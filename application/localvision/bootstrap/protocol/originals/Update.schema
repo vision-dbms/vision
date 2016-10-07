@@ -1,0 +1,22 @@
+#!/bin/csh
+
+##################################################
+#  Script to Update Schema Dictionary
+##################################################
+
+
+if ($#argv > 0) then
+	set MAIN = $argv[1]
+else
+	set MAIN = $VisionBuildVersion
+endif
+
+echo "Running $MAIN "
+
+$MAIN -iU3 <<@@@EOF@@@
+Schema processAllMessages ;
+Utility updateNetwork
+?g
+?t
+@@@EOF@@@
+

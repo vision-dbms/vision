@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Fundamentals </title>
+
+</head>
+<body>
+<body bgcolor=white>
+<h2>Vision Fundamentals</h2>
+
+<p>
+     | <a href="FHome.htm">Home</a> | <a href="Classes.htm">Classes</a> | <a href="Messages.htm">Messages</a> | <a href="Terms.htm">Term Summary</a> |
+<hr>
+<h3>Topics Covered:</h3>
+<ul type="square">
+<li><a href="#overview">Overview</a>
+<li><a href="#basic">Basic Terminology</a>
+<li><a href="#message">Messages</a>
+<li><a href="#class">Classes </a>
+<li><a href="#review">Review</a>
+</ul>
+<hr>
+<h3><a name="overview">Overview</a></h3>
+<p>
+The information used in the decision making process can be integrated
+from many disparate sources.  Commercial sources of public
+information such as economic, demographic, financial, and
+product data are often combined with internally generated data such
+as operating statistics and forecasts.  A fundamental requirement of
+any database management system is that it provide a consistent
+framework in which to structure your information.  
+<p>
+Many database management systems are designed around the individual
+databases you use.  Vision assumes that the data provided in the
+commercial and internal databases represents only one part of your
+information resource.  As an object-oriented database management
+system, Vision allows you to store data and the rules for
+interrelating and using this information.  In addition, Vision treats
+the dimensions of time and currency as integral components of your database.  
+<p>
+<hr>
+<h3><a name="basic">Basic Terminology</a></h3>
+<p>
+<a name="objects"><b>Objects</b>
+</a>
+are the fundamental building block in Vision.  For example,
+the number 3, the country Great Britain, GM's common stock, and the
+baseball player Babe Ruth can all be thought of as Objects.  Objects
+are the basic unit of information representation.  
+<p>
+A <a name="property"><b>Property</b></a>
+is an attribute of an object whose value can be assigned
+and updated.  For example, the properties of a company could include
+its sales, earnings, and name.  The properties of a country could
+include its gross national product and official languages. 
+<p>
+A <b>Method</b>
+is an operation which can be performed on an object.  For
+example, you could count the number of characters in a string,
+produce a balance sheet for a company, and compute a batting average
+for a baseball player.  
+<p>
+Vision is designed around the concept of communicating objects.
+Objects interact with one another via a process known as <b>Sending a
+Message</b>.  A <a href="#message"><b>Message</b></a>
+is a request for an object to return the value of
+one of its properties or execute one of its methods.  
+The object receiving the request is known as the
+<b>Recipient Object</b>.
+The only way to interact with an Object is
+through one of its messages.
+Messages can ensure the modularity of the system
+because they specify the type of operation desired, but not how that
+operation should be accomplished for a particular type of object.  
+<p>
+The nature of an object's messages depends on the type of object it
+represents.  Objects representing numbers understand messages that
+compute arithmetic functions; however, it would not be appropriate to
+define a property <i>sales</i> for a number (i.e., the number 3 does not
+have a sales value).  <i>Sales</i> is a meaningful property to define for a
+company; however, it would not be meaningful to add two companies
+(e.g., GM + Ford) directly, although it is meaningful to think about
+adding the sales values of these companies.  
+<p>
+It is useful to classify objects based on common properties and
+operations.  For example, GM, Xerox, and IBM have the same properties
+(e.g., sales, earnings, company name) and respond in the same way to
+specific operations.  A 
+<a href="#class"><b>Class</b></a>
+is used to describe a group of similar
+objects.  GM, Xerox, and IBM are Objects that could belong to a class
+known as <i>Company</i>.  The United States, Great Britain, and Germany are
+objects that could belong to a class known as <i>Country</i>.  3, 17.2, and
+-.23 are objects that belong to a class known as <i>Number</i>.  
+<p>
+Each individual object is known as an 
+<a href="#instance"><b>Instance</b></a> of the class.
+Each instance of a class has a distinct value for each of the properties
+defined for its class.  All instances of a class will respond to the
+same set of messages, using the same methodology for carrying out any
+of its operations.  
+
+Perhaps the easiest way to understand the relationships among
+classes, instances, and messages is to think of them in terms of a
+table.  Each class can be thought of as a separate table.  The
+instances of the class form the rows of the table.  The messages of
+the class form the columns in the table.  A sample tabular
+representation for the class Company is shown below:  
+<p>
+<pre>
+                        <Font Size = +1> <b>Company Class</b> </Font>
+<ul>
+      <img src="fund1.jpg" lowsrc="fund1.jpg" alt="Tabular representation for Company" ></ul>
+</pre>
+<p>
+This tabular organization is similar to the relational database
+model.  However, in most relational systems, the actual data that can
+be found for the values in the columns are restricted to a fixed set
+of simple data types:  integer, real, string, and date.  No such
+restriction exists in Vision.  For example, all companies are part of
+an industry.  In the relational model, the value of industry would
+probably be stored as a string or number in a company table.  This
+value would then be used to query an industry table in order to
+access information about a company's industry.  In Vision, the object
+representing the company's industry is stored directly as the
+value of the industry property.  As a result, the simple 
+expression:<pre><tt><b>
+     gm industry name 
+</b></tt></pre>
+could be used to access the name of GM's industry.
+<p>
+By providing a mechanism for linking tables, Vision offers additional
+modeling power not present in relational systems.  Class
+<a name="specialization"><b>Specialization</b>
+</a>
+provides a means for defining a new class that
+<a name="inherits"><b>Inherits</b>
+</a>
+common properties and operations from another class.  A
+class that is a specialization of another class is called a <b>Subclass</b>.
+For example, bank companies are similar to industrial companies in
+many ways, yet they have certain characteristics that are unique to
+banks.  You may want to create a class <i>BankCompany</i> as a subclass of
+the class <i>Company</i>.  The object <i>Citibank</i> could be defined as an
+instance of this new class.  
+<p>
+A class inherits both the properties and methods of 
+its <a name="superclass"><b>Superclass</b></a>
+the class from which it was created.  All instances of a class are
+also considered to be instances of its superclass.  This organization
+is illustrated below:  
+<p>
+<pre>
+<Font Size = +1><b>          Bank Company Class         Company Class</b></Font>
+
+<ul>            <img src="fund2.jpg" lowsrc="fund2.jpg" alt="Instances Hierarchy" ></ul></pre>
+<p>
+New properties and methods may be defined by the subclass.  For
+example, banks have a value for outstanding loan balance and standard
+companies do not.  The property <i>loansOut</i> could be defined for the
+class <i>BankCompany</i> to record loan balance values for banks.  The
+company <i>GM</i> would not recognize the message <i>loansOut</i>
+because it is not
+a bank company.  The company <i>Citibank</i> would respond to this message
+because it is a bank company.  Both <i>GM</i> and 
+<i>Citibank</i> would respond to
+any messages defined for the class <i>Company</i>, such as name and sales.  
+<p>
+A subclass may also redefine a method that is defined by its
+superclass.  If a method is redefined by a subclass, instances of the
+subclass will use the new method.  
+<p>
+New classes are always created as a subclass of an existing class.  A
+subclass is in all respects a class and can therefore have subclasses
+itself.  For example, the class <i>SavingsAndLoan</i> can be created as a
+specialization of the class <i>BankCompany</i>.  
+<p>
+A class actually has a sequence of classes from which it inherits
+properties and methods not defined by the class itself.  This
+sequence begins with a class' superclass and continues with its
+superclass' superclass, and so on.  The inheritance chain continues
+until the class named <i>Object</i> is encountered.  The class <i>Object</i>
+defines messages that are available to all objects in the system.  
+<p>
+<hr>
+<h3><a name="message">Properties, Methods, and Messages - Overview</a></h3>
+<p>
+This section provides a basic overview for defining messages.  More
+<a href="Messages.htm">detailed information</a> is available.
+<p>
+In the Vision language, objects communicate with one another by
+sending messages.  The instances of a class all respond to the same
+messages.  The message determines what type of operation the
+recipient object should perform.  The recipient object's class
+determines the manner in which to actually perform the operation
+indicated by the message.  
+<p>
+For example, the expression:<pre><tt><b>
+     gm sales 
+</b></tt></pre>
+sends the message <i>sales</i> to the company named <i>gm</i>.  
+The definition of the message <i>sales</i> for the class 
+<i>Company</i> may simply look up the value
+of GM's sales property.  Alternatively, the expression:<pre><tt><b>
+     autoIndustry sales 
+</b></tt></pre>
+sends the message <i>sales</i> to the industry named <i>autoIndustry</i>.
+The definition of the message <i>sales</i> for the class 
+<i>Industry</i> could be a
+method that computes the total aggregate sales for all companies
+defined to be a part of the automotive industry.  
+<p>
+Four types of message can be defined:
+<p>
+<ul type="disc">
+<li><a href="#fixed">Fixed Properties</a>
+<li><a href="#ts">Time Varying Properties</a>
+<li><a href="#constant">Class Constants</a>
+<li><a href="#method">Methods</a>
+</ul>
+<p>
+You do not need to know what type of message has been defined in
+order to use the message.  In all cases, the form:<pre><tt><b>
+     object messageName 
+</b></tt></pre>
+is used to request that the recipient object carry out the specific
+function indicated by the message.
+<p>
+<a name="fixed">
+<b>Fixed Properties</b></a> are defined for storing information that does not
+need to be maintained over time.  The general form for creating a
+fixed property is:<pre><tt><b>
+     className defineFixedProperty: 'propertyName' ;
+</b></tt></pre>
+where <i>className</i> 
+is the name of the class for which you are defining the property and
+<i>propertyName</i> is the name of the message which will be used to access
+the property.
+<p>
+For example, you could define a property to store the year in which a
+company was founded as shown below:<pre><tt><b>
+     Company defineFixedProperty: 'yearFounded' ;
+</b></tt></pre>
+The value of a property for any instance of the class
+is <a href="clNA.htm"><i>NA</i></a> by 
+<a name="default">default</a>.
+The <i>yearFounded</i> property can be 
+<a name="update">updated</a> for instances of the class
+<i>Company</i> as illustrated below:<pre><tt><b>
+     gm :yearFounded <- 1935 ;
+</b></tt></pre>
+You place the : character in front of the property name to indicate that
+you want to return the <a name="intensional"><b>Intensional Form</b>
+of the property.  This form
+responds to a variety of messages including the assignment message
+which is used to update the property.  When the : is not prepended to
+the property name, the value of <i>yearFounded</i> for <i>gm</i> 
+is accessed:<pre><tt><b>
+     gm yearFounded 
+</b></tt></pre>
+<p>
+<a name="ts">  </a>
+You may want to retain the values for a property over time.  The
+general form for creating a <b>Time Varying Property</b> is:<pre><tt><b>
+     className define: 'propertyName' ;
+</b></tt></pre>
+where <i>className</i> is the name of the class for which you are 
+defining the property and <i>propertyName</i> 
+is the name of the message which will be used to access the property.
+<p>
+For example, you could define a property to track company sales over
+time as shown below:  <pre><tt><b>
+     Company define: 'sales' ;
+</b></tt></pre>
+Initially, this time series property will not have any points in it
+for any instance of the class and the value of this property will be
+<a href="clNA.htm"><i>NA</i></a>.
+The sales values for <i>gm</i> for 1993, 1994, and 1995 could be 
+updated as illustrated below:<pre><tt><b>
+     gm :sales asOf: 93 put: 96371.63 ; 
+     gm :sales asOf: 94 put: 102813.00 ; 
+     gm :sales asOf: 95 put: 101781.00 ; 
+</b></tt></pre>
+Again, you
+place the : character in front of the property name to return it in
+a form that can be updated.  In this case, the <i>asOf:put:</i> message
+is used to update the time series property.
+<p>
+The sales values can be accessed as shown below:<pre><tt><b>
+     gm sales               
+</b></tt></pre>
+returns the most recent sales and<pre><tt><b>
+     gm :sales asOf: 94
+</b></tt></pre>
+returns the sales as of year-end 1994.  A time series property
+returns its value as of the current evaluation date which is the
+current date by default.  The <i>asOf:</i> message can be sent to
+the intensional form of a time series (i.e., the form returned by
+prepending the : character) to override the default access date.
+<p>
+<a name="constant"><b>Class Constants</b></a>
+are defined for storing information that is identical for all instances of a
+class.  The general form for creating a class constant is:<pre><tt><b>
+     className define: 'constantName' toBe: object ;
+</b></tt></pre>
+where <i>className</i> is the name of the class for which you are defining
+the class constant and <i>constantName</i> is the name of the message which
+will be used to access the constant for any instance of the class and
+<i>object</i> is the object which should be returned whenever this message
+is sent to any instance of this class.
+<p>
+For example, the message <i>isCompany</i> could be defined to return the
+<i>Boolean</i> object <i>TRUE</i> for all companies as shown below:<pre><tt><b>
+     Company define: 'isCompany' toBe: TRUE ;
+</b></tt></pre>
+The message can be defined to return <i>FALSE</i> for all other objects as
+shown below:<pre><tt><b>
+     Object define: 'isCompany' toBe: FALSE ;
+</b></tt></pre>
+This message can be evaluated for <i>gm</i> using the expression:<pre><tt><b>
+     gm isCompany 
+</b></tt></pre>
+This expression returns the value <i>TRUE</i>.  The expression:<pre><tt><b>
+     3 isCompany 
+</b></tt></pre>
+returns the value <i>FALSE</i>.
+<p>
+<a name="method"><b>Methods</b></a>
+are used to define procedures.  The general form for creating
+a method is:<pre><tt><b>
+     className defineMethod: 
+     [ | methodName | 
+         . . . 
+     ] ;
+</b></tt></pre>
+where <i>className</i> is the name of the class for which you are
+defining the method and <i>methodName</i> is the name of the
+message which will be used to execute the method.
+<p>
+For example, a method to compute the price to earnings ratio for a
+company can be written as shown below:<pre><tt><b>
+     Company defineMethod: 
+     [ | peRatio | 
+       price / earnings 
+     ] ; 
+</b></tt></pre>
+This method can be executed for the company <i>gm</i> using the 
+expression:<pre><tt><b>
+     gm peRatio 
+</b></tt></pre>
+This method assumes the messages <i>price</i> and <i>earnings</i> 
+are defined as messages for the class <i>Company</i> as well.
+<p>
+As indicated earlier, you need not know that the message <i>sales</i> was
+defined as a time series and that <i>peRatio</i> is actually a method that
+accesses time series properties.  For example, the price to earnings
+ratio for GM for 1994 can be accessed in the same manner as <i>sales</i>, as
+illustrated below:  <pre><tt><b>
+     gm :peRatio asOf: 94 
+</b></tt></pre>
+In this case, all data required by the 
+<i>peRatio</i> method is accessed as of 1994.
+<p>
+Methods can be defined to require one or more parameters.  
+The general form for creating a multi-parameter method is:<pre><tt><b>
+     className defineMethod: 
+     [ | methodWithParam1: p1 param2: p2 param3: p3 ... | 
+         . . . 
+     ] ;
+</b></tt></pre>
+where <i>className</i> is the name of the class for which you
+are defining the method and
+<i>methodNameWithParam1:param2:param3:</i>
+is the name of a three parameter method which will be used to 
+execute the method.
+<p>
+For example, a method to compute the price to earnings ratio for a 
+company using a supplied price could be written as shown below:<pre><tt><b>
+     Company defineMethod: 
+     [ | peRatioWithPrice: inputPrice | 
+       inputPrice / earnings 
+     ] ; 
+</b></tt></pre>
+This method can be executed for <i>gm</i> using the expression:<pre><tt><b>
+     gm peRatioWithPrice: 73.25 
+</b></tt></pre>
+This method assumes the message <i>earnings</i> is defined as a message
+for the class <i>Company</i> and divides the supplied price by this value.
+<p>
+The <a href="#intensional">intensional form</a>
+of a message was briefly introduced earlier as a way
+to update properties.  Another use of this form is for
+viewing the definition of a method.  For example:<pre><tt><b>
+     gm :peRatio 
+</b></tt></pre>
+displays the definition of the method <i>peRatio</i> instead of evaluating
+it.  If you wish to display the definition of a method that has
+multiple parameters, you must supply "dummy" values for each
+parameter.  For example, the expression:<pre><tt><b>
+     gm :peRatioWithPrice: 0 
+</b></tt></pre>
+displays the definition of the <i>peRatioWithPrice:</i> method.  If the
+method has several parameters, you only need to place the ":"  in
+front of the first one to display its contents, but you must supply a
+value for each parameter.  
+<p>
+<hr>
+<h3><a name="class">Classes and Instances - Overview</a></h3>
+<p>
+This section provides a basic overview for defining classes and
+instances.  More
+<a href="Classes.htm">detailed information</a> is available.
+<p>
+<b>Classes</b> provide a basic tool for organizing your information.  Vision
+comes with many built-in classes including <i>Number</i>, <i>String</i>,
+<i>Date</i>, <i>List</i>, and 
+<i>TimeSeries</i>.  All instances of a class respond to the same
+set of messages and use the same set of methods to do so.  All
+instances of a class have the same number of properties and use the
+same names to refer to them.  
+<p>
+You can define new classes as needed as illustrated below:<pre><tt><b>
+     !Company <- Object createSubclass ;
+</b></tt></pre>
+New classes are always created as a subclass of an existing class.  
+Any number of subclasses can be created.  For example:<pre><tt><b>
+     !BankCompany <- Company createSubclass ; 
+     !InsuranceCompany <- Company createSubclass ; 
+     !SavingsAndLoan <- BankCompany createSubclass ; 
+     !Industry <- Object createSubclass ;
+</b></tt></pre>
+The resultant class hierarchy is illustrated below:
+<pre>
+<ul>            <img src="fund3.jpg" lowsrc="fund3.jpg" alt="Sample Inheritance Hierarchy" ></ul>
+                            <b>Sample Inheritance Hierarchy</b></pre>
+
+<p>
+The <i>showInheritance</i> message is used to 
+display the class hierarchy for a specific class.  For example:<pre><tt><b>
+     Company showInheritance
+</b></tt></pre>
+All objects respond to the message 
+<i>instanceList</i> by returning an object representing the list of all 
+the instances in a class.  All <i>List</i> objects respond to the
+message <i>count</i>.  Therefore, the expression:<pre><tt><b>
+     Company instanceList count 
+</b></tt></pre>
+returns the number of instances in the class Company.  
+This count should be one immediately after the class has been created.
+<p>   
+The <a name="instance"><i>createInstance</i></a>
+message is used to create a new instance
+for a class.  For example:<pre><tt><b>
+     !ibm <- Company createInstance ; 
+     !gm <- Company createInstance ; 
+     !citibank <- BankCompany createInstance ; 
+</b></tt></pre>
+<p>
+A subclass inherits both the properties and the methods of its
+superclass.  The objects <i>gm</i> and <i>ibm</i> will respond to
+all <i>Company</i>
+messages.  The object <i>citibank</i> will respond to all
+<i>BankCompany</i>
+messages which includes the set of messages defined for the class
+<i>Company</i>.  
+<p>
+New properties, constants, and methods may be defined by the
+subclass.  For example, you can define a property <i>loansOut</i> for the
+class <i>BankCompany</i>:<pre><tt><b>
+     BankCompany define: 'loansOut' 
+</b></tt></pre>
+The object <i>gm</i> would not recognize the message 
+<i>loansOut</i> because it is
+a <i>Company</i>.  The object <i>citibank</i> 
+will respond to this message because it is a <i>BankCompany</i>.  
+<p>
+The subclass may also redefine a method that is defined by its
+superclass.  If a method is redefined by a subclass, the instances of
+the subclass will use the new method.  For example, a valid operation
+to perform on a company is to generate its balance sheet.  The
+message <i>balanceSheet</i> could be defined to mean collect the required
+company data and produce a report in balance sheet format.  The
+method to accomplish this operation would be defined as part of the
+class <i>Company</i>.  Since a bank company would require different data and
+format for its balance sheet, this method could be redefined for the
+class <i>BankCompany</i> as outlined below:<pre><tt><b>
+     Company defineMethod: 
+     [ | balanceSheet | 
+       ...  get company data 
+       ...  display company balance sheet format 
+     ] ; 
+
+     BankCompany defineMethod: 
+     [ | balanceSheet | 
+       ...  get bank company data 
+       ...  display bank balance sheet format 
+     ] ; 
+</b></tt></pre>
+All instances of the class <i>BankCompany</i> 
+would use the second method when responding to the message
+<i>balanceSheet</i>.  All other companies (i.e., non-bank companies) 
+would use the first method, defined for the class 
+<i>Company</i>.  
+Although different methods would actually be executed, 
+the request for <i>gm</i>'s and <i>citibank</i>'s balance sheet
+would look identical:<pre><tt><b>
+     gm balanceSheet ; 
+     citibank balanceSheet ; 
+</b></tt></pre>
+In the first case, <i>gm</i> is the recipient object and
+<i>balanceSheet</i> is the message.  Since <i>gm</i> is an instance
+of the class <i>Company</i>, Vision would look for its definition
+there.  In the second case, <i>citibank</i> is the recipient object
+and <i>balanceSheet</i> is the message.  Since <i>citibank</i> is an
+instance of the class <i>BankCompany</i>, Vision would look for its
+definition there.  Since a definition of <i>balanceSheet</i> does exist for
+the class <i>BankCompany</i>, it is used.  If no definition had been found,
+the definition at the class <i>Company</i> would have been executed.  Notice
+that you do not have to specifically request a different report based
+on the type of company being analyzed.  
+<p>
+When a message is sent to an object, Vision searches for its
+definition starting with the object's class.  If the message is not
+found, the superclass' definition of the message is used.  If the
+message is not defined by the superclass either, the superclass'
+superclass is used, and so on through the inheritance chain.  The
+search terminates at the class Object.  If the message definition is
+still not found, an appropriate 
+<a href="Error.htm#snf">error message</a> will be returned.  
+<p>
+It is sometimes useful to access the version of a message defined at
+the superclass of the object.  All objects respond to the message
+<i>super</i>.  For example, the expression:<pre><tt><b>
+     citibank super balanceSheet 
+</b></tt></pre>
+creates Citibank's balance sheet as though it were a standard
+company.
+<p>
+<hr>
+<h3><a name="review">Review</a></h3>
+<p>
+This section has introduced many new concepts.  The major points are
+summarized below:  
+<p>
+<ul type="disc">
+<li>To create a new class, send the message
+<i>createSubclass</i> to an existing class:<pre><tt><b>
+     !testClass <- Object createSubclass ;
+</b></tt></pre>
+<li> To display the inheritance hierarchy for a class:<pre><tt><b>
+     testClass showInheritance ;
+</b></tt></pre>
+<li>To create a new instance of this class, send the class the 
+<i>createInstance</i> message:<pre><tt><b>
+     !test1 <- testClass createInstance ;
+</b></tt></pre>
+<li>To count the number of instances in a class:<pre><tt><b>
+     testClass instanceList count 
+</b></tt></pre>
+<li>To create a new property for this class that does not vary over 
+time:<pre><tt><b>
+     testClass defineFixedProperty: 'startDate' ;
+</b></tt></pre>
+<li>To assign a value to this property:<pre><tt><b>
+     test1 :startDate <- 951231 asDate ;
+</b></tt></pre>
+<li> To access this value:<pre><tt><b>
+     test1 startDate 
+</b></tt></pre>
+<li>To create a new property for this class that varies over time:<pre><tt><b>
+     testClass define: 'rating'  ;
+</b></tt></pre>
+<li>To assign values to this property for May, June, and July 1995:<pre><tt><b>
+     test1 :rating asOf: 9505 put: 10 ; 
+     test1 :rating asOf: 9506 put: 13 ; 
+     test1 :rating asOf: 9507 put: 15 ; 
+</b></tt></pre>
+<li>To access the most recent value:<pre><tt><b>
+      test1 rating 
+</b></tt></pre>
+<li>To access the June 1995 value:<pre><tt><b>
+     test1 :rating asOf: 9506 
+</b></tt></pre>
+<li>To create a new method:<pre><tt><b>
+     testClass defineMethod: 
+     [ | sample | 
+       "This Method Displays The Rating Value " print ; 
+       rating print ; 
+     ] ; 
+</b></tt></pre>
+<li>To execute this method:<pre><tt><b>
+     test1 sample 
+</b></tt></pre>
+</ul>
+<p>
+A final example should be useful for unifying these concepts.
+Suppose that the class <i>Industry</i> is defined to have three
+properties:  <i>codeNumber</i>, <i>name</i>, and <i>growthRate</i>.
+An object named <i>autos</i> is created as an instance of this class and its
+values are initialized.  <pre><tt><b>
+     !Industry <- Object createSubclass ; 
+     Industry defineFixedProperty: 'codeNumber' ; 
+     Industry defineFixedProperty: 'name' ; 
+     Industry define: 'growthRate' ; 
+
+     !autos <- Industry createInstance ;
+     autos :codeNumber <- 3711 ; 
+     autos :name <- "Automotive" ; 
+     autos :growthRate asOf: 95 put: 10 ; 
+</b></tt></pre>
+<p>
+The class <i>Company</i> can be defined to respond to the message
+<i>industry</i> by returning the object representing the company's industry.
+For example:  <pre><tt><b>
+     !Company <- Object createSubclass ; 
+     Company defineFixedProperty: 'industry' ; 
+     !gm <- Company createInstance ; 
+     !ford <- Company createInstance ; 
+     !chrysler <- Company createInstance ; 
+
+     gm :industry <- autos ; 
+     ford :industry <- autos ; 
+     chrysler :industry <- autos ; 
+</b></tt></pre>    
+The expression:<pre><tt><b>
+     gm industry 
+</b></tt></pre>    
+returns the object representing the auto industry as its value.
+The expression:<pre><tt><b>
+     gm industry codeNumber
+</b></tt></pre>    
+returns the number <i>3711</i> and the expression:<pre><tt><b>
+     gm industry name 
+</b></tt></pre>    
+returns the string <i>Automotive</i>.
+<p>
+A method could be defined for the class 
+<i>Company</i> that computes expected sales based on the 
+company's industry growth rate:<pre><tt><b>
+     Company define: 'sales' ; 
+     gm :sales asOf: 95 put: 1000 ; 
+     ford :sales asOf: 95 put: 500 ; 
+     chrysler :sales asOf: 95 put: 100 ; 
+
+     Company defineMethod: 
+     [ | expectedSales | 
+       sales * ( 1 + industry growthRate / 100 ) 
+     ]  ;
+</b></tt></pre>    
+The expression:<pre><tt><b>
+     gm expectedSales 
+</b></tt></pre>    
+returns the value <i>1100</i>, the expression:<pre><tt><b>
+     ford expectedSales 
+</b></tt></pre>    
+returns the value <i>550</i>, and the expression:<pre><tt><b>
+     chrysler expectedSales 
+</b></tt></pre>    
+returns the value <i>110</i>.
+<p>
+Properties can refer to lists of objects.  For example:<pre><tt><b>
+    Industry defineFixedProperty: 'companyList' ; 
+    autos :companyList <- gm, ford, chrysler ; 
+</b></tt></pre>    
+can be used to assign a list of auto industry companies into the
+<i>companyList</i> property defined for the class <i>Industry</i>.  
+The expression:<pre><tt><b>
+     autos companyList 
+</b></tt></pre>    
+returns the list of companies in the automotive industry.  
+If you wanted instances of the class <i>Industry</i>
+to respond to the message <i>sales</i> by computing the 
+total sales for the companies in the industry, 
+you could define this method as shown below:<pre><tt><b>
+     Industry defineMethod: 
+     [ | sales | 
+       companyList total: [ sales ] 
+     ]  ;
+</b></tt></pre>    
+The expression:<pre><tt><b>
+     autos sales 
+</b></tt></pre>    
+computes the total sales for the automotive industry.  The 
+expression:<pre><tt><b>
+     gm industry sales 
+</b></tt></pre>    
+produces the same value.  The expression:<pre><tt><b>
+     gm sales / gm industry sales * 100 
+</b></tt></pre>    
+computes GM's percentage of the automotive industry's sales.
+<p>
+<hr>
+
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy 1997 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated June 19, 1997</font>
+</tr>
+</table>
+
+</body>
+</html>

@@ -1,0 +1,31 @@
+
+######################
+######################
+####  Indexed List Extensions
+######################
+######################
+#
+#  This file defines primitives to query and change the indexing type of an
+#  indexed list cluster.
+#
+######################
+
+IndexedList
+
+################
+#  Indexing Type Update and Query
+################
+
+#----------
+#  '__getIndexingType' returns an integer interpreted as follows:
+#
+#	1	The recipient uses product mapped indexing.
+#	2	The recipient uses partition mapped indexing.
+#----------
+define: '__getIndexingType'			toBePrimitive: 293 .
+
+define: '__setIndexingTypeToProductMapped'	toBePrimitive: 294
+					     withControlValue:   1 .
+define: '__setIndexingTypeToPartitionMapped'	toBePrimitive: 294
+					     withControlValue:   2 .
+;

@@ -1,0 +1,4849 @@
+#################################################
+#  PMW Applications - Starter Kit
+##################################################
+
+####################
+#  cleanups
+####################
+Interface Global setDateTo: NA ;
+
+#======================================================================
+
+####################
+#  ApplicationWS support methods
+####################
+
+Interface ApplicationWS defineMethod: [ | getDatesFrom: input |
+!dateList <- input isCollection ifTrue: [ input ] .
+   elseIf: [ input = "5Days" ] 
+     then:   [ ^date, ^date - 1 businessDays, ^date - 2 businessDays, 
+               ^date - 3 businessDays, ^date - 4 businessDays
+             ] .
+   elseIf: [ input = "EndMonth,EndQtr,EndYr" ] 
+     then: [ ^date, ^date - 1 monthEnds, 
+             ^date - 1 quarterEnds, ^date - 1 yearEnds 
+           ] .
+   elseIf: [ input = "4MonthEnds"]   
+     then: [ ^date, ^date - 1 monthEnds, 
+             ^date - 2 monthEnds, ^date - 3 monthEnds, ^date - 4 monthEnds
+           ] .
+     else: [ input asString breakOn: "," .
+              send: [ asDate ] .
+              select: [ isDate ] .
+              select: [ isntDefault ] 
+           ] ;
+dateList count > 0 
+   ifTrue: [ dateList ] ifFalse: [ NA ] 
+] ;
+
+Interface ApplicationWS defineMethod: [ | getCompanyFor: secId |
+  !id <- secId else: "" ;
+  ^global Company validateInputString: id 
+] ;
+
+Interface ApplicationWS defineMethod: [ | getSecurityFor: secId |
+  !id <- secId else: "" ;
+  ^global Security validateInputString: id
+] ;
+Interface ApplicationWS defineMethod: [ | getAccountFor: acctId |
+  !id <- acctId else: "" ;
+  ^global Account locateId: id 
+] ;
+
+Interface ApplicationWS defineMethod: [ | getUniverseFor: uid |
+  !id <- uid else: "" ;
+  ^global Universe validateInputString: id
+] ;
+
+#--------------------
+
+
+#======================================================================
+
+##################################################
+#  ApplicationWS Interface and underlying methods
+##################################################
+
+####################
+#  Company Reports
+####################
+
+Interface ApplicationWS defineMethod: [ | CompanyProfile | 
+  !id <- ^self getParameter: 1 orName: "id" ;
+  !instance <- ^self getCompanyFor: id ;
+  !curr <- ^global Named Currency at: (^self getParameter: 2 ) ;
+  instance isntNA
+  ifTrue: 
+    [ !optionsBar <- [
+         !priceLink <- "http://quote.yahoo.com/quotes?SYMBOLS="
+             concat: instance ticker toLower .
+             concat: "&detailed=f" ;
+         " | " print ; 
+         FormatTools buildLinkForApp: "ShowAllDataValues"
+              withLabel: "Data Values" 
+              andParams: "Company", id . print ;
+         " | " print ; 
+         FormatTools buildLink: priceLink withLabel: "Quotes" . print ;
+         " | " printNL ;
+      ] divertOutput ;
+      FormatTools buildOptionsBar: optionsBar . printNL ;
+
+      curr isCurrency
+      ifTrue: 
+        [ curr evaluate: 
+            [ instance summary  ;
+              ^self displayChangeEntityPromptForApp: "CompanyProfile" 
+                    withPrompt: "Enter Company: " andId: instance code ;
+            ] ;
+        ] 
+      ifFalse: 
+        [ instance summary ;
+          ^self displayChangeEntityPromptForApp: "CompanyProfile" 
+                withPrompt: "Enter Company: " andId: instance code ;
+        ] ;
+    ] 
+  ifFalse: [ ">>> Bad Company Id Supplied." printNL ] ;
+] ;
+
+#----------
+
+Company defineMethod: [ | summary | 
+
+logoFile isntNA
+ifTrue:
+  [ FormatTools center:
+       (FormatTools
+          buildImage: logoFile withPath: NA withAlt: "  -- Logo --  " . 
+       ) . printNL ;
+  ] ;
+  FormatTools
+      buildTitle: ("Company Profile For: " concat: name) ,
+          ("Data As Of: " concat: ^date . concat: "   ---   Currency: " .
+               concat: currency name
+          )  over: 80 withStyle: "Arial", "darkblue" . print ;
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+      
+!table <- ^global LayoutTools Named TableSpec at: "basic2Column" ;
+table getColumn: 1 . getHeader: 1 . setTextTo: "---  Basics  ---" ;
+
+FormatTools buildTableFor: table for: ^self withBlock:
+  [
+  "Primary Id: " print: 20 ; code printNL ;
+  "Primary Security: " print: 20 ; 
+  FormatTools buildLinkForApp: "SecurityProfile"
+       withLabel: primarySecurity name
+       andParams: primarySecurity code . printNL;
+  "Ticker: " print:20 ; ticker printNL ;
+  cusip isntNA  ifTrue: [ "Cusip: " print: 20 ; cusip printNL ] ;
+  sedol isntNA  ifTrue: [ "Sedol: " print: 20 ; sedol printNL ] ;
+  "Base Currency: " print ;
+  baseCurrency != currency
+  ifTrue:
+    [ FormatTools buildLinkForApp: "CompanyProfile"
+         withLabel: baseCurrency name 
+         andParams: code, baseCurrency code . printNL;
+    ]
+  ifFalse: [ baseCurrency name printNL ] ;
+  "Fiscal Year End: " print: 20 ; fiscalYearEnd printNL: -4 ;
+  isntActive
+  ifTrue:
+    [ "Company Deactivated: " print: 20 ;
+      [ deletionReason else: "" . print ;
+        deletionDate isntNA
+           ifTrue: [ " on " print ; deletionDate print ] ;
+      ] divertOutput printNL ;
+    ] ;
+  webSite isntNA
+  ifTrue:
+    [ "Web Site: " print: 20 ;
+      FormatTools buildLink: ("http://" concat: webSite)
+                  withLabel: webSite . printNL ;
+    ] ;
+  ] . print ;
+
+table getColumn: 1 . 
+    getHeader: 1 . setTextTo: "---  Relationships  ---" ;
+FormatTools buildTableFor: table for: ^self withBlock:
+  [
+  "Country: " print ; 
+  country isntDefault
+  ifTrue: 
+    [ FormatTools buildLinkForApp: "CountryProfile"
+         withLabel: country name
+         andParams: country code . printNL ;
+    ]
+  ifFalse: [ country name printNL ] ;
+
+  !realIndustries <- :industry nonDefaults ;
+  industry isntDefault
+  ifTrue:
+    [ "Industry: " print:20 ; 
+      FormatTools buildLinkForApp: "IndustryProfile" 
+         withLabel: industry name 
+         andParams: industry code . printNL ;
+      "Sector: " print:20 ; 
+      FormatTools buildLinkForApp: "SectorProfile" 
+         withLabel: sector name 
+         andParams: sector code . printNL ;
+    ]
+  ifFalse:
+    [ realIndustries count > 0
+      ifTrue:
+        [ "Was in Industry: " print: 20 ;
+          realIndustries value name printNL ;
+          " ... removed on: " print: 20 ; 
+          :industry effectiveDate printNL ;
+        ] 
+      ifFalse:
+        [ "Industry: " print: 20 ; industry name printNL ] ;
+    ] ;
+  universes sortUp: [ name ] . numberElements 
+  do: [ "Universe " concat: position . concat: ": " . print: 20 ;
+        FormatTools buildLinkForApp: "UniverseProfile" 
+           withLabel: name andParams: code . printNL ;
+      ] ;
+
+  ] . print ;
+
+table getColumn: 1 . 
+    getHeader: 1 . setTextTo: "---  Highlights  ---" ;
+FormatTools buildTableFor: table for: ^self withBlock:
+  [
+  !latestAnnual <- :funDataA nonDefaults lastObservation ;
+  latestAnnual isntDefault
+  ifTrue: [ "Latest Fiscal Yr: " print: 20 ; 
+            latestAnnual date printNL: -14 ;
+            FormatTools buildLinkForApp: "CompanyIncomeStatement"
+              withLabel: (" ... Sales: " pad: 20) andParams: code . print ;
+            latestAnnual sales printWithCommasNL: 14.2 ;
+            FormatTools buildLinkForApp: "CompanyBalanceSheet"
+              withLabel: (" ... Assets: " pad: 20) andParams: code . print ;
+            latestAnnual assets printWithCommasNL: 14.2 ;
+          ] ;
+  funDataQ date isntDefault
+  ifTrue: [ "Latest Fiscal Qtr: " print: 20 ; 
+            funDataQ date printNL: -14 ;
+            FormatTools buildLinkForApp: "CompanyIncomeStatementQ"
+              withLabel: (" ... Sales: " pad: 20) andParams: code . print ;
+            funDataQ sales printWithCommasNL: 14.2 ;
+            FormatTools buildLinkForApp: "CompanyBalanceSheetQ"
+              withLabel: (" ... Assets: " pad: 20) andParams: code . print ;
+            funDataQ assets printWithCommasNL: 14.2 ;
+          ] ;
+  funDataM date isntDefault
+  ifTrue: [ FormatTools buildLinkForApp: "CompanyEarningsReport"
+              withLabel: "Latest End-of-Month:" andParams: code . print ;
+            funDataM date printNL: -14 ;
+          ] ;
+ !company <- ^self ;
+ ^global DataItem getProfileItemsFor: company .
+ do: [ !item <- ^my company send: block ;
+       !label <- shortName concat: ": " ;
+       item isntDefault
+       ifTrue:
+         [ profileLink isntDefault
+           ifTrue:
+             [ FormatTools buildLinkForApp: profileLink
+                   withLabel: label andParams: ^my company code . print ;
+             ]
+           ifFalse: [ label print: 20 ] ;
+           !format <- 15 + (defaultDecimals else: 2) / 10 ;
+           item printWithCommasNL: format ;
+         ] ;
+     ] ;
+
+  ] . print ;
+
+table getColumn: 1 . 
+    getHeader: 1 . setTextTo: "---  Securities in Company  ---" ;
+FormatTools buildTableFor: table for: ^self withBlock:
+  [ securityList
+    do: [ FormatTools buildLinkForApp: "SecurityProfile"
+            withLabel: code andParams: code . print ;
+          name printNL ;
+        ] ;
+  ] . print ;
+
+] .
+;
+
+#----------------------------------------------------------------------
+
+####################
+#  Security Reports
+####################
+
+#--------------------
+#  Security Profile and Interface
+#--------------------
+Interface ApplicationWS defineMethod: [ | SecurityProfile | 
+  !id <- ^self getParameter: 1 orName: "id" ;
+  !instance <- ^self getSecurityFor: id ;
+  !curr <- ^global Named Currency at: (^self getParameter: 2 ) ;
+  instance isntNA
+  ifTrue: 
+    [ !optionsBar <- [
+         !priceLink <- "http://quote.yahoo.com/quotes?SYMBOLS="
+             concat: instance ticker toLower .
+             concat: "&detailed=f" ;
+         " | " print ; 
+         FormatTools buildLinkForApp: "ShowAllDataValues"
+              withLabel: "Data Values" 
+              andParams: "Security", id . print ;
+         " | " print ; 
+         FormatTools buildLink: priceLink withLabel: "Quotes" . print ;
+         " | " printNL ;
+      ] divertOutput ;
+      FormatTools buildOptionsBar: optionsBar . printNL ;
+
+      curr isCurrency
+      ifTrue: 
+        [ curr evaluate: 
+            [ instance summary  ;
+              ^self displayChangeEntityPromptForApp: "SecurityProfile" 
+                    withPrompt: "Enter Security: " andId: instance code ;
+            ] ;
+        ] 
+      ifFalse: 
+        [ instance summary ;
+          ^self displayChangeEntityPromptForApp: "SecurityProfile" 
+                withPrompt: "Enter Security: " andId: instance code ;
+        ] ;
+    ] 
+  ifFalse: [ ">>> Bad Security Id Supplied." printNL ] ;
+] ;
+
+#----------
+
+Security defineMethod: [ | summary | 
+currency evaluate: [ 
+
+company logoFile isntNA
+ifTrue:
+  [ FormatTools center:
+       (FormatTools
+          buildImage: company logoFile withPath: NA withAlt: "  -- Logo --  " . 
+       ) . printNL ;
+  ] ;
+  FormatTools
+      buildTitle: ("Security Profile For: " concat: name) ,
+          ("Data As Of: " concat: ^date . concat: "   ---   Currency: " .
+               concat: currency name
+          )  over: 80 withStyle: "Arial", "darkblue" . print ;
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+      
+!table <- ^global LayoutTools Named TableSpec at: "basic2Column" ;
+table getColumn: 1 . getHeader: 1 . setTextTo: "---  Basics  ---" ;
+
+FormatTools buildTableFor: table for: ^self withBlock:
+  [
+  "Primary Id: " print: 20 ; code printNL ;
+  "Ticker: " print:20 ; ticker printNL ;
+  cusip isntNA  ifTrue: [ "Cusip: " print: 20 ; cusip printNL ] ;
+  sedol isntNA  ifTrue: [ "Sedol: " print: 20 ; sedol printNL ] ;
+  "Security Type: " print:20 ; type name printNL ;
+  "Base Currency: " print ;
+  baseCurrency != currency
+  ifTrue:
+    [ FormatTools buildLinkForApp: "SecurityProfile"
+         withLabel: baseCurrency name 
+         andParams: code, baseCurrency code . printNL;
+    ]
+  ifFalse: [ baseCurrency name printNL ] ;
+  company webSite isntNA
+  ifTrue:
+    [ "Web Site: " print: 20 ;
+      FormatTools buildLink: ("http://" concat: company webSite)
+                  withLabel: company webSite . printNL ;
+    ] ;
+  ] . print ;
+
+table getColumn: 1 . 
+    getHeader: 1 . setTextTo: "---  Relationships  ---" ;
+FormatTools buildTableFor: table for: ^self withBlock:
+  [
+  "Company: " print ; 
+   FormatTools buildLinkForApp: "CompanyProfile"
+      withLabel: company name
+      andParams: company code . printNL ;
+  "Country: " print ; 
+  company country isntDefault
+  ifTrue: 
+    [ FormatTools buildLinkForApp: "CountryProfile"
+         withLabel: company country name
+         andParams: company country code . printNL ;
+    ]
+  ifFalse: [ company country name printNL ] ;
+
+  !realIndustries <- company :industry nonDefaults ;
+  company industry isntDefault
+  ifTrue:
+    [ "Industry: " print:20 ; 
+      FormatTools buildLinkForApp: "IndustryProfile" 
+         withLabel: company industry name 
+         andParams: company industry code . printNL ;
+      "Sector: " print:20 ; 
+      FormatTools buildLinkForApp: "SectorProfile" 
+         withLabel: company sector name 
+         andParams: company sector code . printNL ;
+    ]
+  ifFalse:
+    [ realIndustries count > 0
+      ifTrue:
+        [ "Was in Industry: " print: 20 ;
+          realIndustries value name printNL ;
+          " ... removed on: " print: 20 ; 
+          company :industry effectiveDate printNL ;
+        ] 
+      ifFalse:
+        [ "Industry: " print: 20 ; company industry name printNL ] ;
+    ] ;
+  universes sortUp: [ name ] . numberElements 
+  do: [ "Universe " concat: position . concat: ": " . print: 20 ;
+        FormatTools buildLinkForApp: "UniverseProfile" 
+           withLabel: name andParams: code . printNL ;
+      ] ;
+
+  ] . print ;
+
+table getColumn: 1 . 
+    getHeader: 1 . setTextTo: "--- Highlights  ---" ;
+FormatTools buildTableFor: table for: ^self withBlock:
+  [
+ !security <- ^self ;
+ ^global DataItem getProfileItemsFor: security .
+ do: [ !item <- ^my security send: block ;
+       !label <- shortName concat: ": " ;
+       item isntDefault
+       ifTrue:
+         [ profileLink isntDefault
+           ifTrue:
+             [ FormatTools buildLinkForApp: profileLink
+                   withLabel: label andParams: ^my security code . print ;
+             ]
+           ifFalse: [ label print: 20 ] ;
+           !format <- 15 + (defaultDecimals else: 2) / 10 ;
+           item printWithCommasNL: format ;
+         ] ;
+     ] ;
+
+  !latestAnnual <- company :funDataA nonDefaults lastObservation ;
+  latestAnnual isntDefault
+  ifTrue: [ "Latest Fiscal Yr: " print: 20 ; 
+            latestAnnual date printNL: -14 ;
+            FormatTools buildLinkForApp: "CompanyIncomeStatement"
+              withLabel: (" ... Sales: " pad: 20) andParams: code . print ;
+            latestAnnual sales printWithCommasNL: 14.2 ;
+            FormatTools buildLinkForApp: "CompanyBalanceSheet"
+              withLabel: (" ... Assets: " pad: 20) andParams: code . print ;
+            latestAnnual assets printWithCommasNL: 14.2 ;
+          ] ;
+  company funDataQ date isntDefault
+  ifTrue: [ "Latest Fiscal Qtr: " print: 20 ; 
+            company funDataQ date printNL: -14 ;
+            FormatTools buildLinkForApp: "CompanyIncomeStatementQ"
+              withLabel: (" ... Sales: " pad: 20) andParams: code . print ;
+            company funDataQ sales printWithCommasNL: 14.2 ;
+            FormatTools buildLinkForApp: "CompanyBalanceSheetQ"
+              withLabel: (" ... Assets: " pad: 20) andParams: code . print ;
+            company funDataQ assets printWithCommasNL: 14.2 ;
+          ] ;
+  ] . print ;
+
+table getColumn: 1 . 
+    getHeader: 1 . setTextTo: "---  Portfolio Highlights  ---" ;
+FormatTools buildTableFor: table for: ^self withBlock:
+  [ 
+   !ports <-  holdings select: [ account isPortfolio ] ;
+    FormatTools buildLinkForApp: "HoldingsForSecurity"
+       withLabel: "Total Portfolios:" andParams: code . print ;
+   ports count printNL ;
+  "Total Portfolio Shares: " print ; 
+   ports total: [ shares ] . printWithCommasNL: 18.0 ;
+   "Total Portfolio MVal: " print ;
+   ports total: [ totalMarketValue ] . printWithCommasNL: 18.0 ;
+  ] . print ;
+
+  ] ;   #- of currency
+] .
+;
+
+#--------------------
+#  Financial Statement and Interfaces
+#--------------------
+
+Interface ApplicationWS defineMethod: [ | FinStatement | 
+  !isBSheet <- namedParameters at: "groupCode" .
+        else: "" . take: 1 . = "B" ;
+  isBSheet
+     ifTrue: [ CompanyBalanceSheet ] 
+    ifFalse: [ CompanyIncomeStatement ] ;
+] ;
+
+#----------
+
+Interface ApplicationWS defineMethod: [ | CompanyBalanceSheet |
+  !id <- ^self getParameter: 1 orName: "id" ;
+  !instance <- ^self getSecurityFor: id ;
+  instance isntNA
+  ifTrue:
+    [ !optionsBar <- [
+         " | " print ; 
+         FormatTools buildLinkForApp: "SecurityProfile" 
+             withLabel: "Profile" andParams: instance code . print ;
+         " | " print ; 
+         FormatTools buildLinkForApp: "CompanyIncomeStatement" 
+             withLabel: "Income Statement" andParams: instance code . print ;
+         " | " print ;
+         FormatTools buildLinkForApp: "CompanyBalanceSheetQ" 
+             withLabel: "Quarterly Balance Sheet" 
+             andParams: instance code . printNL;
+         instance company industry isntDefault
+         ifTrue:
+           [ " | " print ; 
+             FormatTools buildLinkForApp: "IndustryBalanceSheet"
+                 withLabel: "Industry" 
+                 andParams: instance company industry code . printNL ;
+           ];
+         " | " printNL ;
+       ] divertOutput ;
+      FormatTools buildOptionsBar: optionsBar . printNL ;
+      instance company balanceSheet ;
+      ^self displayChangeEntityPromptForApp: "CompanyBalanceSheet" 
+            withPrompt: "Enter Security: " andId: instance code ;
+    ] 
+  ifFalse: [ ">>> Bad Security Id Supplied." printNL ] ;
+] ;
+
+#----------
+
+Interface ApplicationWS defineMethod: [ | CompanyIncomeStatement |
+  !id <- ^self getParameter: 1 orName: "id" ;
+  !instance <- ^self getSecurityFor: id ;
+  instance isntNA
+  ifTrue:
+    [ !optionsBar <- [
+         " | " print ; 
+         FormatTools buildLinkForApp: "SecurityProfile" 
+                withLabel: "Profile" andParams: instance code . print ;
+         " | " print ; 
+         FormatTools buildLinkForApp: "CompanyBalanceSheet" 
+                withLabel: "Balance Sheet" andParams: instance code . print ;
+         " | " print ;
+         FormatTools buildLinkForApp: "CompanyIncomeStatementQ" 
+             withLabel: "Quarterly Income Statement" 
+             andParams: instance code . printNL;
+         instance company industry isntDefault
+         ifTrue:
+           [ " | " print ; 
+             FormatTools buildLinkForApp: "IndustryIncomeStatement"
+                 withLabel: "Industry" 
+                 andParams: instance company industry code . printNL ;
+           ] ;
+         " | " printNL ;
+       ] divertOutput ;
+      FormatTools buildOptionsBar: optionsBar . printNL ;
+      instance company incomeStatement ;
+      ^self displayChangeEntityPromptForApp: "CompanyIncomeStatement" 
+            withPrompt: "Enter Security: " andId: instance code ;
+    ] 
+  ifFalse: [ ">>> Bad Security Id Supplied." printNL ] ;
+] ;
+
+#----------
+
+Interface ApplicationWS defineMethod: [ | CompanyBalanceSheetQ |
+  !id <- ^self getParameter: 1 orName: "id" ;
+  !instance <- ^self getSecurityFor: id ;
+  instance isntNA
+  ifTrue:
+    [ !optionsBar <- [
+        " | " print ; 
+        FormatTools buildLinkForApp: "SecurityProfile"
+            withLabel: "Profile" andParams: instance code . print ;
+        " | " print ; 
+        FormatTools buildLinkForApp: "CompanyBalanceSheet" 
+           withLabel: "Annual Balance Sheet" andParams: instance code . print ;
+        " | " printNL ;
+       ] divertOutput ;
+      FormatTools buildOptionsBar: optionsBar . printNL ;
+      instance company balanceSheetQ ;
+      ^self displayChangeEntityPromptForApp: "CompanyBalanceSheetQ" 
+            withPrompt: "Enter Security: " andId: instance code ;
+    ] 
+  ifFalse: [ ">>> Bad Security Id Supplied." printNL ] ;
+] ;
+
+#----------
+
+Interface ApplicationWS defineMethod: [ | CompanyIncomeStatementQ |
+  !id <- ^self getParameter: 1 orName: "id" ;
+  !instance <- ^self getSecurityFor: id ;
+  instance isntNA
+  ifTrue:
+    [ !optionsBar <- [
+         " | " print ; 
+         FormatTools buildLinkForApp: "SecurityProfile" 
+             withLabel: "Profile" andParams: instance code . print ;
+         " | " print ; 
+         FormatTools buildLinkForApp: "CompanyIncomeStatement" 
+             withLabel: "Annual Income Statement" andParams: instance code . 
+                print ;
+         " | " printNL ;
+       ] divertOutput ;
+      FormatTools buildOptionsBar: optionsBar . printNL ;
+      instance company incomeStatementQ ;
+      ^self displayChangeEntityPromptForApp: "CompanyIncomeStatementQ" 
+            withPrompt: "Enter Security: " andId: instance code ;
+    ] 
+  ifFalse: [ ">>> Bad Security Id Supplied." printNL ] ;
+] ;
+
+
+#----------
+
+Interface ApplicationWS defineMethod: [ | CompanyEarningsReport |
+  !id <- ^self getParameter: 1 orName: "id" ;
+  !instance <- ^self getSecurityFor: id ;
+  instance isntNA
+  ifTrue:
+    [ !optionsBar <- [
+         " | " print ; 
+         FormatTools buildLinkForApp: "SecurityProfile" 
+             withLabel: "Profile" andParams: instance code . print ;
+         " | " print ; 
+         FormatTools buildLinkForApp: "SecurityPricingReport" 
+             withLabel: "Pricing Report" andParams: instance code . print ;
+         " | " printNL ;
+       ] divertOutput ;
+      FormatTools buildOptionsBar: optionsBar . printNL ;
+      instance company earningsReport ;
+      ^self displayChangeEntityPromptForApp: "CompanyEarningsReport" 
+            withPrompt: "Enter Security: " andId: instance code ;
+    ] 
+  ifFalse: [ ">>> Bad Security Id Supplied." printNL ] ;
+] ;
+
+#----------
+
+Company defineMethod: [ | balanceSheet |
+
+FormatTools
+   buildTitle: name ,
+     ("Data As Of: " concat: ^date . concat: "   ---   Currency: " .
+          concat: currency name
+     )  over: 80 withStyle: "Arial", "darkblue" . print ;
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+      
+!table <- ^global LayoutTools Named TableSpec at: "finStatement" ;
+table setColumnCountTo: 4 ;
+table caption setTextTo: "Annual Balance Sheet" ;
+
+!lastDate <- :funDataA nonDefaults effectiveDate else: [ ^date ] ;
+!dr <- lastDate to: lastDate - 24 monthEnds by: 12 monthEnds;
+dr asDateList numberElements do:
+  [ !label <- [ " " print ; ^self print: 5 ] divertOutput ;
+     ^my table getColumn: (position + 1 ) asInteger .
+           getHeader: 1 . setTextTo: label ;
+  ] ;
+
+FormatTools buildTableFor: table for: ^self withBlock: 
+  [ 
+  !dr <- ^my dr ;
+  newLine print ;
+  "   ASSETS" printNL ;
+  newLine print ;
+  "Current Assets" printNL ;
+  "   Cash" print ;
+  dr evaluate: [  funDataA cash printWithCommas:9.0]; 
+  newLine print; 
+  "   Accounts Receivables" print ;
+  dr evaluate: [  funDataA receivables printWithCommas:9.0]; 
+  newLine print; 
+  "   Inventories" print ;
+  dr evaluate: [  funDataA inventory printWithCommas:9.0]; 
+  newLine print; 
+  "   Other Current Assets" print ;
+  dr evaluate: [  funDataA curAssetsOther printWithCommas:9.0]; 
+  newLine print; 
+  " " print ;  dr evaluate: [" --------" print]; 
+  newLine print; 
+  "Total Current Assets" print ;
+  dr evaluate: [  funDataA curAssets printWithCommas:9.0]; 
+  newLine print; 
+  newLine print; 
+  "Net Plant" print;
+  dr evaluate: [  funDataA ppeNet printWithCommas:9.0]; 
+  newLine print; 
+  "Invest & Advnces - Equity" print ;
+  dr evaluate: [  funDataA investAndAdvEquity printWithCommas:9.0]; 
+  newLine print; 
+  "Invest & Advnces - Other" print; 
+  dr evaluate: [  funDataA investAndAdvOther printWithCommas:9.0]; 
+  newLine print; 
+  "Intangible Assets" print; 
+  dr evaluate: [  funDataA intang printWithCommas:9.0]; 
+  newLine print; 
+  "Other Assets" print; 
+  dr evaluate: [  funDataA assetsOther printWithCommas:9.0]; 
+  newLine print; 
+  newLine print; 
+  "Total Assets" print; 
+  dr evaluate: [  funDataA assets printWithCommas:9.0]; 
+  newLine print; 
+  " " print; 
+  dr evaluate: [" ========" print]; 
+  newLine print; 
+  newLine print; 
+  newLine print; 
+  "   LIABILITIES AND NET WORTH  " printNL; 
+  newLine print; 
+  "Debt In Cur Liabilities" print; 
+  dr evaluate: [  funDataA debtCurLiab printWithCommas:9.0]; 
+  newLine print; 
+  "Accounts Payable" print; 
+  dr evaluate: [  funDataA payables printWithCommas:9.0]; 
+  newLine print; 
+  "Income Taxes Payable" print; 
+  dr evaluate: [  funDataA taxesPayable printWithCommas:9.0]; 
+  newLine print; 
+  "Other Current Liabilities" print; 
+  dr evaluate: [  funDataA curLiabOther printWithCommas:9.0]; 
+  newLine print; 
+  " " print; 
+  dr evaluate: [" --------" print]; 
+  newLine print; 
+  "Total Current Liabilities" print; 
+  dr evaluate: [  funDataA curLiab printWithCommas:9.0]; 
+  newLine print; 
+  newLine print; 
+  "Total Lt Debt" print; 
+  dr evaluate: [  funDataA ltDebt printWithCommas:9.0]; 
+  newLine print; 
+  "Other Liabilities" print; 
+  dr evaluate: [  funDataA liabOther printWithCommas:9.0]; 
+  newLine print; 
+  "Def Taxes And ITC" print; 
+  dr evaluate: [  funDataA defTax printWithCommas:9.0]; 
+  newLine print; 
+  "Minority Interest" print; 
+  dr evaluate: [  funDataA minorIntBS printWithCommas:9.0]; 
+  newLine print; 
+  " " print; 
+  dr evaluate: [" --------" print]; 
+  newLine print; 
+  "Total Liabilities" print; 
+  dr evaluate: [  funDataA liab printWithCommas:9.0]; 
+  newLine print; 
+  newLine print; 
+  "  Preferred Stock" print; 
+  dr evaluate: [  funDataA prefStockCV printWithCommas:9.0]; 
+  newLine print; 
+  "  Common Equity" print; 
+  dr evaluate: [  funDataA commonEquity printWithCommas:9.0]; 
+  newLine print; 
+  " " print; 
+  dr evaluate: [" --------" print]; 
+  newLine print; 
+  "Total Stockholder's Equity" print; 
+  dr evaluate: [  funDataA stockhEquity printWithCommas:9.0]; 
+  newLine print; 
+  newLine print; 
+  "Total Liab. + Net Worth" print; 
+  dr evaluate: [  funDataA assets printWithCommas:9.0]; 
+  newLine print; 
+  " " print; 
+  dr evaluate: [" ========" print]; 
+  newLine print; 
+  ] . print ;
+
+] ;
+
+
+#----------
+
+Company defineMethod: [ | balanceSheetQ |
+
+FormatTools
+   buildTitle: name,
+     ("Data As Of: " concat: ^date . concat: "   ---   Currency: " .
+          concat: currency name
+     )  over: 80 withStyle: "Arial", "darkblue" . print ;
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+      
+!table <- ^global LayoutTools Named TableSpec at: "finStatement" ;
+table setColumnCountTo: 6 ;
+table caption setTextTo: "Quarterly Balance Sheet" ;
+
+!lastDate <- :funDataQ nonDefaults effectiveDate else: [ ^date ] ;
+!dr <- lastDate to: lastDate - 12 monthEnds by: 3 monthEnds;    
+
+dr asDateList numberElements do:
+  [ !label <- [ " " print ; ^self print: 5 ] divertOutput ;
+     ^my table getColumn: (position + 1 ) asInteger .
+           getHeader: 1 . setTextTo: label ;
+  ] ;
+
+FormatTools buildTableFor: table for: ^self withBlock:
+  [
+  !dr <- ^my dr ;
+  newLine print; 
+  "ASSETS" printNL ;
+  "Current Assets" printNL; 
+  "   Cash" print; 
+  dr evaluate: [ funDataQ cash printWithCommas:9.0]; 
+  newLine print; 
+  "   Accounts Receivables" print; 
+  dr evaluate: [ funDataQ receivables printWithCommas:9.0]; 
+  newLine print; 
+  "   Inventories" print; 
+  dr evaluate: [ funDataQ inventory printWithCommas:9.0]; 
+  newLine print; 
+  "   Other Current Assets" print; 
+  dr evaluate: [ funDataQ curAssetsOther printWithCommas:9.0]; 
+  newLine print; 
+  " " print; 
+  dr evaluate: [" --------" print]; 
+  newLine print; 
+  "Total Current Assets" print; 
+  dr evaluate: [ funDataQ curAssets printWithCommas:9.0]; 
+  newLine print; 
+  newLine print; 
+  "Net Plant" print; 
+  dr evaluate: [ funDataQ ppeNet printWithCommas:9.0]; 
+  newLine print; 
+  "Other Assets" print; 
+  dr evaluate: [ funDataQ assetsOther printWithCommas:9.0]; 
+  newLine print; 
+  newLine print; 
+  "Total Assets" print; 
+  dr evaluate: [ funDataQ assets printWithCommas:9.0]; 
+  newLine print; 
+  " " print; 
+  dr evaluate: [" ========" print]; 
+  newLine print; 
+  newLine print; 
+  newLine print; 
+  "   LIABILITIES AND NET WORTH" printNL; 
+  newLine print; 
+  "Debt In Cur Liabilities" print; 
+  dr evaluate: [ funDataQ debtCurLiab printWithCommas:9.0]; 
+  newLine print; 
+  "Accounts Payable" print; 
+  dr evaluate: [ funDataQ payables printWithCommas:9.0]; 
+  newLine print; 
+  "Income Taxes Payable" print; 
+  dr evaluate: [ funDataQ taxesPayable printWithCommas:9.0]; 
+  newLine print; 
+  "Other Current Liabilities" print; 
+  dr evaluate: [ funDataQ curLiabOther printWithCommas:9.0]; 
+  newLine print; 
+  " " print; 
+  dr evaluate: [" --------" print]; 
+  newLine print; 
+  "Total Current Liabilities" print; 
+  dr evaluate: [ funDataQ curLiab printWithCommas:9.0]; 
+  newLine print; 
+  newLine print; 
+  "Total Lt Debt" print; 
+  dr evaluate: [ funDataQ ltDebt printWithCommas:9.0]; 
+  newLine print; 
+  "Other Liabilities" print; 
+  dr evaluate: [ funDataQ liabOther printWithCommas:9.0]; 
+  newLine print; 
+  "Def Taxes And ITC" print; 
+  dr evaluate: [ funDataQ defTax printWithCommas:9.0]; 
+  newLine print; 
+  "Minority Interest" print; 
+  dr evaluate: [ funDataQ minorIntBS printWithCommas:9.0]; 
+  newLine print; 
+  " " print; 
+  dr evaluate: [" --------" print ]; 
+  newLine print; 
+  "Total Liabilities" print; 
+  dr evaluate: [ funDataQ liab printWithCommas:9.0]; 
+  newLine print; 
+  newLine print; 
+  "  Preferred Stock" print; 
+  dr evaluate: [ funDataQ prefStockCV printWithCommas:9.0]; 
+  newLine print; 
+  "  Common Equity" print; 
+  dr evaluate: [ funDataQ commonEquity printWithCommas:9.0]; 
+  newLine print; 
+  " " print; 
+  dr evaluate: [" --------" print]; 
+  newLine print; 
+  "Total Stockholder's Equity" print; 
+  dr evaluate: [ funDataQ stockhEquity printWithCommas:9.0]; 
+  newLine print; 
+  newLine print; 
+  "Total Liab. + Net Worth" print; 
+  dr evaluate: [ funDataQ assets printWithCommas:9.0]; 
+  newLine print; 
+  " " print; 
+  dr evaluate: [" ========" print]; 
+  newLine print; 
+  ] . print ;
+] ;
+
+#----------
+
+Company defineMethod: [ | incomeStatement |
+
+FormatTools
+   buildTitle: name,
+     ("Data As Of: " concat: ^date . concat: "   ---   Currency: " .
+          concat: currency name
+     )  over: 80 withStyle: "Arial", "darkblue" . print ;
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+      
+!table <- ^global LayoutTools Named TableSpec at: "finStatement" ;
+table setColumnCountTo: 4 ;
+table caption setTextTo: "Annual Income Statement" ;
+
+!lastDate <- :funDataA nonDefaults effectiveDate else: [ ^date ] ;
+!dr <- lastDate to: lastDate - 24 monthEnds by: 12 monthEnds;
+dr asDateList numberElements do:
+  [  !label <- [ " " print ; ^self print: 5 ] divertOutput ;
+     ^my table getColumn: (position + 1 ) asInteger .
+           getHeader: 1 . setTextTo: label ;
+  ] ;
+
+FormatTools buildTableFor: table for: ^self withBlock: 
+  [ 
+  !dr <- ^my dr ;
+  newLine print; 
+  "Sales" print; 
+  dr evaluate: [ funDataA sales printWithCommas:9.0]; 
+  newLine print; 
+  newLine print; 
+  " - Cost Of Goods Sold" print; 
+  dr evaluate: [ funDataA cogs printWithCommas:9.0]; 
+  newLine print; 
+  " - S, G, And A" print; 
+  dr evaluate: [ funDataA sga printWithCommas:9.0]; 
+  newLine print; 
+  " - Depreciation" print; 
+  dr evaluate: [ funDataA deprecAmort printWithCommas:9.0]; 
+  newLine print; 
+  newLine print; 
+  "Operating Income" print; 
+  dr evaluate: [ funDataA opIncome printWithCommas:9.0]; 
+  newLine print; 
+  newLine print; 
+  " - Interest Expense" print; 
+  dr evaluate: [ funDataA intExp printWithCommas:9.0]; 
+  newLine print; 
+  " + Other Income" print; 
+  dr evaluate: [ funDataA nonOpIncome printWithCommas:9.0]; 
+  newLine print; 
+  " + Special Items" print; 
+  dr evaluate: [ funDataA specialItems printWithCommas:9.0]; 
+  newLine print; 
+  newLine print; 
+  "Pretax Income" print; 
+  dr evaluate: [ funDataA pretaxIncome printWithCommas:9.0]; 
+  newLine print; 
+  newLine print; 
+  " - Income Taxes" print; 
+  dr evaluate: [ funDataA incomeTax printWithCommas:9.0]; 
+  newLine print; 
+  " - Minority Interest" print; 
+  dr evaluate: [ funDataA minorInt printWithCommas:9.0]; 
+  newLine print; 
+  newLine print; 
+  "Income Before Extraordinary" print; 
+  dr evaluate: [ funDataA income printWithCommas:9.0]; 
+  newLine print; 
+  newLine print; 
+  "Net Income (Loss)" print; 
+  dr evaluate: [ funDataA netIncome printWithCommas:9.0]; 
+  newLine print; 
+  " " print; 
+  dr evaluate: [" ========" print]; 
+  ] . print ;
+
+] ;
+
+#----------
+
+Company defineMethod: [ | incomeStatementQ |
+
+FormatTools
+   buildTitle:  name,
+     ("Data As Of: " concat: ^date . concat: "   ---   Currency: " .
+          concat: currency name
+     )  over: 80 withStyle: "Arial", "darkblue" . print ;
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+      
+!table <- ^global LayoutTools Named TableSpec at: "finStatement" ;
+table setColumnCountTo: 6 ;
+table caption setTextTo: "Quarterly Income Statement" ;
+
+!lastDate <- :funDataQ nonDefaults effectiveDate else: [ ^date ] ;
+!dr <- lastDate to: lastDate - 12 monthEnds by: 3 monthEnds;    
+
+dr asDateList numberElements do:
+  [ !label <- [ " " print ; ^self print: 5 ] divertOutput ;
+     ^my table getColumn: (position + 1 ) asInteger .
+           getHeader: 1 . setTextTo: label ;
+  ] ;
+
+FormatTools buildTableFor: table for: ^self withBlock:
+  [
+  !dr <- ^my dr ;
+  newLine print; 
+  "Sales" print; 
+  dr evaluate: [ funDataQ sales printWithCommas:9.0]; 
+  newLine print; 
+  newLine print; 
+  " - Cost Of Goods Sold" print; 
+  dr evaluate: [ funDataQ cogs printWithCommas:9.0]; 
+  newLine print; 
+  " - S, G, And A" print; 
+  dr evaluate: [ funDataQ sga printWithCommas:9.0]; 
+  newLine print; 
+  " - Depreciation" print; 
+  dr evaluate: [ funDataQ deprecAmort printWithCommas:9.0]; 
+  newLine print; 
+  " - Interest Expense" print; 
+  dr evaluate: [ funDataQ intExp printWithCommas:9.0]; 
+  newLine print; 
+  " + Other Income" print; 
+  dr evaluate: [ funDataQ nonOpIncome printWithCommas:9.0]; 
+  newLine print; 
+  " + Special Items" print; 
+  dr evaluate: [ funDataQ specialItems printWithCommas:9.0]; 
+  newLine print; 
+  newLine print; 
+  "Pretax Income" print; 
+  dr evaluate: [ funDataQ pretaxIncome printWithCommas:9.0]; 
+  newLine print; 
+  newLine print; 
+  " - Income Taxes" print; 
+  dr evaluate: [ funDataQ incomeTax printWithCommas:9.0]; 
+  newLine print; 
+  " - Minority Interest" print; 
+  dr evaluate: [ funDataQ minorInt printWithCommas:9.0]; 
+  newLine print; 
+  newLine print; 
+  "Income Before Extraordinary" print; 
+  dr evaluate: [ funDataQ income printWithCommas:9.0]; 
+  newLine print; 
+  newLine print; 
+  "Net Income (Loss)" print; 
+  dr evaluate: [ funDataQ netIncome printWithCommas:9.0]; 
+  newLine print; 
+  " " print; 
+  dr evaluate: [" ========" print]; 
+  newLine print; 
+  ] . print ;
+] ;
+
+#--------------------
+
+Company defineMethod: [ | balanceSheetFor: companyList withTitle: title |
+
+currency ifDefault: "US" asCurrency . evaluate: [ 
+
+FormatTools
+   buildTitle: title, 
+     ("Data As Of: " concat: ^date . concat: "   ---   Currency: " .
+          concat: currency name
+     )  over: 80 withStyle: "Arial", "darkblue" . print ;
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+      
+!list <- companyList select: [ funDataA isntDefault ] .
+   sortDown: [ funDataA assets ] . first: 5 ;
+
+!table <- ^global LayoutTools Named TableSpec at: "finStatement" ;
+table setColumnCountTo: (list count min: 5 . + 1 ) asInteger ;
+table caption setTextTo: "Comparative Balance Sheet" ;
+
+list numberElements
+  do: [ !text <- FormatTools buildLinkForApp: "SecurityProfile"
+             withLabel: (id pad: -9) andParams: code ;
+        ^my table getColumn: (position + 1 ) asInteger .
+             getHeader: 1 . setTextTo: text ;
+      ] ;
+
+FormatTools buildTableFor: table for: ^current withBlock: 
+  [ 
+  newLine print ;
+  "Fiscal Year End" print ;
+  list do: [ funDataA date print: -9 ] ; 
+  newLine print ;
+
+  newLine print ;
+  "   ASSETS" printNL ;
+  newLine print ;
+  "Current Assets" printNL ;
+  "   Cash" print ;
+  list do: [  funDataA cash printWithCommas:9.0]; 
+  newLine print; 
+  "   Accounts Receivables" print ;
+  list do: [  funDataA receivables printWithCommas:9.0]; 
+  newLine print; 
+  "   Inventories" print ;
+  list do: [  funDataA inventory printWithCommas:9.0]; 
+  newLine print; 
+  "   Other Current Assets" print ;
+  list do: [  funDataA curAssetsOther printWithCommas:9.0]; 
+  newLine print; 
+  " " print ;  list do: [" --------" print]; 
+  newLine print; 
+  "Total Current Assets" print ;
+  list do: [  funDataA curAssets printWithCommas:9.0]; 
+  newLine print; 
+  newLine print; 
+  "Net Plant" print;
+  list do: [  funDataA ppeNet printWithCommas:9.0]; 
+  newLine print; 
+  "Invest & Advnces - Equity" print ;
+  list do: [  funDataA investAndAdvEquity printWithCommas:9.0]; 
+  newLine print; 
+  "Invest & Advnces - Other" print; 
+  list do: [  funDataA investAndAdvOther printWithCommas:9.0]; 
+  newLine print; 
+  "Intangible Assets" print; 
+  list do: [  funDataA intang printWithCommas:9.0]; 
+  newLine print; 
+  "Other Assets" print; 
+  list do: [  funDataA assetsOther printWithCommas:9.0]; 
+  newLine print; 
+  newLine print; 
+  "Total Assets" print; 
+  list do: [  funDataA assets printWithCommas:9.0]; 
+  newLine print; 
+  " " print; 
+  list do: [" ========" print]; 
+  newLine print; 
+  newLine print; 
+  newLine print; 
+  "   LIABILITIES AND NET WORTH  " printNL; 
+  newLine print; 
+  "Debt In Cur Liabilities" print; 
+  list do: [  funDataA debtCurLiab printWithCommas:9.0]; 
+  newLine print; 
+  "Accounts Payable" print; 
+  list do: [  funDataA payables printWithCommas:9.0]; 
+  newLine print; 
+  "Income Taxes Payable" print; 
+  list do: [  funDataA taxesPayable printWithCommas:9.0]; 
+  newLine print; 
+  "Other Current Liabilities" print; 
+  list do: [  funDataA curLiabOther printWithCommas:9.0]; 
+  newLine print; 
+  " " print; 
+  list do: [" --------" print]; 
+  newLine print; 
+  "Total Current Liabilities" print; 
+  list do: [  funDataA curLiab printWithCommas:9.0]; 
+  newLine print; 
+  newLine print; 
+  "Total Lt Debt" print; 
+  list do: [  funDataA ltDebt printWithCommas:9.0]; 
+  newLine print; 
+  "Other Liabilities" print; 
+  list do: [  funDataA liabOther printWithCommas:9.0]; 
+  newLine print; 
+  "Def Taxes And ITC" print; 
+  list do: [  funDataA defTax printWithCommas:9.0]; 
+  newLine print; 
+  "Minority Interest" print; 
+  list do: [  funDataA minorIntBS printWithCommas:9.0]; 
+  newLine print; 
+  " " print; 
+  list do: [" --------" print]; 
+  newLine print; 
+  "Total Liabilities" print; 
+  list do: [  funDataA liab printWithCommas:9.0]; 
+  newLine print; 
+  newLine print; 
+  "  Preferred Stock" print; 
+  list do: [  funDataA prefStockCV printWithCommas:9.0]; 
+  newLine print; 
+  "  Common Equity" print; 
+  list do: [  funDataA commonEquity printWithCommas:9.0]; 
+  newLine print; 
+  " " print; 
+  list do: [" --------" print]; 
+  newLine print; 
+  "Total Stockholder's Equity" print; 
+  list do: [  funDataA stockhEquity printWithCommas:9.0]; 
+  newLine print; 
+  newLine print; 
+  "Total Liab. + Net Worth" print; 
+  list do: [  funDataA assets printWithCommas:9.0]; 
+  newLine print; 
+  " " print; 
+  list do: [" ========" print]; 
+  newLine print; 
+  ] . print ;
+
+  ] ;
+] ;
+
+#----------
+
+Company defineMethod: [ | incomeStatementFor: companyList withTitle: title |
+
+currency ifDefault: "US" asCurrency . evaluate: [ 
+
+FormatTools
+   buildTitle: title, 
+     ("Data As Of: " concat: ^date . concat: "   ---   Currency: " .
+          concat: currency name
+     )  over: 80 withStyle: "Arial", "darkblue" . print ;
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+      
+!list <- companyList select: [ funDataA isntDefault ] .
+   sortDown: [ funDataA sales ] . first: 5 ;
+
+!table <- ^global LayoutTools Named TableSpec at: "finStatement" ;
+table setColumnCountTo: (list count min: 5 . + 1 ) asInteger ;
+table caption setTextTo: "Comparative Income Statement" ;
+
+list numberElements
+  do: [ !text <- FormatTools buildLinkForApp: "SecurityProfile"
+             withLabel: (id pad: -9) andParams: code ;
+        ^my table getColumn: (position + 1 ) asInteger .
+             getHeader: 1 . setTextTo: text ;
+      ] ;
+
+FormatTools buildTableFor: table for: ^current withBlock: 
+  [ 
+  newLine print ;
+  "Fiscal Year End" print ;
+  list do: [ funDataA date print: -9 ] ; 
+  newLine print ;
+
+  newLine print; 
+  "Sales" print; 
+  list do: [ funDataA sales printWithCommas:9.0]; 
+  newLine print; 
+  newLine print; 
+  " - Cost Of Goods Sold" print; 
+  list do: [ funDataA cogs printWithCommas:9.0]; 
+  newLine print; 
+  " - S, G, And A" print; 
+  list do: [ funDataA sga printWithCommas:9.0]; 
+  newLine print; 
+  " - Depreciation" print; 
+  list do: [ funDataA deprecAmort printWithCommas:9.0]; 
+  newLine print; 
+  newLine print; 
+  "Operating Income" print; 
+  list do: [ funDataA opIncome printWithCommas:9.0]; 
+  newLine print; 
+  newLine print; 
+  " - Interest Expense" print; 
+  list do: [ funDataA intExp printWithCommas:9.0]; 
+  newLine print; 
+  " + Other Income" print; 
+  list do: [ funDataA nonOpIncome printWithCommas:9.0]; 
+  newLine print; 
+  " + Special Items" print; 
+  list do: [ funDataA specialItems printWithCommas:9.0]; 
+  newLine print; 
+  newLine print; 
+  "Pretax Income" print; 
+  list do: [ funDataA pretaxIncome printWithCommas:9.0]; 
+  newLine print; 
+  newLine print; 
+  " - Income Taxes" print; 
+  list do: [ funDataA incomeTax printWithCommas:9.0]; 
+  newLine print; 
+  " - Minority Interest" print; 
+  list do: [ funDataA minorInt printWithCommas:9.0]; 
+  newLine print; 
+  newLine print; 
+  "Income Before Extraordinary" print; 
+  list do: [ funDataA income printWithCommas:9.0]; 
+  newLine print; 
+  newLine print; 
+  "Net Income (Loss)" print; 
+  list do: [ funDataA netIncome printWithCommas:9.0]; 
+  newLine print; 
+  " " print; 
+  list do: [" ========" print]; 
+  ] . print ;
+
+  ] ;
+] ;
+
+#----------
+
+Company defineMethod: [ | earningsReport | 
+FormatTools
+   buildTitle: name,
+   ("Data As Of: " concat: ^date . concat: "   ---   Currency: " .
+         concat: currency name
+   )  over: 80 withStyle: "Arial", "darkblue" . print ;
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+
+!table <- ^global LayoutTools Named TableSpec at: "finHistory" ;
+table setColumnCountTo: 7 ;
+table caption setTextTo: "Earnings History" ;
+table getColumn: 2 . getHeader: 1 . setTextTo: "Price" ;
+table getColumn: 3 . getHeader: 1 . setTextTo: "Eps" ;
+table getColumn: 4 . getHeader: 1 . setTextTo: "Eps(op)" ;
+table getColumn: 5 . getHeader: 1 . setTextTo: "P/E" ;
+table getColumn: 6 . getHeader: 1 . setTextTo: "Shrs Out" ;
+table getColumn: 7 . getHeader: 1 . setTextTo: "Mkt Cap" ;
+
+FormatTools buildTableFor: table for: ^self withBlock:
+    [ :funDataM nonDefaults sortDown: [ date ] .
+          first: 24 .
+       do: [ date print ;
+             price print ;
+             eps12 print ;
+             epsOps12 print ;
+             pe print ;
+             sharesOut printWithCommas: 12.0 ;
+             marketCap printWithCommas: 12.0 ;
+             newLine print ;
+           ] ;
+    ] . print ;
+] ;
+
+#----------
+
+#--------------------
+#  Pricing Report
+#--------------------
+
+Interface ApplicationWS defineMethod: [ | SecurityPricingReport |
+  !id <- ^self getParameter: 1 orName: "id" ;
+  !instance <- ^self getSecurityFor: id ;
+  instance isntNA
+  ifTrue:
+    [ !optionsBar <- [
+         " | " print ; 
+         FormatTools buildLinkForApp: "SecurityProfile" 
+             withLabel: "Summary" andParams: instance code . print ;
+         " | " printNL ;
+       ] divertOutput ;
+      FormatTools buildOptionsBar: optionsBar . printNL ;
+
+      instance pricingReport ;
+     ^self displayChangeEntityPromptForApp: "SecurityPricingReport" 
+           withPrompt: "Enter Security: " andId: instance code ;
+    ] 
+  ifFalse: [ ">>> Bad Security Id Supplied." printNL ] ;
+] .
+;
+
+#----------
+
+Security defineMethod: [ | pricingReport | 
+FormatTools
+   buildTitle: name,
+   ("Data As Of: " concat: ^date . concat: "   ---   Currency: " .
+         concat: currency name
+   )  over: 80 withStyle: "Arial", "darkblue" . print ;
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+
+currency isUS not 
+   ifTrue: [ pricingCurrencyReport ] 
+ifFalse:
+  [
+  !table <- ^global LayoutTools Named TableSpec at: "finHistory" ;
+  table setColumnCountTo: 3 ;
+  table caption setTextTo: "Security Pricing History" ;
+  table getColumn: 2 . getHeader: 1 . setTextTo: "Price" ;
+  table getColumn: 3 . getHeader: 1 . setTextTo: "P/E" ;
+
+  !allPrices <- prices from: ^date - 25 monthEnds ;
+  !daily <- allPrices last: 10 ;
+  !monthly <- allPrices
+     select: [ date isLastBusinessDayOfMonth || date isMonthEnd ] ;
+
+  FormatTools buildTableFor: table for: ^current withBlock:
+    [ daily sortDown: [ date ] .
+      do: [ date formatUsingMMDDYY print ; 
+            price print:12.3 ; ^my :pe asOf: date . printNL ;
+          ] ;
+      monthly sortDown: [ date ] .
+      do: [ date formatUsingMMDDYY print ; 
+            price print:12.3 ; ^my :pe asOf: date . printNL ;
+          ] ;
+    ] . print ;
+
+  !data <- monthly last: 24 ;
+  data count > 0 
+  ifTrue: 
+    [
+    !chart <- ^global LayoutTools Named Linechart at: "monthlyHistory" ;
+    chart header
+      setTextTo: "  Monthly Price and P/E ";
+    chart bottomAxis
+       setTimeBaseTo: data firstDate formatUsingMMDDYY .
+       setMinValueTo: data firstDate formatUsingMMDDYY.
+       setMaxValueTo: data lastDate formatUsingMMDDYY .
+      ;
+    chart clearDataSets ;
+    chart addDataSet: 1 . setLabelTo: "Price" .
+      setSymbolColorTo: "green" . setSymbolTypeTo: "CROSS" .
+      setSymbolSizeTo: 8 . setSymbolStyleTo: "FILLED" .
+      setLineTypeTo: "SOLID" . setLineColorTo: "darkgreen" .
+      setValuesTo: (data send: [ date formatUsingMMDDYY, price ] ) ;
+    chart addDataSet: 2 . setLabelTo: "P/E" .
+      setSymbolColorTo: "blue" . setSymbolTypeTo: "CIRCLE" .
+      setSymbolSizeTo: 6 . setSymbolStyleTo: "FILLED" .
+      setLineTypeTo: "DASHED" . setLineColorTo: "slateblue" .
+      setValuesTo: 
+          (data send: [ date formatUsingMMDDYY, (^my :pe asOf: date)] ) ;
+
+  FormatTools center: (FormatTools buildLinechartFor: chart ) . printNL ;
+  ] ;
+
+  ] ;
+
+] ;
+
+#----------
+
+Security defineMethod: [ | pricingCurrencyReport | 
+
+!table <- ^global LayoutTools Named TableSpec at: "finHistory" ;
+table setColumnCountTo: 4 ;
+table caption setTextTo: "Security Pricing History" ;
+table getColumn: 2 . getHeader: 1 . setTextTo: (currency code, "Close") ;
+table getColumn: 3 . getHeader: 1 . setTextTo: ("US$", "Close") ;
+table getColumn: 4 . getHeader: 1 . setTextTo: ("Exchange", "Rate") ;
+
+FormatTools buildTableFor: table for: ^self withBlock:
+    [
+    !data <- prices from: ^date - 25 monthEnds .
+       extendBy: [ !usclose <- "US" asCurrency evaluate: [ price ] ;
+                   !exchange <- currency usExchange 
+                     elseIf: [ currency isEuro ] 
+                     then: [ !leg <- security legacyCurrency ;
+                             !legToUS <- leg usExchange ;
+                             !legToEuro <- leg fixedRateToEuro ;
+                             legToUS isntNA && legToEuro isntNA
+                             ifTrue:
+                               [ legToUS asString concat: " / " .
+                                    concat: legToEuro .
+                                    concat: " = " .
+                                    concat: (legToUS / legToEuro )
+                               ]
+                           ]
+                 ] ;
+    data sortDown: [ date ] .
+    do: [ date formatUsingMMDDYY print ; 
+          price print ; usclose print ;
+          exchange printNL ;
+        ] ;
+    ] . print ;
+] ;
+
+#--------------------
+#  Security Holdings
+#--------------------
+
+Interface ApplicationWS defineMethod: [ | HoldingsForSecurity |
+  !id <- ^self getParameter: 1 orName: "id" ;
+  !currentEntity <- ^self getSecurityFor: id ;
+  currentEntity isntNA
+  ifTrue:
+    [ !asof <- parameterList at: 2 . asDate else: ^date ;
+      !sortBy <- parameterList at: 3 . else: "shares" ;
+      !optionsBar <- [
+         " | " print ; 
+         FormatTools buildLinkForApp: "SecurityProfile" 
+            withLabel: "Summary" andParams: currentEntity code . print ;
+         " | " print ; 
+         FormatTools buildLinkForApp: "HoldingsHistoryForSecurity" 
+            withLabel: "Chronology" andParams: currentEntity code . print ;
+         " | " printNL ;
+      ] divertOutput ;
+      FormatTools buildOptionsBar: optionsBar . printNL ;
+      asof evaluate: 
+        [ currentEntity positionsSortedBy: sortBy ;
+          ^self displayChangeEntityPromptForApp: "HoldingsForSecurity" 
+                withPrompt: "Enter Security: " andId: currentEntity code ;
+        ] ;
+   ]
+  ifFalse: [ ">>> Bad Security Id Supplied." printNL ] ;
+] ;
+
+#----------
+
+Security defineMethod: [ | positionsSortedBy: sort | 
+currency evaluate: [ 
+
+!sortBlock <- sort isBlock ifTrue: [ sort ] .
+    elseIf: [ sort isString ] then: [ sort asBlock ] .
+    else: [ [ shares ] ] ;
+!sortName <- sortBlock asUndelimitedString translate: newLine to: "" ;
+!sortUp <- (sortName contains: "name" ) || (sortName contains: "code") ;
+!list <- holdings 
+    select: [ account isPortfolio ] ;
+:list <- sortUp
+  ifTrue: [ list sortUp: sortBlock ] ifFalse: [ list sortDown: sortBlock ] ;
+
+FormatTools
+  buildTitle: 
+      ("---  Holdings in " concat: name . concat: "  ---") ,
+      ("Data As Of: " concat: holdingsDate . 
+            concat: "   ---   Currency: " . concat: currency name) ,
+      ([ "Latest Price: " print ; price print: -12.4 ] divertOutput )
+  over: 80 withStyle: "Arial", "darkblue" . print ;
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+      
+!table <- ^global LayoutTools Named TableSpec at: "basicEntity" ;
+table setColumnCountTo: 5 ;
+!header <- 
+   "(sorted by " concat: sortBlock asUndelimitedString .
+   concat: " ; restricted to Portfolios)" ; 
+table getColumn: 1 . getHeader: 1 .
+    setColumnSpanTo: 5 .
+    setTextTo: header ;
+!link <- FormatTools buildLinkForApp: "HoldingsForSecurity"
+   withLabel: "Code" andParams: code, ^date asInteger, "account code" ;
+table getColumn: 1 . getHeader: 2 . setTextTo: link ;
+!link <- FormatTools buildLinkForApp: "HoldingsForSecurity"
+   withLabel: "Account Name" andParams: code, ^date asInteger, "account name" ;
+table getColumn: 2 . getHeader: 2 . setTextTo: link ;
+!link <- FormatTools buildLinkForApp: "HoldingsForSecurity"
+   withLabel: "Shares" andParams: code, ^date asInteger, "shares" ;
+table getColumn: 3 . getHeader: 2 . setTextTo: link ;
+!link <- FormatTools buildLinkForApp: "HoldingsForSecurity"
+   withLabel: "Market Value" andParams: code, ^date asInteger, "totalMarketValue" ;
+table getColumn: 4 . getHeader: 2 . setTextTo: link ;
+!link <- FormatTools buildLinkForApp: "HoldingsForSecurity"
+   withLabel: "% of Port" andParams: code, ^date asInteger, "percentOfPort" ;
+table getColumn: 5 . getHeader: 2 . setTextTo: link ;
+
+FormatTools buildTableFor: table for: ^current withBlock:
+  [
+  " " print ; " Total for Security:" print ;
+  list total: [ shares ] . printWithCommas: 14.0 ;
+  list total: [ totalMarketValue ] . printWithCommas: 14.0 ;
+  " " printNL ;
+  newLine print ;
+  list
+  do: [ FormatTools buildLinkForApp: "AccountProfile"
+            withLabel: account code andParams: account uniqueId . print ;
+        account name take: 30 . print ;
+        shares printWithCommas: 14.0 ;
+        totalMarketValue printWithCommas: 14.0 ;
+        percentOfPort print ;
+        newLine print ;
+       ] ;
+  ] . print ;
+
+#--  reset id,name column header since this table is shared by multiple reports
+table getColumn: 1 . getHeader: 2 . setTextTo: "Id" ;
+table getColumn: 2 . getHeader: 2 . setTextTo: "Name" ;
+
+] ;  #--  of currency
+
+] ;
+
+#--------------------
+#  Security Holdings History
+#--------------------
+
+Interface ApplicationWS defineMethod: [ | HoldingsHistoryForSecurity |
+  !id <- ^self getParameter: 1 orName: "id" ;
+  !currentEntity <- ^self getSecurityFor: id ;
+  !dates <- ^self getParameter: 2  orName: "enterdates" ;
+  dates isDefault
+     ifTrue:[ :dates <- ^self getParameter:3 orName: "menudates" ];
+ 
+  currentEntity isntNA
+  ifTrue:
+    [ !runDates <- 
+         currentEntity holdingsDate evaluate: [ ^self getDatesFrom: dates ] ;
+      !optionsBar <- [
+         " | " print ; 
+         FormatTools buildLinkForApp: "SecurityProfile" 
+            withLabel: "Summary" andParams: currentEntity code . print ;
+         " | " printNL ;
+      ] divertOutput ;
+      FormatTools buildOptionsBar: optionsBar . printNL ;
+      
+      currentEntity chronology: runDates ;
+
+      !form <- ^global LayoutTools Named FormSpec HoldingsChronology ;
+      form 
+        setTitleTo: "Security Chronology" .
+        setApplicationNameTo: "HoldingsHistoryForSecurity" .
+        getInputSpec: 1 . setInitialValueTo: id . setLabelTo: "Security:";
+
+      FormatTools buildShortFormFor: form . printNL ;
+     ]
+  ifFalse: [ ">>> Bad Security Id Supplied." printNL ] ;
+] ;
+
+#----------
+
+Security defineMethod: [ | chronology: runDates | 
+
+FormatTools
+  buildTitle: ("---  Holdings History for " concat: name . concat: "  ---") ,
+      ("Run As Of: " concat: ^date . concat: "   ---   Currency: " .
+           concat: currency name
+      )  over: 80 withStyle: "Arial", "darkblue" . print ;
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+
+!sec <- ^self ; 
+runDates isDefault
+   ifTrue: [ :runDates <- holdingsDate, holdingsDate - 1 monthEnds ] ;
+!holdUniverse <- runDates
+    collectListElementsFrom: 
+     [ ^my :holdings asOf: ^self . 
+          select: [ account isPortfolio && shares > 0 ] . 
+          extendBy: [ !accessDate <- ^my asDate ]    #- date may be earlier
+     ] ;
+
+!accounts <- holdUniverse groupedBy: [ account ] .
+    extendBy: [ !xref <- ^global IndexedList new ; 
+                groupList do: [ ^my xref at: accessDate put: ^self ] ;
+              ] .
+    sortUp: [ name ] ;
+
+!table <- ^global LayoutTools Named TableSpec at: "basicEntity" ;
+table setColumnCountTo: (2 + runDates count)  ;
+table getColumn: 1 . getHeader: 1 .
+    setColumnSpanTo: (2 + runDates count)  .
+    setTextTo: "---  Shares Held by Portfolio ---" ;
+    
+runDates numberElements
+do: [ !label <- FormatTools buildLinkForApp: "HoldingsForSecurity"
+         withLabel: formatUsingMMDDYY andParams: ^my code, asInteger ;
+       ^my table getColumn: (position + 2) asInteger .
+          getHeader: 2 . setTextTo: label ;
+    ] ;
+
+FormatTools buildTableFor: table for: ^current withBlock:
+  [
+  " " print ; "Price" print ; 
+  runDates do: [ ^self evaluate: [ ^my price print:14.4 ] ] ;
+  newLine print ;
+  " " print ; "Shares" print ; 
+  runDates do: [ ^my accounts send: [ xref at: ^my asDate . ] .
+                 select: [ isHolding ] . 
+                 total: [ shares ] . else: 0.0 . printWithCommas: 14.0 ;
+            ] ;
+  newLine print ;
+  newLine print ;
+  accounts
+  do: [ FormatTools buildLinkForApp: "AccountProfile" 
+          withLabel: code andParams: uniqueId . print ;
+        name print: 25 ;
+       
+        ^my runDates
+        do: [ !holding <- ^my xref at: ^self ;
+              holding isHolding 
+                 ifTrue: [ holding shares printWithCommas: 14.0 ] 
+                ifFalse: [ " " print: 14 ] ;
+            ] ;
+        newLine print ;
+     ] ;
+  ] . print ;
+] ;
+
+
+#==================================================
+
+#--------------------
+#  Account Profile
+#--------------------
+
+Interface ApplicationWS 
+   defineMethod: [ | PortfolioProfile | AccountProfile ] ;
+Interface ApplicationWS 
+   defineMethod: [ | AggAccountProfile | AccountProfile ] ;
+Interface ApplicationWS 
+   defineMethod: [ | IndexAccountProfile | AccountProfile ] ;
+
+Interface ApplicationWS defineMethod: [ | AccountProfile | 
+  !id <- ^self getParameter: 1 orName: "id" ;
+  !instance <- ^self getAccountFor: id ;
+  instance isntNA
+  ifTrue:
+    [ !optionsBar <- [
+         " | " print ; 
+         FormatTools buildLinkForApp: "AccountHoldings" 
+           withLabel: "Holdings" 
+           andParams: instance uniqueId . print ;
+         " | " print ; 
+         FormatTools buildLinkForApp: "AccountBreakdown" 
+           withLabel: "Breakdown" 
+           andParams: instance uniqueId . print ;
+         " | " print ; 
+         FormatTools buildLinkForApp: "AccountCharXRef" 
+           withLabel: "Characteristics" 
+           andParams: instance uniqueId . print ;
+         " | " print ; 
+         FormatTools buildLinkForApp: "AccountAttribution" 
+           withLabel: "Attribution" 
+           andParams: instance uniqueId . print ;
+         " | " print ; 
+         FormatTools buildLinkForApp: "AccountCompare" 
+           withLabel: "Comparison" 
+           andParams: instance uniqueId . print ;
+         " | " print ; 
+         FormatTools buildLinkForApp: "ShowAllDataValues"
+              withLabel: "Data Values" 
+              andParams: "Account", instance uniqueId . print ;
+         " | " printNL ;
+      ] divertOutput ;
+      FormatTools buildOptionsBar: optionsBar . printNL ;
+
+      instance summary ;
+     ^self displayChangeEntityPromptForApp: "AccountProfile" 
+           withPrompt: "Enter Account: " andId: instance code ;
+    ] 
+  ifFalse: [
+  	    !sortorder <- ^self getParameter: 2 ;
+            ^global Account activeUniverseReport: sortorder  
+           ] ;
+] ;  
+
+
+#----------
+
+Interface ApplicationWS defineMethod: [ | AccountHoldingsHistory |
+  !id <- ^self getParameter: 1 orName: "id" ;
+  !currentEntity <- ^self getAccountFor: id ;
+  currentEntity isntNA
+  ifTrue:
+    [ !optionsBar <- [
+         " | " print ; 
+         FormatTools buildLinkForApp: "AccountProfile" 
+            withLabel: "Summary" andParams: currentEntity uniqueId . print ;
+         " | " printNL ;
+      ] divertOutput ;
+      FormatTools buildOptionsBar: optionsBar . printNL ;
+    
+      currentEntity holdingsHistoryReport ;
+     ^self displayChangeEntityPromptForApp: "AccountHoldingsHistory" 
+           withPrompt: "Enter Account: " andId: currentEntity code ;
+   ] 
+  ifFalse: [ ">>> Bad Account Id Supplied." printNL ] ;
+] ;
+
+#----------
+
+Interface ApplicationWS defineMethod: [ | AccountComponentHistory |
+  !id <- ^self getParameter: 1 orName: "id" ;
+  !currentEntity <- ^self getAccountFor: id ;
+  currentEntity isAggAccount || currentEntity isCompositeAccount
+  ifTrue:
+    [ !optionsBar <- [
+         " | " print ; 
+         FormatTools buildLinkForApp: "AccountProfile" 
+            withLabel: "Summary" andParams: currentEntity uniqueId . print ;
+         " | " printNL ;
+      ] divertOutput ;
+      FormatTools buildOptionsBar: optionsBar . printNL ;
+    
+      currentEntity componentHistoryReport ;
+     ^self displayChangeEntityPromptForApp: "AccountComponentHistory" 
+           withPrompt: "Enter Account: " andId: currentEntity code ;
+    ] .
+  elseIf: [ currentEntity isAccount ]
+    then: [ ">>>  Report not defined for " print ; 
+            currentEntity whatAmI print ; " class." printNL ;
+          ] .
+    else: [ ">>> Bad Account Id Supplied." printNL ] ;
+] ;
+
+#----------
+
+Account defineMethod: [ | activeUniverseReport: sortorder | 
+
+sortorder isNA
+  ifTrue: [:sortorder <- "code" ];
+
+FormatTools
+   buildTitle: "Active Account Universe",
+      ("As Of: " concat: ^date . concat: "   ---   Currency: " .
+            concat: currency name ),  
+      ( " Sorted By: " concat: sortorder)             
+            over: 80 withStyle: "Arial", "darkblue" . print ;
+      
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+      
+#--!list <- ^self masterList select: [ holdings count > 0 ] ;
+!list <- ^self activeList 
+extendBy:
+[
+!id <- ^my sortorder = "name" 
+ifTrue:[name]
+  else:[code];
+
+] ;
+
+!groups <- list 
+   extendBy: [ !group <- id take: 1 . toUpper ;
+               group contains: "[0-9A-Z]" . 
+                 ifFalse: [ :group <- "Other" ; ] ;
+             ] .
+   groupedByString: [ group ] .
+   sortUp: [ asSelf = "Other" 
+                 ifTrue: [ "ZZZZZ" ] ifFalse: [ asSelf ] 
+           ] ;
+
+FormatTools buildOptionsBar:
+   [ groups
+     do: [ FormatTools
+              buildLink: ("#" concat: asSelf) 
+              withLabel: (FormatTools bold: asSelf ) . print ;
+            " " print ;
+         ]
+   ] divertOutput . printNL ;
+
+FormatTools beginPreserveMode printNL ;
+
+FormatTools bold: 
+[
+   FormatTools 
+    	buildLinkForApp: "AccountProfile" 
+    	withLabel: "Id" 
+    	andParams: NA,"code" . print; 
+"         " print; 
+   FormatTools 
+    	buildLinkForApp: "AccountProfile" 
+    	withLabel: "Name" 
+    	andParams: NA, "name" . print; 
+"                    " print;     
+	
+    "Count" print: -6 ; "Total MVal" print: -20 ; "Total Cash" print: -15 ;
+    newLine print ;
+  ] divertOutput . print ;
+
+groups
+do: [ newLine print ;
+      !label <- FormatTools bold: ("-- " concat: asSelf . concat: " --") ;
+      FormatTools buildAnchor: asSelf withLabel: label . print ;
+
+      groupList groupedBy: [ whatAmI ] .
+      sortUp: [ ^self = "Portfolio" ifTrue: [ 1 ] .
+                   elseIf: [ ^self = "AggAccount" ] then: [ 2 ] .
+                   else: [ 3 ]
+              ] .
+      do: [ newLine print ;
+            groupList sortUp: [ id ] .
+            do: [ FormatTools buildLinkForApp: "AccountProfile" 
+                     withLabel: (code pad: 10) andParams: uniqueId . print;
+                  " " concat: (name take: 24 ) . print: 25 ;
+                  holdings count print: 6 ;
+                  totalMarketValue else: 0.0 . printWithCommas: 20.0 ;
+                  totalMarketValueCash else: 0.0 . printWithCommas: 15.0 ;
+                  newLine print ;
+               ] ;
+          ]
+    ] ;
+
+FormatTools endPreserveMode printNL ;
+] ;
+
+
+#----------
+
+Account defineMethod: [ | summary | 
+
+FormatTools
+      buildTitle: (^self whatAmI concat: " Profile For: " . concat: name) ,
+          ("Data As Of: " concat: ^date . concat: "   ---   Currency: " .
+               concat: currency name
+          )  over: 80 withStyle: "Arial", "darkblue" . print ;
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+      
+!table <- ^global LayoutTools Named TableSpec at: "basic2Column" ;
+table getColumn: 1 . getHeader: 1 . setTextTo: "---  Basics  ---" ;
+
+FormatTools buildTableFor: table for: ^self withBlock:
+  [
+  "Id: " print ; code printNL ;
+  "Type: " print ; whatAmI printNL ;
+  "Currency: " print ; baseCurrency printNL ;
+  FormatTools buildLinkForApp: "AccountHoldings"
+       withLabel: "Total Holdings: " andParams: uniqueId . print ;
+  holdings count printNL: 18.0 ;
+  "EffectiveDate: " print ; holdingsDate printNL ;
+  "Mkt Value: " print ; totalMarketValue else: 0.0 . printWithCommasNL: 18 ;
+  "Equity: " print ; totalMarketValueEquity else: 0.0 . printWithCommasNL: 18 ; 
+  "Fixed: " print ; totalMarketValueFixed else: 0.0 . printWithCommasNL: 18 ;
+  "Cash: " print ; totalMarketValueCash else: 0.0 . printWithCommasNL: 18 ; 
+  ] . print ;
+
+!table <- ^global LayoutTools Named TableSpec at: "basicEntity" ;
+table setColumnCountTo: 5 ;
+table getColumn: 1 . getHeader: 1 .
+    setColumnSpanTo: 5 .
+    setTextTo: "--- Top 5 Equity Holdings ---" ;
+table getColumn: 3 . getHeader: 2 . setTextTo: "Shares" ;
+table getColumn: 4 . getHeader: 2 . setTextTo: "Mkt Val" ;
+table getColumn: 5 . getHeader: 2 . setTextTo: "Pct of Port" ;
+FormatTools buildTableFor: table for: ^self withBlock:
+  [
+  holdings select: [ security type isEquity ] .
+     sortDown: [ percentOfPort ] . first: 5 .
+     do: [ FormatTools buildLinkForApp: "SecurityProfile" 
+             withLabel: security id 
+             andParams: security code . print ;
+           security name print: 24 ;
+           shares printWithCommas: 15.0 ;
+           totalMarketValue printWithCommas: 18.0 ;
+           [ percentOfPort print: 7 ; " %" print ] divertOutput printNL ;
+         ] ;
+   ] . printNL ;
+
+!table <- ^global LayoutTools Named TableSpec at: "basicHistory" ;
+table setColumnCountTo: 4 ;
+table getColumn: 1 . getHeader: 1 .
+    setColumnSpanTo: 4 .
+    setTextTo: "--- Recent Holdings History ---" ;
+table getColumn: 2 . getHeader: 2 . setTextTo: "Count" ;
+table getColumn: 3 . getHeader: 2 . setTextTo: "Total MVal" ;
+table getColumn: 4 . getHeader: 2 . setTextTo: "Total Cash" ;
+FormatTools buildTableFor: table for: ^self withBlock:
+  [ !acct <- ^self ;
+    :holdingsSeries last: 5 . doReverse:
+        [ FormatTools buildLinkForApp: "AccountHoldings"
+            withLabel: ^date formatUsingMMDDYY
+            andParams: ^my acct uniqueId, date asInteger . print ;
+          count print ;
+          ^my totalMarketValue printWithCommas: 18.0 ;
+          ^my totalMarketValueCash printWithCommasNL: 18.0 ;
+        ] ;
+    :holdingsSeries nonDefaults count > 5
+    ifTrue:
+      [ FormatTools buildLinkForApp: "AccountHoldingsHistory"
+            withLabel: "... more" andParams: acct uniqueId . print ;
+        " " print ; " " print ; " " printNL ;
+      ] ;
+   ] . printNL ;
+
+] ;
+
+Portfolio defineMethod: [ | summary | 
+^super summary ;
+
+!table <- ^global LayoutTools Named TableSpec at: "basicEntity" ;
+table setColumnCountTo: 2 ;
+table getColumn: 1 . getHeader: 1 .
+     setColumnSpanTo: 2 .
+     setTextTo: "---  AggAccount Participation  ---" ;
+
+FormatTools buildTableFor: table for: ^current withBlock:
+  [ aggregateList sortUp: [ code ] .
+    do: [ FormatTools buildLinkForApp: "AccountProfile"
+             withLabel: code andParams: uniqueId . print ;
+          name printNL ;
+        ] ;
+  ] . print ;
+] ;
+
+AggAccount defineMethod: [ | summary | 
+^super summary ;
+
+!table <- ^global LayoutTools Named TableSpec at: "basicEntity" ;
+table setColumnCountTo: 5 ;
+!label <- FormatTools buildLinkForApp: "AccountComponentHistory"
+   withLabel: "---  Portfolios in Aggregate ---" andParams: uniqueId ;
+table getColumn: 1 . getHeader: 1 .
+    setColumnSpanTo: 5 .
+    setTextTo: label ;
+table getColumn: 3 . getHeader: 2 . setTextTo: "Count" ;
+table getColumn: 4 . getHeader: 2 . setTextTo: "Total MVal" ;
+table getColumn: 5 . getHeader: 2 . setTextTo: "Total Cash" ;
+FormatTools buildTableFor: table for: ^current withBlock:
+  [ !acct <- ^self ;
+    acct holdingsDate evaluate:
+      [ memberList sortUp: [ code ] .
+        do: [ FormatTools buildLinkForApp: "AccountProfile"
+                 withLabel: code andParams: uniqueId . print ;
+              name print ;
+              holdings count print ; 
+              totalMarketValue printWithCommas: 18.0 ;
+              totalMarketValueCash printWithCommas: 18.0 ;
+              newLine print ;
+            ] ;
+      ] ;
+  ] . print ;
+] ;
+
+
+IndexAccount defineMethod: [ | summary | 
+^super summary ;
+
+!table <- ^global LayoutTools Named TableSpec at: "basicHistory" ;
+table setColumnCountTo: 4 ;
+table getColumn: 1 . getHeader: 1 .
+    setColumnSpanTo: 4 .
+    setTextTo: "--- Membership History ---" ;
+table getColumn: 2 . getHeader: 2 . setTextTo: "Count" ;
+table getColumn: 3 . getHeader: 2 . setTextTo: "Universe" ;
+table getColumn: 4 . getHeader: 2 . setTextTo: "Style" ;
+FormatTools buildTableFor: table for: ^current withBlock:
+  [ !acct <- ^self asSelf ;
+    :memberList select: [ ^date isntDefault || count > 0 ] . 
+    doReverse:
+        [ ^date formatUsingMMDDYY print ;
+          count print ;
+          ^my universe isntDefault 
+             ifTrue: [ ^my universe print ; ^my style print ] 
+            ifFalse: [ " - " print ; " - " print ] ;
+          newLine print ;
+        ] ;
+  ] . print ;
+] ;
+
+CompositeAccount defineMethod: [ | summary | 
+^super summary ;
+
+!table <- ^global LayoutTools Named TableSpec at: "basicEntity" ;
+table setColumnCountTo: 5 ;
+!label <- FormatTools buildLinkForApp: "AccountComponentHistory"
+   withLabel: "---  Accounts in Composite ---" andParams: uniqueId ;
+table getColumn: 1 . getHeader: 1 .
+    setColumnSpanTo: 5 .
+    setTextTo: label ;
+table getColumn: 3 . getHeader: 2 . setTextTo: "Weight" ;
+table getColumn: 4 . getHeader: 2 . setTextTo: "Total MVal" ;
+table getColumn: 5 . getHeader: 2 . setTextTo: "Total Cash" ;
+FormatTools buildTableFor: table for: ^current withBlock:
+  [ !acct <- ^self asSelf ;
+    acct holdingsDate evaluate:
+      [ componentList sortUp: [ code ] .
+        do: [ FormatTools buildLinkForApp: "AccountProfile"
+                 withLabel: account code andParams: account uniqueId . print ;
+              account name print ;
+              weight print ;
+              account totalMarketValue printWithCommas: 18.0 ;
+              account totalMarketValueCash printWithCommas: 18.0 ;
+              newLine print ;
+            ] ;
+      ] ;
+  ] . print ;
+] ;
+
+#----------
+
+Account defineMethod: [ | holdingsHistoryReport | 
+
+FormatTools
+   buildTitle: ( "Holdings History For: " concat: name) ,
+      ("Data As Of: " concat: ^date . concat: "   ---   Currency: " .
+            concat: currency name
+      )  over: 80 withStyle: "Arial", "darkblue" . print ;
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+      
+!table <- ^global LayoutTools Named TableSpec at: "basicHistory" ;
+table setColumnCountTo: 6 ;
+table getColumn: 1 . getHeader: 1 .
+    setColumnSpanTo: 6 .
+    setTextTo: "--- Holdings History ---" ;
+table getColumn: 2 . getHeader: 2 . setTextTo: "Count" ;
+table getColumn: 3 . getHeader: 2 . setTextTo: "Total MVal" ;
+table getColumn: 4 . getHeader: 2 . setTextTo: "Total Cash" ;
+table getColumn: 5 . getHeader: 2 . setTextTo: "Total Equity" ;
+table getColumn: 6 . getHeader: 2 . setTextTo: "Total Fixed" ;
+FormatTools buildTableFor: table for: ^self withBlock:
+  [ !acct <- ^self ;
+    :holdingsSeries select: [ ^date isntDefault || count > 0 ] . 
+    doReverse: 
+        [ FormatTools buildLinkForApp: "AccountHoldings"
+            withLabel: ^date formatUsingMMDDYY
+            andParams: ^my acct uniqueId, date asInteger . print ;
+          count print ;
+          ^my totalMarketValue else: 0.0 . printWithCommas: 18.0 ;
+          ^my totalMarketValueCash else: 0.0 . printWithCommas: 18.0 ;
+          ^my totalMarketValueEquity else: 0.0 . printWithCommas: 18.0 ;
+          ^my totalMarketValueFixed else: 0.0 . printWithCommas: 18.0 ;
+          newLine print ;
+        ] ;
+   ] . printNL ;
+] ;
+
+#----------
+
+AggAccount defineMethod: [ | componentHistoryReport | 
+
+FormatTools
+  buildTitle: ("Membership and Update History For: " concat: name) ,
+      ("Data As Of: " concat: ^date )
+        over: 80 withStyle: "Arial", "darkblue" . print ;
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+      
+!table <- ^global LayoutTools Named TableSpec at: "basicEntity" ;
+table setColumnCountTo: 2 ;
+table getColumn: 1 . getHeader: 1 .
+    setColumnSpanTo: 2 .
+     setTextTo: "---  Membership History  ---" ;
+
+FormatTools buildTableFor: table for: ^current withBlock:
+  [ :memberList select: [ ^date isntDefault || count > 0 ] . 
+    doReverse: 
+        [ FormatTools bold: ^date formatUsingMMDDYY . print ; 
+          " " print ; " " print ; " " print ; " " printNL ;
+          ^self sortUp: [ code ] . 
+          do: [ !label <- FormatTools buildLinkForApp: "AccountProfile"
+                     withLabel: code andParams: uniqueId ;
+                "... " concat: label . print ; name print ;
+                newLine print ;
+              ] ;
+        ] ;
+  ] . print ;
+
+!table <- ^global LayoutTools Named TableSpec at: "basicHistory" ;
+table setColumnCountTo: 3 ;
+table getColumn: 1 . getHeader: 1 .
+    setColumnSpanTo: 3 .
+     setTextTo: "---  Update History  ---" ;
+table getColumn: 2 . getHeader: 2 . setTextTo: "Total MVal" ;
+table getColumn: 3 . getHeader: 2 . setTextTo: "# Holdings" ;
+
+FormatTools buildTableFor: table for: ^current withBlock:
+  [ :holdingsSeries select: [ ^date isntDefault ] .
+    doReverse: 
+        [ FormatTools bold: ^date formatUsingMMDDYY . print ; 
+          FormatTools bold:
+             [ ^my totalMarketValue printWithCommas: 18.0 ] divertOutput .
+              print ;
+          FormatTools bold: count .  printNL ;
+          ^my memberList sortUp: [ code ] .
+          do: [ "... " concat: code . print ; 
+                totalMarketValue printWithCommas: 18.0 ;
+                holdings count printNL ;
+              ] ;
+        ] ;
+  ] . print ;
+
+] ;
+
+CompositeAccount defineMethod: [ | componentHistoryReport | 
+FormatTools
+  buildTitle: ("Component History For: " concat: name) ,
+      ("Data As Of: " concat: ^date )
+        over: 80 withStyle: "Arial", "darkblue" . print ;
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+      
+!table <- ^global LayoutTools Named TableSpec at: "basicEntity" ;
+table setColumnCountTo: 3 ;
+table getColumn: 1 . getHeader: 1 .
+    setColumnSpanTo: 3 .
+     setTextTo: "---  Accounts in Composite  ---" ;
+table getColumn: 3 . getHeader: 2 . setTextTo: "Weight" ;
+
+FormatTools buildTableFor: table for: ^current withBlock:
+  [ :componentList select: [ ^date isntDefault || count > 0 ] . 
+    doReverse:
+        [ FormatTools bold: ^date formatUsingMMDDYY . print ; " " printNL ;
+          ^self sortUp: [ account code ] . 
+          do: [ !label <- FormatTools buildLinkForApp: "AccountProfile"
+                     withLabel: account code andParams: account uniqueId ;
+                "... " concat: label . print ; account name print ;
+                weight printNL ;
+              ] ;
+        ] ;
+  ] . print ;
+
+] ;
+
+#--------------------
+#   AccountHoldings
+#--------------------
+
+Interface ApplicationWS defineMethod: [ | AccountHoldings |
+  !id <- ^self getParameter: 1 orName: "id" ;
+  !currentEntity <- ^self getAccountFor: id ;
+  currentEntity isntNA
+  ifTrue:
+    [ !asof <- parameterList at: 2 . asDate else: ^date ;
+      !sortBy <- parameterList at: 3 . else: "totalMarketValue" ;
+      !optionsBar <- [
+         " | " print ; 
+         FormatTools buildLinkForApp: "AccountProfile" 
+            withLabel: "Summary" andParams: currentEntity uniqueId . print ;
+         " | " print ; 
+         FormatTools buildLinkForApp: "AccountChronology" 
+            withLabel: "Chronology" andParams: currentEntity uniqueId . print ;
+         " | " print ; 
+         FormatTools buildLinkForApp: "AccountCharXRef" 
+            withLabel: "Characteristics" 
+            andParams: currentEntity uniqueId . print ;
+         " | " print ;
+         FormatTools buildLinkForApp: "AccountAttribution" 
+            withLabel: "Attribution" andParams: currentEntity uniqueId . 
+                print ;
+         FormatTools startParagraph print ;
+         FormatTools bold: "Breakdown By: " . print ;
+         ^self getValidGroupsFor: ^global Holding .
+         do: [ " | " print ; 
+               FormatTools buildLinkForApp: "AccountBreakdown" 
+                 withLabel: shortName 
+                 andParams: ^my currentEntity uniqueId, code .
+                 print ;
+              ] ;
+         " | " printNL ;
+      ] divertOutput ;
+      FormatTools buildOptionsBar: optionsBar . printNL ;
+    
+      asof evaluate: 
+        [ currentEntity positionsSortedBy: sortBy ;
+          ^self displayChangeEntityPromptForApp: "AccountHoldings" 
+           withPrompt: "Enter Account: " andId: currentEntity code ;
+        ] ;
+    ] 
+  ifFalse: [ ">>> Bad Account Id Supplied." printNL ] ;
+] ;
+
+#----------
+
+Account defineMethod: [ | positionsSortedBy: sort | 
+
+!sortBlock <- sort isBlock ifTrue: [ sort ] .
+    elseIf: [ sort isString ] then: [ sort asBlock ] .
+    else: [ [ totalMarketValue ] ] ;
+!sortName <- sortBlock asUndelimitedString translate: newLine to: "" ;
+!sortUp <- (sortName contains: "name" ) || (sortName contains: "code") ;
+!list <- sortUp
+  ifTrue: [ holdings sortUp: sortBlock ] 
+ ifFalse: [ holdings sortDown: sortBlock ] ;
+
+FormatTools
+  buildTitle: ("---  Holdings in " concat: name . concat: "  ---") ,
+      ("Data As Of: " concat: holdingsDate . concat: "   ---   Currency: " .
+           concat: currency name
+      )  over: 80 withStyle: "Arial", "darkblue" . print ;
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+      
+!table <- ^global LayoutTools Named TableSpec at: "basicEntity" ;
+table setColumnCountTo: 5 ;
+!header <- "(sorted by " concat: sortBlock asUndelimitedString . concat: ")" ;
+table getColumn: 1 . getHeader: 1 .
+    setColumnSpanTo: 5 .
+    setTextTo: header ;
+!link <- FormatTools buildLinkForApp: "AccountHoldings"
+   withLabel: "Code" andParams: code, ^date asInteger, "security code" ;
+table getColumn: 1 . getHeader: 2 . setTextTo: link ;
+!link <- FormatTools buildLinkForApp: "AccountHoldings"
+   withLabel: "Security Name" andParams: code, ^date asInteger, "security name" ;
+table getColumn: 2 . getHeader: 2 . setTextTo: link ;
+!link <- FormatTools buildLinkForApp: "AccountHoldings"
+   withLabel: "Shares" andParams: code, ^date asInteger, "shares" ;
+table getColumn: 3 . getHeader: 2 . setTextTo: link ;
+!link <- FormatTools buildLinkForApp: "AccountHoldings"
+   withLabel: "Market Value" andParams: code, ^date asInteger, "totalMarketValue" ;
+table getColumn: 4 . getHeader: 2 . setTextTo: link ;
+!link <- FormatTools buildLinkForApp: "AccountHoldings"
+   withLabel: "% of Port" andParams: code, ^date asInteger, "percentOfPort" ;
+table getColumn: 5 . getHeader: 2 . setTextTo: link ;
+
+FormatTools buildTableFor: table for: ^current withBlock:
+  [
+  " " print ; " Total for Account" print ;
+  " " print ; totalMarketValue printWithCommasNL: 14.0 ;
+  " " print ; " Total Equity" print ;
+  " " print ; totalMarketValueEquity else: 0.0 . printWithCommas: 14.0 ;
+  totalMarketValueEquity / totalMarketValue * 100 else: 0.0 . printNL: 10 ;
+  " " print ; " Total Fixed Income" print ;
+  " " print ; totalMarketValueFixed else: 0.0 . printWithCommas: 14.0 ;
+  totalMarketValueFixed / totalMarketValue * 100 else: 0.0 . printNL: 10 ;
+  " " print ; " Total Cash" print ;
+  " " print ; totalMarketValueCash else: 0.0 . printWithCommas: 14.0 ;
+  totalMarketValueCash / totalMarketValue * 100 else: 0.0 . printNL: 10 ;
+  newLine print ;
+
+  list
+  do: [ FormatTools buildLinkForApp: "SecurityProfile"
+             withLabel: security id
+             andParams: security code . print ;
+        security name print ;
+        shares printWithCommas: 14.0 ;
+        totalMarketValue printWithCommas: 14.0 ;
+        percentOfPort print: 10 ;
+        newLine print ;
+      ] ;
+  ] . print ;
+
+#--  reset id,name column header since this table is shared by multiple reports
+table getColumn: 1 . getHeader: 2 . setTextTo: "Id" ;
+table getColumn: 2 . getHeader: 2 . setTextTo: "Name" ;
+
+] ;
+
+#--------------------
+#   AccountChronology
+#--------------------
+Interface ApplicationWS defineMethod: [ | AccountChronology |
+  !id <- ^self getParameter: 1 orName: "id" ;
+  !currentEntity <- ^self getAccountFor: id ;
+  !dates <- ^self getParameter: 2  orName: "enterdates" ;
+  dates isDefault
+    ifTrue: [:dates <- ^self getParameter:3 orName: "menudates" ];
+
+  currentEntity isntNA
+  ifTrue:
+    [ !runDates <- 
+         currentEntity holdingsDate evaluate: [ ^self getDatesFrom: dates ] ;
+      !optionsBar <- [
+         " | " print ; 
+         FormatTools buildLinkForApp: "AccountProfile" 
+            withLabel: "Summary" andParams: currentEntity uniqueId . print ;
+         " | " print ; 
+         FormatTools buildLinkForApp: "AccountCharXRef" 
+            withLabel: "Characteristics" 
+            andParams: currentEntity uniqueId . print ;
+         " | " printNL ;
+      ] divertOutput ;
+      FormatTools buildOptionsBar: optionsBar . printNL ;
+
+      currentEntity chronology: runDates ;
+
+      !form <- ^global LayoutTools Named FormSpec HoldingsChronology ;
+      form 
+        setTitleTo: "Account Chronology" .
+        setApplicationNameTo: "AccountChronology" .
+        getInputSpec: 1 . setInitialValueTo: id . setLabelTo: "Account";
+      FormatTools buildShortFormFor: form . printNL ;
+
+    ] 
+  ifFalse: [ ">>> Bad Account Id Supplied." printNL ] ;
+] ;
+
+#----------
+
+Account defineMethod: [ | chronology: runDates | 
+
+FormatTools
+  buildTitle: ("---  Historic Holdings in " concat: name . concat: "  ---") ,
+      ("Run As Of: " concat: ^date . concat: "   ---   Currency: " .
+           concat: currency name
+      )  over: 80 withStyle: "Arial", "darkblue" . print ;
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+
+!acct <- ^self ; 
+runDates isDefault
+   ifTrue: [ :runDates <- holdingsDate, holdingsDate - 1 monthEnds ] ;
+!holdUniverse <-  runDates
+   collectListElementsFrom: 
+     [ ^my acct :holdings asOf: ^self .
+        extendBy: [ !accessDate <- ^my asDate ]    #- date may be earlier
+     ] ;
+!securities <- holdUniverse groupedBy: [ security asSelf ] .
+    extendBy: [ !xref <- ^global IndexedList new ; 
+                groupList do: [ ^my xref at: accessDate put: ^self ] ;
+              ] .
+    sortUp: [ code ] ;
+
+!table <- ^global LayoutTools Named TableSpec at: "basicEntity" ;
+table setColumnCountTo: (2 + runDates count) ;
+table getColumn: 1 . getHeader: 1 .
+    setColumnSpanTo: (2 + runDates count) .
+    setTextTo: "---  Shares Held Over Time ---" ;
+
+runDates numberElements
+do: [ !label <- FormatTools buildLinkForApp: "AccountHoldings"
+         withLabel: formatUsingMMDDYY andParams: ^my code, asInteger ;
+      ^my table getColumn: (position + 2) asInteger .
+         getHeader: 2 . setTextTo: label ;
+    ] ;
+
+FormatTools buildTableFor: table for: ^self withBlock:
+  [
+  !dates <- ^my runDates ;
+  " " print ; "Total Mkt Value" print ;
+  dates do: [ ^my :totalMarketValue asOf: ^self . printWithCommas: 14.0 ] ;
+  newLine print ;
+  " " print ; "Total Holdings" print ; 
+  dates do: [ ^my :holdings asOf: ^self . count printWithCommas: 14] ;
+  newLine print ;
+  " " print ; "Effective Date: " print ;
+  dates do: [ ^my :holdingsDate asOf: ^self . print: -14];
+  newLine print ;
+
+  newLine print ;
+  ^my securities
+  do: [ FormatTools buildLinkForApp: "SecurityProfile" 
+          withLabel: id andParams: code . print ;
+        name print: 25 ;
+        ^my dates
+        do: [ !holding <- ^my xref at: ^self ;
+              holding isHolding 
+                 ifTrue: [ holding shares printWithCommas: 14.0 ] 
+                ifFalse: [ " " print: 14 ] ;
+            ] ;
+        newLine print ;
+     ] ;
+  ] . print ;
+
+] ;
+
+
+#--------------------
+#   AccountBreakdown
+#--------------------
+
+Interface ApplicationWS defineMethod: [ | AccountBreakdown |
+  !details <- FALSE ;
+  !id <- ^self getParameter: 1 orName: "id" ;
+  !acct <- ^self getAccountFor: id ;
+  acct isntNA
+  ifTrue:
+    [ !group <- ^self
+         getGroupFromParameter: 2 orMenu: "group" orEntry: "groupEntry" ;
+      !groupId <- ^self getParameter: 3 ;
+      namedParameters at: "detail" . else: "" . contains: "Detail" .
+          ifTrue: [ :groupId <- "ALL" ] ;
+    
+      !optionsBar <- [
+         " | " print ; 
+         FormatTools buildLinkForApp: "AccountProfile" 
+            withLabel: "Account Summary" 
+            andParams: acct uniqueId . print ;
+         " | " print ; 
+         FormatTools buildLinkForApp: "AccountHoldings" 
+            withLabel: "Account Holdings" 
+            andParams: acct uniqueId . print ;
+         " | " print ; 
+         groupId isNA
+         ifTrue:
+           [ FormatTools buildLinkForApp: "AccountBreakdown"
+              withLabel: "Breakdown Details" 
+              andParams: acct uniqueId, group, "ALL" . print ;
+           ] 
+         ifFalse:
+           [ FormatTools buildLinkForApp: "AccountBreakdown"
+              withLabel: "Breakdown Summary" 
+              andParams: acct uniqueId, group . print ;
+           ] ;
+         " | " print ; 
+         FormatTools buildLinkForApp: "AccountCharXRef" 
+            withLabel: "Characteristics" 
+            andParams: acct uniqueId, ^date asInteger, group . print ;
+         " | " printNL ;
+
+      ] divertOutput ;
+      FormatTools buildOptionsBar: optionsBar . printNL ;
+
+      acct breakdownBy: group for: groupId ;
+      FormatTools buildSectionBreakOver: "30%" alignedTo: "center" . print ;
+      !form <- ^global LayoutTools Named FormSpec AccountBreakdown ;
+      form getInputSpec: 1 . setInitialValueTo: acct uniqueId ;
+      !menu <- form getInputSpec: 2 ;
+      ^self 
+         setGroupsIn: menu for: ^global Holding withCurrent: group ;
+       !level <- form getInputSpec: 3 ;
+       level clearSelection ;
+       groupId isNA
+          ifTrue: [ level selectChoice: 1 ] 
+         ifFalse: [ level selectChoice: 2 ] ;
+       menu setSizeTo: 1 ;
+       FormatTools buildShortFormFor: form . printNL ;
+   ] 
+  ifFalse: [ ">>> Bad Account Id Supplied." printNL ] ;
+] ;
+
+#----------
+
+Account defineMethod: [ | breakdownBy: group for: groupId |
+!groupBlock <- 
+   ^global DataItem getGroupBlockFor: group from: ^global Holding .
+    else: [ [ security company sector ] ] ;
+!list <- holdings groupedBy: groupBlock .
+    extendBy: [ !id <- code else: [ asString ] ;
+                !name <- id ;
+                isEntity
+                ifTrue:
+                  [ :id <- shortName else: [ code ] ;
+                    :name <- ^self name ;
+                  ] ;
+                !tmv <- groupList total: [ totalMarketValue ] ;
+                !pct <- groupList total: [ percentOfPort ] ;
+              ] .
+    sortDown: [ pct ] ;
+!details <- FALSE ;
+!restricted <- FALSE ;
+groupId isntNA 
+ifTrue:
+  [ :details <- TRUE ;
+    !subset <- list select: [ asString = ^my groupId asString ] ;
+    subset count > 0 && groupId != "ALL"
+   ifTrue: 
+     [ :list <- subset ;
+       :restricted <- TRUE ;
+     ] ;
+  ] ;
+
+FormatTools
+  buildTitle: 
+      ("---  Holdings Breakdown for " concat: name . concat: "  ---") ,
+      ("Data As Of: " concat: holdingsDate . 
+            concat: "   ---   Currency: " . concat: currency name) 
+  over: 80 withStyle: "Arial", "darkblue" . print ;
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+      
+!table <- ^global LayoutTools Named TableSpec at: "basicEntity" ;
+table setColumnCountTo: 5 ;
+!format <- details 
+   ifTrue: [ "Details by " ] ifFalse: [ "Summary by " ] ;
+!header <- restricted
+    ifTrue: [ "For " concat: groupBlock . concat: " = " . concat: groupId ] 
+   ifFalse: [ format concat: groupBlock ] ;
+table getColumn: 1 . getHeader: 1 .
+    setColumnSpanTo: 5 .
+    setTextTo: header ;
+table getColumn: 3 . getHeader: 2 . setTextTo: "Market Value" ;
+table getColumn: 4 . getHeader: 2 . setTextTo: "% of Port" ;
+details
+   ifTrue: [ table getColumn: 5 . getHeader: 2 . setTextTo: "Shares" ]
+  ifFalse: [ table getColumn: 5 . getHeader: 2 . setTextTo: "Count" ] ;
+
+FormatTools buildTableFor: table for: ^current withBlock:
+  [
+  " " print ; " Total for Account" print ;
+  totalMarketValue printWithCommasNL: 14.0 ;
+  " " print ; " Total Equity" print ;
+  totalMarketValueEquity else: 0.0 . printWithCommas: 14.0 ;
+  totalMarketValueEquity / totalMarketValue * 100 else: 0.0 . printNL: 10 ;
+  " " print ; " Total Fixed Income" print ;
+  totalMarketValueFixed else: 0.0 . printWithCommas: 14.0 ;
+  totalMarketValueFixed / totalMarketValue * 100 else: 0.0 . printNL: 10 ;
+  " " print ; " Total Cash" print ;
+  totalMarketValueCash else: 0.0 . printWithCommas: 14.0 ;
+  totalMarketValueCash / totalMarketValue * 100 else: 0.0 . printNL: 10 ;
+  details
+  ifTrue:
+    [ list
+      do: [ newLine print ;
+            FormatTools bold: id . print ;
+            FormatTools bold: name . print ;
+            FormatTools bold: [ tmv printWithCommas: 14.0 ] divertOutput .
+               print ;
+            FormatTools bold: pct . print ;
+            newLine print ;
+            groupList sortUp: [ security name ] .
+            do: [ FormatTools buildLinkForApp: "SecurityProfile"
+                     withLabel: security id
+                     andParams: security code . print ;
+                   security name print ;
+                   totalMarketValue printWithCommas: 15.0 ;
+                   percentOfPort print: 10 ;
+                   shares printWithCommas: 15.0 ;
+                   newLine print ;
+                 ] ;
+          ] ;
+    ]    
+  ifFalse:
+    [ newLine print ;
+      list
+       do: [ FormatTools buildLinkForApp: "AccountBreakdown" 
+                 withLabel: id 
+                 andParams: ^my uniqueId, ^my group, id . print ;
+             name print ; 
+             tmv printWithCommas: 15.0  ;
+             pct print: 10.2 ;
+             groupList count printNL ;
+            ] ;
+    ] ;
+  ] . print ;
+
+#--  show pie chart if summary level
+details
+ifFalse:
+   [
+   !pie <- ^global LayoutTools Named Piechart MarketShare ;
+   pie header setTextTo: " Breakdown by Percent " ;
+   pie clearSlices ;
+   !subset <- list sortDown: [ pct ] . first: 9 ; 
+   subset count < list count
+   ifTrue: [ !other <- 100 - (subset total: [ pct ] )
+                extendBy: [ !pct <- ^self ;
+                            !id <- "Other" ;
+                          ] ;
+             subset , other ;
+           ] ;
+   subset numberElements
+   do: [ !slice <- ^my pie addSlice: position ;
+          slice setAmountTo: pct .
+             label setTextTo: id . setColorTo: "black" . setFontTo: "Arial" .
+                   setBoxColorTo: "white" . 
+                   setBoxStyleTo: "NONE" ;
+          slice setLinkTo:
+             (FormatTools buildURLForApp: "AccountBreakdown" 
+                  andParams: ^my uniqueId, ^my group, id)
+       ] ;
+   FormatTools center: (FormatTools buildPiechartFor: pie ) . printNL ;
+   ] ;
+] ;
+
+#--------------------
+#   AccountCompare
+#--------------------
+
+Interface ApplicationWS defineMethod: [ | AccountCompare |
+  !details <- FALSE ;
+  !id <- ^self getParameter: 1 orName: "id" ;
+  !acct1 <- ^self getAccountFor: id . else: [ ^global Account ] ;
+  !ids <- ^self getParameter: 2 orName: "ids" ;
+
+  !group <- 
+    ^self getGroupFromParameter: 3 orMenu: "group" orEntry: "groupEntry" ;
+  !groupId <- ^self getParameter: 4 ;
+  namedParameters at: "detail" . else: "" . contains: "Detail" .
+         ifTrue: [ :groupId <- "ALL" ] ;
+
+  !optionsBar <- [
+     " | " print ;
+     !idList <- ids isNA
+        ifTrue: [ acct1 code ] 
+       ifFalse: [ acct1 code concat: ", " . concat: ids ] ;
+     FormatTools buildLinkForApp: "AccountCharXRef" 
+        withLabel: "Account Characteristics" 
+        andParams: idList, NA, group  . print ;
+     " | " print ;
+     groupId isNA
+     ifTrue:
+       [ FormatTools buildLinkForApp: "AccountCompare"
+              withLabel: "Compare Details" 
+              andParams: acct1 uniqueId, ids, group, "ALL" . print ;
+       ] 
+     ifFalse:
+       [ FormatTools buildLinkForApp: "AccountCompare"
+              withLabel: "Compare Summary" 
+              andParams: acct1 uniqueId, ids, group . print ;
+       ] ;
+     " | " printNL ;
+  ] divertOutput ;
+  FormatTools buildOptionsBar: optionsBar . printNL ;
+
+  acct1 compareTo: ids by: group for: groupId ;
+
+  FormatTools buildSectionBreakOver: "30%" alignedTo: "center" . print ;
+  !form <- ^global LayoutTools Named FormSpec AccountCompare ;
+  form getInputSpec: 1 . setInitialValueTo: acct1 uniqueId ;
+  form getInputSpec: 2 . setInitialValueTo: ids ;
+  !menu <- form getInputSpec: 3 ;
+  ^self 
+    setGroupsIn: menu for: ^global Holding withCurrent: group ;
+  !level <- form getInputSpec: 4 ;
+  level clearSelection ;
+  groupId isNA
+     ifTrue: [ level selectChoice: 1 ] 
+    ifFalse: [ level selectChoice: 2 ] ;
+   menu setSizeTo: 1 ;
+   FormatTools buildShortFormFor: form . printNL ;
+] ;
+
+#----------
+
+Account defineMethod:[ | compareTo: ids by: group for: groupId |
+!acct1 <- ^self ;
+!groupBlock <- 
+   ^global DataItem getGroupBlockFor: group from: ^global Holding .
+    else: [ [ security company sector ] ] ;
+!accts <- ^global Account locateIds: ids . unique ;
+acct1 isCompositeAccount && accts count = 0
+   ifTrue: [ :accts <- acct1 componentList send: [ account ] ] ;
+acct1 isAggAccount && accts count = 0 
+   ifTrue: [ :accts <- acct1 memberList ; ] ;
+
+#---  Create List of Accounts 
+!acctList <- acct1 asList append: accts .
+    extendBy: [ !xhold <- holdings 
+                   collect: ^my groupBlock .    #- extends by !value
+                   extendBy: [ !groupValue <- value ] ;
+              ] ;
+!xhold <- acctList collectListElementsFrom: [ xhold ] ;
+!list <- xhold groupedBy: [ groupValue ]  .
+   extendBy: [ !id <- code else: [ asString ] ;
+               !name <- id ;
+               isEntity
+               ifTrue:
+                 [ :id <- shortName else: [ code ] ;
+                   :name <- ^self name ;
+                 ] ;
+               !sort <- isntDefault
+                  ifTrue: [ isRangeClassification 
+                                ifTrue: [ shortName ] ifFalse: [ name ] 
+                          ] 
+                 ifFalse: [ "zzz" ] 
+             ] .
+   sortUp: [ sort ] ;
+
+!details <- FALSE ;
+!restricted <- FALSE ;
+groupId isntNA 
+ifTrue:
+  [ :details <- TRUE ;
+    !subset <- list select: [ asString = ^my groupId asString ] ;
+    subset count > 0 && groupId != "ALL"
+   ifTrue: 
+     [ :list <- subset ;
+       :restricted <- TRUE ;
+     ] ;
+  ] ;
+
+FormatTools
+  buildTitle:
+      "--- Account Comparison Report  ---", 
+      [ acct1 shortName print ;
+        "    vs " print ; accts do: [ " " print ; shortName print ] ;
+      ] divertOutput, 
+      ("Data As Of: " concat: ^date)
+  over: 80 withStyle: "Arial", "darkblue" . print ;
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+
+!table <- ^global LayoutTools Named TableSpec at: "basicEntity" ;
+!columnCount <- (2 + acctList count) asInteger ;
+table setColumnCountTo: columnCount ;
+!format <- details ifTrue: [ "Details by " ] ifFalse: [ "Summary by " ] ;
+!header <- restricted
+    ifTrue: [ "For " concat: groupBlock . concat: " = " . concat: groupId ] 
+   ifFalse: [ format concat: groupBlock ] ;
+table getColumn: 1 . getHeader: 1 .
+    setColumnSpanTo: columnCount .
+    setTextTo: header ;
+acctList numberElements
+do: [ !label <- (isAggAccount || isCompositeAccount) && position != 1
+      ifTrue:
+        [ FormatTools buildLinkForApp: "AccountCompare"
+             withLabel: shortName andParams: uniqueId, ^my group, ^my groupId
+        ]
+      ifFalse:
+        [ FormatTools buildLinkForApp: "AccountBreakdown"
+             withLabel: shortName andParams: uniqueId, ^my group, ^my groupId
+        ] ;
+     ^my table getColumn: (position + 2) asInteger . 
+        getHeader: 2 . setTextTo: label ;
+    ] ;
+
+FormatTools buildTableFor: table for: ^current withBlock:
+  [
+  " " print ; " Total Market Value" print ;
+  acctList do: [ totalMarketValue printWithCommas: 14.0 ] ;
+  newLine print ;
+  " " print ; " Total Cash Value" print ;
+  acctList do: [ totalMarketValueCash else: 0.0 . printWithCommas: 14.0 ] ;
+  newLine print ;
+  " " print ; " Number of Holdings" print ;
+  acctList do: [ holdings count print ] ;
+  newLine print ;
+  " " print ; " Effective Date" print ;
+  acctList do: [ holdingsDate print ] ;
+  newLine print ;
+  newLine print ;
+  details
+  ifTrue:
+   [ list
+     do: [ !group <- asSelf ;
+           !acctList <- ^my acctList ;
+           FormatTools bold: id . print ;
+           FormatTools bold: name . print ;
+           groupList groupedBy: [ account ] in: ^my acctList .
+           do: [ !pct <- groupList total: [ percentOfPort ] . else: 0.0 ;
+                 FormatTools bold: pct . print ;
+               ] ;
+           newLine print;
+           groupList groupedBy: [ security ] . sortUp: [ code ] .
+           do:[ FormatTools buildLinkForApp: "SecurityProfile" 
+                   withLabel: id andParams: code . print;
+                name print ;
+                groupList groupedBy: [ account ] in: ^my acctList .
+                do: [ groupList total: [ percentOfPort ] . else: 0.0 .
+                         print: 10 ;
+                    ] ;
+                newLine print ;
+              ] ;
+          newLine print ;
+          ] ;
+     ] 
+  ifFalse:
+    [  list
+       do: [ FormatTools buildLinkForApp: "AccountCompare" 
+                 withLabel: id 
+                 andParams: ^my uniqueId, ^my ids, ^my group, id . print ;
+             name print ; 
+             groupList groupedBy: [ account ] in: ^my acctList .
+             do: [ groupList total: [ percentOfEquity ] . else: 0.0 . print ;
+                 ] ;
+             newLine print;
+           ] ;
+       newLine print ;
+    ] ;
+  ] . print ;
+];
+
+#--------------------
+#   AccountCharXRef
+#--------------------
+
+Interface ApplicationWS defineMethod: [ | AccountCharXRef |
+  !ids <- ^self getParameter: 1 orName: "ids" . else: "" ;
+  !dates <- ^self getParameter: 2 orName: "dates" ;
+  !group <- ^self getParameter: 3 orName: "group" ;
+  group else: "" .  = "None" ifTrue: [ :group <- NA ] ;
+  !statGroup <- ^self getParameter: 4 orName: "statGroup" . 
+       as: ^global Universe ;
+  statGroup entityType isDataItem
+     ifFalse: [ :statGroup <- NA ] ;
+  !statGroups <- ^global Universe masterList 
+      select: [ entityType isDataItem ] ;
+  !optionsBar <- [
+     !acct1 <- ids to: "," . stripChar: "," ;
+     !other <- ids from: "," . drop: 1 . stripBoundingBlanks ;
+     other isDefault
+     ifTrue:    #- only 1 acct; options are single-account oriented
+       [ " | " print ; 
+         FormatTools buildLinkForApp: "AccountProfile" 
+            withLabel: "Summary" andParams: acct1 . print ;
+         " | " print ; 
+         FormatTools buildLinkForApp: "AccountHoldings" 
+            withLabel: "Holdings" andParams: acct1 . print ;
+         " | " print ; 
+         FormatTools buildLinkForApp: "AccountBreakdown" 
+            withLabel: "Breakdown" andParams: acct1, group . print ;
+       ]
+     ifFalse:   #- multiple accts supplied; options are multi-account
+       [ ids breakOn: "," . 
+           send: [ stripBoundingBlanks ] . select: [ isntDefault ] .
+         do: [ " | " print ; 
+               FormatTools buildLinkForApp: "AccountProfile" 
+                  withLabel: (asSelf concat: " Summary")
+                  andParams: asSelf . print ; 
+             ] ;
+         " | " print ; 
+         FormatTools buildLinkForApp: "AccountCompare"
+             withLabel: "Compare Holdings" 
+             andParams: acct1, other, group . print ;
+       ] ;
+     " | " printNL ;
+  ] divertOutput ;
+  FormatTools buildOptionsBar: optionsBar . printNL ;
+
+  !dateList <- ^self getDatesFrom: dates ;
+  ^global Account 
+     characteristicsFor: ids over: dateList byGroup: group using: statGroup ;
+
+  !form <- ^global LayoutTools Named FormSpec AccountCharXRef ;
+  form getInputSpec: 1 . setInitialValueTo: ids ;
+  form getInputSpec: 2 . setInitialValueTo: dates ;
+  !menu <- form getInputSpec: 3 ;
+  !choices <- "None" asList
+     extendBy: [ !code <- ^self ; !sortCode <- "" ; !shortName <- ^self ] .
+     append: (^self getValidGroupsFor: ^global Holding) . 
+     sortUp: [ sortCode ] ;
+  ^self setGroupsIn: menu for: choices withCurrent: group ;
+  !menu <- form getInputSpec: 4 ;
+  !choices <- "All" asList
+     extendBy: [ !code <- ^self ; !sortCode <- "" ; !shortName <- ^self ] .
+     append: statGroups . sortUp: [ sortCode ] ;
+  ^self setGroupsIn: menu for: choices withCurrent: statGroup code ;
+  menu setSizeTo: 1 ;
+  FormatTools buildShortFormFor: form . printNL ;
+] ;
+
+
+#----------
+
+#--------------------
+#  support tools
+#--------------------
+
+Account defineMethod: [ | getAccountListFrom: ids | 
+#-- translate ids into list of accounts ; if only one and it is
+#-- a composite or agg account, return the composite/agg followed
+#-- by its members
+
+  !acctList <- ids isList
+       ifTrue: [ ids select: [ isAccount ] ] .
+       else: [ ^self locateIds: ids . unique  ] ;
+  !firstOne <- acctList at: 1 ;
+  acctList count = 1 && firstOne isCompositeAccount
+  ifTrue: 
+    [ :acctList <- firstOne asList
+         append: (firstOne componentList sortUp: [account shortName ] . 
+                        send: [ account ] )
+    ]  ;
+
+  acctList count = 1 && firstOne isAggAccount
+  ifTrue: 
+    [ :acctList <- firstOne asList 
+         append: (firstOne memberList sortUp: [ shortName ] )
+    ] ;
+
+  acctList
+] ;
+
+#----------
+
+Account defineMethod: 
+[ | getDataFor: accts over: dates byGroup: groupBlock forStats: stats |
+
+!acctList <- accts isList ifTrue: [ accts ] ifFalse: [ accts asList ] ;
+!dateList <- dates isList ifTrue: [ dates ] ifFalse: [ dates asList ] ;
+!statList <- stats isList ifTrue: [ stats ] ifFalse: [ stats asList ] ;
+
+!data <- dateList
+  extendBy: 
+    [ !date <- asSelf ;
+      !statList <- ^my statList ;
+      !groupBlock <- ^my groupBlock ; 
+      !acctList <- date evaluate:
+         [ ^my acctList
+            extendBy: 
+             [ !groupBlock <- ^my groupBlock ;
+               !statList <- ^my statList ;
+               !tmv <- totalMarketValue ;
+               !cash <- totalMarketValueCash ;
+               !holds <- holdings ;
+               !hdate <- holdingsDate ;
+               !equities <- holds select: [ security type isEquity ] .
+                    extendBy: [ !stats <- ^my statList
+                                    send: [ ^my send: block ] ;
+                              ] ;
+               !groups <- groupBlock isBlock
+               ifTrue:
+                 [ equities groupedBy: groupBlock .
+                    extendBy: [ !tmv <- groupList total: [ totalMarketValue ] ;
+                                !pct <- groupList total: [ percentOfPort ] ;
+                                !pcte <- groupList total: [ percentOfEquity ] ;
+                              ]
+                 ] ;
+             ] 
+          ] ;
+      !acct <- acctList at: 1 ;
+    ] ;
+
+data
+] ;
+
+#--------------------
+
+Account defineMethod: 
+[ | characteristicsFor: ids over: dates byGroup: group using: stats |
+
+currency evaluate: [ 
+
+!acctList <- ^self getAccountListFrom: ids ;
+!acct <- acctList at: 1 . ifDefault: [ ^self ] ;
+!dateList <-  dates isntDefault
+   ifTrue: [ dates ] 
+  ifFalse: [ acctList count > 1 
+               ifTrue: [ ^date, ^date - 1 monthEnds ] 
+              ifFalse: [ acct holdingsDate, acct holdingsDate - 1 monthEnds ] 
+           ] ;
+
+#-- pick correct version of report
+!date <- dateList count = 1
+       ifTrue: [ dateList at: 1 ] ifFalse: [ ^date ] ;
+date evaluate:
+   [ 
+   acctList count = 0
+   ifTrue: [ ">>>  No valid Account ids supplied." printNL ] .
+   elseIf: [ acctList count = 1  ] 
+     then:   #- single account by date(s) and/or groups
+     [ group isDefault
+        ifTrue: [ acct characteristicsOver: dateList using: stats ; ] .
+        elseIf: [ dateList count = 1 || dates isDefault ]
+        then: [ acct characteristicsByGroup: group using: stats ; ] .
+        else: [ acct 
+                 characteristicsByGroup: group over: dateList using: stats ;
+              ] 
+     ] .
+   else:    #- multiple accounts
+     [ group isntDefault
+        ifTrue: 
+            [ ^self characteristicsFor: acctList byGroup: group using: stats;
+            ] .
+        elseIf: [ dateList count = 1 || dates isDefault ]
+        then: [ ^self characteristicsFor: acctList using: stats ; ] .
+        else: [ ^self 
+                  characteristicsFor: acctList over: dateList using: stats ;
+              ] ;
+     ] ;
+   ]  #-- of date
+
+] ;    #-- of currency
+
+] ;
+
+#----------
+
+Account defineMethod: [ | characteristicsOver: dateList using: stats |
+  #--   Statistic     date1    date2    date3    (for acct = ^self)
+
+  !acct <- ^self ;
+  !statList <- ^global DataItem getStatsFor: stats from: ^global Holding .
+    else: [ ^global DataItem getValidStatsFor: ^global Holding ] ;
+
+  #-- up to 10 dates
+  :dateList <- dateList first: 10 ;
+
+  !dataByDate <- 
+     ^self getDataFor: acct over: dateList byGroup: NA forStats: statList .
+         send: [ acct ] ;
+
+  ^self displayTitle: "Account Characteristics Report"
+         withSub: NA asOf: NA inCurrency: currency ;
+
+  !table <- ^global LayoutTools Named TableSpec at: "finStatement" ;
+  !columnCount <- (1 + dateList count) asInteger ;
+  table setColumnCountTo: columnCount ;
+  table caption setTextTo: "(equity only)" ;
+  dateList numberElements
+  do: [ ^my table getColumn: (position + 1) asInteger . 
+          getHeader: 1 . setTextTo: 
+           (FormatTools buildLinkForApp: "AccountCharDetails"
+              withLabel: ^self asString
+              andParams: ^my acct uniqueId, NA, ^my stats, ^self asInteger
+           ) ;
+      ] ;
+
+  FormatTools buildTableFor: table for: ^current withBlock:
+  [
+  dataByDate displayAcross: [ tmv else: 0.0 ] 
+     withLabel: "Total Market Value" andFormat: 14.0 ;
+  dataByDate displayAcross: [ cash else: 0.0 ]
+     withLabel: "Total Cash" andFormat: 14.0 ;
+  dataByDate displayAcross: [ holds count else: 0 ]
+     withLabel: "Number of Holdings" andFormat: 14.0 ;
+  dataByDate displayAcross: [ hdate ]
+     withLabel: "Effective Date" andFormat: -14 ;
+  newLine print ; 
+  
+  statList numberElements
+  do: [ !dataForStat <- ^my dataByDate 
+            send: [ !position <- ^my position ; 
+                    equities
+                    extendBy: [ !stat <- stats at: ^my position ;
+                                !weight <- percentOfEquity ;
+                              ] 
+                  ] ;
+         ^self displayAllStatRowsFor: dataForStat ;
+         newLine print ;
+      ] ;
+   ] . print ;
+
+] ;
+
+#----------
+
+Account defineMethod: [ | characteristicsByGroup: group using: stats |
+  #--   Statistic    group1    group2    ...    (for acct = ^self; ^date)
+
+  !acct <- ^self ;
+
+  !groupBlock <-  ^global DataItem
+         getGroupBlockFor: group from: ^global Holding .
+         else: [ [ security company sector ] ] ;
+  !statList <- ^global DataItem getStatsFor: stats from: ^global Holding .
+    else: [ ^global DataItem getValidStatsFor: ^global Holding ] ;
+
+  !data <- ^self 
+      getDataFor: acct over: ^date byGroup: groupBlock forStats: statList .
+         at: 1 . acctList at: 1 ;
+  !groups <- data groups
+   extendBy: [ !id <- isRangeClassification
+                 ifTrue: [ name ] . else: [ shortName ] . else: [ asString ] ;
+             ] .
+    sortDown: [ pct ] .
+    first: 10 ;    #- largest 10 groups
+
+  !subtitle <- "Grouped By: " concat: (FormatTools italic: groupBlock) ;
+  acct displayTitle: "Account Characteristics Report" withSub: subtitle
+      asOf: acct holdingsDate inCurrency: currency ;
+
+  !table <- ^global LayoutTools Named TableSpec at: "finStatement" ;
+  !columnCount <- (1 + groups count) asInteger ;
+  table setColumnCountTo: columnCount ;
+  table caption setTextTo: "(equity only)" ;
+  groups numberElements
+  do: [ ^my table getColumn: (position + 1) asInteger . 
+          getHeader: 1 . setTextTo: 
+           (FormatTools buildLinkForApp: "AccountCharDetails"
+              withLabel: id
+              andParams: ^my acct uniqueId, NA, ^my stats, ^date asInteger,
+                ^my group, code
+           ) ;
+      ] ;
+  FormatTools buildTableFor: table for: ^current withBlock:
+  [
+  FormatTools buildLinkForApp: "AccountCharDetails"
+     withLabel: "All Group Details"
+     andParams: acct uniqueId, NA, stats, ^date asInteger, group . printNL ;
+  groups displayAcross: [ tmv else: 0.0 ] 
+      withLabel: "Total Market Value" andFormat: 14.0 ;
+  groups displayAcross: [ pct else: 0.0 ] 
+      withLabel: "Percent of Account" andFormat: 14.2 ;
+  groups displayAcross: [ pcte else: 0.0 ] 
+      withLabel: "Percent of Equity" andFormat: 14.2 ;
+  groups displayAcross: [ groupList count ] 
+      withLabel: "Number of Holdings" andFormat: 14.0 ;
+  newLine print ;
+  
+  statList numberElements
+  do: [ !dataForStat <- ^my groups 
+           send: [ !position <- ^my position ;
+                   groupList 
+                   extendBy: [ !stat <- stats at: ^my position ;
+                               !weight <- percentOfEquity ;
+                             ]
+                 ] ;
+         ^self displayAllStatRowsFor: dataForStat ;
+         newLine print ;
+      ] ;
+   ] . print ;
+
+] ;
+
+#----------
+
+Account defineMethod: 
+[ | characteristicsByGroup: group over: dateList using: stats |
+  #--                      group1              group2        (for acct= ^self)
+  #--   Statistic   date1  date2 date3   date1 date2 date3
+
+  !acct <- ^self ;
+
+  !groupBlock <-  ^global DataItem
+         getGroupBlockFor: group from: ^global Holding .
+         else: [ [ security company sector ] ] ;
+  !statList <- ^global DataItem getStatsFor: stats from: ^global Holding .
+    else: [ ^global DataItem getValidStatsFor: ^global Holding ] ;
+
+  #-- up to 3 dates
+  :dateList <- dateList first: 3 ;
+
+  !dataByDate <- ^self 
+      getDataFor: acct over: dateList byGroup: groupBlock forStats: statList ;
+
+  #-- create xref of group/date combinations in use
+  !groupXRef <- ^global IndexedList new ; 
+  !groupType <- ^global Holding send: groupBlock ;
+  groupType instanceList
+  do: [ ^my groupXRef 
+             at: asSelf 
+            put: (asSelf extendBy: [ !dates <- ^global IndexedList new ] ) ;
+      ] ;
+  dataByDate
+  do: [ !groupXRef <- ^my groupXRef ;
+        acct groups
+        do: [ ^my groupXRef at: asSelf . dates at: ^my date put: ^self ] ;
+      ] ;
+
+  !groups <- groupXRef select: [ dates count > 0 ] .
+    sortDown: [ dates total: [ pct ] ] .
+    first: 10 .    #- largest 10 groups
+   extendBy: [ !id <- isRangeClassification
+                 ifTrue: [ name ] . else: [ shortName ] . else: [ asString ] ;
+               !dateList <- ^my dateList 
+                   send: [ ^my dates at: asSelf .
+                              else: [ ^self extendBy: [
+                                          !tmv <- 0.0 ;
+                                          !pct <- 0.0 ;
+                                          !pcte <- 0.0 ;
+                                          !groupList <- ^global List ;
+                                          ] 
+                                    ] 
+                         ] 
+             ] ;
+
+  !subtitle <- "Grouped By: " concat: (FormatTools italic: groupBlock) ;
+  acct displayTitle: "Account Characteristics Report" withSub: subtitle
+      asOf: acct holdingsDate inCurrency: currency ;
+
+  !table <- ^global LayoutTools Named TableSpec at: "multiXTab" ;
+  !head1 <- groups extendBy: 
+     [ !label <- id ;
+     ] ;
+    !head2 <- dateList extendBy: 
+       [ !label <- 
+           [ | :header1 | 
+             FormatTools buildLinkForApp: "AccountCharDetails"
+               withLabel: asString
+               andParams: ^my uniqueId, NA, ^my stats, 
+                            asInteger, ^my group, header1 code 
+           ] ;
+       ] ;
+    table setupMultiHeadersUsing: head1 and: head2 withLabel: "Statistic" ;
+
+  FormatTools buildTableFor: table for: ^current withBlock:
+  [
+  FormatTools buildLinkForApp: "AccountCharDetails"
+    withLabel: "All Group Details"
+    andParams: acct uniqueId, NA, stats, (dateList at: 1 . asInteger), group .
+          printNL ;
+  !data <- groups collectListElementsFrom: [ dateList ] ;
+  data displayAcross: [ tmv ] 
+     withLabel: "Total Market Value" andFormat: 14.0 ;
+  data displayAcross: [ pct ] 
+     withLabel: "Percent of Account" andFormat: 14.2 ;
+  data displayAcross: [ pcte ] 
+     withLabel: "Percent of Equity" andFormat: 14.2 ;
+  data displayAcross: [ groupList count ] 
+     withLabel: "Number of Holdings" andFormat: 14.0 ;
+  newLine print ;  
+  statList numberElements
+  do: [ !dataForStat <- ^my data 
+           send: [ !position <- ^my position ;
+                   groupList 
+                    extendBy: [ !stat <- stats at: ^my position ;
+                                !weight <- percentOfEquity ;
+                              ]
+                 ] ;
+         ^self displayAllStatRowsFor: dataForStat ;
+         newLine print ;
+      ] ;
+   ] . print ;
+
+] ;
+
+#----------
+
+Account defineMethod: [ | characteristicsFor: acctList using: stats | 
+  #--   Statistic     acct1    acct2    acct3     (for a ^date)
+
+  !statList <- ^global DataItem getStatsFor: stats from: ^global Holding .
+    else: [ ^global DataItem getValidStatsFor: ^global Holding ] ;
+
+#-- up to 10 accounts 
+  :acctList <- acctList first: 10 ;
+
+  !data <- ^self getDataFor: acctList 
+         over: ^date byGroup: NA forStats: statList . at: 1 . acctList ;
+
+  ^self displayTitle: "Account Characteristics Report" withSub: NA
+      asOf: ^date inCurrency: currency for: acctList ;
+
+  !table <- ^global LayoutTools Named TableSpec at: "finStatement" ;
+  !columnCount <- (1 + acctList count) asInteger ;
+  table setColumnCountTo: columnCount ;
+  table caption setTextTo: "(equity only)" ;
+  acctList numberElements 
+  do: [ ^my table getColumn: (position + 1) asInteger . 
+          getHeader: 1 . setTextTo: 
+           (FormatTools buildLinkForApp: "AccountCharDetails"
+              withLabel: shortName
+              andParams: uniqueId, NA, ^my stats, ^date asInteger ) ;
+      ] ;
+
+FormatTools buildTableFor: table for: ^current withBlock:
+  [
+  !ids <- [ acctList do: [ uniqueId print; "," print; ] 
+          ] divertOutput drop: -1 ; 
+  FormatTools buildLinkForApp: "AccountCharDetails"
+     withLabel: "All Details"
+     andParams: ids, NA, stats, ^date asInteger . printNL ;
+  data displayAcross: [ tmv else: 0.0 ] 
+     withLabel: "Total Market Value" andFormat: 14.0 ;
+  data displayAcross: [ cash else: 0.0 ] 
+     withLabel: "Total Cash" andFormat: 14.0 ;
+  data displayAcross: [ holds count ]
+     withLabel: "Number of Holdings" andFormat: 14.0 ;
+  data displayAcross: [ hdate ] 
+     withLabel: "Effective Date" andFormat: -14 ;
+  newLine print ;
+  
+  statList numberElements
+  do: [ !dataForStat <- ^my data
+          send: [ !position <- ^my position ; 
+                  equities
+                   extendBy: [ !stat <- stats at: ^my position ;
+                               !weight <- percentOfEquity ;
+                             ] 
+                ] ;
+         ^self displayAllStatRowsFor: dataForStat ;
+         newLine print ; 
+      ] ;
+ ] . print ;
+
+
+];
+
+#----------
+
+Account defineMethod: 
+[ | characteristicsFor: acctList over: dateList using: stats | 
+  #---              date1                    date2              
+  #---  Stat  acct1 acct2 acct3        acct1 acct2 acct3
+
+  !statList <- ^global DataItem getStatsFor: stats from: ^global Holding .
+       else: [ ^global DataItem getValidStatsFor: ^global Holding ] ;
+
+  #-- up to 10 accounts and 3 dates
+  :acctList <- acctList first: 10 ;
+  !ids <- [ acctList do: [ uniqueId print ; "," print; ]
+          ] divertOutput drop: -1 ;
+  :dateList <- dateList first: 3 ;
+  !dataByDate <- ^self getDataFor: acctList 
+       over: dateList byGroup: NA forStats: statList;
+    
+  !subtitle <-
+     [ "Dates: " print ; 
+       dateList do: [ FormatTools italic: asSelf . print; ", " print ; ] ;
+     ] divertOutput drop: -2 ;
+  ^self displayTitle: "Account Characteristics Report" withSub: subtitle
+      asOf: NA inCurrency: currency for: acctList ;
+
+  !table <- ^global LayoutTools Named TableSpec at: "multiXTab" ;
+  !head1 <- dateList extendBy: 
+       [ !label <- FormatTools buildLinkForApp: "AccountCharDetails"
+             withLabel: asString
+             andParams: ^my ids, NA, ^my stats, asInteger asString ;
+       ] ;
+  !head2 <- acctList extendBy: 
+       [ !label <- 
+           [ | :header1 | 
+             FormatTools buildLinkForApp: "AccountCharDetails"
+               withLabel: shortName 
+               andParams: uniqueId, NA, ^my stats, header1 asInteger asString
+           ] ;
+       ] ;
+    table setupMultiHeadersUsing: head1 and: head2 withLabel: "Statistic" ;
+    
+    FormatTools buildTableFor: table for: ^current withBlock:
+      [
+      !data <- dataByDate collectListElementsFrom: [ acctList ] ;
+      data displayAcross: [ tmv else: 0.0 ]
+         withLabel: "Total Market Value" andFormat: 14.0  ;
+      data displayAcross: [ cash else: 0.0 ]
+         withLabel: "Total Cash" andFormat: 14.0  ;
+      data displayAcross: [ holds count else: 0 ]
+         withLabel: "Number of Holdings" andFormat: 14.0 ;
+      data displayAcross: [ hdate ] 
+         withLabel: "Effective Date" andFormat: -14 ;
+      newLine print ; 
+      
+      statList numberElements
+      do: [ !dataForStat <- ^my data
+              send: [ !position <- ^my position ; 
+                      equities
+                      extendBy: [ !stat <- stats at: ^my position ;
+                                  !weight <- percentOfEquity ;
+                                ] 
+                    ] ;
+             ^self displayAllStatRowsFor: dataForStat ;
+             newLine print ; 
+          ] ;
+     ] . print ;
+] ;
+
+#----------
+
+Account defineMethod: 
+[ | characteristicsFor: acctList byGroup: group using: stats |
+  #--                      group1              group2        (for date= ^date)
+  #--   Statistic   acct1  acct2 acct3   acct1 acct2 acct3
+
+  !groupBlock <-  ^global DataItem
+         getGroupBlockFor: group from: ^global Holding .
+         else: [ [ security company sector ] ] ;
+  !statList <- ^global DataItem getStatsFor: stats from: ^global Holding .
+    else: [ ^global DataItem getValidStatsFor: ^global Holding ] ;
+
+  #-- up to 3 accounts
+  :acctList <- acctList first: 3 ;
+  !ids <- [ acctList do: [ uniqueId print ; "," print; ]
+          ] divertOutput drop: -1 ;
+  !dataByAcct <- ^self 
+      getDataFor: acctList over: ^date byGroup: groupBlock forStats: statList .
+         at: 1 . acctList ;
+
+  #-- create xref of group/date combinations in use
+  !groupXRef <- ^global IndexedList new ; 
+  !groupType <- ^global Holding send: groupBlock ;
+  groupType instanceList
+  do: [ ^my groupXRef 
+             at: asSelf 
+            put: (asSelf extendBy: [ !accts <- ^global IndexedList new ] ) ;
+      ] ;
+  dataByAcct
+  do: [ !groupXRef <- ^my groupXRef ;
+        !acct <- asSelf ;
+        groups
+        do: [ ^my groupXRef at: asSelf . accts at: ^my acct put: ^self ] ;
+      ] ;
+
+  !groups <- groupXRef select: [ accts count > 0 ] .
+    sortDown: [ accts total: [ pct ] ] .
+    first: 10 .    #- largest 10 groups
+   extendBy: [ !id <- isRangeClassification
+                 ifTrue: [ name ] . else: [ shortName ] . else: [ asString ] ;
+               !acctList <- ^my acctList 
+                   send: [ ^my accts at: asSelf .
+                              else: [ ^self extendBy: [
+                                          !tmv <- 0.0 ;
+                                          !pct <- 0.0 ;
+                                          !pcte <- 0.0 ;
+                                          !groupList <- ^global List ;
+                                          ] 
+                                    ] 
+                         ] 
+             ] ;
+
+  !subtitle <- "Grouped By: " concat: (FormatTools italic: groupBlock) ;
+  ^self displayTitle: "Account Characteristics Report" withSub: subtitle
+      asOf: ^date inCurrency: currency for: acctList ;
+
+  !table <- ^global LayoutTools Named TableSpec at: "multiXTab" ;
+  !head1 <- groups extendBy: 
+     [ !label <- [ FormatTools buildLinkForApp: "AccountCharDetails"
+                     withLabel: id
+                      andParams: ^my ids, NA, ^my stats, ^date asInteger,
+                        ^my group, code 
+                 ] ;
+     ] ;
+    !head2 <- acctList extendBy: 
+       [ !label <- 
+           [ | :header1 | 
+             FormatTools buildLinkForApp: "AccountCharDetails"
+               withLabel: asString
+               andParams: uniqueId, NA, ^my stats, ^date asInteger, 
+                          ^my group, header1 code 
+           ] ;
+       ] ;
+    table setupMultiHeadersUsing: head1 and: head2 withLabel: "Statistic" ;
+
+  FormatTools buildTableFor: table for: ^current withBlock:
+  [
+  !ids <- [ acctList do: [ uniqueId print; "," print; ] 
+          ] divertOutput drop: -1 ; 
+  FormatTools buildLinkForApp: "AccountCharDetails"
+     withLabel: "All Group Details"
+     andParams: ids, NA, stats, ^date asInteger, group . printNL ;
+  !data <- groups collectListElementsFrom: [ acctList ] ;
+  data displayAcross: [ tmv ]
+    withLabel: "Total Market Value" andFormat: 14.0 ;
+  data displayAcross: [ pct ]
+    withLabel: "Percent of Account" andFormat:14.2 ;
+  data displayAcross: [ pcte ]
+    withLabel: "Percent of Equity" andFormat: 14.2 ;
+  data displayAcross: [ groupList count ]
+    withLabel: "Number of Holdings" andFormat: 14.0  ;
+  newLine print ; 
+  
+  statList numberElements
+  do: [ !dataForStat <- ^my data
+           send: [ !position <- ^my position ;
+                   groupList 
+                     extendBy: [ !stat <- stats at: ^my position ;
+                                 !weight <- percentOfEquity ;
+                               ]
+                 ] ;
+         ^self displayAllStatRowsFor: dataForStat ;
+         newLine print ;
+      ] ;
+   ] . print ;
+
+] ;
+
+
+#--------------------
+#   AccountCharDetails
+#--------------------
+Interface ApplicationWS defineMethod: [ | AccountCharDetails |
+  !ids <- ^self getParameter: 1 orName: "id" . else: "" ;
+  !sort <- ^self getParameter: 2 ;
+  !statGroup <- ^self getParameter: 3 . as: ^global Universe ;
+  !asof <- ^self getParameter: 4 . asDate else: ^date ;
+  !group <- ^self getParameter: 5 ;
+  !groupId <- ^self getParameter: 6 ;
+  !currentEntity <- ^self getAccountFor: ids ;
+  !optionsBar <- 
+    [ currentEntity isntNA
+      ifTrue:
+        [ " | " print ; 
+          FormatTools buildLinkForApp: "AccountProfile" 
+             withLabel: "Summary" andParams: currentEntity uniqueId . print ;
+        ] ;
+      " | " print ;
+      FormatTools buildLinkForApp: "AccountCharXRef"
+          withLabel: "Characteristic Summary" 
+             andParams: ids, asof asInteger, group, statGroup . print ;
+      " | " printNL ;
+    ] divertOutput ;
+    FormatTools buildOptionsBar: optionsBar . printNL ;
+
+    asof evaluate: 
+        [ ^global Account
+             characteristicDetailsFor: ids by: sort using: statGroup
+                 groupedBy: group for: groupId ;
+          ^self displayChangeEntityPromptForApp: "AccountCharDetails" 
+                withPrompt: "Enter Account(s): " andId: ids ;
+        ] ;
+] ;
+
+#----------
+
+Account defineMethod:
+  [ | characteristicDetailsFor: ids 
+         by: sort using: statGroup groupedBy: group for: gid | 
+currency evaluate: [ 
+
+!acctList <- ^self getAccountListFrom: ids . first: 3 ;
+acctList count = 0 ifTrue: [ ">>>  No valid Account ids supplied." printNL ] .
+else:
+  [
+  !stats <- ^global DataItem getStatsFor: statGroup from: ^global Security .
+    else: [ ^global DataItem getValidStatsFor: ^global Security ] . first: 7 ;
+  !groupBlock <- group isntDefault
+  ifTrue: 
+    [ ^global DataItem getGroupBlockFor: group from: ^global Security 
+    ] ;
+
+  !secList <- acctList 
+      collectListElementsFrom: [ holdings select: [ security type isEquity ] ] .
+      groupedBy: [ security ] .
+      extendBy: [ !group <- ^my groupBlock isBlock
+                     ifTrue: [ ^self send: ^my groupBlock ] ;
+                ] ;
+  gid isntNA
+    ifTrue: [ :secList <- secList select: [ group code = ^my gid asSelf ] ] ;
+
+  :secList <- secList
+     extendBy: [ !accts <- groupList groupedBy: [ account ] in: ^my acctList ;
+                 !pcts <- accts 
+                    send: [ groupList total: [ percentOfEquity ] . else: 0.0 ] ;
+                 !values <- ^my stats 
+                    extendBy: [ !value <- ^my send: block ] ;
+               ] . sortUp: [ name ] ;
+  !sortName <- "Acct " concat: (acctList at: 1 . shortName ) . concat: " %" ;
+  !sortBlock <- sort isntDefault
+  ifTrue: 
+    [ sort asNumber isNumber
+      ifTrue:
+        [ !number <- sort asNumber ;
+          :sortName <- "Acct " concat: 
+               (acctList uniformAt: number . shortName ) . concat: " %" ;
+          [ pcts uniformAt: ^my number ] 
+        ]
+      else: 
+        [ !block <- 
+             ^global DataItem getStatBlockFor: sort from: ^global Security ;
+          :sortName <- block asUndelimitedString translate: newLine to: "" ;
+          block
+        ] 
+    ] .
+      else: [ [ pcts at: 1 ] ] ;
+  !sortUp <- (sortName contains: "name" ) || (sortName contains: "code") ;
+  :secList <- sortUp
+    ifTrue: [ secList sortUp: sortBlock ] 
+   ifFalse: [ secList sortDown: sortBlock ] ;
+
+  acctList count = 1
+  ifTrue:
+    [ !acct <- acctList at: 1 ;
+      acct displayTitle: "Account Characteristic Detail Report" withSub: NA
+         asOf: acct holdingsDate inCurrency: currency ;
+    ]
+  ifFalse:
+    [ ^self displayTitle: "Account Characteristic Detail Report" withSub: NA
+         asOf: ^date inCurrency: currency for: acctList ;
+    ] ;
+      
+  !table <- ^global LayoutTools Named TableSpec at: "basicEntity" ;
+  !nonStatCols <- 2 + acctList count ;
+  table setColumnCountTo: (nonStatCols + stats count) asInteger ;
+  !header <- gid isntNA 
+    ifTrue: [ "(for " concat: group . concat: "=" . concat: gid .
+                 concat: " sort by " . concat: sortName . concat: ")"
+            ]
+   ifFalse: [ "(sorted by " concat: sortName . concat: ")" ] ;
+  table getColumn: 1 . getHeader: 1 .
+      setColumnSpanTo: (nonStatCols + stats count ) asInteger .
+      setTextTo: header ;
+  !link <- FormatTools buildLinkForApp: "AccountCharDetails"
+     withLabel: "Id" 
+     andParams: ids, "code", statGroup, ^date asInteger, group, gid ;
+  table getColumn: 1 . getHeader: 2 . setTextTo: link ;
+  !link <- FormatTools buildLinkForApp: "AccountCharDetails"
+     withLabel: "Security Name" andParams: ids, "name",
+        statGroup, ^date asInteger, group, gid ;
+  table getColumn: 2 . getHeader: 2 . setTextTo: link ;
+  acctList numberElements
+  do: [ !link <- FormatTools buildLinkForApp: "AccountCharDetails"
+           withLabel: ("Acct " concat: shortName )
+           andParams: ^my ids, position, ^my statGroup, ^date asInteger,
+                      ^my group, ^my gid ;
+        ^my table getColumn: (2 + position) . getHeader: 2 . setTextTo: link ;
+      ] ;
+  stats numberElements
+  do: [ !link <- FormatTools buildLinkForApp: "AccountCharDetails" 
+           withLabel: shortName andParams: ^my ids, fullAccessPath ,
+             ^my statGroup, ^date asInteger, ^my group, ^my gid ;
+        ^my table getColumn: (^my nonStatCols + position) asInteger . 
+                  getHeader: 2 . setTextTo: link ;
+      ] ;
+
+  FormatTools buildTableFor: table for: ^current withBlock:
+    [
+    " " print ; " Total Equity" print ;
+    acctList do: [ totalMarketValueEquity else: 0.0 . printWithCommas: 15.0 ] ;
+    newLine print ; 
+    " " print ; " Equity Percent" print ;
+    acctList 
+    do: [ totalMarketValueEquity / totalMarketValue * 100 else: 0.0 . print ] ;
+    newLine print ; newLine print ;
+
+    !hasGroups <- groupBlock isBlock ;
+    groupBlock isBlock
+       ifTrue: [ secList groupedBy: [ group ] ] .
+         else: [ secList groupedBy: [ defaultInstance ] ] .
+    sortUp: [ name ] .
+    do: [ ^my hasGroups
+          ifTrue: 
+            [ newLine print ; 
+              FormatTools bold: (whatAmI concat: " " . concat: code) . print ;
+              FormatTools bold: name . print ;
+              ^my acctList numberElements
+              do: [ !pct <- ^my groupList total: [ pcts at: ^my position ] ;
+                    FormatTools bold: pct . print ;
+                  ] ;
+              newLine print ; 
+            ] ;
+          groupList
+          do: [ FormatTools buildLinkForApp: "SecurityProfile"
+                    withLabel: id andParams: code . print ;
+                name print ;
+                pcts do: [ ^self else: 0.0 . print ] ;
+                values
+                do: [ !format <- 12 + (defaultDecimals else: 2 . / 10) ;
+                      value printWithCommas: format ;
+                    ] ;
+                newLine print ;
+              ] ;
+          ] ;
+    ] . print ;
+
+#--  reset id,name column header since this table is shared by multiple reports
+  table getColumn: 1 . getHeader: 2 . setTextTo: "Id" ;
+  table getColumn: 2 . getHeader: 2 . setTextTo: "Name" ;
+
+  ] ;   #- end of acctList count != 0 else clause
+
+] ;   #--  of currency
+
+];
+
+#--------------------
+#   AccountAttribution
+#--------------------
+
+Interface ApplicationWS defineMethod: [ | AccountAttribution |
+  !details <- FALSE ;
+  !id1 <- ^self getParameter: 1 orName: "id1" . else: "" ;
+  !source <- ^self getAccountFor: id1 ;
+  !id2 <- ^self getParameter: 2 orName: "id2" . else: "" ;
+  !target <- ^self getAccountFor: id2 ;
+  !start <- ^self getParameter: 3 orName: "startDate" ;
+  !end <- ^self getParameter: 4 orName: "endDate" ;
+  !group <- ^self
+     getGroupFromParameter: 5 orMenu: "group" orEntry: "groupEntry" ;
+  !groupId <- ^self getParameter: 6 ;
+  source isntDefault && target isntDefault && source != target
+  ifTrue:
+    [ 
+      namedParameters at: "detail" . else: "" . contains: "Detail" .
+         ifTrue: [ :groupId <- "ALL" ] ;
+      !optionsBar <- [
+         " | " print ; 
+         groupId isNA || [ groupId isBlank ]
+         ifTrue: 
+           [ FormatTools buildLinkForApp: "AccountAttribution"
+                withLabel: "All Details" andParams: 
+                  source uniqueId, target uniqueId, start, end, group, "ALL" 
+           ]
+         ifFalse: 
+           [ FormatTools buildLinkForApp: "AccountAttribution"
+                withLabel: "Group Summary" andParams: 
+                  source uniqueId, target uniqueId, start, end, group
+           ] . print ;
+         " | " print ; 
+         FormatTools buildLinkForApp: "AccountProfile" 
+            withLabel: (source code concat: " Summary" )
+            andParams: source uniqueId . print ;
+         " | " print ;
+         !ids <- source uniqueId concat: ", " . concat: target uniqueId ;
+         FormatTools buildLinkForApp: "AccountCharXRef" 
+            withLabel: "Account Characteristics" 
+            andParams: ids, NA, group . print ;
+         " | " print ;
+         FormatTools buildLinkForApp: "AccountCompare" 
+          withLabel: "Compare" 
+          andParams: source uniqueId, target uniqueId, group, groupId .
+               print ;
+        " | " printNL ;
+      ] divertOutput ;
+      FormatTools buildOptionsBar: optionsBar . printNL ;
+      source
+         attributionVs: target from: start to: end by: group for: groupId ;
+   ]
+  ifFalse:
+    [ source isDefault || target isDefault
+      ifTrue:
+        [ (id1 isntDefault || id2 isntDefault) 
+           ifFalse: [ ">>> Bad Source or Target Account Provided." printNL ] 
+        ]
+       ifFalse: [ ">>> Source and Target are the Same Account." printNL ] ;
+    ] ;
+  FormatTools buildSectionBreakOver: "30%" alignedTo: "center" . print ;
+  !form <- ^global LayoutTools Named FormSpec AccountAttribution ;
+  form getInputSpec: 1 . 
+      setInitialValueTo: (source else: ^global Account . uniqueId ) ;
+  form getInputSpec: 2 . 
+      setInitialValueTo: (target else: ^global Account . uniqueId ) ;
+  form getInputSpec: 3 . setInitialValueTo: start ;
+  form getInputSpec: 4 . setInitialValueTo: end ;
+  !menu <- form getInputSpec: 5 ;
+  ^self 
+    setGroupsIn: menu for: ^global Holding withCurrent: group ;
+  !level <- form getInputSpec: 6 ;
+  level clearSelection ;
+  groupId isNA
+     ifTrue: [ level selectChoice: 1 ] 
+    ifFalse: [ level selectChoice: 2 ] ;
+   menu setSizeTo: 1 ;
+   FormatTools buildShortFormFor: form . printNL ;
+] ;
+
+#----------
+
+Account defineMethod:
+[ | attributionVs: target from: date1 to: date2 by: group for: groupId |
+  !source <- ^self asSelf ;
+  !groupBlock <- 
+     ^global DataItem getGroupBlockFor: group from: ^global Holding .
+      else: [ [ security company sector ] ] ;
+  !end <- date2 asDate else: ^date . asMostRecentMonthEnd ;
+  !start <- date1 asDate else: end - 1 monthEnds . asMostRecentMonthEnd ;
+  !dr <- start to: end by: 1 monthEnds ;
+
+  #--  get universe of equity holdings
+  !equities <- source, target 
+      collectListElementsFrom:
+         [ !source <- ^my source ;
+           !target <- ^my target ;
+           :holdings asOf: ^my start . select: [ security type isEquity ] .
+                 collect: ^my groupBlock .
+               extendBy: 
+                 [ !groupValue <- value ;
+                   !compoundReturn ;
+                   !contrib ;
+                   !isSource <- account = ^my source ;
+                   !isTarget <- account = ^my target ;
+                 ] 
+            ] ;
+
+  #-- get compound monthly returns for period (use price for now)
+    equities groupedBy: [ security ] . 
+    do: [ !prices <- ^my dr extract: [ price ] for: asSelf . linkElements ;
+          !return <- prices numberElements 
+               select: [position > 1 ] .   #-- return starts in month 2
+                send: [ (^self / prior - 1 ) * 100 ] .
+              compound ;
+          groupList do: [ :compoundReturn <- ^my return ] ;
+        ] ;
+      
+  !groups <- equities groupedBy: [ groupValue ] . 
+  extendBy:
+    [ !group <- asSelf ;
+      !id <- code else: [ asString ] ;
+      !name <- id ;
+      isEntity
+      ifTrue: 
+        [ :id <- shortName else: [ code ] ;
+          :name <- ^self name ;
+        ] ;
+      !sourceList <- groupList select: [ isSource ] ;
+      !swt <- sourceList total: [ percentOfEquity ] . else: 0.0 ;
+      !srtn <- sourceList 
+         do: [ :contrib <- percentOfEquity * compoundReturn / ^my swt ] .
+         total: [ contrib ] . else: 0.0 ;
+      !targetList <- groupList select: [ isTarget ] ;
+      !twt <- targetList total: [ percentOfEquity ] . else: 0.0 ;
+      !trtn <- targetList
+         do: [ :contrib <- percentOfEquity * compoundReturn / ^my twt ] .
+         total: [ contrib ] . else: 0.0 ;
+      !alloc ;
+      !select ;
+      !total ;
+    ] .
+  sortUp:
+    [ isntDefault
+         ifTrue: [ isRangeClassification 
+                      ifTrue: [ shortName ] ifFalse: [ name ]
+                 ] 
+        ifFalse: [ "zzz" ] 
+   ] ;
+
+  #-- calc totals and update group totals
+  !sTotalWt <- groups total: [ swt ] ;
+  !sTotalRtn <- groups total: [ swt / 100 * srtn ] ;
+  !tTotalWt <- groups total: [ twt ] ;
+  !tTotalRtn <- groups total: [ twt / 100 * trtn ] ;
+  groups
+  do: [ :alloc <- (swt - twt) * (trtn - ^my tTotalRtn) / 100 ;
+        :select <- (srtn - trtn) * swt / 100 ;
+        :total <- alloc + select ;
+      ] ;
+  !alloc <- groups total: [ alloc ] ;
+  !select <- groups total: [ select ] ;
+  !total <- groups total: [ total ] ;
+
+  #--  restrict to single group if specified and set detail indicator
+  !details <- FALSE ;
+  !restricted <- FALSE ;
+  groupId isntNA 
+  ifTrue:
+    [ :details <- TRUE ;
+      !subset <- groups
+         select: [ asString = ^my groupId asString ] ;
+      subset count > 0 && groupId != "ALL"
+      ifTrue: 
+       [ :groups <- subset ;
+         :restricted <- TRUE ;
+       ] ;
+    ] ;
+
+  !format <- details ifTrue: [ "Details by " ] ifFalse: [ "Summary by " ] ;
+  !header <- restricted
+    ifTrue: [ "For " concat: groupBlock . concat: " = " . concat: groupId ] 
+   ifFalse: [ format concat: groupBlock ] ;
+  FormatTools buildTitle:
+     "--- Account Attribution  ---", 
+     [ source name print ; " vs " print ; target name print ] divertOutput,
+     ("Holdings As Of " concat: start formatUsingShortName ),
+     ("Monthly Compounded Returns through " concat: end formatUsingShortName),
+     header
+   over: 80 withStyle: "Arial", "darkblue" . print ;
+  FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+  !table <- ^global LayoutTools Named TableSpec at: "basicEntity" ;
+  table setColumnCountTo: 9 ;
+  table getColumn: 1 . getHeader: 1 . setColumnSpanTo: 2 . setTextTo: "" ;
+  table getColumn: 3 . getHeader: 1 . setColumnSpanTo: 2 . setSizeTo: 2 .
+      setTextTo: ("Source: " concat: source shortName ) ;
+  table getColumn: 5 . getHeader: 1 . setColumnSpanTo: 2 . setSizeTo: 2 .
+      setTextTo: ("Target: " concat: target shortName ) ;
+  table getColumn: 7 . getHeader: 1 . setColumnSpanTo: 3 . setSizeTo: 2 .
+     setTextTo: "Attribution" ;
+  table getColumn: 3 . getHeader: 2 . setTextTo: "%" ;
+  table getColumn: 4 . getHeader: 2 . setTextTo: "Contrib" ;
+  table getColumn: 5 . getHeader: 2 . setTextTo: "%" ;
+  table getColumn: 6 . getHeader: 2 . setTextTo: "Contrib" ;
+  table getColumn: 7 . getHeader: 2 . setTextTo: "Allocation" ;
+  table getColumn: 8 . getHeader: 2 . setTextTo: "Selection" ;
+  table getColumn: 9 . getHeader: 2 . setTextTo: "Total" ;
+
+  FormatTools buildTableFor: table for: ^current withBlock:
+     [
+     details
+     ifTrue:
+       [ groups
+         do: [ !group <- asSelf ;
+               FormatTools bold: id . print ;
+               FormatTools bold: name . print ;
+               FormatTools bold: swt . print ;
+               FormatTools bold: srtn . print ;
+               FormatTools bold: twt . print ;
+               FormatTools bold: trtn . print ;
+               FormatTools bold: alloc . print ;
+               FormatTools bold: select . print ;
+               FormatTools bold: total . printNL ;
+               !secs <- groupList groupedBy: [ security ] .
+                  sortUp: [ name ] .
+               do: [ !label <- "   " concat: id ;
+                     FormatTools buildLinkForApp: "SecurityProfile" 
+                        withLabel: label andParams: code . print ;
+                     name print ; 
+                     !source <- groupList select: [ isSource ] ;
+                     source total: [ percentOfEquity ] . else: 0.0 . print ;
+                     source total: [ contrib ] . else: 0.0 . print ;
+                     !target <- groupList select: [ isTarget ] ;
+                     target total: [ percentOfEquity ] . else: 0.0 . print ;
+                     target total: [ contrib ] . else: 0.0 . print ;
+                     newLine print ;
+                   ] ;
+               newLine print ;
+             ] ;
+       ] 
+    ifFalse:
+       [ groups
+         do: [ FormatTools buildLinkForApp: "AccountAttribution" 
+                  withLabel: id 
+                  andParams: ^my source uniqueId, ^my target uniqueId,
+                    ^my start asInteger, ^my end asInteger, ^my group, id .
+                          print ;
+               name print ; 
+               swt print ; srtn print ; twt print ; trtn print ; 
+               alloc print ; select print ; total print ;
+              newLine print;
+            ] ;
+          newLine print ;
+       ] ;
+
+     " " print ; FormatTools bold: "Total Equities" . print ;
+     sTotalWt print ; sTotalRtn print ; tTotalWt print ; tTotalRtn print ;
+     alloc print ; select print ; total print ;
+     newLine print ;
+   ] . print ;
+
+  #- reset table attributes that are shared
+  table getColumn: 1 . getHeader: 1 . setColumnSpanTo: 1 . setTextTo: NA ;
+  table getColumn: 3 . deleteHeader: 1 ;
+  table getColumn: 5 . deleteHeader: 1 ;
+  table getColumn: 7 . deleteHeader: 1 ;
+];
+
+
+#==================================================
+
+####################
+#  Industry Reports
+####################
+
+Interface ApplicationWS defineMethod: [ | IndustryProfile | 
+  !id <- ^self getParameter: 1 orName: "id" . else: "" ;
+  !instance <- ^global Industry validateInputString: id ;
+  instance isntNA
+  ifTrue: 
+    [ !optionsBar <- [
+      " | " print ; 
+      FormatTools buildLinkForApp: "AttributeSelector" 
+         withLabel: "Attributes" andParams: "Industry", instance code . print ;
+         " | " print ; 
+         FormatTools buildLinkForApp: "ShowAllDataValues"
+              withLabel: "Data Values" 
+              andParams: "Industry", instance code . print ;
+      " | " printNL ;
+      ] divertOutput ;
+      FormatTools buildOptionsBar: optionsBar . printNL ;
+
+      instance summary ;
+      ^self displayChangeEntityPromptForApp: "IndustryProfile" 
+            withPrompt: "Enter Industry: " andId: instance code ;
+    ] 
+  ifFalse: [ FormatTools bold: "Do You Mean?" . print ;
+             FormatTools startParagraph print ;
+             ^self runWith: "EntityHelper", "Industry"  ;
+           ] ;
+] ;
+
+#----------
+
+Interface ApplicationWS defineMethod: [ | IndustryMembership |
+  !id <- ^self getParameter: 1 orName: "id" ;
+  !date <- ^self getParameter: 2 orName: "date" . asNumber asDate else: ^date ;
+  !instance <- ^global Industry validateInputString: id ;
+  instance isntNA
+  ifTrue: 
+    [ 
+      !optionsBar <- [
+         " | " print ; 
+         FormatTools buildLinkForApp: "IndustryProfile" 
+             withLabel: "Profile" andParams: instance code . print ;
+         " | " print ; 
+         FormatTools buildLinkForApp: "IndustryHighlights" 
+             withLabel: "Highlights" andParams: instance code . print ;
+         " | " printNL ;
+       ] divertOutput ;
+      FormatTools buildOptionsBar: optionsBar . printNL ;
+      date evaluate: 
+         [ instance companyMembershipReport ;
+           ^self displayChangeEntityPromptForApp: "IndustryMembership" 
+            withPrompt: "Enter Industry: " andId: instance code ;
+         ] ;
+    ] 
+  ifFalse: [ ">>> Bad Industry Id Supplied." printNL ] ;
+] ;
+
+#----------
+
+Interface ApplicationWS defineMethod: [ | IndustryHighlights |
+  !id <- ^self getParameter: 1 orName: "id" ;
+  !instance <- ^global Industry validateInputString: id ;
+  instance isntNA
+  ifTrue: 
+    [ 
+      !optionsBar <- [
+         " | " print ; 
+         FormatTools buildLinkForApp: "IndustryProfile" 
+             withLabel: "Profile" andParams: instance code . print ;
+         " | " print ; 
+         FormatTools buildLinkForApp: "IndustryMembership" 
+             withLabel: "Membership" andParams: instance code . print ;
+         " | " printNL ;
+       ] divertOutput ;
+      FormatTools buildOptionsBar: optionsBar . printNL ;
+      instance highlights ;
+      ^self displayChangeEntityPromptForApp: "IndustryHighlights" 
+            withPrompt: "Enter Industry: " andId: instance code ;
+    ] 
+  ifFalse: [ ">>> Bad Industry Id Supplied." printNL ] ;
+] ;
+
+#----------
+
+Interface ApplicationWS defineMethod: [ | IndustryBalanceSheet |
+  !id <- ^self getParameter: 1 orName: "id" ;
+  !instance <- ^global Industry validateInputString: id ;
+  instance isntNA
+  ifTrue: 
+    [ 
+      !optionsBar <- [
+         " | " print ; 
+         FormatTools buildLinkForApp: "IndustryProfile" 
+             withLabel: "Profile" andParams: instance code . print ;
+         " | " print ; 
+         FormatTools buildLinkForApp: "IndustryIncomeStatement" 
+             withLabel: "Income Statement" andParams: instance code . print ;
+         " | " printNL ;
+       ] divertOutput ;
+      FormatTools buildOptionsBar: optionsBar . printNL ;
+      ^global Company balanceSheetFor: instance companyList 
+                      withTitle: "Industry Peer Analysis" ;
+      ^self displayChangeEntityPromptForApp: "IndustryBalanceSheet" 
+            withPrompt: "Enter Industry: " andId: instance code ;
+    ] 
+  ifFalse: [ ">>> Bad Industry Id Supplied." printNL ] ;
+] ;
+
+#----------
+
+Interface ApplicationWS defineMethod: [ | IndustryIncomeStatement |
+  !id <- ^self getParameter: 1 orName: "id" ;
+  !instance <- ^global Industry validateInputString: id ;
+  instance isntNA
+  ifTrue: 
+    [ 
+      !optionsBar <- [
+         " | " print ; 
+         FormatTools buildLinkForApp: "IndustryProfile" 
+             withLabel: "Profile" andParams: instance code . print ;
+         " | " print ; 
+         FormatTools buildLinkForApp: "IndustryBalanceSheet" 
+             withLabel: "Balance Sheet" andParams: instance code . print ;
+         " | " printNL ;
+       ] divertOutput ;
+      FormatTools buildOptionsBar: optionsBar . printNL ;
+      ^global Company incomeStatementFor: instance companyList 
+                      withTitle: "Industry Peer Analysis" ;
+      ^self displayChangeEntityPromptForApp: "IndustryIncomeStatement" 
+            withPrompt: "Enter Industry: " andId: instance code ;
+    ] 
+  ifFalse: [ ">>> Bad Industry Id Supplied." printNL ] ;
+] ;
+
+
+#--------------------
+
+Industry defineMethod: [ | summary | 
+
+currency ifDefault: "US" asCurrency . evaluate: [ 
+
+FormatTools
+   buildTitle: ("Industry Profile For: " concat: name) ,
+       ("Data As Of: " concat: ^date . concat: "   ---   Currency: " .
+            concat: currency name
+       )  over: 80 withStyle: "Arial", "darkblue" . print ;
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+      
+!table <- ^global LayoutTools Named TableSpec at: "basic2Column" ;
+table getColumn: 1 . getHeader: 1 . setTextTo: "---  Basics  ---" ;
+
+FormatTools buildTableFor: table for: ^self withBlock:
+  [
+  "Industry Code: " print:20 ; code printNL ; 
+  parent isntDefault && isParent not
+  ifTrue:
+    [ "Parent: " print: 20 ;
+      FormatTools buildLinkForApp: "IndustryProfile"
+      withLabel: parent name  andParams: parent code . printNL ;
+    ] ;
+  "Sector: " print:20 ;
+  FormatTools buildLinkForApp: "SectorProfile"
+      withLabel: sector name andParams: sector code . printNL ;
+  !label <- :memberList effectiveDate
+     ifDefault: [ "Initial Members: " ] 
+     else: [ "Members (" concat: formatUsingMMDDYY . concat: ")" ] ;
+  label print: 20 ; 
+  FormatTools buildLinkForApp: "IndustryMembership" 
+     withLabel: memberList count andParams: code . printNL ;
+  ] . printNL ;
+
+  table getColumn: 1 . 
+     getHeader: 1 . setTextTo: "---  Financial Highlights  ---" ;
+  FormatTools buildTableFor: table for: ^self withBlock:
+  [
+  FormatTools buildLinkForApp: "IndustryIncomeStatement"
+     withLabel: "Total Sales: " andParams: code . print ;
+  memberList total: [ funDataA sales ] . printWithCommasNL: 10.2 ;
+  FormatTools buildLinkForApp: "IndustryBalanceSheet"
+    withLabel: "Total Assets: " andParams: code . print ;
+  memberList total: [ funDataA assets ] . printWithCommasNL: 10.2 ;
+  FormatTools buildLinkForApp: "IndustryHighlights"
+      withLabel: "Average P/E: "andParams: code . print ;
+  memberList average: [ funDataM pe ] . printWithCommasNL: 10.2 ;
+  ] . printNL ;   #-- end of table
+
+table getColumn: 1 . 
+   getHeader: 1 . setTextTo: "---  Membership History  ---" ;
+FormatTools buildTableFor: table for: ^self withBlock:
+    [ :memberList select: [ count > 0 ] .
+         extendBy: [ !date <- ^date ] .
+         sortDown: [ date ] .
+        first: 25 .
+      do: [ FormatTools buildLinkForApp: "IndustryMembership"
+               withLabel: (date ifDefault: [ "Initial" ] 
+                                     else: [formatUsingMMDDYY ] )
+               andParams: ^my code, date asInteger . print ;
+            count printNL ;
+          ] ;
+     ] . print ;
+
+  ] ;
+] ;
+
+Industry defineMethod: [ | companyMembershipReport |
+
+FormatTools
+    buildTitle: ("Companies in Industry: " concat: name)
+          over: 80 withStyle: "Arial", "darkblue" . print ;
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+      
+!currentDate <- :memberList effectiveDate else: earliestPossibleDate ;
+!currentList <- memberList nonDefaults ;
+!priorDate <- currentDate isntDefault
+    ifTrue: [ currentDate - 1 days ]
+   ifFalse: [ currentDate ] ;
+!priorList <- :memberList asOf: priorDate ;
+
+!table <- ^global LayoutTools Named TableSpec at: "wrap2Column" ;
+
+!label <- currentDate 
+   ifDefault: [ "---  Initial Members  ---" ]  
+   else: [ "--- Members As Of " concat: formatUsingMMDDYY . concat: " ---" ] ;
+table getColumn: 1 . getHeader: 1 . setTextTo: label ;
+FormatTools buildTableFor: table for: ^current withBlock:
+  [ currentList sortUp: [ name ] . numberElements
+      extendBy: [ !isOdd <- position mod: 2 . = 1 ] .
+    do: [ isOdd && position != 1 ifTrue: [ newLine print ] ;
+          FormatTools buildLinkForApp: "CompanyProfile"
+             withLabel: (id pad: 8 . concat: name . pad: 35) 
+           andParams: code . print;
+        ] ;
+  ] . print ;
+
+!changes <- currentList exclude: priorList ;
+table getColumn: 1 . getHeader: 1 . setTextTo: "---  New Members  ---" ;
+changes count > 0 
+ifTrue:
+  [
+  FormatTools buildTableFor: table for: ^current withBlock:
+    [ changes sortUp: [ name ] .
+      do: [ FormatTools buildLinkForApp: "CompanyProfile"
+              withLabel: (id pad: 8 . concat: name . pad: 35 ) 
+              andParams: code . print ;
+            !prior <- :industry asOf: ^my priorDate ;
+            prior isntDefault
+            ifTrue:
+              [
+              FormatTools buildLinkForApp: "IndustryProfile"
+                 withLabel: (" (from " concat: prior name . concat: ")" ) 
+                 andParams: prior code . print ;
+              ] 
+            ifFalse: [ " -- no prior industry -- " print ] ;
+            newLine print ; 
+           ] ;
+    ] . print ;
+  ] ;
+!changes <- priorList exclude: currentList ;
+table getColumn: 1 . getHeader: 1 . setTextTo: "---  Dropped  ---" ;
+changes count > 0 
+ifTrue:
+  [
+  FormatTools buildTableFor: table for: ^current withBlock:
+    [ changes sortUp: [ name ] .
+      do: [ FormatTools buildLinkForApp: "CompanyProfile"
+              withLabel: (id pad: 8 . concat: name . pad: 35 ) 
+              andParams: code . print ;
+            !current <- :industry asOf: ^my currentDate ;
+            current isntDefault
+            ifTrue:
+              [
+              FormatTools buildLinkForApp: "IndustryProfile"
+                 withLabel: (" (now in " concat: current name . concat: ")" ) 
+                 andParams: current code . print ;
+              ] 
+            ifFalse: [ " (no current industry) " print ] ;
+            newLine print ; 
+           ] ;
+    ] . print ;
+  ] ;
+
+] ;
+
+#----------
+
+Industry defineMethod: [ | highlights | 
+
+currency ifDefault: "US" asCurrency . evaluate: [ 
+
+  FormatTools
+      buildTitle: ("Industry Highlights For: " concat: name) ,
+     ("Data As Of: " concat: ^date . concat: "   ---   Currency: " .
+          concat: currency name
+     )  over: 80 withStyle: "Arial", "darkblue" . print ;
+  FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+      
+  !table <- ^global LayoutTools Named TableSpec at: "finStatement" ;
+  table setColumnCountTo: 4 ;
+  table caption setTextTo: "Industry Highlights" ;
+
+  !lastDate <- ^date ;
+  !dr <- lastDate to: lastDate - 2 years by: 1 years ;
+  !data <- dr extract:
+      [ memberList extendBy: 
+          [ !sales <- funDataA sales ;
+            !mcap <- funDataM marketCap ;
+            !pe <- funDataM pe ;
+          ] . basicExtend:
+          [ !date <- ^date ;
+            !members <- ^self ;
+            !totSales <- members total: [ sales ] ;
+            !maxSales <- members max: [ sales ] ;
+            !totMCap  <- members total: [ mcap ] ;
+            !maxMCap  <- members max: [ mcap ] ;
+            !avgPe    <- members average: [ pe ] ;
+            !maxPe    <- members max: [ pe ] ;
+            !minPe    <- members min: [ pe ] ;
+          ]
+      ]  for: ^self . sortDown: [ date ] ;
+      
+  data numberElements do:
+    [ !label <- [ " " print: 4 ; date print: 8 ] divertOutput ;
+       ^my table getColumn: (position + 1 ) asInteger .
+             getHeader: 1 . setTextTo: label ;
+    ] ;
+
+  FormatTools buildTableFor: table for: ^current withBlock:
+    [
+    " Total Companies: " print ; 
+    data do:
+       [ FormatTools buildLinkForApp: "IndustryMembership" 
+             withLabel: (count asString pad: -12) 
+             andParams: ^my code, date asInteger . print ;
+       ] ;
+    newLine print ;
+    newLine print ; 
+
+    "     Total Sales:" print ; 
+    data do: 
+      [ FormatTools buildLinkForApp: "IndustryGraph" 
+           withLabel: [ totSales printWithCommas: 12.0 ] divertOutput
+           andParams: ^my code, date asInteger, "sales", "pie" . print ;
+      ] ;
+    newLine print ;
+    "         Largest:" print ; 
+    data do: [ ^self largest: [ sales ] . id print: -12 ] ;
+    newLine print ;
+    "           Sales:" print ; 
+    data do: [ maxSales printWithCommas: 12.0 ] ;
+    newLine print ;
+    "         % Total:" print ;
+    data do: [ maxSales / totSales * 100 print: 12 ] ;
+    newLine print ;
+    newLine print ;
+
+    "   Total Mkt Cap:" print ; 
+   data do:
+      [ FormatTools buildLinkForApp: "IndustryGraph" 
+          withLabel: [totMCap printWithCommas: 12.0 ] divertOutput
+          andParams: ^my code, date asInteger, "mktCap", "pie" . print ;
+      ] ;
+    newLine print ;
+    "         Largest:" print ; 
+    data do: [ ^self largest: [ mcap ] . id print: -12 ] ;
+    newLine print ;
+    "         Mkt Cap:" print ; 
+    data do: [ maxMCap printWithCommas: 12.0 ] ;
+    newLine print ;
+    "         % Total:" print ;
+    data do: [ maxMCap / totMCap * 100 print: 12 ] ;
+    newLine print ;
+    newLine print ;
+
+    "     Average P/E: " print ; 
+    data do: [ avgPe printWithCommas: 12.2 ] ;
+    newLine print ;
+    "         Largest:" print ; 
+    data do: [ ^self largest: [ pe ] . id print: -12 ] ;
+    newLine print ;
+    "             P/E:" print ; 
+    data do: 
+      [ FormatTools buildLinkForApp: "IndustryGraph" 
+            withLabel: [ maxPe printWithCommas: 12.2 ] divertOutput
+            andParams: ^my code, date asInteger, "pe", "bar", 10 . print ;
+      ] ;
+    newLine print ;
+    "        Smallest:" print ; 
+    data do: [ ^self smallest: [ pe ] . id print: -12 ] ;
+    newLine print ;
+    "             P/E:" print ; 
+    data do:
+      [ FormatTools buildLinkForApp: "IndustryGraph" 
+            withLabel: [ minPe printWithCommas: 12.2 ] divertOutput
+            andParams: ^my code, date asInteger, "pe", "bar", -10 . print ;
+      ] ;
+    newLine print ;
+    newLine print ;
+  ] . print ;
+
+  ] ;
+] ;
+
+Interface ApplicationWS defineMethod: [ | IndustryGraph |
+  !id <- ^self getParameter: 1 orName: "id" ;
+  !instance <- ^global Industry validateInputString: id ;
+  !asof <- ^self getParameter: 2 orName: "asof" . asDate else: ^date ;
+  !item <- ^self getParameter: 3 orName: "item" . else: "" ;
+  :item <- item contains: "sales" . ifTrue: [ "funDataA sales" ] .
+     elseIf: [ item contains: "pe" ] then: [ "funDataM pe" ] .
+     else: [ "funDataM marketCap" ] ;
+  !format <- ^self getParameter: 4 orName: "format" ;
+  !cutoff <- ^self getParameter: 5 orName: "cutoff" . asNumber ;
+  instance isntNA
+  ifTrue:
+    [!optionsBar <- [
+         " | " print ; 
+         FormatTools buildLinkForApp: "IndustryProfile" 
+             withLabel: "Profile" andParams: instance code . print ;
+         " | " print ; 
+         FormatTools buildLinkForApp: "IndustryMembership" 
+             withLabel: "Membership" andParams: instance code . print ;
+         " | " printNL ;
+      ] divertOutput ;
+     FormatTools buildOptionsBar: optionsBar . printNL ;
+     asof evaluate: 
+      [ format = "bar" 
+          ifTrue: [instance buildComparativeBarChartFor: item cutoff: cutoff]
+         ifFalse: [instance buildComparativePieChartFor: item ] . printNL;
+      ]
+    ] 
+  ifFalse: [ ">>> Bad Industry Id Supplied." printNL ] ;
+] ;
+
+Industry defineMethod: [ | buildComparativePieChartFor: item |
+currency else: "US" asCurrency . evaluate: [
+
+!data <- companyList collect: item asBlock .
+   sortDown: [ value ] ;
+!total <- data total: [ value ] ;
+!top5 <- data first: 5 .
+   extendBy: [ !id <- ticker else: code ] ;
+data count > 5
+   ifTrue: [ !rest <- total - (top5 total: [ value ] ) ;
+             top5 , 
+             (rest extendBy: [ !value <- ^self ; 
+                               !id <- "Other" ;
+                             ]
+             ) ;
+           ] ;
+top5 do: [ :value <- value / ^my total * 100 ] ;
+
+FormatTools 
+   buildTitle: (name concat: " Industry Comparative Analysis" ),
+               ("Data As Of: " concat: ^date . concat: "   ---   Currency: " .
+                   concat: currency name
+               )  over: 80 withStyle: "Arial", "darkblue" . print ;
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+
+!pie <- ^global LayoutTools Named Piechart MarketShare ;
+pie header
+    setTextTo: "  Industry Breakdown  ", 
+              ("  By Percent " concat: item . concat: "  " ) .
+    ;
+pie clearSlices ;
+top5 numberElements
+do: [ !slice <- ^my pie addSlice: position ;
+      slice setAmountTo: value .
+          label setTextTo: id . setColorTo: "black" . setFontTo: "Arial" .
+                setBoxColorTo: "white" . 
+                setBoxStyleTo: "NONE" ;
+      id != "Other" 
+       ifTrue: [ slice setLinkTo:
+                  (FormatTools buildURLForApp: "CompanyProfile" 
+                        andParams: code 
+                  )
+               ] ;
+   ] ;
+FormatTools center: (FormatTools buildPiechartFor: pie ) . printNL ;
+
+
+] ;
+] ;
+
+#--------------------
+
+Industry defineMethod: [ | buildComparativeBarChartFor: item cutoff: n |
+!cutoff <- n asInteger else: companyList count . absoluteValue ;
+currency else: "US" asCurrency . evaluate: [
+!data <- companyList collect: item asBlock ;
+:data <- n < 0 
+  ifTrue: [ data sortUp: [ value ] ] . 
+    else: [ data sortDown: [ value ] ] .
+    first: cutoff ;
+
+FormatTools 
+   buildTitle: (name concat: " Industry Comparative Analysis" ),
+               ("Data As Of: " concat: ^date . concat: "   ---   Currency: " .
+                   concat: currency name
+               )  over: 80 withStyle: "Arial", "darkblue" . print ;
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+
+!chart <- ^global LayoutTools Named Barchart BasicBar ;
+!title2 <- n < 0
+   ifTrue: [ "  By Smallest " ] ifFalse: [ "  By Largest " ] .
+      concat: item . concat: "  " ;
+chart header
+    setTextTo: "  Industry Breakdown  ", title2 ;
+chart setBarLabelsTo: (data send: [ ticker ] ) ;
+    ;
+!dataSet <- chart getDataSet: 1 . clearLists 
+  setLabelTo: (item asWords last: 1 . at: 1) .
+  setValuesTo: (data send: [ value ] ) .
+  setLinksTo: (data send: [ FormatTools buildURLForApp: "CompanyProfile" 
+                               andParams: code 
+                          ]
+              ) ;
+FormatTools center: (FormatTools buildBarchartFor: chart ) . printNL ;
+
+] ;
+] ;
+
+
+Interface ApplicationWS defineMethod: [ | SectorProfile | 
+  !id <- ^self getParameter: 1 orName: "id" . else: "" ;
+  !instance <- ^global Sector validateInputString: id ;
+  instance isntNA
+  ifTrue: 
+    [ 
+      !optionsBar <- [
+      " | " print ; 
+      FormatTools buildLinkForApp: "AttributeSelector" 
+         withLabel: "Attributes" andParams: "Sector", instance code . print ;
+         " | " print ; 
+         FormatTools buildLinkForApp: "ShowAllDataValues"
+              withLabel: "Data Values" 
+              andParams: "Sector", instance code . print ;
+      " | " printNL ;
+      ] divertOutput ;
+      FormatTools buildOptionsBar: optionsBar . printNL ;
+
+      instance summary ;
+      ^self displayChangeEntityPromptForApp: "SectorProfile" 
+            withPrompt: "Enter Sector: " andId: instance code ;
+    ] 
+  ifFalse: [ FormatTools bold: "Do You Mean?" . print ;
+             FormatTools startParagraph print ;
+             ^self runWith: "EntityHelper", "Sector"  ;
+           ] ;
+] ;
+
+#----------
+
+Sector defineMethod: [ | summary | 
+
+FormatTools
+   buildTitle: ("Sector Profile For: " concat: name) ,
+       ("Data As Of: " concat: ^date )
+         over: 80 withStyle: "Arial", "darkblue" . print ;
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+      
+!table <- ^global LayoutTools Named TableSpec at: "basic2Column" ;
+table getColumn: 1 . 
+    getHeader: 1 . setTextTo: "---  Industries in Sector  ---" ;
+FormatTools buildTableFor: table for: ^self withBlock:
+  [
+  memberList sortUp: [ name ] .
+  do: [ FormatTools buildLinkForApp: "IndustryMembership"
+           withLabel: name andParams: code . print ; 
+        companyList count printNL ;
+      ] ;
+  ] . print ;
+] ;
+
+#--------------------
+
+Interface ApplicationWS defineMethod: [ | CountryProfile | 
+  !id <- ^self getParameter: 1 orName: "id" . else: "" ;
+  !instance <- ^global Country validateInputString: id ;
+  instance isntNA
+  ifTrue: 
+    [ 
+      !optionsBar <- [
+      " | " print ; 
+      FormatTools buildLinkForApp: "AttributeSelector" 
+         withLabel: "Attributes" andParams: "Country", instance code . print ;
+         " | " print ; 
+         FormatTools buildLinkForApp: "ShowAllDataValues"
+              withLabel: "Data Values" 
+              andParams: "Country", instance code . print ;
+      " | " printNL ;
+      ] divertOutput ;
+      FormatTools buildOptionsBar: optionsBar . printNL ;
+
+      instance summary ;
+      ^self displayChangeEntityPromptForApp: "CountryProfile" 
+            withPrompt: "Enter Country: " andId: instance code ;
+    ] 
+  ifFalse: [ FormatTools bold: "Do You Mean?" . print ;
+             FormatTools startParagraph print ;
+             ^self runWith: "EntityHelper", "Country"  ;
+           ] ;
+] ;
+
+#----------
+
+Country defineMethod: [ | summary | 
+
+FormatTools
+   buildTitle: ("Country Profile For: " concat: name) ,
+       ("Data As Of: " concat: ^date )
+         over: 80 withStyle: "Arial", "darkblue" . print ;
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+      
+
+!table <- ^global LayoutTools Named TableSpec at: "basic2Column" ;
+table getColumn: 1 . 
+    getHeader: 1 . setTextTo: "--- Companies in Country ---" ;
+FormatTools buildTableFor: table for: ^self withBlock:
+  [ memberList sortUp: [ name ] .
+    do: [ FormatTools buildLinkForApp: "CompanyProfile"
+             withLabel: id andParams: code . print ;
+          name printNL ;
+        ] ;
+  ] . print ;
+] ;
+
+####################
+#  Universe Reports
+####################
+
+#--------------------
+#  Universe Profile and Interface
+#--------------------
+
+Interface ApplicationWS defineMethod: [ | UniverseProfile | 
+  !id <- ^self getParameter: 1 orName: "id" ;
+  !instance <- ^self getUniverseFor: id ;
+  instance isntNA
+  ifTrue:
+    [ 
+#      !ticList <- 
+#        [ instance list sortDown: [ company funDataA sales ] . first: 10 .
+#             do: [ ticker toLower print ; "+" print ] ;
+#        ] divertOutput drop: -1 ;
+      !optionsBar <- [
+#         !priceLink <- "http://quote.yahoo.com/quotes?SYMBOLS="
+#             concat: ticList .
+#             concat: "&detailed=f" ;
+#         " | " print ; 
+#         FormatTools buildLink: priceLink withLabel: "Quotes" . print ;
+         " | " print ; 
+         FormatTools buildLinkForApp: "ShowAllDataValues"
+              withLabel: "Data Values" 
+              andParams: "Universe", instance code . print ;
+         " | " printNL ;
+       ] divertOutput ;
+      FormatTools buildOptionsBar: optionsBar . printNL ;
+      instance summary ;
+      ^self displayChangeEntityPromptForApp: "UniverseProfile" 
+            withPrompt: "Enter Universe: " andId: instance code ;
+    ] 
+  ifFalse: [ FormatTools bold: "... Do You Mean?" . print ; 
+             FormatTools startParagraph print ;
+             ^self runWith: "EntityHelper", "Universe"  ;
+           ] ;
+] ;
+
+
+Universe defineMethod: [ | summary | 
+
+  FormatTools
+      buildTitle: ("Universe Profile For: " concat: name)
+       over: 80 withStyle: "Arial", "darkblue" . print ;
+  FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+      
+!table <- ^global LayoutTools Named TableSpec at: "finHistory" ;
+table setColumnCountTo: 2 ;
+table caption setTextTo: "Membership History" ;
+table getColumn: 2 . getHeader: 1 . setTextTo: "Members" ;
+
+FormatTools buildTableFor: table for: ^self withBlock:
+    [
+    :list extendBy: [ !date <- ^date ] .
+        sortDown: [ date  ] .
+        select: [ date <= ^date && count > 0 ] .
+        first: 25 .
+    do: [ FormatTools buildLinkForApp: "UniverseMembership"
+             withLabel: date formatUsingMMDDYY
+             andParams: ^my code, date asInteger . print ;
+           count printNL ;
+         ] ;
+    ] . print ;
+] .
+;
+
+#--------------------
+#  Universe Highlights and Memberships
+#--------------------
+
+Interface ApplicationWS defineMethod: [ | UniverseMembership |
+  !id <- ^self getParameter: 1 orName: "id" ;
+  !date <- ^self getParameter: 2 orName: "date" . asNumber asDate else: ^date ;
+  !instance <- ^self getUniverseFor: id ;
+  instance isntNA
+  ifTrue:
+    [ 
+#      !ticList <- 
+#        [ instance list sortDown: [ company funDataA sales ] . first: 10 .
+#             do: [ ticker toLower print ; "+" print ] ;
+#        ] divertOutput drop: -1 ;
+      !optionsBar <- [
+#         !priceLink <- "http://quote.yahoo.com/quotes?SYMBOLS="
+#             concat: ticList .
+#             concat: "&detailed=f" ;
+#         " | " print ; 
+#         FormatTools buildLink: priceLink withLabel: "Quotes" . print ;
+         " | " print ; 
+         FormatTools buildLinkForApp: "UniverseProfile" 
+             withLabel: "Profile" andParams: instance code . print ;
+         " | " print ; 
+         FormatTools buildLinkForApp: "AttributeSelector" 
+            withLabel: "Attributes" andParams: "Universe", instance code . print ;
+         " | " printNL ;
+       ] divertOutput ;
+      FormatTools buildOptionsBar: optionsBar . printNL ;
+      date evaluate: 
+         [ instance membershipReport ;
+           ^self displayChangeEntityPromptForApp: "UniverseMembership" 
+              withPrompt: "Enter Universe: " andId: instance code ;
+         ] ;
+    ] 
+  ifFalse: [ ">>> Bad Universe Id Supplied." printNL ] ;
+] .
+
+;
+
+Universe defineMethod: [ | membershipReport |
+
+currency ifDefault: "US" asCurrency . evaluate: [ 
+
+FormatTools
+    buildTitle: ("Universe Membership For: " concat: name) ,
+          ("Data As Of: " concat: ^date . concat: "   ---   Currency: " .
+               concat: currency name
+          )  over: 80 withStyle: "Arial", "darkblue" . print ;
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+      
+!date <- :list effectiveDate ;
+!currentList <- list ;
+!priorDate <- date != earliestPossibleDate
+   ifTrue: [ :list effectiveDateAsOf: date - 1 days ] ;
+!priorList <- priorDate isntNA
+    ifTrue: [ :list asOf: priorDate ] ifFalse: [ list ] ;
+
+!table <- ^global LayoutTools Named TableSpec at: "basic2Column" ;
+table getColumn: 1 . getHeader: 1 . setTextTo: "---  Basics  ---" ;
+FormatTools buildTableFor: table for: ^self withBlock:
+  [
+  "# Current Members: " print: 20; list count printNL ;
+  "Effective Date: " print: 20 ; 
+  ^my date isDefault ifTrue: [ "Initial" ] ifFalse: [ ^my date ] .  printNL ;
+  ^my priorDate isntNA
+  ifTrue:
+    [
+    "# Prior Members: " print: 20 ; ^my priorList count printNL ;
+    "Effective Date: " print: 20 ;  ^my priorDate printNL ;
+    ] ;
+  ] . print ;
+
+!table <- ^global LayoutTools Named TableSpec at: "wrap2Column" ;
+!newList <- currentList exclude: priorList ;
+table getColumn: 1 . getHeader: 1 . setTextTo: "---  New Members  ---" ;
+newList count > 0 
+ifTrue: 
+  [ 
+  FormatTools buildTableFor: table for: ^self withBlock:
+    [
+    ^date ifDefault: [ ^today ] . evaluate: [
+    ^my newList sortUp: [ name ] . numberElements
+       extendBy: [ !isOdd <- position mod: 2 . = 1 ] .
+    do: [ isOdd && position != 1 ifTrue: [ newLine print ] ;
+           FormatTools buildLinkForApp: "SecurityProfile"
+              withLabel: (ticker pad: 8 . concat: name . pad: 35) 
+              andParams: code . print ;
+         ] ;
+    ] ;
+    ] . print ;
+  ] ;
+
+!dropped <- priorList exclude: currentList ;
+table getColumn: 1 . getHeader: 1 . setTextTo: "---  Dropped Members  ---" ;
+dropped count > 0 
+ifTrue: 
+  [ 
+  FormatTools buildTableFor: table for: ^self withBlock:
+    [
+    ^date ifDefault: [ ^today ] . evaluate: [
+    ^my dropped sortUp: [ name ] . numberElements
+       extendBy: [ !isOdd <- position mod: 2 . = 1 ] .
+    do: [ isOdd && position != 1 ifTrue: [ newLine print ] ;
+           FormatTools buildLinkForApp: "SecurityProfile"
+              withLabel: (ticker pad: 8 . concat: name . pad: 35) 
+              andParams: code . print ;
+         ] ;
+    ] ;
+    ] . print ;
+  ] ;
+
+table getColumn: 1 . getHeader: 1 . setTextTo: "---  Current Members  ---" ;
+FormatTools buildTableFor: table for: ^self withBlock:
+  [
+  ^date ifDefault: ^today . evaluate: [ 
+  ^my currentList sortUp: [ name ] . numberElements
+       extendBy: [ !isOdd <- position mod: 2 . = 1 ] .
+    do: [ isOdd && position != 1 ifTrue: [ newLine print ] ;
+           FormatTools buildLinkForApp: "SecurityProfile"
+              withLabel: (ticker pad: 8 . concat: name . pad: 35) 
+              andParams: code . print ;
+         ] ;
+  ] ;
+  ] . print ;
+
+ ] ;
+] ;
+
+#==================================================
+
+#--------------------
+#  Attribute Screen and Interfaces
+#--------------------
+
+Interface ApplicationWS defineMethod: [ | AttributeSelector | 
+  !class <- ^self getParameter: 1 orName: "classid" . else: "" . evaluate ;
+  !id <- ^self getParameter: 2 orName: "id" . else: "" ;
+  !entity <- class isEntity 
+     ifTrue: [ class named at: id ] ;
+
+  !optionsBar <- [
+     class isEntity
+     ifTrue:
+       [ " | " print ; 
+         !appName <- class whatAmI concat: "Profile" ;
+         FormatTools buildLinkForApp: appName withLabel: "Profile"
+            andParams: entity code . print ;
+       ] ;
+     !changeForm <- class isUniverse ifTrue: [ "UnivAttrSel.htm" ] .
+        elseIf: [ class isSector ] then: [ "SectorAttrSel.htm" ] .
+        elseIf: [ class isIndustry ] then: [ "IndAttrSel.htm" ] .
+          else: [ "AttrSel.htm" ] ;
+     " | " print ; 
+     FormatTools buildLink: changeForm withPath: NA
+          withLabel: "Change Attributes" . print ;
+     " | " printNL ;
+  ] divertOutput ;
+  FormatTools buildOptionsBar: optionsBar . printNL ;
+
+  !cutoff <- namedParameters at: "cutoff" . asNumber else: 50 ;
+  !item <- namedParameters at: "itemcode" . else: "" ;
+  item isBlank ifTrue: [ :item <- NA ] ;
+  !altItem <- namedParameters at: "enter" . else: "" ;
+  altItem isBlank ifTrue: [ :altItem <- NA ] ;
+  !sortUp <- namedParameters at: "sortcode" . else: "" . 
+     take: 1 . toUpper = "S" ;
+  !itemToUse <- altItem else: item . 
+         else: "company funDataA sales" . stripBoundingBlanks ;
+    
+#  ^global Security respondsTo: itemToUse .
+#  ifTrue: [
+    ^global Security
+         screenOn: itemToUse withCutoff: cutoff sortUp: sortUp for: entity ;
+#    ] 
+#  ifFalse: [ ">>>  Bad Item Entered." printNL ] ;
+] ;
+
+Security defineMethod: 
+  [ | screenOn: item withCutoff: n sortUp: sortFlag for: entity | 
+
+currency evaluate: [ 
+
+!accessBlock <- item asBlock ;
+!list <- entity isUniverse
+   ifTrue: [ entity list ] .
+   elseIf: [ entity isIndustry || entity isSector ] 
+     then: [ entity companyList send: [ primarySecurity ] ] .
+     else: [ asSelf masterList ] .
+       collect: accessBlock ;
+!cutoff <- n isNumber 
+  ifTrue: [ n ] ifFalse: [ list count ] . min: list count ;
+!universe <- sortFlag 
+   ifTrue: [ list sortUp: [ value ] ] 
+  ifFalse: [ list sortDown: [ value ] ] . first: cutoff ;
+
+!title1 <- [
+  sortFlag ifTrue: [ "Smallest " ] ifFalse: [ "Largest " ] . print ;
+  cutoff asString print ; " Companies in " print ;
+  entity isNA
+    ifTrue: [ "Full Universe" print ] 
+   ifFalse: [ entity whatAmI print ; " " print ; entity code print ] ;
+  ] divertOutput ;
+FormatTools
+    buildTitle: title1,
+          ("Data As Of: " concat: ^date . concat: "   ---   Currency: " .
+               concat: currency name
+          )  over: 80 withStyle: "Arial", "darkblue" . print ;
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+      
+!table <- ^global LayoutTools Named TableSpec at: "basicEntity" ;
+table setColumnCountTo: 6 ;
+table getColumn: 1 . getHeader: 1 .
+    setColumnSpanTo: 7 .
+    setTextTo: ("By " concat: item ) ;
+!shortItem <- item asWords last: 1 . at: 1 ;
+table getColumn: 3 . 
+     getHeader: 2 . setTextTo: ("* " concat: shortItem . concat: " *" ) ;
+table getColumn: 4 . getHeader: 2 . setTextTo: "Price" ;
+table getColumn: 5 . getHeader: 2 . setTextTo: "Mkt Cap" ;
+table getColumn: 6 . getHeader: 2 . setTextTo: "Sales" ;
+table getColumn: 7 . getHeader: 2 . setTextTo: "P/E" ;
+
+FormatTools buildTableFor: table for: ^self withBlock:
+   [
+   ^my universe
+   do: [ FormatTools buildLinkForApp: "SecurityProfile"
+             withLabel: id andParams: code . print ;
+         name print;
+         value printWithCommas: 15 ;
+         price print: 10.3 ;
+         company funDataM marketCap printWithCommas: 12.0 ;
+         company funDataA sales printWithCommas: 12.0 ;
+         pe print: 8.2 ;
+         newLine print ; 
+       ] ;
+  ] . print ;
+
+] ;   #-- of currency
+
+] ;
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,1056 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                          Section 2
+
+                                      New Database Setup
+
+
+
+
+            2.1  Terminology
+
+            The term "Data Source" is used to refer to an external source  of  one
+            or more related files of information.  Each of these files is referred
+            to as a "Data Set".  Each data set will correspond to a  Vision  class
+            whose  instances  are  the  records  or  rows  in  the  file and whose
+            properties are the fields or columns in the file.
+
+
+            Data sets may be provided on a one-time, as-needed, or periodic  basis
+            such  as  daily or monthly.  Some data sets are designed to completely
+            refresh or replace existing data in your Vision database.  Other  data
+            sets  are  designed  to  provide periodic updates which are associated
+            with Vision properties that are tracked over  time.   The  process  of
+            relating  your external data to existing Vision structures is known as
+            "Reconciliation". Because you define your reconcile  rules  as  Vision
+            methods,  you  have  the flexibility to accommodate any type of update
+            requirement.
+
+
+            Although many updates will require customized reconcile rules,  Insyte
+            has  pre-defined  and parameterized some reconcile methods that can be
+            used for data sources that are updated on  a  regular  basis  and  use
+            local entities to link data in the data sets to shared entities.  This
+            type of update  is  known  as  a  "LocalEntity-style"  update  and  is
+            described in detail in Section 5 of this document.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            New Database Setup                                      2-2
+
+
+
+            2.2  Overview of Process
+
+            You will want to create a "Database Driver" for any data  source  that
+            supplies  data  sets containing a large number of records on a regular
+            basis.  For small data sets that are supplied as  "one-time"  updates,
+            you  should  consider  reading the data directly into Vision using the
+            approach described in Section 7.
+
+
+            You should be logged in to the "dbadmin" user code  to  define  a  new
+            database  driver.   The  definition  of a new external database driver
+            involves the following steps:
+
+
+               - Creating a new directory for maintaining the  scripts  and  files
+                 associated with the new data source.
+
+               - Creating layout files that describe the data fields  in  each  of
+                 the source's data sets.
+
+               - Creating a new object space that  contains  the  Vision  classes,
+                 properties,  and  methods  needed  to relate the external data to
+                 Vision objects.
+
+               - Defining a Unix script to convert the raw data files supplied  by
+                 the data source into a form that can be incorporated into Vision.
+
+
+            These steps are described in detail in the remainder of this  section.
+            Once  a  database driver has been defined, you will use the procedures
+            described in Section 3 to load and update data for this data source.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            New Database Setup                                      2-3
+
+
+
+            2.3  Creating a New Update Work Area
+
+            Each database driver is stored  in  its  own  Unix  directory  in  the
+            /localvision/update directory tree.  Use the following steps to create
+            a new update directory for the data source Demo:
+
+
+                 cd /localvision/update
+                 /localvision/tools/NewDB Demo
+
+
+            You should see the prompt:
+
+                 LocalEntity Style Reconcile [ No ] ?
+
+
+            If this database  driver  needs  the  pre-packaged  LocalEntity  style
+            reconcile  tools,  type  "yes" or "Yes" followed by a carriage return.
+            This answer dictates which starter scripts  are  copied  to  the  Demo
+            directory.   The  directory /localvision/update/Templates contains all
+            the sample scripts used.
+
+
+            The update  directory  Demo  will  contain  the  following  files  and
+            subdirectories:
+
+
+            Load        Sample script that is used  to  convert  raw  data  source
+                        files  into  a  form that can be updated.  You may need to
+                        modify   this   script   to   accommodate   the   specific
+                        requirements of your data sets.  Section 2.7 describes the
+                        Load script in detail.
+
+            Go          Script that runs the various  steps  associated  with  the
+                        update process.  This script should not need modification.
+
+            data/       Directory used to  store  raw  data  and  temporary  files
+                        created  during  the  "Go"  process.   Raw  data files are
+                        stored using the naming convention  data/prefix.dat  where
+                        prefix refers to the code assigned to a data set.
+
+            helpers/    Directory containing the scripts used to  incorporate  new
+                        data.   The  file "reconcile.style" will also be placed in
+                        this directory.  This file will indicate if the  reconcile
+                        style is "Custom" or "LocalEntity".
+
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            New Database Setup                                      2-4
+
+
+
+            layouts/    Directory containing the layout files that  correspond  to
+                        the data sets provided by this data source.  A layout file
+                        describes the layout of the data fields within records  in
+                        the  raw  data  files.   Layout  files are named using the
+                        convention layouts/prefix.lay where prefix refers  to  the
+                        code assigned to the data set.
+
+            logs/       This directory is used to store log files associated  with
+                        the update process.
+
+            reports/     This  directory  is  used  to  store  exception   reports
+                        associated with the update process.
+
+            scripts/    This directory is used to store the  Vision  scripts  that
+                        define  classes  and  messages  associated  with this data
+                        source.
+
+            tokens/     This directory is  used  to  chart  the  progress  of  the
+                        database update.
+
+            wkspace/    This directory is used as a temporary work area during the
+                        "Go" process.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            New Database Setup                                      2-5
+
+
+
+            2.4  Layout Files
+
+            For each data set, you will need to define a layout file, a text  file
+            that  identifies  the total record size and the position of each field
+            (data item) within a record.  Each data set is assigned a prefix.  The
+            layout  file  for  a  specific data set should be saved in the layouts
+            directory with the name "prefix.lay".
+
+
+            For example, assume that you have a data set named "demo" containing 2
+            pieces of information for 1000 companies, a comprehensive score and an
+            estimate of future earnings.  This data set is updated once  a  month.
+            You have the following record layout information about the data set:
+
+
+                           Starting   Number   Data
+                 Field     Position  of Chars  Type      Description
+                 -----------------------------------------------------------------
+                   1           1        10     alpha     Company Identifier
+                   2          11         4     integer   Score
+                   3          15         8     decimal   Estimated Earnings
+                   4          23         5               Filler (including carriage return)
+
+                 Total Record Size: 27 bytes
+
+
+            To update this data set, you will need to create a layout  file  named
+            "demo.lay" and place it in the "layouts" directory.
+
+
+            A layout file contains three sections:
+
+                 - header section
+                 - key section
+                 - items
+
+            The Header Section is the first line in the layout file.  It  contains
+            the following pieces of information, separated by one or more spaces:
+
+            Prefix         The prefix for this data set.  This is the same  prefix
+                           used  to  name  the  layout file and raw data file.  By
+                           default, this prefix will also be used to identify  the
+                           particular  Vision  class  associated  with  this  data
+                           source.
+
+            Record Size    The fixed length size of each record in the  data  set.
+                           Note  that, if present, you should include the carriage
+                           return and/or line  feed  characters  as  part  of  the
+                           record size.
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            New Database Setup                                      2-6
+
+
+
+            Block Size     The block size is usually the same as the record size.
+
+            Ebcdic Flag    This flag is set to 1 if data  needs  to  be  converted
+                           from ebcdic to ascii, 0 otherwise.
+
+            Headers        Number of header records to skip.
+
+            Tables         Number of distinct tables of data to be generated  from
+                           this data set.  Note that for all new database drivers,
+                           this value should be 1.
+
+            Reserved       The final two fields should contain the value 0.
+
+
+            The header line of the file "demo.lay" would contain:
+
+                 demo  27  27  0  0  1  0  0
+
+
+            The Key Section of the layout file contains  one  line  with  6  or  7
+            fields.  The first field should correspond to the starting position of
+            the "key" field in the record (0 relative) and the second field should
+            correspond to the length of the "key" field.  The next four fields are
+            no longer used and should all be 0.  A final seventh field is used  by
+            the  process that generates the "BLD" file and is described in Section
+            2.5.
+
+
+            For example, in the sample database the company identifier  starts  at
+            position  0  for  10  characters.   The key section of the layout file
+            would therefore contain the entry:
+
+
+                 0  10  0  0  0  0
+
+            Note that the information supplied by this section is used  for  cross
+            referencing  purposes  only and is no longer used in the actual update
+            process.
+
+
+            The Item Section of the layout file should  have  one  line  for  each
+            field  in  the  database record that you want updated in Vision.  Each
+            line in this section should contain 8 fields, separated by one or more
+            spaces or tabs as described below:
+
+            Item Code      The item name (maximum of  20  characters).   The  item
+                           code  corresponds  to  the  name of the Vision property
+                           that will be used to access this data item.
+
+            Table          This field should always contain the value 0.
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            New Database Setup                                      2-7
+
+
+
+            Start          The starting position for the item  in  the  record  (1
+                           relative).
+
+            Length         The number of characters in this item.
+
+            Decimals       The number of decimal places for  non-integer  numbers.
+                           If  the  decimal  point  is  explicitly included in the
+                           number, then this value should be 0.
+
+            Type           The data type:
+
+                                a     alpha
+                                i     integer
+                                d     decimal (floating point)
+                                D     decimal (double precision)
+
+
+            Reserved       This field should always be 0.
+
+            Description    Item description (not used by update).
+
+
+            The complete layout file for the demo data set is shown below:
+
+
+                 demo  27 27  0  0  1  0  0
+                 0  10  0  0  0  0
+                 companyID   0   1  10  0  a  0  Company Identifier
+                 score       0  11   4  0  i  0  Composite Score
+                 estimate    0  15   8  0  D  0  Earnings Estimate
+
+
+            This file should be saved  as  layouts/demo.lay  in  the  Demo  update
+            directory.      This    sample    file    is    available    in    the
+            /localvision/update/Templates/layouts directory.
+
+
+            Note that to use the "bulk" database loader your  data  sets  must  be
+            supplied  as fixed record, fixed field files.  If your data set is not
+            in a fixed format, you will need to create a filter that  can  convert
+            the  raw  data into a fixed format file.  Unix utilities such as "awk"
+            can be used to create  this  filter.   This  conversion  step  can  be
+            performed as part of the "Load" script described in Section 2.7.
+
+
+
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            New Database Setup                                      2-8
+
+
+
+            2.5  Defining the "Build" Script
+
+            All structures and fields defined in the layout files must  correspond
+            to  classes and properties defined in Vision.  A separate object space
+            is created to store the classes and any methods needed to  incorporate
+            the  external  data  sets  into your Vision database.  A file (usually
+            referred to as the "build" script) containing the  appropriate  Vision
+            code  to  define  the  object  space, classes, properties, and methods
+            needed to incorporate this data is created  and  installed  into  your
+            Vision  database.   By  convention, this file is usually stored in the
+            scripts directory using the file name  scripts/BLDprefix.   This  file
+            must be installed prior to the first update for the data source.
+
+
+            The "build" script performs the following functions:
+
+
+               - New object space creation.
+
+               - String management class creation.
+
+               - Class and property creation and initialization for each data set.
+
+               - Definition of "dumpTables" method.
+
+               - Definition of other standard messages.
+
+
+            The Unix script /localvision/tools/createBLD can be  used  to  convert
+            your  layout  files  into a Vision "build" script.  This script can be
+            supplied with 3 optional parameters.
+
+
+                Option  Description             Default
+                --------------------------------------------------
+                -l      layout directory        ./layouts
+                -n      new ospace name         base name of current directory
+                -s      reconcile style         helpers/reconcile.style value if
+                                                available ; valid options are
+                                                Custom or LocalEntity
+
+            To create a "build" script, do the following (in Unix):
+
+
+                 cd /localvision/update/Demo
+                 /localvision/tools/createBLD -s Custom >& scripts/BLDDemo
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            New Database Setup                                      2-9
+
+
+
+            The resultant file "BLDDemo" will contain the Vision code to create  a
+            new  object  space,  define the classes and properties associated with
+            your  data  sets,  and  define  some  supporting  methods  needed   to
+            incorporate  external data into Vision.  Inconsistencies and errors in
+            your layouts are noted in this file as well.  After  you  create  this
+            script  you  should  review  it for errors in your layout and make any
+            corrections.  Then re-generate the script.
+
+
+            For example, if the "demo.lay" file is the only  layout  file  in  the
+            Demo/layouts directory, the BLDDemo file will be created as follows:
+
+
+
+            ##########################################################################
+
+                 #--->  Running CreateBLD Mon May 30 14:20:55 EDT 1994
+                 #      layouts:  /localvision/update/Demo/layouts
+                 #      name:     Demo
+                 #      style:    Custom
+
+                 ##################################################
+                 #  Build Script: Demo
+                 #
+                 #  Run in new ospace (no -U option)
+                 ##################################################
+
+                 newLine print ;
+                 "--> Begin Loading Build Script" print ;
+                 newLine print ;
+
+                 ####################
+                 #  Create New Space
+                 ####################
+                 Environment MaintenanceTools
+                   setupSpaceFor: "Demo"
+                              as: "DB"
+                     description: "Demo";
+
+                 ####################
+                 #  Incorporator Tools
+                 ####################
+
+                 #--------------------
+                 #  String Store
+                 #--------------------
+                 ^current define: 'stringStore' toBe: "" fixed ;
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            New Database Setup                                     2-10
+
+
+
+
+                 #--------------------
+                 #  demo
+                 #--------------------
+                 IncorporatorPrototype createIncorporatorClass: "demo" ;
+                 demo
+                   defineFixedProperty: 'companyID' withDefault: stringStore .
+                   defineFixedProperty: 'score' withDefault: 0 asInteger .
+                   defineFixedProperty: 'estimate' withDefault: 0 asDouble .
+                 ;
+
+                 #---  Reassign to NA (optional)
+                 demo instanceList at: 1 .
+                 do: [
+                     :companyID <- NA ;
+                     :score <- NA ;
+                     :estimate <- NA ;
+                     ] ;
+
+                 #--------------------
+                 #  Define a method to Dump the tables
+                 #--------------------
+
+                 ^current
+                 defineMethod:
+                 [| dumpTables |
+                 #-- First Align stores if needed
+                    stringStore alignStore
+                    || demo alignStore
+                     ifTrue: [ Utility updateNetwork ] ;
+
+                 "demo.ss" additionUpdateDumpOf: stringStore ;
+                 "demo0.tab" additionUpdateDumpOf: demo ;
+                 ] ;
+
+
+                 #--------------------
+                 #  Create Other Standard Messages
+                 #--------------------
+
+                 ^current define: 'dataSetList' toBe: (
+                    demo ) ;
+
+                 demo define: 'updateMode' toBe: "Append";
+
+                 ####################
+                 #  Create DataSource
+                 ####################
+
+                 DataSource createInstance: "Demo";
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            New Database Setup                                     2-11
+
+
+
+            The first part of the "build" script defines a new  object  space  for
+            this  data  source.   You  can  modify the description for this object
+            space, if desired.
+
+
+            The next section  of  the  script  defines  the  "stringStore".   This
+            structure  is  used  to  manage strings efficiently within this object
+            space and should not be modified.
+
+
+            A separate class will be created for each layout  file  using  the  id
+            supplied  in  the  header record.  Each field identified in the layout
+            will be defined as a property and  initialized  to  its  correct  data
+            type.   By default the new class is defined as a subclass of the class
+            IncorporatorPrototype.  If this had been  a  "LocalEntity-style"  data
+            source,  the  new  class  would  be defined as a subclass of the class
+            DataSet.  You can change the parent class  from  IncorporatorPrototype
+            to  some  other  class if desired. Note that each of the properties is
+            reassigned to NA so that the default instance has NA values  for  each
+            of its properties.  This step is optional.
+
+
+            The next part of the "build" script defines the  method  "dumpTables".
+            The  first  step  of  this  method  aligns  any  of  the  classes that
+            correspond to data sets in case any  manual  insertions  or  deletions
+            have  been  performed  since the last "bulk" update.  The remainder of
+            this method is used to write out  descriptive  information  about  the
+            class  which  is  used  to  incorporate  the  new  data.   The message
+            "additionUpdateDumpOf:" indicates that records in each update will  be
+            added  (i.e.,  appended) to the instances in the existing class.  This
+            message can be changed to "replacementUpdateDumpOf:"  which  indicates
+            that  records in each update will replace the current instances in the
+            class.  You can instruct  the  "createBLD"  utility  to  automatically
+            assume that this is a "replacement" update if you store the value 0 as
+            the seventh field of the key line in  the  layout  (i.e.,  the  second
+            line).
+
+
+            The final part of the "build" script defines a  new  instance  of  the
+            DataSource  class.  This class is used to manage information about the
+            data sets and updates associated with this data source.
+
+
+            To test the "Build" script, start up a Vision session and read in  the
+            file  you  created.   You should see a message that a new object space
+            has been created.   You  should  not  see  any  "Selector  Not  Found"
+            messages or any other errors.
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            New Database Setup                                     2-12
+
+
+
+            2.6  Installing the "Build" Script
+
+            To install this script execute the following in Unix (as  the  dbadmin
+            user):
+
+
+                 cd /localvision/update/Demo
+                 /localvision/transactions/scripts/installSpace DB
+
+
+            You will be prompted for the name of a build  file.   Enter  the  file
+            name  (scripts/BLDDemo) followed by a carriage return.  The new object
+            space will be created and the new classes and methods will be saved in
+            it.   In  addition,  the  file  'OS'  will  be created in your current
+            directory.  This file will contain the object space number and will be
+            used by the update process.
+
+
+            Note that the installSpace script is designed to interlock with  other
+            potential updates that are running.  If you see the message:
+
+               >>> Space Install Already In Progress.  Try Later or Remove File
+                    --> /localvision/status/tokens/spaceInstall.inProgress
+
+            and you know that no one is  currently  creating  a  new  space,  just
+            remove  the  file  indicated and try again.  Note that if you exit the
+            "installSpace" script ungracefully, it will  not  cleanup  this  token
+            file correctly.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            New Database Setup                                     2-13
+
+
+
+            2.7  Defining the "Load" Script
+
+            The "Load" script is a Unix script that converts  the  raw  data  sets
+            supplied  by  the  external  data  source  into  a  form  that  can be
+            incorporated into Vision.  The script then sets some processing tokens
+            to  indicate  that  the data is ready to go. Depending on the style of
+            reconcile you indicated, the Load.Custom  or  Load.LocalEntity  script
+            was  copied  from  the  /localvision/update/Templates directory as the
+            initial Load script for this data source.  In many cases, this  script
+            is  sufficient  and  requires no further modification.  In some cases,
+            you will need to alter this script or create  a  completely  different
+            script, based on your data source's requirements.
+
+
+            The default Load script  is  invoked  with  the  name  of  the  source
+            directory  that  contains  the  raw  data  files.   If  no argument is
+            supplied, the value of the "sourceDir" environment variable  is  used.
+            The source directory should have two subdirectories - a Data directory
+            that contains the raw data files with  date  extensions  and  a  Token
+            directory  that  contains files that indicate that data is ready.  The
+            contents of a token file should be the date extension used  to  locate
+            the  appropriate  file  in  the  Data directory.  For example, if your
+            working directory is named /rawdata and the demo data file from  April
+            1994  is  available  for  processing,  then  the following files would
+            exist:
+
+
+                 /rawdata/Data/demo.9404               contains actual data
+                 /rawdata/Token/demo                   contains string 9404
+
+
+            If your driver is a "Custom-style" driver, the Load program by default
+            will  load  each file that corresponds to the data sets in the layouts
+            directory.  For example, assume the Demo data  source  includes  three
+            data sets, demoA, demoB, and demoC.  If you execute:
+
+                 cd /localvision/update/Demo
+                 Load /rawdata
+
+            then the following processing steps will be performed:
+
+
+               - Check for the file /rawdata/Token/demoA.
+
+               -   If   the   token    exists,    the    raw    data    file    is
+                 /rawdata/Data/demoA.ext,  where "ext" is the file extension found
+                 in the Token/demoA file.
+
+               - If the raw file exists, check to make sure that the total size of
+                 the   file   is   a   multiple   of  the  record  size  found  in
+                 layouts/demoA.lay.
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            New Database Setup                                     2-14
+
+
+
+               - If the file size is okay, link the  file  /rawdata/Data/demoA.ext
+                 to   the   file   data/demoA.dat.    Set  the  processing  tokens
+                 data/tokens/expected/demoA and  data/tokens/standardize/demoA  to
+                 indicate that the raw file is ready to go.
+
+               - Repeat for demoB and demoC.
+
+               - Create the file data/updateDate which contains the current  value
+                 of the processDate environment variable.
+
+            If your driver is a "LocalEntity-style" driver, the Load  program  has
+            slightly different behavior which is described in Section 5.
+
+
+            There are several reasons that you may need to modify the Load script.
+            You  may  need  to  preprocess  your raw data files to get them into a
+            format that can be directly incorporated into Vision.  To use Vision's
+            "bulk"  database  update  facility, your data sets must be supplied as
+            fixed record, fixed field files.  If your data set is not in  a  fixed
+            format, you will need to create a filter that can convert the raw data
+            into a fixed format file.  Unix utilities such as "awk" can be used to
+            create this filter.  This conversion step is usually performed as part
+            of the "Load".
+
+
+            The filter should generate files with the following characteristics:
+
+
+               - All records within a data set must be fixed length.   The  record
+                 length  need  not  be  the  same  for all data sets for a source.
+                 Fields within a record can contain alpha,  integer,  and  decimal
+                 data.   The  width  and  data  type  of  each  field is specified
+                 separately in the layout file and each field must occupy a  fixed
+                 position across records.
+
+               - Numeric data should be formatted using an appropriate field width
+                 and  should  be  0  or  blank-padded  on  the  left (i.e., right-
+                 justified in their field).  Negative numbers  should  have  their
+                 sign  within  the  field, to the left of the number.  The decimal
+                 point can be implied or  explicit,  as  long  as  the  convention
+                 chosen  is  used throughout.  Missing (not available) data should
+                 be specified by placing the string NA in the first two  positions
+                 within the field, with the remainder of the field blank-padded.
+
+               - Alpha data should be formatted using an appropriate field  width.
+                 Alpha  data  should  be left-justified and blank padded.  Missing
+                 (not available) information should  be  supplied  as  all  blanks
+                 within the field.
+
+
+            Another reason for modifying the Load script is that you want to  read
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            New Database Setup                                     2-15
+
+
+
+            the data sets directory from tape instead of preloading the files into
+            a raw data directory. Tapes can be  loaded  using  the  Unix  facility
+            'dd'.   Insyte  has  also provided a tape loading utility that is more
+            streamlined and that does not require as much  information  about  the
+            tape  structure.   The  "loadtape"  program is usually embedded in the
+            Load script for databases that are updated  from  tape.   The  general
+            form for invoking the loadtape program is:
+
+
+                 loadtape {-a} {-t tape drive} filename
+
+            where the filename parameter is the name of the file in which to store
+            the  data.   By default, the "loadtape" program assumes that an ebcdic
+            format is read from the magnetic tape drive (/dev/rmt).  The -a option
+            can  be  used  to  specify  that  the data is in ascii format.  The -t
+            option can be used to specify an alternative tape device.
+
+
+            Other modifications may be made to the Load script to  strip  specific
+            records   (e.g.,   headers  or  trailers)  or  to  perform  additional
+            validation checks on the raw data file.
+
+
+            In summary, the purpose of the Load script is to  invoke  the  scripts
+            and  filters  necessary  to  actually transfer raw data to the correct
+            data directory and to set the flags indicating that the data is  ready
+            to  be processed.  If you do need to modify the Load script, it should
+            minimally provide the following:
+
+
+               - For each data set  to  be  processed,  the  file  data/prefix.dat
+                 should  be  created.   This  file  can  be a symbolic link to the
+                 actual raw data file.
+
+               -   For   each   data   set   to   be   processed,    the    tokens
+                 tokens/expected/prefix  and  tokens/standardize/prefix  should be
+                 created.  These are empty files that are just used to  chart  the
+                 progress of the actual update.
+
+               - Create the file data/updateDate which contains the "as  of"  date
+                 for  the update in YYMMDD or YYMM format. If this file exists, it
+                 is used as the evaluation date for the Reconcile.
+
+
+
+
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+

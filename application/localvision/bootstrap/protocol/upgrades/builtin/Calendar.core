@@ -1,0 +1,66 @@
+####################
+#  Calendar and Related Protocol
+####################
+
+# $File: //depot/vision/applications/core/builtin/mainline/Calendar.core $
+# $DateTime: 2006/05/01 10:30:50 $
+# $Revision: #4 $
+# $Author: dohara $
+
+####################
+#  Create the Calendar Class
+####################
+
+CoreWorkspace respondsTo: "Calendar" .
+ifFalse:
+[
+
+Interface BatchFeedManager createEntityClass: "Calendar" from: "Support" ;
+
+PropertySetup updateFromString:
+"classId | property | dataType | tsFlag | description
+Calendar | dates | Date | Y | stores a t/s of dates
+" ;
+
+EntityExtenderFeedSetup updateFromString: "feedId | baseClassId
+CalendarFeed | Calendar
+" ;
+
+] ;
+
+CalendarFeed respondsTo: "disableOptimization" .
+ifTrue: [ CalendarFeed disableOptimization ; ] ;
+
+####################
+#  Basic Calendar Operations
+####################
+
+#--  return a time series of values by running supplied block 
+#--  for supplied object for each date in the calendar
+
+Calendar defineMethod: [ | displayDates |
+  :dates do: [ ^date printNL ] ;
+] ;
+  
+Calendar defineMethod: [ | extract: block for: object |
+  !ts <- CoreWorkspace TimeSeries new ;
+  :dates
+  do: [ ^self evaluate: [ ^my ts put: (^my object send: ^my block) ]
+      ] ;
+  ts
+] ;
+
+Calendar defineMethod: [ | evaluate: block |
+  :dates
+  do: [ ^self evaluate: [ ^global basicSend: ^my block ] ] ;
+  ^self
+] ;
+
+Calendar defineMethod: [ | nonHolidayDate: aDate |
+  !hDate <- aDate + 0 businessDays ;
+  :dates on: hDate . isDate
+  ifTrue: [ :hDate <- hDate - 1 businessDays ;
+            :dates on: hDate . isDate
+            ifTrue: [ ^self nonHolidayDate: hDate ] ] .
+  else: [ hDate ]
+] ;

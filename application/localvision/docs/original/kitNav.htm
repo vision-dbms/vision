@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>The Vision Database Navigator Kit</title>
+</head>
+<body bgcolor=white>
+<h2>The Vision Database Navigator Kit</h2>
+
+<p>
+     | <a href="FHome.htm">Home</a> 
+     | <a href="tkSchema.htm">Schema Tools </a>
+     | <a href="tkInterface.htm">Interface Tools</a>
+     | <a href="ifHtml.htm">Html Access </a>
+     |
+<hr>
+<h3>Topics Covered:</h3>
+<ul type=square>
+<li><a href="#overview">Overview</a>
+<li><a href="#programmer">Programmer Tools</a>
+<li><a href="#dataModel">Data Model Tools</a>
+<li><a href="#inspect">Data Inspection Tools</a>
+<li><a href="#structure">Structure Analysis Tools</a>
+<li><a href="#operation">Operation</a>
+</ul>
+<p>
+<hr>
+<p>
+<h3><a name="overview">Overview</a></h3>
+<p>
+Vision offers a general purpose information 
+management engine that allows you to manage data relationships and programs in
+addition to raw data.  The database is fully integrated with a complete
+programming environment.  
+<p>
+The Vision Database Navigator provides a framework for presenting information
+about your Vision environment.  This kit includes a number of Vision methods
+that are designed to help you explore your Vision environment from a 
+programming, database, end user, and architectural perspective.
+These methods are defined to interact with the 
+<a href="tkSchema.htm"><i>Schema</i></a> and
+<a href="tkInterface.htm"><i>Interface</i></a> ToolKits
+and produce reports containing Html tags, designed to be used with
+standard browsers.
+These reports can be executed as part of a "live" Vision environment
+or can be pre-generated and stored on a server for static access.
+<p>
+There are a number of different perspectives from which a Vision database
+can be viewed including:
+<p>
+<center>
+<table border=1 width=85% cellspacing=2 cellpadding=4>
+<tr><th colspan=2 rowspan= 1 align=center valign=top>
+<font face=Arial color=black size=3 >---  Navigation Views  ---</font>
+
+<tr><td align=center valign=center> <font face=Arial color=black> 
+<b><A HREF="#programmer">Programmer Tools</A></b></font></td>
+<td align=left valign=bottom> 
+<font face=Arial color=black >
+<i>What classes and messages are available, how do they work, and where are 
+they used?</i></font></td></tr>
+
+<tr><td align=center valign=center> <font face=Arial color=black > 
+<b><A HREF="#dataModel">Data Model Tools</A></b></font></td>
+<td align=left valign=bottom> <font face=Arial color=black > 
+<i>What data is available, how is it accessed, and what 
+inter-relationships exist? (i.e., what is the data model?)</i></font></td></tr>
+
+<tr><td align=center valign=center> <font face=Arial color=black > 
+<b><A HREF="#inspect">Data Inspection Tools</A></b></font></td>
+<td align=left valign=bottom> <font face=Arial color=black > 
+<i>What are the values for a specific entity as of a
+specific point in time?</i></font></td></tr>
+
+<tr><td align=center valign=center> <font face=Arial color=black > 
+<b><A HREF="#structure">Structure Analysis Tools</A></b></font></td>
+<td align=left valign=bottom> <font face=Arial color=black > 
+<i>What physical structures are defined in the database and what potential 
+performance tuning opportunities are implied?</i></font></td></tr>
+</table></center>
+
+<p>
+Although these reports can be viewed interactively using any of the
+Vision Editors, they are designed to be viewed via a standard browser
+capable of interpretting Html tags.
+The reports can be accessed as part of a "live" Vision environment
+or can be pre-generated and stored on a server for static access.
+
+<p>
+<hr>
+<h3><a name="programmer">Programmer Tools</a></h3>
+<p>
+The Programmer Tools provide information about all the Classes and
+Messages in your Vision database.  The following reports are available:
+<p>
+<ul type="disc">
+<li><b><A HREF="#ShowClassXRefSummary">Summary Class Cross Reference</A></b>
+<blockquote><font size=-1>
+Shows available classes, by type.  For each type, top level classes
+defined for that type are displayed.  Click on a type to see
+hierarchy of all classes defined for that type.  Click on a class to
+see a summary for the class.</font></blockquote>
+
+<li><b><A HREF="#ShowFullHierarchy">Full Class Hierarchy</A></b>
+<blockquote><font size=-1>
+Shows all available classes as a hierarchy.  Classes at the same
+level in the hierarchy are sorted alphabetically.  Click on a class
+to see a class summary.</font></blockquote>
+
+<li><b><A HREF="#ClassXRefFor">Class Cross Reference <i>{for type}</i></A></b>
+<blockquote><font size=-1>
+Shows class hierarchy for a class type such as BuiltIns or
+Application.  Click on a class to see a summary for the
+class.</font></blockquote>
+
+<li><b><A HREF="#ClassSummaryFor">Class Summary <i>{for class}</i></A></b>
+<blockquote><font size=-1>
+Shows class summary for a specific class such as Number or Entity.
+Summary includes description, sample usage, class hierarchy, and
+class characteristics.  Links to class' messages and other classes in
+hierarchy provided.</font></blockquote>
+
+<li><b><A HREF="#MessageDetailsFor">Message Details <i>{for class}</i></A></b>
+<blockquote><font size=-1>
+Shows index of all messages directly defined for a specific class
+followed by a detailed description of each message.  Links to the
+actual message definition if run as a dynamic 
+application.</font></blockquote>
+
+<li><b><A HREF="#MessageXRefFor">Message Cross Reference <i>{for class}</i></A></b>
+<blockquote><font size=-1>
+Shows an index of all messages defined for all classes,
+alphabetically.  Displayed messages can be limited using user-defined
+restrictions.
+</font></blockquote>
+
+</ul>
+<p>
+
+<p>
+<hr size=1 width=50%><p>
+<h4><a name="ShowClassXRefSummary">Summary Class Cross Reference Report</A>
+</h4>
+<p>
+The <b>Summary Class Cross Reference Report</b> is one of the report views
+that allows you to navigate to an initial class.  This
+report organizes the available classes by 
+<a href="tkSchema.htm#classType">ClassType</a> - 
+<i>BuiltIn, Application, DataFeed, ToolKit, Dictionary, ObjectSpace,</i>
+and <i>Other.</i>  For each type, the top level classes defined for
+that type are displayed.  If the class you want is visible, you 
+can click on it to display a summary report for the
+class (i.e., the <a href="#ClassSummaryFor"><i>Class Summary</i></a>
+report).  Alternatively, you can click on a type to see the
+hierarchy of all classes defined for that type (i.e., 
+the <a href="#ClassXRefFor"><i>Class Cross Reference for type</i></a>
+report).  
+<p>
+For example:
+<p>
+
+<Center><table width="85%" border="1" cellspacing=5 cellpadding=5>
+<caption><b>--- Sample Summary Class Cross Reference Report ---</b></caption>
+<tr><td>
+
+<center><font face="Arial" color="darkblue" size=2 >
+<h4>Summary Class Hierarchy: Vision Demonstration Database</h4>
+</center></font><p><blockquote><hr width=70%></blockquote><p>
+
+<center><table border=0 width=90% cellspacing=5 cellpadding=9>
+<tr><td  align=right valign=top> <font  face=Arial size=-1>
+
+<center><table border=1 width=65% cellspacing=3 cellpadding=3>
+<tr><th  colspan= 1 rowspan= 1   align= center  valign= top >
+<font face=Arial size =2 > BuiltIn </font></th></tr>
+<tr><td  align=left valign=bottom> 
+<font  face=Arial size=-1>Boolean</font></td></tr>
+<tr><td  align=left valign=bottom>
+<font  face=Arial size=-1>DateRange</font></td></tr>
+<tr><td  align=left valign=bottom>
+<font  face=Arial size=-1> . . . </font></td></tr>
+</table></center></font></td>
+
+<td  align=right valign=top> <font face=Arial size=-1>
+<center><table border=1 width=65% cellspacing=3 cellpadding=3>
+<tr><th  colspan= 1 rowspan= 1   align= center  valign= top >
+<font face=Arial size =2> Application </font></th></tr>
+<tr><td  align=left valign=bottom>
+<font face=Arial size=-1>Bridge</font></td></tr>
+<tr><td  align=left valign=bottom>
+<font face=Arial size=-1>Entity</font></td></tr>
+<tr><td  align=left valign=bottom>
+<font face=Arial size=-1> . . . </font></td></tr>
+</table></center></font></td>
+<td  align=right valign=top> <font face=Arial size=-1>
+<center><table border=1 width=65% cellspacing=3 cellpadding=3>
+<tr><th colspan= 1 rowspan= 1   align= center  valign= top >
+<font face=Arial size=2> DataFeed </font></th></tr>
+<tr><td  align=left valign=bottom>
+<font face=Arial size=-1> Incorporator </font></td></tr>
+</table></center></font></td></tr>
+</table></center>
+
+</table></center>
+</tr></table></Center>
+<p>
+In this report, you can click on <i>BuiltIn, Application,</i> or
+<i>DataFeed</i>, to display a list of classes available for that
+class type.  You can click on <i>Boolean, DateRange, Bridge, Entity,
+</i>or <i>Incorporator</i> to display a summary of that class.
+<p>
+<hr size=1 width=50%><p>
+<h4><A name="ShowFullHierarchy">Full Class Hierarchy Report</A></h4>
+<p>
+The <b>Full Class Hierarchy Report</b> is one of the report views
+that allows you to navigate to an initial class.  This
+report shows all the available classes in hierarchical form starting
+with <i>Object</i> as the top of the hierarchy.  Classes at the same
+level in the hierarchy are sorted alphabetically.  You can 
+can click on a class to display its summary report 
+(i.e., the <a href="#ClassSummaryFor"><i>Class Summary</i></a>
+report).  
+<p>
+For example:
+<Center><table width="85%" border="1" cellspacing=5 cellpadding=5>
+<caption><b>--- Sample Full Class Hierarchy Report ---</b></caption>
+<tr><td>
+
+<center><font face="Arial" color="darkblue" size=2 >
+<p><h4>Full Class Hierarchy for: Vision Demonstration Database</h4>
+</center></font><font size=-1><pre>
+
+     Object
+       |
+       +--- Boolean
+       |      |
+       |      +--- FALSE
+       |      |
+       |      +--- TRUE
+       |
+       +--- Bridge
+       |
+       +--- BuiltInWorkspace
+       |      |
+       |      +--- CoreWorkspace
+       |
+       +--- DataRecord
+       |
+       +--- DateRange
+       |
+       +--- Dictionary
+     
+       . . .
+</pre></font>
+
+</tr></table></Center></font><p>
+In this report, you can click on any of the classes, 
+to display a summary of that class.
+
+<p>
+<hr size=1 width=50%><p>
+<h4>
+<A name="ClassXRefFor">Class Cross Reference <i>{for type}</i> Report</A></h4>
+<p>
+The <b>Class Cross Reference {for type} Report</b> is one of the report views
+that allows you to navigate to an initial class.  This report shows
+a class hierarchy for a specific type such as <i>BuiltIn</i> or
+<i>Application</i>.  All the classes defined for the selected type
+are displayed as a hierarchy.  Classes at the same
+level in the hierarchy are sorted alphabetically.  You can 
+can click on a class to display its summary report 
+(i.e., the <a href="#ClassSummaryFor"><i>Class Summary</i></a>
+report).  
+<p>
+For example, a sample report for the <i>BuiltIn</i> type is
+illustrated below:<p>
+<Center><table width="85%" border="1" cellspacing=5 cellpadding=5>
+<caption>
+<b>--- Sample Class Cross Reference {for type} Report ---</b></caption>
+<tr><td>
+
+<center><font face="Arial" color="darkblue" size=2 >
+<h4>Class Hierarchy for Category: BuiltIn</h4></center></font>
+<font size=-1><p><blockquote><center><hr width=70%><p>
+The BuiltIn Classes are defined as part of all Vision databases.
+Although most of these classes are defined as part of the database
+bootstrap process, you can modify most of the supplied messages and
+define new messages for any of these classes.
+<p><hr width=70%></center></blockquote><p>
+<pre>
+     Object
+       |  
+       +--- Boolean
+       |      |
+       |      +--- FALSE
+       |      |
+       |      +--- TRUE
+       |  
+       +--- DateRange
+       |  
+       +--- FixedProperty
+       |      |
+       |      +--- TimeSeriesProperty
+       . . . 
+</pre></font>
+
+</tr></table></Center><p>
+This report displays a description of the class type, followed by a
+hierarchical display of the classes for this type.
+You can click on any of the classes to display a summary of that class.
+
+<p>
+<hr size=1 width=50%><p>
+<h4><A name="ClassSummaryFor">Class Summary <i>{for class}</i> Report</A></h4>
+<p>
+The <b>Class Summary {for class} Report</b> summarizes a specific
+class such as <i>Number</i> or <i>Entity</i>.  This summary includes
+the class description, sample usage, class hierarchy, and class
+characteristics.  This report provides links to reports that display
+messages defined for this class.  In addition, links to other
+classes in this class' hierarchy are defined from this report.
+<p>
+For example, the following report is a class summary for the
+<i>Entity</i> class: <p>
+<Center><table width="85%" border="1" cellspacing=5 cellpadding=5>
+<caption>
+<b>--- Sample Class Summary {for class} Report ---</b></caption>
+<tr><td>
+
+
+<center><font size=-1>
+| Message Details | Message XRef |
+<hr>
+<font face="Arial" color="darkblue">
+<h4>Profile of Class <i>Entity</i></h4></font><p>
+<blockquote><hr width=70%><p>
+This abstract class is a superclass of the classes whose instances represent
+real-world entities.
+<p><hr width=70%></blockquote>
+</center><p>
+<pre>
+
+     Object
+       | 
+       +--- <b>Entity</b>
+            +--- Classification  -> 
+            +--- Currency
+            +--- DataSource
+            +--- Support
+            +--- SystemTable  -> 
+            +--- Table
+            +--- Universe
+
+</pre></font>
+<p><hr align=left width=70% ><p>
+
+<center><table border=1 width=65% cellspacing=2 cellpadding=1>
+<tr><th  colspan= 2 rowspan= 1   align= center  valign= top ><font face=Arial  size =2 >---  Class Characteristics  ---</font></th></tr>
+<tr><td  align=left valign=top> <font  face=Arial size=-1> <strong>Instances:     </strong></font></td><td  align=right valign=bottom> <font  face=Arial size=-1>      1326</font></td></tr>
+<tr><td  align=left valign=top> <font  face=Arial size=-1> <strong>Messages:      </strong></font></td><td  align=right valign=bottom> <font  face=Arial size=-1>        54</font></td></tr>
+<tr><td  align=left valign=top> <font  face=Arial size=-1> <strong>   Constant</strong></font></td><td  align=right valign=bottom> <font  face=Arial size=-1>         7</font></td></tr>
+<tr><td  align=left valign=top> <font  face=Arial size=-1> <strong>   FixedProperty</strong></font></td><td  align=right valign=bottom> <font  face=Arial size=-1>         5</font></td></tr>
+<tr><td  align=left valign=top> <font  face=Arial size=-1> <strong>   Method</strong></font></td><td  align=right valign=bottom> <font  face=Arial size=-1>        41</font></td></tr>
+<tr><td  align=left valign=top> <font  face=Arial size=-1> <strong>   Primitive</strong></font></td><td  align=right valign=bottom> <font  face=Arial size=-1>         1</font></td></tr>
+<tr><td  align=left valign=top> <font  face=Arial size=-1> <strong>Web Document:  </strong></font></td><td  align=right valign=bottom> <font  face=Arial size=-1> clEntity.htm</font></td></tr>
+</table>
+</center>
+
+</tr></table></Center><p>
+The top of this report displays an options bar that allows you to
+navigate to documents supplying information about the messages in
+this class.  You can transfer to
+the <a href="#MessageDetailsFor"><i>Message Details</i></a> or 
+the <a href="#MessageXRefFor"><i>Message Cross Reference</i></a> report
+for the class by clicking the appropriate link at the top of the report.
+<p>
+Following a description of the class, an abbreviated class hierarchy
+for this class is displayed.  The full super class hierarchy is shown,
+followed by the classes that are immediate subclasses of this one.
+You can click on any of the classes in the hierarchy
+to display a summary of that class.  Class names followed by the
+right arrow indicate that there are additional subclasses defined
+under the indicated class. 
+<p>
+The final section in this report displays some summary
+characteristics of the class, including the number of instances,
+the number of messages, a breakdown of message by message type, and
+a link to the web-site documentation for this class, if appropriate.
+<p>
+<hr size=1 width=50%><p>
+<h4>
+<A name="MessageDetailsFor">Message Details <i>{for class}</i> Report</A></h4>
+<p>
+The <b>Message Details {for class} Report</b> shows an index of all
+messages directly defined for a class, followed by a detailed
+description of each message.  Links to the actual message definition
+are also defined if this is run as a <a href="#dynamic">dynamic</a>
+application.  Note that this report does not include messages defined
+at super classes of this class.  The <a href="#MessageXRefFor"><i>Message
+Cross Reference</i></a> report includes these messages as well.
+<p>
+For example, the following report show the message details for the
+<i>Entity</i> class: <p>
+<Center><table width="85%" border="1" cellspacing=5 cellpadding=5>
+<caption>
+<b>--- Sample Message Details {for class} Report ---</b></caption>
+<tr><td>
+
+<center> | Class Summary | Message XRef |</center><hr>
+
+<center><font face="Arial" color="darkblue" size=2 >
+<h4>Messages for Class <i>Entity</i></h4></center></font><p>
+<p><hr align=left width=70% ><p>
+<font size=+0 face="Arial" color="darkred">Message Index</font><p>
+<font size=-1>
+<img src="instdot.gif" align="middle" border=0 alt="o "><b>XRef</b><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><b>accessExpression</b><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><b>addAlias: string</b><br>
+<p> . . . 
+<p><hr align=left width=70% ><p></font>
+<font size=+0 face="Arial" color="darkred">Messages</font>
+<p><font size=-1>
+<img src="instdot.gif" align="middle" border=0 alt="o "><b>XRef</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity XRef</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+General cross reference naming dictionaries.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>XRef
+<p><b>Also Defined At: </b><br>
+ | CoreWorkspace | Currency | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><b>accessExpression</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity accessExpression</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a string that could be used to request recipient</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>String
+<p><b>Also Defined At: </b><br>
+ | Object | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><b>addAlias:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity addAlias: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Adds supplied string as alternate name in recipient's naming dictionary.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Entity
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote></font>
+
+</tr></table></Center><p>
+The top of this report displays an options bar that allows you to
+navigate to the class summary report and the message cross reference
+report.  This is followed by an index of all messages defined
+directly for this class.  Each message links to a more detailed
+description further down in the report.  Note that this report does
+not include messages defined at super classes of this class.  Link
+to the <a href="#MessageXRefFor"><i>Message Cross Reference</i></a> report
+to see these messages.
+<p>
+Following the message index is a detailed description of each
+message.  The description includes a synopsis which displays the
+message syntax in red.  This is followed by a description of the
+message, its type, the type of object it returns, any parameters,
+and a list of other classes defining this message.  This information
+is drawn from 
+the <a href="tkSchema.htm#mid"><i>MessageImplementationDescriptor</i></a>
+for the message.  If you click on one of these
+other classes, you will transfer to a document that displays the
+definition for the message for the selected class.
+If you are running the <a href="#dynamic">dynamic version</a>
+of the Navigator, you can click on the message name to see the
+actual message implementation.
+<p>
+<hr size=1 width=50%><p>
+<h4>
+<A name="MessageXRefFor">Message Cross Reference <i>{for class}</i> Report</A>
+</h4>
+<p>
+
+The <b>Message Cross Reference {for class} Report</b> shows an index of all
+messages defined in the hierarchy of a specific class.  This
+includes all messages defined directly for the class and any of its
+sub and super classes including <i>Object</i>.  The messages are
+displayed alphabetically.  If the same message is defined for more
+than one class in the hierarchy, each one is displayed as a separate
+entry.  Each of these messages is linked to the appropriate spot in
+the corresponding <a href="#MessageDetailsFor"><i>Message
+Detail</i></a> report.
+<p>
+For example, the following report shows the message cross reference for the
+<i>Entity</i> class which includes messages defined for 
+<i>Object</i>, <i>Currency</i>, and <i>Classification</i> 
+since these classes are all in <i>Entity's</i> hierarchy: <p>
+<Center><table width="85%" border="1" cellspacing=5 cellpadding=5>
+<caption>
+<b>--- Sample Message Cross Reference {for class} Report ---</b></caption>
+<tr><td>
+
+<center> | Class Summary | </center><hr>
+
+<center>
+<font face="Arial" color="darkblue" size=2 >
+<h4>Index of all Messages</h4>
+<h5>In Hierarchy of the Class <i>Entity</i></h5></center></font><p>
+<font size=-1>
+<center><A href="#A"><b>A</b></A> <A href="#B"><b>B</b></A>
+</center><hr></font>
+
+<p><hr align=left width=70% ><p><font size=-1>
+<A name="A"><font size=+0 face="Arial"><b>-- A --</b></font></A><p>
+<b>accessBlock</b> -- FixedProperty in class DataSource<br>
+<b>accessExpression</b> -- Method in class Object<br>
+<b>accessExpression</b> -- Method in class Entity<br>
+<b>activeList</b> -- Method in class Object<br>
+<b>addAlias: string</b> -- Method in class Entity<br>
+<b>asCurrency</b> -- Method in class Currency<br>
+<b>asSelf</b> -- Primitive in class Object<br>
+<b>asSelf</b> -- Primitive in class Entity<br>
+<b>asSelf</b> -- Primitive in class Currency<br>
+<b>asSelf</b> -- Primitive in class Classification<br>
+   . . . <p>
+<p><hr align=left width=70% ><p>
+<A name="B"><font size=+0 face="Arial"><b>-- B --</b></font></A><p>
+<b>baseCurrency</b> -- FixedProperty in class Object<br>
+<b>baseObject</b> -- FixedProperty in class Object<br>
+   . . . <p>
+
+</font>
+</tr></table></Center><p>
+The top of this report displays an options bar that allows you to
+navigate to the class summary report.  A message restriction form is
+presented at the bottom of this document which can be used to
+eliminate messages based on type, usage level, update date, and search strings.
+This form can only be used with the <a href="#dynamic">dynamic version</a>
+of the Navigator.
+<p>
+An index of all the initial letters for messages appears at the top
+of the report.  You can click on the first letter of the message to
+go directly to that section of the index.  Each message defined for
+any class in the hierarchy is displayed, with an indication of the
+message type and the class for which the message was actually defined.
+<p>
+The restriction form at the bottom of the document can be used to
+restrict the messages to a specific class, category, message type,
+or usage level.  You can explicitly
+exclude messages defined at the class <i>Object</i>.  
+You can supply a cutoff date to indicate you
+only want to see messages that have been redefined since this date.  You
+can also restrict messages using a search string which matches
+message name, description, or implementations.  
+When you submit these criteria, the subset of messages
+meeting these restrictions for the selected class or category
+will be displayed in the <a href="#MessageXRefFor"><i>Message Cross
+Reference</i></a> report format.
+<p>
+To generate a cross reference of all messages defined in the database,
+enter the class Object and check the <i>Include Object</i> choice in
+the <i>hierarchy</i> section of the form.
+
+<p>
+<hr>
+<h3><a name="dataModel">Data Model Tools</a></h3>
+<p>
+The Data Model Tools describe the subset of classes and messages in 
+your Vision database that organize the application components of your
+environment.  All classes with 
+<a href="tkSchema.htm#classType">class type</a> of <i>Application</i>
+are considered to be part of the data model.
+All messages with
+<a href="tkSchema.htm#schemaTables">function type</a> of <i>Data</i>
+are considered to be part of the data model.
+Application classes are described in more detail in
+<a href="appClasses.htm"><i>Vision Application Classes</i></a>.
+<p>
+The following reports are available:<p>
+<ul type="disc">
+
+<li><b><A HREF="#ShowDataModelClasses">Data Model Classes</A></b>
+<blockquote><font size=-1>
+Shows data model classes as a hierarchy with the Entity classes
+appearing first.  The remaining classes -- DataRecord, LinkRecord,
+Bridge, DBEntity, and DataSet -- are sorted based on the number of
+subclasses present.  Click on a class to see a summary view for the
+class.</font></blockquote> 
+
+<li><b>
+<A HREF="#ShowModelSummaryFor">Data Model Summary <i>{for class}</i></A></b>
+<blockquote><font size=-1>
+Shows class summary for a specific class.  This view displays the
+class's description as well as its parent class, subclasses, and
+sample usage.</font></blockquote> 
+
+<li><b><A HREF="#ShowClassLinksFor">Class Links <i>{for class}</i></A></b>
+<blockquote><font size=-1>
+Summarizes all messages defined for any class that link to this class
+(i.e., return an instance of this class) and all messages defined for
+this class that return an instance of another application class.  The
+messages returning an instance of the selected class are displayed on
+the left; the messages in the selected class that link to another
+application class are displayed on the right.  Each link shows the
+class, the message name, and a symbol indicating if the returned
+object is a collection.</font></blockquote> 
+
+<li><b>
+<A HREF="#ShowModelDetailsFor">Data Model Details <i>{for class}</i></A></b>
+<blockquote><font size=-1>
+Shows detailed information about each message defined for this class
+that has been flagged for inclusion in the data model.  This view
+includes the message name, the return object's class, the form of the
+returned object (i.e., <i>Object, List, TimeSeries, IndexedList</i>),
+the type of message (i.e., <i>Fixed Property, TimeSeries Property, Method,
+TimeVarying Method, Constant</i>), any parameters (for IndexedLists and
+parameterized methods), and additional comments.  The default view
+includes all messages defined for this class or any of its
+superclasses.  The view can be restricted to eliminate messages
+defined for parent classes and to include only messages that link
+to other application classes.</font></blockquote> 
+</ul>
+<p>
+
+<p>
+<hr size=1 width=50%><p>
+<h4><a name="ShowDataModelClasses">Data Model Classes Report</A>
+</h4>
+<p>
+The <b>Data Model Classes Report</b> 
+shows all the data model classes as a hierarchy
+A class is included in the data model if its
+<a href="tkSchema.htm#classType"><i>classDescriptor type</i></a>
+is <i>Application</i>.  The Entity classes appear first.
+The remaining classes -- DataRecord, LinkRecord,
+Bridge, DBEntity, and DataSet -- are sorted based on the number of
+subclasses present.  
+<p>
+For example:<p>
+<Center><table width="85%" border="1" cellspacing=5 cellpadding=5>
+<caption><b>--- Sample Data Model Classes Report ---</b></caption>
+<tr><td>
+
+<center><font face="Arial" color="darkblue" size=2>
+<h4>Vision Data Model Classes For: <i>Vision Demonstration Database</i></h4>
+</center></font><p>
+<font size=-1><blockquote><center><hr width=70%><p>
+The Vision Demonstration Database features the Vision
+object-oriented analytic database and highlights dynamic data
+retrieval, data navigation, cross-sectional and time series
+analysis, and dynamic modifications to the database.
+<p><hr width=70%></center></blockquote><p>
+<pre>
+<blockquote>
+<blockquote>
+     Object
+       |  
+       +--- Entity
+       |      |
+       |      +--- Classification
+       |      |      |
+       |      |      +--- RangeClassification
+       |      |
+       |      +--- Currency
+       |  
+       +--- Bridge
+       |  
+       +--- DBEntity
+       |  
+       +--- DataRecord
+       |  
+       +--- LinkRecord
+
+</blockquote></blockquote></pre></font>
+
+</tr></table></Center>
+<p>
+In this report, you can click on any class to see its
+<a href="#ShowModelSummaryFor"><i>Data Model Summary</i></a> report.
+
+<p>
+<hr size=1 width=50%><p>
+<h4>
+<a name="ShowModelSummaryFor">Data Model Summary <i>{for class}</i> Report</A>
+</h4>
+<p>
+The <b>Data Model Summary {for class} Report</b> 
+shows a class summary for a specific class.  This view displays the
+class's description as well as its inheritance hierarchy, and
+displays sample access syntax if defined for the class.
+<p>
+For example, the following report shows a sample summary for the
+<i>Entity</i> class in an investment application:<p>
+<Center><table width="85%" border="1" cellspacing=5 cellpadding=5>
+<caption>
+<b>--- Sample Data Model Summary {for class} Report ---</b></caption>
+<tr><td>
+
+<center><font face="Arial" color="darkblue" size=2 >
+<h4>Data Model Summary: <i>Entity</i></h4>
+</center></font>
+<font size=-1><p><blockquote><center><hr width=70%><p>
+This abstract class is a superclass of the classes whose instances represent
+real-world entities.<p><hr width=70%></center></blockquote></font><p>
+<center><table border=0 width=80% cellspacing=2 cellpadding=2>
+<tr><th  colspan= 8 rowspan= 1   align= center  valign= top ><font face=Arial color=black size =3 >Object</font></th></tr>
+<tr><th  colspan= 8 rowspan= 1   align= center  valign= top ><font face=Arial color=black size =3 ><img src="arrow2.gif" align="middle" border=0 alt="|"></font></th></tr>
+<tr><th  colspan= 8 rowspan= 1   align= center  valign= top ><font face=Arial color=black size =3 >Entity</font></th></tr>
+<tr><th  colspan= 1 rowspan= 1   align= center  valign= top ><font face=Courier color=black size =2 ><img src="arrow2.gif" align="middle" border=0 alt="|"></font></th><th  colspan= 1 rowspan= 1   align= center  valign= top ><font face=Courier color=black size =2 ><img src="arrow2.gif" align="middle" border=0 alt="|"></font></th><th  colspan= 1 rowspan= 1   align= center  valign= top ><font face=Courier color=black size =2 ><img src="arrow2.gif" align="middle" border=0 alt="|"></font></th><th  colspan= 1 rowspan= 1   align= center  valign= top ><font face=Courier color=black size =2 ><img src="arrow2.gif" align="middle" border=0 alt="|"></font></th><th  colspan= 1 rowspan= 1   align= center  valign= top ><font face=Courier color=black size =2 ><img src="arrow2.gif" align="middle" border=0 alt="|"></font></th><th  colspan= 1 rowspan= 1   align= center  valign= top ><font face=Courier color=black size =2 ><img src="arrow2.gif" align="middle" border=0 alt="|"></font></th><th  colspan= 1
+rowspan= 1   align= center  valign= top ><font face=Courier color=black size =2 ><img src="arrow2.gif" align="middle" border=0 alt="|"></font></th><th  colspan= 1 rowspan= 1   align= center  valign= top ><font face=Courier color=black size =2 ><img src="arrow2.gif" align="middle" border=0 alt="|"></font></th></tr>
+<tr><td  align=center valign=bottom> <font  face=Arial color=black size =-1>Classification </font></td><td  align=center valign=bottom> <font  face=Arial color=black size =-1>    Company    </font></td><td  align=center valign=bottom> <font  face=Arial color=black size =-1>   Currency    </font></td><td  align=center valign=bottom> <font  face=Arial color=black size =-1>  DataSource   </font></td><td  align=center valign=bottom> <font  face=Arial color=black size =-1>    Support    </font></td><td  align=center valign=bottom> <font  face=Arial color=black size =-1>  SystemTable  </font></td><td  align=center valign=bottom> <font  face=Arial color=black size =-1>     Table     </font></td><td  align=center valign=bottom> <font  face=Arial color=black size =-1>   Universe  
+</font></td></tr>
+</table></center>
+
+</tr></table></Center>
+<p>
+This report shows the parent and direct children classes for the
+selected subclass.  you can click on any class to switch to the
+<a href="#ShowModelSummaryFor"><i>Data Model Summary</i></a> report for that
+class.  The options bar at the top allows you to change to the
+<a href="#ShowClassLinksFor"><i>Class Links</i></a> and
+<a href="#ShowModelDetailsFor"><i>Model Detail</i></a> 
+views for the current class.
+
+<p>
+<hr size=1 width=50%><p>
+<h4>
+<a name="ShowClassLinksFor">Class Links <i>{for class}</i> Report</A>
+</h4>
+<p>
+The <b>Class Links {for class} Report</b> 
+summarizes all messages that link to this class
+(i.e., return an instance of this class) and all messages defined for
+this class that return an instance of another application class.  The
+messages returning an instance of the selected class are displayed on
+the left; the messages in the selected class that link to another
+application class are displayed on the right.  Each link shows the
+class, the message name, and a symbol indicating the form in which
+the object is returned.  This form can be as a single scalar
+<i>Object</i>, or as a <i>List</i>, <i>IndexedList</i>, or
+<i>TimeSeries</i>.
+<p>
+For example, the following report shows a sample links report for the
+<i>Company</i> class in an investment application:<p>
+<Center><table width="85%" border="1" cellspacing=5 cellpadding=5>
+<caption>
+<b>--- Sample Data Model Links Summary {for class} Report ---</b></caption>
+<tr><td>
+
+<center><font face="Arial" color="darkblue" size=2 >
+<h4>Data Model Link Summary for: <i>Company</i></h4></center></font><p>
+<center><table border=0 width=80% cellspacing=2 cellpadding=2>
+<tr><td  align=center valign=top> <font  face=Arial color=black size =2>
+<center><table border=0 width=80% cellspacing=2 cellpadding=2>
+<tr><th  colspan= 1 rowspan= 1   align= left  valign= top ><font face=Arial color=black size =2 >From Class</font></th><th  colspan= 1 rowspan= 1   align= left  valign= top ><font face=Arial color=black size =2 >Via</font></th><th  colspan= 1 rowspan= 1   align= left  valign= top ><font face=Arial color=black size =2 > </font></th></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =2> Industry</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =1> companyList</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =2> <img src="List.gif" align="middle" border=0 alt="List.gif"></font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =2>Universe</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =1> entityType *</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =2> <img src="Object.gif" align="middle" border=0 alt="Object.gif"></font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =2>Universe</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =1> list *</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =2> <img src="List.gif" align="middle" border=0 alt="List.gif"></font></td></tr>
+</table></center></font></td>
+<td  align=center valign=top> <font  face=Arial color=black size =2> 
+<img src="arrow1.gif" align="middle" border=0 alt="->">   <b>Company</b>   <img src="arrow1.gif" align="middle" border=0 alt="->"></font></td><td  align=center valign=top> <font  face=Arial color=black size =2> </pre>
+<center><table border=0 width=80% cellspacing=2 cellpadding=2>
+<tr><th  colspan= 1 rowspan= 1   align= left  valign= top ><font face=Arial color=black size =2 >To Class</font></th><th  colspan= 1 rowspan= 1   align= left  valign= top ><font face=Arial color=black size =2 >Via</font></th><th  colspan= 1 rowspan= 1   align= left  valign= top ><font face=Arial color=black size =2 > </font></th></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =2>Currency</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =1> baseCurrency</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =2> <img src="Object.gif" align="middle" border=0 alt="Object.gif"></font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =2>Country</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =1> country</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =2> <img src="Object.gif" align="middle" border=0 alt="Object.gif"></font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =2>Industry</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =1> industry</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =2> <img src="Object.gif" align="middle" border=0 alt="Object.gif"></font></td></tr>
+</table></center></font></td></tr></table></center></pre>
+<center><table border=1 width=75% cellspacing=0 cellpadding=0>
+<tr><th  colspan= 1 rowspan= 1   align= center  valign= top ><font face=Arial color=black size =-1 >* message returns super class of this class</font></th></tr>
+<tr><th  colspan= 1 rowspan= 1   align= center  valign= top ><font face=Arial color=black size =-1 ><img src="Object.gif" align="middle" border=0>&nbsp <font size=-2 face="Arial" color="black"><b>Object</b></font>&nbsp &nbsp <img src="List.gif" align="middle" border=0>&nbsp <font size=-2 face="Arial" color="black"><b>List</b></font>&nbsp &nbsp <img src="IList.gif" align="middle" border=0>&nbsp <font size=-2 face="Arial" color="black"><b>IndexedList</b></font>&nbsp &nbsp <img src="TS1.gif" align="middle" border=0>&nbsp <font size=-2 face="Arial" color="black"><b>TimeSeries</b></font>&nbsp &nbsp </font></th></tr>
+</table></center>
+
+</tr></table></Center>
+<p>
+This report shows the messages that navigate to or from the selected
+class.  On the left side, the list of messages that return an
+instance of the selected class are displayed.  The class defining the
+message and the message name are indicated.  The list includes any
+message that explicitly returns this class or one of its subclasses.
+Messages followed by * return a super class of the selected class.
+Values can be returned as single objects or as collections.  The
+symbol after the message indicates the container form.
+<p>
+The right side of the report shows messages defined for the selected
+class that return instances of other application classes.  
+
+
+<p>
+<hr size=1 width=50%><p>
+<h4>
+<a name="ShowModelDetailsFor">Data Model Details <i>{for class}</i> Report</A>
+</h4>
+<p>
+The <b>Data Model Details {for class} Report</b> 
+shows detailed information about each message defined for this class
+that has been flagged for inclusion in the data model.  This view
+includes the message name, the return object's class, the form of the
+returned object (i.e., <i>Object, List, TimeSeries, IndexedList</i>),
+the type of message (i.e., <i>Fixed Property, TimeSeries Property, Method,
+TimeVarying Method, Constant</i>), any parameters (for IndexedLists and
+parameterized methods), and additional comments.  The default view
+includes all messages defined for this class or any of its
+superclasses.  The view can be restricted to eliminate messages
+defined for parent classes and to include only links.
+<p>
+For example, the following report shows a sample detail report for the
+<i>Industry</i> class in an investment application:<p>
+<Center><table width="85%" border="1" cellspacing=5 cellpadding=5>
+<caption>
+<b>--- Sample Data Model Details {for class} Report ---</b></caption>
+<tr><td>
+
+<center><font face="Arial" color="darkblue" size=2>
+<h4>Data Model Details for: <i>Industry</i></h4></center></font><p>
+<center><table border=1 width=80% cellspacing=2 cellpadding=2>
+<tr><th  colspan= 6 rowspan= 1   align= center  valign= top ><font face=Arial color=black size =2 >Industry Messages </font></th></tr>
+<tr><th  colspan= 6 rowspan= 1   align= center  valign= top ><font face=Arial color=black size =1 > | Links Only/No Parents | Links Only/Include Parents | Exclude Parents | </font></th></tr>
+<tr><th  colspan= 1 rowspan= 1   align= center  valign= top ><font face=Arial color=black size =2 >Message</font></th><th  colspan= 1 rowspan= 1   align= center  valign= top ><font face=Arial color=black size =2 >Returns</font></th><th  colspan= 1 rowspan= 1   align= center  valign= top ><font face=Arial color=black size =2 >As</font></th><th  colspan= 1 rowspan= 1   align= center  valign= top ><font face=Arial color=black size =2 >Type</font></th><th  colspan= 1 rowspan= 1   align= center  valign= top ><font face=Arial color=black size =2 >Params</font></th><th  colspan= 1 rowspan= 1   align= center  valign= top ><font face=Arial color=black size =2 >Notes</font></th></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =-1>aliases</font></td><td  align=center valign=bottom> <font  face=Arial color=black size =-1> String</font></td><td  align=center valign=bottom> <font  face=Arial color=black size =-1> <img src="List.gif" align="middle" border=0 alt="List.gif"></font></td><td  align=center valign=bottom> <font  face=Arial color=black size =-1> <img src="FP.gif" align="middle" border=0 alt="Fixed"></font></td><td  align=left valign=bottom> <font  face=Arial color=black size =-1>  </font></td><td  align=left valign=bottom> <font  face=Arial color=black size =-1> <font size=+1 face="TimesRoman" color="black"><b>P; </b></font>Returns list of aliases named for entity.</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =-1> baseCurrency</font></td><td  align=center valign=bottom> <font  face=Arial color=black size =-1> Currency</font></td><td  align=center valign=bottom> <font  face=Arial color=black size =-1> <img src="Object.gif" align="middle" border=0 alt="Object.gif"></font></td><td  align=center valign=bottom> <font  face=Arial color=black size =-1> <img src="FP.gif" align="middle" border=0 alt="Fixed"></font></td><td  align=left valign=bottom> <font  face=Arial color=black size =-1>  </font></td><td  align=left valign=bottom> <font  face=Arial color=black size =-1> <font size=+1 face="TimesRoman" color="black"><b>P; </b></font></font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =-1> code</font></td><td  align=center valign=bottom> <font  face=Arial color=black size =-1> String</font></td><td  align=center valign=bottom> <font  face=Arial color=black size =-1> <img src="Object.gif" align="middle" border=0 alt="Object.gif"></font></td><td  align=center valign=bottom> <font  face=Arial color=black size =-1> <img src="FP.gif" align="middle" border=0 alt="Fixed"></font></td><td  align=left valign=bottom> <font  face=Arial color=black size =-1>  </font></td><td  align=left valign=bottom> <font  face=Arial color=black size =-1> <font size=+1 face="TimesRoman" color="black"><b>P; </b></font>Object identifier.</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =-1> companyList</font></td><td  align=center valign=bottom> <font  face=Arial color=black size =-1> Company</font></td><td  align=center valign=bottom> <font  face=Arial color=black size =-1> <img src="List.gif" align="middle" border=0 alt="List.gif"></font></td><td  align=center valign=bottom> <font  face=Arial color=black size =-1> <img src="M2.gif" align="middle" border=0 alt="MethodTV"></font></td><td  align=left valign=bottom> <font  face=Arial color=black size =-1>  </font></td><td  align=left valign=bottom> <font  face=Arial color=black size =-1>  </font></td></tr>
+</table></center><p>
+<center><table border=1 width=75% cellspacing=2 cellpadding=2>
+<tr><th  colspan= 1 rowspan= 1   align= center  valign= top ><font face=Arial color=black size =-2 ><img src="Object.gif" align="middle" border=0>&nbsp <font size=-2 face="Arial" color="black">Object</font>&nbsp &nbsp <img src="List.gif" align="middle" border=0>&nbsp <font size=-2 face="Arial" color="black">List</font>&nbsp &nbsp <img src="IList.gif" align="middle" border=0>&nbsp <font size=-2 face="Arial" color="black">IndexedList</font>&nbsp &nbsp <img src="TS1.gif" align="middle" border=0>&nbsp <font size=-2 face="Arial" color="black">TimeSeries</font>&nbsp &nbsp </font></th></tr>
+<tr><th  colspan= 1 rowspan= 1   align= center  valign= top ><font face=Arial color=black size =-2 ><img src="FP.gif" align="middle" border=0>&nbsp <font size=-2 face="Arial" color="black">Fixed Property</font>&nbsp &nbsp <img src="TS2.gif" align="middle" border=0>&nbsp <font size=-2 face="Arial" color="black">TimeSeries</font>&nbsp &nbsp <img src="M1.gif" align="middle" border=0>&nbsp <font size=-2 face="Arial" color="black">Method</font>&nbsp &nbsp <img src="M2.gif" align="middle" border=0>&nbsp <font size=-2 face="Arial" color="black">TimeVarying Method</font>&nbsp &nbsp <b>C</b>&nbsp <font size=-2 face="Arial" color="black">Constant</font>&nbsp &nbsp </font></th></tr>
+<tr><th  colspan= 1 rowspan= 1   align= center  valign= top ><font face=Arial color=black size =-2 ><b>P</b>&nbsp <font size=-2 face="Arial" color="black">Parent Class</font>&nbsp &nbsp <img src="Key1.gif" align="middle" border=0>&nbsp <font size=-2 face="Arial" color="black">Unique Key</font>&nbsp &nbsp <img src="Key2.gif" align="middle" border=0>&nbsp <font size=-2 face="Arial" color="black">Partial Key</font>&nbsp &nbsp </font></th></tr>
+</table></center>
+<p><b>Parent Class: </b>Classification
+<p><b>Siblings: </b> | Country | RangeClassification | Sector | 
+<p><b>Children: </b>
+
+</tr></table></Center>
+<p>
+This report displays information about each message in the data model
+for the class.  Options allow you to include or exclude messages defined for
+parent classes (Include/Exclude parents)
+and restrict the messages to those that return an 
+instance of an application class (i.e., Links Only).
+For each message, the name of the message, the
+returned object's class, the form of the returned object
+(i.e., Object, List, TimeSeries, or IndexedList), and the type of 
+message (i.e,. FixedProperty, TimeSeriesProperty, Method,
+TimeVaryingMethod, or Constant) are displayed.  
+For IndexedList and parameterized messages, the class of the parameter(s)
+is (are) indicated.  
+<p>
+Messages that are implemented as properties are indicated by a circle 
+in the <i>Type</i> column.  Messages that
+are implemented as methods are indicated as a square.  Class
+constants contain the letter <b>C</b> in this column.  Messages
+that vary of time contain an arrow inside the circle or square.
+A property is considered to be time varying if it can store different
+values as of different points in time.  Time varying properties are
+created using the <i>define:</i> message.  A method is considered to
+be time varying if it can evaluate to different values when executed
+as of different dates (i.e, it directly or indirectly references
+propeties with are time varying).  To be considered time varying, a method's
+type must explicitly be flagged as 
+<a href="tkSchema.htm#schemaTables"><i>Named MessageType MethodTV</i></a>.
+<p>
+Messages that vary over time should not be confused with messages
+that return a <i>TimeSeries</i> of values.  A time varying method
+will produce different results when evaluated within a <i>date
+evaluate:</i> block.
+A message that returns a <i>TimeSeries</i>
+object responds to <i>TimeSeries</i> messages.  You must explicitly
+send the <i>value</i> or <i>asOf:</i> message to evaluate it as of a
+date.  See <a href="clTS.htm#props"><i>TimeSeries and
+Properties</i></a> for more information.
+<p>
+Any special comments about the message are supplied in
+the final column.  A <b>P</b> in this column 
+indicates that the message was defined at a parent class.
+If a message has been flagged as a 
+<a href="tkSchema.htm#schemaTables">'key'</a>,
+the partial or full key symbol appear in this column.  Note that
+Vision does not explicitly use this key information for anything.
+<p>
+For messages that return instances of other application classes,
+you can click on the return class to link to the 
+<a href="#ShowModelSummaryFor"><i>Data Model Summary</i></a> report
+for that class.  In <a href="#dynamic">dynamic versions</a> of the
+Navigator, you can click on the message name to see its actual 
+implementation.
+<p>
+Additional information about the selected class is displayed after this table.
+Included here are the names of the parent class, sibling classes, and 
+child classes.  If you click on any of the classes in this section,
+you will switch to the data model detail view for that class.
+
+<p>
+<hr>
+<h3><a name="inspect">Data Inspection Tools</a></h3>
+<p>
+The Data Inspection Tools display data values for a specific instance
+of an entity class.  The data items displayed are based on the class
+of the instance.  Any message flagged for inclusion in the data
+model for the class is included in the data inspection reports.
+<p>
+The following reports are available:
+<p>
+<ul type="disc">
+
+<li><b>
+<A HREF="#ShowAllDataValues">Show All Data Values <i>{for instance}</i></A>
+</b><blockquote><font size=-1>
+For the supplied instance,
+displays the value of each data item that has been flagged for inclusion
+in its class' data model.
+</font></blockquote>
+
+<li><b>
+<a href="#ShowTimeSeriesSummary">Show TimeSeries Summary <i>{for instance}</i>
+</a></b><blockquote><font size=-1>
+For the supplied instance,
+displays a summary of each time series defined in its class' data model.
+</font></blockquote>
+
+<li><b>
+<a href="#ShowHistoryForTimeSeries">Show History For TimeSeries
+ <i>{for instance, time series item}</i></a></b><blockquote><font size=-1>
+Displays all dates and values defined for the specified time series
+for the specified instance.
+</font></blockquote>
+
+<li><b>
+<a href="#ShowMembersInCollection">Show Members In Collection 
+<i>{for instance, collection item}</i></a></b><blockquote><font size=-1>
+Displays all elements defined in the specified collection for the
+specified instance.
+</font></blockquote>
+</ul>
+<p>
+
+<p>
+<hr size=1 width=50%><p>
+<h4><a name="ShowAllDataValues">Show All Data Values <i>{for instance}</i></A>
+</h4>
+<p>
+The <b>Show All Data Values Report</b> is used to display the values
+of each data item defined for a specified instance.  The name, value,
+and message type are displayed for each data item.  
+The type column indicates if the item value is stored as
+a property or derived via a method.  If the type is
+a <b>TimeSeriesProperty</b>, the effective date of the data is
+displayed in the next column.  A final column indicates if
+the value can be updated via a <a href="clDataFeed.htm"><b>DataFeed</b></a>
+subclass.
+<p>
+If you are running the <a href="#dynamic">dynamic version</a>
+of the Navigator, several links are defined as well.  If the value is
+an instance of another application class (e.g., an <b>Entity</b>,
+<b>DataRecord</b>, or <b>Bridge</b>), it is displayed as a link
+to this instance.  If the value returned is a <b>TimeSeries</b>,
+it is displayed as a link to the <b>Show History For Time Series</b>
+report.  If the value returned is a <b>List</b> or <b>IndexedList</b>,
+it is displayed as a link to the <b>Show Members In Collection</b>
+report.  If the value is stored as a
+<b>TimeSeriesProperty</b>, the type is displayed as a link to the
+<b>Show History For Time Series</b> report.  
+If the type is a <b>Method</b>, it is displayed as a link to the
+<b>Show Message Profile</b> report.
+<p>
+For example, the following report shows a sample data value report
+for the <i>Company IBM</i>:<p>
+<Center><table width="85%" border="1" cellspacing=5 cellpadding=5>
+<caption>
+<b>--- Sample Show All Data Values {for instance} Report ---</b></caption>
+<tr><td>
+
+<center><font face="Arial" color="darkblue" size=2 >
+<h4>Data for Company INTL BUSINESS MACHINES CORP</h4></center></font><p>
+<center><table border=1 width=80% cellspacing=2 cellpadding=2>
+<tr><th  colspan= 5 rowspan= 1   align= center  valign= top ><font face=Arial color=black size =3 >Named Company at: "45920010" .  </font></th></tr>
+<tr><th  colspan= 1 rowspan= 1   align= center  valign= bottom ><font face=Arial color=black size =2 >Company<br>Item</font></th><th  colspan= 1 rowspan= 1   align= center  valign= bottom ><font face=Arial color=black size =2 >Value</font></th><th  colspan= 1 rowspan= 1   align= center  valign= bottom ><font face=Arial color=black size =2 >Type</font></th><th  colspan= 1 rowspan= 1   align= center  valign= bottom ><font face=Arial color=black size =2 >Effective<br>Date</font></th><th  colspan= 1 rowspan= 1   align= center  valign= bottom ><font face=Arial color=black size =2 >Okay<br>to<br>Upload</font></th></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> code</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> 45920010</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> Fixed</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> &nbsp</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> &nbsp</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> aliases</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> List of 2</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> Fixed</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> &nbsp</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> &nbsp</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> analyst</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> Default</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> TimeSeries</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> 1/1/1</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> Yes </font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> analystEsts</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> AnalystEstimate</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> TimeSeries</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> 1/1/1</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> &nbsp</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> baseCurrency</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> USD</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> Fixed</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> &nbsp</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> &nbsp</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> country</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> US</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> Fixed</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> &nbsp</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2>  Yes </font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> cusip</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> 45920010</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> Method</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> &nbsp</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> &nbsp</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> cusip6</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> 459200</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> Fixed</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> &nbsp</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> &nbsp</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> fiscalYearEnd</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0>        12</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> Fixed</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> &nbsp</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2>  Yes </font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> funDataA</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> FundamentalDataA</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> TimeSeries</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> 12/31/1996</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> &nbsp</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> funDataM</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> FundamentalDataM</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> TimeSeries</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> 11/30/1997</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> &nbsp</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> funDataQ</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> FundamentalDataQ</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> TimeSeries</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> 9/30/1997</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> &nbsp</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> id</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> IBM</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> Method</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> &nbsp</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> &nbsp</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> industry</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> 530</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> TimeSeries</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> 1/1/1</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2>  Yes </font></td></tr>
+</table></center><p>
+</tr></table></Center>
+
+
+<p>
+<hr size=1 width=50%><p>
+<h4>
+<a name="ShowTimeSeriesSummary">Show Time Series Summary <i>{for instance}</i>
+</A></h4>
+<p>
+The <b>Show Time Series Summary Report</b> displays a summary of each time
+series defined for the supplied instance.  The name, number of points
+in the time series, first date, and last date are displayed for each
+data item defined as a <b>TimeSeriesProperty</b> or defined to return a
+<b>TimeSeries</b> object.  A final column indicates if
+the value can be updated via a <a href="clDataFeed.htm"><b>DataFeed</b></a>
+subclass.
+<p>
+If you are running the <a href="#dynamic">dynamic version</a>
+of the Navigator, the time series name is displayed as a link
+to the <b>Show History For Time Series</b> report.  
+<p>
+For example, the following report shows a sample time series summary report
+for the <i>Company IBM</i>:<p>
+<Center><table width="85%" border="1" cellspacing=5 cellpadding=5>
+<caption>
+<b>--- Sample Show Time Series Summary {for instance} Report ---</b></caption>
+<tr><td>
+
+<center><font face="Arial" color="darkblue" size=2 >
+<h4>Time Series Data for Company INTL BUSINESS MACHINES CORP</h4>
+</center></font><p>
+<center><table border=1 width=80% cellspacing=2 cellpadding=2>
+<tr><th  colspan= 5 rowspan= 1   align= center  valign= top ><font face=Arial color=black size =3 >Named Company at: "45920010" .  </font></th></tr>
+<tr><th  colspan= 1 rowspan= 1   align= center  valign= bottom ><font face=Arial color=black size =2 >Item</font></th><th  colspan= 1 rowspan= 1   align= center  valign= bottom ><font face=Arial color=black size =2 >Count</font></th><th  colspan= 1 rowspan= 1   align= center  valign= bottom ><font face=Arial color=black size =2 >First<br>Date</font></th><th  colspan= 1 rowspan= 1   align= center  valign= bottom ><font face=Arial color=black size =2 >Last<br>Date</font></th><th  colspan= 1 rowspan= 1   align= center  valign= bottom ><font face=Arial color=black size =2 >Okay<br>to<br>Upload</font></th></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> analyst</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0>         1</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> 1/1/1</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> 1/1/1</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2>  Yes </font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> analystEsts</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0>         1</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> 1/1/1</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> 1/1/1</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> &nbsp</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> funDataA</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0>         6</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> 1/1/1</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> 12/31/1996</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> &nbsp</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> funDataM</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0>        25</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> 1/1/1</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> 11/30/1997</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> &nbsp</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> funDataQ</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0>        13</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> 1/1/1</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> 9/30/1997</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> &nbsp</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> industry</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0>         1</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> 1/1/1</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> 1/1/1</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2>  Yes </font></td></tr>
+</table></center><p>
+</tr></table></Center>
+
+<p>
+<hr size=1 width=50%><p>
+<h4><a name="ShowHistoryForTimeSeries">Show History For Time Series
+<i>{for instance, time series item}</i></A></h4>
+<p>
+The <b>Show History for Time Series Report</b> displays 
+all dates and values defined for the specified time series for the
+specified instance.
+<p>
+If you are running the <a href="#dynamic">dynamic version</a>
+of the Navigator, the value is displayed as a link if it is an
+<b>Entity</b>, <b>DataRecord</b>, <b>Bridge</b>, or <b>Collection</b>.
+<p>
+For example, the following report shows a sample time series summary report
+for the <i>Security IBM's adjustment factor</i>:<p>
+<Center><table width="85%" border="1" cellspacing=5 cellpadding=5>
+<caption>
+<b>--- Sample Show Time Series Summary {for instance, item} Report ---</b>
+</caption><tr><td>
+
+<center><font face="Arial" color="darkblue" size=2 >
+<h4>Data History of: <i>adjustmentFactor</i></h4>
+<h4>for Security INTERNATIONAL BUSINESS MACH COM</h4>
+</center></font><p>
+<center><table border=1 width=65% cellspacing=2 cellpadding=2>
+<tr><th  colspan= 2 rowspan= 1   align= center  valign= top ><font face=Arial color=black size =3 >Named Security at: "45920010" .   :adjustmentFactor</font></th></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> <strong>05/28/97</strong></font></td><td  align=right valign=bottom> <font  face=Arial color=black size =+0>      8.00</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> <strong>06/01/79</strong></font></td><td  align=right valign=bottom> <font  face=Arial color=black size =+0>      4.00</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> <strong>01/01/01</strong></font></td><td  align=right valign=bottom> <font  face=Arial color=black size =+0>      1.00</font></td></tr>
+</table></center>
+</tr></table></Center>
+
+<p>
+<hr size=1 width=50%><p>
+<h4><a name="ShowMembersInCollection">Show Members In Collection
+<i>{for instance, collection item}</i></A></h4>
+<p>
+The <b>Show Members In Collection Report</b> displays 
+the elements in a collection returned by the specified data item for the
+specified instance.
+<p>
+If you are running the <a href="#dynamic">dynamic version</a>
+of the Navigator, the value is displayed as a link if it is an
+<b>Entity</b>, <b>DataRecord</b>, or <b>Bridge</b>.
+<p>
+For example, the following report shows the elements in
+<i>Industry 530's memberList</i>:<p>
+<Center><table width="85%" border="1" cellspacing=5 cellpadding=5>
+<caption>
+<b>--- Sample Show Members In Collection {for instance, item} Report ---</b>
+</caption><tr><td>
+
+<center><font face="Arial" color="darkblue" size=2 >
+<h4>Members in: <i>memberList</i></h4>
+<h4>for Industry Computers/Office Automation</h4>
+</center></font><p>
+<center><table border=1 width=80% cellspacing=2 cellpadding=2>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> Company</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> 88553510     COMS         3COM CORP</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> Company</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> 00443110     00443110     ACER COMPUTER LATINO AME</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> Company</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> 00752510     ADIC         ADVANCED DIGITAL INFO CORP</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> Company</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> 02390510     AMH          AMDAHL CORP</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> Company</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> 03232910     AMTC         AMTECH CORP</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> Company</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> 03783310     AAPL         APPLE COMPUTER INC</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> Company</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> 00194110     *ATY         ATI TECHNOLOGIES INC</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> Company</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> 05211610     ASPX         AUSPEX SYSTEMS INC</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> Company</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> 07251010     BAY          BAY NETWORKS INC</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> Company</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> 12692010     CS           CABLETRON SYSTEMS</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> Company</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> 617232       7751         CANON INC</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> Company</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> 15677T10     CEN          CERIDIAN CORP</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> Company</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> 17275R10     CSCO         CISCO SYSTEMS INC</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> Company</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> 19242210     CGNX         COGNEX CORP</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> Company</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> 20449310     CPQ          COMPAQ COMPUTER CORP</font></td></tr>
+</table></center>
+</tr></table></Center>
+
+
+<p>
+<hr>
+<h3><a name="structure">Structure Analysis Tools</a></h3>
+<p>
+<i>These reports are currently under development and are not included
+in this release.</i>
+
+<p>
+<hr>
+<h3><a name="operation">Operation</a></h3>
+<p>
+Most of the Vision <i>Navigator</i> reports have been a standard component of
+all databases bootstrapped since July 1997.  The Data Inspector reports
+were added in July 1998.  If your database does not include these reports,
+please contact your Insyte consultant to determine which Vision scripts you 
+may need and whether any additional modifications to your environment may be
+required.
+<p>
+<h4><a name="dynamic">Dynamic Execution via Web</a></h4>
+<p>
+If you are currently using
+<a href="pmaInstall.htm#runtime">the Vision run-time environment</a>, 
+you can access any of the <i>Navigator</i> reports via the URL
+<a href=http://visionWeb/vision><i>http://visionWeb/vision</i></a>.
+You should see the home page for accessing your Vision applications
+and a link to the navigator reports.
+Note that you may need to replace the name <i>visionWeb/vision</i> 
+with an access path defined for your organization.
+<p>
+
+<p>
+<h4><a name="interactive">Interactive Execution via Editor</a></h4>
+<p>
+All the navigator reports are accessible via the 
+<a href="tkInterface.htm#apps"><b>Interface Application</b></a> class.
+To interact with the <b>Interface ApplicationWS</b> class, you need to
+specify an application name and a list of parameter values.
+Two general formats are available:<pre><tt><b>
+     Interface ApplicationWS runWith: "appName", p1, p2, ... pn ;
+
+</b>and<b>
+
+     Interface ApplicationWS reset
+          setApplicationTo: "appName" .
+          set: "param1" to: p1 .
+          set: "param2" to: p2 .
+          set: "paramn" to: pn .
+     run ;
+
+</b></tt></pre>
+In the first format, you supply a list of inputs to the <i>runWith:</i>
+message where the first element in this list is the name of the application
+to run and the remaining list elements are the input values.  
+In the second format, you explicitly set the application and 
+parameter values by name.  In this example, three parameters are
+explicitly named and assigned values.
+<p>
+The navigator applications and their parameters are summarized below:
+<p><Center><table width="80%" border="1" cellspacing="2" cellpadding="2">
+<tr><th>Application Name<th>List Position<th>Named Id<th>Description</tr>
+<tr>
+<tr><th colspan=4>Summary Class Cross Reference
+<tr><th>ShowClassXRefSummary<td>0 <td>&nbsp <td>(no parameters needed)
+<tr>
+<tr><th colspan=4>Full Class Hierarchy
+<tr><th>ShowFullHierarchy<td>0 <td>&nbsp <td>(no parameters needed)
+<tr>
+<tr><th colspan=4>Class Cross Reference <i>{for type}</i>
+<tr><th>ShowClassXRefDetails<td>1 <td>categoryId <td>BuiltIn, Application, ...
+<tr>
+<tr><th colspan=4>Class Summary <i>{for class}</i>
+<tr><th>ShowClassSummary<td>1 <td>classId <td>&nbsp
+<tr>
+<tr><th colspan=4>Message Details <i>{for class}</i>
+<tr><th>ShowMessageDetails<td>1 <td>classId <td>&nbsp
+<tr>
+<tr><th colspan=4>Message Cross Reference <i>{for class}</i>
+<tr><th>ShowMessageXRef <td>1<td>classId <td>&nbsp
+<tr>
+<tr><th colspan=4>Message Profile <i>{for class,message}</i>
+<tr><th rowspan=2>ShowMessageProfile<td>1<td>classId <td>&nbsp
+                                <tr><td>2 <td>messageId <td>&nbsp
+
+<tr>
+<tr><th colspan=4>Data Model Classes
+<tr><th>ShowDataModelClasses<td>0 <td>&nbsp <td>no parameters needed
+<tr>
+<tr><th colspan=4>Data Model Summary <i>{for class}</i>
+<tr><th>ShowDataModelClassSummary <td>1 <td>&nbsp <td>class id
+<tr>
+<tr><th colspan=4>Class Links <i>{for class}</i>
+<tr><th>ShowDataModelLinks<td>1 <td>&nbsp <td> class id
+<tr>
+<tr><th colspan=4>Data Model Details <i>{for class}</i>
+<tr><th rowspan= 3>ShowDataModelDetails<td>1 <td>&nbsp <td>class id
+                    <tr><td>2 <td>&nbsp <td>links only ("TRUE"/"FALSE")
+                    <tr><td>3 <td>&nbsp <td>include parents ("TRUE"/"FALSE")
+<tr>
+<tr><th colspan=4>Show All Data Values <i>{for instance}</i>
+<tr><th rowspan= 4>ShowAllDataValues<td>1 <td>entityType <td>class id
+              <tr><td>2 <td>entityId <td>instance id
+              <tr><td>3 <td>path <td>optional access path to apply to instance
+              <tr><td>4 <td>element <td>optional element (via collection path)
+<tr>
+<tr><th colspan=4>Show TimeSeries Summary <i>{for instance}</i>
+<tr><th rowspan= 3>ShowTimeSeriesSummary<td>1 <td>entityType <td>class id
+              <tr><td>2 <td>entityId <td>instance id
+              <tr><td>3 <td>path <td>optional access path to apply to instance
+<tr>
+<tr><th colspan=4>Show History For TimeSeries <i>{for instance, item}</i>
+<tr><th rowspan= 4>ShowHistoryForTimeSeries<td>1 <td>entityType <td>class id
+              <tr><td>2 <td>entityId <td>instance id
+              <tr><td>3 <td>path <td>optional access path to apply to instance
+              <tr><td>4 <td>item <td>item that returns a time series
+<tr>
+<tr><th colspan=4>Show Members In Collection <i>{for instance, item}</i>
+<tr><th rowspan= 4>ShowMembersInCollection<td>1 <td>entityType <td>class id
+              <tr><td>2 <td>entityId <td>instance id
+              <tr><td>3 <td>path <td>optional access path to apply to instance
+              <tr><td>4 <td>item <td>item that returns a collection
+</tr></table></Center><p>
+
+For example:<pre><tt><b>
+     Interface ApplicationWS 
+        runWith: "ShowDataModelClassSummary", "Company" ;
+</b></tt></pre>
+displays the data model summary for the class <b>Company</b> 
+and:<pre><tt><b>
+     Interface ApplicationWS 
+        reset
+        setApplicationTo: "ShowAllDataValues" .
+        set: "entityType" to: "Currency" .
+        set: "entityId" to: "CAD" .
+        run ;
+</b></tt></pre>
+displays the data values report for the Canadian currency.
+
+<p>
+<h4><a name="static">Static Web Documents</a></h4>
+<p>
+You can create static versions of these reports with <i>Html</i> 
+links embedded.  Create a new working directory, start an interactive Vision
+session, and execute the following:<pre><tt><b>
+     Interface HtmlAccess
+       setServerTo: "" .
+       setResourcePathTo: "" ;
+
+     FormatTools Html evaluate: [ 
+
+     !header <-   "&ltHTML>&ltBODY bgcolor=white>
+     &ltH2>Vision Database Navigator - Demo Database&lt/H2>&lthr>" ;
+
+     "index.html" substituteOutputOf: [ 
+        header printNL ;
+        Interface ApplicationWS runWith: "displayMainMenu" ;
+        ] ;
+
+     #--------------------
+     #  Programmer Tools
+     #--------------------
+
+     !app <- "ShowClassXRefSummary" ;
+     app concat: ".htm" . substituteOutputOf: [ 
+        header printNL ;
+        Interface ApplicationWS runWith: app ;
+     ] ;
+     !app <- "ShowFullHierarchy" ;
+     app concat: ".htm" . substituteOutputOf: [ 
+        header printNL ;
+        Interface ApplicationWS runWith: app ;
+     ] ;
+
+     ClassType masterList select: [ code != "Unused" ] .
+     iterate: 
+       [ 
+       !app <- "ShowClassXRefDetails" ;
+       !file <- app concat: "-" . concat: code . concat: ".htm" ;
+       file substituteOutputOf: 
+          [ ^my header printNL ;
+            ^my Interface ApplicationWS runWith: app, name ;
+          ] ;
+      ] ; 
+
+    Schema CD instanceList
+        select: [ type code != "Unused" ] .
+    iterate:
+      [ !ws <- ^my Interface ApplicationWS ;
+        !app <- "ShowMessageXRef" ;
+        !file <- app concat: "-" . concat: name . concat: ".htm" . 
+           translate: " " to: "_" ;
+        file substituteOutputOf: 
+          [ ^my header printNL ;
+            ws runWith: app, name ;
+          ] ;
+ 
+        !app <- "ShowClassSummary" ;
+        !file <- app concat: "-" . concat: name . concat: ".htm" . 
+           translate: " " to: "_" ;
+        file substituteOutputOf: 
+          [ ^my header printNL ;
+            ws runWith: app, name ;
+          ] ;
+ 
+        !app <- "ShowMessageDetails" ;
+        !file <- app concat: "-" . concat: name . concat: ".htm" . 
+           translate: " " to: "_" ;
+        file substituteOutputOf: 
+          [ ^my header printNL ;
+            ws runWith: app, name ;
+          ] ;
+     ] ;
+
+     #--------------------
+     #  Data Model
+     #--------------------
+
+     "ShowDataModelClasses.htm" substituteOutputOf: [ 
+        header printNL ;
+        Interface ApplicationWS runWith: "ShowDataModelClasses" ;
+        ] ;
+
+     Schema CD instanceList
+        select: [ includeInDataModel ] .
+     iterate: [
+         !ws <- ^global Interface ApplicationWS ;
+         !app <- "ShowDataModelClassSummary" ;
+         !file <- app concat: "-" . concat: name . concat: ".htm" . 
+            translate: " " to: "_" ;
+         file substituteOutputOf: 
+           [ ^my header printNL ;
+             ws runWith: app, name ;
+           ] ;
+ 
+        !app <- "ShowDataModelLinks" ;
+        !file <- app concat: "-" . concat: name . concat: ".htm" . 
+            translate: " " to: "_" ;
+        file substituteOutputOf: 
+          [ ^my header printNL ;
+            ws runWith: app, name ;
+          ] ;
+ 
+        !app <- "ShowDataModelDetails" ;
+        !file <- app concat: "-" . concat: name . concat: "-FALSE-TRUE.htm" . 
+           translate: " " to: "_" ;
+        file substituteOutputOf: 
+          [ ^my header printNL ;
+            ws runWith: app, name, "FALSE", "TRUE" ;
+          ] ;
+       ] ;
+    ] ;
+</b></tt></pre>
+
+<hr>
+
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy 1998 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated August 25, 1998</font>
+
+</table>
+

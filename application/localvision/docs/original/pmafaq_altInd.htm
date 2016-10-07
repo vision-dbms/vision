@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Portfolio Management FAQ: Alternative Industries </title>
+</head>
+<body>
+<body bgcolor=white>
+<h2>Vision Portfolio Management FAQ:  Alternative Industries</h2>
+<hr><p>
+<h4>Goal:</h4>
+<ul>
+To create an alternative industry scheme that can be accessed via
+the primary industry scheme
+by using <a href="#excel"><i>Excel</i></a> or the 
+<a href="#vadmin"><i>VAdmin</i></a> interface.
+
+</ul>
+
+<p>
+<h4>Description:</h4>
+<ul>
+An alternative table of industry codes and names is available.  Each of
+the primary <b>Industry</b> instances can be associated with one of these
+alternative industries.  An alternative industry is accessed indirectly
+from <b>Company</b>, via its <i>industry</i>.
+</ul>
+
+<p>
+<h4>DataFeed Assumptions:</h4>
+<p>
+<center><table border=1 width=80% cellpadding=4 cellspacing=2>
+<tr><th>DataFeed<th>Fields
+<tr>
+<td>IndustryMaster
+<td><i>id, name, altIndustryId, ... </i>
+<tr>
+<td>AltIndustryMaster
+<td><i>id, name</i>
+</table></center>
+<p>
+
+<a name="excel"><h4>Using Excel to load alternative industries</h4></a>
+
+<p>
+<h4>Steps:</h4>
+<p>
+<ol type="A">
+
+<p>
+<li>Create the <b>Classification</b> subclass, <b>AltIndustry</b>
+<p>
+<ol type="1">
+<li>Select <i>Create Entity</i> from <i>VUpload</i> menu
+<li>Enter <i>AltIndustry</i> as new <b>Entity</b>
+<li>Select <b>Classification</b> as starting entity class
+</ol>
+<p>
+The <b>AltIndustry</b> class and the <b>AltIndustryMaster</b> feed
+will be created.
+
+<p>
+<li>Load <b>AltIndustry</b> Instances
+<ol type="1">
+<p>
+<li>Set up the spreadsheet to look like the following.  Note that the feed name
+is in the top left of the range.
+<pre>
+        AltIndustryMaster		
+
+	<b>id	name</b>	
+	Alt110	Alt Beverages	
+	Alt210	Alt Automobiles	
+	Alt310	Alt Broadcasting	
+	Alt410	Alt Food Chains	
+</pre>
+
+<li>Select the entire range, including the feed name.
+<li>Select <i>Upload Data</i> from the <i>VUpload</i> menu.
+<p>
+
+The <i>AltIndustry</i> instances have been created.
+</ol>
+
+<p>
+
+<li> Define link from <b>Industry</b> to <b>AltIndustry</b>
+<ol type="1">
+<p>
+<li> Set up the spreadsheet to look like the following example.  
+Note that the feed name is in the top left of the range.
+
+<pre>
+	PropertySetup				
+
+	<b>classId	   property	tsflag	defaultValue</b>	
+	Industry   altIndustry	N	AltIndustry	
+</pre>
+
+<li>Select the range, including the feed name.
+<li>Select <i>Upload Data</i> from the <i>VUpload</i> menu.
+<p>
+
+The <i>altIndustry</i> property has been created.
+</ol>
+<p>
+
+<li>Connect <b>Industry</b> with <b>AltIndustry</b>
+<p>
+<ol type="1">
+<li>Set up the spreadsheet to look like the following example:
+
+<pre>	IndustryMaster		
+
+	<b>id	name	        altIndustry</b>
+	110	Beverages	Alt110
+	210	Automobiles	Alt210
+	310	Broadcasting	Alt310
+	410	Food Chains	Alt410
+</pre>
+
+<li>Select the range.
+<li>Select <i>Upload Data</i> from the <i>VUpload</i> menu.
+<p>
+
+The <i>altIndustry</i> property of <i>Industry</i> has been created.
+</ol>
+
+<p>
+
+<li>Access the Data
+<p>
+<ol type="1">
+<li>Assuming that you have already updated industries for your companies,
+set up the spreadsheet to look like the following example:
+
+<pre>
+<b>		industry name	industry altIndustry name</b>
+	ibm	
+	gm	
+	msft	
+	f	
+</pre>
+
+<li>Select the range.
+<li>Select <i>Set Defaults</i> from the <i>Vision</i> menu.
+<li>Enter <i>Company</i> as the <i>EntityType</i>.
+<li>Select <i>Get Entity By Item Data</i> from the <i>Vision</i> menu.
+<p>
+The output will look similar to the following example:
+
+<pre>
+<b>		industry name	industry altIndustry name</b>
+	ibm	Software	Alt Software		
+	gm	Automobiles	Alt Automobiles
+</pre>
+
+Your Extraction is complete.
+
+</ol>
+</ol>
+<hr>
+
+<a name="vadmin"><h4>Using VAdmin to load alternative industries</h4></a>
+
+<p>
+<h4>Steps:</h4>
+<p>
+<ol type="A">
+
+<p>
+<li>Create the <b>Classification</b> subclass, <b>AltIndustry</b>
+<p>
+<ol type="1">
+<li>Select <i>Add New Entity</i> from <i>Schema</i> menu
+<li>Enter <i>AltIndustry</i> as new <b>Entity</b>
+<li>Select <b>Classification</b> as starting entity class
+</ol>
+<p>
+The <b>AltIndustry</b> class and the <b>AltIndustryMaster</b> feed
+will be created.
+
+<p>
+<li>Load <b>AltIndustry</b> Instances
+<ol type="1">
+<p>
+<li>Set up a tab delimited text file to look like the following example.  
+<pre>
+	AltIndustryMaster		
+
+	<b>id	name</b>	
+	Alt110	Alt Beverages	
+	Alt210	Alt Automobiles	
+	Alt310	Alt Broadcasting	
+	Alt410	Alt Food Chains	
+</pre>
+Save the file and put it in the <i>localvision/upload/feeds</i> directory.
+<p>
+
+<li>Select the file name from the <i>Pending DataFeeds</i> list box.
+<li>Select the category <i>Entity</i> and the feed name <i>AltIndustryFeed</i>.
+<li>Select the <i>update</i> button.
+<p>
+
+The <i>AltIndustry</i> instances have been created.
+</ol>
+
+<p>
+
+<li> Define link from <b>Industry</b> to <b>AltIndustry</b>
+<ol type="1">
+<p>
+<li>Set up a tab delimited file to look like the following example.  
+
+<pre>
+	PropertySetup				
+
+	<b>classId	   property	tsflag	defaultValue</b>	
+	Industry   altIndustry	N	AltIndustry	
+</pre>
+Save the file and put it in the <i>localvision/upload/feeds</i> directory.
+<p>
+
+<li>Select the file name from the <i>Pending DataFeeds</i> list box.
+<li>Select the category <i>PropertySetup</i> and the feed name <i>PropertySetup</i>.
+<li>Select the <i>Update</i> button.
+<p>
+
+The <i>altIndustry</i> property has been created.
+</ol>
+<p>
+
+<li>Connect <b>Industry</b> with <b>AltIndustry</b>
+<p>
+<ol type="1">
+<li>Set up a tab delimited file to look like the following example:
+
+<pre>	IndustryMaster		
+
+	<b>id	name	        altIndustry</b>
+	110	Beverages	Alt110
+	210	Automobiles	Alt210
+	310	Broadcasting	Alt310
+	410	Food Chains	Alt410
+</pre>
+<p>
+Save the file and put it in the <i>localvision/upload/feeds</i> directory.
+
+<p>
+<li>Select the file name from the <i>Pending DataFeeds</i> list box.
+<li>Select the category <i>Entity</i> and the feed name <i>IndustryMaster</i>.
+<li>Select the <i>Update</i> button.
+<p>
+
+The <i>altIndustry</i> property of <i>Industry</i> has been created.
+</ol>
+
+<p>
+
+<li>Access the Data in Excel
+<p>
+<ol type="1">
+<li>Open Excel
+<li>Assuming that you have already updated industries for your companies,
+set up the spreadsheet to look like the following example:
+
+<pre>
+<b>		industry name	industry altIndustry name</b>
+	ibm	
+	gm	
+	msft	
+	f	
+</pre>
+
+<li>Select the range.
+<li>Select <i>Set Defaults</i> from the <i>Vision</i> menu.
+<li>Enter <i>Company</i> as the <i>EntityType</i>.
+<li>Select <i>Get Entity By Item Data</i> from the <i>Vision</i> menu.
+<p>
+The output will look similar to the following example:
+
+<pre>
+<b>		industry name	industry altIndustry name</b>
+	ibm	Software	Alt Software		
+	gm	Automobiles	Alt Automobiles
+</pre>
+
+Your Extraction is complete.
+
+</ol>
+
+</ol></ul></ul>
+<hr>
+<table border="0" width="100%">
+<tr>
+<td align="left"><font size="-1">Copyright &copy; 1998 Innovative Systems Techniques, Inc.</font>
+<td align="right"><font size="-1">Updated December 23, 1998</font>
+</table>
+</body>
+</html>
+

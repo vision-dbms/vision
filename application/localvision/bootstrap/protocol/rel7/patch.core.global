@@ -1,0 +1,82 @@
+####################
+#  convert all current uses of ^global to CoreWorkspace
+####################
+
+Schema processAllMessages ;
+
+[ 
+Schema MID activeList 
+   select: [ type isMethod ] .
+   select: [ implementationSource containsSubstring: "^global" ] .
+   reject: [ class isUtility ] .     #- saving messages
+   reject: [ class isMaintenanceTools ] .
+groupedBy: [ messageClassDescriptor name ] .
+sortUp: [ asSelf ] .
+do: [ "#" fill: 20 . printNL ;
+      "# ^global -> CoreWorkspace for class: " print ; printNL ;
+      "#" fill: 20 . printNL ;
+      newLine print ;
+      groupList sortUp: [ code ] . 
+        do: [ formatMessageImplementation 
+                 translateString: "^global" to: "CoreWorkspace" . 
+                   drop: -1 . concat: ";" . printNL ;
+              newLine print ; 
+              "#----- " printNL ;
+             newLine print ;
+            ] ;
+    ] ;
+
+] divertOutput evaluateIn: ^self ;
+Schema processAllMessages ;
+
+Object defineMethod: [ | GlobalWorkspace | ^global CoreWorkspace ] ;
+
+#======================================================================
+
+####################
+#  Redefine method that create new stores and count on ^global to
+#    determine the object space reference; Note that
+#   'establishResidenceOf:' cannot be used here since these methods are
+#    getting called from within scripts that create new object spaces
+#   and therefore do not yet have a residence.
+####################
+
+#-------------
+#  PriceTool store creation
+#  . PriceTools 'createTSStoresAsOf: date' method revision
+#    to ensure new time series stores are created as product mapped.
+#-------------
+
+PriceTools defineMethod: [ | createTSStoreAsOf: date | 
+#-- store at global so the structure is stored in this space
+   ^global define: 'PriceTSGenerator' toBe: PriceTSGenerator newPrototype;
+   :tsStoreXRef asOf: date put: ^global PriceTSGenerator;
+#-- touch the time series to give it a home as well
+#--xx  ^global PriceTSGenerator :ts ;
+#-- create new ts as product mapped
+  ^global PriceTSGenerator :ts __setIndexingTypeToProductMapped;
+  ^global PriceTSGenerator
+] ;
+
+PriceTools defineMethod: [ | createDailyStoreAsOf: date |
+#-- store at global so the structure is stored in this space
+  ^global define: 'PriceRecord' toBe: PriceRecord getNewPrototype ;
+  :dailyStoreXRef asOf: date put: ^global PriceRecord ;
+  ^global PriceRecord 
+] ;
+
+PriceTools defineMethod: [ | createEOMStoreAsOf: date |
+#-- store at global so the structure is stored in this space
+  ^global define: 'PriceRecord' toBe: PriceRecord getNewPrototype ;
+  :eomStoreXRef asOf: date put: ^global PriceRecord ;
+  ^global PriceRecord
+] ;
+
+#-------------
+#  Holding store creation
+#-------------
+
+Holding defineMethod: [| createNewStoreAsOf: date |
+  ^self createNewStoreAsOf: date at: ^global
+];
+

@@ -1,0 +1,526 @@
+#**********************************************************
+#**********************************************************
+#		Test: usersGuide 
+#
+#  Examples from the User's Guide:
+#  "Introduction to the Vision Language"
+#
+#  9/4/87 	jad
+#**********************************************************
+#**********************************************************
+
+Utility echoToFile: (^tmp componentOutput concat:"/usersGuide.O");
+newLine print; "Beginning file: usersGuide.S ..." printNL;
+###########################################################
+#		Tests Begin Here ...                      #
+###########################################################
+
+"
+#--------------------------------------------------------
+#  Section 4: The Basics
+#--------------------------------------------------------
+" printNL;
+
+3 print;
+1.23 print;
+"this is a string" print;
+(2 + 2) print;
+(102.23 + 1.2) print;
+" " printNL;
+"This next line should produce an error ... " printNL;
+"error" + 3;
+"do some wrong";
+2 + 2 printNL;
+(4 + 4) printNL;
+"this is a string" count print;
+("this is a string" count + 3) print;
+3 printNL;
+1.1 print: 8.3;
+1.12345 print: 8.3;
+123456 print: 2;
+5000000 printWithCommas: 12;
+3.12 printNL;
+"x" printNL: -20;
+#"My Title" center: 80;
+
+" " printNL;
+"The Answer Is: " print;
+(2 + 2) printNL;
+
+!x <- 2 + 2;
+x printNL;
+(x + 1) printNL;
+
+" " printNL;
+!x <- 2;
+!y <- 3;
+!z <- x + y;
+"The Value Of x Is: " print;
+x printNL;
+"The Value Of y Is: " print;
+y printNL;
+"The Value Of x + y (z) Is: " print;
+z printNL;
+
+!answer <- "The Answer Is: " ;
+answer print;
+(2 + 2) printNL;
+" " printNL;
+
+"
+#--------------------------------------------------------
+#  Section 5: Company Data (screenings)
+#--------------------------------------------------------
+" printNL;
+
+!dowList;
+!newDowList;
+
+19851231 evaluate:
+[
+Named Company GM
+send:   [ name print: 30;
+          sales print: 10;
+          income printNL: 10;
+        ] ;
+" " printNL;
+];
+
+Named Company GM
+send: [ "Sales" print: 30;
+         sales printNL: 10;
+        "Income" print: 30;
+         income printNL: 10;
+        "Sales / Income" print: 30;
+         sales / income printNL: 10;
+        ] ;
+" " printNL;
+
+Named Company GM
+send: [ "Sales" print: 30;
+         sales printWithCommasNL: 10;
+        "Income" print: 30;
+         income printWithCommasNL: 10;
+        "Sales / Income" print: 30;
+         sales / income printWithCommasNL: 10;
+        ] ;
+" " printNL;
+
+:dowList <- Named Company send: 
+        [ ALD, AA, AXP, T, BS, BA, CHV, KO, DD, EK, XON, GE, GM, GT, IBM,
+          IP, MCD, MRK, MMM, NAV, MO, PA, PG, S, QTX, X, UK, UTX, WX, Z ] ;
+
+"The Number of Companies in dowList is: " print;
+dowList count printNL;
+" " printNL;
+
+dowList do: [ name printNL; ] ;
+" " printNL;
+
+dowList select: [sales > 10000 ] .
+        do:     [ name print: 35;
+                  sales print;
+                  income printNL;
+                ] ;
+" " printNL;
+
+!selectList <- dowList select: [sales > 10000 ] ;
+selectList
+        do:     [ name print: 35;
+                  sales print;
+                  income printNL;
+                ] ;
+" " printNL;
+
+"The number of companies with sales > 10000 is: " print;
+selectList count printNL;
+" " printNL;
+"The number of companies with sales > 10000 and interestCov > 4 is: " print;
+dowList select: [sales > 10000 && (interestExp + income) / interestExp > 4].
+        count printNL; 
+" " printNL;
+
+dowList select: [sales > 10000 && (interestExp + income) / interestExp > 4].
+        do:     [ name print: 35;
+                  sales print;
+                  (interestExp + income) / interestExp printNL;
+                ] ;
+" " printNL;
+
+"The number of companies with sales > 10000 or interestCov > 4 is: " print;
+!tmpList <- 
+   dowList select: [sales > 10000 || (interestExp + income) / interestExp > 4];
+tmpList count printNL;
+" " printNL;
+
+tmpList
+        do:     [ name print: 35;
+                  sales print;
+                  (interestExp + income) / interestExp printNL;
+                ] ;
+" " printNL;
+
+dowList select: [sales > 10000 && (interestExp + income) / interestExp > 4].
+  sortUp: [ sales ] .
+        do:     [ name print: 35;
+                  sales print;
+                  (interestExp + income) / interestExp printNL;
+                ] ;
+" " printNL;
+
+dowList extendBy:
+        [ !interestCov <- (interestExp + income) / interestExp;
+          !margin <- income / sales;
+        ] .
+select: [sales > 10000 && interestCov > 4 ] .
+  sortUp: [ sales ] .
+        do:     [ name print: 35;
+                  sales print;
+                  interestCov printNL;
+                ] ;
+" " printNL;
+
+:newDowList <-  
+        dowList extendBy:
+                [ !interestCov <- (interestExp + income) / interestExp;
+                  !margin <- income / sales;
+                ] .
+#        select: [sales > 10000 && interestCov > 4 ] ;
+         select: [ sales > 10000 ] .
+         select: [ "BA", "XON", "GE", "IBM", "WX" includesElement: ticker ] .
+;
+
+"
+#--------------------------------------------------------
+#  Build Sectors and Industries For newDowList Companies ...
+#--------------------------------------------------------
+" printNL;
+
+"NewDowList count= " print;
+newDowList count printNL;
+" " printNL;
+
+#--!sector <- Classification specialized;
+Entity createSubclass: "sector" ;
+!IE <- sector createInstance: "IE" .
+  do: [:name <- "Industrial Equipment";];
+!EN <- sector createInstance: "EN" .
+  do: [:name <- "Energy and Related";];
+!CP <- sector createInstance: "CP" .
+  do: [:name <- "Consumer Products";];
+!TE <- sector createInstance: "TE" .
+  do: [:name <- "Technology";];
+!CS <- sector createInstance: "CS" .
+  do: [:name <- "Consumer Staples";];
+
+Company defineFixedProperty: 'sector';
+Company instanceList do: [ :sector <- ^my sector ] ;
+Named Company do:
+        [ BA  :sector <- ^my IE;
+          XON :sector <- ^my EN;
+          GE  :sector <- ^my IE;
+          GM  :sector <- ^my CP;
+          IBM :sector <- ^my TE;
+          MO  :sector <- ^my CS;
+          WX  :sector <- ^my IE;
+          PG  :sector <- ^my CS;
+        ];
+
+sector defineMethod: [|print| ^self code print; ^self];
+sector defineMethod: [|print: aWidth| ^self code print; ^self];
+sector defineMethod: [|printNL| ^self code printNL; ^self];
+sector defineMethod: [|printNL: aWidth| ^self code printNL; ^self];
+
+#---!industry <- Classification specialized;
+Entity createSubclass: "industry" ;
+!Aerospace   <- industry createInstance: "Aerospace" .
+  do: [:name <- "Aerospace";];
+!OilProd     <- industry createInstance: "OilProd" .
+  do: [:name <- "Oil Products";];
+!ElecEquip   <- industry createInstance: "ElecEquip" .
+  do: [:name <- "Electrical Equipment";];
+!Auto        <- industry createInstance: "Auto" .
+  do: [:name <- "Automobiles";];
+!OfficeEquip <- industry createInstance: "OfficeEquip" .
+  do: [:name <- "Office Equipment";];
+!Tobacco     <- industry createInstance: "Tobacco" .
+  do: [:name <- "Tobacco";];
+!Soap        <- industry createInstance: "Soap" .
+  do: [:name <- "Soap and Cosmetics";];
+
+
+Company defineFixedProperty: 'industry';
+Company instanceList do: [ :industry <- ^my industry ] ;
+Named Company do:
+        [ BA  :industry <- ^my Aerospace;
+          XON :industry <- ^my OilProd;
+          GE  :industry <- ^my ElecEquip;
+          GM  :industry <- ^my Auto;
+          IBM :industry <- ^my OfficeEquip;
+          MO  :industry <- ^my Tobacco;
+          WX  :industry <- ^my ElecEquip;
+          PG  :industry <- ^my Soap;
+        ];
+
+industry defineMethod: [|print| ^self code print; ^self];
+industry defineMethod: [|print: aWidth| ^self code print; ^self];
+industry defineMethod: [|printNL| ^self code printNL; ^self];
+industry defineMethod: [|printNL: aWidth| ^self code printNL; ^self];
+
+newDowList do:
+        [ ticker printNL: 6;
+          "name" print: 15; name printNL: 35;
+          "sector" print: 15; sector printNL: 10;
+          sector do: 
+                [ "sector name" print: 15; name printNL: 30; ] ;
+          "industry" print: 15; industry printNL: 30;
+          industry do: 
+                [ "industry name" print: 15; name printNL: 30; ] ;
+          " " printNL;
+        ];
+
+"
+#--------------------------------------------------------
+#  Section 6: Lists
+#--------------------------------------------------------
+" printNL;
+
+newDowList groupedBy: [ sector ] .              # group by sector
+        do: ["SECTOR: " print;
+             name printNL;                      # print each sector's name
+             groupList groupedBy: [ industry] . # group companies in sector
+                                                # by industry
+             do:  [ "INDUSTRY: " print;
+                    name printNL;               # print each industry name
+                    groupList do:               # for each company in 
+                                                #     in industry do:
+                        [ "      " print;       
+                          name printNL;         # print company name
+                        ];
+                  ];
+            newLine print;
+            ];
+" " printNL;
+
+newDowList groupedBy: [sector] .
+do:     [ name printNL;
+        groupList
+        do:     [ "   " print; name print: 30;
+                  sales printNL;
+                ] ;
+        "SUB TOTALS: " print: 33;
+        groupList total: [sales] . printNL;
+        newLine print;
+        ] ;
+" " printNL;
+
+!autoList <- Named Company send: [GM, F, C, HMC];
+!techList <- Named Company send: [IBM, DEC, HWP, PRM, WAN\.B, HON, UIS, F];
+
+autoList count printNL;
+techList count printNL;
+
+!autoTechList <- autoList append: techList;
+autoTechList count printNL;
+autoTechList do: [name printNL;];
+
+!autoTechList <- autoList union: techList;
+autoTechList count printNL;
+
+!dowNoAutoList <- dowList exclude: autoList;
+dowNoAutoList count printNL;
+
+!autoInDowList <- autoList intersect: dowList;
+autoInDowList count printNL;
+
+"
+#--------------------------------------------------------
+#  Section 7: Time Series
+#--------------------------------------------------------
+" printNL;
+
+Named Company GM :sales asOf: 85 . printNL;
+Named Company GM :sales asOf: 8512 . printNL;
+Named Company GM :sales asOf: 19851231 . printNL;
+" " printNL;
+
+19851231 evaluate:
+        [ Named Company GM sales printNL;
+          Named Company IBM sales printNL;
+        ];
+" " printNL;
+
+19841231 to: 19851231 by: 1 yearEnds .
+evaluate:
+        [ Named Company GM sales print;
+          " " printNL;
+        ];
+
+19851231 to: 19841231 by: 1 yearEnds .
+evaluate:
+        [ Named Company GM sales print;
+          " " printNL;
+        ];
+
+19851231 to: 19841231 by: 1 yearEnds .
+evaluate:
+        [ ^date print;
+          Named Company GM sales print;
+          Named Company GM income print;
+          " " printNL;
+        ];
+" " printNL;
+
+!dr <- 19841231 to: 19851231 by: 1 yearEnds;
+dr evaluate: [^date print: 12];
+" " printNL;
+dr evaluate: [Named Company GM sales print: 12];
+" " printNL;
+dr evaluate: [Named Company GM income print: 12];
+" " printNL;
+
+dr evaluate: [^date year print: 12];
+" " printNL;
+
+19841231 to: 19851231 by: 1 monthEnds .
+evaluate: [^date printNL: 12];
+" " printNL;
+
+19841231 to: 19851231 by: 2 monthEnds .
+evaluate: [^date printNL: 12];
+" " printNL;
+
+(19870528 asDate + 0 quarterEnds) printNL;
+19851231 asDate - 1 yearEnds to: 19851231 asDate - 5 yearEnds by: 1 yearEnds .
+evaluate:
+        [^date printNL;];
+" " printNL;
+
+19861231 evaluate:
+        [ ^date print: 12;
+          ^date + 1 monthEnds print: 12;
+          ^date + 3 monthEnds print: 12;
+          ^date + 6 monthEnds print: 12;
+          ^date + 12 monthEnds printNL: 12;
+        ];
+" " printNL;
+
+(Named Company GM sales -
+   (Named Company GM :sales asOf: 19841231) ) printNL;
+" " printNL;
+
+19851231 evaluate:
+        [ (Named Company GM sales -
+          (Named Company GM :sales lag: 1 yearEnds) ) printNL;
+        ];
+" " printNL;
+
+19851231 evaluate:
+        [ Named Company GM :sales changeLag: 1 yearEnds . printNL];
+" " printNL;
+
+19861231 evaluate:
+        [ 100 * (Named Company GM sales /
+                (Named Company GM :sales lag: 3 yearEnds ) - 1 )
+          printNL: 20;
+        ];
+" " printNL;
+
+19861231 evaluate:
+        [ Named Company GM :sales pctChangeLag: 3 yearEnds . printNL: 20;];
+" " printNL;
+
+Company define: 'score';
+Named Company IBM score printNL;
+Named Company IBM :score asOf: 19870131 put: 7;
+Named Company IBM :score asOf: 19870131 . printNL;
+Named Company IBM score printNL;
+Named Company IBM :score asOf: 19870228 put: 9;
+Named Company IBM score printNL;
+" " printNL;
+
+Named Company DEC :score asOf: 19870228 put: 8;
+Named Company XON :score asOf: 19870228 put: 3;
+Named Company C   :score asOf: 19870228 put: 6;
+
+19870228 evaluate:
+        [
+         Named Company DEC :score put: 8;
+         Named Company XON :score put: 3;
+         Named Company C   :score put: 6;
+        ];
+
+Named Company do:
+        [DEC :score asOf: 19870228 . print: 12;
+         XON :score asOf: 19870228 . print: 12;
+         C   :score asOf: 19870228 . print: 12;
+        ];
+" " printNL;
+
+Named Company IBM :score displayAll;
+" " printNL;
+
+Named Company GM :score displayAll;
+
+Named Company IBM :score count printNL;
+Named Company GM :score count printNL;
+Named Company IBM :score firstDate printNL;
+Named Company IBM :score lastDate printNL; 
+Named Company IBM :score asOf: 19861231 . printNL;
+Named Company IBM :score asOf: 19870215 . printNL;
+Named Company IBM :score asOf: 20011231 . printNL;
+Named Company IBM :score effectiveDateAsOf: 19870215 . printNL;
+Named Company IBM :score nextDateAsOf: 19870215 . printNL;
+" " printNL;
+
+Named Company DEC :score asOf: 19870515 assign: 2;
+Named Company DEC :score asOf: 19870515 . printNL;
+Named Company DEC :score effectiveDateAsOf: 19870515 . printNL;
+Named Company DEC :score <- 9;
+Named Company DEC score printNL;
+Named Company DEC :score count printNL;
+Named Company DEC :score delete: 19870228;
+Named Company DEC :score count printNL;
+" " printNL;
+
+"These next 2 commands should produce errors ... " printNL;
+Named Company GM :sales displayAll;
+Named Company GM :sales asOf: 19871231 put: 100;
+
+Named Company GM :score printNL;
+Named Company GM :sales printNL;
+" " printNL;
+
+!aTimeSeries <- 
+        Named Company GM
+                :sales extractForDateRange: (811231 to: 851231 by: 1 yearEnds);
+aTimeSeries printNL;
+aTimeSeries asOf: 84 . printNL;
+aTimeSeries count printNL;
+aTimeSeries firstDate printNL;
+aTimeSeries lastDate printNL;
+aTimeSeries effectiveDateAsOf: 850630 . printNL;
+" " printNL;
+
+Named Company IBM :score average printNL;
+Named Company IBM do:
+        [ :score asOf: 8601 put: 1;
+          :score asOf: 8603 put: 4;
+        ];
+
+Named Company IBM :score 
+        extractForDateRange: (8601 to: 8603 by: 1 monthEnds) .
+                average printNL;
+Named Company IBM :score
+        aveForDateRange: (8601 to: 8603 by: 1 monthEnds) . printNL;
+
+
+###########################################################
+#		End of tests ...			  #
+###########################################################
+newLine print; "End of file: usersGuide.S" printNL; newLine print;
+?g
+?t
+Utility stopEchoToFile;
+?g
+

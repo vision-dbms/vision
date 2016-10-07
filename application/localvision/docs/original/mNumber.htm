@@ -1,0 +1,3143 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Messages: Number</title>
+</head>
+<body bgcolor=white>
+<p>
+<center> | <A href="FHome.htm">Home</A>
+ | <A href="clNumber.htm">Number Class  </A>
+ | <A href="mXRef.htm">Message XRef</A>
+ | <A href="Messages.htm">Messages (General)</A>
+ | 
+</center><hr>
+
+<center>
+<font face="Arial" color="darkblue" size=3 >
+<h3>Profile of Class <i>Number</i></h3>
+</center>
+</font><p>
+<blockquote><center><hr width=70%><p>
+Includes Classes: <i>Double, Float, Integer, Number, Ordinal</i>
+<p><hr width=70%></center></blockquote><p>
+<pre>
+
+<A href="clObject.htm">Object</A>
+  | 
+Ordinal
+  | 
+  +--- <b>Number</b>
+  |      |
+  |      +--- Double
+  |      |
+  |      +--- Float
+  |      |
+  |      +--- Integer
+</pre>
+<p><hr align=left width=70% ><p>
+
+The class Number is an abstract class that is used to organize the
+numeric classes in the VISION hierarchy.  Each different kind of
+numerical value is represented by one of three specializations of the
+class Number:  Double, Float, or Integer.  Most numbers are either
+Integer (no decimal value) or Double (decimal value).  The Float
+class is used for efficiency in storing numbers in large databases
+that are known not to require the extra precision and space
+associated with double precision numbers.  
+<p><hr align=left width=70% ><p>
+
+<font size=+1 face="Arial" color="darkred">Message Index</font>
+<p><img src="instdot.gif" align="middle" alt="o "><A href="#!="><b>!= aValue</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#*"><b>* aValue</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#*"><b>* aValue</b></A><i> (Float)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#*"><b>* aValue</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#+"><b>+ aValue</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#+"><b>+ aValue</b></A><i> (Float)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#+"><b>+ aValue</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#-"><b>- aValue</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#-"><b>- aValue</b></A><i> (Float)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#-"><b>- aValue</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#/"><b>/ aValue</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#/"><b>/ aValue</b></A><i> (Float)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#/"><b>/ aValue</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#<"><b>< aNumber</b></A><i> (Ordinal)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#<"><b>< aValue</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#<"><b>< aValue</b></A><i> (Float)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#<"><b>< aValue</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#<="><b><= aNumber</b></A><i> (Ordinal)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#<="><b><= aValue</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#<="><b><= aValue</b></A><i> (Float)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#<="><b><= aValue</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#="><b>= aValue</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#="><b>= aValue</b></A><i> (Float)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#="><b>= aValue</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#>"><b>> aNumber</b></A><i> (Ordinal)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#>"><b>> aValue</b></A><i> (Number)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#>="><b>>= aNumber</b></A><i> (Ordinal)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#>="><b>>= aValue</b></A><i> (Number)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#__asOpenVisionChannel"><b>__asOpenVisionChannel</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#__fixReference"><b>__fixReference</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#__fixReference"><b>__fixReference</b></A><i> (Float)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#__fixReference"><b>__fixReference</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#_integerRefTo:"><b>_integerRefTo:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#_nthPOPReferencedBy:"><b> _nthPOPReferencedBy: pop</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#_packPOPWithSpace:"><b> _packPOPWithSpace: space</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#_primitiveRefTo:"><b>_primitiveRefTo:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#absoluteValue"><b>absoluteValue</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#adjustedMod:"><b>adjustedMod: aNumber</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#arcCosine"><b>arcCosine</b></A><i> (Number)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#arcCosine"><b>arcCosine</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#arcSine"><b>arcSine</b></A><i> (Number)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#arcSine"><b>arcSine</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#arcTangent"><b>arcTangent</b></A><i> (Number)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#arcTangent"><b>arcTangent</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asAPowerOf:"><b>asAPowerOf: baseNumber</b></A><i> (Number)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asAPowerOf:"><b>asAPowerOf: aBaseNumber</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asClusterType"><b>asClusterType</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asDate"><b>asDate</b></A><i> (Number)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asDate"><b>asDate</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asDateFromMMDD"><b>asDateFromMMDD</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asDateFromMMDDYY"><b>asDateFromMMDDYY</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asDateFromMMDDYYYY"><b>asDateFromMMDDYYYY</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asDateFromMMYY"><b>asDateFromMMYY</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asDateFromYYMMDD"><b>asDateFromYYMMDD</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asDateFromYYYYMM"><b>asDateFromYYYYMM</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asDouble"><b>asDouble</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asDouble"><b>asDouble</b></A><i> (Float)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asDouble"><b>asDouble</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asFloat"><b>asFloat</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asFloat"><b>asFloat</b></A><i> (Float)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asFloat"><b>asFloat</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asInteger"><b>asInteger</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asInteger"><b>asInteger</b></A><i> (Float)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asInteger"><b>asInteger</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asMonthEnd"><b>asMonthEnd</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asMonthEndInYear:"><b>asMonthEndInYear: aYear</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asNumber"><b>asNumber</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asNumber"><b>asNumber</b></A><i> (Float)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asNumber"><b>asNumber</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asObjectSpace"><b>asObjectSpace</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asOpenVisionChannel"><b>asOpenVisionChannel</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asPOP"><b>asPOP</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asPointerTo:"><b>asPointerTo:</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asPointerTo:"><b>asPointerTo:</b></A><i> (Float)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asPointerTo:"><b>asPointerTo:</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asPrimitive"><b>asPrimitive</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asReferenceTo:"><b>asReferenceTo:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (Ordinal)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (Number)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (Float)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asString"><b>asString</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#base0CellPositionOf:"><b>base0CellPositionOf: aList</b></A><i> (Number)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#base0CellPositionOf:"><b>base0CellPositionOf: aList</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#base1CellPositionOf:"><b>base1CellPositionOf: aList</b></A><i> (Number)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#base1CellPositionOf:"><b>base1CellPositionOf: aList</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#basicAsDate"><b>basicAsDate</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#becomeSeekOffsetOf:"><b>becomeSeekOffsetOf: openVisionChannel</b></A><i> (Number)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#becomeSeekOffsetOf:"><b>becomeSeekOffsetOf: openVisionChannel</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#between:and:"><b>between: anOrdinal1 and: anOrdinal2</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#businessDays"><b>businessDays</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#canonicalizedForSort"><b>canonicalizedForSort</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#canonicalizedForSort"><b>canonicalizedForSort</b></A><i> (Float)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#canonicalizedForSort"><b>canonicalizedForSort</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (Ordinal)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (Number)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (Float)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#convertFrom:"><b> convertFrom: string</b></A><i> (Number)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#convertFrom:"><b> convertFrom: string</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#convertFrom:"><b> convertFrom: string</b></A><i> (Float)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#convertFrom:"><b> convertFrom: string</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#cosine"><b>cosine</b></A><i> (Number)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#cosine"><b>cosine</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#days"><b>days</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (Ordinal)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (Number)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (Float)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#dividedInto:"><b>dividedInto:</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#dividedInto:"><b>dividedInto:</b></A><i> (Float)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#dividedInto:"><b>dividedInto:</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#dropFromString:"><b>dropFromString: aString</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#evaluate:"><b>evaluate: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#exp"><b>exp</b></A><i> (Number)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#exp"><b>exp</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#fillFromString:"><b>fillFromString: aString</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#getStringFrom:"><b>getStringFrom: openVisionChannel</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#hyperbolicCosine"><b>hyperbolicCosine</b></A><i> (Number)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#hyperbolicCosine"><b>hyperbolicCosine</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#hyperbolicSine"><b>hyperbolicSine</b></A><i> (Number)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#hyperbolicSine"><b>hyperbolicSine</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#hyperbolicTangent"><b>hyperbolicTangent</b></A><i> (Number)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#hyperbolicTangent"><b>hyperbolicTangent</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#inRange:"><b>Ordinal inRange: aList</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#inSet:"><b>inSet: aList</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#inputExpression"><b>inputExpression</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#instancesAdjacentTo:"><b>instancesAdjacentTo:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isDouble"><b>isDouble</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isFloat"><b>isFloat</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isInteger"><b>isInteger</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isNumber"><b>isNumber</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isOrdinal"><b>isOrdinal</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#log"><b>log</b></A><i> (Number)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#log"><b>log</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#log:"><b>log: aNumber </b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#max:"><b>max: aNumber</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#min:"><b>min: aNumber</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#mod:"><b>mod: aValue</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#monthBeginnings"><b>monthBeginnings</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#monthEnds"><b>monthEnds</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#months"><b>months</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#negated"><b>negated</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#new"><b>new</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#notBetween:and:"><b>notBetween: anOrdinal1 and: anOrdinal2</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#numberOfDigits"><b>numberOfDigits</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#orderUsingDictionary:"><b>orderUsingDictionary:</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#orderUsingDictionary:"><b>orderUsingDictionary:</b></A><i> (Float)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#orderUsingDictionary:"><b>orderUsingDictionary:</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#pctChangeTo:"><b>pctChangeTo: aNumber</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#prefixWith:"><b>prefixWith: aString</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#print"><b>print</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#print"><b>print</b></A><i> (Float)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#print"><b>print</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#print:"><b>print: aNumber</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#printOf:"><b>printOf:</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#printOf:"><b> printOf: anObject</b></A><i> (Float)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#printOf:"><b>printOf:</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#printWithCommas:"><b>printWithCommas: aNumber</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#printWithCommasOf:"><b>printWithCommasOf:</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#printWithCommasOf:"><b>printWithCommasOf: anObject</b></A><i> (Float)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#printWithCommasOf:"><b>printWithCommasOf:</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#printWithLeadingZeros:"><b>printWithLeadingZeros: width</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#printWithLeadingZerosNL:"><b>printWithLeadingZerosNL: width</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#putByteTo:"><b>putByteTo: openVisionChannel</b></A><i> (Number)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#putByteTo:"><b>putByteTo:</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#putDoubleTo:"><b>putDoubleTo: openVisionChannel</b></A><i> (Number)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#putDoubleTo:"><b>putDoubleTo:</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#putFloatTo:"><b>putFloatTo: openVisionChannel</b></A><i> (Number)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#putFloatTo:"><b>putFloatTo:</b></A><i> (Float)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#putLongTo:"><b>putLongTo: openVisionChannel</b></A><i> (Number)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#putLongTo:"><b>putLongTo:</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#putShortTo:"><b>putShortTo: openVisionChannel</b></A><i> (Number)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#putShortTo:"><b>putShortTo:</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#quarterBeginnings"><b>quarterBeginnings</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#quarterEnds"><b>quarterEnds</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#quarters"><b>quarters</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#round"><b>round</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#round:"><b>round: anInteger</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#sequence"><b>sequence</b></A><i> (Number)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#sequence"><b>sequence</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#sequence0"><b>sequence0</b></A><i> (Number)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#sequence0"><b>sequence0</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#sequenceTo:"><b>sequenceTo: endNumber</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#sign"><b>sign</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#sine"><b>sine</b></A><i> (Number)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#sine"><b>sine</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#sprint:"><b>sprint: aNumber</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#sprintOf:"><b>sprintOf:</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#sprintOf:"><b> sprintOf: anObject</b></A><i> (Float)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#sprintOf:"><b>sprintOf:</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#sprintWithCommas:"><b>sprintWithCommas: aNumber</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#sprintWithCommasOf:"><b>sprintWithCommasOf:</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#sprintWithCommasOf:"><b>sprintWithCommasOf: anObject</b></A><i> (Float)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#sprintWithCommasOf:"><b>sprintWithCommasOf:</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#sqrt"><b>sqrt</b></A><i> (Number)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#sqrt"><b>sqrt</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#subtractedFrom:"><b>subtractedFrom:</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#subtractedFrom:"><b>subtractedFrom:</b></A><i> (Float)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#subtractedFrom:"><b>subtractedFrom:</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#takeFromString:"><b>takeFromString: aString</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#tangent"><b>tangent</b></A><i> (Number)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#tangent"><b>tangent</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#to:by:"><b>to: aDate by: aDateOffset</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#toThe:"><b>toThe: aNumber</b></A><i> (Number)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#toThe:"><b>toThe: aValue</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (Ordinal)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (Number)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (Double)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (Float)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (Integer)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#within:percentOf:"><b>within: x percentOf: y</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#yearBeginnings"><b>yearBeginnings</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#yearEnds"><b>yearEnds</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#years"><b>years</b></A><br>
+<p><hr align=left width=70% ><p>
+
+<font size=+1 face="Arial" color="darkred">Messages</font>
+<p><img src="instdot.gif" align="middle" alt="o "><A name="!="></A><b>!=</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number != aValue</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if supplied value is not equal to recipient Number.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Value<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#!=">Date</A> | <A href="mObject.htm#!=">Object</A> | <A href="mString.htm#!=">String</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="*"></A><b>*</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double * aValue</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Multiplies recipient by the supplied value.  If invalid parameter is given, 
+it returns NA.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mOffset.htm#*">DateOffset</A> | <A href="mList.htm#*">List</A> | <A href="mTS.htm#*">TimeSeries</A> | <A href="mNA.htm#*">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="*"></A><b>*</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Float * aValue</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Multiplies recipient by the supplied value.  If an invalid paramter is given, 
+it returns NA.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Also Defined At: </b><br>
+ | <A href="mOffset.htm#*">DateOffset</A> | <A href="mList.htm#*">List</A> | <A href="mTS.htm#*">TimeSeries</A> | <A href="mNA.htm#*">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="*"></A><b>*</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer * aValue</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Multiplies recipient by the supplied value.  If an invalid parameter is 
+given, it returns NA.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Also Defined At: </b><br>
+ | <A href="mOffset.htm#*">DateOffset</A> | <A href="mList.htm#*">List</A> | <A href="mTS.htm#*">TimeSeries</A> | <A href="mNA.htm#*">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="+"></A><b>+</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double + aValue</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Adds supplied value to the recipient.  If an invalid parameter is given, it 
+returns NA.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#+">Date</A> | <A href="mOffset.htm#+">DateOffset</A> | <A href="mList.htm#+">List</A> | <A href="mTS.htm#+">TimeSeries</A> | <A href="mNA.htm#+">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="+"></A><b>+</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Float + aValue</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Adds supplied value to the recipient.  If an invalid parameter is given, it 
+returns NA.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#+">Date</A> | <A href="mOffset.htm#+">DateOffset</A> | <A href="mList.htm#+">List</A> | <A href="mTS.htm#+">TimeSeries</A> | <A href="mNA.htm#+">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="+"></A><b>+</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer + aValue</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Adds supplied value to the recipient.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#+">Date</A> | <A href="mOffset.htm#+">DateOffset</A> | <A href="mList.htm#+">List</A> | <A href="mTS.htm#+">TimeSeries</A> | <A href="mNA.htm#+">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="-"></A><b>-</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double - aValue</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Subtracts supplied value from the recipient.  If an invalid parameter is 
+given, it returns NA.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#-">Date</A> | <A href="mList.htm#-">List</A> | <A href="mTS.htm#-">TimeSeries</A> | <A href="mNA.htm#-">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="-"></A><b>-</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Float - aValue</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Subtracts supplied value from the recipient.  If an invalid parameter is given, 
+it returns NA.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#-">Date</A> | <A href="mList.htm#-">List</A> | <A href="mTS.htm#-">TimeSeries</A> | <A href="mNA.htm#-">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="-"></A><b>-</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer - aValue</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Subtracts supplied value from the recipient.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#-">Date</A> | <A href="mList.htm#-">List</A> | <A href="mTS.htm#-">TimeSeries</A> | <A href="mNA.htm#-">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="/"></A><b>/</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double / aValue</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Divides recipient by the supplied value.  If invalid parameter is given, it 
+returns NA.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mList.htm#/">List</A> | <A href="mTS.htm#/">TimeSeries</A> | <A href="mNA.htm#/">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="/"></A><b>/</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Float / aValue</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Divides recipient by the supplied value.  If an invalid parameter is given, 
+it returns NA.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Also Defined At: </b><br>
+ | <A href="mList.htm#/">List</A> | <A href="mTS.htm#/">TimeSeries</A> | <A href="mNA.htm#/">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="/"></A><b>/</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer / aValue</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Divides recipient by the supplied value.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Also Defined At: </b><br>
+ | <A href="mList.htm#/">List</A> | <A href="mTS.htm#/">TimeSeries</A> | <A href="mNA.htm#/">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="<"></A><b><</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal < aNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient is smaller than supplied value.  Each subclass of Ordinal 
+must redefine this message.  If a subclass does not implement <, then an 
+attempt to send the message to a subclass results in an error message of the 
+form: >>> '<' must be implemented for 'recipient' <<<.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#<">Date</A> | <A href="mObject.htm#<">Object</A> | <A href="mString.htm#<">String</A> | <A href="mNA.htm#<">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="<"></A><b><</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double < aValue</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient is less than supplied value.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#<">Date</A> | <A href="mObject.htm#<">Object</A> | <A href="mString.htm#<">String</A> | <A href="mNA.htm#<">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="<"></A><b><</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Float < aValue</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient is less that supplied value.  If an invalid parameter is 
+given, it returns NA.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#<">Date</A> | <A href="mObject.htm#<">Object</A> | <A href="mString.htm#<">String</A> | <A href="mNA.htm#<">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="<"></A><b><</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer < aValue</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient is less than supplied value.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#<">Date</A> | <A href="mObject.htm#<">Object</A> | <A href="mString.htm#<">String</A> | <A href="mNA.htm#<">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="<="></A><b><=</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal <= aNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient is smaller than or equal to supplied value.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#<=">Date</A> | <A href="mObject.htm#<=">Object</A> | <A href="mString.htm#<=">String</A> | <A href="mNA.htm#<=">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="<="></A><b><=</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double <= aValue</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient is less than or equal to supplied value.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#<=">Date</A> | <A href="mObject.htm#<=">Object</A> | <A href="mString.htm#<=">String</A> | <A href="mNA.htm#<=">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="<="></A><b><=</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Float <= aValue</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient is less than or equal to supplied value.  If an invalid 
+parameter is given, it returns NA.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#<=">Date</A> | <A href="mObject.htm#<=">Object</A> | <A href="mString.htm#<=">String</A> | <A href="mNA.htm#<=">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="<="></A><b><=</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer <= aValue</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient is less than or equal to supplied value.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#<=">Date</A> | <A href="mObject.htm#<=">Object</A> | <A href="mString.htm#<=">String</A> | <A href="mNA.htm#<=">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="="></A><b>=</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double = aValue</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient equals the supplied value.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#=">Date</A> | <A href="mDate.htm#=">DateRange</A> | <A href="mObject.htm#=">Object</A> | <A href="mString.htm#=">String</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="="></A><b>=</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Float = aValue</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient equals the supplied value.  If an invalid parameter is 
+given, it returns NA.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#=">Date</A> | <A href="mDate.htm#=">DateRange</A> | <A href="mObject.htm#=">Object</A> | <A href="mString.htm#=">String</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="="></A><b>=</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer = aValue</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient equals the supplied value.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#=">Date</A> | <A href="mDate.htm#=">DateRange</A> | <A href="mObject.htm#=">Object</A> | <A href="mString.htm#=">String</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name=">"></A><b>></b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal > aNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient is larger than supplied value.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#>">Date</A> | <A href="mNumber.htm#>">Number</A> | <A href="mObject.htm#>">Object</A> | <A href="mString.htm#>">String</A> | <A href="mNA.htm#>">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name=">"></A><b>></b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number > aValue</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient Number is greater than supplied value.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Value<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#>">Date</A> | <A href="mObject.htm#>">Object</A> | <A href="mString.htm#>">String</A> | <A href="mNA.htm#>">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name=">="></A><b>>=</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal >= aNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient is larger than or equal to supplied value.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#>=">Date</A> | <A href="mNumber.htm#>=">Number</A> | <A href="mObject.htm#>=">Object</A> | <A href="mString.htm#>=">String</A> | <A href="mNA.htm#>=">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name=">="></A><b>>=</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number >= aValue</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient Number is greater than or equal to supplied value.  If 
+invalid parameter is supplied, NA is returned.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Value<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#>=">Date</A> | <A href="mObject.htm#>=">Object</A> | <A href="mString.htm#>=">String</A> | <A href="mNA.htm#>=">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="__asOpenVisionChannel"></A><b>__asOpenVisionChannel</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer __asOpenVisionChannel</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mString.htm#__asOpenVisionChannel">String</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="__fixReference"></A><b>__fixReference</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double __fixReference</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#__fixReference">Date</A> | <A href="mOffset.htm#__fixReference">DateOffset</A> | <A href="mObject.htm#__fixReference">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="__fixReference"></A><b>__fixReference</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Float __fixReference</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#__fixReference">Date</A> | <A href="mOffset.htm#__fixReference">DateOffset</A> | <A href="mObject.htm#__fixReference">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="__fixReference"></A><b>__fixReference</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer __fixReference</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#__fixReference">Date</A> | <A href="mOffset.htm#__fixReference">DateOffset</A> | <A href="mObject.htm#__fixReference">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="_integerRefTo:"></A><b>_integerRefTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer _integerRefTo:</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="_nthPOPReferencedBy:"></A><b>_nthPOPReferencedBy:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer  _nthPOPReferencedBy: pop</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="_packPOPWithSpace:"></A><b>_packPOPWithSpace:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer  _packPOPWithSpace: space</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="_primitiveRefTo:"></A><b>_primitiveRefTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer _primitiveRefTo:</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="absoluteValue"></A><b>absoluteValue</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number absoluteValue</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the absolute value of the Number.  Non-negative values return 
+unchanged; negative values returned without the negative sign.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#absoluteValue">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="adjustedMod:"></A><b>adjustedMod:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer adjustedMod: aNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the recipient modulo supplied number as a value from 1 to
+aNumber (instead of mod: which returns a number from 0 to aNumber - 1).</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="arcCosine"></A><b>arcCosine</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number arcCosine</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Basic mathematical function.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNA.htm">Undefined</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="arcCosine"></A><b>arcCosine</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double arcCosine</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Basic mathematical function.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNA.htm">Undefined</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNumber.htm#arcCosine">Number</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="arcSine"></A><b>arcSine</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number arcSine</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Basic mathematical function.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNA.htm">Undefined</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="arcSine"></A><b>arcSine</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double arcSine</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Basic mathematical function.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNA.htm">Undefined</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNumber.htm#arcSine">Number</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="arcTangent"></A><b>arcTangent</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number arcTangent</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Basic mathematical function.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="arcTangent"></A><b>arcTangent</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double arcTangent</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Basic mathematical function.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Also Defined At: </b><br>
+ | <A href="mNumber.htm#arcTangent">Number</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asAPowerOf:"></A><b>asAPowerOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number asAPowerOf: baseNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Raises the baseNumber to the recipient Number power 
+(baseNumber ^ recipient).</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#asAPowerOf:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asAPowerOf:"></A><b>asAPowerOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double asAPowerOf: aBaseNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Raises supplied number to the recipient power (baseNumber ^recipient).</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNumber.htm#asAPowerOf:">Number</A> | <A href="mNA.htm#asAPowerOf:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asClusterType"></A><b>asClusterType</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer asClusterType</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#asClusterType">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asDate"></A><b>asDate</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number asDate</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts the recipient Number into a Date.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDate.htm">Date</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#asDate">Date</A> | <A href="mOffset.htm#asDate">DateOffset</A> | <A href="mString.htm#asDate">String</A> | <A href="mNA.htm#asDate">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asDate"></A><b>asDate</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer asDate</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts an Integer into a Date.  Assumes recipient is in one of the 
+following forms: YYYYMMDD, YYMMDD, YYMM, YY.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDate.htm">Date</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#asDate">Date</A> | <A href="mOffset.htm#asDate">DateOffset</A> | <A href="mNumber.htm#asDate">Number</A> | <A href="mString.htm#asDate">String</A> | <A href="mNA.htm#asDate">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asDateFromMMDD"></A><b>asDateFromMMDD</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer asDateFromMMDD</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts an integer in month-day form to a date.  Invalid month-day 
+combination returns an NA.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDate.htm">Date</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asDateFromMMDDYY"></A><b>asDateFromMMDDYY</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer asDateFromMMDDYY</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts an integer in month-day-year form to a date. Invalid month-day-year 
+combination returns an NA.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDate.htm">Date</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asDateFromMMDDYYYY"></A><b>asDateFromMMDDYYYY</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer asDateFromMMDDYYYY</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts an integer in month-day-year form to a date. Invalid month-day-year 
+combination returns an NA.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDate.htm">Date</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asDateFromMMYY"></A><b>asDateFromMMYY</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer asDateFromMMYY</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts an integer in month-year format to a date. Invalid month-year 
+combination returns an NA.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDate.htm">Date</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asDateFromYYMMDD"></A><b>asDateFromYYMMDD</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer asDateFromYYMMDD</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asDateFromYYYYMM"></A><b>asDateFromYYYYMM</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer asDateFromYYYYMM</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts integer to a month-end date where year is represented by the<br>
+full four digits.  For example:<br>
+     200012 asDateFromYYYYMM<br>
+returns the date 12/31/2000.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDate.htm">Date</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asDouble"></A><b>asDouble</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double asDouble</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns recipient stripped of any extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#asDouble">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asDouble"></A><b>asDouble</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Float asDouble</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts recipient into a Number of class Double</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#asDouble">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asDouble"></A><b>asDouble</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer asDouble</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts recipient into a Number of class Double.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#asDouble">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asFloat"></A><b>asFloat</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double asFloat</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts recipient into a Number of class Float.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Float
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#asFloat">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asFloat"></A><b>asFloat</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Float asFloat</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns recipient stripped of any extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Float
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#asFloat">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asFloat"></A><b>asFloat</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer asFloat</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts recipient into a Number of class Float.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Float
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#asFloat">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asInteger"></A><b>asInteger</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double asInteger</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts recipient into a Number of class Integer.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Integer
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#asInteger">Date</A> | <A href="mOffset.htm#asInteger">DateOffset</A> | <A href="mString.htm#asInteger">String</A> | <A href="mNA.htm#asInteger">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asInteger"></A><b>asInteger</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Float asInteger</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts recipient into a Number of class Integer.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Integer
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#asInteger">Date</A> | <A href="mOffset.htm#asInteger">DateOffset</A> | <A href="mString.htm#asInteger">String</A> | <A href="mNA.htm#asInteger">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asInteger"></A><b>asInteger</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer asInteger</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns recipient stripped of any extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Integer
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#asInteger">Date</A> | <A href="mOffset.htm#asInteger">DateOffset</A> | <A href="mString.htm#asInteger">String</A> | <A href="mNA.htm#asInteger">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asMonthEnd"></A><b>asMonthEnd</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer asMonthEnd</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns month-end date in current year for month represented by recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDate.htm">Date</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#asMonthEnd">Date</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asMonthEndInYear:"></A><b>asMonthEndInYear:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer asMonthEndInYear: aYear</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns month-end date in supplied year for month represented by recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDate.htm">Date</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Integer<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asNumber"></A><b>asNumber</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double asNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns recipient stripped of any extensions.  Same message as 'asDouble'.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Also Defined At: </b><br>
+ | <A href="mString.htm#asNumber">String</A> | <A href="mNA.htm#asNumber">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asNumber"></A><b>asNumber</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Float asNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns recipient stripped of any extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Float
+<p><b>Also Defined At: </b><br>
+ | <A href="mString.htm#asNumber">String</A> | <A href="mNA.htm#asNumber">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asNumber"></A><b>asNumber</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer asNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns recipient stripped of any extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Integer
+<p><b>Also Defined At: </b><br>
+ | <A href="mString.htm#asNumber">String</A> | <A href="mNA.htm#asNumber">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asObjectSpace"></A><b>asObjectSpace</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer asObjectSpace</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#asObjectSpace">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asOpenVisionChannel"></A><b>asOpenVisionChannel</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer asOpenVisionChannel</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mString.htm#asOpenVisionChannel">String</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asPOP"></A><b>asPOP</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer asPOP</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#asPOP">Object</A> | <A href="mNA.htm#asPOP">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asPointerTo:"></A><b>asPointerTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double asPointerTo:</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#asPointerTo:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asPointerTo:"></A><b>asPointerTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Float asPointerTo:</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#asPointerTo:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asPointerTo:"></A><b>asPointerTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer asPointerTo:</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#asPointerTo:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asPrimitive"></A><b>asPrimitive</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer asPrimitive</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asReferenceTo:"></A><b>asReferenceTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer asReferenceTo:</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the original object.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Ordinal
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#asSelf">Block</A> | <A href="mBoolean.htm#asSelf">Boolean</A> | <A href="mClassify.htm#asSelf">Classification</A> | <A href="mCollect.htm#asSelf">Collection</A> | <A href="mCurrency.htm#asSelf">Currency</A> | <A href="mDate.htm#asSelf">Date</A> | <A href="mOffset.htm#asSelf">DateOffset</A> | <A href="mDate.htm#asSelf">DateRange</A> | <A href="mDict.htm#asSelf">Dictionary</A> | <A href="mEntity.htm#asSelf">Entity</A> | <A href="mIList.htm#asSelf">IndexedList</A> | <A href="mInterface.htm#asSelf">Interface</A> | <A href="mList.htm#asSelf">List</A> | <A href="mNumber.htm#asSelf">Number</A> | <A href="mObject.htm#asSelf">Object</A> | <A href="mOpenVision.htm#asSelf">OpenVision</A> | <A href="mSchema.htm#asSelf">Schema</A> | <A href="mString.htm#asSelf">String</A> | <A href="mTS.htm#asSelf">TimeSeries</A> | <A href="mNA.htm#asSelf">Undefined</A> | <A href="mUtil.htm#asSelf">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the original object.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#asSelf">Block</A> | <A href="mBoolean.htm#asSelf">Boolean</A> | <A href="mClassify.htm#asSelf">Classification</A> | <A href="mCollect.htm#asSelf">Collection</A> | <A href="mCurrency.htm#asSelf">Currency</A> | <A href="mDate.htm#asSelf">Date</A> | <A href="mOffset.htm#asSelf">DateOffset</A> | <A href="mDate.htm#asSelf">DateRange</A> | <A href="mDict.htm#asSelf">Dictionary</A> | <A href="mEntity.htm#asSelf">Entity</A> | <A href="mIList.htm#asSelf">IndexedList</A> | <A href="mInterface.htm#asSelf">Interface</A> | <A href="mList.htm#asSelf">List</A> | <A href="mObject.htm#asSelf">Object</A> | <A href="mOpenVision.htm#asSelf">OpenVision</A> | <A href="mSchema.htm#asSelf">Schema</A> | <A href="mString.htm#asSelf">String</A> | <A href="mTS.htm#asSelf">TimeSeries</A> | <A href="mNA.htm#asSelf">Undefined</A> | <A href="mUtil.htm#asSelf">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the original object.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#asSelf">Block</A> | <A href="mBoolean.htm#asSelf">Boolean</A> | <A href="mClassify.htm#asSelf">Classification</A> | <A href="mCollect.htm#asSelf">Collection</A> | <A href="mCurrency.htm#asSelf">Currency</A> | <A href="mDate.htm#asSelf">Date</A> | <A href="mOffset.htm#asSelf">DateOffset</A> | <A href="mDate.htm#asSelf">DateRange</A> | <A href="mDict.htm#asSelf">Dictionary</A> | <A href="mEntity.htm#asSelf">Entity</A> | <A href="mIList.htm#asSelf">IndexedList</A> | <A href="mInterface.htm#asSelf">Interface</A> | <A href="mList.htm#asSelf">List</A> | <A href="mNumber.htm#asSelf">Number</A> | <A href="mObject.htm#asSelf">Object</A> | <A href="mOpenVision.htm#asSelf">OpenVision</A> | <A href="mSchema.htm#asSelf">Schema</A> | <A href="mString.htm#asSelf">String</A> | <A href="mTS.htm#asSelf">TimeSeries</A> | <A href="mNA.htm#asSelf">Undefined</A> | <A href="mUtil.htm#asSelf">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Float asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the original object.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Float
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#asSelf">Block</A> | <A href="mBoolean.htm#asSelf">Boolean</A> | <A href="mClassify.htm#asSelf">Classification</A> | <A href="mCollect.htm#asSelf">Collection</A> | <A href="mCurrency.htm#asSelf">Currency</A> | <A href="mDate.htm#asSelf">Date</A> | <A href="mOffset.htm#asSelf">DateOffset</A> | <A href="mDate.htm#asSelf">DateRange</A> | <A href="mDict.htm#asSelf">Dictionary</A> | <A href="mEntity.htm#asSelf">Entity</A> | <A href="mIList.htm#asSelf">IndexedList</A> | <A href="mInterface.htm#asSelf">Interface</A> | <A href="mList.htm#asSelf">List</A> | <A href="mNumber.htm#asSelf">Number</A> | <A href="mObject.htm#asSelf">Object</A> | <A href="mOpenVision.htm#asSelf">OpenVision</A> | <A href="mSchema.htm#asSelf">Schema</A> | <A href="mString.htm#asSelf">String</A> | <A href="mTS.htm#asSelf">TimeSeries</A> | <A href="mNA.htm#asSelf">Undefined</A> | <A href="mUtil.htm#asSelf">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the original object.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Integer
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#asSelf">Block</A> | <A href="mBoolean.htm#asSelf">Boolean</A> | <A href="mClassify.htm#asSelf">Classification</A> | <A href="mCollect.htm#asSelf">Collection</A> | <A href="mCurrency.htm#asSelf">Currency</A> | <A href="mDate.htm#asSelf">Date</A> | <A href="mOffset.htm#asSelf">DateOffset</A> | <A href="mDate.htm#asSelf">DateRange</A> | <A href="mDict.htm#asSelf">Dictionary</A> | <A href="mEntity.htm#asSelf">Entity</A> | <A href="mIList.htm#asSelf">IndexedList</A> | <A href="mInterface.htm#asSelf">Interface</A> | <A href="mList.htm#asSelf">List</A> | <A href="mNumber.htm#asSelf">Number</A> | <A href="mObject.htm#asSelf">Object</A> | <A href="mOpenVision.htm#asSelf">OpenVision</A> | <A href="mSchema.htm#asSelf">Schema</A> | <A href="mString.htm#asSelf">String</A> | <A href="mTS.htm#asSelf">TimeSeries</A> | <A href="mNA.htm#asSelf">Undefined</A> | <A href="mUtil.htm#asSelf">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asString"></A><b>asString</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer asString</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts recipient integer into a string.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#asString">Object</A> | <A href="mString.htm#asString">String</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="base0CellPositionOf:"></A><b>base0CellPositionOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number base0CellPositionOf: aList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="base0CellPositionOf:"></A><b>base0CellPositionOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer base0CellPositionOf: aList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNumber.htm#base0CellPositionOf:">Number</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="base1CellPositionOf:"></A><b>base1CellPositionOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number base1CellPositionOf: aList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="base1CellPositionOf:"></A><b>base1CellPositionOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer base1CellPositionOf: aList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNumber.htm#base1CellPositionOf:">Number</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="basicAsDate"></A><b>basicAsDate</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer basicAsDate</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts an Integer of form (YYYYMMDD) into a Date. Assumes Integer is in the 
+form YYYYMMDD (e.g., 19920922 for September 22, 1992).  To construct a date 
+from three numbers, year, month, and day the following approach can be used: 
+(year * 10000 + month * 100 + day) asInteger asDate.  See the 'asDate' message 
+for a more general implementation.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDate.htm">Date</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#basicAsDate">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="becomeSeekOffsetOf:"></A><b>becomeSeekOffsetOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number becomeSeekOffsetOf: openVisionChannel</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="becomeSeekOffsetOf:"></A><b>becomeSeekOffsetOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer becomeSeekOffsetOf: openVisionChannel</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNumber.htm#becomeSeekOffsetOf:">Number</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="between:and:"></A><b>between:and:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal between: anOrdinal1 and: anOrdinal2</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient Ordinal is between supplied Ordinal1 and
+supplied Ordinal2</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+2 - String<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#between:and:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="businessDays"></A><b>businessDays</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer businessDays</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts the recipient into a BusinessDays DateOffset. Used in conjunction 
+with DateRange formation and date arithmetic.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>BusinessDays
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="canonicalizedForSort"></A><b>canonicalizedForSort</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double canonicalizedForSort</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#canonicalizedForSort">Object</A> | <A href="mString.htm#canonicalizedForSort">String</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="canonicalizedForSort"></A><b>canonicalizedForSort</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Float canonicalizedForSort</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#canonicalizedForSort">Object</A> | <A href="mString.htm#canonicalizedForSort">String</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="canonicalizedForSort"></A><b>canonicalizedForSort</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer canonicalizedForSort</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#canonicalizedForSort">Object</A> | <A href="mString.htm#canonicalizedForSort">String</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reference to the object which describes the class.  Class level information 
+is stored here.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#classDescriptor">Block</A> | <A href="mBoolean.htm#classDescriptor">Boolean</A> | <A href="mClassify.htm#classDescriptor">Classification</A> | <A href="mCollect.htm#classDescriptor">Collection</A> | <A href="mCurrency.htm#classDescriptor">Currency</A> | <A href="mDate.htm#classDescriptor">Date</A> | <A href="mOffset.htm#classDescriptor">DateOffset</A> | <A href="mDate.htm#classDescriptor">DateRange</A> | <A href="mDict.htm#classDescriptor">Dictionary</A> | <A href="mEntity.htm#classDescriptor">Entity</A> | <A href="mIList.htm#classDescriptor">IndexedList</A> | <A href="mInterface.htm#classDescriptor">Interface</A> | <A href="mList.htm#classDescriptor">List</A> | <A href="mNumber.htm#classDescriptor">Number</A> | <A href="mObject.htm#classDescriptor">Object</A> | <A href="mOpenVision.htm#classDescriptor">OpenVision</A> | <A href="mSchema.htm#classDescriptor">Schema</A> | <A href="mString.htm#classDescriptor">String</A> | <A href="mTS.htm#classDescriptor">TimeSeries</A> | <A href="mNA.htm#classDescriptor">Undefined</A> | <A href="mUtil.htm#classDescriptor">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reference to the object which describes the class.  Class level information 
+is stored here.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#classDescriptor">Block</A> | <A href="mBoolean.htm#classDescriptor">Boolean</A> | <A href="mClassify.htm#classDescriptor">Classification</A> | <A href="mCollect.htm#classDescriptor">Collection</A> | <A href="mCurrency.htm#classDescriptor">Currency</A> | <A href="mDate.htm#classDescriptor">Date</A> | <A href="mOffset.htm#classDescriptor">DateOffset</A> | <A href="mDate.htm#classDescriptor">DateRange</A> | <A href="mDict.htm#classDescriptor">Dictionary</A> | <A href="mEntity.htm#classDescriptor">Entity</A> | <A href="mIList.htm#classDescriptor">IndexedList</A> | <A href="mInterface.htm#classDescriptor">Interface</A> | <A href="mList.htm#classDescriptor">List</A> | <A href="mObject.htm#classDescriptor">Object</A> | <A href="mOpenVision.htm#classDescriptor">OpenVision</A> | <A href="mSchema.htm#classDescriptor">Schema</A> | <A href="mString.htm#classDescriptor">String</A> | <A href="mTS.htm#classDescriptor">TimeSeries</A> | <A href="mNA.htm#classDescriptor">Undefined</A> | <A href="mUtil.htm#classDescriptor">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reference to the object which describes the class.  Class level information 
+is stored here.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#classDescriptor">Block</A> | <A href="mBoolean.htm#classDescriptor">Boolean</A> | <A href="mClassify.htm#classDescriptor">Classification</A> | <A href="mCollect.htm#classDescriptor">Collection</A> | <A href="mCurrency.htm#classDescriptor">Currency</A> | <A href="mDate.htm#classDescriptor">Date</A> | <A href="mOffset.htm#classDescriptor">DateOffset</A> | <A href="mDate.htm#classDescriptor">DateRange</A> | <A href="mDict.htm#classDescriptor">Dictionary</A> | <A href="mEntity.htm#classDescriptor">Entity</A> | <A href="mIList.htm#classDescriptor">IndexedList</A> | <A href="mInterface.htm#classDescriptor">Interface</A> | <A href="mList.htm#classDescriptor">List</A> | <A href="mNumber.htm#classDescriptor">Number</A> | <A href="mObject.htm#classDescriptor">Object</A> | <A href="mOpenVision.htm#classDescriptor">OpenVision</A> | <A href="mSchema.htm#classDescriptor">Schema</A> | <A href="mString.htm#classDescriptor">String</A> | <A href="mTS.htm#classDescriptor">TimeSeries</A> | <A href="mNA.htm#classDescriptor">Undefined</A> | <A href="mUtil.htm#classDescriptor">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Float classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reference to the object which describes the class.  Class level information 
+is stored here.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#classDescriptor">Block</A> | <A href="mBoolean.htm#classDescriptor">Boolean</A> | <A href="mClassify.htm#classDescriptor">Classification</A> | <A href="mCollect.htm#classDescriptor">Collection</A> | <A href="mCurrency.htm#classDescriptor">Currency</A> | <A href="mDate.htm#classDescriptor">Date</A> | <A href="mOffset.htm#classDescriptor">DateOffset</A> | <A href="mDate.htm#classDescriptor">DateRange</A> | <A href="mDict.htm#classDescriptor">Dictionary</A> | <A href="mEntity.htm#classDescriptor">Entity</A> | <A href="mIList.htm#classDescriptor">IndexedList</A> | <A href="mInterface.htm#classDescriptor">Interface</A> | <A href="mList.htm#classDescriptor">List</A> | <A href="mNumber.htm#classDescriptor">Number</A> | <A href="mObject.htm#classDescriptor">Object</A> | <A href="mOpenVision.htm#classDescriptor">OpenVision</A> | <A href="mSchema.htm#classDescriptor">Schema</A> | <A href="mString.htm#classDescriptor">String</A> | <A href="mTS.htm#classDescriptor">TimeSeries</A> | <A href="mNA.htm#classDescriptor">Undefined</A> | <A href="mUtil.htm#classDescriptor">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reference to the object which describes the class.  Class level information 
+is stored here.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#classDescriptor">Block</A> | <A href="mBoolean.htm#classDescriptor">Boolean</A> | <A href="mClassify.htm#classDescriptor">Classification</A> | <A href="mCollect.htm#classDescriptor">Collection</A> | <A href="mCurrency.htm#classDescriptor">Currency</A> | <A href="mDate.htm#classDescriptor">Date</A> | <A href="mOffset.htm#classDescriptor">DateOffset</A> | <A href="mDate.htm#classDescriptor">DateRange</A> | <A href="mDict.htm#classDescriptor">Dictionary</A> | <A href="mEntity.htm#classDescriptor">Entity</A> | <A href="mIList.htm#classDescriptor">IndexedList</A> | <A href="mInterface.htm#classDescriptor">Interface</A> | <A href="mList.htm#classDescriptor">List</A> | <A href="mNumber.htm#classDescriptor">Number</A> | <A href="mObject.htm#classDescriptor">Object</A> | <A href="mOpenVision.htm#classDescriptor">OpenVision</A> | <A href="mSchema.htm#classDescriptor">Schema</A> | <A href="mString.htm#classDescriptor">String</A> | <A href="mTS.htm#classDescriptor">TimeSeries</A> | <A href="mNA.htm#classDescriptor">Undefined</A> | <A href="mUtil.htm#classDescriptor">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="convertFrom:"></A><b>convertFrom:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number  convertFrom: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+This message converts the supplied string to an instance of the recipient's
+class if applicable, returning NA otherwise.  The definition at Object
+will lookup the string in the class' naming dictionary, if defined.
+The version at String returns the recipient stripped of any extensions.
+The versions at Number, Integer, Double, and Float convert the recipient
+to a numeric value if possible.  The version at Date converts the recipient
+to a Date using the 'asDate' message defined at String.  The version at
+Boolean returns TRUE if the recipient contains an upper/lower case
+combination of 'true' and FALSE if the recipient contains an upper/lower
+case combination of 'false'.  The version at block returns a block 
+containing the string as a message.  This message is called by the
+'as:' message at String.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#convertFrom:">Block</A> | <A href="mBoolean.htm#convertFrom:">Boolean</A> | <A href="mDate.htm#convertFrom:">Date</A> | <A href="mObject.htm#convertFrom:">Object</A> | <A href="mString.htm#convertFrom:">String</A> | <A href="mNA.htm#convertFrom:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="convertFrom:"></A><b>convertFrom:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double  convertFrom: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+This message converts the supplied string to an instance of the recipient's
+class if applicable, returning NA otherwise.  The definition at Object
+will lookup the string in the class' naming dictionary, if defined.
+The version at String returns the recipient stripped of any extensions.
+The versions at Number, Integer, Double, and Float convert the recipient
+to a numeric value if possible.  The version at Date converts the recipient
+to a Date using the 'asDate' message defined at String.  The version at
+Boolean returns TRUE if the recipient contains an upper/lower case
+combination of 'true' and FALSE if the recipient contains an upper/lower
+case combination of 'false'.  The version at block returns a block 
+containing the string as a message.  This message is called by the
+'as:' message at String.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#convertFrom:">Block</A> | <A href="mBoolean.htm#convertFrom:">Boolean</A> | <A href="mDate.htm#convertFrom:">Date</A> | <A href="mNumber.htm#convertFrom:">Number</A> | <A href="mObject.htm#convertFrom:">Object</A> | <A href="mString.htm#convertFrom:">String</A> | <A href="mNA.htm#convertFrom:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="convertFrom:"></A><b>convertFrom:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Float  convertFrom: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+This message converts the supplied string to an instance of the recipient's
+class if applicable, returning NA otherwise.  The definition at Object
+will lookup the string in the class' naming dictionary, if defined.
+The version at String returns the recipient stripped of any extensions.
+The versions at Number, Integer, Double, and Float convert the recipient
+to a numeric value if possible.  The version at Date converts the recipient
+to a Date using the 'asDate' message defined at String.  The version at
+Boolean returns TRUE if the recipient contains an upper/lower case
+combination of 'true' and FALSE if the recipient contains an upper/lower
+case combination of 'false'.  The version at block returns a block 
+containing the string as a message.  This message is called by the
+'as:' message at String.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#convertFrom:">Block</A> | <A href="mBoolean.htm#convertFrom:">Boolean</A> | <A href="mDate.htm#convertFrom:">Date</A> | <A href="mNumber.htm#convertFrom:">Number</A> | <A href="mObject.htm#convertFrom:">Object</A> | <A href="mString.htm#convertFrom:">String</A> | <A href="mNA.htm#convertFrom:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="convertFrom:"></A><b>convertFrom:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer  convertFrom: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+This message converts the supplied string to an instance of the recipient's
+class if applicable, returning NA otherwise.  The definition at Object
+will lookup the string in the class' naming dictionary, if defined.
+The version at String returns the recipient stripped of any extensions.
+The versions at Number, Integer, Double, and Float convert the recipient
+to a numeric value if possible.  The version at Date converts the recipient
+to a Date using the 'asDate' message defined at String.  The version at
+Boolean returns TRUE if the recipient contains an upper/lower case
+combination of 'true' and FALSE if the recipient contains an upper/lower
+case combination of 'false'.  The version at block returns a block 
+containing the string as a message.  This message is called by the
+'as:' message at String.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#convertFrom:">Block</A> | <A href="mBoolean.htm#convertFrom:">Boolean</A> | <A href="mDate.htm#convertFrom:">Date</A> | <A href="mNumber.htm#convertFrom:">Number</A> | <A href="mObject.htm#convertFrom:">Object</A> | <A href="mString.htm#convertFrom:">String</A> | <A href="mNA.htm#convertFrom:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="cosine"></A><b>cosine</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number cosine</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Basic mathematical function.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="cosine"></A><b>cosine</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double cosine</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Basic mathematical function.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Also Defined At: </b><br>
+ | <A href="mNumber.htm#cosine">Number</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="days"></A><b>days</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer days</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts the recipient into a Days DateOffset.  Used in conjunction with 
+DateRange formation and date arithmetic.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Days
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default instance of the recipient object's class</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Ordinal
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#defaultInstance">Block</A> | <A href="mBoolean.htm#defaultInstance">Boolean</A> | <A href="mClassify.htm#defaultInstance">Classification</A> | <A href="mCollect.htm#defaultInstance">Collection</A> | <A href="mCurrency.htm#defaultInstance">Currency</A> | <A href="mDate.htm#defaultInstance">Date</A> | <A href="mOffset.htm#defaultInstance">DateOffset</A> | <A href="mDate.htm#defaultInstance">DateRange</A> | <A href="mDict.htm#defaultInstance">Dictionary</A> | <A href="mEntity.htm#defaultInstance">Entity</A> | <A href="mIList.htm#defaultInstance">IndexedList</A> | <A href="mInterface.htm#defaultInstance">Interface</A> | <A href="mList.htm#defaultInstance">List</A> | <A href="mNumber.htm#defaultInstance">Number</A> | <A href="mOpenVision.htm#defaultInstance">OpenVision</A> | <A href="mSchema.htm#defaultInstance">Schema</A> | <A href="mString.htm#defaultInstance">String</A> | <A href="mTS.htm#defaultInstance">TimeSeries</A> | <A href="mNA.htm#defaultInstance">Undefined</A> | <A href="mUtil.htm#defaultInstance">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default instance of the recipient object's class</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#defaultInstance">Block</A> | <A href="mBoolean.htm#defaultInstance">Boolean</A> | <A href="mClassify.htm#defaultInstance">Classification</A> | <A href="mCollect.htm#defaultInstance">Collection</A> | <A href="mCurrency.htm#defaultInstance">Currency</A> | <A href="mDate.htm#defaultInstance">Date</A> | <A href="mOffset.htm#defaultInstance">DateOffset</A> | <A href="mDate.htm#defaultInstance">DateRange</A> | <A href="mDict.htm#defaultInstance">Dictionary</A> | <A href="mEntity.htm#defaultInstance">Entity</A> | <A href="mIList.htm#defaultInstance">IndexedList</A> | <A href="mInterface.htm#defaultInstance">Interface</A> | <A href="mList.htm#defaultInstance">List</A> | <A href="mOpenVision.htm#defaultInstance">OpenVision</A> | <A href="mSchema.htm#defaultInstance">Schema</A> | <A href="mString.htm#defaultInstance">String</A> | <A href="mTS.htm#defaultInstance">TimeSeries</A> | <A href="mNA.htm#defaultInstance">Undefined</A> | <A href="mUtil.htm#defaultInstance">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default instance of the recipient object's class</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#defaultInstance">Block</A> | <A href="mBoolean.htm#defaultInstance">Boolean</A> | <A href="mClassify.htm#defaultInstance">Classification</A> | <A href="mCollect.htm#defaultInstance">Collection</A> | <A href="mCurrency.htm#defaultInstance">Currency</A> | <A href="mDate.htm#defaultInstance">Date</A> | <A href="mOffset.htm#defaultInstance">DateOffset</A> | <A href="mDate.htm#defaultInstance">DateRange</A> | <A href="mDict.htm#defaultInstance">Dictionary</A> | <A href="mEntity.htm#defaultInstance">Entity</A> | <A href="mIList.htm#defaultInstance">IndexedList</A> | <A href="mInterface.htm#defaultInstance">Interface</A> | <A href="mList.htm#defaultInstance">List</A> | <A href="mNumber.htm#defaultInstance">Number</A> | <A href="mOpenVision.htm#defaultInstance">OpenVision</A> | <A href="mSchema.htm#defaultInstance">Schema</A> | <A href="mString.htm#defaultInstance">String</A> | <A href="mTS.htm#defaultInstance">TimeSeries</A> | <A href="mNA.htm#defaultInstance">Undefined</A> | <A href="mUtil.htm#defaultInstance">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Float defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default instance of the recipient object's class</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Float
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#defaultInstance">Block</A> | <A href="mBoolean.htm#defaultInstance">Boolean</A> | <A href="mClassify.htm#defaultInstance">Classification</A> | <A href="mCollect.htm#defaultInstance">Collection</A> | <A href="mCurrency.htm#defaultInstance">Currency</A> | <A href="mDate.htm#defaultInstance">Date</A> | <A href="mOffset.htm#defaultInstance">DateOffset</A> | <A href="mDate.htm#defaultInstance">DateRange</A> | <A href="mDict.htm#defaultInstance">Dictionary</A> | <A href="mEntity.htm#defaultInstance">Entity</A> | <A href="mIList.htm#defaultInstance">IndexedList</A> | <A href="mInterface.htm#defaultInstance">Interface</A> | <A href="mList.htm#defaultInstance">List</A> | <A href="mNumber.htm#defaultInstance">Number</A> | <A href="mOpenVision.htm#defaultInstance">OpenVision</A> | <A href="mSchema.htm#defaultInstance">Schema</A> | <A href="mString.htm#defaultInstance">String</A> | <A href="mTS.htm#defaultInstance">TimeSeries</A> | <A href="mNA.htm#defaultInstance">Undefined</A> | <A href="mUtil.htm#defaultInstance">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default instance of the recipient object's class</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Integer
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#defaultInstance">Block</A> | <A href="mBoolean.htm#defaultInstance">Boolean</A> | <A href="mClassify.htm#defaultInstance">Classification</A> | <A href="mCollect.htm#defaultInstance">Collection</A> | <A href="mCurrency.htm#defaultInstance">Currency</A> | <A href="mDate.htm#defaultInstance">Date</A> | <A href="mOffset.htm#defaultInstance">DateOffset</A> | <A href="mDate.htm#defaultInstance">DateRange</A> | <A href="mDict.htm#defaultInstance">Dictionary</A> | <A href="mEntity.htm#defaultInstance">Entity</A> | <A href="mIList.htm#defaultInstance">IndexedList</A> | <A href="mInterface.htm#defaultInstance">Interface</A> | <A href="mList.htm#defaultInstance">List</A> | <A href="mNumber.htm#defaultInstance">Number</A> | <A href="mOpenVision.htm#defaultInstance">OpenVision</A> | <A href="mSchema.htm#defaultInstance">Schema</A> | <A href="mString.htm#defaultInstance">String</A> | <A href="mTS.htm#defaultInstance">TimeSeries</A> | <A href="mNA.htm#defaultInstance">Undefined</A> | <A href="mUtil.htm#defaultInstance">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="dividedInto:"></A><b>dividedInto:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double dividedInto:</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#dividedInto:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="dividedInto:"></A><b>dividedInto:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Float dividedInto:</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#dividedInto:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="dividedInto:"></A><b>dividedInto:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer dividedInto:</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#dividedInto:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="dropFromString:"></A><b>dropFromString:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer dropFromString: aString</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Drops the recipient number of characters from supplied string.  A positive 
+integer drops characters starting at the beginning of the string.  A negative 
+number drops characters starting at the end of the string.  If you drop more 
+characters than the string contains, a string with 0 characters is returned.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="evaluate:"></A><b>evaluate:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer evaluate: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts the recipient to a Date and evaluates the supplied block as of this 
+date.  If recipient does not convert into a valid date, the block is not 
+evaluated.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDate.htm">Date</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mCurrency.htm#evaluate:">Currency</A> | <A href="mDate.htm#evaluate:">Date</A> | <A href="mOffset.htm#evaluate:">DateOffset</A> | <A href="mDate.htm#evaluate:">DateRange</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="exp"></A><b>exp</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number exp</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Raises the mathematical constant e (~ 2.7183) to the
+recipient Number power (i.e., e ^ recipient).</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#exp">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="exp"></A><b>exp</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double exp</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Raises the mathematical constant e (~2.7183) to the recipient power 
+(i.e., e ^ recipient).</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Also Defined At: </b><br>
+ | <A href="mNumber.htm#exp">Number</A> | <A href="mNA.htm#exp">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="fillFromString:"></A><b>fillFromString:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer fillFromString: aString</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Repeats the characters in the supplied string until a string of the length 
+specified by the recipient is formed.  A negative number repeats the pattern 
+from right to left.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="getStringFrom:"></A><b>getStringFrom:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer getStringFrom: openVisionChannel</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="hyperbolicCosine"></A><b>hyperbolicCosine</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number hyperbolicCosine</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Basic mathematical function.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="hyperbolicCosine"></A><b>hyperbolicCosine</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double hyperbolicCosine</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Basic mathematical function.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Also Defined At: </b><br>
+ | <A href="mNumber.htm#hyperbolicCosine">Number</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="hyperbolicSine"></A><b>hyperbolicSine</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number hyperbolicSine</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Basic mathematical function.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="hyperbolicSine"></A><b>hyperbolicSine</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double hyperbolicSine</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Basic mathematical function.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Also Defined At: </b><br>
+ | <A href="mNumber.htm#hyperbolicSine">Number</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="hyperbolicTangent"></A><b>hyperbolicTangent</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number hyperbolicTangent</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Basic mathematical function.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="hyperbolicTangent"></A><b>hyperbolicTangent</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double hyperbolicTangent</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Basic mathematical function</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Also Defined At: </b><br>
+ | <A href="mNumber.htm#hyperbolicTangent">Number</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="inRange:"></A><b>inRange:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal Ordinal inRange: aList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient Ordinal is in range specified by aList, where aList
+contains 2 elements - the start and end of the range (inclusive).</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="inSet:"></A><b>inSet:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal inSet: aList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient Ordinal is included in supplied list.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="inputExpression"></A><b>inputExpression</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number inputExpression</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Used by DDMS ToolKit to format recipient as input.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#inputExpression">Date</A> | <A href="mObject.htm#inputExpression">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="instancesAdjacentTo:"></A><b>instancesAdjacentTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer instancesAdjacentTo:</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isDouble"></A><b>isDouble</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double isDouble</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a TRUE value when sent to any Double.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>TRUE
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#isDouble">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isFloat"></A><b>isFloat</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Float isFloat</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a TRUE value when sent to any Float.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>TRUE
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#isFloat">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isInteger"></A><b>isInteger</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer isInteger</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a TRUE value when sent to any Integer.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>TRUE
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#isInteger">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isNumber"></A><b>isNumber</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number isNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a TRUE value when sent to any Number.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>TRUE
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#isNumber">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isOrdinal"></A><b>isOrdinal</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal isOrdinal</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a TRUE value when sent to any Ordinal.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>TRUE
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#isOrdinal">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="log"></A><b>log</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number log</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the natural log of the recipient Number.  Recipient must be 
+positive; the log is undefined for numbers less than or equal to 0.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#log">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="log"></A><b>log</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double log</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the natural log of the recipient.  Recipient must be positive; the 
+log is undefined for numbers less than or equal to 0.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Also Defined At: </b><br>
+ | <A href="mNumber.htm#log">Number</A> | <A href="mNA.htm#log">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="log:"></A><b>log:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number log: aNumber </font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the log of the recipient number using supplied base.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#log:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="max:"></A><b>max:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal max: aNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the larger of the supplied value and the recipient Number. If an 
+invalid parameter is supplied, NA is returned.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mCollect.htm#max:">Collection</A> | <A href="mNA.htm#max:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="min:"></A><b>min:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal min: aNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the smaller of the supplied value and the recipient Number. If an 
+invalid parameter is supplied, NA is returned.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mCollect.htm#min:">Collection</A> | <A href="mNA.htm#min:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="mod:"></A><b>mod:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer mod: aValue</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the recipient Integer modulo of the supplied value.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Integer
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#mod:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="monthBeginnings"></A><b>monthBeginnings</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer monthBeginnings</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts the recipient into a MonthBeginnings DateOffset. Used in conjunction 
+with DateRange formation and date arithmetic.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clOffset.htm">DateOffset</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="monthEnds"></A><b>monthEnds</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer monthEnds</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts the recipient into a MonthEnds DateOffset.  Used in conjunction with 
+DateRange formation and date arithmetic.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clOffset.htm">DateOffset</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="months"></A><b>months</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer months</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts the recipient into a Months DateOffset.  Used in conjunction with 
+DateRange formation and date arithmetic.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clOffset.htm">DateOffset</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="negated"></A><b>negated</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number negated</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Multiplies the recipient Number by -1.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#negated">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="new"></A><b>new</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal new</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Undefines the 'new' message for Ordinal classes.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Ordinal
+<p><b>Also Defined At: </b><br>
+ | <A href="mBoolean.htm#new">Boolean</A> | <A href="mCollect.htm#new">Collection</A> | <A href="mDate.htm#new">DateRange</A> | <A href="mDict.htm#new">Dictionary</A> | <A href="mObject.htm#new">Object</A> | <A href="mNA.htm#new">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="notBetween:and:"></A><b>notBetween:and:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal notBetween: anOrdinal1 and: anOrdinal2</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient Ordinal is not between supplied Ordinal1
+and supplied Ordinal2.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+2 - String<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#notBetween:and:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="numberOfDigits"></A><b>numberOfDigits</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer numberOfDigits</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the number of digits in the recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Integer
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#numberOfDigits">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="orderUsingDictionary:"></A><b>orderUsingDictionary:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double orderUsingDictionary:</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#orderUsingDictionary:">Object</A> | <A href="mString.htm#orderUsingDictionary:">String</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="orderUsingDictionary:"></A><b>orderUsingDictionary:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Float orderUsingDictionary:</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#orderUsingDictionary:">Object</A> | <A href="mString.htm#orderUsingDictionary:">String</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="orderUsingDictionary:"></A><b>orderUsingDictionary:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer orderUsingDictionary:</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#orderUsingDictionary:">Object</A> | <A href="mString.htm#orderUsingDictionary:">String</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="pctChangeTo:"></A><b>pctChangeTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number pctChangeTo: aNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the percentage change between the recipient and supplied Number.  
+Uses the formula: (recipient / supplied Value - 1 ) * 100. If supplied 
+parameter is 0, NA is returned.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#pctChangeTo:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="prefixWith:"></A><b>prefixWith:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer prefixWith: aString</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mString.htm#prefixWith:">String</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="print"></A><b>print</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double print</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Redefines the standard print message so that the value of the number is 
+printed.  The default print format for doubles is 9 character positions with 
+two decimal places.  The format is expanded if more space is needed.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#print">Block</A> | <A href="mDate.htm#print">Date</A> | <A href="mOffset.htm#print">DateOffset</A> | <A href="mDate.htm#print">DateRange</A> | <A href="mEntity.htm#print">Entity</A> | <A href="mIList.htm#print">IndexedList</A> | <A href="mList.htm#print">List</A> | <A href="mObject.htm#print">Object</A> | <A href="mString.htm#print">String</A> | <A href="mTS.htm#print">TimeSeries</A> | <A href="mNA.htm#print">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="print"></A><b>print</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Float print</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Redefines the standard print message so that the value of the number is 
+printed.  The default format for floats is 9 character positions with two 
+decimal places.  The format is expanded if more space is needed.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Float
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#print">Block</A> | <A href="mDate.htm#print">Date</A> | <A href="mOffset.htm#print">DateOffset</A> | <A href="mDate.htm#print">DateRange</A> | <A href="mEntity.htm#print">Entity</A> | <A href="mIList.htm#print">IndexedList</A> | <A href="mList.htm#print">List</A> | <A href="mObject.htm#print">Object</A> | <A href="mString.htm#print">String</A> | <A href="mTS.htm#print">TimeSeries</A> | <A href="mNA.htm#print">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="print"></A><b>print</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer print</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Redefines the standard print message so that the value of the recipient 
+Integer is printed.  The default print format for integers is 9 character 
+positions with no decimal places.  The format is expanded if more space is 
+needed.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Integer
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#print">Block</A> | <A href="mDate.htm#print">Date</A> | <A href="mOffset.htm#print">DateOffset</A> | <A href="mDate.htm#print">DateRange</A> | <A href="mEntity.htm#print">Entity</A> | <A href="mIList.htm#print">IndexedList</A> | <A href="mList.htm#print">List</A> | <A href="mObject.htm#print">Object</A> | <A href="mString.htm#print">String</A> | <A href="mTS.htm#print">TimeSeries</A> | <A href="mNA.htm#print">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="print:"></A><b>print:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number print: aNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Prints the recipient Number using the supplied format.  If no decimal is 
+provided in the format, the default value of 2 decimal places is used.  When 
+integers are printed, the decimal specification will be ignored.  If the 
+specification width is not large enough, **** will be displayed instead of 
+the value.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBoolean.htm#print:">Boolean</A> | <A href="mDate.htm#print:">Date</A> | <A href="mEntity.htm#print:">Entity</A> | <A href="mObject.htm#print:">Object</A> | <A href="mString.htm#print:">String</A> | <A href="mNA.htm#print:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="printOf:"></A><b>printOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double printOf:</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#printOf:">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="printOf:"></A><b>printOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Float  printOf: anObject</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#printOf:">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="printOf:"></A><b>printOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer printOf:</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#printOf:">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="printWithCommas:"></A><b>printWithCommas:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number printWithCommas: aNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Prints the Number using the supplied format, inserting commas where 
+appropriate.  If no decimal is provided in the format, the default value of 2 
+decimal places is used.  When integers are printed, the decimal specification 
+will be ignored.  If the specification width is not large enough, **** will be 
+displayed instead of the value.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#printWithCommas:">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="printWithCommasOf:"></A><b>printWithCommasOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double printWithCommasOf:</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="printWithCommasOf:"></A><b>printWithCommasOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Float printWithCommasOf: anObject</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="printWithCommasOf:"></A><b>printWithCommasOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer printWithCommasOf:</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="printWithLeadingZeros:"></A><b>printWithLeadingZeros:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number printWithLeadingZeros: width</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Displays the recipient with leading 0s to fill out the supplied width
+if width is positive.  If width is negative, no padding is done.
+</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#printWithLeadingZeros:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="printWithLeadingZerosNL:"></A><b>printWithLeadingZerosNL:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number printWithLeadingZerosNL: width</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Displays the recipient with leading 0s to fill out the supplied width
+followed by a new line if width is positive.  If width is negative, no 
+padding is done.
+</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#printWithLeadingZerosNL:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="putByteTo:"></A><b>putByteTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number putByteTo: openVisionChannel</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="putByteTo:"></A><b>putByteTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer putByteTo:</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNumber.htm#putByteTo:">Number</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="putDoubleTo:"></A><b>putDoubleTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number putDoubleTo: openVisionChannel</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="putDoubleTo:"></A><b>putDoubleTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double putDoubleTo:</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNumber.htm#putDoubleTo:">Number</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="putFloatTo:"></A><b>putFloatTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number putFloatTo: openVisionChannel</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="putFloatTo:"></A><b>putFloatTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Float putFloatTo:</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNumber.htm#putFloatTo:">Number</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="putLongTo:"></A><b>putLongTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number putLongTo: openVisionChannel</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="putLongTo:"></A><b>putLongTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer putLongTo:</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNumber.htm#putLongTo:">Number</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="putShortTo:"></A><b>putShortTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number putShortTo: openVisionChannel</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="putShortTo:"></A><b>putShortTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer putShortTo:</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNumber.htm#putShortTo:">Number</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="quarterBeginnings"></A><b>quarterBeginnings</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer quarterBeginnings</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts the recipient into a QuarterBeginnings DateOffset.  Used in 
+conjunction with DateRange formation and date arithmetic.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clOffset.htm">DateOffset</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="quarterEnds"></A><b>quarterEnds</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer quarterEnds</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts the recipient into a QuarterEnds DateOffset. Used in conjunction 
+with DateRange formation and date arithmetic.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clOffset.htm">DateOffset</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="quarters"></A><b>quarters</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer quarters</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts the recipient into a Quarterrs DateOffset.  Used in conjunction with 
+DateRange formation and date arithmetic.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clOffset.htm">DateOffset</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="round"></A><b>round</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number round</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Rounds the Number to the nearest integer.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Integer
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#round">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="round:"></A><b>round:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number round: anInteger</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Rounds the Number to the specified number of decimal places. Supplied integer 
+must be non-negative.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Integer<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#round:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="sequence"></A><b>sequence</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number sequence</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a list of integers from 1 through recipient Number.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="sequence"></A><b>sequence</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer sequence</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a list of integers from 1 through recipient Integer.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNumber.htm#sequence">Number</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="sequence0"></A><b>sequence0</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number sequence0</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a list of integets from 0 through recipient minus 1.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="sequence0"></A><b>sequence0</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer sequence0</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a list of integers from 0 through recipient Integer minus 1.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNumber.htm#sequence0">Number</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="sequenceTo:"></A><b>sequenceTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer sequenceTo: endNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a list of integers from recipient value to the supplied end number.
+If the supplied paramter is not a number, 0 will be used as the end-point.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="sign"></A><b>sign</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number sign</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the value -1, 0, or 1, depending on the sign of the recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Integer
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="sine"></A><b>sine</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number sine</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Basic mathematical function.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="sine"></A><b>sine</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double sine</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Basic mathematical function.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Also Defined At: </b><br>
+ | <A href="mNumber.htm#sine">Number</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="sprint:"></A><b>sprint:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number sprint: aNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the recipient number as a string formatted to the number of 
+characters specified.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#sprint:">Object</A> | <A href="mString.htm#sprint:">String</A> | <A href="mNA.htm#sprint:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="sprintOf:"></A><b>sprintOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double sprintOf:</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="sprintOf:"></A><b>sprintOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Float  sprintOf: anObject</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="sprintOf:"></A><b>sprintOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer sprintOf:</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="sprintWithCommas:"></A><b>sprintWithCommas:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number sprintWithCommas: aNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the recipient number as a string formatted to the number of 
+characters specified, inserting commas as appropriate.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="sprintWithCommasOf:"></A><b>sprintWithCommasOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double sprintWithCommasOf:</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="sprintWithCommasOf:"></A><b>sprintWithCommasOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Float sprintWithCommasOf: anObject</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="sprintWithCommasOf:"></A><b>sprintWithCommasOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer sprintWithCommasOf:</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="sqrt"></A><b>sqrt</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number sqrt</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the square root of the recipient Number.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#sqrt">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="sqrt"></A><b>sqrt</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double sqrt</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the square root of the recipient.  Recipient must be a 
+non-negative Double.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Also Defined At: </b><br>
+ | <A href="mNumber.htm#sqrt">Number</A> | <A href="mNA.htm#sqrt">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="subtractedFrom:"></A><b>subtractedFrom:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double subtractedFrom:</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mOffset.htm#subtractedFrom:">DateOffset</A> | <A href="mNA.htm#subtractedFrom:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="subtractedFrom:"></A><b>subtractedFrom:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Float subtractedFrom:</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mOffset.htm#subtractedFrom:">DateOffset</A> | <A href="mNA.htm#subtractedFrom:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="subtractedFrom:"></A><b>subtractedFrom:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer subtractedFrom:</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mOffset.htm#subtractedFrom:">DateOffset</A> | <A href="mNA.htm#subtractedFrom:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="takeFromString:"></A><b>takeFromString:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer takeFromString: aString</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Keeps the recipient number of characters from supplied string.  A positive 
+number keeps characters starting at the beginning of the string.  A negative 
+number keeps characters starting at the end of the string.  If you keep more 
+characters than the string contains, blanks will be added to the beginning or 
+end of the string.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="tangent"></A><b>tangent</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number tangent</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Basic mathematical function.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="tangent"></A><b>tangent</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double tangent</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Basic mathematical function.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Also Defined At: </b><br>
+ | <A href="mNumber.htm#tangent">Number</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="to:by:"></A><b>to:by:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer to: aDate by: aDateOffset</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts the recipient into a date, then constructs a date range from this 
+date, the supplied date, and the the supplied increment.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDate.htm">DateRange</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Date<br>
+2 - DateOffset<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#to:by:">Date</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="toThe:"></A><b>toThe:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number toThe: aNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Raises the recipient Number to the specified power.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#toThe:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="toThe:"></A><b>toThe:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double toThe: aValue</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Raises the recipient to the specified power.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNumber.htm#toThe:">Number</A> | <A href="mNA.htm#toThe:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the string 'Ordinal'.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#whatAmI">Block</A> | <A href="mBoolean.htm#whatAmI">Boolean</A> | <A href="mClassify.htm#whatAmI">Classification</A> | <A href="mCollect.htm#whatAmI">Collection</A> | <A href="mCurrency.htm#whatAmI">Currency</A> | <A href="mDate.htm#whatAmI">Date</A> | <A href="mOffset.htm#whatAmI">DateOffset</A> | <A href="mDate.htm#whatAmI">DateRange</A> | <A href="mDict.htm#whatAmI">Dictionary</A> | <A href="mEntity.htm#whatAmI">Entity</A> | <A href="mIList.htm#whatAmI">IndexedList</A> | <A href="mInterface.htm#whatAmI">Interface</A> | <A href="mList.htm#whatAmI">List</A> | <A href="mNumber.htm#whatAmI">Number</A> | <A href="mObject.htm#whatAmI">Object</A> | <A href="mOpenVision.htm#whatAmI">OpenVision</A> | <A href="mSchema.htm#whatAmI">Schema</A> | <A href="mString.htm#whatAmI">String</A> | <A href="mTS.htm#whatAmI">TimeSeries</A> | <A href="mNA.htm#whatAmI">Undefined</A> | <A href="mUtil.htm#whatAmI">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the string 'Number'.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#whatAmI">Block</A> | <A href="mBoolean.htm#whatAmI">Boolean</A> | <A href="mClassify.htm#whatAmI">Classification</A> | <A href="mCollect.htm#whatAmI">Collection</A> | <A href="mCurrency.htm#whatAmI">Currency</A> | <A href="mDate.htm#whatAmI">Date</A> | <A href="mOffset.htm#whatAmI">DateOffset</A> | <A href="mDate.htm#whatAmI">DateRange</A> | <A href="mDict.htm#whatAmI">Dictionary</A> | <A href="mEntity.htm#whatAmI">Entity</A> | <A href="mIList.htm#whatAmI">IndexedList</A> | <A href="mInterface.htm#whatAmI">Interface</A> | <A href="mList.htm#whatAmI">List</A> | <A href="mObject.htm#whatAmI">Object</A> | <A href="mOpenVision.htm#whatAmI">OpenVision</A> | <A href="mSchema.htm#whatAmI">Schema</A> | <A href="mString.htm#whatAmI">String</A> | <A href="mTS.htm#whatAmI">TimeSeries</A> | <A href="mNA.htm#whatAmI">Undefined</A> | <A href="mUtil.htm#whatAmI">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Double whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the string 'Double'.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#whatAmI">Block</A> | <A href="mBoolean.htm#whatAmI">Boolean</A> | <A href="mClassify.htm#whatAmI">Classification</A> | <A href="mCollect.htm#whatAmI">Collection</A> | <A href="mCurrency.htm#whatAmI">Currency</A> | <A href="mDate.htm#whatAmI">Date</A> | <A href="mOffset.htm#whatAmI">DateOffset</A> | <A href="mDate.htm#whatAmI">DateRange</A> | <A href="mDict.htm#whatAmI">Dictionary</A> | <A href="mEntity.htm#whatAmI">Entity</A> | <A href="mIList.htm#whatAmI">IndexedList</A> | <A href="mInterface.htm#whatAmI">Interface</A> | <A href="mList.htm#whatAmI">List</A> | <A href="mNumber.htm#whatAmI">Number</A> | <A href="mObject.htm#whatAmI">Object</A> | <A href="mOpenVision.htm#whatAmI">OpenVision</A> | <A href="mSchema.htm#whatAmI">Schema</A> | <A href="mString.htm#whatAmI">String</A> | <A href="mTS.htm#whatAmI">TimeSeries</A> | <A href="mNA.htm#whatAmI">Undefined</A> | <A href="mUtil.htm#whatAmI">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Float whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the string 'Float'.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#whatAmI">Block</A> | <A href="mBoolean.htm#whatAmI">Boolean</A> | <A href="mClassify.htm#whatAmI">Classification</A> | <A href="mCollect.htm#whatAmI">Collection</A> | <A href="mCurrency.htm#whatAmI">Currency</A> | <A href="mDate.htm#whatAmI">Date</A> | <A href="mOffset.htm#whatAmI">DateOffset</A> | <A href="mDate.htm#whatAmI">DateRange</A> | <A href="mDict.htm#whatAmI">Dictionary</A> | <A href="mEntity.htm#whatAmI">Entity</A> | <A href="mIList.htm#whatAmI">IndexedList</A> | <A href="mInterface.htm#whatAmI">Interface</A> | <A href="mList.htm#whatAmI">List</A> | <A href="mNumber.htm#whatAmI">Number</A> | <A href="mObject.htm#whatAmI">Object</A> | <A href="mOpenVision.htm#whatAmI">OpenVision</A> | <A href="mSchema.htm#whatAmI">Schema</A> | <A href="mString.htm#whatAmI">String</A> | <A href="mTS.htm#whatAmI">TimeSeries</A> | <A href="mNA.htm#whatAmI">Undefined</A> | <A href="mUtil.htm#whatAmI">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the string 'Integer'.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#whatAmI">Block</A> | <A href="mBoolean.htm#whatAmI">Boolean</A> | <A href="mClassify.htm#whatAmI">Classification</A> | <A href="mCollect.htm#whatAmI">Collection</A> | <A href="mCurrency.htm#whatAmI">Currency</A> | <A href="mDate.htm#whatAmI">Date</A> | <A href="mOffset.htm#whatAmI">DateOffset</A> | <A href="mDate.htm#whatAmI">DateRange</A> | <A href="mDict.htm#whatAmI">Dictionary</A> | <A href="mEntity.htm#whatAmI">Entity</A> | <A href="mIList.htm#whatAmI">IndexedList</A> | <A href="mInterface.htm#whatAmI">Interface</A> | <A href="mList.htm#whatAmI">List</A> | <A href="mNumber.htm#whatAmI">Number</A> | <A href="mObject.htm#whatAmI">Object</A> | <A href="mOpenVision.htm#whatAmI">OpenVision</A> | <A href="mSchema.htm#whatAmI">Schema</A> | <A href="mString.htm#whatAmI">String</A> | <A href="mTS.htm#whatAmI">TimeSeries</A> | <A href="mNA.htm#whatAmI">Undefined</A> | <A href="mUtil.htm#whatAmI">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="within:percentOf:"></A><b>within:percentOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Number within: x percentOf: y</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes whether the recipient number is within x percent of the value y.  
+This message builds a closed interval around y and tests to see if x falls in 
+that range.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+2 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#within:percentOf:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="yearBeginnings"></A><b>yearBeginnings</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer yearBeginnings</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts the recipient into a YearBeginnings DateOffset. Used in conjunction 
+with DateRange formation and date arithmetic.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clOffset.htm">DateOffset</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="yearEnds"></A><b>yearEnds</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer yearEnds</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts the recipient into a YearEnds DateOffset. Used in conjunction with 
+DateRange formation and date arithmetic.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clOffset.htm">DateOffset</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="years"></A><b>years</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Integer years</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts the recipient into a Years DateOffset. Used in conjunction with 
+DateRange formation and date arithmetic.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clOffset.htm">DateOffset</A>
+<p></blockquote>
+
+<p><hr>
+<table border=0 width=100%>
+<tr>
+<td align=left>
+<font size=-1>Copyright &copy 1997 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated May 7, 1997</font>
+</table>
+</body>
+</html>

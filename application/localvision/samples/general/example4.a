@@ -1,0 +1,15 @@
+
+
+     !list <- testList ;
+     !blockList <- 
+         [ ticker ] , [ name ] , [ sales ] , [ price / earningsPerShare ] ;
+     
+     list
+     do: [ !element <- ^self ;
+           ^my blockList
+              do: [ ^my element send: ^self . print: 12 ] ;
+            newLine print ;
+         ] ;
+
+
+

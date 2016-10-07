@@ -1,0 +1,126 @@
+#!/bin/csh
+
+if ($#argv > 2) then
+        set rtenv = "yes"
+else
+        set rtenv = "no"
+endif
+
+if ($#argv > 1) then
+	set scriptDir = $argv[2]
+else
+	set scriptDir = $cwd
+endif
+
+if ($#argv > 0) then
+	set MAIN = $argv[1]
+else
+	set MAIN = $DBbatchvision
+endif
+
+
+setenv DBbatchvision $MAIN
+
+echo "Install InvestCore Bootstrap"
+echo "Running $MAIN with scripts from $scriptDir"
+
+$scriptDir/InstallCoreSpaces.inv
+
+set comment = "Install Investment Core: Classes Creation"
+echo "--->" $comment
+date
+$MAIN -adU3 <<@@@EOF@@@
+?? $scriptDir/INIcore.inv
+?g
+
+
+Utility updateNetworkWithAnnotation: "$comment" ;
+?g
+
+@@@EOF@@@
+
+
+set comment = "Install Investment Core: Protocol"
+echo "--->" $comment
+date
+$MAIN -adU3 <<@@@EOF@@@
+?? $scriptDir/DEFcore.inv
+?? $scriptDir/INSTcore.inv
+?g
+
+
+Utility updateNetworkWithAnnotation: "$comment" ;
+?g
+
+@@@EOF@@@
+
+set comment = "Install Investment Core: dbs driver support"
+echo "--->" $comment
+date
+$MAIN -adU3 <<@@@EOF@@@
+?? $scriptDir/DEFdbs.inv
+?g
+Utility updateNetworkWithAnnotation: "$comment" ;
+?g
+
+@@@EOF@@@
+
+set comment = "Install Investment Core: data feed support"
+echo "--->" $comment
+date
+$MAIN -adU3 <<@@@EOF@@@
+?? $scriptDir/INIfeeds.inv
+?? $scriptDir/DEFfeeds.inv
+?g
+
+Utility updateNetworkWithAnnotation: "$comment" ;
+?g
+
+@@@EOF@@@
+
+set comment = "Install Investment Core: data feed inst and doc"
+echo "--->" $comment
+date
+$MAIN -adU3 <<@@@EOF@@@
+?? $scriptDir/INSTfeeds.inv
+?g
+
+?? $scriptDir/DOCcore.inv
+?g
+
+Utility updateNetworkWithAnnotation: "$comment" ;
+?g
+
+@@@EOF@@@
+
+$scriptDir/InstallPriceSpaces.inv
+$scriptDir/InstallHoldingSpaces.inv
+
+if ($rtenv == "yes" ) then     #- install demo support setup
+   $scriptDir/InstallStarterDemo.idemo $scriptDir
+endif
+
+echo "---> Schema Update"
+date
+$MAIN -adU3 <<@@@EOF@@@
+Object showInheritance ; 
+Schema processAllMessages ;
+Utility updateNetworkWithAnnotation: "Schema Update" ;
+?g
+@@@EOF@@@
+
+echo "---> Admin Cleanup"
+date
+$MAIN -adU3 <<@@@EOF@@@
+newLine print ;
+"---  Object Spaces --- " centerNL: 80 . printNL ;
+AdminTools objectSpaceList send: [ getSpace ] .
+do: [ number print: 10 ; whatAmI printNL ] ;
+newLine print ;
+AdminTools cleanNetwork ;
+Utility collectGarbage ;
+
+Utility updateNetworkWithAnnotation: "Admin Cleanup" ;
+?g
+@@@EOF@@@
+

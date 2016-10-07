@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="Mozilla/4.04 [en] (WinNT; I) [Netscape]">
+   <TITLE>Vision Upload Format: AccountCharacteristics </TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF">
+
+<H2>
+Vision Portfolio Management Application Layer: Application</H2>
+| <A HREF="pmaApps.htm">Headstart Applications</A>
+|&nbsp;
+<HR>
+
+<P><FONT SIZE=+2><B>Application: </B><I>AccountCharacteristics</I></FONT>
+
+<P>&nbsp;
+<H3>
+Summary:</H3>
+The <B>AccountCharacteristics</B> application is used to display summary
+fundamental information for one or more accounts. A number of key statistics
+are computed and the average, weighted average, and median values for each
+account are displayed.
+<H3>
+Inputs:</H3>
+
+<CENTER><TABLE BORDER CELLSPACING=2 CELLPADDING=4 WIDTH="80%" >
+<TR>
+<TH>Position</TH>
+
+<TH>Form Id</TH>
+
+<TH>Description&nbsp;</TH>
+</TR>
+
+<TR>
+<TD>1&nbsp;</TD>
+
+<TD>ids&nbsp;</TD>
+
+<TD>String containing 1 or more account id separated by <I>,</I>&nbsp;</TD>
+</TR>
+</TABLE></CENTER>
+
+<H3>
+Analysis:</H3>
+
+<UL type=disc>
+<LI>
+The supplied <I>ids</I> must contain a comma-separated string of valid
+account identifiers.</LI>
+
+<LI>
+If only one id is supplied and it refers to a <B>CompositeAccount</B>,
+the list of accounts will include this composite and each of its component
+accounts. If only one id is supplied and it refers to an <B>AggAccount</B>,
+the list of accounts will include the aggregate and each of its component
+portfolios.</LI>
+
+<LI>
+The basic report displays summary statistics as rows. The statistics for
+each account are displayed in its own column. The following statistics
+are computed:
+<ul type=disc>Average Market Capitalization<br>
+
+Weighted Market Capitalization<br>
+
+Median Market Capitalization<br>
+
+Average P/E<br>
+
+Weighted P/E<br>
+
+Median P/E<br>
+
+Average Price to Book<br>
+
+Weighted Price to Book<br>
+
+Median Price to Book</ul>
+
+<LI>
+If no global currency has been specified, all monetary data is converted
+to the account's base currency.</LI>
+
+<li>Report size can vary depending on the amount of accounts, dates, and groups supplied.  In order to keep the reports from growing too large, the following list of cutoff points have been established for each variation:
+<ul type=disc><table cellpadding=0><tr align=left valign=top><td>single account/multiple dates<td>up to 10 dates  (in order supplied)
+<tr align=left valign=top><td>single account/by group <td>up to 10 groups (largest by percent)
+<tr align=left valign=top><td>single account/by groups/by dates <td>up to 10 groups (largest by percent) and up to 3 dates per group
+<tr align=left valign=top><td>multiple accounts/single date/no groups <td>up to 10 accounts
+<tr align=left valign=top><td>multiple dates/multiple accounts <td>up to 3 dates and 10 accounts per date
+<tr align=left valign=top><td>groups/multiple accounts <td>up to 10 groups (largest by percent) and up to 3 accounts per group
+</table></ul>
+
+
+</UL>
+
+<H3>
+Key Data Feeds:</H3>
+
+<UL type=disc>
+<LI>
+<I><A HREF="pma_HoldingsFeed.htm">HoldingsFeed</A></I></LI>
+
+<LI>
+<I><A HREF="pma_FundamentalM.htm">FundamentalM</A></I></LI>
+</UL>
+
+<H3>
+Related Reports:</H3>
+
+<UL type=disc>
+<LI>
+<I><A HREF="pma_AccountProfile.htm">AccountProfile</A></I></LI>
+
+<LI>
+<I><A HREF="pma_AccountCharDetails.htm">AccountCharDetails</A></I></LI>
+
+<LI>
+<I><A HREF="pma_AccountCompare.htm">AccountCompare</A></I></LI>
+</UL>
+
+<H3>
+Sample Usage:</H3>
+
+<UL type=disc>
+<PRE><B><TT>&nbsp;Interface ApplicationWS runWith: "AccountCharacteristics", "102" ;</TT></B></PRE>
+</UL>
+
+<H3>
+Sample Input:</H3>
+<FORM NAME=ApplicationForm ACTION="http://visionWeb/cgi-bin/vquery.exe/default/">
+<CENTER><TABLE BORDER CELLSPACING=2 CELLPADDING=8 WIDTH="50%" >
+<TR>
+<TH COLSPAN="3" BGCOLOR="#ADD8E6"><FONT SIZE=-1>Change Account Characteristic
+Cross Reference</FONT></TH>
+
+<TH><INPUT TYPE=submit VALUE=Submit></TH>
+</TR>
+
+<TR>
+<TH><FONT SIZE=-1>Account:&nbsp;</FONT></TH>
+
+<TH><FONT SIZE=-1>Date List:&nbsp;</FONT></TH>
+
+<TH><FONT SIZE=-1>Group By:&nbsp;</FONT></TH>
+
+<TH><FONT SIZE=-1>Stat Group:&nbsp;</FONT></TH>
+</TR>
+
+<TR>
+<TD><INPUT TYPE=text NAME= ids SIZE= 15 VALUE= "102"></TD>
+
+<TD><INPUT TYPE=text NAME= dates SIZE= 15></TD>
+
+<TD><SELECT NAME= group SIZE= 3><OPTION VALUE= "None" SELECTED>None&nbsp;<OPTION VALUE= "sector">Sector&nbsp;<OPTION VALUE= "industry">Industry&nbsp;<OPTION VALUE= "country">Country&nbsp;<OPTION VALUE= "mcapGroup">MCap
+Group&nbsp;<OPTION VALUE= "secType">SecurityType&nbsp;<OPTION VALUE= "assetCat">Asset
+Cat&nbsp;<OPTION VALUE= "peGroup">P/E Group&nbsp;<OPTION VALUE= "pbGroup">P/B
+Group&nbsp;</SELECT>
+<BR><INPUT TYPE=text NAME= groupEntry></TD>
+
+<TD><SELECT NAME= statGroup SIZE= 1><OPTION VALUE= "All" SELECTED>All&nbsp;</SELECT></TD>
+</TR>
+
+<TR>
+<TH><FONT SIZE=-1>Date:</FONT>
+<BR><INPUT TYPE=text NAME=globalDate VALUE= "19971115"></TH>
+
+<TH COLSPAN="3"><FONT SIZE=-1>Currency:</FONT>
+<BR><SELECT NAME=globalCurrency><OPTION VALUE=LOC SELECTED><FONT SIZE=-1>Local&nbsp;<OPTION VALUE=USD >United
+States Dollar&nbsp;<OPTION VALUE=ARS>Argentine Peso&nbsp;<OPTION VALUE=AUD>Australian
+Dollar&nbsp;<OPTION VALUE=ATS>Austrian Schilling&nbsp;<OPTION VALUE=BEF>Belgian
+Franc&nbsp;<OPTION VALUE=BRL>Brazilian Real&nbsp;<OPTION VALUE=GBP>British
+Pound&nbsp;<OPTION VALUE=CAD>Canadian Dollar&nbsp;<OPTION VALUE=CLP>Chilean
+Peso&nbsp;<OPTION VALUE=CNY>Chinese (yuan) Renmin&nbsp;<OPTION VALUE=COP>Columbian
+Peso&nbsp;<OPTION VALUE=CZK>Czechoslovakian Korun&nbsp;<OPTION VALUE=DKK>Danish
+Krone&nbsp;<OPTION VALUE=EGP>Egyptian Pound&nbsp;<OPTION VALUE=EUR>Euro
+Dollar&nbsp;<OPTION VALUE=FIM>Finnish Markka&nbsp;<OPTION VALUE=FRF>French
+Franc&nbsp;<OPTION VALUE=DEM>German Deutschmark&nbsp;<OPTION VALUE=GRD>Greek
+Drachma&nbsp;<OPTION VALUE=HKD>Hong Kong Dollar&nbsp;<OPTION VALUE=HUF>Hungarian
+Forint&nbsp;<OPTION VALUE=INR>Indian Rupee&nbsp;<OPTION VALUE=IDR>Indonesian
+Rupiah&nbsp;<OPTION VALUE=IEP>Irish Pound&nbsp;<OPTION VALUE=ILS>Israeli
+Shekel&nbsp;<OPTION VALUE=ITL>Italian Lira&nbsp;<OPTION VALUE=JMD>Jamaican
+Dollar&nbsp;<OPTION VALUE=JPY>Japanese Yen&nbsp;<OPTION VALUE=JOD>Jordanian
+Dinar&nbsp;<OPTION VALUE=KES>Kenyan Shilling&nbsp;<OPTION VALUE=LUF>Luxembourg
+Franc&nbsp;<OPTION VALUE=MYR>Malaysian Ringgit&nbsp;<OPTION VALUE=MAD>Moroccan
+Dirham&nbsp;<OPTION VALUE=NLG>Netherlands Guilder&nbsp;<OPTION VALUE=MXP>New
+Mexican Peso&nbsp;<OPTION VALUE=NZD>New Zealand Dollar&nbsp;<OPTION VALUE=NGN>Nigerian
+Naira&nbsp;<OPTION VALUE=NOK>Norwegian Krone&nbsp;<OPTION VALUE=PKR>Pakistani
+Rupee&nbsp;<OPTION VALUE=PEN>Peruvian new Sol&nbsp;<OPTION VALUE=PHP>Philippine
+Peso&nbsp;<OPTION VALUE=PLZ>Polish Zloty&nbsp;<OPTION VALUE=PTE>Portugese
+Escudo&nbsp;<OPTION VALUE=SGD>Singapore Dollar&nbsp;<OPTION VALUE=ZAR>South
+African Rand&nbsp;<OPTION VALUE=KRW>South Korean Won&nbsp;<OPTION VALUE=ESP>Spanish
+Peseta&nbsp;<OPTION VALUE=LKR>Sri Lankan Rupee&nbsp;<OPTION VALUE=SEK>Swedish
+Krona&nbsp;<OPTION VALUE=CHF>Swiss Franc&nbsp;<OPTION VALUE=TWD>Taiwan
+Dollar&nbsp;<OPTION VALUE=THB>Thailand Baht&nbsp;<OPTION VALUE=TRL>Turkish
+Lira&nbsp;<OPTION VALUE=VEB>Venezuelan Bolivar&nbsp;<OPTION VALUE=ZWD>Zimbabwe
+Dollar&nbsp;</FONT></SELECT></TH>
+</TR>
+</TABLE></CENTER>
+<INPUT TYPE=hidden NAME=appName VALUE="AccountCharXRef"></FORM>
+<H3>
+Sample Output:</H3>
+
+<UL type=disc>
+<CENTER>
+<H3>
+&nbsp;<FONT FACE="Arial"><FONT COLOR="#00008B"><FONT SIZE=+0>--- Account
+Characteristics Report for: <I>Insyte Test 102</I> ---</FONT></FONT></FONT></H3></CENTER>
+
+<CENTER>
+<H4>
+<FONT FACE="Arial"><FONT COLOR="#00008B"><FONT SIZE=+0>Currency: <I>United
+States Dollar</I></FONT></FONT></FONT></H4></CENTER>
+
+<HR align=center width=50%>
+<CENTER><TABLE BORDER CELLSPACING=0 WIDTH="80%" >
+<CAPTION><B><FONT FACE="Arial"><FONT COLOR="#008000"><FONT SIZE=+1>(equity
+only)</FONT></FONT></FONT></B></CAPTION>
+
+<TR>
+<TH ALIGN=CENTER VALIGN=TOP><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=-2>&nbsp;</FONT></FONT></FONT></TH>
+
+<TH ALIGN=CENTER VALIGN=TOP><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>10/31/1997</FONT></FONT></FONT></TH>
+
+<TH ALIGN=CENTER VALIGN=TOP><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>9/30/1997</FONT></FONT></FONT></TH>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Total
+Market Value</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+20,126,205</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+21,509,941</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Total
+Cash</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+578,676</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+69,704</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Number
+of Holdings</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+40</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+42</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Effective
+Date</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+10/31/1997</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+09/30/1997</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>MCap
+US - Total&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+819,879</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+860,201</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>MCap
+US - Avg&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+21,023</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+20,981</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>MCap
+US - Wtd Avg&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+19,402</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+19,447</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>P/E
+- Avg&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+25.12</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+28.56</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>P/E
+- Wtd Avg&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+26.57</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+30.09</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>P/E
+- Median&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+21.24</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+24.14</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>P/B
+- Avg&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+7.43</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+8.11</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>P/B
+- Wtd Avg&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+8.14</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+8.76</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+</TR>
+</TABLE></CENTER>
+&nbsp;</UL>
+
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy; 1999 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated March 26, 1999</font>
+</table></BODY>
+</HTML>

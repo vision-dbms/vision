@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title>Vision Tutorial 4: Using Lists</title>
+</head>
+<body bgcolor=white>
+<body>
+
+<h2>Vision Tutorial 4: Using Lists<a name="Vision Tutorial 4: Using Lists"></a></h2>
+
+<p>
+| <a href="FHome.htm">Home</a> 
+| <a href="vtutor.htm">Tutorials</a> 
+| <a href="clList.htm">The List Class</a> 
+| <a href="clCollect.htm">The Collection Class</a> |
+<hr>
+
+<h3>Topics Covered:</h3>
+
+<ul type= square>
+<li><a href="#List Creation and Basic Access">List Creation
+and Basic Access</a>
+<li><a href="#The do: Message">The "do:" Message</a>
+<li><a href="#The select: Message">The "select:" Message</a>
+<li><a href="#Sort Messages">Sort Messages</a>
+<li><a href="#The extendBy: Message">The "extendBy" Message</a>
+<li><a href="#List Rank, Decile, and Quintile Messages">List
+Rank, Decile, and Quintile Messages</a>
+<li><a href="#The groupedBy: Message">The "groupedBy"
+Message</a>
+<li><a href="#Statistical Messages">Statistical Messages</a>
+<li><a href="#Other List Messages">Other List Messages</a>
+<li><a href="#See Also">See Also</a>:
+</ul>
+<hr>
+
+<blockquote><hr>
+<center><b><font size+1>Reminder!</font></b> </a></center>
+To run these examples, you should first start a new session then load the sample database using:
+<pre><tt><b>     "/localvision/samples/general/sample.load" asFileContents evaluate ; 
+</b></tt></pre>
+Any other files referenced can be read from the <i>/localvision/samples/general/</i>
+directory.
+<p>
+<b>Note:</b> The <i>sample.load</i> file runs by default on a <i>Unix</i> environment.  If you are using a <i>Windows NT</i> platform, this location may be prefixed by a drive  and optional path (e.g. <i>d:/visiondb/localvision/samples/general/sample.load</i>).  Check with your Vision Administrator for further details.<hr></blockquote>
+
+<hr>
+<a name="List Creation and Basic Access"><b><h3>List Creation and Basic Access</h3></b></a>
+
+<p>Vision allows you to store one or more objects in a list. To create
+a list, just separate the objects you wish to include in the list with
+commas. For example, assume you wish to create a list containing the companies
+GM, IBM, and Exxon and name this list <i>testList</i>. Type and execute
+the following:
+
+<ul>
+<pre><b>!testList <- Named Company GM, Named Company IBM, Named Company XON </b></pre>
+</ul>
+
+You should see: 
+
+<ul>
+<pre><b>List of 3</b></pre>
+</ul>
+
+Vision has executed your request and created a variable called <i>testList</i>.
+The output <i>aList</i> informs you that you have created a list of elements.
+If you wish to suppress the printing of <i>aList</i>, simply type <i>;</i> at
+the end of the previous expression. Notice that the expression <i>Named
+Company</i> is repeated for each element in the list. The <i><a href="mList.htm#send:">send:</a></i>
+message can be used to streamline this operation. Type the following: </p>
+
+<ul>
+<pre><b>!testList <- Named Company send: [ GM, IBM, XON ] </b></pre>
+</ul>
+
+The two previous examples produce identical results. 
+
+<p>The count message can be sent to a list of elements to return the number
+of elements in the list. For example, the expression: 
+
+<ul>
+<pre><b>testList count</b></pre>
+</ul>
+
+returns the number <i>3</i>, the total number of companies in <i>testList</i>.
+
+
+<p>To access the list of all instances in the class Company, execute the
+expression: 
+
+<ul>
+<pre><b>!fullList <- Company masterList ;</b></pre>
+</ul>
+
+Vision has executed your request and created a variable called <i>fullList</i>.
+The expression: 
+
+<ul>
+<pre><b>fullList count</b></pre>
+</ul>
+
+returns the number <i>38</i>, the total number of companies in fullList. 
+
+<p>The <i>asList</i> message can be used to produce a 1 element list from
+a single object. For example: 
+
+<ul>
+<pre><b>!gmAsList <- Named Company GM asList ;</b></pre>
+</ul>
+
+produces a list object that contains 1 object, the company GM. You can
+append additional objects to <i>gmAsList</i> and use all the other List
+messages with this list. 
+
+<p>Individual objects in a List can be accessed directly using the <a href="mList.htm#at:"><i>at</i>:</a>
+message. For example, the expression: 
+
+<ul>
+<pre><b>testList at: 2</b></pre>
+</ul>
+
+returns the second element of this list. In this case, the Company object
+IBM is returned. The expression: 
+
+<ul>
+<pre><b>(testList at: 2) = Named Company IBM</b></pre>
+</ul>
+
+returns the value <i>TRUE</i>. 
+
+<hr width="100%" ></p>
+
+<a name="The do: Message"><h3><b>The "<a href="clCollect.htm#do">do:</a>" Message</b></h3></a>
+
+<p>Now that you know how many companies are in <i>testList</i>, you may
+wish to analyze and display information for each company in the list. The
+<i>do:</i> message is used for this purpose. You used this message in a 
+previous section to display multiple pieces of information for a single
+company. 
+
+<p>The syntax for the <i>do:</i> message is: 
+
+<ul>
+<pre><b>list do: [ 
+          operation 1 ; 
+          operation 2 ; 
+          operation 3 ; 
+          . . . 
+          operation n ; 
+         ] ; 
+</b></pre>
+</ul>
+
+where list is a list of elements (e.g., <i>testList</i>) and each operation
+represents an action you want executed for each element in the list. As
+usual, each separate operation is followed by the ; character. 
+
+<p>The expression: 
+
+<ul>
+<pre><b>testList do: [ ticker print; ] ;</b></pre>
+</ul>
+
+produces the output:
+
+<ul>
+<pre><b>GMIBMXON</b></pre>
+</ul>
+
+This program prints the ticker for each company in <i>testList</i>.
+However, the output in this example is almost unreadable. That is because
+you did not tell Vision to perform a carriage return after printing each
+ticker. Instead of using the <i><a href="mList.htm#print">print</a></i>
+message, use <i>printNL</i> as shown below: 
+
+<ul>
+<pre><b>testList do: [ ticker printNL; ] ;</b></pre>
+</ul>
+
+The Output Window should display: 
+
+<ul>
+<pre><b>GM 
+IBM 
+XON</b></pre>
+</ul>
+
+This program prints a ticker for each company in <i>testList</i>, followed
+by a carriage return. 
+
+<p>The message <i>do:</i> operates like a loop that says print the ticker
+for company 1 in <i>testList</i> followed by a carriage return, print the
+ticker for company 2 in <i>testList</i> followed by a carriage return,
+and so on. If you wished to perform this same operation for a list containing
+10,000 companies, only the list name would need to be changed. For example,
+you could use <i>fullList</i> to display the ticker for each company instance:
+
+
+<ul>
+<pre><b>fullList do: [ ticker printNL; ] ;</b></pre>
+</ul>
+
+Suppose you wish to print the names of the companies in <i>testList</i>.
+The expression: 
+
+<ul>
+<pre><b>testList do: [ name printNL ] ;</b></pre>
+</ul>
+
+produces: 
+
+<ul>
+<pre><b>General Motors Corp
+IBM Corp 
+Exxon Corp </b></pre>
+</ul>
+
+In addition to name, print the sales for each company in <i>testList</i>.
+The expression: 
+
+<ul>
+<pre><b>testList do: [ name print; sales printNL; ] ;</b></pre>
+</ul>
+
+produces:
+
+<ul>
+<pre><b>General Motors Corp  101781.00 
+IBM Corp 54217.02 
+Exxon Corp 76416.00 </b></pre>
+</ul>
+
+To get the sales column to line up neatly, specify a column width for
+the name using the <i>print:</i> message as shown below: 
+
+<ul>
+<pre><b>testList do: [name print: 35; sales printNL; ] ;</b> </pre>
+</ul>
+
+You should see: 
+
+<ul>
+<pre><b>General Motors Corp             101781.00
+IBM Corp                         54217.02
+Exxon Corp                       76416.00</b></pre>
+</ul>
+
+The message <i>print: 35</i> reserves 35 spaces for each company's name
+and inserts spaces for names that have fewer characters. 
+
+<p>The <i>do:</i> message can be used with calculations as well. Suppose
+you wish to calculate the price-earnings ratio for each company in <i>testList</i>.
+The expression: 
+
+<ul>
+<pre><b>testList 
+do:[ 
+    name print: 35; 
+    sales print: 10 ; 
+    price / earningsPerShare printNL: 8 ; 
+   ] ; </b></pre>
+</ul>
+
+produces the results: 
+
+<ul>
+<pre><b>General Motors Corp    101781.00     6.39
+IBM Corp                54217.02     9.26 
+Exxon Corp              76416.00     8.62
+</b></pre>
+</ul>
+
+In this case, the <i>do:</i> message executes three operations for each
+element in the list, printing the name, the sales value, and the price-earnings
+ratio followed by a carriage return. The sales values is printed in 10
+character positions and the price-earnings ratio is printed in 8 positions.
+Change <i>testList</i> to <i>fullList</i> to execute this report for all
+the companies. 
+
+<hr>
+
+<a name="The select: Message"><b><h3>The "<a href="clCollect.htm#select">select:</a>" Message</h3></b></a>
+
+<p>It is often useful to restrict a list to objects that meet certain criteria.
+For example, you may wish to find the companies in <i>fullList</i> whose
+sales were greater than 15,000 and produce the previous report for these
+companies only. The expression: 
+
+<ul>
+<pre><b>fullList select: [ sales > 15000 ] . 
+do: [ 
+     name print: 35 ; 
+     sales print: 10 ; 
+     price / earningsPerShare printNL: 8 ; 
+    ] ; </b></pre>
+</ul>
+
+produces: 
+
+<ul>
+<pre><b>Aetna Life & Cas       22114.11       5.46
+American Tel & Tel     51209.02      23.20 
+Amoco Corp             20174.00      19.91 
+Atlantic Richfield     16282.00      18.15 
+Boeing Co              15355.00      26.63 
+...</b></pre>
+</ul>
+
+This expression selects companies in <i>fullList</i> whose sales were
+greater than 15,000 and displays each company's name, sales, and price-earnings
+ratio for the companies that passed the criteria.
+
+<p>The <i>select:</i> message returns a list of those elements in the original
+list that meet the criteria specified. Pictorially the select: message
+works as follows: 
+
+<ul>
+<p><img src="list1.gif" lowsrc="list1.gif" alt="select: message structure" border=0 ></p>
+</ul>
+
+<p>The resultant list is a new list object that contains a subset of the
+objects in the original list. The resultant list can be empty (i.e., contain
+no objects) but will never have more elements than the original list. When
+you send the <i>do:</i> message to the resultant list, the report is only
+produced for those companies in this list. This same task could have been
+accomplished by creating a new variable that represents the result of screening
+for the specified criteria and then producing the report for this list
+as shown below: 
+
+<ul>
+<pre><b>!selectList <- fullList select: [ sales > 15000 ] ; 
+selectList 
+  do: [ 
+       name print: 35 ; 
+       sales print: 10 ; 
+       price/earningsPerShare printNL: 8 ; 
+      ]; </b></pre>
+</ul>
+
+This program produces results that are identical to the previous example.
+
+
+<p>If you wish to find the companies that had sales greater than 15,000
+and a price-earnings ratio of less than 10, type the expression: 
+
+<ul>
+<pre><b>fullList 
+ select: [ sales > 15000 && (price / earningsPerShare) < 10 ] . 
+ do: [ 
+      name print:35; 
+      sales print: 10 ; 
+      price / earningsPerShare printNL: 8 ;
+     ] ; </b></pre>
+</ul>
+
+You should see
+
+<ul>
+<pre><b>Aetna Life & Cas         22114.11      5.46
+CIGNA Corp               16909.30      6.90
+Chrysler Corp            26276.51      3.92 
+Citicorp                 27988.01      3.67 
+Ford Motor Company       71643.38      4.36 
+General Motors Corp     101781.00      6.39 
+IBM Corp                 54217.02      9.26
+Travelers Corp           17459.10      5.49 </b></pre>
+</ul>
+
+The message <i>&&</i> is the relational operator for <i>and</i>.
+It is used to create selection criteria where several criteria must all
+be TRUE. The message <i>| |</i> is the relational operator for <i>or</i>
+and is used to specify criteria where either or both criteria are TRUE.
+For example, if you wish to find the companies whose sales are greater
+than 15,000 or that have a price-earnings ratio of less than 15, execute:
+
+<ul>
+<pre><b>fullList
+    select: [ sales > 15000 || (price / earningsPerShare) < 10 ] . 
+     do: [ 
+          name print: 35 ; 
+          sales print: 10 ; 
+          price/ earningsPerShare printNL: 8 ; 
+         ]; </b></pre>
+</ul>
+
+You should see:
+
+<ul>
+<pre><b>Aetna Life & Cas           22114.11        5.46 
+American Tel & Tel         51209.02       23.20
+Amoco Corp                 20174.00       19.91 
+Atlantic Richfield         16282.00       18.15 
+Boeing Co                  15355.00       26.63 
+...</b></pre>
+</ul>
+
+Notice that calculations (e.g., <i>price / earningsPerShare</i>) can
+be performed within selection brackets. The selection criteria is really
+just a Vision program. Within the square brackets, you can define temporary
+variables, perform conditional tests, and do complex calculations to specify
+your criteria. 
+
+<hr></p>
+
+<a name="Sort Messages"><b><h3>
+<a href="clCollect.htm#sorts">Sort</a> Messages</h3></b></a>
+
+<p>It is often useful to display your information in sorted order. The
+<i><a href="mList.htm#sortDown:">sortDown:</a></i> and <i><a href="mList.htm#sortUp:">sortUp:</a>
+</i>messages enable you to do this. For example, after you performed your
+screen on <i>fullList</i>, you may wish to display the results from highest
+to lowest sales. For example, the expression: 
+
+<ul>
+<pre><b>fullList 
+    select: [ sales > 15000 && (price / earningsPerShare) < 10 ] . 
+    sortDown: [ sales ] . 
+do: [ 
+     name print: 35 ; 
+     sales print: 10 ; 
+     price / earningsPerShare printNL: 8 ;
+    ] ;</b></pre>
+</ul>
+
+produces the output: 
+
+<ul>
+<pre><b>General Motors Corp     101781.00    6.39 
+Ford Motor Company       71643.38    4.36 
+IBM Corp                 54217.02    9.26 
+Citicorp                 27988.01    3.67 
+...</b></pre>
+</ul>
+
+As with other list messages, you are not limited in the complexity of
+the calculation to be sorted on. For example you may sort on the price-earnings
+ratio by executing the following: 
+
+<ul>
+<pre><b>fullList 
+    select: [ sales > 15000 && (price / earningsPerShare) < 10 ] . 
+    sortUp: [ price / earningsPerShare ] . 
+do: [ 
+     name print: 35 ; 
+     sales print: 10 ; 
+     price / earningsPerShare printNL: 8 ;
+    ] ; </b></pre>
+</ul>
+
+producing the results: 
+
+<ul>
+<pre><b>Citicorp                 27988.01     3.67
+Chrysler Corp            26276.51     3.92 
+Ford Motor Company       71643.38     4.36 
+Aetna Life & Cas         22114.11     5.46 
+...</b></pre>
+</ul>
+
+In this case, the <i>sortUp:</i> message was used to sort the values
+from lowest to highest price-earnings ratio. You can perform multiple sorts
+using the <i><a href="mList.htm#sortUpBy:then:">sortUpBy: then:</a></i>
+message and supplying two criteria. For example, to sort by the integer
+portion of the price-earnings ratio then by name, use: 
+
+<ul>
+<pre><b>fullList 
+  select: [ sales > 15000 && (price / earningsPerShare) < 10 ] . 
+  sortUpBy: [ (price / earningsPerShare) asInteger ] then: [ name ] .
+do: [ name print: 35 ; 
+      sales print: 10 ;
+      price / earningsPerShare printNL:8 ;
+    ] ; </b></pre>
+</ul>
+
+<p>You should see: </p>
+
+<ul>
+<pre><b>Chrysler Corp          26276.51     3.92 
+Citicorp               27988.01     3.67 
+Ford Motor Company     71643.38     4.36 
+Aetna Life & Cas       22114.11     5.46 
+...</b></pre>
+</ul>
+
+Notice that Chrysler now appears before Citicorp. Since the integer
+value of the ratio is 3 in both cases, the name sort is used as a secondary
+sort. 
+
+<p>Additional variations of the <a href="clCollect.htm#sorts"><i>Sort:messsages</i></a>
+are available.
+<hr>
+
+<a name="The extendBy: Message"><h3>The <a href="clCollect.htm#extend">"extendBy:"</a>Message</h3></a>
+
+<p>The last example used the calculation price / earningsPerShare three
+times (selecting, sorting, and doing) thus creating two inefficiencies.
+First, it is tedious to type in the same calculation three times, particularly
+when calculations use many variables. In addition, by writing the calculation
+three times, you are asking Vision to retrieve the same information for
+the same companies three times. As usual, Vision provides a more efficient
+way to accomplish this. 
+
+<p>The message <i><a href="mList.htm#extendBy:">extendBy:</a></i> lets
+you calculate variables once for each element in the list and then lets
+you reuse this information. For example, the previous example can be more
+effectively written as follows: 
+
+<ul>
+<pre><b>fullList 
+extendBy: [ !pe <- price / earningsPerShare; 
+          ] . 
+select: [ sales > 15000 && pe < 10 ] . 
+   sortUpBy: [ pe ] then: [ name ] . 
+do: [ 
+     name print: 35 ; 
+     sales print: 10 ; 
+     pe printNL: 8 ;
+    ] ;</b></pre>
+</ul>
+
+This program produces the same output as the prior example. Instead
+of calculating <i>price / earningsPerShare</i> three times, the <i>extendBy:</i>
+message allows you to create a variable that stores the result of this
+calculation once. 
+
+<p>All objects in the list respond to the <i>pe </i>message just like any
+other message. All objects in the list continue to respond to the messages
+already defined. 
+
+<p>Pictorially the extendBy: message works as follows: </p>
+
+<ul>
+<p><img src="list2.gif" lowsrc="list2.gif" alt="extendBy: message structure" border=0 ></p>
+</ul>
+
+<p>Within the square brackets, you can define as many variables as you
+would like. Each variable should be introduced with the symbol <b>!</b>
+followed by a variable name. Each variable that you define can be thought
+of as a new column for the list. For example: 
+
+<ul>
+<pre><b>fullList 
+extendBy: [ !pe <- price / earningsPerShare; 
+            !margin <- netIncome / sales;
+          ] .
+select: [ sales > 15000 && pe < 10 ] . 
+  sortUp: [ pe ] .
+do:[ 
+    name print: 35 ;
+    margin print ;
+    sales print: 10 ;
+    pe printNL: 8 ;
+   ] ; </b></pre>
+</ul>
+
+produces: 
+
+<ul>
+<pre><b>Citicorp             0.04    27988.01      3.67
+Chrysler Corp        0.05    26276.51      3.92 
+Ford Motor Company   0.06    71643.38      4.36 
+Aetna Life & Cas     0.04    22114.11      5.46 
+Travelers Corp       0.02    17459.10      5.49 
+General Motors Corp  0.03   101781.00      6.39 
+CIGNA Corp           0.04    16909.30      6.90
+IBM Corp             0.10    54217.02      9.26 </b></pre>
+</ul>
+
+The new variable definitions can be as simple or complex as needed.
+For example, you could create an additional variable that contains an *
+if margin is more than .9 or sales is less than 20,000 using: 
+
+<ul>
+<pre><b>fullList 
+extendBy: [ !pe <- price / earningsPerShare; 
+            !margin <- netIncome / sales;
+            !flag <- " " ; 
+            margin > .9 || sales < 20000
+             ifTrue:[ :flag <- "*"; ] ; 
+          ] .
+select: [ sales > 15000 && pe < 10 ] .
+  sortUp: [ pe ] .
+do: [ 
+     flag print: 2 ;
+     name print: 35 ;
+     margin print ; 
+     sales print: 10 ; 
+     pe printNL: 8 ; 
+    ] ;</b></pre>
+</ul>
+
+producing the output: 
+
+<ul>
+<pre><b>Citicorp             0.04   27988.01     3.67
+Chrysler Corp        0.05   26276.51     3.92
+Ford Motor Company   0.06   71643.38     4.36 
+Aetna Life Cas       0.04   22114.11     5.46
+* Travelers Corp     0.02   17459.10     5.49
+General Motors Corp  0.03  101781.00     6.39 
+* CIGNA Corp           0.04   16909.30     6.90
+IBM Corp           0.10   54217.02     9.26 </b></pre>
+</ul>
+
+<p>
+<hr>
+
+<a name="List Rank, Decile, and Quintile Messages">
+<h3>List <a href="clCollect.htm#ranks">Rank</a>, 
+<a href="clCollect.htm#tiles">Decile</a>, and 
+<a href="clCollect.htm#tiles">Quintile</a> Messages</h3></a>
+
+<p>You may wish to determine the rank of each company in a list based on
+one of its data values. In <i>fullList</i>, for example, the company with
+the highest sales would receive a rank of 1 and the one with the lowest
+sales would receive a rank of 38. Vision provides two messages, <i><a href="mList.htm#rankUp:">rankUp:</a></i>
+and <i><a href="mList.htm#rankDown:">rankDown:</a></i> for this purpose.
+The rankUp:message assigns the value 1 to the list element with the lowest
+value for the supplied criteria. The rankDown: message assigns the value
+1 to the list element with the highest value for the supplied criteria.</p>
+
+<p>When you send one of these messages to a list, Vision returns an extended
+variable for the list named <i>rank</i>. For example, if you wished to
+rank the companies selected in the previous examples from highest to lowest
+<i>sales</i> and sort the companies by <i>pe</i>, you could execute: </p>
+
+<ul>
+<pre><b>fullList 
+extendBy: [ !pe <- price / earningsPerShare;
+            !margin <- netIncome / sales;
+          ] .
+  select: [ sales > 15000 && pe < 10 ] .
+  rankDown: [ sales ] . 
+  sortUp: [ pe ] . 
+do: [ 
+     name print: 30 ; 
+     margin print ; 
+     sales print: 10 ; 
+     rank print ; 
+     pe printNL: 8 ; 
+    ] ; </b></pre>
+</ul>
+
+producing the output: 
+
+<ul>
+<pre><b>Citicorp             0.04     27988.01    4    3.67 
+Chrysler Corp        0.05     26276.51    5    3.92 
+Ford Motor Company   0.06     71643.38    2    4.36 
+Aetna Life & Cas     0.04     22114.11    6    5.46 
+Travelers Corp       0.02     17459.10    7    5.49 
+General Motors Corp  0.03    101781.00    1    6.39
+CIGNA Corp           0.04     16909.30    8    6.90 
+IBM Corp             0.10     54217.02    3    9.26</b></pre>
+</ul>
+
+The displayed rank indicates the company's position in the list by sales.
+Citicorp, with a sales rank of 4, is displayed first because the report
+is sorted by <i>pe</i> and Citicorp has the lowest <i>pe</i> value. If
+you were to rank and sort the list by the same value, the companies will
+display in rank order. For example, to rank and sort the list by <i>pe</i>,
+type the following: 
+
+<ul>
+<pre><b>fullList 
+extendBy: [ !pe <- price / earningsPerShare ; 
+            !margin <- netIncome / sales ; 
+          ] . 
+  select: [ sales > 15000 && pe < 10 ] . 
+  rankUp: [ pe ] . 
+  sortUp: [ pe ] . 
+do: [ 
+     name print: 30 ; 
+     margin print ; 
+     sales print: 10 ; 
+     rank print ; 
+     pe printNL: 8 ; 
+    ] ; </b></pre>
+</ul>
+
+producing the output: 
+
+<ul>
+<pre><b>Citicorp              0.04    27988.01    1     3.67 
+Chrysler Corp         0.05    26276.51    2     3.92 
+Ford Motor Company    0.06    71643.38    3     4.36 
+Aetna Life & Cas      0.04    22114.11    4     5.46 
+Travelers Corp        0.02    17459.10    5     5.49 
+General Motors Corp   0.03   101781.00    6     6.39 
+CIGNA Corp            0.04    16909.30    7     6.90 
+IBM Corp              0.10    54217.02    8     9.26 </b></pre>
+</ul>
+
+Notice that the ranks are in ascending order in this case. 
+
+<p>In the last few examples, you have performed the same <i><a href="mList.htm#extendBy:">extendBy:</a></i>
+and <a href="mList.htm#select:"><i>select:</i> </a>operations repeatedly.
+You may wish to create a new list that represents the original list containing
+only those companies meeting your criteria and providing the two pre-calculations.
+To do this, type: 
+
+<ul>
+<pre><b>!subset <-
+   fullList 
+   extendBy: [ !pe <- price / earningsPerShare; 
+               !margin <- netIncome / sales; 
+             ]. 
+select: [ sales > 15000 && pe < 10] ; </b></pre>
+</ul>
+
+The variable <i>subset</i> can now be used directly. For example, to
+generate the last report using this list type: 
+
+<ul>
+<pre><b>subset 
+    rankUp: [ pe ] . 
+    sortUp: [ pe ] . 
+do: [ 
+     name print: 30 ; 
+     margin print; 
+     sales print: 10 ; 
+     rank print; 
+     pe printNL: 8 ; 
+    ] ; </b></pre>
+</ul>
+
+The output should be identical to the previous report. Notice that there
+was no need to do the <i>extend:</i> or <i>select: </i>operations this
+time. 
+
+<p>The <i><a href="mList.htm#decileUp:">decileUp:</a></i> and <i><a href="mList.htm#decileDown:">decileDown:</a></i>
+messages have been implemented to assign a value from 1 to 10 to each element
+in the list based on the criteria supplied. The <i>decileUp:</i> message
+assigns the value 1 to the first 10% of the list elements with the lowest
+values, the value 2 to the next 10%, and so on with the value 10 assigned
+to the list elements in the top 10%. The <i>decileDown:</i> message assigns
+the value 1 to the first 10% of the list elements with the highest values
+and the value 10 to the list elements in the bottom 10%. When you send
+one of these messages to a list, Vision returns an extended variable for
+the list named <i>decile</i>. For example: </p>
+
+<ul>
+<pre><b>fullList 
+decileDown: [ sales ] . 
+do: [ name print: 30 ; 
+      sales print: 10 ; 
+      decile printNL ; 
+    ] ; </b></pre>
+</ul>
+
+produces the output: 
+
+<ul>
+<pre><b>Aetna Life & Cas        22114.11    4 
+American Tel & Tel      51209.02    2 
+Amoco Corp              20174.00    4 
+Atlantic Richfield      16282.00    6 
+...</b></pre>
+</ul>
+
+Each company is assigned a decile value from 1 to 10 based on where
+its sales value falls compared to the other companies in the list. The
+companies with the largest sales all have the decile value 1. The companies
+with the smallest sales all have the decile value 10. Sorting the list
+by <i>sales</i> may make this clearer: 
+
+<ul>
+<pre><b>fullList 
+decileDown: [ sales ] . 
+sortDown: [ sales ] . 
+do: [ name print: 30 ; 
+      sales print: 10 ; 
+      decile printNL ; 
+    ] ; </b></pre>
+</ul>
+
+You should see: 
+
+<ul>
+<pre><b>General Motors Corp     101781.00     1 
+Exxon Corp               76416.00     1 
+Ford Motor Company       71643.38     1 
+IBM Corp                 54217.02     1 
+Mobil Corporation        51223.02     2 
+American Tel & Tel       51209.02     2 
+Sears Roebuck & Co       48439.61     2 
+General Electric Co      39315.01     2 
+DuPont EI de Nemours     30468.01     3
+. . .</b></pre>
+</ul>
+
+The <i><a href="mList.htm#quintileUp:">quintileUp:</a></i> and <i><a href="mList.htm#quintileDown:">quintileDown:</a></i>
+messages are identical to the decile messages except they assign a value
+from 1 to 5, returned in a variable named <i>quintile</i>. For example,
+you could assign a <i>sales</i> quintile and an <i>earningsPerShare</i>
+decile value using the following: 
+
+<ul>
+<pre><b>fullList 
+quintileDown: [ sales ] . 
+decileUp: [ earningsPerShare ] . 
+do: [ 
+     name print: 30 ; 
+     sales print: 10 ; 
+     quintile print ; 
+     earningsPerShare print ; 
+     decile printNL ; 
+    ] ; </b></pre>
+</ul>
+
+producing the output: 
+
+<ul>
+<pre><b>Aetna Life & Cas        22114.11    2   7.48     9 
+American Tel & Tel      51209.02    1   1.88     2 
+Amoco Corp              20174.00    2   2.65     4 
+Atlantic Richfield      16282.00    3   6.68     8 
+BellSouth Corp          12269.10    4   3.46     6 
+Boeing Co               15355.00    3   1.38     2 
+...</b></pre>
+</ul>
+
+<p>
+<hr>
+
+<a name="The groupedBy: Message"><h3>The <a href="clCollect.htm#groups">"groupedBy:"</a> Message</a>
+</h3>
+
+<p>The <i>groupedBy:</i> message provides you with a powerful tool for
+aggregation, enabling you to simultaneously analyze information at a detailed
+and aggregate level. The <i>groupedBy:</i> message is used to organize
+your original list into a list of sublists or groups based on criteria
+that you specify. You can then perform summary analysis on each group as
+well as analyze the individual elements in each group. 
+
+<p>The <i>groupedBy:</i> message is often used to group information by industry,
+analyst, rating, or any other criteria that allows you to classify similar
+information. 
+
+<p>To group the list <i>subset</i> by sector, and display each sector's
+name, type the following expression:</p>
+
+<ul>
+<pre><b>subset groupedBy: [ industry sector ] . 
+do: [ 
+     name printNL; 
+    ] ; </b></pre>
+</ul>
+
+You should see: 
+
+<ul>
+<pre><b>Durables 
+Finance 
+Technology</b></pre>
+</ul>
+
+By asking Vision to group subset by sector, Vision returns a list of
+the sectors that exist in <i>subset</i>. When you send the <i>do:</i> message
+to this list and ask for the name of each element to be printed, the sector
+names are displayed. 
+
+<p>Your original list of companies is not lost. Each element in the list
+formed by the <i>groupedBy:</i> message responds to the message <i>groupList</i>.
+This message returns the list of companies from the original list that
+are associated with the specific group. To determine the number of companies
+in each sector, type the following: 
+
+<ul>
+<pre><b>subset groupedBy: [ industry sector ] . 
+do: [ 
+     name print: 35 ; 
+     groupList count printNL; 
+    ] ;</b></pre>
+</ul>
+
+producing the output: 
+
+<ul>
+<pre><b>Durables           3
+Finance            4
+Technology         1</b></pre>
+</ul>
+
+To display the companies in each sector, and the <i>sales</i>, <i>pe</i>
+and <i>margin</i> for each company, type the following: 
+
+<ul>
+<pre><b>subset groupedBy: [ industry sector ] . 
+do: [ 
+     name printNL;                # print sector name 
+     groupList 
+     do: [                        # for each company in sector 
+          " " print:5;            # indent 5 spaces 
+          name print: 30 ;        # print company data 
+          margin print ; 
+          sales print: 10 ; 
+          pe printNL; 
+         ] ; 
+    ]; </b></pre>
+</ul>
+
+You should see:
+
+<ul>
+<pre><b>Durables 
+    Chrysler Corp        0.05   26276.51   3.92 
+    Ford Motor Company   0.06   71643.38   4.36 
+    General Motors Corp  0.03  101781.00   6.39 
+Finance 
+    Aetna Life & Cas     0.04   22114.11   5.46 
+    CIGNA Corp           0.04   16909.30   6.90 
+    Citicorp             0.04   27988.01   3.67 
+    Travelers Corp       0.02   17459.10   5.49 
+Technology 
+    IBM Corp             0.10   54217.02   9.26</b></pre>
+</ul>
+                      
+Pictorially the groupedBy: message works as follows: 
+
+<ul>
+<p><img src="list3.gif" lowsrc="list3.gif" alt="groupedBy: message structure" border=0 ></p>
+</ul>
+
+<p>Grouping introduces a concept known as <b>nested</b> lists. The outer
+list represents a list of sectors. Each element in this outer list in turn
+responds to the message <i>groupList</i> which returns the set of elements
+from the original list that are in the current group. Since this subset
+is itself a list, you can perform any list operations on it, including
+<i>count</i>, <i>do:</i>, and <i>select:</i>. For example, to sort the
+companies in each group by sales, use the following: 
+
+<ul>
+<pre><b>subset groupedBy: [ industry sector ] . 
+do: [ name printNL ;                           # print sector name 
+      groupList 
+      sortDown: [ sales ] .                    # sort companies in sector 
+      do: [                                    # sort each company in sector do: [ 
+           " " print: 5 ;                      # indent 5 spaces  
+           name print: 30 ;                    # print company data
+           margin print ; 
+           sales print: 10 ; 
+           pe printNL ; 
+          ] ; 
+    ] ; </b></pre>
+</ul>
+
+You should see: 
+
+<ul>
+<pre><b>Durables 
+       General Motors Corp   0.03  101781.00   6.39 
+       Ford Motor Company    0.06   71643.38   4.36 
+       Chrysler Corp         0.05   26276.51   3.92 
+Finance 
+       Citicorp              0.04   27988.01   3.67 
+       Aetna Life & Cas      0.04   22114.11   5.46 
+       Travelers Corp        0.02   17459.10   5.49 
+       CIGNA Corp            0.04   16909.30   6.90 
+Technology 
+       IBM Corp              0.10   54217.02   9.26 </b></pre>
+</ul>
+
+You can sort each of the group levels independently. For example, you
+could sort the sector groups by number of companies in the group using
+the following: 
+
+<ul>
+<pre><b>subset groupedBy: [ industry sector ] . 
+sortUp: [ groupList count ] .        # sort sectors by number in group 
+do: [ 
+     name printNL ;                  # print sector name 
+     groupList 
+     sortDown: [ sales ] .           # sort companies in sector 
+     do: [                           # for each company in sector do: [ 
+          " " print: 5 ;             # indent 5 spaces 
+          name print: 30 ;           # print company data 
+          margin print ; 
+          sales print: 10 ; 
+          pe printNL;
+         ] ; 
+    ] ; </b></pre>
+</ul>
+
+You should see: 
+
+<ul>
+<pre><b>Technology 
+        IBM Corp             0.10      54217.02     9.26 
+Durables 
+        General Motors Corp  0.03     101781.00     6.39 
+        Ford Motor Company   0.06      71643.38     4.36 
+        Chrysler Corp        0.05      26276.51     3.92 
+Finance 
+        Citicorp             0.04      27988.01     3.67 
+        Aetna Life & Cas     0.04      22114.11     5.46 
+        Travelers Corp       0.02      17459.10     5.49 
+        CIGNA Corp           0.04      16909.30     6.90 </b></pre>
+</ul>
+
+Since the <i>groupList</i> is a list, it can be grouped further,
+as shown below: 
+
+<ul>
+<pre><b>subset groupedBy: [ industry sector ] .         # group by sector 
+do: [ 
+     "SECTOR: " print; 
+     name printNL;                              # print sector's name 
+     groupList groupedBy: [ industry ] .        # group companies in sector 
+     do: [                                      # by industry 
+          " INDUSTRY: " print; 
+          name printNL;                         # print industry's name 
+          groupList                             # for each company 
+          do: [                                 # in industry do: 
+               " " print: 8 ;                   # indent 8 spaces 
+               name print: 30 ;                 # print company data 
+               sales print:10 ; 
+               price print:10 ; 
+               earningsPerShare print: 10 ; 
+               newLine print ; 
+              ] ;                               # end of companies in ind. 
+        ] ;                                     # end of industries in sector 
+newLine print;                                  # skip line between sectors 
+] ;                                             # end of sectors </b></pre>
+</ul>
+
+You should see: 
+
+<ul>
+<pre><b>SECTOR: Durables 
+ INDUSTRY: Automotive 
+     Chrysler Corp           26276.51   23.13    5.90 
+     Ford Motor Company      71643.38   39.50    9.05 
+     General Motors Corp    101781.00   32.13    5.03 
+
+SECTOR: Finance 
+ INDUSTRY: Banks 
+     Citicorp                27988.01   15.63    4.26 
+ INDUSTRY: Insurance 
+     Aetna Life & Cas        22114.11   40.88    7.48
+     CIGNA Corp              16909.30   50.00    7.25 
+     Travelers Corp          17459.10   22.50    4.10 
+SECTOR: Technology 
+ INDUSTRY: Computers and Services 
+     IBM Corp                54217.02   80.75    8.72 
+...</b></pre>
+</ul>
+
+This report organizes the list <i>subset</i> into sectors. Within each
+sector the industries are separated, and then the companies are listed
+under their corresponding industry. This example uses the <i>groupedBy:</i>
+message twice; once to group the original list into sectors; the second
+time to group the companies in a given sector into industries. You can
+change the initial list from <i>subset</i> to <i>fullList</i>, to display
+this report for all companies.
+
+<hr>
+
+<a name="Statistical Messages" href="clCollect.htm#compute">
+<h3>Statistical Messages</h3></a>
+
+<p>Vision offers various messages for calculating summary statistics about
+a list. For example, if you wish to calculate the average sales for the
+companies in <i>fullList</i> execute: </p>
+
+<ul>
+<pre><b>fullList average: [ sales ]</b></pre>
+</ul>
+
+You should see: 
+
+<ul>
+<pre><b>25701.95</b></pre>
+</ul>
+
+To determine the total sales in <i>fullList</i> execute: 
+
+<ul>
+<pre><b>fullList total: [ sales ]</b></pre>
+</ul>
+
+producing the output: 
+
+<ul>
+<pre><b>976674.02</b></pre>
+</ul>
+
+Other statistical messages include: 
+
+<a href="mList.htm#average:"><i>average:</i></a>, 
+<a href="mList.htm#max:"><i>max:</i></a>,  
+<a href="mList.htm#median:"><i>median:</i></a>,
+<a href="mList.htm#min:"><i>min:</i></a>,
+<a href="mList.htm#mode:"><i>mode:</i></a>,
+<a href="mList.htm#stdDev:"><i>stdDev:</i></a>, and
+<a href="mList.htm#total:"><i>total:</i></a>.
+
+<p>
+
+Many of these messages, such as <i><a href="mList.htm#median:">median:</a></i>
+were written in Vision and can be modified or expanded as needed. The brackets
+can contain a simple message, a calculation, or a complex program. 
+
+<p>To save the total, average, minimum and maximum sales for the companies
+in <i>fullList </i>in the variables fullTot, fullAvg, fullMin, and fullMax
+respectively, execute:
+
+<ul>
+<pre><b>!tot <- fullList total: [ sales ]; 
+!avg <- fullList average: [ sales ]; 
+!min <- fullList min: [ sales ]; 
+!max <- fullList max: [ sales ]; </b></pre>
+</ul>
+
+To print the results for each variable with a description execute: 
+
+<ul>
+<pre><b>"TOTAL SALES" print: 35 ; tot printNL ; 
+"AVERAGE SALES" print: 35 ; avg printNL ; 
+"MIN SALES" print: 35 ; min printNL ; 
+"MAX SALES" print: 35 ; max printNL ; </b></pre>
+</ul>
+
+producing the output: 
+
+<ul>
+<pre><b>TOTAL SALES           976674.02
+AVERAGE SALES          25701.95
+MIN SALES               8090.00
+MAX SALES             101781.00</b></pre>
+</ul>
+
+The following program adds subtotals to the sector report created earlier:
+
+<ul>
+<pre><b>subset groupedBy: [ industry sector ] . 
+do: [ 
+     printNL ;                     # print sector name 
+     groupList 
+     do: [                         # for each company in sector do: [ 
+          " " print: 5 ;           # indent 5 spaces 
+          name print: 30 ;         # print company data 
+          sales printNL; 
+         ] ; 
+     "SUB TOTALS: " print: 35 ; 
+     groupList total: [ sales ] . printNL ; 
+     newLine print ; 
+    ] ; </b></pre>
+</ul>
+
+You should see:
+
+<ul>
+<pre><b>Durables 
+    Chrysler Corp            26276.51
+    Ford Motor Company       71643.38
+    General Motors Corp     101781.00
+SUB TOTALS:                 199700.89
+
+Finance 
+    Aetna Life & Cas         22114.11
+    CIGNA Corp               16909.30
+    Citicorp                 27988.01
+    Travelers Corp           17459.10
+SUB TOTALS:                  84470.52
+. . . </b></pre>
+</ul>
+
+To display subtotals for the industry-sector report, use: 
+
+<ul>
+<pre><b>fullList groupedBy: [ industry sector ] . 
+do: [ "Sector: " print ; 
+      name printNL ; 
+
+      groupList groupedBy: [ industry ] . 
+      do: [" Industry: " print ; 
+           name printNL ; 
+           groupList
+           do:[
+               " " print: 8 ; 
+               name print: 30 ; 
+               sales print: 10 ; 
+               price print: 10 ; 
+               earningsPerShare print: 10 ; 
+               newLine print ; 
+              ]; 
+#-- Industry Sub Totals 
+               "Industry Totals: " print: 38 ; 
+               groupList total: [ sales ] . print: 10 ; 
+               " " print: 10 ; 
+               groupList average: [ earningsPerShare ] . print: 10 ; 
+               newLine print ; 
+               newLine print ; 
+          ];
+#-- Sector Sub Totals 
+    "Sector Totals: " print: 38 ; 
+    groupList total: [ sales ] . print: 10 ; 
+    " " print: 10 ; 
+    groupList average: [ earningsPerShare ] . print: 10 ; 
+    newLine print ; 
+    newLine print ; 
+    ] ;              # end of sectors </b></pre>
+</ul>
+
+producing the output: 
+
+<ul>
+<pre><b>Sector: Non-durables 
+ Industry: Food, Beverage, Tobacco 
+      Pepsico Inc               11485.20     37.88    0.77 
+      Philip Morris Cos         22279.00     84.75    1.94 
+Industry Totals:                33764.20              1.35
+
+ Industry: Household Products 
+      Eastman Kodak Co          13305.00     44.50    3.52
+      Procter & Gamble Co       17000.00     49.38    0.47 
+Industy Totals:                 30305.00              2.00
+
+Sector Totals:                  64069.20              1.68
+
+Sector: Durables 
+ Industry: Automotive 
+      Chrysler Corp             26276.51     23.13    5.90 
+      Ford Motor Company        71643.38     39.50    9.05 
+      General Motors Corp      101781.00     32.13    5.03 
+Industry Totals:                19700.89              6.66
+
+Sector Totals:                 199700.89              6.66
+...</b></pre>
+</ul>
+<hr>
+
+<a name="Other List Messages"><h3><b>Other List Messages</b></h3></a>
+
+<p>Many applications require merging several lists together. Vision offers
+several messages to support these operations. Start by creating two lists:
+<i>techList</i> which contains the companies IBM, DEC, and HWP and <i>highSalesList</i>
+which includes companies with sales over 15,000. 
+
+<ul>
+<pre><b>!techList <- Named Company send: [ IBM, DEC, HWP ] ; 
+!highSalesList <- fullList select: [ sales > 15000 ] ; </b></pre>
+</ul>
+
+First, determine the number of companies in each list: 
+
+<ul>
+<pre><b>techList count</b></pre>
+</ul>
+
+You should see: 
+
+<ul>
+<pre><b>3</b></pre>
+</ul>
+
+Now type: 
+
+<ul>
+<pre><b>highSalesList count</b></pre>
+</ul>
+
+You should see: 
+
+<ul>
+<pre><b>22</b></pre>
+</ul>
+
+Suppose you wish to create a new list which includes all of the companies
+in highSalesList and techList. The <a href="mList.htm#append:">append:</a>
+message can be used for this purpose. To define a new list called <i>combinedList</i>
+with all of the companies in both lists execute the following: 
+
+<ul>
+<pre><b>!combinedList <- highSalesList append: techList;</b></pre>
+</ul>
+
+Now count the number of companies in <i>combinedList</i> using: 
+
+<ul>
+<pre><b>combinedList count</b></pre>
+</ul>
+
+producing the output: 
+
+<ul>
+<pre><b>25</b></pre>
+</ul>
+
+To print the names of the companies in <i>combinedList</i> type the
+following: 
+
+<ul>
+<pre><b>combinedList do: [ name printNL ] ;</b></pre>
+</ul>
+
+You should see: 
+
+<ul>
+<pre><b>Aetna Life & Cas 
+American Tel & Tel 
+Amoco Corp 
+Atlantic Richfield 
+Boeing Co 
+CIGNA Corp 
+Chevron Corp 
+Chrysler Corp 
+Citicorp 
+DuPont EI de Nemours 
+Exxon Corp 
+Ford Motor Company 
+GTE Corp 
+General Electric Co 
+General Motors Corp 
+IBM Corp 
+K Mart Corp 
+Mobil Corporation 
+Philip Morris Cos 
+Procter &amp; Gamble Co 
+Sears Roebuck &amp; Co 
+Travelers Corp 
+IBM Corp
+Digital Equipment Corp 
+Hewlett-Packard Co 
+</b></pre>
+</ul>
+
+Notice that IBM appears twice. The <i>append:</i> message does not remove
+duplicate companies. To eliminate the duplication, use the <i><a href="mList.htm#union:">union:</a></i>
+message. Union finds elements that are in either or both lists specified.
+Change the previous example to use <i>union:</i> instead of <i>append:</i> :
+
+<ul>
+<pre><b>!combinedList <- highSalesList union: techList; 
+combinedList do: [ name printNL; ]; </b></pre>
+</ul>
+
+You should see the following:
+
+<ul>
+<pre><b>Aetna Life & Cas 
+American Tel & Tel 
+Amoco Corp 
+Atlantic Richfield 
+Boeing Co 
+CIGNA Corp 
+Chevron Corp 
+Chrysler Corp 
+Citicorp 
+Digital Equipment Corp 
+DuPont EI de Nemours 
+Exxon Corp 
+Ford Motor Company 
+GTE Corp 
+General Electric Co 
+General Motors Corp 
+Hewlett-Packard Co 
+IBM Corp 
+K Mart Corp 
+Mobil Corporation 
+Philip Morris Cos 
+Procter & Gamble Co 
+Sears Roebuck & Co 
+Travelers Corp </b></pre>
+</ul>
+
+Notice that this time, IBM appears only once. 
+
+<p>Suppose you wish to create a list of all companies excluding the companies
+in <i>techList</i>. Use the <i><a href="mList.htm#exclude:">exclude:</a></i>
+message as shown below: 
+
+<ul>
+<pre><b>!fullNoTechList <- fullList exclude: techList; 
+fullNoTechList count </b></pre>
+</ul>
+
+producing the output: 
+
+<ul>
+<pre><b>35</b></pre>
+</ul>
+
+Notice that now there are only 35 companies. If you wish to know which
+ones, you can execute the following: 
+
+<ul>
+<pre><b>fullNoTechList do: [ name printNL; ];</b></pre>
+</ul>
+
+producing the output: 
+
+<ul>
+<pre><b>Aetna Life & Cas 
+American Tel & Tel 
+Amoco Corp 
+Atlantic Richfield 
+BellSouth Corp 
+...</b></pre>
+</ul>
+
+To determine which companies are in both <i>techList</i> and <i>highSalesList</i>,
+execute the following:
+
+<ul>
+<pre><b>techList intersect: highSalesList . 
+do: [ name printNL ] ; </b></pre>
+</ul>
+
+You should see: 
+
+<ul>
+<pre><b>IBM Corp</b></pre>
+</ul>
+
+The <i>numberElements</i> message is used to extend the list by the
+variable position which represents the element's position in the list.
+For example: 
+
+<ul>
+<pre><b>subset numberElements 
+do: [ name print: 35 ; 
+      position printNL ; 
+    ] ; </b></pre>
+</ul>
+
+produces the output: 
+
+<ul>
+<pre><b>Aetna Life & Cas        1
+CIGNA Corp              2
+Chrysler Corp           3
+Citicorp                4
+Ford Motor Company      5 
+General Motors Corp     6 
+IBM Corp                7
+Travelers Corp          8</b></pre>
+</ul>
+
+<hr>
+
+<h3>See Also<a name="See Also"></a></h3>
+
+<p>
+
+| <a href="tuBasic.htm">Vision Basics</a> 
+| <a href="tuLoad.htm">Creating A Demo Database</a>
+| <a href="tuSingle.htm">Single Object Access</a> 
+| <a href="tuTS.htm">Using Dates and TimeSeries</a> |
+
+<hr>
+
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy; 1999 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated January 25, 1999</font>
+</table>
+
+</body>
+</html>

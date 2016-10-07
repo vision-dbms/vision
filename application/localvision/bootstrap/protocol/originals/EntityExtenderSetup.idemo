@@ -1,0 +1,49 @@
+####################
+#  EntityExtenderFeedSetup - Portfolio Management Application Layer: supp
+#    this feed is used to define all the EntityExtender
+#    feeds that will be used for updating properties in Entity and DataRecord
+#    classes.  Each EntityExtender feed defines a set of values that
+#    get updated as a unit.  EntityExtender feeds can be used to 
+#    modify existing values and maintain data over time.  A separate
+#    EntityExtender feed class is created for each unit of update.
+#    This feed is used to define the set of entity extender feeds you wish 
+#    to use.
+#
+#  This feed uses the following fields:
+#     feedId            name of feed
+#     baseClassId       name of associated entity or data record class 
+#     baseEntityId      name of entity class if baseClass is data record
+#     frequency         offset used to expire old data
+#
+#  feedId
+#    This field represents the name of the class that will be used to
+#    temporarily store the data from your feed and translate it to the
+#    correct entities or data records.
+#  baseClassId
+#    This field indicates the base class associated with this feed.
+#    It can refer to an Entity or a DataRecord class.  The fields
+#    associated with this specific feed will update properties defined
+#    at this class.
+#  baseEntityId
+#    This field inidicates the entity class associated with the
+#    feed for feeds where the base class is a DataRecord.  This field
+#    should be omitted if the base class is an Entity.
+#  frequency
+#    This field is optional and is used to expire old data for feeds
+#    that track DataRecords over time.  They should be specified as a
+#    date offset - a positive integer followed by an increment.   
+#
+#  The fields must be supplied in this order.  You can include a header
+#  line in this feed, but the header values are ignored.  The first
+#  two fields must be supplied.
+#
+####################
+
+feedId	baseClassId	baseEntityId	frequency	
+
+FundamentalA	FundamentalDataA	Company	12 monthEnds
+FundamentalQ	FundamentalDataQ	Company	3 monthEnds
+FundamentalM	FundamentalDataM	Company	1 monthEnds
+
+AnalystEst	AnalystEstimate	Company	
+EconFeed	EconomicData	Country

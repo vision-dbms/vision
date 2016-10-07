@@ -1,0 +1,137 @@
+"
+####################
+#  Catalog and Related Protocol
+####################
+
+" print ;
+
+Catalog 
+;
+
+Catalog
+   define: 'Library' toBe: Dictionary new .
+
+   defineFixedProperty: 'code' .
+   defineFixedProperty: 'name' .
+   defineFixedProperty: 'shortDescription' .
+   defineFixedProperty: 'longDescription' .
+   define: "EntryTemplate" toBe: Prototypical IndexedList new .
+   defineFixedProperty: 'entries' .
+   defineFixedProperty: 'autoSort' .
+
+   defineMethod: [ | displayLabel | ^self name ] .
+
+defineMethod:
+[ | initializeGlobalSubclassProperties |
+  ^super initializeGlobalSubclassProperties ;
+  ^self
+      define: 'Library' toBe: super Library new ; 
+  ^self Library at: "Default" put: ^self ;
+  ^self :name <- "Default " concat: ^self whatAmI ;
+  ^self :deletionFlag <- FALSE ;
+  ^self
+] .
+
+defineMethod:
+[ | helpMessage |
+  [^self whatAmI print; ": " print ; name printNL ;
+  "Entries: " print; entries count printNL: -5 ;
+  shortDescription isntNA ifTrue: [ shortDescription printNL ] ;
+  longDescription isntNA ifTrue: [ longDescription printNL ] ;
+  ] divertOutput
+] .
+
+#--------------------
+
+defineMethod:
+[ | setupPrivateStructures |
+  !privateClass <- ^self newPrototype new specialized ;
+  ^global define: ^self whatAmI toBe: privateClass ;
+  privateClass
+     define: "Library" toBe: ^self Library specializeClass .
+     define: "EntryTemplate" toBe: ^self EntryTemplate new .
+     define: "whatAmI" toBe: ("Private " concat: ^self whatAmI) ;
+] .
+
+
+#--------------------
+#   creation
+#--------------------
+
+defineMethod:
+[ | create: id |
+  !newInstance <- ^self new 
+  do: [ :code <- ^my id ;
+      ] . initialize ;
+  ^self Library at: id put: newInstance ; 
+  newInstance 
+] .
+
+defineMethod:
+[ | initialize |
+  ^self do: [ :name <- code ;
+              :entries <- ^self EntryTemplate clusterNew ;
+              :autoSort <- TRUE ;
+            ]
+] .
+
+#--------------------
+#  settings
+#--------------------
+
+defineMethod:
+[ | setNameTo: string |
+  :name <- string ;
+  ^self
+] .
+
+defineMethod:
+[ | setShortDescriptionTo: string |
+  :shortDescription <- string ;
+  ^self
+] .
+
+defineMethod:
+[ | setLongDescriptionTo: string |
+  :longDescription <- string ;
+  ^self
+] .
+
+#--------------------
+#  access
+#--------------------
+
+defineMethod:
+[ | getMasterList |
+  ^self instanceList select: [ isActive ]
+] .
+
+defineMethod:
+[ | getEntries |
+  autoSort = TRUE
+  ifTrue: [ entries sortUp: [ displayLabel ] ]
+  ifFalse: [ entries toList ]
+] .
+
+defineMethod:
+[ | addEntry: object |
+  ^self entries at: object put: object ;
+  ^self
+] .
+
+defineMethod:
+[ | deleteEntry: object |
+  ^self entries delete: object ;
+  ^self
+] .
+
+defineMethod:
+[ | flagForDeletion |
+  ^super flagForDeletion ;
+  ^self Library delete: ^self displayLabelKey ;
+  ^self
+] .
+;
+
+
+

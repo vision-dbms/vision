@@ -1,0 +1,227 @@
+"
+####################
+#  ToolKit: Protocol for Subclasses
+####################
+
+" print ;
+
+#--------------------
+#  Environment MaintenanceTools
+#--------------------
+
+"
+#-->  Environment MaintenanceTools
+" print ;
+
+#----------
+#  space counters/pointers
+#----------
+Environment MaintenanceTools 
+   defineFixedProperty: 'spaceCount' .
+   defineFixedProperty: 'spaceList' ;
+
+Environment MaintenanceTools
+do: [ :spaceCount <- 3 ;
+      :spaceList <- ^global List new ;
+    ] ;
+
+
+Environment MaintenanceTools
+defineMethod: 
+[ | setupSpaceFor: aCode as: aType description: aString |
+  !maintenance <- ^self ;
+  !environment <- ^global Environment ;
+  okayToCreateNewSpace
+  ifTrue: 
+    [ !type <- environment at: aType ;
+      type isNA
+        ifTrue: [ :type <- environment User ] ;
+      type at: aCode put: ^global ; 
+
+      ^global
+          define: 'number' toBe: (maintenance spaceCount + 1 ) asInteger .
+          define: 'code' toBe: aCode .
+          define: 'name' toBe: aString .
+          define: 'whatAmI' toBe: (type whatAmI concat: " " . concat: aCode) .
+          define: 'type' toBe: type ;
+      type at: ^global number asString put: ^global ; 
+      maintenance :spaceCount <- ^global number ;
+      maintenance spaceList, ^global ;
+
+      ^global defineMethod:
+      [ | displayInfo |
+        "Object Space Number: " print; number printNL ;
+       "This Space Contains: " print;  name printNL ;
+       "Shared Access Via: " print; type print; " " print ;
+       code printNL ;
+      ] ;
+
+      "...  Creating Space #" print ;
+      ^global number printNL: -3 ;
+      " For: " print ;
+      ^global name printNL ;
+      aType = "DB" 
+          ifTrue: [ "OS" substituteOutputOf: [ ^global number printNL: -3 ] ] ;
+    ]
+  ifFalse:
+    [ "...  Cannot Create New Object Space" printNL ] ; 
+] .
+
+defineMethod:
+[ | okayToCreateNewSpace |
+  ^global super number = ^global number && ^global number = 3
+] .
+
+defineMethod:
+[ | setupPrivateSpaceFor: user fullName: name | 
+#--  Create New space
+  ^self setupSpaceFor: user as: ^global Environment User description: name ;
+#--  Create Local Classes that can be managed by private user
+  ^global define: 'doNotUpdateSchema' toBe: TRUE ;
+  ^global Object createIncorporatorClass: "MyObject" ;
+  ^global Dictionary createIncorporatorClass: "MyDictionary" ;
+  ^global Entity createIncorporatorClass: "MyEntity" ;
+  ^global Named createIncorporatorClass: "Named" ;
+  ^global PrivateRecord createIncorporatorClass: "MyPrivateRecord" ;   
+  ^global CoreWorkspace Named createIncorporatorClass: "PrivateNamed" ;
+  !methodName <- "| " concat: user . concat: "Data | " . concat: newLine ;
+  !methodBody <-  "^self getRecordForUser: \"" concat: user . concat: "\" " ;
+  ^global Entity defineMethod: (methodName concat: methodBody) asBlock ;
+] .
+
+;
+
+
+#--------------------
+#  PrinterTools
+#--------------------
+
+"
+#-->  PrinterTools Descriptor
+" print ;
+
+PrinterTools Descriptor
+   define: 'Named' toBe: Named new .
+   defineFixedProperty: 'isType' .
+   defineFixedProperty: 'isOption' .
+   defineFixedProperty: 'name' .
+   defineFixedProperty: 'description' .
+   defineFixedProperty: 'letterOption' .
+   defineFixedProperty: 'controlString' .
+   defineFixedProperty: 'optionList' .
+   defineFixedProperty: 'printer' .
+
+defineMethod:
+[ | createTypeNamed: code withControlString: string |
+  ^self createAs: code withControlString: string .
+      initializeNewType
+] .
+
+defineMethod:
+[ | addOptionNamed: code withControlString: string |
+  !newOption <- 
+     ^self createAs: code withControlString: string . 
+        initializeNewOptionForPrinter: ^self ;
+  optionList , newOption ;
+  newOption 
+] .
+  
+defineMethod:
+[ | createAs: code withControlString: string |
+  ^self newAs: code .
+    do: [ :controlString <- ^my string ; 
+          :name <- code ;
+        ] .
+       setDescriptionTo: code .
+       setLetterOptionTo: (code take: 1 ) .
+] .
+
+defineMethod:
+[ | setNameTo: code |
+  :name <- code ; 
+  ^self
+] .
+
+defineMethod:
+[ | setControlStringTo: string |
+  :controlString <- string ;
+  ^self
+] .
+
+defineMethod:
+[ | setDescriptionTo: string |
+  :description <- string ;
+  ^self
+] .
+
+defineMethod:
+[ | setLetterOptionTo: letter |
+  :letterOption <- letter ;
+  ^self
+] .
+
+defineMethod:
+[ | initializeNewType |
+  Named at: name put: ^self ;
+  :isType <- TRUE ;
+  :isOption <- FALSE ;
+  :optionList <- ^global Prototypical List new ; 
+  ^self
+] .
+
+defineMethod:
+[ | initializeNewOptionForPrinter: p |
+  :isType <- FALSE ;
+  :isOption <- TRUE ;
+  :printer <- p ; 
+  ^self
+] .
+
+defineMethod:
+[ | displayData |
+  name print; " ;" print ; 
+  description print; " ;" print; 
+  letterOption print ; " ;" print ;
+  controlString print; ";" print ;
+  newLine print ;
+] .
+
+defineMethod:
+[ | getNumberOfPrinters |
+  ^self instanceList select: [ isType ] . count
+] .
+
+defineMethod:
+[ | displayPrinterData |
+  ^self instanceList select: [ isType ] .
+     do: [ displayData ] ;
+
+] .
+
+defineMethod:
+[ | getNumberOfOptions |
+  optionList count
+] .
+
+defineMethod:
+[ | displayPrinterOptions |
+  optionList do: [ displayData ] ;
+] .
+
+;  
+
+####################
+#  Create Printers
+####################
+
+PrinterTools Descriptor
+  createTypeNamed: "PC" withControlString: "pcprint" .
+     setDescriptionTo: "Use the PC Printer" .
+  addOptionNamed: "Portrait Cmp." withControlString: "E&k2S&l8D" .
+     setDescriptionTo: "Portrait Compressed 8pt. font" .
+  printer addOptionNamed: "Courier 6pt." withControlString: "E" .
+     setDescriptionTo: "Courier 6pt. font" .
+  printer addOptionNamed: "Landscape Cmp." withControlString: "E&k2S&l8D&l1O" .
+     setDescriptionTo: "Landscape Compressed 8pt. font" .
+;
+

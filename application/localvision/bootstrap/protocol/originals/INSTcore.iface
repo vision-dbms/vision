@@ -1,0 +1,216 @@
+##################################################
+#  INSTcore.iface 
+#
+#  Defines Standard Interface Applications at Interface ApplicationWS
+##################################################
+
+####################
+#  Standard Apps
+####################
+
+Interface ApplicationWS defineMethod: [ | Profile | 
+  !classId <- ^self getParameter: 1 orName: "classId" ;
+  !id <- ^self getParameter: 2 orName: "id" . else: "Default" .
+        stripBoundingBlanks ;
+  !entity <- ^self getEntity: id forType: classId ;
+  entity isntNA
+  ifTrue: [ !appName <- classId concat: "Profile" ;
+            ^self asSelf respondsTo: appName .
+               ifTrue: 
+                [ ^self setParameterListTo: id ;
+                  appName evaluateIn: ^self ;
+                ]
+              ifFalse: 
+                [ FormatTools beginPreserveMode printNL ;;
+                  entity profile ;
+                  FormatTools endPreserveMode printNL ;
+                ] ;
+          ] 
+  ifFalse: [ ^self displayAlternativesFor: id toUpper in: classId evaluate ] ;
+] .
+
+defineMethod:
+[ | displayAlternativesFor: id in: class |
+  !alternatives <- class masterList ;
+  id isntNA && [ id count > 0 ] 
+  ifTrue: 
+    [ :alternatives <- alternatives 
+        select: [ (code contains: ^my id ) || (name contains: ^my id) ] .
+    ] ;
+  :alternatives <- alternatives sortUp: [ name ] . first: 50 ;
+  FormatTools bold: "...  Do you mean?" . print ; ;
+  newLine print ;
+  !list <- 
+     [  alternatives 
+        do: [ 
+            FormatTools buildLinkForApp: "Profile"
+               withLabel: ([ displayInfo ] divertOutput drop: -1)
+               andParams: whatAmI, code . print ;
+            newLine print ;
+            ] ;
+      ] divertOutput ;
+   FormatTools buildItemList: list .  print ;
+] .
+
+;
+
+#----------
+
+Interface ApplicationWS defineMethod: [ | EntityHelper |
+!classId <- ^self getParameter: 1 orName: "helpClass" ;
+!search <- namedParameters at: "search" . else: "" ; 
+!begin <- namedParameters at: "Beginning" . else: ""; 
+!end <- namedParameters at: "Ending" .else: ""; 
+!cutoff <- namedParameters at: "cutoff" . else: 50 . asNumber ;
+!extra1 <- namedParameters at: "extra1" ;
+!extra2 <- namedParameters at: "extra2" ;
+!extra3 <- namedParameters at: "extra3" ;
+!extra4 <- namedParameters at: "extra4" ;
+classId isNA
+ ifTrue: [ErrorLog post: "Bad Class Id" for: ^self with: classId]
+ifFalse: 
+   [
+   !class <- classId evaluate; 
+   !alternatives <- class masterList; 
+   search count > 0
+   ifTrue: 
+     [
+     begin = "on" ifTrue: [:search <- "^" concat: search]; 
+     end = "on" ifTrue: [:search <- search concat: "$"]; 
+     !usearch <- search convertToCaseInsensitiveRegEx ;
+     :alternatives <- alternatives 
+       select: [ (name contains: ^my usearch) || [code contains: ^my usearch ]
+               ]; 
+     ]; 
+   extra1 isntDefault
+     ifTrue: [ :alternatives <- alternatives select: extra1 asBlock ] ;
+   extra2 isntDefault
+     ifTrue: [ :alternatives <- alternatives select: extra2 asBlock ] ;
+   extra3 isntDefault
+     ifTrue: [ :alternatives <- alternatives select: extra3 asBlock ] ;
+   extra4 isntDefault
+     ifTrue: [ :alternatives <- alternatives select: extra4 asBlock ] ;
+   :alternatives <- alternatives sortUp: [name] . first: cutoff ;
+   alternatives
+   do: [ !label <- [ code print ; " " print ; name print ] divertOutput;
+         FormatTools buildLinkForApp: "Profile"
+           withLabel: label andParams: ^my classId, code . print ;
+         FormatTools startLine print ;
+       ] ;
+   ]; 
+] ;
+
+#----------
+
+Interface ApplicationWS defineMethod: [ | GetValue | 
+  !type <- ^self getParameter: 1 orName: "entityType" ;
+  !id <- ^self getParameter: 2 orName: "entityId" . stripBoundingBlanks ;
+  !entity <- ^self getEntity: id forType: type ;
+  !item <- ^self getParameter: 3 orName: "item" ;
+  !path <- ^self getParameter: 4 orName: "path" . else: "" ; 
+  !itemBlock <- item asBlock ;
+  !pathBlock <- path isBlank
+       ifTrue: [ "^self " ] ifFalse: [ path ] . asBlock ;
+  entity isNA
+  ifTrue: [ ErrorLog 
+              post: "Bad Entity Type Or ID" for: ^self with: type,id ;
+          ] .
+  else:
+    [ !answer <- entity
+         extendBy: [ !id <- displayLabelKey ; 
+                     !path <- ^self send: ^my pathBlock ;
+                     !values <- path send: ^my itemBlock ;
+                   ] ;
+      entity isList
+      ifTrue:
+        [
+        FormatTools beginPreserveMode printNL ;
+        !max <- answer max: [ id count ] ;
+        "id" print: max ; " " print: 3 ; item printNL ;
+        answer 
+        do: [ id print: ^my max ; " " print: 3 ; 
+              values do: [ ^self print ; " " print ] ;
+              newLine print ;
+            ] ;
+        FormatTools endPreserveMode printNL ;
+        ]
+      ifFalse:
+        [ answer values isList
+          ifTrue:
+            [
+            FormatTools beginPreserveMode printNL ;
+            "--> " print ; entity whatAmI print ; " " print ; entity print ; 
+            ": " print ; path print ; " " print ; item printNL ;
+            answer values
+               do: [ whatAmI print ; ": " print ; displayInfo ] ;
+            FormatTools endPreserveMode printNL ;
+            ] 
+         ifFalse: [ answer values printNL ] ;
+        ] ;
+    ]  ;
+
+] ;
+
+####################
+#  Application Interface support tools
+####################
+
+Interface ApplicationWS defineMethod: 
+[ | displayChangeEntityPromptForApp: app withPrompt: prompt andId: id |
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+
+!form <- ^global LayoutTools Named FormSpec ChangeEntity ;
+form setApplicationNameTo: app ;
+form getInputSpec: 1 . 
+   setLabelTo: prompt .
+   setInitialValueTo: id ;
+FormatTools buildShortFormFor: form . print ;
+
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+] ;
+
+Interface ApplicationWS defineMethod: [ | getValidGroupsFor: class |
+  ^global DataItem getValidGroupsFor: class 
+] ;
+
+Interface ApplicationWS 
+defineMethod: [ | getGroupFromParameter: n orMenu: menuIn orEntry: entryIn |
+  ^self getParameter: n . 
+    else:
+    [ !menu <- namedParameters at: menuIn . else: "" ;
+      !entry <- namedParameters at: entryIn . else: "" ;
+      entry isBlank ifTrue: [ menu ] ifFalse: [ entry ]
+    ] 
+] ;
+
+Interface ApplicationWS 
+defineMethod: [ | setGroupsIn: spec for: classOrList withCurrent: group |
+  spec clearChoices ;
+  !choices <- classOrList isCollection
+      ifTrue: [ classOrList ] 
+     ifFalse: [ ^self getValidGroupsFor: classOrList ] . numberElements ;
+  choices 
+  do: [ ^my spec
+           setChoice: position labelTo: shortName .
+           setChoice: position valueTo: code .
+      ] ;
+  !selection <- choices select: [ code asSelf = ^my group asSelf ] . at: 1 .
+       ifDefault: [ 1 ] else: [ position ] ;
+  spec selectChoice: selection ;
+] ;
+
+Interface ApplicationWS 
+defineMethod: [ | setStatsIn: spec for: classOrList withCurrent: stat |
+  spec clearChoices ;
+  !choices <- classOrList isCollection
+      ifTrue: [ classOrList ] 
+     ifFalse: [ ^self getValidStatsFor: classOrList ] . numberElements ;
+  choices 
+  do: [ ^my spec
+           setChoice: position labelTo: shortName .
+           setChoice: position valueTo: code .
+      ] ;
+  !selection <- choices select: [ code asSelf = ^my stat asSelf ] . at: 1 .
+       ifDefault: [ 1 ] else: [ position ] ;
+  spec selectChoice: selection ;
+] ;

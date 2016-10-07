@@ -1,0 +1,1872 @@
+##################################################
+#  patch.core.613a
+#
+#  Incremental changes to core vision database to be applied to installations
+#     running batchvision release 6.1.3
+#
+##################################################
+
+#======================================================================
+
+newLine print ;
+"...  Miscellaneous core changes " printNL ;
+newLine print ;
+
+##################################################
+#  patch.misc
+#
+#  Collection class Modifications and Additions
+#    - change 'collectListElementsFrom:' to not preserve sort order
+#      by default; add 'collectSortedListElementsFrom:' to do this
+#    - add 'correlateWith:' method and variations
+#    - add 'top:' to perform the same function as 'first:' but leaving
+#      the defaults in the collection
+#
+#  Entity Class Modifications and Additions
+#
+#  - Entity
+#    . add general cover 'id' which defaults to code
+#    . flag for deletion should not remove  aliases; 
+#    . fix long-standing bug that prevents alias from ever getting deleted
+#      since '^self at: id' always returns NA
+#
+#  - Classification
+#    . add variation of membership history report that takes a memberList id
+#      as a parameter
+#   .  fix 'getAllChildren' to eliminate a potential infinite loop
+#   .  new method to return ordered list of parent instances
+#
+#  - IndexAccount
+#    . add method to remove duplicate memberLists 
+#    . add member history report
+#    . modify 'createHoldingsFrom:' to only update memberList on change
+#
+##################################################
+
+####################
+#  Collection Class modifications and additions
+####################
+
+#--------------------
+#  Modifications
+#--------------------
+Collection defineMethod: [ | collectSortedListElementsFrom: aBlock| 
+!resultList <- ^global Prototypical List new; 
+^self numberElements 
+do: [!resultList <- ^my resultList; 
+    ^self super basicSend: ^my aBlock .numberElements 
+    do: [:position <- ^my position * 10000 + position].
+    do: [^my resultList , ^self]]; 
+resultList sortUp: [position].send: [^self super]
+] ;
+
+Collection defineMethod: [ | collectListElementsFrom: aBlock| 
+  !resultList <- ^global Prototypical List new; 
+  ^self 
+  do: [ !resultList <- ^my resultList; 
+        ^self basicSend: ^my aBlock .
+         do: [^my resultList , ^self]
+      ] ; 
+  resultList
+] ;
+
+#--------------------
+#  Additions
+#--------------------
+
+Collection defineMethod: [| correlateWith: list2 |
+#--  this version assumes ^self and list2 are both lists of numbers
+
+!list1 <- ^self toList ;
+:list2 <- list2 toList ;
+!xy <- list1 numberElements average: [ ^self * (^my list2 at: position) ];
+(xy - list1 average * list2 average) / (list1 stdDev * list2 stdDev)
+] ;
+
+#----------
+
+Collection defineMethod: [ | correlateWith: l2 on: keyBlock using: attBlock |
+!xref1 <- ^global IndexedList new ;
+!xref2 <- ^global IndexedList new ;
+^self extendBy:
+   [ !key <- ^self send: ^my keyBlock . asSelf ;
+     !val <- ^self send: ^my attBlock ;
+   ] .
+  select: [ val isNumber ] .
+do: [ ^my xref1 at: key put: val ;
+      ^my xref2 at: key put: 0.0 ;
+   ] ;
+l2 extendBy:
+   [ !key <- ^self send: ^my keyBlock . asSelf ;
+     !val <- ^self send: ^my attBlock ;
+   ] .
+  select: [ val isNumber ] .
+do: [ ^my xref1 at: key . isNA
+          ifTrue: [ ^my xref1 at: key put: 0.0 ] ;
+      ^my xref2 at: key put: val ;
+    ] ;
+xref1 correlateWith: xref2
+] ;
+
+#----------
+
+Collection defineMethod: [ | top: n | 
+  ^self numberElements select: [position <= ^my n ] .
+] ;
+
+
+####################
+#  Entity Class modifications and additions
+####################
+
+#--------------------
+#  Entity
+#    . add general cover 'id' which defaults to code
+#    . flag for deletion should not remove  aliases; 
+#    . fix long-standing bug that prevents alias from ever getting deleted
+#      since '^self at: id' always returns NA
+#--------------------
+
+Entity defineMethod: [ | id | code ] ;
+
+Entity defineMethod: [ | cleanupLocalNames | 
+  !ent <- ^self asSelf ; 
+  !nd <- ^self named ;
+  ^self aliases
+     select: [ ^my nd at: asString . = ^my ent ] .
+  do: [ ^my ent deleteAlias: asString ] ;
+#-->  ^self aliases rdelete ;
+  ^self XRef objects 
+     select: [isXRef] . select: [updateBlock isntNA] .
+  do: [ !id <- ^my ent send: updateBlock . value ;
+        !xref <- ^self super ;
+#-->        ^self at: id . = ^my ent
+        xref at: id . = ^my ent ifTrue: [ xref delete: id ] ;
+      ] ;
+  ^self
+] ;
+
+#--------------------
+#  Classification:
+#     add variation of membership history report that takes a memberlist id
+#     as a parameter
+#  Sample: Named SPIndustry \850 displayMemberHistoryFor: "fsMemberList" ;
+#--------------------
+
+Classification defineMethod: [ | displayMemberHistoryFor: id since: start |
+!accessBlock <- id asUpdateBlock ;
+!date <- start asDate else: earliestPossibleDate ;
+"---  Membership History Report  ---" centerNL: 80 .print; 
+  [ "for " print; ^self whatAmI print; " " print; 
+    code print; " " print; name print; 
+    " via " print ; id print ; " since " print ;
+    date isntDefault
+       ifTrue: [ date ] ifFalse: [ "inception" ] . print ;
+   ] divertOutput centerNL: 80 .printNL; 
+^self send: accessBlock . linkElements 
+  select: [ ^date >= ^my date ] .
+doReverse:
+   [ !priorList <- prior isntNA 
+         ifTrue: [prior asSelf ] ifFalse: [^global IndexedList] ;
+      !diffs <- ^self difference: priorList asSelf; 
+      ^date print: 15; 
+      count print; " current " print; 
+      priorList count print; " prior" printNL ;
+      diffs at: 1 .sortUp: [name].
+         do: ["    added ... " print; displayInfo]; 
+      diffs at: 2 .sortUp: [name].
+         do: ["  dropped ... " print; displayInfo]; 
+   ]; 
+] ;
+
+#--------------------
+#  Classification:
+#     fix getAllChildren to make sure ^self isn't included to avoid
+#     an infinite loop
+#--------------------
+Classification defineMethod: [ | getAllChildren |
+  !object <- ^self asSelf ;
+  !children <- ^self childList select: [ asSelf != ^my object ] ;
+  children append: ( children collectListElementsFrom: [ getAllChildren ] )
+] ;
+
+#--------------------
+#  Classification:
+#     new method to return list of parent gic industry instances 
+#--------------------
+
+Classification defineMethod: [ | getParentHierarchy | 
+  !list <- ^global List new ;
+  !next <- ^self parent ;
+  [ next != ^self asSelf && next isntDefault ] 
+    whileTrue: [ list , next ;
+                 :next <- next parent != next 
+                   ifTrue: [ next parent ] ;
+               ] ;
+  list
+] ;
+
+
+#--------------------
+#  IndexAccount:
+#    - add method to remove duplicate memberLists 
+#    - add member history report
+#    - modify 'createHoldingsFrom:' to only update memberList on change
+#--------------------
+
+IndexAccount defineMethod: [ | removeDuplicateMemberLists |
+!list <- :memberList linkElements select: [ prior isntDefault ] ;
+!deletes <- list select: [ ^self isEquivalentTo: prior ] ;
+displayInfo ;
+"  Current Number of Member Lists: " print: 40 ; 
+:memberList count printNL ;
+"  Points to Delete: " print: 40 ;
+deletes count printNL ;
+deletes
+do: [ "   ... deleting " print ; ^date print: 15 ;
+      "(list of " concat: count . concat: " )" . printNL ;
+      count > 0 ifTrue: [ ^self rdelete ] ;
+      ^my :memberList delete: ^date ;
+    ] ;
+"  Final Number of Member Lists: " print: 40 ;
+:memberList count printNL ;
+:memberList
+do: [ "   " print ; ^date print: 15 ; printNL ] ;
+
+] ;
+
+#----------
+
+IndexAccount defineMethod: [ | displayMemberHistorySince: start |
+!date <- start asDate else: earliestPossibleDate ;
+"---  Membership History Report  ---" centerNL: 80 .print; 
+  [ "for " print; code print; " " print; name print; 
+    " since " print ;
+    date isntDefault
+       ifTrue: [ date ] ifFalse: [ "inception" ] . print ;
+   ] divertOutput centerNL: 80 .printNL; 
+:memberList linkElements
+  select: [ ^date >= ^my date ] .
+doReverse:
+   [ !priorList <- prior isntNA 
+         ifTrue: [prior asSelf ] ifFalse: [^global IndexedList] ;
+      !diffs <- ^self difference: priorList asSelf; 
+      ^date print: 15; 
+      count print; " current " print; 
+      priorList count print; " prior" printNL ;
+      diffs at: 1 .sortUp: [name].
+         do: ["    added ... " print; displayInfo]; 
+      diffs at: 2 .sortUp: [name].
+         do: ["  dropped ... " print; displayInfo]; 
+   ]; 
+] ;
+
+#----------
+
+IndexAccount defineMethod: [ | createHoldingsFrom: xsecList | 
+  ^super createHoldingsFrom: xsecList ;
+  !secs <- xsecList send: [ security ] ;
+  !oldList <- :memberList asOf: ^date - 1 days ;
+  oldList isntEquivalentTo: secs . || [ universe isntDefault ]
+  ifTrue:
+    [ ^self setUniverseTo: ^global Universe . setStyleTo: "Manual" ;
+      ^self setSecuritiesTo: secs asOf: ^date ;
+    ] ;
+] ;
+
+newLine print ;
+"...  Miscellaneous core changes - DataFeed cleanups " printNL ;
+newLine print ;
+
+#======================================================================
+
+##################################################
+#  patch.feeds
+#
+#  DataFeed: general changes
+#     - clear runtime and cfg attributes when file not found
+#     - optional rejects file
+#     - default location for rejects file
+#
+#  MasterFeed
+#    - add support for updating aliases as a wrapup setp
+#
+#  EEF 
+#
+#  MembershipFeed
+#    - update member only on change by default; add toggle to update all
+#
+#  PropertySetup
+#  - add support for euro rates and set legacy for Greece
+#
+##################################################
+
+####################
+#  DataFeed: general changes
+#     - clear runtiime and cfg attributes when file not found
+#     - optional rejects file
+#     - default location for rejects file
+####################
+
+#--------------------
+#  rejects file changes
+#     - optional rejects file
+#     - default location for rejects file
+#--------------------
+
+#----------
+#  and support for disabling reject file - enabled by default
+#----------
+DataFeed defineMethod: [ | enableUsesRejectsFile |
+  ^self define: 'usesRejectFile' toBe: TRUE ;
+  ^self
+] ;
+
+DataFeed defineMethod: [ | disableUsesRejectsFile |
+  ^self define: 'usesRejectFile' toBe: FALSE ;
+  ^self
+] ;
+
+#---  and enable it for all feeds by default; disable for Globals
+DataFeed enableUsesRejectsFile ;
+GlobalsFeed disableUsesRejectsFile ;
+
+#--  make sure environment variables are set so rejects have a place to go
+[ ProcessControlTools setupEnvironment ] divertOutput;
+
+#----------
+#  check reject file toggle prior to saving
+#----------
+
+DataFeed defineMethod: [ | saveRejectsToFile: fileName withLabel: label |
+  !feed <- ^self currentStore ;
+  !rejects <- feed masterList select: [ isntProcessed ] ;
+  rejects count > 0 && [ feed usesRejectFile ]
+  ifTrue:
+    [ :fileName <- fileName else: "" ;
+      !isBulk <- ^self getGlobalOption: "bulkLoadInProgress" . else: FALSE ;
+      isBulk not ||
+         [ !currentFile <- fileName asFileContents ;
+           currentFile isNA || [currentFile count = 0 ] 
+         ] 
+      ifTrue: 
+        [ fileName substituteOutputOf:
+             [ feed fieldOrderList do: [ print; " | " print; ] ;
+               newLine print ;
+             ] ;
+        ] ;
+
+      fileName appendOutputOf: 
+        [ "#-" fill: 80 .printNL ;
+          "# Rejects from feed " print; feed whatAmI printNL ;
+          "#                at " print;
+          ^global Utility UnixSeconds currentTime printNL ;
+          "# " concat: (label else: " ") . printNL ;
+          rejects
+          do: [ getValueList do: [ print ; " | " print ] ;
+                !reason <- ^self rejectReason ;
+                reason isntDefault
+                  ifTrue: [ "  # " print; reason print ] ;
+                newLine print ;
+              ] ;
+        ] ;
+    rejects count print ; 
+    " rejects saved to file " print; fileName else: "" . printNL;
+    ] .
+  elseIf: [ rejects count > 0 ]
+  then: [ feed whatAmI print; " does not save rejects to file." print ;
+          rejects count print ; " rejects NOT saved." printNL ;
+         ] ;
+  rejects count > 0
+] ;
+
+DataFeed defineMethod: [ | displayFeedConstants | 
+  !feed <- ^self asSelf ;
+  "required fields: " print: 20 ; feed requiredFields printNL ;
+  "fields from header: " print: 20 ; feed usesHeaderForFields printNL ;
+  "uses local fields: " print: 20 ; feed usesLocalFields printNL ;
+  "uses reject file: " print: 20 ; feed usesRejectFile printNL ;
+] ;
+
+
+
+#----------
+#  establish default location for rejects files in upload/feeds/rejects
+#----------
+DataFeed defineMethod: [ | getRejectFileNameFor: file |
+  !dir <- ^global ProcessControlTools Environment at: "feedFilePath" ;
+  !backslash <- ^global Interface Constant backslash ;
+  dir isntDefault ifTrue: [ :dir <- dir concat: "rejects/" ] ;
+  !baseFile <- file contains: "/" .
+      ifTrue: [ file reverse to: "/" . reverse drop: 1 ] .
+      elseIf: [ file containsSubstring: backslash ] 
+        then: [ file reverse to: backslash . reverse drop: 1 ] .
+        else: [ file ] . else: "" ;
+  !fullFile <- dir isntDefault 
+      ifTrue: [ dir concat: baseFile ] ifFalse: [ file ] . 
+        concat: ".rejects" ;
+  ^self getGlobalOption: "rejectFileName" . else: fullFile 
+] ;
+
+#----------
+#  - use standardized reject file name
+#  - clear runtime attributes as well as cfg file
+#----------
+DataFeed defineMethod: [ | loadFromFile: file |
+   !feed <- ^self ;
+   !okay <- FALSE ;
+   feed isGlobalsFeed
+       ifTrue: [  "---> Loading Config File: " ]
+      ifFalse: [  "---> Loading Data File: " ] . print ;
+   file print ; " for " print ; ^self whatAmI printNL ;
+
+   !contents <- file asFileContents ;
+   contents isNA 
+      ifTrue: 
+        [ "...  file not present. " printNL ;
+#--          ^global GlobalsFeed setDefaultGlobals ;
+          feed resetRunTimeAttributes ;
+        ] .
+      elseIf: [ contents count = 0 ] 
+        then: 
+        [ "...  file is empty.  " printNL ;
+#--          ^global GlobalsFeed setDefaultGlobals ;
+          feed resetRunTimeAttributes ;
+        ] .
+       else: 
+        [ 
+          !rejectFile <- ^self getRejectFileNameFor: file ;
+          ^self updateFromString: contents ;
+          feed saveRejectsToFile: rejectFile withLabel: "" ;
+         :okay <- TRUE ;
+        ] ;
+   okay
+] ;
+
+DataFeed defineMethod: 
+[ | bulkLoadFromFile: fname withConfig: cfgName
+       andBatchSize: bsize fromBatch: bnum to: enum | 
+  !feed <- ^self ;
+
+  newLine print ; 
+  "--->  Bulk Loading " print ; ^self whatAmI printNL ;
+  "      from file " print ; fname printNL ;
+  "      using config " print ; cfgName printNL ;
+  "      " print ; ^global Utility UnixSeconds currentTime printNL ;
+
+  !file <- "file:" concat: fname .
+      asOpenVisionChannel
+      setTrimFormatToUntrimmed ;
+  !fsize  <- file byteCount;
+  fsize = 0 
+    ifTrue: [ ">>> Empty file or file not found." printNL ] .
+    elseIf: [ cfgName isntDefault && [cfgName asFileContents isNA ] ]
+      then: [ ">>> Config file " concat: cfgName . concat: " not found." .
+               printNL ;
+            ] .
+  else:
+    [
+    :bsize <- bsize else: fsize ;
+    !approxBatches <- (fsize / bsize + 1) asInteger ; 
+    !firstBatch <- bnum else: 0 ;
+    !lastBatch <- enum else: (approxBatches - 1) . asInteger ;
+
+#--- load the cfg file, if present
+    ^self loadConfig: cfgName ;
+
+#--- remove unused lines at top, including header
+    !skipLines <- ^self getSkipLinesAtTop ;
+    !startOfFile <- "" ;
+    !count <- 1 ;
+    [ count <= skipLines ] 
+       whileTrue: [ !line <- file getLine else: "" .
+                     extendBy: [ !baseLine <- ^self stripBoundingBlanks 
+                                     stripChar: newLine ;
+                                 !skipIt <- (baseLine isBlank || 
+                                              [ baseLine contains: "^#"] );
+                               ] ;
+                  line skipIt
+                  ifFalse: [ :startOfFile <- startOfFile concat: line asSelf ;
+                             :count increment  ;
+                           ] ;
+                  ] ;
+    !extraOffset <- 0;
+    :extraOffset <- (startOfFile count max: 1 . - 1) asInteger ;
+
+#--- if fieldOrderList not stored, get it from first line of file
+    !headers <- ^self getGlobalOption: "fieldOrderList";
+    headers isNA
+     ifTrue: [ !headerLine <- ^self getHeaderLineNumber else: 1 ;
+               !line <- startOfFile asLines at: headerLine ;
+               !headers <- line translate: "|	" to: ",";
+               ^global GlobalsFeed
+                   setGlobalOption: "fieldOrderList" to: headers;
+            ];
+#--- Turn off the options that would not work with bulk processing.
+    ^global GlobalsFeed 
+        setGlobalOption: "headerLineNumber"   to: 0 .
+        setGlobalOption: "skipTop"            to: 0 .
+        setGlobalOption: "skipBottom"         to: 0 .
+        setGlobalOption: "maxRecords"         to: 0 .
+        setGlobalOption: "asOfDateLineNumber" to: 0 ;
+
+#--- if delimiter is default, unset it so global load doesn't get confused
+  !delimiter <- ^self getGlobalOption: "delimiter" . else: "|" ;
+  (delimiter contains: "|" ) || (delimiter contains: "	")
+      ifTrue: [ ^global GlobalsFeed Globals delete: "delimiter" ] ;
+
+#---  preserve the globals
+    ^global GlobalsFeed enableBulkLoadInProgress ;
+    !globals <- Globals selectorList
+       select: [ asString take: 1 . != "_" ] .
+       extendBy: 
+          [ !option <- asSelf ;
+            !setting <- ^my Globals at: asSelf ;
+          ] .
+       select: [ setting isntNA ] ;
+
+    newLine print ;
+    "    File Size " print: 20 ;   fsize printNL;
+    "    ~ Batch Size " print: 20 ; bsize printNL ;
+    "    ~ # of Batches " print: 20 ; approxBatches printNL ;
+    "    First Batch " print: 20 ; firstBatch printNL ;
+    "    Last Batch " print: 20 ; lastBatch printNL ;
+    newLine print ;
+
+  #--  iterate through the batches
+    !rejectFile <- ^self getRejectFileNameFor: fname ;
+    !rejectsFound <- FALSE ;
+    approxBatches sequence0 
+        select: [ ^self >= ^my firstBatch && ^self <= ^my lastBatch ] .
+    iterate: [
+      !start <- (^self * ^my bsize + ^my extraOffset + 1) asInteger ;
+      !size <- ^my bsize min: (^my fsize - start + 1) . max: 0 . asInteger ;
+      !string <- ^my file getString: size at: start . else: "" ;
+      !extra <- ^my file getLine else: "" ;
+      ^my :extraOffset incrementBy: extra count ;
+     string count > 0 
+      ifTrue: 
+        [ newLine print ;
+          "*" fill: 5 . print ;
+          "  starting iteration " print ; print ; "  -- " print ;
+          ^global Utility UnixSeconds currentTime printNL ;
+          "    start     size   string    extra" printNL ;
+          start print ; size print ; string count print ; extra count printNL ;
+
+#-- reset globals
+         ^global GlobalsFeed clearGlobalOptions ;
+         ^my globals
+            do: [ ^global GlobalsFeed setGlobalOption: option to: setting ] ;
+#        ^global GlobalsFeed showGlobals ;
+          ^my feed updateFromString: (string concat: extra) ;
+          !status <- ^my feed saveRejectsToFile: ^my rejectFile 
+                withLabel: ("Bulk load iteration: " concat: asSelf) ;
+          status ifTrue: [ ^my :rejectsFound <- TRUE ] ;
+        ] ;
+    ];
+
+    file close;
+    newLine print ;
+    "--->  End of Bulk Loading " print ; ^self whatAmI printNL ;
+    "      from file " print ; fname printNL ;
+    rejectsFound 
+      ifTrue: [ "      rejects in " print; rejectFile printNL ] ;
+    "      " print ; ^global Utility UnixSeconds currentTime printNL ;
+  
+    ^global GlobalsFeed disableBulkLoadInProgress ; 
+   ] ;
+
+] ;
+
+
+
+####################
+#  MasterFeed
+####################
+
+#----------
+#  generic change at MasterFeed to support updating aliases
+#----------
+MasterFeed defineMethod: [ | runWrapup | 
+  ^super runWrapup ; 
+  ^self autoCreateIds isTrue
+     ifTrue: [ ^self createInternalIds ] ;
+  ^self updateAliases ;
+] ;
+
+MasterFeed defineMethod: [ | updateAliases | 
+  ^self
+] ;
+
+####################
+#  EEF
+####################
+
+####################
+#  MembershipFeed
+#    - update member only on change by default; add toggle to update all
+####################
+
+MembershipFeed defineMethod: [ | enableOnlyUpdateOnChange | 
+  ^self define: 'onlyUpdateOnChangeFlag' toBe: TRUE ;
+  ^self
+] ;
+
+MembershipFeed defineMethod: [ | disableOnlyUpdateOnChange | 
+  ^self define: 'onlyUpdateOnChangeFlag' toBe: NA ;
+  ^self
+] ;
+
+MembershipFeed enableOnlyUpdateOnChange ;
+
+#--------------------
+#  add test in method that updates group assignments to only update t/s
+#     if the value has changed unless the toggle is disabled
+#--------------------
+
+MembershipFeed defineMethod: [ | updateGroupAssignmentsOn: date using: list |
+  !feed <- ^self ;
+  !memberBlock <- feed memberUpdateBlock ;
+  !membersAreTimeSeries <- feed memberType send: memberBlock . isTimeSeries ;
+
+  !evalDate <- date else: earliestPossibleDate ;
+  evalDate evaluate:
+     [
+     list select: [ member isntDefault ] .
+     do: [ ^my onlyUpdateOnChangeFlag isTrue && ^my membersAreTimeSeries
+            ifTrue: [ member send: ^my memberBlock . updateWith: group ]
+           ifFalse: [ member setProperty: ^my memberBlock to: group ] ;
+         ] ;
+     ] ;
+] ;
+
+
+####################
+#  PropertySetup
+#  - add support for euro and set rate for Greece
+####################
+
+#--------------------
+#  setup properties to update euro legacy currency info
+#--------------------
+PropertySetup updateFromString: "property | classId | dataType | description
+euroStartDate | Currency | Date | Date this Currency Converted to EUR
+fixedRateToEuro | Currency | Double | Legacy Rate to EURO on euroStartDate
+euroStartDate | Entity | Date | Date this Security converted to EUR
+";
+
+#--------------------
+#  update Greece to euro
+#--------------------
+
+CurrencyMaster updateFromString: "id | euroStartDate | fixedRateToEuro
+GRD | 1/1/2001 | 340.74911324
+";
+
+#======================================================================
+
+newLine print ;
+"...  Miscellaneous invest core changes " printNL ;
+newLine print ;
+
+##################################################
+#  patch.inv
+#
+#  Security
+#  - add SecurityIdRecord protocol and modify Security accordingly
+#
+#  -  add Security unlinkFromCompany, and company cleanup messages
+#
+#  - add 'id' which returns ticker, then code
+#
+#  - add support for parentSecurity; modify 'rebuildSecurityList'
+#    to set company on securities with parentSecurity company
+#  - modify rebuildCusipIssuerXRef to update _prmaryCompany
+#
+#  - modify 'deleteAlias:' to only delete at company if company isntDefault
+#  - modify 'resetSedolTo:' to reset ticker if same as old sedol
+#
+#  Account
+#  - fix 'addAlias:' and 'deleteAlias:' to store to baseObject not
+#    Account level instance in Named Account
+#  - add manager, benchmark, inceptionDate, and ticker properties
+#  - set 'id' to return ticker, then code
+#  - add _totalNetAssets, and cover; add 'percentofTMV' and move
+#    'percentOfPort' values to this property; redefine 'percentofPort'
+#    as a cover ; define 'percentofTNA' cover ; modify 'computeAccountTotals'
+#    to update 'percentOfTMV'
+#  - modify displayInfo and profile to reflect new properties
+#  - add miscellaneous methods used in elumient applications including
+#    'getHoldingsDates', 'asAccountList',  and 'correlateWith:'
+#
+#
+#  patch.inv (feeds)
+#
+# SecurityMaster
+#   - process name as a special item via cover method
+#   - view cusip changes from 8->9 and sedols from 6-7 as"okay" even
+#     if disable changes is set
+#
+# PortfolioMaster, AggAccountMaster, IndexAccountMaster, CompositeAccountMaster
+#   - add ticker as alias 
+#
+#  SplitsFeed
+#    - fix purge logic to purge individual dates supplied, not range
+#
+#  PortfolioManagerMaster
+#    - create PortfolioManager entity class and feed
+#
+#
+##################################################
+
+####################
+#  SecurityIdRecord and supporting Protocol
+#    - establish residence in Security ospace
+#    - track all changes in cusip, sedol, ticker, and name over time
+#
+#    Security
+#    - modify Security to generate an idHistory record on creation
+#
+#    - Feed used to process idc and/or exshare change and post if legit
+####################
+
+#--------------------
+#  Create class and t/s properties
+#--------------------
+Interface BatchFeedManager setObjectSpaceTo: Environment DBA SecurityClass ;
+Interface BatchFeedManager 
+  createDataRecordClass: "SecurityIdRecord" from: "DataRecord"
+  linkedTo: "Security" via: "idHistory" asTS: "NA" ;
+
+PropertySetup updateFromString: "
+classId  | property | tsFlag | 
+SecurityIdRecord | id  | Y
+SecurityIdRecord | cusip | Y
+SecurityIdRecord | sedol | Y
+SecurityIdRecord | ticker | Y
+SecurityIdRecord | name | Y
+" ;
+
+#--------------------
+#  Initializations and Display
+#--------------------
+
+SecurityIdRecord defineMethod: [ | initializeKeys: keys | 
+  :entity <- keys asSelf ;
+  ^self
+] ;
+
+SecurityIdRecord defineMethod: [ | initializeLocalAttributes | 
+  :code <- entity code ;
+  :id updateWith: code ;
+  ^self
+] ;
+ 
+SecurityIdRecord defineMethod: [ | setIdTo: string |
+  :id updateWith: string ;
+  ^self 
+] ;
+
+SecurityIdRecord defineMethod: [ | setCusipTo: string |
+  :cusip updateWith: string ;
+  ^self 
+] ;
+
+SecurityIdRecord defineMethod: [ | setSedolTo: string |
+  :sedol updateWith: string ;
+  ^self 
+] ;
+
+SecurityIdRecord defineMethod: [ | setTickerTo: string |
+  :ticker updateWith: string ;
+  ^self 
+] ;
+
+SecurityIdRecord defineMethod: [ | setNameTo: string |
+  :name updateWith: string ;
+  ^self 
+] ;
+
+SecurityIdRecord defineMethod: [ | profile |
+"Id History for: " print ; entity displayInfo ;
+"--> initial code: " print ; code printNL ;
+"--> current entity aliases: " print ; 
+entity aliases do: [ print ; " | " print ] ; newLine print;
+"--> id: " printNL ; :id displayAll ;
+"--> cusip: " printNL ; :cusip displayAll ;
+"--> sedol: " printNL ; :sedol displayAll ;
+"--> ticker: " printNL ; :ticker displayAll ;
+"--> name: " printNL ; :name displayAll ;
+newLine print
+] ;
+
+
+#--------------------
+#  modify security creation to create idHistory record and modify
+#    cusip, etc update methods to track in idHistory as well
+#--------------------
+
+Security instanceList
+do: [ :idHistory <- ^global SecurityIdRecord createInstance: asSelf ;
+      idHistory :id delete: ^date ;
+      creationDate evaluate: [
+         idHistory setIdTo: code ;
+         cusip isntDefault ifTrue: [ idHistory setCusipTo: cusip ] ;
+         sedol isntDefault ifTrue: [ idHistory setSedolTo: sedol ] ;
+         ticker isntDefault ifTrue: [ idHistory setTickerTo: ticker ] ;
+         name isntDefault ifTrue: [ idHistory setNameTo: name ] ;
+      ] ;
+    ] ;
+
+Security defineMethod: [ | initialize | 
+  ^super initialize ;
+  :ticker <- code ;
+  :pricingSeries <- ^global PriceTools PriceTSGenerator :ts ;
+  :holdingsSeries <- holdingsPrototype ;
+  :idHistory <- defaultInstance idHistory createInstance: ^self ;
+  ^self
+] ;
+
+#--------------------
+#  add support for idHistory when key ids changes
+#--------------------
+Security defineMethod: [ | resetCodeTo: string | 
+string isntDefault && [ string != code ] 
+ifTrue:
+  [
+#--  if code and company code are the same, they should both be changed;
+#--     new code is also added as alias
+  code = company code
+     ifTrue: [ company :code <- company getClusteredString: string ] ;
+  :code <- ^self getClusteredString: string ;
+  ^self addAlias: string ; 
+  idHistory setIdTo: code ;
+  ] ;
+  ^self
+] ;
+
+Security defineMethod: [ | setCusipTo: string | 
+  string isntDefault && [ string != cusip ] 
+  ifTrue:
+  [
+  cusip isntNA && [ code = cusip ]
+    ifTrue: [ ^self resetCodeTo: string ] ;     #- adds as Alias as well
+  cusip = ticker ifTrue: [ ^self setTickerTo: string ] ;
+  ^self setXRefIn: XRef Cusip to: string ; 
+  ^self addAlias: cusip8 toXRefIn: XRef Cusip ;
+  ^self addAlias: cusip ;
+  ^self addAlias: cusip8 ;
+  idHistory setCusipTo: cusip ;
+  ] ;
+  ^self
+] ;
+
+Security defineMethod: [ | setSedolTo: string | 
+  string isntDefault && [ string != sedol ] 
+  ifTrue:
+  [
+  sedol isntNA && [ (code take: 6) = (sedol take: 6) ]
+    ifTrue: [ ^self resetCodeTo: string ] ;     #- adds as Alias as well
+  sedol = ticker ifTrue: [ ^self setTickerTo: string ] ;
+  ^self setXRefIn: XRef Sedol to: string ; 
+  ^self addAlias: sedol6 toXRefIn: XRef Sedol ;
+  ^self addAlias: sedol ; 
+  ^self addAlias: sedol6 ;
+  idHistory setSedolTo: sedol ;
+  ] ;
+  ^self
+] ;
+
+Security defineMethod: [ | setTickerTo: string |
+  string isntDefault && [ string != ticker ] 
+  ifTrue:
+    [ :ticker <- ^self getClusteredString: string; 
+      ^self addAlias: ticker ; 
+       idHistory setTickerTo: ticker ;
+    ] ;
+^self
+] ;
+
+Security defineMethod: [ | setNameTo: string | 
+  string isntDefault && [ string != name ] 
+  ifTrue:
+    [ ^super setNameTo: string ;
+      idHistory setNameTo: name ;
+    ] ;
+  ^self
+] ;
+
+####################
+#  Support for Corrections
+####################
+
+Security defineMethod: [ | unlinkFromCompany |
+#--- take aliases away - note: this may leave no company aliases
+company deleteAlias: aliases toList ;
+#--- if no aliases left, flag company for deletion and set code to xCode
+company isntDefault && [ company aliases count = 0 ] 
+ifTrue: 
+  [ !reason <- 
+      "Unlinked from security " concat: code . concat: ". No aliases remain." ;
+    company flagForDeletionWithReason: reason ;
+  ] ;
+#---  if this is primary for company, remove it
+!thisOne <- asSelf ;
+company primarySecurity = thisOne
+ifTrue: 
+  [ !newPrimary <- 
+       company securityList select: [ asSelf != ^my thisOne ] . at: 1 .
+       else: defaultInstance ;
+    company :primarySecurity <- newPrimary ;
+  ] ;
+       
+#--- set this company to default
+:company <- defaultInstance company ;
+#---  note that the securityList needs to be rebuilt for company
+^self
+] ;
+
+Company defineMethod: [ | cleanupLocalAttributes |
+  ^super cleanupLocalAttributes;
+  securityList
+  do: [ :company <- defaultInstance company ;
+      ] ;
+  :primarySecurity <- defaultInstance primarySecurity;
+  :cusip6 <- NA ;
+] ;
+
+Company defineMethod: [ | cleanupLocalNames | 
+  ^super cleanupLocalNames ;
+  !newId <- "x" concat: code ;
+  :code <- ^self getClusteredString: newId ;
+ ^self addAlias: code ;
+ ^self
+] ;
+
+####################
+#  Other Security and Company
+####################
+
+#--------------------
+#  General Changes
+#--------------------
+
+Security defineMethod: [ | id | 
+ ^self asSelf = (named at: ticker)
+     ifTrue: [ ticker ] . else: cusip . else: sedol . else: code
+] ;
+
+#--------------------
+#  parentSecurity
+#  . add property
+#  . modify rebuildSecurityList to set company to parentSecurity company
+#  . modify rebuildCusipIssuerXRef to update _prmaryCompany
+#--------------------
+
+PropertySetup updateFromString: "
+classId  | property | defaultValue 
+Security | parentSecurity | Security 
+" ;
+
+Company defineMethod: [ | rebuildSecurityList | 
+  ^global Security masterList
+      select: [ parentSecurity company isntDefault ] .
+  do: [ company isDefault 
+          ifTrue: [ ^self setCompanyTo: parentSecurity company ] .
+          elseIf: [ company != parentSecurity company ] 
+          then: [ ">>> Company/Parent Company Mismatch" printNL ;
+                  "    Security: " print; displayInfo ;
+                  "     Company: " print ; company displayInfo ;
+                  "    Parent:   " print ; parentSecurity displayInfo ;
+                  "     Company: " print ; parentSecurity company displayInfo;
+                ] ;
+       ] ;
+  ^self masterList 
+     do: [ :securityList <- defaultInstance securityList ] ; 
+  ^global Security masterList select: [ company isntDefault ] .
+     groupedBy: [company].
+   do: [ :securityList <- groupList ]; 
+] ;
+
+Company defineMethod: [ | rebuildCusipIssuerXRef |
+^self masterList select: [primarySecurity cusip isntDefault].
+    select: [ primarySecurity cusip count between: 8 and: 9 ] .
+    extendBy: [!cusip6 <- primarySecurity cusip take: 6 ; ] .
+    select: [cusip6 isBlank not].
+    groupedByString: [cusip6].
+do: [ !company <- groupList sortUp: [primarySecurity cusip].at: 1 . asSelf ; 
+      company setXRefIn: company XRef CusipIssuer to: asSelf; 
+      groupList select: [ asSelf != ^my company ] .
+         do: [ :_primaryCompany <- ^my company ] ;    
+    ]; 
+^global Security masterList select: [company isDefault].
+     select: [cusip isntNA].
+    select: [ cusip count between: 8 and: 9 ] .
+do: [!issuer <- ^global Company XRef CusipIssuer at: (cusip take: 6); 
+     issuer isCompany ifTrue: [^self setCompanyTo: issuer]; 
+    ]; 
+] ;
+
+#--------------------
+#  Security
+#  - modify 'deleteAlias:' to only delete at company if isntDefault
+#  - modify cusip8 and sedol6 to make sure underlying property has 
+#    8/9 or 6/7 characters
+#--------------------
+
+Security defineMethod: [ | deleteAlias: string | 
+  ^super deleteAlias: string; 
+  company isntDefault ifTrue: [ company deleteAlias: string] ;
+  ^self
+] ;
+
+#----------
+
+Security defineMethod: [ | cusip8 | 
+  cusip isString && [ cusip count between: 8  and: 9 ] 
+      ifTrue: [ cusip take: 8 ] 
+] ;
+
+Security defineMethod: [ | sedol6 | 
+  sedol isString && [ sedol count between: 6 and: 7 ] 
+      ifTrue: [ sedol take: 6 ] 
+] ;
+
+####################
+#  Account Changes
+####################
+
+#--------------------
+#  fix account aliases to return correct subclass 
+#--------------------
+
+Account defineMethod: [ | addAlias: alias | 
+^super addAlias: alias ;
+^global Named Account at: alias  . isNA
+    ifTrue: [ ^global Named Account at: alias put: ^self asSelf ] ;
+  ^self
+] ;
+
+Account defineMethod: [ | deleteAlias: alias |
+  ^super deleteAlias: alias ;
+  !entity <- ^self asSelf ;
+  alias
+  do: [ ^global Named Account at: asSelf . = ^my entity 
+             ifTrue: [ ^global Named Account delete: asSelf ] ;
+      ] ;
+  ^self
+] ;
+
+#--------------------
+#  More optional properties at account and appropriate class setup
+#--------------------
+
+Interface BatchFeedManager
+   createEntityClass: "PortfolioManager" from: "Entity" ;
+
+Account define: 'manager' withDefault: PortfolioManager ;
+Account define: 'benchmark' withDefault: IndexAccount ;
+
+Account
+   defineFixedProperty: 'inceptionDate' .
+;
+
+#--------------------
+#  - add support for ticker at Account ; id returns ticker if defined
+#  - add support for auto-aliasing ticker via Portfolio feeds; generic
+#    support for updating aliases at MasterFeed
+#--------------------
+
+PropertySetup updateFromString: "property | classId
+ticker | Account
+" ;
+
+Account defineMethod: [ | id | 
+   ^self asSelf = (^self named at: ticker) ifTrue: [ ticker ] else: code
+] ;
+
+#--------------------
+#  Account - add totalNetAssets and update percentOfTMV vs TNA
+#--------------------
+Account
+   define: '_totalNetAssets' .
+;
+
+Account defineMethod: [ | totalNetAssets | 
+    _totalNetAssets * ^self currencyFactor
+] ;
+
+Holding
+   defineFixedProperty: 'percentOfTMV' .
+;
+
+Holding defineMethod: [ | percentOfTNA  |
+   100 * _totalMarketValue / account _totalNetAssets
+] ;
+
+Holding defineMethod: [ | percentOfPort |
+  percentOfTMV
+] ;
+
+
+Holding :storeXRef
+do: [ ^self instanceList
+      do: [ :percentOfTMV <- date evaluate:
+                 [ _totalMarketValue / account totalMarketValue * 100 ] ;
+          ] ;
+    ] ;
+  
+Account defineMethod: [ | computeAccountTotals | 
+ ^self baseCurrency evaluate:
+    [ !data <-  #-- get tmv in correct currency
+         holdingsSeries extendBy: [ !tmv <- totalMarketValue ] ;
+      :_totalMarketValue <- data total: [ tmv ] ;
+      :_totalMarketValueCash <- data
+         select: [security type isCashEquiv] .
+          total: [ tmv ] ;
+      :_totalMarketValueEquity <- data
+          select: [ security type isEquity ] .
+           total: [ tmv] ;
+      :_totalMarketValueFixed <- data
+          select: [ security type isFixed ] .
+           total: [ tmv ] ;
+      :_totalCost <- holdingsSeries total: [ totalCost ] ;
+      data
+      do: [ :percentOfTMV <- 100 * tmv / ^my _totalMarketValue ;
+            :percentOfEquity <- security type isEquity
+                ifTrue: [ 100 * tmv / ^my _totalMarketValueEquity ] ;
+          ] ;
+    ] ;
+ ^self
+] ;
+
+
+#--------------------
+#  Account - display methods
+#--------------------
+
+Account defineMethod: [ | displayInfo |
+" " print; ^self code print: 10 ; ^self id print: 10 ; ^self name printNL ;
+] ;
+
+Account defineMethod: [ | profile |
+  ^super profile ; 
+  "---  Supplemental Data  ---" printNL ;
+  "uniqueId: " print: 30 ; ^self uniqueId printNL ;
+  "ticker: " print: 30 ; ticker printNL ;
+  "holdings (count): " print: 30 ; holdings count printNL:15 ;
+  "totalMarketValue (" concat: currency code . concat: "): " . print: 30 ; 
+  ^self totalMarketValue printWithCommasNL: 15.0 ;
+  "totalNetAssets (" concat: currency code . concat: "): " . print: 30 ; 
+  ^self totalNetAssets printWithCommasNL: 15.0 ;
+  currency isUS 
+  ifFalse: 
+    [ "totalMarketValue (US): " print: 30 ; 
+      "US" asCurrency evaluate: [ totalMarketValue printWithCommasNL: 15.0 ] ;
+      "totalNetAssets (US): " print: 30 ; 
+      "US" asCurrency evaluate: [ totalNetAssets printWithCommasNL: 15.0 ] ;
+    ] ;
+  newLine print ; 
+] ;
+
+#--------------------
+#  Account : other changes
+#--------------------
+
+Account defineMethod: [ | getHoldingsDates |
+  ^self :holdingsSeries select: [ count > 0 ] . send: [ ^date ] 
+] ;
+
+Account defineMethod: [ | asAccountList |
+  ^self asList select: [ hasHoldings ] 
+] ;
+
+AggAccount defineMethod: [ | asAccountList |
+  ^self asList append: (memberList sortUp: [ id ] ) .
+    select: [ hasHoldings ]
+] ;
+
+CompositeAccount defineMethod: [ | asAccountList |
+  ^self asList 
+    append: (componentList send: [ account ] . sortUp: [ id ] ) .
+    select: [ hasHoldings ]
+] ;
+
+Account defineMethod: [ | correlateWith: acct |
+holdings
+   correlateWith: acct holdings on: [ security ] using: [ percentOfPort ] 
+
+] ;
+
+Account defineMethod: [ | overlapWith: acct2 |
+!xref <- ^global IndexedList new ;
+holdings do: [ ^my xref at: security put: percentOfPort ] ;
+acct2 holdings
+   total: [ percentOfPort min: (^my xref at: security . else: 0) ]
+] ;
+
+
+#======================================================================
+
+####################
+#   SecurityMaster
+#   - process name as a special item via cover method
+#   - view cusip changes from 8->9 and sedols from 6-7 as"okay" even
+#     if disable changes is set
+####################
+
+SecurityMaster defineFixedProperty: 'name' ;
+
+#--------------------
+#  view cusip changes from 8->9 and sedols from 6->7 as "okay" even
+#     if disable changes sets
+#--------------------
+
+SecurityMaster defineMethod: [ | runUpdate | 
+  ^super runUpdate ;
+  !list <- ^self instanceList select: [ isProcessed ];
+  list
+  do: [underlyingRecord setTickerTo: ticker ;
+       :currentByCusip <- ^global Security XRef Cusip at: cusip ;
+       :currentBySedol <- ^global Security XRef Sedol at: sedol ;
+       :priorCusip <- underlyingRecord cusip ;
+       :priorSedol <- underlyingRecord sedol ;
+       :company <- getCompanyId as: ^global Company ;
+       :priorCompany <- underlyingRecord company ;
+      ] ;
+
+#-- Only update these identifiers with unique values 
+#--    and cusip/sedol not in use if cusip update is enabled
+    !todo <- allowCusipChanges
+       ifTrue: [ list ] 
+       else: 
+       [ list
+          select: [ priorCusip isDefault ||   #- prior is 8 character
+                    [ priorCusip = (cusip else: "" .take:8) ] 
+                  ] 
+       ] ;
+    todo select: [ currentByCusip isDefault 
+                   || currentByCusip = underlyingRecord
+                 ] .
+        groupedByString: [ cusip ] . select: [ groupList count = 1 ] .
+    do: [groupList do: [ underlyingRecord setCusipTo: cusip ];];
+
+    !todo <- allowSedolChanges
+       ifTrue: [ list ] 
+       else: 
+       [ list
+          select: [ priorSedol isDefault ||            #- prior is 6 char
+                    [ priorSedol = (sedol else: "" . take:6) ]  
+                  ] 
+       ] ;
+    todo select: [ currentBySedol isDefault 
+                   || currentBySedol = underlyingRecord
+                 ] .
+         groupedByString: [ sedol ] . select: [ groupList count = 1 ] .
+    do: [ groupList do: [underlyingRecord setSedolTo: sedol ];];
+
+    !todo <- allowCompanyChanges
+       ifTrue: [ list ] else: [ list select: [ priorCompany isDefault ] ] ;
+    todo do: [ underlyingRecord setCompanyTo: company ] ;
+
+    !todo <- list select: [ name isntDefault ] ;
+    todo do: [ underlyingRecord setNameTo: name ] ;
+ 
+] ;
+
+#----------
+
+SecurityMaster defineMethod: [ | displayOtherExceptions | 
+  ^super displayOtherExceptions ;
+  !items <- fieldOrderList 
+    select: [ isntDefault ] . send: [ toUpper stripChar: " " ] ;
+  !hasCompany <- items any: [ ^self = "COMPANY"] ;
+  hasCompany ifTrue: [
+    newLine print;
+    "--> WARNING: This Feed Contains the field 'company'.  " printNL ;
+    "    This field is ignored.  Use 'companyId' to update 'company'." printNL ;
+   ] ;
+  
+  !list <- ^self instanceList select: [ isProcessed ] ; 
+
+  !dupTick <- list select: [ ticker isntNA ] . 
+          groupedByString: [ ticker ] . 
+                   select: [ groupList count > 1 ];
+  !dupCusip <- list select: [ cusip isntNA ] . 
+          groupedByString: [ cusip ]  . 
+                   select: [ groupList count > 1 ];
+  !dupSedol <- list select: [ sedol isntNA ] . 
+          groupedByString: [ sedol ]  . 
+                   select: [ groupList count > 1 ];
+  !inUseCusip <- list select: [ currentByCusip isntDefault ] .
+       select: [ currentByCusip != underlyingRecord ] ;
+  !inUseSedol <- list select: [ currentBySedol isntDefault ] .
+       select: [ currentBySedol != underlyingRecord ] ;
+  !cusipChanges <- list
+     select: [ currentByCusip isDefault || currentByCusip = underlyingRecord ].
+     select: [ priorCusip isntDefault && cusip isntDefault ] .
+     select: [ cusip else: "" . take: 8 . != priorCusip ] .
+     select: [ cusip != priorCusip ] ;
+  !sedolChanges <- list
+     select: [ currentBySedol isDefault || currentBySedol = underlyingRecord ].
+     select: [ priorSedol isntDefault && sedol isntDefault ] .
+     select: [ sedol else: "" . take: 6 . != priorSedol ] .
+     select: [ sedol != priorSedol ] ;
+  !companyChanges <- list
+       select: [ priorCompany isntDefault && company isntDefault ] .
+        select: [ company != priorCompany ] ;
+
+  dupTick count > 0 ifTrue: [
+    newLine print;
+    "--> Feed Contains " print;
+    dupTick count asString print ; 
+    " Records with Duplicate Tickers.  Updated for ALL." printNL;
+   ] ;
+  dupCusip count > 0 ifTrue: [
+    newLine print;
+    "---> Feed Contains " print;
+    dupCusip count asString print ;
+    " Duplicate Cusips Found. NOT Updated." printNL;
+    dupCusip
+    do: [ "Cusip: " print ; print ; "  --  " print ; 
+          groupList count print ; " records found. " printNL ;
+        ] ;
+   ];
+ inUseCusip count > 0 ifTrue: [
+    newLine print;
+    "---> Feed Contains " print;
+    inUseCusip count asString print ;
+    " Cusips In Use. NOT Updated." printNL;
+    inUseCusip
+    do: [ "Current By Cusip " print ; cusip print: 10 ; ": " print ;
+          currentByCusip
+             do: [ code print: 10 ; cusip print: 10 ; name printNL ] ;
+          "Entity Not Updated with Cusip: " print ; 
+          underlyingRecord 
+             do: [ code print: 10 ; cusip print: 10 ; name printNL ] ;
+          newLine print ;
+        ] ;
+   ];
+  cusipChanges count > 0 ifTrue: [
+    newLine print ;
+    allowCusipChanges 
+        ifTrue: [ "---> Feed has Changed " ] 
+          else: [ "---> Feed would have Changed " ] . print ;
+    cusipChanges count asString print ;
+    " Cusips." printNL ;
+    cusipChanges
+    do: [ "Was: " print ; priorCusip print ; " Now: " print ; cusip print ;
+          " | " print ; 
+          underlyingRecord
+             do: [ code print: 10 ; cusip print: 10 ; name printNL ] ;
+        ] ;
+  ] ;
+
+  dupSedol count > 0 ifTrue: [
+    newLine print;
+    "---> Feed Contains " print;
+    dupSedol count asString print ;
+    " Duplicate Sedols Found.  NOT Updated." printNL;
+    dupSedol
+    do: [ "Sedol: " print ; print ; "  --  " print ; 
+          groupList count print ; " records found. " printNL ;
+        ] ;
+   ];
+ inUseSedol count > 0 ifTrue: [
+    newLine print;
+    "---> Feed Contains " print;
+    inUseSedol count asString print ;
+    " Sedols In Use. NOT Updated." printNL;
+    inUseSedol
+    do: [ "Current By Sedol " print ; sedol print: 10 ; ": " print ;
+          currentBySedol
+             do: [ code print: 10 ; sedol print: 10 ; name printNL ] ;
+          "Entity Not Updated with Sedol: " print ; 
+          underlyingRecord 
+             do: [ code print: 10 ; sedol print: 10 ; name printNL ] ;
+          newLine print ;
+        ] ;
+   ];
+  sedolChanges count > 0 ifTrue: [
+    newLine print ;
+    allowSedolChanges 
+        ifTrue: [ "---> Feed has Changed " ] 
+          else: [ "---> Feed would have Changed " ] . print ;
+    sedolChanges count asString print ;
+    " Sedols." printNL ;
+    sedolChanges
+    do: [ "Was: " print ; priorSedol print ; " Now: " print ; sedol print ;
+          " | " print ; 
+          underlyingRecord
+             do: [ code print: 10 ; sedol print: 10 ; name printNL ] ;
+        ] ;
+  ] ;
+
+  companyChanges count > 0 ifTrue: [
+    newLine print ;
+    allowCompanyChanges 
+        ifTrue: [ "---> Feed has Changed " ] 
+          else: [ "---> Feed would have Changed " ] . print ;
+    companyChanges count asString print ;
+    " Companies." printNL ;
+    companyChanges
+    do: [ "Was: " print ; 
+          priorCompany do: [code print: 10 ; name print: 15 ] ;
+          " Now: " print ; 
+          company  do: [code print: 10 ; name print: 15 ] ;
+          " | " print ;
+          underlyingRecord 
+          do: [ code print: 10 ; cusip print: 10 ; sedol print: 10 ;
+                name printNL ;
+              ] ;
+          allowCompanyChanges isTrue && 
+              [ underlyingRecord company != company ] 
+          ifTrue: 
+            [ "   !!! company not changed because codes match." printNL ;
+            ] ;
+        ] ;
+  ] ;
+
+] ;
+
+
+####################
+#  Account masters - add ticker as auto-alias
+####################
+
+PortfolioMaster defineMethod: [ | updateAliases |
+  ^super updateAliases ;
+  ^self masterList select: [ underlyingRecord ticker isntDefault ] .
+     do: [ underlyingRecord addAlias: underlyingRecord ticker ] ;
+  ^self
+] ;
+      
+IndexAccountMaster defineMethod: [ | updateAliases |
+  ^super updateAliases ;
+  ^self masterList select: [ underlyingRecord ticker isntDefault ] .
+     do: [ underlyingRecord addAlias: underlyingRecord ticker ] ;
+  ^self
+] ;
+      
+AggAccountMaster defineMethod: [ | updateAliases |
+  ^super updateAliases ;
+  ^self masterList select: [ underlyingRecord ticker isntDefault ] .
+     do: [ underlyingRecord addAlias: underlyingRecord ticker ] ;
+  ^self
+] ;
+      
+CompositeAccountMaster defineMethod: [ | updateAliases |
+  ^super updateAliases ;
+  ^self masterList select: [ underlyingRecord ticker isntDefault ] .
+     do: [ underlyingRecord addAlias: underlyingRecord ticker ] ;
+  ^self
+] ;
+      
+
+####################
+#  SplitsFeed
+#     - fix purge to delete points for dates supplied
+#     - add run-time setting to autoPurge for range
+####################
+
+SplitsFeed defineMethod: [ | purgeRecords | 
+!feed <- ^self asSelf currentStore ;
+#-- make sure no rates supplied, then reconcile will remove point for date
+feed instanceList do: [ :rate <- NA ] ;
+newLine print ; 
+"  ... purging splits for securities/dates in this feed." printNL ;
+newLine print ; 
+feed reconcile ;
+] ;
+
+SplitsFeed defineMethod: [ | setAutoPurgeRangeTo: dr |
+  ^self define: 'autoPurgeRange' toBe: dr ;
+  ^self
+] ;
+
+SplitsFeed defineMethod: [ | enableAutoPurgeAll |
+  ^self setAutoPurgeRangeTo: "*" 
+] ;
+
+SplitsFeed defineMethod: [ | disableAutoPurgeRange |
+  ^self setAutoPurgeRangeTo: NA
+] ;
+
+SplitsFeed defineMethod: [ | resetRunTimeAttributes | 
+   ^super resetRunTimeAttributes 
+   disableAutoPurgeRange 
+] ;
+
+SplitsFeed disableAutoPurgeRange ;
+
+
+SplitsFeed defineMethod: [ | runUpdate | 
+  !valid <- ^self asSelf instanceList 
+     select: [ underlyingRecord isntDefault && date isDate
+             ] ;
+  ^self autoPurgeRange isntDefault
+      ifTrue: [ ^self autoPurgeSplitsFor: valid ] ;
+  ^self updateSplitsFor: valid ;
+] ;
+
+SplitsFeed defineMethod: [ | autoPurgeSplitsFor: valid |
+
+!startDate ; !endDate ;
+autoPurgeRange else: "" . contains: ":" .
+  ifTrue: [ :startDate <- autoPurgeRange to: ":" . drop: -1 . asDate ;
+            :endDate <- autoPurgeRange from: ":" . drop: 1 . asDate ;
+          ] .
+  elseIf: [ autoPurgeRange else: "" . containsSubstring: "*" . not ]
+    then: [ :startDate <- autoPurgeRange asDate ; 
+            :endDate <- autoPurgeRange asDate ;
+          ] ;
+newLine print ; 
+"  ... purging splits for securities in this feed for range " print ;
+autoPurgeRange printNL ;
+newLine print ; 
+
+valid groupedBy: [ underlyingRecord ] .
+do: [ 
+:rawSplitFactor from: ^my startDate to: ^my endDate .
+      do: [ ^my :rawSplitFactor delete: ^date ] ;
+    ] ;
+
+] ;
+
+
+####################
+#  SecurityIdRecordFeed
+####################
+
+SecurityIdRecordFeed
+   defineFixedProperty: 'newCusip' .
+   defineFixedProperty: 'newSedol' .
+
+   defineFixedProperty: 'security' .
+   defineFixedProperty: 'oldSecurityByCusip' .
+   defineFixedProperty: 'oldSecurityBySedol' .
+
+   defineFixedProperty: 'cusipUpdated' .
+   defineFixedProperty: 'sedolUpdated' .
+
+;
+
+SecurityIdRecordFeed defineMethod: [ | displayInfo |
+ entityId print ; " " print ; evaluationDate print: 12 ;
+ newCusip print ; " " print ; newSedol printNL
+] ;
+
+SecurityIdRecordFeed defineMethod: [ | evaluationDate |
+  date else: ^date
+] ;
+
+SecurityIdRecordFeed defineMethod: [ | rejectReason |
+  security isDefault 
+    ifTrue: [ ^super rejectReason ] .
+  elseIf: [ sedolInUse || cusipInUse ] 
+    then: [ "proposed change refers to different security" ] .
+  elseIf: [ (newCusip isDefault || cusipUnchanged) &&
+            [newSedol isDefault || sedolUnchanged]
+          ] 
+    then: [ "proposed change already assigned to security" ]
+] ;
+
+SecurityIdRecordFeed defineMethod: [ | cusipInUse |
+  oldSecurityByCusip isntDefault && [ oldSecurityByCusip != security ] 
+] ;
+
+SecurityIdRecordFeed defineMethod: [ | cusipUnchanged |
+   oldSecurityByCusip = security && [ security cusip = newCusip ] 
+] ;
+
+SecurityIdRecordFeed defineMethod: [ | sedolInUse |
+  oldSecurityBySedol isntDefault && [ oldSecurityBySedol != security ] 
+] ;
+
+SecurityIdRecordFeed defineMethod: [ | sedolUnchanged |
+  oldSecurityBySedol isntDefault && [ oldSecurityBySedol sedol = newSedol ]
+] ;
+
+SecurityIdRecordFeed defineMethod: [ | initializeProcessing | 
+  ^self asSelf instanceList do:
+     [
+     :security <- ^global Security locateId: entityId ;
+     security isntDefault ifTrue: [ :underlyingRecord <- security idHistory ] ;
+     :oldSecurityByCusip <- newCusip as: ^global Security ;
+     :oldSecurityBySedol <- newSedol as: ^global Security;
+     ] ;
+]  ;
+
+SecurityIdRecordFeed defineMethod: [ | runUpdate | 
+  !valid <- ^self asSelf instanceList 
+    select: [ security isntDefault ] .
+    reject: [ cusipInUse ] .
+    reject: [ sedolInUse ] .
+    select: [ (newCusip isntDefault && security cusip != newCusip ) ||
+              [newSedol isntDefault && security sedol != newSedol ] 
+            ] ;
+  ^self updateFor: valid; 
+] ;
+
+SecurityIdRecordFeed defineMethod: [ | updateFor: recs | 
+recs
+do: [ newCusip isntDefault && security cusip != newCusip
+      ifTrue:
+        [ evaluationDate >= (underlyingRecord :cusip lastDate else: ^date )
+           ifTrue: 
+             [ evaluationDate evaluate: [ security setCusipTo: newCusip ] ;
+             ]
+           ifFalse: 
+             [ evaluationDate evaluate:
+                 [ underlyingRecord setCusipTo: newCusip ;
+                   security addAlias: newCusip ;
+                 ] ;
+             ] ;
+          :cusipUpdated <- TRUE ;
+          :isProcessed <- TRUE ;
+        ] ;
+      newSedol isntDefault && security sedol != newSedol
+      ifTrue:
+        [ evaluationDate >= (underlyingRecord :sedol lastDate else: ^date)
+           ifTrue: 
+             [ evaluationDate evaluate: [ security setSedolTo: newSedol ] ; 
+             ]
+           ifFalse: 
+             [ evaluationDate evaluate:
+                  [ underlyingRecord setSedolTo: newSedol ;
+                    security addAlias: newSedol ;
+                  ] ;
+             ] ;
+          :sedolUpdated <- TRUE ;
+          :isProcessed <- TRUE ;
+        ] ;
+    ] ;
+
+] ;
+
+#----------
+
+SecurityIdRecordFeed defineMethod: [ | displayNewOnes | 
+  !updates <- ^self instanceList select: [ cusipUpdated ] ;
+  updates count > 0
+  ifTrue:
+    [ newLine print ;
+      updates count print; " cusips have been updated." printNL ;
+      updates
+      do: [ "Cusip " print ; newCusip print: 10 ; " assigned on " print ;
+            evaluationDate print ; " | " print ;
+            security do: [ code print: 10 ; cusip print: 10 ; name printNL ] ;
+          ] ;
+    ] ;
+  !updates <- ^self instanceList select: [ sedolUpdated ] ;
+  updates count > 0
+  ifTrue:
+    [ newLine print ;
+      updates count print; " sedols have been updated." printNL ;
+      updates
+      do: [ "Sedol " print ; newSedol print: 10 ; " assigned on " print ;
+            evaluationDate print ; " | " print ;
+            security do: [ code print: 10 ; sedol print: 10 ; name printNL ] ;
+          ] ;
+    ] ;
+
+] ;
+
+
+SecurityIdRecordFeed defineMethod: [ | displayBadOnes |
+!feed <- ^self; 
+!badOnes <- ^self asSelf instanceList 
+    select: [isntProcessed && entityId isntDefault] ;
+!badIds <- badOnes select: [ security isDefault ] ;
+badIds count > 0 
+ ifTrue: [newLine print; 
+          "--> Bad entityId supplied. " print; 
+          badIds count print; " not processed." printNL; 
+          newLine print ;
+          badIds groupedByString: [entityId].
+          do: [" " print: 5 ; ^self print: 20; 
+               groupList count print; " records skipped." printNL; 
+              ]; 
+          ]; 
+!inUse <- badOnes
+    select: [ security isntDefault && 
+              [ newCusip isDefault || cusipUnchanged ] &&
+              [ newSedol isDefault || sedolUnchanged ]
+            ] ;
+inUse count > 0 
+ ifTrue: [newLine print; 
+          "--> Proposed Id Change Already Valid for Security. " print; 
+          inUse count print; " skipped." printNL; 
+          newLine print ;
+          inUse
+          do: [ "Security to Change: " print ; entityId print ; " | " print ; 
+                security displayInfo ;
+                newCusip isntDefault && [ cusipUnchanged ] 
+                ifTrue:
+                  [ " " print: 5 ; newCusip print ; " already valid." printNL];
+               newSedol isntDefault && [ sedolUnchanged ] 
+                ifTrue:
+                  [ " " print: 5 ; newSedol print ; " already valid." printNL];
+              ] ;
+          ]; 
+!bad <- badOnes select: [ security isntDefault && cusipInUse ] ;
+bad count > 0 
+ifTrue:
+  [ newLine print ;
+    "--> Proposed Cusip Changes Refer to Different Security." print ;
+    bad count print ; " skipped." printNL ;
+    newLine print ;
+    bad sortUp: [ entityId ] .
+    do: [ "Old: " print ; entityId print ; " | " print ;
+          security displayInfo ;
+          "New: " print ; newCusip print ; " | " print ;
+          oldSecurityByCusip displayInfo ;
+          ^my feed displayIdCheckFrom: security
+                                   to: oldSecurityByCusip ;
+          "+" fill: 75 . printNL ;
+          newLine print ;
+        ] ;
+   ] ;
+!bad <- badOnes select: [ security isntDefault && sedolInUse ] ;
+bad count > 0 
+ifTrue:
+  [ newLine print ;
+    "--> Proposed Sedol Changes Refer to Different Security." print ;
+    bad count print ; " skipped." printNL ;
+    newLine print ;
+    bad sortUp: [ entityId ] .
+    do: [ "Old: " print ; entityId print ; " | " print ;
+          security displayInfo ;
+          "New: " print ; newSedol print ; " | " print ;
+          oldSecurityBySedol displayInfo ;
+          ^my feed displayIdCheckFrom: security
+                                   to: oldSecurityBySedol ;
+          "+" fill: 75 . printNL ;
+          newLine print ;
+        ] ;
+   ] ;
+
+] ;
+
+SecurityIdRecordFeed defineMethod: [ | displayIdCheckFrom: old to: new |
+
+!list <- old, new
+   extendBy: [
+             ] ;
+newLine print ;
+" " print: 15 ; "Old" print: 30 ; "New" print: 30 ; newLine print;
+"-" fill: 75 .printNL ;
+"Code: " print: 15; list do: [ code print: 30 ] ; newLine print ;
+"Name: " print: 15; list do: [ name print: 30 ] ; newLine print ;
+"Creation: " print: 15 ; list do: [ creationDate print: 30 ] ; newLine print ;
+"Modified: " print: 15 ; 
+list 
+do: [ lastModifiedByFeed
+          isntDefault: [ formatAsTimeStamp ] else: [ " - " ] . print: 30 ;
+    ] ; 
+newLine print ;
+"Company: " print: 15 ; list do: [ company code print: 30 ] ; newLine print ;
+"Creation: " print: 15 ; list do: [ company creationDate print: 30 ] ;
+newLine print ;
+#"Msci: " print: 15; list do: [ fset msciId else: "" . print: 30 ] ;
+#newLine print ;
+#"WScope: " print: 15; list do: [ fset wscopeId else: "" . print: 30 ] ;
+#newLine print ;
+
+!list1 <- old aliases toList ;
+!list2 <- new aliases toList ;
+!count <- list1 count max: list2 count ;
+count sequence
+do: [ ^self = 1 ifTrue: [ "Aliases: " ] ifFalse: [ "" ] .print: 15 ;
+      ^my list1 at: ^self . else: "" . print: 30;  
+      ^my list2 at: ^self . else: "" . print: 30 ;
+      newLine print;
+    ] ;
+
+!oprices <- old prices nonDefaults ;
+!nprices <- new prices nonDefaults ;
+
+"Last PDate: " print: 15 ; list do: [ lastPricingDate print: 30 ] ;
+newLine print ;
+"Prices" print: 15 ; 
+oprices firstDate asString 
+    concat: " - " . concat: oprices lastDate . print: 30 ;
+nprices firstDate asString 
+    concat: " - " . concat: nprices lastDate . print: 30 ;
+newLine print ;
+"Last Price" print: 15 ;
+oprices value print: -30 ; nprices value print: -30 ; newLine print ;
+"Last Split" print: 15 ;
+list
+do: [ !date <- :adjustmentFactor effectiveDate;
+      adjustmentFactor asString concat: " on " . concat: date . print: 30 ;
+   ] ;
+newLine print;
+"Last Div" print: 15 ;
+list
+do: [ !date <- :dividendSeries effectiveDate;
+      dividend asString concat: " on " . concat: date . print: 30 ;
+   ] ;
+newLine print;
+"     Raw" print: 20 ;
+list do: [ dividendSeries recordValue print: -30 ] ;
+newLine print ;
+
+" -" fill: 70 . printNL ;
+newLine print ;
+list
+do: [ displayInfo ;
+      "Aliases: " print ; 
+      aliases do: [ print ; " | " print ] ; newLine print ;
+      "--> Last 5 Prices: " printNL ;
+      prices last: 5 . displayAll ;
+      "--> Split History: " printNL ;
+      :rawSplitFactor displayAll ;
+      "--> Dividend History: "printNL ;
+      dividends displayAll ;
+      newLine print ;
+      " -" fill: 70 . printNL ;
+      newLine print ;
+    ] ;
+
+] ;
+
+
+#======================================================================
+
+####################
+#  Schema
+####################
+
+newLine print ;
+"...  Update schema and flag messages as needed" printNL ;
+newLine print ;
+
+Schema processAllMessages ;
+
+MessageSetup updateFromString: 
+"classId|message|keyType|returnType|containerType|tvFlag|description|paramList
+Account|_totalNetAssets|N|Number|Object|Y|unadjusted net asset value|
+Account|totalNetAssets|N|Number|Object|Y|split/curr adjusted nav
+Account|inceptionDate|N|Date|Object|N|inception date
+Account|manager|N|PortfolioManager|Object|Y|portfolio manager
+Account|benchmark|N|IndexAccount|Object|Y|benchmark account for comparison
+Holding|percentOfTMV|N|Number|Object|N|stored % total market value
+Holding|percentOfTNA|N|Number|Object|N|derived % total net assets
+Holding|percentOfPort|N|Number|Object|N|returns percentOfTMV by default
+" ;
+
+"ticker", "cusip", "sedol", "companyId", "name" 
+   do: [ ^my SecurityMaster getMessage: asSelf . enableOkayToUpload ] ;
+
+SecurityIdRecordFeed enableLocalFields enableDisplayNewOnes ;
+SecurityIdRecordFeed getMessage: "newCusip" . enableOkayToUpload ;
+SecurityIdRecordFeed getMessage: "newSedol" . enableOkayToUpload ;
+
+
+#-- Update "INSTALL.log" with patch installation information
+#ProcessControlTools Environment at: "updateLogPath" . 
+#    else: "/localvision/logs/" . concat: "INSTALL.log" .
+# appendOutputOf: ["Applied patch.core.613a at " print; 
+#                  ^global Utility UnixSeconds currentTime printNL ;
+#                 ];

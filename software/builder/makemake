@@ -1,0 +1,137 @@
+#!/bin/tcsh
+#
+# Builds makefile inside a particular Vision build directory.
+# TODO: add .PHONY target as necessary.
+# TODO: add external libraries as deps for each link target.
+
+#####  Obtain the target list ...
+if ( -f make.tlist ) then
+    set targets = (`cat make.tlist`)
+else
+    set targets = (main)
+endif
+
+#####  Erase the 'makefile' ...
+cp /dev/null makefile
+
+#####  ... set a default goal ...
+echo ".DEFAULT_GOAL = release" >> makefile
+echo "" >> makefile
+
+#####  ... append the definition files ...
+foreach prefixfile (make.defs.*)
+    echo "include $prefixfile" >> makefile
+end
+echo "" >> makefile
+
+#####  ... append a definition for 'LINKER' if necessary ...
+if ( `grep -c LINKER make.defs.*` == 0 ) then
+    echo 'LINKER  = VLINK-CC' >> makefile
+    echo "" >> makefile
+endif
+
+#####  ... scan the makefile for meta-entries
+set objectprefix = ""
+set objectsuffix = ""
+set targetprefix = ""
+set targetsuffix = ""
+set taruleprefix = ""
+set tarulesuffix = ""
+
+set nonomatch
+
+foreach metatag (objectprefix objectsuffix targetprefix targetsuffix taruleprefix tarulesuffix)
+    set metatokens = (`grep "#--$metatag--#" make.defs.*`)
+    if ($#metatokens > 1) then
+	set $metatag = $metatokens[2]
+    endif
+end
+
+set buildtargets = targets
+set objectrule = ""
+
+foreach metatag (buildtargets objectrule)
+    set metatokens = (`grep "#--$metatag--#" make.defs.*`)
+    if ($#metatokens > 1) then
+	set $metatag = ($metatokens[2-])
+    endif
+end
+
+unset nonomatch
+
+#####  ... the targets ...
+set targetline = ($buildtargets :)
+foreach target ($targets)
+    set targetline = ($targetline $targetprefix$target$targetsuffix)
+end
+echo $targetline >> makefile
+echo "" >> makefile
+
+foreach target ($targets)
+    # Find our objects.
+    if ( -f make.plist.${target} ) then
+	set objects = (`cat make.plist.${target}`)
+    else
+	set objects = (`cat make.plist`)
+    endif
+
+    # Output our rule for this target.
+    set mungedobjects = ()
+    foreach object ($objects)
+	set mungedobjects = ($mungedobjects $objectprefix$object$objectsuffix)
+    end
+    set mungedtarget = $targetprefix$target$targetsuffix
+    echo $mungedtarget : $mungedobjects >> makefile
+    if ( -f make.rule.${target} ) then
+	cat make.rule.${target} >> makefile
+    else
+	set mungedobjects = ()
+	foreach object ($objects)
+	    set mungedobjects = ($mungedobjects $taruleprefix$object$tarulesuffix)
+	end
+	echo '	$(LINKER) $@ $(CFLAGS)' $mungedobjects '$(LIBS)' >> makefile
+    endif
+    echo "" >> makefile
+    
+    # Add to our generated files list for cleaning.
+    echo GENERATEDFILES += $mungedtarget $mungedtarget.withSymbols $mungedobjects >> make.defs.clean
+end
+
+# Get our CINCS and VPATH into this shell.
+set CINCS=`grep 'CINCS.*=' make.defs.* | cut -d = -f 2`
+set VPATH=`grep 'VPATH.*=' make.defs.* | cut -d = -f 2`
+
+# Append to CINCS if we're on Solaris, so we include our sun headers.
+if (`uname` == "SunOS") then
+    # Find where CC lives by following symbolic links.
+    set CCbin = `which CC`
+    while ( -l $CCbin )
+        set relativePath = `\ls -l $CCbin | cut -d '>' -f 2`
+        set CCbin = "`dirname $CCbin`/$relativePath"
+    end
+    # Our include directory is adjacent to the directory that CC lives in.
+    set CCinc = "`dirname $CCbin`/../include/cc"
+    set CINCS = "-isystem $CCinc $CINCS"
+endif
+
+# Find source files from object list(s).
+foreach object (`grep -h '\.o' make.plist* | sort | uniq`)
+    # Find the source file.
+    foreach source ( $object:r.cpp $object:r.c )
+        foreach d ( . $VPATH )
+            if ( -e $d/$source ) then
+                set realSource = $d/$source
+                break
+            endif
+        end
+    end
+    if (! $?realSource) then
+        echo ">>> Error: No source found for $object, searched: . $VPATH"
+        exit 1
+    endif
+    
+    # Find dependencies using gcc.
+    gcc $CINCS -MM -MT $objectprefix$object$objectsuffix $realSource >> makefile
+    echo "	$objectrule $realSource" >> makefile
+    echo "" >> makefile
+end

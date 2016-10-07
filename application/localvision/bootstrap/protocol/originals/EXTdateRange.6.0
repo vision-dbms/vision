@@ -1,0 +1,98 @@
+
+######################
+######################
+####  Date Range Time Compatibility Mode Extensions
+######################
+######################
+#
+#  This file provides a compatibility mode for date ranges that allows them
+#  to use time values as one or both of their end points.  It does not define
+#  any high resolution offset or increment types.
+#
+#  Affected Classes:
+#	DateOffset its subclasses
+#	DateRange
+#	Date
+#	Time
+#
+######################
+
+######################
+####  Date Offset Corrections
+######################
+
+BusinessDays
+, Days
+, MonthBeginnings
+, MonthEnds
+, Months
+, QuarterBeginnings
+, QuarterEnds
+, Quarters
+, YearBeginnings
+, YearEnds
+, Years
+do: [
+    ^self define: 'basicFrom:to:evaluate:' toBe: (^self :from: 0 to: 0 evaluate: 0) asMethod;
+    ^self deleteMessage: 'from:to:evaluate:';
+];
+
+DateOffset
+defineMethod:
+[ | from: point1 to: point2 evaluate: aBlock |
+    point1 < point2 ifTrue: [
+	point2 isDate ifTrue: [
+	    ^self basicFrom: point1 asDate to: point2 evaluate: aBlock
+	] ifFalse: [
+	    ^self basicFrom: point1 asDate to: point2 asDate evaluate: [
+	        point2 setDateTo: ^date. evaluate: aBlock
+	    ]
+	]
+    ] ifFalse: [
+	point1 isDate ifTrue: [
+	    ^self basicFrom: point1 to: point2 asDate evaluate: aBlock
+	] ifFalse: [
+	    ^self basicFrom: point1 asDate to: point2 asDate evaluate: [
+		point1 setDateTo: ^date. evaluate: aBlock
+	    ]
+	]
+    ].
+];
+
+
+######################
+####  Date Range Corrections
+######################
+
+DateRange
+defineMethod:
+[ | from: date1 to: date2 by: increment |
+    date2 isDate || [date2 isTime] ifFalse: [
+	:date2 <- date2 asDate else: [date1]
+    ];
+    increment asInteger = 0 ifTrue: [
+	:increment <- 1 days
+    ];
+    ^self newPrototype clusterNew do: [
+	:date1 <- ^my date1;
+	:date2 <- ^my date2;
+	:increment <- ^my increment;
+    ]
+].
+
+
+######################
+####  Date and Time Corrections
+######################
+
+Date
+defineMethod:
+[| to: date2 by: increment |
+    ^my Prototypical DateRange from: ^self to: date2 by: increment
+];
+
+Time
+defineMethod:
+[| to: date2 by: increment |
+    ^my Prototypical DateRange from: ^self to: date2 by: increment
+];

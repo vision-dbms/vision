@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Upload Format: DataFeed Status</title>
+
+</head>
+<body>
+<body bgcolor=white>
+<h2>Vision Portfolio Management Application Layer: Application</h2>
+<p>
+| <a href="pmaApps.htm">Headstart Applications</a> |
+<hr><p>
+<font size=+2><b>Application: </b><i>DataFeed Status</i></font><p>
+<p>
+<h3>Summary:</h3>
+<p>
+The <b>DataFeedStatus</b> application is used to display the date and time of the most recent data feed uploads and indicates the number of records updated.  This application also provides links to more detailed information about the individual feeds.
+<p>
+
+<h3>Analysis:</h3>
+<p>
+<ul type=disc>
+<li>No inputs are necessary for this report.
+<p>
+<li>By default, the report is sorted by the time of upload.  It can also be
+sorted alphabetically by data feed.  Each sort can be achieved by clicking on the individual column heading.
+<p>
+
+<li>Each feed has a link to a report containing the parent name and a list of available fields.  
+
+<p>
+</ul>
+<p>
+<h3>Key Data Feeds:</h3>
+<p><ul type=disc>
+
+<li><a href="pma_CompanyMaster.htm"><i>CompanyMaster</i></a>
+<li><a href="pma_CountryMaster.htm"><i>CountryMaster</i></a>
+<li><a href="pma_CurrencyMaster.htm"><i>CurrencyMaster</i></a>
+<li><a href="pma_HoldingsFeed.htm"><i>HoldingsFeed</i></a>
+<li><a href="pma_IndustryMaster.htm"><i>IndustryMaster</i></a>
+<li><a href="pma_PortfolioMaster.htm"><i>PortfolioMaster</i></a>
+<li><a href="pma_PriceFeed.htm"><i>PriceFeed</i></a>
+<li><a href="pma_SectorMaster.htm"><i>SectorMaster</i></a>
+<li><a href="pma_SecurityMaster.htm"><i>SecurityMaster</i></a>
+<li><a href="pma_SecurityTypeMaster.htm"><i>SecurityTypeMaster</i></a>
+</ul>
+<p>
+<p>
+<h3>Sample Usage:</h3>
+<ul type=disc>
+<pre><tt><b>
+Interface ApplicationWS runWith: "DataFeedStatus";
+</b></tt></pre>
+</ul>
+<p>
+<h3>Sample Output:</h3>
+
+<CENTER>
+<H3>
+<FONT FACE="Arial"><FONT COLOR="#00008B"><FONT SIZE=+0>--- DataFeed Update Status ---</FONT></FONT></FONT></H3></CENTER>
+
+
+<CENTER><TABLE BORDER CELLSPACING=2 WIDTH="80%" >
+<TR>
+<TH ALIGN=CENTER VALIGN=TOP COLSPAN="4"><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Sorted
+By: [time]</FONT></FONT></FONT></TH>
+
+<center>
+<table border=1 width=80% cellspacing=2 cellpadding=1>
+<tr><th  colspan= 3 rowspan= 1   align= center  valign= top ><font face=Arial color=black size =3 >Sorted By Time</font></th></tr>
+
+<tr><th  colspan= 1 rowspan= 1   align= center  valign= bottom ><font face=Arial color=black size =2 >Data Feed</font></th><th  colspan= 1 rowspan= 1   align= center  valign= bottom ><font face=Arial color=black size =2 >Update Time</font></th><th  colspan= 1 rowspan= 1   align= center  valign= bottom ><font face=Arial color=black size =2 >Records</font></th></tr>
+
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0>HoldingsFeed&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> 01/25/99&nbsp;09:24:20&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1491</font></td></tr>
+
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0>PriceFeed&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> 01/25/99&nbsp;09:24:10&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2296</font></td></tr>
+
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0>PortfolioMaster&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> 01/25/99&nbsp;09:24:06&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;12</font></td></tr>
+
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0>SecurityMaster&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> 01/25/99&nbsp;09:24:05&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1200</font></td></tr>
+
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0>SecurityTypeMaster&nbsp;&nbsp;</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> 01/25/99&nbsp;09:23:51&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;13</font></td></tr>
+
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0>CompanyMaster&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> 01/25/99&nbsp;09:23:50&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1185</font></td></tr>
+
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0>IndustryMaster&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> 01/25/99&nbsp;09:23:47&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;103</font></td></tr>
+
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0>SectorMaster&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> 01/25/99&nbsp;09:23:46&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;14</font></td></tr>
+
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0>CountryMaster&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> 01/25/99&nbsp;09:23:45&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;248</font></td></tr>
+
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0>CurrencyMaster&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font></td><td  align=left valign=bottom> <font  face=Arial color=black size =+0> 01/25/99&nbsp;09:23:44&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font></td><td  align=right valign=bottom> <font  face=Courier color=black size =2> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;180</font></td></tr>
+
+</table>
+</center>
+<p>
+
+
+<center>
+<font face="Arial" color="darkblue" size=3 >
+<h3> Feed: HoldingsFeed</h3>
+<h4>This feed is used to update instances of the class Holding.</h4>
+</center>
+</font><p>
+<p><hr align=center width=50% ><p>
+</pre>
+<center>
+<table border=1 width=65% cellspacing=2 cellpadding=1>
+<tr><th  colspan= 2 rowspan= 1   align= center  valign= top ><font face=Arial color=black size =3 >---  Basics  ---</font></th></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> <strong>Parent:&nbsp;</strong></font></td><td  align=right valign=bottom> <font  face=Arial color=black size =+0> TransactionFeed</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> <strong>Last&nbsp;Updated:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</strong></font></td><td  align=right valign=bottom> <font  face=Arial color=black size =+0> 01/25/99@09:24:20</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> <strong>Records&nbsp;Updated:&nbsp;&nbsp;&nbsp;&nbsp;</strong></font></td><td  align=right valign=bottom> <font  face=Arial color=black size =+0> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1491</font></td></tr>
+</table>
+</center>
+</pre>
+<center>
+<table border=1 width=65% cellspacing=2 cellpadding=1>
+<tr><th  colspan= 2 rowspan= 1   align= center  valign= top ><font face=Arial color=black size =3 >---  Available Fields  ---</font></th></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> <strong>Available&nbsp;Fields:</strong></font></td><td  align=right valign=bottom> <font  face=Arial color=black size =+0> &nbsp;</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> <strong>date</strong></font></td><td  align=right valign=bottom> <font  face=Arial color=black size =+0> used&nbsp;as&nbsp;'as&nbsp;of'&nbsp;date&nbsp;for&nbsp;ts&nbsp;updates</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> <strong>acctId</strong></font></td><td  align=right valign=bottom> <font  face=Arial color=black size =+0> &nbsp;</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> <strong>mval</strong></font></td><td  align=right valign=bottom> <font  face=Arial color=black size =+0> &nbsp;</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> <strong>price</strong></font></td><td  align=right valign=bottom> <font  face=Arial color=black size =+0> split/curr&nbsp;adjusted</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> <strong>secId</strong></font></td><td  align=right valign=bottom> <font  face=Arial color=black size =+0> &nbsp;</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> <strong>shares</strong></font></td><td  align=right valign=bottom> <font  face=Arial color=black size =+0> split/curr&nbsp;adjusted</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> <strong>totalCost</strong></font></td><td  align=right valign=bottom> <font  face=Arial color=black size =+0> curr&nbsp;adjusted</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> <strong>unitCost</strong></font></td><td  align=right valign=bottom> <font  face=Arial color=black size =+0> &nbsp;</font></td></tr>
+</table>
+</center>
+</pre>
+<center>
+<table border=1 width=65% cellspacing=2 cellpadding=1>
+<tr><th  colspan= 2 rowspan= 1   align= center  valign= top ><font face=Arial color=black size =3 >--- Miscellaneous ---</font></th></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> <strong>required&nbsp;fields:&nbsp;&nbsp;&nbsp;&nbsp;</strong></font></td><td  align=right valign=bottom> <font  face=Arial color=black size =+0> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NA&nbsp;</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> <strong>fields&nbsp;from&nbsp;header:&nbsp;</strong></font></td><td  align=right valign=bottom> <font  face=Arial color=black size =+0> TRUE</font></td></tr>
+<tr><td  align=left valign=bottom> <font  face=Arial color=black size =+0> <strong>uses&nbsp;local&nbsp;fields:&nbsp;&nbsp;</strong></font></td><td  align=right valign=bottom> <font  face=Arial color=black size =+0> TRUE</font></td></tr>
+</table>
+</center></PRE>
+
+
+<p>
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy; 1999 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated January 28, 1999</font>
+</tr>
+</table>
+
+</body>
+</html>
+
+
+
+
+
+
+
+

@@ -1,0 +1,306 @@
+##################################################
+#  Define core protocol for Investment classes
+##################################################
+
+####################
+#  Security
+####################
+
+#--------------------
+#  map and global security access
+#--------------------
+
+Security defineMethod: [ | globalLocateId: id |
+  !map <- GlobalWorkspace SecurityMap ;
+  map locateId: id .
+      ifDefault: [ ^my map getPrimaryReference ]
+          else: [ globalSecurity ]
+] ;
+
+Security defineMethod: [ | getMapEntry |
+  GlobalWorkspace SecurityMap isntNA
+  ifTrue: [ GlobalWorkspace SecurityMap locateObject: ^self asSelf .
+              else: GlobalWorkspace SecurityMap ]
+] ;
+
+# Update getCalcPack to use SecurityMap's 'calcPackage'.
+Security defineMethod: [ | getCalcPack | 
+  !me <- ^self asSelf ;
+  ^self getMapEntry calcPackage extendBy: [ !entity <- ^my me ]
+] ;
+
+# Change currency definition at Security to use global security's currency.
+Security defineMethod: [ | currency |
+   ^local currency isntNA 
+   ifTrue: [ ^local currency isLegacy 
+              ifTrue: [^self legacyCurrency]
+             ifFalse: [^local currency]
+           ]
+   ifFalse: [^self asGlobalSecurity baseCurrency underlyingCurrency ] .
+     asGlobalCurrency
+] ;
+
+# patch_101.vis
+# Allow securities not in the map to become "global"
+Security defineMethod: [ | asGlobalSecurity |
+  !map <- ^self getMapEntry ;
+  map isntNA && [ map isntDefault || [ ^self isDefault ] ]
+  ifTrue: [ map globalSecurity ] .
+  else: [ ^self asSelf ]
+] ;
+
+#--------------------
+#  split adjustments - for now, support one policies:
+#    1) use local adjustment factor if available, global otherwise;
+#       if any points exist in t/s, then assume locally maintained
+#  future policies could include default and security-specific
+#  date ranges where global should/should not be used
+#--------------------
+
+Security defineMethod: [ | adjustmentRelativeTo: aDate |
+aDate isntNA
+  ifTrue:
+    [ :rawSplitFactor count > 0
+         ifTrue: [ ^self localAdjustmentRelativeTo: aDate ]
+        ifFalse: [ ^self globalAdjustmentRelativeTo: aDate ]
+    ]
+  ifFalse: [ 1.0 ] 
+] ;
+
+Security defineMethod: [ | localAdjustmentRelativeTo: aDate |
+  (:adjustmentFactor asOf: ^today) / (:adjustmentFactor asOf: aDate)
+] ;
+
+Security defineMethod: [ | globalAdjustmentRelativeTo: aDate |
+  ^self asGlobalSecurity localAdjustmentRelativeTo: aDate
+] ;
+
+###
+# revise to use new method cashDiv (exclude special div)
+###
+#from patch_104.vis
+#from patch_106.vis
+
+Security defineMethod: [| getDivsFrom: date1 to: date2|
+   ^self dividends from: date1 to: date2 .
+                  total: [cashDiv] . else: [ 0.000000 ] 
+];
+
+#-------------------
+# CalcPack Support
+#-------------------
+# patch_103.vis
+
+#- Addition for P VOLUME CalcPack
+Security defineMethod: [ | getEffectivePriceDate |
+  !series <- ^self pricingSeries firstDate > ^date
+             ifTrue: [ ^self :pricingSeries lag: 1 yearEnds ]
+             ifFalse: [ ^self pricingSeries] ;
+  series effectiveDate else: [ earliestPossibleDate ]
+] ;
+#- Addition for P PRETC CalcPack
+
+# from patch_106.vis (replacing the revision of patch_104.vis
+
+#-----------------------
+# Defining pretcFrom:To: - the compound return between two dates
+#-----------------------
+Security defineMethod: [| pretcFrom: date1 to: date2|
+!d1 <- date1 max: date2 .asDate;
+!d2 <- date1 min: date2 .asDate;
+d1 = d2
+ ifTrue: [0.000000]
+ifFalse: [
+    !price1 <- ^self :price asOf: d1 ;
+    !price2 <- ^self :price asOf: d2 ;
+    !myDiv <- ^self dividends from: (d2 + 1 days) to: d1  .
+                            reject: [ cashDiv isDefault ] .
+    send: [1 + (cashDiv / (entity :getPriceRecord asOf: ^date .
+                                                  send: [ priceExSpinoff]))];
+    (((price1 / price2) * (myDiv product else: [1.000000])) - 1 )*100
+         ]
+];
+
+#-----------------------
+# Modify totalReturnFrom:To: 
+# exclude special divs by filtering for cashDiv
+# patch_106.vis
+#-----------------------
+Security defineMethod: [| totalReturnFrom: date1 to: date2|
+      !divs <- ^self dividends from: (date1 + 1 businessDays) to: date2 .
+               reject: [ cashDiv isDefault ] .
+                total: [ cashDiv ] . else: [ 0.0 ] ;
+      !p <- ^self :getPriceRecord asOf: date2 . priceExSpinoff  ;
+      !price1 <- ^self :getPriceRecord asOf: date1 . price ;
+      !price2 <- ^self :getPriceRecord asOf: date2 . price ;
+       ((price2/price1*(1+divs/p)-1)*100)
+];
+
+
+
+#-----------------------
+# From patch_107.vis
+
+Security defineMethod: [ | firstPricingDate |
+  !first <- :pricingSeries nextDateAsOf: earliestPossibleDate ;
+  first isDate
+  ifTrue: [ :pricingSeries asOf: first . firstDate ] .
+  else: [ earliestPossibleDate ]
+] ;
+
+
+Security defineMethod: [ | getIndexAccountHoldings |
+  !sec <- ^self asSelf ;
+  !mostRecent <- sec :holdingsSeries lastDate ;
+  !asof <- CoreWorkspace getAuthenticatedDateAsOf: mostRecent ;
+  asof evaluate: [
+     !indexHoldings <- sec holdings select: [ account isIndexAccount && [ account isActive ] ] ;
+     indexHoldings count > 0
+        ifTrue: [ indexHoldings ]
+          else: [ sec getIndexAccounts select: [ isActive ] .
+                      send: [ ^self getHoldingIn: ^my sec ] .
+                      select: [ isntDefault ] .
+                ] .
+       select: [ account isAuthenticated ]
+  ]
+] ;
+
+
+#-----------------------
+
+
+####################
+#  Account
+####################
+
+#--------------------
+#  global access
+#--------------------
+
+Account defineMethod: [ | getCalcPack |
+  !me <- ^self asSelf ;
+  GlobalWorkspace Account calcPackage extendBy: [ !entity <- ^my me ]
+] ;
+
+#--------------------
+#  subclass independent access messages
+#--------------------
+
+# Also as is in patch_107.vis
+Account defineMethod: [ | hasHistory | 
+  ^self :holdingsSeries nonDefaults count > 1
+] ;
+
+# Revised in patch_107.vis
+Account defineMethod: [ | getHoldings |
+  !acct <- ^self asSelf ;
+  acct isAuthenticated
+  ifTrue:
+  [ !mostRecent <- acct :holdingsSeries lastDate ;
+    !asof <- ^self getAuthenticatedDateAsOf: mostRecent ;
+    asof evaluate: [ acct holdings ]
+  ]
+  ifFalse: [ :holdingsSeries asOf: earliestPossibleDate ]
+] ;
+
+# patch_102.vis
+Account defineMethod: [ | globalHoldings | 
+  !acct <- ^self ;
+  acct asGlobal
+      ifDefault: [ ^my acct holdingsSeries ] else: [ holdingsSeries ] 
+] ;
+
+# patch_102.vis
+Account defineMethod: [ | holdingsDate | 
+  ^self asGlobal :holdingsSeries effectiveDate
+] ;
+
+
+#------------------------
+
+# From patch_107.vis
+
+Account defineMethod: [ | getAuthenticatedDateAsOf: mostRecent |
+  CoreWorkspace getAuthenticatedDateAsOf: mostRecent
+] ;
+
+Account defineMethod: [ | calcPackage | GlobalWorkspace AccountFormulaLibrary ] ;
+
+
+####################
+#  IndexAccount
+####################
+
+# patch_102.vis
+IndexAccount defineMethod: [ | holdings | 
+   ^self holdingsSeries isntDefault
+   ifTrue: [ ^self holdingsSeries ] 
+  ifFalse: [ ^self globalHoldings ]
+] ;
+
+
+###
+# >> 
+###
+
+# orig from patch.core.613c
+# revised 4/3/07  patch_105.vis
+# revised 7/08    patch_106.vis
+# -- new special div rules
+
+DivRecord defineMethod: [|updateSpinoffFactor|
+   !yesterday <- isntDefault ifTrue: [date - 1 businessDays]ifFalse: 
+[date];
+   !priceRec <- entity :getPriceRecord asOf: yesterday ; 
+   !isntFuture <- date < ^today;
+    priceRec isDefault 
+      ifTrue: [:priceRec <- entity :getPriceRecord asOf: date] ;
+               priceRec isntDefault && isntFuture
+                ifTrue: [
+                         !price <- priceRec priceExSpinoff ; 
+                         !rate <- price / (price - specialDiv );
+                          rate isntNA && [ rate > 0 ] 
+                          ifTrue: [ entity addSpinoffFactorOf: rate 
+onExDate: date;];
+                        ];
+    priceRec isntDefault 
+];
+
+# patch_106.vis
+#-----------------------
+# Defining cashDiv method for the purpose of removing special dividends.
+#-----------------------
+DivRecord defineMethod: [ |cashDiv|
+   div - ( specialDiv else: 0.000000 )
+];
+
+
+####################
+#  Holding
+####################
+
+#------------------------
+
+## From patch_107.vis
+
+Holding defineMethod: [ | weight | percentOfTMV ] ;
+Holding defineMethod: [ | name | security name ] ;
+
+Holding defineMethod: [ | mapEntry |
+   security getMapEntry
+] ;
+
+Holding defineMethod: [ | globalSecurity |
+   mapEntry globalSecurity
+       ifDefault: [ security ]
+] ;
+
+Holding defineMethod: [ | cp |
+  mapEntry cp
+] ;
+
+#------------------------
+
+
+
+

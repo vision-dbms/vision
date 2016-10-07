@@ -1,0 +1,182 @@
+"
+####################
+#  Dictionary: Protocol
+####################
+
+" print ;
+
+#--------------------
+#  Dictionary is special
+#    Because dictionary is really used to keep track of messages,
+#    a new Dictionary really needs to be a specialization so that
+#    dictionary entries can be tracked correctly; instanceList is
+#    modified so that each of these specializations can be accessed
+#    as though they are instances of a single class.
+#  Redefine initializeGlobalSubclassProperties at Dictionary
+#     create local version of instanceList to track
+#     'new' instances 
+#
+#--------------------
+
+Dictionary
+defineMethod:
+[ | specialized |
+  !block <- "[ ]" evaluate ;
+#--  ^self newPrototype clusterNew basicExtend: block . 
+  ^self clusterNew basicExtend: block . 
+    initializeGlobalSubclassProperties
+    initializeGlobalInstanceProperties
+] .
+
+defineMethod:
+[ | initializeGlobalSubclassProperties |
+  ^super initializeGlobalSubclassProperties ;
+  ^self define: 'instanceList' toBe: (^global List new , ^self)
+] .
+
+defineMethod:
+[ | new |
+  !parent <- ^self ;
+  !block <- "[ ]" evaluate; 
+  !newDictionary <- parent clusterNew basicExtend: block .
+     initializeGlobalInstanceProperties; 
+   parent instanceList , newDictionary; 
+   newDictionary
+] .
+
+defineMethod:
+[ | newAs: string | 
+  !newDictionary <- ^super newAs: string ; 
+  newDictionary initialize ;
+  newDictionary 
+] .
+
+defineMethod:
+[ | initialize |
+  !newDictionary <- ^self ;
+  ^self defaultInstance at: ^self code put: newDictionary ;
+  newDictionary define: 'whatAmI' toBe: 
+    (^self defaultInstance whatAmI concat: " " . concat: ^self code) ;
+  newDictionary
+] .
+
+defineMethod:
+[ | cleanupClassStructures |
+  ^super cleanupClassStructures ;
+  ^self instanceList do: [ ^self cleanStore ] ;
+] .
+
+;
+
+#----------
+#  access and update
+#----------
+
+Dictionary
+defineMethod: 
+[ | at: aString |
+
+aString isString
+ifTrue: 
+   [
+   aString locateInDictionaryOf: ^self .
+   send: [
+         isntNA ifTrue: [ value ]
+         ]
+   ] 
+] .
+
+#----------
+
+defineMethod:
+[ | uniformAt: aString |
+
+!entry <- ^self at: aString ;
+entry isntNA ifTrue: [ entry ] ifFalse: [ ^self at: "Default" ]
+
+] .
+
+#----------
+
+defineMethod:
+[ | at: aString put: anObject |
+
+aString isString
+ifTrue:
+  [
+  aString locateOrAddInDictionaryOf: ^self . <- anObject
+  ] ;
+ ^self
+
+] .
+
+#----------
+
+defineMethod: 
+[ | delete: aString |
+
+aString isString
+ifTrue:
+   [
+   aString deleteFromDictionaryOf: ^self 
+   ]
+
+] .
+
+#--------------------
+#  Dictionary objects
+#    this message returns a list of all objects corresponding to
+#    the selectors in a Dictionary
+#--------------------
+
+defineMethod:
+[ | objects |
+!dictionary <- ^self; 
+^self selectorList 
+   send: [^my dictionary at: ^self .
+             extendBy: [ !selector <- ^my asString ]
+         ] 
+].
+
+#--------------------
+#  Dictionary locate: name
+#     this message does a hierarchical search for a dictionary entry
+#--------------------
+
+defineMethod:
+[ | locate: name |      # hierarchical search for name
+  !object <- name locateInDictionaryOf: ^self ;
+  object isntNA ifTrue: [ object value ] 
+               ifFalse: [ ^self super isDictionary
+                           ifTrue: [ ^self super locate: name ]
+                        ]
+] .
+
+;
+
+Dictionary defineMethod: [ | profile |
+!sels <- ^self selectorList ;
+!objs <- ^self objects ;
+"Profile of " print ; whatAmI printNL ;
+newLine print ; 
+"Selectors: " print: 15 ; sels count printNL ;
+"Objects: " print: 15 ; objs groupedBy: [ asSelf ] . count printNL ;
+newLine print ;
+"---  Distribution by First Letter  ---" printNL ;
+sels groupedByString: [ ^self take: 1 ] .
+do: [ print ; groupList count printNL ] ;
+
+] ;
+
+Dictionary defineMethod: [ | display: from to: to | 
+!dict <- ^self; 
+!sels <- dict selectorList ;
+:from <- from else: [ sels at: 1 ] . asString ;
+:to <- to else: [ sels at: sels count ] . asString ;
+!objects <- dict objects select: [ selector between: ^my from and: ^my to ] ;
+!max <- (objects max: [ selector count ] . + 1 ) asInteger ;
+objects
+do: [ selector print: ^my max ; 
+      print ; " (" print ; whatAmI print ; ")" printNL 
+    ] ;
+] ;

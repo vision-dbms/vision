@@ -1,0 +1,1207 @@
+##################################################
+#  inprog.core.613b
+#
+#  Incremental changes to core vision database to be applied to installations
+#     running batchvision release 6.1.3 + patch.core.613a
+#
+##################################################
+
+#======================================================================
+
+newLine print ;
+"...  Miscellaneous core changes " printNL ;
+newLine print ;
+
+##################################################
+#  patch.misc
+#
+#    High Freq T/S Support with data feeds
+#    - fix DataRecord creation to prevent converting hfts dates to dates
+#    - fix String asDate to consider time portion of date
+#    - fix snf in navigator; add asInteger cover at Time
+#
+##################################################
+
+#--------------------
+#  String asDate : add test for numbers that contain time components
+#--------------------
+
+String defineMethod: [ | asDate | 
+  ^self asNumber isInteger
+  ifTrue:
+    [ count = 4 ifTrue: [ asNumber asDateFromYYMM ] .
+      elseIf: [ count = 6 ] then: [ asNumber asDateFromYYMMDD ] .
+      else: [ asNumber asDate ]
+    ] .
+  elseIf: [ ^self asNumber isDouble ] then: [ ^self asNumber asDate ] .
+  elseIf: [^self howManyOf: "-/" .= 2]
+    then: 
+     [ !fields <- ^self breakOn: "/-";      #- m/d/y.hhmmdd or m/d/y:hhmmdd
+       !m <- fields at: 1 .asNumber asInteger ; 
+       !d <- fields at: 2 .asNumber asInteger ; 
+       !rest <- fields at: 3 . breakOn: ":." ;    #- look for hhmmdd suffix
+       !y <- rest at: 1 . asNumber asInteger ;
+       !hhmmdd <- rest at: 2 ;
+       !date <- m isInteger && [ d isInteger ] && [ y isInteger ] 
+         ifTrue: [ y asDateFromYearForMonth: m andDay: d ] ;
+       hhmmdd asNumber isNA
+         ifTrue: [ date ] .
+         else: [ date asInteger asString concat: "." . concat: hhmmdd .
+                    asNumber asDate
+               ] 
+     ] .
+    elseIf: 
+     [ ^self contains: "[dD]ays" .
+       || [^self contains: "month"]
+       || [^self contains: "quarter"]
+       || [^self contains: "year"]
+     ]
+   then: [^date + ^self evaluate] . 
+   elseIf: [toLower contains: "today"]
+     then: [^today] . 
+   elseIf: [toLower contains: "yesterday"]
+     then: [^today - 1 days].
+] ;
+
+#--------------------
+#  DataRecord initializeKeys:
+#    - fix recordDate update to not convert timestamps back to dates
+#--------------------
+
+DataRecord defineMethod: [ | initializeKeys: keys |   #--  ent, date, val, curr
+  :entity <- keys at: 1 . asSelf ;
+  !date <- keys at: 2 ;
+  :recordDate <- date isTime 
+       ifTrue: [ date ] ifFalse: [ date asDate ] ;
+  :recordValue <- keys at: 3 . asSelf ;
+  :baseCurrency <- keys at: 4 . asSelf else: ^global Named Currency Default ;
+  ^self
+] ;
+
+Time defineMethod: [ | asInteger | ^self asNumber asInteger ] ;
+
+Entity defineMethod: [ | showTimeSeriesViaPath: path for: item |
+!entity <- ^self ;
+!object <- path isDefault
+   ifTrue: [ entity ] .
+   elseIf: [ path isBlock ] then: [ entity send: path ] .
+   else: [ entity send: path asBlock ] ;
+
+!title <- 
+    ("Data History of: " concat: (FormatTools italic: (item else: ""))),
+    ("for " concat: ^self whatAmI . concat: " " . concat: ^self name ) ;
+path isntDefault ifTrue: [ title, ("via " concat: path) ] ;
+FormatTools
+     buildTitle: title over: 80 withStyle: "Arial", "darkblue" . print ;
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+
+!isProperty <- TRUE ;
+!ts <- item isntNA && [ object respondsTo: item ] 
+   ifTrue: [ object send: item asUpdateBlock ] ;
+ts isBlock 
+ ifTrue: [ :ts <- ts value ;
+           :isProperty <- FALSE ;
+         ] ;
+ts isTimeSeries
+ifTrue:
+  [
+  !table <- ^global LayoutTools Named TableSpec at: "basic2Column" ;
+  !header <- ^self accessExpression concat: " " . concat: (path else: "") ;
+  :header <- isProperty
+     ifTrue: [ header concat: " :" ] 
+    ifFalse: [ header concat: " " ] . concat: item ;
+  table getColumn: 1 . getHeader: 1 . setTextTo: header ;
+
+  FormatTools buildTableFor: table for: ^current withBlock:
+    [
+    !via <- ^my path concat: " " . concat: ^my item ;
+    ts extendBy: [ !date <- ^date ] . sortDown: [ date ] .
+    do: [ date evaluate:
+            [ !entity <- ^my entity ;
+              !val <- ^self ;
+              date isDate
+                ifTrue: [ date formatUsingMMDDYY ] 
+               ifFalse: [ date formatAsTimeStamp ] . print ;
+              val isDataRecord
+              ifTrue: 
+                [ !label <- val recordValue isntNA
+                  ifTrue: 
+                    [ val recordValue asString concat: " (" .
+                        concat: val whatAmI . concat: ") " 
+                    ] .
+                  elseIf: [ val isDefault ] 
+                    then: [ "Default " concat: val whatAmI ] .
+                    else: [ val whatAmI ] ;
+                  FormatTools buildLinkForApp: "ShowAllDataValues"
+                      withLabel: label
+                      andParams: entity whatAmI, entity code, ^my via . print ;
+                ] .
+             elseIf: [ val isBridge ] 
+             then:
+               [ FormatTools buildLinkForApp: "ShowAllDataValues"
+                      withLabel: val whatAmI
+                      andParams: entity whatAmI, entity code, ^my via . print ;
+               ] .
+             elseIf: [ val isCollection ] 
+             then:
+               [ FormatTools buildLinkForApp: "ShowMembersInCollection" 
+                   withLabel: val asString
+                   andParams: entity whatAmI, entity code, ^my path, ^my item . 
+                        print;
+               ] .
+             elseIf: [ val isEntity ]
+               then: [ !label <- [ whatAmI print ; " " print ; displayInfo ] 
+                          divertOutput stripChar: newLine ;
+                       FormatTools buildLinkForApp: "ShowAllDataValues"
+                           withLabel: label
+                            andParams: val whatAmI, val code . print ;
+                     ] .
+               else: [ val print ; ] ;
+             newLine print ;
+            ];
+       ] ;
+    ] . print ;
+  ] .
+elseIf: [ item isDefault ] then: [ ">>> no item supplied." printNL ] .
+  else: [ ">>> " print ; item print ; " is not a time series." printNL ] ;
+
+] ;
+
+
+#======================================================================
+
+newLine print ;
+"...  Miscellaneous core changes - DataFeed cleanups " printNL ;
+newLine print ;
+
+
+##################################################
+#  patch.feeds
+#
+#  DataFeed
+#  - High Freq T/S Support with data feeds:
+#     .fix 'load file with cfg:' at DataFeed to clear settingsd when not found
+#    . fix DataFeed initializeDate to accept timestamp values
+#
+#  EEF
+#   - add enable/disableBadIdFlag to control whether bad entity ids
+#     are displayed in exception report and rejects file
+#
+#   - add  Support for default purge range in EEFeeds - 
+#     add Globals option defaultPurgeRange which can be a
+#     date, a date1:date2 range, or * for all to be used
+#     in conjunction with enablePurge when no date is supplied in record
+#
+#  RangeGroupFeeds
+#    - if feed has no instances, do not recreate ranges; otherwise,
+#      clear and recreate
+#    - only update if range value has changed
+#
+##################################################
+
+####################
+#  DataFeed
+#  - fix 'load file with cfg' to clear settings when file not found
+####################
+
+DataFeed defineMethod: [ | loadFromFile: file withConfig: cfgFile |
+  ^self loadConfig: cfgFile .
+     ifTrue: [ ^self loadFromFile: file ] 
+    ifFalse: [ "     File " print ; file print ; " not loaded." printNL; 
+               ^self resetRunTimeAttributes ;
+               FALSE
+             ]
+] ;
+
+####################
+#    High Freq T/S Support with data feeds
+#    - fix DataFeed initializeDate to accept timestamp values
+#
+#  Note:
+#    PropertySetup methods can't handle HFTS, so explicitly create
+#    the properties with define:withTimeIndex; update the Schema
+#    before using this property in any DataRecord setup
+####################
+
+#--------------------
+#  DataFeed initializeDate
+#    modify to accept timestamps
+#--------------------
+
+DataFeed defineMethod: [ | initializeDate |
+  !realDate <- date isString
+  ifTrue: 
+    [ date toUpper = "DEFAULT"
+       ifTrue: [ earliestPossibleDate ] 
+      ifFalse:
+        [ !format <- getDateFormat else: "" . stripBoundingBlanks ;
+          !paddedDate <- "0" fill: format count . 
+             concat: date . take: -1 * format count ;
+          format = "MMYYYY"  || format = "MMYY"
+          ifTrue: 
+            [ !mm <- paddedDate take: 2 . asNumber asInteger ;
+              !year <- paddedDate drop: 2 . asNumber asInteger ;
+              year isNumber && mm isNumber
+              ifTrue: [ year asDateFromYearForMonth: mm andDay: 1 .
+                             + 0 monthEnds 
+                      ]
+            ] .
+          elseIf: [ format = "MMDDYY" || format = "MMDDYYYY" ] 
+          then: 
+            [ !mm <- paddedDate take: 2 . asNumber asInteger ;
+              !dd <- paddedDate drop: 2 . take: 2 . asNumber asInteger ;
+              !year <- paddedDate drop: 4 . asNumber asInteger ;
+              year isNumber && mm isNumber && dd isNumber
+                ifTrue: [ year asDateFromYearForMonth: mm andDay: dd ] 
+            ] .
+          elseIf: [ format = "YYYYMM" || format = "YYYYMMXX" ]
+          then: 
+            [ !yyyy <- paddedDate take: 4 . asNumber asInteger ;
+              !mm <- paddedDate drop: 4 . take: 2 . asNumber asInteger ;
+              yyyy isNumber && mm isNumber 
+                ifTrue: [ yyyy asDateFromYearForMonth: mm andDay: 1 .
+                             + 0 monthEnds
+                        ] 
+            ] .
+           elseIf: [ ^self purgeEnabled not ] then: [ date asDate ] .
+           elseIf: [ date contains: ":" . not ] then: [ date asDate ] .
+        ] 
+    ] ;
+  :date <- realDate isDate || realDate isTime
+     ifTrue: [ realDate ] 
+    ifFalse: [ ^self purgeEnabled
+                   ifTrue: [ date ]      #-- could be a string comment
+                  ifFalse: [ ^self asofDate ] 
+             ] ;
+  ^self
+] ;
+
+####################
+#  EEF
+#   - add enable/disableBadIdFlag to control whether bad entity ids
+#     are displayed in exception report and rejects file
+####################
+
+#--------------------
+#  add the toggle
+#--------------------
+
+EntityExtenderFeed defineMethod: [ | enableDisplayBadId | 
+  ^self define: 'displayBadIdFlag' toBe: TRUE ;
+  ^self
+] ;
+
+EntityExtenderFeed defineMethod: [ | disableDisplayBadId | 
+  ^self define: 'displayBadIdFlag' toBe: NA ;
+  ^self
+] ;
+
+EntityExtenderFeed defineMethod: [ | resetRunTimeAttributes | 
+   ^super resetRunTimeAttributes 
+   disableOnlyUpdateOnChange 
+   enableDisplayBadId   ;
+  ^self
+] ;
+
+EntityExtenderFeed enableDisplayBadId ;
+
+#--------------------
+#  fix reject processing to allow subclasses to redefine reject test
+#--------------------
+
+DataFeed defineMethod: [ | isRejected | ^self isntProcessed ] ;
+
+EntityExtenderFeed defineFixedProperty: 'isRejected' ;
+
+DataFeed defineMethod: [ | saveRejectsToFile: fileName withLabel: label |
+  !feed <- ^self currentStore ;
+  !rejects <- feed masterList select: [ isRejected ] ;     # <---
+  rejects count > 0 && [ feed usesRejectFile ]
+  ifTrue:
+    [ :fileName <- fileName else: "" ;
+      !isBulk <- ^self getGlobalOption: "bulkLoadInProgress" . else: FALSE ;
+      isBulk not ||
+         [ !currentFile <- fileName asFileContents ;
+           currentFile isNA || [currentFile count = 0 ] 
+         ] 
+      ifTrue: 
+        [ fileName substituteOutputOf:
+             [ feed fieldOrderList do: [ print; " | " print; ] ;
+               newLine print ;
+             ] ;
+        ] ;
+
+      fileName appendOutputOf: 
+        [ "#-" fill: 80 .printNL ;
+          "# Rejects from feed " print; feed whatAmI printNL ;
+          "#                at " print;
+          ^global Utility UnixSeconds currentTime printNL ;
+          "# " concat: (label else: " ") . printNL ;
+          rejects
+          do: [ getValueList do: [ print ; " | " print ] ;
+                !reason <- ^self rejectReason ;
+                reason isntDefault
+                  ifTrue: [ "  # " print; reason print ] ;
+                newLine print ;
+              ] ;
+        ] ;
+    rejects count print ; 
+    " rejects saved to file " print; fileName else: "" . printNL;
+    ] .
+  elseIf: [ rejects count > 0 ]
+  then: [ feed whatAmI print; " does not save rejects to file." print ;
+          rejects count print ; " rejects NOT saved." printNL ;
+         ] ;
+  rejects count > 0
+] ;
+
+#--------------------
+#  modify exception report and rejects to look at flag
+#--------------------
+EntityExtenderFeed defineMethod: [ | displayBadOnes | 
+  !feed <- ^self ;
+
+#-- general entity extenders only work if entity-bridge connection
+#-- (i.e., specialized methods needed for entity-bridge-bridge updates)
+  !entityOrBridgeClass <- ^self baseEntity else: [ ^self baseClass ] ;
+  !entityClass <- entityOrBridgeClass isEntity
+     ifTrue: [ entityOrBridgeClass ] .
+     elseIf: [ entityOrBridgeClass baseClass isEntity ]
+       then: [ entityOrBridgeClass baseClass ] ;
+  entityClass isEntity
+  ifTrue:
+    [ !badOnes <- ^self asSelf instanceList 
+         select: [ isntProcessed && entityId isntDefault ] ;
+      badOnes count > 0
+      ifTrue: [ newLine print ; 
+                "Bad entityId supplied. " print ;
+                badOnes count print ; " not processed." printNL ;
+                ^self displayBadIdFlag isTrue
+                ifTrue:
+                  [ badOnes groupedByString: [ entityId ] .
+                    do: [ ^self print: 20 ;
+                          groupList count print ; " records skipped." printNL ;
+                        ] ;
+                  ] ;
+              ] ;
+    ] 
+  ifFalse: [ ">>>  Not Defined for this type of Bridge." printNL  ] ;
+
+] ;
+
+#--------------------
+#  Modify runWrapup to set isRejected flag
+#--------------------
+
+EntityExtenderFeed defineMethod: [ | runWrapup | 
+   ^super runWrapup ;
+   ^self updateRejectionFlag ;
+   ^self
+] ;
+
+EntityExtenderFeed defineMethod: [ | updateRejectionFlag | 
+   ^self masterList select: [ isntProcessed ] .
+   do: [ :isRejected <- TRUE ] .
+   select: [ entityId isntDefault && underlyingRecord isDefault &&
+               displayBadIdFlag isDefault
+           ] .
+   do: [ :isRejected <- NA ] ;
+  ^self
+] ;
+
+#--------------------
+#  Modifications to special inv feed processing to skip bad id display
+#--------------------
+
+SplitsFeed defineMethod: [ | displayBadOnes | 
+  !noSec <- ^self asSelf instanceList 
+      select: [ underlyingRecord isNA && isntDefault ] ;
+  noSec count > 0 
+  ifTrue: [ newLine print ; 
+            noSec count print ; " missing Securities. " printNL ;
+            ^self displayBadIdFlag isTrue
+            ifTrue:
+              [ noSec groupedByString: [ entityId ] .
+                do: [ print ; groupList count print ; " records. " printNL ] ;
+              ] ;
+          ] ;
+  !noDate <- ^self asSelf instanceList select: [ date isNA && isntDefault ] ;
+  noDate count > 0
+  ifTrue: [ newLine print ; 
+            noDate count print ; " missing Dates. " printNL ;
+            noDate do: [ displayInfo ] ;
+          ] ;
+] ;
+
+PriceFeed defineMethod: [ | displayBadOnes | 
+  !feed <- ^self ;
+  !noSec <- ^self asSelf instanceList select: [ security isNA && isntDefault ];
+  noSec count > 0
+  ifTrue: [ newLine print ;
+            noSec count print ; " missing Securities. " printNL ;
+            ^self displayBadIdFlag isTrue
+            ifTrue:
+              [ noSec groupedByString: [ entityId ] .
+                do: [ print ; groupList count print ; " records. " printNL ] ;
+              ] ;
+          ] ;
+  !noDate <- ^self asSelf instanceList select: [ date isNA && isntDefault ] ;
+  noDate count > 0
+  ifTrue: [ newLine print ; newLine print ; 
+            noDate count print ; " missing Dates. " printNL ;
+            noDate do: [ displayInfo ] ;
+          ] ;
+  !noClose <- ^self asSelf masterList select: [ close <= 0 ] ;
+  noClose count > 0
+  ifTrue: [ newLine print ; newLine print ; 
+            noClose count print ; " Missing Closes. " printNL ;
+            noClose do: [ displayInfo ] ;
+          ] ;
+] ;
+
+PriceFeed defineMethod: [ | updateRejectionFlag | 
+   ^self masterList select: [ isntProcessed ] .
+   do: [ :isRejected <- TRUE ] .
+   select: [ entityId isntDefault && security isDefault &&
+               displayBadIdFlag isDefault
+           ] .
+   do: [ :isRejected <- NA ] ;
+  ^self
+] ;
+
+EstimateRecordFeed defineMethod: [ | rejectReason | 
+    ^self entity isDefault && ^self displayBadIdFlag isTrue
+       ifTrue: [ "Bad entityId supplied - " concat:  entityId ] .
+       elseIf: [ ^self frequency isntNA && periodEndDate isNA ]
+         then: [ "Bad periodEndDate supplied - " concat: periodEndDate ] .
+       elseIf: [ date isNA ]
+         then: [ "Bad date supplied - " concat: date ] .
+       elseIf: [ badEstimatorId isntDefault ]
+         then: [ "Bad estimator supplied - " concat: badEstimatorId ] 
+] ;
+
+EstimateRecordFeed defineMethod: [ | displayBadOnes | 
+  !feed <- ^self ;
+  !badOnes <- ^self asSelf instanceList 
+       select: [ isntProcessed && entityId isntDefault ] ;
+  badOnes count > 0 
+  ifTrue: 
+    [ newLine print ;
+      feed displayBadIdFlag isTrue
+      ifTrue:
+        [ badOnes select: [ entity isDefault ] .
+             groupedByString: [ entityId ] .
+          do: [ "Bad Entity: " print ; printNL  ] ;
+        ] 
+      ifFalse:
+        [ badOnes select: [ entity isDefault ] . count print ;
+          " Records Have Bad Entity Ids. " printNL ;
+        ] ;
+      !isStatic <- feed frequency isNA ;
+      badOnes select: [ periodEndDate isNA && ^my isStatic not ] .
+      do: [ " Bad Period End Date: " print ; 
+            entityId print ; " | " print ; 
+            date print ; " | " print ; periodEndDate printNL ;
+          ] ;
+      badOnes select: [ date isNA ] .
+      do: [ " Bad Date: " print ;
+            entityId print ; " | " print ; 
+            date print ; " | " print ; periodEndDate printNL ;
+          ] ;
+    ];
+ !badOnes <- ^self asSelf instanceList 
+      select: [ isntProcessed ] .
+      select: [ badEstimatorId  isntDefault ] ;
+  badOnes count > 0
+  ifTrue: 
+    [ newLine print ; newLine print ;
+      badOnes groupedByString: [ badEstimatorId ] .
+      do: [ "Bad Estimator: " print ; printNL  ] ;
+    ]
+] ;
+
+SecurityIdRecordFeed defineMethod: [ | rejectReason |
+  security isDefault && [ ^self displayBadIdFlag isTrue ]
+    ifTrue: [ ^super rejectReason ] .
+  elseIf: [ sedolInUse || cusipInUse ] 
+    then: [ "proposed change refers to different security" ] .
+  elseIf: [ (newCusip isDefault || cusipUnchanged) &&
+            [newSedol isDefault || sedolUnchanged]
+          ] 
+    then: [ "proposed change already assigned to security" ]
+] ;
+
+SecurityIdRecordFeed defineMethod: [ | displayBadOnes |
+!feed <- ^self; 
+!badOnes <- ^self asSelf instanceList 
+    select: [isntProcessed && entityId isntDefault] ;
+!badIds <- badOnes select: [ security isDefault ] ;
+badIds count > 0 
+ ifTrue: [newLine print; 
+          "--> Bad entityId supplied. " print; 
+          badIds count print; " not processed." printNL; 
+          feed displayBadIdFlag isTrue 
+          ifTrue: 
+            [ newLine print ;
+              badIds groupedByString: [entityId].
+              do: [" " print: 5 ; ^self print: 20; 
+                   groupList count print; " records skipped." printNL; 
+                  ]; 
+            ] ;
+          ]; 
+!inUse <- badOnes
+    select: [ security isntDefault && 
+              [ newCusip isDefault || cusipUnchanged ] &&
+              [ newSedol isDefault || sedolUnchanged ]
+            ] ;
+inUse count > 0 
+ ifTrue: [newLine print; 
+          "--> Proposed Id Change Already Valid for Security. " print; 
+          inUse count print; " skipped." printNL; 
+          newLine print ;
+          inUse
+          do: [ "Security to Change: " print ; entityId print ; " | " print ; 
+                security displayInfo ;
+                newCusip isntDefault && [ cusipUnchanged ] 
+                ifTrue:
+                  [ " " print: 5 ; newCusip print ; " already valid." printNL];
+               newSedol isntDefault && [ sedolUnchanged ] 
+                ifTrue:
+                  [ " " print: 5 ; newSedol print ; " already valid." printNL];
+              ] ;
+          ]; 
+!bad <- badOnes select: [ security isntDefault && cusipInUse ] ;
+bad count > 0 
+ifTrue:
+  [ newLine print ;
+    "--> Proposed Cusip Changes Refer to Different Security." print ;
+    bad count print ; " skipped." printNL ;
+    newLine print ;
+    bad sortUp: [ entityId ] .
+    do: [ "Old: " print ; entityId print ; " | " print ;
+          security displayInfo ;
+          "New: " print ; newCusip print ; " | " print ;
+          oldSecurityByCusip displayInfo ;
+          ^my feed displayIdCheckFrom: security
+                                   to: oldSecurityByCusip ;
+          "+" fill: 75 . printNL ;
+          newLine print ;
+        ] ;
+   ] ;
+!bad <- badOnes select: [ security isntDefault && sedolInUse ] ;
+bad count > 0 
+ifTrue:
+  [ newLine print ;
+    "--> Proposed Sedol Changes Refer to Different Security." print ;
+    bad count print ; " skipped." printNL ;
+    newLine print ;
+    bad sortUp: [ entityId ] .
+    do: [ "Old: " print ; entityId print ; " | " print ;
+          security displayInfo ;
+          "New: " print ; newSedol print ; " | " print ;
+          oldSecurityBySedol displayInfo ;
+          ^my feed displayIdCheckFrom: security
+                                   to: oldSecurityBySedol ;
+          "+" fill: 75 . printNL ;
+          newLine print ;
+        ] ;
+   ] ;
+
+] ;
+
+#--------------------
+
+ExchangeRateFeed defineMethod: [ | runWrapup |
+  ^super runWrapup ;     #<--  add this step
+  ^self instanceList select: [ isProcessed ] .
+     select: [ underlyingRecord isEuro ] .
+  groupedBy: [ date ] .
+  do: [ asSelf evaluate:
+           [ !euroToUS <- ^global Named Currency EUR usExchange;
+             ^global Currency masterList select: [ inEMU ] .
+                   select: [ ^date >= euroStartDate ] .
+                do: [ :usExchange put: (fixedRateToEuro * ^my euroToUS)];
+           ] ;
+       ] ;
+
+] ;
+
+####################
+#  EEF
+#     Support for default purge range in EEFeeds - 
+#     add Globals option defaultPurgeRange which can be a
+#     date, a date1:date2 range, or * for all to be used
+#     in conjunction with enablePurge when no date is supplied in record
+####################
+
+#--------------------
+#  EntityExtenderFeed: new/changed methods for purge support
+#--------------------
+
+EntityExtenderFeed defineMethod: [ | purgeRecords | 
+!feed <- ^self asSelf currentStore ;
+
+#-- Styles:
+#--   1) time series properties at entity - delete date in each t/s
+#--   2) time series of data record - delete date; flag record
+#--   3) fixed data record - delete t/s point within record
+#--      if entity = * , then all entities
+#--      if date = *, then all dates ; preserve 1/1/1 value
+#--      if date contains :, then range of dates
+
+!defaultPurgeRange <- ^self getGlobalOption: "defaultPurgeRange" ;
+!todo <- feed getRecordsToPurge 
+   extendBy:
+   [
+   date isDefault ifTrue: [ :date <- ^my defaultPurgeRange ] ;
+   !allDates ; !startDate ; !endDate; !singleDate ;
+   date isDate 
+      ifTrue: [ :singleDate <- date ] .
+      elseIf: [ date = "*" ] then: [ :allDates <- TRUE ] .
+      elseIf: [ date contains: ":" ] 
+        then: [ !range <- date breakOn: ":" ;
+                :startDate <- range at: 1 . asDate ;
+                :endDate <- range at: 2 . asDate ;
+              ] .
+        else: [ :singleDate <- date asDate ] ;
+   !hasDate <- allDates, startDate, endDate, singleDate any: [ isntNA ] ;
+   ] .
+select: [ entities isntNA && hasDate ] ;
+
+todo do: [ :isProcessed <- TRUE ] ;
+feed baseClass isEntityOrBridge
+    ifTrue: [ feed purgePointsInEntityPropertiesFor: todo ]
+   ifFalse: [ feed purgeEntityDataRecordsFor: todo ] ;
+
+!notdone <- feed masterList select: [ isntProcessed ] ;
+notdone count > 0 
+ifTrue:
+   [ newLine print ; 
+     notdone count print ; " " print ; 
+     " bad instances or dates - not processed. " printNL ;
+     ^self displayBadIdFlag isTrue
+      ifTrue: 
+        [ notdone sortUp: [ entityId ] .
+            do: [ entityId print: 20 ; date printNL ; ] ;
+        ] ;
+   ] ;
+
+newLine print ; 
+"--->  The following deletes were processed: " printNL ;
+#--- only display 1 per entityId/date combination
+todo groupedByString: [ entityId ] .
+   extendBy: [ !ranges <- groupList groupedBy: [ date ]  .
+                  send: [ groupList at: 1 ]
+             ] . collectListElementsFrom: [ ranges ] .
+do: [ underlyingRecord isntNA
+      ifTrue: [ underlyingRecord code print: 10 ; 
+                underlyingRecord name print: 25 ; 
+              ]
+     ifFalse: [ "  *  " print: 10 ; "(All Instances)" print: 25 ; ] ;
+     "  --  " print ; 
+      allDates isntNA ifTrue: [ "All Dates" printNL ] .
+        elseIf: [ singleDate isDate ] then: [ singleDate printNL ] .
+        else: 
+         [ startDate else: "... " . print ;
+           " through " print ; 
+           endDate else: " ..." . printNL ;
+        ] ;
+    ] ;
+
+] ;
+
+####################
+#  RangeGroupFeeds
+#    - if feed has no instances, do not recreate ranges; otherwise,
+#      clear and recreate
+#    - only update if range value has changed
+####################
+
+RangeGroupFeed defineMethod: [ | runUpdate | 
+  !feed <- ^self asSelf ;
+
+  feed masterList count > 0
+  ifTrue:
+    [ feed clearCurrentRangeGroupInstances ;
+      feed masterList
+      iterate: 
+         [     #- use iterate so code gets assigned in serial
+           rangeClass createInstance: startValue asNumber, endValue asNumber .
+               setNameTo: label ;
+            :isProcessed <- TRUE ;
+         ] ;
+    ] ;
+  feed updateCurrentRangeGroups ;
+] ;
+
+RangeGroupFeed defineMethod: [ | updateCurrentRangeGroups |
+  !feed <- ^self ;
+  feed updateProperty isntNA && feed accessRule isntNA 
+  ifTrue:
+    [ !isTS <- feed baseClass send: feed updateProperty . isTimeSeries ;
+      feed baseClass masterList collect: feed accessRule .
+      do: [ !group <- ^my feed rangeClass getClassificationFor: value ;
+            !updateSlot <- ^self send: ^my feed updateProperty ;
+             ^my isTS 
+                ifTrue: [ updateSlot updateWith: group ] 
+               ifFalse: [ updateSlot <- group ] ;
+          ] ;
+    ] ;
+] ;
+
+
+
+#======================================================================
+
+newLine print ;
+"...  Miscellaneous invest core changes " printNL ;
+newLine print ;
+
+##################################################
+#  patch.inv
+#
+#  New Support Classes for mapping ids to unique securities over time
+#  - Create SedolId and CusipId classes and protocol
+#  - Modify SecurityIdRecord to update Id xref information
+#  - Initialize the CusipId and SedolId classes with current history
+#
+#  Company
+#  - fix 'cleanupLocalAttributes' at Company to purge reference in
+#    XRef CusipIssuer when company is flagged for deletion
+#  - fix 'rebuildCUsipIssuer' to remove primary companies associated
+#    with deleted companies
+#
+#  AggAccount
+#  - fix 'buildHoldings' to correctly use multi-currency holdings
+#
+#  Holding
+#  - fix currency covers to correctly report values when holding
+#    is in a different currency from the account
+#
+#  SecurityIdRecord
+#  - modify behavior of 'setNameTo:' to make sure name is not getting
+#    set back to the prior day's value.
+#
+#  SplitsFeed
+#  - allow auto purge for records with no date
+#
+#  Special Dividends
+#  - core and feed support for separate spinoff adjustment factor
+#
+##################################################
+
+####################
+#  New Support Classes for xref of id mapping to unique securities over time
+####################
+
+Interface BatchFeedManager createEntityClass: "IdXRef" from: "Support" ;
+Interface BatchFeedManager createEntityClass: "SedolId" from: "IdXRef" ;
+Interface BatchFeedManager createEntityClass: "CusipId" from: "IdXRef" ;
+
+PropertySetup updateFromString: 
+"property | classId | tsFlag | dataType | description
+security | SedolId | Y | Security | tracks securities with this sedol over time
+security | CusipId | Y | Security | tracks securities with this cusip over time
+" ;
+
+CusipId defineMethod: [ | set: id to: entity |
+id isntDefault
+ifTrue:
+  [ ^self getOrCreate: id . :security updateWith: entity ;
+    !cusip8 <- ^self named at: (id take: 8) ;
+    cusip8 isntDefault ifTrue: [ cusip8 :security updateWith: entity ] ;
+  ] ;
+^self
+] ;
+
+SedolId defineMethod: [ | set: id to: entity |
+id isntDefault
+ifTrue:
+  [ ^self getOrCreate: id . :security updateWith: entity ;
+    !sedol6 <- ^self named at: (id take: 6) ;
+    sedol6 isntDefault ifTrue: [ sedol6 :security updateWith: entity ] ;
+  ] ;
+^self
+] ;
+
+#--------------------
+#  Modify setSedolTo and setCusipTo to update SedolId or CusipId
+#--------------------
+
+SecurityIdRecord defineMethod: [ | setCusipTo: string |
+  ^global CusipId set: string to: entity ;
+  :cusip updateWith: string ;
+  ^self 
+] ;
+
+SecurityIdRecord defineMethod: [ | setSedolTo: string |
+  ^global SedolId set: string to: entity ;
+  :sedol updateWith: string ;
+  ^self 
+] ;
+
+#--------------------
+#  Initialize CusipId and SedolId 
+#--------------------
+
+Security instanceList
+do: [ !sec <- ^self asSelf ; 
+      idHistory :cusip nonDefaults
+         do: [ ^global CusipId set: asSelf to: ^my sec ] ;
+      idHistory :sedol nonDefaults
+         do: [ ^global SedolId set: asSelf to: ^my sec ] ;
+    ] ;
+
+####################
+#  Company
+#  - fix 'cleanupLocalAttributes' at Company to purge reference in
+#    XRef CusipIssuer when company is flagged for deletion
+#  - fix 'rebuildCusipIssuer' to disallow primary companies that 
+#    have been flagged for deletion
+####################
+
+Company defineMethod: [ | cleanupLocalAttributes |
+  ^super cleanupLocalAttributes;
+  securityList
+  do: [ :company <- defaultInstance company ;
+      ] ;
+  :primarySecurity <- defaultInstance primarySecurity;
+  !xref <- code else: "" . translate: "x" to: "" . take: 6 ;
+  XRef CusipIssuer at: xref . = asSelf 
+      ifTrue: [ XRef CusipIssuer delete: xref ] ;
+  :cusip6 <- NA ;
+] ;
+
+#----------
+
+Company defineMethod: [ | rebuildCusipIssuerXRef |
+^self masterList select: [ _primaryCompany isDeleted ] .
+   do: [ :_primaryCompany <- NA ] ;
+^self masterList select: [primarySecurity cusip isntDefault].
+    select: [ primarySecurity cusip count between: 8 and: 9 ] .
+    extendBy: [!cusip6 <- primarySecurity cusip take: 6 ; ] .
+    select: [cusip6 isBlank not].
+    groupedByString: [cusip6].
+do: [ !company <- groupList sortUp: [primarySecurity cusip].at: 1 . asSelf ; 
+      company setXRefIn: company XRef CusipIssuer to: asSelf; 
+      groupList select: [ asSelf != ^my company ] .
+         do: [ :_primaryCompany <- ^my company ] ;    
+    ]; 
+^global Security masterList select: [company isDefault].
+     select: [cusip isntNA].
+    select: [ cusip count between: 8 and: 9 ] .
+do: [!issuer <- ^global Company XRef CusipIssuer at: (cusip take: 6); 
+     issuer isCompany ifTrue: [^self setCompanyTo: issuer]; 
+    ]; 
+] ;
+
+
+####################
+#  AggAccount
+#  - fix rollups to allow for multiple currencies
+####################
+
+AggAccount defineMethod: [ | buildHoldings |
+  baseCurrency evaluate: [      #- use AggAccount's currency
+#--  ^self updateMemberships ;    #(removed until block driven input supported)
+  !secs <- ^self memberList
+      select: [hasHoldings].
+      collectListElementsFrom: [holdings] .
+      groupedBy: [security] .
+      extendBy: [ !security <- ^self asSelf ;
+                  !shares <- groupList total: [ _shares ] ;
+                  !totalMarketValue <- groupList total: [ totalMarketValue ] ;
+                  !totalCost <- groupList total: [ totalCost ] ;
+                ] ;
+  ^self createHoldingsFrom: secs ;
+  ] ;
+] ;
+
+####################
+#  Holding 
+#  - fix currency conversions
+####################
+
+#--------------------
+#  add 'currency' to use account's currency as default for reporting
+#--------------------
+
+Holding defineMethod: [ | currency | 
+  account currency else: ^global Currency
+] ;
+
+#--------------------
+#  percentOfTNA cannot use raw values since holding and account
+#   can now be in different currencies
+#--------------------
+
+Holding defineMethod: [ | percentOfTNA  |
+   100 * totalMarketValue / account totalNetAssets
+] ;
+
+####################
+#  SecurityIdRecord
+#
+#  Modify the behavior of 'setNameTo:' at SecurityIdRecord
+#     to make sure that the name is not getting set back to the prior
+#     day's value.  The pattern being corrected is the result of two
+#     different sources setting/resetting the name on a daily basis -
+#     the smaster sets a value for today, the internal feed changes the value
+#     slightly; the following day the smaster update detects a name change
+#     and sets the new value, the internal feed then resets it.  The
+#     net result is consecutive days have the same name (the one supplied
+#     by the internal feed).  This patch performs the extra check - not
+#     only does the update check that the name is different from the value
+#     currently stored, it now checks that the new name for the current
+#     date is actually different from the prior day's as well.
+####################
+
+SecurityIdRecord defineMethod: [ | setNameTo: string |
+  :name updateWith: string ;
+  name = (:name lag: 1 days)
+     ifTrue: [ :name delete: ^date ] ;
+  ^self 
+] ;
+
+####################
+#  SplitsFeed
+#  - allow auto purge for records with no date
+####################
+
+SplitsFeed defineMethod: [ | runUpdate | 
+  !valid <- ^self asSelf instanceList 
+     select: [ underlyingRecord isntDefault ] ;
+  ^self autoPurgeRange isntDefault
+      ifTrue: [ ^self autoPurgeSplitsFor: valid ] ;
+  :valid <- valid select: [ date isDate ] ;
+  ^self updateSplitsFor: valid ;
+] ;
+
+#----------------------------------------
+
+####################
+#  Special Dividend Processing
+#  - core and feed support for separate spinoff adjustment factor
+#
+#    Create structures to store spinoffAdjustmentFactors derived
+#    from "special" dividends; add a flag to the DivRecord to
+#    indicate that it's special, and derive the spinoff adjustment
+#    from it
+####################
+
+#--------------------
+#  core support for spinoff adjustment
+#    - add properties at Security
+#--------------------
+
+PropertySetup updateFromString: "property | classId | defaultValue | tsFlag
+spinoffAdjustmentFactor | Security | 1.0 | Y
+rawSpinoffFactor | Security | | Y
+" ;
+
+Security defineMethod: [ | addSpinoffFactorOf: aFactor onExDate: aDate |
+  aDate evaluate:
+   [
+   :rawSpinoffFactor put: aFactor asDouble;
+   :spinoffAdjustmentFactor
+       put: (:spinoffAdjustmentFactor lag: 1 days . * rawSpinoffFactor ) ;
+   ] ;
+  ^self
+] ;          #  addSplitFactorOf: onExDate:
+
+Security defineMethod: [ | rebuildSpinoffAdjustmentFactor |
+  :spinoffAdjustmentFactor deleteAllPoints; 
+  :spinoffAdjustmentFactor asOf: 10101 put: 1.0 ;
+  :rawSpinoffFactor runningTotal: [ ^self log ] .
+  do: [ ^my :spinoffAdjustmentFactor put: runningTotal exp ] ;
+] ;
+
+Security defineMethod: [ | spinoffAdjustmentRelativeTo: aDate |
+  aDate isntNA 
+  ifTrue: [ (:spinoffAdjustmentFactor asOf: ^today ) / 
+            (:spinoffAdjustmentFactor asOf: aDate ) 
+          ] . else: [ 1.0 ] 
+] ; 
+
+#--------------------
+#  core support for spinoff adjustment
+#    - add properties and methods to DivRecord
+#--------------------
+
+PropertySetup updateFromString: "property | classId | defaultValue
+specialDivFlag | DivRecord | FALSE
+" ;
+
+DivRecord defineMethod: [ | isSpecialDiv | specialDivFlag isTrue ] ;
+
+DivRecord defineMethod: [ | updateSpinoffFactor |
+ !price <- entity :price asOf: date ;
+ !rate <- (price + div) / price ;
+ entity addSpinoffFactorOf: rate onExDate: date ;
+] ;
+
+#--------------------
+#  core support for spinoff adjustment
+#    - default price adjustment for high,low, etc uses spinoff-adjusted
+#      values
+#--------------------
+
+PriceRecord defineMethod: [ | spinoffAdjustmentFactor |
+  !adate <- adjustmentDate ifDefault: [ recordDate ] ;
+  entity isSecurity && [ adate isDate && adate isntDefault ] 
+     ifTrue: [entity spinoffAdjustmentRelativeTo: adate ] .
+] ;
+
+PriceRecord defineMethod: [ | adjustmentFactor | 
+  ^super adjustmentFactor * spinoffAdjustmentFactor
+] ;
+
+PriceRecord defineMethod: [ | adjustmentFactorExSpinoff |
+  ^super adjustmentFactor
+] ;
+
+PriceRecord  defineMethod: [ | volume | 
+  _volume * ^self adjustmentFactorExSpinoff
+] ;
+
+PriceRecord  defineMethod: [ | priceExSpinoff | 
+   _price / adjustmentFactorExSpinoff
+] ;
+
+####################
+#  Modify DivFeed runWrapup to generate the spinoff adjustment factor
+####################
+
+DivFeed defineMethod: [ | runWrapup |
+^super runWrapup ;
+
+#---  remove any records that have no record value
+^self instanceList select: [ isProcessed ] .
+    select: [ underlyingRecord recordValue isNA && newOneCreated ] .
+send: [ underlyingRecord ] .
+do: [ entity :dividendSeries  delete: date ;
+      ^self flagForDeletion ; ^self rdelete ;
+    ] ;
+ 
+newLine print ;
+"---> Begin Special Dividend Processing" printNL ;
+newLine print ;
+ ^self masterList select: [ isProcessed ] .
+    select: [ underlyingRecord isSpecialDiv ] .
+ do: [ !entity <- underlyingRecord entity ;
+       !currentSpinoff <- entity :rawSpinoffFactor on: date ;
+       underlyingRecord updateSpinoffFactor ;
+       !newSpinoff <- entity :rawSpinoffFactor on: date ;
+       currentSpinoff isDefault && newSpinoff isntDefault
+         ifTrue: [ "New Spinoff Added for " print ; 
+                   entity print; " on " print ; date print ;
+                   " of " print ; newSpinoff printNL: 15.6 ;
+                   displaySpinoffReport ;
+                 ] .
+       elseIf: [ currentSpinoff != newSpinoff && newSpinoff isntDefault ] 
+         then: [ "Spinoff Changed for " print ; 
+                   entity print; " on " print ; date print ;
+                   " from " print ; currentSpinoff print: 15.6 ;
+                   " to " print ; newSpinoff printNL:15.6 ;
+                   displaySpinoffReport ;
+                 ] .
+       elseIf: [ currentSpinoff isntDefault && newSpinoff isDefault ] 
+         then: [ "Spinoff Remove for " print ; 
+                   entity print; " on " print ; date print ;
+                   ".  Was " print ; currentSpinoff printNL:15.6 ;
+                   displaySpinoffReport ;
+                 ] ;
+     ]  ;
+
+#--  check that securities with spinoffs still have special divs
+^self refreshSpinoffs ;
+
+"---> End Special Dividend Processing" printNL ;
+newLine print ;
+
+] ;
+
+DivFeed defineMethod: [ | refreshSpinoffs |
+^global Security masterList select: [ :rawSpinoffFactor count > 0 ] .
+do: [ !date <- :rawSpinoffFactor effectiveDate ;
+      !divOnDate <- :dividendSeries on: date ;
+      divOnDate isDefault || [ divOnDate isSpecialDiv not ] 
+      ifTrue:
+        [ "Removing spinoff for " print ; code print ; 
+          " on " print ; date printNL ;
+          :rawSpinoffFactor delete: date ;
+        ] ;
+      rebuildSpinoffAdjustmentFactor ;
+      ] ;
+newLine print ;
+] ;
+
+DivFeed defineMethod: [ | displaySpinoffReport |       
+!sec <- underlyingRecord entity ;
+newLine print ;
+"=== Id History ===" printNL ;
+sec idHistory profile ;
+
+newLine print ;
+"=== Spinoffs ===" printNL ;
+sec :rawSpinoffFactor
+do: [ ^date print: 15 ;
+      ^self print: 15.6 ; " (raw)    " print ;
+      ^my sec spinoffAdjustmentFactor print:15.6 ; " (adj)" printNL ;
+    ] ;
+
+newLine print ;
+"=== Splits ===" printNL ;
+sec :rawSplitFactor
+do: [ ^date print: 15 ;
+      print ; " (raw)    " print ;
+      ^my sec adjustmentFactor print ; " (adj)" printNL ;
+    ] ;
+
+newLine print ;
+"=== Divs ===" printNL ;
+sec :dividendSeries last: 5 .
+do: [ isSpecialDiv ifTrue: [ " * " ] ifFalse: [ "   " ] . print ;
+     ^date print: 15 ;
+      _div print ; " (raw)    " print ;
+      div print ; " (adj)   " print ; 
+      adjustmentFactor print ; " (Factor)" printNL ;
+    ] ;
+
+newLine print ;
+"=== Prices ===" printNL ;
+sec prices from: date - 2 days to: date + 2 days .
+do: [ ^date print: 12 ;
+      _price print:10.4 ; " (raw) |" print ; 
+      price print:10.4 ; " (adj) " print ;
+      adjustmentFactor print ; " (af) |" print ;
+      priceExSpinoff print: 10.4 ;
+      adjustmentFactorExSpinoff print ; "(afx)" print ;
+      newLine print ;  
+    ] ;
+" -" fill: 70 . printNL ;
+] ;
+
+DivFeed defineMethod: [ | purgeRecords | 
+^super purgeRecords ;
+^self refreshSpinoffs ;
+] ;
+
+#======================================================================
+
+####################
+#  Schema
+####################
+
+newLine print ;
+"...  Update schema and flag messages as needed" printNL ;
+newLine print ;
+
+Schema processAllMessages ;
+
+#-- Update "INSTALL.log" with patch installation information
+#ProcessControlTools Environment at: "updateLogPath" . 
+#    else: "/localvision/logs/" . concat: "INSTALL.log" .
+# appendOutputOf: ["Applied inprog.core.613b at " print; 
+#                  ^global Utility UnixSeconds currentTime printNL ;
+#                 ];

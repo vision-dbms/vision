@@ -1,0 +1,776 @@
+##################################################
+#  Script to support connection between DataFeed classes
+#  and external environments such as Excel and Sql
+#
+#  Data Upload Tools
+#  -----------------
+#  To validate a feed name use:
+#      Interface ExcelManager validateFeedName: "feedId" ;
+#  Which returns the string Valid or Invalid.
+#
+#  To display classes in a category use:
+#      Interface ExcelManager displayFeedsFor: "categoryId" ;
+#  where "categoryId"
+#     is one of: 
+#          "Entity"  
+#          "Entity Extender"  
+#          "Membership" 
+#          "Transaction"         
+#          "Alias"   
+#          "XRef"   
+#          "Range Group" 
+#          "Core Class Setup"
+#          "Property Setup" 
+#          "Message Setup" 
+#      or  "DataFeed Setup" 
+#  This displays the feedId and the feed description
+#
+#  To display the items available for a feed class use
+#      Interface ExcelManager displayItemsForFeed: "feedId" ;
+#  This displays the item, the type, and the description.
+#
+#  To display all feed tables:
+#      Interface SqlManager displayTables
+#
+#  To display all fields for all feed tables:
+#      Interface SqlManager displayFields
+#
+#  To upload data for a class use:
+#     Interface ExcelManager reset
+#       upload: "feedId" using: "id	name
+#   id1	name1
+#   id2	name2
+#   ...
+#  " ;
+#  To upload data for an entity class and not create instances use:
+#     Interface ExcelManager reset
+#       uploadNoCreate: "feedId" using: "id	name
+#   id1	name1
+#   id2	name2
+#   ...
+#  " ;
+#
+#  To upload data from a file for a class use:
+#     Interface ExcelManager reset
+#       upload: "feedId" usingFile: "fname" ;
+#
+
+#  Structure Creation Tools
+#  ------------------------
+#  To get current Entity classes use:
+#      Interface ExcelManager displayEntityClasses
+#
+#  To get current DataRecord classes use:
+#      Interface ExcelManager displayDataRecordClasses
+#
+#  To create a new Entity class and corresponding feed class use:
+#      Interface ExcelManager reset
+#          createEntityClass: "NewClass" from: "ExistingEntity" ;
+#
+#  To create a new DataRecord class and corresponding feed class use:
+#     Interface ExcelManager reset
+#         createDataRecordClass: "NewClass" from: "ExistingDR" 
+#         linkedTo: "EntityClass" via: "accessPath" asTS: TRUE   (or FALSE)
+#
+#  To create a new Relationship and correspoding Membership feed class use:
+#     Interface ExcelManager reset
+#         createRelationship: "id"
+#         withGroupType: "GroupEntity" via: "groupPath"
+#         andMemberType: "MemberEntity" via: "memberPath"
+#         asTS: TRUE     ( or FALSE)
+#
+####################
+
+####################
+#  Create Interface Feed classes
+####################
+Interface External createSubclass: "ExternalFeedManager" at: Interface ;
+Interface ExternalFeedManager classDescriptor setClassTypeTo: "Core" ; 
+
+Interface ExternalFeedManager createSubclass: "ExcelManager" at: Interface ;
+Interface ExternalFeedManager createSubclass: "SqlManager" at: Interface ;
+Interface ExternalFeedManager createSubclass: "DBAdminManager" at: Interface ;
+Interface ExternalFeedManager createSubclass: "BatchFeedManager" at: Interface;
+Interface ExcelManager classDescriptor setClassTypeTo: "Core" ; 
+Interface SqlManager classDescriptor setClassTypeTo: "Core" ; 
+Interface DBAdminManager classDescriptor setClassTypeTo: "Core" ; 
+Interface BatchFeedManager classDescriptor setClassTypeTo: "Core" ; 
+
+
+####################
+#  Interface ExternalFeedManager protocol
+####################
+
+Interface ExternalFeedManager defineMethod: [ | setDelimiterTo: char |
+  ^self define: 'delimiter' toBe: char ;
+  ^self
+] ;
+
+Interface ExternalFeedManager defineMethod: [ | reset | 
+  ^super reset ;
+  ErrorLog clearErrorStack; 
+  ^self 
+] ;
+
+Interface ExternalFeedManager defineMethod: [ | runExpression: block | 
+  Global setDelimiterTo: ^self delimiter ;
+  ^super runExpression: block ;
+  ^self 
+] ;
+
+Interface ExternalFeedManager setDelimiterTo: "	" ;
+Interface ExcelManager setDelimiterTo: NA ;
+
+Interface ExternalFeedManager define: 'feedXRef' toBe: Dictionary new ;
+Interface ExternalFeedManager feedXRef
+   at: "Entity" put: MasterFeed .
+   at: "Master" put: MasterFeed .
+   at: "Entity Extender" put: EntityExtenderFeed .
+   at: "Membership" put: MembershipFeed .
+   at: "Transaction" put: TransactionFeed .
+   at: "Alias" put: AliasFeed .
+   at: "XRef" put: XRefFeed .
+   at: "Range Group" put: RangeGroupFeed .
+   at: "Support" put: MasterFeed .
+   at: "Core Class Setup" put: ClassSetup .
+   at: "Property Setup" put: PropertySetup .
+   at: "Message Setup" put: MessageSetup .
+   at: "DataFeed Setup" put: DataFeedSetup .
+;
+
+Interface ExternalFeedManager defineMethod: [ | validateFeedName: feedId |
+   feedId isString
+     ifTrue: [ feedId asClass ] ifFalse: [ feedId ] . isDataFeed
+] ;
+
+Interface ExternalFeedManager defineMethod: [ | displayFeedsFor: catId |
+  !baseFeedClass <- ^self feedXRef at: catId stripBoundingBlanks ;
+  baseFeedClass isntNA
+  ifTrue:
+    [ !list <- baseFeedClass subclassList 
+         select: [ classDescriptor childList count = 0 ] .
+         sortUp: [ whatAmI ] ;
+      baseFeedClass isMasterFeed
+      ifTrue:
+        [ :list <- catId toUpper = "SUPPORT" 
+          ifTrue:
+            [ list select: [ entityType isSupport ]
+            ]
+          ifFalse:
+            [ list select: [ entityType isSupport not ] 
+            ] ;
+        ] ;
+      list count = 0 ifTrue: [ :list <- baseFeedClass ] ;
+      list
+      do: [ whatAmI print; "	" print ; 
+            classDescriptor description translate: newLine to: " " .
+                printNL ;
+          ] ;
+    ] 
+  ifFalse:
+     [ !error <- "Category not found." ;
+       ErrorLog post: error for: ^self with: NA ;
+       ">>> Error" printNL ;
+       error printNL ;
+     ] ;
+] ;
+
+Interface ExternalFeedManager defineMethod: [ | displayItemsForFeed: feedId |
+  !feed <- feedId asClass ;
+  feed isDataFeed
+  ifTrue:
+    [ "Feed:	" print ; feed whatAmI printNL ;
+      newLine print ;
+     feed isEntityExtenderFeed
+     ifTrue:
+       [ "baseClass:	 " print; feed baseClass whatAmI printNL ;
+         feed baseClass isDataRecord
+         ifTrue:
+           [ "baseEntity:	" ; feed baseEntity whatAmI printNL ;
+             "accessPath:	 " print; feed baseClass updateBlock printNL ;
+           ] ;
+         newLine print ;
+       ] ;
+     "Item	Type	Description" printNL ;
+      feed getUploadProperties
+      do: [ code else: asSelf . print ; "	" print ;
+            isSchema 
+            ifTrue: 
+              [ !default <- defaultDataType;
+                default isntNA  ifTrue: [ default whatAmI print ] ;
+                "	" print ;
+                description else: "" . translate: newLine to: " ". print ;
+              ] ;
+            newLine print ;
+          ];
+    ] 
+   ifFalse: 
+     [ !error <- feed isNA 
+         ifTrue: [ feedId asString concat: " not found" ] 
+        ifFalse: [ feed whatAmI concat: " is not a DataFeed" ] ;
+       ErrorLog post: error for: ^self with: NA ;
+       ">>> Error" printNL ;
+       error printNL ;
+     ] ;
+] ;
+
+Interface ExternalFeedManager defineMethod: [ | displayTables |
+  ^self runExpression:
+    [ "feedId" print ; "feedType" print ; "description" printNL ;
+       ^global DataFeed subclassList
+         select: [ classDescriptor childList count = 0 ] .
+         extendBy: [ !cat <- classDescriptor inheritancePath toList at: 4 ] .
+         sortUp: [ whatAmI ] . 
+         sortUp: [ cat ] .
+       do: [ whatAmI print ; cat code print;
+             classDescriptor description translate: newLine to: " " . printNL ;
+           ] ;
+    ] ;
+] ;
+
+Interface ExternalFeedManager defineMethod: [ | displayFields |
+  !iface <- ^self ;
+  ^self runExpression:
+    [ "feedId" print ; "columnNumber" print ; "columnName" print ;
+      "dataType" print ; "description" printNL ;
+      ^global DataFeed subclassList
+        select: [ classDescriptor childList count = 0 ] .
+        sortUp: [ whatAmI ] . 
+        sortUp: [ isSchemaFeeds ifTrue: [ 1 ] ifFalse: [ 0 ] ] .
+     do: [ !feed <- ^self ;
+           !iface <- ^my iface ;
+           !default <- feed usesLocalFields || feed isAliasFeed
+              ifTrue: [ "" ] ifFalse: [ 0.0 ] ;
+           feed getUploadProperties numberElements
+           do: [ ^my feed whatAmI print ;
+                 position print ;
+                 code else: asSelf . print ;
+                 isSchema 
+                 ifTrue: 
+                   [ !default <- defaultDataType else: [ ^my default ] ;
+                      ^my iface displayTypeFor: default ;
+                     description else: " " . 
+                       translate: newLine to: " " . printNL ;
+                   ]
+                ifFalse: 
+                   [ ^my iface displayTypeFor: ^my default ; 
+                     " " printNL ;
+                   ] ;
+               ] ;
+          ];
+    ] ;
+] ;
+
+Interface ExternalFeedManager defineMethod: [ | displayTypeFor: object |
+  object whatAmI print ;
+] ;
+Interface SqlManager defineMethod: [ | displayTypeFor: object |
+  object isInteger ifTrue: [ "Int" ] .
+    elseIf: [ object isNumber ] then: [ "Float" ] .
+    elseIf: [ object isDate ] then: [ "Date" ] .
+    else: [ "String" ] . print ;
+]  ;
+
+
+Interface ExternalFeedManager 
+defineMethod: [ | uploadNoCreate: feedName using: string |
+  !feed <- feedName asString asClass ;
+  feed isMasterFeed ifTrue: [ feed disableEntityCreation ] ;
+  ^self upload: feedName using: string 
+] ;
+
+Interface ExternalFeedManager defineMethod: [ | upload: feedName using: string |
+  !feed <- feedName asString asClass ;
+  feed isDataFeed
+    ifTrue: 
+     [ ^self setRowLimitTo: 0 ;
+       ^self runExpression: [ feed updateFromString: string ] ; 
+      ^self displayRowsFrom: 5 to: NA ;
+     ]
+   ifFalse: 
+     [ !error <- feed isNA 
+         ifTrue: [ feedName asString concat: " not found" ] 
+        ifFalse: [ feed whatAmI concat: " is not a DataFeed" ] ;
+       ErrorLog post: error for: ^self with: NA ;
+       ">>> Error" printNL ;
+       error printNL ;
+     ] ;
+] ;
+
+Interface ExternalFeedManager
+defineMethod: [ | upload: feedName usingFile: fname |
+  !feed <- feedName asString asClass ;
+  feed isDataFeed
+    ifTrue: 
+     [ ^self setRowLimitTo: 0 ;
+       ^self runExpression: [ feed loadFromFile: fname ; ] ; 
+      ^self displayRowsFrom: 6 to: NA ;
+     ]
+   ifFalse: 
+     [ !error <- feed isNA 
+         ifTrue: [ feedName asString concat: " not found" ] 
+        ifFalse: [ feed whatAmI concat: " is not a DataFeed" ] ;
+       ErrorLog post: error for: ^self with: NA ;
+       ">>> Error" printNL ;
+       error printNL ;
+     ] ;
+] ;
+
+
+Interface ExternalFeedManager
+defineMethod: [ | getConfigurationFromFile: configFile |
+  ^global DataFeed loadConfig: configFile;
+  ^self
+] ;
+
+
+
+####################
+#  Structural Creation Tools
+####################
+
+Interface ExternalFeedManager defineMethod: [ | displayEntityClasses |
+  ^global Entity asList append:
+     (^global Entity subclassList sortUp: [ whatAmI ] ) .
+  do: [ whatAmI printNL ] ;
+] ;
+
+Interface ExternalFeedManager defineMethod: [ | displayDataRecordClasses |
+  ^global DataRecord asList append:
+     (^global DataRecord subclassList sortUp: [ whatAmI ] ) .
+  do: [ whatAmI printNL ] ;
+] ;
+
+Interface ExternalFeedManager defineMethod: [ | getValidClassNameFrom: id |
+  id else: "" . capitalize stripChar: " "
+] ;
+
+Interface ExternalFeedManager defineMethod: [ | setObjectSpaceTo: os |
+  !space <- os isNumber
+     ifTrue: [ os asInteger ] .
+     elseIf: [ os isObjectSpace ] then: [ os number ] .
+     else: [ NA ] ;
+  ^self define: 'ospace' toBe: space ;
+  ^self
+] ;
+Interface ExternalFeedManager setObjectSpaceTo: NA ;
+
+Interface ExternalFeedManager
+defineMethod: [ | createEntityClass: newClassId from: oldId |
+!newId <- ^self getValidClassNameFrom: newClassId ;
+
+!newClass <- ^self createCoreClass: newId from: oldId as: ^global Entity ;
+newClass isEntity
+ifTrue:
+  [ ^self createMasterFeed: (newId capitalize concat: "Master") 
+                 forEntity: newClass ;
+  ] 
+ifFalse:
+  [ ">>> No MasterFeed class created." printNL ;
+  ] ;
+
+] ;
+
+Interface ExternalFeedManager
+defineMethod: [ | createDataRecordClass: newClassId from: oldId
+  linkedTo: entityId via: path asTS: flag |
+!newId <- ^self getValidClassNameFrom: newClassId ;
+!newClass <- ^self createCoreClass: newId from: oldId as: ^global DataRecord ;
+newClass isDataRecord 
+ifTrue:
+  [ !entityClass <- entityId asClass ;
+    entityClass isEntityOrBridge && path isntDefault
+    ifTrue:
+       [ ^self createLinkFrom: entityClass to: newClass via: path asTS: flag ;
+       ]
+    ifFalse:
+       [ !message <- "No property link defined as access path." ;
+         entityId isntDefault && path isntDefault
+          ifTrue: [ ">>> Bad entity/bridge supplied. " print ; message printNL]
+          ifFalse: [ message printNL ] ;
+       ] ;
+#--  create the feed if entity class OR path is provided
+    entityClass isEntityOrBridge || path isntDefault
+    ifTrue:
+       [ !feedId <- newId capitalize concat: "Feed" ;
+         !feed <- feedId asClass ;
+         feed isEntityExtenderFeed && 
+          [ feed baseEntity isEntityOrBridge ] &&
+          [ feed baseEntity != entityClass]
+         ifTrue: 
+           [ :feedId <- newId capitalize
+                  concat: entityClass whatAmI . concat: "Feed";
+           ] ;
+         ^self createExtenderFeed: feedId 
+               forBaseClass: newClass linkedTo: entityClass ;
+      ] ;
+  ] 
+ifFalse:
+  [ ">>> No property link defined as access path." printNL ;
+    ">>> No EntityExtenderFeed class created." printNL ;
+  ] ;
+
+] ;
+
+Interface ExternalFeedManager defineMethod: 
+[ | createEstimateBridgeClass: newId from: oldId 
+  linkedTo: baseId via: path withEstimateRecordClass: erecId andFreq: freq |
+
+  ^self createEstimateBridgeClass: newId from: oldId
+     linkedTo: baseId via: path withEstimateRecordClass: erecId andFreq: freq 
+     withDetailEstimateRecordClass: NA .
+];
+
+Interface ExternalFeedManager defineMethod: 
+[ | createEstimateBridgeClass: newId from: oldId 
+  linkedTo: baseId via: path withEstimateRecordClass: erecId 
+   andFreq: freq withDetailEstimateRecordClass: dtlErecId |
+
+  !isTS <- freq isntNA ;
+  !objectSpace <- ^self ospace ;
+  !bridgeClass <- ^self createBridgeClass: newId from: oldId 
+                 linkedTo: baseId via: path asTS: isTS ;
+  bridgeClass isEstimateBridge
+  ifTrue:
+    [ !erecord <- erecId isString 
+         ifTrue: [ erecId asClass ] ifFalse: [ erecId ] ;
+      erecord isEstimateRecord
+      ifTrue:
+        [ #-- set default record for observation and actual values
+          bridgeClass :observation <- erecord ;
+          bridgeClass :actualRecord <- erecord ;
+
+          #-- create the feed for updating this bridge
+          !feed <- ^global ClassSetup ;
+          !newFeedId <- bridgeClass whatAmI concat: "Feed" ;
+          !upload <-
+            [ "classId | parentId | description" printNL ;
+              newFeedId print ; " | EstimateRecordFeed | Updates " print ; 
+              path print; 
+              isTS ifTrue: [ " t/s" print ] ; " at " print ;
+              baseId printNL ;
+            ] divertOutput ;
+         ^self setRowLimitTo: 0 ;
+         ^self runExpression: [ feed updateFromString: upload ] ; 
+         !feedClass <- newFeedId asClass ;
+         feedClass isDataFeed
+         ifTrue:
+           [ "Use EstimateRecordFeed class " print ; 
+             newFeedId print ; " to upload." printNL ;
+             #--  assign relationship and frequency for feed
+             feedClass 
+               setBaseClassTo: erecord .
+               setBaseEntityTo: bridgeClass .
+               setFrequencyTo: freq ;
+           ] 
+       ifFalse: [ ">>> Feed Class " print ; newFeedId print ;
+                  " not defined." printNL ;
+                ] ;
+       ] 
+     ifFalse:
+       [ erecId isntDefault && [ erecId else: "" . isBlank not ] 
+         ifTrue: 
+           [ ">>> " print ; erecId print ; 
+             " not defined as an EstimateFeed.  Feed not established." printNL;
+           ] ;
+       ]
+    ] 
+  ifFalse:
+    [ ">>> Estimate Bridge not created." printNL ;
+    ] ;
+  bridgeClass isSummaryEstimateBridge 
+     && [ "defaultDetailBridge" locateInDictionaryOf: bridgeClass . isNA ]
+  ifTrue:    #-- create the detail bridge if needed
+    [ ^self setObjectSpaceTo: objectSpace ;
+      !newId <- "Detail" concat: bridgeClass whatAmI ;
+      !oldId <- bridgeClass defaultDetailBridge whatAmI ;
+      !dbridgeClass <-
+         ^self createCoreClass: newId from: oldId 
+               as: ^global DetailEstimateBridge ;
+      bridgeClass setDefaultDetailBridgeTo: dbridgeClass ;
+      dbridgeClass setDefaultSummaryBridgeTo: bridgeClass ;
+      dbridgeClass setBaseClassTo: bridgeClass ;
+      dbridgeClass :underlyingObject <- bridgeClass ;
+      !erecord <- dtlErecId isString 
+         ifTrue: [ dtlErecId asClass ] 
+        ifFalse: [^global AnalystEstimateRecord ] ;
+      dbridgeClass :observation <- erecord ;
+      dbridgeClass :actualRecord <- erecord ;
+   
+      !feed <- ^global ClassSetup ;
+      !newFeedId <- dbridgeClass whatAmI concat: "Feed" ;
+      !upload <-
+         [ "classId | parentId | description" printNL ;
+            newFeedId print ; " | EstimateRecordFeed | " print ;
+            " Detail for " print ; bridgeClass whatAmI printNL ;
+            ] divertOutput ;
+      ^self setRowLimitTo: 0 ;
+      ^self runExpression: [ feed updateFromString: upload ] ; 
+      !feedClass <- newFeedId asClass ;
+      feedClass isDataFeed
+      ifTrue:
+        [ "Use EstimateRecordFeed class " print ; 
+          newFeedId print ; " to upload." printNL ;
+          #--  assign relationship and frequency for feed
+          feedClass 
+            setBaseClassTo: erecord .
+            setBaseEntityTo: dbridgeClass .
+            setFrequencyTo: freq ;
+        ] 
+      ifFalse: 
+        [ ">>> Feed Class " print ; newFeedId print ;
+          " not defined." printNL ;
+        ] ;
+    ] ;
+
+] ;
+
+Interface ExternalFeedManager
+defineMethod: [ | createRelationship: id 
+  withGroupType: groupId via: groupPath andMemberType: memberId via: memberPath
+  asTS: tsFlag |
+
+#--  create the property
+!feed <- ^global PropertySetup ;
+!upload <-
+    [ "classId	property	tsFlag	defaultValue	propertyXRef" printNL ;
+      memberId print ; "	" print ;
+      memberPath print ; "	" print ;
+      tsFlag print ; "	" print ;
+      groupId print ; "	" print ;
+      groupPath print ; "	" printNL ;
+    ] divertOutput ;
+^self setRowLimitTo: 0 ;
+^self runExpression: [ feed updateFromString: upload ] ; 
+"Two-way link between " print ; memberId print ;
+" and " print ; groupId print ; " defined." printNL ;
+
+#--  create the Membership Feed
+!feed <- ^global MembershipFeedSetup ;
+!upload <-
+    [ "feedId	groupId	groupPath	memberId	memberPath" printNL ;
+      id capitalize print ; "	" print ;
+      groupId print ; "	" print ; groupPath print ; "	" print ;
+      memberId print; "	" print ; memberPath printNL ;
+    ] divertOutput ;
+^self setRowLimitTo: 0 ;
+^self runExpression: [ feed updateFromString: upload ] ; 
+id asClass isMembershipFeed
+ifTrue:
+  [ "Use MembershipFeed " print ; id print ; 
+    " for membership updates." printNL ;
+  ] 
+ifFalse:
+  [ ">>> No MembershipFeed class created." printNL ;
+  ] ;
+
+] ;
+
+Interface ExternalFeedManager defineMethod: 
+[ | createBridgeClass: newClassId from: oldId 
+    linkedTo: baseId via: path asTS: tsFlag |
+!newId <- ^self getValidClassNameFrom: newClassId ;
+!newClass <- ^self createCoreClass: newId from: oldId as: ^global Bridge ;
+newClass isBridge
+ifTrue:
+  [ !baseClass <- baseId asClass ;
+    baseClass isntNA && path isntDefault
+    ifTrue:
+       [ newClass setBaseClassTo: baseClass ;
+         newClass isLocalEntity &&
+            [ tsFlag asString asString toUpper contains: "METHOD" ]
+        ifTrue:
+           [ !method <- [
+                 "[ | " print ; path print ; " | " printNL ;
+                 "  ^global " print ; newClass whatAmI print ; " " print ;
+                 "access: asSelf" printNL ;
+                 "]" printNL ;
+              ] divertOutput ;
+              baseClass defineMethod: method ;
+              newClass enableEntityLookup ;
+              newClass setUpdateBlockTo: path asUpdateBlock ;
+              baseClass getMessage: path . 
+                 setFunctionTypeTo: "Data" .
+                 setReturnObjectTypeTo: newClass ;
+             "Lookup Method " print ; path print ; " defined at " print ;
+             baseClass whatAmI printNL ;
+           ] 
+        ifFalse:
+           [ ^self createLinkFrom: baseClass to: newClass 
+                 via: path asTS: tsFlag ;
+           ]  ;
+       ]
+    ifFalse: [ ">>> No link defined as access path." printNL ] ;
+  ] 
+ifFalse:
+  [ ">>> Bridge not created." printNL ;
+  ] ;
+
+newClass isBridge ifTrue: [ newClass ] 
+] ;
+
+
+Interface ExternalFeedManager
+defineMethod: [ | createCoreClass: newId from: oldId as: type |
+
+!newClass <- newId asClass ;
+newClass isntNA
+ifTrue:
+  [ newClass inheritsFrom: type .
+       ifTrue: 
+         [ "Class " print ; newId print ;
+           " is already a subclass of " print ; type whatAmI printNL ;
+         ] 
+      ifFalse: 
+        [ ">>> Class " print ; newId print ;
+          " already exists as a non-" print ; type whatAmI printNL ;
+          :newClass <- NA ;
+        ] ;
+  ] 
+ifFalse:
+  [ !oldClass <- oldId asClass ;
+    oldClass inheritsFrom: type . not
+    ifTrue:
+      [ ">>> Class " print ; oldId print ; " not a subclass of " print ;
+        type whatAmI printNL ;
+        :newClass <- NA ;
+      ] .
+    else:
+      [ !feed <- ^global ClassSetup ;
+        !upload <-
+            [ "classId | parentId | ospace | description" printNL ;
+              newId print ; "|" print ; oldId print ; "|" print ;
+              ^self ospace print ; "|" print ;
+              "This class represents individual " print ; 
+              newId print ; " instances." printNL ;
+            ] divertOutput ;
+        ^self setRowLimitTo: 0 ;
+        ^self runExpression: [ feed updateFromString: upload ] ; 
+        :newClass <- newId asClass ;
+        "Class " print ; newId print ; " created" print ;
+        ^self ospace isntNA 
+           ifTrue: [ " in object space " print ; 
+                     ^self ospace asString print ;
+                   ] ;
+        "." printNL ;
+      ] ;
+  ] ;
+
+^self setObjectSpaceTo: NA ;
+newClass
+
+] ;
+
+Interface ExternalFeedManager
+defineMethod: [ | createMasterFeed: id forEntity: entity |
+
+!feed <- ^global MasterFeedSetup ;
+!upload <-
+    [ "feedId	baseClassId" printNL ;
+      id print ; "	" print ; entity whatAmI printNL ;
+    ] divertOutput ;
+^self setRowLimitTo: 0 ;
+^self runExpression: [ feed updateFromString: upload ] ; 
+id asClass isMasterFeed
+ifTrue:
+  [ "Use MasterFeed " print ; id print ; 
+    " for instance creation." printNL ;
+  ] 
+ifFalse:
+  [ ">>> No MasterFeed class created." printNL ;
+  ] ;
+
+] ;
+
+Interface ExternalFeedManager
+defineMethod: [ |createExtenderFeed: id forBaseClass: bclass linkedTo: eclass|
+
+!feed <- ^global EntityExtenderFeedSetup ;
+!upload <-
+    [ "feedId	baseClassId	baseEntityId" printNL ;
+      id print ; "	" print ; bclass whatAmI print ; "	" print ;
+      eclass isntNA ifTrue: [ eclass whatAmI print ] ;
+      newLine print ;
+    ] divertOutput ;
+^self setRowLimitTo: 0 ;
+^self runExpression: [ feed updateFromString: upload ] ; 
+id asClass isEntityExtenderFeed
+ifTrue:
+  [ "Use Entity Extender " print ; id print ; 
+    " to update properties." printNL ;
+  ] 
+ifFalse:
+  [ ">>> EntityExtenderFeed class not created." printNL ;
+  ] ;
+
+] ;
+
+Interface ExternalFeedManager 
+defineMethod: [ | createLinkFrom: eClass to: drClass via: path asTS: flag |
+!feed <- ^global PropertySetup ;
+!upload <-
+    [ "classId	property	tsFlag	defaultValue	description" printNL ;
+      eClass whatAmI print ; "	" print ;
+      path print ; "	" print ;
+      flag print ; "	" print ;
+      drClass whatAmI print ; "	" print ;
+      "links " print ; eClass whatAmI print ; " to " print ;
+      drClass whatAmI print ; " data." printNL ;
+    ] divertOutput ;
+^self setRowLimitTo: 0 ;
+^self runExpression: [ feed updateFromString: upload ] ; 
+!message <- 
+  [ "Property link between " print ; eClass whatAmI print ;
+    " and " print ; drClass whatAmI print ; " via " print ;  path print ; 
+  ] divertOutput ;
+eClass getMessage: path . isntDefault
+   ifTrue: [ message print ; " defined. " printNL ]
+  ifFalse: [ ">>> " concat: message . print ; " not defined. " printNL ] ;
+
+] ;
+
+#======================================================================
+
+####################
+#  ExcelManager versions
+####################
+
+Interface ExcelManager defineMethod: [ | validateFeedName: feedId |
+^super validateFeedName: feedId .
+   ifTrue: [ "Valid" printNL ] ifFalse: [ "Invalid" printNL ] ;
+] ;
+
+####################
+#  DBAdminManager versions
+####################
+
+Interface DBAdminManager defineMethod: [ | displayFeedsFor: catId |
+  [ ^super displayFeedsFor: catId 
+  ] divertOutput asLines
+  do: [ !fields <- ^self breakOn: "	" ;
+        fields at: 1 . printNL ;
+      ] ;
+] ;
+
+####################
+#  BatchFeedManager versions
+####################
+
+Interface BatchFeedManager
+defineMethod: [ | upload: feedName usingFile: feedFile withConfig: cfgFile |
+  !feed <- feedName asString asClass ;
+  feed isDataFeed
+    ifTrue: 
+     [ feed loadFromFile: feedFile withConfig: cfgFile;
+       feed currentStore cleanupCurrentInstances ;
+     ]
+   ifFalse: 
+     [ !error <- feed isNA 
+         ifTrue: [ feedName asString concat: " not found" ] 
+        ifFalse: [ feed whatAmI concat: " is not a DataFeed" ] ;
+       ">>> Error --- " print ; error printNL ;
+     ] ;
+] ;
+
+
+

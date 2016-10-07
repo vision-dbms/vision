@@ -1,0 +1,155 @@
+##################
+####  Object  ####
+##################
+
+Object
+define: 'isOpenVisionChannel' toBe: FALSE.
+;
+
+
+##################
+####  Number  ####
+##################
+
+Number
+
+################
+#  Seek Support
+################
+
+defineMethod:
+[ | becomeSeekOffsetOf: openVisionChannel |
+    openVisionChannel setSeekOffsetTo: ^self asInteger
+].
+
+################
+#  Output Support
+################
+
+defineMethod:
+[ | putByteTo: openVisionChannel |
+    ^self asInteger putByteTo: openVisionChannel
+].
+
+defineMethod:
+[ | putShortTo: openVisionChannel |
+    ^self asInteger putShortTo: openVisionChannel
+].
+
+defineMethod:
+[ | putLongTo: openVisionChannel |
+    ^self asInteger putLongTo: openVisionChannel
+].
+
+defineMethod:
+[ | putFloatTo: openVisionChannel |
+    ^self asFloat putFloatTo: openVisionChannel
+].
+
+defineMethod:
+[ | putDoubleTo: openVisionChannel |
+    ^self asDouble putDoubleTo: openVisionChannel
+].
+;
+
+
+#################
+####  Float  ####
+#################
+
+Float
+
+################
+#  Output Support
+################
+
+define: 'putFloatTo:'		toBe: 596 asPrimitive.
+;
+
+##################
+####  Double  ####
+##################
+
+Double
+
+################
+#  Output Support
+################
+
+define: 'putDoubleTo:'		toBe: 597 asPrimitive.
+;
+
+
+###################
+####  Integer  ####
+###################
+
+Integer
+
+################
+#  Access
+################
+
+defineMethod:
+[ | asOpenVisionChannel |
+    ^self __asOpenVisionChannel asPointerTo: ^global OpenVision Channel
+].
+define: '__asOpenVisionChannel'	toBe: 539 asPrimitive.
+
+################
+#  Seek Support
+################
+
+defineMethod:
+[ | becomeSeekOffsetOf: openVisionChannel |
+    openVisionChannel setSeekOffsetTo: super
+].
+
+
+################
+#  Input Support
+################
+
+defineMethod:
+[ | getStringFrom: openVisionChannel |
+    openVisionChannel getStringOfLength: super
+].
+
+################
+#  Output Support
+################
+
+define: 'putByteTo:'		toBe: 591 asPrimitive.
+define: 'putShortTo:'		toBe: 593 asPrimitive.
+define: 'putLongTo:'		toBe: 595 asPrimitive.
+;
+
+
+##################
+####  String  ####
+##################
+
+String
+
+################
+#  Creation
+################
+
+defineMethod:
+[ | asOpenVisionChannel |
+    ^self __asOpenVisionChannel asPointerTo: ^global OpenVision Channel
+].
+define: '__asOpenVisionChannel'		toBe: 530 asPrimitive.
+
+defineMethod:
+[ | asOpenVisionChannelToVision |
+    ^self asOpenVisionChannel consumeVisionPrompt
+].
+
+################
+#  Output Support
+################
+
+define: 'putStringTo:'		toBe: 598 asPrimitive.
+;
+

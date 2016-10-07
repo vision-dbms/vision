@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Design Methodology: Application Classes </title>
+</head>
+<body bgcolor=white>
+<h2>Vision Design Methodology: Core Application Classes</h2>
+
+<p>
+| <a href="FHome.htm">Home</a>
+| <a href="vapps.htm">Applications</a> 
+| <a href="clXRef.htm">Class XRef</a> |
+<p>
+<hr>
+<h3>Topics Covered:</h3>
+<ul type=square>
+<li><a href="#overview">Overview</a>
+<li><a href="#entity">Entity Classes</a>
+<li><a href="#data">Data Records</a>
+<li><a href="#link">Link Records </a>
+<li><a href="#bridge">Bridge Classes </a>
+<li><a href="#feeds">External Data Sets</a>
+<li><a href="#dbentity">DBEntity Classes</a>
+</ul>
+<hr>
+<h3><a name="overview">Overview</a></h3>
+<p>
+A number of <b>Abstract Classes</b> have been defined to organize different
+components of your Vision class hierarchy.  Abstract classes are not
+normally instantiated directly; instead they serve to organize a set
+of subclasses that share some basic behavior.  Built-in abstract
+classes include <b>Collection</b> which is the superclass of
+<b>List</b> and <b>TimeSeries</b> and <b>Ordinal</b> which is the
+superclass of <b>Number</b>, <b>Date</b>, and <b>String</b>.
+<p>
+It is useful to have a basic hierarchy for your application classes
+as well.  Several abstract classes have been defined to help organize 
+application classes: 
+<p>
+<ul type="disc">
+<li>Entity
+<li>DataRecord
+<li>LinkRecord
+<li>Bridge
+<li>DataFeed
+<li>DBEntity
+</ul>
+<p>
+Most applications will interact with the database via <b>Entity</b>
+instances.  The other classes are used to store data or manage navigations
+from an entity to other parts of the database.
+<p>
+The organization provided by these classes is intended to serve 
+as a guideline that can be applied as appropriate.
+These classes are all defined in Vision and can 
+therefore be modified and expanded as needed by the database
+designer. 
+<p>
+<blockquote><hr><center><a name="missingDefs"> <b>Note:</b></a></center>
+Some of the classes referenced in this document were added to the Vision
+bootstrap database as part of release 5.9.4.  If your installation
+was bootstrapped prior to this, you may need to define the
+following:<pre><tt><b>
+     Entity createSubclass: "Support" ;
+     Entity createSubclass: "Table" ;
+     Object createSubclass: "Bridge" ;
+     IncorporatorPrototype createSubclass: "DataFeed" ;
+</b></tt></pre>
+<hr></blockquote><p>
+
+<p>
+<hr>
+<h3><a href="clEntity.htm" name="entity">Entity Classes</a></h3>
+<p>
+The <b>Entity</b> class is a superclass of the
+classes whose instances represent
+real-world entities such as companies, products, and industries.  Instances
+of the entity subclasses are named, often with several different aliases.
+Instances of the entity subclasses normally have one or more descriptive
+names in addition to a unique identifier.
+Instances of the entity subclasses are often referenced individually
+by name or as the value of a property of another entity instance.  
+Almost all applications are designed to start with a specific entity
+or a set of entities.
+<p>
+Core entities in your application domain are normally defined as direct
+subclasses of <b>Entity</b>.  In an investment management application, these
+entities could include: 
+<i>Company</i>, <i>Security</i>, <i>Account</i>, and <i>Broker</i>.
+In a pharmaceutical application, these entities could include: <i>Drug</i>,
+<i>Pharmacy</i>, <i>HealthPlan</i>, and <i>Doctor</i>.  
+<p>
+Entity classes represent objects that are named.  Every entity subclass
+has a corresponding <a href="clEntity.htm#access">naming dictionary</a>
+that allows you to reference specific instances by one or more
+identifiers.  The properties <i>name</i>, <i>shortName</i>,
+<i>sortCode</i>, and <i>numericCode</i> are defined for the class.
+Initially these properties are all set to the value of <i>code</i>;
+you can modify any or all of these values as needed.
+<p>
+<h4><a name="classify" href="clClassify.htm">The Classification Class</a></h4>
+<p>
+The class <b>Classification</b>
+has been defined as an abstract subclass of <b>Entity</b> to
+organize subclasses which are used for grouping and summarization
+purposes.  This class is included with all Vision installations.
+Instances of <b>Classification</b> subclasses are normally referenced
+by other Entity instances.  For example, the property <i>region</i>
+could be define for the class <b>Company</b> to return
+an instance of the <b>Region</b> class representing the region
+in which the company is based and the
+property <i>industry</i> could be defined to return an instance of the
+class <b>Industry</b> representing the company's major industry.
+<p>
+Instances of many classification subclasses are often managed as a
+hierarchy.  For example, <i>Industry 123</i> may refer to "Book
+Publishing", <i>Industry 120</i> may refer to "General Publishing", 
+and <i>Industry 100</i> may refer to "General Media".  
+The <b>Classification</b>
+class provides protocol to link these instances into a hierarchical
+structure.
+
+<p>
+<h4><a name="miscEntity">Support and Table Classes</a></h4>
+<p>
+Two additional abstract subclasses, <b>Support</b> and
+<b>Table</b> are recommended for organizing classes that require
+objects that are individually named that are not really core
+entities in the application.  Note that these classes may need to
+be <a href="#missingDefs">added to your database</a> if you want
+to use them.  There is no special protocol that needs to be defined
+for these classes.  They simply provide a way of organizing the
+entity subclasses so that the expression:<pre><tt><b>
+     Entity showInheritance
+</b></tt></pre>
+neatly separates the core entity classes from miscellaneous support
+classes.  For example, you could create a subclass of <b>Table</b>
+when you need a place to store descriptions for coded information.
+
+<p>
+<h4><a name="currency" href="clCurrency.htm">The Currency Class</a></h4>
+<p>
+The class <b>Currency</b>
+is a subclass of <b>Entity</b> that is included as part of all Vision
+installations.  This 
+class is used to track exchange rate information between
+currencies.  Instances of the class currency represent the currencies
+in which monetary transactions are performed such as "US Dollars" or
+"British Pounds".  
+
+<p>
+<h4><a name="universe" href="clUniverse.htm">The Universe Class</a></h4>
+<p>
+The class <b>Universe</b>
+is a subclass of <b>Entity</b> that is included as part of all
+installations.  Instances of this class are used to name and
+track lists of related
+entities over time.  For example, a <b>Universe</b> instance named
+<i>SP500</i> could be defined to track the list of <b>Security</b>
+instances comprising the <i>Standard & Poors 500</i> each month.
+
+<p>
+<hr>
+<h3><a name="data">Data Records</a></h3>
+<p>
+The subclasses of <b>DataRecord</b> are used to
+manage sets of related information about a specific entity.
+These classes provide a way to organize data about an 
+entity into manageable substructures.  
+<p>
+For example, in an investment
+management application you need to track various pieces of
+pricing information for a security
+such as high, low, and closing price.  You could define this
+protocol directly at the Security class including properties to
+hold the data values and methods for manipulating the values.
+Alternatively, you could define a subclass of <b>DataRecord</b>
+to manage this information and create a single property that
+can link a security instance to its pricing instances over time.
+<p>
+<b>DataRecord</b> instances are not usually accessed directly.
+An instance of a <b>DataRecord</b> subclass is normally accessed via
+a property defined at the entity instance with which it is associated.
+The <i>createInstance:</i> message for this class assumes you are supplying
+four values: the entity, a date, a value, and a base currency if applicable.
+<p>
+For example:<pre><tt><b>
+     #-- Create price time series for Security class
+     Entity createSubclass: "Security"
+     Security define: 'price' ;
+
+     #-- Create PriceRecord which tracks high, low, and close for a security
+     DataRecord createSubclass: "PriceRecord" ;
+     PriceRecord defineFixedProperty: 'high' ;
+     PriceRecord defineFixedProperty: 'low' ;
+     PriceRecord defineFixedProperty: 'close' ;
+
+     #--  Update IBM's prices for several dates
+     Security createInstance: "IBM" ;
+     Named Security IBM 
+     do: [ !newPrice <- ^global PriceRecord createInstance: ^self, 9601 .
+               do: [ :high <- 101.25 ; :low <- 100.75 ; :close <- 101.00 ] ;
+           :prices asOf: 9601 put: newPrice;
+           !newPrice <- ^global PriceRecord createInstance: ^self, 9602 .
+               do: [ :high <- 102.25 ; :low <- 100.75 ; :close <- 101.75 ] ;
+           :prices asOf: 9602 put: newPrice;
+         ] ;
+
+    #-- Display the data
+    Named Security IBM :prices
+       do: [ ^date print: 15 ; high print ; close print ; low printNL ] ;
+</b></tt></pre>
+
+<p>
+<hr>
+<h3><a name="link">Link Records</a></h3>
+<p>
+The subclasses of <b>LinkRecord</b> are used to manage
+information that symmetrically relates two or more entities.  
+For example, in an investment application a holding describes
+a relationship between a specific security and account on a specific
+date.  Properties of the class <i>Holding</i> could 
+therefore include <i>account</i>, <i>security</i>, <i>date</i>, 
+<i>sharesOwned</i>, and <i>cost</i>.
+A consumer products application could define a subclass of
+<b>LinkRecord</b> to manage sales transactions.  Properties of
+the class <i>SalesTransaction</i> could include 
+<i>product</i>, <i>customer</i>, and <i>store</i>
+as well as <i>unitsSold</i> and <i>dollarValue</i>.  The values
+of the first three of these properties could be instances of the <i>Entity</i>
+subclasses <i>Product</i>, <i>Customer</i> and <i>Store</i>.
+<p>
+Instances of <b>LinkRecord</b> subclasses are not normally
+referenced directly.
+Subsets of <b>LinkRecord</b> instances are often cross-referenced
+at the entity classes with which they are associated.  For example,
+the time series property <i>holdings</i> could
+be defined at the <b>Entity</b> subclass <i>Account</i> could 
+to return the list of <i>Holding</i> instances associated 
+with the specific account instance over time.
+The property <i>salesTransactions</i> at the <b>Entity</b> subclass
+<i>Customer</i> could be defined to return a list of the
+<i>SalesTransaction</i> instances associated with the specific
+customer instance.  
+
+<p>
+<hr>
+<h3><a name="bridge">Bridge Classes</a></h3>
+<p>
+The subclasses of the <b>Bridge</b> class are used to manage
+the protocol for connecting an entity to one more <b>DataRecord</b>
+instances.  It is useful when there are complex relationships that
+need to be managed and you do not want to overburden the entity
+class with all the required information.
+<p>
+An instance of a <b>Bridge</b> subclass is normally
+referenced via the entity instance with which it is associated.
+
+<p>
+<hr>
+<h3><a name="feeds">External Data Sets</a></h3>
+<p>
+The classes <b>Data Feed</b> and <b>DataSet</b> are subclasses of
+the abstract class <b>IncorporatorPrototype</b> with subclasses that
+represent data that is supplied via an external file or transfer.  Each
+external feed maps to a specific subclass of <b>DataFeed</b> or <b>DataSet</b>.
+The instances of these subclasses correspond to the 
+records or rows in the external feed.  The properties of these
+subclasses correspond to the fields or columns in the
+external feed.  
+<p>
+Instances of the <a href="clDataFeed.htm"><b>DataFeed</b> subclasses</a>
+are normally used to create and update instances of 
+<b>Entity</b> and <b>DataRecord</b> subclasses and are not 
+normally accessed directly by applications once the data has been
+processed.
+<p>
+Unlike <b>DataFeed</b> classes which are not normally referenced even 
+indirectly by other objects, subclasses of <b>DataSet</b> are used to
+store information which are an active part of the database.
+<b>DataSet</b> instances are normally access via an instance of
+the <b>DBEntity</b> subclass, <a href="#dbentity">described below</a>.
+Once the data from an external feed has been
+incorporated into a <b>DataSet's</b> instances, there is no
+logical difference between a <b>DataSet</b> and a <b>DataRecord</b>.
+
+<p>
+<hr>
+<h3><a name="dbentity">DBEntity Classes</a></h3>
+<p>
+Data from multiple sources is often managed within a single Vision
+database.  This data is normally associated with instances of
+one or more entity subclasses.  A specific source may not supply
+information for every instance in the related entity class.  The
+source may also provide data for entities that do not have a
+corresponding entity instance.  In this case, you may not want to
+lose the data; however, you do not necessarily want to manufacture new
+entity instances to house it.
+<p>
+The abstract class <b>DBEntity</b> has been defined to provide
+protocol for defining pseudo-entities that correspond to the
+set of instances tracked by a specific data source.
+Subclasses of this
+class are normally used to manage the links between core
+<b>Entity</b> instances and the actual data supplied by the data
+source.  These subclasses are normally named <b>LocalEntity</b>
+and are defined in the object space associated with a particular
+data source.  In the current Vision database bootstrap, this
+class is a direct subclass of <b>Object</b>.  Based on its role,
+it should probably be viewed as a subclass of the <b>Bridge</b>
+class since it links a single <b>Entity</b> to one or more
+<b>DataSet</b> instances.
+<p>
+More information about the <b>DBEntity</b> model 
+<a href="clDBEntity.htm">is available</a>.
+
+<p>
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy 1998 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated August 28, 1998</font>
+</table>
+
+</body>
+</html>
+
+
+

@@ -1,0 +1,51 @@
+####################
+#  MembershipFeedSetup - Portfolio Management Application Layer: supp
+#    this feed is used to define all the Membership
+#    feeds that will be used for updating one-to-many relationships
+#    between entity classes.  Each MembershipFeed defines a relationship
+#    between a grouping class and a membership class.  This feed is 
+#    used to define the set of membership feeds you wish  to use.
+#
+#  This feed uses the following fields:
+#     feedId            name of feed
+#     groupId           class that stores list of members
+#     groupPath         name of property at group that stores members
+#     memberId          class of the members
+#     memberPath        name of property that references group from member
+#     mode              append or replace existing relationship
+#
+#  A relationship can be defined in two ways :
+#    1.  Track a related group of entities - this approach stores
+#        a list of entities of the class identified by "memberId".
+#        The list can be tracked over time.  There is no corresponding
+#        property at the member class.  For example, The SP500 is
+#        a Universe (groupId) of Securities (memberId) that is tracked
+#        in the time series property 'list' (groupPath) at Universe.
+#        This style of relationship should always reference the class
+#        Universe (or a user-defined subclass) as the "groupId" and
+#        the "groupPath" of "list" .
+#    2.  Track a bi-directional relationship between group and member -
+#        this approach stores the list of entities at the group and
+#        also stores a specific instance of the group as the member's
+#        value.  For example, the US is a Country (groupId) that tracks
+#        Company instances (memberId) in the property 'companyList'
+#        (groupPath); the property 'country' (memberPath) stores the
+#        value of a company's country.
+#        
+#  The "feedId", "groupId", "groupPath", and "memberId" are required.
+#  The "memberPath" is required for the bi-directional relationships.
+#  The "groupPath" and "memberPath" properties should be defined as
+#  part of the PropertySetup feed.  The "groupPath" property serves
+#  as the "propertyXRef" for the "memberPath" definition.  For the
+#  above example, the following entry would appear in the PropertySetup
+#  feed:
+#      classId     property     defaultValue     propertyXRef
+#      Company     country      Country          companyList
+#
+#  The fields must be supplied in this order.  You can include a header
+#  line in this feed, but the header values are ignored.  
+#
+####################
+
+feedId	groupId	groupPath	memberId	memberPath	mode
+

@@ -1,0 +1,50 @@
+
+######################
+######################
+####  Indexed Collection Extensions
+######################
+######################
+#
+#  This file defines primitives to query and change the default
+#  key map type for new time-series and indexed lists.
+#
+######################
+
+IndexedCollection 
+
+################
+#  Indexing Type Update and Query
+################
+
+#----------
+#  '__getDefaultIndexingType' returns an integer interpreted as follows:
+#
+#	1	New indexed lists and time-series are created using product
+#		mapped indexing, cloned ('newPrototype') indexed lists and
+#		time-series are created using the same type of indexing as
+#		their prototype.
+#	2	New indexed lists and time-series are created using partition
+#		mapped indexing, cloned ('newPrototype') indexed lists and
+#		time-series are created using the same type of indexing as
+#		their prototype.
+#	257	New indexed lists and time-series are always created using
+#		product mapped indexing.  Cloned indexed collections ignore
+#		the indexing type of their prototype.
+#	258	New indexed lists and time-series are always created using
+#		partition mapped indexing.  Cloned indexed collections ignore
+#		the indexing type of their prototype.
+#----------
+define: '__getDefaultIndexingType'			toBePrimitive: 298 .
+
+define: '__setDefaultIndexingTypeToProductMapped'	toBePrimitive: 299
+						     withControlValue:   1 .
+define: '__setDefaultIndexingTypeToPartitionMapped'	toBePrimitive: 299
+						     withControlValue:   2 .
+
+define: '__setDefaultIndexingTypeToCoercedProductMapped'
+							toBePrimitive: 299
+						     withControlValue: 257 .
+define: '__setDefaultIndexingTypeToCoercedPartitionMapped'
+							toBePrimitive: 299
+						     withControlValue: 258 .
+;

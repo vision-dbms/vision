@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html>
+<head><title>Vision Administration: Batch Processing</title></head>
+<body bgcolor=white>
+<h2>Vision Administration: Batch Processing</h2>
+<p>
+| <a href="FHome.htm">Home</a> 
+| <a href="clDataFeed.htm">Data Feeds</a>
+| <a href="pmaFeeds.htm">PMA Feeds</a>
+|
+<hr>
+
+
+
+<h3>Topics Covered:</h3>
+<ul type=square>
+<li><a href="#overview">Overview</a>
+<li><a href="#Batch">Creating Batch Scripts</a>
+<li><a href="#Updating">Using BatchScripts to Run DataFeeds</a>
+<li><a href="#New">Defining New Classes and Properties</a>
+<li><a href="#ModelData">ModelData Sample</a>
+<li><a href="#Maintenance">Database Maintenance Functions</a>
+<li><a href="#ObjectSpaces">Creating New Object Spaces</a>
+<li><a href="#ObjectSpaceAssign">Assigning New Classes to an Object Space</a>
+<li><a href="#ClassStores">Creating New DataRecord Stores</a>
+<li><a href="#Bridges">Creating Bridge Classes and Feeds</a>
+<li><a href="#LocalEntity">LocalEntity Bridges and Private Object Spaces</a>
+<li><a href="#EstimateBridge">Creating Estimate Bridges and Feeds</a>
+
+</ul>
+<p><hr>
+<h3><a name="overview">Overview</a></h3>
+<p>
+The <a href="pmaDBA.htm">Vision Administrator Module</a> performs various Database Administration functions
+in an interactive Windows environment.  You may find it useful to use scripts to
+perform these same functions in a batch environment.  Such sample scripts are
+described in this document and can serve as a basis for designing your own.  These
+scripts work outside the VAdmin module and allow you to perform multiple functions
+and/or load multiple files simultaneously, as well as allow you to keep an 'audit
+trail' of your scripting iterations.
+
+<p>The examples as provided assume certain  environment variables have
+been set to the standards established in PMA Release 1.7.  If you
+are on a prior release, you will need to modify these variables
+before running your scripts as described in this document:<p>
+
+On Unix:<p>
+
+Modify the general defaults for Vision Database Administrator processing in <i>/localvision/include/DBAVision.env</i>:
+<ul type=disc>        Add <i>setenv VisionAdm 1</i><br>
+        Add <i>setenv UserOSI 3</i><br>
+        Change the <i>VisionMaxSegSize</i> from <i>50000000</i> to <i>33554432</i></ul>
+<p>
+On NT:<p>
+
+Modify the System Variables:
+<ul type=disc>Add <i>%VisionRoot%bin</i> to the values listed for the Path variable<br>
+Add the new variable <i>NDFPathName</i> with a value of <i>%LocalVisionRoot%network\NDF</i></ul>
+
+Modify the User Variables for the Vision Administrator:
+<ul type=disc>Add the new variable <i>UserOSI</i> with a value of  <i>3</i><br>
+Add the new variable <i>VisionAdm</i> with a value of  <i>1</i><br>
+Add the new variable <i>VisionMaxSegSize</i> with a value of <i>33554432</i></ul>
+<p>
+If you need additional help setting up these variables,  please
+contact your Insyte consultant.
+
+
+
+<p><hr>
+<H3><a name="Batch">Creating Batch Scripts</a></h3>
+<p>
+The server-based software that manages your Vision database
+is the component known as <i>batchvision</i>.
+When you use VAdmin or one of the Vision editors, you are communicating
+with a <i>batchvision</i> process interactively.  The <i>batchvision</i>
+program is also used to execute non-interactive programs.
+Requests can be submitted to
+<i>batchvision</i> via Vision script files.  A Vision script file is
+simply a standard text file containing one or more Vision requests.
+Any number of requests can be included in a Vision script file.  Each
+request is terminated by the <b>?g</b> command which instructs
+Vision to begin executing the request.
+<p>
+For example, assume the message <i>displayWeeklyReports</i> has been
+saved in the Vision database and you want to run this program.  You
+could create the file <i>testfile</i> which contains the following
+lines:
+<pre><tt><b>     displayWeeklyReports ;
+     ?g</b></tt></pre>
+Note that the characters <b>?g</b> must be the only characters on the line
+followed by a carriage return.
+To execute this Vision script file, it can be used as standard input to the
+<i>batchvision</i> program as shown below for both Unix and NT:
+
+<ul><pre><tt><b>batchvision < testfile > testfile.out</b></tt></pre></ul>
+
+The requests in a Vision Script file can access, create, and manipulate
+any Vision structures that have been saved in the database or defined
+in the script.
+<p>
+If you want your Vision script to commit any new or changed information
+to the database, you need to start <i>batchvision</i> as the Vision Administrator and include an explicit instruction to update the database
+in your Vision script.  For example, the following script defines
+a new display method for the class Object and saves the method to the
+database:
+
+<b><pre>     #---  Vision Script to define and save a new method at Object
+     Object defineMethod: [ | display |
+        ^self whatAmI print ; ^self creationDate print ;
+        ^self code printNL ;
+     ] ;
+     ?g
+
+     #---  Now save the results - don't forget the ?g on its own line
+     Utility updateNetworkWithAnnotation: "define a new display method" ;
+     ?g</pre></b>
+
+Assume this script is saved as the file <i>testupdate</i>.  You
+can run and save this script on Unix or NT using:
+
+<ul><pre><tt><b>batchvision < testupdate > testupdate.out</b></tt></pre></ul>
+
+Once this script has completed, you will be able to access the new
+method any time you connect to the Vision database.
+You must be logged in as the Vision Database Administrator
+to save the results of this script.
+<p>
+NOTE: On Unix systems, you need to source the following file before you begin your batch processing:
+<ul><pre><b>source /localvision/include/DBAVision.env</b></pre></ul>
+
+<p>
+
+<b>!!!  Warnings !!!</b>
+<p>
+<ul type=disc>
+<li>When you are testing your Vision scripts you should make sure that
+  they do not include the step that updates the database.
+<p>
+<li>Scripts that contain the ?g characters cannot be loaded via VAdmin.
+</ul>
+<p>
+
+
+<hr>
+<h3><a name="Updating">Using BatchScripts to Run DataFeeds</a></h3>
+<p>
+The VAdmin module limits DataFeed loading to one feed at a time.
+Once you have established some basic procedures for loading your
+data, you may prefer to create some batch scripts for yourself
+that perform the same function for multiple feeds at a time.
+<p>
+The Vision method for loading a data file via a data feed requires
+that you provide the name of the feed, the name of the file, and
+an optional <a href="pmaFeeds.htm#config">configuration file name</a>.
+  For example, if you want to
+load data using the <b>SecurityMaster</b> feed from the file
+<i>/localvision/upload/feeds/secmaster.dat</i>, use the expression:
+
+<b><pre>         Interface BatchFeedManager
+         upload: "SecurityMaster"
+         usingFile: "/localvision/upload/feeds/secmaster.dat"
+         withConfig: NA ;</pre></b>
+
+If you have an explicit configuration file to use, replace the
+third parameter with the actual file name.
+ To update the Security
+Master via a batch process, do the following:
+<ol type=1>
+<li>Create a Vision script that loads and saves the data
+
+<b><pre>         #--  Load the data
+         Interface BatchFeedManager
+             upload: "SecurityMaster"
+             usingFile: "/localvision/upload/feeds/secmaster.dat"
+             withConfig: NA ;
+         ?g
+
+         #--  and Update the database - don't forget the ?g on its own line
+         Utility updateNetworkWithAnnotation: "load single secmaster file" ;
+         ?g</pre></b><p>
+Note:  On NT systems, if your data files are on a different drive than your script, you need to use the absolute path name.<p>
+<li>Save the Vision script as <i>secmaster.vis</i>
+
+<li>Submit this script to <i>batchvision</i> for update. You must be logged in as the Vision Database Administrator to update the database.  For both Unix and NT use:
+
+<ul><b><pre>batchvision < secmaster.vis > secmaster.out</pre></b></ul>
+
+</ol>
+Your Vision script can be modified to include multiple updates.
+For example, you may want to update a standard set of files each
+day in a specific order.  Assume on a daily basis you receive
+a security master, company master, portfolio master, prices, and
+holdings file.  If you copy these files to a known directory and
+name them the same way each day, you can use a single Vision script
+to update the set:
+
+<b><pre>         #--  Load the data
+         Interface BatchFeedManager
+             upload: "CompanyMaster"
+             usingFile: "/localvision/upload/feeds/compmaster.dat"
+             withConfig: NA ;
+         ?g
+         Interface BatchFeedManager
+             upload: "SecurityMaster"
+             usingFile: "/localvision/upload/feeds/secmaster.dat"
+             withConfig: NA ;
+         ?g
+         Interface BatchFeedManager
+             upload: "PortfolioMaster"
+             usingFile: "/localvision/upload/feeds/portmaster.dat"
+             withConfig: NA ;
+         ?g
+         Interface BatchFeedManager
+             upload: "PriceFeed"
+             usingFile: "/localvision/upload/feeds/prices.dat"
+             withConfig: NA ;
+         ?g
+         Interface BatchFeedManager
+             upload: "HoldingsFeed"
+             usingFile: "/localvision/upload/feeds/holdings.dat"
+             withConfig: NA ;
+         ?g
+
+         #--  and Update the database - don't forget the ?g on its own line
+         Utility updateNetworkWithAnnotation: "load daily file" ;
+         ?g</pre></b>
+
+<hr>
+<h3><a name="New">Defining New Classes and Properties</a></h3>
+<p>
+In addition to loading data, the menus in the VAdmin module
+provide tools that allow you to define new classes and relationships.
+The actual Vision code invoked by VAdmin to perform these functions
+is supplied below:
+
+<b><pre>     #--------------------
+     #  VAdmin Schema Choice: Create Entity Class
+     #      Creates Entity subclass and associated MasterFeed
+     #  Inputs -
+     #        createEntityClass:      name of subclass to create
+     #                     from:      Entity class to subclass
+     #--------------------
+     Interface BatchFeedManager
+        createEntityClass: "SPIndustry" from: "Industry" ;
+
+     #--------------------
+     #  VAdmin Schema Choice: Create DataRecord Class
+     #      Creates DataRecord subclass and EntityExtenderFeed
+     #  Inputs -
+     #        createDataRecordClass:     name of subclass to create
+     #                         from:     DataRecord class to subclass
+     #                     linkedTo:     Entity class to link to
+     #                          via:     property to define at linkedTo class
+     #                         asTS:     should property be a t/s?
+     #--------------------
+     Interface BatchFeedManager
+       createDataRecordClass: "ModelData" from: "DataRecord"
+          linkedTo: "Company" via: "modelData" asTS: "YES" ;
+
+     #------------------------------------------
+     #  VAdmin DataFeeds Choice: PropertySetup
+     #      Define properties for new DataRecord Class
+     #  Inputs -
+     #               classId:   name of class/subclass properties are assigned to
+     #              property:   name of property
+     #                tsflag:   is property a t/s? Y or N
+     #              datatype:   class of object returned by this property
+     PropertySetup updateFromString:
+         #--  these are tab-delimited
+         "classId  property  tsflag  datatype
+         ModelData	model1	N	Number
+         ModelData	model2	N	Number
+         ModelData	model3	N	Number
+         ";
+
+
+     #--------------------
+     #  VAdmin Schema Choice: Create Relationship
+     #      Creates MembershipFeed and property tracking relationship
+     #              at the group and member entity classes supplied
+     #  Inputs -
+     #        createRelationship:     name of MembershipFeed class to create
+     #             withGroupType:     Entity class of Groups
+     #                       via:     list property defined at group class
+     #             andMemberType:     Entity class of Members
+     #                       via:     property defined at member class
+     #                      asTS:     should properties be t/s?
+     #--------------------
+     Interface BatchFeedManager
+       createRelationship: "CompanyToSPIndustry"
+          withGroupType: "SPIndustry" via: "memberList"
+          andMemberType: "Company" via: "spIndustry" asTS: "YES" ;</pre></b>
+
+
+You can include these functions in any batch script you submit for update.
+<p><hr><P>
+
+<h3><a name="ModelData">ModelData Sample</a></h3>
+<p>
+Assume that you want to track several model scores about a company over
+time.  You need to:
+<ol type=1>
+<li>Create the <b>ModelData</b> class as a <b>DataRecord</b>
+        linked to <b>Company</b> over time.
+
+<li>Define the model properties for your new class.
+
+<li>Load model data for specific company/date combinations.
+</ol> 
+The following Vision script can be used to define the new class:
+
+<b><pre>     Interface BatchFeedManager
+       createDataRecordClass: "ModelData" from: "DataRecord" 
+          linkedTo: "Company" via: "modelData" asTS: "YES" ;
+     ?g
+
+     PropertySetup updateFromString:
+        "classId     property     tsflag     datatype
+         ModelData   model1       N          Number
+         ModelData   model2       N          Number
+         ModelData   model3       N          Number
+        " ;
+     ?g
+
+     Utility updateNetworkWithAnnotation: "Define ModelData class" ;
+     ?g</pre></b>
+
+
+This creates the class <b>ModelData</b> and defines three properties.  
+Model data for the three model values can be updated using
+the <b>ModelDataFeed</b>.  For example, if you create a file
+named <i>models.dat</i>, that contains:
+
+<b><pre>     id     date     model1     model2     model3
+     ibm    9801     1          2          3
+     ibm    9802     2          2          3
+     dell   9801     10         12         14</pre></b>
+
+you can update it using:
+
+<b><pre>         Interface BatchFeedManager 
+             upload: "ModelDataFeed"
+             usingFile: "models.dat
+             withConfig: NA ;
+         ?g</pre></b>
+
+Access to the data is provided via the Vision expression:
+
+<b><pre>      Named Company IBM modelData
+      do: [ date print: 15 ; 
+            model1 print ;
+            model2 print ;
+            model3 printNL ;
+          ] ;</pre></b>
+<p><hr><p>
+<h3><a name="Maintenance">Database Maintenance Functions</a></h3>
+
+
+A set of database maintenance functions needs to be performed 
+periodically to reclaim space and compress structures that
+have become sub-optimal as the result of many updates to the
+database.  These functions are described in the table below:
+<p>
+<center><table border=1 width=80% cellpadding=4 cellspacing=2>
+<tr><th>DBA Function<th>Description
+<tr>
+<td><i>Database Cleanups and Garbage Collection</i>
+<td>Performs various cleanup activities that are standard for all
+installations.
+<tr>
+<td><i>Compaction</i>
+<td>Physically moves unused information out of the database and
+temporarily relocates it elsewhere on the disk.
+<tr>
+<td><i>Delete Segments</i>
+<td>Removes the unused information identified by the compaction process.
+</table></center>
+<p>
+In a starter environment, these maintenance activities are invoked
+interactively using the VAdmin module as needed.  As you move towards
+a production environment, you may prefer to create a batch process that
+performs these maintenance tasks.
+<p>
+The <i>adminScripts</i> directory in the <i>localvision</i> directory
+contains batch scripts that perform these functions.  On Unix systems,
+this directory is accessed via <i>/localvision/adminScripts</i>.
+On NT systems, this directory is located in <i>c:\localvision</i> by 
+default, but is usually relocated during the installation process.  
+The environment variable <i>LocalVisionRoot</i> 
+refers to the location chosen for the <i>localvision</i> directory
+on NT.
+<p>
+The following scripts are included in the <i>adminScripts</i>
+directory:
+<p>
+<center><table border=1 width=80% cellpadding=4 cellspacing=2>
+<tr><th colspan=2>Maintenance scripts in <i>/localvision/adminScripts</i>
+<tr><th>Script Name <th>DBA Function
+<tr>
+<td><i>garbageCollect.cmd</i>
+<td>Database Cleanups and Garbage Collection
+<tr>
+<td><i>fullCompact.cmd</i>
+<td>Compaction
+<tr>
+<td><i>deleteCompactSegments.cmd</i>
+<td>Delete Segments
+<tr><td><i>batchCleanup.cmd</i><td>Includes above 3 functions in one script.
+</table></center>
+<p>
+These scripts can be run directly from the operating system prompt.
+You must be logged in as the Vision Administrator.  
+
+
+<p>
+<font size=+1>Running Maintenance Scripts in Unix</font>
+<p>
+On Unix systems, you need to source the following file before you start your batchvision session:
+
+
+<ul><pre><b>source /localvision/include/DBAVision.env</b></pre></ul>
+<p>
+To run a script, type the script name and redirect its output to 
+another file.  For example:
+
+<ul><pre><b>/localvision/adminScripts/garbageCollect.cmd > /localvision/logs/gc.yymmdd</b></pre></ul><p>
+Note that if you setup an automated procedure to run the maintenance tools
+that bypasses the standard login procedure, you should include the
+following "source" statement in your procedure:
+
+<ul><pre><b>source /localvision/include/DBAVision.env</b></pre></ul>
+
+
+<font size=+1>Running Maintenance Scripts on NT</font>
+<p>
+To run a script, type the script name and redirect its output to 
+another file.  For example:
+
+<ul><pre><b>%LocalVisionRoot%adminScripts\garbageCollect.cmd > %LocalVisionRoot%logs\gc.yymmdd</b></pre></ul>
+<font size=+1>When to Run the Maintenance Scripts</font>
+<p>
+Large production environments typically run the maintenance functions
+nightly in order to optimize their space utilization.  In this type
+of environment we recommend the steps run in the sequence employed
+by the <i>batchCleanup.cmd</i> script:
+<ul type=disc><b><pre>deleteCompactSegments.cmd
+garbageCollect.cmd
+fullCompact.cmd</pre></b></ul>
+This sequence introduces a one day lag in the removal of segments
+flagged for deletion, allowing for deleted segments to be backed up
+in case they are needed for recovery activities.
+<p>
+Your environment may not require the maintenance functions to be run
+as frequently.  If you find you only need to run them on a sporadic
+basis, you will probably want to run the <i>deleteCompactSegments</i>
+(using the batch script or the VAdmin module) after Compaction to
+immediately reclaim the space.   The following guidelines can be
+used to determine the optimum frequency for running the maintenance
+functions:
+</pre></b></ul>TBD</pre></b></ul>
+
+
+<p><hr><P>
+
+
+<h3><a name="ObjectSpaces">Creating New Object Spaces</a></h3>
+
+<p>
+Object spaces are used to organize functional components of the
+Vision database.  They correspond to physical directories in the
+localvision/network branch of the file system.  By default, classes,
+instances, and data will be stored in object space 3.  This is fine
+for prototyping and small systems.  If you plan to load a large
+amount of historical data from multiple sources and update on a
+regular basis, multiple object spaces are normally appropriate.  The
+primary reason to do this is that it will allow the compaction
+process to operate more efficiently and effectively.  Most users and
+applications will not need to know about the object space structure
+in order to use the database since messages encapsulate the
+navigations for you.  
+<p>
+We recommend creating a separate object space for each data source
+that loads as a unit on a regular basis.  For example, Barra
+data should be physically stored in its own object space.  Note that
+your initial installation includes object spaces that have been
+pre-allocated for pricing and holdings so there is no need to
+create separate object spaces for these sources initially.
+<p>
+The script <i>installSpace.cmd</i> is available in the
+<i>/localvision/adminScripts</i> directory and is used to create
+new object spaces.  The script requires that you provide a code
+that identifies the object space and an option type that indicates
+the role of the object space.  The type can be supplied as one of
+<i>DB</i>, <i>DBA</i>, or <i>User</i>.  If omitted, the type is
+assumed to be <i>DB</i>.  <i>DB</i> object spaces are used 
+to store instances and property values for one or more
+classes.  <i>DBA</i> object spaces are used to store
+tools to manage various aspects of the database.  <i>User</i> object
+spaces are used to store private data for a specific user.
+<p>
+For example, to install a new object space for storing model data,
+run the following command:
+<ul type=disc>
+   On Unix:
+<b><pre>       /localvision/adminScripts/installSpace.cmd Models DB</pre></b>
+
+   On NT:
+<b><pre>       %LocalVisionRoot%adminScripts\installSpace.cmd Models DB</pre></b></ul>
+
+After this runs, you should see an 'object space created' message as
+well as the normal update message.
+<p>
+Once you have created your new Models object space you can access it
+via:
+<b><pre>      Environment DB Models</pre></b>
+
+<p>
+NOTE: &nbsp;If you rollback through a space installation, you will need to
+ manually delete the associated physical sub-directory under
+ localvision/network.  If you are unsure of what the number of the object
+ space to be deleted is, refer to the NDF.JOURNAL file in the
+ localvision/network directory.
+
+<p><hr><P>
+
+
+<h3><a name="ObjectSpaceAssign">Assigning New Classes to an Object Space</a>
+</h3>
+
+<p>
+
+By default, new <b>Entity</b> classes are created in object space 3 and new
+<b>DataRecord</b> classes are created in object space 6.  The instances
+of a class and the property values associated with each of these instances
+are stored in the object space in which the class is originally installed.
+<p>
+We recommend creating a separate object space for each data source
+that loads as a unit on a regular basis.  For example, your Model
+data could be physically stored in its own object space.  
+You need to specify
+the object space location of a new class prior to its creation using the
+following expression:
+<b><pre>     #---  Set the object space of the next class created to 
+     #--     the space define to hold the Models
+     Interface BatchFeedManager setObjectSpaceTo: Environment DB Models;
+
+</pre></b>
+You can use the object space name or the object space number as the
+parameter to <i>setObjectSpaceTo:</i>.
+You must precede each <b>Entity</b> and <b>DataRecord</b> subclass 
+creation request with the <i>setObjectSpaceTo:</i> expression if you want
+the new class set up in a specific object space.  For example:
+<b><pre>     Interface BatchFeedManager
+        setObjectSpaceTo: Environment DB Models;
+     Interface BatchFeedManager 
+        createEntityClass: "ModelType" from: "Classification" ;
+
+     Interface BatchFeedManager
+        setObjectSpaceTo: Environment DB Models;
+     Interface BatchFeedManager
+       createDataRecordClass: "ModelData" from: "DataRecord"
+          linkedTo: "Company" via: "modelData" asTS: "YES" ;
+
+</pre></b>
+This request will create the new entity class <b>ModelType</b> and
+the new data record class <b>ModelData</b> in the object space named
+<i>Environment DB Models</i> if the classes do not already exist.
+Note that this approach will <b>not</b>
+recreate the classes if they already exist
+and it will not relocate existing classes to the object space 
+specified.
+
+<p><hr><P>
+
+<h3><a name="ClassStores">Creating New DataRecord Stores</a></h3>
+
+<p>
+By default, the instances of a class and the property values 
+associated with these instances are stored in the object space
+in which the class was originally installed.  For <b>DataRecord</b>
+subclasses that will store a large number of instances over time,
+we recommend that data be physically stored in a new storage structure
+in its own object space.  
+<p>
+Once you have created the space, you will
+need to define a "new store" for the class you wish to store in
+that space.  For example, to create a new store for <b>ModelData</b> 
+in the <b>Models</b> object space, create a Vision script that 
+contains the following:
+
+<b><pre>       #--  Create a new store for ModelData in Models object space
+       ModelData createNewStoreAt: Environment DB Models ;
+       ?g</pre></b>
+
+Once you have saved this script, any new instances created via
+the <b>ModelDataFeed</b> will be stored in the <b>Models</b> object space.
+<p>
+Note that instances and data that existed prior to the creation of the
+new store will continue to reside in its original location.  Normally,
+you would create the new object space and store immediately after
+creating the new <b>DataRecord</b> subclass and prior to updating
+any actual data.
+<p>
+If you use a <b>DataFeed</b> to update your data, the information will
+automatically get placed in the last "store" created.  If you are
+writing your own Vision methods to load data directly, you will need
+to modify any code that creates new instances so it is in the form:
+
+<b><pre>     ^global ModelData currentStore createInstance: "xxx" ;</pre></b>
+
+
+<p><hr><p>
+<h3><a name="Bridges">Creating Bridge Classes and Feeds</a></h3>
+
+<p>
+The subclasses of the <b>Bridge</b> class are used to manage
+the protocol for connecting an entity to one or more <b>DataRecord</b>
+instances.  It is useful when there are complex relationships that
+need to be managed and you do not want to overburden the entity
+class with all the required information.
+An instance of a <b>Bridge</b> subclass is normally
+referenced via the entity instance with which it is associated.
+<p>
+To create a subclass of <b>Bridge</b>, you provide the <b>Entity</b>
+class with which the new class is associated, the name of the property
+that establishes the connection between an instance of entity's class
+and an instance of the bridge's class, and an indication whether the
+relationship should vary over time.  
+For example, you may want
+to create a bridge class called <b>FundamentalBridge</b> which
+links to separate data record classes that track annual, quarterly,
+and monthly fundamental data.  
+To create the <b>FundamentalBridge</b> class and associate
+it with the <b>Company</b> entity via the fixed property
+<i>fundamentalData</i>, do the following:
+<b><pre>
+     #--------------------
+     #  Create Bridge Class
+     #      Creates Bridge subclass and establishes relationship
+     #          with existing Entity subclass
+     #  Inputs -
+     #        createBridgeClass:     name of subclass to create
+     #                     from:     Bridge class to subclass
+     #                 linkedTo:     Entity class to link to
+     #                      via:     property to define at linkedTo class
+     #                     asTS:     should property be a t/s?
+     #--------------------
+     Interface BatchFeedManager
+       createBridgeClass: "FundamentalBridge" from: "Bridge"
+          linkedTo: "Company" via: "fundamentalData" asTS: "NO" ;
+
+</pre></b>
+You can create and attach the different data records to this class
+using: <b><pre>
+     Interface BatchFeedManager
+       createDataRecordClass: "AnnualData" from: "DataRecord"
+          linkedTo: "FundamentalBridge" via: "annual" asTS: "YES" ;
+     Interface BatchFeedManager
+       createDataRecordClass: "QuarterlyData" from: "DataRecord"
+          linkedTo: "FundamentalBridge" via: "quarterly" asTS: "YES" ;
+
+</pre></b>
+The <b>PropertySetup</b> feed can be used to define updateable properties
+for the <b>AnnualData</b> and <b>QuarterData</b> classes and the
+<b>AnnualDataFeed</b> and <b>QuarterlyDataFeed</b> classes can be used
+to update these properties for specific companies on specific dates.
+<p>
+Once these classes have been established, you can access the specific
+fundamental data record using: <b><pre>
+     Named Company IBM fundamentalData annual  #insert property name
+or
+     Named Company IBM fundamentalData quarterly   #insert property name
+</pre></b>
+
+<p><hr><p>
+<h3><a name="LocalEntity">LocalEntity Bridges and Private Object Spaces</a></h3>
+
+<p>
+A <b>LocalEntity</b> is an abstract subclass of <b>Bridge</b> designed
+to provide special protocol for a subset of instances of a specific
+entity class to enable private saves.  <b>LocalEntity</b> subclasses can be created in a way that allows them to connect with their underlying entity dynamically.
+As a result, these bridge classes, and their related data record
+classes can be stored in a way that allows them to be updated privately.
+<p>
+For example, suppose the Equity Research group wants to update information
+about a subset of companies without requiring the intervention of the
+global database administrator.  A separate object space can be created
+for this group.  The <b>ERCompany</b> bridge class and one or more 
+data record classes can be created in this space.  Data associated with
+this bridge class can then be updated privately.
+<p>
+Here are the steps involved with setting up a private space that
+can be updated using data feeds:
+<p><ol>
+<li>Use the <a href="#ObjectSpaces"><i>installSpace.cmd</i></a> script
+to create a new object space:<b><pre>
+       /localvision/adminScripts/installSpace.cmd MySpace
+</pre></b>
+<p><li>Set the permissions on this space so that the private user and
+the Vision Administrator can update it.
+<p><li>As the Vision Administrator, define and save a <b>LocalEntity</b> bridge
+in this space for any entity class you wish to extend with private
+data:<b><pre>
+       Interface BatchFeedManager 
+          setObjectSpaceTo: Environment DB MySpace ;
+       Interface BatchFeedManager
+            createBridgeClass: "MyCompany" from: "LocalEntity" 
+            linkedTo: "Company" via: "myCompany" asTS: "Method" ;
+</pre></b>
+<p><li>As the Vision Administrator, define and save one or more
+<b>DataRecord</b> classes attached to this bridge in this space:<b><pre>
+       Interface BatchFeedManager
+           setObjectSpaceTo: Environment DB MySpace ;
+       Interface BatchFeedManager
+            createDataRecordClass: "AnalystRating" from: "DataRecord"
+            linkedTo: "MyCompany" via: "rating" asTS: "Y" ;
+
+       Interface BatchFeedManager
+           setObjectSpaceTo: Environment DB MySpace ;
+       Interface BatchFeedManager
+            createDataRecordClass: "CompanyAnnualOverride" from: "DataRecord"
+            linkedTo: "MyCompany" via: "companyAnnualOverride" asTS: "Y" ;
+</pre></b>
+<p><li>If you want to create private <b>Entity</b> classes in your
+private space, you must save the following Vision code in the private
+space: <pre><b>
+     Environment DB MySpace 
+          define: 'Entity' toBe: CoreWorkspace Entity newPrototype ;
+     Environment DB MySpace 
+          define: 'Named' toBe: CoreWorkspace Named newPrototype ;
+
+</b></pre>
+This code must be saved by the Vision Administrator.
+<p><li>As the Vision Administrator, define and save one or more
+<b>Entity</b> classes.  Note that you must start your <i>batchvision</i>
+with the -U# option, where # indicates the private object space 
+number:<pre><b>
+       Interface BatchFeedManager
+           setObjectSpaceTo: Environment DB MySpace ;
+       Interface BatchFeedManager 
+          createEntityClass: "MyIndustry" from: "Entity" ;
+
+</pre></b>
+</ol>
+Once the Vision Administrator has saved the appropriate classes,
+the private user can use the feeds to update the database using the
+<i>upload:usingFile:withConfig:</i> message.  The private user must
+follow these steps:
+<ul>
+<p><li>Log in as the private user
+<p><li>Start batchvision with the -U## option (or set the <i>UserOSI</i>
+environment variable) where ## is the private object space number 
+<p><li>When the <i>Utility updateNetworkWithAnnotation:</i> runs, the message
+<i>User Space Updated</i> should display instead of <i>Object Network
+Updated</i>.
+</ul>
+<p>
+Note that private updates should not run when general vision 
+database maintenance is in progress.  This includes garbage collection
+and compaction.  
+
+<p><hr><p>
+<h3><a name="EstimateBridge">Creating Estimate Bridges and Feeds</a></h3>
+<p>
+<p>
+The subclasses of the <b>EstimateBridge</b> class are used to manage
+the relationship between an entity or bridge and 
+data that can be estimated for multiple time periods. 
+To create a subclass of <b>Bridge</b>, you provide the <b>Entity</b>
+or <b>Bridge</b>
+class with which the new class is associated, the name of the property
+that establishes the connection between an instance of this class
+and an instance of the estimate bridge's class, the type of 
+estimate record, and the periodicity of the estimate.
+For example, you may want to create an estimate bridge for
+tracking  annual company eps estimates made by an analyst as well
+as consensus estimate provided by a source such as I/B/E/S:
+<b><pre>
+     #--------------------
+     #  Create EstimateBridge Class
+     #  Inputs -
+     #    createEstimateBridgeClass: name of subclass to create
+     #                         from: EstimateBridge class to subclass
+     #                     linkedTo: Entity or Bridge class to link to
+     #                          via: t/s property to define at linkedTo class
+     #      withEstimateRecordClass: subclass of EstimateRecord
+     #                      andFreq: periodicity of estimates
+     #--------------------
+
+     Interface BatchFeedManager
+         createEstimateBridgeClass: "EpsABridge" from: "EstimateBridge" 
+         linkedTo: "Company" via: "analystEpsEst" 
+         withEstimateRecordClass: "AnalystEstimateRecord" 
+         andFreq: 12 monthEnds ;
+
+     Interface BatchFeedManager
+         createEstimateBridgeClass: "IbesEpsABridge" from: "EstimateBridge" 
+         linkedTo: "Company" via: "ibesEpsEst" 
+         withEstimateRecordClass: "ConsensusEstimateRecord" 
+         andFreq: 12 monthEnds ;
+
+</pre></b>
+<p>
+Once the estimate bridges have been created you can use the appropriate feed to update the database using the <i> upload:usingFile:withConfig:</i>  message.
+<p>
+Access to estimate structures and additional examples are <a href="clDataFeedAdv.htm#bridges">
+described elsewhere</a>.  
+
+<p>
+
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy; 1999 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated December 31, 1999</font>
+</table>
+</body></html>

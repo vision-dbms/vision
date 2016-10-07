@@ -1,0 +1,70 @@
+##################################################
+#  Standard InvestCore Instances
+##################################################
+
+####################
+#  Country
+####################
+Country createInstance: "US" .
+  setNameTo: "United States" .
+  setBaseCurrencyTo: "USD" .
+  addAlias: "USA" ;
+Country createInstance: "CA" .
+  setNameTo: "Canada" .
+  setBaseCurrencyTo: "CAD" .
+  addAlias: "CAN" ;
+
+Country
+  defineMethod: [ | isUS | code = "US" ] .
+  defineMethod: [ | isUSA | code = "US" ] .
+  defineMethod: [ | isCanada | code = "CA" ] .
+;
+
+####################
+#  Currency - more on euros   (see EXTcore.INI for USD/EUR)
+####################
+
+Currency createInstance: "ATS" . 
+   setNameTo: "Austrian Schilling" .
+do: [ :fixedRateToEuro <- 13.7603 ] ;
+Currency createInstance: "BEF" . 
+   setNameTo: "Belgian Franc" .
+do: [ :fixedRateToEuro <- 40.3399 ] ;
+Currency createInstance: "FIM" . 
+   setNameTo: "Finnish Markka" .
+do: [ :fixedRateToEuro <- 5.94573 ] ;
+Currency createInstance: "FRF" . 
+   setNameTo: "French Franc" .
+do: [ :fixedRateToEuro <- 6.55957 ] ;
+Currency createInstance: "DEM" . 
+   setNameTo: "German Deutschmark" .
+do: [ :fixedRateToEuro <- 1.95583 ] ;
+Currency createInstance: "IEP" . 
+   setNameTo: "Irish Punt" .
+do: [ :fixedRateToEuro <- .787564 ] ;
+Currency createInstance: "ITL" . 
+   setNameTo: "Italian Lira" .
+do: [ :fixedRateToEuro <- 1936.27 ] ;
+Currency createInstance: "NLG" . 
+   setNameTo: "Netherlands Guilder" .
+do: [ :fixedRateToEuro <- 2.20371 ] ;
+Currency createInstance: "PTE" . 
+   setNameTo: "Portugese Escudo" .
+do: [ :fixedRateToEuro <- 200.482 ] ;
+Currency createInstance: "ESP" . 
+   setNameTo: "Spanish Peseta" .
+do: [ :fixedRateToEuro <- 166.386 ] ;
+Currency createInstance: "LUF" . 
+   setNameTo: "Luxembourg Franc" .
+do: [ :fixedRateToEuro <- 40.3399 ] ;
+
+Named Currency
+    send: [ ATS, BEF, FIM, FRF, DEM, IEP, ITL, NLG, PTE, ESP, LUF ] .
+do: [ :euroStartDate <- 990101 asDate ] ;
+
+####################
+#  Security 
+####################
+Security createInstance: "CashUS" .
+  setBaseCurrencyTo: "USD" ;
+

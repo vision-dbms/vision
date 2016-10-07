@@ -1,0 +1,52 @@
+#!/bin/csh
+
+####  Initialize the audit environment variables, ...
+setenv AuditEnabled	1
+setenv AuditEntry	"`date +%y%m%d%H%M%S`"
+if ( ! $?AuditFile ) then
+	setenv AuditFile	$cwd/AUDIT
+endif
+if ( ! $?AuditLogs ) then
+	setenv AuditLogs	$cwd/LOGS
+endif
+
+####  ... create the audit log directory if necessary, ...
+if ( ! -e $AuditLogs ) then
+	mkdir $AuditLogs
+endif
+if ( ! -d $AuditLogs ) then
+	echo "$0: Audit command log directory could not be created"
+	exit 1
+endif
+
+####  ... write the audit file header, ...
+touch $AuditFile
+echo >> $AuditFile
+echo "----------------------------------------------------------------" >> $AuditFile
+echo "+++Entry:   " $AuditEntry >> $AuditFile
+echo "+++Login:   " $LOGNAME >> $AuditFile
+echo "+++Command: " $argv[*] >> $AuditFile
+CC -V >>& $AuditFile
+echo "+++Platform: `uname -a`" >> $AuditFile
+
+####  ... write the audit comment, ...
+#echo "+++User Comments:" >> $AuditFile
+#echo "Enter audit comments, terminate with ^d"
+#cat - >> $AuditFile
+
+####  ... create the audit log file, ...
+cat < /dev/null > $AuditLogs/A$AuditEntry
+if ( -e $AuditLogs/current ) then
+	"rm" -f $AuditLogs/current
+endif
+ln $AuditLogs/A$AuditEntry $AuditLogs/current
+
+####  ... and run the audited command.
+echo "+++Command Comments:" >> $AuditFile
+set cmd = $0
+if ( ${cmd:t} == auditb ) then
+	$argv[*] >>& $AuditLogs/A$AuditEntry &
+else
+	$argv[*] >>& $AuditLogs/A$AuditEntry
+	exit $status
+endif

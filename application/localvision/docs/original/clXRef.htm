@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Class Cross Reference </title>
+</head>
+<body bgcolor = white>
+
+<h2>Vision Class Cross Reference</h2>
+<p>
+| <a href="FHome.htm">Home</a> | <a href="Classes.htm">Classes</a> | <a href="Messages.htm">Messages</a> | <a href="mXRef.htm">Cross Reference</a> |
+<hr>
+<p>
+<h3>Topics Covered:</h3>
+<ul type="square">
+<li><a href="#hierarchy">Predefined Class Hierarchy</a>
+<li><a href="#boolean">The Boolean Class</a>
+<li><a href="#drange">The DateRange Class</a>
+<li><a href="#dictionary">The Dictionary Class</a>
+<li><a href="#entity">The Entity Class</a>
+<li><a href="#function">The Function Classes</a>
+<li><a href="#ordinal">The Ordinal Classes</a>
+<li><a href="#selector">The Selector Class</a>
+<li><a href="#tools">The ToolKit Class</a>
+<li><a href="#util">The Utility Class</a>
+<li><a href="#na">The Undefined Class</a>
+<li><a href="#application">The Application Class</a>
+</ul>
+<p>
+<hr>
+<h3><a name="hierarchy">Predefined Class Hierarchy</a></h3>
+<p>
+Your Vision database comes with a number of pre-defined classes.  
+These classes include an initial set of methods which you can
+modify and extend.  
+All classes are direct or indirect subclasses of the class Object.
+You can also define any number of additional subclasses.
+<p>
+The pre-defined class hierarchy is illustrated below:
+<p>
+<blockquote><font size=+1><pre>
+<a href="clObject.htm">Object</a>
+   <a href="clBoolean.htm">Boolean</a>
+   <a href="appClasses.htm">Bridge</a>
+   BuiltInWorkspace
+      CoreWorkspace
+   <a href="appClasses.htm">DBEntity</a>
+   <a href="appClasses.htm">DataRecord</a>
+   <a href="clDate.htm#dr">DateRange</a>
+   <a href="clDict.htm">Dictionary</a>
+   <a href="clEntity.htm">Entity</a>
+      <a href="clClassify.htm">Classification</a>
+      <a href="clCurrency.htm">Currency</a>
+      DataSource
+   FixedProperty   
+      TimeSeriesProperty 
+   Function
+      ComputedFunction 
+         Block
+         Method
+         Primitive
+      EnumeratedFunction
+         Collection
+            IndexedCollection
+               <a href="clIList.htm">IndexedList</a>
+               <a href="clTS.htm">TimeSeries</a>
+            SequencedCollection
+               <a href="clList.htm">List</a> 
+         <a href="clValue.htm">Value</a>
+   <a href="appClasses.htm">IncorporatorPrototype</a>
+   <a href="appClasses.htm">LinkRecord</a>
+   Ordinal
+      <a href="clDate.htm">Date</a>
+      <a href="clDate.htm#offset">DateOffset</a>
+      <a href="clNumber.htm">Number</a>
+         Double
+         Float
+         Integer 
+      <a href="clString.htm">String</a>
+   <a href="appClasses.htm">PrivateRecord</a>
+   <a href="Lang.htm#names">Selector</a>
+   ToolKit
+      Environment MaintenanceTools
+      <a href="tkInterface.htm">FormatTools</a>
+      <a href="tkInterface.htm">Interface</a>
+      <a href="tkOpenVision.htm">OpenVision</a>
+      <a href="tkSchema.htm">Schema</a> 
+   <a href="clNA.htm">Undefined</a>
+   Utility
+
+</blockquote></font></pre>
+<p>
+<hr>
+
+<p>
+<h3><a href="clBoolean.htm" name="boolean">The Boolean Class </a></h3>
+<p>
+This class provides protocol for logical values.  Logical values are
+represented by the two subclasses of <i>Boolean</i> - <b><i>TRUE</i></b> and
+<b><i>FALSE</i></b>.
+<p>
+<hr>
+<p>
+<h3><a href="clDate.htm#dr" name="drange">The DateRange Class </a></h3>
+<p>
+This class is defined by specifying a starting date, an ending date
+an an increment.  Starting and ending dates can be any valid
+absolute or relative date.  The increment is an instance of one of the
+<a href="#offset"><i>DateOffset</i></a> classes.
+<p>
+<hr>
+<p>
+<h3><a href="clDict.htm" name="dictionary">The Dictionary Class </a></h3>
+<p>
+The subclasses of the <i>Dictionary</i>
+class are used to name related objects in a homogeneous way.  
+<p>
+<hr>
+<p>
+<h3><a href="clEntity.htm" name="entity">The Entity Class </a></h3>
+<p>
+The subclasses of the <i>Entity</i> class are used to describe
+real-world entities such as companies, countries, and products.
+Instances of these classes are usually named and can be referenced
+directly or used as part of a list.
+<p>
+<hr>
+<p>
+<h3><a name="function">The Function Classes </a></h3>
+<p>
+This class is an abstract class that is used to organize the classes
+in the hierarchy that can be evaluated.  Two major subclasses are
+defined:  <b>ComputedFunction</b> and <b>EnumeratedFunction</b>.  The class
+<i>ComputedFunction</i> is an abstract class that is used to organize the
+<i>Function</i> classes in the hierarchy that are computed rather than
+enumerated.  The class <i>EnumeratedFunction</i> is an abstract class that
+is used to organize the <i>Function</i> classes in the hierarchy that are
+enumerated rather than computed.  These classes are also divided into
+several subclasses.  
+<p>
+Three subclasses of the class <i>ComputedFunction</i> have been defined:
+<b>Block</b>, <b>Method</b> and <b>Primitive</b>.  Instances of these
+classes all represent a type of function which evaluates by
+computation.  A <a href="clBlock.htm"><i>Block</i></a> is a set of one or
+more expressions that are viewed together as a unit.  <i>Methods</i> are a
+special form of block that are created and used internally.  The
+class <i>Primitive</i> represents methods that are implemented primitively
+in Vision.  Although messages that are primitives are not
+distinguishable from other messages from a usage perspective, these
+messages cannot be directly altered inside Vision.  
+<p>
+Two subclasses of the class <i>EnumeratedFunction</i> have been defined:
+<b>Collection</b> and <b>Value</b>.  Instances of these classes all
+represent a type of function which evaluates by enumerating elements.
+The class <i>Collection</i> is an abstract class that is used to organize
+multi-valued <i>EnumeratedFunction</i> classes in the hierarchy.  The
+instances of the class 
+<a href="clValue"><i>Value</i></a> are single-valued enumerated functions.
+The class <i>Collection</i> includes two types of collections:
+<b>IndexedCollection</b> and <b>SequencedCollection</b>.  The class
+<i>IndexedCollection</i> is an abstract class that is used to organize
+the collections that are indexed, 
+<a href="clIList.htm"><b>IndexedList</b></a> and 
+<a href="clTS.htm"><b>TimeSeries</b></a>.
+The class <i>SequencedCollection</i> is an abstract class that is used to
+organize the collection subclass that is not indexed,
+the <a href="clList.htm"><b>List</b></a> class.
+<p>
+<hr>
+<p>
+<h3><a name="ordinal">The Ordinal Classes </a></h3>
+<p>
+This class is an abstract class that is used to organize the classes
+in the hierarchy whose instances can be compared along a linear
+dimension.  Subclasses of the class <i>Ordinal</i> are <b>Character</b>, 
+<b>Date</b>, <a name="offset"><b>DateOffset</b></a>, 
+<b>Number</b> and <b>String</b>.  
+<p>
+The instances of the class 
+<a href="clDate.htm"><i>Date</i></a> 
+represent a specific day in the
+calendar.  Each date encompasses a day, month, and year.  The class
+<a href="clDate.htm#offset"><i>DateOffset</i></a> 
+is an abstract class that supports the protocol for
+different date increments:  <b>BusinessDays</b>, <b>Days</b>,
+<b>MonthBeginnings</b>, <b>MonthEnds</b>, <b>Months</b>, 
+<b>QuarterBeginnings</b>, <b>QuarterEnds</b>, <b>Quarters</b>, 
+<b>YearBeginnings</b>, <b>YearEnds</b>, and <b>Years</b>.  
+<p>
+The class 
+<a href="clNumber.htm"><i>Number</i></a> 
+is used to organize the numeric classes 
+<b>Double</b>, <b>Float</b>, and <b>Integer</b>.  
+The instances of the class 
+<a href="clString.htm"><i>String</i></a> 
+are objects that represent sequences of characters.  
+<p>
+<hr>
+<p>
+<h3><a href="Lang.htm#names" name="selector">The Selector Class </a></h3>
+<p>
+The instances of this class are objects that represent strings used
+for names in the system.  Each selector is unique; there can never be
+two selectors with identical character sequences defined for the same
+class. 
+<p>
+<hr>
+<p>
+<h3><a name="tools">The ToolKit Class </a></h3>
+<p>
+Subclasses of this class are used to organize packages of
+classes and messages offered as a unit to perform a set of related
+functions.  Built-in ToolKits include
+<a href="tkOpenVision.htm"><i>The OpenVision ToolKit</i></a>,
+<a href="tkSchema.htm"><i>The Schema ToolKit</i></a>, and
+<a href="tkInterface.htm"><i>The UserInterface ToolKit</i></a>.
+<p>
+<hr>
+<p>
+<h3><a name="util">The Utility Class</a></h3>
+<p>
+This class is used to organize miscellaneous utility operations.
+This class does not have any instances.  It does respond to a set of
+primitive messages which execute utility functions.  
+<p>
+<hr>
+<p>
+<h3><a href="clNA.htm" name="na">The Undefined Class </a></h3>
+<p>
+This class is used to represent values that are not available (NA).
+<p>
+<hr>
+<p>
+<a href="appClasses.htm" name="application"><h3>The Application Classes</h3></a>
+<p>
+These classes are used to organize the data and manage the navigations, access and
+processing rules associated with specific application.
+<p>
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy 1997 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated July 17, 1997</font>
+
+</table>
+
+</body>
+</html>

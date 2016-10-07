@@ -1,0 +1,3186 @@
+####################
+#  patch.hostedSynch     : 11/12/02; 12/02/02; 12/17/02; etc
+#
+#  Created by: doh,lhk,dkr,mrk,sgbl,lcn,tlh
+#
+#  Description:
+#
+#  Consolidate changes needed for local/hosted compatibility in
+#  support of the Ibes/WScope loads; many of these patches are from
+#  patch.core.613d and will be moved to patch.core.613c once they
+#  are distributed to daily feed clients.
+#
+#  Audit:
+#
+#  Miscellaneous changes from 5/30/2003 forward:
+#  - enable update on low space in new runWraup step - runMainenance
+#  - tighten up currency definition to bump to primaryEntity when available
+#  - allow the XRef source to be defined in the config file for all records
+#  - modify rebuildHoldings to address performance issues (patch.rebuildHold)
+#  - reimplement stdDev as a method that adjusts new _stdDev property
+#  - add intialization steps to default instance created by createSubclass
+#       (patch.subclassDefs)
+#  - new method to reset the code of an entity (patch.resetCode)
+#  - new method to return t/s of dates in the date range   (patch.asTS)
+#  - add back support for integer paramaters in various ts methods including
+#      'from:', 'to:', 'from:to:', 'on:'   (patch.fromto)
+#
+# 02/10/04:
+#  - feedspeed changes merged in (including fixed fields and feed comment) 
+#       (patch.feedspeed)
+#
+# 02/18/04:
+#  - add support for parentfeed in BatchFeedManager (patch.parentFeed)
+#  - add doOnce methods (patch.doOnce)
+#  - new method to compute covariance (patch.covariance)
+#  - add localizeValueForUpdate (this must be added to all including map,cp)
+#
+#
+# 08/02/04:
+#  - modify Integer increment: to restrict parameter (patch.increment)
+#
+# 09/21/04:
+#  - modify Schema MD to add 'toUpper' to cleanupLocalNames (patch.schema)
+#
+# 03/21/05:
+#  - Modify Date convertFrom: "" to return default date when parameter is "NA"
+#       (patch.asDate)
+#  - Modify String from: message to fix bug if numeric value > string length
+#       (patch.from)
+#  - Add rclusterSize and pmap for PriceTools t/s 
+#       (patch.priceStore.2; patch.methodToInstall)
+#  - Convert existing pricing t/s (outer and inner) to Product Mapped
+#  - misc patches consolidated from cpit,custagg, constix projects 
+#        (patch.core.20050321)
+#
+#= = = = = = =  freeze releases/localvision/20050321 = = = = = = = = = = =
+#
+# 05/05/05:
+#  - fix rebuildHoldings - missing comment character leads to snf's
+#      (patch.rebuildHold)
+#
+# 06/15/05:
+#  - change default feed flags: 
+#      . DataFeed enableUpdateIfSpaceIsLow
+#      . EEF enableCreateNewStore
+#      (init.feedSettings)
+#  - fix rebuildHoldings - use all Accounts (not just Portfolios)
+#      (patch.rebuildHold)
+#  - modularize HoldingsFeed runWrapup and misc fixes
+#    . enable/disable flags for rebuildAggAccountHoldings, rebuildSecurityXRef,
+#        and updatePrices
+#    . support auto expire for index account
+#    . prevent orphaned memberLists in IndexAccount holdings creation
+#      (patch.hfeed)
+#  - standardize commit techniques at ProcessControlTools
+#      (patch.commit)
+#  - add generic Context class
+#      (patch.context)
+#  - add ClientTools class
+#      (patch.clientTools)
+#
+# - - - - - - - - - - - - - merge into new inprog on 20050617 - - - - - - -
+# 06/20/05:
+#   - fix autoCreateNewStores to confirm we are working on a DataRecord class
+#     (patch.core.20050321)
+#  - change default feed flags: 
+#      . remove disableUsesRejectsFile toggle (added on 6/17/05)
+#      (init.feedSettings)
+#
+#
+####################
+
+"- " fill: 70 . printNL ;
+"  Loading patch.hostedSynch" printNL ;
+"  " print ; Utility UnixSeconds currentTime printNL ;
+"- " fill: 70 . printNL ;
+newLine print ;
+
+#======================================================================
+
+##################################################
+#  moved from patch.core.613d
+##################################################
+
+##################################################
+#  patch.core
+#
+#  Double
+#  - modify 'asAPowerOf:' converse to fix bug in scalar case introduced
+#   in 6.1 batchvision; this will be fixed in the 7.0 series of batchvision
+#   but an easy work-around can be accomplished by replacing the converse
+#   primitive with the method included in this patch.
+#
+#  Integer
+#  - modify 'increment:' and 'decrement:' to restrict parameter to Numbers;
+#      this keeps the date converse messages from generating an infinite loop
+#      when adding an integer to a date
+#
+#  String
+#  - modify 'asNumber' message at String to support correct
+#    conversion if input string is in "E" format.  For example:
+#          "9E-6" asNumber printNL: 19.7 ;
+#
+#  Date  firstDayInMonthForIndexOf:
+#     Method to get the first day in the month that 
+#     corresponds to 'n'. Where 'n' is the dayNumberOfWeek 
+#     associated with the Day you are looking for.
+#
+#  Date MonthDescriptor
+#  - add support for additional formatting and lookups
+#
+#  Utility
+#    - add missing session attribute from 6.1.3
+#
+#  VendorEntity
+#  - tighten up and expand methods
+#  - tighten up currency definition to bump to primaryEntity when available
+#
+#  DataRecord
+#  - add getPriorRecord method
+#  - fix adjustmentFactor to convert time to date
+#  - add adjustment factors for t/s properties of data record
+#
+#  VendorDataRecord
+#  - add protocol
+#
+#  ProcessControlTools
+#  - add methods to get environment variables from csh
+#
+##################################################
+
+newLine print ;
+"...  Miscellaneous core changes " printNL ;
+newLine print ;
+
+####################
+#   Double 
+#  - modify 'asAPowerOf:' converse to fix bug in scalar case introduced
+#   in 6.1 batchvision; this will be fixed in the 7.0 series of batchvision
+#   but an easy work-around can be accomplished by replacing the converse
+#   primitive with this method
+####################
+
+Double defineMethod:[|asAPowerOf: x|
+    x asDouble toThe: ^self asDouble
+];
+
+#----------
+
+####################
+#  Integer
+#  - modify 'increment:' and 'decrement:' to restrict parameter to Numbers;
+#      this keeps the date converse messages from generating an infinite loop
+#      when adding an integer to a date
+#
+####################
+
+Integer defineMethod: [ | increment: n |
+  n isNumber ifTrue: [ (^self + n) asInteger ]
+] ;
+
+Integer defineMethod: [ | decrement: n |
+  n isNumber ifTrue: [ (^self - n) asInteger ]
+] ;
+
+#-----------
+
+####################
+#  String.bi
+#    - Modify 'asNumber' message at String to support correct
+#      conversion if input string is in "E" format.  For example:
+#      "9E-6" asNumber printNL: 19.7 ;
+#
+####################
+
+#--------------------
+#  String asNumber
+#     support correct conversion if input string is in "E" format.
+#     Samples to try:
+#       "10" asNumber       should return 10
+#       "10." asNumber      should return 10.00
+#       "10.0" asNumber     should return 10.00
+#       "9.3e3" asNumber    should return 9300.00
+#       "9.3e-3" asNumber   should return .0093  
+#--------------------
+
+String defineMethod: [ | asNumber |
+  !d <- toDouble ;
+  !i <- d asInteger ;
+  d = i && [ ^self containsSubstring: "." . not ]
+    ifTrue: [ i ] ifFalse: [ d ] 
+] ;
+
+####################
+# Date
+#    firstDayInMonthForIndexOf:
+#
+#  Method to get the first day in the month that 
+#  corresponds to 'n'. Where 'n' is the dayNumberOfWeek 
+#  associated with the Day you are looking for.
+#
+#    n=1 implies first Monday
+#    n=2 implies first Tuesday
+#    n=3 implies first Wednesday
+#    n=4 implies first Thursday
+#    n=5 implies first Friday
+#    n=6 implies first Saturday
+#    n=7 implies first Sunday; 
+####################
+
+Date defineMethod: [  |  firstDayInMonthForIndexOf: n  | 
+!targetDay    <- n mod: 7 ;
+!firstOfMonth <- ^self + 0 monthBeginnings ;
+!firstDay     <- firstOfMonth dayNumberOfWeek ;
+!daysToAdd    <- (7 - firstDay + targetDay) asInteger mod: 7 ;
+firstOfMonth + daysToAdd days
+] ;
+
+####################
+#  Date MonthDescriptor
+#  - add support for additional formatting and lookups
+####################
+
+#--------------------
+#  Date MonthDescriptor - track month number in property
+#--------------------
+Date MonthDescriptor defineFixedProperty: 'month' ;
+Date MonthDescriptor instanceList numberElements
+  do: [ :month <- position ];
+
+Date MonthDescriptor defineMethod: [| formatMonth |
+   month < 10
+   ifTrue: [ "0" concat: month asString ]
+     else: [ month asString ]
+];
+
+#--------------------
+# Create a look-up for Date MoDesc instances based on
+#   shortName (Mmm), shortName toUpper (MMM), monthNumber (XX)
+#--------------------
+
+Date MonthDescriptor define: 'XRef' toBe: Dictionary basicSpecialized;
+Date MonthDescriptor instanceList 
+do: [ XRef at: shortName put: ^self ;
+      XRef at: shortName toUpper put: ^self ;
+      XRef at: formatMonth put: ^self ;
+      XRef at: month asString put: ^self ;
+    ];
+
+#--- test it
+#--- Date MonthDescriptor XRef objects groupedBy: [ asSelf ] .
+#--- do: [month print: -5 ; formatMonth print: 5 ; shortName print: 5 ;
+#---      groupList do: [ " | " print ; selector print ] ; newLine print;
+#--- ] ;
+
+####################
+#  Util.bi
+#    - add missing session attribute from 6.1.3
+####################
+
+Utility SessionAttribute
+   define: 'visionMaxSeriousErrors' 
+     toBe: (271 asPointerTo: Utility SessionAttribute) ;
+
+####################
+#  VendorEntity
+#   - tighten up and expand methods
+#   - tighten up currency definition to bump to primaryEntity when available
+#
+#  VendorEntity Additions to handle the processing rules for linking
+#  vendor instances to the primary class.
+#
+#  Processing Rules:
+#    Operating assumption is that you are working on ALL instances  
+#    each time you run the update.
+#
+#    Order of operation:
+#    1. Initialize crossreferrence fields at BOTH PrimaryEntity and VendorEntity
+#       VendorEntity
+#         - primaryEntity 
+#         - primaryEntityList
+#       PrimaryEntity
+#         - ^self linkBlock
+#    2. Determine the PrimaryEntity lookup rule to use on an instance by instance basis. If the 
+#       'pleaseLinkUsingThisId' value is set use that value otherwise use the default
+#       'primaryEntityLookupRule' value to pass into the 'resetPrimaryEntityTo:' method.
+#    3. Update ONLY Active instances and instances that want to be linked (ie. pleaseDontLinkMe != True).
+#    4. For each instance that returns a valid PrimaryEntity set the cross-referrence
+#       fields on BOTH VendorEntity (primaryEntity) and PrimaryEntity (linkBlock) regardless 
+#       of which one is found.
+#    5. Run the 'resolveDuplicatePrimaryReferences' method using the list of VendorEntity instances
+#       to detect if there are multiple references from VendorEntity to one PrimaryEntity. 
+#       If this is the case we will select ONLY ONE referrence and fix the rest. Generically this is
+#       based upon a simple rule that can be customized for each Vendor.
+#    6. If the 'multipleSecRefsToOneVendorEntity' flag is set for the VendorEntity class
+#       call the 'propagateReferencesFor: updateBlock' messages at the PrimaryEntity class.
+#    7. Update the VendorEntity references back to the Primary USING the multiple
+#       referrence information.
+#----------------------------------------------------------------------------
+#
+# Use of VendorEntity linkage overrides. These were established to allow the 
+# Vision DBA greater flexibility in determining the database references between
+# a Vendor's instance the Primary Entity class instances via DataFeeds.
+#
+# Case 1. The Vendor feed provided instances that  the user/dba has 
+#         determined should not be linked back to the primary entity. 
+#         In this case the Boolean flag 'pleaseDontLinkMe' should be 
+#         set to TRUE.
+#
+# Case 2. The Vendor feed provided instances were the default lookup
+#         rule (e.g. cusip) is filled with bogus data. That would prevent
+#         our default 'primaryEntityLookupRule' from working for just this one
+#         case. Here you can update the 'pleaseLinkUsingThisId' property with the 
+#         correct value and the 'updatePrimaryEntity' method will use this instead.
+#
+####################
+
+#--------------------
+#  New VendorEntity Properties
+#--------------------
+
+PropertySetup updateFromString: "
+classId     |property             |tsFlag|defaultValue|dataType   |description
+VendorEntity|pleaseDontLinkMe     |F     |            |Boolean    |Skip this instance when linking to primary entity.
+VendorEntity|pleaseLinkUsingThisId|F     |            |String     |Use this value instead of the default when linking.
+VendorEntity|primaryEntityList    |F     |IndexedList |IndexedList|Indexed List of PrimaryEntity instances referrencing this instance.
+";
+
+#-- Initialize
+VendorEntity define: 'multipleSecRefsToOneVendorEntity' toBe: NA;
+ 
+VendorEntity defineMethod: [ | enableMultipleSecRefs | 
+  ^self define: 'multipleSecRefsToOneVendorEntity' toBe: TRUE; 
+  ^self
+];
+ 
+VendorEntity defineMethod: [ | disableMultipleSecRefs | 
+  ^self define: 'multipleSecRefsToOneVendorEntity' toBe: NA ; 
+  ^self
+];
+
+
+#--------------------
+#  Vendor Entity modifications
+#--------------------
+
+VendorEntity defineMethod: [ | initializeGlobalSubclassProperties |
+   ^super initializeGlobalSubclassProperties ;
+   ^self :primaryEntityList <- CoreWorkspace IndexedList new ;
+   ^self
+] ;
+
+VendorEntity defineMethod: [ | initializeLocalAttributes |
+   ^super initializeLocalAttributes;
+   # Set Default value of primaryEntity for new instances.
+   ^self :primaryEntity <- ^self defaultInstance primaryEntity ;
+   ^self
+] ;
+
+VendorEntity defineMethod: [ | adjustmentRelativeTo: adate |
+   # Look to the VendorEntity's Security or Company for adjustment.
+   (primaryEntity isCompany || primaryEntity isSecurity) 
+       && [ adate isDate && adate isntDefault ]
+    ifTrue: [ primaryEntity adjustmentRelativeTo: adate ] . else: [ 1.0 ]
+] ;
+
+#-- Reorganized method so the nothing would run if the 'primary' was already
+#   setup. This would better match the ifTrue or ifFalse logic and message.
+VendorEntity 
+defineMethod: [ | setPrimaryEntityClassTo: primary withLink: linkName |
+  linkName locateInDictionaryOf: primary asSelf . isNA && [ primary isntNA ]
+  ifTrue: 
+   [ 
+     ^self define: 'primaryEntityClass' toBe: primary defaultInstance ;
+     # Set value of primaryEntity on Default instance to Default of primary.
+     ^self defaultInstance :primaryEntity <- ^self primaryEntityClass ;
+
+     primary defineFixedProperty: linkName withDefault: ^self asSelf ;
+     ^self define: 'linkBlock' toBe: [ linkName asUpdateBlock ] ;
+   ] 
+  ifFalse:
+   [ primary isNA
+         ifTrue: [ ">>> Primary Class Not Defined." ] 
+        ifFalse: [ ">>> linkName " concat: linkName . concat: " Already in Use."] .
+          printNL ;
+      ">>> linkBlock Not Established." printNL ;
+   ] ;
+  ^self
+] ;
+
+VendorEntity defineMethod: [ | setPrimaryEntityClassTo: primary |
+  !linkName <- ^self whatAmI lowercase ;
+  ^self setPrimaryEntityClassTo: primary withLink: linkName
+] ;
+
+VendorEntity defineMethod: [ | updatePrimaryEntity |
+  !primeClass  <- ^self primaryEntityClass ;
+  primeClass isntNA
+  ifTrue:
+    [ 
+      #<-- Initialize cross-reference properties between two classes for all Non-Default instances.
+      ^self masterList 
+        do: [primaryEntityList != ^self asSelf defaultInstance primaryEntityList
+               ifTrue: [primaryEntityList rdelete];
+             :primaryEntity     <- ^self asSelf defaultInstance primaryEntity;
+             :primaryEntityList <- ^self asSelf defaultInstance primaryEntityList clusterNew; 
+            ];
+      !def <- ^self asSelf defaultInstance;
+      primeClass masterList
+        do: [^self send: ^my def linkBlock . <- ^my def;];
+
+      #<-- Determine the lookup rule to use.
+      !rule <- [^self pleaseLinkUsingThisId 
+                 else: (^self send: ^self primaryEntityLookupRule) . 
+                 else: code
+               ]; 
+
+      #<-- Change to use activeList (matches WS_Entity version)
+      !processedList <- ^self asSelf activeList                         
+           reject: [ pleaseDontLinkMe isTrue ] .
+         extendBy: [ !id <- ^self send: ^my rule ] .
+           select: [ id isntDefault ] .
+         extendBy: [ !entity <- ^my primeClass locateId: id ] .
+           select: [ entity isntDefault ] .
+               do: [ ^self resetPrimaryEntityTo: entity ] ;
+
+      #<-- Clear out any cases where multiple VendorEntity instances
+      #    refer back to one PrimaryEntity instance. 
+      ^self resolveDuplicatePrimaryReferences: processedList;
+
+      #<-- Run Propagation method at PrimaryEntity if applicable
+      ^self multipleSecRefsToOneVendorEntity isTrue
+        ifTrue: [primeClass propagateReferencesFor: def linkBlock];
+
+      #<-- Update the primaryEntityList with all primary entities that refer to myself
+      primeClass activeList 
+         extendBy: [!linkValue <- ^self send: ^my def linkBlock . value] .    
+           select: [linkValue isntDefault] .
+        groupedBy: [linkValue] .
+               do: [groupList 
+                      do: [^my primaryEntityList at: (^self asSelf) put: (^self asSelf)];
+                   ];
+     ] ;
+];
+
+VendorEntity defineMethod: [| resolveDuplicatePrimaryReferences: processedList|
+#-- Do the right thing here
+  processedList
+     groupedBy: [primaryEntity] . 
+        select: [groupList count > 1] .
+      extendBy: [!hits  <- groupList select: [id = primaryEntity code] ; 
+                 !choice;
+                 hits count > 0 
+                   ifTrue: [:choice <- hits at: 1;]
+                  ifFalse: [:choice <- groupList at: 1;];
+                ] .
+            do: [!primaryEntity <- ^self asSelf;
+                 #-- Reset all of the VendorEntity instances
+                 groupList do: [:primaryEntity <- ^self asSelf primaryEntityClass;];
+                 choice resetPrimaryEntityTo: primaryEntity;
+                ];
+^self
+];
+
+
+VendorEntity defineMethod: [| resetPrimaryEntityTo: entity| 
+entity isEntity 
+  ifTrue: [:primaryEntity                 <- entity;                  
+           entity send: ^self linkBlock . <- ^self asSelf;             
+          ];
+];
+
+Entity defineMethod: [|propagateReferencesFor: updateBlock| 
+ ^self
+];
+
+Security defineMethod: [|propagateReferencesFor: updateBlock|
+ ^self activeList 
+   extendBy: [!linkValue <- ^self send: ^my updateBlock . value] .    
+     select: [linkValue isDefault] .                                  
+     select: [company isntDefault] .
+     groupedBy: [company] .
+      extendBy: [!updateBlock <- ^my updateBlock;
+                 !secList     <- securityList 
+                    extendBy: [!linkValue <- ^self send: ^my updateBlock . value] .
+                      select: [linkValue isntDefault];
+                ] .
+       select: [secList count > 0] .
+           do: [!primary <- secList sortUp: [code] . at: 1 . send: [linkValue] . asSelf;
+                groupList do: [^self send: ^my updateBlock . <- ^my primary;];
+               ];
+^self 
+];
+
+#------------------------------
+
+#--------------------
+#  VendorEntity: currency support
+#  - tighten up currency definition to bump to primaryEntity when available
+#--------------------
+
+VendorEntity defineMethod: [ | currency |
+  !primaryLink <- ^self primaryEntity isDefault
+                  ifTrue: [ ^self ]
+                  ifFalse: [ ^self primaryEntity ] ;
+  ^local currency isntNA
+   ifTrue: [ ^local currency isLegacy
+             ifTrue: [ primaryLink legacyCurrency ]
+             ifFalse: [ ^local currency ]
+           ]
+   ifFalse: [ primaryLink baseCurrency ]
+] ;
+
+####################
+#  DataRecord
+#  - add getPriorRecord method
+#  - fix adjustment factor to convert time to date
+#  - add adjustment methods for t/s properties of data record
+####################
+
+DataRecord defineMethod: [ | getPriorRecord |
+   date isntDefault && [ ^self updateBlock isBlock ] 
+     ifTrue: [ entity send: ^self updateBlock . asOf: date predecessor ]
+    ifFalse: [ ^self defaultInstance ] 
+] ;
+
+DataRecord defineMethod: [ | adjustmentFactor |
+  !adate <- 
+     adjustmentDate ifDefault: [ recordDate ] . asDate ; #- convert from Time
+  !baseEntity <- entity isEntity ifTrue: [ entity ] .
+      elseIf: [ entity isBridge ] then: [ entity baseEntity ] ;
+  (baseEntity isCompany || baseEntity isSecurity)
+   && [ adate isDate && adate isntDefault ] 
+     ifTrue: [baseEntity adjustmentRelativeTo: adate ] .
+] ;
+
+#--------------------
+#  adjustment factors for t/s properties in data record
+#--------------------
+
+DataRecord defineMethod: [ | getAdjustedDataFor: aTimeSeries |
+ !adate <- aTimeSeries effectiveDate asDate ;
+ !baseEntity <- ^self getUnderlyingEntity ;
+ (baseEntity isCompany || baseEntity isSecurity || baseEntity isVendorEntity)
+         && [ adate isDate && adate isntDefault ]
+   ifTrue: [ aTimeSeries value / (baseEntity adjustmentRelativeTo: adate) ] 
+] ;
+
+DataRecord defineMethod: [ | getAdjustedSharesDataFor: aTimeSeries |
+ !adate <- aTimeSeries effectiveDate asDate ;
+ !baseEntity <- ^self getUnderlyingEntity ;
+ (baseEntity isCompany || baseEntity isSecurity || baseEntity isVendorEntity)
+         && [ adate isDate && adate isntDefault ]
+   ifTrue: [ aTimeSeries value * (baseEntity adjustmentRelativeTo: adate) ] 
+] ;
+
+
+####################
+#  VendorDataRecord subclass
+#  - add protocol
+####################
+
+CoreWorkspace respondsTo: "VendorDataRecord" .
+  ifFalse: [ DataRecord createSubclass: "VendorDataRecord" at: CoreWorkspace ];
+
+VendorDataRecord defineMethod: [ | adjustmentFactor |
+   !adate <- adjustmentDate ifDefault: [recordDate] . asDate ;
+   !baseEntity <- ^self getUnderlyingEntity ;
+   baseEntity isVendorEntity && [ adate isDate && adate isntDefault ]
+      ifTrue: [ baseEntity adjustmentRelativeTo: adate ] . else: [ 1.0 ]
+] ;
+
+####################
+#  ProcessControlTools
+#  - add methods to get environment variables from csh
+#    (these will need to be modified for NT)
+####################
+
+ProcessControlTools defineMethod: [ | getEnvFor: text | 
+!env <- "/bin/csh -f" asProgramWith: [ "echo $" print ; text printNL ] .
+    stripChar: newLine ;
+env contains: ">>> Error" . 
+    ifTrue: [ env printNL ; NA ] ifFalse: [ env ]
+] ;
+
+ProcessControlTools defineMethod: [ | getEnv | 
+"/bin/csh -f" asProgramWith: [ "env" printNL ] 
+] ;
+
+
+#======================================================================
+
+newLine print ;
+"...  Miscellaneous feed changes " printNL ;
+newLine print ;
+
+####################
+#  DataFeed
+#  - add feedspeed patches to DataFeed and EEF
+#
+#  DataFeed bulkLoad
+#  - add step to resetRunTimeAttributes at end of bulk load only
+#  - make sure records aren't lost at boundaries when starting at non-0 batch
+#
+#  ExternalFeedManager
+#  - fix DataRecord subclass initialization to reference correct type of entity
+#  - add cover to upload:usingFile: for no-cfg version
+#
+#  XRefFeed
+#  - allow the XRef source to be defined in the config file for all records
+#
+####################
+
+#========================================
+
+####################
+#  DataFeed/EEF
+#  - feedspeed patches
+#  --> +bulkLoad
+#  - add step to resetRunTimeAttributes at end of bulk load only
+#  - make sure records aren't lost at boundaries when starting at non-0 batch
+####################
+
+#--------------------
+# DataFeed updateFromString: string
+#    optimized version
+#    - this method implements some of the optimizations discussed such
+#      as improved screens, and early relinquishment of memory.  
+#--------------------
+
+DataFeed defineMethod: [| updateFromString: string|
+  !feed <- ^self asSelf currentStore;
+  feed printTimeWith: "... start of updateFromString: ";
+
+  !delim <- feed getDelimiter;
+  !emptyPattern <- "[ " concat: delim . concat:"      ]*";
+  !skipChars <- feed getSkipChars;
+  !comment <- 
+       "^" concat: (^self getGlobalOption: "commentOverride" . else: "#" ) ;
+  !recs <- skipChars isntNA
+    ifTrue: [string value else: "" .stripChar: skipChars]
+    ifFalse: [string value else: ""].
+    asLines select: [stripLeadingBlanks contains: ^my comment . not].
+          select: [^self findPatternExtent:^my emptyPattern .!= count];
+
+  feed printTimeWith: ("... after recs creation " concat: recs count);
+
+  string isValue ifTrue:[
+    string <- NA; string cleanStore;
+    feed printTimeWith: ("... after string cleanStore " concat: recs
+count);
+  ];
+
+  feed processAsofDateFor: recs;
+
+#--  add option to process fixed field records
+  !fixedFields <- ^self getGlobalOption: "fixedFields" ;
+  fixedFields isntNA
+    ifTrue: [ :recs <- ^self processFixedFieldsFor: recs using: fixedFields  .
+                numberElements ;
+            ]
+   ifFalse: 
+     [ :recs <- recs send: [
+          !result <- CoreWorkspace Object basicExtend:[!fields];
+           result :fields <- ^self breakOn: ^my delim;
+           result
+        ]. numberElements;
+    ] ;
+
+  feed printTimeWith: ("... after fields creation " concat: recs count);
+  :recs cleanStore;
+  feed printTimeWith: ("... after recs cleanStore " concat: recs count);
+
+  feed processHeadersFor: recs;
+  feed printTimeWith: ("... after headers " concat: recs count);
+
+  !bot <- recs count - feed getSkipLinesAtBottom;
+  bot > 0 ifTrue: [:recs <- recs select: [position <= ^my bot];];
+  !top <- feed getSkipLinesAtTop;
+  top > 0 ifTrue: [:recs <- recs select: [position > ^my top]];
+  !max <- feed maxRecordsToProcess;
+  max isntNA ifTrue: [:recs <- recs first: max];
+
+  feed cleanupCurrentInstances;
+  feed printTimeWith: "... after purge ";
+  feed setUpdateBlocks;
+  feed printTimeWith: "... after setUpdateBlocks";
+
+  recs do: [^my feed createInstanceFrom: ^self];
+  feed printTimeWith: ("... after createInstanceFrom:  " concat: recs
+count);
+
+  :recs <- NA; :recs cleanStore;
+  feed printTimeWith: "... after cleanStore  ";
+
+  feed updateCurrencyValue;
+  feed asofDate else: ^date .evaluate: [
+    feed purgeEnabled ifTrue: [feed purgeRecords]
+    ifFalse: [feed reconcile];
+    feed resetRunTimeAttributes;
+   ];
+  feed printTimeWith: "... end of updateFromString: ";
+];
+
+#--------------------
+#  DataFeed bulkLoadFromFile: 
+#    optimized version
+#  - This method was changed to pass updateFromString: the 
+#      intensional form of the input plus other misc cleanups
+#  - make sure records aren't lost at boundaries when starting at non-0 batch
+#--------------------
+
+DataFeed defineMethod: [|bulkLoadFromFile: fname withConfig: cfgName
+andBatchSize: bsize fromBatch: bnum to: enum|
+  !feed <- ^self;
+  newLine print;
+  "--->  Bulk Loading " print; ^self whatAmI printNL;
+  "      from file " print; fname printNL;
+  "      using config " print; cfgName printNL;
+  "      " print; CoreWorkspace Utility UnixSeconds currentTime printNL;
+
+  !file <- "file:" concat: fname .
+    asOpenVisionChannel setTrimFormatToUntrimmed;
+  !fsize <- file byteCount;
+  fsize = 0
+    ifTrue: [">>> Empty file or file not found." printNL].
+    elseIf: [cfgName isntDefault && [cfgName asFileContents isNA]]
+    then: [">>> Config file " concat: cfgName .concat: " not found." .
+printNL; ].
+    else: [
+      :bsize <- bsize else: fsize;
+      !approxBatches <- (fsize / bsize + 1) asInteger;
+      !firstBatch <- bnum else: 0;
+      !lastBatch <- enum else: (approxBatches - 1) .asInteger;
+      ^self loadConfig: cfgName;
+      !skipLines <- ^self getSkipLinesAtTop;
+      !startOfFile <- "";
+      !count <- 1;
+      [ count <= skipLines] whileTrue: [
+          !line <- file getLine else: "" .
+            extendBy: [
+                !baseLine <- ^self stripBoundingBlanks stripChar: newLine;
+                !skipIt <- (baseLine isBlank || [baseLine contains: "^#"]);
+            ];
+          line skipIt ifFalse: [
+            :startOfFile <- startOfFile concat: line asSelf;
+            :count increment;
+          ];
+      ];
+      !extraOffset <- (startOfFile count max: 1 .- 1) asInteger;
+      ^self getGlobalOption: "fieldOrderList". isNA ifTrue: [
+          !headerLine <- ^self getHeaderLineNumber else: 1;
+          !line <- startOfFile asLines at: headerLine;
+          !headers <- line translate: "|	" to: ",";
+          CoreWorkspace GlobalsFeed setGlobalOption: "fieldOrderList" to:
+headers;
+      ];
+      CoreWorkspace GlobalsFeed setGlobalOption: "headerLineNumber" to: 0 .
+                      setGlobalOption: "skipTop" to: 0 .
+                      setGlobalOption: "skipBottom" to: 0 .
+                      setGlobalOption: "maxRecords" to: 0 .
+                      setGlobalOption: "asOfDateLineNumber" to: 0;
+      !delimiter <- ^self getGlobalOption: "delimiter" .else: "|";
+      (delimiter contains: "|") || [delimiter contains: "	"]
+          ifTrue: [CoreWorkspace GlobalsFeed Globals delete: "delimiter"];
+      CoreWorkspace GlobalsFeed enableBulkLoadInProgress;
+      !globals <- Globals selectorList select: [asString take: 1 .!= "_"].
+          extendBy: [
+            !option <- asSelf;
+            !setting <- ^my Globals at: asSelf;
+          ]. select: [setting isntNA];
+
+      newLine print;
+      "    File Size " print: 20; fsize printNL;
+      "    ~ Batch Size " print: 20; bsize printNL;
+      "    ~ # of Batches " print: 20; approxBatches printNL;
+      "    First Batch " print: 20; firstBatch printNL;
+      "    Last Batch " print: 20; lastBatch printNL;
+      newLine print;
+
+      !rejectFile <- ^self getRejectFileNameFor: fname;
+      !rejectsFound <- FALSE;
+      approxBatches sequence0 iterate: [
+          !start <- (^self * ^my bsize + ^my extraOffset + 1) asInteger;
+          !size <- ^my bsize min: (^my fsize - start + 1) .max: 0
+.asInteger;
+
+          !string <- (^my file getString: size at: start .else: "") concat:
+                        (!extra <- ^my file getLine else: "");
+
+          ^my :extraOffset incrementBy: extra count;
+          newLine print;
+          "Iteration: " print; ^self print: -5;
+          " totNetAllocSize: " print;
+          CoreWorkspace AdminTools
+            totalNetworkAllocation printWithCommasNL: 20.0;
+  #--- I suggest we handle the checks in here to allow the bookkeeping
+  #    of 'extraOffset' to work regardless of your starting point.
+  #    Confirm batch number and string count before calling updateFromString
+          ^self >= ^my firstBatch &&
+          [^self <= ^my lastBatch]&& [string count > 0] ifTrue: [
+            newLine print;
+            "*" fill: 5 .print;
+            "  starting iteration " print; print; "  -- " print;
+            CoreWorkspace Utility UnixSeconds currentTime printNL;
+            "    start     size   string    extra" printNL;
+            start print; size print; string count print; extra count
+printNL;
+
+          CoreWorkspace GlobalsFeed clearGlobalOptions;
+          ^my globals
+           do:[CoreWorkspace GlobalsFeed setGlobalOption: option to: setting ];
+          ^my feed updateFromString: :string;
+          :string cleanStore ;    #---  (added back from patch.hosted)
+          !status <- ^my feed saveRejectsToFile: ^my rejectFile
+                              withLabel: ("Bulk load iteration: " concat:
+asSelf);
+            status ifTrue: [^my :rejectsFound <- TRUE];
+          ];
+      ];
+      file close;
+      newLine print;
+      "--->  End of Bulk Loading " print; ^self whatAmI printNL;
+      "      from file " print; fname printNL;
+      rejectsFound ifTrue: ["      rejects in " print; rejectFile printNL];
+      "      " print; CoreWorkspace Utility UnixSeconds currentTime printNL;
+      CoreWorkspace GlobalsFeed disableBulkLoadInProgress;
+    ^self isEntityExtenderFeed ifTrue: [^self resetRunTimeAttributes]; 
+    ];
+];
+
+#--------------------
+#  EntityExtenderFeed
+#    - new flag:  enableOptimization
+#    - new flags: testForNAExplicitly; fixedProperties only
+#    - new optimized initializeKeys
+#    - new optimized updateDataFor: recs
+#--------------------
+
+#----------
+#  EntityExtenderFeed
+#  - new flag: enableOptimization (disable default - preserve current behavior)
+#----------
+
+EntityExtenderFeed defineMethod: [ | enableOptimization | 
+  ^self define:"useOptimizationFlag" toBe: TRUE ;
+  ^self
+] ;
+
+EntityExtenderFeed defineMethod: [ | disableOptimization | 
+  ^self define:"useOptimizationFlag" toBe: NA ;
+  ^self
+] ;
+
+EntityExtenderFeed disableOptimization ;
+
+#----------
+#  EntityExtenderFeed
+#    - new flags: testForNAExplicitly; fixedProperties only
+#----------
+
+EntityExtenderFeed defineMethod: [ | enableTestForNaExplicitly |
+  ^self define:"testForNaExplicitly" toBe: TRUE ;
+  ^self
+] ;
+EntityExtenderFeed defineMethod: [ | disableTestForNaExplicitly |
+  ^self define:"testForNaExplicitly" toBe: FALSE ;
+  ^self
+] ;
+EntityExtenderFeed disableTestForNaExplicitly ;
+
+EntityExtenderFeed defineMethod: [ | enableFixedPropertiesOnly |
+  ^self define:"fixedPropertiesOnly" toBe: TRUE ;
+  ^self
+] ;
+EntityExtenderFeed defineMethod: [ | disableFixedPropertiesOnly |
+  ^self define:"fixedPropertiesOnly" toBe: FALSE ;
+  ^self
+] ;
+EntityExtenderFeed enableFixedPropertiesOnly ;
+
+#--------------------
+#  EntityExtenderFeed
+#    - new optimized initializeKeys (new version at EEF)
+#      . na processing moved to updateDataFor:
+#--------------------
+
+EntityExtenderFeed defineMethod: [ | initializeKeys: inputs |
+  ^self useOptimizationFlag isTrue
+    ifTrue: [ ^self initializeKeysOptimized: inputs ]
+   ifFalse: [ ^super initializeKeys: inputs ] 
+] ;
+
+EntityExtenderFeed defineMethod: [| initializeKeysOptimized: inputs|
+  !newOne <- ^self asSelf;
+
+  newOne updateBlocksToDo count > 0 ifTrue: [
+    newOne usesLocalFields ifTrue: [
+      newOne updateBlocksToDo do: [
+          !input <- ^my inputs at: position .else: "" .
+                  stripLeadingBlanks stripTrailingBlanks;
+          !noValue <- input isDefault ||
+                  [^my newOne naTest any: [^my input send: asSelf]];
+          ^my newOne send: ^self . <- noValue ifTrue: [NA]ifFalse: [input];
+      ]
+    ] ifFalse: [newOne :valueList <- inputs;];
+  ] ifFalse: [
+    newOne :valueList <- inputs send: [
+      !input <- ^self;
+      !noValue <- ^self isDefault ||
+                [^my newOne naTest any: [^my input send: asSelf]];
+      noValue ifTrue: [NA]
+      ifFalse: [^self stripLeadingBlanks stripTrailingBlanks]
+    ];
+  ];
+  newOne usesLocalFields ifFalse: [
+    newOne localOnlyBlocks do: [
+      !block <- asSelf;
+      !value <- ^my newOne valueList at: itemNum .else:"".
+      stripLeadingBlanks stripTrailingBlanks;
+      value isDefault || [^my newOne naTest any: [^my value send: asSelf]]
+       ifFalse: [^my newOne send: block .<- value ]
+    ];
+  ];
+  newOne
+];
+
+#--------------------
+#  EntityExtenderFeed
+#    - new optimized updateDataFor: recs
+#      . new tests for na and fixed properties
+#      . handles na case
+#--------------------
+
+EntityExtenderFeed defineMethod: [| runUpdate |
+  !feed <- ^self asSelf ;
+  !todo <- feed instanceList select: [ underlyingRecord isntDefault ] ;
+
+  ^self incrementalUpdateFlag isTrue
+  ifTrue: 
+    [ todo count > 0
+        ifTrue: [ feed updateIncrementalDataFor: todo ]  ;
+      feed printTimeWith: "...  after updateIncrementalDataFor: "
+    ] .
+  elseIf: [ ^self useOptimizationFlag isTrue ] 
+  then:
+    [ todo count > 0
+        ifTrue: [ feed updateDataForOptimized: todo ]  ;
+      feed printTimeWith: "...  after updateDataFor: " ;
+    ] .
+  else:
+    [ todo count > 0
+        ifTrue: [ feed updateDataFor: todo ]  ;
+      feed printTimeWith: "...  after updateDataFor: " ;
+    ] ;
+
+  !expirationCheck <- ^self getGlobalOption: "autoExpire" ;
+  expirationCheck isDateOffset &&
+      [ feed baseEntity isEntityOrBridge ] && [ feed recordIsTS ]
+     ifTrue: [ ^self expireOldDataUsing: expirationCheck ] ;
+] ;  ## runUpdate @EEF
+
+
+EntityExtenderFeed defineMethod: [| updateDataForOptimized: recs|
+  !feed <- ^self asSelf;
+  !underlyingClass <- recs at: 1 .
+    isntDefault: [underlyingRecord] else: [NA];
+  !excludeList <- feed keyList append: feed localPropertyList;
+  !updateBlocks <- feed updateBlockList numberElements
+    select: [isntNA].
+    select: [^my excludeList excludesElement: position].
+    extendBy: [!message <- ^my feed fieldOrderList at: position;
+      !mid <- ^my underlyingClass getMessage: message;
+      !dataType <- mid isntDefault ifTrue: [mid defaultDataType];
+    ];
+  !adjDate <- feed getAdjustmentDate;
+  !noAutoCurrency <- feed autoCurrencyDisabled;
+  recs do: [
+    evaluationDate evaluate: [
+      ^my updateBlocks do: [
+          !currentValue <- ^my valueList at: position.else:"";
+          !convertedValue; 
+          ^my testForNaExplicitly || [dataType isNumber not ] 
+            ifTrue: [
+              :currentValue <- currentValue stripLeadingBlanks stripTrailingBlanks;
+              currentValue isDefault || [^my naTest any: [^my currentValue send: asSelf]]
+                ifTrue: [:currentValue <- NA ];
+              :convertedValue <- currentValue isntNA 
+                ifTrue: [
+                  dataType isString || [dataType isNA] 
+                    ifTrue: [  ^my underlyingRecord getClusteredString: currentValue ] 
+                    ifFalse: [  currentValue as: dataType ]
+                 ] 
+                ifFalse: [
+                  dataType isString 
+                    ifTrue: [^my underlyingRecord getClusteredString: "" ]
+                    ifFalse: [ currentValue as: dataType ]  ## added 10/24/03 to include NA case
+                ] 
+            ] 
+            ifFalse: [ :convertedValue <- currentValue as: dataType; ];
+
+          ^my fixedPropertiesOnly 
+            ifTrue: [ ^my underlyingRecord send:^self . <- convertedValue; ] 
+            ifFalse: [ mid type isTimeSeriesProperty && [^my onlyUpdateOnChangeFlag isTrue]
+              ifTrue:  [^my underlyingRecord send: ^self .updateWith: convertedValue]
+              ifFalse: [^my underlyingRecord setProperty: ^self to: convertedValue];
+            ];
+      ];
+      :valueList <- NA; :valueList cleanStore;
+      :underlyingCurrency <- currencyId asCurrency;
+      underlyingCurrency
+        isDefault && [^my noAutoCurrency isFalse] && [underlyingRecord isDataRecord]
+          ifTrue: [ :underlyingCurrency <-  underlyingRecord getUnderlyingBaseCurrency ; ] ;
+      underlyingCurrency isntDefault
+          ifTrue: [underlyingRecord setBaseCurrencyTo: underlyingCurrency];
+      ^my adjDate isntNA && underlyingRecord isDataRecord
+          ifTrue: [underlyingRecord setAdjustmentDateTo: ^my adjDate];
+      :isProcessed <- TRUE;
+    ];
+  ];
+];
+
+#--------------------
+#  add optimization branch to estimate updates as well
+#--------------------
+
+EstimateRecordFeed defineMethod: [ | updateEstimatesFor: recs |
+!noAutoCurrency <- ^self autoCurrencyDisabled ;
+!items <- ^self fieldOrderList 
+select: [isntDefault].send: [toUpper stripChar: " "]; 
+!hasEstimate <- items any: [^self = "ESTIMATE"]; 
+!hasEstimator <- items any: [^self = "ESTIMATOR"]; 
+!hasActual <- ^self actualFlagEnabled 
+else: [items any: [^self = "ACTUALFLAG"]]; 
+recs 
+do: [^my hasEstimate ifTrue: [underlyingRecord setEstimateTo: estimate]; 
+    ^my hasEstimator ifTrue: [underlyingRecord setEstimatorTo: estimator]; 
+    underlyingCurrency isDefault && [ ^my noAutoCurrency isFalse ]
+      ifTrue: [ :underlyingCurrency <- 
+                    underlyingRecord getUnderlyingBaseCurrency ;
+              ] ;
+    underlyingCurrency isntDefault 
+    ifTrue: [underlyingRecord setBaseCurrencyTo: underlyingCurrency]; 
+    !adate <- adjustmentDate ifDefault: [getAdjustmentDate]; 
+    adate isntNA 
+    ifTrue: [underlyingRecord setAdjustmentDateTo: adate]; 
+    :isProcessed <- TRUE; 
+   ]; 
+recs do: [:evaluationDate <- getEvaluationDate]; 
+
+#-- update other properties here using optimization, if set
+^self useOptimizationFlag isTrue 
+   ifTrue: [ ^self updateDataForOptimized: recs ]
+  ifFalse: [ ^self updateDataFor: recs ] ;
+
+hasActual 
+  ifTrue: [recs do: [underlyingRecord setActualFlagTo: actualFlag]]; 
+
+] ;
+
+#--------------------
+#  DataFeed bulkLoad...
+#  - add step to resetRunTimeAttributes at end of bulk load only
+#--------------------
+
+EntityExtenderFeed defineMethod: [ | resetRunTimeAttributes | 
+^self getGlobalOption: "bulkLoadInProgress" . else: FALSE .
+ifFalse: [ ^super resetRunTimeAttributes
+              disableOnlyUpdateOnChange
+              enableDisplayBadId
+              disableIncremental
+         ];
+  ^self
+] ;
+
+
+####################
+#  ExternalFeedManager
+#  - fix DataRecord subclass initialization
+#  - add BatchFeedManager version of "upload: usingFile:" that
+#    uses "uplad:usingFile:withConfig:NA" instead of the version
+#    defined at its super class which was designed to work with vadmin
+####################
+
+Interface ExternalFeedManager 
+defineMethod: [ | createDataRecordClass: newClassId from: oldId
+                  linkedTo: entityId via: path asTS: flag |
+!newId <- ^self getValidClassNameFrom: newClassId ;
+!newClass <- 
+   ^self createCoreClass: newId from: oldId as: CoreWorkspace DataRecord ;
+newClass isDataRecord
+ifTrue:
+  [ !entityClass <- entityId asClass ;
+#-- this section added
+    entityClass isEntityOrBridge
+    ifTrue:
+       [ newClass :entity <- entityClass defaultInstance ;
+         "Setting 'entity' on Default " print ; newClass print ; 
+         " to Default " print ; entityId printNL ;
+       ] ;
+#-- end of added section
+    entityClass isEntityOrBridge && path isntDefault
+    ifTrue:
+       [ ^self createLinkFrom: entityClass to: newClass via: path asTS: flag ;
+       ]
+    ifFalse:
+      [ !message <- "No property link defined as access path." ;
+        entityId isntDefault && path isntDefault
+         ifTrue: [ ">>> Bad entity/bridge supplied. " print ; message printNL ]
+         ifFalse: [ message printNL ] ;
+      ] ;
+#--  create the feed if entity class OR path is provided
+    entityClass isEntityOrBridge || path isntDefault
+    ifTrue:
+       [ !feedId <- newId capitalize concat: "Feed" ;
+         !feed <- feedId asClass ;
+         feed isEntityExtenderFeed &&
+          [ feed baseEntity isEntityOrBridge ] &&
+                [ feed baseEntity != entityClass]
+         ifTrue:
+           [ :feedId <- newId capitalize
+                  concat: entityClass whatAmI . concat: "Feed";
+           ] ;
+         ^self createExtenderFeed: feedId
+               forBaseClass: newClass linkedTo: entityClass ;
+      ] ;
+  ]
+ifFalse:
+  [ ">>> No property link defined as access path." printNL ;
+    ">>> No EntityExtenderFeed class created." printNL ;
+  ] ;
+
+] ;
+
+Interface BatchFeedManager 
+defineMethod: [ | upload: feedName usingFile: fileName |
+  ^self upload: feedName usingFile: fileName withConfig: NA
+] ;
+
+
+####################
+#  More DataFeed
+#    - new flag:  enable update on low space
+#    - add to runWrapup to force save when appropriate
+#
+#     -add new method to process fixed fields for on feed records
+#       fixedFields is a cfg file option in form
+#           from:for,from:for,from:for
+#       where each from:for pair corresponds to field in the fieldOrderList
+#       use multiple ,, to skip a field that appears in the list
+####################
+
+#--------------------
+#  DataFeed
+#  - new flag: enableUpdateOnLowSpace
+#--------------------
+
+DataFeed defineMethod: [ | enableUpdateIfSpaceIsLow | 
+  ^self define:"updateIfSpaceIsLowFlag" toBe: TRUE ;
+  ^self
+] ;
+
+DataFeed defineMethod: [ | disableUpdateIfSpaceIsLow | 
+  ^self define:"updateIfSpaceIsLowFlag" toBe: NA ;
+  ^self
+] ;
+
+DataFeed defineMethod: [ | runWrapup | 
+  ^self runMaintenance ;
+  ^self
+] ;
+
+DataFeed defineMethod: [ | runMaintenance |
+  ^self updateIfSpaceIsLowFlag isTrue 
+      ifTrue: [ CoreWorkspace AdminTools updateNetworkIfSpaceIsLow ] ;
+  ^self
+] ;
+
+DataFeed enableUpdateIfSpaceIsLow ;
+
+#--------------------
+
+#--------------------
+#  DataFeed: fixed fields
+#--------------------
+
+DataFeed defineMethod: [ | processFixedFieldsFor: recs using: fixedFields |
+!rules <- fixedFields breakOn: "," .
+    extendBy: [ !from <- ^self to: ":" . drop: -1 . asNumber ;
+                !for <- ^self from: ":" . drop: 1 . asNumber ;
+              ] ;
+recs 
+  send: [ !rec <- ^self ;
+          !result <- CoreWorkspace Object basicExtend:[!fields];
+     
+          result :fields <- 
+          ^my rules 
+             send: [ from isntNA && for isntNA
+                        ifTrue: [ ^my rec from: from for: for ]
+                       ifFalse: [ "" ] 
+                   ] ;
+          result
+        ] 
+] ;
+
+
+#-----------------------------------------
+
+####################
+#  XRefFeed
+#  - allow the XRef source to be defined in the config file for all records
+####################
+XRefFeed defineMethod: [ | getSourceId |
+  ^self getGlobalOption: "xrefSourceId"
+];
+
+XRefFeed defineMethod: [ | initializeProcessing |
+  !feed <- ^self asSelf ;
+  feed masterList
+  do: [ :underlyingRecord <- entityType locateId: entityId ;
+        #-- Added to allow for GlobalsFeed option on source
+        :sourceId <- sourceId ifDefault: [ ^my feed getSourceId ] ;
+        :source <- CoreWorkspace Named IdSource at: sourceId ;
+      ] ;
+  !todo <- feed masterList
+     select: [ underlyingRecord isntDefault && source isntDefault ] ;
+#--  make sure XRef dictionaries have been setup for each source present
+  todo
+  groupedBy: [ source ] .
+  do: [ !xref <- ^self getXRefFor: ^my feed entityType .
+           else: [ groupList at: 1 . :newOneCreated <- TRUE ;
+                   ^self createXRefFor: ^my feed entityType
+                 ] ;
+        groupList do: [ :xref <- ^my xref ] ;
+      ] ;
+#-- lookup entity currently associated with symbol and current symbol
+  todo
+  do: [ :priorEntity <- xref at: symbol ;
+        :priorSymbol <- xref getValueFor: underlyingRecord ;
+      ] ;
+]  ;
+
+#======================================================================
+
+newLine print ;
+"...  Miscellaneous invest core changes " printNL ;
+newLine print ;
+
+##################################################
+#  DEFcore.inv
+#
+#  Security
+#  - modify rebuildHoldings to address performance issues
+#
+#  EstimateBridge
+#  - add purge summary/detail support methods
+#
+#  EstimateRecord
+#  - add reportedDate property and modify actual record update to process value
+#
+#  ConsensusEstimateRecord
+#  - reimplement stdDev as a method that adjusts new _stdDev property;
+#    note that current values need to be copied from stdDev before redefining
+#
+##################################################
+
+####################
+#  Security: rebuildHoldings
+#  - modify rebuildHoldings to address performance issues
+#
+#  patch.rebuildHoldings : 9/12/02
+#    Modified: dkr 9/12/02
+#              dkr 8/2/03
+#              dkr 8/11/03
+#              lcn 5/5/05
+#              lcn 6/15/05
+#
+#  Description:
+#
+#  1)  The rebuldHoldings method at Security will cross reference all
+#    portfolio holdings as of the current date.  This can potentially
+#    include holdings from an early date if a portfolio has not updated.
+#    Un-updated portfolios should probably have their holdings expired
+#    using a cfg option, but in cases where the expire has not run, we
+#    may want to have rebuildHoldings restrict itself to a single date.
+#
+#  2)  Securities that do not have holdings have the default list stored
+#     for each date.
+#
+#  3) Lists for each 'holdingsSeries' day is currently stored in a separate
+#     cluster leading to many clusters over time since this is a daily t/s
+#
+#  Solution:
+#  1)  Modify the rebuildHoldings method to restrict by date
+#  2)  Only store the default if the prior date is non-default
+#  3)  Cluster the 'holdingsSeries' lists together with 'holdingsPrototype'
+#      list; also, convert the storage type to 'Product Mapped' for the t/s
+#
+#  NOTE: By modifying this method, a portfolio that does not update daily
+#        will no longer have prior day's holdings included in the xref.
+#        Additionally, if holdings are loaded again as refresh and securities
+#        that where previously not held and had a empty list are then held, then
+#        there will be gaps in the use of the empty lists as fallbacks. This could
+#        result in misrepresenting of data. The exposure to these events has been
+#        determined to be typically very small, so in light of a future modification
+#        we will use this approach because the benifits outweight the drawbacks.
+#
+#  Audit:
+#   8/02/2003 - dkr - Modified to separate the cleanup step from the
+#                     method change. The cleanup
+#                     process will require allot of processing,
+#                     depending upon the extent of the data to be
+#                     cleaned.  The cleanup will be managed by an
+#                     operator to confirm successful completion
+#                     prior to installing this patch.
+#   8/11/2003 - dkr - Modified to include additional suggests by lhk
+#                     that include:
+#                     - purging of current holdings if real by calling
+#                       the 'deleteCurrentHoldings' message.
+#                     - making sure we use the prototype list when
+#                       putting in default (empty) lists.
+#   5/05/2005 - lcn -  add # in front of 'wrapped' comment
+#
+#   6/15/2005 - lcn - change to use Account instead of Portfolio
+#          (also required changes to use holdingsSeries not holdings
+#           which has been redefined for some clients to locate the
+#           benchmark in a foreign database - e.g., nacm)
+#
+####################
+
+Security defineMethod: "[| rebuildHoldings |
+## Initialize for current daily holdings update
+  asSelf masterList do:
+  [ #-- delete current holdings (list if not prototype and date if = ^date)
+    deleteCurrentHoldings;
+    #-- initialize with holdingsPrototype list for current date.
+    :holdingsSeries put: holdingsPrototype;
+  ];
+  ### Collect valid holdings for current date.
+  !validAccounts <- CoreWorkspace Account masterList 
+      select: [ holdingsSeries count > 0 && [ holdingsDate = ^date ] ];
+  !holdings <- validAccounts collectListElementsFrom: [ holdingsSeries ];
+  #-- reuse variable and run cleanStore; this reduces overhead during execution
+  #-- by freeing up storage of 'collectLE' list
+  ## Securities extended by holdings groupList
+  :holdings <- holdings groupedBy: [ security asSelf ];  
+  :holdings cleanStore;
+  ### Create new list in prototype cluster to append current holdings
+  holdings do:
+  [ :holdingsSeries put: holdingsPrototype clusterNew;
+    groupList do: [ ^my holdingsSeries , ^self ];
+  ];
+  ### Remove current ^date if prior observation contains the Default.
+  asSelf masterList
+      select: [ holdingsSeries isDefault ] .
+      select: [ :holdingsSeries lag: 1 days . isDefault ] .
+          do: [ :holdingsSeries delete: ^date ] ;
+]";
+
+"--->  converting holdingsSeries t/s to Product Mapped storage" printNL ;
+Security :holdingsSeries __setIndexingTypeToProductMapped;
+
+#--------------------
+
+####################
+#  EstimateBridge
+#    Methods to purge estimate consensus and detail
+#    observations. These include the estimate records
+#    and actual records.
+####################
+
+#--------------------
+#  Purge Methods
+#--------------------
+
+SummaryEstimateBridge defineMethod: [ | purgeFrom: d1 to: d2 |
+  ^self purgeConsensusFrom: d1 to: d2 ;
+  ^self purgeDetailFrom: d1 to: d2 ;
+] ;
+
+SummaryEstimateBridge defineMethod: [ | purgeConsensusFrom: d1 to: d2 |
+  !bridge <- ^self ;
+  !start  <- d1 asDate ;
+  !end    <- d2 asDate ;
+  !todo   <- :observation nonDefaults from: start to: end ;
+  todo
+  do: [^my bridge :observation delete: ^date ;
+       ^self flagForDeletion ; ^self rdelete ;
+      ] ;
+  !todo <- :actualRecord nonDefaults from: start to: end ;
+  todo
+  do: [^my bridge :actualRecord delete: ^date ;
+       ^self flagForDeletion ; ^self rdelete ;
+      ] ;
+] ;
+
+SummaryEstimateBridge defineMethod: [ | purgeDetailFrom: d1 to: d2 |
+  !bridge <- ^self ;
+  !start  <- d1 asDate ;
+  !end    <- d2 asDate ;
+
+  bridge detailXRef
+  do: [ !sbridge <- ^my bridge ;
+        !dbridge <- ^self ;
+        !todo <- :observation nonDefaults from: ^my start to: ^my end ;
+        todo
+        do: [ ^my dbridge :observation delete: ^date ;
+              ^self flagForDeletion ; ^self rdelete ;
+            ] ;
+     ] ;
+] ;
+
+####################
+#  EstimateRecord
+#  - add reportedDate property and modify actual record update to process value
+####################
+
+PropertySetup updateFromString: "
+classId        | property     | defaultValue   | dataType | description
+EstimateRecord | reportedDate |                | Date     | Date actual was Reported
+" ;
+
+EstimateRecord defineMethod: [ | setActualFlagTo: flag |
+  :actualFlag <- flag isTrue ifTrue: [ TRUE ] else: [ FALSE ] ;
+
+#-- move actual record out of t/s if attached to an estimate bridge
+  ^self actualFlag isTrue &&
+       [ bridge isEstimateBridge ] && [ ^self updateBlock isBlock ]
+  ifTrue:
+     [ !currentActual <- bridge :actualRecord asOf: date ;
+       (currentActual _estimate != ^self _estimate) 
+         || (currentActual reportedDate != ^self reportedDate)
+           ifTrue: [ bridge :actualRecord asOf: date put: ^self asSelf ]
+          ifFalse: [ ^self asSelf flagForDeletion ] ;
+       bridge send: ^self updateBlock . delete: date ;
+     ] ;
+  ^self
+] ;
+
+####################
+#  ConsensusEstimateRecord
+#  - reimplement stdDev as a method that adjusts new _stdDev property;
+#    note that current values need to be copied from stdDev before redefining
+####################
+
+#--  add property
+PropertySetup updateFromString: "property | classId | dataType | 
+_stdDev | ConsensusEstimateRecord | Double 
+" ;
+
+#--- move the data in current systems
+ConsensusEstimateRecord subclassList
+do: [ whatAmI print: 30 ; storeXRef count printNL ;
+      storeXRef 
+       do: [ "... processing " print; ^self instanceList count print ; 
+             " instances in " print ; ^self displayPOP ;
+             ^self instanceList do: [ :_stdDev <- stdDev ] ;
+           ] ;
+    ] ;
+
+#--- redefine as method
+ConsensusEstimateRecord deleteMessage: "stdDev" ;
+ConsensusEstimateRecord defineMethod: [ | stdDev | 
+    _stdDev / ^self adjustmentFactor * ^self currencyFactor
+] ;
+
+#======================================================================
+
+####################
+#  Other pre-federated synchronizations
+####################
+
+newLine print ;
+"...  Miscellaneous core changes - pre-federated " printNL ;
+newLine print ;
+
+#--------------------
+#  CoreWorkspace
+#  - add name
+#--------------------
+CoreWorkspace define: 'name' toBe: NA ;
+
+#--------------------
+#  Object : createSubclass
+#
+#  Add the missing intialization steps to default instances create via
+#  createSubclass.
+#
+#  As part of the process of creating a new subclass, the createSubclass
+#  method(s) create an initial instance in the new subclass (the default 
+#  instance).  This instance is initialized using the 
+#  'initializeGlobalInstanceProperties' method (via specialized), which is
+#  the same initialization step used by the 'new' message.  When new
+#  instances are created with createInstance, all the steps run by the 'new'
+#  messages are performed, followed by extra initializations using schema
+#  data.  These extra initializations are currently NOT run for the default
+#  instance created by createSubclass.
+#
+#  Note: set asofDate in DataFeed so subclass creation does not generate snf
+#--------------------
+DataFeed setAsofDateTo: NA ;
+
+Object defineMethod: [ | createSubclass: name at: object | 
+!newClass <- ^self specializeAs: name at: object; 
+^self hasSchema 
+  ifTrue: 
+   [ !cd <- ^self classDescriptor createInstance: newClass , name , object ;
+     newClass initializeDefaults; 
+     newClass initializeLocalAttributes; 
+     newClass initializeNames; 
+   ]
+ ifFalse: 
+   [ "===> " print; ^self whatAmI print; 
+     ": Schema Not Defined. New Class Will Not Have ClassDescriptor" printNL; 
+   ]; 
+newClass
+] ;
+
+#--------------------
+#  Object
+#  - add rclusterSize
+#  - add printUniversal
+#  - misc fixes to anticipate federated
+#  - doOnce
+#--------------------
+
+Object defineMethod: [ | defineMethod: methodSource |
+  !method <- methodSource ;
+  methodSource isString ifTrue: [ :method <- methodSource evaluate ] ;
+  method selector deleteFromDictionaryOf: ^self ;
+  ^self __defineMethod: method ;
+  ^self hasSchema 
+  ifTrue:
+    [
+    methodSource isString 
+    ifTrue:
+       [ !name <-  method selector asString ;
+         CoreWorkspace Schema
+            updateMethod: name at: ^self classDescriptor with: methodSource ;
+       ]
+    ifFalse: [ ^self classDescriptor flagForMessageUpdate ] ;
+    ] ;
+  ^self
+] ;
+
+Object defineMethod: [ | globalDefineMethod: method |
+  ^self defineMethod: method
+] ;
+
+Object defineMethod: [ | localizeValue | 
+  ^self
+] ;
+
+#-----
+#  This change allows isntEquivalentTo to use the right "TRUE"
+#-----
+
+Object defineMethod: [ | isntEquivalentTo: object | 
+  ^self isEquivalentTo: object . isTrue not
+] ;
+
+#--------------------
+
+Object defineMethod: [| rclusterSize |
+  !obj <- ^self;
+  !myOS <- obj objectSpace;
+  !clSize <- 0 asList;
+  [ obj !== obj super && obj objectSpace == myOS ]
+  whileTrue:
+     [ clSize , obj clusterSize;
+       :obj <- obj super; 
+     ]; 
+  #-- check top-level store
+  obj == obj super && obj objectSpace == myOS
+    ifTrue: [ clSize , obj clusterSize ];
+  clSize total ## return total across inheritance chain stores in same OS
+];
+
+
+Object defineMethod: [ | printUniversal |
+  ^self print ;
+] ;
+
+Number defineMethod: [ | printUniversal |
+  ^self printWithCommas: 20.8
+] ;
+
+#--------------------
+#  the doOnce method (once and for all)
+#--------------------
+
+Object defineMethod: [ | doOnce: block |
+    !thread <- ^current;
+    !local  <- ^local;
+    !date   <- ^date;
+    !self   <- ^self;
+    0 asReferenceTo: ^current. == ^current ifTrue: [
+	thread instanceList groupedBy: [date]. do: [
+	    ^self super evaluate: [
+		groupList groupedBy: [local]. do: [
+		    ^self super asLocalContextFor: [
+			groupList groupedBy: [self]. do: [
+			    ^self super basicDo: (groupList at: 1 . block)
+			];
+		    ];
+		];
+	    ];
+	];
+    ];
+    :thread <- NA; :thread cleanStore; # remove circular reference
+    ^self
+] ;
+
+Object defineMethod: [ | doOnceNoContext: block |
+    !thread <- ^current;
+    !self   <- ^self;
+    0 asReferenceTo: ^current. == ^current ifTrue: [
+	thread instanceList groupedBy: [self]. do: [
+	    ^self super basicDo: (groupList at: 1 . block);
+	];
+    ];
+    :thread <- NA; :thread cleanStore; # remove circular reference
+    ^self
+] ;
+
+Object defineMethod: [ | sendOnce: block |
+    !thread <- ^current;
+    !local  <- ^local;
+    !date   <- ^date;
+    !self   <- ^self;
+    !result;
+    0 asReferenceTo: ^current. == ^current ifTrue: [
+	thread instanceList groupedBy: [date]. do: [
+	    ^self super evaluate: [
+		groupList groupedBy: [local]. do: [
+		    ^self super asLocalContextFor: [
+			groupList groupedBy: [self]. do: [
+			    !result <- ^self super basicSend: (groupList at: 1 . block);
+			    groupList do: [:result <- ^my result];
+			];
+		    ];
+		];
+	    ];
+	];
+    ];
+    :thread <- NA; :thread cleanStore; # remove circular reference
+    result
+] ; 
+
+Object defineMethod: [ | sendOnceNoContext: block |
+    !thread <- ^current;
+    !self   <- ^self;
+    !result;
+    0 asReferenceTo: ^current. == ^current ifTrue: [
+	thread instanceList groupedBy: [self]. do: [
+	    !result <- ^self super basicSend: (groupList at: 1 . block);
+	    groupList do: [:result <- ^my result];
+	];
+    ];
+    :thread <- NA; :thread cleanStore; # remove circular reference
+    result
+] ;
+
+#--------------------
+
+#--------------------
+#  DateRange asTimeSeries
+#    new method to return t/s of dates in the date range
+#--------------------
+
+DateRange defineMethod: [ | asTimeSeries | 
+!ts <- CoreWorkspace TimeSeries new ;
+^self evaluate: [ ts put: ^date ] ;
+ts
+] ;
+
+#--------------------
+#  Date: modify convertFrom: to return default date when sent to NA
+#--------------------
+
+Date defineMethod: [ | convertFrom: string |
+  string asDate else: [ earliestPossibleDate ]
+] ;
+
+#--------------------
+#  String
+#  Fix bug in 'String from:' message when a numeric value is supplied that
+#   is larger than the string length.  The current value returned is completely
+#   bogus; this patch returns an empty string instead.
+#
+#  "xyz" from: 10 . do: [ print ; " -- " print ; count printNL ] ;
+#
+#--------------------
+
+String defineMethod: [ | from: pos | 
+  pos isNumber 
+    ifTrue: 
+      [ pos <= ^self count
+          ifTrue: [ ^self from: pos to: ^self count ]
+            else: [ "" ] 
+      ]
+    ifFalse: [^self drop: (^self findSubstringOrigin: pos asString) ]
+] ;
+
+
+#--------------------
+#  String: convert to daterange
+#--------------------
+
+String defineMethod: [ | asDateRange | 
+  !parts <- ^self breakOn: ":," ;
+  !start <- parts at: 1 . asDate else: ^date ;
+  !end <- parts at: 2 . asDate else: ^date ;
+  !freq <- parts at: 3 . else: "M" . toUpper take: 1 ;
+  !incr <-     freq = "D" ifTrue: [ 1 days ] .
+     elseIf: [ freq = "B" ] then: [ 1 businessDays ] .
+     elseIf: [ freq = "W" ] then: [ 5 businessDays ] .
+     elseIf: [ freq = "M" ] then: [ 1 monthEnds ] .
+     elseIf: [ freq = "Q" ] then: [ 3 monthEnds ] .
+     elseIf: [ freq = "Y" ] then: [ 12 monthEnds ] ;
+  start to: end by: incr
+] ;
+
+#--------------------
+#  String: white space handlers
+#--------------------
+
+String defineMethod: [ | stripWhiteSpace |
+^self stripLeadingWhiteSpace stripTrailingWhiteSpace 
+] ;
+
+String defineMethod: [ | stripLeadingWhiteSpace |
+  !white <- newLine concat: " 	" ;   #- newLine, space, tab
+  ^self drop: (^self prefixSpannedBy: white)
+] ;
+
+String defineMethod: [ | stripTrailingWhiteSpace |
+  ^self reverse stripLeadingWhiteSpace reverse
+] ;
+
+#--------------------
+#  String asCurrency : modify to anticipate federated
+#  String globalAs:  : added to support global conversion
+#  Object globalDefineMethod:    : added to anticipate federated
+#--------------------
+
+String defineMethod: 
+[| asCurrency|
+  ^self asString as: CoreWorkspace Currency
+];
+
+String defineMethod: [ | globalAsCurrency |
+   GlobalWorkspace Currency globalLocateId: ^self asSelf .
+      else: [GlobalWorkspace Currency]
+] ;
+
+String defineMethod: [ | globalAs: type |
+!isList <- ^self contains: ","; 
+:type <- type isString && type isntDefault
+    ifTrue: [ type ] ifFalse: [ type whatAmI ] ;
+!toType <- type evaluateIn: GlobalWorkspace ;
+toType isEntity
+ifTrue:
+  [ isList 
+    ifTrue: [^self breakOn: "," .
+                 send: [^my toType findId: ^self stripBoundingBlanks ] 
+            ]
+    ifFalse: [toType findId: ^self stripBoundingBlanks ]
+  ] .
+else: [ ^self as: toType ] 
+] ;
+
+
+#--------------------
+#  String: build dictionary from attribute/value delimited source
+#--------------------
+
+String defineMethod: [ | asDictionaryUsing: attChar and: valChar  |
+  !specialChars <- CoreWorkspace Interface HtmlAccess ;
+  !dictionary <- CoreWorkspace Dictionary basicSpecialized ;
+  ^self breakOn: attChar .
+    extendBy: [ !fields <- ^self breakOn: ^my valChar ;
+                !id <- fields at: 1 . else: "" . stripBoundingBlanks ;
+                !val <- fields at: 2 . else: "" . stripBoundingBlanks ;
+                :val <- ^my specialChars decodeString: val;
+              ] .
+    select: [ id isntDefault ] .
+    do: [ ^my dictionary at: id put: val ] ;
+  dictionary
+
+] ;
+
+#--------------------
+#  Dictionary
+#   - create attribute/value string from dictionary
+#--------------------
+
+Dictionary defineMethod: [ | formatWith: attChar and: valChar |
+  [ ^self objects
+    do: [ selector print ; ^my valChar print ; ^self asString print ;
+          ^my attChar print ;
+        ]
+  ] divertOutput drop: -1 
+
+] ;
+
+#--------------------
+#  TimeSeries from:to:
+#  TimeSeries on:
+#     add support for numeric inputs
+#--------------------
+
+TimeSeries defineMethod: [ | from: date1 | 
+date1 isNumber ifTrue: [ :date1 <- date1 asDate ] ;
+!date <- ^self convertToConformantKey: date1 ; 
+date isntNA
+    ifTrue: [^self select: [^my date <= ^date] ]
+   ifFalse: [^self]
+] ;
+
+TimeSeries defineMethod: [ | to: date2 | 
+date2 isNumber ifTrue: [ :date2 <- date2 asDate ] ;
+!date <- ^self convertToConformantKey: date2; 
+date isntNA 
+   ifTrue: [^self select: [^my date >= ^date]]
+  ifFalse: [^self]
+] ;
+
+TimeSeries defineMethod: [ | from: date1 to: date2 | 
+date1 isNumber ifTrue: [ :date1 <- date1 asDate ] ;
+date2 isNumber ifTrue: [ :date2 <- date2 asDate ] ;
+!d1 <- ^self convertToConformantKey: date1; 
+!d2 <- ^self convertToConformantKey: date2; 
+d1 isDate && [d2 isDate] && [d2 < d1]
+   ifTrue: [!tmp <- d2; :d2 <- d1; :d1 <- tmp]; 
+d1 isNA 
+   ifTrue: [^self to: d2].
+   elseIf: [d2 isNA] then: [^self from: d1].
+     else: [^self select: [^my d1 <= ^date && ^date <= ^my d2] ]
+] ;
+
+TimeSeries defineMethod: [ | on: aDate |
+aDate isNumber ifTrue: [ :aDate <- aDate asDate ] ;
+!date <- ^self convertToConformantKey: aDate; 
+date isntNA && [^self effectiveDateAsOf: date .= date]
+ifTrue: [^self asOf: date]
+] ;
+
+#--------------------
+#  TimeSeries normalizeToDate: date
+#    restates t/s values relative to supplied date
+#--------------------
+
+TimeSeries defineMethod: [ | normalizeToDate: date |
+  !baseValue <- ^self asOf: date ;
+  ^self * ( 100 / baseValue )
+] ;
+
+#--------------------
+#  Collect.bi
+#  
+#  - add method "runningProduct: block"
+#  - add method "capAt: cap using: block "
+#    cap/resize all elements using supplied argument
+#  - add sortUpByCriteria:
+#  - add groupedBy:in:else: to capture "other" bucket"
+#  - add new statistic support
+#
+#--------------------
+
+#--------------------
+#  stabilize append:
+#--------------------
+
+Collection defineMethod: [| append: aList| 
+!initialList <- ^self toList numberElements; 
+!appendList <- aList isCollection 
+    ifTrue: [aList toList] ifFalse: [aList asList].numberElements 
+  do: [:position <- (position + ^my initialList count) asInteger]; 
+appendList do: [^my initialList , ^self]; 
+initialList sortUp: [position canonicalizedForSort ].
+   send: [^self super]
+]  ;
+
+#--------------------
+#  Collection runningProduct: 
+#--------------------
+
+Collection defineMethod: [ | runningProduct: block | #-- assume values > 0 
+  !values <- ^self collect: block . 
+     runningTotal: [ value asNumber log ] ;
+  values select: [ value > 0 ] . count = ^self count
+  ifTrue: [ values extendBy: [ !runningProduct <- runningTotal exp ] .
+          ]
+  ifFalse: [ values extendBy: [ !runningProduct <- NA ] ]
+] ;
+
+#--------------------
+#  Collection capAt:using:
+#    cap/resize all elements using supplied argument
+#--------------------
+
+Collection defineMethod: [ | capAt: cap using: block |
+:cap <- cap asDouble ;
+!list <- ^self 
+   extendBy: [ !currentValue <- ^self send: ^my block ;
+               !extra <- currentValue - ^my cap ;
+               !newValue ;
+             ] ;
+
+  #-- check if have enough elements to rebalance
+  !base <- list total: [ currentValue ];
+  base isntNA && [list count * cap >= base] ifTrue:
+  [ !xlist <- list
+      sortDown: [ currentValue ] . numberElements
+      runningTotal: [ extra ] .
+     extendBy: [ !distFrom <- runningTotal - extra ;
+                 !distTo <- 100 - position decrement * ^my cap - distFrom ;
+                 !factor <- 1 + distFrom  /distTo ;
+             ] ;
+   !factor <- xlist select: [ currentValue * factor < ^my cap ] . at: 1 . 
+       else: [ xlist at: xlist count ] . factor;
+   xlist do: [ :newValue <- currentValue * ^my factor min: ^my cap] ;
+  ] ;
+list
+] ;
+
+#--------------------
+#  Collection: sortUpByCriteria:
+#--------------------
+
+Collection defineMethod: [ | sortUpByCriteria: blockList |
+!blocks <- blockList isList
+   ifTrue: [ blockList ] else: [ blockList asList ];
+!list <- ^self ;
+!n <- blocks count ;
+[ n >= 1 ] whileTrue: 
+  [ :list <- list sortUp: (blocks at: n) ;
+    :n decrement ;
+  ] ;
+list
+] ;
+
+Collection defineMethod: [ | sortDownByCriteria: blockList |
+!blocks <- blockList isList
+   ifTrue: [ blockList ] else: [ blockList asList ];
+!list <- ^self ;
+!n <- blocks count ;
+[ n >= 1 ] whileTrue: 
+  [ :list <- list sortDown: (blocks at: n) ;
+    :n decrement ;
+  ] ;
+list
+] ;
+
+#--------------------
+#  Collection: groupedBy:in:else:
+#    new method to capture all criteria not passed in second parameter
+#--------------------
+
+Collection defineMethod: [| groupedBy: block in: list else: other | 
+!ilist <- CoreWorkspace IndexedList new; 
+list numberElements 
+do: [ ^my ilist at: ^self asSelf 
+               put: (^self asSelf 
+                        extendBy: [!groupList <- CoreWorkspace List new; 
+                                   !position <- ^my position; 
+                                  ] 
+                    ) ; 
+    ] ;
+!exList <- CoreWorkspace IndexedList new; 
+^self groupedBy: block .
+do: [^my ilist at: ^self asSelf . isntNA 
+        ifTrue: [^my ilist at: ^self asSelf .:groupList <- groupList;]
+       ifFalse: [^my exList at: ^self asSelf
+                           put: (^self asSelf 
+                                    extendBy: [!groupList <- ^my groupList; ]
+                                );
+                ] ;
+    ] ;
+:other <- other
+   extendBy: [!groupList <- ^my exList collectListElementsFrom: [groupList] ];
+ilist sortUp: [ position ] . , other
+] ;
+
+#----------
+
+Collection defineMethod: [ | groupedByValueSet: valuesBlock |
+!xref <- GlobalWorkspace Dictionary new ;
+^self collect: valuesBlock .
+extendBy: 
+    [ !id <- [ value do: [ print ; "|" print ] ] divertOutput ;
+      ^my xref at: id put: ^current ;
+    ] . groupedBy: [ ^my xref at: id ] 
+] ;
+
+#--------------------
+#  Collection: new statistic support
+#--------------------
+
+#----------
+#  covariance (assumes extension by x and y)
+#  covarianceWith:
+#    (3,2,4,5,6) covarianceWith: (9,7,12,15,17)
+#----------
+Collection defineMethod: [ | covariance | 
+  !avgx <- ^self average: [ x ] ;
+  !avgy <- ^self average: [ y ] ;
+  ^self average: [ (x - ^my avgx) * (y - ^my avgy) ] 
+] ;
+
+Collection defineMethod: [ | covarianceWith: list2 |
+!list1 <- ^self toList; 
+:list2 <- list2 toList; 
+list1 count = list2 count
+ifTrue:
+  [ !avg1 <- list1 average;
+    !avg2 <- list2 average;
+    list1 numberElements
+      average: [ (^self - ^my avg1) * 
+                 (^my list2 at: position . - ^my avg2) 
+               ] 
+  ] 
+] ;
+
+Collection defineMethod: [ | countGoodOnes |
+   ^self select: [ isntDefault ] . count
+] ;
+
+Collection defineMethod: [ | percentAvailable |
+   (^self countGoodOnes / ^self count * 100) else: 0.0
+] ;
+
+Collection defineMethod: [ | countPositives |
+   ^self select: [ ^self > 0 ] . count
+] ;
+
+Collection defineMethod: [ | countNegatives |
+   ^self select: [ ^self < 0 ] . count
+] ;
+
+Collection defineMethod: [ | countZeros |
+   ^self select: [ ^self = 0 ] . count
+] ;
+
+Collection defineMethod: [ | weightedAverage |
+  ^self average: [ ^self ] withWeights: [ weight ]
+] ;
+
+Collection defineMethod: [ | weightedHarmonicMean |
+  ^self harmonicMean: [ ^self ] withWeights: [ weight ]
+] ;
+
+Collection defineMethod: [ | median: aBlock withWeights: bBlock |
+!list <- ^self 
+  extendBy: [!val1 <- ^self send: ^my aBlock; 
+             !val2 <- ^self send: ^my bBlock; 
+            ] .
+    select: [ val1 isntNA && val2 isntNA ] .
+    sortUp: [ val1 ] ;
+!total <- list total: [ val2 ] ;
+:list <- list runningTotal: [ val2 / ^my total ] .
+    select: [ runningTotal > .5 ] ;
+list count > 0 
+   ifTrue: [ list at: 1 . val1 ] 
+] ;
+
+
+Collection defineMethod: [ | weightedMedian |
+  ^self median: [ ^self ] withWeights: [ weight ]
+] ;
+
+Collection defineMethod: [ | total: aBlock adjustedBy: bBlock |
+!list <- ^self 
+  extendBy: [!val1 <- ^self send: ^my aBlock; 
+             !val2 <- ^self send: ^my bBlock; 
+             !val <- val1 isNumber && val2 isNumber 
+                ifTrue: [val1 * val2]; 
+            ].
+     select: [val isntNA]; 
+list total: [ val ] 
+] ;
+
+Collection defineMethod: [ | adjustedTotal |
+  ^self total: [ ^self ] adjustedBy: [ adjustFactor ] 
+] ;
+
+Collection defineMethod: [ | totalNum: aBlock toTotalDenom: bBlock |
+!list <- ^self 
+  extendBy: [!val1 <- ^self send: ^my aBlock; 
+             !val2 <- ^self send: ^my bBlock; 
+            ].
+     select: [val1 isntNA && val2 isntNA ]; 
+(list total: [ val1 ] ) / (list total: [ val2 ] )
+] ;
+
+Collection defineMethod: [ | sumNumToSumDen |
+  ^self totalNum: [ numerator ] toTotalDenom: [ denominator ] 
+] ;
+
+#--------------------
+#  user named variables for rank
+#--------------------
+
+Collection defineMethod: [ | rankDown: valueBlock using: id | 
+!collector <- "| :" concat: id asString .concat: " | ^current"; 
+^self rankDown: valueBlock usingCollector: collector asBlock 
+] ;
+
+Collection defineMethod: [ | rankUp: valueBlock using: id | 
+!collector <- "| :" concat: id asString .concat: " | ^current"; 
+^self rankUp: valueBlock usingCollector: collector asBlock 
+] ;
+
+#--------------------
+#  IndexedList.bi
+#  
+#  - fix extendIndex to work with nested collection
+#--------------------
+
+IndexedList defineMethod: [|extendIndex|    #-- change to basicExtend
+!origList <- ^self asSelf; 
+!keyList <- ^self asSelf asPOP getNthPOP: 2 .
+   asObject instanceList send: [value]; 
+!nilValue <- ^self valueCell: "newKeyWithNoValue"; 
+!hitList <- keyList 
+   extendBy: 
+    [!index <- ^self; 
+     !myValue <- ^my origList valueCell: index; 
+    ].
+  select: [myValue != ^my nilValue]; 
+!newList <- CoreWorkspace IndexedList new; 
+hitList 
+do: [^my newList at: index 
+                put: ( ^my origList at: index .
+                            basicExtend: [!index <- ^my index]
+                     )
+    ]; 
+newList
+] ;
+
+#--------------------
+#  DEFlowResTime.6.0 ; DEFhighResTime.6.0
+#
+#  - modify 'as' covers to strip extensions so we don't get infinite
+#    loops on relational operation comparisons with extensions:
+#       Date != (LowResolutionTime extendBy: [ ] )
+#
+#--------------------
+
+LowResolutionTime
+    define: 'asLowResolutionTime' toBe: 11 asPrimitive ;
+HighResolutionTime 
+   define: 'asHighResolutionTime' toBe: 11 asPrimitive ;
+
+
+#--------------------
+#  Entity
+#  - add method to set/reset code
+#  - modify setNumericCodeTo: method to cluster strings
+#  - support for global version of locateId
+#--------------------
+
+#--------------------
+#  Entity
+#  - general method to reset the code of an entity
+#
+#  Add new methods at Entity to change the code (and add an alias).  The
+#  'reset' version deletes the old code from the naming dictionary, the
+#  'set' version does not
+#--------------------
+#-- reset the code: delete the current code, then set to new one and add alias
+Entity defineMethod: [ | resetCodeTo: string | 
+  ^self deleteAlias: code ;    #- current code
+  ^self setCodeTo: string ;
+  ^self
+] ;
+
+Entity defineMethod:  [ | setCodeTo: string |
+string isntDefault ifTrue:
+  [
+  :code <- ^self getClusteredString: string ;
+  ^self addAlias: string ; 
+  ] ;
+^self
+] ;
+
+#--------------------
+#  other Entity modifications
+#--------------------
+Entity defineMethod: [| setNumericCodeTo: string |
+  string isntDefault
+    ifTrue: [ ^self :numericCode <- ^self getClusteredString: string ];
+  ^self
+];
+
+Entity defineMethod: [ | findId: id | 
+  ^self locateId: id .
+     else: [ ^self globalLocateId: id ] 
+] ;
+
+Entity defineMethod: [ | globalLocateId: id | 
+id isEntity
+  ifTrue: [ id ] 
+ ifFalse: [ ^self named at: id ]
+] ;
+
+#--------------------
+#  DataRecord 
+#  - property value dump
+#--------------------
+
+DataRecord defineMethod: [ | getUpdateBlocks | 
+  ^self getMessagesX select: [ type isFixedProperty ] .
+    extendBy: [ !block <- code asUpdateBlock ] 
+] ;
+
+DataRecord globalDefineMethod: [ | dumpPropertyValues | 
+  !record <- ^self ;
+  !blocks <- ^self getUpdateBlocks 
+  do: [ code print: 20 ; ^my record send: block . value print ; 
+        " " print: 3 ; description else: "" . printNL ;
+      ] ;
+] ;
+
+#--------------------
+#  DataRecord 
+#    - store threshhold
+#  EEFeed
+#   - auto store creation
+#--------------------
+
+DataRecord define: 'storeThreshold' toBe: 5000000 ;
+
+EntityExtenderFeed defineMethod: [ | enableCreateNewStores | 
+ ^self define: 'autoCreateStoreFlag' toBe: TRUE 
+] ;
+
+EntityExtenderFeed  defineMethod: [ | disableCreateNewStores | 
+ ^self define: 'autoCreateStoreFlag' toBe: FALSE 
+] ;
+
+EntityExtenderFeed defineMethod: [ | runWrapup |
+^super runWrapup;
+^self updateRejectionFlag;
+^self autoCreateNewStores ; #<- new
+^self
+];
+
+EntityExtenderFeed defineMethod: [ | autoCreateNewStores |
+^self autoCreateStoreFlag && [ ^self baseClass isDataRecord ] 
+ifTrue:
+   [
+    ^self baseClass
+     do:
+      [
+        (^self currentStore instanceList count > ^self storeThreshold)
+          || (^self currentStore rclusterSize > ^self maxClusterSize)
+        ifTrue: [^self createNewStoreAt: ^self currentStore];
+      ];
+   ];
+];
+
+# setting constant
+EntityExtenderFeed enableCreateNewStores;
+
+
+####################
+#  Interface ExtractWS
+#
+#  Description:
+#
+#  There is a bug in ExtractWS in the Entity x Item case when using
+#     the derived list feature to return a second-level collection.
+#     The specific example is using ":holdingsSeries" as the "entity"
+#     dimension and "^date", "^self total: [ totalMarketValue ]" 
+#     as the item dimension.
+#
+#  This bug was reported by dkr working with aim on this example in
+#  excel.  The actual vision code to produce the bug is:
+#
+#     Interface ExtractWS reset
+#        setOrientationTo: "EI" .
+#        setEntityTypeTo: Security .
+#        setEntityTo: "DELL" .
+#        setEntityListTo: [ :holdingsSeries ] .
+#        setItemListTo: "^date" , "^self total: [ totalMarketValue ]".
+#        run ;
+#
+#  Solution:
+#
+#  Tighten up so code in DEFcore.iface to use "basicSend:" instead of
+#  "send:".
+#
+#  Other New Features:
+#  - modify lookup methods to use locateId: so SecurityMap looks like
+#    an entity
+####################
+
+Interface ExtractWS defineMethod: [ | getItemBlockFor: string | 
+  #-- item    item@date     item@date@curr@path     item@@curr@path
+  string isBlank
+   ifTrue: [ NA ]
+  ifFalse:
+    [
+    !request <- string breakOn: "@" ;
+    !itemString <- request at: 1 . asString ;
+    !item <- CoreWorkspace DataItem findId: itemString . else: [itemString ] ;
+    !item <- itemString ;      #- until DI really established
+    !date <- request at: 2 . else: "" . evaluate ;
+    date isInteger ifTrue: [ :date <- date asDate ] ;
+    !currCode <- request at: 3 ;
+#--    !currency <- CoreWorkspace Currency locateId: currCode ;
+    !currency <- GlobalWorkspace CurrencyMap 
+        findId: currCode . ifDefault: [ NA ] else: [ globalObject ] ;
+    !path <- request at: 4 . else: "" . concat: " " ;
+    !message <- item isDataItem
+           ifTrue: [ path concat: (item getAccessFrom: currentEntity ) ] .
+             else: [ path concat: item asString ] . asBlock ;
+    currency isCurrency
+    ifTrue:
+      [ date isDate
+        ifTrue:
+          [ [ ^my currency evaluate:
+                [ ^my date evaluate: [ ^self basicSend: ^my message ] ]
+            ]
+          ] .
+        elseIf: date isDateOffset
+        then:
+          [ [ ^my currency evaluate:
+                [ ^date + ^my date
+                       evaluate: [ ^self basicSend: ^my message ]
+                ]
+            ]
+          ] .
+        else:
+          [ [ ^my currency evaluate: [ ^self basicSend: ^my message ] ] 
+          ]
+      ]
+    ifFalse: 
+      [ date isDate
+        ifTrue:
+          [ [ ^my date evaluate: [ ^self basicSend: ^my message ] ]
+          ] .
+        elseIf: date isDateOffset
+        then:
+          [ [ ^date + ^my date evaluate: [ ^self basicSend: ^my message ] ]
+          ] .
+        else:
+          [ [ ^self basicSend: ^my message ] 
+          ] 
+      ] 
+   ]
+
+] ;
+
+Interface ExtractWS defineMethod: [ | executeEntityByItem | 
+  !entities <- getEntityList ;
+  ^self displaySizeFor: entities by: currentItemList ; 
+  ^self displayHeadersForScalar: Global date withColumns: currentItemNames ;
+
+  entities
+  do: [ !entity <- ^self ; 
+        !label <- entity else: "" ;
+        !values <- ^my currentItemList
+        send: [ ^self isntNA && ^my entity isntNA
+                   ifTrue: [ ^my entity basicSend: ^self ] 
+                  ifFalse: [ "" ]
+              ] ;
+        ^my displayRowWithLabel: label andValues: values ;
+      ] ;
+] ;
+
+#--------------------
+#  switch to findId
+#--------------------
+Interface ExtractWS defineMethod: [ | setEntityTo: entity | 
+!newEntity <- entity isString 
+   ifTrue: [ currentEntityType findId: entity ] 
+  ifFalse: [entity]; 
+newEntity != currentEntity && [ newEntity isntNA ]
+ifTrue: [
+    :currentEntity <- newEntity; 
+    :currentEntityList <- currentEntity activeList; 
+    currentExpression isBlock 
+    ifTrue: [:currentEntityList <- currentEntity send: currentExpression]; 
+   ]; 
+^self
+] ;
+
+Interface ExtractWS defineMethod: [ | setEntityListTo: expression | 
+:currentEntityList <- expression isBlock 
+ifTrue: 
+  [ :currentExpression <- expression; 
+    currentEntity send: expression
+  ].
+ elseIf: [expression isList]
+ then: [ :currentExpression <- NA; 
+         expression 
+          send: [^my currentEntityType findId: ^self] 
+       ] .
+ elseIf: [expression isString]
+ then: [ :currentExpression <- NA; 
+         expression breakOn: "," .
+             send: [ ^my currentEntityType findId: ^self ] .
+           select: [ isntDefault ]      
+       ] .
+  else: [currentEntityList]; 
+currentEntityList isCollection not 
+   ifTrue: [:currentEntityList <- currentEntityList asList]; 
+^self
+] ;
+
+#--------------------
+#  add support for date range in extractws
+#--------------------
+
+Interface ExtractWS defineMethod: [ | setDateListTo: list| 
+  list isString && [ list contains: ":" ]
+    ifTrue: [ :currentDateList <- list asDateRange asDateList ] .
+  else:
+  [ :currentDateList <- list 
+       send: [ isString ifTrue: [asDate] ifFalse: [^self] ].
+       send: [isInteger || isDate ifTrue: [asDate].
+                elseIf: isDateOffset then: [^self]
+             ] ;
+  ]; 
+  currentDateList isList not 
+   ifTrue: [:currentDateList <- currentDateList asList]; 
+  ^self
+] ;
+
+
+#--------------------
+#  DataFeed initializeDate
+#    modify to accept timestamps and mm/YYYY case
+#--------------------
+
+DataFeed defineMethod: [ | initializeDate |
+  !realDate <- date isString
+  ifTrue: 
+    [ date toUpper = "DEFAULT"
+       ifTrue: [ earliestPossibleDate ] 
+      ifFalse:
+        [ !format <- getDateFormat else: "" . stripBoundingBlanks ;
+          !paddedDate <- "0" fill: format count . 
+             concat: date . take: -1 * format count ;
+          format = "MMYYYY"  || format = "MMYY"
+          ifTrue: 
+            [ !mm <- paddedDate take: 2 . asNumber asInteger ;
+              !year <- paddedDate drop: 2 . asNumber asInteger ;
+              year isNumber && mm isNumber
+              ifTrue: [ year asDateFromYearForMonth: mm andDay: 1 .
+                             + 0 monthEnds 
+                      ]
+            ] .
+          elseIf: [ format = "MMDDYY" || format = "MMDDYYYY" ] 
+          then: 
+            [ !mm <- paddedDate take: 2 . asNumber asInteger ;
+              !dd <- paddedDate drop: 2 . take: 2 . asNumber asInteger ;
+              !year <- paddedDate drop: 4 . asNumber asInteger ;
+              year isNumber && mm isNumber && dd isNumber
+                ifTrue: [ year asDateFromYearForMonth: mm andDay: dd ] 
+            ] .
+          elseIf: [ format = "YYYYMM" || format = "YYYYMMXX" ]
+          then: 
+            [ !yyyy <- paddedDate take: 4 . asNumber asInteger ;
+              !mm <- paddedDate drop: 4 . take: 2 . asNumber asInteger ;
+              yyyy isNumber && mm isNumber 
+                ifTrue: [ yyyy asDateFromYearForMonth: mm andDay: 1 .
+                             + 0 monthEnds
+                        ] 
+            ] .
+          elseIf: [ format = "MM/YYYY" ]
+          then:
+            [ !fields <- paddedDate breakOn: "/-";
+              !mm <- fields at: 1 .asNumber asInteger;
+              !year <- fields at: 2 .asNumber asInteger;
+              year isNumber && mm isNumber
+                ifTrue: [year asDateFromYearForMonth: mm andDay: 1 .
+                             + 0 monthEnds
+                      ]
+            ] .
+           elseIf: [ ^self purgeEnabled not ] then: [ date asDate ] .
+           elseIf: [ date contains: ":" . not ] then: [ date asDate ] .
+        ] 
+    ] ;
+  :date <- realDate isDate || realDate isTime
+     ifTrue: [ realDate ] 
+    ifFalse: [ ^self purgeEnabled
+                   ifTrue: [ date ]      #-- could be a string comment
+                  ifFalse: [ ^self asofDate ] 
+             ] ;
+  ^self
+] ;
+
+###########################################
+
+#--------------------
+#  new standard commit tools
+#--------------------
+
+ProcessControlTools defineMethod: [| writeCommitAudit|
+  ^self writeCommitAudit: NA
+];
+
+ProcessControlTools defineMethod: [| writeCommitAudit: auditLog|
+auditLog ifDefault: [^self getEnvFor: "OSDPathName" . concat:
+"/commitAudit.log"] .
+appendOutputOf: [
+ CoreWorkspace Utility
+   do: ["Proc Id: "        print; processId print;
+        "  Accessed Ver: " print; accessedNetworkVersion print;
+        "  Current Ver: "  print; currentNetworkVersion print;
+        "  Time: "         print; UnixSeconds currentTime printNL;
+       ];
+ ];
+];
+
+ProcessControlTools defineMethod: [| commitToDatabase: text|
+^self writeCommitAudit;
+CoreWorkspace Utility updateNetworkWithAnnotation: text .= 0
+];
+
+ProcessControlTools defineMethod: [| commitToDatabaseAndRestartQueryPool:
+text|
+^self writeCommitAudit;
+!commitVal <- GlobalWorkspace Utility updateNetworkWithAnnotation: text;
+commitVal = 0
+ifTrue: [!path <- ^self getEnvFor: "FedVisionRoot" .concat: "/scripts/";
+    !prog <- path concat: "PoolTool.csh -a restart -p querypool";
+    ExternalProgram reset
+    setProgramTo: prog .
+    setOutputBlockTo: [| :out| printSuccess; out printNL;].
+    setErrorBlockTo: [| :out| printError; out printNL;].
+    run;
+   ];
+commitVal
+];
+
+
+#--------------------
+#  new standard "core" classes"
+#     - Context
+#     - ClientTools
+#--------------------
+
+#---  Context
+
+Interface BatchFeedManager createEntityClass: "Context" from: "Support" ;
+
+PropertySetup updateFromString: "classId | property
+Context | libraryId
+" ;
+
+Context defineMethod: [ | evaluate: block |
+!context <- ^self;
+^local extendedBy: [!context <- ^my context ] asLocalContextFor: block
+] ;
+GlobalWorkspace define: 'context' toBe: NA ;
+
+String defineMethod: [ | asContext |
+  ^self as: GlobalWorkspace Context
+] ;
+
+#---  ClientTools 
+CoreWorkspace respondsTo: "ClientTools" .
+    ifFalse: [ ToolKit createSubclass: "ClientTools" at: CoreWorkspace ] ;
+
+####################
+#  DEFcore.inv
+#
+#  Account
+#  - modify totalValue and tna covers
+#  - add members over time method
+#  - modify createHoldingsFrom: at IndexAccount for better cleanups
+#  - misc fixes for federated (insert CoreWorkspace)
+#
+#  Security
+#  - add method to get holdings for index accounts including this security
+#  - add default behavior for asGlobalSecurity, getMapEntry, getCalcPack
+#    (anticipates federated)
+#
+#  Broker
+#  - create MasterFeed
+#
+##################################################
+
+#--------------------
+#  Account
+#  - modify total value and tna covers
+#  - add generalized message to return memberList over time for any subclass
+#  - modify createHoldingsFrom: at IndexAccount for better cleanups
+#  - misc fixes for federated (insert CoreWorkspace)
+#--------------------
+
+Account defineMethod: [ | totalValue | 
+  ^self totalNetAssets else: [ totalMarketValue ] 
+] ;
+
+AggAccount defineMethod: [ | totalNetAssets | 
+_totalNetAssets else: [ memberList total: [totalNetAssets] ]
+] ;
+
+Account defineMethod: [ | getMembersOverTime | 
+  :holdingsSeries send: [ ^self send: [ security ] ] . linkElements
+      select: [ ^date isntDefault ] .
+    select: [ ^self isntEquivalentTo: prior ]
+] ;
+
+IndexAccount defineMethod: [ | getMembersOverTime | 
+  :memberList 
+] ;
+
+Account defineMethod:  [ | deleteAlias: alias| 
+^super deleteAlias: alias; 
+!entity <- ^self asSelf; 
+alias 
+do: [ CoreWorkspace Named Account at: asSelf .= ^my entity 
+       ifTrue: [CoreWorkspace Named Account delete: asSelf]; 
+    ]; 
+^self
+];
+
+Portfolio defineMethod: [ | aggregateList | 
+  !port <- ^self asSelf; 
+  CoreWorkspace AggAccount instanceList 
+     select: [memberList at: ^my port .isntNA]
+] ;
+
+#----------
+# IndexAccount patch prevents orphaned memberList in most conditions
+#----------
+
+IndexAccount defineMethod: [| createHoldingsFrom: xsecList |
+  ^super createHoldingsFrom: xsecList;
+  !secs <- xsecList send: [security];
+
+  # This is a bad corner case on reloads.
+  #!oldList <- :memberList asOf: ^date - 1 days;
+  !oldList <- memberList;
+
+  oldList isntEquivalentTo: secs .|| [universe isntDefault]
+  ifTrue: [
+    ^self setUniverseTo: CoreWorkspace Universe .setStyleTo: "Manual";
+    ^self setSecuritiesTo: secs asOf: ^date;
+  ];
+];
+
+
+#--------------------
+#  Security
+#  - add method to get holdings for index accounts including this security
+#  - add default behavior for asGlobalSecurity, getMapEntry, getCalcPack;
+#    (anticipates federated)
+#--------------------
+
+Security defineMethod: [ | getIndexAccounts | 
+   CoreWorkspace IndexAccount activeList
+       select: [memberList at: ^my asSelf .isntNA]
+] ;
+
+Security defineMethod: [ | getIndexAccountHoldings | 
+   !sec <- ^self asSelf ;
+   sec getIndexAccounts send: [ ^self getHoldingIn: ^my sec ] 
+] ;
+
+Security defineMethod: [ | getHoldingIn: acct | 
+!account <- acct isString
+     ifTrue: [ acct as: CoreWorkspace Account ] ifFalse: [ acct ] ;
+!holding <- ^self holdings select: [account asSelf = ^my account asSelf]; 
+holding count = 1 
+   ifTrue: [holding at: 1] ifFalse: [CoreWorkspace Holding]
+] ;
+
+#--------------------
+#  Security: add covers to anticipate federated
+#--------------------
+
+Security defineMethod: [ | asGlobalSecurity | asSelf ] ;
+Security defineMethod: [ | getMapEntry |   asSelf ] ;
+Security defineMethod: [ | getCalcPack | asSelf ] ;
+
+#--------------------
+#  split adjustments - for now, support one policies:
+#    1) use local adjustment factor if available, global otherwise;
+#       if any points exist in t/s, then assume locally maintained
+#  future policies could include default and security-specific
+#  date ranges where global should/should not be used
+#--------------------
+
+Security defineMethod: [ | adjustmentRelativeTo: aDate |
+aDate isntNA
+  ifTrue:
+    [ :rawSplitFactor count > 0
+         ifTrue: [ ^self localAdjustmentRelativeTo: aDate ]
+        ifFalse: [ ^self globalAdjustmentRelativeTo: aDate ]
+    ]
+  ifFalse: [ 1.0 ] 
+] ;
+
+Security defineMethod: [ | localAdjustmentRelativeTo: aDate |
+  (:adjustmentFactor asOf: ^today) / (:adjustmentFactor asOf: aDate)
+] ;
+
+Security defineMethod: [ | globalAdjustmentRelativeTo: aDate |
+  ^self asGlobalSecurity localAdjustmentRelativeTo: aDate
+] ;
+
+
+####################
+#  Currency
+#  - add default behavior to anticipates federated
+####################
+
+#--------------------
+#  Currency: add covers to anticipate federated
+#--------------------
+
+Currency defineMethod: [ | asGlobalCurrency | asSelf ] ;
+Currency defineMethod: [ | getMapEntry |   asSelf ] ;
+
+Currency defineMethod: [ | exchangeTo: targetCurr relativeTo: date | 
+   ^self defaultInstance = targetCurr defaultInstance
+   ifTrue: [ ^self localExchangeTo: targetCurr relativeTo: date ] .
+     else: [ ^self globalExchangeTo: targetCurr relativeTo: date ]
+] ;
+
+Currency defineMethod: [ | localExchangeTo: targetCurr relativeTo: date | 
+!rate <- 1.000000; 
+^self underlyingCurrency != targetCurr asSelf 
+ifTrue: [
+    date evaluate: [
+        !preEuro <- (
+        targetCurr 
+        isEuro && targetCurr usExchange isNA) || [
+            underlyingCurrency isEuro && underlyingCurrency usExchange isNA]; 
+        preEuro ifTrue: [
+            :rate <- fixedEuroRateEnabled ifTrue: [
+                targetCurr isEuro ifTrue: [1 / underlyingCurrency fixedRateToEuro]
+                ifFalse: [targetCurr fixedRateToEuro]]
+            ifFalse: [NA]; 
+           ]
+        ifFalse: [
+            !sourceToUs <- ^self underlyingCurrency usExchange; 
+            !targetToUs <- targetCurr 
+            send: [^self underlyingCurrency usExchange * 
+                ^self underlyingExchange]; 
+            :rate <- targetToUs / sourceToUs; 
+           ]; 
+       ]; 
+   ]; 
+rate / ^self underlyingExchange
+] ;
+
+Currency defineMethod: [ | globalExchangeTo: targetCurr relativeTo: date | 
+!source <- ^self asGlobalCurrency ;
+!target <- targetCurr asGlobalCurrency ;
+source localExchangeTo: target relativeTo: date
+] ;
+
+
+####################
+#  Broker
+#  - create MasterFeed
+####################
+
+MasterFeedSetup updateFromString: 
+"feedId | entityId
+BrokerMaster | Broker
+" ;
+
+####################
+#  patch.parentFeed      : 2/10/2004
+#  
+#  Using BatchFeedManager, new MasterFeeds are created as a subclass of the
+#  MasterFeed class.  As a result, it has been cumbersome to create
+#  intermediate subclasses as part of the class creation process with BFM.
+#  This patch provides a way to tell the BFM to use a subclass of MasterFeed
+#  as the parent class.
+#
+#  For example:
+#
+#  #---  Create a CustomIndex entity class and corresponding feed
+#     Interface BatchFeedManager 
+#         createEntityClass: "CustomIndex" from: "Entity" ;
+#  #--- Redefine runWrapup for CustomIndexMaster
+#     CustomIndexMaster defineMethod: [ | runWrapup | "do something" printNL ];
+#  #--  Create subclasses of CustomIndex with corresponding feeds 
+#  #--    inheriting from CustomIndexMaster
+#     Interface BatchFeedManager 
+#         setParentFeedTo: CustomIndexMaster .
+#         createEntityClass: "RussellIndex" from: "CustomIndex" ;
+#     Interface BatchFeedManager 
+#         setParentFeedTo: CustomIndexMaster .
+#         createEntityClass: "SPIndex" from: "CustomIndex" ;
+#
+#  Note that the parent feed gets reset to NA after each execution
+####################
+
+Interface ExternalFeedManager defineMethod: [ | setParentFeedTo: feed |
+  ^self define: 'parentFeed' toBe: feed ;
+  ^self
+] ;
+Interface ExternalFeedManager setParentFeedTo: NA ;
+
+#----------
+
+Interface BatchFeedManager 
+defineMethod: [ | createMasterFeed: id forEntity: entity | 
+!feed <- CoreWorkspace MasterFeedSetup ;
+#--  if parentFeed is set, use it; otherwise use the default MasterFeed
+!parentFeed <- ^self parentFeed ;
+!defaultMaster <- CoreWorkspace MasterFeedSetup feedClassType ;
+parentFeed isMasterFeed
+   ifTrue: [ CoreWorkspace MasterFeedSetup setFeedClassTo: parentFeed ;
+             "...  using parent feed " print ; parentFeed whatAmI printNL ;
+           ] ;
+!upload <- 
+   [ "feedId | baseClassId" printNL; 
+     id print; " | " print; entity whatAmI printNL; 
+   ] divertOutput; 
+^self setRowLimitTo: 0; 
+^self runExpression: [ feed updateFromString: upload ] ; 
+id asClass isMasterFeed 
+  ifTrue: [ "Use MasterFeed " print; id print; 
+            " for instance creation." printNL; 
+          ]
+  ifFalse: [ ">>> No MasterFeed class created." printNL;  ]; 
+#-- reset the default master feed and clear the parent
+CoreWorkspace MasterFeedSetup setFeedClassTo: defaultMaster ;
+^self setParentFeedTo: NA ;
+] ;
+
+Interface ExternalFeedManager defineMethod:
+[ | createExtenderFeed: id forBaseClass: bclass linkedTo: eclass | 
+!feed <- CoreWorkspace EntityExtenderFeedSetup; 
+!parentFeed <- ^self parentFeed; 
+!default <- feed feedClassType; 
+parentFeed isEntityExtenderFeed 
+   ifTrue: [feed setFeedClassTo: parentFeed; 
+            "...  using parent feed " print; parentFeed whatAmI printNL; 
+           ]; 
+!upload <- [
+  "feedId | baseClassId | baseEntityId" printNL; 
+  id print; " | " print; bclass whatAmI print; " | " print; 
+  eclass isntNA ifTrue: [eclass whatAmI print]; 
+  newLine print; 
+] divertOutput; 
+^self setRowLimitTo: 0; 
+^self runExpression: [feed updateFromString: upload]; 
+id asClass isEntityExtenderFeed 
+  ifTrue: 
+    [ "Use Entity Extender " print; id print; 
+      " to update properties." printNL; 
+    ]
+ifFalse: 
+    [ ">>> EntityExtenderFeed class not created." printNL; 
+    ]; 
+CoreWorkspace EntityExtenderFeedSetup setFeedClassTo: default ;
+^self setParentFeedTo: NA; 
+] ;
+
+####################
+#  HoldingsFeed changes
+#	-- moduralize  runWrapup of HoldingsFeed 
+#       -- expire IndexAccounts options
+####################
+
+#--------------------
+#   Options to modularize HoldingsFeed runWrapup step
+#--------------------
+
+HoldingsFeed defineMethod: [ | enableAggAcctHoldings | 
+ ^self define: 'aggAcctHoldingsFlag' toBe: TRUE
+] .
+ defineMethod: [ | disableAggAcctHoldings |
+ ^self define: 'aggAcctHoldingsFlag' toBe: FALSE
+] ;
+
+HoldingsFeed enableAggAcctHoldings;
+
+HoldingsFeed defineMethod: [ | enableSecXRef | 
+ ^self define: 'secXRefFlag' toBe: TRUE
+] .
+ defineMethod: [ | disableSecXRef |
+ ^self define: 'secXRefFlag' toBe: FALSE
+] ;
+
+HoldingsFeed enableSecXRef;
+
+HoldingsFeed defineMethod: [ | enableUpdatePrices | 
+ ^self define: 'updatePricesFlag' toBe: TRUE
+] .
+ defineMethod: [ | disableUpdatePrices |
+ ^self define: 'updatePricesFlag' toBe: FALSE
+] ;
+
+HoldingsFeed enableUpdatePrices ;
+
+#--------------------
+#   Modularize runWrapup
+#--------------------
+
+HoldingsFeed defineMethod: [ | runWrapup |
+
+newLine print;
+aggAcctHoldingsFlag isTrue 
+ ifTrue: [ rebuildAggAccountHoldings ] ;
+secXRefFlag isTrue
+ ifTrue: [ rebuildSecurityXRef ] ;
+updatePricesFlag isTrue
+ ifTrue: [ updatePrices ] 
+
+];
+
+#----------
+
+HoldingsFeed defineMethod: [ | rebuildAggAccountHoldings | 
+
+!ports <- ^self currentStore instanceList 
+                select: [isProcessed] . 
+		select: [ account isPortfolio ] ; 
+ports groupedBy: [date].
+do: [^self evaluate:
+       [
+        !xref <- CoreWorkspace IndexedList new; 
+        groupList do: [^my xref at: account put: account]; 
+        !aggs <- CoreWorkspace AggAccount masterList 
+        select: [!xref <- ^my xref; 
+            memberList any: [^my xref at: asSelf .isntNA]]; 
+        aggs 
+        do: ["...  Rebuilding holdings in AggAccount " print; 
+            code print; " on " print; ^date printNL; 
+            buildHoldings; 
+           ]; 
+       ];
+    ];
+
+] ;
+
+#----------
+
+HoldingsFeed defineMethod: [ |rebuildSecurityXRef |
+
+!ports <- ^self currentStore instanceList select: [isProcessed]; 
+
+ports groupedBy: [date] .
+do: [ 
+      ^self evaluate:
+       [
+        "...  Rebuilding Security holdings cross reference on " print; 
+        ^date printNL; 
+        CoreWorkspace Security rebuildHoldings; 
+       ]; 
+    ] ;
+];
+
+#----------
+
+HoldingsFeed defineMethod: [ | updatePrices | 
+!ports <- ^self currentStore instanceList select: [isProcessed]; 
+!secs <- ports select: [price > 0].groupedBy: [security].
+extendBy: [
+    !dates <- groupList groupedBy: [date].
+    send: [groupList at: 1]; 
+   ]; 
+secs count > 0 
+ifTrue: [
+    !priceFeed <- [
+        "id|date|acctPrice|acctCurr" printNL; 
+        secs collectListElementsFrom: [dates].
+        do: [security code print; "|" print; 
+            date print; "|" print; 
+            price print; "|" print; 
+            currencyId isntDefault
+               ifTrue: [currencyId]
+              ifFalse: [account baseCurrency code].printNL; 
+           ]; 
+       ]divertOutput; 
+    ^self resetRunTimeAttributes; 
+    CoreWorkspace PriceFeed updateFromString: priceFeed; 
+   ]; 
+] ;
+
+#--------------------
+#   patching HoldingsFeed runUpdate:
+#     -  adding section to support auto expire for index accounts
+#--------------------
+
+HoldingsFeed defineMethod: [|runUpdate|
+!valid <- ^self asSelf instanceList 
+select: [security isntDefault && account isntDefault && date isntDefault]; 
+maxStoreSize isNumber 
+ifTrue: [^self createNewStoreIfNeededFor: valid]; 
+^self updateHoldingsFor: valid; 
+
+!expirePortfolios <- ^self getGlobalOption: "autoExpirePortfolios"; 
+!cutoff <- expirePortfolios isDateOffset 
+ifTrue: [expirePortfolios ].
+elseIf: [expirePortfolios isString]
+  then: [expirePortfolios as: CoreWorkspace DateOffset].
+elseIf: [expirePortfolios asNumber isNumber]
+  then: [expirePortfolios asNumber asInteger businessDays]; 
+cutoff isDateOffset 
+ifTrue: [^self expirePortfoliosUsing: cutoff]; 
+
+#add section to expire holdings on index accounts
+^self expireIndexAccounts ;
+^self
+];
+
+HoldingsFeed defineMethod: [ | expireIndexAccounts |
+!feed <- ^self asSelf; 
+
+!expireCutoff <-  ^self getGlobalOption: "autoExpireIndexAccounts" ;
+expireCutoff isntNA
+ifTrue:
+   [ :expireCutoff <- expireCutoff isDateOffset 
+        ifTrue: [expireCutoff ].
+        elseIf: [expireCutoff isString]
+          then: [expireCutoff as: CoreWorkspace DateOffset].
+        elseIf: [expireCutoff asNumber isNumber]
+          then: [expireCutoff asNumber asInteger businessDays] ;
+   # set default if all that above didn't make a good one
+     expireCutoff isDateOffset not
+        ifTrue: [ :expireCutoff <- 5 businessDays ];
+
+     !todo <- CoreWorkspace IndexAccount activeList 
+        select: [hasHoldings].
+        select: [holdingsDate + ^my expireCutoff <= ^date]; 
+     todo 
+     do: [  holdingsDate + 1 businessDays 
+            evaluate: 
+            [ # create empty list and NA content for ^date
+                  initializeDailyHoldingsBasedValues ;
+              # set empty list for memberList on ^date (tlh)
+             :memberList put: ^self memberListPrototype ; #tlh
+            ]; 
+         ]; 
+
+   ] ;
+] ;
+
+####################
+#  Schema cleanups
+####################
+
+#--------------------
+#  Schema MD
+#    -  Modify cleanupLocalNames to include "toUpper" check to be
+#       consistent with initialization
+#--------------------
+
+Schema MD defineMethod: [ | cleanupLocalNames |
+  !id <- "__" concat: code asString ;
+  MessageDictionary delete: id ;
+  !id <- "___" concat: code asString toUpper ;
+  MessageDictionary at: id . = asSelf 
+     ifTrue: [ MessageDictionary delete: id ; ] ;
+  ^self
+] ;
+
+
+####################
+#  Schema
+####################
+Schema processAllMessages ;
+
+Security getMessage: "asGlobalSecurity" . setFunctionTypeTo: "Data" ;
+Security getMessage: "getMapEntry" . setFunctionTypeTo: "Data" ;
+Security getMessage: "getCalcPack" . setFunctionTypeTo: "Data" ;
+Currency getMessage: "asGlobalCurrency" . setFunctionTypeTo: "Data" ;
+Currency getMessage: "getMapEntry" . setFunctionTypeTo: "Data" ;
+
+DataRecord getMessage: "getAdjustedDataFor:" .
+   setSelectorTo: "getAdjustedDataFor: aTimeSeries" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Advanced" .
+   setTypeTo: Named MessageType MethodTV . 
+   setReturnObjectTypeTo: Number .
+   setParameter: 1 typeTo: TimeSeries .
+   setDescriptionTo: "Returns the value of the supplied time series as of
+^date, adjusted for any splits that have occurred since the value went into
+effect.  The raw value in the time series is divided by the adjustment
+(i.e., per share)." .
+;
+
+DataRecord getMessage: "getAdjustedSharesDataFor:" .
+   setSelectorTo: "getAdjustedSharesDataFor: aTimeSeries" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Advanced" .
+   setTypeTo: Named MessageType MethodTV . 
+   setReturnObjectTypeTo: Number .
+   setParameter: 1 typeTo: TimeSeries .
+   setDescriptionTo: "Returns the value of the supplied time series as of
+^date, adjusted for any splits that have occurred since the value went into
+effect.  The raw value in the time series is multipled by the adjustment
+(i.e., shares out)." .
+;
+
+MessageSetup updateFromString: 
+"classId | message                    | returnType | containerType | tvFlag | paramList | description 
+Date     | firstDayInMonthForIndexOf: | Date       | Object        | N      | Integer   | Return the first date of the month that corresponds to the passed dayNumberOfWeek argument (0-7).
+";
+
+#==================================================
+
+############################################################
+# patch for smaster.	  [ slee 11/2004 ]
+# Patch 
+#  . Convert Security :pricingSeries to product mapped.
+#  . Convert Security :pricingSeries interior time series 
+#    to product mapped. 
+#
+# Considerations
+# . Extensive PriceRecord deletion necessitates re-evaluating the 
+#   time series afer data purge, to ensure product mapped is still 
+#   optimal indexing type. It should be, but this should be re-
+#   confirmed. Therefore, after empty price records deleted from
+#   the PriceTools eomStoreXRef and PriceTools dailyStoreXRef
+#   re-confirm product mapped time series is still optimal.
+##############################################################
+
+#####-----
+# Conversion to product mapped time series type.
+# . Security 'pricingSeries'
+# . PriceTools :tsStoreXRef referenced TSGenerator. Convert :ts.
+#####-----
+
+"Indexing type of Security :pricingSeries: " print;
+Security :pricingSeries __getIndexingType printNL; 
+newLine print;
+"Profile of Security :pricingSeries: - BEFORE" printNL; 
+Security :pricingSeries displayClusterProfile;
+"-" fill: 80 . printNL; 
+
+##-- Convert Security :pricingSeries to product mapped.
+Security :pricingSeries __setIndexingTypeToProductMapped;
+
+##-- Convert interior time series of Security :pricingSeries to product mapped.
+PriceTools :tsStoreXRef 
+do: [ ^date printNL; 
+      "Indexing type - before: " print; 
+      ^self :ts  __getIndexingType printNL; 
+      ^self :ts  __setIndexingTypeToProductMapped; 
+      "Indexing type - after:  " print; 
+      ^self :ts  __getIndexingType printNL; 
+      newLine print;
+]; 
+
+"Profile of Security :pricingSeries: - AFTER" printNL; 
+Security :pricingSeries displayClusterProfile;
+
+
+#======================================================================
+
+newLine print ;
+"- " fill: 70 . printNL ;
+"  End of patch.hostedSynch" printNL ;
+"  " print ; Utility UnixSeconds currentTime printNL ;
+"- " fill: 70 . printNL ;
+newLine print ;
+
+
+

@@ -1,0 +1,59 @@
+#!/bin/csh
+
+set jobName    = TestUpdate
+set tokenFlag  = test
+
+#--------------------
+# Change to working directory and setup environment
+#--------------------
+set workDir  = $updateArea/Test
+cd $workDir
+
+set processLog = logs/log.$processDate
+$adminArea/helpers/SetupLog $processLog
+
+#--------------------
+#  Process
+#--------------------
+set okay = 0
+echo "...  Starting Load" 
+date
+Load $sourceDir $processDate >& $processLog
+
+if ($status != 0 ) then
+    set okay = 1
+    echo ">>> Load Failed. " 
+    echo ">>> $jobName Load Failed `date`" >> $errorLog
+else
+    echo "...  Starting Go"
+    date
+    Go >>& $processLog
+    set okay = $status
+    if ($okay == 0) then
+       $adminArea/helpers/CheckLog $processLog $jobName 1
+       set okay = $status
+    endif
+
+    if ($okay != 0) then
+       echo ">>>  Go Failed."
+   endif
+
+endif
+
+#--  If error, copy entire log, otherwise just reconcile report
+if ($okay != 0 ) then
+   cp $processLog $globalLogs/$jobName.log
+else
+   cp reports/reconcile $globalLogs/$jobName.log
+endif
+
+#--------------------
+#  Clean up token flag
+#--------------------
+mv -f $sourceDir/Token/$tokenFlag $sourceDir/OldToken/$tokenFlag.$processDate
+
+#--------------------
+#  and exit 
+#--------------------
+exit $okay
+

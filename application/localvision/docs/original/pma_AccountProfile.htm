@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="Mozilla/4.04 [en] (WinNT; I) [Netscape]">
+   <TITLE>Vision Upload Format: AccountProfile</TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF">
+
+<H2>
+Vision Portfolio Management Application Layer: Application</H2>
+| <A HREF="pmaApps.htm">Headstart Applications</A>
+|&nbsp;
+<HR>
+
+<P><FONT SIZE=+2><B>Application: </B><I>AccountProfile</I></FONT>
+
+<P>&nbsp;
+<H3>
+Summary:</H3>
+The <B>AccountProfile</B> application is used to provide summary information
+about an account with links to more in depth information. The summary includes
+basic information about the account, a list of its largest holdings, and
+a summary of its holdings history.
+<H3>
+Inputs:</H3>
+
+<CENTER><TABLE BORDER CELLSPACING=2 CELLPADDING=4 WIDTH="80%" >
+<TR>
+<TH>Position</TH>
+
+<TH>Form Id</TH>
+
+<TH>Description&nbsp;</TH>
+</TR>
+
+<TR>
+<TD>1&nbsp;</TD>
+
+<TD>id&nbsp;</TD>
+
+<TD>Id of the account&nbsp;</TD>
+</TR>
+</TABLE></CENTER>
+
+<H3>
+Analysis:</H3>
+
+<UL type=disc>
+<LI>
+The <I>id</I> must reference an existing <B>Account</B> instance. If it
+does not, a directory of all accounts is displayed, with the option to sort the list by account ID or account name.</LI>
+
+<LI>
+The display includes four sections:</LI>
+
+<DL>
+<DD>
+1. Basics - basic information about the account</DD>
+
+<DD>
+2. Top 5 Equity Holdings - security name, shares, market value, and percentage
+for the largest five equity holdings in the account</DD>
+
+<DD>
+3. Recent Holdings History - dates of the last five holdings updates and
+the market value and cash for each date</DD>
+
+<DD>
+4. Membership Information - for Portfolios, this section displays all the
+aggregates that include the portfolio ; for AggAccounts, this section displays
+the portfolios currently comprising the aggregate ; for IndexAccounts,
+this section displays the history membership definition rules; for CompositeAccounts,
+this section displays the accounts currently comprising the composite and
+their weights in the composite</DD>
+</DL>
+</UL>
+
+<H3>
+Key Data Feeds:</H3>
+
+<UL type=disc>
+<LI>
+<I><A HREF="pma_HoldingsFeed.htm">HoldingsFeed</A></I></LI>
+
+<LI>
+<I><A HREF="pma_PortfolioAggregates.htm">PortfolioAggregates</A></I></LI>
+
+<LI>
+<I><A HREF="pma_CompositeAccountMembers.htm">CompositeAccountMembers</A></I></LI>
+</UL>
+
+<H3>
+Related Reports:</H3>
+
+<H3>
+Sample Usage:</H3>
+
+<UL type=disc>
+<PRE><B><TT>Interface ApplicationWS runWith: "AccountProfile", "102" ;</TT></B></PRE>
+</UL>
+
+<H3>
+Sample Input:</H3>
+<FORM NAME=ApplicationForm ACTION="http://visionWeb/cgi-bin/vquery.exe/default/">
+<CENTER><TABLE BORDER CELLSPACING=2 CELLPADDING=8 WIDTH="50%" >
+<TR>
+<TH ALIGN=RIGHT BGCOLOR="#ADD8E6">Enter Account:&nbsp;</TH>
+
+<TD><INPUT TYPE=text NAME= id SIZE= 15 VALUE= "102"><INPUT TYPE=submit value=Submit></TD>
+</TR>
+
+<TR>
+<TH><FONT SIZE=-1>Date:</FONT>&nbsp;
+<BR><INPUT TYPE=text NAME=globalDate VALUE= "19990115"></TH>
+
+<TH><FONT SIZE=-1>Currency:</FONT>&nbsp;
+<BR><SELECT NAME=globalCurrency><OPTION VALUE=LOC SELECTED><FONT SIZE=-1>Local&nbsp;<OPTION VALUE=USD >United
+States Dollar&nbsp;<OPTION VALUE=ARS>Argentine Peso&nbsp;<OPTION VALUE=AUD>Australian
+Dollar&nbsp;<OPTION VALUE=ATS>Austrian Schilling&nbsp;<OPTION VALUE=BEF>Belgian
+Franc&nbsp;<OPTION VALUE=BRL>Brazilian Real&nbsp;<OPTION VALUE=GBP>British
+Pound&nbsp;<OPTION VALUE=CAD>Canadian Dollar&nbsp;<OPTION VALUE=CLP>Chilean
+Peso&nbsp;<OPTION VALUE=CNY>Chinese (yuan) Renmin&nbsp;<OPTION VALUE=COP>Columbian
+Peso&nbsp;<OPTION VALUE=CZK>Czechoslovakian Korun&nbsp;<OPTION VALUE=DKK>Danish
+Krone&nbsp;<OPTION VALUE=EGP>Egyptian Pound&nbsp;<OPTION VALUE=EUR>Euro
+Dollar&nbsp;<OPTION VALUE=FIM>Finnish Markka&nbsp;<OPTION VALUE=FRF>French
+Franc&nbsp;<OPTION VALUE=DEM>German Deutschmark&nbsp;<OPTION VALUE=GRD>Greek
+Drachma&nbsp;<OPTION VALUE=HKD>Hong Kong Dollar&nbsp;<OPTION VALUE=HUF>Hungarian
+Forint&nbsp;<OPTION VALUE=INR>Indian Rupee&nbsp;<OPTION VALUE=IDR>Indonesian
+Rupiah&nbsp;<OPTION VALUE=IEP>Irish Pound&nbsp;<OPTION VALUE=ILS>Israeli
+Shekel&nbsp;<OPTION VALUE=ITL>Italian Lira&nbsp;<OPTION VALUE=JMD>Jamaican
+Dollar&nbsp;<OPTION VALUE=JPY>Japanese Yen&nbsp;<OPTION VALUE=JOD>Jordanian
+Dinar&nbsp;<OPTION VALUE=KES>Kenyan Shilling&nbsp;<OPTION VALUE=LUF>Luxembourg
+Franc&nbsp;<OPTION VALUE=MYR>Malaysian Ringgit&nbsp;<OPTION VALUE=MAD>Moroccan
+Dirham&nbsp;<OPTION VALUE=NLG>Netherlands Guilder&nbsp;<OPTION VALUE=MXP>New
+Mexican Peso&nbsp;<OPTION VALUE=NZD>New Zealand Dollar&nbsp;<OPTION VALUE=NGN>Nigerian
+Naira&nbsp;<OPTION VALUE=NOK>Norwegian Krone&nbsp;<OPTION VALUE=PKR>Pakistani
+Rupee&nbsp;<OPTION VALUE=PEN>Peruvian new Sol&nbsp;<OPTION VALUE=PHP>Philippine
+Peso&nbsp;<OPTION VALUE=PLZ>Polish Zloty&nbsp;<OPTION VALUE=PTE>Portugese
+Escudo&nbsp;<OPTION VALUE=SGD>Singapore Dollar&nbsp;<OPTION VALUE=ZAR>South
+African Rand&nbsp;<OPTION VALUE=KRW>South Korean Won&nbsp;<OPTION VALUE=ESP>Spanish
+Peseta&nbsp;<OPTION VALUE=LKR>Sri Lankan Rupee&nbsp;<OPTION VALUE=SEK>Swedish
+Krona&nbsp;<OPTION VALUE=CHF>Swiss Franc&nbsp;<OPTION VALUE=TWD>Taiwan
+Dollar&nbsp;<OPTION VALUE=THB>Thailand Baht&nbsp;<OPTION VALUE=TRL>Turkish
+Lira&nbsp;<OPTION VALUE=VEB>Venezuelan Bolivar&nbsp;<OPTION VALUE=ZWD>Zimbabwe
+Dollar&nbsp;</FONT></SELECT></TH>
+</TR>
+</TABLE></CENTER>
+<INPUT TYPE=hidden NAME=appName VALUE="AccountProfile"></FORM>
+<H3>
+Sample Output:</H3>
+
+<CENTER>
+<H3>
+<FONT FACE="Arial"><FONT COLOR="#00008B"><FONT SIZE=+0>Portfolio Profile
+For: Insyte Test 102</FONT></FONT></FONT></H3></CENTER>
+
+<CENTER>
+<H4>
+<FONT FACE="Arial"><FONT COLOR="#00008B"><FONT SIZE=+0>Data As Of: 1/15/1999
+--- Currency: United States Dollar</FONT></FONT></FONT></H4></CENTER>
+
+<HR align=center width=50%>
+<CENTER><TABLE BORDER CELLSPACING=2 WIDTH="65%" >
+<TR>
+<TH ALIGN=CENTER VALIGN=TOP COLSPAN="2"><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>---
+Basics ---</FONT></FONT></FONT></TH>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Id:&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>102</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Type:&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Portfolio</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Currency:&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>USD</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Total
+Holdings:&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+57</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>EffectiveDate:&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>1/13/1999</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Mkt
+Value:&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;&nbsp;&nbsp;&nbsp;
+17,912,721.43</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Equity:&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;&nbsp;&nbsp;&nbsp;
+17,767,241.66</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Fixed:&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0.00</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Cash:&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+145,479.77</FONT></FONT></FONT></TD>
+</TR>
+</TABLE></CENTER>
+&nbsp;
+<CENTER><TABLE BORDER CELLSPACING=2 WIDTH="80%" >
+<TR>
+<TH ALIGN=CENTER VALIGN=TOP COLSPAN="5"><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>---
+Top 5 Equity Holdings ---</FONT></FONT></FONT></TH>
+</TR>
+
+<TR>
+<TH ALIGN=CENTER VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=-1>Id</FONT></FONT></FONT></TH>
+
+<TH ALIGN=CENTER VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=-1>Name</FONT></FONT></FONT></TH>
+
+<TH ALIGN=CENTER VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=-1>Shares</FONT></FONT></FONT></TH>
+
+<TH ALIGN=CENTER VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=-1>Mkt
+Val</FONT></FONT></FONT></TH>
+
+<TH ALIGN=CENTER VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=-1>Pct
+of Port</FONT></FONT></FONT></TH>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>AOL</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>AMERICA
+ONLINE INC DEL C</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+7,600</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+1,107,700</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;
+6.18 %</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>INTC</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>INTEL
+CORP COM&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+7,200</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+1,000,800</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;
+5.59 %</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>DELL</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>DELL
+COMPUTER CORP COM&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+11,400</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+904,162</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;
+5.05 %</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>MSFT</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>MICROSOFT
+CORP COM&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+6,100</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+877,256</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;
+4.90 %</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>SGP</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>SCHERING
+PLOUGH CORP COM</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+13,900</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+710,638</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;
+3.97 %</FONT></FONT></FONT></TD>
+</TR>
+</TABLE></CENTER>
+&nbsp;
+<CENTER><TABLE BORDER CELLSPACING=2 WIDTH="80%" >
+<TR>
+<TH ALIGN=CENTER VALIGN=TOP COLSPAN="4"><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>---
+Recent Holdings History ---</FONT></FONT></FONT></TH>
+</TR>
+
+<TR>
+<TH ALIGN=CENTER VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=-1>Date</FONT></FONT></FONT></TH>
+
+<TH ALIGN=CENTER VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=-1>Count</FONT></FONT></FONT></TH>
+
+<TH ALIGN=CENTER VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=-1>Total
+MVal</FONT></FONT></FONT></TH>
+
+<TH ALIGN=CENTER VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=-1>Total
+Cash</FONT></FONT></FONT></TH>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>01/13/99</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+57</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+17,912,721</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+145,480</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>01/12/99</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+57</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+18,048,991</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+145,480</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>12/31/98</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+57</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+18,029,847</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+136,612</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>12/03/98</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+58</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+16,184,157</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+157,837</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>12/02/98</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+58</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+16,492,106</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+157,837</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>...
+more</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+</TR>
+</TABLE></CENTER>
+&nbsp;
+<CENTER><TABLE BORDER CELLSPACING=2 WIDTH="80%" >
+<TR>
+<TH ALIGN=CENTER VALIGN=TOP COLSPAN="2"><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>---
+AggAccount Participation ---</FONT></FONT></FONT></TH>
+</TR>
+
+<TR>
+<TH ALIGN=CENTER VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=-1>Id</FONT></FONT></FONT></TH>
+
+<TH ALIGN=CENTER VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=-1>Name</FONT></FONT></FONT></TH>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>99</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Agg
+99</FONT></FONT></FONT></TD>
+</TR>
+</TABLE></CENTER>
+
+<HR align=center width=50%>
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy 1999 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated January 28, 1999</font>
+</table></BODY>
+</HTML>

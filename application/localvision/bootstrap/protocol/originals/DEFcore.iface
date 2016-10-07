@@ -1,0 +1,1073 @@
+##################################################
+#  DEFcore.iface
+#  Basic Protocol for Interface classes
+#     Interface
+#     Interface Constant
+#     Interface Global
+#     Interface ErrorLog
+#     Interface Workspace (ApplicationWS; ExtractWS)
+#     Interface External
+##################################################
+
+####################
+#  Interface - basic execution of supplied expression
+#     incorporating tools for using globals and output buffering
+####################
+
+#--------------------
+#  Controls
+#--------------------
+Interface
+   defineFixedProperty: 'currentRowLimit' .
+   defineFixedProperty: 'currentOutput' .
+   defineFixedProperty: 'currentRows' .
+   defineFixedProperty: 'currentColumns' .
+
+defineMethod:
+[ | reset | 
+  :currentRowLimit <- NA ;
+  :currentOutput <- NA ;
+  :currentOutput rcleanStoreAndDictionary ;
+  :currentRows <- NA ;
+  :currentColumns <- NA ;
+  ^self
+] .
+
+defineMethod:
+[ | resetGlobals | 
+  Global reset ;
+  ^self
+] .
+
+defineMethod:
+[ | setRowLimitTo: n | 
+  :currentRowLimit <- n asNumber ;
+  ^self
+] .
+;
+
+#--------------------
+#  Display
+#--------------------
+Interface defineMethod: [ | profile | 
+"Current Interface Settings" printNL ;
+"  Row Limit: " print ; currentRowLimit printNL ;
+displayCounts ;
+"-" fill: 50 . printNL ;
+Global profile ;
+"-" fill: 50 . printNL ;
+] ;
+
+#--------------------
+#  Basic Execution - use globals and run expression
+#--------------------
+
+Interface
+defineMethod:
+[ | runExpression: expression | 
+  ErrorLog clearErrorStack ;
+  !evaluateBlock <- expression isBlock
+     ifTrue: [ [ expression value ] ]
+    ifFalse: [ [ expression asString evaluate ] ] ;
+  !output <-
+    [ Global date else: ^today . evaluate:
+        [ Global currency isCurrency
+            ifTrue: [ Global currency evaluate: evaluateBlock ] 
+           ifFalse: evaluateBlock . print ;
+        ] 
+    ] divertDelimitedOutput ;
+  ^self formatOutput: output ;
+  currentRowLimit isNA
+     ifTrue: [ currentOutput print ] 
+    ifFalse: [ ^self displayRowsFrom: 1 to: currentRowLimit ] ;
+] .
+
+defineMethod:
+[ | formatOutput: output |
+  :currentOutput <- [
+    Global delimiter isNA
+    ifTrue: 
+      [ output breakOn: Constant visionDelimiter . 
+        do: [ print ] 
+      ] 
+    ifFalse: 
+      [ output asLines
+        do: [ ^self take: 1 . = ^my Constant visionDelimiter
+              #-- drop vision delimiters from beginning of lines
+                ifTrue: [ ^self drop: 1 ] ifFalse: [ ^self ] .
+               translate: ^my Constant visionDelimiter 
+                      to: ^my Global delimiter . printNL ;
+             ] ;
+      ] ;
+  ] divertOutput ;
+  !lines <- currentOutput asLines;
+  :currentRows <- lines count ;
+  :currentColumns <- Global delimiter isNA
+    ifTrue: [ lines max: [ count ] ]
+   ifFalse: 
+      [ !delim <- Global delimiter stripBoundingBlanks ;
+        lines max: [ ^self howManyOf: ^my delim ]
+      ] .
+  asInteger ;
+] .
+
+#--------------------
+#  post-run record acccess
+#--------------------
+defineMethod:
+[ | displayRowsFrom: start to: end |
+  currentOutput else: "" . asLines numberElements
+     select: [ position between: ^my start and: ^my end ] .
+  do: [ printNL ] ;
+] .
+defineMethod:
+[ | displayCounts |
+  " Characters: " print ; currentOutput else: "" . count printNL ;
+  "       Rows: " print ; currentRows printNL ;
+  "Max Columns: " print ; currentColumns printNL ;
+] .
+
+;
+
+######################################################################
+
+####################
+#  Interface Constant
+#####################
+
+Interface Constant
+   define: 'visionDelimiter' toBe: "ÿ"  .
+   define: 'formatDelimiter' toBe: "@@@"  .
+   define: 'tab' toBe: "	" . #-- Tab
+   define: 'quote' toBe: "\"" .
+   define: 'backslash' toBe: ("\\ " take: 1) .
+   define: 'escape' toBe: "" .
+;
+
+####################
+#  Interface Global
+#####################
+
+Interface Global
+   defineFixedProperty: 'date' .
+   defineFixedProperty: 'currency' .
+   defineFixedProperty: 'delimiter' .
+   defineFixedProperty: 'numberFormat' .
+   defineFixedProperty: 'commaFlag' .
+
+defineMethod:
+[ | setDateTo: value | 
+  :date <- value asDate ;
+  ^self
+] .
+
+defineMethod:
+[ | setCurrencyTo: value | 
+  !curr <- value asCurrency ;
+  :currency <- curr isntDefault
+      ifTrue: [ curr ] ;
+  ^self
+] .
+
+defineMethod:
+[ | setDelimiterTo: value | 
+  :delimiter <- value ;
+  ^self
+] .
+
+defineMethod:
+[ | setNumberFormatTo: value |
+  :commaFlag <- value asString contains: "," ;
+  :numberFormat <- value asString stripChar: "," . asNumber asDouble ;
+  ^self
+] .
+
+defineMethod:
+[ | reset |
+  :date <- ^today ;
+  :currency <- NA ; 
+  :delimiter <- NA ;
+  :numberFormat <- NA ;
+  :commaFlag <- NA ;
+  ^self
+] .
+
+defineMethod:
+[ | profile |
+  "Current Interface Globals" printNL ;
+  "Date: " print:15 ; date printNL ;
+  "Currency: " print:15 ; currency displayInfo ;
+  "Delimiter: " print: 15 ; delimiter printNL ;
+  "Number Format: " print: 15 ; numberFormat print ;
+  commaFlag isntNA ifTrue: [ " (with commas) " print ] ;
+  newLine print ;
+] .
+;  
+
+Interface Global reset ;
+
+
+
+
+####################
+#  Interface ErrorLog
+#
+#  Errors should be posted in methods where the method is expected to
+#    perform an action that may not occur, but the method returns
+#    ^self instead of an indicator (e.g., NA) that the action did not
+#    work
+####################
+
+Interface ErrorLog
+   defineFixedProperty: 'errorStack' .
+   defineFixedProperty: 'errorStackEntryPoints' .
+   defineFixedProperty: 'autoDisplayFlag' .
+
+#--------------------
+#  attribute setting
+#--------------------
+
+defineMethod:
+[ | setAutoDisplay | 
+  :autoDisplayFlag <- TRUE ;
+  ^self
+] .
+
+defineMethod:
+[ | clearAutoDisplay | 
+  :autoDisplayFlag <- FALSE ;
+  ^self
+] .
+
+#--------------------
+#  posting
+#--------------------
+
+defineMethod:
+[ | clearErrorStack | 
+  :errorStack <- ^global List new ;
+  :errorStackEntryPoints <- ^global IndexedList new ;
+  ^self
+] .
+
+defineMethod:
+[ | startNewTransaction |
+  !tnum <- (errorStackEntryPoints count + 1 ) asInteger ; 
+  !enum <- (errorStack count + 1 ) asInteger ;
+  errorStackEntryPoints at: tnum put: enum ;
+  ^self
+] .
+
+defineMethod:
+[ | post: message for: object with: inputs | 
+  ^self post: message type: "Error" for: object with: inputs 
+] .
+
+defineMethod:
+[ | postWarning: message for: object with: inputs | 
+  ^self post: message type: "Warning" for: object with: inputs 
+] .
+
+defineMethod: 
+[ | addError: message | 
+  ^self post: message type: "Error" for: NA with: NA
+] .
+
+defineMethod:
+[ | post: message type: type for: object with: inputs | 
+  errorStack count = 0 ifTrue: [ startNewTransaction ] ;
+  !error <- object
+     extendBy: [ !message <- ^my message;
+                 !inputs <- ^my inputs ;
+                 !type <- ^my type ;
+               ] ;
+  errorStack, error ;
+  autoDisplayFlag
+     ifTrue: [ ^self displayError: error ] ;
+  error
+] .
+
+#--------------------
+#  display
+#--------------------
+
+defineMethod:
+[ | displayErrorCount | 
+  errorStack count
+] .
+
+defineMethod:
+[ | displayLastError |
+  !errors <- errorStack numberElements ; 
+  !entry <- errorStackEntryPoints at: errorStackEntryPoints count ;
+  errors select: [ position >= ^my entry ] .
+     do: [ ^my displayError: ^self ] ;
+] .
+
+defineMethod:
+[ | displayFullLog | 
+  !errors <- errorStack numberElements ;
+  errorStackEntryPoints count sequence
+  do: [ "Transaction #: " print ; ^self printNL: -8 ;
+        !start <- ^my errorStackEntryPoints at: ^self ;
+        !end <- ^my errorStackEntryPoints at: (^self + 1) asInteger .
+          else: (^my errorStack count + 1 ) asInteger ;
+        !errorLevel <- ^my ;
+        ^my errors select: [ position >= ^my start && position < ^my end ] .
+            do: [ ^my errorLevel displayError: ^self ] ;
+        newLine print ; 
+      ] ;
+] .
+
+defineMethod:
+[ | displayError: error | 
+  error type print ; ": " print ; 
+  error message printNL ;
+  "   in: " print ; error displayInfo ; 
+  error inputs isntNA
+  ifTrue:
+    [ error inputs
+         do: [ "   Input: " print ; whatAmI print ; " " print ; printNL ] ;
+    ] ;
+] .
+;
+
+#------------------------------
+
+Interface ErrorLog
+   clearErrorStack
+   clearAutoDisplay 
+;
+
+
+######################################################################
+
+
+##################################################
+#  Basic Protocol for Interface Workspace Classes
+#
+#  ApplicationWS handles parameterized application execution
+#  ExtractWS handles structured data extraction
+#
+#  Individual workspace in any subclass can be named to cache
+#     values temporaliy
+##################################################
+
+####################
+#  Interface Workspace
+####################
+Interface Workspace
+
+defineMethod:
+[ | displayInfo | 
+  " " print ; ^self whatAmI print ; " :  " print ; ^self code printNL ;
+] .
+
+defineMethod: 
+[ | deleteInstance |
+  !id <- code ;
+  ^self isntDefault
+   ifTrue: [ ^self classDescriptor namingDictionary delete: code ;
+             ^self rdelete ;
+             id print ; " deleted. " printNL ;
+          ] 
+   ifFalse: [ ">>> Cannot Delete Default Instance." printNL ] ;
+] 
+;
+
+####################
+#  ApplicationWS
+####################
+
+Interface ApplicationWS
+   defineFixedProperty: 'parameterList' .
+   defineFixedProperty: 'namedParameters' .
+   defineFixedProperty: 'currentApplication' .
+;
+
+#--------------------
+#  display messages
+#--------------------
+Interface ApplicationWS defineMethod: [ | profile | 
+  ^self whatAmI print ; " Profile " print ;
+  code isntNA ifTrue: [ " - " print ; code print ] ;
+  newLine print ;
+  "Current Application: " print ; currentApplication printNL ;
+  "Parameters: " printNL ;
+  parameterList numberElements
+  do: [ " " print ; position print: -3 ; print ;
+        "  (" print ; whatAmI print ; ")" printNL ;
+      ] ;
+  "Named Parameters: " printNL ;
+  namedParameters selectorList
+  do: [ ^self print ; " -- " print ;
+        ^my namedParameters at: ^self . printNL ;
+      ] ;
+] .
+;
+
+  
+#--------------------
+#  initialization
+#--------------------
+Interface ApplicationWS
+defineMethod:
+[ | initializeLocalAttributes | 
+  ^super initializeLocalAttributes ;
+#--  Named ApplicationWS at: code put: ^self ;
+  :parameterList <- ^global List new ;
+  :namedParameters <- ^global Dictionary new ;
+] ;
+
+#--------------------
+#  initialize properties in default instances for this and future subclasses
+#--------------------
+Interface ApplicationWS
+defineMethod:
+[ | initializeGlobalSubclassProperties |
+  ^super initializeGlobalSubclassProperties ;
+  :parameterList <- ^global List new ;
+  :namedParameters <- ^global Dictionary new ;
+  ^self
+] ;
+
+
+Interface ApplicationWS initializeGlobalSubclassProperties ;
+
+#--------------------
+#  Input Management
+#--------------------
+
+Interface ApplicationWS defineMethod: [ | reset |
+  ^super reset ;
+  :currentApplication <- NA ;
+  :parameterList <- ^global List new ;
+  namedParameters selectorList
+     do: [ ^my namedParameters delete: ^self ] ;
+  ^self
+] ;
+
+Interface ApplicationWS defineMethod: [ | setApplicationTo: app |
+:currentApplication <- app ;
+^self
+] ;
+
+Interface ApplicationWS defineMethod: [ | set: id to: val |
+  namedParameters at: id put: val ;
+  ^self
+] ;
+
+Interface ApplicationWS defineMethod: [ | setParameterListTo: plist |
+  :parameterList <- plist isList
+      ifTrue: [ plist ] ifFalse: [ plist asList ] ;
+  ^self
+] ;
+
+####################
+#  Methods that run application with current inputs
+####################
+
+Interface ApplicationWS defineMethod: [ | runWith: plist | #-- app, plist
+^self reset ;
+!params <- plist isList 
+    ifTrue: [ plist ] ifFalse: [ plist asList ]  ;
+
+#-- the app name is supplied as a string in the first parameter
+#-- the remaining parameters are cached in parameterList property
+!app <- params at: 1 ;
+:params <- params numberElements select: [ position > 1 ] ;
+^self
+   setApplicationTo: app . setParameterListTo: params .
+   run ;
+] ;
+
+Interface ApplicationWS defineMethod: [ | validateApplication: app | 
+!selector <- app asSelector  ;
+selector isntNA
+   ifTrue: [ selector locateInDictionaryOf: ^self .isntNA 
+              ifTrue: [TRUE].
+              elseIf: [^self super isApplicationWS ] 
+                then: [^self super validateApplication: selector ].
+                else: [FALSE]
+           ]
+  ifFalse: [ FALSE ]
+] ;
+
+Interface ApplicationWS defineMethod: [ | run | 
+!app <- currentApplication else: [ namedParameters at: "application" ] ;
+app isNA
+ifTrue:
+  [ ErrorLog post: "No Application Selected" for: ^self with: NA ;
+  ] 
+ifFalse:
+  [ 
+  ^self validateApplication: app .
+  ifTrue:
+     [ !executionBlock <-  [ ^self send: app asBlock ] ;
+       ^self runExpression: executionBlock ;
+     ]
+  ifFalse: [ ErrorLog post: "Application Not Defined" for: ^self with: app ] ;
+  ] ;
+ ErrorLog displayFullLog ;
+] ;
+
+
+####################
+#  Methods that retrieve parameters
+####################
+
+Interface ApplicationWS defineMethod: [ | getParameter: p |
+   ^self getParameter: p orName: p
+] ;
+
+Interface ApplicationWS defineMethod: [ | getParameter: p orName: n | 
+p isNumber
+  ifTrue: [ parameterList at: p ] .
+  else: [ namedParameters at: n ] 
+] ;
+
+Interface ApplicationWS defineMethod: [ | getEntity: id forType: type | 
+  !entities <- type isString
+     ifTrue: [ type evaluate ] ifFalse: [ type ] . locateIds: id ;
+  entities count = 1 ifTrue: [ entities at: 1 ] .
+    elseIf: [ entities count > 1 ] then: [ entities ]
+] ;
+
+
+#--------------------------------------------------
+
+####################
+#  Interface ExtractWS
+####################
+
+Interface ExtractWS
+   defineFixedProperty: 'currentDelimiter' .
+   defineFixedProperty: 'currentOrientation' .
+   defineFixedProperty: 'currentEntityType' .
+   defineFixedProperty: 'currentEntity' .
+   defineFixedProperty: 'currentEntityList' .
+   defineFixedProperty: 'currentExpression' .
+   defineFixedProperty: 'currentItemNames' .
+   defineFixedProperty: 'currentItemList' .
+   defineFixedProperty: 'currentDateList' .
+
+   defineFixedProperty: 'showScalarLabel' .
+   defineFixedProperty: 'showColumnLabels' .
+   defineFixedProperty: 'showRowLabels' .
+;
+
+#--------------------
+#  display messages
+#--------------------
+Interface ExtractWS defineMethod: [ | profile | 
+  "Current Extract Settings For: " print ; code printNL ;
+  newLine print ;
+  "Orientation: " print: 15 ; currentOrientation printNL ;
+  "Scalar Label: " print: 15; showScalarLabel printNL ;
+  "Column Labels: " print: 15; showColumnLabels printNL ;
+  "Row Labels: " print: 15; showRowLabels printNL ;
+  "Delimiter: " print: 15; currentDelimiter printNL ;
+  "Row Limit: " print: 15 ; currentRowLimit printNL ;
+  "Class: " print: 15 ; currentEntityType whatAmI printNL ;
+  "Entity: " print: 15 ; currentEntity displayInfo ; 
+  currentExpression isntNA
+     ifTrue: [ "Access Via: " print: 15 ; currentExpression printNL ] ;
+  "Entity List Contains " print ; currentEntityList count print ; 
+  " Elements" printNL ;
+  "Default Date: " print; Global date printNL ;
+  "Date List: " print ; currentDateList do: [ print ; " " print ] ; 
+  newLine print ;
+  "Currency: " print: 15 ; Global currency displayInfo ; 
+  "Items: " print: 15 ; currentItemNames do: [ print ; ", " print ] ;
+  newLine print ; 
+] ;
+
+#--------------------
+#  initialization
+#--------------------
+Interface ExtractWS
+defineMethod:
+[ | initializeLocalAttributes | 
+  ^super initializeLocalAttributes ;
+#--  Named ExtractWS at: code put: ^self ;
+  ^self reset
+] ;
+
+
+#--------------------
+#  execution setup
+#--------------------
+Interface ExtractWS
+
+defineMethod:
+[ | reset |
+  Global reset ;
+  ^super reset ;    #- clears output and rowLimit
+  ^self
+     setEntityTypeTo: ^global Entity .
+     setOrientationTo: NA .
+     setDelimiterTo: " " .
+     setScalarLabelOff 
+     setColumnLabelsOff
+     setRowLabelsOff 
+] .
+
+defineMethod:
+[ | setOrientationTo: string | 
+  :currentOrientation <- string ; 
+  ^self
+] .
+
+defineMethod:
+[ | setEntityTypeTo: class | 
+  :currentEntityType <- class ;
+  :currentEntity <- class ;
+  :currentEntityList <- class activeList ;
+  :currentItemList <- ^global List new ; 
+  :currentItemNames <- NA ;
+  :currentExpression <- NA ;
+  ^self
+] .
+
+defineMethod:
+[ | setEntityTo: entity | 
+  !newEntity <- entity isString
+     ifTrue: [ currentEntityType named uniformAt: entity ] 
+    ifFalse: [ entity ] ;
+  newEntity != currentEntity
+  ifTrue:
+    [ :currentEntity <- newEntity ;
+      :currentEntityList <- currentEntity activeList ;
+      currentExpression isBlock 
+       ifTrue: [ :currentEntityList <- currentEntity send: currentExpression ];
+    ] ;
+  ^self
+] .
+
+defineMethod:
+[ | setEntityListTo: expression |
+  :currentEntityList <- expression isBlock
+  ifTrue:
+    [ :currentExpression <- expression ;
+      currentEntity send: expression
+    ] .
+  elseIf: [expression isList ]
+  then:
+    [ :currentExpression <- NA ;
+      expression send: [ ^my currentEntityType named at: ^self ] 
+    ] .
+  elseIf: [ expression isString ] 
+  then:
+    [ :currentExpression <- NA ;
+       currentEntityType locateIds: expression
+    ] .
+  else: [ currentEntityList ] ;
+  currentEntityList isCollection not 
+      ifTrue: [ :currentEntityList <- currentEntityList asList ] ;
+  ^self
+] .
+
+defineMethod:
+[ | getEntityList | 
+  !list <- currentExpression isBlock
+     ifTrue: [ currentEntity send: currentExpression ]
+    ifFalse: [ currentEntityList ] ;
+  list isCollection ifTrue: [ list ] ifFalse: [ list asList ]
+] .
+
+defineMethod:
+[ | setItemTo: string | 
+  ^self setItemListTo: string asList
+] .
+
+defineMethod:
+[ | setItemListTo: stringList |
+  !list <- stringList isList 
+     ifTrue: [ stringList ] ifFalse: [ stringList asList ] ;
+  :currentItemNames <- list ; 
+  :currentItemList <- list send: [ ^my getItemBlockFor: ^self ] ;
+  ^self
+] .
+
+defineMethod:
+[ | getItemBlockFor: string | 
+  #-- item    item@date     item@date@curr@path     item@@curr@path
+  #-- item    item.date     item.date.curr.path     item..curr.path
+  string isBlank
+   ifTrue: [ NA ]
+  ifFalse:
+    [
+    !request <- string breakOn: "@." ;
+    !item <- request at: 1 . asString ;
+    !date <- request at: 2 . else: "" . evaluate ;
+    date isInteger ifTrue: [ :date <- date asDate ] ;
+    !currCode <- request at: 3 ;
+    !currency <- ^global Named Currency at: currCode ;
+    !path <- request at: 4 . else: "" . concat: " " ;
+    !message <- path concat: item . asBlock ;
+    currency isCurrency
+    ifTrue:
+      [ date isDate
+        ifTrue:
+          [ [ ^my currency evaluate:
+                [ ^my date evaluate: [ ^self send: ^my message ] ]
+            ]
+          ] .
+        elseIf: date isDateOffset
+        then:
+          [ [ ^my currency evaluate:
+                [ ^date + ^my date
+                       evaluate: [ ^self send: ^my message ]
+                ]
+            ]
+          ] .
+        else:
+          [ [ ^my currency evaluate: [ ^self send: ^my message ] ] 
+          ]
+      ]
+    ifFalse: 
+      [ date isDate
+        ifTrue:
+          [ [ ^my date evaluate: [ ^self send: ^my message ] ]
+          ] .
+        elseIf: date isDateOffset
+        then:
+          [ [ ^date + ^my date evaluate: [ ^self send: ^my message ] ]
+          ] .
+        else:
+          [ [ ^self send: ^my message ] 
+          ] 
+      ] 
+   ]
+
+] .
+
+defineMethod:
+[ | setDateTo: date |
+  Global setDateTo: date ;
+  ^self
+] .
+   defineMethod: [ | setTimeTo: date |  ^self setDateTo: date  ] .
+
+defineMethod:
+[ | setDateListTo: list | 
+  :currentDateList <- list 
+     send: [ isString ifTrue: [ asDate ] ifFalse: [ ^self ] ] .
+     send: [ isInteger || isDate
+               ifTrue: [ asDate ] .
+               elseIf: isDateOffset then: [ ^self ] 
+           ] ;
+  currentDateList isList not
+     ifTrue: [ :currentDateList <- currentDateList asList ] ;
+  ^self
+] .
+   defineMethod: [ | setTimeListTo: list |  ^self setDateListTo: list  ] .
+
+defineMethod:
+[ | setCurrencyTo: curr |
+  Global setCurrencyTo: curr ;
+  ^self
+] .
+
+defineMethod:
+[ | setNumberFormatTo: format |
+  Global setNumberFormatTo: format ;
+  ^self
+] .
+
+defineMethod:
+[ | setDelimiterTo: char | 
+  :currentDelimiter <- char ;
+  ^self
+] .
+
+defineMethod:
+[ | setScalarLabelTo: bool | 
+  :showScalarLabel <- bool = TRUE ;
+  ^self
+] .
+
+defineMethod:
+[ | setScalarLabelOn | 
+  :showScalarLabel <- TRUE ; 
+  ^self
+] .
+
+defineMethod:
+[ | setScalarLabelOff | 
+  :showScalarLabel <- FALSE ;
+  ^self
+] .
+
+defineMethod:
+[ | setColumnLabelsTo: bool | 
+  :showColumnLabels <- bool = TRUE ;
+  ^self
+] .
+
+defineMethod:
+[ | setColumnLabelsOn | 
+  :showColumnLabels <- TRUE ; 
+  ^self
+] .
+
+defineMethod:
+[ | setColumnLabelsOff | 
+  :showColumnLabels <- FALSE ;
+  ^self
+] .
+
+defineMethod:
+[ | setRowLabelsTo: bool | 
+  :showRowLabels <- bool = TRUE ;
+  ^self
+] .
+
+defineMethod:
+[ | setRowLabelsOn | 
+  :showRowLabels <- TRUE ; 
+  ^self
+] .
+
+defineMethod:
+[ | setRowLabelsOff | 
+  :showRowLabels <- FALSE ;
+  ^self
+] .
+
+#--------------------
+#  Access
+#--------------------
+
+defineMethod:
+[ | getCurrentItem | 
+  currentItemList isList
+      ifTrue: [ currentItemList at: 1 ] ifFalse: [ currentItemList ] .
+
+] .
+
+defineMethod:
+[ | getCurrentItemName | 
+  currentItemNames isList
+      ifTrue: [ currentItemNames at: 1 ] ifFalse: [ currentItemNames ] .
+
+] .
+
+defineMethod:
+[ | getCurrentDates | 
+  currentDateList 
+     send: [ isDate ifTrue: [ ^self ] .
+               elseIf: isDateOffset then: [ ^date + ^self ] .
+               else: "" 
+           ] 
+] .
+
+#--------------------
+
+defineMethod:
+[ | run | 
+  !delim <- Global delimiter ;
+  Global setDelimiterTo: currentDelimiter ;
+  ^self runExpression: [ ^self execute ] ;
+  Global setDelimiterTo: delim ;
+] .
+
+defineMethod:
+[ | execute |
+  currentOrientation = "EI"
+    ifTrue: [ executeEntityByItem ] .
+    elseIf: currentOrientation = "IE" 
+      then: [ executeItemByEntity ] .
+    elseIf: [ currentOrientation = "ET" || currentOrientation = "ED" ] 
+      then: [ executeEntityByTime ] .
+    elseIf: [ currentOrientation = "TE" || currentOrientation = "DE" ] 
+      then: [ executeTimeByEntity ] .
+    elseIf: [ currentOrientation = "IT" || currentOrientation = "ID" ]
+      then: [ executeItemByTime ] .
+    elseIf: [ currentOrientation = "TI" || currentOrientation = "DI" ]
+      then: [ executeTimeByItem ] ;
+] .
+
+defineMethod:
+[ | executeEntityByItem | 
+  !entities <- getEntityList ;
+  ^self displaySizeFor: entities by: currentItemList ; 
+  ^self displayHeadersForScalar: Global date withColumns: currentItemNames ;
+
+  entities
+  do: [ !entity <- ^self ; 
+        !label <- entity else: "" ;
+        !values <- ^my currentItemList
+        send: [ ^self isntNA && ^my entity isntNA
+                   ifTrue: [ ^my entity send: ^self ] 
+                  ifFalse: [ "" ]
+              ] ;
+        ^my displayRowWithLabel: label andValues: values ;
+      ] ;
+] .
+
+defineMethod:
+[ | executeItemByEntity | 
+  !entities <- getEntityList ;
+  ^self displaySizeFor: currentItemList by: entities ;
+  ^self displayHeadersForScalar: Global date withColumns: entities ;
+
+  currentItemList numberElements
+  do: [ !item <- ^self ;
+        !itemName <- item isntNA
+            ifTrue: [ ^my currentItemNames at: position ] ifFalse: [ "" ] ;
+        !values <- ^my entities
+        send: [ ^self isntNA && ^my item isntNA
+                   ifTrue: [ ^self send: ^my item ]
+                  ifFalse: [ "" ]
+              ] ;
+          ^my displayRowWithLabel: itemName andValues: values ;
+      ] ;
+] .
+
+defineMethod:
+[ | executeEntityByTime | 
+  !dates <- getCurrentDates ;
+  !entities <- getEntityList ;
+  ^self displaySizeFor: entities by: dates ;
+  ^self displayHeadersForScalar: getCurrentItemName withColumns: dates ;
+
+  !item <- getCurrentItem ;
+  entities
+  do: [ !entity <- ^self ; 
+        !label <- entity else: "" ;
+        !item <- ^my item ;
+        !values <- ^my dates
+        send: [ ^self isDate && ^my entity isntNA
+                ifTrue: [ ^self evaluate: [ ^my entity send: ^my item ] ]
+               ifFalse: [ "" ]
+              ] ;
+        ^my displayRowWithLabel: label andValues: values ;
+      ] ;
+] .
+
+defineMethod:
+[ | executeTimeByEntity | 
+  !dates <- getCurrentDates ;
+  !entities <- getEntityList ;
+  ^self displaySizeFor: dates by: entities ;
+  ^self displayHeadersForScalar: getCurrentItemName
+                    withColumns: entities ;
+
+  !item <- getCurrentItem ;
+  dates
+  do: [ !item <- ^my item ;
+        !values <- ^self isDate 
+        ifTrue:
+          [ ^self evaluate:
+             [ ^my entities 
+               send: [ ^self isntNA 
+                         ifTrue: [ ^self send: ^my item ] ifFalse: [ "" ] 
+                     ]
+             ]
+          ]
+        ifFalse:
+          [ ^my entities send: [ "" ] 
+          ] ;
+        ^my displayRowWithLabel: ^self andValues: values ;
+      ] ;
+] .
+
+defineMethod:
+[ | executeItemByTime | 
+  !dates <- getCurrentDates ;
+  ^self displaySizeFor: currentItemList by: dates ;
+  ^self displayHeadersForScalar: currentEntity withColumns: dates ;
+
+  currentItemList numberElements
+  do: [ !item <- ^self ;
+        !itemName <- item isntNA
+           ifTrue: [ ^my currentItemNames at: position ] ifFalse: [ "" ] ;
+        !entity <- ^my currentEntity ;
+        !values <- ^my dates
+          send: [ ^self isDate && ^my item isntNA
+                    ifTrue: [ ^self evaluate: [ ^my entity send: ^my item ] ]
+                   ifFalse: [ "" ]
+                ] ;
+          ^my displayRowWithLabel: itemName andValues: values ;
+      ] ;
+] .
+
+defineMethod:
+[ | executeTimeByItem | 
+  !dates <- getCurrentDates ;
+  ^self displaySizeFor: dates by: currentItemList ;
+  ^self displayHeadersForScalar: currentEntity withColumns: currentItemNames ;
+
+  dates
+  do: [ !values <- ^self isDate
+        ifTrue:
+          [ ^self evaluate:
+             [ !entity <- ^my currentEntity ;
+               ^my currentItemList 
+               send: [ ^self isntNA
+                          ifTrue: [ ^my entity send: ^self ] 
+                         ifFalse: [ "" ]
+                     ] 
+             ]
+          ]
+        ifFalse: 
+          [ ^my currentItemList send: [ "" ]
+          ] ;
+        ^my displayRowWithLabel: ^self andValues: values ;
+      ] ;
+] .
+
+#--------------------
+#  display support
+#--------------------
+
+defineMethod:
+[ | displaySizeFor: rows by: cols |
+  !increment <- showScalarLabel || showColumnLabels
+      ifTrue: [ 1 ] ifFalse: [ 0 ] ;
+  (rows count + increment) asInteger print ; 
+  !increment <- showScalarLabel || showRowLabels
+      ifTrue: [ 1 ] ifFalse: [ 0 ] ;
+  (cols count + increment) asInteger printNL ;
+] .
+
+defineMethod:
+[ | displayHeadersForScalar: scalar withColumns: columns | 
+  showScalarLabel || showColumnLabels
+  ifTrue: 
+    [ showScalarLabel || showRowLabels
+      ifTrue: 
+        [ showScalarLabel ifTrue: [ scalar print ] ifFalse: [ "" print ] ;
+        ] ;
+      columns 
+      do: [ ^my showColumnLabels
+               ifTrue: [ ^self else: "" . print ] ifFalse: [ "" print ] ;
+          ] ;
+      newLine print ;
+    ] ;
+] .
+
+defineMethod:
+[ | displayRowWithLabel: label andValues: values | 
+  showRowLabels || showScalarLabel
+  ifTrue:
+     [ showRowLabels ifTrue: [ label print ] ifFalse: [ "" print ] ;
+     ] ;
+  !format <- Global numberFormat else: 18.2 ;
+  !commas <- Global commaFlag isTrue ;
+  values
+  do: [ ^self isNumber
+          ifTrue: [ ^my commas
+                       ifTrue: [ ^self printWithCommas: ^my format ]
+                      ifFalse: [ ^self print: ^my format ] ;
+                  ]
+         ifFalse: [ ^self print ] ;
+      ] ;
+  newLine print ;
+] .
+
+;
+
+Interface ExtractWS reset ;
+

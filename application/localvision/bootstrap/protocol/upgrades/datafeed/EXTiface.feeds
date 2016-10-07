@@ -1,0 +1,35 @@
+####################################################
+#  Define core protocol for Interface ExternalFeedManager.
+####################################################
+
+
+
+Interface ExternalFeedManager
+defineMethod: [ | createIndexedDataRecordClass: newClassId from: oldId
+                  linkedTo: entityId via: xref by: typeId |
+:oldId <- ^self getValidClassNameFrom: oldId ;
+!oldClass <- oldId asClass ;
+oldClass isIndexedDataRecord
+ifTrue:
+  [ ^self setParentFeedTo: CoreWorkspace IndexedDataRecordFeed ;
+    ^self createDataRecordClass: newClassId
+       from: oldId linkedTo: entityId via: xref asTS: "N" ;
+    !typeClass <- typeId asClass ;
+    !entityClass <- entityId asClass ;
+    !newClass <- newClassId asClass ;
+    entityClass isEntity && xref isntDefault && typeClass isEntity
+    ifTrue:
+      [ newClass define: 'indexType' toBe: typeClass ;
+        "Setting '" print ; xref print ; "' on " print ;
+        entityClass whatAmI print ; " to IndexedList of " print ;
+        newClass whatAmI print ; " indexed by " print ;
+        typeClass whatAmI print ; "." printNL ;
+        entityClass defineFixedProperty: xref
+                    withDefault: CoreWorkspace IndexedList new ;
+      ] ;
+    newClass
+   ]
+] ;
+
+
+

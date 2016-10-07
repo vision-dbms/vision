@@ -1,0 +1,110 @@
+#!/bin/csh 
+
+####################
+#  job: SecurityPlus.job
+#
+#  This job loads the security and related internal feeds into vision.  The
+#  SecurityPlus token in status/pending should contain the file extension
+#  to use for loading the files.
+#
+#  Environment Variables:
+#     statusArea      /lv/production/status
+#     feedFilePath    /lv/upload/feeds/
+#     updateArea      /lv/production/Updates
+#     processDate     current run date of daemon 
+#     globalLogs      /lv/production/status/logs
+#
+#  The following Feeds are Loaded if Available:
+#     Feed Name            File name in $feedFilePath
+#     SecurityTypeMaster   SecTypeMaster.ext
+#     SecurityAliases      SecurityAliases.ext
+#     CompanyMaster        CompanyMaster.ext
+#     SecurityMaster       SecurityMaster.ext
+#
+####################
+
+#----------
+#  Setup
+#----------
+
+set jobName    = SecurityPlus
+set pending    = $statusArea/pending
+set src        = $feedFilePath
+
+#--  get the file extension from the pending token
+set fileExt = `cat $pending/$jobName`
+
+#--  Setup log
+set workDir  = $updateArea/workArea/Internal
+set processLog = $workDir/$jobName.$processDate
+$adminArea/helpers/SetupLog $processLog
+
+#----------
+#  Load the Available SecurityPlus Data
+#----------
+
+echo "" >& $processLog
+echo "********************************************************" >> $processLog
+echo "*  Loading Security and Related Data Feeds" >> $processLog
+echo "*  Start Time: `date` " >> $processLog
+echo "*  From:  $src " >> $processLog
+echo "********************************************************" >> $processLog
+echo "" >>& $processLog
+
+#---  start up a batchvision, run the feeds, and save the session
+($DBbatchvision -U3) << EOD |& sed 's/V> //g' >>& $processLog
+$processDate evaluate:
+   [ newLine print ;
+     !file <- "$src/SecTypeMaster.$fileExt" ;
+     Interface BatchFeedManager   
+          upload: "SecurityTypeMaster" usingFile: file withConfig: NA ;
+     newLine print ;
+     !file <- "$src/SecurityAliases.$fileExt" ;
+     Interface BatchFeedManager
+          upload: "SecurityAliases" usingFile: file withConfig: NA ;      
+     newLine print ;
+     !file <- "$src/CompanyMaster.$fileExt" ;
+     Interface BatchFeedManager
+          upload: "CompanyMaster" usingFile: file withConfig: NA ;        
+     newLine print ;
+     !file <- "$src/SecurityMaster.$fileExt" ;
+     Interface BatchFeedManager
+          upload: "SecurityMaster" usingFile: file withConfig: NA ;       
+     newLine print ;
+   ] ;
+?g
+?t
+
+Utility updateNetworkWithAnnotation: "$jobName Loads" ;
+?g
+?t
+
+EOD
+
+#----------
+#  Wraup
+#----------
+
+#--  Check job completion status and log file to confirm update
+set okay = $status
+if ($okay == 0) then
+   $adminArea/helpers/CheckLog $processLog $jobName 1
+   set okay = $status
+endif
+
+#--  copy the log to global status area
+cp $processLog $globalLogs/$jobName.log
+
+#--  if okay, move data files to done
+if ($okay == 0) then
+    cd $src
+    mv SecTypeMaster.$fileExt done
+    mv SecurityAliases.$fileExt done
+    mv CompanyMaster.$fileExt done
+    mv SecurityMaster.$fileExt done
+endif
+
+#----------
+#  and exit 
+#----------
+exit $okay

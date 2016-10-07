@@ -1,0 +1,45 @@
+##################################################
+# Time Series Testing
+#
+# StandAlone/Property
+# number of instances in cluster
+# patterns of update, access, delete
+# deleteColumn
+##################################################
+
+
+TimeSeries 
+defineMethod:
+[ | displayClusterStats |
+  !ts <- ^self new ;
+  ^self instanceList
+   do: [ !ts <- ^my ts ; 
+         ^self do: [ ^my ts put: 0 ]
+       ] ;
+  ^self instanceList 
+    iterate: [ !ts <- ^my ts ;
+               ^self do: [ ^my ts put: ( ^my ts value + 1) ] ;
+             ] by: 1 ;
+  "===> Duplicate Dates" printNL ;
+  ts select: [ ^self > 1 ] .  
+     do: [ ^date print: 15 ; printNL ] ;
+  newLine print ; 
+  "===> All Dates" printNL ;
+  ts      do: [ ^date print: 15 ; printNL ] ;
+  newLine print ; 
+] .
+;
+
+?g
+
+#---  Create clustered standalone time series
+!tsc1 <- TimeSeries new ;
+!tsc2 <- tsc1 clusterNew ; 
+
+tsc1 asOf: 880711 put: 880711.0 ;
+tsc2 asOf: 880711 put: 880711.0 ;
+
+tsc1 displayClusterStats ;
+
+
+?g

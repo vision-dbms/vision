@@ -1,0 +1,695 @@
+"
+####################
+#  Schema Extensions: Global Changes at Object
+####################
+" print ;
+
+#--------------------
+#  String cluster support 
+#--------------------
+
+Object defineMethod: [ | getClusteredString: input |
+  input isString
+    ifTrue: [ input insertIntoCluster:
+                 ^self classDescriptor primaryStringCluster
+            ]
+] ;
+
+Object defineMethod: [ | newAs: string | 
+  !id <- string isString
+     ifTrue: [ ^self getClusteredString: string ] 
+    ifFalse: [ string ] ;
+  ^self new do: [ ^self :code <- ^my id ] 
+] ;
+
+#--------------------
+
+Object
+
+#----------
+#  basic queries
+#----------
+defineMethod:
+[ | hasSchema |
+     ('classDescriptor' locateInDictionaryOf: ^self . isntNA)
+] .
+
+defineMethod: [ | asClassDescriptor | ^self classDescriptor ] .
+
+#----------
+#  subclass creation
+#----------
+
+defineMethod:
+[ | createSubclass |
+  ^self createSubclass: NA at: ^global
+] .
+
+defineMethod:
+[ | createSubclass: name |
+  ^self createSubclass: name at: ^global 
+] .
+
+defineMethod:
+[ | createSubclass: name at: object |
+  !newClass <- ^self specializeAs: name at: object ;
+  ^self hasSchema
+  ifTrue: [ ^self classDescriptor createInstance: newClass, name, object ]  
+  ifFalse: 
+    [ "===> " print ; ^self whatAmI print ;
+      ": Schema Not Defined. New Class Will Not Have ClassDescriptor" printNL ;
+    ] ;
+  newClass
+] .
+
+defineMethod:
+[ | createIncorporatorClass: name |
+  !newClass <- NA asPointerTo: ^self . specializeAs: name at: ^global ;
+
+  newClass define: 'currentStore' toBe: newClass;  
+
+  !properties <- ^self getMessagesX    
+     select: [ type isFixedProperty ] .      #-- copy fixed properties
+  do: [ ^my newClass 
+            defineFixedProperty: getInternalSelector ;
+      ] ;
+  !properties <- ^self getMessagesX
+     select: [ type isTimeSeriesProperty ] . #-- copy ts properties
+  do: [ ^my newClass 
+            define: getInternalSelector ;
+      ] ;
+  newClass                   #--- run these again for "real" properties
+     initializeGlobalSubclassProperties
+     initializeGlobalInstanceProperties ;
+
+#--  create schema entry if parent has schema and no global flag set
+  ^self hasSchema && 
+    ('doNotUpdateSchema' locateInDictionaryOf: ^global . value != TRUE )
+  ifTrue:
+     [
+     !newDescriptor <-  ^self classDescriptor 
+         createInstance: newClass, name, ^global ;   #<- no class type needed
+
+      newClass initializeDefaults ;
+      newClass
+      defineMethod:
+      [ | initializeStoreItems |
+        !object <- ^self ;
+        ^self classDescriptor defaultPropertyList
+        do: [ !item <- ^my object send: updateBlock ;
+              item <- NA ;
+              defaultValue isString
+                ifTrue: [ item <- ^global stringStore ] 
+               ifFalse: [ item <- defaultValue  ] ;
+            ] ;
+        ^self
+       ] ;
+    ] ;
+  newClass  
+] .
+
+#----------
+#  instance creation
+#----------
+
+defineMethod:
+[ | createInstance |
+  ^self createInstance: NA 
+] .
+
+defineMethod:
+[ | createInstance: keys |
+  ^self new 
+  do: [ 
+      ^self initializeKeys: ^my keys ;
+      ^self initializeDefaults ;
+      ^self initializeLocalAttributes ;
+      ^self initializeNames ;
+     ] 
+] .
+
+defineMethod: [ | initializeKeys: keys | 
+   ^self :code <- ^self getClusteredString: keys ; 
+   ^self
+] .
+
+defineMethod:
+[ | initializeDefaults |
+  ^self hasSchema
+  ifTrue:
+     [
+     !object <- ^self ;
+     ^self classDescriptor defaultPropertyList
+     do: [ !currentSlot <- ^my object send: messageDescriptor updateBlock ;
+           currentSlot value isNA    #<-- don't override if set by initKeys:
+              ifTrue: [ currentSlot <- defaultValue ] ;
+         ] ;
+     ] ;
+  ^self
+] .
+
+defineMethod:
+[ | initializeLocalAttributes |
+  ^self
+] .
+
+defineMethod:
+[ | initializeNames |
+  ^self hasSchema
+    ifTrue: [ ^self initializeNamesFor: ^self code ] ;
+  ^self
+] .
+
+defineMethod:
+[ | initializeNamesFor: list |
+  !instance <- ^self ; 
+  !dictionary <- ^self classDescriptor namingDictionary ;
+  dictionary isntNA
+  ifTrue: [ list do: [ ^my dictionary at: ^self put: ^my instance ] ] ;
+  ^self
+] .
+
+defineMethod:
+[ | cleanupDeletedObject |
+  ^self cleanupLocalAttributes ;
+  ^self cleanupLocalNames ;
+  ^self
+] .
+
+defineMethod:
+[ | cleanupLocalAttributes |
+  ^self
+] .
+
+defineMethod:
+[ | cleanupLocalNames |
+  !dictionary <- ^self classDescriptor namingDictionary ;
+  dictionary isntNA
+    ifTrue: [ dictionary delete: code ]  ;
+  ^self
+] .
+
+#--------------------
+#  messages
+#--------------------
+
+defineMethod:
+[ | define: name toBe: constant | 
+  !selector <- name asSelf asSelector ;
+  selector deleteFromDictionaryOf: ^self; 
+  ^self __define: selector toBe: constant; 
+  ^self hasSchema ifTrue: [^self classDescriptor flagForMessageUpdate]; 
+  ^self
+] .
+
+defineMethod:
+[ | defineFixedProperty: name | 
+  !selector <- name asSelf asSelector ;
+  selector deleteFromDictionaryOf: ^self; 
+  ^self __defineFixedProperty: selector ; 
+  ^self hasSchema ifTrue: [^self classDescriptor flagForMessageUpdate]; 
+  ^self
+] .
+
+defineMethod:
+[ | define: name |
+  !selector <- name asSelf asSelector ;
+  selector deleteFromDictionaryOf: ^self; 
+  ^self __define: selector ;
+  ^self hasSchema ifTrue: [^self classDescriptor flagForMessageUpdate]; 
+  ^self
+] .
+
+defineMethod:
+[ | defineMethod: methodSource |
+  !method <- methodSource ;
+  methodSource isString ifTrue: [ :method <- methodSource evaluate ] ;
+  method selector deleteFromDictionaryOf: ^self ;
+  ^self __defineMethod: method ;
+  ^self hasSchema 
+  ifTrue:
+    [
+    methodSource isString 
+    ifTrue:
+       [ !name <-  method selector asString ;
+         ^global Schema
+            updateMethod: name at: ^self classDescriptor with: methodSource ;
+       ]
+    ifFalse: [ ^self classDescriptor flagForMessageUpdate ] ;
+    ] ;
+  ^self
+]  .
+
+defineMethod:
+[ | defineFixedProperty: name withDefault: default |
+  ^self defineFixedProperty: name ;
+  ^self hasSchema 
+  ifTrue:
+    [ ^global Schema 
+        setDefaultValueOf: name at: ^self classDescriptor to: default ;
+    ] 
+  ifFalse:     #-- explicit initialize if no place to store default
+    [ !updateBlock <- ":" concat: name . asBlock ;
+      ^self instanceList 
+         do: [ ^self send: ^my updateBlock . <- ^my default ] ;
+    ] ;
+  ^self
+] .
+
+ defineMethod: [ | define: name withDefault: default | 
+  ^self define: name ;
+  ^self hasSchema 
+  ifTrue:
+     [	^global Schema setDefaultValueOf: name 
+                       at: ^self classDescriptor 
+                       to: default ; 
+     ]
+  ifFalse: 
+     [ !updateBlock <- ":" concat: name .asBlock; 
+       ^self instanceList 
+       do: [ ^self send: ^my updateBlock .<- ^my default ]; 
+     ] ;
+^self
+] .
+
+defineMethod:  [ | redefineAsFixedProperty: selector withDefault: default |
+  !cd <- ^self classDescriptor ;
+  !mid <- ^self getMessage: selector ;
+  !todo ;
+  mid isntNA && [ mid messageClassDescriptor = cd ]  
+     ifTrue:
+       [ !block <- selector asString asBlock ;
+         :todo <- ^self subclassList append: ^self .
+             collectListElementsFrom: [ ^self instanceList ] .
+             extendBy: [ !oldValue <- ^self send: ^my block ] ;
+       ] ;
+   ^self defineFixedProperty: selector withDefault: default ;
+  todo isntNA
+     ifTrue:
+       [ !block <- selector asString asUpdateBlock ;
+         todo do: [ ^self send: ^my block . <- oldValue ] ;
+       ] ;
+  ^self
+] .
+
+defineMethod:  [ | redefineAsTSProperty: selector withDefault: default |
+  !cd <- ^self classDescriptor ;
+  !mid <- ^self getMessage: selector ;
+  !todo ;
+  mid isntNA && [ mid messageClassDescriptor = cd ]  
+     ifTrue:
+       [ !block <- selector asString asBlock ;
+         :todo <- ^self subclassList append: ^self .
+             collectListElementsFrom: [ ^self instanceList ] .
+             extendBy: [ !oldValue <- ^self send: ^my block ] ;
+       ] ;
+   ^self define: selector withDefault: default ;
+  todo isntNA
+     ifTrue:
+       [ !block <- selector asString asUpdateBlock ;
+         todo 
+         do: [ !ts <- ^self send: ^my block ;
+               ts asOf: 10101 put: ^my default ;
+               oldValue isntDefault ifTrue: [ ts put: oldValue ] ;
+             ] ;
+       ] ;
+  ^self
+] .
+
+defineMethod:
+[ | getMessage: message | 
+  ^self classDescriptor getMessageImplementationFor: message
+] .
+
+defineMethod:
+[ | deleteMessage: name |
+  name deleteFromDictionaryOf: ^self ;
+  ^self hasSchema
+  ifTrue:
+     [
+     ^global Schema deleteMessage: name in: ^self classDescriptor ;
+     ] ;
+  ^self 
+] .
+;
+
+IncorporatorPrototype
+defineMethod: 
+[ | defineFixedProperty: name withDefault: default |
+  ^super defineFixedProperty: name withDefault: default ;
+  !updateBlock <- ":" concat: name . asBlock ;
+  ^self classDescriptor asList append: ^self classDescriptor getAllChildren .
+     select: [ isIncorporatorClass ] .
+  do: [ class defineFixedProperty: ^my name ;
+        !default <- ^my default ;
+        !updateBlock <- ^my updateBlock ;
+        class storeXRef
+        do: [ !item <- ^self send: ^my updateBlock ;
+              !stringStore <- 
+                 ^global Environment DB at: ^self objectSpace asString .
+                    else: ^global . stringStore ;
+              item <- NA ; 
+              ^my default isString
+                  ifTrue: [ item <- stringStore ] 
+                 ifFalse: [ item <- ^my default ] ;
+            ] ;
+      ] ;
+  ^self
+] ;
+
+
+#--------------------
+#  Reports: Inheritance
+#--------------------
+
+Object
+
+defineMethod:
+[ | showInheritance |
+  ^self hasSchema
+    ifTrue: [ ^self classDescriptor showInheritance ]
+   ifFalse: [ "***  Class Does Not Have Schema Data ***" printNL ;
+              ^self displayInheritance
+            ] ;
+] .
+
+defineMethod:
+[ | inheritsFrom: class |
+  ^self classDescriptor inheritsFrom: class classDescriptor
+] .
+
+defineMethod:
+[ | isSuperClassOf: class |
+  class classDescriptor inheritsFrom: ^self classDescriptor
+] .
+;
+
+
+#--------------------
+#  Messages
+#--------------------
+
+Object
+
+#----------
+# query: list
+#----------
+
+defineMethod: [ | subclassList | 
+  ^self classDescriptor getAllChildren send: [ class defaultInstance ] 
+] .
+
+defineMethod:
+[ | getMessages |  
+  !cd <- ^self classDescriptor ;
+  ^self selectorList
+  send: [ !mid <- ^global Schema MessageDescriptor 
+            getMessage: ^self in: ^my cd ;
+          mid isntNA ifTrue: [ mid ] ifFalse: [ ^self asString ] 
+        ] .
+     sortUp: [ code isntNA ifTrue: [ code ] ifFalse: [ "" ] ]
+] .
+
+defineMethod:
+[ | getMessagesX |
+  ^self classDescriptor inheritancePath toList
+     collectListElementsFrom:
+         [ !slist <- ^global List new ;
+           !cd <- ^self asSelf ; 
+           class selectorList do: [ ^my slist, ^self ] ;
+           slist send: [ ^global Schema MessageDescriptor 
+                             getMessage: ^self in: ^my cd
+                       ]
+         ] .
+    select: [ isntNA ] .
+    sortUp: [ messageClassDescriptor ] .
+    sortUp: [ code ]
+] .
+
+defineMethod:
+[ | getMessagesInInheritancePath |
+  !cd <- ^self classDescriptor ;
+  ^global Schema MessageImplementationDescriptor activeList
+     select: [ messageClassDescriptor isInInheritancePathOf: ^my cd ] 
+] .
+  
+defineMethod:
+[ | getMessagesDefining: string |
+  !md <- ^global Schema MessageDescriptor getMessageFor: string ;
+  !cd <- ^self classDescriptor ;
+  md isntNA
+  ifTrue: 
+    [ md implementationList 
+         select: [ messageClassDescriptor isInInheritancePathOf: ^my cd ] .
+           sortUp: [ messageClassDescriptor name ] 
+    ] 
+  ifFalse: [ ^global List new ] 
+] .
+
+defineMethod:
+[ | getMessageNamesContaining: string |
+  ^self getMessagesInInheritancePath
+      select: [ code contains: ^my string ] .
+      sortUp: [ messageClassDescriptor ] .
+      sortUp: [ code ] 
+] .
+
+defineMethod:
+[ | getMessagesUsing: string |
+  ^self getMessagesInInheritancePath
+      select: [ type isMethod ] .
+      select: [ implementationSource contains: ^my string ] .
+      sortUp: [ messageClassDescriptor ] .
+      sortUp: [ code ] .
+] .
+
+#--------------------
+#  display:
+#--------------------
+
+defineMethod:
+[ | showMessageSummaryFor: list |
+  list count > 0
+  ifTrue: 
+    [
+    !max <- (list max: [ code count ] . + 1 ) asInteger ;    # <---
+    "Message" print: max ;
+    "Type" print: 13 ; 
+    "Defined At" printNL ; 
+    "-" fill: 79 . printNL ; 
+    list
+    do: [ code print: ^my max ;      # <--
+          type shortName print: 12 ; " " print ; 
+          messageClassDescriptor name printNL ;
+        ] . 
+    ]
+  ifFalse: [ "...  No Messages Defined" printNL ] ;
+] .
+
+defineMethod:
+[ | showMessages |
+  "Messages Defined At Class: " print ; ^self whatAmI printNL ; 
+  ^self showVariables ;
+  ^self asSelf getMessages 
+  do: [ ^self isMessageImplementationDescriptor
+        ifTrue: 
+          [
+          code print: 30 ; 
+          type code printNL ;
+          ]
+        ifFalse:
+          [
+          ^self print: 30 ; "  * New Message" printNL ;
+          ] ;
+       ] ;    
+] .
+
+defineMethod:
+[ | showMessagesX |
+  "Messages Defined In Class Hierarchy Of: " print ; ^self whatAmI printNL ; 
+  "  --> Excludes Messages Defined At Object " printNL ; 
+  ^self asSelf hasSchema 
+    ifTrue:
+      [ ^self classDescriptor messagesHaveBeenUpdated
+        ifTrue: [ "  --> Excludes New Messages Not In Schema" printNL ] ;
+      ] 
+    ifFalse: [ "  *** Class Does Not Have Schema Record ***" print ] ;
+  newLine print ;   
+  ^self showVariables ; 
+  ^self showMessageSummaryFor: 
+     (^self asSelf getMessagesX
+          select: [ messageClassDescriptor isObjectDescriptor not ] 
+     )
+] .
+
+defineMethod:
+[ | showProperties |
+  "Properties Defined In Class Hierarchy Of: " print ; ^self whatAmI printNL ; 
+  ^self asSelf hasSchema 
+    ifTrue:
+      [ ^self classDescriptor messagesHaveBeenUpdated
+        ifTrue: [ "  --> Excludes New Messages Not In Schema" printNL ] ;
+      ] 
+    ifFalse: [ "  *** Class Does Not Have Schema Record ***" print ] ;
+  newLine print ;   
+  ^self showMessageSummaryFor: 
+     (^self asSelf getMessagesX select: [ type isProperty ] 
+     )
+] .
+
+defineMethod:
+[ | showVariables |
+  !ilist <- ^global IndexedList new ; 
+  !object <- ^self ;
+  !extension <- 1 ;
+  [ object hasExtensions ] 
+    whileTrue: [ ilist at: extension put: object selectorList ;
+                 :object <- object super ;
+                 :extension <- (extension + 1 ) asInteger ;
+               ] ;
+  (ilist count > 0) && (ilist total: [ ^self count ] . > 0 )
+  ifTrue: 
+    [
+    "Variable" print: 50 ; 
+    "Defined At" printNL ; 
+    "-" fill: 79 . printNL ;
+    ilist count sequence
+    do: [ !extension <- ^my ilist count - ^self + 1 ;
+          ^my ilist at: ^self .
+          do: [ ^self print: 50 ;  
+                "Extension " print; ^my extension printNL: -2.0 ;
+              ] ;
+        ] ;
+    newLine print ;
+    ] ;
+] .
+
+defineMethod:
+[ | showMessagesDefining: string |
+  ^self showMessageSummaryFor: (^self getMessagesDefining: string) ;
+] .
+
+defineMethod:
+[ | showMessageNamesContaining: string |
+  ^self showMessageSummaryFor: (^self getMessageNamesContaining: string ) ;
+] .
+
+defineMethod:
+[ | showMessagesUsing: string |
+  ^self showMessageSummaryFor: (^self getMessagesUsing: string) ;
+] .
+
+defineMethod:
+[ | showMethodsUsing: string |
+  ^self getMessagesUsing: string . 
+   do: [ "---> " print ;
+         code print ; "   " print ; messageClassDescriptor name printNL ;
+         implementationSource printNL; 
+         "-" fill: 70 . printNL ;
+       ] .
+   count = 0 
+   ifTrue: [ "...  No Method Implementations Found." printNL ] ;
+] .
+
+;
+
+
+#--------------------
+
+"
+####################
+#  Schema Extensions: Global Changes at Dictionary
+####################
+" print ;
+
+Dictionary
+defineMethod:
+[ | initializeLocalAttributes |
+  ^super initializeLocalAttributes ; 
+  ^self initialize ;
+  ^self
+] .
+
+;
+
+#--------------------
+
+"
+####################
+#  Schema Extensions: Global Changes at Entity
+####################
+" print ;
+
+Entity
+defineMethod:
+[ | initializeLocalAttributes |
+  ^super initializeLocalAttributes ; 
+  ^self initialize ;
+  ^self
+] .
+
+defineMethod:
+[ | getOrCreate: key | 
+  !id <- key ;
+  key isList ifTrue: [ :id <- (key at: 1 ) asString ] ;
+  !entity <- ^self classDescriptor namingDictionary at: id ;
+  entity isNA
+     ifTrue: [ :entity <- ^self createInstance: key ] ;
+  entity
+] .
+
+;
+
+#--------------------
+
+"
+####################
+#  Schema Extensions: Global Changes at Environment MaintenanceTools
+####################
+" print ;
+
+Environment MaintenanceTools
+defineMethod: 
+[ | setupSpaceFor: aCode as: aType description: aString |
+  !maintenance <- ^self ;
+  !environment <- ^global Environment ;
+  okayToCreateNewSpace
+  ifTrue: 
+    [ !type <- environment at: aType ;
+      type isNA
+        ifTrue: [ :type <- environment User ] ;
+      type at: aCode put: ^global ; 
+
+      ^global
+          define: 'number' toBe: (maintenance spaceCount + 1 ) asInteger .
+          define: 'code' toBe: aCode .
+          define: 'name' toBe: aString .
+          define: 'whatAmI' toBe: (type whatAmI concat: " " . concat: aCode) .
+          define: 'type' toBe: type ;
+      type at: ^global number asString put: ^global ; 
+      maintenance :spaceCount <- ^global number ;
+      maintenance spaceList, ^global ;
+
+      ^global defineMethod:
+      [ | displayInfo |
+        "Object Space Number: " print; number printNL ;
+       "This Space Contains: " print;  name printNL ;
+       "Shared Access Via: " print; type print; " " print ;
+       code printNL ;
+      ] ;
+
+      "...  Creating Space #" print ;
+      ^global number printNL: -3 ;
+      " For: " print ;
+      ^global name printNL ;
+      aType = "DB" 
+          ifTrue: [ "OS" substituteOutputOf: [ ^global number printNL: -3 ] ] ;
+      ^global Schema addClass: ^global at: type .
+          setClassTypeTo: "ObjectSpace" ;
+    ]
+  ifFalse:
+    [ "...  Cannot Create New Object Space" printNL ] ; 
+] .
+
+;
+

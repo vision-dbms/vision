@@ -1,0 +1,49 @@
+##################################################
+#   INIcore.iface -  Interface Class Creation
+##################################################
+
+ToolKit createSubclass: "Interface" ;
+Interface classDescriptor setClassTypeTo: "Core" ;
+
+#--------------------
+#  Support Classes
+#--------------------
+Dictionary createSubclass: "Named" at: Interface ;
+Interface Named classDescriptor setClassTypeTo: "Core" ;
+Interface createSubclass: "Constant" at: Interface ;
+Interface Constant classDescriptor setClassTypeTo: "Core" ;
+Interface createSubclass: "Global" at: Interface ;
+Interface Global classDescriptor setClassTypeTo: "Core" ;
+Interface createSubclass: "ErrorLog" at: Interface ;
+Interface ErrorLog classDescriptor setClassTypeTo: "Core" ; 
+
+#--------------------
+#  External Interface for i/o management
+#--------------------
+Interface createSubclass: "External" at: Interface ;
+Interface External classDescriptor setClassTypeTo: "Core" ; 
+
+#--------------------
+#  Workspaces : 
+#     correspond to different styles of structured query; multiple
+#     work areas can be setup and named store cache different parameters
+#--------------------
+
+Interface createSubclass: "Workspace" at: Interface ;
+Interface Workspace classDescriptor setClassTypeTo: "Core" ; 
+
+Interface Workspace createSubclass: "ExtractWS" at: Interface ;
+Interface ExtractWS classDescriptor setClassTypeTo: "Core" ;
+Interface Named createInstance: "ExtractWS" ;
+Interface ExtractWS classDescriptor
+     setNamingDictionaryTo: Interface Named ExtractWS ;
+
+Interface Workspace createSubclass: "ApplicationWS" at: Interface ;
+Interface ApplicationWS classDescriptor setClassTypeTo: "Core" ;
+Interface Named createInstance: "ApplicationWS" ;
+Interface ApplicationWS classDescriptor
+     setNamingDictionaryTo: Interface Named ApplicationWS ;
+
+##################################################
+
+

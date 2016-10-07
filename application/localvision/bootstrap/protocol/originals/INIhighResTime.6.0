@@ -1,0 +1,24 @@
+
+######################
+######################
+####  HighResolutionTime Class
+######################
+######################
+#
+# This file declares the high (femtosecond) resolution time class.
+#
+######################
+
+^global define: 'HighResolutionTime' toBe: Time basicSpecialized newPrototype __zeroU96;
+
+HighResolutionTime
+define: 'whatAmI'		toBe: "HighResolutionTime".
+define: 'isHighResolutionTime'	toBe: TRUE.
+;
+
+Object
+define: 'isHighResolutionTime'	toBe: FALSE.
+;
+
+Schema addClass: HighResolutionTime at: ^global.
+  setClassTypeTo: "BuiltIn";

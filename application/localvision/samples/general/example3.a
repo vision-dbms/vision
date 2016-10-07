@@ -1,0 +1,21 @@
+
+
+     #---  Build a List that is extended by 2 quintile values
+     !quintileList <- testList 
+        quintileUp: [ netIncome ] .
+        extendBy: [ !quintile1 <- quintile ] .
+        quintileUp: [ earningsPerShare ] .
+        extendBy: [ !quintile2 <- quintile ] ;
+     
+     #---  Display Basic Report for this List
+     quintileList
+     do: [ ticker print: 10 ; 
+           netIncome print: 10 ; 
+           quintile1 print: 3 ;
+           earningsPerShare print: 10 ; 
+           quintile2 print: 3 ;
+           sales print: 10 ;
+           newLine print ; 
+         ] ;
+
+

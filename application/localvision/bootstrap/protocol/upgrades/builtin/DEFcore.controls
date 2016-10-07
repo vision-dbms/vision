@@ -1,0 +1,227 @@
+####################
+#  DEFcore.controls
+####################
+
+#--------------------
+#  Initialize
+#--------------------
+
+ProcessControlTools defineMethod: [ | getEnvFor: text |
+  !OS <- GlobalWorkspace ProcessControlTools 
+             Environment at: "visionServerType" .
+             else: [ "WINNT" ] ;
+  !env <- OS = "UNIX"
+    ifTrue: [ "/bin/csh -f" asProgramWith: [ "echo $" print; text printNL ; ] ] .  else: [ "cmd /C echo %" concat: text . concat: "%" . 
+                    asProgramWith: [ " " ] 
+          ] . stripChar: newLine ;
+  (env contains: "%") || [ env contains: ">>> Error" ]
+  ifTrue: [ ">>> Error" printNL; NA ]
+  ifFalse: [ env ]
+] ;
+
+#--------------------
+# ProcessControlTools State -  Controls for displaying status
+# patch_125.vis
+#--------------------
+
+ProcessControlTools State defineMethod: [ | enable | 
+  ^self asSelf define: 'enableFlag' toBe: TRUE ;
+  ^self
+] ;
+
+ProcessControlTools State defineMethod: [ | disable | 
+  ^self asSelf define: 'enableFlag' toBe: FALSE ;
+  ^self
+] ;
+
+ProcessControlTools State defineMethod: [ | isEnabled | 
+  ^self enableFlag isTrue
+] ;
+
+ProcessControlTools State defineMethod: [ | messagePrefix |
+  ">>>" concat: (^self whatAmI from: " ") . concat: ": "
+] ;
+
+ProcessControlTools State defineMethod: [ | display: message |
+  !state <- ^self ;
+  state isEnabled 
+  ifTrue:
+    [ 0 asReferenceTo: ^current . doOnceNoContext: 
+         [ state messagePrefix concat: message . printNL ; ] ;
+    ] ;
+  ^self
+] ;
+
+ProcessControlTools State defineMethod: [ | display: comment withLabel: label |
+  !state <- ^self ;
+  state isEnabled
+  ifTrue:
+    [ 0 asReferenceTo: ^current . doOnceNoContext:
+        [ state messagePrefix concat: label . concat: " --> " . 
+                  concat: comment . printNL ;
+        ] ;
+    ] ;
+  ^self
+] ;
+
+ProcessControlTools State defineMethod: [ | displayTimeWithLabel: label |
+ !state <- ^self ;
+ !time <- CoreWorkspace Utility UnixSeconds currentTime;
+ state display: time asString withLabel: label ;
+ state isEnabled
+ ifTrue:
+   [  0 asReferenceTo: ^current . doOnceNoContext:
+       [ "   ---> Total Network Allocation: " print; 
+        CoreWorkspace AdminTools 
+          totalNetworkAllocation printWithCommasNL: 15.0 ;
+       ] ;
+   ] ;
+  ^self
+] ;
+
+
+#--------------------
+# ProcessControlTools
+# From core/builtin/patch_124.vis 12/15/2008
+#--------------------
+
+#-- Update script called to 'PoolManager.csh' with 'allHosts' flag
+ProcessControlTools defineMethod: [| commitToDatabaseAndRestartQueryPool: text|
+!commitVal <- CoreWorkspace Utility updateNetworkWithAnnotation: text;
+commitVal = 0
+ifTrue: [
+    #-- Initiate immedidate restart of same host querypool and set allHosts option during call.
+    !path <- ^self getEnvFor: "osvAdmin" . 
+            concat: "/localvision/production/scripts/";
+    !prog <- path concat: "PoolManager.csh -a restart -p querypool -allHosts";
+    ExternalProgram reset
+    setProgramTo: prog .
+    setOutputBlockTo: [| :out| printSuccess; out printNL;].
+    setErrorBlockTo: [| :out| printError; out printNL;].
+    run;
+   ];
+commitVal
+];
+
+#####-----
+# patch_128.vis
+#####-----
+
+#####################
+#  Description:
+#    - Low: Changed to read the NDF.OSDPATH file to get a fixed path to the OSD.
+#           The NDF is re-read for untouched object spaces so we need a fixed path.
+#           Fixes a bug with moving symbolic links in the sites directory around.
+#
+####################
+
+#- patch.pre7.fed - dated 3/19/2004 - released in the 3/21/2005 bootstrap
+
+
+
+#####-----
+# patch_129.vis
+#####-----
+
+#----------------------
+#- FedWorkspace Access
+#----------------------
+
+#- Only set this in the Federator database itself.
+#- The object is to purposely generate selector errors for _FedWorkspace.
+#CoreWorkspace define: "_FedWorkspace" toBe: CoreWorkspace ;
+
+ProcessControlTools Environment define: 'federatorNetwork' toBe: NA ;
+
+#- Make a method that will work off central setting of visionServerType.
+ProcessControlTools defineMethod: [ | getVisionServerType |
+  GlobalWorkspace ProcessControlTools Environment at: "visionServerType" .
+    else: [ GlobalWorkspace ProcessControlTools Environment at: "VisionServerType" ]
+] ;
+
+#--------------
+#- Re-Bindings
+#--------------
+
+#- MapLibrary
+
+CoreWorkspace define: '_MapWorkspace' toBe: NA ;
+
+CoreWorkspace defineMethod: [ | MapWorkspace |
+  ^tmp _MapWorkspace
+  else: [ DBMapTools home isntNA
+          ifTrue: [ 
+                  ^tmp define: '_MapWorkspace' toBe: DBMapTools home 
+                  ] 
+         ]
+] ;
+
+#- CalcLibrary
+CoreWorkspace respondsTo: "SecurityFormulaLibrary" .                    ## <- Added 8/2009
+ifTrue: [
+        CoreWorkspace SecurityFormulaLibrary defaultInstance homeLocation isDefault
+        ifTrue: [
+                CoreWorkspace SecurityFormulaLibrary defaultInstance
+                do: [
+                    :homeLocation <- ^self getClusteredString: "CalcLibrary";
+                    :root <- ^self getClusteredString: "SecurityCalcs"
+                    ];
+  ];
+];
+
+CoreWorkspace defineMethod: [ | CalcWorkspace |                         ## <- Revised 8/2009
+  GlobalWorkspace SecurityFormulaLibrary home CoreWorkspace
+] ;
+
+
+
+#--------------
+#- Re-Bindings
+#--------------
+
+(CoreWorkspace respondsTo: "VisionDB") &&                               ## <-- Revised 7/2009
+   [ CoreWorkspace :VisionDB isBlock  ]
+ifTrue: [
+         CoreWorkspace defineMethod: [ | VisionDB |
+         MapWorkspace isntNA
+         ifTrue: [ MapWorkspace VisionDB ]
+         ];
+] ;
+
+(CoreWorkspace respondsTo: "SecurityMap") &&                            ## <-- Revised 7/2009
+   [ CoreWorkspace :SecurityMap isBlock  ]
+ifTrue: [
+        CoreWorkspace defineMethod: [ | SecurityMap |
+        MapWorkspace isntNA
+        ifTrue: [ MapWorkspace SecurityMap ]
+        ];
+] ;
+
+(CoreWorkspace respondsTo: "CurrencyMap") &&                            ## <-- Revised 7/2009
+   [ CoreWorkspace :CurrencyMap isBlock  ]
+ifTrue: [
+        CoreWorkspace defineMethod: [ | CurrencyMap |
+        MapWorkspace isntNA
+        ifTrue: [ MapWorkspace CurrencyMap ]
+        ];
+] ;
+
+(CoreWorkspace respondsTo: "VisionDBMaster") &&                         ## <-- Revised 7/2009
+   [ CoreWorkspace :VisionDBMaster isBlock  ]
+ifTrue: [
+        CoreWorkspace defineMethod: [ | VisionDBMaster |
+        MapWorkspace isntNA
+        ifTrue: [ MapWorkspace VisionDBMaster ]
+        ];
+] ;
+
+(CoreWorkspace Named respondsTo: "VisionDB") &&                         ## <-- Revised 7/2009
+   [ CoreWorkspace Named :VisionDB isBlock  ]
+ifTrue: [
+        CoreWorkspace Named __defineMethod: [ | VisionDB |
+        CoreWorkspace VisionDB isntNA
+        ifTrue: [ CoreWorkspace VisionDB named ]
+        ];
+] ;
+
+

@@ -1,0 +1,191 @@
+
+#####################
+#####################
+####  Date Extensions
+#####################
+#####################
+#
+#  This file extends the Date class to give minimum protocol it requires to
+#  work in a mixed resolution time-series environment.  The messages defined
+#  in this file are only required for operation in an environment that
+#  supports ^date polymorphism.
+#
+#  Affected Classes:
+#	Date
+#
+#  Notes:
+#	This file contains implementations for the messages required to use a
+#	class as the index of a TimeSeries.
+#
+#	In addition to these messages, for every pair of time series index
+#	classes, 'C' and 'X', two value conversion messages must be defined:
+#
+#		C defineMethod: [ | asX | ... ];
+#
+#	to convert instances of class C into instances of class X, and:
+#
+#		X defineMethod: [ | asC | ... ];
+#
+#	to convert instances of class X into instances of class C.  The
+#	messages needed to convert instances of class Date to instances
+#	of HighResolutionTime and LowResolutionTime are defined below.
+#
+################
+
+Date
+
+################
+####  Required Protocol
+################
+
+#----------
+#  Time Series Instantiation
+#----------
+define: 'newTimeSeries'		toBePrimitive: 145 withControlValue: 1 .
+
+#----------
+#  ^date evaluate:
+#----------
+#
+#  define: 'evaluate:'		toBePrimitive: 44 .
+#
+#----------
+
+#----------
+#  Natural Print Width
+#----------
+define: 'naturalPrintWidth'	toBe: 12 .
+
+#----------
+#  Type Conversion
+#----------
+defineMethod:
+[ | convertToMyKindOfObject: aDate |
+    aDate asDate
+].
+
+#----------
+#  Predecessor and Successor
+#----------
+defineMethod:
+[ | predecessor |
+    !Date <- super;
+    ^self asIDate7 - 1
+        send: [^self > 0 ifTrue: [^self] else: [1]]. 
+        asInteger asPointerTo: Date
+].
+
+defineMethod:
+[ | successor |
+    !Date <- super;
+    ^self asIDate7 + 1
+        send: [^self > 0 ifTrue: [^self] else: [1]].
+	asInteger asPointerTo: Date
+].
+
+#----------
+#  Comparison
+#----------
+
+define: '<'	toBePrimitive: 229 withControlValue: 0 .
+define: '<='	toBePrimitive: 229 withControlValue: 1 .
+define: '='	toBePrimitive: 229 withControlValue: 2 .
+define: '!='	toBePrimitive: 229 withControlValue: 3 .
+define: '>='	toBePrimitive: 229 withControlValue: 4 .
+define: '>'	toBePrimitive: 229 withControlValue: 5 .
+
+#----------
+#  Non-Conformant Comparison
+#----------
+#  These messages should always be written to coerce
+#  to the highest resolution available.
+#----------
+defineMethod:
+[ | lessThanNonConformantValue: aValue |
+    !self <- ^self;
+    aValue isTime
+       ifTrue: [ :self   <- aValue convertToMyKindOfObject: ^self ]
+      ifFalse: [ :aValue <- ^self convertToMyKindOfObject: aValue ];
+    self isntNA && [aValue isntNA] ifTrue: [ self < aValue ]
+].
+
+defineMethod:
+[ | lessThanOrEqualToNonConformantValue: aValue |
+    !self <- ^self;
+    aValue isTime
+       ifTrue: [ :self   <- aValue convertToMyKindOfObject: ^self ]
+      ifFalse: [ :aValue <- ^self convertToMyKindOfObject: aValue ];
+    self isntNA && [aValue isntNA] ifTrue: [ self <= aValue ]
+].
+
+defineMethod:
+[ | equalToNonConformantValue: aValue |
+    !self <- ^self;
+    aValue isTime
+       ifTrue: [ :self   <- aValue convertToMyKindOfObject: ^self ]
+      ifFalse: [ :aValue <- ^self convertToMyKindOfObject: aValue ];
+    self isntNA && [aValue isntNA] && [ self = aValue ]
+].
+
+defineMethod:
+[ | notEqualToNonConformantValue: aValue |
+    ^self equalToNonConformantValue: aValue. not
+].
+
+defineMethod:
+[ | greaterThanOrEqualToNonConformantValue: aValue |
+    !self <- ^self;
+    aValue isTime
+       ifTrue: [ :self   <- aValue convertToMyKindOfObject: ^self ]
+      ifFalse: [ :aValue <- ^self convertToMyKindOfObject: aValue ];
+    self isntNA && [aValue isntNA] ifTrue: [ self >= aValue ]
+].
+
+defineMethod:
+[ | greaterThanNonConformantValue: aValue |
+    !self <- ^self;
+    aValue isTime
+       ifTrue: [ :self   <- aValue convertToMyKindOfObject: ^self ]
+      ifFalse: [ :aValue <- ^self convertToMyKindOfObject: aValue ];
+    self isntNA && [aValue isntNA] ifTrue: [ self > aValue ]
+].
+;
+
+
+######################
+####  Required Conversions
+######################
+
+Date
+#----------
+#
+# defineMethod:
+# [ | asDate |
+#     ^self
+# ].
+#
+#----------
+
+defineMethod:
+[ | asLowResolutionTime |
+    ^global LowResolutionTime __fromIDate7: asIDate7
+].
+
+defineMethod:
+[ | asHighResolutionTime |
+    ^global HighResolutionTime __fromIDate7: asIDate7
+].
+;
+
+
+######################
+####  Additional Protocol
+######################
+
+Date
+defineMethod:
+[ | __fromIDate7: anIDate7 |
+    !Date <- super;
+    anIDate7 asInteger asPointerTo: Date
+].
+;

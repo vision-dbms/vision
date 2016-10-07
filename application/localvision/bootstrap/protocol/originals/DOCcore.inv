@@ -1,0 +1,4370 @@
+Schema setSiteNameTo: "Vision Portfolio Management Application Layer" ;
+Schema setDescriptionTo:
+"The Vision Portfolio Management Application Layer
+provides the Portfolio Manager, Research Analyst, and others
+involved in the investment decision-making process with access to
+key data and applications." ;
+
+####################
+# Account
+####################
+
+Account classDescriptor
+   setBriefDescriptionTo: "This class represents actual and derived investment accounts." .
+   setDescriptionTo: "This class represents actual and derived investment accounts.
+The subclasses of Account are used to define different styles of Account
+holding derivation.  Applications that are independent of the holdings
+creation process are defined at this class so that instances of the
+different subclasses can be used interchangeably." .
+   setSampleUsageTo: "Named Account XXX 
+Named Account at: \"XXX\" .
+" .
+   setHtmlDocNameTo: "clpmaAccount.htm" ;
+
+#--------------------------------------------------
+
+Account getMessage: "_totalCost" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Total cost of holdings in account (in its base currency)." .
+;
+
+Account getMessage: "_totalMarketValue" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Total market value of account (in its base currency)." .
+;
+
+Account getMessage: "_totalMarketValueCash" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Total cash available in account (in its base currency)." .
+;
+
+Account getMessage: "_totalMarketValueEquity" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Total market value of equity portion of account (in its base currency)." .
+;
+
+Account getMessage: "_totalMarketValueFixed" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Total market value of fixed income portion of account (in its base currency)." .
+;
+
+Account getMessage: "asSelf" .
+   setFunctionTypeTo: "Conversion" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Object .
+   setDescriptionTo: "recipient object, stripped of any extensions." .
+;
+
+Account getMessage: "classDescriptor" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Schema CD classDescriptor .
+   setDescriptionTo: "Class descriptor for recipient's class." .
+;
+
+Account getMessage: "computeAccountTotals" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setTypeTo: Named MessageType MethodTV . 
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Computes the total market values by asset category
+for recipient and updates the 'percentOfPort' and 'percentOfEquity'
+values for each of its holdings.  This method is automatically run as
+part of the holdings creation process." .
+;
+
+Account getMessage: "createHoldingsFrom:" .
+   setSelectorTo: "createHoldingsFrom: xsecList" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setTypeTo: Named MessageType MethodTV . 
+   setReturnObjectTypeTo: NoValue .
+   setParameter: 1 typeTo: List .
+   setDescriptionTo: "Creates holdings in the recipient using the supplied 
+list of extended securities.  List elements must be extended by the 
+variables 'security', 'totalMarketValue', 'shares', 'totalCost', and,
+optionally, 'accountingPrice'." .
+;
+
+Account getMessage: "dailyCutoff" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: DateOffset .
+   setDescriptionTo: "Constant used to determine the number of days
+of daily holdings to keep whenever the 'purgeHoldings' message is invoked." .
+;
+
+Account getMessage: "defaultInstance" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Account .
+   setDescriptionTo: "Default Account instance." .
+;
+
+Account getMessage: "deleteCurrentHoldings" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setTypeTo: Named MessageType MethodTV .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Deletes holdings in the recipient as of current ^date." .
+;
+
+Account getMessage: "getHoldingIn:" .
+   setSelectorTo: "getHoldingIn: security" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setTypeTo: Named MessageType MethodTV .
+   setReturnObjectTypeTo: Holding .
+   setParameter: 1 typeTo: Security .
+   setDescriptionTo: "Returns Holding instance for the supplied security
+in the recipient.  If security is not held, the default Holding is returned." ;
+
+Account getMessage: "hasHoldings" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setTypeTo: Named MessageType MethodTV .
+   setReturnObjectTypeTo: Boolean .
+   setDescriptionTo: "Does recipient have holdings as of current ^date?" .
+;
+
+Account getMessage: "holdings" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setTypeTo: Named MessageType MethodTV .
+   setReturnObjectTypeTo: Holding .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "List of Holding objects for this recipient as of
+the current ^date." .
+;
+
+Account getMessage: "holdingsDate" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setTypeTo: Named MessageType MethodTV .
+   setReturnObjectTypeTo: Date .
+   setDescriptionTo: "Actual date of the latest holdings available on
+or before current ^date." .
+;
+
+Account getMessage: "holdingsPrototype" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Holding .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "Used to cluster 'holdingsSeries' list objects." .
+;
+
+Account getMessage: "holdingsSeries" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Holding .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "Time series of lists of holdings in recipient account." .
+;
+
+Account getMessage: "holds:" .
+   setSelectorTo: "holds: security" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setTypeTo: Named MessageType MethodTV .
+   setReturnObjectTypeTo: Boolean .
+   setParameter: 1 typeTo: Security .
+   setDescriptionTo: "Is supplied security held by recipient?" .
+;
+
+Account getMessage: "initializationList" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Block .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "Default values set on instance creation,
+this list includes 'baseCurrency'." .
+;
+
+Account getMessage: "initialize" .
+   setFunctionTypeTo: "Creation" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Account .
+   setDescriptionTo: "Initializes properties in newly created instance." .
+;
+
+Account getMessage: "initializeDailyHoldingsBasedValues" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setTypeTo: Named MessageType MethodTV .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Initializes time series properties prior to holdings 
+creation for recipient.  The 'holdingsSeries' is set to the empty list 
+(holdingsPrototype) and the total market value and cost properties are
+set to NA for the current evaluation date (^date)." .
+;
+
+Account getMessage: "initializeDailySummaryValues" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Initializes properties prior to holdings creation
+for recipient.  This method can be used to initialize other account-related
+properties, not initialized with 'initializeDailyHoldingsBasedValues." .
+;
+
+Account getMessage: "initializeForHoldingsPrecalcs" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setTypeTo: Named MessageType MethodTV .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Initializes properties prior to holdings creation
+for all Accounts and Securities.  This method should be run in environments
+where all portfolios are updated at the same time and any portfolio not
+included in an update needs to have its values reset to NA." .
+;
+
+Account getMessage: "isAccount" .
+   setFunctionTypeTo: "Inquiry" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: TRUE .
+   setDescriptionTo: "Returns the value TRUE." .
+;
+
+Account getMessage: "locateId:" .
+   setSelectorTo: "locateId: id" .
+   setFunctionTypeTo: "Access" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Account .
+   setParameter: 1 typeTo: String .
+   setDescriptionTo: "Returns the Account object associated with the supplied
+id.  If the message is sent directly to 'Account', the naming dictionary
+search order starts with Named Account, followed by Named Portfolio,
+Named AggAccount, Named IndexAccount, and Named CompositeAccount.  If
+the message is set to a subclass of 'Account', just that subclass'
+naming dictionary is used." .
+;
+
+Account getMessage: "named" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Named Account .
+   setDescriptionTo: "Naming dictionary associated with recipient's class." .
+;
+
+Account getMessage: "profile" .
+   setFunctionTypeTo: "Display" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Basic descriptive report about the recipient." .
+;
+
+Account getMessage: "purgeHoldings" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setTypeTo: Named MessageType MethodTV .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Deletes all holdings in recipient as of ^date,
+and removes the empty list from 'holdingsSeries' on that date." .
+;
+
+Account getMessage: "purgeOldHoldingsForAll" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "For any account having holdings, this method purges
+all holdings that are not for the last day (or business day) of the month
+that are older than the 'dailyCutoff'-specified increment.  For each
+date that is purge, the corresponding security holdings structures
+are also cleared." .
+;
+
+Account getMessage: "totalCost" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setTypeTo: Named MessageType MethodTV .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Total cost of holdings (adjusted to current currency)." .
+;
+
+Account getMessage: "totalMarketValue" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setTypeTo: Named MessageType MethodTV .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Total market value of holdings (adjusted to current currency)." .
+;
+
+Account getMessage: "totalMarketValueCash" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setTypeTo: Named MessageType MethodTV .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Total market value of cash holdings (adjusted to current currency)." .
+;
+
+Account getMessage: "totalMarketValueEquity" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setTypeTo: Named MessageType MethodTV .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Total market value of equity holdings (adjusted to current currency)." .
+;
+
+Account getMessage: "totalMarketValueFixed" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setTypeTo: Named MessageType MethodTV .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Total market value of fixed income holdings (adjusted to current currency)." .
+;
+
+Account getMessage: "uniqueId" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Unique identification for the recipient among all account classes." .
+;
+
+Account getMessage: "whatAmI" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Returns the string \"Account\"." .
+;
+
+#==================================================
+
+####################
+# AggAccount
+####################
+
+AggAccount classDescriptor
+   setBriefDescriptionTo: "Instances of this class represent aggregates
+of one or more Portfolios." .
+   setDescriptionTo: "Instances of this class represent aggregates of
+one or more Portfolios.  Portfolio membership is tracked over time.
+AggAccount holdings are created by aggregating the holdings of its
+member portfolios." .
+   setSampleUsageTo: "Named AggAccount XXX 
+Named AggAccount at: \"XXX\
+Named Account XXX
+Named Account at: \"XXX\" .
+Named Account A_XXX .
+" .
+   setHtmlDocNameTo: "clpmaAccount.htm" ;
+
+#--------------------------------------------------
+
+AggAccount getMessage: "asSelf" .
+   setFunctionTypeTo: "Conversion" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: AggAccount .
+   setDescriptionTo: "Recipient stripped of any extensions." .
+;
+
+AggAccount getMessage: "buildHoldings" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setTypeTo: Named MessageType MethodTV .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Creates holdings from the holdings associated with
+the Portfolios in recipient's memberList as of the evalution date." .
+;
+
+AggAccount getMessage: "classDescriptor" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Schema CD classDescriptor .
+   setDescriptionTo: "Class descriptor for recipient's class." .
+;
+
+AggAccount getMessage: "cleanupClassStructures" .
+   setFunctionTypeTo: "DBAdmin" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Aligns complex structures.  This method is invoked as
+part of a production cleanup process." .
+;
+
+AggAccount getMessage: "defaultInstance" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: AggAccount .
+   setDescriptionTo: "Returns the default AggAccount instance." .
+;
+
+AggAccount getMessage: "initializationList" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Block .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "Default values set on instance creation,
+this list includes 'baseCurrency'." .
+;
+
+AggAccount getMessage: "initialize" .
+   setFunctionTypeTo: "Creation" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: AggAccount .
+   setDescriptionTo: "Initializes properties in newly created instance." .
+;
+
+AggAccount getMessage: "isAggAccount" .
+   setFunctionTypeTo: "Inquiry" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: TRUE .
+   setDescriptionTo: "Returns the value TRUE." .
+;
+
+AggAccount getMessage: "memberList" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Portfolio .
+   setReturnObjectContainerTo: IndexedList .
+   setDescriptionTo: "IndexedList of portfolios in recipient as of evaluation 
+date." .
+;
+
+AggAccount getMessage: "memberListPrototype" .
+   setFunctionTypeTo: "Creation" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Portfolio .
+   setReturnObjectContainerTo: IndexedList .
+   setDescriptionTo: "Used to cluster 'memberList' list objects." .
+;
+
+AggAccount getMessage: "membershipRule" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Reserved" .
+   setReturnObjectTypeTo: Block .
+   setDescriptionTo: "Block used to derive <i>memberList</i>.  Not currently
+supported." .
+;
+
+AggAccount getMessage: "named" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Named AggAccount .
+   setDescriptionTo: "Naming dictionary associated with recipient's class." .
+;
+
+AggAccount getMessage: "profile" .
+   setFunctionTypeTo: "Display" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Basic descriptive report about the recipient." .
+;
+
+AggAccount getMessage: "setMembershipRuleTo:" .
+   setSelectorTo: "setMembershipRuleTo: block" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: AggAccount .
+   setParameter: 1 typeTo: Block .
+   setDescriptionTo: "Updates the 'membershipRule' property.  Not 
+currently supported." .
+;
+
+AggAccount getMessage: "whatAmI" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Returns the string \"AggAccount\"." .
+;
+
+
+#==================================================
+
+####################
+# AssetCategory
+####################
+
+AssetCategory classDescriptor
+   setBriefDescriptionTo: "This class represents general security asset categories." .
+   setDescriptionTo: "Instances of this class represents general categories
+for classification securities.  These instances normally include
+Equity, Fixed Income, Cash and Equivalents, and Other" .
+   setSampleUsageTo: "Named AssetCategory XXX 
+Named AssetCategory at: \"XXX\" .
+" .
+   setHtmlDocNameTo: "clpmaCompany.htm" ;
+
+#--------------------------------------------------
+
+AssetCategory getMessage: "asSelf" .
+   setFunctionTypeTo: "Conversion" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: AssetCategory .
+   setDescriptionTo: "Recipient stripped of any extensions." .
+;
+
+AssetCategory getMessage: "classDescriptor" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Schema CD classDescriptor .
+   setDescriptionTo: "Class descriptor for recipient's class." .
+;
+
+AssetCategory getMessage: "defaultInstance" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: AssetCategory .
+   setDescriptionTo: "Returns the default AssetCategory instance." .
+;
+
+AssetCategory getMessage: "isAssetCategory" .
+   setFunctionTypeTo: "Inquiry" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: TRUE .
+   setDescriptionTo: "Returns the value TRUE." .
+;
+
+AssetCategory getMessage: "named" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Named AssetCategory .
+   setDescriptionTo: "Naming dictionary associated with recipient's class." .
+;
+
+AssetCategory getMessage: "whatAmI" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Returns the string \"AssetCategory\"." .
+;
+
+
+#==================================================
+
+####################
+# Classification
+####################
+
+Classification classDescriptor
+   setBriefDescriptionTo: "This abstract class is a subclass of Entity and a superclass of
+classes used primarily for grouping and aggregation purposes." .
+   setDescriptionTo: "This abstract class is a subclass of Entity and a superclass of
+classes used primarily for grouping and aggregation purposes." .
+   setSampleUsageTo: "" .
+   setHtmlDocNameTo: "clClassify.htm" ;
+
+#--------------------------------------------------
+
+Classification getMessage: "asSelf" .
+   setFunctionTypeTo: "Conversion" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Classification .
+   setDescriptionTo: "Recipient stripped of any extensions." .
+;
+
+Classification getMessage: "childList" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Classification .
+   setReturnObjectContainerTo: IndexedList .
+   setDescriptionTo: "List of instances of recipient's class that have
+recipient as a direct parent." .
+;
+
+Classification getMessage: "classDescriptor" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Schema CD classDescriptor .
+   setDescriptionTo: "Class descriptor for recipient's class." .
+;
+
+Classification getMessage: "defaultInstance" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Classification .
+   setDescriptionTo: "Returns the default Classification instance." .
+;
+
+Classification getMessage: "displayHierarchy" .
+   setFunctionTypeTo: "Display" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Displays recipient's parent hierarchy." .
+;
+
+Classification getMessage: "displayMemberHistory" .
+   setFunctionTypeTo: "Display" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Displays history of changes to the 'memberList'
+property." .
+;
+
+Classification getMessage: "getAllChildren" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Classification .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "List of instances of recipient's class that have
+recipient as a direct or indirect parent." .
+;
+
+Classification getMessage: "getAllMembers" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setTypeTo: Named MessageType MethodTV . 
+   setReturnObjectTypeTo: Entity .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "List of members in 'memberList' for recipient and
+all direct and indirect children of recipient." .
+;
+
+Classification getMessage: "includesElement:" .
+   setSelectorTo: "includesElement: entity" .
+   setFunctionTypeTo: "Inquiry" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Boolean .
+   setParameter: 1 typeTo: Entity .
+   setDescriptionTo: "Returns TRUE if recipient's 'memberList' includes
+supplied entity." .
+;
+
+Classification getMessage: "initializeGlobalInstanceProperties" .
+   setFunctionTypeTo: "Creation" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Classification .
+   setDescriptionTo: "This method is run as part of the 'new' method and is used to initialize
+properties in the new instance." .
+;
+
+Classification getMessage: "isClassification" .
+   setFunctionTypeTo: "Inquiry" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: TRUE .
+   setDescriptionTo: "Returns the value TRUE." .
+;
+
+Classification getMessage: "isParent" .
+   setFunctionTypeTo: "Inquiry" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Boolean .
+   setDescriptionTo: "Returns TRUE if recipient is its own parent. 
+(TRUE by default)." .
+;
+
+Classification getMessage: "memberList" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Entity .
+   setReturnObjectContainerTo: IndexedList .
+   setDescriptionTo: "Member entities associated with recipient." .
+;
+
+Classification getMessage: "named" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Named Classification .
+   setDescriptionTo: "Naming dictionary associated with recipient's class." .
+;
+
+Classification getMessage: "parent" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Classification .
+   setDescriptionTo: "Recipient's parent object.  This is an instance of
+the recipient's class and is the recipient by default.  This property is
+used to construct classification hierarchies." .
+;
+
+Classification getMessage: "setParentTo:" .
+   setSelectorTo: "setParentTo: p" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Classification .
+   setParameter: 1 typeTo: Classification .
+   setDescriptionTo: "Reassign the parent object to another instance
+of recipient's class.  By default, the recipient is its own parent." .
+;
+
+Classification getMessage: "whatAmI" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Returns the string \"Classification\"." .
+;
+
+
+#==================================================
+
+####################
+# Company
+####################
+
+Company classDescriptor
+   setBriefDescriptionTo: "This class represents corporate entities." .
+   setDescriptionTo: "This class represents corporate entities.  Information
+maintained for a company typically includes country, industry, sales,
+and earnings.  One or more securities may be issued by a company." .
+   setSampleUsageTo: "Named Company XXX 
+Named Company at: \"XXX\" .
+" .
+   setHtmlDocNameTo: "clpmaCompany.htm" ;
+
+#--------------------------------------------------
+
+Company getMessage: "XRef" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Company XRef .
+   setDescriptionTo: "Provides cross reference for alternative identifiers." .
+;
+
+Company getMessage: "adjustmentRelativeTo:" .
+   setSelectorTo: "adjustmentRelativeTo: aDate" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setParameter: 1 typeTo: Date .
+   setDescriptionTo: "Adjustment value that accounts for any splits in
+the recipient since supplied date.  This value will be 1.0 if no splits
+have occurred.  The value is used to adjust historic per-share and shares
+outstanding data." .
+;
+
+Company getMessage: "asSelf" .
+   setFunctionTypeTo: "Conversion" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Company .
+   setDescriptionTo: "Recipient stripped of any extensions." .
+;
+
+Company getMessage: "classDescriptor" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Schema CD classDescriptor .
+   setDescriptionTo: "Class descriptor for recipient's class." .
+;
+
+Company getMessage: "cleanupClassStructures" .
+   setFunctionTypeTo: "DBAdmin" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Aligns complex structures.  This method is invoked as
+part of a production cleanup process." .
+;
+
+Company getMessage: "country" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Country .
+   setDescriptionTo: "Principal country of business." .
+;
+
+Company getMessage: "cusip" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Cusip associated with primary security." .
+;
+
+Company getMessage: "cusip6" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "6-character issuer id (domestic companies)." .
+;
+
+Company getMessage: "defaultInstance" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Company .
+   setDescriptionTo: "Returns the default Company instance." .
+;
+
+Company getMessage: "displayInfo" .
+   setFunctionTypeTo: "Display" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "One line display of code, ticker, and name." .
+;
+
+Company getMessage: "fiscalYearEnd" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Integer .
+   setDescriptionTo: "Month of fiscal year end (1 - 12)." .
+;
+
+Company getMessage: "getAdjustedDataFor:" .
+   setSelectorTo: "getAdjustedDataFor: aTimeSeries" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Advanced" .
+   setTypeTo: Named MessageType MethodTV . 
+   setReturnObjectTypeTo: Number .
+   setParameter: 1 typeTo: TimeSeries .
+   setDescriptionTo: "Returns the value of the supplied time series as of
+^date, adjusted for any splits that have occurred since the value went into
+effect.  The raw value in the time series is divided by the adjustment
+(i.e., per share)." .
+;
+
+Company getMessage: "getAdjustedSharesDataFor:" .
+   setSelectorTo: "getAdjustedSharesDataFor: aTimeSeries" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Advanced" .
+   setTypeTo: Named MessageType MethodTV . 
+   setReturnObjectTypeTo: Number .
+   setParameter: 1 typeTo: TimeSeries .
+   setDescriptionTo: "Returns the value of the supplied time series as of
+^date, adjusted for any splits that have occurred since the value went into
+effect.  The raw value in the time series is multipled by the adjustment
+(i.e., shares out)." .
+;
+
+Company getMessage: "id" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Returns the ticker if non-NA, the code otherwise." .
+;
+
+Company getMessage: "industry" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Industry .
+   setDescriptionTo: "Primary industry." .
+;
+
+Company getMessage: "initializationList" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Block .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "Default values set on instance creation,
+this list includes 'baseCurrency'." .
+;
+
+Company getMessage: "initialize" .
+   setFunctionTypeTo: "Creation" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Company .
+   setDescriptionTo: "Initializes properties in newly created instance." .
+;
+
+Company getMessage: "isCompany" .
+   setFunctionTypeTo: "Inquiry" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: TRUE .
+   setDescriptionTo: "Returns the value TRUE." .
+;
+
+Company getMessage: "isin" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Isin code associated with primary security." .
+;
+
+Company getMessage: "named" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Named Company .
+   setDescriptionTo: "Naming dictionary associated with recipient's class." .
+;
+
+Company getMessage: "primarySecurity" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Security .
+   setDescriptionTo: "Primary security issued by recipient.  This is usually
+the common stock security." .
+;
+
+Company getMessage: "profile" .
+   setFunctionTypeTo: "Display" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Basic descriptive report about the recipient." .
+;
+
+Company getMessage: "rebuildCusipIssuerXRef" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Rebuilds the CusipIssuer XRef using the 6 character
+issuer id (cusip6) if available.  This message is executed for the entire
+company class and is normally sent to the default instance." .
+;
+
+Company getMessage: "rebuildSecurityList" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Rebuilds the 'securityList' for all companies.  This
+message is executed for the entire company class and is normally sent to the
+default instance." .
+;
+
+Company getMessage: "resetPrimarySecurity" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Object .
+   setDescriptionTo: "Resets the primary security to the default Security 
+for the recipient." .
+;
+
+Company getMessage: "sector" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setTypeTo: Named MessageType MethodTV . 
+   setReturnObjectTypeTo: Sector .
+   setDescriptionTo: "Sector associated with the recipient's industry." .
+;
+
+Company getMessage: "securityList" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Security .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "List of securities issued by recipient.  This list
+is updated as part of a batch process and will not reflect securities that
+have been manually assigned to this company." .
+;
+
+Company getMessage: "sedol" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Sedol associated with primary security." .
+;
+
+Company getMessage: "setFiscalYearEndTo:" .
+   setSelectorTo: "setFiscalYearEndTo: fyr" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Company .
+   setParameter: 1 typeTo: Integer .
+   setDescriptionTo: "Sets the 'fiscalYearEnd' to supplied parameter.
+The parameter should be a number from 1 - 12 indicating the month in which
+the fiscal year ends." .
+;
+
+Company getMessage: "setPrimarySecurityTo:" .
+   setSelectorTo: "setPrimarySecurityTo: sec" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Company .
+   setParameter: 1 typeTo: Security .
+   setDescriptionTo: "Updates the 'primarySecurity' property. " .
+;
+
+Company getMessage: "ticker" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Ticker symbol associated with primary security." .
+;
+
+Company getMessage: "valor" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Valor number associated with primary security." .
+;
+
+Company getMessage: "whatAmI" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Returns the string \"Company\"." .
+;
+
+
+#==================================================
+
+####################
+# CompositeAccount
+####################
+
+CompositeAccount classDescriptor
+   setBriefDescriptionTo: "Instances of this class represent composite
+accounts derived as weighted combinations of one or more accounts." .
+   setDescriptionTo: "Instances of this class represent composite
+accounts derived as weighted combinations of one or more accounts." .
+   setSampleUsageTo: "Named ComositeAccount XXX 
+Named ComositeAccount at: \"XXX\
+Named Account XXX
+Named Account at: \"XXX\" .
+Named Account C_XXX .
+" .
+   setHtmlDocNameTo: "clpmaAccount.htm" ;
+
+#--------------------------------------------------
+
+CompositeAccount getMessage: "Component" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: CompositeAccount Component .
+   setDescriptionTo: "Returns default instance of class used to
+instantiate components for a composite." .
+;
+
+CompositeAccount getMessage: "addComponent:withWeight:" .
+   setSelectorTo: "addComponent: account withWeight: weight" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setTypeTo: Named MessageType MethodTV .
+   setReturnObjectTypeTo: CompositeAccount .
+   setParameter: 1 typeTo: Account .
+   setParameter: 2 typeTo: Number .
+   setDescriptionTo: "Creates a new instance of Component and adds it
+to recipient's 'componentList' as of current evaluation date
+using the supplied account as the index.  The
+properties 'account' and 'weight' in the new component are set to the
+supplied values.  Weights should be supplied as a percent." .
+;
+
+CompositeAccount getMessage: "asSelf" .
+   setFunctionTypeTo: "Conversion" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: CompositeAccount .
+   setDescriptionTo: "Recipient stripped of any extensions." .
+;
+
+CompositeAccount getMessage: "buildHoldings" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setTypeTo: Named MessageType MethodTV .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Creates holdings from the holdings associated with
+the accounts in  recipient's 'componentList' as of the evalution date.
+The shares and market values are computed using the weight stored for
+the component.  For example, if Account XYZ is a component with a
+weight of 50, 50% of each holding in Account XYZ will be included
+in the rcipient.  Note that the weights are used to determine the
+number of shares and market value for each holding and need not
+add up to 100.
+" .
+;
+
+CompositeAccount getMessage: "classDescriptor" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Schema CD classDescriptor .
+   setDescriptionTo: "Class descriptor for recipient's class." .
+;
+
+CompositeAccount getMessage: "componentList" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: CompositeAccount Component .
+   setReturnObjectContainerTo: IndexedList .
+   setDescriptionTo: "IndexedList of components in recipient as of evaluation 
+date." .
+;
+
+CompositeAccount getMessage: "defaultInstance" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: CompositeAccount .
+   setDescriptionTo: "Returns the default CompositeAccount instance." .
+;
+
+CompositeAccount getMessage: "initializationList" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Block .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "Default values set on instance creation,
+this list includes 'baseCurrency'." .
+;
+
+CompositeAccount getMessage: "initialize" .
+   setFunctionTypeTo: "Creation" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: CompositeAccount .
+   setDescriptionTo: "Initializes properties in newly created instance." .
+;
+
+CompositeAccount getMessage: "initializeComponentList" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setTypeTo: Named MessageType MethodTV .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Creates a new IndexedList and stores it in
+'componentList' time series as of current evaluation date (^date)." .
+;
+
+CompositeAccount getMessage: "isCompositeAccount" .
+   setFunctionTypeTo: "Inquiry" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: TRUE .
+   setDescriptionTo: "Returns the value TRUE." .
+;
+
+CompositeAccount getMessage: "named" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Named CompositeAccount .
+   setDescriptionTo: "Naming dictionary associated with recipient's class." .
+;
+
+CompositeAccount getMessage: "profile" .
+   setFunctionTypeTo: "Display" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Basic descriptive report about the recipient." .
+;
+
+CompositeAccount getMessage: "whatAmI" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Returns the string \"CompositeAccount\"." .
+;
+
+
+#==================================================
+
+####################
+# CompositeAccount Component
+####################
+
+CompositeAccount Component classDescriptor
+   setBriefDescriptionTo: "Instances of this class define component accounts
+and weights for a CompositeAccount on a specific date." .
+   setDescriptionTo: "Instances of this class define component accounts
+and weights for a CompositeAccount on a specific date." .
+   setSampleUsageTo: 
+"Named CompositeAccount XXX componentList 
+   do: [ account print ; weight printNL ] ;" .
+   setHtmlDocNameTo: "clpmaAccount.htm" ;
+
+#--------------------------------------------------
+
+CompositeAccount Component getMessage: "account" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Account .
+   setDescriptionTo: "Account object represented by component" .
+;
+
+CompositeAccount Component getMessage: "asSelf" .
+   setFunctionTypeTo: "Conversion" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: CompositeAccount Component.
+   setDescriptionTo: "Recipient stripped of any extensions." .
+;
+
+CompositeAccount Component getMessage: "classDescriptor" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Schema CD classDescriptor .
+   setDescriptionTo: "Class descriptor for recipient's class." .
+;
+
+CompositeAccount Component getMessage: "compositeAccount" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: CompositeAccount .
+   setDescriptionTo: "CompositeAccount object represented by component" .
+;
+
+CompositeAccount Component getMessage: "date" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Date .
+   setDescriptionTo: "Date represented by component.  This date
+corresponds to the date in the underlying CompositeAccount's 
+componentList on which this component is a member." .
+;
+
+CompositeAccount Component getMessage: "defaultInstance" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: CompositeAccount Component .
+   setDescriptionTo: "Returns the default CompositeAccount Component 
+instance." .
+;
+
+CompositeAccount Component getMessage: "isComponent" .
+   setFunctionTypeTo: "Inquiry" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: TRUE .
+   setDescriptionTo: "Returns the value TRUE." .
+;
+
+CompositeAccount Component getMessage: "keyList" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Object .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "Returns the list: CompositeAccount, Account, Date -
+the keys for the recipient's class." .
+;
+
+CompositeAccount Component getMessage: "updateBlocks" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Block .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "List of blocks that can be sent to recipient
+to retrieve value of each key (CompositeAccount, Account and Date)." .
+;
+
+CompositeAccount Component getMessage: "weight" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Weight to use when accessing holdings for account
+object represented by component" .
+;
+
+CompositeAccount Component getMessage: "whatAmI" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Returns the string \"CompositeAccount Component\"." .
+;
+
+
+#==================================================
+
+####################
+# Country
+####################
+
+Country classDescriptor
+   setBriefDescriptionTo: "Instances of this class represent individual
+countries." .
+   setDescriptionTo: "Instances of this class represent individual 
+countries such as the United States, Great Britain, and France." .
+   setSampleUsageTo: "Named Country XXX 
+Named Country at: \"XXX\" .
+" .
+   setHtmlDocNameTo: "clpmaCompany.htm" ;
+
+#--------------------------------------------------
+
+Country getMessage: "asSelf" .
+   setFunctionTypeTo: "Conversion" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Country .
+   setDescriptionTo: "Recipient stripped of any extensions." .
+;
+
+Country getMessage: "classDescriptor" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Schema CD classDescriptor .
+   setDescriptionTo: "Class descriptor for recipient's class." .
+;
+
+Country getMessage: "companyList" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Company .
+   setReturnObjectContainerTo: IndexedList .
+   setDescriptionTo: "List of companies in recpient (same as 'memberList'). " .
+;
+
+Country getMessage: "defaultInstance" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Country .
+   setDescriptionTo: "Returns the default Country instance." .
+;
+
+Country getMessage: "initializationList" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Block .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "Default values set on instance creation,
+this list includes 'baseCurrency'." .
+;
+
+Country getMessage: "isCanada" .
+   setFunctionTypeTo: "Inquiry" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Boolean .
+   setDescriptionTo: "Is recpient the country 'Canada'?" .
+;
+
+Country getMessage: "isCountry" .
+   setFunctionTypeTo: "Inquiry" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: TRUE .
+   setDescriptionTo: "Returns the value TRUE." .
+;
+
+Country getMessage: "isUS" .
+   setFunctionTypeTo: "Inquiry" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Boolean .
+   setDescriptionTo: "Is recpient the country 'United States'?" .
+;
+
+Country getMessage: "isUSA" .
+   setFunctionTypeTo: "Inquiry" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Boolean .
+   setDescriptionTo: "Is recpient the country 'United States'?" .
+;
+
+Country getMessage: "named" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Named Country .
+   setDescriptionTo: "Naming dictionary associated with recipient's class." .
+;
+
+Country getMessage: "whatAmI" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Returns the string \"Country\"." .
+;
+
+
+#==================================================
+
+####################
+# DataRecord
+####################
+
+DataRecord classDescriptor
+   setBriefDescriptionTo: "This abstract class is used to define subclasses that manage
+subsets of data about a specific entity so that data can be
+organized into manageable units." .
+   setDescriptionTo: "This abstract class is used to define subclasses that manage
+subsets of data about a specific entity so that data can be
+organized into manageable units." .
+   setHtmlDocNameTo: "appClasses.htm" ;
+
+#--------------------------------------------------
+
+DataRecord getMessage: "adjustmentDate" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Date .
+   setDescriptionTo: "Date through which data in recipient is adjusted.
+By default, this is the same as the 'recordDate'." .
+;
+
+DataRecord getMessage: "adjustmentFactor" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Factor to adjust data in recipient for splits that
+have occurred since 'adjustmentDate'.  By default, this value is 1.0." .
+;
+
+DataRecord getMessage: "asSelf" .
+   setFunctionTypeTo: "Conversion" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: DataRecord .
+   setDescriptionTo: "Recipient stripped of any extensions." .
+;
+
+DataRecord getMessage: "classDescriptor" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Schema CD classDescriptor .
+   setDescriptionTo: "Class descriptor for recipient's class." .
+;
+
+DataRecord getMessage: "cleanupClassStructures" .
+   setFunctionTypeTo: "DBAdmin" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Runs 'cleanStoreAndDictionary' at Object, this method is redefined as
+needed by subclasses to perform general cleanup functions." .
+;
+
+DataRecord getMessage: "currency" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Currency .
+   setDescriptionTo: "Currency of related entity.  This is 
+the 'baseCurrency' of the entity by default, unless a currency override
+is in effect." .
+;
+
+DataRecord getMessage: "currencyFactor" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Factor to convert monetary values in recpient to
+the current 'currency'" .
+;
+
+DataRecord getMessage: "currentStore" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: DataRecord .
+   setDescriptionTo: "Current physical store used to instatiate new
+instances." .
+;
+
+DataRecord getMessage: "date" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Date .
+   setDescriptionTo: "Date for which data in recipient applies
+(same as 'recordDate')" .
+;
+
+DataRecord getMessage: "defaultInstance" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: DataRecord .
+   setDescriptionTo: "Default DataRecord instance." .
+;
+
+DataRecord getMessage: "displayInfo" .
+   setFunctionTypeTo: "Display" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Displays a single line summary of recipient
+terminated with a new line." .
+;
+
+DataRecord getMessage: "entity" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   flagAsPartialKeyField
+   setReturnObjectTypeTo: Entity .
+   setDescriptionTo: "Entity with which the recpient is associated." .
+;
+
+DataRecord getMessage: "getAllInstances" .
+   setFunctionTypeTo: "Access" .
+   setLevelTo: "Advanced" .
+   setReturnObjectTypeTo: DataRecord .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "List of all instances in all stores of recipient's
+class." .
+;
+
+DataRecord getMessage: "getCurrentInstances" .
+   setFunctionTypeTo: "Access" .
+   setLevelTo: "Advanced" .
+   setReturnObjectTypeTo: DataRecord .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "List of all instances in recipient's 'currentStore'." .
+;
+
+DataRecord getMessage: "getNewPrototype" .
+   setFunctionTypeTo: "DBAdmin" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: DataRecord .
+   setDescriptionTo: "Creates new physical store for recipient's class." .
+;
+
+DataRecord getMessage: "initializeGlobalSubclassProperties" .
+   setFunctionTypeTo: "Creation" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: DataRecord .
+   setDescriptionTo: "This method is run as part of the 'specialized' method and is used to 
+initialize properties in the default row of the new class." .
+;
+
+DataRecord getMessage: "initializeKeys:" .
+   setSelectorTo: "initializeKeys: keys" .
+   setFunctionTypeTo: "Creation" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: DataRecord .
+   setParameter: 1 typeTo: List .
+   setDescriptionTo: "Initializes new instance with supplied key values.
+Up to four values should be supplied as a list: entity, date, value, and
+currency.  These values will be used to update the 'entity', 'recordDate',
+'recordValue', and 'baseCurrency' properties in the recipient." .
+;
+
+DataRecord getMessage: "initializeLocalAttributes" .
+   setFunctionTypeTo: "Creation" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: DataRecord .
+   setDescriptionTo: "Iniitializes new instances.
+This method runs the general initializations defined
+for all objects followed by initializations defined for 
+the recipient's class." .
+;
+
+DataRecord getMessage: "isDataRecord" .
+   setFunctionTypeTo: "Inquiry" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: TRUE .
+   setDescriptionTo: "Returns the value TRUE." .
+;
+
+DataRecord getMessage: "print" .
+   setFunctionTypeTo: "Display" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: DataRecord .
+   setDescriptionTo: "Prints the recipient's 'recordValue' if non-NA;
+otherwise, the recipient's class name is printed." .
+;
+
+DataRecord getMessage: "print:" .
+   setSelectorTo: "print: format" .
+   setFunctionTypeTo: "Display" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: DataRecord .
+   setParameter: 1 typeTo: Number .
+   setDescriptionTo: "Prints recipient using supplied format." .
+;
+
+DataRecord getMessage: "purgeRecordAndLink" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Deletes the recipient after severing its
+relationship with its underlying entity." .
+;
+
+DataRecord getMessage: "recordDate" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   flagAsPartialKeyField
+   setReturnObjectTypeTo: Date .
+   setDescriptionTo: "Date for which data in recipient applies." .
+;
+
+DataRecord getMessage: "recordValue" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Double .
+   setDescriptionTo: "Property used to record 'primary' data value in
+record, if appropriate.  This is the value that will print by default." .
+;
+
+DataRecord getMessage: "setAdjustmentDateTo:" .
+   setSelectorTo: "setAdjustmentDateTo: date" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: DataRecord .
+   setParameter: 1 typeTo: Date .
+   setDescriptionTo: "Updates the 'adjustmentDate' to indicate that data
+in the recpient has been adjusted through a date that is different from the
+record date." .
+;
+
+DataRecord getMessage: "setUpdateBlockTo:" .
+   setSelectorTo: "setUpdateBlockTo: aBlock" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: DataRecord .
+   setParameter: 1 typeTo: Block .
+   setDescriptionTo: "Defines the block to use to access the property
+at the underlying entity's class for update." .
+;
+
+DataRecord getMessage: "storeXRef" .
+   setFunctionTypeTo: "DBAdmin" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: DataRecord .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "List of physical storage structures created for 
+recipient's class." .
+;
+
+DataRecord getMessage: "updateBlock" .
+   setFunctionTypeTo: "DBAdmin" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Block .
+   setDescriptionTo: "Block used to access the property
+at the underlying entity's class for update." .
+;
+
+DataRecord getMessage: "whatAmI" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Returns name of recipient's class." .
+;
+
+
+#==================================================
+
+####################
+# DivRecord
+####################
+
+DivRecord classDescriptor
+   setBriefDescriptionTo: "This class stores dividend data for a security." .
+   setDescriptionTo: "This class stores dividend data for a security.
+DivRecord instances are attached to Security instances via the
+time series property 'dividendSeries' defined for Security.  All cash dividends
+paid by a security on a given ex-date are summed for that date." .
+   setSampleUsageTo: "Named Security XXX :dividendSeries" .
+   setHtmlDocNameTo: "clpmaCompany.htm" ;
+
+#--------------------------------------------------
+
+DivRecord getMessage: "_div" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Same as 'recordValue'.  Total cash dividend paid
+by 'security' on 'date' in record's 'baseCurrency' unadjusted for splits
+since 'adjustmentDate'. " .
+;
+
+DivRecord getMessage: "addDiv:asOf:inCurrency:for:" .
+   setSelectorTo: "addDiv: div asOf: date inCurrency: curr for: security" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: DivRecord .
+   setParameter: 1 typeTo: Number .
+   setParameter: 2 typeTo: Date .
+   setParameter: 3 typeTo: Currency .
+   setParameter: 4 typeTo: Security .
+   setDescriptionTo: "Adds a new DivRecord for supplied security on supplied
+date if needed, then refreshes its 'recordValue' and 'baseCurrency' with
+supplied dividend and currency. " .
+;
+
+DivRecord getMessage: "asSelf" .
+   setFunctionTypeTo: "Conversion" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: DivRecord .
+   setDescriptionTo: "recipient object, stripped of any extensions." .
+;
+
+DivRecord getMessage: "classDescriptor" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Schema CD classDescriptor .
+   setDescriptionTo: "Class descriptor for recipient's class." .
+;
+
+DivRecord getMessage: "currentStore" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: DivRecord .
+   setDescriptionTo: "Current physical store used to instatiate new
+instances." .
+;
+
+DivRecord getMessage: "defaultInstance" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: DivRecord .
+   setDescriptionTo: "Default DivRecord instance." .
+;
+
+DivRecord getMessage: "div" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Total dividends paid for security on date adjusted for
+splits in current currency associated with security." .
+;
+
+DivRecord getMessage: "isDivRecord" .
+   setFunctionTypeTo: "Inquiry" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: TRUE .
+   setDescriptionTo: "Returns the value TRUE." .
+;
+
+DivRecord getMessage: "paymentDate" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Date .
+   setDescriptionTo: "Payment date for dividend" .
+;
+
+DivRecord getMessage: "print" .
+   setFunctionTypeTo: "Display" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: DivRecord .
+   setDescriptionTo: "Prints the total dividend, by default." .
+;
+
+DivRecord getMessage: "print:" .
+   setSelectorTo: "print: format" .
+   setFunctionTypeTo: "Display" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: DivRecord .
+   setParameter: 1 typeTo: Number .
+   setDescriptionTo: "Prints the dividend using supplied format." .
+;
+
+DivRecord getMessage: "security" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Security .
+   setDescriptionTo: "Same as 'entity'.  Security associated with recipient." .
+;
+
+DivRecord getMessage: "setDividendTo:" .
+   setSelectorTo: "setDividendTo: div" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: DivRecord .
+   setParameter: 1 typeTo: Number .
+   setDescriptionTo: "Set/reset value of dividend in recipient." .
+;
+
+DivRecord getMessage: "setPaymentDateTo:" .
+   setSelectorTo: "setPaymentDateTo: date" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: DivRecord .
+   setParameter: 1 typeTo: Date .
+   setDescriptionTo: "Set/reset value of payment date in recipient." .
+;
+
+DivRecord getMessage: "storeXRef" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: DivRecord .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "List of physical storage structures created for 
+recipient's class." .
+;
+
+DivRecord getMessage: "whatAmI" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Returns name of recipient's class." .
+;
+
+
+#==================================================
+
+####################
+# Entity
+####################
+
+Entity classDescriptor
+   setBriefDescriptionTo: "The Entity subclasses are defined to describe real-world entities
+such as companies, industries, countries, and products." .
+   setDescriptionTo: "The Entity subclasses are defined to describe real-world entities
+such as companies, industries, countries, and products.  Instances of
+the entity subclasses are usually named and can be referenced directly
+or used as part of a list.  Tables are often created as subclasses of
+Entity.  " .
+   setHtmlDocNameTo: "clEntity.htm" ;
+
+#--------------------------------------------------
+
+Entity getMessage: "XRef" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: XRef .
+   setDescriptionTo: "Provides cross reference for alternative identifiers." .
+;
+
+Entity getMessage: "accessExpression" .
+   setFunctionTypeTo: "Format" .
+   setLevelTo: "Advanced" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Returns a string that could be used to request recipient" .
+;
+
+Entity getMessage: "addAlias:" .
+   setSelectorTo: "addAlias: alias" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Entity .
+   setParameter: 1 typeTo: String .
+   setDescriptionTo: "Adds supplied string as alternate name in recipient's naming dictionary." .
+;
+
+Entity getMessage: "addAlias:toXRefIn:" .
+   setSelectorTo: "addAlias: string toXRefIn: dictionary" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Entity .
+   setParameter: 1 typeTo: String .
+   setParameter: 2 typeTo: XRef .
+   setDescriptionTo: "Adds the supplied string as an alias in the supplied cross reference dictionary." .
+;
+
+Entity getMessage: "aliases" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "Returns list of aliases defined for recipient.
+These aliases should represent valid identifier to use with the recipient's
+naming dictionary." .
+;
+
+Entity getMessage: "asSelf" .
+   setFunctionTypeTo: "Conversion" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Entity .
+   setDescriptionTo: "Recipient stripped of any extensions." .
+;
+
+Entity getMessage: "classDescriptor" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Schema CD classDescriptor .
+   setDescriptionTo: "Class descriptor for recipient's class." .
+;
+
+Entity getMessage: "cleanupClassStructures" .
+   setFunctionTypeTo: "DBAdmin" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Runs 'cleanStoreAndDictionary' at Object, this method is redefined as
+needed by subclasses to perform general cleanup functions." .
+;
+
+Entity getMessage: "cleanupLocalNames" .
+   setFunctionTypeTo: "DBAdmin" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "This method is executed by the 'flagForDeletionWithReason:' 
+message and is used to remove aliases from the appropriate naming
+dictionaries." .
+;
+
+Entity getMessage: "clusterStrings" .
+   setFunctionTypeTo: "DBAdamin" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Reclusters string property values." .
+;
+
+Entity getMessage: "createInitializationListFrom:" .
+   setSelectorTo: "createInitializationListFrom: initList" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Entity .
+   setParameter: 1 typeTo: List .
+   setDescriptionTo: "Creates a new class constant for the recipient's class 
+named 'initializationList' and copies the list of blocks in supplied parameter
+to this list.  The initializationList is used during the instance creation
+process to initialize default values in the new instance." .
+;
+
+Entity getMessage: "createNewXRefManager" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: XRef .
+   setDescriptionTo: "Creates a new XRef manager as a class constant
+for the recipient's class and stores the Default reference to the
+recipient's class naming dictionary." .
+;
+
+Entity getMessage: "createPrivateStructure" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: PrivateRecord .
+   setDescriptionTo: "Creates private extension of recipient's class." .
+;
+
+Entity getMessage: "createXRef:withProperty:" .
+   setSelectorTo: "createXRef: id withProperty: propertyId" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: XRef .
+   setParameter: 1 typeTo: String .
+   setParameter: 2 typeTo: String .
+   setDescriptionTo: "Creates a new XRef for recipient's class and
+defines the supplied property for this class." .
+;
+
+Entity getMessage: "defaultInstance" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Entity .
+   setDescriptionTo: "Returns the default Entity instance." .
+;
+
+Entity getMessage: "deleteAlias:" .
+   setSelectorTo: "deleteAlias: aliasList" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Entity .
+   setParameter: 1 typeTo: String .
+   setDescriptionTo: "Deletes the alias from the recipient's naming 
+dictionary." .
+;
+
+Entity getMessage: "displayInfo" .
+   setFunctionTypeTo: "Display" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Displays the code and name for the recipient followed by a new line.
+This message is often redefined by the subclasses to display one line
+of simple formatted information about an entity." .
+;
+
+Entity getMessage: "displayLabel" .
+   setFunctionTypeTo: "Display" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Returns recipient's name by default.  This message
+is often redefined by the Entity subclasses." .
+;
+
+Entity getMessage: "displayLabelKey" .
+   setFunctionTypeTo: "Display" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Returns the recipient's code by default.  This message
+is often redefined by the Entity subclasses." .
+;
+
+Entity getMessage: "displayXRefAuditReport" .
+   setFunctionTypeTo: "Display" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Displays a report summarizing the different XRef
+dictionaries defined for recipient's class." .
+;
+
+Entity getMessage: "getOrCreate:" .
+   setSelectorTo: "getOrCreate: key" .
+   setFunctionTypeTo: "Access" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Entity .
+   setParameter: 1 typeTo: String .
+   setDescriptionTo: "Returns object named by string in recipient class' naming dictionary.
+If not found, a new instance is created and returned." .
+;
+
+Entity getMessage: "getRecordForUser:" .
+   setSelectorTo: "getRecordForUser: userName" .
+   setFunctionTypeTo: "Access" .
+   setLevelTo: "Advanced" .
+   setReturnObjectTypeTo: PrivateRecord .
+   setParameter: 1 typeTo: String .
+   setDescriptionTo: "Returns private data extension for recipient 
+maintained by specified user." .
+;
+
+Entity getMessage: "initializationList" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Block .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "Returns the list of blocks used to initialize default values in new
+instances of the recipient's class." .
+;
+
+Entity getMessage: "initialize" .
+   setFunctionTypeTo: "Creation" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Entity .
+   setDescriptionTo: "Initializes properties in newly created instance." .
+;
+
+Entity getMessage: "initializeDataBaseLinks" .
+   setFunctionTypeTo: "Creation" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Entity .
+   setDescriptionTo: "Initializes a new instance.  Run as part of the instance creation process." .
+;
+
+Entity getMessage: "initializeGlobalInstanceProperties" .
+   setFunctionTypeTo: "Creation" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Entity .
+   setDescriptionTo: "Initializes a new instance.  Run as part of the instance creation process." .
+;
+
+Entity getMessage: "initializeGlobalSubclassProperties" .
+   setFunctionTypeTo: "Creation" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Entity .
+   setDescriptionTo: "This method is run as part of the 'specialized' method and is used to 
+initialize properties in the default row of the new class." .
+;
+
+Entity getMessage: "initializeLocalAttributes" .
+   setFunctionTypeTo: "Creation" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Entity .
+   setDescriptionTo: "Initializes a new instance.  Run as part of the instance creation process." .
+;
+
+Entity getMessage: "isEntity" .
+   setFunctionTypeTo: "Inquiry" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: TRUE .
+   setDescriptionTo: "Returns the value TRUE when sent to any Entity." .
+;
+
+Entity getMessage: "isMemberOf:" .
+   setSelectorTo: "isMemberOf: universe" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setTypeTo: Named MessageType MethodTV . 
+   setReturnObjectTypeTo: Boolean .
+   setParameter: 1 typeTo: Universe .
+   setDescriptionTo: "Returns TRUE if recipient is a member of supplied
+Universe or Classification." .
+;
+
+Entity getMessage: "locateId:" .
+   setSelectorTo: "locateId: id" .
+   setFunctionTypeTo: "Access" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Entity .
+   setParameter: 1 typeTo: String .
+   setDescriptionTo: "Returns entity associated with id supplied, searching naming dictionaries
+associated with entity class.  By default only 'named' is searched; this
+message can be redefined for subclasses that can use multiple dictionaries." .
+;
+
+Entity getMessage: "locateIds:" .
+   setSelectorTo: "locateIds: string" .
+   setFunctionTypeTo: "Access" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Entity .
+   setReturnObjectContainerTo: List .
+   setParameter: 1 typeTo: String .
+   setDescriptionTo: "Returns a list of entities of recipient's class.
+The parameter should be supplied as a single string with the ',' character
+used to separate the ids to locate (e.g., \"GM, IBM, XON\" ). " .
+;
+
+Entity getMessage: "masterListCodes" .
+   setFunctionTypeTo: "Display" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Displays code and name for all non-default instances in 
+recipient's class." .
+;
+
+Entity getMessage: "name" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "recipient's name." .
+;
+
+Entity getMessage: "named" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Dictionary .
+   setDescriptionTo: "Naming dictionary for recipient's class." .
+;
+
+Entity getMessage: "newAs:" .
+   setSelectorTo: "newAs: string" .
+   setFunctionTypeTo: "Creation" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Entity .
+   setParameter: 1 typeTo: String .
+   setDescriptionTo: "Special version of 'newAs:' message designed to address the additional
+requirements of entity instance creation." .
+;
+
+Entity getMessage: "numericCode" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Numeric code.  This value can be used to assign
+numeric orderings for instances of a class." .
+;
+
+Entity getMessage: "print" .
+   setFunctionTypeTo: "Display" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Entity .
+   setDescriptionTo: "Redefines the standard print message so that 
+recipient's 'code' is printed." .
+;
+
+Entity getMessage: "print:" .
+   setSelectorTo: "print: aFormat" .
+   setFunctionTypeTo: "Display" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Entity .
+   setParameter: 1 typeTo: Integer .
+   setDescriptionTo: "Prints recipient's 'code' using supplied format.  " .
+;
+
+Entity getMessage: "profile" .
+   setFunctionTypeTo: "Display" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Displays a multi-line description of recipient." .
+;
+
+Entity getMessage: "rebuildAliases" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Rebuilds the 'aliases' list for all instances of
+ recipient's using the current selector in recpient's naming dictionary." .
+;
+
+Entity getMessage: "setNameTo:" .
+   setSelectorTo: "setNameTo: string" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Entity .
+   setParameter: 1 typeTo: String .
+   setDescriptionTo: "Updates recipient's 'name' property with supplied 
+string." .
+;
+
+Entity getMessage: "setNumericCodeTo:" .
+   setSelectorTo: "setNumericCodeTo: string" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Entity .
+   setParameter: 1 typeTo: Number .
+   setDescriptionTo: "Updates recipient's 'numericCode' property with 
+supplied number." .
+;
+
+Entity getMessage: "setShortNameTo:" .
+   setSelectorTo: "setShortNameTo: string" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Entity .
+   setParameter: 1 typeTo: String .
+   setDescriptionTo: "Updates recipient's 'shortName' property with string." .
+;
+
+Entity getMessage: "setSortCodeTo:" .
+   setSelectorTo: "setSortCodeTo: string" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Entity .
+   setParameter: 1 typeTo: String .
+   setDescriptionTo: "Updates recipient's 'sortCode' property with string." .
+;
+
+Entity getMessage: "setXRefIn:to:" .
+   setSelectorTo: "setXRefIn: dictionary to: string" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Entity .
+   setParameter: 1 typeTo: XRef .
+   setParameter: 2 typeTo: String .
+   setDescriptionTo: "Sets the supplied string in the supplied XRef dictionary
+to return recipient." .
+;
+
+Entity getMessage: "shortName" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Short name.  This is the same as 'code' by default." .
+;
+
+Entity getMessage: "sortCode" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Code that can be used to sort instances.  This is
+the same as 'code' by default." .
+;
+
+Entity getMessage: "specializeAs:at:" .
+   setSelectorTo: "specializeAs: string at: object" .
+   setFunctionTypeTo: "Creation" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Entity .
+   setParameter: 1 typeTo: String .
+   setParameter: 2 typeTo: Object .
+   setDescriptionTo: "Creates a subclass of recipient named by supplied string.  The name is
+defined at the supplied object.  Note that this class is NOT installed
+in the Schema database by default" .
+;
+
+Entity getMessage: "universes" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setTypeTo: Named MessageType MethodTV . 
+   setReturnObjectTypeTo: Universe .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "List of Universe in which recipient is a member." .
+;
+
+Entity getMessage: "updateInitializationListWith:" .
+   setSelectorTo: "updateInitializationListWith: block" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Entity .
+   setParameter: 1 typeTo: Block .
+   setDescriptionTo: "Adds the supplied block to the recipient class' initializationList." .
+;
+
+Entity getMessage: "validateInputString:" .
+   setSelectorTo: "validateInputString: input" .
+   setFunctionTypeTo: "Access" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Entity .
+   setParameter: 1 typeTo: String .
+   setDescriptionTo: "Instance in recipient's class associated
+with the supplied string.  If not found, NA is returned." .
+;
+
+Entity getMessage: "whatAmI" .
+   setFunctionTypeTo: "Descriptive" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Return the string \"Entity\"." .
+;
+
+
+#==================================================
+
+####################
+# Holding
+####################
+
+Holding classDescriptor
+   setBriefDescriptionTo: "Instances of this class represent
+the amount of a security held by an account on a specific date." .
+   setDescriptionTo: "Instances of this class represent
+the amount of a security held by an account on a specific date." .
+   setSampleUsageTo: "Named Account XYZ getHoldingIn: Named Security IBM .
+
+Named Account XYZ holdings
+    do: [ security name print: 30 ; shares printNL ] ;
+" .
+   setHtmlDocNameTo: "clpmaAccount.htm" ;
+
+#--------------------------------------------------
+
+Holding getMessage: "_accountingPrice" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Actual price supplied to compute market value." .
+;
+
+Holding getMessage: "_shares" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Actual shares held by account in security on date." .
+;
+
+Holding getMessage: "_totalCost" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Cost of shares held by account in security on
+date (in baseCurrency of account)." .
+;
+
+Holding getMessage: "_totalMarketValue" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Market value of shares held by account in security on
+date (in baseCurrency of account)." .
+;
+
+Holding getMessage: "account" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Account .
+   setDescriptionTo: "Account represented by holding." .
+;
+
+Holding getMessage: "accountingPrice" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Price supplied to compute market value (adjusted
+for splits and currency override)." .
+;
+
+Holding getMessage: "adjustmentFactor" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Split adjustment factor since date." .
+;
+
+Holding getMessage: "asSelf" .
+   setFunctionTypeTo: "Conversion" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Holding .
+   setDescriptionTo: "Recipient stripped of any extensions." .
+;
+
+Holding getMessage: "classDescriptor" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Schema CD classDescriptor .
+   setDescriptionTo: "Class descriptor for recipient's class." .
+;
+
+Holding getMessage: "cleanupClassStructures" .
+   setFunctionTypeTo: "DBAdmin" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Aligns complex structures.  This method is invoked as
+part of a production cleanup process." .
+;
+
+Holding getMessage: "createInSecurity:andAccount:" .
+   setSelectorTo: "createInSecurity: sec andAccount: port" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Holding .
+   setParameter: 1 typeTo: Security .
+   setParameter: 2 typeTo: Account .
+   setDescriptionTo: "Creates a new Holding and initializes
+'security' and 'account' properties with supplied values." .
+;
+
+Holding getMessage: "createNewStoreAsOf:" .
+   setSelectorTo: "createNewStoreAsOf: date" .
+   setFunctionTypeTo: "DBAdmin" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Holding .
+   setParameter: 1 typeTo: Date .
+   setDescriptionTo: "Creates new physical store for Holding instances
+and updates the 'storeXRef' time series as of supplied date with the
+new store." .
+;
+
+Holding getMessage: "createNewStoreAsOf:at:" .
+   setSelectorTo: "createNewStoreAsOf: date at: ospace" .
+   setFunctionTypeTo: "DBAdmin" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Holding .
+   setParameter: 1 typeTo: Date .
+   setParameter: 2 typeTo: Object .
+   setDescriptionTo: "Creates new physical store for Holding instances
+and updates the 'storeXRef' time series as of supplied date with the
+new store.  The message 'Holding' is deifned at the supplied object
+to return the new store as well." .
+;
+
+Holding getMessage: "currencyFactor" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Factor to convert monetary values in recpient to
+the current 'currency'" .
+;
+
+Holding getMessage: "date" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Date .
+   setDescriptionTo: "Date represented by holding." .
+;
+
+Holding getMessage: "defaultInstance" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Holding .
+   setDescriptionTo: "Returns the default Holding instance." .
+;
+
+Holding getMessage: "id" .
+   setFunctionTypeTo: "Format" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Formatted string containing securityId---accountId." .
+;
+
+Holding getMessage: "initializeCashFrom:" .
+   setSelectorTo: "initializeCashFrom: list" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Holding .
+   setParameter: 1 typeTo: List .
+   setDescriptionTo: "Updates the '_totalMarketValue', '_shares', and
+'_totalCost' properties in recipients using the total 'totalMarketValue'
+of the supplied list if non-NA, otherwise using the total
+'shares' of the supplied list if non-NA, otherwise using the total
+'totalCost' of the supplied list.  The recipient is assumed to be
+a holding in a cash security and the supplied is list is assumed to
+respond to the 'totalMarketValue', 'shares', and 'totalCost' messages." .
+;
+
+Holding getMessage: "initializeFrom:" .
+   setSelectorTo: "initializeFrom: list" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Holding .
+   setParameter: 1 typeTo: List .
+   setDescriptionTo: "Updates the '_shares' property in recipient using
+the total 'shares' in supplied list, updates the '_totalMarketValue'
+property in recipient using the total 'totalMarketValue' in supplied
+list, and updates the '_totalCost' property in recipient using the total
+'totalCost' in supplied list." .
+;
+
+Holding getMessage: "initializeKeys:" .
+   setSelectorTo: "initializeKeys: keys" .
+   setFunctionTypeTo: "Creation" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Holding .
+   setParameter: 1 typeTo: List .
+   setDescriptionTo: "Initializes the recpient with values supplied in
+parameter.  Parameter should be a list containing a Security object as
+its first element and an Account object as its second element.  These
+values are used to update the 'security' and 'account' properties in 
+recipient.  The recipient's 'baseCurrency' is set to the account's
+base currency value and the 'date' is set to the current ^date." .
+;
+
+Holding getMessage: "isHolding" .
+   setFunctionTypeTo: "Inquiry" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: TRUE .
+   setDescriptionTo: "Returns the value TRUE." .
+;
+
+Holding getMessage: "keyList" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Object .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "Returns the list: Security, Account, Date -
+the keys for the Holding class." .
+;
+
+Holding getMessage: "percentOfEquity" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Percent of equity portion of account represented
+by recipient on recipient's 'date'." .
+;
+
+Holding getMessage: "percentOfPort" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Percent of account's market value represented
+by recipient on recipient's 'date'." .
+;
+
+Holding getMessage: "security" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Security .
+   setDescriptionTo: "Security represented by holding." .
+;
+
+Holding getMessage: "shares" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Shares (or unit amount) of recipient's 'security'
+held by recipient's 'account' on recipient's date, adjusted for splits." .
+;
+
+Holding getMessage: "storeXRef" .
+   setFunctionTypeTo: "DBAdmin" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Holding .
+   setReturnObjectContainerTo: TimeSeries .
+   setDescriptionTo: "TimeSeries of physical storage structures created for 
+recipient's class." .
+;
+
+Holding getMessage: "totalCost" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Cost of shares held (adjusted for currency override)." .
+;
+
+Holding getMessage: "totalMarketValue" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Market value of shares held (adjusted for currency
+override)." .
+;
+
+Holding getMessage: "updateBlocks" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Block .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "List of blocks that can be sent to recipient
+to retrieve value of each key (Security, Account and Date)." .
+;
+
+Holding getMessage: "whatAmI" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Returns the string \"Holding\"." .
+;
+
+
+#==================================================
+
+####################
+# IndexAccount
+####################
+
+IndexAccount classDescriptor
+   setBriefDescriptionTo: "Instances of this class represent holdings 
+derived from a list of securities." .
+   setDescriptionTo: "Instances of this class represent holdings 
+derived from a list of securities.  Shares and market values can be
+set explitly or derived using various rules." .
+   setSampleUsageTo: "Named IndexAccount XXX 
+Named IndexAccount at: \"XXX\
+Named Account XXX
+Named Account at: \"XXX\" .
+Named Account I_XXX .
+" .
+   setHtmlDocNameTo: "clpmaAccount.htm" ;
+
+#--------------------------------------------------
+
+IndexAccount getMessage: "addMember:" .
+   setSelectorTo: "addMember: security" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setTypeTo: Named MessageType MethodTV .
+   setReturnObjectTypeTo: IndexAccount .
+   setParameter: 1 typeTo: Security .
+   setDescriptionTo: "Add supplied security to 'memberList' defined as of 
+current evaluation date." .
+;
+
+IndexAccount getMessage: "asSelf" .
+   setFunctionTypeTo: "Conversion" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: IndexAccount .
+   setDescriptionTo: "Recipient stripped of any extensions." .
+;
+
+IndexAccount getMessage: "classDescriptor" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Schema CD classDescriptor .
+   setDescriptionTo: "Class descriptor for recipient's class." .
+;
+
+IndexAccount getMessage: "cleanupClassStructures" .
+   setFunctionTypeTo: "DBAdmin" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Aligns complex structures.  This method is invoked as
+part of a production cleanup process." .
+;
+
+IndexAccount getMessage: "createEvenDollarHoldingsAsOf:" .
+   setSelectorTo: "createEvenDollarHoldingsAsOf: date" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "Advanced" .
+   setReturnObjectTypeTo: NoValue .
+   setParameter: 1 typeTo: Date .
+   setDescriptionTo: "Creates even dollar holdings for recipient
+as of supplied date using securities in 'memberList' as of that date.
+This method assumes that $1,000 of each security is held.  The
+'_totalMarketValue' of each holding is therefore $1,000 and the 
+'_shares' are set to 1000 / the security's price.  Account totals
+are computed and 'percentOfPort' is updated for each holding.
+" .
+;
+
+IndexAccount getMessage: "createEvenShareHoldingsAsOf:" .
+   setSelectorTo: "createEvenShareHoldingsAsOf: date" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "Advanced" .
+   setReturnObjectTypeTo: NoValue .
+   setParameter: 1 typeTo: Date .
+   setDescriptionTo: "Creates even share holdings for recipient
+as of supplied date using securities in 'memberList' as of that date.
+This method assumes that 1,000 shares of each security is held.  The
+'_shares' of each holding are set to 1000.00 and the '_totalMarketValue'
+is computed as 'price * shares' using the security's price.  Account totals
+are computed and 'percentOfPort' is updated for each holding." .
+;
+
+IndexAccount getMessage: "createHoldingsFrom:" .
+   setSelectorTo: "createHoldingsFrom: xsecList" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setTypeTo: Named MessageType MethodTV . 
+   setReturnObjectTypeTo: NoValue .
+   setParameter: 1 typeTo: List .
+   setDescriptionTo: "Creates holdings in the recipient using the supplied 
+list of extended securities.  List elements must be extended by the 
+variables 'security', 'totalMarketValue', 'shares', 'totalCost', and,
+optionally, 'accountingPrice'.  The 'memberList' property is set to
+the unextended list of securities as of the evaluation and
+the 'universe' property is set to
+'Default' and the 'style' property is set to 'Manual' as of this date.
+" .
+;
+
+IndexAccount getMessage: "createHoldingsFromMembers" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "Advanced" .
+   setTypeTo: Named MessageType MethodTV . 
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Creates a holding object for each security in
+'memberList' as of current evaluation date.  The holding properties
+(e.g., '_shares' and '_totalMarketValue' are not initialized.  This
+method is normally called by one of the other 'create...HoldingsAsOf:'
+messages, which fill in these property values." .
+;
+
+IndexAccount getMessage: "createMCapWeightedHoldingsAsOf:" .
+   setSelectorTo: "createMCapWeightedHoldingsAsOf: date" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "Advanced" .
+   setReturnObjectTypeTo: NoValue .
+   setParameter: 1 typeTo: Date .
+   setDescriptionTo: "Creates market-cap-weighted holdings for recipient
+as of supplied date using securities in 'memberList' as of that date.
+This method assumes that you hold the total market value of each holding
+is equal to the security's market capitalization.  The '_shares' 
+are set to this market value / the security's price.  Account totals
+are computed and 'percentOfPort' is updated for each holding.
+This method assumes that the 'marketCap' method has been defined for
+security.  All market cap values are accessed in the base currency of
+the recipient." .
+;
+
+IndexAccount getMessage: "createMValWeightedHoldingsAsOf:using:" .
+   setSelectorTo: "createMValWeightedHoldingsAsOf: date using: acct" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "Advanced" .
+   setReturnObjectTypeTo: NoValue .
+   setParameter: 1 typeTo: Date .
+   setParameter: 2 typeTo: Account .
+   setDescriptionTo: "Creates holdings for recipient
+as of supplied date using securities in 'memberList' as of that date
+based on the market value of the security in the supplied Account.
+This method assumes that you own the same number of shares that the
+supplied account has.  If the supplied account does not own the security,
+the shares value in the recipient's holding will be 0.
+The '_totalMarketValue'
+is computed as 'price * shares' using the security's price.  Account totals
+are computed and 'percentOfPort' is updated for each holding." .
+;
+
+IndexAccount getMessage: "createWeightedHoldingsAsOf:using:" .
+   setSelectorTo: "createWeightedHoldingsAsOf: date using: acct" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "Advanced" .
+   setReturnObjectTypeTo: NoValue .
+   setParameter: 1 typeTo: Date .
+   setParameter: 2 typeTo: Account .
+   setDescriptionTo: "Creates holdings extended by various
+statistics for recipient
+as of supplied date using securities in 'memberList' as of that date.
+This method assumes that you own the same number of shares that the
+supplied account has.  The extension includes the property 
+'mvalEvenDollar' which is set to 1000, 'mvalMCapWeighted' which is
+set to the security's price (in recipient's base currency) * the
+security's 'sharesOut' value, and 'mvalMVWeighted' which is set to the
+security's price * the shares held in supplied account.  The
+extension propeties 'pctEvenDollar', 'pctMCapWeighted', and 'pctMValWeighted'
+are computed relative to this list of holdings." .
+;
+
+IndexAccount getMessage: "defaultInstance" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: IndexAccount .
+   setDescriptionTo: "Returns the default IndexAccount instance." .
+;
+
+IndexAccount getMessage: "deleteMember:" .
+   setSelectorTo: "deleteMember: security" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setTypeTo: Named MessageType MethodTV .
+   setReturnObjectTypeTo: IndexAccount .
+   setParameter: 1 typeTo: Security .
+   setDescriptionTo: "Deletes supplied security from 'memberList' as of 
+current evaluation date." .
+;
+
+IndexAccount getMessage: "getMemberWeightsUsingAccount:" .
+   setSelectorTo: "getMemberWeightsUsingAccount: acct" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setTypeTo: Named MessageType MethodTV .
+   setReturnObjectTypeTo: Security .
+   setReturnObjectContainerTo: List .
+   setParameter: 1 typeTo: Account .
+   setDescriptionTo: "Returns list of securities in 'memberList' as of
+evaluation date extended by the properties 
+'mvalEvenDollar' which stores the value 1000,
+'pctEvenDollar' which stores the percent of index in this security
+based on even dollar market values,
+'mvalMCapWeighted' which stores the security's 'price' * the security's
+'sharesOut' in the recipient's currency,
+'pctMCapWeighted' which stores the percent of index in this security
+based on market cap values,
+'mvalMValWeighted' which stores the market value based on the number
+shares of this security in the supplied account as of the evaluation date, and
+'pctMValWeighted' which stores the percent of index in this security based
+on the supplied accounts' market value." .
+;
+
+IndexAccount getMessage: "getMembers" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setTypeTo: Named MessageType MethodTV .
+   setReturnObjectTypeTo: Security .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "Returns list of security members in recipient
+as of evaluation date.  If 'membershipRule' is stored for recipient
+it is evalauted; otherwise, 'memberList' is converted to a List an
+returned." .
+;
+
+IndexAccount getMessage: "initializationList" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Block .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "Default values set on instance creation,
+this list includes 'baseCurrency'." .
+;
+
+IndexAccount getMessage: "initialize" .
+   setFunctionTypeTo: "Creation" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: IndexAccount .
+   setDescriptionTo: "Initializes properties in newly created instance." .
+;
+
+IndexAccount getMessage: "initializeNewMembershipDate" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setTypeTo: Named MessageType MethodTV .
+   setReturnObjectTypeTo: IndexAccount .
+   setDescriptionTo: "Creates a new IndexedList and stores it in
+'memberList' time series as of current evaluation date (^date)." .
+;
+
+IndexAccount getMessage: "isIndexAccount" .
+   setFunctionTypeTo: "Inquiry" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: TRUE .
+   setDescriptionTo: "Returns the value TRUE." .
+;
+
+IndexAccount getMessage: "memberList" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Security .
+   setReturnObjectContainerTo: IndexedList .
+   setDescriptionTo: "IndexedList of securities in recipient as of evaluation
+date." .
+;
+
+IndexAccount getMessage: "memberListPrototype" .
+   setFunctionTypeTo: "Creation" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Portfolio .
+   setReturnObjectContainerTo: IndexedList .
+   setDescriptionTo: "Used to cluster 'memberList' list objects." .
+;
+
+IndexAccount getMessage: "membershipRule" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Reserved" .
+   setReturnObjectTypeTo: Block .
+   setDescriptionTo: "Block used to derive <i>memberList</i>.  Not currently
+supported." .
+;
+
+IndexAccount getMessage: "named" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Named IndexAccount .
+   setDescriptionTo: "Naming dictionary associated with recipient's class." .
+;
+
+IndexAccount getMessage: "profile" .
+   setFunctionTypeTo: "Display" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Basic descriptive report about the recipient." .
+;
+
+IndexAccount getMessage: "setMembershipRuleTo:" .
+   setSelectorTo: "setMembershipRuleTo: block" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: IndexAccount .
+   setParameter: 1 typeTo: Block .
+   setDescriptionTo: "Updates the 'membershipRule' property.  Not 
+currently supported." .
+;
+
+IndexAccount getMessage: "setSecuritiesTo:asOf:" .
+   setSelectorTo: "setSecuritiesTo: list asOf: date" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: IndexAccount .
+   setParameter: 1 typeTo: List .
+   setParameter: 2 typeTo: Date .
+   setDescriptionTo: "Updates 'memberList' property with supplied
+list of securities on supplied date." .
+;
+
+IndexAccount getMessage: "setStyleTo:" .
+   setSelectorTo: "setStyleTo: input" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setTypeTo: Named MessageType MethodTV .
+   setReturnObjectTypeTo: IndexAccount .
+   setParameter: 1 typeTo: String .
+   setDescriptionTo: "Sets 'style' to supplied value as of current
+evaluation date (^date)." .
+;
+
+IndexAccount getMessage: "setUniverseTo:" .
+   setSelectorTo: "setUniverseTo: input" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setTypeTo: Named MessageType MethodTV .
+   setReturnObjectTypeTo: IndexAccount .
+   setParameter: 1 typeTo: Universe .
+   setDescriptionTo: "Sets 'universe' to supplied Universe instance
+as of current evaluation date (^date) and updates 'memberList' with
+securities in that universe as of the same date." .
+;
+
+IndexAccount getMessage: "style" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Style used to derive holding shares and market value." .
+;
+
+IndexAccount getMessage: "universe" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Universe .
+   setDescriptionTo: "Universe used to retrieve security members." .
+;
+
+IndexAccount getMessage: "updateMemberships" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setTypeTo: Named MessageType MethodTV .
+   setReturnObjectTypeTo: IndexAccount .
+   setDescriptionTo: "If 'membershipRule' is defined, it is used
+to update the securities in 'memberList' as of current evaluation date." .
+;
+
+IndexAccount getMessage: "whatAmI" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Returns the string \"IndexAccount\"." .
+;
+
+
+#==================================================
+
+####################
+# Industry
+####################
+
+Industry classDescriptor
+   setBriefDescriptionTo: "This class represents general industries into which
+companies can be classified." .
+   setDescriptionTo: "This class represents general industries into which
+companies can be classified." .
+   setSampleUsageTo: "Named Industry XXX 
+Named Industry at: \"XXX\" .
+" .
+   setHtmlDocNameTo: "clpmaCompany.htm" ;
+
+#--------------------------------------------------
+
+Industry getMessage: "asSelf" .
+   setFunctionTypeTo: "Conversion" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Industry .
+   setDescriptionTo: "Recipient stripped of any extensions." .
+;
+
+Industry getMessage: "classDescriptor" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Schema CD classDescriptor .
+   setDescriptionTo: "Class descriptor for recipient's class." .
+;
+
+Industry getMessage: "companyList" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setTypeTo: Named MessageType MethodTV . 
+   setReturnObjectTypeTo: Company .
+   setReturnObjectContainerTo: IndexedList .
+   setDescriptionTo: "List of companies in recipient (same as 'memberList'). " .
+;
+
+Industry getMessage: "defaultInstance" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Industry .
+   setDescriptionTo: "Returns the default Industry instance." .
+;
+
+Industry getMessage: "getAllCompanies" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setTypeTo: Named MessageType MethodTV . 
+   setReturnObjectTypeTo: Company .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "List of all companies in recipient's 'memberList'
+or the 'memberList' of any of its direct or indirect children." .
+;
+
+Industry getMessage: "isIndustry" .
+   setFunctionTypeTo: "Inquiry" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: TRUE .
+   setDescriptionTo: "Returns the value TRUE." .
+;
+
+Industry getMessage: "named" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Named Industry .
+   setDescriptionTo: "Naming dictionary associated with recipient's class." .
+;
+
+Industry getMessage: "sector" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Sector .
+   setDescriptionTo: "Sector associated with recipient." .
+;
+
+Industry getMessage: "whatAmI" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Returns the string \"Industry\"." .
+;
+
+
+#==================================================
+
+####################
+# LinkRecord
+####################
+
+LinkRecord classDescriptor
+   setBriefDescriptionTo: "This abstract class is used to define subclasses that symmetrically
+related two or more entities to other data." .
+   setDescriptionTo: "This abstract class is used to define subclasses that symmetrically
+related two or more entities to other data." .
+   setSampleUsageTo: "" .
+   setHtmlDocNameTo: "appClasses.htm" ;
+
+#--------------------------------------------------
+
+LinkRecord getMessage: "addKeyOfType:" .
+   setSelectorTo: "addKeyOfType: type" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: LinkRecord .
+   setParameter: 1 typeTo: Object .
+   setDescriptionTo: "Adds supplied object to 'keyList' and defines a fixed
+property for recipient's class using this object's whatAmI (initial letter
+is lowercase) if it does not already exist.  If defined, the property
+will return the supplied object by default." .
+;
+
+LinkRecord getMessage: "asSelf" .
+   setFunctionTypeTo: "Conversion" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: LinkRecord .
+   setDescriptionTo: "Recipient stripped of any extensions." .
+;
+
+LinkRecord getMessage: "classDescriptor" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Schema CD classDescriptor .
+   setDescriptionTo: "Class descriptor for recipient's class." .
+;
+
+LinkRecord getMessage: "defaultInstance" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: LinkRecord .
+   setDescriptionTo: "Returns the default LinkRecord instance." .
+;
+
+LinkRecord getMessage: "displayInfo" .
+   setFunctionTypeTo: "Display" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Displays a single line summary of the object terminated with a new line." .
+;
+
+LinkRecord getMessage: "getKeyValues" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Object .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "Returns list of values for the recipient's 'key'
+properties."  .
+;
+
+LinkRecord getMessage: "initializeGlobalSubclassProperties" .
+   setFunctionTypeTo: "Creation" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: LinkRecord .
+   setDescriptionTo: "This method is run as part of the 'specialized' method and is used to 
+initialize properties in the default row of the new class." .
+;
+
+LinkRecord getMessage: "initializeKeys:" .
+   setSelectorTo: "initializeKeys: keys" .
+   setFunctionTypeTo: "Creation" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: LinkRecord .
+   setParameter: 1 typeTo: List .
+   setDescriptionTo: "This method is run as part of the 'createInstance:' process.  " .
+;
+
+LinkRecord getMessage: "isLinkRecord" .
+   setFunctionTypeTo: "Inquiry" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: TRUE .
+   setDescriptionTo: "Returns the value TRUE." .
+;
+
+LinkRecord getMessage: "keyList" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Object .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "List of 'key' types defined for recipient's class." .
+;
+
+LinkRecord getMessage: "print" .
+   setFunctionTypeTo: "Display" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: LinkRecord .
+   setDescriptionTo: "Prints the recipient's keys." .
+;
+
+LinkRecord getMessage: "profile" .
+   setFunctionTypeTo: "Display" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Displays a multi-line description of the recipient." .
+;
+
+LinkRecord getMessage: "updateBlocks" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Block .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "List of blocks that can be sent to recipient
+to retrieve value of each key." .
+;
+
+LinkRecord getMessage: "whatAmI" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Returns the string \"LinkRecord\"." .
+;
+
+
+#==================================================
+
+####################
+# Portfolio
+####################
+
+Portfolio classDescriptor
+   setBriefDescriptionTo: "Instances of this class represent acutal
+Portfolios." .
+   setDescriptionTo: "Instances of this class represent actual Portfolios
+that have holdings delivered from an account system." .
+   setSampleUsageTo: "Named Portfolio XXX 
+Named Portfolio at: \"XXX\
+Named Account XXX
+Named Account at: \"XXX\" .
+" .
+   setHtmlDocNameTo: "clpmaAccount.htm" ;
+
+#--------------------------------------------------
+
+Portfolio getMessage: "aggregateList" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setTypeTo: Named MessageType MethodTV .
+   setReturnObjectTypeTo: AggAccount .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "List of AggAccounts that include recipient." .
+;
+
+Portfolio getMessage: "asSelf" .
+   setFunctionTypeTo: "Conversion" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Portfolio .
+   setDescriptionTo: "Recipient stripped of any extensions." .
+;
+
+Portfolio getMessage: "classDescriptor" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Schema CD classDescriptor .
+   setDescriptionTo: "Class descriptor for recipient's class." .
+;
+
+Portfolio getMessage: "defaultInstance" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Portfolio .
+   setDescriptionTo: "Returns the default Portfolio instance." .
+;
+
+Portfolio getMessage: "displayAggregateList" .
+   setFunctionTypeTo: "Display" .
+   setLevelTo: "Basic" .
+   setTypeTo: Named MessageType MethodTV .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Displays list of AggAccount instances that include
+recipient." .
+;
+
+Portfolio getMessage: "initializationList" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Block .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "Default values set on instance creation,
+this list includes 'baseCurrency'." .
+;
+
+Portfolio getMessage: "initialize" .
+   setFunctionTypeTo: "Creation" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Portfolio .
+   setDescriptionTo: "Initializes properties in newly created instance." .
+;
+
+Portfolio getMessage: "isPortfolio" .
+   setFunctionTypeTo: "Inquiry" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: TRUE .
+   setDescriptionTo: "Returns the value TRUE." .
+;
+
+Portfolio getMessage: "named" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Named Portfolio .
+   setDescriptionTo: "Naming dictionary associated with recipient's class." .
+;
+
+Portfolio getMessage: "profile" .
+   setFunctionTypeTo: "Display" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Basic descriptive report about the recipient." .
+;
+
+Portfolio getMessage: "whatAmI" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Returns the string \"Portfolio\"." .
+;
+
+
+#==================================================
+
+####################
+# PriceRecord
+####################
+
+PriceRecord classDescriptor
+   setBriefDescriptionTo: "This class stores pricing data for a security." .
+   setDescriptionTo: "This class stores pricing data for a security.
+PriceRecord instances are attached to Security instances via the
+time series property 'pricingSeries' defined for Security. " .
+   setSampleUsageTo: "Named Security XXX getPriceRecord
+Named Security XXX prices do: [ ] " .
+   setHtmlDocNameTo: "clpmaCompany.htm" ;
+
+#--------------------------------------------------
+
+PriceRecord getMessage: "_ask" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Asking price of 'security' on 'date' in 'baseCurrency'
+of recipient unadjusted for splits since 'adjustmentDate'." .
+;
+
+PriceRecord getMessage: "_bid" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Bid price of 'security' on 'date' in 'baseCurrency'
+of recipient unadjusted for splits since 'adjustmentDate'." .
+;
+
+PriceRecord getMessage: "_high" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "High price of 'security' on 'date' in 'baseCurrency'
+of recipient unadjusted for splits since 'adjustmentDate'." .
+;
+
+PriceRecord getMessage: "_low" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Low price of 'security' on 'date' in 'baseCurrency'
+of recipient unadjusted for splits since 'adjustmentDate'." .
+;
+
+PriceRecord getMessage: "_open" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Opening price of 'security' on 'date' in 'baseCurrency'
+of recipient unadjusted for splits since 'adjustmentDate'." .
+;
+
+PriceRecord getMessage: "_price" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Same as 'recordValue'.  Closing price of 'security'
+on 'date' in 'baseCurrency' of recipient unadjusted for splits since 'adjustmentDate'." .
+;
+
+PriceRecord getMessage: "_volume" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Trading volume of 'security' on 'date' unadjusted for
+splits since 'adjustmentDate'." .
+;
+
+PriceRecord getMessage: "asSelf" .
+   setFunctionTypeTo: "Conversion" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: PriceRecord .
+   setDescriptionTo: "recipient object, stripped of any extensions." .
+;
+
+PriceRecord getMessage: "ask" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Asking price, adjusted for splits in current currency
+associated with security." .
+;
+
+PriceRecord getMessage: "bid" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Bid price, adjusted for splits in current currency
+associated with security." .
+;
+
+PriceRecord getMessage: "classDescriptor" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Schema CD classDescriptor .
+   setDescriptionTo: "Class descriptor for recipient's class." .
+;
+
+PriceRecord getMessage: "currentStore" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: PriceRecord .
+   setDescriptionTo: "Current physical store used to instatiate new
+instances." .
+;
+
+PriceRecord getMessage: "defaultInstance" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: PriceRecord .
+   setDescriptionTo: "Default PriceRecord instance." .
+;
+
+PriceRecord getMessage: "high" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "High price, adjusted for splits in current currency
+associated with security." .
+;
+
+PriceRecord getMessage: "isPriceRecord" .
+   setFunctionTypeTo: "Inquiry" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: TRUE .
+   setDescriptionTo: "Returns the value TRUE." .
+;
+
+PriceRecord getMessage: "low" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Low price, adjusted for splits in current currency
+associated with security." .
+;
+
+PriceRecord getMessage: "open" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Opening price, adjusted for splits in current currency
+associated with security." .
+;
+
+PriceRecord getMessage: "price" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Closing price, adjusted for splits in current currency
+associated with security." .
+;
+
+PriceRecord getMessage: "print" .
+   setFunctionTypeTo: "Display" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: PriceRecord .
+   setDescriptionTo: "Prints the closing price, by default." .
+;
+
+PriceRecord getMessage: "print:" .
+   setSelectorTo: "print: format" .
+   setFunctionTypeTo: "Display" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: PriceRecord .
+   setParameter: 1 typeTo: Number .
+   setDescriptionTo: "Prints closing price using supplied format." .
+;
+
+PriceRecord getMessage: "security" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Security .
+   setDescriptionTo: "Same as 'entity'.  Security associated with recipient." .
+;
+
+PriceRecord getMessage: "setAskTo:" .
+   setSelectorTo: "setAskTo: value" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: PriceRecord .
+   setParameter: 1 typeTo: Number .
+   setDescriptionTo: "Set/reset ask value in recipient." .
+;
+
+PriceRecord getMessage: "setBidTo:" .
+   setSelectorTo: "setBidTo: value" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: PriceRecord .
+   setParameter: 1 typeTo: Number .
+   setDescriptionTo: "Set/reset bid value in recipient." .
+;
+
+PriceRecord getMessage: "setHighTo:" .
+   setSelectorTo: "setHighTo: value" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: PriceRecord .
+   setParameter: 1 typeTo: Number .
+   setDescriptionTo: "Set/reset high value in recipient." .
+;
+
+PriceRecord getMessage: "setLowTo:" .
+   setSelectorTo: "setLowTo: value" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: PriceRecord .
+   setParameter: 1 typeTo: Number .
+   setDescriptionTo: "Set/reset low value in recipient." .
+;
+
+PriceRecord getMessage: "setOpenTo:" .
+   setSelectorTo: "setOpenTo: value" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: PriceRecord .
+   setParameter: 1 typeTo: Number .
+   setDescriptionTo: "Set/reset open value in recipient." .
+;
+
+PriceRecord getMessage: "setPriceTo:" .
+   setSelectorTo: "setPriceTo: price" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: PriceRecord .
+   setParameter: 1 typeTo: Number .
+   setDescriptionTo: "Set/reset closing price in recipient." .
+;
+
+PriceRecord getMessage: "setVolumeTo:" .
+   setSelectorTo: "setVolumeTo: vol" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: PriceRecord .
+   setParameter: 1 typeTo: Number .
+   setDescriptionTo: "Set/reset volume in recipient." .
+;
+
+PriceRecord getMessage: "storeXRef" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: PriceRecord .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "List of physical storage structures created for 
+recipient's class." .
+;
+
+PriceRecord getMessage: "volume" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Volume, adjusted for splits." .
+;
+
+PriceRecord getMessage: "whatAmI" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Returns name of recipient's class." .
+;
+
+
+#==================================================
+
+####################
+# Sector
+####################
+
+Sector classDescriptor
+   setBriefDescriptionTo: "This class represents general sectors into which
+companies can be classified." .
+   setDescriptionTo: "This class represents general sectors into which
+companies can be classified.  Sectors consist of one or more industries." .
+   setSampleUsageTo: "Named Sector XXX 
+Named Sector at: \"XXX\" .
+" .
+   setHtmlDocNameTo: "clpmaCompany.htm" ;
+
+#--------------------------------------------------
+
+Sector getMessage: "asSelf" .
+   setFunctionTypeTo: "Conversion" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Sector .
+   setDescriptionTo: "Recipient stripped of any extensions." .
+;
+
+Sector getMessage: "classDescriptor" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Schema CD classDescriptor .
+   setDescriptionTo: "Class descriptor for recipient's class." .
+;
+
+Sector getMessage: "companyList" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setTypeTo: Named MessageType MethodTV . 
+   setReturnObjectTypeTo: Company .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "List of all companies in the 'memberList'
+of the industries in recpient's 'memberList'. " .
+;
+
+Sector getMessage: "defaultInstance" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Sector .
+   setDescriptionTo: "Returns the default Sector instance." .
+;
+
+Sector getMessage: "industryList" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Industry .
+   setReturnObjectContainerTo: IndexedList .
+   setDescriptionTo: "List of industries in recpient (same as 'memberList')." .
+;
+
+Sector getMessage: "isSector" .
+   setFunctionTypeTo: "Inquiry" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: TRUE .
+   setDescriptionTo: "Returns the value TRUE." .
+;
+
+Sector getMessage: "named" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Named Sector .
+   setDescriptionTo: "Naming dictionary associated with recipient's class." .
+;
+
+Sector getMessage: "whatAmI" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Returns the string \"Sector\"." .
+;
+
+
+#==================================================
+
+####################
+# Security
+####################
+
+Security classDescriptor
+   setBriefDescriptionTo: "This class represents the individual securities
+issued by a company." .
+   setDescriptionTo: "Instances of the Security class represent the 
+individual securities issued by a company or equivalent entity such as the
+government.  A variety of security types may exist including cash, common
+and preferred stocks, convertible and non-convertible bonds, and put and call
+options.  Data maintained for a security typically includes  price,
+dividend and shares/amount outstanding information.  Portfolios hold specific
+amounts of one or more securities.  " .
+   setSampleUsageTo: "Named Security XXX 
+Named Security at: \"XXX\" .
+" .
+   setHtmlDocNameTo: "clpmaCompany.htm" ;
+
+#--------------------------------------------------
+
+Security getMessage: "XRef" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Security XRef .
+   setDescriptionTo: "Provides cross reference for alternative identifiers." .
+;
+
+Security getMessage: "_sharesOut" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setTypeTo: Named MessageType MethodTV .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Shares outstanding (unadjusted for splits)." .
+;
+
+
+Security getMessage: "addAlias:" .
+   setSelectorTo: "addAlias: string" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Security .
+   setParameter: 1 typeTo: String .
+   setDescriptionTo: "Adds the parameter as an alias in Named Security.
+The alias is also added to the Named Company dictionary if the recipient
+is associated with a non-default Company." .
+;
+
+Security getMessage: "addSplitFactorOf:onExDate:" .
+   setSelectorTo: "addSplitFactorOf: aFactor onExDate: aDate" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Security .
+   setParameter: 1 typeTo: Number .
+   setParameter: 2 typeTo: Date .
+   setDescriptionTo: "Adds the supplied split factor to the recipient's
+'rawSplitFactor' on the supplied date.  A 2-for-1 stock split should get
+added with a factor of 2.0.  A 10% stock dividend should get added
+with a factor of 1.1. " .
+;
+
+Security getMessage: "adjustmentFactor" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Cumulative adjustment factor.  This property has an
+initial value of 1.0.  Each time a split occurs, a new point representing
+the product of the new raw factor and the last adjustment factor is stored
+in this property as of the ex-date.  To properly use the adjustment factor, 
+you access values as of the two dates involved, the adjustment
+date and the current date.  The ratio of these factors gives you
+the correct adjustment.  " .
+;
+
+Security getMessage: "adjustmentRelativeTo:" .
+   setSelectorTo: "adjustmentRelativeTo: aDate" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setParameter: 1 typeTo: Date .
+   setDescriptionTo: "Adjustment value that accounts for any splits in
+the recipient since supplied date.  This value will be 1.0 if no splits
+have occurred.  The value is used to adjust historic per-share and shares
+outstanding data." .
+;
+
+Security getMessage: "asSelf" .
+   setFunctionTypeTo: "Conversion" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Security .
+   setDescriptionTo: "Recipient stripped of any extensions." .
+;
+
+Security getMessage: "canCusip" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Canadian cusip." .
+;
+
+Security getMessage: "canCusip8" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "First 8 characters of canadian cusip." .
+;
+
+Security getMessage: "classDescriptor" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Schema CD classDescriptor .
+   setDescriptionTo: "Class descriptor for recipient's class." .
+;
+
+Security getMessage: "cleanupHoldingsAsOf:" .
+   setSelectorTo: "cleanupHoldingsAsOf: date" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: NoValue .
+   setParameter: 1 typeTo: Date .
+   setDescriptionTo: "Deletes holdingsSeries lists for all Securities as
+of supplied date.  This method is normally run as part of the purging of 
+holdings for all accounts ('Account purgeOldHoldingsForAll')." .
+;
+
+Security getMessage: "cleanupLocalNames" .
+   setFunctionTypeTo: "DBAdmin" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Deletes cusip8 and sedol6 aliases from appropriate
+naming dictionaries." .
+;
+
+Security getMessage: "company" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Company .
+   setDescriptionTo: "Company issuing the recipient." .
+;
+
+Security getMessage: "createAndLink:" .
+   setSelectorTo: "createAndLink: id" .
+   setFunctionTypeTo: "Creation" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Security .
+   setParameter: 1 typeTo: String .
+   setDescriptionTo: "Creates Security and/or Company using supplied id.
+The security's 'company' is set to this company.  The company's 
+'primarySecurity' is set to this security if it is currently not set." .
+;
+
+Security getMessage: "cusip" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Cusip identifier." .
+;
+
+Security getMessage: "cusip8" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Object .
+   setDescriptionTo: "First 8 characters of cusip." .
+;
+
+Security getMessage: "defaultInstance" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Security .
+   setDescriptionTo: "Returns the default Security instance." .
+;
+
+Security getMessage: "deleteAlias:" .
+   setSelectorTo: "deleteAlias: string" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Security .
+   setParameter: 1 typeTo: String .
+   setDescriptionTo: "Deletes the alias from the Named Security and Name
+Company dictionaries." .
+;
+
+Security getMessage: "deleteCurrentHoldings" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setTypeTo: Named MessageType MethodTV .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Deletes holdingsSeries list as of ^date.
+This method is normally run as part of a global purge of old holdings." .
+;
+
+Security getMessage: "displayInfo" .
+   setFunctionTypeTo: "Display" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "One line display of code, ticker, and name." .
+;
+
+Security getMessage: "dividend" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setTypeTo: Named MessageType MethodTV . 
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Last cash dividend paid on or before ^date (adjusted
+for splits and currency). " .
+;
+
+Security getMessage: "dividendSeries" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: DivRecord .
+   setDescriptionTo: "Last DivRecord on or before ^date." .
+;
+
+Security getMessage: "dividends" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: DivRecord .
+   setReturnObjectContainerTo: TimeSeries .
+   setDescriptionTo: "TimeSeries of all DivRecords for the recipient." .
+;
+
+Security getMessage: "getAdjustedDataFor:" .
+   setSelectorTo: "getAdjustedDataFor: aTimeSeries" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Advanced" .
+   setTypeTo: Named MessageType MethodTV . 
+   setReturnObjectTypeTo: Number .
+   setParameter: 1 typeTo: TimeSeries .
+   setDescriptionTo: "Returns the value of the supplied time series as of
+^date, adjusted for any splits that have occurred since the value went into
+effect.  The raw value in the time series is divided by the adjustment
+(i.e., per share)." .
+;
+
+Security getMessage: "getAdjustedSharesDataFor:" .
+   setSelectorTo: "getAdjustedSharesDataFor: aTimeSeries" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Advanced" .
+   setTypeTo: Named MessageType MethodTV . 
+   setReturnObjectTypeTo: Number .
+   setParameter: 1 typeTo: TimeSeries .
+   setDescriptionTo: "Returns the value of the supplied time series as of
+^date, adjusted for any splits that have occurred since the value went into
+effect.  The raw value in the time series is multipled by the adjustment
+(i.e., shares out)." .
+;
+
+Security getMessage: "getAggAccounts" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setTypeTo: Named MessageType MethodTV . 
+   setReturnObjectTypeTo: AggAccount .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "List of AggAccounts holding recipient." .
+;
+
+Security getMessage: "getDivsFrom:to:" .
+   setSelectorTo: "getDivsFrom: date1 to: date2" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setParameter: 1 typeTo: Date .
+   setParameter: 2 typeTo: Date .
+   setDescriptionTo: "Total cash dividend paid between two supplied dates." .
+;
+
+Security getMessage: "getHoldingIn:" .
+   setSelectorTo: "getHoldingIn: portfolio" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setTypeTo: Named MessageType MethodTV . 
+   setReturnObjectTypeTo: Holding .
+   setParameter: 1 typeTo: Portfolio .
+   setDescriptionTo: "If recipient is held by supplied Portfolio, the
+Holdng is returned.  If it is not held,  the default Holding is returned." .
+;
+
+Security getMessage: "getIndexAccounts" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setTypeTo: Named MessageType MethodTV . 
+   setReturnObjectTypeTo: IndexAccount .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "List of IndexAccounts that include recipient." .
+;
+
+Security getMessage: "getPriceRecord" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setTypeTo: Named MessageType MethodTV . 
+   setReturnObjectTypeTo: PriceRecord .
+   setDescriptionTo: "Latest PriceRecord on or before ^date." .
+;
+
+Security getMessage: "heldIn:" .
+   setSelectorTo: "heldIn: portfolio" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setTypeTo: Named MessageType MethodTV . 
+   setReturnObjectTypeTo: Boolean .
+   setParameter: 1 typeTo: Portfolio .
+   setDescriptionTo: "Is recipient held in supplied Portfolio?" .
+;
+
+Security getMessage: "holdings" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setTypeTo: Named MessageType MethodTV . 
+   setReturnObjectTypeTo: Holding .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "List of Holding instances that reference recipient.
+Holdings list are maintained over time and reflect all Portfolios that
+owned recipient as of a date." .
+;
+
+Security getMessage: "holdingsDate" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setTypeTo: Named MessageType MethodTV . 
+   setReturnObjectTypeTo: Date .
+   setDescriptionTo: "Effective date of holdings relative to ^date." .
+;
+
+Security getMessage: "holdingsPrototype" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Holding .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "Used to cluster 'holdingsSeries' list objects." .
+;
+
+Security getMessage: "holdingsSeries" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Holding .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "TimeSeries of Lists of Holdings of recipient security." .
+;
+
+Security getMessage: "id" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Returns the ticker if non-NA, the code otherwise." .
+;
+
+Security getMessage: "initializationList" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Block .
+   setReturnObjectContainerTo: List .
+   setDescriptionTo: "Default values set on instance creation,
+this list includes 'baseCurrency'." .
+;
+
+Security getMessage: "initialize" .
+   setFunctionTypeTo: "Creation" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Security .
+   setDescriptionTo: "Initializes properties in newly created instance." .
+;
+
+Security getMessage: "initializeForHoldingsPrecalcs" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setTypeTo: Named MessageType MethodTV .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Initializes properties prior to holdings cross
+reference for securities." .
+;
+
+Security getMessage: "isSecurity" .
+   setFunctionTypeTo: "Inquiry" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: TRUE .
+   setDescriptionTo: "Returns the value TRUE." .
+;
+
+Security getMessage: "isin" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Isin code." .
+;
+
+Security getMessage: "locateId:" .
+   setSelectorTo: "locateId: id" .
+   setFunctionTypeTo: "Access" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Security .
+   setParameter: 1 typeTo: String .
+   setDescriptionTo: "Returns the Security object associated with the supplied
+id.  If the id is not found in the Named Security dictionary, the Cusip,
+Sedol, CanCusip, Valor, and Isin XRef dictionaries are searched in order
+until a match is found.  If no match is found, NA is returned." .
+;
+
+Security getMessage: "named" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Named Security .
+   setDescriptionTo: "Naming dictionary associated with recipient's class." .
+;
+
+Security getMessage: "price" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setTypeTo: Named MessageType MethodTV . 
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Closing price for recipient (adjusted for splits and
+currency)." .
+;
+
+Security getMessage: "priceChangeFrom:to:" .
+   setSelectorTo: "priceChangeFrom: date1 to: date2" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setParameter: 1 typeTo: Date .
+   setParameter: 2 typeTo: Date .
+   setDescriptionTo: "Percent change in price between two supplied dates." .
+;
+
+Security getMessage: "prices" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: PriceRecord .
+   setReturnObjectContainerTo: TimeSeries .
+   setDescriptionTo: "TimeSeries of all PriceRecords for recipient." .
+;
+
+Security getMessage: "pricingSeries" .
+   setFunctionTypeTo: "DBAdmin" .
+   setLevelTo: "Advanced" .
+   setReturnObjectTypeTo: TimeSeries .
+   setReturnObjectContainerTo: TimeSeries .
+   setDescriptionTo: "Multi-level pricing structure used to efficiently
+store references to the PriceRecords associated with the reicpient." .
+;
+
+Security getMessage: "profile" .
+   setFunctionTypeTo: "Display" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Basic descriptive report about the recipient." .
+;
+
+Security getMessage: "purgeHoldings" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setTypeTo: Named MessageType MethodTV .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Removes list from 'holdingsSeries' on ^date." .
+;
+
+Security getMessage: "rawSplitFactor" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Records stock split and stock dividends for the recipient
+by ex-date. A 2-for-1 stock split is stored as a 2.0.  A 10% stock dividend
+is stored as a 1.1. " .
+;
+
+Security getMessage: "rebuildAdjustmentFactor" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Rebuilds the 'adjustmentFactor' time series for the
+recipient using the values in 'rawSplitFactor'." .
+;
+
+Security getMessage: "rebuildHoldings" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setTypeTo: Named MessageType MethodTV .
+   setReturnObjectTypeTo: NoValue .
+   setDescriptionTo: "Rebuilds the holdings cross reference for all securities.
+The holdings for all Portfolio instances are included." .
+;
+
+Security getMessage: "resetCanCusipTo:" .
+   setSelectorTo: "resetCanCusipTo: string" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Security .
+   setParameter: 1 typeTo: String .
+   setDescriptionTo: "Delete the recipient's current canadian cusip and
+set the 'canCusip' to the supplied value.  The current value is removed
+from the Named Security, Named Company, and XRef CanCusip dictionaries." .
+;
+
+Security getMessage: "resetCodeTo:" .
+   setSelectorTo: "resetCodeTo: string" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Security .
+   setParameter: 1 typeTo: String .
+   setDescriptionTo: "Change the recipient's 'code' to the supplied string.
+If the recipient's company code was the same as the recipient's code,
+it is changed to the supplied string as well." .
+;
+
+Security getMessage: "resetCompany" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Security .
+   setDescriptionTo: "Resets recipient's 'company' to the default." .
+;
+
+Security getMessage: "resetCusipTo:" .
+   setSelectorTo: "resetCusipTo: string" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Security .
+   setParameter: 1 typeTo: String .
+   setDescriptionTo: "Delete the recipient's current cusip and set 
+the 'cusip' to the supplied value.  The current value is removed
+from the Named Security, Named Company, and XRef Cusip dictionaries." .
+;
+
+Security getMessage: "resetIsinTo:" .
+   setSelectorTo: "resetIsinTo: string" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Security .
+   setParameter: 1 typeTo: String .
+   setDescriptionTo: "Delete the recipient's current isin and set 
+the 'cusip' to the supplied value.  The current value is removed
+from the Named Security, Named Company, and XRef Isin dictionaries." .
+;
+
+Security getMessage: "resetSedolTo:" .
+   setSelectorTo: "resetSedolTo: string" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Security .
+   setParameter: 1 typeTo: String .
+   setDescriptionTo: "Delete the recipient's current sedol and set 
+the 'sedol' to the supplied value.  The current value is removed
+from the Named Security, Named Company, and XRef Sedol dictionaries." .
+;
+
+Security getMessage: "resetValorTo:" .
+   setSelectorTo: "resetValorTo: string" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Security .
+   setParameter: 1 typeTo: String .
+   setDescriptionTo: "Delete the recipient's current valor and set 
+the 'valor' to the supplied value.  The current value is removed
+from the Named Security, Named Company, and XRef Valor dictionaries." .
+;
+
+Security getMessage: "sedol" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Sedol identifier." .
+;
+
+Security getMessage: "sedol6" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "First 6 characters of sedol." .
+;
+
+Security getMessage: "setCanCusipTo:" .
+   setSelectorTo: "setCanCusipTo: string" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Security .
+   setParameter: 1 typeTo: String .
+   setDescriptionTo: "Sets the recipient's 'canCusip' to supplied string.
+If the current 'code' is the same as the old 'canCusip', it is reset to
+the supplied string as well.  The string is added as an alias to the
+Named Security and Named Company dictionaries (with a prepended 'c') and 
+to the XRef CanCusip (as an 8 and 9 character id)." .
+;
+
+Security getMessage: "setCompanyTo:" .
+   setSelectorTo: "setCompanyTo: comp" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Security .
+   setParameter: 1 typeTo: Company .
+   setDescriptionTo: "Set company for recipient.  Note that security/company
+pairs that are created together with 'createAndLink:' will have identical
+'code' value and should not be reset because you will lose aliases at
+the company. The recipient's aliases that are associated with the original
+company are deleted from this company and added to the supplied company.
+If the supplied company does not refer to a primary security, its
+'primarySecurity' is set to recipient." .
+;
+
+Security getMessage: "setCusipTo:" .
+   setSelectorTo: "setCusipTo: string" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Security .
+   setParameter: 1 typeTo: String .
+   setDescriptionTo: "Sets the recipient's 'cusip' to supplied string.
+If the current 'code' is the same as the old 'cusip', it is reset to
+the supplied string as well.  The string is added as an alias to the
+Named Security and Named Company dictionaries and to the XRef Cusip
+(as an 8 and 9 character id)." .
+;
+
+Security getMessage: "setIsinTo:" .
+   setSelectorTo: "setIsinTo: string" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Security .
+   setParameter: 1 typeTo: String .
+   setDescriptionTo: "Sets the recipient's 'isin' to supplied string.
+If the current 'code' is the same as the old 'isin', it is reset to
+the supplied string as well.  The string is added as an alias to the
+Named Security and Named Company dictionaries and to the XRef Isin." .
+;
+
+Security getMessage: "setSedolTo:" .
+   setSelectorTo: "setSedolTo: string" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Security .
+   setParameter: 1 typeTo: String .
+   setDescriptionTo: "Sets the recipient's 'sedol' to supplied string.
+If the current 'code' is the same as the old 'sedol', it is reset to
+the supplied string as well.  The string is added as an alias to the
+Named Security and Named Company dictionaries and to the XRef Sedol
+(6 and 7 character sedol id)." .
+;
+
+Security getMessage: "setTickerTo:" .
+   setSelectorTo: "setTickerTo: string" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Security .
+   setParameter: 1 typeTo: String .
+   setDescriptionTo: "Sets the recipient's 'ticker' to supplied string.
+The string is added as an alias to the Named Security and Named Company
+dictionaries." .
+;
+
+Security getMessage: "setTypeTo:" .
+   setSelectorTo: "setTypeTo: sectype" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Security .
+   setParameter: 1 typeTo: SecurityType .
+   setDescriptionTo: "Sets recipient's 'type' property to the supplied 
+SecurityType." .
+;
+
+Security getMessage: "setValorTo:" .
+   setSelectorTo: "setValorTo: string" .
+   setFunctionTypeTo: "Update" .
+   setLevelTo: "DBA" .
+   setReturnObjectTypeTo: Security .
+   setParameter: 1 typeTo: String .
+   setDescriptionTo: "Sets the recipient's 'valor' to supplied string.
+If the current 'code' is the same as the old 'valor', it is reset to
+the supplied string as well.  The string is added as an alias to the
+Named Security and Named Company dictionaries (prepended with 'v')
+and to the XRef Valor." .
+;
+
+Security getMessage: "sharesOut" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setTypeTo: Named MessageType MethodTV .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Latest shares outstanding on or before ^date
+(adjusted for splits)." .
+;
+
+Security getMessage: "ticker" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Ticker symbol." .
+;
+
+Security getMessage: "totalReturnFrom:to:" .
+   setSelectorTo: "totalReturnFrom: date1 to: date2" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Number .
+   setParameter: 1 typeTo: Date .
+   setParameter: 2 typeTo: Date .
+   setDescriptionTo: "Total return between supplied dates.  This value
+is computed using starting and ending price and the dividends in the
+period." .
+;
+
+Security getMessage: "type" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: SecurityType .
+   setDescriptionTo: "Security type." .
+;
+
+Security getMessage: "valor" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Valor identifier." .
+;
+
+Security getMessage: "volume" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setTypeTo: Named MessageType MethodTV .
+   setReturnObjectTypeTo: Number .
+   setDescriptionTo: "Lates trading volume on or before ^date." .
+;
+
+Security getMessage: "whatAmI" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Returns the string \"Security\"." .
+;
+
+
+#==================================================
+
+####################
+# SecurityType
+####################
+
+SecurityType classDescriptor
+   setBriefDescriptionTo: "This class represents security types." .
+   setDescriptionTo: "Instances of this class represents types of
+security assets.  These instances are normally more detailed than
+the general AssetCategories and include Common Stock, Corporate Bond,
+and Put Option." .
+   setSampleUsageTo: "Named SecurityType XXX 
+Named SecurityType at: \"XXX\" .
+" .
+   setHtmlDocNameTo: "clpmaCompany.htm" ;
+
+
+#--------------------------------------------------
+
+SecurityType getMessage: "asSelf" .
+   setFunctionTypeTo: "Conversion" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: SecurityType .
+   setDescriptionTo: "Recipient stripped of any extensions." .
+;
+
+SecurityType getMessage: "classDescriptor" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Schema CD classDescriptor .
+   setDescriptionTo: "Class descriptor for recipient's class." .
+;
+
+SecurityType getMessage: "defaultInstance" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: SecurityType .
+   setDescriptionTo: "Returns the default SecurityType instance." .
+;
+
+SecurityType getMessage: "isCashEquiv" .
+   setFunctionTypeTo: "Inquiry" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Boolean .
+   setDescriptionTo: "Is recpient's 'assetCategory' cash?" .
+;
+
+SecurityType getMessage: "isEquity" .
+   setFunctionTypeTo: "Inquiry" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Boolean .
+   setDescriptionTo: "Is recpient's 'assetCategory' equity?" .
+;
+
+SecurityType getMessage: "isFixed" .
+   setFunctionTypeTo: "Inquiry" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Boolean .
+   setDescriptionTo: "Is recpient's 'assetCategory' fixed income?" .
+;
+
+SecurityType getMessage: "isOther" .
+   setFunctionTypeTo: "Inquiry" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Boolean .
+   setDescriptionTo: "Is recpient's 'assetCategory' other?" .
+;
+
+SecurityType getMessage: "isSecurityType" .
+   setFunctionTypeTo: "Inquiry" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: TRUE .
+   setDescriptionTo: "Returns the value TRUE." .
+;
+
+SecurityType getMessage: "named" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Named SecurityType .
+   setDescriptionTo: "Naming dictionary associated with recipient's class." .
+;
+
+SecurityType getMessage: "unitCalc" .
+   setFunctionTypeTo: "Data" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: Double .
+   setDescriptionTo: "Mutliplier for adjusting units of security held for
+market value calculation purposes." .
+;
+
+SecurityType getMessage: "whatAmI" .
+   setFunctionTypeTo: "Schema" .
+   setLevelTo: "Basic" .
+   setReturnObjectTypeTo: String .
+   setDescriptionTo: "Returns the string \"SecurityType\"." .
+;
+
+####################
+# DataFeed classes
+####################
+DataFeed classDescriptor getAllChildren
+  select: [ childList count = 0 ] .
+do: [ ^self setHtmlDocNameTo: ("pma_" concat: code . concat: ".htm") ] ;
+

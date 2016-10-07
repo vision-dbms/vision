@@ -1,0 +1,2772 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                          Section 5
+
+                                   Local Entity Reconciles
+
+
+
+
+            Many external data sources supply one or more data sets related  to  a
+            specific  entity  type  on  a  regular basis.  These data sets contain
+            records for a set of entities representing data as of different points
+            in  time.   Each  data  set  can  contain one record per entity or can
+            supply  multiple  records  for  the  same  entity,  with  each  record
+            representing  a  "snapshot" of the data as of a specific date.  Access
+            to this data is provided via a set  of  messages  defined  to  link  a
+            specific  entity  instance with its corresponding data in the external
+            source.
+
+
+            Although many updates will require customized reconcile rules,  Insyte
+            has defined a set of classes and messages to support data sources that
+            are updated on a regular basis and use local entities to link data  in
+            the  data sets to shared entities.  This type of reconcile, known as a
+            "LocalEntity-style" reconcile, has the following characteristics:
+
+
+               - The records in the data set  supply  information  about  specific
+                 entities  in  your  Vision  database.  The  data  sets  are often
+                 supplied  by  an  external  source  which  may  have   a   unique
+                 identification  for  the  data.  These rules for linking the data
+                 set instances to actual entity instances can be stored  with  the
+                 data source.
+
+               - The data items in the data set are usually  used  in  conjunction
+                 with one another.
+
+               - Each update provides a new period's worth of  data  or  refreshes
+                 multiple  periods  of historical data.  The instances of the data
+                 set are kept over time.
+
+               - A data set may contain instances that do not link  to  a  current
+                 entity.  These instances may need to be linked at a future time.
+
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                 5-2
+
+
+
+            In general, the procedures described in the preceding  sections  apply
+            to  LocalEntity-style  data  sources as well.  Several differences are
+            noted below:
+
+
+               - You will normally have one layout file which by convention should
+                 be  named  snapshot.   If  the  data source supplies several data
+                 sets,  one  data  set  (usually   the   one   providing   current
+                 information)  is named snapshot.  User-defined names are used for
+                 the other data sets.
+
+               - The script created using the createBLD program  will  define  new
+                 classes  as  subclasses  of  the  DataSet  class  instead  of the
+                 IncorporatorPrototype class.
+
+               -  The  default  Load   script   is   automatically   copied   from
+                 Load.LocalEntity  in the /localvision/update/Templates directory.
+                 This script differs from  the  custom  Load  script  in  that  it
+                 assumes  that  there is one data set named "snapshot" to process.
+                 The layout file  snapshot.lay  must  exist.   A  sample  file  is
+                 supplied  in  the  Templates/layouts  directory.  The Load script
+                 takes a second parameter which names the raw data file. This data
+                 file  is  renamed  as  snapshot.dat  in  the data directory.  For
+                 example:
+
+                      cd /localvision/update
+                      cp Templates/layouts/snapshot.lay Demo/layouts
+                      cp Templates/data/demo.dat RawData/Data/demo.9404
+                      echo "9404" > RawData/Token/demo
+
+                      cd /localvision/update/Demo
+                      Load /localvision/update/RawData demo
+
+                 If your data source has more than one data set or the data set is
+                 not named snapshot, the Load script will need to be modified.
+
+
+               - The default Reconcile script is  automatically  copied  from  the
+                 Templates  directory  as  well.   The  remainder  of this section
+                 describes the modifications that you may need  to  make  to  this
+                 script.
+
+
+
+
+
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                 5-3
+
+
+
+            5.1  The General Model
+
+            Each data set supplied by the data source is mapped to its own  Vision
+            class  which  is a subclass of the DataSet class.  An additional class
+            is created for each data source  to  manage  the  links  between  core
+            entity  instances  such  as Company objects and the specific data sets
+            associated  with  the  data  source.   This  class  is  always   named
+            LocalEntity  in  the  object  space  defined  for  the data source.  A
+            dictionary subclass named LocalDictionary  is  also  created  in  this
+            object  space  and  is  used  to  name the individual instances of the
+            LocalEntity class.  This class names the local entity instances in the
+            same  way  the  Named  Company  dictionary  is  used  to  name Company
+            instances.
+
+
+            Unlike the core entity classes, you almost never access the  data  set
+            classes directly.  Instead, you access the specific instances you need
+            via messages that link the core entity instances to the specific  data
+            set  instances  with  which  they  are  associated.   These  links are
+            established as part of the reconciliation process.
+
+
+            Assume the Demo data source supplies one  data  set  that  relates  to
+            company  instances.   This  data source provides an incremental update
+            once a month.  The table supplies twenty pieces of information  (e.g.,
+            item1,  item2, ... item20) as well as a localId code and a date.  Each
+            instance will therefore contain values for each of these data items.
+
+
+            To support this data source,  three  new  classes  are  defined.   The
+            external  data  set  that  is  updated monthly is normally stored in a
+            class named "snapshot" since it represents periodic snapshots  of  the
+            external  data.  The class "LocalEntity" is the class that manages the
+            links between Company instances and the instances  of  Demo  snapshot.
+            The  class  "LocalDictionary"  names  the instances of the LocalEntity
+            class.  Since these classes will be stored in a separate object space,
+            the  class names are defined relative to the space.  As a result, each
+            source  can  have  classes  named   "snapshot",   "LocalEntity",   and
+            "LocalDictionary" without conflict.
+
+
+            Each company in the Demo database will have an instance  in  the  Demo
+            LocalEntity  class.  These instances are created and maintained during
+            the reconciliation process.  Initially, there  will  be  a  one-to-one
+            correspondence  between the instances of LocalEntity and the instances
+            of snapshot if we assume that the initial  update  provides  a  single
+            month's information.  During subsequent updates, new instances will be
+            created in the LocalEntity class as new companies  are  added  to  the
+            Demo  database.   One or more snapshot records will be associated with
+            each LocalEntity instance, each representing a specific point in time.
+            To  access a specific instance of the LocalEntity class, you would use
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                 5-4
+
+
+
+            the expression:
+
+
+                 LocalDictionary id
+
+                 where id is an identifier associated with the local entity
+
+
+            This expression returns an instance of the  LocalEntity  class.   Note
+            that  if  your global environment is not the global environment of the
+            data source, you can access this instance using:
+
+
+                 Named DataSource Demo objectSpace LocalDictionary id
+
+
+            To establish the connection between  specific  Company  instances  and
+            their corresponding instances in the Demo LocalEntity class, the fixed
+            property "DemoData" is defined at the class  Company.   The  value  of
+            this  property  is  the  actual instance in the Demo LocalEntity class
+            that represents the data for the specific company.  The expression:
+
+
+                 Named Company IBM DemoData
+
+            returns the instance in the Demo  LocalEntity  class  that  represents
+            IBM's data.  This is illustrated pictorially below:
+
+
+                 Company                                  Demo LocalEntity
+                 =================================        ==============================
+                 | ticker | name | ... | DemoData|        |  id       | ...            |
+                 |________|______|_____|_________|        |____________________________|
+                 |  GM    |      |     |         |        |   id1     |                |
+                 |  IBM   |      |     |  =======|===|    |   id2     |                |
+                 |  XON   |      |     |         |   |    |   id3     |                |
+                 |  . . .                        |   |====|=> idIBM   |                |
+                 |_______________________________|        | . . .                      |
+                                                          |____________________________|
+
+
+            The "DemoData" property establishes a permanent  relationship  between
+            the  two  instances.  As a result, the user is sheltered from any "id"
+            changes in either the Company or the Demo LocalEntity classes.
+
+
+            Because the value of this property  is  the  actual  instance  in  the
+            LocalEntity class, it responds to the messages defined for that class.
+            In this example, the expression:
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                 5-5
+
+
+
+                 Named Company IBM DemoData id
+
+            returns the string value "idIBM".  If "idIBM" is the local id used  to
+            identify the IBM instance, then the expressions:
+
+
+                 Named Company IBM DemoData
+
+            and
+
+                 LocalEntity idIBM
+
+            are identical and return IBM's instance in the Demo LocalEntity class.
+
+
+            Since the message "displayMessages" lists all the messages defined for
+            the recipient object's class, the expressions:
+
+                 LocalEntity displayMessages                   # (or displayMessagesX)
+            and
+                 Named Company IBM DemoData displayMessages    # (or displayMessagesX)
+
+
+            display all the messages defined for the Demo LocalEntity class.
+
+
+            It is likely that the Demo database will not  supply  information  for
+            every  Company  instance.  To keep access to the database uniform, any
+            company not having actual Demo data will have the default instance  of
+            the Demo LocalEntity class assigned to its "DemoData" property.  Every
+            company will therefore return an  instance  of  the  Demo  LocalEntity
+            class in response to the message "DemoData".  The messages "isDefault"
+            and "isntDefault" are defined for all  objects  to  determine  if  the
+            value  is the default instance of the class.  For example, assume that
+            the Demo database does not supply information for GM.  The expression:
+
+
+                 Named Company GM DemoData isDefault
+
+            returns the value TRUE, the expression:
+
+
+                 Named Company IBM DemoData isDefault
+
+            returns the value FALSE, and the expression:
+
+
+                 Company masterList select: [ DemoData isntDefault ]
+
+            returns the list of Company instances that have "real" Demo data.
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                 5-6
+
+
+
+            It is also possible that Demo will provide data for companies that  do
+            not  have  a  corresponding  Company  instance.   In  this  case,  the
+            information will be tracked in the  Demo  LocalEntity  class  and  not
+            linked  to  a specific Company instance.  If the company is created as
+            an instance in the future, the link can be established  at  that  time
+            and  any Demo data history collected will be automatically accessible.
+            The expression:
+
+
+                 Company DemoData masterList
+
+            returns the list of all Demo  local  entity  instances  regardless  of
+            whether  they  are  linked  to  an  actual  company   instance.   This
+            expression is identical to:
+
+
+                 Named DataSource Demo objectSpace LocalEntity masterList
+
+
+            To establish the connection between specific LocalEntity instances and
+            the  corresponding  instances  in  the snapshot class, the time series
+            property "history" is defined at the class LocalEntity.  The values of
+            this  property  are  the  actual  instances in the snapshot class that
+            correspond to the data for the LocalEntity as of a specific  point  in
+            time.  The expression:
+
+
+                 Named Company IBM DemoData history
+
+            returns the instance in the snapshot class that represents IBM's  most
+            recent data in the Demo database and the expressions:
+
+
+                 Named Company IBM DemoData :history asOf: 9211 .
+            or
+                 9211 evaluate:
+                   [ Named Company IBM DemoData history ]
+
+            return the instance  in  the  snapshot  class  that  represents  IBM's
+            November  1992  data  in  the  Demo  database.   This  is  illustrated
+            pictorially below:
+
+
+
+
+
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                 5-7
+
+
+
+                 LocalEntity                           snapshot
+                 ==============================       ================================
+                 | id      | ... | history    |       | localId   | date | item1 | ...
+                 |---------|-----|------------|       |-----------|------|-------|-----
+                 | id1     |     | 9211-------|-------|--> id1    | 9211 |
+                 |         |     | 9212-------|-----  |    id2    | 9211 |
+                 |         |     | 9301-------|--  |  |    id3    | 9211 |
+                 | . . .   |     |            | |  |--|--> id1    | 9212 |
+                 |               |            | |     |    id2    | 9212 |
+                 |               |            | |     |    id3    | 9212 |
+                 |               |            | |-----|--> id1    | 9301 |
+                 |               |            |       |           |      |
+                 |_______________|____________|       |___________|______|_____________
+
+
+            The "history" property establishes a  permanent  relationship  between
+            the  LocalEntity  instance  and the set of snapshot records associated
+            with that instance over time.
+
+
+            Because the values in the "history" property are actual  instances  in
+            the  snapshot  class,  they  respond  to the messages defined for that
+            class.  The expression:
+
+
+                 Named Company IBM DemoData history item1
+
+            returns the value of "item1". To determine  the  date  of  the  record
+            retrieved, use the "date" message:
+
+
+                 Named Company IBM DemoData history date
+
+
+            Since the message "displayMessages" lists all the messages defined for
+            the recipient object's class, the expressions:
+
+
+                 snapshot displayMessages                             (# displayMessagesX)
+
+                 LocalEntity history displayMessages                  (# displayMessagesX)
+            and
+                 Named Company IBM DemoData history displayMessages   (# displayMessagesX)
+
+            are identical and display all the messages defined  for  the  snapshot
+            class.
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                 5-8
+
+
+
+            The message "history" refers to a time series property.  As a  result,
+            the expressions:
+
+
+                 Named Company IBM DemoData :history asOf: 9211 . item1
+            or
+                 9211 evaluate:
+                   [ Named Company IBM DemoData history item1 ]
+
+            can be used to access the value of Demo "item1" as of November 1992.
+
+
+            Because the expression "DemoData history" will be used to access  most
+            of  the  useful  data  in  this  database,  a cover method is normally
+            defined to simplify this access.  For example, the method "demo" could
+            be  defined  at  the class Company to execute the expression "DemoData
+            history".  The previous expressions would then be rewritten as:
+
+
+                 Named Company IBM :demo asOf: 9211 . item1
+            or
+                 9211 evaluate:
+                   [ Named Company IBM demo item1 ]
+
+
+            The default instance for the snapshot class is stored in the "history"
+            time  series  as of "earliestPossibleDate" (i.e., 1/1/1).  The default
+            entry is stored in the time series so that you do  not  get  "Selector
+            Not  Found"  errors  if you access data from a date prior to the first
+            "real" date.  If this value were not stored and the first "real"  date
+            were November 1992, the expression:
+
+
+                 9206 evaluate:
+                   [
+                     Named Company IBM DemoData history
+                     do: [ date print ;
+                           item1 print ;
+                           item2 print ;
+                           item3 printNL ;
+                         ] ;
+                   ] ;
+
+            would display the errors:
+
+                      >>> Selector 'item1' Not Found <<<
+                      >>> Selector 'item2' Not Found <<<
+                      >>> Selector 'item3' Not Found <<<
+
+            because the "history" message would return the value NA.
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                 5-9
+
+
+
+            All LocalEntity instances will  minimally  have  this  single  default
+            record  in  the time series.  Therefore, if you ask for a company that
+            does not have any data or a company that does not  have  data  as  far
+            back  as you have requested, you will not get the "Selector Not Found"
+            errors.
+
+
+            The expression:
+
+
+                 Company masterList select: [ DemoData history isntDefault ] .
+
+            selects the companies that have "real"  snapshot  records  as  of  the
+            current  date.   Since  the  message  "demo" translates into "DemoData
+            history", this is identical to the expression:
+
+
+                 Company masterList select: [ demo isntDefault ] .
+
+
+            To select those companies that have some Demo data but do not have any
+            data on or before December 1992, use:
+
+
+                 92 evaluate:
+                   [ Company masterList
+                       select: [ DemoData isntDefault && DemoData history isDefault ]
+                   ]
+            or
+                 Company masterList
+                     select: [ DemoData isntDefault && (:demo asOf: 92 . isDefault) ]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                5-10
+
+
+
+            5.2  The Reconcile Process
+
+            The pre-defined methods for the LocalEntity-style reconcile have  been
+            designed to perform two major functions: Dictionary Reconciliation and
+            Data Reconciliation.
+
+
+            Dictionary reconciliation involves linking the  entities  provided  in
+            the  current  update  to  existing local and global entities using the
+            "key" information and processing rules defined for  the  data  source.
+            Data  reconciliation  involves  updating  the  LocalEntity time series
+            properties with  the  new  instances  of  each  data  set  as  of  the
+            processing  date.   The reconcile process includes the following major
+            steps:
+
+
+            Setup               This step sets the various  processing  dates  for
+                                the  data  source and each data set, cleans up any
+                                data set instances  that  have  been  flagged  for
+                                deletion,  flags  any  bad or duplicate records in
+                                each data set, and  runs  any  supplemental  setup
+                                methods defined for each data set.
+
+            Dictionary Update   This step is  used  to  create  new  instances  of
+                                LocalEntity  using  any data set flagged to update
+                                dictionary information.  If  the  "localId"  of  a
+                                data  set  instance  is  not already a LocalEntity
+                                instance, Vision checks to see if a  "key"  change
+                                has been posted globally.  If so, Vision uses this
+                                information to identify  the  correct  LocalEntity
+                                instance   and   updates   the   local  dictionary
+                                accordingly.   Otherwise,  a  new  LocalEntity  is
+                                created.   An  attempt  is  then  made to link any
+                                local entity not  currently  linked  to  a  global
+                                entity,  based  on  the  rules associated with the
+                                data source.
+
+            Data Update          This  step  updates  the  properties  defined  at
+                                LocalEntity   with   the   appropriate   data  set
+                                instance(s) as of the correct date  and  runs  any
+                                supplemental  update  methods defined for the data
+                                set.  Data set instances excluded from the  update
+                                are noted as exceptions and flagged for deletion.
+
+            Exception Reports   This step displays test data for  each  data  set,
+                                critical  exception  reports, and any supplemental
+                                reports defined for the data source.
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                5-11
+
+
+
+            The "LocalEntity-style" reconcile produces a standard  set  of  status
+            and  exception  reports  during  the reconcile process.  These reports
+            include:
+
+
+                 -  Summary Counts Report
+                 -  Data Set Cleanup Report
+                 -  Local Reconcile Report
+                 -  Global Reconcile Report
+                 -  Data Set Update Report
+                 -  Sample Test Data
+                 -  Exception Reports
+
+
+            A number of optional reports are also available.
+
+
+            When the reconcile begins, it displays a header containing the name of
+            the  data  source  and  the  actual  and "as of" date of the update as
+            illustrated below:
+
+
+                                     *****   BEGIN Demo RECONCILE   *****
+                                             Process Date: 4/7/1994
+
+
+                Update As Of: 3/31/1994
+
+
+            All of  the  standard  reports  and  any  optional  reports  are  then
+            displayed.  The reconcile concludes with:
+
+
+
+                                       *****   END Demo RECONCILE   *****
+                 >>> Object Network Updated <<<
+
+
+            The individual reports are described in detail on the following pages.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                5-12
+
+
+
+            Summary Counts Report
+            ------- ------ ------
+
+            This  report  displays  summary  counts  for  the  classes  and  links
+            associated with the data source as shown below:
+
+
+                                             ---  Begin Counts  ---
+
+                Local Dictionary:        4347
+                Local Entity:            4347
+                Entity:                  3404
+                Global Recs:             3404
+                history:                 8324
+                . . .
+
+                                             ---  End Counts  ---
+
+                where:
+
+                Row             Description
+                ------------------------------------------------------------
+                Local Dict:     The number of aliases defined in the LocalDictionary
+                                class; this count is the number of unique keys ever
+                                supplied by this data source since updates have begun
+
+                Local Entity:   The number of instances in the LocalEntity class
+
+                Entity:         This row label will contain the name of the entity
+                                class linked to this data source; the count indicates
+                                the number of global entities that have a corresponding
+                                instance in the LocalEntity class
+
+                Global Recs:    The number of local entities that correspond to an
+                                actual entity
+
+                history:        This row label will contain the name of a time series
+                                at LocalEntity; the count indicates the total number
+                                of data set instances associated with this time series
+
+                . . .           A separate row will be generated for each data set
+                                associated with a LocalEntity time series
+
+
+            This report is generated at the start of the reconcile and after  each
+            major  component  of  the  reconcile has been completed.  You can also
+            generate this report interactively using:
+
+
+                 LocalEntity displayStats
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                5-13
+
+
+
+            Data Set Cleanup Report
+            ---- --- ------- ------
+
+            This report displays a cleanup summary for each  data  set  associated
+            with the data source in the form:
+
+
+                                         ---  Begin snapshot Cleanup ---
+
+                            4346 Total Instances Found.
+                               0 Records Deleted.
+
+
+                                              ---  End Cleanup  ---
+
+
+            The first line indicates the total number of instances in the data set
+            class.   The  second  line  indicates the number of instances deleted.
+            Instances will only be deleted if they have been flagged for  deletion
+            by a previous reconcile.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                5-14
+
+
+
+            Local Reconcile Report
+            ----- --------- ------
+
+            This report displays  a  summary  of  any  new  LocalEntity  instances
+            created and any "key" changes found as illustrated below:
+
+
+                                 ---  Begin Local Reconcile Using snapshot  ---
+
+                 Local Add:     00036020
+                 Local Add:     00036110
+                 Id Change:     from 12345678        to  87654321
+                 Local Add:     00075210
+                 . . .
+
+                      4346 Input Records Processed
+
+                                          ---  End Local Reconcile  ---
+
+
+            This  report  displays  any  "localId"  values  in  the  new  snapshot
+            instances  that  were  added  as  new  LocalEntity  instances.  If the
+            "localId"  of  a  snapshot  is  not  found  in   the   data   source's
+            LocalDictionary  but  it is associated with an existing entity, an "Id
+            Change" message is displayed and the new identifier is  added  to  the
+            LocalDictionary  as  an alias for the old identifier.  In other words,
+            both the new  and  old  identifiers  refer  to  the  same  LocalEntity
+            instance  and  no  new  instance  is  created.   The  total  number of
+            instances processed is displayed at the end of the report.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                5-15
+
+
+
+            Global Reconcile Report
+            ------ --------- ------
+
+            This report displays a summary of any LocalEntity instances that  were
+            linked to global entities during this update as illustrated below:
+
+
+                               ---  Begin New Global Reconciliations Report  ---
+
+                 45920010   Linked To: 459200101    IBM     INTERNATIONAL BUSINESS MACHINES
+                 37044210   Linked To: 370442105    GM      GENERAL MOTORS CORP
+                 . . .
+
+                                 ---  End New Global Reconciliations Report  ---
+
+
+            The  report  shows  the  local  entity  information  followed  by  the
+            identifiers and name of the entity object to which it has been linked.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                5-16
+
+
+
+            Data Set Update Report
+            ---- --- ------ ------
+
+            This report displays an update summary for each  data  set  associated
+            with the data source in the form:
+
+
+                                   ---   Begin snapshot Update (history)   ---
+
+                   Total Records Found:                4346
+                   Total Good Records:                 4346
+                   Records Processed:                  4346
+
+                   Bad Record Exclusion Reason: Duplicate or Bad localId
+
+
+                                         ---   End snapshot Update  ---
+
+
+            This report shows the number of total  records  (instances)  available
+            for  processing  and  the number actually processed for each data set.
+            The major reason an instance would not be processed is if it does  not
+            have an identifier or other key information available.  Instances that
+            are considered "bad" are flagged as  bad  records.   If  a  particular
+            update  supplies duplicate records, only one of the instances would be
+            used and others would be  flagged  as  duplicates  and  excluded  from
+            processing.   The  exclusion  message  displayed  at  the  end of this
+            reports can be modified to reflect the rules defined for a  particular
+            data set.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                5-17
+
+
+
+            Sample Test Data
+            ------ ---- ----
+
+            Once the dictionary and data updates have completed,  sample  data  is
+            displayed  for  a small number of LocalEntity instances as illustrated
+            below:
+
+
+                                            ---  Begin Test Data  ---
+
+                 --------------------------------------------------
+                 Test Data For: 370442105   37044210
+                           370442105    GM           GENERAL MOTORS CORP
+
+                  --> DataSet: snapshot
+                                   [id]        [item1]     [item2]
+                     3/ 4/1994     370442105     62.00        2.13
+                 --------------------------------------------------
+
+                 . . .
+
+                                             ---  End Test Data  ---
+
+
+            The rules for defining the test universe and the test data  items  can
+            be customized for each data source.  You can also generate this report
+            interactively using:
+
+
+                 LocalEntity displayTestData
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                5-18
+
+
+
+            Exception Reports
+            --------- -------
+
+            Several exception reports are automatically generated by default.  For
+            each  data  set,  a  report summarizes the number of bad and duplicate
+            records found during processing as illustrated below:
+
+
+                               *****    snapshot Summary Exception Report    *****
+
+                   Total Records Found:             4346
+                   Total Not Processed:                0
+                   Total Bad Records:                  0
+                   Total Duplicate Records:            0
+
+
+                                *****    End of Summary Exception Report    *****
+
+
+            The Duplicate Entity report displays any entities that are  associated
+            with  more  than  one  LocalEntity  instance.  The LocalEntity that is
+            linked to the global entity is indicated by the *:
+
+
+                                  *****    Demo Duplicate Company Report    *****
+
+                         The Following 1 Global Entities Have More Than One Local Entity
+                                   ( * indicates the one that Global references)
+
+                 --> Company: 370442105    GM           GENERAL MOTORS CORP
+                  Local Entity: * 370442105
+                  Local Entity:   370442907
+
+
+
+                                 *****    End of Duplicate Entity Report    *****
+
+
+            You can generate the standard exception reports interactively using:
+
+
+                 LocalEntity displayExceptions
+
+
+
+
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                5-19
+
+
+
+            5.3  Defining the "Reconcile" Script
+
+            A starter reconciliation script is supplied in the scripts  directory.
+            Depending on the style of reconcile you indicated, the RECshell.Custom
+            or    RECshell.LocalEntity    script    was    copied     from     the
+            /localvision/update/Templates   directory  as  the  initial  reconcile
+            script for this data source.  If this script is  not  the  LocalEntity
+            version, copy the correct version from the Templates directory to your
+            scripts directory.
+
+
+            Minimally, you will need to set the Entity type and indicate that this
+            is a "LocalEntity" style reconcile.  You should see the lines:
+
+
+                 DataSource
+                     setEntityTypeTo: Entity .
+                     # setDBCodeTo: "" .
+                     setUpdateTypeTo: "LocalEntity" ;
+
+            near the beginning of the reconcile script.  The entity  type  is  the
+            default  instance  of  the class associated with the data source.  You
+            should edit this line to indicate the actual entity  class  associated
+            with this data source.
+
+
+            The "setUpdateTypeTo:" message indicates that this is  a  LocalEntity-
+            style  update.  When this message is executed, the classes LocalEntity
+            and LocalDictionary are created in the  data  source's  object  space.
+            The  properties  "localEntity" and "dictionary" for the DataSource are
+            updated to return these objects.  In  addition,  the  property  formed
+            using  the capitalized value of "dbCode" followed by "Data" is defined
+            at the entity's class if it does not already exist.   By  default  the
+            "dbCode"  is  the  data source's code.  In this case, since no code is
+            supplied to overwrite the default "dbCode", the property "DemoData" is
+            defined  at  the  class Company.  This property is added to the entity
+            class' initialization list and current instances in the  entity  class
+            are  initialized  to return the default LocalEntity instance.  At this
+            point the expression:
+
+
+                 Named Company IBM DemoData
+
+            can be used to access the LocalEntity associated with IBM.  Initially,
+            this value will be the default local entity instance.
+
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                5-20
+
+
+
+            The next portion of the reconcile script provides a  set  of  optional
+            parameters that can be set for the data source.  These include:
+
+
+               -  redefining  the  cross  reference  dictionary  used  for  global
+                 reconciliation.
+
+               - setting the update frequency for the data source.
+
+               - adding one or more cover messages at the entity class.
+
+
+            The  message  "setEntityXRefTo:"  is  used  to  change   the   default
+            dictionary  used  to  link local entity identifiers with global entity
+            identifiers.  By default the  Named  dictionary  associated  with  the
+            entity  class is used.  Any cross reference dictionary defined for the
+            entity's class can be used instead.  The actual XRef dictionary  class
+            or  its  name  can  be supplied as a parameter.  For example, to use a
+            cross reference dictionary named "AltNames" defined  for  the  Company
+            class, the expression:
+
+
+                 DataSource setEntityXRefTo: "AltNames" ;
+            or
+                 DataSource setEntityXRefTo: Company XRef AltNames ;
+
+            can be used.  The property "entityXRef"  at  DataSource  contains  the
+            current cross reference dictionary for the data source.
+
+
+            The message "setUpdateFrequencyTo:" is used to indicate  the  expected
+            frequency  at  which  the  data  source will be updated.  The supplied
+            parameter should be any valid date offset such as 1  monthEnds.   This
+            frequency  is optional descriptive information you can provide about a
+            data   source   source   and   is   not   enforced.    The    property
+            "updateFrequency"  at DataSource contains the current update frequency
+            for the data source.
+
+
+            The message "setEntityCoverTo: using:" is used to define one  or  more
+            cover  methods  at the entity class that can be used navigate directly
+            to a data set.  For example, to define the message  "demo"  to  return
+            the value of the local entity's history instance, use the expression:
+
+
+                 DataSource setEntityCoverTo: "demo" using: "DemoData history" ;
+
+
+            The sample Reconcile script contains a  section  for  defining  and/or
+            redefining  LocalEntity methods.  No methods are actually redefined in
+            the sample script.
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                5-21
+
+
+
+            For each data set, you may want to define a number of parameters.  The
+            next section of the sample script includes the lines:
+
+
+                 snapshot
+                    enableUpdatesDictionary
+                    # disableUpdatesData
+                    setDurationTo: 1 monthEnds .
+
+                    #--  set item list to display in Test Data report
+                    # setTestItemListTo: [ item1 ] , [ item2 ] , [ item3 ] .
+                 ;
+
+
+            If instances of the data set should be used to create new  LocalEntity
+            instances, you will want to set the "enableUpdatesDictionary" flag for
+            the data set.  By default a data set  is  not  automatically  used  to
+            create  new  LocalEntity instances.  In cases where more than one data
+            set is supplied by a data source, you  will  normally  select  one  of
+            these  data  sets  to  create  new  LocalEntity  instances.  The Local
+            Reconcile Report described in Section 5.2 will include  a  summary  of
+            each data set with "UpdatesDictionary" enabled.
+
+
+            If  instances  of  the  data  set  should  be  used   for   dictionary
+            reconciliation  but  not  for  data  reconciliation,  you will want to
+            disable the "UpdatesData" flag.  For example,  your  data  source  may
+            include  a  data  set  named  "static"  that  just provides the set of
+            current "ids" for the data source.  In this case,  you  would  include
+            the lines:
+
+                 static
+                    enableUpdatesDictionary
+                    disableUpdatesData
+                 ;
+
+            in your reconcile script.
+
+
+            The expression "setDurationTo:" is used to define a time limit for the
+            instances in a data set.  The supplied parameter can be any valid date
+            offset such as "1 monthEnds". The expression  "setTestItemListTo:"  is
+            used  to  define the items that appear in the default Sample Test Data
+            reports described in Section 5.2.  The supplied parameter should be  a
+            list of blocks containing messages defined for the data set class.
+
+
+            The remainder of the reconcile script is  used  to  define  customized
+            versions  of  methods  used  as  part  of  the reconcile process.  The
+            specific methods you may need to redefine are described in  detail  in
+            Section 5.5.
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                5-22
+
+
+
+            The last expression in the reconcile script must be:
+
+
+                 LocalEntity runInitialSetup ;
+
+
+            This expression will define any additional structures  and  initialize
+            properties  based  on  information  provided in this script.  For each
+            data set, a property will be defined at LocalEntity that will be  used
+            to  link  the  local  entity to the data set.  The following rules are
+            used to name this property:
+
+
+                   Property Name             Type          Condition
+                   ------------------------------------------------------------
+                   history                   Time Series   data set name is snapshot
+                   data set name             Fixed         data set is a "replacement"
+                   data set name + History   Time Series   data set is an "append"
+
+
+            For example, if "snapshot" is the  data  set  name,  the  time  series
+            property  "history"  would  be defined at LocalEntity.  if "demo" is a
+            replacement data set, the fixed property "demo" would  be  defined  at
+            LocalEntity.   If  "demo"  is  an  append  data  set,  the time series
+            property "demoHistory" would be defined at LocalEntity.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                5-23
+
+
+
+            Once you have a version of your reconcile code to test,  start  Vision
+            with the -U option specifying the correct object space.  For instance,
+            if your Demo data is stored in object space 14, start Vision using:
+
+
+                 vision -U14
+
+
+            Read in the reconcile script and execute it.  Then execute:
+
+
+                 updateDate evaluate: [ DataSource reconcile ] ;
+
+                 where updateDate is the as of date for the current data
+
+
+            You should perform whatever additional testing is  needed  to  confirm
+            that the reconcile is working correctly.
+
+
+            When the script is complete, you can install it permanently using  the
+            "dbSubmit" utility in Unix:
+
+
+                 dbSubmit scripts/RECdemo
+
+
+            You will be prompted for the object space number associated with  this
+            data  source.   If the automated update daemon is not running for your
+            system, execute:
+
+
+                 cd /localvision/transactions/scripts
+                 processUpdate
+
+
+            Once the reconcile script has been saved, you can  run  the  reconcile
+            for  the  data  that has been incorporated.  To run just the reconcile
+            component, execute:
+
+
+                 cd /localvision/update/Demo
+                 helpers/Reconcile >& logs/rec.demo.9404 &
+
+
+            Future updates will automatically run the reconcile step  as  part  of
+            the Go process.
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                5-24
+
+
+
+            5.4  Data Access and Exception Reports
+
+            Execute the "profile" message for the data source.  The  "Access  Via"
+            expression  in  the top portion of the profile is the access path that
+            can be used to navigate from a core entity to a local entity for  this
+            data  source.  In most cases, the message name is the data source name
+            with the suffix "Data". For  example,  the  profile  for  Demo  should
+            include the line:
+
+
+                  Access Via:       Company DemoData
+
+            The profile includes a section for each data set in the  data  source.
+            For  example,  the  DataSource  profile  for  Demo  might  include the
+            section:
+
+
+                 Data Set:           snapshot
+                 Update Mode:        Append
+                 Access Via:         Company DemoData history
+                 Duration:            7 Days
+                 First Available:    11/30/1993
+
+
+            Any data set profile that  includes  the  line  "Access  Via"  can  be
+            accessed  via  the  local  entity  instance  using the navigation path
+            displayed.  For example, the expression:
+
+
+                 Named Company IBM DemoData history
+
+            is used to access Demo snapshot records.  To access all snapshots over
+            time, use the expression:
+
+
+                 Named Company IBM DemoData :history
+                 do: [ #---
+                     ] ;
+
+
+            LocalEntity instances for  each  data  source  are  linked  to  Entity
+            instances  such  as  Company  or Security.  The property "globalEntry"
+            defined at the LocalEntity class returns the  actual  Entity  instance
+            associated with a LocalEntity instance.  The expression:
+
+
+                 Named Company IBM DemoData globalEntry
+
+
+            returns the Company object:
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                5-25
+
+
+
+                 Named Company IBM
+
+
+            Data set instances for each data  source  are  linked  to  LocalEntity
+            instances.   The  property  "localEntry"  defined at the DataSet class
+            returns the actual LocalEntity instance associated  with  a  data  set
+            instance.  The expression:
+
+
+                 Named Company IBM DemoData history localEntry
+
+
+            returns the Demo LocalEntity object:
+
+
+                 Named Company IBM DemoData
+
+
+            The following is a summary of frequently used messages defined for the
+            LocalEntity class in each data source:
+
+                  Message                   Description
+                  ------------------------------------------------------
+                  dataSource                returns DataSource instance (constant
+                                            for data set)
+                  displayFullInfo           displays descriptive information about the
+                                            local and global entity
+                  displayInfo               displays descriptive information about the
+                                            local entity instance
+                  globalEntry               returns the global entity instance associated
+                                            with the local entity instance
+                  hasBeenUpdated            TRUE if updated by current reconcile
+                  hasntBeenUpdated          TRUE if not updated by current reconcile
+                  id                        the local entity id
+                  isReconciledGlobally      TRUE if linked to a global entity
+                  isntReconciledGlobally    TRUE if not linked to a global entity
+                  lastUpdateDate            as of date of last update
+                  localId                   same as id
+                  profile                   descriptive report about the local entity
+
+
+            Although each data  source  is  updated  according  to  its  scheduled
+            frequency,  not  all  entities  that were previously updated will have
+            data  in  the  current  update.   The  messages  "hasBeenUpdated"  and
+            "hasntBeenUpdated"  defined  at  the  LocalEntity classes indicate the
+            update status of a given instance  as  of  its  data  source's  latest
+            update.
+
+
+            For example, to find the companies which have  actual  Demo  data  but
+            have not been updated by the latest update, use the following:
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                5-26
+
+
+
+                  Company masterList
+                    select: [ DemoData isntDefault &&
+                              DemoData hasntBeenUpdated
+                            ] .
+
+
+            To display the last update date for Demo data in companies which  have
+            not been updated by the latest update, use:
+
+                  Company masterList
+                    select: [ DemoData isntDefault &&
+                              DemoData hasntBeenUpdated
+                            ] .
+                    sortUp: [ id ] .
+                        do: [ DemoData lastUpdateDate print: 12;
+                              displayInfo;
+                            ];
+
+
+            Each data source may also provide  data  for  entities  that  are  not
+            globally  defined.   This  data is still maintained at the LocalEntity
+            class for each data source, but the local entity is not  linked  to  a
+            global    entity.     The    messages    "isReconciledGlobally"    and
+            "isntReconciledGlobally" have been defined to flag this state.
+
+
+            For example, to find the local entities in Demo that are not  globally
+            reconciled, use:
+
+
+                  Company DemoData masterList
+                    select: [ isntReconciledGlobally ] .
+
+
+            The  message  "displayGlobalExceptionReport"  defined  for  DataSource
+            lists  the  local  entities  in  the data source that are not globally
+            reconciled.  To produce this report, use the expression:
+
+
+                  Named DataSource Demo displayGlobalExceptionReport
+
+
+            Several additional exception reports are defined  for  the  DataSource
+            class.  The message "displayDuplicateEntityTypeReport" displays global
+            entities that are referenced by more than  one  LocalEntity  instance.
+            The   message   "displayNotUpdatedReport"   displays  the  LocalEntity
+            instances that were updated in the prior update but not updated in the
+            current    update.    The   message   "displayCurrencyExceptionReport"
+            displays a report showing missing and mismatched currencies  for  each
+            data set defined for the data source.
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                5-27
+
+
+
+            The message "coverageIn:for:usingDateRange:" defined at the DataSource
+            class produces a coverage report in a given data set for the specified
+            items over the supplied date range.  The displayed counts indicate the
+            number of instances with "real" (i.e., non-NA) values for the selected
+            items on the specific dates.  As each  data  source  is  updated,  the
+            coverage in certain items may change, and this report is a useful tool
+            to track data availability.  For example:
+
+
+
+
+                  Named DataSource Demo coverageIn: "history"
+                     for: [ item1 ], [ item2 ],
+                     usingDateRange: (9312 to: 9406 by: 1 monthEnds);
+
+
+            produces a report in the form:
+
+
+                   ... Data Coverage For Demo history
+
+                              item1     item2
+
+                  12/31/1993   xxx        xxx
+                   . . .
+                   6/30/1994    xx        xxx
+
+                   Total Universe:     2389
+
+
+            Several additional exception  reports  are  defined  for  the  DataSet
+            class.   The  message  "displayBadRecordsReport"  displays  a  summary
+            report showing the number of instances in the most recent update  that
+            have  missing  localId  values,  missing date values, or are "bad" for
+            some  other  reason.   The   message   "displayDuplicateRecordsReport"
+            displays  a  list of all instances in the most recent update that were
+            flagged as duplicates based based on the keys supplied.   The  message
+            "displayMismatchedCurrencyReport"  displays any current instance whose
+            base currency does not match the base currency of its  global  entity.
+            The   message   "displayMissingCurrencyReport"  displays  any  current
+            instance that has a currencyCode value that does not correspond  to  a
+            valid currency instance.
+
+
+
+
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                5-28
+
+
+
+            In summary, the following reports can be displayed interactively:
+
+                  Message                              Defined At
+                  ----------------------------------------------------------------
+                  displayUpdateStatus                  DataSource
+                  profile                              DataSource
+                  displayGlobalExceptionReport         DataSource
+                  displayDuplicateEntityTypeReport     DataSource
+                  displayNotUpdatedReport              DataSource
+                  displayCurrencyExceptionReport       DataSource
+                  coverageIn: for: usingDateRange:     DataSource
+                  displayStats                         LocalEntity
+                  displayTestData                      LocalEntity
+                  displayBadRecordsReport              DataSet
+                  displayDuplicateRecordsReport        DataSet
+                  displayMissingCurrencyReport         DataSet
+                  displayMismatchedCurrencyReport      DataSet
+
+
+            The following messages are frequently used to access information about
+            a specific data set or one of its instances:
+
+                  Message               Description
+                  ----------------------------------------------------------------
+                  accessName            name of local entity property used to link to
+                                        this data set
+                  baseCurrency          property used to store actual currency in which
+                                        data items for instance are stored
+                  currency              value of 'currency' for related global entity
+                  currencyCode          property used to store currency code for instance
+                  currencyFactor        conversion factor from data set instance currency
+                                        to the default currency for the global entity to
+                                        which it is linked
+                  dataSource            returns DataSource instance for this data set
+                  date                  the as of date for the instance
+                  displayFullInfo       displays localId, refreshCount, firstAvailableDate,
+                                        processDate, updateDate in a single line
+                  displayInfo           displays localId followed by a carriage return
+                  duration              used to limit access to "old" data; this is a
+                                        constant value for the data set
+                  firstAvailableDate    actual date instance was first available in Vision
+                  localEntry            associated instance in LocalEntity class
+                  localId               id of local entity to which record is linked
+                  processDate           actual date instance was last processed
+                  recordDate            same as date
+                  refreshCount          number of times this record has been refreshed
+                  updateDate            as of date for update
+                  updateModeIsAppend    TRUE if data set is Append
+                  updateModeIsReplace   TRUE if data set is Replacement
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                5-29
+
+
+
+            5.5  Reconcile Customizations
+
+            The LocalEntity-style reconcile has been parameterized to allow you to
+            accommodate  the  special  needs of a data source or a particular data
+            set.  You can  customize  the  reconcile  by  redefining  methods  and
+            parameter  values  for  your  LocalEntity  and  data set classes.  The
+            following general rules apply:
+
+
+               - Each data set should define a message "localId" which  represents
+                 the  main  "key" for the instance.  The "localId" can be a string
+                 property defined in your layout or can be a method that refers to
+                 the correct layout item.
+
+               - The property "date" is defined  for  the  DataSet  class  and  is
+                 updated  during  the reconcile to contain the actual "as of" date
+                 of the data set instance.  If you wish to include date properties
+                 in  a  data set's layout, you should select a different item name
+                 (e.g., "dataDate").
+
+               -  Each  data  set  can  be  used  for   dictionary   and/or   data
+                 reconciliation.  During dictionary reconciliation, id changes for
+                 existing LocalEntity instances are  identified,  new  LocalEntity
+                 instances  are created, and key properties of the LocalEntity are
+                 refreshed using the data set instance.  By default, a data set is
+                 not   automatically   used  for  dictionary  reconciliation.   To
+                 indicate  that  a  data  set  should  be  used   for   dictionary
+                 reconciliation, your reconcile script should include the line:
+
+                      dataSetName enableUpdatesDictionary ;
+
+                 By default all data sets are used for data reconciliation.   This
+                 implies  that  there is a property at LocalEntity that is used to
+                 link the local entity instances to one or more instances  in  the
+                 data  set class.  To exclude a data set from data reconciliation,
+                 your reconcile script should include the line:
+
+                      dataSetName disableUpdatesData ;
+
+
+
+            The overall reconcile process conists of four major components:
+
+                 -  Setup
+                 -  Dictionary Reconcile
+                 -  Data Reconcile
+                 -  Test Data and Exception Reporting
+
+
+            These areas, and the customizations you can define, are  described  in
+            the remainder of this section.
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                5-30
+
+
+
+            Reconcile Setup
+            ---------------
+
+            The reconcile setup phase includes the following steps:
+
+
+              1.  Define "As Of" Date for the Reconcile
+
+                  By default, the "as of" date for the reconcile  is  the  current
+                  evaluation  date (i.e., ^date).  If your Load script creates the
+                  file "data/updateDate", this date  is  used  as  the  evaluation
+                  date;  otherwise,  the current date (i.e., ^today) is used.  The
+                  method "computeLatestUpdateDate" is defined at  the  LocalEntity
+                  class  to  determine this date.  You can redefine this method if
+                  the rule for determining the update date is a  function  of  the
+                  current  data supplied.  For example, if you want the date to be
+                  the largest date supplied in the "vendorDate" property  for  the
+                  snapshot instances, you could redefine the method using:
+
+                       LocalEntity
+                       defineMethod:
+                       [ | computeLatestUpdateDate |
+                         dataSource objectSpace snapshot getInstances
+                            max: [ vendorDate ] . asInteger asDate
+                       ] ;
+
+
+              2.  Run Supplemental Setup For LocalEntity and Data Sets
+
+                  The method "runSupplementalSetup" defined  for  the  LocalEntity
+                  class  is  invoked  at  the  start of the reconcile process.  By
+                  default, this method does nothing.  Since  this  method  is  run
+                  prior to any dictionary or data reconciliation, you can redefine
+                  it  if  you  need  to  initialize   any   data-set   independent
+                  information prior to the start of the standard reconcile.
+
+                  After the  "runSupplementalSetup"  method  is  run,  the  method
+                  "preinitializeSupplementalValuesForSetup"  is  invoked  for each
+                  data set defined for the data source. By  default,  this  method
+                  does  nothing.  Since this method is run prior to any dictionary
+                  or data reconciliation, you can  redefine  it  if  you  need  to
+                  initialize any data-set dependent information prior to the start
+                  of the standard reconcile.
+
+
+
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                5-31
+
+
+
+              3.  Delete Flagged Data Set Instances
+
+                  This setup  step  is  executed  for  each  data  set  to  delete
+                  instances  that  have  been flagged for deletion by the previous
+                  reconcile.  The Data Set Cleanup Report described in Section 5.2
+                  is generated by this step.
+
+
+              4.  Date New Data Set Instances
+
+                  For each data set, this step identifies new instances  and  sets
+                  the  value  of  the  "processDate"  property to the current date
+                  (i.e., ^today) and the  "updateDate"  property  to  the  current
+                  evaluation date (i.e., ^date).
+
+
+              5.  Flag Bad and Duplicate Data Set Instances
+
+                  Bad and duplicate instances are flagged for each data  set.   By
+                  default,  any  instance  that  has  a  "localId"  value of NA is
+                  flagged as a bad instance.  You can redefine the rule using:
+
+                       dataSetName setBadRecordRuleTo: [ ] withDescription: "" ;
+
+                  The supplied block should return a boolean value when sent to an
+                  instance of the data set class.  The default rule is:
+
+                       [ localId isNA ]
+
+                  The bad record rule description can be any text string you  wish
+                  to  have  appear  on  the  exception  report.  If an instance is
+                  flagged as "bad", the message "isGoodRecord" for  that  instance
+                  returns FALSE.
+
+                  By default, if a data set includes new instances with  the  same
+                  localId,  one  of  these  instances  is  used and the others are
+                  flagged as duplicates.  Some data sets supply multiple instances
+                  for the same localId.  For example, a data set supplying several
+                  years of historical  data  in  a  single  update  would  include
+                  several   instances   that   would  erroneously  be  flagged  as
+                  duplicates if this default rule were used.  In  this  case,  you
+                  would  want  to  use  both  the  "localId" and the "year" values
+                  associated with the instance.  You can define this rule using:
+
+                       dataSetName setDupRecordKeyListTo: [ localId ] , [ year ] ;
+
+                  The supplied parameter should be a list of blocks  that  can  be
+                  sent  to  instances  of  the  data set class.  If an instance is
+                  flagged as a "duplicate", the message "isntDuplicate"  for  that
+                  instance returns FALSE.
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                5-32
+
+
+
+              6.  Run Any Additional Setup Procedures
+
+                  The   last   step   of   the   setup    invokes    the    method
+                  "augmentSupplementalValuesForSetup"   for  each  data  set.   By
+                  default, this method does nothing.  This method is run prior  to
+                  any  dictionary  or  data  reconciliation, but after any bad and
+                  duplicate data set instances have been flagged.
+
+
+
+
+
+            Dictionary Reconciliation
+            -------------------------
+
+            The dictionary reconciliation phase uses the data sets that have  been
+            enabled  for  "UpdatesDictionary"  to  create  and refresh LocalEntity
+            instances.  This phase includes the following steps:
+
+
+              1.  Identify Id Changes
+
+                  If the "localId" of a data set instance does  not  refer  to  an
+                  existing  LocalEntity,  the  message "getGlobalEntryFor:" is run
+                  using this id to see if it matches an  existing  global  entity.
+                  If  it  does,  and  this  global  entity is already linked to an
+                  existing LocalEntity instance, an id change has occurred and the
+                  new   value  for  "localId"  is  added  as  an  alias  for  this
+                  LocalEntity  instance.   Id  changes  are  noted  in  the  Local
+                  Reconcile Report described in Section 5.2.
+
+                  By default, the "getGlobalEntryFor:" method  will  look  up  the
+                  "localId"  in  the  cross  reference  dictionary  defined in the
+                  "entityXRef" property for the data  source.   You  can  redefine
+                  this  method  if  you  want  to define a different global lookup
+                  scheme.  For example, to search several dictionaries to  find  a
+                  match, you could redefine this method using:
+
+                       LocalEntity
+                       defineMethod:
+                       [ | getGlobalEntryFor: id |
+                         ^global Company XRef Lookup1 at: id .
+                           else: [ ^global Company XRef Lookup2 at: id ] .
+                           else: [ ^global Company ]
+                       ] ;
+
+                  Note that if you redefine this method, it must  return  a  valid
+                  instance of the global entity's class.
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                5-33
+
+
+
+              2.  Create New LocalEntity Instances
+
+                  If  the  "localId"  does  not  exist,  a  new  instance  of  the
+                  LocalEntity  class  is  created  and  the "localId" added to the
+                  LocalDictionary to reference  this  new  instance.   The  method
+                  "initializeSupplementalLinks"  defined  at the LocalEntity class
+                  is then executed for this new instance.  By default, this method
+                  does   not  do  anything.   You  can  redefine  this  method  to
+                  initialize any properties defined for the LocalEntity class that
+                  have default values other than NA.
+
+                  For example,  if  your  define  the  property  "score"  for  the
+                  LocalEntity  class  and  you want the default value to be 0, you
+                  could redefine the method using:
+
+                       LocalEntity
+                            defineFixedProperty: 'score' .
+                       defineMethod:
+                       [ | initializeSupplementalLinks |
+                         :score <- 0 ;
+                       ] ;
+
+
+              3.  Refresh LocalEntity Instances
+
+                  This  step  is  used  to   update   the   "lastUpdateDate"   and
+                  "hasBeenUpdated"  flag for each LocalEntity instance included in
+                  the current data set.  The method "supplementalRefreshUsing:" is
+                  used  to  update additional key items defined at the LocalEntity
+                  class.  These values are copied from the data set instance  used
+                  to  perform the dictionary update.  By default, this method does
+                  nothing.
+
+                  For example, if your data set record  supplies  a  name  and  an
+                  alternative  identifier  which  you  wish  to  maintain as fixed
+                  properties of the LocalEntity, you could define the following:
+
+                       LocalEntity
+                          defineFixedProperty: 'name' .
+                          defineFixedProperty: 'altId' .
+                       defineMethod:
+                       [ | supplementalRefreshUsing: record |
+                         :name <- record name ;
+                         :altId <- record altId ;
+                       ] ;
+
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                5-34
+
+
+
+              4.  Global Reconcile
+
+                  This step tries to determine the global entity  associated  with
+                  any  LocalEntity  instance that does not already correspond to a
+                  global entity.   The  method  "getGlobalEntry"  defined  at  the
+                  LocalEntity class is used to link existing LocalEntity instances
+                  to global entities if they are not already linked.  By  default,
+                  this  method  runs  the  "getGlobalEntryFor:"  method (described
+                  above)  using  the  LocalEntity  instance's  "localId"  for  its
+                  lookup.   You would redefine this method if you want to define a
+                  different lookup scheme that does not use the "localId" of  this
+                  instance.
+
+                  For  example,  if  the  property  'altId'  is  defined  for  the
+                  LocalEntity   and   you  wish  to  use  this  value  for  global
+                  reconciliation, you could redefine this method using:
+
+                       LocalEntity
+                       defineMethod:
+                       [ | getGlobalEntry |
+                         ^global Named Company uniformAt: altId
+                       ] ;
+
+                  Note that if you redefine this method, it must  return  a  valid
+                  instance of the global entity class.
+
+
+
+
+            Data Reconciliation
+            -------------------
+
+            The data reconciliation phase uses the data sets that  have  not  been
+            disabled  for  "UpdatesData"  to  update  properties at LocalEntity to
+            refer to new instances of the data set classes.  For all new instances
+            in  each  data  set  that  have not been flagged as a bad or duplicate
+            instance, this phase includes the following steps:
+
+
+              1.  Initialize Values For Update
+
+                  The value of the  "date"  property  is  set  to  the  result  of
+                  executing  the  "computeActualDate" method for the data set.  By
+                  default, this value is the evaluation date (i.e.,  ^date).   You
+                  can  redefine  this  method  to return a different date based on
+                  other data values  for  the  instance.   If  you  redefine  this
+                  method,  it  should  return a valid date instance.  Any instance
+                  that does not have a valid value is flagged as a bad record.
+
+                  The value of the "baseCurrency" property is set to the result of
+                  executing  the  "getActualCurrency" method for the data set.  By
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                5-35
+
+
+
+                  default, this value is the default Currency instance.   You  can
+                  redefine  this  method  to  return a different Currency based on
+                  other data values  for  the  instance.   If  you  redefine  this
+                  method,  it  should  return a valid Currency instance, otherwise
+                  the value will be reset to the default Currency.
+
+                  Once the date and  base  currency  have  been  set,  the  method
+                  "initializeSupplementalValuesForUpdate"  is  executed  for  each
+                  instance of the data set.  By default, this method does nothing.
+                  You would redefine it if you need to initialize values for other
+                  properties defined for the  data  set.   For  example,  if  your
+                  snapshot data set includes a value for industryCode and you want
+                  to store an actual industry instance in a separate property, you
+                  could use:
+
+                       snapshot
+                          defineFixedProperty: 'industry' .
+                       defineMethod:
+                       [ | initializeSupplementalValuesForUpdate |
+                         :industry <- ^global Named Industry uniformAt: industryCode ;
+                       ] ;
+
+
+              2.  Process Good Records
+
+                  This step links each "good" instance in each  data  set  to  the
+                  appropriate property in its associated LocalEntity instance.  If
+                  the data set instance is replacing an existing instance, the old
+                  instance   is   flagged   for   deletion   and   the  properties
+                  "firstAvailableDate" and "refreshCount" are updated in  the  new
+                  instance.
+
+
+              3.  Run Post Processing
+
+                  If the data set has a duration  value,  this  step  is  used  to
+                  "expire"  any LocalEntity instances that were not updated in the
+                  current reconcile.  To set the duration to 1 monthEnds  for  the
+                  snapshot data set, use:
+
+                       snapshot setDurationTo: 1 monthEnds ;
+
+                  The method "runSupplementalPostProcess" defined for the data set
+                  runs  as  the  final  step  in  this  part  of the reconcile. By
+                  default, this method does not do anything.
+
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                5-36
+
+
+
+            Test Data and Exception Reports
+            -------------------------------
+
+            This phase includes the following steps:
+
+              1.  Display Test Data
+
+                  The method "displayTestData" is used to display test data  after
+                  the  reconcile  has  completed.   To change this report, you can
+                  redefine this method for the LocalEntity class.   Alternatively,
+                  you  can  customize the default report by redefining the list of
+                  local entities to report on and the  items  displayed  for  each
+                  data set.
+
+                  By default, the first and last three local  entities  that  have
+                  been  globally  reconciled and updated are used.  To modify this
+                  criteria, you supply a block that returns a list of  LocalEntity
+                  instances.  For example:
+
+                       LocalEntity setTestListRuleTo:
+                           [ ^global Named Company IBM, ^global Named Company GM
+                                 send: [ DemoData ]
+                           ] ;
+
+                  You can specify the data items to display by providing a list of
+                  blocks  to  the  "setTestItemListTo:"  message for any data set.
+                  For example, to display "item1" and  "item2"  for  the  snapshot
+                  data set:
+
+                          snapshot setTestItemListTo: [ item1 ] , [ item2 ]  ;
+
+
+              2.  Display Exceptions
+
+                  Several  exception  reports  are  automatically   generated   by
+                  default.   For  each  data set, a separate report summarizes the
+                  number of bad and duplicate  records  found  during  processing.
+                  The  Duplicate  Entity  report  displays  any  entities that are
+                  associated with more than one LocalEntity instance.
+
+                  The method "displaySupplementalExceptions" can be  redefined  at
+                  the LocalEntity class to define any additional exception reports
+                  that automatically run as part of the  reconcile  process.   For
+                  example,  if  you always want to run the global exception report
+                  you would redefine the method using:
+
+                       LocalEntity
+                       defineMethod:
+                       [ | displaySupplementalExceptions |
+                         dataSource displayGlobalExceptionReport ;
+                       ] ;
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                5-37
+
+
+
+              3.  Other Reporting Messages
+
+                  The message "displayInfo" is  defined  at  the  LocalEntity  and
+                  individual  data  set  classes  to  display  a  single  line  of
+                  descriptive information about a specific local  entity  or  data
+                  set  instance.   The  message  "displayFullInfo"  is  defined at
+                  LocalEntity to display a single line of descriptive  information
+                  about  a  specific  local  entity and its related global entity.
+                  These messages can be redefined for any LocalEntity or data  set
+                  class for which you wish to display additional information.  For
+                  example, if  name  is  a  property  of  LocalEntity,  you  could
+                  redefine the "displayFullInfo" method using:
+
+                       LocalEntity
+                       defineMethod:
+                       [ | displayFullInfo |
+                         id print: 12 ; name print: 20 ; " " print: 3;
+                         globalEntry displayInfo;
+                       ] ;
+
+                  These methods are used in many of the exception reports.
+
+                  The  method  "includeInGlobalDuplicateCheck"  is  used  by   the
+                  "displayDuplicateEntityTypeReport"  to  screen  out  LocalEntity
+                  instances that should be excluded from this  report's  checking.
+                  By default, all instances are included.
+
+                  For example, to exclude instances whose "localId"  value  begins
+                  with the letter X, you could redefine the method using:
+
+                       LocalEntity
+                       defineMethod:
+                       [ | includeInGlobalDuplicateCheck |
+                         id take: 1 . != "X"
+                       ] ;
+
+                  Similarly, the method  "includeInGlobalExceptionCheck"  is  used
+                  during    global    reconciliation    as    well   as   by   the
+                  "displayGlobalExceptionReport"   to   screen   out   LocalEntity
+                  instances  that  should  be  excluded  from the global reconcile
+                  process and reporting.  By default, all instances are included.
+
+
+
+
+
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                5-38
+
+
+
+            In summary, the following methods can be redefined for LocalEntity:
+
+
+                 Method                                 Used During
+                 ------------------------------------------------------------
+                 computeLatestUpdateDate                Setup
+                 displayFullInfo                        Exception Reports
+                 displayInfo                            Exception Reports
+                 displaySupplementalExceptions          Exception Reports
+                 displayTestData                        Exception Reports
+                 getGlobalEntry                         Dictionary Reconcile
+                 getGlobalEntryFor:                     Dictionary Reconcile
+                 includeInGlobalDuplicateCheck          Exception Reports
+                 includeInGlobalExceptionCheck          Exceptions; Dictionary Rec
+                 initializeSupplementalLinks            Dictionary Reconcile
+                 runSupplementalSetup                   Setup
+                 supplementalRefreshUsing:              Dictionary Reconcile
+
+
+            To modify a method, use the form:
+
+
+                 LocalEntity
+                 defineMethod:
+                 [ | displayFullInfo |        #-- method to be changed
+                   #-- your version goes here
+                 ] ;
+
+
+            These modifications should be inserted into the reconcile  script  and
+            executed in the data source's object space.
+
+
+            The following parameter values can be redefined for LocalEntity:
+
+
+                 Value                             Notes
+                 ------------------------------------------------------------
+                 setTestListRuleTo: block          By default, the first and
+                                                   last three local entities
+                                                   that have been globally
+                                                   reconciled that were
+                                                   updated in this reconcile;
+                                                   this block is sent to the
+                                                   LocalEntity class and must
+                                                   return a list of LocalEntity
+                                                   instances
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                5-39
+
+
+
+            The following methods can be redefined for any data set class:
+
+
+                 Method                                   Used During
+                 ------------------------------------------------------------
+                 augmentSupplementalValuesForSetup        Setup
+                 computeActualDate                        Data Reconcile
+                 displayFullInfo                          Exception Reports
+                 displayInfo                              Exception Reports
+                 getActualCurrency                        Data Reconcile
+                 initializeSupplementalValuesForUpdate    Data Reconcile
+                 preinitializeSupplementalValuesForSetup  Setup
+                 runSupplementalPostProcess               Data Reconcile
+
+
+            To modify a method, use the form:
+
+
+                 dataSetName                  #-- name of actual data set
+                 defineMethod:
+                 [ | displayFullInfo |        #-- method to be changed
+                   #-- your version goes here
+                 ] ;
+
+
+            These modifications should be inserted into the reconcile  script  and
+            executed in the data source's object space.
+
+
+            The following parameter values can be redefined for a data set:
+
+
+                 Value                             Notes
+                 --------------------------------------------------------------------
+                 disableUpdatesData                All data sets enabled by default
+                 disableUpdatesDictionary          Default
+                 enableUpdatesData                 Default
+                 enableUpdatesDictionary           All data sets disabled by default
+                 setBadRecordRuleTo: block
+                    withDescription: string
+                 setDupRecordKeyListTo: blockList
+                 setDurationTo: dateOffset
+                 setTestItemListTo: blockList
+
+
+
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                5-40
+
+
+
+            5.6  Manual Changes
+
+            A number of messages have been defined to allow you to manually manage
+            the  LocalDictionary  identifiers  and  the  links between LocalEntity
+            instances and global entities.  The following messages are defined for
+            the LocalEntity class:
+
+
+                 Message                       Function
+                 -------------------------------------------------------
+                 addAlias: string              Add a new alias to an existing LocalEntity
+                 globalReconcileTo: entity     Links local and global entity
+                 setAsLocalEntryFor: entity    Reassigns global entity to this local
+                                               entity instance
+                 setGlobalEntryTo: entity      Reassigns global entity for this
+                                               local entity instance
+                 globalReconcile               Auto-reconcile any unlinked entities, if
+                                               possible
+
+            These messages are described below.
+
+
+
+
+            The message "addAlias:" is used to define a new alias for an  existing
+            LocalEntity  instance.   The supplied parameter is a string containing
+            the new alias name.  If this string is already an alias, you will  get
+            an  error  message;  otherwise, the new alias will be added as a valid
+            access id for the recipient instance.  For example, if GM is  a  valid
+            alias  for  the  LocalEntity  GM and you wish to add the alias CAR for
+            this instance, the expression:
+
+                 LocalDictionary GM addAlias: "CAR" ;
+
+            can be used.  The expressions:
+
+                 LocalDictionary GM
+            and
+                 LocalDictionary CAR
+
+            would both return the same LocalEntity instance representing GM.
+
+
+            The message "globalReconcileTo:" is  used  to  set  the  "globalEntry"
+            value  of  the recipient LocalEntity to the supplied entity parameter.
+            The supplied parameter is the global entity to which the local  entity
+            instance  should  be  linked.  If the global entity is not linked to a
+            real (i.e., non-default) local entity, it is linked to  the  recipient
+            LocalEntity.   A  confirmation  message is displayed.  For example, if
+            the local entity CAR is not currently linked to a global  company  and
+            you wish to link it to the Company GM, use:
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Local Entity Reconciles                                5-41
+
+
+
+                 LocalDictionary CAR globalReconcileTo: Named Company GM ;
+
+            The expressions:
+
+                 LocalDictionary CAR globalEntry
+            and
+                 Named Company GM
+
+            would both return the same Company instance representing GM.
+
+
+            The message "setGlobalEntryTo:" is used  to  reset  the  "globalEntry"
+            value  of  the recipient LocalEntity to the supplied entity parameter.
+            The supplied parameter is the global entity to which the local  entity
+            instance  should  be  linked.   The  old  value for the globalEntry is
+            printed followed by the new value.   If  the  new  value  is  not  the
+            default  instance,  then  the  global  entity  is linked to this local
+            entity if it is not already linked to a real  local  entity  instance.
+            For  example,  to  reset the global entity for the CAR local entity to
+            Ford, use:
+
+                 LocalDictionary CAR setGlobalEntryTo: Named Company Ford ;
+
+            To unlink the global entity for the CAR local entity, use:
+
+                 LocalDictionary CAR setGlobalEntryTo: Named Company Default ;
+
+
+
+            The message "setAsLocalEntryFor:" is used to link the supplied  global
+            entity  to  the  recipient LocalEntity instance.  The old local entity
+            for the global entity is printed followed by the new  value.   If  the
+            recipient  LocalEntity  is not already linked to a real global entity,
+            its "globalEntry" property is updated as well.  For example, to  reset
+            the Company GM's local entity to the GM, use:
+
+                 LocalDictionary GM setAsLocalEntryFor: Named Company GM
+
+
+
+            The LocalEntity method "globalReconcile" can be executed to  link  any
+            unlinked  LocalEntity  instances  to  a  global entity using the rules
+            defined for the data source.  This method  automatically  runs  during
+            the  dictionary reconciliation phase of the reconcile.  You can run it
+            manually if you wish to update any links that reflect changes  to  the
+            database that have been made since the last reconcile has run.
+
+
+            Manual changes are usually submitted for  update  using  the  dbSubmit
+            facility.
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+

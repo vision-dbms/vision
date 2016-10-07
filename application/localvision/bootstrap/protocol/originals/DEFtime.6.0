@@ -1,0 +1,106 @@
+
+######################
+######################
+####  Time Abstract Class
+######################
+######################
+#
+# This file implements an abstract class that serves as a base class for concrete
+# time classes.
+#
+######################
+
+Time
+
+#----------
+#  Class Constants (Do Not Change)
+#----------
+define: 'MaxUTick' toBe: 3599999999 .
+
+#----------
+#  Non-Conformant Comparison
+#----------
+#  These messages should always be written to coerce
+#  to the highest resolution available.
+#----------
+defineMethod:
+[ | notEqualToNonConformantValue: aValue |
+    ^self equalToNonConformantValue: aValue. not
+].
+
+#----------
+#  Conversion Helpers
+#----------
+
+#----------
+#  Print Helpers
+#----------
+defineMethod:
+[ | printHTicks: hTicks andUTicks: uTicks |
+    !date <- ^global Date __fromIDate7: hTicks / 24;
+    date year print: 4;
+    "/" print; date month printWithLeadingZeros: 2;
+    "/" print; date day   printWithLeadingZeros: 2;
+    ":" print; hTicks asInteger mod: 24 . printWithLeadingZeros: 2;
+    ":" print; (uTicks / 60e6) asInteger mod: 60 . printWithLeadingZeros: 2;
+    ":" print; (uTicks /  1e6) asInteger mod: 60 . printWithLeadingZeros: 2;
+    "." print; (uTicks - (uTicks / 1e6) asInteger * 1e6) asInteger printWithLeadingZeros: 6;
+    ^self
+].
+
+
+#----------
+#  Value Creation, Access, and Encoding Helpers
+#----------
+
+defineMethod:
+[ | setDateTo: aDate |
+    :aDate <- aDate asDate;
+    aDate isDate ifTrue: [
+        ^self __setLongValuePart0To: aDate asIDate7 * 24 + (
+	    ^self __getLongValuePart0 asInteger mod: 24
+	)
+    ] ifFalse: [^self]
+].
+
+#----------
+#  Current Time
+#----------
+defineMethod: [ | localTimeNow |
+    ^global Utility UnixSeconds currentTime passDecodedLocalTimeToCollector:
+    [ | :year :mon :day :hour :min :sec :yday :wday :isdst |
+            ^self fromYear: year + 1900
+                     month: mon + 1
+                       day: day
+                     hours: hour
+                   minutes: min
+                andSeconds: sec
+    ]
+] .
+
+defineMethod: [ | gmTimeNow |
+    ^global Utility UnixSeconds currentTime passDecodedGreenwichMeanTimeToCollector:
+    [ | :year :mon :day :hour :min :sec :yday :wday :isdst |
+            ^self fromYear: year + 1900
+                     month: mon + 1
+                       day: day
+                     hours: hour
+                   minutes: min
+                andSeconds: sec
+    ]
+] .
+
+#----------
+#  Date Arithmetic Helpers
+#----------
+
+defineMethod:
+[  | + anIncrement |
+    ^self setDateTo: (^self asDate + anIncrement)
+].
+
+defineMethod:
+[ | - anIncrement |
+    ^self setDateTo: (^self asDate - anIncrement)
+].
+;

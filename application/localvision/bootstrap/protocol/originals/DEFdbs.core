@@ -1,0 +1,3072 @@
+##################################################
+#  Define prototocal for external database tool classes:
+#      IncorporatorPrototype, DataSource, DBEntity and DataSet
+#
+#  NOTE: new versions of many messages were added in rel 6.1.2
+#     in 3/99 - they were appended at the end of this script;
+#     When searching for a message, keep in mind that there may
+#     be two definitions in this file.  In those cases, the second
+#     method is the one that is installed.
+#  
+#  Run in U3
+##################################################
+
+####################
+#  IncorporatorPrototype
+####################
+
+IncorporatorPrototype
+   define: 'dataSource' toBe: DataSource . 
+
+defineMethod: [| workSpace | 
+  ^self dataSource objectSpace
+] .
+
+defineMethod: [| setDataSourceTo: source |
+  ^self define: 'dataSource' toBe: source;
+  ^self
+] .
+
+defineMethod: [| storeXRef | 
+  ^self asSelf asList
+] .
+
+defineMethod: [| currentStore | 
+  ^self asSelf
+] .
+
+defineMethod: [| getInstances | 
+  ^self storeXRef collectListElementsFrom: [ ^self instanceList ] 
+] .
+
+defineMethod: [| getCurrentInstances | 
+  ^self currentStore instanceList
+] .
+
+defineMethod: [| createNewStore |
+  !newStore <- ^self newPrototype clusterNew initializeStoreItems
+     do: [ :defaultFlag <- TRUE ; 
+         ] ;
+#--  redefine name at top level to use new store
+  ^global define: ^self classDescriptor code toBe: newStore ;
+  ^self storeXRef count = 1
+     ifTrue: [ ^self define: 'storeXRef' toBe: ^self asList ] ;
+  ^self storeXRef , newStore ; 
+  ^self define: 'currentStore' toBe: newStore ;
+  newStore
+] .
+
+defineMethod: [| cleanupClassStructures | 
+  ^super cleanupClassStructures ;
+  ^self storeXRef 
+  do: [ ^self cleanStore 
+          ifTrue: [ ^self whatAmI print ; 
+                    " -- cleaning store " print ; ^self displayPOP ;
+                  ] ;
+      ] ;
+] .
+
+#--------------------
+# . Standardize IncorporatorPrototype for DataFeed, DataSet subclass use
+#    - defaultRow creation/initialization for replace tables
+#--------------------
+
+defineMethod: [| setDefaultRowTo: row |
+  ^self define: 'defaultRow' toBe: row; 
+  row :defaultFlag <- TRUE; 
+  row :code <- "Default"; 
+  ^self define: 'defaultInstance' toBe: row; 
+  ^self defaultRow initializeDefaultValues; 
+  ^self
+] .
+
+defineMethod: [| initializeDefaultValues |
+  ^self do:
+  [ :defaultFlag <- TRUE ;
+    :baseCurrency <- ^global Currency ;
+    ^self initializeSupplementalDefaultValues; 
+  ];
+] .
+
+defineMethod: [| initializeSupplementalDefaultValues |
+  ^self
+] .
+;
+
+
+
+
+####################
+#  UpdateType
+####################
+UpdateType
+   defineMethod: [| isLocalEntity | code = "LocalEntity" ] . ;
+
+
+
+####################
+#  DataSource
+####################
+
+DataSource
+   defineFixedProperty: 'dbCode' .             # code used for entity ptr to localEntity
+   defineFixedProperty: 'entityType' .
+
+   defineFixedProperty: 'objectSpace' .        # local db ospace
+   defineFixedProperty: 'dataSetList'     .    # list of DataSet/Incorporator classes
+
+   defineFixedProperty: 'dictionary' withDefault: LocalDBDictionary .
+   defineFixedProperty: 'localEntity' withDefault: DBEntity . 
+   defineFixedProperty: 'accessBlock' .
+
+   defineFixedProperty: 'updateType' .
+   defineFixedProperty: 'entityXRef' .
+   defineFixedProperty: 'updateFrequency' .
+   defineFixedProperty: 'displayStatusBlock' .
+
+   defineFixedProperty: 'lastProcessDate' .
+   define: 'updateDates' .
+   defineMethod: [| earliestUpdateDate | :updateDates firstDate ] .
+   defineMethod: [| mostRecentUpdateDate | :updateDates lastDate ] .
+   defineMethod: [| previousUpdateDate | :updateDates last: 2 . firstDate ] .
+;
+
+#--------------------
+#  Initializations
+#--------------------
+
+DataSource do:
+ [ :objectSpace <- ^global ;
+   :dataSetList <- ^global List new ;
+   :updateType <- ^global UpdateType ;
+ ] ;
+
+#--------------------
+#  Methods
+#--------------------
+
+DataSource
+
+#----------
+#  instance setup
+#----------
+
+defineMethod: [| initializeKeys: keys |  
+  keys isList
+  ifTrue:
+    [
+    ^self :code <- keys at: 1;                     ## "Reuters", "IbesIntl"
+    ^self setEntityTypeTo: (keys at: 2) ;          ## Security,  Company
+    ^self setEntityXRefTo: (keys at: 3) ;
+    ^self setDBCodeTo: (keys at: 4 ) ; ## "Reuters", "Ibes"
+    ]
+   ifFalse:
+    [ ^self :code <- keys ;
+      ^self :dbCode <- keys ;
+    ] ;
+  ^self
+] .
+
+defineMethod: [| setEntityTypeTo: type | 
+  type != ^self entityType
+  ifTrue:
+    [ ^self :entityType <- type; 
+      ^self setEntityXRefTo: ^self code ;
+    ] ;
+  ^self
+] .
+
+defineMethod: [| setEntityXRefTo: xref | 
+  !newXref <- xref isString && ^self entityType isEntity
+    ifTrue:
+      [ ^self entityType XRef at: xref . else: ^self entityType named ] .
+    elseIf: xref isXRef
+      then: [ xref ] ;
+  newXref isntNA 
+     ifTrue: [ ^self :entityXRef <- newXref ] 
+    ifFalse: [ ^self entityXRef isNA 
+                 ifTrue: [ ^self :entityXRef <- ^global Entity XRef ] ;
+             ] ;
+  ^self
+] .
+
+defineMethod: [| setDBCodeTo: string | 
+  ^self :dbCode <- string else: ^self code ;
+  ^self
+] .
+
+defineMethod: [| initializeLocalAttributes | 
+  ^super initializeLocalAttributes;
+  ^self
+     setupObjectSpace ;
+  :updateType <- defaultInstance updateType ;
+  :dataSetList <- defaultInstance dataSetList clusterNew ;
+  'dataSetList' locateInDictionaryOf: ^global . isntNA
+     ifTrue: [ ^self createDataSetListFrom: ^global dataSetList ] ;
+  ^self
+] .
+
+defineMethod: [| setupObjectSpace | 
+  :objectSpace <- ^global ;
+  objectSpace define: 'DataSource' toBe: ^self;
+  objectSpace defineFixedProperty: 'LatestUpdateDate';
+  ^self
+] .
+
+defineMethod: [| createDataSetListFrom: setList |
+  !source <- ^self ; 
+  setList
+  do: [ ^my dataSetList , ^self ;
+        ^self setDataSourceTo: ^my source ;
+      ] ;
+  ^self
+] .
+
+#----------
+#  specific setup specific updateTypes
+#----------
+defineMethod: [| setUpdateTypeTo: type | 
+  :updateType <- type isUpdateType
+      ifTrue: [ type ] 
+     ifFalse: [ ^global Named UpdateType uniformAt: type ] ;
+  updateType isLocalEntity
+     ifTrue: [ ^self setupLocalEntityTypeUpdate ] ;
+  ^self  
+] .
+
+defineMethod: [| setupLocalEntityTypeUpdate | 
+  ^self
+     createLocalDictionary
+     createLocalEntity
+] .
+
+defineMethod: [| createLocalDictionary | 
+  ^global define: 'LocalDictionary' toBe: ^global LocalDBDictionary new;
+  :dictionary <- ^global LocalDictionary ;
+  ^self
+] .
+
+defineMethod: [| createLocalEntity | 
+  ^global DBEntity createSubclass: "LocalEntity" .
+     setDataSourceTo: ^self;    #-- this sets localEntity at ^self
+  ^global LocalDictionary at: "Default" put: ^global LocalEntity ;
+  !dbProperty <- dbCode concat: "Data";
+  :accessBlock <- ":" concat: dbProperty . asBlock;
+#--  only define if does not already exist - e.g., IbesData
+  dbProperty locateInDictionaryOf: entityType . isNA
+  ifTrue:
+    [
+    entityType
+       defineFixedProperty: dbProperty .
+       updateInitializationListWith: accessBlock ;
+    #-- initialize existing entities
+    entityType instanceList 
+       do: [ ^self send: ^my accessBlock . <- ^my localEntity asSelf ] ;
+    ] ;
+  ^self
+] .
+
+defineMethod: [| setLocalEntityTo: entity |
+  :localEntity <- entity;
+  ^self
+] .
+
+#----------
+
+#----------
+#  additional user setup
+#----------
+
+defineMethod: [| setUpdateFrequencyTo: period |
+  :updateFrequency <- period;
+  ^self
+] .
+
+defineMethod: [| setEntityCoverTo: methodName using: methodBody |
+  !block <- ^self createMethodBlockFrom: methodBody named: methodName;
+  entityType defineMethod: block;
+  ^self
+] .
+
+defineMethod: [| setDisplayStatusBlockTo: block | 
+  :displayStatusBlock <- block ;
+  ^self
+] .
+
+defineMethod: [| addDataSet: dataSet | 
+  dataSet setDataSourceTo: ^self;
+  dataSetList select: [ ^self = ^my dataSet asSelf ] . count = 0
+      ifTrue: [ dataSetList , dataSet asSelf ] ;
+  ^self
+] .
+
+defineMethod: [| deleteDataSet: dataSet | 
+  !newList <- dataSetList select: [ ^self != ^my dataSet asSelf ] ;
+  newList count < dataSetList count
+     ifTrue: [ :dataSetList <- newList ] ;
+  dataSet setDataSourceTo: ^global Named DataSource Default ;
+  ^self
+] .
+
+#--------------------
+#   Reconcile
+#--------------------
+
+defineMethod: [| reconcile |
+  newLine print;  
+  [ "*****   BEGIN " print; code print; " RECONCILE   *****" print;
+  ] divertOutput centerNL: 80 . print;
+  [ "Process Date: " print; ^today print;
+  ] divertOutput centerNL: 80 . print;
+  newLine print;
+  newLine print;
+
+  updateType isDefault
+     ifTrue: [ objectSpace reconcile ] 
+    ifFalse: [ localEntity reconcile ] ;
+
+  newLine print;
+  newLine print;
+  [ "*****   END " print;
+    code print;
+    " RECONCILE   *****" print;
+  ] divertOutput centerNL: 80 . print;
+] .
+
+#--------------------
+#  reconcile support
+#--------------------
+
+defineMethod: [| setUpdateDateForSpaceTo: date | 
+  ^self objectSpace :LatestUpdateDate <- date isDate
+       ifTrue: [ date ] ifFalse: [ ^date ] ;
+  ^self
+] .
+
+defineMethod: [| setLastUpdateDateTo: date | 
+  !updDate <- date asDate else: ^date ;
+  :updateDates at: updDate put: updDate ;
+  ^self
+] .
+
+defineMethod: [| setLastProcessDateTo: date | 
+  :lastProcessDate <- date asDate;
+  ^self
+] .
+
+#--------------------
+#  Reconcile Reports
+#--------------------
+
+defineMethod: [| displayDuplicateEntityTypeReport |
+newLine print;
+newLine print;
+[ "*****    " print; code print;
+ " Duplicate " print; entityType whatAmI print;
+ " Report    *****" print;
+] divertOutput centerNL: 80 . print;
+newLine print;
+
+!exceptionList <- localEntity masterList 
+     select: [ ^self includeInGlobalDuplicateCheck ] .
+     groupedBy: [ globalEntry ] .
+  select: [ isntDefault && groupList count > 1 ];
+
+!okayMessage <-   updateType isLocalEntity 
+   ifTrue: [ "...  No Duplicates Found." ]
+  ifFalse: [ "...  Report Not Defined for Custom DataSource." ] ; 
+exceptionList count > 0 
+  ifTrue:
+    [ 
+      [ "The Following " print ; exceptionList count asString print ; 
+       " Global Entities Have More Than One Local Entity " print;
+      ] divertOutput centerNL: 80 . print;
+     "  ( * indicates the one that Global references)" centerNL: 80 . print ;
+     newLine print;
+     exceptionList do:
+        [ "--> " print; ^my entityType whatAmI print;
+          ": " print; displayInfo ; 
+          groupList 
+          do: [ " Local Entity: " print ; 
+                 ^self = (^self getGlobalLocalEntitySlot value)
+                   ifTrue: [ "* " ] ifFalse: [ "  " ] . print ; 
+                displayInfo ; 
+              ] ;
+          newLine print;
+        ];
+    ]
+ ifFalse: [ okayMessage printNL ; ] ;
+
+newLine print;
+newLine print;
+"*****    End of Duplicate Entity Report    *****" centerNL: 80 . print;
+newLine print;
+newLine print;
+] .
+
+#----------
+
+defineMethod: [| displayGlobalExceptionReport |
+newLine print;
+newLine print;
+[ "*****    " print; code print;
+  " Global Exception Report    *****" print;
+] divertOutput centerNL: 80 . print;
+newLine print;
+
+!okayMessage <-   updateType isLocalEntity 
+   ifTrue: [  [ "... All " print; code print;
+                " Local Entities Reconciled." print ;
+              ] divertOutput
+           ] 
+  ifFalse: [ "...  Report Not Defined for Custom DataSource." ] ; 
+
+!exceptionList <- localEntity masterList
+     select: [ isntReconciledGlobally ] . 
+     select: [ ^self includeInGlobalExceptionCheck ] .
+     sortUp: [ id ] ;
+
+exceptionList count > 0
+ ifTrue:
+   [
+     [ "The Following " print ; exceptionList count asString print ; 
+       " Local Entities Are Not Reconciled With Global " print;
+       entityType whatAmI print;
+     ] divertOutput centerNL: 80 . print;
+     newLine print;
+     exceptionList do: [ " Local Entity: " print; displayInfo ];
+   ]
+ ifFalse: [ okayMessage printNL ] ;
+
+newLine print;
+newLine print;
+"*****    End of Global Exception Report    *****" centerNL: 80 . print;
+newLine print;
+newLine print;
+] .
+
+#----------
+
+defineMethod: [| displayNotUpdatedReport |
+newLine print;
+newLine print;
+[ "*****    " print; code print;
+  " Local Entity Not Updated Report    *****" print;
+] divertOutput centerNL: 80 . print;
+newLine print;
+
+!okayMessage <-   updateType isLocalEntity 
+   ifTrue: [  [ "... All " print; code print;
+                " Local Entities Updated." print ;
+              ] divertOutput
+           ] 
+  ifFalse: [ "...  Report Not Defined for Custom DataSource." ] ; 
+
+!notUpdated <- localEntity masterList
+      select: [ hasntBeenUpdated && lastUpdateDate = ^my previousUpdateDate ] .
+      sortUp: [ id ] ;
+
+notUpdated count > 0
+ ifTrue: 
+   [ 
+     [ "The Following " print ; notUpdated count asString print ; 
+       " Local Entities Were Not Updated " print;
+     ] divertOutput centerNL: 80 . print;
+     newLine print;
+     notUpdated do: [ "Local Entity: " ; displayInfo ];
+   ]
+ ifFalse:  [ okayMessage printNL ] ;
+
+newLine print;
+newLine print;
+"*****    End of Local Entity Not Updated Report    *****" centerNL: 80 . print;
+newLine print;
+newLine print;
+] .
+
+#----------
+
+defineMethod: [| displayCurrencyExceptionReport |
+  newLine print;
+  newLine print;
+
+  [ "*****    " print; code print;
+    " Currency Exception Report    *****" print;
+  ] divertOutput centerNL: 80 . print;
+  newLine print;
+
+  updateType isLocalEntity
+  ifTrue:
+  [
+   dataSetList select: [ updatesData ] . sortUp: [ classDescriptor code ] .
+   do: [ ^self displayMissingCurrencyReport ;
+         ^self displayMismatchedCurrencyReport ;
+       ] ;
+  ] 
+  ifFalse: [ "...  Report Not Defined For Custom DataSource." printNL ] ;
+
+  newLine print;
+  newLine print;
+  "*****    End of Currency Exception Report    *****" centerNL: 80 . print;
+  newLine print;
+  newLine print;
+] .
+
+#--------------------
+#  Other Reports
+#--------------------
+
+defineMethod: [| profile |
+  "Data Source: " print; code print; " " print;
+  code != name ifTrue: [ name print ] ;
+  newLine print;
+  objectSpace isntNA ifTrue:
+  [ "Object Space:  " print; objectSpace number print: -5;
+    objectSpace whatAmI printNL;
+  ];
+  "Entity Type:" print: 20; entityType whatAmI printNL;
+  entityXRef isDictionary
+   ifTrue: [ "Entity XRef: " print: 20 ; entityXRef whatAmI printNL ] ;
+  updateType isLocalEntity 
+  ifTrue:
+    [ "Access Via: " print: 20 ; 
+     entityType whatAmI print ; " " print ; dbCode print ; "Data" printNL ;
+    ] ;
+  "Frequency:" print: 12; updateFrequency printNL;
+  "Last Processed:" print: 20; lastProcessDate printNL;
+  "Last Update As Of:" print: 20; mostRecentUpdateDate printNL; 
+  "Previous Update:" print: 20; previousUpdateDate printNL;
+  "Available For:" print: 20;
+  earliestUpdateDate print; " - " print; mostRecentUpdateDate printNL;
+  newLine print;
+  updateType isLocalEntity
+  ifTrue: 
+    [ "Data Source Includes the Following Data Sets: " printNL;
+      !sets <- dataSetList select: [ updatesData ] ;
+      sets sortUp: [ classDescriptor code ] . do: [ profile ] ;
+    ]  
+  ifFalse: 
+    [ displayStatusBlock isntNA
+       ifTrue: [ displayStatusBlock value ] 
+      ifFalse: 
+        [ dataSetList count > 0 
+          ifTrue: [  "Data Source Includes the Following Data Sets: " printNL;
+                     dataSetList do: [ classDescriptor code printNL ];
+                  ];
+        ];
+    ];
+  newLine print;
+] .
+
+#----------
+
+defineMethod: [| displayUpdateStatus |
+
+  newLine print;
+  "Vision Database Update Status" center: 50 . printNL;
+  "As Of:  " concat: ^today asString . center: 50 . printNL;
+  newLine print;
+  newLine print;
+  "Source" print: 20;
+  "Latest" center: 12 . print; " " print: 3;
+  "Earliest" center: 12 . print;
+  newLine print;
+  newLine print;
+  ^self asSelf masterList sortUp: [ code ] . do:
+    [ code print: 20;
+      mostRecentUpdateDate print: 15;
+      earliestUpdateDate printNL: 15;
+    ];
+  newLine print;
+] .
+
+#----------
+
+defineMethod: [| coverageIn: dataSetAccessName for: itemBlocks usingDateRange: dr |
+  !block <- dataSetAccessName asBlock;
+  !universe <- localEntity masterList ; #-- select: [ isReconciledGlobally ];
+  !items <- itemBlocks isList
+            ifTrue: [ itemBlocks ] ifFalse: [ itemBlocks asList ];
+  :items <- items extendBy: [ !width <- asString count ];
+
+  newLine print;
+  " ... Data Coverage For " print;
+  code print; " " print; dataSetAccessName printNL;
+  newLine print;
+  " " print: 12;
+  items do: [ asString drop: 1 . drop: -1 . print: width negated ]; ## R-Adj
+  newLine printNL;
+
+  dr evaluate:
+    [ ^date print: 12;
+      items count sequence do:
+      [ !item <- ^my items at: ^self;
+        ^my universe send: ^my block . send: item .
+          select: [ isntNA ] . count print: item width;
+      ];
+      newLine print;
+    ];
+  newLine print;
+  " Total Universe:" print; universe count printNL;
+] .
+
+#--------------------
+#   Augement
+#--------------------
+
+defineMethod: [| augment |
+  newLine print;  
+  [ "*****   BEGIN " print; code print; " AUGMENT   *****" print;
+  ] divertOutput centerNL: 80 . print;
+  [ "Process Date: " print; ^today print;
+  ] divertOutput centerNL: 80 . print;
+  newLine print;
+  newLine print;
+
+  updateType isDefault
+     ifTrue: [ objectSpace augment ] 
+    ifFalse: [ localEntity augment ] ;
+
+  newLine print;
+  newLine print;
+  [ "*****   END " print;
+    code print;
+    " AUGMENT   *****" print;
+  ] divertOutput centerNL: 80 . print;
+] .
+
+#--------------------
+#  augment support
+#--------------------
+
+#--------------------
+#  Other Support Methods
+#--------------------
+
+defineMethod: [| createMethodBlockFrom: msgBodyStr named: msgNameStr |
+  "| " concat: msgNameStr . concat: " |" . concat: msgBodyStr .
+  asBlock
+] .
+;
+
+#------------------------------
+
+
+
+####################
+#  DBEntity .. Specialized for each DB
+####################
+
+#--------------------
+#  Properties and inits
+#--------------------
+
+DBEntity
+  define: 'dataSource' toBe: DataSource .
+  defineFixedProperty: 'id' .
+  defineMethod: [| localId | ^self id ] .
+  defineFixedProperty: 'globalEntry' .
+
+  defineFixedProperty: 'isReconciled' .
+  defineMethod: [| isReconciledGlobally | ^self isReconciled isntNA ] .
+  defineMethod: [| isntReconciledGlobally | ^self isReconciled isNA ] .
+
+  defineFixedProperty: 'lastUpdateDate' .
+  defineFixedProperty: 'hasBeenUpdated' .
+  defineMethod: [| hasntBeenUpdated | hasBeenUpdated isNA ] .
+
+  define: 'isPrimaryLocalEntity' toBe: TRUE .
+
+  define: 'includeInGlobalDuplicateCheck' toBe: TRUE .
+  define: 'includeInGlobalExceptionCheck' toBe: TRUE .
+
+  define: 'testListRule' 
+    toBe: [ [ !list <- ^self masterList
+                 select: [ isReconciledGlobally && hasBeenUpdated ] .
+                 numberElements ;
+              !cutoff <- list count - 2 ;
+              list select: [ position <= 3 || position >= ^my cutoff ]
+          ] ] 
+;
+
+#--------------------
+#  initializations
+#--------------------
+
+DBEntity do:
+  [ 
+  ] ;
+
+
+#--------------------
+#  Methods: setup and initialization
+#--------------------
+DBEntity defineMethod: [| initializeLocalAttributes |
+  ^self :lastUpdateDate <- earliestPossibleDate ;
+  ^self :latestUpdateDate <- earliestPossibleDate ;
+  ^self
+] ;
+
+DBEntity
+
+defineMethod: [| setDataSourceTo: source | 
+  ^self define: 'dataSource' toBe: source;
+  source setLocalEntityTo: ^self;
+  ^self createEntityLink;
+  ^self
+] .
+
+defineMethod: [| createEntityLink |
+  !entityAccess <- ^self dataSource entityType whatAmI lowercase;
+  !method <- dataSource
+      createMethodBlockFrom: " globalEntry " named: entityAccess ;
+  ^self defineMethod: method ;   ^self
+] .
+
+defineMethod: [| runInitialSetup | 
+  ^self dataSource dataSetList do: [ ^self initializeDefault ] ;
+  ^self initializeDefault ;
+  ^self
+] .
+
+#--------------------
+# . preserve latest updateDate in order to process back history reloads
+#   correctly (cf expiration rule in DataSet runPostProcess)
+#--------------------
+
+   defineFixedProperty: 'latestUpdateDate' .
+
+defineMethod: [| initializeDefault|
+  ^self initializeLocalAttributes ;
+  ^self initializeLinks
+] .
+
+defineMethod: [| getGlobalLocalEntitySlot |
+  ^self globalEntry send: ^self dataSource accessBlock 
+] .
+
+;
+
+#--------------------
+#  User-Defined Paramters
+#--------------------
+
+DBEntity
+defineMethod: [| setTestListRuleTo: block | 
+  ^self define: 'testListRule' toBe: [ block ] ;
+  ^self
+] .
+;
+
+#--------------------
+#  Standard Methods - redefine at subclasses as needed
+#--------------------
+DBEntity
+
+defineMethod: [| displayInfo |
+  ^self id printNL;
+] .
+
+defineMethod: [| displayFullInfo |
+  ^self id print: 12;
+  " " print: 3;
+  ^self globalEntry displayInfo;
+] .
+
+#----------
+
+defineMethod: [| getLocalEntryFor: id | 
+  ^self dataSource dictionary at: id
+] .
+
+defineMethod: [| getGlobalEntryFor: id |
+  ^self dataSource entityXRef uniformAt: id
+] .
+
+defineMethod: [| getGlobalEntry | 
+  ^self getGlobalEntryFor: id
+] .
+
+defineMethod: [| getMainRecordForGlobal: entity using: groupList |
+  #-- default behavior: omit global entity test
+  groupList sortUp: [ id ] . at: 1 . asSelf
+] .
+
+#----------
+
+;
+
+#--------------------
+#  Reconcile Methods
+#--------------------
+
+DBEntity
+
+defineMethod: [| reconcile | 
+  "Update As Of: " print; 
+  !updateDate <- ^self computeLatestUpdateDate printNL ;
+  ^self dataSource setUpdateDateForSpaceTo: updateDate asDate ;
+  updateDate evaluate:
+      [ ^self
+           setupUpdate
+           updateLocalDictionary
+           runUpdate
+           displayTestData ;
+        ^self displayExceptions;
+      ] ;
+] .
+
+#----------
+
+defineMethod: [| computeLatestUpdateDate |     #--- redefine if needed
+  ^date
+] .
+
+#----------
+
+defineMethod:  [| displayStats |
+  newLine print;
+  "---  Begin Counts  ---" centerNL: 80 . print;
+  newLine print;
+
+  !source <- ^self dataSource;
+  !dataSets <- source dataSetList select: [ updatesData ] ;
+
+  "Local Dictionary:" print: 20;
+  source dictionary selectorList count printNL;
+  "Local Entity:" print: 20;
+  ^self instanceList count printNL;
+  source entityType whatAmI concat: ":" . print: 20;
+  source entityType instanceList send: source accessBlock .
+         select: [ value isntDefault ] . count printNL;
+  "Global Recs:" print: 20;
+  ^self instanceList select: [ isReconciledGlobally ] . count printNL;
+  dataSets sortUp: [ accessName ] . do:
+  [ accessName concat: ":" . print: 20;
+    ^self getInstances
+       select: [ isProcessed && isActive ] . count printNL; 
+  ];
+
+  newLine print;
+  "---  End Counts  ---" centerNL: 80 . print;
+  newLine print;
+  ^self
+] .    # displayStats
+
+#--------------------
+#  Setup Step
+#--------------------
+
+#--------------------
+# . allow multiple dataSets to update same localEntry in different
+#   sessions for same update date
+#   - 'hasBeenUpdated' no longer reflects universe updated by a given
+#     dataSet if reconciles run in separate sessions
+#   - keep consistent dataSet sort, although update logic does not imply
+#     any order (use classDescriptor code since code = "Default")
+#--------------------
+
+defineMethod: [| setupUpdate |
+  #-- Flag all entities not yet updated
+  ^self masterList select: [ lastUpdateDate != ^date ] .
+   do: [ :hasBeenUpdated <- NA ];
+
+  ^self 
+     displayStats
+     setUpdateDates
+     runSupplementalSetup ;
+
+  ^self dataSource dataSetList select: [ updatesData || updatesDictionary ] . 
+      sortUp: [ classDescriptor code ] .
+      do: [ ^self setupUpdate ] ;
+
+  ^self
+] .
+
+defineMethod: [| setUpdateDates | 
+  ^self dataSource
+     setLastUpdateDateTo: ^date .
+     setLastProcessDateTo: ^today;
+  ^self
+] .
+
+defineMethod: [| runSupplementalSetup |      #--- redefine if needed
+  ^self
+] .
+
+#--------------------
+#  Dictionary Update Step
+#--------------------
+
+defineMethod: [| updateLocalDictionary | 
+  ^self displayStats ;
+
+  ^self dataSource dataSetList select: [ updatesDictionary ] . 
+      sortUp: [ classDescriptor code ] .
+   do: [ ^self updateLocalDictionary ] ;
+
+  ^self globalReconcile;
+
+  ^self displayStats  ;
+  ^self
+] .
+
+#-----
+# updateDictionaryUsing: recordList
+#  . recordList is list of data records that respond to localId
+#  . processes id changes only if not referencing current localEntity
+#    and in same class (i.e. no cross-space links allowed)
+#  . creates new LocalEntity instance if not found in LocalDictionary
+#  . refreshes LocalEntity "static" properties using record
+#----
+
+defineMethod: [| updateDictionaryUsing: recordList |
+  !LocalEntity <- ^self;
+
+  recordList groupedByString: [ localId asString ] .
+    send: [ groupList at: 1 . asSelf ] .
+  do:
+  [ !currentLocalEntry <- ^my LocalEntity getLocalEntryFor: localId;
+    !globalEntry <- ^my LocalEntity getGlobalEntryFor: localId ;
+    !globalLocalEntry <- globalEntry send: dataSource accessBlock . value ;
+
+    #-- If no local and global points to a "real" record, id change has occurred
+    #-- Screen out xlinks to different class
+    currentLocalEntry isNA && globalLocalEntry isntDefault &&
+      (globalLocalEntry classDescriptor = ^my LocalEntity classDescriptor)
+    ifTrue:
+     [ #-- Derived local entry is global's pointer to this dataset
+       :currentLocalEntry <- globalLocalEntry;
+       dataSource dictionary at: localId put: currentLocalEntry;
+       "Id Change: " print: 15;
+       "from  " print; currentLocalEntry id print: 15; 
+       "to  " print; localId printNL;
+     ];
+
+    #-- Add new entries and refresh all
+    #-- Note: local duplicates created here; global reconcile fixes global link
+    currentLocalEntry isNA ifTrue:
+     [ :currentLocalEntry <- ^my LocalEntity createNewEntryFrom: ^self ];
+    currentLocalEntry refreshUsing: ^self;
+  ]; #  end of recordList
+
+  #-- Assign permanent reference to localEntry for all records
+  recordList do: [ ^self setUpdateEntry ] ;   #<===
+
+  newLine print; 
+  recordList count print; 
+  " Input Records Processed" printNL;
+] .
+
+defineMethod: [| createNewEntryFrom: record |
+  !newEntry <- ^self createInstance: record localId . initializeLinks;  
+  ^self dataSource dictionary at: record localId asString put: newEntry;
+  "Local Add: " print: 15; record displayInfo; 
+  newEntry
+] .
+
+defineMethod: [| initializeLinks |
+  ^self
+     initializeEntity
+     initializeHistory
+     initializeSupplementalLinks ;
+  ^self
+] .
+
+defineMethod: [| initializeEntity |
+  ^self :globalEntry <- ^self dataSource entityType;
+  ^self
+] .
+
+defineMethod: [| initializeHistory |
+  !localEntity <- ^self;
+  !source <- ^self dataSource;
+  earliestPossibleDate evaluate:
+  [ source dataSetList
+     select: [ updatesData ] .
+         do: [ ^my localEntity send: updateBlock . <- defaultRow ];
+  ];
+  ^self
+] .
+
+defineMethod: [| initializeSupplementalLinks |     #-- redefine if needed
+  ^self
+] .
+
+defineMethod: [| refreshUsing: record | 
+  ^self :id <- record localId asString ; 
+  ^self flagAsUpdated;
+  record :isReconciled <- TRUE;
+  ^self supplementalRefreshUsing: record ;
+  ^self
+] .
+
+defineMethod: [| flagAsUpdated |
+  ^self :hasBeenUpdated <- TRUE ;
+  ^self :lastUpdateDate <- ^date ;
+  ^self latestUpdateDate < ^date
+     ifTrue: [ ^self :latestUpdateDate <- ^date ];
+] .
+
+defineMethod: [| supplementalRefreshUsing: record |         #-- redefine if needed
+  ^self
+] .
+
+#-----
+# globalReconcile
+#  . links LocalEntity instance to global entity if id globally known
+#    and not already reconciled
+#  . corrects global link via getMainRecord method (rule is DataSource-specific
+#    but defaults to original behavior if company primarySecurity test does not
+#    apply)
+#----
+
+defineMethod:  [| globalReconcile |
+
+  newLine print;
+  "---  Begin New Global Reconciliations Report  ---  " centerNL: 80 . print;
+  newLine print;
+
+  ^self masterList 
+     select: [ isntReconciledGlobally ] .
+     select: [ ^self includeInGlobalExceptionCheck ] . 
+     extendBy: [ !globalLink <- ^self getGlobalEntry ] .
+     select: [ globalLink isntDefault ] .
+     groupedBy: [ globalLink ] .
+  do: [ !mainRecord <- ^my getMainRecordForGlobal: asSelf using: groupList;
+        groupList do: [ :globalEntry <- globalLink ] ;
+        #-- Set link to point to main record, then update others
+        mainRecord do:
+          [ setEntityLink;
+            id print: 10;
+           " Linked To: " print;
+           globalEntry displayInfo;
+          ] ;
+        groupList select: [ ^self asSelf != ^my mainRecord ] . do: 
+          [ setEntityLink;
+            id print: 10;
+           " Also Linked To: " print;
+           globalEntry displayInfo;
+          ] ;
+      ] .
+  count = 0
+   ifTrue: [ newLine print;
+             "... All Entries Reconciled Globally" printNL ;
+           ];
+
+newLine print;
+"---  End New Global Reconciliations Report  ---" centerNL: 80 . print;
+newLine print;
+newLine print;
+] .          # globalReconcile
+
+#----------
+
+defineMethod: [| setEntityLink | 
+  ^self do:
+  [ globalEntry isntDefault ifTrue:
+     [ !globalLocal <- getGlobalLocalEntitySlot;
+       globalLocal value isDefault || 
+       [ globalLocal value isPrimaryLocalEntity not ]
+         ifTrue: [ globalLocal <- asSelf ];
+       :isReconciled <- TRUE;
+     ];
+  ];
+  ^self
+] .
+
+#--------------------
+#  Update Step
+#--------------------
+
+defineMethod: [| runUpdate | 
+  ^self dataSource dataSetList select: [ updatesData ] .
+     sortUp: [ classDescriptor code ] .   #-- assumes no order dependency
+     do: [ ^self runUpdate ] ;
+  ^self runSupplementalUpdate ;
+  ^self displayStats ;
+  ^self
+] .
+
+defineMethod: [| runSupplementalUpdate |     #--- redefine if needed
+  ^self
+] .
+
+#----------
+
+defineMethod: [| displayTestData |
+  newLine print;
+  "---  Begin Test Data  ---" centerNL: 80 . print;
+  newLine print;
+
+  !list <- ^self send: ^self testListRule ;
+  !sets <- ^self dataSource dataSetList select: [ updatesData ] .
+    extendBy: [ !items <- testItemList 
+                 extendBy: 
+                   [ !title <- asString stripChar: newLine ;
+                     !width <- title count max: 12 ;
+                   ] ;
+              ] ;
+  list do:
+  [ !element <- ^self ; 
+    "-" fill: 50 . printNL ;
+    "Test Data For: " print ; element displayInfo ; 
+    " " print: 10 ; globalEntry displayInfo ;
+    ^my sets do:
+     [ newLine print ; 
+       " --> DataSet: " print ; className printNL ;
+       !element <- ^my element ;
+       !ts <- element send: updateBlock ; 
+       " " print: 15 ; 
+       items do: [ title center: width . print ] ;
+       newLine print ; 
+       ts select: [ ^date > earliestPossibleDate ] .
+       do: [ !items <- ^my items ;  #<===
+             ^self do:  #<===
+              [ " " print: 3 ; ^date print: 12 ;
+                ^my items do: [ ^my send: ^self . print: width ] ;
+                newLine print ;     
+              ] ;
+           ] ;
+       newLine print ; 
+     ] ;
+    newLine print ; 
+  ] ;
+
+  newLine print;
+  "---  End Test Data  ---" centerNL: 80 . print;
+  newLine print;
+  newLine print;
+] .    # displayTestData
+
+#----------
+
+defineMethod: [| displayExceptions |
+  ^self dataSource dataSetList
+     select: [ updatesData ] . 
+     sortUp: [ classDescriptor code ] .
+  do: [ ^self displaySummaryExceptionReport ] ;
+
+  ^self dataSource displayDuplicateEntityTypeReport ;
+  ^self displaySupplementalExceptions ;
+  ^self
+] .
+
+defineMethod: [| displaySupplementalExceptions | 
+  ^self
+] .
+
+#----------
+
+defineMethod: [| displayFullExceptionReports |
+  ^self dataSource do:
+   [ displayGlobalExceptionReport ; 
+     dataSetList select: [ updatesData ] . sortUp: [ classDescriptor code ] .
+     do: [ ^self displayBadRecordsReport ;
+           ^self displayDuplicateRecordsReport ;
+         ] ;
+     displayDuplicateEntityTypeReport;
+     displayNotUpdatedReport;
+   ];
+  ^self displaySupplementalExceptions ;
+  ^self
+] .
+
+#--------------------
+#  Manual Reconcile
+#--------------------
+
+defineMethod: [| profile |
+  "LocalEntity Profile For: " print ; ^self id printNL ;
+  "DataSource: " print: 20 ; ^self dataSource code printNL ;
+  "Environment: " print: 20 ; ^self whatAmI printNL ;
+  "Local Id: " print: 20 ; id printNL ;
+  "Object Space: " print: 20 ; ^self objectSpace printNL ;
+  "Reconciled: " print: 20 ; ^self isReconciledGlobally printNL ;
+  "Global Link: " print: 20 ; ^self globalEntry displayInfo ; 
+  !globalLocal <- ^self getGlobalLocalEntitySlot value ; 
+  globalLocal != ^self asSelf
+     ifTrue: [ "Global Linked To: " print: 20 ; 
+               globalLocal id printNL ;
+             ] ;
+  "Last Update: " print: 20 ; lastUpdateDate printNL ;
+  "In Latest Update: " print: 20 ; (hasBeenUpdated = TRUE ) printNL ;
+  newLine print ; 
+  !local <- ^self ;
+  ^self dataSource dataSetList select: [ updatesData ] .
+  do: [ "DataSet: " print ; className print; 
+        " ( :" print ; ^self accessName print ; " ) " printNL ;
+       !ts <- ^my local send: updateBlock . select: [ isntDefault ] ;
+      "   Total Real Points: " print: 25 ; ts count printNL: -5 ;
+      "   First Real Point: " print: 25 ;  ts firstDate printNL ;
+      "   Last Real Point: " print: 25 ; ts lastDate printNL ;
+      ] ;
+] .
+
+defineMethod: [| addAlias: id | 
+  !entity <- ^self dataSource dictionary at: id ;
+  entity isNA
+  ifTrue: [ ^self dataSource dictionary at: id put: ^self asSelf ] 
+  ifFalse: 
+    [ ">>> Alias " print ; id print ; " already in use for: " print ; 
+      entity displayInfo ;
+    ] ;
+  ^self
+] .
+
+defineMethod: [| globalReconcileTo: entity | 
+  entity isEntity
+  ifTrue:
+    [ ^self
+      do: [ :globalEntry <- ^my entity asSelf ;
+            setEntityLink;
+            id print: 10;
+            " Reconciled To: " print;
+            globalEntry displayInfo;
+          ] ;
+    ]
+  ifFalse:
+    [ ">>> globalReconcileTo: Parameter Must Be an Entity. " print ;
+      entity print ; " is a " print ; entity whatAmI printNL ;
+    ] ;
+  ^self
+] .
+
+defineMethod: [| setGlobalEntryTo: entity | 
+  entity isEntity
+  ifTrue:
+    [ ^self
+      do: [ id print ; 
+            " Global Link Was: " print ; globalEntry code print ;
+            :globalEntry <- ^my entity asSelf ;
+            " Now: " print ; globalEntry code print ;
+            :isReconciled <- ^my entity isntDefault ;
+            isReconciledGlobally
+            ifTrue:
+              [
+              !currentLocal <- getGlobalLocalEntitySlot ; 
+              currentLocal value isDefault
+              ifTrue:
+                [ currentLocal <- ^self asSelf ;
+                  ".  (Global linked to Local)" printNL ;
+                ]
+              ifFalse:
+                [ currentLocal value = ^self asSelf
+                  ifTrue: [ ".  (Global already linked to Local)" printNL ]
+                 ifFalse: 
+                   [ newLine print ;
+                     "     ---> Global linked to different Local: " print ; 
+                     currentLocal value id printNL ;
+                   ] ;
+                ] ;
+              ] 
+            ifFalse: [ newLine print ] ;
+        ] ;
+    ]
+  ifFalse:
+    [ ">>> setGlobalEntryTo: Parameter Must Be an Entity. " print ;
+      entity print ; " is a " print ; entity whatAmI printNL ;
+    ] ;
+  ^self
+] .
+
+defineMethod: [| setAsLocalEntryFor: entity | 
+  entity isEntity
+  ifTrue:
+    [ ^self
+      do: [ !currentLocal <- ^my entity send: dataSource accessBlock ;
+            ^my entity code print ; 
+            " Was Linked To: " print ; currentLocal value id print ;
+            currentLocal <- ^self asSelf ;
+            " Now: " print ; id print ;
+            ^my entity isntDefault
+            ifTrue:
+              [ globalEntry isDefault
+                ifTrue:
+                  [ :globalEntry <- ^my entity asSelf ;
+                    :isReconciled <- ^my entity isntDefault ;
+                    ".  (Local linked to Global)" printNL ;
+                  ]
+                ifFalse:
+                  [ globalEntry = ^my entity asSelf
+                      ifTrue: [ ". (Local already linked to Global)" printNL ]
+                     ifFalse: 
+                       [ newLine print ;
+                         "     ---> Local linked to different Global: " print ; 
+                         globalEntry code printNL ;
+                       ] ;
+                  ] ;
+               ]
+            ifFalse: [ newLine print ] ;
+          ] ;
+    ]
+  ifFalse:
+    [ ">>> setAsLocalEntityFor: Parameter Must Be an Entity. " print ;
+      entity print ; " is a " print ; entity whatAmI printNL ;
+    ] ;
+  ^self
+] .
+;
+
+#--------------------
+#  Augment Methods
+#--------------------
+
+DBEntity
+
+defineMethod: [| augment | 
+  "---  No Augment Defined  ---" centerNL: 80 . print ; 
+] .
+
+#----------
+;
+
+
+####################
+#  DataSet
+#
+#  Assumptions: 
+#    localId is defined as a property/method that can be used for lookup;
+#         it can be used as a layout item and should return a string
+#    date is a property for append/duration data sets and should not be
+#         used in layout
+####################
+
+DataSet
+
+#--------------------
+#  properties and default values
+#--------------------
+
+   define: 'duration' toBe: NA .                   # user override
+   define: 'updateBlock' toBe: [ [ ] ].            # derived
+   define: 'updateMode' toBe: NA .                 # set by createBLD
+   defineMethod: [| updateModeIsAppend | ^self updateMode = "Append" ] .
+   defineMethod: [| updateModeIsReplace | ^self updateMode = "Replace" ] .
+
+   defineMethod: [| defaultRow | ^self defaultInstance ] .
+
+   define: 'accessName' toBe: NA .                 # derived
+
+defineMethod: [| className | 
+  ^self hasSchema 
+      ifTrue: [ ^self classDescriptor code ] 
+   ifFalse:
+     [ !words <- ^self whatAmI asWords ;
+       words at: words count
+     ]
+] .
+
+   define: 'badRecordRule' 
+     toBe: [ [ localId isNA ] ] .                            # user override
+   define: 'badRecordDescription' 
+     toBe: "localId isNA or date isNA " .                    # user override
+   define: 'updatesDictionary' toBe: FALSE .                 # user override
+   define: 'updatesData' toBe: TRUE .                        # user override
+   define: 'dupRecordKeyList' toBe: [ localId ] asList .     # user override
+   define: 'testItemList' 
+     toBe: [ localId ] , [ date ] , [ updateDate ] .         # user override
+
+# NOTE: use defineFP: withDefault: format to create "real" property slots
+#   for incorporator subclasses on creation
+
+#--  currencyCode and baseCurrency are provided as standard names across all
+#--     datasets for storing the local currency id and the global currency
+#--     instance that matches to this id; 
+   defineFixedProperty: 'currencyCode' withDefault: NA .
+   defineMethod: [| currency | ^self localEntry globalEntry currency ] .
+ defineMethod: [ | currencyFactor |
+  ^self baseCurrency isCurrency
+    ifTrue: 
+      [ ^self baseCurrency exchangeTo: ^self currency relativeTo: ^self date ]
+] .
+#--  date and recordDate are provided as standard names across all
+#--     datasets for storing the actual date used to attach this record
+#--     to a time series property; for standard incremental updates, it
+#--     is the same as the updateDate; for multi-date datasets, it is
+#--     the fiscal or calendar date associated with the record.  In this
+#--     case, the computeActualDate method is redefined to compute a
+#--     date other than the updateDate; 
+   defineFixedProperty: 'date' withDefault: Date .
+   defineMethod: [| recordDate | ^self date ] .
+
+#-- The remaining proprerties are used to keep track of the update
+   defineFixedProperty: 'updateDate' withDefault: Date .
+   defineFixedProperty: 'processDate' withDefault: Date .
+   defineFixedProperty: 'firstAvailableDate' withDefault: Date .
+   defineFixedProperty: 'refreshCount' withDefault: Integer .
+
+   defineFixedProperty: 'localEntry' withDefault: DBEntity .
+   defineFixedProperty: 'isDuplicate' withDefault: FALSE .
+   defineMethod: [| isntDuplicate | ^self isDuplicate isNA ] .
+   defineFixedProperty: 'recordUsedForDuplicate' withDefault: NA .
+   defineFixedProperty: 'isBadRecord' withDefault: FALSE .
+   defineMethod: [| isGoodRecord | ^self isBadRecord isNA ] .
+   defineFixedProperty: 'isReconciled' withDefault: TRUE .
+   defineMethod: [| isntReconciledLocally | ^self isReconciled isNA ] .
+   defineFixedProperty: 'isProcessed' withDefault: TRUE .
+   defineMethod: [| isntProcessed | ^self isProcessed isNA ] .
+;
+
+#--------------------
+#  Define a place to prestore a method to run to setup extra
+#    methods based on EntityType of DataSource
+#--------------------
+DataSet define: "extraMethodsByEntity" toBe: IndexedList new ;
+DataSet
+defineMethod: [| addRule: block forEntity: entity | 
+  extraMethodsByEntity at: entity asSelf put: block ;
+  ^self
+] .
+;
+
+#--------------------
+
+DataSet
+
+#----------
+#  user-define one-time inits
+#----------
+
+defineMethod: [| setDurationTo: period |
+  ^self define: 'duration' toBe: period;
+  ^self
+] .
+
+defineMethod: [| enableUpdatesDictionary |
+  ^self define: 'updatesDictionary' toBe: TRUE ;
+  ^self
+] .
+
+defineMethod: [| disableUpdatesDictionary |       #-- default
+  ^self define: 'updatesDictionary' toBe: FALSE ; 
+  ^self
+] .
+
+defineMethod: [| enableUpdatesData |        #-- default
+  ^self define: 'updatesData' toBe: TRUE ; 
+  ^self
+] .
+
+defineMethod: [| disableUpdatesData | 
+  ^self define: 'updatesData' toBe: FALSE ; 
+  ^self
+] .
+
+defineMethod: [| setBadRecordDescriptionTo: string |
+  ^self define: 'badRecordDescription' toBe: string asString ;
+  ^self
+] .
+
+defineMethod: [| setBadRecordRuleTo: block withDescription: string |
+  !rule <- block isBlock
+     ifTrue: [ block ] ifFalse: [ block asBlock ] ;
+  ^self define: 'badRecordRule' toBe: [ rule ] ;
+  ^self setBadRecordDescriptionTo: string 
+] .
+
+defineMethod: [| setDupRecordKeyListTo: blockList | 
+  !list <- blockList isList 
+      ifTrue: [ blockList ] ifFalse: [ blockList asList ] .
+    send: [ ^self isBlock 
+               ifTrue: [ ^self ] ifFalse: [ ^self asString asBlock ]
+          ] ;
+  ^self define: 'dupRecordKeyList' toBe: list ;
+  ^self
+] .
+
+defineMethod: [| setTestItemListTo: blockList | 
+  !list <- blockList isList 
+      ifTrue: [ blockList ] ifFalse: [ blockList asList ] .
+    send: [ ^self isBlock 
+               ifTrue: [ ^self ] ifFalse: [ ^self asString asBlock ]
+          ] ;
+  ^self define: 'testItemList' toBe: list ;
+  ^self
+] .
+
+#----------
+#  one-time inits called by runInitialSetup
+#----------
+
+  define: 'updatesHistoryRule' toBe: [[ ^self updateModeIsAppend || ^self duration isntNA ]] .
+
+defineMethod: [| initializeDefault |
+  ^self setAccessName ;
+  ^self setDefaultRowTo: ^self defaultInstance ; #-- cf stdized BLD
+  ^self defineStandardMessages ;
+  ^self
+] .
+
+defineMethod: [| setAccessName |
+  !name <- ^self className = "snapshot" ifTrue: [ "history" ];
+  name isNA ifTrue:
+  [ :name <- ^self className;
+    ^self send: ^self updatesHistoryRule .
+     ifTrue: [ :name <- name concat: "History" ];
+  ];
+  ^self setAccessNameTo: name;
+  ^self
+] .
+
+defineMethod: [| setAccessNameTo: name |
+  ^self define: 'accessName' toBe: name;
+  ^self define: 'updateBlock'
+          toBe: ("[ :" concat: name . concat: " ]") asBlock;
+  ^self updatesData
+  ifTrue: 
+    [ ^self send: ^self updatesHistoryRule .
+         ifTrue: [ ^self dataSource localEntity define: name ]
+        ifFalse: [ ^self dataSource localEntity defineFixedProperty: name ] ;
+    ] ;
+  ^self
+] .
+
+defineMethod: [| initializeDefaultValues |  #-- redefine std IncP method
+  ^self 
+  do: [ :localEntry <- ^self dataSource localEntity;
+        :isProcessed <- TRUE;
+        :isReconciled <- TRUE;
+        :defaultFlag <- TRUE;
+        :date <- earliestPossibleDate ;
+        :updateDate <- earliestPossibleDate;
+        :processDate <- earliestPossibleDate;
+        :firstAvailableDate <- earliestPossibleDate;
+        :baseCurrency <- ^global Currency ;
+        ^self initializeSupplementalDefaultValues ;
+      ];
+  ^self
+] .
+
+
+defineMethod: [| initializeSupplementalDefaultValues |        #-- redefine if needed
+  ^self
+] .
+
+#--  define prepackaged methods for DataSource's Entity type
+defineMethod: [|  defineStandardMessages |    
+  !rules <- extraMethodsByEntity at: ^self dataSource entityType ;
+  rules isBlock
+    ifTrue: [ ^self send: rules ] ;
+  ^self
+] .
+;
+
+#--------------------
+
+#---------------------
+#  Reconcile methods
+#---------------------
+
+DataSet
+
+defineMethod: [| getNewRecords | 
+  ^self getCurrentInstances
+     select: [ updateDate = ^self workSpace LatestUpdateDate ]
+] .
+
+#----------
+#  Setup Step
+#----------
+
+defineMethod: [| setupUpdate | 
+  ^self preinitializeSupplementalValuesForSetup ;
+  ^self
+     runCleanup
+     dateNewRecords
+     flagBadRecords
+     flagDuplicateRecords ;
+  ^self augmentSupplementalValuesForSetup ;
+  ^self
+] .
+
+#----------
+#---  preinitializeSupplementalValuesForSet
+#---     Primarily used to standardize any data used as keys including
+#---       clustering localId if needed (i.e, if not an incorporator
+#---       string); filling in an alternative date field, etc.
+#----------
+
+defineMethod: [| preinitializeSupplementalValuesForSetup |    #-- redefine as needed
+  ^self
+] .
+
+defineMethod: [| runCleanup |
+  newLine print;
+  newLine print;
+  [ "---  Begin " print ; 
+    ^self className print; 
+    " Cleanup ---" print ;
+  ] divertOutput centerNL: 80 . print ;
+
+  ^self
+    runRecordCleanup
+    runHistoryCleanup;
+  newLine print;
+  "---  End Cleanup  ---" centerNL: 80 . print ; 
+  newLine print ; 
+  newLine print;
+  ^self
+] .
+
+defineMethod: [| runRecordCleanup |
+  newLine print;
+  !deletes <- ^self getInstances select: [ deletionFlag isntNA ];
+  deletes do: [ ^self delete ];
+  deletes count > 0 ifTrue:
+   [ deletes count print: 15; " Records Deleted." printNL;
+     ^self storeXRef do: [ ^self alignStore ];
+     newLine print;
+   ];
+  ^self
+] .
+
+#-- each dataSet defines localEntity ts cleanup
+#-- eg. refresh table will delete all ts points and reset 1/1/1 to defaultRow
+#--  while Ibes will clean up weekly points > 8 weeks && not monthEnd
+defineMethod: [| runHistoryCleanup |      #--  redefine if needed
+  ^self
+] .
+
+#-----
+# dateNewRecords
+#  . collects records with NA processDate (latest incorporation)
+#  . sets processDate to ^today for new records
+#  . resets refreshCount to 0 if NA
+#  . sets firstAvailableDate to arg for new records if NA
+#  . resets defaultRow firstAvailableDate if earliestPossibleDate
+#-----
+defineMethod: [| dateNewRecords | 
+  ^self getCurrentInstances select: [ processDate isNA ] . do:
+  [ :processDate <- ^today ;
+    refreshCount isNA ifTrue: [ :refreshCount <- 0 ];
+    firstAvailableDate isNA ifTrue: [ :firstAvailableDate <- ^today ];
+    updateDate isNA ifTrue: [ :updateDate <- ^date ] ;
+  ];
+  ^self defaultRow firstAvailableDate = earliestPossibleDate
+     ifTrue: [ ^self defaultRow :firstAvailableDate <- ^today ];
+  ^self
+] .
+
+defineMethod: [| flagBadRecords |
+  ^self getNewRecords 
+    select: ^self badRecordRule .
+      do: [ :isBadRecord <- TRUE ];   #-- reset badRecordDescription
+  ^self
+] .
+
+defineMethod: [| flagDuplicateRecords | 
+  ^self getNewRecords select: [ isntProcessed && isGoodRecord ] .
+      groupedByCriteria: ^self dupRecordKeyList .
+      select: [ groupList count > 1 ] .
+  do: [ !useRecord <- groupList at: 1 . asSelf ;
+        groupList
+        do: [ :recordUsedForDuplicate <- ^my useRecord ;
+              ^self asSelf != recordUsedForDuplicate
+                   ifTrue: [ :isDuplicate <- TRUE ] ;
+            ] ; 
+      ] ;
+  ^self
+] .
+
+defineMethod: [| augmentSupplementalValuesForSetup | 
+  ^self
+] .
+
+#----------
+#  Dictionary Update Step
+#----------
+
+defineMethod: [| updateLocalDictionary | 
+  !records <- ^self getNewRecords 
+    select: [ isntReconciledLocally && isGoodRecord && isntDuplicate ] ;
+
+  newLine print; newLine print;
+  [ "---  Begin Local Reconcile Using " print ; 
+    ^self className print ; "  ---" print;
+  ] divertOutput centerNL: 80 . printNL ;
+
+  ^self dataSource localEntity updateDictionaryUsing: records ;
+  newLine print;
+  "---  End Local Reconcile  ---" centerNL: 80 . print;
+  newLine print;
+  ^self 
+] .
+
+#----------
+#  Run Update Step
+#----------
+
+defineMethod: [| runUpdate | 
+  newLine print;
+  [ "---   Begin " print;
+    ^self className print ; 
+    " Update (" print ; 
+    ^self accessName print;
+    ")  ---" print;
+  ] divertOutput centerNL: 80 . print;
+  newLine print;
+
+  ^self initializeValuesForUpdate ;
+
+  !recs <- ^self getNewRecords select: [ isntProcessed ] ;
+  !goodRecs <- recs select: [ isGoodRecord && isntDuplicate ] ;
+
+  ### Process good records
+  goodRecs select: [ localEntry isntDefault ] .
+     do: [ ^self updateLocalEntry ;
+           localEntry flagAsUpdated ;
+         ] ;
+
+  ### Run any post processing if real records were processed
+  goodRecs count > 0 ifTrue: [ ^self runPostProcess ] ;
+
+  !goodRecs <- recs select: [ isGoodRecord && isntDuplicate ] ;
+  !processedRecs <- goodRecs select: [ isProcessed ] ;
+
+  ### Report results
+  "  Total Records Found: " print: 33 ; recs count printNL ;
+  "  Total Good Records:  " print: 33 ; goodRecs count printNL ;
+  "  Records Processed: " print: 33 ; processedRecs count printNL ;
+  newLine print;
+  recs count != processedRecs count
+  ifTrue: 
+    [ "  Bad Record Exclusion Reason: " print;
+      "Duplicate or " print ; 
+      ^self badRecordDescription printNL;
+      newLine print;
+    ] ;
+
+  ### Flag current update records for deletion 
+  ^self flagRecordsForDeletion ;  #-- always last step
+
+  newLine print;
+  [ "---   End " print;
+    ^self className print;
+    " Update  ---" print;
+  ] divertOutput centerNL: 80 . print;
+  newLine print;    
+
+  ^self
+] .
+
+#----------
+
+defineMethod: [| initializeValuesForUpdate | 
+#--  Set localEntry pointer in "good", new records
+  ^self getNewRecords select: [ isntProcessed ] .
+     select: [ isGoodRecord && isntDuplicate ] .
+  do: [ ^self setUpdateEntry ;
+        ^self setDate ;
+        ^self setCurrency ;
+        ^self initializeSupplementalValuesForUpdate ;
+      ] ;
+] .
+
+defineMethod:  [| setUpdateEntry | 
+  ^self :localEntry <- 
+     ^self dataSource dictionary at: ^self localId asString . 
+      else: [ ^self dataSource localEntity ] 
+] .
+
+defineMethod: [| setDate | 
+  ^self do: [ :date <- computeActualDate ; 
+              date isDate ifFalse: [ :isBadRecord <- TRUE ] ;
+            ] ;
+  ^self
+] .
+
+defineMethod: [| computeActualDate | 
+  ^date 
+] .
+
+defineMethod: [| setCurrency | 
+  ^self do: 
+    [ 
+    :baseCurrency <- ^self getActualCurrency ;
+     baseCurrency isCurrency 
+       ifFalse: [ :baseCurrency <- ^global Currency ] ;
+     ] 
+] .
+ 
+defineMethod: [| getActualCurrency | 
+  ^global Currency
+] .
+
+defineMethod: [| initializeSupplementalValuesForUpdate |      #-- redefine if needed
+  ^self
+] .
+
+#----------
+
+defineMethod: [| updateLocalEntry |
+  ^self do:
+  [ !newRec <- ^self asSelf;
+    !ts <- localEntry send: updateBlock;
+    !oldRec <- ts asOf: date;
+    !oldDate <- oldRec date; # should = ts effectiveDateAsOf: date;
+    ## If record exists for current date and isnt default,
+    ## copy info and flag for deletion
+    oldDate = date && oldRec isntDefault ifTrue:
+     [ newRec :firstAvailableDate <- oldRec firstAvailableDate;
+       newRec :refreshCount <- 1 + oldRec refreshCount;
+       oldRec flagForDeletion;
+     ];
+    ## Update new record
+    ts asOf: date put: newRec;
+    newRec :isProcessed <- TRUE;
+  ];
+] .
+
+#-----
+# runPostProcess
+#  . expires ts for LocalEntity masterList if expiration is enabled
+#  . runs a supplemental post process if defined for the dataSet
+#
+# Expiration rule:
+#    - expires ts if recent record was not updated in this update and its
+#      expiration date is not a future date with respect to this update date
+#    - if ts only contains initial (earliest) date or current update is a
+#      backhistory rerun, nothing is expired
+#
+# Note: an expiration offset override can be set for dataSets which should
+#       be expired on a different schedule than the default
+#
+# For example:
+#   - monthly update:
+#     . quarterly record dated as of 9609 and updated thru 9702 update
+#       will be expired as of 9612 by 9703 update
+#     . annual record dated as of 9512 and updated thru 9610 update
+#       will be expired as of 9612 by 9612 update (not 9611 update)
+#   - daily update:
+#     . record expiration can be overridden with an override offset
+#       of N days instead of 1 day if want to keep last value for at
+#       least N days
+#--------------------
+
+  define: 'expirationOffset' toBe: NA .   #-- user override
+  define: 'expiresData' toBe: TRUE .      #-- user override (disable/enable)
+
+defineMethod: [| setExpirationOffsetTo: increment |
+  ^self define: 'expirationOffset' toBe: increment ;
+  ^self
+] .
+
+defineMethod: [| enableExpiresData |
+  ^self define: 'expiresData' toBe: TRUE ;
+  ^self
+] .
+
+defineMethod: [| disableExpiresData |
+  ^self define: 'expiresData' toBe: FALSE ;
+  ^self
+] .
+
+defineMethod: [ | runPostProcess |
+  ^self expiresData ifTrue:
+   [ !block <- ^self updateBlock ;
+     !offset <- ^self expirationOffset else: ^self duration ;
+     !default <- ^self defaultRow ;
+     !updateDate <- ^self workSpace LatestUpdateDate ;
+
+     ## Only expire forward updates; backhistory reload of full
+     ##  or partial universe should not expire any data
+     ^self localEntry masterList select: [ lastUpdateDate = latestUpdateDate ] .
+     do:
+     [ !ts <- ^self send: ^my block ;
+       !currRecord <- ts value ;
+       !nextDate <- ^my offset isntNA
+         ifTrue: [ currRecord date + ^my offset ]
+        ifFalse: [ ^my updateDate ] ;
+       currRecord isntDefault &&                   ## record is real
+       currRecord updateDate != ^my updateDate &&  ## hasn't been updated this update
+       nextDate <= ^my updateDate                  ## do not expire into the future
+         ifTrue: [ ts asOf: nextDate put: ^my default ] ;
+     ] ;
+   ] ;
+  ^self runSupplementalPostProcess ;
+  ^self
+] .
+
+defineMethod: [| runSupplementalPostProcess |         #-- redefine if needed
+  ^self
+] .
+
+#----------
+
+defineMethod: [| flagRecordsForDeletion |
+  ^self getNewRecords select: [ isBadRecord || isDuplicate ] .
+   do: [ flagForDeletion ] ;
+  ^self
+] .
+
+;
+
+#--------------------
+#  Reports
+#--------------------
+
+DataSet
+
+defineMethod: [| displaySummaryExceptionReport | 
+  newLine print;
+  newLine print;
+  [ "*****    " print;
+    ^self className print;
+   " Summary Exception Report    *****" print;
+  ] divertOutput centerNL: 80 . print;
+  newLine print;
+
+  !currentList <- ^self getNewRecords ;
+  "  Total Records Found: " print: 30 ; currentList count printNL ;
+  "  Total Not Procssed:  " print: 30 ; 
+  !bad <- currentList select: [ isntProcessed ] . count printNL ;
+  "  Total Bad Records:  " print: 30 ; 
+  currentList select: [ isBadRecord ] . count printNL ;
+  "  Total Duplicate Records:  " print: 30 ; 
+  currentList select: [ isDuplicate ] . count printNL ;
+  newLine print ; 
+  
+  bad > 0 
+  ifTrue: 
+    [
+    "  Bad Record Reasons: " print;
+    "Duplicate or " print ; 
+    ^self badRecordDescription printNL;
+    newLine print;
+    "For More Info run:" printNL ;
+    "     " print ; ^self className print ; 
+    " displayBadRecordsReport " printNL ;
+    " or  " print ; ^self className print ; 
+    " displayDuplicateRecordsReport " printNL ;
+    ] ;
+
+  newLine print;
+  newLine print;
+  "*****    End of Summary Exception Report    *****" centerNL: 80 . print;
+  newLine print;
+  newLine print;
+
+] .
+  
+defineMethod: [| displayBadRecordsReport | 
+newLine print;
+newLine print;
+[ "*****    " print;
+  ^self className print;
+  " Bad Records Report    *****" print;
+] divertOutput centerNL: 80 . print;
+newLine print;
+
+!currentList <- ^self getNewRecords ;
+
+!bad <- currentList select: [ isBadRecord ];
+bad count > 0 
+ifTrue:
+  [ newLine print;
+    bad count print: 6;
+    "  Bad Records Not Processed" printNL;
+    bad select: [ localId isNA]. count print: 6 ; 
+    "  Bad localId Records Not Processed" printNL;
+    bad select: [ date isNA]. count print: 6 ; 
+    "  Bad date Records Not Processed" printNL;
+    bad select: [ localId isntNA && date isntNA]. count print: 6 ; 
+    "  Records Not Processed for Other Reasons" printNL;
+  ]
+ifFalse: [ "...  No Bad Records Found in Current Update" printNL ] ;
+
+newLine print;
+newLine print;
+"*****    End of Bad Records Report    *****" centerNL: 80 . print;
+newLine print;
+newLine print;
+] .    # displayBadRecordsReport
+
+
+#----------
+# displayDuplicateRecordsReports
+#  . displays duplicate records, indicating which record was processed
+#----------
+
+defineMethod: [| displayDuplicateRecordsReport |
+  newLine print;
+  newLine print;
+  [ "*****   " print ; ^self className print;
+    " Duplicate Records Report   *****" print ; 
+  ] divertOutput centerNL: 80 . print;
+  newLine print ; ;
+
+  !duplicates <- ^self getNewRecords
+     select: [ recordUsedForDuplicate isntNA ] .
+     groupedBy: [ recordUsedForDuplicate ] ;
+  duplicates count > 0 
+  ifTrue: 
+    [ [ "The Following " print ; duplicates count asString print ; 
+        " Ids Were Included Duplicate Times" print ;
+      ] divertOutput centerNL: 80 . print ; 
+      "     (P) indicates record was processed " printNL;
+      "     (R) indicates localEntry was reconciled globally" printNL;
+      newLine print ; 
+      duplicates 
+       do: [ groupList 
+             do: [ " " print: 5;
+                   isProcessed isntNA ifTrue: [ "(P) " print ]
+                                     ifFalse: [ "    " print ];
+                   localEntry isntNA && [localEntry isReconciledGlobally ] 
+                                      ifTrue: [ "(R) " print ]
+                                     ifFalse: [ "    " print ] ;
+                   displayInfo; 
+                 ]; 
+             newLine print; 
+           ];
+     ]
+    ifFalse: [ "... No Duplicates Found." printNL ] ;
+
+  newLine print;
+  newLine print;
+  "*****    End of Duplicate Records Report    *****" centerNL: 80 . print;
+  newLine print;
+  newLine print;
+] .   # displayDuplicateRecords
+
+#----------
+
+defineMethod: [| displayMissingCurrencyReport | 
+#-- !list <- ^self getCurrentInstances
+  !list <- ^self getNewRecords  ## limit report to current update records
+      select: [ isProcessed ] .
+      select: [ baseCurrency isDefault && currencyCode isntNA ] .
+      groupedByString: [ currencyCode asString ];
+
+  list count > 0 
+  ifTrue:
+     [ [ "--- Local Currencies Missing XRef In " print ; 
+         ^self className print ; " ---" print ;
+       ] divertOutput centerNL: 80 . print ; 
+       newLine print;
+       list do:
+         [ "Local Currency " print ; print ;
+           groupList count print ; " Found" printNL ;
+           groupList groupedBy: [ localEntry globalEntry baseCurrency ] .
+           do: [ groupList count print: 6 ;
+                 " Match to Global " print ; displayInfo ;
+               ] ;
+         ];
+     newLine print; newLine print ; 
+     ] ;
+] .
+
+defineMethod: [| displayMismatchedCurrencyReport | 
+#-- !list <- ^self getCurrentInstances
+  !list <- ^self getNewRecords  ## limit report to current update records
+      select: [ isProcessed ] .
+      select: [ localEntry isReconciledGlobally ] .
+      select: [ baseCurrency isntDefault && baseCurrency isntNA &&
+                localEntry globalEntry baseCurrency isntDefault  &&
+                baseCurrency underlyingCurrency != 
+                localEntry globalEntry baseCurrency underlyingCurrency
+              ] ;
+
+  list count > 0 
+  ifTrue:
+     [ [ "--- Mismatched Local/Global Currencies In " print ; 
+         ^self className print ; " ---" print ;
+       ] divertOutput centerNL: 80 . print ; 
+       newLine print;
+       "Local Id" print: 15 ; "Date: " print: 12 ; "Local Currency" print: 35 ;
+       "Global Id" print: 15 ; "Global Currency" printNL ;
+       list do:
+         [ localId print: 15 ; date print: 12 ; 
+           baseCurrency 
+           do: [ code print: 6 ; " " print: 2 ; name print: 26 ] ;
+           " " print ; localEntry globalEntry code print: 15 ; 
+           localEntry globalEntry baseCurrency
+           do: [ code print: 6 ; " " print: 2 ; name printNL ] ;
+         ];
+     newLine print; newLine print ; 
+     ] ;
+] .
+;
+
+
+#--------------------
+#   Display
+#       redefine for each dataSet as needed
+#--------------------
+
+DataSet
+
+defineMethod: [| displayInfo |
+  ^self localId printNL;
+] .
+
+#-- each dataSet should add record date if exists and critical data items
+defineMethod: [| displayFullInfo |
+  ^self do:
+  [ localId print: 12;
+    refreshCount asInteger print: 3;
+    " " print: 2;
+    firstAvailableDate print: 12;
+    processDate print: 12;
+    updateDate printNL: 12;
+  ];
+] .
+
+#----------
+
+defineMethod: [| displayCharacteristics |
+  ^self className print; " (" print; 
+  ^self updateMode print; ") " print; 
+  ^self duration isntNA
+    ifTrue: [  " duration - " print; ^self duration print ];
+  newLine print;
+] .
+
+#----------
+
+defineMethod: [| profile |
+  "Data Set: " print: 20; ^self className printNL;
+  "Update Mode: " print: 20; ^self updateMode printNL;
+  ^self updateModeIsAppend
+   ifTrue: [ "Access Via: " print: 20;
+             ^self dataSource entityType whatAmI print ; " " print ; 
+             ^self dataSource dbCode print ; "Data " print ; 
+             ^self accessName printNL;
+           ];
+  "Duration: " print: 13; ^self duration printNL;
+  "First Available: " print: 20; ^self defaultRow firstAvailableDate printNL;
+  ^self testItemList isCollection
+  ifTrue: [ "Test Items: " print: 20 ; 
+            ^self testItemList 
+            do: [ ^self asString stripChar: newLine . print ; 
+                  " " print ; 
+                ] ;
+            newLine print ; 
+          ] ;
+  newLine print;
+] .
+;
+
+#======================================================================
+
+####################
+#  Rel 6.1.2 installation 3/99
+####################
+
+####################
+#  IncorporatorPrototype
+#
+# - Add Schema defaultPropertyList init for IncPrototype and
+#   and DataSet default row
+#
+#  . needed for "Replace" table default row initialization
+#    if using define/FP with default
+####################
+IncorporatorPrototype
+
+#--------------------
+# . Standardize IncorporatorPrototype (add protocol currently at DataSet)
+#   to comply with new createBLD
+#    - defaultRow creation/initialization for replace tables
+#--------------------
+
+defineMethod: [| setDefaultRowTo: row |
+  ^self define: 'defaultRow' toBe: row; 
+  row :defaultFlag <- TRUE; 
+  row :code <- "Default"; 
+  ^self define: 'defaultInstance' toBe: row; 
+  ^self defaultRow initializeDefaultValues; 
+  ^self
+] .
+
+defineMethod: [| initializeDefaultValues |  #-- called by `setDefaultRowTo:`
+  ^self initializeDefaults  #<=== add std schema prop init
+  do: [ :defaultFlag <- TRUE ;
+        :baseCurrency <- ^global Currency ;
+        ^self initializeSupplementalDefaultValues; 
+      ];
+] .
+
+defineMethod: [| initializeSupplementalDefaultValues |
+  ^self
+] .
+;
+
+####################
+#  DataSet
+#
+# - Add "enable/disable/set" methods to modify DataSet
+#   'updatesHistoryRule' constant for subclasses
+#
+#   . enableUpdatesHistoryRule
+#      - changes constant rule block to a TRUE in block
+#      .. if used, intent is to always return TRUE; no
+#         rule code needs to be evaluated
+#
+#   . disableUpdatesHistoryRule
+#      - changes constant rule block to a FALSE in block
+#      .. if used, intent is to always return FALSE,
+#         effectively disabling protocol that requires it
+#         to be TRUE in order to be evaluated
+#
+#   . resetUpdatesHistoryRule
+#      - deletes message if defined at subclass of DataSet
+#      .. if used, assumes intent is to revert back to std
+#         parent rule:
+#
+#        [^self updateModeIsAppend || ^self duration isntNA]
+#
+#   . setUpdatesHistoryRuleTo: [ rule code ]
+#      - defines class constant to contain diff rule from parent
+#
+# - Add method 'setUpdateBlockTo:' @DataSet and revise std method
+#   'setAccessNameTo:' to use it
+#   Usage:  snapshot setUpdateBlockTo: [ :history ];
+#
+# runPostProcess
+#  . expires ts for LocalEntity masterList if expiration is enabled
+#  . runs a supplemental post process if defined for the dataSet
+#
+# Expiration rule:
+#    - expires ts if recent record was not updated in this update and its
+#      expiration date is not a future date with respect to this update date
+#    - if ts only contains initial (earliest) date or current update is a
+#      backhistory rerun, nothing is expired
+#
+# Note: an expiration offset override can be set for dataSets which should
+#       be expired on a different schedule than the default
+#
+# For example:
+#   - monthly update:
+#     . quarterly record dated as of 9609 and updated thru 9702 update
+#       will be expired as of 9612 by 9703 update
+#     . annual record dated as of 9512 and updated thru 9610 update
+#       will be expired as of 9612 by 9612 update (not 9611 update)
+#   - daily update:
+#     . record expiration can be overridden with an override offset
+#       of N days instead of 1 day if want to keep last value for at
+#       least N days
+#
+# - Add methods @DataSet to return time series where DataSet
+#   is referenced:
+#        'getTimeSeriesForUpdate'
+#        'getTimeSeriesForUpdateIn:'
+#
+####################
+DataSet
+
+#-- orig selection criterion was 'updatesData || updatesDictionary' in LE setupUpdate
+  define: 'setupUpdateEnabled' toBe: TRUE .  #<== default; override in REC
+
+  define: 'expirationOffset' toBe: NA .   #-- user override
+  define: 'expiresData' toBe: TRUE .      #-- user override (disable/enable)
+  define: 'updatesHistoryRule' toBe: [[ ^self updateModeIsAppend || ^self duration isntNA ]] .
+
+
+#--------------------
+#  one-time inits called by runInitialSetup
+#--------------------
+
+defineMethod: [| initializeDefault |
+  ^self setAccessName ;
+#--  ^self updateModeIsAppend
+#--    ifTrue: [ ^self setDefaultRowTo: ^self ] 
+#--   ifFalse: [ ^self setDefaultRowTo: ^self newPrototype new ] ;
+  ^self setDefaultRowTo: ^self defaultInstance ; #-- cf stdized BLD  (?omit altogether?)
+  ^self defineStandardMessages ;
+  ^self
+] .
+
+defineMethod: [| initializeDefaultValues |
+  ^self initializeDefaults  #<=== add std schema prop init
+  do: [ :localEntry <- ^self dataSource localEntity;
+        :isProcessed <- TRUE;
+        :isReconciled <- TRUE;
+        :defaultFlag <- TRUE;
+        :date <- earliestPossibleDate ;
+        :updateDate <- earliestPossibleDate;
+        :processDate <- earliestPossibleDate;
+        :firstAvailableDate <- earliestPossibleDate;
+        :baseCurrency <- ^global Currency ;
+        ^self initializeSupplementalDefaultValues ;
+      ];
+  ^self
+] .
+
+defineMethod: [| setAccessName |
+  !name <- ^self className = "snapshot" ifTrue: [ "history" ];
+  name isNA ifTrue:
+  [ :name <- ^self className;
+    ^self send: ^self updatesHistoryRule .  #<===
+     ifTrue: [ :name <- name concat: "History" ];
+  ];
+  ^self setAccessNameTo: name;
+  ^self
+] .
+
+defineMethod: [| setUpdateBlockTo: intensionBlock |
+  !block <- intensionBlock isBlock
+     ifTrue: [ intensionBlock ] ifFalse: [ intensionBlock asBlock ];
+  ^self define: 'updateBlock' toBe: [ block ];
+  ^self
+] .
+
+defineMethod: [| setAccessNameTo: name |
+  ^self define: 'accessName' toBe: name;
+  ^self setUpdateBlockTo: (":" concat: name) asBlock;
+  ^self updatesData ifTrue:
+   [ ^self send: ^self updatesHistoryRule .
+       ifTrue: [ ^self dataSource localEntity define: name ]
+      ifFalse: [ ^self dataSource localEntity defineFixedProperty: name ];
+   ]; 
+  ^self
+] .
+
+defineMethod: [| globalId | ^self localId ] .  ##-- default; redefine in REC
+
+defineMethod: [| refreshLocalEntry: localEnt | 
+  localEnt :id <- ^self localId asString;
+  localEnt flagAsUpdated;
+  ^self :isReconciled <- TRUE;
+  ^self supplementalRefreshLocalEntry: localEnt;
+  ^self
+] .
+
+defineMethod: [| supplementalRefreshLocalEntry: localEnt |
+  ^self
+] .
+
+#----------
+#  dictionary update
+#----------
+
+defineMethod:
+[ | updateLocalDictionary | 
+  !records <- ^self getNewRecords 
+#-- select: [ isntProcessed && isGoodRecord && isntDuplicate ] ;
+    select: [ isntReconciledLocally && isGoodRecord && isntDuplicate ] ; #<===
+
+  newLine print; newLine print;
+  [ "---  Begin Local Reconcile Using " print ; 
+    ^self className print ; "  ---" print;
+  ] divertOutput centerNL: 80 . printNL ;
+
+  ^self dataSource localEntity updateDictionaryUsing:  records ;
+  newLine print;
+  "---  End Local Reconcile  ---" centerNL: 80 . print;
+  newLine print;
+  ^self 
+] .
+ 
+defineMethod: [| enableSetupUpdate |
+  ^self define: 'setupUpdateEnabled' toBe: TRUE;
+  ^self
+] .
+defineMethod: [| disableSetupUpdate |
+  ^self define: 'setupUpdateEnabled' toBe: FALSE;
+  ^self
+] .
+
+#-------------
+
+defineMethod: [| enableInitializeHistory |
+  ^self define: 'initializeHistoryEnabled' toBe: TRUE;
+  ^self
+] .
+defineMethod: [| disableInitializeHistory |
+  ^self define: 'initializeHistoryEnabled' toBe: FALSE;
+  ^self
+] .
+
+defineMethod: [| initializeHistoryEnabled |   #<-- original rule; redefine as needed
+  ^self updatesData
+] .
+
+defineMethod: [| initializeHistoryFor: localEnt |  #<-- original rule; redefine as needed
+  localEnt send: ^self updateBlock . <- ^self defaultRow;
+  ^self
+] .
+ 
+defineMethod: [| getTimeSeriesForUpdate |  #<== ADD; use in new 'updateLocalEntry'.
+  ^self localEntry send: ^self updateBlock #<-- current default behavior
+] .
+
+
+defineMethod: [| getTimeSeriesForUpdateIn: localEnt | # <=== ADD: use in new 'runPostProc'.
+  localEnt send: ^self updateBlock #<-- current default behavior
+] .
+
+
+defineMethod: [| updateLocalEntry |   #<-- redefine
+  ^self do:
+  [ !newRec <- ^self asSelf;
+#--> !ts <- localEntry send: updateBlock;
+    !ts <- getTimeSeriesForUpdate;  #<==
+    !oldRec <- ts asOf: date;
+    !oldDate <- oldRec date; # should = ts effectiveDateAsOf: date;
+    ## If record exists for current date and isnt default,
+    ## copy info and flag for deletion
+    oldDate = date && oldRec isntDefault ifTrue:
+     [ newRec :firstAvailableDate <- oldRec firstAvailableDate;
+       newRec :refreshCount <- 1 + oldRec refreshCount;
+       oldRec flagForDeletion;
+     ];
+    ## Update new record
+    ts asOf: date put: newRec;
+    newRec :isProcessed <- TRUE;
+  ];
+] .
+
+defineMethod: [| setExpirationOffsetTo: increment |
+  ^self define: 'expirationOffset' toBe: increment ;
+  ^self
+] .
+
+defineMethod: [| enableExpiresData |
+  ^self define: 'expiresData' toBe: TRUE ;
+  ^self
+] .
+
+defineMethod: [| disableExpiresData |
+  ^self define: 'expiresData' toBe: FALSE ;
+  ^self
+] .
+
+defineMethod: [| runPostProcess |   #<-- redefine
+  ^self expiresData ifTrue:
+   [ #-->!block <- ^self updateBlock;
+     !offset <- ^self expirationOffset else: ^self duration;
+     !default <- ^self defaultRow;
+     !updateDate <- ^self workSpace LatestUpdateDate;
+     !dset <- ^self;  #<===
+     ## Only expire forward updates; backhistory reload of full or partial
+     ##  universe should not expire any data (lastUpdDate = latestUpdDate).
+     ## Add extra offset to allow universe to be split among tapes which may
+     ##  not necessarily be processed in same cycle but still belong to same
+     ##  updateDate -> note: if LocalEnt expiration offset isNA, will never
+     ##  get expired automatically
+     ^self localEntry masterList
+      select: [ lastUpdateDate = latestUpdateDate && expirationOffset isntNA ] .
+      select: [ latestUpdateDate + expirationOffset < dataSource mostRecentUpdateDate ] .
+     do:
+     [ #-->!ts <- ^self send: ^my block;
+       !ts <- ^my dset getTimeSeriesForUpdateIn: ^self;  #<===
+       !currRecord <- ts value;
+       !nextDate <- ^my offset isntNA
+         ifTrue: [ currRecord date + ^my offset ]
+        ifFalse: [ ^my updateDate ];
+       currRecord isntDefault &&                 ## record is real
+       currRecord updateDate < ^my updateDate && ## wasn't updated this update, but earlier one
+       nextDate <= ^my updateDate                ## don't expire into the future
+         ifTrue: [ ts asOf: nextDate put: ^my default ];
+     ];
+   ];
+  ^self runSupplementalPostProcess;
+  ^self
+] .
+
+##-- NOTE: ensured to be executed by subclasses only
+
+defineMethod: [| setUpdatesHistoryRuleTo: block |
+  ^self classDescriptor != ^global DataSet classDescriptor
+  ifTrue:
+    [ !rule <- block isBlock ifTrue: [ block ] ifFalse: [ block asBlock ];
+      ^self define: 'updatesHistoryRule' toBe: [ rule ];
+    ];
+  ^self
+] .
+
+defineMethod: [| enableUpdatesHistoryRule |
+  ^self setUpdatesHistoryRuleTo: [ TRUE ];
+  ^self
+] .
+
+defineMethod: [| disableUpdatesHistoryRule |
+  ^self setUpdatesHistoryRuleTo: [ FALSE ];
+  ^self
+] .
+
+defineMethod: [| resetUpdatesHistoryRule |
+  !selector <- "updatesHistoryRule";
+  !msg <- ^self getMessage: selector;
+  msg class classDescriptor != ^self classDescriptor
+    ifTrue: [ ^self deleteMessage: selector ];
+  ^self
+] .
+ 
+
+#----------
+#  display methods
+#----------
+
+defineMethod: [| displayCharacteristics |
+  ^self className print; " (" print; 
+  ^self updateMode print; ") " print; 
+  ^self duration isntNA
+    ifTrue: [ " duration - " print;
+              [ ^self duration print ] divertOutput stripBoundingBlanks print;
+            ];
+  ^self expiresData 
+    ifTrue: [ "  expires data/offset - " print;
+              [ ^self expirationOffset print ] divertOutput stripBoundingBlanks print;
+            ];
+  newLine print;
+] .
+
+##############################################################
+#  - Fix DataSet 'displayMissingCurrencyReport' format
+##############################################################
+
+defineMethod: [| displayMissingCurrencyReport | 
+  !list <- ^self getNewRecords  ## limit report to current update records
+      select: [ isProcessed ] .
+      select: [ baseCurrency isDefault && currencyCode isntNA ] .
+      groupedByString: [ currencyCode asString ];
+
+  list count > 0 
+  ifTrue:
+     [ [ "--- Local Currencies Missing XRef In " print ; 
+         ^self className print ; " ---" print ;
+       ] divertOutput centerNL: 80 . print ; 
+       newLine print;
+       list do:
+         [ "Local Currency " print ; print ;
+           groupList count print ; " Found" printNL ;
+           groupList groupedBy: [ localEntry globalEntry baseCurrency ] .
+           do: [ groupList count print: 6 ;
+                 " Match to Global " print ; displayInfo ;
+               ] ;
+           newLine print;
+         ];
+     newLine print; newLine print ; 
+     ] ;
+] .
+
+
+##############################################################
+# - Revise DataSet 'displaySummaryExceptionReport'
+#
+#  . fix "Procssed" typo
+#  . add globalId isNA count if updatesDictionary
+##############################################################
+
+
+defineMethod: [| displaySummaryExceptionReport | 
+  newLine print;
+  newLine print;
+  [ "*****    " print;
+    ^self className print;
+   " Summary Exception Report    *****" print;
+  ] divertOutput centerNL: 80 . print;
+  newLine print;
+
+  !currentList <- ^self getNewRecords;
+  "  Total Records Found:" print: 30; currentList count printNL;
+  "  Total Not Processed:" print: 30;    #<== fix typo
+  !bad <- currentList select: [ isntProcessed ] . count printNL;
+  "  Total Bad Records:" print: 30; 
+  currentList select: [ isBadRecord ] . count printNL;
+  "  Total Duplicate Records:" print: 30; 
+  currentList select: [ isDuplicate ] . count printNL;
+  ^self updatesDictionary ifTrue:
+  [ !badGlobal <- currentList select: [ globalId isNA ];
+    badGlobal count > 0 ifTrue:
+    [ newLine print;
+      "  Total NA globalId Records:" print: 30;
+      badGlobal count printNL;
+    ];
+  ];
+  newLine print; 
+  
+  bad > 0 ifTrue:
+  [
+    "  Bad Record Reasons: " print;
+    "Duplicate or " print; 
+    ^self badRecordDescription printNL;
+    newLine print;
+    "For More Info run:" printNL;
+    "     " print; ^self className print; 
+    " displayBadRecordsReport " printNL;
+    " or  " print; ^self className print; 
+    " displayDuplicateRecordsReport " printNL;
+  ];
+
+  newLine print;
+  newLine print;
+  "*****    End of Summary Exception Report    *****" centerNL: 80 . print;
+  newLine print;
+  newLine print;
+] .
+
+#----------
+
+defineMethod: [| profile |
+  "Data Set: " print: 20; ^self className printNL;
+  "Update Mode: " print: 20; ^self updateMode printNL;
+  ^self send: ^self updatesHistoryRule . #<===  was updateModeIsAppend
+   ifTrue: [ "Access Via: " print: 20;
+             ^self dataSource entityType whatAmI print ; " " print ; 
+             ^self dataSource dbCode print ; "Data " print ; 
+             ^self accessName printNL;
+           ];
+  "Duration: " print: 20;
+  [^self duration print] divertOutput stripBoundingBlanks printNL;
+  "Expires Data: " print: 20; ^self expiresData printNL;
+  "Expire Offset: " print: 20;
+  [^self expirationOffset print] divertOutput stripBoundingBlanks printNL;
+  "First Available: " print: 20; ^self defaultRow firstAvailableDate printNL;
+  ^self testItemList isCollection
+  ifTrue: [ "Test Items: " print: 20 ; 
+            ^self testItemList 
+            do: [ ^self asString stripChar: newLine . print ; 
+                  " " print ; 
+                ] ;
+            newLine print ; 
+          ] ;
+  newLine print;
+] .
+
+;
+
+####################
+#  DBEntity
+####################
+
+DBEntity
+
+#--------------------
+# . preserve latest updateDate in order to process back history reloads
+#   correctly (cf expiration rule in DataSet runPostProcess)
+# . add expirationOffset to provide more flexibility regarding when a
+#   localEntity gets expired
+#   - default value is 0 days to keep original expiration rule intact
+#     i.e. localEntity is expiration candidate if not updated by current
+#     update
+#   - each driver will need to be amended to establish an offset which
+#     is reasonable in order to stop partial universe updates from expiring
+#     localEntities unnecessarily:
+#       . each LocalEntity defaultInstance should get default value set
+#         but fixedProperty value can be changed for individual instances
+#         as needed (eg by country, etc)
+#
+# - Add 'displayReconcileStats' method @DBEntity and revise
+#   methods 'displayStats' and 'updateLocalDictionary' to use
+#   this method.
+#   Net effect is to exclude dataSet stats from local dictionary
+#   report since redundant and irrelevant at that point.
+#--------------------
+
+   defineFixedProperty: 'latestUpdateDate' .
+   define: 'expirationOffset' toBe: 0 days .  ## default must be overriden by driver REC; ADD to boot
+
+defineMethod: [| initializeLocalAttributes |  #<===  add method
+  ^self :lastUpdateDate <- earliestPossibleDate ;
+  ^self :latestUpdateDate <- earliestPossibleDate ;
+  ^self
+] .
+
+defineMethod: [| initializeDefault |
+  ^self 
+    initializeLocalAttributes  #<=== 
+    initializeLinks
+] .
+
+defineMethod: [| flagAsUpdated |
+  ^self :hasBeenUpdated <- TRUE ;
+  ^self :lastUpdateDate <- ^date ;
+  ^self latestUpdateDate < ^date   #<===
+     ifTrue: [ ^self :latestUpdateDate <- ^date ];  #<===
+] .
+
+defineMethod: [| setExpirationOffsetTo: offset |  #<== new method; add to RECshell
+  ^self define: 'expirationOffset' toBe: offset ;
+  ^self
+] .
+
+defineMethod: [| createNewEntryFrom: record |
+  !newEntry <- ^self createInstance: record localId . initializeLinks;  #<=== was ^self new
+  ^self dataSource dictionary at: record localId asString put: newEntry;
+  "Local Add: " print: 15; record displayInfo; 
+  newEntry
+] .
+
+#--------------------
+# . allow multiple dataSets to update same localEntry in different
+#   sessions for same update date
+#   - 'hasBeenUpdated' no longer reflects universe updated by a given
+#     dataSet if reconciles run in separate sessions
+#   - keep consistent dataSet sort, although update logic does not imply
+#     any order (use classDescriptor code since code = "Default")
+#--------------------
+
+#-----------
+#  setup
+#-----------
+
+defineMethod: [| setupUpdate |  ##<-- redef
+  ^self masterList select: [ lastUpdateDate != ^date ] .
+     do: [ :hasBeenUpdated <- NA ];
+  ^self
+     displayStats
+     setUpdateDates
+     runSupplementalSetup;
+  ^self dataSource dataSetList select: [ ^self setupUpdateEnabled ] . #<===
+     sortUp: [ classDescriptor code ] .
+         do: [ ^self setupUpdate ];
+  ^self
+] .
+
+## runs once during Install (runInitialSetup) and each update (createNewEntryFrom:)
+
+defineMethod: [| initializeHistory |  #<--- revised
+  !localEntity <- ^self;
+  !source <- ^self dataSource; 
+  earliestPossibleDate evaluate:
+  [ source dataSetList
+#-- select: [ updatesData ] .
+    select: [ ^self initializeHistoryEnabled ] .  #<== default rule; redef as needed
+#---    do: [ ^my localEntity send: updateBlock . <- defaultRow ];
+        do: [ ^self initializeHistoryFor: ^my localEntity ]; #<== default method; redef as needed
+
+  ]; 
+  ^self
+] .
+
+defineMethod: [| updateLocalDictionary | 
+  newLine print;
+  "---  Begin Counts  ---" centerNL: 80 . print;
+  newLine print;
+  ^self displayReconcileStats;  #<====
+  newLine print;
+  "---  End Counts  ---" centerNL: 80 . print;
+  newLine print;
+
+  ^self dataSource dataSetList select: [ updatesDictionary ] .
+      sortUp: [ classDescriptor code ] .
+   do: [ ^self updateLocalDictionary ];
+
+  ^self globalReconcile;
+
+  newLine print;
+  "---  Begin Counts  ---" centerNL: 80 . print;
+  newLine print;
+  ^self displayReconcileStats;   #<====
+  newLine print;
+  "---  End Counts  ---" centerNL: 80 . print;
+  newLine print;
+  ^self
+] .
+
+defineMethod: [| runUpdate | 
+  ^self dataSource dataSetList select: [ updatesData ] .
+     sortUp: [ classDescriptor code ] . #-- assumes no order dependency #<===
+     do: [ ^self runUpdate ] ;
+  ^self runSupplementalUpdate ;
+  ^self displayStats ;
+  ^self
+] .
+
+defineMethod: [| displayExceptions |
+  ^self dataSource dataSetList
+     select: [ updatesData ] . 
+     sortUp: [ classDescriptor code ] . #<===
+  do: [ ^self displaySummaryExceptionReport ] ;
+
+  ^self dataSource displayDuplicateEntityTypeReport ;
+  ^self displaySupplementalExceptions ;
+  ^self
+] .
+
+defineMethod: [| displayFullExceptionReports |
+  ^self dataSource do:
+   [ displayGlobalExceptionReport ; 
+     dataSetList select: [ updatesData ] . sortUp: [ classDescriptor code ] . #<===
+     do: [ ^self displayBadRecordsReport ;
+           ^self displayDuplicateRecordsReport ;
+         ] ;
+     displayDuplicateEntityTypeReport;
+     displayNotUpdatedReport;
+   ];
+  ^self displaySupplementalExceptions ;
+  ^self
+] .
+
+defineMethod:  [| displayStats |
+  newLine print;
+  "---  Begin Counts  ---" centerNL: 80 . print;
+  newLine print;
+
+  !source <- ^self dataSource;
+  !dataSets <- source dataSetList select: [ updatesData ] ;
+
+  ^self displayReconcileStats;   #<====
+
+  dataSets sortUp: [ accessName ] . do:
+  [ accessName concat: ":" . print: 20;
+    ^self getInstances
+       select: [ isProcessed && isActive ] . count printNL; 
+  ];
+
+  newLine print;
+  "---  End Counts  ---" centerNL: 80 . print;
+  newLine print;
+  ^self
+] .    # displayStats
+
+#------
+
+defineMethod: [| displayReconcileStats |
+  !source <- ^self dataSource; 
+
+  "Local Dictionary:" print: 20;
+  source dictionary selectorList count printNL;
+  "Local Entity:" print: 20;
+  ^self instanceList count printNL;
+  source entityType whatAmI concat: ":" . print: 20;
+  source entityType instanceList send: source accessBlock .
+         select: [ value isntDefault ] . count printNL;
+  "Global Recs:" print: 20;
+  ^self instanceList select: [ isReconciledGlobally ] . count printNL;
+  newLine print;
+] .    # displayReconcileStats
+
+
+#-----------
+# . display test output for single LocalEntity or list 
+#   - revise 'displayTestData' to call new method 'displayTestDataFor:'
+#     which now contains report logic
+#-----------
+
+defineMethod: [| displayTestData |   #<=== revised
+  !list <- ^self send: ^self testListRule;
+  ^self displayTestDataFor: list;
+] .
+
+defineMethod: [| displayTestDataFor: localEnt |  #<=== ADD
+  newLine print;
+  "---  Begin Test Data  ---" centerNL: 80 . print;
+  newLine print;
+
+  !sets <- ^self dataSource dataSetList select: [ updatesData ] .
+    extendBy: [ !items <- testItemList 
+                 extendBy: 
+                   [ !title <- asString stripChar: newLine ;
+                     !width <- title count max: 12 ;
+                   ] ;
+              ] ;
+  localEnt do:  #<== 
+  [ !element <- ^self ; 
+    "-" fill: 50 . printNL ;
+    "Test Data For: " print ; element displayInfo ; 
+    " " print: 10 ; globalEntry displayInfo ;
+    ^my sets do:
+     [ newLine print ; 
+       " --> DataSet: " print ; className printNL ;
+       !element <- ^my element ;
+       !ts <- element send: updateBlock ; 
+       " " print: 15 ; 
+       items do: [ title center: width . print ] ;
+       newLine print ; 
+       ts select: [ ^date > earliestPossibleDate ] .
+       do: [ !items <- ^my items ;  #<===
+             ^self do:  #<===
+              [ " " print: 3 ; ^date print: 12 ;
+                ^my items do: [ ^my send: ^self . print: width ] ;
+                newLine print ;     
+              ] ;
+           ] ;
+       newLine print ; 
+     ] ;
+    newLine print ; 
+  ] ;
+
+  newLine print;
+  "---  End Test Data  ---" centerNL: 80 . print;
+  newLine print;
+  newLine print;
+] .    # displayTestData
+;
+
+##############################################################
+# - Add globalId cover method to both DataSet and DBEntity
+#   which can be redefined by drivers as needed; default
+#   value is 'localId' and 'id' respectively.
+#
+#   Redefine 'getGlobalEntry' @DBEntity to use globalId.
+#
+#   Intent is to use globalId for global lookup/reconcile
+#   and localId for local lookup/reconcile.
+#
+# - Modify DBEntity 'updateDictionaryUsing:'
+#    . add globalId ref
+#    . add enable/disableLocalIdChanges
+#      orig version automatically processes localId changes
+#      some drivers need to turn this off (eg Barra)
+#    . use last record in groupList to refresh using latest info
+#      orig version always used 1st record
+#       
+# - Add DBEntity methods 'isReferencedByGlobal', 'isntReferencedByGlobal'
+#   to check if globalEntry references self
+##############################################################
+
+###########
+# DBEntity
+###########
+DBEntity
+
+   define: 'processLocalIdChanges' toBe: TRUE . ##--  override via disable in REC
+
+defineMethod: [| enableLocalIdChanges |
+   ^self define: 'processLocalIdChanges' toBe: TRUE ;
+   ^self
+] .
+
+defineMethod: [| disableLocalIdChanges |
+   ^self define: 'processLocalIdChanges' toBe: FALSE ;
+   ^self
+] .
+
+defineMethod: [| globalId | ^self id ] .   ##-- default; redefine in REC (eg sedol)
+
+defineMethod: [| getGlobalEntry |   ##<== redefine to use globalId
+  ^self getGlobalEntryFor: ^self globalId
+] .
+
+#-----------------
+
+defineMethod: [| isReferencedByGlobal |
+   ^self globalEntry send: ^self dataSource accessBlock . value = asSelf
+] .
+
+defineMethod: [| isntReferencedByGlobal |
+   ^self isReferencedByGlobal not
+] .
+
+#--------------------
+# updateDictionaryUsing: recordList
+#  . recordList is list of data records that respond to localId
+#  . processes id changes only if not referencing current localEntity
+#    and in same class (i.e. no cross-space links allowed)
+#  . creates new LocalEntity instance if not found in LocalDictionary
+#  . refreshes LocalEntity "static" properties using record
+#--------------------
+defineMethod: [| updateDictionaryUsing: recordList |
+  !LocalEntity <- ^self;
+  recordList groupedByString: [ localId asString ] .
+    send: [ groupList at: (groupList count) . asSelf ] .  ##<== was 'at: 1 .'
+  do:
+  [ !currentLocalEntry <- ^my LocalEntity getLocalEntryFor: localId;
+
+    ^my LocalEntity processLocalIdChanges ifTrue:
+    [ !globalEntry <- ^my LocalEntity getGlobalEntryFor: globalId;  #<==
+      !globalLocalEntry <- globalEntry send: dataSource accessBlock . value;
+      #-- If no local and global points to a "real" record, id change has occurred
+      #-- Screen out xlinks to different class
+      currentLocalEntry isNA && globalLocalEntry isntDefault &&
+        (globalLocalEntry classDescriptor = ^my LocalEntity classDescriptor)
+      ifTrue:
+       [ #-- Derived local entry is global's pointer to this dataset
+         :currentLocalEntry <- globalLocalEntry;
+         dataSource dictionary at: localId put: currentLocalEntry;
+         "Id Change: " print: 15;
+         "from  " print; currentLocalEntry id print: 15; 
+         "to  " print; localId printNL;
+       ];
+    ]; ## end of local id chg
+
+    #-- Add new entries and refresh all
+    #-- Note: local duplicates created here; global reconcile makes global link
+    currentLocalEntry isNA ifTrue:
+     [ :currentLocalEntry <- ^my LocalEntity createNewEntryFrom: ^self ];
+    currentLocalEntry refreshUsing: ^self;
+  ]; #  end of recordList
+
+  #-- Assign permanent reference to localEntry for all records
+  recordList do: [ ^self setUpdateEntry ];
+
+  newLine print; 
+  recordList count print; 
+  " Input Records Processed" printNL;
+] .
+;
+
+
+####################
+#  DataSource
+#
+# - Revise DataSource protocol to allow use of different
+#   parent class for LocalEntity creation.
+#   Current default is DBEntity.
+#
+#   . add fixed property 'dbEntity'
+#   . add method 'setDBEntityTypeTo:' to set this value
+#   . revise 'createLocalEntity' to use dbEntity parent
+####################
+DataSource
+
+#-- Existing DataSource instances get updated with default automatically
+#--  but are not affected since their respective LocalEntity subclasses
+#--  already exist and are expected to use the standard DBEntity parent
+
+   defineFixedProperty: 'dbEntity' withDefault: DBEntity .
+
+
+#-- add method to reset value
+
+defineMethod: "[| setDBEntityTypeTo: dbEntityClass |
+  ## Overrides default DBEntity parent for LocalEntity subclass.
+  ## Must be executed before 'setUpdateTypeTo: \"LocalEntity\"'
+  ##   is called (typically in REC script)
+
+  :dbEntity <- dbEntityClass;
+  ^self
+]" .
+
+#-- revise method to use new 'dbEntity' parent class
+
+defineMethod: "[| createLocalEntity |
+  ## Add reference to parent for LocalEntity subclass
+  ## Note: can change default parent using 'setDBEntityTypeTo:'
+  ##   before executing this method
+
+  dbEntity createSubclass: \"LocalEntity\" . setDataSourceTo: ^self;
+  ^global LocalDictionary at: \"Default\" put: ^global LocalEntity;
+  !dbProperty <- dbCode concat: \"Data\";
+  :accessBlock <- \":\" concat: dbProperty . asBlock; 
+  dbProperty locateInDictionaryOf: entityType . isNA
+  ifTrue:
+   [ entityType 
+       defineFixedProperty: dbProperty .
+       updateInitializationListWith: accessBlock;
+     entityType instanceList 
+     do: [ ^self send: ^my accessBlock . <- ^my localEntity asSelf ];
+   ];
+  ^self
+]" .
+
+defineMethod: [| displayCurrencyExceptionReport |
+  newLine print;
+  newLine print;
+
+  [ "*****    " print; code print;
+    " Currency Exception Report    *****" print;
+  ] divertOutput centerNL: 80 . print;
+  newLine print;
+
+  updateType isLocalEntity
+  ifTrue:
+  [
+   dataSetList select: [ updatesData ] . sortUp: [ classDescriptor code ] . #<===
+   do: [ ^self displayMissingCurrencyReport ;
+         ^self displayMismatchedCurrencyReport ;
+       ] ;
+  ] 
+  ifFalse: [ "...  Report Not Defined For Custom DataSource." printNL ] ;
+
+  newLine print;
+  newLine print;
+  "*****    End of Currency Exception Report    *****" centerNL: 80 . print;
+  newLine print;
+  newLine print;
+] .
+;

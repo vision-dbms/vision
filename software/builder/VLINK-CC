@@ -1,0 +1,139 @@
+#!/bin/csh
+
+####  Verify the argument count, ...
+if ( $#argv < 2 ) then
+	echo "Usage:\nVLINK program-name cc-options"
+	exit 1
+endif
+
+####  ... initialize/validate audit information, ...
+if ( ! $?AuditEnabled ) then
+	set AuditFile	= "/dev/null"
+	set AuditEntry	= "NA"
+else if ( ! $?AuditEntry ) then
+	echo "VLINK: Audit Information Not Available"
+	exit 1
+endif
+
+if ( ! $?AuditFile ) then
+	set AuditFile	= $cwd/AUDIT
+endif
+
+if ( ! $?AuditRelease ) then
+	set AuditRelease = "NA"
+endif
+
+if ( ! $?AuditShell ) then
+	set AuditShell	= $cwd/../../../../builder/templates/auditshell.c
+endif
+
+####  ... initialize audit parameter definition strings, ...
+set AuditFile_		= \"AUDITINFO:AuditFile:$AuditFile\"
+set AuditEntry_		= \"AUDITINFO:AuditEntry:$AuditEntry\"
+set CompLogin_		= \"AUDITINFO:CompilationLogin:$LOGNAME\"
+set CompDate_		= \"AUDITINFO:CompilationDate:`date`\"
+set Platform_		= \"AUDITINFO:BuildPlatform:`uname -srp`\"
+set Release_		= \"AUDITINFO:ReleaseID:$AuditRelease\"
+
+####  ... determine the compiler to use, ...
+set OSType = `uname -s`
+switch ($OSType)
+case AIX:
+    set Compiler = xlC
+    breaksw
+case Linux:
+    set Compiler = g++
+    breaksw
+case SunOS:
+    set Compiler = CC
+    breaksw
+case HP-UX:
+    set Compiler = aCC
+    breaksw
+default:
+    echo ">>> Unsupported OS %OSType"
+    exit 1
+endsw
+
+####  ... make sure the executable is writable if it exists, ...
+if ( -f $argv[1] ) then
+    chmod +w $argv[1]
+endif
+
+####  ... compile the audit module and generate an executable, ...
+set failed = 0
+if ( -f /bin/hp9000s700) then
+    set debugFlag = ""
+    set stripFlag = ""
+    set gprofFlag = ""
+    $Compiler -c\
+	"-DAuditFile_=$AuditFile_"\
+	"-DAuditEntry_=$AuditEntry_"\
+	"-DCompilationLogin_=$CompLogin_"\
+	"-DCompilationDate_=$CompDate_"\
+	"-DPlatform_=$Platform_"\
+	"-DRelease_=$Release_"\
+	$AuditShell
+    if ( $status != 0 ) then
+        set failed = 1
+        echo ">>> Failed to compile \$AuditShell."
+        goto cleanup
+    endif
+    @ i = 2
+    while (${argv[$i]:e}_ != o_)
+	if ($argv[$i] == "-g") set debugFlag = '-g'
+	if ($argv[$i] == "-s") set stripFlag = '-s'
+	if ($argv[$i] == "-G") set gprofFlag = '-G'
+	@ i = $i + 1
+    end
+    $Compiler $debugFlag $stripFlag $gprofFlag -o $argv[1] auditshell.o $argv[$i-]
+    if ( $status != 0 ) then
+        set failed = 1
+        goto cleanup
+    endif
+else
+    $Compiler\
+	-o $argv[1]\
+	"-DAuditFile_=$AuditFile_"\
+	"-DAuditEntry_=$AuditEntry_"\
+	"-DCompilationLogin_=$CompLogin_"\
+	"-DCompilationDate_=$CompDate_"\
+	"-DPlatform_=$Platform_"\
+	"-DRelease_=$Release_"\
+	$AuditShell\
+	$argv[2-]
+    if ( $status != 0 ) then
+        set failed = 1
+        goto cleanup
+    endif
+endif
+
+####  ... update the audit file and cache directories, ...
+chmod a=rx $argv[1]
+ls -li $argv[1] >> $AuditFile
+
+if ( -d Executable ) then
+	ln $argv[1] Executable
+endif
+
+if ( -d Recompiled ) then
+	ln $argv[1] Recompiled
+endif
+
+####  ... delete the audit shell output file, ...
+cleanup:
+
+################
+#===  'csh' does not accept qualifiers like ':t' on environment variables.  Because there's
+#===  a very good chance that AuditShell is an envionment variable, copy its value into a
+#===  regular 'csh' variable that can be qualifed:
+################
+set AS = $AuditShell
+set AuditShellObj = ${AS:t}
+set AuditShellObj = ${AuditShellObj:r}.o
+if ( -f $AuditShellObj ) then
+	"rm" -f $AuditShellObj
+endif
+
+####  ... and exit.
+exit $failed

@@ -1,0 +1,471 @@
+##################################################
+#  Setup the standard DataFeed classes included with the 
+#  Portfolio Management Application Layer
+##################################################
+
+#--------------------
+#  ClassSetup
+#--------------------
+ClassSetup updateFromString: "ClassID	ParentID	Description
+
+#--  Core Entity classes
+Currency	Entity	This class represents different monetary currencies.
+Universe	Entity	This class represents named groups of entities.
+DataItem	Support	This class names data items used for reporting
+DataAccessPath	Support	This class names naviation paths used for reporting
+IdSource	Support	This class represents different instance identifier sources.
+
+#--  Core Portfolio Mangement Workstation Entity classes
+Security	Entity	This class represents individual security instances.
+Company	Entity	This class represents individual company instances.
+Account	Entity	This class represents actual and derived investment accounts.
+Portfolio	Account	This class represents actual investment portfolios.
+AggAccount	Account	This class represents aggregates based on a list of portfolios
+IndexAccount	Account	This class represents accounts with holdings generated from a list of securities
+CompositeAccount	Account	This class represents combined accounts.
+Industry	Classification	This class represents industry classifications.
+Sector	Classification	This class represents sector classifications.
+Country	Classification	This class represents individual country instances.
+SecurityType	Classification	This class represents different security types.
+AssetCategory	Classification	This class represents different asset categories.
+Analyst	Entity	This class represents analysts that follow companies.
+Broker	Entity	This class represents brokers.
+
+Frequency	Support	This class represents different reporting frequencies.
+DataSeries	Support	This class represents different DataTypes-Frequency combinations.
+DataType	Support	This class represents data items that are tracked.
+
+#--  Core Portfolio Management Workstation DataRecord classes
+PriceRecord	DataRecord	This class stores pricing data for a security.
+DivRecord	DataRecord	This class stores dividend data for a security.
+
+#--  Core Portfolio Management Workstation LinkRecord classes
+Holding	LinkRecord	This class store holding instances that track securities held in accounts over time
+
+" ;
+
+#--------------------
+#  PropertySetup
+#--------------------
+PropertySetup updateFromString: 
+"classId	property	tsFlag	dataType	defaultValue	adjustments	propertyXRef	description
+
+#--  Core Entity properties : many of these are defined in bootstrap as well
+Entity	name	N	String	NA	NA	NA	descriptive name
+Entity	shortName	N	String	NA	NA	NA	short name
+Entity	sortCode	N	String	NA	NA	NA	code for sorting
+Entity	numericCode	N	Number	NA	NA	NA	numeric code
+
+Currency	underlyingCurrency	N	NA	Currency	NA	NA	main currency for exchange rate storage
+Currency	underlyingExchange	N	Double	NA	NA	NA	rate used to convert to underlyingCurrency
+Currency	usExchange	Y	Double	NA	NA	NA	rate of exchange to $US
+
+DataItem	baseClass	N	NA	Object
+DataItem	accessPath
+DataItem	showTot	N	NA	FALSE
+DataItem	showAvg	N	NA	TRUE
+DataItem	showMed	N	NA	TRUE
+DataItem	showWtAvg	N	NA	FALSE
+DataItem	showHMean	N	NA	FALSE
+DataItem	defaultWidth	N	Integer	9
+DataItem	defaultDecimals	N	Integer	2
+DataItem	isGroup	N	NA	FALSE
+DataItem	isStat	N	NA	FALSE
+DataItem	inProfile	N	NA	FALSE
+DataItem	profileLink
+DataAccessPath	fromClass	N	NA	Object
+DataAccessPath	toClass	N	NA	Object
+DataAccessPath	via	N	NA	[ asSelf ]
+
+IdSource	primaryFlag	N	Boolean	FALSE	NA	NA	indicates whether id is added to Named dictionary
+IdSource	xrefName	N	String	NA	NA	NA	name at XRef
+IdSource	xrefProperty	N	String	NA	NA	NA	property name at entity class
+IdSource	retainOldFlag	N	Boolean	FALSE	NA	NA	indicates whether old id is retained on change
+
+DataRecord	recordValue	N	Double	NA	NA	NA	value printed by default
+
+#--  Investment Core Entity properties : many of these are defined in bootstrap
+Company	primarySecurity	N	NA	Security
+Company	fiscalYearEnd	N	Integer	12	NA	NA	month of fiscal year end
+
+SecurityType	assetCategory	N	NA	AssetCategory	NA	NA	asset category for type
+SecurityType	unitCalc	N	NA	1.0	NA	NA	multiplier for market value calcs
+Security	type	N	NA	SecurityType	NA	NA	type of security
+Security	cusip	N	String
+Security	isin	N	String
+Security	sedol	N	String
+Security	ticker	N	String
+Security	valor	N	String
+Security	_sharesOut	Y	Double	NA	SHARES
+Security	latestMarketCapUS	N	Double	NA	NA	NA	latest mcap available (in US$)
+
+Holding	accountingPrice	N	Double	NA	CURRENCY,PERSHARE	NA	price supplied by accounting system
+
+#--  Investment Entity-DataRecord relationships
+Security	dividendSeries	Y	NA	DivRecord
+
+#--  Investment One-to-many Membership Relationship
+Industry	sector	N	NA	Sector	NA	memberList
+Company	industry	Y	NA	Industry	NA	memberList
+Company	country	Y	NA	Country	NA	memberList
+Company	analyst	Y	NA	Analyst	NA	companyList
+
+#--  Invest DataRecord items
+DataRecord	adjustmentDate	N	NA	Date
+DivRecord	paymentDate	N	NA	Date
+" ;
+
+#--------------------
+#  baseClass is set to functionType by DataItem ; as a result,
+#   all subsequent definitions of baseClass get included in nav by default
+#--------------------
+
+DataItem getMessage: "baseClass" . 
+     messageDescriptor setFunctionTypeTo: "Default" ;
+Object getMessagesDefining: "baseClass" .
+   do: [ ^self setFunctionTypeTo: "Schema"  ] ;
+DataItem getMessage: "baseClass" . setFunctionTypeTo: "Data" ;
+
+#--------------------
+#  ConsensusEstimateRecord: bootstrap protocol
+#--------------------
+
+PropertySetup updateFromString:
+"classId | property | defaultValue | tsFlag | dataType | adjustments
+ConsensusEstimateRecord | medianEst | | N | Double | CURRENCY PERSHARE
+ConsensusEstimateRecord | medianEstPrev | | N | Double | CURRENCY PERSHARE
+ConsensusEstimateRecord | meanEst | | N | Double | CURRENCY PERSHARE
+ConsensusEstimateRecord | meanEstPrev | | N | Double | CURRENCY PERSHARE
+ConsensusEstimateRecord | highEst | | N | Double | CURRENCY PERSHARE
+ConsensusEstimateRecord | lowEst | | N | Double | CURRENCY PERSHARE
+ConsensusEstimateRecord | naiveEst | | N | Double | CURRENCY PERSHARE
+ConsensusEstimateRecord | numberOfEstimates | | N | Integer | 
+ConsensusEstimateRecord | numberUp | | N | Integer | 
+ConsensusEstimateRecord | numberDown | | N | Integer | 
+ConsensusEstimateRecord | stdDev | | N | Double | 
+ConsensusEstimateRecord | pe | | N | Double | 
+ConsensusEstimateRecord | pePrev | | N | Double | 
+";
+
+#--------------------
+#  _primaryCompany and cover
+#--------------------
+
+PropertySetup updateFromString: "classId | property | dataType
+Company | _primaryCompany | Company
+" ;
+
+Company defineMethod: [ | primaryCompany | 
+   _primaryCompany else: asSelf
+] ;
+
+
+
+#--------------------
+#  MessageSetup
+#--------------------
+MessageSetup updateFromString: "classId	message	keyType	returnType	containerType	tvFlag	description	paramList
+
+Object	baseCurrency	N	Currency
+Object	code	N	String
+
+Entity	aliases	N	String	List
+Entity	isMemberOf:	N	Boolean	Object	Y	is it a member of supplied parameter	Universe
+Entity	universes	N	Universe	List	Y	list of universes in which it is a member
+
+Classification	isParent	N	Boolean
+Classification	parent	N	Classification	Object	N	returns parent instance of same class as recipient
+Classification	childList	N	Classification	IndexedList
+Classification	memberList	N	Entity	IndexedList	Y
+Classification	getAllChildren	N	Classification	List	N	recursive childList
+Classification	getAllMembers	N	Entity	List	Y	recursive list of members from all children
+RangeClassification	getClassificationFor:	N	RangeClassification	Object	N	instance that includes supplied value	Number
+RangeClassification	lowerBound	N	Number
+RangeClassification	rangeName	N	String
+RangeClassification	upperBound	N	Number
+
+Currency	exchangeTo:relativeTo:	N	Number	Object	Y	units of target/recipient	Currency, Date
+Currency	isTrueCurrency	N	Boolean
+
+Universe	criteriaBlock	N	Block
+Universe	entityType	N	Entity
+Universe	list	N	Entity	IndexedList
+
+Company	id	N	String	Object	N	ticker if defined, code otherwise
+
+Security	id	N	String	Object	N	ticker if defined, code otherwise
+Security	company	N	Company
+Security	adjustmentFactor	N	Number
+Security	adjustmentRelativeTo:	N	Number	Object	N		Date
+Security	dividend	N	Number	Object	Y	split/curr adjusted
+Security	dividends	N	DivRecord	TimeSeries
+Security	getDivsFrom:to:	N	Number	Object	N		Date,Date
+Security	getPriceRecord	N	PriceRecord	Object	Y
+Security	price	N	Number	Object	Y	split/curr adjusted
+Security	priceChangeFrom:to:	N	Number	Object	N		Date,Date
+Security	prices	N	PriceRecord	TimeSeries
+Security	rawSplitFactor	N	Number
+Security	totalReturnFrom:to:	N	Number	Object	N		Date,Date
+Security	volume	N	Number
+
+Security	getHoldingIn:	N	Holding	Object	Y		Account
+Security	heldIn:	N	Boolean	Object	Y		Account
+Security	holdings	N	Holding	List	Y
+Security	holdingsDate	N	Date	Object	Y
+Security	holdingsSeries	N	Holding	List
+
+Country	companyList	N	Company	IndexedList	Y	same as memberList	Company
+
+Sector	industryList	N	Industry	IndexedList	Y	same as memberList	Industry
+Sector	companyList	N	Company	List	Y	list of all companies for all industries in sector
+Industry	companyList	N	Company	IndexedList	Y	same as memberList	Company
+Industry	getAllCompanies	N	Company	List	Y	same as getAllMembers
+
+SecurityType	isEquity	N	Boolean
+SecurityType	isFixed	N	Boolean
+SecurityType	isCashEquiv	N	Boolean
+SecurityType	isOther	N	Boolean
+
+Account	_totalCost	N	Number	Object	N	unadjusted
+Account	_totalMarketValue	N	Number	Object	N	unadjusted
+Account	_totalMarketValueCash	N	Number	Object	N	unadjusted
+Account	_totalMarketValueEquity	N	Number	Object	N	unadjusted
+Account	_totalMarketValueFixed	N	Number	Object	N	unadjusted
+Account	getHoldingIn:	N	Holding	Object	Y		Security
+Account	holdings	N	Holding	List	Y
+Account	holdingsDate	N	Date	Object	Y
+Account	holdingsSeries	N	Holding	List
+Account	holds:	N	Boolean	Object	Y		Security
+Account	totalCost	N	Number	Object	Y	split/curr adjusted
+Account	totalMarketValue	N	Number	Object	Y	split/curr adjusted
+Account	totalMarketValueCash	N	Number	Object	Y	split/curr adjusted
+Account	totalMarketValueEquity	N	Number	Object	Y	split/curr adjusted
+Account	totalMarketValueFixed	N	Number	Object	Y	split/curr adjusted
+
+AggAccount	memberList	N	Portfolio	IndexedList	N		Portfolio
+AggAccount	membershipRule	N	Block
+
+IndexAccount	universe	N	Universe	Object	Y	used to derive security list
+IndexAccount	style	N	String	Object	Y	Even $, MCap Wt
+
+IndexAccount	memberList	N	Security	IndexedList	Y		Security
+IndexAccount	membershipRule	N	Block
+
+Portfolio	aggregateList	N	AggAccount	List	N		AggAccount
+#--CompositeAccount	componentList	N	CompositeAccount Component	IndexedList	Y	components in composite	Account
+#--CompositeAccount Component	weight	N	Number
+
+Holding	_shares	N	Number	Object	N	unadjusted
+Holding	_totalCost	N	Number	Object	N	unadjusted
+Holding	_totalMarketValue	N	Number	Object	N	unadjusted
+Holding	account	Partial	Account
+Holding	adjustmentFactor	N	Number	Object	N	relative to date
+Holding	currencyFactor	N	Number	Object	N	relative to date
+Holding	date	Partial	Date
+Holding	percentOfEquity	N	Number
+Holding	percentOfPort	N	Number
+Holding	security	Partial	Security
+Holding	shares	N	Number	Object	N	split/curr adjusted
+Holding	totalCost	N	Number	Object	N	curr adjusted
+Holding	totalMarketValue	N	Number	Object	N	curr adjusted
+Holding	_accountingPrice	N	Number	Object	N	price used by accting feed (unadjusted)
+Holding	accountingPrice	N	Number	Object	N	currency/split adjusted price from accting feed
+Holding	_adjustmentDate	N	Date	Object	N	as of date of split adjustment
+Holding	adjustmentDate	N	Date	Object	N	_adjustmentDate if present, date otherwise
+
+DataRecord	entity	Partial	Entity
+DataRecord	recordDate	Partial	Date
+DataRecord	adjustmentDate	N	Date	Object	N	defaults to recordDate
+DataRecord	adjustmentFactor	N	Number	Object	N	relative to adjustmentDate
+DataRecord	currency	N	Currency
+DataRecord	currencyFactor	N	Number	Object	N	relative to recordDate
+
+DivRecord	_div	N	Number	Object	N	unadjusted 
+DivRecord	div	N	Number	Object	N	split/curr adjusted
+DivRecord	paymentDate	N	Date
+DivRecord	security	N	Security	Object	N	same as entity
+
+PriceRecord	_ask	N	Number	Object	N	unadjusted
+PriceRecord	_bid	N	Number	Object	N	unadjusted
+PriceRecord	_high	N	Number	Object	N	unadjusted
+PriceRecord	_low	N	Number	Object	N	unadjusted
+PriceRecord	_open	N	Number	Object	N	unadjusted
+PriceRecord	_price	N	Number	Object	N	unadjusted
+PriceRecord	_volume	N	Number	Object	N	unadjusted
+PriceRecord	_dailyReturn	Number	supplied 1-day return %
+PriceRecord	dailyReturn	Number	computed 1-day return %
+PriceRecord	_unitReturn	Number	supplied 1-day unit return
+PriceRecord	unitReturn	Number	computed 1-day unit return
+PriceRecord	ask	N	Number	Object	N	split/curr adjusted
+PriceRecord	bid	N	Number	Object	N	split/curr adjusted
+PriceRecord	high	N	Number	Object	N	split/curr adjusted
+PriceRecord	low	N	Number	Object	N	split/curr adjusted
+PriceRecord	open	N	Number	Object	N	split/curr adjusted
+PriceRecord	price	N	Number	Object	N	split/curr adjusted
+PriceRecord	security	N	Security	Object	N	same as entity
+PriceRecord	volume	N	Number	Object	N	split adjusted
+PriceRecord	_accountingPrice	N	Number	Object	N	unadjusted
+PriceRecord	accountingPrice	N 	Number	Object	N	split/curr adjusted
+PriceRecord	accountingCurrency	N 	Number	Object	N	used to adjust _accountingPrice
+PriceRecord	accountingCurrencyFactor	N 	Number	Object	N	used to adjust _accountingPrice
+
+DataFeed	entityId	N	String	Object	N	(or id or entity) used to identify underlying entity
+DataFeed	currencyId	N	String	Object	N	(or currency) used to set baseCurrency in underlying class (Entity or DataRecord)
+DataFeed	date	N	Date	Object	N	used as 'as of' date for ts updates
+MasterFeed	terminateFlag	N	Date
+CurrencyMaster	conversion	N	Double
+" ;
+
+MessageSetup updateFromString: "classId	message	function
+Object	code	Data" ;
+
+MessageSetup updateFromString: "classId | message
+Bridge | underlyingObject 
+Bridge | baseEntity
+EstimateBridge | observation
+EstimateBridge | periodEndDate
+EstimateBridge | actualRecord
+EstimateBridge | actual
+EstimateBridge | actualDate
+EstimateBridge | surprise
+EstimateBridge | surpriseDiff
+EstimateBridge | lastObservation
+EstimateBridge | priorObservation
+EstimateBridge | priorPeriod
+EstimateBridge | nextPeriod
+EstimateRecord | actualFlag
+EstimateRecord | estimator
+EstimateRecord | periodEndDate 
+EstimateRecord | estimate 
+"; 
+
+#--------------------
+#  MessageSetup
+#--------------------
+MessageSetup updateFromString: 
+"classId | message | keyType | returnType | containerType | tvFlag | description | paramList
+
+SummaryEstimateBridge | detailXRef | N | DetailEstimateBridge | IndexedList | N | detail estimate records cross referenced by estimator
+DetailEstimateBridge | estimator | N | Analyst | Object | N | analyst or broker supplying detailed estimate
+" ;
+
+
+
+#--------------------
+#  MasterFeedSetup
+#--------------------
+MasterFeedSetup updateFromString: "feedId	entityId
+#--  Core classes
+CurrencyMaster	Currency
+UniverseMaster	Universe
+DataItemFeed	DataItem
+DataAccessPathFeed	DataAccessPath
+IdSourceMaster	IdSource
+
+#--  Investment core classes
+SecurityMaster	Security
+CompanyMaster	Company
+PortfolioMaster	Portfolio
+AggAccountMaster	AggAccount
+IndexAccountMaster	IndexAccount
+CompositeAccountMaster	CompositeAccount
+IndustryMaster	Industry
+SectorMaster	Sector
+CountryMaster	Country
+SecurityTypeMaster	SecurityType
+AssetCatMaster	AssetCategory
+AnalystMaster	Analyst
+" ;
+
+#--------------------
+#  EntityExtenderFeedSetup
+#--------------------
+EntityExtenderFeedSetup updateFromString: "feedId	baseClassId	baseEntityId
+
+ExchangeRateFeed	Currency
+SplitsFeed	Security
+IndexAccountBuilder	IndexAccount
+PriceFeed	PriceRecord	Security
+DivFeed	DivRecord	Security
+" ;
+
+#--------------------
+#  MembershipFeedSetup
+#--------------------
+MembershipFeedSetup updateFromString: "feedId	groupId	groupPath	memberId	memberPath	mode
+
+UniverseMembers	Universe	list	Entity	NA	REPLACE
+
+CompanyToIndustry	Industry	memberList	Company	industry
+CompanyToCountry	Country	memberList	Company	country
+IndustryToSector	Sector	memberList	Industry	sector
+PortfolioAggregates	AggAccount	memberList	Portfolio		Replace
+CompositeAccountMembers	CompositeAccount	componentList	Account		Replace
+CompanyToAnalyst	Analyst	companyList	Company	analyst
+" ;
+
+#--------------------
+#  TransactionFeedSetup
+#--------------------
+TransactionFeedSetup updateFromString: "feedId	baseClassId
+HoldingsFeed	Holding
+" ;
+
+#--------------------
+#  AliasFeedSetup
+#--------------------
+AliasFeedSetup updateFromString: "feedId	entityId
+
+SecurityAliases	Security
+" ;
+
+#--------------------
+#  XRefFeedSetup
+#--------------------
+XRefFeedSetup updateFromString: "feedId	entityId
+SecurityXRef	Security
+" ;
+
+#--------------------
+#  SecurityType for Cash
+#--------------------
+SecurityTypeMaster updateFromString: "id	assetCategory
+Cash	Cash" ;
+SecurityMaster updateFromString: "id	type
+CashUS	Cash" ;
+
+#--------------------
+#  IdSourceMaster - standard investment identifier sources
+#--------------------
+IdSourceMaster updateFromString: 
+"id	name	primaryFlag	xrefName	xrefProperty	retainOldFlag
+Internal	Internal	No	Internal	internalId
+CUSIP	Cusip	Yes	Cusip	cusip	Yes
+SEDOL	Sedol	Yes	Sedol	sedol	Yes
+TICKERUS	Ticker Symbol (US only)	Yes	TickerUS	ticker	No
+RIC	Reuters	No	Ric	ricCode	No
+ISIN	Isin	Yes	Isin	isin	No
+VALOR	Valor	No	Valor	valor	No
+" ;
+
+#----------
+#  add augment rule to store cusip8 and sedol6
+#----------
+Named IdSource CUSIP setAugmentRuleTo:
+    [ !id <- cusip8 ;
+      id isntNA
+         ifTrue: [ ^self addAlias: id toXRefIn: XRef Cusip ;
+                   ^self addAlias: id ;
+                 ] ;
+    ] ;
+
+Named IdSource SEDOL setAugmentRuleTo:
+    [ !id <- sedol6 ;
+      id isntNA
+         ifTrue: [ ^self addAlias: id toXRefIn: XRef Sedol ;
+                   ^self addAlias: id ;
+                 ] ;
+    ] ;
+
+
+

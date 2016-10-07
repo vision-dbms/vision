@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<body>
+<title>Vision Portfolio Management FAQ: Customizing the Account Characteristic Application </title>
+
+<body>
+<body bgcolor=white>
+<h2>Vision Portfolio Management FAQ: Customizing the Account Characteristic Application</h2>
+<hr><p>
+<h4>Goal:</h4>
+
+<ul>
+To change the statistics displayed in the Account Characteristics report.
+</ul>
+<p>
+
+<h4>Description:</h4>
+<p>
+
+<ul>
+A feed has been defined which allows you to name data items and indicate
+the types of summary statistics associated with each item.  For example,
+you may want to define a data item named "mcap" 
+which accesses the information following the navigation "funDataM marketCap"
+from Company.  For any data item, you can indicate whether you want
+total, average, weighted average, and median to be displayed.  
+Once you have defined your data items, 
+you can use the <a href="pma_UniverseMaster.htm">UniverseMaster</a> and 
+<a href="pma_UniverseMembers.htm">UniverseMembers</a> feeds to define subsets of these items to display as a unit.
+<p>
+A number of data items have been pre-defined and are displayed on the
+characteristic report by default:
+<ul><pre>
+<b>DataItem     BaseClass     AccessPath</b>
+mcapUS       Security      marketCapUS 
+pe           Security      pe
+pb           Security      priceToBook
+</pre></ul>
+<p>
+The <i>DataItem</i> column identifies the statistic.  The <i>BaseClass</i> column indicates
+the entity class from which the navigation to the data begins.  The <i>AccessPath</i> column
+contains the message or navigation expression needed to actually access
+the data relative to the base class.  
+</ul>
+<p>
+
+<p>
+<h4>DataFeed Assumptions:</h4>
+<p>
+<center><table border=1 width=80% cellpadding=4 cellspacing=2>
+<tr><th>DataFeed<th>Fields
+<tr>
+<td><a href="pma_McapGroups.htm">McapGroups</a>
+<td><i>startValue, endValue, label</i>
+
+<tr>
+<td>DataItemFeed
+<td><i>id, shortName, baseClass, accessPath, isStat, showTot,	
+showAvg, showWtAvg, showMed
+</i>
+
+<tr>
+<td><a href="pma_UniverseMaster.htm">UniverseMaster</a>
+<td><i>id, name, memberType</i>
+
+<tr>
+<td><a href="pma_UniverseMembers.htm">UniverseMembers</a>
+<td><i>groupId, memberId</i>
+
+</table></center>
+<p>
+
+<h4>
+Topic 1: Defining Statistics
+
+</h4>
+
+<h4>Steps:</h4>
+
+<ol type="A">
+
+<li>Use the <b>DataItemFeed</b> to create new items and update display options.
+
+<p>
+<ol type="1">
+<li>Set up the spreadsheet to look like the following.
+Note that the feed name <i>DataItemFeed</i> is in the top left of the range.
+
+<ul>
+<pre><b>
+DataItemFeed
+
+id     shortName  baseClass  accessPath     isStat  showTot showAvg showWtAvg showMed
+
+sales  Sales      Company    funDataA sales   T     T       T       F         F
+qsales Qtr Sales  Company    funDataQ sales   T     T       F       F         F
+</b></pre>
+</ul>
+
+<li>Select the entire range.
+<li>Select <i>Upload Data</i> from the <i>VUpload</i> menu.
+<li>Select the <i>Range</i> button.
+
+<p>
+The <i>shortName</i> field is used as the label for the statistic in the 
+characteristic report.  The <i>isStat</i> field should be set to <b>True (T)</b>
+to include the item as a statistic in the report.  The last columns can be set to <b>True (or T or Yes or Y)</b> or <b>False (or F or No or N)</b>
+to indicate whether the total, average, weighted average, and/or median should
+be computed for the item.  If weighted average is selected, the statistic
+is weighted by each holding's percent of portfolio.
+<p>
+
+This feed can also include the <i>sortCode</i> field which can be used to
+control the order in which the statistics appear in the report.  The
+<i>defaultDecimals</i> field can be used to control the number of decimal
+points displayed for a statistic.
+
+</ol>
+<p>
+
+<li>Check the results.
+<ol type="1">
+
+<p>
+
+<li>Open the Vision Reporter in your web browser at http://visionweb/vision
+<li>Select <i>Account Reports</i>.
+<li>Select <i>AccountCharacteristics</i>.
+<li>Enter an account and run the report.
+<p>
+
+The values for <i>Qtr Sales-Total</i>, <i>Sales-Total</i>, and <i>Sales-Avg</i> 
+should now appear as part of report.
+<p>
+</ol>
+</ol>
+<hr>
+
+<h4>Topic 2: Creating Sets of Characteristics</h4>
+
+<ol type="A">
+
+<li>Define the <b>Stat Group</b>, <b>SalesChars</b> by using the <a href="pma_UniverseMaster.htm"><i>UniverseMaster</i></a> feed. 
+
+<p>
+<ol type="1">
+
+
+<li>Set up the spreadsheet to look like the following.
+Note that the feed name <i>UniverseMaster</i> is in the top left of the range.
+<p>
+
+<ul>
+<pre><b>
+UniverseMaster
+id          name                     memberType
+SalesChars  Sales Characteristics    DataItem
+</b></pre>
+</ul>
+
+
+<li>Select the entire range.
+<li>Select <i>Upload Data</i> from the <i>VUpload</i> menu.
+<li>Select the <i>Range</i> button.
+
+<p>
+<i>SalesChars</i> has been created.
+</ol>
+
+<p>
+
+
+<li>Define the members of the <b>SalesChars</b> group by using the
+<a href="pma_UniverseMembers.htm"><i>UniverseMembers</i></a> feed:
+
+<p>
+<ol type="1">
+<li>Set up the spreadsheet to look like the following.
+Note that the feed name <i>UniverseMembers</i> is in the top left of the range.
+
+<ul>
+<pre><b>
+UniverseMembers
+
+groupId            memberId
+SalesChars         sales
+SalesChars         qsales
+</b></pre>
+</ul>
+
+
+<li>Select the entire range.
+<li>Select <i>Upload Data</i> from the <i>VUpload</i> menu.
+<li>Select the <i>Range</i> button.
+
+<p>
+The <i>SalesChars</i> members have been defined. 
+
+</ol>
+<p>
+
+<li>Check the results.
+<ol type="1">
+
+<p>
+
+<li>Open the Vision Reporter in your web browser at <i>http://visionweb/vision</i>.
+<li>Select <i>Account Reports</i>.
+<li>Select <i>AccountCharacteristics</i>.
+<li>Enter an account and run the report.
+<p>
+
+<i>SalesChars</i> should now appear in the <i>Stat Group</i> menu at the bottom of 
+report.  
+If you choose this one, the report should only include these two statistics.
+<p>
+</ol>
+</ol>
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy; 1999 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated January 28, 1999</font>
+</tr>
+</table></body>
+</html>

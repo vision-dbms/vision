@@ -1,0 +1,91 @@
+##################################################
+#  Core Classes: Move from .G to .DEF
+##################################################
+
+# $File: //depot/vision/applications/core/builtin/mainline/EXTcore.DEF $
+# $DateTime: 2007/03/09 13:04:29 $
+# $Revision: #9 $
+# $Author: dohara $
+
+#--------------------
+#  Currency Class
+#--------------------
+
+# Allow currencies not in the map to become "global"
+# Force all global currencies to their underlyingCurrency
+Currency defineMethod: [ | asGlobalCurrency |
+  !map <- ^self underlyingCurrency getMapEntry ;
+  map isntNA && [ map isntDefault || [ ^self isDefault ] ]
+  ifTrue: [ map globalObject ] .
+  else: [ ^self underlyingCurrency ]
+] ;
+
+# Force the use of local underlyingCurrency before going global
+Currency defineMethod: [ | globalExchangeTo: targetCurr relativeTo: date |
+  !source <- ^self underlyingCurrency asGlobalCurrency ;
+  !target <- targetCurr asGlobalCurrency ;
+  (source localExchangeTo: target relativeTo: date) / ^self underlyingExchange
+] ;
+
+#--------------------
+#  Entity
+#--------------------
+
+Entity respondsTo: "isAuthenticated" .
+ifFalse: [ Entity define: 'isAuthenticated' toBe: TRUE ; ] ;
+
+CoreWorkspace respondsTo: 'getAuthenticatedDateAsOf:' .
+ifFalse: [ CoreWorkspace defineMethod: [ | getAuthenticatedDateAsOf: mostRecent | ^date ] ; ] ;
+
+#----------
+#  XRef and Alias management
+#----------
+# updated in patch_118.vis
+
+Entity defineMethod: [| addAlias: alias |
+!thisEntity <- ^self asSelf ;
+!namingDictionary <- thisEntity named ;
+namingDictionary isDictionary && alias isString && [alias isBlank not]
+ifTrue:
+[ !entityWithAlias <- namingDictionary at: alias ;
+  entityWithAlias != thisEntity
+  ifTrue:
+  [ entityWithAlias isntNA
+     ifTrue: [ entityWithAlias aliases
+               delete: (entityWithAlias getClusteredString: alias)
+             ];
+ #-- reference new entity via existing alias string in dictionary
+    namingDictionary at: alias put: thisEntity ;
+    !newAlias <- ^self getClusteredString: alias ;
+    ^self aliases at: newAlias put: newAlias ;
+  ] ;
+] ;
+^self
+] ;
+#--------------------
+#  DataRecord
+#--------------------
+
+#----------
+#  Store Management
+#----------
+
+DataRecord defineMethod: [ | createNewStoreAt: objectSpace |
+  !currentStore <- ^self ;
+  !newStore <- currentStore newPrototype new
+  do: [ :defaultFlag <- TRUE ;
+        :entity <- ^my currentStore entity ;
+        :baseCurrency <- ^my currentStore baseCurrency ;
+        :recordDate <- ^date ;
+      ] ;
+#--  define class name at object space if different from CoreWorkspace
+  (objectSpace else: CoreWorkspace) != CoreWorkspace
+  ifTrue: [ objectSpace else: CoreWorkspace .
+                define: ^self classDescriptor code toBe: newStore ;
+          ];
+  currentStore storeXRef, newStore ;
+  currentStore define: 'currentStore' toBe: newStore ;
+  objectSpace isntNA
+     ifTrue: [ newStore establishResidenceInSpaceOf: objectSpace ] ;
+  newStore
+] ;

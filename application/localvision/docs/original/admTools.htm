@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title>Network Administration Tools</title>
+</head>
+<body bgcolor=white>
+
+<h2>Network Administration Tools</h2>
+
+| <a href="FHome.htm">Home</a> 
+| <a href="Running.htm">Running Vision</a> 
+| <a href="admDBA.htm">GeneralAdministration</a> | 
+<hr>
+
+<p>
+<h3>Topics Covered:</h3>
+<ul type="square">
+<li><a href="#NDF.JOURNAL and NDF.ERROR Files">NDF.JOURNAL and NDF.ERRORS Files</a>
+<li><a href="#Network Versions">Network Versions</a>
+<li><a href="#Garbage Collection">Garbage Collection</a>
+<li><a href="#compaction">Compaction</a>
+<li><a href="#dbconvert">The dbconvert Utility</a>
+<li><a href="#Other Tools">Other Tools</a>
+</ul>
+<hr>
+<a name = "NDF.JOURNAL and NDF.ERROR Files"><H3>NDF.JOURNAL and NDF.ERRORS Files</H3></a>
+
+<a name = "NDF.JOURNAL File"><h4>The NDF.JOURNAL File</h4></a>
+
+The file <i>/localvision/network/NDF.JOURNAL</I> contains a record  
+of every update committed  to  the Vision database network.  The journal 
+is an Ascii file containing three  types of  entries:  segment creation entries, 
+update commit entries, and minimum segment entries.  
+Minimum segment entries are written only by the <a href="#compaction">compactor</a>.
+
+<p>
+
+Most journal entries are in the form:
+
+<ul>
+<pre><b>
+5482d6c7.6002df0a.00000001 NewSeg 4/18    U 0
+5482d6c7.6002df0a.00000001 NewSeg 3/28    U 1
+5482d6c7.6002df0a.00000001 Commit 9514
+</b></pre>
+</ul>
+
+
+All entries contain a unique identifier for the transaction such as: <i>5482d6c7.6002df0a.00000001</i>.   
+The <i>5482d6c7.6002df0a</i> part is a unique id for the process that 
+did the update, and the <i>00000001</i> is the sequence number of this 
+update relative to the process that performed it.
+
+<p>
+Each journal entry has a type of <i>NewSeg</i>, <i>Commit</i>, or <i>MinSeg</i>.  
+A <i>NewSeg</i> entry indicates that a new segment was created.  
+It is followed by the space and segment number (e.g., 4/18), an update 
+type ( <i>U</i> for standard update, <i>C</i> for compaction update, 
+and <i>I</i> for incorporator update), and the sequence number of this 
+segment relative to the update.  In cases where only one segment is
+created in the update the sequence number will be 0.  A <i>Commit</i> 
+entry follows a set of one or more <i>NewSeg</i> entries and indicates
+that the update that produced these segments succeeded.  The <i>Commit</i> 
+entry, and the <i>NewSeg</i> entries related to it, all have the same journal entry id.
+
+<p>
+Since the NDF.JOURNAL is an Ascii file, you can add comments to it 
+as appropriate.   By convention, any script that is designed to perform a 
+database update automatically appends a comment and a time stamp to 
+this file after an update has been committed.
+<p>
+
+<a name="NDF.ERRORS File"><h4>The NDF.ERRORS File</h4></a>
+
+The file <i>/localvision/network/NDF.ERRORS</i> is a centralized error 
+log file that tracks all internal Vision errors reported to users using 
+the NDF in this directory.  All users should have write permission for 
+this file.  A typical entry is illustrated below:
+<ul>
+<pre><b>
+***** 59DE7FDE.2002CE66.00000000 Fri Jul 10 11:20:52 1992 lcn [31 31 23 23]
+ >>>  Error Log Entry  <<<
+*  The Signal Handler [309]
+*  A Segmentation Fault
+*  Segmentation Violation Signal
+</b></pre>
+</ul>
+
+The identifying information occurs in the first line and includes the 
+process/transaction identifier (i.e., 59DE7FDE.2002CE66.00000000), a  
+time stamp, and the user's name and real and effective user and group numbers.   
+The  process/transaction identifier is the same identifier used in 
+the <i>NDF.JOURNAL</i> file.  If all three of its parts match an entry
+in the <i>NDF.JOURNAL</i>, an  update was saved after the error occurred.  
+If only the first two parts match, successful updates were performed 
+before the error was reported.
+<hr>
+
+<a name="Network Versions"><h3>Network Versions</h3></a>
+
+Each time a save is committed to the database network, a  new  version
+of the database is created.  Old versions are not destroyed until explicitly 
+removed by the <a href="#compaction"><i>compaction</i></a> 
+process.  By default, a new Vision session opens the most recent version of the
+database network.  This is the version you see throughout your session 
+even if subsequent updates are committed by other users.  You can use
+the <i>-v</i> option when your start Vision to specify an older version  
+of the database.  The <i>viewndf</i> program can be used to display information 
+about each version in the database network including the version id.
+
+<h4>The viewndf Program</h4>
+
+To invoke the <i>viewndf</i> program, type:
+
+<pre><b>
+        /vision/tools/viewndf | more
+</b></pre>
+or
+<pre><b>
+ 	/vision/tools/viewndf /localvision/network/NDF | more
+</b></pre>
+
+
+This program takes one optional parameter, the NDF file to view.  The 
+current NDF is used by  default.  Since the output from this is lengthy, 
+it is useful to redirect it to a file or filter it through more.
+<p>
+
+The first page of the output contains header information that describes 
+where internal structures are located as illustrated below:
+
+<pre><b>
+	NETWORK DIRECTORY HEADER -- ( /localvision/network )
+	signature        : 314159265
+	ndf version      : 2
+	directory version: 0
+	current NVD FO   : 33960
+	update timestamp : 08/02/94:10:38:53.322409
+</b></pre>
+
+This  header shows the location of your object space (<b>/localvision/network</b>) 
+and the time stamp of the last update.  Scroll down to the part of the 
+output that looks similar to the section illustrated below:
+
+<pre><b>
+	NETWORK VERSION #1 (most recent) NVD FO:33960
+	   timestamp -- 08/02/94:10:38:53.322147
+
+	   previous version  : 33716
+	   previous nvd chain: 1073741823
+	   update thread     : 33716
+	   accessed version  : 33716
+	   directory version : 0
+	   software version  : 3
+	________________________________________SVD_________________
+        ROLE	SPC	INX	MIN	MAX	ROOT	ORIGRT	CTFO
+	N	0	
+	R	1	1	1	1	1	48
+	R	2	1	2	6	26	14872
+	M	3	1	4	3	43	388
+	U	4	1	9	9	9	320
+	U	5	1	30	30	30	2221312
+	U	6	1	35	35	35	15936
+	 . . .
+</b></pre>
+
+This output displays information about the current version of the 
+network (version 1).  The header information describes the location 
+of internal structures.  The table displays information about each 
+object space in the current version of the network.  In addition to 
+the object space number, two pieces of information are useful: the role 
+and the maximum segment number.   The role indicates if the object space 
+was modified (M), read (R), or unread (U) during the session that produced 
+the save.  The maximum segment number indicates the last segment in the 
+object space after the update had completed.
+<p>
+
+If you continue scrolling you will see that the same information is available 
+for each older version of the network.  This information is useful during 
+problem diagnosis that requires reproducing an accurate history of the 
+network updates.  Old versions are maintained until a full compaction 
+is executed.  Information from versions that are older than the compaction 
+point are compressed into the oldest version kept by the compaction.
+<p>
+
+Since this program does not create or destroy network information,  
+it can be executed at any time.  It is safe to give this program group
+execute permission if desired, so that it may be run from non 
+<i>dbadmin</i> user codes.
+
+<p>
+<a name="-v Option"><h4>Viewing Older Versions:  The -v Option</h4></a>
+
+
+The <i>-v</i> option to <i>batchvision</i> (and <i>vision</i>)names 
+the database version to be accessed.  The name of a version contains
+an absolute version and an optional offset.  Absolute versions are 
+named by the version number assigned in the NDF or by a database segment 
+created to hold data in that version.  The following are examples of 
+absolute version specifications:
+
+<p><Center>
+<table width="85%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Version</b></td>
+<td><b>Definition</b></td>
+</tr>
+
+<tr>
+<td><i></i></td>
+<td>The empty version names the newest available version in 
+the database and is opened by default.</td>
+</tr>
+
+<tr>
+<td><i>33716</i></td>
+<td>a version specification consisting of a non-negative 
+integer names the version whose NDF id equals this 
+number. This is the version id reported by <b>viewndf</b></td>
+</tr>
+
+<tr>
+<td><i>s6/28</i></td>
+<td>a version specification prefixed by "s" names a version 
+by a database segment.  The version here is the version 
+which created <i>segment 28</i> in <i>object space 6</i></td>
+</tr>
+
+<tr>
+<td><i>s8</i></td>
+<td>a version specification which names a version by segment 
+but includes only the name of the space names the version 
+which created the newest segment in the space.  The version 
+named here is the version that created the newest segment 
+in object space 8.</td>
+</tr>
+</table></Center>
+<p>
+
+Any absolute version can be followed by an optional offset.   
+Offsets are always negative and always select a version that many 
+versions before the absolute version specified.  The offset '-1' 
+selects the version which is one version before whatever absolute version 
+was specified in the required part of the version specification.  
+For example:
+
+<p><Center>
+<table width="85%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Version</b></td>
+<td><b>Definition</b></td>
+</tr>
+
+<tr>
+<td><i>-5</i></td>
+<td>the version which is 5 versions before the newest version</td>
+</tr>
+
+<tr>
+<td><i>33716-5</i></td>
+<td>the version 5 versions before the version whose NDF id 
+is 33716.</td>
+</tr>
+
+<tr>
+<td><i>s6/28-5</i></td>
+<td>the version 5 versions before the version that created 
+segment 6/28.  The five versions are counted relative to all 
+updates and are not restricted to object space 6 updates.</td>
+</tr>
+
+<tr>
+<td><i>s8-5</i></td>
+<td>the version 5 versions before the version that created 
+the newest segment in object space 8.  
+The five versions are counted relative to all updates and 
+are not restricted to object space 8 updates.</td>
+</tr>
+</table></Center>
+<p>
+	
+All version specifications can be preceded by the letter "r" to denote 
+session restart (e.g., r78234, rs32, rs32/179, rs32/179-5, etc.).  
+The session restart flag modifies the interpretation of the version 
+to make the current session behave as though it is a continuation of
+the session that created the version.  It does this by making the view 
+of the database seen by the current (new) session the same as the view 
+of the database seen by the creator of the version immediately after it wrote
+the version.  That view is the one accessed by the creator as modified 
+by just those updates made and successfully saved by the version creator.
+<p>
+
+This behavior differs from the normal interpretation of the version.  
+Without the restart flag, a version represents a view of the database 
+that is the result of merging (serializing) the changes made by the creator 
+of the version with the then newest version of the database.  With the 
+session restart flag, the version represents a view of the database that 
+sees just the changes made by the creator of the version.
+<hr>
+
+<a name= "Garbage Collection"><h3>Garbage Collection</h3>
+
+The <i>GCollect</i> script is used to flag Vision structures that are 
+no longer accessed by the current version of the network.  This process 
+is known as Garbage Collection.  This script also runs the object network 
+consistency check program (<i>onck</i>) to identify any potential network 
+inconsistencies.  This script must be run by the <i>dbadmin</i> user code,  
+and is normally executed as part of a normal production cycle.
+<p>
+
+To invoke this script, type:
+
+<pre><b>
+	/vision/tools/GCollect >& gc.out &
+</b></pre>
+
+Since the process is lengthy, you will probably want to redirect its 
+output to another file and run the process in background as illustrated 
+above.  When the process finishes, your output file should look similar to the 
+one displayed below:
+<pre><b>
+	V>
+	...  Running Garbage Collection
+	>>> Object Network Updated <<<
+	++++++++++++++++
+	+++++  Object Network Consistency Check Output:
+	Processing Network Described by /vision/network/NDF
+
+	Space Statistics:
+	Space   1: Segments:   44...49    CTE Count:      2
+	Space   2: Segments:   66...74    CTE Count:   8194
+	Space   3: Segments:  236...250   CTE Count:  26626
+                                . . .
+<hr width="85%">	
+	Space 1 Statistics:
+ 		Reachable Containers  . . 2
+		          Bytes	. . . . . 56
+		Unreachable Containers  . 0
+			  Bytes . . . . . 0
+		Free Containers . . . . . 0
+
+	Space 2 Statistics:
+		Reachable Containers  . . 7316
+	                  Bytes . . . . . 419644
+		Unreachable Containers  . 0
+			  Bytes . . . . . 0
+	        Free Containers . . . . . 878
+	    . . .
+	
+	Network Total Statistics:
+		Reachable Containers  . . 64895
+			  Bytes . . . . . 108573128
+	 	Unreachable Containers  . 0
+	                  Bytes . . . . . 0
+	        Free Containers . . . . . 18075
+	++++++++++++++++
+</b></pre>
+
+The first part of the report is a Vision session that actually executes  
+the message to perform the garbage collection. You should see the 
+<i>>>> Object Network Updated &lt&lt&lt</i> message indicating that the process 
+completed successfully.  This update will add a new segment to all existing 
+object spaces.  (You can use the <i>viewndf</i> program to confirm this).  
+No information is actually removed from the network at this point.
+<p>
+
+The remainder of the report is generated by the <i>onck</i> program and is used 
+to confirm that the network is consistent. Any error messages should be 
+reported to Insyte and no network updates or compactions should be run 
+until the problem has been investigated.  The last section displays 
+statistics about each space.  The "Reachable Bytes" value represents 
+the total disk space that will be used by the object space after a 
+full compaction.
+<p>
+
+The network can be checked for consistency independent of the garbage 
+collection process.  To execute the program, type:
+<pre><b>
+	/vision/tools/onck /localvision/network/NDF
+</b></pre>
+
+Any errors flagged should be reported to Insyte and no network updates
+or compactions should be run until the problem has been investigated. 
+Note that when the <i>onck</i> program is run directly after the garbage collection 
+update, the values for unreachable containers and bytes should be zero 
+for all spaces.  If the <i>onck</i> program is not run immediately after 
+the garbage collection update, the unreachable container numbers will 
+not necessarily be zero.
+<p>
+
+The <i>GCollect</i> script should be executed immediately preceding a 
+full compaction if you wish to maximize the space recovered by the compaction 
+process.  Since this process does create new network information, 
+it should not be executed in conjunction with any other process that 
+updates the network.  Since the <i>onck</i> program is highly cpu-intensive, 
+it is usually run when the system is not actively being used 
+(i.e., as part of the overnight production cycle).
+<hr>
+
+<a name="compaction"><h3>Compaction</h3></a>
+
+The compaction process is used to remove obsolete and redundant structures from the 
+Vision network.  Each structure present in each segment of the network is 
+evaluated to determine whether it can be eliminated.  If enough structures  
+in a segment can be removed, any structures that continue to be required are copied to a 
+new segment in the network and the old segment is moved out of the network.  
+The net result is an overall reduction in the amount of disk space used by the network;  
+however, until the compacted segments are actually deleted, available disk space 
+will decrease.
+<p>
+
+The compaction process moves the segments to be deleted into a subdirectory 
+of the segment's object space called <i>.dsegs</i>.  The segments are 
+no longer part of the network, but could be reinstated if any problems 
+developed that required reverting to an older version of the network.  
+The Compaction process is normally run as part of the overnight production cycle.
+<p>
+
+The compactor's goal is to compute the minimum segment to
+save (MSS) for each object space.  The segment chosen is 
+based on a function which optimizes the total size of the 
+structures to copy versus the amount of space that removing 
+the segment will free.  The MSS chosen is the segment that has 
+the highest function score.  All segments that precede the MSS 
+in this space will be moved out of the network.
+<p>
+
+Once the MSS has been computed, active data from segments 
+earlier than the MSS will be copied to a new segment in
+each object space as needed.  A file named MSS containing 
+the value for the minimum segment to save will be created 
+in each space.  When all spaces are finished, the segments 
+in each space that are earlier than the MSS value can be 
+moved to a directory called <i>.dsegs</i>.
+<p>
+
+The script <i>/vision/tools/Compact</i> has been defined 
+to fully compact all object spaces and move the compacted 
+segments to the <i>.dsegs</i> directories.  To invoke this 
+script, type:
+<pre><b>
+	/vision/tools/Compact >& compact.out &
+</b></pre>
+
+Since the process is lengthy, you will probably want to 
+redirect its output to another file and run the process 
+in background as illustrated above.  The compaction report 
+displays a table of statistics for each object space considered. 
+For each segment that is a candidate for removal, the report  
+displays the segment number, function value (score), 
+segment size, number of bytes of data that will need to be copied, 
+and the cumulative amount that will be freed and copied for all segments
+already considered in this space. The total amount that will be 
+copied and freed is summarized in the last line of the report
+for each space.
+<p>
+
+When the process finishes, your output file should look 
+similar to the one displayed below:
+<pre><b>
+	V> V> V> V>
+	+++  Compaction Statistics For Space 3:
+	Time Now: 07/26/94:18:27:40
+	Unaccessed Container Count For Space 3: 8988
+	Seg	Score	Size	Copy	Cum Free  Cum Copy
+	1	8360	8696	168	8696	  168
+	2 	-75976	282720	183528	291416 	  183696
+	3	-32608 	43896	264	335312	  183960
+	4	31492	80252	8076	415564	  192036
+	5	93768	70444	4084	486008	  196120
+	6	129800	110568	37268	596576 	  233388
+	7	-54156	370892	277424	967468	  510812
+	8	-186464	345236	238772	1312704	  749584
+	9	-96272	90192	0	1402896	  749584
+	10	-6080	90192	0	1493088	  749584
+	11	84112	90192	0	1583280	  749584
+	12	174304	90192	0	1673472	  749584
+	13	264496	90192	0 	1763664	  749584
+	MSS = 14 [Reclaimed = 1763664,   Copied = 749584]
+
+	+++  Compaction Statistics For Space 2:
+	Time Now: 07/26/94:18:27:42
+	Unaccessed Container Count For Space 2:   12739
+	1	-12828	23180	5176	23180	  5176
+	2	-348368	836524	598860	859704	  604036
+	3	-205284	146300	1608	1006004	  605644
+	4	-82092	123192	0	1129196	  605644
+	5	51260	133352	0	1262548	  605644
+	6	186148	143528	4320	1406076	  609964
+	7	266808	214972	67156	1621048	  677120
+	8	375072	138736	15236	1759784	  692356
+	9	496668	124324	1364	1884108	  693720
+	10	619628	122960	0	2007068	  693720
+	11	742588	122960	0	2130028	  693720
+	12	865548	122960	0	2252988	  693720
+	13	988508	122960	0	2375948	  693720
+	14	1111468	122960	0	2498908	  693720
+	MSS = 15 [Reclaimed = 2498908, Copied  =  693720]
+
+	. . .
+
+	>>> Object Network Updated <<<
+</b></pre>
+
+In the example illustrated above,  the  MSS for <i>object space 3</i>
+is computed to be segment 14.  Segments 1 through 13 will 
+be moved to the directory  <i>/localvision/network/3/.dsegs</i> 
+when the compaction has completed.  These segments are no
+longer a part of the active Vision network.
+<p>
+
+The <i>/vision/tools/DeleteSegs</i> script can be used to 
+physically delete the compacted segments from the disk.  
+It should be run after you have confirmed that the garbage 
+collection and compaction processes have successfully completed.
+<p>
+
+Note that since the <i>Compact</i> script is designed to move actual 
+database segments out of the network, it should not be 
+run while concurrent Vision sessions are operating.
+<p>
+
+Several compaction options are available that allow you
+to tune the compaction process in a variety of ways so 
+that flexible compaction schedules and policies can be
+supported including support of concurrent access and updates 
+during compaction.  To understand the operation of the compactor, 
+the process needs to be divided into its component 
+parts - copying, base version generation, and segment removal.
+<p>
+
+Before an old segment can be discarded, the system needs to
+guarantee that no version of interest references objects stored 
+in the segment.  To support this, the objects must be copied 
+from the old segment to a new segment.  The copy operation, 
+because it requires the analysis and movement of data, is the 
+time-consuming part of the compaction.  Once the required 
+objects have been copied, the versions using the old segment 
+can be declared inaccessible, making removal of the segment possible.
+The oldest accessible version becomes the base version for 
+the next generation of the database, allowing segments not needed 
+by the base version to be deleted.  Segment removal is the 
+process of moving the segments out of their object spaces and 
+into the <i>.dsegs</i> directories.
+<p>
+
+The copy operation can be performed by global and private 
+users as part of a standard update.  Because this operation 
+is a form of update, it will not affect other sessions that
+are executing concurrently.  Base version generation is 
+an administrative function which should only be executed 
+as part of a global update. Because the actual removal of 
+segments can impact current sessions, this operation is normally 
+only performed as part of a nightly maintenance cycle.  
+If segments are removed while Vision sessions are running, 
+those sessions may get error messages indicating that specific 
+segment files cannot be located.
+<p>
+
+The <i>Compact</i> script combines all of the compaction 
+steps (i.e., copying,  base version  generation,  and segment removal) 
+into one process.  You can create other compaction scripts  
+using various session attributes defined to control the compaction.
+<p>
+
+A number of session attributes control the operation of 
+the copy phase of the compactor.  The most important is 
+the attribute which requests the compaction - <i>compactOnUpdate</i>.  
+This flag can be set explicitly using:
+<pre><b>
+	Utility SessionAttribute compactOnUpdate <- TRUE;
+	Utility SessionAttribute compactOnUpdate <- FALSE;
+</b></pre>
+
+If this attribute is set to TRUE, all subsequent updates  
+in your session will perform the copy phase of the compaction on all 
+object spaces modified as part of the update.  For private 
+updates, this is the object space specified by the <b>-U</b> option 
+or <i>UserOSI</i> environment variable; for global updates, 
+this is the set of object spaces marked as modified since 
+the last update performed in the session.  If the session just 
+ran a garbage collection, all spaces will be modified since the 
+garbage collector always updates all object spaces.  By 
+default, however, if a space is unmodified, it will not be included 
+in the compaction.  For a session running with global update 
+permission, additional spaces can be included in the update 
+list with the <i>updateFlagOfSpace:</i> session attribute.  
+For example,
+<pre><b>
+ 	Utility SessionAttribute updateFlagOfSpace: 3 . <- TRUE;
+</b></pre>
+
+forces object space 3 to be included in the next update.  
+A number of restrictions apply to this attribute:
+<ul type="disc">
+<li>It can only be set to TRUE, it cannot be set to FALSE.</br>
+<li>It can only be used to force the update of the user's private object space for non-global updates.</br>
+<li>It applies only to the next save.</br>
+</ul>
+
+Because of the mechanism used to identify session attributes, 
+the object space number must be greater than zero or unpredictable 
+results will occur; however, specifying an object space 
+index larger than the index of the largest object space 
+is ignored.  Since the largest possible object space is 1024, 
+the expression:
+<pre><b>
+	1024 sequence
+	do: 
+	[
+	^global Utility SessionAttribute updateFlagOfSpace: ^self. <- TRUE ;
+	];
+</b></pre>
+
+is a good way to force an update of each object space in 
+any size network.
+
+While the <i>updateFlagOfSpace:</i> session attribute brings 
+a space to the attention of the update, the <i>compactionFlagOfSpace:</i> 
+causes a space otherwise being updated to be ignored by the compactor.  
+Therefore,
+<pre><b>
+	Utility SessionAttribute compactionFlagOfSpace: 3 . <- FALSE;
+</b></pre>
+
+suppresses the compaction of object space 3 in subsequent 
+compacting updates performed in this session.  By default, 
+the compaction flag for all spaces is TRUE; it can be changed 
+to either TRUE or FALSE at any time for any combination of 
+object spaces.
+<p>
+
+To select a specific MSS for an object space, you can use 
+the expression:
+<pre><b>
+	Utility SessionAttribute mssOverrideOfSpace: 3 . <- 9324 ;
+</b></pre>
+
+If the segment is invalid for the specified object space, 
+the specified segment is ignored and replaced by a segment 
+of the compactor's liking.  The MSS override applies to 
+the next compacting update only - once used it is reset.
+<p>
+
+Two attributes are available for tuning the tradeoff between 
+amount of space needed to copy data versus the amount reclaimed 
+by the compaction:
+<pre><b>
+	Utility SessionAttribute    copyCoefficientOfSpace: 3 . <- 1.5;
+	Utility SessionAttribute reclaimCoefficientOfSpace: 3 . <- .75;
+</b></pre>
+
+By default these session attributes are 1.  The MSS for  
+a space is selected as the segment which generates the largest 
+value using the formula:
+<pre><b>
+	reclaimCoefficient * cumulativeReclaimedAsOfSegment
+	-  copyCoefficient * cumulativeCopiedAsOfSegment
+</b></pre>
+
+Decreasing the copy coefficient from its default value of 
+1 (note that negative and non-integral values are allowed and valid)  
+and/or increasing the reclaim coefficient from its default 
+value of 1 favors reclaiming space and should generate larger 
+minimum segment values.  On the other hand, increasing 
+the copy coefficient and/or decreasing the reclaim coefficient  
+favors leaving objects where they are and should generate 
+smaller minimum segment values.
+<p>
+
+The attribute <i>traceCompaction</i> causes the compactor to generate 
+a report of its activity:
+<pre><b>
+	Utility SessionAttribute traceCompaction <- TRUE;
+</b></pre>
+
+The output is generated on a space by space basis with  
+no guaranteed order of display of the spaces.  The following 
+is a typical display:
+<pre><b>
+	+++  Compaction Statistics For Space 3:
+	Time Now: 11/10/92:15:51:52
+	Unaccessed Container Count For Space 3: 0
+	Seg	Score	Size	Copy	Cum Free   Cum Copy
+	28	385100	2593964	2208864	2593964	   2208864
+	29	770200	385100	0	2979064	   2208864
+	30	1155300	385100	0	3364164	   2208864
+	31	1540400	385100	0	3749264	   2208864
+	32	1925500	385100	0	4134364	   2208864
+	33	2310600	385100	0	4519464	   2208864
+	34	2695700	385100	0	4904564	   2208864
+	MSS = 35 [Reclaimed = 4904564, Copied =    2208864]
+</b></pre>
+
+The creation of a base version is controlled by the session 
+attribute <i>makeBaseVersionOnUpdate</i>.  Updates performed 
+while this attribute is TRUE create base versions.  
+The session attribute can be set using:
+<pre><b>
+	Utility SessionAttribute makeBaseVersionOnUpdate <- TRUE;
+	Utility SessionAttribute makeBaseVersionOnUpdate <- FALSE;
+</b></pre>
+
+Creating a base version causes the generation of <i>MSS</i> files but  
+does not actually move the files to the <i>.dsegs</i> directory.  
+Creating a base version also causes minimum segment records to be written
+to the <i>NDF.JOURNAL</i>.  Note that the creation of a base version alone does 
+not copy any objects; however, this operation does write  
+to each object space and must be performed by the <i>dbadmin</i>.
+<p>
+
+The session attribute <i>targetSegmentSizeOfSpace:</i>  
+is available to control the size of segments created by updates.  
+The attribute is object space specific.  For example:
+<pre><b>
+	Utility SessionAttribute targetSegmentSizeOfSpace: 3 . <- 1000000 ;
+</b></pre>
+
+sets the target size of new object space 3 segments created  
+in this session.  This example sets that size to 1 megabyte.  
+If more than 1MB of data must be written to space 3 by this 
+session in a single update, it will be divided into as many 
+1MB segments as are needed to accommodate the update.  
+The value set by this tuning parameter is a target and 
+not a maximum.  Individual segments can exceed this value  
+to accommodate the last structure written to the segment.  
+The default value of this attribute is 2GB.  The 
+<i>VisionMaxSegSize</i> environment variable overrides 
+this default value for all spaces.  This attribute can be used 
+to break large existing segments into smaller segments simply 
+by setting <i>targetSegmentSizeOfSpace:</i> and performing an updating  
+compaction.  As they are copied, the large segments will 
+be broken into pieces with sizes near the value of this attribute.
+<p>
+
+The total amount of space consumed by a compaction can be 
+further limited using the space specific session attribute  
+<i>maxCompactionSegmentsOfSpace:</i>.  For example:
+<pre><b>
+	Utility SessionAttribute maxCompactionSegmentsOfSpace: 3 . <- 10 ;
+</b></pre>
+
+limits to 10 the number of segments of <i>targetSegmentSizeOfSpace:</i>  
+that will be created to hold compacted data in subsequent compactions  
+of space 3 performed in this session.  The compactor uses  
+this statistic by first computing an MSS in the normal way.  
+If more than the product of <i>targetSegmentSize</i> and  
+<i>maxCompactionSegments</i> bytes would be be copied using  
+the normal MSS, the MSS will be adjusted downward until the amount 
+copied is less than this product.  Note that this rule implies  
+that it is impossible to copy part of a segment during a compaction.   
+The default value of this attribute is 2  billion.   
+The <i>VisionMaxCompSegs</i> environment variable overrides 
+this default for all spaces.  This attribute does not apply if  
+a specific MSS has been selected.
+<p>
+
+Several cover methods have been written to perform various 
+forms of compacting update.  These methods are all defined 
+at <i>Utility</i>.
+
+<ul type=disc>
+<li><i>Utility updateAndCompactNetworkWithAnnotation: "comment here" ;</i>
+
+   Performs copy phase of compact as part of annotated update
+
+<li><i>Utility updateAndCompact ;</i>
+
+   Performs copy phase of compact as part of unannotated update
+
+<li><i>Utility updateNetworkAsBaseVersionWithAnnotation: "comment here" ;</i>
+
+   Performs base version phase of compact as part of annotated update
+
+<li><i>Utility updateAndCompactNetworkAsBaseVersionWithAnnotation: "comment" ;</i>
+
+   Performs copy and base version phases of compact as part of update
+
+<li><i>Utility fullCompact ;</i>
+
+   Performs copy and base version phases of compact for all 
+   object spaces and generates trace report as part of update 
+   (used by <i>/vision/tools/Compact</i> script).
+</pre>
+</ul>
+
+<hr>
+<a name="dbconvert"><h3>The <i>dbconvert</i> Utility</h3></a>
+
+This document describes the current version of <i>dbconvert</i>, a tool that
+facilitates the transfer and conversion of a data base from one machine or
+processor architecture to another.  <i>dbconvert</i> has several modes of operation:
+
+<ul type=square>
+<li><a href="#segment">standalone segment maintenance</a>
+<li><a href="#network">standalone network maintenance</a>
+<li><a href="#client">client network maintenance</a>
+<li><a href="#server">server network distribution</a>
+</ul>
+
+Briefly, this document describes each of these modes and how they are used.
+<p>
+
+<a name="segment"><h4>Standalone Segment Maintenance</h4></a>
+<p>
+
+Standalone segment maintenance mode is the simplest mode of operation
+for <i>dbconvert</i>.  In this mode, <i>dbconvert</i> accepts the
+names of one or more segments on its command line:<pre><b>
+    dbconvert /localvision/network/3/104 /localvision/network/4/107
+</b></pre>
+
+<i>dbconvert</i> examines the data format of these segments and converts them, if
+necessary, to the data format of the local machine.  This is the original mode
+of operation for <i>dbconvert</i>.  Although this mode still has value if one or
+more segments needs to be moved and converted from one processor architecture
+to another, the new modes described below are more generally useful for
+transfering and converting entire databases.
+<p>
+
+The only circumstance in which this mode is required involves processing a data
+base whose NDF has been rebuilt using the <i>-R</i> option to batchvision.  A
+rebuilt NDF does not have information required by the three modes described
+below.  In particular, it lacks the list of segment identifiers needed to
+authenticate a segment.  <i>dbconvert</i> does not attempt the automatic transfer or
+conversion of segments it cannot verify.  Instead, for each segment that cannot
+be verified, it issues a warning that manual intervention is required.  Segment
+maintenance mode is used to convert those segments.  This warning only applies
+to segments created before the rebuild.  Segments created after the rebuild are
+processed automatically.
+<p>
+NDFs rebuild with <i>batchvision</i> version 5.9.5 or higher do have
+the required segment information which enables automatic segment
+transfer.
+<p>
+
+<a name="network"><h4>Standalone Network Maintenance</h4></a>
+<p>
+
+Standalone network maintenance mode allows an entire database to be analyzed
+and converted.  Standalone maintenance mode is invoked by passing the name of
+an existing NDF to <i>dbconvert</i> using the <i>-n</i> option:
+<pre><b>
+    dbconvert -n /localvision/network/NDF
+</b></pre>
+
+In this mode, the NDF is read and converted, if necessary.  Once the NDF has
+been converted, the data base segments described in the NDF are examined and
+converted if necessary.  If any segments are missing, cannot be converted, or
+have been damaged by a previous unsuccessful conversion, <i>dbconvert</i> generates a
+warning.  To avoid possible problems, <i>dbconvert</i> will remove any segments that
+cannot be converted or have been damaged.  Additionally, <i>dbconvert</i> will move
+to the <i>.dsegs</i> directory of each space all segments that have been rendered
+obsolete by the most recent compaction.
+<p>
+
+Three additional command line options are recognized in standalone maintenance
+mode, verbose mode (-v), no cleanup mode (-p), and base version (-b<number>).
+<i>Verbose</i> mode causes <i>dbconvert</i> to generate a detailed progress report of its
+actions.  <i>No cleanup</i> mode causes <i>dbconvert</i> to skip the transfer of compacted
+segments to a <i>.dsegs</i> directory.  Finally, <i>base version</i> supplies an integer
+which selects the number of base versions to skip in determining the need for
+segments.  By default, <i>dbconvert</i> assumes this option is specified as zero;
+consequently, <i>dbconvert</i> stops looking for segments as soon as it finds a
+compaction base version.  Specifying a base count of '1' (e.g., -b 1) instructs
+<i>dbconvert</i> to look back through the second most recent base version; higher
+values for base count go back further.
+<p>
+
+These options also apply to client network maintenance mode described in the
+next section.
+<p>
+
+<a name = "client"><h4>Client Network Maintenance</h4></a>
+<p>
+
+Client network maintenance mode gives <i>dbconvert</i> the ability to automatically
+transfer updates from a master to a slave (client) copy of a data base.  Client
+network maintenance mode requires the availability of a <i>dbconvert</i> running in
+server network distribution mode.  Server network distribution mode is described
+in the section following this one.
+<p>
+
+Client network maintenance mode adds two options to standalone network mode,
+remote NDF (-N remote-ndf-path-name) and remote server (-a host:port).  The
+intent of these options is straightforward.  The remote NDF option supplies the
+name of the NDF on the server system.  That NDF will be used to update the local
+NDF supplied by the <i>-n</i> option.  The remote server option supplies the name of
+host and a port on that host on which a copy of <i>dbconvert</i> is listening for
+transfer requests.
+<p>
+
+Note that in client maintenance mode, the local NDF does not have to exist.
+Usually, only the local <i>NDF.OSDPATH</i> file needs to exist so that <i>dbconvert</i>
+knows where to look for and place incoming segments.
+<p>
+
+The use of the verbose (-v) option in client maintenance mode is strongly
+recommended, the log it generates is valuable in following the progress of
+the transfer and conversion.  The following command is typical of a <i>dbconvert</i>
+command used to update a client copy of the data base:
+
+<pre><b>
+    dbconvert -vn /my/vision/network/NDF -N /vision/network/NDF -a fred:10000
+</b></pre>
+
+This command transfers updates from /vision/network/NDF using the <i>dbconvert</i>
+server listening at TCP/IP port 10000 on 'fred' to the local data base described
+by the NDF <i>/my/vision/network/NDF</i>.  After contacting the server, <i>dbconvert</i>
+transfers and converts the NDF, analyzes the NDF for updates, and transfers and
+converts any segments that it needs.  After performing the transfer, segments no
+longer required are moved to the <i>.dsegs</i> directory for their respective object
+space.
+<p>
+
+Five notes are of interest.  First, if the path name of object space directory
+associated with the master <i>/vision/network/NDF</i> is not the same as the object
+space directory associated with <i>/my/vision/network/NDF</i>, it is essential that
+<i>/my/vision/network/NDF.OSDPATH</i> exist and be correct before running this
+command.  Second, if <i>dbconvert</i> is interrupted, it can simply be restarted. It
+will attempt to pick up where it stopped.  Third <i>dbconvert</i> moves just those
+segments it needs to move, it does not transfer the entire data base.  Fourth,
+<i>dbconvert</i> reflects the results of the most recent compaction to the master, 
+unless overridden by the <i>-b</i> or <i>-p</i> option, by moving unneeded client
+segments to the appropriate <i>.dsegs</i> directory.  Fifth, and finally, <i>dbconvert</i>
+ignores all updates to the <i>local</i> data base, effectively rolling them back and 
+replacing them with updates from the master.
+<p>
+
+<a name="server"><h4>Server Network Distribution</h4></a>
+<p>
+
+To use client network maintenance mode, a version of <i>dbconvert</i> running in
+server mode must be available.  <i>dbconvert</i> takes no arguments when used as a
+server, it learns everything it needs to know from its clients.  In fact, a
+copy of <i>dbconvert</i> designed to run in server distribution mode can be misled
+by arguments, specifying one or more segment arguments would put <i>dbconvert</i>
+into standalone segment maintenance mode; specifying a local NDF with the
+<i>-n</i> option would put <i>dbconvert</i> into either standalone or client network
+maintenance mode, depending on the other arguments specified.
+<p>
+
+As a server, <i>dbconvert</i> is designed to run from the UNIX <i>inetd</i> daemon or
+its equivalent.  To configure an <i>inetd</i> service, two files typically need to be
+modified, <i>/etc/services</i> and <i>/etc/inetd.conf</i>.  The following entries are
+appropriate for configuring a <i>dbconvert</i> service under HP-UX:
+
+<pre><b>
+<i>/etc/services</i>:
+    vdbxfer         10000/tcp       # Vision DB Transfer Agent
+
+<i>/etc/inetd.conf</i>:
+    vdbxfer stream tcp nowait insyte /vision/tools/dbconvert dbconvert
+</b></pre>
+
+Once <i>dbconvert</i> is configured to run as a server, any client can contact it to
+request a refresh of any data base to which the server has access.
+<p>
+
+<h4>Logging Information (HP-UX only)</h4>
+
+Release 5.9.5 adds a syslog interface for the Global Reclamation Manager (GRM)
+on HP-UX installations only.  Currently three categories of information are
+logged:
+
+<ul type=square>
+<li>Starting of the dbconvert server (LOG_INFO)
+<li>Starting of any executable which can participate in the GRM but elects not to. (LOG_INFO)
+<li>Failure to map a file (LOG_WARNING)
+</ul>
+
+See the man page for syslogd(1M) for a general explanation of
+the syslog facility. The <i>dbconvert</i> utility
+can be configured to log to a number of different
+facilities -- local0, local1, local2, local3, local4, local5,
+local6, local7, daemon. 
+
+
+<hr>
+<a name="Other Tools"><h3>Other Tools</h3></a>
+
+Several additional tools are available for general system 
+administration activities including: <b>checksum</b>, 
+<b>rollback</b>, and <b>ndftool</b>.
+<p>
+
+
+<p>
+<a name="checksum"><h4>The checksum Utility</h4></a>
+
+A segment checksum is computed when a new segment is created 
+and is validated by re-reading the segment immediately after 
+the operating system reports that its contents are on disk.  
+If the checksum fails validation, the update is aborted.   
+By default, checksum validation is enabled.  Because validation  
+is potentially slow, it can be controlled.  If the environment 
+variable <i>VisionCheckCheckSM</i> is set to 0, checksum validation 
+will be disabled.  This environment variable sets a default 
+validation policy which can be altered by changing the session 
+attribute <i>validatingChecksums</i> using:
+<pre><b>
+	Utility SessionAttribute validatingChecksums <- TRUE ;
+</b></pre>
+or
+<pre><b>
+	Utility SessionAttribute validatingChecksums <- FALSE ;
+</b></pre>
+
+The program <i>/vision/tools/checksum</i> is available to validate 
+the checksums of segment files whose names are passed to it 
+as command line arguments.  For example:
+<pre><b>
+	/vision/tools/checksum 1/4 1/5 1/6 1/7
+</b></pre>
+
+For each segment, this tool prints a one line summary that 
+displays the stored and computed checksums and a checksum 
+validity indicator:
+<pre><b>
+	1/4   : stored cs =          0, computed cs = 4294967281 (NA)
+	1/5   : stored cs = 4290772989, computed cs = 4290772989 (OK)
+	1/6   : stored cs = 4290772990, computed cs = 4290772990 (OK)
+	1/7   : stored cs = 2349028409, computed cs = 4290772990 (MISMATCH)
+</b></pre>
+
+A stored checksum of zero means that a checksum was not  
+originally saved in the segment. In addition, this tool 
+returns the number of segments with mismatched checksums 
+(i.e., the number of segments with  a non-zero stored checksum 
+that does not match the computed checksum).  This return value 
+is accessible as the value of the C-Shell variable <i>$status</i>
+immediately after execution of the checksum tool.
+
+<a name="rollback"><h4>The rollback Utility</h4></a>
+
+The <i>rollback</i> program is used to create an NDF that represents
+an earlier version of the network.  This is especially 
+useful if you wish to examine data and structures as they 
+existed prior to updates that affect the current version of  
+the network.  In most cases, the functionality of this tool 
+has been replaced by the <i>-v</i> option;  however, <i>rollback</i> 
+provides a mechanism for replacing an existing NDF with an older 
+version if necessary.
+<p>
+
+To invoke the rollback program, type:
+<pre><b>
+	/vision/tools/rollback /localvision/network/NDF [ -n <# of versions> ]
+</b></pre>
+
+The program takes one required parameter, the NDF file to 
+view and one optional parameter, the number of versions 
+to eliminate.  In general, you will want to use the default 
+NDF as illustrated above.  By default, the number of versions 
+to eliminate is one (the most recent).  The <i>viewndf</i> program is 
+useful for determining how many versions you wish to rollback.  
+The <i>rollback</i> program does not change the default NDF.  
+It creates a new NDF which is stored as the file <i>RollBkNDF</i> in your 
+current directory.
+<p>
+
+For example, to create a new NDF that reflects the network 
+before the last three updates, type:
+<pre><b>
+	/vision/tools/rollback /localvision/network/NDF -n 3
+</b></pre>
+
+This program finishes almost immediately and generates no output.
+<p>
+
+To use this NDF instead of the default, you need to specify  
+it when you start your Vision session as illustrated below:
+<pre><b>
+	batchvision -n RollBkNDF
+</b></pre>
+
+Your entire Vision session will reflect the older version  
+of the network.  If you run the <i>viewndf</i> program and 
+specify the <i>RollBkNDF</i> file as the parameter, you can 
+confirm that the most recent version does not include the 
+updates you wish to eliminate.  Your private NDF file 
+(i.e., RollBkNDF) will become obsolete as soon as a compaction 
+is run.  You should not update the network using this 
+NDF, since you will overwrite segments in the active network.
+<p>
+
+This tool can be used to examine older versions of the  
+network.  It can also be used to revert back to an older 
+version of the network, if necessary, by replacing the default 
+NDF with the file <i>RollBkNDF</i>.  This activity should  
+be performed with caution, while no Vision sessions are running.
+<p>
+
+<a name="ndftool"><h4>The ndftool Utility</h4></a>
+
+The program <i>/vision/tools/ndftool</i> is an advanced 
+tool capable of performing more sophisticated analysis 
+and rollback than the basic <i>viewndf</i> and <i>rollback</i> tools.  
+In particular, it understands the dependencies between  
+transactions.  It uses that understanding to support the 
+selective deletion of transactions and their dependents,  
+leaving unrelated transactions unaffected.  In contrast,
+the basic <i>rollback</i> tool can only be used to delete 
+the most recent transactions from the database.
+<p>
+
+The NDF contains the maps which associate Vision  
+structures with physical data.  When the Vision database  
+is updated, new data is written out to segment files under 
+the network directory, and a new version of the NDF's  
+maps is added to the NDF.  A version Y is <i>dependent</i> on a 
+previous version X if it reads or modifies any data which  
+was added by X.  Any subsequent version which is dependent on Y  
+is also dependent on X.  Since old versions are not discarded,  
+a database can be accessed in any of its previous states, as long as the
+necessary segments are still accessible.
+<p>
+
+The <i>ndftool</i> program is located in the <i>/vision/tools</i> directory 
+and supports the following options:
+
+<ul>
+<pre><b>
+ndftool -v 	show all versions (verbose)
+ndftool <version>	show specified version plus dependent versions
+ndftool -uc <version>	rollback specified version plus all dependent versions
+ndftool -xuc	undo last rollback if there has been no intervening update
+ndftool -n <ndf>	override NDF (can be used in conjunction with other options)
+ndftool -b #	refer to versions before # base versions (can be used with other options)
+ndftool -r[012]	use alternate output format (can be used with other options)
+ndftool -q -uc <version>	supress output (quiet)
+</b></pre>
+</ul>
+
+A version is specified in one of the following forms:
+<ul>
+<pre><b>
+V#####	absolute version specification
+V0	most current version
+SXX/YY	version which added segment YY to space XX
+</b></pre>
+</ul>
+
+In addition, version specifications beginning with 'V' 
+can be modified with an offset, indicating some number 
+of versions previous to the specified version.  For example:
+<ul>
+<pre><b>
+V0-3	3 versions before current version
+</b></pre>
+</ul>
+
+Because <i>ndftool</i> generates a good deal of output, 
+the output is typically redirected to a file or piped through 
+some other command.  The ability to annotate updates makes 
+<i>grep</i> a particularly effective way of extracting specific 
+information from an NDF.  It is therefore useful to design 
+your update annotations with this use in mind.
+<p>
+
+To see the version number, time stamp, annotation and  
+segments added for the latest update use:
+<pre><b>
+	ndftool V0
+</b></pre>
+
+To see the last few updates use:
+<pre><b>
+	ndftool -v |head
+</b></pre>
+
+To see all updates that were not annotated with the word 
+Reconcile use:
+<pre><b>
+	ndftool -v | grep -v "Reconcile" | more
+</b></pre>
+
+The <i>rollback</i> program creates a new, updated copy 
+of the NDF, but does not commit the update to the existing 
+NDF.  The <i>-uc</i> option to <i>ndftool</i> both updates 
+the NDF and commits the change to the NDF in the same step.  
+It should therefore be used with care.  The <i>-xuc</i> option 
+provides a way of undoing the previous update-and-commit operation, 
+but it is effective only as long as no other changes have been made 
+to the NDF.
+<p>
+
+The first step in doing a rollback is to identify which  
+version is to be removed.  Using <ib>ndftool</i> without 
+the <i>-uc</i>  option shows which spaces will be affected 
+by the rollback.  Any session accessing these spaces will 
+get an <i>Accessed Network Out Of Date</i> error if they 
+continue to save after a rollback.  Executing <i>ndftool</i> 
+with the <i>-uc</i> option will not affect sessions that do 
+not access the removed versions.
+<p>
+
+For example, say that corruption has been detected in 
+<i>segment 4 of object space 22</i>.  First identify which 
+versions are affected:
+<pre><b>
+	ndftool S22/4
+
+	--->  Segment 22/4 Deletion Requested.
+	Version	Role	Segment	Commit Time	        Annotation
+	50927	RuleDel	17/3	08/11/94:16:58:29	Update to 17
+	50470	RuleDel	17/2	08/11/94:16:58:29	Update to 17
+	49995	RuleDel	22/5	08/11/94:16:58:29	Update to 22
+	49572	UserDel	22/4	08/11/94:16:58:29	Update to 22
+</b></pre>
+
+The save associated with version 50470 read data from 
+22/4, so it and its dependents must be removed as well.  
+Ensure that no updates are being made to spaces 17 or 22.  
+Then execute the rollback using:
+<pre><b>
+	ndftool -uc S22/4
+</b></pre>
+<hr>
+
+
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy 1997 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated September 19, 1997</font>
+</table>
+
+</body>
+</html>
+

@@ -1,0 +1,336 @@
+#!/bin/bash
+#
+# Builds a given Vision checkout.
+# Should be run from inside the src directory.
+#
+
+# Script metadata.
+MYNAME=`basename $0`
+MYMAJORVER=2
+MYREVISION='$Revision: #17 $'
+
+# Parse MYREVISION since perforce may garble it in certain circumstances.
+MYREVISION=`echo ${MYREVISION/*#} | cut -d ' ' -f 1`
+
+# Configuration
+[[ "$NICENESS" == "" ]] && NICENESS=5
+KEEPGOING="false"
+SHOWERRORLOG="true"
+RCFILE=.visionBuilder
+
+# Toolkits that should be built.
+if [[ -f local_projects.dat ]]; then
+    BUILDLIST=( `cat local_projects.dat` )
+else
+    BUILDLIST=( * )
+fi
+
+# Toolkits that should not be built.
+EXCLUDELIST=( )
+
+# Exit status
+EXITSTATUS=0
+
+# List of directories that we've already built.
+didBuild=( ${EXCLUDELIST[@]} )
+
+# Status output handling.
+# Do not call this directly. Instead, use error, fatalError, or info.
+function displayMessage() {
+  echo "`date +'%F %T'` $@"
+}
+
+# Non-fatal error handling.
+function error() {
+  $KEEPGOING || fatalError $@
+  EXITSTATUS=1
+  displayMessage ">>> Error: $@"
+  displayMessage ">>> Non-fatal error encountered. Continuing execution."
+  return 1
+}
+
+# Fatal Error handling.
+function fatalError() {
+  displayMessage ">>> Error: $@"
+  displayMessage ">>> Fatal error encountered. Exiting."
+  exit 1
+}
+
+# Informational handling.
+function info() {
+  displayMessage "*** $@"
+}
+
+# Help.
+function doHelp() {
+  displayMessage "VisionBuilder $MYMAJORVER ($MYREVISION)
+
+Usage: $MYNAME [<options>] <operation list>
+
+Where <options> is any mixture of the following options:
+	-h       Prints this help message.
+	-k       Continues compilation even after failures.
+	-q       Enables quiet mode; hides log output on compilation failures.
+
+And where <operation list> is a list of zero or more of the following operations:
+	build:   The default operation.
+	debug:   Builds in debug mode.
+	clean:   Cleans out build objects, targets, libraries, etc.
+	scrub:   In addition to clean, deletes logs, generated makefiles, etc.
+	linkSrc: Performs linkp4src.
+	help:    Prints this help message."
+}
+
+# Clean.
+# Does not clean out links created using linkp4src.
+function doClean() {
+  info "Beginning clean."
+  getMakeOpts
+  cd "$SRCDIR"
+
+  # Clear out our object files and targets.
+  local i buildDir
+  for i in `ls */makefile 2>/dev/null`; do
+    buildDir="`dirname $i`"
+    cd "$buildDir" || ( error "Unable to change to directory for $buildDir." && continue )
+    nice -n $NICENESS $MAKEBIN clean-all >/dev/null || error "Clean failed for $buildDir."
+    cd "$SRCDIR"
+  done
+}
+
+# Scrub.
+# Cleans out makefiles, and some linkp4src files in addition to a normal clean.
+function doScrub() {
+  doClean
+  
+  info "Beginning scrub."
+  cd "$SRCDIR"
+  
+  # Clear out scrub files in each directory.
+  for i in `ls */visionBuilder.scrubFiles 2>/dev/null`; do
+    buildDir="`dirname $i`"
+    cd "$buildDir" || ( error "Unable to change to directory for $buildDir." && continue )
+    for j in `cat visionBuilder.scrubFiles`; do
+      rm -f $j || error "Unable to remove $buildDir/$j."
+    done
+    cd "$SRCDIR"
+  done
+  
+  # Clear logs and audit info, etc.
+  rm -rf $RCFILE */visionBuilder.scrubFiles
+  
+  # We have now undone the linkp4src and initialize.
+  unset LINKP4SRCDATE
+  unset INITIALIZED
+}
+
+# Link.
+function doLinkSrc() {
+  info "Beginning source linking."
+  cd "$SRCDIR"
+  nice -n $NICENESS linkp4src || fatalError "linkp4src failed."
+  save_var LINKP4SRCDATE `date`
+}
+
+# Get make options.
+function getMakeOpts() {
+  [[ "$CPUCOUNT" != "" ]] && return;
+  
+  local OS=`uname`
+
+  # Find our CPU count, default to 1.
+  CPUCOUNT=1
+  case $OS in
+  Linux)
+    CPUCOUNT=`grep -c processor /proc/cpuinfo`
+    [[ "$MAKEBIN" == "" ]] && MAKEBIN=gmake
+    ;;
+  SunOS)
+    # For now we don't use CPUCOUNT, but we will if we ever use gmake.
+    CPUCOUNT=`psrinfo | wc -l`
+    [[ "$MAKEBIN" == "" ]] && MAKEBIN=gmake
+    ;;
+  Default)
+    error "Unsupported OS: `$OS`"
+    ;;
+  esac
+  
+  # Use parallel make if possible.
+  [[ "$MAKEBIN" == "gmake" ]] && MAKEOPTS="-j`expr $CPUCOUNT + 1`"
+
+  # handle KEEPGOING option.
+  if [[ $KEEPGOING ]]; then
+    MAKEOPTS="$MAKEOPTS -k"
+  fi
+}
+
+# Build single.
+# Expects as its argument the directory (under $SRCDIR) to build.
+function doSingleBuild() {
+  # Get our argument.
+  local BUILDDIR="$1"
+
+  # Make sure we have a directory.
+  [[ -d "$SRCDIR/$BUILDDIR" ]] || return;
+ 
+  # Skip this directory if there's no makefile.
+  [[ -f "$SRCDIR/$BUILDDIR/makefile" ]] || return;
+ 
+  # Check if we've already done this build.
+  for built in ${didBuild[@]}; do
+    [[ "$built" == "$BUILDDIR" ]] && return 0;
+  done
+
+  # Remember that we've done this build.
+  didBuild=( ${didBuild[@]} $BUILDDIR )
+
+  # Make sure that we've built our dependencies.
+  local -a deps=( V Vca Vsa ) # Default dependencies as given in linkp4src.
+  if [[ -f "$SRCDIR/$BUILDDIR/make.llist" ]]; then
+    deps=( `cat "$SRCDIR/$BUILDDIR/make.llist"` )
+  fi
+  for dep in ${deps[@]}; do
+      doSingleBuild $dep
+  done
+
+  # Build.
+  info "Entering into $BUILDDIR..."
+  getMakeOpts
+  cd "$SRCDIR/$BUILDDIR" || ( error "Unable to change directory to '$SRCDIR/$BUILDDIR'." && return 1 )
+  nice -n $NICENESS audit $MAKEBIN $MAKEOPTS -k $target
+  if [[ $? != 0 ]]; then
+    if $SHOWERRORLOG; then
+      info "Build error. Build log for $BUILDDIR:"
+      cat LOGS/current
+    fi
+    error "Build failed for $BUILDDIR"
+  fi
+}
+
+# Build all.
+function doBuild() {
+  cd "$SRCDIR"
+
+  # Run linkp4src as necessary
+  if [[ "$LINKP4SRCDATE" == "" ]]; then
+    info "Running linkp4src before build."
+    doLinkSrc
+  fi
+  
+  # Start building.
+  info "Beginning build."
+  local i
+  for i in ${BUILDLIST[@]}; do
+    doSingleBuild $i
+  done
+}
+
+function initialize() {
+    # Repeat check.
+    [[ "$INITIALIZED" == "1" ]] && return
+
+    # Create or read the RCFILE as necessary.
+    if [[ ! -e $RCFILE ]]; then
+        # Create RCFILE.
+        echo '#!/bin/bash' > $RCFILE
+        echo "# Automatically generated by visionBuilder on `date`. Do not edit manually." >> $RCFILE
+        save_var SRCDIR "`pwd`"
+        save_var OSNAME "`uname`"
+        save_var MAJORVER $MYMAJORVER
+        save_var REVISION $MYREVISION
+    elif [[ ! -r $RCFILE ]]; then
+        # File exists but is unreadable. Error.
+        error "$RCFILE is not a readable file. Exiting."
+    else
+        # Source RCFILE
+        source $RCFILE
+    fi
+
+    export INITIALIZED=1
+    info "$MYNAME initialized for $SRCDIR."
+}
+
+# Saves persistent variable named $1 with value $2-, also setting it in this session.
+function save_var() {
+    local varName="$1"
+    shift
+    local export="export $varName='$@'"
+    echo $export >> $RCFILE
+    eval $export
+}
+
+# Parse our arguments.
+OPTIND=1
+while getopts 'hkq' OPTION; do case $OPTION in
+    h)
+        doHelp
+        exit;
+        ;;
+    k)
+        KEEPGOING="true"
+        ;;
+    q)
+        SHOWERRORLOG="false"
+        ;;
+    ?)
+        fatalError "Argument parse error."
+        ;;
+esac; done
+shift $(($OPTIND - 1))
+
+# Initialize.
+initialize
+
+# Build environment incompatibility check as necessary.
+if [[ "$1" != "scrub" ]]; then
+    # Make sure we're on the right version.
+    if [[ "$MAJORVER" != "$MYMAJORVER" ]]; then
+        error "Build environment in $SRCDIR was created by an incompatible version ($MAJORVER) of VisionBuilder. In order to build here, you'll first need to scrub."
+    fi
+
+    # Make sure we're on the right arch.
+    if [[ "$OSNAME" != "`uname`" ]]; then
+        error "Build environment in $SRCDIR is for $OSNAME only. In order to build here, you'll first need to scrub."
+    fi
+fi
+
+# Check for arguments.
+if [[ $# == 0 ]]; then
+  # Build by default if no arguments exist.
+  doBuild
+fi
+
+OPTIND=1
+for i in $@; do
+  initialize
+  case "$i" in
+    "help")
+      doHelp
+      exit;
+      ;;
+    "clean")
+      doClean
+      ;;
+    "scrub")
+      doScrub
+      ;;
+    "linkSrc")
+      doLinkSrc
+      ;;
+    "build")
+      doBuild
+      ;;
+    "debug")
+      target=debug doBuild
+      ;;
+    *)
+      error "Unhandled operation '$i'. Ignoring."
+      ;;
+  esac
+done
+
+# Report status and exit.
+if [[ $EXITSTATUS != 0 ]]; then
+  fatalError "Non-fatal errors encountered while exiting. Raising final fatal error."
+fi
+info "$MYNAME exiting normally."

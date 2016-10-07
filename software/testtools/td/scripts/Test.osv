@@ -1,0 +1,83 @@
+#!/bin/csh
+
+unalias cd
+unalias ls
+
+set HostName	= `uname -n`
+set HostId	= `uname -n -m`
+set OSVersion	= `uname -s -r -v`
+set TestDate	= `date`
+
+if ($#argv > 3) then
+    set TDComponentsUpperDir = $argv[4]
+else
+    set TDComponentsUpperDir = ~/vision-open-source/software/testtools/td/component
+endif
+
+if ($#argv > 2) then
+    set TDVersion = $argv[3]
+else
+    set TDVersion = 8.0 
+endif
+
+set TDComponents = $TDComponentsUpperDir/$TDVersion
+if (! -d $TDComponents) then
+    echo ">>> Test Components Directory '$TDComponents' Not Found"
+    exit 1
+endif
+
+if ($#argv > 1) then
+    setenv NDFPathName $argv[2]
+endif
+    
+
+set ReleaseDirectory	= $cwd
+set ReleaseExecutable	= $DBbatchvision
+set ReleaseOutput	= $ReleaseDirectory/component.$TDVersion
+set LogFile             = $ReleaseDirectory/LOG.$TDVersion
+
+
+cat /dev/null > $LogFile
+echo	 "********************************************************">> $LogFile
+echo	 "*  Test Suite Execution"			>> $LogFile
+echo	 "*    Test Date . . . . . . . $TestDate"	>> $LogFile 
+echo	 "*    Machine . . . . . . . . $HostId"		>> $LogFile 
+echo	 "*    OS Version. . . . . . . $OSVersion"	>> $LogFile 
+echo	 "*    Test Suite Version. . . $TDVersion"	>> $LogFile
+echo     "*    Components Directory. . $TDComponentsUpperDir" >> $LogFile 
+
+setenv OSDPathName $ReleaseDirectory/testNetwork-linux
+setenv NDFPathName $OSDPathName/NDF
+
+echo "*    NDF . . . . . . . . . . $NDFPathName"	>> $LogFile
+echo	 "*    Release Audit:"				>> $LogFile
+strings $ReleaseExecutable | grep AUDIT | sed 's/AUDITINFO:/*        /g' >> $LogFile
+echo	 "********************************************************">> $LogFile
+
+cat $LogFile
+
+mkdir $ReleaseOutput
+
+cd $TDComponents
+# One of the stress tests will run small systems out of RAM if we don't limit the datasize
+limit datasize 2000000
+
+$ReleaseExecutable -d >>& $LogFile << @@@EOD@@@
+^tmp define: 'componentOutput' toBe: "$ReleaseOutput";
+?g
+?? component.set
+?d
+#M displayCPDCountsByRType displayMallocInfo displayMappingInfo displayCounts preservingCPCCs print,
+#V displayState displayCounts,
+#RTYPE_C_Dictionary usingCache print,
+QUIT
+
+@@@EOD@@@
+
+echo "" >> $LogFile
+
+
+
+
+
+

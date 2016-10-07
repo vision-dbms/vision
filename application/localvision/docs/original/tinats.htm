@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head><title>Time Is Not A Time-Series</title>
+  
+</head>
+<body bgcolor=white>
+
+<center><h1>Time Is Not A Time-Series</h1></center>
+<h2>Introduction</h2>
+Representing time-varying data in a database has long been a problem.
+While it has always been possible to build structures tagged with time
+fields, the database tools for maintaining and analyzing time-varying
+data have left much to be desired.</p>
+
+<p>In the days of relational databases,
+there were few choices except to use the database system as a simple data
+repository.  Most, if not all, of the analysis and query logic associated
+with time-varying data needed to be implemented in application programs.
+The deficiency of the relational systems was their inability to
+create new data types that could hold time-varying collections of data.
+If the operation couldn't be done using select, project, join, and cartesian
+product, it couldn't be done in the relational system.</p>
+
+<p>With the advent
+of object-oriented technology in general, and object-oriented database
+systems in particular, the obvious problem of the relational systems appears
+to be solved. Because object-oriented database systems can implement new
+data types that are directly usable by the database system, it is now
+possible to define new types of collections -- such as time-series -- that
+model time-varying collections of data.  Presumably, these new data types
+can include the operations needed to maintain, select, and aggregate their
+contents based on the needs of the application builder.
+
+<p>Based on this new-found
+capability, there is now a perception that the only thing to do is
+provide a starter set of classes.  Our ten years of experience in designing
+and using Vision<sup>TM</sup> -- our commercial, temporal,
+object-oriented database system -- tells us that the problem is larger
+than that.</p>
+<ul><p>
+<a href="tinats.htm#Capturing Relationships">Capturing Relationships</a>
+</p>
+
+<p><a href="tinats.htm#Encapsulating Complexity">Encapsulating Complexity</a>
+</p>
+
+<p><a href="tinats.htm#Querying The Data Base">Querying The Data Base</a>
+</p>
+
+<p><a href="tinats.htm#Solving The Problem">Solving The Problem</a> </p>
+</ul>
+
+<h2><a name="Capturing Relationships"></a>Capturing Relationships -- How
+Time Affects A Data Model</h2>
+
+<p>Providing a <i>TimeSeries</i> class -- a type of indexed collection
+that understands time as its index -- is a reasonable starting point for
+modeling time-varying data in an object-oriented system.  Of its many and
+extensible set of properties and operations, the salient features of this
+new class are as follows:</p>
+<ul type=disk>
+<li>It is ordered by its index (i.e., last Friday is before
+this Tuesday)</li><p>
+<li>It supports order-aware interval queries (i.e., find
+the most recent observation recorded in the series on or before November
+23, 1992)</li><p>
+<li>It is possible to use its instances to hold elements
+of any data type -- subject, of course, to the requirements of its type
+declaration and the type checking requirements of the database (i.e.,
+it should be possible to construct a time-series of <i>Company</i> objects,
+not just a time series of numbers).</li>
+</ul>
+<p>Although many time-series hold observations
+recorded at a fixed frequency such as annual, quarterly, or monthly, it
+is overly restrictive to require a regular pattern of observations -- stock
+split adjustment factors and intra-day trades on a stock exchange, for
+example, will never occur at regular intervals.</p>
+
+<p>Armed with a <i>TimeSeries</i> class, properties of new and existing
+classes can be declared in terms of its instances.  Applications of <i>TimeSeries</i>
+in a number of real financial systems developed with&nbsp;<b>Vision</b>
+include:
+</p>
+<ul>
+<li>A <i>pricingSeries </i>property at <i>Security</i> that returns a <i>TimeSeries</i>
+of <i>Price</i> objects</li>
+<p>
+<li>A <i>holdingsSeries</i> property at <i>Account</i> that returns a <i>TimeSeries</i>
+of <i>HoldingsList</i> objects</li>
+<p>
+<li>An <i>industrySeries</i> property at <i>Company</i> that returns a
+<i>TimeSeries</i> of <i>Industry</i> objects</li>
+<p>
+<li>An <i>estimateSeries</i> property at <i>Security</i> that returns a
+<i>TimeSeries</i> of <i>TimeSeries</i> of <i>EarningsEstimate</i> objects</li>
+
+</ul>
+
+<p>Intuitively, there are no surprises here.  Just as other collection types
+are used to model structural one-to-many relationships, time-series are
+used to model temporal one-to-many relationships.  There is, however, one
+significant difference between structural and temporal one-to-many relationships.
+In most databases, there are usually more temporal one-to-many relationships
+than there are structural one-to-many relationships.</p>
+
+<p>With the exception
+of a few truly immutable properties, such as a person's blood type or birth
+date, any property has the potential to be time-varying.  In practice, which
+properties actually need to be made time-varying is a function of the information
+the database needs to capture and how that information will be used.  That
+is a fact of life and a source of complexity that must be managed.</p>
+
+<h2><a name="Encapsulating Complexity"></a>Encapsulating Complexity --How Time Affects A Program</h2>
+
+<p>An application can use time-varying data in a database in one of two
+general ways.  It can directly examine a time-series to display its content,
+query its elements, compute a statistic, or perform some other operation
+that can be answered locally by the time-series.  Adding an observation
+or generating a price chart are examples.</p>
+
+<p>The other way an application can use a time-series is as part of a navigation
+from one object to another.  In that role, the time-series is simply expected
+to supply whichever one of its elements is appropriate as of a particular
+point in time:</p>
+<ul>
+<ul>
+
+<p><i>ibm industrySeries asOf: aPointInTime</i></p>
+</ul>
+</ul>
+
+<p>The navigational use of time-series, although apparently simpler, has
+far greater impact than any other use.  Other uses are localized to a specific
+part of an application. Navigation, on the other hand, is fundamental to
+the operation of an object-oriented database.</p>
+
+<p>Every time-varying property
+participates in a time-dependent navigation every time it is accessed on
+the way from one part of the database to another.  If the data model specifies
+that the <i>industry</i> classification of a <i>Company</i> varies over
+time, it is incumbent on the application to supply a point in time when
+it wants a company's <i>industry.</i></p>
+
+<p>Although it can be done, it is unreasonable to require that every application
+supply an explicit extra parameter every time it traverses a time-varying
+property.  Access to time-varying properties needs to be encapsulated in
+a way that simplifies the use of those properties from an application.
+In the case of this example, it is reasonable to define an <i>industry</i>
+method at <i>Company</i> that gets a value for <i>aPointInTime </i>from
+somewhere else:</p><ul><ul><p><i>ibm industry</i></p>
+</ul>
+</ul>
+
+<p>This encapsulation is useful for all the obvious programming reasons.
+It happens to be useful from a data modeling point of view as well.  The
+designer of the database probably intended to assert that every <i>Company</i>
+has an <i>Industry</i> -- it just happens that the <i>industry</i> property
+of <i>Company</i> varies over time.</p>
+
+<p>The set of time-varying properties is also subject to change as the
+database evolves.  If <i>industry</i> changes from a time-invariant property
+to a time-varying property, the ability to write a method to encapsulate
+the navigation is not just nice to have -- it is an absolute necessity.
+If existing programs are to continue to work, the new type signature for
+the class <i>Company</i> has to be substitutable for the old signature.
+For example, <i>industry</i> has to continue to return an <i>Industry</i> object;
+it can't simply disappear or suddenly return a different kind of object
+like a time-series.</p>
+
+<p>All of this may seem to belabor the obvious.  Of course these methods
+can and should be written -- any competent programmer can see that all
+that is needed is some global location to which a method can refer to answer
+the <i>when?</i> question.  The ability to create new properties and methods,
+is, after all, part of every object-oriented programming environment. The
+problem is not quite that simple.</p>
+
+<h2><a name="Querying The Data Base"></a>Querying The Data Base -- The
+Problem Goes Global</h2>
+
+<p>There is a major problem here, and it comes from the use of global variables
+to pass the values of parameters.  The objects used to record and supply
+the temporal context used to navigate the database are not properly part
+of the database -- they exist only to support its use.  They also should
+not be globals.  The use of globals to cache state and pass parameters has
+rightfully fallen into disfavor -- especially in environments like a database
+system that need to be multi-user and multi-threaded. </p>
+
+<p>To illustrate some of the difficulties, consider answering the question:</p>
+<ul>
+<p>&quot;In which of the last five years did the earnings per share of more
+than half the companies in the database exceed the previous year's industry
+average earnings per share?&quot;</p>
+</ul>
+<p> This is a query based on the overall
+state of the database, not the content of some specific time-series.  To
+answer this question using just the capabilities of the programming language
+without architectural support from the database, an application programmer
+must manually iterate through the years of interest, running the query
+for each year in turn.  More subtly, the need to answer the previous year
+sub-query embedded in this query requires that the temporal context change
+during the query.</p>
+
+<p>The solution to this problem is not simply
+a matter of application programmer cleverness. This approach has pushed
+a substantial amount of responsibility back onto the application programmer.
+Even if all of this complexity can be encapsulated to look benign, it is,
+in fact, a cumbersome, non-reentrant, highly procedural way of doing things.
+In effect, this <i>work-around</i> has removed the problem from the database
+system -- where it can be optimized by designers who know how to do
+such things -- and hidden it in the bowels of an application's logic. </p>
+
+<h2><a name="Solving The Problem"></a>Solving The Problem -- Dimensionality
+Is Architectural</h2>
+
+<p>That time is special should not come as a surprise.  The world is multi-dimensional
+and time is one of those dimensions.  Different points in time select different
+states of the world. A database dealing with time-varying data needs to
+do the same.</p>
+
+<p>Technically, time is a parameter.  Unlike the properties of a class,
+which parameterize instances of that class, time parameterizes the entire
+database.  The programming tools suitable for parameterizing a class are
+not sufficient to parameterize the entire database.  When an application
+supplies a value -- or set of values -- for time, it is selecting a collection
+of states from the database, not a set of instances from a class in the
+database.</p>
+
+<p>Although the precise interaction of time with the data model
+is managed <i>in the small</i> at the level of the data model's structure,
+time itself exists <i>in the large</i> -- globally and <i>outside</i> the
+context of any particular part of the database. Supporting time in a database
+-- or any other system that models the world -- requires architectural
+support to parameterize the model as a whole, not just the component
+parts of the model.</p>
+
+<p>Time is not the only property that parameterizes whole models. Any property
+that depends on the perspective of the user places exactly the same demands
+on the system.  For example, in a financial system that deals with multi-currency
+data, <i>Currency</i> works the same way. <i>In the small</i>, the data
+model specifies the rules for accessing and using monetary values consistently;
+<i>in the large</i>, the perspective of the user determines how those rules
+get used. Other properties such as <i>Scenario</i> and <i>Version</i> play
+similar roles in other applications.</p>
+<hr>
+<table border="0" width="100%">
+<tr>
+<td align="left"><font size="-1">Copyright &copy; 1999 Innovative Systems Techniques, Inc.</font>
+<td align="right"><font size="-1">Updated January 28, 1999</font>
+</table>
+
+<hr>
+
+<font size=-1><Center> 
+| <a href="index.htm">Home</a> 
+| <a href="abtinsyt.htm">About Insyte</a> |
+<br>
+| <a href="vonline.htm">Vision On-line</a> 
+| <a href="visiontech.htm">Vision Technology</a>
+| <a href="vpma.htm">Investment Managers</a>  
+| <a href="trowestory.htm">Client Spotlight</a>
+| <a href="euro.htm">Euro</a> | <a href="findus.htm">Find Us</a>
+| <a href="mailto:insytenet@istvision.com">E-Mail Insyte</a> |
+<br>
+| <a href="toc.htm">Table of Contents</a> |
+
+</center></font>
+
+
+</body></html>

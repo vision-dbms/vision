@@ -1,0 +1,2521 @@
+##################################################
+#  patch.pre7.apps
+#
+#  Incremental changes to core vision database from: portal
+#
+#  Introduces:
+#      ApplicationTools (AccountViewer, CalcPackage, etc)
+#      Statistic
+#      Library
+#      Application, ApplicationParam
+#
+#  Includes changes to:
+#      DataItem
+#
+#  Derived from files: 
+#      - portalSetup.vis
+#      - patch.portal.1
+#      - acctViewSetup.vis
+#      - requestWS.vis
+#
+##################################################
+
+####################
+#  ApplicationTools
+####################
+
+CoreWorkspace respondsTo: "ApplicationTools" .
+ifFalse:
+  [ ToolKit createSubclass: "ApplicationTools" ;
+    Dictionary createSubclass: "Named" at: ApplicationTools ;
+
+    ApplicationTools createSubclass: "ViewerModule" at: ApplicationTools ;
+    ApplicationTools ViewerModule
+        createSubclass: "AccountViewer" at: ApplicationTools ;
+    ApplicationTools Named createInstance: "AccountViewer" ;
+    ApplicationTools AccountViewer classDescriptor
+         setNamingDictionaryTo: ApplicationTools Named AccountViewer ;
+    
+    ApplicationTools ViewerModule
+        createSubclass: "SecurityViewer" at: ApplicationTools ;
+    ApplicationTools Named createInstance: "SecurityViewer" ;
+    ApplicationTools SecurityViewer classDescriptor
+         setNamingDictionaryTo: ApplicationTools Named SecurityViewer ;
+    
+    ApplicationTools ViewerModule
+        createSubclass: "SupportView" at: ApplicationTools ;
+    ApplicationTools Named createInstance: "SupportView" ;
+    ApplicationTools SupportView classDescriptor
+         setNamingDictionaryTo: ApplicationTools Named SupportView ;
+    
+    ApplicationTools 
+       createSubclass: "DisplayObject" at: ApplicationTools ViewerModule ;
+    
+    ApplicationTools createSubclass: "CalcPackage" at: ApplicationTools ;
+    ApplicationTools CalcPackage
+        createSubclass: "SecurityCalcs" at: ApplicationTools ;
+    ApplicationTools CalcPackage
+        createSubclass: "AccountCalcs" at: ApplicationTools ;
+  ] ;
+
+#======================================================================
+
+####################
+#  Other Support Classes and Instances: Statistic
+####################
+
+Interface BatchFeedManager 
+    createEntityClass: "Statistic" from: "Support" ;
+
+PropertySetup updateFromString: "property | classId | dataType | defaultValue
+isPercent | Statistic | Boolean | FALSE
+isCount | Statistic | Boolean | FALSE
+accessBlock | Statistic | Block
+statSet | DataItem | Statistic
+" ;
+
+Statistic defineMethod: [ | initializeLocalAttributes | 
+  ^super initializeLocalAttributes ;
+  :accessBlock <- code asBlock ;
+  ^self
+] ;
+
+#--  auto add shortname as alias
+StatisticMaster defineMethod: [ | updateAliases | 
+  ^self entityType masterList 
+     do: [ ^self addAlias: shortName ] ;
+  ^self
+] ;
+
+
+StatisticMaster updateFromString: 
+"id | name | sortCode | shortName | isPercent | isCount
+countGoodOnes | Number Available | 1 | Num Avail | N | Y
+percentAvailable | Percent Available | 2 | Pct Avail | Y | N
+weightedAverage | Wtd Average | 3 | Wtd Avg
+average | Average | 4 | Avg
+total | Sum | 5 | Sum 
+median | Median | 6 | Med
+min | Min | 7 | Min
+max | Max | 8 | Max
+stdDev | Standard Dev | 9 | Std Dev
+countPositives | Positives | 10 | Positives | N | Y
+countNegatives | Negatives | 11 | Negatives | N | Y
+countZeros | Zeros | 12 | Zeros | N | Y
+harmonicMean | Harmonic Avg | 13 | Hmnc Avg | 
+weightedHarmonicMean | Wtd Harmonic Avg | 14 | Wtd HAvg
+weightedMedian | Wtd Median | 15 | Wtd Med
+adjustedTotal | Adjusted Total | 16 | Adj Tot | 
+sumNumToSumDen | Sum Numerator-to-Sum Denominator | 17 | SumNToSumD
+" ;
+
+####################
+#  Other Support Classes and Instances: Application and ApplicationParam
+####################
+
+Interface BatchFeedManager
+   createEntityClass: "Application" from: "Support" ;
+Interface BatchFeedManager
+   createEntityClass: "ApplicationParam" from: "Support" ;
+
+PropertySetup updateFromString: "classId | property | dataType | defaultValue
+Application | description | String
+ApplicationParam | description1 | String
+ApplicationParam | description2 | String
+ApplicationParam | allowList | Boolean | FALSE
+ApplicationParam | type | String
+" ;
+
+Application
+    defineFixedProperty: 'parameterList' withDefault: IndexedList new ;
+
+Application defineMethod: [ | initializeLocalAttributes |
+ ^super initializeLocalAttributes ;
+  :parameterList <- defaultInstance parameterList clusterNew ;
+  ^self
+] ;
+
+MembershipFeedSetup updateFromString: "feedId | groupId | groupPath | memberId | memberPath | mode
+ApplicationParameters | Application | parameterList | ApplicationParam | NA | APPEND
+" ;
+
+####################
+#  Other Support Classes and Instances: Library
+#     This entity class defines all the ApplicationTools federated in
+#     a specific environment. FormulaLibrary is used for CalcPackage.
+#     Later, ViewerLibrary may be added for ViewerModule.
+####################
+
+Interface BatchFeedManager
+    createEntityClass: "Library" from: "Support" ;
+
+Interface BatchFeedManager
+    createEntityClass: "FormulaLibrary" from: "Library" ;
+
+Interface BatchFeedManager
+    createEntityClass: "AccountFormulaLibrary" from: "FormulaLibrary" ;
+
+Interface BatchFeedManager
+    createEntityClass: "SecurityFormulaLibrary" from: "FormulaLibrary" ;
+
+#--------------------
+#  Library: properties and initialization
+#     home       reference to top level of the "foreign" database
+#     root       reference to the Application class
+#--------------------
+
+Library                define: 'appType' toBe: "ApplicationTools" ;
+FormulaLibrary         define: 'appType' toBe: "ApplicationTools CalcPackage" ;
+AccountFormulaLibrary  define: 'appType' toBe: "ApplicationTools AccountCalcs" ;
+SecurityFormulaLibrary define: 'appType' toBe: "ApplicationTools SecurityCalcs" ;
+
+PropertySetup updateFromString: "
+classId | property     | defaultValue | description
+Library | homeLocation | String       | Network Path or Site name
+Library | root         | String       | Library Class (e.g. CompustatAnnualCalcs)
+" ;
+
+#==========
+# Account
+#==========
+
+# Define constant 'calcPackage' that points to AccountFormulaLibrary.
+Account define: 'calcPackage' toBe: GlobalWorkspace ApplicationTools AccountCalcs ;
+
+Account defineMethod: [ | getCalcPack | 
+  !me <- ^self asSelf ;
+  GlobalWorkspace Account calcPackage extendBy: [ !entity <- ^my me ] 
+] ;
+
+# Switch to 'entity'
+ApplicationTools AccountCalcs
+  defineMethod: [ | entity | CoreWorkspace Account ] .
+  defineMethod: [ | account | ^self entity ] .
+;
+
+#----------
+# Account - FormulaLibrary
+#----------
+
+AccountFormulaLibrary defineMethod: [ | account | ^self entity ] ;
+
+# Default Value
+AccountFormulaLibrary defineMethod: [ | entity |
+  CoreWorkspace Account
+] ;
+
+#======================================================================
+
+####################
+#  DataItem
+####################
+
+Named DataItem defineMethod: [ | at: aString put: anObject | 
+aString isString 
+ifTrue: 
+  [ ^super at: aString put: anObject ;
+    ^super at: aString toUpper put: anObject ;
+  ] ; 
+^self
+] ;
+
+Named DataItem defineMethod: [ | delete: aString |
+aString isString 
+ifTrue: 
+  [ ^super delete: aString ;
+    ^super delete: aString toUpper ;
+  ] ; 
+^self
+] ;
+
+#--------------------
+
+DataItem defineMethod: [ | getStatsFor: ids from: class | 
+  ^self getItemsFor: ids from: class .
+        select: [ okayAsStat ] .
+] ;
+
+DataItem defineMethod: [ | getPrimaryStat |
+  showWtAvg isTrue  ifTrue: [ "Wtg" ] .
+  elseIf: [ showTot isTrue ] then: [ "Tot" ] .
+  elseIf: [ showMed isTrue ] then: [ "Med" ] .
+  elseIf: [ showAvg isTrue ] then: [ "Avg" ] . 
+  else: [ "" ] 
+] ;
+
+DataItem defineMethod: [ | getPrimaryStatFor: list | 
+!stat <- statSet isList ifTrue: [ statSet at: 1 ] else: [ statSet ] ;
+stat isntDefault && [ stat accessBlock isBlock ] 
+   ifTrue: [ list basicSend: stat accessBlock ] 
+  ifFalse: [ list basicSend: [ weightedAverage ] ]
+] ;
+
+DataItem defineMethod: [ | getStatsOrDefaultFor: stats from: baseClass |
+  !statList <- ^self getStatsFor: stats from: baseClass ;
+  statList count = 0
+     ifTrue: [ :statList <- ^self getValidStatsFor: baseClass ] ;
+  statList 
+] ;
+
+DataItem defineMethod: [ | isValidFor: class | 
+  !baseClasses <- CoreWorkspace DataAccessPath masterList
+     select: [ ^my class inheritsFrom: fromClass ] . 
+     send: [ toClass ] . append: class defaultInstance ;
+  baseClasses includesElement: baseClass
+] ;
+
+DataItem defineMethod: [ | getItemFor: id from: class |
+!item <- id isDataItem ifTrue: [ id ] .
+   else: [ id as: ^self ] ;
+item isValidFor: class .
+ifFalse:
+  [ :item <- ^self getValidStatsFor: class . sortUp: [ sortCode ] . at: 1 .
+        else: [ defaultInstance ] ;
+  ] ;
+item
+
+] ;
+DataItem defineMethod: [ | getAccessFor: id from: fromClass |
+!item <- ^self getItemFor: id from: fromClass ;
+item extendBy: [ !accessPath <- ^self getAccessFrom: ^my fromClass ;
+                 !accessBlock <- accessPath isntNA
+                    ifTrue: [ accessPath asBlock ] ifFalse: [ [ NA ] ] 
+               ]
+] ;
+
+
+DataItem defineMethod: [ | getItemsFor: ids from: class | 
+  !list <- ids isCollection
+  ifTrue:
+     [ ids send: [ ^my locateId: ^self ] .
+     ] .
+  elseIf: [ ids isUniverse && [ ids entityType isDataItem ] ]
+    then: [ ids list sortUp: [ sortCode ] ] .
+  elseIf: [ ids isString ] 
+    then: [ !universe <- CoreWorkspace Universe locateId: ids ;
+            universe isntDefault
+              ifTrue: [ universe list sortUp: [ sortCode ] ] . 
+                else: [ ^self locateIds: ids ] 
+          ] ;
+  :list <- list isntNA
+  ifTrue:
+    [ list
+        select: [ isntDefault ] .
+        extendBy: 
+          [ !fullAccessPath <- ^self getAccessFrom: ^my class ;
+            !block <- fullAccessPath isntNA      #<<<---
+               ifTrue: [ fullAccessPath asBlock ] ;
+          ] .
+        select: [ block isBlock ] .
+    ] .
+  elseIf: [ ids isDefault ] then: [ ^self getValidStatsFor: class ] 
+
+] ;
+
+DataItem defineMethod: [ | displayAllStatRowsFor: dataSet | 
+
+  !format <- 15 + (defaultDecimals else: 2 . / 10) ;
+  showTot isTrue
+  ifTrue: 
+    [ dataSet displayAcross: [ ^self total: [ stat ] . else: " " ]
+         withLabel: (FormatTools bold: (shortName concat: " - Total ") )
+         andFormat: format ;
+    ] ;
+  showAvg isTrue
+  ifTrue: 
+    [ dataSet displayAcross: [ ^self average: [ stat ] . else: " " ]
+         withLabel: (FormatTools bold: (shortName concat: " - Avg " ) )
+         andFormat: format ;
+    ] ;
+  showWtAvg isTrue
+  ifTrue: 
+    [ dataSet 
+         displayAcross: 
+            [ ^self average: [ stat ] withWeights: [ weight ] . else: " " ]
+         withLabel: (FormatTools bold: (shortName concat: " - Wtd Avg " ) )
+         andFormat: format ;
+    ] ;
+  showMed isTrue
+  ifTrue: 
+    [ dataSet displayAcross: [ ^self median: [ stat ] . else: " " ]
+         withLabel: (FormatTools bold: (shortName concat: " - Median " ) )
+          andFormat: format ;
+    ] ;
+
+] ;
+
+#======================================================================
+
+##############################
+#  ApplicationTools
+##############################
+
+####################
+#  General Tools
+####################
+
+ApplicationTools defineMethod: [ | asListOf: type from: object |
+  object isUniverse ifTrue: [ object list ] .
+     elseIf: [ object isCollection ] then: [ object ] .
+     elseIf: [ object isString ] 
+       then: [ object stripChar: newLine . breakOn: "," ] .
+     else: [ object asList ] .
+   send: [ isString ifTrue: [ ^self globalAs: ^my type ] ifFalse: [ ^self ] ]
+
+] ;
+
+#--------------------
+
+####################
+#  AccountViewer
+####################
+
+ApplicationTools AccountViewer
+   defineFixedProperty: 'baseAccount' .
+   defineFixedProperty: 'accounts' .
+   defineFixedProperty: 'restrictionBlock' .
+   defineFixedProperty: 'restrictionText' .
+   defineFixedProperty: 'dates' .
+   defineFixedProperty: 'groups' .
+   defineFixedProperty: 'groupMaps' .
+   defineFixedProperty: 'groupMapsWithOther' .
+   defineFixedProperty: 'groupId' .
+   defineFixedProperty: 'groupSortFlag' .
+   defineFixedProperty: 'detailSort' .
+   defineFixedProperty: 'groupCutoff' .
+   defineFixedProperty: 'securityCutoff' .
+
+   defineFixedProperty: 'items' .
+   defineFixedProperty: 'statsForAll' .
+
+   defineFixedProperty: 'detailFlag' .
+   defineFixedProperty: 'restrictDetailsToBaseAccountFlag' .
+   defineFixedProperty: 'tnaTmvToggle' .
+   defineFixedProperty: 'accountByDateFormat' .
+   defineFixedProperty: 'excludeLocalStatsFormat' .
+
+   defineFixedProperty: 'currentAccounts' .
+   defineFixedProperty: 'currentDates' .
+   defineFixedProperty: 'currentGroupItems' .
+   defineFixedProperty: 'currentItems' .
+
+   defineFixedProperty: 'currentHoldings' .
+   defineFixedProperty: 'currentHoldingsByAccountDate' .
+   defineFixedProperty: 'currentGroupedHoldings' .
+
+;
+
+ApplicationTools AccountViewer 
+defineMethod: [ | initializeLocalAttributes |
+  ^super initializeLocalAttributes ;
+  ^self reset 
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | profile |
+"Accounts: " printNL ;
+accounts do: [ whatAmI print: 30 ; displayInfo ] ;
+"Dates: " print: 30 ; 
+dates do: [ print ; " | " print ] ; newLine print ;
+accounts count > 1 && dates count > 1
+   ifTrue: [ accountByDateFormat ifTrue: [ "Account x Date Format" ] 
+                                   else: [ "Date x Account Format" ] . printNL;
+           ] ;
+"Base Currency: " print: 30 ; 
+baseCurrency isntDefault
+    ifTrue: [ baseCurrency displayInfo ] 
+   ifFalse: [ " use currency of account" printNL ] ;
+"Restriction Block: " print: 30 ; restrictionBlock printNL ;
+"Restriction Text: " print: 30 ; restrictionText printNL ;
+"Show Detail: " print: 30 ; 
+detailFlag isNA
+   ifTrue: [ "Yes" ] else: [ "No" ] . printNL ;
+"Restrict Details to Base: " print: 30 ; 
+restrictDetailsToBaseAccountFlag isTrue
+   ifTrue: [ "Yes" ] else: [ "No" ] . printNL ;
+"TNA / TMV Toggle: " print: 30 ; tnaTmvToggle printNL ;
+"Detail Sort: " print ; detailSort printNL ;
+securityCutoff isntNA 
+  ifTrue: [ "Security Cutoff: " print:30 ; securityCutoff printNL ] ;
+" -" fill: 50 .printNL ;
+"Groups: " print: 30 ;
+groups do: [ print ; " | " print ; ] ; newLine print ;
+"Group Sort: " print: 30 ; groupSortFlag printNL ;
+groupCutoff isntNA 
+  ifTrue: [ "Group Cutoff: " print:30 ; groupCutoff printNL ] ;
+"Group Maps: " printNL ;
+groupMaps 
+extendIndex 
+do: [ index whatAmI print: 30 ; 
+      ^self do: [ " | " print ; ^self do: [ print; " " print ]  ] ;
+      ^my groupMapsWithOther at: index . isntNA
+        ifTrue: [" (+ other)" print;] ;
+      newLine print ;
+    ];
+newLine print ;
+" -" fill: 50 .printNL ;
+"Items: " print: 30 ; 
+items do: [print ; " | " print ] ; newLine print ;
+"Stats for All: " print: 30 ;
+statsForAll do: [ print ; " | " print ] ; newLine print ;
+"=" fill: 50 .printNL;
+] ;
+
+
+ApplicationTools AccountViewer defineMethod: [ | reset |
+  ^self resetAccounts ;
+  ^self resetDates ;
+  ^self resetGroups ;
+  ^self resetGroupMaps ;
+  ^self resetRestrictionBlock ;
+  ^self resetSorts ;
+  ^self resetItems ;
+  ^self resetOptions ;
+  ^self setBaseCurrencyTo: NA ;
+  ^self
+] ;
+  
+ApplicationTools AccountViewer defineMethod: [ | resetAccounts |
+  ^self :baseAccount <- NA ;
+  ^self :accounts <- CoreWorkspace IndexedList new ;
+  ^self :currentAccounts <- NA ;
+  ^self clearCachedData ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | resetDates |
+  ^self :dates <- CoreWorkspace IndexedList new ;
+  ^self :currentDates <- NA ;
+  ^self clearCachedData ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | resetGroups |
+  ^self :groups <- CoreWorkspace IndexedList new ;
+#  ^self :groupMaps <- CoreWorkspace IndexedList new ;
+  ^self :groupId <- NA ;
+  ^self setGroupSortToName ;
+  ^self :currentGroupItems <- CoreWorkspace List ;
+  ^self clearCachedGroupedData ;
+  ^self
+] ;
+ 
+ApplicationTools AccountViewer defineMethod: [ | resetGroupMaps |
+  ^self :groupMaps <- CoreWorkspace IndexedList new ;
+  ^self :groupMapsWithOther <- CoreWorkspace IndexedList new ;
+  ^self clearCachedGroupedData ;
+  ^self
+] ;
+ 
+ApplicationTools AccountViewer defineMethod: [ | resetItems |
+  ^self :items <- CoreWorkspace IndexedList new ;
+  ^self :currentItems <- items ;
+  ^self clearCachedItemData ;
+  ^self resetStatsForAll 
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | resetStatsForAll |
+  ^self :statsForAll <- ^global List new ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | resetRestrictionBlock |
+  ^self :restrictionBlock <- NA ;
+  ^self :restrictionText <- NA ;
+  ^self clearCachedData ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | resetSorts |
+  ^self clearCachedSortData ;
+  ^self setDetailSortTo: "security name" ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | resetOptions |
+  ^self :detailFlag <- NA ;
+  ^self :securityCutoff <- NA ;
+  ^self :groupCutoff <- NA ;
+  ^self :restrictDetailsToBaseAccountFlag <- TRUE ;
+  ^self :tnaTmvToggle <- "TMV" ;
+  ^self :accountByDateFormat <- NA ;
+  ^self :excludeLocalStatsFormat <- NA ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | clearCachedData |
+  ^self :currentHoldings <- NA ;
+  ^self :currentHoldingsByAccountDate <- NA ;
+  ^self :currentGroupedHoldings <- NA ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | clearCachedGroupedData |
+  ^self :currentHoldings <- NA ;
+  ^self :currentHoldingsByAccountDate <- NA ;
+  ^self :currentGroupedHoldings <- NA ;
+#  ^self currentHoldings isntNA
+#  ifTrue: 
+#     [ ^self currentHoldings do: [ :groupValues <- CoreWorkspace List new ] ;
+#     ] ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | clearCachedItemData |
+  clearCachedData ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | clearCachedSortData |
+  ^self :currentGroupedHoldings <- NA ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer
+defineMethod: [ | setAccountsTo: accountList |
+  resetAccounts ;
+  !list <- ^self accounts ;
+  ^self asListOf: CoreWorkspace Account from: accountList .
+     numberElements
+     select: [ isAccount ] .
+  do: [ ^my list at: position put: ^self asSelf ] ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | setAccount: n to: id |
+  !acct <- CoreWorkspace Account findId: id ;
+  acct isAccount
+    ifTrue: [ ^self accounts at: n asInteger put: acct ] ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | clearAccount: n |
+  ^self accounts delete: n asInteger ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | setBaseAccountTo: id |
+  !acct <- id isNumber
+     ifTrue: [ ^self accounts at: id ] .
+     else: [ CoreWorkspace Account findId: id ] ;
+  ^self :baseAccount <- acct ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | setDatesTo: dateList |
+  resetDates ;
+  !list <- ^self dates ;
+  ^self asListOf: CoreWorkspace Date from: dateList .
+     numberElements 
+  do: [ ^my list at: position put: ^self asSelf] ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | setDate: n to: date |
+  ^self dates at: n asInteger put: date asDate ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | clearDate: n |
+  ^self dates delete: n asInteger ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | setGroupsTo: groupList |
+  resetGroups ;
+  !list <- ^self groups ;
+  ^self asListOf: "" from: groupList .
+     numberElements
+  do: [ ^my list at: position put: ^self asSelf ] ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer
+defineMethod: [ | setGroupMapFor: class to: groups |
+  !mapClass <- class defaultInstance ;
+  !list <- groups isString && [ groups contains: "|" ]
+    ifTrue: 
+      [ groups breakOn: "|" . select: [ isntDefault ] .
+           send: [ ^my asListOf: ^my mapClass from: ^self ]
+      ] 
+    ifFalse: [ ^self asListOf: mapClass from: groups ] ;
+  groupMaps at: mapClass put: list ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer 
+defineMethod: [ | setGroupMapFor: class withOtherTo: groups |
+  !mapClass <- class defaultInstance ;
+  groupMapsWithOther at: mapClass put: TRUE;
+  ^self setGroupMapFor: class to: groups;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | setGroup: n to: group |
+  ^self groups at: n asInteger put: group ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | clearGroup: n |
+  ^self groups delete: n asInteger ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | setGroupIdTo: id |
+  :groupId <- id ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | setRestrictionBlockTo: block | 
+  resetRestrictionBlock ;
+  :restrictionBlock <- block isBlock
+      ifTrue: [ block ] .
+      elseIf: [ block isString ] 
+        then: [ ^self getRestrictionBlockFor: block ] .
+        else: [ NA ] ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | setRestrictionTextTo: txt | 
+  :restrictionText <- txt ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | setItemsTo: itemList |
+  resetItems ;
+  !list <- ^self items ;
+  ^self asListOf: "" from: itemList .
+     numberElements
+  do: [ ^my list at: position put: ^self asSelf ] ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | setStatsForAllTo: statList |
+  resetStatsForAll ;
+  :statsForAll <- ^self statsForAll 
+   append: ( ^self asListOf: CoreWorkspace Statistic from: statList .
+                select: [ isntDefault ] ) ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | enableShowDetail |
+  :detailFlag <- NA ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | disableShowDetail |
+  :detailFlag <- FALSE ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | enableRestrictDetails |
+  :restrictDetailsToBaseAccountFlag <- TRUE ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | disableRestrictDetails |
+  :restrictDetailsToBaseAccountFlag <- NA ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | enableTNACalcs |
+  :tnaTmvToggle <- "TNA" ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | enableTMVCalcs |
+  :tnaTmvToggle <- "TMV" ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | useTNACalcs | 
+  tnaTmvToggle = "TNA"
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | useTMVCalcs | 
+  useTNACalcs not
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | enableAccountByDateFormat |
+  :accountByDateFormat <- TRUE ;
+  ^self
+] ;
+ApplicationTools AccountViewer defineMethod: [ | disableAccountByDateFormat |
+  :accountByDateFormat <- NA ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | enableLocalStatsFormat |
+  :excludeLocalStatsFormat <- NA ;
+  ^self
+] ;
+ApplicationTools AccountViewer defineMethod: [ | disableLocalStatsFormat |
+  :excludeLocalStatsFormat <- TRUE ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer 
+defineMethod: [ | getRestrictionBlockFor: block | 
+  !string <- block asString toUpper ;
+  string contains: "FI" . ifTrue: [ ^self getFixedIncomeRestriction ] .
+    elseIf: [ string contains: "EQ" ] then: [ ^self getEquityRestriction ] .
+    elseIf: [ string contains: "NOCASH" ] then: [ ^self getNoCashRestriction ].
+    else: [ string asBlock ] 
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | getFixedIncomeRestriction |
+  [ security type isFixed ]
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | getEquityRestriction |
+  [ security type isEquity ]
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | getNoCashRestriction |
+  [ security type isCash not ]
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | setGroupSortToId |
+  :groupSortFlag <- "id" ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | setGroupSortToName |
+  :groupSortFlag <- "name" ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | setGroupSortToPct |
+  :groupSortFlag <- "pct" ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | setGroupCutoffTo: n |
+  :groupCutoff <- n asInteger absoluteValue ;
+  ^self 
+] ;
+
+ApplicationTools AccountViewer
+defineMethod: [ | setDetailSortTo: sort |
+  !sortBlock <- sort isBlock 
+    ifTrue: [  sort ] .
+    elseIf: [ sort != "pct" ] 
+      then: [ !item <- sort as: CoreWorkspace DataItem ;
+            item isValidFor: CoreWorkspace Holding .
+               ifTrue: [ item  getAccessFrom: CoreWorkspace Holding . asBlock]
+          ] .
+    elseIf: [ sort isString ] then: [ sort asBlock ] .
+    else: [ [security name ] ]  ;
+  !sortName <- sortBlock asUndelimitedString translate: newLine to: "" ;
+  !sortUp <- (sortName contains: "name" ) || (sortName contains: "id") ;
+  :detailSort <- sortBlock 
+     extendBy: [ !block <- ^self ;
+                 !name <- ^my sortName ;
+                 !isUp <- ^my sortUp ;
+               ] ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | setSecurityCutoffTo: n |
+  :securityCutoff <- n asInteger absoluteValue ;
+  ^self 
+] ;
+
+ApplicationTools AccountViewer reset ;
+
+####################
+#  DisplayObject
+####################
+
+ApplicationTools ViewerModule DisplayObject
+     defineFixedProperty: 'levelIndicator' .
+     defineFixedProperty: 'maxLevel' .
+     defineFixedProperty: 'levelMap' .
+     defineFixedProperty: 'levelObject' .
+     defineFixedProperty: 'label' withDefault: "" .
+     defineFixedProperty: 'id' withDefault: "" .
+;
+
+ApplicationTools ViewerModule DisplayObject
+defineMethod: [ | initializeKeys: keys |
+  :levelIndicator <- keys at: 1 . asNumber else: 0 ;
+  :maxLevel <- keys at: 2 . asNumber else: 0 ;
+] ;
+
+ApplicationTools ViewerModule DisplayObject
+defineMethod: [ | initializeLocalAttributes  |
+  ^super initializeLocalAttributes ;
+  :levelMap <- maxLevel sequence send: [ 0 ] ;
+  ^self
+] ;
+
+ApplicationTools ViewerModule DisplayObject
+defineMethod: [ | setLevelMapTo: entries | 
+  entries isCollection ifTrue: [ entries ] ifFalse: [ entries asList ] .
+    numberElements do: [ ^my levelMap at: position put: ^self asNumber ] ;
+  ^self
+] ;
+
+ApplicationTools ViewerModule DisplayObject 
+defineMethod: [ | setLevelObjectTo: object | 
+  :levelObject <- object ; 
+  ^self
+] ;
+
+#ApplicationTools ViewerModule DisplayObject 
+#defineMethod: [ | setIdTo: string | 
+#  :id <- string ; 
+#  ^self
+#] ;
+#
+#ApplicationTools ViewerModule DisplayObject 
+#defineMethod: [ | setLabelTo: string | 
+#  :label <- string ; 
+#  ^self
+#] ;
+
+ApplicationTools ViewerModule DisplayObject defineMethod: [ | isDetail |
+   maxLevel = levelIndicator
+] ;
+
+ApplicationTools ViewerModule DisplayObject defineMethod: [ | isSummary |
+  levelIndicator = 0
+] ;
+
+ApplicationTools ViewerModule DisplayObject defineMethod: [ | getLevelMapId | 
+  [ levelMap do: [ asString print ; "." print ] ] divertOutput 
+] ;
+
+
+
+####################
+#  Processing Rules
+####################
+
+ApplicationTools AccountViewer defineMethod: [ | updateHoldings |
+!list <- CoreWorkspace List new ;
+!groupItems <- ^self getGroupItems ;
+!dataItems <- ^self getDataItems ;
+!acctList <- ^self getAccountList ;
+!dateList <- ^self getDateList ;
+!reportCurrency <- currency ;
+acctList select: [ isAccount ] .
+do: [ !list <- ^my list ;
+      !acct <- ^self asSelf ;
+      !groupItems <- ^my groupItems ;
+      !dataItems <- ^my dataItems ;
+      !restrictBlock <- ^my restrictionBlock else: [ [ TRUE ] ] ;
+      !sortBlock <- ^my detailSort ;
+      !useTNA <- ^my useTNACalcs ;
+      ^my reportCurrency else: [ acct currency ] .
+      evaluate: [
+         ^my dateList
+         do: [ !list <- ^my list ;
+               !acct <- ^my acct ;
+               !date <- ^self asSelf ;
+               !groupItems <- ^my groupItems ;
+               !dataItems <- ^my dataItems ;
+               !sortBlock <- ^my sortBlock ;
+               !useTNA <- ^my useTNA ;
+               date evaluate:
+                 [ !list <- acct holdings select: ^my restrictBlock ;
+                   !tmv <- list total: [ totalMarketValue ] ;
+                   !tna <- acct totalNetAssets else: acct totalMarketValue ;
+                   list 
+                   extendBy: 
+                     [ !acct <- ^my acct ;
+                       !date <- ^date ;
+                       !reportCurrency <- currency ;
+                       !tmv <- totalMarketValue ; 
+                       !acctTMV <- ^my tmv ;
+                       !acctTNA <- ^my tna ;
+                       !pct <- ^my useTNA
+                           ifTrue: [ tmv / acctTNA * 100 ] 
+                          ifFalse: [ tmv / acctTMV * 100 ] . else: 0.0 ;
+                       !pctRank ;
+                       !groupValues <- ^my groupItems
+                             send: [ ^my send: groupBlock ] ;
+                       !dataValues <- ^my dataItems
+                         extendBy: [ !calc <- ^self ;
+                                     !calcValue <- ^my send: dataBlock ;
+                                   ] ;
+                       !sortValue <- ^my sortBlock isBlock
+                           ifTrue: [ ^current send: ^my sortBlock ] ;
+                       !sortPosition ;
+                     ] . rankDown: [ pct ] . do: [ :pctRank <- rank ] 
+                 ] . do: [ ^my list , ^self  ] ;
+             ] ;    #- end of date evaluate
+        ] ;         #- end of dateList do
+     ] ;            #- end of currency
+currentGroupItems count = 0 && [ securityCutoff isInteger ]
+  ifTrue: [ :list <- list select: [ pctRank <= ^my securityCutoff ] ] ;
+detailSort isBlock && [ detailSort isUp ]
+  ifTrue: [ :list <- list sortUp: [ sortValue ]  ] .
+  elseIf: [ detailSort isBlock ]
+    then: [ :list <- list sortDown: [ sortValue ]   ] ;
+list numberElements do: [ :sortPosition <- position ] ;
+:currentHoldings <- list ;
+updateByAccountDate ;
+currentHoldings
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | updateByAccountDate |
+!data <- ^global IndexedList new ;
+!shift <- 10 toThe: (currentDates count / 10 ) asInteger increment;
+currentAccounts numberElements
+do: [ !key <- position * ^my shift ;
+      !data <- ^my data ;
+      ^my currentDates numberElements
+      do: [ !key <- (^my key + position) asInteger ;
+            ^my data at: key put: 
+              (^my extendBy: [ !account <- asSelf ;
+                               !date <- ^my asSelf ;
+                               !acctPos <- position ;
+                               !groupList <- ^global List new ;
+                               !reportCurrency <- "USD" asCurrency ;
+                             ]
+              )
+          ]
+     ] ;
+
+!acctXRef <- ^global IndexedList new ;
+currentAccounts numberElements do: [ ^my acctXRef at: asSelf put: position ] ;
+!dateXRef <- ^global IndexedList new ;
+currentDates numberElements do: [ ^my dateXRef at: asSelf put: position ] ;
+
+currentHoldings 
+groupedByCriteria: [account], [date].
+do: [ !acctPos <- ^my acctXRef at: (keyList at: 1) ;
+      !datePos <- ^my dateXRef at: (keyList at: 2) ;
+      !key <- (acctPos * ^my shift + datePos) asInteger ;
+      ^my data at: key . :groupList <- groupList ;
+      ^my data at: key . :reportCurrency <- groupList at: 1 . reportCurrency;
+    ]; 
+:currentHoldingsByAccountDate <- accountByDateFormat
+    ifTrue: [data sortDown: [date] . sortUp: [acctPos] ]
+      else: [data sortUp: [acctPos] . sortDown: [date] ] ; 
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | getHoldings |
+  currentHoldings else: [ updateHoldings ] 
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | getHoldingsByAccountDate |
+  currentHoldingsByAccountDate 
+    else: [ updateHoldings ;   currentHoldingsByAccountDate ]
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | getAccountList |
+!acctList <- accounts select: [ isAccount ] . numberElements
+   groupedBy: [ asSelf ] . 
+   send: [ groupList sortUp: [ position ] . at: 1 ] ;
+^self :currentAccounts <- acctList sortUp: [ position ] . numberElements ;
+^self currentAccounts
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | getDateList |
+!dateList <- dates select: [ isDate ] . numberElements
+   groupedBy: [ asSelf ] . 
+   send: [ groupList sortUp: [ position ] . at: 1 ] ;
+dateList count = 0 ifTrue: [ :dateList <- ^date asList numberElements ] ;
+^self :currentDates <- dateList sortUp: [ position ] . numberElements ;
+^self currentDates
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | getGroupItems |
+  :currentGroupItems <- groups send: 
+    [ isDataItem ifTrue: [ ^self ] 
+         else: [ ^self as: CoreWorkspace DataItem ] .
+         else: [ CoreWorkspace DataItem getValidGroupsFor: CoreWorkspace Holding . at: 1].
+         else: [ CoreWorkspace DataItem ]
+    ] .
+  select: [ isntDefault ] .
+  extendBy: [ !accessPath <- ^self getAccessFrom: CoreWorkspace Holding ;
+              !groupBlock <- accessPath isntNA 
+                   ifTrue: [ accessPath asBlock ]
+                  ifFalse: [ [ ^self ] ] ;
+              !defaultInstance <- CoreWorkspace Holding 
+                   send: groupBlock . defaultInstance ;
+            ] . numberElements
+
+] ;
+
+#--------------------
+#  getDataItems
+#    modify this method to support syntax: dataItem/stat 
+#    If /stat is added to a data item, the statSet will be the
+#    list of /stat options supplied for a specific item; if the
+#    item is included once in the list with no /stat option, the
+#    default statSet supplied with the DataFeed is used
+#--------------------
+
+ApplicationTools AccountViewer defineMethod: [ | getDataItems |
+  !baseItems <- items 
+     extendBy: [ !base <- ^self else:"" . stripBoundingBlanks ;
+                 !stat ;
+                 base containsSubstring: "/" .
+                    ifTrue: [ :base <- base to: "/" . drop: -1 ;
+                              :stat <- ^self from: "/" . drop: 1 ;
+                            ] ;
+               ] .
+     groupedByString: [ base ] .
+        extendBy: [ !overrides <- groupList send: [ stat ] . 
+                        send: [ ^self as: ^global Statistic ] .
+                        select: [ isntDefault ] ;
+                  ] ;
+
+            
+  :currentItems <- 
+     baseItems numberElements collectListElementsFrom:
+        [ CoreWorkspace DataItem 
+             getItemsFor: ^self stripBoundingBlanks from: CoreWorkspace Holding .
+             extendBy: [ !format <- defaultFormat  ;
+                         !label <- shortName isntDefault
+                            ifTrue: [ shortName ] ifFalse: [ code ] ;
+                         !dataBlock <- block ;
+                         !itemLevel <- ^my position ;
+                         !statSet <- ^my overrides count > 0
+                             ifTrue: [ ^my overrides ] 
+                            ifFalse: [ ^self statSet ] 
+                       ] . 
+         ] . sortUp: [itemLevel ] . 
+        groupedBy: [ asSelf ] . send: [ groupList at: 1 ] .
+        sortUp: [ itemLevel ] . sortUp: [ sortCode ] . numberElements
+] ;
+
+
+
+ApplicationTools AccountViewer defineMethod: [ | getFlattenedGroups |
+  !holdingsByGroup <- ^self getGroupedHoldings ;
+  holdingsByGroup isntDefault
+    ifTrue: [ ^self flattenGroups: ^self getGroupedHoldings ]
+   ifFalse: [ CoreWorkspace List ] 
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | updateGroupedHoldings | 
+  :currentGroupedHoldings <- 
+     getHoldings groupedBy: [GlobalWorkspace TRUE ]  . numberElements
+     extendBy: 
+      [ !group <- ^self ;
+        !id <- "Total" ;
+        !name <- "" ;
+        !subset <- ^my getGroupsFor: groupList atLevel: 1 fromElement: 1 ;
+        !hasSubGroups <- ^my currentGroupItems count > 0 ;
+        hasSubGroups && [ ^my groupCutoff isInteger ]
+        ifTrue: 
+          [ !cutoff <- ^my groupCutoff ;
+            :subset <- subset 
+               select: [ group pctRank <= ^my cutoff || group pctRank isNA ] ;
+            :groupList <- subset collectListElementsFrom: [ groupList ] ;
+          ] ;
+      ] 
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | getGroupedHoldings | 
+  currentGroupedHoldings else: [ updateGroupedHoldings ] 
+] ;
+
+ApplicationTools AccountViewer
+defineMethod: [ | getGroupsFor: list atLevel: n fromElement: position |
+   !hasSubGroups <- n < currentGroupItems count ;
+   n > currentGroupItems count
+   ifTrue: [ list ] 
+   ifFalse:
+     [ !data <- list extendBy: [ !groupValue <- groupValues at: ^my n ] ;
+       !groupType <- currentGroupItems at: n . defaultInstance ;
+       !mapEntry <- groupMaps at: groupType ;
+       mapEntry isCollection && [ mapEntry at: 1 . isCollection ] 
+            ifTrue: [ :mapEntry <- mapEntry at: position ] ;
+       !mapEntryWithOthers <- groupMapsWithOther at: groupType . else: [FALSE];
+       !groups <- mapEntry isCollection && [ mapEntryWithOthers ]
+          ifTrue: [ data groupedBy: [ groupValue ] 
+                         in: mapEntry 
+                         else: (groupType extendBy: [!code <- "other";] )
+                  ] .
+         elseIf: [ mapEntry isCollection ] 
+           then: [ data groupedBy: [ groupValue ] in: mapEntry ] .
+           else: [ data groupedBy: [ groupValue ] ] .
+       rankDown:
+          [ !acct <- ^my currentAccounts at: 1 . asSelf ;
+            !date <- ^my currentDates at: 1 . asSelf ;
+            !total <- groupList
+                select: [ account = ^my acct && [ date = ^my date ] ] .
+                total: [ pct ] . else: 0.0 ;
+            total
+          ] ;
+       mapEntry isCollection
+       ifFalse: 
+         [ :groups <- groupSortFlag = "pct"
+             ifTrue: [ groups sortUp: [ rank ] ] .
+             elseIf: [ groupSortFlag = "name" ]
+               then: [ groups sortUp: 
+                         [ isntDefault
+                           ifTrue: 
+                           [ isRangeClassification ifTrue: [ id ] .
+                                elseIf: [ isEntity ] then: [ name ] .
+                                else: [ ^self ] 
+                           ]
+                          ifFalse: [ "zzz" ] 
+                       ] . 
+                    ] .
+              else: [ groups 
+                        sortUp: [ isntDefault
+                                     ifTrue: [ id asNumber else: id ] 
+                                    ifFalse: [ 9999.999 ] 
+                                ] . 
+                    ] .
+         ] ;
+     groups numberElements
+       extendBy: [ !group <- ^self 
+                   extendBy:
+                     [ !id <- code else: [ asString ] ;
+                       !name <- id ;
+                       isEntity
+                          ifTrue: [ :id <- ^self id ; :name <- ^self name ] ;
+                       isDefault && [code = "other"]
+                          ifTrue: [ :id <- "Others"; :name <- "Others" ] .
+                          elseIf: [isDefault] 
+                            then: [ :id <- "???" ; :name <- "Unclassified" ] ;
+                       !sortPosition <- position ;
+                       !pctRank <- rank ;
+                     ] ;
+                   !subset <-
+                      ^my getGroupsFor: groupList atLevel: ^my n increment
+                              fromElement: position ;
+                   !hasSubGroups <- ^my hasSubGroups ;
+                 ] .
+     ] 
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | flattenGroups: data | 
+!level0 <- DisplayObject createInstance: 0, currentGroupItems count increment .
+    setLevelObjectTo: (data at: 1) ;
+!flatList <- level0 asList ;
+!subset <- level0 levelObject subset ;
+currentGroupItems count > 0
+   ifTrue: [ ^self flattenGroups: subset atLevel: 0 asList in: flatList ]
+  ifFalse: [ ^self flattenDetails: subset atLevel: 1 asList in: flatList ] ;
+!sortCrit <- currentGroupItems count increment sequence
+    send: [ [ levelMap at: ^my ] ] ;
+flatList sortUpByCriteria: sortCrit
+] ;
+
+ApplicationTools AccountViewer 
+defineMethod: [ | flattenGroups: data atLevel: levelMap in: flatList |
+!level <- levelMap count ;
+!settings <- level, currentGroupItems count increment ;
+data numberElements
+do: [ !levelMap <- ^my levelMap copyListElements ;
+      levelMap at: ^my level put: position ;
+      !displayObject <- ^my DisplayObject createInstance: ^my settings .
+          setLevelMapTo: levelMap .
+          setLevelObjectTo: group ;
+      !flatList <- ^my flatList , displayObject ;
+      hasSubGroups 
+      ifTrue: 
+        [ 
+          ^my flattenGroups: subset atLevel: (levelMap , 0) in: flatList ;
+        ]
+      ifFalse: 
+        [ 
+          ^my flattenDetails: groupList atLevel: (levelMap, 0) in: flatList ;
+        ] ;
+    ] ;
+flatList
+] ;
+
+ApplicationTools AccountViewer 
+defineMethod: [ | flattenDetails: data atLevel: levelMap in: flatList |
+  !acctList <- ^self currentAccounts ;
+  !dateList <- ^self currentDates ;
+  !level <- levelMap count ;
+  !settings <- level, currentGroupItems count increment ;
+  !bySecurity <- data groupedBy: [ security asGlobalSecurity ] ;
+  !base <- accounts at: 1 ;
+  !date <- dateList at: 1 . asSelf ;
+  restrictDetailsToBaseAccountFlag isTrue
+     ifTrue: [ :bySecurity <- bySecurity 
+                  select: [ !base <- ^my base ;
+                            groupList any: [ account = ^my base ] 
+                          ] 
+             ] ;
+  detailSort isBlock 
+     ifTrue: 
+     [ !maxSort <- data max: [ sortPosition ] . + 1 ;
+      :bySecurity <- bySecurity
+            sortUp: [ !base <- ^my base ; !date <- ^my date ;
+                      !baseHolding <- 
+                        groupList 
+                           select: [ account = ^my base && date = ^my date ] . 
+                               at: 1;
+                      baseHolding isntDefault 
+                          ifTrue: [ baseHolding sortPosition ]
+                         ifFalse: [ ^my maxSort ]
+                    ] 
+     ] ;
+  bySecurity
+    numberElements
+  do: [ !levelMap <- ^my levelMap copyListElements  ;
+        levelMap at: ^my level put: position ;
+        !accts <- ^my acctList ;
+        !dateList <- ^my dateList ;
+        !bySecurity <- 
+           accts count = 1 && dateList count = 1
+           ifTrue: 
+             [ ^self extendBy: [ !holding <- groupList at: 1 ;
+                                 !byAccount <- holding asList ;
+                               ]
+             ] .
+           elseIf: [ accts count = 1 ] 
+             then: [ ^self extendBy: 
+                        [ !byDate <- 
+                            groupList groupedBy: [ date ] in: ^my dateList .
+                               send: [ groupList at: 1 . 
+                                     ]
+                        ]
+                   ] .
+           elseIf: [ dateList count = 1 ]
+             then: [ ^self extendBy: 
+                        [ !byAccount <-
+                            groupList groupedBy: [ account ] in: ^my accts .
+                               send: [ groupList at: 1 . 
+                                     ]
+                        ]
+                   ] .
+             else: [ ^self extendBy:
+                        [ !byAccountDate <- 
+                            groupList groupedBy: [ account ] in: ^my accts .
+                              extendBy: [ !byDate <- groupList ] ;
+                        ]
+                   ] ;
+        !displayObject <- ^my DisplayObject createInstance: ^my settings .
+               setLevelMapTo: levelMap .
+               setLevelObjectTo: bySecurity ;
+         ^my flatList , displayObject ;
+       ] ;
+flatList 
+
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | getSummaryStats |
+  !data <- getHoldingsByAccountDate ;
+  !items <- currentItems else: [ getDataItems ] . 
+        select: [ isStat ] .
+     extendBy: [ !stats <- ^my statsForAll ;
+                 ^my excludeLocalStatsFormat isNA && statSet isntDefault
+                   ifTrue: [ :stats <- stats append: statSet ] ;
+               ] ;
+  :data <- data 
+     extendBy: 
+     [ !items <- ^my items
+          extendBy: [ !valueSet <- ^my groupList 
+                         send: [ dataValues at: ^my position . calcValue
+                                   extendBy: [ !weight <- ^my pct ;
+                                               !adjustFactor <- ^my shares ;
+                                               !numerator <- ^my tmv ;
+                                               !denominator <- 
+                                                   ^self * ^my shares ;
+                                             ]
+                               ] ;
+                      !calcs <- stats extendBy: 
+                          [ !calc <- ^my valueSet basicSend: accessBlock ] ;
+                    ] ;
+     ] . basicExtend: [ !items <- ^my items ]
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | getSummaryStatsByItem |
+  !data <- ^self getSummaryStats ;
+  !items <- data items numberElements
+  extendBy:
+     [ !data <- ^my data send: [ items at: ^my position ] ;
+       !stats <- ^self stats numberElements
+          extendBy: [ !valueSet <- ^my data 
+                         send: [ calcs at: ^my position . calc ] ;
+                    ] .
+     ] . basicExtend: [ !data <- ^my data ] 
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | getItemsForFlattenedGroups |
+  accounts count = 1 && [ dates isNA || [ dates count < 2 ] ]
+  ifTrue:
+    [ !groupedData <- getFlattenedGroups ;
+      groupedData
+      extendBy: 
+        [ !dataValues <- 
+          isDetail
+            ifTrue: [ levelObject holding dataValues ]
+           ifFalse: 
+             [ ^my currentItems 
+               send: 
+                [ isStat
+                  ifTrue: 
+                   [ !values <- ^my levelObject groupList 
+                         send: [ dataValues at: ^my position .
+                                   send: [ calcValue ] .
+                                    extendBy: [ !weight <- ^my pct ;
+                                                !adjustFactor <- ^my shares ;
+                                              ] 
+                               ] ;
+                      ^self getPrimaryStatFor: values
+                    ] . extendBy: [ !calc <- ^my ; !calcValue <- ^self ]
+                 ]
+               ] 
+        ] 
+    ] 
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | getStatsForFlattenedGroups |
+  dates isNA || [ dates count < 2 ] 
+  ifTrue:
+    [ !groupedData <- getFlattenedGroups ;
+      groupedData
+      extendBy: 
+        [ !accts <- ^my currentAccounts ;
+          !byAccount <- levelObject groupList 
+            groupedBy: [ account ] in: accts ;
+          !dataValues <- ^my currentItems select: [ isStat ] . 
+          extendBy: 
+            [ !byAccount <- ^my byAccount
+                 extendBy:
+                  [ !dataPosition <- ^my position ;
+                    !values <- groupList 
+                        send: [ dataValues at: ^my dataPosition .
+                                  send: [ calcValue ] .
+                                  extendBy: [ !weight <- ^my pct ;
+                                              !adjustFactor <- ^my shares ;
+                                            ]
+                              ] ;
+                     !calcValue <- ^my getPrimaryStatFor: values ;
+                     !calc <- ^my ;
+                  ]
+            ] 
+        ] 
+    ] 
+] ;
+
+#--------------------
+#  getFlattenedStats
+#     returns list of item/stats extended by dataItem, stat, valueSet
+#     where valueSet is the list of values in account/date order for
+#     this dataItem/stat combination; default sort order is by 
+#     dataItem position where position is the orignal position in
+#     the item list
+#--------------------
+
+ApplicationTools AccountViewer defineMethod: [ | getFlattenedStats |
+   getSummaryStatsByItem  collectListElementsFrom:
+      [ stats
+          extendBy: [ !dataItem <- ^my ;
+                      !stat <- ^self ;
+                    ]
+      ] .
+    sortUp: [ dataItem position ] 
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | getItemDetails |
+  !data <- getHoldings ;
+  !date <- currentDates at: 1 . asSelf ;
+  :data <- data select: [ date = ^my date ] .
+      groupedBy: [ security asGlobalSecurity ] .
+      extendBy: [ !byAccount <- 
+                     groupList groupedBy: [ account ] in: ^my currentAccounts .
+                     extendBy: [ !pct <- groupList count > 0 
+                                    ifTrue: [ groupList at: 1 . pct ] ;
+                               ] ;
+                    !values <- byAccount select: [ groupList count > 0 ] .
+                        at: 1 . groupList at: 1 . dataValues ;
+                  ] .
+         sortUp: [ !base <- ^my accounts at: 1 ;
+                   !baseHolding <- 
+                       groupList select: [ account = ^my base ] . at: 1;
+                    baseHolding isntDefault 
+                       ifTrue: [ baseHolding sortPosition ]
+                 ] ;
+
+       restrictDetailsToBaseAccountFlag isTrue
+         ifTrue: [ data select: [ byAccount at: 1 . groupList count > 0 ] ]
+        ifFalse: [ data ] 
+] ;
+
+
+####################
+#  Components for building profile reports
+####################
+
+ApplicationTools AccountViewer defineMethod: [ | getGroupedXRef |
+
+!groupedData <- ^self getFlattenedGroups 
+    reject: [ isDetail ] .
+    reject: [ levelIndicator = 0 ] ;
+  
+groupedData
+extendBy:
+  [ !indent <- levelIndicator * 2 ;
+    !label <- " " fill: indent . concat: levelObject name ;
+    !byAcctDate <- levelObject groupList
+          groupedBy: [ account ] in: ^my currentAccounts .
+           extendBy: [ !pct <- groupList total: [ pct ] ] ;
+  ] 
+
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | getStatXRef |
+!items <- ^self getSummaryStatsByItem ;
+!keys <- items data ;
+items 
+extendBy: 
+    [ !keys <- ^my keys ; 
+      !byAccountDate <- data numberElements
+         extendBy: [ !account <- ^my keys at: position . account ;
+                     !date <- ^my keys at: position . date ;
+                     !statSets <- ^my stats
+                        extendBy: [ !calc <- valueSet at: ^my position  ]
+                   ] 
+    ] 
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | getAllStats |
+!items <- ^self getSummaryStatsByItem ;
+items 
+extendBy: 
+    [ 
+      !byAccountDate <- data numberElements
+         extendBy: [ !statSets <- ^my stats
+                        extendBy: [ !calc <- valueSet at: ^my position  ]
+                   ] 
+    ] 
+] ;
+
+ApplicationTools AccountViewer
+defineMethod: [ | getQuintileRangesByBenchFor: item |
+!dataItem <- item as: CoreWorkspace DataItem ;
+!block <- dataItem isValidFor: CoreWorkspace Holding .
+      ifTrue: [ dataItem  getAccessFrom: CoreWorkspace Holding . asBlock] ;
+updateByAccountDate ;
+!data <- getHoldingsByAccountDate
+   extendBy: [ !bench <- account getBenchmarkForQuntiles ;
+               !block <- ^my block ;
+               !dataValues <- groupList 
+                 extendBy: [ !value <- ^self send: ^my block ;
+                           ] ;
+               !goodOnes <- dataValues select: [ value >= 0 ] ;
+               !noData <- dataValues select: [ value isDefault ] ;
+               !negative <- dataValues select: [ value < 0 ] ;
+               !byTile ;
+             ] ;
+
+!benchXRef <- CoreWorkspace IndexedList new ;
+data groupedBy: [ bench ] .
+do: [ !block <- ^my block ;
+      !tiles <- holdings extendBy: [ !value <- ^self send: ^my block ] . 
+          select: [ value >= 0 ] .
+          quintileDown: [ value ] .
+          groupedBy: [ quintile ] ;
+       !bounds <- tiles send: [ groupList min: [ value ] ] ;
+       bounds at: 5 put: 0.0 ;
+       ^my benchXRef at: asSelf put: bounds ;
+    ] ;
+
+data
+do: [ !bounds <- ^my benchXRef at: bench ;
+      :byTile <- goodOnes groupedBy: [ value ] usingCutoffs: bounds . 
+         select: [ lowerBoundary >= 0 ] .
+        sortDown: [ lowerBoundary ] .
+        extendBy: [ !count <- groupList count ;
+                    !format1 <- lowerBoundary < 10 
+                        ifTrue: [ 8.1 ] else: [ 8.0 ] ;
+                    !format2 <- upperBoundary < 10 
+                        ifTrue: [ -8.1 ] else: [ -8.0 ] ;
+                    !label <- lowerBoundary else: "" . sprint: format1 . 
+                        concat: "/" .
+                        concat: (upperBoundary else: "" . sprint: format2) ;
+                    !pct <- groupList total: [ pct ] ;
+                  ] ;
+    ] ;
+
+!tileData <- ("Highest Quintile", "Second Quintile", "Third Qunitile",
+   "Fourth Quintile", "Lowest Quntile" )
+     numberElements
+  extendBy: [ !label <- "  " concat: asSelf ;
+              !data <- ^my data send: [ byTile at: ^my position ]  ;
+            ] ;
+data basicExtend: [ !byTile <- ^my tileData ] 
+] ;
+
+#--------------------
+#  AccountViewer: display support
+#--------------------
+
+ApplicationTools AccountViewer defineMethod: [ | displayAccountDescription |
+   accounts select:[isntDefault] .
+   do: [ 
+         FormatTools buildTag: "DESCRIPTOR"
+          withAttributes: "type", "account", "id", id, "class", whatAmI
+            andContent: name . printNL ;
+       ] ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | displayDateDescription |
+   currentDates numberElements
+   do: [ FormatTools buildTag: "DESCRIPTOR" 
+           withAttributes: "type", "date"
+            andContent: asInteger asString . printNL ;
+       ] ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | displayGroupDescription |
+   currentGroupItems numberElements
+   do: [ FormatTools buildTag: "DESCRIPTOR" 
+           withAttributes: "type", "group", "id", id, "level", position
+            andContent: name . printNL ;
+       ] ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | displayItemDescription |
+   currentItems numberElements
+   do: [ FormatTools buildTag: "DESCRIPTOR" 
+           withAttributes: "type", "item", "id", id
+            andContent: name . printNL ;
+       ] ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | displayStatItemDescription |
+currentItems sortUp: [ id ] .
+select: [isStat].
+do: [ statSet isCollection 
+        ifTrue: [ statSet sortUp: [ shortName ] ]
+       ifFalse: [ statSet ] .
+      do: [ #!id <- ^my id concat: "/" . concat: ^self shortName ;
+            !name <- ^my name concat: "/" . concat: ^self name ;
+             FormatTools
+                 buildTag: "DESCRIPTOR"
+                 withAttributes: 
+                     "type" , "item" , "item", ^my id, "stat", shortName 
+                 andContent: name .printNL; 
+          ] ;
+   ] ; 
+^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | displayRestrictions  |
+  FormatTools buildTag: "DESCRIPTOR"
+       withAttributes: "type", "calc" 
+       andContent: ("Market Values based on " concat: tnaTmvToggle) . printNL;
+  restrictionBlock isBlock
+  ifTrue: 
+    [ FormatTools buildTag: "DESCRIPTOR" 
+          withAttributes: "type", "restriction"
+            andContent: restrictionBlock asUndelimitedString  . printNL ;
+    ] ;
+  groups count = 0 && [ securityCutoff isInteger ]
+  ifTrue:
+    [ !message <- "Limited to first " concat: securityCutoff .
+        concat: " securities by pct in base account" ;
+      FormatTools buildTag: "DESCRIPTOR"
+          withAttributes: "type", "restriction"
+            andContent: message . printNL ;
+    ] .
+  elseIf: [ groups count > 0 && [ groupCutoff isInteger ] ]
+  then:
+    [ !message <- "Limited to first " concat: groupCutoff .
+        concat: " groups by pct in base account" ;
+      FormatTools buildTag: "DESCRIPTOR"
+          withAttributes: "type", "restriction"
+            andContent: message . printNL ;
+    ] ;
+
+  accounts count = 1 && [ detailFlag isFalse ]
+  ifTrue: 
+    [ FormatTools buildTag: "DESCRIPTOR"
+             withAttributes: "type", "restriction"
+             andContent: "No Details Displayed" . printNL ;
+    ] ;
+  accounts count > 1
+  ifTrue:
+    [ detailFlag isFalse
+      ifTrue: 
+        [ FormatTools buildTag: "DESCRIPTOR"
+             withAttributes: "type", "restriction"
+             andContent: "No Details Displayed" . printNL ;
+        ] .
+      elseIf: [ restrictDetailsToBaseAccountFlag isTrue ] 
+      then:
+        [ FormatTools buildTag: "DESCRIPTOR"
+             withAttributes: "type", "restriction"
+             andContent: "Only Base Account Securities Included" . printNL ;
+        ] ;
+    ] ;
+  ^self
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | getRestrictionMessage |
+  [ FormatTools bold: "Restricted To: " . print ; 
+    restrictionText value 
+        elseIf: [ restrictionBlock isBlock ] 
+          then: [ restrictionBlock asUndelimitedString stripChar: newLine ].
+          else: [ "All Holdings" ] . print ;
+    FormatTools startLine print ;
+    FormatTools bold: "Calculation Method: " . print ; 
+    tnaTmvToggle print ;
+    FormatTools startLine print ;
+    accounts count > 1
+    ifTrue:
+      [ FormatTools bold: "Asset Detail: " . print ; 
+        detailFlag isFalse
+           ifTrue: [ "No Detail Included" ] .
+          elseIf: [ restrictDetailsToBaseAccountFlag ]
+            then: [ "Only Base Account Included" ] .
+            else: [ "All Accounts' Assets Included" ] . print ;
+        FormatTools startLine print ;
+      ] ;
+    FormatTools bold: "Sort Assets By: " .print ;
+    detailSort name printNL ;
+    FormatTools startLine print ;
+    currentGroupItems isntDefault
+    ifTrue: [ FormatTools bold: "Grouping Levels: " . print ; 
+              currentGroupItems do: [ id print ; " -> " print ] ;
+              " Security" printNL ;
+              FormatTools startLine print ;
+            ] ;
+    "Data as of " concat: ^date formatUsingShortName . 
+       concat: " unless otherwise noted." . printNL ;
+    FormatTools startLine print ;
+    currency isntDefault
+    ifTrue:
+      [ "Monetary Data displayed in " concat: currency name . printNL ;
+         FormatTools startLine print ;
+      ] ;
+  ] divertOutput
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | getSummaryRestrictionMessage |
+  [ FormatTools bold: "Restricted To: " . print ; 
+    restrictionText value 
+        elseIf: [ restrictionBlock isBlock ] 
+          then: [ restrictionBlock asUndelimitedString stripChar: newLine ].
+          else: [ "All Holdings" ] . print ;
+    FormatTools startLine print ;
+    FormatTools bold: "Calculation Method: " . print ; 
+    tnaTmvToggle print ;
+    FormatTools startLine print ;
+    "Data as of " concat: ^date formatUsingShortName . 
+       concat: " unless otherwise noted." . printNL ;
+    FormatTools startLine print ;
+    currency isntDefault
+    ifTrue:
+      [ "Monetary Data displayed in " concat: currency name . printNL ;
+         FormatTools startLine print ;
+      ] ;
+  ] divertOutput
+] ;
+
+#------------------------------
+
+#--------------------
+#  sample application to dump summary stats for 
+#    account/data/group/item-stat combinations
+#
+#  Interface RequestWS reset
+#     addRequest: "ExtractStats" 
+#      andParams: "accountIds=SP50,R.3000&dates=20020831,20020731&groups=sector,country&items=pct,pe/average,pe/median,priceToBook/average,priceToBook/weightedAverage" .
+#     runWithFormat: "Xml" forUser: "Test" ;
+#
+#  Interface RequestWS reset
+#     addRequest: "ExtractStats" 
+#      andParams: "accountIds=SP50,R.3000&dateRange=20020831:20020331&items=pct,pe/average,pe/median,priceToBook/average,priceToBook/weightedAverage&orientation=DI" .
+#     runWithFormat: "Xml" forUser: "Test" ;
+#
+#  Note - to supply dateRange instead of dates, use syntax:
+#       dateRange=start:end:freq
+#     where start and end express the starting and ending dates in
+#     any valid date format and freq is one of M, Q, or Y indicating
+#     monthly, quarterly, or yearly data
+#
+#  Note - to force sort order we will be using orientation attribute.  For
+#    now, orientation=DI implies that this is a Date x Item format and 
+#    that dates are used for the row sort.  Within a row, the data is
+#    sorted by account,then item/stats for the account.  Groups are not
+#    currently considered in the sort but we can add new "orientation"
+#    settings to handle this in the future.  to supply orientation, use:
+#         orientation=DI
+#--------------------
+
+ApplicationTools AccountViewer 
+defineMethod: [ | reportExtractStatsUsing: orientation |
+
+    !data <- ^self getFlattenedData ;
+    displayAccountDescription ;
+    displayDateDescription ;
+    displayGroupDescription ;
+    displayStatItemDescription;
+    displayRestrictions ;
+    
+    orientation = "DI"
+      ifTrue: [ :data <- data
+                    sortUp: [ account id ] .
+                    sortDown: [ date ] .
+              ] ;
+
+    data count > 0 
+    ifTrue:
+      [ !table <- ^global LayoutTools Named TableSpec basicEntity ;
+        table setColumnCountTo: 9 ;
+        table getColumn:1 . getHeader:1 . 
+           setColumnSpanTo: 9 . setTextTo: "Extract Stats" ;
+        table getColumn: 1 . getHeader: 2 . setTextTo: "Account Id" ;       
+        table getColumn: 2 . getHeader: 2 . setTextTo: "Date" ;       
+        table getColumn: 3 . getHeader: 2 . setTextTo: "Level" ;       
+        table getColumn: 4 . getHeader: 2 . setTextTo: "Level Id" ;       
+        table getColumn: 5 . getHeader: 2 . setTextTo: "Group Id" ;       
+        table getColumn: 6 . getHeader: 2 . setTextTo: "Group Name" ;       
+        table getColumn: 7 . getHeader: 2 . setTextTo: "Data Item" ;       
+        table getColumn: 8 . getHeader: 2 . setTextTo: "Statistic" ;       
+        table getColumn: 9 . getHeader: 2 . setTextTo: "Value" ;       
+      
+        FormatTools buildTableFor: table for: ^current withBlock:
+        [ data
+          do: [ itemStats
+                do: [ ^my account id print ; ^my date asInteger print ;
+                      ^my group levelIndicator print ;
+                      ^my group getLevelMapId print ;
+                      ^my group id print ; ^my group name print ;
+                      dataItem id print ; stat shortName print ; 
+                      calc print: dataItem format ;
+                      newLine print ;
+                    ] ;
+               ] ;
+         ] . printNL ;
+     ]
+   ifFalse:
+     [ !acct <- currentAccounts at: 1 ;
+       acct isDefault
+       ifTrue:
+       [
+         FormatTools buildTag: "ERROR"
+           withAttributes: "type", "FATAL", "id", "noData" 
+           andContent: "Invalid Account Supplied" . printNL ;      
+       ]
+       else:
+       [
+        !noHoldings <- "There are no Holdings in: " 
+               concat: acct id . concat: " " . concat: acct name;
+         FormatTools buildTag: "ERROR"
+           withAttributes: "type", "FATAL", "id", "noData" 
+           andContent: noHoldings . printNL ;     
+       ];
+     ] ;
+] ;
+
+#--------------------
+#  New Support Methods
+#--------------------
+
+ApplicationTools AccountViewer defineMethod: [ | quickUpdateHoldings |
+!list <- CoreWorkspace List new ; 
+!groupItems <- ^self getGroupItems ; 
+!dataItems <- ^self getDataItems ; 
+!acctList <- ^self getAccountList ; 
+!dateList <- ^self getDateList ; 
+!reportCurrency <- currency ; 
+acctList select: [ isAccount ] .
+do: [ !list <- ^my list; 
+      !acct <- ^self asSelf; 
+      !groupItems <- ^my groupItems; 
+      !dataItems <- ^my dataItems; 
+      !restrictBlock <- ^my restrictionBlock else: [ [TRUE] ]; 
+      ^my reportCurrency else: [acct currency].
+      evaluate: 
+      [ ^my dateList 
+        do: [ !list <- ^my list; 
+              !acct <- ^my acct; 
+              !date <- ^self asSelf; 
+              !groupItems <- ^my groupItems; 
+              !dataItems <- ^my dataItems; 
+              date evaluate: 
+              [ !list <- acct holdings select: ^my restrictBlock .
+                   extendBy: [ !acct <- ^my acct ;
+                               !date <- ^date ;
+                               !reportCurrency <- currency; 
+                               !tmv <- totalMarketValue; 
+                             ] ;
+                !tmv <- list total: [ tmv ]; 
+                list 
+                extendBy: 
+                  [ !acctTMV <- ^my tmv; 
+                    !pct <- tmv / acctTMV * 100 else: 0.000000; 
+                    !groupValues <- ^my groupItems 
+                       send: [^my send: groupBlock] ; 
+                    !dataValues <- ^my dataItems 
+                       extendBy: [!calc <- ^self; 
+                                  !calcValue <- ^my send: dataBlock; 
+                                 ]; 
+                    !sortPosition ;
+                  ].
+                ] .     #- of date evaluate: [             
+            do: [^my list , ^self] ; 
+           ];           #- dateList do: [ 
+       ];               #- currency evaluate: [
+   ];                   #- acctList do: [ 
+:currentHoldings <- list ; 
+currentHoldings 
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | getFlattenedData |
+groups isDefault
+   ifTrue: [ getFlattenedSummaryData ] .
+   elseIf: [ groups count = 1 ] then: [ getFlattenedSingleGroupData ] .
+   else: [ getFlattenedGroupData ] 
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | getFlattenedSummaryData |
+quickUpdateHoldings ;
+!summaryLevel <- "Total" extendBy:
+    [ !levelIndicator <- 0 ;
+      !getLevelMapId <- "0." ;
+      !id <- ^self ; !name <- "" ;
+    ] ;
+
+currentHoldings groupedByCriteria: [ account ] , [ date ] .
+       extendBy: [ !account <- keyList at: 1 ;
+                   !date <- keyList at: 2 ;
+                   !itemStats <- ^my  getDataForSubset: groupList ;
+                   !group <- ^my summaryLevel ;
+                 ] .
+    sortDown: [ date ] .
+    sortUp: [ account id ] .
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | getFlattenedGroupData |
+quickUpdateHoldings ;
+!groups <- currentHoldings groupedByValueSet: [ groupValues ] .
+   extendBy: 
+   [ !tools <- ^my ;
+     !groupValues <- groupList at: 1 . groupValues ;
+     !name <- [ groupValues do: [ name print ; "|" print ] ] divertOutput ;
+     !items <- ^my items ;
+     !byAcctDate <- groupList groupedByCriteria: [account], [date] .
+       extendBy: [ !account <- keyList at: 1 ;
+                   !date <- keyList at: 2 ;
+                   !group <- ^my 
+                       extendBy: [ !levelIndicator <- groupValues count ;
+                                   !getLevelMapId <- "" ;
+                                 ] ;
+                   !itemStats <- ^my tools getDataForSubset: groupList ;
+                 ] ;
+   ] .
+  collectListElementsFrom: [ byAcctDate ] .
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | getFlattenedSingleGroupData |
+quickUpdateHoldings ;
+currentHoldings groupedByCriteria: [ account ] , [ date ] .
+  extendBy: [ !tools <- ^my ; 
+              !account <- keyList at: 1 ;
+              !date <- keyList at: 2 ;
+              !byGroup <- groupList groupedBy: [ groupValues at: 1 ] .
+                 numberElements
+                 extendBy: 
+                 [ !account <- ^my account ;
+                   !date <- ^my date ; 
+                   !group <- ^self 
+                      extendBy: 
+                      [ !levelIndicator <- 1 ;
+                        !getLevelMapId <- position asString concat: "." ;
+                      ] ;
+                   !itemStats <- ^my tools getDataForSubset: groupList ;
+                 ] ;
+             ] .
+    collectListElementsFrom: [ byGroup ] .
+    sortDown: [ date ] .
+    sortUp: [ account id ] .
+] ;
+
+ApplicationTools AccountViewer defineMethod: [ | getDataForSubset: list |
+^self currentItems collectListElementsFrom:
+    [ !valueSet <- ^my list
+         send: [ dataValues at: ^my position . calcValue 
+                   extendBy: [ !weight <- ^my pct ;
+                               !adjustFactor <- ^my shares ;
+                               !numerator <- ^my tmv ;
+                              !denominator <- ^self * ^my shares ;
+                             ]
+                ] ;
+       ^self statSet extendBy: 
+          [ !dataItem <- ^my ;
+            !stat <- ^self ;
+            !calc <- ^my valueSet basicSend: accessBlock ;
+          ]
+    ] 
+] ;
+
+
+#======================================================================
+
+####################
+#  SecurityViewer
+####################
+
+ApplicationTools SecurityViewer
+   defineFixedProperty: 'baseSecurity' .
+   defineFixedProperty: 'dates' .
+;
+
+
+ApplicationTools SecurityViewer 
+defineMethod: [ | initializeLocalAttributes |
+  ^super initializeLocalAttributes ;
+  ^self reset 
+] ;
+
+ApplicationTools SecurityViewer defineMethod: [ | profile |
+"Base Security: " printNL ;
+baseSecurity displayInfo ;
+"Dates: " print: 30 ; 
+dates do: [ print ; " | " print ] ; newLine print ;
+"Currency: " print: 30 ; baseSecurity baseCurrency displayInfo ;
+"=" fill: 50 .printNL;
+] ;
+
+
+ApplicationTools SecurityViewer defineMethod: [ | reset |
+  ^self resetSecurities ;
+  ^self resetDates ;
+  ^self
+] ;
+  
+ApplicationTools SecurityViewer defineMethod: [ | resetSecurities |
+  ^self :baseSecurity <- NA ;
+  ^self
+] ;
+
+ApplicationTools SecurityViewer defineMethod: [ | resetDates |
+  ^self :dates <- CoreWorkspace IndexedList new ;
+  ^self
+] ;
+
+ApplicationTools SecurityViewer defineMethod: [ | setBaseSecurityTo: id |
+  ^self :baseSecurity <- CoreWorkspace Security findId: id ;
+  ^self
+] ;
+
+ApplicationTools SecurityViewer defineMethod: [ | setDatesTo: dateList |
+  resetDates ;
+  !list <- ^self dates ;
+  ^self asListOf: CoreWorkspace Date from: dateList .
+     numberElements 
+  do: [ ^my list at: position put: ^self asSelf] ;
+  ^self
+] ;
+
+ApplicationTools SecurityViewer defineMethod: [ | setDate: n to: date |
+  ^self dates at: n asInteger put: date asDate ;
+  ^self
+] ;
+
+ApplicationTools SecurityViewer defineMethod: [ | clearDate: n |
+  ^self dates delete: n asInteger ;
+  ^self
+] ;
+
+####################
+#  SupportView
+####################
+
+ApplicationTools SupportView defineMethod: [ | showTreeFor: object |
+  ^self showTreeFor: object detailFlag: FALSE
+] ;
+
+ApplicationTools SupportView 
+defineMethod: [ | showTreeFor: object detailFlag: flag |
+object id isntNA
+ifTrue:
+  [ !showDetail <- 
+     (object isUniverse not && object isClassification not) && [ flag isTrue ] ;
+   !currentLevel <- FormatTools indentLevel ;
+   !nextFormat <- FormatTools getNextIndentLevel;
+   !label <- "ShowTree_" concat: object whatAmI . 
+        concat: "_" . concat: object id ;
+   currentLevel = 0
+     ifTrue: [ FormatTools startOutline: "TREE" withId: label . printNL];
+   !label <- showDetail
+   ifTrue:
+      [ [ nextFormat evaluate: [ object describeYourself ] 
+        ] divertOutput 
+      ]
+    ifFalse: [ object name ] ;
+   FormatTools buildOutlineLevel: currentLevel
+       withId: object id andLabel: label
+       andType: object whatAmI . 
+         translate: "&" to: "+" .         #-- Added by dkr
+   #-- Not sure these make any sense since this is not strictly XML ?????
+   #     translate: "&" to: "&amp;" .            #-- Modified by dkr
+   #     translate: "<" to: "&lt;" .             #-- Modified by dkr
+   #     translate: ">" to: "&gt;"               #-- Modified by dkr
+         printNL;
+   nextFormat evaluate:
+      [ 
+        object isUniverse
+        ifTrue: [ object list 
+                     do: [ ^my showTreeFor: ^self detailFlag: ^my flag] 
+                ] .
+        elseIf: [ object isClassification ] 
+        then:
+          [ object childList 
+               do: [ ^my showTreeFor: ^self detailFlag: ^my flag ] ;
+            object memberList
+               do: [ ^my showTreeFor: ^self detailFlag: ^my flag ] ;
+          ] ;
+      ] ;
+   currentLevel = 0
+    ifTrue: [ FormatTools endOutline: "TREE" . printNL ] 
+  ] 
+ifFalse: [ FormatTools buildTag: "ERROR" 
+             withAttributes: "appId", "ShowTree", "id", object code 
+             andContent: "Bad Entity Supplied." . printNL ;
+         ] ;
+] ;
+
+ApplicationTools SupportView 
+defineMethod: [ | showNestedTreeFor: object openFlag: oflag closeFlag: cflag |
+object id isntNA
+ifTrue:
+  [ 
+   !currentLevel <- FormatTools indentLevel ;
+   !nextFormat <- FormatTools getNextIndentLevel;
+   !label <- object name ;
+   !todo <- object isUniverse ifTrue: [ object list ] .
+        elseIf: [ object isClassification ] 
+        then: [ object childList append: object memberList ] .
+        else: [ ^global List ] . numberElements ;
+   !isBranch <- todo count > 0 ;
+   isBranch && oflag isTrue
+       ifTrue: [ FormatTools startOutline: "TREE" withId: NA . printNL ] ;
+   isBranch
+     ifTrue: [ FormatTools buildOutlineBranchFor: object withLabel: label ] 
+    ifFalse: [ FormatTools buildOutlineLeafFor: object withLabel: label ] .
+     printNL ;
+   isBranch
+   ifTrue:
+     [  nextFormat evaluate:
+        [ FormatTools startOutline: "TREE" withId: NA . printNL ;
+          !max <- todo count ;
+          todo 
+          do: [ ^my showNestedTreeFor: ^self 
+                  openFlag: position > 1 closeFlag: position < ^my max
+              ] ;
+          FormatTools endOutline: "TREE" . printNL ;
+        ] ;
+    ] ;
+  isBranch && cflag isTrue
+     ifTrue: [ FormatTools endOutline: "TREE" . printNL ] ;
+  ] 
+ifFalse: [ FormatTools buildTag: "ERROR" 
+             withAttributes: "appId", "ShowTree", "id", object code 
+             andContent: "Bad Entity Supplied." . printNL ;
+         ] ;
+] ;
+
+
+
+ApplicationTools AccountViewer defineMethod: [ | showAccountHierarchy |
+!accts <- CoreWorkspace Account masterList select: [ hasHoldings ] .
+    groupedBy: [ whatAmI ] .
+   extendBy: 
+     [ !id <- ^self ; !name <- ^self ;
+       !whatAmI <- ^self ;
+       !list <- groupList ; 
+       !isUniverse <- TRUE ;
+     ] ;
+!object <- CoreWorkspace Account 
+   extendBy: [ !list <- ^my accts ;
+               !id <- "Master" ; !name <- "Master" ;
+               !isUniverse <- TRUE ;
+             ] ;
+SupportView showNestedTreeFor: object openFlag: TRUE closeFlag: TRUE ;
+
+] ;
+
+Object defineMethod: [ | describeYourself |
+  !atts <- "type", ^self whatAmI ;
+  ^self code isntNA ifTrue: [ atts, "id", ^self code ] ;
+  ^self FormatTools 
+     buildTag: "Object" withAttributes: atts andContent: NA . printNL ;
+] ;
+
+Entity defineMethod: [ | describeYourself |
+  !atts <- "type", ^self whatAmI, "id", ^self code ;
+  FormatTools openTag: "Entity" withAttributes: atts . printNL ;
+  !format <- FormatTools getNextIndentLevel ;
+  format buildTag: "NAME" 
+     withAttributes: NA andContent: ^self name . printNL ;
+  format buildTag: "SHORT_NAME" 
+     withAttributes: NA andContent: ^self shortName . printNL ;
+  format buildTag: "SORT_CODE"
+     withAttributes: NA andContent: ^self sortCode . printNL ;
+  format startCollection: "ALIASES" 
+     withAttributes: "count", ^self aliases count . printNL ;
+  !nextLevelFormat <- format getNextIndentLevel ;
+  ^self aliases
+  do: [ ^my nextLevelFormat buildTag: "ALIAS" 
+          withAttributes: NA andContent: ^self . printNL ;
+      ] ;
+  format endCollection: "ALIASES" . printNL ;
+  FormatTools closeTag: "Entity" . printNL ;
+] ;
+
+Application defineMethod: [ | describeYourself | 
+!atts <- "id", code;
+FormatTools openTag: "APPLICATION" withAttributes: atts. printNL ;
+!format <- FormatTools getNextIndentLevel ;
+format buildTag: "NAME" withAttributes: NA andContent: name . printNL;
+format buildTag: "DESCRIPTION" 
+   withAttributes: NA andContent: description  . printNL;
+!atts <- "count", parameterList count ;
+format startCollection: "PARAMS" withAttributes: atts . printNL ;
+!nextLevel <- format getNextIndentLevel ;
+parameterList
+do: [ ^my nextLevel buildTag: "PARAM" 
+           withAttributes: "id", code andContent: NA . printNL ;
+    ] ;      
+format endCollection: "PARAMS" . printNL ;
+FormatTools closeTag: "APPLICATION" . printNL ;
+
+] ;
+
+DataItem defineMethod: [ | describeYourself | 
+!atts <- "id", code;
+isStat || [ statSet isntDefault ] ifTrue: [ atts , "isStat", "Yes" ] ;
+isGroup ifTrue: [ atts, "isGroup", "Yes" ] ;
+FormatTools openTag: "DataItem" withAttributes: atts. printNL ;
+!format <- FormatTools getNextIndentLevel ;
+format buildTag: "NAME" 
+   withAttributes: NA andContent: ^self name . printNL ;
+format buildTag: "SHORT_NAME" 
+   withAttributes: NA andContent: ^self shortName . printNL ;
+format buildTag: "SORT_CODE"
+   withAttributes: NA andContent: ^self sortCode . printNL ;
+format buildTag: "BASE_CLASS"
+   withAttributes: NA andContent: ^self baseClass whatAmI . printNL ;
+format buildTag: "ACCESS_PATH"
+   withAttributes: NA andContent: ^self accessPath . printNL ;
+format buildTag: "WIDTH"
+   withAttributes: NA andContent: ^self defaultWidth . printNL ;
+format buildTag: "DECIMALS"
+   withAttributes: NA andContent: ^self defaultDecimals . printNL ;
+statSet isntDefault
+ifTrue:
+  [ !atts <- "count", (statSet isList ifTrue: [ statSet count ] ifFalse: [1]);
+    format startCollection: "STATS" withAttributes: atts . printNL ;
+   !nextLevel <- format getNextIndentLevel ;
+   statSet
+   do: [ ^my nextLevel buildTag: "STAT" 
+             withAttributes: "id", code andContent: NA . printNL ;
+       ] ;      
+  format endCollection: "STATS" . printNL ;
+  ] ;
+FormatTools closeTag: "DataItem" . printNL ;
+] ;
+
+ApplicationParam defineMethod: [ | describeYourself |
+!atts <- "id", code;
+FormatTools openTag: "PARAMETER" withAttributes: atts. printNL ;
+!format <- FormatTools getNextIndentLevel ;
+format buildTag: "DESCRIPTION1" 
+   withAttributes: NA andContent: description1  . printNL;
+format buildTag: "DESCRIPTION2" 
+   withAttributes: NA andContent: description2  . printNL;
+format buildTag: "ALLOW_LIST_OF" 
+   withAttributes: NA andContent: allowList  . printNL;
+format buildTag: "TYPE" 
+   withAttributes: NA andContent: type  . printNL;
+FormatTools closeTag: "PARAMETER" . printNL ;
+] ;
+
+#======================================================================
+
+####################
+#  BuiltIn Applications
+####################
+
+Interface ApplicationWS defineMethod: [ | ExtractStats |
+!template <- getAccountViewerTemplate ;
+
+template 
+  setRestrictionBlockTo: [ security type isEquity ] .
+  enableTMVCalcs; 
+^self 
+   set: "noBench" to:"yes" . 
+   set: "calculation" to: "TMV" ;
+!dr <- ^self getParameter: "dateRange"  ;
+dr isntDefault
+   ifTrue: [ !parts <- dr breakOn: ": " ;
+             !start <- parts at: 1 . asDate else: ^date - 12 monthEnds ;
+             !end <- parts at: 2 . asDate else: ^date - 1 monthEnds ;
+             !freq <- parts at: 3 . else: "" .  
+               stripBoundingBlanks toUpper take: 1 ;
+             !offset <- freq = "Y" ifTrue: [ 1 yearEnds ] .
+                   elseIf: [ freq = "Q" ] then: [ 1 quarterEnds ] .
+                   else: [ 1 monthEnds ] ;
+             !dates <- start to: end by: offset . asDateList ;
+             ^self set: "dates" to: dates ;
+            ] ;
+^self getParameter: "dates" . isDefault
+     ifTrue: [ ^self set: "dates" to: "^today, -1 monthEnds" ] ;
+^self 
+  setAccountsIn: template .
+  setMultipleDatesIn: template .
+  setRestrictionsIn: template .
+  setItemsIn: template .
+  setGroupsIn: template .
+  setDisplayOptionsIn: template .
+;
+!orientation <- ^self getParameter: "orientation" ;
+template reportExtractStatsUsing: orientation ;
+] ;
+
+#--------------------
+
+Interface ApplicationWS defineMethod: [ | ShowAllDataItems |
+!object <- CoreWorkspace DataItem
+   extendBy: [ !id <- "Master" ;
+               !name <- "Master" ;
+               !isUniverse <- TRUE ;
+               !list <- ^self activeList sortUp: [ sortCode ] ;
+             ] ;
+  CoreWorkspace ApplicationTools SupportView showTreeFor: object ;
+] ;
+
+Interface ApplicationWS defineMethod: [ | ShowAllApplications |
+!object <- CoreWorkspace Application
+   extendBy: [ !id <- "Master" ;
+               !name <- "Master" ;
+               !isUniverse <- TRUE ;
+               !list <- ^self activeList sortUp: [ sortCode ] ;
+             ] ;
+  CoreWorkspace ApplicationTools SupportView showTreeFor: object ;
+] ;
+
+Interface ApplicationWS defineMethod: [ | ShowAllApplicationParams |
+!object <- CoreWorkspace ApplicationParam
+   extendBy: [ !id <- "Master" ;
+               !name <- "Master" ;
+               !isUniverse <- TRUE ;
+               !list <- ^self activeList sortUp: [ sortCode ] ;
+             ] ;
+  CoreWorkspace ApplicationTools SupportView showTreeFor: object ;
+] ;
+
+Interface ApplicationWS defineMethod: [ | DescribeDataItem |
+!id <- ^self getParameter: "dataItemId" ;
+!object <- CoreWorkspace DataItem locateId: id ;
+object isntDefault
+   ifTrue: [ object describeYourself ]
+  ifFalse: [ FormatTools buildTag: "ERROR" 
+               withAttributes: "appId", "DescribeDataItem", "id", id
+               andContent: "Bad DataItem id Supplied." . printNL ;
+           ] ;
+] ;
+
+Interface ApplicationWS defineMethod: [ | DescribeApplication |
+!id <- ^self getParameter: "applicationId" ;
+!object <- CoreWorkspace Application locateId: id ;
+object isntDefault
+   ifTrue: [ object describeYourself ]
+  ifFalse: [ FormatTools buildTag: "ERROR" 
+               withAttributes: "appId", "DescribeApplication", "id", id
+               andContent: "Bad Application id Supplied." . printNL ;
+           ] ;
+] ;
+
+Interface ApplicationWS defineMethod: [ | DescribeApplicationParam |
+!id <- ^self getParameter: "appParamId" ;
+!object <- CoreWorkspace ApplicationParam locateId: id ;
+object isntDefault
+   ifTrue: [ object describeYourself ]
+  ifFalse: [ FormatTools buildTag: "ERROR" 
+               withAttributes: "appId", "DescribeApplicationParam", "id", id
+               andContent: "Bad ApplicationParam id Supplied." . printNL ;
+           ] ;
+] ;
+
+Interface ApplicationWS defineMethod: [ | ShowItemUniverses |
+  !object <- CoreWorkspace Universe 
+      extendBy: [ !id <- "Master" ;
+                  !name <- "Master" ;
+                  !whatAmI <- "DataItemUniverse" ; 
+                  !list <- ^self activeList
+                       select: [ entityType isDataItem ] ;
+                ] ;
+  CoreWorkspace ApplicationTools SupportView showTreeFor: object ;
+] ;
+
+Interface ApplicationWS defineMethod: [ | ShowItemUniverse |
+!catId <- ^self getParameter: "universeId" ;
+!cat <- CoreWorkspace Universe locateId: catId ;
+cat isUniverse && [ cat entityType isUniverse || cat entityType isDataItem ]
+   ifTrue: [ CoreWorkspace ApplicationTools SupportView 
+                showTreeFor: cat detailFlag: TRUE ;
+           ] 
+  ifFalse: [ FormatTools buildTag: "ERROR" 
+               withAttributes: "appId", "ShowItemUniverse", "id", catId
+               andContent: "Bad Item Universe id Supplied." . printNL ;
+           ] ;
+] ;
+
+Interface ApplicationWS defineMethod: [ | ShowApplicationUniverses |
+  !object <- CoreWorkspace Universe 
+      extendBy: [ !id <- "Master" ;
+                  !name <- "Master" ;
+                  !whatAmI <- "ApplicationUniverse" ; 
+                  !list <- ^self activeList
+                       select: [ entityType isApplication ] ;
+                ] ;
+  CoreWorkspace ApplicationTools SupportView showTreeFor: object ;
+] ;
+
+Interface ApplicationWS defineMethod: [ | ShowApplicationUniverse |
+!catId <- ^self getParameter: "universeId" ;
+!cat <- CoreWorkspace Universe locateId: catId ;
+cat isUniverse && [ cat entityType isUniverse || cat entityType isApplication]
+   ifTrue: [ CoreWorkspace ApplicationTools SupportView 
+                 showTreeFor: cat detailFlag: TRUE 
+           ] 
+  ifFalse: [ FormatTools buildTag: "ERROR" 
+               withAttributes: "appId", "ShowApplicationUniverse", "id", catId
+               andContent: "Bad Application Universe id Supplied." . printNL ;
+           ] ;
+] ;
+
+Interface ApplicationWS defineMethod: [ | ShowAccountHierarchy | 
+  !template <- getAccountViewerTemplate ;
+  template showAccountHierarchy ;
+] ;
+
+
+#======================================================================
+
+####################
+#  CalcPackage
+####################
+
+#--------------------
+#  Interface to security
+#--------------------
+
+Security defineMethod: [ | getCalcPack | 
+  !me <- ^self asSelf ;
+  ^self getMapEntry calcPackage extendBy: [ !entity <- ^my me ]
+] ;
+
+ApplicationTools SecurityCalcs
+  defineMethod: [ | entity | CoreWorkspace Security ] .
+  defineMethod: [ | security | ^self entity ] .
+;
+
+
+ApplicationTools SecurityCalcs defineMethod: [ | mapEntry | 
+ ^self security getMapEntry
+] ;
+
+ApplicationTools SecurityCalcs defineMethod: [ | globalSecurity | 
+ ^self security asGlobalSecurity
+] ;
+
+#-----------
+# Security - FormulaLibrary
+#-----------
+
+SecurityFormulaLibrary defineMethod: [ | security | ^self entity ] ;
+
+# Default Value
+SecurityFormulaLibrary defineMethod: [ | entity |
+  CoreWorkspace Security
+] ;
+
+#########################
+#  CalcPackage Protocol
+#########################
+# This demonstrates protocol to allow CalcPackages to be set up 
+# as local context, in somewhat the same way FormatTools and Currency work.
+#
+# One difference between CalcPackage and FormatTools is that CalcPackage
+# is not a true default - it is the parent of sub-hierarchies which can
+# be used independently. For example, if a Security calculation is
+# specialized at a subclass of SecurityCalcs, the default implementation
+# of that calculation belongs at SecurityCalcs, not at CalcPackage. There
+# may be other subclasses of CalcPackage, such as AccountCalcs, which 
+# have unrelated calculations and if all the defaults were placed at
+# CalcPackage, names could potentially conflict.
+#
+# This implementation allows for more than one subclass of CalcPackage
+# to be defined in the local context, while only one instance of each
+# subclass is available at a given time.
+###########
+
+ApplicationTools CalcPackage 
+
+# -- Make CalcPackage available in local context
+defineMethod: [ | evaluate: aBlock |
+  !pkg <- ^self;
+  ^local extendedBy: [ "!" concat: ^my pkg getLocalName . 
+                               evaluateIn: ^current . <- ^my pkg 
+                     ] asLocalContextFor: aBlock
+] .
+
+# -- Look up CalcPackage in local context - else return NA
+defineMethod: [ | getLocalContext |
+  !name <- ^self getLocalName ;
+  name locateInDictionaryOf: ^local . isntNA
+    ifTrue: [ name evaluateIn: ^local ]
+] .
+
+# -- Define access path
+defineMethod: [ | getLocalName |
+  ^self whatAmI asWords last: 1 . at: 1
+] .
+
+;
+
+# -- Create a new CalcPackage subclass - AccountCalcs
+#    Even though Accounts are not cross referenced across databases,
+#    using a CalcPackage insures that calculations are performed
+#    consistently across databases (if that behavior is desired)
+
+# -- This insures that all subclasses can be identified 
+#    at ^local without interfering with other CalcPackage subclasses
+
+ApplicationTools AccountCalcs defineMethod: [ | getLocalName | "AccountCalcs" ] ;
+ApplicationTools SecurityCalcs defineMethod: [ | getLocalName | "SecurityCalcs" ] ;
+
+
+#======================================================================
+
+####################
+#  Misc DataItem Initializations  ???
+#    add stats 
+####################
+
+DataItemFeed updateFromString: "id | name | baseClass | accessPath | isStat | statSet
+pct | % Port | Holding | pct | Y | total
+" ;
+
+DataItemFeed updateFromString: "id | isStat | isGroup | statSet 
+epsGrow3Yr | TRUE | FALSE | weightedAverage
+epsGrow5Yr | TRUE | FALSE | weightedAverage
+mcap | TRUE | FALSE | weightedAverage, total, median, weightedMedian
+mcapUS | TRUE | FALSE | weightedAverage, total, median, weightedMedian
+mval | TRUE | FALSE | total 
+pb | TRUE | FALSE | weightedAverage, countNegatives
+pcf | TRUE | FALSE | weightedAverage, countNegatives
+pct | TRUE | FALSE | total
+pcte | TRUE | FALSE | total
+pe | TRUE | FALSE | weightedAverage, weightedMedian 
+peEst1 | TRUE | FALSE | weightedAverage, weightedMedian
+peEst2 | TRUE | FALSE | weightedAverage, weightedMedian
+return1m | TRUE | FALSE | weightedAverage
+yield | TRUE | FALSE | weightedAverage, average
+" ;
+

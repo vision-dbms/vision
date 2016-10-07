@@ -1,0 +1,1417 @@
+##################################################
+#  patch.pre7.smaster
+#
+#  Incremental changes to core vision database from: smaster
+#
+#  Derived from files: smasterSetup.vis ; patch.smaster.1
+#
+##################################################
+
+####################
+#  Security extensions
+####################
+
+PropertySetup updateFromString: "
+classId  | property | defaultValue | dataType | tsFlag
+Security | tradingCountry | Country | 
+Security | adrFlag | FALSE
+Security | adrRatio | | Double
+Security | lastPricingDate | | Date
+" ;
+
+Named Security CashUS addAlias: "$$CASH00" ;
+
+####################
+#  SecurityIdRecord extensions
+#  -  When a dually listed canadian has a us cusip change, a sedol change
+#     may occur at the same time with no indication from the vendor.  
+#     Add a warning to the SecurityIdRecordFeed exception report to it
+#     can serve as an early warning indicator when a dually listed issue
+#     experiences an id change.
+####################
+
+#--------------------
+#  Add displayOtherExceptions to SecurityIdRecordFeed to display
+#     an early warning indicator when a dually listed issues experiences
+#     an id change
+#--------------------
+
+##################################################
+#  corrections.vis
+#
+#  This script starts a new branch of the DataFeed hierarchy that
+#     can be used to process correction transactions in general and
+#     security id corrections in particular
+##################################################
+
+####################
+#  New Feed Branch for corrections
+#    (should be a separate branch - leave under Transaction until 
+#     vadmin checked)
+####################
+
+CoreWorkspace respondsTo: "CorrectionFeed" .
+ifFalse:
+   [
+   #--DataFeed createSubclass: "CorrectionFeed" at: CoreWorkspace ;
+   TransactionFeed createSubclass: "CorrectionFeed" at: CoreWorkspace ;
+   Interface ExternalFeedManager feedXRef
+         at: "Correction" put: CorrectionFeed ;
+
+   CorrectionFeed createSubclass: "SecurityCorrectionFeed" at: CoreWorkspace ;
+   SecurityCorrectionFeed
+       createSubclass: "StitchSecurityFeed" at: CoreWorkspace ;
+   SecurityCorrectionFeed
+       createSubclass: "UnstitchSecurityFeed" at: CoreWorkspace ;
+   SecurityCorrectionFeed
+       createSubclass: "RemoveSecurityFeed" at: CoreWorkspace ;
+   SecurityCorrectionFeed
+       createSubclass: "RemoveCompanyFeed" at: CoreWorkspace ;
+   SecurityCorrectionFeed
+       createSubclass: "MoveSecurityInfoFeed" at: CoreWorkspace ;
+   SecurityCorrectionFeed
+       createSubclass: "CanadianIdChangeFeed" at: CoreWorkspace ;
+   SecurityCorrectionFeed
+       createSubclass: "ReuseSecurityIdFeed" at: CoreWorkspace ;
+
+   CorrectionFeed classDescriptor setDescriptionTo: "
+   CorrectionFeeds are used to correct complex data relationships in 
+your Vision database." ;
+   SecurityCorrectionFeed classDescriptor setDescriptionTo: "
+SecurityCorrectionFeeds are used to correct complex data relationships
+associated with Securities.
+" ;
+   StitchSecurityFeed classDescriptor setDescriptionTo: "
+The StitchSecurityFeed is used to correct for missed id changes that
+produced a second security instance instead of an alias for an 
+existing instance.
+" ;
+   UnstitchSecurityFeed classDescriptor setDescriptionTo: "
+The UnstitchSecurityFeed is used to break a single security into
+two distinct securities.
+" ;
+   RemoveSecurityFeed classDescriptor setDescriptionTo: "
+The RemoveSecurityFeed is used to flag a security instance for deletion.
+" ;
+   RemoveCompanyFeed classDescriptor setDescriptionTo: "
+The RemoveCompanyFeed is used to flag a company instance for deletion.
+" ;
+
+   MoveSecurityInfoFeed classDescriptor setDescriptionTo: "
+The MoveSecurityInfoFeed is used to move data from one security to 
+another.
+" ;
+
+   CanadianIdChangeFeed classDescriptor setDescriptionTo: "
+The CanadianIdChangeFeed is used to change a Canadian security's
+primary id from cusip to sedol and to remove the cusip so it is
+available for the US-listed version of the security.
+" ;
+
+   ReuseSecurityIdFeed classDescriptor setDescriptionTo: "
+The ReuseSecurityIdFeed is used to free up an existing cusip or sedol
+from a security so it can be associated with a new security.  A separate
+cross reference of that cusip or sedol is tracked over time in the
+SedolId or CusipId class." ;
+] ;
+
+#----------------------------------------------------------------------
+
+####################
+#  SecurityCorrectionFeed - General Protocol
+#   
+####################
+
+SecurityCorrectionFeed
+  defineFixedProperty: 'firstPriceDateToMove' .
+  defineFixedProperty: 'lastPriceDateToMove' .
+  defineFixedProperty: 'firstSplitDateToMove' .
+  defineFixedProperty: 'lastSplitDateToMove' .
+  defineFixedProperty: 'firstDivDateToMove' .
+  defineFixedProperty: 'lastDivDateToMove' .
+;
+
+SecurityCorrectionFeed defineMethod: [ | getUploadProperties | 
+  ^super getUploadProperties
+    select: [ code != "entityId" && code != "currencyId" ] .
+] ;
+
+
+SecurityCorrectionFeed
+defineMethod: [ | flagSecurity: security forDeletionWithReason: reason |
+  security
+  do: [ !fakeId <- "x" concat: code ;
+        ^self flagForDeletionWithReason: ^my reason ;
+        ^self resetCodeTo: fakeId .
+           setCusipTo: code . setSedolTo: code . setTickerTo: code ;
+#        ^self deleteAlias: (fakeId take: 6) ;
+#        ^self deleteAlias: (fakeId take: 8) ;
+      ] ;
+] ;
+
+SecurityCorrectionFeed 
+defineMethod: [ | reloadPricesFor: list purgeSource: purgeFlag |
+!recs <- list 
+  extendBy: [ !startDate <- firstPriceDateToMove asDate ; 
+              !endDate <- lastPriceDateToMove asDate ;
+            ] ;
+!valid <- recs select: [ startDate isntNA && endDate isntNA ] .
+   extendBy: [ !todo <- sourceSecurity prices from: startDate to: endDate ;
+               !first <- todo firstDate ;
+               !last <- todo lastDate ;
+             ] ;
+valid count > 0
+ifTrue:
+  [ !feed <-  
+     [ "id|date|adjustmentDate|currency|close|high|low|open|volume|" print;
+       "ask|bid|dailyReturn|unitReturn|yield|acctPrice|acctCurr" printNL ;
+       valid
+       do: [ todo 
+             do: [ ^my targetSecurity code, date, adjustmentDate, baseCurrency,
+                   _price, _high, _low, _open, _volume, 
+                   _ask, _bid, dailyReturn, unitReturn, yield,
+                   (_accountingPrice else: 0.0) , accountingCurrency
+                        do: [ ^self print: 20.8 ; " | " print ] ;
+                   newLine print ;
+                 ] ;
+           ] ;
+     ] divertOutput ;
+    newLine print ;
+    !realOnes <- valid select: [ todo count > 0 ]  ;
+    " ... Copying prices from source to target security." printNL ;
+    
+    realOnes count > 0 
+       ifTrue: [ CoreWorkspace PriceFeed updateFromString: feed ] ;
+    valid
+    do: [ newLine print ;
+          "   Prices for " print ; sourceSecurity code print ; 
+          ^my purgeFlag isTrue
+              ifTrue: [ " moved " ] ifFalse: [ " copied " ] . print ;
+          "to " print ; targetSecurity code print ;
+         " for range " print ; 
+         startDate print ; " - " print ; endDate printNL ;
+         first isNA
+            ifTrue: [ "    (no prices in supplied range) " printNL ] .
+         elseIf: [ first != startDate || last != endDate ] 
+         then:
+            [ "   (actual dates from " print ; first print ;
+              " to " print ; last print; ")" printNL ;
+            ] ;
+         "Date" print: 12 ; "Price (Adj)" print: 16 ; "Price (Raw)" print: 16 ;
+         "Vol (Adj)" print: 16 ; "Vol (Raw)" print: 16 ;
+         newLine print ;
+         targetSecurity prices from: startDate to: endDate .
+         do: [ date print: 12 ; price print:16.4 ; _price print: 16.4 ;
+               volume print:16 ; _volume printNL: 16 ;
+             ] ;
+        ] ;
+
+    purgeFlag isTrue
+    ifTrue:
+      [ newLine print ;
+        " ...  Purging prices from source security." printNL ;
+        !feed <-  
+          [ "id|date" printNL ;
+            valid select: [ first isntNA ] .
+            do: [ sourceSecurity code print ; " | " print ;
+                  first asInteger asString concat: ":" . 
+                      concat: last asInteger asString . printNL ;
+                ] ;
+          ] divertOutput ;
+    realOnes count > 0 
+       ifTrue: [ CoreWorkspace PriceFeed enablePurge updateFromString: feed ]
+      ifFalse: [ "      No valid dates to purge." printNL ] ;
+     ] ;
+  ] ;
+
+recs select: 
+   [ (firstPriceDateToMove isntDefault || lastPriceDateToMove isntDefault)
+      && (startDate isNA || endDate isNA)
+   ] .
+do: [ newLine print ;
+      "---> Prices for " print ; sourceSecurity code print ; 
+      " not copied.  Bad Date Range: " concat: firstPriceDateToMove .     
+          concat: " -- " . concat: lastPriceDateToMove .printNL ;
+    ] ;
+] ;
+
+SecurityCorrectionFeed 
+defineMethod: [ | reloadSplitsFor: list purgeSource: purgeFlag |
+!recs <- list 
+  extendBy: [ !startDate <- firstSplitDateToMove asDate ; 
+              !endDate <- lastSplitDateToMove asDate ;
+            ] ;
+!valid <- recs select: [ startDate isntNA && endDate isntNA ] .
+   extendBy: [ !todo <- sourceSecurity :rawSplitFactor
+                    from: startDate to: endDate ;
+               !first <- todo firstDate ;
+               !last <- todo lastDate ;
+             ] ;
+valid count > 0
+ifTrue:
+  [ !feed <-  
+     [ "id|date|rate" printNL ;
+       valid
+       do: [ todo 
+             do: [ ^my targetSecurity code print ; " | " print ;
+                   ^date print ; " | " print ;
+                   ^self printNL: 20.8 ;
+                 ] ;
+           ] ;
+     ] divertOutput ;
+    newLine print ;
+    !realOnes <- valid select: [ todo count > 0 ]  ;
+    " ... Copying splits from source to target security." printNL ;
+    realOnes count > 0 
+    ifTrue: 
+      [ !invert <- CoreWorkspace SplitsFeed invertSplits isTrue ;
+        CoreWorkspace SplitsFeed disableSplitInversion updateFromString: feed ;
+        invert ifTrue: [ CoreWorkspace SplitsFeed enableSplitInversion ] ;
+      ] ;
+    valid
+    do: [ newLine print ;
+          "   Splits for " print ; sourceSecurity code print ; 
+          ^my purgeFlag isTrue
+              ifTrue: [ " moved " ] ifFalse: [ " copied " ] . print ;
+          "to " print ; targetSecurity code print ;
+         " for range " print ; 
+         startDate print ; " - " print ; endDate printNL ;
+         first isNA
+            ifTrue: [ "    (no splits in supplied range) " printNL ] .
+         elseIf: [ first != startDate || last != endDate ] 
+         then:
+            [ "   (actual dates from " print ; first print ;
+              " to " print ; last print; ")" printNL ;
+            ] ;
+         targetSecurity :adjustmentFactor
+         do: [ ^date print: 12 ; 
+               ^my targetSecurity rawSplitFactor print: 20.8; " (raw)" print ;
+               ^self print: 20.8 ; " (adj)" printNL ;
+             ] ;
+        ] ;
+
+    purgeFlag isTrue
+    ifTrue:
+      [ newLine print ;
+        " ...  Purging splits from source security." printNL ;
+        !feed <-  
+          [ "id|date" printNL ;
+            valid select: [ first isntNA ] .
+            do: [ todo
+                  do: [ ^my sourceSecurity code print ; " | " print ;
+                        ^date printNL ;
+                      ] ;
+                ] ;
+          ] divertOutput ;
+    realOnes count > 0 
+       ifTrue: [ CoreWorkspace SplitsFeed enablePurge updateFromString: feed ]
+      ifFalse: [ "      No valid dates to purge." printNL ] ;
+     ] ;
+  ] ;
+
+recs select: 
+   [ (firstSplitDateToMove isntDefault || lastSplitDateToMove isntDefault)
+      && (startDate isNA || endDate isNA)
+   ] .
+do: [ newLine print ;
+      "---> Splits for " print ; sourceSecurity code print ; 
+      " not copied.  Bad Date Range: " concat: firstSplitDateToMove .     
+          concat: " -- " . concat: lastSplitDateToMove .printNL ;
+    ] ;
+] ;
+
+SecurityCorrectionFeed 
+defineMethod: [ | reloadDivsFor: list purgeSource: purgeFlag |
+!recs <- list 
+  extendBy: [ !startDate <- firstDivDateToMove asDate ; 
+              !endDate <- lastDivDateToMove asDate ;
+            ] ;
+!valid <- recs select: [ startDate isntNA && endDate isntNA ] .
+   extendBy: [ !todo <- sourceSecurity :dividendSeries
+                    from: startDate to: endDate ;
+               !first <- todo firstDate ;
+               !last <- todo lastDate ;
+             ] ;
+valid count > 0
+ifTrue:
+  [ !feed <-  
+     [ "id|date|adjustmentDate|currency|recordValue|paymentDate" printNL ;
+       valid
+       do: [ todo 
+             do: [ ^my targetSecurity code, date, adjustmentDate, baseCurrency,
+                   recordValue, paymentDate
+                        do: [ ^self print: 20.8 ; " | " print ] ;
+                   newLine print ;
+                 ] ;
+           ] ;
+     ] divertOutput ;
+    newLine print ;
+    !realOnes <- valid select: [ todo count > 0 ]  ;
+    " ... Copying dividends from source to target security." printNL ;
+    
+    realOnes count > 0 
+       ifTrue: [ CoreWorkspace DivFeed updateFromString: feed ] ;
+    valid
+    do: [ newLine print ;
+          "   Dividends for " print ; sourceSecurity code print ; 
+          ^my purgeFlag isTrue
+              ifTrue: [ " moved " ] ifFalse: [ " copied " ] . print ;
+          "to " print ; targetSecurity code print ;
+         " for range " print ; 
+         startDate print ; " - " print ; endDate printNL ;
+         first isNA
+            ifTrue: [ "    (no dividends in supplied range) " printNL ] .
+         elseIf: [ first != startDate || last != endDate ] 
+         then:
+            [ "   (actual dates from " print ; first print ;
+              " to " print ; last print; ")" printNL ;
+            ] ;
+         "Date" print: 12 ; "Div (Adj)" print: 16 ; "Div (Raw)" print: 16 ;
+         newLine print ;
+         targetSecurity :dividendSeries from: startDate to: endDate .
+         do: [ date print: 12 ; div print:16.4 ; _div print: 16.4 ;
+               newLine print ;
+             ] ;
+        ] ;
+
+    purgeFlag isTrue
+    ifTrue:
+      [ newLine print ;
+        " ...  Purging dividends from source security." printNL ;
+        !feed <-  
+          [ "id|date" printNL ;
+            valid select: [ first isntNA ] .
+            do: [ sourceSecurity code print ; " | " print ;
+                  first asInteger asString concat: ":" . 
+                      concat: last asInteger asString . printNL ;
+                ] ;
+          ] divertOutput ;
+    realOnes count > 0 
+       ifTrue: [ CoreWorkspace DivFeed enablePurge updateFromString: feed ]
+      ifFalse: [ "      No valid dates to purge." printNL ] ;
+     ] ;
+  ] ;
+
+recs select: 
+   [ (firstDivDateToMove isntDefault || lastDivDateToMove isntDefault)
+      && (startDate isNA || endDate isNA)
+   ] .
+do: [ newLine print ;
+      "---> Divs for " print ; sourceSecurity code print ; 
+      " not copied.  Bad Date Range: " concat: firstDivDateToMove .     
+          concat: " -- " . concat: lastDivDateToMove .printNL ;
+    ] ;
+] ;
+
+
+####################
+#  StitchSecurityFeed Protocol
+#
+#  Inputs:
+#     idToKeep
+#     idToMove
+####################
+
+StitchSecurityFeed
+  defineFixedProperty: 'idToKeep' .
+  defineFixedProperty: 'idToMove' .
+
+  defineFixedProperty: 'securityToKeep' .
+  defineFixedProperty: 'securityToMove' .
+  defineFixedProperty: 'movedCompany' .
+  defineFixedProperty: 'skippedReason' .
+  define: 'errorCannotStitchMultiples' 
+    toBe: "Cannot Stitch More than 1 Security to a Single Security in 1 Feed" .
+  define: 'errorCannotStitchToMultiple' 
+    toBe: "Cannot Stitch 1 Security to Multiple Securities" .
+  define: 'errorMoveEqualsKeep'
+    toBe: "idToMove and idToKeep Already Refer to Same Security" .
+  define: 'errorMoveAlsoAKeepSecurity'
+    toBe: "idToMove Also Refers to a Security to Keep in this Feed" .
+  define: 'errorKeepAlsoAMoveSecurity'
+    toBe: "idToKeep Also Refers to a Security to Move in this Feed" .
+;
+
+StitchSecurityFeed defineMethod: [ | getUploadProperties | 
+  ^super getUploadProperties
+    select: [ code != "entityId" && code != "currencyId" ] .
+] ;
+
+StitchSecurityFeed defineMethod: [ | displayInfo | 
+  "idToKeep: " print ; idToKeep print ; 
+  " | " print ; getSecurityToKeep displayInfo ;
+  "idToMove: " print ; idToMove print ; 
+  " | " print ; getSecurityToMove displayInfo ;
+] ;
+
+StitchSecurityFeed  defineMethod: [ | rejectReason | 
+   skippedReason isntDefault
+      ifTrue: [ skippedReason ] .
+   elseIf: [ securityToKeep isDefault ] 
+     then: [ "Bad securityToKeep supplied - " concat: idToKeep ] .
+   elseIf: [ securityToMove isDefault ] 
+     then: [ "Bad securityToMove supplied - " concat: idToMove ] .
+] ;
+
+#--------------------
+
+StitchSecurityFeed defineMethod: [ | getSecurityToKeep |
+  idToKeep as: CoreWorkspace Security
+] ;
+
+StitchSecurityFeed defineMethod: [ | getSecurityToMove |
+  idToMove as: CoreWorkspace Security
+] ;
+
+#--------------------
+
+StitchSecurityFeed defineMethod: [ | initializeProcessing |
+  ^self masterList
+  do: [ :securityToKeep <- getSecurityToKeep ;
+        :securityToMove <- getSecurityToMove ;
+     ]; 
+] ;
+
+StitchSecurityFeed defineMethod: [ | runUpdate | 
+  !valid <- ^self masterList
+    select: [ securityToKeep isntDefault && securityToMove isntDefault ] ;
+  valid select: [ securityToKeep = securityToMove ] .
+     do: [ :skippedReason <- errorMoveEqualsKeep ] ;
+  valid select: [ skippedReason isNA ] .
+      groupedBy: [ securityToKeep ] .
+      select: [ groupList count > 1 ] .
+   do: [ groupList do: [ :skippedReason <- errorCannotStitchMultiples ] ] ;
+  valid select: [ skippedReason isNA ] .
+      groupedBy: [ securityToMove ] .
+      select: [ groupList count > 1 ] .
+   do: [ groupList do: [ :skippedReason <- errorCannotStitchToMultiple ] ] ;
+
+  !xref <- CoreWorkspace IndexedList new ;
+  valid do: [ ^my xref at: securityToKeep put: securityToKeep ] ;
+  valid select: [ skippedReason isDefault ] .
+     select: [ ^my xref at: securityToMove . isntNA ] .
+  do: [ :skippedReason <- errorMoveAlsoAKeepSecurity ] ;
+  !xref <- CoreWorkspace IndexedList new ;
+  valid do: [ ^my xref at: securityToMove put: securityToMove ] ;
+  valid select: [ skippedReason isDefault ] .
+     select: [ ^my xref at: securityToKeep . isntNA ] .
+  do: [ :skippedReason <- errorKeepAlsoAMoveSecurity ] ;
+
+  !todo <- valid select: [ skippedReason isDefault ] ;
+  ^self processUpdateFor: todo ;
+] ;
+
+#----------
+
+StitchSecurityFeed defineMethod: [ | processUpdateFor: recs |
+recs do:
+   [ cleanupCompanyLinks ;
+     moveSecurityAliasesAndLinks ;
+     !reason <- "Stitched into security " concat: idToKeep ;
+     ^self flagSecurity: securityToMove forDeletionWithReason: reason ;
+     refreshInformation ;
+     :isProcessed <- TRUE ;
+   ] ;
+] ;
+
+#--------------------
+#  cleanupCompanyLinks
+#   . move securities with this one as a parent to security to keep
+#--------------------
+
+StitchSecurityFeed defineMethod: [ | cleanupCompanyLinks |
+!keepCompany <- securityToKeep company ;
+!removeCompany <- securityToMove company ;
+keepCompany isDefault && removeCompany isntDefault
+ifTrue: 
+  [ securityToKeep setCompanyTo: removeCompany ;
+    :movedCompany <- TRUE ;
+  ] ;
+
+#---  get securities with this parent
+!thisParent <- CoreWorkspace Security instanceList
+     select: [ parentSecurity = ^my securityToMove ] ;
+
+#---  unlink from company
+securityToMove unlinkFromCompany ;
+
+#---  reset parent
+thisParent do: [ :parentSecurity <- ^my securityToKeep ] ;
+
+] ;
+
+StitchSecurityFeed defineMethod: [ | moveSecurityAliasesAndLinks |
+  !id <- securityToMove cusip ;
+  id isntDefault ifTrue: [ securityToKeep setCusipTo: id ] ;
+  !id <- securityToMove sedol ;
+  id isntDefault ifTrue: [ securityToKeep setSedolTo: id ] ;
+  !id <- securityToMove ticker ;
+  id isntDefault ifTrue: [ securityToKeep setTickerTo: id ] ;
+  movedCompany isTrue 
+  ifTrue:
+    [ securityToKeep code = securityToKeep company code 
+         && securityToKeep != securityToKeep company primarySecurity
+       ifTrue: 
+         [ securityToKeep company setPrimarySecurityTo: securityToKeep ;
+         ] ;
+    ] ;
+  #--  other aliases ???
+] ;
+
+StitchSecurityFeed defineMethod: [ | refreshInformation |
+  securityToKeep setNameTo: securityToMove name ;
+  movedCompany isTrue && [ securityToKeep code = securityToKeep company code ]
+     ifTrue: [ securityToKeep company setNameTo: securityToKeep name ] ;
+  !newName <- securityToMove name concat: " (FLAGGED FOR DELETION)" ;
+  securityToMove setNameTo: newName ;
+] ;
+
+#----------
+
+StitchSecurityFeed defineMethod: [ | displayNewOnes | 
+  !goodOnes <- ^self instanceList select: [ isProcessed ] ;
+  goodOnes count > 0 
+  ifTrue:
+    [ newLine print ;
+      "---> The Following Securities were Stitched: " printNL ;
+      goodOnes
+      do: [ idToMove print ; " stitched into " print ; idToKeep printNL ;
+           "     Aliases for " print ; idToKeep print ; 
+           securityToKeep aliases do: [ " | " print ; print ] ; newLine print ;
+           "     Aliases for " print ; idToMove print ;
+           securityToMove aliases do: [ " | " print ; print ] ; newLine print ;
+          ] ;
+    ] ;
+] ;
+
+StitchSecurityFeed defineMethod: [ | displayBadOnes | 
+  !bad <- ^self asSelf masterList select: [ securityToKeep isDefault ] ;
+  bad count > 0
+  ifTrue: [ newLine print ; 
+            bad count print ; " bad Id to Keep. " printNL ;
+            bad do: [ "Cannot move " print; idToMove print ;
+                      " to " print ; idToKeep print; " (bad id)" printNL ;
+                    ] ;
+          ] ;
+  !bad <- ^self asSelf masterList select: [ securityToMove isDefault ] ;
+  bad count > 0
+  ifTrue: [ newLine print ; 
+            bad count print ; " bad Id to Move. " printNL ;
+            bad do: [ "Cannot move " print; 
+                      idToMove print; " (bad id)" print ;
+                      " to " print ; idToKeep printNL ;
+                    ] ;
+          ] ;
+  !bad <- ^self asSelf masterList select: [ skippedReason isntDefault ] ;
+  bad count > 0
+  ifTrue: [ newLine print ; 
+            bad count print ; " Skipped for Another Reason. " printNL ;
+            bad groupedBy: [ skippedReason ] .
+            do: [ newLine print ;
+                  "--> Reason: " print ; printNL ;
+                  groupList do: [ displayInfo ; "-" fill: 50 . printNL ] ;
+                 
+                ] ;
+          ] ;
+] ;
+
+StitchSecurityFeed defineMethod: [ | runWrapup | 
+newLine print ;
+^super runWrapup ;
+CoreWorkspace Company rebuildSecurityList ;
+reloadData ;
+^self
+] ;
+
+StitchSecurityFeed defineMethod: [ | reloadData |
+#---  reset the cfg flie attributes before running reloads
+^self resetRunTimeAttributes ;
+
+!list <- ^self masterList select: [ isProcessed ] .
+   extendBy: [ !sourceSecurity <- securityToMove ;
+               !targetSecurity <- securityToKeep ;
+             ] ;
+
+^self reloadPricesFor: list purgeSource: FALSE ;
+^self reloadSplitsFor: list purgeSource: FALSE ;
+^self reloadDivsFor: list purgeSource: FALSE ;
+
+#reloadIndexAccounts ;
+reloadOtherData ;
+
+] ;
+
+StitchSecurityFeed defineMethod: [ | reloadOtherData |
+] ;
+
+#==================================================
+
+####################
+#  UnstitchSecurityFeed Protocol
+#
+#  Inputs:
+#     idToKeep
+#     idToMove
+####################
+
+UnstitchSecurityFeed
+  defineFixedProperty: 'idToKeep' .
+  defineFixedProperty: 'idToMove' .
+
+  defineFixedProperty: 'securityToKeep' .
+  defineFixedProperty: 'securityToMove' .
+
+  defineFixedProperty: 'newSecurity' .
+
+  defineFixedProperty: 'skippedReason' .
+  define: 'errorMoveNotEqualToKeep'
+    toBe: "idToMove and idToKeep Do Not Refer to Same Security" .
+;
+
+UnstitchSecurityFeed defineMethod: [ | displayInfo | 
+  "idToKeep: " print ; idToKeep print ; 
+  " | " print ; getSecurityToKeep displayInfo ;
+  "idToMove: " print ; idToMove print ; 
+  " | " print ; getSecurityToMove displayInfo ;
+] ;
+
+UnstitchSecurityFeed  defineMethod: [ | rejectReason | 
+   skippedReason isntDefault
+      ifTrue: [ skippedReason ] .
+   elseIf: [ securityToKeep isDefault ] 
+     then: [ "Bad securityToKeep supplied - " concat: idToKeep ] .
+   elseIf: [ securityToMove isDefault ] 
+     then: [ "Bad securityToMove supplied - " concat: idToMove ] .
+] ;
+
+#--------------------
+
+UnstitchSecurityFeed defineMethod: [ | getSecurityToKeep |
+  idToKeep as: CoreWorkspace Security
+] ;
+
+UnstitchSecurityFeed defineMethod: [ | getSecurityToMove |
+  idToMove as: CoreWorkspace Security
+] ;
+
+#--------------------
+
+UnstitchSecurityFeed defineMethod: [ | initializeProcessing |
+  ^self masterList
+  do: [ :securityToKeep <- getSecurityToKeep ;
+        :securityToMove <- getSecurityToMove ;
+     ]; 
+] ;
+
+UnstitchSecurityFeed defineMethod: [ | runUpdate | 
+  !valid <- ^self masterList
+    select: [ securityToKeep isntDefault && securityToMove isntDefault ] ;
+  valid select: [ securityToKeep != securityToMove ] .
+     do: [ :skippedReason <- errorMoveNotEqualToKeep ] ;
+  !todo <- valid select: [ skippedReason isDefault ] ;
+  ^self processUpdateFor: todo ;
+] ;
+
+#----------
+
+UnstitchSecurityFeed defineMethod: [ | processUpdateFor: recs |
+recs do:
+   [ :idToMove <- idToMove toUpper ;
+     !isCusip <- 
+        (securityToKeep cusip else: "" . take: 8) = (idToMove take: 8) ;
+     !isSedol <- 
+        (securityToKeep sedol else: "" . take: 6) = (idToMove take: 6) ;
+     isCusip ifTrue: [ securityToKeep setCusipTo: idToKeep ] ;
+     isSedol ifTrue: [ securityToKeep setSedolTo: idToKeep ] ;
+
+     !id <- "^" concat: idToMove ;
+     !todo <- securityToKeep aliases select: [ ^self contains: ^my id ] ;
+     idToMove count >= 8 
+     ifTrue:
+       [ todo, (idToMove take: 8) ;
+         securityToKeep deleteAlias: todo ;
+         todo do: [ ^my securityToKeep XRef Cusip delete: asSelf ] ;
+         todo
+         do: [ !sec <- ^my securityToKeep ;
+               sec idHistory :cusip select: [ asSelf = ^my asSelf ] .
+               do: [ ^my sec idHistory :cusip delete: ^date ;
+                     asSelf as: CoreWorkspace CusipId . :security delete: ^date ;
+                   ] ;
+             ] ;
+       ] .
+     elseIf: [ idToMove count >= 6 ] 
+     then:
+       [ todo, (idToMove take: 6) ;
+         securityToKeep deleteAlias: todo ;
+         todo do: [ ^my securityToKeep XRef Sedol delete: asSelf ] ;
+         todo
+         do: [ !sec <- ^my securityToKeep ;
+               sec idHistory :sedol select: [ asSelf = ^my asSelf ] .
+               do: [ ^my sec idHistory :sedol delete: ^date ;
+                     asSelf as: CoreWorkspace SedolId . :security delete: ^date ;
+                   ] ;
+             ] ;
+       ] .
+     else: [ securityToKeep deleteAlias: idToMove ] ;
+     :newSecurity <- CoreWorkspace Security 
+         createInstance: idToMove .
+         setBaseCurrencyTo: securityToKeep baseCurrency ;
+     isCusip ifTrue: [ newSecurity setCusipTo: idToMove ] ;
+     isSedol ifTrue: [ newSecurity setSedolTo: idToMove ] ;
+     :isProcessed <- TRUE ;
+   ] ;
+] ;
+
+#----------
+
+UnstitchSecurityFeed defineMethod: [ | displayNewOnes | 
+  !goodOnes <- ^self instanceList select: [ isProcessed ] ;
+  goodOnes count > 0 
+  ifTrue:
+    [ newLine print ;
+      "---> The Following Securities were Unstitched: " printNL ;
+      goodOnes
+      do: [ idToMove print ; " unstitched from " print ; idToKeep printNL ;
+           "     Aliases for " print ; idToKeep print ; 
+           securityToKeep aliases do: [ " | " print ; print ] ; newLine print;
+           "           Code: " print ; securityToKeep code print ;
+           "  Cusip: " print ; securityToKeep cusip print ;
+           "  Sedol: " print ; securityToKeep sedol print ; 
+           "  " print ; securityToKeep name printNL ;
+           "     Aliases for " print ; idToMove print ;
+           newSecurity aliases do: [ " | " print ; print ] ; newLine print ;
+           "           Code: " print ; newSecurity code print ;
+           "  Cusip: " print ; newSecurity cusip print ;
+           "  Sedol: " print ; newSecurity sedol print ; 
+           "  " print ; newSecurity name printNL ;
+          ] ;
+    ] ;
+] ;
+
+UnstitchSecurityFeed defineMethod: [ | displayBadOnes | 
+  !bad <- ^self asSelf masterList select: [ securityToKeep isDefault ] ;
+  bad count > 0
+  ifTrue: [ newLine print ; 
+            bad count print ; " bad Id to Keep. " printNL ;
+            bad do: [ "Cannot unstitch " print; idToMove print ;
+                      " from " print ; idToKeep print; " (bad id)" printNL ;
+                    ] ;
+          ] ;
+  !bad <- ^self asSelf masterList select: [ securityToMove isDefault ] ;
+  bad count > 0
+  ifTrue: [ newLine print ; 
+            bad count print ; " bad Id to Move. " printNL ;
+            bad do: [ "Cannot unstitch " print; 
+                      idToMove print; " (bad id)" print ;
+                      " from " print ; idToKeep printNL ;
+                    ] ;
+          ] ;
+  !bad <- ^self asSelf masterList select: [ skippedReason isntDefault ] ;
+  bad count > 0
+  ifTrue: [ newLine print ; 
+            bad count print ; " Skipped for Another Reason. " printNL ;
+            bad groupedBy: [ skippedReason ] .
+            do: [ newLine print ;
+                  "--> Reason: " print ; printNL ;
+                  groupList do: [ displayInfo ; "-" fill: 50 . printNL ] ;
+                 
+                ] ;
+          ] ;
+] ;
+
+UnstitchSecurityFeed defineMethod: [ | runWrapup | 
+^super runWrapup ;
+reloadData ;
+^self
+] ;
+
+UnstitchSecurityFeed defineMethod: [ | reloadData |
+#---  reset the cfg flie attributes before running reloads
+^self resetRunTimeAttributes ;
+
+!list <- ^self masterList select: [ isProcessed ] .
+   extendBy: [ !sourceSecurity <- securityToKeep ;
+               !targetSecurity <- newSecurity ;
+             ] ;
+
+^self reloadPricesFor: list purgeSource: TRUE ;
+^self reloadSplitsFor: list purgeSource: TRUE ;
+^self reloadDivsFor: list purgeSource: TRUE ;
+reloadOtherData ;
+
+] ;
+
+UnstitchSecurityFeed defineMethod: [ | reloadOtherData |
+
+] ;
+
+#==================================================
+
+####################
+#  MoveSecurityInfoFeed Protocol
+#
+#  Inputs:
+#     sourceId
+#     targetId
+####################
+
+MoveSecurityInfoFeed
+  defineFixedProperty: 'sourceId' .
+  defineFixedProperty: 'targetId' .
+
+  defineFixedProperty: 'sourceSecurity' .
+  defineFixedProperty: 'targetSecurity' .
+
+  defineFixedProperty: 'skippedReason' .
+  define: 'errorSourceEqualsTarget'
+    toBe: "sourceId and targetId Refer to Same Security" .
+;
+
+MoveSecurityInfoFeed defineMethod: [ | displayInfo | 
+  "sourceId: " print ; sourceId print ; 
+  " | " print ; getSourceSecurity displayInfo ;
+  "targetId: " print ; targetId print ; 
+  " | " print ; getTargetSecurity displayInfo ;
+] ;
+
+MoveSecurityInfoFeed  defineMethod: [ | rejectReason | 
+   skippedReason isntDefault
+      ifTrue: [ skippedReason ] .
+   elseIf: [ sourceSecurity isDefault ] 
+     then: [ "Bad sourceSecurity supplied - " concat: sourceId ] .
+   elseIf: [ targetSecurity isDefault ] 
+     then: [ "Bad targetSecurity supplied - " concat: targetId ] .
+] ;
+
+#--------------------
+
+MoveSecurityInfoFeed defineMethod: [ | getSourceSecurity |
+  sourceId as: CoreWorkspace Security
+] ;
+
+MoveSecurityInfoFeed defineMethod: [ | getTargetSecurity |
+  targetId as: CoreWorkspace Security
+] ;
+
+#--------------------
+
+MoveSecurityInfoFeed defineMethod: [ | initializeProcessing |
+  ^self masterList
+  do: [ :sourceSecurity <- getSourceSecurity ;
+        :targetSecurity <- getTargetSecurity ;
+     ]; 
+] ;
+
+MoveSecurityInfoFeed defineMethod: [ | runUpdate | 
+  !valid <- ^self masterList
+    select: [ sourceSecurity isntDefault && targetSecurity isntDefault ] ;
+  valid select: [ sourceSecurity = targetSecurity ] .
+     do: [ :skippedReason <- errorSourceEqualsTarget ] ;
+  !todo <- valid select: [ skippedReason isDefault ] ;
+  ^self processUpdateFor: todo ;
+] ;
+
+#----------
+
+MoveSecurityInfoFeed defineMethod: [ | processUpdateFor: recs |
+recs do:
+   [
+     :isProcessed <- TRUE ;
+   ] ;
+] ;
+
+#----------
+
+MoveSecurityInfoFeed defineMethod: [ | displayNewOnes | 
+  !goodOnes <- ^self instanceList select: [ isProcessed ] ;
+  goodOnes count > 0 
+  ifTrue:
+    [ newLine print ;
+      "---> Security Information was Moved for the Following Securities: "
+          printNL ;
+      goodOnes
+      do: [ "From: " print; sourceId print ; " | " print ;
+            sourceSecurity displayInfo ;
+            "  To: " print ; targetId print; " | " print ;
+            targetSecurity displayInfo ;
+          ] ;
+    ] ;
+] ;
+
+MoveSecurityInfoFeed defineMethod: [ | displayBadOnes | 
+  !bad <- ^self asSelf masterList select: [ sourceSecurity isDefault ] ;
+  bad count > 0
+  ifTrue: [ newLine print ; 
+            bad count print ; " bad sourceId. " printNL ;
+            bad do: [ "Cannot move from " print; 
+                      sourceId print ; " (bad id) " print ;
+                      " to " print ; targetId printNL ;
+                    ] ;
+          ] ;
+  !bad <- ^self asSelf masterList select: [ targetSecurity isDefault ] ;
+  bad count > 0
+  ifTrue: [ newLine print ; 
+            bad count print ; " bad targetId. " printNL ;
+            bad do: [ "Cannot move from " print; sourceId print ;
+                      " to " print; targetId print ; " (bad id)" printNL ;
+                    ] ;
+          ] ;
+  !bad <- ^self asSelf masterList select: [ skippedReason isntDefault ] ;
+  bad count > 0
+  ifTrue: [ newLine print ; 
+            bad count print ; " Skipped for Another Reason. " printNL ;
+            bad groupedBy: [ skippedReason ] .
+            do: [ newLine print ;
+                  "--> Reason: " print ; printNL ;
+                  groupList do: [ displayInfo ; "-" fill: 50 . printNL ] ;
+                 
+                ] ;
+          ] ;
+] ;
+
+MoveSecurityInfoFeed defineMethod: [ | runWrapup | 
+^super runWrapup ;
+reloadData ;
+^self
+] ;
+
+MoveSecurityInfoFeed defineMethod: [ | reloadData |
+#---  reset the cfg flie attributes before running reloads
+^self resetRunTimeAttributes ;
+!list <- ^self masterList select: [ isProcessed ] ;
+^self reloadPricesFor: list purgeSource: TRUE ;
+^self reloadSplitsFor: list purgeSource: TRUE ;
+^self reloadDivsFor: list purgeSource: TRUE ;
+reloadOtherData ;
+
+] ;
+
+MoveSecurityInfoFeed defineMethod: [ | reloadOtherData |
+] ;
+
+
+#==================================================
+
+####################
+#  CanadianIdChangeFeed Protocol
+# 
+#  Inputs:
+#    cusip
+#    sedol
+####################
+
+CanadianIdChangeFeed
+  defineFixedProperty: 'cusip' .
+  defineFixedProperty: 'sedol' .
+
+  defineFixedProperty: 'securityBySedol' .
+  defineFixedProperty: 'oldAliases' .
+
+  defineFixedProperty: 'skippedReason' .
+  define: 'errorCusipMustExist' 
+    toBe: "Cusip Must Already Exist" .
+  define: 'errorCusipMustBePrimary' 
+    toBe: "Cusip Must be Primary Id For Security" .
+  define: 'errorMustSupplySedol' 
+    toBe: "Sedol Must Be Provided" .
+  define: 'errorCusipAndSedolAreLinked' 
+    toBe: "Cusip and Sedol Reference Same Security" .
+  define: 'errorSedolMustNotExist' 
+    toBe: "Sedol Already References a Security" .
+  define: 'errorCannotSetMultipleSedols' 
+    toBe: "Cannot Set Multiple Sedols to Same Security" .
+  define: 'errorCannotSetSedolToMultipleSecurities' 
+    toBe: "Cannot Set Sedol to Multiple Securities" .
+;
+
+CanadianIdChangeFeed defineMethod: [ | getUploadProperties | 
+  ^super getUploadProperties
+    select: [ code != "entityId" && code != "currencyId" ] .
+    reject: [ code contains: "DateToMove" ]
+] ;
+
+CanadianIdChangeFeed defineMethod: [ | displayInfo | 
+  cusip print: 10 ; sedol print: 10 ; " | " print ;
+  underlyingRecord displayInfo ;
+] ;
+
+CanadianIdChangeFeed  defineMethod: [ | rejectReason | 
+   skippedReason isntDefault
+      ifTrue: [ skippedReason ] .
+] ;
+
+#--------------------
+
+CanadianIdChangeFeed defineMethod: [ | initializeProcessing |
+  ^self masterList
+  do: [ :underlyingRecord <- CoreWorkspace Security locateId: cusip ;
+        :securityBySedol <- CoreWorkspace Security locateId: sedol ;
+     ]; 
+] ;
+
+CanadianIdChangeFeed defineMethod: [ | runUpdate | 
+  ^self masterList
+  do: [ :skippedReason <- underlyingRecord isDefault
+          ifTrue: [ errorCusipMustExist ] .
+          elseIf: [ underlyingRecord code take: 8 . != 
+                       (cusip toUpper take: 8) ] 
+            then: [ errorCusipMustBePrimary ] .
+          elseIf: [ sedol isDefault ] then: [ errorMustSupplySedol ] .
+          elseIf: [ underlyingRecord = securityBySedol ] 
+            then: [ errorCusipAndSedolAreLinked ] .
+          elseIf: [ securityBySedol isntDefault ]
+            then: [ errorSedolMustNotExist ] ;
+      ] ;
+ ^self masterList 
+      groupedBy: [ underlyingRecord ] .
+      select: [ groupList count > 1 ] .
+   do: [ groupList do: [ :skippedReason <- errorCannotSetMultipleSedols ] ] ;
+ ^self masterList 
+      groupedByString: [ sedol ] .
+      select: [ groupList count > 1 ] .
+   do: [ groupList
+         do: [ :skippedReason <- errorCannotSetSedolToMultipleSecurities ] 
+       ] ;
+  !todo <- ^self masterList select: [ skippedReason isDefault ] ;
+  ^self processUpdateFor: todo ;
+] ;
+
+
+CanadianIdChangeFeed defineMethod: [ | processUpdateFor: recs |
+recs do:
+   [ #-- remove all aliases from security and set sedol and code directly
+     :oldAliases <- underlyingRecord aliases send: [ asSelf ] ;
+     underlyingRecord 
+     do: [ !oldCusip <- cusip ;
+           ^self deleteAlias: aliases toList ;
+           ^self resetCodeTo: ^my sedol . setSedolTo: ^my sedol .
+              resetCusipTo: NA ;
+           idHistory cusip = oldCusip
+           ifTrue: 
+             [ !date <- idHistory :cusip effectiveDate ;
+               idHistory :cusip delete: date ;
+               oldCusip as: CoreWorkspace CusipId .
+               do: [ :security select: [ ^self = ^my asSelf ] .
+                       do: [ :security delete: ^my date ] ;
+                   ] ;
+             ] ;
+           idHistory setCusipTo: NA ;
+           :ticker <- NA ; idHistory setTickerTo: NA ;
+           #-- add the cusip and cusip back to the company, if exists
+           company isntDefault
+             ifTrue: [ company addAlias: oldCusip . 
+                               addAlias: (oldCusip take: 8) 
+                     ] ;
+         ] ;
+     :isProcessed <- TRUE ;
+   ] ;
+] ;
+
+#----------
+
+CanadianIdChangeFeed defineMethod: [ | displayNewOnes | 
+  !goodOnes <- ^self instanceList select: [ isProcessed ] ;
+  goodOnes count > 0 
+  ifTrue:
+    [ newLine print ;
+      "---> The Following Ids were Changed from Cusip to Sedol: " printNL ;
+      goodOnes
+      do: [ "From Cusip: " print ; cusip print; 
+            "  To Sedol: " print ; sedol printNL ;
+            "Security " print ; underlyingRecord code print: 10 ; 
+            underlyingRecord sedol print:10 ; 
+            underlyingRecord name printNL ;
+            "   Old Ids: " print ; 
+            oldAliases do: [ print ; " | " print ] ; newLine print ;
+          ] ;
+    ] ;
+] ;
+
+CanadianIdChangeFeed defineMethod: [ | displayBadOnes | 
+  !bad <- ^self asSelf masterList select: [ skippedReason isntDefault ] ;
+  bad count > 0
+  ifTrue: [ newLine print ; 
+            bad groupedBy: [ skippedReason ] .
+            do: [ newLine print ;
+                  "--> Skipped Reason: " print ; printNL ;
+                  groupList do: [ cusip print: 10 ; sedol printNL ] ;
+                  newLine print ;
+                ] ;
+          ] ;
+] ;
+
+#==================================================
+
+####################
+#  RemoveSecurityFeed Protocol
+# 
+#  Inputs:
+#    entityId
+####################
+
+RemoveSecurityFeed defineMethod: [ | getUploadProperties | 
+  ^super getUploadProperties
+    reject: [ code contains: "DateToMove" ]
+] ;
+
+RemoveSecurityFeed defineMethod: [ | rejectReason | 
+    "Bad entityId supplied - " concat: entityId 
+] ;
+
+#----------
+
+RemoveSecurityFeed defineMethod: [ | initializeProcessing |
+  ^self masterList
+  do: [ :underlyingRecord <- entityId as: CoreWorkspace Security ;
+      ]; 
+] ;
+
+RemoveSecurityFeed defineMethod: [ | runUpdate | 
+  !valid <- ^self masterList
+    select: [ underlyingRecord isntDefault ] ;
+  ^self processUpdateFor: valid ;
+] ;
+
+#----------
+
+RemoveSecurityFeed defineMethod: [ | processUpdateFor: recs |
+recs do:
+   [ underlyingRecord unlinkFromCompany ;
+     !reason <- "Manually Removed" ;
+     ^self flagSecurity: underlyingRecord forDeletionWithReason: reason ;
+     !newName <- underlyingRecord name concat: " (FLAGGED FOR DELETION)" ;
+     underlyingRecord setNameTo: newName ;
+     :isProcessed <- TRUE ;
+   ] ;
+] ;
+
+#----------
+
+RemoveSecurityFeed defineMethod: [ | displayNewOnes | 
+  !goodOnes <- ^self instanceList select: [ isProcessed ] ;
+  goodOnes count > 0 
+  ifTrue:
+    [ newLine print ;
+      "---> The Following Securities were Flagged for Deletion: " printNL ;
+      goodOnes
+      do: [ entityId print ; " | " print ; underlyingRecord displayInfo ;
+          ] ;
+    ] ;
+] ;
+
+RemoveSecurityFeed defineMethod: [ | displayBadOnes | 
+  !bad <- ^self asSelf masterList select: [ underlyingRecord isDefault ] ;
+  bad count > 0
+  ifTrue: [ newLine print ; 
+            bad count print ; " Bad entityId Supplied. " printNL ;
+            bad do: [ entityId printNL ] ;
+          ] ;
+] ;
+
+RemoveSecurityFeed defineMethod: [ | runWrapup | 
+newLine print ;
+^super runWrapup ;
+CoreWorkspace Company rebuildSecurityList ;
+^self
+] ;
+
+####################
+#  RemoveCompanyFeed Protocol
+# 
+#  Inputs:
+#    entityId
+####################
+
+RemoveCompanyFeed defineMethod: [ | getUploadProperties | 
+  ^super getUploadProperties
+    reject: [ code contains: "DateToMove" ]
+] ;
+
+RemoveCompanyFeed defineMethod: [ | rejectReason | 
+    "Bad entityId supplied - " concat: entityId 
+] ;
+
+#----------
+
+RemoveCompanyFeed defineMethod: [ | initializeProcessing |
+  ^self masterList
+  do: [ :underlyingRecord <- entityId as: CoreWorkspace Company ;
+      ]; 
+] ;
+
+RemoveCompanyFeed defineMethod: [ | runUpdate | 
+  !valid <- ^self masterList
+    select: [ underlyingRecord isntDefault ] ;
+  ^self processUpdateFor: valid ;
+] ;
+
+#----------
+
+RemoveCompanyFeed defineMethod: [ | processUpdateFor: recs |
+recs do:
+   [ !reason <- "Manually Removed" ;
+     underlyingRecord flagForDeletionWithReason: reason ;
+     !newName <- underlyingRecord name concat: " (FLAGGED FOR DELETION)" ;
+     underlyingRecord setNameTo: newName ;
+     :isProcessed <- TRUE ;
+   ] ;
+] ;
+
+#----------
+
+RemoveCompanyFeed defineMethod: [ | displayNewOnes | 
+  !goodOnes <- ^self instanceList select: [ isProcessed ] ;
+  goodOnes count > 0 
+  ifTrue:
+    [ newLine print ;
+      "---> The Following Companies were Flagged for Deletion: " printNL ;
+      goodOnes
+      do: [ entityId print ; " | " print ; underlyingRecord displayInfo ;
+          ] ;
+    ] ;
+] ;
+
+RemoveCompanyFeed defineMethod: [ | displayBadOnes | 
+  !bad <- ^self asSelf masterList select: [ underlyingRecord isDefault ] ;
+  bad count > 0
+  ifTrue: [ newLine print ; 
+            bad count print ; " Bad entityId Supplied. " printNL ;
+            bad do: [ entityId printNL ] ;
+          ] ;
+] ;
+
+RemoveCompanyFeed defineMethod: [ | runWrapup | 
+newLine print ;
+^super runWrapup ;
+CoreWorkspace Company rebuildSecurityList ;
+^self
+] ;
+
+####################
+#  ReuseSecurityIdFeed Protocol
+# 
+#  Inputs:
+#    entityId
+####################
+
+ReuseSecurityIdFeed
+;
+
+ReuseSecurityIdFeed defineMethod: [ | getUploadProperties | 
+  ^super getUploadProperties
+    select: [ code != "currencyId" ] .
+    reject: [ code contains: "DateToMove" ]
+] ;
+
+ReuseSecurityIdFeed  defineMethod: [ | rejectReason | 
+  "Bad entityId supplied - " concat: entityId 
+] ;
+
+#--------------------
+
+ReuseSecurityIdFeed defineMethod: [ | initializeProcessing |
+  ^self masterList
+  do: [ :underlyingRecord <- entityId as: CoreWorkspace Security ;
+      ]; 
+] ;
+
+ReuseSecurityIdFeed defineMethod: [ | runUpdate | 
+  !valid <- ^self masterList
+    select: [ underlyingRecord isntDefault ] ;
+  ^self processUpdateFor: valid ;
+] ;
+
+ReuseSecurityIdFeed defineMethod: [ | processUpdateFor: recs |
+recs do:
+   [ !newId <- "h" concat: entityId ;
+     !isCusip <- entityId count between: 8 and: 9 ;
+     !isSedol <- entityId count between: 6 and: 7 ;
+     isCusip ifTrue:
+        [ !id8 <- entityId take: 8 ;
+          !isCurrent <- underlyingRecord cusip take: 8 . = id8 ;
+          isCurrent
+            ifTrue: [ underlyingRecord setCusipTo: newId ] 
+           ifFalse: [ underlyingRecord addAlias: newId ] ;
+          !match <- "^" concat: id8 ;
+          !aliases <- underlyingRecord aliases
+              select: [ ^self contains: ^my match ] ;
+          underlyingRecord deleteAlias: aliases ;
+          aliases do: [ ^my underlyingRecord XRef Cusip delete: ^self ] ;
+          newId count = 9
+             ifTrue: [ underlyingRecord deleteAlias: (newId drop: -1) ] ;
+          !xref <- aliases sortDown: [ count ] . at: 1 ;
+          CoreWorkspace CusipId set: xref to: CoreWorkspace Security ;
+        ] .
+     elseIf: [ isSedol ] then: 
+        [ !id6 <- entityId take: 6 ;
+          !isCurrent <- underlyingRecord sedol take: 6 . = id6 ;
+          isCurrent
+            ifTrue: [ underlyingRecord setSedolTo: newId ]
+           ifFalse: [ underlyingRecord addAlias: newId ] ;
+          !match <- "^" concat: id6 ;
+          !aliases <- underlyingRecord aliases
+              select: [ ^self contains: ^my match ] ;
+          underlyingRecord deleteAlias: aliases ;
+          aliases do: [ ^my underlyingRecord XRef Sedol delete: ^self ] ;
+          newId count = 7
+             ifTrue: [ underlyingRecord deleteAlias: (newId drop: -1) ] ;
+          !xref <- aliases sortDown: [ count ] . at: 1 ;
+          CoreWorkspace SedolId set: xref to: CoreWorkspace Security ;
+        ] .
+     else: [ underlyingRecord deleteAlias: entityId ;
+             underlyingRecord addAlias: newId ;
+           ] ;
+     :isProcessed <- TRUE ;
+   ] ;
+] ;
+
+#----------
+
+ReuseSecurityIdFeed defineMethod: [ | displayNewOnes | 
+  !goodOnes <- ^self instanceList select: [ isProcessed ] ;
+  goodOnes count > 0 
+  ifTrue:
+    [ newLine print ;
+      "---> The Following Ids were Removed: " printNL ;
+      goodOnes sortDown: [ entityId count ] . sortUp: [ entityId ] .
+      do: [ "EntityId: " print ; entityId print ; 
+            " -- " print ; underlyingRecord displayInfo ;
+            underlyingRecord idHistory profile ;
+            underlyingRecord company securityList count > 1 &&
+            [ underlyingRecord company code contains: "^h" ] 
+            ifTrue:
+              [ "   Company: " print ; underlyingRecord company displayInfo;
+                underlyingRecord company securityList
+                   do: [ "   Security: " print ; displayInfo ] ;
+              ] ;
+            " -" fill: 80 . printNL ;
+          ] ;
+    ] ;
+] ;
+
+ReuseSecurityIdFeed defineMethod: [ | displayBadOnes | 
+  !bad <- ^self asSelf masterList select: [ underlyingRecord isDefault ] ;
+  bad count > 0
+  ifTrue: [ newLine print ; 
+            bad count print ; " bad entityIds. " printNL ;
+            bad do: [ entityId printNL ; ] ;
+          ] ;
+] ;
+
+######################################################################
+
+Schema processAllMessages ;
+SecurityCorrectionFeed getMessage: "firstPriceDateToMove" . enableOkayToUpload;
+SecurityCorrectionFeed getMessage: "lastPriceDateToMove" . enableOkayToUpload;
+SecurityCorrectionFeed getMessage: "firstSplitDateToMove" . enableOkayToUpload;
+SecurityCorrectionFeed getMessage: "lastSplitDateToMove" . enableOkayToUpload;
+SecurityCorrectionFeed getMessage: "firstDivDateToMove" . enableOkayToUpload;
+SecurityCorrectionFeed getMessage: "lastDivDateToMove" . enableOkayToUpload;
+
+StitchSecurityFeed getMessage: "idToKeep" . enableOkayToUpload ;
+StitchSecurityFeed getMessage: "idToMove" . enableOkayToUpload ;
+UnstitchSecurityFeed getMessage: "idToKeep" . enableOkayToUpload ;
+UnstitchSecurityFeed getMessage: "idToMove" . enableOkayToUpload ;
+CanadianIdChangeFeed getMessage: "cusip" . enableOkayToUpload ;
+CanadianIdChangeFeed  getMessage: "sedol" . enableOkayToUpload ;
+

@@ -1,0 +1,164 @@
+#!/bin/tcsh -f
+
+####  Delete potentially problematic aliases, ...
+unalias cd
+unalias rm
+
+####  Acquire arguments
+set doMakefileCheck = 0
+foreach arg ($argv)
+    switch ($arg)
+    case '-quick':
+	set doMakefileCheck = 1
+	breaksw
+    case '-f':
+	set doMakefileCheck = 0
+	breaksw
+    default:
+	echo "+++ Unrecognized option: $f"
+	breaksw
+    endsw
+end
+
+####  Determine the platform, ...
+set os = `uname -s`
+set ov = `uname -r`
+
+set vp = "_"
+switch ($os)
+case SunOS:
+    set vp = "Solaris_2x"
+    breaksw
+case Linux:
+    set vp = "Linux"
+    breaksw
+default:
+    echo ">>> Unsupported Platform: $os"
+    exit 1
+    breaksw
+endsw
+
+####  Determine the source directory targets being built, ...
+set base = $cwd
+
+set dirs = ()
+foreach f (`find . -name make.tlist`)
+    set dirs = (`dirname $f` $dirs)
+end
+
+if ($#dirs == 0) then
+    echo ">>> Current directory doesn't contain make.tlist files."
+    exit
+endif
+
+foreach dir ($dirs)
+    if ($doMakefileCheck && -e $dir/makefile) then
+	echo "+++ Skipping build directory ${dir}: Makefile already exists."
+    else
+	cd $dir
+	echo "+++ Creating build directory $cwd."
+
+	####  Remove existing symlinks, ...
+	foreach file (*)
+            if (-l "$file") rm $file
+        end
+        
+        ####  Remove existing intermediate files.
+        rm -f make.defs.includes make.defs.clean visionBuilder.scrubFiles
+
+	####  ... create the links needed by the build, ...
+	if (-e make.sources) then
+	    set sources = (`cat make.sources`)
+	else
+    	    set sources = (../kernel ../network)
+	endif
+
+	if (-e make.xsources) then
+	    set sources = (`cat make.xsources` $sources)
+	endif
+        
+        # Create our make.defs.clean file's beginnings.
+        echo "clean:" >> make.defs.clean
+        echo '	rm -f $(GENERATEDFILES)' >> make.defs.clean
+        echo '	rm -f *.o$B' >> make.defs.clean
+        echo "" >> make.defs.clean
+        echo "make.defs.clean" >> visionBuilder.scrubFiles
+
+        # Link in platform-dependent make.defs files.
+	if (-d M_${os}_${ov}) then
+            set platformdir = "M_${os}_${ov}"
+	else if (-d M_${os}) then
+            set platformdir = "M_${os}"
+	endif
+        if ( $?platformdir ) then
+            foreach i ($platformdir/*)
+                ln -s -f $i
+                echo `basename $i` >> visionBuilder.scrubFiles
+            end
+        endif
+        
+        if ($#sources > 0) then
+            echo "CINCS += -I." >> make.defs.includes
+            echo "make.defs.includes" >> visionBuilder.scrubFiles
+        endif
+        
+	foreach sourcedir ($sources)
+            # Add in our include directory to the makefile.
+            echo "CINCS += -I$sourcedir" >> make.defs.includes
+            echo "VPATH += $sourcedir" >> make.defs.includes
+            
+            # Link in our files that can't be referenced directly via makefile.
+	    set sFiles = ()
+	    if (-e $sourcedir/make.linkallsrc) then
+                # TODO: Reduce the following find as much as possible, hopefully to nonexistence.
+		set sFiles = (`find $sourcedir -type f -name "*.[ly]" -o -name "*.[ly]o" -o -name "make.defs.*"`)
+		if ("$os" == "SunOS") then
+		    set sFiles = ($sFiles `find $sourcedir -type f -name "sun.*.il"`)
+		endif
+	    endif
+	    if ( $#sFiles > 0 ) then
+                foreach sFile ($sFiles)
+                    ln -s -f $sFile
+                    echo `basename $sFile` >> visionBuilder.scrubFiles
+                end
+            endif
+	end
+
+        # Manually link in our platform-specific code.
+        # TODO: Do this once inside the kernel/ directory, or change the code to use #ifdefs.
+        foreach file ( Vp{,Socket,FileMapping}_${vp}.h )
+            set destFile = `echo $file | sed -e "s/_${vp}//"`
+	    ln -s -f ../kernel/$file $destFile
+            echo "$destFile" >> visionBuilder.scrubFiles
+        end
+
+	if (-f VpOpenDialog_Not.h) then
+            ln -s -f VpOpenDialog_Not.h VpOpenDialog.h
+            echo "VpOpenDialog.h" >> visionBuilder.scrubFiles
+        endif
+
+	####  ... create the library list, ...
+	if (-e make.llist) then
+	    set liblist = (`cat make.llist`)
+	else
+	    set liblist = (Vsa Vca V)
+	endif
+
+	set locallibs = ()
+	foreach l ($liblist)
+	    set locallibs = ($locallibs "-l$l")
+	end
+
+	echo "#####  LOCALLIBS" > make.defs.1
+	echo "LOCALLIBS = $locallibs" >> make.defs.1
+        echo "make.defs.1" >> visionBuilder.scrubFiles
+
+	####  ... create the makefile, ...
+	makemake
+        echo "makefile" >> visionBuilder.scrubFiles
+
+	cd $base
+    endif
+end
+
+exit 0

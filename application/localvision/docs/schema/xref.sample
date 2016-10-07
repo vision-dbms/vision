@@ -1,0 +1,217 @@
+##################################################
+#  Sample Usage of Schema Database to generate class/message XRef
+#
+#  To invoke:
+#    Specific class -
+#         Integer classDescriptor fullReport        
+#    All classes - 
+#         Schema ClassDescriptor instanceList
+#         do: [ name translate: " " to: "_" . concat: ".doc" . 
+#                  substituteOutputOf: [ fullReport ] ;
+#             ] ;
+#
+#  To invoke full cross reference:
+#        Schema ClassDescriptor
+#        do: [ 
+#            !title <- "***  Message Cross Reference - All Messages  ***" ;
+#            !list <- MessageImplementationDescriptor activeList
+#               select: [ usageLevel isInternal not ] ;
+#            ^self alphaXRefFor: list withTitle: title ;
+#           ^self functionXRefFor: list withTitle: title ;
+#           ] ;
+#
+#  See /localvision/doc/schema/schema.out for more information about
+#      the schema database
+#
+###################################################
+
+Schema ClassDescriptor  
+defineMethod:
+[ | fullReport |
+
+  "The Class: " print ; name printNL ;
+  newLine print ; newLine print ; 
+  description isntNA 
+      ifTrue: [ description printNL ;
+                newLine print ; newLine print ; 
+              ] ;
+
+  asSelf isObjectDescriptor 
+      ifFalse: [ class showInheritance ] ;
+
+  detailReport ;
+  alphaXRefReport ;
+  functionXRefReport ;
+
+] ;
+
+#--------------------
+
+Schema ClassDescriptor
+defineMethod:
+[ | detailReport |
+  newPage print ; 
+  [ 
+    "Message Detail For Class " print ;
+    ^self code print ;
+  ] divertOutput centerNL: 80 . print ; 
+  ^self class getMessages
+     select: [ isMessageImplementationDescriptor ] .
+     select: [ usageLevel isInternal not && usageLevel isReserved not ] .
+  do: [ 
+        !name <- fullSelector ;
+        name print ; 
+        functionType isntNA
+        ifTrue: 
+          [ " " print: (69 - name count - functionType code count) ;
+            "Function: " print: 10 ; functionType code printNL ;
+          ]
+        ifFalse: [ newLine print ] ;
+        newLine print ;
+        description isntNA ifTrue: [ description printNL ] ;
+        parameterList count > 0 && type isMethod
+        ifTrue:
+           [ newLine print ; 
+             parameterList toList numberElements
+             do: [ "Parameter " print; position print: -3 ;
+                   "is " print ;
+                   code printNL
+                ] ;
+           ] ;
+        "-" fill: 80 . printNL ;
+      ] ;
+] ;
+
+
+#--------------------
+
+Schema ClassDescriptor
+defineMethod:
+[ | alphaXRefReport |
+  !list <- class getMessagesX ;
+  asSelf isObjectDescriptor
+     ifFalse: [ :list <- list 
+                  select: [messageClassDescriptor isObjectDescriptor not]
+              ] ;
+  !title <- 
+     [ "***  Message Cross Reference For " print ; 
+       ^self code print ; 
+       "  ***" print ;
+     ] divertOutput ;
+  ^self alphaXRefFor: list withTitle: title ;
+] .
+
+defineMethod:
+[ | alphaFullXRefReport | 
+  !list <- class getMessagesInInheritancePath 
+      select: [ usageLevel isInternal not ] ;
+  !title <- 
+     "***  Message Cross Reference - All Messages  ***" ;
+  ^self functionXRefFor: list withTitle: title ;
+] .
+
+defineMethod:
+[ | alphaXRefFor: messageList withTitle: title  | 
+  !list <- messageList sortUp: [ code ] .
+              select: [ usageLevel isReserved not ] ;
+  !maxMess  <- (list max: [ message count ] . + 1) asInteger ;
+  !maxClass <- 
+      (list max: [ messageClassDescriptor name count ] . + 2 ) asInteger ;
+  !maxFunction <- (list select: [ functionType isntNA ] . 
+                        max: [ functionType code count ] . + 2 ) asInteger ;
+  !width <- (maxMess + maxClass + maxFunction + 25 ) asInteger ;
+
+  newPage print ; 
+  title centerNL: 75 . print ; 
+  "Sorted By Message" centerNL: 75 . print ;
+  newLine print ;
+  "Message" print: maxMess ;
+  "Class" print: maxClass ;
+  "Type" print: 11 ; 
+  "Function" print: maxFunction ; 
+  "Level" printNL ; 
+  "-" fill: width . printNL ;
+  list numberElements
+  do: [ 
+        message print: ^my maxMess ; 
+        messageClassDescriptor name print: ^my maxClass ;
+        type shortName print: 11 ; 
+        functionType isNA
+           ifTrue: [ " " ] 
+          ifFalse: [ functionType code ] . print: ^my maxFunction ;
+        usageLevel isAdvanced || usageLevel isInternal
+           ifTrue: [ usageLevel code print ] ;
+        newLine print ; 
+      ] ;
+] .
+
+#------------------------------
+
+defineMethod:
+[ | functionXRefReport | 
+  !list <- class  getMessagesX ;
+  asSelf isObjectDescriptor
+    ifFalse: [ :list <- list 
+                  select: [messageClassDescriptor isObjectDescriptor not] 
+             ] ;
+  !title <- 
+     [ "***  Message Cross Reference For " print ; 
+       ^self code print ; 
+       "  ***" print ;
+     ] divertOutput ;
+  ^self functionXRefFor: list withTitle: title ;
+] .
+
+defineMethod:
+[ | functionFullXRefReport | 
+  !list <- class getMessagesInInheritancePath 
+      select: [ usageLevel isInternal not ] ;
+  !title <- 
+     "***  Message Cross Reference - All Messages  ***" ;
+  ^self functionXRefFor: list withTitle: title ;
+] .
+
+defineMethod:
+[ | functionXRefFor: messageList withTitle: title | 
+  newPage printNL ;
+  !list <- messageList
+      select: [ functionType isntNA && usageLevel isReserved not ] ;
+  !maxMess  <- (list max: [ message count ] . + 1) asInteger ;
+  !maxClass <- 
+      (list max: [ messageClassDescriptor name count ] . + 2 ) asInteger ;
+  !maxFunction <- (list max: [ functionType code count ] . + 2 ) asInteger ;
+  !width <- (maxMess + maxClass + maxFunction + 25 ) asInteger ;
+  
+  title centerNL: 75 . print ;
+  "Sorted By Function" centerNL: 75 . print ; 
+  newLine print ;
+  "Message" print: maxMess ;
+  "Class" print: maxClass ;
+  "Type" print: 11 ; 
+  "Function" print: maxFunction ; 
+  "Level" printNL ; 
+  "-" fill: width . printNL ;
+
+  list groupedBy: [ functionType ] . sortUp: [ code ] .
+  do: [ !maxMess <- ^my maxMess ; 
+        !maxClass <- ^my maxClass ; 
+        !maxFunction <- ^my maxFunction ;
+        groupList sortUp: [ message ] . numberElements
+        do: [
+              message print: ^my maxMess ; 
+              messageClassDescriptor name print: ^my maxClass ;
+              type shortName print: 11 ; 
+              functionType code print: ^my maxFunction ;
+              usageLevel isAdvanced || usageLevel isInternal
+                 ifTrue: [ usageLevel code print ] ;
+              newLine print ; 
+            ] ;
+      ] ;
+] .
+
+;
+
+
+#--------------------------------------------------
+
+

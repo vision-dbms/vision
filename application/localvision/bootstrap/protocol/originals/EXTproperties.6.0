@@ -1,0 +1,73 @@
+
+######################
+######################
+####  Property Management Extensions
+######################
+######################
+#
+#  This file implements the extensions needed to support property prototypes.
+#
+#  Affected Classes:
+#	Object
+#	NA
+#	Value
+#
+################
+
+################
+####  Object Extensions
+################
+
+Object
+defineMethod:
+[| defineProperty: name withPrototype: prototype |
+    name
+        locateOrAddInDictionaryOf: ^self.
+	__locateOrAddDictionaryPropertySlot <- prototype;
+    ^self hasSchema ifTrue: [^self classDescriptor flagForMessageUpdate]; 
+    ^self
+].
+
+defineMethod:
+[ | clearPropertyDesignationFor: name |
+    name locateInDictionaryOf: ^self. __deleteDictionaryPropertySlot
+].
+
+defineMethod:
+[ | getPropertyDesignationFor: name |
+    name locateInDictionaryOf: ^self. __locateDictionaryPropertySlot isntNA
+].
+
+defineMethod:
+[ | getPropertyPrototypeFor: name |
+    name locateInDictionaryOf: ^self. __locateDictionaryPropertySlot value
+].
+
+defineMethod:
+[ | propertyList |
+    !self <- ^self;
+    ^self selectorList select: [^my self getPropertyDesignationFor: ^self]
+].
+;
+
+
+################
+####  NA Extensions
+################
+
+NA
+define: '__locateOrAddDictionaryPropertySlot'	toBe: NA.
+define: '__locateDictionaryPropertySlot'	toBe: NA.
+define: '__deleteDictionaryPropertySlot'	toBe: NA.
+;
+
+
+################
+####  Value Extensions
+################
+
+Value
+define: '__locateOrAddDictionaryPropertySlot'	toBe: 77 asPrimitive.
+define: '__locateDictionaryPropertySlot'	toBe: 78 asPrimitive.
+define: '__deleteDictionaryPropertySlot'	toBe: 79 asPrimitive.
+;

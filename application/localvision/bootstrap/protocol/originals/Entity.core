@@ -1,0 +1,271 @@
+"
+####################
+#  Entity: Protocol
+####################
+
+" print ;
+
+Entity
+  defineFixedProperty: 'name' .
+  defineFixedProperty: 'shortName' .
+  defineFixedProperty: 'numericCode' .
+  defineFixedProperty: 'sortCode ' .
+  defineFixedProperty: 'aliases' .
+  define: 'named' toBe: NA .
+;
+
+#--------------------
+#  initial values
+#--------------------
+Entity :aliases <- ^global IndexedList new ;
+
+#--------------------
+#  schema
+#--------------------
+
+Entity
+defineMethod:
+[ | specializeAs: string at: object |
+  !newEntity <- ^super specializeAs: string at: object .
+      do: [ ^self :name <- ^self code ;         #<--
+            ^self :shortName <- ^self code ;    #<--
+            ^self :sortCode <- ^self code ;     #<--
+          ] ;
+
+### Add Class Dictinary to Named    (i.e., Named Company)
+   !newNamedDictionary <- ^global Named newAs: string ;
+### Name Initial Row in New Entity to be Default Row in Dictionary
+   newNamedDictionary define: 'Default' toBe: newEntity ;
+### Create a Class Variable Pointing to the New Entity's Named Dictionary
+   newEntity define: 'named' toBe: newNamedDictionary ;
+   newEntity
+] .
+
+
+defineMethod:
+[ | newAs: string | 
+  !newEntity <- ^super newAs: string ;
+  newEntity initialize ;
+  newEntity
+] .
+
+   define: 'initializationList' toBe: List new .
+
+defineMethod:
+[ | initializeGlobalSubclassProperties |
+  ^super initializeGlobalSubclassProperties ;
+  ^self :aliases <- ^global IndexedList new ;    
+  ^self
+] .
+
+defineMethod:
+[ | initializeGlobalInstanceProperties |
+  ^super initializeGlobalInstanceProperties ;
+  ^self :aliases <- ^self defaultInstance aliases clusterNew ;     #<--
+  ^self
+] .
+
+defineMethod:
+[ | initialize |
+  !entity <- ^self;
+  ^self do:
+  [ name isNA ifTrue: [ :name <- code ];            #<===
+    shortName isNA ifTrue: [ :shortName <- code ];  #<===
+    sortCode isNA ifTrue: [ :sortCode <- code ];    #<===
+    ^self addAlias: code;
+  ];
+  ^self initializationList
+  do: [ ^my entity send: ^self . <- 
+           (^my entity defaultInstance send: ^self . value);
+      ];
+  ^self initializeDataBaseLinks;
+  ^self
+] .
+
+defineMethod:
+[ | initializeDataBaseLinks |
+  ^self
+] .
+
+defineMethod:
+[ | createInitializationListFrom: initList |
+  !newList <- ^global List new ;
+  ^self define: 'initializationList' toBe: newList ;
+  initList isntNA
+  ifTrue: [ initList do: [ ^my newList, ^self ] ] ;
+  ^self
+] .
+
+defineMethod:
+[ | updateInitializationListWith: block |
+  ^self initializationList, block ;
+  ^self
+] .
+ 
+;
+
+#--------------------
+#  display
+#--------------------
+
+Entity 
+
+defineMethod: [ | print | ^self code print; ^self ] .
+
+defineMethod: [ | print: aFormat | ^self code print: aFormat ; ^self ] .
+
+defineMethod: 
+[ | displayInfo | 
+  " " print; ^self code print: 10; ^self name printNL ; 
+] .
+
+defineMethod:
+[ | profile | 
+  "*** " print ; ^self whatAmI print ;
+  " Profile For: " print ; ^self name printNL ;
+  "Code: " print: 30 ; ^self code printNL ; 
+  "Aliases: " print: 30 ; ^self aliases do: [ print ; " / " print ] ; 
+  newLine print ;
+  newLine print ; 
+  "---  Links   ---" printNL ;
+  !entity <- ^self ;
+  ^self initializationList
+  do: [ ^self asUndelimitedString drop: 1 . concat: " : " . print: 29 ;
+        ^my entity send: ^self . value displayInfo ;
+      ] ;
+   newLine print ; 
+   "---  XRefs  ---" printNL ;
+   ^self XRef objects select: [ isXRef ] . select: [ updateBlock isntNA ] .
+   do: [ updateBlock asUndelimitedString drop: 1 . concat: ":" . print: 29 ;
+        ^my entity send: updateBlock . value printNL ;
+       ] ;
+   newLine print ;
+] .
+
+defineMethod:
+[ | masterListCodes | 
+  !maxCode <- 
+    (^self masterList max: [ ^self code count ] . + 1) asInteger ;
+  "Code" print: maxCode  ; "Name" printNL ;
+  ^self masterList 
+  do: [ code print: ^my maxCode ; name printNL ];
+] .
+;
+
+#--------------------
+#  other protocol
+#--------------------
+Entity
+
+defineMethod: 
+[ | addAlias: alias |
+  !namingDictionary <- ^self named ;
+  namingDictionary isDictionary && 
+  alias isString && [alias isBlank not]
+  ifTrue: 
+    [ !entity <- namingDictionary at: alias ;
+      entity != ^self asSelf
+      ifTrue:
+        [
+        entity isntNA
+          ifTrue: [ entity :aliases <- entity aliases 
+                      select: [ ^self != ^my alias ] ;
+                  ] ;
+        namingDictionary at: alias put: ^self asSelf ;
+        ^self aliases , alias ;
+        ] ;
+    ] ;
+  ^self
+] .
+
+defineMethod: 
+[ | setNameTo: string | 
+  ^self :name <- string ; 
+  ^self
+] .
+
+defineMethod: 
+[ | setShortNameTo: string | 
+  ^self :shortName <- string ; 
+  ^self
+] .
+
+defineMethod: 
+[ | setNumericCodeTo: string | 
+  ^self :numericCode <- string ; 
+  ^self
+] .
+
+defineMethod: 
+[ | setSortCodeTo: string | 
+  ^self :sortCode <- string ; 
+  ^self
+] .
+
+defineMethod:
+[ | locateId: id | 
+  ^self named at: id
+] .
+
+;
+
+#--------------------
+#  Entity support for Private Structures
+#--------------------
+
+Entity
+
+defineMethod:
+[ | getRecordForUser: userName | 
+  !space <- ^global Environment User at: userName asString ;
+  space isntNA
+  ifTrue:
+    [ !dictionary <- space PrivateNamed at: ^self whatAmI ;
+      dictionary isDictionary
+      ifTrue: [ dictionary uniformAt: ^self code ]
+    ]
+] .
+
+defineMethod:
+[ | createPrivateStructure | 
+  !newClass <- 
+     ^global MyPrivateRecord specializeAs: (^self whatAmI concat: "Record") ;
+  newClass :entity <- ^self ;
+  !newNamedDictionary <- ^global PrivateNamed newAs: ^self whatAmI ;
+  newNamedDictionary define: 'Default' toBe: newClass ;
+  newClass define: 'named' toBe: newNamedDictionary ;
+  newClass
+    define: 'accessBlock' toBe: [ ^global code concat: "Data" . asBlock ] ;
+  newClass
+] .
+
+;
+
+
+#--------------------
+#  redefine standard uims display and access messages at Entity
+#--------------------
+Entity
+defineMethod: [ | displayLabel | ^self name ] .
+defineMethod: [ | displayLabelKey | ^self code ] .
+
+defineMethod:
+[ | helpMessage |
+  [ "Class: " print: 10 ; ^self whatAmI printNL ;
+    "Code: " print: 10 ; ^self code printNL ;
+    "Name: " print: 10 ; ^self name printNL ;
+  ] divertOutput
+] .
+
+defineMethod:
+[ | accessExpression |
+  [ "Named " print ; ^self named Default whatAmI print; 
+    " at: \"" print ; ^self displayLabelKey print ; 
+    "\" . " print ;
+  ] divertOutput
+] .
+
+;
+
+
+

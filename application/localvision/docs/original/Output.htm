@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Formatting Vision Output </title>
+</head>
+<body bgcolor= white>
+<h2>Formatting Vision Output</h2>
+
+<p>
+     | <a href="FHome.htm">Home</a> | <a href="Running.htm">Running Vision</a> | <a href="vifaces.htm">Interfaces</a> | <a href="Lang.htm">Vision Language</a> | 
+<hr>
+<h3>Topics Covered:</h3>
+<ul type="square">
+<li><a href="#print">Printing</a>
+<li><a href="#format">Basic String Formatting</a>
+<li><a href="#convert">Converting Objects to Strings</a>
+<li><a href="#files">Output Files</a>
+<li><a href="#more">Additional Formatting</a>
+</ul>
+
+<p>
+<hr>
+<h3><a name="print">Printing</a></h3>
+<p>
+Several variations of the <i>print</i> message are defined at Object including:
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b></td>
+<td><b>Definition</b></td>
+</tr>
+
+<tr>
+<td><i>print</i></td>
+<td>Prints recipient object's value using default for class.</td>
+</tr>
+<tr>
+<td><i>printNL</i></td>
+<td>Prints recipient object's value using default for class followed 
+by a new line.</td>
+</tr>
+
+<tr>
+<td><i>print: fmt</i></td>
+<td>Prints recipient object's value using supplied format.</td>
+</tr>
+<tr>
+<td><i>printNL: fmt</i></td>
+<td>Prints recipient object's value using supplied format followed 
+by a new line.</td>
+</tr>
+
+<tr>
+<td><i>printWithCommas: fmt</i></td>
+<td>Prints recipient object's value using supplied format, inserting 
+commas where appropriate if the recipient is a number.</td>
+</tr>
+<tr>
+<td><i>printWithCommasNL:fmt</i></td>
+<td>Prints recipient object's value using supplied format, inserting
+commas where appropriate, followed by a new line.</td>
+</tr>
+
+</table></Center>
+<p>
+
+By default, the <i>print</i> message displays the name of the object's
+class.  Many classes redefine the print message.  The <i>Ordinal</i>
+subclasses all print the value of the recipient object instead of the
+name of the class.  The <i>Entity</i> subclasses all print the value of the
+object's code property by default.  The <i>print:</i>  message provides the
+user with control over the printing format.  The interpretation of
+the supplied parameter depends on the recipient's class.  
+<p>
+<a name="printString">The following rules apply to String objects:</a>
+<p>
+<p>
+<ul type="disc">
+<li>
+The <i>print</i> message prints all characters in the recipient object.  All
+characters are printed; no truncation or padding occurs.  
+<li>
+The parameter to the <i>print:</i> message controls the output width.  The
+supplied parameter should be an integer.  Only the integer portion of
+a decimal number will be used.  The supplied parameter indicates the
+number of characters that should be output.  
+<li>
+Strings containing fewer characters than the supplied width are
+padded with the appropriate number of blanks on the right (i.e., they
+are left-justified) by default.  A string containing more characters
+than the supplied width will have its rightmost characters truncated.
+<li>
+If the supplied width is a negative value, the recipient will be
+padded with the blanks on the left (i.e., right-justified).  
+<li>
+Strings can contain the new line and other special characters.  
+</ul>
+<p>
+For example:
+<p>
+<Center><table width="80%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Expression</b></td>
+<td><b>Returns</b></td>
+</tr>
+
+<tr>
+<td><i> "xyz" print: 1</i></td>
+<td>x</td>
+
+<tr>
+<td><i>"xyz" print: 2</i></td>
+<td>xy</td>
+
+<tr>
+<td><i>"xyz" print: 3</i></td>
+<td>xyz</td>
+
+<tr>
+<td><i>"xyz" print: 4</i></td>
+<td>xyz#</td>
+
+<tr>
+<td><i>"xyz" print: -4</i></td>
+<td>#xyz</td>
+
+</tr>
+</table></Center>
+<p>
+
+where the # indicates a blank.
+<p>
+<a name="printInteger">The following rules apply to Integer objects:</a>
+<p>
+<ul type="disc">
+<li>
+The <i>print</i> message prints the value of the recipient in 9 character
+positions with no decimals places.  The format is automatically
+expanded if more space is needed.  
+<li>
+The parameter to the <i>print:</i> and <i>printWithCommas:</i>
+messages controls the output width.  The
+supplied parameter should be an integer.  Only the integer portion of
+a decimal number will be used.  The supplied parameter indicates the
+number of characters that should be output.  When using the comma
+format, you need to supply an integer wide enough to accommodate the
+additional comma characters as well.
+<li>
+Integers that require fewer positions than the supplied width are
+padded with the appropriate number of blanks on the left (i.e., they
+are right-justified) by default.  If the specified width is not large
+enough, **** will be displayed instead of the value.  
+<li>
+If the supplied width is a negative value, the recipient will be
+padded with the blanks on the right (i.e., left-justified).
+</ul>
+<p>
+For example:
+<p>
+<Center><table width="80%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Expression</b></td>
+<td><b>Returns</b></td>
+</tr>
+
+<tr>
+<td><i> 3 print: 10</i></td>
+<td>#########3</td>
+
+<tr>
+<td><i> 3 print: -10</i></td>
+<td>3#########</td>
+
+<tr>
+<td><i> 3 print: 2</i></td>
+<td>#3</td>
+
+<tr>
+<td><i> 300 print: 2</i></td>
+<td>**</td>
+
+<tr>
+<td><i> 3000 printWithCommas: 5</i></td>
+<td>3,000</td>
+
+<tr>
+<td><i> 30000 print: 5</i></td>
+<td>*****</td>
+
+</tr>
+</table></Center>
+<p>
+
+where the # indicates a blank.
+<p>
+<a name="printDouble">The following rules apply to Double and Float
+objects:</a>
+<p>
+<ul type="disc">
+<li>
+The <i>print</i> message prints the value of the recipient in 9
+character positions with 2 decimal places.  The format is
+automatically expanded if more space is needed.  
+<li>
+The parameter to the <i>print:</i> and <i>printWithCommas:</i>
+messages controls the output width and
+the number of decimal places.  The integer portion of the parameter
+indicates the total column width and the decimal portion of the
+parameter indicates the number of decimal digits.  If the supplied
+parameter is an integer, the number of decimal places is assumed to
+be 2.  The total column width should be wide enough to include the
+decimal point, decimal digits, and the commas if appropriate.
+<li>
+Numbers that require fewer positions than the supplied width are
+padded with the appropriate number of blanks on the left (i.e., they
+are right-justified) by default.  If the specified width is not large
+enough, **** will be displayed instead of the value.  
+<li>
+If the supplied width is a negative value, the recipient will be
+padded with the blanks on the right (i.e., left-justified).  
+</ul>
+<p>
+For example:
+<p>
+<Center><table width="80%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Expression</b></td>
+<td><b>Returns</b></td>
+</tr>
+
+<tr>
+<td><i> 3.333 print: 8.1</i></td>
+<td>#####3.3</td>
+
+<tr>
+<td><i> 3.333 print: 8.3</i></td>
+<td>###3.333</td>
+<tr>
+
+<td><i> 3.333 print: 8.5</i></td>
+<td>#3.33300</td>
+<tr>
+<tr>
+<td><i> 3.333 print: -8.5</i></td>
+<td>3.33300#</td>
+
+</tr>
+</table></Center>
+<p>
+where the # indicates a blank.
+
+<p>
+<a name="printDate">The following rules apply to Date objects:</a>
+<p>
+<ul type="disc">
+<li>
+The <i>print</i> message prints the value of the recipient in M/D/Y
+format where M is a number from 1 - 12, D is a number from 1 - 31,
+and Y is the four-digit year.  
+<li>
+The parameter to the <i>print:</i> message controls the output width and
+the type of date format used.  The smallest width is 5.  Any
+positive value less than 5 is reset to 5.
+<li>
+Dates that require fewer positions than the supplied width are
+padded with the appropriate number of blanks on the right (i.e., they
+are left-justified) by default.  
+<li>
+If the supplied width is a negative value, the recipient will be
+padded with the blanks on the left (i.e., right-justified).  
+</ul>
+<p>
+Possible widths and their related formats for displaying the date
+March 5, 1990 are summarized below:  
+<p>
+<Center><table width="80%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Width</b></td>
+<td><b>Format</b></td>
+<td><b>Formats To</b></td>
+</tr>
+
+<tr>
+<td><i>5</i></td>
+<td>MM/YY</td>
+<td>#3/90</td>
+
+<tr>
+<td><i>6</i></td>
+<td>MM/YY#</td>
+<td>03/90#</td>
+
+<tr>
+<td><i>7</i></td>
+<td>MM/YY##</td>
+<td>03/90##</td>
+<tr>
+
+<td><i>8</i></td>
+<td>MM/DD/YY</td>
+<td>03/05/90</td>
+<tr>
+
+<td><i>9</i></td>
+<td>MM/DD/YY#</td>
+<td>03/05/90#</td>
+<tr>
+
+<td><i>10</i></td>
+<td>MM/DD/YYYY</td>
+<td>03/05/1990</td>
+<tr>
+
+<td><i>11</i></td>
+<td>MM/DD/YYYY#</td>
+<td>03/05/1990#</td>
+<tr>
+
+<td><i>-11</i></td>
+<td>#MM/DD/YYYY</td>
+<td>#03/05/1990</td>
+
+</tr>
+</table></Center>
+
+<p>
+<a name="printNA">The following rules apply to the NA object:</a>
+<p>
+<ul type="disc">
+<li>
+The <i>print</i> message prints the string "NA " in 9 character
+positions (6 leading spaces and 1 trailing space).
+<li>
+The parameter to the <i>print:</i> 
+message controls the output width.  The
+supplied parameter should be an integer.  Only the absolute value of
+the integer portion of
+a decimal number will be used.  The supplied parameter indicates the
+number of characters that should be output.  The string "NA " is
+always right justified in a field of the supplied width.
+</ul>
+<p>
+<a name="define"> </a>
+The <i>print</i> messages can be redefined as needed by a class.  By
+convention, these messages are usually defined to return the recipient
+object (i.e., <i>^self</i>) after performing the print.  As a rule,
+only the <i>print</i> and <i>print:</i> messages need to be redefined.
+Since <i>printNL</i> is defined at <i>Object</i>
+to run the object's <i>print</i>
+message followed by printing a new line, it should not be necessary
+to redefine this message when you redefine <i>print</i>.
+For example:<pre><tt><b>
+     Entity defineMethod: 
+     [ | print | 
+       code print ; ^self
+     ] ;
+
+     Entity defineMethod: 
+     [ | print: f | 
+       code print: f ; ^self 
+     ] ;
+</b></tt></pre>
+You can also define new variations of the print messages.  For example,
+you could define <i>printBar:</i> to do a formatted print followed by
+a vertical bar character using:<pre><tt><b>
+     Object defineMethod: 
+     [ | printBar: f | 
+       ^self print: f ; "|" print ; ^self
+     ] ;
+</b></tt></pre>
+<p>
+<hr>
+<h3><a name="format">Basic String Formatting</a></h3>
+<p>
+Many messages have been defined at the class <i>String</i> that aid in
+formatting your output.
+The messages
+<a href="mString.htm#take:"><i>take:</i></a>,
+<a href="mString.htm#drop:"><i>drop:</i></a>,
+<a href="mString.htm#from:to:"><i>from:to:</i></a>,
+<a href="mString.htm#from:for:"><i>from:for:</i></a>,
+<a href="mString.htm#from:"><i>from:</i></a>, and
+<a href="mString.htm#to:"><i>to:</i></a>
+are used to extract a substring of the recipient string.
+The message
+<a href="mString.htm#concat:"><i>concat:</i></a>
+appends the supplied string to the end of the recipient string.
+For example:<pre><tt><b>
+     "This is a very long string" take: 8 . concat: "shorter" .
+</b></tt></pre>
+returns the string "This is shorter".
+<p>
+The messages 
+<a href="mString.htm#center:"><i>center:</i></a> and
+<a href="mString.htm#centerNL:"><i>centerNL:</i></a>
+are used to center the recipient string in the supplied width.
+For example:<pre><tt><b>
+     "This is a very long string" take: 8 . 
+        concat: "shorter" .
+        center: 80 . printNL ;
+</b></tt></pre>
+centers the string "This is shorter" over 80 columns and print it.
+<p>
+The messages
+<a href="mString.htm#fill:"><i>fill:</i></a> and
+<a href="mString.htm#pad:"><i>pad:</i></a> are used to
+return a string containing the supplied number of characters.
+If the recipient string count is less than the parameter,
+the <i>fill:</i> message will repeat the 
+characters in the recipient until a string of the specified length is formed.
+If the recipient string count is less than the parameter,
+the <i>pad:</i> message will pad the recipient with blanks.
+For example:<pre><tt><b>
+     "=" fill: 5 . concat: ">" . pad: 10
+</b></tt></pre>
+returns the string <i>"=====>&nbsp&nbsp&nbsp&nbsp"</i>.
+<p>
+<hr>
+<h3><a name="convert">Converting Objects to Strings</a></h3>
+<p>
+As you have seen, there are a number of useful formatting messages
+defined at the class <i>String</i>.  You can convert an object
+into a string by sending it the 
+<a href="mString.htm#asString"><i>asString</i></a> message
+which returns the result of sending the <i>print</i> message
+to the object as a string.  For example: <pre><tt><b>
+     ^today asString center: 80 . print ;
+</b></tt></pre> converts the current date to a string, then centers
+and prints it.  
+<p> 
+The <i>divertOutput</i> message provides a general
+purpose way to create strings.  Defined at the class <i>Block</i>, this
+message is designed to divert any print messages used in the block
+and returns a single string containing this output.  For example, the
+program:  <pre><tt><b>
+     !x <- 2 + 2 ; 
+     "The answer is: " print ; 
+     x printNL ; 
+</b></tt></pre>
+prints the string followed by the value.  If you wanted to center
+this entire output, you could use <i>divertOutput</i> to capture the results
+first:  <pre><tt><b>
+     [ !x <- 2 + 2 ; 
+       "The answer is: " print ; 
+       x print ; 
+     ] divertOutput center: 80 . print ;
+</b></tt></pre>
+<p>
+Several messages have been defined to convert dates into strings 
+using different date formats:
+<p>
+<Center><table width="80%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Expression</b></td>
+<td><b>Returns String</b></td>
+</tr>
+
+<tr>
+<td><i>960305 asDate formatUsingLongName</i>
+<td>March 5, 1996
+
+<tr>
+<td><i>960305 asDate formatUsingShortName</i>
+<td>_5-Mar-1996
+
+<tr>
+<td><i>960305 asDate formatUsingMMDD</i>
+<td>03/05
+
+<tr>
+<td><i>960305 asDate formatUsingMMDDYY</i>
+<td>03/05/96
+
+<tr>
+<td><i>960305 asDate formatUsingMMDDYYYY</i>
+<td>03/05/1996
+
+</tr></table></Center>
+<p>
+For example, to
+center the current date formatted using its long name, you could use
+the expression:<pre><tt><b>
+     ^today formatUsingLongName center: 80 . print ;
+</b></tt></pre>
+<p>
+<hr>
+<h3><a name="files">Output Files</a></h3>
+<p>
+The messages 
+<a href="mString.htm#substituteOutputOf:"<i>substituteOutputOf:</i></a> and 
+<a href="mString.htm#appendOutputOf:"<i>appendOutputOf:</i></a>
+are defined at the class <i>String</i>
+to allow you to create/overwrite a file or append output to an
+existing file.  The recipient string provides the filename.  The
+parameter to these messages should be a block.  All print statements
+encountered in the block are printed to the file instead of your
+standard output device.  For example, the expression:  <pre><tt><b>
+     "myFile" appendOutputOf: 
+        [ "First 10 Squares" centerNL: 20 . print ;
+          10 sequence 
+          do: [ !currentNumber <- ^self ;
+                currentNumber print: 10 ;
+                currentNumber * currentNumber printNL: 10 ; 
+              ] ; 
+        ] ;
+</b></tt></pre>
+creates a table of the first 10 integers and their squares and
+appends this output to the end of the file <i>myFile</i>. 
+No output will be displayed on your standard output device.  
+<p>
+The message 
+<a name="filter" href="mString.htm#filterOutputOf:"<i>filterOutputOf:</i></a>
+can be used to submit the output from a Vision request to another program.  
+This message is sent to a string
+containing the name of the operating system level command or program
+to run.  The parameter is a block.  Any printing performed within the
+block is sent to the external program as standard input.  Any output
+generating by the external program is returned and printed by
+default.  For
+example, suppose you wanted to use the Unix utility <i>grep</i> to select
+the numbers in the first 1000 integers that contain the digits 10.
+You could use the expression:  <pre><tt><b>
+     "grep 10" filterOutputOf: 
+        [ 1000 sequence do: [ printNL ] ; 
+        ] ; 
+</b></tt></pre>
+The results are displayed on your output device.  
+The expression:<pre><tt><b>
+     !result <- 
+        [ "grep 10" filterOutputOf: [ 1000 sequence do: [ printNL ] ] ; 
+        ] divertOutput ;
+</b></tt></pre>
+can be used to capture the result a string.
+<p>
+<hr>
+<h3><a name="more">Additional Formatting</a></h3>
+<p>
+The message
+<a href="mBlock.htm#formatForExcel"<i>formatForExcel</i></a>
+can be sent to a block and generates tab-delimited output suitable
+for loading into Excel and other many other packages.  The message
+returns a string.  Any print statement encountered while executing
+this block will be followed by a tab character.  For example:<pre><tt><b>
+        [ 100 sequence
+          do: [ print ;
+                (^self + 1 ) asInteger print ;
+                (^self * 2 ) asInteger printNL ;
+              ]
+        ] formatForExcel print ;
+</b></tt></pre>
+To save these results to an output file named <i>myFile</i> use:<pre><tt><b>
+     "myFile" substituteOutputOf: [ 
+        [ 100 sequence
+          do: [ print ;
+                (^self + 1 ) asInteger print ;
+                (^self * 2 ) asInteger printNL ;
+              ]
+        ] formatForExcel print ;
+     ] ;
+</b></tt></pre>
+The <i>formatForExcel</i> message uses the 
+<a href="mBlock.htm#divertDelimitedOutput"<i>divertDelimitedOutput</i></a>
+message to mark the spots in the output where printing has occurred.  
+Each print statement encountered while evaluating the block will
+be followed by the <i>octal 377</i> character, returning the result as a 
+string.  This character can be translated into any other character
+using the <i>translate:to:</i> message.  For example: <pre><tt><b>
+     #-- capture output delimited by octal 377 character
+     !output <- 
+        [ 100 sequence
+          do: [ print ;
+                (^self + 1 ) asInteger print ;
+                (^self * 2 ) asInteger printNL ;
+              ]
+        ] divertDelimitedOutput ;  
+
+     #-- convert character into | and print
+     !delimiter <- "\377" ;     #- must be actual octal character
+     output translate: delimiter to: "|" . print ;
+</b></tt></pre>
+<p>
+<hr>
+
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy 1997 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated June 19, 1997</font>
+</tr>
+</table>
+
+</body>
+</html>

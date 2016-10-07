@@ -1,0 +1,1134 @@
+
+Beginning file: lio.S ...
+
+#----------------------------------------------------------
+#  Setup (lio)
+#----------------------------------------------------------
+
+
+#----------------------------------------------------------
+#  Normal Input (lio)
+#----------------------------------------------------------
+
+
+
+-------------------------------------------------------
+-------------------------------------------------------
+------  PART 1 A - Test LIO Print Functions
+------
+-------------------------------------------------------
+-------------------------------------------------------
+
+### 1) PrintCurrentAsPointer: PrintAValue (LIO_printf)
+### char, double, float, int
+
+a
+b
+c
+d
+     1.20
+89000000000000001376304724927144494480312698220175256453251759870901759310880675955517741164653086277156105304578983756762804721369893727406680835865068713115666141064576678259271900422850952852078706463759448485330610236238306006755163255274343715507048787142496960945133885950106215541419347332801700560896.00
+1234563231.11
+     2.33
+9999999562023526247432192.00
+323432224.00
+     2.33
+11111111111.00
+        2
+        3
+        4
+
+
+### 2) PrintOf List (LIO_puts)
+
+         344343
+        122.333
+       1234.560
+              0
+            101
+        334.230
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------     ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------     ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------     ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------     ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------     
+
+### 3A&B) PrintAAsString: Print string or user selector (LIO_printf)
+###	A) handle block string
+
+Hello There World
+Hello There World
+
+>>> Selector 'print12' Not Found <<<
+
+>>> Selector 'print24' Not Found <<<
+
+
+###	b) handle lstore string
+
+Hello There World
+Hello There World
+
+>>> Selector 'print12' Not Found <<<
+
+>>> Selector 'print12' Not Found <<<
+
+>>> Selector 'print24' Not Found <<<
+
+>>> Selector 'print24' Not Found <<<
+
+
+### 4) PrintAASKSI (LIO_puts)
+
+value
++
+=
+
+
+### 5) PrintAASPrimfn <> (LIO_printf)
+
+<StringLessThan>
+
+<StringLessThanOrEqual>
+
+{| >= aString| aString asString <= super}
+
+{| > aString| aString asString < super}
+
+{| 
+= s2| 
+s2 isString ifTrue: [^self _equals: s2]ifFalse: [FALSE]}
+
+{| != aString| (aString = super) not}
+
+<PrintString>
+
+{| breakString: aString| aString breakOn: super}
+
+{| cbreakString: aString| aString cbreakOn: super}
+
+{| 
+prefixSpannedIn: aString| 
+aString prefixSpannedBy: super}
+
+{| 
+prefixNotSpannedIn: aString| 
+aString prefixNotSpannedBy: super}
+
+{| matchesString: aString| aString basicContains: super}
+
+{| print: aFormat| aFormat printOf: super}
+
+{| prefixWith: aString| aString concat: super}
+
+<Create>
+
+<StringEqual>
+
+<DBUpdateAppendDump>
+
+<AppendOutput>
+
+{| as: type| 
+!isList <- ^self contains: ","; 
+!toType <- type isString && [type isntDefault]ifTrue: [type evaluate]
+ifFalse: [type]; 
+isList ifTrue: [^self breakOn: "," .
+    send: [^my toType convertFrom: ^self]]
+ifFalse: [toType convertFrom: ^self]}
+
+{|asBlock|
+!string <- ("[ " concat: ^self .concat: " ] "); 
+!block <- string evaluateWithCompilationErrorHandler: [| 
+    :string :errorLine :errorCharacter|]
+in: CoreWorkspace; 
+block isBlock ifTrue: [block]ifFalse: [[NoValue]]}
+
+{| 
+asBlockIn: object| (
+"[ " concat: ^self .concat: " ] ") evaluateIn: object}
+
+{|asCSVRecords|
+^self asFileContents translate: "," to: "	" .
+asLines select: [count > 0].
+send: [
+    !quotes <- ^self breakOn: "\"" .numberElements; [
+        quotes 
+        do: [
+            position mod: 2 .= 1 ifTrue: [print]
+            ifFalse: [^self translate: "	" to: "," .print]; 
+           ]; 
+       ]divertOutput].
+extendBy: [!fields <- ^self breakOn: "	"]}
+
+{|asCells|
+!delimiter <- "	ÿ"; 
+^self asCellsOn: delimiter}
+
+{| 
+asCellsOn: delimiter| 
+^self breakOn: newLine .
+select: [count > 0].
+select: [^self contains: "@@@" .not].
+extendBy: [
+    !cells <- ^self breakOn: ^my delimiter .
+    select: [count > 0].
+    select: [^self contains: "" .not]; 
+   ].
+select: [cells count > 0]}
+
+{|asClass|
+!id <- ^self stripChar: " "; 
+!capId <- id capitalize; 
+CoreWorkspace respondsTo: id .
+ifTrue: [id evaluate].elseIf: [CoreWorkspace respondsTo: capId]then: [capId evaluate].
+else: [CoreWorkspace getMessage: id .isntDefault: [message evaluate]else: [CoreWorkspace getMessage: ^my capId .isntDefault: [message evaluate]else: [NA]]]}
+
+{|asContext|
+^self as: GlobalWorkspace Context}
+
+{|asCurrency|
+^self asString as: CoreWorkspace Currency}
+
+{|asDate|
+^self asNumber isInteger 
+ifTrue: [count = 4 
+    ifTrue: [asNumber asDateFromYYMM].elseIf: [count = 6]
+    then: [asNumber asDateFromYYMMDD].
+    else: [asNumber asDate]].elseIf: [^self asNumber isDouble]
+then: [^self asNumber asDate].elseIf: [^self howManyOf: "-/" .= 2]
+then: [!fields <- ^self breakOn: "/-"; 
+    !m <- fields at: 1 .asNumber asInteger; 
+    !d <- fields at: 2 .asNumber asInteger; 
+    !rest <- fields at: 3 .breakOn: ":."; 
+    !y <- rest at: 1 .asNumber asInteger; 
+    !hhmmdd <- rest at: 2; 
+    !date <- m isInteger && [d isInteger]&& [y isInteger]
+    ifTrue: [y asDateFromYearForMonth: m andDay: d]; 
+    hhmmdd asNumber isNA 
+    ifTrue: [date].
+    else: [date asInteger asString concat: "." .concat: hhmmdd .
+        asNumber asDate]].elseIf: [^self howManyOf: "-/" .= 1]
+then: [!fields <- ^self breakOn: "/-"; 
+    !m; !y; 
+    !f <- fields at: 1; 
+    !s <- fields at: 2; 
+    f count <= 2 && [s count = 4]
+    ifTrue: [:m <- f asNumber asInteger; 
+        :y <- s asNumber asInteger; 
+       ]; 
+    f count = 4 && [s count <= 2]
+    ifTrue: [:y <- f asNumber asInteger; 
+        :m <- s asNumber asInteger; 
+       ]; 
+    !date <- m isInteger && [y isInteger]
+    ifTrue: [y asDateFromYearForMonth: m andDay: 1 .+ 0 monthEnds]; 
+    date].elseIf: [^self contains: "[dD]ays" .|| [
+        ^self contains: "month"]|| [
+        ^self contains: "quarter"]|| [
+        ^self contains: "year"]]
+then: [^date + ^self evaluate].elseIf: [toLower contains: "today"]
+then: [^today].elseIf: [toLower contains: "yesterday"]
+then: [^today - 1 days].}
+
+{|asDateFromDDMMYYYY|
+!fields <- ^self breakOn: "-/"; 
+!dd <- fields at: 1 .asNumber asInteger; 
+!mm <- fields at: 2 .asNumber asInteger; 
+!yyyy <- fields at: 3 .asNumber asInteger; 
+mm isInteger && [dd isInteger]&& [yyyy isInteger]
+ifTrue: [yyyy asDateFromYearForMonth: mm andDay: dd]}
+
+{|asDateFromMMYYYY|
+!fields <- ^self breakOn: "-/"; 
+!mm <- fields at: 1 .asNumber asInteger; 
+!yyyy <- fields at: 2 .asNumber asInteger; 
+mm isInteger && yyyy isInteger 
+ifTrue: [mm asMonthEndInYear: yyyy]}
+
+{|asDateRange|
+!dict <- CoreWorkspace Dictionary basicSpecialized; 
+dict at: "D" put: [days]; 
+dict at: "B" put: [businessDays]; 
+dict at: "TD" put: [businessDays]; 
+dict at: "M" put: [months]; 
+dict at: "MB" put: [monthBeginnings]; 
+dict at: "ME" put: [monthEnds]; 
+dict at: "Q" put: [quarters]; 
+dict at: "QB" put: [quarterBeginnings]; 
+dict at: "QE" put: [quarterEnds]; 
+dict at: "Y" put: [years]; 
+dict at: "YB" put: [yearBeginnings]; 
+dict at: "YE" put: [yearEnds]; 
+dict at: "AW" put: [7 days]; 
+dict at: "W" put: [7 days]; 
+!parts <- ^self breakOn: ":,"; 
+!p1 <- parts at: 1 .else: "" .stripBoundingBlanks toUpper; 
+!p2 <- parts at: 2 .else: "" .stripBoundingBlanks toUpper; 
+!p3 <- parts at: 3 .else: "" .stripBoundingBlanks toUpper; 
+!interval <- p3 convertToNumber else: 1; 
+!offset <- p3 drop: (p3 prefixSpannedBy: "0123456789"); 
+!freq <- dict at: offset .else: [[monthEnds]]; 
+!incr <- interval send: freq; 
+!start <- p1 isDefault || [p1 asNumber = 0]ifTrue: [^date].elseIf: [p1 contains: "^[-+]"]
+then: [!interval <- p1 convertToNumber else: 0; 
+    !offset <- p1 drop: (p1 prefixSpannedBy: "+-0123456789"); 
+    !f <- dict at: offset .else: [freq]; 
+    p1 convertToNumber else: 0 .send: f .asDate].
+else: [p1 asDate].else: [^date]; 
+!end <- p2 isDefault || [p2 asNumber = 0]ifTrue: [^date].elseIf: [p2 contains: "^[-+]"]
+then: [!interval <- p2 convertToNumber else: 0; 
+    !offset <- p2 drop: (p2 prefixSpannedBy: "+-0123456789"); 
+    !f <- dict at: offset .else: [freq]; 
+    p2 convertToNumber else: 0 .send: f .asDate].
+else: [p2 asDate].else: [^date]; 
+p3 = "W" 
+ifTrue: [
+    start < end ifTrue: [
+        :start <- start asFriday; 
+        :end <- end asFriday - 7 days]
+    else: [
+        :start <- start asFriday - 7 days; 
+        :end <- end asFriday]]; 
+start to: end by: incr}
+
+{| asDictionaryUsing: attChar and: valChar| 
+!specialChars <- CoreWorkspace Interface HtmlAccess; 
+!dictionary <- CoreWorkspace Dictionary basicSpecialized enableAutoUpperCase; 
+^self breakOn: attChar .
+extendBy: [
+    !fields <- ^self breakOn: ^my valChar; 
+    !id <- fields at: 1 .else: "" .stripBoundingBlanks; 
+    !val <- fields at: 2 .else: "" .stripBoundingBlanks; 
+    :val <- ^my specialChars decodeString: val; 
+   ].
+select: [id isntDefault].
+do: [^my dictionary at: id put: val]; 
+dictionary}
+
+{|asFileContents|
+!ovc <- "file:" concat: ^self .asOpenVisionChannel; 
+!result <- ovc status != ovc status Failed 
+ifTrue: [!result <- ovc getString; 
+    result isNA ifTrue: [""]ifFalse: [result]]; 
+ovc close; 
+result}
+
+{|asFormulaList|
+!string <- asString stripBoundingBlanks; 
+string at: 1 .= "," ifTrue: [:string <- " " concat: string;]; 
+!list <- string toList; 
+!rlist <- list runningTotal: [
+    ^self = "(" ifTrue: 1 .elseIf: [^self = ")"]
+    then: -1 .
+    else: 0].
+runningTotal: [runningTotal = 0 && ^self = "," ifTrue: 1 ifFalse: 0]; 
+rlist groupedBy: [runningTotal].
+send: ["," concat: [
+        groupList do: [print]]
+    divertOutput .concat: " " .
+    stripLeading: "," .stripBoundingBlanks].}
+
+{|asInteger|
+^self asNumber asInteger}
+
+{|asLines|
+^self contains: "" .ifTrue: [^self stripChar: ""]
+ifFalse: [^self].
+send: [^self take: -1 .= newLine1 ifTrue: [^self drop: -1]
+    ifFalse: [^self].
+    breakOn: newLine1]}
+
+{|asNumber|
+!d <- toDouble; 
+!i <- d asInteger; 
+d = i && [^self containsSubstring: "." .not]ifTrue: [i]
+ifFalse: [d]}
+
+{|asOpenVisionChannel|
+^self __asOpenVisionChannel asPointerTo: CoreWorkspace OpenVision Channel}
+
+{|asOpenVisionChannelToVision|
+^self asOpenVisionChannel consumeVisionPrompt}
+
+{|asProgram|
+asSelf asProgramWith: NA}
+
+{| asProgramWith: inputBlock| 
+!error; 
+!block <- inputBlock else: []; 
+!out <- [:error <- asSelf filterOutputOf: block]divertOutput; 
+error = 0 ifTrue: [out]
+ifFalse: [[
+        ">>> Error " print; error asString printNL; 
+        "    Processing Program: " print; printNL; 
+        inputBlock isntNA 
+        ifTrue: ["    with " print; inputBlock printNL]; 
+        out isntDefault 
+        ifTrue: [
+            "... Output: " printNL; 
+            out printNL; 
+           ]; 
+       ]divertOutput]}
+
+{|asQuotedString|
+"\"" concat: ^self .concat: "\""}
+
+{|asRecords|
+^self asFileContents asLines select: [count > 0]}
+
+{|asSelector|
+!stripStrayChars <- [
+    asSelf cbreakOn: 
+    "0123456789_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" .
+    do: [print]]
+divertOutput; 
+stripStrayChars count > 0 
+ifTrue: [
+    !escape <- "\ " take: 1; 
+    stripStrayChars at: 1 .asNumber isNumber 
+    ifTrue: [:stripStrayChars <- escape concat: stripStrayChars]; 
+    "'" concat: stripStrayChars .concat: "'" .asBlock value]}
+
+<ReturnCurrent>
+
+<ReturnCurrent>
+
+{|asUpdateBlock|
+^self contains: ":" .ifTrue: [^self]
+ifFalse: [":" concat: ^self].asBlock}
+
+{|asUpperLowerWords|
+!word <- ^self; 
+!list <- CoreWorkspace List new; [
+    word count > 0]
+whileTrue: [
+    !boundary <- (
+    word drop: 1 .
+    prefixNotSpannedBy: "ABCDEFGHIJKLMNOPQRSTUVWXYZ" .+ 
+    1) asInteger; 
+    list , (word take: boundary .capitalize); 
+    :word <- word drop: boundary; 
+   ]; 
+list}
+
+{|asUrl|
+toUpper contains: "FORMAT=DDO" .ifTrue: [
+    FormatTools DDO evaluate: [
+        GlobalWorkspace Interface ApplicationWS reset runUrl: asSelf]]
+ifFalse: [GlobalWorkspace Interface RequestWS reset runUrl: asSelf]; 
+}
+
+{|asWords|
+!boundary <- newLine concat: " " .concat: "	"; 
+^self breakOn: boundary .select: [count > 0]}
+
+{| 
+at: n| 
+n isNumber && n > 0 && n <= ^self count ifTrue: [^self drop: n - 1 .take: 1]
+ifFalse: [""]}
+
+{| 
+at: n put: s| 
+n isNumber ifTrue: [
+    !prefix <- n <= 1 
+    ifTrue: [0].elseIf: n > count 
+    then: [count].
+    else: [(n - 1) asInteger]; 
+    ^self take: prefix .concat: s asString .concat: (^self drop: prefix)]
+ifFalse: [^self]}
+
+<StringConcat>
+
+<StringMatch>
+
+<StringDrop>
+
+<StringFill>
+
+<PatternExtent>
+
+<PatternOrigin>
+
+<SubstringOrigin>
+
+<NewPrototype[1]>
+
+<StringTake>
+
+<StringBreak>
+
+<StringBreakOnPattern>
+
+<StringBreakOnString>
+
+{| breakTokenize: aString| aString tokenizeOn: super}
+
+<EncodeStringAsDouble>
+
+<StringProcessor[4]>
+
+<StringCBreak>
+
+{| cbreakTokenize: aString| aString cbreakTokenize: super}
+
+{| 
+center: aWidth| [
+    !blanks <- ((aWidth - count) / 2) asInteger; 
+    blanks > 0 ifTrue: [
+        " " print: blanks; 
+        ^self print: (aWidth - 2 * blanks); 
+        " " print: blanks; 
+       ]
+    ifFalse: [^self print: aWidth]; 
+   ]divertOutput}
+
+{| 
+centerNL: aWidth| 
+^self center: aWidth .concat: newLine}
+
+{| clusterDelete: aString| 
+aString deleteFromCluster: super}
+
+{| clusterInsert: aString| 
+aString insertIntoCluster: super}
+
+{| clusterLocate: aString| 
+aString locateInCluster: super}
+
+{| 
+concat: string| 
+string isString ifTrue: [^self basicConcat: string asString]
+ifFalse: [^self basicConcat: string asString stripBoundingBlanks]}
+
+{| contains: string| ^self basicContains: string asString}
+
+{| 
+containsSubstring: substring| 
+^self findSubstringOrigin: substring .< ^self count}
+
+{| convertFrom: string| 
+string asString}
+
+{|convertToCaseInsensitiveRegEx|[
+    toList 
+    do: [!u <- toUpper; 
+        !l <- toLower; 
+        u != l 
+        ifTrue: [
+            "[" print; u print; l print; "]" print; 
+           ].
+        else: [print]]; 
+   ]divertOutput}
+
+{|convertToNumber|
+!prefix <- ^self prefixNotSpannedBy: "0123456789.-+"; 
+!string <- ^self drop: prefix; 
+!suffix <- string reverse prefixNotSpannedBy: "0123456789.-+"; 
+:string <- string drop: (-1 * suffix) asInteger; 
+string contains: "\." .ifTrue: [string stripCommas asNumber asDouble]
+ifFalse: [string stripCommas asNumber]}
+
+{|copyString|
+^self drop: 0}
+
+<StringSize>
+
+<StringCBreak[1]>
+
+<XDeleteFromStringStore>
+
+<DeleteFromDictionaryOf>
+
+{| drop: n| ^self basicDrop: (n asInteger else: 0)}
+
+{|evaluate|
+^self evaluateIn: CoreWorkspace}
+
+{| 
+evaluateIn: anObject| 
+^self evaluateWithCompilationErrorHandler: [| 
+    :string :errorLine :errorCharacter| 
+    "Error at line/character [" print; 
+    errorLine print; "/" print; errorCharacter print; 
+    "] of <" print; 
+    string print; 
+    ">" printNL; 
+   ]
+in: anObject}
+
+<StringEvaluate>
+
+{|fileExists|
+!ovc <- "file:" concat: ^self .asOpenVisionChannel; 
+!result <- ovc status != ovc status Failed; 
+ovc close; 
+result}
+
+{| fill: n| ^self basicFill: (n asInteger else: 0)}
+
+<FilterOutput>
+
+{| 
+findPatternExtent: string| 
+^self basicFindPatternExtent: string asString}
+
+{| 
+findPatternOrigin: string| 
+^self basicFindPatternOrigin: string asString}
+
+{| 
+findPatternSuffix: pattern| ((
+^self 
+findPatternOrigin: pattern) + (
+^self findPatternExtent: pattern)) 
+asInteger}
+
+{| 
+findSubstringExtent: substring| 
+!substringOrigin <- ^self findSubstringOrigin: substring; 
+substringOrigin < ^self count ifTrue: [substring count]
+ifFalse: [0]}
+
+{| 
+findSubstringOrigin: string| 
+^self basicFindSubstringOrigin: string asString}
+
+{| 
+findSubstringSuffix: substring| 
+!substringOrigin <- ^self findSubstringOrigin: substring; 
+substringOrigin < ^self count ifTrue: [(substringOrigin + substring count) asInteger]
+ifFalse: [^self count]}
+
+<ToLStoreString>
+
+{|formatForExcel|[
+    ^self asCells 
+    do: [cells 
+        do: [^self stripBoundingBlanks = "NA" ifTrue: ["" print]
+            ifFalse: [print]; 
+            "	" print; 
+           ]; 
+        newLine print; 
+       ]; 
+   ]divertOutput}
+
+{|formatForPRN|[
+    ^self asCells 
+    do: [cells 
+        do: [!number <- ^self convertToNumber; 
+            number isNumber ifTrue: [number print; " " print]
+            ifFalse: [
+                "\"" print; 
+                ^self stripBoundingBlanks = "NA" ifTrue: [" " print]
+                ifFalse: [print]; 
+                "\"" print; " " print; 
+               ]; 
+           ]; 
+        newLine print; 
+       ]; 
+   ]divertOutput}
+
+{| from: pos| 
+pos isNumber ifTrue: [
+    pos <= ^self count ifTrue: [^self from: pos to: ^self count]
+    else: [""]]
+ifFalse: [^self drop: (^self findSubstringOrigin: pos asString)]}
+
+{| from: pos for: count| 
+count = 0 ifTrue: [""]else: [
+    pos <= 0 
+    ifTrue: [:pos <- 1]; 
+    !start <- pos; 
+    !end <- count > 0 ifTrue: [pos + count - 1]
+    else: [pos + count + 1]; 
+    start < end ifTrue: [^self from: start to: end]
+    ifFalse: [^self from: end to: start]]}
+
+{| 
+from: pos1 to: pos2| 
+!start <- pos1 max: 1; 
+!end <- pos2 max: 1; 
+!count <- (end - start) absoluteValue + 1; 
+!drop <- start min: end .- 1; 
+!result <- ^self drop: drop .take: count; 
+start <= end ifTrue: [result]ifFalse: [result reverse]}
+
+{| globalAs: type| 
+!isList <- ^self contains: ","; 
+:type <- type isString && type isntDefault ifTrue: [type]
+ifFalse: [type whatAmI]; 
+!toType <- type evaluateIn: GlobalWorkspace; 
+toType isEntity 
+ifTrue: [
+    isList ifTrue: [^self breakOn: "," .
+        send: [^my toType findId: ^self stripBoundingBlanks]]
+    ifFalse: [toType findId: ^self stripBoundingBlanks]].
+else: [^self as: toType]}
+
+{|globalAsCurrency|
+GlobalWorkspace Currency globalLocateId: ^self asSelf .
+else: [GlobalWorkspace Currency]}
+
+{| howManyOf: char| (
+^self breakOn: char .count - 1) asInteger}
+
+<XLocateOrAddToStringStore>
+
+<ClusterBoolean[51]>
+
+{|isBlank|
+" " take: (^self count) .= ^self asSelf}
+
+{| 
+isBlankFor: n| 
+^self take: n .= (" " take: n)}
+
+{|isDefault|^self count = 0}
+
+{|isExtendedAscii|
+!xascii <- "€"; 
+^self >= xascii}
+
+<XLocateInStringStore>
+
+<LocateEntryInDictionaryOf>
+
+<LocateOrAddEntryInDictionaryOf>
+
+<StringProcessor[5]>
+
+{|newAssociativeCluster|
+^self fixed basicNewAssociativeCluster}
+
+{|notifyAsComment|
+"   ...  " print; 
+print; 
+newLine print; 
+}
+
+{|notifyAsError|
+"   >>>   " print; 
+print; 
+"   <<<" print; 
+newLine print; 
+}
+
+{|notifyAsWarning|
+"   ==> WARNING:  " print; 
+print; 
+newLine print; 
+}
+
+<Federate>
+
+{| 
+orderUsingDictionary: dictionary| 
+"." concat: super .locateOrAddInDictionaryOf: dictionary}
+
+{| 
+pad: n| [
+    ^self print: n]divertOutput}
+
+{| patternBreak: aString| aString breakOnPattern: super}
+
+{| 
+patternExtentIn: string| 
+string findPatternExtent: super}
+
+{| 
+patternOriginIn: string| 
+string findPatternOrigin: super}
+
+{| patternTokenize: aString| aString tokenizeOnPattern: super}
+
+<StringCSpan>
+
+<StringSpan>
+
+{|printPRN|
+"\"" print; 
+^self print; 
+"\"" print; 
+^self}
+
+{| 
+printPRN: aFormat| 
+"\"" print; 
+^self print: aFormat; 
+"\"" print; 
+^self}
+
+<PutString>
+
+<DBUpdateReplaceDump>
+
+<StringReverse>
+
+{| sprint: aFormat| aFormat sprintOf: super}
+
+{| 
+startingPositionOf: subString| 
+!matches <- ^self startingPositionsOf: subString; 
+matches isntNA ifTrue: [matches at: 1]}
+
+{| 
+startingPositionsOf: subString| 
+!searchString <- ^self; 
+searchString contains: subString .
+ifTrue: [
+    !firstChar <- subString take: 1; 
+    !length <- subString count; 
+    !entryPoints <- searchString breakOn: firstChar .
+    runningTotal: [1 + ^self count].
+    extendBy: [
+        !startingPosition <- (runningTotal - 1) asInteger; 
+        !matchString <- 
+        ^my searchString drop: startingPosition .take: ^my length; 
+       ]; 
+    !matches <- entryPoints select: [matchString = ^my subString]; 
+    matches send: [(startingPosition + 1) asInteger]]}
+
+{| stringBreak: aString| aString breakOnString: super}
+
+{| stringTokenize: aString| aString tokenizeOnString: super}
+
+<StringStrip[2]>
+
+<StringStrip[5]>
+
+{|stripBoundingBlanks|
+^self stripBounding: " "}
+
+{| 
+stripChar: char| [
+    ^self breakOn: char .do: [print]]
+divertOutput}
+
+{|stripCommas|[
+    ^self breakOn: "," .
+    do: [print]]
+divertOutput}
+
+{|stripExtra0s|
+!s <- ^self stripBoundingBlanks; 
+!padding <- 0; 
+s containsSubstring: "." .
+ifTrue: [:padding <- s reverse prefixSpannedBy: "0"]; 
+s drop: padding negated}
+
+{| stripFromBothEndsOf: aString| 
+aString asString stripBounding: super}
+
+{| stripFromBothEndsOfAlwaysCopy: aString| 
+aString asString stripBoundingAlwaysCopy: super}
+
+{| stripFromEndOf: aString| 
+aString asString stripTrailing: super}
+
+{| stripFromEndOfAlwaysCopy: aString| 
+aString asString stripTrailingAlwaysCopy: super}
+
+{| stripFromFrontOf: aString| 
+aString asString stripLeading: super}
+
+{| stripFromFrontOfAlwaysCopy: aString| 
+aString asString stripLeadingAlwaysCopy: super}
+
+<StringStrip>
+
+<StringStrip[3]>
+
+{|stripLeadingBlanks|
+^self stripLeading: " "}
+
+{|stripLeadingWhiteSpace|
+!whiteSpace <- newLine concat: "	 "; 
+^self stripLeading: whiteSpace}
+
+<StringStrip[1]>
+
+<StringStrip[4]>
+
+{|stripTrailingBlanks|
+^self stripTrailing: " "}
+
+{|stripTrailingWhiteSpace|
+!whiteSpace <- newLine concat: "	 "; 
+^self stripTrailing: whiteSpace}
+
+{|stripWhiteSpace|
+!whiteSpace <- newLine concat: "	 "; 
+^self stripBounding: whiteSpace}
+
+<WriteOutput>
+
+{| 
+substringOriginIn: string| 
+string findSubstringOrigin: super}
+
+{| take: n| ^self basicTake: (n asInteger else: 0)}
+
+{| 
+to: pos| 
+pos isNumber ifTrue: [^self from: 1 to: pos]
+ifFalse: [^self take: (^self findSubstringSuffix: pos asString)]}
+
+<ToDouble>
+
+{|toList|
+!tokens <- ^self ctokenizeOn: ""; 
+^self count sequence send: [^my tokens at: (^self * 2) asInteger]}
+
+<StringProcessor[2]>
+
+<StringProcessor[1]>
+
+<StringProcessor[3]>
+
+<StringBreak[1]>
+
+<StringBreakOnPattern[1]>
+
+<StringBreakOnString[1]>
+
+{| translate: char to: string| [
+    ^self breakOn: char .do: [print; ^my string print;]]
+divertOutput drop: string count * -1}
+
+{| translatePattern: pattern to: replacement| [
+    ^self breakOnPattern: pattern .do: [print; ^my replacement print]]
+divertOutput drop: replacement count * -1}
+
+{| translateString: string to: replacement| [
+    ^self breakOnString: string .do: [print; ^my replacement print]]
+divertOutput drop: replacement count * -1}
+
+{|unixFileContents|[
+    "cat -s " concat: ^self .filterOutputOf: []]divertOutput}
+
+{| validateAsExpressionIn: object| 
+!string <- ^self; 
+!okay <- string contains: ":" .not; 
+!messages <- string asWords select: [isntDefault]; 
+!count <- 1; [
+    count <= messages count && okay]whileTrue: [
+    !message <- messages at: count; 
+    object respondsTo: message .ifTrue: [:object <- message evaluateIn: object]
+    ifFalse: [:okay <- FALSE]; 
+    :count <- (count + 1) asInteger; 
+   ]; 
+okay}
+
+
+
+### 6) PrintAAsBlockClosureInd  (LIO_broadcast)
+
+
+>>> Selector 'ClassDescriptor' Not Found <<<
+
+[|print|^self code print; ^self]
+[|print|"      NA " print; ^self]
+[|print|
+^self whatAmI print; " of " print; ^self count asString print; 
+^self]
+[|print|"      NA " print; ^self]
+[|print|
+^self whatAmI print; " of " print; ^self count asString print; 
+^self]
+<PrintDate>
+[|print|^self code print; ^self]
+<PrintString>
+<PrintCurrentAsPointer>
+<PrintString>
+
+### 7) PrintDate (LIO_printf)
+
+12/31/1983
+2/21/1983
+1/1/1980
+
+Compile Statistics:
+elapsed: 0.009003
+user: 0
+system: 0.006999
+majflts: 0
+minflts: 898
+Execute Statistics:
+elapsed: 0.017259
+user: 0.011998
+system: 0.001
+majflts: 0
+minflts: 670
+
+
+###############################
+###############################
+###  Now test large prints
+###############################
+###############################
+
+### 8
+### elements longer than 256 - strings
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Compile Statistics:
+elapsed: 3.2e-05
+user: 0
+system: 0
+majflts: 0
+minflts: 0
+Execute Statistics:
+elapsed: 0.000394
+user: 0
+system: 0
+majflts: 0
+minflts: 12
+
+### 9
+### force it to realloc - doubles
+
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200          12.200
+
+Compile Statistics:
+elapsed: 4.3e-05
+user: 0
+system: 0
+majflts: 0
+minflts: 0
+Execute Statistics:
+elapsed: 0.002708
+user: 0.002
+system: 0.000999
+majflts: 0
+minflts: 27
+
+End of file: lio.S
+
+Compile Statistics:
+elapsed: 1.8e-05
+user: 0
+system: 0
+majflts: 0
+minflts: 0
+Execute Statistics:
+elapsed: 5e-05
+user: 0
+system: 0
+majflts: 0
+minflts: 0

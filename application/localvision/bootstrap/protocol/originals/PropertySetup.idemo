@@ -1,0 +1,198 @@
+####################
+#  PropertySetup -  Portfolio Management Application Layer: supp
+#     this feed is used to define all properties for supplemental
+#     classes in a Vision database supplying the Portfolio Application Layer.
+#
+#  This feed uses the following fields:
+#     classId           core class name
+#     property          message name for the property
+#     tsFlag            Y/N is this a time series property
+#     dataType          data type for value (returnObjectType)
+#     defaultValue      default value the property should return
+#     adjustments       currency and application specific adjustment flags
+#     propertyXRef      name of property that cross references the values
+#                       of this property at the class indicated by defaultValue
+#     description       description of the property
+#
+#  classId
+#     This field identifies the class at which to define the property.
+#     This id must reference an existing class.
+#  property
+#     This field identifies the property to create or update.  If the
+#     property does not exist it is created for the indicated class.
+#  tsFlag
+#     This field indicates whether the property should be created as
+#     a time series.  A value of Yes or True indicates that the property
+#     is a time series.  Properties are created as fixed properties by
+#     default.  Note that if the message is already defined for the class, 
+#     this field is ignored. 
+#  dataType
+#     This field indicates the class of the value returned by this property
+#     and is used to update the returnObjectType.  If the defaultValue is
+#     supplied, it is converted to a value of this type.  If you do not
+#     want to automatically initialize the value of new instances for this
+#     property, use this field to set a default type that is not used for
+#     initialization.  If the defaultValue is used, this value can be NA.
+#  defaultValue
+#     This field indicates the default value  for the property when a
+#     new instance is created.  If omitted, the value NA is returned.
+#     For time series properties, this default value is set as of the
+#     earliestPossibleDate (1/1/0001).  This value can be supplied as the
+#     name of a class (e.g., Country to indicate that the property should
+#     return a Country object) or a specific value (e.g., 0 or -999.99).
+#     If the defaultValue is a DataRecord, this property is used to
+#     establish the update relationship between the supplied class and
+#     the DataRecord subclass.  
+#  adjustments
+#     This field is used to indicate if the property is being used to
+#     store data that needs special adjustemnts.  If this field is used,
+#     the underlying property name has a _ prepended to it and a cover
+#     method is defined using the property name without the _ to access this
+#     property with the appopriate adjustments.  This field can contain
+#     any of the keywords defined to perform adjustments.  The following
+#     keywords have been defined:
+#         CURRENCY     data is in monentary units; adjust for currency
+#         PERSHARE     data is supplied as per share values ; adjust for splits
+#         SHARES       data is supplied in terms of shares outstanding; 
+#                      adjust for splits
+#     The CURRENCY keyword is application to all databases; the other PERSHARE
+#     and SHARES keyword apply only to investment databases.
+#  propertyXRef
+#    This field is used to establish a one-to-many relationship between the
+#    supplied class and the class indicated by the defaultValue.  This field
+#    defines a property at the defaultValue class that returns an IndexedList 
+#    of the instances that are members of that class.  For example,
+#       classId = Company
+#       property = country
+#       defaultValue = Country
+#       propertyXRef = companyList
+#    defines the following:
+#       - The property 'country' is defined at the class Company.  This
+#         property will return Country instances.
+#       - The property 'companyList' is defined at the class Country.  This
+#         property wil return the list of companies associated with the
+#         specific country instance.
+#    Note that if the 'tsFlag' indicates time series, this relationship
+#    is tracked over time.
+#  description
+#    This field supplies a description of the property.
+#
+#  The fields can be supplied in any order as long as the header line
+#  indicates which fields are present.  The 'classId' and 'property'
+#  fields must be present.  The 'tsFlag' and 'adjustments' field are
+#  only examined when a new property is created so these should be
+#  present if applicable.
+####################
+
+classId	property	ts flag	dataType	defaultValue	adjustments	propertyXRef	description
+
+#--  Entity properties
+Security	marketCapGroup	N	NA	MCapGroup	NA	NA	market cap group
+Security	peGroup	N	NA	PEGroup	NA	NA	pe group
+Security	pbGroup	N	NA	PBGroup	NA	NA	price to book group
+
+#--  Investment Entity-DataRecord relationships
+Company	funDataA	Y	NA	FundamentalDataA	
+Company	funDataQ	Y	NA	FundamentalDataQ	
+Company	funDataM	Y	NA	FundamentalDataM	
+Company	analystEsts	Y	NA	AnalystEstimate
+Country	econData	N	NA	EconomicData
+
+#--  Investment One-to-many Membership Relationship
+
+#--  Invest DataRecord items
+AnalystEstimate	analyst	N	NA	Analyst	NA
+AnalystEstimate	nextQuarterEnd	N	NA	Date
+AnalystEstimate	nextYearEnd	N	NA	Date
+AnalystEstimate	y1Est	N	Double	NA	CURRENCY,PERSHARE
+AnalystEstimate	y2Est	N	Double	NA	CURRENCY,PERSHARE
+AnalystEstimate	y3Est	N	Double	NA	CURRENCY,PERSHARE
+AnalystEstimate	q1Est	N	Double	NA	CURRENCY,PERSHARE
+AnalystEstimate	q2Est	N	Double	NA	CURRENCY,PERSHARE
+AnalystEstimate	q3Est	N	Double	NA	CURRENCY,PERSHARE
+AnalystEstimate	q4Est	N	Double	NA	CURRENCY,PERSHARE
+
+EconomicData	gnp	Y	Double	NA
+EconomicData	cpi	Y	Double	NA
+
+FundamentalDataA	sales	N	Double	NA	CURRENCY	
+FundamentalDataA	cogs	N	Double	NA	CURRENCY	
+FundamentalDataA	sga	N	Double	NA	CURRENCY	
+FundamentalDataA	deprecAmort	N	Double	NA	CURRENCY	
+FundamentalDataA	opIncome	N	Double	NA	CURRENCY	
+FundamentalDataA	intExp	N	Double	NA	CURRENCY	
+FundamentalDataA	nonOpIncome	N	Double	NA	CURRENCY	
+FundamentalDataA	specialItems	N	Double	NA	CURRENCY	
+FundamentalDataA	pretaxIncome	N	Double	NA	CURRENCY	
+FundamentalDataA	incomeTax	N	Double	NA	CURRENCY	
+FundamentalDataA	minorInt	N	Double	NA	CURRENCY	
+FundamentalDataA	income	N	Double	NA	CURRENCY	
+FundamentalDataA	netIncome	N	Double	NA	CURRENCY	
+FundamentalDataA	cash	N	Double	NA	CURRENCY	
+FundamentalDataA	receivables	N	Double	NA	CURRENCY	
+FundamentalDataA	inventory	N	Double	NA	CURRENCY	
+FundamentalDataA	curAssetsOther	N	Double	NA	CURRENCY	
+FundamentalDataA	curAssets	N	Double	NA	CURRENCY	
+FundamentalDataA	ppeNet	N	Double	NA	CURRENCY	
+FundamentalDataA	investAndAdvEquity	N	Double	NA	CURRENCY	
+FundamentalDataA	investAndAdvOther	N	Double	NA	CURRENCY	
+FundamentalDataA	intang	N	Double	NA	CURRENCY	
+FundamentalDataA	assetsOther	N	Double	NA	CURRENCY	
+FundamentalDataA	assets	N	Double	NA	CURRENCY	
+FundamentalDataA	debtCurLiab	N	Double	NA	CURRENCY	
+FundamentalDataA	payables	N	Double	NA	CURRENCY	
+FundamentalDataA	taxesPayable	N	Double	NA	CURRENCY	
+FundamentalDataA	curLiabOther	N	Double	NA	CURRENCY	
+FundamentalDataA	curLiab	N	Double	NA	CURRENCY	
+FundamentalDataA	ltDebt	N	Double	NA	CURRENCY	
+FundamentalDataA	liabOther	N	Double	NA	CURRENCY	
+FundamentalDataA	defTax	N	Double	NA	CURRENCY	
+FundamentalDataA	minorIntBS	N	Double	NA	CURRENCY	
+FundamentalDataA	liab	N	Double	NA	CURRENCY	
+FundamentalDataA	prefStockCV	N	Double	NA	CURRENCY	
+FundamentalDataA	commonEquity	N	Double	NA	CURRENCY	
+FundamentalDataA	stockhEquity	N	Double	NA	CURRENCY	
+
+FundamentalDataQ	sales	N	Double	NA	CURRENCY	
+FundamentalDataQ	cogs	N	Double	NA	CURRENCY	
+FundamentalDataQ	sga	N	Double	NA	CURRENCY	
+FundamentalDataQ	deprecAmort	N	Double	NA	CURRENCY	
+FundamentalDataQ	intExp	N	Double	NA	CURRENCY	
+FundamentalDataQ	nonOpIncome	N	Double	NA	CURRENCY	
+FundamentalDataQ	specialItems	N	Double	NA	CURRENCY	
+FundamentalDataQ	pretaxIncome	N	Double	NA	CURRENCY	
+FundamentalDataQ	incomeTax	N	Double	NA	CURRENCY	
+FundamentalDataQ	minorInt	N	Double	NA	CURRENCY	
+FundamentalDataQ	income	N	Double	NA	CURRENCY	
+FundamentalDataQ	netIncome	N	Double	NA	CURRENCY	
+FundamentalDataQ	cash	N	Double	NA	CURRENCY	
+FundamentalDataQ	receivables	N	Double	NA	CURRENCY	
+FundamentalDataQ	inventory	N	Double	NA	CURRENCY	
+FundamentalDataQ	curAssetsOther	N	Double	NA	CURRENCY	
+FundamentalDataQ	curAssets	N	Double	NA	CURRENCY	
+FundamentalDataQ	ppeNet	N	Double	NA	CURRENCY	
+FundamentalDataQ	assetsOther	N	Double	NA	CURRENCY	
+FundamentalDataQ	assets	N	Double	NA	CURRENCY	
+FundamentalDataQ	debtCurLiab	N	Double	NA	CURRENCY	
+FundamentalDataQ	payables	N	Double	NA	CURRENCY	
+FundamentalDataQ	taxesPayable	N	Double	NA	CURRENCY	
+FundamentalDataQ	curLiabOther	N	Double	NA	CURRENCY	
+FundamentalDataQ	curLiab	N	Double	NA	CURRENCY	
+FundamentalDataQ	ltDebt	N	Double	NA	CURRENCY	
+FundamentalDataQ	liabOther	N	Double	NA	CURRENCY	
+FundamentalDataQ	defTax	N	Double	NA	CURRENCY	
+FundamentalDataQ	minorIntBS	N	Double	NA	CURRENCY	
+FundamentalDataQ	liab	N	Double	NA	CURRENCY	
+FundamentalDataQ	prefStockCV	N	Double	NA	CURRENCY	
+FundamentalDataQ	commonEquity	N	Double	NA	CURRENCY	
+FundamentalDataQ	stockhEquity	N	Double	NA	CURRENCY	
+FundamentalDataM	price	N	Double	NA	PERSHARE,CURRENCY	
+FundamentalDataM	eps12	N	Double	NA	PERSHARE,CURRENCY
+FundamentalDataM	epsOps12	N	Double	NA	PERSHARE,CURRENCY
+FundamentalDataM	bookValue	N	Double	NA	PERSHARE,CURRENCY
+FundamentalDataM	sharesOut	N	Double	NA	SHARES
+FundamentalDataM	marketCap	N	Double	NA	CURRENCY
+FundamentalDataM	pe	N	Double	NA	NA
+FundamentalDataM	priceToBook	N	Double	NA	NA	
+FundamentalDataM	return1m	N	Double	NA	NA	NA
+

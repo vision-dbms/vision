@@ -1,0 +1,83 @@
+== Begin ==
+
+For professional users who are building an application admin 
+for their applications.  This set up establishes a central admin
+suitable to provide shared scripted production and a seed database
+for other applications.  This account set up is also suitable to
+provide an updating account using the installed database. 
+
+1.0 follow instructions in Install.Sandbox from 1 to 4
+outcome is a compiled set of executables and bootnet vdbs
+
+2.0 create central directories and copy material from git
+
+ mkdir -p ~/dbadmin/localvision; cd ~/dbadmin/localvision
+ cp -pr ~/vision-open-source/application/localvision/adminScripts adminScripts
+ mkdir -p ~/dbadmin/localvision/bootstrap; cd bootstrap
+ cp -pr ~/vision-open-source/application/localvision/bootstrap/protocol protocol
+ mkdir ~/dbadmin/software; cd ~/dbadmin/software
+ mkdir -p ~/dbadmin/production; cd ~/dbadmin/production 
+ cp -pr ~/vision-open-source/application/production/scripts scripts
+
+3.0 establish software executables separate from git versions
+
+setenv versionNum 8.0.0
+
+ cd ~/dbadmin/software
+ cp -pr ~/vision-open-source/software/builds/$versionNum $versionNum 
+
+ #links back to vision software
+ mkdir -p ~/dbadmin/vision/bin; cd ~/dbadmin/vision/bin; 
+ ln -s ~/dbadmin/software/$versionNum/Linux_x86_64/bin/vision vision
+ ln -s ~/dbadmin/software/$versionNum/Linux_x86_64/bin/batchvision batchvision
+ cd ~/dbadmin/vision
+ ln -s ~/dbadmin/software/$versionNum/Linux_x86_64/bin tools
+ ln -s ~/dbadmin/software/$versionNum/Linux_x86_64/lib lib
+
+4.0 install the bootNet
+ cd ~/dbadmin/localvision/bootstrap
+ mv ~/vision-open-source/application/localvision/bootstrap/investNet investNet
+ cd ~/dbadmin/localvision/bootstrap/investNet
+ whoami >  NDF.GURL 
+ \rm NDF.UUID
+ pwd > NDF.OSDPATH
+ 
+5.0 more environment
+ cd ~/dbadmin; cp -pr ~/vision-open-source/application/include include
+ cd ~
+ ln -s dbadmin/localvision localvision
+
+6.0 startup
+ mkdir ~/dbadmin/startup; cd ~/dbadmin/startup
+ cp -pr ~/vision-open-source/application/startup/unix  unix
+ cp ~/dbadmin/startup/unix/usr.cshrc ~/.cshrc
+ cp ~/dbadmin/startup/unix/usr.login ~/.login
+
+7.0: exit and  re-enter
+sets typical dbadmin run time env var
+
+8.0: finish installing application for professional application seed
+
+ mkdir $osvAdmin/releases; cd  $osvAdmin/releases
+ cp -pr $osvAdmin/localvision/bootstrap/investNet $processDate
+
+ cd $LocalVisionRoot
+ ln -s $osvAdmin/releases/$processDate network
+ cd $LocalVisionRoot/network
+
+ rm NDF.UUID
+ pwd > NDF.OSDPATH
+
+ $DBbatchvision 
+ osdPathName
+ ?g
+
+ #confirm UUID newly dated/created
+ ls -l NDF.UUID
+
+Final: 
+This is the end of the application setup.  At this time the account is set up with 
+-- the git repo for any changes proposed that should be updated into the open source space, 
+-- a central set of directories to share production and application activity, 
+-- a vision database that is suitable for updating and querying or as a seed for other applications.
+

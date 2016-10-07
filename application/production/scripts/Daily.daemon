@@ -1,0 +1,18 @@
+#!/bin/csh
+
+####
+# Daily.daemon
+#
+# This is a wrapper for daily.daemon. It will write out an error token
+#  if any part of the daily daemon process fails. This will allow
+#  us to respond earlier to failed gcollects, compactions, etc.
+#
+# Daily.daemon should be used instead of daily.daemon in an application's cron.
+####
+
+csh $HOME/localvision/production/admin/daily.daemon
+
+if ($status != 0) then
+ touch $HOME/localvision/production/status/tokens/Error.daily.daemon
+ exit 1
+endif

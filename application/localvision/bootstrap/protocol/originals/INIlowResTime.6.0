@@ -1,0 +1,24 @@
+
+######################
+######################
+####  LowResolutionTime Class
+######################
+######################
+#
+# This file declares the low (microsecond) resolution time class.
+#
+######################
+
+^global define: 'LowResolutionTime' toBe: Time basicSpecialized newPrototype __zeroU64;
+
+LowResolutionTime
+define: 'whatAmI'		toBe: "LowResolutionTime".
+define: 'isLowResolutionTime'	toBe: TRUE.
+;
+
+Object
+define: 'isLowResolutionTime'	toBe: FALSE.
+;
+
+Schema addClass: LowResolutionTime at: ^global.
+  setClassTypeTo: "BuiltIn";

@@ -1,0 +1,162 @@
+"
+####################
+#  Chain and Related Protocol
+####################
+
+" print ;
+
+Chain
+   defineFixedProperty: 'links' .
+   defineFixedProperty: 'owner' .
+
+defineMethod:
+[ | setupPrivateStructures |
+  !chain <- ^self newPrototype ;
+  ^global define: 'Chain' toBe: chain ; 
+  chain
+] .
+
+defineMethod:
+[ | createForOwner: ownerObject forInitialObject: initialObject |
+  ^self new initializeFor: initialObject .
+      setOwnerTo: ownerObject
+] .
+
+defineMethod:
+[ | initializeFor: object |
+  :links <- Link newPrototype createFor: object .
+     setParentTo: ^self ;
+  ^self
+] .
+
+defineMethod:
+[ | setOwnerTo: object |
+  :owner <- object ; 
+  ^self
+] .
+
+defineMethod:
+[ | getChainAsList |
+  links getChainAsList
+] .
+
+defineMethod:
+[ | addLink: link |
+  links append: link ;
+  ^self
+] .
+
+defineMethod:
+[ | insertLink: link atPosition: number |
+  number asInteger = 1
+    ifTrue: [ :links <- links insertFirst: link ]
+      ifFalse:
+        [ !chain <- links getChainAsList ;
+          !position <- (number - 1 min: chain count ) asInteger ;
+          chain at: position . insert: link ;
+        ] ;
+  ^self
+] .
+
+defineMethod:
+[ | deleteLinkAtPosition: number |
+  !chain <- links getChainAsList ;
+  number >= 1 && number <= chain count && chain count > 1
+    ifTrue: [ chain at: number . deleteLink ;
+              number = 1 ifTrue: [ :links <- chain at: 2 ] ;
+            ] ;
+  ^self
+] .
+
+defineMethod:
+[ | replaceObjectAtPosition: number with: object |
+  !link <- links getChainAsList at: number ; 
+  link isntNA
+  ifTrue: [ link setObjectTo: object ] ;
+  ^self
+] .
+
+defineMethod:
+[ | moveLinkAtPosition: fromPosition toPosition: toPosition |
+  !chain <- links getChainAsList ;
+  !link <- chain at: fromPosition ;
+  link isntNA
+     ifTrue: [ ^self
+                  deleteLinkAtPosition: fromPosition .
+                  insertLink: link atPosition: toPosition 
+             ] ;
+  ^self
+] .
+
+;
+
+Chain Link
+   defineFixedProperty: 'next' .
+   defineFixedProperty: 'previous' .
+   defineFixedProperty: 'object' .
+   defineFixedProperty: 'parent' .
+
+defineMethod:
+[ | createFor: object |
+  ^self new setObjectTo: object 
+] .
+
+defineMethod:
+[ | insert: link |         # inserts after ^self and returns link
+  !current <- ^self ;
+  link 
+  do: [ :previous <- ^my current ;
+        :next <- ^my current next ;
+        :parent <- ^my current parent ;
+        ^my current :next <- ^self ;
+        next isntNA
+           ifTrue: [ next :previous <- ^self ] ;
+      ] 
+] .
+
+defineMethod:
+[ | insertFirst: link |
+  !first <- ^self getChainAsList at: 1 ;
+  link :previous <- NA ;
+  link :next <- first ;
+  link :parent <- first parent ;
+  first :previous <- link ;
+  link
+] .
+
+defineMethod:
+[ | append: link |
+  !chain <- ^self getChainAsList ;
+  chain at: chain count . insert: link
+] .
+
+defineMethod:
+[ | deleteLink |
+  previous isntNA ifTrue: [ previous :next <- next ] ;
+  next isntNA ifTrue: [ next :previous <- previous ] ;
+] .
+
+defineMethod:
+[ | getChainAsList |
+  !list <- ^self asList ; 
+  !nextElement <- ^self next ;
+  [ nextElement isntNA ]
+      whileTrue: [ list, nextElement ;
+                   :nextElement <- nextElement next ;
+                 ] ;
+  list
+] .
+
+defineMethod:
+[ | setObjectTo: suppliedObject |
+  :object <- suppliedObject ;
+  ^self
+] .
+
+defineMethod:
+[ | setParentTo: object |
+  :parent <- object ;
+  ^self
+] .
+
+;

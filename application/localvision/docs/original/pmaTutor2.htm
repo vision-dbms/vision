@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title>PMA Tutorial 2: Account and Holding Access</title>
+</head>
+<body>
+<body bgcolor=white>
+
+<h2>PMA Tutorial 2: Account and Holding Access</h2>
+
+<p>| <a href="FHome.htm">Home</a> 
+   | <a href="vtutor.htm">Tutorials</a> | <hr>
+
+<blockquote><hr>
+<center><b><font size+1>Reminder!</font></b> </a></center>
+To run these examples, you should first start a new session then load the sample database using:
+<pre><tt><b>     "/localvision/samples/pma/sample.load" asFileContents evaluate ; 
+</b></tt></pre>
+Any other files referenced can be read from the <i>/localvision/samples/pma</i>
+directory.
+<p>
+<b>Note:</b> The <i>sample.load</i> file runs by default on a <i>Unix</i> environment.  If you are using a <i>Windows NT</i> platform, this location may be prefixed by a drive  and optional path (e.g. <i>d:/visiondb/localvision/samples/pma/sample.load</i>).  Check with your Vision Administrator for further details.
+<hr></blockquote>
+<p>
+
+<hr>
+
+The following example displays the basic holdings data for an Account.
+Read the file <i>example2.a.</i> You should see: 
+
+<ul>
+<pre><b>
+Named Account \102 holdings
+do:
+   [
+    security code print:10 ;
+    security name print:30 ;
+    shares print:10 ;
+    totalMarketValue printWithCommas:15 ;
+    percentOfPort printNL ;
+   ];
+</b></pre>
+</ul>
+
+<p>Execute this program. You should see: 
+
+<ul>
+<pre><b>       
+02364J10  AMERICA ONLINE INC DEL COM       8200.00     695,975.00    14.95
+37044210  GENERAL MTRS CORP COM            7800.00     497,741.40    10.69
+00949T10  AIRTOUCH COMMUNICATNS COM       15200.00     589,000.00    12.65
+...
+</b></pre>
+</ul>
+<p>
+The message <i>holdings</i> is a list that contains the individual securities held within the specific account.
+The message <i>shares</i>, <i>totalMarketValue</i>, and <i>percentOfPort</i> directly access data for each individual holding.
+The message <i>security</i> navigates to specific security level messages like <i>name</i> and <i>code</i>.
+<hr>
+
+The next example displays holdings data with headings, sorted by percentage of portfolio.
+
+Read the file <i>example2.b.</i> You should see: 
+
+<ul>
+<pre><b>
+# Add headers 
+"Code" print:10 ;
+"Name" print:35 ;
+"Shares" print:12 ;
+"Total Mkt Val" print:15 ;
+"% of Port" printNL ;
+newLine print ;
+
+Named Account \102 holdings
+sortDown:[percentOfPort] .  # sorted in descending order 
+do:
+   [
+    security code print:10 ;
+    security name print:35 ;
+    shares print:10 ;
+    totalMarketValue printWithCommas:15 ;
+    percentOfPort printNL ;
+   ];
+</b></pre>
+</ul>
+<p>Execute this program. You should see: 
+
+<ul>
+<pre><b>
+Code      Name                               Shares      Total Mkt Val  % of Port
+
+24702510  DELL COMPUTER CORP COM                8600.00     717,566.80    15.41
+02364J10  AMERICA ONLINE INC DEL COM            8200.00     695,975.00    14.95
+00949T10  AIRTOUCH COMMUNICATNS COM            15200.00     589,000.00    12.65
+...
+</b></pre>
+</ul>
+<p>
+This example expands on the previous example by adding column headings and sorting the holdings.
+The message <i>sortDown</i> displays the holdings in descending order.  
+The data can also be displayed in ascending order by using the message <i>sortUp</i>. 
+<hr>
+<p>
+The next example displays holdings data with headings, sorted by percentage of portfolio
+from a different date.
+
+Read the file <i>example2.c.</i> You should see: 
+
+<ul>
+<pre><b>
+"Code" print:10 ;
+"Name" print:37 ;
+"Shares" print:12 ;
+"Total Mkt Val" print:15 ;
+"% of Port" printNL ;
+newLine print ;
+
+971105 evaluate:  # access the data as of this date
+[
+Named Account \102 holdings
+sortDown:[percentOfPort] .
+do:
+   [
+    security code print:10 ;
+    security name print:35 ;
+    shares printWithCommas:10 ;
+    totalMarketValue printWithCommas:15 ;
+    percentOfPort printNL ;
+   ];
+];
+</b></pre>
+</ul>
+<p>Execute this program. You should see:
+
+<ul>
+<pre><b>
+Code      Name                                 Shares      Total Mkt Val  % of Port
+
+40410010  HBO & CO COM                        19,600.00     852,600.00     9.61
+37935240  GLOBAL MARINE INC COM               25,400.00     790,575.00     8.91
+24702510  DELL COMPUTER CORP COM               8,600.00     689,075.00     7.77
+...
+</b></pre>
+</ul>
+<p>
+By surrounding the request with a changed date, you are able to display the same
+report but with different data.   The <i>evaluate:</i> message will access the data as of the date supplied. 
+This date becomes the default date used for all operations inside the brackets.
+
+
+<hr>
+This example displays sectors for each holding.
+Read the file <i>example2.d</i>.  You should see:
+
+<ul>
+<pre><b>
+"Code" print:10 ;
+"Name" print:37 ;
+"Shares" print:12 ;
+"Total Mkt Val" print:15 ;
+"% of Port" print:10 ;
+"Sector" printNL:-10 ;
+
+newLine print;
+
+Named Account \102 holdings
+sortDown:[percentOfPort] .
+do:
+   [
+    security code print:10 ;
+    security name print:35 ;
+    shares printWithCommas:10 ;
+    totalMarketValue printWithCommas:15 ;
+    percentOfPort print:10 ;
+    security company industry sector name printNL:-35 ;  #Navigate to sector
+   ];
+</b></pre>
+</ul>
+<p>Execute this program. You should see:
+
+<ul>
+<pre><b>
+Code      Name                                 Shares      Total Mkt Val  % of Port     Sector
+
+24702510  DELL COMPUTER CORP COM               8,600.00     717,566.80     15.41                         Technology
+02364J10  AMERICA ONLINE INC DEL COM           8,200.00     695,975.00     14.95                  Consumer services
+00949T10  AIRTOUCH COMMUNICATNS COM           15,200.00     589,000.00     12.65     Commercial/industrial services
+...
+</b></pre>
+</ul>
+<p>
+
+One aspect of navigational flow in Vision is that messages are defined to return objects from other classes. 
+The example <i>security company industry sector name</i>, is a continuation of the navigational theme.
+The message <i>company</i> at the class <b>Security</b>, returns an instance of the <b>Company</b> class.
+The message <i>industry</i> at the class <b>Company</b>, returns an instance of the <b>Industry</b> class.
+The message <i>sector</i> at the class Industry returns an instance of the <b>Sector</b> class.
+The full expression <i>security company industry sector name</i> navigates from the 
+specific holding to its sector and accesses the sector's name.
+<hr>
+
+This example displays holdings grouped into sectors.
+Read the file <i>example2.e.</i> You should see: 
+
+<ul>
+<pre><b>
+Named Account \102 holdings
+groupedBy:[security company industry sector] .  # group into sectors
+sortUp:[name] . # sort by sector name
+do:
+   [
+    code print:10 ;      # sector code
+    name printNL:35 ;    # sector name
+    groupList           # for each holding in sector
+    do:
+       [
+        security code print:10 ;
+        security name print:30 ;
+        shares print:10 ;
+        totalMarketValue printWithCommas:15 ;
+        percentOfPort printNL ;
+       ];
+        newLine print ;
+   ];
+</b></pre>
+</ul>
+
+<p>Execute this program. You should see:
+
+<ul>
+<pre><b>
+SRVI      Commercial/industrial services     
+00949T10  AIRTOUCH COMMUNICATNS COM       15200.00     589,000.00    12.65
+
+DURB      Consumer durables                  
+37044210  GENERAL MTRS CORP COM            7800.00     497,741.40    10.69
+34537010  FORD MTR CO DEL COM              7200.00     338,853.60     7.28
+
+...
+</b></pre>
+</ul>
+<p>
+The <i>groupedBy:</i> message groups the current list based on the supplied block.
+
+Once the list has been grouped, the holdings in the group are accessed with the
+<i>groupList</i> message.   
+
+
+<hr>
+
+This example displays holdings grouped into sectors with a different date.
+Read the file <i>example2.f.</i> You should see: 
+<p>
+
+<ul>
+<pre><b>
+971105 evaluate:
+[
+Named Account \102 holdings
+groupedBy:[security company industry sector] .
+sortUp:[name] .     # Sort by sector name
+do:
+   [
+    code print:10 ;     # sector code
+    name printNL:35 ;   # sector name
+    groupList          # For each holding in sector 
+    do:
+       [
+        security code print:10 ;
+        security name print:30 ;
+        shares print:10 ;
+        totalMarketValue printWithCommas:15 ;
+        percentOfPort printNL ;
+       ];
+
+        newLine print ;
+   ];
+];
+</b></pre>
+</ul>
+
+<p>Execute this program. You should see:
+
+<ul>
+<pre><b>
+SRVI      Commercial/industrial services     
+00949T10  AIRTOUCH COMMUNICATNS COM       15200.00     587,100.00     6.62
+
+DURB      Consumer durables                  
+37044210  GENERAL MTRS CORP COM            7800.00     500,666.40     5.65
+34537010  FORD MTR CO DEL COM             12400.00     541,731.20     6.11
+...
+</b></pre>
+</ul>
+
+
+<hr>
+| <a href="tuBasic.htm">Vision Basics</a>  
+| <a href="tuLoad.htm">Creating a Demo Database</a>
+| <a href="tuSingle.htm">Single Object Access</a> 
+| <a href="tuList.htm">Using Lists</a> 
+| <a href="tuTS.htm">Using Dates and TimeSeries</a> |
+
+<hr>
+
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy; 1999 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Created January 29, 1999</font>
+</table>
+
+</body>
+</html>

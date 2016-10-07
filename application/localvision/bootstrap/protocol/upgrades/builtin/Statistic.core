@@ -1,0 +1,97 @@
+####################
+#  Statistic: Protocol
+####################
+#
+# 10/31/06 - lcn - Additional protocol referenced by later patches
+#       + Statistic - create class and initial protocol - patch.pre7.apps
+#
+#  Introduces:
+#      Statistic
+#
+# $File: //depot/vision/applications/core/builtin/mainline/Statistic.core $
+# $DateTime: 2008/12/15 16:47:28 $
+# $Revision: #3 $
+# $Author: sglee $
+
+####################
+#  Other Support Classes and Instances: Statistic
+####################
+
+Interface BatchFeedManager 
+    createEntityClass: "Statistic" from: "Support" ;
+
+PropertySetup updateFromString: "property | classId | dataType | defaultValue
+isPercent | Statistic | Boolean | FALSE
+isCount | Statistic | Boolean | FALSE
+accessBlock | Statistic | Block
+statSet | DataItem | Statistic
+" ;
+
+Statistic defineMethod: [ | initializeLocalAttributes | 
+  ^super initializeLocalAttributes ;
+  :accessBlock <- code asBlock ;
+  ^self
+] ;
+
+
+## -- Already in StatisticMaster.core; 
+##    Came in again in patch_124.vis
+#--  auto add shortname and upper case as aliases
+StatisticMaster defineMethod: [ | updateAliases |
+  ^self entityType masterList
+     do: [ ^self addAlias: shortName ;
+           aliases do: [ ^my addAlias: ^self toUpper ] ;
+         ] ;
+  ^self
+] ;
+
+
+
+#--------------------
+#  Statistic
+#--------------------
+# changed sortCode to put the most popular at the top of the list
+StatisticMaster updateFromString: 
+"id                  | name            | sortCode | shortName | isPercent | isCount
+countGoodOnes        | Number Available      | 0i | NUM    | N | Y
+percentAvailable     | Percent Available     | 0j | PCT    | Y | N
+weightedAverage      | Wtd Average           | 0b | WAVG
+average              | Average               | 0a | AVG
+total                | Sum                   | 0e | SUM 
+median               | Median                | 0f | MEDIAN
+min                  | Min                   | 0l | MIN
+max                  | Max                   | 0k | MAX
+stdDev               | Standard Dev          | 0g | STDDEV
+countPositives       | Positives             | 0m | POS    | N | Y
+countNegatives       | Negatives             | 0o | NEG    | N | Y
+countZeros           | Zeros                 | 0q | ZERO   | N | Y
+harmonicMean         | Harmonic Avg          | 0c | HAVG 
+weightedHarmonicMean | Wtd Harmonic Avg      | 0d | WHAVG
+weightedMedian       | Wtd Median            | 0h | WMEDIAN
+pctPositives         | % Positives           | 0n | PCTPOS
+pctNegatives         | % Negatives           | 0p | PCTNEG
+pctZeros             | % Zeros               | 0r | PCTZERO
+averageNoNegs                | Average (no negs)               | averageNoNegs                | AVGNN
+average2Std                  | Average 2 std dev               | average2Std                  | A2STD
+average2StdNoNegs            | Average 2 std dev (no negs)     | average2StdNoNegs            | A2STDNN
+weightedAverageNoNegs        | Wtd Average (no negs)           | weightedAverageNoNegs        | WAVGNN
+weightedAverage2Std          | Wtd Average 2 std dev           | weightedAverage2Std          | W2STD
+weightedAverage2StdNoNegs    | Wtd Average 2 std dev (no negs) | weightedAverage2StdNoNegs    | W2STDNN
+weightedHAverage2Std         | Wtd Harmonic Average 2 std dev  | weightedHAverage2Std         | WH2STD
+weightedAverageCapped        | Wtd Average Capped              | weightedAverageCapped        | WAvgCap
+weightedAverageInterQuartile | Wtd Average InterQuartile       | weightedAverageInterQuartile | WAVGIQ
+#adjustedTotal                | Adjusted Total        | 16 | Adj Tot | 
+#sumNumToSumDen               | Sum Numerator-to-Sum Denominator | 17 | SumNToSumD
+" ;
+
+#- Grandfather old aliases
+Named Statistic median addAlias: "Med" . addAlias: "MED" ;
+
+#-- allows shortName and uppercase versions to be used as aliases
+#Statistic masterList 
+#do:[^self addAlias: shortName ;
+#    aliases do: [ ^my addAlias: ^self toUpper ] ;
+#   ] ;
+
+#- Flag unused stats for deletion
+#"Adj Tot,SumNToSumD" as: Statistic . do: [ flagForDeletion ] ;

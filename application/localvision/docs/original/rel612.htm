@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head><title>Vision Release  6.1.2 Notes</title></head>
+<body bgcolor=white>
+<h2>Vision Release 6.1.2 Notes</h2>
+
+
+<hr><h3>Topics Covered:</h3>
+<ul type=square>
+<li><a href="#description">Description</a>
+<li><a href="#stringclustering">String Clustering Primitives</a>
+<br><li><a href="#newcluster">New Cluster Locator Primitive</a>
+<br><li><a href="#support">Support for Euro Currency</a>
+<br><li><a href="#bulkchanges">Miscellaneous Changes to the Bulk Database Driver</a>
+<br><li><a href="#miscchanges">Other Miscellaneous Changes</a>
+</ul><p><hr><p>
+
+<h3><a name=description>Description</a></h3><p>
+Release 6.1.2 incorporates several new primitives introduced in Release 6.1.1, our recommended changes for supporting the euro currency, and other miscellaneous changes.<p>
+
+As part of this release new vision executables have been created that will need to be installed.  Several Vision scripts have also been included, providing optional new and modified messages for your installation:<p>
+
+<ul type=disc><table cellspacing=4>
+<tr align=left valign=top><td>CHcore.6.1.2<td>Incorporates new primitives 
+<tr align=left valign=top><td>CHdbs.6.1.2<td>Miscellaneous changes to bulk database driver
+<tr align=left valign=top><td>DataRecordOSpace.6.1.2<td>New ObjectSpace for PMA
+</table></ul>
+
+
+<p>For the download and installation instructions, click either <a href="rel612NT.htm">Release 6.1.2 Upgrade for NT</a> or <a href="rel612Unix.htm">Release 6.1.2 Upgrade for Unix</a>.
+<p>
+<hr>
+
+<h3><a name=stringclustering>String Clustering Primitives</a></h3>
+<p>
+The message <i>primaryStringCluster</i> has been added to the <b>Schema
+ClassDescriptor</b> class to provide a default location that manages
+the string values associated with the properties of a class.  
+<b>ClassDescriptor</b> instance creation has been modified to create a
+new string cluster when the new subclass is created. There is a section in the CHcore.6.1.2
+script that generates a string cluster for all existing classes. 
+<p>
+The string clusters provide an efficient way to store properties that
+contain string values.  In addition, string clusters only maintain a
+single copy of the string, eliminating the storage overhead involved
+with storing duplicate values and providing a way of "uniquifying"
+the object returned.  The message <i>getClusteredString:</i> at <b>Object</b>
+looks up the supplied parameter in the recipient's primary string
+cluster and adds it if not present.  
+<p>
+A number of core messages including <i>newAs:</i> and <i>initializeKeys:</i>
+at <b>Object</b> and <i>setNameTo:</i> at <b>Entity</b> have been modified to use
+the class' string cluster.  These changes are included in the script CHcore.6.1.2.
+<p>
+<hr>
+
+<h3><a name=newcluster>New Cluster Locator Primitive</a></h3>
+<p>
+The <i>specialized</i> method at <b>Object</b> has been modified to eliminate the
+check for "not owned" classes, since core classes can now be located
+in object spaces other than 3.  Methods that create new stores have been modified
+to take advantage of the explicit method that establishes store
+location. These changes are included in CHcore.6.1.2. 
+<p>
+
+<hr><p>
+
+<h3><a name="support">Support for Euro Currency</a></h3>
+<p>
+The recommended patches for managing the euro currency have been
+incorporated and include:
+<ul type=disc><li>all suggested code in our web document
+<li>enabled fixed euro rate by default
+<li>pre-created EUR and LEGACY currencies
+<li>pre-created 11 EMU currencies and assigned their fixed rates
+</ul><p>
+
+
+<hr><p>
+
+<h3><a name="bulkchanges">Miscellaneous Changes to the Bulk Database Driver</a></h3>
+<ul type=disc><li>Miscellaneous changes to the bulk database driver processing for
+<b>DataSet</b> reconciles have been consolidated into the scripts CHdbs.6.1.2.
+</ul>
+
+
+<p><hr><p><h3><a name="miscchanges">Other Miscellaneous Changes</a></h3>
+<p>The script CHcore.6.1.2 includes:
+
+<p>Changes to Core<p><ul type=disc> 
+
+
+    <li>Added the classes <b>DataType,</b> <b>DataSeries,</b> and <b>Frequency</b>.
+<p>
+    <li>Added <i>asDateFromYYMMDD</i> method which is useful for interpreting
+     six digit dates that have leading 0s.
+<p>
+    <li>Added the Collection messages <i>from:</i> and <i>to:</i>.
+<p>
+    <li>Added <i>validateAsExpressionIn:</i> message at <b>String</b> to confirm
+     that a string sent to an object should not generate any "selector
+     not found"s.
+<p>
+    <li>Modified <i>initialize</i> method at <b>Entity</b> to only initialize 
+     <i>name</i>, <i>shortName</i>, and <i>sortCode</i> if value is <i>NA</i>; this allows
+     these fields to be passed in as part of <i>createInstance:</i>.
+<p>
+    <li>Modified the <i>deleteAlias:</i> message at <b>Entity</b> to create the
+     new list of aliases in the same cluster as the other lists.
+<p>
+    <li>Modified <i>sortUp:</i> and <i>sortDown:</i> at <b>Collection</b> to reference
+     <i>^self</i> instead of <i>^current</i> for its temporary structure creation
+     which will allow for more efficient cleanup.
+<p>
+    <li>Modified <i>median:</i> and <i>average:withWeights:</i> at <b>Collection</b> to
+     test on values being numeric before doing calculations (eliminate
+     "selector not found"s).
+<p>
+    <li>Modified <i>getClassificationFor:</i> method at <b>RangeClassification</b> to
+     work correctly when ranges are missing.
+<p>
+    <li>Added <i>getInternalSelector</i> method to <b>Schema MID</b> to access correct
+     case-sensitive value for <i>code</i>.  Modified <i>createIncorporatorSubclass:</i>
+     to use this selector.
+<p>
+    <li>Modified object space profile reports in <b>AdminTools</b> and fixed
+     a minor bug in <i>profileVector:</i> message.  Changed the name <i>onprof</i>
+     to <i>objectSpaceProfile</i> in <b>AdminTools</b>.
+</ul><p>
+
+
+
+
+
+<p>
+
+   Changes to Feed Processing/ Process Control Tools/ Interface Tools 
+<p>
+<ul type=disc><li>Modified <b>DataRecord</b> subclass creation to locate new class in
+     the default <b>DataRecord</b> object space (object space 7).
+<p>
+<li>Modified <b>MasterFeed</b> and <b>EntityExtenderFeed</b> to assign clustered
+     strings where appropriate.
+<p>
+<li>Added <i>dateFormat</i> as a configuration file option.  Valid values are: MMYYYY, MMYY, MMDDYY, MMDDYYYY, which indicate the format for the digits supplied in the field.
+<p>     
+<li>Added <i>runWrapup</i> step to <b>ExchangeRateFeed</b> that will automatically update
+     legacy currencies when EUR rates are provided.
+<p>
+<li>Modified <b>AliasFeed</b> processing to add all supplied aliases.  Prior
+     versions only added aliases not currently in use.
+<p>
+<li>Replaced use of <i>named at:</i> with <i>locateId:</i> for entity lookups
+     in <b>MasterFeed</b>, <b>EntityExtenderFeed</b>, <b>MembershipFeed</b>, and 
+     <b>UniverseMembers</b> processing.
+<p>
+<li>Modified <i>rollbackVersion:</i> method at <b>ProcessControlTools</b> to
+     reformat output returned from restarting the master listener.
+
+<p></ul>
+   Changes to Core Applications
+<p><ul type=disc><li>Modified Currency menu in reports to include LEGACY as last choice;
+     only Local, US, Legacy, and currencies having at least one exchange
+     rate will be included in the body of the menu.
+
+<p></ul>   Changes to PMA  Core
+<p><ul type=disc><li>Added <b>Broker</b> as a core class.
+<p>
+<li>Modified <i>locateId:</i> message at <b>Security</b> to consider the eighth character cusip and six carachter sedol as part of its search path.
+<p>
+<li>Modifed the <i>rebuildSecurityList</i> method at <b>Company</b> so the
+     default list does not reference all securities that do not have
+     a company.
+<p>
+<li>Assigned the primary string cluster for <b>Security</b>, <b>Company</b>, and <b>Account</b>
+     classes to the same object space as the class.  Modifed the <i>resetCodeTo:</i>
+     and <i>setTickerTo:</i> messages at <b>Security</b> to use clustered strings.
+<p>
+<li>Modified <b>PriceRecord</b> to store daily return either as a percent or in
+     unitized form.  Two properties have been added: <i>_dailyReturn</i>
+     and <i>_unitReturn</i>.  Only one of these properties needs to be 
+     updated.  The cover methods <i>dailyReturn</i> and <i>unitReturn</i> at
+     <b>PriceRecord</b> derive the value not loaded.
+<p>
+<li>Modified new <b>Holding</b> store creation to use new store location method.
+<p>
+<li>Added <i>return1m</i> as an updateable property for <b>FundamentalDataM.</b>
+<p></ul>
+
+Changes to PMA Feeds
+<p><ul type=disc><li>Modified <b>HoldingsFeed</b> to use <i>locateId:</i> instead of <i>named at:</i>
+     for entity lookups.
+<p>
+<li>Modified <b>HoldingsFeed</b> <i>displayBadOnes</i> report to fix "Selector Not Found"s in missing data section.
+<p>
+<li>Modified <b>PriceFeed</b> to support update of <i>dailyReturn</i> and <i>unitReturn</i>.
+<p>
+<b><li>FundamentalM</b> can be used to update <i>return1m</i>.
+<p></ul>
+   Changes to PMA Apps
+<p><ul type=disc><li>Modified Balance Sheet and Income Statement reports to link to
+      the latest quarterly version, eliminating individual links by year.
+<p>
+<li>Modified Account Characteristic reports that contain 2 levels
+     of grouping (date/account and group/account) so the generated detail link
+      only includes the subset of accounts displayed.  The
+     link had contained all accounts which consequently produced a browser error
+     when the string became too long.
+<p>
+<li>Modified the Pricing Currency report to display the conversion
+     formula when a report that includes pre-euro dates is requested in euro.
+<p>
+<li>Modified <i>getAccountListFrom:</i> method at <b>Account</b> to sort
+     list correctly if composite is used.
+
+
+</ul>
+
+
+<p><hr><table border=0 width="100%"><tr><td align=left><font size=-1>Copyright &copy; 1999 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated May 7, 1999</font></tr></table>
+</body></html>

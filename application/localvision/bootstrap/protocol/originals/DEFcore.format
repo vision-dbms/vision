@@ -1,0 +1,195 @@
+####################
+#  DEFcore.format
+#
+#  General formatting tools - should be redefined as needed by
+#     subclasses that support different tagging styles
+#
+####################
+
+#--------------------
+#  Support for ^local override
+#--------------------
+
+Object defineMethod: [ | FormatTools | ^local FormatToolProtocol ] ;
+
+FormatTools defineMethod: [ | evaluate: aBlock | 
+  !tools <- ^self ;
+  ^local extendedBy: [!FormatToolProtocol <- ^my tools] 
+         asLocalContextFor: aBlock
+];
+
+#--------------------
+#  Formatting Messages
+#     redefine as needed for subclasses
+#--------------------
+
+FormatTools
+#--------------------
+#  basic modes
+#--------------------
+
+defineMethod:
+[ | beginPreserveMode |
+] .
+
+defineMethod:
+[ | endPreserveMode | 
+] .
+
+#--------------------
+#  titles
+#--------------------
+
+defineMethod:
+[ | buildTitle: string over: span |
+  ^self buildTitle: string over: span withStyle: NA .
+] .
+
+#-- style parameters passed as list : 
+#--      fontString, colorString, fontSize, centerFlag
+defineMethod:
+[ | buildTitle: string over: span withStyle: list |
+  !centerFlag <- list isList ifTrue: [ list at: 4 ] . else: TRUE ;
+  [ string 
+    do: [ ^my centerFlag isTrue
+             ifTrue: [ ^self center: ^my span . printNL ]
+            ifFalse: [ ^self printNL: ^my span ] ;
+        ] ;
+    newLine print ;
+  ] divertOutput
+] .
+
+defineMethod:
+[ | buildCommentBlock: string over: span |
+  [ string asLines 
+    do: [ ^self center: ^my span . printNL;];
+    newLine print ;
+  ] divertOutput 
+] .
+
+defineMethod: [ | buildOptionsBar: string |
+] .
+
+defineMethod: [ | buildSectionBreakOver: span alignedTo: align |
+  !size <- span isNumber 
+     ifTrue: [ span ] ifFalse: [ span asString convertToNumber ] . else: 80; 
+  !break <- "-" fill: size ;
+  [ newLine print; 
+    align = "center" 
+       ifTrue: [ break center: 80 .printNL ] .
+    elseIf: [ align = "right" ]
+       then: [ break printNL: -80 ] .
+       else: [ break printNL ] ; 
+  ] divertOutput
+] .
+
+#--------------------
+#  format styles
+#--------------------
+defineMethod: [ | bold: string |  
+  string 
+] .
+
+defineMethod: [ | italic: string | 
+  string
+] .
+
+defineMethod: [ | center: string | 
+  string center: 80 
+] .
+
+defineMethod:
+[ | buildItemList: stringList | 
+  stringList 
+] .
+
+#--------------------
+#  links
+#--------------------
+
+defineMethod:
+[ | buildLinkForApp: app withLabel: label andParams: plist |
+  label
+] .
+
+defineMethod:
+[ | buildLinkForApp: app withLabel: label |
+  label
+] .
+
+defineMethod: [ | buildLink: link withLabel: label | 
+  label 
+] .
+
+defineMethod: [ | buildLink: link withPath: path withLabel: label | 
+  label 
+] .
+
+defineMethod: [ | buildImage: file |
+^self buildImage: file withAlt: "" 
+] .
+
+defineMethod: [ | buildImage: file withAlt: alt |
+  alt 
+] .
+
+defineMethod: [ | buildImage: file withPath: path withAlt: alt |
+  alt 
+] .
+
+defineMethod: [ | buildLinkForApp: app 
+                        withCheck: block
+                        withLabel: label 
+                        andParams: plist | 
+  label asString 
+] .
+
+defineMethod: [ | buildLinkForAppZeroCheck: app 
+                                 withLabel: label 
+                                 andParams: plist | 
+  label asString 
+] .
+
+defineMethod: [ | buildURLForApp: app andParams: plist | 
+  [ app print ;
+    plist isntNA
+    ifTrue: [ plist 
+               do: [ "@" print ; asString stripBoundingBlanks print];
+            ] ;
+  ] divertOutput
+] .
+
+defineMethod: [ | encodeNewLinesIn: text | 
+  text
+] .
+defineMethod: [ | decodeNewLinesIn: text | 
+  text 
+] .
+defineMethod: [ | blankFill: n | 
+  " " fill: n
+] .
+defineMethod: [ | font: font inSize: size andColor: color for: text |
+  text
+] .
+defineMethod: [ | indent: text | 
+  [ text isCollection 
+       ifTrue: [ text ] ifFalse: [ text asString asLines ] .
+    do: [ " " print: 5 ; printNL ] ;
+  ] divertOutput
+] .
+defineMethod: [ | startParagraph |
+  newLine
+] .
+defineMethod: [ | startLine |
+  newLine
+] .
+defineMethod: [ | buildAnchor: anchor withLabel: label |
+  label
+] .
+defineMethod: [ | buildScriptFrom: text |
+] .
+defineMethod: [ | buildOnClick: function withLabel: label |
+  label
+] .
+
+;

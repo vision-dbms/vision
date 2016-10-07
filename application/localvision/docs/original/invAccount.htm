@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>The Account Classes</title>
+</head>
+
+<body bgcolor=white>
+<h2>The Account Classes</h2>
+| <a href="FHome.htm">Home</a> | <a href="invRef.htm">Investment Reference</a> | <a href="invHolding.htm">The Holding Class</a> |
+<hr>
+
+<h3>Topics Covered:</h3>
+<ul type = square>
+<li><a href="#Overview">Overview</a>
+<li><a href="#The Account Class">The Account Class</a>
+<li><a href="#The Portfolio Class">The Portfolio Class</a>
+<li><a href="#The AggAccount Class">The AggAccount Class</a>
+<li><a href="#The IndexAccount Class">The IndexAccount Class</a>
+<li><a href="#New Instances and Additional Messages">New Instances and Additional Messages</a>
+</ul>
+<hr>
+
+<a name="Overview"><h3>Overview</h3></a>
+
+The  class  <b>Account</b>  is  a  super  class  of  the  classes  <b>Portfolio</b>,
+<b>AggAccount</b>,  and  <b>IndexAccount</b>.   A Portfolio is defined as an account
+whose holdings are created via a  feed  from  an  internal  accounting
+system.  The actual portfolio instances may represent <i>real</i> or <i>test</i>
+portfolios.  An AggAccount is defined as an account whose holdings are
+created  by combining the holdings for a list of component portfolios.
+This portfolio list may be explicit or derived.   An  IndexAccount  is
+defined  as an account whose holdings are created starting with a list
+of securities and one or more rules to derive a <i>shares owned</i> value.
+<p>
+
+Messages that apply to all Account subclasses are defined at  Account.
+Messages   that   address   the   unique  requirements  of  Portfolio,
+AggAccount, and IndexAccount instances are defined at the  appropriate
+subclass.  Your installation may define additional subclasses.
+<p>
+
+Instances of the Account classes are named at the lowest level  class.
+For example, portfolio XYZ would be accessed using:
+<pre><b>    Named Portfolio XYZ </b></pre>
+
+An extra naming dictionary is defined at the Account  class  to  allow
+interchangeable   access   among   the   classes.   For  example,  the
+expression:
+<pre><b>    Named Account XYZ </b></pre>
+
+also returns portfolio XYZ.  If the same id  is  used  to  identify  a
+portfolio and another account instance, the expression will return the
+portfolio instance.  The property  <i>uniqueId</i>  is  used  to  create  a
+unique identifier for each instance.  The expressions:
+<pre><b>    Named Account P_XYZ = Named Portfolio XYZ
+
+    Named Account A_XYZ = Named AggAccount XYZ </b></pre>
+
+      and
+
+<pre><b>    Named Account I_XYZ = Named IndexAccount XYZ </b></pre>
+
+all return the value TRUE.
+
+The message <i>locateId:</i> has been redefined at the Account class to use
+the following search rule:
+
+<ul type=disc>
+<li>Named Account
+<p>
+<li>Named Portfolio
+<p>
+<li>Named AggAccount
+<p>
+<li>Named IndexAccount
+</ul>
+<p>
+
+For example, the expression:
+
+<pre><b>    Account locateId: "XYZ" </b></pre>
+
+returns <i>Named Account XYZ</i> if it is  defined,  otherwise  it  returns
+<i>Named  Portfolio  XYZ</i>,  otherwise  <i>Named AggAccount XYZ</i>, otherwise
+<i>Named IndexAccount XYZ</i>, otherwise NA.
+<p>
+
+<hr>
+
+<a name="The Account Class"><h3>The Account Class</h3></a>
+
+The class Account is used to unify all the protocol that is common  to
+portfolios,   aggregates,   and  index  accounts.  The  following  key
+properties are defined for all Accounts:
+<p>
+
+<center><table border=1 cellspacing=2 cellpadding=8>
+<tr><td><b>Property</b><td><b>Initial Value</b><td><b>Type</b>
+<tr><td>code<td>Supplied String<td>String
+<tr><td>name<td>code<td>String
+<tr><td>uniqueId<td>{P,A,orI}_code<td>String
+<tr><td>* baseCurrency<td>Named Currency US<td>Currency
+<tr><td>* manager<td>Named Manager Default<td>Manager
+</table></center>
+<p>
+
+<center>* Included in Account initialization list</center>
+<p>
+
+Each subclass of  Account  performs  its  own  unique  initializations
+followed  by  general  account  initializations.   In  addition to the
+specific   subclass   initializations   and   the   standard    Entity
+initializations,  the  class Account performs the following steps when
+you create a new instance of any subclass:
+
+<dl>
+<dt><dd>- The <i>uniqueId</i> for the instance is added to the  <i>Named  Account</i> dictionary.
+<dt><dd>- The structures needed to support holdings data are initialized.
+</dl>
+<p>
+
+All accounts respond to the message <i>holdings</i> by returning  the  list
+of  Holding instances associated with the Account as of the evaluation
+date.  Holdings-related messages are described in detail in <a href="invHolding.htm"><i>The Class Holding</i></a>.
+<p>
+
+Several properties are  precomputed  whenever  the  holdings  data  is
+updated.  These values are retained over time.
+<p>
+
+<center><table border=1 cellspacing=2 cellpadding=8>
+<tr><td><b>Message</b><td><b>Returns</b>
+<tr><td>*_totalCost<td>unadjusted total cost
+<tr><td> totalCost<td>currency adjusted total cost
+<tr><td>*_totalMarketValue<td>unadjusted total market value
+<tr><td> totalMarketValue<td>currency adjusted total market value
+<tr><td>*_totalMarketValueCash<td>unadjsuted mkt value (cash)
+<tr><td> totalMarketValueCash<td>currency adjusted mkt value (cash)
+<tr><td>*_totalMarketValueEquity<td>unadjusted mkt value (equity)
+<tr><td> totalMarketValueEquity<td>currency adjsuted mkt value (equity)
+<tr><td>*_totalMarketValueFixed<td>unadjusted mkt value (fixed)
+<tr><td> totalMarketValueFixed<td>currency adjsuted mkt value (fixed)
+</table></center>
+<p>
+
+<center>* Indicates the property value </center>
+<p>
+
+The <i>profile</i> message can be used to display a summary description  of an Account:
+
+<pre><b>    Named Account A_XYZ profile</b></pre>
+
+produces:
+
+<pre><b>    *** AggAccount Profile For: XYZ
+    Code:                         XYZ
+    Aliases:                      XYZ /
+
+    ---  Links   ---
+    baseCurrency :                US        US Dollars
+    manager :                     Default   Default
+
+    ---  XRefs  ---
+
+    ---  Supplemental Data  ---
+    uniqueId:                     A_XYZ
+    holdings (count):                           0
+    totalMarketValue (US):                    NA</b></pre>
+
+Additional messages defined at the Account class include:
+<p>
+
+<center><table border=1 cellspacing=2 cellpadding=8>
+<tr><th colspan=2><b><a href="clCurrency.htm">Currency Related Messages</a></b>
+<tr><td>baseCurrency<td>local currency for Account (US default)
+<tr><td>currency<td>current currency override
+<tr><td>currencyFactor<td>currency coversion multiple
+<tr><td>inCurrency:do:
+<tr><td>setBaseCurrencyTo:<td>change baseCurrency of Account
+</table border></center>
+<p>
+
+<center><table border=1 cellspacing=2 cellpadding=8>
+<tr><th colspan=2><b><a href="invHolding.htm">Holdings Access Messages</a></b>
+<tr><td>getHoldingIn:<td>returns holding for a Security
+<tr><td>hasHoldings<td>returns TRUE/FALSE
+<tr><td>holdings<td>List of Holding instances over time
+<tr><td>holdingsDate<td>effective date of holdings
+<tr><td>holds:<td>returns TRUE/FALSE if security is held
+</table></center>
+<p>
+              
+<hr>
+
+<a name="The Portfolio Class"><h3>The Portfolio Class</h3></a>
+
+Instances of the class <b>Portfolio</b> correspond to portfolios  as  defined
+by  the  accounting  system.   A  new  Portfolio  instance  is created
+whenever a new portfolio is introduced by the production account feed.
+<p>
+
+The following key properties are defined for the class Portfolio:
+<p>
+
+<center><table border=1 cellspacing=2 cellpadding=8>
+<tr><td><b>Property</b><td><b>Initial Value</b><td><b>Type</b>
+<tr><td>code<td>Supplied String<td>String
+<tr><td>name<td>code<td>String
+<tr><td>uniqueId<td>P_code<td>String
+<tr><td>* baseCurrency<td>Named Currency US<td>Currency
+<tr><td>* manager<td>Named Manager Default<td>Manager
+<tr><td>aggregateList<td>empty list<td>IndexedList
+</table></center>
+<p>
+<center>* Included in Portfolio initialization list</center>
+<p>
+
+In addition to the standard Entity and  Account  initializations,  the
+class  Portfolio  performs  the  following steps when you create a new
+instance:
+
+<dl>
+<dt><dd>-The <i>uniqueId</i> is created by appending the value of <i>code</i> to the
+prefix <i>P_</i>.
+<dt><dd>-The value of code is added the <i>Named Account</i> dictionary as well
+  as the <i>Name Portfolio</i> dictionary.
+<dt><dd>-The <i>aggregateList</i> property is initialized to an empty list.
+</dl>
+<p>
+For example, the expression:
+<p>
+<pre><b>    Portfolio createInstance: "XYZ" .
+    setNameTo: "Sample XYZ Portfolio" </b></pre>
+
+creates a new Portfolio instance with a <i>code</i> of <i>XYZ</i>, a  <i>uniqueId</i>
+of  <i>P_XYZ</i>, and the supplied name.  The <i>profile</i> message can be used
+to display a summary description of this portfolio:
+<p>
+<pre><b>    Named Portfolio XYZ profile </b></pre>
+
+produces:
+
+<pre><b>    *** Portfolio Profile For: Sample XYZ Portfolio
+    Code:                         XYZ
+    Aliases:                      XYZ /
+
+    ---  Links   ---
+    baseCurrency :                US        US Dollars
+    manager :                     Default   Default
+
+    ---  XRefs  ---
+
+    ---  Supplemental Data  ---
+    uniqueId:                     P_XYZ
+    holdings (count):                           0
+    totalMarketValue (US):                    NA
+
+    aggregateList (count):                      0 </b></pre>
+
+Portfolios can be added and removed from  AggAccount  instances.   The
+following  messages  are  used  to  manage  the relationship between a
+Portfolio instance and the aggregates of which it is a member:
+<p>
+
+<center><table border=1 cellspacing=2 cellpadding=8>
+<tr><td><b>Portfolio Message</b><td><b>Description</b>
+<tr><td>addToAggregate: aggAcct<td>Adds recipient to supplied aggregate
+<tr><td>aggregateList<td>IndexedList of aggregates that include this Portfolio
+<tr><td>displayAggregateList<td>Displays the current list of aggregates that include this Portfolio
+<tr><td>removeFromAggregate: aggAcct<td>Removes recipient from supplied aggregate
+</table></center>
+<p>
+
+AggAccounts are described in more detail in the next section.
+<p>
+
+<hr>
+
+<a name="The AggAccount Class"><h3>The AggAccount Class</h3></a>
+
+Instances of the class <b>AggAccount</b> correspond to user defined groupings
+of  portfolios.   A  new AggAccount instance and its portfolio members
+can be defined via a feed from the accounting system or  interactively
+using the messages described below.  A specific portfolio will only be
+included  in  an  aggregate's  member  list  one  time.   The  message
+<i>memberList</i>  returns  an  indexed  list  of  the portfolios currently
+included in the aggregate's definition.
+<p>
+
+Several messages are  available  to  create  and  maintain  AggAccount
+instances.  To create a new AggAccount, type the expression:
+
+<pre><b>    AggAccount create: "code" fromPortfolioList: list </b></pre>
+
+where code is name you wish to use to reference the AggAccount
+and list is a list of portfolios to be used or a block defining a rule which returns a list of portfolios
+when executed.
+<p>
+
+This message performs the following steps:
+
+<ul type=circle>
+<li>A new instance  is  created  using  the  supplied  code  and  the <i>uniqueId</i>  is  created by
+appending the code value to the prefix <i>A_</i>.  The <i>memberList</i> property is initialized to an empty  list
+and   all   standard   Account  and  Entity  initializations  are
+performed.
+<p>
+
+<li>If the supplied portfolioList is a List, each member is added  to
+the aggregate's memberList.
+<p>
+
+<li>If the supplied portfolioList is a  Block,  the  <i>membershipRule</i>
+property is set to the block.
+</ul>
+<p>
+For example:
+
+<pre><b>    AggAccount create: "Test1"
+        fromPortfolioList: (Named Portfolio XYZ, Named Portfolio ABC) ; </b></pre>
+
+This message will create an AggAccount named Test1 with two  portfolio
+members  (assuming  they exist).  The <i>profile</i> message can be used to
+display a summary description of this aggregate:
+
+<pre><b>    Named AggAccount Test1 profile </b></pre>
+
+produces:
+
+<pre><b>    *** AggAccount Profile For: Test1
+    Code:                         Test1
+    Aliases:                      Test1 /
+
+    ---  Links   ---
+    baseCurrency :                US        US Dollars
+    manager :                     Default   Default
+
+    ---  XRefs  ---
+
+    ---  Supplemental Data  ---
+    uniqueId:                     A_Test1
+    holdings (count):                           0
+    totalMarketValue (US):                    NA
+
+    memberList (count):                         2 </b></pre>
+
+
+To create an AggAccount using a rule instead of an explicit list,  you
+supply  a  block that can be executed to produce a list of portfolios.
+<p>
+
+For example:
+
+
+<pre><b>    AggAccount create: "Test2"
+       fromPortfolioList: [ ^global Portfolio masterList ] ; </b></pre>
+
+This message will create an AggAccount named Test2 and will update its
+member list whenever you execute the <i>updateMemberships</i> message.  For
+example, if there are currently 10 portfolio instances defined in your
+database, the expression:
+
+<pre><b>    Named AggAccount Test2 updateMemberships profile </b></pre>
+
+produces:
+
+<pre><b>    *** AggAccount Profile For: Test2
+    Code:                         Test2
+    Aliases:                      Test2 /
+
+    ---  Links   ---
+    baseCurrency :                US        US Dollars
+    manager :                     Default   Default
+
+    ---  XRefs  ---
+
+    ---  Supplemental Data  ---
+    uniqueId:                     A_Test2
+    holdings (count):                           0
+    totalMarketValue (US):                    NA
+
+    memberList (count):                        10
+    membershipRule:
+    [ | membershipRule | ^global Portfolio masterList ] </b></pre>
+
+
+To change the membership rule, use the <i>setMembershipRuleTo:</i> message.
+For example:
+<pre><b>    Named AggAccount Test2
+      setMembershipRuleTo: [ ^global Portfolio activeList ] ; </b></pre>
+
+By  default,  an  AggAccount  will  not   have   any   holdings.    To
+automatically create the AggAccount and build the appropriate holdings
+structures, use the form:
+
+<pre><b>    AggAccount createAndInitialize: "Test" fromPortfolioList:
+       (Named Portfolio XYZ, Named Portfolio ABC) ; </b></pre>
+
+This  message  will  create  an  AggAccount  named  Test,  create  the
+appropriate  holding  instances,  and  compute portfolio level summary
+statistics.   Holdings  data  and  portfolio  summary  statistics  are
+described more fully in <a href="invHolding.htm"><i>The Holding Class</i></a>.
+
+To set the membership list to an  explicit  portfolio  list,  use  the
+expression:
+
+<pre><b>    Named AggAccount Test setPortfolioListTo:
+      (Named Portfolio XYZ, Named Portfolio DEF) ; </b></pre>
+
+To add a portfolio to this AggAccount, use the expression:
+
+<pre><b>    Named AggAccount Test addPortfolio: Named Portfolio DEF ; </b></pre>
+
+To delete a portfolio from the AggAccount, use:
+
+<pre><b>    Named AggAccount Test deletePortfolio: Named Portfolio ABC ; </b></pre>
+
+After you have added and/or deleted portfolios from an aggregate,  you
+must rebuild its holdings-related data using the expression:
+
+<pre><b>    Named AggAccount Test doPrecalcs </b></pre>
+
+The precalcs are not done automatically so that you can add and delete
+several portfolios quickly.
+<p>
+
+To display the current portfolios in this aggregate, use:
+
+<pre><b>    Named AggAccount Test portfolioList
+      do: [ code print: 10 ; name printNL ] ; </b></pre>
+
+To determine which aggregates include a particular portfolio, use  the
+expression:
+
+<pre><b>    Named Portfolio XYZ displayAggregateList </b></pre>
+
+
+This list will display all AggAccounts that include this Portfolio.
+<p>
+
+<hr>
+
+<a name="The IndexAccount Class"><h3>The IndexAccount Class</h3></a>
+
+Instances of the class IndexAccount correspond to user  defined  lists
+of  securities  that  can be viewed as an Account.  A new IndexAccount
+instance and its security  members  can  be  created  via  a  feed  or
+interactively using the messages described below.  A specific security
+will only be included in an index account's member list one time.  The
+message  <i>memberList</i>  returns  an  indexed  list  of  the  securities
+currently included in the index portfolio's definition.
+<p>
+
+To create a new IndexAccount and assign an initial list of securities,
+type the expression:
+<pre><b>    IndexAccount createInstance: "MyIndex" .
+       setSecuritiesTo: (Named Security GM, Named Security IBM )
+       asOf: earliestPossibleDate ; </b></pre>
+
+This message  creates  a  new  IndexAccount  named  <i>MyIndex</i>  with  2
+members.   The  member  list can be accessed via the <i>memberList</i> time
+series which returns the list of security members as  of  the  current
+evaluation  date.   The  <i>profile</i>  message  can  be used to display a
+summary description of this aggregate:
+
+<pre><b>    Named IndexAccount MyIndex profile </b></pre>
+
+produces:
+
+<pre><b>    *** IndexAccount Profile For: MyIndex
+    Code:                         MyIndex
+    Aliases:                      MyIndex /
+
+    ---  Links   ---
+    baseCurrency :                US        US Dollars
+    manager :                     Default   Default
+
+    ---  XRefs  ---
+
+    ---  Supplemental Data  ---
+    uniqueId:                     I_MyIndex
+    holdings (count):                           0
+    totalMarketValue (US):                    NA
+
+    memberList (count):                         2 </b></pre>
+
+
+To create the membership for an IndexAccount using a rule  instead  of
+an explicit list, you supply a block that can be executed to produce a
+list of securities.  For example:
+
+<pre><b>    Named IndexAccount MyIndex
+      setMembershipRuleTo:
+      [ ^global Security masterList select: [ baseCurrency isUS ] ]; </b></pre>
+
+The <i>getMembers</i> message returns the list of security members  for  an
+IndexAccount  as  of  the  evaluation  date.   If a membership rule is
+defined, the list is created using the rule; otherwise,  the  security
+list  stored  in  the <i>memberList</i> time series is returned as a simple
+List.   The   message   <i>updateMemberships</i>   actually   updates   the
+<i>memberList</i>  property  as of the current evaluation date by using the
+defined membership rule.
+<p>
+
+The message <i>addMember:</i> can be used to add a security to the  current
+member list of the index as of the evaluation date.  For example:
+
+<pre><b>    Named IndexAccount MyIndex addMember: Named Security IBM </b></pre>
+
+adds this security to the most recent membership list for  this  index
+if  it  is  not  already a member.  The message <i>deleteMember:</i> can be
+used to delete a security from the current member list.
+<p>
+
+The message <i>getIndices</i> defined at the Security class returns a  list
+of  IndexAccount  instances  that  include  that  security  as  of the
+evaluation date.  For example, the expression:
+
+<pre><b>    Named Security IBM getIndices
+    do: [ code printNL ] ; </b></pre>
+
+displays the list of IndexAccounts that include IBM as of  the  latest
+membership update date.
+<p>
+
+The message <i>getMemberWeightsUsingAccount: account</i> is used to  extend
+the  current  list  of  member  securities  by  their market value and
+weights based on various weighting schemes.  The message  returns  the
+member security list extended by the following messages:
+
+<pre><b>    pctEvenDollar
+    mvalEvenDollar
+    pctMCapWeighted
+    mvalMCapWeighted
+    pctMValWeighted
+    mvalMValWeighted </b></pre>
+
+
+The  <i>MVal</i>-weighted  values  are  computed  using  the  corresponding
+holding  in  the  supplied Account.  This value can be supplied as NA.
+The <i>even dollar</i> technique assumes that $1,000 is  invested  in  each
+security  in  the  index.  The <i>market cap weighted</i> technique assumes
+you own all the outstanding shares in  the  security,  valued  at  the
+current evaluation date's price.  If an account or valid account id is
+supplied as a parameter to this message, the <i>market  value  weighted</i>
+technique  assumes  that  you  own  the  same  number of shares in the
+security that you own in the supplied account, valued at  the  current
+evaluation date's price.
+<p>
+
+For example, the expression:
+
+<pre><b>    Named IndexAccount MyIndex getMemberWeightsUsingAccount: NA .
+    do: [ ticker print: 10 ;      #-  security ticker
+          name print: 30 ;        #-  security name
+          pctEvenDollar print ;   #-  %held if even dollar weighted
+          pctMCapWeighted print ; #-  %held if mkt cap weighted
+          newLine print ;
+        ] ; </b></pre>
+
+generates a report that  shows  the  <i>even  dollar</i>  and  <i>market  cap
+weighted</i> percentages held for each security in the the IndexAccount.
+<p>
+
+Several messages  have  been  defined  to  generate  holdings  for  an
+IndexAccount  using  various  rules  for  generated  ownership.  These
+messages include:
+
+<pre><b>    createEvenDollarHoldingsAsOf:
+    createEvenShareHoldingsAsOf:
+    createMCapWeightedHoldingsAsOf:
+    createMValWeightedHoldingsAsOf:using:
+    setSharesIn:to: </b></pre>
+
+These messages are describe in detail in <a href="invHolding.htm"><i>The Holding Class</i></a>.
+<p>
+
+<hr>
+
+<a name="New Instances and Additional Messages"><h3>New Instances and Additional Messages</h3></a>
+
+Account instances are usually created and  maintained  as  part  of  a
+nightly  production  cycle.   The  specific processing rules used vary
+based on your installation's policies.  
+<p>
+
+Your installation may have defined many additional  messages  for  the
+various Account classes.  The <i>showMessages</i> message is the fastest
+way to determine the current list of messages available for  a  class.
+For example:
+
+<pre><b>    Portfolio showMessages </b></pre>
+
+displays the messages defined for the Portfolio class and
+
+<pre><b>    Portfolio showMessagesX </b></pre>
+
+displays the messages  defined  for  Portfolio  and  its  superclasses
+Account and Entity.
+<hr>
+
+<table border="0" width="100%">
+<tr>
+<td align="left"><font size="-1">Copyright &copy 1997 Innovative Systems Techniques, Inc.</font>
+<td align="right"><font size="-1">Created June 11, 1997</font>
+</table>
+<hr>
+
+</center></font>
+</body>
+</html>

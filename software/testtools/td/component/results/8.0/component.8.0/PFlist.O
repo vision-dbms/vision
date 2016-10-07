@@ -1,0 +1,456 @@
+
+Beginning file: PFlist.S ...
+
+
+
+******************************************************
+(PART 1)
+--------  Numeric Lists                       --------
+******************************************************
+
+
+### Test scalar-mode sequence generator (+ receipient)
+
+       10  0  1  2  3  4  5  6  7  8  9
+       10  1  2  3  4  5  6  7  8  9 10
+
+### Test scalar-mode sequence generator (0 receipient)
+
+        0
+        0
+
+### Test scalar-mode sequence generator (- receipient)
+
+        0
+        0
+
+### Test non-scalar-mode sequence generator
+
+       10  0  1  2  3  4  5  6  7  8  9
+       10  1  2  3  4  5  6  7  8  9 10
+        0
+        0
+        0
+        0
+        5  0  1  2  3  4
+        5  1  2  3  4  5
+
+
+
+******************************************************
+(PART 2)
+--------  CellAtPosition - List Subscripts    --------
+******************************************************
+
+
+### setup
+
+
+###  Scalar Subscripts
+
+      NA 
+:[        0]
+:[        5]
+:[        9]
+      NA 
+      NA 
+      NA 
+
+      NA 
+:[        1]
+:[        6]
+:[        9]
+      NA 
+      NA 
+      NA 
+
+:[       20]
+:[       11]
+:[       24]
+:[       55]
+      NA 
+      NA 
+      NA 
+      NA 
+
+      NA 
+:[       21]
+:[       24]
+:[       25]
+      NA 
+      NA 
+:[       56]
+      NA 
+
+
+### Scalar Subscript in Empty List
+
+      NA 
+      NA 
+      NA 
+
+      NA 
+      NA 
+      NA 
+      NA 
+
+
+###
+# Non-scalar Subscripts
+###
+
+:[        0]
+:[        1]
+:[        2]
+:[        3]
+:[        4]
+:[        5]
+:[        6]
+:[        7]
+:[        8]
+:[        9]
+
+      NA 
+      NA 
+:[        0]
+:[        1]
+:[        5]
+:[        9]
+      NA 
+      NA 
+
+      NA 
+      NA 
+      NA 
+      NA 
+
+
+:[       20]
+:[       11]
+:[       52]
+:[       23]
+:[       24]
+:[       55]
+
+      NA 
+      NA 
+:[       20]
+:[       11]
+:[       55]
+      NA 
+      NA 
+      NA 
+
+      NA 
+      NA 
+      NA 
+      NA 
+
+
+
+      NA 
+      NA 
+      NA 
+      NA 
+      NA 
+      NA 
+      NA 
+      NA 
+
+      NA 
+      NA 
+      NA 
+      NA 
+
+
+
+### Base 1 Non-scalar Tests
+
+:[        1]
+:[        2]
+:[        3]
+:[        4]
+:[        5]
+:[        6]
+:[        7]
+:[        8]
+:[        9]
+:[       10]
+
+      NA 
+      NA 
+:[        1]
+:[        2]
+:[        6]
+:[       10]
+      NA 
+      NA 
+
+      NA 
+      NA 
+      NA 
+      NA 
+
+
+:[       21]
+:[       12]
+:[       53]
+:[       24]
+:[       25]
+:[       56]
+
+      NA 
+      NA 
+:[       21]
+:[       12]
+:[       56]
+      NA 
+      NA 
+      NA 
+
+      NA 
+      NA 
+      NA 
+      NA 
+
+
+
+      NA 
+      NA 
+      NA 
+      NA 
+      NA 
+      NA 
+      NA 
+      NA 
+
+      NA 
+      NA 
+      NA 
+      NA 
+
+
+
+###
+#  Test Multiple lists in one LStore
+###
+
+      NA 
+      NA 
+      NA 
+
+:[        0]
+:[       20]
+:[       40]
+
+:[        2]
+      NA 
+:[       52]
+
+      NA 
+      NA 
+      NA 
+      NA 
+      NA 
+
+:[        0]
+:[       20]
+:[       20]
+:[        0]
+:[       40]
+
+:[        2]
+      NA 
+      NA 
+:[        2]
+:[       52]
+
+      NA 
+      NA 
+      NA 
+      NA 
+
+:[        0]
+:[       20]
+:[       40]
+:[       40]
+
+:[        2]
+      NA 
+:[       52]
+:[       52]
+
+
+
+#####
+##### Test IndexList interface
+#####
+
+      NA 
+
+###  The results of the next tests may vary from run to run
+###  The following SEVEN sets must be identical (within one run).
+
+     ONE:
+
+       10
+       11
+       12
+
+     TWO:
+
+       10
+       11
+       12
+
+     THREE:
+
+       10
+       11
+       12
+
+###
+#  Test valid converse and covering messages at IndexedList
+###
+
+     FOUR:
+
+       10
+       11
+       12
+
+     FIVE:
+
+       10
+       11
+       12
+
+     SIX:
+
+       10
+       11
+       12
+
+     SEVEN:
+
+       10
+       11
+       12
+
+
+####
+#### Test TimeSeries Interface
+####
+
+      NA 
+
+###  The results of the next tests may vary from run to run
+###  The following SEVEN sets must be identical (within one run).
+
+     ONE:
+
+       40
+       41
+       42
+
+     TWO:
+
+       40
+       41
+       42
+
+     THREE:
+
+       40
+       41
+       42
+
+###
+#  Test valid converse and covering messages at TimeSeries
+###
+
+     FOUR:
+
+       40
+       41
+       42
+
+     FIVE:
+
+       40
+       41
+       42
+
+     SIX:
+
+       40
+       41
+       42
+
+     SEVEN:
+
+       40
+       41
+       42
+ 
+###
+#  Test binary converse 
+###
+
+###  Bogus message
+
+
+>>> Selector 'base0CellPositionOf:' Not Found <<<
+      NA 
+
+###
+#  Test valid converse and covering messages at List
+###
+
+:[        0]
+
+:[        3]
+:[        1]
+:[        2]
+:[        3]
+
+:[        2]
+:[        0]
+:[        1]
+:[        2]
+
+        1        2        3        1        2        3
+>>>  Invalid Iteration Factor.  Default Value(1) used.  <<<
+        1        2        3       40       41       42       40       41       42
+>>>  Invalid Iteration Factor.  Default Value(1) used.  <<<
+       40       41       42
+>>>  Invalid Iteration Factor.  Default Value(1) used.  <<<
+
+>>>  Invalid Iteration Factor.  Default Value(1) used.  <<<
+        1        2        3
+       40       41       42
+        1        2        3
+       40       41       42
+        1        2        3
+       40       41       42
+        1        2        3
+       40       41       42
+        1        2        3
+       40       41       42
+        1        2        3
+       40       41       42
+
+End of file: PFlist.S
+
+Compile Statistics:
+elapsed: 0.002619
+user: 0.002379
+system: 0.000242
+majflts: 0
+minflts: 0
+Execute Statistics:
+elapsed: 0.015425
+user: 0.014656
+system: 0.000779
+majflts: 0
+minflts: 9

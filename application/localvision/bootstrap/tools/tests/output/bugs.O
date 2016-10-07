@@ -1,0 +1,295 @@
+
+Beginning file: bugs.S ...
+Bug 1
+        1        0        0        0
+        1
+Bug 2
+
+>>> Selector 'IBM' Not Found <<<
+
+>>> Selector 'foo' Not Found <<<
+      NA 
+
+>>> Selector 'IBM' Not Found <<<
+
+>>> Selector 'foo' Not Found <<<
+      NA 
+
+>>> Selector 'GM' Not Found <<<
+
+>>> Selector 'foo' Not Found <<<
+
+>>> Selector 'asOf:put:' Not Found <<<
+
+>>> Selector 'IBM' Not Found <<<
+
+>>> Selector 'foo' Not Found <<<
+      NA 
+
+>>> Selector 'IBM' Not Found <<<
+
+>>> Selector 'foo' Not Found <<<
+      NA 
+
+>>> Selector 'GM' Not Found <<<
+
+>>> Selector 'foo' Not Found <<<
+      NA 
+
+>>> Selector 'GM' Not Found <<<
+
+>>> Selector 'foo' Not Found <<<
+      NA 
+Bug 3
+         0         0
+         1         0
+Bug 4
+        3
+        5
+Bug 5
+
+>>> Selector 'IBM' Not Found <<<
+
+>>> Selector 'sales' Not Found <<<
+
+>>> Selector 'ifTrue:' Not Found <<<
+Bug 6
+        4
+        0
+        2
+        3
+        7
+
+        5
+        1
+        4
+        5
+        6
+        8
+
+        5
+        1
+        4
+        5
+        6
+        8
+
+TRUE
+Bug 7
+
+>>> Selector 'GM' Not Found <<<
+
+>>> Selector 'xyzzy' Not Found <<<
+
+>>> Selector 'asOf:put:' Not Found <<<
+
+>>> Selector 'GM' Not Found <<<
+
+>>> Selector 'xyzzy' Not Found <<<
+
+>>> Selector 'select:' Not Found <<<
+Bug 8
+[|testDecompiler|
+!a <- b :c; 
+1 a: 2 b: 3 .:c; 
+]
+Bug 9
+
+>>> Selector 'GM' Not Found <<<
+
+>>> Selector 'sales' Not Found <<<
+      NA 
+Bug 10
+Bug 11
+Bug 12
+    25.00
+value
+
+>>> Parameter 'b' Unavailable <<<
+
+>>> Parameter 'a' Unavailable <<<
+
+>>> Parameter 'z' Unavailable <<<
+
+>>> Parameter 'y' Unavailable <<<
+
+>>> Parameter 'x' Unavailable <<<
+      NA 
+valueWith:and:and:and:and:and:
+    25.00
+valueWith:and:and:and:and:
+    20.00
+valueWith:and:and:
+
+>>> Parameter 'y' Unavailable <<<
+
+>>> Parameter 'x' Unavailable <<<
+      NA 
+   180.00
+
+>>> Parameter 'aWidth' Unavailable <<<
+CoreWorkspace
+
+>>> Parameter '<IterateInContext>' Unavailable <<<
+
+>>> Selector 'asClosure:' Not Found <<<
+
+>>> Parameter 'collectorBlock' Unavailable <<<
+
+>>> Parameter 'valueBlock' Unavailable <<<
+
+>>> Selector 'asClosure:' Not Found <<<
+
+>>> Selector 'asClosure:' Not Found <<<
+
+>>> Parameter 'valueBlock' Unavailable <<<
+
+>>> Selector 'asClosure:' Not Found <<<
+
+>>> Parameter 'b' Unavailable <<<
+
+>>> Parameter 'a' Unavailable <<<
+
+>>> Parameter 'z' Unavailable <<<
+
+>>> Parameter 'y' Unavailable <<<
+
+>>> Parameter 'x' Unavailable <<<
+
+>>> Parameter 'y' Unavailable <<<
+
+>>> Parameter 'x' Unavailable <<<
+
+>>> Parameter 'aWidth' Unavailable <<<
+
+>>> Parameter '<IterateInContext>' Unavailable <<<
+
+>>> Selector 'asClosure:' Not Found <<<
+
+>>> Parameter 'b' Unavailable <<<
+
+>>> Parameter 'a' Unavailable <<<
+
+>>> Parameter 'z' Unavailable <<<
+
+>>> Parameter 'y' Unavailable <<<
+
+>>> Parameter 'x' Unavailable <<<
+
+>>> Parameter 'y' Unavailable <<<
+
+>>> Parameter 'x' Unavailable <<<
+
+>>> Parameter 'aWidth' Unavailable <<<
+
+>>> Parameter '<IterateInContext>' Unavailable <<<
+
+>>> Selector 'asClosure:' Not Found <<<
+    25.00
+value
+      NA 
+valueWith:and:and:and:and:and:
+    25.00
+valueWith:and:and:and:and:
+    20.00
+valueWith:and:and:
+      NA 
+   180.00
+        1
+    25.00
+value
+      NA 
+valueWith:and:and:and:and:and:
+    25.00
+valueWith:and:and:and:and:
+    20.00
+valueWith:and:and:
+      NA 
+   180.00
+     2.00
+    25.00
+value
+      NA 
+valueWith:and:and:and:and:and:
+    25.00
+valueWith:and:and:and:and:
+    20.00
+valueWith:and:and:
+      NA 
+   180.00
+        3
+Bug 13
+
+>>> Selector 'Compustat' Not Found <<<
+
+>>> Selector 'stringStore' Not Found <<<
+FALSE
+
+>>> Selector 'Compustat' Not Found <<<
+
+>>> Selector 'staticData' Not Found <<<
+FALSE
+
+>>> Selector 'CompustatData' Not Found <<<
+
+>>> Selector 'history' Not Found <<<
+FALSE
+Bug 14
+      NA 
+The 2 values on the next line should be the same.
+        3        3
+The next two lines should be identical.
+      NA       NA         3        4        5        6        7
+      NA       NA         3        4        5        6        7
+Bug 15
+      NA 
+      NA 
+      NA      0.00     0.69     1.10     1.39
+Compile Statistics:
+elapsed: 0.006065
+user: 0.00506
+system: 0.000929
+majflts: 0
+minflts: 935
+Execute Statistics:
+elapsed: 0.017429
+user: 0.016376
+system: 0.001063
+majflts: 0
+minflts: 753
+Bug 16
+Following Error should be usage error rather than bus error
+ or segmentation fault
+>>>  Error Trapped By Read-Eval-Print  <<<
+*	VTransientServices [163]
+*	A Usage Error
+*	CompareValues: Unexpected Descriptor Type (4:2)
+
+*****    P      2 IntegerEqual
+*****    B      2 -1 asReferenceTo: ^self .= ^self
+*****    P      2 SendForValue
+*****    P      1 IterateInContext
+*****    B      1 0 , 0 do: [-1 asReferenceTo: ^self .= ^self]; 
+newLine print; 
+
+Bug 17
+        3
+        3
+
+Bug 18
+Bug 19
+Compile Statistics:
+elapsed: 0.000164
+user: 0.000282
+system: 0
+majflts: 0
+minflts: 0
+Execute Statistics:
+elapsed: 0.123345
+user: 0.07828
+system: 0.044919
+majflts: 0
+minflts: 16529
+
+End of file: bugs.S
+

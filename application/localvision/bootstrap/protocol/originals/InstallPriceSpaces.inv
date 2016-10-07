@@ -1,0 +1,82 @@
+# 
+
+####################
+#  This Script is Used To Create Separate Object Spaces for
+#     each year of price history.  New object spaces can
+#     be created as needed in the future.
+####################
+
+echo " " 
+echo " " 
+echo "        ***  Installing Historical Price Object Spaces  ***"
+date
+echo " "
+
+setenv VisionAdm 1 
+
+$DBbatchvision << @@@EOF@@@     #--- eom
+PriceTools setupEOMFrom: earliestPossibleDate ;
+Utility createSpaceInNetworkWithAnnotation: "Price Space Setup" ;
+?g
+@@@EOF@@@
+
+
+$DBbatchvision << @@@EOF@@@     #--- early
+PriceTools setupYear: 19001231 ;
+Utility createSpaceInNetworkWithAnnotation: "Price Space Setup" ;
+?g
+@@@EOF@@@
+
+$DBbatchvision << @@@EOF@@@     #--- 5 prior
+PriceTools setupYear: ^today - 5 yearBeginnings ;
+Utility createSpaceInNetworkWithAnnotation: "Price Space Setup" ;
+?g
+@@@EOF@@@
+
+$DBbatchvision << @@@EOF@@@     #--- 4 prior
+PriceTools setupYear: ^today - 4 yearBeginnings ;
+Utility createSpaceInNetworkWithAnnotation: "Price Space Setup" ;
+?g
+@@@EOF@@@
+
+$DBbatchvision << @@@EOF@@@     #--- 3 prior
+PriceTools setupYear: ^today - 3 yearBeginnings ;
+Utility createSpaceInNetworkWithAnnotation: "Price Space Setup" ;
+?g
+@@@EOF@@@
+
+$DBbatchvision << @@@EOF@@@     #--- 2 prior
+PriceTools setupYear: ^today - 2 yearBeginnings ;
+Utility createSpaceInNetworkWithAnnotation: "Price Space Setup" ;
+?g
+@@@EOF@@@
+
+$DBbatchvision << @@@EOF@@@     #--- 1 prior
+PriceTools setupYear: ^today - 1 yearBeginnings ;
+Utility createSpaceInNetworkWithAnnotation: "Price Space Setup" ;
+?g
+@@@EOF@@@
+
+$DBbatchvision << @@@EOF@@@     #--- current
+PriceTools setupYear: ^today + 0 yearBeginnings ;
+Utility createSpaceInNetworkWithAnnotation: "Price Space Setup" ;
+?g
+@@@EOF@@@
+
+$DBbatchvision << @@@EOF@@@     #--- next year
+PriceTools setupYear: ^today + 1 yearBeginnings ;
+Utility createSpaceInNetworkWithAnnotation: "Price Space Setup" ;
+?g
+@@@EOF@@@
+
+$DBbatchvision << @@@EOF@@@     #--- + 2 year
+PriceTools setupYear: ^today + 2  yearBeginnings ;
+Utility createSpaceInNetworkWithAnnotation: "Price Space Setup" ;
+?g
+@@@EOF@@@
+
+echo "===> Initial Price Space Installation" `date` >> $NDFJournal
+echo " " 
+echo "        ***  End Of Historical Price Object Spaces  ***"
+date
+

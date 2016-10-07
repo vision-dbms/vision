@@ -1,0 +1,290 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{3B66CB94-F8B6-41D3-83BD-C3A9059A3B18}</ProjectGuid>
+    <RootNamespace>Vxa</RootNamespace>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccProvider>
+    </SccProvider>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\../Release/Vxa.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/Zm1000  %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;VXA_EXPORTS;_WIN32;_WIN32_WINNT=0x0502;WINVER=0x0502;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <PrecompiledHeaderOutputFile>.\./Release/Vxa.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)vc70.pdb</ProgramDataBaseFileName>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DisableSpecificWarnings>4910</DisableSpecificWarnings>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ProgramDatabaseFile>.\../Release/Vxa.pdb</ProgramDatabaseFile>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>.\../Release/Vxa.lib</ImportLibrary>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\../Debug/Vxa.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/Zm1000  %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;VXA_EXPORTS;_WIN32;_WIN32_WINNT=0x0502;WINVER=0x0502;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <PrecompiledHeaderOutputFile>.\./Debug/Vxa.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)vc70.pdb</ProgramDataBaseFileName>
+      <BrowseInformation>true</BrowseInformation>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DisableSpecificWarnings>4910</DisableSpecificWarnings>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>.\../Debug/Vxa.pdb</ProgramDatabaseFile>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>.\../Debug/Vxa.lib</ImportLibrary>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\Vxa.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
+    </ClCompile>
+    <ClCompile Include="..\Vxa_ICaller.cpp" />
+    <ClCompile Include="..\Vxa_ICollection.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
+    </ClCompile>
+    <ClCompile Include="..\Vxa_INumericSink.cpp" />
+    <ClCompile Include="..\Vxa_ISingleton.cpp" />
+    <ClCompile Include="..\Vxa_IVSNFTaskHolder.cpp" />
+    <ClCompile Include="..\Vxa_IVSNFTaskHolder1.cpp" />
+    <ClCompile Include="..\Vxa_IVSNFTaskHolder2.cpp" />
+    <ClCompile Include="..\Vxa_IVSNFTaskImplementation.cpp" />
+    <ClCompile Include="..\Vxa_IVSNFTaskImplementation2.cpp" />
+    <ClCompile Include="..\Vxa_IVSNFTaskImplementation3.cpp" />
+    <ClCompile Include="..\Vxa_IVSNFTaskImplementation3NC.cpp" />
+    <ClCompile Include="..\Vxa_VCallAgent.cpp" />
+    <ClCompile Include="..\Vxa_VCallData.cpp" />
+    <ClCompile Include="..\Vxa_VCallHandle.cpp" />
+    <ClCompile Include="..\Vxa_VCallType1.cpp" />
+    <ClCompile Include="..\Vxa_VCallType1Exporter.cpp" />
+    <ClCompile Include="..\Vxa_VCallType2.cpp" />
+    <ClCompile Include="..\Vxa_VCallType2Exporter.cpp" />
+    <ClCompile Include="..\Vxa_VCardinalityHints.cpp" />
+    <ClCompile Include="..\Vxa_VClass.cpp" />
+    <ClCompile Include="..\Vxa_VCLF.cpp" />
+    <ClCompile Include="..\Vxa_VCollectableCollection.cpp" />
+    <ClCompile Include="..\Vxa_VCollectableObject.cpp" />
+    <ClCompile Include="..\Vxa_VCollection.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
+    </ClCompile>
+    <ClCompile Include="..\Vxa_VCursor.cpp" />
+    <ClCompile Include="..\Vxa_VError.cpp" />
+    <ClCompile Include="..\Vxa_VExportable.cpp" />
+    <ClCompile Include="..\Vxa_VExportableDatum.cpp" />
+    <ClCompile Include="..\Vxa_VFiniteSet.cpp" />
+    <ClCompile Include="..\Vxa_VImportable.cpp" />
+    <ClCompile Include="..\Vxa_VInfiniteSet.cpp" />
+    <ClCompile Include="..\Vxa_VMap.cpp" />
+    <ClCompile Include="..\Vxa_VMapMaker.cpp" />
+    <ClCompile Include="..\Vxa_VMethod.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
+    </ClCompile>
+    <ClCompile Include="..\Vxa_VMonotypeMap.cpp" />
+    <ClCompile Include="..\Vxa_VMonotypeMapMaker.cpp" />
+    <ClCompile Include="..\Vxa_VMonotypeMapMakerFor.cpp" />
+    <ClCompile Include="..\Vxa_VPolytypeMap.cpp" />
+    <ClCompile Include="..\Vxa_VPolytypeMapMaker.cpp" />
+    <ClCompile Include="..\Vxa_VResultBuilder.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
+    </ClCompile>
+    <ClCompile Include="..\Vxa_VRolePlayer.cpp" />
+    <ClCompile Include="..\Vxa_VSerializer2DynArray.cpp" />
+    <ClCompile Include="..\Vxa_VSet.cpp" />
+    <ClCompile Include="..\Vxa_VTask.cpp" />
+    <ClCompile Include="..\Vxa_VTaskCursor.cpp" />
+    <ClCompile Include="..\Vxa_VType.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Vxa.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Vxa.h" />
+    <ClInclude Include="..\Vxa_ICaller.h" />
+    <ClInclude Include="..\Vxa_ICollection.h" />
+    <ClInclude Include="..\Vxa_INumericSink.h" />
+    <ClInclude Include="..\Vxa_ISingleton.h" />
+    <ClInclude Include="..\Vxa_IVSNFTaskHolder.h" />
+    <ClInclude Include="..\Vxa_IVSNFTaskHolder1.h" />
+    <ClInclude Include="..\Vxa_IVSNFTaskHolder2.h" />
+    <ClInclude Include="..\Vxa_IVSNFTaskImplementation.h" />
+    <ClInclude Include="..\Vxa_IVSNFTaskImplementation2.h" />
+    <ClInclude Include="..\Vxa_IVSNFTaskImplementation3.h" />
+    <ClInclude Include="..\Vxa_IVSNFTaskImplementation3NC.h" />
+    <ClInclude Include="..\Vxa_VArray.h" />
+    <ClInclude Include="..\Vxa_VArrayConstructor.h" />
+    <ClInclude Include="..\Vxa_VCallAgent.h" />
+    <ClInclude Include="..\Vxa_VCallData.h" />
+    <ClInclude Include="..\Vxa_VCallHandle.h" />
+    <ClInclude Include="..\Vxa_VCallType1.h" />
+    <ClInclude Include="..\Vxa_VCallType1Exporter.h" />
+    <ClInclude Include="..\Vxa_VCallType2.h" />
+    <ClInclude Include="..\Vxa_VCallType2Exporter.h" />
+    <ClInclude Include="..\Vxa_VCardinalityHints.h" />
+    <ClInclude Include="..\Vxa_VClass.h" />
+    <ClInclude Include="..\Vxa_VCLF.h" />
+    <ClInclude Include="..\Vxa_VCollectable.h" />
+    <ClInclude Include="..\Vxa_VCollectableCollection.h" />
+    <ClInclude Include="..\Vxa_VCollectableCollectionOf.h" />
+    <ClInclude Include="..\Vxa_VCollectableMethod.h" />
+    <ClInclude Include="..\Vxa_VCollectableObject.h" />
+    <ClInclude Include="..\Vxa_VCollection.h" />
+    <ClInclude Include="..\Vxa_VConstant.h" />
+    <ClInclude Include="..\Vxa_VCursor.h" />
+    <ClInclude Include="..\Vxa_VError.h" />
+    <ClInclude Include="..\Vxa_VExportable.h" />
+    <ClInclude Include="..\Vxa_VExportableDatum.h" />
+    <ClInclude Include="..\Vxa_VFiniteSet.h" />
+    <ClInclude Include="..\Vxa_VImportable.h" />
+    <ClInclude Include="..\Vxa_VInfiniteSet.h" />
+    <ClInclude Include="..\Vxa_VInfiniteSetOf.h" />
+    <ClInclude Include="..\Vxa_VMap.h" />
+    <ClInclude Include="..\Vxa_VMapMaker.h" />
+    <ClInclude Include="..\Vxa_VMethod.h" />
+    <ClInclude Include="..\Vxa_VMonotypeMap.h" />
+    <ClInclude Include="..\Vxa_VMonotypeMapMaker.h" />
+    <ClInclude Include="..\Vxa_VMonotypeMapMakerFor.h" />
+    <ClInclude Include="..\Vxa_VParameter.h" />
+    <ClInclude Include="..\Vxa_VPolytypeMap.h" />
+    <ClInclude Include="..\Vxa_VPolytypeMapMaker.h" />
+    <ClInclude Include="..\Vxa_VResultBuilder.h" />
+    <ClInclude Include="..\Vxa_VRolePlayer.h" />
+    <ClInclude Include="..\Vxa_VScalar.h" />
+    <ClInclude Include="..\Vxa_VSerializer2DynArray.h" />
+    <ClInclude Include="..\Vxa_VSet.h" />
+    <ClInclude Include="..\Vxa_VTask.h" />
+    <ClInclude Include="..\Vxa_VTaskCursor.h" />
+    <ClInclude Include="..\Vxa_VType.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Vca\Vca.vcxproj">
+      <Project>{07f5addb-56de-4070-ac6b-ab71096aa20c}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

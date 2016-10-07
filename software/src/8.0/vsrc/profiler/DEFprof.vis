@@ -1,0 +1,96 @@
+################
+####  ProfileTools
+################
+
+ProfileTools
+defineMethod: [ | loadExperiment: code withDescription: description fromFile: filename |
+   !string <- filename asFileContents;
+   string isString ifTrue: [ ^self loadExperiment: code withDescription: description fromString: string]
+].
+
+defineMethod: [ | loadExperiment: code withDescription: description fromString: string |
+   Experiment createInstance: code. do: [
+       :description <- ^my description;
+       :records <- Experiment records clusterNew;
+       ^self loadRecordsFrom: ^my string;
+   ]
+];
+
+
+################
+####  ProfileTools Experiment
+################
+
+ProfileTools Experiment
+defineMethod: [ | record: n | records at: n ].
+
+defineMethod: [ | loadRecordsFrom: string |
+   !experiment <- ^self;
+
+###  create new records...
+   !lines <- string asLines;
+   !newRecords <- lines select: [^self take: 1 . = "S"]. send: [
+      !experiment <- ^my experiment;
+
+      !fields <- ^self breakOn: "	";	# tab
+
+      !frameString <- fields at: 2 . concat: "";
+      !frameNumber <- frameString asInteger;
+
+      !record <- ^my Record createInstance: frameString;
+      ^my records at: frameNumber asInteger put: record. do: [
+         :experiment   <- ^my experiment;
+         :children     <- Experiment Record children clusterNew;
+         :frameNumber  <- ^my frameNumber;
+
+         :caller       <- ^my fields at: 3 . asInteger;
+         :creator      <- ^my fields at: 4 . asInteger;
+         :elapsed      <- ^my fields at: 5 . asNumber;
+         :user         <- ^my fields at: 6 . asNumber;
+         :system       <- ^my fields at: 7 . asNumber;
+         :pageflts     <- ^my fields at: 8 . asInteger;
+         :dirio        <- ^my fields at: 9 . asInteger;
+         :bufio        <- ^my fields at: 10 . asInteger;
+         :filecnt      <- ^my fields at: 11 . asInteger;
+         :cardinality  <- ^my fields at: 12 . asInteger;
+         :frameType    <- ^my fields at: 13 . concat: "";
+         :selector     <- ^my fields at: 14 . concat: "";
+      ]
+   ];
+
+   newRecords do: [  
+      :caller  <- ^self experimentRecord: caller;
+      :creator <- ^self experimentRecord: creator;
+   ];
+
+###  initialize the call 'context'...
+   lines select: [^self take: 1 . = "C"]. extendBy: [
+      !fields <- ^self breakOn: " 	". first: 2;	# blank, tab
+   ]. groupedBy: [ fields at: 2 . asInteger]. do: [
+      ^my record: ^self asSelf. :context <- [
+         groupList do: [^self drop: (fields total: [count]. + 1) asInteger. printNL]
+      ] divertOutput;
+   ];
+   newRecords select: [context isNA && [creator isntNA]]. do: [:context <- creator context];
+
+###  initialize the list of 'children'...
+   newRecords groupedBy: [creator]. select: [isntNA]. do: [
+      groupList do: [^my children at: frameNumber put: ^self]
+   ];
+
+   ^self
+];
+
+
+
+################
+####  ProfileTools Experiment Record
+################
+
+ProfileTools Experiment Record
+defineMethod: [ | experimentRecord: n | experiment record: n ].
+
+defineMethod: [ | isCall | frameType contains: "Call" ].
+
+defineMethod: [ | isTask | frameType contains: "Task" ].
+;

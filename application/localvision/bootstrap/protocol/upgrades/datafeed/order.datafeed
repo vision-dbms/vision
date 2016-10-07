@@ -1,0 +1,20 @@
+###
+# order.datafeed
+##
+
+# The script adds full datafeed protocol 
+# expects the PatchTable has been installed in the
+# database where being applied
+
+
+^tmp define: "upgradeDir" 
+       toBe: (ProcessControlTools getEnvFor: "osvAdmin" .
+                 concat: "/localvision/bootstrap/protocol/upgrades/" ) ;
+ 
+^tmp upgradeDir concat: "datafeed/INIfeeds.G" . asFileContents evaluate ;
+^tmp upgradeDir concat: "datafeed/DEFfeeds.G" . asFileContents evaluate ;
+
+^tmp upgradeDir concat: "datafeed/EXTiface.feeds" . asFileContents evaluate ;
+^tmp upgradeDir concat: "datafeed/INITpatch.datafeed" . asFileContents evaluate ;
+
+

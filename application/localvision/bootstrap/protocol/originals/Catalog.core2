@@ -1,0 +1,250 @@
+####################
+#  EntityCatalog protocol
+####################
+
+EntityCatalog
+   defineFixedProperty: 'class' .
+   defineFixedProperty: 'criteriaChain' .
+   defineFixedProperty: 'usesCriteria' .
+   defineFixedProperty: 'initialMasterList' .
+   defineFixedProperty: 'currentSubset' .
+   defineFixedProperty: 'rebuildSubsetFlag' .
+   defineMethod: [ | allowsEntry | usesCriteria isNA ] .
+
+defineMethod:
+[ | create: id |
+  ">>>  Must Use Form EntityCatalog create: id forClass: class <<<"
+     printNL ;
+] .
+
+defineMethod:
+[ | create: id forClass: class |
+  ^super create: id .
+   do: [ 
+        :class <- ^my class ;
+       ] 
+] .
+
+defineMethod:
+[ | getEntries |
+  allowsEntry 
+  ifTrue:
+    [autoSort = TRUE
+        ifTrue: [ entries sortUp: [ displayLabel ] ]
+       ifFalse: [ entries ]
+    ]
+  ifFalse: [ class masterList select: criteria ]
+] .
+
+defineMethod:
+[ | helpMessage |
+  [ class whatAmI print; " Catalog: " print ; 
+    name printNL ;
+    newLine print ; 
+    showPredefinedEntries ; 
+    newLine print ; 
+    showCriteria ;
+  ] divertOutput
+] .
+
+defineMethod:
+[ | displayCurrentSubset |
+  currentSubset isList
+  ifTrue: 
+     [ currentSubset count > 0
+         ifTrue: [  currentSubset sortUp: [ displayLabelKey ] .
+                    do: [ displayLabelKey print: 20 ; " " print ;
+                          displayLabel printNL 
+                        ] ;
+                 ] 
+        ifFalse: [ " ...  Current Subset is Empty" printNL ] ;
+     ] ;
+] .
+
+defineMethod:
+[ | getPredefinedEntries |
+  entries sortUp: [ displayLabel ] 
+] .
+
+defineMethod:
+[ | getEntries |
+  !list <- entries toList ;
+  usesCriteria = TRUE
+  ifTrue: [ rebuildSubset ;
+            currentSubset union: list using: [ asSelf ] 
+          ] 
+  ifFalse: [ list ] 
+] .
+
+defineMethod:
+[ | setRebuildSubset |
+  :rebuildSubsetFlag <- TRUE ;
+  ^self
+] .
+
+defineMethod:
+[ | setUsesCriteria |
+  :usesCriteria <- TRUE ;
+  ^self
+] .
+
+defineMethod:
+[ | clearUsesCriteria |
+  :usesCriteria <- FALSE ;
+  :criteriaChain <- NA ; 
+  :currentSubset <- NA ;
+  ^self
+] .
+
+defineMethod:
+[ | initializeCriteriaChainWith: criteria |
+  :criteriaChain <- ^global Chain 
+        createForOwner: ^self forInitialObject: criteria ; 
+  setUsesCriteria ;
+  getInitialMasterList ;
+  setRebuildSubset ; 
+  criteriaChain links
+] .
+
+defineMethod:
+[ | createLinkForCriteria: criteria |
+  criteriaChain isNA
+     ifTrue: [ ^self initializeCriteriaChainWith: criteria ; ]
+    ifFalse: [ criteria isScreeningCriteriaDescriptor
+                ifTrue: [ criteriaChain Link createFor: criteria ]
+             ]
+] .
+  
+defineMethod:
+[ | addCriteria: criteria |
+  !link <- ^self createLinkForCriteria: criteria ; 
+  link isntNA ifTrue: [ criteriaChain addLink: link ;
+                        setRebuildSubset ; 
+                      ] ;
+  ^self
+] .
+
+defineMethod:
+[ | insertCriteria: criteria atPosition: number |
+  !link <- ^self createLinkForCriteria: criteria ;
+  link isntNA && number > 0
+     ifTrue: [ criteriaChain insertLink: link atPosition: number ;
+               setRebuildSubset ; 
+             ] ;
+  ^self
+] .
+
+defineMethod:
+[ | replacePosition: number withCriteria: criteria |
+  criteria isScreeningCriteriaDescriptor && criteriaChain isntNA
+      ifTrue: [ criteriaChain replaceObjectAtPosition: number with: criteria ;
+                setRebuildSubset ; 
+              ] ;
+  ^self
+] .
+
+defineMethod:
+[ | deleteCriteriaAtPosition: number |
+  getCriteriaList count = 1 && number = 1
+     ifTrue: [ :criteriaChain <- NA  ]
+    ifFalse: [ criteriaChain deleteLinkAtPosition: number ] ;
+  setRebuildSubset ; 
+  ^self
+] .
+
+defineMethod:
+[ | revertToCriteriaAtPosition: number |
+  criteriaChain isntNA
+  ifTrue: [ !link <- criteriaChain getChainAsList at: number ;
+            link isntNA 
+              ifTrue: [ link :next <- NA ;
+                        :currentSubset <- link object currentUniverse ;
+                      ] ;
+          ] ;
+  ^self
+] .
+
+defineMethod:
+[ | convertQueryToEntries |
+  rebuildSubset ;
+  currentSubset count <= 500 
+  ifTrue: [ currentSubset do: [ ^my addEntry: ^self ] ;
+            clearUsesCriteria ;
+            TRUE 
+          ]
+  ifFalse: [ FALSE ] 
+] .
+  
+defineMethod:
+[ | getCriteriaList |
+  criteriaChain isntNA
+     ifTrue: [ criteriaChain getChainAsList send: [ object ] ]
+    ifFalse: [ ^global List ] 
+] .
+
+defineMethod:
+[ | getCriteriaAtPosition: number |
+  getCriteriaList at: number
+] .
+
+defineMethod:
+[ | showPredefinedEntries |
+  usesCriteria != TRUE || entries count > 0
+    ifTrue: [ "Catalog Contains: " print ; 
+              entries count print: 4 ; 
+              " Predefined Entries." printNL ;
+            ] 
+] .
+
+defineMethod:
+[ | showCriteria |
+  usesCriteria = TRUE
+  ifTrue:
+    [
+    "The Following Criteria Have Been Defined: " printNL ;
+    newLine print ;
+    "Subset" print: 8 ; "Count " print: 8 ; "Criteria" printNL ;
+    0 print: -8 ;
+    getInitialMasterList count print: -8 ; 
+    "Initial " print; class whatAmI print ; " Universe" printNL ; 
+    getCriteriaList numberElements
+    do: [ position print: -8 ;
+          ^my rebuildSubsetFlag != FALSE
+              ifTrue: [ " " print: 8 ] 
+             ifFalse: [ currentUniverse count print: -8 ] ;
+          displayLabel printNL ;
+        ] ;
+    newLine print ; 
+    ] ;
+] .
+
+defineMethod:
+[ | getInitialMasterList |
+  initialMasterList isNA
+     ifTrue: [ :initialMasterList <- class getInitialScreeningUniverse ;
+               :currentSubset <- initialMasterList ;
+             ] ;
+  initialMasterList
+] .
+
+defineMethod:
+[ | rebuildSubset |
+  initialMasterList isNA
+     ifTrue: [ :currentSubset <- getInitialMasterList ;
+               setRebuildSubset ;
+             ] ;
+  rebuildSubsetFlag != FALSE && criteriaChain isntNA
+  ifTrue: [ :currentSubset <- criteriaChain links object
+                applyTo: initialMasterList
+                followedBy: criteriaChain links next ;
+            :rebuildSubsetFlag <- FALSE ;
+          ] ;
+  ^self
+] .
+;
+
+
+
+
+
+

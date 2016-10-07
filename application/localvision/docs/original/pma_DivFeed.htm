@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Upload Format: DivFeed</title>
+
+</head>
+<body>
+<body bgcolor=white>
+<h2>Vision Portfolio Management Application Layer: Data Feeds</h2>
+<p>
+| <a href="pmaFeeds.htm">Application Feeds</a> |
+<hr><p>
+<font size=+2><b>Data Feed: </b><i>DivFeed</i></font><p>
+<font size=+1><b>Category: </b><i>EntityExtenderFeed</i></font><p>
+
+<h3>Summary:</h3>
+<p>
+<ul>
+The <i>DivFeed</i> feed is used to create and update <b>DivRecord</b>
+   instances for securities.  This feed can include data for any number
+   of securities for any number of dates.  This class is used to track
+   cash dividends paid by a security over time.  The <b>DivRecord</b> class is
+   described in detail in the 
+   <a href="pmaIssues.htm#prices"><i>Portfolio Management Application
+     Issues</i></a> document.  
+</ul>
+<p>
+
+<h3>Available Fields:</h3>
+<p>
+<center><table border=1 width=80% cellpadding=4 cellspacing=2>
+<tr><th>Field<th>DivRecord Property<th>Type<th>Description
+<tr>
+<tr><th align=center colspan=4>--- Required Fields ---
+<tr>
+<td><i>entityId</i>
+<td><i>entity</i>
+<td>String
+<td>any valid security identifier
+<tr>
+<td><i>date</i>
+<td><i>date</i>
+<td>Date
+<td>ex-date of dividend data
+<tr>
+<td><i>currencyId</i>
+<td><i>baseCurrency</i>
+<td>String
+<td>id of currency in which dividends are provided
+<tr><th align=center colspan=4>--- Suggested Fields ---
+<tr>
+<td><i>adjustmentDate</i>
+<td><i>adjustmentDate</i>
+<td>Date
+<td>date through which dividend is adjusted
+<tr>
+<td><i>recordValue</i>
+<td><i>recordValue</i>
+<td>Number
+<td>total cash dividends on ex-date
+<tr>
+</table></center>
+<p>
+
+<h3>Special Processing Rules:</h3>
+<p>
+<ul type=disc>
+<li>The <i>entityId</i> must correspond to an existing <b>Security</b>
+     instance.  Any valid security alias can be used to identify the security.
+<p>
+<li>The <i>date</i> must be included and indicates the ex-date of the
+      dividend.  It can be in any valid date format
+      such as <i>19971215</i> or <i>12/15/97</i>.
+<p>
+<li>The <i>currencyId</i> is used to identify the currency in which the
+      dividend is supplied.
+      This currency can be different from the security's base currency.  
+      By default, the dividend information is
+      automatically converted into its security's base currency when it
+      is accessed (in cases where the currencies are different).
+      If the supplied <i>currencyId</i> 
+      does not map to an existing currency instance, the dividend record's
+      <i>baseCurrency</i> is set to the default currency.
+<p>
+<li>The <i>adjustmentDate</i> is used to identify the date through
+      which the data in the feed instance has been adjusted for splits.
+      Normally, this date is the same as the record's date and this field
+      need not be provided.  When loading dividend history and/or corrections,
+      the values may be supplied unadjusted (i.e., the values that
+      existed on the ex-date) or adjusted (i.e., the values adjusted for
+      any splits that have occurred since the ex-date.  If the data is
+      unadjusted, the <i>adjustmentDate</i> field is not needed or can 
+      contain the same value as the <i>date</i> field.  If the
+      data has been adjusted to reflect splits that have occurred since
+      the record date, this field should indicate the date through
+      which splits have been applied.
+<p>
+      Note that you do not need to resend data that has changed as the result
+      of a split adjustment.  Only true data corrections need to be supplied 
+      using this feed.
+<p>
+<li>The <i>recordValue</i> field should contain the total cash dividends
+      paid by that security on that date.  
+</ul>
+<p>
+<a name="related">
+<h3>Related Feeds:</h3>
+<p>
+<ul type=disc>
+<li><a href="pma_
+SecurityMaster.htm"><i>SecurityMaster</i></a>:
+defines Security instances referenced by this feed
+<li><a href="pma_SecurityAliases.htm"><i>SecurityAliases</i></a>:
+loads cusip/sedol changes and adds other aliases that 
+can serve as the <i>entityId</i> for a security.
+</ul>
+<p>
+<h3>Sample Upload:</h3>
+<p>
+The following tab-delimited feed could be used to create <b>DividendRecord</b>
+instances:
+<pre><tt><b>
+     Interface ExternalFeedManager upload: "DivFeed" using:
+     "entityId     date          currencyId     recordValue
+      45920010     05/07/1997    USD             0.20 
+      45920010     08/07/1997    USD             0.20
+      45920010     11/06/1997    USD             0.20
+      37044210     05/13/1997    USD             0.50
+      37044210     08/12/1997    USD             0.50
+      37044210     11/10/1997    USD             0.50
+     " ;
+</b></tt></pre>
+
+<p>
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy; 2000 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated December 15, 2000</font>
+</tr>
+</table>
+
+</body>
+</html>

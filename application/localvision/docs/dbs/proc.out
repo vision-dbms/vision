@@ -1,0 +1,528 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                          Section 3
+
+                                     Processing the Data
+
+
+
+
+            Once the database has been initialized using the procedures  described
+            in  the  previous  section,  the  actual  database  can  be updated as
+            frequently as needed.  Two scripts are  used  to  control  the  update
+            process,  "Load"  and  "Go". The "Load" process is used to convert the
+            raw data files into a form that can be incorporated into Vision.   The
+            "Go"  process  is used to convert the data from its external form into
+            internal Vision objects and reconcile this new data with  the  objects
+            already  in your Vision database. The "Load" script must be created to
+            conform to the requirements of the specific data source.   A  standard
+            "Go"  script  is  created when the database directory is set up.  This
+            script does not usually need to be tailored.
+
+
+
+
+            3.1 The "Load" Process
+
+            The Load script you defined in Section 2.7 is used to convert raw data
+            files into files that can be incorporated into Vision.  Minimally, the
+            Load script links each data set present to a file  named  "prefix.dat"
+            in the data directory and sets flags indicating that the data is ready
+            to be processed. Usually, the  raw  data  is  stored  in  a  temporary
+            working  directory  separate  from  the  /localvision directories.  By
+            convention, the temporary directory should have two subdirectories,  a
+            Data directory that contains raw data files with date extensions and a
+            Token directory that contains files that indicate that data is  ready.
+            The  contents  of  a  token  file  is the date extension to be used to
+            locate the appropriate file in the Data directory.
+
+
+            The directory /localvision/update/RawData is created  by  default  and
+            can  be  used  as your working directory.  The sample file demo.dat is
+            available in the /localvision/update/Templates/data directory.  Assume
+            this  demo  data  file  is  from  April  1994.   Then  you  can do the
+            following:
+
+
+                 cd /localvision/update
+                 cp Templates/data/demo.dat RawData/Data/demo.9404
+                 echo "9404" > RawData/Token/demo
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Processing the Data                                     3-2
+
+
+
+            To Load this data into your Demo processing  directory  use  the  Load
+            script with the name of the raw data directory as a parameter:
+
+
+                 cd /localvision/update/Demo
+                 Load /localvision/update/RawData
+
+
+            After the Load script  has  executed,  your  Demo  database  directory
+            should be in the following state:
+
+
+               - The raw data should be stored in a file called data/demo.dat.
+
+               - The file data/updateDate should contain the date 9404.
+
+               - The file tokens/expected/demo should exist.
+
+               - The file tokens/standardize/demo should exist.
+
+
+            The raw data is now ready for processing.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Processing the Data                                     3-3
+
+
+
+            3.2 The "Go" Process
+
+            Once the data has been loaded, the Go script is used  to  convert  the
+            raw data stored in the data directory into internal Vision structures.
+            In summary, the Go script performs the following steps:
+
+
+            Standardize    The script helpers/Standardize is used  to  standardize
+                           each  data  set.   This  step  eliminates  any database
+                           specific  structural  details  and  produces   separate
+                           'standardized'    files   for   each   data   type/size
+                           combination present in each data set.
+
+            Transpose      The script helpers/Transpose is used to transpose  each
+                           standardized  file.   This step inverts all the data so
+                           that it is stored in a 'transposed' form inside Vision.
+
+            Incorporate    The script helpers/Incorporate is used  to  incorporate
+                           the  transposed  data  files  into  the Vision network.
+                           Once this step  is  completed,  the  data  is  directly
+                           accessible in Vision.
+
+            Reconcile      The script helpers/Reconcile is used to  reconcile  the
+                           incorporated  data  with  other  Vision   objects.  The
+                           actual reconciliation procedures are written in Vision.
+
+
+            These steps are transparent to the user.  Normally, you will just  run
+            the  "Go"  script  which executes each of the helpers in sequence.  To
+            execute the Go script for the Demo data you loaded, run:
+
+
+                 cd /localvision/update/Demo
+                 Go >& logs/log.demo.9404 &
+
+
+            The final step of the  Go  process  is  to  reconcile  the  data  with
+            existing Vision objects.  Initially, the Reconcile process does not do
+            anything and you will see a "Selector Not Found" message in  your  log
+            file.   Once  methods have been defined and saved in the data source's
+            object  space,  the  helpers/Reconcile  script  can  be  tailored   to
+            automatically  execute  these  methods.  Sections 4 and 5 describe the
+            art of reconcile method writing in detail.
+
+
+
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Processing the Data                                     3-4
+
+
+
+            3.3 The "Go" Process - Details
+
+            The tokens directory contains five subdirectories used  to  chart  the
+            progress  of a database update.  The structure of the tokens directory
+            is illustrated below:
+
+
+                                             tokens
+                                               |
+                         ----------------------|-------------------------
+                         |          |          |            |           |
+                     expected/ standardize/ transpose/ incorporate/  completed/
+
+
+            A token is merely an empty file whose name corresponds to  the  prefix
+            of  a  particular data set associated with the data source.  When data
+            is available for update, a  token  is  created  in  the  expected  and
+            standardize  directories for each data set that needs to be processed.
+            These initial tokens are normally created by the Load script.  As  the
+            update  proceeds,  tokens  are  passed  from  one  token  directory to
+            another.
+
+
+            For example, when the demo database is loaded,  the  tokens  directory
+            will contain the following:
+
+
+                                             tokens
+                                               |
+                         ----------------------|------------------------
+                         |          |             |          |          |
+                     expected/  standardize/ transpose/ incorporate/  completed/
+                         |          |
+                         demo       demo
+
+            After the standardize portion  of  the  "Go"  process  completes,  the
+            tokens directory will be updated as shown below:
+
+
+                                             tokens
+                                               |
+                         ----------------------|-------------------------
+                         |          |             |          |          |
+                     expected/  standardize/ transpose/ incorporate/  completed/
+                         |                     |
+                         demo                  demo
+
+
+            When the data set has been successfully incorporated into Vision,  the
+            token will move to the completed directory.
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Processing the Data                                     3-5
+
+
+
+            The remainder of this section describes the steps of the "Go"  process
+            in  more detail.  You do not need to be familiar with these details to
+            update external databases.
+
+
+
+            Standardize
+            -----------
+
+            Using  the  layout  file,  the  standardizing  program  separates  the
+            original  data  file into subsets based on data type.  For example, if
+            database xyz contains integer, double precision,  and  alpha  data  of
+            lengths  four  and  eight characters, the standardization process will
+            break the original data file into four smaller  files,  one  per  data
+            type. These temporary files will be stored in the data directory using
+            the naming convention:  data/xyz0.dat,  data/xyz1.dat,  data/xyz2.dat,
+            and  data/xyz3.dat.   These  files  are  binary  files.  If you try to
+            display them, only the files containing character data types  will  be
+            readable.  A mini-layout file will also be generated for each of these
+            subsets  named  data/xyz0.lay,   data/xyz1.lay,   data/xyz2.lay,   and
+            data/xyz3.lay.   The  file data/xyz0.key will contain the key for each
+            record as identified by the second line of your layout file.  This  is
+            an  Ascii file where each key is on a separate line.  The key file can
+            provide a good way to check if your layout is out of alignment,  since
+            you should see one key per line if the record size is correct.
+
+
+
+            Transpose
+            ---------
+
+            The transpose step is run for each .dat file created  by  Standardize.
+            The  data in the .dat files is transposed in place (i.e., no new files
+            or disk space required).   As  a  result,  this  step  should  not  be
+            interrupted  or  run  twice or you will get unpredictable results.  If
+            the process is interrupted, the standardize step should be  run  again
+            and then transpose can be rerun.
+
+
+
+            Incorporate
+            -----------
+
+            The purpose of this step is to move the transposed data files into the
+            Vision  Network as new segments. The data will be stored in the object
+            space identified by the file OS in the update directory.
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Processing the Data                                     3-6
+
+
+
+            The Incorporate script performs the following tasks:
+
+
+               - Checks to see if all expected tokens are ready for incorporation.
+                 If not, the Go script will terminate with an error.
+
+               - Initiates a batchvision session  and  executes  the  'dumpTables'
+                 message.   This  message  writes structural information about the
+                 object    space    to    the    files    wkspace/prefix.ss    and
+                 wkspace/prefix#.tab  where  prefix  corresponds  to  the database
+                 prefix used by the .dat and .lay files and #  refers  to  one  or
+                 more table numbers starting with 0.
+
+               - Copies the data and layout files from the data directory  to  the
+                 wkspace directory.
+
+               - Runs the incorporator which transforms the transposed data  files
+                 into  valid  Vision structures, using the descriptive information
+                 generated by the "dumpTables" method.
+
+               - Initiates a batchvision session with an option  that  allows  the
+                 incorporator  data  files  to be moved into the Vision network as
+                 segments.
+
+
+            Note that by default, the Incorporate step copies the files  from  the
+            data  directory  to the wkspace directory for processing so you do not
+            have to restart from the Standardize step if there is a  problem.   If
+            the  files  are  large,  you may prefer to save disk space and time by
+            setting an environment variable that moves the files instead.   To  do
+            this insert the following line into the "helpers/Incorporate" script:
+
+
+                  setenv DBIncMv 1                  # <--  insert this line
+                  $DBUpdateBinaries/Incorporate     # <--  ahead of this line
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Processing the Data                                     3-7
+
+
+
+            Because the incorporator uses an operating system call that links  the
+            wkspace files to the appropriate Vision object space, the object space
+            and the wkspace directory must be located on the  same  logical  disk.
+            The error message:
+
+
+               >>>  Error Default Error Handler Exit  <<<
+               *    The Persistent Storage Manager [###]
+               *    A System Fault
+               *    External Segment Link [xyz0.dat->/localvision/network/#/#]: 'Cross-device link'
+
+
+            indicates that your  wkspace  and  object  space  directories  are  on
+            different  disks and the segments cannot be installed. You should move
+            the  wkspace  directory  to  the  correct  disk,  and  re-execute  the
+            Incorporator step.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+

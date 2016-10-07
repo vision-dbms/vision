@@ -1,0 +1,264 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                          Appendix A
+
+                                 Driver Installation Summary
+
+
+
+
+            1.  Create New Update Directory
+
+            Each database driver is stored  in  its  own  Unix  directory  in  the
+            /localvision/update directory tree.  Use the following steps to create
+            a new update directory for the data source Demo:
+
+               cd /localvision/update
+               /localvision/tools/NewDB Demo
+
+            You will be asked if  this  is  a  LocalEntity-style  reconcile.   The
+            update  directory  Demo  will  then  be  created  with the appropriate
+            starter files and subdirectories.
+
+
+            2.  Create Layout Files
+
+            Each data set associated with the data source requires its own  layout
+            file.   For  example, if there are three data sets named demoA, demoB,
+            and demoC, you  would  create  the  files  demoA.lay,  demoB.lay,  and
+            demoC.lay  in  the the /localvision/update/Demo/layouts directory.  If
+            this is a LocalEntity-style update, there is typically  one  data  set
+            that  is  updated  on  a  regular  basis.   This file is usually named
+            "snapshot" and the layout file named "snapshot.lay" should  be  placed
+            in the layouts directory.
+
+
+            3.  Create the "Build" Script
+
+            All structures and fields defined in the layout file  must  correspond
+            to  classes and properties defined in Vision.  A separate object space
+            is created to store these classes and any methods  needed  to  support
+            reconciling  this  database.   For  this  purpose, a "build" script is
+            created and saved in the data source's object space.  This  file  must
+            be executed and saved prior to the first update for the data source.
+
+            To convert your layout files into a  Vision  "build"  script,  do  the
+            following:
+
+                 cd /localvision/update/Demo
+                 /localvision/tools/createBLD >& scripts/BLDDemo
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Driver Installation Summary                             A-2
+
+
+
+            After you create this script you should review it for errors  in  your
+            layouts and make any corrections.  Then re-generate the script.
+
+
+            4.  Install the "Build" Script
+
+            To test the "Build" script, start up a Vision session and read in  the
+            file  you  created.   You should see a message that a new object space
+            has been created.   You  should  not  see  any  "Selector  Not  Found"
+            messages or any other errors.
+
+            To install this script execute the following in Unix:
+
+                 cd /localvision/update/Demo
+                 /localvision/transactions/scripts/installSpace DB
+
+            You will be prompted for the name of a build  file.   Enter  the  file
+            name  (scripts/BLDDemo) followed by a carriage return.  The new object
+            space will be created and the new classes and methods will be saved in
+            it.
+
+
+            5.  Loading the Data
+
+            Data can be supplied  by  external  vendors  in  a  variety  of  forms
+            including tape, transmission, and pc disk.  Usually, this data is read
+            and  stored  in  a  temporary  working  directory  separate  from  the
+            /localvision  directories.   The  working  directory  should  have two
+            subdirectories, a Data directory that contains  raw  data  files  with
+            date  extensions  and  a  Token  directory  that  contains  files that
+            indicate that data is ready.  The contents of a token file is the date
+            extension  to  be  used  to  locate  the  appropriate file in the Data
+            directory.
+
+            For example, assume your working directory is named /rawdata  and  the
+            demo  data file from April 1994 is available for processing.  Then the
+            following files would exist:
+
+                 /rawdata/Data/demo.9404               contains actual data
+                 /rawdata/Token/demo                   contains string 9404
+
+            To Load this data into your Demo processing  directory  use  the  Load
+            script with the name of the raw data directory as a parameter:
+
+                 cd /localvision/update/Demo
+                 Load /rawdata
+
+            The data will be loaded into the data directory  and  the  appropriate
+            processing tokens will be set.
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Driver Installation Summary                             A-3
+
+
+
+            6.  Processing the Data
+
+            Once the data has been loaded, the Go script is used  to  convert  the
+            raw data stored in the data directory into Vision objects.
+
+            To execute the Go script for the Demo data you loaded, run:
+
+                 cd /localvision/update/Demo
+                 Go >& logs/log.demo.9404 &
+
+            The final step of the  Go  process  is  to  reconcile  the  data  with
+            existing Vision objects.  The Reconcile process will not run until you
+            have added the appropriate reconcile rules.
+
+
+            7.  Adding the Reconcile Rules
+
+            A starter reconciliation script is supplied in the scripts  directory.
+            Once  you have made any modifications, start Vision with the -U option
+            specifying the correct object space.  For example,  if  Demo  data  is
+            stored in object space 14, start Vision using:
+
+                 vision -U14
+
+            Read in the reconcile script and execute it.  Then execute:
+
+                 updateDate evaluate: [ DataSource reconcile ] ;
+
+            When the reconcile script has been tested, you can save it  using  the
+            "dbSubmit" utility in Unix:
+
+                 dbSubmit scripts/RECDemo
+
+            You will be prompted for an object space number.  If the update daemon
+            has not been started for your system, execute:
+
+                 cd /localvision/transactions/scripts
+                 processUpdate
+
+
+
+            8.  Running the Reconcile
+
+            Once the reconcile script has been saved, you can  run  the  reconcile
+            for the data that has already been incorporated by executing:
+
+                 cd /localvision/update/Demo
+                 helpers/Reconcile >& logs/rec.demo.9404 &
+
+            Future updates will automatically run this reconcile step as  part  of
+            the Go process.
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+

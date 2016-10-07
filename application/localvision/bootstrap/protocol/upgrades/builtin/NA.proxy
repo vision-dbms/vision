@@ -1,0 +1,64 @@
+####################
+#  NA.proxy
+#
+#  formerly patch.proxyNA     : 3/4/2005
+#
+#  Created by: doh
+#
+#  Description:
+#    this class is to handle special COMPUSTAT missing values
+#
+#  Audit:
+#    20050409 - doh - Added four more proxies for CF, NM, IF, and IR.
+#
+#  Implementation:
+#
+####################
+
+#- Basic Class Definition
+
+CoreWorkspace respondsTo: 'ProxyNA' .
+ifFalse:
+[
+
+Undefined createSubclass: "ProxyNA" ;
+ProxyNA createSubclass: "AnnualNA" at: ProxyNA ;
+ProxyNA createSubclass: "SemiAnnNA" at: ProxyNA ;
+ProxyNA createSubclass: "CombinedNA" at: ProxyNA ;
+ProxyNA createSubclass: "NotMeaningfulNA" at: ProxyNA ;
+ProxyNA createSubclass: "InsignificantNA" at: ProxyNA ;
+ProxyNA createSubclass: "IrrelevantNA" at: ProxyNA ;
+
+] ;
+
+#------------
+
+ProxyNA SemiAnnNA
+ defineMethod: [ | print | "      SA " print ; ^self ] .
+ defineMethod: [ | print: aWidth | "SA " print: aWidth absoluteValue negated; ^self ] .
+;
+
+ProxyNA AnnualNA
+ defineMethod: [ | print | "      AN " print ; ^self ] .
+ defineMethod: [ | print: aWidth | "AN " print: aWidth absoluteValue negated; ^self ] .
+;
+
+ProxyNA CombinedNA
+ defineMethod: [ | print | "      CF " print ; ^self ] .
+ defineMethod: [ | print: aWidth | "CF " print: aWidth absoluteValue negated; ^self ] .
+;
+
+ProxyNA NotMeaningfulNA
+ defineMethod: [ | print | "      NM " print ; ^self ] .
+ defineMethod: [ | print: aWidth | "NM " print: aWidth absoluteValue negated; ^self ] .
+;
+
+ProxyNA InsignificantNA
+ defineMethod: [ | print | "      IF " print ; ^self ] .
+ defineMethod: [ | print: aWidth | "IF " print: aWidth absoluteValue negated; ^self ] .
+;
+
+ProxyNA IrrelevantNA
+ defineMethod: [ | print | "      IR " print ; ^self ] .
+ defineMethod: [ | print: aWidth | "IR " print: aWidth absoluteValue negated; ^self ] .
+;

@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="Mozilla/4.04 [en] (WinNT; I) [Netscape]">
+   <TITLE>Vision Upload Format: AccountAttrubution </TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF">
+
+<H2>
+Vision Portfolio Management Application Layer: Application</H2>
+| <A HREF="pmaApps.htm">Headstart Applications</A>
+|&nbsp;
+<HR>
+
+<P><FONT SIZE=+2><B>Application: </B><I>AccountAttribution</I></FONT>
+
+<P>&nbsp;
+<H3>
+Summary:</H3>
+
+<UL>The <B>AccountAttribution</B> application is used to compare the performance
+of an account to a target account using monthly returns over a user-specified
+holding period. The equity portion of the source and target accounts are
+grouped based on a user-specified critria. Returns are computed for each
+group. The relative return that can be attributed to overall group allocation
+and stock selection within the group is computed and displayed.</UL>
+
+<H3>
+Inputs:</H3>
+
+<CENTER><TABLE BORDER CELLSPACING=2 CELLPADDING=4 WIDTH="80%" >
+<TR>
+<TH>Position</TH>
+
+<TH>Form Id</TH>
+
+<TH>Description&nbsp;</TH>
+</TR>
+
+<TR>
+<TD>1&nbsp;</TD>
+
+<TD>id1&nbsp;</TD>
+
+<TD>Id of the source account&nbsp;</TD>
+</TR>
+
+<TR>
+<TD>2&nbsp;</TD>
+
+<TD>id2&nbsp;</TD>
+
+<TD>Id of the target account&nbsp;</TD>
+</TR>
+
+<TR>
+<TD>3&nbsp;</TD>
+
+<TD>startDate&nbsp;</TD>
+
+<TD>Starting date of holding period&nbsp;</TD>
+</TR>
+
+<TR>
+<TD>4&nbsp;</TD>
+
+<TD>endDate&nbsp;</TD>
+
+<TD>Ending date of holding period&nbsp;</TD>
+</TR>
+
+<TR>
+<TD>5&nbsp;</TD>
+
+<TD>group&nbsp;</TD>
+
+<TD>Grouping criteria (from menu)&nbsp;</TD>
+</TR>
+
+<TR>
+<TD>-&nbsp;</TD>
+
+<TD>groupEntry&nbsp;</TD>
+
+<TD>Specific group to display&nbsp;</TD>
+</TR>
+
+<TR>
+<TD>6&nbsp;</TD>
+
+<TD>-&nbsp;</TD>
+
+<TD>Specific group to display&nbsp;</TD>
+</TR>
+
+<TR>
+<TD>-&nbsp;</TD>
+
+<TD>details&nbsp;</TD>
+
+<TD>Indicates if all details should be displayed&nbsp;</TD>
+</TR>
+</TABLE></CENTER>
+
+<H3>
+Analysis:</H3>
+
+<UL type=disc>
+<LI>
+The source and target account ids must reference existing <B>Account</B>
+instances. They should refer to different accounts.</LI>
+
+<LI>
+If the end date is not supplied, the most recent month end date is used.
+If the start date is not supplied, the month-end prior to the end date
+is used. Account holdings are accessed as of the start date.</LI>
+
+<LI>
+If parameter 5 or the <I>group</I> field is supplied, it specifies the
+grouping criteria. If the <I>groupEntry</I> field is also supplied, it
+will be used as the criteria. The default grouping criteria is <I>security
+company sector</I>.</LI>
+
+<LI>
+If parameter 6 is supplied, it indicates that details should be displayed
+for this group. If the <I>details</I> field contains the string <I>Detail</I>,
+details will be displayed for all groups.</LI>
+
+<LI>
+Only equity holdings are included in the analysis. The compounded monthly
+return is computed for each equity. The weighted return is then computed
+for the source and target accounts for each group. Contribution based on
+allocation is computed by group as the difference in source and target
+weight times the difference in target return and total target return. Contribution
+based on stock selection is computed by group as the difference in source
+and target return weighted by the source account's weight. Total contribution
+is the sum of the allocation and selection components.</LI>
+
+<LI>
+The basic report displays groups as rows and the following columns:</LI>
+
+<DL>
+<DD>
+Group Id</DD>
+
+<DD>
+Group Name</DD>
+
+<DD>
+Source Account weight in group</DD>
+
+<DD>
+Source Account return in group</DD>
+
+<DD>
+Target Account weight in group</DD>
+
+<DD>
+Target Account return in group</DD>
+
+<DD>
+Return attributed to group allocation</DD>
+
+<DD>
+Return attributed to stock selection</DD>
+
+<DD>
+Total attribution</DD>
+</DL>
+If a specific group or "all" details is requested, the actual securities
+held in the group and their weights will also be displayed.</UL>
+
+<H3>
+Key Data Feeds:</H3>
+
+<UL type=disc>
+<LI>
+<I><A HREF="pma_HoldingsFeed.htm">HoldingsFeed</A></I></LI>
+
+<LI>
+<I><A HREF="pma_PriceFeed.htm">PriceFeed</A></I></LI>
+</UL>
+
+<H3>
+Related Reports:</H3>
+
+<UL type=disc>
+<LI>
+<I><A HREF="pma_AccountCharacteristics.htm">Account
+Characteristics</A></I></LI>
+</UL>
+
+<H3>
+Sample Usage:</H3>
+
+<UL type=disc>
+<PRE>
+<B><TT>&nbsp;Interface ApplicationWS runWith: "AccountAttribution",
+&nbsp; "102", "003", "9701", "9709", "security company sector" ;</TT></B></PRE>
+</UL>
+
+<H3>
+Sample Input:</H3>
+<ul type=disc><FORM NAME=ApplicationForm ACTION="http://visionWeb/cgi-bin/vquery.exe/default/">
+<CENTER><TABLE BORDER CELLSPACING=2 CELLPADDING=8 WIDTH=60%>
+<TR>
+<TH COLSPAN="5" BGCOLOR="#ADD8E6"><FONT SIZE=-1>Change Account Attribution</FONT></TH>
+
+<TH><INPUT TYPE=submit VALUE=Submit></TH>
+</TR>
+
+<TR>
+<TH><FONT SIZE=-1>Source Acct&nbsp;</FONT></TH>
+
+<TH><FONT SIZE=-1>Target Acct&nbsp;</FONT></TH>
+
+<TH><FONT SIZE=-1>From&nbsp;</FONT></TH>
+
+<TH><FONT SIZE=-1>To&nbsp;</FONT></TH>
+
+<TH><FONT SIZE=-1>Group&nbsp;</FONT></TH>
+
+<TH><FONT SIZE=-1>Level&nbsp;</FONT></TH>
+</TR>
+
+<TR>
+<TD><INPUT TYPE=text NAME= id1 SIZE= 10 VALUE= "P_102"></TD>
+
+<TD><INPUT TYPE=text NAME= id2 SIZE= 10 VALUE= "P_003"></TD>
+
+<TD><INPUT TYPE=text NAME= startDate SIZE= 8 VALUE= "9701"></TD>
+
+<TD><INPUT TYPE=text NAME= endDate SIZE= 8 VALUE= "9709"></TD>
+
+<TD><SELECT NAME= group SIZE= 1><OPTION VALUE= "sector" SELECTED>Sector&nbsp;<OPTION VALUE= "industry">Industry&nbsp;<OPTION VALUE= "country">Country&nbsp;<OPTION VALUE= "mcapGroup">MCap
+Group&nbsp;<OPTION VALUE= "secType">SecurityType&nbsp;<OPTION VALUE= "assetCat">Asset
+Cat&nbsp;<OPTION VALUE= "peGroup">P/E Group&nbsp;<OPTION VALUE= "pbGroup">P/B
+Group&nbsp;</SELECT>
+<BR><INPUT TYPE=text NAME= groupEntry></TD>
+
+<TD>Summary:&nbsp;<INPUT TYPE=radio NAME=detail VALUE= "Summary" CHECKED>Detail:&nbsp;<INPUT TYPE=radio NAME=detail VALUE= "Detail"></TD>
+</TR>
+</TABLE></CENTER></ul>
+
+<H3>
+<INPUT TYPE=hidden NAME=appName VALUE="AccountAttribution"></FORM></H3>
+
+<H3>
+Sample Output:</H3>
+
+<CENTER>
+<H3>
+<FONT FACE="Arial"><FONT COLOR="#00008B"><FONT SIZE=+0>--- Account Attribution
+---</FONT></FONT></FONT></H3></CENTER>
+
+<CENTER>
+<H4>
+<FONT FACE="Arial"><FONT COLOR="#00008B"><FONT SIZE=+0>Insyte Test 102
+vs Insyte Test 003</FONT></FONT></FONT></H4></CENTER>
+
+<CENTER>
+<H4>
+<FONT FACE="Arial"><FONT COLOR="#00008B"><FONT SIZE=+0>Holdings As Of 31-Jan-1997</FONT></FONT></FONT></H4></CENTER>
+
+<CENTER>
+<H4>
+<FONT FACE="Arial"><FONT COLOR="#00008B"><FONT SIZE=+0>Monthly Compounded
+Returns through 30-Sep-1997</FONT></FONT></FONT></H4></CENTER>
+
+<CENTER>
+<H4>
+<FONT FACE="Arial"><FONT COLOR="#00008B"><FONT SIZE=+0>Summary by [security
+company industry sector]</FONT></FONT></FONT></H4></CENTER>
+
+<HR align=center width=50%>
+<CENTER><TABLE BORDER CELLSPACING=2 WIDTH="80%" >
+<TR>
+<TH ALIGN=CENTER VALIGN=TOP COLSPAN="2"><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;</FONT></FONT></FONT></TH>
+
+<TH ALIGN=CENTER VALIGN=TOP COLSPAN="2"><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=-1>Source:
+102</FONT></FONT></FONT></TH>
+
+<TH ALIGN=CENTER VALIGN=TOP COLSPAN="2"><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=-1>Target:
+003</FONT></FONT></FONT></TH>
+
+<TH ALIGN=CENTER VALIGN=TOP COLSPAN="3"><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=-1>Attribution</FONT></FONT></FONT></TH>
+</TR>
+
+<TR>
+<TH ALIGN=CENTER VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=-1>Id</FONT></FONT></FONT></TH>
+
+<TH ALIGN=CENTER VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=-1>Name</FONT></FONT></FONT></TH>
+
+<TH ALIGN=CENTER VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=-1>%</FONT></FONT></FONT></TH>
+
+<TH ALIGN=CENTER VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=-1>Contrib</FONT></FONT></FONT></TH>
+
+<TH ALIGN=CENTER VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=-1>%</FONT></FONT></FONT></TH>
+
+<TH ALIGN=CENTER VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=-1>Contrib</FONT></FONT></FONT></TH>
+
+<TH ALIGN=CENTER VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=-1>Allocation</FONT></FONT></FONT></TH>
+
+<TH ALIGN=CENTER VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=-1>Selection</FONT></FONT></FONT></TH>
+
+<TH ALIGN=CENTER VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=-1>Total</FONT></FONT></FONT></TH>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>1300</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Commercial/industrial
+services</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+0.00</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+0.00</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+1.72</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+7.86</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+0.31</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+-0.00</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+0.31</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>200</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Consumer
+durables</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+3.64</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+5.55</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+3.37</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+5.55</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+-0.05</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+0.00</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+-0.05</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>100</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Consumer
+non-durables</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+11.65</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+6.16</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+11.13</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.22</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+-0.11</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+0.23</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+0.11</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>300</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Consumer
+services</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+8.87</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+12.82</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+6.33</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+13.57</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+-0.31</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+-0.07</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+-0.38</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>1200</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Energy</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+3.57</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+17.00</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+5.40</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+25.80</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+0.00</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+-0.31</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+-0.31</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>800</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Financial
+services</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+6.17</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+32.28</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+6.55</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+35.11</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+-0.03</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+-0.17</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+-0.21</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>600</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Health
+technology/services</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+20.67</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+37.75</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+20.16</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+38.43</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+0.06</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+-0.14</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+-0.08</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>900</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insurance
+services</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+6.69</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+32.35</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+8.42</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+37.91</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+-0.21</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+-0.37</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+-0.58</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>1000</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Producers/manufacturing</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+7.44</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+2.44</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.72</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;
+-13.37</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+-1.07</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+1.18</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+0.11</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>400</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Retail
+trade</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.37</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+65.33</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+5.31</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+62.91</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+-0.35</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+0.11</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+-0.24</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>500</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Technology</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+26.93</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+28.73</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+26.91</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+25.72</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+-0.00</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+0.81</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+0.81</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Total
+Equities</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;
+100.00</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+25.39</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;
+100.00</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+25.91</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+-1.76</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+1.25</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+-0.52</FONT></FONT></FONT></TD>
+</TR>
+</TABLE></CENTER>
+
+<HR align=center width=30%>
+<BR>&nbsp;
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy 1999 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated January 28, 1999</font>
+</table></BODY>
+</HTML>

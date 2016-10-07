@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title>Vision Tutorial 3: Single Object Access</title>
+</head>
+<body bgcolor=white>
+
+<body>
+
+<h2>Vision Tutorial 3: Single Object Access </h2>
+
+<p>
+| <a href="FHome.htm">Home</a> 
+| <a href="vtutor.htm">Tutorials</a> 
+| <a href="clEntity.htm">The Entity Class</a> |
+
+<hr>
+
+<h3>Topics Covered:</h3>
+
+<ul type=square>
+<li><a href="#Basic Access">Basic Access</a>
+<li><a href="#Access Shortcuts">Access Shortcuts</a>
+<li><a href="#Developing Programs">Developing Programs</a>
+<li><a href="#Creating A Method">Creating A Method</a>
+<li><a href="#Basic Navigations">Basic Navigations</a>
+<li><a href="#See Also:">See Also:</a>
+</ul>
+
+<hr>
+
+<blockquote><hr>
+<center><b><font size+1>Reminder!</font></b> </a></center>
+To run these examples, you should first start a new session then load the sample database using:
+<pre><tt><b>     "/localvision/samples/general/sample.load" asFileContents evaluate ; 
+</b></tt></pre>
+Any other files referenced can be read from the <i>/localvision/samples/general/</i>
+directory.
+<p>
+<b>Note:</b> The <i>sample.load</i> file runs by default on a <i>Unix</i> environment.  If you are using a <i>Windows NT</i> platform, this location may be prefixed by a drive  and optional path (e.g. <i>d:/visiondb/localvision/samples/general/sample.load</i>).  Check with your Vision Administrator for further details.<hr></blockquote>
+
+<hr>
+
+<a name="Basic Access"><h3><b>Basic Access</b></h3></a>
+
+<p>There are many objects in Vision that you need to access by name. Because
+Vision allows you to maintain many different classes of information, certain
+conventions have been established to help keep the names straight. For
+example, suppose you manage a portfolio for General Motors, analyze the
+company General Motors, and own the common stock of General Motors. These
+would represent three distinct objects in Vision. The variable name GM
+could only be associated with one of these objects. To address this situation,
+a separate <a href="clDict.htm#named">dictionary of names</a> is set up
+for each entity class. You would access a specific entity object using
+an expression of the form: 
+
+<ul>
+<pre><b>Named Company GM</b></pre>
+</ul>
+
+to access the Company object or 
+
+<ul>
+<pre><b>Named Account GM</b></pre>
+</ul>
+
+to access the Account object. For example, the sample database
+includes a sector named RETAIL and an industry named RETAIL. The expression:
+
+<ul>
+<pre><b>Named Industry RETAIL</b></pre>
+</ul>
+
+accesses the industry and the expression: 
+
+<ul>
+<pre><b>Named Sector RETAIL</b></pre>
+</ul>
+
+accesses the sector. 
+
+<p>Type and execute the expression: 
+
+<ul>
+<pre><b>Named Company GM</b></pre>
+</ul>
+
+You should see:
+
+<ul>
+<pre><b>GM</b></pre>
+</ul>
+
+Now try accessing a company that does not exist: 
+
+<ul>
+<pre><b>Named Company XYZ</b></pre>
+</ul>
+
+You should see:
+
+<ul>
+<pre><b>>>> Selector 'XYZ' Not Found <<< 
+       NA </b></pre>
+</ul>
+
+Because XYZ is not defined as a Company, Vision displays a <a href="Error.htm#snf">not
+found</a> error and returns the value <i>NA</i> (not available) as the 
+result. 
+
+<p>To access the latest sales value for GM, execute the expression: 
+
+<ul>
+<pre><b>Named Company GM sales</b></pre>
+</ul>
+
+You should see:
+
+<ul>
+<pre><b>101781.00</b></pre>
+</ul>
+
+To access GM's price, execute: 
+<ul>
+<pre><b>Named Company GM price</b></pre>
+</ul>
+
+You should see: 
+<ul>
+<pre><b>32.12</b></pre>
+</ul>
+
+If you request information that does not exist, you will receive a <a href="Error.htm#snf">Selector
+Not Found</a> message as shown below: 
+
+<ul>
+<pre><b>Named Company GM xyz </b></pre>
+</ul>
+
+You should see
+
+<ul>
+<pre><b>>>> Selector 'xyz' Not Found <<< 
+      NA </b></pre>
+</ul>
+
+This message informs you that the company GM does not respond to the
+message <i>xyz</i>. To determine what messages the company does respond
+to, send the <a href="mObject.htm#displayMessages">displayMessages</a> message:
+
+<ul>
+<pre><b>Named Company GM displayMessages</b></pre>
+</ul>
+
+You will see a list of the messages that have been defined for the Company
+class. Because all instances of a class respond to the same messages, the
+expression: 
+
+<ul>
+<pre><b>Company displayMessages</b></pre>
+</ul>
+
+is identical to the previous expression. To access the earnings per
+share value for GM, execute: 
+
+<ul>
+<pre><b>Named Company GM earningsPerShare</b></pre>
+</ul>
+
+producing the result: 
+
+<ul>
+<pre><b>5.03</b></pre>
+</ul>
+
+Change <i>GM</i> to <i>IBM</i> as shown below: 
+
+<ul>
+<pre><b>Named Company IBM earningsPerShare</b></pre>
+</ul>
+
+You should see: 
+
+<ul>
+<pre><b>8.72</b></pre>
+</ul>
+
+To better identify what information is being printed, modify the previous
+program as shown below:
+
+<ul>
+<pre><b>"IBM Earnings Per Share: " print; 
+Named Company IBM earningsPerShare</b></pre>
+</ul>
+
+You should see: 
+
+<ul>
+<pre><b>IBM Earnings Per Share: 8.72</b></pre>
+</ul>
+
+You can do calculations with the information you access. For example,
+to compute GM's return on equity, execute the following: 
+
+<ul>
+<pre><b>Named Company GM netIncome / Named Company GM commonEquity * 100</b></pre>
+</ul>
+
+You should see: 
+
+<ul>
+<pre><b>10.76</b></pre>
+</ul>
+
+Suppose you want to display several pieces of information for GM in
+the same program. For example, to look at the components of return on equity
+followed by the computation, execute: 
+
+<ul>
+<pre><b>Named Company GM netIncome print: 10.3 ; 
+Named Company GM commonEquity print: 10.3 ; 
+Named Company GM netIncome / Named Company GM commonEquity * 100 </b></pre>
+</ul>
+
+You should see: 
+
+<ul>
+<pre><b>3550.900  32988.910  10.76</b></pre>
+</ul>
+
+To make the results of the last program more presentable, try the following
+modifications: 
+
+<ul>
+<pre><b>"Net Income" print: 30 ; 
+Named Company GM netIncome printNL: 10.3 ; 
+"Common Equity" print: 30 ; 
+Named Company GM commonEquity printNL: 10.3 ; 
+"Return On Equity" print: 30 ; 
+Named Company GM netIncome / Named Company GM commonEquity 
+* 100 printNL: 10.3 ; </b></pre>
+</ul>
+
+Your should see: 
+
+<ul>
+<pre><b>Net Income              3550.900
+Common Equity          32988.910
+Return On Equity          10.764</b></pre>
+</ul>
+
+The <i>print: 30</i> message to the strings causes them to be padded
+with blank spaces so that the labels are all the same length. The <i>printNL:</i>
+message is used to separate each item into its own row. 
+
+<hr>
+
+<p>
+<a name="Access Shortcuts"><h3><b>Access Shortcuts</b></h3></a>
+
+<p>By this time, you have probably become tired of typing <i>Named Company
+GM</i> over and over again. Several techniques are available in Vision
+to help streamline your programs. 
+
+<p>You can create a <a href="Lang.htm#variable">variable</a> that represents
+the company GM. To do this type: 
+
+<ul>
+<pre><b>!gm <- Named Company GM</b></pre>
+</ul>
+
+The variable <i>gm</i> will remain available until you terminate your
+session. The expression: 
+
+<ul>
+<pre><b>gm sales</b></pre>
+</ul>
+
+can now be used to access GM's latest sales value and the program: 
+
+<ul>
+<pre><b>"Net Income" print: 30 ; 
+gm netIncome printNL: 10.3 ; 
+"Common Equity" print: 30 ; 
+gm commonEquity printNL: 10.3 ; 
+"Return On Equity" print: 30 ; 
+gm netIncome / gm commonEquity * 100 printNL: 10.3 ;</b></pre>
+</ul>
+
+can be used to compute and display GM's return on equity calculation.
+Variables can be used to save the results of calculations. For example,
+a variable can be created to store the results of the roe calculation:
+
+<ul>
+<pre><b>!roeGM <- gm netIncome / gm commonEquity * 100 ;</b></pre>
+</ul>
+
+The previous program could then be rewritten as: 
+
+<ul>
+<pre><b>gm netIncome print: 10.3 ; 
+gm commonEquity print: 10.3 ; 
+roeGM </b></pre>
+</ul>
+
+By creating the variables <i>gm</i> and <i>roeGM</i> you were able to
+eliminate some typing in the previous examples. Unfortunately, this approach
+is only useful if you are working the company GM. The <i>do:</i> message
+provides a more general way to streamline your program. 
+
+<p>Type the following: 
+
+<ul>
+<pre><b>gm 
+do: [ name print: 30 ; 
+      sales print: 10 ; 
+      netIncome print: 10 ; 
+    ] ;</b></pre>
+</ul>
+
+You should see: 
+
+<ul>
+<pre><b>General Motors Corp          101781.00   3550.90</b></pre>
+</ul>
+
+The <i><a href="clObject.htm#do:">do:</a></i> message can be used to "factor out" 
+the repeated expression in the body of your program, in this
+case the <i>gm</i>. The <i>do:</i> message requires one parameter. This
+parameter is enclosed by square brackets [ ]. All expressions inside the
+brackets are evaluated for the company GM. Any valid Vision expression
+can be included inside the brackets. The previous example is identical
+to: 
+
+<ul>
+<pre><b>Named Company GM 
+do: [ name print: 30 ; 
+      sales print: 10 ; 
+      netIncome print: 10 ; 
+    ] ; </b></pre>
+</ul>
+
+In addition to sales, suppose that you wished to calculate the price-earnings
+ratio for GM by dividing the price by the earnings per share value. The
+program: 
+
+<ul>
+<pre><b>Named Company GM 
+do: [ name print: 30 ; 
+      sales print: 10 ; 
+      price / earningsPerShare print:10 ; 
+    ] ; </b></pre>
+</ul>
+
+produces the result: 
+
+<ul>
+<pre><b>General Motors Corp        101781.00   6.39</b></pre>
+</ul>
+
+To find the same information for IBM, change <i>GM</i> to <i>IBM </i>as
+shown below: 
+
+<ul>
+<pre><b>Named Company IBM 
+do: [ name print: 30 ; 
+      sales print: 10 ; 
+      price / earningsPerShare print:10 ; 
+    ] ; </b></pre>
+</ul>
+
+You should see: 
+
+<ul>
+<pre><b>IBM Corp     54217.02    9.26</b></pre>
+</ul>
+
+To find the same information for Exxon, change <i>IBM</i> to <i>XON</i>
+as shown below: 
+
+<ul>
+<pre><b>Named Company XON 
+do: [ name print: 30 ; 
+      sales print: 10 ; 
+      price / earningsPerShare print:10 ; 
+    ] ; </b></pre>
+</ul>
+
+You should see: 
+
+<ul>
+<pre><b>Exxon Corp       76416.00       18.62</b></pre>
+</ul>
+
+<p>
+<hr>
+
+<p>
+<a name="Developing Programs"><b><h3>Developing Programs</h3></b></a>
+
+<p>You saw in the previous example that the <i>do:</i> message allows you
+to develop a program for one company and easily modify it to work with
+another one. By combining this streamlined access mechanism with various
+formatting techniques, you are ready to build substantial programs. 
+
+<p>Start by labeling the items displayed in the previous report: 
+
+<pre><b>Named Company GM 
+do: [ 
+     "Sales" print: 30 ; 
+      sales printNL: 10 ; 
+     "Price-Earning Ratio" print: 30 ; 
+     price / earningsPerShare printNL: 10 ; 
+    ] ; </b></pre>
+
+producing the result: 
+
+<ul>
+<pre><b>Sales                101781.00
+Price-Earning Ratio       6.39</b></pre>
+</ul>
+
+
+<p>To display net income as the second line item in this report, modify
+the previous program as follows: 
+
+<ul>
+<pre><b>Named Company GM 
+do: [ "Sales" print: 30 ; 
+      sales printNL: 10 ; 
+      "Net Income" print: 30 ; 
+      netIncome printNL: 10 ; 
+      "Price-Earning Ratio" print: 30 ; 
+      price /earningsPerShare printNL:10 ; 
+    ] ; </b></pre>
+</ul>
+
+producing the result: 
+
+<ul>
+<pre><b>Sales               101781.00
+Net Income            3550.90
+Price-Earning Ratio      6.39</b></pre>
+</ul>
+
+To display the large numbers with commas to make them more readable,
+modify the program as shown below: 
+
+<ul>
+<pre><b>Named Company GM 
+do: [ "Sales" print: 30 ; 
+      sales printWithCommasNL: 10 ; 
+      "Net Income" print: 30 ; 
+      netIncome printWithCommasNL: 10 ; 
+      "Price-Earning Ratio" print: 30 ; 
+      price /earningsPerShare printNL:10 ; 
+    ] ; </b></pre>
+</ul>
+
+producing the result: 
+
+<ul>
+<pre><b>Sales                 101,781.00
+Net Income              3,550.90
+Price-Earning Ratio         6.39</b></pre>
+</ul>
+
+Now modify the program to print the company name centered over the forty
+columns of the report:
+
+<ul>
+<pre><b>Named Company GM 
+do: [ name centerNL: 40 . print; 
+      "Sales" print: 30 ; 
+      sales printWithCommasNL: 10 ; 
+      "Net Income" print: 30 ; 
+      netIncome printWithCommasNL: 10 ; 
+      "Price-Earning Ratio" print: 30 ; 
+      price /earningsPerShare printNL: 10 ; 
+    ] ;</b></pre>
+</ul>
+
+producing the result:
+
+<ul>
+<pre><b>         General Motors  Corp 
+Sales                              101,781.00
+Net Income                           3,550.90
+Price-Earning Ratio                      6.39</b></pre>
+</ul>
+
+Skip an extra line after the company name. As a finishing touch, place
+a note at the bottom of the output, indicating that you have just completed
+your first major report: 
+
+<ul>
+<pre><b>Named Company GM 
+do: [ name centerNL: 40 . print; 
+      newLine print ; 
+      "Sales" print: 30 ; 
+      sales printWithCommasNL: 10 ; 
+      "Net Income" print: 30; 
+      netIncome printWithCommasNL: 10 ; 
+      "Price-Earning Ratio" print: 30 ; 
+      price /earningsPerShare printNL: 10 ; 
+    ] ; 
+newLine print ; 
+"--------------------" printNL ; 
+"My First Report" printNL ; </b></pre>
+</ul>
+
+producing the result: 
+
+<ul>
+<pre><b>        General Motors Corp
+
+Sales                                 101,781.00
+Net Income                              3,550.90
+Price-Earning Ratio                         6.39
+
+-------------------- 
+My First Report</b></pre>
+</ul>
+
+To prepare this report for a different company, just change the <i>GM</i>
+to the company of your choice.
+
+<hr>
+
+<p>
+<a name="Creating A Method"><h3><b>Creating A Method</b></h3></a>
+
+<p>It would now be useful to turn this program into a method that you can
+run without recalling the program each time. To create a method called
+"firstReport", execute the following: 
+
+<ul>
+<pre><b>Company 
+defineMethod: 
+[ | firstReport | 
+  name centerNL: 40 . print; 
+  newLine print; 
+  "Sales" print: 30 ; 
+  sales printWithCommasNL: 10 ; 
+  "Net Income" print: 30 ; 
+  netIncome printWithCommasNL: 10 ; 
+  "Price-Earning Ratio" print: 30 ; 
+  price / earningsPerShare printNL: 10 ; 
+  newLine print; 
+  "--------------------" printNL ; 
+  "My First Report Method" printNL ; 
+] ; </b></pre>
+</ul>
+
+To run this method, execute: 
+
+<ul>
+<pre><b>Named Company IBM firstReport</b></pre>
+</ul>
+
+You should see: 
+
+<ul>
+<pre><b>    IBM Corp
+
+Sales                      54,217.02
+Net Income                  5,258.00
+Price-Earning Ratio             9.26
+
+-------------------- 
+My First Report Method</b></pre>
+</ul>
+
+To run this report for GM, execute: 
+
+<ul>
+<pre><b>Named Company GM firstReport</b></pre>
+</ul>
+
+You should see: 
+
+<ul>
+<pre><b>       General Motors Corp 
+
+Sales                                 101,781.00
+Net Income                              3,550.90
+Price-Earning Ratio                         6.39
+
+-------------------- 
+My First Report Method </b></pre>
+</ul>
+
+<p>
+<hr>
+
+<p>
+<a name="Basic Navigations"><h3><b>Basic Navigations</b></h3></a>
+ 
+<p>In the examples so far, you have printed numeric and textual information
+defined specifically for each company such as<i> </i><a href="mEntity.htm#name">name</a><i>
+</i>and <a href="mEntity.htm">sales</a>. In Vision, there is no restriction
+on the type of data you can store for a property. For example, the value
+for the company GM's industry was defined using the expression:
+
+<ul>
+<pre><b>Named Company GM :industry <- Named Industry AUTO ;</b></pre>
+</ul>
+
+In a traditional database, the value of <i>industry</i> would probably
+be stored as a string or number in a company table. This value would then
+be used to query an industry table in order to access information about
+a company's industry. In Vision, the object representing the company's
+industry is stored directly as the value of the industry property. As a
+result, the simple expression: 
+
+<ul>
+<pre><b>Named Company GM industry</b></pre>
+</ul>
+
+returns an object of the class <i>Industry</i> that responds all the <i>Industry</i>
+messages including name. The expression: 
+
+<ul>
+<pre><b>Named Company GM industry name</b></pre>
+</ul>
+
+accesses the name of GM's industry. The expression: 
+
+<ul>
+<pre><b>Named Company GM industry whatAmI</b></pre>
+</ul>
+
+informs you that the object is of the class <i>Industry</i> and the
+expression: 
+
+<ul>
+<pre><b>Named Company GM industry displayMessages</b></pre>
+</ul>
+
+displays the list of messages that are defined for industry objects.
+Notice that one of the messages is the <i>sector</i> message. In the sample
+database, the value for the AUTO industry's sector was defined using: 
+
+<ul>
+<pre><b>Named Industry AUTO :sector <- Named Sector DUR ;</b></pre>
+</ul>
+
+This expression assigns the object representing the <i>Durable Goods</i>
+sector to the <i>AUTO</i> industry's property. Since all sectors respond
+to the message <i>name</i>, the expression: 
+
+<ul>
+<pre><b>Named Company GM industry sector name</b></pre>
+</ul>
+
+displays the result: 
+
+<ul>
+<pre><b>Durables</b></pre>
+</ul>
+
+<p>
+<hr>
+
+<a Name="See Also:"><h3>See Also:</h3></a>
+
+| <a href="tuBasic.htm">Vision Basics</a> 
+| <a href="tuLoad.htm">Creating a Demo Database</a>
+| <a href="tuList.htm">Using Lists</a>
+| <a href="tuTS.htm">Using Dates and TimeSeries</a> |
+
+<hr>
+
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy; 1999 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated January 25, 1999</font>
+</table>
+
+</body>
+</html>
+

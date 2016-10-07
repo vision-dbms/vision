@@ -1,0 +1,14 @@
+#########################################################
+#		Local Compiler Rules			#
+#########################################################
+
+LINKER	= VLINK-aCC
+
+CDEFS	= -DOPEN_DLG
+CINCS	= -I /usr/include/X11R5
+LIBS	= /usr/lib/libdlg.a /usr/lib/libmtf.a -L /usr/lib/X11R5 -l X11 -N -lm -lc -lPW -ldce
+
+CFLAGS	= +O2 +Onolimit +u4 -w
+
+.c.o:
+	aCC $(CFLAGS) $(CDEFS) $(CINCS) -c $*.c

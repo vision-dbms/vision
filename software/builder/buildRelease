@@ -1,0 +1,10 @@
+#!/bin/csh
+
+if ($#argv != 1) then
+   echo "Usage: ${0} <releaseNumber(minimum of 5 characters .. eg, 7.1.4>"
+   exit
+endif
+
+setenv AuditRelease ${1}
+
+visionBuilder build

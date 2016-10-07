@@ -1,0 +1,42 @@
+##################################################
+#   Core Vision Classes: DataSource/DataSet Tools
+#
+#  Run in OS3
+##################################################
+
+#--------------------
+#  DataSource: used to track data about groups ofexternal datasets 
+#--------------------
+Entity createSubclass: "DataSource" ;
+DataSource classDescriptor setClassTypeTo: "Core" ;
+
+#--------------------
+#  UpdateType: used to flag different styles of external db update
+#--------------------
+SystemTable createSubclass: "UpdateType" ;
+UpdateType classDescriptor setClassTypeTo: "Core" ;
+UpdateType newAs: "LocalEntity" ;
+
+#--------------------
+#  DBEntity: used to track entities maintained by a specific data souce
+#  LocalDBDictionary: used to track identifies associated with a DBEntity
+#--------------------
+Object createSubclass: "DBEntity" ;
+DBEntity classDescriptor setClassTypeTo: "Core" ;
+Dictionary createSubclass: "LocalDBDictionary" ;
+
+#--------------------
+#  DataFeed: incorporated class that is used to populate application-level
+#    classes but is temporary itself
+#  Typical usage is in "custom" reconciles
+#--------------------
+IncorporatorPrototype createSubclass: "DataFeed";
+DataFeed classDescriptor setClassTypeTo: "Core" ;
+
+#--------------------
+#  DataSet: incorporated class that contains records for local entities
+#    reconciled using a standard set of update rules; records are
+#    permanent (application-level)
+#--------------------
+IncorporatorPrototype createSubclass: "DataSet";
+DataSet classDescriptor setClassTypeTo: "Core" ;

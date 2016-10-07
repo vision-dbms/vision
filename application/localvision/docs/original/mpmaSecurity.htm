@@ -1,0 +1,1939 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Messages: Security</title>
+</head>
+<body bgcolor=white>
+<p>
+<center> | 
+ | <a href="vpma.htm">Portfolio Management Application Overview</a> 
+ | <A href="clpmaCompany.htm">Company Class  </A>
+ | <A href="mXRef.htm">Message XRef</A>
+ | <A href="Messages.htm">Messages (General)</A>
+ | 
+</center><hr>
+
+<center>
+<font face="Arial" color="darkblue" size=3 >
+<h3>Profile of Class <i>Security</i></h3>
+</center>
+</font><p>
+<blockquote><center><hr width=70%><p>
+Includes Classes: <i>Entity, Security</i>
+<p><hr width=70%></center></blockquote><p>
+<pre>
+
+<A href="clObject.htm">Object</A>
+  | 
+<A href="clEntity.htm">Entity</A>
+  | 
+  +--- <b>Security</b>
+</pre>
+<p><hr align=left width=70% ><p>
+
+Instances of the Security class represent the 
+individual securities issued by a company or equivalent entity such as the
+government.  A variety of security types may exist including cash, common
+and preferred stocks, convertible and non-convertible bonds, and put and call
+options.  Data maintained for a security typically includes  price,
+dividend and shares/amount outstanding information.  Portfolios hold specific
+amounts of one or more securities.  
+<p><hr align=left width=70% ><p>
+
+<font size=+1 face="Arial" color="darkred">Message Index</font>
+<p><img src="instdot.gif" align="middle" border=0 alt="o "><A href="#XRef"><b>XRef</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#XRef"><b>XRef</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#_sharesOut"><b>_sharesOut</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#accessExpression"><b>accessExpression</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#addAlias:"><b>addAlias: alias</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#addAlias:"><b>addAlias: string</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#addAlias:toXRefIn:"><b>addAlias: string toXRefIn: dictionary</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#addSplitFactorOf:onExDate:"><b>addSplitFactorOf: aFactor onExDate: aDate</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#adjustmentFactor"><b>adjustmentFactor</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#adjustmentRelativeTo:"><b>adjustmentRelativeTo: aDate</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#aliases"><b>aliases</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#canCusip"><b>canCusip</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#canCusip8"><b>canCusip8</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#cleanupClassStructures"><b>cleanupClassStructures</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#cleanupHoldingsAsOf:"><b>cleanupHoldingsAsOf: date</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#cleanupLocalNames"><b>cleanupLocalNames</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#cleanupLocalNames"><b>cleanupLocalNames</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#clusterStrings"><b>clusterStrings</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#company"><b>company</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#createAndLink:"><b>createAndLink: id</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#createInitializationListFrom:"><b>createInitializationListFrom: initList</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#createNewXRefManager"><b>createNewXRefManager</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#createPrivateStructure"><b>createPrivateStructure</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#createXRef:withProperty:"><b>createXRef: id withProperty: propertyId</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#cusip"><b>cusip</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#cusip8"><b>cusip8</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#deleteAlias:"><b>deleteAlias: aliasList</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#deleteAlias:"><b>deleteAlias: string</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#deleteCurrentHoldings"><b>deleteCurrentHoldings</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#displayInfo"><b>displayInfo</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#displayInfo"><b>displayInfo</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#displayLabel"><b>displayLabel</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#displayLabelKey"><b>displayLabelKey</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#displayXRefAuditReport"><b>displayXRefAuditReport</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#dividend"><b>dividend</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#dividendSeries"><b>dividendSeries</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#dividends"><b>dividends</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#getAdjustedDataFor:"><b>getAdjustedDataFor: aTimeSeries</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#getAdjustedSharesDataFor:"><b>getAdjustedSharesDataFor: aTimeSeries</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#getAggAccounts"><b>getAggAccounts</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#getDivsFrom:to:"><b>getDivsFrom: date1 to: date2</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#getHoldingIn:"><b>getHoldingIn: portfolio</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#getIndexAccounts"><b>getIndexAccounts</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#getOrCreate:"><b>getOrCreate: key</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#getPriceRecord"><b>getPriceRecord</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#getRecordForUser:"><b>getRecordForUser: userName</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#heldIn:"><b>heldIn: portfolio</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#helpMessage"><b>helpMessage</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#holdings"><b>holdings</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#holdingsDate"><b>holdingsDate</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#holdingsPrototype"><b>holdingsPrototype</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#holdingsSeries"><b>holdingsSeries</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#id"><b>id</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializationList"><b>initializationList</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializationList"><b>initializationList</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initialize"><b>initialize</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initialize"><b>initialize</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializeDataBaseLinks"><b>initializeDataBaseLinks</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializeForHoldingsPrecalcs"><b>initializeForHoldingsPrecalcs</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializeGlobalInstanceProperties"><b>initializeGlobalInstanceProperties</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializeGlobalSubclassProperties"><b>initializeGlobalSubclassProperties</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializeLocalAttributes"><b>initializeLocalAttributes</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#isEntity"><b>isEntity</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#isMemberOf:"><b>isMemberOf: universe</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#isSecurity"><b>isSecurity</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#isin"><b>isin</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#locateId:"><b>locateId: id</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#locateId:"><b>locateId: id</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#locateIds:"><b>locateIds: string</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#masterListCodes"><b>masterListCodes</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#name"><b>name</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#named"><b>named</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#named"><b>named</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#newAs:"><b>newAs: string</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#numericCode"><b>numericCode</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#price"><b>price</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#priceChangeFrom:to:"><b>priceChangeFrom: date1 to: date2</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#prices"><b>prices</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#pricingSeries"><b>pricingSeries</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#print"><b>print</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#print:"><b>print: aFormat</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#profile"><b>profile</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#profile"><b>profile</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#purgeHoldings"><b>purgeHoldings</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#rawSplitFactor"><b>rawSplitFactor</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#rebuildAdjustmentFactor"><b>rebuildAdjustmentFactor</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#rebuildAliases"><b>rebuildAliases</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#rebuildHoldings"><b>rebuildHoldings</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#resetCanCusipTo:"><b>resetCanCusipTo: string</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#resetCodeTo:"><b>resetCodeTo: string</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#resetCompany"><b>resetCompany</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#resetCusipTo:"><b>resetCusipTo: string</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#resetIsinTo:"><b>resetIsinTo: string</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#resetSedolTo:"><b>resetSedolTo: string</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#resetValorTo:"><b>resetValorTo: string</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#sedol"><b>sedol</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#sedol6"><b>sedol6</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setCanCusipTo:"><b>setCanCusipTo: string</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setCompanyTo:"><b>setCompanyTo: comp</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setCusipTo:"><b>setCusipTo: string</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setIsinTo:"><b>setIsinTo: string</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setNameTo:"><b>setNameTo: string</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setNumericCodeTo:"><b>setNumericCodeTo: string</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setSedolTo:"><b>setSedolTo: string</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setShortNameTo:"><b>setShortNameTo: string</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setSortCodeTo:"><b>setSortCodeTo: string</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setTickerTo:"><b>setTickerTo: string</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setTypeTo:"><b>setTypeTo: sectype</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setValorTo:"><b>setValorTo: string</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setXRefIn:to:"><b>setXRefIn: dictionary to: string</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#sharesOut"><b>sharesOut</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#shortName"><b>shortName</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#sortCode"><b>sortCode</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#specializeAs:at:"><b>specializeAs: string at: object</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#ticker"><b>ticker</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#totalReturnFrom:to:"><b>totalReturnFrom: date1 to: date2</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#type"><b>type</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#universes"><b>universes</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#updateInitializationListWith:"><b>updateInitializationListWith: block</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#validateInputString:"><b>validateInputString: input</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#valor"><b>valor</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#volume"><b>volume</b></A><i> (Security)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (Security)</i><br>
+<p><hr align=left width=70% ><p>
+
+<font size=+1 face="Arial" color="darkred">Messages</font>
+<p><img src="instdot.gif" align="middle" border=0 alt="o "><A name="XRef"></A><b>XRef</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity XRef</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Provides cross reference for alternative identifiers.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>XRef
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="XRef"></A><b>XRef</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security XRef</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Provides cross reference for alternative identifiers.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>Security XRef
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="_sharesOut"></A><b>_sharesOut</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security _sharesOut</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Shares outstanding (unadjusted for splits).</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="accessExpression"></A><b>accessExpression</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity accessExpression</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a string that could be used to request recipient</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Format&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Advanced
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="addAlias:"></A><b>addAlias:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity addAlias: alias</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Adds supplied string as alternate name in recipient's naming dictionary.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="addAlias:"></A><b>addAlias:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security addAlias: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Adds the parameter as an alias in Named Security.
+The alias is also added to the Named Company dictionary if the recipient
+is associated with a non-default Company.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaSecurity.htm">Security</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="addAlias:toXRefIn:"></A><b>addAlias:toXRefIn:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity addAlias: string toXRefIn: dictionary</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Adds the supplied string as an alias in the supplied cross reference dictionary.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+2 - XRef<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="addSplitFactorOf:onExDate:"></A><b>addSplitFactorOf:onExDate:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security addSplitFactorOf: aFactor onExDate: aDate</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Adds the supplied split factor to the recipient's
+'rawSplitFactor' on the supplied date.  A 2-for-1 stock split should get
+added with a factor of 2.0.  A 10% stock dividend should get added
+with a factor of 1.1. </blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaSecurity.htm">Security</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+2 - Date<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="adjustmentFactor"></A><b>adjustmentFactor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security adjustmentFactor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Cumulative adjustment factor.  This property has an
+initial value of 1.0.  Each time a split occurs, a new point representing
+the product of the new raw factor and the last adjustment factor is stored
+in this property as of the ex-date.  To properly use the adjustment factor, 
+you access values as of the two dates involved, the adjustment
+date and the current date.  The ratio of these factors gives you
+the correct adjustment.  </blockquote>
+<p><b>Type: </b>TimeSeriesProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="adjustmentRelativeTo:"></A><b>adjustmentRelativeTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security adjustmentRelativeTo: aDate</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Adjustment value that accounts for any splits in
+the recipient since supplied date.  This value will be 1.0 if no splits
+have occurred.  The value is used to adjust historic per-share and shares
+outstanding data.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Date<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="aliases"></A><b>aliases</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity aliases</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns list of aliases defined for recipient.
+These aliases should represent valid identifier to use with the recipient's
+naming dictionary.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>List of <A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Recipient stripped of any extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Conversion&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Recipient stripped of any extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Conversion&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaSecurity.htm">Security</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="canCusip"></A><b>canCusip</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security canCusip</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Canadian cusip.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="canCusip8"></A><b>canCusip8</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security canCusip8</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+First 8 characters of canadian cusip.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Class descriptor for recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Schema ClassDescriptor
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Class descriptor for recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Schema ClassDescriptor
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="cleanupClassStructures"></A><b>cleanupClassStructures</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity cleanupClassStructures</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Runs 'cleanStoreAndDictionary' at Object, this method is redefined as
+needed by subclasses to perform general cleanup functions.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>DBAdmin&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="cleanupHoldingsAsOf:"></A><b>cleanupHoldingsAsOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security cleanupHoldingsAsOf: date</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Deletes holdingsSeries lists for all Securities as
+of supplied date.  This method is normally run as part of the purging of 
+holdings for all accounts ('Account purgeOldHoldingsForAll').</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>NoValue
+<p><b>Parameters: </b>
+<blockquote>
+1 - Date<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="cleanupLocalNames"></A><b>cleanupLocalNames</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity cleanupLocalNames</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+This method is executed by the 'flagForDeletionWithReason:' 
+message and is used to remove aliases from the appropriate naming
+dictionaries.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>DBAdmin&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="cleanupLocalNames"></A><b>cleanupLocalNames</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security cleanupLocalNames</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Deletes cusip8 and sedol6 aliases from appropriate
+naming dictionaries.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>DBAdmin&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="clusterStrings"></A><b>clusterStrings</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity clusterStrings</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reclusters string property values.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>DBAdamin&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="company"></A><b>company</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security company</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Company issuing the recipient.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaCompany.htm">Company</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="createAndLink:"></A><b>createAndLink:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security createAndLink: id</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Creates Security and/or Company using supplied id.
+The security's 'company' is set to this company.  The company's 
+'primarySecurity' is set to this security if it is currently not set.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaSecurity.htm">Security</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="createInitializationListFrom:"></A><b>createInitializationListFrom:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity createInitializationListFrom: initList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Creates a new class constant for the recipient's class 
+named 'initializationList' and copies the list of blocks in supplied parameter
+to this list.  The initializationList is used during the instance creation
+process to initialize default values in the new instance.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - List<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="createNewXRefManager"></A><b>createNewXRefManager</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity createNewXRefManager</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Creates a new XRef manager as a class constant
+for the recipient's class and stores the Default reference to the
+recipient's class naming dictionary.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>XRef
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="createPrivateStructure"></A><b>createPrivateStructure</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity createPrivateStructure</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Creates private extension of recipient's class.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="admUpdat.htm">PrivateRecord</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="createXRef:withProperty:"></A><b>createXRef:withProperty:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity createXRef: id withProperty: propertyId</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Creates a new XRef for recipient's class and
+defines the supplied property for this class.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>XRef
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+2 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="cusip"></A><b>cusip</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security cusip</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Cusip identifier.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="cusip8"></A><b>cusip8</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security cusip8</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+First 8 characters of cusip.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default Entity instance.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default Security instance.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaSecurity.htm">Security</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="deleteAlias:"></A><b>deleteAlias:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity deleteAlias: aliasList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Deletes the alias from the recipient's naming 
+dictionary.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="deleteAlias:"></A><b>deleteAlias:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security deleteAlias: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Deletes the alias from the Named Security and Name
+Company dictionaries.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaSecurity.htm">Security</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="deleteCurrentHoldings"></A><b>deleteCurrentHoldings</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security deleteCurrentHoldings</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Deletes holdingsSeries list as of ^date.
+This method is normally run as part of a global purge of old holdings.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="displayInfo"></A><b>displayInfo</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity displayInfo</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Displays the code and name for the recipient followed by a new line.
+This message is often redefined by the subclasses to display one line
+of simple formatted information about an entity.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="displayInfo"></A><b>displayInfo</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security displayInfo</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+One line display of code, ticker, and name.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="displayLabel"></A><b>displayLabel</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity displayLabel</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns recipient's name by default.  This message
+is often redefined by the Entity subclasses.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="displayLabelKey"></A><b>displayLabelKey</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity displayLabelKey</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the recipient's code by default.  This message
+is often redefined by the Entity subclasses.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="displayXRefAuditReport"></A><b>displayXRefAuditReport</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity displayXRefAuditReport</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Displays a report summarizing the different XRef
+dictionaries defined for recipient's class.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="dividend"></A><b>dividend</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security dividend</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Last cash dividend paid on or before ^date (adjusted
+for splits and currency). </blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="dividendSeries"></A><b>dividendSeries</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security dividendSeries</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Last DivRecord on or before ^date.</blockquote>
+<p><b>Type: </b>TimeSeriesProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaCompany.htm">DivRecord</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="dividends"></A><b>dividends</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security dividends</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+TimeSeries of all DivRecords for the recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>TimeSeries of <A href="clpmaCompany.htm">DivRecord</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="getAdjustedDataFor:"></A><b>getAdjustedDataFor:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security getAdjustedDataFor: aTimeSeries</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the value of the supplied time series as of
+^date, adjusted for any splits that have occurred since the value went into
+effect.  The raw value in the time series is divided by the adjustment
+(i.e., per share).</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Advanced
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - TimeSeries<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="getAdjustedSharesDataFor:"></A><b>getAdjustedSharesDataFor:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security getAdjustedSharesDataFor: aTimeSeries</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the value of the supplied time series as of
+^date, adjusted for any splits that have occurred since the value went into
+effect.  The raw value in the time series is multipled by the adjustment
+(i.e., shares out).</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Advanced
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - TimeSeries<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="getAggAccounts"></A><b>getAggAccounts</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security getAggAccounts</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+List of AggAccounts holding recipient.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>List of AggAccount
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="getDivsFrom:to:"></A><b>getDivsFrom:to:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security getDivsFrom: date1 to: date2</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Total cash dividend paid between two supplied dates.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Date<br>
+2 - Date<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="getHoldingIn:"></A><b>getHoldingIn:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security getHoldingIn: portfolio</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+If recipient is held by supplied Portfolio, the
+Holdng is returned.  If it is not held,  the default Holding is returned.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Holding
+<p><b>Parameters: </b>
+<blockquote>
+1 - Portfolio<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="getIndexAccounts"></A><b>getIndexAccounts</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security getIndexAccounts</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+List of IndexAccounts that include recipient.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>List of IndexAccount
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="getOrCreate:"></A><b>getOrCreate:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity getOrCreate: key</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns object named by string in recipient class' naming dictionary.
+If not found, a new instance is created and returned.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Access&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="getPriceRecord"></A><b>getPriceRecord</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security getPriceRecord</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Latest PriceRecord on or before ^date.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaCompany.htm">PriceRecord</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="getRecordForUser:"></A><b>getRecordForUser:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity getRecordForUser: userName</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns private data extension for recipient 
+maintained by specified user.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Access&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Advanced
+<p><b>Returns: </b><A href="admUpdat.htm">PrivateRecord</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="heldIn:"></A><b>heldIn:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security heldIn: portfolio</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Is recipient held in supplied Portfolio?</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Portfolio<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="helpMessage"></A><b>helpMessage</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity helpMessage</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a message describing the recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Descriptive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="holdings"></A><b>holdings</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security holdings</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+List of Holding instances that reference recipient.
+Holdings list are maintained over time and reflect all Portfolios that
+owned recipient as of a date.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>List of Holding
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="holdingsDate"></A><b>holdingsDate</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security holdingsDate</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Effective date of holdings relative to ^date.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clDate.htm">Date</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="holdingsPrototype"></A><b>holdingsPrototype</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security holdingsPrototype</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Used to cluster 'holdingsSeries' list objects.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>List of Holding
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="holdingsSeries"></A><b>holdingsSeries</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security holdingsSeries</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+TimeSeries of Lists of Holdings of recipient security.</blockquote>
+<p><b>Type: </b>TimeSeriesProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>List of Holding
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="id"></A><b>id</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security id</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the ticker if non-NA, the code otherwise.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializationList"></A><b>initializationList</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity initializationList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the list of blocks used to initialize default values in new
+instances of the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>List of <A href="clBlock.htm">Block</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializationList"></A><b>initializationList</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security initializationList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Default values set on instance creation,
+this list includes 'baseCurrency'.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>List of <A href="clBlock.htm">Block</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initialize"></A><b>initialize</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity initialize</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Initializes properties in newly created instance.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initialize"></A><b>initialize</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security initialize</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Initializes properties in newly created instance.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaSecurity.htm">Security</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializeDataBaseLinks"></A><b>initializeDataBaseLinks</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity initializeDataBaseLinks</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Initializes a new instance.  Run as part of the instance creation process.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializeForHoldingsPrecalcs"></A><b>initializeForHoldingsPrecalcs</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security initializeForHoldingsPrecalcs</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Initializes properties prior to holdings cross
+reference for securities.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializeGlobalInstanceProperties"></A><b>initializeGlobalInstanceProperties</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity initializeGlobalInstanceProperties</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Initializes a new instance.  Run as part of the instance creation process.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializeGlobalSubclassProperties"></A><b>initializeGlobalSubclassProperties</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity initializeGlobalSubclassProperties</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+This method is run as part of the 'specialized' method and is used to 
+initialize properties in the default row of the new class.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializeLocalAttributes"></A><b>initializeLocalAttributes</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity initializeLocalAttributes</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Initializes a new instance.  Run as part of the instance creation process.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="isEntity"></A><b>isEntity</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity isEntity</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the value TRUE when sent to any Entity.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Inquiry&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>TRUE
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="isMemberOf:"></A><b>isMemberOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity isMemberOf: universe</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns TRUE if recipient is a member of supplied
+Universe or Classification.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Universe<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="isSecurity"></A><b>isSecurity</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security isSecurity</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the value TRUE.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Inquiry&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>TRUE
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="isin"></A><b>isin</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security isin</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Isin code.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="locateId:"></A><b>locateId:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity locateId: id</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns entity associated with id supplied, searching naming dictionaries
+associated with entity class.  By default only 'named' is searched; this
+message can be redefined for subclasses that can use multiple dictionaries.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Access&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="locateId:"></A><b>locateId:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security locateId: id</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the Security object associated with the supplied
+id.  If the id is not found in the Named Security dictionary, the Cusip,
+Sedol, CanCusip, Valor, and Isin XRef dictionaries are searched in order
+until a match is found.  If no match is found, NA is returned.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Access&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaSecurity.htm">Security</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="locateIds:"></A><b>locateIds:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity locateIds: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a list of entities of recipient's class.
+The parameter should be supplied as a single string with the ',' character
+used to separate the ids to locate (e.g., "GM, IBM, XON" ). </blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Access&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>List of <A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="masterListCodes"></A><b>masterListCodes</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity masterListCodes</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Displays code and name for all non-default instances in 
+recipient's class.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="name"></A><b>name</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity name</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+recipient's name.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="named"></A><b>named</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity named</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Naming dictionary for recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clDict.htm">Dictionary</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="named"></A><b>named</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security named</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Naming dictionary associated with recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Named
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="newAs:"></A><b>newAs:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity newAs: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Special version of 'newAs:' message designed to address the additional
+requirements of entity instance creation.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="numericCode"></A><b>numericCode</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity numericCode</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Numeric code.  This value can be used to assign
+numeric orderings for instances of a class.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="price"></A><b>price</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security price</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Closing price for recipient (adjusted for splits and
+currency).</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="priceChangeFrom:to:"></A><b>priceChangeFrom:to:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security priceChangeFrom: date1 to: date2</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Percent change in price between two supplied dates.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Date<br>
+2 - Date<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="prices"></A><b>prices</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security prices</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+TimeSeries of all PriceRecords for recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>TimeSeries of <A href="clpmaCompany.htm">PriceRecord</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="pricingSeries"></A><b>pricingSeries</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security pricingSeries</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Multi-level pricing structure used to efficiently
+store references to the PriceRecords associated with the reicpient.</blockquote>
+<p><b>Type: </b>TimeSeriesProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>DBAdmin&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Advanced
+<p><b>Returns: </b>TimeSeries of <A href="clTS.htm">TimeSeries</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="print"></A><b>print</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity print</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Redefines the standard print message so that 
+recipient's 'code' is printed.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="print:"></A><b>print:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity print: aFormat</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Prints recipient's 'code' using supplied format.  </blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Integer<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="profile"></A><b>profile</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity profile</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Displays a multi-line description of recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="profile"></A><b>profile</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security profile</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Basic descriptive report about the recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="purgeHoldings"></A><b>purgeHoldings</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security purgeHoldings</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Removes list from 'holdingsSeries' on ^date.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="rawSplitFactor"></A><b>rawSplitFactor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security rawSplitFactor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Records stock split and stock dividends for the recipient
+by ex-date. A 2-for-1 stock split is stored as a 2.0.  A 10% stock dividend
+is stored as a 1.1. </blockquote>
+<p><b>Type: </b>TimeSeriesProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="rebuildAdjustmentFactor"></A><b>rebuildAdjustmentFactor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security rebuildAdjustmentFactor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Rebuilds the 'adjustmentFactor' time series for the
+recipient using the values in 'rawSplitFactor'.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="rebuildAliases"></A><b>rebuildAliases</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity rebuildAliases</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Rebuilds the 'aliases' list for all instances of
+ recipient's using the current selector in recpient's naming dictionary.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="rebuildHoldings"></A><b>rebuildHoldings</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security rebuildHoldings</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Rebuilds the holdings cross reference for all securities.
+The holdings for all Portfolio instances are included.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="resetCanCusipTo:"></A><b>resetCanCusipTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security resetCanCusipTo: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Delete the recipient's current canadian cusip and
+set the 'canCusip' to the supplied value.  The current value is removed
+from the Named Security, Named Company, and XRef CanCusip dictionaries.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaSecurity.htm">Security</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="resetCodeTo:"></A><b>resetCodeTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security resetCodeTo: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Change the recipient's 'code' to the supplied string.
+If the recipient's company code was the same as the recipient's code,
+it is changed to the supplied string as well.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaSecurity.htm">Security</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="resetCompany"></A><b>resetCompany</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security resetCompany</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Resets recipient's 'company' to the default.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaSecurity.htm">Security</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="resetCusipTo:"></A><b>resetCusipTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security resetCusipTo: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Delete the recipient's current cusip and set 
+the 'cusip' to the supplied value.  The current value is removed
+from the Named Security, Named Company, and XRef Cusip dictionaries.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaSecurity.htm">Security</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="resetIsinTo:"></A><b>resetIsinTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security resetIsinTo: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Delete the recipient's current isin and set 
+the 'cusip' to the supplied value.  The current value is removed
+from the Named Security, Named Company, and XRef Isin dictionaries.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaSecurity.htm">Security</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="resetSedolTo:"></A><b>resetSedolTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security resetSedolTo: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Delete the recipient's current sedol and set 
+the 'sedol' to the supplied value.  The current value is removed
+from the Named Security, Named Company, and XRef Sedol dictionaries.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaSecurity.htm">Security</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="resetValorTo:"></A><b>resetValorTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security resetValorTo: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Delete the recipient's current valor and set 
+the 'valor' to the supplied value.  The current value is removed
+from the Named Security, Named Company, and XRef Valor dictionaries.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaSecurity.htm">Security</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="sedol"></A><b>sedol</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security sedol</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Sedol identifier.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="sedol6"></A><b>sedol6</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security sedol6</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+First 6 characters of sedol.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setCanCusipTo:"></A><b>setCanCusipTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security setCanCusipTo: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Sets the recipient's 'canCusip' to supplied string.
+If the current 'code' is the same as the old 'canCusip', it is reset to
+the supplied string as well.  The string is added as an alias to the
+Named Security and Named Company dictionaries (with a prepended 'c') and 
+to the XRef CanCusip (as an 8 and 9 character id).</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaSecurity.htm">Security</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setCompanyTo:"></A><b>setCompanyTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security setCompanyTo: comp</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Set company for recipient.  Note that security/company
+pairs that are created together with 'createAndLink:' will have identical
+'code' value and should not be reset because you will lose aliases at
+the company. The recipient's aliases that are associated with the original
+company are deleted from this company and added to the supplied company.
+If the supplied company does not refer to a primary security, its
+'primarySecurity' is set to recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaSecurity.htm">Security</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Company<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setCusipTo:"></A><b>setCusipTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security setCusipTo: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Sets the recipient's 'cusip' to supplied string.
+If the current 'code' is the same as the old 'cusip', it is reset to
+the supplied string as well.  The string is added as an alias to the
+Named Security and Named Company dictionaries and to the XRef Cusip
+(as an 8 and 9 character id).</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaSecurity.htm">Security</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setIsinTo:"></A><b>setIsinTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security setIsinTo: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Sets the recipient's 'isin' to supplied string.
+If the current 'code' is the same as the old 'isin', it is reset to
+the supplied string as well.  The string is added as an alias to the
+Named Security and Named Company dictionaries and to the XRef Isin.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaSecurity.htm">Security</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setNameTo:"></A><b>setNameTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity setNameTo: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Updates recipient's 'name' property with supplied 
+string.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setNumericCodeTo:"></A><b>setNumericCodeTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity setNumericCodeTo: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Updates recipient's 'numericCode' property with 
+supplied number.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setSedolTo:"></A><b>setSedolTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security setSedolTo: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Sets the recipient's 'sedol' to supplied string.
+If the current 'code' is the same as the old 'sedol', it is reset to
+the supplied string as well.  The string is added as an alias to the
+Named Security and Named Company dictionaries and to the XRef Sedol
+(6 and 7 character sedol id).</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaSecurity.htm">Security</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setShortNameTo:"></A><b>setShortNameTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity setShortNameTo: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Updates recipient's 'shortName' property with string.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setSortCodeTo:"></A><b>setSortCodeTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity setSortCodeTo: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Updates recipient's 'sortCode' property with string.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setTickerTo:"></A><b>setTickerTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security setTickerTo: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Sets the recipient's 'ticker' to supplied string.
+The string is added as an alias to the Named Security and Named Company
+dictionaries.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaSecurity.htm">Security</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setTypeTo:"></A><b>setTypeTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security setTypeTo: sectype</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Sets recipient's 'type' property to the supplied 
+SecurityType.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaSecurity.htm">Security</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - SecurityType<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setValorTo:"></A><b>setValorTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security setValorTo: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Sets the recipient's 'valor' to supplied string.
+If the current 'code' is the same as the old 'valor', it is reset to
+the supplied string as well.  The string is added as an alias to the
+Named Security and Named Company dictionaries (prepended with 'v')
+and to the XRef Valor.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaSecurity.htm">Security</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setXRefIn:to:"></A><b>setXRefIn:to:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity setXRefIn: dictionary to: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Sets the supplied string in the supplied XRef dictionary
+to return recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - XRef<br>
+2 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="sharesOut"></A><b>sharesOut</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security sharesOut</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Latest shares outstanding on or before ^date
+(adjusted for splits).</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="shortName"></A><b>shortName</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity shortName</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Short name.  This is the same as 'code' by default.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="sortCode"></A><b>sortCode</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity sortCode</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Code that can be used to sort instances.  This is
+the same as 'code' by default.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="specializeAs:at:"></A><b>specializeAs:at:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity specializeAs: string at: object</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Creates a subclass of recipient named by supplied string.  The name is
+defined at the supplied object.  Note that this class is NOT installed
+in the Schema database by default</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+2 - Object<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="ticker"></A><b>ticker</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security ticker</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Ticker symbol.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="totalReturnFrom:to:"></A><b>totalReturnFrom:to:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security totalReturnFrom: date1 to: date2</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Total return between supplied dates.  This value
+is computed using starting and ending price and the dividends in the
+period.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Date<br>
+2 - Date<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="type"></A><b>type</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security type</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Security type.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaCompany.htm">SecurityType</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="universes"></A><b>universes</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity universes</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+List of Universe in which recipient is a member.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>List of Universe
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="updateInitializationListWith:"></A><b>updateInitializationListWith:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity updateInitializationListWith: block</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Adds the supplied block to the recipient class' initializationList.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="validateInputString:"></A><b>validateInputString:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity validateInputString: input</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Instance in recipient's class associated
+with the supplied string.  If not found, NA is returned.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Access&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="valor"></A><b>valor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security valor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Valor identifier.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="volume"></A><b>volume</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security volume</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Lates trading volume on or before ^date.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Return the string "Entity".</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Descriptive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Security whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the string "Security".</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+
+<p><hr>
+<table border=0 width=100%>
+<tr>
+<td align=left>
+<font size=-1>Copyright &copy 1998 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated March 19, 1998</font>
+</table>
+</body>
+</html>

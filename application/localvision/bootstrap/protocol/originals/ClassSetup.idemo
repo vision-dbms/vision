@@ -1,0 +1,37 @@
+####################
+#  ClassSetup -  Portfolio Management Application Layer: supp
+#    this feed is used to define all the supplemental classes in 
+#     a Vision database supplying the Portfolio Management Application Layer.
+#
+#  This feed uses the following fields:
+#     classId           core class name
+#     parentId          class to subclass 
+#     description       description of class
+#
+#  The "classId" represents the name of the class to create.  If it
+#  does not exist, the class identified by the "parentId" is used as
+#  the parent class to subclass.  The "parentId" is ususally one of
+#  Entity, DataRecord, or LinkRecord, but it can indicate a subclass
+#  of one of these if desired.  Since the "classId" is used to name
+#  vision classes, the names should conform to the convention of
+#  starting with a capital letter, although this is not enforced.
+#
+#  The fields can be supplied in any order as long as the header line
+#  indicates one of the three valid field names for each field.
+####################
+
+Class ID	Parent ID	Description
+
+#--  Supplemental Portfolio Mangement Entity classes
+MCapGroup	RangeClassification	This class represents market cap ranges.
+PEGroup	RangeClassification	This class represents pe ranges.
+PBGroup	RangeClassification	This class represents price to book ranges.
+
+#--  Supplemental Portfolio Management Workstation DataRecord classes
+FundamentalData	DataRecord	This class represents different frequencies of fundamental company data.
+FundamentalDataA	FundamentalData	This class stores company annual fundamentals.
+FundamentalDataQ	FundamentalData	This class stores company quarterly fundamentals.
+FundamentalDataM	FundamentalData	This class stores company monthly fundamentals.
+AnalystEstimate	DataRecord	This class stores estimate data for a company.
+EconomicData	DataRecord	This class stores economic time series for a country.
+

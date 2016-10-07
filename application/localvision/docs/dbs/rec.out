@@ -1,0 +1,726 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                          Section 4
+
+                                        Reconciliation
+
+
+
+
+            4.1  Defining Reconcile Rules
+
+            Once you have incorporated the data for the first time by running  the
+            Go  script,  you  can  use this data in Vision to define and test your
+            reconcile rules.   To  access  this  data,  begin  a  Vision  session,
+            specifying  the object space number for the data source as a parameter
+            as shown below:
+
+
+                 vision -U#
+
+                 where # is the object space number assigned to this data source
+
+
+            If you incorporated data into the class named "demo", you  can  access
+            the instances (records) in demo using the Vision expression:
+
+
+                 demo instanceList
+
+
+            For example, the expression:
+
+
+                 demo instanceList count
+
+            returns the number of instances (i.e., records) found in  this  class.
+            At this point the records from the external data set are the instances
+            of the class demo.  The list  formed  by  sending  the  "instanceList"
+            message  operates  just like any other list in Vision.  Therefore, you
+            can send messages like "do:", "select:" and "groupedBy:" to it.
+
+
+            Note  that  the  examples  that  follow  are  designed  to  illustrate
+            techniques  for  reconciling  the  data  to  existing  classes.  These
+            examples assume that the class Company is defined  in  your  database.
+            If  it  is  not,  you can read and execute the sample database file in
+            /vision/lib/sample.db to create this class and some sample instances.
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Reconciliation                                          4-2
+
+
+
+            Assume that the properties "demoScore"  and  "demoEstimate"  are  time
+            series  defined  for the class Company.  A strategy for updating these
+            time series is shown below:
+
+
+                 Company define: 'demoScore' . define: 'demoEstimate' ;
+
+                 ^today - 1 monthEnds
+                 evaluate:      # evaluate all time series as of last month-end
+                    [ demo instanceList
+                      do: [
+                      ###  Look up companyID in Named Company dictionary
+                          !company <- ^global Named Company at: companyID ;
+                      ### If found, update the company properties
+                          company isntNA
+                          ifTrue: [ company :demoScore put: score ;
+                                    company :demoEstimate put: estimate ;
+                                  ]
+                          ifFalse:[ ">>> Company Not Found: " print ;
+                                    companyID printNL ;
+                                  ] ;
+                          ] ;
+                      ] ;
+
+            Because the actual reconciliation procedures are  written  in  Vision,
+            they  can  be  readily  tailored  to  meet  any  specific  data set or
+            organizational needs.  For example, it is often useful to  maintain  a
+            local   dictionary  of  names  used  by  the  data  source  as  record
+            identifiers (i.e., keys).  The entries in the local dictionary can  be
+            linked  to  the   global instance to which the entity corresponds.  In
+            this way, peculiarities in individual data  source  "key"  definitions
+            can be identified and the correct relationship can be stored once.
+
+
+            The following Vision code illustrates this concept:
+
+                 ###  Create a structure for maintaining local-global relationships
+                 !LocalDictionary <- Dictionary specialized ;
+
+                 ###  Define a method to add all aliases that are the found
+                 ^current defineMethod:
+                 [ | updateLocalDictionaryWithAll |
+                   demo instanceList
+                   do: [ !company <- ^global Named Company at: companyID ;
+                         company isntNA
+                          ifTrue: [ ^global LocalDictionary at: companyID put: company ]
+                       ] ;
+                 ] ;
+
+                 ###  And execute the method
+                 updateLocalDictionaryWithAll ;
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Reconciliation                                          4-3
+
+
+
+                 ###  Define a method to show exceptions and execute it
+                 ^current defineMethod:
+                 [ | showExceptions |
+                   "The Following Company ID's Are Not In the Local Dictionary:" printNL ;
+                   demo instanceList
+                     select: [ ^global LocalDictionary at: companyID . isNA ] .
+                   do: [ companyID printNL ] ;
+                 ] ;
+
+                 ###  And execute the method
+                 showExceptions ;
+
+                 ###  Define a method to add a specific alias
+                 ^current defineMethod:
+                 [ | add: localAlias asAliasFor: globalAlias |
+                   !company <- Named Company at: globalAlias ;
+                   company isntNA
+                      ifTrue: [ LocalDictionary at: localAlias put: company ]
+                     ifFalse: [ ">>>  Company Not Found. Alias Not Added. <<<" printNL ] ;
+                 ] ;
+
+                 ###  Update LocalDictionary to refer to IBM as XYZ in this database
+                 ^current add: "XYZ" asAliasFor: "IBM" ;
+
+                 ###  Write an update method to use the local dictionary
+                 ^current defineMethod:
+                 [ | reconcile |
+                   ^today - 1 monthEnds
+                   evaluate:      # evaluate all time series as of last month-end
+                     [
+                     demo instanceList
+                     do: [
+                         ###  Look up companyID in Named Company dictionary
+                         !company <- ^global LocalDictionary at: companyID ;
+                         ### If found, update the company properties
+                         company isntNA
+                           ifTrue: [ company :demoScore put: score ;
+                                     company :demoEstimate put: estimate
+                                   ]
+                           ifFalse:[ ">>> Company Not Found: " print ;
+                                     companyID printNL ;
+                                   ] ;
+                         ] ;
+                     ] ;
+                  ] ;
+
+                 ###  and run it
+                 reconcile
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Reconciliation                                          4-4
+
+
+
+            Once these messages have  been  saved,  the  "reconcile"  method  will
+            automatically  run  as  part of the "Go" process to copy the data from
+            the "demo" instances to the time series  properties  for  the  related
+            company.   To access the demo score for IBM any of the following forms
+            could be used:
+
+
+                 Named Company IBM demoScore print ;
+            or
+                 Named Company IBM :demoScore asOf: ^today - 1 monthEnds . print ;
+            or
+                 ^today - 1 monthEnds evaluate: [ Named Company IBM demoScore print ] ;
+
+
+            After the data has been copied via the "reconcile" method, you do  not
+            need  the  instances in the "demo" class any longer.  This class would
+            therefore  be  a  good  candidate  for  the  "replacement"   form   of
+            incorporation  defined  in  Section  2.5.   To indicate that this is a
+            replacement class, your "dumpTables" message should contain:
+
+
+                      "demo0.tab" replacementUpdateDumpOf: demo ;
+
+
+            Alternatively, assume that the demo class is updated each  month,  but
+            you want to refer directly to the instances in this class from company
+            instead of copying each value to its own time series.   The  following
+            methodology could be used:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Reconciliation                                          4-5
+
+
+
+                 ###  Create a time series property at Company to store the references
+                 Company define: 'demoData' ;
+
+                 ###  Create a property at demo to identify new instances
+                 demo defineFixedProperty: 'processedFlag' ;
+                 demo :processedFlag <- TRUE ;      #-- set default instance to TRUE
+
+                 ###  Create a property at demo to identify the update date used
+                 demo defineFixedProperty: 'updateDate' ;
+
+                 ###  Write an update method using the local dictionary technique
+                 ^current defineMethod:
+                 [ | reconcile |
+                   ^today - 1 monthEnds
+                   evaluate:      # evaluate all time series as of last month-end
+                     [
+                     demo instanceList
+                         select: [ processedFlag isNA ] .       #-- not yet processed
+                     do: [
+                         :processedFlag <- TRUE ;               #-- has been processed
+                         :updateDate <- ^date ;
+                         !company <- ^global LocalDictionary at: companyID ;
+                         #-- if company is found, update demoData with actual instance
+                         company isntNA
+                         ifTrue: [ company :demoData put: ^self ;
+                                 ]
+                         ifFalse:[ ">>> Company Not Found: " print ;
+                                   companyID printNL ;
+                                 ] ;
+                         ] ;
+                     ] ;
+                  ] ;
+
+                 ###  and run it
+                 reconcile
+
+            This "reconcile" method selects the instances  that  have  never  been
+            processed  before  and links the "demoData" property at Company to the
+            actual instance.  To access  the  demo  score  for  IBM,  any  of  the
+            following forms could be used:
+
+
+                 Named Company IBM demoData score print ;
+            or
+                 Named Company IBM :demoData asOf: ^today - 1 monthEnds . score print ;
+            or
+                 ^today - 1 monthEnds
+                    evaluate: [ Named Company IBM demoData score print ] ;
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Reconciliation                                          4-6
+
+
+
+            4.2  Defining the "Reconcile" Script
+
+            All methods and additional  properties  used  by  the  reconcile,  are
+            stored  in  the  Vision  database.   A file named scripts/RECprefix is
+            usually created to define these messages and any  additional  protocol
+            needed  to  support  the  reconcile  process.  Note that the reconcile
+            portion of the "Go" script will generate a "Selector  'reconcile'  Not
+            Found" if this script has not been installed.
+
+
+            A starter reconciliation script is supplied in the scripts  directory.
+            Depending on the style of reconcile you indicated, the RECshell.Custom
+            or    RECshell.LocalEntity    script    was    copied     from     the
+            /localvision/update/Templates   directory  as  the  initial  reconcile
+            script for this data source. Minimally, you will need  to  define  the
+            method  "reconcile".  The shell provided displays some standard header
+            and  footer  information.   You  can  eliminate  this  information  if
+            desired.  You will need to fill in the reconcile details to conform to
+            your update requirements.  If your  driver  is  a  "LocalEntity-style"
+            driver,  the  reconcile  methodology  is  somewhat  different.   These
+            specific techniques are described in Section 5.
+
+
+            The class DataSource is used to  manage  information  about  the  data
+            source  in this object space.  The messages "setLastUpdateDateTo:" and
+            "setLastProcessDateTo:" are used to track the actual and "as of" dates
+            associated  with  the  last  update  of  this data source.  The sample
+            reconcile method illustrates how to set these values as part  of  each
+            update.  Section 4.4 shows how to access this information.
+
+
+            Once you have a version of your reconcile code to test,  start  Vision
+            with the -U option specifying the correct object space.  For instance,
+            if your Demo data is stored in object space 14, start Vision using:
+
+
+                 vision -U14
+
+
+            Read in the reconcile script and execute it.  Then execute:
+
+
+                 updateDate evaluate: [ DataSource reconcile ] ;
+
+
+            You should perform whatever additional testing is  needed  to  confirm
+            that the reconcile is working correctly.
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Reconciliation                                          4-7
+
+
+
+            4.3  Installing the "Reconcile" Script
+
+            When the script is complete, you can install it permanently using  the
+            "dbSubmit" utility in Unix:
+
+
+                 dbSubmit scripts/RECdemo
+
+
+            You will be prompted for the object space number associated with  this
+            data  source.   If the automated update daemon is not running for your
+            system, execute:
+
+
+                 cd /localvision/transactions/scripts
+                 processUpdate
+
+
+            Once the reconcile script has been saved, you can  run  the  reconcile
+            for  the  data  that has been incorporated.  To run just the reconcile
+            component, execute:
+
+
+                 cd /localvision/update/Demo
+                 helpers/Reconcile >& logs/rec.demo.9404 &
+
+
+            Future updates will automatically run the reconcile step  as  part  of
+            the Go process.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Reconciliation                                          4-8
+
+
+
+            4.4  Status Information
+
+            The class DataSource has  been  defined  to  track  information  about
+            external  data  sources and their data sets.  A summary report listing
+            all current data sources with their latest and earliest data dates can
+            be displayed using the expression:
+
+
+                  DataSource displayUpdateStatus
+
+            generating a report of the form:
+
+
+                            Vision Database Update Status
+                                  As Of:  3/31/1994
+
+
+                  Source                 Latest        Earliest
+
+                  Demo                 3/31/1994     10/14/1993
+                  XYZ                 12/16/1993      9/30/1993
+                  . . .
+
+            The message "profile" produces a detailed report showing  data  source
+            characteristics  such  as  its  update frequency, the entity class for
+            which data is provided, and its data sets and  their  characteristics.
+            For example:
+
+
+                 Named DataSource Demo profile
+
+
+            produces a report of the form:
+
+
+                 Data Source: Demo
+                 Object Space:  14   Environment DB Demo
+                 Entity Type:        Undefined
+                 Frequency:        NA
+                 Last Processed:           NA
+                 Last Update As Of:        NA
+                 Previous Update:          NA
+                 Available For:            NA  -       NA
+
+                 Data Source Includes the Following Data Sets:
+                 . . .
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Reconciliation                                          4-9
+
+
+
+            This profile displays general information about the data source at the
+            top.   Each  data  set associated with the data source is also listed.
+            The message "dataSetList" at DataSource returns the  list  of  DataSet
+            classes that are associated with a given data source.
+
+
+            "Object Space" indicates the  environment  in  which  the  specialized
+            messages  designed  to  reconcile  this  data  source are stored.  The
+            access path to this object space from other spaces  is  printed  after
+            the  number.   In  this  case,  the  object space number is 14 and the
+            access path is "Environment  DB  Demo".   The  property  "objectSpace"
+            defined  at  DataSource  returns  the  object  returning the top level
+            environment (i.e., ^global) associated with  this  data  source.   The
+            expressions:
+
+
+                 Environment DB Demo
+
+            and
+
+               Named DataSource Demo objectSpace
+
+            are identical and both return the global  environment  for  this  data
+            source.  The expressions:
+
+
+                 Environment DB Demo demo instanceList count
+
+            and
+
+                 Named DataSource Demo objectSpace demo instanceList count
+
+
+            are identical and return the number of instances  in  the  demo  class
+            associated with this data source.
+
+
+            "Entity Type" refers to the default instance of the  class  associated
+            with  the  data  source.   If  this  data  source is associated with a
+            particular class, your reconcile script can include the expression:
+
+
+                 Named DataSource Demo setEntityTypeTo: class ;
+
+            where class  is  an  entity  class  such  as  Company.   The  property
+            "entityType"  defined  at  DataSource  returns the entity you assigned
+            with this message.
+
+
+            "Frequency" indicates the expected frequency at which the data  source
+            will  be updated. If this data source is associated with a  particular
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Reconciliation                                         4-10
+
+
+
+            update frequency, your reconcile script can include the expression:
+
+
+                 Named DataSource Demo setUpdateFrequencyTo: 1 monthEnds ;
+
+
+            The property  "updateFrequency"  defined  at  DataSource  returns  the
+            update  frequency  you have assigned.  Note that the frequency for the
+            data source indicates the expected  update  cycle  for  refreshing  or
+            adding  to  each  data  set.  This  frequency  is optional descriptive
+            information you can provide about a data  source  source  and  is  not
+            enforced.
+
+
+            The "Last Processed" date refers to the  actual  date  that  the  last
+            update  was  installed  and available in Vision.  The "Last Updated As
+            Of" and "Previous Update" dates refer to the "as of" dates  associated
+            with  the  most  recent  two updates of the data.  The "Available For"
+            range indicates the first and last periods of data  availability.   To
+            track this information, the Vision code:
+
+
+              DataSource
+                  setLastUpdateDateTo: asOfDate .
+                  setLastProcessDateTo: ^today ;
+
+
+            should be included  in  your  "reconcile"  method.   These  statements
+            update    the    values    of    the   properties   "lastProcessDate",
+            "mostRecentUpdatDate", "previousUpdateDate, and "earliestUpdateDate".
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+

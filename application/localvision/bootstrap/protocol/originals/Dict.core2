@@ -1,0 +1,111 @@
+"
+####################
+#  Dictionary: Protocol for Subclasses
+####################
+
+" print ;
+
+#--------------------
+#  Environemnt
+#--------------------
+
+"
+#-->  Environment
+" printNL ;
+
+#--  Create New Instances
+Environment newAs: "DB" ;
+Environment newAs: "DBA" ;
+Environment newAs: "User" ;
+
+#--------------------------------------------------
+
+"
+#-->  SystemDictionary
+" printNL ;
+
+#--  New Instances
+SystemDictionary newAs: "UpperCaseDictionary" ;
+SystemDictionary newAs: "LowerCaseDictionary" ;
+
+#-- New Protocol At String
+String 
+  define: 'UpperCaseDictionary' toBe: SystemDictionary UpperCaseDictionary .
+  define: 'LowerCaseDictionary' toBe: SystemDictionary LowerCaseDictionary .
+;
+
+String UpperCaseDictionary
+  at: "a" put: "A" .
+  at: "b" put: "B" .
+  at: "c" put: "C" .
+  at: "d" put: "D" .
+  at: "e" put: "E" .
+  at: "f" put: "F" .
+  at: "g" put: "G" .
+  at: "h" put: "H" .
+  at: "i" put: "I" .
+  at: "j" put: "J" .
+  at: "k" put: "K" .
+  at: "l" put: "L" .
+  at: "m" put: "M" .
+  at: "n" put: "N" .
+  at: "o" put: "O" .
+  at: "p" put: "P" .
+  at: "q" put: "Q" .
+  at: "r" put: "R" .
+  at: "s" put: "S" .
+  at: "t" put: "T" .
+  at: "u" put: "U" .
+  at: "v" put: "V" .
+  at: "w" put: "W" .
+  at: "x" put: "X" .
+  at: "y" put: "Y" .
+  at: "z" put: "Z" ;
+
+String LowerCaseDictionary
+  at: "A" put: "a" .
+  at: "B" put: "b" .
+  at: "C" put: "c" .
+  at: "D" put: "d" .
+  at: "E" put: "e" .
+  at: "F" put: "f" .
+  at: "G" put: "g" .
+  at: "H" put: "h" .
+  at: "I" put: "i" .
+  at: "J" put: "j" .
+  at: "K" put: "k" .
+  at: "L" put: "l" .
+  at: "M" put: "m" .
+  at: "N" put: "n" .
+  at: "O" put: "o" .
+  at: "P" put: "p" .
+  at: "Q" put: "q" .
+  at: "R" put: "r" .
+  at: "S" put: "s" .
+  at: "T" put: "t" .
+  at: "U" put: "u" .
+  at: "V" put: "v" .
+  at: "W" put: "w" .
+  at: "X" put: "x" .
+  at: "Y" put: "y" .
+  at: "Z" put: "z" ;
+
+String 
+
+defineMethod:
+[ | asUpperLowerWords |
+!word <- ^self  ;
+!list <- ^global List new ; 
+[ word count > 0 ]
+whileTrue:
+ [ !boundary <- 
+      (word drop: 1 . prefixNotSpannedBy: "ABCDEFGHIJKLMNOPQRSTUVWXYZ" . 
+        + 1 ) asInteger ;
+   list , (word take: boundary . capitalize ) ;
+   :word <- word drop: boundary ;
+ ] ;
+list
+] ;
+
+
+

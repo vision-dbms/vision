@@ -1,0 +1,38 @@
+# 
+
+####################
+#  This Script is Used To Install protocol added as part of upgrading
+#    to the federated 7.0 environment
+####################
+
+set scriptDir = $bootSource/protocol/rel7
+
+set comment = "Install Investment Core: Release 7 Protocol"
+echo "--->" $comment
+date
+
+$DBbatchvision -adU3 << @@@EOF@@@
+
+#--patch.pre7.core
+"$scriptDir/patch.core.613a" asFileContents evaluate ;
+"$scriptDir/patch.core.613b" asFileContents evaluate ;
+"$scriptDir/patch.core.613c" asFileContents evaluate ;
+"$scriptDir/patch.hostedSynch" asFileContents evaluate ;
+"$scriptDir/patch.core.global" asFileContents evaluate ;
+
+"$scriptDir/patch.pre7.smaster" asFileContents evaluate ;
+"$scriptDir/patch.pre7.iface" asFileContents evaluate ;
+"$scriptDir/patch.pre7.apps" asFileContents evaluate ;
+"$scriptDir/patch.pre7.schema" asFileContents evaluate ;
+"$scriptDir/patch.pre7.fed" asFileContents evaluate ;
+Schema processAllMessages ;
+
+#"$scriptDir/DEFpatch.core"  asFileContents evaluate ;
+#"$scriptDir/INITpatch.core" asFileContents evaluate ;
+#Schema processAllMessages ;
+
+Utility updateNetworkWithAnnotation: "$comment" ;
+?g
+
+
+

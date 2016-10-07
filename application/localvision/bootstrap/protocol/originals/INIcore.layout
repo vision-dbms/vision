@@ -1,0 +1,77 @@
+##################################################
+#   INIcore.layout -  LayoutTools ToolKit
+##################################################
+
+ToolKit createSubclass: "LayoutTools" ;
+Dictionary createSubclass: "Named" at: LayoutTools ;
+
+####################
+#  Specifications : 
+#     correspond to different styles of layout structures that
+#     describe an object that is "rendered" by an external layout
+#  Component :
+#     correspond to subcomponents of a specification object
+####################
+
+LayoutTools createSubclass: "Specification" at: LayoutTools ;
+LayoutTools createSubclass: "Component" at: LayoutTools ;
+
+####################
+#  TableSpec Classes
+####################
+LayoutTools Specification createSubclass: "TableSpec" at: LayoutTools ;
+
+#----------
+#  Set up Naming Dictionaries for TableSpec objects
+#----------
+LayoutTools Named createInstance: "TableSpec" ;
+LayoutTools TableSpec classDescriptor
+     setNamingDictionaryTo: LayoutTools Named TableSpec ;
+
+#----------
+#  Support Structures
+#----------
+LayoutTools Component createSubclass: "Label"      at: LayoutTools TableSpec ;
+LayoutTools Component createSubclass: "ColumnSpec" at: LayoutTools TableSpec ;
+
+
+####################
+#  FormSpec
+####################
+
+LayoutTools Specification createSubclass: "FormSpec" at: LayoutTools ;
+LayoutTools Named createInstance: "FormSpec" ;
+LayoutTools FormSpec classDescriptor
+     setNamingDictionaryTo: LayoutTools Named FormSpec ;
+LayoutTools Component createSubclass: "InputSpec" at: LayoutTools FormSpec ;
+
+####################
+#  GraphSpec Classes
+####################
+LayoutTools Specification createSubclass: "GraphSpec" at: LayoutTools ;
+LayoutTools GraphSpec createSubclass: "Piechart" at: LayoutTools ;
+LayoutTools GraphSpec createSubclass: "Barchart" at: LayoutTools ;
+LayoutTools GraphSpec createSubclass: "Linechart" at: LayoutTools ;
+
+#--------------------
+#  Set up Naming Dictionaries for GraphSpec objects
+#--------------------
+LayoutTools Named createInstance: "Piechart" ;
+LayoutTools Piechart classDescriptor
+     setNamingDictionaryTo: LayoutTools Named Piechart ;
+LayoutTools Named createInstance: "Barchart" ;
+LayoutTools Barchart classDescriptor
+     setNamingDictionaryTo: LayoutTools Named Barchart ;
+LayoutTools Named createInstance: "Linechart" ;
+LayoutTools Linechart classDescriptor
+     setNamingDictionaryTo: LayoutTools Named Linechart ;
+
+#----------
+#  Support Classes
+#----------
+LayoutTools Component createSubclass: "Label" at: LayoutTools GraphSpec ;
+LayoutTools Component createSubclass: "Axis" at: LayoutTools GraphSpec ;
+LayoutTools Component createSubclass: "Slice" at: LayoutTools Piechart ;
+LayoutTools Component createSubclass: "DataSet" at: LayoutTools Barchart ;
+LayoutTools Component createSubclass: "DataSet" at: LayoutTools Linechart ;
+

@@ -1,0 +1,117 @@
+####################
+#  patch.doOnce      : 2/10/2004
+#
+#  Created by: lcn
+#
+#  Description:
+#    these methods have been in the queue forever
+#
+#  Audit:
+#
+#  Implementation:
+#
+####################
+# core/builtin/patches - Patch Level 100
+
+# 12/03/05 - doh - Core protocol taken from patch.pre7.fed and patch.hostedSynch
+# Candidates for update are clients, cstat, mmibesd, etc (plus smaster and wscope)
+
+# $File: //depot/vision/applications/core/builtin/mainline/Object.doOnce $
+# $DateTime: 2006/11/18 17:34:30 $
+# $Revision: #2 $
+# $Author: dohara $
+
+"- " fill: 70 . printNL ;
+"  Loading patch.doOnce" printNL ;
+"  " print ; Utility UnixSeconds currentTime printNL ;
+"- " fill: 70 . printNL ;
+newLine print ;
+#======================================================================
+
+#--------------------
+#  doOnce, sendOnce
+#--------------------
+
+Prototypical Object
+
+defineMethod: [ | doOnce: block |
+    !thread <- ^current;
+    !local  <- ^local;
+    !date   <- ^date;
+    !self   <- ^self;
+    0 asReferenceTo: ^current. == ^current ifTrue: [
+        thread instanceList groupedBy: [date]. do: [
+            ^self super evaluate: [
+                groupList groupedBy: [local]. do: [
+                    ^self super asLocalContextFor: [
+                        groupList groupedBy: [self]. do: [
+                            ^self super basicDo: (groupList at: 1 . block)
+                        ];
+                    ];
+                ];
+            ];
+        ];
+    ];
+    :thread <- NA; :thread cleanStore; # remove circular reference
+    ^self
+] .
+
+defineMethod: [ | doOnceNoContext: block |
+    !thread <- ^current;
+    !self   <- ^self;
+    0 asReferenceTo: ^current. == ^current ifTrue: [
+        thread instanceList groupedBy: [self]. do: [
+            ^self super basicDo: (groupList at: 1 . block);
+        ];
+    ];
+    :thread <- NA; :thread cleanStore; # remove circular reference
+    ^self
+] .
+
+defineMethod: [ | sendOnce: block |
+    !thread <- ^current;
+    !local  <- ^local;
+    !date   <- ^date;
+    !self   <- ^self;
+    !result;
+    0 asReferenceTo: ^current. == ^current ifTrue: [
+        thread instanceList groupedBy: [date]. do: [
+            ^self super evaluate: [
+                groupList groupedBy: [local]. do: [
+                    ^self super asLocalContextFor: [
+                        groupList groupedBy: [self]. do: [
+                            !result <- ^self super basicSend: (groupList at: 1 . block);
+                            groupList do: [:result <- ^my result];
+                        ];
+                    ];
+                ];
+            ];
+        ];
+    ];
+    :thread <- NA; :thread cleanStore; # remove circular reference
+    result
+] .
+
+defineMethod: [ | sendOnceNoContext: block |
+    !thread <- ^current;
+    !self   <- ^self;
+    !result;
+    0 asReferenceTo: ^current. == ^current ifTrue: [
+        thread instanceList groupedBy: [self]. do: [
+            !result <- ^self super basicSend: (groupList at: 1 . block);
+            groupList do: [:result <- ^my result];
+        ];
+    ];
+    :thread <- NA; :thread cleanStore; # remove circular reference
+    result
+] .
+
+;
+#======================================================================
+
+newLine print ;
+"- " fill: 70 . printNL ;
+"  End of patch.doOnce" printNL ;
+"  " print ; Utility UnixSeconds currentTime printNL ;
+"- " fill: 70 . printNL ;
+newLine print ;

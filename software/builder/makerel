@@ -1,0 +1,22 @@
+#/bin/tcsh
+
+set unamed = `uname`_`uname -m`_`uname -r`
+set udated = `date +%Y%m%d`
+
+set releasedir = ~/vision/software/$udated/$unamed
+
+foreach d ( $releasedir $releasedir/bin $releasedir/lib )
+    if ( ! -e $d ) then
+	mkdir -p $d
+    else if ( ! -d $d ) then
+	echo "+++ '$d' exists and is not a directory."
+	exit 1
+    endif
+end
+
+cp -pf `find lib -type f` $releasedir/lib
+
+foreach f (*/make.rlist)
+    (cd `dirname $f`; source ./make.rlist)
+end
+

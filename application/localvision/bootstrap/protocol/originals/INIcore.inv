@@ -1,0 +1,95 @@
+##################################################
+#   Core Classes: Investment Application Layer
+#
+#  Run in OS3
+##################################################
+
+####################
+#  Entity Classes
+####################
+
+#--------------------
+#  Company and Security
+#--------------------
+Entity createSubclass: "Security" ;
+Security establishResidenceInSpaceOf: Environment DBA SecurityClass ;
+Entity createSubclass: "Company" ;
+Company establishResidenceInSpaceOf: Environment DBA CompanyClass ;
+
+#--------------------
+#  Account
+#--------------------
+
+Entity createSubclass: "Account" ;      
+Account establishResidenceInSpaceOf: Environment DBA AccountClass ;
+Account createSubclass: "Portfolio" ;
+Portfolio establishResidenceInSpaceOf: Environment DBA AccountClass ;
+Account createSubclass: "AggAccount" ;
+AggAccount establishResidenceInSpaceOf: Environment DBA AccountClass ;
+Account createSubclass: "IndexAccount" ;
+IndexAccount establishResidenceInSpaceOf: Environment DBA AccountClass ;
+Account createSubclass: "CompositeAccount" ;
+CompositeAccount establishResidenceInSpaceOf: Environment DBA AccountClass ;
+
+Security, Company, 
+Account, Portfolio, AggAccount, IndexAccount, CompositeAccount
+   send: [ classDescriptor ] .
+do: [ primaryStringCluster establishResidenceInSpaceOf: class ] ;
+
+#--------------------
+#  Classifications
+#--------------------
+Classification createSubclass: "Country" ;
+Classification createSubclass: "Industry" ;
+Classification createSubclass: "Sector" ;
+Classification createSubclass: "SecurityType" ;
+Classification createSubclass: "AssetCategory" ;
+
+#--------------------
+#  Misc Entity Classes
+#--------------------
+Entity createSubclass: "Analyst" ;
+Entity createSubclass: "Broker" ;
+
+#--------------------
+#  Support
+#--------------------
+Support createSubclass: "Frequency" ;
+Support createSubclass: "DataSeries" ;
+Support createSubclass: "DataType" ;
+
+####################
+#  Non-Entity Classes
+####################
+
+#--------------------
+#  LinkRecord
+#--------------------
+
+LinkRecord createSubclass: "Holding" .
+  addKeyOfType: Security . addKeyOfType: Account . addKeyOfType: Date ;
+
+LinkRecord createSubclass: "Component" at: CompositeAccount .
+  addKeyOfType: CompositeAccount . addKeyOfType: Account . addKeyOfType: Date;
+
+#--------------------
+#  DataRecord
+#--------------------
+DataRecord createSubclass: "DivRecord" ;
+DivRecord establishResidenceInSpaceOf: Environment DBA DataRecordClasses ;
+DataRecord createSubclass: "PriceRecord" ;
+
+#--------------------
+#  Multi-level TimeSeries Manager
+#--------------------
+ToolKit createSubclass: "MiscTools" ;
+MiscTools createSubclass: "TSGenerator" at: MiscTools ;
+
+#--------------------
+#  Pricing Record Management Support Classes
+#--------------------
+ToolKit createSubclass: "PriceTools" ;
+MiscTools TSGenerator createSubclass: "PriceTSGenerator" at: PriceTools ;
+
+
+

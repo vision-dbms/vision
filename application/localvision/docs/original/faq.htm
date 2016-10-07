@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision FAQ: Frequently Asked Questions</title>
+</head>
+<body bgcolor=white background="indexpaper.jpg">
+
+<center>
+<img src="insyte.gif" alt="Insyte Logo" border=0 width=150 height=57>
+</center>
+<hr>
+
+<center><table>
+<tr><th><i><font size=+2>Vision Online</font></i>
+</table></center>
+<hr>
+
+<center><table>
+<tr><th><i><font size=+2>VisionFAQ: Frequently Asked Questions</font></i>
+</table></center>
+<hr>
+
+<h3>Syntax Problems</h3>
+<ul type="disk">
+<li><a href="faq.htm#print">Method Does Not Print</a>
+<li><a href="faq.htm#calculation">Printing Wrong Value In Calculation</a>
+<li><a href="faq.htm#snf"><i>Selector Not Found </i> message for <i>select: do:</i></a>
+</ul>
+
+<h3>Message Usage</h3>
+<ul type="disk">
+<li><a href="faq.htm#sorting">Multiple Sorts</a><br>
+<li><a href="faq.htm#list">Displaying messages for a Collection Element</a><br>
+<li><a href="faq.htm#current sector">Grouping List into a range of values</a><br>
+<li><a href="faq.htm#rating">Grouping elements by string values</a><br>
+<li><a href="faq.htm#showMessages">Sending <i>showMessages</i> message to a list</a><br>
+</ul>
+
+<h3>Techniques</h3>
+<ul type="disk">
+<li><a href="faq.htm#^my">Using <i>^my</i> to copy variables</a>
+</ul>
+
+<a href="mailto:insytenet@istvision.com"><h3>E-Mail Your Questions To Insyte</h3></a> 
+<hr>
+<p>
+
+<a name="print"><i><b>I defined a method to compute the price-earnings ratio and it does 
+not print anything.  What did I do wrong?</i></b></a>
+<p>
+
+The most likely problem is that you terminated your method with the ; character 
+so it is not returning anything.  For example, the method:
+
+<ul>
+<pre><b>
+Company defineMethod: [ | peRatio | price / earningsPerShare ; ] 
+</b></pre>
+</ul>
+
+would perform the calculation but not return the value.  
+Remove the terminating ; character and the result of the calculation 
+will be returned.
+<p>
+See: <a href="clNA.htm#novalue">The noValue Value</a>
+<hr>
+<p>
+
+<a name="calculation"><i><b>I am printing the result of a ratio calculation 
+and the value printed is the value of the last item in the calculation.  
+What happened to the calculation?</i></b></a>
+
+<p>
+This is probably a precedence order problem.  For example, the program:
+
+<ul>
+<pre><b>
+myList 
+do: [ price / earningsPerShare printNL ; 
+    ] ; 
+</b></pre>
+</ul>
+
+will print the value of <i>earningsPerShare</i>.  Because <i>unary</i> messages 
+are evaluated before <i>binary</i> messages, the value is printed prior to 
+performing the calculation.  The results of the calculation are lost in this case.  
+You could use either one of the following programs to print the correct value:
+
+<ul>
+<pre><b>
+myList 
+do: [ (price / earningsPerShare) printNL ; 
+    ] ; 
+</b></pre>
+</ul>
+
+or
+
+<ul>
+<pre><b>
+myList 
+do: [ price / earningsPerShare printNL: 10 ; 
+    ] ; 
+</b></pre>
+</ul>
+<p>
+See: <a href="Syntax.htm#order">Precedence Order</a>
+<hr>
+<p>
+
+<a name="snf"><i><b>I am getting the <b>Selector Not Found</b> message for 
+<b>select: do:</b>.  What does this mean?</i></b></a>
+<p>
+
+You are most likely missing a <i>.</i> character after the <i>select:</i> block.  
+The program:
+
+<ul>
+<pre><b>
+myList select: [ sales > 25000 ]         # <--  . omitted 
+       do: [ ticker printNL ] ; 
+</b></pre>
+</ul>
+
+would produce this error message.  The correct expression is:
+
+<ul>
+<pre><b>
+myList select: [ sales > 25000 ] . 
+  do: [ticker printNL]; 
+</b></pre>
+</ul>
+
+The program:
+
+<ul>
+<pre><b>
+"Automotive" take: 4. concat: " Industry" 
+                 #  ^ this dot needs to be preceded by a space 
+</b></pre>
+</ul>
+
+illustrates a common variation of this problem.  In this case the 
+<i>.</i> character following the number 4 is interpretted as part of the 
+number so the <i>Selector Not Found</i> message indicates that 
+<i>take:concat:</i> is not defined.  The correct form of this expression 
+is:
+
+<ul>
+<pre><b>
+"Automotive" take: 4 . concat: " Industry" 
+</b></pre>
+</ul>
+<p>
+See: <a href="Syntax.htm#dot">The dot operator</a>,
+<a href="clCollect.htm#dot">The . and Collections</a>
+<hr>
+<p>
+
+<a name="sorting"><i><b>I want to sort my list from highest to lowest score and then 
+alphabetically for ties.  How do I do this?</i></b></a>
+<p>
+
+The <a href="mList.htm#sortUpBy:then:"><i>sortUpBy:then:</i></a> and 
+<a href="mList.htm#sortDownBy:then:"><i>sortDownBy:then:</i></a> messages do not 
+work in this case because you want one of your sorts to be ascending 
+and one descending.  To accomplish this, you need to take advantage of 
+the fact that the sort messages produce "stable" sorts.  This means 
+that when a sort message is applied to a list, the original order of 
+the list is preserved if the sort produces a tied value.  If you apply
+several sort criteria in reverse order (i.e., the most detailed level 
+of sort first), you can produce the desired results.  For example, 
+the expression:
+
+<ul>
+<pre><b>
+myList 
+   sortUp: [ name ] . 
+   sortDown: [ score ] 
+</b></pre>
+</ul>
+
+first sorts <i>myList</i> alphabetically by name.  This list is then sorted 
+from highest to lowest score.  Any score values that are ties preserve the 
+order of the alphabetical list.  As a result, the list is sorted in the desired order.
+<p>
+See: <a href="clCollect.htm#sorts">Sorting Collections</a>
+<hr>
+<p>
+
+
+
+<a name="list"><i><b>How do I group my list into ranges of values?</i></b></a>
+<p>
+
+The message <a href="mList.htm#groupedBy:usingCutoffs:"><i>groupedBy: usingCutoffs:</i></a>
+was designed for this purpose.  The first <i>parameter</i> is the block 
+used to evaluate the list elements; the second <i>parameter</i> is a 
+list of cutoff points to be used to indicate the range boundaries.  
+For example, to group the company master list into price-earnings ratio 
+ranges of < 0, 0-5, 5-10, 10-20, and > 20 you would use:
+
+<ul>
+<pre><b>
+Company masterList 
+   groupedBy: [ price / earningsPerShare ] 
+    usingCutoffs: 0, 5, 10, 20 
+</b></pre>
+</ul>
+
+This expression returns a list whose elements correspond to the five buckets 
+created (one for each range).  Each element of this returned list is extended 
+by the variables <i>lowerBoundary</i>, <i>upperBoundary</i>, 
+<i>categoryNumber</i>, and <i>groupList</i>.  The message <i>lowerBoundary</i>
+returns the lower limit of the range (or NA if it is the first element).  
+The message <i>upperBoundary</i> returns the upper limit of the range 
+(or NA if it is the last element).  The message <i>categoryNumber</i> 
+identifies the group (in this case a number from 1 to 5).  The <i>groupList</i> 
+message returns the list of original elements falling in this group.
+<p>
+
+The following program performs the grouping and displays the results in 
+a useful format:
+
+<ul>
+<pre><b>
+Company masterList 
+   groupedBy: [ price / earningsPerShare ] 
+   usingCutoffs: 0, 5, 10, 20 . 
+do: [ lowerBoundary isntNA 
+      ifTrue: 
+        [ 
+         upperBoundary isntNA 
+         ifTrue: [ lowerBoundary print: 3 ; "-" print ; 
+                   upperBoundary print: -3 ; 
+                 ] 
+         ifFalse: [ " > " print ; lowerBoundary print: -4; ]; 
+        ] 
+      ifFalse: [ " < " print ; upperBoundary print: -4 ; ] ; 
+      groupList count printNL ; 
+    ] ; 
+</b></pre>
+</ul>
+<hr>
+<p>
+
+<a name="current sector"><i><b>I am trying to find all the elements in a 
+<b>groupList</b> that are in the current sector and the list is always 
+empty even though I know there are matches.  Why?</i></b></a>
+<p>
+
+Your program probably looks something like this:
+
+<ul>
+<pre><b>
+myList groupedBy: [ industry sector ] . 
+do: [ !currentSector <- ^self ; 
+      currentSector code print: 10 ; 
+      groupList count print ; 
+      groupList select: [ industry sector = ^my currentSector ] . 
+          count printNL ; 
+    ] ; 
+</b></pre>
+</ul>
+
+Since all the elements in <i>groupList</i> should be in the 
+<i>currentSector</i> by definition, you would expect the two counts to 
+be the same.  In actuality, the second count is 0.  The selection criteria 
+compares the value of industry sector to the object <i>^my currentSector</i>. 
+Because <i>currentSector</i> was created as the result of a 
+<i>groupedBy: operation</i>, it is really an extension of a Sector object.  
+As a result, the two objects are not equal.  
+<p>
+
+The following programs offer two alternatives that will both produce 
+correct results:
+<ul>
+<pre><b>
+myList groupedBy: [ industry sector ] . 
+do: [ !currentSector <- ^self ; 
+      currentSector code print: 10 ; 
+      groupList count print ; 
+      groupList 
+         select: [ industry sector code = ^my currentSector code ] . 
+         count printNL ; 
+    ] ; 
+</pre></b>
+</ul>
+
+or
+
+<ul>
+<pre><b>
+myList groupedBy: [ industry sector ] . 
+do: [ !currentSector <- ^self ; 
+      currentSector code print: 10 ; 
+      groupList count print ; 
+      groupList select: [ industry sector = ^my currentSector asSelf ] . 
+          count printNL ; 
+    ] ; 
+</b></pre>
+</ul>
+
+The <a href="mObject.htm#asSelf"><i>asSelf</i></a> message strips 
+any extensions off the object and returns the "pure" sector object.
+<p>
+See: <a href="Classes.htm#hierarchy">Instance Hierarchy</a>,
+<a href="clObject.htm#extensions">Object Extensions</a>
+<hr>
+<p>
+
+<a name="rating"><i><b>I created a property 'rating' for company and assigned the values 
+A, B, or C to some instances.  When I group my company list by rating, 
+there are several groups with the same rating.  Why?</i></b></a>
+<p>
+
+The grouping operation groups objects into unique buckets.  If you 
+assigned your ratings using two distinct string objects that both contained 
+the contents A, they would group into distinct buckets.  This would happen 
+if you assign the values in different executions.  For example, if you execute 
+the expression:
+
+<ul>
+<pre><b>
+Named Company GM :rating <- "A" ; 
+</b></pre>
+</ul>
+
+and then execute the expression:
+
+<ul>
+<pre><b>
+Named Company IBM :rating <- "A" ; 
+</b></pre>
+</ul>
+
+in a separate execution, the ratings will not be grouped together.  To 
+perform this assignment correctly, you could create class constants that 
+represent each rating as illustrated below:
+
+<ul>
+<pre><b>
+Company define: 'ratingA' toBe: "A" ; 
+Company define: 'ratingB' toBe: "B" ; 
+Named Company GM do: [ :rating <- ratingA ] ; 
+Named Company IBM do: [ :rating <- ratingA ] ; 
+</b></pre>
+</ul>
+
+In this case, the two companies would appear in the same group since the 
+rating value is identical for both of them.  Alternatively, you could create 
+a new class of rating values and assign each value to an entry in this table 
+as illustrated below:
+
+<ul>
+<pre><b>
+Entity createSubclass: "Rating" ;       #-- code and name available 
+Rating createInstance: "A" ; 
+Rating createInstance: "B" ; 
+Rating createInstance: "C" ; 
+Named Company GM :rating <- Named Rating A ; 
+Named Company IBM :rating <- Named Rating A ; 
+</b></pre>
+</ul>
+
+In this case, you can also correctly group by the rating object.
+<p>
+
+The previous example often introduces a common programming 
+inefficiency.  Instead of grouping by the rating, users will 
+often group by the rating code value.  For example, the expressions:
+
+<ul>
+<pre><b>
+Company masterList 
+groupedBy: [ industry code ] . 
+do: [ print ; groupList count printNL ] ; 
+</b></pre>
+</ul>
+
+and
+
+<ul>
+<pre><b>
+Company masterList 
+groupedBy: [ industry ] . 
+do: [ print ; groupList count printNL ] ; 
+</b></pre>
+</ul>
+
+appear to work identically.  The inefficiency arises if you wish to access 
+additional information about the industry.  For example, the two approaches 
+are used below to also display the industry's name:
+
+<ul>
+<pre><b>
+#---  Group by industry code and also display the name 
+Company masterList 
+groupedBy: [ industry code ] . 
+do: [ #-- ^self is the string value of code at this point 
+      #--  you need to look up the code in the industry dictionary 
+      !ind <- ^global Named Industry at: ^self ; 
+      ind code print: 10 ; 
+      ind name print: 30 ; 
+      groupList count printNL ; 
+    ] ; 
+</b></pre>
+</ul>
+
+and
+
+<ul>
+<pre><b>
+#---  Group by industry and also display the name 
+Company masterList 
+groupedBy: [ industry ] . 
+do: [ #-- ^self is the industry at this time 
+      #--  code and name are both directly available 
+      code print: 10 ; 
+      name print: 30 ; 
+      groupList count printNL ; 
+    ] ; 
+</b></pre>
+</ul>
+
+The second approach is much cleaner than the first.
+<p>
+The <a href="mList.htm#groupedByString:"><i>groupedByString</a></i>
+message can be used instead of <i>groupedBy:</i> to perform this query correctly.
+<p>
+See: <a href="clCollect.htm#groups">Grouping Collections</a>
+<hr>
+<p>
+
+<a name="showMessages"><i><b>When I send the <b>&quotshowMessages&quot</b> message to a list 
+I get the set of messages that all lists respond to.  
+How do I know what the elements of the list respond to?</i></b></a>
+<p>
+
+You really want the list of messages associated with the elements of the list.  
+You could execute the <i>showMessages</i> message inside the list using:
+
+<ul>
+<pre><b>
+myList do: [ ^self showMessages ] ; 
+
+#-- Note: omitting the ^self will display the messages defined 
+#--       inside the block - not what you want 
+</b></pre>
+</ul>
+
+This technique will work but generates the output for all elements in the 
+list.  Since many or all of the list elements are probably from the same 
+class, this produces a good deal of extraneous output.  Assuming all the 
+elements are from the same class, the expression:
+
+<ul>
+<pre><b>
+myList at: 1 . showMessages 
+</b></pre>
+</ul>
+
+can be used to display the messages to which any element of the list 
+will respond.  To see what classes are actually present in the list, use 
+the expression:
+
+<ul>
+<pre><b>
+myList groupedBy: [ whatAmI ] . 
+    do: [ ^self print: 50 ; groupList count printNL ] ; 
+</b></pre>
+</ul>
+
+<hr>
+<p>
+
+<a name="^my"><i><b>When and why do you have to copy variables using ^my?</i></b></a>
+<p>
+
+Because the magic word <i>^my</i> can only "reach back" one level of 
+context, you need to copy variables when you create many nested context 
+levels that all need access to information from prior levels.  This 
+usually happens when you perform many nested list or time series operations.  
+For example, you could define a local variable x at each level of a 3-level 
+grouping and display each of the values using the program:
+
+<ul>
+<pre><b>
+myList quintileDown: [ sales ] . 
+groupedBy: [ quintile ] . 
+do: [ !level1 <- ^current ; 
+      !x <- 1 ; 
+      groupList groupedBy: [ industry sector ] . 
+      do: [ !level2 <- ^current ; 
+            !level1 <- ^my level1 ; 
+            !x <- 2 ; 
+            groupList groupedBy: [ industry ] . 
+            do: [ !level3 <- ^current ; 
+                  !level2 <- ^my level2 ; 
+                  !level1 <- ^my level1 ; 
+                  !x <- 3 ; 
+                  groupList 
+                  do: [ !x <- quintile ; 
+                        ticker print: 10 ; 
+                        x print ; 
+                        ^my level1 x print ; 
+                        ^my level2 x print ; 
+                        ^my level3 x print ; 
+                        newLine print ; 
+                      ] ; 
+                ] ; 
+          ] ; 
+    ] ; 
+</b></pre>
+</ul>
+
+This program will display the values for x from each level for each 
+company in each group.  The actual values printed will be the same for 
+all companies (i.e., 1, 2, and 3).
+<p>
+See: <a href="Execution.htm#my">The Magic Word ^my</a>
+<hr>
+<table border="0" width="100%">
+<tr>
+<td align="left"><font size="-1">Copyright &copy; 1999 Innovative Systems Techniques, Inc.</font>
+<td align="right"><font size="-1">Updated January 28, 1999</font>
+</table>
+
+<hr>
+
+<font size=-1><Center> 
+| <a href="index.htm">Home</a> 
+| <a href="abtinsyt.htm">About Insyte</a> |
+<br>
+| <a href="vonline.htm">Vision On-line</a> 
+| <a href="visiontech.htm">Vision Technology</a>
+| <a href="vpma.htm">Investment Managers</a>  
+| <a href="trowestory.htm">Client Spotlight</a>
+| <a href="findus.htm">Find Us</a>
+| <a href="mailto:insytenet@istvision.com">E-Mail Insyte</a> |
+<br>
+| <a href="toc.htm">Table of Contents</a> |
+
+</center></font>
+
+
+</body></html>

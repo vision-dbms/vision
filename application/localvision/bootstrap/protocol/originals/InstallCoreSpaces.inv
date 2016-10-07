@@ -1,0 +1,47 @@
+# 
+
+####################
+#  This Script is Used To Create Separate Object Spaces to
+#     store the data associated with core Entity investment classes.
+####################
+
+setenv VisionAdm 1 
+
+echo " " 
+echo " " 
+echo "        ***  Installing Investment Core Spaces  ***"
+date
+echo " "
+
+$DBbatchvision << @@@EOF@@@
+  Environment MaintenanceTools
+      setupSpaceFor: "SecurityClass"
+      as: "DBA"
+      description: "Storage for Security Properties" ;
+  Utility createSpaceInNetworkWithAnnotation: "Security Space Setup" ;
+?g
+@@@EOF@@@
+
+$DBbatchvision << @@@EOF@@@
+  Environment MaintenanceTools
+      setupSpaceFor: "CompanyClass"
+      as: "DBA"
+      description: "Storage for Company Properties" ;
+  Utility createSpaceInNetworkWithAnnotation: "Company Space Setup" ;
+?g
+@@@EOF@@@
+
+$DBbatchvision << @@@EOF@@@
+  Environment MaintenanceTools
+      setupSpaceFor: "AccountClass"
+      as: "DBA"
+      description: "Storage for Account Properties" ;
+  Utility createSpaceInNetworkWithAnnotation: "Account Space Setup" ;
+?g
+@@@EOF@@@
+
+echo "===> Investment Core Space Installation" `date` >> $NDFJournal
+echo " " 
+echo "        ***  End Of Investment Core Object Spaces  ***"
+date
+

@@ -1,0 +1,44 @@
+###
+# order.builtin
+###
+
+# The script adds full core/builtin protocol to empty bootstrap.
+
+^tmp define: 'upgradeDir'
+     toBe: (ProcessControlTools getEnvFor: "osvAdmin"  
+             . concat: "/localvision/bootstrap/protocol/upgrades") ;
+
+^tmp upgradeDir concat: "/builtin/DEFpatch.core" . asFileContents evaluate ;
+^tmp upgradeDir  concat: "/builtin/INIcore.controls" . asFileContents evaluate;
+^tmp upgradeDir   concat: "/builtin/DEFcore.controls" . asFileContents evaluate ;
+
+#- Add builtin modules to PatchTable.
+^tmp upgradeDir   concat: "/builtin/INITpatch.builtin" . asFileContents evaluate ;
+  
+#- Add Builtin Protocol
+^tmp upgradeDir   concat: "/builtin/Object.bi" . asFileContents evaluate ;
+^tmp upgradeDir   concat: "/builtin/NA.bi" . asFileContents evaluate ;
+^tmp upgradeDir   concat: "/builtin/String.bi" . asFileContents evaluate ;
+^tmp upgradeDir   concat: "/builtin/Number.bi" . asFileContents evaluate ;
+^tmp upgradeDir   concat: "/builtin/Integer.bi" . asFileContents evaluate ;
+^tmp upgradeDir   concat: "/builtin/Boolean.bi" . asFileContents evaluate ;
+^tmp upgradeDir   concat: "/builtin/Time.bi" . asFileContents evaluate ;
+^tmp upgradeDir   concat: "/builtin/Date.bi" . asFileContents evaluate ;
+^tmp upgradeDir   concat: "/builtin/List.bi" . asFileContents evaluate ;
+^tmp upgradeDir   concat: "/builtin/IndList.bi" . asFileContents evaluate ;
+^tmp upgradeDir   concat: "/builtin/TS.bi" . asFileContents evaluate ;
+^tmp upgradeDir   concat: "/builtin/DataItem.bi" . asFileContents evaluate ;
+^tmp upgradeDir   concat: "/builtin/Collect.bi" . asFileContents evaluate ;
+^tmp upgradeDir   concat: "/builtin/Entity.bi" . asFileContents evaluate ;
+^tmp upgradeDir   concat: "/builtin/Util.bi" . asFileContents evaluate ;
+
+
+#- Add Extended Core
+^tmp upgradeDir   concat: "/builtin/EXTcore.DEF" . asFileContents evaluate ;
+
+#- Add Other Core Classes
+^tmp upgradeDir   concat: "/builtin/Dict.core" . asFileContents evaluate ;
+
+^tmp upgradeDir   concat: "/builtin/Statistic.core" . asFileContents evaluate ;
+
+

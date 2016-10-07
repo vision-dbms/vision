@@ -1,0 +1,29 @@
+"
+####################
+#  ToolKit and Related Protocol
+####################
+
+" print ;
+
+ToolKit 
+   defineFixedProperty: 'description' .
+   defineFixedProperty: '_briefDescription' .
+
+defineMethod:
+[ | setDescriptionTo: string | 
+  ^self :description <- string ;
+  ^self
+] .
+
+defineMethod: [ | setBriefDescriptionTo: string | 
+  :_briefDescription <- string ;
+  ^self
+] .
+;
+
+ToolKit defineMethod: [ | briefDescription | 
+  ^self _briefDescription 
+    else: [ ^self description else: "" . to: "." ]
+] ;
+
+

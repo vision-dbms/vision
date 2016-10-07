@@ -1,0 +1,2834 @@
+##################################################
+#  Define core protocol for Investment classes
+##################################################
+
+#========================================
+#  Special Prototocol
+#========================================
+
+####################
+#  MiscTools TSGenerator
+####################
+
+MiscTools TSGenerator
+   define: 'ts' .
+   defineMethod: [ | newTS | ^self new :ts ] ;
+
+
+#==================================================
+
+
+####################
+#  Security
+####################
+
+#--------------------
+#  Standard XRef Dictionaries
+#--------------------
+
+Security createXRef: "Cusip" withProperty: "cusip" ;
+Security createXRef: "CanCusip" withProperty: "canCusip" ;
+Security createXRef: "Sedol" withProperty: "sedol" ;
+Security createXRef: "Valor" withProperty: "valor" ;
+Security createXRef: "Isin" withProperty: "isin" ;
+
+#--------------------
+#  Properties, initializations, and cleanups
+#--------------------
+
+Security
+
+   defineFixedProperty: 'company' withDefault: Company .
+   defineFixedProperty: 'type' withDefault: SecurityType .
+
+   defineFixedProperty: 'ticker' .
+   defineMethod: [ | id | ticker else: code ] .
+
+   define: 'adjustmentFactor' withDefault: 1.0 .
+   define: 'rawSplitFactor' .
+
+   define: 'pricingSeries' .
+   define: 'dividendSeries' withDefault: DivRecord .
+   define: '_sharesOut' .
+
+   define: 'holdingsPrototype' toBe: List new .
+   define: 'holdingsSeries' .
+;
+
+#----------
+
+Security defineMethod: [ | initialize | 
+  ^super initialize ;
+  :ticker <- code ;
+  :pricingSeries <- ^global PriceTools PriceTSGenerator :ts ;
+  :holdingsSeries <- holdingsPrototype ;
+  ^self
+] ;
+
+Security defineMethod: [ | cleanupLocalNames | 
+  cusip isString ifTrue: [ XRef Cusip delete: (cusip take: 8 ) ] ;
+  sedol isString ifTrue: [ XRef Sedol delete: (sedol take: 6 ) ] ;
+  ^super cleanupLocalNames ;
+  ^self
+]  ;
+
+#----------
+
+Security createInitializationListFrom: NA ;
+Security updateInitializationListWith: [ :baseCurrency ] ;
+
+Security
+do: [ 
+    :baseCurrency <- ^global Currency ; 
+    ^self initialize ;
+    ] ;
+
+#--------------------
+#  Aliases and Company Links
+#--------------------
+
+Security defineMethod: [ | createAndLink: id |
+  !sec <- ^self named at: id .
+     else: [ ^self createInstance: id ] ;
+  !comp <- ^global Company locateId: id .
+     else: [ ^global Company createInstance: id ] ;
+  sec :company <- comp ;
+  comp primarySecurity isDefault
+    ifTrue: [ comp :primarySecurity <- sec ] ;
+  sec
+] ;
+
+Security defineMethod: [ | setCompanyTo: comp | 
+#--  This method should be used to set company for the first time
+#--    or to change a company that has been manual set; security/company
+#--    pairs that are created will have identical code values and
+#--    should not be reset because you may lose all aliases at company
+  code != company code     #-- if security/company have same code, donot reset
+  ifTrue:
+    [
+    !newComp <- comp isCompany
+        ifTrue: [ comp asSelf ] .
+        elseIf: comp isString 
+          then: [ ^global Company locateId: comp ] ;
+#--  If the company has changed, remove this security's aliases from
+#--     its old company, reassign the company, and add this aliases
+#--     to the new company.  If the company does not currently have
+#--     a primarySecurity, this security is it.
+    newComp isCompany && newComp != company 
+    ifTrue:
+      [ company deleteAlias: aliases ;     
+        :company <- newComp ;
+        company isntDefault
+        ifTrue:
+          [
+          aliases do: [ ^my company addAlias: ^self ] ; 
+          company primarySecurity isDefault
+            ifTrue: [ company setPrimarySecurityTo: ^self asSelf ] ;
+          ] ;  
+      ] ;
+    ] ;
+  ^self
+] ;
+
+Security defineMethod: [ | resetCompany | 
+  ^self setCompanyTo: defaultInstance company
+] ;
+
+#----------
+
+Security defineMethod:  [| locateId: id|
+^super locateId: id .
+   elseIf: [id isString && [ (id count = 8 || id count = 9 ) ]  ]
+     then: [ XRef Cusip at: id . else: ( XRef Cusip at: (id take: 8))] .
+   elseIf: [ id isString && [ ( id count = 7 || id count = 6) ] ] 
+     then: [ XRef Sedol at: id . else: ( XRef Sedol at: (id take: 6))] .
+     else: [XRef CanCusip at: id].
+     else: [XRef Valor at: id].
+    else: [XRef Isin at: id] 
+];
+
+Security defineMethod: [ | addAlias: string | 
+  ^super addAlias: string ; 
+#--  only add alias to non-default company; since this can be
+#--    run prior to default company link being established, also
+#--    check that company is a company
+  company isCompany && company isntDefault
+     ifTrue: [ company addAlias: string ] ;
+  ^self
+] ;
+
+Security defineMethod: [ | deleteAlias: string | 
+  ^super deleteAlias: string ;
+  company deleteAlias: string ;
+  ^self
+] ;
+
+Security defineMethod: [ | resetCodeTo: string | 
+string isntDefault ifTrue:
+  [
+#--  if code and company code are the same, they should both be changed;
+#--     new code is also added as alias
+  code = company code
+     ifTrue: [ company :code <- company getClusteredString: string ] ;
+  :code <- ^self getClusteredString: string ;
+  ^self addAlias: string ; 
+  ] ;
+  ^self
+] ;
+
+#----------
+
+Security defineMethod: [ | cusip8 | 
+  cusip isString && [ cusip count >= 8 ] 
+      ifTrue: [ cusip take: 8 ] 
+] ;
+
+Security defineMethod: [ | setCusipTo: string | 
+  string isntDefault ifTrue:
+  [
+  cusip isntNA && [ (code take: 8) = (cusip take: 8) ]
+    ifTrue: [ ^self resetCodeTo: string ] ;     #- adds as Alias as well
+  ^self setXRefIn: XRef Cusip to: string ; 
+  ^self addAlias: cusip8 toXRefIn: XRef Cusip ;
+  ^self addAlias: cusip ;
+  ^self addAlias: cusip8 ;
+  ] ;
+  ^self
+] ;
+
+Security defineMethod: [ | resetCusipTo: string | 
+  ^self deleteAlias: cusip8, cusip ;
+  XRef Cusip delete: cusip ;
+  XRef Cusip delete: cusip8 ;
+  :cusip <- NA ; 
+  ^self setCusipTo: string 
+] ;
+ 
+Security defineMethod: [ | canCusip8 | 
+  canCusip isString && [ canCusip count >= 8 ] 
+      ifTrue: [ canCusip take: 8 ] 
+] ;
+
+Security defineMethod: [ | setCanCusipTo: string | 
+  string isntDefault ifTrue:
+  [
+  !id <- "c" concat: string ; 
+  canCusip isntNA && [ code drop: 1 . = canCusip ] 
+    ifTrue: [ ^self resetCodeTo: id ] ;     #- adds as Alias as well
+  ^self setXRefIn: XRef CanCusip to: string ; 
+  ^self addAlias: canCusip8 toXRefIn: XRef CanCusip ;
+  ^self addAlias: id ;
+  ^self addAlias: (id take: 9) ;
+  ] ;
+  ^self
+] ;
+
+Security defineMethod: [ | resetCanCusipTo: string | 
+  !id <- "c" concat: canCusip ;
+  XRef CanCusip delete: canCusip ;
+  XRef CanCusip delete: canCusip8 ;
+  :canCusip <- NA ; 
+  ^self deleteAlias: id, (id take: 9) ;
+  ^self setCanCusipTo: string 
+] ;
+ 
+Security defineMethod: [ | sedol6 | 
+  sedol isString && [ sedol count >= 6 ] 
+      ifTrue: [ sedol take: 6 ] 
+] ;
+
+Security defineMethod: [ | setSedolTo: string | 
+  string isntDefault ifTrue:
+  [
+  sedol isntNA && [ (code take: 6) = (sedol take: 6) ]
+    ifTrue: [ ^self resetCodeTo: string ] ;     #- adds as Alias as well
+  ^self setXRefIn: XRef Sedol to: string ; 
+  ^self addAlias: sedol6 toXRefIn: XRef Sedol ;
+  ^self addAlias: sedol ; 
+  ^self addAlias: sedol6 ;
+  ] ;
+  ^self
+] ;
+
+Security defineMethod: [ | resetSedolTo: string | 
+  XRef Sedol delete: sedol ;
+  XRef Sedol delete: sedol6 ;
+  ^self deleteAlias: sedol, sedol6 ;
+  :sedol <- NA ; 
+  ^self setSedolTo: string 
+] ;
+ 
+Security defineMethod: [ | setValorTo: string | 
+  string isntDefault ifTrue:
+  [
+  !id <- "v" concat: string ; 
+  valor isntNA && [ code drop: 1 . = valor ] 
+    ifTrue: [ ^self resetCodeTo: id ] ;     #- adds as Alias as well
+  ^self setXRefIn: XRef Valor to: string ; 
+  ^self addAlias: id ;
+  ] ;
+  ^self
+]  ;
+
+Security defineMethod: [ | resetValorTo: string | 
+  XRef Valor delete: valor ;
+  ^self deleteAlias: ("v" concat: valor) ;
+  :valor <- NA ; 
+  ^self setValorTo: string 
+] ;
+ 
+Security defineMethod: [ | setIsinTo: string | 
+  string isntDefault ifTrue:
+  [
+  isin isntNA && [ code = isin ]
+    ifTrue: [ ^self resetCodeTo: string ] ;     #- adds as Alias as well
+  ^self setXRefIn: XRef Isin to: string ; 
+  ^self addAlias: isin ; 
+  ] ;
+  ^self
+] ;
+
+Security defineMethod: [ | resetIsinTo: string | 
+  XRef Isin delete: isin ;
+  ^self deleteAlias: isin ;
+  :isin <- NA ; 
+  ^self setIsinTo: string 
+] ;
+ 
+Security defineMethod: [ | setTickerTo: string |
+  string isntDefault
+  ifTrue:
+    [ :ticker <- ^self getClusteredString: string; 
+      ^self addAlias: ticker ; 
+    ] ;
+^self
+] ;
+
+Security defineMethod: [ | setTypeTo: sectype |
+  :type <- sectype;
+  type isString ifTrue:
+    [ :type <- ^global Named SecurityType uniformAt: sectype ];
+  ^self
+] ;
+
+#--------------------
+#  split/currency adjustments
+#--------------------
+
+Security defineMethod: [ | addSplitFactorOf: aFactor onExDate: aDate |
+  aDate evaluate:
+   [
+   :rawSplitFactor put: aFactor asDouble;
+   :adjustmentFactor put: (:adjustmentFactor lag: 1 days . * rawSplitFactor ) ;
+   ] ;
+  ^self
+] ;          #  addSplitFactorOf: onExDate:
+
+Security defineMethod: [ | rebuildAdjustmentFactor |
+  :adjustmentFactor deleteAllPoints; 
+  :adjustmentFactor asOf: 10101 put: 1.0 ;
+  :rawSplitFactor runningTotal: [ ^self log ] .
+  do: [ ^my :adjustmentFactor put: runningTotal exp ] ;
+] ;
+
+Security defineMethod: [ | adjustmentRelativeTo: aDate |
+  aDate isntNA 
+  ifTrue: 
+    [ 
+    (:adjustmentFactor asOf: ^today ) / (:adjustmentFactor asOf: aDate ) 
+    ]
+  ifFalse: [ 1.0 ] 
+] ;          #  adjustmentRelativeTo:
+
+Security defineMethod: [ | getAdjustedDataFor: aTimeSeries |
+aTimeSeries value /
+   (^self adjustmentRelativeTo: aTimeSeries effectiveDate)
+] ;          #  getAdjustedDataFor: 
+
+Security defineMethod: [ | getAdjustedSharesDataFor: aTimeSeries |
+aTimeSeries value *
+    (^self adjustmentRelativeTo: aTimeSeries effectiveDate)
+] ;          #  getAdjustedSharesDataFor: 
+
+#-----------
+#  shares, prices, volume, dividends
+#----------
+
+Security defineMethod: [ | sharesOut | 
+  ^self getAdjustedSharesDataFor: :_sharesOut 
+] ;
+
+Security defineMethod: [ | getPriceRecord | 
+  !series <- ^self pricingSeries firstDate > ^date
+    ifTrue: [ ^self :pricingSeries lag: 1 yearEnds ]
+   ifFalse: [ ^self pricingSeries ] ;
+  !record <- series value; 
+  record isntNA 
+     ifTrue: [ record ] ifFalse: [ ^global PriceTools PriceRecord ]
+] ;
+
+Security defineMethod: [ | prices | 
+  !sec <- ^self ;
+  !ts <- ^global TimeSeries new ;
+  :pricingSeries 
+  do: [ 
+        !ts <- ^my ts ;
+        ^self do: [ ^my ts put: ^self ] ;
+      ] ;
+  ts 
+] ;
+
+Security defineMethod: [ | price | ^self getPriceRecord price ] ;
+Security defineMethod: [ | volume | ^self getPriceRecord volume ] ;
+
+Security defineMethod: [ | dividends | 
+  !sec <- ^self ;
+  :dividendSeries 
+] ;
+
+Security defineMethod: [ | dividend | ^self dividendSeries div ] ;
+
+Security defineMethod: [ | priceChangeFrom: date1 to: date2 | 
+     !price1 <- ^self :price asOf: date1; 
+     !price2 <- ^self :price asOf: date2; 
+     ( price2 / price1 - 1) * 100
+] ;
+
+Security defineMethod: [ | getDivsFrom: date1 to: date2 | 
+  ^self dividends from: date1 to: date2 .
+    total: [ div ] . else: 0.0 
+] ;
+
+Security defineMethod: [ | totalReturnFrom: date1 to: date2 |
+  !divs <- ^self getDivsFrom: date1 + 1 businessDays to: date2 ;
+  !price1 <- ^self :price asOf: date1 ;
+  !price2 <- ^self :price asOf: date2 ;
+  (price2 + divs - price1 ) / price1 * 100 
+] ;
+
+#--------------------
+#  portfolio related access
+#--------------------
+
+Security defineMethod: [ | holdingsDate |  :holdingsSeries effectiveDate ] ;
+Security defineMethod: [ | holdings | holdingsSeries ] ;
+
+Security defineMethod: [ | getHoldingIn: account | 
+   !holding <- ^self holdings select: [ account asSelf = ^my account asSelf ] ;
+   holding count = 1
+       ifTrue: [ holding at: 1 ] ifFalse: [ ^global Holding ]
+] ;
+
+Security defineMethod: [ | heldIn: account | 
+  ^self getHoldingIn: account . isntDefault
+] ;
+
+Security defineMethod: [ | getIndexAccounts |
+  ^global IndexAccount masterList 
+    select: [memberList at: ^my asSelf .isntNA]
+] ;
+
+Security defineMethod: [ | getAggAccounts |
+  holdings collectListElementsFrom: [ account aggregateList ] .
+      unique
+] ;
+
+#--------------------
+#  display
+#--------------------
+
+Security defineMethod:  [ | displayInfo | 
+  code print: 13 ;  ticker print: 13; name printNL ;
+] ;
+
+Security defineMethod: [ | profile |
+  ^super profile ;
+  "---  Supplemental Data  ---" printNL ;
+  "ticker: " print: 30 ; ticker printNL ;
+  "company: " print: 30 ; company displayInfo ;
+  "type: " print ; 30 ; type displayInfo ;
+  !rec <- ^self getPriceRecord ;
+  "price: (" concat: rec date . concat: ")" . print: 30 ; rec price print ; 
+  "holdings (count): " print: 30 ; holdings count printNL ;
+  newLine print ; 
+]  ;
+
+#==================================================
+
+
+
+
+####################
+#  Company
+####################
+
+#--------------------
+#  Standard XRef Dictionaries
+#--------------------
+Company createXRef: "CusipIssuer" withProperty: "cusip6" ;
+
+#--------------------
+#  Properties and initializations
+#--------------------
+
+Company
+   defineFixedProperty: 'primarySecurity' withDefault: Security .
+
+   defineFixedProperty: 'fiscalYearEnd' withDefault: 12 .
+
+   defineFixedProperty: 'country' withDefault: Country .
+   define: 'industry' withDefault: Industry .
+   defineFixedProperty: 'securityList' .
+;
+
+Company defineMethod: [ | initialize | 
+  ^super initialize ;
+  :securityList <- defaultInstance securityList ;
+  ^self
+] ;
+
+Company defineMethod: [ | locateId: id |
+  ^super locateId: id .
+   else: [ !sec <- ^global Security locateId: id ;
+           sec isntNA && [ sec company isntDefault ] 
+             ifTrue: [ sec company ]
+         ]
+];
+
+Company defineMethod: [ | cleanupClassStructures | 
+  ^super cleanupClassStructures ;
+  securityList cleanStore
+     ifTrue: [ ^self whatAmI print ; " -- securityList" printNL ] ;
+  ^self
+] ;
+
+#----------
+
+Company createInitializationListFrom: NA ;
+Company updateInitializationListWith: [ :baseCurrency ] ;
+
+Company 
+do: [ 
+    :baseCurrency <- ^global Currency ; 
+    :securityList <- ^global List new ;
+    ] ;
+
+#--------------------
+#  Aliases and Security Links
+#--------------------
+
+Company defineMethod:  [ | cusip | 
+  primarySecurity cusip8 else: primarySecurity canCusip8 
+] ;
+
+Company defineMethod: [ | sedol | primarySecurity sedol6 ] ;
+Company defineMethod: [ | valor | primarySecurity valor ] ;
+Company defineMethod: [ | isin | primarySecurity isin ] ;
+Company defineMethod: [ | ticker | primarySecurity ticker ] ;
+Company defineMethod: [ | id | ticker else: code ] ;
+
+#---------
+#   assignments
+#---------
+
+Company defineMethod: [ | setPrimarySecurityTo: sec | 
+  !newSec <- sec isSecurity
+    ifTrue: [ sec asSelf ] .
+    elseIf: sec isString 
+      then: (^global Security locateId: sec ) ;
+  newSec isSecurity && newSec != primarySecurity 
+    && [ newSec company isDefault || newSec company = ^self asSelf ] 
+  ifTrue:
+    [ :primarySecurity <- newSec ;
+      newSec company isDefault
+         ifTrue: [ newSec setCompanyTo: ^self asSelf ] ;
+    ] ;
+  ^self
+] ;
+
+Company defineMethod: [ | resetPrimarySecurity | 
+  ^self setPrimarySecurityTo: defaultInstance primarySecurity
+] ;
+
+Company defineMethod: [ | rebuildSecurityList | 
+  ^self masterList 
+     do: [ :securityList <- defaultInstance securityList ] ; 
+  ^global Security masterList select: [ company isntDefault ] .
+     groupedBy: [company].
+   do: [ :securityList <- groupList ]; 
+] ;
+
+Company defineMethod: [ | rebuildCusipIssuerXRef |
+  #--  build out cusip6 cross reference for companies with a cusip
+  ^self masterList select: [ primarySecurity cusip isntDefault ] .
+   extendBy: [ !cusip6 <- primarySecurity cusip take: 6 ;
+             ] . 
+   select: [ cusip6 isBlank not ] .
+   groupedByString: [ cusip6 ] .
+   do: [ !company <- groupList sortUp: [ primarySecurity cusip ] . at: 1 ;
+         company asSelf setXRefIn: company XRef CusipIssuer to: asSelf ;
+       ] ;
+
+   ^global Security masterList select: [ company isDefault ] .
+       select: [ cusip isntNA ] .
+   do: [ !issuer <- ^global Company XRef CusipIssuer at: (cusip take: 6) ;
+        issuer isCompany ifTrue: [ ^self setCompanyTo: issuer ] ;
+       ] ;
+] ;
+
+Company defineMethod: [ | setFiscalYearEndTo: fyr | 
+  fyr isNumber && [ fyr >= 1 && fyr <= 12 ] 
+     ifTrue: [ :fiscalYearEnd <- fyr asInteger ] ;
+  ^self
+] ;
+
+#--------------------
+#  split/currency adjustments
+#--------------------
+
+Company defineMethod:  [ | adjustmentRelativeTo: aDate |
+   primarySecurity adjustmentRelativeTo: aDate
+] ;          #  adjustmentRelativeTo:
+
+Company defineMethod: [ | getAdjustedDataFor: aTimeSeries |
+  aTimeSeries value / (^self adjustmentRelativeTo: aTimeSeries effectiveDate)
+] ;          #  getAdjustedDataFor: 
+
+Company defineMethod: [ | getAdjustedSharesDataFor: aTimeSeries |
+  aTimeSeries value *
+      (^self adjustmentRelativeTo: aTimeSeries effectiveDate)
+] ;          #  getAdjustedSharesDataFor: 
+
+#--------------------
+#  display
+#--------------------
+
+Company defineMethod:  [ | displayInfo | 
+  code print: 13 ; ticker print: 13 ; name printNL ;
+] ;
+
+Company defineMethod: [ | profile |
+  ^super profile ; 
+  "---  Supplemental Data  ---" printNL ;
+  "ticker: " print: 30 ; ticker printNL ;
+  "primarySecurity: " print: 30 ; primarySecurity displayInfo ;
+  "country: " print: 30 ; country displayInfo ;
+  "industry: " print: 30 ; industry displayInfo ;
+  "fiscalYearEnd: " print: 30 ; fiscalYearEnd printNL: -5 ;
+  newLine print ; 
+] ;
+
+#==================================================
+
+
+
+####################
+#  Classification
+####################
+
+Sector defineMethod: [ | industryList | memberList ] ;
+Sector defineMethod: [ | companyList | 
+  industryList collectListElementsFrom: [ getAllCompanies ]
+] ;
+
+Industry defineFixedProperty: 'sector' withDefault: Sector ;
+Industry defineMethod: [ | companyList | memberList ] ;
+Industry defineMethod: [ | getAllCompanies | getAllMembers ] ;
+Company defineMethod: [ | sector | industry sector ] ;
+
+#----------
+
+Country createInitializationListFrom: NA ;
+Country updateInitializationListWith: [ :baseCurrency ] ;
+Country :baseCurrency <- ^global Currency ; 
+
+Country defineMethod: [ | companyList | memberList ] ;
+
+#----------
+
+SecurityType
+   defineFixedProperty: 'unitCalc' withDefault: 1.0 .
+defineMethod: [ | isEquity | isDefault || [ assetCategory code = "EQUITY" ] ] .
+defineMethod: [ | isFixed | assetCategory code = "FIXED" ] .
+defineMethod: [ | isCashEquiv | assetCategory code = "CASH" ] .
+defineMethod: [ | isOther | assetCategory code = "OTHER" ] .
+;
+
+AssetCategory createInstance: "EQUITY" .
+   setNameTo: "Equity" . addAlias: "E" ;
+AssetCategory createInstance: "FIXED" .
+   setNameTo: "Fixed" . addAlias: "F" ;
+AssetCategory createInstance: "CASH" .
+   setNameTo: "Cash" . addAlias: "C" ;
+AssetCategory createInstance: "OTHER" .
+   setNameTo: "Other" . addAlias: "O" ;
+
+#==================================================
+
+
+####################
+#  Account
+####################
+
+#--------------------
+#  Properties and initializations
+#--------------------
+
+Account
+
+#---  Core properties should NOT be redefined at subclasses
+   defineFixedProperty: 'uniqueId' .
+   define: 'holdingsPrototype' toBe: List new .
+   define: 'holdingsSeries' .
+
+   define: '_totalMarketValue' .
+   define: '_totalMarketValueCash' .
+   define: '_totalMarketValueEquity' .
+   define: '_totalMarketValueFixed' .
+   define: '_totalCost' .
+;
+
+#----------
+
+Account defineMethod: [ | initialize |
+  ^super initialize ;
+  ^global Named Account at: ^self uniqueId put: ^self ;   
+  :baseCurrency <- ^self defaultInstance baseCurrency ;
+  :holdingsSeries <- holdingsPrototype ; 
+  ^self
+] ;
+
+Account createInitializationListFrom: NA ;
+Account updateInitializationListWith: [ :baseCurrency ] ;
+
+Account
+do: [
+    :holdingsSeries <- holdingsPrototype ; 
+    :baseCurrency <- ^global Named Currency USD ;
+    ] ;
+
+#--------------------
+#  subclass independent access messages
+#--------------------
+
+Account defineMethod: [ | locateId: id | 
+  id isString  && [^self classDescriptor = ^global Account classDescriptor]
+  ifTrue: [ ^global Named Account at: id .
+               else: (^global Named Portfolio at: id ) .
+               else: (^global Named AggAccount at: id ).
+               else: (^global Named IndexAccount at: id ) .
+               else: (^global Named CompositeAccount at: id )
+          ]
+   ifFalse: [ ^super locateId: id ] 
+] ;
+
+Account defineMethod: [ | addAlias: alias | 
+^super addAlias: alias ;
+^global Named Account at: alias  . isNA
+    ifTrue: [ ^global Named Account at: alias put: asSelf ] ;
+  ^self
+] ;
+
+Account defineMethod: [ | deleteAlias: alias |
+  ^super deleteAlias: alias ;
+  !entity <- ^self ;
+  alias
+  do: [ ^global Named Account at: asSelf . = ^my entity 
+             ifTrue: [ ^global Named Account delete: asSelf ] ;
+      ] ;
+  ^self
+] ;
+
+Account defineMethod: [ | holdings | holdingsSeries ] ;
+Account defineMethod: [ | hasHoldings | holdingsSeries count > 0 ] ;
+Account defineMethod: [ | holdingsDate | :holdingsSeries effectiveDate ] ;
+
+Account defineMethod: [ | getHoldingIn: security |
+  !holding <- ^self holdings
+      select: [ security asSelf = ^my security asSelf ] ;
+  holding count = 1
+      ifTrue: [ holding at: 1 ] ifFalse: [ ^global Holding ]
+] ;
+
+Account defineMethod: [ | holds: security | 
+  ^self getHoldingIn: security . isntDefault
+] ;
+
+#----------
+#  currency adjustments
+#----------
+
+Account defineMethod: [ | totalMarketValue | 
+    _totalMarketValue * ^self currencyFactor
+] ;
+
+Account defineMethod: [ | totalMarketValueCash | 
+  _totalMarketValueCash * ^self currencyFactor
+] ;
+
+Account defineMethod: [ | totalMarketValueEquity | 
+  _totalMarketValueEquity * ^self currencyFactor
+] ;
+
+Account defineMethod: [ | totalMarketValueFixed | 
+  _totalMarketValueFixed * ^self currencyFactor
+] ;
+
+Account defineMethod: [ | totalCost | 
+  _totalCost * ^self currencyFactor
+] ;
+
+#--------------------
+#  display tools
+#--------------------
+
+Account defineMethod: [ | profile |
+  ^super profile ; 
+  "---  Supplemental Data  ---" printNL ;
+  "uniqueId: " print: 30 ; ^self uniqueId printNL ;
+  "holdings (count): " print: 30 ; holdings count printNL:15 ;
+  "totalMarketValue (" concat: currency code . concat: "): " . print: 30 ; 
+  ^self totalMarketValue printWithCommasNL: 15.0 ;
+  currency isUS 
+  ifFalse: 
+    [ "totalMarketValue (US): " print: 30 ; 
+      "US" asCurrency evaluate: [ totalMarketValue printWithCommasNL: 15.0 ] ;
+    ] ;
+  newLine print ; 
+] ;
+
+#------------------------------
+
+####################
+#  Portfolio
+####################
+
+#--------------------
+#  Properties and initializations
+#--------------------
+
+Portfolio defineMethod: [ | initialize |
+  :uniqueId <- "P_" concat: code ;
+  ^global Named Account at: code put: ^self ;      #--  add to Named Account
+  ^super initialize
+] ;
+
+Portfolio createInitializationListFrom: Account initializationList ;
+
+Portfolio 
+do: [ 
+    :holdingsSeries <- holdingsPrototype ; 
+    :baseCurrency <- ^global Named Currency USD ;
+    ] ;
+
+#--------------------
+#   aggregate management
+#--------------------
+
+Portfolio defineMethod: [ | aggregateList | 
+  !port <- ^self asSelf ;
+  ^global AggAccount instanceList
+      select: [ memberList at: ^my port . isntNA ] 
+] ;
+
+Portfolio defineMethod: [ | displayAggregateList |
+  "Portfolio: " print; code print; 
+  " Is Included In the Following Aggregates: " printNL ;
+  aggregateList do: [ code print: 20; name printNL ] ;
+] ;
+
+#--------------------
+#  display
+#--------------------
+Portfolio defineMethod: [ | profile | 
+  ^super profile ; 
+  "aggregateList (count): " print: 30 ; aggregateList count printNL:15 ;
+  newLine print ;
+] ;
+
+#--------------------------------------------------
+
+####################
+#  AggAccount
+####################
+
+#--------------------
+#  Properties and initializations
+#--------------------
+
+AggAccount
+   define: 'memberListPrototype' toBe: Prototypical IndexedList new .
+   define: 'memberList' .
+   defineFixedProperty: 'membershipRule' .
+;
+
+#----------
+
+AggAccount defineMethod: [ | initialize |
+  :uniqueId <- "A_" concat: code ;
+  :memberList <- memberListPrototype clusterNew ;
+  ^global Named Account at: code . isNA      #-- add base code if not in use
+      ifTrue: [ ^global Named Account at: code put: ^self ] ;
+  ^super initialize
+] ;
+
+AggAccount defineMethod: [ | cleanupClassStructures | 
+  ^super cleanupClassStructures ;
+  memberList cleanStore
+     ifTrue: [ ^self whatAmI print ; " -- memberList" printNL ] ;
+  ^self
+] ;
+
+#----------
+
+AggAccount createInitializationListFrom: Account initializationList ;
+
+AggAccount
+do: [ 
+    :holdingsSeries <- holdingsPrototype ; 
+    :baseCurrency <- ^global Named Currency USD ;
+    :memberList <- memberListPrototype ;
+    ] ;
+
+#----------
+#  Agg memberships
+#----------
+
+AggAccount defineMethod: [ | setMembershipRuleTo: block | 
+  block isBlock
+   ifTrue: [ :membershipRule <- block ] 
+  ifFalse: 
+     [ ">>> Rule must be a block that returns a portfolio list." printNL ;
+     ] ;
+  ^self
+] ;
+
+#----------
+#  display
+#----------
+
+AggAccount defineMethod: [ | profile | 
+  ^super profile ; 
+  "memberList (count): " print: 30 ; memberList count printNL:15 ;
+  membershipRule isBlock
+     ifTrue: [ "membershipRule: " printNL ; membershipRule printNL ] ;
+  newLine print ;
+] ;
+
+#--------------------------------------------------
+
+####################
+#  IndexAccount
+####################
+
+#--------------------
+#  Properties and initializations
+#--------------------
+
+IndexAccount
+   define: 'memberListPrototype' toBe: IndexedList new .
+   define: 'memberList' .
+   defineFixedProperty: 'membershipRule' .
+   define: 'universe' withDefault: Universe .
+   define: 'style' .
+;
+
+#----------
+
+IndexAccount defineMethod: [ | initialize |
+  :uniqueId <- "I_" concat: code ;
+  :memberList <- memberListPrototype clusterNew ;
+  ^global Named Account at: code . isNA      #-- add base code if not in use
+      ifTrue: [ ^global Named Account at: code put: ^self ] ;
+  ^super initialize
+] ;
+
+IndexAccount defineMethod: [ | cleanupClassStructures | 
+  ^super cleanupClassStructures ;
+  memberList cleanStore
+     ifTrue: [ ^self whatAmI print ; " -- memberList" printNL ] ;
+  ^self
+] ;
+
+#----------
+
+IndexAccount createInitializationListFrom: Account initializationList ;
+
+IndexAccount
+do: [
+    :holdingsSeries <- holdingsPrototype ; 
+    :baseCurrency <- ^global Named Currency USD ;
+    :memberList <- memberListPrototype ;
+    ] ;
+
+#--------------------
+#  memberList update
+#--------------------
+
+IndexAccount defineMethod:
+[ | setMembershipRuleTo: block | 
+  block isBlock
+   ifTrue: [ :membershipRule <- block ] 
+  ifFalse: 
+     [ ">>> Rule must be a block that returns a security list." printNL ;
+     ] ;
+  ^self
+] ;
+
+IndexAccount defineMethod: [ | setSecuritiesTo: list asOf: date | 
+  date evaluate:
+    [
+    initializeNewMembershipDate ;
+    list do: [ ^my addMember: ^self ] ;
+    ] ;
+  ^self
+] ;
+
+IndexAccount defineMethod: [ | setUniverseTo: input | 
+  :universe 
+    put: (input isString
+            ifTrue: [ input as: ^global Universe ] else: [ input ] 
+         ) ;
+  !secs <- universe isntDefault && universe isUniverse
+  ifTrue:
+    [ universe entityType isSecurity ifTrue: [ universe list ] .
+         elseIf: [ universe entityType isCompany ] 
+           then: [ universe list send: [ primarySecurity ] ] .
+    ] else: [ ^global List ] ;
+  ^self setSecuritiesTo: secs asOf: ^date ;
+  ^self
+] ;
+
+IndexAccount defineMethod: [ | setStyleTo: input |
+  :style put: input ;
+  ^self
+] ;
+
+IndexAccount defineMethod: [ | initializeNewMembershipDate |
+  (:memberList on: ^date . isntNA ) && memberList != memberListPrototype
+    ifTrue: [ memberList do: [ ^my memberList delete: asSelf ] ; ]
+   ifFalse: [ :memberList put: memberListPrototype clusterNew  ] ;
+  ^self
+] ;
+
+IndexAccount defineMethod: [ | updateMemberships | 
+  membershipRule isBlock
+    ifTrue: [ ^self setSecuritiesTo: ^self getMembers asOf: ^date ] ;
+  ^self
+] ;
+
+IndexAccount defineMethod: [ | addMember: security |
+      #--  assumes current date and list
+  memberList at: security asSelf put: security asSelf ;
+  ^self
+] ;
+
+IndexAccount defineMethod: [ | deleteMember: security |
+      #--  assumes current date and list
+  memberList delete: security asSelf ;
+  ^self
+] ;
+
+IndexAccount defineMethod: [ | getMembers | 
+  membershipRule isBlock
+  ifTrue:
+    [ !list <- ^self send: membershipRule ;
+      list isList
+        ifTrue: [ list ] 
+       ifFalse: [ list asList ] 
+    ]
+  ifFalse: 
+    [
+    memberList toList
+    ]
+] ;
+
+IndexAccount defineMethod: [ | getMemberWeightsUsingAccount: acct |
+  !index <- ^self ;
+  !account <- acct isAccount
+     ifTrue: [ acct ] ifFalse: [ ^global Account locateId: acct asString ] ;
+  !xlist <- getMembers
+  extendBy:
+    [ !pctEvenDollar ;
+      !mvalEvenDollar ;
+      !pctMCapWeighted ;
+      !mvalMCapWeighted ; 
+      !pctMValWeighted ;
+      !mvalMValWeighted ;
+    ] .
+  do: 
+    [ !localPrice <- ^my index currency evaluate: [ price ] ;
+      :mvalEvenDollar <- 1000.00 ;
+      :mvalMCapWeighted <- localPrice * sharesOut ;
+      ^my account isAccount
+      ifTrue: 
+        [ !shares <- ^my account getHoldingIn: ^self . shares else: 0 ;
+          :mvalMValWeighted <- localPrice * shares ;
+        ] ;
+    ] ;
+
+  !mvalEvenDollar <- xlist total: [ mvalEvenDollar ] ;
+  !mvalMCapWeighted <- xlist total: [ mvalMCapWeighted ] ;
+  !mvalMValWeighted <- xlist total: [ mvalMValWeighted ] ;
+
+  xlist do:
+    [ :pctEvenDollar <- 100 * mvalEvenDollar / ^my mvalEvenDollar ;
+      :pctMCapWeighted <- 100 * mvalMCapWeighted / ^my mvalMCapWeighted ;
+      :pctMValWeighted <- 100 * mvalMValWeighted / ^my mvalMValWeighted ;
+    ] 
+
+] ;
+
+#----------
+#  display
+#----------
+
+IndexAccount defineMethod: [ | profile | 
+  ^super profile ; 
+  "memberList (count): " print: 30 ; memberList count printNL:15 ;
+  membershipRule isBlock
+     ifTrue: [ "membershipRule: " printNL ; membershipRule printNL ] ;
+  newLine print ;
+] ;
+
+#--------------------------------------------------
+
+####################
+#  CompositeAccount
+####################
+
+CompositeAccount
+   define: 'componentList' withDefault: IndexedList new .
+;
+
+CompositeAccount defineMethod: [ | initialize |
+  :uniqueId <- "C_" concat: code; 
+  ^global Named Account at: code .isNA 
+     ifTrue: [^global Named Account at: code put: ^self]; 
+  ^super initialize
+] ;
+
+CompositeAccount createInitializationListFrom: Account initializationList ;
+
+CompositeAccount
+do: [ 
+    :holdingsSeries <- holdingsPrototype ; 
+    :baseCurrency <- ^global Named Currency USD ;
+    ] ;
+
+#----------
+
+CompositeAccount defineMethod: [ | initializeComponentList |
+  !defaultList <- defaultInstance :componentList asOf: earliestPossibleDate ;
+  componentList != defaultList && [ :componentList on: ^date . isntNA ] 
+  ifTrue:
+    [ componentList
+      do: [ ^my componentList delete: account ;    #- remove current elements
+            flagForDeletion ;                      #- underlying component
+          ] ;
+    ] 
+  ifFalse: [ :componentList put: defaultList clusterNew ] ;
+] ;
+
+CompositeAccount defineMethod: [ | addComponent: account withWeight: weight |
+  !newOne <- Component createInstance: ^self, account, ^date ;
+  newOne :weight <- weight ;
+  componentList at: account asSelf put: newOne ;
+  ^self
+] ;
+
+CompositeAccount defineMethod: [ | profile | 
+  ^super profile ;
+  "Components: " printNL ;
+  componentList
+  do: [ account whatAmI print ; " " print ; account code print ;
+        " weight of " print ; weight asString print ; " %" printNL ;
+      ] . count = 0 
+    ifTrue: [ "...  no components defined." printNL ];
+] ;
+
+#----------
+
+CompositeAccount Component defineFixedProperty: 'weight' ;
+
+
+
+
+####################
+#  Holding
+####################
+
+#--------------------
+#  Properties and initializations
+#--------------------
+
+Holding
+   defineFixedProperty: 'date' .
+   defineFixedProperty: 'account' .
+   defineFixedProperty: 'security' .
+
+   defineFixedProperty: '_shares' .
+   defineFixedProperty: '_totalMarketValue' .
+   defineFixedProperty: '_totalCost' .
+   defineFixedProperty: '_accountingPrice' .
+   defineFixedProperty: 'percentOfPort' .
+   defineFixedProperty: 'percentOfEquity' .
+   defineFixedProperty: '_adjustmentDate' .
+
+   define: 'storeXRef' toBe: TimeSeries new .
+;
+
+#----------
+
+Holding defineMethod: [ | initializeKeys: keys | 
+  :security <- keys at: 1 . asSelf ;
+  :account  <- keys at: 2 . asSelf ;
+  :baseCurrency <- account baseCurrency ;
+  :date <- ^date asSelf ; 
+] ;
+
+Holding defineMethod: [ | cleanupClassStructures | 
+  ^super cleanupClassStructures ;
+#-- clean the xref time series
+  :storeXRef cleanStore
+     ifTrue: [ ^self whatAmI print ; " -- :storeXRef " printNL ] ;
+#--  clean each Holding cluster recursively
+  :storeXRef
+  do: [ ^self rcleanStoreAndDictionary
+          ifTrue: [ "Holding storeXRef --  " print; ^date printNL ] ;
+      ] ;
+#--  Clean list structure at Security and Account -
+#--  Note that each date must be cleaned if list is updated using a
+#--      a groupList assignment directly to the property
+  !currentHoldings <- storeXRef instanceList ;
+  "Holding -- cleaning all security/account holdingsSeries" printNL ;
+  currentHoldings groupedBy: [ date ] .
+  do: [ !record <- groupList at: 1 ;
+        ^self evaluate:
+           [ record security holdingsSeries cleanStore ;
+             record account holdingsSeries cleanStore ;
+           ] ;
+      ] ;
+  ^self
+] ;
+
+#----------
+
+Holding 
+do: [ 
+    :account <- ^global Named Account Default ;
+    :security <- ^global Named Security Default ;
+    :date <- earliestPossibleDate ;
+    :baseCurrency <- ^global Named Currency Default ;
+    :storeXRef asOf: earliestPossibleDate put: ^self ;
+    ] ;
+
+#--------------------
+#  basic access
+#--------------------
+
+Holding defineMethod: [ | id | 
+  ^self security code concat: "---" . concat: ^self account code
+] ;
+
+#----------
+#  currency and split adjustment covers
+#----------
+
+Holding defineMethod: [ | adjustmentDate | _adjustmentDate else: date ] ;
+
+Holding defineMethod: [ | adjustmentFactor | 
+  ^self security adjustmentRelativeTo: ^self adjustmentDate 
+] ;
+
+Holding defineMethod: [ | setAdjustmentDateTo: date |
+  :_adjustmentDate <- date asDate ;
+  ^self
+] ;
+
+Holding defineMethod: [ | currencyFactor |
+  ^self baseCurrency isCurrency
+    ifTrue: 
+      [ ^self baseCurrency exchangeTo: ^self currency relativeTo: ^self date ]
+] ;
+
+Holding defineMethod: [ | shares | ^self _shares * ^self adjustmentFactor ] ;
+
+Holding defineMethod: [ | totalMarketValue | 
+    ^self _totalMarketValue * ^self currencyFactor 
+] ;
+
+Holding defineMethod: [ | totalCost |
+   ^self _totalCost * ^self currencyFactor 
+] ;
+
+Holding defineMethod: [ | accountingPrice | 
+  ^self _accountingPrice * ^self currencyFactor / ^self adjustmentFactor
+] ;
+
+#----------
+#  Store Managment
+#----------
+
+#--  create new store in same object space as store as of date
+Holding defineMethod: [ | createNewStore | 
+  ^self createNewStoreAsOf: ^date at: NA
+] ;
+
+Holding defineMethod: [ | createNewStoreAsOf: date | 
+  ^self createNewStoreAsOf: date at: ^global 
+] ;
+
+Holding defineMethod: [ | createNewStoreAsOf: date at: ospace |
+  !store <- ^self newPrototype new
+  do: [ 
+      :defaultFlag <- TRUE ;
+      :account <- ^global Named Account Default ;
+      :security <- ^global Named Security Default ;
+      :baseCurrency <- ^global Named Currency Default ; 
+      :date <- ^my date ;
+      ] ;
+  !location <- ospace isntNA
+     ifTrue: [ ospace ] ifFalse: [ ^self :storeXRef asOf: date ] ;
+  location objectSpace > 0 
+     ifTrue: [ store establishResidenceInSpaceOf: location ] ;
+  ospace isntNA
+     ifTrue: [ ospace define: 'Holding' toBe: store ] ;
+  ^self :storeXRef asOf: date put: store ;
+  store
+] ;
+
+#--------------------
+#  Holding creation
+#--------------------
+
+Holding defineMethod: [ | createInSecurity: sec andAccount: port |
+  #-- cluster holdings by date
+  ^self storeXRef createInstance: sec, port
+] ;
+
+Holding defineMethod: [ | initializeFrom: list | 
+  ^self :_shares <- list total: [ shares ] ;
+  ^self :_totalMarketValue <- list total: [ totalMarketValue ] ;
+  ^self :_totalCost <- list total: [ totalCost ] ;
+  ^self
+] ;
+
+Holding defineMethod: [ | initializeCashFrom: list |
+  !tmv <- list total: [ totalMarketValue ] ;
+  !shs <- list total: [ shares ] ;
+  !cst <- list total: [ totalCost ] ;
+  !val <- tmv else: shs . else: cst ;
+  ^self :_totalMarketValue <- val ;
+  ^self :_shares <- val ;
+  ^self :_totalCost <- val;
+  ^self
+] ;
+
+#--------------------
+#  Holdings Mangement - Account and Security
+#--------------------
+
+#----------
+#  Holdings Initializations
+#      rebuild for all Portfolio and AggAccounts as of ^date
+#----------
+
+Account defineMethod: [ | initializeForHoldingsPrecalcs | 
+  "...  initializeForHoldingsPrecalcs" printNL ;
+  "   Holdings At Start: " print: 20 ; 
+  ^global Holding instanceList count printNL ;
+
+  ^self masterList select: [ isPortfolio || isAggAccount ] .
+   do: [ ^self initializeDailyHoldingsBasedValues ;
+       ] ;
+  ^global Security initializeForHoldingsPrecalcs ;
+
+  "   Holdings At End: " print: 20 ; 
+  ^global Holding instanceList count printNL ;
+  ^self
+] ;
+
+Security defineMethod: [ | initializeForHoldingsPrecalcs | 
+#-- only init securities that have real holdings on prior day
+#-- always init the eom points that follow non-eom points
+  !eom <- ^date isLastBusinessDayOfMonth || ^date isMonthEnd ;
+  ^self masterList
+   do: [ ^self deleteCurrentHoldings ;    #-- if asof ^date
+        (holdingsSeries count > 0 ) || 
+        [ holdingsSeries count = 0 && ^my eom &&
+          [:holdingsSeries effectiveDate 
+              send: [ isLastBusinessDayOfMonth || isMonthEnd || year = 1 ] . 
+               not
+          ]
+        ] ifTrue: [ :holdingsSeries put: holdingsPrototype ] ;
+       ] ;
+] ;
+
+#----------
+#  Holdings Initializations
+#      specific Account
+#----------
+
+Account defineMethod: [ | initializeDailyHoldingsBasedValues | 
+  ^self deleteCurrentHoldings ;    #-- if asof ^date
+  :holdingsSeries put: holdingsPrototype ;
+  :_totalMarketValue put: NA ; 
+  :_totalMarketValueCash put: NA ; 
+  :_totalMarketValueEquity put: NA ; 
+  :_totalMarketValueFixed put: NA ; 
+  :_totalCost put: NA ;
+] ;
+
+#----------
+
+Account defineMethod: [ | initializeDailySummaryValues | 
+] ;
+
+#----------
+#  Holdings creation
+#----------
+
+#----------
+#-   Account createHoldingsFrom:
+#-     . set adjustmentDate and currency if present
+#-     . is cash/cashEquiv special? minimally need multiple cash by currency
+#----------
+
+Account defineMethod: [ | createHoldingsFrom: xsecList | 
+#-- xsecList is list of securities extended by necessary holding properties
+#--  security, totalMarketValue, shares, totalCost, 
+#--  {accountingPrice, accountingCurrency, adjustmentDate}
+
+  !acct <- ^self ; 
+  !record <- xsecList at: 1 ;
+  !includesPrice <- record respondsTo: "accountingPrice" ;
+  !includesCurrency <- record respondsTo: "accountingCurrency" ;
+  !includesADate <- record respondsTo: "adjustmentDate" ;
+
+  ^self initializeDailyHoldingsBasedValues ;
+  :holdingsSeries <- holdingsPrototype clusterNew; 
+
+  !tmpHoldings <- xsecList
+      #-- remove this screen select: [ security type isCashEquiv not ] .
+    groupedBy: [ security ] .
+    send: [ !hold <- ^global Holding
+               createInSecurity: asSelf andAccount: ^my acct .
+               initializeFrom: groupList ;
+            !record <- groupList at: 1 ;
+            ^my includesPrice isTrue
+               ifTrue: [ hold :_accountingPrice <- record accountingPrice ] ;
+            ^my includesCurrency isTrue 
+                   && [ record accountingCurrency isntDefault ] 
+               ifTrue: [ hold setBaseCurrencyTo: record accountingCurrency ] ;
+            ^my includesADate isTrue && [ record adjustmentDate isntDefault ] 
+               ifTrue: [ hold setAdjustmentDateTo: record adjustmentDate ] ;
+            hold
+          ] ;
+  tmpHoldings do: [^my holdingsSeries , ^self]; 
+
+#--  remove this block of code
+#--   !cashLots <- xsecList select: [ security type isCashEquiv ] ;
+#--   cashLots count > 0 
+#--   ifTrue:
+#--     [ !cashHolding <- ^global Holding 
+#--          createInSecurity: ^global Named Security CashUS andAccount: acct .
+#--             initializeCashFrom: cashLots ;
+#--        holdingsSeries , cashHolding ;
+#--     ] ;
+
+  ^self computeAccountTotals; 
+] ;
+   
+
+#----------
+#  Account computeAccountTotals
+#    All calcs should be in baseCurrency of account ; 
+#    This implies that exchange rates have already been updated
+#----------
+
+Account defineMethod: [ | computeAccountTotals | 
+ ^self baseCurrency evaluate:
+    [ !data <-  #-- get tmv in correct currency
+         holdingsSeries extendBy: [ !tmv <- totalMarketValue ] ;
+      :_totalMarketValue <- data total: [ tmv ] ;
+      :_totalMarketValueCash <- data
+         select: [security type isCashEquiv] .
+          total: [ tmv ] ;
+      :_totalMarketValueEquity <- data
+          select: [ security type isEquity ] .
+           total: [ tmv] ;
+      :_totalMarketValueFixed <- data
+          select: [ security type isFixed ] .
+           total: [ tmv ] ;
+      :_totalCost <- holdingsSeries total: [ totalCost ] ;
+      data
+      do: [ :percentOfPort <- 100 * tmv / ^my _totalMarketValue ;
+            :percentOfEquity <- security type isEquity
+                ifTrue: [ 100 * tmv / ^my _totalMarketValueEquity ] ;
+          ] ;
+    ] ;
+ ^self
+] ;
+
+#----------
+
+AggAccount defineMethod: [ | buildHoldings |
+#--  ^self updateMemberships ;    #(removed until block driven input supported)
+  !secs <- ^self memberList
+      select: [hasHoldings].
+      collectListElementsFrom: [holdings] .
+      groupedBy: [security] .
+      extendBy: [ !security <- ^self asSelf ;
+                  !shares <- groupList total: [ _shares ] ;
+                  !totalMarketValue <- groupList total: [ _totalMarketValue ] ;
+                  !totalCost <- groupList total: [ _totalCost ] ;
+                ] ;
+  ^self createHoldingsFrom: secs ;
+] ;
+
+#----------
+
+IndexAccount defineMethod: [ | createHoldingsFrom: xsecList | 
+  ^super createHoldingsFrom: xsecList ;
+  !secs <- xsecList send: [ security ] ;
+  ^self setUniverseTo: ^global Universe . setStyleTo: "Manual" ;
+  ^self setSecuritiesTo: secs asOf: ^date ;
+] ;
+
+#----------
+
+IndexAccount defineMethod: [ | createHoldingsFromMembers |
+  !acct <- ^self ;
+  acct initializeDailyHoldingsBasedValues ;
+  !tmpHoldings <- getMembers
+    send: [ ^global Holding createInSecurity: asSelf andAccount: ^my acct ] ;
+  :holdingsSeries put: holdingsPrototype clusterNew ;
+  tmpHoldings do: [ ^my holdingsSeries , ^self ] ;
+] ;
+
+#----------
+
+IndexAccount defineMethod: [ | createEvenDollarHoldingsAsOf: date |
+     #--  invest $1000 in each security
+date evaluate: 
+  [ createHoldingsFromMembers ;
+     holdingsSeries
+     do: [ 
+         !price <- account baseCurrency evaluate: [ security price ] ;
+         :_shares <- 1000 / price ;
+         :_totalMarketValue <- 1000.00 ;
+         ] ;
+     computeAccountTotals ;
+     ^self setStyleTo: "EvenDollar" ;
+  ] ;
+] ;
+
+#----------
+
+IndexAccount defineMethod: [ | createEvenShareHoldingsAsOf: date | 
+      #--  buy 1000 shares of each
+date evaluate: 
+   [ createHoldingsFromMembers ;
+     holdingsSeries
+     do: [ 
+         !price <- account baseCurrency evaluate: [ security price ] ;
+         :_shares <- 1000.00 ;
+         :_totalMarketValue <- price * 1000 ;
+         ] ;
+     computeAccountTotals ;
+     ^self setStyleTo: "EvenShare" ;
+   ] ;
+] ;
+
+#----------
+
+IndexAccount defineMethod: [ | createMCapWeightedHoldingsAsOf: date | 
+      #--  buy shareOut of each
+baseCurrency evaluate: [ 
+date evaluate: 
+  [ createHoldingsFromMembers ;
+    holdingsSeries
+    do: [ 
+        !price <- security price ;
+        :_totalMarketValue <- security marketCap ;
+        :_shares <- _totalMarketValue  / price ;
+        ] ;
+    computeAccountTotals ;
+    ^self setStyleTo: "MCapWeighted" ;
+  ] ;
+] ;
+] ;
+
+#----------
+
+IndexAccount 
+defineMethod: [ | createMValWeightedHoldingsAsOf: date using: acct |  
+  !account <- acct isAccount
+     ifTrue: [ acct ] ifFalse: [ ^global Named Account at: acct asString ] ;
+  date evaluate: 
+     [ createHoldingsFromMembers ;
+       holdingsSeries
+       do: [ 
+           !price <- account baseCurrency 
+              evaluate: [ security price ] ;
+           :_shares <- 
+               security getHoldingIn: ^my account . shares else: [ 0 ] ;
+           :_totalMarketValue <- price * shares ;
+           ] ;
+       computeAccountTotals ;
+     ] ;
+] ;
+
+#----------
+
+IndexAccount defineMethod: [ | createWeightedHoldingsAsOf: date using: acct |  
+
+#--  Get account for weightings if exists
+  !account <- acct isAccount
+     ifTrue: [ acct ] ifFalse: [ ^global Named Account at: acct asString ] ;
+
+  date evaluate: 
+     [ createHoldingsFromMembers ;   #-- build holdings based on memberList
+
+#--  create variables for each type of weighting
+       !holdingsData <- holdingsSeries
+       extendBy:
+            [ !pctEvenDollar ;
+              !mvalEvenDollar ;
+              !pctMCapWeighted ;
+              !mvalMCapWeighted ; 
+              !pctMValWeighted ;
+              !mvalMValWeighted ;
+            ] .
+#--  update the values
+       do: [ 
+           !price <- account baseCurrency evaluate: [ security price ] ;
+           !shares <- 1000 / price ;
+           :mvalEvenDollar <- 1000.00 ;
+           !shares <- security sharesOut ; 
+           :mvalMCapWeighted <- price * shares ;
+           ^my account isAccount
+           ifTrue: [
+                   !shares <- 
+                      security getHoldingIn: ^my account . shares else: 0 ;
+                   :mvalMValWeighted <- price * shares ;
+                   ] ;
+           ] ;
+#---  compute totals to assign pct weights
+       !mvalEvenDollar <- holdingsData total: [ mvalEvenDollar ] ;
+       !mvalMCapWeighted <- holdingsData total: [ mvalMCapWeighted ] ;
+       !mvalMValWeighted <- holdingsData total: [ mvalMValWeighted ] ;
+       holdingsData
+       do: [ 
+           :pctEvenDollar <- 100 * mvalEvenDollar / ^my mvalEvenDollar ;
+           :pctMCapWeighted <- 100 * mvalMCapWeighted / ^my mvalMCapWeighted ;
+           :pctMValWeighted <- 100 * mvalMValWeighted / ^my mvalMValWeighted ;
+           ] ;
+#---  copy extended structure into holdings for date
+       :holdingsSeries put: holdingsData ;
+     ] ;
+] ;
+
+#----------
+
+CompositeAccount defineMethod: [ | buildHoldings |
+  !secs <- componentList collectListElementsFrom:
+    [ !wt <- weight / 100 ;
+      account holdings extendBy: 
+         [ !wtShares <- shares * ^my wt ;
+           !wtMVal <- totalMarketValue * ^my wt ;
+         ] 
+    ] .
+    groupedBy: [ security ] .
+    extendBy:
+       [ !security <- ^self ; 
+         !shares <- groupList total: [ wtShares ] ;
+         !totalMarketValue <- groupList total: [ wtMVal ] ;
+         !totalCost <- NA ;
+       ]  ;
+ ^self createHoldingsFrom: secs ;
+] ;
+
+#----------
+
+Security defineMethod: [ | rebuildHoldings |
+  asSelf masterList do: [ :holdingsSeries put: holdingsPrototype ] ;
+  !validAccounts <- ^global Portfolio instanceList select: [ hasHoldings ] ; 
+  !holdings <- validAccounts collectListElementsFrom: [ holdingsSeries ] ; 
+  holdings groupedBy: [ security asSelf ] .
+    do: [ :holdingsSeries put: groupList ]; 
+] ;
+
+#----------
+#  Holdings Deletion - Account
+#----------
+
+Account  define: 'dailyCutoff' toBe: 2 monthEnds ;
+
+#----------
+
+Account defineMethod: [ | deleteCurrentHoldings |
+   holdingsDate = ^date     #--- cleanup if holdings exist for date
+      ifTrue: [ ^self purgeHoldings ] ;
+] ;
+
+#----------
+
+Account defineMethod: [ | purgeHoldings |      
+   #--  purge holdings asof ^date and remove ts point
+  holdingsSeries do: [^self rdelete]; 
+  holdingsSeries != holdingsPrototype 
+     ifTrue: [ holdingsSeries rdelete ] ;
+  :holdingsSeries delete: ^date ;
+] ;
+
+#----------
+
+Account defineMethod: [ | purgeOldHoldingsForAll | 
+  !list <- ^self masterList select: [ :holdingsSeries count > 1 ] ;
+  !cutoff <- ^date - ^self dailyCutoff ; 
+  !dates <- ^global TimeSeries new ; 
+  list 
+  do: [ !dates <- ^my dates ; 
+        :holdingsSeries do: [ ^my dates put: ^date ] ;
+      ] ;
+  :dates <- dates
+  select: [ ^self != earliestPossibleDate &&
+            ^self isMonthEnd not && ^self isLastBusinessDayOfMonth not &&
+            ^self < ^my cutoff 
+          ] ;
+  dates count > 0 
+  ifTrue:
+    [ "...  Purging Old Holdings" printNL ;
+      "     Holdings at Start: " print ; 
+      list total: [ :holdingsSeries total: [ count ] ] . printNL: 10.0 ;
+      dates
+      do: [ ^self evaluate:
+             [ "   Purging Old Holdings as Of: " print; ^date printNL ;
+               ^my list do: [ deleteCurrentHoldings ] ;
+#--  Cleanup corresponding security structures for date
+               ^global Security cleanupHoldingsAsOf: ^date ;
+             ] ;
+          ] ;
+      "     Holdings at End: " print ; 
+      list total: [ :holdingsSeries total: [ count ] ] . printNL: 10.0 ;
+      ] ;
+] ;
+
+#----------
+#  Holdings Deletion - Security
+#----------
+
+Security defineMethod:  [ | cleanupHoldingsAsOf: date | 
+  !list <- ^self masterList ; 
+  date evaluate:
+    [
+    list do: [ deleteCurrentHoldings ] ;
+    ] ;
+] ;
+
+#----------
+
+Security defineMethod: [ | deleteCurrentHoldings |
+   holdingsDate = ^date     #--- cleanup if holdings exist for date
+      ifTrue: [ ^self purgeHoldings ] ;
+] ;
+
+#----------
+
+Security defineMethod: [ | purgeHoldings | 
+  #--  purge holdings asof ^date and remove ts point
+  holdingsSeries != holdingsPrototype 
+     ifTrue: [ holdingsSeries rdelete ] ;
+  :holdingsSeries delete: ^date ;
+] ;
+
+#==================================================
+
+####################
+#  DataType, DataSeries, and Frequency
+####################
+
+#--------------------
+#  DataType protocol
+#--------------------
+DataType
+   defineFixedProperty: 'entityType' .       ## class data series defined for
+   defineFixedProperty: 'dataSeriesReturnType' . ## class returned by series
+   defineFixedProperty: 'dataSeriesXRef' .       ## IList by freq of DSeries
+
+defineMethod: [| initializeGlobalSubclassProperties |
+  ^super initializeGlobalSubclassProperties ;
+  ^self :dataSeriesXRef <- ^global IndexedList new;
+  ^self
+] .
+
+defineMethod: "[| initializeGlobalInstanceProperties |
+  ^super initializeGlobalInstanceProperties; 
+  ^self :dataSeriesXRef <- ^self defaultInstance dataSeriesXRef clusterNew; 
+  ^self
+]" .
+
+#------------------
+# DataType Setup
+#------------------
+
+defineMethod: [| setEntityTypeTo: class |
+  ^self :entityType <- class ;
+  ^self
+] .
+
+defineMethod: [| setDataSeriesReturnTypeTo: class |
+  ^self :dataSeriesReturnType <- class ;
+  ^self
+] .
+
+#------------------
+
+defineMethod: "[| initializeKeys: keys | #-- code, entType, dsReturnType
+  keys isList
+     ifTrue: [ :code <- keys at: 1;
+               :entityType <- keys at: 2 . asSelf;
+               :dataSeriesReturnType <- keys at: 3 . asSelf;
+             ]
+    ifFalse: [ ^super initializeKeys: keys ]; #-- sets code
+  ^self
+]" .
+
+#------------------
+# DataType Display
+#------------------
+
+defineMethod: [| displayInfo |
+  ^self do:
+  [ code print: 10;
+    "" print: 2; name print: 40; "  | " print;
+    dataSeriesXRef do: [ frequency code print; " " print; ];
+    newLine print;
+  ];
+] .
+
+defineMethod: [| profile | 
+  ^self do:
+  [ classDescriptor name print;
+    " Profile for: " print; code print; " - " print; name printNL;
+    newLine print;
+    "Entity Type:" print: 25; entityType whatAmI printNL;
+    "DataSeries ReturnType:" print: 25; dataSeriesReturnType whatAmI printNL;
+    newLine print;
+    "Frequency" print: 15; "Property" printNL;
+    dataSeriesXRef do: [ frequency name print: 15; accessBlock printNL ];
+  ];
+] .
+
+#------------------
+# DataType Update Methods
+#------------------
+
+#-- DataSeries creation:  measure/frequency keys
+
+defineMethod: [| addFrequency: period |
+  ^self do:
+  [ !frequency <- ^global Frequency locateId: ^my period;
+    frequency isntNA && [ dataSeriesXRef at: frequency . isNA ]
+    ifTrue:
+      [ !series <- ^global DataSeries createInstance: asSelf, frequency;
+        dataSeriesXRef at: frequency put: series;
+      ];
+  ];
+  ^self
+] .
+
+#------------------
+# DataType Access to Series Methods
+#------------------
+defineMethod: [| getSeriesFor: frequency |
+  ^self dataSeriesXRef at: frequency
+] .
+;
+
+#------------------
+# DataType Initializations
+#------------------
+DataType instanceList do:
+[ :entityType <- ^global Entity;
+  :dataSeriesReturnType <- ^global DataRecord;
+  :dataSeriesXRef <- ^global IndexedList new;
+];
+
+
+#--------------------
+#  DataSeries protocol
+#--------------------
+DataSeries
+   defineFixedProperty: 'dataType' .
+   defineFixedProperty: 'frequency' .
+   defineFixedProperty: 'accessBlock' .
+   defineFixedProperty: 'updateBlock' .
+
+defineMethod: [| initializeKeys: keys | #-- dataType, frequency
+  ^self do:
+  [ :dataType <- ^my keys at: 1 . asSelf;
+    :frequency <- ^my keys at: 2 . asSelf;
+    :code  <- frequency isntDefault
+       ifTrue: [ dataType code toLower concat: frequency shortName]
+         else: [ dataType code toLower ];
+  ] .
+] .
+
+defineMethod: "[| initializeEntityType |
+  #-- adds new property for entityType and initializes all instances
+  ^self do:
+  [ !entity <- dataType entityType;
+    !rtnClass <- getReturnType;
+    code locateInDictionaryOf: entity . isNA
+    ifTrue:
+      [ frequency isSnapshot
+         ifTrue: [ entity defineFixedProperty: code withDefault: rtnClass ] 
+        ifFalse: [ entity define: code withDefault: rtnClass ];
+     ];
+    :accessBlock <- code asBlock;
+    :updateBlock <- \":\" concat: code . asBlock;
+  ];
+  ^self
+]" .
+
+#----------
+#  This message accesses the updateable property for the object
+#    for the correct series
+#----------
+
+defineMethod: [| getPropertyFor: object | 
+  object send: (^self updateBlock else: [[]] )  
+      ## [] returns NoValue (isNA = TRUE, prints as blank)
+] .   
+
+#----------
+#  DataSeries method for series to Entity lookup
+#----------
+
+defineMethod: [| getSeriesFor: object |
+  !baseObject <- object classDescriptor = ^self getEntityType classDescriptor
+     ifTrue: [ object ];
+  baseObject isntNA
+     ifTrue: [ baseObject send: ^self updateBlock ]
+] .
+
+#---------
+# Access to defaults
+#---------
+
+defineMethod: [| getEntityType |
+  ^self dataType entityType
+] .
+
+defineMethod: [| getReturnType |
+  ^self dataType dataSeriesReturnType
+] .
+
+#------------------
+#  DataSeries Display
+#------------------
+
+defineMethod: [| displayInfo |
+  " " print; ^self code print: 15; ^self name printNL;
+] .
+;
+
+#------------------
+# DataSeries Initializations
+#------------------
+DataSeries instanceList do:
+[ :dataType <- ^global DataType;
+  :frequency <- ^global Frequency;
+] ;
+
+
+#--------------------
+#  Frequency class protocol
+#--------------------
+Frequency
+   defineFixedProperty: 'interval' .
+
+defineMethod: [| initializeKeys: keys | #-- code, shortName, interval
+  ^self do:
+  [ :code <- ^my keys at: 1;
+    :shortName <- ^my keys at: 2;
+    :interval <- ^my keys at: 3;
+  ];
+  ^self
+] ;
+
+
+
+
+#==================================================
+
+
+
+####################
+#  DataRecord
+####################
+
+#--------------------
+#  redefine subclass and instance creation to set adjustment dates
+#--------------------
+
+DataRecord defineFixedProperty: 'adjustmentDate' ;
+
+DataRecord defineMethod: [ | initializeGlobalSubclassProperties |
+^super initializeGlobalSubclassProperties ;
+!newClass <- ^self asSelf ;
+newClass define: 'storeXRef' toBe: newClass asList; 
+^self define: 'currentStore' toBe: newClass; 
+newClass 
+do: [:entity <- ^global Entity; 
+    :baseCurrency <- ^global Currency; 
+    :recordDate <- earliestPossibleDate; 
+    :adjustmentDate <- recordDate; 
+   ]; 
+newClass
+] ;
+
+DataRecord defineMethod: [ | initializeLocalAttributes |
+  ^super initializeLocalAttributes ;
+  :adjustmentDate <- recordDate; 
+  ^self updateBlock isBlock && [ ^self entity isntDefault ] 
+  ifTrue: 
+    [ ^self recordDate else: earliestPossibleDate . evaluate:
+          [ ^self entity setProperty: ^self updateBlock to: ^self asSelf ] ;
+    ]  ;
+  ^self
+] ;
+
+#----------
+
+DataRecord subclassList
+   do: [ ^self instanceList do: [ :adjustmentDate <- recordDate ] ] ;
+
+#----------
+
+DataRecord defineMethod: [ | adjustmentFactor |
+  !adate <- adjustmentDate ifDefault: [ recordDate ] ;
+  !baseEntity <- entity isEntity ifTrue: [ entity ] .
+      elseIf: [ entity isBridge ] then: [ entity baseEntity ] ;
+  (baseEntity isCompany || baseEntity isSecurity)
+   && [ adate isDate && adate isntDefault ] 
+     ifTrue: [baseEntity adjustmentRelativeTo: adate ] .
+] ;
+
+DataRecord defineMethod: [ | setAdjustmentDateTo: date | 
+  :adjustmentDate <- date asDate ;
+  ^self
+] ;
+
+#==================================================
+
+####################
+# DivRecord
+####################
+
+DivRecord
+   defineFixedProperty: 'paymentDate' .
+;
+
+DivRecord
+do: [ 
+    :entity <- ^global Security ;
+    :recordDate <- earliestPossibleDate ;
+    :baseCurrency <- ^global Currency ;
+    :adjustmentDate <- recordDate ;
+    ] ;
+
+#----------
+
+DivRecord defineMethod: [ | security | ^self entity ] ;
+DivRecord defineMethod: [ | _div | ^self recordValue  ] ;
+
+DivRecord defineMethod: [ | div | 
+  _div / ^self adjustmentFactor * ^self currencyFactor 
+] ;
+
+DivRecord defineMethod:
+[ | addDiv: div asOf: date inCurrency: curr for: security |
+  !currentRecord <- security :dividendSeries asOf: date ;
+  currentRecord recordDate != date asDate
+  ifTrue:
+    [ :currentRecord <- currentStore
+           createInstance: security asSelf , date asDate , div, curr ;
+       security :dividendSeries asOf: date put: currentRecord ;
+    ] 
+  ifFalse:
+    [
+    currentRecord
+       setDividendTo: div . 
+       setBaseCurrencyTo: curr ;
+    ] ;
+  currentRecord
+] ;
+
+DivRecord defineMethod: [ | setDividendTo: div |
+  ^self :recordValue <- div ;
+  ^self
+] ;
+
+DivRecord defineMethod: [ | setPaymentDateTo: date | 
+  :paymentDate <- date asDate ;
+  ^self
+] ;
+
+#----------
+#  display
+#----------
+
+DivRecord defineMethod:  [ | print |  ^self div print ; ^self ] ;
+DivRecord defineMethod:  [ | print: format | ^self div print: format ; ^self ];
+
+#==================================================
+
+
+####################
+#  PriceTools
+####################
+
+PriceTools
+   define: 'PriceRecord' toBe: PriceRecord .
+   define: 'dailyStoreXRef' .
+   define: 'eomStoreXRef' .
+   define: 'tsStoreXRef' .
+;
+
+PriceTools defineMethod: [ | cleanupClassStructures | 
+  ^super cleanupClassStructures ;
+#--  get each prototype
+  "PriceTools -- cleaning all PriceRecord and PriceTSGenerator stores" printNL;
+  :dailyStoreXRef do: [ ^self rcleanStore ] ;
+  :eomStoreXRef do: [ ^self rcleanStore ] ;
+  :tsStoreXRef do: [ ^self rcleanStore ] ;
+  ^self
+] ;
+
+PriceTools defineMethod: [ | removeDeletedRecords |
+  newLine print ;
+  "---> Removing daily PriceRecords that were flagged for deletion " printNL ;
+  "Store Date" print: 15 ; "In Store" print: -15 ; 
+  "Removing" print: -15 ; "Remaining" print: -15 ;
+  " " print ; "Store Location" printNL ;
+  :dailyStoreXRef 
+  do: [ !todo <- ^self instanceList select: [ isDeleted ] ;
+        todo count > 0
+        ifTrue:
+          [ ^date print: 15 ;
+            ^self instanceList count printWithCommas: 15.0 ;
+            todo count printWithCommas: 15.0 ;
+            todo do: [ ^self rdelete ] ;
+            ^self instanceList count printWithCommas: 15.0 ;
+            " " print ; ^self displayPOP ;
+            ^self rcleanStoreAndDictionary ;
+          ] ;
+       ] ;
+  newLine print ;
+  "---> Removing eom PriceRecords that were flagged for deletion " printNL ;
+  "Store Date" print: 15 ; "In Store" print: -15 ; 
+  "Removing" print: -15 ; "Remaining" print: -15 ;
+  " " print ; "Store Location" printNL ;
+  :eomStoreXRef 
+  do: [ !todo <- ^self instanceList select: [ isDeleted ] ;
+        todo count > 0
+        ifTrue:
+          [ ^date print: 15; 
+            ^self instanceList count printWithCommas: 15.0 ;
+            todo count printWithCommas: 15.0 ;
+            todo do: [ ^self rdelete ] ;
+            ^self instanceList count printWithCommas: 15.0 ;
+            " " print ; ^self displayPOP ;
+            ^self rcleanStoreAndDictionary ;
+          ] ;
+       ] ;
+] ;
+
+#--------------------
+#  space creation
+#--------------------
+
+PriceTools defineMethod: [ | setupYear: year | 
+  ^global Environment MaintenanceTools okayToCreateNewSpace
+  ifTrue:
+    [
+    !date <- year asDate ;
+    date isDate 
+       ifTrue: [ :date <- date + 0 yearBeginnings ]
+      ifFalse: [ :date <- earliestPossibleDate ] ;
+    :tsStoreXRef effectiveDateAsOf: date . = date
+     ifTrue:
+       [ ">>> Space Already Defined For Year.  Not Setup. <<<" printNL ;
+       ]
+     ifFalse:
+       [ 
+       !id <- "DailyPrice" concat: date year asString ;
+       ^global Environment MaintenanceTools
+           setupSpaceFor: id
+           as: "DB" 
+           description: 
+           ("Annual Price History Storage As Of " concat: date year asString) ;
+       ^self createTSStoreAsOf: date ;
+       ^self createDailyStoreAsOf: date ;
+       ^self createDailyStoreAsOf: date + 3 months ;
+       ^self createDailyStoreAsOf: date + 6 months ;
+       ^self createDailyStoreAsOf: date + 9 months ;
+       ] ;
+    ]
+  ifFalse:
+    [ ">>> Must Be Run In New Object Space.  New Year Not Setup. <<<" printNL;
+    ] ;
+] ;
+
+PriceTools defineMethod: [ | setupEOMFrom: year | 
+  ^global Environment MaintenanceTools okayToCreateNewSpace
+  ifTrue:
+    [
+    !date <- year asDate ;
+    date isDate 
+       ifTrue: [ :date <- date + 0 yearBeginnings ]
+      ifFalse: [ :date <- earliestPossibleDate ] ;
+    !id <- "EOMPrice" concat: date year asString ;
+    ^global Environment MaintenanceTools
+         setupSpaceFor: id
+         as: "DB" 
+         description: 
+         ("EOM Price History Storage As Of " concat: date year asString) ;
+       ^self createEOMStoreAsOf: date ;
+    ]
+  ifFalse:
+    [ ">>> Must Be Run In New Object Space.  New Year Not Setup. <<<" printNL;
+    ] ;
+] ;
+
+PriceTools defineMethod: [ | createTSStoreAsOf: date | 
+#-- store at global so the structure is stored in this space
+  ^global define: 'PriceTSGenerator' 
+            toBe: PriceTSGenerator newPrototype ;
+  :tsStoreXRef asOf: date put: ^global PriceTSGenerator ;
+#-- touch the time series to give it a home as well
+  ^global PriceTSGenerator :ts ;
+  ^global PriceTSGenerator
+] ;
+
+PriceTools defineMethod: [ | createDailyStoreAsOf: date |
+#-- store at global so the structure is stored in this space
+  ^global define: 'PriceRecord' toBe: PriceRecord getNewPrototype ;
+  :dailyStoreXRef asOf: date put: ^global PriceRecord ;
+  ^global PriceRecord 
+] ;
+
+PriceTools defineMethod: [ | createEOMStoreAsOf: date |
+#-- store at global so the structure is stored in this space
+  ^global define: 'PriceRecord' toBe: PriceRecord getNewPrototype ;
+  :eomStoreXRef asOf: date put: ^global PriceRecord ;
+  ^global PriceRecord
+] ;
+
+#--------------------
+#  add method at price tools to pre-allocate outer time point in multi-date
+#  updates
+#--------------------
+PriceTools defineMethod: [ | preallocateDatesIn: dateList forSecurity: sec |
+#-- add outer point for any year needing it --
+#-- for a given date, if the effectiveDate of the pricingSeries
+#-- as of that date is different from the generic tsStore date
+#-- create a newTS in that ts store; only one should be created for
+#-- the pricingSeries for a given tsStoreDate
+dateList
+   extendBy: 
+   [ !tsStoreDate <- ^my :tsStoreXRef effectiveDateAsOf: ^self ;
+     !secStoreDate <- ^my sec :pricingSeries effectiveDateAsOf: ^self ;
+   ] .
+select: [  tsStoreDate != secStoreDate ] .
+groupedBy: [ tsStoreDate ] .
+do: [ !sec <- ^my sec ;
+      !tsStore <- ^my :tsStoreXRef asOf: asDate ;
+      sec :pricingSeries asOf: asDate put: tsStore newTS ;
+      !PriceTools <- ^my ;
+      #-- add the records for the dates in the store
+      groupList 
+         do: [ ^my PriceTools createRecordIn: ^my sec asOf: asDate ] ;
+    ] ;
+] ;
+
+#----------
+#  store access
+#----------
+
+PriceTools defineMethod: [ | getTSStoreAsOf: date | 
+  :tsStoreXRef asOf: date 
+] ;
+
+PriceTools defineMethod: [ | getDataStoreAsOf: date |
+  date evaluate:
+     [
+     ^date isLastBusinessDayOfMonth
+        ifTrue: [ eomStoreXRef ] 
+       ifFalse: [ dailyStoreXRef ]
+     ]
+] ;
+
+PriceTools defineMethod:
+[ | addPrice: price asOf: date inCurrency: curr for: security |
+  !currentRecord <- security :getPriceRecord asOf: date ;
+  currentRecord recordDate != date 
+    ifTrue: [ :currentRecord <- ^self createRecordIn: security asOf: date ] ;
+  currentRecord
+      setPriceTo: price . 
+      setBaseCurrencyTo: curr ;
+] ;
+
+PriceTools defineMethod: [ | createRecordIn: security asOf: date | 
+  date evaluate:
+     [ 
+       !store <- ^self getDataStoreAsOf: ^date ;
+       !record <- store createInstance: security asSelf, ^date ;
+       !tsStoreDate <- :tsStoreXRef effectiveDate ;
+       !secStoreDate <- security :pricingSeries effectiveDate ;
+       tsStoreDate != secStoreDate
+         ifTrue: [ security :pricingSeries 
+                     asOf: tsStoreDate put: tsStoreXRef newTS ;
+                 ] ;
+       security :pricingSeries asOf: ^date .
+          asOf: ^date put: record ;
+       record
+     ] 
+] ;
+
+PriceTools defineMethod:  [ | getOrCreateRecordIn: sec asOf: date | 
+  !priceDate <- date asDate ;
+  !currentRecord <- sec :getPriceRecord asOf: priceDate ;
+  currentRecord recordDate = priceDate 
+     ifTrue: [ currentRecord ] 
+  ifFalse:  
+     [ ^self createRecordIn: sec asOf: priceDate .      # <---
+#--          setPriceTo: currentRecord price .
+#--          setBaseCurrencyTo: currentRecord currency
+     ]
+] ;
+
+#------------
+# . returns boolean indicating if all dates in list have
+#   corresponding ospace/store for PriceRecord and prints
+#   warning message for missing space/store year(s)
+#------------
+
+PriceTools defineMethod: [ | checkPriceDates: dateList |
+  ## Check if missing any object spaces/stores for years
+  !status <- TRUE;
+  #-- get individual years
+  dateList send: [ asYearBeginning ] . groupedBy: [ ^self ] . do:
+  [ ^self evaluate:
+    [ ^my :tsStoreXRef effectiveDateAsOf: ^date . year = ^date year
+      ifFalse:
+        [ ">>> WARNING: Pricing object space/store missing for year " print;
+          ^date year asString printNL;
+          ^my :status <- FALSE;
+        ];
+    ];   
+  ];
+  status
+] ;
+
+#--------------------------------------------------
+
+####################
+#  PriceTools PriceTSGenerator
+####################
+
+PriceTools 
+do: [ PriceTSGenerator :ts <- ^global PriceRecord ;
+      :tsStoreXRef <- ^global PriceTools PriceTSGenerator ;
+      :dailyStoreXRef <- ^global PriceRecord ;  
+      :eomStoreXRef <- ^global PriceRecord ;  
+    ] ;
+
+#--  create a date after 1/1/1 for cases where no separate spaces have
+#--  been created
+PriceTools createTSStoreAsOf: 18990101 asDate ;
+
+#--------------------------------------------------
+
+####################
+#  PriceRecord
+####################
+
+PriceTools PriceRecord
+
+   defineMethod: [ | security | ^self entity ] .
+   defineMethod: [ | _price | ^self recordValue  ] .
+   defineFixedProperty: '_volume' .
+   defineFixedProperty: '_open' .
+   defineFixedProperty: '_high' .
+   defineFixedProperty: '_low' .
+   defineFixedProperty: '_bid' .
+   defineFixedProperty: '_ask' .
+   defineFixedProperty: '_accountingPrice' .
+   defineFixedProperty: 'accountingCurrency' .
+   defineFixedProperty: 'yield' .
+   defineFixedProperty: '_dailyReturn' .
+   defineFixedProperty: '_unitReturn' .
+;
+
+#----------
+
+PriceTools PriceRecord defineMethod: [ | price | 
+  _price / ^self adjustmentFactor * ^self currencyFactor 
+     else: [ accountingPrice ] 
+] ;
+
+PriceTools PriceRecord defineMethod: [ | open | 
+  _open / ^self adjustmentFactor * ^self currencyFactor 
+] ;
+
+PriceTools PriceRecord defineMethod: [ | high | 
+  _high / ^self adjustmentFactor * ^self currencyFactor 
+] ;
+
+PriceTools PriceRecord defineMethod: [ | low | 
+  _low / ^self adjustmentFactor * ^self currencyFactor 
+] ;
+
+PriceTools PriceRecord  defineMethod: [ | volume | 
+  _volume * ^self adjustmentFactor
+] ;
+
+PriceTools PriceRecord defineMethod: [ | bid | 
+  _bid / ^self adjustmentFactor * ^self currencyFactor 
+] ;
+
+PriceTools PriceRecord defineMethod: [ | ask | 
+  _ask / ^self adjustmentFactor * ^self currencyFactor 
+] ;
+
+PriceRecord defineMethod: [ | accountingCurrencyFactor | 
+   accountingCurrency isCurrency
+     ifTrue: 
+       [ accountingCurrency exchangeTo: ^self currency relativeTo: recordDate ]
+];
+
+PriceRecord defineMethod: [ | accountingPrice | 
+   _accountingPrice / adjustmentFactor * accountingCurrencyFactor
+];
+
+PriceTools PriceRecord defineMethod: [ | dailyReturn | 
+  _dailyReturn else: [ (_unitReturn - 1) * 100 ] 
+] ;
+
+PriceTools PriceRecord defineMethod: [ | unitReturn | 
+  _unitReturn else: [ _dailyReturn / 100 + 1 ] 
+] ;
+
+PriceTools PriceRecord defineMethod: [ | setPriceTo: price |
+  ^self :recordValue <- price ;
+  ^self
+] ;
+
+PriceTools PriceRecord defineMethod: [ | setVolumeTo: vol |
+  ^self :_volume <- vol ;
+  ^self
+] ;
+
+PriceTools PriceRecord defineMethod: [ | setHighTo: value |
+  ^self :_high <- value ;
+  ^self
+] ;
+
+PriceTools PriceRecord defineMethod: [ | setLowTo: value |
+  ^self :_low <- value ;
+  ^self
+] ;
+
+PriceTools PriceRecord defineMethod: [ | setOpenTo: value |
+  ^self :_open <- value ;
+  ^self
+] ;
+
+PriceTools PriceRecord defineMethod: [ | setBidTo: value |
+  ^self :_bid <- value ;
+  ^self
+] ;
+
+PriceTools PriceRecord defineMethod: [ | setAskTo: value |
+  ^self :_ask <- value ;
+  ^self
+] ;
+
+PriceTools PriceRecord defineMethod: [ | setAccountingPriceTo: value |
+  ^self :_accountingPrice <- value ;
+  ^self
+] ;
+
+PriceRecord defineMethod: [ | setAccountingCurrencyTo: curr |
+  ^self :accountingCurrency <- curr asCurrency ;
+  ^self
+] ;
+
+PriceTools PriceRecord defineMethod: [ | setYieldTo: yld |
+  ^self :yield <- yld ;
+  ^self
+] ;
+
+PriceTools PriceRecord defineMethod: [ | setDailyReturnTo: value | 
+  :_dailyReturn <- value ;
+  ^self
+] ;
+
+PriceTools PriceRecord defineMethod: [ | setUnitReturnTo: value | 
+  :_unitReturn <- value ;
+  ^self
+] ;
+
+#----------
+#  display
+#----------
+
+PriceTools PriceRecord defineMethod:  [ | print | 
+  ^self price print ; ^self
+] ;
+
+PriceTools PriceRecord defineMethod:  [ | print: format | 
+  ^self price print: format ; ^self
+] ;
+
+#--------------------
+#  Default Values
+#--------------------
+
+PriceTools PriceRecord
+do: [ :recordDate <- earliestPossibleDate ;
+      :entity <- ^global Security ; 
+      :baseCurrency <- ^global Currency ;
+      :adjustmentDate <- recordDate ;
+    ] ;
+
+#==================================================
+
+##################################################
+#  Estimate Bridge/ Record protocol
+#
+#  Create basic structures and protocol for storing estimated data.
+#
+#  Assumptions
+#    Different types of estimates can be tracked for different
+#    types of data at different frequencies.  Estimates are made
+#    for multiple points in the future.  The estimate for a specific
+#    data item for a future date can change over time and these 
+#    changes need to be tracked as well.  For example, you may want to
+#    estimate the next 5 annual eps values, the next 8 quarterly eps
+#    values, and the next 5 annual dps values.
+#
+#  Basic Structure
+#     Estimate are tracked as two-level time series structures.
+#     The outer level time series is used to specify the period ending
+#     date for the estimate.  This time series returns an object
+#     that can store the history of all estimates made for the
+#     entity/periodEndDate/dataItem combination.
+#
+##################################################
+
+#--------------------
+#  EstimateBridge: bootstrap protocol
+#--------------------
+
+EstimateBridge
+   defineFixedProperty: 'periodEndDate' withDefault: 10101 asDate .
+;
+
+
+#----------
+#  initialization
+#----------
+EstimateBridge defineMethod: [ | initializeKeys: keys |
+  :keys <- keys isList ifTrue: [ keys ] ifFalse: [ keys asList ] ;
+  ^super initializeKeys: (keys at: 1) ;
+  :periodEndDate <- keys at: 2 . asDate ;
+  ^self
+] ;
+
+EstimateBridge defineMethod: [ | initializeLocalAttributes |
+  ^self :observation <- ^self defaultInstance observation ;
+  ^self :actualRecord <- ^self defaultInstance actualRecord ;
+  ^self periodEndDate else: earliestPossibleDate . evaluate: 
+     [ ^super initializeLocalAttributes ] ;
+^self
+] ;
+
+
+#----------
+#  display
+#----------
+EstimateBridge defineMethod: [ | print |
+  ^self whatAmI concat: ":" . concat: ^self underlyingObject . 
+         concat: ":" . concat: ^self periodEndDate . print ; 
+  ^self
+] ;
+
+EstimateBridge defineMethod: [ | print: f | 
+  ^self whatAmI concat: ":" . concat: ^self underlyingObject.  
+      concat: ":" . concat: ^self periodEndDate . print: f ; 
+  ^self
+] ;
+
+EstimateBridge defineMethod: [ | displayInfo |
+  ^self whatAmI print; ":" print ; 
+  ^self underlyingObject print ; " " print; periodEndDate printNL ;
+] ;
+
+EstimateBridge defineMethod: [ | accessExpression | 
+  !asof <- ^self periodEndDate isntDefault
+     ifTrue: [ " asOf: " concat: ^self periodEndDate asInteger .
+                   concat: " . "
+             ]
+     ifFalse: [ " value " ] ;
+  ^self baseEntity accessExpression 
+     concat: ^self updateBlock asUndelimitedString .
+     concat: asof
+] ;
+
+#----------
+#  access
+#----------
+
+EstimateBridge defineMethod: 
+[ | actual | 
+  :actualRecord lastObservation estimate 
+] ;
+
+EstimateBridge defineMethod: [ | actualDate | 
+   :actualRecord lastObservation date ifDefault: [ NA ]
+] ;
+
+EstimateBridge defineMethod: [ | surprise | 
+   actual pctChangeTo: lastObservation estimate
+] ;
+EstimateBridge defineMethod: [ | surpriseDiff | 
+  actual - lastObservation estimate
+] ;
+
+EstimateBridge defineMethod: [ | lastObservation |
+  :observation lastObservation
+] ;
+
+EstimateBridge defineMethod: [ | priorObservation |
+   !currentDate <- lastObservation date ;
+   currentDate isntDefault
+      ifTrue: [ :observation asOf: currentDate predecessor ]
+     ifFalse: [ lastObservation ] .     #- default record
+] ;
+
+EstimateBridge defineMethod: [ | getAllPeriods | 
+  ^self periodEndDate isntDefault
+     ifTrue: [ ^self underlyingObject send: ^self updateBlock ] 
+    ifFalse: [ ^self underlyingObject send: ^self updateBlock . value asList ] 
+] ;
+
+EstimateBridge defineMethod: [ | priorPeriod |
+  ^self periodEndDate isntDefault
+     ifTrue: [ ^self getAllPeriods asOf: ^self periodEndDate - 1 days ]
+    ifFalse: [ ^self defaultInstance ]
+] ;
+
+EstimateBridge defineMethod: [ | nextPeriod |
+  ^self periodEndDate isntDefault
+     ifTrue: 
+      [ !ts <- ^self getAllPeriods ;
+        !next <- ts nextDateAsOf: ^self periodEndDate ;
+        next isntNA
+           ifTrue: [ ts asOf: next ] ifFalse: [ ^self defaultInstance ]
+      ]
+    ifFalse: [ ^self defaultInstance ]
+] ;
+
+
+####################
+#  Define specialty protocol for Summary and Detail bridges
+####################
+
+SummaryEstimateBridge
+    defineFixedProperty: 'detailXRef' .
+;
+
+SummaryEstimateBridge defineMethod: [ | initializeGlobalSubclassProperties |
+  ^super initializeGlobalSubclassProperties; 
+  :detailXRef <- ^global IndexedList new ;
+  ^self
+] ;
+SummaryEstimateBridge initializeGlobalSubclassProperties ;
+
+SummaryEstimateBridge defineMethod: [ | initializeLocalAttributes |
+  ^super initializeLocalAttributes ;
+  :detailXRef <- ^self defaultInstance detailXRef clusterNew ;
+  ^self
+] ;
+
+SummaryEstimateBridge defineMethod: [ | setDefaultDetailBridgeTo: dbridge |
+  dbridge isDetailEstimateBridge
+     ifTrue: [ ^self define: 'defaultDetailBridge' toBe: dbridge asSelf ] ;
+  ^self
+] ;
+
+SummaryEstimateBridge setDefaultDetailBridgeTo: DetailEstimateBridge ;
+
+SummaryEstimateBridge defineMethod: [ | forDetail: detail | 
+  detailXRef at: detail . else: [ ^self defaultDetailBridge ]
+] ;
+
+#--------------------
+
+DetailEstimateBridge
+   defineFixedProperty: 'estimator' .
+
+   defineMethod: [ | summaryBridge | underlyingObject ] .
+   defineMethod: [ | periodEndDate | summaryBridge periodEndDate ] .
+   defineMethod: [ | baseEntity | underlyingObject baseEntity ] .
+;
+
+DetailEstimateBridge defineMethod: [ | initializeKeys: keys |
+#--  summaryBridge, estimator
+  :underlyingObject <- keys at: 1 . asSelf ;
+  :estimator <- keys at: 2 . asSelf ;
+  ^self
+] ;
+
+DetailEstimateBridge defineMethod: [ | initializeLocalAttributes |
+  ^super initializeLocalAttributes ;
+  ^self underlyingObject detailXRef at: estimator put: ^self asSelf ;
+  ^self
+] ;
+
+DetailEstimateBridge defineMethod: [ | setDefaultSummaryBridgeTo: sbridge |
+  sbridge isSummaryEstimateBridge
+     ifTrue: [ ^self define: 'defaultSummaryBridge' toBe: sbridge asSelf ] ;
+  ^self
+] ;
+DetailEstimateBridge setDefaultSummaryBridgeTo: SummaryEstimateBridge ;
+
+#----------
+#  display
+#----------
+DetailEstimateBridge defineMethod: [ | print |
+  ^self estimator asString concat: " " . 
+      concat: ^self underlyingObject . print ;
+  ^self
+] ;
+
+DetailEstimateBridge defineMethod: [ | print: f | 
+  ^self estimator asString concat: " " .
+      concat: ^self underlyingObject . print: f ;
+  ^self
+] ;
+
+DetailEstimateBridge defineMethod: [ | displayInfo |
+  ^self whatAmI print; ":" print ; 
+  ^self printNL ;
+] ;
+
+DetailEstimateBridge defineMethod: [ | getAllPeriods | 
+   ^self underlyingObject getAllPeriods
+      send: [ ^self forDetail: ^my estimator ]
+] ;
+
+#--------------------
+#  EstimateRecord: bootstrap protocol
+#--------------------
+
+EstimateRecord 
+   defineFixedProperty: 'actualFlag' withDefault: FALSE .
+   defineFixedProperty: 'estimator' withDefault: Analyst .
+
+   defineMethod: [ | bridge | entity ] .
+   defineMethod: [ | periodEndDate | bridge periodEndDate ] .
+
+defineMethod: [ | _estimate | recordValue ] .
+defineMethod: [ | estimate | 
+  ^self _estimate / ^self adjustmentFactor * ^self currencyFactor
+] .
+;
+
+EstimateRecord defineMethod: [|currencyFactor|
+  (^self baseCurrency isCurrency && [^self baseCurrency isntDefault ])
+  ifTrue: 
+    [^self baseCurrency exchangeTo: ^self currency relativeTo: recordDate] .
+  elseIf: [^self baseCurrency isDefault 
+              && [^self entity baseEntity isntDefault]
+          ]
+    then: [^self entity baseEntity baseCurrency
+               exchangeTo: ^self currency relativeTo: recordDate
+          ] .
+] ;
+
+
+EstimateRecord defineMethod: [ | setEstimateTo: est | 
+  :recordValue <- est ;
+  ^self 
+] ;
+
+EstimateRecord defineMethod: [ | setActualFlagTo: flag |
+  :actualFlag <- flag isTrue ifTrue: [ TRUE ] else: [ FALSE ] ;
+
+#-- move actual record out of t/s if attached to an estimate bridge
+  ^self actualFlag isTrue &&
+       [ bridge isEstimateBridge ] && [ ^self updateBlock isBlock ] 
+  ifTrue: 
+     [ !currentActual <- bridge :actualRecord asOf: date ;
+       currentActual _estimate != ^self _estimate
+          ifTrue: [ bridge :actualRecord asOf: date put: ^self asSelf ] 
+         ifFalse: [ ^self asSelf flagForDeletion ] ;
+       bridge send: ^self updateBlock . delete: date ;
+     ] ;
+  ^self
+] ;
+
+EstimateRecord defineMethod: [ | setEstimatorTo: input |
+  :estimator <- input isString
+      ifTrue: [ input as: ^self defaultInstance estimator ]
+     ifFalse: [ input asSelf ] ;
+  ^self
+] ;
+
+EstimateRecord defineMethod: [ | displayInfo | 
+  entity print ; " " print ; periodEndDate print ; " " print ;
+  date print ; " " print ; estimate print ; " " print ; 
+  baseCurrency printNL ;
+] ;
+
+#--------------------
+#  AnalystEstimateRecord: bootstrap protocol
+#--------------------
+
+AnalystEstimateRecord
+   defineMethod: [ | analyst | estimator ] .
+;
+
+
+AnalystEstimateRecord defineMethod: [ | getAnalystName | 
+  ^self estimator name
+] ;
+
+#--------------------
+#  ConsensusEstimate
+#--------------------
+
+ConsensusEstimateRecord defineMethod: 
+[ | _estimate | ^self _meanEst else: recordValue ] ;
+
+ConsensusEstimateRecord defineMethod: [ | getAnalystName |
+  "Consensus"
+] ;
+
+
+#----------
+#  subclass inits
+#----------
+EstimateRecord setUpdateBlockTo: [ :observation ] ;
+
+
+
+#==================================================
+

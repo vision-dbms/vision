@@ -1,0 +1,159 @@
+"
+####################
+#  Descriptor: Protocol for Subclasses
+####################
+
+" print ;
+
+#--------------------
+#  Date DayOfWeekDescriptor
+#--------------------
+
+"
+#-->  Date DayOfWeekDescriptor
+" print ;
+
+#--  Generate 7 distinct day of week descriptors (including default row)
+Date DayOfWeekDescriptor new new new new new new ;
+
+#--  Initialize
+^date DayOfWeekDescriptor instanceList at0: 0 . :code <- "Sunday" ;
+^date DayOfWeekDescriptor instanceList at0: 1 . :code <- "Monday" ;
+^date DayOfWeekDescriptor instanceList at0: 2 . :code <- "Tuesday" ;
+^date DayOfWeekDescriptor instanceList at0: 3 . :code <- "Wednesday" ;
+^date DayOfWeekDescriptor instanceList at0: 4 . :code <- "Thursday" ;
+^date DayOfWeekDescriptor instanceList at0: 5 . :code <- "Friday" ;
+^date DayOfWeekDescriptor instanceList at0: 6 . :code <- "Saturday" ;
+
+#--  Support Methods at Date
+Date
+defineMethod: 
+[ | getDayOfWeekDescriptor | 
+DayOfWeekDescriptor instanceList at0: (^self asIDate7 mod: 7)
+] .
+
+defineMethod:
+[ | dayOfWeek |
+  getDayOfWeekDescriptor code
+] .
+
+;
+
+
+#--------------------
+#  Date MonthDescriptor
+#--------------------
+
+"
+#-->  Date MonthDescriptor 
+" printNL ;
+
+
+#-- Additional Prototocl
+Date MonthDescriptor
+   defineFixedProperty: 'shortName' . 
+   defineFixedProperty: 'longName' .
+   defineFixedProperty: 'firstLetter' .
+   defineFixedProperty: 'secondLetter' .
+   defineFixedProperty: 'thirdLetter' ;
+
+#--  Generate 12 distinct month descriptors (including default)
+Date MonthDescriptor
+   new new new new new new new new new new new ;
+
+Date MonthDescriptor instanceList at: 1 . :shortName <- "Jan" ;
+Date MonthDescriptor instanceList at: 1 . :longName <- "January" ;
+Date MonthDescriptor instanceList at: 1 . :firstLetter <- "J" ;
+Date MonthDescriptor instanceList at: 1 . :secondLetter <- "A" ;
+Date MonthDescriptor instanceList at: 1 . :thirdLetter <- "N" ;
+
+Date MonthDescriptor instanceList at: 2 . :shortName <- "Feb" ;
+Date MonthDescriptor instanceList at: 2 . :longName <- "February" ;
+Date MonthDescriptor instanceList at: 2 . :firstLetter <- "F" ;
+Date MonthDescriptor instanceList at: 2 . :secondLetter <- "E" ;
+Date MonthDescriptor instanceList at: 2 . :thirdLetter <- "B" ;
+
+Date MonthDescriptor instanceList at: 3 . :shortName <- "Mar" ;
+Date MonthDescriptor instanceList at: 3 . :longName <- "March" ;
+Date MonthDescriptor instanceList at: 3 . :firstLetter <- "M" ;
+Date MonthDescriptor instanceList at: 3 . :secondLetter <- "A" ;
+Date MonthDescriptor instanceList at: 3 . :thirdLetter <- "R" ;
+
+Date MonthDescriptor instanceList at: 4 . :shortName <- "Apr" ;
+Date MonthDescriptor instanceList at: 4 . :longName <- "April" ;
+Date MonthDescriptor instanceList at: 4 . :firstLetter <- "A" ;
+Date MonthDescriptor instanceList at: 4 . :secondLetter <- "P" ;
+Date MonthDescriptor instanceList at: 4 . :thirdLetter <- "R" ;
+
+Date MonthDescriptor instanceList at: 5 . :shortName <- "May" ;
+Date MonthDescriptor instanceList at: 5 . :longName <- "May" ;
+Date MonthDescriptor instanceList at: 5 . :firstLetter <- "M" ;
+Date MonthDescriptor instanceList at: 5 . :secondLetter <- "A" ;
+Date MonthDescriptor instanceList at: 5 . :thirdLetter <- "Y" ;
+
+Date MonthDescriptor instanceList at: 6 . :shortName <- "Jun" ;
+Date MonthDescriptor instanceList at: 6 . :longName <- "June" ;
+Date MonthDescriptor instanceList at: 6 . :firstLetter <- "J" ;
+Date MonthDescriptor instanceList at: 6 . :secondLetter <- "U" ;
+Date MonthDescriptor instanceList at: 6 . :thirdLetter <- "N" ;
+
+Date MonthDescriptor instanceList at: 7 . :shortName <- "Jul" ;
+Date MonthDescriptor instanceList at: 7 . :longName <- "July" ;
+Date MonthDescriptor instanceList at: 7 . :firstLetter <- "J" ;
+Date MonthDescriptor instanceList at: 7 . :secondLetter <- "U" ;
+Date MonthDescriptor instanceList at: 7 . :thirdLetter <- "L" ;
+
+Date MonthDescriptor instanceList at: 8 . :shortName <- "Aug" ;
+Date MonthDescriptor instanceList at: 8 . :longName <- "August" ;
+Date MonthDescriptor instanceList at: 8 . :firstLetter <- "A" ;
+Date MonthDescriptor instanceList at: 8 . :secondLetter <- "U" ;
+Date MonthDescriptor instanceList at: 8 . :thirdLetter <- "G" ;
+
+Date MonthDescriptor instanceList at: 9 . :shortName <- "Sep" ;
+Date MonthDescriptor instanceList at: 9 . :longName <- "September" ;
+Date MonthDescriptor instanceList at: 9 . :firstLetter <- "S" ;
+Date MonthDescriptor instanceList at: 9 . :secondLetter <- "E" ;
+Date MonthDescriptor instanceList at: 9 . :thirdLetter <- "P" ;
+
+Date MonthDescriptor instanceList at: 10 . :shortName <- "Oct" ;
+Date MonthDescriptor instanceList at: 10 . :longName <- "October" ;
+Date MonthDescriptor instanceList at: 10 . :firstLetter <- "O" ;
+Date MonthDescriptor instanceList at: 10 . :secondLetter <- "C" ;
+Date MonthDescriptor instanceList at: 10 . :thirdLetter <- "T" ;
+
+Date MonthDescriptor instanceList at: 11 . :shortName <- "Nov" ;
+Date MonthDescriptor instanceList at: 11 . :longName <- "November" ;
+Date MonthDescriptor instanceList at: 11 . :firstLetter <- "N" ;
+Date MonthDescriptor instanceList at: 11 . :secondLetter <- "O" ;
+Date MonthDescriptor instanceList at: 11 . :thirdLetter <- "V" ;
+
+Date MonthDescriptor instanceList at: 12 . :shortName <- "Dec" ;
+Date MonthDescriptor instanceList at: 12 . :longName <- "December" ;
+Date MonthDescriptor instanceList at: 12 . :firstLetter <- "D" ;
+Date MonthDescriptor instanceList at: 12 . :secondLetter <- "E" ;
+Date MonthDescriptor instanceList at: 12 . :thirdLetter <- "C" ;
+
+#--  Support Methods at Date
+Date
+
+defineMethod: 
+[ | getMonthDescriptor | 
+MonthDescriptor instanceList at: month 
+] .
+
+defineMethod:
+[ | formatUsingShortName | 
+     [ day print: 2 ; "-" print; getMonthDescriptor shortName print ;
+       "-" print; year print: 4 ] divertOutput
+] .
+
+defineMethod: 
+[ | formatUsingLongName |
+  [ getMonthDescriptor longName print; " " print ;
+    day asString print ; ", " print ;
+    year print: 4 ; ] divertOutput
+] .
+
+;
+
+

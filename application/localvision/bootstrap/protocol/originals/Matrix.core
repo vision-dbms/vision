@@ -1,0 +1,643 @@
+###################################################################
+#  Class: Matrix
+#     This class can be installed into any Vision database running any
+#     version of batchvision
+# 
+#   I. Description
+#      ===========
+#      The Matrix class represents a group of Objects organized into
+#      equal-sized ordered subgroups: in effect, rows and columns. The 
+#      contents of a Matrix may be of any class, though it is expected 
+#      that typically they will be Numbers. However, the arithmetic 
+#      functions defined for Matrix require that the contents respond 
+#      to the corresponding arithmetic binary message - for example, 
+#      "addMatrix:" expects the contents of both recipient and argument 
+#      to respond to the "+" message.
+# 
+#      The following messages defined for the Matrix class. They are 
+#      described in more detail below.
+#          
+#          Creation
+#          --------
+#          numRows
+#          numCols
+#          rowPrototype
+#          colPrototype
+#          rows
+#          createMatrixFromRows:
+#          setCellsTo:
+#          checkRow:
+#          checkColumn:
+#          
+#          Access
+#          ------
+#          getValueAtRow:andColumn:
+#          getRow:
+#          getRows
+#          getColumn:
+#          getColumns
+#          
+#          Update
+#          ------
+#          putValue:atRow:andColumn:
+#          
+#          Transformation
+#          --------------
+#          transpose
+#          addScalar:
+#          subtractScalar:
+#          multiplyScalar:
+#          addMatrix:
+#          subtractMatrix:
+#          multiplyMatrix:
+#          
+#          Display
+#          -------
+#          print
+#          print:
+#          printUsing:
+#          display
+# 
+# 
+#  II. Creation
+#      ========
+#      Matrix instances may be created in three different ways. Arguments
+#      representing row or column dimensions must be positive Integers.
+#      An NA is returned if a Matrix could not be created as specified.
+# 
+#      The "createInstance:" message takes as an argument the dimensions
+#      of the desired matrix, and returns a Matrix object with no contents.
+#      For example,
+# 
+#        Matrix createInstance: (2,3)
+# 
+#      returns a Matrix with 2 rows and 3 columns, but any access query
+#      via "getValueAtRow:andColumn:" will return NA. Values may be 
+#      inserted in the empty Matrix using the "putValue:atRow:andColumn:"
+#      message.
+# 
+#      The "setCellsTo:" message can be used to set all the cells in
+#      a matrix to the supplied object.  For example,
+# 
+#        Matrix createInstance: 2,3 . setCellsTo: 0.0 
+# 
+#      creates the Matrix:
+# 
+#        0.0     0.0     0.0          
+#        0.0     0.0     0.0          
+# 
+#      The message "createMatrixFromRows:" takes as an argument a list
+#      of lists which are used to constitute the rows of the returned
+#      Matrix. If the sublists are not all of the same length, the shortest
+#      one is used to set the column dimension of the Matrix. The row
+#      dimension is obviously the number of sublists within the enclosing 
+#      list. For example,
+# 
+#        Matrix createMatrixFromRows: ( (11,12,13) asList, (21,22,23) )
+# 
+#      creates the Matrix:
+# 
+#        11        12        13 
+#        21        22        23 
+# 
+#      Note the use of "asList" in this example to prevent the comma 
+#      operator from appending the second list (21,22,23) to the first.
+# 
+#    
+# III. Access
+#      ======
+#      The message "getValueAtRow:andColumn:" returns the individual 
+#      value stored at a specific row and column position. For example,
+# 
+#        !mat <- Matrix createMatrixFromRows: 
+#                           ( (11,12,13) asList, (21,22,23) );
+#        mat getValueAtRow: 2 andColumn: 3
+# 
+#      returns 23. 
+# 
+#      The "getRow:" and "getColumn:" messages each return a List 
+#      comprised of the values in the specifed row or column, 
+#      respectively. For example,
+# 
+#        mat getColumn: 2 . total
+# 
+#      returns 34.00, the total of the list (12,22).
+# 
+#      The "getRows" and "getColumns" messages return a List of Lists,
+#      the sublists comprised of the values in each row or column, 
+#      respectively. For example,
+# 
+#        mat getRows do: [ ^self total printNL ]
+# 
+#      returns:
+# 
+#        36.00
+#        66.00
+# 
+#      The message "numRows" returns the row dimension and "numCols"
+#      returns the column dimension.
+# 
+#      Arguments representing row or column positions must be positive
+#      Integers within the dimensions of the Matrix; otherwise NA is 
+#      returned.
+# 
+#  IV. Update
+#      ======
+#      The message "putValue:atRow:andColumn:" inserts a new value
+#      at the specified row and column position. The recipient Matrix
+#      is returned. The arguments must be positive Integers within
+#      the dimensions of the Matrix; otherwise no action is taken.
+# 
+#      For example:
+# 
+#        mat putValue: 100 atRow: 2 andColumn: 3
+# 
+#      returns the same Matrix but with the contents:
+# 
+#        11        12        13 
+#        21        22       100 
+# 
+#   V. Transformations
+#      ===============
+#      The following messages perform a transformation on the recipient
+#      Matrix, but return a new Matrix object without updating the
+#      recipient. If the transformed Matrix is intended to be saved 
+#      in place of the original, it is necessary to perform a 
+#      reassignment, such as:
+# 
+#        :mat <- mat addScalar: .5
+# 
+#      The "transpose" message returns a Matrix whose row dimension
+#      is the same as the recipient's column dimension, and whose
+#      column dimension is the recipient's row dimension. The row 
+#      and column positions of each value are reversed relative to 
+#      the recipient. For example,
+# 
+#      mat transpose 
+# 
+#      returns the Matrix:
+# 
+#        11        21 
+#        12        22 
+#        13       100 
+# 
+# 
+#      The messages "addScalar:", "subtractScalar:" and "multiplyScalar:"
+#      each take a Number as an argument, and use it to perform the 
+#      appropriate arithmetic operation on each value in the matrix.
+#      For example,
+# 
+#        mat addScalar: .5
+# 
+#      returns the Matrix
+# 
+#        11.50     12.50     13.50 
+#        21.50     22.50    100.50 
+# 
+#      NA is returned if the argument is not a Number. If the binary
+#      messages "+", "-" or "*" are not defined for the values in the
+#      Matrix, "Selector Not Found" errors will result.
+# 
+#      The messages "addMatrix:" and "subtractMatrix:" each take as
+#      an argument a Matrix with the same dimensions as the recipient
+#      Matrix; otherwise NA is returned. The appropriate arithmetic
+#      operation is performed on each pair of values in corresponding
+#      positions in the two matrices. For example,
+# 
+#        mat addMatrix: mat
+# 
+#      returns the Matrix:
+# 
+#        22.00     24.00     26.00 
+#        42.00     44.00    200.00 
+# 
+#      If the binary messages "+" or "-" are not defined for the 
+#      values in the both the recipient and argument matrices, 
+#      "Selector Not Found" errors will result.
+# 
+#      The message "multiplyMatrix:" takes as an argument a Matrix with 
+#      the same row dimension as the recipient's column dimension; 
+#      otherwise NA is returned. The returned Matrix has the recipient's 
+#      row dimension and the argument's column dimension. The value in 
+#      each row and column is obtained by totaling the products of the 
+#      corresponding pairs of values in the same-positioned row of the 
+#      recipient and the same-positioned column of the argument. An 
+#      example follows:
+# 
+#         Input:
+#         !pat <- Matrix createInstance: 3, 5 . setCellsTo: 0.0 .
+#                      putValue: 1 atRow: 1 andColumn: 1 . 
+#                      putValue: 1 atRow: 1 andColumn: 2 . 
+#                      putValue: 1 atRow: 2 andColumn: 2 . 
+#                      putValue: 1 atRow: 3 andColumn: 4 ; 
+# 
+#         mat print; newLine print; newLine print; pat print;
+# 
+# 
+#         Output:
+# 
+#           11        12        13 
+#           21        22       100 
+# 
+# 
+#            1         1      0.00      0.00      0.00 
+#         0.00         1      0.00      0.00      0.00 
+#         0.00      0.00      0.00         1      0.00 
+# 
+# 
+# 
+#         Input:
+#         mat multiplyMatrix: pat
+# 
+#         Output:
+# 
+#        11.00     23.00      0.00     13.00      0.00 
+#        21.00     43.00      0.00    100.00      0.00 
+# 
+# 
+#      If the binary messages "*" is not defined for the 
+#      values in the both the recipient and argument matrices, 
+#      "Selector Not Found" errors will result.
+# 
+#  VI. Display
+#      =======
+#      The basic Matrix "print" message sends the "print" message to 
+#      each value in the rows, with one extra space separating the 
+#      columns and a newLine printed at the end of the row.
+# 
+#      Because the Vision editor sends the "print" message to the result
+#      of an evaluation, it is advisable to use a semicolon to terminate 
+#      statements that create or operate on very large matrices.
+# 
+#      The "print:" message passes along the supplied format, allowing 
+#      control over the justification and width of the display.
+# 
+#      The "printUsing:" message takes a block as an argument and sends 
+#      that block to each value instead of the "print" message.
+#
+#      To illustrate,
+# 
+#         Input:
+#         mat print;
+# 
+#         Output:
+# 
+#               11        12        13 
+#               21        22       100 
+# 
+#        Input:
+#        mat print: 4;
+# 
+#        Output:
+# 
+#          11   12   13 
+#          21   22  100 
+# 
+#        Input:
+#        mat printUsing: [ ^self asString print: 4; " | " print ];
+# 
+#        Output:
+# 
+#        11   |  12   |  13   |  
+#        21   |  22   |  100  |  
+#
+#      The "display" message prints the dimensions of the Matrix before
+#      printing the values.
+# 
+###################################################################
+
+
+##########
+# Class definition
+##########
+
+Object createSubclass: "Matrix" ;
+
+Matrix
+defineFixedProperty: 'rows' .
+defineFixedProperty: 'numRows' .
+defineFixedProperty: 'numCols' .
+define: 'rowPrototype' toBe: IndexedList new .
+define: 'colPrototype' toBe: IndexedList new .
+
+;
+
+##########
+# Methods
+##########
+
+Matrix
+
+#---------
+# Creation
+#---------
+
+# Use the expression
+#      Matrix createInstance: (numRows, numCols)
+# to create an empty Matrix. The properties 'numRows' and 'numCols' 
+# will be set to a positive Integer or zero. The property 'rows' 
+# will be set to an IndexedList, indexed by Integer, whose elements 
+# are IndexedLists
+
+defineMethod:
+[ | initializeKeys: keys |
+  ^super initializeKeys: keys;
+  !rows <- (keys at: 1);
+  !cols <- (keys at: 2);
+  ^self :numRows <- rows isInteger && rows > 0 
+                      ifTrue: [ rows ] ifFalse: [ 0 ];
+  ^self :numCols <- cols isInteger && cols > 0 
+                      ifTrue: [ cols ] ifFalse: [ 0 ];
+  ^self
+] . 
+
+defineMethod:
+[ | initializeLocalAttributes |
+  ^super initializeLocalAttributes;
+  ^self :rows <- ^self rowPrototype clusterNew;
+  ^self numRows sequence
+    do: [ ^my rows at: asInteger put: ^my colPrototype clusterNew ];
+  ^self
+] . 
+
+# Sets all the values in the matrix to the supplied object
+defineMethod:
+[ | setCellsTo: object | 
+  !matrix <- ^self ;
+  matrix rows
+   do: [ !row <- ^self;
+         !object <- ^my object ;
+         ^my matrix numCols sequence
+           do: [ ^my row at: asInteger put: ^my object ];
+       ];
+  matrix
+] . 
+
+# Returns Matrix with provided rows
+# Argument must be a list of lists
+defineMethod:
+[ | createMatrixFromRows: rows |
+  # Find dimensions, allowing for bad arguments or uneven rows
+  !numRows <- rows isList ifTrue: [ rows count ] ifFalse: [ 0 ];
+  !numCols <- rows isList 
+               ifTrue: [ rows select: [ isList ] . 
+                               min: [ count ] . asInteger
+                       ]
+              ifFalse: [ 0 ];
+  !newMatrix <- ^self createInstance: (numRows, numCols) ;
+  # Copy elements from list of lists into new Matrix object
+  numRows sequence
+   do: [ !newRow <- ^my newMatrix rows at: ^self;
+         !sourceRow <- ^my rows isList ifTrue: [ ^my rows at: ^self ];
+         sourceRow isList ifTrue: [
+           sourceRow numberElements
+             do: [ ^my newRow at: position asInteger put: ^self ];
+         ];
+       ];
+  newMatrix
+] . 
+
+# Returns TRUE if argument is positive Integer within dimensions of Matrix;
+# otherwise returns FALSE
+defineMethod:
+[ | checkRow: rowNum |
+  rowNum isInteger && [ rowNum > 0 && rowNum <= ^self numRows ]
+] . 
+
+# Returns TRUE if argument is positive Integer within dimensions of Matrix;
+# otherwise returns FALSE
+defineMethod:
+[ | checkColumn: colNum |
+  colNum isInteger && [ colNum > 0 && colNum <= ^self numCols ]
+] . 
+
+#---------
+# Access
+#---------
+
+# Returns value stored at specified row and column;
+# otherwise returns NA 
+defineMethod:
+[ | getValueAtRow: rowNum andColumn: colNum | 
+  (^self checkRow: rowNum) && (^self checkColumn: colNum) ifTrue: [ 
+    ^self rows at: rowNum asInteger . at: colNum asInteger
+  ]
+] .
+
+# Returns list of values stored in specified row;
+# otherwise returns NA 
+defineMethod:
+[ | getRow: rowNum | 
+  ^self checkRow: rowNum . ifTrue: [
+    ^self rows at: rowNum asInteger . copyListElements
+  ]
+] .
+
+# Returns list of lists, corresponding to rows of values
+defineMethod:
+[ | getRows | 
+  ^self rows send: [ ^self copyListElements ]
+] .
+
+# Returns list of values stored in specified column;
+# otherwise returns NA 
+defineMethod:
+[ | getColumn: colNum | 
+  ^self checkColumn: colNum .  ifTrue: [ 
+    ^self rows send: [ ^self at: ^my colNum asInteger ]
+  ]
+] .
+
+# Returns list of lists, corresponding to columns of values
+defineMethod:
+[ | getColumns | 
+  ^self numCols sequence 
+     send: [ !colNum <- asInteger;
+             ^my rows send: [ ^self at: ^my colNum asInteger ]
+           ]
+] .
+
+#---------
+# Update
+#---------
+
+# Stores value at specified row and column if possible
+# Returns ^self
+defineMethod:
+[ | putValue: value atRow: rowNum andColumn: colNum | 
+  (^self checkRow: rowNum) && (^self checkColumn: colNum) ifTrue: [ 
+    ^self rows at: rowNum asInteger . at: colNum asInteger put: value
+  ];
+  ^self
+] .
+
+#---------
+# Display
+#---------
+
+# Prints contents of Matrix arrayed in rows and columns
+# using default "print" message
+defineMethod:
+[ | print |
+  ^self rows do: [ 
+                   !row <- ^self;
+                   ^my numCols else: 0 . sequence
+                      do: [ ^my row at: asInteger . print; " " print; ]; 
+                   newLine print; 
+                 ];
+  ^self
+] .
+
+# Prints contents of Matrix arrayed in rows and columns
+# using "print:" message
+defineMethod:
+[ | print: aFormat |
+  ^self rows do: [ !aFormat <- ^my aFormat;
+                   !row <- ^self;
+                   ^my numCols else: 0 . sequence
+                      do: [ ^my row at: asInteger . print: ^my aFormat; " " print; ]; 
+                   newLine print; 
+                 ];
+  ^self
+] .
+
+# Prints contents of Matrix arrayed in rows and columns
+# using supplied block
+defineMethod:
+[ | printUsing: aBlock |
+  ^self rows do: [ !aBlock <- ^my aBlock;
+                   !row <- ^self;
+                   ^my numCols else: 0 . sequence
+                      do: [ ^my row at: asInteger . send: ^my aBlock; " " print; ]; 
+                   newLine print; 
+                 ];
+  ^self
+] .
+
+# Prints dimensions and contents
+defineMethod:
+[ | display |
+  ^self numRows asString print; " Rows by " print;
+  ^self numCols asString print; " Columns" printNL;
+  ^self print;
+  ^self
+] .
+
+#---------
+# Transformation
+#---------
+
+# Returns Matrix whose rows are created from recipient's columns
+defineMethod:
+[ | transpose |
+  ^self createMatrixFromRows: ^self getColumns
+] .
+
+# Returns Matrix that is the result of adding recipient to argument
+# Argument must be Matrix object with same dimensions as recipient
+# Contents of recipient and argument must respond to "+" message
+defineMethod:
+[ | addMatrix: aMatrix |
+  aMatrix isMatrix && 
+  [ ^self numRows = aMatrix numRows && ^self numCols = aMatrix numCols ] 
+  ifTrue: 
+  [ ^self createMatrixFromRows: 
+      (^self getRows numberElements
+           send: [ !sourceRow <- ^my aMatrix rows at: position;
+                   ^self numberElements
+                      send: [ ^self + (^my sourceRow at: position) ] 
+                 ]
+      )
+  ]
+] .
+
+# Returns Matrix that is the result of adding argument to all values of
+#   recipient
+# Argument must be a Number
+# Contents of recipient must respond to "+" message
+defineMethod:
+[ | addScalar: element |
+  element isNumber  
+  ifTrue: 
+  [ ^self createMatrixFromRows: 
+      (^self getRows send: [ !element <- ^my element;
+                             ^self send: [ ^self + ^my element ] 
+                           ]
+      )
+  ]
+] .
+
+# Returns Matrix that is the result of subtracting argument from recipient
+# Argument must be Matrix object with same dimensions as recipient
+# Contents of recipient and argument must respond to "-" message
+defineMethod:
+[ | subtractMatrix: aMatrix |
+  aMatrix isMatrix && 
+  [ ^self numRows = aMatrix numRows && ^self numCols = aMatrix numCols ] 
+  ifTrue: 
+  [ ^self createMatrixFromRows: 
+      (^self getRows numberElements
+           send: [ !sourceRow <- ^my aMatrix rows at: position;
+                   ^self numberElements
+                      send: [ ^self - (^my sourceRow at: position) ] 
+                 ]
+      )
+  ]
+] .
+
+# Returns Matrix that is the result of subtracting argument from all 
+#   values of recipient
+# Argument must be a Number
+# Contents of recipient must respond to "-" message
+defineMethod:
+[ | subtractScalar: element |
+  element isNumber  
+  ifTrue: 
+  [ ^self createMatrixFromRows: 
+      (^self getRows send: [ !element <- ^my element;
+                             ^self send: [ ^self - ^my element ] 
+                           ]
+      )
+  ]
+] .
+
+# Returns Matrix that is the result of multiplying recipient by argument
+# Argument must be Matrix object with same row dimension as 
+#   recipient's column dimension
+# Contents of recipient and argument must respond to "*" message
+defineMethod:
+[ | multiplyMatrix: aMatrix |
+  aMatrix isMatrix && [ ^self numCols = aMatrix numRows ] 
+  ifTrue: 
+  [ !columns <- aMatrix getColumns;
+    ^self createMatrixFromRows: 
+      (^self getRows 
+           send: [ !row <- ^self;
+                   ^my columns 
+                      send: [ !row <- ^my row;
+                              ^self numberElements
+                                 total: [ ^self * (^my row at: position) ] 
+                            ]
+                 ]
+      )
+  ]
+] .
+
+# Returns Matrix that is the result of multiplying all values of 
+#   recipient by argument
+# Argument must be a Number
+# Contents of recipient must respond to "*" message
+defineMethod:
+[ | multiplyScalar: element |
+  element isNumber  
+  ifTrue: 
+  [ ^self createMatrixFromRows: 
+      (^self getRows send: [ !element <- ^my element;
+                             ^self send: [ ^self * ^my element ] 
+                           ]
+      )
+  ]
+] .
+
+;
+

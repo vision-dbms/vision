@@ -1,0 +1,67 @@
+"
+####################
+#  UserEnvironment and Related Protocol
+####################
+
+" print ;
+
+UserEnvironment
+;
+
+PrivateRecord
+   defineFixedProperty: 'entity' .
+
+defineMethod:
+[ | newAs: string | 
+  ^super newAs: string . 
+    setEntityTo: ^self defaultInstance entity 
+] .
+
+defineMethod:
+[ | setEntityTo: input | 
+  ^self :entity <- input ;
+  input isDefault 
+    ifFalse: [ ^self addAlias: ^self entity code ] ;
+  ^self
+] .
+
+defineMethod:
+[ | addAlias: strings | 
+  !dictionary <- ^self named ;
+  !record <- ^self asSelf ;
+  strings do: [ ^my dictionary at: ^self put: ^my record ] ;
+  ^self
+] .
+
+defineMethod:
+[ | createMissingLinksForClass | 
+  ^self createMissingLinksForList: ^self entity masterList
+] .
+
+defineMethod:
+[ | createMissingLinksForList: list | 
+  !class <- ^self ;
+  "...  Creating Missing Global Aliases and New Instances For: " print ; 
+  class entity whatAmI print ; " " print ; 
+  !block <- ^self accessBlock ;
+  block asUndelimitedString printNL ;
+  ^self addMissingGlobalAliases ;
+  list select: [ ^self send: ^my block . isDefault] .
+  do: [ ^my class newAs: code . setEntityTo: ^self ;
+      ] . count print ; " New Private Records Created. " printNL ;
+] .
+
+defineMethod:
+[ | addMissingGlobalAliases | 
+  ^self masterList select: [ ^self entity isDefault ] .
+     extendBy: [ !global <- ^self entity locateId: ^self code ] .
+     select: [ global isEntity ] .
+  do: [ ^self setEntityTo: global ;
+      ] . count print ; " Linked To New Globals. " printNL ;
+  ^self
+] .
+;
+
+PrivateRecord :entity <- Entity ;
+
+#--------------------------------------------------

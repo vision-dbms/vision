@@ -1,0 +1,116 @@
+#!/bin/csh 
+
+####################
+#  job: PricePlus.job
+#
+#  This job loads the price, dividends, splits and currency exchange
+#  files into vision.  The PricePlus token in status/pending should
+#  contain the file extension to use for loading the files.
+#
+#  Environment Variables:
+#     statusArea      /lv/production/status
+#     feedFilePath    /lv/upload/feeds/
+#     updateArea      /lv/production/Updates
+#     processDate     current run date of daemon 
+#     globalLogs      /lv/production/status/logs
+#
+#  The following Feeds are Loaded if Available:
+#     Feed Name            File name in $feedFilePath
+#     PricesFeed           Prices.ext
+#     SplitsFeed           Splits.ext
+#     DivFeed              Divs.ext
+#     CurrencyMaster       CurrencyMaster.ext
+#     ExchangeRateFeed     CurrencyExchange.ext
+#
+####################
+
+#----------
+#  Setup
+#----------
+
+set jobName    = PricePlus
+set pending    = $statusArea/pending
+set src        = $feedFilePath
+
+#--  get the file extension from the pending token
+set fileExt = `cat $pending/$jobName`
+
+#--  Setup log
+set workDir  = $updateArea/workArea/Internal
+set processLog = $workDir/$jobName.$processDate
+$adminArea/helpers/SetupLog $processLog
+
+#----------
+#  Load the Available PricePlus Data
+#----------
+
+echo "" >& $processLog
+echo "********************************************************" >> $processLog
+echo "*  Loading Pricing and Related Data Feeds" >> $processLog
+echo "*  Start Time: `date` " >> $processLog
+echo "*  From:  $src " >> $processLog
+echo "********************************************************" >> $processLog
+echo "" >>& $processLog
+
+#---  start up a batchvision, run the feeds, and save the session
+($DBbatchvision -U3) << EOD |& sed 's/V> //g' >>& $processLog
+$processDate evaluate:
+   [ newLine print ;
+     !file <- "$src/Prices.$fileExt" ;
+     Interface BatchFeedManager
+          upload: "PriceFeed" usingFile: file withConfig: NA ;               
+     newLine print ;
+     !file <- "$src/Splits.$fileExt" ;
+     SplitsFeed enablePurge ;      #--  purge current splits first
+     Interface BatchFeedManager
+          upload: "SplitsFeed" usingFile: file withConfig: NA ;               
+     !file <- "$src/Divs.$fileExt" ;
+     Interface BatchFeedManager
+          upload: "DivFeed" usingFile: file withConfig: NA ;               
+     newLine print ;
+     !file <- "$src/CurrencyMaster.$fileExt" ;
+     Interface BatchFeedManager   
+          upload: "CurrencyMaster" usingFile: file withConfig: NA ;
+     newLine print ;
+     !file <- "$src/CurrencyExchange.$fileExt" ;
+     Interface BatchFeedManager   
+          upload: "ExchangeRateFeed" usingFile: file withConfig: NA ;
+     newLine print ;
+   ] ;
+?g
+?t
+
+Utility updateNetworkWithAnnotation: "$jobName Loads" ;
+?g
+?t
+
+EOD
+
+#----------
+#  Wraup
+#----------
+
+#--  Check job completion status and log file to confirm update
+set okay = $status
+if ($okay == 0) then
+   $adminArea/helpers/CheckLog $processLog $jobName 1
+   set okay = $status
+endif
+
+#--  copy the log to global status area
+cp $processLog $globalLogs/$jobName.log
+
+#--  if okay, move data files to done
+if ($okay == 0) then
+    cd $src
+    mv Prices.$fileExt done
+    mv Splits.$fileExt done
+    mv Divs.$fileExt done
+    mv CurrencyMaster.$fileExt done
+    mv CurrencyExchange.$fileExt done
+endif
+
+#----------
+#  and exit 
+#----------
+exit $okay

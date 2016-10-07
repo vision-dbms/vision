@@ -1,0 +1,1611 @@
+##################################################
+#  Core Classes: Move from .G to .DEF
+##################################################
+
+####################
+#  Special Processing - Context-sensitive Currency Control
+####################
+
+CoreWorkspace define: "currency" toBe: NA;
+
+Object defineMethod: [ | setBaseCurrencyTo: curr | 
+  ^self :baseCurrency <- curr asCurrency ;
+  ^self
+] ;
+
+Object defineMethod: [ | currencyFactor |
+  ^self baseCurrency isCurrency
+    ifTrue: 
+      [ ^self baseCurrency exchangeTo: ^self currency relativeTo: ^date ]
+] ;
+
+Object defineMethod: [ | currency |
+  ^local currency isntNA 
+     ifTrue: [^local currency] ifFalse: [^self baseCurrency ]
+] ;
+
+Object defineMethod: [ | inCurrency: curr do: aBlock |
+  curr asCurrency evaluate: [^self do: aBlock]
+] ;
+
+Currency defineMethod: [ | evaluate: aBlock |
+  !currency <- ^self ;
+  ^local extendedBy: [!currency <- ^my currency ] 
+         asLocalContextFor: aBlock
+] ;
+
+Currency defineMethod: [ | setAsDefault | 
+  ^global define: "currency" toBe: ^self asSelf ;
+  ^self
+] ;
+
+Currency defineMethod: [ | clearDefault | 
+  ^global define: "currency" toBe: NA ;
+  ^self
+] ;
+
+Currency defineMethod: [ | displayGlobalOverride | 
+  !override <- ^global currency ;
+  currency isNA
+    ifTrue: [ "...  No Global Currency Override Set" printNL ] 
+   ifFalse: [ "Current Global Currency Override Is: " print ; 
+              override displayInfo ;
+            ] ;
+] ;
+
+String defineMethod: [ | asCurrency | 
+  ^global Named Currency uniformAt: ^self asString
+] ;
+
+Currency defineMethod: [ | asCurrency |   ^self asSelf ] ;
+
+
+#----------
+#--  Entity based currency support for legacy vs euro
+#----------
+
+Entity defineFixedProperty: 'euroStartDate' ;
+Entity defineFixedProperty: '_legacyCurrency' ;
+Entity defineMethod: [ | legacyCurrency | 
+   _legacyCurrency else: baseCurrency
+] ;
+
+#---  define a method that switches base to EUR, copying the legacy first
+Entity defineMethod: [ | setBaseCurrencyToEuro |
+  baseCurrency isEuro not
+     ifTrue: [ :_legacyCurrency <- baseCurrency ;
+               :baseCurrency <- ^global Named Currency EUR ;
+               :euroStartDate <- ^date ;
+             ] ;
+  ^self
+] ;
+
+Entity defineMethod: [ | setBaseCurrencyTo: curr |
+  !newCurr <- curr asCurrency ;
+  newCurr isCurrency && [ newCurr isEuro ] 
+    ifTrue: [ ^self setBaseCurrencyToEuro ] 
+   ifFalse: [ ^super setBaseCurrencyTo: newCurr ] ;
+  ^self
+] ;
+
+#----------
+#  Provide a mechanism to evaluate a mixed security list in "Legacy" currency:
+#     Named Currency LEGACY evaluate: [ ] ;
+#----------
+Entity defineMethod: [ | currency |
+  ^local currency isntNA 
+  ifTrue:                                     #-- inside an evaluate: [ ] 
+    [ ^local currency isLegacy 
+        ifTrue: [ ^self legacyCurrency ]      #-- LEGACY evaluate: []
+       ifFalse: [ ^local currency ]           #-- other currency evaluate: []
+    ]   
+ ifFalse: [^self baseCurrency ]               #-- not in an evaluate  
+] ;
+
+#----------
+# reported currency for monetary data stored directly at Entity
+#----------
+Entity defineMethod: [ | reportedCurrency |
+  !currencyToUse <- ^self baseCurrency ;
+  ^self euroStartDate isDate && [ ^self euroStartDate >= ^date ]
+       ifTrue: [ :currencyToUse <- ^self legacyCurrency ] ;
+  currencyToUse
+] ;
+
+Entity defineMethod: [ | currencyFactor |
+  !fromCurr <- ^self reportedCurrency ;
+  fromCurr isCurrency
+     ifTrue: [ fromCurr exchangeTo: ^self currency relativeTo: ^date ] 
+] ;
+
+
+#========================================
+
+####################
+#  Core Class Prototocl - DEF
+####################
+
+#--------------------
+#  Entity
+#--------------------
+
+#----------
+#  display
+#----------
+
+Entity defineMethod: [ | profile | 
+  "*** " print ; ^self whatAmI print ;
+  " Profile For: " print ; ^self name printNL ;
+  "Code: " print: 30 ; ^self code printNL ; 
+  "Aliases: " print: 30 ; ^self aliases do: [ print ; " / " print ] ; 
+  newLine print ;
+  newLine print ; 
+  "---  Links   ---" printNL ;
+  !entity <- ^self ;
+  ^self initializationList
+  do: [ ^self asUndelimitedString 
+          drop: 1 . concat: " : " . print: 29 ;
+        ^my entity send: ^self . value displayInfo ;
+      ] ;
+   newLine print ; 
+   "---  XRefs  ---" printNL ;
+   ^self XRef objects select: [ isXRef ] . select: [ updateBlock isntNA ] .
+   do: [ updateBlock asUndelimitedString drop: 1 . concat: ":" . print: 29 ;
+        ^my entity send: updateBlock . value printNL ;
+       ] ;
+   newLine print ;
+] ;
+
+Entity defineMethod: [ | displayXRefAuditReport | 
+  "*** XRef Audit Report For " concat: ^self whatAmI . 
+     concat: " ***" . center: 80 . printNL ;
+  newLine print ;
+  !entity <- ^self ;
+  !xrefs <- ^self XRef objects select: [ isXRef ] ;
+  xrefs select: [ updateBlock isntNA ] .
+  do: [ "---> " print ; whatAmI printNL ;
+        !xref <- ^self ;
+        !entities <- ^my entity masterList 
+            send: [ ^self send: ^my xref updateBlock . value ] ;
+        !aliases <- ^self selectorList
+           extendBy: [ !object <- ^my xref at: ^self ] .
+           select: [ object isEntity ] ;
+        "Entities With No XRef: " print: 30 ;
+        entities select: [ isNA ] . count printNL ;
+        "Total Aliases Defined: " print: 30 ; aliases count printNL ;
+        "Entities With Dup Aliases: " print: 30 ;
+        !multi <- aliases groupedBy: [ object ] .
+           select: [ groupList count > 1 ] ;
+        multi count printNL ;
+        multi 
+        do: [ "   Entity: " print ; code print: 10 ; name print: 30 ;
+              " : " print ; groupList do: [ print ; " / " print ] ;
+              newLine print ;
+            ] ;
+       newLine print ;
+     ] ;
+  newLine print ; 
+] ;
+
+#----------
+#  String Lookup and Validation
+#----------
+
+Entity defineMethod: [ | validateInputString: input | 
+  ^self locateId: input stripBoundingBlanks
+] ;
+
+Entity defineMethod: [ | locateId: id |
+  id isEntity 
+  ifTrue:
+    [ id defaultInstance inheritsFrom: ^self defaultInstance  .
+        ifTrue: [ id asSelf ] 
+    ] 
+  ifFalse:
+    [ ^self named isDictionary 
+        ifTrue: [ ^self named at: id asString ]
+    ] 
+] ;
+
+Entity defineMethod: [ | locateIds: string | 
+  !entity <- ^self ; 
+  string else: "" . breakOn: "," .
+    send: [ ^my entity locateId: ^self stripBoundingBlanks ] .
+    select: [ isntNA ] 
+] ;
+
+#----------
+#  Standard Property Updates
+#----------
+
+Entity defineMethod: [ | setNameTo: string | 
+  string isntDefault 
+     ifTrue: [ ^self :name <- ^self getClusteredString: string ] ;
+  ^self
+] ;
+
+Entity defineMethod: [ | setShortNameTo: string | 
+  string isntDefault
+     ifTrue: [ ^self :shortName <- ^self getClusteredString: string ] ;
+  ^self
+] ;
+
+Entity defineMethod: [ | setSortCodeTo: string | 
+  string isntDefault
+     ifTrue: [ ^self :sortCode <- ^self getClusteredString: string ] ;
+  ^self
+] ;
+
+#----------
+#  XRef and Alias managment
+#----------
+Entity defineMethod: [ | addAlias: alias |
+  !thisEntity <- ^self asSelf ; 
+  !namingDictionary <- thisEntity named ;
+  namingDictionary isDictionary && 
+  alias isString && [alias isBlank not]
+  ifTrue: 
+    [ !entityWithAlias <- namingDictionary at: alias ;
+      entityWithAlias != thisEntity
+      ifTrue:
+        [
+        entityWithAlias isntNA
+          ifTrue: [ entityWithAlias deleteAlias: alias ] ;
+        namingDictionary at: alias put: thisEntity ;
+        !newAlias <- ^self getClusteredString: alias ;         # new indexList
+        ^self aliases at: newAlias put: newAlias               # new indexList
+        ] ;
+    ] ;
+  ^self
+] ;
+
+Entity defineMethod: [ | deleteAlias: aliasList | 
+#--  allows for deletion of one or more aliases at a time
+  !entity <- ^self asSelf ; 
+  !namingDictionary <- entity named ;
+  !list <- aliasList isList
+     ifTrue: [ aliasList ] ifFalse: [ aliasList asList ] .
+        select: [ isString ] ;
+  namingDictionary isDictionary
+  ifTrue: 
+    [ list
+      do: [^my namingDictionary delete: ^self;
+           ^my entity aliases delete: (^my entity getClusteredString: ^self);
+          ];
+    ] ;
+  entity
+] ;
+
+#--------------------
+#  full rebuild of all aliases using class's naming dictionary
+#--------------------
+
+Entity defineMethod: [ | rebuildAliases | 
+  !dictionary <- ^self named ;
+  dictionary isDictionary
+  ifTrue:
+    [
+#--  only add aliases that reference entities in this exact class
+    "... Rebuilding aliases for: " print ; ^self whatAmI printNL ;
+    !cd <- ^self classDescriptor ;
+    !selectors <- dictionary selectorList
+       extendBy: [ !object <- ^my dictionary at: ^self ] .
+       select: [ object isEntity ] .
+       select: [ object classDescriptor = ^my cd ] ;
+    !list <- ^self instanceList select: [ ^self = ^self asBaseObject ] ;
+    !oldAliases <- ^self defaultInstance aliases instanceList ;
+
+    " instances: " print: -15 ; list count print: -6 ;
+    " aliases: " print: -15 ; selectors count print: -6 ;
+    " old lists: " print: -15 ; oldAliases count printNL: -6 ;
+    " old totals: " print: -15 ; list total: [ aliases count ] . printNL: 9.0 ;
+
+    oldAliases do: [ ^self rdelete ] ;
+    ^self defaultInstance :aliases <- ^global IndexedList new ; 
+    list do: [ :aliases <- defaultInstance aliases clusterNew ] ;
+    selectors
+       do: [!newAlias <- object getClusteredString: ^self asString; 
+            object aliases at: newAlias put: newAlias;       
+           ] ;                                          
+    ^self rcleanStoreAndDictionary ;
+    " new totals: " print: -15 ; list total: [ aliases count ] . printNL: 9.0 ;
+    ] ;
+] ;
+
+#--------------------
+#  Full cleanup of XRef properties for class
+#--------------------
+Entity defineMethod: [ | rebuildXRefs | 
+#--  only operate on xrefs that reference entities in this exact class
+    "... Cleaning XRef entries for: " print ; ^self whatAmI printNL ;
+    !list <- ^self instanceList select: [^self = ^self asBaseObject ] ;
+    list 
+     do: [!ent <- ^self asSelf ; 
+          ^self XRef objects 
+            select: [isXRef] . 
+            select: [updateBlock isntNA] .
+              send: [^self asBaseObject] .
+                do: [!id <- ^my ent send: updateBlock . value ;
+                     (^self at: id . != ^my ent)
+                       ifTrue: [^self getPropertyFor: ^my ent . <- NA;
+                               ];
+                    ];
+         ];
+] ;
+
+Entity defineMethod: [ | createXRef: id withProperty: propertyId | 
+  ^self XRef = ^self super XRef
+     ifTrue: [ ^self createNewXRefManager ] ;
+  !xref <- ^self XRef newAs: id ; 
+  !block <- ":" concat: propertyId . asBlock ;
+  xref :updateBlock <- block ;
+  xref at: "Default" put: ^self ;
+  ^self defineFixedProperty: propertyId withDefault: NA ;
+  xref
+] ;
+
+Entity defineMethod: [ | setXRefIn: dictionary to: string |
+  dictionary isXRef
+  ifTrue: 
+    [ !id <- ^self getClusteredString: 
+           (string else: "" . stripBoundingBlanks ) ;
+      !property <- dictionary getPropertyFor: ^self ;
+      !currentEntity <- dictionary at: id ;
+      currentEntity isntDefault
+         ifTrue: [ dictionary getPropertyFor: currentEntity . <- NA ] ;
+      id isntDefault
+           #- update xref and property
+       ifTrue: [ dictionary at: id put: ^self asSelf ;
+                 property <- id ;
+               ] 
+           #- delete current symbol and set property to NA
+      ifFalse: [ !currentSymbol <- property value ;
+                  dictionary delete: currentSymbol ;
+                 property <- NA ;
+               ] ;
+    ] ;
+  ^self
+] ;
+
+Entity defineMethod: [ | addAlias: string toXRefIn: dictionary |
+  string isString
+  ifTrue: 
+    [ !id <- ^self getClusteredString: (string stripBoundingBlanks ) ;
+      id isBlank not
+      ifTrue:  [ dictionary at: id put: ^self asSelf ;
+               ] ;
+    ] ;
+  ^self
+] ;
+
+
+#----------
+#  cleanup methods
+#----------
+
+Entity defineMethod: [ | cleanupClassStructures | 
+#--  ^self clusterStrings ; 
+  ^super cleanupClassStructures ;
+  ^self
+] ;
+
+Entity defineMethod: [ | clusterStrings |
+  !xrefs <- ^self XRef objects
+      select: [ isXRef ] . select: [ updateBlock isntNA ] ;
+  ^self masterList
+  do: [ ^self :code <- [ ^self code print ] divertOutput ;
+        ^self :name <- [ ^self name print ] divertOutput ;
+#--        ^self :aliases <- 
+#--           [ ^self aliases do: [ printNL ] ] divertOutput asLines
+#--           select: [ ^self isBlank not ] ;
+        !entity <- ^self ; 
+        ^my xrefs
+        do: [ !property <- ^my entity send: updateBlock ;
+              !value <- property value ;
+              value isString
+                 ifTrue: [ property <- [ value print ] divertOutput ] ;
+            ] ;
+       ] ;
+  ^self
+] ;
+
+Entity defineMethod: [ | cleanupLocalNames | 
+  !ent <- ^self asSelf ; 
+  !nd <- ^self named ;
+  ^self aliases
+     select: [ ^my nd at: asString . = ^my ent ] .
+  do: [ ^my ent deleteAlias: asString ] ;
+  ^self aliases rdelete ;
+  ^self XRef objects 
+     select: [isXRef] . select: [updateBlock isntNA] .
+  do: [ !id <- ^my ent send: updateBlock . value ;
+        ^self at: id . = ^my ent
+          ifTrue: [ ^self delete: id ] ;
+      ] ;
+  ^self
+] ;
+
+#----------
+#  memberships
+#----------
+
+Entity defineMethod: [ | isMemberOf: universe |
+  universe includesElement: ^self asSelf
+] ;
+
+Entity defineMethod: [ | universes | 
+  !me <- ^self asSelf; 
+  ^global Universe instanceList 
+     select: [^self includesElement: ^my me]
+] ;
+
+#----------
+#  Add methods at Entity to format standard title
+#----------
+Entity defineMethod: 
+[ | displayTitle: title withSub: sub asOf: date inCurrency: curr |
+   :title <- 
+      ("--- " concat: title . concat: " for: " . 
+         concat: (FormatTools italic: ^self name) . concat: " ---"
+      ) ;
+   !subsub <- date isntDefault
+   ifTrue:
+     [ !datetext <- "Data As Of: " concat: (FormatTools italic: date) ;
+       curr isCurrency
+       ifTrue: 
+         [ datetext concat: "  ---  Currency: " .
+                concat: (FormatTools italic: curr name) 
+         ]
+       ifFalse: [ datetext ] 
+     ] 
+   ifFalse: 
+     [ curr isCurrency
+         ifTrue: [ "Currency: " concat: (FormatTools italic: curr name) ]
+     ] ;
+  !titles <- title asList ;
+  sub isntDefault ifTrue: [ :titles <- titles append: sub ] ;
+  subsub isntDefault ifTrue: [ titles, subsub ] ;
+  FormatTools 
+     buildTitle: titles over: 80 withStyle: "Arial", "darkblue" . print ;
+  FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+
+] ;
+
+Entity defineMethod: 
+[ | displayTitle: title withSub: sub asOf: date inCurrency: curr for: list |
+   !title1 <- "--- " concat: title . concat: " ---" ;
+   !title2 <- 
+     [ ^self whatAmI print ; " List: " print ;
+       list 
+       do: [ FormatTools italic: shortName . print ; ", " print ; ] ; 
+     ] divertOutput drop: -2 ;
+   !subsub <- date isntDefault
+   ifTrue:
+     [ !datetext <- "Data As Of: " concat: (FormatTools italic: date) ;
+       curr isCurrency
+       ifTrue: 
+         [ datetext concat: "  ---  Currency: " .
+                concat: (FormatTools italic: curr name) 
+         ]
+       ifFalse: [ datetext ] 
+     ] 
+   ifFalse: 
+     [ curr isCurrency
+         ifTrue: [ "Currency: " concat: (FormatTools italic: curr name) ]
+     ] ;
+  !titles <- title1, title2 ;
+  sub isntDefault ifTrue: [ :titles <- titles append: sub ] ;
+  subsub isntDefault ifTrue: [ titles, subsub ] ;
+  FormatTools 
+     buildTitle: titles over: 80 withStyle: "Arial", "darkblue" . print ;
+  FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+
+] ;
+
+
+#--------------------
+#  Named
+#--------------------
+
+#----------
+#  Modify 'at:' at Named to only use strings for lookups and to test
+#     uppercase version of parameter if no exact match found
+#----------
+Named defineMethod: [ | at: aString | 
+  aString isString
+  ifTrue: [ ^super at: aString . 
+               else: [ ^super at: aString toUpper ]
+          ]
+] ;
+
+#--------------------
+#  XRef
+#--------------------
+
+XRef defineMethod: [ | profile | 
+  ^self whatAmI print ; "  For Item: " print ; ^self updateBlock printNL ;
+  "Code" print: 10 ; "Name" print: 30 ; "XRef Value" printNL ;
+  !xref <- ^self ; 
+  xref selectorList
+     extendBy: [ !object <- ^my xref at: ^self ] .
+     select: [ object isEntity ] .
+     groupedBy: [ object ] . sortUp: [ code ] .
+     do: [ code print: 10 ; name print: 30 ; 
+           " : " print ; groupList do: [ print ; " / " print ] ;
+           newLine print ; 
+         ] ;
+] ;
+
+XRef defineMethod: [ | getPropertyFor: entity |
+  entity send: ^self updateBlock 
+] ;
+
+XRef defineMethod: [ | getValueFor: entity | 
+  ^self getPropertyFor: entity . value 
+] ;
+
+#--------------------
+#  Currency Class
+#--------------------
+Currency defineFixedProperty: 'euroStartDate' ;
+Currency defineMethod: [ | inEMU | euroStartDate isDate ] ;
+
+
+#----------
+
+Currency defineMethod: [ | setUnderlyingCurrencyTo: curr withExchange: exch | 
+  !currency <- curr asCurrency ; 
+  currency isCurrency && exch > 0
+  ifTrue: 
+    [ ^self :underlyingCurrency <- currency ;
+      ^self :underlyingExchange <- exch ;
+    ]
+  ifFalse: 
+    [ ">>> Bad Currency/Exchange Supplied. Currency " print ; 
+      code print ; " Not Changed.  <<<" printNL ;
+    ] ;
+  ^self
+] ;
+
+Currency defineMethod: [ | isTrueCurrency |
+  ^self underlyingCurrency = ^self asSelf
+] ;
+
+#---  create mechanism to enable or disable ; save database with
+#---  preferred default behavior; this script disables fixed rate 
+Currency defineMethod: [ | enableFixedEuroRate |
+  ^self define: 'fixedEuroRateEnabled' toBe: TRUE ;
+  ^self
+] ;
+
+Currency defineMethod: [ | disableFixedEuroRate |
+  ^self define: 'fixedEuroRateEnabled' toBe: FALSE ;
+  ^self
+] ;
+
+Currency enableFixedEuroRate ;       #-- enable 
+
+Currency defineMethod: [ | exchangeTo: targetCurr relativeTo: date |
+
+#--  Assumes usExchange returns values in units of foreign currency per US$
+#--  Result is returned in units of target currency / source currency
+#--     so it can be used to multiply values in source currency to
+#--     convert to results in target currency
+#--  If fixedRateEuroEnabled isTrue, use it to convert to or from euro
+#--    when exchange rate isNA
+
+  !rate <- 1.0 ;
+  ^self underlyingCurrency != targetCurr asSelf
+   ifTrue: 
+     [ date evaluate:  #--  convert as of supplied date 
+         [ !preEuro <- 
+              (targetCurr isEuro && targetCurr usExchange isNA)
+                 || [ underlyingCurrency isEuro && underlyingCurrency usExchange isNA ] ;
+           preEuro
+           ifTrue:
+             [ :rate <- fixedEuroRateEnabled
+               ifTrue: 
+                 [ targetCurr isEuro
+                     ifTrue: [ 1 / underlyingCurrency fixedRateToEuro ]
+                   ifFalse: [ targetCurr fixedRateToEuro ] 
+                 ] 
+               ifFalse: [ NA ] ;
+             ]
+           ifFalse:
+             [ !sourceToUs <- ^self underlyingCurrency usExchange ;
+               !targetToUs <- targetCurr 
+                   send: [ ^self underlyingCurrency usExchange * 
+                           ^self underlyingExchange
+                         ] ;
+               :rate <- targetToUs / sourceToUs ; 
+            ] ;
+         ] ;
+     ] ;
+  rate / ^self underlyingExchange
+] ;
+
+#----------
+
+#--------------------
+#  Classification Class
+#--------------------
+
+#----------
+#  intiialization
+#----------
+
+Classification defineMethod: [ | initializeGlobalInstanceProperties | 
+  ^super initializeGlobalInstanceProperties ;
+  ^self :parent <- ^self ;
+  ^self :childList <- ^self defaultInstance childList clusterNew ;
+  ^self :memberList <- ^self defaultInstance memberList clusterNew ;
+  ^self
+] ;
+
+#----------
+#  parent and membership management
+#----------
+Classification defineMethod: [ | setParentTo: p |
+  !instance <- ^self asSelf ;
+  !newParent <- ^self locateId: p ;
+  newParent isntNA 
+  ifTrue:
+    [ instance parent childList delete: instance;
+      instance :parent <- newParent ;
+      newParent isntDefault && newParent != instance
+         ifTrue: [ newParent childList at: instance put: instance ] ;
+    ] ;
+  ^self
+] ;
+
+Classification defineMethod: [ | isParent | 
+  ^self asSelf = ^self parent
+] ;
+
+Classification defineMethod: [ | includesElement: entity | 
+  ^self memberList at: entity asSelf . isntNA
+] ;
+
+Classification defineMethod: [ | getAllChildren | 
+   ^self childList toList 
+      append: (^self childList collectListElementsFrom: [ getAllChildren] )
+] ;
+
+Classification defineMethod: [ | getAllMembers | 
+  ^self memberList toList 
+     append: (^self getAllChildren collectListElementsFrom: [ memberList ] )
+     unique
+] ;
+
+#----------
+
+Classification defineMethod: [ | displayHierarchy | 
+  !level <- 0 ;
+  !object <- ^self ; 
+  [ object isClassification ]
+     whileTrue: [ " " print: level * 3 ;
+                   object displayInfo ; 
+                   :level <- level + 1 ;
+                   :object <- object parent != object
+                      ifTrue: [ object parent ] ;
+                 ] ;
+] ;
+
+Classification defineMethod: [ | displayMemberHistory | 
+  "---  Membership History Report  ---" centerNL: 80 . print ;
+  [ "for " print ; ^self whatAmI print ; " " print ; 
+    code print ; " " print ; name  print ;
+  ] divertOutput centerNL: 80 . printNL ;
+
+  ^self :memberList linkElements 
+  do: [ !priorList <- prior isntNA 
+           ifTrue: [ prior asSelf ] ifFalse: [ ^global IndexedList ] ;
+        !diffs <- ^self difference: priorList asSelf ;
+        ^date print: 15; 
+        count print ; " current " print ;
+        priorList count print ; " prior" printNL ;
+        diffs at: 1 . sortUp: [ name ] .
+           do: [ "    added ... " print ; displayInfo ] ;
+        diffs at: 2 . sortUp: [ name ] .
+           do: [ "  dropped ... " print ; displayInfo ] ;
+      ] ;
+] ;
+
+#--------------------
+#  RangeClassification Class
+#--------------------
+
+RangeClassification defineMethod: [ | initializeKeys: keys | 
+  ^self :lowerBound <- keys at: 1 ;
+  ^self :upperBound <- keys at: 2 ;
+  ^self :code <- ^self masterList count asString ;
+  ^self :rangeName <- 
+    "(" concat: ^self lowerBound asString stripBoundingBlanks .
+       concat: ", " . concat: ^self upperBound asString stripBoundingBlanks . 
+       concat: ")" ;
+  ^self
+] ;
+
+#----------
+#  getClassificationFor: input | 
+#  Note: assumes range instances have been created with contiguous values
+#----------
+
+RangeClassification defineMethod: [ | getClassificationFor: input |
+   ^self activeList 
+      select: [ lowerBound isntNA && upperBound isntNA
+                  ifTrue: [ ^my input >= lowerBound && ^my input < upperBound ]
+                 ifFalse:
+                   [
+                   lowerBound isntNA 
+                       ifTrue: [ ^my input >= lowerBound ] 
+                      ifFalse: [ ^my input < upperBound ]
+                   ] 
+              ] .
+      at: 1 . else: [ ^self defaultInstance ]
+] ;
+
+#--------------------
+#  Universe Class
+#--------------------
+
+Universe defineMethod: [ | initialize |
+  ^super initialize;
+  :entityType <- ^global Entity ;
+  :list <- defaultInstance list clusterNew ;
+  ^self
+] ;
+
+
+#----------
+
+Universe defineMethod: [ | setEntityTypeTo: type | 
+  :entityType <- type ;
+  ^self
+] ;
+
+Universe defineMethod: [ | setCriteriaTo: block |
+  :criteriaBlock <- block ; 
+  ^self
+] ;
+
+Universe defineMethod: [ | setListTo: universe | 
+  :list on: ^date . isNA
+     ifTrue: [ :list put: ^self defaultInstance list clusterNew ]
+    ifFalse: [ list do: [ ^my deleteMember: ^self ] ] ;
+  universe do: [ ^my addMember: ^self ] ;
+  ^self
+] ;
+
+Universe defineMethod: [ | addMember: member |   #-- assumes asof date
+  !entity <- entityType locateId: member . asSelf ;
+  entity isntDefault
+      ifTrue: [ list at: entity put: entity ] ;
+  ^self
+] ;
+
+Universe defineMethod: [ | deleteMember: member |   #-- assumes asof date
+  !entity <- entityType locateId: member . else: member . asSelf ;
+  list delete: entity ;
+  ^self
+] ;
+
+Universe defineMethod: [ | includesElement: entity | 
+  list at: entity asSelf . isntNA
+] ;
+
+Universe defineMethod: [ | updateUniverse |
+  criteriaBlock isntNA
+     ifTrue: [ ^self setListTo: criteriaBlock value ] ;
+  ^self
+] ;
+
+#----------
+
+Universe defineMethod: [ | displayMemberHistory | 
+  "---  Membership History Report  ---" centerNL: 80 . print ;
+  [ "for " print ; ^self whatAmI print ; " " print ; 
+    code print ; " " print ; name  print ;
+  ] divertOutput centerNL: 80 . printNL ;
+
+  ^self :list linkElements 
+  do: [ !priorList <- prior isntNA 
+           ifTrue: [ prior asSelf ] ifFalse: [ ^global IndexedList ] ;
+        !diffs <- ^self difference: priorList asSelf ;
+        ^date print: 15; 
+        count print ; " current " print ;
+        priorList count print ; " prior" printNL ;
+        diffs at: 1 . sortUp: [ name ] .
+           do: [ "    added ... " print ; displayInfo ] ;
+        diffs at: 2 . sortUp: [ name ] .
+           do: [ "  dropped ... " print ; displayInfo ] ;
+      ] ;
+] ;
+
+#--------------------
+#  DataItem and DataAccessPath
+#--------------------
+DataItem defineMethod: [ | okayAsGroup | isGroup isTrue ] ;
+DataItem defineMethod: [ | okayAsStat | isStat isTrue ] ;
+DataItem defineMethod: [ | okayForProfile | inProfile isTrue ] ;
+
+DataItem defineMethod: [ | getStatsFor: ids from: class | 
+  !list <- ids isCollection
+  ifTrue:
+     [ ids send: [ ^my locateId: ^self ] .
+     ] .
+  elseIf: [ ids isUniverse && [ ids entityType isDataItem ] ]
+    then: [ ids list ] .
+  elseIf: [ ids isString ] 
+    then: [ !universe <- ^global Universe locateId: ids ;
+            universe isntDefault
+              ifTrue: [ list ] .
+                else: [ ^self locateIds: ids ] 
+          ] ;
+  :list <- list isntNA
+  ifTrue:
+    [ list
+        select: [ isntDefault ] .
+        select: [ okayAsStat ] .
+        extendBy: 
+          [ !fullAccessPath <- ^self getAccessFrom: ^my class ;
+            !block <- fullAccessPath asBlock ;
+          ] .
+        sortUp: [ sortCode ] .
+    ] .
+  elseIf: [ ids isDefault ] then: [ ^self getValidStatsFor: class ] 
+
+] ;
+
+DataItem defineMethod: [ | getGroupBlockFor: id from: class |
+  id isBlock ifTrue: [ id ] .
+    elseIf: [ id isDefault ]
+    then: [ ^self getValidGroupsFor: class . at: 1 .
+               ifDefault: [ NA ] else: [ block ] 
+          ] .
+    elseIf: [ id isString ]
+    then: [ !item <- ^self locateId: id ;
+            item isntNA && [ item okayAsGroup ] 
+              ifTrue: [ item getAccessFrom: class ] 
+             ifFalse: [ id ] . asBlock 
+          ] 
+] ;
+
+DataItem defineMethod: [ | getStatBlockFor: id from: class |
+  id isBlock ifTrue: [ id ] .
+    elseIf: [ id isDefault ]
+    then: [ ^self getValidStatsFor: class . at: 1 .
+               ifDefault: [ NA ] else: [ block ] 
+          ] .
+    elseIf: [ id isString ]
+    then: [ !item <- ^self locateId: id ;
+            item isntNA && [ item okayAsStat ] 
+              ifTrue: [ item getAccessFrom: class ] 
+             ifFalse: [ id ] . asBlock 
+          ] 
+] ;
+
+DataItem defineMethod: [ | getAccessFrom: fromClass |
+  !path <- fromClass defaultInstance != baseClass defaultInstance
+    ifTrue: [ ^global DataAccessPath getPathFrom: fromClass to: baseClass ]
+   ifFalse: [ "" ] ;
+  path isntNA
+    ifTrue: [ path concat: " " . concat: accessPath ] 
+] ;
+
+DataItem defineMethod: [ | getValidGroupsFor: class | 
+  !baseClasses <- ^global DataAccessPath masterList
+     select: [ ^my class inheritsFrom: fromClass ] . 
+     send: [ toClass ] . append: class defaultInstance ;
+  asSelf instanceList select: [ okayAsGroup ] .
+     select: [ ^my baseClasses includesElement: baseClass ] .
+     extendBy: 
+       [ !fullAccessPath <- ^self getAccessFrom: ^my class ;
+         !block <- fullAccessPath asBlock ;
+       ] .
+     sortUp: [ sortCode ] .
+] ;
+
+DataItem defineMethod: [ | getValidStatsFor: class | 
+  !baseClasses <- ^global DataAccessPath masterList
+     select: [ ^my class inheritsFrom: fromClass ] . 
+     send: [ toClass ] . append: class defaultInstance ;
+  asSelf instanceList select: [ okayAsStat ] .
+     select: [ ^my baseClasses includesElement: baseClass ] .
+     extendBy: 
+       [ !fullAccessPath <- ^self getAccessFrom: ^my class ;
+         !block <- fullAccessPath asBlock ;
+       ] .
+     sortUp: [ sortCode ] .
+] ;
+
+DataItem defineMethod: [ | getProfileItemsFor: class | 
+  !baseClasses <- ^global DataAccessPath masterList
+     select: [ ^my class inheritsFrom: fromClass ] . 
+     send: [ toClass ] . append: class defaultInstance ;
+  asSelf instanceList select: [ okayForProfile ] .
+     select: [ ^my baseClasses includesElement: baseClass ] .
+     extendBy: 
+       [ !fullAccessPath <- ^self getAccessFrom: ^my class ;
+         !block <- fullAccessPath asBlock ;
+       ] .
+     sortUp: [ sortCode ] .
+] ;
+
+#--------------------
+#  Add method at DataItem that displays all applicable summary calcs
+#  {total, average, weightd average, median) for an item.  Each
+#  of these summary calcs is displayed on its own line.  The summary
+#  calc is computed for one or more columns of data controlled by the
+#  parameter which is supplied as a list of lists.
+#
+#  The supplied parameter is a list corresponding to each 
+#  column of data to display.  The value of each element in the
+#  list is a list of values extended by the variables 'stat' and 'weight'
+#  which are used to compute the various summary calcs.
+#--------------------
+
+DataItem defineMethod: [ | displayAllStatRowsFor: dataSet | 
+
+  !format <- 15 + (defaultDecimals else: 2 . / 10) ;
+  showTot isTrue
+  ifTrue: 
+    [ dataSet displayAcross: [ ^self total: [ stat ] ]
+         withLabel: (shortName concat: " - Total ") andFormat: format ;
+    ] ;
+  showAvg isTrue
+  ifTrue: 
+    [ dataSet displayAcross: [ ^self average: [ stat ] ]
+         withLabel: (shortName concat: " - Avg " ) andFormat: format ;
+    ] ;
+  showWtAvg isTrue
+  ifTrue: 
+    [ dataSet 
+         displayAcross: [ ^self average: [ stat ] withWeights: [ weight ] ]
+         withLabel: (shortName concat: " - Wtd Avg " ) andFormat: format ;
+    ] ;
+  showMed isTrue
+  ifTrue: 
+    [ dataSet displayAcross: [ ^self median: [ stat ] ]
+         withLabel: (shortName concat: " - Median " ) andFormat: format ;
+    ] ;
+
+] ;
+
+DataItem defineMethod: [ | defaultFormat | 
+  #-- note that defaultWidth and defaultDecimals are defined in PropertySetup
+  (defaultWidth asInteger else: 15 ) + (defaultDecimals else: 2 . / 10)
+] ;
+
+
+
+#----------
+
+
+DataAccessPath defineMethod: [ | getPathFrom: fromClass to: toClass | 
+  !pathId <- fromClass whatAmI concat: "-" . concat: toClass whatAmI ;
+  !path <- named at: pathId .
+   else: [ ^self masterList
+             select: [ fromClass = ^my fromClass defaultInstance &&
+                       toClass = ^my toClass defaultInstance
+                     ] . at: 1 
+         ] ;
+  path isntNA ifTrue: [ path via ] 
+] ;
+
+#--------------------
+#  IdSource
+#--------------------
+
+IdSource
+   defineFixedProperty: 'xrefName' .
+   defineFixedProperty: 'xrefProperty' .
+   defineFixedProperty: 'primaryFlag' withDefault: FALSE .
+   defineFixedProperty: 'retainOldFlag' withDefault: FALSE .
+   defineFixedProperty: 'augmentRule' .
+;
+
+IdSource defineMethod: [ | initialize |
+  ^super initialize ;
+  :xrefName <- code ; 
+  :xrefProperty <- code toLower ;
+  ^self
+] ;
+
+IdSource defineMethod: [ | displayInfo | 
+  code print ; " " print ; name print ; 
+  "; XRef - " print ; xrefName print ;
+  "; property - " print ; xrefProperty print ;
+  "; primary - " print ; primaryFlag print ;
+  "; retain - " print ; retainOldFlag print ;
+  augmentRule isBlock
+      ifTrue: [ "; has augment rule" print ] ;
+  newLine print ;
+] ;
+
+IdSource defineMethod: [ | profile | 
+  ^super profile ; 
+  newLine print ;
+  "xrefName: " print: 30 ; xrefName printNL ;
+  "xrefProperty: " print: 30 ; xrefProperty printNL ;
+  "primaryFlag: " print: 30 ; primaryFlag printNL ;
+  "retainOldFlag: " print: 30 ; retainOldFlag printNL ;
+  "augmentRule: " print: 30 ; augmentRule printNL ;
+  newLine print ;
+] ;
+
+#----------
+#  attribute setting
+#----------
+
+IdSource defineMethod: [ | setAugmentRuleTo: block | 
+  :augmentRule <- block ; 
+  ^self
+] ;
+
+#----------
+#  xref update
+#----------
+
+IdSource defineMethod: [ | getXRefFor: class |
+   class XRef at: xrefName 
+] ;
+
+IdSource defineMethod: [ | createXRefFor: class |
+  class XRef = class super XRef
+     ifTrue: [ class createNewXRefManager ] ;
+  class XRef at: xrefName .
+    else: [ class createXRef: xrefName withProperty: xrefProperty ]
+] ;
+
+IdSource defineMethod: [ | addSymbol: symbol toEntity: entity |
+  !xref <- ^self getXRefFor: entity ;
+  xref isntNA
+  ifTrue:
+    [ retainOldFlag 
+      ifFalse:
+        [ !currentSymbol <- xref getValueFor: entity ;
+          xref at: currentSymbol . = entity
+            ifTrue: [ xref delete: currentSymbol ] ;
+          primaryFlag isTrue
+            ifTrue: [ entity deleteAlias: currentSymbol ] ;
+        ] ;
+      entity setXRefIn: xref to: symbol ;
+      primaryFlag
+        ifTrue: [ entity addAlias: symbol ] ;
+      augmentRule isntNA
+         ifTrue: [ entity send: augmentRule ] ;
+    ] ;
+] ;
+
+#--------------------
+#  VendorEntity: common protocol
+#--------------------
+VendorEntity
+    defineFixedProperty: 'primaryEntity' withDefault: NA .
+;
+
+VendorEntity defineMethod: [ | setPrimaryEntityClassTo: primary |
+  ^self define: 'primaryEntityClass' toBe: primary defaultInstance ;
+  ^self defaultInstance :primaryEntity <- ^self primaryEntityClass ;
+  !linkName <- ^self whatAmI lowercase ;
+  linkName locateInDictionaryOf: primary asSelf . isNA && [ primary isntNA ]
+     ifTrue: 
+       [ primary defineFixedProperty: linkName withDefault: ^self asSelf ;
+         ^self define: 'linkBlock' toBe: [ linkName asUpdateBlock ] ;
+       ] ;
+   ^self
+] ;
+
+VendorEntity defineMethod: [ | setPrimaryEntityLookupRuleTo: block | 
+  ^self define: 'primaryEntityLookupRule' toBe: [ block ] ;
+  ^self
+] ;
+
+VendorEntity setPrimaryEntityClassTo: NA . setPrimaryEntityLookupRuleTo: NA ;
+
+#----------
+#  always initialize baseCurrency
+#----------
+VendorEntity defineMethod: [ | initializeGlobalInstanceProperties | 
+  ^super initializeGlobalInstanceProperties ;
+  :baseCurrency <- ^global Currency;
+  ^self
+] ;
+
+#----------
+#  link to primary entity
+#----------
+VendorEntity defineMethod: [ | updatePrimaryEntity | 
+  !base <- ^self primaryEntityClass ;
+  base isntNA
+  ifTrue:
+    [ !rule <- ^self primaryEntityLookupRule isntNA
+         ifTrue: [ ^self primaryEntityLookupRule  ]
+        ifFalse: [ [ code ] ] ;
+      ^self asSelf masterList
+         select: [ primaryEntity isDefault ] .
+         extendBy: [ !id <- ^self send: ^my rule ] .
+         select: [ id isntDefault ] .        
+         extendBy: [ !entity <- id as: ^my base ] .
+      do: [ ^self resetPrimaryEntityTo: entity ] ;
+     ] ;
+];
+
+VendorEntity defineMethod: [ | resetPrimaryEntityTo: entity | 
+  entity isEntity
+  ifTrue:
+     [ :primaryEntity <- entity ;
+       !currentLink <- entity send: ^self linkBlock ;
+       !currentValue <- currentLink value ;
+       currentValue isDefault 
+            || [ currentValue primaryEntity != primaryEntity ]
+          ifTrue: [ currentLink <- ^self asSelf ] ;
+     ] ;
+] ;
+
+VendorEntity defineMethod: [|reportPrimaryLinkSummary|
+  !iCount   <- ^self asSelf masterList count;
+  ^self whatAmI concat: " Total: " . print: 45 ;
+  iCount printWithCommasNL: 10 ;
+
+  !unLinked <- ^self asSelf masterList select: [primaryEntity isDefault ] ;
+  "   Unlinked: " print: 45; unLinked count printWithCommasNL: 10 ;
+
+  !multiLinked <- ^self asSelf masterList
+      select: [ primaryEntity isntDefault ] .
+      groupedBy: [ primaryEntity ] .
+      select: [ groupList count > 1 ] ;
+  "   Entities with more than 1 reference: " print: 45 ; 
+  multiLinked count printWithCommasNL: 10 ;
+
+] ;
+
+VendorEntity defineMethod: [|reportPrimaryLinkDetails|
+  ^self reportPrimaryLinkSummary;
+  newLine print ;
+
+  "--> The following " print; ^self whatAmI print; 
+  " instances are not linked to " print; 
+  ^self primaryEntityClass whatAmI printNL ;
+  ^self asSelf masterList select: [primaryEntity isDefault ] .
+      do: [ displayInfo ] ;
+  newLine print ;
+
+  "--> The following " print; ^self primaryEntityClass whatAmI print ;
+  " instances are referenced by multiple " print ; 
+   ^self whatAmI print; " instances: " printNL ;
+  ^self asSelf masterList
+      select: [ primaryEntity isntDefault ] .
+      groupedBy: [ primaryEntity ] .
+      select: [ groupList count > 1 ] .
+   do: [ whatAmI print ; ": " print ; displayInfo ;
+         groupList do: [ whatAmI print ; ": " print ; displayInfo ] ;
+         "-" fill: 50 .printNL ;
+       ] ;
+  newLine print ;
+
+  "--> The following " print; ^self whatAmI print ;
+  " instances are potentially mislinked: " printNL ;
+  !rule <- ^self primaryEntityLookupRule isntNA
+         ifTrue: [ ^self primaryEntityLookupRule  ]
+        ifFalse: [ [ code ] ] ;
+  ^self asSelf masterList
+         select: [ primaryEntity isntDefault ] .
+         extendBy: [ !id <- ^self send: ^my rule ] .
+         select: [ id isntDefault ] .        
+         extendBy: [ !entity <- id as: primaryEntityClass ] .
+         select: [ entity != primaryEntity ] .
+   do: [ whatAmI print ; ": " print ; displayInfo ;
+         "Stored Link: " print ; primaryEntity displayInfo ;
+         "Potential Link: " print; entity displayInfo ;
+         "-" fill: 50 .printNL ;
+       ] ;
+  newLine print ;
+];
+
+
+#--------------------
+#  DataRecord
+#--------------------
+
+DataRecord
+   defineMethod: [ | date | recordDate ] .
+
+   define: 'updateBlock' toBe: NA .  ## [:tsProperty]
+;
+
+#----------
+#  Initialization
+#----------
+
+DataRecord defineMethod: [ | initializeKeys: keys |   #--  ent, date, val, curr
+  :entity <- keys at: 1 . asSelf ;
+  :recordDate <- keys at: 2 . asDate ;
+  :recordValue <- keys at: 3 . asSelf ;
+  :baseCurrency <- keys at: 4 . asSelf else: ^global Named Currency Default ;
+  ^self
+] ;
+
+DataRecord defineMethod: [ | initializeLocalAttributes |
+  ^super initializeLocalAttributes ;
+  ^self updateBlock isBlock && [ ^self entity isntDefault ] 
+  ifTrue: 
+    [ ^self recordDate else: earliestPossibleDate . evaluate:
+          [ ^self entity setProperty: ^self updateBlock to: ^self asSelf ] ;
+    ]  ;
+  ^self
+] ;
+
+#----------
+#  Display
+#----------
+
+DataRecord defineMethod: [ | print | 
+  ^self recordValue else: ^self whatAmI . print ; ^self
+] ;
+
+DataRecord defineMethod: [ | print: format | 
+  ^self recordValue else: ^self whatAmI . print: format ; ^self
+] ;
+
+DataRecord defineMethod: [ | displayInfo | 
+^self entity print ; " " print ;
+^self recordDate else: "" .print ; " " print ;
+^self recordValue else: " -- " . print ;
+" | " print ;
+^self baseCurrency code print: 5; 
+^self currency code print: 5; 
+^self currencyFactor printNL; 
+] ;
+
+#----------
+
+DataRecord defineMethod: [ | currency | 
+  ^self entity currency else: ^global Currency
+] ;
+
+DataRecord defineMethod: [ | currencyFactor |
+  ^self baseCurrency isCurrency
+    ifTrue: 
+      [ ^self baseCurrency exchangeTo: ^self currency relativeTo: recordDate ]
+] ;
+
+DataRecord defineMethod: [ | setUpdateBlockTo: aBlock |
+  ^self define: 'updateBlock' toBe: [ aBlock ];
+  ^self
+] ;
+
+DataRecord defineMethod: [ | purgeRecordAndLink |
+  ^self updateBlock isntNA ifTrue:
+  [ ^self do:
+    [ entity isntNA && recordDate isDate
+      ifTrue: [	entity send: updateBlock . delete: recordDate ] ;
+    ]; 
+    ^self rdelete; 
+  ] ;
+] ;
+
+#----------
+#  Store Management
+#----------
+
+DataRecord
+   define: 'currentStore' toBe: DataRecord .
+   define: 'storeXRef' toBe: DataRecord asList .
+;
+
+DataRecord defineMethod: [ | getAllInstances | 
+  ^self storeXRef collectListElementsFrom: [ ^self instanceList ] 
+] ;
+
+DataRecord defineMethod: [ | getCurrentInstances | 
+  ^self currentStore instanceList
+] ;
+
+DataRecord defineMethod: [ | createNewStoreAt: objectSpace | 
+  !currentStore <- ^self ;
+  !newStore <- currentStore newPrototype new
+  do: [ :defaultFlag <- TRUE ;
+        :entity <- ^my currentStore entity ;
+        :baseCurrency <- ^my currentStore currency ;
+        :recordDate <- ^date ;
+      ] ;
+#--  define class name at object space if different from CoreWorkspace
+  (objectSpace else: ^global) != ^global CoreWorkspace 
+  ifTrue: [ objectSpace else: ^global .
+                define: ^self classDescriptor code toBe: newStore ;
+          ];
+  currentStore storeXRef, newStore ;
+  currentStore define: 'currentStore' toBe: newStore ;
+  objectSpace isntNA
+     ifTrue: [ newStore establishResidenceInSpaceOf: objectSpace ] ;
+  newStore
+] ;
+
+DataRecord defineMethod: [ | getNewPrototype | 
+  ^self createNewStoreAt: NA
+] ;
+
+DataRecord defineMethod: [ | cleanupClassStructures | 
+  ^super cleanupClassStructures ;
+  ^self storeXRef 
+  do: [ ^self rcleanStore 
+          ifTrue: [ ^self whatAmI print ; 
+                    " -- cleaning store " print ; ^self displayPOP ;
+                  ] ;
+      ] ;
+] ;
+
+#--------------------
+#  DataRecord removeDeletedRecords - removes records that
+#     have been flagged for deletion and aligns the store
+#--------------------
+
+DataRecord defineMethod: [ | removeDeletedRecords |
+  ^self storeXRef 
+  do: [ !todo <- ^self instanceList select: [ isDeleted ] ;
+        todo count > 0
+        ifTrue:
+          [ 
+           "---> Removing " concat: ^self whatAmI .
+               concat: "s that were flagged for deletion " . printNL ;
+            ^self instanceList count printWithCommas: 15.0 ;
+            "  - "print ; todo count printWithCommas: 15.0 ;
+            todo do: [ ^self rdelete ] ;
+            " = " print ; ^self instanceList count printWithCommas: 15.0 ;
+            " " print ; ^self displayPOP ;
+            ^self rcleanStoreAndDictionary ;
+          ] ;
+       ] ;
+  ^self
+ ] ;
+
+#--------------------
+#  LinkRecord Class
+#--------------------
+
+LinkRecord 
+  define: 'keyList' toBe: ^global List new .
+  define: 'updateBlocks' toBe: ^global List new .
+;
+
+LinkRecord defineMethod: [ | initializeKeys: keys | 
+  !rec <- ^self asSelf ;
+  ^self updateBlocks numberElements
+  do: [ ^my rec send: ^self . <- (^my keys at: position . asSelf) ] ;
+  ^self
+] ;
+
+LinkRecord defineMethod: [ | addKeyOfType: type |
+  !key <- type defaultInstance ;
+  !name <- key whatAmI lowercase ;
+  ^self keyList excludesElement: key .
+  ifTrue: 
+    [ ^self keyList , key ;
+       ^self updateBlocks , name asUpdateBlock ;
+    ] ;
+  ^self respondsTo: name .
+  ifFalse: 
+    [ ^self defineFixedProperty: name withDefault: key ;
+      ^self getMessage: name . 
+         setFunctionTypeTo: "Data" ;
+    ] ;
+  ^self
+] ;
+
+LinkRecord defineMethod: [ | getKeyValues |
+  !record <- ^self asSelf ;
+  ^self updateBlocks send: [ ^my record send: ^self . value ] 
+] ;
+
+LinkRecord defineMethod: [ | print |
+  [ ^self getKeyValues do: [ print ; "-" print ]
+  ] divertOutput drop: -1 . print ;
+  ^self
+] ;
+
+LinkRecord defineMethod: [ | displayInfo | 
+  !record <- ^self asSelf ;
+  record getKeyValues 
+  do: [ whatAmI print ; "-" print ; print ; "; " print ] ;
+  newLine print ;
+] ;
+
+LinkRecord defineMethod: [ | profile | 
+  !record <- ^self ;
+  "Class: " print: 30; record whatAmI printNL; 
+  "Created: " print: 30; record creationDate printNL; 
+  record getKeyValues
+  do: [ whatAmI print: 30 ; printNL ] ;
+] ;
+
+
+#==================================================
+
+####################
+#  Basic Bridge protocol
+####################
+
+#----------
+#  Class Constants
+#----------
+Bridge defineMethod: [ | setBaseClassTo: class | 
+  ^self define: 'baseClass' toBe: class ;
+  ^self defaultInstance :underlyingObject <- class defaultInstance ;
+  :baseEntity <- class isEntity
+     ifTrue: [ class defaultInstance ] 
+    ifFalse: [ class asBaseEntity ] ;
+  ^self
+] ;
+
+Bridge defineMethod: [ | setUpdateBlockTo: block | 
+  ^self define: 'updateBlock' toBe: [ block ] ;
+  ^self
+] ;
+
+Bridge defineMethod: [ | accessExpression |
+^self baseEntity accessExpression
+   concat: (^self updateBlock asUndelimitedString stripChar: ":")
+] ;
+
+#----------
+#  Initialization and Cleanup
+#----------
+
+Bridge defineMethod: [ | initializeKeys: keys |   #- underlyingObject
+  :underlyingObject <- keys asSelf else: ^self baseClass defaultInstance ;
+  :baseEntity <- underlyingObject isEntity
+     ifTrue: [ underlyingObject ] ifFalse: [ underlyingObject asBaseEntity ] ;
+  ^self
+] ;
+
+Bridge defineMethod: [ | initializeLocalAttributes |
+  ^super initializeLocalAttributes ;
+  ^self updateBlock isBlock && [ ^self underlyingObject isntDefault ] 
+  ifTrue: 
+    [ ^self underlyingObject
+          setProperty: ^self updateBlock to: ^self asSelf;
+    ]  ;
+  ^self
+] ;
+
+Bridge defineMethod: [ | purgeBridgeAndLink |
+  ^self updateBlock isBlock && [ ^self underlyingObject isntDefault ] 
+  ifTrue: 
+    [ ^self underlyingObject 
+         setProperty: ^self updateBlock to: ^self defaultInstance ;
+    ]  ;
+  ^self isntDefault ifTrue: [ ^self rdelete ] ;
+  ^self
+] ;
+
+#--------------------
+#  Homogonize entity/bridge class
+#--------------------
+
+Object defineMethod: [ | isEntityOrBridge | 
+   ^self isEntity || ^self isBridge 
+] ;
+
+Bridge defineMethod: [ | currency |
+  ^local currency isntNA 
+    ifTrue: [^local currency]
+   ifFalse: [^self baseCurrency else: ^self underlyingObject currency ]
+] ;
+
+Bridge defineMethod: [ | name | 
+  baseEntity isEntity ifTrue: [ baseEntity name ] 
+] ;
+
+#----------
+#  Access to underlying entity
+#    Note: this must be recursive since a bridge can get attached to
+#          an entity or another bridge; maintain list of classes checked
+#          to avoid infinite loop
+#----------
+
+Bridge defineMethod: [ | asBaseEntity |
+  !ilist <- ^global IndexedList new ;
+  ^self asBaseEntityWithTracker: ilist 
+] ;
+
+Bridge defineMethod: [ | asBaseEntityWithTracker: ilist |
+  ilist at: ^self defaultInstance . isntNA 
+     || [ ^self baseClass isEntityOrBridge not ] 
+     ifTrue: [ NA ] .
+     elseIf: [ ^self baseClass isEntity ] then: [ ^self underlyingObject ] .
+     else: [ ilist at: ^self defaultInstance put: ^self asSelf ;
+             ^self underlyingObject asBaseEntityWithTracker: ilist
+           ] 
+] ;
+
+
+#----------
+#  Display
+#----------
+
+Bridge defineMethod: [ | print | 
+  ^self whatAmI concat: ":" . concat: ^self underlyingObject . print ; ^self
+] ;
+
+Bridge defineMethod: [ | print: f | 
+  ^self whatAmI concat: ":" . concat: ^self underlyingObject.  print: f ; ^self
+] ;
+
+Bridge defineMethod: [ | displayInfo | 
+  ^self whatAmI print ; ":" print ;
+  ^self baseEntity displayInfo ;
+] ;
+
+####################
+#  LocalEntity Bridge protocol
+####################
+
+#--------------------
+#  Manage entity lookup via a xref
+#--------------------
+LocalEntity 
+   define: 'entityLookup' toBe: IndexedList new .
+   define: 'useEntityLookup' toBe: FALSE .
+;
+
+LocalEntity  defineMethod: [ | initializeGlobalSubclassProperties |
+  ^super initializeGlobalSubclassProperties ;
+  ^self define: 'entityLookup' toBe: ^self super entityLookup new ;
+  ^self define: 'useEntityLookup' toBe: ^self super useEntityLookup ;
+  ^self
+] ;
+
+LocalEntity defineMethod: [ | enableEntityLookup |
+  ^self define: 'useEntityLookup' toBe: TRUE ;
+  ^self
+] ;
+
+LocalEntity defineMethod: [ | disableEntityLookup |
+  ^self define: 'useEntityLookup' toBe: TRUE ;
+  ^self
+] ;
+
+LocalEntity defineMethod: [ | access: entity | 
+  ^self entityLookup at: entity asSelf . else: [ ^self defaultInstance ] 
+] ;
+
+LocalEntity defineMethod: [ | initializeLocalAttributes |
+  ^self useEntityLookup isTrue
+  ifTrue:
+    [ ^self entityLookup at: ^self underlyingObject put: ^self asSelf ;
+    ]
+  ifFalse: [ ^super initializeLocalAttributes ] ;
+  ^self
+] ;
+
+LocalEntity defineMethod: [ | purgeBridgeAndLink |
+  ^self useEntityLookup isTrue
+     ifTrue: [ ^self entityLookup delete: ^self underlyingObject ] 
+    ifFalse: [ ^super purgeBridgeAndLink ] ;
+  ^self isntDefault ifTrue: [ ^self rdelete ] ;
+  ^self
+] ;
+
+####################
+#  Summary and Detail EstimateBridge protocol
+####################
+
+
+SummaryEstimateBridge
+   do: [ :observation <- ^global ConsensusEstimateRecord ] ;
+DetailEstimateBridge setBaseClassTo: SummaryEstimateBridge .
+do: [ :underlyingObject <- baseClass ;
+      :observation <- ^global AnalystEstimateRecord ;
+    ] ;
+
+#==================================================
+
+#--------------------
+#  post messages
+#--------------------
+Schema processAllMessages;
+
+
+

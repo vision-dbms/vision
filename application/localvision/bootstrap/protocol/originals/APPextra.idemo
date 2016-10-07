@@ -1,0 +1,119 @@
+ClassSetup loadFromFile: "ClassSetup.idemo" ;
+PropertySetup loadFromFile: "PropertySetup.idemo" ;
+MessageSetup loadFromFile: "MessageSetup.idemo" ;
+
+MasterFeedSetup loadFromFile: "MasterSetup.idemo" ;
+EntityExtenderFeedSetup loadFromFile: "EntityExtenderSetup.idemo" ;
+MembershipFeedSetup loadFromFile: "MembershipSetup.idemo" ;
+TransactionFeedSetup loadFromFile: "TransactionSetup.idemo" ;
+AliasFeedSetup loadFromFile: "AliasSetup.idemo" ;
+RangeGroupFeedSetup loadFromFile: "RangeGroupSetup.idemo" ;
+
+Security defineMethod: "[ | pe | 
+ !val <- company funDataM pe ;
+ val between: 0 and: 500 . 
+     ifTrue: [ val ] else: [ NA ] 
+]" ;
+
+Security defineMethod: "[ | priceToBook |
+ !val <- company funDataM priceToBook ;
+  val between: 0 and: 100 . ifTrue: [ val ] else: [ NA ] 
+]" ;
+
+Security defineMethod: "[ | marketCap | 
+ !val <- company funDataM marketCap ;
+ val else: 0 . > 0 ifTrue: [ val ] 
+]" ;
+
+Security defineMethod: "[ | marketCapUS | 
+ ^global Named Currency US evaluate: 
+   [ !val <- company funDataM marketCap ;
+     val else: 0 . > 0 ifTrue: [ val ] 
+   ] 
+]" ;
+
+MessageSetup updateFromString: "classId	message	tvFlag	description
+Security	pe	Y	 price to earnings from operations
+Security	priceToBook	Y	price to book value
+Security	marketCap	Y	price * shares out
+Security	marketCapUS	Y	price * shares out in US$
+" ;
+
+####################
+#  logo and web site data 
+####################
+PropertySetup updateFromString: "classId	property
+Company	logoFile
+Company	webSite
+" ;
+
+####################
+#  data item setup
+####################
+DataItemFeed updateFromString: 
+"id	name	shortName	sortCode	baseClass	accessPath	isStat	isGroup
+mcap	Market Capitalization	Mkt Cap	1	Security	marketCap	N	N
+mcapUS	Market Cap US$	MCap US	1	Security	marketCapUS	Y	N
+lmcapUS	Latest Market Cap (US)	Latest MCap (US)	4	Security	latestMarketCapUS
+price	Price	Price	5	Security	price
+pe	P/E Ratio	P/E	9	Security	pe	Y	N
+pb	P/B Ratio	P/B	9	Security	priceToBook	Y	N
+
+priceDate	Price Date	Price Date	6	Security	getPriceRecord date
+sector	Industry Sector	Sector	1	Company	industry sector	N	Y
+industry	Industry	Industry	2	Company	industry	N	Y
+country	Country	Country	3	Company	country	N	Y
+secType	Security Type	SecurityType	5	Security	type	N	Y
+assetCat	Asset Category	Asset Cat	6	Security	type assetCategory	N	Y
+" ;
+
+DataItemFeed updateFromString: 
+"id	showAvg	showTot	showWtAvg	showMed	defaultDecimals
+mcap	T	T	T	F	0
+mcapUS	T	T	T	F	0
+pe	T	F	T	T	2
+pb	T	F	T	F	2
+" ;
+
+DataItemFeed updateFromString: 
+"id	isGroup
+sector	T
+industry	T
+country	T
+secType	T
+assetCat	T
+" ;
+
+DataItemFeed updateFromString: 
+"id	inProfile	profileLink	defaultDecimals
+lmcapUS	T		0
+price	T	SecurityPricingReport	3
+pe	T	CompanyEarningsReport
+" ;
+
+DataAccessPathFeed updateFromString: 
+"id	fromClass	toClass	via
+Holding-Security	Holding	Security	security
+Holding-Company	Holding	Company	security company
+Security-Company	Security	Company	company
+" ;
+
+####################
+#  cleanups
+####################
+AdminTools cleanNetwork ;
+Utility collectGarbage ;
+
+newLine print ; newLine print ;
+"--> Space Stats at End" printNL ;
+newLine print ;
+"Space" print: 10 ; "Containers" print: -12 ; "Size (kb)" printNL: -12 ;
+AdminTools objectSpaceList
+do: [ !containers <- containerList extendBy: [ !size <- containerSize ] ;
+      asNumber print: -10 ;
+      containers count printWithCommas: 12.0 ;
+      !size <- containers total: [ size ] . / 1000 printWithCommas: 12.0 ;
+      " " print: 2 ;
+      spaceName printNL ;
+      ] ;
+

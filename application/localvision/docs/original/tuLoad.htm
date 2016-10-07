@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Tutorial 2: Loading Sample Data </title>
+
+</head>
+<body>
+<body bgcolor=white>
+
+<h2>Vision Tutorial 2: Loading Sample Data</h2>
+
+<p>
+     | <a href="FHome.htm">Home</a> 
+     | <a href="vtutor.htm">Tutorials</a> 
+     | <a href="Input.htm">Loading Information</a> 
+     | <a href="clEntity.htm">The Entity Class</a> 
+     | <a href="Fund.htm">Class and Message Basics</a> | 
+<hr>
+<h3>Topics Covered:</h3>
+<ul type="square">
+<li><a href="#overview">Overview</a>
+<li><a href="#sector">Loading Sector Data</a>
+<li><a href="#industry">Loading Industry Data</a>
+<li><a href="#company">Loading Company Data</a>
+<li><a href="#ts">Updating Time Series Properties</a>
+<li><a href="#SeeAlso:">See Also:</a>
+</ul>
+<hr>
+<h3><a name="overview">Overview</a></h3>
+<p>
+The sample <a href="vtutor.htm">Tutorials and Case Studies</a>
+are based on the data described in this section.  The sample database
+provides basic information about companies.  Several sample data
+files have been supplied in addition to sample Vision code which can
+be executed to read these files and create the database.
+<p>
+By default, all files referenced are in the directory
+<i>/localvision/samples/general/</i>.  Check with your Vision administrator if
+you do not see the following files in the directory:
+<p>
+<Center><table width="85%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>File Name</b>
+<td><b>Function</b>
+</tr>
+
+<tr>
+<td><i>sector.dat</i>
+<td>Vertical bar-delimited file containing sector identifiers and names.
+<tr>
+<td><i>industry.dat</i>
+<td>Vertical bar-delimited file containing industry identifiers and names
+and a sector identifier.
+
+<tr>
+<td><i>company.dat</i>
+<td>Vertical bar-delimited file containing basic company information:
+id, name, price, and industry id.
+
+<tr>
+<td><i>company2.dat</i>
+<td>Vertical bar-delimited file containing additional company information
+for different time points: id, year, sales, earnings, income, and
+common equity.
+
+<tr>
+<td><i>sample.load</i>
+<td>File containing Vision code that defines the <i>Company</i>,
+<i>Industry</i>, and <i>Sector</i> classes and populates these
+classes using the data in the <i>.dat</i> files.
+
+</tr></table></Center>
+<p>
+You can read the <i>sample.load</i> file into your favorite 
+<a href="Editor.htm">Vision Editor</a> or you can execute the 
+code in this file using the
+<a href="Input.htm#program">asFileContents evaluate</a>
+expression:
+<ul type=disc><pre><tt><b>"/localvision/samples/general/sample.load" asFileContents evaluate ;
+</b></tt></pre></ul>
+<p>
+<b>Note:</b> The <i>sample.load</i> file runs by default on a <i>Unix</i> environment.  If you are using a <i>Windows NT</i> platform, this location may be prefixed by a drive and optional path (e.g., <i>d:/visiondb/localvision/samples/general/sample.load</i>).  In addition, the <i>sample.load</i> file must be edited by your Vision Administrator to reflect the correct location.
+<p>
+<hr>
+<h3><a name="sector">Loading Sector Data</a></h3>
+<p>
+The file <i>sector.dat</i> contains one line per sector.  Each line
+contains a sector identifier and a sector name, separated by the vertical
+bar ( | ) character.  The first few lines of this file are displayed
+below:
+<pre><tt>     NONDUR|Non-durables
+     DUR|Durables
+</tt></pre>
+The techniques described in
+<a href="Input.htm#data"><i>Loading Data Files</i></a>
+are used to parse this data file to create new sectors.
+<p>
+This subset of the Vision code in the <i>sample.load</i> file is used
+for defining sectors:
+<pre><tt><b>     #--------------------
+     #  Create The Class
+     #--------------------
+     Entity createSubclass: "Sector" ;
+     
+     #--------------------
+     #  Read and process the vertical bar-delimited file
+     #  Fields are: id | name
+     #--------------------
+     "/localvision/samples/general/sector.dat" asFileContents asLines
+     do: [ !fields <- ^self breakOn: "|" ;
+           !id <- fields at: 1 . stripBoundingBlanks ;
+           !name <- fields at: 2 . stripBoundingBlanks ;
+           id isBlank not && name isBlank not
+              ifTrue: [ ^global Sector createInstance: id . setNameTo: name ] ;
+         ] ;
+</b></tt></pre>
+<p>
+The first step is to create the new class, <i>Sector</i> using the
+<a href="clEntity.htm#subclass"><i>createSubclass:</i></a> message.
+By creating <i>Sector</i> as a subclass of <i>Entity</i>, the
+<a href="clEntity.htm#access"><i>Named Sector</i></a>
+dictionary is automatically created
+for storing references to individual sector instances.  
+<p>
+The file <i>sector.dat</i> is then processed to create and name the
+<i>Sector</i> instances.  The 
+<a href="mString.htm#asFileContents"><i>asFileContents</i></a>
+message returns the contents of the file as a string, the 
+<a href="mString.htm#asLines"><i>asLines</i></a>
+message returns a list of strings corresponding to the individual rows in the
+file and the 
+<a href="mString.htm#breakOn:"><i>breakOn:</i></a>
+message breaks each line into a list of string fields using
+the vertical bar character as a delimiter.  
+The variable <i>fields</i> is a list
+of strings where the first element is the sector identifier and the
+second element is the sector name.
+<p>
+If a non-blank sector id and name are provided, a new sector is
+created using the
+<a hef="clEntity.htm#instance"><i>createInstance:</i></a> message.
+The <i>id</i> value is used to name the new sector and will be
+the value of the new sector's <i>code</i> property.
+The <i>name</i> value is used to update the <i>name</i> property of
+the new sector.  Since
+the property <i>code</i> is defined at the <i>Object</i> class
+and the property <i>name</i> is defined at the <i>Entity</i> class,
+these properties do not need to be explicitly defined for the
+<i>Sector</i> class.
+<p>
+After the sectors have been created you can display the list of
+all sectors using:
+<pre><tt><b>     Sector masterList
+     do: [ code print: 10 ; 
+           name printNL ;
+         ] ;
+</b></tt></pre>
+You can reference a specific sector using:
+<pre><tt><b>     Named Sector at: "DUR" . name printNL ;
+</b></tt></pre>
+<p>
+<hr>
+<h3><a name="industry">Loading Industry Data</a></h3>
+<p>
+The file <i>industry.dat</i> contains one line per industry.  Each line
+contains an industry identifier, an industry name, and a sector identifier,
+separated by the vertical bar ( | )
+character.  The first few lines of this file are displayed
+below:
+<pre><tt>     FBT|Food, Beverage, Tobacco|NONDUR
+     HH|Household Products|NONDUR
+</tt></pre>
+The techniques described in
+<a href="Input.htm#data"><i>Loading Data Files</i></a>
+are used to parse this data file to create new industries.
+<p>
+This subset of the Vision code in the <i>sample.load</i> file is used
+for defining industries:
+<pre><tt><b>     #--------------------
+     #  Create The Class
+     #--------------------
+     Entity createSubclass: "Industry" ;
+     
+     #--------------------
+     #  Define the sector property
+     #--------------------
+     Industry defineFixedProperty: 'sector' withDefault: Sector ;
+     
+     #--------------------
+     #  Read and process the vertical bar-delimited file
+     #  Fields are: id  name  sectorId
+     #--------------------
+     "/localvision/samples/general/industry.dat" asFileContents asLines
+     do: [ !fields <- ^self breakOn: "|" ;
+           !id <- fields at: 1 . stripBoundingBlanks ;
+           !name <- fields at: 2 . stripBoundingBlanks ;
+           !sectID <- fields at: 3 . stripBoundingBlanks ;
+           !sector <- ^global Named Sector uniformAt: sectID ;
+           id isBlank not && name isBlank not
+           ifTrue: 
+             [ !newOne <- ^global Industry createInstance: id . 
+                   setNameTo: name;
+               newOne :sector <- sector ;
+             ] ;
+         ] ;
+</b></tt></pre>
+<p>
+The first step is to create the new class, <i>Industry</i> using the
+<a href="clEntity.htm#subclass"><i>createSubclass:</i></a> message.
+By creating <i>Industry</i> as a subclass of <i>Entity</i>, the
+<a href="clEntity.htm#access"><i>Named Industry</i></a> dictionary is automatically created
+for storing references to individual industry instances.
+<p>
+The next step is to define an extra property at the <i>Industry</i>
+class which will be used to store the value of an industry's sector.
+Since the <a href="Messages.htm#default"><i>withDefault:</i></a>
+parameter is supplied for this new property, new industry instances
+created with the <i>createInstance:</i> message will have their
+<i>sector</i> property initialized to the default <i>Sector</i>.
+<p>
+The file <i>industry.dat</i> is then processed to create and name the
+<i>Industry</i> instances.  The 
+<a href="mString.htm#asFileContents"><i>asFileContents</i></a>
+message returns the contents of the file as a string, the 
+<a href="mString.htm#asLines"><i>asLines</i></a>
+message returns a list of strings corresponding to the individual rows in the
+file and the 
+<a href="mString.htm#breakOn:"><i>breakOn:</i></a>
+message breaks each line into a list of string fields using
+the vertical bar character as a delimiter.  
+The variable <i>fields</i> is a list
+of strings where the first element is the industry identifier, the
+second element is the industry name, and the third element is the
+sector id.  The variable <i>sector</i> is created to convert the
+string representing the sector id into an actual sector object.
+The <a href="mString.htm#uniformAt:"><i>uniformAt:</i></a> message is
+used to return the default sector if the supplied id does not match
+an existing sector.
+<p>
+If a non-blank industry id and name are provided, a new industry is
+created using the
+<a hef="clEntity.htm#instance"><i>createInstance:</i></a> message.
+The <i>id</i> value is used to name the new industry and will be
+the value of the new industry's <i>code</i> property.
+The <i>name</i> value is used to update the <i>name</i> property of
+the new industry and the sector object is assigned to the new
+industry's <i>sector</i> property.  
+<p>
+After the industries have been created you can display the list of
+all industries grouped into sectors using:
+<pre><tt><b>     Industry masterList
+          groupedBy: [ sector ] .
+     do: [ "Sector: " print ; code print: 10 ; name printNL ;
+           groupList 
+           do: [ "   Ind: " print ; 
+                 code print: 10 ;
+                 name printNL ;
+               ] ;
+           newLine print ;
+         ] ;
+</b></tt></pre>
+You can reference a specific industry using:
+<pre><tt><b>     Named Industry at: "FBT" . name printNL ;
+</b></tt></pre>
+You can reference a specific industry's sector using:
+<pre><tt><b>     Named Industry at: "FBT" . sector name printNL ;
+</b></tt></pre>
+<p>
+<hr>
+<h3><a name="company">Loading Company Data</a></h3>
+<p>
+The file <i>company.dat</i> contains one line per company.  Each line
+contains a company identifier, a company name, a price, and an industry
+identifier separated by the vertical bar ( | )
+character.  The first few lines of this file are displayed
+below:
+<pre><tt>     AET|Aetna Life & Cas| 40.875|INSUR
+     T|American Tel & Tel| 43.625|TEL
+</tt></pre>
+The techniques described in
+<a href="Input.htm#data"><i>Loading Data Files</i></a>
+are used to parse this data file to create new companies.
+<p>
+This subset of the Vision code in the <i>sample.load</i> file is used
+for defining Companies:
+<pre><tt><b>     #--------------------
+     #  Create The Class
+     #--------------------
+     Entity createSubclass: "Company" ;
+     
+     #--------------------
+     #  Define some basic properties
+     #--------------------
+     Company defineFixedProperty: 'ticker' ;
+     Company defineFixedProperty: 'price' ;
+     Company defineFixedProperty: 'industry' withDefault: Industry ;
+     
+     #--------------------
+     #  Read and process the vertical bar-delimited file
+     #  Fields are: id  name  price  industryId
+     #--------------------
+     "/localvision/samples/general/company.dat" asFileContents asLines
+     do: [ !fields <- ^self breakOn: "|" ;
+           !id <- fields at: 1 . stripBoundingBlanks ;
+           !name <- fields at: 2 . stripBoundingBlanks ;
+           !price <- fields at: 3 . asNumber ;
+           !indID <- fields at: 4 . stripBoundingBlanks ;
+           !industry <- ^global Named Industry uniformAt: indID ;
+           id isBlank not && name isBlank not
+           ifTrue: 
+             [ !newOne <- ^global Company createInstance: id . 
+                  setNameTo: name;
+               newOne :ticker <- id ;
+               newOne :price <- price ;
+               newOne :industry <- industry ;
+             ] ;
+         ] ;
+</b></tt></pre>
+The first step is to create the new class, <i>Company</i> using the
+<a href="clEntity.htm#subclass"><i>createSubclass:</i></a> message.
+By creating <i>Company</i> as a subclass of <i>Entity</i>, the
+<a href="clEntity.htm#access"><i>Named Company</i></a>
+dictionary is automatically created
+for storing references to individual company instances.
+<p>
+The next step is to define some additional properties at the <i>Company</i>
+class that will be used to store the ticker symbol, price, and
+industry for each instance.
+Since the <a href="Messages.htm#default"><i>withDefault:</i></a>
+parameter is supplied for the <i>industry</i> property, 
+new company instances
+created with the <i>createInstance:</i> message will have 
+this property initialized to the default <i>Industry</i>.
+The <i>ticker</i> and <i>price</i> properties will have <i>NA</i>
+values for new company instances.
+<p>
+The file <i>company.dat</i> is then processed to create and name the
+<i>Company</i> instances.  The 
+<a href="mString.htm#asFileContents"><i>asFileContents</i></a>
+message returns the contents of the file as a string, the 
+<a href="mString.htm#asLines"><i>asLines</i></a>
+message returns a list of strings corresponding to the individual rows in the
+file and the 
+<a href="mString.htm#breakOn:"><i>breakOn:</i></a>
+message breaks each line into a list of string fields using
+the vertical bar character as a delimiter.  
+The variable <i>fields</i> is a list
+of strings where the first element is the company identifier, the
+second element is the company name, the third element is the
+price (which is converted from a string to a number), and the fourth
+element is an
+industry id.  The variable <i>industry</i> is created to convert the
+string representing the industry id into an actual industry object.
+The <a href="mString.htm#uniformAt:"><i>uniformAt:</i></a> message is
+used to return the default industry if the supplied id does not match
+an existing industry.
+<p>
+If a non-blank company id and name are provided, a new company is
+created using the
+<a hef="clEntity.htm#instance"><i>createInstance:</i></a> message.
+The <i>id</i> value is used to name the new company and will be
+the value of the new company's <i>code</i> property.
+The <i>name</i> value is used to update the <i>name</i> property of
+the new company, the price is assigned into the
+<i>price</i> property, and the industry object is assigned to the new
+company's <i>industry</i> property.  
+<p>
+After the companies have been created you can display the list of
+all companies grouped into industries using:
+<pre><tt><b>     Company masterList
+          groupedBy: [ industry ] .
+     do: [ "Industry: " print ; code print: 10 ; name printNL ;
+           groupList 
+           do: [ code print: 10 ;
+                 name print: 30 ; 
+                 price printNL ;
+               ] ;
+           newLine print ;
+         ] ;
+</b></tt></pre>
+You can reference a specific company using:
+<pre><tt><b>     Named Company at: "T" . name printNL ;
+</b></tt></pre>
+You can reference a specific company's industry using:
+<pre><tt><b>     Named Company at: "T" . industry name printNL ;
+</b></tt></pre>
+You can reference a specific company's sector using:
+<pre><tt><b>     Named Company at: "T" . industry sector name printNL ;
+</b></tt></pre>
+<p>
+<hr>
+<h3><a name="ts">Updating TimeSeries Properties</a></h3>
+<p>
+The file <i>company2.dat</i> contains multiple lines per company,
+with each line representing a specific year's data for the company.
+Each line contains a company identifier, a year, and a sales,
+earnings per share, net income, and common equity value for the
+company for the year separated by the vertical bar ( | )
+character.  The first few lines of this file are displayed
+below:
+<pre><tt>     AET|90| 22114.11| 7.48| 920.60| 6084.80
+     AET|89| 20482.91| 6.18| 1043.10| 5497.19
+</tt></pre>
+The techniques described in
+<a href="Input.htm#data"><i>Loading Data Files</i></a>
+are used to parse this data file to update time series
+properties for existing companies.
+<p>
+This subset of the Vision code in the <i>sample.load</i> file is used
+for updating the company data:
+<pre><tt><b>     #--------------------
+     #  Define some time series properties
+     #--------------------
+     Company define: 'sales' ;
+     Company define: 'earningsPerShare' ;
+     Company define: 'netIncome' ;
+     Company define: 'commonEquity' ;
+     
+     #--------------------
+     #  Read and process the vertical bar-delimited file
+     #  Fields are: id year sales earningsPerShare netIncome commonEquity
+     #--------------------
+     "/localvision/samples/general/company2.dat" asFileContents asLines
+     do: [ !fields <- ^self breakOn: "|" ; 
+           !id <- fields at: 1 . stripBoundingBlanks ;
+           !company <- ^global Named Company at: id ;
+           !date <- fields at: 2 . asNumber asDate ;
+           !sales <- fields at: 3 . asNumber ;
+           !eps <- fields at: 4 . asNumber ;
+           !netinc <- fields at: 5 . asNumber ;
+           !commone <- fields at: 6 . asNumber ;
+     
+           company isntNA
+           ifTrue: 
+             [ company :sales asOf: date put: sales ;
+               company :earningsPerShare asOf: date put: eps ;
+               company :netIncome asOf: date put: netinc ;
+               company :commonEquity asOf: date put: commone ;
+             ] 
+          ifFalse:
+             [ ">>> Company not Found: " print ; id printNL ] ;
+         ] ;
+</b></tt></pre>
+The first step is to create four new time series properties for
+storing the sales, earnings, income, and common equity values.
+By default, there are no data points in these time series and
+the value <i>NA</i> will be returned.
+<p>
+The file <i>company2.dat</i> is then processed.  The
+<a href="mString.htm#asFileContents"><i>asFileContents</i></a>
+message returns the contents of the file as a string, the 
+<a href="mString.htm#asLines"><i>asLines</i></a>
+message returns a list of strings corresponding to the individual rows in the
+file and the 
+<a href="mString.htm#breakOn:"><i>breakOn:</i></a>
+message breaks each line into a list of string fields using
+the vertical bar character as a delimiter.  
+The variable <i>fields</i> is a list
+of strings where the first element is the company identifier, the
+second element is the date which is converted from a string
+to a number to a date, and the third through sixth elements
+are the sales, earnings, income, and equity values which are
+converted from strings to numbers.
+The variable <i>company</i> is created to convert the
+string representing the company id into an actual company object.
+Because the <a href="mString.htm#at:"><i>at:</i></a> message is
+used to lookup the id, the value <i>NA</i> will be returned if 
+the id does not match an existing company.
+<p>
+If the company is found, the values of the time series properties
+<i>sales</i>, <i>earningsPerShare</i>, 
+<i>netIncome</i>, and <i>commonEquity</i> are updated as of the
+<i>date</i> supplied.  If the company is not found, a warning message
+is displayed.
+<p>
+After the  data has been updated, you can look at a specific sales
+value for a company using:
+<pre><tt><b>     Named Company T sales printNL;                #- most recent
+     Named Company T :sales asOf: 88 . printNL ;   #- as of 88
+     88 evaluate:                                  #- as of 88
+         [ Named Company T sales printNL ] ;       #- alternative
+</b></tt></pre>
+You can display all the sales values for a specific company using:
+<pre><tt><b>     Named Company at: "T" . :sales displayAll ;
+</b></tt></pre>
+<p>
+<hr>
+<a name="SeeAlso:"><b><h3>See Also:</h3></b></a>
+  <a href="tuBasic.htm">Vision Basics</a>
+| <a href="tuSingle.htm">Single Object Access</a> 
+| <a href="tuList.htm">Using Lists</a>
+| <a href="tuTS.htm">Using Dates and TimeSeries</a>
+<hr>
+
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy; 1999 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated January 25, 1999</font>
+</table>
+
+</body>
+</html>

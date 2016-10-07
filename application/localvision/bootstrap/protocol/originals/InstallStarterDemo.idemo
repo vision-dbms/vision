@@ -1,0 +1,38 @@
+# 
+
+####################
+#  This Script is Used To Install the pieces needed to support
+#     the pma starter demonstration system that is included as
+#     a standard part of the run-time environment
+####################
+
+if ($#argv > 0) then
+	set scriptDir = $argv[1]
+else
+	set scriptDir = $cwd
+endif
+
+cd $scriptDir
+set comment = "Install Investment Core: run-time starter system"
+echo "--->" $comment
+date
+$DBbatchvision -adU3 <<@@@EOF@@@
+
+#--------------------
+#  starter reports
+#--------------------
+?? APPspecs.idemo
+?? APPreps.idemo
+?g
+
+#--------------------
+#  load extra setup feeds
+#--------------------
+?? APPextra.idemo
+?g
+
+Utility updateNetworkWithAnnotation: "$comment" ;
+?g
+
+@@@EOF@@@
+

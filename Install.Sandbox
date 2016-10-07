@@ -1,0 +1,104 @@
+== Begin ==
+
+
+Choose this install if the intent is to have a vision database
+suitable for updating outside a production admin account.
+
+Choose the Install.Admin for production professional use.
+
+These tools and instructions are written using csh as the default shell
+Do not introduce any .cshrc or .login yet
+
+1. Create an osvadmin account and login
+
+2. Place the contents of the GIT Repository into ~/vision-open-source
+
+3. Generate executables
+
+cd ~/vision-open-source/software/
+setenv PATH `pwd`/builder/:$PATH
+cd src/8.0/src
+buildRelease 8.0  
+pushBinaries ../ ~/vision-open-source/software/builds/8.0.0/Linux_x86_64
+
+4. Generate Vision BootNets
+
+4.1: vars
+cd ~
+setenv osv ~/vision-open-source/
+setenv osvAdmin $osv/application
+setenv LocalVisionRoot $osvAdmin/localvision
+
+#!!! edit this version per the builds subdir 
+setenv VisionBin $osv/software/builds/8.0.0/Linux_x86_64/bin
+
+setenv DBbatchvision $VisionBin/batchvision
+setenv feedFilePath ; setenv scriptFilePath; setenv updateLogPath
+setenv PATH $LocalVisionRoot/adminScripts/:${PATH}
+
+4.2: build bootnets
+
+ cd ~/vision-open-source/application/localvision/bootstrap; ls -l
+ --> remove any existing bootNets - investNet or basicNet from bootstrap if already exists 
+
+4.2.1: Create a basicNet
+cd ~
+csh -f $LocalVisionRoot/bootstrap/scripts/BuildBootDB.cmd
+
+the -f prevents executing any .cshrc
+confim stdout echo's
+choose B 
+
+cd  $LocalVisionRoot/bootstrap/basicNet
+\rm NDF.UUID
+$DBbatchvision -n NDF 
+2+2
+QUIT
+
+4.2.2: Create a investNet
+cd ~
+csh -f $LocalVisionRoot/bootstrap/scripts/BuildBootDB.cmd
+
+the -f prevents executing any .cshrc
+confim stdout echo's
+choose I
+
+remove the OS that appears in cwd
+
+cd  $LocalVisionRoot/bootstrap/investNet
+\rm NDF.UUID
+$DBbatchvision -n NDF 
+2+2
+?g
+osdPathName
+?g
+QUIT
+
+5. Prepare for use
+Users wishing to use a professional production implementation should follow DBAdmin setup instructions.  Users wishing to start from a minimal implemntation or sandbox, continue with these instructions.  
+
+The databases are moved out of the git repository into a sandbox space
+
+cd 
+mkdir -p ~/localvision/sandbox
+mkdir -p ~/localvision/sandbox/releases/network && cd ~/localvision/sandbox/releases/network
+mv $LocalVisionRoot/bootstrap/investNet investNet
+mv $LocalVisionRoot/bootstrap/basicNet basicNet
+cd  ~/sandbox/localvision
+ln -s ~/sandbox/releases/network/investNet network
+cd ~/sandbox/releases/network/investNet
+pwd > NDF.OSDPATH
+whoami > NDF.GURL
+cd ~/sandbox/releases/network/basicNet
+pwd > NDF.OSDPATH
+whoami > NDF.GURL
+
+5.1 Automate starting environment
+Recommended startup variables suitable for .cshrc automation
+
+setenv LocalVisionRoot ~/sandbox/localvision
+setenv OSDPathName $LocalVisionRoot/network
+setenv NDFPathName $OSDPathName/NDF
+
+This is the completion of a non production sandbox release.  These two databases are ready for vision use.  
+

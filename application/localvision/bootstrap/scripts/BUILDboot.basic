@@ -1,0 +1,397 @@
+#!/bin/csh -f
+
+###################
+#  Bootstrap the basic vision database network
+#  Set variable names to match original script in SETUPboot.core
+####################
+
+set MAIN = $DBbatchvision
+set scriptDir = $bootSource/protocol/originals
+
+echo "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+echo "%%%    Install Basic Bootstrap    %%%"
+echo "Running $MAIN with scripts from $scriptDir in $NDFPathName"
+echo "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+
+#---  no default object space
+unsetenv UserOSI
+
+echo "Building $OSDPathName using $MAIN with scripts from $scriptDir "
+
+echo "---> Installing BootStrap"
+date
+$MAIN -bad << @@@EOF@@@
+?? $scriptDir/BootStrap.boot
+@@@EOF@@@
+
+echo "---> Installing BuiltInClasses"
+date
+$MAIN -adU2 <<@@@EOF@@@
+?? $scriptDir/NameBuiltIns.boot
+
+?? $scriptDir/Object.bi
+
+?? $scriptDir/Boolean.bi
+?? $scriptDir/Property.bi
+
+?? $scriptDir/Function.bi
+?? $scriptDir/CompFn.bi
+?? $scriptDir/Closure.bi
+?? $scriptDir/Method.bi
+?? $scriptDir/Primitive.bi
+?? $scriptDir/EnumFn.bi
+?? $scriptDir/Collect.bi
+?? $scriptDir/IndColl.bi
+?? $scriptDir/IndList.bi
+?? $scriptDir/TS.bi
+?? $scriptDir/SeqColl.bi
+?? $scriptDir/List.bi
+?? $scriptDir/Value.bi
+
+?? $scriptDir/Ordinal.bi
+?? $scriptDir/Char.bi
+?? $scriptDir/Date.bi
+?? $scriptDir/Number.bi
+?? $scriptDir/Double.bi
+?? $scriptDir/Float.bi
+?? $scriptDir/Integer.bi
+?? $scriptDir/String.bi
+
+?? $scriptDir/Selector.bi
+?? $scriptDir/NA.bi
+
+?? $scriptDir/CREATE.bi
+?? $scriptDir/DateRange.bi
+?? $scriptDir/Offset.bi
+?? $scriptDir/Util.bi
+
+?? $scriptDir/INIT.bi
+?? $scriptDir/CLEAN.bi
+
+Utility basicUpdateNetwork ;
+?g
+
+@@@EOF@@@
+
+echo "---> Installing Core Classes and Protocol"
+date
+$MAIN -adU3 <<@@@EOF@@@
+?? $scriptDir/Space.core
+?? $scriptDir/CREATE.core
+
+?? $scriptDir/Catalog.core
+?? $scriptDir/Chain.core
+?? $scriptDir/Descr.core
+?? $scriptDir/Dict.core
+?? $scriptDir/Entity.core
+?? $scriptDir/Incorp.core
+?? $scriptDir/Spec.core
+?? $scriptDir/ToolKit.core
+?? $scriptDir/User.core
+
+?? $scriptDir/CREATE.core2
+
+?? $scriptDir/Catalog.core2
+?? $scriptDir/Descr.core2
+?? $scriptDir/Dict.core2
+?? $scriptDir/ToolKit.core2
+
+Utility basicUpdateNetwork ;
+?g
+
+@@@EOF@@@
+
+
+echo "---> Installing DDMS Object Space"
+date
+$MAIN -ad <<@@@EOF@@@
+?? $scriptDir/DDMSsetup.G
+Utility createSpaceInNetworkWithAnnotation: "DDMS Object Space Creation" ;
+?g
+
+@@@EOF@@@
+
+echo "---> Installing Schema Support Classes"
+date
+$MAIN -adU3 <<@@@EOF@@@
+?? $scriptDir/INSTschema.G
+Utility updateNetwork ;
+?g
+
+@@@EOF@@@
+
+echo "---> Installing Schema Classes "
+date
+$MAIN -ad <<@@@EOF@@@
+?? $scriptDir/INIschema.G
+?? $scriptDir/EXTcore.schema
+?? $scriptDir/DEFschema.G
+Utility createSpaceInNetworkWithAnnotation: "Schema Object Space Creation" ;
+?g
+
+@@@EOF@@@
+
+
+echo "---> Installing Schema Protocol"
+date
+$MAIN -adU3 <<@@@EOF@@@
+?? $scriptDir/INITschema.G
+Utility updateNetwork ;
+?g
+
+@@@EOF@@@
+
+echo "---> Installing DataFeed Object Space"
+date
+$MAIN -ad <<@@@EOF@@@
+?? $scriptDir/DataFeedSetup.G
+Utility createSpaceInNetworkWithAnnotation: "DataFeed Object Space Creation" ;
+?g
+
+@@@EOF@@@
+
+echo "---> Installing Default DataRecord Object Space"
+date
+$MAIN -ad <<@@@EOF@@@
+?? $scriptDir/DataRecordSetup.G
+Utility createSpaceInNetworkWithAnnotation: "DataRecord Object Space Creation" ;
+?g
+
+@@@EOF@@@
+
+echo "---> Installing OpenVision Protocol"
+date
+$MAIN -adU3 <<@@@EOF@@@
+?? $scriptDir/INIov.G
+?? $scriptDir/DEFov.G
+?? $scriptDir/EXTcore.ov
+;
+Object showInheritance ; 
+Schema processAllMessages ;
+
+Utility updateNetwork ;
+?g
+
+@@@EOF@@@
+
+echo "---> Installing AdminTools Protocol"
+date
+$MAIN -adU3 <<@@@EOF@@@
+?? $scriptDir/INIadmin.G
+?? $scriptDir/DEFadmin.G
+;
+Object showInheritance ; 
+Schema processAllMessages ;
+
+Utility updateNetwork ;
+?g
+
+@@@EOF@@@
+
+echo "---> Installing Interface Protocol"
+date
+$MAIN -adU3 <<@@@EOF@@@
+?? $scriptDir/INIcore.format
+?? $scriptDir/DEFcore.format
+?? $scriptDir/INIcore.iface
+?? $scriptDir/DEFcore.iface
+?? $scriptDir/INSTcore.iface
+?? $scriptDir/INIcore.html
+?? $scriptDir/DEFcore.html
+?? $scriptDir/INIcore.layout
+?? $scriptDir/DEFcore.layout
+?? $scriptDir/INSTcore.layout
+?? $scriptDir/INIcore.controls
+?? $scriptDir/DEFcore.controls
+;
+Object showInheritance ; 
+Schema processAllMessages ;
+
+Utility updateNetwork ;
+?g
+
+@@@EOF@@@
+
+echo "---> Installing Incorporator Class Tools"
+date
+$MAIN -adU3 <<@@@EOF@@@
+?? $scriptDir/INIdbs.core
+?? $scriptDir/DEFdbs.core
+;
+Object showInheritance ; 
+Schema processAllMessages ;
+
+Utility updateNetwork ;
+?g
+
+@@@EOF@@@
+
+echo "---> Installing 6.0 Protocol"
+date
+$MAIN -adU3 <<@@@EOF@@@
+#--"$scriptDir/EXTnumber.6.0" asFileContents evaluate ;
+#--"$scriptDir/EXTprimitives.6.0" asFileContents evaluate ;
+
+"$scriptDir/EXTproperties.6.0" asFileContents evaluate ;
+"$scriptDir/EXTlongValues.6.0" asFileContents evaluate ;
+
+"$scriptDir/INItime.6.0" asFileContents evaluate ;
+"$scriptDir/INIlowResTime.6.0" asFileContents evaluate ;
+"$scriptDir/INIhighResTime.6.0" asFileContents evaluate ;
+
+"$scriptDir/DEFtime.6.0" asFileContents evaluate ;
+"$scriptDir/DEFlowResTime.6.0" asFileContents evaluate ;
+"$scriptDir/DEFhighResTime.6.0" asFileContents evaluate ;
+
+"$scriptDir/EXTdate.6.0" asFileContents evaluate ;
+"$scriptDir/EXTdateRange.6.0" asFileContents evaluate ;
+"$scriptDir/EXTtimeSeries.6.0" asFileContents evaluate ;
+
+"$scriptDir/EXTunixSeconds.6.0" asFileContents evaluate ;
+
+"$scriptDir/supp.6.0" asFileContents evaluate ;
+
+?g
+Object showInheritance ; 
+Schema processAllMessages ;
+
+Utility updateNetwork ;
+?g
+
+@@@EOF@@@
+
+echo "---> Installing EXTcore.patch, EXTcore.INI, EXTcore.DEF"
+date
+$MAIN -adU3 <<@@@EOF@@@
+?? $scriptDir/EXTcore.patch
+?? $scriptDir/EXTcore.INI
+?? $scriptDir/EXTcore.DEF
+#--?? $scriptDir/EXTcore.date
+?g
+Object showInheritance ; 
+Schema processAllMessages ;
+
+Utility updateNetwork ;
+?g
+
+@@@EOF@@@
+echo "---> Installing Documentation"
+date
+$MAIN -adU3 <<@@@EOF@@@
+?? $scriptDir/DOCclass.G
+?g
+
+?? $scriptDir/DOCobject.G
+?g
+?? $scriptDir/DOCbool.G
+?? $scriptDir/DOCdrange.G
+?? $scriptDir/DOCprop.G
+?? $scriptDir/DOCfunc.G
+?g
+?? $scriptDir/DOCordinal.G
+?? $scriptDir/DOCselect.G
+?? $scriptDir/DOCna.G
+?? $scriptDir/DOCutil.G
+?? $scriptDir/DOCcore.G
+?g
+Object getMessage: "whatAmI" .
+messageDescriptor implementationList
+do: [ ^self setFunctionTypeTo: "Descriptive" ] ;
+;
+?g
+Object showInheritance ; 
+Schema processAllMessages ;
+
+Utility updateNetwork ;
+?g
+
+@@@EOF@@@
+
+echo "---> Installing CLEANschema.G"
+date
+$MAIN -adU3 <<@@@EOF@@@
+?? $scriptDir/CLEANschema.G
+?? $scriptDir/DOCschema.G
+?g
+Object showInheritance ; 
+Schema processAllMessages ;
+
+Utility updateNetwork ;
+?g
+
+@@@EOF@@@
+
+echo "---> Installing Matrix.core"
+date
+$MAIN -adU3 <<@@@EOF@@@
+?? $scriptDir/Matrix.core
+?g
+Object showInheritance ; 
+Schema processAllMessages ;
+
+Utility updateNetwork ;
+?g
+
+@@@EOF@@@
+
+echo "---> Installing DataFeed protocol"
+date
+$MAIN -adU3 <<@@@EOF@@@
+?? $scriptDir/INIfeeds.G
+?? $scriptDir/DEFfeeds.G
+?? $scriptDir/EXTiface.feeds
+
+?g
+Object showInheritance ; 
+Schema processAllMessages ;
+
+Utility updateNetwork ;
+?g
+
+@@@EOF@@@
+
+
+echo "---> Installing Navigator Application"
+date
+$MAIN -adU3 <<@@@EOF@@@
+?? $scriptDir/APPspecs.nav
+?? $scriptDir/APPreps.nav
+
+?g
+Object showInheritance ; 
+Schema processAllMessages ;
+
+Utility updateNetwork ;
+?g
+
+@@@EOF@@@
+
+
+echo "---> Creating NDF.JOURNAL file"
+echo "Bootstrap Completed `date`" > $OSDPathName/NDF.JOURNAL
+chmod 666 $OSDPathName/NDF
+chmod 666 $OSDPathName/NDF.JOURNAL
+touch $OSDPathName/NDF.ERRORS
+chmod 666 $OSDPathName/NDF.ERRORS
+
+echo "--->  Compacting network $NDFPathName using $AdminTools"
+date
+cd $AdminTools
+csh -f bootCompact.cmd
+
+csh -f deleteCompactSegments.cmd
+echo "--->  End of Compaction"
+date
+echo ""
+
+echo "---> Running AdminTools objectSpaceProfile"
+date
+$MAIN  <<@@@EOF@@@
+AdminTools objectSpaceProfile ;
+?g
+@@@EOF@@@
+
+echo "--->  Setting network directory permissions"
+cd $OSDPathName
+chmod 755 [1-9]*
+

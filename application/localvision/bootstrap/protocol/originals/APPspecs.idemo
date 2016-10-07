@@ -1,0 +1,337 @@
+##################################################
+#  Predefine tables and graphs used by demo reports
+##################################################
+
+####################
+#  Tables
+####################
+
+LayoutTools TableSpec createInstance: "finStatement" .
+   setHeaderCountTo: 1 .
+   enableRowLabels setCenterTo: TRUE .
+   setCellPaddingTo: 1 . setCellSpacingTo: 0 . setBorderTo: 1 .
+do: [ !table <- ^self ;
+      table caption setColorTo: "green" . setSizeTo: 4 . setWidthTo: 80 ;
+      table addColumn: 1 . setWidthTo: 30 . setSizeTo: 3 .
+         enableFillBlanks
+         setHAlignmentTo: "left" . setVAlignmentTo: "top" .
+         addHeader: 1 . setWidthTo: 30 ;
+      #- pre allocate columns to use
+      10 sequence
+      do: [ ^my table addColumn: ((^self + 1) asInteger) .
+                setSizeTo: 2 . setWidthTo: -15 . setFontTo: "Courier" . 
+                enableFillBlanks
+            addHeader: 1 .
+                setSizeTo: 3 . setWidthTo: -15 ;
+          ] ;
+    ] ;
+
+LayoutTools TableSpec createInstance: "finHistory" .
+   setHeaderCountTo: 1 .
+   enableRowLabels
+   setCellPaddingTo: 1 . setCellSpacingTo: 2 . setBorderTo: 1 .
+do: [ !table <- ^self ;
+      table caption setColorTo: "green" . setSizeTo: 4 . setWidthTo: 80 ;
+      table addColumn: 1 . setWidthTo: 15 . setSizeTo: 3 .
+         setHAlignmentTo: "left" . setVAlignmentTo: "top" .
+         addHeader: 1 . setWidthTo: 15 ;
+      #- pre allocate columns to use
+      10 sequence
+      do: [ ^my table addColumn: ((^self + 1) asInteger) .
+                setSizeTo: 2 . setWidthTo: -15 .
+                enableFillBlanks setFontTo: "Courier" .
+            addHeader: 1 . setSizeTo: 3 . setWidthTo: -15 ;
+          ] ;
+    ] ;
+
+
+
+#--------------------------------------------------
+
+####################
+#  Forms
+####################
+
+LayoutTools FormSpec createInstance: "AccountBreakdown" .
+   enableGlobalDate
+   enableGlobalCurrency
+   setTitleTo: "Account Breakdown" .
+   setApplicationNameTo: "AccountBreakdown" .
+   setDescriptionTo:
+"displays an account's holdings, summarized by a user-specific
+criteria such as sector or country.  The user can specify to include 
+summary-only or detail level information.
+" ;
+
+LayoutTools Named FormSpec AccountBreakdown
+addInputSpec: 1 .
+   setLabelTo: "Account: ".
+   setTypeToText 
+   setNameTo: "id" . 
+   setSizeTo: 15 ;
+LayoutTools Named FormSpec AccountBreakdown
+addInputSpec: 2 .
+   setLabelTo: "Group By: ".
+   setTypeToMenu
+   setNameTo: "group" . 
+   setSizeTo: 3 .
+   setAltEntryTo: "groupEntry" .
+;
+LayoutTools Named FormSpec AccountBreakdown
+addInputSpec: 3 .
+   setLabelTo: "Level: " .
+   setTypeToRadio 
+   setNameTo: "detail" .
+   setChoice: 1 labelTo: "Summary: " .
+   setChoice: 1 valueTo: "Summary" .
+   selectChoice: 1 .
+   setChoice: 2 labelTo: "Detail: " .
+   setChoice: 2 valueTo: "Detail" .
+;
+
+#--------------------
+
+LayoutTools FormSpec createInstance: "HoldingsChronology" .
+   enableGlobalDate
+   enableGlobalCurrency
+ ;
+
+LayoutTools Named FormSpec HoldingsChronology
+addInputSpec: 1 .
+   setTypeToText 
+   setNameTo: "id" . 
+   setSizeTo: 10 ;
+   
+   
+LayoutTools Named FormSpec HoldingsChronology
+addInputSpec: 2 .
+   setLabelTo: "Select Dates: " .
+   setTypeToMenu 
+   setNameTo: "menudates" .
+   setChoice: 1 labelTo: "Last 5 Days" .
+   setChoice: 1 valueTo: "5Days" .
+   selectChoice: 1 .
+   
+   setChoice: 2 labelTo: "End Of Month, End Of Quarter, End Of Year" .
+   setChoice: 2 valueTo: "EndMonth,EndQtr,EndYr" .
+
+   setChoice: 3 labelTo: "Last 4 monthEnds" .
+   setChoice: 3 valueTo: "4MonthEnds" .
+
+   setAltEntryTo: "enterdates"
+;
+
+
+#--------------------
+
+LayoutTools FormSpec createInstance: "AccountCompare" .
+   enableGlobalDate
+   enableGlobalCurrency
+   setTitleTo: "Account Comparison" .
+   setApplicationNameTo: "AccountCompare" .
+   setDescriptionTo:
+"compares two or more accounts, summarized by a user-specified criteria 
+such as sector or country.  The user can specify to include summary-only or 
+detail level information." ;
+
+LayoutTools Named FormSpec AccountCompare
+addInputSpec: 1 .
+   setLabelTo: "Account: ".
+   setTypeToText 
+   setNameTo: "id" . 
+   setSizeTo: 15 ;
+LayoutTools Named FormSpec AccountCompare
+addInputSpec: 2 .
+   setLabelTo: "VS: ".
+   setTypeToText 
+   setNameTo: "ids" . 
+   setSizeTo: 25 ;
+LayoutTools Named FormSpec AccountCompare
+addInputSpec: 3 .
+   setLabelTo: "Group By: ".
+   setTypeToMenu
+   setNameTo: "group" . 
+   setSizeTo: 3 .
+   setAltEntryTo: "groupEntry" .
+;
+LayoutTools Named FormSpec AccountCompare
+addInputSpec: 4 .
+   setLabelTo: "Level: " .
+   setTypeToRadio 
+   setNameTo: "detail" .
+   setChoice: 1 labelTo: "Summary: " .
+   setChoice: 1 valueTo: "Summary" .
+   selectChoice: 1 .
+   setChoice: 2 labelTo: "Detail: " .
+   setChoice: 2 valueTo: "Detail" .
+;
+
+#--------------------
+
+LayoutTools FormSpec createInstance: "AccountCharXRef" .
+   enableGlobalDate
+   enableGlobalCurrency
+   setTitleTo: "Account Characteristic Cross Reference" .
+   setApplicationNameTo: "AccountCharXRef" .
+   setDescriptionTo:
+"displays summary characteristics for a list of accounts using a specified 
+set of statistics or all available statistics.
+" ;
+
+LayoutTools Named FormSpec AccountCharXRef
+addInputSpec: 1 .
+   setLabelTo: "Account: ".
+   setTypeToText 
+   setNameTo: "ids" . 
+   setSizeTo: 15 ;
+LayoutTools Named FormSpec AccountCharXRef
+addInputSpec: 2 .
+   setLabelTo: "Date List: ".
+   setTypeToText 
+   setNameTo: "dates" . 
+   setSizeTo: 15 ;
+LayoutTools Named FormSpec AccountCharXRef
+addInputSpec: 3 .
+   setLabelTo: "Group By: ".
+   setTypeToMenu
+   setNameTo: "group" . 
+   setSizeTo: 3 .
+   setAltEntryTo: "groupEntry" ;
+LayoutTools Named FormSpec AccountCharXRef
+addInputSpec: 4 .
+   setLabelTo: "Stat Group: ".
+   setTypeToMenu
+   setNameTo: "statGroup" . 
+   setSizeTo: 3 .
+;
+
+#--------------------
+
+LayoutTools FormSpec createInstance: "AccountAttribution" .
+   setTitleTo: "Account Attribution" .
+   setApplicationNameTo: "AccountAttribution" .
+   setDescriptionTo:
+"computes the impact of security returns and stock selection between
+a source and target account using monthly returns over a user-specified
+time interval.  The impact is summarized by a user-specified criteria such as 
+sector or country.  The user can specify to include summary-only or detail
+level information." ;
+
+LayoutTools Named FormSpec AccountAttribution
+addInputSpec: 1 .
+   setLabelTo: "Source Acct".
+   setTypeToText 
+   setNameTo: "id1" . 
+   setSizeTo: 10 ;
+LayoutTools Named FormSpec AccountAttribution
+addInputSpec: 2 .
+   setLabelTo: "Target Acct".
+   setTypeToText 
+   setNameTo: "id2" . 
+   setSizeTo: 10 ;
+LayoutTools Named FormSpec AccountAttribution
+addInputSpec: 3 .
+   setLabelTo: "From".
+   setTypeToText 
+   setNameTo: "startDate" . 
+   setSizeTo: 8 ;
+LayoutTools Named FormSpec AccountAttribution
+addInputSpec: 4 .
+   setLabelTo: "To".
+   setTypeToText 
+   setNameTo: "endDate" . 
+   setSizeTo: 8 ;
+LayoutTools Named FormSpec AccountAttribution
+addInputSpec: 5 .
+   setLabelTo: "Group".
+   setTypeToMenu
+   setNameTo: "group" . 
+   setSizeTo: 3 .
+   setAltEntryTo: "groupEntry" .
+;
+LayoutTools Named FormSpec AccountAttribution
+addInputSpec: 6 .
+   setLabelTo: "Level" .
+   setTypeToRadio 
+   setNameTo: "detail" .
+   setChoice: 1 labelTo: "Summary: " .
+   setChoice: 1 valueTo: "Summary" .
+   selectChoice: 1 .
+   setChoice: 2 labelTo: "Detail: " .
+   setChoice: 2 valueTo: "Detail" .
+;
+
+
+#--------------------
+
+LayoutTools FormSpec createInstance: "AttributeSelector" .
+   enableGlobalDate
+   enableGlobalCurrency
+   setTitleTo: "Basic Attribute Selection" .
+   setApplicationNameTo: "AttributeSelector" .
+   setDescriptionTo:
+"selects the top companies or securities in a collection based on a 
+user-specified data item or criteria.  You can select the number of entities to
+display and whethr top is defined as larges or smallest by attribute.
+" ;
+
+LayoutTools Named FormSpec AttributeSelector
+addInputSpec: 1 .
+   setLabelTo: "Class: ".
+   setTypeToMenu
+   setNameTo: "classId" . 
+   setSizeTo: 1 .
+   setChoice: 1 labelTo: "Account" .
+   setChoice: 2 labelTo: "Industry" .
+   setChoice: 3 labelTo: "Sector" .
+   setChoice: 4 labelTo: "Universe" .
+   setChoice: 5 labelTo: "Company (All)" .
+   setChoice: 5 valueTo: "Company" .
+   setChoice: 6 labelTo: "Security (All)" .
+   setChoice: 6 valueTo: "Security" .
+;
+LayoutTools Named FormSpec AttributeSelector
+addInputSpec: 2 .
+   setLabelTo: "Id: ".
+   setTypeToText
+   setNameTo: "id" . 
+   setSizeTo: 10 ;
+LayoutTools Named FormSpec AttributeSelector
+addInputSpec: 3 .
+   setLabelTo: "By: ".
+   setTypeToMenu
+   setNameTo: "itemcode" . 
+   setSizeTo: 1 .
+   setAltEntryTo: "enter" ;
+LayoutTools Named FormSpec AttributeSelector
+addInputSpec: 4 .
+   setLabelTo: "Cutoff: ".
+   setTypeToText
+   setNameTo: "cutoff" . 
+   setSizeTo: 10 ;
+LayoutTools Named FormSpec AttributeSelector
+addInputSpec: 5 .
+   setLabelTo: "Order:" .
+   setTypeToRadio 
+   setNameTo: "sortcode" .
+   setChoice: 1 labelTo: "Largest: " .
+   setChoice: 1 valueTo: "Largest" .
+   selectChoice: 1 .
+   setChoice: 2 labelTo: "Smallest: " .
+   setChoice: 2 valueTo: "Smallest" .
+;
+LayoutTools Named FormSpec AttributeSelector
+addInputSpec: 6 .
+   setLabelTo: "Stat Group: ".
+   setTypeToMenu
+   setNameTo: "statGroup" . 
+   setSizeTo: 1 .
+;
+
+
+#--------------------------------------------------
+
+####################
+#  Graphs
+####################
+

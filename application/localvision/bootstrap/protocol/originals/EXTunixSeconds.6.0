@@ -1,0 +1,40 @@
+
+######################
+######################
+####  Utility UnixSeconds
+######################
+######################
+#
+#  This file implements messages that convert values of type UnixSeconds into
+#  values of the type 'LowResolutionTime' and 'HighResolutionTime'.  Because
+#  UnixSeconds only represent a subset of the dates representable by the other
+#  date and time classes in Vision, their use as a time-series index is not
+#  recommended, although there is nothing preventing it if the appropriate
+#  coercion and time-series creation messages are defined for them.
+#
+######################
+
+Utility UnixSeconds defineMethod: [ | asHighResolutionTime |
+    ^self passDecodedLocalTimeToCollector: [
+        | :year :mon :day :hour :min :sec :yday :wday :isdst |
+        ^global HighResolutionTime fromYear: year + 1900
+                                      month: mon + 1
+                                        day: day
+                                      hours: hour
+                                    minutes: min
+                                 andSeconds: sec
+    ]
+] .
+
+defineMethod: [ | asLowResolutionTime |
+    ^self passDecodedLocalTimeToCollector: [
+        | :year :mon :day :hour :min :sec :yday :wday :isdst |
+        ^global LowResolutionTime fromYear: year + 1900
+                                     month: mon + 1
+                                       day: day
+                                     hours: hour
+                                   minutes: min
+                                andSeconds: sec
+    ]
+] .
+;

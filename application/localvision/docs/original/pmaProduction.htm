@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Portfolio Management Application: Sample Production Environment
+</title>
+</head>
+<body bgcolor=white>
+<h2>Vision Portfolio Management Application: Sample Production Environment</h2>
+
+<p>
+| <a href="admProduction.htm">Production Processing</a> 
+| <a href="pmaDBA.htm">Portfolio Management Application Administration</a>
+| <a href="vpma.htm">Application Overview</a>
+|
+<hr>
+<h3>Topics Covered:</h3>
+<ul type=square>
+<li><a href="#overview">Overview of the Sample Production Environment </a>
+<li><a href="#requirements">Daily Processing Requirements</a>
+<li><a href="#assumptions">Assumptions</a>
+<li><a href="#typical">A Typical Daily Cycle</a>
+<li><a href="#MiscMasters">The <i>MiscMasters</i> Job</a>
+<li><a href="#SecurityPlus">The <i>SecurityPlus</i> Job</a>
+<li><a href="#HoldingsPlus">The <i>HoldingsPlus</i> Job</a>
+<li><a href="#PricePlus">The <i>PricePlus</i> Job</a>
+</ul>
+
+<p><hr>
+<h3><a name="overview">Overview of the Sample Production Environment</a></h3>
+<p>
+Sample jobs that can be used in a typical portfolio management
+environment are provided with all installations that include the
+Portfolio Management Application Layer.  The following sample files
+can be found in the <i>/localvision/production/Updates/jobs</i>
+directory: <i>MiscMasters.job, SecurityPlus.job, 
+HoldingsPlus.job, HoldingsPlus.okay, PricePlus.job, 
+and DailyCleanup.okay</i>.  For many installations, these jobs can
+be used as is.  Alternatively, they can be modified to address the 
+specific needs of your production environment.
+<p>
+
+<p><hr>
+<h3><a name="requirements">Daily Processing Requirements</a></h3>
+<p>
+Each day, new security, portfolio, pricing, and holdings information
+is available.  Data may be available throughout the evening from
+a combination of internal and external sources.  Daily production
+feeds in a portfolio management environment can be grouped as
+follows:
+<p>
+<ul>
+<a name="miscFeeds">Miscellaneous Master Feeds</a>
+<ul>
+<li><i><a href="pma_CurrencyMaster.htm">CurrencyMaster</i></a>
+<li><i><a href="pma_CountryMaster.htm">CountryMaster</i></a>
+<li><i><a href="pma_SectorMaster.htm">SectorMaster</i></a>
+<li><i><a href="pma_IndustryMaster.htm">IndustryMaster</i></a>
+<li><i><a href="pma_SecurityTypeMaster.htm">SecurityTypeMaster</i></a>
+</ul>
+</ul>
+
+<ul>
+<a name="secFeeds">Security, Company, and Related Feeds</a>
+<ul>
+<li><i><a href="pma_SecurityTypeMaster.htm">SecurityTypeMaster</i></a>
+<li><i><a href="pma_SecurityAliases.htm">SecurityAliases</i></a>
+<li><i><a href="pma_CompanyMaster.htm">CompanyMaster</i></a>
+<li><i><a href="pma_SecurityMaster.htm">SecurityMaster</i></a>
+</ul>
+</ul>
+
+<ul>
+<a name="acctFeeds">Account and Holdings Feeds</a>
+<ul>
+<li><i><a href="pma_PortfolioMaster.htm">PortfolioMaster</i></a>
+<li><i><a href="pma_AggAccountMaster.htm">AggAccountMaster</i></a>
+<li><i><a href="pma_PortfolioAggregates.htm">PortfolioAggregates</i></a>
+<li><i><a href="pma_HoldingsFeed.htm">HoldingsFeed</i></a> (current and eom)
+
+</ul>
+</ul>
+
+<ul>
+<a name="priceFeeds">Pricing and Related Feeds</a>
+<ul>
+<li><i><a href="pma_PriceFeed.htm">PriceFeed</i></a>
+<li><i><a href="pma_SplitsFeed.htm">SplitsFeed</i></a>
+<li><i><a href="pma_DivFeed.htm">DivFeed</i></a>
+<li><i><a href="pma_CurrencyMaster.htm">CurrencyMaster</i></a>
+<li><i><a href="pma_ExchangeRateFeed.htm">ExchangeRateFeed</i></a>
+</ul>
+</ul>
+<p>
+The miscellaneous master files should be processed first, 
+followed by the security and related files.
+The daily cleanup should be delayed until holdings and pricing have
+been updated.
+
+
+<p><hr>
+<h3><a name="assumptions">Assumptions</a></h3>
+<p>
+To use the supplied jobs as is, you will need to create extract
+files with the following names:
+<p>
+<ul>
+<li><i>AggAccountMaster.yyyymmdd</i>
+<li><i>AggMembers.yyyymmdd</i>
+<li><i>CompanyMaster.yyyymmdd</i>
+<li><i>CountryMaster.yyyymmdd</i>
+<li><i>CurrencyExchange.yyyymmdd</i>
+<li><i>CurrencyMaster.yyyymmdd</i>
+<li><i>Holdings.yyyymmdd</i>
+<li><i>HoldingsEom.yyyymmdd</i>
+<li><i>IndustryMaster.yyyymmdd</i>
+<li><i>PortfolioMaster.yyyymmdd</i>
+<li><i>Prices.yyyymmdd</i>
+<li><i>SecTypeMaster.yyyymmdd</i>
+<li><i>SectorMaster.yyyymmdd</i>
+<li><i>SecurityAliases.yyyymmdd</i>
+<li><i>SecurityMaster.yyyymmdd</i>
+<li><i>Splits.yyyymmdd</i>
+</ul>
+The file extension <i>yyyymmdd</i> is the "as of" date of the data.
+This is normally the prior end-of-day date.
+Data files containing data extracted from the appropriate
+internal and external systems
+should be placed in the <i>/localvision/upload/feeds</i> directory.
+<p>
+When the current day's <a href="#miscFeeds">miscellaneous
+master files</a> are available, the update job <i>MiscMasters</i>
+should be scheduled.  The contents of the token file should be
+the date used as a file extension for these files.  
+For example:<ul><pre><b>cd /localvision/production/status
+echo 19981115 > pending/MiscMasters</b></pre></ul>
+This job should begin within five minutes.  When completed,
+the <i>pending</i> token will automatically be removed and
+the token <i>Done.MiscMasters</i> or <i>Error.MiscMasters</i>
+will be placed in the <i>/localvision/production/status/tokens</i>
+directory.  
+<p>
+When the current day's <a href="#secFeeds">security and
+related files</a> are available, the update job <i>SecurityPlus</i>
+should be scheduled.  The contents of the token file should be
+the date used as a file extension for these files.  
+For example:<ul><pre><b>cd /localvision/production/status
+echo 19981115 > pending/SecurityPlus</b></pre></ul>
+This job should begin within five minutes.  When completed,
+the <i>pending</i> token will automatically be removed and
+the token <i>Done.SecurityPlus</i> or <i>Error.SecurityPlus</i>
+will be placed in the <i>/localvision/production/status/tokens</i>
+directory.  Note that you should not schedule this job to
+run prior to scheduling the <i>MiscMasters</i> job for the day.
+<p>
+When the current day's <a href="#acctFeeds">account and
+holdings files</a> are available, the update job <i>HoldingsPlus</i>
+should be scheduled.  The contents of the token file should be
+the date used as a file extension for these files.  
+For example:<ul><pre><b>cd /localvision/production/status
+echo 19981115 > pending/HoldingsPlus</b></pre></ul>
+This job should begin within five minutes.  When completed,
+the <i>pending</i> token will automatically be removed and
+the token <i>Done.HoldingsPlus</i> or <i>Error.HoldingsPlus</i>
+will be placed in the <i>/localvision/production/status/tokens</i>
+directory.  Note that you should not schedule this job to
+run prior to scheduling the <i>SecurityPlus</i> job for the day.
+<p>
+When the current day's <a href="#priceFeeds">price and related
+files</a> are available, the update job <i>PricePlus</i>
+should be scheduled.  The contents of the token file should be
+the date used as a file extension for these files.  
+For example:<ul><pre><b>cd /localvision/production/status
+echo 19981115 > pending/PricePlus</b></pre></ul>
+This job should begin within five minutes.  When completed,
+the <i>pending</i> token will automatically be removed and
+the token <i>Done.PricePlus</i> or <i>Error.PricePlus</i>
+will be placed in the <i>/localvision/production/status/tokens</i>
+directory.  Note that you should not schedule this job to
+run prior to scheduling the <i>SecurityPlus</i> job for the day.
+
+<p><hr>
+<h3><a name="typical">A Typical Daily Cycle</a></h3>
+<p>
+<ol>
+<li>Each weekday night, <b>cron</b> starts a new production cycle.
+Once a set of daily maintenance tasks have completed successfully,
+the update and report processing daemons are started.  These processes
+will wait for update and report jobs to be scheduled in the
+<i>/localvision/production/status/pending</i> directory.  If the
+pre-conditions for a pending job are met, the job will run.  
+The pending token will be removed and the appropriate tokens and
+output will be placed in the <i>status/tokens</i>, <i>status/logs</i>, 
+and/or <i>status/reports</i> directory.  When multiple jobs
+are pending, they are run in the order that they were scheduled.
+<p>
+<li>Throughout the evening, one or more processes are run to extract
+data from various internal and external sources.  Since requirements
+and tools vary from installation to installation, you will need
+to create the jobs to extract this information as needed.
+Extracted data files should be placed in the directory
+<i>/localvision/upload/feeds</i> using the names
+<a href="#assumptions">listed above.</a>
+When the current day's extracts are available, the files
+<i>MiscMasters</i>, <i>SecurityPlus</i>, <i>HoldingsPlus</i>, and
+<i>PricePlus</i> should be created in the <i>status/pending</i>
+directory.  These files should contain the date used as the file
+extension for the extracted files.  These jobs do not need to
+ be scheduled at the same time; however, they should be 
+scheduled in this order.
+<p>
+<li>
+To see which jobs are active and which are still pending, 
+use:<ul><pre><b>cd /localvision/production/status
+ls active pending</ul></pre></b>
+<p>     
+To see the status of completed jobs use:
+<ul><pre><b>cd /localvision/production/status
+ls tokens</ul></pre></b>
+<p>     
+To view a log file use:<ul><pre><b>cd /localvision/production/status
+more logs/HoldingsPlus.log</ul></pre></b>
+</ol>
+
+<p><hr>
+<h3><a name="MiscMasters">The <i>MiscMasters</i> Job</a></h3>
+<p>
+The sample job <i>MiscMasters.job</i> is located in the directory
+<i>/localvision/production/Updates/jobs</i>.  It will update the
+Vision database with the following files, if they exist in
+the <i>/localvision/upload/feeds</i> directory:
+<p><center><table border=1 cellpadding=4 cellspacing=2 width=80%>
+<tr><th>File Name <th>Feed Name
+<tr><td>CurrencyMaster.yyyymmdd <td>CurrencyMaster
+<tr><td>CountryMaster.yyyymmdd <td>CountryMaster
+<tr><td>SectorMaster.yyyymmdd <td>SectorMaster
+<tr><td>IndustryMaster.yyyymmdd <td>IndustryMaster
+<tr><td>SecTypeMaster.yyyymmdd <td>SecurityTypeMaster
+</table></center>
+<p>
+This job executes the following steps:
+<p>
+<ol>
+<li>Get the file extension to use for the current data files
+from the <i>pending</i> token.
+<li>Create the log file
+<i>MiscMasters.yyyymmdd</i> in the directory
+<i>/localvision/production/Updates/workArea/Internal</i>.
+If the  log already exists, append it to the end of a running log for that
+date and start a new log.
+<li>Write job header to log file.
+<li>Start a vision session logging output to the log file.
+<li>Load the <i>CurrencyMaster</i>, <i>CountryMaster</i>,
+<i>SectorMaster</i>, <i>IndustryMaster</i>, and 
+<i>SecurityTypeMaster</i> data.
+<li>Commit the new data to the database.
+<li>Check the log to make sure the update succeeded.
+<li>Copy the log to the <i>/localvision/production/status/logs</i>
+directory.
+<li>Move the data files into the <i>/localvision/upload/feeds/done</i>
+directory.
+<li> Return <i>0</i> if the job succeeded, <i>1</i> if there was an error.
+</ol>
+<p>
+
+<p><hr>
+<h3><a name="SecurityPlus">The <i>SecurityPlus</i> Job</a></h3>
+<p>
+
+<p>
+The sample job <i>SecurityPlus.job</i> is located in the directory
+<i>/localvision/production/Updates/jobs</i>.  It will update the
+Vision database with the following files, if they exist in
+the <i>/localvision/upload/feeds</i> directory:
+<p><center><table border=1 cellpadding=4 cellspacing=2 width=80%>
+<tr><th>File Name <th>Feed Name
+<tr><td>SecTypeMaster.yyyymmdd <td>SecurityTypeMaster
+<tr><td>SecurityAliases.yyyymmdd <td>SecurityAliases
+<tr><td>CompanyMaster.yyyymmdd <td>CompanyMaster
+<tr><td>SecurityMaster.yyyymmdd <td>SecurityMaster
+</table></center>
+<p>
+This job executes the following steps:
+<p>
+<ol>
+<li>Get the file extension to use for the current data files
+from the <i>pending</i> token.
+<li>Create the log file
+<i>SecurityPlus.yyyymmdd</i> in the directory
+<i>/localvision/production/Updates/workArea/Internal</i>.
+If the log already exists, append it to the end of a running log for that
+date and start a new log.
+<li>Write job header to log file.
+<li>Start a vision session logging output to the log file.
+<li>Load the <i>SecurityTypeMaster</i>,
+<i>SecurityAliases</i>, <i>CompanyMaster</i>, and
+<i>SecurityMaster</i> data.
+<li>Commit the new data to the database.
+<li>Check the log to make sure the update succeeded.
+<li>Copy the log to the <i>/localvision/production/status/logs</i>
+directory.
+<li>Move the data files into the <i>/localvision/upload/feeds/done</i>
+directory.
+<li> Return <i>0</i> if the job succeeded, <i>1</i> if there was an error.
+</ol>
+<p>
+
+
+<p><hr>
+<h3><a name="HoldingsPlus">The <i>HoldingsPlus</i> Job</a></h3>
+<p>
+
+The sample job <i>HoldingsPlus.job</i> is located in the directory
+<i>/localvision/production/Updates/jobs</i>.  It will update the
+Vision database with the following files, if they exist in
+the <i>/localvision/upload/feeds</i> directory:
+<p><center><table border=1 cellpadding=4 cellspacing=2 width=80%>
+<tr><th>File Name <th>Feed Name
+<tr><td>PortfolioMaster.yyyymmdd <td>PortfolioMaster
+<tr><td>AggAccountMaster.yyyymmdd <td>AggAccountMaster
+<tr><td>AggMembers.yyyymmdd <td>PortfolioAggregates
+<tr><td>Holdings.yyyymmdd <td>HoldingsFeed
+<tr><td>HoldingsEom.yyyymmdd <td>HoldingsFeed
+</table></center>
+<p>
+This job executes the following steps:
+<p>
+<ol>
+<li>Get the file extension to use for the current data files
+from the <i>pending</i> token.
+<li>Create the log file
+<i>HoldingsPlus.yyyymmdd</i> in the directory
+<i>/localvision/production/Updates/workArea/Internal</i>.
+If the log already exists, append it to the end of a running log for that
+date and start a new log.
+<li>Write job header to log file.
+<li>Start a vision session logging output to the log file.
+<li>Load the <i>PortfolioMaster</i>,
+<i>AggAccountMaster</i>, <i>PortfolioAggregates</i>, and
+<i>HoldingsFeed</i> data.  Two holdings extracts are normally
+provided.  The file <i>Holdings.yyyymmdd</i> contains the latest
+holdings and the file <i>HoldingsEom.yyyymmdd</i> contains a 
+replacement for the latest end-of-month holdings.
+<li>Commit the new data to the database.
+<li>Check the log to make sure the update succeeded.
+<li>Copy the log to the <i>/localvision/production/status/logs</i>
+directory.
+<li>Move the data files into the <i>/localvision/upload/feeds/done</i>
+directory.
+<li> Return <i>0</i> if the job succeeded, <i>1</i> if there was an error.
+</ol>
+<p>
+
+
+<p><hr>
+<h3><a name="PricePlus">The <i>PricePlus</i> Job</a></h3>
+<p>
+
+<p>
+The sample job <i>PricePlus.job</i> is located in the directory
+<i>/localvision/production/Updates/jobs</i>.  It will update the
+Vision database with the following files, if they exist in
+the <i>/localvision/upload/feeds</i> directory:
+<p><center><table border=1 cellpadding=4 cellspacing=2 width=80%>
+<tr><th>File Name <th>Feed Name
+<tr><td>Prices.yyyymmdd <td>PriceFeed
+<tr><td>Splits.yyyymmdd <td>SplitsFeed
+<tr><td>Divs.yyyymmdd <td>DivFeed
+<tr><td>CurrencyMaster.yyyymmdd <td>CurrencyMaster
+<tr><td>CurrencyExchange.yyyymmdd <td>ExchangeRateFeed
+</table></center>
+<p>
+This job executes the following steps:
+<p>
+<ol>
+<li>Get the file extension to use for the current data files
+from the <i>pending</i> token.
+<li>Create the log file
+<i>PricePlus.yyyymmdd</i> in the directory
+<i>/localvision/production/Updates/workArea/Internal</i>.
+If the log already exists, append it to the end of a running log for that
+date and start a new log.
+<li>Write job header to log file.
+<li>Start a vision session logging output to the log file.
+<li>Load the
+<i>PriceFeed</i>, <i>SplitsFeed</i>, <i>DivFeed</i>, 
+<i>CurrencyMaster</i>, and <i>ExchangeRateFeed</i> data.
+<li>Commit the new data to the database.
+<li>Check the log to make sure the update succeeded.
+<li>Copy the log to the <i>/localvision/production/status/logs</i>
+directory.
+<li>Move the data files into the <i>/localvision/upload/feeds/done</i>
+directory.
+<li> Return <i>0</i> if the job succeeded, <i>1</i> if there was an error.
+</ol>
+<p>
+
+
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy; 1998 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated December 23, 1998</font>
+</table>
+
+</body>
+</html>

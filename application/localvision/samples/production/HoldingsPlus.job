@@ -1,0 +1,116 @@
+#!/bin/csh 
+
+####################
+#  job: HoldingsPlus.job
+#
+#  This job loads the security and related internal feeds into vision.  The
+#  HoldingsPlus token in status/pending should contain the file extension
+#  to use for loading the files.
+#
+#  Environment Variables:
+#     statusArea      /lv/production/status
+#     feedFilePath    /lv/upload/feeds/
+#     updateArea      /lv/production/Updates
+#     processDate     current run date of daemon 
+#     globalLogs      /lv/production/status/logs
+#
+#  The following Feeds are Loaded if Available:
+#     Feed Name            File name in $feedFilePath
+#     PortfolioMaster      PortfolioMaster
+#     AggAccountMaster     AggAccountMaster
+#     PortfolioAggregates  AggMembers
+#     HoldingsFeed         Holdings
+#     HoldingsFeed         HoldingsEom
+#
+####################
+
+#----------
+#  Setup
+#----------
+
+set jobName    = HoldingsPlus
+set pending    = $statusArea/pending
+set src        = $feedFilePath
+
+#--  get the file extension from the pending token
+set fileExt = `cat $pending/$jobName`
+
+#--  Setup log
+set workDir  = $updateArea/workArea/Internal
+set processLog = $workDir/$jobName.$processDate
+$adminArea/helpers/SetupLog $processLog
+
+#----------
+#  Load the Available HoldingsPlus Data
+#----------
+
+echo "" >& $processLog
+echo "********************************************************" >> $processLog
+echo "*  Loading Holdings and Related Data Feeds" >> $processLog
+echo "*  Start Time: `date` " >> $processLog
+echo "*  From:  $src " >> $processLog
+echo "********************************************************" >> $processLog
+echo "" >>& $processLog
+
+#---  start up a batchvision, run the feeds, and save the session
+($DBbatchvision -U3) << EOD |& sed 's/V> //g' >>& $processLog
+$processDate evaluate:
+   [ newLine print ;
+     !file <- "$src/PortfolioMaster.$fileExt" ;
+     Interface BatchFeedManager
+          upload: "PortfolioMaster" usingFile: file withConfig: NA ;
+     newLine print ;
+     !file <- "$src/AggAccountMaster.$fileExt" ;
+     Interface BatchFeedManager
+          upload: "AggAccountMaster" usingFile: file withConfig: NA ;
+     newLine print ;
+     !file <- "$src/AggMembers.$fileExt" ;
+     Interface BatchFeedManager
+          upload: "PortfolioAggregates" usingFile: file withConfig: NA ;
+     newLine print ;
+     !file <- "$src/Holdings.$fileExt" ;
+     Interface BatchFeedManager
+          upload: "HoldingsFeed" usingFile: file withConfig: NA ;
+     newLine print ;
+     !file <- "$src/HoldingsEom.$fileExt" ;
+     Interface BatchFeedManager
+          upload: "HoldingsFeed" usingFile: file withConfig: NA ;
+     newLine print ;
+   ] ;
+?g
+?t
+
+Utility updateNetworkWithAnnotation: "$jobName Loads" ;
+?g
+?t
+
+EOD
+
+#----------
+#  Wraup
+#----------
+
+#--  Check job completion status and log file to confirm update
+set okay = $status
+if ($okay == 0) then
+   $adminArea/helpers/CheckLog $processLog $jobName 1
+   set okay = $status
+endif
+
+#--  copy the log to global status area
+cp $processLog $globalLogs/$jobName.log
+
+#--  if okay, move data files to done
+if ($okay == 0) then
+    cd $src
+    mv PortfolioMaster.$fileExt done
+    mv AggAccountMaster.$fileExt done
+    mv AggMembers.$fileExt done
+    mv Holdings.$fileExt done
+    mv HoldingsEom.$fileExt done
+endif
+
+#----------
+#  and exit 
+#----------
+exit $okay

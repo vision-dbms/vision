@@ -1,0 +1,1579 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title>Vision Program Execution</title>
+ </head>
+<body bgcolor=white>
+
+<h2>Vision Program Execution</h2>
+
+<p>
+     | <a href="FHome.htm">Home</a> | <a href="Program.htm">Vision Programs</a> | <a href="Fund.htm">Vision Fundamentals</a> | 
+<hr>
+
+<h3>Topics Covered:</h3>
+
+<ul type="square">
+<li><a href="#overview">Overview</a></li>
+<li><a href="#layers">Object Layers</a></li>
+<li><a href="#blockContext">Block Context</a></li>
+<li><a href="#globalContext">Global Context</a></li>
+<li><a href="#dynamicContext">Dynamic Context</a></li>
+</ul>
+<hr>
+<h3><a name="overview"></a>Overview</h3>
+
+<p>Vision works by sending messages to objects. Every Vision <a href="Lang.htm#expression">expression</a>
+is constructed in terms of building blocks of the form:</p>
+
+<ul>
+<p><i>object message</i></p>
+</ul>
+
+<p>For example, the expression:</p>
+
+<ul>
+<p><b>3.14 asInteger</b></p>
+</ul>
+
+<p>sends the <i>asInteger</i> message to a familiar looking number.</p>
+
+<p>The result of sending a message to an object is itself an object. As
+an object, it can be the target of a message. For example, the expression:</p>
+
+<ul>
+<p><b>3.14 asInteger sqrt</b></p>
+</ul>
+
+<p>sends the <i>sqrt</i> message to the object returned by the <i>asInteger</i>
+message to that same familiar looking number. The Vision language can represent
+numbers and strings directly, but where do other objects come from? Since
+every name in a Vision expression is the name of a message, what object
+receives the <i>gm</i> message in the following expression?</p>
+
+<ul>
+<p><b>gm sales</b></p>
+</ul>
+
+<p>To answer these questions, Vision provides a special collection of variables
+called the 
+<a name="magic"><b>Magic Words</b></a>.
+These variables return objects that give every expression a 
+<a name="context"><b>Context</b></a>
+in which to execute. There are ten magic words in
+Vision -- <i>^current</i>, <i>^my</i>, <i>^self</i>, <i>^super</i>, <i>^here</i>,
+<i>^global</i>, <i>^tmp</i>, <i>^today</i>, <i>^date</i>, and <i>^local</i>
+-- and three kinds of context -- <i><a href="#blockContext">Block
+Context</a></i>, <i><a href="#globalContext">Global Context</a></i>,
+and <i><a href="#dynamicContext">Dynamic Context</a></i>.</p>
+
+<p>
+<a name="env"> </a>
+<i><a href="#blockContext">Block Context</a></i> is the largest
+and most complex of the contexts. Half of the magic words -- <i>^current</i>,
+<i>^my</i>, <i>^self</i>, <i>^super</i>, <i>^here</i> -- return objects
+related to the block context of an expression. Every expression 
+executes in an <b>Environment</b>, a
+default place to look for the implementation of a message as well as a
+place to record the values of local variables and parameters. 
+The <a href="#current"><i>^current</i> magic word</a> 
+magic word returns the object filling that role. 
+A block can be sent to
+an object and asked to execute in the context of that object. When that
+happens, the block needs a way to access messages defined in the environment
+from which it came. 
+The <a href="#my"><i>^my</i> magic word</a> provides that capability.
+Whenever a block or message is sent to an object, Vision remembers the
+object to which the block or message was sent. 
+<a href="#self"><i>^self</i> magic word</a> 
+returns that object. An expression sometimes needs to override the default
+search rules Vision uses to locate messages. 
+The <a href="#super"><i>^super</i></a> and 
+<a href="#here"><i>^here</i></a>
+magic words make that possible. </p>
+
+<p><i><a href="#globalContext">Global Context</a></i> accesses
+the fixed, global state of your Vision session. Three magic words supply
+the global context for an expression -- <i>^global</i>, <i>^tmp</i>, and
+<i>^today</i>. Of these, <i>^global</i> and <i>^tmp</i> are the most significant
+since <i>^today</i> simply returns the start date of the current session.
+When a Vision session starts, an initial top level object is derived from
+your session's startup options. That object provides a view of the data
+base and a workspace for the session. It is returned by the
+<a href="#global"><i>^global</i> magic word</a>.
+Any object created during a session and made accessible either
+directly or indirectly from the <i>^global</i> object may be saved if the
+session updates the data base. That is not desirable for objects that represent
+intermediate results or inherently transient objects like connections to
+files, processes, or services. To provide a purely temporary place to record
+those objects, Vision provides an object that is not automatically saved
+as part of an update. That object is derived from the <i>^global</i> object
+and accessed via the <a href="#tmp"><i>^tmp</i> magic word</a>.
+
+<p><i><a href="#dynamicContext">Dynamic Context</a></i> defines
+your perspective on the data base. Two magic words provide the dynamic
+context for an expression -- <i>^date</i> and <i>^local</i>. 
+The <a href="#date"><i>^date</i>
+magic word</a> provides an expression with a point in time from which it should
+view the data base. It is changed by operations like <i>date evaluate:
+[]. </i>The <i>^date</i> magic word is a special case of a more general
+concept. Any part of an application can be written to behave in a perspective
+dependent way. One of many examples is the target currency used to manipulate
+and display monetary values. To implement a dynamic perspective, an application
+needs to provide any expressions that depend on that perspective with access
+to the values that define it. 
+The <a href="#local"><i>^local</i> magic word</a> returns the
+object that records those values. </p>
+
+<p>The rest of this document describes these topics in detail.</p>
+
+<p>
+<hr width="100%" ></p>
+
+<h3><a name="layers"></a>Objects Layers</h3>
+
+<p>The objects accessed and constructed as part of the context for a Vision
+expression take special advantage of the Vision object model. This section
+reviews that model.</p>
+
+<p>Vision objects are constructed in layers. The layers of an object correspond
+to its <b><a href="Fund.htm#class">Class</a></b> structure. 
+Each layer 
+provides an environment that
+adds the properties and methods defined at the corresponding level of the
+class hierarchy. The outermost layer of an object represents the most specialized
+class in the hierarchy. When a message is sent to an object, the layers
+of the object are searched for a definition of that message, starting at
+the outermost.  This is known as 
+<a name="resolve"><b>Resolving the Message</b></a>.
+
+<p><b>Classes</b> provide a template for constructing similar objects.
+<b>Layers</b> provide an implementation for those objects. Since object
+layers implement object classes in the natural way, the distinction between
+classes and layers can be ignored in most cases. Object layers provide
+a more flexible form of inheritance, however, and that flexibility is exploited
+by blocks and methods to implement their behavior.</p>
+
+<p>The easiest way to understand object layers and their relationship to
+object classes is to think of classes as tables and layers as rows in those
+tables. A class provides definitions for the columns of the table while
+a layer holds the property values associated with a particular instance
+of that class. Just as every class except <i>Object</i> inherits the definitions
+of properties and methods from its superclass, every layer except those
+at <i>Object</i> inherits property values from a <i>super</i>-layer associated
+with the object's superclass. That behavior is provided automatically by
+Vision. While there is no ambiguity concerning the superclass from which
+a particular layer inherits, there is ambiguity regarding the super-layer.
+That ambiguity is resolved when the layer is created. For example, when
+an object is created with the <i>new</i> or
+<i>createInstance</i> message, Vision automatically
+creates a new layer for each class in the object's superclass chain. It
+links those newly created layers together so that each layer can uniquely
+find its superior. For example:<pre><tt><b>
+     Object createSubclass: "MySubclass" ;
+     !instance1 <- MySubclass createInstance;
+</tt></b></pre>
+creates <i>instance1</i> with two layers -- one associated with <i>MySubclass</i>
+and the other with <i>Object</i>. Each of these layers stores the values
+for properties defined at its associated class. For example, if <i>MySubclass</i>
+defines two fixed properties,<i> x</i> and<i> y</i>,</p>
+
+<ul>
+<pre><b><tt>MySubclass defineFixedProperty: 'x';
+MySubclass defineFixedProperty: 'y';</tt></b></pre>
+</ul>
+
+<p>and <i>Object</i> defines the fixed property, <i>code</i>:</p>
+
+<ul>
+<pre><b>Object defineFixedProperty: 'code';</b></pre>
+</ul>
+
+<p>the layer of <i>instance1</i> associated with <i>MySubclass</i> stores
+<i>instance1</i>'s values for <i>x</i> and <i>y</i>:</p>
+
+<ul>
+<pre><b><tt>instance1 :x &lt;- 23; 
+instance1 :y &lt;- 92;</tt></b></pre>
+</ul>
+
+<p>while the layer associated with <i>Object</i> stores the value for <i>code</i>:</p>
+
+<ul>
+<pre><b><tt>instance1 :code &lt;- &quot;instance1&quot;;</tt></b></pre>
+</ul>
+
+<a name="specialization"> </a>
+<p>Instantiation is not the only mechanism by which object layers are created.
+The other is object specialization. Object specialization adds a layer
+to an existing object. Internally, object specialization is the mechanism
+Vision uses to store and access the local variables and parameters of a
+block. Externally, it is the basis for subclass creation and a number of
+important Vision messages. One of those messages is <i>extendBy:</i>. The
+<i>extendBy:</i> message is defined for all objects. It takes a single
+argument which is expected to be a block. It returns its recipient with
+an added layer. That added layer contains the values of the local variables
+computed during the execution of the block:<pre><tt><b>
+     !instance1a <- instance1
+       extendBy: [ !greeting <- "Hi, I'm instance 1a" ];
+</b></tt></pre>
+<p>Unlike class specialization which inherits only the definitions of messages
+from a superclass, adding a layer to an object produces an object that
+inherits both the message definitions and property values of the original
+object. For example, the value of:</p>
+
+<ul>
+<pre><b>instance1a x</b> </pre>
+</ul>
+
+<p>is <b>23</b> -- the same as <i>instance1</i>'s value of <i>x</i>. If
+an operation on <i>instance1<b> </b></i>changes the value of <i>x</i>,
+<i>instance1a</i> sees the new value; if an operation on <i>instance1a</i>
+changes the value of <i>x</i>, <i>instance1</i> sees the change. 
+<p>
+Multiple
+layers can inherit from the same layer. For example, the expression:</p>
+
+<ul>
+<pre><b>!instance1b &lt;- instance1 extendBy: [ !z &lt;- 16.5 ];</b></pre>
+</ul>
+
+<p>creates another specialization of <i>instance1</i> which, along with
+<i>instance1a</i>, shares all of <i>instance1</i>'s messages and values.</p>
+
+<p>Objects created using object specialization operations like <i>extendBy:</i>
+are full fledged Vision objects in all respects. For example, <i>instance1a</i>
+is a member of a unique subclass of <i>MySubclass</i> which can be instantiated
+by sending the <i>createInstance</i> message to <i>instance1a</i>:<pre><tt><b>
+     !instance2a <- instance1a createInstance;
+     instance2a :greeting <- "Hi, I'm instance 2a" ;
+     instance2a :x <- -17.6;
+     instance2a :y <- 2.718;
+</b></tt></pre>
+
+<p>The layers of any object can be peeled away. Every object responds to
+the <i>super</i> message by removing its outermost layer and returning
+the object that results. The <i>super</i> message does not modify its recipient
+-- it simply returns its next deepest layer. For example,</p>
+
+<ul>
+<pre><b>instance1a super</b></pre>
+</ul>
+
+<p>returns the same object as <i>instance1</i> -- the object which it specialized.</p>
+
+<p>The ability to dynamically add and remove layers of an object is key
+to the operation of Vision programs.</p>
+
+<p>
+<hr width="100%" ></p>
+
+<h3><a name="blockContext"></a>Block Context</h3>
+
+<p><i>Block context</i> is the largest and most complex of the contexts.
+Every expression needs a default place to look for the implementation of
+a message as well as a place to record the values of local variables and
+parameters. A block can be sent to an object and asked to execute in the
+context of that object. When that happens, the block needs a way to access
+messages defined in the environment from which it came. Whenever a block
+or message is sent to an object, Vision needs to remember the object to
+which the block or message was sent. Finally, an expression sometimes needs
+a way to override the default search rules Vision uses to locate messages.
+All of these issues are dealt with using the rules of block context described
+in this section. Topics described in this section include:</p>
+
+<ul>
+<p><a href="#current">The <i>^current</i> Object</a></p>
+
+<p><a href="#operate">Using Blocks To
+Operate On Objects</a></p>
+
+<p><a href="#methods">Using Blocks To Define
+Methods</a></p>
+
+<p><a href="#super">Using <i>^super</i> to Access Superclass
+Definitions</a></p>
+
+<p><a href="#here">Using <i>^here</i> to Ignore Subclass
+Definitions</a></p>
+</ul>
+
+<h4><a name="current"></a>The <i>^current</i> Object</h4>
+
+<p>One of the first questions this document asked was how Vision knows
+where to find <i>gm</i> in the expression:</p>
+
+<ul>
+<pre><b>gm sales</b></pre>
+</ul>
+
+<p>Vision interprets all names as messages to some object. By that rule,
+the symbol<i> gm</i> is the name of a message. As a message, it must be
+sent to an object to produce a result. What object is that? The answer
+is the object returned by the <i>^current</i> magic word. Any Vision expression
+can begin with the name of a unary message. If it does, that message is
+understood to be a message to <i>^current</i>. As a result, <i>gm sales</i>
+is a shorthand for and equivalent to:</p>
+
+<ul>
+<pre><b>^current gm sales</b></pre>
+</ul>
+
+<p>and <i>gm earnings / gm shares</i> is a shorthand for:</p>
+
+<ul>
+<pre><b>^current gm earnings / ^current gm shares</b></pre>
+</ul>
+
+<p>Every Vision expression needs a default place to look for the implementation
+of a message as well as a place to record the values of local variables
+and parameters. <i>^current</i> returns that object. 
+<a name="interactiveCurrent"></a>
+For expressions that you type interactively, <i>^current</i> returns the 
+<a href="#global">top
+level object accessed when you started your Vision session</a>. If you
+type the expression:</p>
+
+<ul>
+<pre><b>showMessages</b></pre>
+</ul>
+
+<p>in your interactive session, you will get a list of the messages defined
+at your top level workspace.</p>
+
+<p><i>^current</i> is only understood as the default recipient for the
+initial unary message in a message expression. If you need to send a binary
+or keyword message to <i>^current</i>, you must explicitly include <i>^current</i>
+as part of your expression. For example, if you want to send the <i>print:</i>
+message to <i>^current</i>, you must type:</p>
+
+<ul>
+<pre><b>^current print: aWidth</b></pre>
+</ul>
+
+<p>If you enter:</p>
+
+<ul>
+<pre><b>print: aWidth</b></pre>
+</ul>
+
+<p>you will get a syntax error from Vision.</p>
+
+<p>Not every expression you give Vision to process is executed immediately
+using the messages available from your top level workspace. In fact, most
+expressions are part of blocks and methods that are executed only when
+appropriate. Blocks and methods also have access to a <i>^current</i> object.
+Their <i>^current</i> object is based on their execution environment.</p>
+
+<p>Basically, the purpose of the <i>^current</i> object is to provide a
+place to store and retrieve the values of the local variables of a block.
+Because methods are blocks too, the same statement applies to them as well.
+Every block carries with it a list of the local definitions it requires.
+When you enter an expression like <b>!x &lt;- 10</b> in a block, you are
+stating that the block requires a fixed property whose name is <b>x</b>.
+The local definitions associated with the block are used to construct the
+<i>^current</i> object that the block will use when it executes. </p>
+
+<p>Because <i>^current</i> is an object, it needs to inherit from somewhere.
+It makes sense to have it inherit from someplace convenient. Consider the
+following Vision code fragment:</p>
+
+<ul>
+<pre><b>!x &lt;- 10;
+!y &lt;- 5;
+[ !x &lt;- 20;
+  x print;
+  y print;
+] value;
+x print;</b></pre>
+</ul>
+
+<p>When executed, this code displays the following result:</p>
+
+<pre><b>       20        5       10</b></pre>
+
+<p>What allows Vision to produce this result? Inside
+the block, we have defined a local variable named <b>x</b> and executed two
+expressions. Those expressions ask Vision to print the objects obtained
+by sending the messages <b>x</b> and <b>y</b> to the block's <i>^current</i>
+object. Because the block provides its own definition and value for <b>x</b>,
+it is no surprise that the first value displayed is <b>20</b>, the value
+locally assigned to <b>x </b>inside the block. The second value displayed
+-- <b>5</b> -- is the value of <b>y</b> defined immediately outside the
+block. That is convenient, useful, and an example of what is known in programming
+language jargon as lexical scope. Sending the <b>value</b> message to the
+block asked the block to construct a <i>^current</i> object for itself
+that inherits from the <i>^current</i> object available where the block
+is defined. Note that the local value of <b>20</b> for <b>x</b> only applies
+inside the block. The value of <b>x</b> outside the block remains unchanged,
+as demonstrated by the third value displayed.</p>
+
+<p>The <i>^current</i> object constructed for the benefit of the block
+is constructed by adding a layer to an existing object using object specialization.
+In this case, that object is the <i>^current</i> object available at the
+spot the block is defined. Within the block, that layer can be removed
+using the <i>super</i> message. For example:</p>
+
+<ul>
+<pre><b>!x &lt;- 10;
+[ !x &lt;- 20;
+  x print;
+  super x print;
+] value;</b></pre>
+</ul>
+
+<p>displays the result:</p>
+
+<pre><b>       20        10</b></pre>
+
+<p>The <i>^current</i> object can also be 
+<a href="#returningCurrent">returned
+from the block</a> or passed as an argument, but that is a topic for another
+section.</p>
+
+<p>As noted, variables created within a block can be accessed from within
+the block and from any new blocks defined within that block; however, these
+variables are not available outside the block. For example, when the code
+fragment:</p>
+
+<ul>
+<pre><b>myList count &gt; 100
+ ifTrue: [ !output &lt;- &quot;This is a big list&quot; ]
+ifFalse: [&nbsp;!output &lt;- &quot;This is a small list&quot; ];
+output</b></pre>
+</ul>
+
+<p>is executed, the final <i>output</i> message will not be found. Although
+both blocks passed to the <i>ifTrue:ifFalse:</i> message define local variables
+called <i>output</i>, neither of these definitions is available at the
+spot where the final <i>output</i> message is sent. The previous program
+could be rewritten as:</p>
+
+<ul>
+<pre><b>myList count &gt; 100
+ ifTrue: [ !output &lt;- &quot;This is a big list&quot;;
+           output
+         ]
+ifFalse: [ !output &lt;- &quot;This is a small list&quot;;
+           output
+         ]</b></pre>
+</ul>
+
+<p>or:</p>
+
+<ul>
+<pre><b>!output;
+myList count &gt; 100
+ ifTrue: [ :output &lt;- &quot;This is a big list&quot; ]
+ifFalse: [&nbsp;:output &lt;- &quot;This is a small list&quot; ];
+output</b></pre>
+</ul>
+
+<p>or:</p>
+
+<ul>
+<pre><b>!output &lt;- myList count &gt;&nbsp;100
+ ifTrue: [ &quot;This is a big list&quot; ]
+ifFalse: [&nbsp;&quot;This is a small list&quot; ];
+output</b></pre>
+</ul>
+
+<p>or:</p>
+
+<ul>
+<pre><b>!output &lt;- &quot;This is a small list&quot;;
+myList count &gt; 100
+ ifTrue: [ :output &lt;- &quot;This is a big list&quot; ];
+output</b></pre>
+</ul>
+
+<p>All of these program fragments produce the same result. The last three
+produce their result by updating the value of the <i>output</i> property
+defined at the same level as the blocks in these examples.</p>
+
+<p>The examples presented thus far are examples in which the <i>^current</i>
+object constructed for a block inherits from the environment in which the
+block was defined. Blocks passed to messages like <i>value</i>,<i> whileTrue:</i>,
+<i>ifTrue:ifFalse:</i> and its variants all behave this way. These messages
+implement conditional control structures similar to those found in traditional
+programming languages. The expressions in the blocks used with these messages
+should see the same collection of names as seen by their non-conditional
+brethren. Constructing a <i>^current</i> object that inherits from the
+environment of the block's definition produces that behavior. </p>
+
+<h4><a name="operate"></a>Using Blocks To Operate
+On Objects</h4>
+
+<p>It is often useful to send a number of messages to the same object.
+For example, you could write code like:</p>
+
+<ul>
+<pre><b>gm sales print;
+gm assets print;
+gm earnings print;</b></pre>
+</ul>
+
+<p>to send a number of different messages to the same object. To allow
+you to 'factor out' the repeated recipient, Vision provides the <i>do:</i>
+message. Using the <i>do:</i> message, you can write the same code as:</p>
+
+<ul>
+<pre><b>gm
+do: [ sales print;
+      assets print;
+      earnings print;
+    ];</b></pre>
+</ul>
+<a name="contextSwitch"> </a>
+<p>The block supplied to the <i>do:</i> message will need a <i>^current</i>
+object when it is run; however, in this example that <i>^current</i> object
+does not inherit from the environment of the block's definition -- it inherits
+from the object <i>gm</i> supplied to the <i>do:</i> message. The <i>do:</i>
+message is one of a number of important Vision messages that behave this
+way. When Vision constructs a block's <i>^current</i> object, it gets to
+decide which object <i>^current</i> should inherit from based on what it
+is going to do with the block. In this case, that object is a dynamically
+supplied one.</p>
+<p>
+Messages such as <i>do:</i> which dynamically change the <i>^current</i>
+object are performing a <b>Context Switch</b>.  Other messages that
+dynamically switch the context include <i>send:</i>, <i>extendBy:</i>
+and most of the <i>Collection</i> messages that require a block as 
+a parameter.
+<p>
+A block whose <i>^current</i> object does not inherit from the environment
+in which the block was defined still has access to that environment. Consider
+the following code fragment:</p>
+
+<ul>
+<pre><b>!industrySales &lt;- gm industry sales;
+gm
+do: [ name print;
+      sales print;
+      (sales / ^my industrySales) printNL</b></pre>
+
+<pre><b>    ];</b></pre>
+</ul>
+
+<a name="my"> </a>
+<p>Whenever Vision creates a block's <i>^current</i> object from a dynamically
+specified object, it makes the object that <i>^current</i> would have inherited
+from available as the value of the <i>^my</i> magic word. Using the <i>^my</i>
+magic word, it is possible to retrieve values from the environment in which
+the block appears. In this example, <i>^my</i> returns the object that
+understands the <i>gm</i> message and defines the <i>industrySales</i>
+local variable.</p>
+
+<a name="self"> </a>
+<p>Whenever Vision creates a block's <i>^current</i> object from a dynamically
+specified object, it also makes that dynamic object available as the value
+of the <i>^self</i> magic word. Using the <i>^self</i> magic word, you
+can access the dynamic object without any of the local redefinitions made
+by the block. This is often helpful. If <i>gm</i> already responds to the
+<i>eps</i> message, that definition will be hidden by the local one in
+the following example:</p>
+
+<ul>
+<pre><b>gm
+do: [ !eps &lt;- earnings &gt; 0 
+         ifTrue: [ earnings / shares ] ifFalse: [ 0 ];
+      &quot;Adjusted eps = &quot; print; eps printNL;
+</b>    <b>];</b></pre>
+</ul>
+
+<p>One way you can access the original definition is by sending the <i>eps</i>
+message to <i>^self</i>. The following code displays the values returned
+by both the original and locally redefined <i>eps</i> messages:</p>
+
+<ul>
+<pre><b>gm
+do: [ !eps &lt;- earnings &gt; 0 
+         ifTrue: [ earnings / shares ] ifFalse: [ 0 ];
+      &quot;Original eps = &quot; print; ^self eps printNL;
+      &quot;Adjusted eps = &quot; print; eps printNL;
+</b>    <b>];</b></pre>
+</ul>
+
+<p>At this point, you should be telling yourself that there is another
+way to achieve the same result. 
+<a name="stripLayer"></a>
+Because
+<i>^current</i> is constructed as a specialization of the dynamic object
+returned by <i>^self</i>, you could also write:</p>
+
+<ul>
+<pre><b>gm
+do: [ !eps &lt;- earnings &gt; 0 
+         ifTrue: [ earnings / shares ] ifFalse: [ 0 ];
+      &quot;Original eps = &quot; print; super eps printNL;
+      &quot;Adjusted eps = &quot; print; eps printNL;
+</b>    <b>];</b></pre>
+</ul>
+
+<p>Because <i>super</i> removes the outer layer of an object, <i>^current
+super</i> returns exactly the same object as <i>^self.</i> If you use the
+<i>super</i> message, however, you need to remove the correct number of
+layers. In this case, you needed to remove one layer -- the layer added
+to form <i>^current</i> for the top level block. When your expression appears
+in a more deeply nested block, you need to remove more layers. The following
+code would not produce the result you expect:</p>
+
+<ul>
+<pre><b>gm
+do: [ !eps &lt;- earnings &gt; 0 
+           ifTrue: [ earnings / shares ] ifFalse: [ 0 ];
+      eps &gt; 0 ifTrue: [
+        &quot;Original eps = &quot; print; super eps printNL;
+        &quot;Adjusted eps = &quot; print; eps printNL;
+      ];
+</b>    <b>];</b></pre>
+</ul>
+
+<p>As before, the <i>super</i> message removes one layer from <i>^current</i>;
+however, at the point where this <i>super</i> message is sent, <i>^current</i>
+refers to the current environment of the <i>ifTrue:</i> block. Inside the
+<i>ifTrue:</i> block, you need to remove two layers to get back to the
+dynamic object -- the layer added by the <i>ifTrue:</i> block and the layer
+added by the <i>do:</i> block. To get the right answer, you need to use:</p>
+
+<ul>
+<pre><b>gm
+do: [ !eps &lt;- earnings &gt; 0 
+         ifTrue: [ earnings / shares ] ifFalse: [ 0 ];
+      eps &gt; 0 ifTrue: [
+        &quot;Original eps = &quot; print; super super eps printNL;
+        &quot;Adjusted eps = &quot; print; eps printNL;
+      ];
+</b>    <b>];</b></pre>
+</ul>
+
+<p>or you need to use <i>^self</i>:</p>
+
+<ul>
+<pre><b>gm
+do: [ !eps &lt;- earnings &gt; 0 
+           ifTrue: [ earnings / shares ] ifFalse: [ 0 ];
+      eps &gt; 0 ifTrue: [
+        &quot;Original eps = &quot; print; ^self eps printNL;
+        &quot;Adjusted eps = &quot; print; eps printNL;
+      ];
+</b>    <b>];</b></pre>
+</ul>
+
+<p>When to use <i>^current</i> and when to use <i>^self</i> is a recurring
+question in Vision programming. For operations like <i>do:</i>, where <i>^current</i>
+always inherits from <i>^self</i>, you can use either and usually get the
+right answer. In some cases, however, you need to be sensitive to the magic
+word you choose. A good rule of thumb is to use <i>^self</i> when you are
+sending a message to the dynamic object and to allow Vision to use <i>^current</i>,
+which it does by default for unary messages, when you are accessing a local
+variable or parameter of the block. </p>
+
+<p>As noted, Vision makes extensive use of blocks that inherit from dynamically
+specified objects. A number of messages are defined at <b>Object</b> that
+use blocks this way. The <i>do:</i> message illustrated here is one of
+those messages. It evaluates a block in the context of a dynamically specified
+object and returns that object. The <i>send:</i> message is another. It
+returns the value of the final expression in the block. 
+<a name="returningCurrent"></a>
+The
+<i>extendBy:</i> message, discussed in the
+<a href="#layers">object layers section of this document</a>, 
+is a third. It returns the <i>^current</i>
+object used by the block while it was being evaluated. In fact, the expression:</p>
+
+<ul>
+<pre><b>gm
+extendBy: [ !eps &lt;- earnings / shares ]</b></pre>
+</ul>
+
+<p>and:</p>
+
+<ul>
+<pre><b>gm
+send: [ !eps &lt;- earnings / shares ;
+        ^current
+      ]</b></pre>
+</ul>
+
+<p>produce exactly the same result -- an object that inherits all of the
+property values and messages of <i>gm</i> along with an additional property
+named <i>eps</i>.</p>
+
+<p>Vision's collection iteration and query operations also make use of
+dynamically specified block inheritance. The <i>do:</i>, <i>send:</i>,
+and <i>extendBy:</i> messages are all redefined by the collection classes
+to apply their block argument to each element of the collection. For example,
+the code fragment:</p>
+
+<ul>
+<pre><b>4 sequence
+do: [ print;
+      sqrt print;
+      newLine print;
+    ];</b></pre>
+</ul>
+
+<p>displays the square roots of the first four integers. All of the query,
+sorting, grouping, and aggregation operations accept one or more blocks
+that are also applied to the collection's elements using the dynamic inheritance
+rules described here. For example, </p>
+
+<ul>
+<pre><b>Company masterList
+select: [ sales &gt; 10000 ].
+sortDown: [ sales ].
+do: [ name print: 40;
+      sales printNL;
+    ];</b></pre>
+</ul>
+
+<p>evaluates all of the initial unary messages in its blocks in the context
+of the elements of the lists it is processing.</p>
+
+<p>Using dynamic inheritance to construct the <i>^current</i> object for
+a block is a convenient shorthand. The messages that use dynamic inheritance
+all operate on one or more objects. The blocks they accept as their arguments
+specify operations to be performed or values needed for that object or
+collection of objects. By arranging the block's affairs so that it inherits
+from the object with which it is working, the block gains direct access
+to the information it needs. That principle also applies to the definition
+of methods.</p>
+
+<h4><a name="methods"></a>Using Blocks To Define Methods</h4>
+
+<p>When you define a method, you are defining code that runs in response
+to a message. Because that code is a block, it will have a <i>^current</i>
+object constructed for it when it runs. To construct that object, Vision
+needs to choose an object from which it will inherit. The following examples
+illustrate how Vision makes that choice.</p>
+
+<p>To start with, assume that <i>Subclass1</i> and <i>Subclass2</i> are
+defined by the following Vision code:<pre><tt><b>
+     Object createSubclass: "Subclass1" ;
+     Subclass1 createSubclass: "Subclass2" ;
+
+     Subclass1 define: 'message1' 
+               toBe: "You got the definition of message1 at Subclass1" ;
+     Subclass1 define: 'message2' 
+               toBe: "You got the definition of message2 at Subclass1" ;
+
+     Subclass2 define: 'message1' 
+               toBe: "You got the definition of message1 at Subclass2" ;
+</b></tt></pre>
+and that <i>Subclass2</i> defines a method that displays the values
+of <i>message1</i> and <i>message2</i> as follows:</p>
+
+<ul>
+<pre><b>Subclass2
+defineMethod:
+[ | displayStuff |
+    message1 printNL;
+    message2 printNL;
+];</b></pre>
+</ul>
+
+<p>Evaluating the expression:</p>
+
+<ul>
+<pre><b>Subclass2 displayStuff</b></pre>
+</ul>
+
+<p>produces the result:</p>
+
+<ul>
+<pre><b>You got the definition of message1 at Subclass2
+You got the definition of message2 at Subclass1</b></pre>
+</ul>
+
+<p>This is probably what you expected. Since <i>message1</i> is defined
+at <i>Subclass2</i>, sending <i>message1</i> to an instance of <i>Subclass2</i>
+finds that definition. Since <i>message2</i> is defined at <i>Subclass1</i>
+but not at <i>Subclass2</i>, sending <i>message2</i> to an instance of
+<i>Subclass2</i> finds the inherited definition at <i>Subclass1</i>. </p>
+
+<p>Suppose <i>Subclass1</i> defines a similar method:</p>
+
+<ul>
+<pre><b>Subclass1
+defineMethod:
+[ | displayStuff1 |
+    message1 printNL;
+    message2 printNL;
+];</b></pre>
+</ul>
+
+<p>Because <i>Subclass2</i> inherits from <i>Subclass1</i>, you can evaluate
+the expression:</p>
+
+<ul>
+<pre><b>Subclass2 displayStuff1</b></pre>
+</ul>
+
+<p>When you do, you get the result:</p>
+
+<ul>
+<pre><b>You got the definition of message1 at Subclass1
+You got the definition of message2 at Subclass1</b></pre>
+</ul>
+
+<p>This may <b>not</b> be what you expected. Even though the <i>displayStuff1</i>
+message was sent to an instance of <i>Subclass2</i>, Vision found <i>Subclass1</i>'s
+definition for <i>message1</i>. It did not find <i>Subclass2</i>'s redefinition.
+Apparently, when <i>displayStuff1</i> is run in this case, it is sending
+<i>message1</i> to an instance of <i>Subclass1</i>, not of <i>Subclass2</i>.
+That is in fact the case. When Vision runs a method, it constructs the
+<i>^current</i> object for that method so that it inherits from the object
+layer associated with the subclass that defines the method, not the object
+layer to which the message was sent. In this example, that is the layer
+of <i>Subclass2</i> associated with <i>Subclass1</i>.</p>
+
+<p>When Vision executes a method in response to a message, <i>^self</i>
+is set to the object to which the message was sent. <i>^self</i> in Vision
+is similar to <i>self</i> in Smalltalk and <i>this</i> in C++. Using <i>^self</i>
+instead of <i>^current</i>, <i>displayStuff1</i> can be rewritten as:</p>
+
+<ul>
+<pre><b>Subclass1
+defineMethod:
+[ | displayStuff1 |
+    ^self message1 printNL;
+    ^self message2 printNL;
+];</b></pre>
+</ul>
+
+<p>Using this definition of <i>displayStuff1</i>, when you evaluate the
+expression:</p>
+
+<ul>
+<pre><b>Subclass2 displayStuff1</b></pre>
+</ul>
+
+<p>you get the result:</p>
+
+<ul>
+<pre><b>You got the definition of message1 at Subclass2
+You got the definition of message2 at Subclass1</b></pre>
+</ul>
+
+<p>which is probably what you expected to see.</p>
+
+<p>As these examples illustrate, when you write a method, you need to consider
+when to use <i>^self</i> and when to use <i>^current</i>. A good rule of
+thumb is to use <i>^self</i> when you are sending a message to the object
+used to invoke your method and <i>^current</i>, which Vision uses by default
+for unary messages, when you are accessing a local variable or parameter
+of the method or one of its nested blocks. When you use <i>^self</i>, you
+are giving Vision access to all of the definitions and redefinitions available
+from the object used to invoke your method. In contrast, when you use <i>^current</i>,
+either explicitly or implicitly, you are telling Vision to ignore the class
+of the recipient and just use the definitions available locally in the
+method, the class at which the method is defined, and any superclasses
+of that class. Except when you are accessing the value of a local variable
+or parameter, that is probably not what you intended. If it is, 
+<a href="#here">the
+<i>^here</i> magic word, described below</a>, is a better choice.</p>
+
+<p>When Vision executes a method in response to a message, it also sets
+the <i>^my</i> magic word. In these examples, <i>^my</i> refers to the
+object that understands the <i>Subclass1</i> and <i>Subclass2</i> messages.
+This is exactly the same behavior as described for <i>do:</i> and its kin.
+When Vision changes the default search path for a block to something other
+than the block's definition environment, it arranges for <i>^my</i> to
+return the definition environment of the block. You will probably never
+need to use <i>^my</i> to access the environment that actually defined
+the method, but you can and it behaves consistently.</p>
+
+<h4><a name="super"></a>Using <i>^super</i> to Access Superclass
+Definitions</h4>
+
+<p>In an object-oriented system, subclasses are used to implement more
+specialized behavior than their superclasses. One way that is done is by
+overriding a superclass' definition of a message in a subclass. Sometimes
+the override provides a completely new definition of the message that has
+nothing to do with the superclass' implementation. More often, its intent
+is to retain the behavior of the original message while adding the special
+processing required by the subclass. </p>
+
+<p>The initialization of a new instance is a common application for this
+kind of specialization. For example, when Vision creates an object using
+the <i>new</i> or
+<i>createInstance</i> message, it sends the <i>initializeGlobalInstanceProperties</i>
+message to the newly created object:</p>
+
+<ul>
+<pre><b>Object
+defineMethod:
+[ | new |
+   ^self clusterNew initializeGlobalInstanceProperties
+];</b></pre>
+</ul>
+
+<p>The intent of the <i>intializeGlobalInstanceProperties</i> is to ask
+the object to assign meaningful initial values to its properties. <i>Object</i>
+provides an implementation of <i>initializeGlobalInstanceProperties</i>
+that takes care of the properties defined at <i>Object</i>:</p>
+
+<ul>
+<pre><b>Object
+defineMethod:
+[ | initializeGlobalInstanceProperties |
+   ^self :baseObject &lt;- ^self;
+   ^self :creationDate &lt;- ^today;
+   ^self
+];</b></pre>
+</ul>
+
+<p>Every class that needs the services of <i>initializeGlobalInstanceProperties</i>
+is expected to override its implementation to take care of its own needs.
+In taking care of itself, however, it cannot ignore its superclasses. For
+example, the implementation of <i>initializeGlobalInstanceProperties</i>
+at <i>Object</i> must still be called if methods that rely on the validity
+of <i>baseObject</i> and <i>creationDate</i> are to continue to work. To
+satisfy this need, a method needs a way to call an implementation that
+it overrides.</p>
+
+<p>The <i>^super</i> magic word provides the needed mechanism. The following
+code fragment shows the definition of <i>initializeGlobalInstanceProperties</i>
+at a subclass of <i>Object</i>:</p>
+
+<ul>
+<pre><b>Object createSubclass: &quot;Entity&quot;;
+
+Entity
+defineMethod:
+[|initializeGlobalInstanceProperties|
+   ^super initializeGlobalInstanceProperties;
+   ^self :aliases &lt;- ^self defaultInstance aliases clusterNew;
+   ^self
+];</b></pre>
+</ul>
+
+<p>The first line in this method uses <i>^super</i> to invoke the implementation
+of <i>initializeGlobalInstanceProperties</i> inherited from <i>Object</i>;
+the rest of the method takes care of <i>Entity</i>'s special needs. This
+technique is recursive. If a subclass of <i>Entity</i> needs to override
+this message, it can use the same technique to ensure that <i>Entity</i>'s
+version of this message is run. When the version of <i>initializeGlobalInstanceProperties</i>
+at <i>Entity</i> is called, it will take care of calling the version at
+<i>Object</i>.</p>
+
+<p>The <i>^super</i> magic word is a cross between <i>^self</i> and <i>^current</i>.
+It is a different from the other magic words you have seen because it behaves
+differently depending on whether you ask for its value or send it a message.
+If you ask for its value or return it as the result of an expression, <i>^super</i>
+is indistinguishable from <i>^self</i>. For example, the expression:</p>
+
+<ul>
+<pre><b>^self == ^super</b></pre>
+</ul>
+
+<p>always returns <b><tt>TRUE</tt><i>. </i></b>When you send a message
+to <i>^super</i>, however, Vision starts searching for the message at <i>^current</i>.
+By starting at <i>^current</i>, the search is restricted to the class and
+superclasses of the class that defined the current method. In the case
+of <i>^super</i>, Vision looks for the <i>second</i> definition of the
+message. When used to access a message definition hidden by a subclass,
+the first definition found on the path from <i>^current</i> is presumably
+the definition of the method that is currently running. Since calling it
+again would simply put Vision into an infinite loop, that is not the version
+Vision wants to find. For example, when Vision executes the <i>^super initializeGlobalInstanceProperties</i>
+expression inside <i>Entity</i>'s definition of <i>initializeGlobalInstanceProperties</i>,
+the first implementation of <i>initializeGlobalInstanceProperties</i> is
+the one at <i>Entity</i>. Skipping the first definition allows Vision to
+proceed up the superclass chain to the hidden definition that <i>^super</i>
+needs to find -- in this case the one at <i>Object</i>.</p>
+
+<p>Once the desired message implementation is found, <i>^super</i> is once
+again indistinguishable from <i>^self</i>. Even though <i>Entity</i>'s
+definition of <i>initializeGlobalInstanceProperties</i> began its <i>^super
+initializeGlobalInstanceProperties </i>search from <i>^current</i> and
+not from <i>^self</i>, <i>^self</i> inside the method at <i>Object</i>
+references the same object as <i>^self</i> inside the method at <i>Entity</i>.
+If the whole process illustrated in this example were initiated by the
+code:</p>
+
+<ul>
+<pre><b>Entity createSubclass: &quot;Company&quot;;
+
+!myCompany &lt;- Company createInstance;</b></pre>
+</ul>
+
+<p>the value of <i>^self</i> seen inside the <i>initializeGlobalInstanceProperties</i>
+method defined at <i>Object</i> is the instance of class<i> Company</i>
+created by the <i>createInstance</i> message -- not the <i>^current</i> object created
+for the benefit of <i>Entity</i>'s implementation of <i>initializeGlobalInstanceProperties</i>.</p>
+
+<p>Although their names are similar, the <i>^super</i> magic word and the
+<i>super</i> message do not do the same thing and are generally not interchangeable.
+<i>^super</i> is a magic word that controls how Vision uses <i>^self</i>
+and <i>^current</i> to search for a message. Its intent is to allow a method
+to call a superclass' version of itself. In all other respects, it is synonymous
+with <i>^self</i>. In contrast, <i>super</i> is a message that removes
+the outermost layer from an arbitrary object. While 
+<a href="#stripLayer">removing
+a layer from an object can sometimes be used to skip a particular message
+definition</a>, removing that layer also makes subclass information associated
+with that layer unavailable to the recipient of the message. The <i>super</i>
+message is intended for use in cases where that consequence is acceptable
+or desirable. Those cases typically involve removing extensions added by
+operations like <i>extendBy:</i> and <i>groupedBy:</i> and implementing
+operations like <i>showMessagesX</i> that must examine each layer of
+an object. </p>
+
+<h4><a name="here"></a>Using <i>^here</i> to Ignore Subclass Definitions</h4>
+
+<p>While the ability to override the implementation of a message in a subclass
+is a powerful capability, sometimes it is too powerful. When you write
+a method that sends a message to <i>^self</i>, the message can be reimplemented
+by any of the classes between the class of <i>^self</i> and the class at
+which your method is defined. When you write a method that sends a message
+to <i>^current</i>, you restrict your search to the local state of your
+method, the class at which your method is defined, and the superclasses
+of that class; however, any methods you call by sending a message to <i>^current</i>
+will not have access to the subclass information associated with your method's
+value of <i>^self</i>. There needs to be a middle ground. The <i>^here</i>
+magic word provides that middle ground.</p>
+
+<p>The <i>^here</i> magic word is another <i>^self -- ^current</i> hybrid
+that evaluates to <i>^self</i> when asked for its value or passed as a
+parameter but that searches for messages beginning with <i>^current</i>.
+In fact, the only difference between <i>^here</i> and <i>^super</i> is
+that <i>^here</i> returns the first definition of a message it finds while
+<i>^super</i> returns the second.</p>
+
+<p><i>^here</i> is intended to assist you in modularizing code. It is designed
+to help in cases where a large method should be broken in several smaller
+methods or where a collection of related methods all require the services
+of a common set of helper methods. The use of <i>^here</i> guarantees that
+these methods can call each other without danger of subclass override and
+without losing the subclass information associated with the recipient of
+the message that invoked the method. For example, the use of <i>^here</i>
+in the following method fragments:</p>
+
+<ul>
+<pre><b>MyClass
+defineMethod:
+[ | doItThisWay |
+   ^here doThisWayOrThatWaySetup;
+   ...
+].
+
+defineMethod:
+[ | doItThatWay |
+   ^here doThisWayOrThatWaySetup;
+   ...
+].
+
+defineMethod:
+[ | doThisWayOrThatWaySetup |
+   ...
+   ^self goThisWayOrThatWay;
+   ^self whatAmI print;
+   ...
+];</b></pre>
+</ul>
+
+<p>insures that <i>doItThisWay</i> and <i>doItThatWay</i> will always find
+the <i>doThisWayOrThatWaySetup</i> method defined at <i>MyClass</i> regardless
+of how that method might be redefined by the subclasses of <i>MyClass</i>.
+The use of <i>^here</i> also guarantees that the expression <i>^self goThisWayOrThatWay</i>
+in <i>doItThisWayOrThatWay</i> will always access to the full recipient
+of the <i>doItThisWay</i> or <i>doItThatWay</i> message -- something it
+would not have if <i>^current</i> were used instead of <i>^here</i>. For
+example, executing the following code:</p>
+
+<ul>
+<pre><b>MyClass createSubclass: &quot;MySubClass&quot;;
+
+MySubClass doItThisWay</b></pre>
+</ul>
+
+<p>will cause:</p>
+
+<ul>
+<pre><b>^self whatAmI print </b></pre>
+</ul>
+
+<p>in the definition of <i>doThisWayOrThatWaySetup</i> to display:</p>
+
+<ul>
+<pre><b>MySubClass</b></pre>
+</ul>
+
+<p>in addition to whatever else these methods do.</p>
+
+<h3><a name="globalContext"></a>Global Context</h3>
+
+<p><i>Global context</i> accesses the fixed, global state of your Vision
+session. Three magic words supply the global context for an expression
+-- <i>^global</i>, <i>^tmp</i>, and <i>^today</i>. Of these, 
+<i><a href="#global">^global</a></i>
+and <i><a href="#tmp">^tmp</a></i> are the most significant since
+<a name="today"> </a>
+<i>^today</i> simply returns the start date of the current session. When
+a Vision session starts, an initial object is derived from the session's
+startup options. That object provides a view of the data base and a workspace
+for the session. It is returned by the <i>^global</i> magic word. Any object
+created during a session and made accessible either directly or indirectly
+from the <i>^global</i> object may be saved if the session updates the
+data base. That is not desirable for objects that represent intermediate
+results or inherently transient objects like connections to files, processes,
+or services. To provide a purely temporary place to record those objects,
+Vision provides an object that is not automatically saved as part of an
+update. That object is derived from the <i>^global</i> object and accessed
+via the <i>^tmp</i> magic word.</p>
+
+<h4><a name="global"></a><i>^global</i></h4>
+
+<p>Every Vision data base is structured as a collection of <a href="Running.htm#ospace">object
+spaces</a>. In addition to organizing a Vision data base on disk, each
+object space remembers a special <b>Top Level Object</b> whose messages
+return other objects from the data base. The top level objects associated
+with the object spaces are starting points for navigation in a Vision data
+base.</p>
+
+<p>When you start a Vision session, you have the option of specifying which
+object space you want to use as your starting point. The object space you
+select determines the top level object you will be using. If you do not
+specify an object space, Vision constructs a temporary one for you. In
+that case, Vision derives a top level object for you by adding a layer
+to the top level object associated with object space 3. The following diagram
+illustrates the inheritance structure for the top level object you get:</p>
+
+<pre>              top-level space       (temporary or explicit object space)
+                    |
+                    |
+                    V
+              object space 3        (shared application core)
+                    |
+                    |
+                    V
+              object space 2        (shared built-in core)
+                    |
+                    |
+                    V
+                 Object</pre>
+
+<p>Whether you explicitly select an object space or Vision implicitly creates
+one for you, the top level object associated with that object space is
+always returned by the <i>^global</i> magic word. <a href="#interactiveCurrent">As
+noted earlier</a>, the same object is also returned by the <i>^current</i>
+magic word when you are evaluating interactive Vision expressions.</p>
+
+<p>The top level object responds to messages that return the default instances
+of built-in classes like <i>Object</i>, <i>Integer</i>, and <i>String</i>
+as well as the default instances of application classes like <i>Company</i>
+that you or your organization add to the data base. To add new objects
+and classes to a data base, you modify your top level object or an object
+accessible from it. For example, the expression:</p>
+
+<ul>
+<pre><b>Object createSubclass: &quot;MyClass&quot;</b></pre>
+</ul>
+
+<p>defines a <i>MyClass</i> message at your top level object that references
+the default instance of the new class it creates for you. To make <i>MyClass</i>
+a permanent part of the data base, you simply need to update the data base.
+When you do, subject to your privileges and update mode, any new or modified
+objects accessible from your top level object will be saved.</p>
+
+<h4><a name="tmp"></a><i>^tmp</i></h4>
+
+<p>While Vision takes care to not save objects you do not have the right
+to save, it will try to save all of the new and updated objects referenced
+from your top level object. If it did not, the data base would be left in
+an inconsistent and damaged state. </p>
+
+<p>Sometimes, you do not want everything you create during your session
+to be saved. For example, you may need to record an intermediate result
+temporarily. Alternatively, you may need to remember an inherently transient
+object like a connection to a process, server, or client. Unfortunately,
+if you directly or indirectly reference any of these objects from <i>^global</i>,
+they will be saved. For example, if you interactively execute:</p>
+
+<ul>
+<pre><b>!partialResult &lt;- ...  # Do something useful</b></pre>
+</ul>
+
+<p>the object referenced by <i>partialResult</i> will be saved when the
+data base is updated.</p>
+
+<p>One way to avoid saving an object like <i>partialResult</i> is to reference
+it from an object that Vision is not going to save. Vision provides just
+such an object. That object is returned by the <i>^tmp</i> magic word.</p>
+
+<p>Instead of referencing your temporary result from a name defined at
+<i>^global</i>, you can reference it instead from a name defined at <i>^tmp</i>.
+You need to do a little more work to define a name at <i>^tmp</i> since
+the local variable definition shorthand <b><i>!variable &lt;- ...</i></b>
+is not applicable to <i>^tmp</i>. Two alternatives are:</p>
+
+<ul>
+<pre><b>^tmp define: 'partialResult' toBe: ( ... ) # Do something useful inside
+                                           # the parentheses</b></pre>
+</ul>
+
+<p>and:</p>
+
+<ul>
+<pre><b>^tmp defineFixedProperty: 'partialResult';
+^tmp :partialResult &lt;- ... # Do something useful here</b></pre>
+</ul>
+
+<p>As long as the object returned by <i>^tmp partialResult</i> is 
+not referenced
+from a permanent object like <i>^global</i> or an object referenced from
+<i>^global</i>, it will not get saved when the data base is updated. Of course,
+if you later evaluate an interactive expression like:</p>
+
+<ul>
+<pre><b>!xyz &lt;- ^tmp partialResult;</b></pre>
+</ul>
+
+<p>you have committed Vision to saving the object.</p>
+
+<p>Internally, the <i>^tmp</i> object is constructed by adding a layer
+to <i>^global</i>. In particular, </p>
+
+<ul>
+<pre><b>^tmp super == ^global</b></pre>
+</ul>
+
+<p>always returns <b><tt>TRUE</tt></b>. Because <i>^tmp</i> inherits the
+messages and property values of <i>^global</i>, you can use <i>^tmp</i>
+virtually any place you would use <i>^global</i>. For example:</p>
+
+<ul>
+<pre><b>!x &lt;- 92;
+x print;
+^tmp x print;
+^tmp :x &lt;- 17;
+x print;</b></pre>
+</ul>
+
+<p>will display:</p>
+
+<pre><b>       92       92       17</b></pre>
+
+<p>when run interactively.</p>
+
+<p>
+<hr width="100%" ></p>
+
+<h3><a name="dynamicContext"></a>Dynamic Context</h3>
+
+<p><i>Dynamic context</i> defines your perspective on the data base. Two
+magic words provide the dynamic context for an expression -- <i><a href="#date">^date</a></i>
+and <i><a href="#local">^local</a></i>. The <i>^date</i> magic
+word provides an expression with a point in time from which it should view
+the data base. 
+It is changed by operations like 
+<a href="clDate.htm#ts"><i>date evaluate: []. </i></a>
+The
+<i>^date</i> magic word is a special case of a more general concept. Any
+part of an application can be written to behave in a perspective dependent
+way. One of many examples is the specification of a target currency used
+to manipulate and display monetary values. To implement a dynamic perspective,
+an application needs to provide any expressions that depend on that perspective
+with access to the values that define it. The <i>^local</i> magic word
+returns the object that records those values. </p>
+
+<p>Dynamic context and perspectives are used to give your data base dimensionality.
+When you use a multi-dimensional data base, you need to specify where you
+are in the multi-dimensional space of that data base. For example, when
+you ask for a value like <i>sales</i> from an object representing <b>General
+Motors</b> or <b>Honda</b>, not only do you need to specify the object
+that should respond, you may also need to specify a date and a currency
+as well. Because dimensions apply to everything in general and nothing
+in particular, dynamic context gives you a way to specify your place without
+cluttering every expression with information about that place, whether
+it needs it or not. In effect, dynamic context provides a way to pass parameters
+to an expression without requiring that they be passed explicitly to or
+through every expression. This is more than just a convenience. New perspectives
+can be added at any point as your data base evolves. Adding those perspectives
+without the tools of dynamic context requires re-writing all of the code
+between where you are as a user and where information about that perspective
+is needed in the data base. That is not a reasonable thing to do.</p>
+
+<h4><a name="date"></a><i>^date</i></h4>
+
+<p>Time is a dimension that slices through an entire data base. When you
+build a data base using Vision, you model some part of the world. Included
+in that model are descriptions of the various kinds of objects with which
+you are working. The description of an object includes a description of
+its properties. Fundamentally, that is where time comes into play. One
+of the decisions you make when you define a property is whether that property
+varies over time. For example, if you are defining an object of type <i>Person</i>,
+some properties like blood type never change; others like income change
+regularly. For example:</p>
+
+<ul>
+<pre><b>Entity createSubclass: &quot;Person&quot;;
+Person
+  defineFixedProperty: 'bloodType'.
+  define: 'income';
+
+!thatPersonOverThere &lt;- Person createInstance;
+thatPersonOverThere do: [
+   :bloodType &lt;- ^global Named BloodType OPositive;
+   :income asOf: 92 put: 35000;
+   :income asOf: 93 put: 45000;
+   :income asOf: 94 put: 52000;
+   :income asOf: 95 put: 47000;
+];</b></pre>
+</ul>
+
+<p>When you ask for the <i>income</i> of <i>thatPersonOverThere</i>, you
+probably are not asking for the person's life history -- you want
+to know what that person's <i>income</i> was as of a particular point in
+time. If you ask for it interactively, Vision supplies the most recent
+value available as of today (technically as of <i>^today</i>). For example,
+assuming that you interactively asked Vision to evaluate:</p>
+
+<ul>
+<pre><b>thatPersonOverThere income</b></pre>
+</ul>
+
+<p>on August 15, 1996, you would get the answer:</p>
+
+<ul>
+<pre><b>47000</b></pre>
+</ul>
+
+<p>When Vision accessed the <i>income</i> time series, it got a date from
+the <i>^date</i> magic word. In an interactive session, <i>^date</i> returns
+the start date of the session.</p>
+
+<p>You change the date used to access time-series properties with the <i>evaluate:</i>
+message. For example:</p>
+
+<ul>
+<pre><b>92 evaluate: [ thatPersonOverThere income print ];</b></pre>
+</ul>
+
+<p>displays:</p>
+
+<ul>
+<pre><b>35000</b></pre>
+</ul>
+
+<p>The <i>evaluate:</i> message does not permanently change the value of
+<i>^date</i> -- it only changes it while the block it was passed is running.
+For example, when the expression:</p>
+
+<ul>
+<pre><b>92 evaluate: [ ^date print ];
+^date print;</b></pre>
+</ul>
+
+<p>is run interactively on August 15, 1996, it displays:</p>
+
+<ul>
+<pre><b>12/31/1992
+8/15/1996</b></pre>
+</ul>
+
+<p><i>^date</i> is the only context changed by the <i>evaluate:</i> message.
+In particular, you have probably noted that the <i>^current</i> objects
+constructed for the blocks in these examples understand the <i>thatPersonOverThere</i>
+message.</p>
+
+<p>The <i>evaluate:</i> message is also implemented for date ranges. For
+example:</p>
+
+<ul>
+<pre><b>91 to: 96 by: 1 yearEnds.
+evaluate: [ ^date print: 12;
+            thatPersonOverThere income printNL;
+          ];</b></pre>
+</ul>
+
+<p>displays:</p>
+
+<ul>
+<pre><b>12/31/1991        NA
+12/31/1992      35000
+12/31/1993      45000
+12/31/1994      52000
+12/31/1995      47000
+12/31/1996      47000</b></pre>
+</ul>
+
+<p>Changing the value of <i>^date</i> always involves the use of a block
+which is evaluated in the context of that new date. That is because the
+<i>evaluate:</i> message does not modify a hidden global variable somewhere.
+Instead, it pushes a new <i>^date</i> value onto a stack. When
+it returns, it pops that stack. This allows you to nest <i>evaluate:</i>
+messages and get the result you expect. For example:</p>
+
+<ul>
+<pre><b>95 to: 96 by: 1 yearEnds.
+evaluate: [ ^date year printNL;
+            ^date to: ^date - 3 quarterEnds by: -1 quarterEnds.
+            evaluate: [ &quot; &quot; print;
+                        ^date printNL: 12 ;
+            ];
+          ];</b></pre>
+</ul>
+
+<p>displays:</p>
+
+<ul>
+<pre><b>     1995
+ 12/31/1995
+ 09/30/1995
+ 06/30/1995
+ 03/31/1995
+     1996
+ 12/31/1996
+ 09/30/1996
+ 06/30/1996
+ 03/31/1996</b></pre>
+</ul>
+
+<p>Any class can implement a message that rebinds <i>^date</i>. For example,
+all of the messages that enumerate the elements of a <i>TimeSeries</i>
+also make the effective date of the element available as the value of the
+<i>^date</i> magic word when they are processing the element.</p>
+
+<h4><a name="local"></a><i>^local</i></h4>
+
+<p>The <i>^date</i> magic word is a special case of a more general concept.
+The <i>^local</i> magic word generalizes that concept. </p>
+
+<p><i>^local</i> works according to the same principles as <i>^date</i>
+-- it has a default initial value that can be overridden for the duration
+of a block. Any part of an application that needs to return a perspective
+dependent result can send messages to <i>^local</i> to determine what its
+perspective should be. The default <i>^local</i> object should respond
+to those messages with answers that select the default perspective. To
+change to a different perspective, a <i>^local</i> override should redefine
+those messages to return whatever new values are appropriate.</p>
+
+<p>The framework supplied by Vision in support of <i>^local</i> is very
+small. Basically, Vision supplies a default initial value for <i>^local</i>
+and a single message that changes the <i>^local</i> object for the duration
+of a block. By default, <i>^local</i> returns the same object as <i>^tmp</i>.
+That means that an application can define its default perspective in terms
+of properties defined persistently at <i>^global</i> or transiently at
+<i>^tmp</i>. To override <i>^local</i>, all objects respond to the <i>asLocalContextFor:
+aBlock</i> message. That message arranges for its recipient to serve as
+the <i>^local</i> object while it is evaluating its block argument. Like
+the <i>evaluate:</i> message defined at <i>Date</i>, the <i>asLocalContextFor:</i>
+message pushes its object onto a stack of <i>^local</i> objects. When it
+returns, it pops the stack. As a result, calls to <i>asLocalContextFor:</i>
+can be nested without unexpected consequences and without causing a permanent
+change to <i>^local</i>.</p>
+
+<p>The preceeding discussion of <i>^local</i> has been very general. That
+is because <i>^local</i> is a general concept that can be used to implement
+multiple perspective dependent views of the data base simultaneously. One
+such perspective dependent view is the target currency used to manipulate
+and display monetary values.</p>
+
+<p>To compare and aggregate monetary values, they must be expressed in
+a common currency. There is, however, no single right choice for that currency.
+It can be whatever is appropriate for the current user of the data base.
+Like time, it is cumbersome and inappropriate to require that every operation
+that returns a monetary value also accept an extra parameter to specify
+its result currency. This calls for the use of <i>^local</i> and dynamic
+perspectives.</p>
+
+<p>To implement dynamic target currencies, <i>^local</i> must respond to
+a message returning an object of type <i>Currency</i>. That message is
+called <i>currency</i> and is defined by the top level object in object
+space 3. Because the default <i>^local</i> object inherits from your top
+level object and all top level objects inherit from object space 3's top
+level object, that definition is available as the source of a default target
+currency.</p>
+
+<p>To override the default target currency, the <i>Currency</i> class defines
+an <i>evaluate:</i> message similar to the <i>evaluate:</i> message defined
+at <i>Date</i>:</p>
+
+<ul>
+<pre><b>Currency
+defineMethod:
+[ | evaluate: aBlock |
+   !currency &lt;- ^self;
+   ^local
+      extendBy: [ !currency &lt;- ^my currency ].
+      asLocalContextFor: aBlock
+];</b></pre>
+</ul>
+
+<p>This method adds a new layer to the current <i>^local</i> object. That
+layer overrides the <i>currency</i> property and is used as the new <i>^local</i>
+object for whatever block the <i>evaluate:</i> message was asked to process.
+Although the <i>evaluate:</i> message could have supplied any object as
+the <i>^local</i> context for that block, it makes sense to base that object
+on the current <i>^local</i> object. That is because <i>currency</i> may
+not be the only dynamic perspective available. Since there may be others,
+the <i>evaluate:</i> message at <i>Currency</i> needs to start with the
+existing <i>^local</i> object so that it does not lose or damage the other
+perspectives.</p>
+
+<p>The selection of the <i>^local</i> properties used to define a perspective
+along with the definition of an <i>evaluate:</i> message that overrides
+those properties completes the first part of the process of defining a
+new perspective. Using the perspective information available from <i>^local</i>
+is the responsibility of methods attached to your classes. The following
+code fragments show how it can be done:</p>
+
+<ul>
+<pre><b>Entity createSubclass: &quot;Company&quot;;
+
+Company
+define: 'rawSales'.
+
+defineMethod:
+[ | sales | rawSales * currencyFactor].
+
+defineMethod:
+[ | currencyFactor |
+   ^self baseCurrency exchangeTo: ^self currency relativeTo: ^date
+].
+
+defineMethod:
+[ | currency |
+   ^local currency isntNA
+      ifTrue: [^local currency] ifFalse: [^self baseCurrency]
+];</b></pre>
+</ul>
+
+<p>Most of the work in these methods is bookkeeping. The part that is relevant
+to dynamic contexts and <i>^local</i> is the implementation of the <i>currency</i>
+method. Basically, this method asks <i>^local</i> for a currency to use
+as a target.</p>
+
+<p>The following illustrates how this capability works in a real data base.
+This expression displays GM's sales in each of four currencies:<pre><tt><b>
+     Named Currency
+     send: [DEM, GBP, USD, XAF].
+     do: [
+         ^self evaluate: [
+             ^local currency name print: 30;   # (same as name in this case)
+             ^global gm sales printNL
+             ] ;
+         ] ;
+</b></tt></pre>
+This is what gets displayed:<pre><tt><b>
+     German Deutschmark            235869.64
+     British Pound                  97265.30
+     United States Dollar          152172.00
+     Franc                         152172.00
+</b></tt></pre>
+<p>
+<hr>
+
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy 1997 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated June 19, 1997</font>
+</table>
+
+</body>
+</html>
+
+

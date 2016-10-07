@@ -1,0 +1,865 @@
+####################
+#  DEFcore.controls
+####################
+
+#--------------------
+#  Initialize 
+#--------------------
+ProcessControlTools define: 'Environment' toBe: Dictionary new ;
+
+ProcessControlTools defineMethod: [ | setupEnvironment |
+#   Environment selectorList do: [ ^my Environment delete: ^self ] ;
+#   !env <- ExternalProgram reset
+#      setProgramTo: "getEnvironment.cmd" .
+#      run ;
+
+   Environment rdelete ;
+   ^self define: 'Environment' toBe: ^global Dictionary new ;
+
+   !env <- ExternalProgram reset 
+	setProgramTo: "getEnvironment.cmd" .
+  	setOutputBlockTo: [ | :out | printSuccess ; out printNL ] .
+   	setErrorBlockTo: [ | :out | printError ; out printNL ] .
+        run; 
+   env isntDefault
+   ifTrue: 
+      [ env asLines
+        do: [ !fields <- ^self breakOn: " 	," . 
+                  select: [ isBlank not ] .
+                    send: [ stripBoundingBlanks ] ;
+              !id <- fields at: 1 ;
+              !setting <- fields at: 2 ;
+              ^my Environment at: id put: setting ;
+            ] ;
+       ] ;
+  ^self
+] ;
+
+ProcessControlTools defineMethod: 
+[|showEnvironment|
+# currently unused by vadmin
+!env <- ExternalProgram reset 
+	setProgramTo: "getEnvironment.cmd" .
+  	setOutputBlockTo: [ | :out | printSuccess ; out printNL ] .
+   	setErrorBlockTo: [ | :out | printError ; out printNL ] .
+run; 
+];
+
+#--------------------
+#  General Support Tools
+#--------------------
+
+#----------
+#  standardize succeed/error messages
+#----------
+
+ProcessControlTools defineMethod: [ | printSuccess |
+   "... Success" printNL ;
+] ;
+
+#----------
+
+ProcessControlTools defineMethod: [ | printError |
+   ">>> Error" printNL ;
+] ;
+
+#----------
+
+ProcessControlTools defineMethod: [ | usesProduction | 
+  productionPath isntDefault
+] ;
+
+ProcessControlTools defineMethod: [ | productionPath |
+  Environment at: "productionPath" . else: ""
+] ;
+
+#--------------------
+#  General Update Controls
+#--------------------
+
+ProcessControlTools defineMethod: [ | commitToDatabaseWithAnnotation: text | 
+   usesProduction
+      ifFalse: [ ^global Utility updateNetworkWithAnnotation: text . = 0 ] .
+      else: [ FALSE ] 
+] ;
+
+ProcessControlTools defineMethod: [ | updateLog: log withText: text | 
+!logFile <- Environment at: "updateLogPath" . concat: log ;
+   logFile appendOutputOf:
+     [ "=" fill: 70 . printNL ;
+       ^global Utility UnixSeconds currentTime printNL ;
+       text printNL ;
+     ] ;
+] ;
+
+ProcessControlTools defineMethod: [ | updateDatedLog: log withText: text | 
+  !datedLog <- log concat: "." . concat: ^today asInteger ;
+  ^self updateLog: datedLog withText: text ;
+] ;
+
+
+#--------------------
+#  Update Support
+#--------------------
+ProcessControlTools defineMethod: [ | runAndCommit: id using: block |
+  usesProduction
+  ifTrue:
+    [ printError ;
+      "    Environment Running Production.  Cannot Perform Interactive Saves."
+         printNL ;
+    ]
+  ifFalse:
+    [ !okay ;
+      !out <-
+         [ "===>  Start of " print ; id printNL ;
+           ^self send: block ;
+           "===>  End of " print ; id printNL ;
+          :okay <- ^self commitToDatabaseWithAnnotation: id ;
+        ] divertOutput ;
+     okay
+      ifTrue: [ printSuccess ] 
+     ifFalse:
+       [ printError ;
+         out asLines select: [ ^self contains: ">>>" ] .
+           do: [ " " print: 5 ; printNL ] ;
+       ] ;
+     out extendBy: [ !status <- ^my okay ] 
+   ] 
+] ;
+
+ProcessControlTools defineMethod: [ | runProcess: process using: block | 
+  "... running process " print ; process printNL ;
+  ^self send: block 
+] ;
+
+#--------------------
+#  DBAdmin - load scripts
+#--------------------
+
+ProcessControlTools defineMethod: [ | getPendingScripts |
+  ExternalProgram reset
+   setProgramTo: "getPendingScripts.cmd" .
+   setOutputBlockTo: [ | :out | printSuccess ; out printNL; ] .
+   setErrorBlockTo: [ | :out | printError ; out printNL; ] .
+     run printNL ;
+] ;
+
+
+ProcessControlTools
+  defineMethod: [ | loadVisionScriptFile: file withComment: comment |
+
+!script <- Environment at: "scriptFilePath" . else: "" . 
+     concat: file .  asFileContents ;
+script isntNA
+ifTrue:
+   [ !exec <- 
+        [ ^self runProcess: "Script Update" using: [ ^my script evaluate ] 
+        ] divertOutput ;
+     exec contains: "Error at line/character" .
+     ifTrue:
+       [ printError ;
+         "    in Script " concat: file . concat: ". Not Updated." . printNL ;
+       ]
+     ifFalse:
+       [
+       printSuccess ;
+       exec printNL ;
+       !text <- "...  " concat: file . concat: " -- " . concat: comment;
+       text printNL ;
+       ^self commitToDatabaseWithAnnotation: comment .
+       ifTrue: 
+         [ ^self updateLog: "vscript.log" withText: text ;
+            ^self moveScriptFile: file ;
+         ] ;
+       ] ;
+   ] 
+ifFalse: [ printError ; file concat: ": file not found." . printNL ] ;
+] ;
+
+ProcessControlTools
+defineMethod: [ | scheduleVisionScriptFile: file withTesting: testFlag |
+!scriptName <- file take: "1" . = "/"
+   ifTrue: [ file ] 
+  ifFalse: [ Environment at: "scriptFilePath" . else: "" . concat: file ] ;
+!script <- scriptName asFileContents ;
+script isntDefault
+ifTrue:
+  [ !okay <- TRUE ;
+    testFlag isTrue
+    ifTrue:
+      [ !exec <- 
+          [ ^self runProcess: "Script Update" using: [ ^my script evaluate ] 
+          ] divertOutput ;
+       exec contains: "Error at line/character" .
+          ifTrue: [ :okay <- FALSE ] ;
+      ] ;
+    okay
+    ifTrue:
+      [ !program <-    #-- -Code -noprompt fileName ospace notest
+            Environment at: "visionSubmit" . else: "" . 
+              concat: " -C -n " . concat: scriptName . concat: " 3 no " ;
+        ExternalProgram reset
+           setProgramTo: program .
+           setOutputBlockTo: [ | :out | printSuccess ; out print ] .
+           setErrorBlockTo: [ | :out | printError ; out print ] .
+           run ;
+
+      ]
+    ifFalse:
+      [ printError ;
+        "    Error in Script " concat: file . concat: ". Not Scheduled." . 
+              printNL ;
+      ] ;
+   ] 
+ifFalse: 
+   [ printError ;
+     file concat: ": file not found." . printNL 
+   ] ;
+] ;
+
+ProcessControlTools
+defineMethod: [ | scheduleAsScript: msgBlock withTesting: testFlag |
+
+ !okay <- TRUE ;
+  testFlag isTrue
+  ifTrue:
+      [ !exec <- [ msgBlock value  ] divertOutput ;
+        exec contains: "Error at line/character" .
+        ifTrue: [ :okay <- FALSE ] ;
+      ] ;
+  okay
+  ifTrue:
+      [!tmpname <- "tmp.vadmin.script" ; 
+	!filename <- Environment at: "scriptFilePath" . else: "" . 
+ 		concat: tmpname ; 
+ 	  filename substituteOutputOf: [ msgBlock asUndelimitedString print;];
+ 	  ^self scheduleVisionScriptFileAndMove:   tmpname  withTesting: testFlag . print;
+ #move to schedule method       ^self moveScriptFile: tmpname . print;
+	]
+
+  ifFalse:
+      [ printError ;
+        [ newLine print;
+	    "Not Scheduled.  Errors in Message: " printNL;
+	     msgText asString printNL;
+        ] divertOutput printNL ;
+      ]
+] ;
+
+ProcessControlTools defineMethod: [ | scheduleVisionScriptFileAndMove: script withTesting: testFlag |
+	^self scheduleVisionScriptFile: script withTesting: testFlag ; 
+      ^self moveScriptFile: script
+
+];
+
+ProcessControlTools defineMethod: [ | moveScriptFile: file | 
+!path <- Environment at: "scriptFilePath" . else: "" ;
+!program <- "moveFile.cmd " concat: file . 
+   concat: " " . concat: path . concat: " " . concat: path . concat: "done" ;
+ExternalProgram reset
+	setProgramTo: program .
+      setOutputBlockTo: [ | :out | printSuccess ; out printNL ] .
+      setErrorBlockTo: [ | :out | printError ; out printNL ] .
+	run  ;
+] ;
+
+#--------------------
+#  DBAdmin - Feeds
+#--------------------
+
+ProcessControlTools defineMethod: [ | getPendingFeeds |
+	[
+		ExternalProgram reset 
+		setProgramTo: "getPendingFeeds.cmd" .
+		setOutputBlockTo: [ | :out | printSuccess ; out printNL; ] .
+   		setErrorBlockTo: [ | :out | printError ; out printNL; ] .
+		run printNL; 
+	]divertOutput asLines 
+select: [^self contains: "cfg$" .not].
+do: [printNL]; 
+];
+
+ProcessControlTools defineMethod: [ | getConfigFileNameFrom: feedFile |
+!path <- Environment at: "feedFilePath" . else: "" ;
+feedFile containsSubstring: "." .
+     ifFalse: [ :feedFile <- feedFile concat: "." ] ;
+path concat: (feedFile to: "." . concat: "cfg") 
+
+] ;
+  
+ProcessControlTools defineMethod: [ | loadFeedFile: ffile forFeed: feed |
+
+!path <- Environment at: "feedFilePath" . else: "" ;
+!configFile <- ^self getConfigFileNameFrom: ffile ;
+!feedFile   <- path concat: ffile ;
+
+[ ^global Interface ExternalFeedManager reset
+   getConfigurationFromFile: configFile ;
+] divertOutput ;
+
+!out <- 
+   [ ^global Interface ExternalFeedManager upload: feed usingFile: feedFile ;
+   ] divertOutput ;
+out contains: ">>> Error" .
+  ifTrue: [ printError ; out printNL ] 
+  ifFalse:
+    [ printSuccess ; out printNL;
+      feed asString asClass currentStore cleanupCurrentInstances ;
+    ] ;
+] ;
+
+ProcessControlTools defineMethod: [ | scheduleFeedFile: ffile forFeed: feed |
+
+!path <- Environment at: "feedFilePath" . else: "" ;
+:path <- path concat: "scheduled/";
+!configFile <- ^self getConfigFileNameFrom: ffile ;
+!feedFile   <- path concat: ffile ;
+
+^global Interface BatchFeedManager validateFeedName: feed .
+ifTrue:
+  [ #	move file out of pending into scheduled dir (tlh)
+    ^self moveFeedFile: ffile to: path  . print;
+
+    !program <-    #-- -Feed -noprompt fileName feedName cfgFileName
+    Environment at: "visionSubmit" . else: "" . 
+       concat: " -F -n " . concat: feedFile . concat: " ".
+       concat: feed . concat: " " . concat: configFile ;
+    ExternalProgram reset
+           setProgramTo: program .
+       setOutputBlockTo: [ | :out | printSuccess ; out printNL ] .
+        setErrorBlockTo: [ | :out | printError ; out printNL ] .
+      run ;
+  ]
+ifFalse:
+  [ printError ;
+    "    " concat: feed  . concat: " -- DataFeed Not Found." printNL ;
+  ] ;
+] ;
+
+ProcessControlTools defineMethod:  [| displayFeedsFor: catId| 
+!EFMManager <- ^global Interface ExternalFeedManager;
+!temp <- [ EFMManager displayFeedsFor: catId] 	divertOutput asLines 
+	 extendBy:  [!fields <- ^self breakOn: "	"; 
+	 	     !cat <- fields at: 1;
+	     ];
+	     
+!pctError <- [ printError asString stripBoundingBlanks] divertOutput drop: -1 ;
+
+!success <- temp select: [ cat contains: ^my pctError ] . count ;
+
+success = 0 ifTrue: [ printSuccess print; ] ; 
+temp count > 0 ifTrue: [ temp do: [ cat printNL ];];
+	
+];
+
+ProcessControlTools defineMethod: [ | moveFeedFile: ffile | 
+!path <- Environment at: "feedFilePath" . else: "" ;
+!program <- "moveFile.cmd " concat: ffile . 
+   concat: " " . concat: path . concat: " " . concat: path . concat: "done" ;
+ExternalProgram reset
+     	setProgramTo: program .
+     	setOutputBlockTo: [ | :out | printSuccess ; out printNL ] .
+     	setErrorBlockTo: [ | :out | printError ; out printNL ] .
+     	run  ;
+] ;
+
+ProcessControlTools defineMethod: [ | moveFeedFile: ffile to: toPath |
+!path <- Environment at: "feedFilePath" . else: "" ;
+!program <- "moveFile.cmd " concat: ffile .
+	concat: " " . concat: path . concat: " " . concat: toPath ;
+ ExternalProgram reset
+     	setProgramTo: program .
+     	setOutputBlockTo: [ | :out | printSuccess ; out printNL ] .
+     	setErrorBlockTo: [ | :out | printError ; out printNL ] .
+     	run  ;
+
+];
+
+
+
+#--------------------
+#  DBAdmin - Maintenance
+#--------------------
+
+ProcessControlTools defineMethod: [ | processSchemaMaintenance |
+usesProduction
+ifTrue:
+  ["Scheduling Schema Maintenance " printNL ;    
+   !script <- Environment at: "vscriptCleanupPath" . else: "" . 
+       concat: "updateSchema.S" ;
+    ^self scheduleVisionScriptFile: script withTesting: FALSE ;
+  ]
+ifFalse:
+  [ ^self runAndCommit: "Schema" 
+        using: [ ^global Schema processAllMessages ] . printNL ;
+  ] ;
+] ;
+
+ProcessControlTools defineMethod: [ | processCleanupMaintenance |
+usesProduction
+ifTrue:
+  ["Scheduling Cleanup Maintenance " printNL ;    
+   !script <- Environment at: "vscriptCleanupPath" . else: "" . 
+       concat: "cleanupNetwork.S" ;
+    ^self scheduleVisionScriptFile: script withTesting: FALSE ;
+  ]
+ifFalse:
+  [ !out <- ^self runAndCommit: "Cleanup" using:
+      [ "    Database Cleanups" printNL ;
+        ^global AdminTools cleanNetwork ;
+        ^global Schema CD instanceList do: [ class cleanupClassStructures ] ;
+      ] ;
+    ^self updateDatedLog: "cleanup.log" withText: out ;
+    "details in " print ; Environment updateLogPath print ;
+    "cleanup.log." print ; ^today asInteger asString print ;
+    " on Vision server." printNL ;
+   ] ;
+] ;
+
+ProcessControlTools defineMethod: [ | processGarbageCollection |
+usesProduction
+ifTrue:
+  ["Scheduling Garbage Collection " printNL ;    
+   !script <- Environment at: "vscriptCleanupPath" . else: "" . 
+       concat: "gCollect.S" ;
+    ^self scheduleVisionScriptFile: script withTesting: FALSE ;
+  ]
+ifFalse:
+  [ !out <- ^self runAndCommit: "Garbage Collection" using:
+      [ "    Garbage Collection" printNL ;
+        ^global Utility collectGarbage ;
+      ] ;
+   :out <- 
+      [ out printNL ;
+        ExternalProgram reset
+           setProgramTo: "profileNetwork.cmd" .
+           run printNL ;
+      ] divertOutput ;
+   ^self updateDatedLog: "gcollect.log" withText: out ;
+   "details in " print ; Environment updateLogPath print ;
+   "gcollect.log." print ; ^today asInteger asString print ;
+    " on Vision server." printNL ;
+  ] ;
+] ;
+
+ProcessControlTools defineMethod: [ | processCompaction |
+usesProduction
+ifTrue:
+  ["Scheduling Compaction  " printNL ;     
+   !script <- Environment at: "vscriptCleanupPath" . else: "" . 
+       concat: "basicCompact.S" ;
+    ^self scheduleVisionScriptFile: script withTesting: FALSE ;
+  ]
+ifFalse:
+  [ !out <- 
+       [ "    Full Compaction" printNL ;
+         ExternalProgram reset
+           setProgramTo: "fullCompact.cmd" .
+           run printNL ;
+       ] divertOutput ;
+    out contains: "Object Network Updated" .
+        ifTrue: [ printSuccess ] ifFalse: [ printError ] ; #[ printFailed ] ;
+    "    Full Compaction" printNL ;
+    ^self updateDatedLog: "compact.log" withText: out ;
+    "details in " print ; Environment updateLogPath print ;
+    "compact.log." print ; ^today asInteger asString print ;
+     " on Vision server." printNL ;
+  ] ;
+] ;
+
+ProcessControlTools defineMethod: [ | processDeleteSegments |
+!out <- 
+   [ "===>  Start of Delete Segments" printNL ;
+     ExternalProgram reset
+        setProgramTo: "deleteCompactSegments.cmd" .
+        setOutputBlockTo: [ | :out | printSuccess ; out ] .
+        setErrorBlockTo: [ | :out | printError ; out ] .
+        run printNL ;
+     "===>  End of Delete Segments" printNL ;
+   ] divertOutput ;
+
+printSuccess ;
+"    Delete Segments" printNL ;
+^self updateDatedLog: "compact.log" withText: out ;
+"details in " print ; Environment updateLogPath print ;
+"compact.log." print ; ^today asInteger asString print ;
+ " on Vision server." printNL ;
+] ;
+
+#--------------------
+#  DBAdmin - revert to earlier versions
+#--------------------
+
+ProcessControlTools defineMethod: [ | restartSession | 
+  ^global Utility restartSession ;
+] ;
+
+ProcessControlTools defineMethod: [ | showProcessesForUser | 
+   ExternalProgram reset
+     	setProgramTo: "showProcesses.cmd" .
+     	setOutputBlockTo: [ | :out | printSuccess ; out printNL ] .
+     	setErrorBlockTo: [ | :out | printError ; out printNL ] .
+   	run ;
+
+];
+
+ProcessControlTools defineMethod: [ | showVersionHistory | 
+  !out <- ExternalProgram reset
+     setProgramTo: "ndftool -v" .
+     run ;
+  "Version" print: 10 ; "	" print ; "Commit Time" print: 18 ;
+  "Annotation" printNL ;
+  out asLines 
+    select: [ ^self containsSubstring: "+++" . not ] .
+    numberElements select: [ position > 1 ] .
+     groupedByString: [ ^self take: 10 ] .
+  do: [ groupList at: 1 . 
+        do: [ ^self print: 10 ; "	" print ;
+              ^self from: 31 . printNL ;
+            ] ;
+      ] ;
+] ;
+
+ProcessControlTools defineMethod: [ | rollbackVersion: vnumber |
+!okay <- TRUE ;
+usesProduction
+ifTrue:
+  [ suspendUpdates ;
+    updatesInSuspend
+    ifFalse:
+      [ :okay <- FALSE ;
+        printError ;
+        "    Rollback: Updates in Progress.  Try Again Later." printNL ;
+        unsuspendUpdates ;
+      ] ;
+  ] ;
+okay
+ifTrue:
+  [ ExternalProgram reset
+        setProgramTo: ("rollbackNetwork.cmd " concat: vnumber) .
+        setOutputBlockTo: [ | :out | 
+           ^self updateDatedLog: "rollback.log" withText: out ; 
+           !lines <- out asLines 
+              select: [ ^self containsSubstring: "..." . not ] ;
+           !firstLine <- lines select: [^self contains: "Version" ] .
+                at: 1 . printNL ;
+           lines select: [ ^self containsSubstring: "+++" ] .
+              do: [ printNL ] ;
+           :lines <- lines  select: [ ^self containsSubstring: "+++" . not ] ;
+           lines count > 2
+           ifTrue:
+             [
+             "Version" print: 10 ; "	" print ; "Commit Time" print: 18 ;
+             "Annotation" printNL ;
+            out asLines numberElements 
+               select: [ ^self take: 1 . asNumber isntNA ] .
+               groupedByString: [ ^self take: 10 ] .
+            do: [ groupList at: 1 . 
+                  do: [ ^self print: 10 ; "	" print ;
+                        ^self from: 31 . printNL ;
+                      ] ;
+                ] ;
+            newLine print ;
+            " ---> Master Listener(s) Restarted." printNL ;
+           ] ;
+        ] . run ;
+     usesProduction ifTrue: [ unsuspendUpdates ] ;
+   ] ;
+] ;
+
+ProcessControlTools defineMethod: [ | restoreBootstrapDatabase |
+  !server <- Environment at: "visionServerType" . else: "" ;
+  server toUpper = "UNIX" && usesProduction not
+  ifTrue:
+    [ printSuccess ;
+      "... running restore bootstrap" printNL ;
+       ExternalProgram reset
+        setProgramTo: "restoreBootstrapDatabase.cmd" .
+        run printNL;
+      "...  bootstrap database restored." printNL ;
+    ] .
+  elseIf: [ usesProduction ] 
+    then: [ printError ;
+            ">>>  Cannot restore bootstrap in production environment." printNL ;
+          ] .
+  else: 
+    [ printError ;
+      ">>>  Cannot restore bootstrap database on NT server." printNL ;
+    ] ;
+] ;
+
+#--------------------
+#  DBAdmin - other tools
+#--------------------
+
+ProcessControlTools defineMethod: [ | updateGURLFile |
+  ExternalProgram reset
+     setProgramTo: "updateGURL.cmd " .
+     run printNL ;
+] ;
+
+ProcessControlTools defineMethod: [ | restartMasterListeners | 
+  !log <- usesProduction
+     ifTrue: [ productionPath concat: "/status/logs/listener.log" ]
+    ifFalse: [ "" ] ;
+  ExternalProgram reset
+     setProgramTo: ("restartMasterListeners.cmd " concat: log) .
+     run printNL;
+] ;
+
+ProcessControlTools defineMethod: [ | shutMasterListeners | 
+  ExternalProgram reset
+     setProgramTo: "shutMasterListeners.cmd" .
+     run printNL;
+] ;
+
+#--------------------
+# Production Monitoring Tools
+#--------------------
+
+ProcessControlTools defineMethod: [ | updatesInSuspend |
+   productionPath
+       concat: "/status/active/Suspend.inProgress" . asFileContents isntNA
+   ifTrue: [ TRUE ] .   #--  Suspend job in progress
+   else:                #--  Suspend job scheduled and no other updates running
+    [ !file1 <- productionPath concat: "/status/pending/Suspend" ;
+      !file2 <- productionPath concat: "/status/active/updateDaemon.inSleep" ;
+      file1 asFileContents isntNA && [ file2 asFileContents isntNA ] 
+    ]
+] ;
+
+ProcessControlTools defineMethod: [ | suspendUpdates |
+   ExternalProgram reset
+     setProgramTo: "suspendUpdates.cmd" .
+     run print;
+] ;
+
+ProcessControlTools defineMethod: [ | unsuspendUpdates |
+   ExternalProgram reset
+     setProgramTo: "unsuspendUpdates.cmd" .
+     run print;
+] ;
+
+ProcessControlTools defineMethod: [ | showReportJobs |
+   ExternalProgram reset
+     setProgramTo: "showReportJobs.cmd" .
+   setOutputBlockTo: [ | :out | printSuccess ; out printNL ] .
+   setErrorBlockTo: [ | :out | printError ; out printNL ] .
+   run ;
+
+] ;
+ProcessControlTools defineMethod: [ | showUpdateJobs |
+   ExternalProgram reset
+     setProgramTo: "showUpdateJobs.cmd" .
+   setOutputBlockTo: [ | :out | printSuccess ; out printNL ] .
+   setErrorBlockTo: [ | :out | printError ; out printNL ] .
+   run ;
+] ;
+
+ProcessControlTools defineMethod:
+[ | showStatusLogs |
+   ExternalProgram reset
+     setProgramTo: "showStatusLogs.cmd" .
+   setOutputBlockTo: [ | :out | printSuccess ; out printNL ] .
+   setErrorBlockTo: [ | :out | printError ; out printNL ] .
+   run ;
+
+];
+ProcessControlTools defineMethod: [ | showReports |
+   ExternalProgram reset
+     	setProgramTo: "showReports.cmd" .
+     	setOutputBlockTo: [ | :out | printSuccess ; out printNL ] .
+     	setErrorBlockTo: [ | :out | printError ; out printNL ] .
+   	run ;
+
+] ;
+
+ProcessControlTools defineMethod: [ | showProductionStatus: statusPath |
+!path <- productionPath concat: "/status/" . concat: statusPath ; 
+!program <- "showProductionStatus.cmd " concat: path ;
+ ExternalProgram reset
+     	setProgramTo: program .
+     	setOutputBlockTo: [ | :out | printSuccess ; out printNL ] .
+     	setErrorBlockTo: [ | :out | printError ; out printNL ] .
+     	run; ;
+
+] ;
+
+ProcessControlTools defineMethod: [ | showRollbackLog |
+
+!file <-  Environment updateLogPath 
+        concat: "rollback.log." . concat: ^today asInteger asString ;
+^self showFile: file withLabel: "Rollback Log ";
+] ;
+
+ProcessControlTools defineMethod: [ | showFile: file withLabel: label |
+   !contents <- file asFileContents ;
+   contents isNA
+   ifTrue:
+     [ printError ;
+       label print ; file print ; " Not Found." printNL ;
+     ]
+   ifFalse:
+     [ printSuccess ;
+       label print ; file printNL ;
+       "Contains the Following: " printNL ;
+       newLine print ;
+       contents print ; 
+       contents count = 0 ifTrue: [ "     (empty file) " printNL ] ;
+     ] ;
+] ;
+
+ProcessControlTools defineMethod: [ | showStatusLogFile: file |
+   !file <- productionPath concat: "/status/logs/" . concat: file ;
+   ^self showFile: file withLabel: "Log File ";
+] ;
+
+ProcessControlTools defineMethod: [ | showStatusToken: file |
+   !file <- productionPath concat: "/status/" . concat: file ;
+   ^self showFile: file withLabel: "Status Token ";
+] ;
+   
+   
+ProcessControlTools defineMethod: [ | showUpdateJob: file |
+   !file <- productionPath concat: "/Updates/jobs/" . concat: file ;
+   ^self showFile: file withLabel: "Update Job ";
+] ;
+   
+ProcessControlTools defineMethod: [ | showReportJob: file |
+   !file <- productionPath concat: "/Reports/jobs/" . concat: file ;
+   ^self showFile: file withLabel: "Report Job " ;
+] ;
+   
+ProcessControlTools defineMethod: [ | showReportOutput: file |
+   !file <- productionPath concat: "/Reports/output/" . concat: file ;
+   ^self showFile: file withLabel: "Report Output " ;
+] ;
+   
+#--------------------
+#  If an empty token is generate, do not print a new line in the
+#     file since this creates 1-character file instead of an empty one
+#--------------------
+
+ProcessControlTools defineMethod: [ | writeFile: file withContents: contents |
+file substituteOutputOf:
+   [ contents isString
+     ifTrue: 
+       [ contents print ;
+         contents isBlank ifFalse: [ newLine print ] ;
+       ] ;
+   ] ;
+] ;
+
+#----------
+
+ProcessControlTools
+defineMethod: [ | scheduleJob: jobName withContents: contents |
+  !file <- productionPath concat: "/status/pending/" . concat: jobName ;
+  ^self writeFile: file withContents: contents ;
+] ;
+
+ProcessControlTools
+defineMethod: [ | scheduleReport:  jobName withContents: contents |
+  !file  <- productionPath
+     concat: "/status/pending/" . concat: "report." . concat: jobName ;
+  ^self writeFile: file withContents: contents ;
+];
+
+ProcessControlTools defineMethod: [ | unscheduleJob: jobName |
+!dir <- productionPath concat: "/status/pending/" ;
+ExternalProgram reset
+   setProgramTo: ("removeFile.cmd " concat: jobName . concat: " " . concat: dir) .
+   setOutputBlockTo: [ | :out | printSuccess ; out printNL ] .
+   setErrorBlockTo: [ | :out | printError ; out printNL ] .
+   run ;
+] ;
+
+ProcessControlTools
+defineMethod: [ | createToken: token withContents: contents |
+  !file <- productionPath concat: "/status/tokens/" . concat: token ;
+  ^self writeFile: file withContents: contents ;
+] ;
+
+ProcessControlTools defineMethod: [ | removeToken: token |
+!dir <- productionPath concat: "/status/tokens/ " ;
+ExternalProgram reset
+   setProgramTo: ("removeFile.cmd " concat: token . concat: " " . concat: dir) .
+   setOutputBlockTo: [ | :out | printSuccess ; out printNL ] .
+   setErrorBlockTo: [ | :out | printError ; out printNL ] .
+   run ;
+] ;
+
+ProcessControlTools defineMethod: [ | removeToDoToken: token |
+!dir <- productionPath concat: "/status/todo/ " ;
+ExternalProgram reset
+   setProgramTo: ("removeFile.cmd " concat: token . concat: " " . concat: dir) .
+   setOutputBlockTo: [ | :out | printSuccess ; out printNL ] .
+   setErrorBlockTo: [ | :out | printError ; out printNL ] .
+   run ;
+] ;
+
+ProcessControlTools defineMethod: [ | removeLogFile: filename |
+# currently unused by vadmin, however removeFile.cmd is VALID
+!dir <- productionPath concat: "/status/logs/ " ;
+ExternalProgram reset
+   setProgramTo: ("removeFile.cmd " concat: filename . concat: " " . concat: dir) .
+   setOutputBlockTo: [ | :out | printSuccess ; out printNL ] .
+   setErrorBlockTo: [ | :out | printError ; out printNL ] .
+   run ;
+] ;
+
+
+#--------------------
+#  ProcessControlTools ExternalProgram
+#--------------------
+
+ProcessControlTools ExternalProgram defineMethod: [ | reset | 
+  ^self
+     setProgramTo: NA .
+     setInputBlockTo: NA .
+     setOutputBlockTo: NA . 
+     setErrorBlockTo: [ | :output | ^self logError: output ] .
+] ;
+
+ProcessControlTools ExternalProgram defineMethod: [ | setProgramTo: text | 
+  ^self define: 'program' toBe: text ;
+  ^self
+] ;
+
+ProcessControlTools ExternalProgram defineMethod: [ | setInputBlockTo: block | 
+  ^self define: 'inputBlock' toBe: [ block ] ;
+  ^self
+] ;
+ProcessControlTools ExternalProgram defineMethod: [ | setOutputBlockTo: block| 
+  ^self define: 'outputBlock' toBe: [ block ] ;
+  ^self
+] ;
+ProcessControlTools ExternalProgram defineMethod: [ | setErrorBlockTo: block | 
+  ^self define: 'errorBlock' toBe: [ block ] ;
+  ^self
+] ;
+
+ProcessControlTools ExternalProgram defineMethod: [ | run | 
+  program isntNA
+  ifTrue:
+    [ !out <- program asProgramWith: inputBlock ;
+      out contains: "^>>> Error" .
+      ifTrue:
+        [ errorBlock isBlock
+            ifTrue: [ ^self send: errorBlock with: out ]
+           ifFalse: [ out ]
+        ]
+      ifFalse:
+        [ outputBlock isBlock
+            ifTrue: [ ^self send: outputBlock with: out ]
+           ifFalse: [ out ]
+        ]
+    ] 
+] ;
+
+ProcessControlTools ExternalProgram defineMethod: [ | logError: error |
+  error printNL ;
+] ;
+
+ProcessControlTools ExternalProgram reset ;
+

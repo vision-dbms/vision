@@ -1,0 +1,2471 @@
+##################################################
+#   Schema and Instance Level Navigator Reports
+#      plus Other Generic Applications
+##################################################
+
+####################
+#   Class XRef - Summary Version 
+#      this version shows all top level BIn, App, and DataFeed classes
+#      and all top and second level Tk, Dict, OS, classes
+####################
+
+Interface ApplicationWS defineMethod: [ | displayMainMenu | 
+FormatTools 
+   buildTitle: "---  Vision Database Navigation  ---" over: 80 
+       withStyle: "Arial" , "darkblue". print ;
+FormatTools buildCommentBlock: 
+"The Vision Database Navigator provides a framework for presenting information
+about your Vision environment.  Vision offers a general purpose information 
+management engine that allows you to manage data relationships and programs in
+addition to raw data.  The database is fully integrated with a complete
+programming environment.  These tools are designed to help you explore
+your Vision environment from a progamming, database, end user, and 
+architectural perspective." over: 80 . print ;
+
+FormatTools startParagraph print ;
+!table <- ^global LayoutTools Named TableSpec at: "basic2Column" ;
+table getColumn: 1 . setHAlignmentTo: "center" . setVAlignmentTo: "center" ;
+table getColumn: 2 . disableFillBlanks setHAlignmentTo: "left" ;
+table getColumn: 1 . getHeader: 1 . setTextTo: "---  Navigation Views  ---" ;
+
+FormatTools buildTableFor: table for: ^self withBlock:
+   [  FormatTools buildLinkForApp: "ShowClassXRefSummary" 
+                  withLabel: "Programmer Tools" . print ;
+      FormatTools italic: "What classes and messages are available, how do they work, and where are they used?" . printNL ;
+      FormatTools buildLinkForApp: "ShowDataModelClasses"
+                  withLabel: "Data Model Tools" . print ;
+      FormatTools italic: "What data is available, how is it accessed, and what inter-relationships exist?" . printNL ;
+      FormatTools buildLinkForApp: "ShowAllDataValues"
+                   withLabel: "Data Inspection Tools" . print ;
+      FormatTools italic: "What value did a data item have for a specific entity as of specific point in time?" . printNL ;
+#      FormatTools buildLinkForApp: "ShowDatabaseProfile"
+#                  withLabel: "Structure Analysis Tools" . print ;
+      "Structure Analysis Tools" print ;
+      FormatTools italic: "What physical structures are defined in the database and what potential performance tuning opportunities are implied?" . printNL ;
+      FormatTools buildLink: "VReporter.htm"
+                  withPath: NA withLabel: "End User Tools" . print ;
+      FormatTools italic: "What reports and applications are available that package the information in the database for different user communities?" . printNL ;
+   ] . print ;
+
+table getColumn: 1 . setHAlignmentTo: "left" . setVAlignmentTo: "top" ;
+table getColumn: 2 . enableFillBlanks setHAlignmentTo: "right" ;
+
+] ;
+
+#----------
+
+Interface ApplicationWS defineMethod: [ | ShowProgrammerToolHelp | 
+FormatTools 
+   buildTitle: "---  Vision Database Navigation: Programmer Tools  ---"
+       over: 80 withStyle: "Arial" , "darkblue". print ;
+FormatTools buildCommentBlock: 
+"The Programmer Tools provide information about all the Classes and
+Messages in your Vision database.  " over: 80 . print ;
+
+FormatTools startParagraph print ;
+!table <- ^global LayoutTools Named TableSpec at: "basic2Column" ;
+table getColumn: 1 . setHAlignmentTo: "center" . setVAlignmentTo: "center" ;
+table getColumn: 2 . disableFillBlanks setHAlignmentTo: "left" ;
+table getColumn: 1 . getHeader: 1 . setTextTo: "---  Programmer Tools  ---" ;
+
+FormatTools buildTableFor: table for: ^self withBlock:
+  [ FormatTools buildLinkForApp: "ShowClassXRefSummary" 
+                withLabel: "Summary Class XRef" . print ;
+    FormatTools italic: "Shows available classes, by type.  For each type, top level classes defined for that type are displayed.  Click on a type to see hierarchy of all classes defined for that type.  Click on a class to see a summary for the class." . printNL ;
+    FormatTools buildLinkForApp: "ShowFullHierarchy"
+                withLabel: "Full Class Hierarchy" . print ;
+    FormatTools italic: "Shows all available classes as a hierarchy.  Classes at the same level in the hierarchy are sorted alphabetically.  Click on a class to see a class summary." . printNL ;
+    "Class XRef For " concat: (FormatTools italic: "{type}") . print ;
+    FormatTools italic: "Shows class hierarchy for a class type such as BuiltIns or Application.  Click on a class to see a summary for the class." . printNL ;
+    "Class Summary " concat: (FormatTools italic: "{for class}") . print ;
+    FormatTools italic: "Shows class summary for a specific class such as Number or Entity.  Summary includes description, sample usage, class hierarchy, and class characteristics.  Links to class' messages and other classes in hierarchy provided." . printNL ;
+    "Message Details " concat: (FormatTools italic: "{for class}") . print ;
+    FormatTools italic: "Shows index of all messages directly defined for a specific class followed by a detailed description of each message.  Links to the actual message definition if run as a dynamic application." . printNL ;
+    "Message XRef " concat: (FormatTools italic: "{for class}") . print ;
+    FormatTools italic: "Shows index of all messages defined in the hierarchy of a specific class (i.e., any message defined for the class, its subclasses, and its superclasses including Object).  " . printNL ;
+    FormatTools buildLinkForApp: "ShowMessageXRef"
+       withLabel: "Restricted Message XRef" . print ;
+    FormatTools italic: "Shows an index of all messages defined based on user-specified restrictions." . printNL ;
+  ] . print ;
+
+table getColumn: 1 . setHAlignmentTo: "left" . setVAlignmentTo: "top" ;
+table getColumn: 2 . enableFillBlanks setHAlignmentTo: "right" ;
+
+] ;
+
+#----------
+
+Interface ApplicationWS defineMethod: [ | ShowClassXRefSummary |
+   !optionsBar <- [
+       " | " print; 
+       FormatTools buildLinkForApp: "ShowFullHierarchy" 
+          withLabel: "Full Class Hierarchy" . printNL ;
+       " | " print; 
+       FormatTools buildLinkForApp: "ShowMessageXRef" 
+          withLabel: "Message XRef" . printNL ;
+       " | " print; 
+       FormatTools buildLinkForApp: "ShowProgrammerToolHelp" 
+          withLabel: "- Help -" . printNL ;
+       " | " printNL; 
+   ] divertOutput; 
+   FormatTools buildOptionsBar: optionsBar . printNL; 
+
+   ^global Schema CD showClassXRefSummary ;
+] ;
+
+#----------
+
+####################
+#   Class XRef - Full Hierarchy
+####################
+
+Interface ApplicationWS defineMethod: [ | ShowFullHierarchy |
+   !optionsBar <- [
+       " | " print; 
+       FormatTools buildLinkForApp: "ShowMessageXRef" 
+          withLabel: "Message XRef" . printNL ;
+       " | " print; 
+       FormatTools buildLinkForApp: "ShowClassXRefSummary" 
+              withLabel: "Summary Class XRef " . printNL ;
+       " | " print; 
+       FormatTools buildLinkForApp: "ShowProgrammerToolHelp" 
+          withLabel: "- Help -" . printNL ;
+       " | " printNL; 
+   ] divertOutput; 
+   FormatTools buildOptionsBar: optionsBar . printNL; 
+
+   FormatTools buildTitle: 
+      ("Full Class Hierarchy for: " concat: ^global Schema siteName ) 
+           over: 80  withStyle: "Arial" , "darkblue". print ;
+  FormatTools beginPreserveMode print ;
+  ^global Object classDescriptor showHierarchyFromLevel: 0 to: NA ;
+  FormatTools endPreserveMode print ;
+] ;
+
+#----------
+
+####################
+#   Class XRef - Detail Version 
+#     show hierarchy for type
+####################
+
+Interface ApplicationWS defineMethod: [ | ShowClassXRefDetails |
+   !typeCode <- ^self getParameter: 1 orName: "categoryId" ;
+   !optionsBar <- [
+       " | " print; 
+       FormatTools buildLinkForApp: "ShowMessageXRef" 
+          withLabel: "Message XRef" . print ;
+       " | " print; 
+       FormatTools buildLinkForApp: "ShowClassXRefSummary" 
+              withLabel: "Summary Class XRef " . printNL ;
+       typeCode = "Application"
+       ifTrue:
+         [ " | " print; 
+           FormatTools buildLinkForApp: "ShowDataModelClasses" 
+              withLabel: "Data Model" . printNL ;
+         ] ;
+#       typeCode = "DataFeed"
+#       ifTrue:
+#         [ " | " print; 
+#           FormatTools buildLink: "model/feedtoc.htm" 
+#              withLabel: "Data Feeds" . printNL ;
+#         ] ;
+       " | " print; 
+       FormatTools buildLinkForApp: "ShowProgrammerToolHelp" 
+          withLabel: "- Help -" . printNL ;
+       " | " printNL; 
+   ] divertOutput; 
+   FormatTools buildOptionsBar: optionsBar . printNL; 
+
+   ^global Schema CD showClassXRefDetailsFor: typeCode ;
+] ;
+
+#----------
+
+####################
+#   Message Cross Reference
+#       display message restrictions page
+####################
+
+Interface ApplicationWS defineMethod: [ | ShowMessageXRef |
+   !classId <- ^self getParameter: 1 orName: "classId" ;
+   !class <- classId else: "" .  asClass else: ^global Object ;
+   namedParameters at: "classId" put: class whatAmI ;
+   !type <- class classDescriptor type code ;
+
+   !optionsBar <- [
+       " | " print; 
+       FormatTools buildLinkForApp: "ShowClassSummary" 
+           withLabel: "Class Summary" andParams: classId . printNL ;
+       " | " print; 
+       FormatTools buildLinkForApp: "ShowClassXRefSummary" 
+           withLabel: "Summary Class XRef " . printNL ;
+       " | " print; 
+       FormatTools buildLinkForApp: "ShowClassXRefDetails" 
+           withLabel: ("Class XRef for " concat: type) 
+           andParams: type  . printNL ;
+       " | " print; 
+       FormatTools buildLinkForApp: "ShowProgrammerToolHelp" 
+          withLabel: "- Help -" . printNL ;
+       " | " printNL; 
+   ] divertOutput; 
+   FormatTools buildOptionsBar: optionsBar . printNL; 
+
+  ^self displayMessageRestrictionFormFor: classId ;
+       
+] ;
+
+#----------
+
+Interface ApplicationWS
+defineMethod: [ | displayMessageRestrictionFormFor: classId |
+
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+
+!form <- ^global LayoutTools Named FormSpec MessageRestrictor ;
+form updateInputsFromDictionary: namedParameters ;
+
+FormatTools buildFormFor: form . print ;
+
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+
+]  ;
+
+
+####################
+#   Message Cross Reference - with restrictions
+####################
+
+Interface ApplicationWS defineMethod: [ | ShowRestrictedMessageXRef |
+
+!list <- ^global Schema MID activeList 
+     select: [ messageClassDescriptor type code != "Unused" ] ;
+
+!classId <- ^self getParameter: 1 orName: "classId" . else: "" ;
+!class ;
+!catId <- namedParameters at: "category" . else: "" . stripBoundingBlanks ;
+!cat <- ^global Named ClassType at: catId ;
+classId isBlank not
+ifTrue:
+  [ :class <- classId evaluate ;
+    :list <- class getMessagesInInheritancePath ;
+  ] .
+ elseIf: [ cat isntNA ] 
+   then: [ :list <- list select: [ messageClassDescriptor type = ^my cat ] ;
+         ] ;
+
+!typeId <- namedParameters at: "type" . else: "" . stripBoundingBlanks ;
+!type <- ^global Named MessageType at: typeId ;
+type isntNA ifTrue: [ :list <- list select: [ type = ^my type ]; ] ;
+
+!functionId <- namedParameters at: "function" . else: "". stripBoundingBlanks;
+!function <- ^global Named FunctionType at: functionId ;
+function isntNA
+    ifTrue: [ :list <- list select: [ functionType = ^my function ]; ] ;
+
+!levelId <- namedParameters at: "level" . else: "" . stripBoundingBlanks ;
+!level <- ^global Named UsageLevel at: levelId ;
+level isntNA ifTrue: [ :list <- list select: [ usageLevel = ^my level ]; ] ;
+
+!hierarchy <- namedParameters at: "hierarchy" . else: "" ;
+hierarchy contains: "Exclude" .
+   ifTrue: [ :list <- list
+                select: [ messageClassDescriptor isObjectDescriptor not ] ;
+           ] ;
+
+!updated <- namedParameters at: "updated" . asDate ;
+updated isDate
+   ifTrue: [ :list <- list select: [ updateDate >= ^my updated ] ] ;
+
+!search <- 
+   namedParameters at: "searchString" . else: "" . stripBoundingBlanks ;
+search isBlank ifTrue: [ :search <- NA ] ;
+!searchType <- namedParameters at: "matchType" ;
+!matchRestrict <- namedParameters at: "matchRestriction" ;
+search isntNA
+ifTrue:
+  [
+  !fullSearch <-
+     matchRestrict contains: "Start" . ifTrue: [ "^" concat: search ] .
+     elseIf: [ matchRestrict contains: "End" ] then: [ search concat: "$" ] .
+     else: [ search ] ;
+  :list <- searchType contains: "Exact" .
+     ifTrue: [ list select: [ code = ^my search ] ] .
+     elseIf: [ searchType contains: "Partial" ] 
+       then: [ list select: [ code contains: ^my fullSearch ] ] .
+     elseIf: [ searchType contains: "Description" ] 
+       then: [ list select: [ description contains: ^my search ] ] .
+       else: [ list select: [ implementationSource contains: ^my search ] ] ;
+  ] ;
+
+!optionsBar <- [
+    " | " print; 
+    FormatTools buildLinkForApp: "ShowClassXRefSummary" 
+       withLabel: "Summary Class XRef " . printNL ;
+    " | " print; 
+ 
+    class isntNA
+    ifTrue:
+      [ FormatTools buildLinkForApp: "ShowClassSummary"
+            withLabel: ("Class Summary for " concat: classId )
+            andParams: classId . printNL ;
+      ] .
+    elseIf: [ cat isntNA ] 
+     then:
+      [ FormatTools buildLinkForApp: "ShowClassXRefDetails" 
+            withLabel: ("Class XRef for " concat: catId) 
+            andParams: catId  . printNL ;
+      ] .
+    else:
+      [ FormatTools buildLinkForApp: "ShowFullHierarchy" 
+            withLabel: "Full Class Hierarchy" . printNL ;
+      ] ;
+    " | " printNL; 
+  ] divertOutput; 
+FormatTools buildOptionsBar: optionsBar . printNL; 
+       
+!title <- class isntNA
+  ifTrue: [ "Index of Messages in Class: " concat: classId ] .
+  elseIf: [ cat isntNA ] 
+    then: [ "Index of Messages in Category: " concat: cat code ] .
+    else: [ "Index of All Messages" ] ;
+FormatTools
+    buildTitle: title over: 80 withStyle: "Arial" , "darkblue" . print ; 
+FormatTools buildCommentBlock:
+  [ FormatTools bold: "Message Type: " . print ; type else: "All" . print ;
+    FormatTools startLine print ;
+    FormatTools bold: "Level: " . print ; level else: "All" . print ;
+    FormatTools startLine print ;
+    updated isntNA
+      ifTrue: [ FormatTools bold: "Updated Since: " . print ; 
+                updated printNL ;
+                FormatTools startLine print ;
+              ] ;
+    search isntNA
+    ifTrue:
+      [ !searchMessage <- searchType contains: "Exact" .
+           ifTrue: [ "Restricted to Messages Named: " ] .
+           elseIf: [ searchType contains: "Partial" ] 
+             then: [ "Restricted to Message Names Containing: " ] .
+           elseIf: [ searchType contains: "Description" ] 
+             then: [ "Restricted to Message Descriptions Containing: " ] .
+             else: [ "Restricted to Method Source Containing: " ] ;
+         FormatTools bold: searchMessage . print ; search printNL ;
+         FormatTools startLine print ;
+      ] ;
+    hierarchy contains: "Exclude" . 
+        ifTrue: [ " ( messages at Object excluded)"  printNL ] ;
+  ] divertOutput over: 80 . print ;
+
+^global Schema CD showMessageXRefFor: list ;
+
+^self displayMessageRestrictionFormFor: classId ;
+] ;
+
+#----------
+
+####################
+#   Class Summary
+#      this version shows descriptive information about the class
+####################
+
+Interface ApplicationWS defineMethod: [ | ShowClassSummary |
+   !classId <- ^self getParameter: 1 orName: "classId" . else: "Object" ;
+   !class <- classId isString
+       ifTrue: [ classId evaluate ] ifFalse: [ classId ] ;
+   !type <- class classDescriptor type code ;
+   !optionsBar <- [
+       " | " print; 
+       FormatTools buildLinkForApp: "ShowMessageDetails" 
+              withLabel: "Message Details" andParams: classId . printNL ;
+       " | " print; 
+       FormatTools buildLinkForApp: "ShowMessageXRef" 
+              withLabel: "Message XRef" andParams: classId . printNL ;
+       " | " print; 
+       FormatTools buildLinkForApp: "ShowClassXRefSummary" 
+              withLabel: "Summary Class XRef " . printNL ;
+       " | " print; 
+       FormatTools buildLinkForApp: "ShowClassXRefDetails" 
+              withLabel: ("Class XRef for " concat: type) 
+              andParams: type  . printNL ;
+       type = "Application" 
+       ifTrue:
+         [ " | " print; 
+           FormatTools buildLinkForApp: "ShowDataModelClassSummary" 
+              withLabel: "Data Model" andParams: classId . printNL;
+         ] ;
+       " | " printNL; 
+   ] divertOutput; 
+   FormatTools buildOptionsBar: optionsBar . printNL; 
+       
+   class classDescriptor summaryProfile ;
+] ;
+
+#----------
+
+####################
+#   Message Details 
+#      this version shows all messages defined explicitly for the
+#      class 
+####################
+
+Interface ApplicationWS defineMethod: [ | ShowMessageDetails |
+   !classId <- ^self getParameter: 1 orName: "classId" . else: "Object" ;
+   !class <- classId isString
+       ifTrue: [ classId evaluate ] ifFalse: [ classId ] ;
+   !type <- class classDescriptor type code ;
+   !optionsBar <- [
+       " | " print; 
+       FormatTools buildLinkForApp: "ShowClassSummary" 
+              withLabel: "Class Summary" andParams: classId . printNL ;
+       " | " print; 
+       FormatTools buildLinkForApp: "ShowMessageXRef" 
+              withLabel: "Message XRef" andParams: classId . printNL ;
+       " | " print; 
+       FormatTools buildLinkForApp: "ShowClassXRefSummary" 
+              withLabel: "Summary Class XRef " . printNL ;
+       " | " print; 
+       FormatTools buildLinkForApp: "ShowClassXRefDetails" 
+              withLabel: ("Class XRef for " concat: type) 
+              andParams: type  . printNL ;
+       type = "Application" 
+       ifTrue:
+         [ " | " print; 
+           FormatTools buildLinkForApp: "ShowDataModelClassSummary" 
+              withLabel: "Data Model" andParams: classId . printNL;
+         ] ;
+       " | " printNL; 
+   ] divertOutput; 
+   FormatTools buildOptionsBar: optionsBar . printNL; 
+       
+   class classDescriptor messageDetails ;
+] ;
+
+#----------
+
+####################
+#   Message profile
+#      this version shows detailed description of a message definition
+#      for a specific class
+####################
+
+Interface ApplicationWS defineMethod: [ | ShowMessageProfile |
+   !classId <- ^self getParameter: 1 orName: "classId" ;
+   !messageId <- ^self getParameter: 2 orName: "messageId" ;
+   !class <- classId isString
+       ifTrue: [ classId evaluate ] ifFalse: [ classId ] ;
+   !mid <- class getMessage: messageId ;
+   !type <- class classDescriptor type code ;
+
+   !optionsBar <- [
+       " | " print; 
+       FormatTools buildLinkForApp: "ShowMessageDetails" 
+         withLabel: "Class Message Details" andParams: class whatAmI . printNL;
+       " | " print; 
+       FormatTools buildLinkForApp: "ShowMessageXRef" 
+              withLabel: "Message XRef" andParams: class whatAmI . printNL ;
+       " | " print; 
+       FormatTools buildLinkForApp: "ShowClassXRefSummary" 
+              withLabel: "Summary Class XRef " . printNL ;
+       " | " print; 
+       FormatTools buildLinkForApp: "ShowClassXRefDetails" 
+              withLabel: ("Class XRef for " concat: type) 
+              andParams: type  . printNL ;
+       " | " printNL; 
+   ] divertOutput; 
+   FormatTools buildOptionsBar: optionsBar . printNL; 
+       
+   mid isntNA
+      ifTrue: [ mid showMessageProfile ] 
+     ifFalse: [ ">>> Bad Class or Message Id." printNL ;
+                "    classId: " print ; classId printNL ;
+                "    message: " print ; messageId printNL ;
+              ] ;
+] ;  
+
+#----------
+
+
+
+
+#==================================================
+#   Message Reports begin here
+#==================================================
+
+#----------
+
+Schema CD defineMethod: [ | showMessageXRefFor: list |
+  !messageGroups <- list 
+     extendBy: [ !group <- code take: 1 . toUpper ;
+                 group contains: "[A-Z]" . 
+                    ifFalse: [ :group <- "Other" ] ;
+               ] .
+     groupedByString: [ group ] .
+     sortUp: [ asSelf = "Other" 
+                    ifTrue: [ "ZZZZZ" ] ifFalse: [ asSelf ] 
+             ] ;
+  FormatTools buildOptionsBar:
+     [ messageGroups
+        do: [ FormatTools
+                 buildLink: ("#" concat: asSelf) 
+                 withLabel: (FormatTools bold: asSelf ) . print ;
+              " " print ;
+            ]
+     ] divertOutput . printNL ;
+
+  FormatTools startParagraph print ;
+  messageGroups do:
+    [ FormatTools buildSectionBreakOver: "70%" alignedTo: "left" . printNL ;
+      !label <- FormatTools font: "Arial" inSize: "+1" andColor: "black"
+          for: (FormatTools bold: ("-- " concat: asSelf . concat: " --") ) ;
+      FormatTools buildAnchor: asSelf withLabel: label . print ;
+      FormatTools startParagraph printNL ;
+
+      groupList sortUpBy: [ code ] then: [ messageClassDescriptor ] .
+      do: [ ^self formatMessageLinkWithLabel: 
+               (FormatTools bold: fullSelector) . print ;
+#    FormatTools buildLinkForApp: "ShowMessageProfile"
+#               withLabel: (FormatTools bold: fullSelector )
+#               andParams: messageClassDescriptor name, code . print ;
+            " -- " print ; type name print ; " in class " print ; 
+            FormatTools buildLinkForApp: "ShowClassSummary" 
+                withLabel: messageClassDescriptor name 
+                andParams: messageClassDescriptor name . print ;
+            FormatTools startLine print ;
+          ] ;
+    ] ;  
+];
+
+#----------
+
+Schema CD defineMethod: [ | summaryProfile | 
+  !messages <- class getMessages
+     select: [ isMessageImplementationDescriptor ] .
+     sortUp: [ code ] ;
+  FormatTools
+     buildTitle: ("Profile of Class " concat: (FormatTools italic: name) )
+           over: 80 
+       withStyle: "Arial" , "darkblue". print ;
+
+  FormatTools buildCommentBlock: 
+    [
+    !preserve <- description else: "" . contains: (newLine fill: 2) ;
+    preserve ifTrue: [ FormatTools beginPreserveMode print ] ;
+    description else: "" . printNL ;
+    preserve ifTrue: [ FormatTools endPreserveMode print ] ;
+    sampleUsage isntNA
+    ifTrue:
+      [ FormatTools beginPreserveMode print ;
+        FormatTools font: "Courier" inSize: "-1" andColor: "black"
+          for: (FormatTools bold: sampleUsage) . print ;
+        FormatTools endPreserveMode print ;
+      ] ;
+    ] divertOutput over: 80 . print ;
+
+  FormatTools beginPreserveMode printNL ;
+  newLine print ;
+  inheritancePath numberElements 
+     select: [ position < ^my inheritancePath count ] .
+  do: [ FormatTools buildLinkForApp: "ShowClassSummary" 
+           withLabel: name andParams: name . printNL ;
+        "  | " printNL ;
+      ] ;
+  "  +--- " print ; FormatTools bold: name . printNL ;
+  childList sortUp: [ name ] .
+  do: [ "       " print ; "+--- " print ; 
+        FormatTools buildLinkForApp: "ShowClassSummary" 
+             withLabel: name andParams: name . print ;
+        childList count > 0  ifTrue: [ "  -> " print ] ;
+        newLine print ; 
+      ] ;
+  FormatTools endPreserveMode printNL ;
+
+  FormatTools buildSectionBreakOver: "70%" alignedTo: "left" . printNL ;
+
+!table <- ^global LayoutTools Named TableSpec at: "basic2Column" ;
+table getColumn: 1 . getHeader: 1 . 
+     setTextTo: "---  Class Characteristics  ---" ;
+FormatTools buildTableFor: table for: ^self withBlock:
+  [ "Instances: " print: 15 ; class instanceList count printNL ;
+    !mess <- class getMessages 
+       extendBy: [ !mtype <- isSchema 
+                     ifTrue: [ type code ] ifFalse: [ "New" ] ;
+                 ] ;
+    "Messages: " print: 15 ; mess count printNL ;
+    mess groupedBy: [ mtype ] .
+    do: [ " " fill: 3 . concat: asSelf . print ;
+          groupList count printNL ;
+        ] ;
+    "Web Document: " print: 15 ; 
+    FormatTools buildLink: htmlDocName
+        withPath: "http://www.insytenet.com" withLabel: htmlDocName .
+          printNL ;
+  ] . print ;
+
+  newLine print ;
+];
+
+#----------
+
+Schema CD defineMethod: [ | messageDetails | 
+  !messages <- class getMessages
+     select: [ isMessageImplementationDescriptor ] .
+     sortUp: [ code ] ;
+  FormatTools
+     buildTitle: ("Messages for Class " concat: (FormatTools italic: name) )
+           over: 80 
+       withStyle: "Arial" , "darkblue". print ;
+
+  FormatTools buildSectionBreakOver: "70%" alignedTo: "left" . printNL ;
+  FormatTools
+     font: "Arial" inSize: "+1" andColor: "darkred" for: "Message Index" .
+     printNL ;
+  FormatTools startParagraph print ;
+  messages
+  do: [ FormatTools
+            buildImage: "instdot.gif" withPath: NA withAlt: "o " . print ; 
+        FormatTools buildLink: ("#" concat: code )
+              withLabel: (FormatTools bold: fullSelector) . print ;
+        FormatTools startLine print ;
+      ] ;
+
+  FormatTools buildSectionBreakOver: "70%" alignedTo: "left" . printNL ;
+  FormatTools
+     font: "Arial" inSize: "+1" andColor: "darkred" for: "Messages" .
+     printNL ;
+  FormatTools startParagraph print ;
+
+  messages
+  do: [ FormatTools
+            buildImage: "instdot.gif" withPath: NA withAlt: "o " . print ; 
+        FormatTools buildAnchor: code withLabel: "" . print ;
+        FormatTools buildLinkForApp: "ShowMessageProfile"
+            withLabel: (FormatTools bold: code) 
+            andParams: messageClassDescriptor name, code . printNL ;
+        FormatTools startParagraph print ;
+
+        FormatTools indent:
+           [
+           FormatTools bold: "Synopsis:      " . printNL ;
+           !text <- messageClassDescriptor name concat: " " .
+              concat: fullSelector ;
+           FormatTools indent:
+              ( FormatTools
+                   font: "Courier" inSize: "+1" andColor: "red" 
+                   for: text . 
+              ) . print;
+
+           description isntNA
+           ifTrue: 
+             [ FormatTools startParagraph print ;
+               FormatTools bold: "Description: " . printNL ;
+               FormatTools indent: formatMessageDescription . print ;
+             ] ;
+
+           FormatTools startParagraph print ;
+           FormatTools bold: "Type: " . print ; 
+           type name print ;
+           FormatTools blankFill: 5 . print ;
+           FormatTools bold: "Returns: " . print ; 
+           returnObjectContainer isntDefault
+               ifTrue: [ returnObjectContainer name print ; " of " print ] ;
+           FormatTools buildLinkForApp: "ShowClassSummary" 
+                withLabel: returnObjectType name
+                andParams: returnObjectType name . printNL ;
+           FormatTools startParagraph print ;
+
+           parameterList count > 0 
+           ifTrue:
+             [
+             FormatTools bold: "Parameters: " . printNL ;
+             FormatTools indent:
+                 [ parameterList numberElements
+                    do: [ position asString print ; " - " print ;
+                          code print ;
+                          FormatTools startLine print ;
+                        ] 
+                 ] divertOutput . print ;
+             FormatTools startParagraph print ;
+             ] ;
+
+           sampleUsage isntNA
+           ifTrue:
+             [ FormatTools bold: "Sample Usage: " . print ;
+               FormatTools beginPreserveMode print ;
+               sampleUsage print ;
+               FormatTools endPreserveMode printNL ;
+            ] ;
+
+           !xref <- messageDescriptor implementationList
+              select: [ ^self != ^my asSelf ] .
+              select: [ messageClassDescriptor type code != "Unused" ] .
+              sortUp: [ messageClassDescriptor name ] ;
+           xref count > 0 
+           ifTrue:
+             [ FormatTools bold: "Also Defined At: " . print ;
+               FormatTools startLine print ;
+               xref sortUp: [ messageClassDescriptor name ] . first: 15 .
+                    do: [ " | " print ;
+                          ^self formatMessageLinkWithLabel: 
+                              messageClassDescriptor name . print ;
+                        ] ;
+              " | " printNL ;
+              FormatTools startParagraph print ;
+            ] ;
+           seeAlsoList isntNA
+           ifTrue:
+             [ FormatTools bold: "See Also: " . print ;
+               FormatTools startLine print ;
+               seeAlsoList
+               do: [ " | " print ;
+                     ^self formatMessageLinkWithLabel: code . print ;
+                   ] ;
+              " | " printNL ;
+              FormatTools startParagraph print ;
+            ] ;
+         ] divertOutput . print ;
+      ] ;
+  newLine print ;
+];
+
+#----------
+
+Schema MID defineMethod: [ | showMessageProfile | 
+!subtitle <- FormatTools italic: code .
+        concat: " in class " . concat: messageClassDescriptor name ;
+FormatTools buildTitle: ("Message Profile", subtitle ) over: 80 
+       withStyle: "Arial" , "darkblue" . print ; 
+
+!table <- ^global LayoutTools Named TableSpec at: "basic2Column" ;
+table getColumn: 1 . getHeader: 1 . setTextTo: "---  Message Profile  ---" ;
+
+FormatTools buildTableFor: table for: ^self withBlock:
+  [ "Message: " print: 15 ; code printNL ;
+    "Class: " print: 15 ; messageClassDescriptor name printNL ;
+    "Synopsis: " print: 15 ; fullSelector printNL ;
+    "Type: " print: 15 ; type name printNL ;
+    defaultValue isntNA
+       ifTrue: [ "Default: " print: 15; defaultValue printNL ] ;
+    "Function: " print: 15 ; functionType printNL ;
+    "Level: " print: 15 ; usageLevel printNL ;
+    !returns <- returnObjectContainer isntDefault
+       ifTrue: [ returnObjectContainer name concat: " of " ]
+      ifFalse: [ "" ] . concat: returnObjectType name ;
+    returnObjectContainer class isIndexedList && parameterList count > 0
+    ifTrue: 
+      [ :returns <- returns 
+           concat: " by " . concat: (parameterList at: 1 . name) ;
+      ] ;
+    "Returns: " print: 15 ; returns printNL ;
+    "Created: " print: 15 ; creationDate printNL ;
+    "Updated: " print: 15 ; updateDate printNL ;
+    returnObjectContainer class isIndexedList not
+    ifTrue:
+      [ parameterList numberElements
+        do: [ "  Parameter "  concat: position . concat: ": " . print: 15 ;
+              name printNL ;
+            ] ;
+      ] ;
+    !xref <- messageDescriptor implementationList
+         select: [ ^self != ^my asSelf ] .
+         select: [ messageClassDescriptor type code != "Unused" ] .
+         sortUp: [ messageClassDescriptor name ] ;
+     xref count > 0
+     ifTrue:
+       [ "See Also: " print: 15 ;
+         [ xref 
+           do: [ " | " print ; 
+                 ^self formatMessageLinkWithLabel: 
+                     messageClassDescriptor name . print ;
+#                 FormatTools buildLinkForApp: "ShowMessageProfile"
+#                     withLabel: messageClassDescriptor name
+#                     andParams: messageClassDescriptor name, code . print ;
+               ] ;
+          " | " print ;
+         ] divertOutput print ;
+       ] ;   
+  ] . print ;
+
+!table <- ^global LayoutTools Named TableSpec at: "basic1Column" ;
+table getColumn: 1 . getHeader: 1 . setTextTo: "---  Description  ---" ;
+FormatTools buildTableFor: table for: ^self withBlock: 
+   [  formatMessageDescription translate: newLine to: " " . print ;
+   ] . print ;
+
+!idate <- :implementationSource effectiveDate 
+   else: [ :implementationSource lastDate ] . else: ^today ;
+!label <- "--- Implementation as of " concat: idate . concat: " ---" ;
+table getColumn: 1 . getHeader: 1 . setTextTo: label ;
+idate evaluate: [
+   FormatTools decodeNewLinesIn: (
+       FormatTools buildTableFor: table for: ^self withBlock:
+         [ FormatTools encodeNewLinesIn: formatMessageImplementation . print ]
+     ) . printNL ;
+   ] ;
+
+] ;
+
+#----------
+
+Schema MID defineMethod: [ | formatMessageLinkWithLabel: label | 
+  FormatTools isHtml && [ FormatTools External serverIsRunning ]
+  ifTrue:
+    [ FormatTools buildLinkForApp: "ShowMessageProfile"
+        withLabel: label
+        andParams: messageClassDescriptor name, code 
+    ]
+  ifFalse:
+    [ !className <- messageClassDescriptor name translate: " " to: "_" ;
+      FormatTools buildLink:
+        ("ShowMessageDetails-" concat: className . concat: ".htm#" . concat: code)
+        withLabel: label 
+    ] 
+] ;
+
+#----------
+
+Schema CD defineMethod: [ | showClassXRefSummary |
+
+FormatTools
+    buildTitle: ("Summary Class Hierarchy: " concat: siteName ) over: 80 
+       withStyle: "Arial" , "darkblue". print ;
+siteDescription isntNA
+ifTrue: [ FormatTools
+             buildCommentBlock: siteDescription over: 80 . print ;
+        ] ;
+!outerTable <- ^global LayoutTools Named TableSpec at: "outerTable" ;
+4 sequence 
+do: [ ^my outerTable addColumn: asSelf . 
+         setWidthTo: 50 .
+         setVAlignmentTo: "top" ;
+    ] ;
+
+#--  set up nested table structure for display of BIns, Apps, Feeds
+outerTable setColumnCountTo: 3 ;
+
+!col1 <- ^self formatClassXRefSummaryFor: "BuiltIn" levels: 1 ;
+!col2 <- ^self formatClassXRefSummaryFor: "Application" levels: 1 ;
+!col3 <- ^self formatClassXRefSummaryFor: "DataFeed" levels: 1 ;
+!output <- FormatTools buildTableFor: outerTable for: ^self withBlock:
+    [ FormatTools encodeNewLinesIn: ^my col1 . print ;
+      FormatTools encodeNewLinesIn: ^my col2 . print ;
+      FormatTools encodeNewLinesIn: ^my col3 . printNL ;
+    ] ;
+FormatTools decodeNewLinesIn: output . print ;
+
+#--  set up nested table structure for display of other classes
+outerTable setColumnCountTo: 4 ;
+
+!col1 <- ^self formatClassXRefSummaryFor: "ToolKit" levels: 2 ;
+!col2 <- ^self formatClassXRefSummaryFor: "Dictionary" levels: 2 ;
+!col3 <- ^self formatClassXRefSummaryFor: "ObjectSpace" levels: 2 ;
+!col4 <- ^self formatClassXRefSummaryFor: "Other" levels: 1 ;
+!output <- FormatTools buildTableFor: outerTable for: ^self withBlock:
+    [ FormatTools encodeNewLinesIn: ^my col1 . print ;
+      FormatTools encodeNewLinesIn: ^my col2 . print ;
+      FormatTools encodeNewLinesIn: ^my col3 . print ;
+      FormatTools encodeNewLinesIn: ^my col4 . print ;
+    ] ;
+FormatTools decodeNewLinesIn: output . print ;
+
+#--  display base classes for BuiltIn/Application classes first
+#--formatPrimaryClassSummary print ;
+
+] ;
+
+#----------
+
+Schema CD defineMethod: [ | formatClassXRefSummaryFor: typeCode levels: n | 
+!levels <- "parent " fill: (n asNumber else: 1 . * 7) .
+   concat: " isObjectDescriptor " .
+   concat: " || name = \"DataSet\" || name = \"DataFeed\" " . asBlock ;
+!type <- ^global ClassType locateId: typeCode ;
+!list <- ^self instanceList select: [ type  = ^my type ] .
+    select: levels .
+    sortUp: [ name ] ;
+!table <- ^global LayoutTools Named TableSpec at: "basic1Column" ;
+
+table getColumn: 1 . getHeader: 1 . setTextTo:
+  (FormatTools buildLinkForApp: "ShowClassXRefDetails"
+      withLabel: typeCode andParams: typeCode ) ;
+FormatTools buildTableFor: table for: ^self withBlock:
+    [ ^my list
+      do: [ FormatTools buildLinkForApp: "ShowClassSummary" 
+              withLabel: name andParams: name . printNL ;
+          ] ; 
+    ] 
+] ;
+
+#----------
+
+Schema CD defineMethod: [ | formatPrimaryClassSummary | 
+!list <- ^self asSelf instanceList 
+   select: [ type code = "BuiltIn" || type code = "Application" ] .
+   select: [ description isntNA ] .
+   select: [ childList count = 0 ] .
+   sortUp: [ name ] .
+   groupedBy: [ type ] .
+   sortUp: [ numericCode ] ;
+
+!table <- ^global LayoutTools Named TableSpec at: "basic2Column" ;
+table getColumn: 1 . getHeader: 1 . setTextTo: "Primary Classes" ;
+table getColumn: 1 . 
+   setHAlignmentTo: "center" . setVAlignmentTo: "center" ;
+table getColumn: 2 . disableFillBlanks setHAlignmentTo: "left" ;
+
+!output <- FormatTools buildTableFor: table for: ^self withBlock:
+    [ ^my list
+      do: [ FormatTools bold: code . print ; newLine print ;
+            groupList
+            do: [ FormatTools buildLinkForApp: "ShowClassSummary" 
+                     withLabel: name andParams: name . print ;
+                   briefDescription translate: newLine to: " " .printNL ;
+                ] ;
+          ] ; 
+    ] ;
+
+table getColumn: 1 . 
+   setHAlignmentTo: "left" . setVAlignmentTo: "top" ;
+table getColumn: 2 . enableFillBlanks setHAlignmentTo: "right" ;
+
+output
+
+] ;
+
+#----------
+
+Schema CD defineMethod: [ | showClassXRefDetailsFor: typeCode |
+!type <- ^global ClassType locateId: typeCode ;
+!list <- ^self masterList select: [ type  = ^my type ] .
+    select: [ parent isObjectDescriptor || name = "DataSet" ] .
+    sortUp: [ name ] ;
+
+FormatTools
+    buildTitle: ("Class Hierarchy for Category: " concat: typeCode ) over: 80 
+       withStyle: "Arial" , "darkblue". print ;
+type description isntNA
+ifTrue: [ FormatTools
+             buildCommentBlock: type description over: 80 . print ;
+        ] ;
+
+FormatTools beginPreserveMode printNL ;
+FormatTools buildLinkForApp: "ShowClassSummary"
+  withLabel: "Object" andParams: "Object" . printNL ;
+list
+do: [ "  |  " printNL ;
+      ^self showHierarchyFromLevel: 1 to: NA ;
+    ] ;
+
+FormatTools endPreserveMode printNL ;
+] ;
+
+#----------
+
+Schema CD defineMethod: [ | showHierarchyFromLevel: start to: end |
+  ^self showHierarchyFromLevel: start to: end withLink: "ShowClassSummary"
+] ;
+
+Schema CD
+defineMethod: [ | showHierarchyFromLevel: start to: end withLink: link |
+!currentIndent <- start = 0 
+   ifTrue: [ "" ] 
+  ifFalse: [ "  " concat: ("|      " fill: 7 * (start - 1) ) . 
+                 concat: "+--- " 
+           ] ;
+!separator <- "  |" concat: ("      |" fill: (7 * start )) ;
+
+currentIndent print ;
+FormatTools buildLinkForApp: link 
+  withLabel: name andParams: name . print ;
+!list <- childList select: [ type code != "Unused" ] ;
+list count > 0 && [ start < (end else: 1000 )] 
+ifTrue:
+  [ newLine print ;
+    list sortUp: [ name ] .
+    do: [ ^my separator printNL ;
+          ^self showHierarchyFromLevel: ^my start + 1 
+                                    to: ^my end withLink: ^my link ;
+        ] ;
+  ] .
+elseIf: [ list count > 0 ] then: [ "  --> " printNL ] .
+  else: [ newLine print ] ;
+] ;
+
+#----------
+
+######################################################################
+
+
+
+#==================================================
+#   Data Model Interface and Reports 
+#==================================================
+
+
+#--------------------
+#  Interface Support
+#--------------------
+
+Interface ApplicationWS defineMethod: [ | ShowDataModelHelp | 
+FormatTools 
+   buildTitle: "---  Vision Database Navigation: Data Model Tools  ---"
+       over: 80 withStyle: "Arial" , "darkblue". print ;
+FormatTools buildCommentBlock: 
+"The Data Model Tools describe the subset of classes and messages in 
+your Vision database that organize the application components of your
+environment.  " over: 80 . print ;
+
+FormatTools startParagraph print ;
+!table <- ^global LayoutTools Named TableSpec at: "basic2Column" ;
+table getColumn: 1 . setHAlignmentTo: "center" . setVAlignmentTo: "center" ;
+table getColumn: 2 . disableFillBlanks setHAlignmentTo: "left" ;
+table getColumn: 1 . getHeader: 1 . setTextTo: "---  Data Model Tools  ---" ;
+
+FormatTools buildTableFor: table for: ^self withBlock:
+  [ FormatTools buildLinkForApp: "ShowDataModelClasses" 
+                withLabel: "Data Model Classes" . print ;
+    FormatTools italic: "Shows data model classes as a hierarchy with the Entity classes appearing first.  The remaining classes -- DataRecord, LinkRecord, Bridge, DBEntity, and DataSet -- are sorted based on the number of subclasses present.  Click on a class to see a summary view for the class." . printNL ;
+   "Class Summary " concat: (FormatTools italic: "{for class}") . print ;
+   FormatTools italic: "Shows class summary for a specific class.  This view displays the class's description as well as its parent classes, subclasses, and sample usage." . printNL ;
+   "Class Links " concat: (FormatTools italic: "{for class}") . print ;
+   FormatTools italic: "Summarizes all messages defined for any class that link to this class (i.e., return an instance of this class) and all messages defined for this class that return an instance of another application class.  The messages returning an instance of the selected class are displayed on the left; the messages in the selected class that link to another application class are displayed on the right.  Each link shows the class, the message name, and a symbol indicating if the returned object is a collection." . printNL ;
+   "Class Details " concat: (FormatTools italic: "{for class}") . print ;
+   FormatTools italic: "Shows detailed information about each message defined for this class that has been flagged for inclusion in the data model.  This view includes the message name, the return object's class, the form of the returned object (i.e., Object, List, TimeSeries, or IndexedList), the type of message (i.e., Fixed Property, TimeSeries Property, Method, TimeVarying Method, Constant), any parameters (for IndexedLists and parameterized methods), and additional comments.  The default view includes all messages defined for this class or any of its superclasses.  The view can be restricted to eliminate messages defined for parent classes and to include only links." . printNL ;
+   ] . print ;
+
+table getColumn: 1 . setHAlignmentTo: "left" . setVAlignmentTo: "top" ;
+table getColumn: 2 . enableFillBlanks setHAlignmentTo: "right" ;
+
+] ;
+
+#----------
+
+Interface ApplicationWS defineMethod: [ | displayDataModelOptionsFor: cd |
+  !optionsBar <- 
+  [ " | " print ; 
+    FormatTools buildLinkForApp: "ShowDataModelClasses" 
+                    withLabel: "Change Class" . print;
+    " | " print ; 
+    FormatTools buildLinkForApp: "ShowDataModelClassSummary" 
+                    withLabel: "Summary" 
+                    andParams: (cd name) . print;
+    " | " print ; 
+    FormatTools buildLinkForApp: "ShowDataModelLinks" 
+                    withLabel: "Links Summary" 
+                    andParams: (cd name) . print;
+    " | " print ; 
+    FormatTools buildLinkForApp: "ShowDataModelDetails" 
+                    withLabel: "Full Detail" 
+                    andParams: (cd name, FALSE, TRUE) . print;
+    " | " print ; 
+    FormatTools buildLinkForApp: "ShowClassSummary" 
+                    withLabel: "General Class Details" 
+                    andParams: cd name . print;
+    " | " print; 
+    FormatTools buildLinkForApp: "ShowDataModelHelp" 
+          withLabel: "- Help -" . printNL ;
+    " | " printNL ; 
+  ] divertOutput ;
+  FormatTools buildOptionsBar: optionsBar . print;
+] ;
+
+#----------
+
+Interface ApplicationWS
+defineMethod: [ | displayInspectorFormFor: classId id: id path: path |
+
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+
+!form <- ^global LayoutTools Named FormSpec EntityInspector ;
+!list <- ^global Entity classDescriptor getAllChildren
+    sortUp: [ code ] . 
+    extendBy: [ !label <- code ; !value <- code ] ;
+
+form getInputSpec: 1 . setChoicesTo: list . setSelectionTo: classId ;
+form getInputSpec: 2 . setInitialValueTo: (id else: "" ) ;
+form getInputSpec: 3 . setInitialValueTo: (path else: "" ) ;
+form getInputSpec: 4 . setInitialValueTo: (classId else: "") ;
+FormatTools buildShortFormFor: form . print ;
+
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+
+]  ;
+
+#----------
+
+Interface ApplicationWS defineMethod: [ | ShowDataModelClasses | 
+  !optionsBar <- 
+  [ " | " print ; 
+     FormatTools buildLinkForApp: "ShowClassXRefSummary" 
+              withLabel: "Full Class XRef " . printNL ;
+    " | " print ; 
+    FormatTools buildLinkForApp: "ShowAllDataValues"
+             withLabel: "Instance Inspector" . print ;
+    " | " print ; 
+    FormatTools buildLinkForApp: "ShowDataModelHelp" 
+        withLabel: "Data Model Help" . print ;
+    " | " printNL ; 
+  ] divertOutput ;
+  FormatTools buildOptionsBar: optionsBar . print;
+  ^global Schema ClassDescriptor showDataModelClasses ;
+] ;
+
+#----------
+
+Interface ApplicationWS defineMethod: [ | ShowDataModelClassSummary | 
+  !classId   <- ^self getParameter: 1 . else: "Object";
+  !cd     <- classId evaluate classDescriptor ;
+  ^self displayDataModelOptionsFor: cd ;
+
+  cd showDataModelSummary ;
+  cd class isEntity
+  ifTrue: 
+    [ ^self displayInspectorFormFor: cd class whatAmI id: "" path: "" ;
+    ] ;
+] ;
+
+#----------
+
+Interface ApplicationWS defineMethod: [ | ShowDataModelLinks | 
+  !classId   <- ^self getParameter: 1 . else: "Object";
+  !cd     <- classId evaluate classDescriptor ;
+  ^self displayDataModelOptionsFor: cd ;
+
+  cd showDataModelLinkSummary ;
+  cd class isEntity
+  ifTrue: 
+    [ ^self displayInspectorFormFor: cd class whatAmI id: "" path: "" ;
+    ] ;
+] ;
+
+#----------
+
+Interface ApplicationWS defineMethod: [ | ShowDataModelDetails | 
+  !classId   <- ^self getParameter: 1 . else: "Object";
+  !cd     <- classId evaluate classDescriptor ;
+  !linksOnly  <- ^self getParameter: 2 . else: "" . evaluate;
+  linksOnly isBoolean ifFalse: [ :linksOnly <- FALSE ] ;
+  !includeParents <- ^self getParameter: 3 . else: "" . evaluate ;
+  includeParents isBoolean ifFalse: [ :includeParents <- FALSE ] ;
+
+  ^self displayDataModelOptionsFor: cd ;
+  cd showDataModelWithParentFlag: includeParents andLinksOnlyFlag: linksOnly ;
+  cd class isEntity
+  ifTrue: 
+    [ ^self displayInspectorFormFor: cd class whatAmI id: "" path: "" ;
+    ] ;
+] ;
+
+
+
+
+#==================================================
+#   Report Methods at Schema
+#==================================================
+
+#--------------------
+#  Schema CD showDataModelClasses
+#     shows all Application classes 
+#--------------------
+
+Schema CD defineMethod: [ | showDataModelClasses |
+
+!title <- "Vision Data Model Classes For: " 
+   concat: (FormatTools italic: siteName) ;
+FormatTools
+  buildTitle: title over: 80 
+   withStyle: "Arial" , "darkblue" . print ; 
+siteDescription isntNA
+ifTrue: [ FormatTools
+             buildCommentBlock: siteDescription over: 80 . print ;
+        ] ;
+
+!list <- ^self masterList select: [ type isApplication ] .
+    select: [ parent isObjectDescriptor ] .
+    sortUp: [ name ] .  
+    sortDown: [ name = "Entity" 
+                  ifTrue: [ 99999 ] ifFalse: [ getAllChildren count] 
+              ] ;
+
+FormatTools beginPreserveMode printNL ;
+FormatTools indent:
+  (FormatTools indent:
+      [ "Object" printNL ;
+        list
+        do: [ "  |  " printNL ;
+              ^self showHierarchyFromLevel: 1 to: NA 
+                  withLink: "ShowDataModelClassSummary" ;
+            ] ;
+      ] divertOutput 
+   ) . print ;
+FormatTools endPreserveMode printNL ;
+] ;
+
+#--------------------
+#  Schema CD showDataModelSummary
+#      shows description and class hierarchy for an application class
+#--------------------
+
+Schema CD defineMethod: [ | showDataModelSummary |
+
+!baseClass <- ^self asSelf;
+
+!title <- "Data Model Summary: " concat: (FormatTools italic: name) ;
+FormatTools buildTitle: title over: 80
+   withStyle: "Arial" , "darkblue" . print ; 
+description isntNA
+  ifTrue: [ FormatTools buildCommentBlock: description over: 80 . print ] ;
+
+!myParent <- parent includeInDataModel
+   ifTrue: 
+     [ FormatTools buildLinkForApp: "ShowDataModelClassSummary"
+            withLabel: (parent name) andParams: (parent name)
+     ]
+   ifFalse: [ parent name ] ;
+!upArrow <- FormatTools buildImage: "arrow2.gif" withAlt: "|";
+
+!table <- ^global LayoutTools Named TableSpec at: "DataModelSummaryTable";
+childList count > 0 
+   ifTrue: [ table setColumnCountTo: childList count ]
+  ifFalse: [ table setColumnCountTo: 1 ] ;
+!width <- (childList max: [ name count ] . + 1 ) asInteger ;
+childList sortUp: [ name ] . numberElements
+do: [ !curr <- ^my table getColumn: position;
+      curr setWidthTo: ^my width .
+           setHAlignmentTo: "center" .
+           setVAlignmentTo: "bottom" .
+           enableFillBlanks ;
+      curr getHeader: 4 .
+          setFontTo: "Courier"   . setSizeTo: 3 .
+          setTextTo: ^my upArrow . setHAlignmentTo: "center";
+    ];
+table getColumn: 1 . getHeader: 1 . 
+   setColumnSpanTo: childList count . setTextTo: myParent ;
+table getColumn: 1 . getHeader: 2 . 
+   setColumnSpanTo: childList count . setTextTo: upArrow ;
+table getColumn: 1 . getHeader: 3 .
+   setColumnSpanTo: childList count . setTextTo: name ;
+childList count = 0
+ifTrue: 
+   [ table getColumn: 1 . getHeader: 4 . 
+        setTextTo: "" . setFontTo: "Arial" . setSizeTo: 1 ;
+   ] ;
+
+!myBlock <- childList count > 0
+ifTrue:
+  [
+    [ !width <- ^my width ; 
+      ^my childList sortUp: [ name ] . 
+      do: [ FormatTools buildLinkForApp: "ShowDataModelClassSummary"
+                    withLabel: (name center: ^my width)
+                    andParams: name . print ;
+          ];
+      newLine print;
+   ] 
+  ] ;
+FormatTools buildTableFor: table for: ^self withBlock: myBlock . print;
+
+sampleUsage isntNA
+ifTrue:
+  [ FormatTools buildCommentBlock:
+      [ FormatTools bold: "Sample Usage" . printNL ;
+        FormatTools beginPreserveMode printNL ;
+        FormatTools font: "Courier" inSize: "+0" andColor: "red"
+          for: (FormatTools bold: sampleUsage) . printNL ;
+        FormatTools endPreserveMode printNL ;
+      ] divertOutput over: 80 . print ;
+  ] ;
+
+];
+
+#--------------------
+#  Schema CD 
+#      Object classDescriptor showDataModelLinkSummary
+#--------------------
+
+Schema CD defineMethod: [ | showDataModelLinkSummary |
+
+!baseClass <- ^self asSelf;
+
+!title <- "Data Model Link Summary for: " concat: (FormatTools italic: name );
+FormatTools buildTitle: title over: 80 
+   withStyle: "Arial" , "darkblue" . print ; 
+
+#----------
+#  This section shows the messages that return an instance of this class.
+#  Messages are separated into two groups - those that explicitly return
+#    an instance of this class or one of its subclasses and those that
+#    return a super class of this class implying it could potentially
+#    return an instance of this class.  Messages that return Object are
+#    excluded from this set since all messages could return Object.
+#----------
+!returnedBy <- baseClass getMessagesReturningClass
+     select: [ includeInDataModel ] .
+     select: [ messageClassDescriptor includeInDataModel ] .
+     sortUpBy: [ messageClassDescriptor name ] then: [ code ] ;
+!potentials <- baseClass getMessagesReturningSuperClass
+     select: [ includeInDataModel ] .
+     select: [ messageClassDescriptor includeInDataModel ] .
+     extendBy: [ !code <- ^self code concat: " *" ] .
+     sortUpBy: [ messageClassDescriptor name ] then: [ code ] ;
+
+!fromTable <- ^global LayoutTools Named TableSpec DataModelLinkFromTable ;
+!fromTableOut <- 
+   FormatTools buildTableFor: fromTable for: ^self withBlock: 
+   [ ^my returnedBy append: ^my potentials .
+     do: [ FormatTools buildLinkForApp: "ShowDataModelLinks"
+                      withLabel: (messageClassDescriptor name)
+                      andParams: (messageClassDescriptor name) . print;
+           code print ;
+           returnObjectContainer imageName printNL ;
+         ] ;
+   ] ;
+
+#----------
+#  This section shows the messages defined for this class that return
+#  an instance of a DataModel class.
+#----------
+!linksTo <- baseClass class getMessagesX 
+   select: [ includeInDataModel && returnObjectType includeInDataModel ] ;
+#-- only take the lowest level definition in inheritance hierarchy
+:linksTo <- linksTo 
+            groupedBy: [ messageDescriptor ] .
+            send: [ groupList 
+                    sortDown: [messageClassDescriptor inheritancePath count] .
+                    at: 1
+                  ] .
+            sortUp: [ messageClassDescriptor name ] .
+            sortUp: [ message capitalize ] .
+            sortUp: [ message contains: ":" . ifTrue: [1] ifFalse: [0] ];
+
+!toTable <- ^global LayoutTools Named TableSpec DataModelLinkToTable ;
+!toTableOut <- FormatTools buildTableFor: toTable for: ^self withBlock:
+  [ ^my linksTo 
+     do: [ FormatTools buildLinkForApp: "ShowDataModelLinks"
+                      withLabel: (returnObjectType name)
+                      andParams: (returnObjectType name) . print;
+           code print ;
+           returnObjectContainer imageName printNL ;
+         ] ;
+   ] ;
+
+#----------
+#  this section puts the tables together
+#----------
+!currObj <- 
+  [ FormatTools buildImage: "arrow1.gif" withAlt: "->" . print ;
+    " " print: 3 ; FormatTools bold: name . print ; " " print: 3; 
+    FormatTools buildImage: "arrow1.gif" withAlt: "->" . print
+  ] divertOutput ;
+!table <- ^global LayoutTools Named TableSpec at: "DataModelLinkTable";
+
+!output <- FormatTools buildTableFor: table for: ^self withBlock:
+   [ FormatTools encodeNewLinesIn: ^my fromTableOut . print;
+     FormatTools encodeNewLinesIn: ^my currObj      . print;
+     FormatTools encodeNewLinesIn: ^my toTableOut   . printNL;
+   ];
+FormatTools decodeNewLinesIn: output . print ;
+
+#----------
+#  Table Legend
+#----------
+!legendTable <- ^global LayoutTools Named TableSpec DataModelShortLegend ;
+FormatTools buildTableFor: legendTable for: ^self withBlock: NA . print;
+
+];
+
+#--------------------
+#  Schema CD 
+#    showDataModelWithParentFlag: includeParents andLinksOnlyFlag: linksOnly
+#      shows description for each message included in model; can be
+#      retricted to exclude/includes messages defined at parent classes
+#      and can be restricted to messages that link to other classes
+#--------------------
+
+Schema CD 
+defineMethod: [ | showDataModelWithParentFlag: pFlag andLinksOnlyFlag: lFlag |
+!baseClass <- ^self asSelf;
+
+!title <- "Data Model Details for: " concat: (FormatTools italic: name );
+FormatTools buildTitle: title over: 100 
+   withStyle: "Arial" , "darkblue" . print ; 
+
+sampleUsage isntNA
+ifTrue:
+  [ FormatTools center:
+      [ FormatTools beginPreserveMode printNL ;
+        FormatTools font: "Courier" inSize: "-1" andColor: "black"
+          for: (FormatTools bold: sampleUsage) . printNL ;
+        FormatTools endPreserveMode printNL ;
+      ] divertOutput . print ;
+  ] ;
+
+!table <- ^global LayoutTools Named TableSpec at: "DataModelDetailTable";
+!text <- 
+   [ baseClass code print ; " Messages " print ;
+     lFlag || pFlag not
+     ifTrue: 
+       [ FormatTools font: "Arial" inSize: "-1" andColor: "black"
+          for:
+           [ " ( " print ;
+               lFlag ifTrue: [ "Links Only; " print ] ;
+               pFlag ifFalse: [ "Excludes Parent Messages" print ] ; 
+               ")" print ;
+           ] divertOutput . print ;
+       ] ;
+   ] divertOutput ;
+table getColumn: 1 . getHeader: 1 . setTextTo: text ;
+
+!text <- 
+  [ 
+    (lFlag && pFlag not)
+    ifFalse: 
+      [ " | " print ; 
+        FormatTools buildLinkForApp: "ShowDataModelDetails"
+          withLabel: "Links Only/No Parents" andParams: (name, TRUE, FALSE) .
+          print ;  
+      ] ;
+    (lFlag && pFlag)
+    ifFalse: 
+      [ " | " print ; 
+        FormatTools buildLinkForApp: "ShowDataModelDetails"
+         withLabel: "Links Only/Include Parents" andParams: (name, TRUE,TRUE) .
+         print ;  
+      ] ;
+    (lFlag not && pFlag)
+    ifFalse: 
+      [ " | " print ; 
+        FormatTools buildLinkForApp: "ShowDataModelDetails"
+          withLabel: "Include Parents" andParams: (name, FALSE, TRUE) .
+          print ;  
+      ] ;
+    (lFlag not && pFlag not)
+    ifFalse: 
+      [ " | " print ; 
+        FormatTools buildLinkForApp: "ShowDataModelDetails"
+           withLabel: "Exclude Parents" andParams: (name, FALSE, FALSE) .
+           print ;  
+      ] ;
+    " | " printNL ; 
+      
+  ] divertOutput ;
+table getColumn: 1 . getHeader: 2 . setTextTo: text ;
+
+!linksTo <- pFlag
+    ifTrue: [ baseClass class getMessagesX ] 
+   ifFalse: [ baseClass class getMessages ] .
+     select: [ isMessageImplementationDescriptor ] .
+   select: [ includeInDataModel ] ;
+lFlag 
+ifTrue: [ :linksTo <- linksTo 
+             select: [ returnObjectType includeInDataModel ] ;
+        ] ;
+#-- only take the lowest level definition in inheritance hierarchy
+:linksTo <- linksTo 
+            groupedBy: [ messageDescriptor ] .
+            send: [ groupList 
+                    sortDown: [messageClassDescriptor inheritancePath count] .
+                    at: 1
+                  ] .
+            sortUp: [ message capitalize ] .
+            sortUp: [ message contains: ":" . ifTrue: [1] ifFalse: [0] ];
+
+FormatTools buildTableFor: table for: ^self withBlock: 
+  [ !baseClass <- ^my baseClass;
+    ^my linksTo 
+    do: [ ^self formatMessageLinkWithLabel: code . print ;
+#     FormatTools buildLinkForApp: "ShowMessageProfile"
+#             withLabel: code andParams: messageClassDescriptor name, code .
+#             print ;
+          returnObjectType includeInDataModel
+          ifTrue: 
+            [ FormatTools buildLinkForApp: "ShowDataModelClassSummary"
+                  withLabel: returnObjectType name
+                  andParams: returnObjectType name
+            ]
+         ifFalse: [ returnObjectType name ] . print ;
+         returnObjectContainer imageName print ;
+         type imageName print ;
+         parameterList count > 0
+         ifTrue: [ [ parameterList do: [ print; ", " print;]
+                   ] divertOutput drop: -2 . 
+                 ]
+         ifFalse: [ " " ] . print;
+         !notes <- messageClassDescriptor = ^my baseClass
+             ifTrue: [ " " ]
+            ifFalse: [ FormatTools font: "TimesRoman" inSize: "+1"
+                          andColor: "black" 
+                          for: (FormatTools bold: "P; " )
+                     ] ;
+         keyType isntNA 
+         ifTrue:
+           [ :notes <- keyType isFull 
+             ifTrue: 
+               [ notes concat:
+                  (FormatTools buildImage: "Key1.gif" withAlt: " * Full Key; ")
+               ]
+             ifFalse:
+               [ notes concat:
+                  (FormatTools buildImage: "Key2.gif" 
+                                  withAlt: " * Partial Key; ")
+               ]  . concat: " " ;
+           ] ;
+         !note <- briefDescription ;
+         (note isntNA && [ note isBlank not ])
+         ifTrue: [ :notes <- notes concat: (note translate: newLine to: " ");
+                 ];
+          notes print;
+          newLine print;
+        ];
+   ] . print ;
+
+!legendTable <- ^global LayoutTools Named TableSpec DataModelLongLegend ;
+FormatTools buildTableFor: legendTable for: ^self withBlock: NA . print;
+
+FormatTools startParagraph print ;
+FormatTools bold: "Parent Class: " . print;
+parent includeInDataModel 
+ifTrue: 
+  [ FormatTools buildLinkForApp: "ShowDataModelDetails"
+       withLabel: parent name andParams: parent name, lFlag, pFlag
+  ] 
+ifFalse: [parent name ] . printNL ;
+
+FormatTools startParagraph print ;
+FormatTools bold: "Siblings: " . print;
+parent childList 
+  select: [ ^self != ^my baseClass ] .
+  select: [ includeInDataModel ] .
+  sortUp:  [ name ] .
+do: [ " | " print;
+      FormatTools buildLinkForApp: "ShowDataModelDetails"
+         withLabel: name andParams: name, ^my lFlag, ^my pFlag . print;
+    ] . count > 0 ifTrue: [ " | " print; ];
+newLine print ;
+
+FormatTools startParagraph print ;
+FormatTools bold: "Children: " . print;
+baseClass childList 
+  sortUp:  [ name ] .
+do: [ " | " print;
+      FormatTools buildLinkForApp: "ShowDataModelDetails"
+                  withLabel: name
+                  andParams: name, ^my lFlag, ^my pFlag . print;
+    ] . count > 0 ifTrue: [ " | " print; ];
+
+newLine printNL;
+
+];
+
+######################################################################
+
+
+
+#==================================================
+#   Data Navigator Interface and Reports 
+#==================================================
+
+Interface ApplicationWS defineMethod: [ | ShowAllDataValues |
+!type <- ^self getParameter: 1 orName: "entityType" . else: "" ; 
+!id <- ^self getParameter: 2 orName: "entityId" . 
+    else: "" . stripBoundingBlanks ; 
+!entity <- type isntDefault
+    ifTrue: [ ^self getEntity: id forType: type ] ;
+!path <- ^self getParameter: 3 orName: "path" . else: "" ;
+!element <- ^self getParameter: 4 orName: "element" . asNumber asInteger ;
+!oldType <- namedParameters at: "priorEntityId" . else: "" ;
+oldType isntDefault  && [ oldType != type ] ifTrue: [ :path <- "" ] ;
+
+entity isEntity
+ifTrue: 
+   [ !optionsBar <- [
+        " | " print ; 
+        FormatTools buildLinkForApp: "ShowTimeSeriesSummary" 
+             withLabel: "Time Series Data" 
+            andParams: type, id, path . print ;
+        " | " print ; 
+        !label <- entity whatAmI concat: " " . concat: "Profile" ;
+        FormatTools buildLinkForApp: "Profile" 
+             withLabel: label
+            andParams: type, id . print ;
+        " | " print ; 
+        FormatTools buildLinkForApp: "ShowDataModelClassSummary" 
+            withLabel: "Class Summary" 
+            andParams: type . print ;
+        " | " printNL ;
+       ] divertOutput ;
+     FormatTools buildOptionsBar: optionsBar . printNL ;
+     entity showDataViaPath: path forElement: element ;
+   ]
+ifFalse: 
+   [ type isDefault
+      ifTrue: [ "...  Please Select an Entity Class and Id." printNL ] .
+      elseIf: [ id isDefault ] 
+      then: [ "...  Please Supply an Instance Id." printNL ] .
+      else: [ ">>>  Bad Instance Id Supplied for Selected Class." printNL ] ;
+   ] ;        
+
+^self displayInspectorFormFor: type id: id path: path ; 
+] ;
+
+Interface ApplicationWS defineMethod: [ | ShowTimeSeriesSummary |
+!type <- ^self getParameter: 1 orName: "entityType"; 
+!id <- ^self getParameter: 2 orName: "entityId" .stripBoundingBlanks; 
+!entity <- ^self getEntity: id forType: type; 
+!path <- ^self getParameter: 3 orName: "path" . else: "" ;
+entity isEntity
+ifTrue: 
+   [ !optionsBar <- [
+        " | " print ; 
+        FormatTools buildLinkForApp: "ShowAllDataValues" 
+             withLabel: "All Data" 
+            andParams: type, id, path . print ;
+        " | " print ; 
+        !label <- entity whatAmI concat: " " . concat: "Profile" ;
+        FormatTools buildLinkForApp: "Profile" 
+             withLabel: label
+            andParams: type, id . print ;
+        " | " print ; 
+        FormatTools buildLinkForApp: "ShowDataModelClassSummary" 
+            withLabel: "Class Summary" 
+            andParams: type . print ;
+        " | " printNL ;
+       ] divertOutput ;
+     FormatTools buildOptionsBar: optionsBar . printNL ;
+     entity showTimeSeriesSummaryViaPath: path ;
+   ]
+ifFalse: [ ErrorLog post: "Bad Entity Type Or ID" for: ^self 
+                 with: type , id; 
+         ] ;
+] ;
+
+Interface ApplicationWS defineMethod: [ | ShowHistoryForTimeSeries |
+!type <- ^self getParameter: 1 orName: "entityType"; 
+!id <- ^self getParameter: 2 orName: "entityId" .stripBoundingBlanks; 
+!entity <- ^self getEntity: id forType: type; 
+!path <- ^self getParameter: 3 orName: "path" . else: "" ;
+!item <- ^self getParameter: 4 orName: "item" ;
+entity isEntity
+ifTrue: 
+   [ !optionsBar <- [
+        " | " print ; 
+        !label <- entity whatAmI concat: " " . concat: "Profile" ;
+        FormatTools buildLinkForApp: "Profile" 
+             withLabel: label
+            andParams: type, id . print ;
+        " | " print ; 
+        FormatTools buildLinkForApp: "ShowTimeSeriesSummary" 
+             withLabel: "All TimeSeries" 
+            andParams: type, id, path . print ;
+        " | " print ; 
+        FormatTools buildLinkForApp: "ShowAllDataValues" 
+             withLabel: "All Data" 
+            andParams: type, id, path . print ;
+        " | " print ; 
+        FormatTools buildLinkForApp: "ShowDataModelClassSummary" 
+            withLabel: "Class Summary" 
+            andParams: type . print ;
+        " | " printNL ;
+       ] divertOutput ;
+     FormatTools buildOptionsBar: optionsBar . printNL ;
+     entity showTimeSeriesViaPath: path for: item ;
+   ]
+ifFalse: [ ErrorLog post: "Bad Entity Type Or ID" for: ^self 
+                 with: type , id; 
+         ] ;
+] ;
+
+Interface ApplicationWS defineMethod: [ | ShowMembersInCollection |
+!type <- ^self getParameter: 1 orName: "entityType"; 
+!id <- ^self getParameter: 2 orName: "entityId" .stripBoundingBlanks; 
+!entity <- ^self getEntity: id forType: type; 
+!path <- ^self getParameter: 3 orName: "path" . else: "" ;
+!item <- ^self getParameter: 4 orName: "item" ;
+entity isEntity
+ifTrue: 
+   [ !optionsBar <- [
+        " | " print ; 
+        !label <- entity whatAmI concat: " " . concat: "Profile" ;
+        FormatTools buildLinkForApp: "Profile" 
+             withLabel: label
+            andParams: type, id . print ;
+        " | " print ; 
+        FormatTools buildLinkForApp: "ShowAllDataValues" 
+             withLabel: "All Data" 
+            andParams: type, id, path . print ;
+        " | " print ; 
+        FormatTools buildLinkForApp: "ShowDataModelClassSummary" 
+            withLabel: "Class Summary" 
+            andParams: type . print ;
+        " | " printNL ;
+       ] divertOutput ;
+     FormatTools buildOptionsBar: optionsBar . printNL ;
+     entity showMembersViaPath: path for: item ;
+   ]
+ifFalse: [ ErrorLog post: "Bad Entity Type Or ID" for: ^self 
+                 with: type , id; 
+         ] ;
+] ;
+
+
+Interface ApplicationWS defineMethod: [ | ShowEstimateData |
+!type <- ^self getParameter: 1 orName: "entityType" . else: "" ; 
+!id <- ^self getParameter: 2 orName: "entityId" . 
+    else: "" . stripBoundingBlanks ; 
+!entity <- type isntDefault
+    ifTrue: [ ^self getEntity: id forType: type ] ;
+!path <- ^self getParameter: 3 orName: "path" . else: "" ;
+!item <- ^self getParameter: 4 orName: "item" ;
+item isDefault
+   ifTrue: [ !reverse <- path reverse ;
+             :path <- reverse from: " " . reverse ;
+             :item <-  reverse to: " " . reverse ;
+           ] ;
+entity isEntity
+ifTrue: 
+   [ !optionsBar <- [
+        " | " print ; 
+        FormatTools buildLinkForApp: "ShowAllDataValues" 
+             withLabel: "All Data" 
+            andParams: type, id, path . print ;
+        " | " print ; 
+        !label <- entity whatAmI concat: " " . concat: "Profile" ;
+        FormatTools buildLinkForApp: "Profile" 
+             withLabel: label
+            andParams: type, id . print ;
+        " | " print ; 
+        FormatTools buildLinkForApp: "ShowDataModelClassSummary" 
+            withLabel: "Class Summary" 
+            andParams: type . print ;
+        " | " printNL ;
+       ] divertOutput ;
+     FormatTools buildOptionsBar: optionsBar . printNL ;
+     !object <- entity respondsTo: path .
+        ifTrue: [ entity send: path asBlock ] . else: [ entity ] ;
+     !bridgeTS <- object respondsTo: item .
+         ifTrue: [ object send: item asUpdateBlock ] ;
+     !latest <- bridgeTS isTimeSeries
+         ifTrue: [ bridgeTS nonDefaults lastObservation ] 
+        ifFalse: [ bridgeTS value ] ;
+     latest isntDefault
+         ifTrue: [ latest showDataViaPath: path andItem: item ] 
+        ifFalse: [ ">>>  No Estimate Data Available via " concat: path . 
+                      concat: " " . concat: item . printNL ;
+                 ] ;
+   ]
+ifFalse: 
+   [ type isDefault
+      ifTrue: [ "...  Please Select an Entity Class and Id." printNL ] .
+      elseIf: [ id isDefault ] 
+      then: [ "...  Please Supply an Instance Id." printNL ] .
+      else: [ ">>>  Bad Instance Id Supplied for Selected Class." printNL ] ;
+   ] ;        
+
+^self displayInspectorFormFor: type id: id path: path ; 
+
+] ;
+
+Interface ApplicationWS defineMethod: [ | ShowDetailEstimateData |
+!type <- ^self getParameter: 1 orName: "entityType" . else: "" ; 
+!id <- ^self getParameter: 2 orName: "entityId" . 
+    else: "" . stripBoundingBlanks ; 
+!entity <- type isntDefault
+    ifTrue: [ ^self getEntity: id forType: type ] ;
+!path <- ^self getParameter: 3 orName: "path" . else: "" ;
+!item <- ^self getParameter: 4 orName: "item" . else: "" ;
+!period <- ^self getParameter: 5 orName: "period" . asDate else: ^date ;
+
+entity isEntity
+ifTrue: 
+   [ !optionsBar <- [
+        " | " print ; 
+        FormatTools buildLinkForApp: "ShowEstimateData" 
+           withLabel: "Summary Estimates"
+               andParams: type, id, path, item . print ;
+        " | " print ; 
+        FormatTools buildLinkForApp: "ShowAllDataValues" 
+             withLabel: "All Data" 
+            andParams: type, id, path . print ;
+        " | " print ; 
+        !label <- entity whatAmI concat: " " . concat: "Profile" ;
+        FormatTools buildLinkForApp: "Profile" 
+             withLabel: label
+            andParams: type, id . print ;
+        " | " print ; 
+        FormatTools buildLinkForApp: "ShowDataModelClassSummary" 
+            withLabel: "Class Summary" 
+            andParams: type . print ;
+        " | " printNL ;
+       ] divertOutput ;
+     FormatTools buildOptionsBar: optionsBar . printNL ;
+     !object <- entity respondsTo: path .
+        ifTrue: [ entity send: path asBlock ] . else: [ entity ] ;
+     !bridgeTS <- object respondsTo: item .
+         ifTrue: [ object send: item asUpdateBlock ] ;
+     !summary <- bridgeTS asOf: period ;
+     summary isntDefault
+         ifTrue: [ summary showDetailDataViaPath: path andItem: item ] 
+        ifFalse: [ ">>>  No Estimate Data Available via " concat: path . 
+                      concat: " " . concat: item . printNL ;
+                 ] ;
+   ]
+ifFalse: 
+   [ type isDefault
+      ifTrue: [ "...  Please Select an Entity Class and Id." printNL ] .
+      elseIf: [ id isDefault ] 
+      then: [ "...  Please Supply an Instance Id." printNL ] .
+      else: [ ">>>  Bad Instance Id Supplied for Selected Class." printNL ] ;
+   ] ;        
+
+^self displayInspectorFormFor: type id: id path: path ; 
+
+] ;
+
+#--------------------
+
+Entity defineMethod: [ | showDataViaPath: path forElement: n |
+!entity <- ^self ;
+!object <- path isDefault
+   ifTrue: [ entity ] .
+   elseIf: [ path isBlock ] then: [ entity send: path ] .
+   else: [ entity send: path asBlock ] ;
+object isTimeSeries
+  ifTrue: [ :object <- object value ] ;
+!usesElement <- FALSE ;
+object isCollection
+ifTrue: [ :object <- object toList at: (n asInteger else: 1) ;
+          :usesElement <- TRUE ;
+        ] ;
+  
+!title <- 
+  ("Data for " concat: ^self whatAmI . concat: " " . concat: ^self name ) 
+     asList;
+path isntDefault
+  ifTrue: [ title, ("via " concat: path) ] ;
+title, ("As Of: " concat: ^date ) ;
+FormatTools
+   buildTitle: title over: 80 withStyle: "Arial", "darkblue" . print ;
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+      
+!table <- ^global LayoutTools Named TableSpec at: "basicEntity" ;
+table setColumnCountTo: 5 ;
+!header <- ^self accessExpression concat: " " . concat: (path else:"") ;
+usesElement
+ifTrue: [ :header <- 
+              header concat: " toList at: " . concat: (n asInteger else: 1)
+        ] ;
+table getColumn: 1 . getHeader: 1 . setColumnSpanTo: 5 . setTextTo: header ;
+table getColumn: 1 . setWidthTo: 25 ;
+table getColumn: 1 . getHeader: 2 . setTextTo: (object whatAmI, "Item" ) ;
+table getColumn: 2 . getHeader: 2 . setTextTo: "Value" ;
+table getColumn: 3 . getHeader: 2 . setTextTo: "Type" ;
+table getColumn: 4 . getHeader: 2 . setTextTo: "Effective","Date" ;
+table getColumn: 5 . getHeader: 2 . setTextTo: "Okay","to","Upload" ;
+
+FormatTools buildTableFor: table for: ^current withBlock:
+  [ !list <- object getMessagesX select: [ includeInDataModel ] .
+      select: [ code contains: ":" . not ] .
+      sortUp: [ code contains: "^_" . 
+                   ifTrue: [ code drop: 1 . ] ifFalse: [ code ] . toUpper
+              ] .
+     sortUp: [ keyType isntDefault ifTrue: [ 0 ] .
+                 elseIf: [ ^my object isEntity && code = "code" ] 
+                   then: [ 0 ] . else: [ 1 ] 
+             ] ;
+   list
+   do: [!entity <- ^my entity ;
+        !internalValue <- ^my object send: code asUpdateBlock ;
+        !val <- internalValue value ;
+        !path <- ^my path concat: " " . concat: code ;
+        code print ;
+        val isEstimateBridge
+        ifTrue:
+          [ FormatTools buildLinkForApp: "ShowEstimateData"
+               withLabel: val whatAmI 
+               andParams: entity whatAmI, entity code, ^my path, code . print ;
+          ] .
+        elseIf: [ val isDataRecord || val isBridge ] 
+        then:
+          [ FormatTools buildLinkForApp: "ShowAllDataValues"
+               withLabel: val whatAmI 
+               andParams: entity whatAmI, entity code, path . print ;
+          ] .
+        elseIf: [ val isTimeSeries ] 
+        then: 
+          [ FormatTools buildLinkForApp: "ShowHistoryForTimeSeries" 
+              withLabel: val asString
+              andParams: entity whatAmI, entity code, ^my path, code . print;
+          ] .
+        elseIf: [ val isCollection ] 
+        then:
+          [ FormatTools buildLinkForApp: "ShowMembersInCollection" 
+              withLabel: val asString
+              andParams: entity whatAmI, entity code, ^my path, code . print;
+          ] .
+        elseIf: [ val isEntity ]
+          then: [ FormatTools buildLinkForApp: "ShowAllDataValues"
+                      withLabel: val
+                       andParams: val whatAmI, val code . print ;
+                ] .
+          else: [ val print ] ;
+        type isMethod
+        ifTrue: 
+          [ FormatTools buildLinkForApp: "ShowMessageProfile" 
+               withLabel: "Method"
+               andParams: messageClassDescriptor name , code . print;
+            " " print ;
+          ] .
+        elseIf: [ type isTimeSeriesProperty && val isEstimateBridge not ]
+        then: 
+          [ FormatTools buildLinkForApp: "ShowHistoryForTimeSeries" 
+              withLabel: "TimeSeries"
+              andParams: entity whatAmI, entity code, ^my path, code . print;
+            internalValue effectiveDate print ;
+          ] .
+        else: [ type shortName print ; " " print ] ;
+        okayToUpload isTrue
+            ifTrue: [ " Yes " print ] ifFalse: [ " " print ] ;
+        newLine print ;
+       ] ;
+  ] . print ;
+
+#--  reset table back to standard values
+table getColumn: 1 . setWidthTo: 10 ;
+table getColumn: 1 . getHeader: 2 . setTextTo: "Id" ;
+table getColumn: 2 . getHeader: 2 . setTextTo: "Name" ;
+] ;
+
+EstimateBridge defineMethod: [ | showDataViaPath: path andItem: item |
+!entity <- ^self underlyingObject ;
+!data <- ^self getAllPeriods 
+    select: [ isntDefault ] .
+    sortDown: [ periodEndDate ] ;
+!title <- 
+  ("Estimate Data for " concat: ^self whatAmI . 
+      concat: " for " . concat: ^self name ) asList ;
+path isntDefault ifTrue: [ title, ("via " concat: path ) ] ;
+FormatTools
+   buildTitle: title over: 80 withStyle: "Arial", "darkblue" . print ;
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+
+!table <- ^global LayoutTools Named TableSpec at: "finHistory" ;
+!caption <- entity accessExpression concat: " :" . concat: item ;
+table caption setTextTo: caption ;
+!record <- data at: 1 ;
+record observation isConsensusEstimateRecord
+  ifTrue:
+    [ table setColumnCountTo: 10 ;
+      table getColumn: 2 . getHeader: 1 . setTextTo: "Observation" ;
+      table getColumn: 3 . getHeader: 1 . setTextTo: "Mean" ;
+      table getColumn: 4 . getHeader: 1 . setTextTo: "Median" ;
+      table getColumn: 5 . getHeader: 1 . setTextTo: "High" ;
+      table getColumn: 6 . getHeader: 1 . setTextTo: "Low" ;
+      table getColumn: 7 . getHeader: 1 . setTextTo: "StdDev" ;
+      table getColumn: 8 . getHeader: 1 . setTextTo: "# Ests" ;
+      table getColumn: 9 . getHeader: 1 . setTextTo: "# Up" ;
+      table getColumn: 10 . getHeader: 1 . setTextTo: "# Down" ;
+    ]
+  ifFalse:
+    [ table setColumnCountTo: 3 ;
+      table getColumn: 2 . getHeader: 1 . setTextTo: "Observation" ;
+      table getColumn: 3 . getHeader: 1 . setTextTo: "Estimate" ;
+    ] ;
+
+FormatTools buildTableFor: table for: ^current withBlock:
+  [
+    data
+    do: [!entity <- ^my entity ;    
+         !path <- ^my path concat: " " . concat: ^my item ;
+         newLine print ;
+         periodEndDate ifDefault: [ "" ] . printNL ;
+         :actualRecord nonDefaults sortDown: [ date ] .
+         do: [ " (actual) " print ; 
+#               date evaluate: [
+#                  FormatTools buildLinkForApp: "ShowAllDataValues" 
+#                     withLabel: (FormatTools bold: date )
+#                      andParams: ^my entity whatAmI , ^my entity code,
+#                                 (^my path concat: " actualRecord") . print ;
+#               ] ;
+               FormatTools bold: date . print ;
+               FormatTools bold: (estimate sprint: 15.4 ) .printNL ;
+           ] ;
+         !records <- :observation nonDefaults sortDown: [ date ] .
+            extendBy: [ !link <- date evaluate: [ FormatTools
+                            buildLinkForApp: "ShowAllDataValues" 
+                            withLabel: date
+                            andParams: ^my entity whatAmI , ^my entity code,
+                                       (^my path concat: " observation")
+                            ] ;
+                      ] ;
+         ^self observation isConsensusEstimateRecord
+          ifTrue:
+            [
+            records 
+            do: [ " " print ; 
+#                  link print ; 
+                  date print ;
+                  meanEst print: 12.4 ; medianEst print: 12.4 ; 
+                  highEst print: 12.4 ; lowEst print: 12.4 ; stdDev print:12.4;
+                  numberOfEstimates print ; numberUp print ; numberDown printNL ;
+                 ] ;
+              ]
+          ifFalse:
+            [
+            records
+            do: [ " " print ; 
+#                 link print ; 
+                  date print ;
+                  estimate printNL ;
+                 ] ;
+             ] ;
+         ^self isSummaryEstimateBridge && [ ^self detailXRef count > 0 ] 
+         ifTrue:
+           [ !text <- detailXRef count asString concat: " details" ;
+             " " print ;
+             FormatTools buildLinkForApp: "ShowDetailEstimateData" 
+               withLabel: text 
+               andParams: ^my entity whatAmI, ^my entity code, 
+                   ^my path, ^my item, periodEndDate asInteger . printNL ;
+           ] ;
+     ] ;
+   ] . printNL ;
+
+] ;
+
+SummaryEstimateBridge defineMethod: [ | showDetailDataViaPath: path andItem: item |
+!entity <- ^self underlyingObject ;
+!data <- ^self detailXRef 
+    sortUp: [ estimator name ifDefault: [ "ZZZ" ] ] ;
+!title <- 
+  ("Detail Estimate Data for " concat: ^self whatAmI . 
+      concat: " for " . concat: ^self name ) asList ;
+path isntDefault ifTrue: [ title, ("via " concat: path ) ] ;
+periodEndDate isntDefault
+   ifTrue: [ title, ("for period ending " concat: periodEndDate) ] ;
+FormatTools
+   buildTitle: title over: 80 withStyle: "Arial", "darkblue" . print ;
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+
+!table <- ^global LayoutTools Named TableSpec at: "basicEntity" ;
+table setColumnCountTo: 4 ;
+!header <- ^self accessExpression ;
+table getColumn: 1 . getHeader: 1 . setColumnSpanTo: 4 . setTextTo: header ;
+table getColumn: 3 . getHeader: 2 . setTextTo: "Date" ;
+table getColumn: 4 . getHeader: 2 . setTextTo: "Estimate" ;
+
+FormatTools buildTableFor: table for: ^current withBlock:
+  [
+    data
+    do: [ newLine print ;
+          FormatTools bold: estimator code . print: 10 ;
+          FormatTools bold: estimator name . print: 25 ;
+          " " print ; " " printNL ;
+         :observation nonDefaults sortDown: [ date ] . 
+         do: [ " " print: 10 ; 
+               getAnalystName else: "" . print: 25 ;
+               date print: 15 ;
+               estimate else: " - " . printNL ;
+            ] ;
+     ] ;
+   ] . printNL ;
+
+] ;
+
+
+Entity defineMethod: [ | showTimeSeriesSummaryViaPath: path |
+!entity <- ^self ;
+!object <- path isDefault
+   ifTrue: [ entity ] .
+   elseIf: [ path isBlock ] then: [ entity send: path ] .
+   else: [ entity send: path asBlock ] ;
+!title <- 
+  ("Time Series Data for " concat: ^self whatAmI . 
+      concat: " " . concat: ^self name ) ;
+path isntDefault ifTrue: [ :title <- title, ("via " concat: path) ] ;
+FormatTools
+   buildTitle: title over: 80 withStyle: "Arial", "darkblue" . print ;
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+      
+!table <- ^global LayoutTools Named TableSpec at: "basicEntity" ;
+table setColumnCountTo: 5 ;
+!header <- ^self accessExpression concat: " " . concat: (path else:"") ;
+table getColumn: 1 . getHeader: 1 .
+    setColumnSpanTo: 5 .
+    setTextTo: header ;
+table getColumn: 1 . setWidthTo: 25 ;
+table getColumn: 1 . getHeader: 2 . setTextTo: "Item" ;
+table getColumn: 2 . getHeader: 2 . setTextTo: "Count" ;
+table getColumn: 3 . getHeader: 2 . setTextTo: "First", "Date" ;
+table getColumn: 4 . getHeader: 2 . setTextTo: "Last","Date" ;
+table getColumn: 5 . getHeader: 2 . setTextTo: "Okay", "to", "Upload" ;
+
+FormatTools buildTableFor: table for: ^current withBlock:
+  [ !list <- object getMessagesX select: [ includeInDataModel ] .
+         select: [ code contains: ":" . not ] .
+         select: [ type isTimeSeriesProperty ||
+                     [ returnObjectContainer class isTimeSeries ]
+                 ] .
+       extendBy: [ !ts <- type isTimeSeriesProperty
+                       ifTrue: [ ^my object send: code asUpdateBlock ]
+                      ifFalse: [ ^my object send: code asBlock ] ;
+                 ] .
+         select: [ ts isTimeSeries ] .
+         sortUp: [ code contains: "^_" . 
+                   ifTrue: [ code drop: 1 . ] ifFalse: [ code ] . toUpper
+                 ] ;
+   list
+   do: [!entity <- ^my entity ;
+        ts value isEstimateBridge
+        ifTrue:
+          [ FormatTools buildLinkForApp: "ShowEstimateData"
+             withLabel: code
+             andParams: entity whatAmI, entity code, ^my path, code . print;
+          ]
+        ifFalse:
+          [ FormatTools buildLinkForApp: "ShowHistoryForTimeSeries"
+               withLabel: code
+               andParams: entity whatAmI, entity code, ^my path, code . print;
+          ] ;
+        ts count print ;
+        ts firstDate print ;
+        ts lastDate  print ;
+        okayToUpload isTrue
+            ifTrue: [ " Yes " print ] ifFalse: [ " " print ] ;
+        newLine print ;
+       ] ;
+  ] . print ;
+
+#--  reset table back to standard values
+table getColumn: 1 . setWidthTo: 10 ;
+table getColumn: 1 . getHeader: 2 . setTextTo: "Id" ;
+table getColumn: 2 . getHeader: 2 . setTextTo: "Name" ;
+] ;
+
+Entity defineMethod: [ | showTimeSeriesViaPath: path for: item |
+!entity <- ^self ;
+!object <- path isDefault
+   ifTrue: [ entity ] .
+   elseIf: [ path isBlock ] then: [ entity send: path ] .
+   else: [ entity send: path asBlock ] ;
+
+!title <- 
+    ("Data History of: " concat: (FormatTools italic: (item else: ""))),
+    ("for " concat: ^self whatAmI . concat: " " . concat: ^self name ) ;
+path isntDefault ifTrue: [ title, ("via " concat: path) ] ;
+FormatTools
+     buildTitle: title over: 80 withStyle: "Arial", "darkblue" . print ;
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+
+!isProperty <- TRUE ;
+!ts <- item isntNA && [ object respondsTo: item ] 
+   ifTrue: [ object send: item asUpdateBlock ] ;
+ts isBlock 
+ ifTrue: [ :ts <- ts value ;
+           :isProperty <- FALSE ;
+         ] ;
+ts isTimeSeries
+ifTrue:
+  [
+  !table <- ^global LayoutTools Named TableSpec at: "basic2Column" ;
+  !header <- ^self accessExpression concat: " " . concat: (path else: "") ;
+  :header <- isProperty
+     ifTrue: [ header concat: " :" ] 
+    ifFalse: [ header concat: " " ] . concat: item ;
+  table getColumn: 1 . getHeader: 1 . setTextTo: header ;
+
+  FormatTools buildTableFor: table for: ^current withBlock:
+    [
+    !via <- ^my path concat: " " . concat: ^my item ;
+    ts extendBy: [ !date <- ^date ] . sortDown: [ date ] .
+    do: [ date evaluate:
+            [ !entity <- ^my entity ;
+              !val <- ^self ;
+              date formatUsingMMDDYY print ;
+              val isDataRecord
+              ifTrue: 
+                [ !label <- val recordValue isntNA
+                  ifTrue: 
+                    [ val recordValue asString concat: " (" .
+                        concat: val whatAmI . concat: ") " 
+                    ] .
+                  elseIf: [ val isDefault ] 
+                    then: [ "Default " concat: val whatAmI ] .
+                    else: [ val whatAmI ] ;
+                  FormatTools buildLinkForApp: "ShowAllDataValues"
+                      withLabel: label
+                      andParams: entity whatAmI, entity code, ^my via . print ;
+                ] .
+             elseIf: [ val isBridge ] 
+             then:
+               [ FormatTools buildLinkForApp: "ShowAllDataValues"
+                      withLabel: val whatAmI
+                      andParams: entity whatAmI, entity code, ^my via . print ;
+               ] .
+             elseIf: [ val isCollection ] 
+             then:
+               [ FormatTools buildLinkForApp: "ShowMembersInCollection" 
+                   withLabel: val asString
+                   andParams: entity whatAmI, entity code, ^my path, ^my item . 
+                        print;
+               ] .
+             elseIf: [ val isEntity ]
+               then: [ !label <- [ whatAmI print ; " " print ; displayInfo ] 
+                          divertOutput stripChar: newLine ;
+                       FormatTools buildLinkForApp: "ShowAllDataValues"
+                           withLabel: label
+                            andParams: val whatAmI, val code . print ;
+                     ] .
+               else: [ val print ; ] ;
+             newLine print ;
+            ];
+       ] ;
+    ] . print ;
+  ] .
+elseIf: [ item isDefault ] then: [ ">>> no item supplied." printNL ] .
+  else: [ ">>> " print ; item print ; " is not a time series." printNL ] ;
+
+] ;
+
+Entity defineMethod: [ | showMembersViaPath: path for: item |
+
+!entity <- ^self ;
+!object <- path isDefault
+   ifTrue: [ entity ] .
+   elseIf: [ path isBlock ] then: [ entity send: path ] .
+   else: [ entity send: path asBlock ] ;
+
+!title <-
+    ("Members in: " concat: (FormatTools italic: (item else: ""))),
+    ("for " concat: ^self whatAmI . concat: " " . concat: ^self name ) ;
+path isntDefault ifTrue: [ title, ("via " concat: path) ] ;
+title, ("As Of: " concat: ^date) ;
+FormatTools
+     buildTitle: title over: 80 withStyle: "Arial", "darkblue" . print ;
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+
+!list <- item isntNA && [ object respondsTo: item ]
+   ifTrue: [ object send: item asBlock ] ;
+list isCollection
+ifTrue:
+  [ !isIList <- list isIndexedList ;
+    !table <- ^global LayoutTools Named TableSpec at: "basicEntity" ;
+    !header <- ^self accessExpression concat: " " . concat: (path else: "") .
+        concat: " " . concat: item ;
+     !via <- path concat: " " . concat: item ;
+    isIList
+    ifTrue:
+      [
+      table setColumnCountTo: 3 ;
+      table getColumn: 1 . getHeader: 1 .
+         setColumnSpanTo: 3 .
+         setTextTo: header ;
+      table getColumn: 1 . getHeader: 2 . setTextTo: "Index" ;
+      table getColumn: 2 . getHeader: 2 . setTextTo: "Class" ;
+      table getColumn: 3 . getHeader: 2 . setTextTo: "Value" ;
+      :list <- list extendIndex 
+          extendBy:
+          [ !indexDisplay <- index asString;
+            index isEntity
+            ifTrue:
+              [ !text <- [ index displayInfo ] divertOutput stripChar: newLine;
+                :indexDisplay <- 
+                   FormatTools buildLinkForApp:"ShowAllDataValues"
+                      withLabel: text andParams: index whatAmI, index code ;
+              ] ;
+          ] ;
+      ]
+   ifFalse:
+      [
+      table setColumnCountTo: 2 ;
+      table getColumn: 1 . getHeader: 1 .
+         setColumnSpanTo: 2 .
+         setTextTo: header ;
+      table getColumn: 1 . getHeader: 2 . setTextTo: "Class" ;
+      table getColumn: 2 . getHeader: 2 . setTextTo: "Value" ;
+      ] ;
+
+  FormatTools buildTableFor: table for: ^current withBlock:
+    [ :list <- list numberElements
+       extendBy:
+         [  !label <- asString ;
+            !sort <- label ;
+            isEntity
+            ifTrue:
+              [ :label <- FormatTools buildLinkForApp: "ShowAllDataValues"
+                   withLabel: code andParams: whatAmI, code, ^my path ;
+                :sort <- name ;
+              ] .
+            elseIf: [ isLinkRecord || isBridge && [^my isIList not] ]
+            then:
+              [ :label <- FormatTools buildLinkForApp: "ShowAllDataValues"
+                   withLabel: asString
+                  andParams: ^my entity whatAmI, ^my entity code,
+                             ^my via, position ;
+              ] ;
+          ] . sortUp: [ sort ] ;
+      ^date ifDefault: ^today . evaluate: [
+         isIList
+         ifTrue:
+           [ list do: [ indexDisplay print; whatAmI print ; label printNL ] ;
+           ]
+         ifFalse: [ list do: [ whatAmI print ; label printNL ] ] ;
+       ] ;
+    ] . print ;
+#--  reset table back to standard values
+  table setColumnCountTo: 2 ;
+  table getColumn: 1 . getHeader: 1 . setColumnSpanTo: 2 ;
+  table getColumn: 1 . getHeader: 2 . setTextTo: "Id" ;
+  table getColumn: 2 . getHeader: 2 . setTextTo: "Name" ;
+  ] .
+  elseIf: [ item isDefault ] then: [ ">>> no item supplied." printNL ] .
+    else: [ ">>> " print ; item print ; " is not a collection." printNL ] ;
+
+] ;
+
+######################################################################
+
+
+
+#==================================================
+#   DataFeed Support Applications
+#==================================================
+
+####################
+#  APPreps.nav
+#    the new data feed status report is included in the nav file
+#    since it is not specific to the pma app.  
+####################
+
+
+Interface ApplicationWS defineMethod: [ | DataFeedStatus |
+   !sortBy <- ^self getParameter: 1 ;
+   ^global DataFeed showUpdateStatusForAll:sortBy ;
+] ;
+
+#----------
+
+DataFeed defineMethod: [ | showUpdateStatusForAll:sortString | 
+
+#---  Get all the subclasses of the data feed class that have been updated
+!list <- ^self classDescriptor getAllChildren 
+     extendBy: [ !time <- class lastUpdateTime ;
+                 !count <- class lastUpdateCount ;
+               ] .
+     select: [ time isntNA ] ;
+     
+#--  sort the list by update time or alpha
+sortString isNA
+   ifTrue:[:sortString <- "time"];
+:list <- sortString = "time" 
+    ifTrue: [ list sortDown: [time] ]
+   ifFalse: [ list sortUp:[code] ] ;
+
+#---  create the report
+FormatTools
+  buildTitle: ("---  DataFeed Update Status ---" )  
+  over: 80 withStyle: "Arial", "darkblue" . print ;
+
+# "---  DataFeed Update Status  ---" centerNL: 80 . print ;
+#"Data As Of: " concat: ^global Utility getAccessedVersionTime .
+#    centerNL: 80 . printNL ;
+
+!table <- ^global LayoutTools Named TableSpec at: "basicEntity" ;
+table setColumnCountTo: 3 ;
+
+!header <- sortString = "time"
+   ifTrue: [ "Sorted By Time" ]  else: [ "Sorted By Feed Name" ] ;
+table getColumn: 1 . getHeader: 1 .
+    setColumnSpanTo:3 . setTextTo: header ;
+
+!link <- FormatTools buildLinkForApp: "DataFeedStatus"
+   withLabel: "Data Feed" andParams: "code" ;
+table getColumn: 1 . getHeader: 2 . setTextTo: link ;
+
+!link <- FormatTools buildLinkForApp: "DataFeedStatus"
+   withLabel: "Update Time" andParams: "time" ;
+table getColumn: 2 . getHeader: 2 . setTextTo: link ;
+
+table getColumn: 3 . getHeader: 2 . setTextTo: "Records" ;
+
+FormatTools buildTableFor: table for: ^current withBlock:
+[
+  list
+  do: [ FormatTools buildLinkForApp: "DataFeedDescription"
+             withLabel: (code pad: 20) andParams: code . print ;
+         time asDate formatUsingMMDDYY 
+             concat: " " .concat:  time asTime . print: 30 ;
+         count printNL:10 ;
+       ] ;
+] . printNL;
+
+#--  reset id,name column header since this table is shared by multiple reports
+table getColumn: 1 . getHeader: 2 . setTextTo: "Id" ;
+table getColumn: 2 . getHeader: 2 . setTextTo: "Name" ;
+
+] ;
+
+#--------------------
+
+Interface ApplicationWS defineMethod: [ | DataFeedDescription |
+  !classId <- ^self getParameter: 1 orName: "id" ;
+  !feed <- classId asClass;
+ 
+  feed isDataFeed
+    ifTrue: [feed describeFeed ] 
+   ifFalse: 
+     ["Feed Name " print ; classId print ; " is not recognized." printNL ] ;
+] ;
+
+#----------
+
+DataFeed defineMethod: [ | describeFeed | 
+!feed <- ^self asSelf ;
+
+FormatTools
+  buildTitle: (" Feed: " concat: feed whatAmI ),
+              feed classDescriptor description
+  over: 80 withStyle: "Arial", "darkblue" . print ;
+
+FormatTools buildSectionBreakOver: "50%" alignedTo: "center" . print ;
+
+!table <- ^global LayoutTools Named TableSpec at: "basic2Column" ;
+table setColumnCountTo: 2 ;
+
+table getColumn: 1 . getHeader: 1 . setTextTo: "---  Basics  ---" ;
+FormatTools buildTableFor: table for: ^current withBlock:
+  [
+   feed super isDataFeed
+     ifTrue:["Parent: " print ; feed super whatAmI printNL] ; 
+
+  feed lastUpdateTime isntNA
+  ifTrue:
+    [ "Last Updated: " print: 20 ; 
+      feed lastUpdateTime formatAsTimeStamp printNL;
+      "Records Updated: " print: 20 ; 
+      feed lastUpdateCount printNL;
+    ] ;
+
+  ] . printNL ;
+
+table getColumn: 1 . 
+    getHeader: 1 . setTextTo: "---  Available Fields  ---" ;
+FormatTools buildTableFor: table for: ^current withBlock:
+[
+
+  "Available Fields:" printNL ;
+  feed getUploadProperties
+  do: [ code print ; briefDescription printNL ] ;
+] . printNL;
+
+
+table getColumn: 1 . 
+    getHeader: 1 . setTextTo: "--- Miscellaneous ---" ;
+FormatTools buildTableFor: table for: ^current withBlock:
+[
+  feed displayFeedConstants ;
+] . print ;
+
+] ;
+
+
+

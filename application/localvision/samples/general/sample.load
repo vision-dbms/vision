@@ -1,0 +1,128 @@
+##################################################
+#  This script can be used to load the sample database from
+#  the sector.dat, industry.dat, company.dat, and company2.dat
+#  files in the /localvision/samples/general directory.  
+#  Modify this directory path if you relocate these files.
+##################################################
+
+####################
+#  Define and Load Sector
+####################
+
+#--------------------
+#  Create The Class
+#--------------------
+Entity createSubclass: "Sector" ;
+
+#--------------------
+#  Read and process the vertical bar-delimited file
+#  Fields are: id  name
+#--------------------
+"/localvision/samples/general/sector.dat" asFileContents asLines
+do: [ !fields <- ^self breakOn: "|" ;
+      !id <- fields at: 1 . stripBoundingBlanks ;
+      !name <- fields at: 2 . stripBoundingBlanks ;
+      id isBlank not && name isBlank not
+         ifTrue: [ ^global Sector createInstance: id . setNameTo: name ] ;
+    ] ;
+
+####################
+#  Define and Load Industry and Link to Sector
+####################
+
+#--------------------
+#  Create The Class
+#--------------------
+Entity createSubclass: "Industry" ;
+
+#--------------------
+#  Define the sector property
+#--------------------
+Industry defineFixedProperty: 'sector' withDefault: Sector ;
+
+#--------------------
+#  Read and process the vertical bar-delimited file
+#  Fields are: id  name  sectorId
+#--------------------
+"/localvision/samples/general/industry.dat" asFileContents asLines
+do: [ !fields <- ^self breakOn: "|" ; 
+      !id <- fields at: 1 . stripBoundingBlanks ;
+      !name <- fields at: 2 . stripBoundingBlanks ;
+      !sectID <- fields at: 3 . stripBoundingBlanks ;
+      !sector <- ^global Named Sector uniformAt: sectID ;
+      id isBlank not && name isBlank not
+      ifTrue: 
+        [ !newOne <- ^global Industry createInstance: id . setNameTo: name;
+          newOne :sector <- sector ;
+        ] ;
+    ] ;
+
+####################
+#  Define and Load Company and Link to Industry
+####################
+
+#--------------------
+#  Create The Class
+#--------------------
+Entity createSubclass: "Company" ;
+
+#--------------------
+#  Define some basic properties
+#--------------------
+Company defineFixedProperty: 'ticker' ;
+Company defineFixedProperty: 'price' ;
+Company defineFixedProperty: 'industry' withDefault: Industry ;
+
+#--------------------
+#  Read and process the vertical bar-delimited file
+#  Fields are: id  name  price  industryId
+#--------------------
+"/localvision/samples/general/company.dat" asFileContents asLines
+do: [ !fields <- ^self breakOn: "|" ;
+      !id <- fields at: 1 . stripBoundingBlanks ;
+      !name <- fields at: 2 . stripBoundingBlanks ;
+      !price <- fields at: 3 . asNumber ;
+      !indID <- fields at: 4 . stripBoundingBlanks ;
+      !industry <- ^global Named Industry uniformAt: indID ;
+      id isBlank not && name isBlank not
+      ifTrue: 
+        [ !newOne <- ^global Company createInstance: id . setNameTo: name;
+          newOne :ticker <- id ;
+          newOne :price <- price ;
+          newOne :industry <- industry ;
+        ] ;
+    ] ;
+
+#--------------------
+#  Define some time series properties
+#--------------------
+Company define: 'sales' ;
+Company define: 'earningsPerShare' ;
+Company define: 'netIncome' ;
+Company define: 'commonEquity' ;
+
+#--------------------
+#  Read and process the vertical bar-delimited file
+#  Fields are: id  year  sales  earningsPerShare  netIncome  commonEquity
+#--------------------
+
+"/localvision/samples/general/company2.dat" asFileContents asLines
+do: [ !fields <- ^self breakOn: "|" ;
+      !id <- fields at: 1 . stripBoundingBlanks ;
+      !company <- ^global Named Company at: id ;
+      !date <- fields at: 2 . asNumber asDate ;
+      !sales <- fields at: 3 . asNumber ;
+      !eps <- fields at: 4 . asNumber ;
+      !netinc <- fields at: 5 . asNumber ;
+      !commone <- fields at: 6 . asNumber ;
+
+      company isntNA
+      ifTrue: 
+        [ company :sales asOf: date put: sales ;
+          company :earningsPerShare asOf: date put: eps ;
+          company :netIncome asOf: date put: netinc ;
+          company :commonEquity asOf: date put: commone ;
+        ] 
+          ifFalse:
+             [ ">>> Company not Found: " print ; id printNL ] ;
+    ] ;

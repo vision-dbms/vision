@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Class: Classification </title>
+
+</head>
+
+<body bgcolor=white>
+<h2>Vision Class: Classification</h2>
+
+<p>
+     | <a href="FHome.htm">Home</a> | <a href="mClassify.htm">Messages</a> | <a href="Classes.htm">Classes</a> | <a href="clXRef.htm">Class XRef</a> | <a href="tuCase5.htm">Sample</a> |
+<hr>
+<h3>Topics Covered:</h3>
+<ul type=square>
+<li><a href="#overview">Classification Overview</a>
+<li><a href="#basic">Basic Usage</a>
+<li><a href="#ranges">The RangeClassification Class</a>
+</ul>
+<hr>
+<h3><a name="overview">Classification Overview</a></h3>
+<p>
+The <b>Classification</b> class is an abstract class used to organize a
+number of subclasses that define instances used for grouping and
+summarization purposes.  
+Instances of Classification subclasses are normally referenced
+by other Entity instances.  For example, the property <i>country</i>
+could be define for the class <i>Company</i> to return
+an instance of the <i>Country</i> class representing the country
+in which the company is based and the
+property <i>industry</i> could be defined to return an instance of the
+class <i>Industry</i> representing the company's major industry.
+<p>
+The Classification class is a direct subclass of Entity:
+<font size=+1><pre>
+          <a href="clObject.htm">Object</a>
+             |
+          <a href="clEntity.htm">Entity</a>
+             |
+             <b>Classification</b>
+                |
+                |-- <a href="#ranges">RangeClassification</a>
+</pre></font>
+<p>
+The class Classification
+is used to unify all the protocol that is common to classifications.
+Your installation may define any number of subclasses of Classification.
+To determine which subclasses have
+been defined, use the expression: <pre><tt><b>
+     Classification showInheritance
+</b></tt></pre>
+<hr>
+<p>
+<h3><a name="basic">Basic Usage</a></h3>
+<p>
+The standard messages are used to create new 
+<a href="clEntity.htm#subclass">subclasses</a>, 
+<a href="clEntity.htm#instance">instances</a>, and
+<a href="Messages.htm">messages</a>
+for the Classification subclasses.  
+For example, to define a new subclass and some instances representing
+countries and a property that links specific currencies to specific
+countries, use the following:<pre><tt><b>
+     #--  Define the new class and some instances
+     Classification createSubclass: "Country" ;
+     Country createInstance: "US" . 
+        setNameTo: "Unites States" ;
+     Country createInstance: "CA" .
+        setNameTo: "Canada" ;
+
+     #--  Define a message at Currency that returns country
+     Currency defineFixedProperty: 'country' ;
+     Named Currency USD :country <- Named Country US ;
+     Named Currency CAD :country <- Named Country CA ;
+</b></tt></pre>
+<p>
+<a name="parent"> </a></h3>
+Instances of many classification subclasses are often managed as a
+hierarchy.  For example, <i>Industry 123</i> may refer to "Book
+Publishing", <i>Industry 120</i> may refer to "General Publishing", 
+and <i>Industry 100</i> may refer to "General Media".  It is often useful
+to be able to link these instances.
+The property <i>parent</i> is defined at Classification and is used
+to store a reference
+to another instance of the class that represents the <i>parent</i>
+instance.  The message <i>setParentTo:</i> allows you to set up these
+relationships.  For example:<pre><tt><b>
+     #--  Create Industry subclass
+     Classification createSubclass: "Industry" ;
+
+     #--  Create Industry instances and link to parent industry
+     Industry createInstance: "100" . 
+         setNameTo: "General Media" ;
+     Industry createInstance: "120" . 
+         setNameTo: "General Publishing" .
+         setParentTo: Named Industry \100 ;
+     Industry createInstance: "123" . 
+         setNameTo: "Book Publishing" .
+         setParentTo: Named Industry \120 ;
+</b></tt></pre>
+The expression:<pre><tt><b>
+     Named Industry \123 parent name
+</b></tt></pre>
+accesses the name of industry 123's parent, "General Publishing".
+The message <i>displayHierarchy</i> displays 
+the industry hierarchy:<pre><tt><b>
+     Named Industry \123 displayHierarchy
+
+</b>produces:<b>
+
+      123       Book Publishing
+         120       General Publishing
+            100       General Media
+</b></tt></pre>
+<p>
+When new instances are created, the <i>parent</i> property is
+initialized to return the new instance.  The <i>isParent</i> message
+returns <i>TRUE</i> if the recipient is its own parent instance.
+<hr>
+<p>
+<h3><a name="ranges">The RangeClassification Class</a></h3>
+<p>
+The class <b>RangeClassification</b> has been created to manage classes
+whose instances are used to assign values falling into a particular
+numeric range.  Instances are not directly created for this class; instead,
+you would create subclasses of RangeClassification for each distinct
+range being tracked.  Instances of subclasses of RangeClassification
+define the properties <i>lowerBound</i> and <i>upperBound</i>.  The message
+<i>getClassificationFor: inputValue</i> is used to access the instance
+whose range contains the supplied value.  The message <i>rangeName</i>
+returns a string formatted as:<pre><tt>
+     (lowerBound, upperBound)
+</tt></pre>
+For example, you can create a class to track market capitalization ranges
+using:<pre><tt><b>
+     RangeClassification createSubclass: "MCapGroup"
+</b></tt></pre>
+New instances are created by supplying the lower and upper boundary
+values to the <i>createInstance:</i>  message.  NA values are used to
+indicate that a lower or upper bound is undefined:  For example,
+you can create the  instances for MCapGroup using:<pre><tt><b>
+     MCapGroup
+       createInstance: NA, 400 .
+       setNameTo: "less than $400M" ;
+     MCapGroup
+       createInstance: 400, 1000 .
+       setNameTo: "$400M - $1,000M" ;
+     MCapGroup
+       createInstance: 1000, 2000 .
+       setNameTo: "$1,000M - $2,000M" ;
+     MCapGroup
+       createInstance: 2000, 5000 .
+       setNameTo: "$2,000M - $5,000M" ;
+     MCapGroup
+       createInstance: 5000, NA .
+       setNameTo: "greater than $5,000M" ;
+</b></tt></pre>
+The expression:<pre><tt><b>
+   MCapGroup getClassificationFor: 2300
+</b></tt></pre>
+returns the instance represented by the range 2000,5000 .
+Selection is done using: <pre><tt>
+     inputValue >= lowerBound && inputValue < upperBound
+</tt></pre>
+Assume that the property <i>marketCap</i> is defined for the class
+<i>Security</i> to return a numeric value.
+For reporting purposes you may want to group your securities into 
+their market capitalization range and display summary data for each
+group.  For example:<pre><tt><b>
+     Security masterList
+     extendBy: 
+       [ !mcapGroup <- 
+            ^global MCapGroup getClassificationFor: marketCap ;
+       ] .
+     groupedBy: [ mcapGroup ] .
+     do: [ name print: 30 ; 
+           groupList count print ;
+           groupList min: [ marketCap ] . print ; 
+           groupList max: [ marketCap ] . printNL ;
+         ] ;
+</b></tt></pre>
+<p>
+<hr>
+
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy 1997 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated June 19, 1997</font>
+</table>
+
+</body>
+</html>

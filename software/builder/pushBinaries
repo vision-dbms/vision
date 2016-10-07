@@ -1,0 +1,71 @@
+#!/bin/csh
+
+if ($#argv != 2) then
+  echo "You must specify the directory to build the release from and it's destination!"
+  exit 1
+endif
+
+setenv sourceDir $1/src
+setenv destDir $2
+echo "Building releases directory from: $sourceDir into $destDir"
+
+setenv bvSource $sourceDir/backend/batchvision
+if (! -f $bvSource) then
+  echo "batchvision not found at $bvSource.  Did you forget to build?"
+  exit 1
+endif
+
+foreach dir ($destDir/lib $destDir/bin) 
+  if (! -f $dir ) then
+    mkdir -p $dir
+  endif
+end
+
+cp -fd $sourceDir/lib/* $destDir/lib
+
+cp -f $sourceDir/tools/makemvscript $destDir/bin
+cp -f $sourceDir/tools/format $destDir/bin
+cp -f $sourceDir/tools/vquery $destDir/bin
+cp -f $sourceDir/tools/rollback $destDir/bin
+cp -f $sourceDir/tools/viewndf $destDir/bin
+cp -f $sourceDir/tools/viewseg $destDir/bin
+cp -f $sourceDir/tools/xndfosds $destDir/bin
+cp -f $sourceDir/tools/ndftool $destDir/bin
+cp -f $sourceDir/tools/uuidgen $destDir/bin
+cp -f $sourceDir/tools/onprof $destDir/bin
+cp -f $sourceDir/tools/paginate $destDir/bin
+cp -f $sourceDir/tools/checksum $destDir/bin
+cp -f $sourceDir/backend/dbconvert $destDir/bin
+cp -f $sourceDir/backend/showsizes $destDir/bin
+cp -f $sourceDir/backend/batchvision $destDir/bin
+cp -f $sourceDir/dbupdate/shuffle $destDir/bin
+cp -f $sourceDir/dbupdate/valueline $destDir/bin
+cp -f $sourceDir/dbupdate/inc. $destDir/bin
+cp -f $sourceDir/dbupdate/transpose $destDir/bin
+cp -f $sourceDir/dbupdate/normalize $destDir/bin
+cp -f $sourceDir/dbupdate/preproc2 $destDir/bin
+cp -f $sourceDir/dbupdate/compustat2 $destDir/bin
+cp -f $sourceDir/dbupdate/loadtape $destDir/bin
+cp -f $sourceDir/vsaprompt/vsaprompt $destDir/bin
+cp -f $sourceDir/vcaquery/vcaquery $destDir/bin
+cp -f $sourceDir/vserver/vserver $destDir/bin
+cp -f $sourceDir/vpooladmin/vpooladmin $destDir/bin
+cp -f $sourceDir/vpassthru/vpassthru $destDir/bin
+cp -f $sourceDir/vcatool/vcatool $destDir/bin
+cp -f $sourceDir/vproxy/vproxy $destDir/bin
+cp -f $sourceDir/vcaservicemanager/vcaservicemanager $destDir/bin
+
+
+# these executables are the same
+cp -f $destDir/bin/onprof $destDir/bin/onck
+
+
+
+set editor = $sourceDir/frontend/frontend
+if (-f $editor) then
+  cp -f $editor $destDir/bin/vision
+endif
+
+set visionHelp = $sourceDir/frontend/VisionHelp
+cp -rf $visionHelp/* $destDir/lib
+

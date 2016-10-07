@@ -1,0 +1,755 @@
+##################################################
+#  DEFcore.html
+#
+#  Protocol for Interface HtmlAccess and FormatTools Html
+#
+#  This file contains the protocol to interface to the HTML-based Reporter
+##################################################
+
+####################
+#  Html versions of FormatTools
+####################
+FormatTools Html
+   define: 'External' toBe: Interface HtmlAccess .
+
+#--------------------
+#  basic modes
+#--------------------
+
+defineMethod: [ | beginPreserveMode | 
+   "<pre>"
+] . 
+
+defineMethod: [ | endPreserveMode | 
+   "</pre>"
+] . 
+
+#--------------------
+#  titles
+#--------------------
+
+defineMethod:
+[ | buildTitle: string over: span |
+  ^self buildTitle: string over: span withStyle: NA . 
+] .
+
+#-- style parameters passed as list : 
+#--      fontString, colorString, fontSize, centerFlag
+defineMethod:
+[ | buildTitle: string over: span withStyle: options |
+  !optionList <- options isList
+       ifTrue: [ options ] ifFalse: [ options asList ] ;
+  !font   <- optionList at: 1 . else: "Times Roman";
+  !color  <- optionList at: 2 . else: "black";
+  !size   <- optionList at: 3 . else: 3 ;
+  !center <- optionList at: 4 . else: TRUE ;
+  !titles <- string isList ifTrue: [ string ] ifFalse: [ string asList ];
+  [ center isTrue ifTrue: [ "<center>" printNL ;];
+    "<font face="  print; font asQuotedString print; 
+    " color=" print; color asQuotedString print; 
+    " size="      print; size asString print; " >" printNL;
+    titles numberElements
+    do: [ !level <- position = 1 ifTrue: [ "3" ] ifFalse: [ "4" ] ;
+          "<h" print ; level print ; ">" print ; print ;
+          "</h" print ; level print ; ">" printNL ;
+        ] ;
+    center isTrue ifTrue: ["</center>" printNL];
+    "</font><p>" printNL ;
+  ] divertOutput
+] .
+
+defineMethod: [ | buildCommentBlock: string over: span |
+ [ "<blockquote><center><hr width=70%><p>" printNL ;
+   string printNL ;
+   "<p><hr width=70%></center></blockquote><p>" printNL ;
+ ] divertOutput
+] .
+
+defineMethod: [ | buildOptionsBar: string |
+ [ "<center>"  print ;
+   string      print ;
+   "</center>" print ;
+   "<hr>"      printNL ;
+ ] divertOutput
+] .
+
+defineMethod: [ | buildSectionBreakOver: span alignedTo: align |
+ [ "<p>" print ;
+   "<hr align=" print ; align print ; 
+   " width=" print ; span print ;
+   " ><p>" printNL ;
+ ] divertOutput
+] .
+
+#--------------------
+#  format styles
+#--------------------
+defineMethod: [ | bold: string |  
+  "<b>" concat: string . concat: "</b>" .
+] .
+
+defineMethod: [ | italic: string | 
+  "<i>" concat: string . concat: "</i>" .
+] .
+
+defineMethod: [ | center: string | 
+  "<center>" concat: string . concat: "</center>" .
+] .
+
+defineMethod:
+[ | buildItemList: stringList | 
+  [ "<p><ul>" printNL ;
+    stringList asLines 
+       do: [ "<LI>" print ; printNL ; ] ;
+    "</ul>" printNL ;
+  ] divertOutput
+] .
+
+#--------------------
+#  links
+#--------------------
+
+defineMethod:
+[ | buildLinkForAppZeroCheck: app withLabel: label andParams: plist | 
+  ^self buildLinkForApp: app
+        withCheck: [ asNumber != 0 ] 
+        withLabel: label
+        andParams: plist
+] .
+
+defineMethod: [ | buildLinkForApp: app 
+                        withCheck: checkBlock
+                        withLabel: label 
+                        andParams: plist | 
+  label send: checkBlock .
+     ifTrue: [ ^self buildLinkForApp: app withLabel: label andParams: plist ] 
+    ifFalse:  [ label ] 
+] .
+
+defineMethod: [ | buildURLForApp: app andParams: plist | 
+  [
+  External serverIsRunning
+  ifTrue: 
+    [ External visionPath print ; 
+      app print ;
+      plist isntNA
+      ifTrue: 
+        [ plist
+          do: [ "@" print ;
+                ^my External encodeString: asString stripBoundingBlanks . 
+                   print;
+              ] ;
+        ] ;
+      "/?globalDate=" print ; ^date asInteger asString print ;
+      currency isCurrency
+        ifTrue: [ "&globalCurrency=" print ; currency code print ] ;
+    ]
+  ifFalse: 
+    [ app print ; 
+      plist isntNA
+      ifTrue: 
+         [ plist 
+           do: [ "-" print ; 
+                 asString stripBoundingBlanks translate: " " to: "_" . print 
+               ] ;
+         ] ;
+      ".htm" print ;
+    ] 
+  ] divertOutput asQuotedString
+] .
+
+defineMethod: [ | buildLinkForApp: app withLabel: label | 
+  ^self buildLinkForApp: app withLabel: label andParams: NA .
+] .
+
+defineMethod: [ | buildLinkForApp: app withLabel: label andParams: plist | 
+# <A HREF=http://www.---.com/cgi-bin/vquery/appName@p1@p2.../?globals>label</A>
+
+ [ "<A HREF=" print ; 
+   ^self buildURLForApp: app andParams: plist . print ;
+   ">" print ; label print ; "</A>" print ; 
+   ] divertOutput 
+] .
+
+defineMethod: [ | buildImage: file |
+  ^self buildImage: file withPath: NA withAlt: NA .
+] .
+
+defineMethod: [ | buildImage: file withAlt: alt |
+  ^self buildImage: file withPath: NA withAlt: alt .
+] .
+
+defineMethod: [ | buildImage: file withPath: path withAlt: alt |
+path isNA ifTrue: [:path <- External resourcePath else: "";]; 
+!fullFile <- path concat: file .asQuotedString; 
+[
+  "<img src=" print; fullFile print; " align=\"middle\"" print; 
+    " border=0" print ;
+    alt isntNA ifTrue: [" alt=" print; alt asQuotedString print;]; 
+  ">" print; 
+] divertOutput
+] .
+
+defineMethod: [ | buildLink: link withPath: path withLabel: label | 
+ !fullPath <- path isNA
+     ifTrue: [ External resourcePath else: "" ] 
+    ifFalse: [ path ] ;
+   !fullLink <- fullPath take: -1 . = "/" 
+     ifTrue: [ fullPath ] ifFalse: [ fullPath concat: "/" ] .
+        concat: link ;
+   ^self buildLink: fullLink withLabel: label
+] .
+
+defineMethod: [ | buildLink: link withLabel: label | 
+  [ "<A href=" print ; link asQuotedString print ;
+    ">" print ; label print ; "</A>" print ;
+  ] divertOutput
+] .
+
+defineMethod: [ | encodeNewLinesIn: text | 
+  text translate: newLine1 to: ""
+] .
+defineMethod: [ | decodeNewLinesIn: text | 
+  text translate: "" to: newLine1 
+] .
+defineMethod: [ | blankFill: n | 
+  "&nbsp " fill: (n * 6)
+] .
+defineMethod: [ | font: font inSize: size andColor: color for: text |
+  [ "<font size=" print ; size else: "3" . asString print ;
+    " face=" print ; font else: "Arial" . asQuotedString print ;
+    " color=" print ; color else: "black" . asQuotedString print ;
+    ">" print ; text print ; "</font>" print ;
+  ] divertOutput
+] .
+
+defineMethod: [ | indent: text | 
+  [ "<blockquote>" printNL ; text print ;  "</blockquote>" printNL
+  ] divertOutput
+] .
+defineMethod: [ | startParagraph | 
+  "<p>" 
+] .
+defineMethod: [ | startLine | 
+  "<br>" concat: newLine
+] .
+defineMethod: [ | buildAnchor: anchor withLabel: label |
+  [ "<A name=" print; anchor asQuotedString print; 
+    ">" print; label print; "</A>" print; 
+  ] divertOutput
+] .
+defineMethod: [ | buildScriptFrom: text | 
+  [
+  "<script>" printNL ;
+  text printNL ;
+  "</script>" printNL ;
+  ] divertOutput
+] .
+defineMethod: [ | buildOnClick: function withLabel: label |
+  [ "<A href='#' onClick="  print; function asQuotedString print; 
+    ">" print; label print; "</A>" print; 
+  ] divertOutput
+] .
+;
+
+
+####################
+#  Interface HtmlAccess
+####################
+
+#--------------------
+#  sourceExpression contains expression portion of http transfer
+#      format: /appName@p1@p2@p3...
+#  sourceQuery contains query portion of http transfer
+#      format: id1=val1&id2=val2&id3=val3...
+#  parameterList is a list of the parameters tacked on to the end of expression
+#  formInputs is a dictionary of id/value pairs based on sourceQuery
+#  currentApplication is the paramater with id appName in sourceQuery
+#    or the first parameter in sourceExpression; if both present, the
+#    appName in the expression is used.
+#--------------------
+
+Interface HtmlAccess
+  defineFixedProperty: 'sourceExpression' .
+  defineFixedProperty: 'sourceQuery' .
+  defineFixedProperty: 'currentWorkspace' .
+  defineFixedProperty: 'displayInputsFlag' .
+;
+
+#--------------------
+# dictionary support for encoding/decoding strings
+#--------------------
+
+Interface HtmlAccess
+   define: 'CharToAscii' toBe: SystemDictionary new .
+   define: 'AsciiToChar' toBe: SystemDictionary new .
+;
+
+Interface HtmlAccess
+do: [ AsciiToChar
+        at: "%21" put: "!" .  
+        at: "%22" put: "\"" .
+        at: "%23" put: "#" .
+        at: "%24" put: "$" .
+        at: "%25" put: "%" .
+        at: "%26" put: "&" .
+        at: "%27" put: "'" .
+        at: "%28" put: "(" .
+        at: "%29" put: ")" .
+        at: "%2A" put: "*" .
+        at: "%2B" put: "+" .
+        at: "%2C" put: "," .
+        at: "%2D" put: "-" .
+        at: "%2E" put: "." .
+        at: "%2F" put: "/" .
+        at: "%3A" put: ":" .
+        at: "%3B" put: ";" .
+        at: "%3C" put: "<" .
+        at: "%3D" put: "=" .
+        at: "%3E" put: ">" .
+        at: "%3F" put: "?" .
+        at: "%40" put: "@" .
+        at: "%5B" put: "[" .
+        at: "%5C" put: Constant backslash .
+        at: "%5D" put: "]" .
+        at: "%5E" put: "^" .
+        at: "%5F" put: "_" .
+        at: "%60" put: "`" .
+        at: "%7B" put: "{" .
+        at: "%7C" put: "|" .
+        at: "%7D" put: "}" .
+        at: "%7E" put: "~" .
+   ] ;
+
+Interface HtmlAccess
+do: [ CharToAscii
+        at: "!" put: "%21" .  
+        at: "\"" put: "%22" .
+        at: "#" put: "%23" .
+        at: "$" put: "%24" .
+        at: "%" put: "%25" .
+        at: "&" put: "%26"  .
+        at: "'" put: "%27"  .
+        at: "(" put: "%28"  .
+        at: ")" put: "%29"  .
+        at: "*" put: "%2A"  .
+        at: "+" put: "%2B"  .
+        at: "," put: "%2C"  .
+        at: "-" put: "%2D"  .
+        at: "." put: "%2E"  .
+        at: "/" put: "%2F"  .
+        at: ":" put: "%3A"  .
+        at: ";" put: "%3B"  .
+        at: "<" put: "%3C"  .
+        at: "=" put: "%3D"  .
+        at: ">" put: "%3E"  .
+        at: "?" put: "%3F"  .
+        at: "@" put: "%40"  .
+        at: "[" put: "%5B"  .
+        at: Constant backslash put: "%5C"  .
+        at: "]" put: "%5D"  .
+        at: "^" put: "%5E"  .
+        at: "_" put: "%5F"  .
+        at: "`" put: "%60"  .
+        at: "{" put: "%7B"  .
+        at: "|" put: "%7C"  .
+        at: "}" put: "%7D"  .
+        at: "~" put: "%7E"  .
+   ] ;
+
+#-- change special characters to hex codes, space to "+"
+#-- this should be used to form the paramater portion of the href
+Interface HtmlAccess defineMethod: [ | encodeString: str |
+  str isString ifTrue: [ 
+    [ str count sequence 
+         do: [ !ch <- ^my str at: ^self;
+               ^my CharToAscii at: ch . else: ch . print;
+             ];
+    ] divertOutput translate: " " to: "+"
+  ] ifFalse: [ str ]
+] ;
+
+#-- change hex codes to special characters, "+" to space 
+#-- this should be used to convert the input parameters
+Interface HtmlAccess defineMethod: [ | decodeString: str |
+  str isString ifTrue: [ 
+    [ :str <- str  translate: "+" to: " " ; 
+      !prefix <- str prefixNotSpannedBy: "%";
+      str take: prefix . print;
+      str drop: prefix .
+       breakOn: "%" .  select: [ count > 0 ] .
+       do: [ !hex <- "%" concat: (^self take: 2);
+             ^my AsciiToChar at: hex . else: [ ^self take: 2 ] . print;
+             ^self drop: 2 . print;
+           ]
+    ] divertOutput
+  ] ifFalse: [ str ]
+] ;
+
+#--------------------
+
+
+#--------------------
+#  get: usingQuery: for: at:
+#    this method is called by the http interface and used to pass the
+#    expression and query paramters from the document
+#--------------------
+
+Interface HtmlAccess
+
+defineMethod:
+[ | get: expression usingQuery: query for: rhost at: radd | 
+  :sourceExpression <- expression translate: "/" to: " " ;
+  :sourceQuery <- query ; 
+  sourceExpression isBlank && query isBlank
+     ifTrue: [ :sourceExpression <- "displayMainMenu" ] ;
+  setupWorkspace ;
+  setupQuery ;
+  setupExpression ;
+  setupGlobals ;
+  execute ;
+] .
+
+#----------
+
+defineMethod:
+[ | setupWorkspace | 
+  currentWorkspace reset ;
+  Global reset ;
+  ^self
+] .
+
+#----------
+
+defineMethod:
+[ | setupQuery |    #-  id=val&id=val&id=val
+  sourceQuery isntNA
+  ifTrue:
+    [ !query <- sourceQuery breakOn: "&" . 
+        select: [ ^self contains: "=" ] .
+        extendBy: [ !field <- ^self breakOn: "=" ;
+                    !id <- ^my decodeString: 
+                        (field at: 1 . stripBoundingBlanks ) ;
+                    !val <- ^my decodeString:
+                        (field at: 2 . stripBoundingBlanks ) ;
+                  ] ;
+       query do: [ ^my currentWorkspace set: id to: val ] ;
+    ] ;
+  !app <- currentWorkspace getParameter: "appName" ;
+  currentWorkspace setApplicationTo: app ;
+] .
+
+#----------
+
+defineMethod:
+[ | setupExpression |
+  !params <- sourceExpression breakOn: "@" ;
+  !app <- params at: 1 ;
+  app isntNA && [ app isBlank not ] 
+  ifTrue:
+    [
+    currentWorkspace setApplicationTo: app ;
+    currentWorkspace setParameterListTo:
+       ( params numberElements
+            select: [ position > 1 ] . 
+            send: [ stripBoundingBlanks ] .
+            send: [ ^my decodeString: ^self ] .
+            send: [ ^self != "NA" ifTrue: [ ^self ] ]
+       ) ;
+    ] ;
+] .
+
+#----------
+
+defineMethod:
+[ | setupGlobals | 
+  setGlobalDate setGlobalCurrency 
+] .
+
+defineMethod:
+[ | setGlobalDate | 
+  !date <- currentWorkspace getParameter: "globalDate" . else: "" ;
+  !yymmdd <- date asNumber ;
+  !globalDate <- yymmdd isNumber
+  ifTrue: 
+    [ yymmdd asDate else: yymmdd asDateFromMMDDYY . else: ^today
+    ]
+  ifFalse:
+    [ date contains: "Yesterday" . 
+        ifTrue: [ ^today - 1 businessDays ] .
+        elseIf: [ date contains: "EndMonth" ] then: [ ^today - 1 monthEnds ] .
+        elseIf: [ date contains: "EndYear" ]  then: [ ^today - 1 yearEnds ] .
+          else: [ ^today ] 
+    ] ;
+  Global setDateTo: globalDate ;
+  ^self
+] .
+
+defineMethod:
+[ | setGlobalCurrency | 
+  !curr <- currentWorkspace getParameter: "globalCurrency" ;
+  Global setCurrencyTo: curr ;
+  ^self
+] .
+
+#----------
+
+defineMethod:
+[ | execute | 
+  FormatTools Html evaluate: 
+  [ displaySetup ;
+    displayPageHeader ;
+    displayReport ;
+    displayPageFooter ;
+    displayCleanup ;
+  ] ;
+] .
+
+#----------
+
+defineMethod:
+[ | displaySetup | 
+#--  first line must be Content-Type followed by a blank line
+
+"Content-Type: text/html
+
+<HTML>
+<HEAD>
+<TITLE>Title: " print ; 
+sourceExpression isBlank
+   ifTrue: [ currentWorkspace currentApplication ] 
+  ifFalse: [ sourceExpression ] . print ;
+"</TITLE>
+</HEAD>
+<BODY bgcolor=white>" printNL ;
+] .
+
+#----------
+
+defineMethod:
+[ | displayPageHeader | #--  display Standard Page Header if not a Helper app
+  isHelper
+     ifTrue: [ buildHelperPageHeader print;] 
+    ifFalse: [ buildStandardPageHeader print;] ;
+] .
+
+#----------
+
+defineMethod:
+[ | displayReport | 
+  currentWorkspace run ;
+] .
+
+#----------
+
+defineMethod:
+[ | displayPageFooter |
+  "</PRE>" printNL ;
+  botBarImage isntNA
+  ifTrue: [ "<br><br>"    print;
+            FormatTools buildImage: botBarImage 
+                           withAlt: "Bottom bar Image file" . print;
+            "<br><br>"    printNL;
+          ] 
+  ifFalse: [ "<HR>" printNL; ];
+  "<A href=" print ; homePath asQuotedString print ; ">" print ; 
+  "Home</A>" printNL ;
+
+  displayInputsFlag isTrue
+  ifTrue:
+    [ "<HR>" printNL ;
+      "<FONT SIZE=-2>" print ;
+      "Expression: " print ; sourceExpression print ; "<BR>" printNL ;
+      "Query: " print ; sourceQuery printNL ;
+      "</FONT>" printNL ;
+    ] ;
+
+] .
+
+defineMethod:
+[ | displayCleanup | 
+  "</BODY> </HTML>" printNL;
+] .
+
+#----------
+
+defineMethod:
+[ | buildHelperPageHeader |
+  "<H3>  Do you Mean? </H3>" 
+] .
+
+defineMethod:
+[ | buildStandardPageHeader |   
+  [ "<H2>" print ; 
+    topLogoImage isntNA
+    ifTrue: [ FormatTools buildImage: topLogoImage 
+                             withAlt: "-- LOGO Image --" . print;
+            ];
+    title  print;
+    "</H2>" print;
+    topBarImage isntNA
+    ifTrue:  [ FormatTools buildImage: topBarImage 
+                              withAlt: "Top bar Image file" . print;
+               "<br><br>" print;
+             ] 
+    ifFalse: [ "<HR>" printNL;];
+  ] divertOutput
+] .
+
+defineMethod: [ | serverIsRunning | 
+   server isntNA && [ server isBlank not ] 
+] .
+
+;
+
+
+
+#--------------------------------------------------
+
+####################
+#  support methods
+####################
+Interface HtmlAccess
+
+defineMethod:    
+[ | isHelper | 
+  currentWorkspace currentApplication contains: "Helper"
+] ;
+
+#--------------------
+#  Session Tailorable Parameters
+#--------------------
+Interface HtmlAccess
+  define: 'server'       toBe: "" .
+  define: 'homePath'     toBe: "" .
+  define: 'path'         toBe: "" .
+  define: 'resourcePath' toBe: NA .                          
+  define: 'topLogoImage' toBe: NA .                          
+  define: 'topBarImage'  toBe: NA .                          
+  define: 'botBarImage'  toBe: NA .                          
+  define: 'cgiExe'       toBe: "/cgi-bin/vquery/" .
+
+defineMethod:
+[ | setResourcePathTo: string |
+  ^self define: 'resourcePath' toBe: string ;
+  ^self
+] .
+
+defineMethod:
+[ | setTopLogoTo: string |
+  ^self define: 'topLogoImage' toBe: string ;
+  ^self
+] .
+
+defineMethod:
+[ | setTopBarTo: string | 
+  ^self define: 'topBarImage' toBe: string ;
+  ^self
+] . 
+
+defineMethod:
+[ | setBottomBarTo: string | 
+  ^self define: 'botBarImage' toBe: string ;
+  ^self
+] . 
+
+defineMethod:
+[ | setCGIExeTo: string | 
+  ^self define: 'cgiExe' toBe: string ;
+  ^self resetVisionPath ;
+  ^self
+] . 
+
+defineMethod:
+[ | setServerTo: string |
+  ^self define: 'server' toBe: string ;
+  ^self resetVisionPath ;
+  ^self
+] .
+
+defineMethod:
+[ | setPathTo: string |
+  ^self define: 'path' toBe: string ;
+  ^self resetVisionPath ;
+  ^self
+] .
+
+defineMethod:
+[ | setVisionPathTo: string | 
+  ^self define: 'visionPath' toBe: string ;
+  ^self
+] . 
+
+defineMethod: 
+[ | resetVisionPath | 
+  !string <- server concat: cgiExe . concat: (path else: "") ;
+  ^self setVisionPathTo: string
+] .
+
+defineMethod:
+[ | setHomePathTo: string |
+  ^self define: 'homePath' toBe: string ;
+  ^self
+] .
+
+defineMethod:
+[ | setTitleTo: string |
+  ^self define: 'title' toBe: string ;
+  ^self
+] .
+
+defineMethod:
+[ | setApplicationWSTo: ws |
+  :currentWorkspace <- ws else: ApplicationWS ;
+  ^self
+] .
+
+defineMethod:
+[ | setDisplayInputsFlagOn | 
+  :displayInputsFlag <- TRUE ;
+  ^self
+] .
+
+defineMethod:
+[ | setDisplayInputsFlagOff | 
+  :displayInputsFlag <- FALSE ;
+  ^self
+] .
+;
+
+Interface HtmlAccess
+  setCGIExeTo: "/cgi-bin/vquery.exe/" .
+  setServerTo: "http://visionWeb" .
+  setPathTo: "default/" .
+  setHomePathTo: "http://visionWeb/vision/" .
+  setResourcePathTo: "http://visionWeb/vision/interface/" .
+  setTitleTo: "Vision Portfolio Application Browser" .
+  setApplicationWSTo: Interface ApplicationWS .
+  setDisplayInputsFlagOff 
+;
+
+####################
+#  DEFcore.html
+#     add start listener / stop listener messages to cache
+####################
+
+Interface HtmlAccess defineMethod: [ | startListenerOnPort: p | 
+  ^self define: 'listener' 
+          toBe: ("inet/stream,p:" concat: p . asOpenVisionChannel);
+  !status <- listener enableHandler;
+  status
+] ;
+
+Interface HtmlAccess defineMethod: [ | stopListenerOnPort: p | 
+!channel <- "inet/stream:" concat: p . asOpenVisionChannel ;
+channel status != channel status Failed
+ifTrue:
+  [
+  channel
+    consumeVisionPrompt  # consume prompt generated by the stream connection
+    submitVisionRequest: "Interface HtmlAccess listener close" ;
+  channel getString ;
+  ] ;
+channel close ;
+] ;
+

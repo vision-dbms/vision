@@ -1,0 +1,246 @@
+
+######################
+######################
+####  LowResolutionTime Class
+######################
+######################
+#
+# This file implements the low (microsecond) resolution time class.
+#
+#  Type Conversion Included:
+#	-> Date
+#	-> HighResolutionTime
+#
+######################
+
+LowResolutionTime
+
+################
+#  TimeSeries Requirements
+################
+
+#----------
+#  Time Series Instantiation
+#----------
+define: 'newTimeSeries'		toBePrimitive: 145 withControlValue: 1 .
+
+#----------
+#  ^date evaluate:
+#----------
+define: 'evaluate:'		toBePrimitive: 44 .
+
+#----------
+#  Natural Print Width
+#----------
+define: 'naturalPrintWidth'	toBe: 25 .
+
+#----------
+#  Type Coercion
+#----------
+defineMethod:
+[ | convertToMyKindOfObject: aDate |
+    aDate asLowResolutionTime
+].
+
+#----------
+#  Predecessor and Successor Methods
+#----------
+defineMethod:
+[ | predecessor |
+    !uTicks <- ^self __getLongValuePart1 - 1;
+    !result <- uTicks < 0 ifTrue: [
+	^self
+	    __setLongValuePart0To: ^self __getLongValuePart0 - 1 .
+	    __setLongValuePart1To: MaxUTick
+    ] ifFalse: [
+	^self __setLongValuePart1To: uTicks
+    ];
+    result
+].
+
+defineMethod:
+[ | successor |
+    !uTicks <- ^self __getLongValuePart1 + 1;
+    !result <- uTicks > MaxUTick ifTrue: [
+	^self
+	    __setLongValuePart0To: ^self __getLongValuePart0 + 1 .
+	    __setLongValuePart1To: 0
+    ] ifFalse: [
+	^self __setLongValuePart1To: uTicks
+    ];
+    result
+].
+
+#----------
+#  Comparison
+#----------
+
+define: '<'	toBePrimitive: 229 withControlValue: 0 .
+define: '<='	toBePrimitive: 229 withControlValue: 1 .
+define: '='	toBePrimitive: 229 withControlValue: 2 .
+define: '!='	toBePrimitive: 229 withControlValue: 3 .
+define: '>='	toBePrimitive: 229 withControlValue: 4 .
+define: '>'	toBePrimitive: 229 withControlValue: 5 .
+
+#----------
+#  Non-Conformant Comparison
+#----------
+#  These messages should always be written to coerce
+#  to the highest resolution available.
+#----------
+defineMethod:
+[ | lessThanNonConformantValue: aValue |
+    !self <- ^self;
+    aValue isHighResolutionTime
+       ifTrue: [ :self   <- aValue convertToMyKindOfObject: ^self ]
+      ifFalse: [ :aValue <- ^self convertToMyKindOfObject: aValue ];
+    self isntNA && [aValue isntNA] ifTrue: [ self < aValue ]
+].
+
+defineMethod:
+[ | lessThanOrEqualToNonConformantValue: aValue |
+    !self <- ^self;
+    aValue isHighResolutionTime
+       ifTrue: [ :self   <- aValue convertToMyKindOfObject: ^self ]
+      ifFalse: [ :aValue <- ^self convertToMyKindOfObject: aValue ];
+    self isntNA && [aValue isntNA] ifTrue: [ self <= aValue ]
+].
+
+defineMethod:
+[ | equalToNonConformantValue: aValue |
+    !self <- ^self;
+    aValue isHighResolutionTime
+       ifTrue: [ :self   <- aValue convertToMyKindOfObject: ^self ]
+      ifFalse: [ :aValue <- ^self convertToMyKindOfObject: aValue ];
+    self isntNA && [aValue isntNA] && [ self = aValue ]
+].
+
+defineMethod:
+[ | notEqualToNonConformantValue: aValue |
+    ^self equalToNonConformantValue: aValue. not
+].
+
+defineMethod:
+[ | greaterThanOrEqualToNonConformantValue: aValue |
+    !self <- ^self;
+    aValue isHighResolutionTime
+       ifTrue: [ :self   <- aValue convertToMyKindOfObject: ^self ]
+      ifFalse: [ :aValue <- ^self convertToMyKindOfObject: aValue ];
+    self isntNA && [aValue isntNA] ifTrue: [ self >= aValue ]
+].
+
+defineMethod:
+[ | greaterThanNonConformantValue: aValue |
+    !self <- ^self;
+    aValue isHighResolutionTime
+       ifTrue: [ :self   <- aValue convertToMyKindOfObject: ^self ]
+      ifFalse: [ :aValue <- ^self convertToMyKindOfObject: aValue ];
+    self isntNA && [aValue isntNA] ifTrue: [ self > aValue ]
+].
+;
+
+
+######################
+####  Required Conversions
+######################
+
+LowResolutionTime
+defineMethod:
+[ | asDate |
+    ^global Date __fromIDate7: ^self __getLongValuePart0 / 24
+].
+
+defineMethod:
+[ | asLowResolutionTime |
+    ^self
+].
+
+defineMethod:
+[ | asHighResolutionTime |
+    ^global HighResolutionTime
+	__fromHTicks: __getLongValuePart0
+	   andUTicks: __getLongValuePart1
+].
+;
+
+
+######################
+####  Additional Protocol
+######################
+
+LowResolutionTime
+
+#----------
+#  Class Constants (Do Not Change)
+#----------
+define: 'MaxFemtoSecond' toBe:  999999999 .
+
+#----------
+#  Display
+#----------
+defineMethod:
+[ | print |
+    [ ^self printHTicks: ^self __getLongValuePart0
+	      andUTicks: ^self __getLongValuePart1;
+    ] divertOutput print;
+    ^self
+].
+
+#----------
+#  Initialization
+#----------
+
+defineMethod:
+[ | fromYear: year month: month day: day hours: h minutes: m andSeconds: s |
+    ^self fromDate: (year * 10000 + month * 100 + day)
+             hours: h
+           minutes: m
+        andSeconds: s
+].
+
+defineMethod:
+[ | fromDate: d hours: h minutes: m andSeconds: s |
+    :d <- d asDate;
+    d isDate ifTrue: [
+        ^self __fromHTicks: d asIDate7 * 24 + h
+		 andUTicks: (s isInteger ifTrue: [999999] ifFalse: [0]) + (s + m * 60) * 1e6
+    ]
+].
+
+defineMethod:
+[ | __fromIDate7: anIDate7 |
+    ^self __fromHTicks: anIDate7 * 24 + 23 andUTicks: MaxUTick
+].
+
+defineMethod:
+[ | __fromHTicks: hTicks andUTicks: uTicks |
+    uTicks < 0 ifTrue: [
+	:uTicks <- 0
+    ];
+    hTicks < 0 ifTrue: [
+	:hTicks <- 0
+    ];
+    uTicks > MaxUTick ifTrue: [
+	!adjustment <- (uTicks / (MaxUTick + 1)) asInteger;
+	:hTicks <- hTicks + adjustment;
+	:uTicks <- uTicks - adjustment * (MaxUTick + 1)
+    ];
+    __zero
+	__setLongValuePart0To: hTicks.
+	__setLongValuePart1To: uTicks.
+].
+
+#----------
+#  Value Creation, Access, and Encoding
+#----------
+
+defineMethod:
+[ | __zero | super __zeroU64 ].
+
+define: '__getLongValuePart0' toBePrimitive: 27 withControlValue: 0 .
+define: '__getLongValuePart1' toBePrimitive: 27 withControlValue: 1 .
+
+define: '__setLongValuePart0To:' toBePrimitive: 28 withControlValue: 0 .
+define: '__setLongValuePart1To:' toBePrimitive: 28 withControlValue: 1 .
+;
+

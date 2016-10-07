@@ -1,0 +1,118 @@
+"
+####################
+#  Dictionary: Protocol
+####################
+
+" print ;
+
+# $File: //depot/vision/applications/core/builtin/mainline/Dict.core $
+# $DateTime: 2005/10/24 08:22:02 $
+# $Revision: #3 $
+# $Author: dohara $
+
+#--------------------
+#  Dictionary is special
+#    Because dictionary is really used to keep track of messages,
+#    a new Dictionary really needs to be a specialization so that
+#    dictionary entries can be tracked correctly; instanceList is
+#    modified so that each of these specializations can be accessed
+#    as though they are instances of a single class.
+#  Redefine initializeGlobalSubclassProperties at Dictionary
+#     create local version of instanceList to track
+#     'new' instances
+#
+#--------------------
+
+####################
+#  Add autoUpperCaseFlag to Dictionary ; default is to preserve current
+#    usage of disabled
+####################
+
+#--------------------
+#  Dictonary: Add flag and enable/disable methods for AutoUpperCase
+#--------------------
+
+Dictionary define: 'autoUpperCaseFlag' toBe: FALSE ;
+
+Dictionary
+
+defineMethod:
+[ | enableAutoUpperCase |
+  !me <- ^self ;
+  me define: 'autoUpperCaseFlag' toBe: TRUE ;
+  #--  add current ones
+  ^self selectorList
+  do: [ !object <- ^my me at: asSelf ;
+        ^my me at: asSelf toUpper put: object ;
+      ] ;
+  ^self
+] .
+
+defineMethod:
+[ | disableAutoUpperCase |
+  ^self define: 'autoUpperCaseFlag' toBe: FALSE ;
+  ^self
+] .
+
+#--------------------
+#  Modify Dictionary lookup/update methods to use uppercase
+#     version if supplied string returns NA
+#--------------------
+
+defineMethod:
+[ | at: aString put: anObject |
+  aString isString
+  ifTrue:
+    [ aString locateOrAddInDictionaryOf: ^self .<- anObject ;
+      ^self autoUpperCaseFlag isTrue
+         ifTrue: [ aString toUpper
+                        locateOrAddInDictionaryOf: ^self . <- anObject ;
+                 ] ;
+    ] ;
+  ^self
+] .
+
+defineMethod:
+[ | at: aString |
+  aString isString
+  ifTrue:
+    [ aString locateInDictionaryOf: ^self . value
+         elseIf: [ ^self autoUpperCaseFlag isTrue ]        # <---
+           then: [ aString toUpper locateInDictionaryOf: ^self .value ] # <---
+    ]
+] .
+
+defineMethod:
+[ | delete: aString | 
+  aString isString && [ aString toUpper != "AUTOUPPERCASEFLAG" ] 
+  ifTrue: 
+    [ aString deleteFromDictionaryOf: ^self ;
+      ^self autoUpperCaseFlag isTrue
+         ifTrue: [ aString toUpper deleteFromDictionaryOf: ^self ] ;
+    ] ;
+  ^self
+] .
+
+;
+
+#--------------------
+#  Modify this dictionary creation method to enable auto uppercase
+#    (used to covert a url into its attribute/value pairs and store
+#      in a dictionary)
+#--------------------
+
+String defineMethod: [ | asDictionaryUsing: attChar and: valChar |
+!specialChars <- CoreWorkspace Interface HtmlAccess ;
+!dictionary <- CoreWorkspace Dictionary basicSpecialized enableAutoUpperCase ;
+^self breakOn: attChar .
+  extendBy:
+   [!fields <- ^self breakOn: ^my valChar ;
+    !id <- fields at: 1 .else: "" .stripBoundingBlanks ;
+    !val <- fields at: 2 .else: "" .stripBoundingBlanks ;
+    :val <- ^my specialChars decodeString: val ;
+   ] .
+  select: [id isntDefault] .
+  do: [^my dictionary at: id put: val] ;
+  dictionary
+] ;
+

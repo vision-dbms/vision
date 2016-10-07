@@ -1,0 +1,68 @@
+####################
+#  MessageSetup -  -  Portfolio Management Application Layer: supp
+#     this feed is used to define descriptive information
+#     about supplemental messages defined for the Portfolio Mangement App
+#
+#  This feed uses the following fields:
+#     classId           core class name
+#     message           message defined for class
+#     keyType           flags that message can be thought of as a 'key'
+#     returnType        type of object returned by message
+#     containerType     form object returned in - Object, List, IList, or TS
+#     level             usage level:  Basic, Advanced, DBA
+#     function          function type: Data by default
+#     tvFlag            time-varying indicator (for methods)
+#     brief             brief description
+#     description       full description
+#     paramList         comma separated list of parameter types (for kword messages)
+#
+#  classId/message
+#     These fields identify the message.  Both must be present and must
+#     identify an existing message.
+#  keyType
+#     This optional field is used to indicate that the message can be
+#     thought of as a "key" for the class.  Vision does not use keys
+#     explicitly but this field can be used as an indicator on schema
+#     based reports.  Valid values for this field are FULL and PARTIAL 
+#     indicating the message represents the FULL (only) key or a PARTIAL
+#     key.
+#  returnType
+#    This field indicates the class of object returned by the method.
+#  containerType
+#    This field indicates the form of the object returned when the
+#    message returns a collection.  Valid values are List, IndexedList,
+#    TimeSeries, and Object indicating the type of collection, if applicable.
+#    The default value is Object.
+#  level
+#    This field is used to indicate expected user level for the message: Basic,
+#    Advanced, or DBA.
+#  function
+#    This field is used to define a functional categorization for the message.
+#    By default, messages uploaded via this feed are set to a function type
+#    of Data.
+#  tvFlag
+#    This flag indicates if the message returns different values over time.
+#    If the message is a property or constant, this field is ignored since
+#    the time varying attribute is based on the type of property.  If this
+#    message refers to a method, you can use this field to indicate that
+#    the method my returned different values as of different dates by
+#    supplying the value Yes or True.  By default, methods are not
+#    flagged as time-varying.
+#  brief
+#   This field is used to define a brief description
+#  description
+#   This field is used to define a long description
+#  paramList
+#   This field contains a comma-separated list of types, one for
+#   each parameter in binary and keyword messages.  This field can also
+#   be used to set the index type for an messages that return an IndexedList.
+#
+#  The fields can be supplied in any order as long as the header line
+#  indicates which fields are present.  The 'classId' and 'message'
+#  fields must be present.  
+####################
+
+
+
+classId	message	keyType	returnType	containerType	tvFlag	description	paramList
+

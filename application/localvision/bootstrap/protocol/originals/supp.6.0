@@ -1,0 +1,268 @@
+##################################################
+#  This file contains miscellaneous methods that have not been migrated
+#     into the rel 6.0 test release scripts or documentation
+##################################################
+
+####################
+#  Messages that define new messages must remove old definition first;
+#  otherwise, the new definition may not stick if the message type changes
+####################
+
+Object defineMethod: [ | defineFixedProperty: name | 
+  !selector <- name asSelf asSelector ;
+  selector deleteFromDictionaryOf: ^self; 
+  ^self __defineFixedProperty: selector ; 
+  ^self hasSchema ifTrue: [^self classDescriptor flagForMessageUpdate]; 
+  ^self
+] ;
+
+Object defineMethod: [ | define: name | 
+  !selector <- name asSelf asSelector ;
+  selector deleteFromDictionaryOf: ^self; 
+  ^self __define: selector ;
+  ^self hasSchema ifTrue: [^self classDescriptor flagForMessageUpdate]; 
+  ^self
+] ;
+
+Object defineMethod: [ | define: name toBe: constant | 
+  !selector <- name asSelf asSelector ;
+  selector deleteFromDictionaryOf: ^self; 
+  ^self __define: selector toBe: constant; 
+  ^self hasSchema ifTrue: [^self classDescriptor flagForMessageUpdate]; 
+  ^self
+] ;
+
+Object defineMethod: [ | defineMethod: methodSource| 
+!method <- methodSource; 
+methodSource isString ifTrue: [:method <- methodSource evaluate]; 
+method selector deleteFromDictionaryOf: ^self ;
+^self __defineMethod: method; 
+^self hasSchema 
+ifTrue: [
+	methodSource isString ifTrue: [
+		!name <- method selector asString; 
+		^global Schema updateMethod: name at: ^self classDescriptor 
+		with: methodSource; 
+		]
+	ifFalse: [^self classDescriptor flagForMessageUpdate]; 
+	]; 
+^self
+] ;
+
+#--------------------
+
+####################
+#  Fix printWithLeadingZeros: method defined in EXTnumber.6.0 to
+#    work with non-integers
+####################
+
+Number defineMethod: [ | printWithLeadingZeros: aWidth | 
+aWidth < 0 
+  ifTrue: [ ^self print: aWidth ]
+ ifFalse: 
+   [ !string <- [ ^self print: aWidth ] divertOutput stripBoundingBlanks;
+     "0" fill: aWidth . concat: string . 
+          take: aWidth negated . print ; 
+   ] ;
+^self
+] ;
+
+Number defineMethod: [ | printWithLeadingZerosNL: aWidth |
+    ^self printWithLeadingZeros: aWidth;
+    newLine print;
+    ^self
+] ;
+
+
+#3.12345 printWithLeadingZerosNL: 10.4 ;
+#3 printWithLeadingZerosNL: 10.4 ;
+#3.12345 printWithLeadingZerosNL: -10.4 ;
+#3 printWithLeadingZerosNL: -10.4 ;
+
+
+
+
+##################################################
+#  Cover Methods for rel6.0
+##################################################
+
+####################
+#  Define prototype to use with HRT and LRT
+####################
+HighResolutionTime 
+   define: 'tsPrototype' toBe: [ HighResolutionTime newTimeSeries ] ;
+LowResolutionTime 
+   define: 'tsPrototype' toBe: [ LowResolutionTime newTimeSeries ] ;
+
+####################
+#  Define t/s properts with time index (Date by default)
+####################
+
+Object 
+defineMethod:
+[ | define: id withTimeIndex: type |
+  type isTime
+    ifTrue: 
+      [^self defineProperty: id withPrototype: type tsPrototype ;
+        id locateInDictionaryOf: ^self . <- ^my TheDefaultProperty ;
+      ]
+    ifFalse: [^self define: id] ;
+  ^self
+] ;
+
+Object
+defineMethod:
+[ | getProperties | 
+  !class <- ^self ;
+  class selectorList
+    extendBy: [ !type <- ^my class getPropertyPrototypeFor: ^self ] .
+    select: [ type isntNA ] 
+] ;
+
+Object
+defineMethod:
+[ | displayProperties |
+!class <- ^self; 
+"Properties Defined At: " print; class whatAmI printNL; 
+!props <- class getProperties ;
+props count > 0 
+ifTrue:
+  [ !max <- props max: [ count ] . + 5 ;
+    props 
+    do: [ ^self print: ^my max ;
+          type isValue 
+            ifTrue: [ " FixedProperty" printNL ] 
+           ifFalse: [ type displayInfo ] ;
+        ] ;
+  ]
+ifFalse:
+  [ "...  No Properties Defined" printNL ] ;
+] ;
+
+  
+####################
+#  Misc cleanups
+####################
+Value defineMethod: 
+[ | displayInfo | 
+  " " print; 
+  ^self whatAmI print; 
+  " [FixedProperty]" printNL ;
+] ;
+
+TimeSeries
+defineMethod:
+[ | displayInfo |
+  " " print; 
+  ^self whatAmI print; 
+  " [" print; ^self timeZero whatAmI print; "]" printNL; 
+] ;
+
+#--------------------------------------------------
+
+####################
+#  Covert Number in date.hhmmsssssss format to LRTS
+#  !!! These are experimental and may not be part of the bootstrap !!!
+####################
+
+Number defineMethod: [ | asTimeStamp |
+!yyyymmdd <- ^self asInteger; 
+!hhmmss <- ((^self - yyyymmdd) * 10000 ) round: 4 ; 
+!hhmm <- hhmmss asInteger; 
+!secs <- (hhmmss - hhmm) * 100 round: 4 ; 
+!hh <- (hhmm / 100) asInteger; 
+!mm <- hhmm mod: 100; 
+^global LowResolutionTime fromDate: yyyymmdd asDate hours: hh minutes: mm 
+andSeconds: secs
+] ;
+
+Number defineMethod: [ | asDate | 
+  ^self asInteger  = ^self
+    ifTrue: [^self asInteger asDate ] ifFalse: [ ^self asTimeStamp ]
+] ;
+
+Number defineMethod: [ | evaluate: aBlock | 
+ ^self asDate send: [isntNA ifTrue: [^self evaluate: ^my aBlock] ]
+] ;
+
+Number defineMethod: [ | asLowResolutionTime |
+  ^self asDate asLowResolutionTime
+] ;
+
+#----------
+
+Time defineMethod: [  | year | ^self asDate year ] ;
+Time defineMethod: [  | month | ^self asDate month ] ;
+Time defineMethod: [  | day | ^self asDate day ] ;
+
+Time defineMethod: [ | hours | 
+  ^self __getLongValuePart0 asInteger mod: 24
+] ;
+
+Time defineMethod: [ | minutes | 
+    (^self __getLongValuePart1 / 60000000.0)  asInteger mod: 60 . 
+] ;
+
+Time defineMethod: [ | seconds |
+  !base <- (^self __getLongValuePart1 / 1000000.0) asInteger ;
+  base mod: 60 . + (^self __getLongValuePart1 - (base * 1000000) ) / 1000000
+] ;
+
+#----------
+
+Time defineMethod: [ | asTime | 
+  [ ^self hours printWithLeadingZeros: 2 ; ":" print ;
+    ^self minutes printWithLeadingZeros: 2 ; ":" print; 
+    ^self seconds asInteger printWithLeadingZeros: 2 ;
+  ] divertOutput 
+] ;
+
+#----------
+
+Time defineMethod: [ | asNumber | 
+  ^self asDate asInteger + 
+    ((^self asTime stripChar: ":") asNumber / 1000000  round: 8 )
+] ;
+
+#----------
+
+Time defineMethod: [ | formatAsTimeStamp | 
+  ^self asDate formatUsingMMDDYY concat: "@" . concat: ^self asTime
+] ;
+
+#!ts <- 960309.03020159 asDate ;
+#ts do: [printNL ; asDate printNL ;
+#year printNL ; month printNL ; day printNL ;
+#hours printNL ;
+#minutes printNL ;
+#seconds printNL: 15.7 ;
+#asTime printNL ;
+#asNumber printNL: 30.6 ;
+#] ;
+
+#----------
+
+Time defineMethod: [ | countMinutesTo: target | 
+  ^self countSecondsTo: target . / 60 
+] ;
+
+Time defineMethod: [ | countHoursTo: target | 
+  ^self countSecondsTo: target . / 3600
+] ;
+
+Time defineMethod: [ | countSecondsTo: target |
+!date1 <- ^self asDate ;
+!date2 <- target asDate ;
+date1 isDate && date2 isDate
+ifTrue:
+  [
+  #--  hhmmss.ss format
+  !seconds1 <- ^self hours * 60 * 60 + ^self minutes * 60 + ^self seconds ;
+  !seconds2 <- target hours * 60 * 60 + target minutes * 60 + target seconds ;
+  !days <- date1 <= date2
+    ifTrue: [ date1 countDaysTo: date2 ]
+   ifFalse: [ date2 countDaysTo: date1 . * -1 ] ;
+  days * 24 * 60 * 60 + seconds2 - seconds1
+  ]
+] ;
+

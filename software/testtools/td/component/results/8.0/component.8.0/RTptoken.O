@@ -1,0 +1,1344 @@
+
+Beginning file: RTptoken.S ...
+
+
+
+********************************************************
+(PART 1)
+--------  Test The Collapse Function:		--------
+--------  'rtPTOKEN_CPDCumAdjustments'		--------
+********************************************************
+
+-----------------
+---  Inserts  ---
+-----------------
+
+(PART 1)-------------- Test 1 -----------------
+4+4 3+3 2+1 0+2
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 4:4
+P-Token{[Shift:14:I] 3:3
+P-Token{[Shift:17:I] 2:1
+P-Token{[Shift:18:I] 0:2
+P-Token{[Base:20:I]}}}}}
+--- Result: ---
+P-Token{[Shift:20] 4:4 3:3 2:1 0:2}
+
+(PART 1)-------------- Test 2 -----------------
+{4+4 3+3}  {2+1 0+2}
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 4:4 3:3
+P-Token{[Shift:17:I] 2:1 0:2
+P-Token{[Base:20:I]}}}
+--- Result: ---
+P-Token{[Shift:20] 4:4 3:3 2:1 0:2}
+
+(PART 1)-------------- Test 3 -----------------
+{4+4 2+1 0+2}  6+3
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 4:4 2:1 0:2
+P-Token{[Shift:17:I] 6:3
+P-Token{[Base:20:I]}}}
+--- Result: ---
+P-Token{[Shift:20] 4:4 3:3 2:1 0:2}
+
+(PART 1)-------------- Test 4 -----------------
+{0+2 3+3}  {2+1 4+4}
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 1:3 0:2
+P-Token{[Shift:15:I] 3:4 2:1
+P-Token{[Base:20:I]}}}
+--- Result: ---
+P-Token{[Shift:20] 1:7 0:3}
+
+(PART 1)-------------- Test 5 -----------------
+0+2 0+3 2+1 8+4 
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 0:2
+P-Token{[Shift:12:I] 0:3
+P-Token{[Shift:15:I] 2:1
+P-Token{[Shift:16:I] 8:4
+P-Token{[Base:20:I]}}}}}
+--- Result: ---
+P-Token{[Shift:20] 2:4 0:6}
+
+(PART 1)-------------- Test 6 -----------------
+{0+2 0+3}  {2+1 8+4}
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 0:5
+P-Token{[Shift:15:I] 7:4 2:1
+P-Token{[Base:20:I]}}}
+--- Result: ---
+P-Token{[Shift:20] 2:4 0:6}
+
+(PART 1)-------------- Test 7 -----------------
+0+2 2+1 0+3 8+4
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 0:2
+P-Token{[Shift:12:I] 2:1
+P-Token{[Shift:13:I] 0:3
+P-Token{[Shift:16:I] 8:4
+P-Token{[Base:20:I]}}}}}
+--- Result: ---
+P-Token{[Shift:20] 2:4 0:6}
+
+(PART 1)-------------- Test 8 -----------------
+{0+2 2+1}  {0+3 8+4}
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 0:3
+P-Token{[Shift:13:I] 5:4 0:3
+P-Token{[Base:20:I]}}}
+--- Result: ---
+P-Token{[Shift:20] 2:4 0:6}
+
+(PART 1)-------------- Test 9 -----------------
+{2+4 0+2} 2+1 0+3
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 2:4 0:2
+P-Token{[Shift:16:I] 2:1
+P-Token{[Shift:17:I] 0:3
+P-Token{[Base:20:I]}}}}
+--- Result: ---
+P-Token{[Shift:20] 2:4 0:6}
+
+(PART 1)-------------- Test 9B -----------------
+0+2 2+1 3+3 4+4
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 0:2
+P-Token{[Shift:12:I] 2:1
+P-Token{[Shift:13:I] 3:3
+P-Token{[Shift:16:I] 4:4
+P-Token{[Base:20:I]}}}}}
+--- Result: ---
+P-Token{[Shift:20] 0:10}
+
+-----------------
+---  Deletes  ---
+-----------------
+
+(PART 1)-------------- Test 10 -----------------
+8-3 4-1 2-2
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 8:-3
+P-Token{[Shift:7:I] 4:-1
+P-Token{[Shift:6:I] 2:-2
+P-Token{[Base:4:I]}}}}
+--- Result: ---
+P-Token{[Shift:4] 8:-3 4:-1 2:-2}
+
+(PART 1)-------------- Test 11 -----------------
+{8-3 4-1}  2-2
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 8:-3 4:-1
+P-Token{[Shift:6:I] 2:-2
+P-Token{[Base:4:I]}}}
+--- Result: ---
+P-Token{[Shift:4] 8:-3 4:-1 2:-2}
+
+(PART 1)-------------- Test 12 -----------------
+8-3 2-2 2-1
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 8:-3
+P-Token{[Shift:7:I] 2:-2
+P-Token{[Shift:5:I] 2:-1
+P-Token{[Base:4:I]}}}}
+--- Result: ---
+P-Token{[Shift:4] 8:-3 4:-1 2:-2}
+
+(PART 1)-------------- Test 13 -----------------
+8-3  {2-2 2-1}
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 8:-3
+P-Token{[Shift:7:I] 4:-1 2:-2
+P-Token{[Base:4:I]}}}
+--- Result: ---
+P-Token{[Shift:4] 8:-3 4:-1 2:-2}
+
+(PART 1)-------------- Test 14 -----------------
+6-2 6-3
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 6:-2
+P-Token{[Shift:8:I] 6:-3
+P-Token{[Base:5:I]}}}
+--- Result: ---
+P-Token{[Shift:5] 8:-5}
+
+(PART 1)-------------- Test 15 -----------------
+6-3 5-2
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 6:-3
+P-Token{[Shift:7:I] 5:-2
+P-Token{[Base:5:I]}}}
+--- Result: ---
+P-Token{[Shift:5] 8:-5}
+
+(PART 1)-------------- Test 16 -----------------
+8-2 6-1
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 8:-2
+P-Token{[Shift:8:I] 6:-1
+P-Token{[Base:7:I]}}}
+--- Result: ---
+P-Token{[Shift:7] 8:-3}
+
+(PART 1)-------------- Test 17 -----------------
+{8-2 6-1}
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 8:-3
+P-Token{[Base:7:I]}}
+--- Result: ---
+P-Token{[Shift:7] 8:-3}
+
+(PART 1)-------------- Test 18 -----------------
+8-2 7-1 6-3
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 8:-2
+P-Token{[Shift:8:I] 7:-1
+P-Token{[Shift:7:I] 6:-3
+P-Token{[Base:4:I]}}}}
+--- Result: ---
+P-Token{[Shift:4] 9:-6}
+
+(PART 1)-------------- Test 19 -----------------
+{8-2 7-1}  6-3
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 9:-3
+P-Token{[Shift:7:I] 6:-3
+P-Token{[Base:4:I]}}}
+--- Result: ---
+P-Token{[Shift:4] 9:-6}
+
+(PART 1)-------------- Test 20 -----------------
+5-2 7-4
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 5:-2
+P-Token{[Shift:8:I] 7:-4
+P-Token{[Base:4:I]}}}
+--- Result: ---
+P-Token{[Shift:4] 9:-6}
+
+(PART 1)-------------- Test 21 -----------------
+5-2 4-1 5-2 4-1
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 5:-2
+P-Token{[Shift:8:I] 4:-1
+P-Token{[Shift:7:I] 5:-2
+P-Token{[Shift:5:I] 4:-1
+P-Token{[Base:4:I]}}}}}
+--- Result: ---
+P-Token{[Shift:4] 9:-6}
+
+(PART 1)-------------- Test 22 -----------------
+{9-2 4-1}  6-3
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 9:-2 4:-1
+P-Token{[Shift:7:I] 6:-3
+P-Token{[Base:4:I]}}}
+--- Result: ---
+P-Token{[Shift:4] 9:-6}
+
+(PART 1)-------------- Test 23 -----------------
+6-2 4-1 6-3
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 6:-2
+P-Token{[Shift:8:I] 4:-1
+P-Token{[Shift:7:I] 6:-3
+P-Token{[Base:4:I]}}}}
+--- Result: ---
+P-Token{[Shift:4] 9:-6}
+
+(PART 1)-------------- Test 24 -----------------
+6-2 6-2 6-2
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 6:-2
+P-Token{[Shift:8:I] 6:-2
+P-Token{[Shift:6:I] 6:-2
+P-Token{[Base:4:I]}}}}
+--- Result: ---
+P-Token{[Shift:4] 10:-6}
+
+(PART 1)-------------- Test 25 -----------------
+6-2 6-2 6-3
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 6:-2
+P-Token{[Shift:8:I] 6:-2
+P-Token{[Shift:6:I] 6:-3
+P-Token{[Base:3:I]}}}}
+--- Result: ---
+P-Token{[Shift:3] 10:-7}
+
+(PART 1)-------------- Test 26 -----------------
+{6-2 6-2}  6-3
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 8:-4
+P-Token{[Shift:6:I] 6:-3
+P-Token{[Base:3:I]}}}
+--- Result: ---
+P-Token{[Shift:3] 10:-7}
+
+-----------------------
+---  DeleteInserts  ---
+-----------------------
+
+(PART 1)-------------- Test 27 -----------------
+6-3 3+3 3+2
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 6:-3
+P-Token{[Shift:7:I] 3:3
+P-Token{[Shift:10:I] 3:2
+P-Token{[Base:12:I]}}}}
+--- Result: ---
+P-Token{[Shift:12] 6:-3 3:5}
+
+(PART 1)-------------- Test 28 -----------------
+{6-3 3+3}  3+2
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 6:-3 3:3
+P-Token{[Shift:10:I] 3:2
+P-Token{[Base:12:I]}}}
+--- Result: ---
+P-Token{[Shift:12] 6:-3 3:5}
+
+(PART 1)-------------- Test 29 -----------------
+6-3 {3+3 3+2}
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 6:-3
+P-Token{[Shift:7:I] 3:5
+P-Token{[Base:12:I]}}}
+--- Result: ---
+P-Token{[Shift:12] 6:-3 3:5}
+
+(PART 1)-------------- Test 30 -----------------
+6-3 3+3 4+2
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 6:-3
+P-Token{[Shift:7:I] 3:3
+P-Token{[Shift:10:I] 4:2
+P-Token{[Base:12:I]}}}}
+--- Result: ---
+P-Token{[Shift:12] 6:-3 3:5}
+
+(PART 1)-------------- Test 31 -----------------
+3-2 5-3 1+2 4+1 
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 3:-2
+P-Token{[Shift:8:I] 5:-3
+P-Token{[Shift:5:I] 1:2
+P-Token{[Shift:7:I] 4:1
+P-Token{[Base:8:I]}}}}}
+--- Result: ---
+P-Token{[Shift:8] 7:-3 4:1 3:-2 1:2}
+
+(PART 1)-------------- Test 32 -----------------
+{3-2 5-3} {1+2 4+1}
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 7:-3 3:-2
+P-Token{[Shift:5:I] 2:1 1:2
+P-Token{[Base:8:I]}}}
+--- Result: ---
+P-Token{[Shift:8] 7:-3 4:1 3:-2 1:2}
+
+(PART 1)-------------- Test 33 -----------------
+3-2 {1+2 7-3 4+1}
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 3:-2
+P-Token{[Shift:8:I] 5:1 5:-3 1:2
+P-Token{[Base:8:I]}}}
+--- Result: ---
+P-Token{[Shift:8] 7:1 7:-3 3:-2 1:2}
+
+(PART 1)-------------- Test 34 -----------------
+{3-2 1+2 7-3} 4+1
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 7:-3 3:2 3:-2
+P-Token{[Shift:7:I] 4:1
+P-Token{[Base:8:I]}}}
+--- Result: ---
+P-Token{[Shift:8] 7:-3 4:1 3:2 3:-2}
+
+(PART 1)-------------- Test 35 -----------------
+3-2 1+2 7-3 4+1
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 3:-2
+P-Token{[Shift:8:I] 1:2
+P-Token{[Shift:10:I] 7:-3
+P-Token{[Shift:7:I] 4:1
+P-Token{[Base:8:I]}}}}}
+--- Result: ---
+P-Token{[Shift:8] 7:-3 4:1 3:-2 1:2}
+
+(PART 1)-------------- Test 36 -----------------
+7-3 4+1 3-2 1+2
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 7:-3
+P-Token{[Shift:7:I] 4:1
+P-Token{[Shift:8:I] 3:-2
+P-Token{[Shift:6:I] 1:2
+P-Token{[Base:8:I]}}}}}
+--- Result: ---
+P-Token{[Shift:8] 7:-3 4:1 3:-2 1:2}
+
+(PART 1)-------------- Test 37 -----------------
+{7-3 4+1 3-2}  1+1 1+5
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 7:-3 4:1 3:-2
+P-Token{[Shift:6:I] 1:1
+P-Token{[Shift:7:I] 1:5
+P-Token{[Base:12:I]}}}}
+--- Result: ---
+P-Token{[Shift:12] 7:-3 4:1 3:-2 1:6}
+
+-----------------------
+---  InsertDeletes  ---
+-----------------------
+
+(PART 1)-------------- Test 38 -----------------
+10+2 2-1 4+3 10-2
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 10:2
+P-Token{[Shift:12:I] 2:-1
+P-Token{[Shift:11:I] 4:3
+P-Token{[Shift:14:I] 10:-2
+P-Token{[Base:12:I]}}}}}
+--- Result: ---
+P-Token{[Shift:12] 10:2 8:-2 5:3 2:-1}
+
+(PART 1)-------------- Test 39 -----------------
+{10+2 2-1} 4+3 10-2
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 10:2 2:-1
+P-Token{[Shift:11:I] 4:3
+P-Token{[Shift:14:I] 10:-2
+P-Token{[Base:12:I]}}}}
+--- Result: ---
+P-Token{[Shift:12] 10:2 8:-2 5:3 2:-1}
+
+(PART 1)-------------- Test 40 -----------------
+{10+2 2-1} {4+3 10-2}
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 10:2 2:-1
+P-Token{[Shift:11:I] 7:-2 4:3
+P-Token{[Base:12:I]}}}
+--- Result: ---
+P-Token{[Shift:12] 10:2 8:-2 5:3 2:-1}
+
+(PART 1)-------------- Test 41 -----------------
+10+2 {2-1 4+3 10-2}
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 10:2
+P-Token{[Shift:12:I] 8:-2 5:3 2:-1
+P-Token{[Base:12:I]}}}
+--- Result: ---
+P-Token{[Shift:12] 10:2 8:-2 5:3 2:-1}
+
+(PART 1)-------------- Test 42 -----------------
+5+3 2-1 0+2 14-2
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 5:3
+P-Token{[Shift:13:I] 2:-1
+P-Token{[Shift:12:I] 0:2
+P-Token{[Shift:14:I] 14:-2
+P-Token{[Base:12:I]}}}}}
+--- Result: ---
+P-Token{[Shift:12] 10:-2 5:3 2:-1 0:2}
+
+(PART 1)-------------- Test 43 -----------------
+{5+3 2-1} {0+2 14-2}
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 5:3 2:-1
+P-Token{[Shift:12:I] 12:-2 0:2
+P-Token{[Base:12:I]}}}
+--- Result: ---
+P-Token{[Shift:12] 10:-2 5:3 2:-1 0:2}
+
+(PART 1)-------------- Test 44 -----------------
+9+2 7-2 4+1 3-3
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 9:2
+P-Token{[Shift:12:I] 7:-2
+P-Token{[Shift:10:I] 4:1
+P-Token{[Shift:11:I] 3:-3
+P-Token{[Base:8:I]}}}}}
+--- Result: ---
+P-Token{[Shift:8] 9:2 7:-2 4:1 3:-3}
+
+(PART 1)-------------- Test 45 -----------------
+{9+2 7-2 4+1} 3-3
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 9:2 7:-2 4:1
+P-Token{[Shift:11:I] 3:-3
+P-Token{[Base:8:I]}}}
+--- Result: ---
+P-Token{[Shift:8] 9:2 7:-2 4:1 3:-3}
+
+(PART 1)-------------- Test 46 -----------------
+{9+2 7-2 4+1 3-3}
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 9:2 7:-2 4:1 3:-3
+P-Token{[Base:8:I]}}
+--- Result: ---
+P-Token{[Shift:8] 9:2 7:-2 4:1 3:-3}
+
+(PART 1)-------------- Test 46B -----------------
+3+3 7-4
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 3:3
+P-Token{[Shift:13:I] 7:-4
+P-Token{[Base:9:I]}}}
+--- Result: ---
+P-Token{[Shift:9] 4:-1}
+
+(PART 1)-------------- Test 46C -----------------
+3+3 7-3
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 3:3
+P-Token{[Shift:13:I] 7:-3
+P-Token{[Base:10:I]}}}
+--- Result: ---
+P-Token{[Shift:10] 4:-1 3:1}
+
+(PART 1)-------------- Test 47 -----------------
+3+3 6-3
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 3:3
+P-Token{[Shift:13:I] 6:-3
+P-Token{[Base:10:I]}}}
+--- Result: ---
+P-Token{[Shift:10]}
+
+(PART 1)-------------- Test 48 -----------------
+3+3 6-2
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 3:3
+P-Token{[Shift:13:I] 6:-2
+P-Token{[Base:11:I]}}}
+--- Result: ---
+P-Token{[Shift:11] 3:1}
+
+(PART 1)-------------- Test 49 -----------------
+3+4 5-2
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 3:4
+P-Token{[Shift:14:I] 5:-2
+P-Token{[Base:12:I]}}}
+--- Result: ---
+P-Token{[Shift:12] 3:2}
+
+(PART 1)-------------- Test 50 -----------------
+3+3 6-4
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 3:3
+P-Token{[Shift:13:I] 6:-4
+P-Token{[Base:9:I]}}}
+--- Result: ---
+P-Token{[Shift:9] 3:-1}
+
+(PART 1)-------------- Test 51 -----------------
+3+3 5-4
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 3:3
+P-Token{[Shift:13:I] 5:-4
+P-Token{[Base:9:I]}}}
+--- Result: ---
+P-Token{[Shift:9] 3:1 3:-2}
+
+(PART 1)-------------- Test 52 -----------------
+9+3 13-4 6+4 11-6 3+1 4-1 1+2 3-3
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 9:3
+P-Token{[Shift:13:I] 13:-4
+P-Token{[Shift:9:I] 6:4
+P-Token{[Shift:13:I] 11:-6
+P-Token{[Shift:7:I] 3:1
+P-Token{[Shift:8:I] 4:-1
+P-Token{[Shift:7:I] 1:2
+P-Token{[Shift:9:I] 3:-3
+P-Token{[Base:6:I]}}}}}}}}}
+--- Result: ---
+P-Token{[Shift:6] 10:-1 7:-2 1:-1}
+
+(PART 1)-------------- Test 53 -----------------
+{9+3 6+4 3+1 1+2} {3-3 3-1 10-6 10-4}
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 9:3 6:4 3:1 1:2
+P-Token{[Shift:20:I] 20:-4 14:-6 6:-1 3:-3
+P-Token{[Base:6:I]}}}
+--- Result: ---
+P-Token{[Shift:6] 10:-1 7:-2 1:-1}
+
+(PART 1)-------------- Test 54 -----------------
+{9+3 6+4} {3+1 1+2} {3-3 3-1} {10-6 10-4}
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 9:3 6:4
+P-Token{[Shift:17:I] 3:1 1:2
+P-Token{[Shift:20:I] 6:-1 3:-3
+P-Token{[Shift:16:I] 16:-4 10:-6
+P-Token{[Base:6:I]}}}}}
+--- Result: ---
+P-Token{[Shift:6] 10:-1 7:-2 1:-1}
+
+(PART 1)-------------- Test 55 -----------------
+{3+1 1+2} 9+4 {16+3 6-1} 13-6 {3-3 10-4}
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 3:1 1:2
+P-Token{[Shift:13:I] 9:4
+P-Token{[Shift:17:I] 16:3 6:-1
+P-Token{[Shift:19:I] 13:-6
+P-Token{[Shift:13:I] 13:-4 3:-3
+P-Token{[Base:6:I]}}}}}}
+--- Result: ---
+P-Token{[Shift:6] 10:-1 7:-2 1:-1}
+
+(PART 1)-------------- Test 56 -----------------
+9+2 10-3 5+3 9-3 3+2 5-1 1+2 2-1
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 9:2
+P-Token{[Shift:12:I] 10:-3
+P-Token{[Shift:9:I] 5:3
+P-Token{[Shift:12:I] 9:-3
+P-Token{[Shift:9:I] 3:2
+P-Token{[Shift:11:I] 5:-1
+P-Token{[Shift:10:I] 1:2
+P-Token{[Shift:12:I] 2:-1
+P-Token{[Base:11:I]}}}}}}}}}
+--- Result: ---
+P-Token{[Shift:11] 9:1 9:-2 6:-1 5:1 3:1 1:1}
+
+(PART 1)-------------- Test 57 -----------------
+9+2 {10-3 5+3} {9-3 3+2} {5-1 1+2} 2-1
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 9:2
+P-Token{[Shift:12:I] 10:-3 5:3
+P-Token{[Shift:12:I] 9:-3 3:2
+P-Token{[Shift:11:I] 5:-1 1:2
+P-Token{[Shift:12:I] 2:-1
+P-Token{[Base:11:I]}}}}}}
+--- Result: ---
+P-Token{[Shift:11] 9:1 9:-2 6:-1 5:1 3:1 1:1}
+
+(PART 1)-------------- Test 58 -----------------
+5+3 9-3 1+2 2-1 4+2 6-1 11+2 12-3
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 5:3
+P-Token{[Shift:13:I] 9:-3
+P-Token{[Shift:10:I] 1:2
+P-Token{[Shift:12:I] 2:-1
+P-Token{[Shift:11:I] 4:2
+P-Token{[Shift:13:I] 6:-1
+P-Token{[Shift:12:I] 11:2
+P-Token{[Shift:14:I] 12:-3
+P-Token{[Base:11:I]}}}}}}}}}
+--- Result: ---
+P-Token{[Shift:11] 9:1 9:-2 6:-1 5:1 3:1 1:1}
+
+(PART 1)-------------- Test 59 -----------------
+9+2 5+3 3+2 1+2 2-1 6-1 11-3 12-3
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 9:2
+P-Token{[Shift:12:I] 5:3
+P-Token{[Shift:15:I] 3:2
+P-Token{[Shift:17:I] 1:2
+P-Token{[Shift:19:I] 17:-3 13:-3 7:-1 2:-1
+P-Token{[Base:11:I]}}}}}}
+--- Result: ---
+P-Token{[Shift:11] 9:1 9:-2 6:-1 5:1 3:1 1:1}
+
+(PART 1)-------------- Test 60 -----------------
+9+2 5+3 1+2 5+2 7-1 2-1 15-3 11-3
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 9:2
+P-Token{[Shift:12:I] 5:3
+P-Token{[Shift:15:I] 1:2
+P-Token{[Shift:17:I] 5:2
+P-Token{[Shift:19:I] 7:-1
+P-Token{[Shift:18:I] 2:-1
+P-Token{[Shift:17:I] 15:-3
+P-Token{[Shift:14:I] 11:-3
+P-Token{[Base:11:I]}}}}}}}}}
+--- Result: ---
+P-Token{[Shift:11] 9:1 9:-2 6:-1 5:1 3:1 1:1}
+
+------------------------------
+---  Misc. Assorted Cases  ---
+------------------------------
+
+(PART 1)-------------- Test 61 -----------------
+10+3 3-2 1+1 1+2 8-2 8+1
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 10:3
+P-Token{[Shift:13:I] 3:-2
+P-Token{[Shift:11:I] 1:1
+P-Token{[Shift:12:I] 1:2
+P-Token{[Shift:14:I] 8:-2
+P-Token{[Shift:12:I] 8:1
+P-Token{[Base:13:I]}}}}}}}
+--- Result: ---
+P-Token{[Shift:13] 10:3 9:1 7:-2 3:-2 1:3}
+
+(PART 1)-------------- Test 62 -----------------
+10+3 {3-2 1+1} {1+2 8-2 8+1}
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 10:3
+P-Token{[Shift:13:I] 3:-2 1:1
+P-Token{[Shift:12:I] 8:1 6:-2 1:2
+P-Token{[Base:13:I]}}}}
+--- Result: ---
+P-Token{[Shift:13] 10:3 9:1 7:-2 3:-2 1:3}
+
+(PART 1)-------------- Test 63 -----------------
+4+4 11+1 8+2 11-3 1-1
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 4:4
+P-Token{[Shift:14:I] 11:1
+P-Token{[Shift:15:I] 8:2
+P-Token{[Shift:17:I] 11:-3
+P-Token{[Shift:14:I] 1:-1
+P-Token{[Base:13:I]}}}}}}
+--- Result: ---
+P-Token{[Shift:13] 7:1 5:-1 4:4 1:-1}
+
+(PART 1)-------------- Test 64 -----------------
+{4+4 11+1} 8+2 {11-3 1-1}
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 7:1 4:4
+P-Token{[Shift:15:I] 8:2
+P-Token{[Shift:17:I] 11:-3 1:-1
+P-Token{[Base:13:I]}}}}
+--- Result: ---
+P-Token{[Shift:13] 7:1 5:-1 4:4 1:-1}
+
+(PART 1)-------------- Test 65 -----------------
+8-1 7-2 1+2 0+1 10+3
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 8:-1
+P-Token{[Shift:9:I] 7:-2
+P-Token{[Shift:7:I] 1:2
+P-Token{[Shift:9:I] 0:1
+P-Token{[Shift:10:I] 10:3
+P-Token{[Base:13:I]}}}}}}
+--- Result: ---
+P-Token{[Shift:13] 10:3 8:-3 1:2 0:1}
+
+(PART 1)-------------- Test 66 -----------------
+{8-1 7-2 1+2 0+1} 10+3
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 8:-3 1:2 0:1
+P-Token{[Shift:10:I] 10:3
+P-Token{[Base:13:I]}}}
+--- Result: ---
+P-Token{[Shift:13] 10:3 8:-3 1:2 0:1}
+
+(PART 1)-------------- Test 67 -----------------
+10-10 0+10
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 10:-10
+P-Token{[Shift:0:I] 0:10
+P-Token{[Base:10:I]}}}
+--- Result: ---
+P-Token{[Shift:10] 10:-10 0:10}
+
+(PART 1)-------------- Test 68 -----------------
+10-10 0+5 2+5
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 10:-10
+P-Token{[Shift:0:I] 0:5
+P-Token{[Shift:5:I] 2:5
+P-Token{[Base:10:I]}}}}
+--- Result: ---
+P-Token{[Shift:10] 10:-10 0:10}
+
+(PART 1)-------------- Test 69 -----------------
+10-5 5-5 0+10
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 10:-5
+P-Token{[Shift:5:I] 5:-5
+P-Token{[Shift:0:I] 0:10
+P-Token{[Base:10:I]}}}}
+--- Result: ---
+P-Token{[Shift:10] 10:-10 0:10}
+
+(PART 1)-------------- Test 70 -----------------
+5-5 5-5 0+10
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 5:-5
+P-Token{[Shift:5:I] 5:-5
+P-Token{[Shift:0:I] 0:10
+P-Token{[Base:10:I]}}}}
+--- Result: ---
+P-Token{[Shift:10] 10:-10 0:10}
+
+(PART 1)-------------- Test 71 -----------------
+10+1 8+1 2+1 5+1 8+1
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 10:1
+P-Token{[Shift:11:I] 8:1
+P-Token{[Shift:12:I] 2:1
+P-Token{[Shift:13:I] 5:1
+P-Token{[Shift:14:I] 8:1
+P-Token{[Base:15:I]}}}}}}
+--- Result: ---
+P-Token{[Shift:15] 10:1 8:1 6:1 4:1 2:1}
+
+(PART 1)-------------- Test 72 -----------------
+10-1 8-1 2-1 3-1 4-1
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 10:-1
+P-Token{[Shift:9:I] 8:-1
+P-Token{[Shift:8:I] 2:-1
+P-Token{[Shift:7:I] 3:-1
+P-Token{[Shift:6:I] 4:-1
+P-Token{[Base:5:I]}}}}}}
+--- Result: ---
+P-Token{[Shift:5] 10:-1 8:-1 6:-1 4:-1 2:-1}
+
+(PART 1)-------------- Test 73 -----------------
+10-10
+
+       
+---  Shift: ---
+P-Token{[Shift:10:I] 10:-10
+P-Token{[Base:0:I]}}
+--- Result: ---
+P-Token{[Shift:0] 10:-10}
+
+(PART 1)-------------- Test 74 -----------------
+0+5 5+5 3-2
+
+       
+---  Shift: ---
+P-Token{[Shift:0:I] 0:5
+P-Token{[Shift:5:I] 5:5
+P-Token{[Shift:10:I] 3:-2
+P-Token{[Base:8:I]}}}}
+--- Result: ---
+P-Token{[Shift:8] 0:8}
+
+
+
+********************************************************
+(PART 2)
+--------  Test The Append Function:		--------
+--------  'rtPTOKEN_AppendAdjustments' 		--------
+********************************************************
+
+(PART 2)-------------- 1 ------------------
+RTYPE_C_IntUV{
+    0 1 2 3 4 5 7 0 8 9 
+}P-Token{[Shift:10:I] 8:1 7:-1
+P-Token{[Base:10:I]}}
+(PART 2)-------------- 2 ------------------
+RTYPE_C_IntUV{
+    0 1 2 3 4 5 6 0 7 0 8 9 
+}P-Token{[Shift:10:I] 8:1 7:1
+P-Token{[Base:12:I]}}
+(PART 2)-------------- 3 ------------------
+RTYPE_C_IntUV{
+    0 1 2 3 4 5 6 0 8 9 
+}P-Token{[Shift:10:I] 8:1 8:-1
+P-Token{[Base:10:I]}}
+(PART 2)-------------- 4 ------------------
+RTYPE_C_IntUV{
+    0 1 2 3 4 5 6 7 0 0 8 9 
+}P-Token{[Shift:10:I] 8:2
+P-Token{[Base:12:I]}}
+(PART 2)-------------- 5 ------------------
+>>>  Error Trapped By Debugger  <<<
+*	Positional Token Representation Type Handler [1490]
+*	An Internal Inconsistency
+*	_AppendAdjustment: Instruction Overlapping or Out of Order
+*		Origin:9, Shift:-1, PrevOrigin:8, PrevShift:1, Order(+)
+
+
+RTYPE_C_IntUV{
+    0 1 2 3 4 5 6 7 8 9 
+}P-Token{[Base:10:I]}
+(PART 2)-------------- 6 ------------------
+RTYPE_C_IntUV{
+    0 1 2 3 4 5 6 7 0 0 8 9 
+}P-Token{[Shift:10:I] 8:2
+P-Token{[Base:12:I]}}
+(PART 2)-------------- 7 ------------------
+RTYPE_C_IntUV{
+    0 1 2 3 4 5 6 7 0 9 
+}P-Token{[Shift:10:I] 9:-1 8:1
+P-Token{[Base:10:I]}}
+(PART 2)-------------- 8 ------------------
+RTYPE_C_IntUV{
+    0 1 2 3 4 5 6 7 0 8 0 9 
+}P-Token{[Shift:10:I] 9:1 8:1
+P-Token{[Base:12:I]}}
+(PART 2)-------------- 9 ------------------
+RTYPE_C_IntUV{
+    0 1 2 3 4 6 8 9 
+}P-Token{[Shift:10:I] 8:-1 6:-1
+P-Token{[Base:8:I]}}
+(PART 2)-------------- 10 ------------------
+RTYPE_C_IntUV{
+    0 1 2 3 4 5 0 6 8 9 
+}P-Token{[Shift:10:I] 8:-1 6:1
+P-Token{[Base:10:I]}}
+(PART 2)-------------- 11 ------------------
+RTYPE_C_IntUV{
+    0 1 2 3 4 5 8 9 
+}P-Token{[Shift:10:I] 8:-2
+P-Token{[Base:8:I]}}
+(PART 2)-------------- 12 ------------------
+RTYPE_C_IntUV{
+    0 1 2 3 4 5 6 0 8 9 
+}P-Token{[Shift:10:I] 8:-1 7:1
+P-Token{[Base:10:I]}}
+(PART 2)-------------- 13 ------------------
+RTYPE_C_IntUV{
+    0 1 2 3 4 5 6 9 
+}P-Token{[Shift:10:I] 9:-2
+P-Token{[Base:8:I]}}
+(PART 2)-------------- 14 ------------------
+RTYPE_C_IntUV{
+    0 1 2 3 4 5 6 8 0 9 
+}P-Token{[Shift:10:I] 9:1 8:-1
+P-Token{[Base:10:I]}}
+(PART 2)-------------- 15 ------------------
+RTYPE_C_IntUV{
+    0 1 2 3 4 5 6 8 
+}P-Token{[Shift:10:I] 10:-1 8:-1
+P-Token{[Base:8:I]}}
+(PART 2)-------------- 16 ------------------
+RTYPE_C_IntUV{
+    0 1 2 3 4 5 6 8 9 0 
+}P-Token{[Shift:10:I] 10:1 8:-1
+P-Token{[Base:10:I]}}
+
+
+********************************************************
+(PART 3)
+--------  Test Cartesian PTokens: 		--------
+--------  Updating them ...			--------
+********************************************************
+
+(PART 3)------------------ 1 ---------------
+RTYPE_C_IntUV{
+    0 0 0 0 0 1 2 3 8 9 10 11 
+}P-Token{[Shift:3:I] 2:-1 0:1
+P-Token{[Base:3:I]}}
+(PART 3)------------------ 2 ---------------
+RTYPE_C_IntUV{
+    0 1 2 3 0 0 0 0 0 0 0 0 4 5 6 7 8 9 10 11 
+}P-Token{[Shift:3:I] 1:2
+P-Token{[Base:5:I]}}
+(PART 3)------------------ 3 ---------------
+RTYPE_C_IntUV{
+    0 1 3 4 5 7 8 9 11 
+}P-Token{[Shift:4:I] 3:-1
+P-Token{[Base:3:I]}}
+(PART 3)------------------ 4 ---------------
+RTYPE_C_IntUV{
+    0 0 2 3 0 4 6 7 0 8 10 11 
+}P-Token{[Shift:4:I] 2:-1 0:1
+P-Token{[Base:4:I]}}
+(PART 3)------------------ 5 ---------------
+RTYPE_C_IntUV{
+    0 0 2 3 0 0 0 0 0 0 0 0 0 4 6 7 0 8 10 11 
+}P-Token{[Shift:3:I] 1:2
+P-Token{[Base:5:I]}}P-Token{[Shift:4:I] 2:-1 0:1
+P-Token{[Base:4:I]}}
+(PART 3)------------------ 6 ---------------
+RTYPE_C_IntUV{
+    0 0 0 0 1 3 8 9 11 
+}P-Token{[Shift:3:I] 2:-1 0:1
+P-Token{[Base:3:I]}}P-Token{[Shift:4:I] 3:-1
+P-Token{[Base:3:I]}}
+(PART 3)------------------ 7 ---------------
+RTYPE_C_IntUV{
+    0 0 0 0 0 0 0 1 2 3 0 4 5 6 7 0 0 0 0 0 0 8 9 10 11 
+}P-Token{[Shift:3:I] 2:1 0:1
+P-Token{[Base:5:I]}}P-Token{[Shift:4:I] 0:1
+P-Token{[Base:5:I]}}
+(PART 3)------------------ 8 ---------------
+RTYPE_C_IntUV{
+    0 0 1 2 3 0 0 5 6 7 0 0 9 10 11 0 0 13 14 15 0 0 0 0 0 0 0 25 26 27 
+}P-Token{[Shift:7:I] 6:-2 4:1
+P-Token{[Base:6:I]}}P-Token{[Shift:4:I] 1:-1 0:2
+P-Token{[Base:5:I]}}
+========== MORE COLUMNS =============
+
+(PART 3)------------------ 9 ---------------
+RTYPE_C_IntUV{
+    1 0 3 6 0 8 11 0 13 
+}P-Token{[Shift:5:I] 5:-1 3:1 3:-1 1:-1
+P-Token{[Base:3:I]}}
+(PART 3)------------------ 10 ---------------
+RTYPE_C_IntUV{
+    0 2 0 0 3 4 0 5 7 0 0 8 9 0 10 12 0 0 13 14 0 
+}P-Token{[Shift:5:I] 5:1 3:2 2:-1
+P-Token{[Base:7:I]}}
+(PART 3)------------------ 11 ---------------
+RTYPE_C_IntUV{
+    2 0 0 3 4 7 0 0 8 9 12 0 0 13 14 
+}P-Token{[Shift:5:I] 3:2 2:-2
+P-Token{[Base:5:I]}}
+(PART 3)------------------ 12 ---------------
+RTYPE_C_IntUV{
+    3 4 8 9 13 14 
+}P-Token{[Shift:5:I] 3:-3
+P-Token{[Base:2:I]}}
+(PART 3)------------------ 13 ---------------
+RTYPE_C_IntUV{
+    0 1 2 5 6 7 10 11 12 
+}P-Token{[Shift:5:I] 5:-2
+P-Token{[Base:3:I]}}
+(PART 3)------------------ 14 ---------------
+RTYPE_C_IntUV{
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+}P-Token{[Shift:5:I] 5:5 5:-5
+P-Token{[Base:5:I]}}
+========== MORE ROWS =============
+
+(PART 3)------------------ 15 ---------------
+RTYPE_C_IntUV{
+    3 4 5 0 0 0 9 10 11 
+}P-Token{[Shift:5:I] 5:-1 3:1 3:-1 1:-1
+P-Token{[Base:3:I]}}
+(PART 3)------------------ 16 ---------------
+RTYPE_C_IntUV{
+    0 1 2 6 7 8 0 0 0 0 0 0 9 10 11 12 13 14 0 0 0 
+}P-Token{[Shift:5:I] 5:1 3:2 2:-1
+P-Token{[Base:7:I]}}
+(PART 3)------------------ 17 ---------------
+RTYPE_C_IntUV{
+    6 7 8 0 0 0 0 0 0 9 10 11 12 13 14 
+}P-Token{[Shift:5:I] 3:2 2:-2
+P-Token{[Base:5:I]}}
+(PART 3)------------------ 18 ---------------
+RTYPE_C_IntUV{
+    9 10 11 12 13 14 
+}P-Token{[Shift:5:I] 3:-3
+P-Token{[Base:2:I]}}
+(PART 3)------------------ 19 ---------------
+RTYPE_C_IntUV{
+    0 1 2 3 4 5 6 7 8 
+}P-Token{[Shift:5:I] 5:-2
+P-Token{[Base:3:I]}}
+(PART 3)------------------ 20 ---------------
+RTYPE_C_IntUV{
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+}P-Token{[Shift:5:I] 5:5 5:-5
+P-Token{[Base:5:I]}}
+========== MORE BOTH =============
+
+(PART 3)------------------ 21 ---------------
+RTYPE_C_IntUV{
+    6 0 8 0 0 0 16 0 18 
+}P-Token{[Shift:5:I] 5:-1 3:1 3:-1 1:-1
+P-Token{[Base:3:I]}}P-Token{[Shift:5:I] 5:-1 3:1 3:-1 1:-1
+P-Token{[Base:3:I]}}
+(PART 3)------------------ 22 ---------------
+RTYPE_C_IntUV{
+    0 2 0 0 3 4 0 10 12 0 0 13 14 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 15 17 0 0 18 19
+    0 20 22 0 0 23 24 0 0 0 0 0 0 0 0 
+}P-Token{[Shift:5:I] 5:1 3:2 2:-1
+P-Token{[Base:7:I]}}P-Token{[Shift:5:I] 5:1 3:2 2:-1
+P-Token{[Base:7:I]}}
+(PART 3)------------------ 23 ---------------
+RTYPE_C_IntUV{
+    12 0 0 13 14 0 0 0 0 0 0 0 0 0 0 17 0 0 18 19 22 0 0 23 24 
+}P-Token{[Shift:5:I] 3:2 2:-2
+P-Token{[Base:5:I]}}P-Token{[Shift:5:I] 3:2 2:-2
+P-Token{[Base:5:I]}}
+(PART 3)------------------ 24 ---------------
+RTYPE_C_IntUV{
+    18 19 23 24 
+}P-Token{[Shift:5:I] 3:-3
+P-Token{[Base:2:I]}}P-Token{[Shift:5:I] 3:-3
+P-Token{[Base:2:I]}}
+(PART 3)------------------ 25 ---------------
+RTYPE_C_IntUV{
+    0 1 2 5 6 7 10 11 12 
+}P-Token{[Shift:5:I] 5:-2
+P-Token{[Base:3:I]}}P-Token{[Shift:5:I] 5:-2
+P-Token{[Base:3:I]}}
+(PART 3)------------------ 26 ---------------
+RTYPE_C_IntUV{
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+}P-Token{[Shift:5:I] 5:5 5:-5
+P-Token{[Base:5:I]}}P-Token{[Shift:5:I] 5:5 5:-5
+P-Token{[Base:5:I]}}
+----------------------------------------------------------
+========== UPDATE CARTESIAN PTOKENS -- EMPTY =============
+----------------------------------------------------------
+
+(PART 3 EMPTY)------------ 1 --------------
+RTYPE_C_IntUV{
+    }
+P-Token{[Shift:0:I] 0:5
+P-Token{[Base:5:I]}}P-Token{[Base:0:I]}
+(PART 3 EMPTY)------------ 2 --------------
+RTYPE_C_IntUV{
+    }
+P-Token{[Shift:5:I] 5:-5
+P-Token{[Base:0:I]}}P-Token{[Base:0:I]}
+(PART 3 EMPTY)------------ 3 --------------
+RTYPE_C_IntUV{
+    }
+P-Token{[Shift:5:I] 5:-1
+P-Token{[Base:4:I]}}P-Token{[Base:0:I]}
+(PART 3 EMPTY)------------ 4 --------------
+RTYPE_C_IntUV{
+    }
+P-Token{[Base:0:I]}P-Token{[Shift:0:I] 0:2
+P-Token{[Base:2:I]}}
+(PART 3 EMPTY)------------ 5 --------------
+RTYPE_C_IntUV{
+    0 0 0 0 0 0 0 0 0 0 
+}
+P-Token{[Shift:0:I] 0:5
+P-Token{[Base:5:I]}}P-Token{[Shift:0:I] 0:2
+P-Token{[Base:2:I]}}
+(PART 3 EMPTY)------------ 6 --------------
+RTYPE_C_IntUV{
+    }
+P-Token{[Shift:5:I] 5:-5
+P-Token{[Base:0:I]}}P-Token{[Shift:0:I] 0:2
+P-Token{[Base:2:I]}}
+(PART 3 EMPTY)------------ 7 --------------
+RTYPE_C_IntUV{
+    0 0 0 0 0 0 0 0 0 0 
+}
+P-Token{[Base:5:I]}P-Token{[Shift:0:I] 0:2
+P-Token{[Base:2:I]}}
+(PART 3 EMPTY)------------ 8 --------------
+RTYPE_C_IntUV{
+    0 0 0 0 0 0 0 0 
+}
+P-Token{[Shift:5:I] 5:-1
+P-Token{[Base:4:I]}}P-Token{[Shift:0:I] 0:2
+P-Token{[Base:2:I]}}
+(PART 3 EMPTY)------------ 9 --------------
+RTYPE_C_IntUV{
+    }
+P-Token{[Base:0:I]}P-Token{[Shift:2:I] 2:-2
+P-Token{[Base:0:I]}}
+(PART 3 EMPTY)------------ 10 --------------
+RTYPE_C_IntUV{
+    }
+P-Token{[Shift:0:I] 0:5
+P-Token{[Base:5:I]}}P-Token{[Shift:2:I] 2:-2
+P-Token{[Base:0:I]}}
+(PART 3 EMPTY)------------ 11 --------------
+RTYPE_C_IntUV{
+    }
+P-Token{[Shift:5:I] 5:-5
+P-Token{[Base:0:I]}}P-Token{[Shift:2:I] 2:-2
+P-Token{[Base:0:I]}}
+(PART 3 EMPTY)------------ 12 --------------
+RTYPE_C_IntUV{
+    }
+P-Token{[Base:5:I]}P-Token{[Shift:2:I] 2:-2
+P-Token{[Base:0:I]}}
+(PART 3 EMPTY)------------ 13 --------------
+RTYPE_C_IntUV{
+    }
+P-Token{[Shift:5:I] 5:-1
+P-Token{[Base:4:I]}}P-Token{[Shift:2:I] 2:-2
+P-Token{[Base:0:I]}}
+(PART 3 EMPTY)------------ 14 --------------
+RTYPE_C_IntUV{
+    0 0 0 0 0 0 0 0 0 0 
+}
+P-Token{[Shift:0:I] 0:5
+P-Token{[Base:5:I]}}P-Token{[Base:2:I]}
+(PART 3 EMPTY)------------ 15 --------------
+RTYPE_C_IntUV{
+    }
+P-Token{[Shift:5:I] 5:-5
+P-Token{[Base:0:I]}}P-Token{[Base:2:I]}
+(PART 3 EMPTY)------------ 16 --------------
+RTYPE_C_IntUV{
+    0 1 2 3 4 5 6 7 
+}
+P-Token{[Shift:5:I] 5:-1
+P-Token{[Base:4:I]}}P-Token{[Base:2:I]}
+(PART 3 EMPTY)------------ 17 --------------
+RTYPE_C_IntUV{
+    }
+P-Token{[Base:0:I]}P-Token{[Shift:2:I] 2:1
+P-Token{[Base:3:I]}}
+(PART 3 EMPTY)------------ 18 --------------
+RTYPE_C_IntUV{
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+}
+P-Token{[Shift:0:I] 0:5
+P-Token{[Base:5:I]}}P-Token{[Shift:2:I] 2:1
+P-Token{[Base:3:I]}}
+(PART 3 EMPTY)------------ 19 --------------
+RTYPE_C_IntUV{
+    }
+P-Token{[Shift:5:I] 5:-5
+P-Token{[Base:0:I]}}P-Token{[Shift:2:I] 2:1
+P-Token{[Base:3:I]}}
+(PART 3 EMPTY)------------ 20 --------------
+RTYPE_C_IntUV{
+    0 1 0 2 3 0 4 5 0 6 7 0 8 9 0 
+}
+P-Token{[Base:5:I]}P-Token{[Shift:2:I] 2:1
+P-Token{[Base:3:I]}}
+(PART 3 EMPTY)------------ 21 --------------
+RTYPE_C_IntUV{
+    0 1 0 2 3 0 4 5 0 6 7 0 
+}
+P-Token{[Shift:5:I] 5:-1
+P-Token{[Base:4:I]}}P-Token{[Shift:2:I] 2:1
+P-Token{[Base:3:I]}}
+ 
+
+End of file: RTptoken.S
+

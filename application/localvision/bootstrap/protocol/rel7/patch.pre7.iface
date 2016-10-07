@@ -1,0 +1,5480 @@
+###################################################
+#  patch.pre7.iface
+#
+#  Incremental changes to core vision database from: portal
+#
+#  Introduces:
+#       - Interface RequestWS
+#
+#  Includes changes to:
+#       - LayoutTools
+#       - ReportTools
+#       - FormatTools
+#       - Interface
+#
+#  Derived from files: 
+#      - portalSetup.vis
+#      - patch.portal.1
+#      - navpatch.all
+#
+##################################################
+
+####################
+#  New RequestWS class
+####################
+
+Interface respondsTo: "RequestWS" .
+ifFalse:
+   [ Interface Workspace createSubclass: "RequestWS" at: Interface ;
+     Interface RequestWS classDescriptor setClassTypeTo: "Core" ;
+     Interface Named createInstance: "RequestWS" ;
+     Interface RequestWS classDescriptor
+          setNamingDictionaryTo: Interface Named RequestWS ;
+    ] ;
+
+####################
+#  New LayoutTool classes
+####################
+
+LayoutTools Named createInstance: "Component" ;
+
+LayoutTools TableSpec createSubclass: "OptionBarSpec" at: LayoutTools ;
+LayoutTools Named createInstance: "OptionBarSpec" ;
+LayoutTools OptionBarSpec classDescriptor
+     setNamingDictionaryTo: LayoutTools Named OptionBarSpec ;
+LayoutTools TableSpec ColumnSpec
+    createSubclass: "Entry" at: LayoutTools OptionBarSpec ;
+
+LayoutTools Component createSubclass: "FillerRow" at: LayoutTools TableSpec ;
+
+LayoutTools FormSpec createSubclass: "DialogFormSpec" at: LayoutTools ;
+LayoutTools Named createInstance: "DialogFormSpec" ;
+LayoutTools DialogFormSpec classDescriptor
+     setNamingDictionaryTo: LayoutTools Named DialogFormSpec ;
+LayoutTools FormSpec
+   createSubclass: "Section" at: LayoutTools DialogFormSpec ;
+
+LayoutTools TableSpec createSubclass: "WrapperSpec" at: LayoutTools ;
+
+####################
+#  ReportTools
+####################
+ToolKit createSubclass: "ReportTools" ;
+ReportTools createSubclass: "Specification" at: ReportTools ;
+ReportTools Specification createSubclass: "GroupSpec" at: ReportTools ;
+ReportTools Specification createSubclass: "ApplicationSpec" at: ReportTools ;
+Dictionary createSubclass: "Named" at: ReportTools ;
+ReportTools Named createInstance: "ApplicationSpec" ;
+ReportTools ApplicationSpec classDescriptor
+     setNamingDictionaryTo: ReportTools Named ApplicationSpec ;
+ReportTools createSubclass: "Global" at: ReportTools ;
+
+####################
+#  New FormatTool Subclasses
+####################
+
+FormatTools createSubclass: "CSV" at: FormatTools ;
+FormatTools Html createSubclass: "Html_Xls" at: FormatTools ;
+FormatTools createSubclass: "Xml" at: FormatTools ;
+FormatTools createSubclass: "DDO" at: FormatTools ;
+
+#======================================================================
+
+####################
+#  RequestWS protocol
+####################
+
+Interface RequestWS
+
+    define: 'defaultDocumentTag' toBe: "VISION" .
+    define: 'defaultFactletTag' toBe: "FACTLET" .
+    define: 'defaultRequestAttributes' toBe: NA .
+
+    defineFixedProperty: 'requestId' .
+    defineFixedProperty: 'userId' .
+
+    defineFixedProperty: 'applicationList' withDefault: List new .
+    defineFixedProperty: 'sharedParams' .
+    defineFixedProperty: 'outputManager' .
+    defineFixedProperty: 'reformatOutputFlag' withDefault: FALSE .
+    defineFixedProperty: 'singleFactletFlag' withDefault: TRUE .
+    defineFixedProperty: 'showMimeTypeFlag' withDefault: TRUE .
+    defineFixedProperty: 'stylesheet' .
+
+    defineFixedProperty: 'appWorkspace' .
+;
+
+Interface RequestWS defineMethod: [ | initializeLocalAttributes |
+  ^super initializeLocalAttributes; 
+  ^self reset
+] ;
+
+Interface RequestWS defineMethod: [ | reset |
+  ^super reset ;
+  :requestId <- "" ;
+  :userId <- "" ;
+  applicationList rdelete ; 
+  :applicationList <- defaultInstance applicationList new ;
+  sharedParams isDictionary && sharedParams isntDefault
+      ifTrue: [ sharedParams rdelete ] ;
+  :sharedParams <- NA ;
+  :outputManager <- NA ;
+  :appWorkspace <- ApplicationWS ;
+  disableReformatOutput ;
+  enableSingleFactlet ;
+  enableShowMimeType ;
+  ^self
+] ;
+
+Interface RequestWS defineMethod: [ | profile | 
+  "Profile for " print ; ^self whatAmI print; " " print ; code printNL ;
+  newLine print ;
+  applicationList numberElements
+  do: [ position print: -5 ; app print ; " | " print ;
+        params formatWith: "&" and: "=" . printNL ;
+      ] ;
+  " -" fill: 50 . printNL ;
+  "Shared Params: " print:20 ;
+  sharedParams isDictionary
+      ifTrue: [ sharedParams formatWith: "&" and: "=" . printNL ] 
+     ifFalse: [ " no shared parameters defined" printNL ] ;
+  outputManager isntDefault
+  ifTrue: 
+    [ "Output Manager: " print: 20 ; outputManager print ;
+      reformatOutputFlag
+         ifTrue: [ " (enabled)" ] ifFalse: [ " (disabled) " ] . printNL ;
+    ] ;
+  " -" fill: 50 . printNL ;
+  "User Id: " print: 20 ; userId printNL ;
+  "Request Id: " print: 20 ; requestId printNL ;
+  "Doc Tag: " print: 20 ; defaultDocumentTag printNL ;
+  "Request Atts: " print: 20 ; defaultRequestAttributes printNL ;
+  "Single Factlet Flag: " print: 20 ; 
+  singleFactletFlag
+      ifTrue: [ " (enabled)" ] ifFalse: [ " (disabled) " ] . printNL ;
+  "Show Mime Type: " print: 20 ; 
+  showMimeTypeFlag
+      ifTrue: [ " (enabled)" ] ifFalse: [ " (disabled) " ] . printNL ;
+] ;  
+
+Interface RequestWS defineMethod: [ | addRequest: app andParams: params |
+  !dict <- params asString else: "" . asDictionaryUsing: "&" and: "=" ;
+  applicationList ,
+     (app extendBy: [ !app <- ^self ; !params <- ^my dict; !output; ] ) ;
+   ^self
+] ;
+
+Interface RequestWS defineMethod: [ | getRequest: n | 
+   applicationList at: n asInteger
+] ;
+
+Interface RequestWS defineMethod: [ | setParamsInRequest: n to: params |
+  !dict <- params asString else: "" . asDictionaryUsing: "&" and: "=" ;
+  ^self getRequest: n . ifDefault: [ NA ] else: [ :params <- ^my parms ] ;
+  ^self
+] ;
+
+Interface RequestWS defineMethod: [ | setSharedParamsTo: params | 
+  :sharedParams <- params asString else: "" . asDictionaryUsing: "&" and: "=" ;
+  ^self
+] ;
+
+Interface RequestWS defineMethod: [ | addParameter: param as: val | 
+  sharedParams isNA
+    ifTrue: [ :sharedParams <- "" asDictionaryUsing: "&" and: "=" ] ;
+  sharedParams at: param put: val ;
+  ^self
+] ;
+
+Interface RequestWS defineMethod: [ | setOutputManagerTo: string |
+  :outputManager <- string ;
+  ^self
+] ;
+
+Interface RequestWS defineMethod: [ | setRequestIdTo: id |
+  :requestId <- id ;
+  ^self
+] ;
+
+Interface RequestWS defineMethod: [ | setRequestAttributesTo: id |
+  ^self define: 'defaultRequestAttributes' toBe: id ;
+  ^self
+] ;
+
+Interface RequestWS defineMethod: [ | setDocumentTagTo: id |
+  ^self define: 'defaultDocumentTag' toBe: id ;
+  ^self
+] ;
+
+Interface RequestWS defineMethod: [ | setFactletTagTo: id |
+  ^self define: 'defaultFactletTag' toBe: id ;
+  ^self
+] ;
+
+Interface RequestWS defineMethod: [ | setUserIdTo: id |
+  :userId <- id ;
+  ^self
+] ;
+
+Interface RequestWS defineMethod: [ | enableSingleFactlet |
+  :singleFactletFlag <- TRUE ;
+  ^self
+] ;
+
+Interface RequestWS defineMethod: [ | disableSingleFactlet |
+  :singleFactletFlag <- FALSE ;
+  ^self
+] ;
+
+Interface RequestWS defineMethod: [ | enableReformatOutput |
+  :reformatOutputFlag <- TRUE ;
+  ^self
+] ;
+
+Interface RequestWS defineMethod: [ | disableReformatOutput |
+  :reformatOutputFlag <- FALSE ;
+  ^self
+] ;
+
+Interface RequestWS defineMethod: [ | enableShowMimeType |
+  :showMimeTypeFlag <- TRUE ;
+  ^self
+] ;
+
+Interface RequestWS defineMethod: [ | disableShowMimeType |
+  :showMimeTypeFlag <- FALSE ;
+  ^self
+] ;
+
+Interface RequestWS defineMethod: [ | getParameterNamesFrom: dictionary | 
+ dictionary objects
+    extendBy: [ !id <- selector ;
+                !val <- ^self ;
+              ] 
+] ;
+
+Interface RequestWS defineMethod: [ | setStylesheetTo: string |
+   ^self :stylesheet <- string ;
+   ^self
+] ;
+
+Interface RequestWS reset ;
+
+
+#----------
+
+Interface RequestWS defineMethod: [ | runWithFormat: format forUser: id |
+!ws <- ^self appWorkspace ;
+^self setUserIdTo: id ;
+
+format isString && [ FormatTools respondsTo: format ] 
+   ifTrue: [ format evaluateIn: FormatTools ] .
+   elseIf: [ format isFormatToolProtocol ] then: [ format ] .
+   else: [ FormatTools CSV ] . 
+evaluate: 
+   [ applicationList numberElements
+     iterate:
+       [ ^my ws respondsTo: app .
+         ifTrue: 
+           [ ^my ws reset setRowLimitTo: 0 . setApplicationTo: app . 
+                 addParametersFrom: ^my sharedParams .
+                 addParametersFrom: params . 
+                 set: "outputOnly" to: "YES" . 
+                 run ;
+              :output <- ^my ws currentOutput ;
+           ]
+         ifFalse: 
+           [ :output <- 
+                 [ FormatTools buildTag: "ERROR"
+                     withAttributes: NA 
+                     andContent: "Application Not Found"  . printNL ;
+                 ] divertOutput ;
+           ] ;
+       ] ;
+     assembleOutput ;
+   ] ;
+ws setRowLimitTo: NA ;
+
+]  ;
+
+#----------
+
+Interface RequestWS defineMethod: [ | assembleOutput |
+  ^self displaySetup ;
+  !reformat <- ^self getOutputManager ;
+  reformatOutputFlag && reformat isntNA
+      ifTrue: [ reformat evaluateIn: ^self appWorkspace ] 
+      ifFalse: [ ^self displayReports ] ;
+  ^self displayWrapup ;
+] ;
+
+#----------
+
+Interface RequestWS defineMethod: [ | getOutputManager |
+  outputManager isString && [ ^self appWorkspace respondsTo: outputManager ] 
+      ifTrue: [ outputManager ] 
+] ;
+
+#----------
+
+Interface RequestWS defineMethod: [ | displaySetup | 
+showMimeTypeFlag ifTrue: [FormatTools displaySetup]; 
+stylesheet isntDefault
+   ifTrue: [ FormatTools displayStyleSheet: stylesheet ] ;
+!atts <- defaultRequestAttributes isString 
+   ifTrue: [defaultRequestAttributes] ifFalse: [""]; 
+requestId isntDefault 
+ifTrue: [:atts <- "id=" concat: requestId .concat: "&" .concat: atts]; 
+FormatTools 
+   openTag: (defaultDocumentTag else: "VISION") 
+   withAttributes: atts .printNL; 
+displayRequest
+];
+
+#----------
+
+Interface RequestWS defineMethod: [ | displayWrapup |
+  FormatTools closeTag: (defaultDocumentTag else: "VISION" ) . printNL; 
+  FormatTools displayWrapup ;
+] ;
+
+#----------
+
+Interface RequestWS defineMethod: [ | displayRequest |
+newLine print ;
+FormatTools openTag: "REQUEST" withAttributes: NA . printNL ;
+FormatTools buildUserInfoFor: userId . printNL ;
+FormatTools openTag: "GLOBALS" withAttributes: NA . printNL ;
+sharedParams isntNA
+ifTrue:
+  [ ^self getParameterNamesFrom: sharedParams . 
+      select: [ id isntDefault ] .
+   do: [ " " print: 2 ;
+         FormatTools buildTag: "PARAM" 
+               withAttributes: "id", id andContent: val . printNL ;
+       ] ;
+  ] ;
+FormatTools closeTag: "GLOBALS" . printNL ;
+
+applicationList numberElements
+do: [ FormatTools openTag: ^my defaultFactletTag 
+           withAttributes: "index", position, "id", app . printNL ;
+      ^my getParameterNamesFrom: params .
+         select: [ id isntDefault ] .
+      do: [ " " print: 2 ;
+            FormatTools buildTag: "PARAM" 
+                withAttributes: "id", id andContent: val . 
+                    printNL ;
+          ] ;
+      FormatTools closeTag: ^my defaultFactletTag  . printNL ;
+    ] ;
+FormatTools closeTag: "REQUEST" . printNL ;
+
+] ;
+
+#----------
+
+Interface RequestWS defineMethod: [ | displayReports |
+  newLine print ;
+  FormatTools openTag: "RESPONSE" withAttributes: NA . printNL ;
+  !multi <- applicationList count > 1 ;
+  !showSingle <- multi || singleFactletFlag ;
+  multi
+  ifTrue: [ FormatTools openTag: "FACTLETS" 
+                 withAttributes: "count", applicationList count . printNL ;
+          ] ;
+  applicationList numberElements
+  do: [ ^my showSingle
+        ifTrue: [ FormatTools openTag: ^my defaultFactletTag 
+                    withAttributes: "id", ^self, "index", position . printNL ;
+                ] ;
+        output print ;
+        ^my showSingle 
+          ifTrue: [ FormatTools closeTag: ^my defaultFactletTag . printNL] ;
+      ] ;
+  multi ifTrue: [ FormatTools closeTag: "FACTLETS" . printNL ] ;
+  FormatTools closeTag: "RESPONSE" . printNL ;
+  newLine print ;
+] ;
+
+#==============================
+
+String defineMethod: [ | asUrl | 
+  toUpper contains: "FORMAT=DDO" .
+  ifTrue: 
+    [ FormatTools DDO evaluate: 
+          [ GlobalWorkspace Interface ApplicationWS reset runUrl: asSelf ]
+    ]
+ ifFalse: [ GlobalWorkspace Interface RequestWS reset runUrl: asSelf ] ;
+] ;
+
+Interface ApplicationWS defineMethod: [ | runUrl: url | 
+!dict <- url else: "" . asDictionaryUsing: "&" and: "=" ;
+!app <- dict at: "appName" ;
+^self addParametersFrom: dict ;
+^self send: app asBlock ;
+^self
+] ;
+
+Interface RequestWS defineMethod: [ | runUrl: url | 
+!dict <- url else: "" . asDictionaryUsing: "&" and: "=" ;
+!app <- dict at: "appName" ;
+!format <- dict at: "format" . else: "XML" . toUpper ;
+!user <- dict at: "user" . else: "" ;
+format contains: "XML" . ifTrue: [ :format <- "Xml" ] ;
+!ws <- ^self Named RequestWS at: app ;
+ws isNA
+ifTrue: 
+  [ :ws <- ^self ;
+    ws applicationList ,
+       (app extendBy: [ !app <- ^self ; !params <- ^my dict; !output; ] ) ;
+  ]
+ifFalse:
+  [ ws setSharedParamsTo: url ;
+  ] ;
+ws runWithFormat: format forUser: user ;
+] ;
+
+
+#======================================================================
+
+####################
+#  ReportTools
+####################
+
+ReportTools Global
+   defineFixedProperty: 'maxLinesToDisplay' .
+;
+ReportTools Global defineMethod: [ | setMaxLinesToDisplayTo: n | 
+  :maxLinesToDisplay <- n asInteger else: 25 . max: 1 ;
+  ^self
+] ;
+
+ReportTools defineMethod: [ | getRangeFor: list from: start sortBy: sort |
+!startPos <- start asInteger else: 1 . max: 1 ;     #- no negatives
+startPos > list count ifTrue: [ :startPos <- 1 ] ;
+!displayMax <- Global maxLinesToDisplay ;
+!endPos <- (startPos + displayMax - 1 ) asInteger ;
+!sortItem <- sort else: "asSelf" ;
+!sortUp <- (sortItem contains: "code" ) || [ sortItem contains: "name" ] 
+        || [ sortItem contains: "id" ] ;
+!sortedList <- sortUp 
+   ifTrue: [ list sortUp: sortItem asBlock ]
+  ifFalse: [ list sortDown: sortItem asBlock ] ;
+
+#--  return object extended by 'startPos', 'endPos', and 'count'
+^self extendBy: [ !startPos <- ^my startPos ;
+                  !endPos <- ^my endPos ;
+                  !count <- ^my list count ;
+                  !sortedList <- ^my sortedList ;
+                  !subset <- sortedList from: startPos to: endPos ;
+                ]
+] ;
+
+
+ReportTools defineMethod:
+[ | displayMoreLink: app withParams: params forRange: range |
+ range endPos < range count
+ ifTrue:
+   [ CoreWorkspace Interface ApplicationWS Global 
+         setSharedParameter: "startPos" to: range endPos increment asString ;
+     FormatTools buildLinkForApp: app
+         withLabel: "  ... more" andParams: params . printNL ;
+   ] ;
+ range startPos > 1
+ ifTrue:
+   [ CoreWorkspace Interface ApplicationWS Global 
+         setSharedParameter: "startPos" to: "1" ;
+     " " print ;
+     FormatTools buildLinkForApp: app
+          withLabel: "Back to top of report" andParams: params . printNL ;
+   ] ;
+
+#---  and clear the start position for the next time around
+CoreWorkspace Interface ApplicationWS Global 
+     setSharedParameter: "startPos" to: "1" ;
+
+] ;
+
+ReportTools Global defineMethod: [ | profile |
+  "Current ReportTools Globals:" printNL ;
+  "maxLinesToDisplay: " print: 25; maxLinesToDisplay printNL ;
+] ;
+;  
+
+ReportTools Global setMaxLinesToDisplayTo: 25 ;
+
+
+#--------------------
+#  ReportTools GroupSpec
+#--------------------
+ReportTools GroupSpec
+   defineFixedProperty: 'item' .
+   defineFixedProperty: 'tileNumber' .
+   defineFixedProperty: 'tileUpFlag' .
+   defineFixedProperty: 'restrictionBlock' .
+;
+
+ReportTools GroupSpec :item <- DataItem ;
+
+ReportTools GroupSpec defineMethod: [ | initializeKeys: keys |
+  keys isList ifFalse: [ :keys <- keys asList ] ;
+  :item <- CoreWorkspace DataItem locateId: (keys at: 1 ) . else: (keys at: 1) ;
+  :tileNumber <- keys at: 2 . asInteger ;
+  :tileUpFlag <- keys at: 3 . asString toUpper take: 1 . = "D"
+        ifTrue: [ FALSE ] else: [ TRUE ] ;
+  ^self 
+] ;
+
+ReportTools GroupSpec defineMethod: [ | displayInfo |
+  item code print ;
+  usesTiling
+  ifTrue: [ "  tiles " print ; tileNumber asString print ; 
+            tileUpFlag ifTrue: [ " (Up) " ] ifFalse: [ " (Down)" ] . print ;
+          ] ;
+  newLine print ;
+] ;
+
+ReportTools GroupSpec defineMethod: [ | profile |
+  "ReportTools GroupSpec Profile" printNL ;
+  "item: " print: 25 ; item displayInfo ;
+  "tileNumber: " print: 25 ; tileNumber printNL ;
+  "tileUpFlag: " print: 25; tileUpFlag printNL ;
+]  ;
+
+ReportTools GroupSpec defineMethod: [ | usesTiling | 
+   tileNumber isInteger && [ tileNumber > 1 ]
+] ;
+
+ReportTools GroupSpec defineMethod: [ | tileOrder | 
+   tileUpFlag isTrue 
+     ifTrue: [ "Up" ] ifFalse: [ "Down" ] 
+] ;
+
+   ReportTools GroupSpec defineMethod: [ | getGroupsFor: list from: baseClass|
+     !groups <- usesTiling
+          ifTrue: [ ^self getTileGroupsFor: list from: baseClass ] 
+         ifFalse: [ ^self getStandardGroupsFor: list from: baseClass ] ;
+     
+     #-- return groups  - restrictionBLock added 10/4
+     restrictionBlock isBlock
+        ifTrue: [ groups select: restrictionBlock ] 
+       ifFalse: [ groups ] .
+        sortUp: [ sort ] 
+     ] ;
+      
+ReportTools GroupSpec defineMethod:
+[ | getGroupsFor: list from: baseClass for: groupId |
+  !groups <- ^self getGroupsFor: list from: baseClass ;
+  !selectGroup <- groups select:[code = ^my groupId asString ];
+  selectGroup count > 0
+     ifTrue: [:groups <- selectGroup at:1 . asList ] ;
+  groups
+] ;
+
+ReportTools GroupSpec defineMethod: [ | getTileGroupsFor: list from: baseClass|
+
+#-- if we have a data item, get its access block for current class
+#-- otherwise, use default
+  !access <- item isDataItem
+     ifTrue: [ item getAccessFrom: baseClass ] ;
+  !groupBlock <- access isntNA 
+     ifTrue: [ access asBlock ]
+    ifFalse: [ CoreWorkspace DataItem getValidStatsFor: baseClass . at: 1 .
+                  getAccessFrom: baseClass . asBlock 
+             ] ;
+
+#--  extend list by groupBlock value (returns !value as extension)
+  :list <- list collect: groupBlock ;
+
+#--  tile up or down based on supplied flag and group by tile
+     tileUpFlag
+       ifTrue: [ list tileUp: [ value ] tiles: tileNumber ]
+      ifFalse: [ list tileDown: [ value ] tiles: tileNumber ] .
+         groupedBy: [ tile ] .
+
+#--  extend the tile groups by standard labels and return
+         extendBy: 
+           [ !id <- asNumber asString concat: " of " . concat: ^my tileNumber ;
+             !min <- groupList min: [ value ] ;
+             !max <- groupList max: [ value ] ;
+             min <= -100 || min >= 100 
+               ifTrue: [ :min <- min asInteger ] else: [];
+             max <= -100 || max >= 100 
+               ifTrue: [ :max <- (max + .5) asInteger ] else: [];
+             !name <- [ min printWithCommas: 10 ; " to " print;
+                        max printWithCommas: -10 ;
+                      ] divertOutput ;
+             isNA ifTrue: 
+               [ :id <- "NoValue" ;
+                 :name <- "NoValue" ;
+               ] ;
+             !sort <- isNA ifTrue: [ 99999 ] . else: [ ^self ] ;
+            ]  . 
+]  ;
+
+ReportTools GroupSpec defineMethod: 
+[ | getStandardGroupsFor: list from: baseClass | 
+
+#-- if we have a data item, get its access block for current class
+#-- otherwise, use the first valid group for class
+  item isDataItem 
+    ifFalse: [ :item <- CoreWorkspace DataItem 
+                  getValidGroupsFor: baseClass . at: 1 .
+                     else: [ CoreWorkspace DataItem ] ;
+             ] ;
+  !access <- item isDataItem
+     ifTrue: [ item getAccessFrom: baseClass ] ;
+  !groupBlock <- access isntNA 
+     ifTrue: [ access asBlock ]
+    ifFalse: [ [ ^self ] ] ;
+
+#--  group list by this block
+     list groupedBy: groupBlock .
+
+#--  extend the groups by standard labels and return
+        extendBy:
+        [ !name <- code else: [ asString ] ;
+          isEntity ifTrue: [ :name <- ^self name ] ;
+          isDefault ifTrue: [ :name <- "Unclassified" ] ;
+          !sort <- isntDefault
+            ifTrue: [ isRangeClassification 
+                         ifTrue: [ code ] ifFalse: [ name ] 
+                    ] 
+           ifFalse: [ "zzz" ] ;
+        ] .
+      sortUp: [ sort ] . numberElements
+         extendBy: 
+           [ !id <- position asString ;
+           ] 
+]  ;
+
+
+   ReportTools GroupSpec defineMethod: [ | setRestrictionBlockTo: block |
+     :restrictionBlock <- block isBlock ifTrue: [ block ] .
+         elseIf: [ block isString ] then: [ block asBlock ] ;
+      ^self
+   ] ;
+
+#--------------------
+#  ApplicationSpec protocol
+#--------------------
+ReportTools ApplicationSpec
+   defineFixedProperty: 'label' .
+   defineFixedProperty: 'methodName' .
+   defineFixedProperty: 'linkName' .
+   defineFixedProperty: 'tutorialName' .
+   defineFixedProperty: 'descriptionDoc' .
+   defineFixedProperty: 'parameterCacheBlock' .
+;
+
+ReportTools ApplicationSpec defineMethod: [ | initializeLocalAttributes |
+  :label <- code ;
+  :methodName <- "Account" concat: code capitalize . concat: "View" ;
+  :parameterCacheBlock <- [ (lastPortfolio first: 1) ] ;
+  ^self
+] ;
+
+ReportTools ApplicationSpec defineMethod: [ | displayInfo |
+code print ; " " print ; label print ; " " print ; methodName print ; 
+" " print ; linkName print ; " " print ; tutorialName print ;
+" " print ; descriptionDoc print; " " print; parameterCacheBlock  printNL ;
+] ;
+
+ReportTools ApplicationSpec defineMethod: [ | profile |
+"Profile for ApplicationSpec: " print ; code printNL ;
+"label: " print: 20 ; label printNL ;
+"methodName: "  print: 20 ; methodName printNL ;
+"linkName: " print: 20 ; linkName printNL ;
+"tutorialName: " print: 20 ; tutorialName printNL ;
+"descriptionDoc: " print: 20 ; descriptionDoc printNL ;
+"parameterCacheBlock: " print: 20 ; parameterCacheBlock printNL ;
+] ;
+
+ReportTools ApplicationSpec defineMethod: [ | setLabelTo: text |
+  :label <- text ;
+  ^self
+] ;
+
+ReportTools ApplicationSpec defineMethod: [ | setMethodNameTo: text |
+  :methodName <- text ;
+  ^self
+] ;
+
+ReportTools ApplicationSpec defineMethod: [ | setLinkNameTo: text |
+  :linkName <- text ;
+  ^self
+] ;
+
+ReportTools ApplicationSpec defineMethod: [ | setTutorialNameTo: text |
+  :tutorialName <- text ;
+  ^self
+] ;
+
+ReportTools ApplicationSpec defineMethod: [ | setDescriptionDocTo: text |
+  :descriptionDoc <- text ;
+  ^self
+] ;
+
+ReportTools ApplicationSpec defineMethod: [ | setParameterBlockTo: block |
+  :parameterCacheBlock <- block ;
+  ^self
+] ;
+
+####################
+#  Share Named Parameters Globally
+####################
+
+#--------------------
+#  define cache and update methods
+#--------------------
+Interface Global
+   defineFixedProperty: 'sharedParameters' .
+;
+
+Interface Global defineMethod: [ | setSharedParametersTo: dictionary | 
+sharedParameters isDictionary && [sharedParameters isntDefault]
+   ifTrue: [sharedParameters rdelete]; 
+:sharedParameters <- CoreWorkspace Dictionary basicSpecialized; 
+dictionary isDictionary 
+ifTrue: 
+  [ dictionary objects select: [isString].
+    do: [^my sharedParameters at: selector
+                             put: (^my getClusteredString: asSelf asString) 
+        ]
+  ] ;
+^self
+
+] ;
+
+Interface Global defineMethod: [ | setSharedParameter: p to: val |
+sharedParameters at: p put: (^self getClusteredString: val) ;
+^self
+] ;
+
+Interface Global defineMethod:[ | clearSharedParameter: params | 
+  params do: [ ^my sharedParameters delete: asSelf ] ;
+  ^self
+] ;
+
+Interface Global defineMethod:[ | showSharedParameters | 
+  sharedParameters objects
+    do: [ selector print ; " | " print ; printNL ] ;
+  ^self
+] ;
+
+Interface Global setSharedParametersTo: Dictionary basicSpecialized ;
+
+#==================================================
+
+####################
+#  New Layout Tools
+####################
+
+LayoutTools defineMethod: [ | nameComponent: component as: id |
+  ^self Named Component at: id put: component ;
+  ^self
+] ;
+
+LayoutTools Specification defineFixedProperty: 'styleClass' ;
+LayoutTools Specification defineMethod: [ | setStyleClassTo: text |
+  :styleClass <- text ;
+  ^self
+] ;
+
+LayoutTools Component defineFixedProperty: 'styleClass' ;
+LayoutTools Component defineMethod: [ | setStyleClassTo: text |
+  :styleClass <- text ;
+  ^self
+] ;
+
+#--------------------
+
+LayoutTools OptionBarSpec
+   
+   defineFixedProperty: 'selectedClass' .
+   defineFixedProperty: 'unselectedClass' .
+   defineFixedProperty: 'rowDividerColor' .
+   defineFixedProperty: 'underline' .
+   defineFixedProperty: 'barColor' .
+   defineFixedProperty: 'textAboveOptions' .
+   defineFixedProperty: 'textBelowOptions' .
+   defineFixedProperty: 'divClass' .
+   defineFixedProperty: 'optionRowWidth' .
+
+   defineFixedProperty: 'entries' .
+   define: 'defaultColumnBackground' toBe: NA .
+   define: 'defaultRowBackground' toBe: NA .
+;
+
+LayoutTools OptionBarSpec defineMethod: [ | reset |
+  ^super reset ;
+  clearEntries ;
+  :underline <- NA ;
+  :barColor <- NA ;
+  :center <- FALSE ;
+  ^self
+] ;
+
+LayoutTools OptionBarSpec defineMethod: [ | columnSpecs | 
+  hasRowDivider
+    ifTrue: [ entries send: [ asSelf, asSelf ] .
+                 collectListElementsFrom: [ ^self ] 
+            ]
+    ifFalse: [ entries ] 
+] ;
+
+LayoutTools OptionBarSpec defineMethod: [ | setSelectedClassTo: input |
+  :selectedClass <- input ; 
+  ^self
+] ;
+
+LayoutTools OptionBarSpec defineMethod: [ | setUnselectedClassTo: input |
+  :unselectedClass <- input ; 
+  ^self
+] ;
+
+LayoutTools OptionBarSpec defineMethod: [ | setRowDividerColorTo: input |
+  :rowDividerColor <- input ; 
+  ^self
+] ;
+
+LayoutTools OptionBarSpec defineMethod: [ | hasRowDivider |
+   rowDividerColor isntDefault
+] ;
+
+LayoutTools OptionBarSpec defineMethod: [ | setBarColorTo: color |
+   :barColor <- color ;
+   ^self
+] ;
+
+LayoutTools OptionBarSpec defineMethod: [ | setTextAboveOptionsTo: text |
+  :textAboveOptions <- text ;
+  ^self
+] ;
+
+LayoutTools OptionBarSpec defineMethod: [ | setTextBelowOptionsTo: text |
+  :textBelowOptions <- text ;
+  ^self
+] ;
+
+LayoutTools OptionBarSpec defineMethod: [ | setDivClassTo: text |
+  :divClass <- text ;
+  ^self
+] ;
+
+LayoutTools OptionBarSpec defineMethod: [ | setOptionRowWidthTo: input |
+  :optionRowWidth <- input ;
+  ^self
+] ;
+
+LayoutTools OptionBarSpec defineMethod: [ | setDefaultColumnBackgroundTo: bground |
+  ^self define: 'defaultColumnBackground' toBe: bground ;
+  ^self
+] ;
+
+LayoutTools OptionBarSpec defineMethod: [ | setDefaultRowBackgroundTo: bground |
+  ^self define: 'defaultRowBackground' toBe: bground ;
+  ^self
+] ;
+
+LayoutTools OptionBarSpec defineMethod: [ | clearEntries |
+  :entries <- CoreWorkspace IndexedList new ;
+  ^self
+] ;
+
+LayoutTools OptionBarSpec defineMethod: [ | addEntry: position |
+  !newOne <- Entry createInstance: ^self ;
+  entries at: position asInteger put: newOne;
+  newOne
+] ;
+
+LayoutTools OptionBarSpec defineMethod: [ | getUnderline |
+  underline else: [ :underline <- Label createInstance: ^self ] 
+] ;
+
+LayoutTools OptionBarSpec defineMethod: [ | getEntry: n |
+  entries at: n asInteger . else: [ ^self addEntry: n ]
+] ;
+
+#----------
+
+LayoutTools OptionBarSpec Entry
+     defineFixedProperty: 'spec' .
+     defineFixedProperty: 'id' .
+     defineFixedProperty: 'text' .
+     defineFixedProperty: 'link' .
+     defineFixedProperty: 'linkType' .
+     defineFixedProperty: 'disableFlag' .
+     defineFixedProperty: 'hideFlag' .
+     defineFixedProperty: 'newWindowFlag' .
+     defineFixedProperty: 'parameters' .
+;
+
+LayoutTools OptionBarSpec Entry defineMethod: [ | initializeKeys: key |
+  :spec <- ^self asSelf ;
+  ^self
+] ;
+
+LayoutTools OptionBarSpec  Entry defineMethod: [ | setIdTo: input |
+  :id <- input ; 
+  ^self
+] ;
+
+LayoutTools OptionBarSpec  Entry defineMethod: [ | setTextTo: input |
+  :text <- input ; 
+  id isDefault ifTrue: [ ^self setIdTo: input ] ;
+  ^self
+] ;
+
+LayoutTools OptionBarSpec Entry defineMethod: [ | setLinkTo: input |
+  :link <- input ; 
+  ^self
+] ;
+
+LayoutTools OptionBarSpec Entry defineMethod: [ | setLinkTypeApp |
+  :linkType <- "App" ;
+  ^self
+] ;
+
+LayoutTools OptionBarSpec Entry defineMethod: [ | setLinkTypeDoc |
+  :linkType <- "Doc" ;
+  ^self
+] ;
+
+LayoutTools OptionBarSpec Entry defineMethod: [ | setLinkTypeImg |
+  :linkType <- "Img" ;
+  ^self
+] ;
+
+LayoutTools OptionBarSpec Entry defineMethod: [ | enableEntry |
+  :disableFlag <- NA ;
+  ^self
+] ;
+
+LayoutTools OptionBarSpec Entry defineMethod: [ | disableEntry |
+  :disableFlag <- TRUE ;
+  ^self
+] ;
+
+LayoutTools OptionBarSpec defineMethod: [ | enableAllEntries |
+  entries do: [ enableEntry ] ;
+  ^self
+] ;
+
+LayoutTools OptionBarSpec defineMethod: [ | disableAllEntries |
+  entries do: [ disableEntry ] ;
+  ^self
+] ;
+
+
+LayoutTools OptionBarSpec Entry defineMethod: [ | showEntry |
+  :hideFlag <- NA ;
+  ^self
+] ;
+
+LayoutTools OptionBarSpec Entry defineMethod: [ | hideEntry |
+  :hideFlag <- TRUE ;
+  ^self
+] ;
+
+LayoutTools OptionBarSpec Entry defineMethod: [ | enableNewWindow |
+  :newWindowFlag <- TRUE ;
+  ^self
+] ;
+
+LayoutTools OptionBarSpec Entry defineMethod: [ | disableNewWindow |
+  :newWindowFlag <- NA ;
+  ^self
+] ;
+
+LayoutTools OptionBarSpec Entry defineMethod: [ | setParametersTo: input |
+  :parameters <- input send: [ ^self ] ; 
+  ^self
+] ;
+
+LayoutTools OptionBarSpec Entry defineMethod: [ | setParameter: n to: input |
+  parameters at: n asInteger put: input ;
+  ^self
+] ;
+
+LayoutTools OptionBarSpec Entry 
+defineMethod: [  | getFormattedTextWith: class |
+hideFlag isNA
+ifTrue:
+  [ disableFlag isNA
+    ifTrue:
+      [ linkType = "Img"
+         ifTrue: [ FormatTools buildImage: link withPath: NA withAlt: text ].
+         elseIf: [ linkType = "Doc" ] 
+         then: [ newWindowFlag isTrue
+                 ifTrue:
+                   [ FormatTools buildLinkToNewWindow: link withLabel: text 
+                        andClass: class
+                   ]
+                 ifFalse:
+                   [ FormatTools buildLink: link withLabel: text 
+                        andClass: class 
+                   ] 
+              ] .
+         elseIf: [ linkType = "App" ] 
+         then: [ FormatTools buildLinkForApp: link withLabel: text 
+                      andParams: parameters andClass: class 
+               ] .
+       ] .
+       else: [ FormatTools style: class forText: text ]
+   ] 
+] ;
+
+LayoutTools OptionBarSpec Entry 
+defineMethod: [  | getFormattedTextWith: class withDivClass: divclass |
+hideFlag isNA
+ifTrue:
+  [ !label <- divclass isntDefault
+      ifTrue: [ !padded <- " " concat: ^self text . concat: " " ;
+                FormatTools style: divclass 
+                            forText: (FormatTools nowrap: padded) 
+              ]
+       ifFalse: [ text ] ;
+    disableFlag isNA
+    ifTrue:
+      [ linkType = "Img"
+         ifTrue: [ FormatTools buildImage: link withPath: NA withAlt: text ].
+         elseIf: [ linkType = "Doc" ] 
+         then: [ newWindowFlag isTrue
+                 ifTrue:
+                   [ FormatTools buildLinkToNewWindow: link withLabel: label
+                        andClass: class
+                   ]
+                 ifFalse:
+                   [ FormatTools buildLink: link withLabel: label
+                        andClass: class 
+                   ] 
+              ] .
+         elseIf: [ linkType = "App" ] 
+         then: [ FormatTools buildLinkForApp: link withLabel: label 
+                      andParams: parameters andClass: class 
+               ] .
+         elseIf: [ text stripBoundingBlanks isDefault ] 
+           then: [ FormatTools nowrap: text ] 
+       ] .
+       else: [ FormatTools style: class forText: text ]
+   ] 
+] ;
+
+#----------
+
+FormatTools defineMethod: [ | formatOption: option withValue: val |
+  val isntDefault
+    ifTrue: [ " " concat: option . concat: "=" .  
+                concat: val asString asQuotedString
+            ]
+   ifFalse: [ "" ] 
+] ;
+
+#-----
+
+FormatTools
+defineMethod: [ | buildColOptionBarFrom: optionBarSpec withChoice: n |
+  !choice <- optionBarSpec entries at: n asInteger ;
+  [ optionBarSpec entries select: [ hideFlag isNA ] .
+    do: [  ^self = ^my choice 
+              ifTrue: [ "* "concat: text value ] 
+             ifFalse: [ text value ] . printNL ;
+        ] ;
+    newLine print ;
+  ] divertOutput
+] ;
+
+FormatTools Html defineMethod: 
+[ | buildColOptionBarFrom: optionBarSpec withChoice: n |
+  [ "<!-- start column option bar-->" printNL;
+    optionBarSpec
+    do: [ 
+        !background <- ^my getFullPathFor: defaultColumnBackground ;
+        "<table border=0 cellpadding=0 cellspacing=0" print ;
+        FormatTools formatOption: "width" withValue: width . print;
+        ">" printNL ;
+       "<tr><td><table" print ; 
+       FormatTools formatOption: "class" withValue: styleClass . print ;
+       FormatTools formatOption: "border" withValue: border . print ;
+       FormatTools formatOption: "cellspacing" withValue: cellSpacing . print ;
+       FormatTools formatOption: "cellpadding" withValue: cellPadding . print ;
+       FormatTools formatOption: "bgcolor" withValue: bgColor . print ;
+       ">" printNL;
+       !choice <- entries at: ^my n asInteger ;
+       entries select: [ hideFlag isNA ] .
+       do: [ !class <- asSelf = ^my choice
+               ifTrue: [ ^my selectedClass ] ifFalse: [ ^my unselectedClass ];
+            "<tr><td " print ; 
+            FormatTools formatOption: "class" withValue: class . print ;      
+            FormatTools
+               formatOption: "background" withValue: ^my background . print ;
+            ">" print ;
+            ^self getFormattedTextWith: class . print ;
+            "</td></tr>" printNL ;
+           ] ;
+       "</table></td></tr>" printNL ;
+   #--  insert a row with an empty table to keep sidebar from expanding
+       "<tr><td>" print ;
+       "<table border=0 cellpadding=0 cellspacing=0>" print ;
+       "<tr><td></td></tr></table></td></tr>" printNL ;
+       "</table>" printNL ;
+    ] ;
+    "<!-- end column option bar-->" printNL;
+   ] divertOutput
+] ;
+
+#----------
+
+FormatTools
+defineMethod: [ | buildRowOptionBarFrom: optionBarSpec withChoice: n |
+  !choice <- optionBarSpec entries at: n asInteger ;
+  [ optionBarSpec entries select: [ hideFlag isNA ] .
+    do: [  ^self = ^my choice 
+              ifTrue: [ "* "concat: text value ] 
+             ifFalse: [ text value ] . print ; " | " print ;
+        ] ;
+    newLine print ;
+  ] divertOutput
+] ;
+
+FormatTools Html defineMethod: 
+[ | buildRowOptionBarFrom: optionBarSpec withChoice: selection |
+!options <- optionBarSpec entries numberElements select: [hideFlag isNA ] ;
+!divider <- optionBarSpec hasRowDivider 
+ ifTrue:
+   [ FormatTools font: NA inSize: NA andColor: optionBarSpec rowDividerColor
+        for: " | " 
+   ] ;
+!choice <- selection isNumber
+    ifTrue: [ selection asInteger ]
+   ifFalse: [ options select: [ id = ^my selection asSelf ] . 
+                 send: [ position ] . at: 1 . else: [ 0 ] 
+            ] ;
+:choice <- choice between: 1 and: optionBarSpec entries count .
+    ifTrue: [ choice ] ifFalse: [ 0 ] ;
+
+!count <- divider isntNA 
+   ifTrue: [ (options count * 2 - 1) asInteger ] ifFalse: [ options count ] ;
+optionBarSpec setColumnCountTo: count ;
+
+[ "<table width=100% cellspacing=0 cellpadding=0 border=0>" printNL ;
+   optionBarSpec textAboveOptions isntDefault
+      ifTrue: [ optionBarSpec textAboveOptions value printNL ] ;
+  options count > 0
+  ifTrue:
+    [
+       "<tr> <td " print ;
+       FormatTools
+         formatOption: "bgcolor" withValue: optionBarSpec barColor . print ;
+       FormatTools
+         formatOption: "width" withValue: optionBarSpec optionRowWidth . print ;
+       ">" printNL ;
+       FormatTools buildTableFor: optionBarSpec for: ^current withBlock:
+       [
+       options numberElements
+       do: [ !class <- ^my choice = position
+                ifTrue: [ ^my optionBarSpec selectedClass ] 
+               ifFalse: [ ^my optionBarSpec unselectedClass ] ;
+             !divClass <- ^my optionBarSpec divClass ;
+              position > 1 && [^my divider isntNA ] 
+                   ifTrue: [ ^my divider print ] ;
+              ^self getFormattedTextWith: class withDivClass: divClass . print;
+           ] ;
+       newLine print ;
+       ] . printNL ;
+       "<!-- end row option bar-->" printNL;
+       "</td></tr>" printNL ;
+    ] ;
+   optionBarSpec underline isntDefault
+   ifTrue:
+      [ "<tr>" print ;
+        FormatTools formatTextCell: optionBarSpec underline .print ;
+       "</tr>" printNL ;
+      ] ;
+   optionBarSpec textBelowOptions isntDefault
+      ifTrue: [ optionBarSpec textBelowOptions value printNL ] ;
+   "</table>" printNL ;
+ ] divertOutput
+] ;
+
+#-----
+
+FormatTools defineMethod: [ | buildRowFrom: table withComponents: list |
+  [ list do: [ print ; " | " print ] ;
+    newLine print ;
+  ] divertOutput
+] ;
+
+FormatTools Html defineMethod: 
+[ | buildRowFrom: tableSpec withComponents: list |
+  [tableSpec center ifTrue: [ "<center>" printNL; ];
+   "<table" print ; 
+   tableSpec
+   do: [
+       FormatTools formatOption: "class" withValue: styleClass . print ;
+       FormatTools formatOption: "border" withValue: border . print ;
+       FormatTools formatOption: "width" withValue: width . print ;
+       FormatTools formatOption: "cellspacing" withValue: cellSpacing . print ;
+       FormatTools formatOption: "cellpadding" withValue: cellPadding . print ;
+       FormatTools formatOption: "bgcolor" withValue: bgColor . print ;
+      ">" printNL;
+      caption inUse
+        ifTrue: [ ^my formatCaption:  caption over: ^my list count . printNL ] ;
+      fillerRows at: 0 . isntDefault
+      ifTrue:
+        [ FormatTools
+            formatFillerRowFrom: (fillerRows at: 0) 
+                            for: ^my list count . printNL;
+        ] ;
+      ] ;
+    "<tr valign=top>" printNL ;
+    list do: [ "<td>" print ; print ; "</td>" printNL ] ;
+    "</tr></table>" printNL ;
+    tableSpec center ifTrue: [ "</center>"     print; ];
+   ] divertOutput
+] ;
+
+#-----
+
+#--------------------
+#  FillerRow
+#--------------------
+
+LayoutTools TableSpec FillerRow
+   defineFixedProperty: 'height' .
+   defineFixedProperty: 'width' .
+   defineFixedProperty: 'bgColor' .
+;
+
+LayoutTools TableSpec FillerRow defineMethod: [ | setHeightTo: input |
+  :height <- input ;
+  ^self
+] ;
+
+LayoutTools TableSpec FillerRow defineMethod: [ | setWidthTo: input |
+  :width <- input ;
+  ^self
+] ;
+
+LayoutTools TableSpec FillerRow defineMethod: [ | setBGColorTo: input |
+  :bgColor <- input ;
+  ^self
+] ;
+
+FormatTools Html defineMethod: [ | formatFillerRowFrom: filler for: count |
+  [ !cell <- 
+      [ "<td><table border=0 cellpadding=0 cellspacing=0>" print ;
+        "<tr><td></td></tr></table></td>" printNL ;
+      ] divertOutput ;
+    "<tr " print ;
+    FormatTools formatOption: "height" withValue: filler height .print ;
+    FormatTools formatOption: "width" withValue: filler width .print ;
+    FormatTools formatOption: "bgcolor" withValue: filler bgColor .print ;
+    ">" printNL ;
+    count sequence do: [ ^my cell print ] ;
+    "</tr>" printNL ;
+  ] divertOutput
+] ;
+
+#--------------------
+#  DialogFormSpec
+#--------------------
+
+LayoutTools DialogFormSpec 
+   defineFixedProperty: 'sectionLabelStyle' .
+   defineFixedProperty: 'sectionHelpStyle' .
+   defineFixedProperty: 'sectionBodyStyle' .
+   defineFixedProperty: 'submitButtonLabel' .
+   defineFixedProperty: 'displayFormat' .
+   defineMethod: [ | isCompressedFormat | displayFormat = "Compressed" ] .
+   defineMethod: [ | isLeftToRightFormat | displayFormat = "LeftToRight" ] .
+   defineFixedProperty: 'centerEnabled' .
+   defineFixedProperty: 'topArea' .
+   defineFixedProperty: 'backgroundArea' .
+   defineFixedProperty: 'inputCellRow' .
+   defineFixedProperty: 'inputCellCol' .
+   defineFixedProperty: 'excludeSubmitFlag' .
+
+   defineFixedProperty: 'sections' .
+;
+
+LayoutTools DialogFormSpec defineMethod: [ | reset |
+  ^super reset ;
+  :displayFormat <- NA ;
+  :sections <- CoreWorkspace IndexedList new ;
+  :topArea <- NA ;
+  :backgroundArea <- NA ; 
+  :inputCellRow <- NA ; :inputCellCol <- NA ;
+  ^self
+] ;
+
+LayoutTools DialogFormSpec defineMethod: [ | profile |
+"Profile of " print ; ^self whatAmI print ; ": " print; 
+applicationName printNL ;
+newLine print ;
+topArea isntNA ifTrue: [ "Top Area contains " print ; topArea displayInfo ] ;
+backgroundArea isntNA 
+   ifTrue: [ "Background Area contains " print ; backgroundArea displayInfo ];
+getInputCell isntDefault
+   ifTrue: [ "Input Cell at row " print ; inputCellRow print ;
+             " and col " print ; inputCellCol printNL ;
+           ] ;
+sections count print: -3 ;
+" sections defined. " printNL ;
+"sectionLabelStyle: " print: 20 ; sectionLabelStyle printNL ;
+"sectionHelpStyle: " print: 20 ; sectionHelpStyle printNL ;
+"sectionBodyStyle: " print: 20 ; sectionBodyStyle printNL ;
+sections numberElements
+do: [ newLine print ;
+      "- " fill: 50 . printNL ;
+      "section: " print ; position print: -3 ;
+      header printNL ;
+      profile ;
+    ] ;
+] ;
+
+
+LayoutTools DialogFormSpec defineMethod: [ | setSectionLabelStyleTo: input |
+  :sectionLabelStyle <- input ;
+  ^self
+] ;
+
+LayoutTools DialogFormSpec defineMethod: [ | setSectionHelpStyleTo: input |
+  :sectionHelpStyle <- input ;
+  ^self
+] ;
+
+LayoutTools DialogFormSpec defineMethod: [ | setSectionBodyStyleTo: input |
+  :sectionBodyStyle <- input ;
+  ^self
+] ;
+
+LayoutTools DialogFormSpec defineMethod: [ | setSubmitButtonLabelTo: input |
+  :submitButtonLabel <- input ;
+  ^self
+] ;
+
+LayoutTools DialogFormSpec defineMethod: [ | enableCompressedFormat | 
+  :displayFormat <- "Compressed" ;
+  ^self
+ ] ;
+
+LayoutTools DialogFormSpec defineMethod: [ | enableLeftToRightFormat | 
+  :displayFormat <- "LeftToRight" ;
+  ^self
+ ] ;
+
+LayoutTools DialogFormSpec defineMethod: [ | disableDisplayFormat | 
+  :displayFormat <- NA ;
+  ^self
+ ] ;
+
+LayoutTools DialogFormSpec defineMethod: [ | enableCentering | 
+  :centerEnabled <- TRUE ;
+  ^self
+ ] ;
+
+LayoutTools DialogFormSpec defineMethod: [ | disableCentering | 
+  :centerEnabled <- NA ;
+  ^self
+ ] ;
+
+LayoutTools DialogFormSpec  defineMethod: [ | enableExcludeSubmitFlag |
+  :excludeSubmitFlag <- TRUE ;
+  ^self
+] ;
+
+LayoutTools DialogFormSpec  defineMethod: [ | disableExcludeSubmitFlag |
+  :excludeSubmitFlag <- NA ;
+  ^self
+] ;
+
+LayoutTools DialogFormSpec defineMethod: [ | addTopAreaWithRows: r andCols: c |
+  :topArea <-  WrapperSpec createInstance setRowsTo: r andColsTo: c ;
+  topArea
+] ;
+
+LayoutTools DialogFormSpec defineMethod: 
+[ | addBackgroundAreaWithRows: r andCols: c |
+  :backgroundArea <- WrapperSpec createInstance setRowsTo: r andColsTo: c ;
+  backgroundArea
+] ;
+
+LayoutTools DialogFormSpec defineMethod: [ | addSection: position |
+  !newOne <- Section createInstance: ^self ;
+  sections at: position asInteger put: newOne;
+  newOne
+] ;
+
+LayoutTools DialogFormSpec defineMethod: [ | getSection: n |
+  sections at: n asInteger . else: [ ^self addSection: n ]
+] ;
+
+LayoutTools DialogFormSpec defineMethod: [| updateInputsFromDictionary: dict| 
+dict isDictionary ifFalse: [:dict <- CoreWorkspace Dictionary]; 
+^super updateInputsFromDictionary: dict ;
+sections do: [ ^self updateInputsFromDictionary: ^my dict ] ;
+^self 
+] ;
+
+LayoutTools DialogFormSpec Section
+     defineFixedProperty: 'spec' .
+
+     defineFixedProperty: 'topText' .
+     defineFixedProperty: 'header' .
+
+     defineFixedProperty: 'numberOfRows' .
+     defineFixedProperty: 'numberOfCols' .
+     defineFixedProperty: 'rowStyles' .
+     defineFixedProperty: 'colStyles' .
+     
+;
+
+LayoutTools DialogFormSpec Section defineMethod: [ | initializeKeys: key |
+  :spec <- ^self asSelf ;
+  ^self
+] ;
+
+LayoutTools DialogFormSpec Section
+defineMethod: [ | initializeLocalAttributes |
+  ^super initializeLocalAttributes ;
+  :rowStyles <- CoreWorkspace IndexedList new ;
+  :colStyles <- CoreWorkspace IndexedList new ;
+  :border <- 0 ; :spacing <- 0 ; :padding <- 1 ;
+  ^self
+] ;
+
+LayoutTools DialogFormSpec Section defineMethod: [ | profile |
+"Style Class: " print: 20 ; styleClass printNL ;
+"header: " print: 20 ; header printNL ;
+"topText: " print: 20 ; topText printNL ;
+"numberOfRows: " print: 20 ; numberOfRows printNL ;
+"numberOfCols: " print: 20 ; numberOfCols printNL ;
+newLine print ;
+numberOfRows sequence
+do: [ !section <- ^my asSelf ;
+      !r <- asSelf ;
+      "-" fill: 20 . printNL ;
+      "    row: " print ; r print: -4 ; 
+      section rowStyles at: r . else: "" . printNL ;
+      section numberOfCols sequence
+      do: [ "    col " print ; print ; ":   " print ;
+            ^my section getInputSpecAtRow: ^my r andCol: asSelf . 
+            do: [ type print: 10 ; initialValue print: 20 ;
+                  styleClass else: "" . print: 15 ;
+                  newLine print ;
+                ] ;
+          ] ;
+    ] ;
+
+] ;
+
+LayoutTools DialogFormSpec Section defineMethod: [ | setHeaderTo: input |
+  :header <- input ;
+  ^self
+] ;
+LayoutTools DialogFormSpec Section defineMethod: [ | setTopTextTo: input |
+  :topText <- input ;
+  ^self
+] ;
+
+LayoutTools DialogFormSpec Section 
+defineMethod: [ | setRowsTo: r andColsTo: c |
+  :numberOfRows <- r > 0 ifTrue: [ r asInteger ] else: [ 1 ] ;
+  :numberOfCols <- c > 0 ifTrue: [ c asInteger ] else: [ 1 ] ;
+
+#--  create inputs for r rows x c cols
+  !section <- ^self ;
+  (numberOfRows * numberOfCols) asInteger sequence
+  do: [ ^my section addInputSpec: asSelf . setTypeToLabel ] ;
+  
+  ^self
+
+] ;
+
+LayoutTools DialogFormSpec Section 
+defineMethod: [ | getInputSpecAtRow: r andCol: c |
+  r between: 1 and: numberOfRows .  && [ c between: 1 and: numberOfCols ] 
+  ifTrue:
+     [ ^self inputSpecList at: ((r - 1) * numberOfCols +  c) asInteger ] 
+] ;
+
+LayoutTools DialogFormSpec Section defineMethod: [ | getInputSpec: coords |
+ :coords <- coords isList ifTrue: [ coords ] ifFalse: [ coords asList ] ;
+ !row <- coords at: 1 . asNumber asInteger else: 1 . max: 1 ;
+ !col <- coords at: 2 . asNumber asInteger else: 1 . max: 1 ;
+ ^self getInputSpecAtRow: row andCol: col
+] ;
+
+LayoutTools DialogFormSpec Section defineMethod: [ | setRow: r styleTo: input |
+  rowStyles at: r put: input ;
+  ^self
+] ;
+
+LayoutTools DialogFormSpec Section defineMethod: [ | setCol: r styleTo: input |
+  colStyles at: r put: input ;
+  ^self
+] ;
+
+LayoutTools DialogFormSpec defineMethod: [ | setInputCellToRow: r andCol: c |
+  :inputCellRow <- r asInteger ;
+  :inputCellCol <- c asInteger ;
+  ^self
+] ;
+
+LayoutTools DialogFormSpec defineMethod: [ | getInputCell | 
+  inputCellRow isInteger && inputCellCol isInteger
+    ifTrue: [ backgroundArea getCellAtRow: inputCellRow andCol: inputCellCol ]
+] ;
+
+LayoutTools DialogFormSpec reset ;
+
+#--------------------
+
+FormatTools defineMethod: [ | buildDialogFrom: dialogSpec |
+  "---  Dialog Spec Goes Here" printNL ;
+  dialogSpec profile
+] ;
+
+FormatTools Html defineMethod: [ | buildDialogFrom: dialogSpec |
+  [ !inputArea <-  dialogSpec isCompressedFormat
+        ifTrue: [ ^self getCompressedInputFormFor: dialogSpec ] .
+       elseIf: [ dialogSpec isLeftToRightFormat ] 
+         then: [ ^self getLeftToRightInputFormFor: dialogSpec ] .
+         else: [ ^self getInputFormFor: dialogSpec ] ;
+
+    ^self displayFormSetupFor: dialogSpec ;
+    dialogSpec centerEnabled isTrue ifTrue: [ "<center>" printNL; ];
+    "<table>" printNL ;
+
+    dialogSpec topArea isntDefault
+    ifTrue:
+      [ "<!-- start top area -->" printNL;
+        ^self buildWrapper: dialogSpec topArea . print ;
+        newLine print ;
+      ] ;
+    dialogSpec backgroundArea isntDefault
+    ifTrue:
+      [ dialogSpec getInputCell setTextTo: inputArea ;
+        "<!-- start background area -->" printNL;
+        ^self buildWrapper: dialogSpec backgroundArea . print ;
+      ]
+    ifFalse: [ inputArea printNL ] ;
+
+   ^self displayFormHiddenValuesFor: dialogSpec ;
+   "</table>" printNL ;
+   dialogSpec centerEnabled isTrue ifTrue: [ "</center>" printNL; ];
+   displayFormTrailer ;
+  ] divertOutput
+] ;
+
+#----------
+
+FormatTools Html defineMethod: [ | getInputFormFor: form | 
+  [
+  newLine print ;
+  "<!-- start inputs area -->" printNL;
+  "<table " print ; 
+  FormatTools formatOption: "class" withValue: form styleClass . print ;
+  FormatTools formatOption: "border" withValue: form border . print ;
+  FormatTools formatOption: "cellspacing" withValue: form spacing . print ;
+  FormatTools formatOption: "cellpadding" withValue: form padding . print ;
+  FormatTools formatOption: "width" withValue:form width . print ;
+  ">" printNL ;
+   #-- display each section
+  form sections numberElements
+  do: [ "<!-- start section " concat: position . concat: "-->" . printNL;
+        !section <- asSelf ;
+        !text <- header value ;
+        text isntDefault
+        ifTrue:
+          [ "<tr><td " print ; 
+            FormatTools formatOption: "class" 
+                        withValue: ^my form sectionLabelStyle . print ;
+           ">" print ; text print ; "</td></tr>" printNL ;
+          ] ;
+        !text <- topText value ;
+        text isntDefault
+        ifTrue:
+          [ "<tr><td " print ; 
+            FormatTools formatOption: "class" 
+                      withValue: ^my form sectionHelpStyle . print ;
+            ">" printNL ;
+           "<i><blockquote>" print ;
+           text print ; "</i></blockquote></td></tr>" printNL ;
+          ] ;
+        "<tr><td><center><table " print ;
+        !tableStyle <- ^my form sectionBodyStyle ;
+        FormatTools formatOption: "border" withValue: border . print ;
+        FormatTools formatOption: "cellspacing" withValue: spacing . print ;
+        FormatTools formatOption: "cellpadding" withValue: padding . print ;
+        FormatTools formatOption: "width" withValue: width . print ;
+        ">" printNL ;
+        numberOfRows sequence
+        do: [ 
+            !section <- ^my section ;
+            !r <- ^self ;
+            !class <- section rowStyles at: r . else: [ ^my tableStyle ] ;
+            "<tr>" print ;
+            section numberOfCols sequence
+            extendBy:
+              [!c <- asSelf ;
+               !spec <- ^my section getInputSpecAtRow: ^my r andCol: c ;
+               !class <- spec styleClass  else: [ ^my class ] ;
+              ] . 
+              select: [ (spec type != "label" ) || 
+                           [ spec initialValue isntNA ] 
+                      ] .
+            do: [
+                "<td " print ;
+                FormatTools formatOption: "class" withValue: class . print;
+                FormatTools
+                   formatOption: "rowSpan" withValue: spec rowSpan . print ;
+                FormatTools
+                   formatOption: "colSpan" withValue: spec colSpan . print ; 
+                FormatTools
+                   formatOption: "background" withValue: spec background . print ; 
+                FormatTools
+                   formatOption: "width" withValue: spec width . print ; 
+                FormatTools
+                   formatOption: "height" withValue: spec height . print ; 
+                ">" print ;
+                FormatTools formatInputElement: spec . print ;
+                 "</td>" printNL ;
+                ] ;
+          "</tr>" printNL ;
+          ] ;
+          "</table></center></td></tr>" printNL ;
+          !empty <- "&nbsp;" ;
+          "<tr><td>" concat: empty . concat: "</td></tr>" . printNL ;
+        ] ;
+
+      form excludeSubmitFlag isNA
+      ifTrue:
+        [ "<tr><td>&nbsp;</td></tr>" printNL ;
+          "<tr><td align=right><input TYPE=submit value=" print ;
+          form submitButtonLabel else: " Run " . asQuotedString print ;
+         "></td></tr>" printNL;
+        ] ;
+  ] divertOutput
+] ;
+
+FormatTools Html defineMethod: [ | getCompressedInputFormFor: form | 
+  [ #-- display each section in compressed format - single row, one td
+    #-- per sectiion; multi-<br> for each row in section; multi cols in
+    #-- section just print side-by-side
+  newLine print ;
+  "<!-- start compressed inputs area -->" printNL;
+  "<table " print ; 
+  FormatTools formatOption: "class" withValue: form styleClass . print ;
+  FormatTools formatOption: "border" withValue: form border . print ;
+  FormatTools formatOption: "cellspacing" withValue: form spacing . print ;
+  FormatTools formatOption: "cellpadding" withValue: form padding . print ;
+  FormatTools formatOption: "width" withValue:form width . print ;
+  ">" printNL ; 
+  "<tr valign=top>" printNL ;
+  form sections numberElements
+  do: [ "<!-- start section " concat: position . concat: "-->" . printNL;
+        !section <- asSelf ;
+        "<td " print ;
+        FormatTools formatOption: "class" withValue: styleClass . print ;
+        FormatTools formatOption: "width" withValue: width . print ;
+        ">" printNL ;
+        numberOfRows sequence
+        do: [ 
+            !section <- ^my section ;
+            !r <- ^self ;
+            section numberOfCols sequence
+            extendBy:
+              [!c <- asSelf ;
+               !spec <- ^my section getInputSpecAtRow: ^my r andCol: c ;
+              ] . 
+             select: [ (spec type != "label" ) || 
+                             [ spec initialValue isntNA ] 
+                        ] .
+             do: [ spec styleClass isntDefault
+                   ifTrue: 
+                     [ "<font class=" concat: spec styleClass . concat: ">" .
+                             print ;
+                     ] ;
+                   FormatTools formatInputElement: spec . stripChar:newLine . print ;
+                   spec styleClass isntDefault ifTrue: [ "</font>" print ] ;
+                   #"&nbsp;" print ;
+                 ] ;
+              "<br>" printNL ;
+              ] ;
+        "</td>" printNL ;
+        ] ;
+   "</tr>" printNL ;
+  "</table>" printNL;
+  ] divertOutput
+] ;
+
+FormatTools Html defineMethod: [ | getLeftToRightInputFormFor: form | 
+  [ #-- display each section as a table in a separate td in a single row
+  newLine print ;
+  "<!-- start left-to-right inputs area -->" printNL;
+  "<table " print ; 
+  FormatTools formatOption: "class" withValue: form styleClass . print ;
+  FormatTools formatOption: "border" withValue: form border . print ;
+  FormatTools formatOption: "cellspacing" withValue: form spacing . print ;
+  FormatTools formatOption: "cellpadding" withValue: form padding . print ;
+  FormatTools formatOption: "width" withValue:form width . print ;
+  ">" printNL ;
+  "<tr valign=top>" printNL ;
+
+  form sections numberElements
+  do: [ "<!-- start section " concat: position . concat: "-->" . printNL;
+        !section <- asSelf ;
+        "<td " print ;
+        FormatTools formatOption: "class" withValue: styleClass . print ;
+        FormatTools formatOption: "width" withValue: width . print ;
+        ">" printNL ;
+        "<table>" printNL ;
+        numberOfRows sequence
+        do: [ 
+            "<tr>" printNL ;
+            !section <- ^my section ;
+            !r <- ^self ;
+            section numberOfCols sequence
+            extendBy:
+              [!c <- asSelf ;
+               !spec <- ^my section getInputSpecAtRow: ^my r andCol: c ;
+              ] . 
+             select: [ (spec type != "label" ) || 
+                             [ spec initialValue isntNA ] 
+                        ] .
+             do: [ "<td" print ;
+                    FormatTools formatOption: "class" 
+                                withValue: spec styleClass . print ;
+                    FormatTools formatOption: "bgcolor" 
+                                withValue: spec bgColor . print ; 
+                    FormatTools formatOption: "colspan" 
+                                withValue: spec colSpan . print;
+                    FormatTools formatOption: "rowspan" 
+                                withValue: spec rowSpan . print ;
+                    FormatTools
+                       formatOption: "background" withValue: spec background . print ; 
+                    FormatTools
+                       formatOption: "width" withValue: spec width . print ; 
+                    FormatTools
+                       formatOption: "height" withValue: spec height . print ; 
+                   "> " printNL ;
+                   spec styleClass isntDefault
+                   ifTrue: 
+                     [ "<font class=" concat: spec styleClass . concat: ">" .
+                             print ;
+                     ] ;
+                   FormatTools formatInputElement: spec . stripChar:newLine . 
+                          print ;
+                   spec styleClass isntDefault ifTrue: [ "</font>" print ] ;
+                   "</td>" printNL ;
+                 ] ;
+              "</tr>" printNL ;
+              ] ;
+        "</table></td>" printNL ;
+        ] ;
+   "</tr>" printNL ;
+  "</table>" printNL;
+  ] divertOutput
+] ;
+
+
+#----------
+
+#--------------------
+#  TableSpec subclass WrapperSpec
+#--------------------
+
+LayoutTools WrapperSpec
+     defineFixedProperty: 'applicationName' .
+     defineFixedProperty: 'cells' .
+     defineFixedProperty: 'numberOfRows' .
+     defineFixedProperty: 'numberOfCols' .
+;
+
+LayoutTools WrapperSpec defineMethod: [ | initializeLocalAttributes |
+  ^super initializeLocalAttributes ;
+  :border <- 0 ; :cellSpacing <- 0 ; :cellPadding <- 0 ;
+  ^self
+] ;
+
+LayoutTools WrapperSpec defineMethod: [ | displayInfo |
+   numberOfRows asString print ; " rows by " print ; 
+   numberOfCols asString print ; " cols." printNL;
+] ;
+
+LayoutTools WrapperSpec defineMethod: [ | profile |
+"Style Class: " print: 20 ; styleClass printNL ;
+"Application Name: " print: 20 ; applicationName printNL ;
+"numberOfRows: " print: 20 ; numberOfRows printNL ;
+"numberOfCols: " print: 20 ; numberOfCols printNL ;
+newLine print ;
+numberOfRows sequence
+do: [ !area <- ^my asSelf ;
+      !r <- asSelf ;
+      "-" fill: 20 . printNL ;
+      "    row: " print ; r print: -4 ; 
+      area numberOfCols sequence
+      do: [ "    col " print ; print ; ":   " print ;
+            ^my area getCellAtRow: ^my r andCol: asSelf . displayInfo ;
+          ] ;
+    ] ;
+] ;
+
+LayoutTools WrapperSpec defineMethod: [ | setApplicationNameTo: text | 
+  :applicationName <- text ;
+  ^self
+] ;
+
+LayoutTools WrapperSpec defineMethod: [ | setRowsTo: r andColsTo: c |
+  :numberOfRows <- r > 0 ifTrue: [ r asInteger ] else: [ 1 ] ;
+  :numberOfCols <- c > 0 ifTrue: [ c asInteger ] else: [ 1 ] ;
+  :cells <- numberOfRows sequence
+      send: [ ^my numberOfCols sequence send: [ NA ] ] ;
+  ^self
+] ;
+
+LayoutTools WrapperSpec defineMethod: [ | getCellAtRow: r andCol: c |
+  r between: 1 and: numberOfRows . && [ c between: 1 and: numberOfCols ] 
+  ifTrue:
+     [ cells at: r . at: c . 
+        else: [ cells at: r .
+                  at: c put: (TableSpec Label createInstance 
+                                 do: [ :object <- asSelf ] )
+              ]
+     ] 
+] ;
+
+LayoutTools WrapperSpec defineMethod: [ | setCellAtRow: r andCol: c to:object |
+  !cell <- ^self getCellAtRow: r andCol: c ;
+  cell isntNA
+  ifTrue:
+    [ object isLabel   #- replace with supplied object
+      ifTrue:
+        [ !reference <- object do: [ :object <- asSelf ] ;
+          cells at: r . at: c put: reference ;
+          reference
+        ]
+     ifFalse: 
+        [ cell do: [ :object <- ^my object ] 
+        ]
+    ] 
+] ;
+
+LayoutTools WrapperSpec defineMethod: [ | updateInputsFromDictionary: dict |
+  cells isCollection && dict isDictionary
+  ifTrue:
+    [   cells collectListElementsFrom: [ ^self ] .
+           select: [ isntDefault ] .
+           select: [ object isInputSpec ] .
+           do: [ object setValueFrom: ^my dict ] ;
+    ] ;
+  ^self
+] ;
+
+####################
+#  New FormSpec tools
+####################
+
+LayoutTools FormSpec defineMethod: [ | initializeLocalAttributes |
+^super initializeLocalAttributes; 
+^self reset 
+] ;
+
+LayoutTools FormSpec
+   defineFixedProperty: 'helpMessage' .
+   defineFixedProperty: 'useRowLabels' .
+   defineFixedProperty: 'resetLabel' .
+   defineFixedProperty: 'advancedModeFlag' .
+
+defineMethod: [ | addInputSpec: position |
+  !newOne <- InputSpec createInstance: asSelf ;
+  inputSpecList at: position asInteger put: newOne;
+  newOne
+] .
+
+defineMethod: [ | setHelpMessageTo: text |
+  :helpMessage <- text ;
+  ^self
+] .
+
+defineMethod: [ | enableRowLabels | :useRowLabels <- TRUE ; ^self ] .
+defineMethod: [ | disableRowLabels | :useRowLabels <- NA ; ^self ] .
+
+defineMethod: [ | setResetLabelTo: label |
+  :resetLabel <- label ;
+  ^self
+] .
+
+defineMethod: [ | enableAdvancedMode | 
+  :advancedModeFlag <- TRUE ;
+  ^self
+] .
+
+defineMethod: [ | disableAdvancedMode |
+  :advancedModeFlag <- NA ;
+  ^self
+] .
+
+defineMethod: [ | advancedEnabled | advancedModeFlag isTrue ] .
+
+;
+
+LayoutTools FormSpec
+   defineFixedProperty: 'buttonColor' .
+   define: 'defaultButtonColor' toBe: "linen" .
+   define: 'defaultBGColor' toBe: "linen" .
+defineMethod: [ | setButtonColorTo: color | 
+  :buttonColor <- color ; 
+  ^self
+] .
+defineMethod: [ | setDefaultButtonColorTo: color |
+  ^self define: 'defaultButtonColor' toBe: color ;
+  ^self
+] .
+defineMethod: [ | setDefaultBGColorTo: color |
+  ^self define: 'defaultBGColor' toBe: color ;
+  ^self
+] .
+
+defineMethod: [ | getButtonColor | 
+  buttonColor = "default" || buttonColor isDefault
+     ifTrue: [ defaultButtonColor ] ifFalse: [ buttonColor ]
+] .
+
+;
+
+LayoutTools FormSpec InputSpec
+   defineFixedProperty: 'formSpec' .
+   defineFixedProperty: 'bgColor' .
+   defineFixedProperty: 'basicElementFlag' .
+   defineFixedProperty: 'endOfRowFlag' .
+   defineFixedProperty: 'autoSubmitFlag' .
+   defineFixedProperty: 'rowSpan' .
+   defineFixedProperty: 'colSpan' . 
+   defineFixedProperty: 'onChange' .
+   defineFixedProperty: 'background' .
+   defineFixedProperty: 'width' .
+   defineFixedProperty: 'height' .
+
+   define: "choicesPrototype" toBe: List new .
+;
+
+LayoutTools FormSpec InputSpec defineMethod: [ | initializeKeys: key |
+  :formSpec <- key asSelf ;
+  ^self
+] ;
+
+LayoutTools FormSpec InputSpec defineMethod: [ | getBGColor |
+  bgColor = "default"
+     ifTrue: [ formSpec defaultBGColor ] ifFalse: [ bgColor ]
+] ;
+
+LayoutTools FormSpec InputSpec
+
+defineMethod: [ | setTypeToLabel |
+  :type <- "label" ;
+  ^self
+] .
+
+defineMethod: [ | setBGColorTo: input | 
+  :bgColor <- input ; 
+  ^self
+] .
+
+defineMethod: [ | flagAsBasicElement |
+  :basicElementFlag <- TRUE ;
+  ^self
+] .
+
+defineMethod: [ | flagAsAdvancedElement |
+  :basicElementFlag <- FALSE ;
+  ^self
+] .
+
+defineMethod: [ | isBasicElement | basicElementFlag isTrue ] .
+defineMethod: [ | isAdvancedElement | basicElementFlag isFalse ] .
+
+defineMethod: [ | isEndOfRow | endOfRowFlag isTrue ] .
+
+defineMethod: [ | flagAsEndOfRow |
+  :endOfRowFlag <- TRUE ;
+  ^self
+] .
+
+defineMethod: [ | unflagAsEndOfRow | 
+  :endOfRowFlag <- NA ;
+  ^self
+] .
+
+defineMethod: [ | enableAutoSubmit |
+  :autoSubmitFlag <- TRUE ;
+  ^self
+] .
+
+defineMethod: [ | disableAutoSubmit |
+  :autoSubmitFlag <- NA ;
+  ^self
+] .
+
+defineMethod: [ | autoSubmit | autoSubmitFlag isTrue ] .
+;
+
+LayoutTools FormSpec InputSpec defineMethod: [ | setBackgroundTo: input |
+  :background <- input ;
+  ^self
+] ;
+
+LayoutTools FormSpec InputSpec defineMethod: [ | setWidthTo: input |
+  :width <- input ;
+  ^self
+] ;
+
+LayoutTools FormSpec InputSpec defineMethod: [ | setHeightTo: input |
+  :height <- input ;
+  ^self
+] ;
+
+
+#--------------------
+#  Fix label set to allow for list of
+#--------------------
+LayoutTools FormSpec InputSpec defineMethod: [ | setLabelTo: input | 
+  :label <- input isntNA
+      ifTrue: [ input send: [ asString ] ] ;
+  ^self
+] ;
+
+LayoutTools FormSpec InputSpec defineMethod: [ | setValueFrom: dict | 
+  !input <- dict at: name . else: "" ;
+  type = "text" ifTrue: [ ^self setInitialValueTo: input ] .
+    elseIf: [ type = "menu" || type = "radio" ] 
+      then: [ ^self setSelectionTo: input ] .
+    elseIf: [type = "hidden" && input isntDefault ] 
+      then: [ ^self setInitialValueTo: input ] ;
+  ^self
+] ;
+
+LayoutTools FormSpec InputSpec defineMethod: [ | setInitialValueTo: input | 
+  :initialValue <- input ;
+  ^self
+] ;
+
+LayoutTools FormSpec InputSpec defineMethod: [ | setRowSpanTo: input | 
+  ^self :rowSpan <- input ;
+  ^self
+] ;
+
+LayoutTools FormSpec InputSpec defineMethod: [ | setColSpanTo: input | 
+  ^self :colSpan <- input ;
+  ^self
+] ;
+
+LayoutTools FormSpec InputSpec defineMethod: [ | setOnChangeTo: input | 
+  ^self :onChange <- input ;
+  ^self
+] ;
+
+#====================
+#--  performance fix
+LayoutTools FormSpec InputSpec defineMethod: [ | addChoice: position |
+  !newOne <- choicesPrototype clusterNew, NA, NA, NA ;
+  choices at: position asInteger put: newOne;
+  newOne
+] ;
+
+LayoutTools FormSpec InputSpec instanceList
+   select: [ choices isntDefault ] .
+do: [ :choices <- CoreWorkspace IndexedList new ] ;
+
+LayoutTools FormSpec InputSpec defineMethod: [ | setChoice: n labelTo: label| 
+  ^self getChoice: n .at: 1 put: (^self getClusteredString: label asString) ;
+  ^self 
+] ;
+
+LayoutTools FormSpec InputSpec defineMethod: [ | setChoice: n valueTo: val| 
+  ^self getChoice: n .at: 2 put: (^self getClusteredString: val asString) ;
+  ^self 
+] ;
+
+#--------------------
+
+FormatTools defineMethod: [ | buildFormFor: form withTextBody: text |
+  [ "---  Top of Form   ---" printNL ;
+    form inputSpecList
+      select: [ isBasicElement ] .
+    do: [ displayInfo ] ;
+    newLine print ;
+    "---  Body of Report  ---" printNL ;
+    text printNL ;
+    newLine print ;
+    "---  Bottom of Form   ---" printNL ;
+    form inputSpecList
+       select: [ isAdvancedElement ] .
+    do: [ displayInfo ] ;
+  ] divertOutput
+] ;
+
+FormatTools Html defineMethod: [ | buildFormFor: form withTextBody: text |
+ [
+   ^self displayFormSetupFor: form ;
+   ^self displayFormBodyFor: form withTextBody: text ;
+   ^self displayFormHiddenValuesFor: form ;
+   displayFormTrailer ;
+
+ ] divertOutput
+
+] ;
+
+#----------
+
+FormatTools Html defineMethod: [ | displayFormBodyFor: form withTextBody: text|
+
+#--- basic element inputs
+!basics <- form inputSpecList select: [ isBasicElement ] ;
+!color <- "<th BGCOLOR=" concat: form getButtonColor  . concat:">" ;
+
+"<center><table " print ; 
+FormatTools formatOption: "class" withValue: form styleClass . print ;
+FormatTools formatOption: "border" withValue: form border . print ;
+FormatTools formatOption: "cellspacing" withValue: form spacing . print ;
+FormatTools formatOption: "cellpadding" withValue: form padding . print ;
+FormatTools formatOption: "width" withValue:form width . print ;
+">" printNL ;
+
+"<tr><td><center><table BORDER=0 CELLSPACING=0 CELLPADDING=2>" printNL ;
+form useRowLabels isTrue
+ifFalse:
+   [ "<tr>" printNL ;
+     basics
+     do: [ "<th" print ;
+            bgColor isntNA
+               ifTrue: [ " BGCOLOR=" concat: getBGColor . print ] ;
+            "><font size=-1>" print ;
+            [ label else: "" . do: [ print; "<br>" print ] ;
+            ] divertOutput drop: -4 . print ;
+            "</th>" printNL;
+         ] ;
+     color print ; "&nbsp;</th>" printNL;
+     "</tr>" printNL ;
+   ] ;
+"<tr>" printNL ;
+basics
+do: [ ^my form useRowLabels isTrue && [ label isntDefault ] 
+      ifTrue: 
+        [ "<th align=right " print ;
+          bgColor isntNA ifTrue: [ " BGCOLOR=" concat: getBGColor . print ] ;
+         "><font size=-1>" print ; 
+         [ label do: [ print; "<br>" print ] ;
+         ] divertOutput drop: -4 . print ;
+         "</th>" printNL ;
+        ] ;
+      ^my displayInputElementFor: ^self ;
+      "</td>" printNL ;
+      isEndOfRow ifTrue: [ "</tr><tr>" printNL ] ;
+    ] ;
+
+color print ; "<input TYPE=submit value=Submit></th>" printNL;
+form resetLabel isntDefault
+  ifTrue: [ color print ; "<input TYPE=reset value=" print ;
+            form resetLabel print ; "></th>" printNL;
+          ] ;
+form helpMessage isntDefault
+ ifTrue:
+   [ !rows <- basics numberElements extendBy: [ !element <- position ] .
+        select: [ isEndOfRow || (element = ^my basics count) ] ;
+     !max <- rows linkElements 
+          max: [ element -
+                    (prior isntNA ifTrue: [ prior element ] . else: 0 )
+               ] . asInteger ;
+     rows count = 1 ifTrue: [ :max increment ] ;     #- submit button
+     form useRowLabels isTrue ifTrue: [ :max increment ] ;
+     form resetLabel isntDefault ifTrue: [ :max increment ] ;
+     "</tr><tr><th " print ;
+     "COLSPAN= " print ; max asInteger asString print ;
+     " BGCOLOR=" concat: form getButtonColor  . concat:">" . printNL ;
+     !color <- External colorMap at: "formInputShortHelp" . else: "darkblue" ;
+     "<font color=" print ; color print ; " size=-1>" printNL ;
+     form helpMessage value print ; "</font></th>" printNL ;
+   ] ;
+"</table></center><p>" printNL ;
+#---  text body
+"<tr><td><center><table BORDER=0 CELLSPACING=0 CELLPADDING=0>" printNL ;
+"<tr><td></td></tr>" printNL; 
+"<tr><td>" printNL ; text printNL ; "</td></tr>" printNL ;
+"<tr><td></td></tr>" printNL;
+"</td></tr></table></center>" printNL ;
+
+
+#--- advanced element inputs
+!extra <- form inputSpecList numberElements select: [isAdvancedElement ] ;
+form advancedEnabled && [ extra count > 0 ] 
+ifTrue:
+  [ "<tr><td><center>" print ;
+    "<table BORDER=1 CELLSPACING=2 CELLPADDING=8 WIDTH=60%>" printNL ;
+    "<tr><th COLSPAN=2 BGCOLOR=" print ;
+    form getButtonColor print ; ">" print ;
+    form title printNL ;
+    "<input TYPE=submit value=Submit> <input TYPE=reset> </th></tr>" printNL ;
+    extra
+    do: [
+        "<tr><td ALIGN=right>" print ;
+         label else: [ "Input " concat: position . concat: ": " ] . print ;
+        "</td>" printNL ;
+        ^my displayInputElementFor: ^self ;
+        "</tr>" printNL ;
+        ] ;
+    "</table></center>" printNL ;
+   ] ;
+
+"</table></center><p>" printNL ;
+] ;
+
+#----------
+
+FormatTools Html defineMethod: [ | displayFormSetupFor: form | 
+    #-- <form Name=ApplciationForm Action=...><center><table ...>
+
+"<form NAME=ApplicationForm ACTION=" print ;
+External visionPath asQuotedString print ; ">" printNL ;
+] ;
+
+FormatTools Html defineMethod: [ | displayFormHiddenValuesFor: form | 
+#--  explicit hidden variables
+form inputSpecList numberElements
+    select: [ type = "hidden" ] .
+do: [  "<input TYPE=hidden" printNL ;
+       " NAME= " print ; name print ;
+       " VALUE= " print ; initialValue asString asQuotedString print ;
+       ">" printNL ;    #- end of <input
+    ] ;
+
+#--  application name
+form applicationName isntDefault
+ifTrue: 
+   [ "<input TYPE=hidden NAME=appName VALUE=" print ; 
+      form applicationName asQuotedString print ; ">" printNL ;
+   ] ;
+
+#--  shared cache
+"<input TYPE=hidden NAME=cachedParams VALUE=" print ;
+  [ External Global sharedParameters objects
+          select: [ isString && isntDefault ] .
+      do: [ selector print ; "=" print; print; "|" print ] ;
+  ] divertOutput asQuotedString print ;
+">" printNL ;
+
+] ;
+
+FormatTools defineMethod: [ | formatInputElement: spec |
+  [ spec displayInfo ] divertOutput
+] ;
+
+FormatTools Html defineMethod: [ | formatInputElement: spec |
+  [ spec type = "label" && [ spec initialValue isntDefault ] 
+    ifTrue:
+      [ [ spec initialValue value do: [ print ; "<br>" print ] ;
+        ] divertOutput drop: -4 . print ;
+      ] .
+    elseIf: [ spec type = "menu" ] 
+      then: [ ^self displayMenuInputFor: spec ] .
+    elseIf: [ spec type = "radio" ]
+      then: [ ^self displayRadioInputFor: spec ] .
+    elseIf: [ spec type = "text" ] 
+      then: [ ^self displayInputFor: spec ] .
+      else: [ "&nbsp;" print ] 
+  ] divertOutput 
+] ;
+
+FormatTools defineMethod: [ | formatCaption: spec |
+   ^self formatCaption: spec over: NA 
+] ;
+
+FormatTools defineMethod: [ | formatCaption: spec over: n |
+   spec
+] ;
+
+FormatTools Html defineMethod: [ | formatCaption: spec over: n |
+  [ spec
+    do: [ !label <-
+            [ "<font" print ;
+              font isntDefault ifTrue: [ " face=" concat: font . print ] ;
+              color isntDefault ifTrue: [ " color="    concat: color . print ];
+              size isntDefault ifTrue: [  " size ="    concat: size . print ];
+              ">"   printNL;
+              text value asLines do: [^self concat: "<br>" . print; ];
+              "</font>" printNL ;
+            ] divertOutput ;
+         ^my n isNumber
+             ifTrue: [ "<tr><th colspan=" concat: ^my n . print ]
+            ifFalse: [ "<caption "          print ]  ;
+         FormatTools formatOption: "class" withValue: styleClass . print ;
+         FormatTools formatOption: "bgcolor" withValue: bgColor . print ;  
+         FormatTools formatOption: "align" withValue: hAlignment . print ;  
+         FormatTools formatOption: "valign" withValue: vAlignment . print ;  
+         ">" printNL ;
+         label print ;
+         ^my n isNumber
+             ifTrue: [ "</th></tr>" print ] ifFalse: [ "</caption> "print ]  ;
+       ] ;
+  ] divertOutput
+] ;
+
+#----------
+
+FormatTools defineMethod: [ | formatTextCell: label | 
+  label
+] ;
+
+FormatTools Html defineMethod: [ | formatTextCell: label | 
+  [ label 
+    do: [ "<td " print ;
+          FormatTools formatOption: "class" withValue: styleClass . print ;
+          FormatTools formatOption: "width" withValue: width . print ;
+          FormatTools formatOption: "height" withValue: height . print ;
+          FormatTools formatOption: "bgcolor" withValue: bgColor . print ; 
+          !bground <- ^my getFullPathFor: background ;
+          FormatTools formatOption: "background" withValue: bground . print;
+          FormatTools formatOption: "align" withValue: hAlignment . print ;
+          FormatTools formatOption: "valign" withValue: vAlignment . print;
+          FormatTools formatOption: "colspan" withValue: columnSpan . print;
+          FormatTools formatOption: "rowspan" withValue: rowSpan . print ;
+          "> " printNL ;
+          text value print ;
+         "</td>" printNL ;
+        ] ;
+  ] divertOutput
+] ;
+
+
+
+#--------------------
+
+FormatTools Html defineMethod: [ | displayInputElementFor: spec | 
+  spec type = "label" ifTrue: [ ^self displayLabelFor: spec ] .
+  else:
+   [ "<td" print ;
+     spec bgColor isntNA
+        ifTrue: [ " BGCOLOR=" concat: spec getBGColor . print ] ;
+     "> " printNL ;
+     spec type = "menu" ifTrue: [ ^self displayMenuInputFor: spec ] .
+     elseIf: [ spec type = "radio" ] then: [ ^self displayRadioInputFor: spec ] .
+     elseIf: [ spec type = "text" ] then: [ ^self displayInputFor: spec ] ;
+     "</td>" printNL ;
+   ] ;
+] ;
+
+FormatTools Html defineMethod: [ | displayLabelFor: spec |
+  spec 
+  do: [ "<th ALIGN=center " print ;
+        bgColor isntNA
+          ifTrue: [ " BGCOLOR=" concat: getBGColor . print ] ;
+        "><font size=-1>" print ; 
+        [ initialValue do: [ print; "<br>" print ] ;
+        ] divertOutput drop: -4 . print ;
+        "</th>" printNL ;
+      ] ;
+] ;
+
+FormatTools Html defineMethod: [ | displayInputFor: spec |
+spec
+do: [ "<input TYPE=" print; type print ;
+       name isntNA ifTrue: [ " NAME= " print ; name print ] ;
+       onChange isntDefault
+         ifTrue: [ " onChange=" concat: onChange asQuotedString . print ];
+       size isntNA ifTrue: [ " SIZE= " print ; size print ] ;
+       initialValue isntNA 
+       ifTrue: [ " VALUE= " print ; 
+                 initialValue asString asQuotedString print ;
+               ] ;
+      autoSubmit ifTrue: [ " onChange=\"submit()\" " print ] ;
+      ">" printNL ;    #- end of <input
+   ] ;
+] ;
+
+FormatTools Html defineMethod: [ | displayRadioInputFor: spec | 
+spec
+do: [ choices      #- choices is a list of 3 part lists: label,value, checked
+      do: [ ^self at: 1 . else: "" . print ; 
+            "<input TYPE=radio NAME=" print ; 
+            ^my name else: "" . print ;
+            !val <- ^self at: 2 ;
+            val isntNA
+               ifTrue: [ " VALUE= " print ; val asString asQuotedString print];
+            ^self at: 3 . isntNA ifTrue: [ " CHECKED" print ] ;
+            ^my autoSubmit ifTrue: [ " onChange=\"submit()\" " print ] ;
+            ">" printNL ;    #- end of input
+          ] ;
+      altEntry isntNA
+      ifTrue:
+        [ "<br><input TYPE=text NAME= " print ; 
+          altEntry print ;
+          ">" printNL ;
+        ] ;
+    ] ;
+] ;
+
+FormatTools Html defineMethod: [ | displayMenuInputFor: spec | 
+spec
+do: [ "<select NAME= " print ; name else: "" . print ; 
+      size isntNA ifTrue: [ " SIZE= " print ; size print ] ;
+      onChange isntDefault
+         ifTrue: [ " onChange=" concat: onChange asQuotedString . print ] .
+      elseIf: [ autoSubmit ] then: [ " onChange=\"submit()\" " print ] ;
+      ">" printNL ;
+      choices      #- choices is a list of 3 part lists: label,value, checked
+      do: [ "<option " print ; 
+            !val <- ^self at: 2 ;
+            val isntNA 
+              ifTrue: [ " VALUE= " print; val asString asQuotedString print] ;
+            ^self at: 3 . isntNA ifTrue: [ " SELECTED" print ] ;
+            "> " print ; ^self at: 1 . printNL ;
+          ] ;
+      "</select>" printNL ;
+      altEntry isntNA
+      ifTrue:
+        [ "<br><input TYPE=text NAME= " print ; 
+          altEntry print ;
+          ">" printNL ;
+        ] ;
+    ] ;
+] ;
+
+
+#======================================================================
+
+####################
+#  New Tablespec tools
+####################
+
+LayoutTools TableSpec 
+   defineFixedProperty: 'evenRowColor' .
+   defineFixedProperty: 'oddRowColor' .
+   defineFixedProperty: 'bgColor' .
+   defineFixedProperty: 'hAlignment' .
+   defineFixedProperty: 'vAlignment' .
+   defineFixedProperty: 'rowIdFlag' .
+   defineFixedProperty: 'fillerRows' withDefault: IndexedList new .
+   define: 'defaultEvenRowColor' toBe: NA .
+   define: 'defaultOddRowColor' toBe: NA .
+;
+
+LayoutTools TableSpec defineMethod: [ | initializeLocalAttributes |
+^super initializeLocalAttributes; 
+^self reset 
+] ;
+
+LayoutTools TableSpec defineMethod: [ | reset |
+  :caption      <- Label createInstance;
+  clearColumns; 
+  clearFillerRows ;
+  :width        <- NA ;
+  :border       <- 1 ;
+  :cellSpacing      <- 2 ;
+  :cellPadding      <- 2 ;
+  :columnCount  <- 0 ;
+  :headerCount  <- 0 ;
+  :rowLabelFlag    <- FALSE ;
+  :center       <- TRUE ;
+  ^self
+] ;
+
+LayoutTools TableSpec defineMethod: [ | setDefaultEvenRowColorTo: color |
+  ^self define: 'defaultEvenRowColor' toBe: color ;
+  ^self
+] ;
+
+LayoutTools TableSpec defineMethod: [ | setDefaultOddRowColorTo: color |
+  ^self define: 'defaultOddRowColor' toBe: color ;
+  ^self
+] ;
+
+LayoutTools TableSpec defineMethod: [ | getEvenRowColor |
+  evenRowColor = "default"
+     ifTrue: [ defaultEvenRowColor ] ifFalse: [ evenRowColor ]
+] ;  
+
+LayoutTools TableSpec defineMethod: [ | getOddRowColor |
+  oddRowColor = "default"
+     ifTrue: [ defaultOddRowColor ] ifFalse: [ oddRowColor ]
+] ;  
+
+LayoutTools TableSpec 
+defineMethod: [ | setEvenRowColorTo: input |
+  :evenRowColor <- input ;
+  ^self
+] .
+
+defineMethod: [ | setOddRowColorTo: input |
+  :oddRowColor <- input ;
+  ^self
+] ;
+
+LayoutTools TableSpec defineMethod: [ | setHAlignmentTo: input |
+  :hAlignment <- input ;
+  ^self
+] ;
+
+LayoutTools TableSpec defineMethod: [ | setVAlignmentTo: input |
+  :vAlignment <- input ;
+  ^self
+];
+
+LayoutTools TableSpec 
+defineMethod: [ | enableRowId | :rowIdFlag <- TRUE ; ^self ] .
+defineMethod: [ | disableRowId | :rowIdFlag <- NA ; ^self ] .
+;
+
+LayoutTools TableSpec defineMethod: [ | profile | 
+"Profile for TableSpec" printNL ;
+"code: "            print: 15 ; code printNL ;
+"width: "           print: 15 ; width printNL ;
+"border: "          print: 15 ; border printNL ;
+"cellSpacing: "         print: 15 ; cellSpacing printNL ;
+"cellPadding: "         print: 15 ; cellPadding printNL ;
+"columnCount: "     print: 15 ; columnCount printNL ;
+"headerCount: "     print: 15 ; headerCount printNL ;
+"rowLabelFlag: "       print: 15 ; rowLabelFlag printNL ;
+"center: "          print: 15 ; center printNL ;
+"evenRowColor: " print: 15 ; evenRowColor printNL ;
+"oddRowColor: " print: 15 ; oddRowColor printNL ;
+"bgColor: " print: 15 ; bgColor printNL ;
+caption inUse isntNA
+   ifTrue: [ "Caption" printNL ; caption displayInfo ] ;
+"Columns: " printNL ;
+columnCount sequence  
+do: [ ^self print: -3 ;
+      ^my columnSpecs at: ^self . displayInfo ;
+    ] ;
+] ;
+
+LayoutTools TableSpec defineMethod: [ | setBGColorTo: input |
+  :bgColor <- input ;
+  ^self
+] ;
+
+LayoutTools TableSpec defineMethod: [ | setDefaultColorTo: color |
+  ^self define: 'defaultColor' toBe: color ;
+  ^self
+] ;
+
+LayoutTools TableSpec defineMethod: [ | getBGColor |
+  bgColor = "default"
+     ifTrue: [ defaultColor ] ifFalse: [ bgColor ]
+] ;  
+
+LayoutTools TableSpec defineMethod: [ | addFillerRow: position |
+  !newOne <- FillerRow createInstance;
+  fillerRows at: position asInteger put: newOne;
+  newOne
+] ;
+
+LayoutTools TableSpec defineMethod: [ | getFillerRow: n |
+  fillerRows at: n asInteger . else: [ ^self addFillerRow: n ]
+] ;
+
+LayoutTools TableSpec defineMethod: [ | clearFillerRows | 
+  :fillerRows <- CoreWorkspace IndexedList new ;
+  ^self
+] ;
+
+#----------
+
+LayoutTools TableSpec ColumnSpec
+   defineFixedProperty: 'height' .
+   defineFixedProperty: 'colChars' .
+;
+
+LayoutTools TableSpec ColumnSpec defineMethod: [ | reset | 
+   :titles     <- CoreWorkspace IndexedList new;
+   :font       <- NA ;
+   :color      <- NA ;
+   :size       <- NA ;
+   :width      <- NA ;
+   :hAlignment <- NA ;
+   :vAlignment <- NA ;
+   :fillBlanks <- FALSE;
+ ^self
+] .
+
+defineMethod: [ | setColCharsTo: input | 
+  :colChars <- input ; 
+  ^self
+] .
+
+defineMethod: [ | setHeightTo: input | 
+  :height <- input ; 
+  ^self
+] .
+
+defineMethod: [ | profile |
+   "font: "       print: 15 ; font printNL ;
+   "color: "      print: 15 ; color printNL ;
+   "size: "       print: 15 ; size printNL ;
+   "width: "      print: 15 ; width printNL ;
+   "height: "      print: 15 ; height printNL ;
+   "colChars: "      print: 15 ; colChars printNL ;
+   "hAlignment: " print: 15 ; hAlignment printNL ;
+   "vAlignment: " print: 15 ; vAlignment printNL ;
+   "fillBlanks: " print: 15 ; fillBlanks printNL ;
+   "bgColor: " print: 15 ; bgColor printNL ;
+   "Headers: "     printNL ;
+   titles do: [ " " print: 5 ; displayInfo ] ;
+] .
+;
+
+LayoutTools TableSpec ColumnSpec
+defineMethod: [ | getBGColorIn: table | 
+  bgColor = "default"
+     ifTrue: [ form defaultBGColor ] ifFalse: [ bgColor ]
+]  ;
+
+
+#--------------------
+#  Expand label attributes
+#--------------------
+
+LayoutTools TableSpec Label
+   defineFixedProperty: 'background' .
+   defineFixedProperty: 'height' .
+   defineFixedProperty: 'object' .
+;
+
+LayoutTools TableSpec Label defineMethod: [ | displayInfo |
+"  Label : " print; 
+text value else: "" . translate: newLine to: " " .print; " | " print; 
+font print; " | " print; 
+color print; " | " print; 
+size print; " | " print; 
+width print; " | " print; 
+hAlignment print; " | " print; 
+vAlignment print; " | " print; 
+columnSpan print; " | " print; 
+rowSpan print; " | " print; 
+fillBlanks print; 
+newLine print; 
+] ;
+
+
+LayoutTools TableSpec Label defineMethod: [ | setBackgroundTo: input |
+  :background <- input ;
+  ^self
+] ;
+
+LayoutTools TableSpec Label defineMethod: [ | setHeightTo: input |
+  :height <- input ;
+  ^self
+] ;
+
+LayoutTools TableSpec Label
+defineMethod: [ | getBGColorIn: table | 
+  bgColor = "default"
+     ifTrue: [ form defaultBGColor ] ifFalse: [ bgColor ]
+]  ;
+
+#--------------------
+
+LayoutTools TableSpec Label defineMethod: [ | reset | 
+   :text       <- "";
+   :font       <- NA ;
+   :color      <- NA ;
+   :size       <- NA ;
+   :width      <- NA ;
+   :hAlignment <- NA ;
+   :vAlignment <- NA ;
+   :columnSpan <- NA ;
+   :rowSpan    <- NA ;
+   :fillBlanks <- TRUE ;
+ ^self
+] ;
+
+#======================================================================
+
+####################
+#  New and Modified FormatTools
+####################
+
+FormatToolProtocol defineMethod: [ | formatId: id | id ] ;
+
+FormatTools  defineMethod: [ | buildSpanTitle: span withLabel:label | 
+label
+] ;
+
+FormatTools Html defineMethod: [ | buildSpanTitle: span withLabel:label | 
+  [ "<span title=" print ; span asQuotedString print ;
+    ">" print ; label print ; "</span>" print ;
+  ] divertOutput
+] ;
+
+FormatTools Html_Xls
+defineMethod: [ | buildSpanTitle: span withLabel:label | 
+label
+] ;
+
+FormatTools Xml defineMethod: [ | buildSpanTitle: span withLabel:label | 
+   label
+] ;
+
+FormatTools defineMethod: [ | formatId: id | 
+  id
+] ;
+
+#-----
+#  Opens new window for Applications
+
+FormatTools defineMethod: 
+[ | buildLinkForAppToNewWindow: link withLabel: label andParams: plist | 
+   ^self buildLinkForApp: link withLabel: label andParams: plist
+] ;
+
+FormatTools Html defineMethod:
+[ | buildLinkForAppToNewWindow: app withLabel: label andParams: plist |
+ [ "<A HREF= \javascript:openWindow(" print ; 
+   ^self buildURLForApp: app andParams: plist . print ;
+    ")" print; 
+   ">" print ; label print ; "</A>" print ; 
+  ] divertOutput 
+] ;
+
+FormatTools CSV
+defineMethod: [ | buildLinkForAppToNewWindow: app withLabel: label andParams: plist |   
+  label
+] ;
+
+FormatTools Html_Xls
+defineMethod: [ | buildLinkForAppToNewWindow: app withLabel: label andParams: plist |   
+  label
+] ;
+
+FormatTools Xml
+defineMethod: 
+[ | buildLinkForAppToNewWindow: app withLabel: label andParams: plist |   
+  ^self buildLinkForApp: app withLabel: label andParams: plist 
+] ;
+
+#-----
+# Returns link from new window to original window
+
+FormatTools defineMethod: 
+[ | buildLinkForAppToMainWindow: link withLabel: label andParams: plist | 
+   ^self buildLinkForApp: link withLabel: label andParams: plist
+] ;
+
+FormatTools Html defineMethod:
+[ | buildLinkForAppToMainWindow: app withLabel: label andParams: plist |
+ [ "<A HREF=" print; 
+   " \javascript:relocateOpener(" print;
+   ^self buildURLForApp: app andParams: plist . print ;       
+   ");" print; 
+   ">" print ; label print ; "</A>" print ; 
+   ] divertOutput 
+] ;
+
+#-----
+#  attribute-based url's and standard application processor function
+
+FormatTools defineMethod: [ | buildAttributeStringFrom: atts | 
+  :atts <- atts else: "" ;
+  !attList <- atts isList ifTrue: [ atts ] ifFalse: [ atts asList ] .
+      numberElements extendBy: [ !isOdd <- position mod: 2 . = 1 ];
+  [ attList 
+    do: [ isOdd
+            ifTrue: [ asString print ; "=" print ]
+           ifFalse: [ asString print; "&" print ] ;
+        ] ;
+  ] divertOutput  
+
+] ;
+
+#-----
+
+FormatTools 
+defineMethod: [| buildLinkForApp: app withLabel: label andAttributes: atts |
+   ^self buildLinkForApp: app withLabel: label andParams: atts
+] ;
+
+FormatTools Html 
+defineMethod: [| buildLinkForApp: app withLabel: label andAttributes: atts |
+  !attString <- FormatTools buildAttributeStringFrom: atts ;
+  !function <- [ "vLoadApp('" print ;
+                 app print ; "','"  print ; attString print ; "')" print ;
+               ] divertOutput ;
+  ^self buildOnClick: function withLabel: label andOptions: NA 
+];
+
+#----- 
+
+FormatTools Html_Xls
+defineMethod: [ | buildLinkForApp: app withLabel: label andParams: plist |   
+  label
+] ;
+
+FormatTools Xml
+defineMethod: [ | buildLinkForApp: app withLabel: label andParams: pList |   
+#  !params <- [ pList do: [ print ; "," print ] ;
+#             ] divertOutput drop: -1 ;
+#  [ FormatTools openTag: "LINK" withAttributes: "app", app . print ;
+#     pList isntDefault 
+#       ifTrue: [ FormatTools buildTag: "PARAMS" withAttributes: NA
+#                    andContent: params . print ;
+#               ] ;
+#    FormatTools closeTag: "LINK" . print ;
+#    label print ;
+#  ] divertOutput
+  label
+
+] ;
+
+#-----
+
+FormatTools 
+defineMethod: [| buildLinkForAppToMainWindow: app withLabel: label andAttributes: atts | 
+    ^self buildLinkForAppToMainWindow: app withLabel: label andParams: atts
+
+] ;
+
+FormatTools Html 
+defineMethod: [| buildLinkForAppToMainWindow: app withLabel: label andAttributes: atts | 
+
+!attString <- FormatTools buildAttributeStringFrom: atts ;
+  !function <- [ "vLoadAppFromNewWindow('" print ;
+                 app print ; "','"  print ; attString print ; "')" print ;
+               ] divertOutput ;
+  ^self buildOnClick: function withLabel: label andOptions: NA   
+  
+];
+
+#-----
+
+FormatTools 
+defineMethod: [ | buildOnClick: function withLabel: label andOptions: options |
+  [ label print ; " (" print ; options print ; " )" print ;
+  ] divertOutput 
+] ;
+
+FormatTools Html 
+defineMethod: [ | buildOnClick: function withLabel: label andOptions: options |
+  [ "<A href='#' onClick="  print; function asQuotedString print ; 
+    options isntDefault
+        ifTrue: [ " " print ; options print ] ;
+    ">" print; label print; "</A>" print; 
+  ] divertOutput
+] .
+;
+
+FormatTools Html_Xls
+defineMethod: [ | buildOnClick: function withLabel: label andOptions: options |
+  [ label print ; " (" print ; options print ; " )" print ;
+  ] divertOutput 
+] ;
+
+#-----
+
+FormatTools defineMethod: 
+[ | buildLevelIndicatorFor: displayObject showGroup:flag |
+  ""
+] ;
+
+FormatTools Html defineMethod: 
+[ | buildLevelIndicatorFor: displayObject showGroup:flag |
+  
+  displayObject isDetail
+  ifTrue: [ "" ] 
+  ifFalse:
+     [ !id <- displayObject getLevelMapId ;
+       !level <- displayObject levelIndicator ;
+       !symbol <- 
+       level = 0 && displayObject maxLevel = 1
+       ifTrue: ["+"] .
+       elseIf:[ level = 0 ]
+       then:["-" ] .
+       elseIf:[level > 0 && flag isTrue]
+       then:["-"] . 
+       else:["+"] ; 
+
+       !function <- "groupOpenClose()" ;
+       !options <- " class=groupSymbol" ;
+       FormatTools
+           buildOnClick: function withLabel: symbol andOptions: options 
+     ] 
+] ;
+
+FormatTools Html_Xls defineMethod: 
+[ | buildLevelIndicatorFor: displayObject showGroup:flag |
+  ""
+] ;
+
+#--------------------
+
+#----------
+# Fix FormatTools Html startLine to not include the newLine character
+#----------
+FormatTools Html defineMethod: [ | startLine | "<br>" ] ;
+
+FormatTools Html defineMethod: [ | indent: text | 
+    "<blockquote>" concat: text . concat: "</blockquote>" 
+] ;
+
+#----------
+
+FormatTools Html 
+defineMethod: [ | font: font inSize: size andColor: color for: text |
+  [ "<font" print ;
+    font isntDefault ifTrue: [ " face=" concat: font asQuotedString . print ] ;
+    size isntDefault ifTrue: [ " size=" concat: size . print ] ;
+    color isntDefault
+       ifTrue: [ " color=" concat: color asQuotedString . print ] ;
+    ">" print ; text print ; "</font>" print ;
+  ] divertOutput
+] ;
+
+FormatTools defineMethod: 
+[ | buildLinkForApp: app withLabel: label andParams: plist andClass: class | 
+  ^self buildLinkForApp: app withLabel: label andParams: plist 
+] ;
+
+FormatTools Html defineMethod:
+[ | buildLinkForApp: app withLabel: label andParams: plist andClass: class |
+ [ "<A HREF=" print ; 
+   ^self buildURLForApp: app andParams: plist . print ;
+   " class=" print ; class asQuotedString print ;
+   ">" print ; label print ; "</A>" print ; 
+   ] divertOutput 
+] ;
+
+FormatTools 
+defineMethod: [ | buildLink: link withLabel: label andClass: class | 
+  ^self buildLink: link withLabel: label
+] ;
+
+FormatTools Html
+defineMethod: [ | buildLink: link withLabel: label andClass: class | 
+  [ "<A href=" print ; link asQuotedString print ;   
+    " class= " print ; class asQuotedString print ;
+    ">" print ; label print ; "</A>" print ;
+  ] divertOutput
+] ;
+
+FormatTools defineMethod:
+[| buildLinkToNewWindowForString: plist withLabel: label | 
+label
+] ;
+
+FormatTools Html defineMethod:
+[| 
+buildLinkToNewWindowForString: plist withLabel: label | 
+  [
+    "<A HREF= javascript:openWindow(" print; 
+   # ^self buildURLForApp: app andParams: plist .print; 
+    "'" concat: plist . concat: "'" . print;
+    ")" print; 
+    ">" print; label print; "</A>" print; 
+   ]divertOutput
+];
+
+FormatTools 
+defineMethod: [ | buildLinkToNewWindow: link withLabel: label andClass:class | 
+  ^self buildLink: link withLabel: label
+] ;
+
+FormatTools Html
+defineMethod: [ | buildLinkToNewWindow: link withLabel: label andClass:class | 
+  !fullPath <- link else: "" . 
+      send: [ (^self contains: "^/" ) || (^self contains: "//") ] .
+      ifTrue: [ link ] ifFalse: [ External resourcePath concat: link ] ;
+  [ "<A href=\"javascript:openWindow('" print ; fullPath print; 
+    "')\"" print ;   
+    class isntDefault
+       ifTrue: [ " class= " print ; class asQuotedString print ] ;
+    " " print;
+    ">" print ; label print ; "</A>" print ;
+  ] divertOutput
+] ;
+
+#----------
+#  add shared parameters to end of all URLs
+#----------
+FormatTools Html defineMethod: [ | buildURLForApp: app andParams: plist | 
+  [
+  External serverIsRunning
+  ifTrue: 
+    [ External visionPath print ; 
+      app print ;
+      plist isntNA
+      ifTrue: 
+        [ plist
+          do: [ "@" print ;
+                ^my External encodeString: asString stripBoundingBlanks . 
+                   print;
+              ] ;
+        ] ;
+      !globalCurr <- External Global sharedParameters at: "globalCurrency" ;
+      External Global clearSharedParameter: ("globalDate", "globalCurrency") ;
+      !params <- External Global sharedParameters objects
+          select: [ isString && isntDefault ] ;
+      "/?globalDate=" print ; ^date asInteger asString print ;
+#--      currency isCurrency 
+       globalCurr isntDefault
+         ifTrue: ["&globalCurrency=" print; globalCurr print]; 
+      params 
+      do: [ "&" print ; selector print ; "=" print ;
+            ^my External encodeString: stripBoundingBlanks . print ;
+          ] ;
+    ]
+  ifFalse: 
+    [ app print ; 
+      plist isntNA
+      ifTrue: 
+         [ plist 
+           do: [ "-" print ; 
+                 asString stripBoundingBlanks translate: " " to: "_" . print 
+               ] ;
+         ] ;
+      ".htm" print ;
+    ] 
+  ] divertOutput asQuotedString
+] ;
+ 
+#--------------------
+
+FormatTools defineMethod: [ | buildImageRowWithLeft: left andRight: right |
+    left concat:( " --- " center: (80 - left count - right count) ) .
+       concat: right
+] ;
+
+FormatTools Html 
+defineMethod: [ | buildImageRowWithLeft: left andRight: right |
+!path <- External resourcePath else: "" ;
+[ "<center><table border=0 cellspacing=0 cellpadding = 0 width=100%>" printNL;
+  "<tr>" print;
+
+  !fullFile <- path concat: left .asQuotedString; 
+  "<td align=left>" print; 
+  "<img src=" print; fullFile print; " align=middle border=0>" print ;
+ 
+  !fullFile <- path concat: right .asQuotedString; 
+  "<td align=right>" print; 
+  "<img src=" print; fullFile print; " align=middle border=0>" printNL ;
+
+ "</table></center>" printNL ;
+  
+  
+] divertOutput
+
+] ;
+
+#----------
+
+FormatTools defineMethod: 
+[ | buildImageRowWithLeft: left withLink: llink 
+                 andRight: right withLink: rlink |
+  ^self buildImageRowWithLeft: left andRight: right
+] ;
+
+FormatTools Html defineMethod: 
+[ | buildImageRowWithLeft: left withLink: llink 
+                 andRight: right withLink: rlink |
+
+!path <- External resourcePath else: "" ;
+!lpath <- External leftLogoLinkPath else: path ;
+!rpath <- External rightLogoLinkPath else: path ;
+[ "<center><table border=0 cellspacing=0 cellpadding = 0 width=100%>" printNL;
+  "<tr>" printNL;
+
+  !fullFile <- path concat: left .asQuotedString; 
+  "<td align=left>" print; 
+  !img <- "<img src=" concat: fullFile . concat: " align=middle border=0>" ;
+  llink isntDefault
+    ifTrue: 
+      [ !link <- lpath concat: llink . asQuotedString ;
+       "<a href=" concat: link . concat: ">" . concat: img . concat: "</a>" 
+      ]
+   ifFalse: [ img ] .printNL ;
+ 
+  !fullFile <- path concat: right .asQuotedString; 
+  "<td align=right>" print; 
+  !img <- "<img src=" concat: fullFile . concat: " align=middle border=0>" ;
+  rlink isntDefault
+    ifTrue: 
+      [ !link <- rpath concat: rlink . asQuotedString ;
+       "<a href=" concat: link . concat: ">" . concat: img . concat: "</a>" 
+      ]
+   ifFalse: [ img ] .printNL ;
+
+ "</table></center>" printNL ;
+] divertOutput
+
+] ;
+
+#----------
+
+FormatTools defineMethod: [ | getFullPathFor: text |
+  text isntDefault
+     ifTrue: [ text asQuotedString ]
+]  ;
+
+FormatTools Html defineMethod: [ | getFullPathFor: text |
+  text isntDefault
+  ifTrue:
+    [ text take: 1 . = "/"
+         ifTrue: [ text ] 
+        ifFalse: [ External resourcePath else: "" . concat: text ] .
+            asQuotedString
+    ]
+]  ;
+
+#----------
+
+FormatTools defineMethod: 
+[ | buildImage: file withPath: path andOptions: options |
+  path else: "" . concat: file 
+] ;
+
+FormatTools Html defineMethod: 
+[ | buildImage: file withPath: path andOptions: options |
+  path isNA ifTrue: [:path <- External resourcePath else: "";]; 
+  !fullFile <- path concat: file .asQuotedString; 
+  [ "<img src=" print; fullFile print; " " print ; options print ;
+    ">" print; 
+  ] divertOutput
+] ;
+
+FormatTools CSV defineMethod: [ | buildImage: file withAlt: alt |
+""
+] ;
+
+FormatTools CSV 
+defineMethod: [ | buildImage: file withPath: path andOptions: options | 
+""
+] ;
+
+FormatTools CSV 
+defineMethod: [ | buildImage: file withPath: path withAlt: alt | 
+""
+] ;
+
+FormatTools Html_Xls
+ defineMethod: [ | buildImage: file withAlt: alt |
+""
+] ;
+
+FormatTools Html_Xls
+defineMethod: [ | buildImage: file withPath: path andOptions: options | 
+""
+] ;
+
+FormatTools Html_Xls
+defineMethod: [ | buildImage: file withPath: path withAlt: alt | 
+""
+] ;
+
+FormatTools Xml defineMethod: [ | buildImage: file withAlt: alt |
+  ""
+] ;
+
+FormatTools Xml
+defineMethod: [ | buildImage: file withPath: path andOptions: options | 
+  ""
+] ;
+
+FormatTools Xml
+defineMethod: [ | buildImage: file withPath: path withAlt: alt | 
+  ""
+] ;
+
+#----------
+
+FormatTools defineMethod: [ | repeatImage: gif for: n |
+!image <- FormatTools buildImage: gif ;
+n isInteger && [ n > 0 ]
+  ifTrue: [ image fill: (image count * n) ] 
+] ;
+
+#----------
+
+FormatTools defineMethod: [ | nowrap: text | 
+  text
+] ;
+
+#--  fix this when trailing > isn't needed
+FormatTools Html defineMethod: [ | nowrap: text |
+  text contains: ">" .
+  ifTrue:
+    [ !nowrap <- 
+      [ text breakOn: ">" . select: [ count > 0 ] .
+        do: [ ^self contains: "^<" . 
+                  ifTrue: [ ^self ] 
+                 ifFalse: [ ^self translate: " " to: "&nbsp;" ] . 
+                    concat: ">" . print ;
+            ]
+      ] divertOutput ;
+      text take: -1 . = ">" 
+        ifTrue: [ nowrap ] ifFalse: [ nowrap drop: -1 ] 
+    ] 
+  ifFalse: [ text translate: " " to: "&nbsp;"  ]
+] ;
+
+#----------
+
+FormatTools defineMethod: [ | style: class forText: text |
+  text
+] ;
+
+FormatTools Html defineMethod: [ | style: class forText: text |
+  [ "<div class=" print ; class print ; ">" print ; text print ;
+    "</div>" print 
+  ] divertOutput
+] ;
+
+#----------
+
+#--------------------
+#  buildTable
+#--------------------
+
+FormatTools
+defineMethod: [ | buildTableFor: table for: object withBlock: inBlock | 
+!output   <- inBlock isBlock
+      ifTrue: [ [ object send: inBlock ] asRowsColumns ] .
+   extendBy: [ !rowId <- "" ;
+               !levelId <- "" ;
+             ] ;
+  table rowIdFlag isTrue      #- id is in column 1
+  ifTrue:
+    [ output do: [ :rowId <- columns at: 1 ;
+                   :columns <- columns select: [ position > 1 ] . 
+                        numberElements ;
+                  ] ;
+    ] ;
+
+  [ 
+  newLine print;
+
+  #--  CAPTION
+  table caption inUse 
+  ifTrue: 
+    [ table caption text value asLines
+         do: [ ^self center: (^my table caption width else: 80) . printNL ] ;
+    ];
+
+  #--  HEADERS
+  !headers <- table headerCount else: 0 ;
+  headers sequence
+  do: [ !rowNumber <- ^self ;
+        !table <- ^my table ;
+        !headersForRow <- table columnCount sequence
+           extendBy: [ !column <- ^my table columnSpecs at: ^self ;
+                       !title <- column isntNA
+                          ifTrue: [ column titles at: ^my rowNumber ] ;
+                       !width <- column colChars asNumber else: -10 ;
+                     ] ;
+        headersForRow
+        do: [!header <- title ;
+             header isntNA && [ header isLabel ] && [ header text isntNA ]
+             ifTrue: #--  value evaluates text if it is a block
+               [ !text <- header text value translate: newLine to: " " ;
+                  header hAlignment else: "" . toUpper = "CENTER"
+                     ifTrue: [ text center: width ]
+                    ifFalse: [ text ] . print: width ;
+               ] ;
+            ];
+        newLine print ;
+     ] ;
+        
+  #--  BODY
+  output isntNA
+  ifTrue:
+    [
+    output
+    do: [ !table <- ^my table;
+          !line  <- ^self ;
+          table columnCount sequence
+          do: [ !item    <- ^my line columns at: ^self ; 
+                !colSpec <- ^my table columnSpecs at: ^self;
+    #--->>>> use colChars as width 
+                !count <- colSpec colChars asNumber else: 10 ; 
+                item else: " " . take: count . print ;
+              ];
+          newLine print;
+        ];
+     ] ;
+
+  ] divertOutput
+] ;
+
+
+FormatTools Html
+defineMethod: [ | buildTableFor: table for: object withBlock: inBlock | 
+  !output   <- inBlock isBlock
+      ifTrue: [ [ object send: inBlock ] asRowsColumns ] .
+   extendBy: [ !rowId <- "" ;
+               !levelId <- "" ;
+             ] ;
+  table rowIdFlag isTrue      #- id is in column 1
+  ifTrue:
+    [ output do: [ :rowId <- columns at: 1 ;
+                   !levelMap <- rowId breakOn: "." . send: [ asNumber ] .
+                      select: [ isNumber ];
+                    !level <- levelMap select: [ asSelf > 0 ] . count ;
+                    :levelId <- level = levelMap count
+                        ifTrue: [ "detail" ] 
+                       ifFalse: ["level" concat: level ] ;
+                    :columns <- columns select: [ position > 1 ] . 
+                        numberElements ;
+                  ] ;
+    ] ;
+
+  [ 
+  "<!-- start output detail " concat: table code . concat: " -->" . printNL ;
+  table center ifTrue: [ "<center>" printNL; ];
+  "<table" print;
+   FormatTools formatOption: "id" withValue: table code . print ;
+   FormatTools formatOption: "class" withValue: table styleClass . print ; 
+   FormatTools formatOption: "border" withValue: table border . print ;
+   FormatTools formatOption: "width" withValue: table width . print ;
+#   FormatTools formatOption: "cols" withValue: table columnCount . print ;
+   FormatTools
+       formatOption: "cellspacing"  withValue: table cellSpacing . print;
+   FormatTools
+       formatOption: "cellpadding"  withValue: table cellPadding . print;
+   FormatTools formatOption: "bgcolor"  withValue: table getBGColor . print;
+  "><tbody id=tbodymain>" printNL;
+
+  #-- CAPTION
+  table caption inUse
+     ifTrue: [ ^self formatCaption: table caption . printNL ] ;
+
+  #--  HEADERS
+  !headers <- table headerCount else: 0 ;
+  headers sequence
+  do: [ !rowNumber <- ^self ;
+        !table <- ^my table ;
+        !rowsToEnd <- (^my table headerCount - rowNumber) asInteger ;
+        !rowBGColor <- rowsToEnd mod: 2 . = 0 
+           ifTrue: [table getEvenRowColor ] ifFalse: [ table getOddRowColor ] ;
+        !headersForRow <- table columnCount sequence
+           send: [ !column <- ^my table columnSpecs at: ^self ;
+                   column isntNA
+                      ifTrue: [ column titles at: ^my rowNumber ]
+                 ] .
+            extendBy: [ !hdr <- ^self ] .
+            select: [ hdr isntNA &&  [hdr columnSpan !=0 ] ] ;
+        headersForRow count > 0 ifTrue: [ "<tr>" printNL ] ;
+        headersForRow 
+        do: [
+             "<th " print;
+             FormatTools formatOption: "class" 
+                         withValue: hdr styleClass . print ; 
+             FormatTools formatOption: "colspan" 
+                         withValue: hdr columnSpan . print ; 
+             FormatTools formatOption: "rowspan" 
+                         withValue: hdr rowSpan . print ; 
+             FormatTools formatOption: "align" 
+                         withValue: hdr hAlignment . print ; 
+             FormatTools formatOption: "valign" 
+                         withValue: hdr vAlignment . print ; 
+             !bg <- hdr bgColor = "default" 
+                ifTrue: [ ^my rowBGColor ] ifFalse: [ hdr bgColor ] ;
+             FormatTools formatOption: "bgcolor" withValue: bg . print ;
+             " >"   printNL;
+
+             !text <- 
+               [ hdr text value else: "" . asLines numberElements
+                 do: [ !cur <- ^self;
+                       cur asString isBlank ifTrue: [:cur <- "&nbsp;"] ;
+                       position > 1 ifTrue: [:cur <- "<br>" concat: cur] ;
+                       cur print;
+                     ];
+               ] divertOutput ;
+             hdr font, hdr color, hdr size any: [isntDefault] .
+             ifTrue:
+               [ "<font" print ;
+                 hdr font isntDefault
+                   ifTrue: [ " face="     concat: (hdr font) . print ] ;
+                 hdr color isntDefault
+                   ifTrue: [ " color="    concat: (hdr color) . print ];
+                 hdr size isntDefault
+                   ifTrue: [  " size ="    concat: (hdr size ) . print ];
+                 " >"   printNL;
+                 text printNL ;
+                 "</font>" printNL;
+               ] ifFalse: [ text printNL ] ;
+              "</th>" printNL;
+           ] ;
+        headersForRow count > 0 ifTrue: [ "</tr>" printNL ] ;
+      ];
+   table fillerRows at: 0 . isntDefault
+   ifTrue:
+     [ FormatTools formatFillerRowFrom: (table fillerRows at: 0) 
+                   for: table columnCount . printNL ;
+     ] ;
+
+   output isntNA
+   ifTrue: 
+     [ output numberElements
+       extendBy:
+       [ !evenRow <- position mod: 2 . = 0 ;
+         !bg <- evenRow && [ ^my table evenRowColor isString ] 
+           ifTrue: [ ^my table getEvenRowColor ] .
+           elseIf: [ evenRow not && [ ^my table oddRowColor isString ] ]
+           then: [ ^my table getOddRowColor ] .
+           elseIf: [ ^my table getBGColor isntDefault ]
+           then: [ ^my table getBGColor ] ;
+        ] .
+     do: [!table <- ^my table;
+          !line  <- ^self ;
+          "<tr " print ;
+          FormatTools formatOption: "class" 
+                         withValue: levelId . print ;
+          FormatTools formatOption: "id" withValue: rowId .print ;
+          FormatTools formatOption: "bgcolor" withValue: bg . print ;
+          ">" printNL ;
+          table columnCount sequence
+          do: [!item    <- ^my line columns at: ^self ; 
+               !colSpec <- ^my table columnSpecs at: ^self;
+               "<td "   print;
+                colSpec styleClass isntDefault
+                  ifTrue: [ " class=" concat: colSpec styleClass . print ] ;
+               colSpec bgColor isntNA 
+               ifTrue: 
+                 [" bgcolor = " concat: (colSpec getBGColorIn: ^my table) .
+                       print;
+                 ] ;
+               colSpec hAlignment isntDefault
+                 ifTrue: [ " align="  concat: (colSpec hAlignment) . print ] ;
+               colSpec vAlignment isntDefault
+                 ifTrue: [ " valign=" concat: (colSpec vAlignment) . print ] ;
+               colSpec width isntNA
+                 ifTrue: [ " width= " concat: colSpec width . print ] ;
+               colSpec height isntNA
+                 ifTrue: [ " height= " concat: colSpec height . print ] ;
+               "> "     printNL;
+               !currItem <- item else: " ";
+               currItem count = 0 ifTrue: [ :currItem <- " ";]; 
+               (colSpec fillBlanks && [currItem isString])
+                  ifTrue: [ :currItem <- FormatTools nowrap: currItem ] 
+                 ifFalse: [ :currItem <- currItem stripBoundingBlanks ] ;
+               !text <- 
+                  [ (^self asSelf = 1 && [^my table rowLabelFlag ])
+                    ifTrue: [ "<b>"    print;
+                              currItem       print;
+                              "</b>"    print;
+                            ] 
+                      ifFalse: [ currItem      print;];
+                  ] divertOutput ;
+                colSpec font, colSpec color, colSpec size any: [isntDefault].
+                ifTrue:
+                  [ "<font" print ;
+                    colSpec font isntDefault
+                      ifTrue: [ " face="     concat: (colSpec font) . print ] ;
+                    colSpec color isntDefault
+                      ifTrue: [ " color="    concat: (colSpec color) . print ];
+                    colSpec size isntDefault
+                     ifTrue: [  " size ="    concat: (colSpec size ) . print ];
+                    " >"   printNL ;
+                    text printNL ;
+                    "</font>" printNL;
+                   ] ifFalse: [ text printNL ] ;
+               "</td>"                    printNL;
+              ];
+          "</tr>"                         printNL;
+          !filler <- ^my table fillerRows at: position ;
+          filler isntDefault
+          ifTrue: [ FormatTools formatFillerRowFrom: filler
+                            for: ^my table columnCount . printNL ;
+                  ] ;
+         ];
+    ] ;
+    "</tbody></table>"                             printNL;
+    "<!-- end output detail " concat: table code . concat: " -->" . printNL ;
+    table center ifTrue: [ "</center>"     print; ];
+ ] divertOutput 
+
+] ;
+
+FormatTools CSV
+defineMethod: [ | buildTableFor: table for: object withBlock: inBlock | 
+!output   <- inBlock isBlock
+      ifTrue: [ [ object send: inBlock ] asRowsColumns ] .
+   extendBy: [ !rowId <- "" ;
+               !level <- 0 ;
+             ] ;
+  table rowIdFlag isTrue      #- id is in column 1
+  ifTrue:
+    [ output do: [ :rowId <- columns at: 1 ;
+                   !levelMap <- rowId breakOn: "." . send: [ asNumber ] .
+                      select: [ isNumber ];
+                   :level <- levelMap select: [ asSelf > 0 ] . count ;
+                   :columns <- columns select: [ position > 1 ] . 
+                        numberElements ;
+                  ] ;
+    ] ;
+
+  [ 
+  newLine print;
+
+  #--  HEADERS
+  !headers <- table headerCount else: 0 ;
+  headers sequence
+  do: [ !rowNumber <- ^self ;
+        !table <- ^my table ;
+        !headersForRow <- table columnCount sequence
+           extendBy: 
+             [ !column <- ^my table columnSpecs at: ^self ;
+               !title <- column isntNA
+                  ifTrue: [ column titles at: ^my rowNumber ] ;
+               !width <- column colChars asNumber ;
+             ] ;
+        headersForRow
+        do: [!header <- title ;
+             header isntNA && [ header isLabel ] && [ header text isntNA ]
+             ifTrue: #--  value evaluates text if it is a block
+               [ !text <- header text value translate: newLine to: " " ;
+                 text asQuotedString print ;
+                  "," print ;
+                  header columnSpan isNumber && header columnSpan > 1
+                     && [ header columnSpan < ^my table columnCount ] 
+                  ifTrue:
+                    [ 2 sequenceTo: header columnSpan .
+                      do: [ " " print ; "," print ] ;
+                    ] ;
+               ] ;
+            ];
+        newLine print ;
+     ] ;
+        
+  #--  BODY
+  output isntNA
+  ifTrue:
+    [
+    output
+      reject: [ ^self containsSubstring: "... display starts with" ] .
+      reject: [ ^self containsSubstring: "... more" ] .
+    do: [ !table <- ^my table;
+          !line  <- ^self ;
+          table columnCount sequence
+          do: [ !item    <- ^my line columns at: ^self .else: "" .
+                   translate: "," to: "" ;
+                !colSpec <- ^my table columnSpecs at: ^self;
+                !prefix <- colSpec hAlignment asString = "left" 
+                  ifTrue: [ " " fill: ^my level * 2 ] 
+                 ifFalse: [ "" ] ;
+                colSpec hAlignment asString = "left" &&
+                   [ item asNumber isNumber ] 
+                  ifTrue: [ :prefix <- prefix concat: "'" ] ;
+                prefix concat: item . asQuotedString print ;
+                "," print ; 
+              ];
+          newLine print;
+        ];
+     ] ;
+
+  ] divertOutput
+] ;
+
+FormatTools Html_Xls
+defineMethod: [ | buildTableFor: table for: object withBlock: inBlock | 
+!output   <- inBlock isBlock
+      ifTrue: [ [ object send: inBlock ] asRowsColumns ] .
+   extendBy: [ !rowId <- "" ;
+               !level <- 0 ;
+             ] ;
+  table rowIdFlag isTrue      #- id is in column 1
+  ifTrue:
+    [ output do: [ :rowId <- columns at: 1 ;
+                   !levelMap <- rowId breakOn: "." . send: [ asNumber ] .
+                      select: [ isNumber ];
+                   :level <- levelMap select: [ asSelf > 0 ] . count ;
+                   :columns <- columns select: [ position > 1 ] . 
+                        numberElements ;
+                  ] ;
+    ] ;
+
+  [ 
+  "<!-- start output detail " concat: table code . concat: " -->" . printNL ;
+  table center ifTrue: [ "<center>" printNL; ];
+  "<table" print;
+   FormatTools formatOption: "class" withValue: table styleClass . print ; 
+   FormatTools formatOption: "border" withValue: table border . print ;
+   FormatTools formatOption: "width" withValue: table width . print ;
+   FormatTools
+       formatOption: "cellspacing"  withValue: table cellSpacing . print;
+   FormatTools
+       formatOption: "cellpadding"  withValue: table cellPadding . print;
+   FormatTools formatOption: "bgcolor"  withValue: table getBGColor . print;
+  ">" printNL;
+
+  #-- CAPTION
+  table caption inUse
+     ifTrue: [ ^self formatCaption: table caption . printNL ] ;
+
+  #--  HEADERS
+  !headers <- table headerCount else: 0 ;
+  headers sequence
+  do: [ !rowNumber <- ^self ;
+        !table <- ^my table ;
+        !rowsToEnd <- (^my table headerCount - rowNumber) asInteger ;
+        !rowBGColor <- rowsToEnd mod: 2 . = 0 
+           ifTrue: [table getEvenRowColor ] ifFalse: [ table getOddRowColor ] ;
+        !headersForRow <- table columnCount sequence
+           send: [ !column <- ^my table columnSpecs at: ^self ;
+                   column isntNA
+                      ifTrue: [ column titles at: ^my rowNumber ]
+                 ] .
+            extendBy: [ !hdr <- ^self ] .
+            select: [ hdr isntNA &&  [hdr columnSpan !=0 ] ] ;
+        headersForRow count > 0 ifTrue: [ "<tr>" printNL ] ;
+        headersForRow 
+        do: [
+             "<th " print;
+             FormatTools formatOption: "class" 
+                         withValue: hdr styleClass . print ; 
+             FormatTools formatOption: "colspan" 
+                         withValue: hdr columnSpan . print ; 
+             FormatTools formatOption: "rowspan" 
+                         withValue: hdr rowSpan . print ; 
+             FormatTools formatOption: "align" 
+                         withValue: hdr hAlignment . print ; 
+             FormatTools formatOption: "valign" 
+                         withValue: hdr vAlignment . print ; 
+             !bg <- hdr bgColor = "default" 
+                ifTrue: [ ^my rowBGColor ] ifFalse: [ hdr bgColor ] ;
+             FormatTools formatOption: "bgcolor" withValue: bg . print ;
+             " >"   printNL;
+
+             !text <- 
+               [ hdr text value else: "" . asLines numberElements
+                 do: [ !cur <- ^self;
+                       cur asString isBlank ifTrue: [:cur <- "&nbsp;"] ;
+                       position > 1 ifTrue: [:cur <- "<br>" concat: cur] ;
+                       cur print;
+                     ];
+               ] divertOutput ;
+             hdr font, hdr color, hdr size any: [isntDefault] .
+             ifTrue:
+               [ "<font" print ;
+                 hdr font isntDefault
+                   ifTrue: [ " face="     concat: (hdr font) . print ] ;
+                 hdr color isntDefault
+                   ifTrue: [ " color="    concat: (hdr color) . print ];
+                 hdr size isntDefault
+                   ifTrue: [  " size ="    concat: (hdr size ) . print ];
+                 " >"   printNL;
+                 text printNL ;
+                 "</font>" printNL;
+               ] ifFalse: [ text printNL ] ;
+              "</th>" printNL;
+           ] ;
+        headersForRow count > 0 ifTrue: [ "</tr>" printNL ] ;
+      ];
+   table fillerRows at: 0 . isntDefault
+   ifTrue:
+     [ FormatTools formatFillerRowFrom: (table fillerRows at: 0) 
+                   for: table columnCount . printNL ;
+     ] ;
+
+   output isntNA
+   ifTrue: 
+     [ output 
+          reject: [ ^self containsSubstring: "... display starts with" ] .
+          reject: [ ^self containsSubstring: "... more" ] .
+       numberElements
+       extendBy:
+       [ !evenRow <- position mod: 2 . = 0 ;
+         !rowTag <- evenRow && [ ^my table evenRowColor isString ] 
+         ifTrue: 
+           [ "<tr bgcolor=" concat: ^my table getEvenRowColor . concat: ">" ].
+         elseIf: [ evenRow not && [ ^my table oddRowColor isString ] ]
+         then: 
+           [ "<tr bgcolor=" concat: ^my table getOddRowColor . concat: ">" ] .
+         elseIf: [ ^my table getBGColor isntDefault ]
+           then: [ "<tr bgcolor=" concat: ^my table getBGColor . concat: ">" ] .
+         else: [ "<tr>" ] ;
+       ] .
+     do: [!table <- ^my table;
+          !line  <- ^self ;
+          rowTag print ;
+          table columnCount sequence
+          do: [!item    <- ^my line columns at: ^self ; 
+               !colSpec <- ^my table columnSpecs at: ^self;
+               "<td "   print;
+                #colSpec styleClass isntDefault
+                #  ifTrue: [ " class=" concat: colSpec styleClass . print ] ;
+               colSpec bgColor isntNA 
+               ifTrue: 
+                 [" bgcolor = " concat: (colSpec getBGColorIn: ^my table) .
+                       print;
+                 ] ;
+               colSpec hAlignment isntDefault
+                 ifTrue: [ " align="  concat: (colSpec hAlignment) . print ] ;
+               colSpec vAlignment isntDefault
+                 ifTrue: [ " valign=" concat: (colSpec vAlignment) . print ] ;
+               colSpec width isntNA
+                 ifTrue: [ " width= " concat: colSpec width . print ] ;
+               colSpec height isntNA
+                 ifTrue: [ " height= " concat: colSpec height . print ] ;
+               "> "     printNL;
+                !prefix <- colSpec hAlignment asString = "left" 
+                  ifTrue: [ " " fill: ^my level * 2 ] 
+                 ifFalse: [ "" ] ;
+                colSpec hAlignment asString = "left" &&
+                   [ item asNumber isNumber ] && [ item take: 1 . = "0" ] 
+                            ifTrue: [ :prefix <- prefix concat: "'" ] ;
+               !currItem <- prefix concat: (item else: " " . take:28) ;
+               currItem count = 0 ifTrue: [ :currItem <- " ";]; 
+           #    (colSpec fillBlanks && [currItem isString])
+           #       ifTrue: [  :currItem <- FormatTools nowrap: currItem ] ;
+               !text <- 
+                  [ (^self asSelf = 1 && [^my table rowLabelFlag ])
+                    ifTrue: [ "<b>"    print;
+                              currItem       print;
+                              "</b>"    print;
+                            ] 
+                      ifFalse: [ currItem      print;];
+                  ] divertOutput ;
+                colSpec font, colSpec color, colSpec size any: [isntDefault].
+                ifTrue:
+                  [ "<font" print ;
+                    colSpec font isntDefault
+                      ifTrue: [ " face="     concat: (colSpec font) . print ] ;
+                    colSpec color isntDefault
+                      ifTrue: [ " color="    concat: (colSpec color) . print ];
+                    colSpec size isntDefault
+                     ifTrue: [  " size ="    concat: (colSpec size ) . print ];
+                    " >"   printNL ;
+                    text printNL ;
+                    "</font>" printNL;
+                   ] ifFalse: [ text printNL ] ;
+               "</td>"                    printNL;
+              ];
+          "</tr>"                         printNL;
+          !filler <- ^my table fillerRows at: position ;
+          filler isntDefault
+          ifTrue: [ FormatTools formatFillerRowFrom: filler
+                            for: ^my table columnCount . printNL ;
+                  ] ;
+         ];
+    ] ;
+    "</table>"                             printNL;
+    "<!-- end output detail " concat: table code . concat: " -->" . printNL ;
+    table center ifTrue: [ "</center>"     print; ];
+
+ ] divertOutput 
+
+] ;
+
+FormatTools Xml defineMethod: 
+[ | buildTableFor: table for: object withBlock: inBlock| 
+!output <- inBlock isBlock 
+   ifTrue: [ [object send: inBlock] asRowsColumns ].
+numberElements 
+extendBy: [!rowId;]; 
+table rowIdFlag isTrue 
+ifTrue: 
+  [ output do: [:rowId <- columns at: 1 .else: ""; 
+                :columns <- columns select: [position > 1].
+                     numberElements; 
+               ]; 
+    !showLevelIndicator <- output any: [rowId howManyOf: "." .> 1]; 
+    showLevelIndicator 
+    ifFalse: [output do: [:rowId <- NA]]; 
+   ]; 
+
+[
+    FormatTools openTag: "OUTPUT" withAttributes: NA .printNL; 
+    " " print: 2; 
+    !titleText <- table caption text else: ""; 
+    !tableHdrCount <- table headerCount; 
+    !colOneLabelOne <- table columnSpecs at: 1 .titles 
+    ifDefault: CoreWorkspace IndexedList .at: 1 .
+    ifDefault: CoreWorkspace LayoutTools TableSpec Label; 
+    !skipHdrRowOne <- colOneLabelOne columnSpan = table columnCount; 
+    !skipHdrRowTwo <- table headerCount >= 2 && [
+        table columnCount sequence 
+        send: [^my table columnSpecs at: ^self .titles at: 2].
+        all: [isDefault || [text value isDefault]]]; 
+    skipHdrRowOne 
+    ifTrue: [:titleText <- titleText concat: colOneLabelOne text value; 
+        :tableHdrCount <- tableHdrCount decrement; 
+       ]; 
+    skipHdrRowTwo 
+    ifTrue: [:tableHdrCount <- tableHdrCount decrement;]; 
+
+    FormatTools buildTag: "TITLE" withAttributes: NA 
+    andContent: titleText value .printNL; 
+    " " print: 2; 
+    "  <COLUMNS count=" 
+           concat: table columnCount asInteger asString asQuotedString .
+           concat: " maxHeaders=" .
+           concat: (tableHdrCount max: 0) asInteger asString asQuotedString .
+           concat: ">" . printNL ;
+    table columnCount sequence 
+    do: [!type <- ""; 
+         "    <COLUMN id=" concat: asString asQuotedString .
+            concat: " dataType=" . concat: type whatAmI asQuotedString .
+            concat: ">" . printNL ;
+        !headers <- ^my table columnSpecs at: asSelf .titles; 
+        !skipHdrRowOne <- ^my skipHdrRowOne; 
+        !skipHdrRowTwo <- ^my skipHdrRowTwo; 
+        ^my table headerCount sequence 
+        reject: [^my skipHdrRowOne && [^self = 1]].
+        reject: [^my skipHdrRowTwo && [^self = 2]].
+        do: [!header <- ^my headers at: ^self; 
+            !currentRow <- ^self; 
+            ^my skipHdrRowOne ifTrue: [:currentRow <- currentRow decrement]; 
+            ^my skipHdrRowTwo ifTrue: [:currentRow <- currentRow decrement]; 
+            !id <- currentRow asString; 
+            header isntDefault && [header text value isntDefault]
+            ifTrue: 
+              [ "      <HEADER id=" concat: id asString asQuotedString .
+                   concat: ">" . concat: header text value .
+                   concat: "</HEADER>" . printNL ;
+              ]; 
+           ]; 
+        " " print: 4; FormatTools closeTag: "COLUMN" .printNL; 
+       ]; 
+    " " print: 2; FormatTools closeTag: "COLUMNS" .printNL; 
+    output isntNA 
+    ifTrue: [
+        :output <- output 
+        reject: [^self containsSubstring: "... display starts with"].
+        reject: [^self containsSubstring: "... more"]; 
+        "  <BODY rows=" concat: output count asString asQuotedString .
+           concat: ">" . printNL ;
+        output numberElements 
+        do: [!table <- ^my table; 
+            !atts <- "id=" concat: position asString asQuotedString ;
+            rowId isntNA 
+               ifTrue: [:atts <- atts concat: " levelId=" . 
+                          concat: rowId asString asQuotedString ;
+                       ] ;
+            "    <ROW " concat: atts . concat: ">" . printNL ;
+            columns numberElements 
+            select: [position <= ^my table columnCount].
+            do: [ !cell <- stripLeadingBlanks stripTrailingBlanks ;
+                  "      <CELL id=" concat: position asString asQuotedString.
+                      concat: ">" . print ;
+                  cell isntDefault
+                     ifTrue: [ FormatTools getValidTag: cell . print ] ;
+                  "</CELL>" printNL ;
+                ]; 
+            " " print: 4; FormatTools closeTag: "ROW" .printNL; 
+           ]; 
+        " " print: 2; FormatTools closeTag: "BODY" .printNL; 
+       ]; 
+    FormatTools closeTag: "OUTPUT" .print; 
+   ]divertOutput
+] ;
+
+
+#--------------------
+#  buildWrapper
+#--------------------
+
+FormatTools defineMethod: [ | buildWrapper: wrapper | wrapper profile ] ;
+
+FormatTools Html defineMethod: [ | buildWrapper: wrapper | 
+ ["<!-- start wrapper " concat: wrapper code . concat: " -->" .printNL;
+  wrapper applicationName isntDefault
+  ifTrue: 
+    [ "<form NAME=ApplicationForm ACTION=" print ;
+      External visionPath asQuotedString print ; ">" printNL ;
+    ] ;
+  "<table " print ;
+  FormatTools formatOption: "class" withValue: wrapper styleClass . print ;
+  FormatTools formatOption: "border" withValue: wrapper border . print ;
+  FormatTools formatOption: "cellspacing" withValue: wrapper cellSpacing . print ;
+  FormatTools formatOption: "cellpadding" withValue: wrapper cellPadding . print ;
+  FormatTools formatOption: "width" withValue: wrapper width . print ;
+  FormatTools formatOption: "bgcolor" withValue: wrapper getBGColor . print ;
+  FormatTools formatOption: "align" withValue: wrapper hAlignment . print ;
+  FormatTools formatOption: "valign" withValue: wrapper vAlignment . print ;
+  
+  ">" printNL ;
+  wrapper numberOfRows sequence
+  do: [ !wrapper <- ^my wrapper ; 
+        "<tr>" printNL ;
+        wrapper numberOfCols sequence
+           extendBy: 
+             [ !cell <- ^my wrapper getCellAtRow: ^my asSelf andCol: asSelf ] .
+           select: [ cell text isntDefault ||
+                       [ cell object isWrapperSpec || cell object isInputSpec ]
+                   ] .
+           send: [ cell ] .
+        do: [ "<td " print ;
+              FormatTools formatOption: "class" withValue: styleClass . print ;
+              FormatTools formatOption: "width" withValue: width . print ;
+              FormatTools formatOption: "height" withValue: height . print ;
+              FormatTools formatOption: "bgcolor" withValue: bgColor . print ; 
+              !bground <- FormatTools getFullPathFor: background ;
+              FormatTools
+                   formatOption: "background" withValue: bground . print ;  
+              FormatTools formatOption: "align" withValue: hAlignment . print ;
+              FormatTools formatOption: "valign" withValue: vAlignment . print;
+              FormatTools formatOption: "colspan" withValue: columnSpan . print;
+              FormatTools formatOption: "rowspan" withValue: rowSpan . print ;
+              "> " printNL ;
+              object isWrapperSpec
+                 ifTrue: [ FormatTools buildWrapper: object . print ] .
+                 elseIf: [ object isInputSpec ]
+                   then: [ FormatTools formatInputElement: object . print] ;
+              text isntDefault ifTrue: [ text value print ] ;
+              "</td>" printNL ;
+            ] ;
+        "</tr>" printNL ;
+      ] ;
+    "</table> " print ;
+    wrapper applicationName isntDefault
+    ifTrue: 
+      [ "<input TYPE=hidden NAME=appName VALUE=" print ; 
+        wrapper applicationName asQuotedString print ; ">" printNL ;
+       "<input TYPE=hidden NAME=cachedParams VALUE=" print ;
+       [ External Global sharedParameters objects
+           select: [ isString && isntDefault ] .
+           do: [ selector print ; "=" print; print; "|" print ] ;
+       ] divertOutput asQuotedString print ;
+       "> </form>" printNL ;
+      ] ;
+    "<!-- end wrapper " concat: wrapper code . concat: " -->" .printNL;
+  ] divertOutput
+] ;
+
+FormatTools CSV defineMethod: [ | buildWrapper: wrapper | 
+ [
+  wrapper numberOfRows sequence
+  do: [ !wrapper <- ^my wrapper ; 
+        wrapper numberOfCols sequence
+           extendBy: 
+             [ !cell <- ^my wrapper getCellAtRow: ^my asSelf andCol: asSelf 
+             ] .
+           select: [ cell text isntDefault ||
+                       [ cell object isWrapperSpec || cell object isInputSpec ]
+                   ] .
+           send: [ cell ] .
+        do: [
+              object isWrapperSpec
+                 ifTrue: [ FormatTools buildWrapper: object . print ] .
+              elseIf: [ object isInputSpec ] 
+                then: [ !choice <- object choices 
+                          select: [ ^self at: 3 ] . at: 1 ;
+                        choice isntDefault 
+                        ifTrue: 
+                          [ choice at: 1 . asQuotedString print; 
+                            "," print ;
+                          ] ;
+                      ] .
+              else: [ text isntDefault 
+                      ifTrue: [ text value print ;
+                                "," print ;
+                              ] 
+                    ]
+            ] ;
+         newLine print ;
+      ] ;
+  ] divertOutput
+] ;
+
+FormatTools Html_Xls defineMethod: [ | buildWrapper: wrapper | 
+ [
+  "<table> " printNL ;
+  wrapper numberOfRows sequence
+  do: [ !wrapper <- ^my wrapper ; 
+        "<tr>" printNL ;
+        wrapper numberOfCols sequence
+           extendBy: 
+             [ !cell <- ^my wrapper getCellAtRow: ^my asSelf andCol: asSelf 
+             ] .
+           select: [ cell text isntDefault ||
+                       [ cell object isWrapperSpec || cell object isInputSpec ]
+                   ] .
+           send: [ cell ] .
+        do: [ object isWrapperSpec
+                 ifTrue: [ FormatTools buildWrapper: object . print ] .
+              elseIf: [ object isInputSpec ] 
+                then: [ !choice <- object choices 
+                          select: [ ^self at: 3 ] . at: 1 ;
+                        choice isntDefault 
+                        ifTrue: 
+                          [ "<td>" print ; choice at: 1 . print; "</td>" print;
+                          ] ;
+                      ] .
+              else: [ text isntDefault 
+                      ifTrue: 
+                        ["<td>" print ; text value print ; "</td>" print ; 
+                        ] 
+                    ]
+            ] ;
+         "</tr>" printNL ;
+      ] ;
+  "</table>   " print ;
+  "<p> " printNL;
+  ] divertOutput
+] ;
+
+FormatTools Xml defineMethod: [ | buildWrapper: wrapper | 
+ [
+  !todo <- wrapper numberOfRows sequence
+     extendBy: [ !wrapper <- ^my wrapper ; 
+                 !cols <- wrapper numberOfCols sequence
+                    send: [ ^my wrapper 
+                               getCellAtRow: ^my asSelf andCol: asSelf 
+                          ] ;
+                 !isWrapper <- cols any: [ object isWrapperSpec ] ;
+                ] ;
+   #- if any wrappers left, skip this level and run for wrappers
+   todo any: [ isWrapper ] .
+   ifTrue:
+     [ todo do: [ cols select: [ object isWrapperSpec ] .
+                  do: [ FormatTools buildWrapper: object . print]
+                ]
+     ]
+   ifFalse:
+     [ todo 
+       do: [ cols select: [ text isntDefault || object isInputSpec ].
+             do: [ object isInputSpec 
+                    ifTrue: [ !choice <- object choices 
+                                 select: [ ^self at: 3 ] . at: 1 ;
+#                              choice isntDefault 
+#                               ifTrue: [ choice at: 1 . print ] ;
+                            ] .
+                     else: [ text isntDefault 
+                             ifTrue: [ text value contains: "OUTPUT" .
+                                          ifTrue: [ text value print ] ;
+                                     ] 
+                             ifFalse:[ ] ;
+                           ]
+                 ] ;
+           ] ;
+         newLine print ;
+      ] ;
+  ] divertOutput
+] ;
+
+#--------------------
+#  New FormatTools methods - added with Xml protocol: generic 
+#--------------------
+FormatTools define: 'indentLevel' toBe: 0 ;
+
+FormatTools defineMethod: [ | getNextIndentLevel |
+  !nextLevel <- ^self FormatTools indentLevel increment ;
+  FormatTools 
+    extendBy: [ !indentLevel <- ^my nextLevel ;
+                !FormatTools <- ^current ;
+              ] 
+] ;
+
+FormatTools defineMethod: [ | openTag: tag withAttributes: atts |
+  [ "Open Tag: " print ; tag print ; 
+    ^self getAttributesFrom: atts . printNL ;
+  ] divertOutput
+] ;
+
+FormatTools defineMethod: [ | closeTag: tag | 
+ [ "Close Tag: " print ; tag print ;
+ ] divertOutput
+] ;
+
+
+FormatTools defineMethod: 
+[ | buildTag: tag withAttributes: atts andContent: text |
+  [ ^self openTag: tag withAttributes: atts . print ;
+    text isntDefault ifTrue: [ text printUniversal ] ;
+    ^self closeTag: tag . print
+  ] divertOutput
+] ;
+
+FormatTools defineMethod: 
+[ | buildEmptyTag: tag withAttributes: atts |
+  ^self buildTag: tag withAttributes: atts andContent: "" 
+] ;
+
+FormatTools defineMethod: [ | displaySetup |
+] ;
+
+FormatTools defineMethod: [ | displayWrapup |
+] ;
+
+FormatTools defineMethod: [ | displayStyleSheet: string | ] ;
+
+FormatTools defineMethod: [ | getAttributesFrom: atts | 
+    atts isString
+       ifTrue: [ ^self getAttributesFromString: atts ] .
+       elseIf: [ atts isDictionary ] 
+         then: [ ^self getAttributesFromDictionary: atts ] .
+       elseIf: [ atts isCollection ] 
+         then: [ ^self getAttributesFromList: atts ] .
+         else: [ "" ] 
+] ;
+
+FormatTools defineMethod: [ | getAttributesFromString: atts |
+  !doubleQuote <- "\" " take: 1 ;
+  !singleQuote <- "'" ;
+  [ atts breakOn: "&" .
+    do: [ !fields <- ^self breakOn: "=" ;
+          fields at: 1 . isntDefault
+          ifTrue:
+            [ " " print ; fields at: 1 . print ; 
+              "=" print ; fields at: 2 . else: "" . stripWhiteSpace 
+                   translate: ^my doubleQuote to: ^my singleQuote .
+                      asQuotedString print ; 
+            ] ;
+        ] 
+   ] divertOutput
+] ;
+
+FormatTools defineMethod: [ | getAttributesFromList: atts |
+  !doubleQuote <- "\" " take: 1 ;
+  !singleQuote <- "'" ;
+
+  [ atts numberElements
+      extendBy: [ !isOdd <- position mod: 2 . = 1 ] .
+    do: [ isOdd
+          ifTrue: [ " " print ; print ;
+                    "=" print ; 
+                  ] 
+         ifFalse: [ asString stripWhiteSpace
+                      translate: ^my doubleQuote to: ^my singleQuote . 
+                           asQuotedString print ;
+                  ] ;
+        ] ;
+  ] divertOutput
+] ;
+
+FormatTools defineMethod: [ | getAttributesFromDictionary: atts |
+  !doubleQuote <- "\" " take: 1 ;
+  !singleQuote <- "'" ;
+  [ atts objects
+    do: [ " " print ; selector print ; "=" print ; 
+          ^self asString stripWhiteSpace
+               translate: ^my doubleQuote to: ^my singleQuote .
+                  asQuotedString print ; 
+        ] 
+   ] divertOutput
+] ;
+
+FormatTools defineMethod: [ | buildTag: tag for: object as: id |
+  object isEntity
+      ifTrue: [ ^self buildEntityTag: tag for: object as: id ] .
+    else:
+     [ ^self
+          buildTag: tag withAttributes: "id", id andContent: object 
+     ]
+] ;
+
+FormatTools defineMethod: [ | buildEntityTag: tag for: object as: id |
+  [ ^self openTag: tag withAttributes: "id", id . printNL ;
+    " " print: 2 ;
+    ^self buildTag: "ENTITY" 
+        withAttributes: "id", object id, "class", object whatAmI 
+        andContent: object name . printNL ;
+    ^self closeTag: tag . print ;
+  ] divertOutput
+
+] ;
+
+FormatTools defineMethod: [ | buildUserInfoFor: id |
+  [ FormatTools openTag: "USERINFO" withAttributes: "userId", id . printNL ;
+    " " print: 2 ;
+    FormatTools buildTag: "ASOF" 
+         withAttributes: NA andContent: ^date . printNL ;
+    " " print: 2 ;
+    FormatTools
+       buildTag: "CURRENCY" withAttributes: NA andContent: currency . printNL ;
+    " " print: 2 ;
+    FormatTools
+       buildTag: "TAGFORMAT" withAttributes: NA 
+       andContent: FormatTools classDescriptor code . printNL ;
+    " " print: 2 ;
+    FormatTools
+       buildTag: "RUNTIME" withAttributes: NA 
+       andContent: CoreWorkspace LowResolutionTime localTimeNow . printNL ;
+    FormatTools closeTag: "USERINFO" . print ;
+  ] divertOutput
+] ;
+
+#--------------------
+#  New FormatTools methods - xml versions
+#--------------------
+
+FormatTools Xml defineMethod: [ | getAttributesFromList: atts |
+!doubleQuote <- "\" " take: 1; 
+!singleQuote <- "'"; 
+
+#--> begin modification
+!list <- ^global List new ;     
+!cluster <- GlobalWorkspace ;   
+atts iterate: [ ^my list , (^my cluster getClusteredString: asString) ] ;
+#--> end modification
+   [ 
+   list numberElements       #<- use list not atts here
+      extendBy: [!isOdd <- position mod: 2 .= 1].
+    do: [ isOdd
+           ifTrue: [" " print; print; "=" print; ] 
+          ifFalse: [ asString stripWhiteSpace
+                       translate: ^my doubleQuote   to: ^my singleQuote .
+                      asQuotedString print; 
+                   ]; 
+       ]; 
+   ] divertOutput
+] ;
+
+FormatTools Xml defineMethod: [| getValidTag: tag| 
+tag isntDefault 
+ifTrue:
+  [ tag breakOn: "#&<>" . count > 1              #<-- only tranlate if needed
+       ifTrue: [ tag translate: "#" to: "No" .
+                     translate: "&" to: "&amp;" .
+                     translate: "<" to: "&lt;" .
+                     translate: ">" to: "&gt;"
+               ]
+       ifFalse: [ tag ] 
+  ] 
+ifFalse: ["VALUE"]
+];
+  
+FormatTools Xml defineMethod: [ | displaySetup |
+"<?xml version=\"1.0\" ?>" printNL ;
+] ;
+
+FormatTools Xml defineMethod: [ | displayWrapup |
+] ;
+
+FormatTools Xml defineMethod: [ | displayStyleSheet: string |
+  "<?xml-stylesheet type=" concat: "text/xsl" asQuotedString .
+     concat: " href=" . concat: string asQuotedString .
+     concat: "?>" . printNL ;
+] ;
+
+#--------------------
+#  Misc New Format Tools Bundlings
+#--------------------
+
+FormatTools defineMethod: [ | startOutline: tag  withId: id |
+  !atts <- id isntDefault ifTrue: [ "id", id ] ;
+  ^self openTag: tag withAttributes: atts 
+] ;
+
+FormatTools Html defineMethod: [ | startOutline: tag withId: id |
+  [
+   # 8/15/02 applied block display to branch level and none to the leaf level
+   ^self indentLevel > 1
+       ifTrue: [ "<div style='display:none'>" printNL ] 
+       else: ["<div style='display:block'>" printNL ];
+    !level <- ^self indentLevel asString ;
+    level count < 2 ifTrue: [ :level <- "0" concat: level ] ;
+   # !label <- "outline" concat: level . asQuotedString ;
+     !label <- "'outline" concat: level . concat: "'" ;
+     
+    # test to add "showOutline" so the htm file can find the name of the container
+    !labelId <- " id=" concat: ("'showOutline" concat:"'"); 
+    label = "'outline00'"
+    ifTrue:[:label <- label concat: labelId ];
+    "<div class=" concat: label . concat: ">" . print ;
+  ] divertOutput
+] ;
+
+FormatTools defineMethod: [ | endOutline: tag  |
+  ^self closeTag: tag 
+] ;
+
+FormatTools Html defineMethod: [ | endOutline: tag | 
+  "</div></div>"
+] ;
+
+FormatTools defineMethod: 
+[ | buildOutlineLevel: n withId: id andLabel: label andType: type |
+  [ n asString print ; " | " print ;
+    id print ; " | " print ;
+    label print ; " | " print ;
+    type print ; " | " print ;
+  ] divertOutput
+]  ;
+   
+FormatTools Html defineMethod: 
+[ | buildOutlineLevel: n withId: id andLabel: label andType: type |
+  !indicator <- type asString concat: "." . concat: id .
+     translate: " " to: "_" ;
+  [
+    "<li id=" print ; indicator asQuotedString print ; 
+    " class=" print ; "outline" concat: n . asQuotedString print ; 
+    ">" print ; label print ; "</li>" print ;
+  ] divertOutput
+]  ;
+   
+FormatTools Xml defineMethod: 
+[ | buildOutlineLevel: n withId: id andLabel: label andType: type |
+  !atts <- "level", n asString, "id", id, "type", type 
+      send: [ ^self translate: " " to: "_" ] ;
+  ^self buildTag: "ENTRY" withAttributes: atts andContent: label
+]  ;
+   
+FormatTools defineMethod: [ | buildOutlineBranchFor: object withLabel: txt |
+  FormatTools buildOutlineLevel: ^self indentLevel
+      withId: object id andLabel: txt andType: object whatAmI
+] ;
+
+FormatTools defineMethod: [ | buildOutlineLeafFor: object withLabel: txt |
+  FormatTools buildOutlineLevel: ^self indentLevel
+      withId: object id andLabel: txt andType: object whatAmI
+] ;
+
+FormatTools Html
+defineMethod: [ | buildOutlineBranchFor: object withLabel: txt |
+ [ 
+  # 8/15/02 screen out top level "all accounts" from turning into branch
+  txt isntDefault
+  ifTrue:
+  [
+  "<div class='outlineBranch'>" printNL ;
+   "<a href='#xxx' id=" print ; 
+   # object id asQuotedString print ; 
+   ("'" concat: object id . concat: "'" )print;
+   " " print ; "onClick='vOpenOrCloseEntry()'" print ;
+   ">+</a> " print ; txt printNL ;
+   "</div>" print ;
+   ];
+  ] divertOutput
+] ;
+
+FormatTools Html
+defineMethod: [ | buildOutlineLeafFor: object withLabel: txt |
+ [ 
+  object holdings count > 0
+  ifTrue:
+  [
+  "<div class='outlineLeaf'>" printNL ;
+   "<a href='#xxx id=" print ; 
+  # object id asQuotedString print ; 
+
+   ("'" concat: object id . concat: "'" )print;
+   " " print ; "onClick='vSelectEntry()'" print ;
+   "> " print ; txt print ; " </a>" printNL ; 
+   "</div>" print ;
+   ];
+  ] divertOutput
+] ;
+
+
+FormatTools defineMethod: [ | startCollection: tag withAttributes: atts |
+  ^self openTag: tag withAttributes: atts
+] ;
+
+FormatTools defineMethod: [ | endCollection: tag  |
+  ^self closeTag: tag 
+] ;
+
+FormatTools Xml defineMethod: [ | openTag: tag withAttributes: atts |
+  :tag <- ^self getValidTag: tag ;
+  [ "" fill: ^self indentLevel * 2 . print ;
+    "<" print ; tag print ;
+    ^self getAttributesFrom: atts . print ;
+    ">" print ;
+  ] divertOutput
+] ;
+
+FormatTools Xml defineMethod: [ | closeTag: tag | 
+  :tag <- ^self getValidTag: tag ;
+ [ "" fill: ^self indentLevel * 2 . print ;
+   "</" print ; tag print ; ">" print ;
+ ] divertOutput
+] ;
+
+FormatTools Xml defineMethod:
+[| buildTag: tag withAttributes: atts andContent: text| 
+    [
+    text isntDefault ifTrue: 
+        [ ^self openTag: tag withAttributes: atts .print; 
+          !out <- [ text printUniversal ] divertOutput 
+                     stripBoundingBlanks ;
+          FormatTools getValidTag: out . print ;     # <-- use new valid tag
+          ^self closeTag: tag .stripLeadingBlanks print; 
+       ]
+    ifFalse: 
+       [ ^self openTag: tag withAttributes: atts .drop: -1 .concat: "/>" .
+             print
+       ]; 
+   ] divertOutput
+] ;
+
+#--------------------
+#  New FormatTools methods - html versions
+#--------------------
+
+FormatTools Html defineMethod: [ | openTag: tag withAttributes: atts |
+  [ "<!-- " print ; tag print ;
+    ^self getAttributesFrom: atts . print ;
+    " --> " print ;
+  ] divertOutput
+] ;
+
+FormatTools Html defineMethod: [ | closeTag: tag | 
+ [ "<!-- /" print ; tag print ; " -->" print ;
+ ] divertOutput
+] ;
+
+FormatTools Html defineMethod: 
+[ | buildTag: tag withAttributes: atts andContent: text |
+  [ "<!-- " print ; tag print ; 
+    ^self getAttributesFrom: atts . print ;
+    text isntDefault
+    ifTrue:
+      [ " " print ; text printUniversal ;
+        " -->" print ;
+      ]
+    ifFalse: [ " -->" print ] ;
+  ] divertOutput
+] ;
+
+FormatTools Html defineMethod: [ | displaySetup |
+External displaySetup ;
+External displayPageHeader ;
+] ;
+
+FormatTools Html defineMethod: [ | displayWrapup |
+External displayPageFooter ;
+External displayCleanup ;
+] ;
+
+#--------------------
+#  csv and xls covers
+#--------------------
+
+FormatTools CSV defineMethod: [ | openTag: tag withAttributes: atts |
+  [ tag print ; "," print ;
+  atts do: [ print; "," print ] ;
+  ] divertOutput
+] ;
+
+FormatTools CSV defineMethod: [ | closeTag: tag | 
+  ""
+] ;
+
+#------------------------------
+
+FormatTools DDO defineMethod: [ | formatId: id |
+"'" concat: id
+] ;
+
+FormatTools DDO
+defineMethod: [ | buildTableFor: table for: object withBlock: block | 
+#-->  [ 
+  #--  HEADERS
+  table caption inUse
+     ifTrue: [ table caption text value printNL ] ;
+  !headers <- table headerCount else: 0 ;
+  headers sequence
+  do: [ !rowNumber <- ^self ;
+        !table <- ^my table ;
+        !headersForRow <- table columnCount sequence
+           extendBy: 
+             [ !column <- ^my table columnSpecs at: ^self ;
+               !title <- column isntNA
+                  ifTrue: [ column titles at: ^my rowNumber ] ;
+             ] ;
+        headersForRow
+        do: [!header <- title ;
+             header isntNA && [ header isLabel ] && [ header text isntNA ]
+             ifTrue: 
+               [ !text <- header text value translate: newLine to: " " ;
+                 text print ;
+                 header columnSpan isNumber && header columnSpan > 1
+                     && [ header columnSpan < ^my table columnCount ] 
+                  ifTrue:
+                    [ 2 sequenceTo: header columnSpan .
+                      do: [ " " print ] ;
+                    ] ;
+               ] ;
+            ];
+        newLine print ;
+     ] ;
+        
+  #--  BODY
+  object send: block ;
+#--> ] divertDelimitedOutput
+] ;
+
+
+
+
+
+#======================================================================
+
+#--------------------
+#  HtmlAccess
+#--------------------
+
+Interface HtmlAccess defineMethod: [ | serverIsRunning | server isntNA ] ;
+
+Interface HtmlAccess
+  setServerTo: "/" .
+  setCGIExeTo: "cgi-bin/vquery.exe/" .
+  setPathTo: "default/" .
+  setHomePathTo: "/vision/interface/" .
+  setResourcePathTo: "/vision/interface/" .
+;
+
+Interface HtmlAccess
+   define: 'colorMap' toBe: Dictionary basicNew .
+   defineFixedProperty: 'cgiEnvironment' .
+
+   define: 'topLeftLogoImage' toBe: NA .
+   define: 'topRightLogoImage' toBe: NA .
+   define: 'leftLogoLink' toBe: NA .
+   define: 'rightLogoLink' toBe: NA .
+   define: 'leftLogoLinkPath' toBe: NA .
+   define: 'rightLogoLinkPath' toBe: NA .
+
+   define: 'footerAboveLine' toBe: NA .
+   define: 'footerBelowLine' toBe: NA .
+   define: 'footerBelowItems' toBe: NA .
+   define: 'footerItemList' toBe: List new .
+;
+
+#--  add special case for + and space characters
+Interface HtmlAccess CharToAscii at: "+" put: "%plus" ;
+Interface HtmlAccess AsciiToChar at: "%20" put: " " ;
+Interface HtmlAccess CharToAscii at: " " put: "%20" ;
+
+#-- change hex codes to special characters, "+" to space, 2bb to +
+Interface HtmlAccess defineMethod: [ | decodeString: str |
+  str isString ifTrue: [ 
+    [ :str <- str  translate: "+" to: " " ; 
+      :str <- str translateString: "%plus" to: "+" ;
+      !prefix <- str prefixNotSpannedBy: "%";
+      str take: prefix . print;
+      str drop: prefix .
+       breakOn: "%" .  select: [ count > 0 ] .
+       do: [ !hex <- "%" concat: (^self take: 2);
+             ^my AsciiToChar at: hex . else: [ ^self take: 2 ] . print;
+             ^self drop: 2 . print;
+           ]
+    ] divertOutput
+  ] ifFalse: [ str ]
+] ;
+
+
+Interface HtmlAccess
+defineMethod: [ | get: expression usingQuery: query for: rhost at: radd | 
+  !csv <- FALSE ; !xls <- FALSE ; !print <- FALSE; !xml <- FALSE ;
+  
+  query isntDefault && [ query take: -4 . = ".xls" ]
+     ifTrue: [ :xls <- TRUE ; :query <- query drop: -4 ] .
+     elseIf: [ expression take: -4 . = ".xls" ]
+       then: [ :xls <- TRUE ; :expression <- expression drop: -4 ] .
+     elseIf: [ query isntDefault && [ query take: -4 . = ".csv" ] ]
+       then: [ :csv <- TRUE ; :query <- query drop: -4 ] .
+     elseIf: [ expression take: -4 . = ".csv" ]
+       then: [ :csv <- TRUE ; :expression <- expression drop: -4 ] .
+     elseIf: [ query isntDefault && [ query toLower contains: "format=xml" ] ]
+       then: [ :xml <- TRUE ] .
+     elseIf: [ expression take: -5 . take: 4 . = ".xml" ]
+       then: [ :xml <- TRUE ; :expression <- expression drop: -4 ] .
+     elseIf: [ query isntDefault && [ query take: -6 . = ".print" ] ]
+       then: [ :print <- TRUE ; :query <- query drop: -6 ] .
+     elseIf: [ expression take: -6 . = ".print" ]
+       then: [ :print <- TRUE ; :expression <- expression drop: -6 ] ;
+  
+  :sourceExpression <- expression translate: "/" to: " " ;
+  :sourceQuery <- query ; 
+  sourceExpression isBlank && query isBlank
+     ifTrue: [ :sourceExpression <- "displayMainMenu" ] ;
+  setupWorkspace ;
+  setupQuery ;
+  setupExpression ;
+  setupGlobals ;
+   [  
+     csv ifTrue:[csvExecute ] .
+       elseIf: [ xls ] then: [ xlsExecute ] .
+       elseIf: [ xml ] then: [ xmlExecute ] .
+       elseIf: [ print ] then: [ printExecute ] .
+       else: [ execute ] ;
+   ] divertOutput print ;
+] ;
+
+Interface HtmlAccess
+defineMethod: [ | get: expression usingQuery: query withEnvironment: env |
+:cgiEnvironment <- CoreWorkspace Dictionary basicSpecialized ;
+env asLines select: [ ^self contains: "=" ] .
+do: [ !id <- ^self to: "=" . drop: -1 . stripBoundingBlanks ;
+      !val <- ^self from: "=" . drop: 1 . stripBoundingBlanks ;
+      ^my cgiEnvironment at: id put: val ;
+    ] ;
+^self get: expression usingQuery: query for: "" at: "" ;
+
+] ;
+
+Interface HtmlAccess defineMethod: [ | csvExecute | 
+  !max <- CoreWorkspace ReportTools Global maxLinesToDisplay ;
+  CoreWorkspace ReportTools Global setMaxLinesToDisplayTo: 999999 ;
+  currentWorkspace set: "useExcel" to: "YES" ;
+  FormatTools CSV evaluate: 
+  [ "Content-Type: text/x-csv" printNL ;
+    newLine print ;
+    displayReport ;
+  ] ;
+  CoreWorkspace ReportTools Global setMaxLinesToDisplayTo: max ;
+] ;
+
+Interface HtmlAccess defineMethod: [ | xlsExecute | 
+  !max <- CoreWorkspace ReportTools Global maxLinesToDisplay ;
+  CoreWorkspace ReportTools Global setMaxLinesToDisplayTo: 999999 ;
+  currentWorkspace set: "useExcel" to: "YES" ;
+  FormatTools Html_Xls evaluate: 
+  [ "Content-Type: application/msexcel" printNL ;
+#"Content-Type: application/vnd-ms.excel" printNL ;
+    newLine print ;
+    displayReport ;
+  ] ;
+  CoreWorkspace ReportTools Global setMaxLinesToDisplayTo: max ;
+] ;
+
+Interface HtmlAccess defineMethod: [ | xmlExecute | 
+  !app <- currentWorkspace currentApplication else: "" . stripBoundingBlanks ;
+  !query <- sourceQuery else: "" ;
+  !localQuery <-  app contains: "SingleAccountApp" . 
+        && [ currentWorkspace parameterList count > 0 ]
+    ifTrue: [ "reportOption=" concat:(currentWorkspace parameterList at: 1) ]
+   ifFalse: [ "" ] ;
+  !ss <- currentWorkspace namedParameters at: "xsl" ;
+  !ws <- ^self Named RequestWS at: app ;
+  ws isNA
+  ifTrue: 
+  [ :ws <- RequestWS reset 
+       addRequest: app andParams: localQuery ;
+  ] ;
+  ws
+    setStylesheetTo: ss . 
+    setSharedParamsTo: query ;
+  "Content-Type: text/xml" printNL ;
+  newLine print ;
+  ws runWithFormat: "Xml" forUser: "xml" ;
+
+] ;
+
+Interface HtmlAccess defineMethod: [ | getUrl |
+  [ visionPath else: "" . print ; 
+    sourceExpression else: "" . print ;
+    sourceQuery isntDefault
+          ifTrue: [ "/?" concat: sourceQuery . print ] ;
+  ] divertOutput 
+];
+
+
+Interface HtmlAccess defineMethod: [ | printExecute | 
+
+currentWorkspace set:"usePrinter" to: "True";
+execute;
+];
+
+#--------------------
+
+Interface HtmlAccess defineMethod: [ | setupQuery |
+sourceQuery isntNA 
+ifTrue: 
+  [ !query <- sourceQuery breakOn: "&" .
+       select: [^self contains: "="].
+    extendBy: 
+      [!field <- ^self breakOn: "="; 
+        !id <- ^my decodeString: (field at: 1 .stripBoundingBlanks); 
+        !val <- ^my decodeString: (field at: 2 .stripBoundingBlanks); 
+       ]; 
+
+    query select: [ id != "cachedParams" ] .
+       do: [ ^my currentWorkspace set: id to: val ] ;
+    #-  parse and update extra parameters in cache
+    query select: [ id = "cachedParams" ] .
+    do: [ !tools <- ^my ;
+          !currentWorkspace <- ^my currentWorkspace ;
+          val breakOn: "|" . select: [ ^self contains: "=" ] .
+          do: [ !field <- ^self breakOn: "=" ;
+                !id <- ^my tools decodeString: 
+                    (field at: 1 . stripBoundingBlanks ) ;
+                !val <- ^my tools decodeString:
+                    (field at: 2 . stripBoundingBlanks ) ;
+                ^my currentWorkspace namedParameters at: id . isNA
+                   ifTrue: [ ^my currentWorkspace set: id to: val ] ;
+              ] ;
+       ] ;          
+   ]; 
+!app <- currentWorkspace getParameter: "appName"; 
+currentWorkspace setApplicationTo: app; 
+Global setSharedParametersTo: currentWorkspace namedParameters ;
+] ;
+
+#--------------------
+#  modify html setup to include sections for scripts and styles
+#--------------------
+Interface HtmlAccess defineMethod: [ | displaySetup | 
+#--  first line must be Content-Type followed by a blank line
+
+"Content-Type: text/html
+
+<HTML>
+<HEAD>
+<TITLE>
+" print ;
+displayTitle ;
+"</TITLE>" printNL ;
+displayScriptSetup ;
+displayStyleSetup ;
+"</HEAD>" printNL ;
+displayBodySetup ;
+] ;
+
+Interface HtmlAccess defineMethod: [ | displayTitle | 
+"Title: " print ; 
+sourceExpression else: "" . isBlank
+   ifTrue: [ currentWorkspace currentApplication ] 
+  ifFalse: [ sourceExpression ] . print ;
+] ;
+
+Interface HtmlAccess defineMethod: [ | displayScriptSetup | 
+"<SCRIPT LANGUAGE=" print ; "JavaScript" asQuotedString print ; ">" printNL;
+"<!--" printNL ;
+#--  start javascript function openWindow (name)
+"function openWindow(name) {" printNL ;
+"window.open(name,''," print ;
+"'width=550,height=550,toolbar=yes,menubar=yes,location=yes,status=yes,screenX=10,screenY=10" print ;
+"menubar=no,scrollbars=yes,resizable=yes');" print;
+"}" printNL;
+#--  end javascript function openWindow (name)
+newLine print ;
+
+#--  start javascript function clearInputs ()
+"
+function clearInputs()
+{
+inputForm = ( document.forms[0])
+inputCount = (inputForm.length);
+
+for (var i = 0 ; i < inputCount ; i++)
+  {
+  Elements = inputForm.elements[i]
+  formType = (Elements.type);
+  if (formType == 'text')
+    {
+    (Elements.value = '' )
+    }
+  if (formType == 'select-one')
+    {
+    (Elements.selectedIndex = 0)
+    }
+  if (formType == 'multiple-one')
+    {
+    (Elements.selectedIndex = 0)
+    }
+  }
+}
+" printNL ;
+#--  end javascript function clearInputs ()
+newLine print ;
+
+#--  start javascript function clearBenchmarks ()
+"
+function clearBenchmarks()
+{
+inputForm = ( document.forms[0])
+inputCount = (inputForm.length);
+
+for (var i = 0 ; i < inputCount ; i++)
+  {
+   Elements = inputForm.elements[i]
+  if(Elements.name == 'benchmark')
+    {
+     inputForm.benchmark.value=''
+     inputForm.benchmarkMenu1.selectedIndex='0'   
+    }
+  }
+}
+" printNL;
+#--  end javascript function clearBenchmarks ()
+newLine print ;
+
+#--  start javascript function relocateOpener ()
+#/ relocates the opener to the given URL.  if no parent is spec'd, open a new one
+# added 6/26/01
+"
+function relocateOpener(sURL) 
+{
+  if(window.opener != null && !window.opener.closed) {
+    window.opener.focus();
+    window.opener.location = sURL;
+  } else {
+    window.open(sURL, '', '').focus();
+  }
+  window.close();
+  return false;
+}
+" printNL;
+
+#--  end javascript function relocateOpener (surl)
+
+
+
+"//-->" printNL ;
+"</SCRIPT>" printNL ;
+displayLocalScriptSetup ;
+] ;
+
+Interface HtmlAccess defineMethod: [ | displayLocalScriptSetup | 
+] ;
+
+Interface HtmlAccess defineMethod: [ | displayStyleSetup | 
+styleSheetSource isntNA
+ifTrue: [ "<link rel=stylesheet type=\"text/css\" href=" 
+               concat: styleSheetSource asQuotedString .
+               concat: ">" . printNL ;
+        ] ;
+"<STYLE TYPE=" print ; "text/css" asQuotedString print ; ">" printNL ;
+"<!--" printNL ;
+displayLocalStyleSetup ;
+"-->" printNL ;
+"</STYLE>" printNL ;
+] ;
+
+Interface HtmlAccess defineMethod: [ | displayLocalStyleSetup | 
+] ;
+
+Interface HtmlAccess defineMethod:
+[ | setStyleSheetSourceTo: string |
+  ^self define: 'styleSheetSource' toBe: string ;
+  ^self
+] ;
+Interface HtmlAccess setStyleSheetSourceTo: NA ;
+
+Interface HtmlAccess defineMethod: [ | displayBodySetup | 
+"<BODY " print ;
+displayLocalBodySetup ;
+">" printNL ;
+] ;
+
+Interface HtmlAccess defineMethod: [ | displayLocalBodySetup | 
+"bgcolor=white " print ;
+] ;
+
+#--------------------
+
+Interface HtmlAccess defineMethod: [ | userAgent |
+  cgiEnvironment at: "HTTP_USER_AGENT"
+] ;
+
+Interface HtmlAccess defineMethod: [ | currentUser |
+  cgiEnvironment at: "REMOTE_USER"
+] ;
+
+Interface HtmlAccess :cgiEnvironment <- Dictionary ;
+
+Interface HtmlAccess defineMethod: [ | clearColorMap |
+  colorMap isntDefault ifTrue: [ colorMap rdelete ] ;
+  ^self define: 'colorMap' toBe: CoreWorkspace Dictionary new ;
+  ^self 
+] ;
+
+Interface HtmlAccess defineMethod: [ | setColorMapEntry: entry  to: text |
+  colorMap at: entry put: text ;
+  ^self 
+] ;
+
+Interface HtmlAccess
+  clearColorMap 
+;
+
+
+Interface HtmlAccess defineMethod:
+[ | setTopLeftLogoTo: string |
+  ^self define: 'topLeftLogoImage' toBe: string ;
+  ^self
+] ;
+
+Interface HtmlAccess defineMethod:
+[ | setTopRightLogoTo: string |
+  ^self define: 'topRightLogoImage' toBe: string ;
+  ^self
+] ;
+
+Interface HtmlAccess defineMethod:
+[ | setLeftLogoLinkTo: string |
+  ^self define: 'leftLogoLink' toBe: string ;
+  ^self
+] ;
+
+Interface HtmlAccess defineMethod:
+[ | setRightLogoLinkTo: string |
+  ^self define: 'rightLogoLink' toBe: string ;
+  ^self
+] ;
+
+Interface HtmlAccess defineMethod:
+[ | setLeftLogoLinkPathTo: string |
+  ^self define: 'leftLogoLinkPath' toBe: string ;
+  ^self
+] ;
+
+Interface HtmlAccess defineMethod:
+[ | setRightLogoLinkPathTo: string |
+  ^self define: 'rightLogoLinkPath' toBe: string ;
+  ^self
+] ;
+
+Interface HtmlAccess defineMethod: [ | setTopStyleTo: text | 
+  ^self define: "topStyle" toBe: text ;
+  ^self
+] ;
+Interface HtmlAccess setTopStyleTo: NA ;
+
+Interface HtmlAccess defineMethod: [ | setFooterAboveLineTo: text |
+  ^self define: 'footerAboveLine' toBe: [ text ] ;
+  ^self
+] ;
+Interface HtmlAccess defineMethod: [ | setFooterBelowLineTo: text |
+  ^self define: 'footerBelowLine' toBe: [ text ] ;
+  ^self
+] ;
+Interface HtmlAccess defineMethod: [ | setFooterBelowItemsTo: text |
+  ^self define: 'footerBelowItems' toBe: [ text ] ;
+  ^self
+] ;
+
+Interface HtmlAccess defineMethod: [ | resetFooterItems |
+  ^self define: 'footerItemList' toBe: CoreWorkspace List new ;
+  ^self
+] ;
+  
+Interface HtmlAccess defineMethod: [ | addFooter: label withLink: link |
+  !app ;
+  footerItemList , ^current ;
+  ^self
+] ;
+
+Interface HtmlAccess
+defineMethod: [ | addFooter: label withApp: app |
+  !link ;
+  footerItemList , ^current ;
+  ^self
+] ;
+
+#--------------------
+#  Set html footer attributes
+#--------------------
+
+Interface HtmlAccess resetFooterItems ;
+
+#----------
+
+Interface HtmlAccess defineMethod: [ | buildStandardPageHeader |   
+  [ 
+    topStyle isntNA
+    ifTrue:
+      [ "<table width=100% cellspacing=0 cellpadding=0 border=0" print ;
+        " class= " concat: topStyle . print ; " >" printNL ;
+        "<tr><td>" printNL ;
+      ] ;
+    topLogoImage isntNA
+    ifTrue: [ FormatTools buildImage: topLogoImage 
+                         withAlt: "-- LOGO Image --" . print;
+            ] .
+    elseIf: [ topLeftLogoImage isntNA && topRightLogoImage isntNA ] 
+    then:
+      [ leftLogoLink isntDefault || rightLogoLink isntDefault
+        ifTrue:
+          [ FormatTools 
+            buildImageRowWithLeft: topLeftLogoImage withLink: leftLogoLink
+                         andRight: topRightLogoImage withLink: rightLogoLink.
+               print ;
+          ]
+        ifFalse:
+          [ FormatTools
+               buildImageRowWithLeft: topLeftLogoImage 
+                            andRight: topRightLogoImage . print ;
+          ] ;
+      ] ;
+    topStyle isntNA
+       ifTrue: [ "</td></tr></table>" printNL ] ;
+
+    title isntNA
+    ifTrue:
+      [ "<H2>" print ; 
+        title  print;
+        "</H2>" print;
+        topBarImage isntNA
+        ifTrue:  [ FormatTools buildImage: topBarImage 
+                                  withAlt: "Top bar Image file" . print;
+                   "<br><br>" print;
+                 ]; 
+        title isntDefault && topBarImage isDefault
+          ifTrue: [ "<HR>" printNL;];
+      ] ;
+  ] divertOutput
+] ;
+
+Interface HtmlAccess defineMethod: [ | displayPageHeader |
+  "<a name=\"top\"> </a>" printNL ;
+  isHelper 
+    ifTrue: [ buildHelperPageHeader print; ]
+   ifFalse: [ buildStandardPageHeader print; ]; 
+] ;
+
+Interface HtmlAccess defineMethod: [ | displayPageFooter |
+  "</PRE>" printNL ;
+  footerAboveLine isntNA
+     ifTrue: [ footerAboveLine value print ] ;
+  botBarImage isntNA
+  ifTrue: [ "<br><br>"    print;
+            FormatTools buildImage: botBarImage 
+                           withAlt: "Bottom bar Image file" . print;
+            "<br><br>"    printNL;
+          ] 
+  ifFalse: [ "<HR>" printNL; ];
+  footerBelowLine isntNA
+     ifTrue: [ footerBelowLine value print ] ;
+
+  footerItemList count > 1
+      ifTrue: [ "<CENTER>" printNL ] ;
+  footerItemList numberElements
+  do: [ app isntNA
+       ifTrue: 
+         [ FormatTools buildLinkForApp: app withLabel: label . print ;
+         ] 
+       ifFalse: 
+         [ !fullLink <- link isDefault 
+             ifTrue: [ ^my homePath ] .
+             elseIf: [ link contains: "http" ] then: [ link ] .
+              else: [ ^my resourcePath concat: link ] . asQuotedString ;
+           "<A href=" print ; fullLink print ; ">" print ;
+           label print ; "</A>" print ;
+         ] ;
+       ^my footerItemList count > 1 ifTrue: [ " | " print ] ;
+       newLine print ;
+     ] ;
+  footerItemList count > 1
+      ifTrue: [ "</CENTER>" printNL ] ;
+  footerBelowItems isntNA
+     ifTrue: [ footerBelowItems value print ] ;
+
+  displayInputsFlag isTrue
+  ifTrue:
+    [ "<HR>" printNL ;
+      "<FONT SIZE=-2>" print ;
+      "Expression: " print ; sourceExpression print ; "<BR>" printNL ;
+      "Query: " print ; sourceQuery printNL ; "<BR>" printNL ;
+      "Agent: " print ; userAgent printNL ;  "<BR>" printNL ;
+      "User: " print ; currentUser printNL ;
+      "<HR>" printNL ;
+       cgiEnvironment objects     #-- add all enviroment variables
+         do: [ selector print; ": " print ; print ; "<BR>" printNL ] ;
+      "</FONT>" printNL ;
+    ] ;
+
+] ;
+
+#--------------------
+#  Interface ApplicationWS patches
+#--------------------
+
+#--------------------
+#  displayMainMenu
+#     If no appName is supplied, the displayMainMenu method runs.  By
+#     default this is defined to run the navigator menu.  Replace this
+#     with an error with option dump of env 
+#--------------------
+
+Interface ApplicationWS defineMethod: [ | displayMainMenu | 
+">>>  No Application Selected." printNL ;
+] ;
+
+#--- fix this one to strip extensions
+Interface ApplicationWS defineMethod: [ | setParameterListTo: plist | 
+  :parameterList <- plist isList 
+     ifTrue: [ plist ]
+    ifFalse: [plist asList] . send: [ asSelf ] ;
+  ^self
+] ;
+
+Interface ApplicationWS defineMethod: [ | clearParameter: n | 
+:n <- n asInteger ;
+parameterList isList && n isntNA
+ifTrue:
+   [ :parameterList <- parameterList numberElements 
+        select: [ position != ^my n ] .
+        send: [ asSelf ] ;
+   ] ;
+^self
+] ;
+
+Interface ApplicationWS defineMethod: [ | clearParameterList | 
+:parameterList <- CoreWorkspace List new ;
+^self
+] ;
+
+Interface ApplicationWS defineMethod: [ | setParameterNamesTo: string |
+#--  assume this is a string containing att1=val1&att2=val2 pairs
+!names <- ^self namedParameters ;
+string breakOn: "&" .
+  extendBy: [ !fields <- ^self breakOn: "=" ] .
+  select: [ fields count = 2 ] .
+do: [ !att <- fields at: 1 . stripBoundingBlanks ;
+      !val <- fields at: 2 . stripBoundingBlanks ;
+      ^my names at: att put: val ;
+    ] ;
+^self
+]  ;
+
+Interface ApplicationWS defineMethod: [ | addParametersFrom: dictionary |
+!names <- ^self namedParameters ;
+dictionary isDictionary
+  ifTrue: [ dictionary objects do: [ ^my names at: selector put: asSelf ] ] ;
+^self
+]  ;
+
+Interface ApplicationWS defineMethod: [ | inputsFromLink | 
+   parameterList count > 0 
+] ;
+
+Interface ApplicationWS defineMethod: [ | set: id toParameter: p | 
+  !param <- parameterList at: (p asInteger else: 0) ;
+  param isntDefault
+    ifTrue: [ ^self namedParameters at: id put: param ;
+              Global sharedParameters at: id put: param ;
+            ] ;
+  ^self
+] ;
+
+
+#--------------------
+#  Interface ApplicationWS 
+#     test if form inputs supplied
+#--------------------
+Interface ApplicationWS defineMethod: [ | inputsFromForm | 
+   namedParameters selectorList count > 0 
+] ;
+
+#--------------------
+#  New interface tool
+#    return an extension containing the variable names
+#    defined in form
+#--------------------
+
+Interface ApplicationWS defineMethod: [ | getNamedFields |
+  !names <- ^self namedParameters ;
+  ^self extendBy: 
+    "  [    #--  build block from string each time to get a unique one
+        namedParameters selectorList do: [ ^my defineFixedProperty: asSelf ] ;
+        namedParameters selectorList
+        do: [ !updateBlock <- asSelf asUpdateBlock ;
+              ^my send: updateBlock . <- ^my namedParameters at: asSelf ;
+            ] ;
+      ] " evaluate
+] ;
+
+#--------------------
+#  Create cross reference that names the applications to use and
+#     assigns the order in which to appear
+#--------------------
+
+Interface ApplicationWS defineMethod: [ | initializeApplicationXRef |
+  ^self define: 'applicationXRef' toBe: CoreWorkspace IndexedList new ;
+] ;
+
+Interface ApplicationWS defineMethod: [ | setApplication: id toPostion: n |
+!app <- CoreWorkspace ReportTools Named ApplicationSpec at: id ;
+app isntDefault
+ ifTrue: 
+   [ :app <- app extendBy: [ !position <- ^my n ] ;
+     ^self applicationXRef at: app asSelf put: app ;
+   ] 
+ ifFalse: [ ">>>  Application " print ; id print ; " not found. " printNL ] ;
+app
+
+] ;
+
+
+
+
+####################
+#  Application Interfaces
+####################
+
+Interface ApplicationWS 
+   defineFixedProperty: 'demonstrationFlag' .
+
+defineMethod: [ | flagAsDemonstration |
+ :demonstrationFlag <- TRUE ;
+  ^self
+] .
+;
+
+#--------------------
+#  indirection for security/account lookup
+#--------------------
+
+Interface ApplicationWS defineMethod: [ | getSecurityFor: secId | 
+  !id <- secId else: ""; 
+  ^global Security findId: id
+] ;
+
+Interface ApplicationWS defineMethod: [ | getAccountFor: acctId | 
+  !id <- acctId else: ""; 
+  ^global Account findId: id
+] ;
+
+
+#--------------------
+#  This is the main display method
+#   displayCustomOptionBar provides a hook for cobranded customizations
+#--------------------
+
+Interface ApplicationWS defineMethod: [ | displayOptionsBarWith: choice |
+
+#--  display custom option bar, if present
+displayCustomOptionsBar ;
+
+!optionBar <- CoreWorkspace LayoutTools Named OptionBarSpec MainAccountOptionBar ;
+FormatTools buildRowOptionBarFrom: optionBar withChoice: choice . print ;
+FormatTools startParagraph printNL ;
+
+] ;
+
+#----------
+
+Interface ApplicationWS defineMethod: [ | displayCustomOptionsBar |
+    #-- fill this in for custom option bar
+] ;
+
+#--------------------
+#  misc changes to APPspec.nav layouts
+#--------------------
+
+LayoutTools Named TableSpec basic1Column getColumn: 1 . setWidthTo: NA ;
+  LayoutTools Named TableSpec at: "basic2Column" .
+do: [ ^self getColumn: 1 . setWidthTo: NA ;
+      ^self getColumn: 2 . setWidthTo: NA ;
+    ] ;
+
+#--------------------
+#  ShowNavigator shows the navigator main menu 
+#--------------------
+Interface ApplicationWS defineMethod: [ | ShowNavigator | 
+FormatTools 
+   buildTitle: "---  Vision Database Navigation  ---" over: 80 
+       withStyle: "Arial" , "darkblue". print ;
+FormatTools buildCommentBlock: 
+"The Vision Database Navigator provides a framework for presenting information
+about your Vision environment.  Vision offers a general purpose information 
+management engine that allows you to manage data relationships and programs in
+addition to raw data.  The database is fully integrated with a complete
+programming environment.  These tools are designed to help you explore
+your Vision environment from a progamming, database, end user, and 
+architectural perspective." over: 80 . print ;
+
+FormatTools startParagraph print ;
+!table <- CoreWorkspace LayoutTools Named TableSpec at: "basic2Column" ;
+table getColumn: 1 . setHAlignmentTo: "center" . setVAlignmentTo: "center" ;
+table getColumn: 2 . disableFillBlanks setHAlignmentTo: "left" ;
+table getColumn: 1 . getHeader: 1 . setTextTo: "---  Navigation Views  ---" ;
+
+FormatTools buildTableFor: table for: ^self withBlock:
+   [  FormatTools buildLinkForApp: "ShowClassXRefSummary" 
+                  withLabel: "Programmer Tools" . print ;
+      FormatTools italic: "What classes and messages are available, how do they work, and where are they used?" . printNL ;
+      FormatTools buildLinkForApp: "ShowDataModelClasses"
+                  withLabel: "Data Model Tools" . print ;
+      FormatTools italic: "What data is available, how is it accessed, and what inter-relationships exist?" . printNL ;
+      FormatTools buildLinkForApp: "ShowAllDataValues"
+                   withLabel: "Data Inspection Tools" . print ;
+      FormatTools italic: "What value did a data item have for a specific entity as of specific point in time?" . printNL ;
+#      FormatTools buildLinkForApp: "ShowDatabaseProfile"
+#                  withLabel: "Structure Analysis Tools" . print ;
+#      "Structure Analysis Tools" print ;
+#      FormatTools italic: "What physical structures are defined in the database and what potential performance tuning opportunities are implied?" . printNL ;
+#      FormatTools buildLink: "VReporter.htm"
+#                  withPath: NA withLabel: "End User Tools" . print ;
+#      FormatTools italic: "What reports and applications are available that package the information in the database for different user communities?" . printNL ;
+   ] . print ;
+
+table getColumn: 1 . setHAlignmentTo: "left" . setVAlignmentTo: "top" ;
+table getColumn: 2 . enableFillBlanks setHAlignmentTo: "right" ;
+
+] ;
+
+####################
+#  ApplicationWS interface methods - generic (from shared.all)
+####################
+
+Interface ApplicationWS defineMethod: 
+[ | displayWithInput: inputs andOutput: output andChoice: choice |
+  !useExcel <- ^self getParameter: "useExcel" . else: "" . = "YES" ;
+  !outputOnly <- ^self getParameter: "outputOnly" . else: "" . = "YES" ;
+  useExcel || outputOnly
+  ifTrue:
+    [ output printNL ;
+    ]
+  ifFalse:
+    [ !menu <- CoreWorkspace
+           LayoutTools Named OptionBarSpec at: "MainAccountOptionBar" ;
+      menu isntDefault && [ menu entries count > 0 ] 
+      ifTrue:
+        [ FormatTools 
+             buildRowOptionBarFrom: menu withChoice: choice . printNL ;
+        ] ;
+      !usePrinter <- ^self getParameter: "usePrinter" ;
+      !viewArea <- 
+         [ usePrinter isDefault
+             ifTrue: [inputs printNL];
+           output printNL;
+         ] divertOutput; 
+      viewArea print;
+    ] ;
+] ;
+
+#--------------------
+#  Interface -> AccountViewer update routines
+#--------------------
+
+Interface ApplicationWS defineMethod: [ | getAccountViewerTemplate |
+!template <- ^self getParameter: "template" . else: "" .
+     as: CoreWorkspace ApplicationTools AccountViewer ;
+template isDefault ifTrue: [ template reset ] ;
+template
+] ;
+
+Interface ApplicationWS defineMethod: [ | setAccountsIn: template |
+!accountId <- ^self getParameter: "accountId1" ;
+!benchmark <- ^self getParameter:"benchmark" ;
+
+accountId isntDefault
+ifTrue: 
+  [ template setAccount: 1 to: accountId ;
+    ^self getParameter: "noBench" . else: "" . as: CoreWorkspace Boolean .
+       else: FALSE .
+     ifFalse:
+       [ !account <- accountId globalAs: CoreWorkspace Account ;
+         !defaultBench <- account benchmark ifDefault: [ "" ] else: [ code ];
+         !bench <- benchmark ifDefault: defaultBench ;    
+         template setAccount: 2 to: bench ;
+         template accounts at:2 . isDefault || 
+           [ (template accounts at:2) = (template accounts at:1) ] 
+         ifTrue: 
+         [
+          ^self set: "benchmark" to: "" ;
+          Global clearSharedParameter: "benchmark" ;
+          template setAccountsTo: account id ;
+         ] ;
+      ] ;
+  ] 
+ifFalse:
+  [ !accountIds <- ^self getParameter: "accountIds" ;
+    template setAccountsTo: accountIds ;
+  ] ;
+template setBaseCurrencyTo: (template accounts at: 1 . currency) ;
+^self
+]  ;
+
+Interface ApplicationWS defineMethod: [ | setOneDateIn: template |
+  !dates <- ^self getParameter: "date1" ;
+  dates isDefault ifTrue: [ :dates <- ^self getParameter: "dates" ] ;
+  !defaultDate <- template accounts at: 1 . 
+    ifDefault: [ ^date ] else: [ holdingsDate ] ;
+  !firstDate <- dates else: "" . breakOn: "," . send: [ asDate ] .
+      select: [ isntDefault ] . at: 1 . else: defaultDate . asInteger asString;
+  template setDatesTo: firstDate ;
+  ^self
+] ;
+
+Interface ApplicationWS defineMethod: [ | setMultipleDatesIn: template |
+  
+!dates <- ^self getParameter:"dates" ;
+template setDatesTo:(dates else: "^today") ;
+^self
+] ;
+
+Interface ApplicationWS defineMethod: [ | setGroupsIn: template |
+
+  !groups <- ^self getParameter:"groups". else: "" ;
+  !groupId <- ^self getParameter:"groupId";
+  groups stripBoundingBlanks toUpper = "NONE" 
+     ifTrue: [ :groups <- "" ] ;
+
+  groups isntDefault ifTrue: [ template setGroupsTo: groups ] ;
+  groupId isntDefault ifTrue: [ template setGroupIdTo: groupId];
+
+  !noDetail <- ^self getParameter: "noDetail" . as: CoreWorkspace Boolean ;
+  noDetail ifTrue: [ template disableShowDetail ]
+          ifFalse: [ template enableShowDetail ] 
+             else: [ ] ;
+  ^self
+] ;
+
+Interface ApplicationWS defineMethod: [ | setRestrictionsIn: template |
+  !restrict <- ^self getParameter: "restrict" ;
+  restrict isntDefault ifTrue: [ template setRestrictionBlockTo: restrict ] ;
+  ^self getParameter: "restrictDetails" . else: "" . 
+         as: CoreWorkspace Boolean . else: TRUE .
+       ifTrue: [ template enableRestrictDetails ] 
+      ifFalse: [ template disableRestrictDetails ] ;
+         
+  !calculation <- ^self getParameter: "calculation" ; 
+   calculation = "TNA"
+      ifTrue:[template enableTNACalcs ] ifFalse:[template enableTMVCalcs ];
+  ^self setLocalRestrictionsIn: template ;
+  ^self
+] ;
+
+Interface ApplicationWS defineMethod: [ | setLocalRestrictionsIn: template |
+  ^self
+] ;
+
+Interface ApplicationWS defineMethod: [ | setDisplayOptionsIn: template |
+  ^self getParameter: "showDetail" . else: "TRUE" . as: CoreWorkspace Boolean .
+       ifTrue: [ template enableShowDetail ] 
+      ifFalse: [ template disableShowDetail ] ;
+
+  !cutoff <- ^self getParameter: "groupCutoff" ;
+  cutoff isntDefault 
+      ifTrue: [ template setGroupCutoffTo: cutoff . setGroupSortToPct ] ;
+  !cutoff <- ^self getParameter: "securityCutoff" ;
+  cutoff isntDefault
+    ifTrue: [ template setSecurityCutoffTo: cutoff . setDetailSortTo: "pct" ] ;
+
+  !sort <- ^self getParameter: "detailSort" ;
+  sort isntDefault 
+  ifTrue: 
+    [ template setDetailSortTo: sort ;
+#      sort contains: "id" . ifTrue: [ template setGroupSortToId ] .
+#      elseIf: [ sort contains: "pct" . || (sort contains: "MarketValue") ] 
+#        then: [ template setGroupSortToPct ] .
+#      elseIf: [ sort contains: "name" ] then: [ template setGroupSortToName ] .
+    ] ;
+  ^self
+] ;
+
+Interface ApplicationWS defineMethod: [ | setItemsIn: template |
+  !items <- ^self getParameter: "items" ;
+  items isntDefault ifTrue: [ template setItemsTo: items ] ;
+  ^self
+] ;
+
+Interface ApplicationWS defineMethod: [ | clearExtraParameters | 
+Global clearSharedParameter: 
+   "date1", "benchmarkMenu1", "dateListMenu", "itemMenu", "portMenu1",
+   "groupLevelMenu", "statFormat", "dates"  ;
+^self set: "statFormat" to: NA ;
+^self set: "itemMenu" to: NA ;
+^self clearLocalExtraParameters ;
+^self
+] ;
+
+Interface ApplicationWS defineMethod: [ | clearLocalExtraParameters | 
+^self
+] ;
+
+
+####################
+#  schema update
+####################
+Schema processAllMessages;
+
+
+

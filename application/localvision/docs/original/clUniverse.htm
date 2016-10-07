@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Class: Universe </title>
+
+</head>
+
+<body bgcolor=white>
+<h2>Vision Class: Universe</h2>
+
+<p>
+| <a href="FHome.htm">Home</a> 
+| <a href="mUniverse.htm">Messages</a> 
+| <a href="Classes.htm">Classes</a>
+| <a href="clXRef.htm">Class XRef</a>
+|
+<hr>
+<h3>Topics Covered:</h3>
+<ul type=square>
+<li><a href="#overview">Universe Overview</a>
+<li><a href="#basic">Basic Usage</a>
+<li><a href="#feeds">Using The ExternalFeedManager</a>
+</ul>
+<hr>
+<h3><a name="overview">Universe Overview</a></h3>
+<p>
+The <b>Universe</b> class is a subclass of <b>Entity</b> used to
+name and track lists of related entities over time.
+For example, a <b>Universe</b> instance named
+<i>SP500</i> could be defined to track the list of <b>Security</b>
+instances comprising the <i>Standard & Poors 500</i> each month.
+<p>
+The Universe class is a direct subclass of Entity:
+<font size=+1><pre>
+          <a href="clObject.htm">Object</a>
+             |
+          <a href="clEntity.htm">Entity</a>
+             |
+             <b>Universe</b>
+
+</pre></font>
+
+<p>
+<hr>
+<p>
+<h3><a name="basic">Basic Usage</a></h3>
+<p>
+<b>Universe</b> instances are created to name and track related entities
+over time.  A universe can be restricted to a certain type of entity by
+setting its <i>entityType</i> property using the <i>setEntityTypeTo:</i>
+message.  For example, to create the <i>Dow Jones 30</i> universe of
+securities:<pre><tt><b>
+     Universe createInstance: "DJ30" .
+         setEntityTypeTo: Security ;
+
+</b></tt></pre>
+The time series property <i>list</i> is defined at the class <b>Universe</b>
+to store lists of entities over time.  This property can be updated
+using the <i>setListTo:</i> message 
+which creates a new <b>IndexedList</b>,
+adds the entities supplied in the parameter, and stores the list in
+the <i>list</i> property as of the current evaluation date.
+If an <i>entityType</i> has been specified, the elements in the supplied
+list are only added if they represent instances of that class.  List
+elements can be supplied as explicit objects or as string.  Strings
+will be converted to instances of the <i>entityType's</i> class using
+the <i>locateId:</i> message for that class.  
+For example:<pre><tt><b>
+     95 evaluate:
+       [ Named Universe DJ30 
+            setListTo: Named Security IBM, "XON", "GM" ;
+       ] ;
+</b></tt></pre>
+stores a list of three securities in the <i>list</i> property for
+the <i>DJ30</i> universe as of year-end 1995.  The strings <i>XON</i>
+and <i>GM</i> are converted into security instances.  The <i>addMember:</i>
+and <i>deleteMember:</i> messages can be use used to modify an
+existing list.  Instances are added or deleted from the list stored
+as of the evaluation date.
+<p>
+To view the universe members as of a specific date use:<pre><tt><b>
+     #-- latest
+     Named Universe DJ30 list do: [ displayInfo ] ;
+
+     #-- as of last month
+     ^today - 1 monthEnds evaluate:
+       [ Named Universe DJ30 list do: [ displayInfo ] ;
+       ] ;
+
+     #-- alternative
+     Named Universe DJ30 :list lag: 1 monthEnds . do: [ displayInfo ] ;
+
+     #-- all periods
+     Named Universe DJ30 :list
+     do: [ ^date print ; count print ; " members" printNL ; 
+           ^self do: [ displayInfo ] ;
+         ] ;
+</b></tt></pre>
+<p>
+The <i>displayMemberHistory</i> report shows changes in the universe
+membership over time.  For example:<pre><tt><b>
+     96 evaluate:
+       [ Named Universe DJ30 
+            setListTo: "IBM", "XON", "GIS", "DD" ;
+       ] ;
+
+     Named Universe DJ30 displayMemberHistory ;
+
+</b>displays: <b>
+                      ---  Membership History Report  ---                     
+                             for Universe DJ30 DJ30                           
+
+     01/01/1                0 current         0 prior
+     12/31/1995             3 current         0 prior
+         added ... 30229010     XON          EXXON CORP COM
+         added ... 37044210     GM           GENERAL MTRS CORP COM
+         added ... 45920010     IBM          INTERNATIONAL BUSINESS MACH COM
+     12/31/1996             4 current         3 prior
+         added ... 26353410     DD           DU PONT E I DE NEMOURS & CO COM
+         added ... 37033410     GIS          GENERAL MLS INC COM
+       dropped ... 37044210     GM           GENERAL MTRS CORP COM
+
+</b></tt></pre>
+The message <i>universe</i> has been defined for the class
+<b>Entity</b> and returns the list of <b>Universe</b> instances
+that contain the recipient object.  For example:<pre><tt><b>
+     Named Security IBM universes
+     do: [ displayInfo ] 
+</b></tt></pre>
+will display the <i>DJ30</i> and any other universe in which the security
+<i>IBM</i> is a member.
+
+<p>
+<hr>
+<p>
+<h3><a name="feeds">Using the ExternalFeedManager</a></h3>
+<p>
+The earlier sections in this document describe ways to directly
+create and update <b>Universe</b> instances.  The <b>Interface</b> class 
+<a href="clDataFeed.htm"><b>ExternalFeedManager</b></a>
+has been created to provide a 
+uniform way to create and update any entity-related information.
+A separate <b>DataFeed</b> subclass is defined to translate one or more
+rows of information into the appropriate structures in your Vision
+database.  Data can be supplied from a file, a spreadsheet,
+a relational database, or any other table-based source.  You can 
+also supply data directly as a string, using the tab character to
+delimit columns and the carriage return to delimit rows.
+<p>
+Several <b>DataFeed</b> classes have been defined to work with 
+<b>Universe</b> data:
+<p><center><table border=1 width=80% cellpadding=4 cellspacing=2>
+<tr><th>DataFeed <th>Description
+<tr>
+<td><a href="pma_UniverseMaster.htm">UniverseMaster</a>
+<td>creates <b>Universe</b> instances and refreshes basic properties
+<tr>
+<td><a href="pma_UniverseMembers.htm">UniverseMembers</a>
+<td>updates memberships for universes over time
+</table></center>
+<p>
+For example, the following tab-delimited string could be used to create
+and refresh <b>Universe</b> instances:<pre><b>
+     Interface ExternalFeedManager upload: "UniverseMaster" using:
+     "Id	Name                      MemberType	
+      SP500     Standard & Poors 500	  Security	
+      DJ30      Dow Jones 30 Industrials  Security
+      DJT       Dow Jones Transportation  Security
+     " ;
+
+</b></pre>
+The following tab-delimited string could be used to define <b>Universe/<b>
+memberships over time:<pre><b>
+     Interface ExternalFeedManager upload: "UniverseMembers" using:
+     "groupId     date       memberId
+      SP500       19971031   45920010	
+      SP500       19971031   37044210	
+      SP500       19971031   88553510	
+      #---  ...
+      SP500       19971130   45920010	
+      SP500       19971130   37044210	
+      SP500       19971130   88553510	
+      #---  ...
+      DJT         Default    01165910
+      DJT         Default    00176510
+      DJT         Default    00202M10
+      #---  ...
+     " ;
+
+</b></pre>
+<p>
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy 1998 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Created March 11, 1998</font>
+</tr>
+</table>
+
+</body>
+</html>

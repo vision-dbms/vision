@@ -1,0 +1,45 @@
+#!/bin/csh 
+
+####################
+#  PrepCleanSpace : runs a base version compact to create the latest MSS
+#     file for each space.  This should always be run in U3 as part of
+#     the standard daily.daemon jobs process.
+#     VisionAdm is unset so that no segments get written to any
+#     space that may be in use for private updates.
+#
+#  The script /localvision/admin/scripts/CleanSpace can be run to
+#    move/delete segments from one or more spaces interactively
+####################
+
+set jobName    = PrepCleanSpace
+
+set workDir  = $LocalVisionRoot/network/logs
+cd $workDir
+
+set processLog = baseVersion.$processDate
+$adminArea/helpers/SetupLog $processLog
+
+#--  unset VisionAdm so at most os3 is updated
+unsetenv VisionAdm
+unsetenv VisionDev
+
+$DBbatchvision -U3 << @@@EOF@@@ | grep -v "V>"  >& $processLog
+Utility updateNetworkAsBaseVersionWithAnnotation: "Base Version Compact" ;
+?g
+@@@EOF@@@
+
+set okay = $status
+if ($okay == 0) then
+   $adminArea/helpers/CheckLog $processLog $jobName 1
+   set okay = $status
+endif
+
+cp $processLog $globalLogs/$jobName.log
+
+echo "===> $jobName `date`" >> $NDFJournal
+
+#--------------------
+#  and exit 
+#--------------------
+exit $okay
+

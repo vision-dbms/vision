@@ -1,0 +1,330 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                Vision Application Environment
+
+                                  External Database Drivers
+
+
+
+                                       Draft - May 1994
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                          Innovative Systems Techniques, Inc.
+                                                           One Gateway Center
+                                                            Newton, MA  02158
+
+                                                               (617) 965-8450
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                 Copyright  (c)  1994 by Innovative Systems Techniques, Inc.
+
+
+            All rights reserved.  This  manual,  or  parts  thereof,  may  not  be
+            reproduced  in  any  form without the written permission of Innovative
+            Systems Techniques, Inc.
+
+            Innovative Systems Techniques, Inc.  has  used  its  best  efforts  to
+            ensure  the  accuracy  of  the information contained herein and cannot
+            accept  any  responsibility,   financial   or   otherwise,   for   any
+            consequences arising out of the use of this material.  The information
+            contained herein is subject to change;  revisions  may  be  issued  to
+            advise of such changes and/or additions.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                Vision Application Environment
+
+                                  External Database Drivers
+                                      (Draft - May 1994)
+
+
+                                      Table of Contents
+
+
+
+             Section  1:  Introduction
+
+             Section  2:  New Database Setup
+                      2.1 Terminology
+                      2.2 Overview of Process
+                      2.3 Creating a New Update Work Area
+                      2.4 Layout Files
+                      2.5 Defining the "Build" Script
+                      2.6 Installing the "Build" Script
+                      2.7 Defining the "Load" Script
+
+             Section  3:  Processing the Data
+                      3.1 The "Load" Process
+                      3.2 The "Go" Process
+                      3.3 The "Go" Process - Details
+
+             Section  4:  Reconciliation
+                      4.1 Defining Reconcile Rules
+                      4.2 Defining the "Reconcile" Script
+                      4.3 Installing the "Reconcile" Script
+                      4.4 Status Information
+
+              Section 5:  Local Entity Reconciles
+                      5.1 The General Model
+                      5.2 The Reconcile Process
+                      5.3 Defining the "Reconcile" Script
+                      5.4 Data Access and Exception Reports
+                      5.5 Reconcile Customizations
+                      5.6 Manual Changes
+
+              Section 6:  Modifying a DataSource
+                      6.1 New Layouts
+                      6.2 Layout Modification
+                      6.3 Creating Additional Instance Stores
+                      6.4 Adding Supplemental Object Spaces
+
+              Section 7:  Loading External Data From Files
+
+
+              Appendix A: Driver Installation Summary
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              Appendix B: The "normalize" Utility
+
+              Other Stuff:
+              - breaking out data types
+              - how to use the Go log
+              - inc troubleshooting
+                . inc.log file
+                . dumpTables
+                . replace tables and instance deletion including default
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,381 @@
+
+######################
+######################
+####  Time Series Extensions
+######################
+######################
+#
+#  This file implements direct enhancements to the TimeSeries class and
+#  redefines, in a class neutral way, a number of bootstrap TimeSeries
+#  operations.  The messages defined in this file are only required for
+#  operation in an environment that supports ^date polymorphism.  In
+#  addition, it also defines primitives to query and change the form of
+#  the key map for a time-series.
+#
+######################
+
+################
+#  New Operations
+################
+
+TimeSeries
+
+#----------
+#  The Beginning of Time For The Key Class of This TimeSeries
+#	(the day before 1/1/1 for class Date).
+#----------
+define: 'timeZero' toBe: 147 asPrimitive.
+
+#----------
+#  Date Conversion
+#----------
+defineMethod:
+[ | convertToConformantKey: aCandidate |
+    ^self timeZero convertToMyKindOfObject: aCandidate
+].
+
+
+################
+#  Non Conformant Key Conversion
+################
+#
+# When the Vision virtual machine or one of its primitives performs a lookup
+# or update operation on a time-series and discovers that the class of ^date
+# does not match the key class of the time-series, it delegates the operation
+# back to the time-series. The implementations of the following messages
+# handle that delegation request by converting ^date to the class of the
+# time-series key.
+#
+################
+
+defineMethod:
+[ | deleteColumnForNonConformantKey |
+    ^self convertToConformantKey: ^date. evaluate: [^self deleteColumn]
+].
+
+defineMethod:
+[ | deletePointForNonConformantKey |
+    ^self convertToConformantKey: ^date. evaluate: [^self deletePoint]
+].
+
+defineMethod:
+[ | intervalEndForNonConformantKey |
+    ^self convertToConformantKey: ^date. evaluate: [^self intervalEnd]
+].
+
+defineMethod:
+[ | intervalStartForNonConformantKey |
+    ^self convertToConformantKey: ^date. evaluate: [^self intervalStart]
+].
+
+defineMethod:
+[ | newValueCellForNonConformantKey |
+    ^self convertToConformantKey: ^date. evaluate: [^self newValueCell]
+].
+
+defineMethod:
+[ | valueCellForNonConformantKey |
+    ^self convertToConformantKey: ^date. evaluate: [^self valueCell]
+].
+
+defineMethod:
+[ | valueForNonConformantKey |
+    ^self convertToConformantKey: ^date. evaluate: [^self value]
+].
+
+
+################
+#  Date Class Neutralization Fixes
+################
+#
+# The following re-implementations remove the assumption that
+# time-series are indexed by instances of the class Date.
+#
+################
+
+#----------
+#  <-
+#----------
+#
+#  Old Implementation:
+#	[ | <- aValue |
+#	  !fdate <- firstDate ; 
+#	  fdate isNA ifTrue: [ :fdate <- ^date + 1 days ] ;
+#	  ^date < fdate
+#	  ifTrue: [ ^self asOf: 10101 basicAsDate put: aValue ]
+#	  ifFalse: [ valueCell <- aValue ]
+#	] .
+#
+#  Change Description:
+#	Replace the date arithmetic based initial interval test:
+#		^date < (firstDate else: [^date + 1 days])
+#	with the direct test:
+#		effectiveDate isNA
+#	for the same condition.
+#
+#----------
+defineMethod:
+[ | <- aValue |
+  effectiveDate isNA
+  ifTrue: [ ^self asOf: earliestPossibleDate put: aValue ]
+  ifFalse: [ valueCell <- aValue ]
+] .
+
+
+#----------
+#  effectiveDateAsOf:
+#----------
+#
+#  Old Implementation:
+#	[| effectiveDateAsOf: aDate |
+#	  aDate evaluate: [intervalStart + 0 days] .
+#	     send: [ isInitialDate ifFalse: [ ^self ] ]
+#	] .
+#
+#  Change Description:
+#	Replace the date arithmetic based initial date test with a direct
+#	comparison made possible by the new 'timeZero' primitive.
+#
+#----------
+defineMethod:
+[ | effectiveDateAsOf: aDate |
+    aDate evaluate: [intervalStart].
+    send: [^self == ^my timeZero ifFalse: [^self]]
+].
+
+#----------
+#  nextDateAsOf:
+#----------
+#
+#  Old Implementation:
+#	[ | nextDateAsOf: aDate |
+#	   aDate evaluate:[intervalEnd + 0 days] .
+#	     send: [ isInitialDate ifFalse: [ ^self ] ]
+#	] .
+#
+#  Change Description:
+#	Replace the date arithmetic based initial date test with a direct
+#	comparison made possible by the new 'timeZero' primitive.
+#
+#----------
+defineMethod:
+[ | nextDateAsOf: aDate |
+    aDate evaluate: [intervalEnd].
+    send: [^self == ^my timeZero ifFalse: [^self]]
+].
+
+
+#----------
+#  firstObservation
+#----------
+#
+#  Old Implementation:
+#	[ | firstObservation | 
+#	!date <- firstDate ;
+#	date isDate ifTrue: [ date evaluate: super super ]
+#	] .
+#
+#  Change Description:
+#	'firstDate' can no longer be counted upon to return an instance
+#	of class 'Date' but can be relied upon to return an NA if an
+#	initial observation isn't supplied.
+#
+#----------
+defineMethod: 
+[ | firstObservation | 
+!date <- firstDate ;
+date isntNA ifTrue: [ date evaluate: super super ]
+] .
+
+
+#----------
+#  from: date1 to: date2
+#----------
+#
+#  Old Implementation:
+#	[ | from: date1 to: date2 | 
+#	  !d1 <- date1 asDate ;
+#	  !d2 <- date2 asDate ;
+#	  d1 isDate && d2 isDate
+#	    ifTrue: [ ^self select: [ ^my d1 <= ^date && ^date <= ^my d2 ] ]
+#	   ifFalse: [ ^self ] 
+#	] .
+#
+#  Change Description:
+#	Replace 'asDate' with key class based conversion.  Replace 'isDate'
+#	with a generic NA based test.
+#
+#----------
+defineMethod: 
+[ | from: date1 to: date2 | 
+  !d1 <- ^self convertToConformantKey: date1 ;
+  !d2 <- ^self convertToConformantKey: date2 ;
+  d1 isDate && [ d2 isDate ] && [ d2 < d1 ]
+    ifTrue: [ !tmp <- d2 ; :d2 <- d1 ; :d1 <- tmp ] ;
+
+  d1 isNA  ifTrue: [ ^self to: d2 ] .
+   elseIf: [ d2 isNA ] then: [ ^self from: d1 ] .
+   else: [ ^self select: [^my d1 <= ^date && ^date <= ^my d2]
+         ]
+] .
+
+#----------
+#  from: aDate
+#----------
+#
+#  Old Implementation:
+#	[ | from: aDate | 
+#	  !date <- aDate asDate ;
+#	  date isDate
+#	     ifTrue: [ ^self select: [^my date <= ^date] ] 
+#	    ifFalse: [ ^self ] 
+#	] .
+#
+#  Change Description:
+#	Replace 'asDate' with key class based conversion.  Replace 'isDate'
+#	with a generic NA based test.
+#
+#----------
+defineMethod:
+[ | from: aDate | 
+  !date <- ^self convertToConformantKey: aDate ;
+  date isntNA
+     ifTrue: [ ^self select: [^my date <= ^date] ] 
+    ifFalse: [ ^self ] 
+] .
+
+
+#----------
+#  to: aDate
+#----------
+#
+#  Old Implementation:
+#	[ | to: aDate | 
+#	  !date <- aDate asDate ;
+#	  date isDate
+#	     ifTrue: [ ^self select: [^my date >= ^date] ] 
+#	    ifFalse: [ ^self ] 
+#	] .
+#
+#  Change Description:
+#	Replace 'asDate' with key class based conversion.  Replace 'isDate'
+#	with a generic NA based test.
+#
+#----------
+defineMethod:
+[ | to: aDate | 
+  !date <- ^self convertToConformantKey: aDate ;
+  date isntNA
+     ifTrue: [ ^self select: [^my date >= ^date] ] 
+    ifFalse: [ ^self ] 
+] .
+
+#----------
+#  on: aDate
+#----------
+#
+#  Old Implementation:
+#	defineMethod:
+#	[ | on: aDate | 
+#	  !date <- aDate asDate ;
+#	  date isntNA && [ ^self effectiveDateAsOf: date . = date ] 
+#	     ifTrue: [ ^self asOf: date ]
+#	] .
+#
+#  Change Description:
+#	Replace 'asDate' with key class based conversion.
+#
+#----------
+defineMethod:
+[ | on: aDate | 
+  !date <- ^self convertToConformantKey: aDate ;
+  date isntNA && [ ^self effectiveDateAsOf: date . = date ] 
+     ifTrue: [ ^self asOf: date ]
+] .
+
+
+################
+#  Display Fixes
+################
+
+#----------
+#  displayAll
+#----------
+#
+#  Old Implementation:
+#	[ | displayAll |
+#	^self do: [ ^date print: 15 ; print; newLine print;];
+#	].
+#
+#  Change Description:
+#	Delegate the field width choice for ^date to its class.
+#
+#----------
+defineMethod:
+[ | displayAll |
+   ^self do: [
+       ^date print: (^date naturalPrintWidth max: 15) ; print; newLine print;
+   ];
+].
+
+#----------
+#  displayAllChanges
+#----------
+#
+#  Old Implementation:
+#	[ | displayAllChanges | 
+#	  !ts <- ^self ;
+#	  ^self select: [ ^date isntDefault ] .
+#	     select: [ ^self isntEquivalentTo: (^my ts lag: 1 days)  ] .
+#	  do: [ ^date print: 12 ; printNL ] 
+#	] .
+#
+#  Change Description:
+#	Delegate the field width and minmium lag: increment for ^date to its
+#	class.
+#
+#----------
+defineMethod:
+[ | displayAllChanges | 
+  !ts <- ^self ;
+  ^self select: [ ^date isntDefault ] .
+     select: [ ^self isntEquivalentTo: (^my ts asOf: ^date predecessor)  ] .
+  do: [ ^date print: (^date naturalPrintWidth max: 12) ; printNL ] 
+] .
+
+
+#----------
+#  displayInfo
+#----------
+#
+#  Old Implementation:
+#	Inherited From Object
+#
+#  Change Description:
+#	Include key class description in display.  Should this be the default
+#	behavior for 'print'?
+#
+#----------
+defineMethod:
+[ | displayInfo |
+    " " print; ^self whatAmI print; "[" print; ^self timeZero whatAmI print; "]" printNL;
+].
+
+
+################
+#  Indexing Type Update and Query
+################
+
+#----------
+#  '__getIndexingType' returns an integer interpreted as follows:
+#
+#	1	The recipient uses product mapped indexing.
+#	2	The recipient uses partition mapped indexing.
+#----------
+define: '__getIndexingType'			toBePrimitive: 293 .
+
+define: '__setIndexingTypeToProductMapped'	toBePrimitive: 294
+					     withControlValue:   1 .
+define: '__setIndexingTypeToPartitionMapped'	toBePrimitive: 294
+					     withControlValue:   2 .
+;

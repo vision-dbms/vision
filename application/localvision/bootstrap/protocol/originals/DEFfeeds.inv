@@ -1,0 +1,1659 @@
+##################################################
+#  DataFeed processing - Inv core protocol
+##################################################
+
+####################
+#  Master Feeds
+####################
+
+#--------------------
+#  SecurityMaster
+#--------------------
+SecurityMaster
+   defineFixedProperty: 'ticker' .
+   defineFixedProperty: 'cusip' .
+   defineFixedProperty: 'sedol' .
+   defineFixedProperty: 'companyId' .
+
+   defineFixedProperty: 'currentByCusip' .
+   defineFixedProperty: 'currentBySedol' .
+   defineFixedProperty: 'priorCusip' .
+   defineFixedProperty: 'priorSedol' .
+   defineFixedProperty: 'priorCompany' .
+   defineFixedProperty: 'company' .
+;
+
+#--------------------
+
+SecurityMaster defineMethod: [ | getCompanyId | companyId else: entityId ] ;
+
+SecurityMaster defineMethod: [ | enableCusipChanges |
+^self define: 'allowCusipChanges' toBe: TRUE ;
+^self
+] ;
+SecurityMaster  defineMethod: [ | disableCusipChanges |
+^self define: 'allowCusipChanges' toBe: NA ;
+^self
+] ;
+SecurityMaster defineMethod: [ | enableSedolChanges |
+^self define: 'allowSedolChanges' toBe: TRUE ;
+^self
+] ;
+SecurityMaster  defineMethod: [ | disableSedolChanges |
+^self define: 'allowSedolChanges' toBe: NA ;
+^self
+] ;
+SecurityMaster defineMethod: [ | enableCompanyChanges |
+^self define: 'allowCompanyChanges' toBe: TRUE ;
+^self
+] ;
+SecurityMaster  defineMethod: [ | disableCompanyChanges |
+^self define: 'allowCompanyChanges' toBe: NA ;
+^self
+] ;
+
+SecurityMaster defineMethod: [ | resetRunTimeAttributes | 
+   ^super resetRunTimeAttributes 
+      enableCusipChanges enableSedolChanges enableCompanyChanges     
+] ;
+
+SecurityMaster resetRunTimeAttributes ;
+
+#--------------------
+
+SecurityMaster defineMethod: [ | initializeProcessing | 
+  ^self asSelf instanceList
+  do: [ :underlyingRecord <- entityType locateId: entityId .
+              else: [ entityType locateId: cusip ] .
+              else: [ entityType locateId: sedol ] .
+#--- remove this line
+#---              else: [ entityType named at: ticker ] ;
+      ] ;
+
+^self allowEntityCreation
+ifTrue:
+  [ ^self asSelf instanceList
+    select: [ underlyingRecord isNA ] .
+    groupedByString: [ entityId ] .      #- only create 1 per unique id
+    select: [ isntDefault ] .
+    do: [ !record <- groupList at: 1 ;
+          !newEntity <- record companyId = record entityId 
+             ifTrue: [ record entityType createAndLink: record entityId ]
+            ifFalse: [ record entityType createInstance: record entityId ] ;
+          record :newOneCreated <- TRUE ;
+          groupList do: [ :underlyingRecord <- ^my newEntity ] ;
+        ] ;
+   ] ;
+]  ;
+
+SecurityMaster defineMethod: [ | runUpdate | 
+  ^super runUpdate ;
+  !list <- ^self instanceList select: [ isProcessed ];
+  list
+  do: [underlyingRecord setTickerTo: ticker ;
+       :currentByCusip <- ^global Security XRef Cusip at: cusip ;
+       :currentBySedol <- ^global Security XRef Sedol at: sedol ;
+       :priorCusip <- underlyingRecord cusip ;
+       :priorSedol <- underlyingRecord sedol ;
+       :company <- getCompanyId as: ^global Company ;
+       :priorCompany <- underlyingRecord company ;
+      ] ;
+
+#-- Only update these identifiers with unique values 
+#--    and cusip/sedol not in use if cusip update is enabled
+    !todo <- allowCusipChanges
+       ifTrue: [ list ] else: [ list select: [ priorCusip isDefault ] ] ;
+    todo select: [ currentByCusip isDefault 
+                   || currentByCusip = underlyingRecord
+                 ] .
+        groupedByString: [ cusip ] . select: [ groupList count = 1 ] .
+    do: [groupList do: [ underlyingRecord setCusipTo: cusip ];];
+
+    !todo <- allowSedolChanges
+       ifTrue: [ list ] else: [ list select: [ priorSedol isDefault ] ] ;
+    todo select: [ currentBySedol isDefault 
+                   || currentBySedol = underlyingRecord
+                 ] .
+         groupedByString: [ sedol ] . select: [ groupList count = 1 ] .
+    do: [ groupList do: [underlyingRecord setSedolTo: sedol ];];
+
+    !todo <- allowCompanyChanges
+       ifTrue: [ list ] else: [ list select: [ priorCompany isDefault ] ] ;
+    todo do: [ underlyingRecord setCompanyTo: company ] ;
+] ;
+
+SecurityMaster defineMethod: [ | displayOtherExceptions | 
+  ^super displayOtherExceptions ;
+  !items <- fieldOrderList 
+    select: [ isntDefault ] . send: [ toUpper stripChar: " " ] ;
+  !hasCompany <- items any: [ ^self = "COMPANY"] ;
+  hasCompany ifTrue: [
+    newLine print;
+    "--> WARNING: This Feed Contains the field 'company'.  " printNL ;
+    "    This field is ignored.  Use 'companyId' to update 'company'." printNL ;
+   ] ;
+  
+  !list <- ^self instanceList select: [ isProcessed ] ; 
+
+  !dupTick <- list select: [ ticker isntNA ] . 
+          groupedByString: [ ticker ] . 
+                   select: [ groupList count > 1 ];
+  !dupCusip <- list select: [ cusip isntNA ] . 
+          groupedByString: [ cusip ]  . 
+                   select: [ groupList count > 1 ];
+  !dupSedol <- list select: [ sedol isntNA ] . 
+          groupedByString: [ sedol ]  . 
+                   select: [ groupList count > 1 ];
+  !inUseCusip <- list select: [ currentByCusip isntDefault ] .
+       select: [ currentByCusip != underlyingRecord ] ;
+  !inUseSedol <- list select: [ currentBySedol isntDefault ] .
+       select: [ currentBySedol != underlyingRecord ] ;
+  !cusipChanges <- list
+     select: [ currentByCusip isDefault || currentByCusip = underlyingRecord ].
+     select: [ priorCusip isntDefault && cusip isntDefault ] .
+     select: [ cusip != priorCusip ] ;
+  !sedolChanges <- list
+     select: [ currentBySedol isDefault || currentBySedol = underlyingRecord ].
+     select: [ priorSedol isntDefault && sedol isntDefault ] .
+      select: [ sedol != priorSedol ] ;
+  !companyChanges <- list
+       select: [ priorCompany isntDefault && company isntDefault ] .
+        select: [ company != priorCompany ] ;
+
+  dupTick count > 0 ifTrue: [
+    newLine print;
+    "--> Feed Contains " print;
+    dupTick count asString print ; 
+    " Records with Duplicate Tickers.  Updated for ALL." printNL;
+   ] ;
+  dupCusip count > 0 ifTrue: [
+    newLine print;
+    "---> Feed Contains " print;
+    dupCusip count asString print ;
+    " Duplicate Cusips Found. NOT Updated." printNL;
+    dupCusip
+    do: [ "Cusip: " print ; print ; "  --  " print ; 
+          groupList count print ; " records found. " printNL ;
+        ] ;
+   ];
+ inUseCusip count > 0 ifTrue: [
+    newLine print;
+    "---> Feed Contains " print;
+    inUseCusip count asString print ;
+    " Cusips In Use. NOT Updated." printNL;
+    inUseCusip
+    do: [ "Current Entity: " print ; 
+          currentByCusip
+             do: [ cusip print: 10 ; sedol print: 10 ; name printNL ] ;
+          "Current Feed: " print ; 
+          cusip print: 10 ; " | " print ; underlyingRecord displayInfo ;
+          newLine print ;
+        ] ;
+   ];
+  cusipChanges count > 0 ifTrue: [
+    newLine print ;
+    allowCusipChanges 
+        ifTrue: [ "---> Feed has Changed " ] 
+          else: [ "---> Feed would have Changed " ] . print ;
+    cusipChanges count asString print ;
+    " Cusips." printNL ;
+    cusipChanges
+    do: [ "Was: " print ; priorCusip print ; " Now: " print ; cusip print ;
+          " | " print ; 
+          underlyingRecord
+             do: [ code print: 10 ; cusip print: 10 ; name printNL ] ;
+        ] ;
+  ] ;
+
+  dupSedol count > 0 ifTrue: [
+    newLine print;
+    "---> Feed Contains " print;
+    dupSedol count asString print ;
+    " Duplicate Sedols Found.  NOT Updated." printNL;
+    dupSedol
+    do: [ "Sedol: " print ; print ; "  --  " print ; 
+          groupList count print ; " records found. " printNL ;
+        ] ;
+   ];
+ inUseSedol count > 0 ifTrue: [
+    newLine print;
+    "---> Feed Contains " print;
+    inUseSedol count asString print ;
+    " Sedols In Use. NOT Updated." printNL;
+    inUseSedol
+    do: [ "Current Entity: " print ; 
+          currentBySedol
+             do: [ cusip print: 10 ; sedol print: 10 ; name printNL ] ;
+          "Current Feed: " print ; 
+          sedol print: 10 ; " | " print;  underlyingRecord displayInfo ;
+          newLine print ;
+        ] ;
+   ];
+  sedolChanges count > 0 ifTrue: [
+    newLine print ;
+    allowSedolChanges 
+        ifTrue: [ "---> Feed has Changed " ] 
+          else: [ "---> Feed would have Changed " ] . print ;
+    sedolChanges count asString print ;
+    " Sedols." printNL ;
+    sedolChanges
+    do: [ "Was: " print ; priorSedol print ; " Now: " print ; sedol print ;
+          " | " print ; 
+          underlyingRecord
+             do: [ code print: 10 ; sedol print: 10 ; name printNL ] ;
+        ] ;
+  ] ;
+
+  companyChanges count > 0 ifTrue: [
+    newLine print ;
+    allowCompanyChanges 
+        ifTrue: [ "---> Feed has Changed " ] 
+          else: [ "---> Feed would have Changed " ] . print ;
+    companyChanges count asString print ;
+    " Companies." printNL ;
+    companyChanges
+    do: [ "Was: " print ; 
+          priorCompany do: [code print: 10 ; name print: 15 ] ;
+          " Now: " print ; 
+          company  do: [code print: 10 ; name print: 15 ] ;
+          " | " print ;
+          underlyingRecord 
+          do: [ code print: 10 ; cusip print: 10 ; sedol print: 10 ;
+                name printNL ;
+              ] ;
+        ] ;
+  ] ;
+
+] ;
+
+SecurityMaster defineMethod: [ | runWrapup | 
+  ^super runWrapup ;
+  newLine print; 
+  "...  Rebuilding Company Cusip6 Cross Reference." printNL; 
+  ^global Company rebuildCusipIssuerXRef; 
+  "...  Rebuilding Company -> Security Cross Reference." printNL; 
+  ^global Company rebuildSecurityList; 
+] ;
+
+#--------------------------------------------------
+
+####################
+#  EntityExtender Feeds
+####################
+
+#--------------------
+#  ExchangeRateFeed wrapup - update legacy's based on EUR and fixed conversion
+#--------------------
+ExchangeRateFeed defineMethod: [ | runWrapup |
+  ^self instanceList select: [ isProcessed ] .
+     select: [ underlyingRecord isEuro ] .
+  groupedBy: [ date ] .
+  do: [ asSelf evaluate:
+           [ !euroToUS <- ^global Named Currency EUR usExchange;
+             ^global Currency masterList select: [ inEMU ] .
+                   select: [ ^date >= euroStartDate ] .
+                do: [ :usExchange put: (fixedRateToEuro * ^my euroToUS)];
+           ] ;
+       ] ;
+
+] ;
+
+
+#--------------------
+#  SplitsFeed
+#--------------------
+SplitsFeed
+   defineFixedProperty: 'rate' .
+;
+
+SplitsFeed defineMethod: [ | displayInfo | 
+  entityId print: 10 ; date print: -10 ; rate printNL ;
+] ;
+
+SplitsFeed  defineMethod: [ | rejectReason | 
+   date isDefault 
+      ifTrue: [ "Bad date supplied" ] 
+     ifFalse: [ "Bad entityId supplied - " concat: ^self entityId ]
+] ;
+
+SplitsFeed defineMethod: [ | enableSplitInversion |
+^self define: 'invertSplits' toBe: TRUE ;
+^self
+] ;
+
+SplitsFeed  defineMethod: [ | disableSplitInversion |
+^self define: 'invertSplits' toBe: NA ;
+^self
+] ;
+
+SplitsFeed defineMethod: [ | initializeLocalAttributes |
+  ^super initializeLocalAttributes ;
+  :rate <- rate asNumber asDouble ;
+  ^self
+] ;
+
+SplitsFeed defineMethod: [ | initializeProcessing | 
+  ^self asSelf instanceList do:
+     [
+     :underlyingRecord <- ^global Security locateId: entityId ;
+     ] ;
+]  ;
+
+SplitsFeed defineMethod: [ | runUpdate | 
+  !valid <- ^self asSelf instanceList 
+     select: [ underlyingRecord isntDefault && date isDate
+             ] ;
+  ^self updateSplitsFor: valid ;
+] ;
+
+#----------
+
+SplitsFeed defineMethod: [ | updateSplitsFor: recs |
+
+  recs groupedBy: [ underlyingRecord ] .
+  do: [ groupList 
+        do: [ rate isNumber && [ rate > 0 ]
+              ifTrue: 
+                [ ^self invertSplits isTrue
+                      ifTrue: [ :rate <- 1 / rate ] ;
+                  underlyingRecord addSplitFactorOf: rate onExDate: date 
+                ]
+              ifFalse: 
+                [ underlyingRecord :rawSplitFactor delete: date ;
+                ] ;
+              :isProcessed <- TRUE ;
+             ] ;
+         asSelf rebuildAdjustmentFactor ;
+       ] ;
+] ;
+
+#----------
+
+SplitsFeed defineMethod: [ | displayNewOnes | 
+  !goodOnes <- ^self instanceList select: [ isProcessed ] ;
+  !secs <- goodOnes groupedBy: [ underlyingRecord ] ;
+  "    Total Securities Changed: " print ; secs count printNL ;
+  newLine print ;
+] ;
+
+SplitsFeed defineMethod: [ | displayBadOnes | 
+  !noSec <- ^self asSelf instanceList 
+      select: [ underlyingRecord isNA && isntDefault ] ;
+  noSec count > 0
+  ifTrue: [ newLine print ; 
+            noSec count print ; " missing Securities. " printNL ;
+            noSec groupedByString: [ entityId ] .
+            do: [ print ; groupList count print ; " records. " printNL ] ;
+          ] ;
+  !noDate <- ^self asSelf instanceList select: [ date isNA && isntDefault ] ;
+  noDate count > 0
+  ifTrue: [ newLine print ; 
+            noDate count print ; " missing Dates. " printNL ;
+            noDate do: [ displayInfo ] ;
+          ] ;
+] ;
+
+SplitsFeed defineMethod: [ | purgeRecords | 
+!feed <- ^self asSelf currentStore ;
+!todo <- feed instanceList select: [ date isDate ] .
+do: [ :underlyingRecord <- ^global Named Security at: entityId ;
+    ] . 
+select: [ underlyingRecord isSecurity ] .
+groupedBy: [ underlyingRecord ] .
+do: [ !from <- groupList min: [ date asInteger ] . asInteger asDate ;
+      !to <- groupList max: [ date asInteger ] . asInteger asDate ;
+      !sec <- ^self ; 
+      sec :rawSplitFactor from: from to: to .
+         do: [ ^my sec :rawSplitFactor delete: ^date ] ;
+    ] ;
+
+newLine print ;
+"  ... purging splits for securities/date range in this feed." printNL ;
+newLine print ; 
+feed reconcile ;
+] ;
+
+#--- disable it by default
+SplitsFeed disableSplitInversion;
+
+#----------------------------------------
+
+#--------------------
+#  PriceFeed
+#--------------------
+
+PriceFeed
+   defineFixedProperty: 'close' .
+   defineFixedProperty: 'high' .
+   defineFixedProperty: 'low' .
+   defineFixedProperty: 'volume' .
+   defineFixedProperty: 'open' .
+   defineFixedProperty: 'ask' .
+   defineFixedProperty: 'bid' .
+   defineFixedProperty: 'acctPrice' .
+   defineFixedProperty: 'acctCurr' .
+   defineFixedProperty: 'yield' .
+   defineFixedProperty: 'dailyReturn' .
+   defineFixedProperty: 'unitReturn' .
+   defineFixedProperty: 'adjustmentDate' .
+
+   defineFixedProperty: 'security' .
+;
+
+PriceFeed define: 'recordIsTS' toBe: TRUE ;
+
+PriceFeed defineMethod: [ | displayInfo | 
+  entityId print: 10 ; date print: -10 ; 
+  close print ; high print ; low print ; volume printNL ;
+] ;
+
+PriceFeed  defineMethod: [ | rejectReason | 
+   date isDefault 
+      ifTrue: [ "Bad date supplied" ] 
+     ifFalse: [ "Bad entityId supplied - " concat: ^self entityId ]
+] ;
+
+PriceFeed defineMethod: [ | initializeLocalAttributes |
+  ^super initializeLocalAttributes ;
+  :close <- close asNumber asDouble ;
+  :high <- high asNumber asDouble ;
+  :low <- low asNumber asDouble ;
+  :volume <- volume asNumber asDouble ;
+  :yield <- yield asNumber asDouble ;
+  :acctPrice <- acctPrice asNumber asDouble ;
+  :dailyReturn <- dailyReturn asNumber asDouble ;
+  :unitReturn <- unitReturn asNumber asDouble ;
+  :adjustmentDate <- adjustmentDate asDate ;
+  :open <- open asNumber asDouble ;          #<- Added 
+  :bid <- bid asNumber asDouble ;            #<- Added 
+  :ask <- ask asNumber asDouble ;            #<- Added 
+  ^self
+] ;
+
+
+PriceFeed defineMethod: [ | initializeProcessing | 
+  ^self asSelf instanceList do:
+     [
+     :security <- ^global Security locateId: entityId ;
+     :underlyingCurrency <- currencyId asCurrency ;
+     ] ;
+]  ;
+
+PriceFeed defineMethod: [ | runUpdate | 
+  !valid <- ^self asSelf instanceList 
+    select: [security isntDefault && date isntDefault]; 
+  ^self updatePricesFor: valid; 
+  !expirationCheck <- ^self getGlobalOption: "autoExpire"; 
+  expirationCheck isDateOffset 
+     ifTrue: [^self expireOldDataUsing: expirationCheck]; 
+] ;
+
+#----------
+
+PriceFeed defineMethod: [ | updatePricesFor: recs |
+#--  preallocate dates for all valid records
+  recs groupedBy: [ security ] .
+   do: [ !dateList <- groupList send: [ date ] ;
+         ^global PriceTools 
+              preallocateDatesIn: dateList forSecurity: ^self ;
+       ] ;
+
+#--  flag fields that are present
+!items <- fieldOrderList 
+    select: [ isntDefault ] . send: [ toUpper stripChar: " " ] ;
+!hasClose <- items any: [ ^self = "CLOSE"] ;
+!hasHigh <- items any: [ ^self = "HIGH"] ;
+!hasLow <- items any: [ ^self = "LOW"] ;
+!hasVol <- items any: [ ^self = "VOLUME"] ;
+!hasAcctPrice <- items any: [ ^self = "ACCTPRICE"] ;
+!hasYield <- items any: [ ^self = "YIELD"] ;
+!hasDailyReturn <- items any: [ ^self = "DAILYRETURN"] ;
+!hasUnitReturn <- items any: [ ^self = "UNITRETURN"] ;
+!hasOpen <- items any: [ ^self = "OPEN"] ;      #<- Added
+!hasBid <- items any: [ ^self = "BID"] ;        #<- Added
+!hasAsk <- items any: [ ^self = "ASK"] ;        #<- Added
+
+#--  process fields present for all records
+  recs groupedByCriteria: [ security ] , [ date ] .
+  do: [ !prec <- ^global PriceTools 
+         getOrCreateRecordIn: (keyList at: 1) asOf: (keyList at: 2) ;
+         groupList do: [ :underlyingRecord <- ^my prec ] ;
+      ] ;
+  recs
+   do: [ ^my hasClose
+           ifTrue: [ underlyingRecord setPriceTo:
+                       (close > 0 ifTrue: [ close ] else: [ NA ] )
+                   ] ;
+         ^my hasHigh
+           ifTrue: [ underlyingRecord setHighTo:
+                       (high > 0 ifTrue: [ high ] else: [ NA ] )
+                   ] ;
+         ^my hasLow
+           ifTrue: [ underlyingRecord setLowTo:
+                       (low > 0 ifTrue: [ low ] else: [ NA ] )
+                   ] ;
+         ^my hasVol
+           ifTrue: [ underlyingRecord setVolumeTo:
+                       (volume > 0 ifTrue: [ volume ] else: [ NA ] )
+                   ] ;
+         ^my hasOpen                                               #<- Added
+           ifTrue: [ underlyingRecord setOpenTo:
+                       (open > 0 ifTrue: [ open ] else: [ NA ] )
+                   ] ;
+         ^my hasAsk                                                #<- Added
+           ifTrue: [ underlyingRecord setAskTo:
+                       (ask > 0 ifTrue: [ ask ] else: [ NA ] )
+                   ] ;
+         ^my hasBid                                                #<- Added
+           ifTrue: [ underlyingRecord setBidTo:
+                       (bid > 0 ifTrue: [ bid ] else: [ NA ] )
+                   ] ;
+         ^my hasAcctPrice
+         ifTrue: 
+           [ acctPrice > 0 
+             ifTrue:
+               [ underlyingRecord 
+                    setAccountingPriceTo: acctPrice .
+                    setAccountingCurrencyTo: acctCurr ;
+               ]
+             ifFalse: 
+               [ underlyingRecord setAccountingPriceTo: NA ;
+               ] ;
+           ] ;
+		    
+         ^my hasYield
+           ifTrue: [ underlyingRecord setYieldTo:
+                       (yield >= 0 ifTrue: [ yield ] else: [ NA ] )
+                   ] ;
+         ^my hasDailyReturn
+            ifTrue: [ underlyingRecord setDailyReturnTo: dailyReturn ] ;
+         ^my hasUnitReturn
+            ifTrue: [ underlyingRecord setUnitReturnTo: unitReturn ] ;
+          underlyingCurrency isntDefault
+           ifTrue: [ underlyingRecord setBaseCurrencyTo: underlyingCurrency ] ;
+        !adate <- adjustmentDate ifDefault: [ getAdjustmentDate ] ;
+        adate isntNA
+            ifTrue: [ underlyingRecord setAdjustmentDateTo: adate ] ;
+        :isProcessed <- TRUE ;
+       ] ;
+] ;
+
+#----------
+
+PriceFeed defineMethod: [ | expireOldDataUsing: expirationCheck |
+!feed <- ^self asSelf; 
+!cutoff <- feed getAdjustmentDate else: ^date; 
+!duration <- feed frequency else: expirationCheck; 
+!todo <- feed baseEntity masterList 
+extendBy: [ !record <- getPriceRecord ] .
+select: [ record isntDefault ] .
+select: [ record date + ^my expirationCheck <= ^my cutoff ] ;
+
+todo
+do: [ !lastDate <- record date ;
+      !nextDate <- lastDate + 1 businessDays ;
+      :pricingSeries asOf: nextDate .
+          asOf: nextDate put: ^global PriceRecord ;
+    ] ;
+] ;
+
+#----------
+
+PriceFeed defineMethod: [ | displayNewOnes | 
+  !feed <- ^self ;
+  !goodOnes <- feed instanceList select: [ isProcessed ] ;
+  "    Total Securities: " print ; 
+  goodOnes groupedBy: [ security ] . count printNL ;
+  "    First Date:       " print ; 
+  goodOnes min: [ date asInteger ] . asInteger asDate printNL ;
+  "    Last Date:        " print ; 
+  goodOnes max: [ date asInteger ] . asInteger asDate printNL ;
+  newLine print ;
+] ;
+  
+PriceFeed defineMethod: [ | displayBadOnes | 
+  !feed <- ^self ;
+  !noSec <- ^self asSelf instanceList select: [ security isNA && isntDefault ];
+  noSec count > 0
+  ifTrue: [ newLine print ; newLine print ; 
+            noSec count print ; " missing Securities. " printNL ;
+            noSec groupedByString: [ entityId ] .
+            do: [ print ; groupList count print ; " records. " printNL ] ;
+          ] ;
+  !noDate <- ^self asSelf instanceList select: [ date isNA && isntDefault ] ;
+  noDate count > 0
+  ifTrue: [ newLine print ; newLine print ; 
+            noDate count print ; " missing Dates. " printNL ;
+            noDate do: [ displayInfo ] ;
+          ] ;
+  !noClose <- ^self asSelf masterList select: [ close <= 0 ] ;
+  noClose count > 0
+  ifTrue: [ newLine print ; newLine print ; 
+            noClose count print ; " Missing Closes. " printNL ;
+            noClose do: [ displayInfo ] ;
+          ] ;
+] ;
+
+PriceFeed defineMethod: [ | purgeEntityDataRecordsFor: todo | 
+!feed <- ^self asSelf currentStore ;
+
+todo 
+do: [ entities
+      do: [ !from <- ^my singleDate else: ^my startDate ;
+            !to <- ^my singleDate else: ^my endDate ;
+            !recs <- prices from: from to: to . 
+               select: [ ^date isntDefault ] ;
+            recs
+            do: [ security isntDefault && recordDate isntDefault
+                  ifTrue: 
+                    [ !ts <- security :pricingSeries ;
+                      ts asOf: recordDate . delete: recordDate ;
+                      flagForDeletion ;
+                    ] ;
+                ] ;
+            :pricingSeries select: [ count = 0 ] .
+                do: [ ^my :pricingSeries delete: ^date ];
+          ] ;
+     ] ;
+
+newLine print ;
+"---  Begin Purges for " concat: feed whatAmI . concat: "  ---" .
+    centerNL: 80 . print ;
+"(Removing Points in Pricing TimeSeries)" centerNL: 80 . printNL ;
+feed displayExceptionSummary ;
+
+^global PriceTools removeDeletedRecords ;
+
+] ;
+
+#--------------------
+#  IndexAccountBuilder
+#--------------------
+
+IndexAccountBuilder
+   defineFixedProperty: 'universeId' .
+   defineFixedProperty: 'style' .
+
+   defineFixedProperty: 'universe' .
+;
+
+IndexAccountBuilder defineMethod: [ | displayInfo | 
+  entityId print: 10 ; date print: -10 ; universeId print: 15 ; style printNL;
+] ;
+
+IndexAccountBuilder defineMethod: [ | initializeProcessing | 
+  ^self asSelf instanceList do:
+     [
+     :underlyingRecord <- ^global Named IndexAccount at: entityId ;
+     :universe <- ^global Named Universe at: universeId ;
+     ] ;
+]  ;
+
+IndexAccountBuilder defineMethod: [ | runUpdate | 
+  !valid <- ^self asSelf instanceList 
+     select: [ underlyingRecord isntDefault && universe isntDefault ] ;
+  ^self updateFor: valid ;
+] ;
+
+#----------
+
+IndexAccountBuilder defineMethod: [ | updateFor: recs |
+
+recs
+do: [ !iacct <- underlyingRecord ;
+      date else: ^date . evaluate:
+        [ iacct setUniverseTo: universe  ;
+          style else: "" . toUpper contains: "EVEN" .
+         ifTrue: [ iacct createEvenDollarHoldingsAsOf: ^date ]
+        ifFalse: [ iacct createMCapWeightedHoldingsAsOf: ^date ] ;
+        ] ;
+      :isProcessed <- TRUE ;
+    ] ;
+] ;
+
+#----------
+
+IndexAccountBuilder defineMethod: [ | displayBadOnes | 
+  !noAcct <- ^self asSelf instanceList 
+      select: [ underlyingRecord isNA && isntDefault ] ;
+  noAcct count > 0
+  ifTrue: [ newLine print ; 
+            noAcct count print ; " missing IndexAccounts. " printNL ;
+            noAcct sortUp: [ entityId ] . do: [ displayInfo ] ;
+          ] ;
+  !noUni <- ^self asSelf instanceList 
+       select: [ universe isNA && isntDefault ] ;
+  noUni count > 0
+  ifTrue: [ newLine print ; 
+            noUni count print ; " missing Universes. " printNL ;
+            noUni sortUp: [ entityId ] . do: [ displayInfo ] ;
+          ] ;
+] ;
+
+IndexAccountBuilder defineMethod: [ | displayOtherExceptions | 
+  ^self instanceList select: [ isProcessed ] . 
+     sortUpBy: [ underlyingRecord code ] then: [ date ] .
+  do: [ "IndexAccount " print ; underlyingRecord code print ;
+        " updated on " print; 
+        date else: ^date . evaluate: [ ^date print ;
+           " from " print ; universe code print ; 
+           " using " print ; underlyingRecord style printNL ;
+           underlyingRecord holdings count print ;
+           " holdings created with market value of " print ;
+           underlyingRecord totalMarketValue printWithCommasNL: 15.0 ;
+        ] ;
+      ] ;
+] ;
+
+#--------------------------------------------------
+
+#--------------------
+#  EstimateRecordFeed: bootstrap protocol
+#----------------------
+
+ClassSetup updateFromString: 
+"classId | parentId | description
+EstimateRecordFeed | EntityExtenderFeed | EstimateRecord feeds are a special case of EntityExtender that initialize and update EstimateBridge-EstimateRecord data.
+" ;
+
+EstimateRecordFeed 
+   defineFixedProperty: 'periodEndDate' .
+   defineFixedProperty: 'estimate' .
+   defineFixedProperty: 'estimator' .
+   defineFixedProperty: 'actualFlag' .
+   defineFixedProperty: 'adjustmentDate' .
+
+   defineFixedProperty: 'entity' .
+   defineFixedProperty: 'entityBridge' .
+   defineFixedProperty: 'estimateBridge' .
+   defineFixedProperty: 'estimateDBridge' .
+
+   defineFixedProperty: 'newEntityBridgeCreated' .
+   defineFixedProperty: 'newEstimateBridgeCreated' .
+   defineFixedProperty: 'newEstimateBridgeDetailCreated' .
+   defineFixedProperty: 'badEstimatorId' .
+;
+
+EstimateRecordFeed defineMethod: [ | displayInfo | 
+  entityId print: 10 ; estimate print ; " " print ; actualFlag print ;
+  " for " print ; periodEndDate print ; " on " print ; date print ;
+  " in " print ; currencyId print ;
+  " by " print ; estimator printNL ;
+] ;
+
+EstimateRecordFeed defineMethod: [ | rejectReason | 
+    ^self entity isDefault
+       ifTrue: [ "Bad entityId supplied - " concat:  entityId ] .
+       elseIf: [ ^self frequency isntNA && periodEndDate isNA ]
+         then: [ "Bad periodEndDate supplied - " concat: periodEndDate ] .
+       elseIf: [ date isNA ]
+         then: [ "Bad date supplied - " concat: date ] .
+       elseIf: [ badEstimatorId isntDefault ]
+         then: [ "Bad estimator supplied - " concat: badEstimatorId ] 
+] ;
+
+EstimateRecordFeed defineMethod: [ | initializeLocalAttributes |
+  ^super initializeLocalAttributes ;
+  :periodEndDate <- periodEndDate asDate ;
+  :estimate <- estimate asNumber asDouble ;
+  :actualFlag <- actualFlag else: "" . as: ^global Boolean .
+      else: [ ^self actualFlagEnabled ] ;
+  :adjustmentDate <- adjustmentDate asDate ;
+  :underlyingCurrency <- currencyId asCurrency ;
+  :estimator <- ^self getEstimator ;
+  ^self
+] ;
+
+EstimateRecordFeed defineMethod: [ | bridgeClass | ^self baseEntity ] ;
+
+#----------
+#  identify broker/analyst dictionary to use for lookup
+#----------
+EstimateRecordFeed defineMethod: [ | setEstimatorXRefTo: xref | 
+  ^self define: 'estimatorXRef' toBe: xref ;
+  ^self
+] ;
+
+EstimateRecordFeed setEstimatorXRefTo: NA ;
+
+#----------
+
+#--------------------
+#  actual flag as a switch
+#--------------------
+
+EstimateRecordFeed defineMethod: [ | enableActualFlag | 
+  ^self define: 'actualFlagEnabled' toBe: TRUE ;
+  ^self
+] ;
+
+EstimateRecordFeed defineMethod: [ | disableActualFlag | 
+  ^self define: 'actualFlagEnabled' toBe: NA ;
+  ^self
+] ;
+
+EstimateRecordFeed defineMethod: [ | resetRunTimeAttributes | 
+   ^super resetRunTimeAttributes 
+   disableActualFlag ;
+] ;
+
+EstimateRecordFeed disableActualFlag ;
+
+#----------
+
+EstimateRecordFeed defineMethod: [ | getEstimator |
+  ^self bridgeClass isDetailEstimateBridge
+  ifTrue:
+    [ !who <- ^self estimatorXRef isDictionary
+         ifTrue: [ ^self estimatorXRef at: estimator ] 
+        ifFalse: [ estimator as: ^self baseClass defaultInstance estimator ];
+      who isDefault
+           ifTrue: [ :badEstimatorId <- estimator; ] ;
+      who
+    ]
+  ifFalse: [ estimator else: "" ]  #<-- force default instance in set method
+] ;
+
+EstimateRecordFeed defineMethod: [ | initializeProcessing | 
+  !estimateBridgeClass <- ^self bridgeClass isDetailEstimateBridge
+      ifTrue: [ ^self bridgeClass defaultSummaryBridge] 
+     ifFalse: [ ^self bridgeClass ] ;
+  !entityClass <- estimateBridgeClass baseEntity ;
+  !entityBridgeClass <- estimateBridgeClass baseClass ;
+  !dataClass <- ^self baseClass ;
+  !isStatic <- ^self frequency isNA ;
+  !duration <- ^self frequency ;
+
+  !recs <- ^self asSelf instanceList 
+    do: [ :entity <- ^my entityClass locateId: entityId ] .
+    select: [ entity isntDefault && date isDate ] .
+    select: [ periodEndDate isDate || ^my isStatic ] .
+    select: [ badEstimatorId isNA ] ;
+
+#-- create entity-entityBridge class if needed; resolve :entityBridge
+  ^self updateEntityBridgesFor: recs usingBridgeClass: entityBridgeClass ;
+
+#-- create the estimate bridge if needed; resolve estimateBridge (summary)
+  ^self updateSummaryBridgesFor: recs usingBridgeClass: estimateBridgeClass 
+        withDuration: duration ;
+
+#--  create the detail bridges if needed
+^self bridgeClass isDetailEstimateBridge
+   ifTrue: [ ^self updateDetailBridgesFor: recs ] ;
+
+#-- get or create the data records and set to underlyingRecord
+  !updateBlock <- dataClass updateBlock else: [ [ :observation ] ] ;
+   recs select: [ estimateBridge isntDefault ] .
+      groupedBy: [ estimateBridge ] .
+     do: [ !dataClass <- ^my dataClass ;
+          !updateBlock <- ^my updateBlock ;
+          groupList groupedBy: [ date ] .
+          do: [ !data <- ^my send: ^my updateBlock . on: asSelf ;
+                data isDefault ||
+                   [ data defaultInstance != ^my dataClass defaultInstance ] 
+                      ifTrue: 
+                         [ :data <- ^my dataClass currentStore
+                              createInstance: ^my asSelf, asSelf ;
+                           groupList at: 1 . :newOneCreated <- TRUE ;
+                         ] ;
+                groupList do: [ :underlyingRecord <- ^my data ] ;
+              ] ;
+        ] ;
+]  ;
+
+EstimateRecordFeed defineMethod: 
+[ | updateEntityBridgesFor: recs usingBridgeClass: entityBridgeClass |
+
+#--  if relationship is entity-bridge-estBridge, resolve the outer bridge
+  !updateBlock <- entityBridgeClass isBridge
+       ifTrue: [ entityBridgeClass updateBlock ] ;
+  updateBlock isBlock
+  ifTrue:
+    [ recs groupedBy: [ entity ] . 
+      do: [ !updateBlock <- ^my updateBlock ;
+            !bridge <- asSelf send: updateBlock . value ;
+            bridge isDefault
+              ifTrue: [ :bridge <- ^my entityBridgeClass
+                           createInstance: asSelf ;
+                        groupList at: 1 . :newEntityBridgeCreated <- TRUE ;
+                      ] ;
+            groupList do: [ :entityBridge <- ^my bridge ];
+          ] ;
+    ] 
+  ifFalse:
+    [ recs do: [ :entityBridge <- entity ] ;
+    ] ;
+] ;
+
+EstimateRecordFeed defineMethod: 
+[ | updateSummaryBridgesFor: recs usingBridgeClass: estimateBridgeClass 
+    withDuration: duration |
+
+!updateBlock <- estimateBridgeClass updateBlock ;
+!isStatic <- ^self frequency isNA ;
+updateBlock isBlock
+ifTrue:
+  [ recs groupedBy: [ entityBridge ] . select: [ isntDefault ] .
+    do: [ !updateBlock <- ^my updateBlock ;
+          !isStatic <- ^my isStatic ;
+          !duration <- ^my duration ;
+          !estimateBridgeClass <- ^my estimateBridgeClass ;
+          groupList groupedBy: [ periodEndDate ] .
+          do: [ !ts <- ^my asSelf send: ^my updateBlock ;
+                !bridge <- ^my isStatic
+                   ifTrue: [ ts value ] ifFalse: [ ts on: asSelf ] ;
+                !period <- ^my isStatic
+                   ifTrue: [ NA ] ifFalse: [ asSelf ] ;
+                bridge isDefault
+                ifTrue: 
+                  [ :bridge <- ^my estimateBridgeClass
+                        createInstance: ^my asSelf , period ;
+                    groupList at: 1 . :newEstimateBridgeCreated <- TRUE ;
+                    ^my isStatic
+                    ifFalse:
+                      [ !next <- ts on: asSelf + ^my duration ;
+                        next isNA
+                        ifTrue: 
+                          [ ts asOf: asSelf + ^my duration
+                               put: ^my estimateBridgeClass defaultInstance ;
+                          ] ;
+                      ] ;
+                  ] ;
+                groupList do: [ :estimateBridge <- ^my bridge ];
+              ] ;
+        ] ;
+    ] ;
+] ;
+
+EstimateRecordFeed defineMethod: [ | updateDetailBridgesFor: recs |
+  !detailBridgeClass <- ^self bridgeClass ;
+  !todo <- recs
+     select: [ estimateBridge isntDefault ] ;
+  todo groupedBy: [ estimateBridge ] .    #- summary level
+  do: [ !summary <- asSelf ;
+        !detailBridgeClass <- ^my detailBridgeClass ;
+        groupList groupedBy: [ estimator ] .
+        do: [ !summary <- ^my summary ;
+              !dbridge <- summary detailXRef at: asSelf ;
+              dbridge isDefault
+              ifTrue: 
+                [ :dbridge <- ^my detailBridgeClass
+                        createInstance: summary, asSelf ;   
+                   groupList at: 1 . :newEstimateBridgeDetailCreated <- TRUE ;
+                ] ;
+                groupList do: [ :estimateBridge <- ^my dbridge ];
+            ] ;
+     ] ;
+] ;
+
+
+EstimateRecordFeed defineMethod: [ | runUpdate | 
+  !isStatic <- ^self frequency isNA ;
+  !valid <- ^self asSelf instanceList 
+     select: [ underlyingRecord isntDefault &&
+                 date isntDefault && 
+                    [ periodEndDate isntDefault || ^my isStatic ] 
+             ] ;
+  ^self updateEstimatesFor: valid ;
+] ;
+
+#----------
+
+EstimateRecordFeed defineMethod: [ | updateEstimatesFor: recs |
+!items <- ^self fieldOrderList 
+    select: [ isntDefault ] . send: [ toUpper stripChar: " " ] ;
+!hasEstimate <- items any: [ ^self = "ESTIMATE"] ;
+!hasEstimator <- items any: [ ^self = "ESTIMATOR" ] ;
+!hasActual <- ^self actualFlagEnabled 
+    else: [ items any: [ ^self = "ACTUALFLAG" ] ] ;
+
+recs
+do: [ ^my hasEstimate ifTrue: [ underlyingRecord setEstimateTo: estimate ] ;
+      ^my hasEstimator ifTrue: [ underlyingRecord setEstimatorTo: estimator ];
+      underlyingCurrency isntDefault
+         ifTrue: [ underlyingRecord setBaseCurrencyTo: underlyingCurrency ] ;
+      !adate <- adjustmentDate ifDefault: [ getAdjustmentDate ] ;
+      adate isntNA
+         ifTrue: [ underlyingRecord setAdjustmentDateTo: adate ] ;
+      :isProcessed <- TRUE ;
+    ] ;
+
+#--  run the generic update process at EntityExtender to pick up pass-thrus
+recs do: [ :evaluationDate <- getEvaluationDate ] ;
+^self updateDataFor: recs ;
+
+#-- process the actuals
+hasActual
+  ifTrue: [ recs do: [ underlyingRecord setActualFlagTo: actualFlag ] ] ;
+
+] ;
+
+#----------
+
+EstimateRecordFeed defineMethod: [ | displayNewOnes | 
+  !feed <- ^self ;
+  !newOnes <- feed instanceList select: [ newEntityBridgeCreated ] ;
+  newOnes count > 0
+  ifTrue: [ newLine print ; 
+            newOnes count print ; " new " print ;
+            newOnes at: 1 . entityBridge whatAmI print ; 
+            " instances created. " printNL ;
+            newOnes do: [ entityBridge displayInfo ] ;
+          ] ;
+  !newOnes <- feed instanceList select: [ newEstimateBridgeCreated ] ;
+  newOnes count > 0
+  ifTrue: [ newLine print ; 
+            newOnes count print ; " new " print ;
+            ^self bridgeClass isDetailEstimateBridge
+            ifTrue: 
+              [ ^self bridgeClass defaultSummaryBridge whatAmI print ;
+                " instances created. " printNL ;
+                newOnes do: [ estimateBridge underlyingObject displayInfo ] ;
+              ]
+            ifFalse:
+              [ ^self bridgeClass whatAmI print ;
+                " instances created. " printNL ;
+                newOnes do: [ estimateBridge displayInfo ] ;
+              ]
+          ] ;
+  !newOnes <- feed instanceList select: [ newEstimateBridgeDetailCreated ] ;
+  newOnes count > 0
+  ifTrue: [ newLine print ; 
+            newOnes count print ; " new " print ;
+            newOnes at: 1 . estimateBridge whatAmI print ; 
+            " instances created. " printNL ;
+            newOnes do: [ estimateBridge displayInfo ] ;
+          ] ;
+  !newOnes <- feed instanceList 
+     select: [ newOneCreated && actualFlag isTrue not] ;    # <---
+  newOnes count > 0
+  ifTrue: [ newLine print ; 
+            newOnes count print ; " new " print ;
+            feed baseClass whatAmI print ; " instances created. " printNL ;
+            newOnes send: [ underlyingRecord ] .
+              do: [ entity print; " " print ; recordDate else: "" . printNL ] ;
+          ] ;
+] ;
+  
+EstimateRecordFeed defineMethod: [ | displayBadOnes | 
+  !feed <- ^self ;
+  !badOnes <- ^self asSelf instanceList 
+       select: [ isntProcessed && entityId isntDefault ] ;
+  badOnes count > 0
+  ifTrue: 
+    [ newLine print ; newLine print ;
+      badOnes select: [ entity isDefault ] .
+          groupedByString: [ entityId ] .
+      do: [ "Bad Entity: " print ; printNL  ] ;
+      !isStatic <- feed frequency isNA ;
+      badOnes select: [ periodEndDate isNA && ^my isStatic not ] .
+      do: [ " Bad Period End Date: " print ; 
+            entityId print ; " | " print ; 
+            date print ; " | " print ; periodEndDate printNL ;
+          ] ;
+      badOnes select: [ date isNA ] .
+      do: [ " Bad Date: " print ;
+            entityId print ; " | " print ; 
+            date print ; " | " print ; periodEndDate printNL ;
+          ] ;
+    ];
+ !badOnes <- ^self asSelf instanceList 
+      select: [ isntProcessed ] .
+      select: [ badEstimatorId  isntDefault ] ;
+  badOnes count > 0
+  ifTrue: 
+    [ newLine print ; newLine print ;
+      badOnes groupedByString: [ badEstimatorId ] .
+      do: [ "Bad Estimator: " print ; printNL  ] ;
+    ]
+] ;
+
+#--------------------
+#  EstimateRecordFeed: purges
+#--------------------
+
+EstimateRecordFeed defineMethod: [ | getRecordsToPurge |
+
+!feed <- ^self ;
+!ebridgeClass <- feed baseEntity ;
+!entityOrBridgeClass <- ebridgeClass baseClass ;
+!entityClass <- entityOrBridgeClass isEntity
+   ifTrue: [ entityOrBridgeClass  ] .
+   elseIf: [ entityOrBridgeClass baseClass isEntity ]
+     then: [ entityOrBridgeClass baseClass ] ;
+
+!todo <- ^global List ;
+entityClass isEntity && [ feed bridgeClass isDetailEstimateBridge not ] 
+ifTrue:
+  [ feed instanceList
+        do: [ :underlyingRecord <- ^my entityClass locateId: entityId ] ;
+    :todo <- feed instanceList
+    extendBy: 
+     [ !entities <- entityId = "*" 
+         ifTrue: [ ^my ebridgeClass masterList ] .
+         elseIf: [ underlyingRecord isntNA ] 
+         then:
+           [ ^my entityOrBridgeClass isEntity
+               ifTrue: [ underlyingRecord send: ^my ebridgeClass updateBlock ]
+              ifFalse: [ underlyingRecord
+                           send: ^my entityOrBridgeClass updateBlock . value
+                           send: ^my ebridgeClass updateBlock
+                       ] . select: [ isntDefault ] 
+           ] ;
+     ] ;
+   ] ;
+todo
+] ;
+
+#--------------------------------------------------
+
+####################
+#  Transaction Feeds
+####################
+
+#--------------------
+#  HoldingsFeed
+#
+#  for IndexAccounts:
+#      even dollar - set all mvals to same amount
+#      weights     - set all mvals to percentage (sum = 100 per acct/date)
+#      mcap        - do not provide shares or mval
+#--------------------
+
+HoldingsFeed
+   defineFixedProperty: 'secId' .
+   defineFixedProperty: 'acctId' .
+   defineFixedProperty: 'shares' .
+   defineFixedProperty: 'price' .
+   defineFixedProperty: 'mval' .
+   defineFixedProperty: 'unitCost' .
+   defineFixedProperty: 'totalCost' .
+   defineFixedProperty: 'adjustDate' .
+
+   defineFixedProperty: 'security' .
+   defineFixedProperty: 'account' .
+;
+
+HoldingsFeed defineMethod: [ | getUploadProperties | 
+  ^super getUploadProperties
+    select: [ code != "entityId" && code != "currencyId" ] .
+    do: [ code = "acctId" 
+           ifTrue: [ :triggerKey <- 1 ] ;
+        ]
+] ;
+
+
+HoldingsFeed defineMethod: [ | totalMarketValue | 
+  security isntDefault && account isntDefault
+  ifTrue:
+    [ 
+#---  next line is the one that is replaced
+#---      mval > 0 ifTrue: [ mval ] .  
+      mval isntNA ifTrue: [ mval ] .  
+        elseIf: [ security code = "CashUS" ] then: [ shares ] .
+        elseIf: [ account isIndexAccount && shares = 0] 
+          then: [ account baseCurrency 
+                   evaluate: [ security :marketCap asOf: date ]
+                ] .
+        else:
+          [ !prc <- price > 0 
+               ifTrue: [ price ] 
+              ifFalse: [ account baseCurrency 
+                         evaluate: 
+                            [ security :getPriceRecord asOf: date . _price 
+                            ]
+                       ] ;
+            shares * prc * (security type unitCalc else: 1) 
+          ] 
+    ] 
+] ;
+
+HoldingsFeed defineMethod: [ | displayInfo | 
+  secId print ; " " print ; acctId print ; date print ; adjustDate print ;
+  shares print ; price print ; mval print ;
+  unitCost print ; totalCost print ; " " print ; currencyId printNL ;
+] ;
+
+HoldingsFeed  defineMethod: [ | rejectReason | 
+   account isDefault
+   ifTrue: [ "Bad acctId supplied - " concat: acctId ] .
+   elseIf: [ security isDefault ] 
+     then: [ "Bad secId supplied - " concat: secId ] .
+   elseIf: [ date isDefault ] then: [ "Bad date supplied" ] 
+
+] ;
+
+HoldingsFeed defineMethod: [ | initializeLocalAttributes |
+  ^super initializeLocalAttributes ;
+  :shares <- shares asNumber asDouble else: 0.0 ;
+  :price <- price asNumber asDouble else: 0.0 ;
+  :mval <- mval asNumber asDouble ;
+  :unitCost <- unitCost asNumber asDouble else: 0.0 ;
+  :totalCost <- totalCost asNumber asDouble else: 0.0 ;
+  :adjustDate <- adjustDate asDate ;
+  ^self
+] ;
+
+HoldingsFeed defineMethod: [ | initializeProcessing |
+  ^self asSelf instanceList 
+  do: [ :account <- ^global Portfolio locateId: acctId .
+           else: [^global IndexAccount locateId: acctId ] ;
+        :security <- ^global Security locateId: secId ;
+        totalCost isNA ifTrue: [:totalCost <- shares * unitCost] ; 
+     ]; 
+] ;
+
+HoldingsFeed defineMethod: [ | runUpdate | 
+  !valid <- ^self asSelf instanceList 
+    select: [ security isntDefault && account isntDefault && date isntDefault 
+            ] ;
+  ^self updateHoldingsFor: valid ;
+] ;
+
+#----------
+
+HoldingsFeed defineMethod: [ | updateHoldingsFor: recs |
+
+!items <- fieldOrderList 
+    select: [ isntDefault ] . send: [ toUpper stripChar: " " ] ;
+!hasPrice <- items any: [ ^self = "PRICE"] ;
+recs groupedBy: [ account ] .
+do: [ 
+    !account <- ^self asSelf ;
+    !hasPrice <- ^my hasPrice ;
+    groupList groupedBy: [ date ] .
+    do: [ !date <- ^self ;
+          !hasPrice <- ^my hasPrice ;
+          !secs <- groupList groupedBy: [ security ] .
+          extendBy: 
+            [ !security <- ^self ; 
+              !shares <- groupList total: [shares ] ;
+              !totalMarketValue <- groupList total: [ totalMarketValue ] ;
+              !totalCost <- groupList total: [ totalCost ] ;
+              !accountingCurrency <- groupList at: 1 . currencyId asCurrency ;
+              !adjustmentDate <- groupList at: 1 . adjustDate ;
+            ] ;
+          hasPrice
+          ifTrue:
+            [ :secs <- secs extendBy: 
+                 [ !accountingPrice <- groupList mode: [ price ] ;
+                 ] 
+            ] ;
+          secs select: [ shares isNA || shares = 0 ] .
+          do: [ :shares <- ^my hasPrice
+                   ifTrue: [ totalMarketValue / accountingPrice ] 
+                  ifFalse: 
+                    [ totalMarketValue / 
+                      (security :getPriceRecord asOf: ^my date . _price)
+                    ]
+              ] ;
+          ^self evaluate: [ ^my account createHoldingsFrom: secs ] ;
+        ] ;
+        groupList do: [ :isProcessed <- TRUE ] ;
+    ] ;
+] ;
+
+#----------
+
+HoldingsFeed defineMethod: [ | displayNewOnes | 
+  !goodOnes <- ^self instanceList select: [ isProcessed ] ;
+  "    Total Securities: " print ; 
+  goodOnes groupedBy: [ security ] . count printNL ;
+  "    Total Accounts: " print ; 
+  goodOnes groupedBy: [ account ] . count printNL ;
+  "    First Date:       " print ; 
+  goodOnes min: [ date asInteger ] . asInteger asDate printNL ;
+  "    Last Date:        " print ; 
+  goodOnes max: [ date asInteger ] . asInteger asDate printNL ;
+  newLine print ;
+] ;
+
+HoldingsFeed defineMethod: [ | displayBadOnes | 
+  !noAcct <- ^self asSelf masterList select: [ account isNA ] .
+       groupedByString: [ acctId ] . sortUp: [ asSelf ] ;
+  noAcct count > 0
+  ifTrue: [ newLine print ; newLine print ; 
+            noAcct count print ; " missing Accounts. " printNL ;
+            noAcct
+            do: [ "     Account " print ; print ; " -- " print ; 
+                  groupList count asString print ; " holdings." printNL ;
+                ] ;
+          ] ;
+  !noSec <- ^self asSelf masterList select: [ security isNA ] .
+      groupedByString: [ secId else: "" ] ;
+  noSec count > 0
+  ifTrue: [ newLine print ; newLine print ; 
+            noSec count print ; " missing Securities. " printNL ;
+            noSec sortUp: [ asSelf ] . sortDown: [ count ] .
+            do: [ "     Security " print ; print ; 
+                  " -- held in " print ; groupList count asString print ; 
+                  " accounts." printNL ;
+                ] ;
+          ] ;
+  !noDate <- ^self asSelf masterList 
+     select: [ date isDefault ] .
+     select: [ account isntNA && security isntNA ] ;
+  noDate count > 0
+  ifTrue: [ newLine print ; newLine print ; 
+            noDate count print ; " missing Dates. " printNL ;
+            noDate groupedBy: [ account ] . 
+              sortUp: [ code ] .
+            do: [ "     Account " print ; print ; " -- " print ; 
+                  groupList count asString print ; " holdings." printNL ;
+                ] ;
+          ] ;
+   newLine print ;
+] ;
+
+HoldingsFeed defineMethod: [ | runWrapup | 
+newLine print ;
+
+!ports <- ^self instanceList select: [ isProcessed ] .
+     select: [ account isPortfolio ] ;
+
+#--  rebuild aggregates and security xref by date
+ports groupedBy: [ date ] .
+do: [ ^self evaluate:
+         [ !xref <- ^global IndexedList new ;
+           groupList do: [ ^my xref at: account put: account ] ;
+           !aggs <- ^global AggAccount masterList
+              select: [ !xref <- ^my xref ;
+                        memberList any: [ ^my xref at: asSelf . isntNA ] 
+                      ] ;
+           aggs 
+           do: [ "...  Rebuilding holdings in AggAccount " print ;
+                 code print ; " on " print ; ^date printNL ;
+                 buildHoldings ;
+               ] ;
+           "...  Rebuilding Security holdings cross reference on " print;
+           ^date printNL ;
+           ^global Security rebuildHoldings ;
+         ] ; 
+      ] ;
+
+
+#-- update security price record with accountingPrice
+!secs <- ports select: [ price > 0 ] . groupedBy: [ security ] .
+  extendBy:
+    [ !dates <- groupList groupedBy: [ date ] . 
+           send: [ groupList at: 1 ] ;
+    ] ;    #- list of securities extended by 1 holdfeed record per date
+secs count > 0
+ifTrue:
+  [ !priceFeed <-
+       [ "id|date|acctPrice|acctCurr" printNL ;
+         secs collectListElementsFrom: [ dates ] .
+         do: [ security code print ; "|" print ; 
+               date print; "|" print ;
+               price print; "|" print ;
+               currencyId isntDefault
+                 ifTrue: [ currencyId ] 
+                ifFalse: [ account baseCurrency code ] . printNL ;
+             ] ;
+       ] divertOutput ;
+
+#---  reset the cfg flie attributes before running the PriceFeed
+    ^self resetRunTimeAttributes ;
+    ^global PriceFeed updateFromString: priceFeed ;
+  ] ;
+
+] ;
+
+HoldingsFeed defineMethod: [ | purgeRecords | 
+!feed <- ^self asSelf currentStore ;
+!todo <- feed instanceList
+do: [ :account <- ^global Account locateId: acctId ;
+      :date <- date asDate ;
+    ] .
+select: [ account isPortfolio || account isIndexAccount ] .
+select: [ date isDate && date isntDefault ] ;
+
+newLine print ;
+"---  Holdings Deletions for " concat: feed whatAmI . concat: " ---" . 
+    centerNL: 80 . printNL ;
+todo 
+do: [ date evaluate: [ account deleteCurrentHoldings ] ;
+    ] ;
+
+todo select: [ account isPortfolio ] . groupedBy: [ date ] .
+do: [ ^self evaluate:
+         [ !aggs <- groupList 
+              collectListElementsFrom: [ account aggregateList ] . unique ;
+           aggs 
+           do: [ "...  Rebuilding holdings in AggAccount " print ;
+                 code print ; " on " print ; ^date printNL ;
+                 buildHoldings ;
+               ] ;
+           "...  Rebuilding Security holdings cross reference on " print;
+           ^date printNL ;
+           ^global Security rebuildHoldings ;
+         ] ; 
+      ] ;
+
+todo do: [ :isProcessed <- TRUE ] ;
+
+feed displayExceptionSummary ; 
+!notdone <- feed masterList select: [ isntProcessed ] ;
+notdone count > 0 
+ifTrue:
+  [ newLine print ; 
+    notdone count print ; " " print ; 
+    " bad account or date - not processed. " printNL ;
+    notdone sortUp: [ acctId ] .
+    do: [ acctId print: 20 ; date print: 15 ;
+          account isAccount
+             ifTrue: [ "  -->  cannot delete holdings from " print ; 
+                       account whatAmI print ; " instances." printNL ;
+                     ]
+            ifFalse: [ newLine print ] ;
+        ] ;
+  ] ;
+
+newLine print ; 
+"--->  The following deletes were processed: " printNL ;
+todo do: [ account whatAmI print: 20 ; account code print: 10 ; 
+           account name print: 25 ; " -- " print ; date printNL ;
+         ] ;
+] ;
+
+#----------------------------------------------------------------------
+
+####################
+#  MembershipFeeds
+####################
+
+#--------------------
+#  CompanyToCountry
+#--------------------
+
+CompanyToCountry defineMethod: [ | runWrapup | 
+
+^self instanceList select: [ member isCompany ] .
+    select: [ member baseCurrency isDefault ] .
+    select: [ member country isntDefault ] .
+do: [ member :baseCurrency <- member country baseCurrency ] ;
+
+] ;
+
+#--------------------
+#  PortfolioAggregates
+#--------------------
+
+PortfolioAggregates defineMethod: [ | runWrapup | 
+
+newLine print ;
+^self instanceList select: [ membershipChange ] .
+   groupedBy: [ date else: earliestPossibleDate ] .
+do: [ ^self evaluate:
+      [ groupList groupedBy: [ group ] . 
+          sortUp: [ sortCode ] .
+        do: [ !start <- ^date ;
+              !end <- :memberList nextDate else: ^today + 1 days ;
+              !datesToRedo <- memberList append: asSelf .
+                 collectListElementsFrom:
+                 [ :holdingsSeries from: ^my start to: ^my end - 1 days .
+                       send: [ ^date ] 
+                 ] . unique nonDefaults ;
+              datesToRedo
+              do: [ "...  Building holdings in AggAccount " print ;
+                     ^my code print ; " on " print ; ^self printNL ;
+                     ^self evaluate: [ ^my buildHoldings ] ;
+                  ] ;
+            ] ;
+      ] 
+    ] ;
+] ;
+
+#--------------------
+#  CompositeAccountMembers
+#--------------------
+
+CompositeAccountMembers defineFixedProperty: 'weight' ;
+
+CompositeAccountMembers defineMethod: [ | getUploadProperties | 
+  !feed <- ^self ;
+  ^super getUploadProperties append:
+      (feed getMessage: "weight" . extendBy: [ !triggerKey ] )  
+] ;
+
+
+CompositeAccountMembers defineMethod: [ | initializeProcessing | 
+  ^super initializeProcessing ;
+  ^self asSelf instanceList
+  do: [ :weight <- weight asNumber asDouble ;
+      ] ;
+]  ;
+
+CompositeAccountMembers defineMethod: [ | updateGroupsUsing: list | 
+  !feed <- ^self asSelf ;
+  list select: [ updateDate isntDefault ] .
+    groupedByCriteria: [ updateDate ], [ group ] .
+  do: [ !date <- keyList at: 1 ;
+        !composite <- keyList at: 2 ;
+        date evaluate:
+          [ composite initializeComponentList ;
+            groupList
+              do: [ ^my composite addComponent: member withWeight: weight ] ;
+            composite buildHoldings ;
+          ] ;
+      ] ;
+] ;
+
+CompositeAccountMembers defineMethod: [ | displayOtherExceptions |
+  ^super displayOtherExceptions ;
+  newLine print ;
+  ^self instanceList select: [ isProcessed ] . 
+      select: [ evaluationDate isntDefault ] .
+     groupedByCriteria: [group], [evaluationDate ] .
+  do: [ !group <- keyList at: 1 ;
+        !date <- keyList at: 2 ;
+        "...  holdings built for composite " print ;
+        group code print ; 
+        date evaluate:
+          [ " on " print ; ^date print ; " from: " printNL ;
+            group componentList
+            do: [ "     " print ; account whatAmI print: 15 ;
+                  account code print: 10 ;
+                  " weight " print ; weight print ;
+                  " holdings as of " print ; account holdingsDate printNL ;
+                ] ;
+          ] ;
+     ] ;
+] ;
+
+CompositeAccountMembers defineMethod: [ | purgeGroupsUsing: list | 
+  !feed <- ^self asSelf ;
+  list select: [ date isntDefault ] .
+    groupedByCriteria: [ date ], [ group ] .
+  do: [ !date <- keyList at: 1 ;
+        !composite <- keyList at: 2 ;
+        date evaluate:
+          [ 
+          !hasMembers <- groupList select: [ member isntNA ] ;
+          hasMembers count > 0 
+          ifTrue:
+            [ hasMembers do: [ ^my composite componentList delete: member ] ;
+              composite buildHoldings ;
+            ] ;
+          !noMembers <- groupList select: [ member isNA ] ;
+          noMembers count > 0 
+             ifTrue: [ composite :componentList delete: ^date ] ;
+          ] ;
+      ] ;
+] ;
+
+#----------------------------------------------------------------------
+
+
+####################
+#  AliasFeeds
+####################
+
+#----------------------------------------------------------------------
+
+####################
+#  RangeGroupFeeds
+####################
+
+#----------------------------------------------------------------------
+
+####################
+#  Custom Feeds
+####################
+
+#----------------------------------------------------------------------
+
+
+
+#======================================================================
+
+Schema processAllMessages ;
+
+#======================================================================
+
+"ticker", "cusip", "sedol", "companyId"
+   do: [ ^my SecurityMaster getMessage: asSelf . enableOkayToUpload ] ;
+
+ExchangeRateFeed
+   enableFieldsFromHeader
+   setRequiredFieldsTo: 3 .
+   setFieldOrderListTo: "ENTITY", "DATE" , "usExchange" ;
+
+SplitsFeed
+   enableFieldsFromHeader
+   enableLocalFields
+   setRequiredFieldsTo: 3 .
+   setFieldOrderListTo: "ENTITY" , "DATE" , "rate" ;
+SplitsFeed getMessage: "rate" . enableOkayToUpload ;
+
+PriceFeed
+   enableLocalFields
+;
+"close", "high", "low", "volume", "open", "bid", "ask" ,
+"acctPrice", "acctCurr", 
+"yield", "adjustmentDate", "dailyReturn", "unitReturn"
+   do: [ ^my PriceFeed getMessage: asSelf . enableOkayToUpload ] ;
+
+"secId", "acctId", "shares", "price", "mval", 
+   "unitCost", "totalCost", "adjustDate" 
+   do: [ ^my HoldingsFeed getMessage: asSelf . enableOkayToUpload ] ;
+
+#--HoldingsFeed getMessage: "mval" . setDefaultValueTo: Double ;
+HoldingsFeed getMessage: "price" . setDefaultValueTo: Double ;
+HoldingsFeed getMessage: "shares" . setDefaultValueTo: Double ;
+HoldingsFeed getMessage: "totalCost" . setDefaultValueTo: Double ;
+HoldingsFeed getMessage: "unitCost" . setDefaultValueTo: Double ;
+PriceFeed getMessage: "adjustmentDate" . setDefaultValueTo: Date ;
+SplitsFeed getMessage: "rate" .   setDefaultValueTo: Double ;
+
+CompositeAccountMembers getMessage: "weight" . 
+    enableOkayToUpload setDefaultValueTo: Double ;
+IndexAccountBuilder enableLocalFields ;
+IndexAccountBuilder getMessage: "universeId" . enableOkayToUpload ;
+IndexAccountBuilder getMessage: "style" . enableOkayToUpload ;
+
+"periodEndDate", "estimate", "estimator", "actualFlag", "adjustmentDate"
+   do: [ ^my EstimateRecordFeed getMessage: asSelf . enableOkayToUpload ] ;
+
+EstimateRecordFeed getMessage: "adjustmentDate" . setDefaultValueTo: Date ;
+

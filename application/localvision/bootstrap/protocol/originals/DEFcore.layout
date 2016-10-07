@@ -1,0 +1,2648 @@
+##################################################
+#  DEFcore.layout
+##################################################
+
+####################
+#  General LayoutTools
+####################
+LayoutTools
+;
+
+####################
+#  General Specification
+####################
+
+LayoutTools Specification
+;
+
+
+#--------------------------------------------------
+
+####################
+#  TableSpec
+####################
+
+LayoutTools TableSpec
+
+#--  General
+   defineFixedProperty: 'width' .         
+   defineFixedProperty: 'border' .       
+   defineFixedProperty: 'cellSpacing' .     
+   defineFixedProperty: 'cellPadding' .    
+   defineFixedProperty: 'columnCount' .   
+   defineFixedProperty: 'headerCount' .   
+   defineFixedProperty: 'rowLabelFlag' .  # first column is treated as label
+   defineFixedProperty: 'center' .        # Table is Centered    (TRUE/FALSE)
+
+#--  Labels
+   defineFixedProperty: 'caption' .       
+
+#--  Column Specifications 
+   defineFixedProperty: 'columnSpecs' .   
+
+#--  Initialization and Reset
+defineMethod: [ | initializeLocalAttributes | 
+  ^super initializeLocalAttributes ;
+  reset
+] .
+
+defineMethod: [ | reset |
+  :caption      <- Label createInstance;
+  clearColumns; 
+  :width        <- "80%" ;
+  :border       <- 1 ;
+  :cellSpacing      <- 2 ;
+  :cellPadding      <- 2 ;
+  :columnCount  <- 0 ;
+  :headerCount  <- 0 ;
+  :rowLabelFlag    <- FALSE ;
+  :center       <- TRUE ;
+  ^self
+] .
+
+defineMethod: [ | clearColumns | 
+  :columnSpecs <- ^global IndexedList new ;
+  ^self
+] .
+
+#--  Update Attributes
+defineMethod: [ | setWidthTo: input | 
+  :width <- input ;
+  ^self
+] .
+defineMethod: [ | setBorderTo: input | 
+  :border <- input ;
+  ^self
+] .
+defineMethod: [ | setCellSpacingTo: input | 
+  :cellSpacing <- input ;
+  ^self
+] .
+defineMethod: [ | setCellPaddingTo: input | 
+  :cellPadding <- input ;
+  ^self
+] .
+defineMethod: [ | setColumnCountTo: input |
+  :columnCount <- input ;
+  ^self
+] .
+defineMethod: [ | setHeaderCountTo: input |
+  :headerCount <- input ;
+  ^self
+] .
+defineMethod: [ | enableRowLabels |
+  :rowLabelFlag <- TRUE ;
+  ^self
+] .
+defineMethod: [ | disableRowLabels |
+  :rowLabelFlag <- FALSE ;
+  ^self
+] .
+defineMethod: [ | setCenterTo: input |
+  :center <- input ;
+  ^self
+] .
+
+defineMethod: [ | addColumn: position |
+  !newOne <- ColumnSpec createInstance;
+  columnSpecs at: position asInteger put: newOne;
+  newOne
+] .
+
+defineMethod: [ | getColumn: n |
+  columnSpecs at: n asInteger . else: [ ^self addColumn: n ]
+] .
+
+#--  Display
+defineMethod: [ | profile | 
+"Profile for TableSpec" printNL ;
+"code: "            print: 15 ; code printNL ;
+"width: "           print: 15 ; width printNL ;
+"border: "          print: 15 ; border printNL ;
+"cellSpacing: "         print: 15 ; cellSpacing printNL ;
+"cellPadding: "         print: 15 ; cellPadding printNL ;
+"columnCount: "     print: 15 ; columnCount printNL ;
+"headerCount: "     print: 15 ; headerCount printNL ;
+"rowLabelFlag: "       print: 15 ; rowLabelFlag printNL ;
+"center: "          print: 15 ; center printNL ;
+caption inUse isntNA
+   ifTrue: [ "Caption" printNL ; caption displayInfo ] ;
+"Columns: " printNL ;
+columnCount sequence  
+do: [ ^self print: -3 ;
+      ^my columnSpecs at: ^self . displayInfo ;
+    ] ;
+] .
+;
+
+#--------------------
+#  Add method at TableSpec to clear and reinitialize two-line headers
+#
+#  Basic Layout:
+#                      ---   header1.1  ---       ---   header1.2   ---
+#    label       head2.1  head2.2  head2.3      head1.2   head2.2   head2.3
+#
+#  For Example:
+#                    12/31/98                 12/31/97
+#    label      acct1  acct2  acct3      acct1  acct2  acct3
+#
+#  The total number of columns will be 1 (for the label) plus
+#  the product of the number of header1's * header2's.  In this example
+#  there are 1 + 2*3 = 7 columns  where 2*3 corresponds to all th
+#  combinations of 2 dates and 3 accounts.
+#
+#--------------------
+
+LayoutTools TableSpec defineMethod: 
+[ | setupMultiHeadersUsing: headers1 and: headers2 withLabel: label |
+  !table <- ^self ;
+  !columnCount <- (1 + headers1 count * headers2 count ) asInteger ;
+  table setColumnCountTo: columnCount ;
+  columnSpecs count sequence
+  do: [ ^my table getColumn: ^self . 
+        do: [ ^self deleteHeader: 1 ;
+              ^self getHeader: 2 . setTextTo: NA ;
+            ] ;
+      ] ;
+  table getColumn: 1 . 
+  do: [ ^self getHeader: 1 . setTextTo: "" ;
+        ^self getHeader: 2 . setTextTo: ^my label ;
+      ] ;
+ headers1 numberElements
+ do: [ !table <- ^my table ;
+   #-- each header1 spans headers2 count columns
+       !span <- ^my headers2 count ;
+       !column <- ((position - 1) * ^my headers2 count + 2 ) asInteger ;
+       table getColumn: column . getHeader: 1 . 
+           setColumnSpanTo: span . setTextTo: label ;
+       ^my headers2 numberElements 
+       do: [ ^my table getColumn: (^my column + position - 1) asInteger . 
+                 getHeader: 2 . setTextTo: (label valueWith: ^my) ;
+           ] ;
+      ] ;
+] ;
+
+#--------------------
+#  LayoutTools TableSpec Label
+#--------------------
+LayoutTools TableSpec Label
+   defineFixedProperty: 'text' .
+   defineMethod: [ | inUse | text else: "" . count > 0 ] .
+   defineFixedProperty: 'font' .
+   defineFixedProperty: 'color' .
+   defineFixedProperty: 'size' .
+   defineFixedProperty: 'width' .
+   defineFixedProperty: 'hAlignment' .
+   defineFixedProperty: 'vAlignment' .
+   defineFixedProperty: 'columnSpan' .
+   defineFixedProperty: 'rowSpan' .
+   defineFixedProperty: 'fillBlanks' .
+   defineFixedProperty: 'bgColor' .
+
+#--  Initialization and Reset
+defineMethod: [ | initializeLocalAttributes | 
+  ^super initializeLocalAttributes ;
+  reset
+] .
+
+defineMethod: [ | reset | 
+   :text       <- "";
+   :font       <- "Arial";
+   :color      <- "black";
+   :size       <- 1;
+   :width      <- 10;
+   :hAlignment <- "center";
+   :vAlignment <- "top";
+   :columnSpan <- 1;
+   :rowSpan    <- 1;
+   :fillBlanks <- TRUE ;
+ ^self
+] .
+
+defineMethod: [ | copyFrom: source | 
+   :text       <- source text ;
+   :font       <- source font ;
+   :color      <- source color ;
+   :size       <- source size ;
+   :width      <- source width ;
+   :hAlignment <- source hAlignment ;
+   :vAlignment <- source vAlignment ;
+   :columnSpan <- source columnSpan ;
+   :rowSpan    <- source rowSpan ;
+   :fillBlanks <- source fillBlanks ;
+   ^self
+] .
+
+defineMethod: [ | setTextTo: input | 
+  :text  <- input isList
+     ifTrue: [ [ input do: [ printNL ] ] divertOutput ] ifFalse: [ input ] ;
+  ^self
+] .
+defineMethod: [ | setFontTo: input | 
+  :font      <- input ; 
+  ^self
+] .
+defineMethod: [ | setColorTo: input | 
+  :color     <- input ; 
+  ^self
+] .
+defineMethod: [ | setSizeTo: input | 
+  :size      <- input ; 
+  ^self
+] .
+defineMethod: [ | setWidthTo: input | 
+  :width     <- input ; 
+  ^self
+] .
+defineMethod: [ | setHAlignmentTo: input | 
+  :hAlignment <- input ; 
+  ^self
+] .
+defineMethod: [ | setVAlignmentTo: input | 
+  :vAlignment <- input ; 
+  ^self
+] .
+defineMethod: [ | setColumnSpanTo: input | 
+  :columnSpan <- input ; 
+  ^self
+] .
+defineMethod: [ | setRowSpanTo: input | 
+  :rowSpan    <- input ; 
+  ^self
+] .
+defineMethod: [ | enableFillBlanks |
+  :fillBlanks <- TRUE ; 
+  ^self
+] .
+defineMethod: [ | disableFillBlanks |
+  :fillBlanks <- FALSE ; 
+  ^self
+] .
+
+defineMethod: [ | setBGColorTo: color |
+  :bgColor <- color  ;
+  ^self 
+] .
+
+defineMethod: [ | setColorFontSizeTo: list |
+  :color     <- list at: 1 ;
+  :font      <- list at: 2 ;
+  :size      <- list at: 3 ;
+  ^self
+] .
+
+defineMethod: [ | displayInfo | 
+   "  Label : " print ; 
+   text value translate: newLine to: " " . print ; " | " print ; 
+                 font print ;                      " | " print ; 
+                 color print ;                     " | " print ; 
+                 size print ;                      " | " print;
+                 width print ;                     " | " print;
+                 hAlignment print ;                " | " print ; 
+                 vAlignment print ;                " | " print ; 
+                 columnSpan print ;                " | " print ; 
+                 rowSpan    print ;                " | " print ;
+                 fillBlanks print ;
+   newLine print;
+] .
+
+defineMethod: [ | profile |
+  "text: "       print: 15 ; text printNL ;
+  "font: "       print: 15 ; font printNL ;
+  "color: "      print: 15 ; color printNL ;
+  "size: "       print: 15 ; size printNL ;
+  "width: "      print: 15 ; width printNL ;
+  "hAlignment: " print: 15 ; hAlignment printNL ;
+  "vAlignment: " print: 15 ; vAlignment printNL ;
+  "columnSpan: " print: 15 ; columnSpan printNL ;
+  "rowSpan: "    print: 15 ; rowSpan printNL ;
+  "fillBlanks: " print: 15 ; fillBlanks printNL ;
+  "bgColor: " print: 15 ; bgColor printNL ;
+] .
+;
+
+#--------------------
+#  LayoutTools TableSpec ColumnSpec
+#--------------------
+LayoutTools TableSpec ColumnSpec
+   defineFixedProperty: 'titles' .
+   defineFixedProperty: 'font' .
+   defineFixedProperty: 'color' .
+   defineFixedProperty: 'size' .
+   defineFixedProperty: 'width' .
+   defineFixedProperty: 'hAlignment' .
+   defineFixedProperty: 'vAlignment' .
+   defineFixedProperty: 'fillBlanks' .
+   defineFixedProperty: 'bgColor' .
+
+#--  Initialization and Reset
+defineMethod: [ | initializeLocalAttributes | 
+  ^super initializeLocalAttributes ;
+  reset
+] .
+
+defineMethod: [ | reset | 
+   :titles     <- ^global IndexedList new;
+   :font       <- "Arial";
+   :color      <- "black";
+   :size       <- "+0" ;
+   :width      <- 10;
+   :hAlignment <- "right";
+   :vAlignment <- "bottom";
+   :fillBlanks <- FALSE;
+ ^self
+] .
+
+defineMethod: [ | setFontTo: input | 
+  :font <- input ; 
+  ^self
+] .
+defineMethod: [ | setColorTo: input | 
+  :color <- input ; 
+  ^self
+] .
+defineMethod: [ | setSizeTo: input | 
+  :size <- input ; 
+  ^self
+] .
+defineMethod: [ | setWidthTo: input | 
+  :width <- input ; 
+  ^self
+] .
+defineMethod: [ | setHAlignmentTo: input | 
+  :hAlignment <- input ; 
+  ^self
+] .
+defineMethod: [ | setVAlignmentTo: input | 
+  :vAlignment <- input ; 
+  ^self
+] .
+defineMethod: [ | enableFillBlanks | 
+  :fillBlanks <- TRUE ;
+  ^self
+] .
+defineMethod: [ | disableFillBlanks | 
+  :fillBlanks <- FALSE ;
+  ^self
+] .
+
+defineMethod: [ | setBGColorTo: color |
+  :bgColor <- color ;
+  ^self
+] .
+ 
+defineMethod: [ | setColorFontSizeTo: list |
+  :color <- list at: 1 ;
+  :font  <- list at: 2 ;
+  :size  <- list at: 3 ;
+  ^self
+] .
+
+defineMethod: [ | addHeader: position |
+  !newOne <- TableSpec Label createInstance;
+  titles at: position asInteger put: newOne;
+  newOne
+] .
+
+defineMethod: [ | getHeader: n |
+  titles at: n asInteger . else: [ ^self addHeader: n ]
+] .
+
+ defineMethod: [ | deleteHeader: position |
+   titles delete: position asInteger ;
+  ^self
+] .
+
+defineMethod: [ | displayInfo |
+   font print ;       " | " print ; 
+   color print ;      " | " print ; 
+   size print ;       " | " print ;
+   width print ;      " | " print ;
+   hAlignment print ; " | " print ; 
+   vAlignment print;  " | " print ;
+   fillBlanks printNL;
+   "Headers: "               printNL ;
+   titles do: [ " " print: 5 ; displayInfo ] ;
+] .
+
+defineMethod: [ | profile |
+   "font: "       print: 15 ; font printNL ;
+   "color: "      print: 15 ; color printNL ;
+   "size: "       print: 15 ; size printNL ;
+   "width: "      print: 15 ; width printNL ;
+   "hAlignment: " print: 15 ; hAlignment printNL ;
+   "vAlignment: " print: 15 ; vAlignment printNL ;
+   "fillBlanks: " print: 15 ; fillBlanks printNL ;
+   "bgColor: " print: 15 ; bgColor printNL ;
+   "Headers: "     printNL ;
+   titles do: [ " " print: 5 ; displayInfo ] ;
+] .
+;
+
+#--------------------
+#  Initializations
+#--------------------
+LayoutTools TableSpec initializeLocalAttributes ;
+
+#--------------------
+#  Additions to FormatTools
+#--------------------
+FormatTools
+defineMethod: [ | buildTableFor: table for: object withBlock: inBlock | 
+!output   <- inBlock isBlock
+      ifTrue: [ [ object send: inBlock ] asRowsColumns ] ;
+
+  [ 
+  newLine print;
+
+  #--  CAPTION
+  table caption inUse 
+  ifTrue: [ table caption text value asLines
+              do: [ ^self center: ^my table caption width . printNL ] ;
+          ];
+
+  #--  HEADERS
+  !headers <- table headerCount else: 0 ;
+  headers sequence
+  do: [ !rowNumber <- ^self ;
+        !table <- ^my table ;
+        !headersForRow <- table columnCount sequence
+           send: [ !column <- ^my table columnSpecs at: ^self ;
+                   column isntNA
+                      ifTrue: [ column titles at: ^my rowNumber ]
+                 ] ;
+        headersForRow
+        do: [!header <- ^self ;
+             header isntNA && [ header isLabel ] && [ header text isntNA ]
+             ifTrue: #--  value evaluates text if it is a block
+               [ !text <- header text value translate: newLine to: " " ;
+                  header hAlignment toUpper = "CENTER"
+                     ifTrue: [ text center: header width ]
+                    ifFalse: [ text ] . print: header width ;
+               ] ;
+            ];
+        newLine print ;
+     ] ;
+        
+  #--  BODY
+  output isntNA
+  ifTrue:
+    [
+    output
+    do: [ !table <- ^my table;
+          !line  <- ^self ;
+          table columnCount sequence
+          do: [ !item    <- ^my line columns at: ^self ; 
+                !colSpec <- ^my table columnSpecs at: ^self;
+                item else: " " . take: (colSpec width) . print;
+              ];
+          newLine print;
+        ];
+     ] ;
+
+  ] divertOutput
+] ;
+
+#--------------------
+
+FormatTools Html
+defineMethod: [ | buildTableFor: table for: object withBlock: inBlock | 
+  !output   <- inBlock isBlock
+      ifTrue: [ [ object send: inBlock ] asRowsColumns ] ;
+
+  [ 
+  #--  PREAMBLE
+  "</pre>" printNL;
+  table center ifTrue: [ "<center>" printNL; ];
+  "<table" print;
+  table border isntNA
+    ifTrue: [ " border=" concat: (table border asString) . print;
+              " width="  concat: (table width asString)  . print;
+            ];
+  " cellspacing="  concat: (table cellSpacing asString) . print;
+  " cellpadding="  concat: (table cellPadding asString) . print;
+  ">" printNL;
+
+  #-- CAPTION
+  table caption inUse
+  ifTrue: [ "<caption><strong>"          print;
+            "<font face=" concat: (table caption font asString)  . print;
+            " color="     concat: (table caption color asString) . print;
+            " size="      concat: (table caption size asString)  . print;
+            " >"                         print;
+            table caption text value asLines
+              do: [^self concat: "<br>" . print; ];
+            "</font></strong></caption>" printNL;
+          ];
+
+  #--  HEADERS
+  !headers <- table headerCount else: 0 ;
+  headers sequence
+  do: [ !rowNumber <- ^self ;
+        !table <- ^my table ;
+        !headersForRow <- table columnCount sequence
+           send: [ !column <- ^my table columnSpecs at: ^self ;
+                   column isntNA
+                      ifTrue: [ column titles at: ^my rowNumber ]
+                 ] ;
+        "<tr>" print;
+        headersForRow
+        do: [!hdr <- ^self ;
+             hdr isntNA ifTrue:
+               ["<th " print;
+                   " colspan= " concat: (hdr columnSpan asString) . print;
+                   " rowspan= " concat: (hdr rowSpan asString) . print;
+                   "   align= " concat: (hdr hAlignment asString) . print;
+                   "  valign= " concat: (hdr vAlignment asString) . print;
+                   hdr bgColor isntNA 
+                      ifTrue:[" bgcolor = " concat: (hdr bgColor asString) .print ] ;	
+                " >"   print;
+                "<font face=" concat: (hdr font asString) . print; 
+                   " color="    concat: (hdr color asString) . print;
+                   " size ="    concat: (hdr size asString) . print;
+                " >"   print;
+                hdr text value else: "" . asLines numberElements
+                do: [ !cur <- ^self;
+                      cur asString isBlank ifTrue: [:cur <- "&nbsp;"] ;
+                      position > 1 ifTrue: [:cur <- "<br>" concat: cur] ;
+                      cur print;
+                    ];
+                "</font>" print;
+                "</th>" print;
+               ];
+            ];
+        "</tr>" printNL;
+      ];
+
+   output isntNA
+   ifTrue: 
+     [ output
+       do: [!table <- ^my table;
+            !line  <- ^self ;
+            "<tr>"                           print;
+            table columnCount sequence
+            do: [!item    <- ^my line columns at: ^self ; 
+                 !colSpec <- ^my table columnSpecs at: ^self;
+                 "<td "   print;
+                 colSpec bgColor isntNA 
+                    ifTrue:[" bgcolor = " concat: (colSpec bgColor asString) .print ] ;
+                 " align="  concat: (colSpec hAlignment asString) . print;
+                 " valign=" concat: (colSpec vAlignment asString) . print;
+                 "> "     print;
+                 "<font " print;
+                 " face="   concat: (colSpec font asString)       . print;
+                 " color="  concat: (colSpec color asString)      . print;
+                 " size ="  concat: (colSpec size asString)       . print;
+                 "> "     print;
+                 !currItem <- item else: " ";
+                 currItem count = 0 ifTrue: [ :currItem <- " ";]; 
+                 (colSpec fillBlanks && [currItem isString])
+                    ifTrue: [ :currItem <- currItem translate: " " to: "&nbsp;";
+                              :currItem <- currItem translateString: 
+                                                 "<A&nbsp;" to: "<A ";
+                              :currItem <- currItem translateString: 
+                                                 "<img&nbsp;src=" to: "<img src=";
+                            ];
+                 (^self asSelf = 1 && [^my table rowLabelFlag ])
+                    ifTrue: [ "<strong>"    print;
+                              currItem       print;
+                              "</strong>"    print;
+                           ] 
+                   ifFalse: [ currItem      print;];
+                 "</font>"                  print;
+                 "</td>"                    print;
+                ];
+            "</tr>"                         printNL;
+           ];
+      ] ;
+      "</table>"                             printNL;
+      table center ifTrue: [ "</center>"     print; ];
+
+  ] divertOutput
+] ;
+
+#--------------------------------------------------
+
+
+
+####################
+#  FormSpec
+####################
+
+#--------------------
+#  LayoutTools FormSpec : General
+#--------------------
+
+LayoutTools FormSpec
+
+   defineFixedProperty: 'applicationName' .
+   defineFixedProperty: 'title' .
+   defineFixedProperty: 'description' .
+   defineFixedProperty: 'inputSpecList' .
+   defineFixedProperty: 'includeGlobalDate' .
+   defineFixedProperty: 'includeGlobalCurrency' .
+defineMethod: [ | allowsGlobals | 
+   includeGlobalDate isTrue || includeGlobalCurrency isTrue 
+] .
+   defineFixedProperty: 'includeBackground' .
+   defineFixedProperty: 'border' .
+   defineFixedProperty: 'spacing' .
+   defineFixedProperty: 'padding' .
+   defineFixedProperty: 'width' .
+
+#--  Initialization and Reset
+defineMethod: [ | initializeLocalAttributes | 
+  ^super initializeLocalAttributes ;
+  reset
+] .
+
+defineMethod: [ | reset |
+  :applicationName <- NA ;
+  :title <- NA ;
+  :description <- NA ;
+  :border <- NA ;
+  :spacing <- NA ;
+  :padding <- NA ;
+  :width <- NA ;
+  disableGlobalDate
+  disableGlobalCurrency
+  disableBackground
+  clearInputSpecList ;
+  ^self
+] .
+
+#--  Update Attributes
+defineMethod: [ | setApplicationNameTo: input | 
+  :applicationName <- input ;
+  ^self
+] .
+defineMethod: [ | setTitleTo: input | 
+  :title <- input ;
+  ^self
+] .
+defineMethod: [ | setDescriptionTo: input | 
+  :description <- input ;
+  ^self
+] .
+defineMethod: [ | setBorderTo: input | 
+  :border <- input ;
+  ^self
+] .
+defineMethod: [ | setSpacingTo: input | 
+  :spacing <- input ;
+  ^self
+] .
+defineMethod: [ | setPaddingTo: input | 
+  :padding <- input ;
+  ^self
+] .
+defineMethod: [ | setWidthTo: input | 
+  :width <- input ;
+  ^self
+] .
+
+defineMethod: [ | clearInputSpecList | 
+  :inputSpecList <- ^global IndexedList new ;
+  ^self
+] .
+
+defineMethod: [ | enableGlobalDate | 
+  :includeGlobalDate <- TRUE ;
+  ^self
+] .
+defineMethod: [ | disableGlobalDate | 
+  :includeGlobalDate <- NA ;
+  ^self
+] .
+defineMethod: [ | enableGlobalCurrency | 
+  :includeGlobalCurrency <- TRUE ;
+  ^self
+] .
+defineMethod: [ | disableGlobalCurrency | 
+  :includeGlobalCurrency <- NA ;
+  ^self
+] .
+defineMethod: [ | enableBackground | 
+  :includeBackground <- TRUE ;
+  ^self
+] .
+defineMethod: [ | disableBackground | 
+  :includeBackground <- NA ;
+  ^self
+] .
+
+defineMethod: [ | addInputSpec: position |
+  !newOne <- InputSpec createInstance;
+  inputSpecList at: position asInteger put: newOne;
+  newOne
+] .
+
+defineMethod: [ | getInputSpec: n |
+  inputSpecList at: n asInteger . else: [ ^self addInputSpec: n ]
+] .
+
+#--  Display
+defineMethod: [ | profile | 
+"Profile for FormSpec: " print ; code printNL ;
+"app name: " print: 15 ; applicationName printNL ;
+"title: " print: 15 ; title printNL ;
+description isntNA
+  ifTrue: [ newLine print ; description printNL ] 
+newLine print ;
+"InputSpecs: " printNL ;
+inputSpecList count sequence  
+do: [ ^self print: -3 ;
+      ^my inputSpecList at: ^self . displayInfo ;
+    ] ;
+] .
+;
+
+LayoutTools FormSpec defineMethod: [ | updateInputsFromDictionary: dict |
+  dict isDictionary ifFalse: [ :dict <- ^global Dictionary ] ;
+  inputSpecList do: [ ^self setValueFrom: ^my dict ] ;
+  ^self
+] ;
+
+
+#--------------------
+#  LayoutTools FormSpec InputSpec
+#--------------------
+LayoutTools FormSpec InputSpec
+   defineFixedProperty: 'type' .
+   defineFixedProperty: 'label' .
+   defineFixedProperty: 'size' .
+   defineFixedProperty: 'name' .
+   defineFixedProperty: 'initialValue' .
+   defineFixedProperty: 'choices' .
+   defineFixedProperty: 'altEntry' .
+
+defineMethod: [ | initializeLocalAttributes | 
+  ^super initializeLocalAttributes ;
+  reset 
+] .
+
+defineMethod: [ | reset | 
+  :type <- "text" ;
+  :label <- "" ;
+  :size <- NA ;
+  :name <- NA ;
+  :initialValue <- NA ;
+  clearChoices ;
+  ^self
+] .
+
+defineMethod: [ | clearChoices | 
+  :choices <- ^global IndexedList new ;
+  clearSelection ;
+  ^self
+] .
+
+defineMethod: [ | clearSelection | 
+  choices numberElements do: [ ^my unselectChoice: position ] ;
+  ^self
+] .
+
+defineMethod: [ | setTypeToText |
+  :type <- "text" ;
+  ^self
+] .
+defineMethod: [ | setTypeToHidden |
+  :type <- "hidden" ;
+  ^self
+] .
+defineMethod: [ | setTypeToMenu |
+  :type <- "menu" ;
+  ^self
+] .
+defineMethod: [ | setTypeToRadio |
+  :type <- "radio" ;
+  ^self
+] .
+defineMethod: [ | setLabelTo: input | 
+  :label <- input isntNA ifTrue: [ input asString ] ;
+  ^self
+] .
+defineMethod: [ | setSizeTo: input | 
+  :size <- input asNumber isntNA ifTrue: [ input asString ] ;
+  ^self
+] .
+defineMethod: [ | setNameTo: input | 
+  :name <- input isntNA ifTrue: [ input asString ] ;
+  ^self
+] .
+defineMethod: [ | setInitialValueTo: input | 
+  :initialValue <- input isntNA ifTrue: [ input asString ] ;
+  ^self
+] .
+
+defineMethod: [ | setAltEntryTo: input | 
+  :altEntry <- input isntNA ifTrue: [ input asString ] ;
+  ^self
+] .
+
+defineMethod: [ | addChoice: position |
+  !newOne <- NA, NA, NA ;
+  choices at: position asInteger put: newOne;
+  newOne
+] .
+
+defineMethod: [ | getChoice: n |
+  choices at: n asInteger . else: [ ^self addChoice: n asInteger ]
+] .
+
+defineMethod: [ | setChoice: n labelTo: label |
+  ^self getChoice: n . at: 1 put: label asString ;
+  ^self
+] .
+defineMethod: [ | setChoice: n valueTo: val |
+  ^self getChoice: n . at: 2 put: val asString ;
+  ^self
+] .
+defineMethod: [ | selectChoice: n |
+  ^self getChoice: n . at: 3 put: TRUE ;
+  ^self
+] .
+defineMethod: [ | unselectChoice: n |
+  ^self getChoice: n . at: 3 put: NA ;
+  ^self
+] .
+
+defineMethod: [ | displayInfo | 
+  type print ; " " print ; label print ; " " print ; name print ; " " print ;
+  initialValue print ; altEntry isntNA ifTrue: [ altEntry print ] ;
+  newLine print ;
+  choices numberElements
+  do: [ position print: 5 ; ^self do: [ " | " print ; print ] ;
+        newLine print ;
+      ] ;
+] .
+;
+
+LayoutTools FormSpec InputSpec defineMethod: [ | setValueFrom: dict | 
+  !input <- dict at: name . else: "" ;
+  type = "text" ifTrue: [ ^self setInitialValueTo: input ] .
+    elseIf: [ type = "menu" || type = "radio" ] 
+      then: [ ^self setSelectionTo: input ] ;
+  ^self
+] ;
+
+
+LayoutTools FormSpec InputSpec defineMethod: [ | setChoicesTo: list | 
+
+#-- assumes list is list of choices extended by 'label' and 'value'
+!spec <- ^self ; 
+
+clearChoices ;
+list numberElements
+do: [ ^my spec 
+         setChoice: position labelTo: label .
+         setChoice: position valueTo: value ;
+    ] ;
+^self
+] ;
+
+LayoutTools FormSpec InputSpec defineMethod: [ | setSelectionTo: string | 
+
+#-- selects choice if field 1 or 2 matches supplied 'string'
+string isDefault     #-- unselect all choices then select the first one
+ifTrue:
+   [ choices do: [ ^self at: 3 put: NA ] ;
+     ^self selectChoice: 1 ;
+   ]
+ifFalse:
+   [ choices
+     do: [ ( ^self at: 1 . else: "" . stripBoundingBlanks = ^my string ) || 
+           [ ^self at: 2 . else: "" . stripBoundingBlanks = ^my string ]
+              ifTrue: [ ^self at: 3 put: TRUE ] 
+                else: [ ^self at: 3 put: NA ] ;
+         ] ;
+   ] ;
+
+^self
+] ;
+
+
+#--------------------
+#  Initializations
+#--------------------
+LayoutTools FormSpec initializeLocalAttributes ;
+LayoutTools FormSpec InputSpec initializeLocalAttributes ;
+
+#--------------------
+#  Additions to FormatTools
+#--------------------
+
+FormatTools defineMethod: [ | buildFormFor: form | 
+ [
+  "---  Form Goes Here  ---" printNL ;
+  form profile
+ ] divertOutput
+] ;
+
+FormatTools defineMethod: [ | buildShortFormFor: form | 
+ [
+  "---  Short Form Goes Here  ---" printNL ;
+  form profile
+ ] divertOutput
+] ;
+
+FormatTools Html defineMethod: [ | buildFormFor: form | 
+ [ form includeGlobalDate isTrue
+     ifTrue: [ displayGlobalSetupForForm ] ;
+   form includeBackground isTrue
+     ifTrue: [ displayFormHeader ] ;
+   ^self displayFormBodyHeaderFor: form title as: form description ;
+   ^self displayFormBodyFor: form ;
+
+   form allowsGlobals
+     ifTrue: [ ^self displayGlobalsForForm: form ] ;
+
+   form applicationName isntNA
+   ifTrue:
+     [ "<input TYPE=hidden NAME=appName VALUE=" print ; 
+       form applicationName asQuotedString print ; ">" printNL ;
+     ] ;
+   form includeGlobalDate isTrue
+   ifTrue:
+     [ "<input TYPE=hidden NAME=globalDate>" printNL ;
+     ] ;
+
+   displayFormTrailer ;
+
+ ] divertOutput
+] ;
+
+FormatTools Html defineMethod: [ | displayGlobalSetupForForm |
+"
+<script>
+function CopyGlobalDate()
+{ 
+  if(document.ApplicationForm.datetext.value == \"\")  
+     {     
+      SelectedDate = document.ApplicationForm.date.options[document.ApplicationForm.date.selectedIndex].text      
+      document.ApplicationForm.globalDate.value= SelectedDate
+     }
+  else 
+      {document.ApplicationForm.globalDate.value = document.ApplicationForm.datetext.value} 
+}
+</script>
+" printNL ;
+
+] ;
+
+FormatTools Html defineMethod: [ | displayFormHeader | 
+   "<body BGCOLOR=white BACKGROUND=" print ;
+    External resourcePath else: "" .
+       concat: "indexPaper.gif" . asQuotedString print ;
+   ">" printNL ;
+   newLine print ;
+] ;
+
+FormatTools Html 
+defineMethod: [ | displayFormBodyHeaderFor: name as: description | 
+   "<form NAME=ApplicationForm ACTION=" print ;
+   External visionPath asQuotedString print ; ">" printNL ;
+   "<p>" printNL ;
+   "<center>" printNL ;
+   "<p><blockquote><blockquote>" printNL ;
+   "The <font SIZE=+1><b><i>" print; name print ; 
+   "</i></b></font> report " print ; description printNL ;
+   "</blockquote></blockquote></center><p>" printNL ;
+] ;
+
+FormatTools Html defineMethod: [ | displayFormBodyFor: form |
+"<center><table BORDER=" print ; 
+form border else: 1 . asString print ; 
+" CELLSPACING=" print ;  form spacing else: 2 . asString print ; 
+" CELLPADDING=" print; form padding else: 8 . asString print ;
+" WIDTH=" print ; form width else: "50%" . asString print ;
+">" printNL ;
+
+"<tr><th COLSPAN=2>" print ; form title printNL ;
+"<input TYPE=submit value=Submit" print ;
+form includeGlobalDate isTrue
+    ifTrue: [ " onClick=\"CopyGlobalDate()\" " print ] ;
+"> <input TYPE=reset>" printNL ;
+
+form inputSpecList numberElements
+do: [
+    "<tr><td ALIGN=right>" print ;
+     label else: [ "Input " concat: position . concat: ": " ] . print ;
+    ^my displayInputElementFor: ^self ;
+     ] ;
+"</table></center><p>" printNL ;
+] ;
+
+FormatTools Html defineMethod: [ | displayInputElementFor: spec | 
+  spec type = "menu" ifTrue: [ ^self displayMenuInputFor: spec ] .
+  elseIf: [ spec type = "radio" ] then: [ ^self displayRadioInputFor: spec ] .
+  else: [ ^self displayInputFor: spec ] ;
+] ;
+
+FormatTools Html defineMethod: [ | displayInputFor: spec |
+spec
+do: [ 
+    "<td> <input TYPE=" print; type print ;
+    name isntNA ifTrue: [ " NAME= " print ; name print ] ;
+    size isntNA ifTrue: [ " SIZE= " print ; size print ] ;
+    initialValue isntNA 
+    ifTrue: [ " VALUE= " print ; 
+              initialValue asString asQuotedString print ;
+            ] ;
+   ">" printNL ;    #- end of <input
+   ] ;
+] ;
+    
+
+FormatTools Html defineMethod: [ | displayRadioInputFor: spec | 
+spec
+do: [ "<td>" printNL ;
+      choices      #- choices is a list of 3 part lists: label,value, checked
+      do: [ ^self at: 1 . else: "" . print ; 
+            "<input TYPE=radio NAME=" print ; 
+            ^my name else: "" . print ;
+            !val <- ^self at: 2 ;
+            val isntNA
+               ifTrue: [ " VALUE= " print ; val asString asQuotedString print];
+            ^self at: 3 . isntNA ifTrue: [ " CHECKED" print ] ;
+            ">" printNL ;    #- end of input
+          ] ;
+      altEntry isntNA
+      ifTrue:
+        [ "<br><input TYPE=text NAME= " print ; 
+          altEntry print ;
+          ">" printNL ;
+        ] ;
+    ] ;
+] ;
+
+FormatTools Html defineMethod: [ | displayMenuInputFor: spec | 
+spec
+do: [ "<td> <select NAME= " print ; name else: "" . print ; 
+      size isntNA ifTrue: [ " SIZE= " print ; size print ] ;
+      ">" printNL ;
+      choices      #- choices is a list of 3 part lists: label,value, checked
+      do: [ "<option " print ; 
+            !val <- ^self at: 2 ;
+            val isntNA 
+              ifTrue: [ " VALUE= " print; val asString asQuotedString print] ;
+            ^self at: 3 . isntNA ifTrue: [ " SELECTED" print ] ;
+            "> " print ; ^self at: 1 . printNL ;
+          ] ;
+      "</select>" printNL ;
+      altEntry isntNA
+      ifTrue:
+        [ "<br><input TYPE=text NAME= " print ; 
+          altEntry print ;
+          ">" printNL ;
+        ] ;
+    ] ;
+] ;
+
+FormatTools Html defineMethod: [ | displayGlobalsForForm: form |
+"<center><table BORDER=1 CELLSPACING=2 CELLPADDING=8 WIDTH=50%>" printNL ;
+"<tr><th COLSPAN=2>Global Values" printNL ;
+form includeGlobalDate isTrue
+ifTrue:
+  [
+  "<tr><td ALIGN=right>Date:" printNL ;
+  "<td>" print ;
+  "<select NAME=date onChange=\"ApplicationForm.datetext.value=''\">" printNL ;
+  "<option SELECTED> Today" printNL ;
+  "<option> Yesterday" printNL ;
+  "<option> EndMonth" printNL ;
+  "<option> EndYear" printNL ;
+  "</select><br><input TYPE=text name=datetext size=15>" printNL ;
+  ] ;
+
+form includeGlobalCurrency isTrue
+ifTrue: 
+  [
+  "<tr><td ALIGN=right>Currency: <td>" printNL ;
+  displayCurrencyMenu ;
+  ] ;
+
+"</table></center>" printNL ;
+] ;
+
+FormatTools Html defineMethod: [ | displayCurrencyMenu | 
+  !list <- ^global Currency masterList 
+     select: [ :usExchange count > 0 ] . sortUp: [ name ] .
+     extendBy: [ !selected <- code = (currency code else: "") ] ;
+  !localOption <- list any: [ selected ] .
+    ifTrue: [ "<option VALUE=LOC>Local" ]
+   ifFalse: [ "<option VALUE=LOC SELECTED>Local" ] ;
+
+  "<SELECT NAME=globalCurrency>" printNL ; 
+  localOption printNL ;
+  "<option VALUE=USD >United States Dollar" printNL ;
+  list
+  do: [ "<option VALUE=" print ; code print ; 
+        selected ifTrue: [ " SELECTED" print ] ;
+        ">" print ; name printNL ;
+      ] ;
+  "<option VALUE=LEGACY >Legacy" printNL ;
+  "</select>" printNL ;
+] ;
+
+FormatTools Html defineMethod: [ | displayFormTrailer | 
+  "</form><p>" printNL ;
+] ;
+
+FormatTools Html defineMethod: [ | buildShortFormFor: form | 
+ [
+   "<form NAME=ApplicationForm ACTION=" print ;
+   External visionPath asQuotedString print ; ">" printNL ;
+
+   ^self displayShortFormBodyFor: form ;
+
+   form applicationName isntDefault
+   ifTrue: 
+    [ "<input TYPE=hidden NAME=appName VALUE=" print ; 
+      form applicationName asQuotedString print ; ">" printNL ;
+    ] ;
+   displayFormTrailer ;
+
+ ] divertOutput
+] ;
+
+FormatTools Html defineMethod: [ | displayShortFormBodyFor: form |
+
+"<center><table BORDER=" print ; form border else: 1 . asString print ; 
+" CELLSPACING=" print ;  form spacing else: 2 . asString print ; 
+" CELLPADDING=" print; form padding else: 8 . asString print ;
+" WIDTH=" print ; form width else: "50%" . asString print ;
+">" printNL ;
+
+form inputSpecList numberElements count = 1
+ifTrue:
+  [ !spec <- form inputSpecList at: 1 ;
+    "<tr><th ALIGN=right BGCOLOR=lightblue>" print ;
+    spec label else: "Enter Value: " . printNL ; 
+    ^self displayInputElementFor: spec ;
+    " <input TYPE=submit value=Submit>" printNL ;
+    form allowsGlobals
+    ifTrue:
+      [
+      "<tr><th><font SIZE=-1> Date:<br><input TYPE=text NAME=globalDate" 
+           print ;
+      " VALUE= " print ; 
+      ^date asInteger asString asQuotedString print ; ">" printNL ;
+      "<th><font SIZE=-1>Currency:<br>" print ;
+      displayCurrencyMenu ;
+      ] ;
+  ] 
+ifFalse:
+  [ !span <- form inputSpecList count - 1 ;
+   "<tr><th BGCOLOR=lightblue COLSPAN=" print ; span asInteger asString print ; 
+   "><font SIZE=-1>" print ;
+    form title isntNA ifTrue: [ "Change " concat: form title . print ] ;
+    "<th><input TYPE=submit VALUE=Submit>" printNL ;
+    "<tr>" print ;
+    form inputSpecList numberElements
+    do: [ "<th><font SIZE=-1>" print ;
+          label else: [ "Input " concat: position . concat: ": " ] . printNL ;
+        ] ;
+    "<tr>" print ; 
+    form inputSpecList numberElements
+    do: [ 
+          ^my displayInputElementFor: ^self ;
+        ] ;
+    form allowsGlobals 
+    ifTrue:
+      [
+      "<tr><th><font SIZE=-1> Date:<br><input TYPE=text NAME=globalDate" 
+           print ;
+      " VALUE= " print ; 
+      ^date asInteger asString asQuotedString print ; ">" printNL ;
+      "<th COLSPAN=" print ; span asInteger asString print ; 
+      "><font SIZE=-1>Currency:<br>" print ;
+      displayCurrencyMenu ;
+      newLine print ; 
+      ] ;
+  ] ;
+"</table></center><p>" printNL ;
+] ;
+
+FormatTools Html defineMethod: [ | displayInputFor: spec |
+spec
+do: [ 
+    "<td> <input TYPE=" print; type print ;
+    name isntNA ifTrue: [ " NAME= " print ; name print ] ;
+    size isntNA ifTrue: [ " SIZE= " print ; size print ] ;
+    initialValue isntNA 
+      ifTrue: [ " VALUE= " print; initialValue asString asQuotedString print];
+   ">" printNL ;    #- end of <input
+   ] ;
+] ;
+    
+
+FormatTools Html defineMethod: [ | displayRadioInputFor: spec | 
+spec
+do: [ "<td>" printNL ;
+      choices      #- choices is a list of 3 part lists: label,value, checked
+      do: [ ^self at: 1 . else: "" . print ; 
+            "<input TYPE=radio NAME=" print ; 
+            ^my name else: "" . print ;
+            !val <- ^self at: 2 ;
+            val isntNA 
+              ifTrue: [ " VALUE= " print ; val asString asQuotedString print];
+            ^self at: 3 . isntNA ifTrue: [ " CHECKED" print ] ;
+            ">" printNL ;    #- end of input
+          ] ;
+      altEntry isntNA
+      ifTrue:
+        [ "<br><input TYPE=text NAME= " print ; 
+          altEntry print ;
+          ">" printNL ;
+        ] ;
+    ] ;
+] ;
+
+FormatTools Html defineMethod: [ | displayMenuInputFor: spec | 
+spec
+do: [ "<td> <select NAME= " print ; name else: "" . print ; 
+      size isntNA ifTrue: [ " SIZE= " print ; size print ] ;
+      ">" printNL ;
+      choices      #- choices is a list of 3 part lists: label,value, checked
+      do: [ "<option " print ; 
+            !val <- ^self at: 2 ;
+            val isntNA 
+             ifTrue: [ " VALUE= " print ; val asString asQuotedString print];
+            ^self at: 3 . isntNA ifTrue: [ " SELECTED" print ] ;
+            "> " print ; ^self at: 1 . printNL ;
+          ] ;
+      "</select>" printNL ;
+      altEntry isntNA
+      ifTrue:
+        [ "<br><input TYPE=text NAME= " print ; 
+          altEntry print ;
+          ">" printNL ;
+        ] ;
+    ] ;
+] ;
+
+
+
+
+####################
+#  GraphSpec
+####################
+
+LayoutTools GraphSpec
+
+#--  General
+   defineFixedProperty: 'width' .
+   defineFixedProperty: 'height' .
+
+#--  Background
+   defineFixedProperty: 'bgColor' .
+   defineFixedProperty: 'bgStyle' .
+   defineFixedProperty: 'bgSize' .
+   defineFixedProperty: 'bgImage' .
+
+#--  Labels
+   defineFixedProperty: 'header' .
+   defineFixedProperty: 'footer' .
+   defineFixedProperty: 'leftTitle' .
+   defineFixedProperty: 'rightTitle' .
+   defineFixedProperty: 'dwellLabel' .
+   defineFixedProperty: 'legend' .
+
+#--  Other
+   defineFixedProperty: 'colorTable' .
+
+#--  Initialization and Reset
+defineMethod: [ | initializeLocalAttributes | 
+  ^super initializeLocalAttributes ;
+  :header <- Label createInstance ;
+  :footer <- Label createInstance ;
+  :leftTitle <- Label createInstance ;
+  :rightTitle <- Label createInstance ;
+  :legend <- Label createInstance ;
+  :dwellLabel <- Label createInstance ;
+] .
+
+defineMethod: [ | reset |
+  :bgColor <- NA ;
+  :bgStyle <- NA ;
+  :bgSize <- NA ;
+  :bgImage <- NA ;
+  :colorTable <- NA ;
+  :width <- NA ;
+  :height <- NA ;
+  header, footer, leftTitle, rightTitle, legend, dwellLabel
+     do: [ reset ] ;
+  ^self
+] .
+
+defineMethod: [ | copyFrom: id | 
+  !source <- id isGraphSpec
+     ifTrue: [ id ] 
+    ifFalse: [ ^self classDescriptor namingDictionary at: id ] .
+    else: [ ^self defaultInstance ] ;
+  :width <- source width ;
+  :height <- source height ;
+  :bgColor <- source bgColor ;
+  :bgStyle <- source bgStyle  ;
+  :bgSize <- source bgSize  ;
+  :bgImage <- source bgImage  ;
+  :colorTable <- source colorTable ;
+  header copyFrom: source header ;
+  footer copyFrom: source footer ;
+  leftTitle copyFrom: source leftTitle ;
+  rightTitle copyFrom: source rightTitle ;
+  legend copyFrom: source legend ;
+  dwellLabel copyFrom: source dwellLabel ;
+] .
+
+#--  Update Attributes
+defineMethod: [ | setWidthTo: input | 
+  :width <- input ;
+  ^self
+] .
+defineMethod: [ | setHeightTo: input | 
+  :height <- input ;
+  ^self
+] .
+defineMethod: [ | setBGColorTo: input | 
+  :bgColor <- input ;
+  ^self
+] .
+defineMethod: [ | setBGStyleTo: input | 
+  :bgStyle <- input ;
+  ^self
+] .
+defineMethod: [ | setBGSizeTo: input |
+  :bgSize <- input asNumber ;
+  ^self
+] .
+defineMethod: [ | setBGImageTo: input |
+  :bgImage <- input ;
+  ^self
+] .
+defineMethod: [ | setColorTableTo: input |
+  :colorTable <- 
+      [ input do: [ print ; ", " print ] ] divertOutput drop: -2 ;
+  ^self
+] .
+
+#--  Display
+defineMethod: [ | profile | 
+"Profile for GraphSpec of type: " print ; ^self whatAmI printNL ;
+newLine print ;
+"code: " print: 15 ; code printNL ;
+"width: " print: 15 ; width printNL ;
+"height: " print: 15 ; height printNL ;
+"bgColor: " print: 15 ; bgColor printNL ;
+"bgStyle: " print: 15 ; bgStyle printNL ;
+"bgSize: " print: 15 ; bgSize printNL ;
+"bgImage: " print: 15 ; bgImage printNL ;
+"colorTable: " print: 15 ; colorTable printNL ;
+header inUse isntNA
+   ifTrue: [ "Header" printNL ; header displayInfo ] ;
+footer inUse isntNA
+   ifTrue: [ "Footer" printNL ; footer displayInfo ] ;
+leftTitle inUse isntNA
+   ifTrue: [ "Left Title" printNL ; leftTitle displayInfo ] ;
+rightTitle inUse isntNA
+   ifTrue: [ "Right Title" printNL ; rightTitle displayInfo ] ;
+legend inUse isntNA
+   ifTrue: [ "Legend" printNL ; legend displayInfo ] ;
+dwellLabel inUse isntNA
+   ifTrue: [ "Dwell Label" printNL ; dwellLabel displayInfo ] ;
+] .
+;
+
+#--------------------
+#  LayoutTools GraphSpec Label
+#--------------------
+LayoutTools GraphSpec Label
+   defineFixedProperty: 'inUse' .
+   defineFixedProperty: 'state' .
+   defineFixedProperty: 'text' .
+   defineFixedProperty: 'color' .
+   defineFixedProperty: 'font' .
+   defineFixedProperty: 'size' .
+   defineFixedProperty: 'angle' .
+   defineFixedProperty: 'boxColor' .
+   defineFixedProperty: 'boxStyle' .
+   defineFixedProperty: 'boxSize' .
+   defineFixedProperty: 'boxImage' .
+
+defineMethod: [ | reset | 
+   :inUse <- NA ;
+   ^self copyFrom: defaultInstance
+] .
+
+defineMethod: [ | copyFrom: source | 
+   :inUse <- source inUse ;
+   :state <- source state ;
+   :text <- source text ;
+   :color <- source color ;
+   :font <- source font ;
+   :size <- source size ;
+   :angle <- source angle ;
+   :boxColor <- source boxColor ;
+   :boxStyle <- source boxStyle ;
+   :boxSize <- source boxSize ;
+   :boxImage <- source boxImage ;
+   ^self
+] .
+
+defineMethod: [ | setStateOn | 
+  :inUse <- TRUE ;
+  :state <- TRUE ;
+  ^self
+] .
+defineMethod: [ | setStateOff | 
+  :inUse <- NA ;
+  :state <- FALSE ;
+  ^self
+] .
+
+defineMethod: [ | setTextTo: input | 
+  :inUse <- TRUE ;
+  :text <- input ; 
+  ^self
+] .
+defineMethod: [ | setColorTo: input | 
+  :inUse <- TRUE ;
+  :color <- input ; 
+  ^self
+] .
+defineMethod: [ | setFontTo: input | 
+  :inUse <- TRUE ;
+  :font <- input ; 
+  ^self
+] .
+defineMethod: [ | setSizeTo: input | 
+  :inUse <- TRUE ;
+  :size <- input ; 
+  ^self
+] .
+defineMethod: [ | setAngleTo: input | 
+  :inUse <- TRUE ;
+  :angle <- input ; 
+  ^self
+] .
+
+defineMethod: [ | setBoxColorTo: input | 
+  :inUse <- TRUE ;
+  :boxColor <- input ; 
+  ^self
+] .
+defineMethod: [ | setBoxStyleTo: input | 
+  :inUse <- TRUE ;
+  :boxStyle <- input ; 
+  ^self
+] .
+defineMethod: [ | setBoxSizeTo: input | 
+  :inUse <- TRUE ;
+  :boxSize <- input ; 
+  ^self
+] .
+defineMethod: [ | setBoxImageTo: input | 
+  :inUse <- TRUE ;
+  :boxImage <- input ; 
+  ^self
+] .
+
+defineMethod: [ | setColorFontSizeTo: list |
+  :inUse <- TRUE ;
+  :color <- list at: 1 ;
+  :font <- list at: 2 ;
+  :size <- list at: 3 ;
+  ^self
+] .
+
+defineMethod: [ | setBoxColorStyleSizeTo: list |
+  :inUse <- TRUE ;
+  :boxColor <- list at: 1 ;
+  :boxStyle <- list at: 2 ;
+  :boxSize <- list at: 3 ;
+  ^self
+] .
+
+defineMethod: [ | displayInfo | 
+   " Label  : " print ; text do: [ print ; " " print ]  ; " | " print ; 
+   color print ; " | " print ; font print ; " | " print ; 
+   size print ; " | " print ; angle print ;
+   state isBoolean
+     ifTrue: [ " | " print ; 
+               state ifTrue: [ "On" ] ifFalse: [ "Off" ] . print ;
+             ] ;
+   newLine print ;
+   " Box    : " print ; 
+   boxColor print ; " | " print ; boxStyle print ; " | " print ; 
+   boxSize print ;  " | " print ; boxImage printNL ;
+] .
+
+defineMethod: [ | profile |
+"inUse: " print: 15 ; inUse printNL ;
+"text: " print: 15 ; text printNL ;
+"color: " print: 15 ; color printNL ;
+"font: " print: 15 ; font printNL ;
+"size: " print: 15 ; size printNL ;
+"angle: " print: 15 ; angle printNL ;
+"boxColor: " print: 15 ; boxColor printNL ;
+"boxStyle: " print: 15 ; boxStyle printNL ;
+"boxSize: " print: 15 ; boxSize printNL ;
+"boxImage: " print: 15 ; boxImage printNL ;
+] .
+;
+
+#--------------------
+#  LayoutTools GraphSpec Axis
+#--------------------
+LayoutTools GraphSpec Axis
+   defineFixedProperty: 'inUse' .
+   defineFixedProperty: 'state' .
+   defineFixedProperty: 'color' .
+   defineFixedProperty: 'ticColor' .
+   defineFixedProperty: 'font' .
+   defineFixedProperty: 'size' .
+   defineFixedProperty: 'angle' .
+   defineFixedProperty: 'minValue' .
+   defineFixedProperty: 'maxValue' .
+   defineFixedProperty: 'stepValue' .
+   defineFixedProperty: 'formatType' .
+   defineFixedProperty: 'format' .
+   defineFixedProperty: 'timeBase' .
+   defineFixedProperty: 'timeUnit' .
+   defineFixedProperty: 'labels' .
+   defineFixedProperty: 'scrollMin' .
+   defineFixedProperty: 'scrollMax' .
+
+defineMethod: [ | reset | 
+   :inUse <- NA ;
+   ^self copyFrom: defaultInstance
+] .
+
+defineMethod: [ | copyFrom: source | 
+   :inUse <- source inUse ;
+   :state <- source state ;
+   :color <- source color ;
+   :ticColor <- source ticColor ;
+   :font <- source font ;
+   :size <- source size ;
+   :angle <- source angle ;
+   :minValue <- source minValue ;
+   :maxValue <- source maxValue ;
+   :stepValue <- source stepValue ;
+   :formatType <- source formatType ;
+   :format <- source format ;
+   :timeBase <- source timeBase ;
+   :timeUnit <- source timeUnit ;
+   :labels <- source labels ;
+   :scrollMin <- source scrollMin ;
+   :scrollMax <- source scrollMax ;
+   ^self
+] .
+
+defineMethod: [ | setStateOn | 
+  :inUse <- TRUE ;
+  :state <- TRUE ;
+  ^self
+] .
+defineMethod: [ | setStateOff | 
+  :inUse <- NA ;
+  :state <- FALSE ;
+  ^self
+] .
+
+defineMethod: [ | setColorTo: input | 
+  :inUse <- TRUE ;
+  :color <- input ; 
+  ^self
+] .
+defineMethod: [ | setTicColorTo: input | 
+  :inUse <- TRUE ;
+  :ticColor <- input ; 
+  ^self
+] .
+defineMethod: [ | setFontTo: input | 
+  :inUse <- TRUE ;
+  :font <- input ; 
+  ^self
+] .
+defineMethod: [ | setSizeTo: input | 
+  :inUse <- TRUE ;
+  :size <- input ; 
+  ^self
+] .
+defineMethod: [ | setAngleTo: input | 
+  :inUse <- TRUE ;
+  :angle <- input ; 
+  ^self
+] .
+
+defineMethod: [ | setMinValueTo: input | 
+  :inUse <- TRUE ;
+  :minValue <- input ;
+  ^self
+] .
+
+defineMethod: [ | setMaxValueTo: input | 
+  :inUse <- TRUE ;
+  :maxValue <- input ;
+  ^self
+] .
+defineMethod: [ | setStepValueTo: input | 
+  :inUse <- TRUE ;
+  :stepValue <- input ;
+  ^self
+] .
+defineMethod: [ | setFormatTypeTo: input | 
+  :inUse <- TRUE ;
+  :formatType <- input ;
+  ^self
+] .
+defineMethod: [ | setFormatTo: input | 
+  :inUse <- TRUE ;
+  :format <- input ;
+  ^self
+] .
+defineMethod: [ | setTimeBaseTo: input | 
+  :inUse <- TRUE ;
+  :timeBase <- input ;
+  ^self
+] .
+defineMethod: [ | setTimeUnitTo: input | 
+  :inUse <- TRUE ;
+  :timeUnit <- input ;
+  ^self
+] .
+defineMethod: [ | setLabelsTo: input | 
+  :inUse <- TRUE ;
+  :labels <- input ;
+  ^self
+] .
+defineMethod: [ | setScrollMinTo: input | 
+  :inUse <- TRUE ;
+  :scrollMin <- input ;
+  ^self
+] .
+defineMethod: [ | setScrollMaxTo: input | 
+  :inUse <- TRUE ;
+  :scrollMax <- input ;
+  ^self
+] .
+
+defineMethod: [ | displayInfo | 
+   " Axis  : " print ; color print ; " | " print ;
+   ticColor print ; " | " print ; font print ; " | " print ; 
+   size print ; " | " print ; angle print ;
+   state isBoolean
+     ifTrue: [ " | " print ; 
+               state ifTrue: [ "On" ] ifFalse: [ "Off" ] . print ;
+             ] ;
+   newLine print ;
+   minValue print ; " | " print ; maxValue print ; " | " print ; 
+   stepValue print ; " | " print ; 
+   scrollMin print ; " | " print;  scrollMax printNL ;
+   formatType print ; " | " print ; format print; " | " print ;
+   timeBase print ; " | " print ; timeUnit print ; " | " print ; 
+   labels do: [ print ] ; 
+   newLine print ;
+] .
+
+defineMethod: [ | profile |
+"inUse: " print: 15 ; inUse printNL ;
+"state: " print: 15 ; state printNL ;
+"color: " print: 15 ; color printNL ;
+"ticColor: " print: 15 ; ticColor printNL ;
+"font: " print: 15 ; font printNL ;
+"size: " print: 15 ; size printNL ;
+"angle: " print: 15 ; angle printNL ;
+"minValue: " print: 15 ; minValue printNL ;
+"maxValue: " print: 15 ; maxValue printNL ;
+"stepValue: " print: 15 ; stepValue printNL ;
+"formatType: " print: 15 ; formatType printNL ;
+"format: " print: 15 ; format printNL ;
+"timeBase: " print: 15 ; timeBase printNL ;
+"timeUnit: " print: 15 ; timeUnit printNL ;
+"labels: " print: 15 ; labels do: [ print; " " print ; ] ; newLine print ;
+"scrollMin: " print: 15 ; scrollMin printNL ;
+"scrollMax: " print: 15 ; scrollMax printNL ;
+] .
+;
+
+
+#--------------------------------------------------
+
+LayoutTools GraphSpec initializeLocalAttributes ;
+
+#--------------------------------------------------
+
+####################
+#  DEFcore.layout : Piechart
+####################
+
+LayoutTools Piechart
+
+#--  LabelPos
+   defineFixedProperty: 'labelPosition' .
+
+#--  Slices
+   defineFixedProperty: 'slices' .
+
+#--  Initialization and Reset
+defineMethod: [ | initializeLocalAttributes | 
+  ^super initializeLocalAttributes ;
+  :slices <- ^global IndexedList new ;
+  ^self
+] .
+
+defineMethod: [ | reset |
+  ^super reset ;
+  clearSlices ;
+  :labelPosition <- NA ;
+  ^self
+] .
+
+#--  Update Attributes
+defineMethod: [ | setLabelPositionTo: input | 
+  :labelPosition <- input asNumber ;
+  ^self
+] .
+
+#--------------------
+#  slices
+#--------------------
+
+defineMethod: [ | clearSlices |
+  :slices <- ^global IndexedList new ;
+  ^self
+] .
+
+defineMethod: [ | addSlice: n |
+ !newOne <- Slice createInstance ;
+ slices at: n asInteger put: newOne ;
+ newOne
+] .
+
+defineMethod: [ | getSlice: n |
+  slices at: n asInteger 
+] .
+
+#--  display
+defineMethod: [ | profile | 
+  ^super profile ;
+  newLine print ; 
+  "labelPosition: " print: 15 ; labelPosition printNL ;
+  "Slices: " printNL ; 
+  slices numberElements
+  do: [ "  Slice " print ; position print: 3 ;
+        displayInfo ;
+      ] ;
+] .
+;
+
+#--------------------
+#  LayoutTools Piechart Slice
+#--------------------
+LayoutTools Piechart Slice
+   defineFixedProperty: 'amount' .
+   defineFixedProperty: 'color' .
+   defineFixedProperty: 'label' .   #--> label
+   defineFixedProperty: 'link' .
+
+#--  Initialization and Reset
+defineMethod: [ | initializeLocalAttributes | 
+  ^super initializeLocalAttributes ;
+  :label <- GraphSpec Label createInstance ;
+] .
+
+defineMethod: [ | reset | 
+   ^self copyFrom: defaultInstance
+] .
+
+defineMethod: [ | copyFrom: source | 
+   :amount <- source amount ;
+   :color <- source color ;
+   :label <- source label ;
+   :link  <- source link  ;
+   ^self
+] .
+
+defineMethod: [ | setAmountTo: input |
+  :amount <- input ; 
+  ^self
+] .
+defineMethod: [ | setColorTo: input |
+  :color <- input ; 
+  ^self
+] .
+defineMethod: [ | setLinkTo: input |
+  :link <- input ; 
+  ^self
+] .
+
+defineMethod: [ | displayInfo | 
+  amount print; " | " print ; 
+  color print ; " | " print ; link print ; " | " printNL ;
+  label displayInfo ;
+] .
+
+defineMethod: [ | profile | 
+  "amount: " print: 15 ; amount printNL ;
+  "color: " print: 15 ; color printNL ;
+  "link:  " print: 15 ; link  printNL ;
+  "label: " print: 15 ; label displayInfo ;
+] ;  
+
+LayoutTools Piechart initializeLocalAttributes ;
+
+#--------------------------------------------------
+
+####################
+#  Barchart
+####################
+LayoutTools Barchart
+
+   defineFixedProperty: 'type' .
+   defineFixedProperty: 'layout' .
+   defineFixedProperty: 'barLabels' .    #- ilist of strings
+   defineFixedProperty: 'bar3DDepth' .
+   defineFixedProperty: 'gridColors' .   #- (lineColor, BGColor, borderColor)
+
+   defineFixedProperty: 'topAxis' .
+   defineFixedProperty: 'bottomAxis' .
+   defineFixedProperty: 'leftAxis' .
+   defineFixedProperty: 'rightAxis' .
+
+   defineFixedProperty: 'dataSets' .
+
+#--  Initialization and Reset
+defineMethod: [ | initializeLocalAttributes | 
+  ^super initializeLocalAttributes ;
+  :barLabels <- ^global IndexedList new ;
+  :topAxis <- Axis createInstance ;
+  :bottomAxis <- Axis createInstance ;
+  :leftAxis <- Axis createInstance ;
+  :rightAxis <- Axis createInstance ;
+  :dataSets <- ^global IndexedList new ;
+  ^self
+] .
+
+defineMethod: [ | reset |
+  ^super reset ;
+  :type <- NA ;
+  :layout <- NA ;
+  :barLabels <- ^global IndexedList new;
+  :bar3DDepth <- NA ;
+  :gridColors <- NA ;
+  topAxis reset ;
+  bottomAxis reset ;
+  leftAxis reset ;
+  rightAxis reset ;
+  clearDataSets ;
+  ^self
+] .
+
+defineMethod: [ | clearDataSets |
+  :dataSets <- ^global IndexedList new ;
+  ^self
+] .
+
+#--  Update Attributes
+defineMethod: [ | setTypeTo: input |
+  :type <- input ;
+  ^self
+] .
+defineMethod: [ | setLayoutTo: input |
+  :layout <- input ;
+  ^self
+] .
+
+defineMethod: [ | addBarLabel: input at: n |
+  barLabels at: n asInteger put: input ;
+  ^self
+] .
+defineMethod: [ | setBarLabelsTo: list | 
+  :barLabels <- ^global IndexedList new ;
+  list isCollection
+    ifTrue: [ list ] ifFalse: [ list asList ] .
+  numberElements 
+     do: [ ^my addBarLabel: ^self at: position ] ;
+  ^self
+] .
+
+
+defineMethod: [ | setBar3DDepthTo: input | 
+  :bar3DDepth <- input asNumber ;
+  ^self
+] .
+
+defineMethod: [ | setGridColorsTo: input |   #- lineCol, bgCol, borderColor
+  :gridColors <- input ;
+  ^self
+] .
+
+
+defineMethod: [ | addDataSet: n |
+ !newOne <- DataSet createInstance ;
+ dataSets at: n asInteger put: newOne ;
+ newOne
+] .
+
+defineMethod: [ | getDataSet: number | 
+  dataSets at: number asInteger
+] .
+
+#--  display
+defineMethod: [ | profile | 
+  ^super profile ;
+  newLine print ; 
+  "type: " print: 15 ; type printNL ;
+  "layout: " print: 15 ; layout printNL ;
+  "bar3DDepth: " print ; bar3DDepth printNL ;
+  "gridColors: " print: 15 ; gridColors do: [ print ; " | " print ; ] ; 
+  newLine print ;
+  newLine print ;
+  topAxis inUse isntNA
+    ifTrue: [   "topAxis: " print: 15 ; topAxis displayInfo ] ;
+  bottomAxis inUse isntNA
+    ifTrue: [   "bottomAxis: " print: 15 ; bottomAxis displayInfo ] ;
+  leftAxis inUse isntNA
+    ifTrue: [   "leftAxis: " print: 15 ; leftAxis displayInfo ] ;
+  rightAxis inUse isntNA
+    ifTrue: [   "rightAxis: " print: 15 ; rightAxis displayInfo ] ;
+  newLine print ;
+  "barLabels: " print: 15 ; barLabels do: [ print ;  " | " print ] ; 
+  newLine print ;
+  "DataSets: " printNL ; 
+  dataSets numberElements
+  do: [ "  Set " print ; position print: -3 ;
+        displayInfo ;
+      ] ;
+] ;
+
+
+#--------------------
+#  LayoutTools Barchart DataSet
+#--------------------
+LayoutTools Barchart DataSet
+   defineFixedProperty: 'label' .
+   defineFixedProperty: 'color' .
+   defineFixedProperty: 'valueList' .   #- valueList and linkList should
+   defineFixedProperty: 'linkList' .    #- have same number of values
+
+defineMethod: [ | initializeLocalAttributes | 
+  ^super initializeLocalAttributes ;
+  clearLists ;
+  ^self
+] .
+
+defineMethod: [ | reset | 
+   clearLists ;
+   ^self copyFrom: defaultInstance
+] .
+
+defineMethod: [ | copyFrom: source | 
+   :label <- source label ;
+   :color <- source color ;
+   ^self
+] .
+
+defineMethod: [ | clearLists |
+  :valueList <- ^global IndexedList new ;
+  :linkList <- ^global IndexedList new ;
+  ^self
+] .
+
+defineMethod: [ | setLabelTo: input |
+  :label <- input ; 
+  ^self
+] .
+
+defineMethod: [ | setColorTo: input |
+  :color <- input ; 
+  ^self
+] .
+
+defineMethod: [ | addValue: input at: n |
+  ^self addValue: input withLink: NA at: n
+] .
+
+defineMethod: [ | addValue: input withLink: link at: n | 
+  valueList at: n asInteger put: input ;
+  linkList  at: n asInteger put: link ;
+  ^self
+] .
+
+defineMethod: [ | setValuesTo: list | 
+  :valueList <- ^global IndexedList new ;
+  list isCollection
+    ifTrue: [ list ] ifFalse: [ list asList ] .
+  numberElements 
+     do: [ ^my valueList at: position put: asSelf ] ;
+  ^self
+] .
+
+defineMethod: [ | setLinksTo: list | 
+  :linkList <- ^global IndexedList new ;
+  list isCollection
+    ifTrue: [ list ] ifFalse: [ list asList ] .
+  numberElements 
+     do: [ ^my linkList at: position put: asSelf ] ;
+  ^self
+] .
+
+defineMethod: [ | displayInfo | 
+  label print; " | " print ; color print ; " | " print ; 
+  linkList any: [ isntNA ] . ifTrue: [ " links defined | " print ] ;
+  valueList do: [ print ; " " print ] ;
+  newLine print ;
+] .
+
+defineMethod: [ | profile | 
+  "label: " print: 15 ; label printNL ;
+  "color: " print: 15 ; color printNL ;
+  " " print: 5 ; "Value" print: -10 ; "Link" printNL: -10 ; 
+  valueList numberElements
+  do: [ position print: -5 ; 
+        ^self print: 10 ; ^my linkList at: position . printNL: 10;
+      ] ;
+] .  
+;
+
+#--------------------
+#  Initializations
+#--------------------
+LayoutTools Barchart DataSet initializeLocalAttributes ;
+LayoutTools Barchart initializeLocalAttributes ;
+
+#--------------------------------------------------
+
+####################
+#  Linechart
+####################
+LayoutTools Linechart
+
+   defineFixedProperty: 'gridColors' .   #- (lineColor, BGColor, borderColor)
+
+   defineFixedProperty: 'topAxis' .
+   defineFixedProperty: 'bottomAxis' .
+   defineFixedProperty: 'leftAxis' .
+   defineFixedProperty: 'rightAxis' .
+
+   defineFixedProperty: 'dataSets' .
+
+#--  Initialization and Reset
+defineMethod: [ | initializeLocalAttributes | 
+  ^super initializeLocalAttributes ;
+  :topAxis <- Axis createInstance ;
+  :bottomAxis <- Axis createInstance ;
+  :leftAxis <- Axis createInstance ;
+  :rightAxis <- Axis createInstance ;
+  :dataSets <- ^global IndexedList new ;
+  ^self
+] .
+
+defineMethod: [ | reset |
+  ^super reset ;
+  :gridColors <- NA ;
+  topAxis reset ;
+  bottomAxis reset ;
+  leftAxis reset ;
+  rightAxis reset ;
+  clearDataSets ;
+  ^self
+] .
+
+defineMethod: [ | clearDataSets |
+  :dataSets <- ^global IndexedList new ;
+  ^self
+] .
+
+#--  Update Attributes
+defineMethod: [ | setGridColorsTo: input |   #- lineCol, bgCol, borderColor
+  :gridColors <- input ;
+  ^self
+] .
+
+
+defineMethod: [ | addDataSet: n |
+ !newOne <- DataSet createInstance ;
+ dataSets at: n asInteger put: newOne ;
+ newOne
+] .
+
+defineMethod: [ | getDataSet: number | 
+  dataSets at: number asInteger
+] .
+
+#--  display
+defineMethod: [ | profile | 
+  ^super profile ;
+  newLine print ; 
+  "gridColors: " print: 15 ; gridColors do: [ print ; " | " print ; ] ; 
+  newLine print ;
+  newLine print ;
+  topAxis inUse isntNA
+    ifTrue: [   "topAxis: " print: 15 ; topAxis displayInfo ] ;
+  bottomAxis inUse isntNA
+    ifTrue: [   "bottomAxis: " print: 15 ; bottomAxis displayInfo ] ;
+  leftAxis inUse isntNA
+    ifTrue: [   "leftAxis: " print: 15 ; leftAxis displayInfo ] ;
+  rightAxis inUse isntNA
+    ifTrue: [   "rightAxis: " print: 15 ; rightAxis displayInfo ] ;
+  newLine print ;
+  "DataSets: " printNL ; 
+  dataSets numberElements
+  do: [ "  Set " print ; position print: -3 ;
+        displayInfo ;
+      ] ;
+] ;
+
+
+#--------------------
+#  LayoutTools Linechart DataSet
+#--------------------
+LayoutTools Linechart DataSet
+   defineFixedProperty: 'label' .
+   defineFixedProperty: 'symbolColor' .
+   defineFixedProperty: 'symbolType' .
+   defineFixedProperty: 'symbolSize' .
+   defineFixedProperty: 'symbolStyle' .
+   defineFixedProperty: 'lineType' .
+   defineFixedProperty: 'lineSize' .
+   defineFixedProperty: 'lineColor' .
+   defineFixedProperty: 'fillColor' .
+
+   defineFixedProperty: 'valueList' .   #- valueList and linkList should
+   defineFixedProperty: 'linkList' .    #- have same number of values
+
+defineMethod: [ | initializeLocalAttributes | 
+  ^super initializeLocalAttributes ;
+  clearLists ;
+  ^self
+] .
+
+defineMethod: [ | reset | 
+   clearLists ;
+   ^self copyFrom: defaultInstance
+] .
+
+defineMethod: [ | copyFrom: source | 
+   :label <- source label ;
+   :symbolColor <- source symbolColor ;
+   :symbolType <- source symbolType ;
+   :symbolSize <- source symbolSize ;
+   :symbolStyle <- source symbolStyle ;
+   :lineType <- source lineType ;
+   :lineSize <- source lineSize ;
+   :lineColor <- source lineColor ;
+   :fillColor <- source fillColor ;
+   ^self
+] .
+
+defineMethod: [ | clearLists |
+  :valueList <- ^global IndexedList new ;
+  :linkList <- ^global IndexedList new ;
+  ^self
+] .
+
+defineMethod: [ | setLabelTo: input |
+  :label <- input ; 
+  ^self
+] .
+
+defineMethod: [ | setSymbolColorTo: input | 
+  :symbolColor <-  input ;
+  ^self
+] .
+
+defineMethod: [ | setSymbolTypeTo: input | 
+  :symbolType <-  input ;
+  ^self
+] .
+
+defineMethod: [ | setSymbolSizeTo: input | 
+  :symbolSize <-  input ;
+  ^self
+] .
+
+defineMethod: [ | setSymbolStyleTo: input | 
+  :symbolStyle <-  input ;
+  ^self
+] .
+
+defineMethod: [ | setLineTypeTo: input | 
+  :lineType <-  input ;
+  ^self
+] .
+
+defineMethod: [ | setLineSizeTo: input | 
+  :lineSize <-  input ;
+  ^self
+] .
+
+defineMethod: [ | setLineColorTo: input | 
+  :lineColor <-  input ;
+  ^self
+] .
+
+defineMethod: [ | setFillColorTo: input | 
+  :fillColor <-  input ;
+  ^self
+] .
+
+defineMethod: [ | addValue: input at: n |   #- input should by x,y pair
+  ^self addValue: input withLink: NA at: n
+] .
+
+defineMethod: [ | addValue: input withLink: link at: n | 
+  valueList at: n asInteger put: input ;
+  linkList  at: n asInteger put: link ;
+  ^self
+] .
+
+defineMethod: [ | setValuesTo: list | 
+  :valueList <- ^global IndexedList new ;
+  list isCollection
+    ifTrue: [ list ] ifFalse: [ list asList ] .
+  numberElements 
+     do: [ ^my valueList at: position put: asSelf ] ;
+  ^self
+] .
+
+defineMethod: [ | setLinksTo: list | 
+  :linkList <- ^global IndexedList new ;
+  list isCollection
+    ifTrue: [ list ] ifFalse: [ list asList ] .
+  numberElements 
+     do: [ ^my linkList at: position put: asSelf ] ;
+  ^self
+] .
+
+defineMethod: [ | displayInfo | 
+  label print; " | " print ; symbolColor print ; " | " print ; 
+  symbolType print ; " | " print ; symbolSize print ; " | " print ;
+  symbolStyle print ; " | " print ; lineType print ; " | " print ;
+  lineSize print ; " | " print ; lineColor print ; " | " print ;
+  fillColor print ; " | " print ;
+  linkList any: [ isntNA ] . ifTrue: [ " links defined | " print ] ;
+  valueList do: [ print ; " " print ] ;
+  newLine print ;
+] .
+
+defineMethod: [ | profile | 
+  "label: " print: 15 ; label printNL ;
+  "symbolColor: " print: 15 ; symbolColor printNL ;
+  "symbolType: " print: 15 ; symbolType printNL ;
+  "symbolSize: " print: 15 ; symbolSize printNL ;
+  "symbolStyle: " print: 15 ; symbolStyle printNL ;
+  "lineType: " print: 15 ; lineType printNL ;
+  "lineSize: " print: 15 ; lineSize printNL ;
+  "lineColor: " print: 15 ; lineColor printNL ;
+  "fillColor: " print: 15 ; fillColor printNL ;
+  " " print: 5 ; "Value" print: -10 ; "Link" printNL: -10 ; 
+  valueList numberElements
+  do: [ position print: -5 ; 
+        ^self print: 10 ; ^my linkList at: position . printNL: 10;
+      ] ;
+] .  
+;
+
+#--------------------
+#  Initializations
+#--------------------
+LayoutTools Linechart DataSet initializeLocalAttributes ;
+LayoutTools Linechart initializeLocalAttributes ;
+
+#--------------------------------------------------
+
+#--------------------
+#  Additions to HtmlAccess
+#--------------------
+
+Interface HtmlAccess
+   define: 'netChartsCodeBase' toBe: "/NetCharts/classes" .
+;
+
+Interface HtmlAccess defineMethod: [ | setNetChartsCodeBaseTo: string |
+  ^self define: 'netChartsCodeBase' toBe: string ;
+  ^self
+] ;
+
+Interface HtmlAccess setNetChartsCodeBaseTo: "/vision/NetCharts/classes" ;
+
+#--------------------
+#  Additions to FormatTools
+#--------------------
+FormatTools defineMethod: [ | buildPiechartFor: graph | 
+ [
+  "---  Pie Chart Goes Here  ---" printNL ;
+  graph profile
+ ] divertOutput
+] ;
+
+FormatTools defineMethod: [ | buildBarchartFor: graph | 
+ [
+  "---  Bar Chart Goes Here  ---" printNL ;
+  graph profile
+ ] divertOutput
+] ;
+
+FormatTools defineMethod: [ | buildLinechartFor: graph | 
+ [
+  "---  Line Chart Goes Here  ---" printNL ;
+  graph profile
+ ] divertOutput
+] ;
+
+#--------------------
+
+FormatTools Html
+   define: 'codeBase' toBe: "/NetCharts/classes" .
+
+defineMethod: [ | displayItem: item withLabel: label | 
+  item isntNA
+  ifTrue: 
+    [ " " print: 5 ; label print ; " = " print ; 
+      item asString print ; ";" printNL 
+    ] ;
+] .
+
+defineMethod: [ | displaySet: set withLabel: label |
+  !list <- set isCollection
+      ifTrue: [ set ] ifFalse: [ set asList ] . numberElements ;
+  label isntNA ifTrue: [ " " print: 5 ; label print ; " = " print ;] ;
+  " ( " print ; 
+  list do: [ position != 1 ifTrue: [ ", " print ] ;
+             ^self else: "" . asString print ;
+           ] ;
+   " ) " print ;
+  label isntNA ifTrue: [ "; " printNL ] ifFalse: [ ", " printNL ] ;
+] .
+
+defineMethod: [ | displayList: list withLabel: label |
+  !values <- list isCollection
+      ifTrue: [ list ] ifFalse: [ list asList ] . numberElements ;
+  " " print: 5 ; label print ; " = " print ; 
+  values do: [ ^self else: "" . asString print ;
+               position != ^my values count
+                 ifTrue: [ ", " print ] ;
+             ] ;
+  " ;" printNL ;
+] .
+
+defineMethod: [ | displayActiveLabels: links forSetNumber: n | 
+!label <- "ActiveLabels" concat: (n asInteger else: 1) ;
+!list <- links isCollection ifTrue: [ links ] ifFalse: [ links asList ] ;
+list any: [ isntNA ] .
+ifTrue:
+  [ "     ActiveClicks = 1; " printNL ;
+    "     ActiveLabels" concat: (n asInteger else: "") . print; " = " printNL ;
+    list send: [ ^self else: "" ] .
+    do: [ !set <- "" asQuotedString, asSelf ;
+          " " print: 5 ; ^my displaySet: set withLabel: NA ;
+        ] ;
+    "     ;" printNL ;
+  ] ;
+
+] .
+
+defineMethod: [ | displayLabelSetFor: label withKeyword: keyword | 
+   label inUse isntNA
+   ifTrue:
+     [
+     !boxKeyword <- keyword = "DwellLabel" 
+          ifTrue: [ "DwellBox" ] ifFalse: [ keyword concat: "Box" ] ;
+     !text <- [ label text else: "" . do: [ print ; "\\n" print ] 
+              ] divertOutput drop: -2 ;
+     !set <- text asQuotedString, label color,
+         (label font isntNA ifTrue: [ label font asQuotedString ]) ,
+         label size asNumber, label angle asNumber ;
+     ^self displaySet: set withLabel: keyword ;
+     !set <- label boxColor, 
+             (label boxStyle isntNA ifTrue: [ label boxStyle toUpper] ), 
+             label boxSize asNumber,
+             (label boxImage isntNA
+                ifTrue: [ External resourcePath else: "" .
+                            concat: label boxImage . asQuotedString 
+                        ] 
+             ) ;
+     ^self displaySet: set withLabel: boxKeyword ;
+     ] ;
+] .
+
+defineMethod: [ | displayAxisFor: axis withLocation: location | 
+   axis inUse isntNA
+   ifTrue:
+     [
+     !keyword <- location concat: "Color" ;     #- TopColor
+     ^self displayItem: axis color withLabel: keyword ;
+
+     axis state isTrue
+     ifTrue:
+       [ !keyword <- location concat: "Tics" ;      #- TopTics
+         !set <- "ON" asQuotedString , axis ticColor, 
+            (axis font isntNA ifTrue: [ axis font asQuotedString ]) ,
+             axis size asNumber, axis angle asNumber ;
+         ^self displaySet: set withLabel: keyword ;
+       ] ;
+
+     !set <- axis send: [ formatType, format, timeBase, timeUnit ] ;
+     set any: [ isntNA ] .
+     ifTrue:
+       [ !keyword <- location concat: "Format" ;      #- TopFormat
+         :set <- set numberElements 
+           send: [ position = 1 
+                     ifTrue: [ ^self ] 
+                     ifFalse: [ isString ifTrue: [asQuotedString ] ]
+                 ] ;
+         ^self displaySet: set withLabel: keyword ;
+       ] ;
+
+     !set <- axis send: [ minValue, maxValue, stepValue ] ;
+     set any: [ isntNA ] .
+     ifTrue:
+       [ !keyword <- location concat: "Scale" ;      #- TopScale
+         :set <- set send: 
+            [ isString 
+                ifTrue: [ asQuotedString ]
+               ifFalse: [ asNumber else: 0 . asString ] 
+            ] ;
+         ^self displaySet: set withLabel: keyword ;
+       ] ;
+
+     axis labels isntNA
+     ifTrue:
+       [ !keyword <- location concat: "Labels" ;      #- TopLabels
+         !set <- axis labels send: [ asString asQuotedString ] ;
+         ^self displaySet: set withLabel: keyword ;
+       ] ;
+
+     !set <- axis send: [ scrollMin, scrollMax ] ;
+     set any: [ isntNA ] .
+     ifTrue:
+       [ !keyword <- location concat: "Scroll" ;      #- TopScrol
+         :set <- set send: 
+            [ isString 
+                ifTrue: [ asQuotedString ]
+               ifFalse: [ asNumber else: 0 . asString ] 
+            ] ;
+         ^self displaySet: set withLabel: keyword ;
+       ] ;
+
+     ] ;
+
+] .
+
+defineMethod: [ | buildGraphSetupFor: graph ofClass: graphClass | 
+ [
+   "<p>" print ;
+   "<applet code=" print ; graphClass asQuotedString printNL ;
+   "        codebase=" print ; 
+   External netChartsCodeBase asQuotedString printNL ;
+   "        align=" print ; "baseline" asQuotedString printNL ;
+   "        width=" print ; graph width else: 500 . asString printNL ;
+   "        height=" print ; graph height else: 400 . asString printNL ;
+   ">" printNL ;
+   graph 
+   do: [ "<param " printNL ;
+         "  name='NFParamScript'" printNL ;
+         "  value='" printNL ;
+         !set <- (bgColor), (bgStyle else: "NONE"), 
+                 (bgSize else: 4 . asString), 
+                 (^my External resourcePath else: "" .
+                     concat: (bgImage else: "" ) . asQuotedString
+                 ) ;
+         ^my displaySet: set withLabel: "Background" ;
+
+         ^my displayLabelSetFor: header withKeyword: "Header" ;
+         ^my displayLabelSetFor: footer withKeyword: "Footer" ;
+         ^my displayLabelSetFor: leftTitle withKeyword: "LeftTitle" ;
+         ^my displayLabelSetFor: rightTitle withKeyword: "RightTitle" ;
+         ^my displayLabelSetFor: dwellLabel withKeyword: "DwellLabel" ;
+         ^my displayLabelSetFor: legend withKeyword: "Legend" ;
+
+         colorTable isntNA
+           ifTrue: [ ^my displayItem: colorTable withLabel: "ColorTable"] ;
+
+        ];
+  ] divertOutput
+] .
+
+defineMethod: [ | buildGraphWrapupFor: graph | 
+   "'>Graphs require Java support</applet></p>" 
+] .
+
+defineMethod: [ | buildPiechartFor: graph | 
+ [ 
+   ^self buildGraphSetupFor: graph ofClass: "NFPiechartApp.class" . printNL ;
+
+   ^self displayItem: graph labelPosition withLabel: "LabelPos" ;
+
+   "     Slices =" printNL ;
+   graph slices
+   do: [ 
+       !set <- amount, color, (label text else: "" . asQuotedString),
+           label color, 
+           (label font isntNA ifTrue: [ label font asQuotedString ] ) ,
+           label size asNumber , label angle asNumber ,
+           label boxColor, 
+           (label boxStyle isntNA 
+                ifTrue: [ label boxStyle toUpper else: "NULL" ] ) ;
+       " " print: 5 ; ^my displaySet: set withLabel: NA ;
+       ] ;
+    "     ;" printNL ;
+
+    !links <- graph slices send: [ link ] ;
+    ^self displayActiveLabels: links forSetNumber: NA ;
+
+  ^self buildGraphWrapupFor: graph . printNL ;
+
+ ] divertOutput
+] . 
+
+defineMethod: [ | buildBarchartFor: graph | 
+ [
+  ^self buildGraphSetupFor: graph ofClass: "NFBarchartApp.class" . print;
+
+  graph do: [
+     !tools <- ^my ;
+     tools displayItem: type withLabel: "GraphType" ;
+     tools displayItem: layout withLabel: "GraphLayout" ;
+     barLabels count > 0 
+     ifTrue: 
+       [ !set <- barLabels send: [ asString asQuotedString ] ;
+         tools displayList: set withLabel: "BarLabels" ;
+       ] ;
+     tools displayItem: bar3DDepth withLabel: "Bar3DDepth" ;
+     gridColors isntNA
+        ifTrue: [ ^my displaySet: gridColors withLabel: "Grid" ] ;
+
+     ^my displayAxisFor: topAxis withLocation: "Top" ;
+     ^my displayAxisFor: bottomAxis withLocation: "Bottom" ;
+     ^my displayAxisFor: leftAxis withLocation: "Left" ;
+     ^my displayAxisFor: rightAxis withLocation: "Right" ;
+
+     "     DataSets = " printNL ;
+     dataSets numberElements
+     do: [ !set <- (label else: ("Set " concat: position) . asQuotedString ),
+               color ;
+           ^my tools displaySet: set withLabel: NA ;
+         ] ;
+     "  ;" printNL ;
+     dataSets numberElements
+     do: [ !tools <- ^my tools ;
+           !label <- "DataSet" concat: position ;
+           !values <- valueList
+              send: [ isNumber ifTrue: [ ^self ] ifFalse: [ 0 ] ] ;
+           tools displayList: values withLabel: label ;
+           tools displayActiveLabels: linkList forSetNumber: position ;
+         ] ;
+  ];
+  ^self buildGraphWrapupFor: graph . print;
+ ] divertOutput
+] .
+
+defineMethod: [ | buildLinechartFor: graph | 
+ [
+  ^self buildGraphSetupFor: graph ofClass: "NFXYChartApp.class" . print;
+
+  graph do: [
+    !tools <- ^my ;
+    tools displayAxisFor: topAxis withLocation: "Top" ;
+    tools displayAxisFor: bottomAxis withLocation: "Bottom" ;
+    tools displayAxisFor: leftAxis withLocation: "Left" ;
+    tools displayAxisFor: rightAxis withLocation: "Right" ;
+
+    gridColors isntNA
+       ifTrue: [ tools displaySet: gridColors withLabel: "Grid" ] ;
+
+     "     DataSets = " printNL ;
+     dataSets numberElements
+     do: [ !set <- (label else: ("Set " concat: position) . asQuotedString ),
+               symbolColor, symbolType, symbolSize, symbolStyle,
+               lineType, lineSize, lineColor, fillColor ;
+           ^my tools displaySet: set withLabel: NA ;
+         ] ;
+     "  ;" printNL ;
+     dataSets numberElements
+     do: [ !tools <- ^my tools ;
+           "     DataSet" concat: position . concat: " = " . print ;
+           valueList
+           do: [ "(" print ; 
+                 ^self at: 1 . 
+                 do: [ isString ifTrue: [ asQuotedString print ]
+                               ifFalse: [ asNumber else: 0 . print ] ;
+                       ", " print ;
+                     ] ;
+                 ^self at: 2 . asNumber else: 0 . print ; "), " print ;
+               ] ;
+           " ;" printNL ;
+           tools displayActiveLabels: linkList forSetNumber: position ;
+         ] ;
+  ];
+  ^self buildGraphWrapupFor: graph . print;
+ ] divertOutput
+] .
+
+;
+

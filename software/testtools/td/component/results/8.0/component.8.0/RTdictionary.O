@@ -1,0 +1,87 @@
+
+Beginning file: RTdictionary.S ...
+This test creates a test store and fills its dictionary to the breaking point
+It should generate a Warning and then an Error ...
+>>>  Warning   <<<
+*	Selector U-Vector Representation Type Handler [167]
+*	An Internal Inconsistency
+*	Dictionary String Space[0:17122] Size (268372859) Nearing Maximum (268435455)
+
+>>>  Error Trapped By Read-Eval-Print  <<<
+*	Selector U-Vector Representation Type Handler [157]
+*	An Internal Inconsistency
+*	Dictionary String Space[0:17122] Size Exceeds Maximum (268435455)
+
+*****    P    120 LocateOrAddEntryInDictionaryOf
+*****    B    120 | 
+__define: aSelector| 
+aSelector locateOrAddInDictionaryOf: ^self .<- ^my TheDefaultProperty; 
+^self
+*****    B    120 ^global store __define: ("_" concat: ^my count .fill: 900 + ^self)
+*****    P    120 SendForValue
+*****    P      1 IterateInContext
+*****    B      1 
+120 sequence do: [^global store __define: ("_" concat: ^my count .fill: 900 + ^self)]; 
+:count <- count + 1
+*****    P      1 WhileTrue
+*****    B      1 id print; ": RTdictionary" printNL; 
+Utility echoToFile: (^tmp componentOutput concat: "/RTdictionary.O"); 
+newLine print; "Beginning file: RTdictionary.S ..." printNL; 
+"This test creates a test store and fills its dictionary to the breaking point" printNL; 
+"It should generate a Warning and then an Error ..." printNL; 
+!store <- Object basicSpecialized; 
+!count <- 0; [
+    TRUE]whileTrue: [
+    120 sequence do: [^global store __define: ("_" concat: ^my count .fill: 900 + ^self)]; 
+    :count <- count + 1]; 
+
+Type:
+    ?d         ... to invoke the debugger.
+    ?f         ... to erase the current program.
+    ?g         ... to compile and run the current program.
+    ?l         ... to compile and run the last program.
+    ?r[count]  ... to compile and repeated run the current program.
+    ?c         ... to compile the current program.
+    ?s         ... to display the current program.
+    ?S         ... to display the last program.
+    ?t         ... to display compile and run times of the last program.
+    ?e         ... to toggle input echo.
+    ?w         ... to save the global environment.
+
+Any thing else will get appended to the current input buffer.
+Compile Statistics:
+elapsed: 0.000282
+user: 0.000305
+system: 0
+majflts: 0
+minflts: 0
+Execute Statistics:
+elapsed: 24.6989
+user: 24.5494
+system: 0.155733
+majflts: 0
+minflts: 57203
+
+ ... and then, a small addition should succeed with a warning. 
+>>>  Warning   <<<
+*	Selector U-Vector Representation Type Handler [167]
+*	An Internal Inconsistency
+*	Dictionary String Space[0:17122] Size (268373904) Nearing Maximum (268435455)
+
+ and we should see the '3' we stored at 'z' ... not an SNF!!
+        3
+
+End of file: RTdictionary.S
+
+Compile Statistics:
+elapsed: 0.000159
+user: 0.000139
+system: 2.1e-05
+majflts: 0
+minflts: 0
+Execute Statistics:
+elapsed: 0.000527
+user: 0.000459
+system: 6.9e-05
+majflts: 0
+minflts: 1

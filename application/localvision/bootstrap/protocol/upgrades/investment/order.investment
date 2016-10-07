@@ -1,0 +1,18 @@
+###
+# order.investment
+###
+
+# The script adds full investment protocol to a bootstrap.
+# expects the PatchTable has been installed 
+
+^tmp define: "upgradeDir" 
+       toBe: (ProcessControlTools getEnvFor: "osvAdmin" .
+                 concat: "/localvision/bootstrap/protocol/upgrades/" ) ;
+ 
+^tmp upgradeDir concat: "investment/DEFcore.inv" . asFileContents evaluateIn: CoreWorkspace ;
+
+#- Add core modules to PatchTable.
+^tmp upgradeDir concat: "investment/INITpatch.inv" . asFileContents evaluateIn: CoreWorkspace ;
+^tmp upgradeDir concat: "investment/INSTfeeds.inv" . asFileContents evaluateIn: CoreWorkspace ;
+
+

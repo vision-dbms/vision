@@ -1,0 +1,198 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                   Vision Database Drivers
+
+
+                                          Section 1
+
+                                         Introduction
+
+
+
+
+            Data that originates outside of your Vision database is often provided
+            in "bulk" form.  Raw files can contain hundreds to millions of records
+            and can be hundreds of megabytes in size.  Rather  than  process  this
+            data  as  though  it  is  a  series of individual transactions, Vision
+            provides a set of database loading  tools  optimized  to  support  the
+            "bulk" nature of these updates.  In addition to providing an efficient
+            means for updating large data files, these tools  were  designed  with
+            two principal objectives in mind:
+
+
+              1.  To provide a facility general enough to support a wide range  of
+                  database  formats  without requiring specialized programming for
+                  each new data source added to the system.
+
+              2.  To provide a facility flexible enough  to  address  the  subtle,
+                  unique, and peculiar aspects of each individual data source.
+
+
+            After data is transferred from the  external  media  on  which  it  is
+            provided  to files on your system's disk, it is incorporated into your
+            Vision environment as a set of one or  more  classes  whose  instances
+            correspond to the records (i.e., lines) in the external file and whose
+            properties correspond to the  fields  in  this  record.   It  is  then
+            reconciled  with existing Vision objects via methods that you write in
+            Vision.
+
+
+            External databases can be reconciled with other Vision objects in  two
+            general  ways.  The first strategy views the external database classes
+            as structures that  hold  data  temporarily.   A  Vision  program  can
+            examine  each instance and copy the data to other Vision properties if
+            appropriate, noting any exceptions and  errors.   Once  executed,  the
+            instances  in this class are no longer needed and can be reused by the
+            next database update.  The second update strategy views  the  database
+            classes  as  permanent  structures whose instances are linked to other
+            parts of the network.  A Vision program can examine each new instance,
+            linking  it  to  other  Vision  objects as appropriate.  Some database
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+
+
+
+
+            Introduction                                            1-2
+
+
+
+            updates use a combination of  these  strategies.   The  most  suitable
+            strategy  will  depend  on  the  details  of the specific data you are
+            incorporating.
+
+
+            This document describes the process of creating a "database driver" to
+            perform   "bulk"   updates   and   describes  various  approaches  for
+            reconciling this data with other Vision objects.  Section 2  describes
+            the  steps  needed to initially define a new external database driver.
+            Section 3 describes the process of updating your Vision database  with
+            external  data.  Section 4 defines approaches for reconciling external
+            data with  other  Vision  objects.   Section  5  describes  a  set  of
+            predefined  reconcile  methods  that  are useful with certain types of
+            external data.  Rules for modifying an existing  database  driver  are
+            described  in  Section  6.  Small data files can potentially be loaded
+            using the alternative technique described in Section 7.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            Vision Database Drivers                      Draft: May 1994
+
+
+
+

@@ -1,0 +1,716 @@
+###
+#  patch.pre7.fed
+#
+#  Incremental changes to core vision database from: federated
+#
+###
+
+
+####################
+#  new primitives
+####################
+
+String define: 'openDatabase' toBePrimitive: 6;
+Object define: 'ndfPathName' toBePrimitive: 510 withControlValue: 2;
+Object define: 'osdPathName' toBePrimitive: 510 withControlValue: 3;
+
+#=============
+# Federation Type Conversion
+#=============
+
+Object __define:'_inContextOf:' toBe: 10 asPrimitive ;
+
+TRUE, FALSE, Date, LowResolutionTime, HighResolutionTime
+do: [ ^self define: 'asPointerTo:' toBe: 31 asPrimitive ; ] ;
+
+Integer defineMethod:[|_inContextOf: context|
+  ^self == super 
+    ifTrue:  [^self asPointerTo: context Integer]
+    ifFalse: [^self]
+];
+
+Float defineMethod:[|_inContextOf: context|
+  ^self == super 
+    ifTrue:  [^self asPointerTo: context Float]
+    ifFalse: [^self]
+];
+
+Double defineMethod:[|_inContextOf: context|
+  ^self == super 
+    ifTrue:  [^self asPointerTo: context Double]
+    ifFalse: [^self]
+];
+
+NA defineMethod:[|_inContextOf: context|
+  ^self == super 
+    ifTrue:  [^self asPointerTo: context NA]
+    ifFalse: [^self]
+];
+
+TRUE defineMethod:[|_inContextOf: context|
+  ^self == super 
+    ifTrue:  [^self asPointerTo: context TRUE]
+    ifFalse: [^self]
+];
+
+FALSE defineMethod:[|_inContextOf: context|
+  ^self == super 
+    ifTrue:  [^self asPointerTo: context FALSE]
+    ifFalse: [^self]
+];
+
+Date defineMethod:[|_inContextOf: context|
+  ^self == super 
+    ifTrue:  [^self asPointerTo: context Date]
+    ifFalse: [^self]
+];
+
+LowResolutionTime defineMethod:[|_inContextOf: context|
+  ^self == super 
+    ifTrue:  [^self asPointerTo: context LowResolutionTime]
+    ifFalse: [^self]
+];
+
+HighResolutionTime defineMethod:[|_inContextOf: context|
+  ^self == super 
+    ifTrue:  [^self asPointerTo: context HighResolutionTime]
+    ifFalse: [^self]
+];
+
+Object defineMethod: [ | localizeValue | 
+  ^self
+] ;
+
+Boolean, Date, Number, Undefined, Time
+do: [ ^self defineMethod: [ | localizeValue | 
+               ^self _inContextOf: GlobalWorkspace
+            ] ;  
+    ] ;
+
+####################
+#  Federated Fixes
+####################
+
+#--------------------
+#  Date lookup resolution in t/s
+#--------------------
+Date define: '__asPointerTo:' toBePrimitive: 31;
+Date defineMethod: [ | convertToMyKindOfObject: aCandidate |
+#   aCandidate isDate 
+#      ifTrue: [ aCandidate asDate __asPointerTo: ^self ] 
+!convert <- aCandidate asDate ;
+convert isntNA
+   ifTrue: [ convert __asPointerTo: ^self ] 
+  ifFalse: [ CoreWorkspace NA ] 
+];
+LowResolutionTime define: '__asPointerTo:' toBePrimitive: 31;
+LowResolutionTime defineMethod: [ | convertToMyKindOfObject: aCandidate |
+#   aCandidate isLowResolutionTime
+#     ifTrue: [ aCandidate asLowResolutionTime __asPointerTo: ^self ] 
+!convert <- aCandidate asLowResolutionTime ;
+convert isntNA
+   ifTrue: [ convert __asPointerTo: ^self ] 
+  ifFalse: [ CoreWorkspace NA ] 
+];
+HighResolutionTime define: '__asPointerTo:' toBePrimitive: 31;
+HighResolutionTime defineMethod: [ | convertToMyKindOfObject: aCandidate |
+#   aCandidate isHighResolutionTime
+#      ifTrue: [ aCandidate asHighResolutionTime __asPointerTo: ^self ] 
+!convert <- aCandidate asHighResolutionTime ;
+convert isntNA
+   ifTrue: [ convert __asPointerTo: ^self ] 
+  ifFalse: [ CoreWorkspace NA ] 
+];
+
+#--------------------
+#  this change allows runningTotal and rank to work
+#--------------------
+Double, Integer, Float do: [ ^self deleteMessage: 'canonicalizedForSort' ];
+Number defineMethod: [ | canonicalizedForSort |
+  ^self asDouble asPointerTo: ^global Double
+];
+
+#--------------------
+#  this change allows sorts to work
+#--------------------
+Double, Integer, Float do: [ ^self deleteMessage: "orderUsingDictionary:" ];
+Number defineMethod: [ | orderUsingDictionary: dictionary |
+    ^self asDouble asPointerTo: ^global Double
+] ;
+
+#--------------------
+#  this change allows indexed list indexed by integer to work
+#--------------------
+Integer defineMethod: [ | canonicalized |
+  ^self asInteger asPointerTo: ^global Integer
+];
+
+IndexedList defineMethod: [ | at: aKey | 
+   aKey isInteger ifTrue: [ :aKey <- aKey canonicalized ] ;
+   ^self valueCell: aKey .
+        send: [isntNA ifTrue: [value] ]
+] ;
+
+IndexedList defineMethod: [ | at: aKey put: aValue | 
+   aKey isInteger ifTrue: [ :aKey <- aKey canonicalized ] ;
+  ^self newValueCell: aKey .<- aValue
+] ;
+
+#======================================================================
+
+####################
+#  New Subclasses
+####################
+
+#--------------------
+#  GenericTools
+#    this class provides a place for miscellaneous stuff
+#--------------------
+CoreWorkspace respondsTo: "GenericTools" . 
+ifFalse:
+  [ ToolKit createSubclass: "GenericTools" at: CoreWorkspace ;
+    GenericTools createSubclass: "LibraryTools" at: GenericTools ;
+    GenericTools LibraryTools createSubclass: "DBMapTools" ;
+    GenericTools LibraryTools createSubclass: "CalcPackageTools" ;
+  ] ;
+
+
+#======================================================================
+
+####################
+#  GenericTools Protocol
+####################
+
+# Returns ndfPathName or "" for a path to a 'network' or a 'site' database.
+# Used below, but also for opening MapLibrary and CalcLibrary without VisionDB.
+
+GenericTools defineMethod: [ | getDatabaseNDFFor: string |
+  !fedpath <- CoreWorkspace ProcessControlTools getEnvFor: "FedVisionRoot" ;
+  !ndfFile <- string concat: "/NDF" . fileExists
+       ifTrue: [ string concat: "/NDF" ]
+      ifFalse: [ fedpath concat: "/sites/" . concat: string . 
+                       concat: "/localvision/network/NDF" ] ;
+  !uuidFile <- ndfFile concat: ".UUID" ;
+  ndfFile fileExists && [ uuidFile fileExists ]
+   ifTrue:
+     [ ndfFile ]
+   ifFalse:
+     [ 
+       ndfFile fileExists
+           ifFalse: [ ">> NDF file does not exist: " print ; 
+                      ndfFile print ; " " printNL ;
+                    ] ;
+       uuidFile fileExists
+           ifFalse: [ ">> NDF.UUID file does not exist: " print ; 
+                      uuidFile print ; " " printNL ;
+                    ] ;
+       "" ]
+] ;
+
+#---------------------
+# SecurityMap Support
+#---------------------
+
+CoreWorkspace defineMethod: [ | SecurityMap |
+  DBMapTools home isntNA
+  ifTrue: [ DBMapTools home SecurityMap ]
+] ;
+
+CoreWorkspace Named __defineMethod: [ | SecurityMap |
+  CoreWorkspace DBMapTools home isntNA
+  ifTrue: [ CoreWorkspace DBMapTools home Named SecurityMap ]
+] ;
+
+CoreWorkspace defineMethod: [ | CurrencyMap |
+  DBMapTools home isntNA
+  ifTrue: [ DBMapTools home CurrencyMap ]
+] ;
+
+CoreWorkspace defineMethod: [ | VisionDB |
+  DBMapTools home isntNA
+  ifTrue: [ DBMapTools home VisionDB ]
+] ;
+
+# Redirect naming dictionary to MapLibrary naming dictionaries.
+CoreWorkspace Named __defineMethod: [ | VisionDB |
+  CoreWorkspace DBMapTools home isntNA
+  ifTrue: [ CoreWorkspace DBMapTools home Named VisionDB ]
+] ;
+
+CoreWorkspace defineMethod: [ | VisionDBMaster |
+  DBMapTools home isntNA
+  ifTrue: [ DBMapTools home VisionDBMaster ]
+] ;
+
+#----------
+# Library
+#----------
+# Save reference to application class in ^tmp libraryHomes (instead of '_home').
+Library defineMethod: [ | home |
+
+  'libraryHomes' locateInDictionaryOf: ^tmp . isNA
+  ifTrue: [ ^tmp define: 'libraryHomes' toBe: ^global IndexedList new ; ] ;
+
+  ^tmp libraryHomes at: ^self asSelf put:
+   ( ^tmp libraryHomes at: ^self asSelf .
+     else:
+     [ !ndfFile <- ^self homeLocation isntDefault
+         ifTrue: [ CoreWorkspace GenericTools getDatabaseNDFFor: ^self homeLocation ] ;
+       !core <- ndfFile isntDefault ifTrue: [ ndfFile openDatabase ] .
+                else: [ ">>> Cannot open " print ; ^self whatAmI print ; ": " print ;
+                        ^self homeLocation printNL ;
+                        NA ] ;
+       core isntNA
+       ifTrue: [ core send: ^self appType asBlock . send: ^self root asBlock ]
+     ]
+   )
+] ;
+
+Library defineMethod: [ | openAll |
+   #--------------------
+   #  Note: must run in iterate since 'home' databases cannot be
+   #        opened in a parallel list operation right now.
+   #--------------------
+   ^self activeList
+   iterate:
+     [ ^self home isntNA
+       ifFalse: [ ">>> Cannot open library: " print ; code printNL ; ] ;
+     ] ;
+] ;
+
+Library defineMethod: [ | displayAll |
+   "Library Type: " print ; ^self appType printNL ;
+   newLine print ;
+   "Code" print: 12 ; "Root" print: 25 ; "homeLocation" print: 20 ; "Name" printNL ;
+   ^self activeList
+   do: [ code print: 12 ;
+         root print: 25 ;
+         homeLocation print: 20 ;
+         name printNL ;
+       ] ;
+] ;
+
+####################
+
+#-----------------
+# FormulaLibrary
+#-----------------
+FormulaLibrary
+   defineFixedProperty: 'accessMethod' .
+;
+
+FormulaLibrary defineMethod: [ | initializeLocalAttributes | 
+  ^super initializeLocalAttributes ;
+  ^self setAccessMethodTo: code toLower ;
+] ;
+
+FormulaLibrary defineMethod: [ | default |
+  !me <- ^self entity ;
+  ^self named at: "Default" . home extendBy: [ !entity <- ^my me ; ]
+] ;
+
+FormulaLibrary defineMethod: [ | setDefaultHomeTo: class |
+  class isCalcPackage
+  ifTrue: [ ^tmp libraryHomes at: ^self defaultInstance put: class ; ] ;
+] ;
+
+# Create methods that map to Library instances.
+# This allows 'cp ca' rather than 'cp named at: "ca"'
+# For example:
+# FormulaLibrary defineMethod: [ | fs |
+#   !my <- ^self entity ;
+#   ^self named at: "fs" . home extendBy: [ !entity <- ^my me ; ]
+# ] ;
+
+FormulaLibrary defineMethod: [ | setAccessMethodTo: id |
+  ^self accessMethod isString && [ accessMethod != id ]
+  ifTrue: [ ^self deleteMessage: ^self accessMethod ; ] ;
+  :accessMethod <- id else: code toLower ;
+  !methodBlock <- [ "| " print; accessMethod print ; " | " print ;
+                    "!me <- ^self entity ;" print ;
+                    "^self named at: \"" print ; code print ; "\" . home extendBy: [ !entity <- ^my me ; ]" print ;
+                  ] divertOutput asBlock ;
+  ^self defineMethod: methodBlock ;
+  ^self
+] ;
+
+####################
+#  GenericTools LibraryTools
+####################
+
+GenericTools LibraryTools defineMethod: [ | setLibraryTo: name |
+  ^self define: 'libraryLocation' toBe: ( name isString ifTrue: [ name ] ) ;
+] ;
+
+GenericTools LibraryTools defineMethod: [ | home |
+  'libraryToolsHomes' locateInDictionaryOf: ^tmp . isntNA
+  ifTrue: [ ^tmp libraryToolsHomes at: ^self asSelf ]
+] ;
+
+GenericTools LibraryTools defineMethod: [ | openDatabase |
+
+  'libraryToolsHomes' locateInDictionaryOf: ^tmp . isNA
+  ifTrue: [ ^tmp define: 'libraryToolsHomes' toBe: ^global IndexedList new ; ] ;
+
+  !ndfFile <- ^self libraryLocation isntNA
+              ifTrue: [ ^self getDatabaseNDFFor: ^self libraryLocation ] ;
+  ^tmp libraryToolsHomes at: ^self asSelf put:
+  ( ndfFile isntDefault ifTrue: [ ndfFile openDatabase ] .
+    else: [ ">>> Cannot open " print ; ^self whatAmI print ; ": " print ;
+            ^self libraryLocation printNL ;
+            NA ]
+  ) ;
+] ;
+
+
+# DBMap Library Tools
+#---------------------
+DBMapTools setLibraryTo: "MapLibrary" ;
+
+DBMapTools defineMethod: [ | openLibrary |
+
+  ^self openDatabase ;
+
+  ^self home isntNA
+  ifTrue:
+  [ ^self home SecurityMap isAvailableForUse &&
+    [ ^self home CurrencyMap isAvailableForUse ]
+    ifTrue: [ ^self relinkMapLibrary ; ]
+    ifFalse: [ ^self rebuildMapLibrary ; ] ;
+  ] ;
+] ;
+
+DBMapTools defineMethod: [ | rebuildMapLibrary |
+  ^self home isntNA
+  ifTrue:
+  [ ^self home
+    do: [ VisionDB masterList
+          do: [ :version <- NA ; ] ;
+          VisionDB openAllDatabases ;
+          "Federated databases are open." printNL ;
+          VisionDB addAllDatabasesToDBMaps ;
+          SecurityMap rebuildAll ;
+          CurrencyMap rebuildAll ;
+        ] ;
+  ] ;
+  "Rebuilt maps in " print ; ^self libraryLocation printNL ;
+] ;
+
+DBMapTools defineMethod: [ | relinkMapLibrary |
+  ^self home isntNA
+  ifTrue:
+  [ ^self home
+    do: [ VisionDB openAllDatabases ;
+          "Federated databases are open." printNL ;
+          SecurityMap relinkAllDatabases ; 
+          CurrencyMap relinkAllDatabases ;
+        ] ;
+  ] ;
+  "Relinked to saved Maps." printNL ;
+] ;
+
+# CalcPackage Library Tools
+#---------------------------
+CalcPackageTools setLibraryTo: "CalcLibrary" ;
+
+CalcPackageTools defineMethod: [ | openLibrary |
+
+  ^self openDatabase ;
+
+  CoreWorkspace FormulaLibrary openAll ;
+
+  CoreWorkspace DBMapTools home isntNA
+  ifTrue:
+  [  # Set SecurityCalcs and AccountCalcs Library
+     CoreWorkspace
+     do: [ ## SecurityMap setCalcPackageTo: ApplicationTools SecurityCalcs ;
+           SecurityMap setCalcPackageTo: SecurityFormulaLibrary ;
+           Account define: 'calcPackage' toBe: AccountFormulaLibrary ;
+
+           SecurityFormulaLibrary
+           do: [ ^self setDefaultHomeTo: ^self fs CoreWorkspace ApplicationTools SecurityCalcs ; ] ;
+
+           AccountFormulaLibrary
+           do: [ ^self setDefaultHomeTo: ^self fs CoreWorkspace ApplicationTools AccountCalcs ; ] ;
+         ] ;
+  ]
+  ifFalse: [ ">>> SecurityMap is not available." printNL ; ] ;
+] ;
+
+#======================================================================
+
+####################
+#  IdSource: New Protocol
+#   (Note: this class exists in current bootstrap but is not really used)
+####################
+
+IdSource
+   defineFixedProperty: 'lookupRule' .
+   defineFixedProperty: 'updateRule' .
+;
+
+Named IdSource CUSIP :lookupRule <- 
+[ | :xref :id | 
+  xref isDictionary && id isString
+  ifTrue: 
+    [  xref at: id .
+         elseIf: [ id count = 9 ] then: [ xref at: (id take: 8) ] 
+    ]
+] ;
+
+Named IdSource CUSIP :updateRule <- 
+[ | :xref :id :val | 
+  xref isDictionary && id isString
+  ifTrue: 
+    [  xref at: id put: val ;
+       id count = 9 ifTrue: [ xref at: (id take: 8) put: val ] ;
+    ] ;
+] ;
+
+Named IdSource SEDOL :lookupRule <- 
+[ | :xref :id | 
+  xref isDictionary && id isString
+  ifTrue: 
+    [  xref at: id .
+         elseIf: [ id count = 7 ] then: [ xref at: (id take: 6) ] 
+    ]
+] ;
+
+Named IdSource SEDOL :updateRule <- 
+[ | :xref :id :val | 
+  xref isDictionary && id isString
+  ifTrue: 
+    [  xref at: id put: val ;
+       id count = 7 ifTrue: [ xref at: (id take: 6) put: val ] ;
+    ] ;
+] ;
+
+IdSource defineMethod: [ | getEntry: id in: xref |
+  lookupRule isBlock
+     ifTrue: [ lookupRule valueWith: xref and: id ] 
+    ifFalse: [ xref at: id ] 
+] ;
+
+IdSource defineMethod: [ | setEntry: id in: xref to: val |
+  updateRule isBlock
+     ifTrue: [ updateRule valueWith: xref and: id and: val ] 
+    ifFalse: [ xref at: id put: val] ;
+  ^self
+] ;
+
+
+#------------------------------------------------------
+
+####################
+#  Global  Access Methods
+####################
+
+Object defineMethod: [ | whereAmI |
+  !home <- CoreWorkspace ProcessControlTools getEnvFor: "HOME" ;
+  !jail <- CoreWorkspace ProcessControlTools 
+      getEnvFor: "FedVisionRoot" . concat: "/sites";
+  ^self ndfPathName 
+       to: "/localvision" . reverse from:"/" . reverse
+       translateString: jail to: "" .
+       translateString: home to: ""
+] ;
+
+#--------------------
+
+Object defineMethod: [ | asClassIn: db |
+!id <- ^self whatAmI ;
+!target <- db isVisionDB 
+   ifTrue: [ db ] ifFalse: [ db asString as: GlobalWorkspace VisionDB ] ;
+target home isntNA 
+  ifTrue: [id evaluateIn: target home ] ifFalse: [ ^self defaultInstance ]
+] ;
+
+#--------------------
+
+Object defineMethod: [ | globalMasterList |
+  !includeGlobal <- TRUE ;
+  !class <- ^self whatAmI ;
+  !list <- GlobalWorkspace VisionDB masterList
+      select: [ home isntNA ] .
+      do: [ home = GlobalWorkspace ifTrue: [ ^my :includeGlobal <- FALSE ] ] .
+      extendBy: [ !class <- ^my class evaluateIn: home ] .
+      collectListElementsFrom: [ class masterList select: [ isActive ] ] ;
+  includeGlobal
+     ifTrue: [ list append: ^self activeList ] ifFalse: [ list ]
+] ;
+
+#--------------------
+
+Object defineMethod: [ | globalDefineMethod: method |
+ !target <- ^self whatAmI ;
+ GlobalWorkspace VisionDB masterList select: [ home isntNA ] .
+    select: [ home respondsTo: ^my target ] .
+    do: [ ^my target evaluateIn: home . defineMethod: ^my method ] ;
+ ^self
+] ;
+
+#--------------------
+
+Entity defineMethod: [ | globalLocateId: id | 
+!class <- ^self ;
+id isEntity
+  ifTrue: [ id ] .
+  elseIf: [ id isString ]
+    then:
+     [ !localClass <- class whatAmI ;
+       GlobalWorkspace VisionDB masterList select: [ home isntNA ] .
+          sortUp: [ sortCode ] .
+          select: [ ^my localClass locateInDictionaryOf: home . isntNA ] .   
+         send: [ ^my localClass evaluateIn: home . locateId: ^my id ] .
+         select: [isntDefault ] . at: 1 . 
+     ] 
+] ;
+
+#=============
+# Security
+#=============
+
+#--------------------
+#  map and global security access
+#--------------------
+
+Security defineMethod: [ | globalLocateId: id | 
+  !map <- GlobalWorkspace SecurityMap ;
+  map locateId: id . 
+      ifDefault: [ ^my map getPrimaryReference ] 
+          else: [ globalSecurity ] 
+] ;
+
+Security defineMethod: [ | getMapEntry |
+  GlobalWorkspace SecurityMap isntNA
+  ifTrue: [ GlobalWorkspace SecurityMap locateObject: ^self asSelf .
+              else: GlobalWorkspace SecurityMap ]
+] ;
+
+Security defineMethod: [ | asGlobalSecurity |
+  !map <- ^self getMapEntry ;
+  map isntNA ifTrue: [ map globalSecurity ] . else: [ ^self asSelf ]
+] ;
+
+Security defineMethod: [ | getCalcPack | 
+  !me <- ^self asSelf ;
+  ^self getMapEntry calcPackage extendBy: [ !entity <- ^my me ]
+] ;
+
+Security defineMethod: [ | currency |
+   ^local currency isntNA 
+   ifTrue: [ ^local currency isLegacy 
+              ifTrue: [^self legacyCurrency]
+             ifFalse: [^local currency]
+           ]
+   ifFalse: [^self asGlobalSecurity baseCurrency ] .
+     asGlobalCurrency
+] ;
+
+#=============
+# Currency
+#=============
+
+Currency defineMethod: [ | globalLocateId: id | 
+  !map <- GlobalWorkspace CurrencyMap ;
+  map locateId: id . 
+      ifDefault: [ ^my map getPrimaryReference ] 
+      else: [ globalObject ] 
+] ;
+
+Currency defineMethod: [ | getMapEntry |
+  GlobalWorkspace CurrencyMap isntNA
+  ifTrue: [ GlobalWorkspace CurrencyMap locateObject: ^self asSelf .
+              else: GlobalWorkspace CurrencyMap ]
+] ;
+
+Currency defineMethod: [ | asGlobalCurrency |
+  !map <- ^self getMapEntry ;
+  map isntNA ifTrue: [ map globalObject ] . else: [ ^self asSelf ]
+] ;
+
+#=============
+# Account
+#=============
+Account defineMethod: [ | getCalcPack | 
+  !me <- ^self asSelf ;
+  GlobalWorkspace Account calcPackage extendBy: [ !entity <- ^my me ] 
+] ;
+
+#--------------------
+#  Additional methods the ProcessControlTools
+#--------------------
+
+ProcessControlTools defineMethod: [ | initializeSessionForQueryPool |
+  #-- Re-Define the updateNetwork message to not work!
+  ^global Utility defineMethod: [ | updateNetwork |
+      ">>>  Updates Not Permitted in this Session   <<<" printNL ;
+     -1
+  ] ;
+];
+
+ProcessControlTools defineMethod: [ | commitToDatabaseAndRestartQueryPool: text |
+  !commitVal <-^global Utility updateNetworkWithAnnotation: text ;
+  commitVal = 0
+  ifTrue: [ !path <- ^self getEnvFor: "FedVisionRoot" . concat: "/scripts/" ;
+            !prog <- path concat: "PoolTool.csh -a restart -p querypool" ;
+            ExternalProgram reset
+               setProgramTo: prog .
+               setOutputBlockTo: [ | :out | printSuccess ; out printNL ; ] .
+               setErrorBlockTo: [ | :out | printError ; out printNL ; ] .
+               run ;
+          ] ;
+  commitVal
+] ;
+
+#======================================================================
+
+####################
+#  Fix Schema MID refreshValues
+#     the "print" to classes like DivRecord and PriceRecord causes
+#       a side effect of running the currency and split adjustment, bad
+#       in this case since it tries to open the map databases; work around
+#       to use the 'whatAmI' for these cases
+####################
+
+Schema MID defineMethod: [ | refreshValues |
+!source <- getInternalMessage; 
+!currentSource <- internalMethod; 
+    #-->>>  work around starts here
+!sourceString <- 
+     [ source isDataRecord
+         ifTrue: [ source whatAmI print ] ifFalse: [ source print ]
+     ] divertOutput ;
+   #--<<<  work around ends here
+!currentType <- source classDescriptor messageType; 
+type isMethod && currentType isMethod 
+   ifTrue: [:currentType <- type]; 
+currentType isConstant 
+   ifTrue: [^self setReturnObjectTypeTo: source classDescriptor]; 
+currentType != type 
+  ifTrue: [
+          ^self setTypeTo: currentType; 
+          ^self setImplementationTextTo: sourceString forMethod: sourceString; 
+          ]
+ ifFalse: [
+          !whiteSpace <- " 	" concat: newLine; 
+          !newSource <- currentSource isNA || 
+              [ currentSource isString && sourceString isString &&
+                  [(currentSource stripChar: whiteSpace) != 
+                   (sourceString stripChar: whiteSpace)
+                  ]
+              ]; 
+          newSource 
+          ifTrue: 
+            [ ^self setImplementationTextTo: sourceString 
+                                  forMethod: sourceString; 
+            ]; 
+          ]; 
+^self
+] ;
+
+
+####################
+#  update Schema
+####################
+Schema processAllMessages ;

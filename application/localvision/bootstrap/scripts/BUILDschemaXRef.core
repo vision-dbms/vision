@@ -1,0 +1,16 @@
+#!/bin/csh -f
+
+###################
+#  Create Schema XRef Documentation for current Database
+####################
+
+set MAIN = $DBbatchvision
+
+echo "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+echo "%%%    Creating Schema Cross Reference Documentation    %%%"
+echo "Running $MAIN in $NDFPathName"
+echo "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+
+cd $LocalVisionRoot/docs/schema
+$MAIN < doc.S
+

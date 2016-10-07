@@ -1,0 +1,297 @@
+##################################################
+#  Predefine standard TableSpec instances
+##################################################
+
+#--------------------
+#  basic1Column
+#--------------------
+
+LayoutTools TableSpec createInstance: "basic1Column" . 
+    setColumnCountTo: 1 . setHeaderCountTo: 1 .
+    setWidthTo: "65%" . 
+   setCellPaddingTo: 3 . setCellSpacingTo: 3 . 
+do: [ !table <- ^self  ;
+      table addColumn: 1 . 
+         setWidthTo: 200 . 
+         setHAlignmentTo: "left" .
+         addHeader: 1 . 
+            setWidthTo: 80 . setSizeTo: 3 . setColumnSpanTo: 1 ;
+    ] ;
+
+#--------------------
+#  basic2Column - used by profiles
+#            ____________________________
+#            |   header goes here       |
+#            |__________________________|
+#            | label 1  |      value 1  |
+#            | label 2  |      value 2  |
+#
+#--------------------
+
+LayoutTools TableSpec createInstance: "basic2Column" . 
+    setColumnCountTo: 2 . setHeaderCountTo: 1 .
+    setWidthTo: "65%" . setCellPaddingTo: 1 . 
+    enableRowLabels setCenterTo: TRUE .
+do: [ !table <- ^self  ;
+      table addColumn: 1 . 
+         setWidthTo: 20 . 
+         enableFillBlanks 
+         setHAlignmentTo: "left" ;
+      table addColumn: 2 . 
+         setWidthTo: 50 .
+         enableFillBlanks 
+         setHAlignmentTo: "right" ;
+      table getColumn: 1 . addHeader: 1 .
+         setWidthTo: 70 . setSizeTo: 3 . setColumnSpanTo: 2 ;
+    ] ;
+
+#--------------------
+#  wrap2Column - used by memberships
+#            ____________________________
+#            |   header goes here       |
+#            |__________________________|
+#            | value 1     | value 2    |
+#            | value 3     | value 4    |
+#
+#--------------------
+
+LayoutTools TableSpec createInstance: "wrap2Column" . 
+    setColumnCountTo: 2 . setHeaderCountTo: 1 .
+    setCellPaddingTo: 1 . setCellSpacingTo: 2 . setBorderTo: 1 .
+    disableRowLabels setCenterTo: TRUE .
+do: [ !table <- ^self  ;
+      table addColumn: 1 . 
+         setWidthTo: 35 . 
+         enableFillBlanks 
+         setHAlignmentTo: "left" .
+         addHeader: 1 .
+            setWidthTo: 70 . setSizeTo: 3 . setColumnSpanTo: 2 ;
+      table addColumn: 2 . 
+         setWidthTo: 35 . 
+         enableFillBlanks 
+         setHAlignmentTo: "left" ;
+    ] ;
+
+#--------------------
+#  basicEntity
+#            _________________________________________
+#            |   header 1 - must set spans as needed |
+#            |  id  |   name  |  col1 |  ... | col10 |
+#            |----------------------------------------
+#            | id1    name1      val1.1    ...  val10.1
+#            | id2    name2      val1.2    ...  val10.2
+#--------------------
+
+LayoutTools TableSpec createInstance: "basicEntity" .
+   setHeaderCountTo: 2 .
+   setCellPaddingTo: 1 . setCellSpacingTo: 2 . setBorderTo: 1 .
+do: [ !table <- ^self ;
+      table addColumn: 1 . 
+        setWidthTo: 10 . enableFillBlanks setHAlignmentTo: "left" ;
+      table getColumn: 1 . addHeader: 1 . setWidthTo: 70 . setSizeTo: 3 ;
+      table getColumn: 1 . addHeader: 2 . setWidthTo: 10 .
+          setTextTo: "Id" . setSizeTo: 2 . setVAlignmentTo: "bottom" ;
+      table addColumn: 2 . 
+          setWidthTo: 25 . enableFillBlanks setHAlignmentTo: "left" .
+          addHeader: 2 . setWidthTo: 25 .
+             setTextTo: "Name" . setSizeTo: 2 . setVAlignmentTo: "bottom" ;
+      #- pre allocate columns to use
+      10 sequence
+      do: [ ^my table addColumn: ((^self + 2) asInteger) .
+                setSizeTo: 2 . setWidthTo: -15 .
+                enableFillBlanks setFontTo: "Courier" .
+            addHeader:2 . 
+               setWidthTo: 15 . setSizeTo: 2 .  setVAlignmentTo: "bottom" ;
+          ] ;
+    ] ;
+
+#--------------------
+#  basicHistory
+#            _________________________________________
+#            |   header 1 - must set spans as needed |
+#            | Date    |  col1     |  ...  | col10   |
+#            |----------------------------------------
+#            | date1   |  val1.1   |  ...  | val10.1
+#            | date2   |  val1.2   |  ...  | val10.2
+#--------------------
+
+LayoutTools TableSpec createInstance: "basicHistory" .
+   setHeaderCountTo: 2 .
+   setCellPaddingTo: 1 . setCellSpacingTo: 2 . setBorderTo: 1 .
+do: [ !table <- ^self ;
+      table addColumn: 1 . 
+        setWidthTo: 10 . enableFillBlanks setHAlignmentTo: "left" ;
+      table getColumn: 1 . addHeader: 1 . setWidthTo: 70 . setSizeTo: 3 ;
+      table getColumn: 1 . addHeader: 2 . setWidthTo: 10 .
+          setTextTo: "Date" . setSizeTo: 2 . setVAlignmentTo: "bottom" ;
+      #- pre allocate columns to use
+      10 sequence
+      do: [ ^my table addColumn: ((^self + 1) asInteger) .
+                setSizeTo: 2 . setWidthTo: -15 .
+                enableFillBlanks setFontTo: "Courier" .
+            addHeader:2 . 
+               setWidthTo: 15 . setSizeTo: 2 .  setVAlignmentTo: "bottom" ;
+          ] ;
+    ] ;
+
+#--------------------
+#  multiXTab  - used by multi-level groups in columns
+#            ________________________________________________________
+#            |        |   Group  A     |   Group B    |  Group C    |
+#            | label  |   A1   |  A2   |   B1  |  B2  |  C1  |  C2  |
+#            |-------------------------------------------------------
+#            | label1 |  a1.1  |  a2.1 |  b1.1 | b2.1 | c1.1 | c2.1 |
+#
+#--------------------
+
+LayoutTools TableSpec createInstance: "multiXTab" .
+   setHeaderCountTo: 2 .
+   setCellPaddingTo: 1 . setCellSpacingTo: 2 . setBorderTo: 1 .
+do: [ !table <- ^self ;
+      table addColumn: 1 . 
+        setWidthTo: 15 . enableFillBlanks setHAlignmentTo: "left" ;
+      table getColumn: 1 . addHeader: 1 . setWidthTo: 15  .
+           setSizeTo: 2 . setVAlignmentTo: "bottom" ;
+      table getColumn: 1 . addHeader: 2 . setWidthTo: 15 .
+           setSizeTo: 2 . setVAlignmentTo: "bottom" ;
+      #- pre allocate columns to use
+      30 sequence
+      do: [ !col <- ^my table addColumn: ((^self + 1) asInteger) .
+                setSizeTo: 2 . setWidthTo: -15 .
+                enableFillBlanks setFontTo: "Courier" ;
+            col addHeader: 1 .
+               setWidthTo: 15 . setSizeTo: 2 .  setVAlignmentTo: "bottom" ;
+            col addHeader: 2 .
+               setWidthTo: 15 . setSizeTo: 2 .  setVAlignmentTo: "bottom" ;
+          ] ;
+    ] ;
+
+##################################################
+#  Predefine standard FormSpec instances
+##################################################
+
+LayoutTools FormSpec createInstance: "ChangeEntity" .
+   enableGlobalDate
+   enableGlobalCurrency
+   setDescriptionTo:
+"selects a new entity for the current report." ;
+
+LayoutTools Named FormSpec ChangeEntity
+   enableGlobalDate
+   enableGlobalCurrency
+addInputSpec: 1 .
+   setLabelTo: "Entity Id: ".
+   setTypeToText 
+   setNameTo: "id" . 
+   setSizeTo: 15 ;
+
+#--------------------
+
+##################################################
+#  Predefine standard GraphSpec instances
+##################################################
+
+LayoutTools Piechart createInstance: "MarketShare" .
+do: [ !pie <- ^self ;
+      pie reset 
+        setWidthTo: 475 . setHeightTo: 325 .
+        setBGColorTo: "white" .
+        setBGStyleTo: "BOX" .
+        setBGSizeTo: 1 .
+        setBGImageTo: "indexpaper.jpg" .
+        setColorTableTo: "crimson", "darkgoldenrod", "darkmagenta", 
+           "cornflowerblue", "saddlebrown", "green", "tomato",
+           "yellowgreen", "powderblue" , "mistyrose" .
+        setLabelPositionTo: .7 ;
+     pie header
+         setColorTo: "darkRed" . 
+         setSizeTo: 20 .
+         setFontTo: "Arial" .
+         setBoxColorTo: "lightGray" .
+         setBoxStyleTo: "RAISED" .
+         setBoxSizeTo: 1.05 .
+         ;
+     #pie legend
+     #  setColorTo: "white" . setFontTo: "Arial" . 
+     #  setBoxColorTo: "lightGray" ;
+     pie dwellLabel
+        setColorTo: "black" . setFontTo: "TimesRoman" . setSizeTo: 16 .
+        setBoxColorTo: "lightGray" . setBoxStyleTo: "SHADOW" . setBoxSizeTo: 3;
+   ] ;
+
+
+LayoutTools Barchart createInstance: "BasicBar" .
+do: [ !basicBar <- ^self ;
+     basicBar reset 
+        setWidthTo: 475 . setHeightTo: 325 .
+        setBGColorTo: "white" .
+        setBGStyleTo: "BOX" .
+        setBGSizeTo: 1 .
+        setBGImageTo: "indexpaper.jpg" .
+        setColorTableTo: "crimson", "darkgoldenrod", "darkmagenta", 
+           "cornflowerblue", "saddlebrown", "green", "tomato",
+           "yellowgreen", "powderblue" , "mistyrose" .
+        setTypeTo: "GROUP" .
+        setLayoutTo: "VERTICAL" .
+        setBar3DDepthTo: 2 .
+        setGridColorsTo: "lightgray", "ivory", "darkgray" .
+     ;
+     basicBar header
+         setColorTo: "darkRed" . 
+         setSizeTo: 20 .
+         setFontTo: "Arial" .
+         setBoxColorTo: "lightGray" .
+         setBoxStyleTo: "RAISED" .
+         setBoxSizeTo: 1.05 .
+         ;
+     #basicBar legend
+     #  setColorTo: "white" . setFontTo: "Arial" . 
+     #  setBoxColorTo: "lightGray" ;
+     basicBar dwellLabel
+        setColorTo: "black" . setFontTo: "TimesRoman" . setSizeTo: 16 .
+        setBoxColorTo: "lightGray" . setBoxStyleTo: "SHADOW" . setBoxSizeTo: 3;
+     basicBar bottomAxis
+        setStateOn
+        setTicColorTo: "black" . setFontTo: "Arial" . setSizeTo: 14 ;
+     basicBar leftAxis
+        setStateOn
+        setTicColorTo: "black" . setFontTo: "Arial" . setSizeTo: 16 ;
+     basicBar addDataSet: 1 ;
+   ] ;
+     
+LayoutTools Linechart createInstance: "monthlyHistory" .
+do: [!line <- ^self ;
+     line reset 
+        setWidthTo: 525 . setHeightTo: 325 .
+        setBGColorTo: "white" .
+        setBGStyleTo: "BOX" .
+        setBGSizeTo: 1 .
+        setBGImageTo: "indexpaper.jpg" .
+        setGridColorsTo: "lightgray", "ivory", "darkgray" .
+     ;
+     line header
+         setColorTo: "darkRed" . 
+         setSizeTo: 20 .
+         setFontTo: "Arial" .
+         setBoxColorTo: "lightGray" .
+         setBoxStyleTo: "RAISED" .
+         setBoxSizeTo: 1.05 .
+         ;
+     line legend
+       setColorTo: "white" . setFontTo: "TimesRoman" . setSizeTo: 14 .
+       setBoxColorTo: "lightGray" . setBoxStyleTo: "NONE" . setBoxSizeTo: 5 ;
+     line dwellLabel
+        setColorTo: "black" . setFontTo: "TimesRoman" . setSizeTo: 12 .
+        setBoxColorTo: "lightGray" . setBoxStyleTo: "SHADOW" . setBoxSizeTo: 3;
+     line bottomAxis
+        setStateOn
+        setTicColorTo: "black" . setFontTo: "Arial" . setSizeTo: 12 .
+        setFormatTypeTo: "DATE" . setFormatTo: "%M/%y" . 
+     setTimeUnitTo: "1M" .
+        setStepValueTo: "3M" ;
+     ;
+     line leftAxis
+        setStateOn
+        setTicColorTo: "black" . setFontTo: "Arial" . setSizeTo: 12 ;
+   ] ;
+

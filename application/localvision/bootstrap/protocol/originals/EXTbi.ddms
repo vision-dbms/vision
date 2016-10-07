@@ -1,0 +1,67 @@
+##################################################
+#  EXTension to Object protocol for DDMS Module
+##################################################
+
+Object
+defineMethod:
+[ | createDataDictionaryItem: item |
+  ^global DDMS Item newAs: item forClass: ^self
+] .
+
+defineMethod:
+[ | getDataDictionaryItem: item |
+  !entry <- ^global DDMS Item getItem: item inClass: ^self ;
+  entry isNA 
+     ifTrue: [ :entry <- ^global DDMS Item Library Global at: item ] ;
+  entry
+] .
+
+defineMethod:
+[ | getDataDictionaryItems |
+  ^global DDMS Item getItemsInClass: ^self 
+] .
+
+defineMethod:
+[ | setDataDictionaryItem: item to: input |
+  !item <- ^self getDataDictionaryItem: item ;
+  item isntNA
+     ifTrue: [ item update: ^self withValue: input ] ;
+  
+] .
+
+defineMethod:
+[ | createReport: id fromTemplate: templateId |
+  !template <- ^global DDMS Report Template at: templateId ;
+  template isntNA 
+      ifTrue: [  template createAs: id ]
+] .
+
+defineMethod:
+[ | getReport: id |
+  ^global DDMS Report Library at: id
+] .
+
+defineMethod:
+[ | getEntityCatalog: id |
+  !catalog <- ^global EntityCatalog Library at: id ;
+  catalog isntNA
+    ifTrue: [ ^self validateInputObject: catalog class . 
+                 ifTrue: [ catalog ]
+            ]
+] .
+
+defineMethod:
+[ | createAddTransactionFor: key |
+  !newEntity <- ^self createNewInstance: key ; 
+  ^global DDMS AddTransaction createFor: ^self with: key ;
+  newEntity
+] .
+
+defineMethod:
+[ | createNewInstance: key |
+  ^self newAs: key 
+] .
+
+define: 'weightingFactor' toBe: 1.0 .
+
+;

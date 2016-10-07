@@ -1,0 +1,27 @@
+####################
+#  RangeGroupFeedSetup - Portfolio Management Application Layer: supp
+#    this feed is used to define all the RangeGroup
+#    feeds that will be used for updating RangeClassifications for an
+#    entity class.  Each RangeGroupFeed defines a relationship
+#    between a RangeClassification class and another core class.
+#    You specify the data access rule and a property to update in this
+#    setup feed.
+#
+#  This feed uses the following fields:
+#     feedId            name of feed
+#     rangeClassId      name of RangeClassification subclass
+#     updateClassId     class which stores the rangeClassification value
+#     updatePath        name of property that references the range value
+#     accessRule        expression that can be evaluated for the updateClass
+#
+#  The fields must be supplied in this order.  You can include a header
+#  line in this feed, but the header values are ignored.  
+#
+####################
+
+feedId	rangeClassId	updateClassId	updatePath	accessRule
+McapGroups	MCapGroup	Security	marketCapGroup	marketCapUS
+PeGroups	PEGroup	Security	peGroup	pe
+PbGroups	PBGroup	Security	pbGroup	priceToBook
+
+

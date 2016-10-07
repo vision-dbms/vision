@@ -1,0 +1,86 @@
+
+######################
+######################
+####  Long Value and Zero Generation Extensions
+######################
+######################
+#
+#  This file provides basic support for long values and zero generation.
+#
+#  Affected Classes:
+#	Object
+#
+#  Note:
+#	The '__setLongValuePart<n>To:' messages defined in this file are
+#	no-ops.  These messages must invoke primitive 28 and must be
+#	explicitly defined by any class that uses long values to name its
+#	instances.
+#
+######################
+
+Object
+
+####
+# Zero Generators
+####
+
+define: '__zeroU64'  toBePrimitive: 29 withControlValue: 3 .
+define: '__zeroU96'  toBePrimitive: 29 withControlValue: 4 .
+define: '__zeroU128' toBePrimitive: 29 withControlValue: 5 .
+
+define: '__zeroS8'   toBePrimitive: 29 withControlValue: 0 + 8192 .
+define: '__zeroS32'  toBePrimitive: 29 withControlValue: 2 + 8192 .
+
+define: '__zeroF32'  toBePrimitive: 29 withControlValue: 2 + 16384 .
+define: '__zeroF64'  toBePrimitive: 29 withControlValue: 3 + 16384 .
+
+define: '__zeroR32'  toBePrimitive: 29 withControlValue: 2 + 24576 .
+
+####
+#  Long Value Initialization Converses
+####
+
+defineMethod:
+[ | __becomeLongValuePart0In: aLongValue |
+    aLongValue __setLongValuePart0To: ^self asDouble
+].
+
+defineMethod:
+[ | __becomeLongValuePart1In: aLongValue |
+    aLongValue __setLongValuePart1To: ^self asDouble
+].
+
+defineMethod:
+[ | __becomeLongValuePart2In: aLongValue |
+    aLongValue __setLongValuePart2To: ^self asDouble
+].
+
+defineMethod:
+[ | __becomeLongValuePart3In: aLongValue |
+    aLongValue __setLongValuePart3To: ^self asDouble
+].
+
+####
+#  Dummy Long Value Initializers
+####
+
+defineMethod:
+[ | __setLongValuePart0To: aValue |
+    ^self
+].
+
+defineMethod:
+[ | __setLongValuePart1To: aValue |
+    ^self
+].
+
+defineMethod:
+[ | __setLongValuePart2To: aValue |
+    ^self
+].
+
+defineMethod:
+[ | __setLongValuePart3To: aValue |
+    ^self
+].
+;

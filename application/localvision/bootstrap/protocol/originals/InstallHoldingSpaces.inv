@@ -1,0 +1,76 @@
+# 
+
+####################
+#  This Script is Used To Create Separate Object Spaces for
+#     historical holdings data and anticipates spaces that may be
+#     needed in the future
+####################
+
+echo " " 
+echo " " 
+echo "        ***  Installing Historical Holding Object Spaces  ***"
+date
+echo " "
+
+setenv VisionAdm 1 
+
+$DBbatchvision << @@@EOF@@@      #--- early
+!startDate <- 19000101 asDate ;
+Environment MaintenanceTools
+   setupSpaceFor: ("Holdings" concat: startDate asInteger) 
+   as: "DB" 
+   description: ("Holdings Data As Of " concat: startDate) ;
+Holding createNewStoreAsOf: startDate ;
+Utility createSpaceInNetworkWithAnnotation: "Holding Space Setup" ;
+?g
+@@@EOF@@@
+
+$DBbatchvision << @@@EOF@@@      #--- prior year
+!startDate <- ^today - 1 yearBeginnings ;
+Environment MaintenanceTools
+   setupSpaceFor: ("Holdings" concat: startDate asInteger) 
+   as: "DB" 
+   description: ("Holdings Data As Of " concat: startDate) ;
+Holding createNewStoreAsOf: startDate ;
+Utility createSpaceInNetworkWithAnnotation: "Holding Space Setup" ;
+?g
+@@@EOF@@@
+
+$DBbatchvision << @@@EOF@@@      #--- current year
+!startDate <- ^today + 0 yearBeginnings ;
+Environment MaintenanceTools
+   setupSpaceFor: ("Holdings" concat: startDate asInteger) 
+   as: "DB" 
+   description: ("Holdings Data As Of " concat: startDate) ;
+Holding createNewStoreAsOf: startDate ;
+Utility createSpaceInNetworkWithAnnotation: "Holding Space Setup" ;
+?g
+@@@EOF@@@
+
+$DBbatchvision << @@@EOF@@@      #--- next year
+!startDate <- ^today + 1 yearBeginnings ;
+Environment MaintenanceTools
+   setupSpaceFor: ("Holdings" concat: startDate asInteger) 
+   as: "DB" 
+   description: ("Holdings Data As Of " concat: startDate) ;
+Holding createNewStoreAsOf: startDate ;
+Utility createSpaceInNetworkWithAnnotation: "Holding Space Setup" ;
+?g
+@@@EOF@@@
+
+$DBbatchvision << @@@EOF@@@      #--- +2 year
+!startDate <- ^today + 2 yearBeginnings ;
+Environment MaintenanceTools
+   setupSpaceFor: ("Holdings" concat: startDate asInteger) 
+   as: "DB" 
+   description: ("Holdings Data As Of " concat: startDate) ;
+Holding createNewStoreAsOf: startDate ;
+Utility createSpaceInNetworkWithAnnotation: "Holding Space Setup" ;
+?g
+@@@EOF@@@
+
+echo "===> Initial Holding Space Installation" `date` >> $NDFJournal
+echo " " 
+echo "        ***  End Of Historical Holdings Object Spaces  ***"
+date
+

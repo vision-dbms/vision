@@ -1,0 +1,278 @@
+
+Beginning file: stringPrims.S ...
+
+
+
+********************************************************
+(PART 1)
+--------  Test the 'ToDouble' String Primitive  --------
+********************************************************
+
+------------------------------------------------------
+(1A)
+---  Test the 'ConvertStringToDouble' macro to make 
+---  sure that it works for all string values.
+------------------------------------------------------
+     1.00
+     4.20
+   100.00
+   123.46
+ 62790.00
+         123456.0789              0.1234     1.00
+     4.20
+   100.00
+   123.46
+ 62790.00
+         123456.0789              0.1234    -1.00
+    -4.20
+  -100.00
+  -123.46
+-62790.00
+        -123456.0789             -0.1234      NA 
+      NA 
+      NA 
+      NA 
+      NA 
+      NA 
+      NA 
+      NA 
+      NA 
+      NA 
+      NA 
+      NA 
+      NA 
+      NA 
+      NA 
+      NA 
+      NA 
+      NA 
+      NA 
+      NA 
+      NA 
+      NA 
+      NA 
+      NA 
+
+------------------------------------------------------
+(1B)
+---  Test the scalar 'blockString' case.
+------------------------------------------------------
+      NA 
+  3405.67
+
+------------------------------------------------------
+(1C)
+---  Test the scalar 'lstoreString' case.
+------------------------------------------------------
+      NA 
+  3405.67
+
+------------------------------------------------------
+(1D)
+---  Test the non-scalar 'blockString' case.
+------------------------------------------------------
+     1.00
+   402.20
+   203.23
+   100.00
+     0.34
+
+      NA 
+      NA 
+      NA 
+      NA 
+
+      NA 
+      NA 
+     2.30
+   444.00
+      NA 
+
+     1.20
+      NA 
+     3.20
+      NA 
+      NA 
+    34.00
+     2.00
+
+      NA 
+     1.00
+      NA 
+
+      NA 
+      NA 
+      NA 
+     2.00
+
+     1.00
+     2.00
+      NA 
+
+    42.00
+      NA 
+
+------------------------------------------------------
+(1E)
+---  Test the non-scalar 'lstoreString' case.
+------------------------------------------------------
+     1.00
+   402.20
+   203.23
+   100.00
+     0.34
+
+      NA 
+      NA 
+      NA 
+      NA 
+
+      NA 
+      NA 
+     2.30
+   444.00
+      NA 
+
+     1.20
+      NA 
+     3.20
+      NA 
+      NA 
+    34.00
+     2.00
+
+      NA 
+     1.00
+      NA 
+
+      NA 
+      NA 
+      NA 
+     2.00
+
+     1.00
+     2.00
+      NA 
+
+    42.00
+      NA 
+
+------------------------------------------------------
+(1F)
+---  Test polymorphic cases.
+     (expect 1 >>> Selector 'toDouble' Not Found <<<)
+------------------------------------------------------
+     1.00
+     2.00
+     3.00
+     4.00
+      NA 
+
+
+>>> Selector 'toDouble' Not Found <<<
+     1.00
+      NA 
+     2.00
+     4.00
+
+
+
+
+********************************************************
+(PART 2)
+--------  Test the 'fill', 'take', 'drop',         -----
+--------  'concat', and 'sort' String Primitives   -----
+********************************************************
+
+------- Single String Fill -----------
+@hellohello@
+@hellohello@
+@@
+
+------- Single String Take ---------
+@hel@
+@llo@
+@hello     @
+@     hello@
+@@
+
+--------- Single String Drop ----------
+@lo@
+@he@
+@@
+@@
+@hello@
+
+-------- List Fill -----------
+@aaaaaaaaaa@ @veryveryve@ @largelarge@ @antantanta@  
+@aaaaaaaaaa@ @ryveryvery@ @largelarge@ @tantantant@  
+@aa@ @ve@ @la@ @an@  
+@aa@ @ry@ @ge@ @nt@  
+@@ @@ @@ @@  
+
+------------ List Take --------------
+@a         @ @very      @ @large     @ @ant       @  
+@         a@ @      very@ @     large@ @       ant@  
+@a @ @ve@ @la@ @an@  
+@ a@ @ry@ @ge@ @nt@  
+@@ @@ @@ @@  
+
+---------- List Drop ---------------
+@@ @@ @@ @@  
+@@ @@ @@ @@  
+@@ @ry@ @rge@ @t@  
+@@ @ve@ @lar@ @a@  
+@a@ @very@ @large@ @ant@  
+
+===========  test invalid args to fill, take , & drop ===========
+
+.... fill tests ...
+     (expect 2 >>> Selector 'fill:' Not Found <<<)
+
+
+>>> Selector 'fill:' Not Found <<<
+
+>>> Selector 'fill:' Not Found <<<
+
+.... take tests ...
+     (expect 2 >>> Selector 'take:' Not Found <<<)
+
+>>> Selector 'take:' Not Found <<<
+
+>>> Selector 'take:' Not Found <<<
+
+.... drop tests ...
+     (expect 2 >>> Selector 'drop:' Not Found <<<)
+
+>>> Selector 'drop:' Not Found <<<
+
+>>> Selector 'drop:' Not Found <<<
+
+=============== test concat =================
+hello there
+hello@ to@ you@  
+
+..... test bad arg .......
+hello10
+
+......... more concat tests ...........
+hello@
+hello there to there you there  
+
+--------------- test string sort ... ------------------
+a brown colored dog enjoys fine gourmet habits imitating jolly kings  
+
+End of file: stringPrims.S
+
+Compile Statistics:
+elapsed: 0.00409
+user: 0.002089
+system: 0.002005
+majflts: 0
+minflts: 952
+Execute Statistics:
+elapsed: 0.010748
+user: 0.007804
+system: 0.00295
+majflts: 0
+minflts: 330

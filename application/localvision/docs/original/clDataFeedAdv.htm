@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<HTML><HEAD><TITLE>Vision Class: DataFeed</TITLE>
+<META content="text/html; charset=windows-1252" http-equiv=Content-Type>
+<META content="MSHTML 5.00.3103.1000" name=GENERATOR></HEAD>
+<BODY bgColor=white>
+<H2>Vision Class: DataFeed - Advanced Topics</H2>
+<P>| <A href="FHome.htm">Home</A> | <A 
+href="clDataFeed.htm">Data Feed Basics</A> | 
+<HR>
+
+<H3>Topics Covered:</H3>
+<UL type=square>
+  <LI><A href="clDataFeedAdv.htm#overview">DataFeed Review</A> 
+  <LI><A href="clDataFeedAdv.htm#bridges">Bridges and EstimateBridges</A> 
+  <LI><A href="clDataFeedAdv.htm#custom">Customizing DataFeeds</A> 
+  <LI><A href="clDataFeedAdv.htm#switches">Enable & Disable Messages</A> 
+  <LI><A href="clDataFeedAdv.htm#advanced">Advanced Examples Using DataFeeds</A> 
+  <LI><A href="clDataFeedAdv.htm#bulk">Optimizing Large Feeds</A> </LI></UL>
+<P>
+<HR>
+
+<H3><A name=overview>DataFeed Review</A></H3>
+<P>The <B>DataFeed</B> class is an abstract class that is used to organize the 
+classes that translate data from sources external to Vision into Vision objects. 
+An external feed corresponds to a flat, tabular structure. Several subclasses of 
+<B>DataFeed</B> have been defined to encapsulate different ways to map data from 
+external formats into Vision objects. You can get a full list of the feeds 
+defined in your environment using:<B><PRE>     DataFeed showInheritance ;
+</PRE></B>
+<P>A separate subclass is defined for each format of external data you wish to 
+load into your Vision database. For example, subclasses of the <B>MasterFeed</B> 
+class are defined to create and update instances of a specific <B>Entity</B>, 
+such as <B>Currency</B> or <B>Security</B>. Subclasses of the 
+<B>EntityExtenderFeed</B> class are defined to update a specific relationship 
+between an <B>Entity</B> subclass and associated data, such as pricing data for 
+a security. 
+<P>At its simplest, a feed is a tab or vertical bar delimited string containing 
+one or more columns of information for one or more rows. For example, to create 
+and update <B>Currency</B> instances, you could use: <PRE><B>
+     CurrencyMaster updateFromString: 
+     "entityId | name                 | shortName
+      USD      | United States Dollar | US Dollar
+      CAD      | Canadian Dollar      | CA Dollar
+      GBP      | Great British Pound  | GB Pound
+     " ;
+</B></PRE>
+<P>This example loads data using the <B>CurrencyMaster</B> feed. This feed will 
+create <B>Currency</B> instances for any <I>entityId</I> not already defined and 
+will update the <I>name</I> and <I>shortName</I> properties for the three 
+instances included. 
+<P>The message <I>updateFromString:</I> can be sent to any <B>DataFeed</B> 
+subclass to update data from the string supplied as a parameter. Alternatively, 
+the message <I>loadFromFile:</I> can be sent to any <B>DataFeed</B> subclass to 
+read the data from the file name supplied as a parameter. 
+<P>The document <A 
+href="clDataFeed.htm"><I>Vision Class: 
+DataFeed</I></A> provides a detailed description of the <B>DataFeed class</B>. A 
+number of specialized interfaces have been defined that package feeds for <A 
+href="admBatch.htm#Updating">batch 
+processing</A>. This document provides additional advanced techniques for 
+working with the feeds through the use of examples. If you need additional 
+assistance implementing some of these techniques in your environment, contact 
+your Insyte consultant. 
+<P>
+<HR>
+
+<H3><A name=bridges>Bridges and EstimateBridges</A></H3>
+<P>The subclasses of the <B>Bridge</B> class are used to manage the protocol for 
+connecting an entity to one more <B>DataRecord</B> instances. It is useful when 
+there are complex relationships that need to be managed and you do not want to 
+overburden the entity class with all the required information. An instance of a 
+<B>Bridge</B> subclass is normally referenced via the entity instance with which 
+it is associated. The <B>BatchFeedManager</B> class supplies an <A 
+href="admBatch.htm#Bridges">interface for 
+creating bridge subclasses</A>. 
+<P>
+<H4>Bridges and Vendor Data</H4>
+<P>External vendors often provide data about a specific entity. This data can be 
+stored directly with the entity by establishing one or more properties that 
+return the vendor information. When several data items and/or data records are 
+associated with a single vendor, a naming convention is usually imposed to keep 
+track of the different sources. This is a situation where a <B>Bridge</B> can be 
+used to help organize the vendor-specific <B>DataRecords</B>: 
+<P>For example, in investment applications fundamental data about companies can 
+be supplied from a number of vendors. Each vendor supplies overlapping data 
+items for multiple frequencies. In particular, Vendor X supplies sales and 
+earnings values annually and quarterly and Vendor Y supplies sales and earnings 
+values annually. The <B>Bridge</B> and <B>DataRecord</B> classes can be set up 
+as follows:<PRE><B>
+
+     #--  Create the Bridges to Company
+     Interface BatchFeedManager
+          createBridgeClass: "VendorX" from: "Bridge" 
+          linkedTo: "Company" via: "vendorX" asTS: "FALSE" ;
+     Interface BatchFeedManager
+          createBridgeClass: "VendorY" from: "Bridge" 
+          linkedTo: "Company" via: "vendorY" asTS: "FALSE" ;
+
+     #--  Create the DataRecord classes and attach to Bridge
+     Interface BatchFeedManager
+          createDataRecordClass: "VendorXAnnual" from: "DataRecord"
+          linkedTo: "VendorX" via: "annual" asTS: "TRUE" ;
+     Interface BatchFeedManager
+          createDataRecordClass: "VendorXQuarter" from: "DataRecord"
+          linkedTo: "VendorX" via: "quarter" asTS: "TRUE" ;
+     Interface BatchFeedManager
+          createDataRecordClass: "VendorYAnnual" from: "DataRecord"
+          linkedTo: "VendorY" via: "annual" asTS: "TRUE" ;
+
+     #--  Define properties for DataRecord classes
+     PropertySetup updateFromString: 
+     "classId        | property | dataType | 
+      VendorXAnnual  | sales    | Double   | 
+      VendorXAnnual  | eps      | Double   | 
+      VendorXQuarter | sales    | Double   |   
+      VendorXQuarter | eps      | Double   | 
+      VendorYAnnual  | sales    | Double   | 
+      VendorYAnnual  | eps      | Double   | 
+      " ;
+
+     #--  Load some data
+     VendorXAnnualFeed updateFromString:
+     "id | date | sales | eps
+     ibm | 9512 | 1000  | 2.34
+     ibm | 9612 | 2000  | 1.24
+     ibm | 9712 | 3000  | 3.29
+     " ;
+
+    #--  Basic Access - latest ibm annual data from vendor X
+    Named Company IBM vendorX annual
+       do: [ date print: 15 ; sales print ; eps printNL ] 
+
+    #--  Basic Access - ibm annual data from vendor X over time
+    Named Company IBM vendorX :annual
+       do: [ ^date print: 15 ; sales print ; eps printNL ] 
+
+</B></PRE>
+<P>
+<H4>Bridges and Private Data</H4>
+<P>Another reason to use <B>Bridge</B> subclasses is to create structures that 
+can be updated by private users. For example, suppose the Equity Research group 
+wants to update analyst rating information for companies without requiring the 
+intervention of the global database administrator. A separate object space can 
+be created for this group. An <B>ERCompany</B> bridge class and one or more data 
+record classes can be created in this space. Data associated with this bridge 
+class can then be <A 
+href="admBatch.htm#LocalEntity">updated 
+privately</A>. 
+<P>Assume that an object space named <I>EquityResearch</I> has been created for 
+storing this private data. The <B>Bridge</B> and <B>DataRecord</B> classes can 
+be set up as follows:<PRE><B>
+
+     #--  Create the Bridge to Company in the EquityResearch object space
+     Interface BatchFeedManager
+          setObjectSpaceTo: Environment DB EquityResearch ;
+     Interface BatchFeedManager
+          createBridgeClass: "ERCompany" from: "LocalEntity" 
+          linkedTo: "Company" via: "erCompany" asTS: "Method" ;
+
+     #--  Create the AnalystRating class and attach to Bridge
+     Interface BatchFeedManager
+          setObjectSpaceTo: Environment DB EquityResearch ;
+     Interface BatchFeedManager
+       createDataRecordClass: "ERAnalystRating" from: "DataRecord"
+       linkedTo: "ERCompany" via: "analystRating" asTS: "TRUE" ;
+
+     #--  Define properties for AnalystRating classes
+     PropertySetup updateFromString: 
+     "classId           | property | dataType
+      ERAnalystRating   | rating | Integer
+      ERAnalystRating   | comment | String
+     " ;
+
+     #--  Load some data  (performed by private user in private object space)
+     ERAnalystRatingFeed updateFromString:
+     "id | date | rating | comment
+     ibm | 9901 | 3      | average
+     ibm | 9902 | 2      | changed to good
+     ibm | 9903 | 1      | changed to excellent
+     " ;
+
+    #--  Basic Access - latest ibm rating data
+    Named Company IBM erCompany analystRating
+       do: [ date print: 15 ; rating print; comment printNL ] ;
+
+    #--  Basic Access - ibm rating data from over time
+    Named Company IBM erCompany :annualRating
+       do: [ ^date print: 15 ; rating print ; comment printNL ] 
+
+</B></PRE>
+<P>
+<H4>Bridges, Private Data, and Memberships</H4>
+<P>Private bridges can be used in conjunction with <A 
+href="clDataFeed.htm#members"><B>MembershipFeeds</B></A> 
+as well. Recall that a <B>MembershipFeed</B> is used to update and cross 
+reference one-to-many and many-to-many relationships between two <B>Entity</B> 
+instances over time. For example, one or more companies can be members of the 
+same industry. Over time, a company can move from one industry to another. In 
+this case, instances of the entity class <B>Company</B> represent members and 
+instances of the entity class <B>Industry</B> represent groups. 
+<P>Since the <B>Company</B> and <B>Industry</B> classes are shared, a private 
+user cannot update the properties that track this relationship if they are 
+defined directly at the entity classes. To circumvent this situation, the 
+cross-referencing properties can be defined at a bridge class that can be 
+updated by the private users. 
+<P>Assume that an object space named <I>MyData</I> has been created for storing 
+this private data and the bridge classes. The membership relationship can be set 
+up as follows:<PRE><B>
+
+     #--  Create bridge classes
+     Interface BatchFeedManager
+        setObjectSpaceTo: Environment DB MyData .
+          createBridgeClass: "MyCompany" from: "LocalEntity" 
+          linkedTo: "Company" via: "myCompany" asTS: "Method" ;
+     
+     Interface BatchFeedManager
+        setObjectSpaceTo: Environment DB MyData .
+          createBridgeClass: "MyIndustry" from: "LocalEntity" 
+          linkedTo: "Industry" via: "myIndustry" asTS: "Method" ;
+     
+     #---  Explicitly define property and xref property at Bridges
+     MyCompany define: 'industry' withDefault: Industry ;
+     MyIndustry define: 'companyList' withDefault: IndexedList new ;
+     
+     #--  Make sure companyList default is stored in correct object space
+     MyIndustry companyList 
+     establishResidenceInSpaceOf: Environment DB MySpace ;
+
+     #--  Enable Navigation
+     MessageSetup updateFromString:
+     "classId | message | tvFlag | returnType | containerType | description
+     MyCompany | industry | N | Industry | |
+     MyIndustry | companyList | N | Company | IndexedList |
+     " ;
+
+     #---  Setup MembershipFeed
+     MembershipFeedSetup updateFromString: "
+     feedId              | groupId  | groupPath   | memberId | memberPath
+     MyCompanyToIndustry | Industry | companyList | Company  | industry
+     " ;
+     
+     #---  Add a "redirection" via the bridge paths
+     MyCompanyToIndustry setGroupBridgePathTo: "myIndustry" ;
+     MyCompanyToIndustry setMemberBridgePathTo: "myCompany" ;
+     
+     
+     #---  Load some Sample Data
+     MyCompanyToIndustry updateFromString: "
+     memberId | groupId 
+     ibm | 530
+     hwp | 530
+     msft | 540
+     orcl | 540
+     gm | 210
+     f | 210
+     c | 210
+     " ;
+     
+     #---  Sample Access: get ibm's industry
+     Named Company IBM myCompany industry displayInfo ;
+     
+     #---  Sample Access: get industry 530's companyList
+     Named Industry \530 myIndustry companyList
+        do: [ displayInfo ] ;
+</B></PRE>
+<P>
+<H4>EstimateBridges</H4>
+<P>External vendors provide data that can be estimated for multiple time 
+periods. Subclasses of the <B>EstimateBridge</B> class can be used to manage the 
+relationship between an entity and the estimate data. For example, suppose you 
+want to create an estimate bridge for tracking consensus estimates provided by 
+I/B/E/S. The <B>EstimateBridge</B> class and associated feed can be set up as 
+follows:<PRE><B>
+
+     Interface BatchFeedManager
+          createBridgeClass: "Ibes" from: "Bridge"
+          linkedTo: "Company" via: "ibes" asTS: FALSE;
+
+     #---  Annual Estimates
+     Interface BatchFeedManager
+       createEstimateBridgeClass: "IbesEpsABridge" from: "EstimateBridge"
+       linkedTo: "Ibes" via: "epsEstA" 
+       withEstimateRecordClass: "ConsensusEstimateRecord" 
+       andFreq: 12 monthEnds ;
+
+     #---  Quarterly Estimates
+     Interface BatchFeedManager
+       createEstimateBridgeClass: "IbesEpsQBridge" from: "EstimateBridge"
+       linkedTo: "Ibes" via: "epsEstQ" 
+       withEstimateRecordClass: "ConsensusEstimateRecord" 
+       andFreq: 3 monthEnds ;
+
+     #---  Sample Data
+     IbesEpsABridgeFeed updateFromString:
+    "id  | date   | periodEndDate | currency | mean | median
+     ibm | 990615 | 98            | USD      | 6.15 | 6.23
+     ibm | 990616 | 98            | USD      | 6.16 | 6.24
+     gm  | 990616 | 98            | USD      | 61.6 | 62.3
+     ibm | 990616 | 99            | USD      | 8.99 | 8.32
+    " ; 
+
+    #---  Sample Access:  all annual values for ibm for 98
+    Named Company IBM ibes :epsEstA asOf: 98 .
+       :observation do: [ ^date print: 15 ; mean printNL ] ;
+
+    #--  Show last observation for each epsEstA for ibm
+    Named Company IBM ibes :epsEstA nonDefaults
+    do: [ ^date print: 15 ; 
+          lastObservation do: [ date print: 15; mean printNL ] ;
+        ] ;
+
+     #--  Show last and prior observation for each epsEstA for ibm
+     Named Company IBM ibes :epsEstA nonDefaults
+     do: [ ^date print: 15 ; 
+           lastObservation, priorObservation
+            do: [ " " print ; date print: 15; mean print ] ;
+            newLine print ;
+         ] ;
+
+     #--  Show actual and last observation for each epsEstA for ibm
+     Named Company IBM ibes :epsEstA nonDefaults
+     do: [ ^date print: 15 ; 
+           actualRecord, lastObservation
+             do: [ " " print ; date print: 15; mean print ] ;
+           newLine print ;
+        ] ;
+
+     #--  Get last 5 estimate made for ibm in 98
+     Named Company IBM ibes :epsEstA asOf: 98 .
+         :observation last: 5 .
+    do: [ date print: 15 ; mean print ; median printNL ] ;
+
+
+</B></PRE>
+<P>
+<H4>Private EstimateBridges</H4>
+<P><B>EstimateBridges</B> can be created in separate object spaces to enable <A 
+href="admBatch.htm#LocalEntity">private 
+updating</A> as follows:<PRE><B>
+
+     Interface BatchFeedManager 
+          setObjectSpaceTo: Environment DB EquityResearch ;
+     Interface BatchFeedManager 
+          createDataRecordClass: "ERAnalystEstimate" 
+          from: "AnalystEstimateRecord"
+          linkedTo: "" via: NA asTS: NA ;
+
+     Interface BatchFeedManager 
+          setObjectSpaceTo: Environment DB EquityResearch ;
+     Interface BatchFeedManager
+         createEstimateBridgeClass: "EpsABridge" from: "EstimateBridge" 
+         linkedTo: "ERCompany" via: "epsEstA" 
+         withEstimateRecordClass: "ERAnalystEstimate" andFreq: 12 monthEnds ;
+
+     EpsABridgeFeed updateFromString:
+     "id | date | periodEndDate | currency | estimate | actualFlag
+      ibm | 990615 | 98 | USD | 6.15    |  N
+      ibm | 990616 | 98 | USD | 6.16    |  N
+      gm  | 990616 | 98 | USD | 61.6    |  N
+      ibm | 990616 | 00 | USD | 99.616  | N
+      " ; 
+
+     Named Company IBM erCompany :epsEstA asOf: 98 . 
+         :observation displayAll ;
+
+
+     Named Company IBM erCompany :epsEstA
+     do: [ ^date print: 15 ; isDefault print: 10 ; :observation count printNL ;
+           :observation displayAll ;
+           "=" fill: 50 . printNL ;
+         ] ;
+
+</B></PRE>
+<P>
+<HR>
+
+<H3><A name=custom>Customizing DataFeeds</A></H3>
+<P>The <I>updateFromString:</I> message defined at DataFeed is called directly 
+or indirectly via the <I>loadFromFile:</I> message or the 
+<B>BatchFeedManager</B> interface. This message clears the last set of instances 
+created for the feed, creates a new instance in the feed class for each record 
+in the feed, and runs the <I>reconcile</I> message which calls the following 
+methods: 
+<P>
+<CENTER>
+<TABLE border=1 cellPadding=4 cellSpacing=2 width="80%">
+  <TBODY>
+  <TR>
+    <TH>Method 
+    <TH>Function 
+  <TR>
+    <TD><I>initializeProcessing</I> 
+    <TD>run any special initializations for each feed instance including the 
+      creation of any missing <B>Entity</B>, <B>Bridge</B>, and/or 
+      <B>DataRecord</B> instances, appropriate for the feed; assign the feed 
+      property <I>underlyingRecord</I> to return the structure to be updated by 
+      the feed instance 
+  <TR>
+    <TD><I>runUpdate</I> 
+    <TD>use each feed instance to update the appropriate properties in the 
+      <I>underlyingRecord</I> 
+  <TR>
+    <TD><I>displayExceptions</I> 
+    <TD>display any errors or other status information 
+  <TR>
+    <TD><I>runWrapup</I> 
+    <TD>execute any special post-processing steps 
+  <TR>
+    <TD><I>runLocalWrapup</I> 
+    <TD>execute any supplemental wrapup steps for built-in feeds 
+  <TR>
+    <TD><I>runUpdateStats</I> 
+    <TD>update summary information about the feed such as timestamp of 
+      processing (<I>lastUpdateTime</I>) and number of instances processed 
+      (<I>lastUpdateCount</I>). </TR></TBODY></TABLE></CENTER>
+<P>
+<P>The <I>displayExceptions</I> message executes the following methods: 
+<P>
+<CENTER>
+<TABLE border=1 cellPadding=4 cellSpacing=2 width="80%">
+  <TBODY>
+  <TR>
+    <TH>Method
+    <TH>Function 
+  <TR>
+    <TD><I>displayExceptionSummary</I> 
+    <TD>display summary counts 
+  <TR>
+    <TD><I>displayBadOnes</I> 
+    <TD>display bad records supplied in feed 
+  <TR>
+    <TD><I>displayNewOnes</I> 
+    <TD>display new core class instances created by feed 
+  <TR>
+    <TD><I>displayOtherExceptions</I> 
+    <TD>display other information about the instances processed in the current 
+      feed update </TR></TBODY></TABLE></CENTER>
+<P>Subclasses of <B>DataFeed</B> redefine any or all of these messages, as 
+needed. The <I>runLocalWrapup</I> and the <I>displayLocalExceptions</I> are the 
+methods that are most frequently modified by users that wish to enhance existing 
+feeds. Any or all of these methods can be redefined by users creating their own 
+feed subclasses. 
+<P>
+<HR>
+
+<H3><A name=switches>Enable & Disable Messages</A></H3>
+<P>
+There are a number of messages that can be used to temporarily or permanently change the default behavior of a Data Feed. The messages need to be set prior to the load, for example:
+<b><p><ul type=disc>
+<br>CurrencyMaster enableInternalIds loadFromFile: "currency.dat" ;
+</b></ul><p> 
+Depending on the message, the behavior can apply to the next load only or remain set until it is explicitly unset.  Following is a list of messages that can be used in this manner and a description of their behavior and defaults:
+<br>
+<br><table border=1 cellPadding=2 cellSpacing=2 width="90%">
+  <tr>
+    <th>Description
+    <th>Data Feed
+    <th>Default
+    <th>Flag Setting
+  <tr>
+    <td colspan =4 ><i>enableCompanyChanges</i>, <i>disableCompanyChanges</i>
+        <br><i>enableCusipChanges</i>, <i>disableCusipChanges</i>
+        <br><i>enableSedolChanges</i>, <i>disableSedolChanges</i>
+  
+  <tr> <td>Allow/prohibit posting company, cusip and sedol changes; changes made or skipped displayed in exception report.
+    <td>SecurityMaster
+    <td>enableCompanyChanges, enableCusipChanges, enableSedolChanges
+    <td>Resets to enable after each update.
+
+  <tr>
+  <td colspan =4 >
+    <i>enableDisplayNewOnes</i>, <i>disableDisplayNewOnes</i>
+  <tr> 
+    <td>Enables/disables the new ones report from displaying in the exception report.
+    <td>All data feeds
+    <td>For all data feeds other than EntityExtender, enableDisplayNewOnes is the default; disableDisplayNewOnes is the default for EntityExtenderFeeds
+    <td>Remains set until explicitly unset.
+
+  <tr>
+  <td colspan =4 >
+    <i>enableEntityCreation</i>, <i>disableEntityCreation</i>
+  <tr>
+    <td>Disable message will prevent any new instances from being created but will update any existing instances
+    <td>MasterFeed
+    <td>enableEntityCreation
+    <td>Resets to enable after each update.
+
+  <tr>
+  <td colspan =4 ><i>enableInternalIds</i>, <i>disableInternalIds</i>
+  <tr>
+    <td>Enable message can be used to automatically generate a permanent, unique id for any instances in the underlying entity class
+    <td>MasterFeed
+    <td>disableInternalIds
+    <td>Remains set until explicitly unset.
+
+  <tr>
+  <td colspan =4><i>enablePurge</i>, <i>disablePurge</i>
+  <tr>
+    <td>Enable message purges all data from following feed
+    <td>MasterFeed (entities are flagged as inactive) and EntityExtenderFeed (DataRecords and points in time series properties are purged)  
+    <td>disablePurge
+    <td>Resets to disable after each update.
+
+  <tr>
+  <td colspan =4 ><i>enableSplitInversion</i>, <i>disableSplitInversion</i>
+  <tr>
+    <td>Use enable message when feed file supplies inverted splits rates
+    <td>SplitsFeed
+    <td>disableSplitInversion
+    <td>Remains set until explicitly unset.
+
+  <tr>
+  <td colspan =4 ><i>enableOnlyUpdateOnChange</i>, <i>disableOnlyUpdateOnChange</i>
+  <tr>
+    <td>Allows updates to time series properties only if the value has changed.  This works with EntityExtenderFeeds that are used to update fields that are time series properties, not feeds that update time series of records.  This message also assumes there is one update per entity per day. Note: use inconsistent with this assumption can cause undesirable results.
+    <td>EntityExtenderFeeds  
+    <td>disableOnlyUpdateOnChange
+    <td>Resets to disable after each update.
+</table>
+<p>
+<HR>
+
+<H3><A name=advanced>Advanced Examples Using DataFeeds</A></H3>
+<P>
+<OL>
+  <LI>Using the same DataRecord subclass with more than one entity or bridge: 
+  <P>Example: <BR>
+  <UL>tracking analyst data (e.g., rating, score, comment) over time for 
+    companies and industries</UL>
+  <P>Constraints: <BR>
+  <UL>since the name of the property that tracks the entity-&gt;datarecord 
+    relationship is stored with the datarecord, you must use the same property 
+    name for each entity/bridge that relates to the datarecord</UL>
+  <P>Approach: 
+  <P>Use the data record class creation interface to create a separate 
+  AnalystRating class linked to company and industry via the same property name 
+  (e.g., rating). This will generate two distinct feeds - the first will be 
+  named AnalystRatingFeed and the second will be named 
+  AnalystRating2ndClassNameFeed: <PRE><B>
+     #-- first one: create new AnalystRating DataRecord class,
+     #--    defines rating t/s property at Company, and creates
+     #--    AnalystRatingFeed to update Company-AnalystRating data
+     Interface BatchFeedManager
+        createDataRecordClass: "AnalystRating" from: "DataRecord"
+        linkedTo: "Company" via: "rating" asTS: "TRUE" ;
+
+     #-- second one: does not create AnalystRating DataRecord class,
+     #--    defines rating t/s property at Industry, and creates
+     #--    AnalystRatingIndustryFeed to update Industry-AnalystRating data
+     Interface BatchFeedManager
+        createDataRecordClass: "AnalystRating" from: "DataRecord"
+        linkedTo: "Industry" via: "rating" asTS: "TRUE" ;
+</PRE></B>
+  <P></P>
+  <LI>Create EntityExtenderFeed subclass that can be used as a superclass of 
+  several entity extender feeds: 
+  <P>Example: <BR>
+  <UL>add special processing rule for analyst rating that applies to the 
+    company and industry analyst rating feeds but no other feeds</UL>
+  <P>Approach: <PRE><B>
+    #----------
+    #  Create the new class with a generic feed class (AnalystRatingFeed).
+    #  Defer the linkage to specific subclasses as needed.
+    #----------
+    Interface BatchFeedManager
+      createDataRecordClass: "AnalystRating" from: "DataRecord"
+      linkedTo: "Entity" via: NA asTS: NA ;
+
+    #----------
+    #  Predefine the separate feed classes as subclasses of AnalystRatingFeed.
+    #  This provides the opportunity for the specific feeds to inherit from a
+    #  single feed class that can define analyst rating specific protocol
+    #----------
+
+    ClassSetup updateFromString:
+    "classId | parentId | description
+    AnalystRatingCompanyFeed | AnalystRatingFeed | Updates company ratings
+    AnalystRatingIndustryFeed | AnalystRatingFeed | Updates industry ratings
+    " ;
+
+    #----------
+    #  Now define the actual relationships between specific  subclasses
+    #    and AnalystRating; this will link the feed named 
+    #       AnalystRating_____Feed with this combination of settings
+    #----------
+
+    Interface BatchFeedManager
+      createDataRecordClass: "AnalystRating" from: "DataRecord"
+      linkedTo: "Company" via: "rating" asTS: "TRUE" ;
+    Interface BatchFeedManager
+      createDataRecordClass: "AnalystRating" from: "DataRecord"
+      linkedTo: "Industry" via: "rating" asTS: "TRUE" ;
+
+    #-- The AnalystRatingFeed class is a subclass of EEFeed and a
+    #-- superclass of AnalystRatingCompanyFeed and AnalystRatingIndustryFeed
+    #-- so special processing protocol can be defined at AnalystRatingFeed
+
+    AnalystRatingFeed showInheritance ;
+</PRE></B>
+  <LI>Create an EntityExtenderFeed to update properties at an Entity or Bridge 
+  without requiring a specific DataRecord: <PRE><B>
+    EntityExtenderFeedSetup updateFromString: "feedId | baseClassId
+    ERMiscFeed | ERCompany
+    " ;
+    
+    ####################
+    #  Here a couple of properties at the ERCompany bridge
+    ####################
+    PropertySetup updateFromString: "classId | property | tsFlag | dataType 
+    ERCompany | ts1 | Y | Double 
+    ERCompany | fp1 | N | Integer
+    " ;
+    
+    ####################
+    #  This feed should update the property ts1 right at the bridge
+    ####################
+    ERMiscFeed updateFromString: "entityId | date | ts1 
+    ibm | 9705 | 10
+    ibm | 9706 | 11
+    " ;
+    
+    ####################
+    #  and show it
+    ####################
+    Named Company IBM erCompany :ts1 displayAll ;
+
+
+
+</B></PRE></LI></OL>
+<P>
+<HR>
+
+<H3><A name=bulk>Optimizing Large Feeds</A></H3>
+<P>Large data files require more system resource to process than small ones. The 
+<I>loadFromFile:</I> message will read and process your entire data file in a 
+single pass. For performance reasons, it may be useful or necessary to divide 
+the processing into multiple passes. The message 
+<I>bulkLoadFromFile:withConfig:andBatchSize:fromBatch:to:</I> is available to 
+do this. The parameters are: 
+<P>
+<CENTER>
+<TABLE border=1 cellPadding=4 cellSpacing=2 width="80%">
+  <TBODY>
+  <TR>
+    <TH>Parameter 
+    <TH>Definition 
+  <TR>
+    <TD><I>bulkLoadFromFile:</I> 
+    <TD>file name 
+  <TR>
+    <TD><I>withConfig:</I> 
+    <TD>configuration file name 
+  <TR>
+    <TD><I>andBatchSize:</I> 
+    <TD>number of characters to process at a time 
+  <TR>
+    <TD><I>fromBatch:</I> 
+    <TD>first batch number 
+  <TR>
+    <TD><I>to:</I> 
+    <TD>last batch number </TR></TBODY></TABLE></CENTER>
+<P>The <a href="pmaFeeds.htm#config">configuration</a> file is read in once and preserved for each batch processed. If the configuration file contains a <i>fieldOrderList</i> it applies to the entire file; otherwise, the line specified in the configuration file as the <i>headerLineNumber</i> is used to set the <i>fieldOrderList</i>. All lines up to and including the <i>headerLineNumber</i> are skipped during the bulk load.  If no line is specified, the first non-blank, non-comment line of the feed file is assumed to contain the field names.  After the header line is identified several configuration file options are not meaningful and are disabled in subsequent iterations, such as <i>skipTop</i>, <i>skipBottom</i>, <i>maxRecords</i>, and <i>asOfdateLineNumber</i>.
+If there are no config file options <i>NA</i> can be supplied at <i>withConfig:</i>. 
+<P>The batch size is used to control the amount of the file read in each pass. 
+For example, if your file is 50mg and you want to process 5mg at a time, you 
+would set this value to 5000000. The load will be broken into subsets of pieces 
+of approximately 5mg and would process the file in 10 iterations. Note that each 
+pass will adjust the number of characters read so that full records are always 
+included. Note also that this technique should only be used on files that can 
+support arbitrary cutoff points for batch sizes. 
+<P>If the <I>fromBatch:</I> and <I>to:</I> parameters are set to NA, the entire 
+file will be processed. If you want to only process a subset of the file, you 
+can indicate the first and/or last batch to include. Batches are numbered from 
+0. The total number of batches will be a function of the total size of the file 
+and the batch size you set. 
+<P>For example, to load an entire price file in subsets of approximately 10mg 
+use:<B><PRE>     PriceFeed bulkLoadFromFile: "price.dat"
+        withConfig: "price.cfg" 
+        andBatchSize: 10000000 fromBatch: NA to: NA ;
+</PRE></B>To load the first 10mg subset, use:<B><PRE>     PriceFeed bulkLoadFromFile: "price.dat"
+        withConfig: "price.cfg" 
+        andBatchSize: 10000000 fromBatch: 0 to: 0 ;
+</PRE></B>
+<P>
+<HR>
+
+<TABLE border=0 width="100%">
+  <TBODY>
+  <TR>
+<td align=left><font size=-1>Copyright &copy; 2000 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated December 15, 2000</font>
+</TR></TBODY></TABLE></BODY></HTML>

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Portfolio Management Application Administration</title>
+</head>
+<body bgcolor=white>
+<h2>Vision Portfolio Management Application Administration</h2>
+
+<p>
+| <a href="vpma.htm">Application Overview</a> 
+| <a href="pmaFeeds.htm">Data Feeds</a>
+| <a href="pmaXRef.htm">Application Cross Reference</a>
+|
+<hr>
+<h3>Topics Covered:</h3>
+<ul type=square>
+<li><a href="#overview">Overview</a>
+<li><a href="#data">Uploading Data From Files</a>
+<li><a href="#scripts">Loading New Vision Scripts</a>
+<li><a href="#schema">Defining New Database Schema</a>
+<li><a href="#versions">Reviewing Version History</a>
+<li><a href="#web">Controlling the Web Reporter</a>
+<li><a href="#maintain">Database Maintenance Functions</a>
+<li><a href="#production">Production Processing</a>
+</ul>
+
+<p>
+<hr>
+<h3><a name="overview">Overview</a></h3>
+<p>
+Your Vision database is designed to store portfolio, security, holding,
+and related information over time.  Although you can load this data
+temporarily on an as needed basis using 
+<a href="pmaFeeds.htm#excel">techniques described elsewhere</a>,
+you will want to permanently commit data to the database
+on a regular basis so that the information can be shared by many
+users.  The <b>Vision Administrator Module</b> provides a number
+of tools for coordinating updates to your Vision database and
+performing various database administration functions.
+<p>
+
+Before you can update the database permanently, you will need to have loaded a valid license file entry for each server being licensed.  Contact Insyte if you have not yet performed this step. 
+<p>
+When you install your Vision system, one user is designated as
+the Vision Administrator.  For this user, the <b>Vision Administrator
+module</b> is included as part of the setup.  An icon in this user's
+Vision program group is available to launch this program which
+is normally located as
+<i>{fill in the blank}</i>.
+Only the Vision Administrator
+has the ability to commit permanent changes to the database including
+data modifications and database extensions that are seen by all users.
+<p>
+Select the <i>VAdmin</i> icon from the Vision program group.  You will
+be prompted for a password.  This should be the Administrator password 
+on the machine that hosts the Vision Application Server.  You should
+then see the basic Vision Administrator form:
+<p>
+<center>
+<img src="admin1.gif" width=562 height=703 border=1 alt="VAdmin Interface">    
+</center>
+<p>
+
+This main form is used to update the database with pending data.
+Additional options are available via the menu bars to perform
+other functions.
+<p>
+
+<p>
+<hr>
+<h3><a name="data">Uploading Data From Files</a></h3>
+<p>
+The list box on the left of the main form shows the data files 
+that are currently available for update.  A data file contains
+one or more records (rows) of tab-delimited data.  The first line
+is a tab-delimited header indicating the data items contained in the file
+and their order.  More information about data feed contents
+<a href="pmaFeeds.htm#formats"> is available</a>.
+<p>
+When you have a data file
+available, you place it in a pre-defined directory on your
+<b>Server</b> machine.  On Unix servers this directory is normally
+<i>/localvision/upload/feeds</i>.  On NT servers, this directory
+is normally stored relative to a specific disk and may include
+an additional prefix as part of its path.  Check with your System
+Administrator for the exact location in your environment.
+<p>
+The list boxes on the right side of the main form allow you to
+select the <b>DataFeed</b> format that goes with your data file.
+The top list box allows you to select the category of feed; based
+on this selection, the bottom list box shows you the <b>DataFeed</b>
+formats that have been defined.  More information about pre-defined data feed
+formats <a href="pmaFeeds.htm#predefined"> is available</a>.
+<p>
+For example, select the <i>mCompany.dat</i> data file from the left and the
+entity data feed <i>CompanyMaster</i> from the right.  Press the <i>Update</i>
+button to load this data.  When the update finishes, you should see a
+summary report similar to:
+<p>
+<center>
+<img src="admin2.gif" width=561 height=321 border=1 alt="Company Diagnostics Report">    
+</center>
+<p>
+Press the <i>Save</i> button to save the feed.  When the save finishes, you should see a message similar to: 
+<p>
+<center>
+<img src="admin3.gif" width=471 height=292 border=1 alt="Saved message">    
+</center>
+<p>
+
+
+If you save the
+data, the data file will be removed from the <i>Pending DataFeeds</i>
+list box.
+<p>
+
+<p>
+<hr>
+<h3><a name="scripts">Loading New Vision Scripts</a></h3>
+<p>
+You may need to load and save new Vision scripts into 
+your database for several reasons such as report modifications,
+new applications, and corrections that cannot be performed via
+data feed files.  Normally, you will receive Vision files from 
+your Insyte consultant along with a description of the change.
+When you have a Vision script file
+available, you place it in a pre-defined directory on your
+<b>Server</b> machine.  On Unix servers this directory is normally
+<i>/localvision/upload/vscripts</i>.  On NT servers, this directory
+is normally stored relative to a specific disk and may include
+an additional prefix as part of its path.  Check with your System
+Administrator for the exact location in your environment.
+<p>
+To load a Vision script file, click the <i>Pending</i> menu at the
+top of the form and select the <i>Show Pending Scripts</i> choice.
+This will change your main form to show pending Vision script files
+instead of pending data feed files in the list box on the left.  The
+list boxes on the right are not applicable when loading Vision script
+files and are therefore disabled.  You can change back to data
+feed mode by selecting the <i>Show Pending DataFeeds</i> choice in
+the <i>Pending</i> menu.
+<p>
+For example, select the <i>vscript1.S</i> script file.
+Press the <i>Save</i>
+button to load this script.  When the update finishes, you should see a
+summary report similar to:
+<p>
+
+<center>
+<img src="admin4.gif" width=471 height=293 border=1 alt="VScripts Message">    
+</center>
+<p>
+
+<p>
+The script file will be removed from the <i>Pending Scripts</i>
+list box.
+
+<p>
+<hr>
+<h3><a name="schema">Defining New Database Schema</a></h3>
+<p>
+Options are available that streamline the creation of
+new database structures. Selecting the <i>Schema</i> choice from
+the Vision Administrator tool bar displays a menu that allows
+you to define new entities, data records, and relationships.
+These options work in the same way that the analyst's version
+<a href="pmaAnalyst.htm#schema">work in Excel</a>; however,
+the VAdmin version will permanently commit the data to the database.
+The user will be prompted to save the newly created instance.
+<p>
+Several data feed formats have been defined that allow you to
+create new core classes, properties, and data feed classes using
+the basic data feed upload mechanisms <a href="#data">described above.</a>
+These formats are described more fully in the
+document <a href="clDataFeed.htm"><i>The <b>DataFeed</b> Class</i></a>.  This document provides sample vision code for using the DataFeed Class, however all of the features described are also available in the VAdmin tool.
+
+<p>
+<hr>
+<h3><a name="versions">Reviewing Version History</a></h3>
+<p>
+Each time you commit information to the Vision database, Vision
+creates a new version or view of the database.  Note that analysts accessing
+the database via their <a href="pmaAnalyst.htm">Excel interface</a>
+will not see these global changes unless they disconnect from Vision
+or exit and restart Excel.
+<p>
+To see the history of your updates to the database, click on the
+<i>Vision DBA</i> menu and select the <i>Version History</i> 
+choice.  This displays the history of your changes since the
+last <a href="#maintain">database compaction</a>.  If you
+want to undo one or more updates, you can select the version that
+you wish to eliminate and press the <i>Rollback</i> option on this
+form.  
+<p>
+<blockquote>
+<b>Note: </b>
+In the NT environment, you should only <i>rollback</i> the database
+when there are no <i>Vision</i> sessions running.  You should 
+shut down <a href="#masterlisteners">the master listeners</a>
+by clicking on the <i>Vision DBA</i> menu and selecting
+the <i>Shut Down Master Listeners</i> choice.  In addition,
+you should make sure that no analysts are accessing the database
+via their excel interface.
+After completing the <i>rollback</i>, you should restart the master listeners
+and notify analysts that they can reconnect to the database.
+</blockquote>
+
+<p>
+<hr>
+<h3><a name="web">Controlling the Web Reporter</a></h3>
+<p>
+To use Vision's web-based applications, there needs to be at least
+one running Vision session waiting for browser requests.  These Vision
+sessions are known as <i>listeners</i>.  Two types of listener can
+be started: <i>master listeners</i> and <i>private listeners</i>.
+The Vision Administrator can start one or more master
+listeners which are available and shared by all browser users.
+Analysts using the Excel add-ins automatically start a private listener
+which enables them to view private data via the standard browser
+applications.
+<p>
+<a name="masterlisteners"> </a>
+To start or restart the master listeners, click on the
+<i>Vision DBA</i> menu and select the <i>Restart Master Listeners</i> 
+choice.  You will need to execute this option to start the listeners
+initially.  These listeners will maintain a constant view of the 
+database.  By default, the browser applications will not see any database
+updates that have occurred since the master listeners were started.
+You will normally want to restart the master listeners after you
+have updated a collection of <a href="#data">data feed files</a> and/or 
+<a href="#scripts">Vision scripts</a>.
+<p>
+Your System Administrator for the Vision Server machine can arrange
+to automatically start the listeners each time the server is rebooted
+by adding the script <i>restartMasterListeners.cmd</i> located in
+the <i>localvision/adminScripts</i> directory on your server machine
+to the appropriate startup files.
+<p>
+More information
+about private listeners <a href="pmaAnalyst.htm#browser">is available</a>.
+
+
+<p>
+<hr>
+<h3><a name="maintain">Database Maintenance Functions</a></h3>
+<p>
+A set of database maintenance functions needs to be performed 
+periodically to reclaim space and compress structures that
+have become sub-optimal as the result of many updates to the
+database.  Click on the <i>Vision DBA</i> choice on your toolbar.
+You should see the menu:
+<p>
+<center>
+<img src="admin5.gif" width=210 height=244 border=1 alt="DBA Menu">    
+</center>
+
+<p>
+The second set of items in this menu perform various Vision maintenance
+functions.  These functions are described in the table below:
+<p>
+<center><table border=1 width=80% cellpadding=4 cellspacing=2>
+<tr><th>DBA Function<th>Description
+<tr>
+<td><i>Schema Processing</i>
+<td>Updates a cross reference of all protocol that has been
+defined in your Vision database.
+<tr>
+<td><i>Database Cleanups</i>
+<td>Performs various database cleanup activities that are configured
+for your installation.
+<tr>
+<td><i>Garbage Collection</i>
+<td>Performs various cleanup activities that are standard for all
+installations.
+<tr>
+<td><i>Compaction</i>
+<td>Physically moves unused information out of the database and
+temporarily relocates it elsewhere on the disk.
+<tr>
+<td><i>Delete Segments</i>
+<td>Removes the unused information identified by the compaction process.
+</table></center>
+<p>
+
+Most of these tasks take a few minutes to run.
+In a starter environment, these maintenance activities are invoked
+interactively as needed, probably a few times a week.  In a full
+production environment, these activities are normally scheduled to
+run on a daily basis at the start of each production cycle.
+
+<p>
+Note: If you are an NT user, after running <i>Compaction</i> interactively you need to <i>Restart Session</i> before continuing.
+<p>
+As part of <a href="pmaInstall.htm#methodology">your installation</a>,
+your Insyte consultant will help you
+understand when and how to use these tools.
+
+<p>
+<hr>
+<h3><a name="production">Production Processing</a></h3>
+<p>
+It is useful to automate the production cycle so that standard
+updates and report generation can be scheduled to run each night.
+The Vision Server Installation for Unix servers
+includes a comprehensive set of scripts that can be used to
+<a href="admProduction.htm">automate your daily production cycle</a>.
+<p>
+If you decide to use these tools, the default behavior of the
+<i>VAdmin</i> Module will change.  The tools described in this
+document for loading data
+files and new Vision scripts will no longer update the database
+immediately.  Instead, the updates will be submitted to the
+production process that is already running.  You will also see
+a menu choice, <i>Production</i>, that contains options for
+looking at the state of the current production cycle, scheduling and
+removing updates and reports, and viewing production logs.
+
+<p>
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy; 2000 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated December 15, 2000</font>
+</table>
+
+</body>
+</html>
+
+
+

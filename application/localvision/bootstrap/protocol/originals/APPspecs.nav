@@ -1,0 +1,443 @@
+##################################################
+#  Predefine tables and graphs used by navigator reports
+##################################################
+
+####################
+#  Table Setup
+####################
+
+LayoutTools TableSpec createInstance: "ItemHelper" . 
+    setColumnCountTo: 2 . setHeaderCountTo: 1 .
+    setWidthTo: "75%" . 
+   setCellPaddingTo: 3 . setCellSpacingTo: 2 . setBorderTo: 2 .
+do: [ !table <- ^self  ;
+      table caption
+        setColorTo: "green" . setSizeTo: 4 . setTextTo: "Data Items" ;
+      table addColumn: 1 . 
+        setWidthTo: 30 . setHAlignmentTo: "left" .
+        addHeader: 1 .
+           setSizeTo: 3 . setTextTo: "Item" ;
+      table addColumn: 2 . 
+        setWidthTo: 40 . setHAlignmentTo: "left" .
+        addHeader: 1 .
+           setSizeTo: 3 . setTextTo: "Returns" ;
+    ] ;
+
+#----------
+
+LayoutTools TableSpec createInstance: "outerTable" . 
+    setWidthTo: "90%" . 
+    setCellPaddingTo: 9 . setCellSpacingTo: 5 . setBorderTo: 0 .
+;
+
+#----------
+
+LayoutTools TableSpec createInstance: "DataModelSummaryTable" .
+do: [ !table <- ^self ;
+      table setHeaderCountTo: 4 ;
+      table setBorderTo: 0 ;
+      table addColumn: 1 .
+      do: [ ^self addHeader: 1 . setWidthTo: 25 . setSizeTo: 4 ;
+            ^self addHeader: 2 . setWidthTo: 25 . setSizeTo: 4 ;
+            ^self addHeader: 3 . setWidthTo: 25 . setSizeTo: 4 ;
+          ] ;
+    ] ;
+
+#----------
+
+LayoutTools TableSpec createInstance: "DataModelLinkFromTable" .
+do: [ !table <- ^self  ;
+      table setBorderTo: 0 . setColumnCountTo: 3 . setHeaderCountTo: 1 ;
+      3 sequence 
+      do: [ !curr <- ^my table addColumn: ^self;
+            curr setSizeTo:  "3" .
+                 setWidthTo:  25 .
+                 setHAlignmentTo: "left" .
+                 setVAlignmentTo: "bottom" .
+                 enableFillBlanks ;
+            curr addHeader: 1 .
+                 setSizeTo: 3 . setHAlignmentTo: "left" ;
+           ] ;
+      table getColumn: 1 . getHeader: 1 . setTextTo: "From Class" ;
+      table getColumn: 2 . 
+          setSizeTo: 2 . getHeader: 1 . setTextTo: "Via" ;
+      table getColumn: 3 . getHeader: 1 . setTextTo: " " ;
+   ] ;
+
+#----------
+
+LayoutTools TableSpec createInstance: "DataModelLinkToTable" .
+do: [ !table <- ^self ;
+      table setBorderTo: 0 . setColumnCountTo: 3 . setHeaderCountTo: 1 ;
+      3 sequence 
+      do: [ !curr <- ^my table addColumn: ^self;
+            curr setSizeTo:  3 .
+                 setWidthTo:  25 .
+                 setHAlignmentTo: "left" .
+                 setVAlignmentTo: "bottom" .
+                 enableFillBlanks ;
+            curr addHeader: 1 . setSizeTo: 3 .
+                 setHAlignmentTo: "left" ;
+           ] ;
+      table getColumn: 1 . getHeader: 1 . setTextTo: "To Class" ;
+      table getColumn: 2 . 
+          setSizeTo: 2 . getHeader: 1 . setTextTo: "Via" ;
+      table getColumn: 3 . getHeader: 1 . setTextTo: " " ;
+   ] ;
+
+#----------
+
+LayoutTools TableSpec createInstance: "DataModelLinkTable" .
+do: [ !table <- ^self ;
+      table setBorderTo: 0 . setColumnCountTo: 3 ;
+      3 sequence 
+      do: [ !curr <- ^my table addColumn: ^self;
+            curr setSizeTo:  5 .
+                 setWidthTo:  50 .
+                 setHAlignmentTo: "center" .
+                 setVAlignmentTo: "top" ;
+            curr setSizeTo: 3 .
+                 setHAlignmentTo: "center" ;
+          ] ;
+       table getColumn: 2 . enableFillBlanks ;
+
+    ];
+
+#----------
+
+LayoutTools TableSpec createInstance: "DataModelShortLegend" .
+do: [ !legendTable <- ^self ;
+      legendTable setWidthTo: "45%" . setBorderTo: 1 . 
+           setCellPaddingTo: 0 . setCellSpacingTo: 0 .
+           setColumnCountTo: 1 . setHeaderCountTo: 2 ;
+      legendTable addColumn: 1 .
+      do: [ !curr <- ^self ;
+            curr enableFillBlanks ;
+          ] ;
+      legendTable getColumn: 1 . addHeader: 1 .
+         setWidthTo: 80 . setColumnSpanTo: 1 . setSizeTo: -1 .
+         setTextTo: "* message returns super class of this class" ;
+      legendTable getColumn: 1 . addHeader: 2 .
+         setSizeTo: -1 . setHAlignmentTo: "center" .
+         setTextTo:
+         [ [ FormatTools buildImage: "Object.gif" . print ;
+             FormatTools blankFill: 1 . print ;
+             FormatTools 
+               font: "Arial" inSize: "-2" andColor: "black" 
+               for:  (FormatTools bold: "Object" ) .print ;
+             FormatTools blankFill: 2 . print ;
+             FormatTools buildImage: "List.gif" . print ;
+             FormatTools blankFill: 1 . print ;
+             FormatTools 
+               font: "Arial" inSize: "-2" andColor: "black" 
+               for:  (FormatTools bold: "List" ) .print ;
+             FormatTools blankFill: 2 . print ;
+             FormatTools buildImage: "IList.gif" . print ;
+             FormatTools blankFill: 1 . print ;
+             FormatTools
+               font: "Arial" inSize: "-2" andColor: "black" 
+               for:  (FormatTools bold: "IndexedList" ) .print ;
+             FormatTools blankFill: 2 . print ;
+             FormatTools buildImage: "TS1.gif" . print ;
+             FormatTools blankFill: 1 . print ;
+             FormatTools
+               font: "Arial" inSize: "-2" andColor: "black" 
+               for:  (FormatTools bold: "TimeSeries" ) .print ;
+            FormatTools blankFill: 2 . print ;
+         ] divertOutput ] ;
+    ] ;
+
+#----------
+
+LayoutTools TableSpec createInstance: "DataModelDetailTable" .
+do: [ !table <- ^self ;
+      table setBorderTo: 1 . setColumnCountTo: 6 . setHeaderCountTo: 3 ;
+      6 sequence 
+      do: [ !curr <- ^my table addColumn: ^self;
+            curr setWidthTo:  22 .
+                 setHAlignmentTo: "center" .
+                 setVAlignmentTo: "bottom" .
+                 disableFillBlanks ;
+ 
+            curr addHeader: 3 . 
+                setWidthTo: 22 .setSizeTo: 3 . setHAlignmentTo: "center";
+           ] ;
+      table getColumn: 1 . addHeader: 1 .
+          setWidthTo: 100 . setSizeTo: 4 . setColumnSpanTo: 6;
+      table getColumn: 1 . addHeader: 2 .
+          setWidthTo: 100 . setSizeTo: 2 . setColumnSpanTo: 6;
+      table getColumn: 1 .
+         setWidthTo: 20 . setHAlignmentTo: "left" .
+         getHeader: 3 . setTextTo: "Message" ;
+      table getColumn:  2 . getHeader: 3 . setTextTo: "Returns" ;
+      table getColumn: 3 .  getHeader: 3 . setTextTo: "As" ;
+      table getColumn: 4 .  getHeader: 3 . setTextTo: "Type" ;
+      table getColumn: 5 .
+         setWidthTo: 25 . enableFillBlanks setHAlignmentTo: "left" .
+         getHeader: 3 . setTextTo: "Params" ;
+      table getColumn: 6 .
+         setWidthTo: 25 . enableFillBlanks setHAlignmentTo: "left" .
+         getHeader: 3 . setTextTo: "Notes" ;
+    ];
+
+#----------
+
+LayoutTools TableSpec createInstance: "DataModelLongLegend" .
+do: [ !legendTable <- ^self ;
+       legendTable
+           setColumnCountTo: 1 . setHeaderCountTo: 3 .
+           setWidthTo: "60%" . setBorderTo: 1 ;
+       legendTable addColumn: 1 . setWidthTo:  80 ;
+       legendTable getColumn: 1 . addHeader: 1 .
+          setWidthTo: 80 . setSizeTo: -2 .
+          setTextTo:
+          [ [ FormatTools buildImage: "Object.gif" . print ;
+              FormatTools blankFill: 1 . print ;
+              FormatTools
+                 font: "Arial" inSize: "-2" andColor: "black" 
+                 for:  "Object" . print ;
+              FormatTools blankFill: 2 . print ;
+              FormatTools buildImage: "List.gif" . print ;
+              FormatTools blankFill: 1 . print ;
+              FormatTools
+                 font: "Arial" inSize: "-2" andColor: "black" 
+                 for:  "List" . print ;
+              FormatTools blankFill: 2 . print ;
+              FormatTools buildImage: "IList.gif" . print ;
+              FormatTools blankFill: 1 . print ;
+              FormatTools
+                 font: "Arial" inSize: "-2" andColor: "black" 
+                 for:  "IndexedList" . print ;
+              FormatTools blankFill: 2 . print ;
+              FormatTools buildImage: "TS1.gif" . print ;
+              FormatTools blankFill: 1 . print ;
+              FormatTools
+                 font: "Arial" inSize: "-2" andColor: "black" 
+                 for:  "TimeSeries" . print ;
+              FormatTools blankFill: 2 . print ;
+            ] divertOutput ] ;
+       legendTable getColumn: 1 . addHeader: 2 .
+          setWidthTo: 80 . setSizeTo: -2 .
+          setTextTo:
+          [ [ FormatTools buildImage: "FP.gif" . print ;
+              FormatTools blankFill: 1 . print ;
+              FormatTools
+                 font: "Arial" inSize: "-2" andColor: "black" 
+                 for: "Fixed Property" . print ;
+              FormatTools blankFill: 2 . print ;
+              FormatTools buildImage: "TS2.gif" . print ;
+              FormatTools blankFill: 1 . print ;
+              FormatTools
+                 font: "Arial" inSize: "-2" andColor: "black" 
+                 for:  "TimeSeries" . print ;
+              FormatTools blankFill: 2 . print ;
+              FormatTools buildImage: "M1.gif" . print ;
+              FormatTools blankFill: 1 . print ;
+              FormatTools
+                 font: "Arial" inSize: "-2" andColor: "black" 
+                 for:  "Method" . print ;
+              FormatTools blankFill: 2 . print ;
+              FormatTools buildImage: "M2.gif" . print ;
+              FormatTools blankFill: 1 . print ;
+              FormatTools
+                 font: "Arial" inSize: "-2" andColor: "black" 
+                 for:  "TimeVarying Method" . print ;
+              FormatTools blankFill: 2 . print ;
+              FormatTools bold: "C" . print ;
+              FormatTools blankFill: 1 . print ;
+              FormatTools
+                 font: "Arial" inSize: "-2" andColor: "black" 
+                 for:  "Constant" . print ;
+              FormatTools blankFill: 2 . print ;
+            ] divertOutput ] ;
+       legendTable getColumn: 1 . addHeader: 3 .
+          setWidthTo: 80 . setSizeTo: -2 .
+          setTextTo:
+          [ [ FormatTools bold: "P" . print ;
+              FormatTools blankFill: 1 . print ;
+              FormatTools
+                 font: "Arial" inSize: "-2" andColor: "black" 
+                 for: "Parent Class" . print ;
+              FormatTools blankFill: 2 . print ;
+              FormatTools buildImage: "Key1.gif" . print ;
+              FormatTools blankFill: 1 . print ;
+              FormatTools
+                 font: "Arial" inSize: "-2" andColor: "black" 
+                 for:  "Unique Key". print ;
+              FormatTools blankFill: 2 . print ;
+              FormatTools buildImage: "Key2.gif" . print ;
+              FormatTools blankFill: 1 . print ;
+              FormatTools
+                 font: "Arial" inSize: "-2" andColor: "black" 
+                 for: "Partial Key" . print ;
+              FormatTools blankFill: 2 . print ;
+            ] divertOutput ] ;
+    ] ;
+
+
+#--------------------------------------------------
+
+####################
+#  LayoutTools FormSpec
+####################
+
+LayoutTools FormSpec createInstance: "EntityInspector" .
+   enableGlobalDate
+   enableGlobalCurrency
+   setTitleTo: " Entity " .
+   setApplicationNameTo: "ShowAllDataValues" .
+   setDescriptionTo:
+"displays the data values for the selected entity." ;
+
+LayoutTools Named FormSpec EntityInspector
+addInputSpec: 1 .
+   setLabelTo: "Class: ".
+   setTypeToMenu
+   setNameTo: "entityType" . 
+   setSizeTo: 1 .
+;
+LayoutTools Named FormSpec EntityInspector
+addInputSpec: 2 .
+   setLabelTo: "Id: ".
+   setTypeToText
+   setNameTo: "entityId" . 
+   setSizeTo: 25 ;
+LayoutTools Named FormSpec EntityInspector
+addInputSpec: 3 .
+   setLabelTo: "".
+   setTypeToHidden
+   setNameTo: "path" ;
+LayoutTools Named FormSpec EntityInspector
+addInputSpec: 4 .
+   setLabelTo: "".
+   setTypeToHidden
+   setNameTo: "priorEntityId" ;
+
+#----------
+
+LayoutTools FormSpec createInstance: "MessageRestrictor" .
+   setTitleTo: " Message Restrictions " .
+   setApplicationNameTo: "ShowRestrictedMessageXRef" .
+   setDescriptionTo:
+"generates an alphabetical cross reference of messages in the database that 
+satisfy user-specify criteria." ;
+
+LayoutTools Named FormSpec MessageRestrictor
+addInputSpec: 1 .
+   setLabelTo: "Enter a Class: ... ".
+   setTypeToText
+   setNameTo: "classId" . 
+   setSizeTo: 25 .
+;
+LayoutTools Named FormSpec MessageRestrictor
+addInputSpec: 2 .
+   setLabelTo: "... or a Category: ".
+   setTypeToMenu
+   setNameTo: "category" . 
+   setSizeTo: 1 .
+   setChoice: 1 labelTo: "All" .
+   setChoice: 2 labelTo: "BuiltIn" .
+   setChoice: 3 labelTo: "Application" .
+   setChoice: 4 labelTo: "DataFeed" .
+   setChoice: 5 labelTo: "ToolKit" .
+   setChoice: 6 labelTo: "Dictionary" .
+   setChoice: 7 labelTo: "ObjectSpace" .
+   setChoice: 8 labelTo: "Other" .
+;
+LayoutTools Named FormSpec MessageRestrictor
+addInputSpec: 3 .
+   setLabelTo: "Type: ".
+   setTypeToMenu
+   setNameTo: "type" . 
+   setSizeTo: 1 .
+   setChoice: 1 labelTo: "All" .
+   setChoice: 2 labelTo: "FixedProperty" .
+   setChoice: 3 labelTo: "TimeSeriesProperty" .
+   setChoice: 4 labelTo: "Method" .
+   setChoice: 5 labelTo: "Constant" .
+;
+
+LayoutTools Named FormSpec MessageRestrictor
+addInputSpec: 4 .
+   setLabelTo: "Function: ".
+   setTypeToMenu
+   setNameTo: "function" . 
+   setSizeTo: 1 .
+   setChoice: 1 labelTo: "All" .
+   setChoice: 2 labelTo: "Comparison" .
+   setChoice: 3 labelTo: "Computation" .
+   setChoice: 4 labelTo: "Conversion" .
+   setChoice: 5 labelTo: "Creation" .
+   setChoice: 6 labelTo: "Data" .
+   setChoice: 7 labelTo: "Display" .
+   setChoice: 8 labelTo: "Format" .
+   setChoice: 9 labelTo: "Inquiry" .
+   setChoice: 10 labelTo: "Transformation" .
+   setChoice: 11 labelTo: "Update" .
+;
+
+LayoutTools Named FormSpec MessageRestrictor
+addInputSpec: 5 .
+   setLabelTo: "Level: ".
+   setTypeToMenu
+   setNameTo: "level" . 
+   setSizeTo: 1 .
+   setChoice: 1 labelTo: "All" .
+   setChoice: 2 labelTo: "Basic" .
+   setChoice: 3 labelTo: "DBA" .
+   setChoice: 4 labelTo: "Advanced" .
+;
+
+LayoutTools Named FormSpec MessageRestrictor
+addInputSpec: 6 .
+   setLabelTo: "Hierarchy: ".
+   setTypeToRadio
+   setNameTo: "hierarchy" . 
+   setChoice: 1 labelTo: "Exclude Object" .
+   setChoice: 1 valueTo: "Exclude Object" .
+   setChoice: 2 labelTo: "Include Object" .
+   setChoice: 2 valueTo: "Include Object" .
+   selectChoice: 1 .
+;
+
+LayoutTools Named FormSpec MessageRestrictor
+addInputSpec: 7 .
+   setLabelTo: "Updated Since: ".
+   setTypeToText
+   setNameTo: "updated" . 
+   setSizeTo: 25 ;
+
+LayoutTools Named FormSpec MessageRestrictor
+addInputSpec: 8 .
+   setLabelTo: "Search String: ".
+   setTypeToText
+   setNameTo: "searchString" . 
+   setSizeTo: 25 ;
+
+LayoutTools Named FormSpec MessageRestrictor
+addInputSpec: 9 .
+   setLabelTo: "Match On: ".
+   setTypeToMenu
+   setNameTo: "matchType" . 
+   setSizeTo: 1 .
+   setChoice: 1 labelTo: "Exact Message Name" .
+   setChoice: 2 labelTo: "Partial Message Name" .
+   setChoice: 3 labelTo: "Message Description" .
+   setChoice: 4 labelTo: "Method Implementation" .
+;
+
+LayoutTools Named FormSpec MessageRestrictor
+addInputSpec: 10 .
+   setLabelTo: "Restrict Partial Match To: " .
+   setTypeToRadio 
+   setNameTo: "matchRestriction" . 
+   setChoice: 1 labelTo: "Start " .
+   setChoice: 1 valueTo: "Start" .
+   setChoice: 2 labelTo: "End  " .
+   setChoice: 2 valueTo: "End" .
+   setChoice: 3 labelTo: "Anywhere " .
+   setChoice: 3 valueTo: "Anywhere" .
+   selectChoice: 3 .
+;
+
+

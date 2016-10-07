@@ -1,0 +1,62 @@
+##################################################
+#  Additional Protocol for IncorporatorPrototype, DBEntity, and DataSouce
+#      classes for Investment installations 
+#
+##################################################
+
+#--------------------
+#  DataSet Methods
+#--------------------
+
+DataSet
+   addRule: [ ^self defineStandardSecurityMessages ] forEntity: Security .
+   addRule: [ ^self defineStandardCompanyMessages ] forEntity: Company .
+
+defineMethod:
+[ | defineStandardSecurityMessages |
+  ^self
+     defineMethod: [ | security | localEntry security ] .
+     defineMethod: [ | company | ^self security company ] .
+     defineMethod:
+     [ | currency | 
+       ^self security currency 
+     ] .
+     defineMethod:
+     [ | currencyFactor |
+       baseCurrency exchangeTo: ^self currency relativeTo: date
+     ] .
+     defineMethod: [ | adjustmentDate | ^self updateDate ] .
+     defineMethod:
+     [ | adjustmentFactor | 
+       !sec <- ^self security;
+       sec isSecurity not || adjustmentDate isNA
+          ifTrue: [ 1.0 ] 
+         ifFalse: [ sec adjustmentRelativeTo: adjustmentDate ]
+     ] ;
+  ^self
+] .
+
+defineMethod:
+[ | defineStandardCompanyMessages |
+  ^self
+     defineMethod: [ | company | localEntry company ] .
+     defineMethod:
+     [ | currency | 
+       ^self company currency 
+     ] .
+     defineMethod:
+     [ | currencyFactor |
+       baseCurrency exchangeTo: ^self currency relativeTo: date
+     ] .
+     defineMethod: [ | adjustmentDate | ^self updateDate ] .
+     defineMethod:
+     [ | adjustmentFactor | 
+       !comp <- ^self company ;
+       comp isCompany not || adjustmentDate isNA
+          ifTrue: [ 1.0 ] 
+         ifFalse: [ comp adjustmentRelativeTo: adjustmentDate ]
+     ] ;
+  ^self
+] .
+
+;

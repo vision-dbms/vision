@@ -1,0 +1,128 @@
+#----------------
+# DEFpatch.core
+#----------------
+#
+# This is designed to keep track of the patch level for core protocol and
+# other applications using PatchTable protcol to track releases
+# these patches are named patch.<number>.vis starting from  the number value
+# in the patch table
+# All databases need a 'Core' and will probably have at least one application.
+#
+
+
+Interface BatchFeedManager createEntityClass: "PatchTable" from: "Table" ;
+
+PropertySetup updateFromString: "
+classId    | property   | dataType | defaultValue
+PatchTable | module     | String   |
+PatchTable | patchLevel | Integer  | 0
+" ;
+
+PatchTable defineFixedProperty: 'lastPatchTime' withDefault: Utility UnixSeconds ;
+
+PatchTableMaster defineMethod: [ | runWrapup |
+  ^super runWrapup ;
+  !feed <- ^self currentStore ;
+  feed masterList
+     select: [ underlyingRecord isntDefault ] .
+  do: [ underlyingRecord :lastPatchTime <- CoreWorkspace Utility UnixSeconds currentTime ; ] ;
+  ^self
+] ;
+
+PatchTable defineMethod: [ | setPatchHomeTo: aString |
+  ^self define: 'patchHome' toBe:
+    ( aString isString
+      ifTrue: [ ^self getClusteredString: aString ]
+      ifFalse: [ aString ]) ;
+  ^self
+] ;
+
+PatchTable setPatchHomeTo: NA ;
+
+PatchTable defineMethod: [ | getPatchHome |
+  GlobalWorkspace respondsTo: 'PatchTable' .
+  ifTrue: [ GlobalWorkspace PatchTable patchHome ] .
+  else: [ ^self patchHome ] .
+  else: [ CoreWorkspace ProcessControlTools getEnvFor: "osvAdmin" ]
+] ;
+
+PatchTable defineMethod: [ | displayStatus |
+  "Module Version: " print ; ^self getPatchHome printNL ;
+  newLine print ;
+  ^self masterList
+  do: [ "Id:" print: 18 ; id print ; " Active: " print ; isActive printNL ;
+        "Name" print: 18 ; name printNL ;
+        "Module:" print: 18 ; module printNL ;
+        "Patch Level:" print: 18 ; patchLevel asString printNL ;
+        "Last Update:" print: 18 ; lastPatchTime printNL ;
+        "Patches Pending:" print: 18 ; ^self getNextPatch isntNA printNL ;
+        newLine print ;
+      ] ;
+] ;
+
+PatchTable defineMethod: [ | applyNextPatch |
+  !patchNumber <- (^self patchLevel + 1) asInteger ;
+  # Apply Global Patch
+  !patchFile <- ^self getPatchHome
+                concat: "/" . concat: ^self module . concat: "/patch_" .
+                concat: patchNumber asString . concat: ".vis" ;
+  patchFile fileExists
+  ifTrue: [ "Applying patch #" print ; patchNumber asString print ; " to " print ; ^self id printNL ;
+            CoreWorkspace getClusteredString: patchFile . asFileContents evaluateIn: CoreWorkspace ;
+            ^self :patchLevel <- patchNumber ;
+            ^self :lastPatchTime <- CoreWorkspace Utility UnixSeconds currentTime ;
+            ^self patchLevel
+  ]
+] ;
+
+PatchTable defineMethod: [ | applyAllPatches |
+  ^self applyNextPatch isntNA
+  ifTrue: [ # Recursive iterate to next patch.
+            ^self applyAllPatches ; ]
+  ifFalse: [ "All patches applied through level " print ; ^self patchLevel asString print ;
+             " for " print ; ^self id print ; " using " print ; ^self module printNL ; ] ;
+] ;
+
+PatchTable defineMethod: [ | updateAllModules |
+  ^self activeList iterate: [ ^self applyAllPatches ; ] ;
+] ;
+
+PatchTable defineMethod: [ | getNextPatch |
+  !patchNumber <- (^self patchLevel + 1) asInteger ;
+  # Apply Global Patch
+  !patchFile <- ^self getPatchHome
+                concat: "/" . concat: ^self module . concat: "/patch_" .
+                concat: patchNumber asString . concat: ".vis" ;
+  patchFile fileExists
+  ifTrue: [ patchNumber ]
+] ;
+
+PatchTable defineMethod: [ | displayPendingPatches |
+  !patchNumber <- ^self getNextPatch ;
+  patchNumber isntNA
+  ifTrue: [ 
+            (^self asSelf patchLevel + 1) = patchNumber
+            ifTrue: [ ^self id print ; " patched at " print ; ^self asSelf patchLevel asString print ; " using " print ; ^self module printNL ; ] ;
+            "  Patch #" print ; patchNumber asString print ; " pending." printNL ;
+            # Recursive iterate to next patch.
+            ^self extendBy: [ !patchLevel <- ^my patchNumber ; ] . displayPendingPatches ; ] ;
+] ;
+
+PatchTable defineMethod: [ | bringPatchLevelTo: newPatchLevel |
+  newPatchLevel >= patchLevel 
+  ifTrue: 
+  [ patchLevel < newPatchLevel 
+    ifTrue: 
+    [ applyNextPatch isntNA
+      ifTrue:
+      [ ^self bringPatchLevelTo: newPatchLevel; ]
+      ifFalse:
+      [ ">>> Update Failed.  Could not achieve desired patch level" printNL; ];
+    ]
+    ifFalse:
+    [ "Patch Level " print; patchLevel asString print; " achieved." printNL; ];
+  ]
+  ifFalse: 
+  [ ">>> Cannot rollout patches using the patch table" printNL; ];
+  ^self
+];

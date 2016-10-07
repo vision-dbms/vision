@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Upload Format: SplitsFeed </title>
+
+</head>
+<body>
+<body bgcolor=white>
+<h2>Vision Portfolio Management Application Layer: Data Feeds</h2>
+<p>
+| <a href="pmaFeeds.htm">Application Feeds</a> |
+<hr><p>
+<font size=+2><b>Data Feed: </b><i>SplitsFeed</i></font><p>
+<font size=+1><b>Category: </b><i>EntityExtenderFeed</i></font><p>
+
+<h3>Summary:</h3>
+<p>
+<ul>
+The <i>SplitsFeed</i> feed is used to maintain the split adjustment
+   history for securities.  Split management is described in detail in the
+   <a href="pmaIssues.htm#splits"><i>Portfolio Management Application
+     Issues</i></a> document.  
+</ul>
+<p>
+
+<h3>Available Fields:</h3>
+<p>
+<center><table border=1 width=80% cellpadding=4 cellspacing=2>
+<tr><th>Field<th>Security <br>Property<th>Type<th>Description
+<tr>
+<tr><th align=center colspan=4>--- Required Fields ---
+<tr>
+<td><i>entityId</i>
+<td> -
+<td>String
+<td>any valid security identifier
+<tr>
+<td><i>date</i>
+<td> -
+<td>Date
+<td>date of split
+<tr>
+<td><i>rate</i>
+<td><i>rawSplitFactor</i>
+<td>Number
+<td>rate of split
+</table></center>
+<p>
+
+<h3>Special Processing Rules:</h3>
+<p>
+<ul type=disc>
+<li>The <i>entityId</i> must correspond to an existing <b>Security</b>
+     instance.  Any valid security alias can be used to identify the security.
+<p>
+<li>The <i>date</i> must be included and indicates the date of the
+      split.  It can be in any valid date format
+      such as <i>19971215</i> or <i>12/15/97</i>.
+<p>
+<li>The <i>rate</i> field should contain the number of new shares received
+      for one existing share.  Stock splits and stock dividends can both be
+      represented this way.  A 2-for-1 stock split
+      has a rate of 2 ; a 10% stock dividend has a rate of 1.1.
+      A rate of NA or a negative value can be used to delete an existing
+      split on a date.
+<p>
+<li>If your feed file supplies inverted rates, you can enable the inversion flag by saving the following code in the database:
+<pre><b>
+	SplitsFeed enableSplitInversion;
+</b></pre>
+By default the inversion flag has been disabled.
+<p>
+<li>Once all raw split values have been updated by this feed, the
+      <b>Security</b> message <i>rebuildAdjustmentFactor</i> is run
+      to update the <i>adjustmentFactor</i> time series.
+</ul>
+
+<p>
+<a name="related">
+<h3>Related Feeds:</h3>
+<p>
+<ul type=disc>
+<li><a href="pma_SecurityMaster.htm"><i>SecurityMaster</i></a>:
+defines Security instances referenced by this feed
+<li><a href="pma_SecurityAliases.htm"><i>SecurityAliases</i></a>:
+loads cusip/sedol changes and adds other aliases that can serve as the 
+<i>entityId</i> for a security.
+</ul>
+<p>
+<h3>Sample Upload:</h3>
+<p>
+The following tab-delimited feed could be used to update splits.  
+<pre><tt><b>
+ Interface ExternalFeedManager upload: "SplitsFeed" using:
+     "entityId        date      rate
+      00079410        19930205  1.50000	
+      00079410        19960809  1.50000	
+      00512510        19921201  2.00000	
+      00512510        19950111  2.00000	
+      00512510        19961112  2.00000	
+     " ;
+</b></tt></pre>
+<p>
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy 1998 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated December 31, 1999</font>
+</tr>
+</table>
+
+</body>
+</html>
