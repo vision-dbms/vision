@@ -688,7 +688,7 @@ typedef void (*STD_SignalHandlerType)(int);
 }
 #endif
 
-#if defined(sun)
+#if defined(sun) || defined(__linux__)
 struct sigvec {
     STD_SignalHandlerType	sv_handler;
     int				sv_mask;
