@@ -15,10 +15,10 @@ CDEFS	= -D_POSIX_C_SOURCE=199506L -D__EXTENSIONS__
 CINCS	=
 CBASE	= -mt -KPIC -template=no%extdef
 CDBG	= -g -xs
-CREL	= -g0 -O5 -xvector
+CREL	= -O -xvector
 CVER	= ${CREL}
 C32	= -xarch=v8plus sun.v8plus.il
-C64	= -xarch=v9 -xmemalign=8i sun.v9.il
+C64	= -m64 -xmemalign=8i sun.v9.il
 CARCH	= ${C64}
 CFLAGS	= ${CVER} ${CBASE} ${CARCH}
 
@@ -33,7 +33,7 @@ release64 : targets
 
 release32 : targets-32
 
-debug : targets-dbg targets-dbg32
+debug : targets-dbg 
 
 debug64 : targets-dbg
 
