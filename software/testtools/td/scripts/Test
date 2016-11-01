@@ -3,21 +3,21 @@
 unalias cd
 unalias ls
 
-set HostName	= `uname -n`
-set HostId	= `uname -n -m`
-set OSVersion	= `uname -s -r -v`
-set TestDate	= `date`
+set HostName    = `uname -n`
+set HostId      = `uname -n -m`
+set OSVersion   = `uname -s -r -v`
+set TestDate    = `date`
 
 if ($#argv > 3) then
     set TDComponentsUpperDir = $argv[4]
 else
-    set TDComponentsUpperDir = ~software/engine/testtools/td/component
+    set TDComponentsUpperDir = ~/vision-master/software/testtools/td/component
 endif
 
 if ($#argv > 2) then
     set TDVersion = $argv[3]
 else
-    set TDVersion = 8.0 
+    set TDVersion = 8.0
 endif
 
 set TDComponents = $TDComponentsUpperDir/$TDVersion
@@ -29,80 +29,61 @@ endif
 if ($#argv > 1) then
     setenv NDFPathName $argv[2]
 endif
-    
-if (-d engine) then
-    set enginepath = $cwd/engine
-else if (-d ../engine) then
-    set enginepath = `(cd ../engine; pwd)`
-else if (-d ../../engine) then
-    set enginepath = `(cd ../../engine; pwd)`
-else if (-d ../../../engine) then
-    set enginepath = `(cd ../../../engine; pwd)`
-else if (-d ../../../../engine) then
-    set enginepath = `(cd ../../../../engine; pwd)`
-else if (-d ../../../../../engine) then
-    set enginepath = `(cd ../../../../../engine; pwd)`
-else if (-d ../../../../../../engine) then
-    set enginepath = `(cd ../../../../../../engine; pwd)`
-else if (-d ../../../../../../../engine) then
-    set enginepath = `(cd ../../../../../../../engine; pwd)`
-else if (-d ../../../../../../../../engine) then
-    set enginepath = `(cd ../../../../../../../../engine; pwd)`
+
+if (-d software) then
+    set softwarepath = $cwd/software
+else if (-d ../software) then
+    set softwarepath = `(cd ../software; pwd)`
+else if (-d ../../software) then
+    set softwarepath = `(cd ../../software; pwd)`
+else if (-d ../../../software) then
+    set softwarepath = `(cd ../../../software; pwd)`
+else if (-d ../../../../software) then
+    set softwarepath = `(cd ../../../../software; pwd)`
+else if (-d ../../../../../software) then
+    set softwarepath = `(cd ../../../../../software; pwd)`
+else if (-d ../../../../../../software) then
+    set softwarepath = `(cd ../../../../../../software; pwd)`
+else if (-d ../../../../../../../software) then
+    set softwarepath = `(cd ../../../../../../../software; pwd)`
+else if (-d ../../../../../../../../software) then
+    set softwarepath = `(cd ../../../../../../../../software; pwd)`
 else
-    set enginepath = `pwd`
+    set softwarepath = `pwd`
 endif
 
 # Always check, whenever there are ambiguity, list all candidates and exit...
-# The release string provided by users should be either "project/projectName","release/releaseNumber", or "projectName", "releaseNumber".
-# For example, "project/linux-port","release/7.0.1", "release-7.0.1extensions", "7.0.2".
+# The release string provided by users should be either "src/projectName","release/releaseNumber", or "projectName", "releaseNumber".
+# For example, "src/linux-port","release/7.0.1", "release-7.0.1extensions", "7.0.2".
 if ($#argv > 0) then
-    if (-d $enginepath/$argv[1]) then
+    if (-d $softwarepath/$argv[1]) then
         set Release = $argv[1]
-    else if (-d $enginepath/project/$argv[1]) then
-        set Release = project/$argv[1]
-    else if (-d $enginepath/release/$argv[1]) then
-        set Release = release/$argv[1]
+    else if (-d $softwarepath/src/$argv[1]) then
+        set Release = src/$argv[1]
     else
-        echo "Cannot find directory $enginepath/$argv[1], $enginepath/project/$argv[1] or $enginepath/release/$argv[1]"
+        echo "Cannot find directory $softwarepath/$argv[1] or $softwarepath/src/$argv[1]"
         exit 1
     endif
 else
     set candidates = ()
-    set releases = (`cd $enginepath/project; ls`)
+    set releases = (`cd $softwarepath/src; ls`)
     foreach release ($releases)
-        if (-x $enginepath/project/$release/src/backend/batchvision) then
-	    set candidates = ($candidates project/$release)
-	endif
+        if (-x $softwarepath/src/$release/src/backend/batchvision) then
+            set candidates = ($candidates src/$release)
+        endif
     end
-    set releases = (`cd $enginepath/release; ls`)
-    foreach release ($releases)
-        if (-x $enginepath/release/$release/src/backend/batchvision) then
-	    set candidates = ($candidates release/$release)
-	else
-	    set minorReleases = (`cd $enginepath/release/$release; ls -d */*`)
-	    foreach minorRelease ($minorReleases)
-		if (-x $enginepath/release/$release/$minorRelease/src/backend/batchvision) then
-		    set candidates = ($candidates release/$release/$minorRelease)
-		endif
-	    end
-	endif
-    end
-#    if ($#candidates == 1) then
-#	set Release = $candidates[1]
-#    else
-	echo "Usage On '$HostName':"
-	foreach candidate ($candidates)
-	    echo "   $0 $candidate [ndf [TDversion [componentDirectory]]]"
-	end
-	exit 1
-#    endif
+        echo "Usage On '$HostName':"
+        foreach candidate ($candidates)
+            echo "   $0 $candidate [ndf [TDversion [componentDirectory]]]"
+        end
+        exit 1
 endif
 
 set Tag = "$HostName $Release $TestDate"
 
-set ReleaseDirectory	= "$enginepath/$Release"
-set ReleaseExecutable	= "$ReleaseDirectory/src/backend/batchvision"
-set ReleaseOutput	= "$ReleaseDirectory/src/backend/TD/component.$TDVersion"
+set ReleaseDirectory    = "$softwarepath/$Release"
+set ReleaseExecutable   = "$ReleaseDirectory/src/backend/batchvision"
+set ReleaseOutput       = "$ReleaseDirectory/src/backend/TD/component.$TDVersion"
 
 if (! -x $ReleaseExecutable) then
     echo ">>> Vision Release $Release Does Not Exist On '$HostName'"
@@ -126,21 +107,21 @@ cd $ReleaseOutput/..
 #######################################################################################################################
 
 cat /dev/null > LOG.$TDVersion
-echo	 "********************************************************">>LOG.$TDVersion
-echo	 "*  Test Suite Execution"			>> LOG.$TDVersion
-echo	 "*    Test Date . . . . . . . $TestDate"	>> LOG.$TDVersion
-echo	 "*    Machine . . . . . . . . $HostId"		>> LOG.$TDVersion
-echo	 "*    OS Version. . . . . . . $OSVersion"	>> LOG.$TDVersion
-echo	 "*    Release Name. . . . . . $Release"	>> LOG.$TDVersion
-echo	 "*    Test Suite Version. . . $TDVersion"	>> LOG.$TDVersion
+echo     "********************************************************">>LOG.$TDVersion
+echo     "*  Test Suite Execution"                      >> LOG.$TDVersion
+echo     "*    Test Date . . . . . . . $TestDate"       >> LOG.$TDVersion
+echo     "*    Machine . . . . . . . . $HostId"         >> LOG.$TDVersion
+echo     "*    OS Version. . . . . . . $OSVersion"      >> LOG.$TDVersion
+echo     "*    Release Name. . . . . . $Release"        >> LOG.$TDVersion
+echo     "*    Test Suite Version. . . $TDVersion"      >> LOG.$TDVersion
 echo     "*    Components Directory. . $TDComponentsUpperDir" >> LOG.$TDVersion
 if ($?NDFPathName) then
-   echo "*    NDF . . . . . . . . . . $NDFPathName"	>> LOG.$TDVersion
+   echo "*    NDF . . . . . . . . . . $NDFPathName"     >> LOG.$TDVersion
 endif
-echo	 "*    Release Audit:"				>> LOG.$TDVersion
+echo     "*    Release Audit:"                          >> LOG.$TDVersion
 strings $ReleaseExecutable | grep AUDIT | sed 's/AUDITINFO:/*        /g' >> LOG.$TDVersion
-echo	 "*    Execution Tag . . . . . $Tag"		>> LOG.$TDVersion
-echo	 "********************************************************">>LOG.$TDVersion
+echo     "*    Execution Tag . . . . . $Tag"            >> LOG.$TDVersion
+echo     "********************************************************">>LOG.$TDVersion
 
 cat LOG.$TDVersion
 
@@ -163,9 +144,4 @@ QUIT
 @@@EOD@@@
 
 echo "" >> $ReleaseOutput/../LOG.$TDVersion
-
-
-
-
-
 
