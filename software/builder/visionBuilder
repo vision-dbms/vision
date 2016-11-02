@@ -142,21 +142,23 @@ function getMakeOpts() {
   CPUCOUNT=1
   case $OS in
   Linux)
+    [[ "$GMAKEBIN" == "" ]] && GMAKEBIN=make
     CPUCOUNT=`grep -c processor /proc/cpuinfo`
-    [[ "$MAKEBIN" == "" ]] && MAKEBIN=gmake
+    [[ "$MAKEBIN" == "" ]] && MAKEBIN=$GMAKEBIN
     ;;
   SunOS)
+    [[ "$GMAKEBIN" == "" ]] && GMAKEBIN=gmake
     # For now we don't use CPUCOUNT, but we will if we ever use gmake.
     CPUCOUNT=`psrinfo | wc -l`
-    [[ "$MAKEBIN" == "" ]] && MAKEBIN=gmake
+    [[ "$MAKEBIN" == "" ]] && MAKEBIN=$GMAKEBIN
     ;;
   Default)
     error "Unsupported OS: `$OS`"
     ;;
   esac
-  
+
   # Use parallel make if possible.
-  [[ "$MAKEBIN" == "gmake" ]] && MAKEOPTS="-j`expr $CPUCOUNT + 1`"
+  [[ "$MAKEBIN" == "$GMAKEBIN" ]] && MAKEOPTS="-j`expr $CPUCOUNT + 1`"
 
   # handle KEEPGOING option.
   if [[ $KEEPGOING ]]; then
