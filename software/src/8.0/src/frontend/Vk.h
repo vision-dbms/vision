@@ -698,7 +698,7 @@ typedef void (*STD_SignalHandlerType) (
     struct sigcontext		*scp
 );
 
-#if defined(solaris_2)
+#if defined(solaris_2) || defined(__linux__) && !defined(__USE_BSD)
 struct sigvec {
     STD_SignalHandlerType	sv_handler;
     int				sv_mask;
