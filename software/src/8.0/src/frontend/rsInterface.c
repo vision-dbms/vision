@@ -1393,12 +1393,23 @@ PublicFnDef int main (
     else BackendIsLocal = TRUE;
 
 /***** try to access the BackendPath in execute mode *****/
-
+/*****
+ *
+ *  >>>  ... but only if BackendPath appears to name a specific file, as evidenced
+ *  >>>  by the presence of a '/' character in its value.  Without this test,
+ *  >>>  all $PATH resolved backends (e.g., the frontend's default of 'batchvision'
+ *  >>>  specified by "WhichRS" in this project's 'main.i' file) are rejected by the
+ *  >>>  call to 'access' unless suitably named executable file exists in the current
+ *  >>>  directory.  This change gives 'execvp' the shot it deserves for finding and
+ *  >>>  successfully starting those backends
+ *
+ *****
+ *****/
     RSargs[0] = BackendPath;
-    if (BackendIsLocal && access (BackendPath, 1) != 0)
+    if (BackendIsLocal && strchr (BackendPath, '/') && access (BackendPath, 1) != 0)
     {
-	fprintf (stderr, "ERROR - cannot run the program: %s\n", BackendPath);
-	exit (ErrorExitValue);
+    	fprintf (stderr, "ERROR - cannot run the program: %s\n", BackendPath);
+    	exit (ErrorExitValue);
     }
 
     readCompanyName();

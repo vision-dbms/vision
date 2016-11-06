@@ -35,8 +35,8 @@
 /* Window structure */
 typedef WINDOW CUR_WINDOW;
 
-#define CUR_maxScrLines	67
-#define CUR_maxScrCols	256
+#define CUR_maxScrLines	256
+#define CUR_maxScrCols	512
 
 /* Curses' Variables */
 #define CUR_stdscr	stdscr
