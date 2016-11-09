@@ -134,22 +134,24 @@ function doLinkSrc() {
 
 # Get make options.
 function getMakeOpts() {
-  [[ "$CPUCOUNT" != "" ]] && return;
-  
+  # Set our expectations regarding 'make' on this platform...
   local OS=`uname`
-
-  # Find our CPU count, default to 1.
-  CPUCOUNT=1
   case $OS in
   Linux)
     [[ "$GMAKEBIN" == "" ]] && GMAKEBIN=make
-    CPUCOUNT=`grep -c processor /proc/cpuinfo`
     [[ "$MAKEBIN" == "" ]] && MAKEBIN=$GMAKEBIN
+
+    # Now that 'vision' is open source, we need a way to compile
+    # it with alternative versions of 'g++' (e.g., when bugs are
+    # discovered or suspected in the default compiler:-)  GNU make
+    # provides an easy way to do that by simply overriding the
+    # value of the CXX variable on the 'make' command line. Do
+    # that here if the 'CXX' environment variable is defined:
+    [[ -v CXX ]] && MAKEOPTS="CXX=$CXX"
+
     ;;
   SunOS)
     [[ "$GMAKEBIN" == "" ]] && GMAKEBIN=gmake
-    # For now we don't use CPUCOUNT, but we will if we ever use gmake.
-    CPUCOUNT=`psrinfo | wc -l`
     [[ "$MAKEBIN" == "" ]] && MAKEBIN=$GMAKEBIN
     ;;
   Default)
@@ -158,12 +160,24 @@ function getMakeOpts() {
   esac
 
   # Use parallel make if possible.
-  [[ "$MAKEBIN" == "$GMAKEBIN" ]] && MAKEOPTS="-j`expr $CPUCOUNT + 1`"
+  if [[ "$MAKEBIN" == "$GMAKEBIN" ]]; then
+      MAKEOPTS="$MAKEOPTS -j"
+      if [[ "$CPUCOUNT" =~ [0-9]+ ]]; then
+	  MAKEOPTS="$MAKEOPTS$CPUCOUNT"
+      fi
+  fi
 
   # handle KEEPGOING option.
-  if [[ $KEEPGOING ]]; then
-    MAKEOPTS="$MAKEOPTS -k"
-  fi
+  # if [[ $KEEPGOING ]]; then
+  #   MAKEOPTS="$MAKEOPTS -k"
+  # fi
+
+  # KEEPGOING (i.e., the '-k' option to make) has been the default for
+  # a long time. Just in case someone ever wants to change that default
+  # in the future, add the required '-k' option to MAKEOPTS here instead
+  # of just adding it to the command line run in 'doSingleBuild':
+
+  MAKEOPTS="$MAKEOPTS -k"
 }
 
 # Build single.
@@ -199,7 +213,7 @@ function doSingleBuild() {
   info "Entering into $BUILDDIR..."
   getMakeOpts
   cd "$SRCDIR/$BUILDDIR" || ( error "Unable to change directory to '$SRCDIR/$BUILDDIR'." && return 1 )
-  nice -n $NICENESS audit $MAKEBIN $MAKEOPTS -k $target
+  nice -n $NICENESS audit $MAKEBIN $MAKEOPTS $target
   if [[ $? != 0 ]]; then
     if $SHOWERRORLOG; then
       info "Build error. Build log for $BUILDDIR:"

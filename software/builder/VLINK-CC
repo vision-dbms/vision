@@ -42,7 +42,14 @@ case AIX:
     set Compiler = xlC
     breaksw
 case Linux:
-    set Compiler = g++
+####
+# If 'visionBuilder' is overriding the compiler (see comments in 'visionBuilder'
+# for more information), use that compiler here too...
+    if ( $?CXX ) then
+	set Compiler = $CXX
+    else if
+	set Compiler = g++
+    endif
     breaksw
 case SunOS:
     set Compiler = CC
