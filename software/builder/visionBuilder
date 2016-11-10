@@ -136,21 +136,15 @@ function doLinkSrc() {
 function getMakeOpts() {
   # Set our expectations regarding 'make' on this platform...
   local OS=`uname`
+
   case $OS in
   Linux)
+    [[ ! -v CPUCOUNT ]] && CPUCOUNT=$(grep -c processor /proc/cpuinfo)
     [[ "$GMAKEBIN" == "" ]] && GMAKEBIN=make
     [[ "$MAKEBIN" == "" ]] && MAKEBIN=$GMAKEBIN
-
-    # Now that 'vision' is open source, we need a way to compile
-    # it with alternative versions of 'g++' (e.g., when bugs are
-    # discovered or suspected in the default compiler:-)  GNU make
-    # provides an easy way to do that by simply overriding the
-    # value of the CXX variable on the 'make' command line. Do
-    # that here if the 'CXX' environment variable is defined:
-    [[ -v CXX ]] && MAKEOPTS="CXX=$CXX"
-
     ;;
   SunOS)
+    [[ ! -v CPUCOUNT ]] && CPUCOUNT=$(psrinfo | wc -l)
     [[ "$GMAKEBIN" == "" ]] && GMAKEBIN=gmake
     [[ "$MAKEBIN" == "" ]] && MAKEBIN=$GMAKEBIN
     ;;
@@ -159,12 +153,21 @@ function getMakeOpts() {
     ;;
   esac
 
-  # Use parallel make if possible.
+  # Set GNU make options.
   if [[ "$MAKEBIN" == "$GMAKEBIN" ]]; then
+      # Use parallel make if possible.
       MAKEOPTS="$MAKEOPTS -j"
       if [[ "$CPUCOUNT" =~ [0-9]+ ]]; then
 	  MAKEOPTS="$MAKEOPTS$CPUCOUNT"
       fi
+
+      # Now that 'vision' is open source, we need a way to compile
+      # it with alternative versions of 'g++' (e.g., when bugs are
+      # discovered or suspected in the default compiler:-)  GNU make
+      # provides an easy way to do that by simply overriding the
+      # value of the CXX variable on the 'make' command line. Do
+      # that here if the 'CXX' environment variable is defined:
+      [[ -v CXX ]] && MAKEOPTS="CXX=$CXX"
   fi
 
   # handle KEEPGOING option.
