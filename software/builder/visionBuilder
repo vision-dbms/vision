@@ -141,12 +141,16 @@ function getMakeOpts() {
 
   case $OS in
   Linux)
-    [[ ! -v CPUCOUNT ]] && CPUCOUNT=$(grep -c processor /proc/cpuinfo)
+    if [ ! -n "${CPUCOUNT+1}" ]; then
+      CPUCOUNT=$(grep -c processor /proc/cpuinfo) 
+    fi
     [[ "$GMAKEBIN" == "" ]] && GMAKEBIN=make
     [[ "$MAKEBIN" == "" ]] && MAKEBIN=$GMAKEBIN
     ;;
   SunOS)
-    [[ ! -v CPUCOUNT ]] && CPUCOUNT=$(psrinfo | wc -l)
+    if [ ! -n "${CPUCOUNT+1}" ]; then
+      CPUCOUNT=$(psrinfo | wc -l)
+    fi
     [[ "$GMAKEBIN" == "" ]] && GMAKEBIN=gmake
     [[ "$MAKEBIN" == "" ]] && MAKEBIN=$GMAKEBIN
     ;;
@@ -169,7 +173,9 @@ function getMakeOpts() {
       # provides an easy way to do that by simply overriding the
       # value of the CXX variable on the 'make' command line. Do
       # that here if the 'CXX' environment variable is defined:
-      [[ -v CXX ]] && MAKEOPTS="CXX=$CXX"
+      if [ -n "${CXX+1}" ]; then
+        MAKEOPTS="CXX=$CXX"
+      fi
   fi
 
   # handle KEEPGOING option.
