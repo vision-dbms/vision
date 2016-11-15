@@ -2,23 +2,48 @@
 #ifndef VkLongUnsigneds_Interface
 #define VkLongUnsigneds_Interface
 
-#include "Vk.h"
+/************************
+ *****  Components  *****
+ ************************/
 
-PublicVarDecl unsigned int VkLongUnsigneds_DummyElement;
+/**************************
+ *****  Declarations  *****
+ **************************/
 
-template <unsigned int sDatum> class VkUnsignedTemplate {
-public:
-    typedef VkUnsignedTemplate<sDatum> ThisClass;
+#include "V_VFamilyValues.h"
+
+/*************************
+ *****  Definitions  *****
+ *************************/
+
+namespace V {
+  /*******************************
+   *----  VLongUnsignedBase  ----*
+   *******************************/
+  class V_API VLongUnsignedBase {
+  public:
+    typedef unsigned int grain_t;
+    typedef unsigned int index_t;
+  protected:
+    static grain_t m_iDummy;
+  };
+}
+
+/*******************************************************************
+ *---- template <unsigned int sDatum> class VkUnsignedTemplate ----*
+ *******************************************************************/
+template <unsigned int sDatum> class VkUnsignedTemplate : public V::VLongUnsignedBase {
+    DECLARE_FAMILY_MEMBERS (VkUnsignedTemplate<sDatum>, V::VLongUnsignedBase);
 
 protected:
-    unsigned int m_i[sDatum];
+    grain_t m_i[sDatum];
 
 public:
     static ThisClass const &Zero ();
 
     void SetToZero ();
 
-    unsigned int operator[] (unsigned int xElement) const {
+    grain_t operator[] (index_t xElement) const {
 	return xElement < sDatum
 #if   Vk_DataFormatNative == Vk_DataFormatBEndian
 	    ? m_i[xElement]
@@ -28,14 +53,14 @@ public:
 	    : 0;
     }
 
-    unsigned int& operator[] (unsigned int xElement) {
+    grain_t& operator[] (index_t xElement) {
 	return xElement < sDatum
 #if   Vk_DataFormatNative == Vk_DataFormatBEndian
 	    ? m_i[xElement]
 #elif Vk_DataFormatNative == Vk_DataFormatLEndian
 	    ? m_i[sDatum - xElement - 1]
 #endif
-	    : VkLongUnsigneds_DummyElement;
+	    : m_iDummy;
     }
 
     bool operator <  (ThisClass const& rOther) const;
@@ -45,6 +70,11 @@ public:
     bool operator >= (ThisClass const& rOther) const;
     bool operator >  (ThisClass const& rOther) const;
 };
+
+
+/***********************************
+ *****  Member Implementation  *****
+ ***********************************/
 
 template <unsigned int sDatum> VkUnsignedTemplate<sDatum> const &VkUnsignedTemplate<sDatum>::Zero () {
     static bool g_bNotInitialized = true;
@@ -57,7 +87,7 @@ template <unsigned int sDatum> VkUnsignedTemplate<sDatum> const &VkUnsignedTempl
 }
 
 template <unsigned int sDatum> void VkUnsignedTemplate<sDatum>::SetToZero () {
-    for (unsigned int j=0; j<sDatum; j++)
+    for (index_t j=0; j<sDatum; j++)
 	m_i[j] = 0;
 }
 
@@ -65,9 +95,9 @@ template <unsigned int sDatum> bool VkUnsignedTemplate<sDatum>::operator < (
     VkUnsignedTemplate<sDatum> const& rOther
 ) const {
 #if   Vk_DataFormatNative == Vk_DataFormatBEndian
-    for (unsigned int j=0; j<sDatum; j++)
+    for (index_t j=0; j<sDatum; j++)
 #elif Vk_DataFormatNative == Vk_DataFormatLEndian
-    for (unsigned int j=sDatum; j-- > 0;)
+    for (index_t j=sDatum; j-- > 0;)
 #endif
     {
 	if (m_i[j] < rOther.m_i[j])
@@ -82,9 +112,9 @@ template <unsigned int sDatum> bool VkUnsignedTemplate<sDatum>::operator <= (
     VkUnsignedTemplate<sDatum> const& rOther
 ) const {
 #if   Vk_DataFormatNative == Vk_DataFormatBEndian
-    for (unsigned int j=0; j<sDatum; j++)
+    for (index_t j=0; j<sDatum; j++)
 #elif Vk_DataFormatNative == Vk_DataFormatLEndian
-    for (unsigned int j=sDatum; j-- > 0;)
+    for (index_t j=sDatum; j-- > 0;)
 #endif
     {
 	if (m_i[j] < rOther.m_i[j])
@@ -99,9 +129,9 @@ template <unsigned int sDatum> bool VkUnsignedTemplate<sDatum>::operator == (
     VkUnsignedTemplate<sDatum> const& rOther
 ) const {
 #if   Vk_DataFormatNative == Vk_DataFormatBEndian
-    for (unsigned int j=0; j<sDatum; j++)
+    for (index_t j=0; j<sDatum; j++)
 #elif Vk_DataFormatNative == Vk_DataFormatLEndian
-    for (unsigned int j=sDatum; j-- > 0;)
+    for (index_t j=sDatum; j-- > 0;)
 #endif
 	if (m_i[j] != rOther.m_i[j])
 	    return false;
@@ -112,9 +142,9 @@ template <unsigned int sDatum> bool VkUnsignedTemplate<sDatum>::operator != (
     VkUnsignedTemplate<sDatum> const& rOther
 ) const {
 #if   Vk_DataFormatNative == Vk_DataFormatBEndian
-    for (unsigned int j=0; j<sDatum; j++)
+    for (index_t j=0; j<sDatum; j++)
 #elif Vk_DataFormatNative == Vk_DataFormatLEndian
-    for (unsigned int j=sDatum; j-- > 0;)
+    for (index_t j=sDatum; j-- > 0;)
 #endif
 	if (m_i[j] != rOther.m_i[j])
 	    return true;
@@ -125,9 +155,9 @@ template <unsigned int sDatum> bool VkUnsignedTemplate<sDatum>::operator >= (
     VkUnsignedTemplate<sDatum> const& rOther
 ) const {
 #if   Vk_DataFormatNative == Vk_DataFormatBEndian
-    for (unsigned int j=0; j<sDatum; j++)
+    for (index_t j=0; j<sDatum; j++)
 #elif Vk_DataFormatNative == Vk_DataFormatLEndian
-    for (unsigned int j=sDatum; j-- > 0;)
+    for (index_t j=sDatum; j-- > 0;)
 #endif
     {
 	if (m_i[j] > rOther.m_i[j])
@@ -142,9 +172,9 @@ template <unsigned int sDatum> bool VkUnsignedTemplate<sDatum>::operator >  (
     VkUnsignedTemplate<sDatum> const& rOther
 ) const {
 #if   Vk_DataFormatNative == Vk_DataFormatBEndian
-    for (unsigned int j=0; j<sDatum; j++)
+    for (index_t j=0; j<sDatum; j++)
 #elif Vk_DataFormatNative == Vk_DataFormatLEndian
-    for (unsigned int j=sDatum; j-- > 0;)
+    for (index_t j=sDatum; j-- > 0;)
 #endif
     {
 	if (m_i[j] > rOther.m_i[j])
@@ -158,6 +188,22 @@ template <unsigned int sDatum> bool VkUnsignedTemplate<sDatum>::operator >  (
 typedef VkUnsignedTemplate<(unsigned int)2> VkUnsigned64;
 typedef VkUnsignedTemplate<(unsigned int)3> VkUnsigned96;
 typedef VkUnsignedTemplate<(unsigned int)4> VkUnsigned128;
+
 
+/****************************
+ *----  Instantiations  ----*
+ ****************************/
+
+#if defined(USING_HIDDEN_DEFAULT_VISIBILITY) || defined(V_VLongUnsigneds)
+
+#ifndef V_VLongUnsigneds
+#define V_VLongUnsigneds extern
+#endif
+
+V_VLongUnsigneds template class V_API VkUnsignedTemplate<(unsigned int)2>;
+V_VLongUnsigneds template class V_API VkUnsignedTemplate<(unsigned int)3>;
+V_VLongUnsigneds template class V_API VkUnsignedTemplate<(unsigned int)4>;
+
+#endif
 
 #endif
