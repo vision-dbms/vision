@@ -62,7 +62,21 @@ typedef caddr_t ifc_buf_t;
  *****  DCE Compliant Systems  *****
  ***********************************/
 
-#if defined(_AIX) || defined(__hpux)
+#if defined(VkUUID_USING_LIBUUID)
+
+namespace {
+    void rpc_string_free	(unsigned char**, u32*) {
+    }
+
+    void uuid_create		(uuid_t*, u32*) {
+    }
+    void uuid_to_string		(uuid_t const*, unsigned char**, u32*) {
+    }
+    void uuid_from_string	(unsigned char const*, uuid_t*, u32*) {
+    }
+}
+
+#elif defined(_AIX) || defined(__hpux)
 #define DCE_UUIDGEN
 
 typedef uuid_t::u32	u32;
@@ -78,9 +92,9 @@ extern "C" {
 };
 
 
-/*****************************
- *****  Solaris Systems  *****
- *****************************/
+/*******************************************
+ *****  DCE/libuuid Version 1 Systems  *****
+ *******************************************/
 
 #elif defined(__VMS) || defined (__linux__) || defined(sun) 
 #define OWN_UUIDGEN

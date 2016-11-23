@@ -42,6 +42,8 @@
 #define __int16			short
 #define __int8			char
 
+#define USING(x) using x;
+
 #define DECLSPEC_DLLEXPORT
 #define DECLSPEC_DLLIMPORT
 
