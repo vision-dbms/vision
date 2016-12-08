@@ -1,0 +1,14 @@
+#########################################################
+#		Local Compiler Rules			#
+#########################################################
+
+LINKER	= VLINK-CC
+
+CDEFS	=
+CINCS	=
+LIBS	= -bloadmap:$@.map -lm -lc -lPW -ldce
+
+CFLAGS	= -+ -O3 -w -qdollar -qinlglue -bmaxdata:0x40000000 -uProgramDescription
+
+.c.o:
+	xlC $(CFLAGS) $(CDEFS) $(CINCS) -o $*.o -c $*.c

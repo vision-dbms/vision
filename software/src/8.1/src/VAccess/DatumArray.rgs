@@ -1,0 +1,26 @@
+HKCR
+{
+	VAccess.DatumArray.1 = s 'DatumArray Class'
+	{
+		CLSID = s '{1F1F0B5A-3B26-11D4-BEBE-00A0C931D9D4}'
+	}
+	VAccess.DatumArray = s 'DatumArray Class'
+	{
+		CLSID = s '{1F1F0B5A-3B26-11D4-BEBE-00A0C931D9D4}'
+		CurVer = s 'VAccess.DatumArray.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {1F1F0B5A-3B26-11D4-BEBE-00A0C931D9D4} = s 'DatumArray Class'
+		{
+			ProgID = s 'VAccess.DatumArray.1'
+			VersionIndependentProgID = s 'VAccess.DatumArray'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			'TypeLib' = s '{F38D0B7E-36FC-11D4-BEBE-00A0C931D9D4}'
+		}
+	}
+}

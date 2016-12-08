@@ -1,0 +1,60 @@
+#########################################################
+#		Local Compiler Rules			#
+#########################################################
+
+#--objectrule--#	CC $(CFLAGS) $(CDEFS) $(CINCS) -o $@ -c 
+#--objectsuffix--#	$B
+#--targetprefix--#	../lib$D/
+#--buildtargets--#	targets
+
+.SUFFIXES :
+
+B	= 
+D	= 
+CDEFS	= -D_POSIX_C_SOURCE=199506L -D__EXTENSIONS__
+CINCS	=
+CBASE	= -mt -KPIC -template=no%extdef
+CDBG	= -g -xs
+CREL	= -O -xvector
+CVER	= ${CREL}
+C32	= -xarch=v8plus sun.v8plus.il
+C64	= -xarch=v9 -m64 -xmemalign=8i sun.v9.il
+CARCH	= ${C64}
+CFLAGS	= ${CVER} ${CBASE} ${CARCH}
+
+LINKER	= VLINK-CC
+LIBS	= ${LOCALLIBS} -lsocket -lnsl
+LBASE	= -G -z text -z lazyload -z combreloc -norunpath -R '$$ORIGIN' -h ${@F} -lpthread -lrt
+LFLAGS	= ${LBASE} -L ../lib$D
+
+release : targets
+
+release64 : targets
+
+release32 : targets-32
+
+debug : targets-dbg 
+
+debug64 : targets-dbg
+
+debug32 : targets-dbg32
+
+targets-32:
+	@${MAKE} B=-32 D=/32 CARCH='$${C32}' targets
+
+targets-dbg:
+	@${MAKE} B=-dbg D=/dbg CVER='$${CDBG}' targets
+
+targets-dbg32:
+	@${MAKE} B=-dbg32 D=/dbg32 CVER='$${CDBG}' CARCH='$${C32}' targets
+
+clean-32:
+	@${MAKE} B=-32 D=/32 clean
+	
+clean-dbg:
+	@${MAKE} B=-dbg D=/dbg clean
+
+clean-dbg32:
+	@${MAKE} B=-dbg32 D=/dbg32 clean
+
+clean-all: clean clean-32 clean-dbg clean-dbg32

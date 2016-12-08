@@ -1,0 +1,14 @@
+#########################################################
+#		Local Compiler Rules			#
+#########################################################
+
+LINKER	= VLINK-aCC
+
+CDEFS	= 
+CINCS	= 
+LIBS	= -N -lm -lc -lPW -ldce
+
+CFLAGS	= +O2 +Onolimit +u4 -w
+
+.c.o:
+	aCC $(CFLAGS) $(CDEFS) $(CINCS) -c $*.c
