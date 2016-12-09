@@ -1,0 +1,14 @@
+#########################################################
+#		Local Compiler Rules			#
+#########################################################
+
+LINKER	= VLINK-CC
+
+CDEFS	=
+CINCS	=
+LIBS	= -lm
+
+CFLAGS	= -+ -O -qnotempinc -bmaxdata:0x40000000 -uProgramDescription
+
+.c.o:
+	xlC $(CFLAGS) $(CDEFS) $(CINCS) -o $*.o -c $*.c

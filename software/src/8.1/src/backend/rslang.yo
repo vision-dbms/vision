@@ -1,0 +1,1101 @@
+#ifdef __cplusplus
+#  include <stdio.h>
+// #  include "yacc.h"
+#endif	/* __cplusplus */ 
+# define TS_Error 257
+# define TS_FinalComment 258
+# define TS_Number 259
+# define TS_String 260
+# define TS_LeftAssignmentOp 261
+# define TS_IntensionalLeftAssignmentOp 262
+# define TS_RightAssignmentOp 263
+# define TS_IntensionalRightAssignmentOp 264
+# define TS_ConcatOp 265
+# define TS_IntensionalConcatOp 266
+# define TS_Keyword 267
+# define TS_IntensionalKeyword 268
+# define TS_RelationalOp 269
+# define TS_IntensionalRelationalOp 270
+# define TS_DisjunctiveOp 271
+# define TS_IntensionalDisjunctiveOp 272
+# define TS_ConjunctiveOp 273
+# define TS_IntensionalConjunctiveOp 274
+# define TS_AdditiveOp 275
+# define TS_IntensionalAdditiveOp 276
+# define TS_MultiplicativeOp 277
+# define TS_IntensionalMultiplicativeOp 278
+# define TS_Identifier 279
+# define TS_IntensionalIdentifier 280
+#define rslangclearin rslangchar = -1
+#define rslangerrok rslangerrflag = 0
+extern int rslangchar;
+#ifndef rslangMAXDEPTH
+#define rslangMAXDEPTH 150
+#endif
+
+/* __rslangSCLASS defines the scoping/storage class for global objects
+ * that are NOT renamed by the -p option.  By default these names
+ * are going to be 'static' so that multi-definition errors
+ * will not occur with multiple parsers.
+ * If you want (unsupported) access to internal names you need
+ * to define this to be null so it implies 'extern' scope.
+ * This should not be used in conjunction with -p.
+ */
+#ifndef __rslangSCLASS
+# define __rslangSCLASS static
+#endif
+#ifndef rslangSTYPE
+#define rslangSTYPE int
+#endif
+rslangSTYPE rslanglval;
+__rslangSCLASS rslangSTYPE rslangval;
+typedef int rslangtabelem;
+# define rslangERRCODE 256
+
+// # line 297 "rslang.y"
+
+
+/************************** SOURCE FILE HISTORY: ************************/
+/************************************************************************
+  rslang.y 1 replace /users/mjc/system
+  860226 16:27:04 mjc create
+
+ ************************************************************************/
+/************************************************************************
+  rslang.y 2 replace /users/mjc/system
+  860317 18:12:45 mjc Replace parser to allow release of new lex/yacc make rules
+
+ ************************************************************************/
+/************************************************************************
+  rslang.y 3 replace /users/mjc/system
+  860324 12:51:41 mjc Returned parser to library for jck\'s use
+
+ ************************************************************************/
+/************************************************************************
+  rslang.y 4 replace /users/jck/system
+  860404 17:29:25 jck Partially completed release
+
+ ************************************************************************/
+/************************************************************************
+  rslang.y 5 replace /users/jck/source
+  860418 00:03:20 jck Code Generator version release
+
+ ************************************************************************/
+/************************************************************************
+  rslang.y 6 replace /users/mjc/system
+  860424 10:26:59 mjc Changed '.' closed keyword expressions to reduce to a primary
+
+ ************************************************************************/
+/************************************************************************
+  rslang.y 7 replace /users/jck/system
+  860429 10:27:37 jck Adjusted closeExp to save parenthesis and semi_colon/ information for decompiling purposes
+
+ ************************************************************************/
+/************************************************************************
+  rslang.y 8 replace /users/jck/system
+  860430 17:42:16 jck Problems with parse tree allocation fixed
+
+ ************************************************************************/
+ /************************************************************************
+  rslang.y 9 replace /users/spe/system
+  860613 11:03:58 spe Added SetPrecedingSemi_Colon statement in ExpressionList actions.
+
+ ************************************************************************/
+/************************************************************************
+  rslang.y 10 replace /users/mjc/system
+  860826 08:57:35 mjc Gave ',' higher precedence than keywords
+
+ ************************************************************************/
+/************************************************************************
+  rslang.y 11 replace /users/mjc/system
+  861002 18:05:00 mjc Correct omission of ',' from block header syntax
+
+ ************************************************************************/
+/************************************************************************
+  rslang.y 12 replace /users/mjc/system
+  861203 12:53:29 mjc Fixed 'magic' word action rule to report bad magic words as syntax errors
+
+ ************************************************************************/
+/************************************************************************
+  rslang.y 13 replace /users/mjc/translation
+  870524 09:43:19 mjc Shortened all identifiers to <= 31 characters
+
+ ************************************************************************/
+/************************************************************************
+  rslang.y 14 replace /users/mjc/system
+  870701 14:45:50 mjc Added 'TS_ConcatOp' to list of binary selectors
+
+ ************************************************************************/
+/************************************************************************
+  rslang.y 15 replace /users/jck/system
+  880114 16:08:38 jck Replaced calls to strncat with calls to memcpy
+
+ ************************************************************************/
+/************************************************************************
+  rslang.y 16 replace /users/jck/system
+  880120 21:12:19 jck Added omitted action for TS_MultiplicativeOp in
+BinaryMessageHeader
+
+ ************************************************************************/
+/************************************************************************
+  rslang.y 17 replace /users/mjc/Workbench/system
+  880210 15:19:27 mjc Moved recognition of negative numbers from lexical to syntactic analysis
+
+ ************************************************************************/
+__rslangSCLASS rslangtabelem rslangexca[] ={
+-1, 1,
+	0, -1,
+	-2, 0,
+	};
+# define rslangNPROD 80
+# define rslangLAST 304
+__rslangSCLASS rslangtabelem rslangact[]={
+
+    90,    25,    27,    26,    28,    29,    30,    31,    32,    33,
+    34,    35,    36,    37,    38,    39,    40,    41,    42,    29,
+    30,    31,    32,    33,    34,    35,    36,    37,    38,    39,
+    40,    41,    42,   113,    95,    93,    96,   107,    97,   106,
+   103,    47,    98,    46,    99,    44,   100,   112,   101,   105,
+   102,    24,    94,   104,    19,    92,    19,     9,    10,   110,
+    22,    18,    22,    18,    62,   109,    63,   108,    64,    60,
+    70,     7,    65,    24,    66,    24,    67,    43,    68,    59,
+    69,    58,    61,    33,    34,    35,    36,    37,    38,    39,
+    40,    41,    42,    33,    34,    41,    42,    37,    38,    39,
+    40,    41,    42,    39,    40,    41,    42,   115,     2,    91,
+     3,    57,    21,    56,    21,    20,    55,    20,    33,    34,
+     4,    54,    53,    51,    39,    40,    41,    42,    50,    49,
+    48,    14,    13,    12,    11,    71,     8,     6,     5,    45,
+     1,     0,     0,     0,     0,    52,    72,    73,    74,    75,
+    76,    77,    78,    79,    80,    81,    82,    83,    84,    85,
+    86,    87,    88,    89,     0,     0,     0,     0,     0,     0,
+     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+     0,   114,     0,     0,     0,     0,     0,     0,     0,     0,
+     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+    25,    27,    26,    28,    29,    30,    31,    32,    33,    34,
+    35,    36,    37,    38,    39,    40,    41,    42,     0,     0,
+     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+    23,     0,    29,    30,     0,     0,    33,    34,    35,    36,
+    37,    38,    39,    40,    41,    42,    29,    30,     0,     0,
+    33,    34,    35,    36,    37,    38,    39,    40,    41,    42,
+    16,    15,    16,    15,     0,     0,     0,   111,     0,     0,
+     0,     0,     0,     0,     0,     0,    17,     0,    17,     0,
+     9,    10,     9,    10 };
+__rslangSCLASS rslangtabelem rslangpact[]={
+
+    23, -3000,    -8, -3000,  -260,  -222, -3000, -3000, -3000, -3000,
+ -3000, -3000, -3000, -3000, -3000, -3000, -3000,  -214,    23,  -236,
+  -238,    21,  -197, -3000,    23,    23,    23,    23,    23,    23,
+    23,    23,    23,    23,    23,    23,    23,    23,    23,    23,
+    23,    23,    23, -3000, -3000,   -41, -3000, -3000,    16,   -69,
+  -245, -3000,  -227, -3000, -3000,  -218,  -240,  -242,    28,    26,
+    20, -3000, -3000, -3000, -3000, -3000, -3000, -3000, -3000, -3000,
+ -3000, -3000,  -260,  -246,  -260,  -246,  -186,  -186,     1,   -13,
+  -172,  -172,  -176,  -176,  -151,  -151,  -182,  -182, -3000, -3000,
+ -3000, -3000,    23, -3000, -3000, -3000, -3000, -3000, -3000, -3000,
+ -3000, -3000, -3000, -3000, -3000, -3000, -3000, -3000, -3000, -3000,
+ -3000, -3000, -3000, -3000,    14, -3000 };
+__rslangSCLASS rslangtabelem rslangpgo[]={
+
+     0,   140,   108,   110,   120,   138,   137,    71,   136,   134,
+   133,   132,   131,   129,   128,   123,   122,   121,   116,   113,
+   111,    81,    79,    69 };
+__rslangSCLASS rslangtabelem rslangr1[]={
+
+     0,     1,     1,     2,     2,     3,     3,     4,     4,     4,
+     4,     4,     4,     4,     4,     4,     4,     4,     4,     4,
+     4,     4,     4,     4,     4,     4,     5,     5,     5,     7,
+     7,     6,     6,     6,     8,     8,     8,     8,     8,     8,
+     8,     8,     9,    10,    11,    11,    13,    13,    15,    15,
+    15,    16,    17,    19,    19,    19,    19,    19,    19,    19,
+    19,    18,    20,    20,    14,    14,    12,    12,    12,    21,
+    22,    22,    22,    22,    22,    22,    22,    22,    23,    23 };
+__rslangSCLASS rslangtabelem rslangr2[]={
+
+     0,     3,     5,     3,     7,     1,     2,     2,     7,     7,
+     7,     7,     7,     7,     7,     7,     7,     7,     7,     7,
+     7,     7,     7,     7,     7,     7,     2,     2,     5,     2,
+     2,     2,     9,     9,     2,     2,     2,     2,     2,     2,
+     5,     7,     5,     5,     7,    11,     2,     2,     2,     2,
+     2,     5,     5,     5,     5,     5,     5,     5,     5,     5,
+     5,     5,     5,     5,     5,     5,     7,     7,     7,     3,
+     3,     3,     3,     3,     3,     3,     3,     3,     3,     5 };
+__rslangSCLASS rslangtabelem rslangchk[]={
+
+ -3000,    -1,    -2,    -3,    -4,    -5,    -6,    -7,    -8,   279,
+   280,    -9,   -10,   -11,   -12,   260,   259,   275,    40,    33,
+    94,    91,    39,   258,    59,   261,   263,   262,   264,   265,
+   266,   267,   268,   269,   270,   271,   272,   273,   274,   275,
+   276,   277,   278,    -7,   259,    -4,   279,   279,    -2,   -13,
+   -14,   -15,   124,   -16,   -17,   -18,   -19,   -20,   -21,   -22,
+   -23,   279,   261,   263,   265,   269,   271,   273,   275,   277,
+   267,    -3,    -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,
+    -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,    -4,
+    41,    93,   124,   280,   279,   261,   263,   265,   269,   271,
+   273,   275,   277,   267,   280,   267,   279,   279,    39,    39,
+    39,   267,    46,    46,    -2,    93 };
+__rslangSCLASS rslangtabelem rslangdef[]={
+
+     5,    -2,     1,     3,     6,     7,    26,    27,    31,    29,
+    30,    34,    35,    36,    37,    38,    39,     0,     0,     0,
+     0,     5,     0,     2,     5,     0,     0,     0,     0,     0,
+     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+     0,     0,     0,    28,    40,     0,    42,    43,     0,     0,
+    46,    47,     0,    48,    49,    50,     0,     0,     0,     0,
+     0,    69,    70,    71,    72,    73,    74,    75,    76,    77,
+    78,     4,     8,     9,    10,    11,    12,    13,    14,    15,
+    16,    17,    18,    19,    20,    21,    22,    23,    24,    25,
+    41,    44,     5,    65,    51,    53,    54,    55,    56,    57,
+    58,    59,    60,    62,    64,    63,    52,    61,    66,    67,
+    68,    79,    32,    33,     0,    45 };
+typedef struct { char *t_name; int t_val; } rslangtoktype;
+#ifndef rslangDEBUG
+#	define rslangDEBUG	0	/* don't allow debugging */
+#endif
+
+#if rslangDEBUG
+
+__rslangSCLASS rslangtoktype rslangtoks[] =
+{
+	"TS_Error",	257,
+	"TS_FinalComment",	258,
+	"TS_Number",	259,
+	"TS_String",	260,
+	"TS_LeftAssignmentOp",	261,
+	"TS_IntensionalLeftAssignmentOp",	262,
+	"TS_RightAssignmentOp",	263,
+	"TS_IntensionalRightAssignmentOp",	264,
+	"TS_ConcatOp",	265,
+	"TS_IntensionalConcatOp",	266,
+	"TS_Keyword",	267,
+	"TS_IntensionalKeyword",	268,
+	"TS_RelationalOp",	269,
+	"TS_IntensionalRelationalOp",	270,
+	"TS_DisjunctiveOp",	271,
+	"TS_IntensionalDisjunctiveOp",	272,
+	"TS_ConjunctiveOp",	273,
+	"TS_IntensionalConjunctiveOp",	274,
+	"TS_AdditiveOp",	275,
+	"TS_IntensionalAdditiveOp",	276,
+	"TS_MultiplicativeOp",	277,
+	"TS_IntensionalMultiplicativeOp",	278,
+	"TS_Identifier",	279,
+	"TS_IntensionalIdentifier",	280,
+	"-unknown-",	-1	/* ends search */
+};
+
+__rslangSCLASS char * rslangreds[] =
+{
+	"-no such reduction-",
+	"Sentence : ExpressionList",
+	"Sentence : ExpressionList TS_FinalComment",
+	"ExpressionList : ExpressionListTerm",
+	"ExpressionList : ExpressionList ';' ExpressionListTerm",
+	"ExpressionListTerm : /* empty */",
+	"ExpressionListTerm : Expression",
+	"Expression : UnaryExpression",
+	"Expression : Expression TS_LeftAssignmentOp Expression",
+	"Expression : Expression TS_RightAssignmentOp Expression",
+	"Expression : Expression TS_IntensionalLeftAssignmentOp Expression",
+	"Expression : Expression TS_IntensionalRightAssignmentOp Expression",
+	"Expression : Expression TS_ConcatOp Expression",
+	"Expression : Expression TS_IntensionalConcatOp Expression",
+	"Expression : Expression TS_Keyword Expression",
+	"Expression : Expression TS_IntensionalKeyword Expression",
+	"Expression : Expression TS_RelationalOp Expression",
+	"Expression : Expression TS_IntensionalRelationalOp Expression",
+	"Expression : Expression TS_DisjunctiveOp Expression",
+	"Expression : Expression TS_IntensionalDisjunctiveOp Expression",
+	"Expression : Expression TS_ConjunctiveOp Expression",
+	"Expression : Expression TS_IntensionalConjunctiveOp Expression",
+	"Expression : Expression TS_AdditiveOp Expression",
+	"Expression : Expression TS_IntensionalAdditiveOp Expression",
+	"Expression : Expression TS_MultiplicativeOp Expression",
+	"Expression : Expression TS_IntensionalMultiplicativeOp Expression",
+	"UnaryExpression : Primary",
+	"UnaryExpression : UnaryOperator",
+	"UnaryExpression : UnaryExpression UnaryOperator",
+	"UnaryOperator : TS_Identifier",
+	"UnaryOperator : TS_IntensionalIdentifier",
+	"Primary : SimplePrimary",
+	"Primary : Expression TS_Keyword Expression '.'",
+	"Primary : Expression TS_IntensionalKeyword Expression '.'",
+	"SimplePrimary : LocalIdentifier",
+	"SimplePrimary : MagicWord",
+	"SimplePrimary : Block",
+	"SimplePrimary : Selector",
+	"SimplePrimary : TS_String",
+	"SimplePrimary : TS_Number",
+	"SimplePrimary : TS_AdditiveOp TS_Number",
+	"SimplePrimary : '(' Expression ')'",
+	"LocalIdentifier : '!' TS_Identifier",
+	"MagicWord : '^' TS_Identifier",
+	"Block : '[' ExpressionList ']'",
+	"Block : '[' BlockHeader '|' ExpressionList ']'",
+	"BlockHeader : ParameterList",
+	"BlockHeader : MessageTemplate",
+	"MessageTemplate : UnaryMessageTemplate",
+	"MessageTemplate : BinaryMessageTemplate",
+	"MessageTemplate : KeywordMessageTemplate",
+	"UnaryMessageTemplate : '|' TS_Identifier",
+	"BinaryMessageTemplate : BinaryMessageHeader TS_Identifier",
+	"BinaryMessageHeader : '|' TS_LeftAssignmentOp",
+	"BinaryMessageHeader : '|' TS_RightAssignmentOp",
+	"BinaryMessageHeader : '|' TS_ConcatOp",
+	"BinaryMessageHeader : '|' TS_RelationalOp",
+	"BinaryMessageHeader : '|' TS_DisjunctiveOp",
+	"BinaryMessageHeader : '|' TS_ConjunctiveOp",
+	"BinaryMessageHeader : '|' TS_AdditiveOp",
+	"BinaryMessageHeader : '|' TS_MultiplicativeOp",
+	"KeywordMessageTemplate : KeywordMessageHeader TS_Identifier",
+	"KeywordMessageHeader : '|' TS_Keyword",
+	"KeywordMessageHeader : KeywordMessageTemplate TS_Keyword",
+	"ParameterList : '|' TS_IntensionalIdentifier",
+	"ParameterList : ParameterList TS_IntensionalIdentifier",
+	"Selector : '\'' UnarySelector '\''",
+	"Selector : '\'' BinarySelector '\''",
+	"Selector : '\'' KeywordSelector '\''",
+	"UnarySelector : TS_Identifier",
+	"BinarySelector : TS_LeftAssignmentOp",
+	"BinarySelector : TS_RightAssignmentOp",
+	"BinarySelector : TS_ConcatOp",
+	"BinarySelector : TS_RelationalOp",
+	"BinarySelector : TS_DisjunctiveOp",
+	"BinarySelector : TS_ConjunctiveOp",
+	"BinarySelector : TS_AdditiveOp",
+	"BinarySelector : TS_MultiplicativeOp",
+	"KeywordSelector : TS_Keyword",
+	"KeywordSelector : KeywordSelector TS_Keyword",
+};
+#endif /* rslangDEBUG */
+#define rslangFLAG  (-3000)
+/* @(#) $Revision: 70.7 $ */    
+
+/*
+** Skeleton parser driver for yacc output
+*/
+
+#if defined(NLS) && !defined(NL_SETN)
+#include <msgbuf.h>
+#endif
+
+#ifndef nl_msg
+#define nl_msg(i,s) (s)
+#endif
+
+/*
+** yacc user known macros and defines
+*/
+#define rslangERROR		goto rslangerrlab
+
+#ifndef __RUNTIME_rslangMAXDEPTH
+#define rslangACCEPT	return(0)
+#define rslangABORT		return(1)
+#else
+#define rslangACCEPT	{free_stacks(); return(0);}
+#define rslangABORT		{free_stacks(); return(1);}
+#endif
+
+#define rslangBACKUP( newtoken, newvalue )\
+{\
+	if ( rslangchar >= 0 || ( rslangr2[ rslangtmp ] >> 1 ) != 1 )\
+	{\
+		rslangerror( (nl_msg(30001,"syntax error - cannot backup")) );\
+		goto rslangerrlab;\
+	}\
+	rslangchar = newtoken;\
+	rslangstate = *rslangps;\
+	rslanglval = newvalue;\
+	goto rslangnewstate;\
+}
+#define rslangRECOVERING()	(!!rslangerrflag)
+#ifndef rslangDEBUG
+#	define rslangDEBUG	1	/* make debugging available */
+#endif
+
+/*
+** user known globals
+*/
+int rslangdebug;			/* set to 1 to get debugging */
+
+/*
+** driver internal defines
+*/
+/* define for rslangFLAG now generated by yacc program. */
+/*#define rslangFLAG		(FLAGVAL)*/
+
+/*
+** global variables used by the parser
+*/
+# ifndef __RUNTIME_rslangMAXDEPTH
+__rslangSCLASS rslangSTYPE rslangv[ rslangMAXDEPTH ];	/* value stack */
+__rslangSCLASS int rslangs[ rslangMAXDEPTH ];		/* state stack */
+# else
+__rslangSCLASS rslangSTYPE *rslangv;			/* pointer to malloc'ed value stack */
+__rslangSCLASS int *rslangs;			/* pointer to malloc'ed stack stack */
+
+#if defined(__STDC__) || defined (__cplusplus)
+#include <stdlib.h>
+#else
+	extern char *malloc();
+	extern char *realloc();
+	extern void free();
+#endif /* __STDC__ or __cplusplus */
+
+
+static int allocate_stacks(); 
+static void free_stacks();
+# ifndef rslangINCREMENT
+# define rslangINCREMENT (rslangMAXDEPTH/2) + 10
+# endif
+# endif	/* __RUNTIME_rslangMAXDEPTH */
+long  rslangmaxdepth = rslangMAXDEPTH;
+
+__rslangSCLASS rslangSTYPE *rslangpv;			/* top of value stack */
+__rslangSCLASS int *rslangps;			/* top of state stack */
+
+__rslangSCLASS int rslangstate;			/* current state */
+__rslangSCLASS int rslangtmp;			/* extra var (lasts between blocks) */
+
+int rslangnerrs;			/* number of errors */
+__rslangSCLASS int rslangerrflag;			/* error recovery flag */
+int rslangchar;			/* current input token number */
+
+
+
+/*
+** rslangparse - return 0 if worked, 1 if syntax error not recovered from
+*/
+int
+rslangparse()
+{
+	register rslangSTYPE *rslangpvt;	/* top of value stack for $vars */
+
+	/*
+	** Initialize externals - rslangparse may be called more than once
+	*/
+# ifdef __RUNTIME_rslangMAXDEPTH
+	if (allocate_stacks()) rslangABORT;
+# endif
+	rslangpv = rslangv;
+	rslangpv--;
+	rslangps = rslangs;
+	rslangps--;
+	rslangstate = 0;
+	rslangtmp = 0;
+	rslangnerrs = 0;
+	rslangerrflag = 0;
+	rslangchar = -1;
+
+	{
+		register rslangSTYPE *rslang_pv;	/* top of value stack */
+		register int *rslang_ps;		/* top of state stack */
+		register int rslang_state;		/* current state */
+		register int  rslang_n;		/* internal state number info */
+
+		goto rslangstack;
+
+		/*
+		** get globals into registers.
+		** branch to here only if rslangBACKUP was called.
+	rslangnewstate:
+		rslang_pv = rslangpv;
+		rslang_ps = rslangps;
+		rslang_state = rslangstate;
+		goto rslang_newstate;
+		*/
+
+		/*
+		** get globals into registers.
+		** either we just started, or we just finished a reduction
+		*/
+	rslangstack:
+		rslang_pv = rslangpv;
+		rslang_ps = rslangps;
+		rslang_state = rslangstate;
+
+		/*
+		** top of for (;;) loop while no reductions done
+		*/
+	rslang_stack:
+		/*
+		** put a state and value onto the stacks
+		*/
+#if rslangDEBUG
+		/*
+		** if debugging, look up token value in list of value vs.
+		** name pairs.  0 and negative (-1) are special values.
+		** Note: linear search is used since time is not a real
+		** consideration while debugging.
+		*/
+		if ( rslangdebug )
+		{
+			register int rslang_i;
+
+			printf( "State %d, token ", rslang_state );
+			if ( rslangchar == 0 )
+				printf( "end-of-file\n" );
+			else if ( rslangchar < 0 )
+				printf( "-none-\n" );
+			else
+			{
+				for ( rslang_i = 0; rslangtoks[rslang_i].t_val >= 0;
+					rslang_i++ )
+				{
+					if ( rslangtoks[rslang_i].t_val == rslangchar )
+						break;
+				}
+				printf( "%s\n", rslangtoks[rslang_i].t_name );
+			}
+		}
+#endif /* rslangDEBUG */
+		if ( ++rslang_ps >= &rslangs[ rslangmaxdepth ] )	/* room on stack? */
+		{
+# ifndef __RUNTIME_rslangMAXDEPTH
+			rslangerror( (nl_msg(30002,"yacc stack overflow")) );
+			rslangABORT;
+# else
+			/* save old stack bases to recalculate pointers */
+			rslangSTYPE * rslangv_old = rslangv;
+			int * rslangs_old = rslangs;
+			rslangmaxdepth += rslangINCREMENT;
+			rslangs = (int *) realloc(rslangs, rslangmaxdepth * sizeof(int));
+			rslangv = (rslangSTYPE *) realloc(rslangv, rslangmaxdepth * sizeof(rslangSTYPE));
+			if (rslangs==0 || rslangv==0) {
+			    rslangerror( (nl_msg(30002,"yacc stack overflow")) );
+			    rslangABORT;
+			    }
+			/* Reset pointers into stack */
+			rslang_ps = (rslang_ps - rslangs_old) + rslangs;
+			rslangps = (rslangps - rslangs_old) + rslangs;
+			rslang_pv = (rslang_pv - rslangv_old) + rslangv;
+			rslangpv = (rslangpv - rslangv_old) + rslangv;
+# endif
+
+		}
+		*rslang_ps = rslang_state;
+		*++rslang_pv = rslangval;
+
+		/*
+		** we have a new state - find out what to do
+		*/
+	rslang_newstate:
+		if ( ( rslang_n = rslangpact[ rslang_state ] ) <= rslangFLAG )
+			goto rslangdefault;		/* simple state */
+#if rslangDEBUG
+		/*
+		** if debugging, need to mark whether new token grabbed
+		*/
+		rslangtmp = rslangchar < 0;
+#endif
+		if ( ( rslangchar < 0 ) && ( ( rslangchar = rslanglex() ) < 0 ) )
+			rslangchar = 0;		/* reached EOF */
+#if rslangDEBUG
+		if ( rslangdebug && rslangtmp )
+		{
+			register int rslang_i;
+
+			printf( "Received token " );
+			if ( rslangchar == 0 )
+				printf( "end-of-file\n" );
+			else if ( rslangchar < 0 )
+				printf( "-none-\n" );
+			else
+			{
+				for ( rslang_i = 0; rslangtoks[rslang_i].t_val >= 0;
+					rslang_i++ )
+				{
+					if ( rslangtoks[rslang_i].t_val == rslangchar )
+						break;
+				}
+				printf( "%s\n", rslangtoks[rslang_i].t_name );
+			}
+		}
+#endif /* rslangDEBUG */
+		if ( ( ( rslang_n += rslangchar ) < 0 ) || ( rslang_n >= rslangLAST ) )
+			goto rslangdefault;
+		if ( rslangchk[ rslang_n = rslangact[ rslang_n ] ] == rslangchar )	/*valid shift*/
+		{
+			rslangchar = -1;
+			rslangval = rslanglval;
+			rslang_state = rslang_n;
+			if ( rslangerrflag > 0 )
+				rslangerrflag--;
+			goto rslang_stack;
+		}
+
+	rslangdefault:
+		if ( ( rslang_n = rslangdef[ rslang_state ] ) == -2 )
+		{
+#if rslangDEBUG
+			rslangtmp = rslangchar < 0;
+#endif
+			if ( ( rslangchar < 0 ) && ( ( rslangchar = rslanglex() ) < 0 ) )
+				rslangchar = 0;		/* reached EOF */
+#if rslangDEBUG
+			if ( rslangdebug && rslangtmp )
+			{
+				register int rslang_i;
+
+				printf( "Received token " );
+				if ( rslangchar == 0 )
+					printf( "end-of-file\n" );
+				else if ( rslangchar < 0 )
+					printf( "-none-\n" );
+				else
+				{
+					for ( rslang_i = 0;
+						rslangtoks[rslang_i].t_val >= 0;
+						rslang_i++ )
+					{
+						if ( rslangtoks[rslang_i].t_val
+							== rslangchar )
+						{
+							break;
+						}
+					}
+					printf( "%s\n", rslangtoks[rslang_i].t_name );
+				}
+			}
+#endif /* rslangDEBUG */
+			/*
+			** look through exception table
+			*/
+			{
+				register int *rslangxi = rslangexca;
+
+				while ( ( *rslangxi != -1 ) ||
+					( rslangxi[1] != rslang_state ) )
+				{
+					rslangxi += 2;
+				}
+				while ( ( *(rslangxi += 2) >= 0 ) &&
+					( *rslangxi != rslangchar ) )
+					;
+				if ( ( rslang_n = rslangxi[1] ) < 0 )
+					rslangACCEPT;
+			}
+		}
+
+		/*
+		** check for syntax error
+		*/
+		if ( rslang_n == 0 )	/* have an error */
+		{
+			/* no worry about speed here! */
+			switch ( rslangerrflag )
+			{
+			case 0:		/* new error */
+				rslangerror( (nl_msg(30003,"syntax error")) );
+				rslangnerrs++;
+				goto skip_init;
+			rslangerrlab:
+				/*
+				** get globals into registers.
+				** we have a user generated syntax type error
+				*/
+				rslang_pv = rslangpv;
+				rslang_ps = rslangps;
+				rslang_state = rslangstate;
+				rslangnerrs++;
+			skip_init:
+			case 1:
+			case 2:		/* incompletely recovered error */
+					/* try again... */
+				rslangerrflag = 3;
+				/*
+				** find state where "error" is a legal
+				** shift action
+				*/
+				while ( rslang_ps >= rslangs )
+				{
+					rslang_n = rslangpact[ *rslang_ps ] + rslangERRCODE;
+					if ( rslang_n >= 0 && rslang_n < rslangLAST &&
+						rslangchk[rslangact[rslang_n]] == rslangERRCODE)					{
+						/*
+						** simulate shift of "error"
+						*/
+						rslang_state = rslangact[ rslang_n ];
+						goto rslang_stack;
+					}
+					/*
+					** current state has no shift on
+					** "error", pop stack
+					*/
+#if rslangDEBUG
+#	define _POP_ "Error recovery pops state %d, uncovers state %d\n"
+					if ( rslangdebug )
+						printf( _POP_, *rslang_ps,
+							rslang_ps[-1] );
+#	undef _POP_
+#endif
+					rslang_ps--;
+					rslang_pv--;
+				}
+				/*
+				** there is no state on stack with "error" as
+				** a valid shift.  give up.
+				*/
+				rslangABORT;
+			case 3:		/* no shift yet; eat a token */
+#if rslangDEBUG
+				/*
+				** if debugging, look up token in list of
+				** pairs.  0 and negative shouldn't occur,
+				** but since timing doesn't matter when
+				** debugging, it doesn't hurt to leave the
+				** tests here.
+				*/
+				if ( rslangdebug )
+				{
+					register int rslang_i;
+
+					printf( "Error recovery discards " );
+					if ( rslangchar == 0 )
+						printf( "token end-of-file\n" );
+					else if ( rslangchar < 0 )
+						printf( "token -none-\n" );
+					else
+					{
+						for ( rslang_i = 0;
+							rslangtoks[rslang_i].t_val >= 0;
+							rslang_i++ )
+						{
+							if ( rslangtoks[rslang_i].t_val
+								== rslangchar )
+							{
+								break;
+							}
+						}
+						printf( "token %s\n",
+							rslangtoks[rslang_i].t_name );
+					}
+				}
+#endif /* rslangDEBUG */
+				if ( rslangchar == 0 )	/* reached EOF. quit */
+					rslangABORT;
+				rslangchar = -1;
+				goto rslang_newstate;
+			}
+		}/* end if ( rslang_n == 0 ) */
+		/*
+		** reduction by production rslang_n
+		** put stack tops, etc. so things right after switch
+		*/
+#if rslangDEBUG
+		/*
+		** if debugging, print the string that is the user's
+		** specification of the reduction which is just about
+		** to be done.
+		*/
+		if ( rslangdebug )
+			printf( "Reduce by (%d) \"%s\"\n",
+				rslang_n, rslangreds[ rslang_n ] );
+#endif
+		rslangtmp = rslang_n;			/* value to switch over */
+		rslangpvt = rslang_pv;			/* $vars top of value stack */
+		/*
+		** Look in goto table for next state
+		** Sorry about using rslang_state here as temporary
+		** register variable, but why not, if it works...
+		** If rslangr2[ rslang_n ] doesn't have the low order bit
+		** set, then there is no action to be done for
+		** this reduction.  So, no saving & unsaving of
+		** registers done.  The only difference between the
+		** code just after the if and the body of the if is
+		** the goto rslang_stack in the body.  This way the test
+		** can be made before the choice of what to do is needed.
+		*/
+		{
+			/* length of production doubled with extra bit */
+			register int rslang_len = rslangr2[ rslang_n ];
+
+			if ( !( rslang_len & 01 ) )
+			{
+				rslang_len >>= 1;
+				rslangval = ( rslang_pv -= rslang_len )[1];	/* $$ = $1 */
+				rslang_state = rslangpgo[ rslang_n = rslangr1[ rslang_n ] ] +
+					*( rslang_ps -= rslang_len ) + 1;
+				if ( rslang_state >= rslangLAST ||
+					rslangchk[ rslang_state =
+					rslangact[ rslang_state ] ] != -rslang_n )
+				{
+					rslang_state = rslangact[ rslangpgo[ rslang_n ] ];
+				}
+				goto rslang_stack;
+			}
+			rslang_len >>= 1;
+			rslangval = ( rslang_pv -= rslang_len )[1];	/* $$ = $1 */
+			rslang_state = rslangpgo[ rslang_n = rslangr1[ rslang_n ] ] +
+				*( rslang_ps -= rslang_len ) + 1;
+			if ( rslang_state >= rslangLAST ||
+				rslangchk[ rslang_state = rslangact[ rslang_state ] ] != -rslang_n )
+			{
+				rslang_state = rslangact[ rslangpgo[ rslang_n ] ];
+			}
+		}
+					/* save until reenter driver code */
+		rslangstate = rslang_state;
+		rslangps = rslang_ps;
+		rslangpv = rslang_pv;
+	}
+	/*
+	** code supplied by user is placed in this switch
+	*/
+	switch( rslangtmp )
+	{
+		
+case 1:
+// # line 51 "rslang.y"
+{ rsROOT = rslangpvt[-0]; } break;
+case 2:
+// # line 53 "rslang.y"
+{Extend (rslangval, rslangpvt[-1], rslangpvt[-0]); rsROOT = rslangpvt[-1];} break;
+case 3:
+// # line 57 "rslang.y"
+{Root (rslangval, rslangpvt[-0]);} break;
+case 4:
+// # line 59 "rslang.y"
+{SetPrecedingSemi_Colon (rslangpvt[-0]);
+			     Extend (rslangval, rslangpvt[-2], rslangpvt[-0]);
+			     } break;
+case 5:
+// # line 65 "rslang.y"
+{ Empty (rslangval);} break;
+case 8:
+// # line 72 "rslang.y"
+{BinaryOp(rslangval,rslangpvt[-2],rslangpvt[-1],rslangpvt[-0]);} break;
+case 9:
+// # line 75 "rslang.y"
+{BinaryOp (rslangval, rslangpvt[-2], rslangpvt[-1], rslangpvt[-0]);} break;
+case 10:
+// # line 78 "rslang.y"
+{BinaryOp (rslangval, rslangpvt[-2], rslangpvt[-1], rslangpvt[-0]);} break;
+case 11:
+// # line 81 "rslang.y"
+{BinaryOp (rslangval, rslangpvt[-2], rslangpvt[-1], rslangpvt[-0]);} break;
+case 12:
+// # line 84 "rslang.y"
+{BinaryOp (rslangval, rslangpvt[-2], rslangpvt[-1], rslangpvt[-0]);} break;
+case 13:
+// # line 87 "rslang.y"
+{BinaryOp (rslangval, rslangpvt[-2], rslangpvt[-1], rslangpvt[-0]);} break;
+case 14:
+// # line 90 "rslang.y"
+{KeywordTerm (rslangval, rslangpvt[-2], rslangpvt[-1], rslangpvt[-0]);} break;
+case 15:
+// # line 93 "rslang.y"
+{KeywordTerm (rslangval, rslangpvt[-2], rslangpvt[-1], rslangpvt[-0]);} break;
+case 16:
+// # line 96 "rslang.y"
+{BinaryOp (rslangval, rslangpvt[-2], rslangpvt[-1], rslangpvt[-0]);} break;
+case 17:
+// # line 99 "rslang.y"
+{BinaryOp (rslangval, rslangpvt[-2], rslangpvt[-1], rslangpvt[-0]);} break;
+case 18:
+// # line 102 "rslang.y"
+{BinaryOp (rslangval, rslangpvt[-2], rslangpvt[-1], rslangpvt[-0]);} break;
+case 19:
+// # line 105 "rslang.y"
+{BinaryOp (rslangval, rslangpvt[-2], rslangpvt[-1], rslangpvt[-0]);} break;
+case 20:
+// # line 108 "rslang.y"
+{BinaryOp (rslangval, rslangpvt[-2], rslangpvt[-1], rslangpvt[-0]);} break;
+case 21:
+// # line 111 "rslang.y"
+{BinaryOp (rslangval, rslangpvt[-2], rslangpvt[-1], rslangpvt[-0]);} break;
+case 22:
+// # line 114 "rslang.y"
+{BinaryOp (rslangval, rslangpvt[-2], rslangpvt[-1], rslangpvt[-0]);} break;
+case 23:
+// # line 117 "rslang.y"
+{BinaryOp (rslangval, rslangpvt[-2], rslangpvt[-1], rslangpvt[-0]);} break;
+case 24:
+// # line 120 "rslang.y"
+{BinaryOp (rslangval, rslangpvt[-2], rslangpvt[-1], rslangpvt[-0]);} break;
+case 25:
+// # line 123 "rslang.y"
+{BinaryOp (rslangval, rslangpvt[-2], rslangpvt[-1], rslangpvt[-0]);} break;
+case 28:
+// # line 129 "rslang.y"
+{UnaryOp (rslangval, rslangpvt[-1], rslangpvt[-0]);} break;
+case 32:
+// # line 138 "rslang.y"
+{ClosingKeywordTerm (rslangval, rslangpvt[-3], rslangpvt[-2], rslangpvt[-1]);} break;
+case 33:
+// # line 140 "rslang.y"
+{ClosingKeywordTerm (rslangval, rslangpvt[-3], rslangpvt[-2], rslangpvt[-1]);} break;
+case 40:
+// # line 150 "rslang.y"
+{
+				rslangval =
+				    (TokenTypes)NodeType (rslangpvt[-1]) != _Minus
+				    ? rslangpvt[-0]
+				    : (TokenTypes)NodeType (rslangpvt[-0]) == _Integer
+				    ? pTreeChangeNodeType (rslangpvt[-0], _NegInteger)
+				    : (TokenTypes)NodeType (rslangpvt[-0]) == _HexInteger
+				    ? pTreeChangeNodeType (rslangpvt[-0], _NegHexInteger)
+				    : pTreeChangeNodeType (rslangpvt[-0], _NegReal);
+			    } break;
+case 41:
+// # line 161 "rslang.y"
+{ CloseParens (rslangval, rslangpvt[-1]);} break;
+case 42:
+// # line 165 "rslang.y"
+{rslangval = pTreeChangeNodeType (rslangpvt[-0], _LocalId);} break;
+case 43:
+// # line 169 "rslang.y"
+{
+				char magic[128];
+				int length = TerminalNode_Length (rslangpvt[-0]);
+				
+				memcpy
+				    (magic,
+				     sourceBASE + TerminalNode_Origin (rslangpvt[-0]),
+				     length);
+				magic[length] = '\0';
+				if (MAGIC_StringToMWI (magic) < 0)
+				{
+				    rslangerror
+				    (
+					UTIL_FormatMessage
+					(
+					   "Unrecognized magic word '^%.*s'",
+					   length, 
+					   sourceBASE + TerminalNode_Origin(rslangpvt[-0])
+					)
+				    );
+				    rslangERROR;
+				}
+				else
+				{
+				    rslangval = pTreeChangeNodeType (rslangpvt[-0], _Magic);
+				}
+			    } break;
+case 44:
+// # line 199 "rslang.y"
+{ Percolate (rslangval, (int)_SimpleBlock, rslangpvt[-1]);} break;
+case 45:
+// # line 201 "rslang.y"
+{ HeadedBlock (rslangval, rslangpvt[-3], rslangpvt[-1]); } break;
+case 51:
+// # line 214 "rslang.y"
+{ Percolate (rslangval, (int)_UnaryMessageTemplate, rslangpvt[-0]); } break;
+case 52:
+// # line 218 "rslang.y"
+{ BinaryMessage (rslangval, rslangpvt[-1], rslangpvt[-0]); } break;
+case 53:
+// # line 222 "rslang.y"
+{ rslangval = rslangpvt[-0]; } break;
+case 54:
+// # line 224 "rslang.y"
+{ rslangval = rslangpvt[-0]; } break;
+case 55:
+// # line 226 "rslang.y"
+{ rslangval = rslangpvt[-0]; } break;
+case 56:
+// # line 228 "rslang.y"
+{ rslangval = rslangpvt[-0]; } break;
+case 57:
+// # line 230 "rslang.y"
+{ rslangval = rslangpvt[-0]; } break;
+case 58:
+// # line 232 "rslang.y"
+{ rslangval = rslangpvt[-0]; } break;
+case 59:
+// # line 234 "rslang.y"
+{ rslangval = rslangpvt[-0]; } break;
+case 60:
+// # line 236 "rslang.y"
+{ rslangval = rslangpvt[-0]; } break;
+case 61:
+// # line 240 "rslang.y"
+{ Extend (rslangval, rslangpvt[-1], rslangpvt[-0]); } break;
+case 62:
+// # line 244 "rslang.y"
+{ Percolate (rslangval, 
+					 (int)_KeywordMessageTemplate, 
+					 rslangpvt[-0]); 
+			    } break;
+case 63:
+// # line 249 "rslang.y"
+{ Extend (rslangval, rslangpvt[-1], rslangpvt[-0]); } break;
+case 64:
+// # line 253 "rslang.y"
+{ Percolate (rslangval, 
+					 (int)_ParametricMessageTemplate, 
+					 rslangpvt[-0]); 
+			    } break;
+case 65:
+// # line 258 "rslang.y"
+{ Extend (rslangval, rslangpvt[-1], rslangpvt[-0]); } break;
+case 66:
+// # line 262 "rslang.y"
+{ rslangval = rslangpvt[-1]; } break;
+case 67:
+// # line 264 "rslang.y"
+{ rslangval = rslangpvt[-1]; } break;
+case 68:
+// # line 266 "rslang.y"
+{ rslangval = rslangpvt[-1]; } break;
+case 69:
+// # line 270 "rslang.y"
+{ Percolate(rslangval, _UnarySelector, rslangpvt[-0]); } break;
+case 70:
+// # line 274 "rslang.y"
+{ Percolate(rslangval, _BinarySelector, rslangpvt[-0]); } break;
+case 71:
+// # line 276 "rslang.y"
+{ Percolate(rslangval, _BinarySelector, rslangpvt[-0]); } break;
+case 72:
+// # line 278 "rslang.y"
+{ Percolate(rslangval, _BinarySelector, rslangpvt[-0]); } break;
+case 73:
+// # line 280 "rslang.y"
+{ Percolate(rslangval, _BinarySelector, rslangpvt[-0]); } break;
+case 74:
+// # line 282 "rslang.y"
+{ Percolate(rslangval, _BinarySelector, rslangpvt[-0]); } break;
+case 75:
+// # line 284 "rslang.y"
+{ Percolate(rslangval, _BinarySelector, rslangpvt[-0]); } break;
+case 76:
+// # line 286 "rslang.y"
+{ Percolate(rslangval, _BinarySelector, rslangpvt[-0]); } break;
+case 77:
+// # line 288 "rslang.y"
+{ Percolate(rslangval, _BinarySelector, rslangpvt[-0]); } break;
+case 78:
+// # line 292 "rslang.y"
+{ Percolate(rslangval, _KeywordSelector, rslangpvt[-0]); } break;
+case 79:
+// # line 294 "rslang.y"
+{ Extend (rslangval, rslangpvt[-1], rslangpvt[-0]); } break;
+	}
+	goto rslangstack;		/* reset registers in driver code */
+}
+
+# ifdef __RUNTIME_rslangMAXDEPTH
+
+static int allocate_stacks() {
+	/* allocate the rslangs and rslangv stacks */
+	rslangs = (int *) malloc(rslangmaxdepth * sizeof(int));
+	rslangv = (rslangSTYPE *) malloc(rslangmaxdepth * sizeof(rslangSTYPE));
+
+	if (rslangs==0 || rslangv==0) {
+	   rslangerror( (nl_msg(30004,"unable to allocate space for yacc stacks")) );
+	   return(1);
+	   }
+	else return(0);
+
+}
+
+
+static void free_stacks() {
+	if (rslangs!=0) free((char *) rslangs);
+	if (rslangv!=0) free((char *) rslangv);
+}
+
+# endif  /* defined(__RUNTIME_rslangMAXDEPTH) */
+
