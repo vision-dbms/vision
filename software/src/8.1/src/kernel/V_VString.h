@@ -105,6 +105,9 @@ public:
     bool equalsIgnoreCase (VString const &rOther) const {
       return strcasecmp (*this, rOther) == 0;
     }
+    bool equalsIgnoreCase (char const* pOther) const {
+      return strcasecmp (*this, pOther) == 0;
+    }
 
     static unsigned int countOf (char const *pString, char iCharacter);
     static unsigned int countOf (char const *pString, char const *pSubstring);
