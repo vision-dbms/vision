@@ -41,7 +41,7 @@ static char const *const g_pNullDeviceName = "/dev/null";
 
 char const* const VTransientServices::g_pRestOfLineBreakSet = "\r\n";
 char const* const VTransientServices::g_pWhitespaceBreakSet = " \t\r\n";
-const VString VTransientServices::g_iEventNames[24] = {
+char const* VTransientServices::g_iEventNames[24] = {
     "CANCEL", "HARDSTOP", "CLIENTDISCONNECT", "WORKERHARDLIMIT", "WORKERSOFTLIMIT", "EVALUATORDISCONNECT",
     "WIPERROR", "WIPRETRYERROR", "WIPTIMEOUT", "WIPRETRYTIMEOUT", "SEFAILCONNECT", "WINUSELIMIT",
     "WUCLIMIT", "TEFFECTIVEWORKERLIMIT", "NONEWGENERATION", "NOEVALUATOR", "CANCELINQUE", "PROMPTSERVERGONE",
