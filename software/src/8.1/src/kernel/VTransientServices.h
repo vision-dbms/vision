@@ -214,7 +214,7 @@ public:
 private:
     static char const* const g_pRestOfLineBreakSet;
     static char const* const g_pWhitespaceBreakSet;
-    static const VString g_iEventNames[24];
+    static char const*       g_iEventNames[24];
 
 // Parse State
     enum ParseState {
