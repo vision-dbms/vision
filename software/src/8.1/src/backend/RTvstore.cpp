@@ -1163,7 +1163,7 @@ RTYPE_DefineHandler (rtVSTORE_Handler) {
 	IOBJ_MDE ("setAuxiliaryColumn:"	, SetAuxiliaryColumnDM)
 	IOBJ_MDE ("setColumn:"		, SetColumnDM)
 	IOBJ_MDE ("defineColumn:"	, SetColumnDM)
-//	IOBJ_MDE ("setColumnPtr:"	, SetColumnPtrDM)
+	IOBJ_MDE ("setColumnPtr:"	, SetColumnPtrDM)
 	IOBJ_MDE ("addRows:"		, AddRowsDM)
 	IOBJ_MDE ("clone"		, CloneDM)
     IOBJ_EndMD;
