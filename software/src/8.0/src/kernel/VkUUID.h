@@ -35,6 +35,7 @@ struct stduuid_t {
 #else
 typedef stduuid_t uuid_t;
 #endif
+#endif
 
 /**************************
  *****  Declarations  *****
