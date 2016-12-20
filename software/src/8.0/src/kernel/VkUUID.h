@@ -11,11 +11,6 @@
  *****  Components  *****
  ************************/
 
-#if defined(sun)
-#define VkUUID_USING_LIBUUID
-#include <uuid/uuid.h>
-
-#else
 struct stduuid_t {
     typedef unsigned int	u32;
     typedef unsigned short	u16;
@@ -31,7 +26,6 @@ struct stduuid_t {
 
 #if defined(_WIN32)
 #include <rpcdce.h>
-#elif
 #else
 typedef stduuid_t uuid_t;
 #endif
