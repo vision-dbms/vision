@@ -26,7 +26,7 @@ CVER	= ${CREL}
 CFLAGS	= ${CVER} ${CBASE}
 
 LINKER	= VLINK-CC
-LIBS	= ${LOCALLIBS} -lpthread
+LIBS	= ${LOCALLIBS} -lpthread -luuid
 LBASE	= -shared -z combreloc '-Wl,-rpath=$$ORIGIN' -Wl,-h${@F}
 LFLAGS	= ${LBASE} -L ../lib$D
 

@@ -27,7 +27,7 @@ CFLAGS	= ${CVER} ${CBASE}
 
 LINKER	= VLINK-CC
 LBASE	= -z combreloc
-LIBASE	= ${LOCALLIBS} -lpthread
+LIBASE	= ${LOCALLIBS} -lpthread -luuid
 LIBS	= ${LBASE} '-Wl,-rpath=$$ORIGIN/../lib$D' -L../lib$D ${LIBASE}
 
 release : targets

@@ -22,6 +22,9 @@ class VPath : public VReferenceable {
     DECLARE_CONCRETE_RTT (VPath, VReferenceable);
 
 public:
+    typedef V::uuid_t uuid_t;
+
+public:
     class VPathPeer : public VReferenceable {
         DECLARE_CONCRETE_RTT (VPathPeer, VReferenceable);
 

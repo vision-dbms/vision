@@ -11,25 +11,6 @@
  *****  Components  *****
  ************************/
 
-struct stduuid_t {
-    typedef unsigned int	u32;
-    typedef unsigned short	u16;
-    typedef unsigned char	u8;
-
-    u32	time_low;
-    u16	time_mid;
-    u16	time_hi_and_version;
-    u8	clock_seq_hi_and_reserved;
-    u8	clock_seq_low;
-    u8	node[6];
-};
-
-#if defined(_WIN32)
-#include <rpcdce.h>
-#else
-typedef stduuid_t uuid_t;
-#endif
-
 /**************************
  *****  Declarations  *****
  **************************/
@@ -41,11 +22,35 @@ class VString;
  *****  Definitions  *****
  *************************/
 
+/*---------------------*
+ *----  V::uuid_t  ----*
+ *---------------------*/
+
+namespace V {
+  struct uuid_t {
+    typedef unsigned int	u32;
+    typedef unsigned short	u16;
+    typedef unsigned char	u8;
+
+    u32	time_low;
+    u16	time_mid;
+    u16	time_hi_and_version;
+    u8	clock_seq_hi_and_reserved;
+    u8	clock_seq_low;
+    u8	node[6];
+  };
+}
+
+
 /*------------------*
  *----  VkUUID  ----*
  *------------------*/
 
 class V_API VkUUID {
+//  uuid_t
+public:
+    typedef V::uuid_t uuid_t;
+
 //  Construction
 public:
     static bool GetUUID (uuid_t &rUUID, char const *pString);

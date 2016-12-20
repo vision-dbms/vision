@@ -25,6 +25,8 @@
  *************************/
 
 namespace Vca {
+    typedef V::uuid_t uuid_t;
+
     class Vca_API VPeerData : public VTransient {
 	DECLARE_FAMILY_MEMBERS (VPeerData, VTransient);
 
