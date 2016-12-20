@@ -105,7 +105,7 @@ Vca_IDataSource_InstantiationsForPODT (Vca::U64);
 #endif  // defined(Vca_IDataSource_Instantiations2)
 
 #ifdef Vca_IDataSource_Instantiations1
-Vca_IDataSource_InstantiationsForREFT (uuid_t);
+Vca_IDataSource_InstantiationsForREFT (V::uuid_t);
 Vca_IDataSource_InstantiationsForREFT (V::VBlob);
 Vca_IDataSource_InstantiationsForREFT (VString);
 Vca_IDataSource_InstantiationsForREFT (V::VTime);

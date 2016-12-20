@@ -48,6 +48,8 @@ class VPassthru : public Vca::VClientApplication {
 
 //  Aliases
 public:
+    typedef V::uuid_t		uuid_t;
+
     typedef Vca::IError		IError;
     typedef Vca::IPassiveCall	IPassiveCall;
     typedef Vca::IPassiveServer	IPassiveServer;

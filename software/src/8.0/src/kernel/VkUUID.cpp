@@ -62,12 +62,16 @@ typedef caddr_t ifc_buf_t;
  *****  DCE Compliant Systems  *****
  ***********************************/
 
-#if defined(_AIX) || defined(__hpux)
+#if defined(_WIN32)
+#include <rpcdce.h>
+
+// #elif defined(__linux__)
+#elif defined(_AIX) || defined(__hpux)
 #define DCE_UUIDGEN
 
-typedef uuid_t::u32	u32;
-typedef uuid_t::u16	u16;
-typedef uuid_t::u8	u8;
+typedef V::uuid_t::u32	u32;
+typedef V::uuid_t::u16	u16;
+typedef V::uuid_t::u8	u8;
 
 extern "C" {
     void rpc_string_free	(unsigned char**, u32*);
@@ -85,9 +89,9 @@ extern "C" {
 #elif defined(__VMS) || defined (__linux__) || defined(sun) 
 #define OWN_UUIDGEN
 
-typedef uuid_t::u32	u32;
-typedef uuid_t::u16	u16;
-typedef uuid_t::u8	u8;
+typedef V::uuid_t::u32	u32;
+typedef V::uuid_t::u16	u16;
+typedef V::uuid_t::u8	u8;
 
 #include "VpSocket.h"
 
@@ -115,9 +119,9 @@ extern "C" {
     void srandom (unsigned int seed);
 }
 
-typedef uuid_t::u32	u32;
-typedef uuid_t::u16	u16;
-typedef uuid_t::u8	u8;
+typedef V::uuid_t::u32	u32;
+typedef V::uuid_t::u16	u16;
+typedef V::uuid_t::u8	u8;
 
 PrivateFnDef void get_random_bytes(void *buf, unsigned int nbytes) {
     char *cp = (char *) buf;
@@ -421,26 +425,13 @@ bool VkUUID::GetUUID (uuid_t &rUUID) {
 }
 
 
-uuid_t VkUUID::ReturnUUID (
+V::uuid_t VkUUID::ReturnUUID (
     unsigned int iD1,
     unsigned short iD2, unsigned short iD3,
     unsigned char iD4_0, unsigned char iD4_1, unsigned char iD4_2, unsigned char iD4_3,
     unsigned char iD4_4, unsigned char iD4_5, unsigned char iD4_6, unsigned char iD4_7
 ) {
     uuid_t iUUID;
-#if defined(_WIN32)
-    iUUID.Data1	= iD1;
-    iUUID.Data2	= iD2;
-    iUUID.Data3	= iD3;
-    iUUID.Data4[0] = iD4_0;
-    iUUID.Data4[1] = iD4_1;
-    iUUID.Data4[2] = iD4_2;
-    iUUID.Data4[3] = iD4_3;
-    iUUID.Data4[4] = iD4_4;
-    iUUID.Data4[5] = iD4_5;
-    iUUID.Data4[6] = iD4_6;
-    iUUID.Data4[7] = iD4_7;
-#else
     iUUID.time_low			= iD1;
     iUUID.time_mid			= iD2;
     iUUID.time_hi_and_version		= iD3;
@@ -452,18 +443,17 @@ uuid_t VkUUID::ReturnUUID (
     iUUID.node[3]			= iD4_5;
     iUUID.node[4]			= iD4_6;
     iUUID.node[5]			= iD4_7;
-#endif
 
     return iUUID;
 }
 
-uuid_t VkUUID::ReturnUUID (char const *pString) {
+V::uuid_t VkUUID::ReturnUUID (char const *pString) {
     uuid_t iUUID;
     GetUUID (iUUID, pString);
     return iUUID;
 }
 
-uuid_t VkUUID::ReturnUUID () {
+V::uuid_t VkUUID::ReturnUUID () {
     uuid_t iUUID;
     GetUUID (iUUID);
     return iUUID;
@@ -637,11 +627,9 @@ bool VkUUID::gt (uuid_t const &rUUID1, uuid_t const &rUUID2) {
  *********************************/
 
 void VkUUID::reverseByteOrder (uuid_t &rUUID) {
-    stduuid_t &rSUUID = *(stduuid_t*)&rUUID;
-
-    Vk_ReverseSizeable (&rSUUID.time_low);
-    Vk_ReverseSizeable (&rSUUID.time_mid);
-    Vk_ReverseSizeable (&rSUUID.time_hi_and_version);
+    Vk_ReverseSizeable (&rUUID.time_low);
+    Vk_ReverseSizeable (&rUUID.time_mid);
+    Vk_ReverseSizeable (&rUUID.time_hi_and_version);
 }
 
 /*********************

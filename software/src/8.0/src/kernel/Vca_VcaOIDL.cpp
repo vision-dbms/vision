@@ -278,7 +278,7 @@ Vca::VcaOIDL::~VcaOIDL () {
  ***************************
  ***************************/
 
-uuid_t const& Vca::VcaOIDL::objectSiteUUID_() const {
+V::uuid_t const& Vca::VcaOIDL::objectSiteUUID_() const {
     return self ()->uuid ();
 }
 
