@@ -18,14 +18,14 @@ CBASE	= -mt -KPIC -template=no%extdef
 CDBG	= -g -xs
 CREL	= -O -xvector
 CVER	= ${CREL}
-C32	=
-C64	=
+C32	= -m32
+C64	= -m64
 CARCH	= ${C64}
 CFLAGS	= ${CVER} ${CBASE} ${CARCH}
 
 LINKER	= VLINK-CC
 LBASE	= -norunpath -z ignore -z lazyload -B direct
-LIBASE	= -lrt -lpthread ${LOCALLIBS} -lsocket -lnsl -Bstatic -lsunmath -Bdynamic -lm
+LIBASE	= -lrt -lpthread -luuid ${LOCALLIBS} -lsocket -lnsl -Bstatic -lsunmath -Bdynamic -lm
 LIBS	= ${LBASE} -R '$$ORIGIN/../lib${D}' -L ../lib${D} ${LIBASE}
 
 release : targets
