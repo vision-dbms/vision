@@ -175,30 +175,6 @@
  *   </tr>
  * </table>
  */
-
-/**
- * @fn static void V::VAtomicMemoryOperations::MemoryBarrierLoadLoad()
- *
- * Free floating memory barrier instruction that mirrors the Sparc memory barriers and is appropriately emulated on other architectures.
- */
-
-/**
- * @fn static void V::VAtomicMemoryOperations::MemoryBarrierLoadStore()
- *
- * @copybrief V::VAtomicMemoryOperations::MemoryBarrierLoadLoad()
- */
-
-/**
- * @fn static void V::VAtomicMemoryOperations::MemoryBarrierStoreStore()
- *
- * @copybrief V::VAtomicMemoryOperations::MemoryBarrierLoadLoad()
- */
-
-/**
- * @fn static void V::VAtomicMemoryOperations::MemoryBarrierStoreLoad()
- *
- * @copybrief V::VAtomicMemoryOperations::MemoryBarrierLoadLoad()
- */
 
 
 // Doxygen tags.
@@ -268,6 +244,15 @@ extern "C" {
 
 #elif defined(sun)
 
+#if defined(USING_LEGACY_SPARC_ATOMICS) && !defined(__sparc)
+#undef USING_LEGACY_SPARC_ATOMICS
+#endif
+
+#if !defined(USING_LEGACY_SPARC_ATOMICS)
+#include <atomic.h>
+
+#else // defined(USING_LEGACY_SPARC_ATOMICS)
+
 ////////////////////////////////////////////////////////
 //  The assembly language implementations of these routines can be found in the 'sun.*.il' file
 //  appropriate for the architecture targeted by the compilation (v8plus = 32bit, v9 = 64 bit).
@@ -297,14 +282,9 @@ extern "C" {
     void membar_release    ();  // #loadstore | #storestore
     void membar_produce    ();  // #storestore
     void membar_consume    ();  // #loadload
-
-    void membar_loadload   ();
-    void membar_loadstore  ();
-    void membar_storeload  ();
-    void membar_storestore ();
 }
-
-#endif
+#endif // defined(USING_LEGACY_SPARC_ATOMICS)
+#endif // defined(sun)
 
 
 /*************************
@@ -330,15 +310,6 @@ namespace V {
         static void MemoryBarrierProduce () {   //  data produce, no write behind.
         }
         static void MemoryBarrierConsume () {   //  data consume, no read ahead.
-        }
-
-        static void MemoryBarrierLoadLoad () {
-        }
-        static void MemoryBarrierLoadStore () {
-        }
-        static void MemoryBarrierStoreStore () {
-        }
-        static void MemoryBarrierStoreLoad () {
         }
     };
 
@@ -375,19 +346,6 @@ namespace V {
         static void MemoryBarrierConsume () {   //  data consume, no read ahead.
             __MB ();
         }
-
-        static void MemoryBarrierLoadLoad () {
-            __MB ();
-        }
-        static void MemoryBarrierLoadStore () {
-            __MB ();
-        }
-        static void MemoryBarrierStoreStore () {
-            __WMB ();
-        }
-        static void MemoryBarrierStoreLoad () {
-            __MB ();
-        }
     };
 
 
@@ -410,15 +368,6 @@ namespace V {
         static void MemoryBarrierProduce () {   //  data produce, no write behind.
         }
         static void MemoryBarrierConsume () {   //  data consume, no read ahead.
-        }
-
-        static void MemoryBarrierLoadLoad () {
-        }
-        static void MemoryBarrierLoadStore () {
-        }
-        static void MemoryBarrierStoreStore () {
-        }
-        static void MemoryBarrierStoreLoad () {
         }
     };
 
@@ -443,22 +392,14 @@ namespace V {
         }
         static void MemoryBarrierConsume () {   //  data consume, no read ahead.
         }
-
-        static void MemoryBarrierLoadLoad () {
-        }
-        static void MemoryBarrierLoadStore () {
-        }
-        static void MemoryBarrierStoreStore () {
-        }
-        static void MemoryBarrierStoreLoad () {
-        }
     };
 
 
-#elif defined(sun)
-    /*-------------------------*
-     *----  Solaris/Sparc  ----*
-     *-------------------------*/
+#elif defined(sun) && defined(USING_LEGACY_SPARC_ATOMICS)
+
+    /*----------------------------------------*
+     *----  Solaris Legacy Sparc Atomics  ----*
+     *----------------------------------------*/
 
     class VAtomicMemoryOperations {
     //  Aliases
@@ -479,21 +420,34 @@ namespace V {
         static void MemoryBarrierConsume () {   //  data consume, no read ahead.
             membar_consume ();
         }
-
-        static void MemoryBarrierLoadLoad () {
-            membar_loadload ();
-        }
-        static void MemoryBarrierLoadStore () {
-            membar_loadstore ();
-        }
-        static void MemoryBarrierStoreStore () {
-            membar_storestore ();
-        }
-        static void MemoryBarrierStoreLoad () {
-            membar_storeload ();
-        }
     };
 
+#elif defined(sun)
+
+    /*---------------------------*
+     *----  Solaris Atomics  ----*
+     *---------------------------*/
+
+    class VAtomicMemoryOperations {
+    //  Aliases
+    public:
+        typedef VAtomicMemoryOperations ThisClass;
+
+    //  Operations
+    public:
+        static void MemoryBarrierAcquire () {   //  lock acquire, no read ahead.
+            membar_enter ();  // #loadload | #loadstore
+        }
+        static void MemoryBarrierRelease () {   //  lock release, no write behind.
+            membar_exit ();
+        }
+        static void MemoryBarrierProduce () {   //  data produce, no write behind.
+            membar_producer ();
+        }
+        static void MemoryBarrierConsume () {   //  data consume, no read ahead.
+            membar_consumer ();
+        }
+    };
 #endif
 }
 

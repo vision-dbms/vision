@@ -116,7 +116,7 @@ namespace V {
 	    return __ATOMIC_INCREMENT_LONG ((void volatile*)&rValue);
 	}
 	static value_t fetchAndDecrement (value_t volatile &rValue) {
-	    MemoryBarrierStoreStore ();	//  ... see comments in "boost_detail_atomic_count_...h"
+	    MemoryBarrierProduce ();	//  ... see comments in "boost_detail_atomic_count_...h"
 	    return __ATOMIC_DECREMENT_LONG ((void volatile*)&rValue);
 	}
 
@@ -124,6 +124,7 @@ namespace V {
 	    return fetchAndIncrement (rValue) + 1;
 	}
 	static value_t decrementAndFetch (value_t volatile &rValue) {
+	    MemoryBarrierProduce ();	//  ... see comments in "boost_detail_atomic_count_...h"
 	    return fetchAndDecrement (rValue) - 1;
 	}
     };
@@ -160,13 +161,14 @@ namespace V {
 	    return __ATOMIC_INCREMENT_QUAD ((void volatile*)&rValue);
 	}
 	static value_t fetchAndDecrement (value_t volatile &rValue) {
-	    MemoryBarrierStoreStore ();	//  ... see comments in "boost_detail_atomic_count_...h"
+	    MemoryBarrierProduce ();	//  ... see comments in "boost_detail_atomic_count_...h"
 	    return __ATOMIC_DECREMENT_QUAD ((void volatile*)&rValue);
 	}
 	static value_t incrementAndFetch (value_t volatile &rValue) {
 	    return fetchAndIncrement (rValue) + 1;
 	}
 	static value_t decrementAndFetch (value_t volatile &rValue) {
+	    MemoryBarrierProduce ();	//  ... see comments in "boost_detail_atomic_count_...h"
 	    return fetchAndDecrement (rValue) - 1;
 	}
     };
@@ -399,9 +401,24 @@ namespace V {
 
 
 #elif defined(sun)
-    /*-------------------------*
-     *----  Solaris/Sparc  ----*
-     *-------------------------*/
+
+    /*-------------------*
+     *----  Solaris  ----*
+     *-------------------*/
+
+    template <typename T> class VAtomicOperations_ : public VAtomicMemoryOperations_<sizeof (T)> {
+    //  Family Values
+    public:
+	typedef T value_t;
+	typedef value_t storage_t;
+    };
+
+
+#if defined(USING_LEGACY_SPARC_ATOMICS)
+
+    /*--------------------------------------------------------------------*
+     *----  Solaris/Sparc Legacy Atomics (Inline .il Assembly Files)  ----*
+     *--------------------------------------------------------------------*/
 
     template <typename T> class VAtomicOperations_ : public VAtomicMemoryOperations_<sizeof (T)> {
     //  Family Values
@@ -446,13 +463,14 @@ namespace V {
 	    return fetchAndAdd (rValue, 1);
 	}
 	static value_t fetchAndDecrement (value_t volatile &rValue) {
-	    MemoryBarrierStoreStore ();
+	    MemoryBarrierProduce ();	//  ... see comments in "boost_detail_atomic_count_...h"
 	    return fetchAndAdd (rValue, (value_t)-1);
 	}
 	static value_t incrementAndFetch (value_t volatile &rValue) {
 	    return fetchAndIncrement (rValue) + 1;
 	}
 	static value_t decrementAndFetch (value_t volatile &rValue) {
+	    MemoryBarrierProduce ();	//  ... see comments in "boost_detail_atomic_count_...h"
 	    return fetchAndDecrement (rValue) - 1;
 	}
     };
@@ -493,17 +511,114 @@ namespace V {
 	    return fetchAndAdd (rValue, 1);
 	}
 	static value_t fetchAndDecrement (value_t volatile &rValue) {
-	    MemoryBarrierStoreStore ();
+	    MemoryBarrierProduce ();	//  ... see comments in "boost_detail_atomic_count_...h"
 	    return fetchAndAdd (rValue, (value_t)-1);
 	}
 	static value_t incrementAndFetch (value_t volatile &rValue) {
 	    return fetchAndIncrement (rValue) + 1;
 	}
 	static value_t decrementAndFetch (value_t volatile &rValue) {
+	    MemoryBarrierProduce ();	//  ... see comments in "boost_detail_atomic_count_...h"
 	    return fetchAndDecrement (rValue) - 1;
 	}
     };
-#endif
+
+#else // !defined(USING_LEGACY_SOLARIS_ATOMICS)
+
+    /*---------------------------*
+     *----  Solaris Atomics  ----*
+     *---------------------------*/
+
+    template<>
+    class VAtomicOperations_<unsigned __int32> : public VAtomicMemoryOperations_<sizeof (unsigned __int32)> {
+    //  Family Values
+    public:
+	typedef unsigned __int32 value_t;
+	typedef value_t storage_t;
+
+    //  Constants
+    public:
+	static value_t zero () {
+	    return 0;
+	}
+
+    //  Operations
+    public:
+	static void increment (value_t volatile &rValue) {
+	    atomic_inc_32 (&rValue);
+	}
+	static void decrement (value_t volatile &rValue) {
+	    atomic_dec_32 (&rValue);
+	}
+	static bool decrementIsZero (value_t volatile &rValue) {
+	    return isZero (decrementAndFetch (rValue));
+	}
+	static bool isZero (value_t iValue) {
+	    return 0 == iValue;
+	}
+
+	static value_t fetchAndIncrement (value_t volatile &rValue) {
+	    return atomic_inc_32_nv (&rValue) - 1;
+	}
+	static value_t fetchAndDecrement (value_t volatile &rValue) {
+	    MemoryBarrierProduce ();	//  ... see comments in "boost_detail_atomic_count_...h"
+	    return atomic_dec_32_nv (&rValue) + 1;
+	}
+	static value_t incrementAndFetch (value_t volatile &rValue) {
+	    return atomic_inc_32_nv (&rValue);
+	}
+	static value_t decrementAndFetch (value_t volatile &rValue) {
+	    MemoryBarrierProduce ();	//  ... see comments in "boost_detail_atomic_count_...h"
+	    return atomic_dec_32_nv (&rValue);
+	}
+    };
+
+    template<>
+    class VAtomicOperations_<unsigned __int64> : public VAtomicMemoryOperations_<sizeof (unsigned __int64)> {
+    //  Family Values
+    public:
+	typedef unsigned __int64 value_t;
+	typedef value_t storage_t;
+
+    //  Constants
+    public:
+	static value_t zero () {
+	    return 0;
+	}
+
+    //  Operations
+    public:
+	static void increment (value_t volatile &rValue) {
+	    atomic_inc_64 (reinterpret_cast<uint64_t volatile*>(&rValue));
+	}
+	static void decrement (value_t volatile &rValue) {
+	    atomic_dec_64 (reinterpret_cast<uint64_t volatile*>(&rValue));
+	}
+	static bool decrementIsZero (value_t volatile &rValue) {
+	    return isZero (decrementAndFetch (rValue));
+	}
+	static bool isZero (value_t iValue) {
+	    return 0 == iValue;
+	}
+
+	static value_t fetchAndIncrement (value_t volatile &rValue) {
+	    return atomic_inc_64_nv (reinterpret_cast<uint64_t volatile*>(&rValue)) - 1;
+	}
+	static value_t fetchAndDecrement (value_t volatile &rValue) {
+	    MemoryBarrierProduce ();	//  ... see comments in "boost_detail_atomic_count_...h"
+	    return atomic_dec_64_nv (reinterpret_cast<uint64_t volatile*>(&rValue)) + 1;
+	}
+	static value_t incrementAndFetch (value_t volatile &rValue) {
+	    return atomic_inc_64_nv (reinterpret_cast<uint64_t volatile*>(&rValue));
+	}
+	static value_t decrementAndFetch (value_t volatile &rValue) {
+	    MemoryBarrierProduce ();	//  ... see comments in "boost_detail_atomic_count_...h"
+	    return atomic_dec_64_nv (reinterpret_cast<uint64_t volatile*>(&rValue));
+	}
+    };
+
+#endif // USING_LEGACY_SPARC_ATOMICS)
+#endif // PLATFORM SPECIFIC CASES
 }
 
 
