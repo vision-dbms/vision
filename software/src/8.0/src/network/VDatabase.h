@@ -21,6 +21,10 @@ class VDatabase : public VBenderenceable {
 //  Run Time Type
     DECLARE_CONCRETE_RTT (VDatabase, VBenderenceable);
 
+//  Aliases
+public:
+    typedef V::uuid_t uuid_t;
+
 //  Construction
 public:
     VDatabase (uuid_t const &rDatabaseUUID) : m_iUUID (rDatabaseUUID) {

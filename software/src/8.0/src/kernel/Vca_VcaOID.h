@@ -27,6 +27,8 @@ class IVUnknown;
  *****  Definitions  *****
  *************************/
 namespace Vca {
+    typedef V::uuid_t uuid_t;
+
     class VMessage;
 
     class VcaPeer;

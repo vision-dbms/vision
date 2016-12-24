@@ -68,7 +68,7 @@
  *****  required
  *****
  *****/
-#ifdef sun
+#ifdef __sparc
 // void Vca::VRolePlayer::QueryRole(Vca::IRoleProvider*,IVReceiver<IVUnknown*>*,VTypeInfo*,IVUnknown*)
 #pragma weak "__1cDVcaLVRolePlayerJQdDueryRole6Mpn0ANIRoleProvider_pn0AIITrigger_pnKIVReceiver4CpnJIVUnknown___pnJVTypeInfo_7_v_" = "__1cDVcaLVRolePlayerJQdDueryRole6Mpn0ANIRoleProvider_pn0AIITrigger_pnKIVReceiver4CpnJIVUnknown___pnJVTypeInfo_p6_v_"
 

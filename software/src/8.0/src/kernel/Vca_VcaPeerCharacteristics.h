@@ -23,6 +23,8 @@
  *************************/
 
 namespace Vca {
+    typedef V::uuid_t uuid_t;
+
     class Vca_API VcaPeerCharacteristics {
     //  Architecture
     public:

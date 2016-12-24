@@ -23,10 +23,68 @@
  ************************/
 
 #include "V_VString.h"
+
 
-#ifdef _WIN32
+/*******************************************
+ *******************************************
+ *****  Platform Specific Definitions  *****
+ *******************************************
+ *******************************************/
+
+typedef V::uuid_t::u32	u32;
+typedef V::uuid_t::u16	u16;
+typedef V::uuid_t::u8	u8;
+
+/***********************************
+ *****  DCE Compliant Systems  *****
+ ***********************************/
+
+#if defined(_WIN32)
+#define USING_WINDOWS_DCE
+#include <rpcdce.h>
 #pragma comment(lib, "rpcrt4.lib")
-#endif
+
+namespace {
+    uuid_t* UCast (V::uuid_t const &rUUID) {
+	return (uuid_t*)(&rUUID);
+    };
+    uuid_t* UCast (V::uuid_t &rUUID) {
+	return (uuid_t*)(&rUUID);
+    };
+}
+
+#elif defined(__linux__) || defined(sun)
+#define USING_LIBUUID_DCE
+#include <uuid/uuid.h>
+
+namespace {
+    u8* UCast (V::uuid_t const &rUUID) {
+	return (u8*)(&rUUID);
+    };
+    u8* UCast (V::uuid_t &rUUID) {
+	return (u8*)(&rUUID);
+    };
+}
+
+#elif defined(_AIX) || defined(__hpux)
+#define USING_LEGACY_DCE
+
+extern "C" {
+    void rpc_string_free	(unsigned char**, u32*);
+
+    void uuid_create		(uuid_t*, u32*);
+    void uuid_to_string		(uuid_t const*, unsigned char**, u32*);
+    void uuid_from_string	(unsigned char const*, uuid_t*, u32*);
+};
+
+
+/***************************
+ *****  Other Systems  *****
+ ***************************/
+
+#elif defined(__VMS)
+//lif defined(__VMS) || defined (__linux__) || defined(sun) 
+#define USING_OWN_IMPLEMENTATION
 
 #ifdef __VMS
 
@@ -50,44 +108,9 @@ typedef caddr_t ifc_buf_t;
 
 #endif
 
-
-
-/*******************************************
- *******************************************
- *****  Platform Specific Definitions  *****
- *******************************************
- *******************************************/
-
-/***********************************
- *****  DCE Compliant Systems  *****
- ***********************************/
-
-#if defined(_AIX) || defined(__hpux)
-#define DCE_UUIDGEN
-
-typedef uuid_t::u32	u32;
-typedef uuid_t::u16	u16;
-typedef uuid_t::u8	u8;
-
-extern "C" {
-    void rpc_string_free	(unsigned char**, u32*);
-
-    void uuid_create		(uuid_t*, u32*);
-    void uuid_to_string		(uuid_t const*, unsigned char**, u32*);
-    void uuid_from_string	(unsigned char const*, uuid_t*, u32*);
-};
-
-
-/*****************************
- *****  Solaris Systems  *****
- *****************************/
-
-#elif defined(__VMS) || defined (__linux__) || defined(sun) 
-#define OWN_UUIDGEN
-
-typedef uuid_t::u32	u32;
-typedef uuid_t::u16	u16;
-typedef uuid_t::u8	u8;
+typedef V::uuid_t::u32	u32;
+typedef V::uuid_t::u16	u16;
+typedef V::uuid_t::u8	u8;
 
 #include "VpSocket.h"
 
@@ -114,10 +137,6 @@ extern "C" {
     long random ();
     void srandom (unsigned int seed);
 }
-
-typedef uuid_t::u32	u32;
-typedef uuid_t::u16	u16;
-typedef uuid_t::u8	u8;
 
 PrivateFnDef void get_random_bytes(void *buf, unsigned int nbytes) {
     char *cp = (char *) buf;
@@ -280,12 +299,18 @@ try_again:
  **************************/
 
 bool VkUUID::GetUUID (uuid_t &rUUID, char const *pString) {
-#if defined(DCE_UUIDGEN)
+#if defined(USING_LIBUUID_DCE)
+    return 0 == uuid_parse (const_cast<char*>(pString), UCast(rUUID));
+
+#elif defined(USING_LEGACY_DCE)
     u32 iStatus;
-    uuid_from_string ((unsigned char const*)pString, &rUUID, &iStatus);
+    uuid_from_string (reinterpret_cast<unsigned char const*>(pString), &rUUID, &iStatus);
     return iStatus == 0;
 
-#elif defined(OWN_UUIDGEN)
+#elif defined(USING_WINDOWS_DCE)
+    return RPC_S_OK == UuidFromString ((unsigned char*)pString, UCast(rUUID));
+
+#elif defined(USING_OWN_IMPLEMENTATION)
     if (strlen(pString) != 36)
 	return false;
 
@@ -326,9 +351,6 @@ bool VkUUID::GetUUID (uuid_t &rUUID, char const *pString) {
 
     return true;
 
-#elif defined(_WIN32)
-    return RPC_S_OK == UuidFromString ((unsigned char*)pString, &rUUID);
-
 #else
     return false;
 
@@ -337,7 +359,11 @@ bool VkUUID::GetUUID (uuid_t &rUUID, char const *pString) {
 
 
 bool VkUUID::GetUUID (uuid_t &rUUID) {
-#if defined(DCE_UUIDGEN)
+#if defined(USING_LIBUUID_DCE)
+    uuid_generate (UCast(rUUID));
+    return true;
+
+#elif defined(USING_LEGACY_DCE)
 #if defined(_AIX)
     ::fprintf (stderr, "+++VkUUID::GetUUID: UUID Creation May Fail With A Segmentation Violation.\n");
 #endif
@@ -345,7 +371,19 @@ bool VkUUID::GetUUID (uuid_t &rUUID) {
     uuid_create (&rUUID, &iStatus);
     return iStatus == 0;
 
-#elif defined(OWN_UUIDGEN)
+#elif defined(USING_WINDOWS_DCE)
+    switch (UuidCreate (&rUUID)) {
+    case RPC_S_OK:
+    case RPC_S_UUID_LOCAL_ONLY:
+	return true;
+
+    default:
+	break;
+    }
+    UuidCreateNil (&rUUID);
+    return true;
+
+#elif defined(USING_LOCAL_IMPLEMENTATION)
 
 #if defined (__VMS)
 #ifdef __VMS
@@ -402,18 +440,6 @@ bool VkUUID::GetUUID (uuid_t &rUUID) {
     memcpy(rUUID.node, node_id, 6);
     return true;
 
-#elif defined(_WIN32)
-    switch (UuidCreate (&rUUID)) {
-    case RPC_S_OK:
-    case RPC_S_UUID_LOCAL_ONLY:
-	return true;
-
-    default:
-	break;
-    }
-    UuidCreateNil (&rUUID);
-    return true;
-
 #else
     return false;
 
@@ -421,26 +447,13 @@ bool VkUUID::GetUUID (uuid_t &rUUID) {
 }
 
 
-uuid_t VkUUID::ReturnUUID (
+V::uuid_t VkUUID::ReturnUUID (
     unsigned int iD1,
     unsigned short iD2, unsigned short iD3,
     unsigned char iD4_0, unsigned char iD4_1, unsigned char iD4_2, unsigned char iD4_3,
     unsigned char iD4_4, unsigned char iD4_5, unsigned char iD4_6, unsigned char iD4_7
 ) {
     uuid_t iUUID;
-#if defined(_WIN32)
-    iUUID.Data1	= iD1;
-    iUUID.Data2	= iD2;
-    iUUID.Data3	= iD3;
-    iUUID.Data4[0] = iD4_0;
-    iUUID.Data4[1] = iD4_1;
-    iUUID.Data4[2] = iD4_2;
-    iUUID.Data4[3] = iD4_3;
-    iUUID.Data4[4] = iD4_4;
-    iUUID.Data4[5] = iD4_5;
-    iUUID.Data4[6] = iD4_6;
-    iUUID.Data4[7] = iD4_7;
-#else
     iUUID.time_low			= iD1;
     iUUID.time_mid			= iD2;
     iUUID.time_hi_and_version		= iD3;
@@ -452,18 +465,17 @@ uuid_t VkUUID::ReturnUUID (
     iUUID.node[3]			= iD4_5;
     iUUID.node[4]			= iD4_6;
     iUUID.node[5]			= iD4_7;
-#endif
 
     return iUUID;
 }
 
-uuid_t VkUUID::ReturnUUID (char const *pString) {
+V::uuid_t VkUUID::ReturnUUID (char const *pString) {
     uuid_t iUUID;
     GetUUID (iUUID, pString);
     return iUUID;
 }
 
-uuid_t VkUUID::ReturnUUID () {
+V::uuid_t VkUUID::ReturnUUID () {
     uuid_t iUUID;
     GetUUID (iUUID);
     return iUUID;
@@ -497,7 +509,11 @@ VkUUID::VkUUID () {
  ********************/
 
 bool VkUUID::GetString (VString &rString) const {
-#if defined(DCE_UUIDGEN)
+#if defined(USING_LIBUUID_DCE)
+    uuid_unparse (UCast(m_iUUID), rString.storage (36));
+    return true;
+
+#elif defined(USING_LEGACY_DCE)
     unsigned char *pString = 0;
     u32 iStatus;
     uuid_to_string (&m_iUUID, &pString, &iStatus);
@@ -508,7 +524,16 @@ bool VkUUID::GetString (VString &rString) const {
 
     return true;
 
-#elif defined(OWN_UUIDGEN)
+#elif defined(USING_WINDOWS_DCE)
+    unsigned char *pString;
+    if (RPC_S_OK != UuidToString (UCast(m_iUUID), &pString))
+	return false;
+
+    rString.setTo ((char const*)pString);
+    RpcStringFree (&pString);
+    return true;
+
+#elif defined(USING_LOCAL_IMPLEMENTATION)
     rString.printf (
 	"%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x",
 	m_iUUID.time_low, m_iUUID.time_mid, m_iUUID.time_hi_and_version,
@@ -517,15 +542,6 @@ bool VkUUID::GetString (VString &rString) const {
 	m_iUUID.node[3], m_iUUID.node[4], m_iUUID.node[5]
     );
 
-    return true;
-
-#elif defined(_WIN32)
-    unsigned char *pString;
-    if (RPC_S_OK != UuidToString (const_cast<uuid_t*>(&m_iUUID), &pString))
-	return false;
-
-    rString.setTo ((char const*)pString);
-    RpcStringFree (&pString);
     return true;
 
 #else
@@ -547,9 +563,11 @@ bool VkUUID::GetString (VString &rString, const uuid_t &rUUID) {
  *******************/
 
 bool VkUUID::isNil () const {
-#if defined(_WIN32)
+#if defined(USING_LIBUUID_DCE)
+    return uuid_is_null (UCast(m_iUUID));
+#elif defined(USING_WINDOWS_DCE)
     RPC_STATUS iStatus;
-    return UuidIsNil (const_cast<uuid_t*>(&m_iUUID), &iStatus) ? true : false;
+    return UuidIsNil (UCast(m_iUUID), &iStatus) ? true : false;
 #else
     return 0 == m_iUUID.time_low
 	&& 0 == m_iUUID.time_mid
@@ -566,66 +584,66 @@ bool VkUUID::isNil () const {
 }
 
 bool VkUUID::lt (uuid_t const &rUUID1, uuid_t const &rUUID2) {
-#if defined(_WIN32)
+#if defined(USING_LIBUUID_DCE)
+    return uuid_compare (UCast(rUUID1), UCast(rUUID2)) < 0;
+#elif defined(USING_WINDOWS_DCE)
     RPC_STATUS iStatus;
-    return UuidCompare (
-	const_cast<uuid_t*>(&rUUID1), const_cast<uuid_t*>(&rUUID2), &iStatus
-    ) < 0;
+    return UuidCompare (UCast(rUUID1), UCast(rUUID2), &iStatus) < 0;
 #else
     return memcmp (&rUUID1, &rUUID2, sizeof (uuid_t)) < 0;
 #endif
 }
 
 bool VkUUID::le (uuid_t const &rUUID1, uuid_t const &rUUID2) {
-#if defined(_WIN32)
+#if defined(USING_LIBUUID_DCE)
+    return uuid_compare (UCast(rUUID1), UCast(rUUID2)) <= 0;
+#elif defined(USING_WINDOWS_DCE)
     RPC_STATUS iStatus;
-    return UuidCompare (
-	const_cast<uuid_t*>(&rUUID1), const_cast<uuid_t*>(&rUUID2), &iStatus
-    ) <= 0;
+    return UuidCompare (UCast(rUUID1), UCast(rUUID2), &iStatus) <= 0;
 #else
     return memcmp (&rUUID1, &rUUID2, sizeof (uuid_t)) <= 0;
 #endif
 }
 
 bool VkUUID::eq (uuid_t const &rUUID1, uuid_t const &rUUID2) {
-#if defined(_WIN32)
+#if defined(USING_LIBUUID_DCE)
+    return uuid_compare (UCast(rUUID1), UCast(rUUID2)) == 0;
+#elif defined(USING_WINDOWS_DCE)
     RPC_STATUS iStatus;
-    return UuidEqual (
-	const_cast<uuid_t*>(&rUUID1), const_cast<uuid_t*>(&rUUID2), &iStatus
-    ) ? true : false;
+    return UuidEqual (UCast(rUUID1), UCast(rUUID2), &iStatus) ? true : false;
 #else
     return memcmp (&rUUID1, &rUUID2, sizeof (uuid_t)) == 0;
 #endif
 }
 
 bool VkUUID::ne (uuid_t const &rUUID1, uuid_t const &rUUID2) {
-#if defined(_WIN32)
+#if defined(USING_LIBUUID_DCE)
+    return uuid_compare (UCast(rUUID1), UCast(rUUID2)) != 0;
+#elif defined(USING_WINDOWS_DCE)
     RPC_STATUS iStatus;
-    return !UuidEqual (
-	const_cast<uuid_t*>(&rUUID1), const_cast<uuid_t*>(&rUUID2), &iStatus
-    );
+    return !UuidEqual (UCast(rUUID1), UCast(rUUID2), &iStatus);
 #else
     return memcmp (&rUUID1, &rUUID2, sizeof (uuid_t)) != 0;
 #endif
 }
 
 bool VkUUID::ge (uuid_t const &rUUID1, uuid_t const &rUUID2) {
-#if defined(_WIN32)
+#if defined(USING_LIBUUID_DCE)
+    return uuid_compare (UCast(rUUID1), UCast(rUUID2)) >= 0;
+#elif defined(USING_WINDOWS_DCE)
     RPC_STATUS iStatus;
-    return UuidCompare (
-	const_cast<uuid_t*>(&rUUID1), const_cast<uuid_t*>(&rUUID2), &iStatus
-    ) >= 0;
+    return UuidCompare (UCast(rUUID1), UCast(rUUID2), &iStatus) >= 0;
 #else
     return memcmp (&rUUID1, &rUUID2, sizeof (uuid_t)) >= 0;
 #endif
 }
 
 bool VkUUID::gt (uuid_t const &rUUID1, uuid_t const &rUUID2) {
-#if defined(_WIN32)
+#if defined(USING_LIBUUID_DCE)
+    return uuid_compare (UCast(rUUID1), UCast(rUUID2)) > 0;
+#elif defined(USING_WINDOWS_DCE)
     RPC_STATUS iStatus;
-    return UuidCompare (
-	const_cast<uuid_t*>(&rUUID1), const_cast<uuid_t*>(&rUUID2), &iStatus
-    ) > 0;
+    return UuidCompare (UCast(rUUID1), UCast(rUUID2), &iStatus) > 0;
 #else
     return memcmp (&rUUID1, &rUUID2, sizeof (uuid_t)) > 0;
 #endif
@@ -637,11 +655,9 @@ bool VkUUID::gt (uuid_t const &rUUID1, uuid_t const &rUUID2) {
  *********************************/
 
 void VkUUID::reverseByteOrder (uuid_t &rUUID) {
-    stduuid_t &rSUUID = *(stduuid_t*)&rUUID;
-
-    Vk_ReverseSizeable (&rSUUID.time_low);
-    Vk_ReverseSizeable (&rSUUID.time_mid);
-    Vk_ReverseSizeable (&rSUUID.time_hi_and_version);
+    Vk_ReverseSizeable (&rUUID.time_low);
+    Vk_ReverseSizeable (&rUUID.time_mid);
+    Vk_ReverseSizeable (&rUUID.time_hi_and_version);
 }
 
 /*********************

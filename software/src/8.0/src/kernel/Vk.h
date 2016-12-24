@@ -272,7 +272,7 @@ namespace V {
  *****  Intel  *****
  *******************/
 
-#if defined(__VMS) || defined(_M_IX86) || defined(__i386__) || defined (__x86_64__) || defined (__arm__)
+#if defined(__VMS) || defined(_M_IX86) || defined(__i386) || defined(__i386__) || defined (__x86_64__) || defined (__arm__)
 
 #define MAXINTDIGITS		11
 #define MAXDOUBLEDIGITS		309
@@ -303,8 +303,8 @@ namespace V {
  *****  SPARC  *****
  *******************/
 
-#elif defined (sun)
-				/*****  Sun  *****/
+#elif defined (__sparc)
+				/*****  Sun/Sparc  *****/
 
 #define MAXINTDIGITS		11
 #define MAXDOUBLEDIGITS		309

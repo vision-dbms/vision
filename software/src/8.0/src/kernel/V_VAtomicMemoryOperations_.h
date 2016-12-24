@@ -393,9 +393,9 @@ namespace V {
 
 
 #elif defined(sun)
-    /*-------------------------*
-     *----  Solaris/Sparc  ----*
-     *-------------------------*/
+    /*-----------------------*
+     *----  Sun/Solaris  ----*
+     *-----------------------*/
 
     template<unsigned int Size> class VAtomicMemoryOperations_ : public VAtomicMemoryOperations {
     };
@@ -423,7 +423,11 @@ namespace V {
 
 	static bool interlockedSetIf (value_t volatile *pMemory, value_t iExpected, value_t iNew) {
 	    //  returns true if memory set, false otherwise
+#ifdef USING_LEGACY_SPARC_ATOMICS
 	    return compareAndSwap32 (pMemory, iExpected, iNew) == iExpected;
+#else
+	    return atomic_cas_32 (pMemory, iExpected, iNew) == iExpected;
+#endif
 	}
 	static bool interlockedSetIf (void volatile *pMemory, value_t iExpected, value_t iNew) {
 	    //  returns true if memory set, false otherwise
@@ -437,7 +441,7 @@ namespace V {
 	    //  returns true if memory set, false otherwise
 	    return interlockedSetIf (pMemory, (value_t)iExpected, (value_t)iNew);
 	}
-#endif
+#endif // !defined(_LP64)
     };
 
     template<> class VAtomicMemoryOperations_<(size_t)8> : public VAtomicMemoryOperations {
@@ -463,7 +467,11 @@ namespace V {
 
 	static bool interlockedSetIf (value_t volatile *pMemory, value_t iExpected, value_t iNew) {
 	    //  returns true if memory set, false otherwise
+#ifdef USING_LEGACY_SPARC_ATOMICS
 	    return compareAndSwap64 (pMemory, iExpected, iNew) == iExpected;
+#else
+	    return atomic_cas_64 (reinterpret_cast<uint64_t volatile*>(pMemory), iExpected, iNew) == iExpected;
+#endif
 	}
 	static bool interlockedSetIf (void volatile *pMemory, value_t iExpected, value_t iNew) {
 	    //  returns true if memory set, false otherwise
@@ -477,7 +485,7 @@ namespace V {
 	    //  returns true if memory set, false otherwise
 	    return interlockedSetIf (pMemory, (value_t)iExpected, (value_t)iNew);
 	}
-#endif
+#endif // defined(_LP64)
     };
 
 #endif
