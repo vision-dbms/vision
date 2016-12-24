@@ -10,7 +10,6 @@
 #include <dirent.h>
 
 #include <float.h>
-#include <ieee754.h>
 #include <math.h>
 
 #include <search.h>
