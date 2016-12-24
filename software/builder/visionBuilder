@@ -140,6 +140,13 @@ function getMakeOpts() {
   local OS=`uname`
 
   case $OS in
+  Darwin)
+    if [ ! -n "${CPUCOUNT+1}" ]; then
+      CPUCOUNT=$(sysctl -n machdep.cpu.thread_count)
+    fi
+    [[ "$GMAKEBIN" == "" ]] && GMAKEBIN=make
+    [[ "$MAKEBIN" == "" ]] && MAKEBIN=$GMAKEBIN
+    ;;
   Linux)
     if [ ! -n "${CPUCOUNT+1}" ]; then
       CPUCOUNT=$(grep -c processor /proc/cpuinfo) 

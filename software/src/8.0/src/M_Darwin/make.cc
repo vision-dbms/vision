@@ -1,0 +1,43 @@
+#########################################################
+#		Local Compiler Rules			#
+#########################################################
+
+#--objectrule--#	$(CXX) $(CFLAGS) $(CDEFS) $(CINCS) -o $@ -c 
+#--objectsuffix--#	$B
+#--targetsuffix--#	$B
+#--tarulesuffix--#	$B
+#--buildtargets--#	targets
+
+.SUFFIXES :
+
+B	= 
+%-dbg 	: B = -dbg
+
+D	= 
+%-dbg 	: D = /dbg
+
+CDEFS	=  -DVisionBuild
+CINCS	=
+CBASE	= -fexceptions -frtti -Wno-trigraphs
+CDBG	= -g
+CREL	= -O2 -U_FORTIFY_SOURCE
+CVER	= ${CREL}
+
+CFLAGS	= ${CVER} ${CBASE}
+
+LINKER	= VLINK-CC
+LBASE	= -z combreloc
+LIBASE	= ${LOCALLIBS} -lpthread
+LIBS	= ${LBASE} '-Wl,-rpath=$$ORIGIN/../lib$D' -L../lib$D ${LIBASE}
+
+release : targets
+
+debug : targets-dbg
+
+targets-dbg :
+	@$(MAKE) B=-dbg D=/dbg CVER=${CDBG} targets
+
+clean-dbg :
+	@$(MAKE) B=-dbg D=/dbg clean
+	
+clean-all : clean clean-dbg
