@@ -200,7 +200,7 @@
  *****  Declarations  *****
  **************************/
 
-#if defined(__arm__)
+#if defined(__arm__) || defined(__APPLE__)
 #define V_VAtomicMemoryOperations_Disabled
 
 #elif defined(__VMS)
