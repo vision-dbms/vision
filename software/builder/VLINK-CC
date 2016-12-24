@@ -41,6 +41,9 @@ switch ($OSType)
 case AIX:
     set Compiler = xlC
     breaksw
+case Darwin:
+    set Compiler = cc
+    breaksw
 case Linux:
 ####
 # If 'visionBuilder' is overriding the compiler (see comments in 'visionBuilder'
@@ -58,7 +61,7 @@ case HP-UX:
     set Compiler = aCC
     breaksw
 default:
-    echo ">>> Unsupported OS %OSType"
+    echo ">>> Unsupported OS $OSType"
     exit 1
 endsw
 
