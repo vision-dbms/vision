@@ -53,7 +53,7 @@ namespace {
     };
 }
 
-#elif defined(__linux__) || defined(sun)
+#elif defined(__APPLE__) || defined(__linux__) || defined(sun)
 #define USING_LIBUUID_DCE
 #include <uuid/uuid.h>
 
