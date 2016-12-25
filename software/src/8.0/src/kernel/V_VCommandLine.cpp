@@ -43,8 +43,7 @@ char const *V::VCommandLine::Cursor::nextString (
     if (pTag) {
 	size_t const sTag = strlen (pTag);
 
-	char const *pWord;
-	while (pWord = nextTag ()) {
+	while (char const *pWord = nextTag ()) {
 	    if (strncasecmp (pWord, pTag, sTag) == 0 && '=' == pWord[sTag])
 		return pWord + sTag + 1;
 	}
@@ -55,8 +54,7 @@ char const *V::VCommandLine::Cursor::nextString (
 
 bool V::VCommandLine::Cursor::nextSwitch (char const *pTag, char const *pVariable) {
     if (pTag) {
-	char const *pWord;
-	while (pWord = nextTag ()) {
+	while (char const *pWord = nextTag ()) {
 	    if (strcasecmp (pWord, pTag) == 0)
 		return true;
 	}
@@ -66,8 +64,7 @@ bool V::VCommandLine::Cursor::nextSwitch (char const *pTag, char const *pVariabl
 
 // -xyz(etc.)
 char const *V::VCommandLine::Cursor::nextTag () {
-    char const *pWord;
-    while (pWord = nextWord ()) {
+    while (char const *pWord = nextWord ()) {
 	if ('-' == pWord[0])
 	    return pWord + 1;
     }
@@ -76,8 +73,7 @@ char const *V::VCommandLine::Cursor::nextTag () {
 
 // xyz NOT -xyz(etc.)
 char const *V::VCommandLine::Cursor::nextToken () {
-    char const *pWord;
-    while (pWord = nextWord ()) {
+    while (char const *pWord = nextWord ()) {
 	if ('-' != pWord[0])
 	    return pWord;
     }
