@@ -71,7 +71,7 @@ typedef WINDOW CUR_WINDOW;
 					subwin(win,lines,cols,beg_y,beg_x)
 #define CUR_touchwin(win)		touchwin(win)
 #define CUR_waddch(win,ch)		waddch(win,ch)
-#define CUR_waddstr(win,str)		waddstr(win,str)
+#define CUR_waddstr(win,str)		waddstr(win,(char*)(str))
 #define CUR_werase(win)			werase(win)
 #define CUR_wmove(win,y,x)		wmove(win,y,x)
 
