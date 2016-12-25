@@ -7,13 +7,13 @@
 #define SPR_initsize    200
 #define SPR_addsize     200
 
-typedef enum { SPR_Empty, SPR_Normal, SPR_Error, SPR_Modified, 
+typedef enum { SPR_Empty, SPR_Normal, SPR_Error, SPR_Modified
 } SPR_CellStatus;
 
-typedef enum {SPR_Norm, SPR_InitBottom, 
+typedef enum {SPR_Norm, SPR_InitBottom
 } SPR_SheetStatus;
 
-typedef enum {SPR_Item, SPR_Line, 
+typedef enum {SPR_Item, SPR_Line
 } SPR_FieldType;
 
 typedef struct {

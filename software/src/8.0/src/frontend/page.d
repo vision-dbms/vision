@@ -18,7 +18,7 @@
 #define PAGE_Elements 10
 
 typedef enum	{PAGE_Normal, 
-		 PAGE_ExitOnExec, 
+		 PAGE_ExitOnExec
 } PAGE_Status;
 
 typedef enum   {PAGE_Init, 
@@ -42,7 +42,7 @@ typedef enum   {PAGE_Init,
 		PAGE_RefreshAndNext,  
 		PAGE_Profile,  
 		PAGE_Editor, 
-		PAGE_Module, 
+		PAGE_Module
 } PAGE_Action;
 
 #define	PAGE_noType	0
