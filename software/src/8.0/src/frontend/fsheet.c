@@ -5,35 +5,30 @@
 #include "Vk.h"
 
 #include "stdcurses.h"
+#include "edit.h"
 #include "misc.h"
 #include "spsheet.h"
 #include "page.h"
 #include "form.h"
 #include "rsInterface.h"
 
+#include "fsheet.h"
+
 /****** defines ******/
 #include "financeSt.d"
 
 /****** Forward Declarations *******/
-PrivateFnDef int execReport (
-    void
-);
+PrivateFnDef void execReport ();
 
-PrivateFnDef int execCompany (
-    void
-);
+PrivateFnDef void execCompany ();
 
-PrivateFnDef int execDates (
-    void
-);
+PrivateFnDef void execDates ();
 
-PrivateFnDef int validDate (
-    char *			string
-);
+PrivateFnDef int validDate (char const *string);
 
 PrivateFnDef int validNumber (
     int				startDate,
-    char *			string,
+    char const*			string,
     char			direction
 );
 
@@ -41,16 +36,16 @@ PrivateFnDef int validNumber (
 PrivateVarDef FORM *Form1, *Form2, *Form3, *Form4;
 
 PrivateVarDef int StartDate, EndDate;
-PrivateVarDef char *ReportType;
+PrivateVarDef char const *ReportType;
 PrivateVarDef SPRSHEET	*FSheet;
 PrivateVarDef CUR_WINDOW	*FWin, *StatWin;
 PrivateVarDef PAGE *ReportPage, *FinanceStatementPage;
 
-PrivateVarDef void changeReport (void);
-PrivateVarDef void changeCompany (void);
-PrivateVarDef void changeType (void);
-PrivateVarDef void changeDates (void);
-PrivateVarDef void printReport (void);
+PrivateVarDef void changeReport ();
+PrivateVarDef void changeCompany ();
+PrivateVarDef void changeType ();
+PrivateVarDef void changeDates ();
+PrivateVarDef void printReport ();
 
 PrivateVarDef MENU_Choice menuChoices[] = {
  " Report ",	" New Report For Current Company/Time Frame",	'r', 
@@ -70,9 +65,7 @@ PrivateVarDef MENU_Choice menuChoices[] = {
 
 PrivateVarDef int	didExec = FALSE;
 
-PrivateFnDef int
-execFsheet()
-{
+PrivateFnDef void execFsheet() {
     char buffer[RS_MaxLine + 1];
     int	nobs;
 
@@ -91,7 +84,7 @@ execFsheet()
     if (isBlank(CompanyField))
     {
         ERR_displayPause ("   Please Enter a Company Ticker Symbol");
-	return (TRUE);
+	return;
     }
 
     sprintf (buffer, "!__tmpCompany <- Named Company %s", CompanyField);
@@ -100,14 +93,14 @@ execFsheet()
     if (RS_sendAndCheck (buffer, ">>>"))
     {
 	ERR_displayPause (" Invalid Company");
-	return (TRUE);
+	return;
     }
 
     sprintf (buffer, "%s asDate", DateField);
     if (RS_sendAndCheck(buffer,"NA"))
     {
 	ERR_displayPause (" Invalid Start Date");
-	return (TRUE);
+	return;
     }
 #endif
     
@@ -132,7 +125,7 @@ execFsheet()
     if( SPR_readSSheet (FSheet) )
     {
 	 ERR_displayPause(" Error reading spread sheet");
-	 return TRUE;
+	 return;
     }
 #endif
     didExec = TRUE;
@@ -141,23 +134,15 @@ execFsheet()
     PAGE_status(FinanceStatementPage) = PAGE_ExitOnExec;
 }
 
-PrivateFnDef int
-reportFileMenu()
-{
+PrivateFnDef void reportFileMenu() {
 	EDIT_reportFileMenu(ReportPage,FALSE);
 }
 
-PrivateFnDef int
-fsheetFileMenu()
-{
+PrivateFnDef void fsheetFileMenu() {
 	EDIT_reportFileMenu(FinanceStatementPage,FALSE);
 }
 
-PublicFnDef int fsheet (form1, FSpage, firstTime)
-FORM *form1;
-PAGE *FSpage;
-int  firstTime;
-{
+PublicFnDef int fsheet (FORM *form1, PAGE *FSpage, int firstTime) {
     int i, j, longest;
     MENU *actionMenu;
 
@@ -223,7 +208,7 @@ int  firstTime;
 /****************************************************
  *****		menu level functions		*****
  ***************************************************/
-PrivateFnDef void writeReport(void) {
+PrivateFnDef void writeReport() {
     char buffer[200];
     
     ERR_displayStr(" Writing report, please wait...", FALSE);
@@ -246,8 +231,7 @@ PrivateFnDef void writeReport(void) {
 /************************************************
  *********	printReport	*****************
  ************************************************/
-PrivateFnDef void printReport(void)
-{
+PrivateFnDef void printReport() {
     SPR_print(FSheet, ReportPage);
 }
 
@@ -274,8 +258,8 @@ PrivateVarDef FORM_Field reportFields[] = {
 
 PrivateVarDef FORM *ReportForm;
 
-PrivateFnDef void changeReport(void) {
-    int i, execReport();
+PrivateFnDef void changeReport() {
+    int i;
     CUR_WINDOW *win, *win2;
     PAGE *page;
     CUR_WINDOW *MenuWin;
@@ -307,15 +291,11 @@ PrivateFnDef void changeReport(void) {
     free(ReportForm);
 }
 
-PrivateFnDef int execReport (
-    void
-)
-{
+PrivateFnDef void execReport () {
     strcpy(ReportField, &ReportForm->field[1]->value[1]);
     strcpy(FreqField, &ReportForm->field[3]->value[1]);
     determineReport();
     writeReport();
-    return (FALSE);
 }
 
 
@@ -341,7 +321,7 @@ PrivateVarDef FORM_Field companyFields[] = {
 PrivateVarDef FORM *CompanyForm;
 PrivateVarDef PAGE *CompanyPage;
 
-PrivateFnDef void changeCompany(void) {
+PrivateFnDef void changeCompany() {
     int i;
     CUR_WINDOW *win, *win2;
     CUR_WINDOW *MenuWin;
@@ -371,10 +351,7 @@ PrivateFnDef void changeCompany(void) {
     free(CompanyForm);
 }
 
-PrivateFnDef int execCompany (
-    void
-)
-{
+PrivateFnDef void execCompany () {
     char buffer[80];
     
     PAGE_status(CompanyPage) = PAGE_Normal;
@@ -426,7 +403,7 @@ PrivateVarDef FORM_Field dateFields[] = {
 PrivateVarDef FORM *DatesForm;
 PrivateVarDef PAGE *DatesPage;
 
-PrivateFnDef void changeDates(void) {
+PrivateFnDef void changeDates() {
     int i;
     CUR_WINDOW *win, *win2;
     CUR_WINDOW *MenuWin;
@@ -456,10 +433,7 @@ PrivateFnDef void changeDates(void) {
     free(DatesForm);
 }
 
-PrivateFnDef int execDates (
-    void
-)
-{
+PrivateFnDef void execDates () {
     int startDate, endDate;
     
     PAGE_status(DatesPage) = PAGE_Normal;
@@ -488,16 +462,13 @@ PrivateFnDef int execDates (
  **********	Edit Routines	********************
  **************************************************/
 
-PrivateFnDef int validDate (
-    char *			string
-)
-{
+PrivateFnDef int validDate (char const *string) {
     return ( atoi(string) );
 }
 
 PrivateFnDef int validNumber (
     int				startDate,
-    char *			string,
+    char const*			string,
     char			direction
 )
 {

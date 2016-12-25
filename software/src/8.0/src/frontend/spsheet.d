@@ -110,7 +110,7 @@ typedef struct {
     }\
     if (SPR_fieldCount(spr) >= SPR_fieldsSize(spr))\
     {\
-        if (NULL == (ptr = realloc(spr->fields,\
+        if (NULL == (ptr = (char*)realloc(spr->fields,\
 	(SPR_fieldsSize(spr) + 10) * sizeof(SPR_Field *))))\
 	    ERR_fatal(" Error allocating space");\
 	spr->fields = (SPR_Field **)ptr;\

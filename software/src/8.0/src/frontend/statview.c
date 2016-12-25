@@ -5,20 +5,20 @@
 #include "Vk.h"
 
 #include "stdcurses.h"
+#include "misc.h"
 #include "page.h"
 #include "form.h"
 #include "rsInterface.h"
 #include "choices.h"
+#include "statsheet.h"
 
 /*************************************************
  **********	Forward Declarations	**********
  *************************************************/
 
-PrivateFnDef int exec (
-    void
-);
+PrivateFnDef void  exec ();
 
-PrivateFnDef trimString (
+PrivateFnDef void trimString (
     char *			str
 );
 
@@ -139,10 +139,7 @@ PublicFnDef PAGE_Action statview()
     return(PAGE_Input);
 }
 
-PrivateFnDef int exec (
-    void
-)
-{
+PrivateFnDef void exec () {
     char buffer[80],
         companyCaps[20], companyLower[20];
     int result, i, len;
@@ -191,7 +188,7 @@ PrivateFnDef int exec (
     if (FALSE == RS_sendAndCheck(buffer, "True"))
     {
         ERR_displayPause(" Invalid company");
-	return(TRUE);
+	return;
     }
 
     len = strlen(CompanyField);
@@ -205,20 +202,20 @@ PrivateFnDef int exec (
 				    DataField);
 	result = ERR_promptYesNo(buffer);
 	if (result == FALSE)
-	    return FALSE;
+	    return;
 	sprintf(buffer, "!%s%s <- Named Company %s extendBy: ssDataset",
 				companyLower, DataField, companyCaps);
 	if (TRUE == RS_sendAndCheck(buffer, ">>>"))
 	{
 	    ERR_displayPause(" Invalid assumptions dataset");
-	    return TRUE;
+	    return;
 	}
 	sprintf(buffer, "%s%s initializePlugs", 
 				companyLower, DataField);
 	if (TRUE == RS_sendAndCheck(buffer, ">>>"))
 	{
 	    ERR_displayPause(" Error initializing assumptions dataset");
-	    return TRUE;
+	    return;
 	}
     }
 /**** create symbolic name for extended company ****/    
@@ -227,18 +224,14 @@ PrivateFnDef int exec (
     if (TRUE == RS_sendAndCheck(buffer, ">>>"))
     {
 	ERR_displayPause(" Error creating temporary company");
-	return TRUE;
+	return;
     }
 
 #endif    
     statsheet(CompanyField, TypeField, Rules, DataField);    
-    return FALSE;
 }
 
-PrivateFnDef trimString (
-    char *			str
-)
-{
+PrivateFnDef void trimString (char *str) {
     char *ptr;
      
     ptr = str;

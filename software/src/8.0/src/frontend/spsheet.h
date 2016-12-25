@@ -13,14 +13,14 @@ PublicFnDecl void SPR_eraseFields(SPRSHEET *spr);
 PublicFnDecl PAGE_Action SPR_handler(
     SPRSHEET *spsheet, CUR_WINDOW *win, PAGE_Action action
 );
-PublicFnDecl SPR_paintScreen(SPRSHEET *spr, CUR_WINDOW *win);
+PublicFnDecl void SPR_paintScreen(SPRSHEET *spr, CUR_WINDOW *win);
 PublicFnDecl int SPR_addRow(SPRSHEET *spr, char *buffer);
 PublicFnDecl int SPR_makeDummySheet(SPRSHEET *spr);
 
 PublicFnDecl int SPR_readSSheet(SPRSHEET *spr);
 PublicFnDecl int SPR_print (SPRSHEET *spr, PAGE *page);
 PublicFnDecl int SPR_writeToFile(SPRSHEET *spr, char const *filename);
-PublicFnDecl int SPR_download(SPRSHEET *spr);
+PublicFnDecl void SPR_download(SPRSHEET *spr);
 
 
 

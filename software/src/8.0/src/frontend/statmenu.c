@@ -11,7 +11,7 @@
 #include "choices.h"
 #include "rsInterface.h"
           
-PublicFnDecl int statview();
+PublicFnDecl void statview();
 
 PrivateVarDef MENU_Choice menuChoices[] = {
  " View ",	    " View analysis; enter new assumptions",	'v', statview, ON, 

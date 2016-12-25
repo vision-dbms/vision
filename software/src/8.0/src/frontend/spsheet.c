@@ -9,6 +9,7 @@
 
 /********** /usr/rs/lib/interface **********/
 #include "misc.h"
+#include "edit.h"
 #include "page.h"
 #include "window.h"
 #include "keys.h"
@@ -17,7 +18,7 @@
 #include "print.h"
 
 /***** Spread Sheet defines *****/
-#include "spsheet.d"
+#include "spsheet.h"
 
 
 /*************************************************
@@ -39,7 +40,7 @@ PrivateFnDef PAGE_Action inputSprSh (
     CUR_WINDOW *		win
 );
 
-PrivateFnDef int systemPrint (
+PrivateFnDef void systemPrint (
     SPRSHEET *			spr
 );
 
@@ -162,9 +163,11 @@ PrivateFnDef PAGE_Action initSprSh (
 /*** refresh the current screen ***/
     CUR_touchwin(win);
     CUR_wnoutrefresh(win);
+
+    return PAGE_Init;
 }
 
-PublicFnDef SPR_paintScreen(SPRSHEET *spr, CUR_WINDOW *win) {
+PublicFnDef void SPR_paintScreen(SPRSHEET *spr, CUR_WINDOW *win) {
     int i, j, row, col;
     char *cell;
     
@@ -574,7 +577,7 @@ PrivateFnDef PAGE_Action inputSprSh (
 }
 
 PublicFnDef int SPR_addRow(SPRSHEET *spr, char *buffer) {
-    char *ptr, *new, *cell, buffer2[80];
+    char *ptr, *neW, *cell, buffer2[80];
     int row, col, len, i;
     
     row = SPR_rowCount(spr);    
@@ -582,17 +585,16 @@ PublicFnDef int SPR_addRow(SPRSHEET *spr, char *buffer) {
     if (SPR_rowsSize(spr) == 0)
     {
 	SPR_rowsSize(spr) = 25;
-        spr->rows =
-	    malloc(SPR_rowsSize(spr) * SPR_colCount(spr) * SPR_cellLen(spr));
+        spr->rows = (char*)malloc(SPR_rowsSize(spr) * SPR_colCount(spr) * SPR_cellLen(spr));
     }
 
     if (row >= SPR_rowsSize(spr))
     {
 	SPR_rowsSize(spr) += 25;
-	new = realloc (spr->rows, 
+	neW = (char*)realloc (spr->rows, 
 	    (SPR_rowsSize(spr) * SPR_colCount(spr) * SPR_cellLen(spr)));
-	if (new == NULL) return TRUE;
-	spr->rows = new;
+	if (neW == NULL) return TRUE;
+	spr->rows = neW;
     }
 
     if (buffer == NULL)
@@ -641,7 +643,7 @@ PublicFnDef int SPR_makeDummySheet(SPRSHEET *spr) {
     int width, j;
 
     width = SPR_colCount(spr) * SPR_cellSize(spr) * sizeof(char) * 2;
-    buffer = malloc(width);
+    buffer = (char*)malloc(width);
     if (buffer == NULL) return(TRUE);	
 
     buffer[0] = '\0';    
@@ -661,7 +663,7 @@ PublicFnDef int SPR_readSSheet(SPRSHEET *spr) {
     int lastIsBlank, width, i;
 
     width = SPR_colCount(spr) * SPR_cellSize(spr) * sizeof(char) * 2;
-    buffer = malloc(width);
+    buffer = (char*)malloc(width);
     if (buffer == NULL) return(TRUE);	
 
     i = SPR_rowCount(spr);
@@ -728,12 +730,12 @@ PublicFnDef int SPR_writeToFile(SPRSHEET *spr, char const *filename) {
     int row,  col, i, lineCount = 0;
     char *cell;
     char *buffer, *ptr;
-    FILE *fd, *fopen();
+    FILE *fd;
 
     ERR_displayStr(" Please wait...",FALSE);
     if( (fd = fopen(filename, "w")) == NULL )
     	return(TRUE);
-    if( (buffer = malloc((SPR_cellSize(spr) * SPR_colCount(spr) * sizeof(char) * 2) + 2)) == NULL )
+    if( (buffer = (char*)malloc((SPR_cellSize(spr) * SPR_colCount(spr) * sizeof(char) * 2) + 2)) == NULL )
     {
     	fclose(fd);
     	return(TRUE);
@@ -751,7 +753,7 @@ PublicFnDef int SPR_writeToFile(SPRSHEET *spr, char const *filename) {
 PrivateVarDef int	doPC = FALSE;
 #endif
 
-PrivateFnDef int systemPrint (SPRSHEET *spr) {
+PrivateFnDef void systemPrint (SPRSHEET *spr) {
     int row,
         col,
         i,
@@ -761,8 +763,7 @@ PrivateFnDef int systemPrint (SPRSHEET *spr) {
          filename[80],
          cmd[128],
          *ptr;
-    FILE *fd,
-         *fopen();
+    FILE *fd;
 
     if (isBlank (PRINT_Command.command))
         {
@@ -775,7 +776,7 @@ PrivateFnDef int systemPrint (SPRSHEET *spr) {
     sprintf (filename, "/tmp/vision%d", getpid());
 
     fd = fopen (filename, "w");
-    buffer = malloc ((SPR_cellSize (spr) * SPR_colCount (spr) * sizeof (char) * 2) + 2);
+    buffer = (char*)malloc ((SPR_cellSize (spr) * SPR_colCount (spr) * sizeof (char) * 2) + 2);
 
     lineCount = 0;
     for (row = 0; row < SPR_rowCount (spr); row++)
@@ -847,7 +848,7 @@ PrivateFnDef int pcPrint(SPRSHEET *spr) {
     CUR_nl();
     putchar('\020');	/*** toggle printer ***/
 
-    buffer = malloc(SPR_cellSize(spr) * SPR_colCount(spr) * sizeof(char) * 2);
+    buffer = (char*)malloc(SPR_cellSize(spr) * SPR_colCount(spr) * sizeof(char) * 2);
 
     lineCount = 0;
     for (row = 0; row < SPR_rowCount(spr); row++)
@@ -887,18 +888,18 @@ PrivateFnDef int isStringCell(char const *str) {
 }
 
 
-PublicFnDef int SPR_download(SPRSHEET *spr) {
+PublicFnDef void SPR_download(SPRSHEET *spr) {
     int row,  col;
     char *cell;
     char buffer[1024], filename[80], *ptr;
     char pcname[128], cmd[128];
-    FILE *fd, *fopen();
+    FILE *fd;
 
     sprintf(filename, "/tmp/vision%d", getpid());
 
     fd = fopen(filename, "w");
     /*
-    buffer = malloc(SPR_cellSize(spr) * SPR_colCount(spr) * sizeof(char) * 2);
+    buffer = (char*)malloc(SPR_cellSize(spr) * SPR_colCount(spr) * sizeof(char) * 2);
     */
 
     for (row = 0; row < SPR_rowCount(spr); row++)

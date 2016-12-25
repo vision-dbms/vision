@@ -17,6 +17,7 @@
 #include "main.i"
 #include "print.h"
 #include "error.h"
+#include "mainmenu.h"
 
 #if !defined(solaris_1)
 #include <term.h>
@@ -53,7 +54,7 @@ PublicFnDef void STD_syserr (char const *msg) {
 /*** NOTE: The stderr and stdout are mapped to the same streams ***/
 PublicFnDef int STD_execute (
     char const*			name,
-    char const*			args[],
+    char*			args[],
     int *			fdin,
     int *			fdout,
     int				(*preChildProcessing)(void)
@@ -166,7 +167,7 @@ PrivateVarDef int   BackendIsLocal;
 PrivateVarDef char  BackendHost[256];
 PrivateVarDef char  BackendUser[128];
 PrivateVarDef char  BackendPass[128];
-PrivateVarDef char *BackendPath;
+PrivateVarDef char const *BackendPath;
 
 PrivateVarDef int AllDone = FALSE;
 PublicVarDef FILE *RSstdin;
@@ -372,7 +373,7 @@ PublicFnDef void RS_compile () {
 PublicFnDef void RS_save () {
     int len, success;
     char buffer[RS_MaxLine + 1];
-    static char *output = "Global Environment Saved";
+    static char const *output = "Global Environment Saved";
 
     ERR_displayStr("Saving Global Environment...",FALSE);
     writeLine("?w");
@@ -400,7 +401,8 @@ PublicFnDef int RS_sendAndCheck(
     writeLine(input);
 	
 /**** read prompt ****/
-    while (RS_readLine (buffer, RS_MaxLine));
+    while (RS_readLine (buffer, RS_MaxLine))
+      ;
 
     writeLine("?g");
 
@@ -424,7 +426,8 @@ PublicFnDef void RS_sendLine(char const* input) {
     
     writeLine(input);
 
-    while(RS_readLine(buffer, RS_MaxLine));
+    while(RS_readLine(buffer, RS_MaxLine))
+      ;
 
     writeLine("?g");
 }
@@ -512,7 +515,7 @@ PrivateFnDef void StartBackend (
 
 	for (ppArg = RSargs; IsntNil (*ppArg); ppArg++)
 	    sCommand += strlen (*ppArg) + 1;
-	pCommand = malloc (sCommand);
+	pCommand = (char*)malloc (sCommand);
 	pCommand[0] = '\0';
 	for (ppArg = RSargs; IsntNil (*ppArg); ppArg++)
 	{
@@ -545,8 +548,6 @@ PrivateFnDef void setupParentSignals ();
  *
  *****/
 PrivateFnDef void execute_user () {
-    int mainmenu ();
-
     STD_checkTerminalCapabilities ();
     STD_checkInputStream();
     CUR_initscr ();  
@@ -660,7 +661,7 @@ PrivateFnDef void handleTermination (
 }
 
 
-PrivateFnDef void seriousSegvHandler ()
+PrivateFnDef void seriousSegvHandler (int xSignal)
 {
 /*****  
  *  We get here if we get a 2nd segmentation fault while handling the
@@ -904,10 +905,12 @@ PrivateFnDef void parentSignalHandler (
     case SIGUSR1:
 	ERR_displayError (ERR_User1Sig);
 	break;
-	
+
+#ifndef __APPLE__	
     case SIGPWR:
 	ERR_displayError (ERR_PowerSig);
 	break;
+#endif
 	
     case SIGVTALRM:
 	ERR_displayError (ERR_VAlarmSig);
@@ -921,9 +924,11 @@ PrivateFnDef void parentSignalHandler (
 	ERR_displayError (ERR_SIGIOSig);
 	break;
 	
+#ifndef __APPLE__
     case SIGWINDOW:
 	ERR_displayError (ERR_WinSig);
 	break;
+#endif
 	
     default:
 	ERR_displayError (ERR_UndefSig);
@@ -1066,7 +1071,7 @@ PrivateFnDef void RS_restoreParentSignals () {
 PrivateFnDef void readCompanyName () {
     char buffer[81];
     int i, len, padding;
-    FILE *fd, *fopen();
+    FILE *fd;
 
     for (i = 0; i < RS_NameLen; i++)
 	RS_CompanyName[i] = ' ';
@@ -1135,7 +1140,7 @@ PublicFnDef int main (
 )
 {
     int i;
-    char *getenv(), buf[256], *home, *pHostBreak;
+    char buf[256], *home, *pHostBreak;
 
     displayLogo();
 
@@ -1170,8 +1175,8 @@ PublicFnDef int main (
 		DEBUG = FALSE;
 	    else
 	    {
-		strncpy(buf,home,sizeof(buf));
-		strncat(buf,"/debug.log", sizeof(buf));
+		strncpy(buf,home,sizeof(buf)-1);
+		strncat(buf,"/debug.log", sizeof(buf)-strlen(buf)-1);
 		if( (RS_outfile = fopen (buf, "w")) == NULL )
 		    DEBUG = FALSE;
 	    }
@@ -1370,8 +1375,7 @@ PublicFnDef int RS_printOutput (
 {
     char buffer[RS_MaxLine+1],
          filename[80];
-    FILE *fd,
-         *fopen();
+    FILE *fd;
 #if 0
     int c;
     

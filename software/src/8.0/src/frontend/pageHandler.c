@@ -13,12 +13,18 @@
 #include "choices.h"
 #include "form.h"
 #include "vars.h"
+#include "misc.h"
+#include "rsInterface.h"
+
+#include "profile.h"
+#include "queries.h"
+#include "report.h"
 
 /**** Page Definitions ****/
-#include "page.d"
+#include "page.h"
 
 /**********  Forward Declarations  **********/
-PrivateFnDef int pageRefresh (PAGE *page);
+PrivateFnDef void pageRefresh (PAGE *page);
 
 PrivateFnDef void pageHelp ();
 
@@ -415,10 +421,7 @@ PublicFnDef void PAGE_handler(PAGE *page) {
     return;					 
 }
 
-PrivateFnDef int pageRefresh (
-    PAGE *			page
-)
-{
+PrivateFnDef void pageRefresh (PAGE *page) {
     int i;
 
     for (i = 0; i < page->elementCount; i++)
@@ -578,7 +581,7 @@ PrivateVarDef int	firstProfile = TRUE;
 PrivateVarDef PAGE	*Page;
 PrivateVarDef FORM	*Form;
 
-PublicFnDef int MAIN_getCompany()
+PublicFnDef void MAIN_getCompany()
 {
     PAGE	*tpage = CurrentPage;
     int i;
@@ -589,7 +592,7 @@ PublicFnDef int MAIN_getCompany()
     	if( inProfile )
     	{
     		ERR_displayPause("Corporate Profile already running");
-    		return(0);
+    		return;
     	}
     	inProfile = TRUE;
     	profile(NULL);
@@ -600,7 +603,7 @@ PublicFnDef int MAIN_getCompany()
     if( inProfile )
     {
     	ERR_displayPause("Corporate Profile already running");
-    	return(0);
+    	return;
     }
 
     inProfile = TRUE;
@@ -638,8 +641,6 @@ PublicFnDef int MAIN_getCompany()
     free(Form);
     inProfile = FALSE;
     CurrentPage = tpage;
-    return(FALSE);
-
 }
 
 PrivateFnDef void execProfile () {
@@ -665,8 +666,7 @@ PrivateFnDef void execProfile () {
     }
 }
 
-PublicFnDef int MAIN_getUniverse()
+PublicFnDef void MAIN_getUniverse()
 {
     report(NULL,NULL);
-    return(FALSE);
 }

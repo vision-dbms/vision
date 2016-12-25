@@ -1,15 +1,15 @@
 /****************************************************************************
 *****									*****
-*****			mainmenu.h					*****
+*****			fsheet.h					*****
 *****									*****
 ****************************************************************************/
 
-#ifndef MAINMENU_H
-#define MAINMENU_H
+#ifndef FSHEET_H
+#define FSHEET_H
 
 #include "Vk.h"
 
-PublicFnDecl int QuitSystem();
-PublicFnDecl void mainmenu();
+PublicFnDecl int fsheet (FORM *form1, PAGE *FSpage, int firstTime);
+
 
 #endif

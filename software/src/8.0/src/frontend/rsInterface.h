@@ -17,7 +17,7 @@ PublicFnDecl void STD_syserr (char const *msg);
 
 PublicFnDecl int STD_execute (
     char const*			name,
-    char const*			args[],
+    char*			args[],
     int *			fdin,
     int *			fdout,
     int				(*preChildProcessing)(void)

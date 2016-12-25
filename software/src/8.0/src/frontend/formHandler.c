@@ -50,7 +50,7 @@ PrivateFnDef PAGE_Action inputForm (
 }
 
 PublicFnDef FORM *FORM_read(char const *filename, int isBuffer) {
-    int i, j, index1, index2, k, bytes, FORM_menuToForm();
+    int i, j, index1, index2, k, bytes;
     char buffer[FORM_MaxLine], string[FORM_MaxLine], 
 	 *bp, *bp2;
     FILE *fptr, *fopen();
@@ -926,7 +926,7 @@ PrivateFnDef PAGE_Action inputForm (FORM *form, CUR_WINDOW *win) {
 }
 
 
-PublicFnDef int FORM_menuToForm() {
+PublicFnDef void FORM_menuToForm() {
     FORM_Field *fptr, *Xfptr, *tfptr;
     MENU *mptr;
     int fld, isS, isX, Xfld;
@@ -964,10 +964,9 @@ PublicFnDef int FORM_menuToForm() {
     if (FORM_fieldChoiceArray (Xfptr) != NULL)
 	CHOICES_LimitOptions (Win, Form,
 			      FORM_fieldChoiceArray(Xfptr)[Pos[Xfld]], Pos);
-    return(0);
 }
 
-PublicFnDef int FORM_centerFormElts(FORM *fptr, int width) {
+PublicFnDef void FORM_centerFormElts(FORM *fptr, int width) {
 	int	i;
 	
 	for( i=0 ; i<FORM_fieldCount(fptr) ; i++ )

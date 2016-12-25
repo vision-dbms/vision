@@ -1,15 +1,15 @@
 /****************************************************************************
 *****									*****
-*****			mainmenu.h					*****
+*****			statsheet.h					*****
 *****									*****
 ****************************************************************************/
 
-#ifndef MAINMENU_H
-#define MAINMENU_H
+#ifndef STATSHEET_H
+#define STATSHEET_H
 
 #include "Vk.h"
 
-PublicFnDecl int QuitSystem();
-PublicFnDecl void mainmenu();
+PublicFnDecl void statsheet(char *company, char *type, char *rules, char *dataset);
+
 
 #endif

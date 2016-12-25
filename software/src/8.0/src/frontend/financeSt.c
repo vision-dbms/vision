@@ -9,6 +9,8 @@
 #include "form.h"
 #include "rsInterface.h"
 
+#include "fsheet.h"
+
 /****** defines ******/
 #include "financeSt.d"
 
@@ -192,7 +194,7 @@ PublicFnDef PAGE_Action financeSt()
 {
     PAGE *page;
     CUR_WINDOW *form1Win, *form2Win, *form3Win, *form4Win, *tmpWin;
-    int i, longest, j, exec();
+    int i, longest, j;
 
     if( inFS )
     {

@@ -492,6 +492,7 @@ PublicFnDef int KEY_getkey(int allowRepetition) {
 PublicFnDef int KEY_putc(int c) {
     Cbuf = c;
     JustDidPutc = TRUE;
+    return FALSE;
 }
 
 PublicFnDef int KEY_beginScriptWrite() {

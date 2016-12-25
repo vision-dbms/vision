@@ -1,15 +1,15 @@
 /****************************************************************************
 *****									*****
-*****			mainmenu.h					*****
+*****			queries.h					*****
 *****									*****
 ****************************************************************************/
 
-#ifndef MAINMENU_H
-#define MAINMENU_H
+#ifndef QUERIES_H
+#define QUERIES_H
 
 #include "Vk.h"
 
-PublicFnDecl int QuitSystem();
-PublicFnDecl void mainmenu();
+PublicFnDecl void queriesReal(PAGE *mpage);
+
 
 #endif
