@@ -73,8 +73,7 @@ VString::VString (size_t sString) : m_iStorage (g_iEmptyBuffer, 1, false) {
 unsigned int VString::countOf (char const *pString, char iCharacter) {
     unsigned int nOccurrences = 0;
 
-    char const *pNextOccurrence;
-    while (pNextOccurrence = strchr (pString, iCharacter)) {
+    while (char const *pNextOccurrence = strchr (pString, iCharacter)) {
 	pString = pNextOccurrence + 1;
 	nOccurrences++;
     }
@@ -85,8 +84,7 @@ unsigned int VString::countOf (char const *pString, char iCharacter) {
 unsigned int VString::countOf (char const *pString, char const *pSubstring) {
     unsigned int nOccurrences = 0;
 
-    char const *pNextOccurrence;
-    while (pNextOccurrence = strstr (pString, pSubstring)) {
+    while (char const *pNextOccurrence = strstr (pString, pSubstring)) {
 	pString = pNextOccurrence + 1;
 	nOccurrences++;
     }
@@ -576,15 +574,14 @@ void VString::replaceSubstring (
 
     // Make a first pass to see how big our resulting string will be.
     char const *pStorage = content ();
-    int sSource = length ();
-    int sResultOrig = rResult.length ();
-    int sSubstring = strlen (pSubstring); // Size of our needle.
-    int sRepstring = strlen (pRepstring); // Size of our replacement.
-    int repIncrement = sRepstring - sSubstring; // Amount of extra room we need per replacement.
-    int sResultNew = length () + sResultOrig; // Not including null character.
-    while (pStorage = strstr (pStorage, pSubstring)) {
+    size_t sSource = length ();
+    size_t sResultOrig = rResult.length ();
+    size_t sSubstring = strlen (pSubstring); // Size of our needle.
+    size_t sRepstring = strlen (pRepstring); // Size of our replacement.
+    size_t repIncrement = sRepstring - sSubstring; // Amount of extra room we need per replacement.
+    size_t sResultNew = length () + sResultOrig; // Not including null character.
+    for (pStorage = strstr (pStorage, pSubstring); pStorage; pStorage += sSubstring) {
       sResultNew += repIncrement;
-      pStorage += sSubstring;
     }
     pStorage = content (); // Reset pStorage.
 
