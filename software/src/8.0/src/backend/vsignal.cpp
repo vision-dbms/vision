@@ -172,10 +172,12 @@ PrivateFnDef void SIGNAL_StandardSignalHandler (
         signalErrorCode = EC__UserSignal2;
 	signalErrorMessage = "User Defined Signal 2";
 	break;
+#ifndef __APPLE__
     case SIGWINDOW:
         signalErrorCode = EC__AnInterrupt;
 	signalErrorMessage = "Windowing Signal Signal";
 	break;
+#endif
     case SIGTSTP:
 	signalErrorCode = EC__AnInterrupt;
         signalErrorMessage = "Control Terminal Stop Signal";
@@ -189,10 +191,12 @@ PrivateFnDef void SIGNAL_StandardSignalHandler (
         signalErrorCode = EC__AnInterrupt;
 	signalErrorMessage = "Death of a Child Signal";
 	break;
+#ifndef __APPLE__
     case SIGPWR:
         signalErrorCode = EC__AnInterrupt;
 	signalErrorMessage = "Power State Indication Signal";
 	break;
+#endif
     case SIGVTALRM:
         signalErrorCode = EC__VTAlarmSignal;
 	signalErrorMessage = "Virtual Timer Alarm Signal";
