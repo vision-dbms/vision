@@ -18,16 +18,16 @@ D	=
 
 CDEFS	= 
 CINCS	=
-CBASE	= -fexceptions -frtti -Wno-trigraphs -fPIC
+CBASE	= -fexceptions -frtti -Wno-trigraphs -fPIC -Wno-undefined-bool-conversion
 CDBG	= -g
-CREL	= -O2 -U_FORTIFY_SOURCE
+CREL	= -O2
 CVER	= ${CREL}
 
 CFLAGS	= ${CVER} ${CBASE}
 
 LINKER	= VLINK-CC
 LIBS	= ${LOCALLIBS} -lpthread
-LBASE	= -shared -z combreloc '-Wl,-rpath=$$ORIGIN' -Wl,-h${@F}
+LBASE	= -shared -c -Wl,-h${@F}
 LFLAGS	= ${LBASE} -L ../lib$D
 
 release : targets

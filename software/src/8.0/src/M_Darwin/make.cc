@@ -18,17 +18,17 @@ D	=
 
 CDEFS	=  -DVisionBuild
 CINCS	=
-CBASE	= -fexceptions -frtti -Wno-trigraphs
+CBASE	= -fexceptions -frtti -Wno-trigraphs -Wno-undefined-bool-conversion
 CDBG	= -g
-CREL	= -O2 -U_FORTIFY_SOURCE
+CREL	= -O2
 CVER	= ${CREL}
 
 CFLAGS	= ${CVER} ${CBASE}
 
 LINKER	= VLINK-CC
-LBASE	= -z combreloc
+LBASE	=
 LIBASE	= ${LOCALLIBS} -lpthread
-LIBS	= ${LBASE} '-Wl,-rpath=$$ORIGIN/../lib$D' -L../lib$D ${LIBASE}
+LIBS	= ${LBASE} -c -L../lib$D ${LIBASE}
 
 release : targets
 
