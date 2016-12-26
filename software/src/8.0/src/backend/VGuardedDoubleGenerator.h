@@ -35,7 +35,7 @@ public:
 //  Update
 public:
     void append (double iValue) {
-	if (finite (*m_pCursor++ = iValue))
+	if (isfinite (*m_pCursor++ = iValue))
 	    m_iGuard.addNext ();
 	else
 	    m_iGuard.skipNext ();

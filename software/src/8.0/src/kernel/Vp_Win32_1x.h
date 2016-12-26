@@ -94,7 +94,7 @@ typedef unsigned __int64	uint_least64_t;
 #define cuserid			Vk_cuserid
 #define dup			_dup
 #define dup2			_dup2
-#define finite			_finite
+#define isfinite		_finite
 #define fstat			_fstat
 #define fsync			_commit
 #define ftruncate		_chsize
