@@ -211,7 +211,7 @@ PrivateFnDef void RewindTape (char const* tapename) {
     system (command);
 }
 
-#elif defined(_WIN32)
+#elif defined(_WIN32) || defined(__APPLE__)
 PrivateFnDef void RewindTape (char const* tapename) {
 }
 
@@ -665,9 +665,9 @@ PublicFnDef void READER_SignalResponse (
 	READER_FatalError ("*** user defined signal 2 signal received ***");
 	break;
 	
-    case SIGPWR:
-	READER_FatalError ("*** power fail signal received ***");
-	break;
+//     case SIGPWR:
+// 	READER_FatalError ("*** power fail signal received ***");
+// 	break;
 	
     case SIGVTALRM:
 	READER_FatalError ("*** virtual timer alarm signal received ***");
@@ -681,9 +681,9 @@ PublicFnDef void READER_SignalResponse (
 	READER_FatalError ("*** SIGIO signal received ***");
 	break;
 	
-    case SIGWINDOW:
-	READER_FatalError ("*** window or mouse signal received ***");
-	break;
+//     case SIGWINDOW:
+// 	READER_FatalError ("*** window or mouse signal received ***");
+// 	break;
 
     case SIGCHLD:
 	if (ChildProcess) READER_FatalError (

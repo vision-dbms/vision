@@ -704,7 +704,7 @@ GOPT_EndOptionDescriptions;
  *  Main Program  *
  ******************/
 
-main (
+int main (
     int				argc,
     char *			argv[]
 )
