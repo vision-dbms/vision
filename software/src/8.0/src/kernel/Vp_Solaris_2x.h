@@ -18,6 +18,9 @@
 #include <search.h>
 #include <unistd.h>
 
+#ifndef isfinite
+#define isfinite(r) finite(r)
+#endif
 #define NaNQ quiet_nan (0)
 
 #define _sysconf sysconf
