@@ -5,6 +5,7 @@
 #--objectrule--#	$(CXX) $(CFLAGS) $(CDEFS) $(CINCS) -o $@ -c
 #--objectsuffix--#	$B
 #--targetprefix--#	../lib$D/
+#--targetsuffix--#	.dylib
 #--buildtargets--#	targets
 
 .SUFFIXES :
@@ -18,7 +19,7 @@ D	=
 
 CDEFS	= 
 CINCS	=
-CBASE	= -fexceptions -frtti -Wno-trigraphs -fPIC -Wno-undefined-bool-conversion
+CBASE	= -fexceptions -frtti -Wno-trigraphs -fPIC -Wno-undefined-bool-conversion -Wno-format -Wno-logical-op-parentheses -Wno-switch -Wno-shift-op-parentheses -Wno-shift-negative-value -Wno-parentheses
 CDBG	= -g
 CREL	= -O2
 CVER	= ${CREL}
@@ -27,7 +28,7 @@ CFLAGS	= ${CVER} ${CBASE}
 
 LINKER	= VLINK-CC
 LIBS	= ${LOCALLIBS} -lpthread
-LBASE	= -shared -c -Wl,-h${@F}
+LBASE	= -v -dynamiclib
 LFLAGS	= ${LBASE} -L ../lib$D
 
 release : targets
