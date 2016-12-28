@@ -1168,7 +1168,7 @@ VkMemory::MapStatus VkMemory::Map (
     );
     if (MAP_FAILED == regionAddress)
 	regionAddress = NilOf (void *);
-#elif defined (sun) || defined (__linux__)
+#elif defined (sun) || defined (__linux__) || defined(__APPLE__)
     void *regionAddress = (void *)mmap (
 	0,
 	regionSize,

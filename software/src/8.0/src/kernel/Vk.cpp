@@ -744,10 +744,10 @@ PublicFnDef V_API int STD_sigvector (int sig, struct sigvec *ivec, struct sigvec
 
 
 /*******************************
- *****  AIX/Solaris/Linux  *****
+ *****  The 'nix and 'nux  *****
  *******************************/
 
-#if defined(_AIX) || defined(sun) || defined(__linux__)
+#if defined(_AIX) || defined(sun) || defined(__linux__) || defined(__APPLE__)
 PrivateFnDef void FillSetFromBitMap (sigset_t *set, STD_maskType bitmap) {
     sigemptyset (set);
     for (int i = 1; i < 32; i++)
@@ -793,7 +793,7 @@ PublicFnDef int STD_sigvector (int sig, struct sigvec *ivec, struct sigvec *ovec
 
     if (IsntNil (ivec)) {
 	iact.sa_handler	= (void(*)(int))ivec->sv_handler;
-#if defined(_AIX) || defined(sun) || defined(__linux__)
+#if defined(_AIX) || defined(sun) || defined(__linux__) || defined(__APPLE__)
 	iact.sa_flags	= SA_RESTART | SA_NOCLDSTOP;
 #else
 	iact.sa_flags	= SA_NOCLDSTOP;

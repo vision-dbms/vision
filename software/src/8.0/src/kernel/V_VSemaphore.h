@@ -10,7 +10,7 @@
 #if defined(_WIN32)
 #define V_SEMAPHORE_IMPLEMENTED_USING_WIN32_SEMAPHORES
 
-#elif defined(sun) || defined(__linux__)
+#elif defined(sun) || defined(__linux__) || defined(__APPLE__)
 #include <semaphore.h>
 #define V_SEMAPHORE_IMPLEMENTED_USING_POSIX_SEMAPHORES
 

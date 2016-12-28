@@ -164,7 +164,7 @@ bool V::VThread::start (pthread_routine_t *pThreadProcedure, void *pThreadData) 
 
     
     //  set minimum stack size....
-#if defined(__VMS) || defined (sun) || defined (__linux__)
+#if defined(__VMS) || defined (sun) || defined (__linux__) || defined(__APPLE__)
     size_t sStack=0;
     pthread_attr_getstacksize (&iTCA, &sStack);
     adjustStackSize (sStack);
