@@ -18,7 +18,7 @@ D	=
 
 CDEFS	=  -DVisionBuild
 CINCS	=
-CBASE	= -fexceptions -frtti -Wno-trigraphs -Wno-undefined-bool-conversion
+CBASE	= -fexceptions -frtti -Wno-trigraphs -Wno-undefined-bool-conversion -Wno-format -Wno-logical-op-parentheses -Wno-switch -Wno-shift-op-parentheses -Wno-shift-negative-value -Wno-parentheses
 CDBG	= -g
 CREL	= -O2
 CVER	= ${CREL}
@@ -28,7 +28,7 @@ CFLAGS	= ${CVER} ${CBASE}
 LINKER	= VLINK-CC
 LBASE	=
 LIBASE	= ${LOCALLIBS} -lpthread
-LIBS	= ${LBASE} -c -L../lib$D ${LIBASE}
+LIBS	= ${LBASE} -L../lib$D ${LIBASE}
 
 release : targets
 
