@@ -37,12 +37,20 @@ set Release_		= \"AUDITINFO:ReleaseID:$AuditRelease\"
 
 ####  ... determine the compiler to use, ...
 set OSType = `uname -s`
+set ExtraArgs = ''
 switch ($OSType)
 case AIX:
     set Compiler = xlC
     breaksw
 case Darwin:
-    set Compiler = cc
+    set Compiler = c++
+    @i = 2
+    foreach arg ($argv)
+	if ("$arg" == "-dynamiclib") then
+	    set ExtraArgs = "-install_name @loader_path/$argv[1]"
+	    break
+	endif
+    end
     breaksw
 case Linux:
 ####
@@ -111,6 +119,7 @@ else
 	"-DPlatform_=$Platform_"\
 	"-DRelease_=$Release_"\
 	$AuditShell\
+	$ExtraArgs\
 	$argv[2-]
     if ( $status != 0 ) then
         set failed = 1
