@@ -37,7 +37,11 @@
 
 #define gethostid		Vk_gethostid
 
+#ifndef _LP64
 #define __int64			long long
+#else
+#define __int64			long
+#endif
 #define __int32			int
 #define __int16			short
 #define __int8			char
