@@ -44,10 +44,9 @@ case AIX:
     breaksw
 case Darwin:
     set Compiler = c++
-    @i = 2
     foreach arg ($argv)
 	if ("$arg" == "-dynamiclib") then
-	    set ExtraArgs = "-install_name @loader_path/$argv[1]"
+	    set ExtraArgs = "-install_name @executable_path/$argv[1]"
 	    break
 	endif
     end
