@@ -3,6 +3,7 @@
 #########################################################
 
 #--objectrule--#	CC $(CFLAGS) $(CDEFS) $(CINCS) -o $@ -c 
+#--linkerrule--#	$(LINKER) $@ $(CFLAGS) $(LFLAGS) *.o$B $(LIBS)
 #--objectsuffix--#	$B
 #--targetprefix--#	../lib$D/
 #--targetsuffix--#	.so

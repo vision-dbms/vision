@@ -6,6 +6,9 @@ if ( $#argv < 2 ) then
 	exit 1
 endif
 
+####  ... give the target a name, ...
+set Target = $argv[1]
+
 ####  ... initialize/validate audit information, ...
 if ( ! $?AuditEnabled ) then
 	set AuditFile	= "/dev/null"
@@ -37,19 +40,12 @@ set Release_		= \"AUDITINFO:ReleaseID:$AuditRelease\"
 
 ####  ... determine the compiler to use, ...
 set OSType = `uname -s`
-set ExtraArgs = ''
 switch ($OSType)
 case AIX:
     set Compiler = xlC
     breaksw
 case Darwin:
     set Compiler = c++
-    foreach arg ($argv)
-	if ("$arg" == "-dynamiclib") then
-	    set ExtraArgs = "-install_name @executable_path/$argv[1]"
-	    break
-	endif
-    end
     breaksw
 case Linux:
 ####
@@ -72,9 +68,15 @@ default:
     exit 1
 endsw
 
+####  ... make sure the executable has a place to call home, ...
+set TargetDir = `dirname $Target`
+if ( "${TargetDir}_" != "_" ) then
+    mkdir -p "$TargetDir"
+endif
+
 ####  ... make sure the executable is writable if it exists, ...
-if ( -f $argv[1] ) then
-    chmod +w $argv[1]
+if ( -f $Target ) then
+    chmod +w $Target
 endif
 
 ####  ... compile the audit module and generate an executable, ...
@@ -103,14 +105,14 @@ if ( -f /bin/hp9000s700) then
 	if ($argv[$i] == "-G") set gprofFlag = '-G'
 	@ i = $i + 1
     end
-    $Compiler $debugFlag $stripFlag $gprofFlag -o $argv[1] auditshell.o $argv[$i-]
+    $Compiler $debugFlag $stripFlag $gprofFlag -o $Target auditshell.o $argv[$i-]
     if ( $status != 0 ) then
         set failed = 1
         goto cleanup
     endif
 else
     $Compiler\
-	-o $argv[1]\
+	-o $Target\
 	"-DAuditFile_=$AuditFile_"\
 	"-DAuditEntry_=$AuditEntry_"\
 	"-DCompilationLogin_=$CompLogin_"\
@@ -118,7 +120,6 @@ else
 	"-DPlatform_=$Platform_"\
 	"-DRelease_=$Release_"\
 	$AuditShell\
-	$ExtraArgs\
 	$argv[2-]
     if ( $status != 0 ) then
         set failed = 1
@@ -127,15 +128,15 @@ else
 endif
 
 ####  ... update the audit file and cache directories, ...
-chmod a=rx $argv[1]
-ls -li $argv[1] >> $AuditFile
+chmod a=rx $Target
+ls -li $Target >> $AuditFile
 
 if ( -d Executable ) then
-	ln $argv[1] Executable
+	ln $Target Executable
 endif
 
 if ( -d Recompiled ) then
-	ln $argv[1] Recompiled
+	ln $Target Recompiled
 endif
 
 ####  ... delete the audit shell output file, ...
