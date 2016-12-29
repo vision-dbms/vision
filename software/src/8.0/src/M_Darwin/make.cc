@@ -19,7 +19,7 @@ D	=
 CDEFS	=  -DVisionBuild
 CINCS	=
 CBASE	= -fexceptions -frtti -Wno-trigraphs -Wno-undefined-bool-conversion -Wno-format -Wno-logical-op-parentheses -Wno-switch -Wno-shift-op-parentheses -Wno-shift-negative-value -Wno-parentheses
-CDBG	= -g
+CDBG	= -g -fno-limit-debug-info
 CREL	= -O2
 CVER	= ${CREL}
 
@@ -35,7 +35,7 @@ release : targets
 debug : targets-dbg
 
 targets-dbg :
-	@$(MAKE) B=-dbg D=/dbg CVER=${CDBG} targets
+	@$(MAKE) B=-dbg D=/dbg CVER="${CDBG}" targets
 
 clean-dbg :
 	@$(MAKE) B=-dbg D=/dbg clean
