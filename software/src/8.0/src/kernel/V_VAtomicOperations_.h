@@ -51,7 +51,7 @@ namespace V {
 	    return rValue++;
 	}
 	static value_t fetchAndDecrement (value_t volatile &rValue) {
-	    return rValue++;
+	    return rValue--;
 	}
 
 	static value_t incrementAndFetch (value_t volatile &rValue) {
