@@ -597,10 +597,10 @@ namespace V {
     //  Operations
     public:
 	static void increment (value_t volatile &rValue) {
-	    atomic_inc_64 (reinterpret_cast<uint64_t volatile*>(&rValue));
+	    atomic_inc_64 (&rValue);
 	}
 	static void decrement (value_t volatile &rValue) {
-	    atomic_dec_64 (reinterpret_cast<uint64_t volatile*>(&rValue));
+	    atomic_dec_64 (&rValue);
 	}
 	static bool decrementIsZero (value_t volatile &rValue) {
 	    return isZero (decrementAndFetch (rValue));
@@ -610,18 +610,18 @@ namespace V {
 	}
 
 	static value_t fetchAndIncrement (value_t volatile &rValue) {
-	    return atomic_inc_64_nv (reinterpret_cast<uint64_t volatile*>(&rValue)) - 1;
+	    return atomic_inc_64_nv (&rValue) - 1;
 	}
 	static value_t fetchAndDecrement (value_t volatile &rValue) {
 	    MemoryBarrierProduce ();	//  ... see comments in "boost_detail_atomic_count_...h"
-	    return atomic_dec_64_nv (reinterpret_cast<uint64_t volatile*>(&rValue)) + 1;
+	    return atomic_dec_64_nv (&rValue) + 1;
 	}
 	static value_t incrementAndFetch (value_t volatile &rValue) {
-	    return atomic_inc_64_nv (reinterpret_cast<uint64_t volatile*>(&rValue));
+	    return atomic_inc_64_nv (&rValue);
 	}
 	static value_t decrementAndFetch (value_t volatile &rValue) {
 	    MemoryBarrierProduce ();	//  ... see comments in "boost_detail_atomic_count_...h"
-	    return atomic_dec_64_nv (reinterpret_cast<uint64_t volatile*>(&rValue));
+	    return atomic_dec_64_nv (&rValue);
 	}
     };
 
