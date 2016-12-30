@@ -72,6 +72,14 @@ namespace V {
     };
 
 
+#elif defined(__APPLE__)
+    /*-----------------*
+     *----  Apple  ----*
+     *-----------------*/
+
+    typedef VAtomicMemoryOperations VAtomicMemoryNilOperations;
+
+
 #elif defined(__VMS)
     /*-------------------------*
      *----  OpenVMS/Alpha  ----*
