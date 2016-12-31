@@ -1369,7 +1369,7 @@ void VkMemory::Destroy () {
 	    }
 	}
 
-#elif defined(__VMS) || defined(_AIX) || defined(__hp9000s800) || defined(__hp9000s700) || defined(sun) || defined(__linux__)
+#elif defined(__VMS) || defined(_AIX) || defined(__hp9000s800) || defined(__hp9000s700) || defined(sun) || defined(__linux__) || defined(__APPLE__)
 	munmap (m_pRegion, m_sRegion);
 #else
 	deallocate (m_pRegion);
