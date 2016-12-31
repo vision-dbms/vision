@@ -200,8 +200,10 @@
  *****  Declarations  *****
  **************************/
 
-#if defined(__arm__) || defined(__APPLE__)
-#define V_VAtomicMemoryOperations_Disabled
+#if defined(V_VAtomicMemoryOperations_Disabled)
+
+#elif defined(__APPLE__)
+#include <libkern/OSAtomic.h>
 
 #elif defined(__VMS)
 #include <builtins.h>
@@ -314,12 +316,39 @@ namespace V {
     };
 
 
+#if defined(V_VAtomicMemoryOperations_Disabled)
     /*---------------------------*
      *----  No Interlocking  ----*
      *---------------------------*/
 
-#if defined(V_VAtomicMemoryOperations_Disabled)
     typedef VAtomicMemoryNilOperations VAtomicMemoryOperations;
+
+
+#elif defined(__APPLE__)
+    /*-----------------*
+     *----  Apple  ----*
+     *-----------------*/
+
+    class VAtomicMemoryOperations {
+    //  Aliases
+    public:
+        typedef VAtomicMemoryNilOperations ThisClass;
+
+    //  Operations
+    public:
+        static void MemoryBarrierAcquire () {   //  lock acquire, no read ahead.
+	    OSMemoryBarrier ();
+        }
+        static void MemoryBarrierRelease () {   //  lock release, no write behind.
+	    OSMemoryBarrier ();
+        }
+        static void MemoryBarrierProduce () {   //  data produce, no write behind.
+	    OSMemoryBarrier ();
+        }
+        static void MemoryBarrierConsume () {   //  data consume, no read ahead.
+	    OSMemoryBarrier ();
+        }
+    };
 
 
 #elif defined(__VMS)

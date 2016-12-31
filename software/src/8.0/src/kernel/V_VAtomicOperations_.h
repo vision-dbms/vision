@@ -77,7 +77,96 @@ namespace V {
      *----  Apple  ----*
      *-----------------*/
 
-    typedef VAtomicMemoryOperations VAtomicMemoryNilOperations;
+    template <typename T> class VAtomicOperations_ : public VAtomicMemoryOperations_<sizeof (T)> {
+    //  Family Values
+    public:
+	typedef T value_t;
+	typedef value_t storage_t;
+    };
+
+    template<>
+    class VAtomicOperations_<unsigned __int32> : public VAtomicMemoryOperations_<sizeof (unsigned __int32)> {
+    //  Family Values
+    public:
+	typedef unsigned __int32 value_t;
+	typedef value_t storage_t;
+
+    //  Constants
+    public:
+	static value_t zero () {
+	    return 0;
+	}
+
+    //  Operations
+    public:
+	static void increment (value_t volatile &rValue) {
+	    OSAtomicIncrement32 (reinterpret_cast<int32_t volatile*>(&rValue));
+	}
+	static void decrement (value_t volatile &rValue) {
+	    OSAtomicDecrement32 (reinterpret_cast<int32_t volatile*>(&rValue));
+	}
+	static bool decrementIsZero (value_t volatile &rValue) {
+	    return isZero (decrementAndFetch (rValue));
+	}
+	static bool isZero (value_t iValue) {
+	    return 0 == iValue;
+	}
+
+	static value_t fetchAndIncrement (value_t volatile &rValue) {
+	    return OSAtomicIncrement32 (reinterpret_cast<int32_t volatile*>(&rValue)) - 1;
+	}
+	static value_t fetchAndDecrement (value_t volatile &rValue) {
+	    return OSAtomicDecrement32Barrier (reinterpret_cast<int32_t volatile*>(&rValue)) + 1;
+	}
+	static value_t incrementAndFetch (value_t volatile &rValue) {
+	    return OSAtomicIncrement32 (reinterpret_cast<int32_t volatile*>(&rValue));
+	}
+	static value_t decrementAndFetch (value_t volatile &rValue) {
+	    return OSAtomicDecrement32Barrier (reinterpret_cast<int32_t volatile*>(&rValue));
+	}
+    };
+
+    template<>
+    class VAtomicOperations_<unsigned __int64> : public VAtomicMemoryOperations_<sizeof (unsigned __int64)> {
+    //  Family Values
+    public:
+	typedef unsigned __int64 value_t;
+	typedef value_t storage_t;
+
+    //  Constants
+    public:
+	static value_t zero () {
+	    return 0;
+	}
+
+    //  Operations
+    public:
+	static void increment (value_t volatile &rValue) {
+	    OSAtomicIncrement64 (reinterpret_cast<OSAtomic_int64_aligned64_t volatile*>(&rValue));
+	}
+	static void decrement (value_t volatile &rValue) {
+	    OSAtomicDecrement64 (reinterpret_cast<OSAtomic_int64_aligned64_t volatile*>(&rValue));
+	}
+	static bool decrementIsZero (value_t volatile &rValue) {
+	    return isZero (decrementAndFetch (rValue));
+	}
+	static bool isZero (value_t iValue) {
+	    return 0 == iValue;
+	}
+
+	static value_t fetchAndIncrement (value_t volatile &rValue) {
+	    return OSAtomicIncrement64 (reinterpret_cast<OSAtomic_int64_aligned64_t volatile*>(&rValue)) - 1;
+	}
+	static value_t fetchAndDecrement (value_t volatile &rValue) {
+	    return OSAtomicDecrement64Barrier (reinterpret_cast<OSAtomic_int64_aligned64_t volatile*>(&rValue)) + 1;
+	}
+	static value_t incrementAndFetch (value_t volatile &rValue) {
+	    return OSAtomicIncrement64 (reinterpret_cast<OSAtomic_int64_aligned64_t volatile*>(&rValue));
+	}
+	static value_t decrementAndFetch (value_t volatile &rValue) {
+	    return OSAtomicDecrement64Barrier (reinterpret_cast<OSAtomic_int64_aligned64_t volatile*>(&rValue));
+	}
+    };
 
 
 #elif defined(__VMS)
