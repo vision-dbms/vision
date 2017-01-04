@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -141,7 +141,7 @@
     <ResourceCompile Include="vpool.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Vsa_VPoolApplication.cpp">
+    <ClCompile Include="..\kernel\Vsa_VPoolApplication.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
@@ -152,7 +152,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
-    <ClInclude Include="..\Vsa_VPoolApplication.h" />
+    <ClInclude Include="..\kernel\Vsa_VPoolApplication.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Vsa\Vsa.vcxproj">
