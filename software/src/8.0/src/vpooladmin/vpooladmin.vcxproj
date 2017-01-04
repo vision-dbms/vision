@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -140,7 +140,7 @@
     <ResourceCompile Include="vpooladmin.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Vsa_VPoolAdmin.cpp">
+    <ClCompile Include="..\kernel\Vsa_VPoolAdmin.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
@@ -148,7 +148,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="..\Vsa_VPoolAdminInterpreter.cpp">
+    <ClCompile Include="..\kernel\Vsa_VPoolAdminInterpreter.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
@@ -156,7 +156,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="..\Vsa_VPoolAdminSession.cpp">
+    <ClCompile Include="..\kernel\Vsa_VPoolAdminSession.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
@@ -167,9 +167,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
-    <ClInclude Include="..\Vsa_VPoolAdmin.h" />
-    <ClInclude Include="..\Vsa_VPoolAdminInterpreter.h" />
-    <ClInclude Include="..\Vsa_VPoolAdminSession.h" />
+    <ClInclude Include="..\kernel\Vsa_VPoolAdmin.h" />
+    <ClInclude Include="..\kernel\Vsa_VPoolAdminInterpreter.h" />
+    <ClInclude Include="..\kernel\Vsa_VPoolAdminSession.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Vsa\Vsa.vcxproj">

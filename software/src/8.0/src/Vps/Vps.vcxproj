@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -143,42 +143,42 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\Vps.cpp">
+    <ClCompile Include="..\kernel\Vps.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
     </ClCompile>
-    <ClCompile Include="..\Vps_IMessage.cpp" />
-    <ClCompile Include="..\Vps_IMessageSink.cpp" />
-    <ClCompile Include="..\Vps_IPublication.cpp">
+    <ClCompile Include="..\kernel\Vps_IMessage.cpp" />
+    <ClCompile Include="..\kernel\Vps_IMessageSink.cpp" />
+    <ClCompile Include="..\kernel\Vps_IPublication.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
     </ClCompile>
-    <ClCompile Include="..\Vps_ISubscription.cpp">
+    <ClCompile Include="..\kernel\Vps_ISubscription.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
     </ClCompile>
-    <ClCompile Include="..\Vps_IWatermarkablePublication.cpp" />
-    <ClCompile Include="..\Vps_IWatermarkedDataSink.cpp" />
-    <ClCompile Include="..\Vps_VPublication.cpp">
+    <ClCompile Include="..\kernel\Vps_IWatermarkablePublication.cpp" />
+    <ClCompile Include="..\kernel\Vps_IWatermarkedDataSink.cpp" />
+    <ClCompile Include="..\kernel\Vps_VPublication.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
     </ClCompile>
-    <ClCompile Include="..\Vps_VRegistrar.cpp" />
-    <ClCompile Include="..\Vps_VRelayPublication.cpp">
+    <ClCompile Include="..\kernel\Vps_VRegistrar.cpp" />
+    <ClCompile Include="..\kernel\Vps_VRelayPublication.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
     </ClCompile>
-    <ClCompile Include="..\Vps_VRelayPublicationDirectory.cpp">
+    <ClCompile Include="..\kernel\Vps_VRelayPublicationDirectory.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
@@ -189,17 +189,17 @@
     <ResourceCompile Include="Vps.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Vps.h" />
-    <ClInclude Include="..\Vps_IMessage.h" />
-    <ClInclude Include="..\Vps_IMessageSink.h" />
-    <ClInclude Include="..\Vps_IPublication.h" />
-    <ClInclude Include="..\Vps_ISubscription.h" />
-    <ClInclude Include="..\Vps_IWatermarkablePublication.h" />
-    <ClInclude Include="..\Vps_IWatermarkedDataSink.h" />
-    <ClInclude Include="..\Vps_VPublication.h" />
-    <ClInclude Include="..\Vps_VRegistrar.h" />
-    <ClInclude Include="..\Vps_VRelayPublication.h" />
-    <ClInclude Include="..\Vps_VRelayPublicationDirectory.h" />
+    <ClInclude Include="..\kernel\Vps.h" />
+    <ClInclude Include="..\kernel\Vps_IMessage.h" />
+    <ClInclude Include="..\kernel\Vps_IMessageSink.h" />
+    <ClInclude Include="..\kernel\Vps_IPublication.h" />
+    <ClInclude Include="..\kernel\Vps_ISubscription.h" />
+    <ClInclude Include="..\kernel\Vps_IWatermarkablePublication.h" />
+    <ClInclude Include="..\kernel\Vps_IWatermarkedDataSink.h" />
+    <ClInclude Include="..\kernel\Vps_VPublication.h" />
+    <ClInclude Include="..\kernel\Vps_VRegistrar.h" />
+    <ClInclude Include="..\kernel\Vps_VRelayPublication.h" />
+    <ClInclude Include="..\kernel\Vps_VRelayPublicationDirectory.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Vca\Vca.vcxproj">
