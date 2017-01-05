@@ -123,7 +123,9 @@ typedef unsigned __int64	uint_least64_t;
 #define unlink			_unlink
 #define write			_write
 
+#ifndef va_copy
 #define va_copy(dst,src) dst = (src)
+#endif
 
 //=====
 //==  Pragmas

@@ -36,10 +36,12 @@
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+    <Import Project="Paths.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+    <Import Project="Paths.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
@@ -387,6 +389,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\kernel\gopt.h" />
+    <ClInclude Include="..\M_Windows\Vp.h" />
+    <ClInclude Include="..\M_Windows\VpFileMapping.h" />
+    <ClInclude Include="..\M_Windows\VpSocket.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="..\kernel\V.h" />
     <ClInclude Include="..\kernel\V_VAbstractFunction.h" />
@@ -463,7 +468,6 @@
     <ClInclude Include="..\kernel\VkStatus.h" />
     <ClInclude Include="..\kernel\VkUUID.h" />
     <ClInclude Include="..\kernel\Vos_VMSMemoryRegion.h" />
-    <ClInclude Include="..\Vp.h" />
     <ClInclude Include="..\kernel\VReference.h" />
     <ClInclude Include="..\kernel\VReferenceable.h" />
     <ClInclude Include="..\kernel\VRunTimeType.h" />
