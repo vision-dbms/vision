@@ -32,6 +32,8 @@ typedef short			pid_t;
 typedef int			ssize_t;
 
 //  ISO <inttypes.h>
+#define USING_STDINT
+#ifndef USING_STDINT
 typedef char			int8_t;
 typedef short			int16_t;
 typedef int			int32_t;
@@ -45,9 +47,6 @@ typedef unsigned __int64	uint64_t;
 typedef __int64			intmax_t;
 typedef unsigned __int64	uintmax_t;
 
-typedef int			intptr_t;
-typedef unsigned int		uintptr_t;
-
 typedef char			int_least8_t;
 typedef short			int_least16_t;
 typedef int			int_least32_t;
@@ -60,6 +59,12 @@ typedef unsigned __int64	uint_least64_t;
 
 #define INT64_MAX		_I64_MAX
 #define UINT64_MAX		_UI64_MAX
+#else
+#include <stdint.h>
+#endif
+
+typedef int			intptr_t;
+typedef unsigned int		uintptr_t;
 
 //=====
 //==  Defines
