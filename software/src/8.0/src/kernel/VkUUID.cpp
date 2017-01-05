@@ -372,7 +372,7 @@ bool VkUUID::GetUUID (uuid_t &rUUID) {
     return iStatus == 0;
 
 #elif defined(USING_WINDOWS_DCE)
-    switch (UuidCreate (&rUUID)) {
+    switch (UuidCreate (UCast(rUUID))) {
     case RPC_S_OK:
     case RPC_S_UUID_LOCAL_ONLY:
 	return true;
@@ -380,7 +380,7 @@ bool VkUUID::GetUUID (uuid_t &rUUID) {
     default:
 	break;
     }
-    UuidCreateNil (&rUUID);
+    UuidCreateNil (UCast(rUUID));
     return true;
 
 #elif defined(USING_LOCAL_IMPLEMENTATION)
