@@ -9,6 +9,7 @@
 
 /***** local includes *****/
 #include "stdcurses.h"
+#include "misc.h"
 #include "gopt.h"
 #include "buffers.h"
 #include "keys.h"

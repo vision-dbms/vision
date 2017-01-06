@@ -5,6 +5,8 @@
 #include "Vk.h"
 
 #include "stdcurses.h"
+#include "misc.h"
+#include "buffers.h"
 #include "page.h"
 #include "form.h"
 #include "rsInterface.h"

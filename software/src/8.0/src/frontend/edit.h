@@ -3,6 +3,10 @@
 
 #include "buffers.h"
 
+PublicFnDecl int EDIT_reportFileMenu (
+     PAGE *page, int doBrowse
+);
+
 PublicFnDecl int EDIT_main(),
                  EDIT_initEditor(),
                  EDIT_runInterface();

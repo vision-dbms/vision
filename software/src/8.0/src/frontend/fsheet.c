@@ -5,6 +5,7 @@
 #include "Vk.h"
 
 #include "stdcurses.h"
+#include "misc.h"
 #include "spsheet.h"
 #include "page.h"
 #include "form.h"

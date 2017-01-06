@@ -7,6 +7,7 @@
 
 /***** local includes *****/
 #include "stdcurses.h"
+#include "misc.h"
 #include "page.h"
 #include "form.h"
 #include "buffers.h"

@@ -125,8 +125,7 @@ char *helpname;
 #endif
 
 
-PublicFnDef void PAGE_handler(page)
-PAGE *page;
+PublicFnDef void PAGE_handler(PAGE *page)
 /*****		Routine to manage user interaction with windows
  *
  *  Argument:
