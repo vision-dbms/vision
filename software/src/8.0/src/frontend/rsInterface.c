@@ -4,21 +4,19 @@
 
 #include "Vk.h"
 
-#include <pwd.h>
-#include <crypt.h>
+#include "rsInterface.h"
 
 /***** local includes *****/
 #include "stdcurses.h"
 #include "misc.h"
 #include "gopt.h"
+#include "edit.h"
 #include "buffers.h"
 #include "keys.h"
 #include "page.h"
 #include "main.i"
 #include "print.h"
 #include "error.h"
-
-#include "rsInterface.d"
 
 #if !defined(solaris_1)
 #include <term.h>
@@ -649,107 +647,6 @@ PrivateFnDef void execute_user (
     	WindowTooSmall = FALSE;
 
     mainmenu ();
-}
-
-PrivateFnDef int privateNetworkUpdate (
-    void
-)
-{
-	int len, success;
-	static char *output = ">>> User Space Updated";
-	char buffer[256];
-
-        CUR_erase();
-        CUR_touchwin(CUR_stdscr);
-        CUR_refresh();
-	CUR_wmove(CUR_stdscr,0,0);
-	CUR_wprintw(CUR_stdscr,"You have private network save privileges.");
-        CUR_refresh();
-	if( !ERR_promptYesNo("Do you want to save to your private space") )
-	{
-		ERR_clearMsg();
-		return;
-	}
-        CUR_erase();
-        CUR_refresh();
-	ERR_displayStr("Please wait...",FALSE);
-	RS_dumpOutput();
-	RS_writeLine("?w");
-	RS_compile();
-	CUR_wmove(CUR_stdscr,0,0);
-	success = FALSE;
-	len = strlen(output);
-	while (RS_readLine (buffer, 256))
-	{
-	    if (0 == strncmp(buffer, output, len))
-		success = TRUE;
-	}
-		
-	if (success)
-	    CUR_wprintw(CUR_stdscr,"Network Update Successful");
-	else
-	{
-	    CUR_wattron(CUR_stdscr,(CUR_A_BLINK | CUR_A_BOLD));
-	    CUR_wprintw(CUR_stdscr,"Error Saving Network");
-	    CUR_wattroff(CUR_stdscr,(CUR_A_BLINK | CUR_A_BOLD));
-	}
-	CUR_refresh();
-	ERR_displayPause("Done");
-}
-
-PrivateFnDef int networkUpdate (
-    void
-)
-{
-	int	i = 3, passwordOK = FALSE;
-	char	prompt[80], buffer[80];
-	char	*crypt(), *s;
-	struct passwd *pw, *getpwnam();
-
-        CUR_erase();
-        CUR_touchwin(CUR_stdscr);
-        CUR_refresh();
-	CUR_wmove(CUR_stdscr,0,0);
-	CUR_wprintw(CUR_stdscr,"You are the database administrator.");
-        CUR_refresh();
-	if( !ERR_promptYesNo("Do you want to save the network") )
-	{
-		ERR_clearMsg();
-		return(TRUE);
-	}
-	ERR_clearMsg();
-        CUR_erase();
-        CUR_refresh();
-
-	if( (pw = getpwnam("dbupdate")) == NULL )
-	{
-		CUR_wattron(CUR_stdscr,CUR_A_BOLD);
-		CUR_wprintw(CUR_stdscr,"No entry for 'dbupdate' in password file\n");
-		CUR_wattroff(CUR_stdscr,CUR_A_BOLD);
-		CUR_refresh();
-		ERR_displayPause(" Contact your INSYTE representative");
-		return(TRUE);
-	}
-	do {
-		sprintf(prompt,"Enter dbupdate password (%d tries left): ",i);
-		if( ERR_promptForString(prompt, buffer, FALSE) )
-			return(TRUE);
-		ERR_clearMsg();
-		s = crypt(buffer, pw->pw_passwd);
-		if( strcmp(pw->pw_passwd,s) == 0 )
-		{
-			ERR_displayStr("Password correct.",FALSE);
-			passwordOK = TRUE;
-		}
-		else
-			ERR_displayStr("Incorrect password.",TRUE);
-		sleep(1);
-		i--;
-	} while( !passwordOK && (i > 0) );
-
-	if( passwordOK )
-		ED_update();
-	return(FALSE);
 }
 
 
@@ -1436,12 +1333,6 @@ PublicFnDef int main (
 
     execute_user ();
     
-    /*****  If user is the Administrator then prompt to save network  *****/
-    /*****  before exitting.  (send a "?w")                           *****/
-    if (Administrator && !WindowTooSmall)
-	networkUpdate();
-    else if (RS_AdministratorPrivate /*&& RS_DataWasUpdated*/ && !WindowTooSmall)
-	privateNetworkUpdate();
     if (DEBUG) fclose(RS_outfile);
     if( KEY_scriptWrite )
 	KEY_beginScriptWrite();

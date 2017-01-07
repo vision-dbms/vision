@@ -6,6 +6,8 @@
 
 #include "Vk.h"
 
+#include "mainmenu.h"
+
 #include "stdcurses.h"
 #include "page.h"
 #include "form.h"
@@ -84,9 +86,7 @@ PrivateVarDef FORM_Field helpFields[] = {
  -1, 
 };
 
-PublicFnDef int
-QuitSystem()
-{
+PublicFnDef int QuitSystem(void) {
     CUR_WINDOW *menuwin;
 
     if( PAGE_ExitSystem )
@@ -270,8 +270,6 @@ PrivateFnDef int noExitSystem()
 }
 
 
-PublicFnDef int 
-    mainmenu()
 /*****  
  *****  This is the User Interface Main Program.
  *
@@ -282,7 +280,7 @@ PublicFnDef int
  *	NOTHING	
  *
  *****/
-{
+PublicFnDef int mainmenu(void) {
 #if NOTRSATTACH
     CUR_initscr();
     CUR_savetty();

@@ -10,7 +10,7 @@ PublicFnDecl FORM *FORM_read();
 
 PublicFnDecl PAGE_Action FORM_handler();
 
-PublicFnDecl int FORM_menuToForm();
+PublicFnDecl void FORM_menuToForm(void);
 
 PublicFnDecl int FORM_centerFormElts();
 

@@ -13,8 +13,8 @@ PublicFnDecl int statmenu(), queries(), financeSt(), dataEntryModule();
 PublicFnDecl int MAIN_getCompany(), MAIN_getUniverse(), timeSeries(), browser();
 
 PublicVarDef char	StartupKit[VARS_maxLen];
-PublicVarDef int 	(*StartupModule)() = NULL;
-PublicVarDef int 	(*DefaultModule)() = EDIT_main;
+PublicVarDef void 	(*StartupModule)(void) = NULL;
+PublicVarDef void 	(*DefaultModule)(void) = EDIT_main;
 
 #define	STARTUPKIT	0
 #define STARTUPMODULE	1

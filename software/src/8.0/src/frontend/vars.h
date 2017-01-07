@@ -4,8 +4,8 @@
 #include "vars.d"
 
 PublicVarDecl char	StartupKit[];
-PublicVarDecl int	(*StartupModule)();
-PublicVarDecl int	(*DefaultModule)();
+PublicVarDecl void	(*StartupModule)(void);
+PublicVarDecl void	(*DefaultModule)(void);
 
 PublicVarDecl VARS_Menu	NameAndFunc[];
 

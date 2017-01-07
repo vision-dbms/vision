@@ -28,7 +28,6 @@ PrivateFnDef int exec (
 
 /* Public function declarations */
 PublicFnDecl char *strtok ();
-PublicFnDecl int FORM_menuToForm();
 
 /* Public variable declarations */
 PublicVarDef int PRINT_Lines;

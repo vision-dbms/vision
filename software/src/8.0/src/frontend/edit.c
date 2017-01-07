@@ -5,12 +5,15 @@
 
 #include "Vk.h"
 
+#include "edit.h"
+
 /***** local includes *****/
 #include "stdcurses.h"
 #include "misc.h"
 #include "page.h"
 #include "form.h"
 #include "buffers.h"
+#include "mainmenu.h"
 #include "menu.h"
 #include "keys.h"
 #include "gopt.h"
@@ -26,39 +29,39 @@
  **********	Forward Declarations	**********
  *************************************************/
 
-PublicFnDef int browser (
+PublicFnDef void browser (
     void
 );
 
-PublicFnDef int ED_subShell (
+PublicFnDef void ED_subShell (
     void
 );
 
-PrivateFnDef int readFile (
+PrivateFnDef void readFile (
     void
 );
 
-PrivateFnDef int readFileInt (
+PrivateFnDef void readFileInt (
     void
 );
 
-PrivateFnDef int saveFileInt (
+PrivateFnDef void saveFileInt (
     void
 );
 
-PrivateFnDef int saveFile (
+PrivateFnDef void saveFile (
     void
 );
 
-PrivateFnDef int listFile (
+PrivateFnDef void listFile (
     void    
 );
 
-PrivateFnDef int runSysMenu (
+PrivateFnDef void runSysMenu (
     void
 );
 
-PrivateFnDef int runEditorInterface (
+PrivateFnDef void runEditorInterface (
     void
 );
 
@@ -66,7 +69,7 @@ PrivateFnDef int execInterface (
     void
 );
 
-PrivateFnDef int copyPasteBufInt (
+PrivateFnDef void copyPasteBufInt (
     void
 );
 
@@ -74,15 +77,15 @@ PrivateFnDef int recall (
     void
 );
 
-PrivateFnDef int printBuffer (
+PrivateFnDef void printBuffer (
     void
 );
 
-PrivateFnDef int saveRegionInt (
+PrivateFnDef void saveRegionInt (
     void
 );
 
-PrivateFnDef int printRegion (
+PrivateFnDef void printRegion (
     void
 );
 
@@ -98,67 +101,65 @@ PrivateFnDef int downloadRegion (
 );
 #endif
 
-PrivateFnDef int beginRegion (
+PrivateFnDef void beginRegion (
     void
 );
 
-PrivateFnDef int endRegion (
+PrivateFnDef void endRegion (
     void
 );
 
-PrivateFnDef int clearRegion (
+PrivateFnDef void clearRegion (
     void
 );
 
-PrivateFnDef int deleteRegion (
+PrivateFnDef void deleteRegion (
     void
 );
 
-PrivateFnDef int insertRegion (
+PrivateFnDef void insertRegion (
     void
 );
 
-PrivateFnDef int runRegion (
+PrivateFnDef void runRegion (
     void
 );
 
-PrivateFnDef int switchWindow (
+PrivateFnDef void switchWindow (
     void
 );
 
-PrivateFnDef int oneWindow (
+PrivateFnDef void oneWindow (
     void
 );
 
-PrivateFnDef int eraseWindow (
+PrivateFnDef void eraseWindow (
     void
 );
 
-PrivateFnDef int twoWindows (
+PrivateFnDef void twoWindows (
     void
 );
 
-PrivateFnDef int saveReportInt (
+PrivateFnDef void saveReportInt (
     void
 );
 
-PrivateFnDef int printReportInt (
+PrivateFnDef void printReportInt (
     void
 );
 
-PrivateFnDef int copyPasteBufReport (
+PrivateFnDef void copyPasteBufReport (
     void
 );
 
-PrivateFnDef int runReportInterface (
+PrivateFnDef void runReportInterface (
     void
 );
 
-PrivateFnDef int listReport (
-    void
-);
+PrivateFnDef void listReport (void);
 
-PrivateFnDef int PrintScreen (
+PrivateFnDef void PrintScreen (
     int				c
 );
 
@@ -625,7 +626,7 @@ copyToPasteBuf()
  *** When in top window of editor ***
  ************************************/
 
-PrivateFnDef editor()
+PrivateFnDef int editor()
 {
     int c, i, j, length, error, cursrow, curscol;
     char *ptr, helpfile[BUF_MaxPathNameChars], *SrcDirName, *getenv();
@@ -1175,17 +1176,11 @@ PrivateFnDef editor()
  **********	Window Functions	**********
  *************************************************/
 
-PrivateFnDef int switchWindow (
-    void
-)
-{
+PrivateFnDef void switchWindow (void) {
     NotDone = FALSE;
 }
 
-PrivateFnDef int eraseWindow (
-    void
-)
-{
+PrivateFnDef void eraseWindow (void) {
     int error;
     
     if (error = BUF_eraseBuffer(CurrBuffer))
@@ -1194,17 +1189,11 @@ PrivateFnDef int eraseWindow (
 	CUR_werase(CurrWin);
 }
 
-PrivateFnDef int oneWindow (
-    void
-)
-{
+PrivateFnDef void oneWindow (void) {
     one_window();
 }
 
-PrivateFnDef int twoWindows (
-    void
-)
-{
+PrivateFnDef void twoWindows (void) {
     two_windows();
     refresh_two();
 }
@@ -1236,10 +1225,7 @@ PrivateFnDef int readFilePrime (
 	BUF_resetScreen(CurrBuffer, CurrWin);
 }
 
-PrivateFnDef int readFile (
-    void
-)
-{
+PrivateFnDef void readFile (void) {
     int error;
 
 /**** always read into the Edit buffer ****/
@@ -1264,18 +1250,12 @@ PrivateFnDef int readFile (
     }
 }
 
-PrivateFnDef int readFileInt (
-    void
-)
-{
+PrivateFnDef void readFileInt (void) {
 	doInterface = TRUE;
 	readFile();
 }
 /*---------------------------------------------------------------------*/
-PrivateFnDef int	
-checkFileExistence(dname)
-char	*dname;
-{
+PrivateFnDef int checkFileExistence(char *dname) {
 	int	response;
 	int	mode = OVERWRITEmode;
 
@@ -1329,10 +1309,7 @@ char *current_file, *pstr;
     return(FALSE);
 }
 
-PrivateFnDef int saveFilePrime (
-    void
-)
-{
+PrivateFnDef void saveFilePrime (void) {
     MENU *mptr;
 
     mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType));
@@ -1350,10 +1327,7 @@ PrivateFnDef int saveFilePrime (
     runEditorInterface();
 }
 
-PrivateFnDef int saveFile (
-    void
-)
-{
+PrivateFnDef void saveFile (void) {
     int error, mode;
     
     if( !doInterface && (error = getFileName(CurrentFile,"write")) != ERR_AskedForHelp )
@@ -1376,19 +1350,13 @@ PrivateFnDef int saveFile (
     saveFilePrime();
 }
 
-PrivateFnDef int saveFileInt (
-    void
-)
-{
+PrivateFnDef void saveFileInt (void) {
 	doInterface = TRUE;
 	saveFile();
 	doInterface = FALSE;
 }
 
-PrivateFnDef int saveReportInt (
-    void
-)
-{
+PrivateFnDef void saveReportInt (void) {
     MENU *mptr;
 
     mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType));
@@ -1406,10 +1374,7 @@ PrivateFnDef int saveReportInt (
     runReportInterface();
 }
 
-PrivateFnDef int copyPasteBufInt (
-    void
-)
-{
+PrivateFnDef void copyPasteBufInt (void) {
     MENU *mptr;
 
     mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType));
@@ -1422,10 +1387,7 @@ PrivateFnDef int copyPasteBufInt (
     runEditorInterface();
 }
 
-PrivateFnDef int copyPasteBufReport (
-    void
-)
-{
+PrivateFnDef void copyPasteBufReport (void) {
     MENU *mptr;
 
     mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType));
@@ -1442,14 +1404,11 @@ PrivateFnDef int copyPasteBufReport (
 
 PrivateVarDef int	RefreshAfterList = TRUE;
 
-PrivateFnDef int listFile (
-    void    
-)
 /* 1) asks the user for a directory name    */
 /* 2) displays an "ll" of that directory    */
 /* 3) waits for the user to hit any key	    */
 /* 4) returns to editing session	    */
-{
+PrivateFnDef void listFile (void) {
    char Directory[BUF_MaxPathNameChars], buf[BUF_MaxPathNameChars + 80];
    int pipe1[2];
    int pipe2[2];
@@ -1518,19 +1477,13 @@ PrivateFnDef int listFile (
     } /* else */
 }
 
-PrivateFnDef int listReport (
-    void
-)
-{
+PrivateFnDef void listReport (void) {
 	RefreshAfterList = FALSE;
 	listFile();
 	RefreshAfterList = TRUE;
 }
 /*---------------------------------------------------------------------*/
-PrivateFnDef int PrintScreen (
-    int				c
-)
-{
+PrivateFnDef void PrintScreen (int c) {
     int y;
 
      y = CUR_WIN_cury(HelpWin);
@@ -1617,112 +1570,11 @@ PrivateFnDef int currentFile (
 #endif
 /*---------------------------------------------------------------------*/
 
-PublicFnDef int ED_update()
-{
-    int len, success, error;
-    int i = 1;
-    char fname[BUF_MaxPathNameChars], path[BUF_MaxPathNameChars], user[80];
-    char buffer2[MAX_OUTPUT_LINE_SIZE + 1], buffer3[80], *cptr, *getenv();
-    static char *output = ">>> Object Network Updated";
-
-    ERR_promptForString("Please enter your initials: ", user, FALSE);
-    CUR_wmove(CUR_stdscr,0,0);
-    CUR_wprintw(CUR_stdscr,"Saving Global Environment... (User: %s)\n",user);
-    CUR_refresh();
-    if( !EDIT_Init )
-    {
-	    Output = (LINEBUFFER *) malloc(sizeof(LINEBUFFER));
-	    BUF_maxLineSize(Output) = MAX_OUTPUT_LINE_SIZE;
-	    BUF_initBuffer(Output, OBUFSIZE);
-
-	    EDIT_Init = TRUE;    
-    }
-    BUF_appendLine(Output," ");
-    BUF_appendLine(Output," ");
-    sprintf(buffer3,"Saving Global Environment... (User: %s)",user);
-    BUF_appendLine(Output,buffer3);
-    RS_writeLine("?w");
-    RS_compile();
-
-    success = FALSE;
-    len = strlen(output);
-    while (RS_readLine (buffer2, MAX_OUTPUT_LINE_SIZE))
-    {
-		if (0 == strncmp(buffer2, output, len))
-		    success = TRUE;
-		BUF_appendLine(Output,buffer2);
-    }
-	    
-    if (success)
-        CUR_wprintw(CUR_stdscr,"\nNetwork Update Successful\n\n");
-    else
-    {
-	CUR_wattron(CUR_stdscr,(CUR_A_BLINK | CUR_A_BOLD));
-	CUR_wprintw(CUR_stdscr,"\nError Saving Network\n\n");
-	CUR_wattroff(CUR_stdscr,(CUR_A_BLINK | CUR_A_BOLD));
-    }
-    CUR_refresh();
-    cptr = getenv("DBUpdateLogs");
-    if( cptr == NULL )
-    {
-	CUR_wattron(CUR_stdscr,(CUR_A_BLINK | CUR_A_BOLD));
-	CUR_wprintw(CUR_stdscr,"Environment variable 'DBUpdateLogs' not set.\n");
-	CUR_wattroff(CUR_stdscr,(CUR_A_BLINK | CUR_A_BOLD));
-	CUR_wprintw(CUR_stdscr,"Creating file 'tempLog' in current directory\n");
-	CUR_refresh();
-	if( (error = BUF_writeFile( Output, "tempLog" )) )
-	    ERR_displayMsgPause(error);
-	else
-	{
-	    chmod("tempLog",0640);
-	    ERR_displayPause(" Contact your INSYTE representative");
-	}
-	return;
-    }
-    strcpy(path,cptr);
-    if( access(path,2) )
-    {
-	CUR_wattron(CUR_stdscr,(CUR_A_BLINK | CUR_A_BOLD));
-	CUR_wprintw(CUR_stdscr,"Logs directory: '%s' not accessible.\n",path);
-	CUR_wattroff(CUR_stdscr,(CUR_A_BLINK | CUR_A_BOLD));
-	CUR_wprintw(CUR_stdscr,"Creating file 'tempLog' in current directory\n");
-	CUR_refresh();
-	if( (error = BUF_writeFile( Output, "tempLog" )) )
-	    ERR_displayMsgPause(error);
-	else
-	{
-	    chmod("tempLog",0640);
-	    ERR_displayPause(" Contact your INSYTE representative");
-	}
-	return;
-    }
-    sprintf(fname,"%s/%d",path,i);
-    while( !access(fname,0) ) {
-	i++;
-	sprintf(fname,"%s/%d",path,i);
-    }
-    CUR_wprintw(CUR_stdscr,"Saving output buffer to log file '%s'\n",fname);
-    CUR_refresh();
-    if( (error = BUF_writeFile( Output, fname )) )
-    {
-	ERR_displayMsgPause(error);
-	return;
-    }
-    else if( success )
-	ERR_displayPause(" Successful save of network");
-    else
-	ERR_displayPause(" Unsuccessful save of network");
-    chmod(fname,0440);
-}
-
 /*************************************************
  **********	Region Functions	**********
  *************************************************/
 
-PrivateFnDef int beginRegion (
-    void
-)
-{
+PrivateFnDef void beginRegion (void) {
     unset_markers(CurrBuffer);
     if BUF_editted(CurrBuffer)
       	BUF_adjustRow(CurrBuffer);
@@ -1798,10 +1650,7 @@ LINEBUFFER	*buffer;
 	unset_markers(buffer);
 }
 
-PrivateFnDef int endRegion (
-    void
-)
-{
+PrivateFnDef void endRegion (void) {
     int error;
 
     if BUF_editted(CurrBuffer)
@@ -1810,14 +1659,14 @@ PrivateFnDef int endRegion (
     	{
     	    ERR_displayStr(" Begin mark has been invalidated.", TRUE);
     	    ED_unsetMarkers(CurrBuffer);
-    	    return(TRUE);
+    	    return;
     	}
       	BUF_adjustRow(CurrBuffer);
     }
     BUF_endrow(CurrBuffer) = BUF_row(CurrBuffer);
     BUF_endcol(CurrBuffer) = BUF_col(CurrBuffer);
     if (test_region ())
-	return(TRUE);			  /* error with region */
+	return;				  /* error with region */
     if (error = BUF_eraseBuffer(Region))  /* erases previous region */
     {
 	ERR_displayError(error);
@@ -1832,28 +1681,21 @@ PrivateFnDef int endRegion (
 	else
 	    ERR_displayMsg(ERR_EndRegion);
     }
-    return(FALSE);
 }
 /*---------------------------------------------------------------------*/
 
-PrivateFnDef int clearRegion (
-    void
-)
-{
+PrivateFnDef void clearRegion (void) {
     unset_markers(CurrBuffer);
     BUF_eraseBuffer(Region);
     ERR_displayMsg(ERR_ClearRegion);
 }
 /*---------------------------------------------------------------------*/
 
-PrivateFnDef int deleteRegion (
-    void
-)
-{
+PrivateFnDef void deleteRegion (void) {
     int error;
     
     if (test_region ())         /* needed because beginRegion doesn't do it*/
-	return(TRUE);		/* error with region */
+	return;			/* error with region */
     if (error = BUF_deleteRegion(CurrBuffer, BUF_startrow(CurrBuffer), BUF_startcol(CurrBuffer), 
 					  BUF_endrow(CurrBuffer), BUF_endcol(CurrBuffer)))
         ERR_displayError(error);
@@ -1863,34 +1705,26 @@ PrivateFnDef int deleteRegion (
 	ERR_displayMsg(ERR_DeleteRegion);
     }
     unset_markers(CurrBuffer);
-    return(FALSE);
 }
 /*---------------------------------------------------------------------*/
 
-PrivateFnDef int insertRegion (
-    void
-)
-{
+PrivateFnDef void insertRegion (void) {
     int error;
     
     if (BUF_firstLine(Region) == NULL && BUF_lastLine(Region) == NULL)
     {
 	ERR_displayError(ERR_NoRegion);
-	return(TRUE);
+	return;
     }
     if (error = BUF_insertRegion(CurrBuffer, CurrWin, Region))
 	ERR_displayError(error);
     else
 	ERR_displayMsg(ERR_InsertRegion);
     BUF_resetScreen(CurrBuffer, CurrWin);
-    return(FALSE);
 }
 /*---------------------------------------------------------------------*/
 
-PrivateFnDef int runRegion (
-    void
-)
-{
+PrivateFnDef void runRegion (void) {
 
 /*
     if (CurrBuffer == Output)
@@ -1904,7 +1738,7 @@ PrivateFnDef int runRegion (
     if (BUF_firstLine(Region) == NULL && BUF_lastLine(Region) == NULL)
     {
 	ERR_displayError(ERR_NoRegion);
-	return(TRUE);
+	return;
     }
     ERR_displayMsg(ERR_ExecRegion);
 #if RSATTACH
@@ -1912,7 +1746,6 @@ PrivateFnDef int runRegion (
 #endif
     if (CurrBuffer != Output)
 	    NotDone = FALSE;
-    return(FALSE);
 }
 
 /*---------------------------------------------------------------------*/
@@ -2087,19 +1920,13 @@ PrivateFnDef int saveRegion (
     return(FALSE);
 }
 
-PrivateFnDef int saveRegionInt (
-    void
-)
-{
+PrivateFnDef void saveRegionInt (void) {
 	doInterface = TRUE;
 	saveRegion();
 	doInterface = FALSE;
 }
 
-PrivateFnDef int printRegion (
-    void
-)
-{
+PrivateFnDef void printRegion (void) {
 #if 0
     PAGE *page;
     int i;
@@ -2135,7 +1962,6 @@ PrivateFnDef int printRegion (
     MENU_currChoice(mptr) = PRINTERfield;
     FORM_currField(interfaceForm) = DestValue;
     runEditorInterface();
-    return(FALSE);
 }
 
 /**************************************************************
@@ -2219,9 +2045,7 @@ LINEBUFFER *inbuffer, *outbuffer, *errbuffer;
     }
 }
 
-PublicFnDef int
-EDIT_browserIO()
-{
+PublicFnDef void EDIT_browserIO(void) {
 	useBrowser = TRUE;
 	editorIO(BrowserInput, BrowserBuf, BrowserBuf);
 	useBrowser = FALSE;
@@ -2229,10 +2053,7 @@ EDIT_browserIO()
 
 /*---------------------------------------------------------------------*/
 
-PublicFnDef int ED_subShell (
-    void
-)
-{
+PublicFnDef void ED_subShell (void) {
     ERR_displayStr(" Entering subshell...",FALSE);
     CUR_saveterm();
     CUR_resetterm();
@@ -2286,10 +2107,7 @@ PrivateFnDef int recall (
 }
 /*---------------------------------------------------------------------*/
 
-PrivateFnDef int printBuffer (
-    void
-)
-{
+PrivateFnDef void printBuffer (void) {
 #if 0
     PAGE *page;
     int i;
@@ -2328,13 +2146,9 @@ PrivateFnDef int printBuffer (
     FORM_currField(interfaceForm) = DestValue;
 
     runEditorInterface();
-    return(FALSE);
 }
 
-PrivateFnDef int printReportInt (
-    void
-)
-{
+PrivateFnDef void printReportInt (void) {
     MENU *mptr;
     
     mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType));
@@ -2345,7 +2159,6 @@ PrivateFnDef int printReportInt (
     MENU_currChoice(mptr) = PRINTERfield;
     FORM_currField(interfaceForm) = DestValue;
     runReportInterface();
-    return(FALSE);
 }
 
 /***************************************
@@ -2353,8 +2166,7 @@ PrivateFnDef int printReportInt (
  *** When in output window of editor ***
  **************************************/
 
-PrivateFnDef session ()
-{
+PrivateFnDef int session () {
     int c, i, length, cursrow, curscol, error;
     char helpfile[BUF_MaxPathNameChars], *SrcDirName, *getenv();
     FILE *helpfd;
@@ -2830,8 +2642,7 @@ PublicFnDef int EDIT_reportFileMenu (
     CUR_delwin(menuWin);
 }
 
-PrivateFnDef initEditor()
-{
+PrivateFnDef void initEditor(void) {
     int longest, i, j, sr, sc;
 
 /*    ERR_displayStr(" Initializing editor...");*/
@@ -2956,8 +2767,7 @@ PrivateFnDef initEditor()
     EDIT_Init = TRUE;    
 }
 
-PrivateFnDef createEditorWindows()
-{
+PrivateFnDef void createEditorWindows(void) {
     TopWin        = CUR_newwin((CUR_LINES - 3) / 2, CUR_COLS-1, 0, 0);
     BotWin        = CUR_newwin((CUR_LINES - 3) - ((CUR_LINES - 3) / 2),
 				CUR_COLS-1, ((CUR_LINES - 3) / 2) + 1, 0);
@@ -3034,19 +2844,17 @@ PrivateFnDef void cleanupEditor()
 
 PublicVarDef int	inEditor = FALSE;
 
-PublicFnDef int
-EDIT_main ()
-{
+PublicFnDef void EDIT_main (void) {
     if( interfacePage != NULL )
     {
     	ERR_displayPause(" Not allowed to enter editor from Interface Form");
-    	return(0);
+    	return;
     }
 
     if( inEditor )
     {
     	ERR_displayPause(" Editor already running");
-    	return(0);
+    	return;
     }
 #if RSATTACH	
 /***** dump any RS output that is left over *****/
@@ -3069,9 +2877,6 @@ EDIT_main ()
     inEditor = FALSE;
 
     deleteEditorWindows();
-
-    return(0);
-    
 }
 
 /************************************************************************
@@ -3124,10 +2929,7 @@ initInterface()
 
 }
 
-PrivateFnDef int runSysMenu (
-    void
-)
-{
+PrivateFnDef void runSysMenu (void) {
 	PAGE	*editPage;
 	int	i;
 
@@ -3149,10 +2951,7 @@ PrivateFnDef int runSysMenu (
 	PAGE_deletePage(editPage, i);
 }
 	
-PrivateFnDef int runEditorInterface (
-    void
-)
-{
+PrivateFnDef void runEditorInterface (void) {
 	PAGE	*editPage;
 	int	i;
 
@@ -3174,10 +2973,7 @@ PrivateFnDef int runEditorInterface (
 	PAGE_deletePage(editPage, i);
 }
 	
-PrivateFnDef int runReportInterface (
-    void
-)
-{
+PrivateFnDef void runReportInterface (void) {
 	EDIT_runInterface(reportPage);
 }
 	
@@ -3185,10 +2981,7 @@ PublicVarDef int	displayErr = FALSE;
 PublicVarDef char	errorMessage[81],
 			errorName[81];
 
-PublicFnDef int EDIT_runInterface(
-    PAGE *			iPage
-)
-{		
+PublicFnDef void EDIT_runInterface(PAGE *iPage) {
 	int	i;
 
 	if( interfacePage != NULL )
@@ -3231,9 +3024,7 @@ PublicFnDef int EDIT_runInterface(
 	doInterfaceClear = FALSE;	
 }
 
-PublicFnDef int
-EDIT_displayErrorMessage()
-{
+PublicFnDef void EDIT_displayErrorMessage(void) {
 	if( displayErr )
 		ERR_displayStrNoRefresh(errorMessage);
 	displayErr = FALSE;
@@ -4179,7 +3970,7 @@ PrivateFnDef int execInterface (
 			if( *fname == '\0' )
 			{
 				ERR_displayPause(" You must supply a Source File Name");
-				return;
+				return TRUE;
 			}
 			if( !execInterfaceFile(fname) )
 				PAGE_status(interfacePage) = PAGE_ExitOnExec;
@@ -4196,7 +3987,7 @@ PrivateFnDef int execInterface (
 			break;
 		case PRINTERfield:
 			ERR_displayPause("Not allowed to use a Printer as A Source");
-			return;
+			return TRUE;
 		case PCfield:
 			fname = FORM_fieldValue(FORM_field(interfaceForm,SourceType+2+PCfield));
 			while( *fname != '\0' && isspace(*fname) )
@@ -4205,7 +3996,7 @@ PrivateFnDef int execInterface (
 			if( *fname == '\0' )
 			{
 				ERR_displayPause(" You must supply a PC Source File Name");
-				return;
+				return TRUE;
 			}
 			if( !execInterfacePC(fname) )
 				PAGE_status(interfacePage) = PAGE_ExitOnExec;
@@ -4216,12 +4007,11 @@ PrivateFnDef int execInterface (
 			break;
 	}
 	ERR_clearMsg();
+	return FALSE;
 }
 			
 
-PublicFnDef int
-EDIT_initEditor()
-{
+PublicFnDef void EDIT_initEditor(void) {
     if (!EDIT_Init)
     {
         initEditor();

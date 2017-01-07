@@ -7,6 +7,7 @@
 #include "Vk.h"
 
 #include "stdcurses.h"
+#include "mainmenu.h"
 #include "buffers.h"
 #include "edit.h"
 #include "choices.h"
@@ -515,7 +516,7 @@ doProfile()
 }
 
 PublicFnDecl int statmenu(), queries(), financeSt(), dataEntryModule(), browser();
-PublicFnDecl int MAIN_getCompany(), MAIN_getUniverse(), timeSeries(), EDIT_main();
+PublicFnDecl int MAIN_getCompany(), MAIN_getUniverse(), timeSeries();
 
 PrivateVarDef MENU_Choice menuChoices[] = {
  " Financial Statements ", " Financial Statement Analysis", 'f', financeSt, ON, 

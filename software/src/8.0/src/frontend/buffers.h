@@ -21,15 +21,15 @@ PublicFnDecl void BUF_paintLine(
 );
 
 PublicFnDecl void BUF_compact(LINEBUFFER *buffer);
-PublicFnDef char *BUF_getLine(
+PublicFnDecl char *BUF_getLine(
     LINEBUFFER *buffer,
     int len
 );
-PublicFnDef char *BUF_appendLine(
+PublicFnDecl char *BUF_appendLine(
     LINEBUFFER *buffer,
     char *str
 );
-PublicFnDef char *BUF_insertLine(
+PublicFnDecl char *BUF_insertLine(
     LINEBUFFER *buffer,
     char *before,
     char *str
@@ -72,12 +72,12 @@ PublicFnDecl int BUF_insertString(
     char       *str,
     CUR_WINDOW *win
 );
-PublicFnDef int BUF_insertChar(
+PublicFnDecl int BUF_insertChar(
     LINEBUFFER *buffer,
     int c,
     CUR_WINDOW *win
 );
-PublicFnDef int BUF_deleteChar(
+PublicFnDecl int BUF_deleteChar(
     LINEBUFFER *buffer,
     CUR_WINDOW *win
 );

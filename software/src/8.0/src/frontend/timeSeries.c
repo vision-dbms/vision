@@ -63,7 +63,7 @@ PrivateFnDef int initBuffer (
     void
 );
 
-PrivateFnDef int itemList (
+PrivateFnDef void itemList (
     void
 );
 
@@ -87,8 +87,6 @@ PrivateVarDef MENU *FrequencyMenu, *DirectionMenu;
 #define DIRECTION	(InitForm->field[7])
 #define INCREMENT	(InitForm->field[9])
 #define FREQUENCY	(InitForm->field[11])
-
-PublicFnDecl int FORM_menuToForm();
 
 PrivateVarDef LINEBUFFER *DisplayBuf;
 PrivateVarDef SPRSHEET *Sprsheet = NULL;
@@ -1566,7 +1564,7 @@ PrivateFnDef int initBuffer (
     BUF_initBuffer(DisplayBuf, (10 * BUFFERSIZE));    
 }
 
-PrivateFnDef int itemList (
+PrivateFnDef void itemList (
     void
 )
 {

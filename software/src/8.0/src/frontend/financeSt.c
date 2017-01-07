@@ -14,7 +14,6 @@
 
 PrivateVarDef FORM *Form1;
 
-PublicFnDecl int FORM_menuToForm();
 PrivateVarDef MENU *menu1, *menu2, *menu3;
 
 PrivateVarDef FORM_Field form1Fields[] = {
