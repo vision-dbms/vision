@@ -5,6 +5,7 @@
 #include "Vk.h"
 
 #include "stdcurses.h"
+#include "misc.h"
 #include "spsheet.h"
 #include "page.h"
 #include "form.h"
@@ -39,14 +40,17 @@ PrivateFnDef int validNumber (
 /****** Globals *******/
 PrivateVarDef FORM *Form1, *Form2, *Form3, *Form4;
 
-PrivateVarDef StartDate, EndDate;
+PrivateVarDef int StartDate, EndDate;
 PrivateVarDef char *ReportType;
 PrivateVarDef SPRSHEET	*FSheet;
 PrivateVarDef CUR_WINDOW	*FWin, *StatWin;
 PrivateVarDef PAGE *ReportPage, *FinanceStatementPage;
 
-PrivateVarDef int changeReport(), changeCompany(), 
-		  changeType(), changeDates(), printReport();
+PrivateVarDef void changeReport (void);
+PrivateVarDef void changeCompany (void);
+PrivateVarDef void changeType (void);
+PrivateVarDef void changeDates (void);
+PrivateVarDef void printReport (void);
 
 PrivateVarDef MENU_Choice menuChoices[] = {
  " Report ",	" New Report For Current Company/Time Frame",	'r', 
@@ -149,7 +153,7 @@ fsheetFileMenu()
 	EDIT_reportFileMenu(FinanceStatementPage,FALSE);
 }
 
-PublicFnDef fsheet (form1, FSpage, firstTime)
+PublicFnDef int fsheet (form1, FSpage, firstTime)
 FORM *form1;
 PAGE *FSpage;
 int  firstTime;
@@ -219,8 +223,7 @@ int  firstTime;
 /****************************************************
  *****		menu level functions		*****
  ***************************************************/
-PrivateFnDef writeReport()
-{
+PrivateFnDef void writeReport(void) {
     char buffer[200];
     
     ERR_displayStr(" Writing report, please wait...", FALSE);
@@ -243,7 +246,7 @@ PrivateFnDef writeReport()
 /************************************************
  *********	printReport	*****************
  ************************************************/
-PrivateFnDef int printReport()
+PrivateFnDef void printReport(void)
 {
     SPR_print(FSheet, ReportPage);
 }
@@ -271,8 +274,7 @@ PrivateVarDef FORM_Field reportFields[] = {
 
 PrivateVarDef FORM *ReportForm;
 
-PrivateFnDef int changeReport()
-{
+PrivateFnDef void changeReport(void) {
     int i, execReport();
     CUR_WINDOW *win, *win2;
     PAGE *page;
@@ -303,7 +305,6 @@ PrivateFnDef int changeReport()
     CUR_delwin(win2);
     CUR_delwin(win);
     free(ReportForm);
-    return(FALSE);
 }
 
 PrivateFnDef int execReport (
@@ -340,8 +341,7 @@ PrivateVarDef FORM_Field companyFields[] = {
 PrivateVarDef FORM *CompanyForm;
 PrivateVarDef PAGE *CompanyPage;
 
-PrivateFnDef int changeCompany()
-{
+PrivateFnDef void changeCompany(void) {
     int i;
     CUR_WINDOW *win, *win2;
     CUR_WINDOW *MenuWin;
@@ -369,7 +369,6 @@ PrivateFnDef int changeCompany()
     CUR_delwin(win2);
     CUR_delwin(win);
     free(CompanyForm);
-    return(FALSE);
 }
 
 PrivateFnDef int execCompany (
@@ -427,8 +426,7 @@ PrivateVarDef FORM_Field dateFields[] = {
 PrivateVarDef FORM *DatesForm;
 PrivateVarDef PAGE *DatesPage;
 
-PrivateFnDef int changeDates()
-{
+PrivateFnDef void changeDates(void) {
     int i;
     CUR_WINDOW *win, *win2;
     CUR_WINDOW *MenuWin;
@@ -456,7 +454,6 @@ PrivateFnDef int changeDates()
     CUR_delwin(win2);
     CUR_delwin(win);
     free(DatesForm);
-    return FALSE;
 }
 
 PrivateFnDef int execDates (

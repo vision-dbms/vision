@@ -5,6 +5,7 @@
 #include "Vk.h"
 
 #include "stdcurses.h"
+#include "misc.h"
 #include "spsheet.h"
 #include "page.h"
 #include "form.h"
@@ -21,9 +22,7 @@ PrivateFnDef int execItem (
     void
 );
 
-PrivateFnDef int itemList (
-    void
-);
+PrivateFnDef void itemList (void);
 
 PrivateFnDef int execExpr (
     void
@@ -449,10 +448,7 @@ PrivateFnDef int execItem (
 
 }
 
-PrivateFnDef int itemList (
-    void
-)
-{
+PrivateFnDef void itemList (void) {
     MENU *menu1, *menu2;
     int choice, i;
     char string[80];

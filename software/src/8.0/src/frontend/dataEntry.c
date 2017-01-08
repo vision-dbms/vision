@@ -7,6 +7,7 @@
 #include "Vk.h"
 
 #include "stdcurses.h"
+#include "misc.h"
 #include "page.h"
 #include "form.h"
 #include "rsInterface.h"
@@ -25,7 +26,7 @@ PrivateFnDef int estDataEntry(
     void
 );
 
-PrivateFnDef int getNewEstObject (
+PrivateFnDef void getNewEstObject (
     void
 );
 
@@ -94,10 +95,20 @@ char	FrequencyLetter;
  **********	Menu Declarations	**********
  *************************************************/
 
-int companyDataEntry(), estimateDataEntry(), companyMiscDataEntry();
-int accountDataEntry(), securityDataEntry(), fundamentalDataEntry();
-int allDataEntry(), calendarDataEntry(), fiscalDataEntry(), 
-    quarterlyDataEntry(), dividendsDataEntry(), allErase();
+PrivateFnDef void MiscDataEntry (void);
+
+PrivateFnDef void companyDataEntry (void);
+PrivateFnDef void estimateDataEntry (void);
+PrivateFnDef void companyMiscDataEntry (void);
+PrivateFnDef void accountDataEntry (void);
+PrivateFnDef void securityDataEntry (void);
+PrivateFnDef void fundamentalDataEntry (void);
+PrivateFnDef void allDataEntry (void);
+PrivateFnDef void calendarDataEntry (void);
+PrivateFnDef void fiscalDataEntry (void);
+PrivateFnDef void quarterlyDataEntry (void);
+PrivateFnDef void dividendsDataEntry (void);
+PrivateFnDef void allErase (void);
 
 PrivateVarDef MENU_Choice menuChoices1[] = {
     " Company              ",
@@ -260,8 +271,7 @@ PublicFnDef int dataEntryModule()
 /******************************************************
  **********	Exec Functions		***************
  *****************************************************/
-PublicFnDef int companyDataEntry()
-{
+PrivateFnDef void companyDataEntry(void) {
     MENU *menu;
     FORM *form;
     PAGE *page;
@@ -310,12 +320,9 @@ PublicFnDef int companyDataEntry()
     free(form);
     PAGE_deletePage(page, i);
     CurrPage = OldPage;
-
-    return(FALSE);
 }
 
-PublicFnDef int estimateDataEntry()
-{
+PublicFnDef void estimateDataEntry(void) {
     MENU *menu;
     FORM *form;
     PAGE *page;
@@ -364,8 +371,6 @@ PublicFnDef int estimateDataEntry()
     free(form);
     PAGE_deletePage(page, i);
     CurrPage = OldPage;
-
-    return(FALSE);
 }
 
 PrivateVarDef FORM_Field fund1Fields[] = {
@@ -455,8 +460,7 @@ PrivateFnDef SPSHEET *createEstDSS()
 	return(SPS_readSSheet("CompanyUpdateStructureEstD"));
 }
 
-PublicFnDef int calendarDataEntry()
-{
+PublicFnDef void calendarDataEntry (void) {
     UseAll = FALSE;
     UseCalendar = TRUE;
     UseFiscal = FALSE;
@@ -464,8 +468,7 @@ PublicFnDef int calendarDataEntry()
     UseDividends = FALSE;
     estDataEntry();
 }
-PublicFnDef int fiscalDataEntry()
-{
+PrivateFnDef void fiscalDataEntry (void) {
     UseAll = FALSE;
     UseCalendar = FALSE;
     UseFiscal = TRUE;
@@ -473,8 +476,7 @@ PublicFnDef int fiscalDataEntry()
     UseDividends = FALSE;
     estDataEntry();
 }
-PublicFnDef int quarterlyDataEntry()
-{
+PrivateFnDef void quarterlyDataEntry (void) {
     UseAll = FALSE;
     UseCalendar = FALSE;
     UseFiscal = FALSE;
@@ -482,8 +484,7 @@ PublicFnDef int quarterlyDataEntry()
     UseDividends = FALSE;
     estDataEntry();
 }
-PublicFnDef int dividendsDataEntry()
-{
+PrivateFnDef void dividendsDataEntry (void) {
     UseAll = FALSE;
     UseCalendar = FALSE;
     UseFiscal = FALSE;
@@ -491,8 +492,7 @@ PublicFnDef int dividendsDataEntry()
     UseDividends = TRUE;
     estDataEntry();
 }
-PublicFnDef int allDataEntry()
-{
+PrivateFnDef void allDataEntry (void) {
     UseAll = TRUE;
     UseCalendar = TRUE;
     UseFiscal = TRUE;
@@ -508,7 +508,7 @@ PrivateFnDef int estDataEntry(
     SPSHEET *spr;
     MENU *actionMenu;
     PAGE *OldPage;
-    PAGE_Action FORM_handler(), SPS_handler();
+    PAGE_Action FORM_handler();
     int i, longest, j;
 
     CurrentObj = CompanyObj;
@@ -734,8 +734,7 @@ PrivateFnDef SPSHEET *createCompanyMiscSS()
 	return(SPS_readSSheet("CompanyUpdateStructureMisc"));
 }
 
-PublicFnDef int allErase()
-{
+PrivateFnDef void allErase(void) {
     SPS_doClearInput(SPS1,ss1Win);
     if( UseAll )
     {
@@ -746,10 +745,7 @@ PublicFnDef int allErase()
     SPS_refreshPage();
 }
 
-PrivateFnDef int getNewEstObject (
-    void
-)
-{
+PrivateFnDef void getNewEstObject (void) {
     SPSHEET *spr;
 
     if( UseAll )
@@ -776,7 +772,7 @@ PrivateFnDef int getNewEstObject (
 
     getObjectAndDate();
     if( !GotValidObjectAndDate )
-	return(0);
+	return;
 
     if( UseCalendar )
     {
@@ -818,10 +814,9 @@ PrivateFnDef int getNewEstObject (
     /*
     SPS_refreshPage();
     */
-    return(0);
 }
 
-PrivateFnDef int getNewFundamental()
+PrivateFnDef void getNewFundamental(void)
 {
     SPSHEET *spr;
     char freqBuf[5];
@@ -835,7 +830,7 @@ PrivateFnDef int getNewFundamental()
 
     getFundamental();
     if( !GotValidObjectAndDate )
-	return(0);
+	return;
     if( (spr = createFundSS()) == NULL )
     {
 	ERR_displayStr(" Could Not Create New Worksheet",TRUE);
@@ -853,10 +848,9 @@ PrivateFnDef int getNewFundamental()
 	FORM_handler(FundForm,fundformWin,PAGE_Init);
 	SPS_handler(FundSS, fundSSWin, PAGE_Init);
     }
-    return(0);
 }
 
-PrivateFnDef int getNewMiscObject()
+PrivateFnDef void getNewMiscObject(void)
 {
     if( SPS_sheetStatus(MiscSS) != SPS_Normal )
     {
@@ -867,7 +861,7 @@ PrivateFnDef int getNewMiscObject()
 
     getObjectAndDate();
     if( !GotValidObjectAndDate )
-	return(0);
+	return;
 
     switch(CurrentObj)
     {
@@ -892,26 +886,22 @@ PrivateFnDef int getNewMiscObject()
     /*
     SPS_refreshPage();
     */
-    return(0);
 }
 
-PublicFnDef int securityDataEntry()
-{
+PrivateFnDef void securityDataEntry(void) {
     CurrentObj = SecurityObj;
     DateType = UpdateDate;
-    return(MiscDataEntry());
+    MiscDataEntry();
 }
-PublicFnDef int accountDataEntry()
-{
+PrivateFnDef void accountDataEntry(void) {
     CurrentObj = AccountObj;
     DateType = UpdateDate;
-    return(MiscDataEntry());
+    MiscDataEntry();
 }
-PublicFnDef int companyMiscDataEntry()
-{
+PrivateFnDef void companyMiscDataEntry (void) {
     CurrentObj = CompanyObj;
     DateType = UpdateDate;
-    return(MiscDataEntry());
+    MiscDataEntry();
 }
 
 PrivateFnDef int estExec (
@@ -988,7 +978,8 @@ PrivateFnDef int fundExec (
 	SPS_writeSSheet(FundSS,"CompanyUpdateStructureFundamental");
     PAGE_status(FundPage) = PAGE_ExitOnExec;
 }
-PublicFnDef int MiscDataEntry()
+
+PrivateFnDef void MiscDataEntry(void)
 {
     PAGE *OldPage;
     MENU *actionMenu;
@@ -997,7 +988,7 @@ PublicFnDef int MiscDataEntry()
 
     getObjectAndDate();
     if( !GotValidObjectAndDate )
-	return(1);
+	return;
 
 /*** create spreadsheets and their windows ***/
     switch(CurrentObj)
@@ -1016,7 +1007,7 @@ PublicFnDef int MiscDataEntry()
     if( MiscSS == (SPSHEET *)NULL )
     {
 	ERR_displayStr(" Could Not Create Worksheet",TRUE);
-	return(1);
+	return;
     }
     ssWin = CUR_newwin(CUR_LINES-6, CUR_COLS, 4, 0);
 
@@ -1102,8 +1093,6 @@ PublicFnDef int MiscDataEntry()
     PAGE_deletePage (MiscPage, i)
     MiscPage = NULL;
     CurrPage = OldPage;
-
-    return (0);
 }
 
 PrivateVarDef FORM_Field objUpdFields[] = {
@@ -1455,8 +1444,7 @@ PrivateFnDef int getObjectAndDate (
 	return(FALSE);
 }
 
-PublicFnDef int fundamentalDataEntry()
-{
+PublicFnDef void fundamentalDataEntry (void) {
     MENU *actionMenu;
     PAGE *OldPage;
     PAGE_Action FORM_handler(), SPS_handler();
@@ -1467,12 +1455,12 @@ PublicFnDef int fundamentalDataEntry()
     DateType = UpdateDate;
     getFundamental();
     if( !GotValidObjectAndDate )
-	return(0);
+	return;
 
     if( (FundSS = createFundSS()) == NULL )
     {
 	ERR_displayStr(" Could Not Create Calendar Worksheet",TRUE);
-	return(1);
+	return;
     }
 /**** create form objects ****/
     FORM_makeForm(FundForm, fund1Fields, i);
@@ -1521,8 +1509,6 @@ PublicFnDef int fundamentalDataEntry()
     PAGE_deletePage (FundPage, i)
     FundPage = NULL;
     CurrPage = OldPage;
-
-    return (0);
 }
 PrivateFnDef int validateFundamental()
 {

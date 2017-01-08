@@ -3,6 +3,7 @@
 #include "Vk.h"
 
 #include <curses.h>
+#include <term.h>
 
 #include "SItermio.h"
 

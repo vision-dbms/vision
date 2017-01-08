@@ -1,8 +1,8 @@
 #include "Vk.h"
 
-PublicFnDef int isBlank(str)
-char *str;
-{
+#include "misc.h"
+
+PublicFnDef int isBlank(char *str) {
     int i, len;
 
     len = strlen(str);
@@ -12,36 +12,25 @@ char *str;
     return TRUE;
 }
 
-PublicFnDef toUpper (ch)
-int ch;
-{
+PublicFnDef int toUpper (int ch) {
     return islower (ch) ? toupper (ch) : ch;
 }
 
-PublicFnDef toLower (ch)
-int ch;
-{
+PublicFnDef int toLower (int ch) {
     return isupper (ch) ? tolower (ch) : ch;
 }
     
-PublicFnDef strToUpper(str)
-char *str;
-{
+PublicFnDef void strToUpper(char *str) {
     while (*str = toUpper (*str))
 	str++;
 }
 
-PublicFnDef strToLower(str)
-char *str;
-{
+PublicFnDef void strToLower(char *str) {
     while (*str = toLower (*str))
 	str++;
 }
 
-PublicFnDef char *
-eatLeadingAndTrailingSpaces(str)
-char	*str;
-{
+PublicFnDef char *eatLeadingAndTrailingSpaces(char *str) {
 	char	*ptr;
 	int	len, i;
 

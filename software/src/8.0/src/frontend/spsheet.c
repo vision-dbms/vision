@@ -8,6 +8,7 @@
 #include "stdcurses.h"
 
 /********** /usr/rs/lib/interface **********/
+#include "misc.h"
 #include "page.h"
 #include "window.h"
 #include "keys.h"

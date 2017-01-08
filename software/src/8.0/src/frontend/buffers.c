@@ -5,6 +5,7 @@
 #include "Vk.h"
 
 #include "stdcurses.h"
+#include "misc.h"
 #include "buffers.h"
 #include "page.h"
 #include "keys.h"
@@ -72,12 +73,12 @@ PrivateFnDef PAGE_Action scrollBuffer (
  *********	Window Operations	******************
  ********************************************************/
 
-PublicFnDef int
-BUF_getColFromSCol(buffer, row, scol, nscol)
-LINEBUFFER	*buffer;
-char		*row;
-int		scol, *nscol;
-{
+PublicFnDef int BUF_getColFromSCol(
+    LINEBUFFER	*buffer,
+    char	*row,
+    int		scol,
+    int		*nscol
+) {
 	int	col = 0, tscol = 0, pscol = 0;
 	char	*ptr;
 	
@@ -111,12 +112,11 @@ int		scol, *nscol;
 	return(col);
 }
 
-PublicFnDef int
-BUF_getSColFromCol(buffer, row, col)
-LINEBUFFER	*buffer;
-char		*row;
-int		col;
-{
+PublicFnDef int BUF_getSColFromCol(
+    LINEBUFFER	*buffer,
+    char	*row,
+    int		col
+) {
 	int	scol = 0, tcol = 0;
 	char	*ptr;
 	
@@ -139,11 +139,10 @@ int		col;
 	return(scol);
 }
 
-PublicFnDef int
-BUF_recalcCols(buffer, win)
-LINEBUFFER	*buffer;
-CUR_WINDOW	*win;
-{
+PublicFnDef int BUF_recalcCols(
+    LINEBUFFER	*buffer,
+    CUR_WINDOW	*win
+) {
 	int	scol;
 	
 	if( BUF_row(buffer) == NULL )
@@ -170,12 +169,11 @@ CUR_WINDOW	*win;
 	return(FALSE);
 }
 
-PublicFnDef int
-BUF_setCol(buffer, win, col)
-LINEBUFFER	*buffer;
-CUR_WINDOW	*win;
-int		col;
-{
+PublicFnDef int BUF_setCol(
+    LINEBUFFER	*buffer,
+    CUR_WINDOW	*win,
+    int		col
+) {
 	int	len;
 	
 	if( (BUF_row(buffer) == NULL) || (col == 0) )
@@ -201,10 +199,10 @@ int		col;
  *********	Window Operations	******************
  ********************************************************/
 
-PublicFnDef void BUF_resetScreen(buffer, win)
-LINEBUFFER *buffer;
-CUR_WINDOW *win;
-{
+PublicFnDef void BUF_resetScreen(
+    LINEBUFFER *buffer,
+    CUR_WINDOW *win
+) {
     int i, len;
     char *scrRow, *prev;
     
@@ -265,10 +263,10 @@ CUR_WINDOW *win;
     BUF_repaintScreen(buffer) = TRUE;
 }
 
-PublicFnDef void BUF_paintWindow(buffer, win)
-LINEBUFFER *buffer;
-CUR_WINDOW *win;
-{
+PublicFnDef void BUF_paintWindow(
+    LINEBUFFER *buffer,
+    CUR_WINDOW *win
+) {
     int i, col, nscol;
     char *ptr;
 
@@ -308,10 +306,10 @@ CUR_WINDOW *win;
     BUF_repaintScreen(buffer) = FALSE;
 }
 
-PublicFnDef void BUF_paintLine(buffer, win)
-LINEBUFFER *buffer;
-CUR_WINDOW *win;
-{
+PublicFnDef void BUF_paintLine(
+    LINEBUFFER *buffer,
+    CUR_WINDOW *win
+) {
     int col, nscol;
     char *ptr;
 
@@ -361,10 +359,10 @@ CUR_WINDOW *win;
 }
 
 
-PublicFnDef int BUF_initBuffer(buffer, size)
-LINEBUFFER *buffer;
-int size;
-{
+PublicFnDef int BUF_initBuffer(
+    LINEBUFFER *buffer,
+    int size
+) {
     int i;
 
     /*if ((int)(buffer->m_lines = memallc (-1, 				  */
@@ -386,7 +384,6 @@ int size;
     return SUCCESS;
 }
 
-PublicFnDef int BUF_eraseBuffer(buffer)
 /************************************************
 *
 *	Arguments:	LINEBUFFER pointer
@@ -394,8 +391,7 @@ PublicFnDef int BUF_eraseBuffer(buffer)
 *	Returns:	FAILURE or SUCCESS
 *
 ************************************************/
-LINEBUFFER *buffer;
-{
+PublicFnDef int BUF_eraseBuffer(LINEBUFFER *buffer) {
     int i;
 
     initBufferVariables(buffer);
@@ -426,7 +422,6 @@ PrivateVarDef char *BUF_tempRow2 = NULL; /* Used in BUF_adjustRow() */
 PrivateVarDef char *BUF_tempRow3 = NULL; /* Used in others functions */
 PrivateVarDef char *BUF_tempRow4 = NULL; /* Used in deleteRegion */
 
-PublicFnDef void BUF_compact(buffer)
 /************************************************
 *
 *	Arguments:	LINEBUFFER pointer
@@ -436,8 +431,7 @@ PublicFnDef void BUF_compact(buffer)
 *	Returns:	NULL
 *
 ************************************************/
-LINEBUFFER *buffer;
-{
+PublicFnDef void BUF_compact(LINEBUFFER *buffer) {
    char *start, *end, *prevLine, *nextLine, *ptr;
    int	len;
 
@@ -517,7 +511,6 @@ LINEBUFFER *buffer;
 
 
 
-PublicFnDef char *BUF_getLine(buffer, len)
 /************************************************
 *
 *	Arguments:	LINEBUFFER pointer
@@ -525,9 +518,10 @@ PublicFnDef char *BUF_getLine(buffer, len)
 *	Returns:	ptr to line of size "len"
 *
 ************************************************/
-LINEBUFFER *buffer;
-int len;
-{
+PublicFnDef char *BUF_getLine(
+    LINEBUFFER *buffer,
+    int len
+) {
     char *ptr;
     int need, diff, i;
     int dotemp = FALSE, dotemp2 = FALSE, dotemp3 = FALSE, dotemp4 = FALSE, 
@@ -641,7 +635,6 @@ int len;
     return(ptr);
 }
 
-PublicFnDef char *BUF_appendLine(buffer, str)
 /************************************************
 *
 *	Function:	Takes buffer and string and adds a line
@@ -653,9 +646,10 @@ PublicFnDef char *BUF_appendLine(buffer, str)
 *	Returns:	FAILURE or index of row added
 *
 ************************************************/
-LINEBUFFER *buffer;
-char *str;
-{
+PublicFnDef char *BUF_appendLine(
+    LINEBUFFER *buffer,
+    char *str
+) {
     int len;
     char *row;
      
@@ -710,7 +704,6 @@ char *str;
 }
 
 
-PublicFnDef char *BUF_insertLine(buffer, before, str)
 /************************************************
 *
 *	Function:	Takes a buffer and string and inserts a line
@@ -721,10 +714,11 @@ PublicFnDef char *BUF_insertLine(buffer, before, str)
 *	Returns:	FAILURE or SUCCESS
 *
 ************************************************/
-LINEBUFFER *buffer;
-char *before;
-char *str;
-{
+PublicFnDef char *BUF_insertLine(
+    LINEBUFFER *buffer,
+    char *before,
+    char *str
+) {
     int len;
     char *row;
 
@@ -770,7 +764,6 @@ char *str;
     return (row);
 }
 
-PublicFnDef int BUF_deleteLine(buffer, bufrow)
 /************************************************
 *
 *	Function:	Deletes a line from the logical list of lines
@@ -782,9 +775,10 @@ PublicFnDef int BUF_deleteLine(buffer, bufrow)
 *	Returns:	FAILURE or SUCCESS
 *
 ************************************************/
-LINEBUFFER *buffer;
-char *bufrow;
-{
+PublicFnDef int BUF_deleteLine(
+    LINEBUFFER *buffer,
+    char *bufrow
+) {
     if (bufrow == BUF_row(buffer))
 	BUF_editted(buffer) = FALSE;
 
@@ -848,7 +842,6 @@ char *bufrow;
     return SUCCESS;
 }
 
-PublicFnDef int BUF_adjustRow(buffer)
 /************************************************
 *
 *	Function:	If the current line has been editted,
@@ -861,8 +854,9 @@ PublicFnDef int BUF_adjustRow(buffer)
 *	Returns: 	FAILURE or SUCCESS
 *
 ************************************************/
-LINEBUFFER *buffer;
-{
+PublicFnDef int BUF_adjustRow(
+    LINEBUFFER *buffer
+) {
     char *new, *old;
     int len, do3 = FALSE, do4 = FALSE, doL = FALSE, doR = FALSE, doO = FALSE;
    
@@ -932,7 +926,6 @@ LINEBUFFER *buffer;
 
 
 
-PublicFnDef int BUF_changeRow(buffer, row)
 /************************************************
 *
 *	Function:	Moves to "row" in "buffer".
@@ -944,9 +937,10 @@ PublicFnDef int BUF_changeRow(buffer, row)
 *	Returns:	FAILURE or SUCCESS
 *
 ************************************************/
-LINEBUFFER *buffer;
-char *row;
-{
+PublicFnDef int BUF_changeRow(
+    LINEBUFFER *buffer,
+    char *row
+) {
     int err;
     
     if (row == NULL)
@@ -979,10 +973,10 @@ char *row;
 /****************************************************************
  ************	    Line Edit Operations	*****************
  ***************************************************************/
-PublicFnDef int BUF_backSpace(buffer, win)
-LINEBUFFER *buffer;
-CUR_WINDOW *win;
-{
+PublicFnDef int BUF_backSpace(
+    LINEBUFFER *buffer,
+    CUR_WINDOW *win
+) {
     char *ptr, buf1[BUF_maxlinesize],
         *prevrow, *bufrow;
     int len1, len2, n;
@@ -1048,7 +1042,6 @@ CUR_WINDOW *win;
     return SUCCESS;
 }
 
-PublicFnDef int BUF_carrReturn(buffer, win)
 /************************************************
 *
 *	Function:	Inserts CR and leaves cursor at 
@@ -1059,9 +1052,10 @@ PublicFnDef int BUF_carrReturn(buffer, win)
 *	Returns:	FAILURE or SUCCESS
 *
 ************************************************/
-LINEBUFFER *buffer;
-CUR_WINDOW *win;
-{
+PublicFnDef int BUF_carrReturn(
+    LINEBUFFER *buffer,
+    CUR_WINDOW *win
+) {
     char *new, *ptr;
     
     if (BUF_row(buffer) == NULL)   /** buffer is empty **/
@@ -1120,7 +1114,6 @@ CUR_WINDOW *win;
     return SUCCESS;
 }
 
-PublicFnDef int BUF_insertString(buffer, str, win)
 /************************************************
 *
 *	Function:	Inserts "str" at cursor's current location
@@ -1132,10 +1125,11 @@ PublicFnDef int BUF_insertString(buffer, str, win)
 *	Returns:	FAILURE or SUCCESS
 *
 ************************************************/
-LINEBUFFER *buffer;
-char *str;
-CUR_WINDOW *win;
-{
+PublicFnDef int BUF_insertString(
+    LINEBUFFER *buffer,
+    char       *str,
+    CUR_WINDOW *win
+) {
     char *ptr, buf1[BUF_maxlinesize], *new;
 
     if (BUF_row(buffer) == NULL)	/** first character in buffer **/
@@ -1168,7 +1162,6 @@ CUR_WINDOW *win;
     return SUCCESS;
 }
 
-PublicFnDef int BUF_insertChar(buffer, c, win)
 /************************************************
 *
 *	Function:	Inserts character "c" at cursor's current location
@@ -1180,10 +1173,11 @@ PublicFnDef int BUF_insertChar(buffer, c, win)
 *	Returns:	FAILURE or SUCCESS
 *
 ************************************************/
-LINEBUFFER *buffer;
-int c;
-CUR_WINDOW *win;
-{
+PublicFnDef int BUF_insertChar(
+    LINEBUFFER *buffer,
+    int c,
+    CUR_WINDOW *win
+) {
     char *ptr, buf1[BUF_maxlinesize], *new;
 
     if (BUF_row(buffer) == NULL)   	/** put first character into buffer **/
@@ -1218,10 +1212,10 @@ CUR_WINDOW *win;
     return SUCCESS;
 }
 
-PublicFnDef int BUF_deleteChar(buffer, win)
-LINEBUFFER *buffer;
-CUR_WINDOW *win;
-{
+PublicFnDef int BUF_deleteChar(
+    LINEBUFFER *buffer,
+    CUR_WINDOW *win
+) {
     char *ptr, buf1[BUF_maxlinesize];
     int	len, error;
 

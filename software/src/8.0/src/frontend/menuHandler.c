@@ -8,6 +8,7 @@
 
 /**** Local Includes ****/
 #include "stdcurses.h"
+#include "misc.h"
 #include "keys.h"
 #include "page.h"
 #include "attr.h"

@@ -5,6 +5,8 @@
 #include "Vk.h"
 
 #include "stdcurses.h"
+#include "misc.h"
+#include "buffers.h"
 #include "page.h"
 #include "form.h"
 #include "rsInterface.h"
@@ -40,29 +42,27 @@ PrivateFnDef int initHistory (
     void
 );
 
-PrivateFnDef int itemList (
+PrivateFnDef void itemList (
     void
 );
 
-PrivateFnDef int exprScreen (
+PrivateFnDef void exprScreen (
     void
 );
 
-PrivateFnDef int priorSubset (
+PrivateFnDef void priorSubset (
     void
 );
 
-PrivateFnDef int clearSubsets (
+PrivateFnDef void clearSubsets (
     void
 );
 
-PrivateFnDef int displaySubset (
+PrivateFnDef void displaySubset (
     void
 );
 
-PrivateFnDef int reportWriter (
-    void
-);
+PrivateFnDef void reportWriter (void);
 
 
 #define BUFFERSIZE  2048
@@ -90,8 +90,6 @@ PrivateVarDef LINEBUFFER *History;
 PrivateVarDef PAGE *Page;
 PrivateVarDef FORM *Form1;
 PrivateVarDef CUR_WINDOW *Win1, *Win2, *Win3;
-
-PublicFnDecl int FORM_menuToForm();
 
 PrivateVarDef FORM_Field form1Fields[] = {
  1, 32, (CUR_A_BOLD | CUR_A_UNDERLINE), 15, 0, 'a', "COMPANY SCREENS", 
@@ -233,16 +231,13 @@ int count;
  **************************************************/
 PrivateVarDef PAGE *MenuPage;
 
-PrivateFnDef int clearSubsets (
-    void
-)
-{
+PrivateFnDef void clearSubsets (void) {
     int i;
     
     if (Count < 1)
     {
         ERR_displayPause(" No Subsets To Clear");
-	return(FALSE);
+	return;
     }
     
     BUF_eraseBuffer(History);
@@ -251,8 +246,6 @@ PrivateFnDef int clearSubsets (
     for (i = 1; i <= Count; i++)
         free(Screen[i]);
     Count = 0;
-
-    return(FALSE);
 }
 
 
@@ -279,10 +272,7 @@ PrivateVarDef FORM_Field exprFields[] = {
 PrivateVarDef FORM *ExprForm;
 PrivateVarDef CUR_WINDOW *ExprWin;
 
-PrivateFnDef int exprScreen (
-    void
-)
-{
+PrivateFnDef void exprScreen (void) {
     int i;
     CUR_WINDOW *win;
     CUR_WINDOW *MenuWin;
@@ -312,7 +302,6 @@ PrivateFnDef int exprScreen (
     CUR_delwin(ExprWin);
     CUR_delwin(win);
     free(ExprForm);
-    return(FALSE);
 }
 
 PrivateFnDef int execScreen (
@@ -342,17 +331,14 @@ PrivateFnDef int execScreen (
  **********	priorSubset	*******************
  *************************************************/
 
-PrivateFnDef int priorSubset (
-    void
-)
-{
+PrivateFnDef void priorSubset (void) {
     int i;
     PAGE_Action BUF_handler();
 
     if (Count <= 1)    
     {
         ERR_displayPause(" No Prior Subsets");
-	return(FALSE);
+	return;
     }
 
     ERR_clearMsg();
@@ -376,8 +362,6 @@ PrivateFnDef int priorSubset (
     BUF_status(History) = BUF_Normal;
     PAGE_deletePage(MenuPage, i);
     CUR_werase(Win3);
-
-    return(FALSE);
 }
 
 PrivateFnDef int execPrior(
@@ -418,10 +402,7 @@ PrivateFnDef int execPrior(
  **********	displaySubset		************
  ***************************************************/
 
-PrivateFnDef int displaySubset (
-    void
-)
-{
+PrivateFnDef void displaySubset (void) {
     int i;
     char string[80];
     PAGE_Action BUF_handler();
@@ -431,7 +412,7 @@ PrivateFnDef int displaySubset (
     if (Screen[Count]->count < 1)
     {
         ERR_displayPause(" No Companies In Subset");
-	return(FALSE);
+	return;
     }
 
     ERR_displayStr(" Getting Companies, please wait...",FALSE);
@@ -469,8 +450,6 @@ PrivateFnDef int displaySubset (
     CUR_delwin(win);
 
     BUF_deleteBuffer(displayBuf);
-
-    return(FALSE);
 }
 
 
@@ -478,10 +457,7 @@ PrivateFnDef int displaySubset (
  **********	reportWriter		************
  ***************************************************/
 
-PrivateFnDef int reportWriter (
-    void
-)
-{
+PrivateFnDef void reportWriter (void) {
     char buffer[80], **reportItem;
     int i, j;
     
@@ -489,14 +465,14 @@ PrivateFnDef int reportWriter (
     if (RS_sendAndCheck(buffer, ">>>"))
     {
         ERR_displayPause(" Error creating screening list");
-	return(FALSE);
+	return;
     }
 
     reportItem = (char **) malloc((Count + 2) * sizeof(char *));
     if (reportItem == NULL)
     {
         ERR_displayPause(" Error Allocating Space");
-	return(FALSE);
+	return;
     }
     
     j = 0;
@@ -509,7 +485,7 @@ PrivateFnDef int reportWriter (
     report("Screening", reportItem);
 
     free(reportItem);
-    return(FALSE);
+    return;
 }
 
 
@@ -661,10 +637,7 @@ PrivateFnDef int initHistory (
     BUF_initBuffer(History, (10 * BUFFERSIZE));    
 }
 
-PrivateFnDef int itemList (
-    void
-)
-{
+PrivateFnDef void itemList (void) {
     MENU *menu1, *menu2;
     int choice, i;
     char string[80];
@@ -680,7 +653,7 @@ PrivateFnDef int itemList (
     if (menu2 == NULL)
     {
         ERR_displayPause(" No items for category selected");
-	return(FALSE);
+	return;
     }
     
     for (i = 0; i < MENU_choiceCount(menu2); i++)
@@ -692,5 +665,4 @@ PrivateFnDef int itemList (
     FORM_fieldMenu(ITEM) = menu1;
     CUR_delwin(SysWin);
     MENU_deleteMenu(menu2, i);
-    return(FALSE);
 }

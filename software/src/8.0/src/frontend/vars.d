@@ -13,7 +13,7 @@
 
 typedef struct {
 	char	*name;
-	int	(*func)();
+	void	(*func)(void);
 } VARS_Menu;
 
 #define VARS_menuName(m)	((m)->name)
@@ -37,6 +37,6 @@ typedef struct {
 #define	VARS_string(v)		((char *)((v)->p))
 #define	VARS_date(v)		(*(int *)((v)->p))
 #define	VARS_float(v)		(*(float *)((v)->p))
-#define	VARS_func(v)		(*(int (**)())((v)->p))
+#define	VARS_func(v)		(*(void (**)(void))((v)->p))
 
 #endif /* VARS_D */

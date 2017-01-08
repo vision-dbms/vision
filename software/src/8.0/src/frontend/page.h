@@ -16,6 +16,8 @@ PublicVarDecl int	PAGE_ExitSystem, PAGE_ToNextEltOnExec,
 			PAGE_ExitF8PageParent;
 
 PublicFnDecl int	PAGE_runSysMenu();
+PublicFnDecl void	PAGE_handler(PAGE *page);
+
 
 #endif
 

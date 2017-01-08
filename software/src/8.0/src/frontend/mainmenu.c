@@ -6,6 +6,8 @@
 
 #include "Vk.h"
 
+#include "mainmenu.h"
+
 #include "stdcurses.h"
 #include "page.h"
 #include "form.h"
@@ -31,8 +33,8 @@ PrivateVarDef int RS_userSystem,
 /*************************************************
  **********	Menu Declarations	**********
  *************************************************/
-PrivateVarDef int exitSystem(), 
-		  noExitSystem();
+PrivateFnDef void exitSystem(void);
+PrivateFnDef void noExitSystem(void);
 
 PrivateVarDef MENU_Choice quitChoices[] = {
     " Yes ",    " Exit System ",	 'y',	    exitSystem,	  ON, 
@@ -84,9 +86,7 @@ PrivateVarDef FORM_Field helpFields[] = {
  -1, 
 };
 
-PublicFnDef int
-QuitSystem()
-{
+PublicFnDef int QuitSystem(void) {
     CUR_WINDOW *menuwin;
 
     if( PAGE_ExitSystem )
@@ -257,21 +257,17 @@ PrivateFnDef void displayMenu()
 }
 
 
-PrivateFnDef int exitSystem()
-{
+PrivateFnDef void exitSystem(void) {
     PAGE_ExitSystem = TRUE;
     NotDone = FALSE;
 }
 
-PrivateFnDef int noExitSystem()
-{
+PrivateFnDef void noExitSystem(void) {
     PAGE_ExitSystem = FALSE;
     NotDone = TRUE;
 }
 
 
-PublicFnDef int 
-    mainmenu()
 /*****  
  *****  This is the User Interface Main Program.
  *
@@ -282,7 +278,7 @@ PublicFnDef int
  *	NOTHING	
  *
  *****/
-{
+PublicFnDef int mainmenu(void) {
 #if NOTRSATTACH
     CUR_initscr();
     CUR_savetty();

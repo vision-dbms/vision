@@ -7,18 +7,82 @@
 #include "page.d"
 #include "buffers.d"
 
-PublicFnDecl void BUF_resetScreen(), 
-		  BUF_paintWindow(), 
-		  BUF_paintLine(),
-		  BUF_compact();
+PublicFnDecl void BUF_resetScreen(
+    LINEBUFFER *buffer,
+    CUR_WINDOW *win
+);
+PublicFnDecl void BUF_paintWindow(
+    LINEBUFFER *buffer,
+    CUR_WINDOW *win
+);
+PublicFnDecl void BUF_paintLine(
+    LINEBUFFER *buffer,
+    CUR_WINDOW *win
+);
 
-PublicFnDecl int BUF_initBuffer(),
-		BUF_setCol(),
-		BUF_eraseBuffer(),
-		BUF_deleteLine(),
-		BUF_backSpace(),
-		BUF_carrReturn(),
-		BUF_insertString(),
+PublicFnDecl void BUF_compact(LINEBUFFER *buffer);
+PublicFnDecl char *BUF_getLine(
+    LINEBUFFER *buffer,
+    int len
+);
+PublicFnDecl char *BUF_appendLine(
+    LINEBUFFER *buffer,
+    char *str
+);
+PublicFnDecl char *BUF_insertLine(
+    LINEBUFFER *buffer,
+    char *before,
+    char *str
+);
+PublicFnDecl int BUF_deleteLine(
+    LINEBUFFER *buffer,
+    char *bufrow
+);
+
+PublicFnDecl int BUF_initBuffer(
+    LINEBUFFER *buffer,
+    int size
+);
+PublicFnDecl int BUF_setCol(
+    LINEBUFFER	*buffer,
+    CUR_WINDOW	*win,
+    int		col
+);
+PublicFnDecl int BUF_eraseBuffer(
+    LINEBUFFER *buffer
+);
+PublicFnDecl int BUF_adjustRow(
+    LINEBUFFER *buffer
+);
+PublicFnDecl int BUF_changeRow(
+    LINEBUFFER *buffer,
+    char *row
+);
+
+PublicFnDecl int BUF_backSpace(
+    LINEBUFFER *buffer,
+    CUR_WINDOW *win
+);
+PublicFnDecl int BUF_carrReturn(
+    LINEBUFFER *buffer,
+    CUR_WINDOW *win
+);
+PublicFnDecl int BUF_insertString(
+    LINEBUFFER *buffer,
+    char       *str,
+    CUR_WINDOW *win
+);
+PublicFnDecl int BUF_insertChar(
+    LINEBUFFER *buffer,
+    int c,
+    CUR_WINDOW *win
+);
+PublicFnDecl int BUF_deleteChar(
+    LINEBUFFER *buffer,
+    CUR_WINDOW *win
+);
+
+PublicFnDecl int
 		BUF_searchString(),
 		BUF_searchNext(),
 		BUF_searchPrev(),
@@ -30,8 +94,6 @@ PublicFnDecl int BUF_initBuffer(),
 		BUF_deletePrevWord(),
 		BUF_scrollUp1(),
 		BUF_scrollDown1(),
-		BUF_insertChar(),
-		BUF_deleteChar(),
 		BUF_deleteRegion(),
 		BUF_insertRegion(),
 		BUF_appendRegion(),
@@ -44,16 +106,28 @@ PublicFnDecl int BUF_initBuffer(),
 #endif
 		BUF_readFile(),
 		BUF_getFile(),
-		BUF_stripTabs(),
-		BUF_adjustRow();
-
-PublicFnDecl char *BUF_getLine(), 
-		  *BUF_appendLine(), 
-		  *BUF_insertLine();
+		BUF_stripTabs();
 
 PublicFnDecl LINEBUFFER *BUF_readBuffer();
 
 PublicFnDecl PAGE_Action BUF_handler();
+
+PublicFnDecl int BUF_getColFromSCol(
+    LINEBUFFER	*buffer,
+    char	*row,
+    int		scol,
+    int		*nscol
+);
+PublicFnDecl int BUF_getSColFromCol(
+    LINEBUFFER	*buffer,
+    char	*row,
+    int		col
+);
+PublicFnDecl int BUF_recalcCols(
+    LINEBUFFER	*buffer,
+    CUR_WINDOW	*win
+);
+
 
 #endif
 

@@ -4,6 +4,8 @@
 
 #include "Vk.h"
 
+#include "sps.h"
+
 /********** /usr/rs/lib/system **********/
 #include "stdcurses.h"
 
@@ -22,17 +24,24 @@
  **********	Forward Declarations	**********
  *************************************************/
 
+PrivateFnDef void SPS_checkForLockedSheet(SPSHEET *spr);
+
+PrivateFnDef int SPS_getHeadingEntry(void);
+PrivateFnDef void SPS_setHeadingEntry(
+    SPS_Heading *h, int flag
+);
+
 PrivateFnDef int SPS_recalcCols (
     SPSHEET *			spr,
     CUR_WINDOW *		win
 );
 
-PrivateFnDef int SPS_keyLeft (
+PrivateFnDef void SPS_keyLeft (
     SPSHEET *			spr,
     CUR_WINDOW *		win
 );
 
-PrivateFnDef int SPS_keyRight (
+PrivateFnDef void SPS_keyRight (
     SPSHEET *			spr,
     CUR_WINDOW *		win
 );
@@ -99,22 +108,19 @@ PublicVarDef SPS_Heading SPS_GlobalSelectorHeading;
 PublicVarDef char	*SPS_hBuf[ItemsInFullListEntry] = {
 				NULL, NULL, NULL, NULL, NULL };
 
-PublicFnDef int SPS_refreshPage()
-{
+PublicFnDef void SPS_refreshPage(void) {
 	MenuOptionSelected = SPS_REFRESHPAGE;
 }
 
-PublicFnDef int SPS_clearCell()
-{
+PublicFnDef void SPS_clearCell(void) {
 	MenuOptionSelected = SPS_CLEARCELL;
 }
 
-PublicFnDef int SPS_doClearCell(spr,win)
-SPSHEET *spr;
-CUR_WINDOW *win;
-{
+PublicFnDef void SPS_doClearCell(
+    SPSHEET *spr, CUR_WINDOW *win
+) {
     int x, y, z;
-    SPS_cell *c, *SPS_cellPtrXYZ();
+    SPS_cell *c;
 
     c = SPS_cellPtrCurr(spr);
     if( (SPS_cellStatus(c) == SPS_NA) ||
@@ -146,17 +152,15 @@ CUR_WINDOW *win;
     }
 }
 
-PublicFnDef int SPS_clearInput()
-{
+PublicFnDef void SPS_clearInput(void) {
 	MenuOptionSelected = SPS_CLEARINPUT;
 }
 
-PublicFnDef int SPS_doClearInput(spr,win)
-SPSHEET *spr;
-CUR_WINDOW *win;
-{
+PublicFnDef int SPS_doClearInput(
+    SPSHEET *spr, CUR_WINDOW *win
+) {
     int x, y, z;
-    SPS_cell *c, *SPS_cellPtrXYZ();
+    SPS_cell *c;
 
     for( x=0 ; x<SPS_XCount(spr) ; x++ )
     {
@@ -181,15 +185,13 @@ CUR_WINDOW *win;
     SPS_repaintScreen(spr) = TRUE;
 }
 
-PublicFnDef int SPS_transposeAxes()
-{
+PublicFnDef void SPS_transposeAxes(void) {
 	MenuOptionSelected = SPS_TRANSPOSE;
 }
 
-PrivateFnDef int doTranspose(spsheet,win)
-SPSHEET *spsheet;
-CUR_WINDOW *win;
-{
+PrivateFnDef void doTranspose(
+    SPSHEET *spsheet, CUR_WINDOW *win
+) {
 	int i;
 	if( !SPS_allowTransposeAndRotate(spsheet) )
 	{
@@ -208,15 +210,13 @@ CUR_WINDOW *win;
 	    SPS_keyRight(spsheet,win);
 }
 
-PublicFnDef int SPS_rotateAxes()
-{
+PublicFnDef void SPS_rotateAxes(void) {
 	MenuOptionSelected = SPS_ROTATE;
 }
 
-PrivateFnDef int doRotate(spsheet,win)
-SPSHEET *spsheet;
-CUR_WINDOW *win;
-{
+PrivateFnDef void doRotate(
+    SPSHEET *spsheet, CUR_WINDOW *win
+) {
 	int i;
 	if( !SPS_allowTransposeAndRotate(spsheet) )
 	{
@@ -237,15 +237,13 @@ CUR_WINDOW *win;
 	    SPS_keyRight(spsheet,win);
 }
 
-PublicFnDef int SPS_incrementZ()
-{
+PublicFnDef void SPS_incrementZ(void) {
 	MenuOptionSelected = SPS_INCREMENTZ;
 }
 
-PrivateFnDef int doIncrement(spsheet,win)
-SPSHEET *spsheet;
-CUR_WINDOW *win;
-{
+PrivateFnDef void doIncrement(
+    SPSHEET *spsheet, CUR_WINDOW *win
+) {
 	if( SPS_ZCount(spsheet) == 1 )
 	    return;
 	if( SPS_currZ(spsheet) == (SPS_ZCount(spsheet) - 1) )
@@ -265,15 +263,13 @@ CUR_WINDOW *win;
 	    SPS_keyRight(spsheet,win);
 }
 
-PublicFnDef int SPS_decrementZ()
-{
+PublicFnDef void SPS_decrementZ(void) {
 	MenuOptionSelected = SPS_DECREMENTZ;
 }
 
-PrivateFnDef int doDecrement(spsheet,win)
-SPSHEET *spsheet;
-CUR_WINDOW *win;
-{
+PrivateFnDef void doDecrement(
+    SPSHEET *spsheet, CUR_WINDOW *win
+) {
 	if( SPS_ZCount(spsheet) == 1 )
 	    return;
 	if( SPS_currZ(spsheet) == 0 )
@@ -293,10 +289,9 @@ CUR_WINDOW *win;
 	    SPS_keyRight(spsheet,win);
 }
 
-PublicFnDef SPS_cell *SPS_cellPtrXYZ(spr,x,y,z)
-SPSHEET *spr;
-int	x,y,z;
-{
+PublicFnDef SPS_cell *SPS_cellPtrXYZ(
+    SPSHEET *spr, int x, int y, int z
+) {
    int	tx, ty, tz;
    if( spr->idx[X] == X )	tx = x;
    else if( spr->idx[X] == Y )	ty = x;
@@ -377,9 +372,7 @@ PrivateFnDef int SPS_recalcCols (
 	SPS_homeY(spr) = 0;
 }
 
-SPS_checkForLockedSheet(spr)
-SPSHEET *spr;
-{
+PrivateFnDef void SPS_checkForLockedSheet(SPSHEET *spr) {
     int xx, yy, zz;
 
     SPS_cellsLocked(spr) = TRUE;
@@ -536,11 +529,10 @@ CUR_WINDOW *win;
   }
 }
 
-PrivateFnDef int SPS_keyLeft (
+PrivateFnDef void SPS_keyLeft (
     SPSHEET *			spr,
     CUR_WINDOW *		win
-)
-{
+) {
   int oldx, oldh, olds;
   if( AlreadyHereInLeft )
   {
@@ -583,7 +575,7 @@ PrivateFnDef int SPS_keyLeft (
   }
 }
 
-PrivateFnDef int SPS_keyRight (
+PrivateFnDef void SPS_keyRight (
     SPSHEET *			spr,
     CUR_WINDOW *		win
 )
@@ -744,9 +736,7 @@ int x, y, ls;
 /**************************************************************
  * Free all memory associated with the given SPSHEET.
  **************************************************************/
-PublicFnDef int SPS_delete(spr)
-SPSHEET *spr;
-{
+PublicFnDef void SPS_delete(SPSHEET *spr) {
     int i, j, k, width;
     SPS_DataType type;
     SPS_cell *c;
@@ -849,9 +839,7 @@ PrivateVarDef char HeadingBuf[81];
  * Format the date in a string based on the format of the
  * internal number.
  **************************************************************/
-PublicFnDef char *SPS_formatDate(date)
-int	date;
-{
+PublicFnDef char *SPS_formatDate(int date) {
 	int	len;
 	static char    buf[32];
 
@@ -893,9 +881,7 @@ int	date;
 	return(DateBuf);
 }
 
-PublicFnDef char *SPS_formatHeading(h)
-SPS_Heading *h;
-{
+PublicFnDef char *SPS_formatHeading(SPS_Heading *h) {
 	HeadingBuf[0] = '\0';
 	if( SPS_headingStatus(h) == SPS_NA )
 	{
@@ -921,10 +907,7 @@ SPS_Heading *h;
 	return(HeadingBuf);
 }
 
-PublicFnDef char *SPS_cellAsString(c,type)
-SPS_cell *c;
-SPS_DataType type;
-{
+PublicFnDef char *SPS_cellAsString(SPS_cell *c, SPS_DataType type) {
 	HeadingBuf[0] = '\0';
 	if( SPS_cellStatus(c) == SPS_ModifiedNA )
 	{
@@ -951,9 +934,7 @@ SPS_DataType type;
 	return(HeadingBuf);
 }
 
-PublicFnDef char *SPS_itemAsString(h)
-SPS_Heading *h;
-{
+PublicFnDef char *SPS_itemAsString(SPS_Heading *h) {
 	HeadingBuf[0] = '\0';
 	if( SPS_headingStatus(h) == SPS_NA )
 	{
@@ -982,11 +963,9 @@ SPS_Heading *h;
 /**************************************************************
  * Print the value of the cell at (x,y,z).
  **************************************************************/
-PrivateFnDef int SPS_printCell(spr,win,x,y)
-SPSHEET *spr;
-CUR_WINDOW *win;
-int x, y;
-{
+PrivateFnDef void SPS_printCell(
+    SPSHEET *spr, CUR_WINDOW *win, int x, int y
+) {
     SPS_cell	*c;
     int width, xx, yy, zz, inp, xlines;
     SPS_DataType type;
@@ -1256,10 +1235,6 @@ int index;
     }
 }
 
-PublicFnDef PAGE_Action SPS_handler(spsheet, win, action)
-SPSHEET *spsheet;
-CUR_WINDOW *win;
-PAGE_Action action;
 /*****		Routine to manage user interaction with spsheet
  *
  *  Arguments:
@@ -1271,7 +1246,9 @@ PAGE_Action action;
  *	PAGE_Action
  *
  *****/
-{
+PublicFnDef PAGE_Action SPS_handler(
+    SPSHEET *spsheet, CUR_WINDOW *win, PAGE_Action action
+) {
     switch (action)
     {
 	case PAGE_Init:
@@ -1358,10 +1335,7 @@ PrivateFnDef PAGE_Action initSprSh (
 /**************************************************************
  * Redraw the spreadsheet.
  **************************************************************/
-PublicFnDef SPS_paintScreen(spr, win)
-SPSHEET *spr;
-CUR_WINDOW *win;
-{
+PublicFnDef void SPS_paintScreen(SPSHEET *spr, CUR_WINDOW *win) {
     int x, y, z, iz;
 
     SPS_recalcCols(spr,win);
@@ -1672,10 +1646,9 @@ PrivateFnDef PAGE_Action inputSprSh (
     return(action);
 }
 
-PublicFnDef int SPS_readHeadingList(spr,count,axis,flag)
-SPSHEET	*spr;
-int	count, axis, flag;
-{
+PublicFnDef int SPS_readHeadingList(
+    SPSHEET *spr, int count, int axis, int flag
+) {
 	int	i;
 	SPS_Heading	*h;
 	char buf[256];
@@ -1699,10 +1672,7 @@ int	count, axis, flag;
 	return(FALSE);	
 }
 
-PublicFnDef int SPS_readStringOnly(buf,len)
-char *buf;
-int len;
-{
+PublicFnDef int SPS_readStringOnly(char *buf, int len) {
 	int	errlen, errval;
 	char	*ptr;
 
@@ -1718,10 +1688,7 @@ int len;
 	return( errval );
 }
 
-PublicFnDef int SPS_readString(buf,len)
-char *buf;
-int len;
-{
+PublicFnDef int SPS_readString(char *buf, int len) {
 	int	errlen, errval;
 	char	*ptr, buf2[256];
 
@@ -1744,8 +1711,7 @@ int len;
 	return( errval );
 }
 
-PublicFnDef int SPS_readInteger()
-{
+PublicFnDef int SPS_readInteger() {
 	int	i;
 	char	buf[SPS_maxItemWidth+1], *ptr;
 
@@ -1782,11 +1748,9 @@ char	*str;
 	return(SPS_Float);
 }
 
-PublicFnDef int SPS_setCellValue(c,type,str)
-SPS_cell	*c;
-SPS_DataType	type;
-char		*str;
-{
+PublicFnDef void SPS_setCellValue(
+    SPS_cell *c, SPS_DataType type, char *str
+) {
 	double	atof();
 
 	if( strcmp(str,"NA") == 0 )
@@ -1827,10 +1791,9 @@ char		*str;
 	}
 }
 
-PublicFnDef int SPS_readCell(c,type)
-SPS_cell	*c;
-SPS_DataType	type;
-{
+PublicFnDef int SPS_readCell(
+    SPS_cell *c, SPS_DataType type
+) {
 	char	buf[SPS_maxItemWidth+1], *ptr;
 	int	errlen;
 
@@ -1857,10 +1820,9 @@ SPS_DataType	type;
 	return(FALSE);
 }
 
-PublicFnDef int SPS_setItemAndStatus(h,str)
-SPS_Heading	*h;
-char		*str;
-{
+PublicFnDef void SPS_setItemAndStatus(
+    SPS_Heading *h, char *str
+) {
 	double	atof();
 
 	if( strcmp(str,"NA") == 0 )
@@ -1901,8 +1863,7 @@ char		*str;
 	}
 }
 
-PublicFnDef int SPS_getHeadingEntry()
-{
+PrivateFnDef int SPS_getHeadingEntry(void) {
 	char	buf2[SPS_maxItemWidth+1];
 	int	i, errlen, gotprompt = FALSE;
 
@@ -1932,10 +1893,9 @@ PublicFnDef int SPS_getHeadingEntry()
 	return( gotprompt );
 }
 
-PublicFnDef int SPS_setHeadingEntry(h,flag)
-SPS_Heading	*h;
-int flag;
-{
+PrivateFnDef void SPS_setHeadingEntry(
+    SPS_Heading *h, int flag
+) {
 	int	len, hlen, hlines;
 	char	*s, *ptr ,dummy[81];
 
@@ -2005,11 +1965,7 @@ int flag;
 		SPS_MaxHeadingLines = hlines;
 }
 
-PublicFnDef int SPS_readHeadings(spr,list,flag)
-SPSHEET *spr;
-char *list;
-int flag;
-{
+PublicFnDef int SPS_readHeadings(SPSHEET *spr, char *list, int flag) {
     char buf[256];
     int oldx, oldy, oldz;
 
@@ -2037,9 +1993,7 @@ int flag;
     return(FALSE);
 }
 
-PublicFnDef SPSHEET *SPS_readSSheet(list)
-char *list;
-{
+PublicFnDef SPSHEET *SPS_readSSheet(char *list) {
     char buf[256];
     int xcount, ycount, zcount;
     SPSHEET *spr;
@@ -2069,10 +2023,7 @@ char *list;
     return(spr);
 }
 
-PublicFnDef int SPS_readCells(spr,list)
-SPSHEET *spr;
-char *list;
-{
+PublicFnDef int SPS_readCells(SPSHEET *spr, char *list) {
     char buff[256];
     SPS_cell	*c;
     SPS_DataType type;
@@ -2705,9 +2656,7 @@ PrivateFnDef int getString (
     return(FALSE);
 }
 
-PrivateFnDef getAxis(buf)
-char *buf;
-{
+PrivateFnDef int getAxis(char *buf) {
     switch(toLower (buf[0]))
     {
 	case 'x':	return(X);
@@ -2718,10 +2667,7 @@ char *buf;
     }
 }
 
-PublicFnDef int SPS_writeSSheet(spr,list)
-SPSHEET *spr;
-char *list;
-{
+PublicFnDef int SPS_writeSSheet(SPSHEET *spr, char *list) {
     int x, y, z, Arg1Axis, Arg2Axis, Arg3Axis, Arg4Axis, width;
     int oldx, oldy, oldz;
     char InitString[256], CleanupString[256], FormatString[256];

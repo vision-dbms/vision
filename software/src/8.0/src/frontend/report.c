@@ -5,6 +5,7 @@
 #include "Vk.h"
 
 #include "stdcurses.h"
+#include "misc.h"
 #include "page.h"
 #include "form.h"
 #include "rsInterface.h"
@@ -53,7 +54,7 @@ PrivateFnDef int initBuffer (
     void
 );
 
-PrivateFnDef int itemList (
+PrivateFnDef void itemList (
     void
 );
 
@@ -87,8 +88,6 @@ PrivateVarDef TOTTABLE Table[] = {
  " None ",	":totalBlock <- NA ;", 
  NULL, 
 };
-
-PublicFnDecl int FORM_menuToForm();
 
 PrivateVarDef char *Universe, **ScreenItem;
 PrivateVarDef LINEBUFFER *DisplayBuf;
@@ -1420,10 +1419,7 @@ PrivateFnDef int initBuffer (
     BUF_initBuffer(DisplayBuf, (10 * BUFFERSIZE));    
 }
 
-PrivateFnDef int itemList (
-    void
-)
-{
+PrivateFnDef void itemList (void) {
     MENU *menu1, *menu2;
     int choice, i;
     char string[80];

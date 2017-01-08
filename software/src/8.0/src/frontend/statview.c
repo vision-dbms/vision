@@ -29,8 +29,6 @@ PrivateFnDef trimString (
 
 #define STANDALONE 0
 
-PublicFnDecl int FORM_menuToForm();
-
 PrivateVarDef FORM_Field formFields[] = {
  1, 20, CUR_A_NORMAL, 40, 0, 'a', "                                        ",  
 	NULL, NULL, NULL, 
