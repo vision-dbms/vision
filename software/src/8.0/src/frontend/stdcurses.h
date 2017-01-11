@@ -18,13 +18,16 @@
 #ifndef NCURSES_OPAQUE
 #define NCURSES_OPAQUE 0
 #endif
+#ifdef sun
+#define NOMACROS
+#endif
 #include <curses.h>
 
 #ifndef TRUE
 #define TRUE 1
 #endif
 #ifndef FALSE
-#define FALSE
+#define FALSE 0
 #endif
 
 
@@ -55,7 +58,7 @@ typedef WINDOW CUR_WINDOW;
 #define CUR_getyx(win,y,x)		getyx(win,y,x)
 #define CUR_initscr()			initscr()
 #define CUR_mvwaddch(win,y,x,ch)	mvwaddch(win,y,x,ch)
-#define CUR_mvwaddstr(win,y,x,str)	mvwaddstr(win,y,x,str)
+#define CUR_mvwaddstr(win,y,x,str)	mvwaddstr(win,y,x,(char*)(str))
 #define CUR_wprintw			wprintw
 #define CUR_newwin(num_lines,num_cols,beg_y,beg_x)\
 					newwin(num_lines,num_cols,beg_y,beg_x)
