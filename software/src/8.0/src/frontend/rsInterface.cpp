@@ -277,7 +277,7 @@ PublicFnDef void RS_system (char const *str) {
     char command[160];
     struct sigvec intvec, quitvec, ivec;
   
-    ivec.sv_handler = SIG_IGN;
+    ivec.sv_handler = (STD_SignalHandlerType)SIG_IGN;
     ivec.sv_mask    = ~0;
     ivec.sv_onstack = 0;
 
@@ -469,7 +469,7 @@ PrivateFnDef void childInitialization () {
 	/***** 
 	 * Force the Research System's quit and Hangup signals to be ignored
 	 *****/
-	vec.sv_handler = SIG_IGN;
+	vec.sv_handler = (STD_SignalHandlerType)SIG_IGN;
 	vec.sv_mask    = ~(STD_maskType)0;
 	vec.sv_onstack = 0;
 	STD_sigvector (SIGQUIT, &vec, NilOf (struct sigvec *));
@@ -668,7 +668,11 @@ PrivateFnDef void handleTermination (
 }
 
 
+#if defined(sun)
+PrivateFnDef void seriousSegvHandler (int xSignal, int code, struct sigcontext *scp)
+#else
 PrivateFnDef void seriousSegvHandler (int xSignal)
+#endif
 {
 /*****  
  *  We get here if we get a 2nd segmentation fault while handling the
@@ -727,9 +731,11 @@ PublicFnDef void RS_DumpWindowStruct (CUR_WINDOW *win)
  *---------------------------------------------------------------------------
  */
 
-PrivateFnDef void parentSignalHandler (
-    int				sig
-)
+#if defined(sun)
+PrivateFnDef void parentSignalHandler (int sig, int code, struct sigcontext *scp)
+#else
+PrivateFnDef void parentSignalHandler (int sig)
+#endif
 {
     int deceasedStatus;
     pid_t deceased;
@@ -844,7 +850,7 @@ PrivateFnDef void parentSignalHandler (
 	 *  fault occurs while processing this one.
 	 *****/
 	
-	vec.sv_handler = seriousSegvHandler;
+	vec.sv_handler = (STD_SignalHandlerType)seriousSegvHandler;
         vec.sv_mask = (unsigned long)0;
 	vec.sv_onstack = 0;
 
@@ -952,7 +958,7 @@ PrivateFnDef void RS_callSignalHandler (
     if( sig <= 0 )
     	handleTermination(sig);
     else
-	parentSignalHandler (sig);
+	parentSignalHandler (sig, 0, NULL);
 }
 
 /*****  Internal routine to set up handlers for the trapable signals.
@@ -997,11 +1003,11 @@ PrivateFnDef void setupParentSignals () {
 
 #endif
 
-    vec.sv_handler	= parentSignalHandler;
+    vec.sv_handler	= (STD_SignalHandlerType)parentSignalHandler;
     vec.sv_mask		= ~(STD_maskType)0;
     vec.sv_onstack	= 0;
 
-    ivec.sv_handler	= SIG_IGN;
+    ivec.sv_handler	= (STD_SignalHandlerType)SIG_IGN;
     ivec.sv_mask	= ~(STD_maskType)0;
     ivec.sv_onstack	= 0;
 
@@ -1016,7 +1022,7 @@ PrivateFnDef void setupParentSignals () {
 	STD_sigvector (i, NilOf (struct sigvec *), &lvec);
 
 	/*****  If its not already set to ignore ... *****/
-	if (lvec.sv_handler == SIG_IGN);
+	if (lvec.sv_handler == (STD_SignalHandlerType)SIG_IGN);
 		/***** Catch the special signals ... *****/
 	else if (isaSpecialSignal (i)) STD_sigvector (
 	    i, &vec, NilOf (struct sigvec *)
