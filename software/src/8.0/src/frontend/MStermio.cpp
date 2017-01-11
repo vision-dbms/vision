@@ -2,6 +2,8 @@
 
 #include "Vk.h"
 
+#include "V_VString.h"
+
 #include <curses.h>
 #include <term.h>
 
@@ -34,10 +36,9 @@ PublicFnDef void STD_checkTerminalCapabilities() {
     if (entryIsntValid)
     {
 	char const *term = getenv ("TERM");
-	if (IsNil (term))
-	    term = "vt100";
+	VString iTerm (term ? term : "vt100", false);
 
-	entryIsntValid = tgetent (entry, term) != 1;
+	entryIsntValid = tgetent (entry, iTerm.storage ()) != 1;
     }
 
     char dl[] = "dl"; char DL[] = "DL";
@@ -56,7 +57,7 @@ STD_cleanupTerminal()
 }
 
 
-#if defined(sun)
+#if 0 // defined(sun)
 #include <sgtty.h>
 
 PrivateVarDef struct sgttyb	ShellModeTerminalState,
