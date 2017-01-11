@@ -9,7 +9,7 @@
 
 #include "Vk.h"
 
-PublicFnDecl int isBlank(char *str);
+PublicFnDecl bool isBlank(char *str);
 PublicFnDecl int toUpper (int ch);
 PublicFnDecl int toLower (int ch);
 PublicFnDecl void strToUpper(char *str);

@@ -6,9 +6,9 @@
 
 #include "Vk.h"
 
+#include "stdcurses.h"
 #include <term.h>
 
-#include "stdcurses.h"
 #include "error.h"
 
 /***** Key Defines *****/

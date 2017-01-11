@@ -2,14 +2,14 @@
 
 #include "misc.h"
 
-PublicFnDef int isBlank(char *str) {
+PublicFnDef bool isBlank(char *str) {
     int i, len;
 
     len = strlen(str);
     for (i = 0; i < len; i++)
         if (str[i] != ' ' && str[i] != '\n') 
-	    return FALSE;
-    return TRUE;
+	    return false;
+    return true;
 }
 
 PublicFnDef int toUpper (int ch) {
