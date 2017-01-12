@@ -15,7 +15,7 @@
 #include "choices.h"
 
 /**** Form Definitions ****/
-#include "form.d"
+#include "form.h"
 
 
 /*************************************************
@@ -49,10 +49,7 @@ PrivateFnDef PAGE_Action inputForm (
     }\
 }
 
-PublicFnDef FORM *FORM_read(filename, isBuffer)
-char *filename;
-int isBuffer;
-{
+PublicFnDef FORM *FORM_read(char const *filename, int isBuffer) {
     int i, j, index1, index2, k, bytes, FORM_menuToForm();
     char buffer[FORM_MaxLine], string[FORM_MaxLine], 
 	 *bp, *bp2;
@@ -241,11 +238,7 @@ PublicFnDef PAGE_Action FORM_handler(FORM *form, CUR_WINDOW *win, PAGE_Action ac
 
 }
 
-PrivateFnDef PAGE_Action initForm (
-    FORM *			form,
-    CUR_WINDOW *		win
-)
-{
+PrivateFnDef PAGE_Action initForm (FORM *form, CUR_WINDOW *win) {
     int i;
     MENU *mptr;
     FORM_Field *fptr;
@@ -384,11 +377,7 @@ PrivateVarDef int Pos[FORM_Fields];
 PrivateVarDef FORM *Form;
 PrivateVarDef CUR_WINDOW *Win;
 
-PrivateFnDef PAGE_Action inputForm (
-    FORM *			form,
-    CUR_WINDOW *		win
-)
-{
+PrivateFnDef PAGE_Action inputForm (FORM *form, CUR_WINDOW *win) {
     int c, i, j, fld, len, Xfld, idx,
 	inputFields, firstKey, 
 	xpos, isS, isX,
@@ -937,8 +926,7 @@ PrivateFnDef PAGE_Action inputForm (
 }
 
 
-PublicFnDef int FORM_menuToForm()
-{
+PublicFnDef int FORM_menuToForm() {
     FORM_Field *fptr, *Xfptr, *tfptr;
     MENU *mptr;
     int fld, isS, isX, Xfld;
@@ -979,10 +967,7 @@ PublicFnDef int FORM_menuToForm()
     return(0);
 }
 
-PublicFnDef int FORM_centerFormElts(fptr,width)
-FORM	*fptr;
-int	width;
-{
+PublicFnDef int FORM_centerFormElts(FORM *fptr, int width) {
 	int	i;
 	
 	for( i=0 ; i<FORM_fieldCount(fptr) ; i++ )

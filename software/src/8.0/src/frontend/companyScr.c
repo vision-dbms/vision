@@ -9,6 +9,7 @@
 #include "buffers.h"
 #include "page.h"
 #include "form.h"
+#include "report.h"
 #include "rsInterface.h"
 
 
@@ -16,17 +17,11 @@
  **********	Forward Declarations		**********
  *********************************************************/
 
-PrivateFnDef int execScreen (
-    void
-);
+PrivateFnDef void execScreen ();
 
-PrivateFnDef int execPrior(
-    void
-);
+PrivateFnDef void execPrior();
 
-PrivateFnDef int exec (
-    void
-);
+PrivateFnDef void exec ();
 
 PrivateFnDef int runScreen (
     char *			screen,
@@ -38,36 +33,22 @@ PrivateFnDef int initUniverse (
     int				count
 );
 
-PrivateFnDef int initHistory (
-    void
-);
+PrivateFnDef void initHistory ();
 
-PrivateFnDef void itemList (
-    void
-);
+PrivateFnDef void itemList ();
 
-PrivateFnDef void exprScreen (
-    void
-);
+PrivateFnDef void exprScreen ();
 
-PrivateFnDef void priorSubset (
-    void
-);
+PrivateFnDef void priorSubset ();
 
-PrivateFnDef void clearSubsets (
-    void
-);
+PrivateFnDef void clearSubsets ();
 
-PrivateFnDef void displaySubset (
-    void
-);
+PrivateFnDef void displaySubset ();
 
-PrivateFnDef void reportWriter (void);
+PrivateFnDef void reportWriter ();
 
 
 #define BUFFERSIZE  2048
-
-PublicFnDecl char *BUF_appendLine();
 
 typedef struct {
     int count;
@@ -147,10 +128,7 @@ PrivateVarDef MENU_Choice operatorChoices[] = {
 };
 
 
-PublicFnDef int companyScr(universe, count)
-char *universe;
-int count;
-{
+PublicFnDef int companyScr(char *universe, int count) {
     MENU *actionMenu, *menu;
     int i, longest, j;
     static int alreadyCentered = FALSE;
@@ -230,7 +208,7 @@ int count;
  **************************************************/
 PrivateVarDef PAGE *MenuPage;
 
-PrivateFnDef void clearSubsets (void) {
+PrivateFnDef void clearSubsets () {
     int i;
     
     if (Count < 1)
@@ -271,7 +249,7 @@ PrivateVarDef FORM_Field exprFields[] = {
 PrivateVarDef FORM *ExprForm;
 PrivateVarDef CUR_WINDOW *ExprWin;
 
-PrivateFnDef void exprScreen (void) {
+PrivateFnDef void exprScreen () {
     int i;
     CUR_WINDOW *win;
     CUR_WINDOW *MenuWin;
@@ -303,10 +281,7 @@ PrivateFnDef void exprScreen (void) {
     free(ExprForm);
 }
 
-PrivateFnDef int execScreen (
-    void
-)
-{
+PrivateFnDef void execScreen () {
     char buffer[RS_MaxLine + 1];
 
     PAGE_status(MenuPage) = PAGE_Normal;
@@ -314,15 +289,12 @@ PrivateFnDef int execScreen (
 	isBlank(FORM_fieldValue(EXPR2)))
     {
         ERR_displayPause (" Please Enter An Expression");
-	return FALSE;
+	return;
     }
 
     PAGE_status(MenuPage) = PAGE_ExitOnExec;
     sprintf(buffer, "%s %s", FORM_fieldValue(EXPR1), FORM_fieldValue(EXPR2));
     runScreen(buffer, TRUE);
-
-    return FALSE;
-
 }
 
 
@@ -330,7 +302,7 @@ PrivateFnDef int execScreen (
  **********	priorSubset	*******************
  *************************************************/
 
-PrivateFnDef void priorSubset (void) {
+PrivateFnDef void priorSubset () {
     int i;
 
     if (Count <= 1)    
@@ -362,10 +334,7 @@ PrivateFnDef void priorSubset (void) {
     CUR_werase(Win3);
 }
 
-PrivateFnDef int execPrior(
-    void
-)
-{
+PrivateFnDef void execPrior() {
     char *ptr, *row;
     int i, count;
 
@@ -400,7 +369,7 @@ PrivateFnDef int execPrior(
  **********	displaySubset		************
  ***************************************************/
 
-PrivateFnDef void displaySubset (void) {
+PrivateFnDef void displaySubset () {
     int i;
     char string[80];
     LINEBUFFER *displayBuf;
@@ -454,7 +423,7 @@ PrivateFnDef void displaySubset (void) {
  **********	reportWriter		************
  ***************************************************/
 
-PrivateFnDef void reportWriter (void) {
+PrivateFnDef void reportWriter () {
     char buffer[80], **reportItem;
     int i, j;
     
@@ -499,30 +468,25 @@ PrivateFnDef void reportWriter (void) {
     CUR_wattroff(win, FORM_fieldAttr(fptr));\
 }
 
-PrivateFnDef int exec (
-    void
-)
-{
+PrivateFnDef void exec () {
     char buffer[RS_MaxLine + 1];
     
     if (isBlank(FORM_fieldValue(ITEM)))
     {
         ERR_displayPause(" Please Enter Item to Screen On");
-	return(FALSE);
+	return;
     }
     
     if (isBlank(FORM_fieldValue(VALUE)))
     {
         ERR_displayPause(" Please Enter Value For Comparison");
-	return(FALSE);
+	return;
     }
 
     sprintf(buffer, "%s%s%s", 
     FORM_fieldValue(ITEM), FORM_fieldValue(OPERATOR), FORM_fieldValue(VALUE));
 
     runScreen(buffer, FALSE);
-    
-    return(FALSE);
 }
 
 PrivateFnDef int runScreen (
@@ -537,7 +501,7 @@ PrivateFnDef int runScreen (
     Count++;
     if (ScreenSize <= Count)
     {
-	ptr = realloc(Screen, (ScreenSize + 10) * sizeof(SCREEN_LIST *));
+      ptr = (char*)realloc(Screen, (ScreenSize + 10) * sizeof(SCREEN_LIST *));
 	if (ptr == NULL) ERR_fatal(" Error allocating space");
         ScreenSize += 10;
 	Screen = (SCREEN_LIST **)ptr;
@@ -625,16 +589,13 @@ PrivateFnDef int initUniverse (
     return FALSE;
 }
 
-PrivateFnDef int initHistory (
-    void
-)
-{
+PrivateFnDef void initHistory () {
     History = (LINEBUFFER *) malloc(sizeof(LINEBUFFER));
     BUF_maxLineSize(History) = BUF_maxlinesize-1;
     BUF_initBuffer(History, (10 * BUFFERSIZE));    
 }
 
-PrivateFnDef void itemList (void) {
+PrivateFnDef void itemList () {
     MENU *menu1, *menu2;
     int choice, i;
     char string[80];

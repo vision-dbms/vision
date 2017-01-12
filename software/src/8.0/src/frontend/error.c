@@ -128,7 +128,6 @@ PublicFnDef void ERR_displayNoCurses(int i) {
 }
 
 PublicFnDef void ERR_displayError(int i) {
-{
     CUR_werase (ERR_Window);
     CUR_wattron(ERR_Window, CUR_A_BOLD);
     CUR_mvwaddstr(ERR_Window, 0, 0, Message[i]);
@@ -491,7 +490,7 @@ PublicFnDef int ERR_promptForRepetition(
 }
 
 PublicFnDef int ERR_promptForInt(char const *str, int *num) {
-    int i, c, col, len, atoi(), NotDone = TRUE;
+    int i, c, col, len, NotDone = TRUE;
     char buffer[80];
 
     buffer[0] = '\0';

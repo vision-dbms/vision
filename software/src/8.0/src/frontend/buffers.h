@@ -128,7 +128,7 @@ PublicFnDecl int BUF_listFile(LINEBUFFER *buffer, char *directory);
 PublicFnDecl int BUF_writeFile(LINEBUFFER *buffer, char const *filename);
 PublicFnDecl int BUF_appendToFile(LINEBUFFER *buffer, char const *filename);
 PublicFnDecl int BUF_writeLastOutput(LINEBUFFER *buffer, char const *filename, char const *mode);
-PublicFnDecl int BUF_stripTabs(char const *source, char *dest, int len);
+PublicFnDecl void BUF_stripTabs(char const *source, char *dest, int len);
 PublicFnDecl int BUF_readFile(LINEBUFFER *buffer, char *current_file);
 PublicFnDecl int BUF_getFile(LINEBUFFER *buffer, char *current_file);
 PublicFnDecl LINEBUFFER *BUF_readBuffer(char const *filename, int len, int min, int max);
@@ -136,6 +136,9 @@ PublicFnDecl LINEBUFFER *BUF_readBuffer(char const *filename, int len, int min, 
 PublicFnDecl PAGE_Action BUF_handler(
     LINEBUFFER *buffer, CUR_WINDOW *win, PAGE_Action actionbuffer
 );
+
+PublicFnDecl void BUF_scrollUp1(LINEBUFFER *buffer, CUR_WINDOW *win);
+PublicFnDecl void BUF_scrollDown1(LINEBUFFER *buffer, CUR_WINDOW *win);
 
 
 #endif

@@ -5,13 +5,8 @@
 #include "page.h"
 #include "form.h"
 #include "menu.h"
-#include "choices.d"
+#include "choices.h"
 
-PublicFnDef void CHOICES_LimitOptions (win, form, dependencyL, Pos)
-CUR_WINDOW *win;
-FORM *form;
-CHOICE_MenuChoice *dependencyL;
-int *Pos;
 /*****  Routine decides which menu choices may be selected by the user.
  *****	  It also turns on and off the field choices depending upon the number
  *****    of active menu choices.
@@ -28,7 +23,9 @@ int *Pos;
  *	NOTHING - Executed for side effects on the form and on its menu.
  *
  *****/
-{
+PublicFnDef void CHOICES_LimitOptions (
+    CUR_WINDOW *win, FORM *form, CHOICE_MenuChoice *dependencyL, int *Pos
+) {
     int count, 
 	fieldNumber, 
 	menuChoice, 

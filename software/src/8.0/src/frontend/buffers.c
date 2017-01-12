@@ -2459,7 +2459,7 @@ PublicFnDef int BUF_writeLastOutput(LINEBUFFER *buffer, char const *filename, ch
  * Strip tabs ('\t') from source into dest and copy
  * no more than len characters (including the '\0')
  ***************************************************/
-PublicFnDef int BUF_stripTabs(char const *source, char *dest, int len) {
+PublicFnDef void BUF_stripTabs(char const *source, char *dest, int len) {
 	int	i, j, k, l, slen;
 
 	slen = strlen(source);
@@ -2530,10 +2530,7 @@ PrivateFnDef int file_read(LINEBUFFER *buffer, char const *current_file) {
 	if ((fgets(string, BUF_maxlinesize, fd)) != NULL)
 	{
 	    BUF_stripTabs(string, str, BUF_maxlinesize);
-	    if (*str == NULL)
-	        len = 0;
-	    else
-		len = strlen(str);
+	    len = strlen(str);
 	    if( (len > 0) && (str[len - 1] == '\n') )
 		str[len - 1] = '\0';
 	    BUF_tempRow3 = BUF_row(buffer);
@@ -2657,8 +2654,6 @@ PublicFnDef LINEBUFFER *BUF_readBuffer(char const *filename, int len, int min, i
 PublicFnDef PAGE_Action BUF_handler(
     LINEBUFFER *buffer, CUR_WINDOW *win, PAGE_Action action
 ) {
-    PAGE_Action initBuffer();
-
     switch (action)
     {
     case PAGE_Init:
@@ -2886,17 +2881,13 @@ PrivateFnDef PAGE_Action scrollBuffer (
     }    
 }
 
-PublicFnDef int
-BUF_scrollUp1(buffer,win)
-LINEBUFFER *buffer;
-CUR_WINDOW *win;
-{
+PublicFnDef void BUF_scrollUp1(LINEBUFFER *buffer, CUR_WINDOW *win) {
 	BUF_adjustRow(buffer);
 	BUF_resetScreen(buffer,win);
 	if( (BUF_row(buffer) == NULL) ||
 	    (BUF_prevLine(BUF_row(buffer)) == NULL) )
 	{
-		return(FALSE);
+		return;
 	}
 	if( BUF_row(buffer) == BUF_bufferRow(buffer,CUR_WIN_maxy(win)) )
 	{
@@ -2906,20 +2897,15 @@ CUR_WINDOW *win;
 	else
 		BUF_screenRow(buffer)++;
 	BUF_resetScreen(buffer,win);
-	return(FALSE);
 }
 
-PublicFnDef int
-BUF_scrollDown1(buffer,win)
-LINEBUFFER *buffer;
-CUR_WINDOW *win;
-{
+PublicFnDef void BUF_scrollDown1(LINEBUFFER *buffer, CUR_WINDOW *win) {
 	BUF_adjustRow(buffer);
 	BUF_resetScreen(buffer,win);
 	if( (BUF_row(buffer) == NULL) ||
 	    (BUF_nextLine(BUF_row(buffer)) == NULL) )
 	{
-		return(FALSE);
+		return;
 	}
 	if( BUF_row(buffer) == BUF_bufferRow(buffer,0) )
 	{
@@ -2929,5 +2915,4 @@ CUR_WINDOW *win;
 	else
 		BUF_screenRow(buffer)--;
 	BUF_resetScreen(buffer,win);
-	return(FALSE);
 }

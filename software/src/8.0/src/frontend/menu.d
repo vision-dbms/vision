@@ -20,7 +20,7 @@ typedef struct {
     char const *label;
     char const *help;
     char letter;	 
-    void (*handler)(void);
+    void (*handler)();
     char active;
 } MENU_Choice;
 

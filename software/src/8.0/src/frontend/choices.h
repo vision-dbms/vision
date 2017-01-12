@@ -7,6 +7,8 @@
 
 /*****  Function Declarations  *****/
 
-PublicFnDecl void CHOICES_LimitOptions();
+PublicFnDecl void CHOICES_LimitOptions (
+    CUR_WINDOW *win, FORM *form, CHOICE_MenuChoice *dependencyL, int *Pos
+);
 
 #endif
