@@ -52,8 +52,7 @@ PublicFnDecl char *BUF_getLine(
     int len
 );
 PublicFnDecl char *BUF_appendLine(
-    LINEBUFFER *buffer,
-    char *str
+    LINEBUFFER *buffer, char const *str
 );
 PublicFnDecl char *BUF_insertLine(
     LINEBUFFER *buffer,
@@ -122,12 +121,12 @@ PublicFnDecl int BUF_appendRegion(
 );
 
 PublicFnDecl int BUF_printBuffer (LINEBUFFER *buf, PAGE *page, int defaultPrinter);
-PublicFnDecl int BUF_saveFile(LINEBUFFER *buffer, char const *current_file);
-PublicFnDecl int BUF_appendFile(LINEBUFFER *buffer, char const *current_file);
+PublicFnDecl int BUF_saveFile(LINEBUFFER *buffer, char *current_file);
+PublicFnDecl int BUF_appendFile(LINEBUFFER *buffer, char *current_file);
 PublicFnDecl int BUF_listFile(LINEBUFFER *buffer, char *directory);
-PublicFnDecl int BUF_writeFile(LINEBUFFER *buffer, char const *filename);
-PublicFnDecl int BUF_appendToFile(LINEBUFFER *buffer, char const *filename);
-PublicFnDecl int BUF_writeLastOutput(LINEBUFFER *buffer, char const *filename, char const *mode);
+PublicFnDecl int BUF_writeFile(LINEBUFFER *buffer, char *filename);
+PublicFnDecl int BUF_appendToFile(LINEBUFFER *buffer, char *filename);
+PublicFnDecl int BUF_writeLastOutput(LINEBUFFER *buffer, char *filename, char const *mode);
 PublicFnDecl void BUF_stripTabs(char const *source, char *dest, int len);
 PublicFnDecl int BUF_readFile(LINEBUFFER *buffer, char *current_file);
 PublicFnDecl int BUF_getFile(LINEBUFFER *buffer, char *current_file);

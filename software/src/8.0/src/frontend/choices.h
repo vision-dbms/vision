@@ -2,6 +2,9 @@
 #ifndef CHOICES_H
 #define CHOICES_H
 
+/*****  Supporting Definitions  *****/
+#include "form.d"
+
 /*****  Shared Definitions  *****/
 #include "choices.d"
 

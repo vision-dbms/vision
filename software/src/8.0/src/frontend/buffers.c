@@ -642,10 +642,7 @@ PublicFnDef char *BUF_getLine(LINEBUFFER *buffer, int len) {
 *	Returns:	FAILURE or index of row added
 *
 ************************************************/
-PublicFnDef char *BUF_appendLine(
-    LINEBUFFER *buffer,
-    char *str
-) {
+PublicFnDef char *BUF_appendLine(LINEBUFFER *buffer, char const *str) {
     int len;
     char *row;
      
@@ -2326,7 +2323,7 @@ PublicFnDef int BUF_printBuffer (LINEBUFFER *buf, PAGE *page, int defaultPrinter
 /*********************************************************
  *********	File / Buffer Operations    **************
  ********************************************************/
-PublicFnDef int BUF_saveFile(LINEBUFFER *buffer, char const *current_file) {
+PublicFnDef int BUF_saveFile(LINEBUFFER *buffer, char *current_file) {
     char string[BUF_MaxPathNameChars], prompt[BUF_MaxPathNameChars + 80];
     int	error;
 
@@ -2357,7 +2354,7 @@ PublicFnDef int BUF_saveFile(LINEBUFFER *buffer, char const *current_file) {
     return(file_write(buffer, current_file, "w"));
 }
 
-PublicFnDef int BUF_appendFile(LINEBUFFER *buffer, char const *current_file) {
+PublicFnDef int BUF_appendFile(LINEBUFFER *buffer, char *current_file) {
     char string[BUF_MaxPathNameChars], prompt[BUF_MaxPathNameChars + 80];
     int	error, mode;
 
@@ -2606,7 +2603,7 @@ PublicFnDef int BUF_readFile(LINEBUFFER *buffer, char *current_file) {
     return( file_read(buffer, current_file) );
 }
 
-PublicFnDef int BUF_getFile(LINEBUFFER *buffer, char const *current_file) {
+PublicFnDef int BUF_getFile(LINEBUFFER *buffer, char *current_file) {
     return( file_read(buffer, current_file) );
 }
 

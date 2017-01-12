@@ -53,9 +53,7 @@ PrivateFnDef int systemPrint (
 PublicVarDef SPRSHEET	*SPR_OldSPR = NULL, *SPR_CurrSPR = NULL;
 PublicVarDef int	SPR_simulateApplic = FALSE;
 
-PublicFnDef void SPR_delete(spr)
-SPRSHEET *spr;
-{
+PublicFnDef void SPR_delete(SPRSHEET *spr) {
     int col;
     
     if( spr == SPR_CurrSPR )
@@ -69,9 +67,7 @@ SPRSHEET *spr;
     free(spr);
 }
 
-PublicFnDef void SPR_erase(spr)
-SPRSHEET *spr;
-{
+PublicFnDef void SPR_erase(SPRSHEET *spr) {
     if (SPR_rowsSize(spr) > 0) free(spr->rows);
     spr->rows = NULL;
     SPR_rowCount(spr) = SPR_rowsSize(spr) = 0;
@@ -81,9 +77,7 @@ SPRSHEET *spr;
 
 }
 
-PublicFnDef void SPR_eraseFields(spr)
-SPRSHEET *spr;
-{
+PublicFnDef void SPR_eraseFields(SPRSHEET *spr) {
     int col;
 
     for (col = 0; col < SPR_fieldCount(spr); col++)
@@ -91,11 +85,6 @@ SPRSHEET *spr;
     SPR_fieldCount(spr) = 0;
 }
 
-
-PublicFnDef PAGE_Action SPR_handler(spsheet, win, action)
-SPRSHEET *spsheet;
-CUR_WINDOW *win;
-PAGE_Action action;
 /*****		Routine to manage user interaction with spsheet 
  *
  *  Arguments:
@@ -107,7 +96,9 @@ PAGE_Action action;
  *	PAGE_Action
  *
  *****/
-{
+PublicFnDef PAGE_Action SPR_handler(
+    SPRSHEET *spsheet, CUR_WINDOW *win, PAGE_Action action
+) {
     switch (action)
     {
     case PAGE_Init:
@@ -173,10 +164,7 @@ PrivateFnDef PAGE_Action initSprSh (
     CUR_wnoutrefresh(win);
 }
 
-PublicFnDef SPR_paintScreen(spr, win)
-SPRSHEET *spr;
-CUR_WINDOW *win;
-{
+PublicFnDef SPR_paintScreen(SPRSHEET *spr, CUR_WINDOW *win) {
     int i, j, row, col;
     char *cell;
     
@@ -585,10 +573,7 @@ PrivateFnDef PAGE_Action inputSprSh (
     return(action);
 }
 
-PublicFnDef int SPR_addRow(spr, buffer)
-SPRSHEET *spr;
-char *buffer;
-{
+PublicFnDef int SPR_addRow(SPRSHEET *spr, char *buffer) {
     char *ptr, *new, *cell, buffer2[80];
     int row, col, len, i;
     
@@ -651,9 +636,7 @@ char *buffer;
     return(FALSE);
 }
 
-PublicFnDef int SPR_makeDummySheet(spr)
-SPRSHEET *spr;
-{
+PublicFnDef int SPR_makeDummySheet(SPRSHEET *spr) {
     char *buffer;
     int width, j;
 
@@ -673,9 +656,7 @@ SPRSHEET *spr;
 
 #if RSATTACH
 
-PublicFnDef int SPR_readSSheet(spr)
-SPRSHEET *spr;
-{
+PublicFnDef int SPR_readSSheet(SPRSHEET *spr) {
     char *buffer;
     int lastIsBlank, width, i;
 
@@ -702,10 +683,7 @@ SPRSHEET *spr;
 #endif
 
 
-PublicFnDef int SPR_print (spr, page)
-SPRSHEET *spr;
-PAGE *page;
-{
+PublicFnDef int SPR_print (SPRSHEET *spr, PAGE *page) {
 #if 0
     int c;
 
@@ -746,10 +724,7 @@ PAGE *page;
     lineCount++;\
 }
 
-PublicFnDef int SPR_writeToFile(spr,filename)
-SPRSHEET *spr;
-char	*filename;
-{
+PublicFnDef int SPR_writeToFile(SPRSHEET *spr, char const *filename) {
     int row,  col, i, lineCount = 0;
     char *cell;
     char *buffer, *ptr;
@@ -776,10 +751,7 @@ char	*filename;
 PrivateVarDef int	doPC = FALSE;
 #endif
 
-PrivateFnDef int systemPrint (
-    SPRSHEET *			spr
-)
-{
+PrivateFnDef int systemPrint (SPRSHEET *spr) {
     int row,
         col,
         i,
@@ -852,9 +824,7 @@ PrivateFnDef int systemPrint (
 }
 
 #if 0
-PrivateFnDef int pcPrint(spr)
-SPRSHEET *spr;
-{
+PrivateFnDef int pcPrint(SPRSHEET *spr) {
  #if 0
     int row,  col, i, lineCount;
     char *cell;
@@ -904,9 +874,7 @@ SPRSHEET *spr;
 }
 #endif
 
-PrivateFnDef int isStringCell(str)
-char *str;
-{
+PrivateFnDef int isStringCell(char const *str) {
     int  i, len;
 
     len = strlen(str);
@@ -919,9 +887,7 @@ char *str;
 }
 
 
-PublicFnDef int SPR_download(spr)
-SPRSHEET *spr;
-{
+PublicFnDef int SPR_download(SPRSHEET *spr) {
     int row,  col;
     char *cell;
     char buffer[1024], filename[80], *ptr;

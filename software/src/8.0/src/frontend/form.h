@@ -14,7 +14,7 @@ PublicFnDecl PAGE_Action FORM_handler(
 
 PublicFnDecl void FORM_menuToForm();
 
-PublicFnDef int FORM_centerFormElts(FORM *fptr, int width);
+PublicFnDecl int FORM_centerFormElts(FORM *fptr, int width);
 
 
 #endif

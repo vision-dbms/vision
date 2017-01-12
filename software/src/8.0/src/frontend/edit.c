@@ -33,57 +33,31 @@ PublicFnDef void browser ();
 
 PublicFnDef void ED_subShell ();
 
-PrivateFnDef void readFile (
-    void
-);
+PrivateFnDef void readFile ();
 
-PrivateFnDef void readFileInt (
-    void
-);
+PrivateFnDef void readFileInt ();
 
-PrivateFnDef void saveFileInt (
-    void
-);
+PrivateFnDef void saveFileInt ();
 
-PrivateFnDef void saveFile (
-    void
-);
+PrivateFnDef void saveFile ();
 
-PrivateFnDef void listFile (
-    void    
-);
+PrivateFnDef void listFile ();
 
-PrivateFnDef void runSysMenu (
-    void
-);
+PrivateFnDef void runSysMenu ();
 
-PrivateFnDef void runEditorInterface (
-    void
-);
+PrivateFnDef void runEditorInterface ();
 
-PrivateFnDef int execInterface (
-    void
-);
+PrivateFnDef void execInterface ();
 
-PrivateFnDef void copyPasteBufInt (
-    void
-);
+PrivateFnDef void copyPasteBufInt ();
 
-PrivateFnDef int recall (
-    void
-);
+PrivateFnDef int recall ();
 
-PrivateFnDef void printBuffer (
-    void
-);
+PrivateFnDef void printBuffer ();
 
-PrivateFnDef void saveRegionInt (
-    void
-);
+PrivateFnDef void saveRegionInt ();
 
-PrivateFnDef void printRegion (
-    void
-);
+PrivateFnDef void printRegion ();
 
 #if 0
 PrivateFnDef int uploadRegion (
@@ -160,8 +134,8 @@ PrivateFnDef void PrintScreen (
 );
 
 PrivateFnDef int copyFile (
-    char *			fname,
-    char *			dname,
+    char const *		fname,
+    char const *		dname,
     int				mode,
     int				filter,
     char *			filterOpts
@@ -409,7 +383,7 @@ PrivateVarDef int RS_autog = TRUE;
  **************************************/
 PrivateVarDef int EDIT_Init = FALSE;
 PrivateVarDef int NotDone, ExecutedBuffer;
-PrivateVarDef void editorIO();
+PrivateFnDef void editorIO(LINEBUFFER *inbuffer, LINEBUFFER *outbuffer, LINEBUFFER *errbuffer);
 
 #define EdKeys \
 " Edit: Help(F1) Exec(F2) Window(F3) Interface(F5) Regions(F6) Quit(F9) "
@@ -436,7 +410,8 @@ PrivateVarDef MENU *FileMenu, *RegMenu, *WinMenu, *AppMenu;
 
 PrivateVarDef int TwoWin = FALSE;
 
-PrivateVarDef char CurrentFile[BUF_MaxPathNameChars], *CurrKeys;
+PrivateVarDef char CurrentFile[BUF_MaxPathNameChars];
+PrivateVarDef char const *CurrKeys;
 
 /**** buffers *****/
 
@@ -1199,10 +1174,7 @@ PrivateFnDef void twoWindows () {
  **********	File Functions		**********
  *************************************************/
 
-PrivateFnDef int readFilePrime (
-    void
-)
-{
+PrivateFnDef int readFilePrime () {
 	MENU *mptr;
 
 	mptr = FORM_fieldMenu(FORM_field(interfaceForm,DestType));
@@ -1273,10 +1245,7 @@ PrivateFnDef int checkFileExistence(char *dname) {
 	return(mode);			
 }
 
-PrivateFnDef int 
-getFileName(current_file, pstr)
-char *current_file, *pstr;
-{
+PrivateFnDef int getFileName(char *current_file, char const *pstr) {
     char string[BUF_MaxPathNameChars], prompt[BUF_MaxPathNameChars + 80];
     int	error;
 
@@ -1513,10 +1482,7 @@ PrivateFnDef int appendFilePrime()
     EDIT_fileMode = NOmode;
 }
 
-PrivateFnDef int appendFile (
-    void
-)
-{
+PrivateFnDef int appendFile () {
     int error;
     
     if( !doInterface && (error = getFileName(CurrentFile,"append")) != ERR_AskedForHelp )
@@ -1540,10 +1506,7 @@ PrivateFnDef int appendFile (
     appendFilePrime();
 }
 
-PrivateFnDef int appendFileInt (
-    void
-)
-{
+PrivateFnDef int appendFileInt () {
 	doInterface = TRUE;
 	appendFile();
 	doInterface = FALSE;
@@ -1553,10 +1516,7 @@ PrivateFnDef int appendFileInt (
 
 /*---------------------------------------------------------------------*/
 #if 0
-PrivateFnDef int currentFile (
-    void
-)
-{
+PrivateFnDef int currentFile () {
     char buffer[BUF_MaxPathNameChars + 80];
     
     sprintf(buffer, " Current file is: %s ", CurrentFile);
@@ -1748,10 +1708,7 @@ static char uplTemplate[] = "/tmp/uplXXXXXX" ;
 static char dnlTemplate[] = "/tmp/dnlXXXXXX" ;
 
 #if 0
-PrivateFnDef int uploadRegion (
-    void
-)
-{
+PrivateFnDef int uploadRegion () {
     int error;
     char	*s, tname[128], pcname[128], *mktemp(), cmd[128];
     
@@ -1803,10 +1760,7 @@ PrivateFnDef int uploadRegion (
 
 
 #if 0
-PrivateFnDef int downloadRegion (
-    void
-)
-{
+PrivateFnDef int downloadRegion () {
     int error;
     char	*s, tname[128], pcname[128], *mktemp(), cmd[128];
     
@@ -1862,10 +1816,7 @@ PrivateFnDef int downloadRegion (
 #endif
 
 
-PrivateFnDef int saveRegionPrime (
-    void
-)
-{
+PrivateFnDef void saveRegionPrime () {
     MENU *mptr;
 
     mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType));
@@ -1882,10 +1833,7 @@ PrivateFnDef int saveRegionPrime (
     runEditorInterface();
 }
 
-PrivateFnDef int saveRegion (
-    void    
-)
-{
+PrivateFnDef int saveRegion () {
     int error, mode;
     
     if (BUF_firstLine(Region) == NULL && BUF_lastLine(Region) == NULL)
@@ -1961,9 +1909,7 @@ PrivateFnDef void printRegion () {
 /**************************************************************
  ***************	Misc. Functions		***************
  *************************************************************/
-PrivateFnDef void editorIO(inbuffer, outbuffer, errbuffer)
-LINEBUFFER *inbuffer, *outbuffer, *errbuffer;
-{
+PrivateFnDef void editorIO(LINEBUFFER *inbuffer, LINEBUFFER *outbuffer, LINEBUFFER *errbuffer) {
     char *row, *ptr, *ptr2;
     int  OMemoryError = FALSE, RMemoryError = FALSE;
 
@@ -2072,10 +2018,7 @@ PublicFnDef void ED_subShell () {
 }
 /*---------------------------------------------------------------------*/
 
-PrivateFnDef int recall (
-    void
-)
-{
+PrivateFnDef int recall () {
     int i, error;
     
     if( RepetitionCount >= NUMRECALL )
@@ -2603,11 +2546,7 @@ PrivateFnDef int session () {
     return(FALSE);
 }
 
-PublicFnDef int EDIT_reportFileMenu (
-    PAGE *			page,
-    int				doBrowse
-)
-{
+PublicFnDef void EDIT_reportFileMenu (PAGE *page, int doBrowse) {
     int		i, j, longest, sr, sc;
     MENU	*menu;
     CUR_WINDOW	*menuWin;
@@ -2784,7 +2723,7 @@ PrivateFnDef void createEditorWindows() {
     CUR_wclear(FullWin);
 }
 
-PrivateFnDef int deleteEditorWindows()
+PrivateFnDef void deleteEditorWindows()
 {
     CUR_delwin(FileMenuWin);
     CUR_delwin(WindowMenuWin);
@@ -2877,9 +2816,7 @@ PublicFnDef void EDIT_main () {
  *********         Interface Form         *******************************
  ************************************************************************/
  
-PrivateFnDef int
-initInterface()
-{
+PrivateFnDef void initInterface() {
 	int	i, j, longest;
 	MENU	*menu;
 
@@ -3029,7 +2966,7 @@ PrivateFnDef int
 getErrorMessage()
 {
 	int	len;
-	FILE	*fp, *fopen();
+	FILE	*fp;
 
 	displayErr = FALSE;	
 	errorMessage[0] = '\0';
@@ -3048,13 +2985,7 @@ getErrorMessage()
 	return(FALSE);
 }
 
-PrivateFnDef int
-doFilter (sname, dname, filter, filterOpts)
-char	*sname,
-	*dname;
-int	filter;
-char	*filterOpts;
-{
+PrivateFnDef int doFilter (char const *sname, char *dname, int filter, char *filterOpts) {
 	char	buffer[2 * BUF_MaxPathNameChars + 80];
 	
 	if (filter == FILTERnone)
@@ -3156,11 +3087,7 @@ PublicFnDef int printFile (char const *fname) {
 }
 
 PrivateFnDef int
-pcTransfer(fname, pname, DirFlag, mode, filter, filterOpts)
-char	*fname, *pname;
-int	DirFlag, mode, filter;
-char	*filterOpts;
-{
+pcTransfer(char const *fname, char *pname, int DirFlag, int mode, int filter, char *filterOpts) {
 	char	buffer[256], buffer2[256], tmpName[256], filterName[256];
 
 	ERR_displayStr("Transfer in process, please wait...",FALSE);
@@ -3208,21 +3135,21 @@ char	*filterOpts;
 }
 
 PrivateFnDef int copyFile(
-    char *			fname,
-    char *			dname,
+    char const *		fname,
+    char const *		dname,
     int				mode,
     int				filter,
     char *			filterOpts
 )
 {
-	char	buffer[1024], filterName[256], *sname;
+	char	buffer[1024], filterName[256];
 	int	ifd, ofd, imode = O_RDONLY, omode = (O_WRONLY|O_CREAT), nread;
 
 	if( mode == ABORTmode )
 		return(TRUE);
 
 	ERR_displayStr("Executing, please wait...",FALSE);
-	sname = fname;
+	char const *sname  = fname;
 	if( filter != FILTERnone )
 	{
 		sprintf(filterName, "/tmp/visfil%d", getpid());
@@ -3269,10 +3196,7 @@ PrivateFnDef int copyFile(
 	return(FALSE);
 }
 
-PrivateFnDef int
-eatTrailingSpaces(tmpName)
-char	*tmpName;
-{
+PrivateFnDef int eatTrailingSpaces(char *tmpName) {
 	int	i;
 
 	i = strlen(tmpName);
@@ -3336,10 +3260,7 @@ char	*tmpName;
 		PBUF_checkPbufType(dname) )\
 		return(TRUE);
 
-PrivateFnDef int illegalDestination (
-    void
-)
-{
+PrivateFnDef int illegalDestination () {
 	MENU	*menu;
 	
 	menu = FORM_fieldMenu(FORM_field(interfaceForm,DestType));
@@ -3373,12 +3294,9 @@ PrivateFnDef int illegalDestination (
 
 PrivateFnDef int	doingSPR = FALSE;
 
-PrivateFnDef int execInterfaceFile (
-    char *			fname
-)
-{
+PrivateFnDef int execInterfaceFile (char const *fname) {
 	MENU	*menu;
-	char	*dname, *sname, tmpName[80], tmpName2[80], *filterOpts;
+	char	*dname, tmpName[80], tmpName2[80], *filterOpts;
 	int	error, mode, filterType, realPasteBuf = FALSE;
 
 	if( access(fname,04) == -1 )
@@ -3386,7 +3304,7 @@ PrivateFnDef int execInterfaceFile (
 		ERR_displayPause("Unable to access Source File");
 		return(TRUE);
 	}
-	sname = fname;
+	char const *sname = fname;
 	menu = FORM_fieldMenu(FORM_field(interfaceForm,DestType));
 	filterType = MENU_currChoice(FORM_fieldMenu(FORM_field(interfaceForm,FilterType)));
 	filterOpts = FORM_fieldValue(FORM_field(interfaceForm,FilterOpts));
@@ -3481,10 +3399,7 @@ PrivateFnDef int execInterfaceFile (
     	return(FALSE);
 }
 	
-PrivateFnDef int execInterfaceBuffer (
-    int				whichBuf
-)
-{
+PrivateFnDef int execInterfaceBuffer (int whichBuf) {
 	MENU		*menu;
 	char		*dname, tmpName[80], tmpName2[80];
 	int		error, mode, filterType, realPasteBuf = FALSE;
@@ -3646,10 +3561,7 @@ PrivateFnDef int execInterfaceBuffer (
     	return(FALSE);
 }
 			
-PrivateFnDef int execInterfaceRegion (
-    int				whichReg
-)
-{
+PrivateFnDef int execInterfaceRegion (int whichReg) {
 	MENU		*menu;
 	char		*dname, tmpName[80], tmpName2[80];
 	int		error, mode, filterType, realPasteBuf = FALSE;
@@ -3764,10 +3676,7 @@ PrivateFnDef int execInterfaceRegion (
     	return(FALSE);
 }
 			
-PrivateFnDef int execInterfacePC (
-    char *			fname
-)
-{
+PrivateFnDef int execInterfacePC (char const *fname) {
 	MENU	*menu;
 	char	*dname, *filterOpts;
 	char	tmpName[80], tmpName2[80];
@@ -3850,10 +3759,7 @@ PrivateFnDef int execInterfacePC (
     	return(FALSE);
 }
 	
-PrivateFnDef int execInterfacePasteBuf (
-    char *			fname
-)
-{
+PrivateFnDef int execInterfacePasteBuf (char const *fname) {
 	MENU	*menu;
 	char	*dname, tmpName[80], tmpName2[80];
 	int	error, mode, filterType, realPasteBuf = FALSE;
@@ -3941,15 +3847,12 @@ PrivateFnDef int execInterfacePasteBuf (
     	return(FALSE);
 }
 
-PrivateFnDef int execInterface (
-    void
-)
-{
+PrivateFnDef void execInterface () {
 	MENU	*menu;
 	char	*fname;
 	
 	if( illegalDestination() )
-		return(TRUE);
+		return;
 	menu = FORM_fieldMenu(FORM_field(interfaceForm,SourceType));
 	switch( MENU_currChoice(menu) )
 	{
@@ -3961,7 +3864,7 @@ PrivateFnDef int execInterface (
 			if( *fname == '\0' )
 			{
 				ERR_displayPause(" You must supply a Source File Name");
-				return TRUE;
+				return;
 			}
 			if( !execInterfaceFile(fname) )
 				PAGE_status(interfacePage) = PAGE_ExitOnExec;
@@ -3978,7 +3881,7 @@ PrivateFnDef int execInterface (
 			break;
 		case PRINTERfield:
 			ERR_displayPause("Not allowed to use a Printer as A Source");
-			return TRUE;
+			return;
 		case PCfield:
 			fname = FORM_fieldValue(FORM_field(interfaceForm,SourceType+2+PCfield));
 			while( *fname != '\0' && isspace(*fname) )
@@ -3987,7 +3890,7 @@ PrivateFnDef int execInterface (
 			if( *fname == '\0' )
 			{
 				ERR_displayPause(" You must supply a PC Source File Name");
-				return TRUE;
+				return;
 			}
 			if( !execInterfacePC(fname) )
 				PAGE_status(interfacePage) = PAGE_ExitOnExec;
@@ -3998,7 +3901,6 @@ PrivateFnDef int execInterface (
 			break;
 	}
 	ERR_clearMsg();
-	return FALSE;
 }
 			
 

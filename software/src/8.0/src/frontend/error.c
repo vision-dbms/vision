@@ -86,9 +86,9 @@ PublicFnDef void ERR_paintLineASCII(
     char const *str, int width, CUR_WINDOW *win, int useHilight, int hilight
 ) {
 	int	i=0, j, k;
-	char	c, *s;
+	char	c;
 
-	for( s=str ; ((*s != '\0') && (i<width)) ; s++ )
+	for( char const *s=str ; ((*s != '\0') && (i<width)) ; s++ )
 	{
 		c = *s;
 		if( c == '\t' )
@@ -414,7 +414,7 @@ PublicFnDef int ERR_promptForString(
 PublicFnDef int ERR_promptForRepetition(
     int *num, CUR_WINDOW *win, int oy, int ox
 ) {
-    int i, c, col, len, atoi(), NotDone = TRUE;
+    int i, c, col, len,  NotDone = TRUE;
     char buffer[80], buffer2[80];
 
     i = 0;

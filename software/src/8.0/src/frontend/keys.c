@@ -6,11 +6,13 @@
 
 #include "Vk.h"
 
+#include <term.h>
+
 #include "stdcurses.h"
 #include "error.h"
 
 /***** Key Defines *****/
-#include "keys.d"
+#include "keys.h"
 
 #define EMPTY 		0
 #define	DelayOFF	0x02
@@ -39,9 +41,9 @@ PublicVarDef int RepetitionCount = 0,
 		 RepetitionQuote = FALSE;
 
 struct StringKey {
-	char 	*s;
-	int	k;
-	char	*descrip;
+    char const 	*s;
+    int		k;
+    char const	*descrip;
 };
 
 #define NUMSTRINGS	82
@@ -192,8 +194,7 @@ PublicFnDef int KEY_cready() {
     return(TRUE);
 }
 
-PrivateFnDef int cget()
-{
+PrivateFnDef int cget() {
 
     int c;
 

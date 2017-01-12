@@ -18,33 +18,19 @@
 #include "page.d"
 
 /**********  Forward Declarations  **********/
-PrivateFnDef int pageRefresh (
-    PAGE *			page
-);
+PrivateFnDef int pageRefresh (PAGE *page);
 
-PrivateFnDef int pageHelp (
-    void
-);
+PrivateFnDef void pageHelp ();
 
-PrivateFnDef int pageWindow (
-    void
-);
+PrivateFnDef void pageWindow ();
 
-PrivateFnDef int pageApplic (
-    void
-);
+PrivateFnDef void pageApplic ();
 
-PrivateFnDef int pagePrev (
-    void
-);
+PrivateFnDef void pagePrev ();
 
-PrivateFnDef int pageEdit (
-    void
-);
+PrivateFnDef void pageEdit ();
 
-PrivateFnDef int execProfile (
-    void
-);
+PrivateFnDef void execProfile ();
 
 /**********  Globals  **********/
 PublicVarDef int PAGE_ExitSystem = FALSE, PAGE_ToNextEltOnExec = FALSE,
@@ -91,9 +77,7 @@ PrivateVarDef PAGE	*CurrentPage = NULL;
 #endif
 
 #ifdef DBMENU
-PrivateFnDef void pageDisplayHelp(helpname)
-char *helpname;
-{
+PrivateFnDef void pageDisplayHelp(char const *helpname) {
 
 #define SourceDirEnv 	"VisionLibrary"
 
@@ -126,7 +110,6 @@ char *helpname;
 #endif
 
 
-PublicFnDef void PAGE_handler(PAGE *page)
 /*****		Routine to manage user interaction with windows
  *
  *  Argument:
@@ -136,7 +119,7 @@ PublicFnDef void PAGE_handler(PAGE *page)
  *	nothing
  *
  *****/
-{
+PublicFnDef void PAGE_handler(PAGE *page) {
     int i, k, 
 	enterCount, 
 	currElement, 
@@ -457,66 +440,46 @@ PrivateFnDef int pageRefresh (
 	CUR_doupdate();
 }
 
-PrivateFnDef int pageHelp (
-    void
-)
-{
+PrivateFnDef void pageHelp () {
     MenuAction = PAGE_Help;
 }
 
-PrivateFnDef int pageWindow (
-    void
-)
-{
+PrivateFnDef void pageWindow () {
     MenuAction = PAGE_Window;
 }
 
-PrivateFnDef int pageApplic (
-    void
-)
-{
+PrivateFnDef void pageApplic () {
     MenuAction = PAGE_AMenu;
 }
 
-PrivateFnDef int pagePrev (
-    void
-)
-{
+PrivateFnDef void pagePrev () {
     MenuAction = PAGE_Prev;
 }
 
-PrivateFnDef int pageEdit (
-    void
-)
-{
+PrivateFnDef void pageEdit () {
     MenuAction = PAGE_Editor;
 }
 
 #if 0
-PrivateFnDef pageModule()
-{
+PrivateFnDef void pageModule() {
     MenuAction = PAGE_Module;
 }
 #endif
 
 PrivateVarDef PAGE	*SysPage = NULL;
 
-PrivateFnDef int
-doEdit()
-{
+PrivateFnDef void doEdit() {
 	EDIT_main();
 	SysPage = NULL;
 }
 
-PrivateFnDef int
-doProfile()
-{
+PrivateFnDef void doProfile() {
 	VARS_runProfile(SysPage);
 	SysPage = NULL;
 }
 
-PublicFnDecl int statmenu(), queries(), financeSt(), dataEntryModule(), browser();
-PublicFnDecl int MAIN_getCompany(), MAIN_getUniverse(), timeSeries();
+PublicFnDecl void statmenu(), queries(), financeSt(), dataEntryModule(), browser();
+PublicFnDecl void MAIN_getCompany(), MAIN_getUniverse(), timeSeries();
 
 PrivateVarDef MENU_Choice menuChoices[] = {
  " Financial Statements ", " Financial Statement Analysis", 'f', financeSt, ON, 
@@ -531,9 +494,7 @@ PrivateVarDef MENU_Choice menuChoices[] = {
  NULL, 
 };
 
-PrivateFnDef int
-doModule()
-{
+PrivateFnDef void doModule() {
 	MENU		*menu;
 	int		i, j, longest, rows, cols, startrow, startcol;
 	CUR_WINDOW	*MenuWin;
@@ -560,10 +521,7 @@ PrivateVarDef MENU_Choice sysChoices[] = {
      NULL,
 };
 
-PublicFnDef int
-PAGE_runSysMenu(opage)
-PAGE	*opage;
-{
+PublicFnDef void PAGE_runSysMenu(PAGE *opage) {
 	MENU	*menu;
 	int	i, j, longest;
 	CUR_WINDOW	*MenuWin;
@@ -585,20 +543,17 @@ PAGE	*opage;
 	
 PublicVarDef int	inQueries = FALSE;
 
-PublicFnDef int
-queries()
-{
+PublicFnDef void queries() {
     PAGE	*tpage = CurrentPage;
     if( inQueries )
     {
     	ERR_displayPause("Screening already running");
-    	return(0);
+    	return;
     }
     inQueries = TRUE;
     queriesReal(CurrentPage);
     inQueries = FALSE;
     CurrentPage = tpage;
-    return(0);
 }
 
 
@@ -687,16 +642,13 @@ PublicFnDef int MAIN_getCompany()
 
 }
 
-PrivateFnDef int execProfile (
-    void
-)
-{
+PrivateFnDef void execProfile () {
     char buffer[80];
     
     if (strlen (COMPANY) == 0)
     {
         ERR_displayPause (" Please Enter a Company Ticker Symbol");
-	return (TRUE);
+	return;
     }
 
     ERR_displayStr(" Validating Company...",FALSE);
@@ -711,7 +663,6 @@ PrivateFnDef int execProfile (
 	profile(COMPANY);
 	PAGE_status(Page) = PAGE_ExitOnExec;
     }
-    return(FALSE);
 }
 
 PublicFnDef int MAIN_getUniverse()

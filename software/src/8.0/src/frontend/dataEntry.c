@@ -20,33 +20,19 @@
  **********	Forward Declarations	**********
  *************************************************/
 
-PrivateFnDef int estDataEntry(
-    void
-);
+PrivateFnDef void estDataEntry();
 
-PrivateFnDef void getNewEstObject (
-    void
-);
+PrivateFnDef void getNewEstObject ();
 
-PrivateFnDef int estExec (
-    void
-);
+PrivateFnDef void estExec ();
 
-PrivateFnDef int getObjectAndDate (
-    void
-);
+PrivateFnDef void getObjectAndDate ();
 
-PrivateFnDef int getFundamental (
-    void
-);
+PrivateFnDef void getFundamental ();
 
-PrivateFnDef int fundExec (
-    void
-);
+PrivateFnDef void fundExec ();
 
-PrivateFnDef int miscExec (
-    void
-);
+PrivateFnDef void  miscExec ();
 
 
 PrivateVarDef SPSHEET *MiscSS;
@@ -496,7 +482,7 @@ PrivateFnDef void allDataEntry () {
     estDataEntry();
 }
 
-PrivateFnDef int estDataEntry() {
+PrivateFnDef void estDataEntry() {
     SPSHEET *spr;
     MENU *actionMenu;
     PAGE *OldPage;
@@ -506,14 +492,14 @@ PrivateFnDef int estDataEntry() {
     DateType = EstimateDate;
     getObjectAndDate();
     if( !GotValidObjectAndDate )
-	return(0);
+	return;
 
     if( UseCalendar )
     {
 	if( (spr = createEstCSS()) == NULL )
 	{
 	    ERR_displayStr(" Could Not Create Calendar Worksheet",TRUE);
-	    return(1);
+	    return;
 	}
 	if( UseAll )	SPS1 = spr;
 	else		SPS1 = spr;
@@ -525,7 +511,7 @@ PrivateFnDef int estDataEntry() {
 	if( (spr = createEstFSS()) == NULL )
 	{
 	    ERR_displayStr(" Could Not Create Fiscal Worksheet",TRUE);
-	    return(1);
+	    return;
 	}
 	if( UseAll )	SPS2 = spr;
 	else		SPS1 = spr;
@@ -537,7 +523,7 @@ PrivateFnDef int estDataEntry() {
 	if( (spr = createEstQSS()) == NULL )
 	{
 	    ERR_displayStr(" Could Not Create Quarterly Worksheet",TRUE);
-	    return(1);
+	    return;
 	}
 	if( UseAll )	SPS3 = spr;
 	else		SPS1 = spr;
@@ -549,7 +535,7 @@ PrivateFnDef int estDataEntry() {
 	if( (spr = createEstDSS()) == NULL )
 	{
 	    ERR_displayStr(" Could Not Create Dividends Worksheet",TRUE);
-	    return(1);
+	    return;
 	}
 	if( UseAll )	SPS4 = spr;
 	else		SPS1 = spr;
@@ -590,8 +576,8 @@ PrivateFnDef int estDataEntry() {
     MENU_makeMenu(actionMenu, dataChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
     MENU_title(actionMenu) = " Data Entry Options";
     MENU_choiceHandler(actionMenu,0) = getNewEstObject;
-    strcpy(MENU_choiceLabel(actionMenu,0)," Change Company ");
-    strcpy(MENU_choiceHelp(actionMenu,0)," Change the Current Company");
+    MENU_choiceLabel(actionMenu,0)=" Change Company ";
+    MENU_choiceHelp(actionMenu,0)=" Change the Current Company";
     if( UseAll )
 	MENU_choiceActive(actionMenu,3) = ON;
     else
@@ -678,8 +664,6 @@ PrivateFnDef int estDataEntry() {
     PAGE_deletePage (EstPage, i)
     EstPage = NULL;
     CurrPage = OldPage;
-
-    return (0);
 }
 
 PrivateVarDef FORM_Field miscFields[] = {
@@ -895,10 +879,7 @@ PrivateFnDef void companyMiscDataEntry () {
     MiscDataEntry();
 }
 
-PrivateFnDef int estExec (
-    void
-)
-{
+PrivateFnDef void estExec () {
     if( UseAll )
     {
 	if( SPS_sheetStatus(SPS1) == SPS_Normal )
@@ -934,10 +915,7 @@ PrivateFnDef int estExec (
     PAGE_status(EstPage) = PAGE_ExitOnExec;
 }
 
-PrivateFnDef int miscExec (
-    void
-)
-{
+PrivateFnDef void miscExec () {
     if( SPS_sheetStatus(MiscSS) == SPS_Normal )
 	ERR_displayPause("Worksheet has not been modified (since last save)");
     else
@@ -959,10 +937,7 @@ PrivateFnDef int miscExec (
     PAGE_status(MiscPage) = PAGE_ExitOnExec;
 }
 
-PrivateFnDef int fundExec (
-    void
-)
-{
+PrivateFnDef void fundExec () {
     if( SPS_sheetStatus(FundSS) == SPS_Normal )
 	ERR_displayPause("Worksheet has not been modified (since last save)");
     else
@@ -1040,17 +1015,17 @@ PrivateFnDef void MiscDataEntry()
     switch(CurrentObj)
     {
 	case SecurityObj:
-	    strcpy(MENU_choiceLabel(actionMenu,0)," Change Security");
-	    strcpy(MENU_choiceHelp(actionMenu,0)," Change the Current Security");
+	    MENU_choiceLabel(actionMenu,0)=" Change Security";
+	    MENU_choiceHelp(actionMenu,0)=" Change the Current Security";
 	    break;
 	case AccountObj:
-	    strcpy(MENU_choiceLabel(actionMenu,0)," Change Account ");
-	    strcpy(MENU_choiceHelp(actionMenu,0)," Change the Current Account");
+	    MENU_choiceLabel(actionMenu,0)=" Change Account ";
+	    MENU_choiceHelp(actionMenu,0)=" Change the Current Account";
 	    break;
 	case CompanyObj:
 	default:
-	    strcpy(MENU_choiceLabel(actionMenu,0)," Change Company ");
-	    strcpy(MENU_choiceHelp(actionMenu,0)," Change the Current Company");
+	    MENU_choiceLabel(actionMenu,0)=" Change Company ";
+	    MENU_choiceHelp(actionMenu,0)=" Change the Current Company";
 	    break;
     }
 
@@ -1195,9 +1170,7 @@ PrivateFnDef int validateAccount()
     while( RS_readLine(buffer,80) ) ;
     return(FALSE);
 }
-PrivateFnDef int validateCompany(str)
-char *str;
-{
+PrivateFnDef int validateCompany(char const *str) {
     char buffer[81];
     ERR_displayStr(str,FALSE);
 
@@ -1224,8 +1197,7 @@ char *str;
     while( RS_readLine(buffer,80) ) ;
     return(FALSE);
 }
-PrivateFnDef int validateSecurity()
-{
+PrivateFnDef int validateSecurity() {
     char buffer[81];
     ERR_displayStr(" Validating Security and Date...",FALSE);
 
@@ -1253,8 +1225,7 @@ PrivateFnDef int validateSecurity()
     return(FALSE);
 }
 
-PrivateFnDef int validateInitial()
-{
+PrivateFnDef void validateInitial() {
     char buffer[81];
 
     GotValidObjectAndDate = FALSE;
@@ -1262,14 +1233,14 @@ PrivateFnDef int validateInitial()
     switch(CurrentObj)
     {
 	case SecurityObj:
-	    if( validateSecurity() ) return(FALSE);
+	    if( validateSecurity() ) return;
 	    break;
 	case AccountObj:
-	    if( validateAccount() ) return(FALSE);
+	    if( validateAccount() ) return;
 	    break;
 	case CompanyObj:
 	default:
-	    if( validateCompany(" Validating Company and Date...") ) return(FALSE);
+	    if( validateCompany(" Validating Company and Date...") ) return;
 	    break;
     }
     dYear = atoi(FORM_fieldValue(IYEAR));
@@ -1279,21 +1250,21 @@ PrivateFnDef int validateInitial()
     if (dMonth < 1 || dMonth > 12)
     {
 	ERR_displayPause(" Invalid Month");
-	return(FALSE);
+	return;
     }
 
     dDay = atoi(FORM_fieldValue(IDAY));
     if (dDay < 1 || dDay > 31)
     {
 	ERR_displayPause(" Invalid Day");
-	return(FALSE);
+	return;
     }
 
     sprintf(buffer, "!__tmpDate <- %04d%02d%02d asDate", dYear,dMonth,dDay);
     if (RS_sendAndCheck(buffer, "       NA"))
     {
 	ERR_displayPause(" Invalid Date");
-	return(FALSE);
+	return;
     }
     sprintf(FormattedDate,"%02d/%02d/%04d",dMonth,dDay,dYear);
     sprintf(UnFormattedDate, "%04d%02d%02d", dYear,dMonth,dDay);
@@ -1306,20 +1277,16 @@ PrivateFnDef int validateInitial()
 	if (RS_sendAndCheck(buffer, ">>>"))
 	{
 	    ERR_displayPause(" Invalid Source");
-	    return(TRUE);
+	    return;
 	}
     }
     PAGE_status(ObjectPage) = PAGE_ExitOnExec;
     GotValidObjectAndDate = TRUE;
-    return(TRUE);
 }
 
 PrivateVarDef MENU	*sourceMenu = NULL;
 
-PrivateFnDef int getObjectAndDate (
-    void
-)
-{
+PrivateFnDef void getObjectAndDate () {
 	CUR_WINDOW	*w1, *w2;
 	int		i, j, longest;
 	char		obuf[81], dbuf[81], tbuf[81];
@@ -1430,8 +1397,6 @@ PrivateFnDef int getObjectAndDate (
 	    MENU_deleteMenu(sourceMenu, i);
 	*/
 	PAGE_deletePage(ObjectPage,i);
-
-	return(FALSE);
 }
 
 PublicFnDef void fundamentalDataEntry () {
@@ -1467,8 +1432,8 @@ PublicFnDef void fundamentalDataEntry () {
     MENU_makeMenu(actionMenu, dataChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
     MENU_title(actionMenu) = " Data Entry Options";
     MENU_choiceHandler(actionMenu,0) = getNewFundamental;
-    strcpy(MENU_choiceLabel(actionMenu,0)," Change Company ");
-    strcpy(MENU_choiceHelp(actionMenu,0)," Change the Current Company");
+    MENU_choiceLabel(actionMenu,0)=" Change Company ";
+    MENU_choiceHelp(actionMenu,0)=" Change the Current Company";
     MENU_choiceActive(actionMenu,3) = OFF;
 /**** create page object ****/
     PAGE_createPage(FundPage, 2, NULL, actionMenu, NULL, PAGE_menuType, i);
@@ -1499,15 +1464,15 @@ PublicFnDef void fundamentalDataEntry () {
     FundPage = NULL;
     CurrPage = OldPage;
 }
-PrivateFnDef int validateFundamental()
+PrivateFnDef void validateFundamental()
 {
-    char buffer[81], c, *s;
+    char buffer[81], c;
     int compustat, error, exists, none;
 
     GotValidObjectAndDate = FALSE;
     compustat = error = exists = none = FALSE;
 
-    if( validateCompany(" Validating Company...") ) return(FALSE);
+    if( validateCompany(" Validating Company...") ) return;
 
     sprintf(buffer, "CompanyUpdateStructureFundamental getPrivateDataStatus");
     RS_sendLine(buffer);
@@ -1526,7 +1491,7 @@ PrivateFnDef int validateFundamental()
     if( compustat )
     {
 	ERR_displayPause("Compustat data already exists for company");
-	return(FALSE);
+	return;
     }
     else if( exists )
     {
@@ -1535,11 +1500,11 @@ PrivateFnDef int validateFundamental()
     else if( none )
     {
 	if( !ERR_promptYesNo("Private Data Store Not Setup:  Create it") )
-	    return(FALSE);
+	    return;
 	while( TRUE )
 	{
 	    if( ERR_promptForInt("Enter month (1 - 12) for fiscal year-end (F9 to abort): ", &dMonth) ) 
-		return(FALSE);
+		return;
 	    if (dMonth < 1 || dMonth > 12)
 		CUR_beep();
 	    else
@@ -1549,16 +1514,16 @@ PrivateFnDef int validateFundamental()
 	if (RS_sendAndCheck(buffer, ">>>"))
 	{
 	    ERR_displayPause(" Error creating new company FYR");
-	    return(FALSE);
+	    return;
 	}
     }
     else if( error )
     {
 	ERR_displayPause("Error validating Company");
-	return(FALSE);
+	return;
     }
 
-    s = eatLeadingAndTrailingSpaces(FORM_fieldValue(IFREQ));
+    char const *s = eatLeadingAndTrailingSpaces(FORM_fieldValue(IFREQ));
     c = *s;
     if( c == 'A' )
 	FrequencyLetter = ' ';
@@ -1571,16 +1536,12 @@ PrivateFnDef int validateFundamental()
 
     PAGE_status(ObjectPage) = PAGE_ExitOnExec;
     GotValidObjectAndDate = TRUE;
-    return(TRUE);
 }
 
 PrivateVarDef MENU	*freqMenu = NULL;
 PrivateVarDef MENU	*categoryMenu = NULL;
 
-PrivateFnDef int getFundamental (
-    void
-)
-{
+PrivateFnDef void getFundamental () {
 	CUR_WINDOW	*w1, *w2;
 	int		i, j, longest;
 
@@ -1635,6 +1596,4 @@ PrivateFnDef int getFundamental (
 	free(ObjectForm);
 	MENU_deleteMenu(freqMenu, i);
 	PAGE_deletePage(ObjectPage,i);
-
-	return(FALSE);
 }

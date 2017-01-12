@@ -26,7 +26,7 @@
 
 PrivateFnDef void SPS_checkForLockedSheet(SPSHEET *spr);
 
-PrivateFnDef int SPS_getHeadingEntry(void);
+PrivateFnDef int SPS_getHeadingEntry();
 PrivateFnDef void SPS_setHeadingEntry(
     SPS_Heading *h, int flag
 );
@@ -106,11 +106,11 @@ PublicVarDef SPS_Heading SPS_GlobalSelectorHeading;
 PublicVarDef char	*SPS_hBuf[ItemsInFullListEntry] = {
 				NULL, NULL, NULL, NULL, NULL };
 
-PublicFnDef void SPS_refreshPage(void) {
+PublicFnDef void SPS_refreshPage() {
 	MenuOptionSelected = SPS_REFRESHPAGE;
 }
 
-PublicFnDef void SPS_clearCell(void) {
+PublicFnDef void SPS_clearCell() {
 	MenuOptionSelected = SPS_CLEARCELL;
 }
 
@@ -150,7 +150,7 @@ PublicFnDef void SPS_doClearCell(
     }
 }
 
-PublicFnDef void SPS_clearInput(void) {
+PublicFnDef void SPS_clearInput() {
 	MenuOptionSelected = SPS_CLEARINPUT;
 }
 
@@ -183,7 +183,7 @@ PublicFnDef int SPS_doClearInput(
     SPS_repaintScreen(spr) = TRUE;
 }
 
-PublicFnDef void SPS_transposeAxes(void) {
+PublicFnDef void SPS_transposeAxes() {
 	MenuOptionSelected = SPS_TRANSPOSE;
 }
 
@@ -208,7 +208,7 @@ PrivateFnDef void doTranspose(
 	    SPS_keyRight(spsheet,win);
 }
 
-PublicFnDef void SPS_rotateAxes(void) {
+PublicFnDef void SPS_rotateAxes() {
 	MenuOptionSelected = SPS_ROTATE;
 }
 
@@ -235,7 +235,7 @@ PrivateFnDef void doRotate(
 	    SPS_keyRight(spsheet,win);
 }
 
-PublicFnDef void SPS_incrementZ(void) {
+PublicFnDef void SPS_incrementZ() {
 	MenuOptionSelected = SPS_INCREMENTZ;
 }
 
@@ -261,7 +261,7 @@ PrivateFnDef void doIncrement(
 	    SPS_keyRight(spsheet,win);
 }
 
-PublicFnDef void SPS_decrementZ(void) {
+PublicFnDef void SPS_decrementZ() {
 	MenuOptionSelected = SPS_DECREMENTZ;
 }
 
@@ -1861,7 +1861,7 @@ PublicFnDef void SPS_setItemAndStatus(
 	}
 }
 
-PrivateFnDef int SPS_getHeadingEntry(void) {
+PrivateFnDef int SPS_getHeadingEntry() {
 	char	buf2[SPS_maxItemWidth+1];
 	int	i, errlen, gotprompt = FALSE;
 
@@ -1963,7 +1963,7 @@ PrivateFnDef void SPS_setHeadingEntry(
 		SPS_MaxHeadingLines = hlines;
 }
 
-PublicFnDef int SPS_readHeadings(SPSHEET *spr, char *list, int flag) {
+PublicFnDef int SPS_readHeadings(SPSHEET *spr, char const *list, int flag) {
     char buf[256];
     int oldx, oldy, oldz;
 
@@ -1991,7 +1991,7 @@ PublicFnDef int SPS_readHeadings(SPSHEET *spr, char *list, int flag) {
     return(FALSE);
 }
 
-PublicFnDef SPSHEET *SPS_readSSheet(char *list) {
+PublicFnDef SPSHEET *SPS_readSSheet(char const *list) {
     char buf[256];
     int xcount, ycount, zcount;
     SPSHEET *spr;
@@ -2021,7 +2021,7 @@ PublicFnDef SPSHEET *SPS_readSSheet(char *list) {
     return(spr);
 }
 
-PublicFnDef int SPS_readCells(SPSHEET *spr, char *list) {
+PublicFnDef int SPS_readCells(SPSHEET *spr, char const *list) {
     char buff[256];
     SPS_cell	*c;
     SPS_DataType type;
@@ -2665,7 +2665,7 @@ PrivateFnDef int getAxis(char *buf) {
     }
 }
 
-PublicFnDef int SPS_writeSSheet(SPSHEET *spr, char *list) {
+PublicFnDef int SPS_writeSSheet(SPSHEET *spr, char const *list) {
     int x, y, z, Arg1Axis, Arg2Axis, Arg3Axis, Arg4Axis, width;
     int oldx, oldy, oldz;
     char InitString[256], CleanupString[256], FormatString[256];

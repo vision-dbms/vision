@@ -3,9 +3,7 @@
 
 #include "buffers.h"
 
-PublicFnDecl int EDIT_reportFileMenu (
-     PAGE *page, int doBrowse
-);
+PublicFnDecl void EDIT_reportFileMenu (PAGE *page, int doBrowse);
 
 PublicFnDecl void EDIT_main();
 PublicFnDecl void EDIT_initEditor();

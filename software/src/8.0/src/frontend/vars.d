@@ -20,10 +20,10 @@ typedef struct {
 #define VARS_menuFunc(m)	((m)->func)
 
 typedef struct {
-	char		*name;
+	char const	*name;
 	int		type;
 	caddr_t		p;
-	char		*menustring;
+	char const	*menustring;
 	MENU		*m;
 } VARS_Type;
 
