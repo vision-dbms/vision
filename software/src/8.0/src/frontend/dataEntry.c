@@ -14,8 +14,6 @@
 #include "choices.h"
 #include "error.h"
 #include "sps.h"
-
-PublicFnDecl char	*eatLeadingAndTrailingSpaces();
 
 
 /*************************************************
@@ -95,20 +93,20 @@ char	FrequencyLetter;
  **********	Menu Declarations	**********
  *************************************************/
 
-PrivateFnDef void MiscDataEntry (void);
+PrivateFnDef void MiscDataEntry ();
 
-PrivateFnDef void companyDataEntry (void);
-PrivateFnDef void estimateDataEntry (void);
-PrivateFnDef void companyMiscDataEntry (void);
-PrivateFnDef void accountDataEntry (void);
-PrivateFnDef void securityDataEntry (void);
-PrivateFnDef void fundamentalDataEntry (void);
-PrivateFnDef void allDataEntry (void);
-PrivateFnDef void calendarDataEntry (void);
-PrivateFnDef void fiscalDataEntry (void);
-PrivateFnDef void quarterlyDataEntry (void);
-PrivateFnDef void dividendsDataEntry (void);
-PrivateFnDef void allErase (void);
+PrivateFnDef void companyDataEntry ();
+PrivateFnDef void estimateDataEntry ();
+PrivateFnDef void companyMiscDataEntry ();
+PrivateFnDef void accountDataEntry ();
+PrivateFnDef void securityDataEntry ();
+PrivateFnDef void fundamentalDataEntry ();
+PrivateFnDef void allDataEntry ();
+PrivateFnDef void calendarDataEntry ();
+PrivateFnDef void fiscalDataEntry ();
+PrivateFnDef void quarterlyDataEntry ();
+PrivateFnDef void dividendsDataEntry ();
+PrivateFnDef void allErase ();
 
 PrivateVarDef MENU_Choice menuChoices1[] = {
     " Company              ",
@@ -212,7 +210,6 @@ PublicFnDef int dataEntryModule()
     PAGE *page;
     PAGE *OldPage;
     CUR_WINDOW *MenuWin, *FormWin;
-    PAGE_Action MENU_handler(), FORM_handler();
     int i, j, cols, startcol, longest;
     static int alreadyCentered = FALSE;
 
@@ -271,13 +268,12 @@ PublicFnDef int dataEntryModule()
 /******************************************************
  **********	Exec Functions		***************
  *****************************************************/
-PrivateFnDef void companyDataEntry(void) {
+PrivateFnDef void companyDataEntry() {
     MENU *menu;
     FORM *form;
     PAGE *page;
     PAGE *OldPage;
     CUR_WINDOW *MenuWin, *FormWin;
-    PAGE_Action MENU_handler(), FORM_handler();
     int i, j, cols, startcol, longest;
     static int alreadyCentered = FALSE;
 
@@ -322,13 +318,12 @@ PrivateFnDef void companyDataEntry(void) {
     CurrPage = OldPage;
 }
 
-PublicFnDef void estimateDataEntry(void) {
+PublicFnDef void estimateDataEntry() {
     MENU *menu;
     FORM *form;
     PAGE *page;
     PAGE *OldPage;
     CUR_WINDOW *MenuWin, *FormWin;
-    PAGE_Action MENU_handler(), FORM_handler();
     int i, j, cols, startcol, longest;
     static int alreadyCentered = FALSE;
 
@@ -460,7 +455,7 @@ PrivateFnDef SPSHEET *createEstDSS()
 	return(SPS_readSSheet("CompanyUpdateStructureEstD"));
 }
 
-PublicFnDef void calendarDataEntry (void) {
+PublicFnDef void calendarDataEntry () {
     UseAll = FALSE;
     UseCalendar = TRUE;
     UseFiscal = FALSE;
@@ -468,7 +463,7 @@ PublicFnDef void calendarDataEntry (void) {
     UseDividends = FALSE;
     estDataEntry();
 }
-PrivateFnDef void fiscalDataEntry (void) {
+PrivateFnDef void fiscalDataEntry () {
     UseAll = FALSE;
     UseCalendar = FALSE;
     UseFiscal = TRUE;
@@ -476,7 +471,7 @@ PrivateFnDef void fiscalDataEntry (void) {
     UseDividends = FALSE;
     estDataEntry();
 }
-PrivateFnDef void quarterlyDataEntry (void) {
+PrivateFnDef void quarterlyDataEntry () {
     UseAll = FALSE;
     UseCalendar = FALSE;
     UseFiscal = FALSE;
@@ -484,7 +479,7 @@ PrivateFnDef void quarterlyDataEntry (void) {
     UseDividends = FALSE;
     estDataEntry();
 }
-PrivateFnDef void dividendsDataEntry (void) {
+PrivateFnDef void dividendsDataEntry () {
     UseAll = FALSE;
     UseCalendar = FALSE;
     UseFiscal = FALSE;
@@ -492,7 +487,7 @@ PrivateFnDef void dividendsDataEntry (void) {
     UseDividends = TRUE;
     estDataEntry();
 }
-PrivateFnDef void allDataEntry (void) {
+PrivateFnDef void allDataEntry () {
     UseAll = TRUE;
     UseCalendar = TRUE;
     UseFiscal = TRUE;
@@ -501,14 +496,10 @@ PrivateFnDef void allDataEntry (void) {
     estDataEntry();
 }
 
-PrivateFnDef int estDataEntry(
-    void
-)
-{
+PrivateFnDef int estDataEntry() {
     SPSHEET *spr;
     MENU *actionMenu;
     PAGE *OldPage;
-    PAGE_Action FORM_handler();
     int i, longest, j;
 
     CurrentObj = CompanyObj;
@@ -734,7 +725,7 @@ PrivateFnDef SPSHEET *createCompanyMiscSS()
 	return(SPS_readSSheet("CompanyUpdateStructureMisc"));
 }
 
-PrivateFnDef void allErase(void) {
+PrivateFnDef void allErase() {
     SPS_doClearInput(SPS1,ss1Win);
     if( UseAll )
     {
@@ -745,7 +736,7 @@ PrivateFnDef void allErase(void) {
     SPS_refreshPage();
 }
 
-PrivateFnDef void getNewEstObject (void) {
+PrivateFnDef void getNewEstObject () {
     SPSHEET *spr;
 
     if( UseAll )
@@ -816,7 +807,7 @@ PrivateFnDef void getNewEstObject (void) {
     */
 }
 
-PrivateFnDef void getNewFundamental(void)
+PrivateFnDef void getNewFundamental()
 {
     SPSHEET *spr;
     char freqBuf[5];
@@ -850,7 +841,7 @@ PrivateFnDef void getNewFundamental(void)
     }
 }
 
-PrivateFnDef void getNewMiscObject(void)
+PrivateFnDef void getNewMiscObject()
 {
     if( SPS_sheetStatus(MiscSS) != SPS_Normal )
     {
@@ -888,17 +879,17 @@ PrivateFnDef void getNewMiscObject(void)
     */
 }
 
-PrivateFnDef void securityDataEntry(void) {
+PrivateFnDef void securityDataEntry() {
     CurrentObj = SecurityObj;
     DateType = UpdateDate;
     MiscDataEntry();
 }
-PrivateFnDef void accountDataEntry(void) {
+PrivateFnDef void accountDataEntry() {
     CurrentObj = AccountObj;
     DateType = UpdateDate;
     MiscDataEntry();
 }
-PrivateFnDef void companyMiscDataEntry (void) {
+PrivateFnDef void companyMiscDataEntry () {
     CurrentObj = CompanyObj;
     DateType = UpdateDate;
     MiscDataEntry();
@@ -979,11 +970,10 @@ PrivateFnDef int fundExec (
     PAGE_status(FundPage) = PAGE_ExitOnExec;
 }
 
-PrivateFnDef void MiscDataEntry(void)
+PrivateFnDef void MiscDataEntry()
 {
     PAGE *OldPage;
     MENU *actionMenu;
-    PAGE_Action FORM_handler(), SPS_handler();
     int i, longest, j;
 
     getObjectAndDate();
@@ -1444,10 +1434,9 @@ PrivateFnDef int getObjectAndDate (
 	return(FALSE);
 }
 
-PublicFnDef void fundamentalDataEntry (void) {
+PublicFnDef void fundamentalDataEntry () {
     MENU *actionMenu;
     PAGE *OldPage;
-    PAGE_Action FORM_handler(), SPS_handler();
     int i, longest, j;
     char freqBuf[5];
 

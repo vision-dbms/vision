@@ -30,7 +30,7 @@ PublicFnDecl SPS_cell *SPS_cellPtrXYZ(
 );
 PublicFnDecl void SPS_delete(SPSHEET *spr);
 
-PublicFnDef int SPS_readHeadings(SPSHEET *spr, char *list, int flag);
+PublicFnDecl int SPS_readHeadings(SPSHEET *spr, char *list, int flag);
 PublicFnDecl SPSHEET *SPS_readSSheet(char *list);
 PublicFnDecl int SPS_readCells(SPSHEET *spr, char *list);
 

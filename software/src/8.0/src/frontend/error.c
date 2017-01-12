@@ -7,13 +7,13 @@
 #include "stdcurses.h"
 #include "keys.h"
 
-#include "error.d"
+#include "error.h"
 
 PublicVarDef CUR_WINDOW *ERR_Window;
 PublicVarDef int ERR_msgDisplayed = FALSE;
 PublicVarDef int RS_TabSpacing = 8;
 
-PrivateVarDef char *Message[] = {
+PrivateVarDef char const *Message[] = {
      "",			/**** do not use this message ****/
      " Top of buffer", 
      " Bottom of buffer", 
@@ -82,13 +82,9 @@ PrivateVarDef char *Message[] = {
     " File was empty",
 };
 
-PublicFnDef int
-ERR_paintLineASCII(str, width, win, useHilight, hilight)
-char		*str;
-int		width;
-CUR_WINDOW	*win;
-int		useHilight, hilight;
-{
+PublicFnDef void ERR_paintLineASCII(
+    char const *str, int width, CUR_WINDOW *win, int useHilight, int hilight
+) {
 	int	i=0, j, k;
 	char	c, *s;
 
@@ -127,14 +123,11 @@ int		useHilight, hilight;
 		CUR_wprintw(win,"%-*.*s",(width-i),(width-i),"  ");
 }
 
-PublicFnDef void ERR_displayNoCurses(i)
-int i;
-{
+PublicFnDef void ERR_displayNoCurses(int i) {
     printf("\n%s%c\n\n",Message[i],7);
 }
 
-PublicFnDef void ERR_displayError(i)
-int i;
+PublicFnDef void ERR_displayError(int i) {
 {
     CUR_werase (ERR_Window);
     CUR_wattron(ERR_Window, CUR_A_BOLD);
@@ -147,9 +140,7 @@ int i;
     ERR_msgDisplayed = TRUE;
 }
 
-PublicFnDef void ERR_displayMsg(i)
-int i;
-{
+PublicFnDef void ERR_displayMsg(int i) {
     CUR_werase (ERR_Window);
     CUR_wattron(ERR_Window, CUR_A_BOLD);
     CUR_mvwaddstr(ERR_Window, 0, 0, Message[i]);
@@ -160,9 +151,7 @@ int i;
     ERR_msgDisplayed = TRUE;
 }
 
-PublicFnDef void ERR_fatal(msg)
-char *msg;
-{
+PublicFnDef void ERR_fatal(char const *msg) {
     int		i;
     char	buf[256];
     sprintf(buf, "%s, press any key to abort...", msg);
@@ -190,9 +179,7 @@ PublicFnDef void ERR_clearMsg()
     ERR_msgDisplayed = FALSE;
 }
 
-PublicFnDef int ERR_promptYesNo(msg)
-char *msg;
-{
+PublicFnDef int ERR_promptYesNo(char const *msg) {
     int c;
     int		i;
     char	buf[256];
@@ -228,10 +215,7 @@ char *msg;
 	return(FALSE);
 }
 
-PublicFnDef void ERR_displayStr(str, error)
-char *str;
-int error;
-{
+PublicFnDef void ERR_displayStr(char const *str, int error) {
     int		i;
     char	buf[256];
     sprintf(buf, "%s", str);
@@ -251,9 +235,7 @@ int error;
     ERR_msgDisplayed = TRUE;
 }
 
-PublicFnDef void ERR_displayStrNoRefresh(str)
-char *str;
-{
+PublicFnDef void ERR_displayStrNoRefresh(char const *str) {
     int		i;
     char	buf[256];
     sprintf(buf, "%s", str);
@@ -272,9 +254,7 @@ char *str;
     ERR_msgDisplayed = TRUE;
 }
 
-PublicFnDef void ERR_displaySearchStr(str)
-char *str;
-{
+PublicFnDef void ERR_displaySearchStr(char const *str) {
     int		i;
     char	buf[256];
     sprintf(buf, "Searching for %s", str);
@@ -293,11 +273,9 @@ char *str;
     ERR_msgDisplayed = TRUE;
 }
 
-PublicFnDef void ERR_displayStrMsg(str, msg, BEEP)
-char *str;
-char *msg;
-int BEEP;
-{
+PublicFnDef void ERR_displayStrMsg(
+    char const *str, char const *msg, int BEEP
+) {
     int	i;
     char buf[256];
 
@@ -318,9 +296,7 @@ int BEEP;
     ERR_msgDisplayed = TRUE;
 }
 
-PublicFnDef void ERR_displayPause(str)
-char *str;
-{
+PublicFnDef void ERR_displayPause(char const *str) {
     int	i;
     char buf[256];
 
@@ -343,16 +319,13 @@ char *str;
     ERR_msgDisplayed = TRUE;
 }
 
-PublicFnDef void ERR_displayMsgPause(i)
-int	i;
-{
+PublicFnDef void ERR_displayMsgPause(int i) {
 	ERR_displayPause(Message[i]);
 }
 
-PublicFnDef int ERR_promptForString(prompt, buffer, allowHelp)
-char *prompt, *buffer;
-int  allowHelp;
-{
+PublicFnDef int ERR_promptForString(
+    char const *prompt, char *buffer, int allowHelp
+) {
     int i, c, col, len, idx;
 
     buffer[0] = '\0';
@@ -439,11 +412,9 @@ int  allowHelp;
     return(FALSE);
 }
 
-PublicFnDef int ERR_promptForRepetition(num,win,oy,ox)
-int		*num;
-CUR_WINDOW	*win;
-int		oy, ox;
-{
+PublicFnDef int ERR_promptForRepetition(
+    int *num, CUR_WINDOW *win, int oy, int ox
+) {
     int i, c, col, len, atoi(), NotDone = TRUE;
     char buffer[80], buffer2[80];
 
@@ -519,10 +490,7 @@ int		oy, ox;
     return(FALSE);
 }
 
-PublicFnDef int ERR_promptForInt(str,num)
-char *str;
-int *num;
-{
+PublicFnDef int ERR_promptForInt(char const *str, int *num) {
     int i, c, col, len, atoi(), NotDone = TRUE;
     char buffer[80];
 
@@ -597,10 +565,7 @@ int *num;
     return(FALSE);
 }
 
-PublicFnDef int ERR_promptForChar(prompt, validChars)
-char *prompt;
-char *validChars;
-{
+PublicFnDef int ERR_promptForChar(char const *prompt, char const *validChars) {
     int c, i, done = FALSE;
     
     if( (i = strlen(prompt)) >= CUR_WIN_maxx(ERR_Window) )

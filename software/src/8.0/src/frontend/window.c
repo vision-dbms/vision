@@ -8,10 +8,9 @@
 
 #include "stdcurses.h"
 
-PublicFnDef void WIN_LineBox(win, title, info)
-CUR_WINDOW *win;
-char *title, *info;
-{
+PublicFnDef void WIN_LineBox(
+    CUR_WINDOW *win, char const *title, char const *info
+) {
     int i;
     char tbuf[81];
 
@@ -52,10 +51,7 @@ char *title, *info;
     }	
 }
 
-PublicFnDef void WIN_RepaintWindow(win, attr)
-CUR_WINDOW *win;
-int attr;
-{
+PublicFnDef void WIN_RepaintWindow(CUR_WINDOW *win, int attr) {
     static int i, j;
 
     if( attr == CUR_A_NORMAL )
@@ -75,15 +71,13 @@ int attr;
     CUR_wattroff(win, attr);
 }
 
-PublicFnDef void WIN_HighlightBox(win, attr, title, info)
-CUR_WINDOW *win;
-int attr;
-char *title, *info;
-{
+PublicFnDef void WIN_HighlightBox(
+    CUR_WINDOW *win, int attr, char const *title, char const *info
+) {
     static int i;
     static int first = TRUE;
     static int special = FALSE;
-    char *tmp, *getenv(), tbuf[81];
+    char *tmp, tbuf[81];
 
     if( first ) {
 	first = FALSE;
@@ -131,18 +125,13 @@ char *title, *info;
     CUR_wattroff(win, attr);
 }
 
-PublicFnDef void WIN_ReverseBox(win, title)
-CUR_WINDOW *win;
-char *title;
-{
+PublicFnDef void WIN_ReverseBox(CUR_WINDOW *win, char const *title) {
 	void WIN_HighlightBox();
 
 	WIN_HighlightBox(win, CUR_A_REVERSE, title, NULL);
 }
 
-PublicFnDef void WIN_ShadowBox(win)
-CUR_WINDOW *win;
-{
+PublicFnDef void WIN_ShadowBox(CUR_WINDOW *win) {
     int i;
 
     CUR_wattron(win, CUR_A_ALTCHARSET);

@@ -37,7 +37,6 @@ PublicFnDef int statmenu()
     FORM *form;
     PAGE *page;
     CUR_WINDOW *menuWin, *formWin;
-    PAGE_Action MENU_handler(), FORM_handler();
     int i, j, longest, rows, cols, startrow, startcol;
     static int alreadyCentered = FALSE;
 

@@ -22,8 +22,6 @@
 #include <term.h>
 #endif
 
-PublicFnDecl char	*eatLeadingAndTrailingSpaces();
-
 PublicVarDef int DEBUG;
 PrivateVarDef int Administrator;
 PrivateVarDef jmp_buf give_up;
@@ -37,17 +35,11 @@ PrivateFnDef void RS_callSignalHandler (
  *****  Warning And Error Utilities  *****
  *****************************************/
 
-PublicFnDef void STD_syswarn (
-    char *			msg
-)
-{
+PublicFnDef void STD_syswarn (char const *msg) {
     fprintf (stderr, "ERROR: %s (%d; %s)\n", msg, errno, strerror(errno));
 }
 
-PublicFnDef void STD_syserr (
-    char *			msg
-)
-{
+PublicFnDef void STD_syserr (char const *msg) {
     STD_syswarn (msg);
     RS_callSignalHandler(0);
 }
@@ -60,8 +52,8 @@ PublicFnDef void STD_syserr (
 
 /*** NOTE: The stderr and stdout are mapped to the same streams ***/
 PublicFnDef int STD_execute (
-    char *			name,
-    char *			args[],
+    char const*			name,
+    char const*			args[],
     int *			fdin,
     int *			fdout,
     int				(*preChildProcessing)(void)
@@ -133,11 +125,7 @@ PublicFnDef int STD_execute (
 
 PrivateVarDef FILE *RS_outfile;
 
-PublicFnDef int RS_fprintf (
-    char *			fmt,
-    ...
-)
-{
+PublicFnDef int RS_fprintf (char const*	fmt, ...) {
     va_list ap;
     int result;
 
@@ -210,10 +198,7 @@ PrivateVarDef char *RSargs[128];
     if (DEBUG) RS_fprintf ("WRITE: %s\n", l);\
 }
 
-PublicFnDef void RS_writeLine (
-    char *			str
-)
-{
+PublicFnDef void RS_writeLine (char const *str) {
     writeLine(str);
 }
 
@@ -285,10 +270,7 @@ PublicFnDef int RS_readLine (
  * 	 NOTHING
  *
  *****/
-PublicFnDef void RS_system (
-    char *			str
-)
-{
+PublicFnDef void RS_system (char const *str) {
     char command[160];
     struct sigvec intvec, quitvec, ivec;
   
@@ -340,10 +322,7 @@ PublicFnDef void RS_system (
  *	NOTHING
  *
  *****/
-PublicFnDef void RS_dumpOutput (
-    void
-)
-{
+PublicFnDef void RS_dumpOutput () {
     char str[RS_MaxLine + 1];
     int len;
 
@@ -386,17 +365,11 @@ PublicFnDef void RS_readOutput (
 	    	memoryError = TRUE;
 }
 
-PublicFnDef void RS_compile (
-    void
-)
-{
+PublicFnDef void RS_compile () {
     writeLine("?g");
 }
 
-PublicFnDef void RS_save (
-    void
-)
-{
+PublicFnDef void RS_save () {
     int len, success;
     char buffer[RS_MaxLine + 1];
     static char *output = "Global Environment Saved";
@@ -419,10 +392,8 @@ PublicFnDef void RS_save (
 }
 
 PublicFnDef int RS_sendAndCheck(
-    char *			input,
-    char *			output
-)
-{
+    char const*	input, char const *output
+) {
     int result, len;
     char buffer[RS_MaxLine + 1], *outp, *buf;
     
@@ -448,10 +419,7 @@ PublicFnDef int RS_sendAndCheck(
     return(result);
 }
 
-PublicFnDef void RS_sendLine(
-    char *			input
-)
-{
+PublicFnDef void RS_sendLine(char const* input) {
     char buffer[RS_MaxLine + 1];
     
     writeLine(input);
@@ -461,10 +429,7 @@ PublicFnDef void RS_sendLine(
     writeLine("?g");
 }
 
-PublicFnDef void RS_sendOnly (
-    char *			string
-)
-{
+PublicFnDef void RS_sendOnly (char const *string) {
     char buffer[RS_MaxLine + 1];
 
     writeLine(string);
@@ -478,12 +443,9 @@ PublicFnDef void RS_sendOnly (
 
 PrivateVarDef int Restart = FALSE;
 
-PrivateFnDef void RS_restoreParentSignals (void);
+PrivateFnDef void RS_restoreParentSignals ();
 
-PrivateFnDef int childInitialization (
-    void
-)
-{
+PrivateFnDef int childInitialization () {
 	struct sigvec vec;
 
 	/***** 
@@ -570,9 +532,7 @@ PrivateFnDef void StartBackend (
     );
 }
 
-PrivateFnDef void setupParentSignals (
-    void
-);
+PrivateFnDef void setupParentSignals ();
 
 /*---------------------------------------------------------------------------
  *****  Function to call the User Interface.
@@ -584,10 +544,7 @@ PrivateFnDef void setupParentSignals (
  *	NOTHING
  *
  *****/
-PrivateFnDef void execute_user (
-    void
-)
-{
+PrivateFnDef void execute_user () {
     int mainmenu ();
 
     STD_checkTerminalCapabilities ();
@@ -654,10 +611,7 @@ PrivateFnDef void execute_user (
  *			 PARENT'S INTERRRUPTS                             *
  **************************************************************************/
 
-PrivateFnDef void cleanupCurses (
-    void
-)
-{
+PrivateFnDef void cleanupCurses () {
     if (InitializedCurses)
     {
         CUR_erase();
@@ -669,10 +623,7 @@ PrivateFnDef void cleanupCurses (
     }
 }
 
-PrivateFnDef void cleanupRs (
-    void
-)
-{
+PrivateFnDef void cleanupRs () {
 /*****  
  * 'AllDone' is set so that the parent will ignore the "death of child"
  *  signal that the 'kill' signal will generate.
@@ -682,10 +633,7 @@ PrivateFnDef void cleanupRs (
     kill (RSpid, SIGTERM); 
 }
 
-PrivateFnDef void cleanup (
-    void
-)
-{
+PrivateFnDef void cleanup () {
 /*****  Cleanup Printer ... *****/
     cleanupPrinters ();
 
@@ -696,10 +644,7 @@ PrivateFnDef void cleanup (
     cleanupRs ();
 }
 
-PrivateFnDef void handleQuickTermination (
-    void
-)
-{
+PrivateFnDef void handleQuickTermination () {
     cleanupRs ();
     exit (NormalExitValue);
 }
@@ -1006,10 +951,7 @@ PrivateFnDef void RS_callSignalHandler (
  *	NOTHING
  *
  ******/
-PrivateFnDef void setupParentSignals (
-    void
-)
-{
+PrivateFnDef void setupParentSignals () {
     int i;
     struct sigvec vec, ivec, lvec;
 
@@ -1087,10 +1029,7 @@ PrivateFnDef void setupParentSignals (
  *	NOTHING
  *
  ******/
-PrivateFnDef void RS_saveParentSignals (
-    void
-)
-{
+PrivateFnDef void RS_saveParentSignals () {
     int i;
 
 /*****  Get the current values for all of the posible signals ... *****/
@@ -1112,10 +1051,7 @@ PrivateFnDef void RS_saveParentSignals (
  *	NOTHING
  *
  ******/
-PrivateFnDef void RS_restoreParentSignals (
-    void
-)
-{
+PrivateFnDef void RS_restoreParentSignals () {
     int i;
 
 /*****  Get the current values for all of the posible signals ... *****/
@@ -1127,10 +1063,7 @@ PrivateFnDef void RS_restoreParentSignals (
 }
 
 
-PrivateFnDef void readCompanyName (
-    void
-)
-{
+PrivateFnDef void readCompanyName () {
     char buffer[81];
     int i, len, padding;
     FILE *fd, *fopen();
@@ -1167,21 +1100,15 @@ PrivateFnDef void readCompanyName (
 }
 
 
-PrivateFnDef void getDate (
-    void
-)
-{
+PrivateFnDef void getDate () {
     long clock;
     
     time(&clock);
     RS_Date = localtime(&clock);
 }
 
-PrivateFnDef void displayLogo (
-    void
-)
-{
-    char logoname[80], *s, *getenv();
+PrivateFnDef void displayLogo () {
+    char logoname[80], *s;
     int c;
     FILE *fd;
 

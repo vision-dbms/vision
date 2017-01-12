@@ -26,16 +26,14 @@ PublicFnDef int STD_delwin (WINDOW *win)
 }
 #endif
 
-PublicFnDef int STD_checkTerminalCapabilities()
-{
+PublicFnDef void STD_checkTerminalCapabilities() {
     static char entry[1024];
     static int  entryIsntValid = TRUE;
-    extern char *tgetstr(), *getenv ();
-    char *term, *areap, area[1024];
+    char *areap, area[1024];
 
     if (entryIsntValid)
     {
-	term = getenv ("TERM");
+	char const *term = getenv ("TERM");
 	if (IsNil (term))
 	    term = "vt100";
 
@@ -50,7 +48,7 @@ PublicFnDef int STD_checkTerminalCapabilities()
     	STD_hasInsertDeleteLine = FALSE;
 }
 
-PublicFnDef int
+PublicFnDef void
 STD_cleanupTerminal()
 {
 }

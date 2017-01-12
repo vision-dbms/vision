@@ -22,9 +22,7 @@ typedef struct
     } commandInfo;
 
 /* Forward function declarations */
-PrivateFnDef int exec (
-    void
-);
+PrivateFnDef int exec ();
 
 /* Public function declarations */
 PublicFnDecl char *strtok ();
@@ -85,9 +83,7 @@ PrivateFnDef void loadPrinters ()
 #endif
 
 
-PrivateFnDef void abortInitPrinters (stage)
-int stage;
-{
+PrivateFnDef void abortInitPrinters (int stage) {
     int i;
 
     /* clean-up from a bad memory allocation.  Use a CASE
@@ -119,8 +115,7 @@ int stage;
 }
 
 
-PrivateFnDef int initPrinters ()
-{
+PrivateFnDef int initPrinters () {
     char buffer[RS_MaxLine + 1],
          *tmpBuffer;
     int *typeCount;
@@ -338,16 +333,12 @@ PrivateFnDef int initPrinters ()
 }
 
 
-PublicFnDef char *print (currPage,defaultPrinter)
-PAGE *currPage;
-int  defaultPrinter;
-{
+PublicFnDef void print (PAGE *currPage, int defaultPrinter) {
     MENU *menu1,
          *menu2;
     PAGE *page;
     CUR_WINDOW *win,
                *formWin;
-    PAGE_Action FORM_handler();
     int i, longest, j, currWindows, start, end;
     FORM_Field	*fptr;
 
@@ -434,8 +425,6 @@ int  defaultPrinter;
     CUR_delwin (formWin);
     CUR_delwin (win);
     PAGE_deletePage (page, i);
-           
-    return (FALSE);
 }
 
 
@@ -443,9 +432,7 @@ int  defaultPrinter;
 /***********************************************
  **********	Execute		****************
  ***********************************************/
-PrivateFnDef char *getPrintStyle(printer)
-char printer;
-{
+PrivateFnDef char *getPrintStyle(char printer) {
     MENU *menu = FORM_fieldMenu (PRINT);
     
     if (printer == 's')
@@ -498,10 +485,7 @@ char printer;
 }
 #endif
 
-PrivateFnDef int exec (
-    void
-)
-{
+PrivateFnDef int exec () {
     char *mode;
     int  i;
 
@@ -546,8 +530,7 @@ PrivateFnDef int exec (
         strcpy (PRINT_Command.initString, types[i].command);
 }
 
-PublicFnDef void cleanupPrinters ()
-{
+PublicFnDef void cleanupPrinters () {
     int i;
     char  fname[128];
 
@@ -594,8 +577,7 @@ PublicFnDef void cleanupPrinters ()
     free (types);
 }
 
-PublicFnDef int checkPrinters ()
-{
+PublicFnDef int checkPrinters () {
     char buffer[RS_MaxLine + 1];
 
     if (printersDefined)

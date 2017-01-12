@@ -73,7 +73,7 @@ PrivateVarDef MENU_Choice ruleChoices[] = {
  NULL, 
 };
 
-PrivateVarDef char *Rules;
+PrivateVarDef char const *Rules;
 
 PrivateVarDef FORM *Form;
 
@@ -94,7 +94,6 @@ PublicFnDef PAGE_Action statview()
     MENU *menu1, *menu2, *menu3;
     PAGE *page;
     CUR_WINDOW *formWin;
-    PAGE_Action FORM_handler();
     int i, longest, j;
     static int alreadyCentered = FALSE;
 

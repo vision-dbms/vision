@@ -6,14 +6,14 @@
 #include "keys.d"
 
 /*****  Keyboard input routines  *****/
-PublicFnDecl int KEY_cready(), 
-		 KEY_getkey(),
-		 KEY_beginScriptRead(),
-		 KEY_beginScriptReadF(),
-		 KEY_beginScriptWrite(),
-		 KEY_initKeyboard(),
-		 KEY_setKeypad(),
-		 KEY_putc();
+PublicFnDecl void KEY_setKeypad();
+PublicFnDecl void KEY_initKeyboard();
+PublicFnDecl int KEY_cready();
+PublicFnDecl int KEY_getkey(int allowRepetition);
+PublicFnDecl int KEY_putc(int c);
+PublicFnDecl int KEY_beginScriptWrite();
+PublicFnDecl int KEY_beginScriptRead();
+PublicFnDecl int KEY_beginScriptReadF(char const *scriptFile);
 
 PublicVarDecl int KEY_scriptWrite, KEY_scriptRead, KEY_QuoteNextKey,
 		  DELAYbits, PASSTHRUbits;

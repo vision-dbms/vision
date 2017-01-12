@@ -208,10 +208,6 @@ int isBuffer;
 #endif
 
 
-PublicFnDef PAGE_Action FORM_handler(form, win, action)
-FORM *form;
-CUR_WINDOW *win;
-PAGE_Action action;
 /*****		Routine to manage user interaction with forms
  *
  *  Arguments:
@@ -224,7 +220,7 @@ PAGE_Action action;
  *	PAGE_Action
  *
  *****/
-{
+PublicFnDef PAGE_Action FORM_handler(FORM *form, CUR_WINDOW *win, PAGE_Action action) {
     switch (action)
     {
     case PAGE_Init:

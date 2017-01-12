@@ -481,11 +481,8 @@ VARS_initProfileVariables()
 
 }
 
-PublicFnDef int
-VARS_funcFromModuleName(name)
-char	*name;
-{
-	char	*nm, *eatLeadingAndTrailingSpaces();
+PublicFnDef int VARS_funcFromModuleName(char const *name) {
+ 	char	*nm;
 	int	i = 0;
 
 	if( name == NULL )

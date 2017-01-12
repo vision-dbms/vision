@@ -17,15 +17,15 @@
 #define	MENU_BackendMenu 0x01
 
 typedef struct {
-    char *label;
-    char *help;
+    char const *label;
+    char const *help;
     char letter;	 
     void (*handler)(void);
     char active;
 } MENU_Choice;
 
 typedef struct {
-    char *title;
+    char const *title;
     int choiceCount;	   
     int currChoice;	  
     int normalAttr;		  
@@ -84,9 +84,9 @@ typedef struct {
 	    for (i = 0; i < MENU_choiceCount(mptr); i++)\
 	    {\
 		if (MENU_choiceLabel(mptr, i) != NULL)\
-		    free(MENU_choiceLabel(mptr, i));\
+		    free((void*)MENU_choiceLabel(mptr, i));\
 		if (MENU_choiceHelp(mptr, i) != NULL)\
-		    free(MENU_choiceHelp(mptr, i));\
+		    free((void*)MENU_choiceHelp(mptr, i));\
 	    }\
 	}\
 	if (MENU_choiceArray(mptr) != NULL)\

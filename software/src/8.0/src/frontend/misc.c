@@ -30,7 +30,7 @@ PublicFnDef void strToLower(char *str) {
 	str++;
 }
 
-PublicFnDef char *eatLeadingAndTrailingSpaces(char *str) {
+PublicFnDef char const *eatLeadingAndTrailingSpaces(char const *str) {
 	char	*ptr;
 	int	len, i;
 

@@ -10,11 +10,16 @@
 
 /***** Function Declarations *****/
 
-PublicFnDecl MENU *MENU_read(), *MENU_getMenu(), *MENU_getMainMenu();
+PublicFnDecl MENU *MENU_read(char const *filename, int isBuffer);
+PublicFnDecl PAGE_Action MENU_handler(
+    MENU *menu, CUR_WINDOW *menuWin, PAGE_Action action
+);
+PublicFnDecl CUR_WINDOW *MENU_makeWindow(
+    MENU *menu, int startrow, int startcol, int maxrows
+);
 
-PublicFnDecl PAGE_Action MENU_handler();
-
-PublicFnDecl CUR_WINDOW *MENU_makeWindow();
+PublicFnDecl MENU *MENU_getMenu(char const *message);
+PublicFnDecl MENU *MENU_getMainMenu();
 
 #endif
 

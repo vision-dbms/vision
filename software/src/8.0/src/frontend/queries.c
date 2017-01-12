@@ -80,7 +80,6 @@ PAGE *mpage;
     MENU *menu;
     FORM *form;
     PAGE *page;
-    PAGE_Action MENU_handler(), FORM_handler();
     int i, j, cols, startcol, longest;
     static int alreadyCentered = FALSE;
 

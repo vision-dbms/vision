@@ -122,8 +122,9 @@ typedef unsigned long		VkSize;
 #define Unused(p) p
 #endif
 
+#ifndef __APPLE__
 extern int sys_nerr;
-/*extern char *sys_errlist[];*/
+#endif
 
 
 /**************************

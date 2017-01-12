@@ -15,6 +15,9 @@
 #undef FALSE
 #endif
 
+#ifndef NCURSES_OPAQUE
+#define NCURSES_OPAQUE 0
+#endif
 #include <curses.h>
 
 #ifndef TRUE

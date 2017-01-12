@@ -32,7 +32,7 @@ typedef struct {
 		autoSelect,
 		lastChoice;
     PAGE_Action	pendingAction;
-    char	*instructions;
+    char const	*instructions;
 } XMENU;
 
 #define XMENU_BaseMenu(menu)		((menu)->baseMenu)
@@ -96,8 +96,8 @@ PrivateVarDef PAGE		*MasterPage,
 PrivateVarDef int		Level;
 PrivateVarDef char		ClassName		[RS_MaxLine],
 				ObjectCatalogName	[RS_MaxLine],
-				MessageCatalogName	[RS_MaxLine],
-				*ObjectCatalogAccessMsg,
+				MessageCatalogName	[RS_MaxLine];
+PrivateVarDef char const	*ObjectCatalogAccessMsg,
 				*MessageCatalogAccessMsg;
 
 /*****************
@@ -132,7 +132,7 @@ PrivateVarDef FORM_Field HelpBannerFields[] = {
  -1,
 };
 
-PrivateFnDef void SelectNullMenuEntry (void);
+PrivateFnDef void SelectNullMenuEntry ();
 PrivateVarDef MENU_Choice NullMenuChoices[] = {
     " ", NULL, '\0', SelectNullMenuEntry, ON, 
     NULL,
@@ -143,9 +143,9 @@ PrivateVarDef MENU_Choice NullMenuChoices[] = {
  ************************************/
 
 /*****  'F8' Menu  *****/
-PrivateFnDef void DetermineContext (void);
-PrivateFnDef void AddCatalog (void);
-PrivateFnDef void AddToCatalog (void);
+PrivateFnDef void DetermineContext ();
+PrivateFnDef void AddCatalog ();
+PrivateFnDef void AddToCatalog ();
 PrivateVarDef MENU_Choice F8MenuChoices[] = {
     " Change Context"	, "Change browser class or level"	  , 'c', DetermineContext, ON,
     " Add to Catalog"	, "Add an object or message to a catalog" , 'a', AddToCatalog	 , ON,
@@ -299,34 +299,25 @@ PrivateVarDef FORM_Field AddMessageFormFields[] = {
  *****  Miscellaneous Utilities  *****
  *************************************/
 
-PrivateFnDef char *
-    VFormatString (fmt, ap)
-char *fmt;
-va_list ap;
-{
+PrivateFnDef char *VFormatString (char const *fmt, va_list ap) {
     static char buffer[RS_MaxLine+1];
 
     vsprintf (buffer, fmt, ap);
     return buffer;
 }
 
-PrivateFnDef char *FormatString (
-    char *			fmt,
-    ...
-)
-{
+PrivateFnDef char *FormatString (char const *fmt, ...) {
     va_list ap;
     char *result;
 
     va_start (ap, fmt);
     result = VFormatString (fmt, ap);
     va_end (ap);
+
+    return result;
 }
 
-PrivateFnDef int
-    SelectorTakesParameters (selector)
-char *selector;
-{
+PrivateFnDef int SelectorTakesParameters (char const *selector) {
     return
 	strpbrk (selector, ":+-*/&|,<>=") != NULL &&
 	(
@@ -351,10 +342,7 @@ char *selector;
 	);
 }
 
-PrivateFnDef char *
-    StringAsValidSelector (buffer, string)
-char *buffer, *string;
-{
+PrivateFnDef char *StringAsValidSelector (char *buffer, char const *string) {
     char *result = buffer;
 
     if (*string && !isalpha (*string))
@@ -373,11 +361,7 @@ char *buffer, *string;
  *****  Extended Menu Type Manager  *****
  ****************************************/
 
-PrivateFnDef XMENU *
-    XMENU_create (menu, instructions)
-MENU *menu;
-char *instructions;
-{
+PrivateFnDef XMENU *XMENU_create (MENU *menu, char const *instructions) {
     XMENU *xmenu;
 
     if ((xmenu = (XMENU *) malloc (sizeof (XMENU))) == NULL)
@@ -392,15 +376,10 @@ char *instructions;
     return xmenu;
 }
 
-PrivateFnDef PAGE_Action
-    XMENU_handler (xmenu, window, action)
-XMENU *xmenu;
-CUR_WINDOW *window;
-PAGE_Action action;
-{
-    int instructionsDisplayed;
-
-    instructionsDisplayed = FALSE;
+PrivateFnDef PAGE_Action XMENU_handler (
+    XMENU *xmenu, CUR_WINDOW *window, PAGE_Action action
+) {
+    int instructionsDisplayed = FALSE;
     if (PAGE_Input == action)
     {
 	if (!XMENU_Enterable (xmenu))
@@ -427,13 +406,9 @@ PAGE_Action action;
     return XMENU_PendingAction (xmenu);
 }
 
-PrivateFnDef void
-    XMENU_ChangeMenu (window, xmenu, newMenu, enterable, autoSelect)
-CUR_WINDOW *window;
-XMENU *xmenu;
-MENU *newMenu;
-int enterable, autoSelect;
-{
+PrivateFnDef void XMENU_ChangeMenu (
+    CUR_WINDOW *window, XMENU *xmenu, MENU *newMenu, int enterable, int autoSelect
+) {
     MENU *oldMenu;
     int i;
 
@@ -457,18 +432,13 @@ int enterable, autoSelect;
  *  General  *
  *************/
 
-PrivateFnDef int
-    ExecuteFileMenu ()
-{
+PrivateFnDef void ExecuteFileMenu () {
     EDIT_reportFileMenu(MasterPage,TRUE);
 }
 
-PrivateFnDef PAGE_Action
-    FormPageHandler (form, window, action)
-FORM *form;
-CUR_WINDOW *window;
-PAGE_Action action;
-{
+PrivateFnDef PAGE_Action FormPageHandler (
+    FORM *form, CUR_WINDOW *window, PAGE_Action action
+) {
     if (TargetPageWindow && PAGE_Input == action)
     {
 	if (TargetPageWindow != window)
@@ -480,12 +450,9 @@ PAGE_Action action;
     return FORM_handler (form, window, action);
 }
 
-PrivateFnDef PAGE_Action
-    XMenuPageHandler (xmenu, window, action)
-XMENU *xmenu;
-CUR_WINDOW *window;
-PAGE_Action action;
-{
+PrivateFnDef PAGE_Action XMenuPageHandler (
+    XMENU *xmenu, CUR_WINDOW *window, PAGE_Action action
+) {
     if (TargetPageWindow && PAGE_Input == action)
     {
 	if (TargetPageWindow != window)
@@ -497,12 +464,9 @@ PAGE_Action action;
     return XMENU_handler (xmenu, window, action);
 }
 
-PrivateFnDef PAGE_Action
-    BufPageHandler (buffer, window, action)
-LINEBUFFER *buffer;
-CUR_WINDOW *window;
-PAGE_Action action;
-{
+PrivateFnDef PAGE_Action BufPageHandler (
+    LINEBUFFER *buffer, CUR_WINDOW *window, PAGE_Action action
+) {
     if (TargetPageWindow && (PAGE_Input == action || PAGE_Scroll == action) )
     {
 	if (TargetPageWindow != window)
@@ -518,7 +482,7 @@ PAGE_Action action;
  *  Master Page  *
  *****************/
 
-PrivateFnDef void SelectInstance (void);
+PrivateFnDef void SelectInstance ();
 
 PrivateFnDef void
     CreateMasterPage ()
@@ -592,9 +556,9 @@ PrivateFnDef void
  ****************/
 
 PrivateFnDef void CreatePopupPage (
-    char *			title,
-    int				(*execfn)(),
-    PAGE_Action			(*handler)(),
+    char const*			title,
+    void			(*execfn)(),
+    PAGE_Action			(*handler)(FORM*,CUR_WINDOW*,PAGE_Action),
     FORM *			object,
     int				ysize,
     int				xsize
@@ -658,9 +622,9 @@ PrivateFnDef void
  *************/
 
 PrivateFnDef MENU *GetMenu (
-    char *			title,
-    void			(*handler)(void),
-    char *			genformat,
+    char const *		title,
+    void			(*handler)(),
+    char const*			genformat,
     ...
 )
 {
@@ -686,7 +650,7 @@ PrivateFnDef MENU *GetMenu (
  *  Null Menu  *
  ***************/
 
-PrivateFnDef void SelectNullMenuEntry (void) {
+PrivateFnDef void SelectNullMenuEntry () {
     ERR_displayPause("Select an entry from previous menu first");
 }
 
@@ -696,12 +660,12 @@ PrivateFnDef void SelectNullMenuEntry (void) {
 
 PrivateFnDef MENU *GetInstanceMenu (
     int				catalogType,
-    char *			catalog,
-    void			(*handler)(void)
+    char const*			catalog,
+    void			(*handler)()
 )
 {
-    char *catalogAccessMsg, *title,
-	 classSelector  [RS_MaxLine + 1],
+    char const *title, *catalogAccessMsg;
+    char classSelector  [RS_MaxLine + 1],
 	 catalogSelector[RS_MaxLine + 1];
 
 /*****  Decode catalog type, ...  *****/
@@ -724,8 +688,7 @@ PrivateFnDef MENU *GetInstanceMenu (
 		    StringAsValidSelector (catalogSelector, catalog));
 }
 
-PrivateFnDef void SelectInstance (void)
-{
+PrivateFnDef void SelectInstance () {
     char classSelector  [RS_MaxLine + 1],
 	 catalogSelector[RS_MaxLine + 1],
 	 objectSelector [RS_MaxLine + 1],
@@ -789,13 +752,12 @@ PrivateFnDef void SelectInstance (void)
 
 PrivateFnDef MENU *GetCatalogMenu (
     int				catalogType,
-    char *			class,
-    char *			catalogAccessMsg,
-    void			(*handler)(void)
-)
-{
-    char *title,
-	 classSelector[RS_MaxLine + 1];
+    char const*			cLass,
+    char const*			catalogAccessMsg,
+    void			(*handler)()
+) {
+    char const *title;
+    char classSelector[RS_MaxLine + 1];
 
 /*****  Decode catalog type, ...  *****/
     if (CTypeObject == catalogType)
@@ -806,7 +768,7 @@ PrivateFnDef MENU *GetCatalogMenu (
     return GetMenu (title,
 		    handler,
 		    "FrontEndTools ClassInfo %s %s displayMessages",
-		    StringAsValidSelector (classSelector, class),
+		    StringAsValidSelector (classSelector, cLass),
 		    catalogAccessMsg);
 }
 
@@ -817,15 +779,12 @@ PrivateFnDef void SelectCatalog (
     char *			targetCatalogName,
     XMENU *			targetXMenu,
     CUR_WINDOW *		targetWindow,
-    void			(*handler)(void),
-    char *			errorMessage
+    void			(*handler)(),
+    char const*			errorMessage
 )
 {
-    char *catalog;
-    MENU *instances;
-
-    catalog = XMENU_currChoiceLabel (sourceXMenu);
-    instances = GetInstanceMenu (catalogType, catalog, handler);
+    char const *const catalog = XMENU_currChoiceLabel (sourceXMenu);
+    MENU *const instances = GetInstanceMenu (catalogType, catalog, handler);
     if (instances == NULL)
     {
 	ERR_displayPause(errorMessage);
@@ -841,7 +800,7 @@ PrivateFnDef void SelectCatalog (
     TargetPageWindow = targetWindow;
 }
 
-PrivateFnDef void SelectObjectCatalog (void) {
+PrivateFnDef void SelectObjectCatalog () {
     SelectCatalog
 	(CTypeObject,
 	 ObjectCatalog,
@@ -852,7 +811,7 @@ PrivateFnDef void SelectObjectCatalog (void) {
 	 "Error reading object instance catalog");
 }
 
-PrivateFnDef void SelectMessageCatalog (void) {
+PrivateFnDef void SelectMessageCatalog () {
     SelectCatalog
 	(CTypeMessage,
 	 MessageCatalog,
@@ -871,14 +830,9 @@ PrivateFnDef void SelectMessageCatalog (void) {
  *  General  *
  *************/
 
-PrivateFnDef int ProcessPopupForm (
-    char *			title,
-    int				(*execfn)(),
-    FORM *			form,
-    int				ysize,
-    int				xsize
-)
-{
+PrivateFnDef void ProcessPopupForm (
+    char const *title, void (*execfn)(), FORM *form, int ysize, int xsize
+) {
     CreatePopupPage (title, execfn, FORM_handler, form, ysize, xsize);
     ProcessPopupPage ();
     DeletePopupPage ();
@@ -889,10 +843,7 @@ PrivateFnDef int ProcessPopupForm (
  *  Context Form  *
  ******************/
 
-PrivateFnDef void CreateContextForm (
-    void
-)
-{
+PrivateFnDef void CreateContextForm () {
     int i;
 
     if (NULL == ClassMenu || NULL == LevelMenu)
@@ -908,13 +859,10 @@ PrivateFnDef void CreateContextForm (
 }
 
 
-PrivateFnDef int ExecuteContextForm (
-    void
-)
-{
+PrivateFnDef void ExecuteContextForm () {
     int level, i;
     MENU *objectCatalog, *messageCatalog;
-    char *className, *objectCatalogAccessMsg, *messageCatalogAccessMsg;
+    char const *className, *objectCatalogAccessMsg, *messageCatalogAccessMsg;
 
     level = MENU_currChoice (FORM_fieldMenu (ContextFormLevelField));
     className = FORM_fieldValue (ContextFormClassField);
@@ -935,7 +883,7 @@ PrivateFnDef int ExecuteContextForm (
     {
 	ERR_displayPause("Error reading object catalog");
 	PAGE_status(PopupPage) = PAGE_Normal;
-	return FALSE;
+	return /*FALSE*/;
     }
 
     messageCatalog =
@@ -945,7 +893,7 @@ PrivateFnDef int ExecuteContextForm (
 	MENU_deleteMenu (objectCatalog, i);
 	ERR_displayPause("Error reading message catalog");
 	PAGE_status(PopupPage) = PAGE_Normal;
-	return FALSE;
+	return /*FALSE*/;
     }
 
     Level			= level;
@@ -960,15 +908,13 @@ PrivateFnDef int ExecuteContextForm (
 
     PAGE_status(PopupPage) = PAGE_ExitOnExec;
     TargetPageWindow = ObjectCatalogWin;
-
-    return(FALSE);
 }
 
-PrivateFnDef void DetermineContext (void) {
+PrivateFnDef void DetermineContext () {
     CreateContextForm ();
 
     if (NULL != ContextForm)
-	ProcessPopupForm
+	ProcessPopupForm 
 	    ("Browsing Context:", ExecuteContextForm, ContextForm, 5, 32);
 }
 
@@ -1000,10 +946,8 @@ PrivateFnDef void
     strcpy (FORM_fieldValue (AddCatalogFormCNameField), "");
 }
 
-PrivateFnDef int
-    ExecuteAddCatalogForm ()
-{
-    char class	[RS_MaxLine],
+PrivateFnDef void ExecuteAddCatalogForm () {
+    char cLass	[RS_MaxLine],
 	 catalog[RS_MaxLine],
 	 *expression;
     int  selectedLevel,
@@ -1013,7 +957,7 @@ PrivateFnDef int
     if (strlen (FORM_fieldValue (AddCatalogFormCNameField)) == 0)
     {
 	ERR_displayPause ("Catalog Name Not Specified");
-	return FALSE;
+	return /*FALSE*/;
     }
 
     selectedLevel = MENU_currChoice (FORM_fieldMenu (AddCatalogFormLevelField));
@@ -1021,7 +965,7 @@ PrivateFnDef int
     expression =
 	FormatString
 	    ("FrontEndTools ClassInfo %s create%s%sCatalog: \"%s\"",
-	     StringAsValidSelector (class, FORM_fieldValue (AddCatalogFormClassField)),
+	     StringAsValidSelector (cLass, FORM_fieldValue (AddCatalogFormClassField)),
 	     LevelIndividual == selectedLevel ? "Individual" : "Collection",
 	     CTypeObject == selectedCType ? "Object" : "Message",
 	     StringAsValidSelector (catalog, FORM_fieldValue (AddCatalogFormCNameField)));
@@ -1029,7 +973,7 @@ PrivateFnDef int
     if (RS_sendAndCheck (expression, ">>>"))
 	ERR_displayPause ("Error adding catalog");
     else if (Level != selectedLevel || 
-	     strcmp (class, FORM_fieldValue (AddCatalogFormClassField)) != 0)
+	     strcmp (cLass, FORM_fieldValue (AddCatalogFormClassField)) != 0)
     {
     }
     else if (CTypeObject == selectedCType)
@@ -1062,11 +1006,9 @@ PrivateFnDef int
 	    TargetPageWindow = MessageCatalogWin;
 	}
     }
-
-    return(FALSE);
 }
 
-PrivateFnDef void AddCatalog (void) {
+PrivateFnDef void AddCatalog () {
     CreateAddCatalogForm ();
 
     if (NULL != AddCatalogForm)
@@ -1080,9 +1022,7 @@ PrivateFnDef void AddCatalog (void) {
  ********************************/
 
 /*****  Add Object Form  *****/
-PrivateFnDef void
-    CreateAddObjectForm ()
-{
+PrivateFnDef void CreateAddObjectForm () {
     int i;
 
     if (NULL == ClassMenu || NULL == LevelMenu || NULL == ETypeMenu)
@@ -1101,10 +1041,8 @@ PrivateFnDef void
     strcpy (FORM_fieldValue (AddObjectFormODefnField), "");
 }
 
-PrivateFnDef int
-    ExecuteAddObjectForm ()
-{
-    char class	[RS_MaxLine],
+PrivateFnDef void ExecuteAddObjectForm () {
+    char cLass	[RS_MaxLine],
 	 catalog[RS_MaxLine],
 	 *expression;
     int  deferringExecution;
@@ -1112,18 +1050,18 @@ PrivateFnDef int
     if (strlen (FORM_fieldValue (AddObjectFormONameField)) == 0)
     {
 	ERR_displayPause ("Object name not specified");
-	return FALSE;
+	return /*FALSE*/;
     }
     if (SelectorTakesParameters (FORM_fieldValue (AddObjectFormONameField)))
     {
 	ERR_displayPause ("Object name cannot require parameters");
-	return FALSE;
+	return /*FALSE*/;
     }
 
     if (strlen (FORM_fieldValue (AddObjectFormODefnField)) == 0)
     {
 	ERR_displayPause ("Object definition not specified");
-	return FALSE;
+	return /*FALSE*/;
     }
 
     deferringExecution =
@@ -1131,7 +1069,7 @@ PrivateFnDef int
     expression =
 	FormatString
 	    ("FrontEndTools ClassInfo %s %s %s add: \"%s\" as: %c%s%c;",
-	     StringAsValidSelector (class, ClassName),
+	     StringAsValidSelector (cLass, ClassName),
 	     ObjectCatalogAccessMsg,
 	     StringAsValidSelector (catalog, FORM_fieldValue (AddObjectFormCNameField)),
 	     FORM_fieldValue (AddObjectFormONameField),
@@ -1152,13 +1090,9 @@ PrivateFnDef int
 	     SelectInstance,
 	     "Error re-reading object instance catalog");
     }
-
-    return(FALSE);
 }
 
-PrivateFnDef int
-    AddObject ()
-{
+PrivateFnDef int AddObject () {
     CreateAddObjectForm ();
 
     if (NULL != AddObjectForm)
@@ -1170,9 +1104,7 @@ PrivateFnDef int
 }
 
 /*****   Add Message Form  *****/
-PrivateFnDef void
-    CreateAddMessageForm ()
-{
+PrivateFnDef void CreateAddMessageForm () {
     int i;
 
     if (NULL == ClassMenu || NULL == LevelMenu)
@@ -1189,28 +1121,26 @@ PrivateFnDef void
     strcpy (FORM_fieldValue (AddMessageFormMNameField), "");
 }
 
-PrivateFnDef int
-    ExecuteAddMessageForm ()
-{
-    char class	[RS_MaxLine],
+PrivateFnDef void ExecuteAddMessageForm () {
+    char cLass	[RS_MaxLine],
 	 catalog[RS_MaxLine],
 	 *expression;
 
     if (strlen (FORM_fieldValue (AddMessageFormMNameField)) == 0)
     {
 	ERR_displayPause ("Message name not specified");
-	return FALSE;
+	return /*FALSE*/;
     }
     if (SelectorTakesParameters (FORM_fieldValue (AddMessageFormMNameField)))
     {
 	ERR_displayPause ("Message cannot require parameters");
-	return FALSE;
+	return /*FALSE*/;
     }
 
     expression =
 	FormatString
 	    ("FrontEndTools ClassInfo %s %s %s add: \"%s\" as: NA;",
-	     StringAsValidSelector (class, ClassName),
+	     StringAsValidSelector (cLass, ClassName),
 	     MessageCatalogAccessMsg,
 	     StringAsValidSelector (catalog, FORM_fieldValue (AddMessageFormCNameField)),
 	     FORM_fieldValue (AddMessageFormMNameField));
@@ -1228,13 +1158,9 @@ PrivateFnDef int
 	     SelectInstance,
 	     "Error re-reading messageinstance catalog");
     }
-
-    return(FALSE);
 }
 
-PrivateFnDef int
-    AddMessage ()
-{
+PrivateFnDef int AddMessage () {
     CreateAddMessageForm ();
 
     if (NULL != AddMessageForm)
@@ -1245,7 +1171,7 @@ PrivateFnDef int
     return (FALSE);
 }
 /*****  Add Object/Message Form Dispatcher  *****/
-PrivateFnDef void AddToCatalog (void) {
+PrivateFnDef void AddToCatalog () {
     if (LastDisplayObject == (caddr_t)ObjectCatalog || LastDisplayObject == (caddr_t)ObjectInstance)
 	AddObject ();
     else if (LastDisplayObject == (caddr_t)MessageCatalog|| LastDisplayObject == (caddr_t)MessageInstance)

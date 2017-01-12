@@ -50,11 +50,13 @@ typedef enum   {PAGE_Init,
 #define	PAGE_formType	2
 #define	PAGE_pageType	3
 
+typedef PAGE_Action (*PAGE_Handler)(void*,CUR_WINDOW*,PAGE_Action);
+
 typedef struct {
-    char	    *object;
+    void	    *object;
     CUR_WINDOW	    *window;
     PAGE_Action	    action;
-    PAGE_Action	    (*handler)();
+    PAGE_Handler    handler;
     unsigned int    enter;
 } PAGE_Element;
 
@@ -71,7 +73,7 @@ typedef struct {
     char	    *obj;
     CUR_WINDOW	    *objWin;
     int		    objType;
-    int		    (*fkeyFunc[10])();
+    void	    (*fkeyFunc[10])();
     PAGE_Status	    status;
 } PAGE;
 
@@ -128,7 +130,7 @@ typedef struct {
     PAGE_objWin(pge) = (CUR_WINDOW *)ow;\
     PAGE_objType(pge) = (int)ot;\
     for (i = 0; i < 10; i++)\
-        PAGE_fkey(pge, i) = (int (*)())NULL;\
+        PAGE_fkey(pge, i) = (void(*)())NULL;\
     PAGE_status(pge) = PAGE_Normal;\
 }
 
@@ -141,7 +143,7 @@ typedef struct {
     PAGE_object(pge, n) = (char *)obj;\
     PAGE_window(pge, n) = (CUR_WINDOW *)win;\
     PAGE_action(pge, n) = (PAGE_Action)action;\
-    PAGE_handlerFn(pge, n) = (fn);\
+    PAGE_handlerFn(pge, n) = (PAGE_Handler)(fn);\
     PAGE_enter(pge, n) = (unsigned int)enter;\
 }
 

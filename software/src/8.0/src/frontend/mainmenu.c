@@ -114,7 +114,6 @@ PrivateFnDef void displayMenu()
 {
     MENU *menu = NULL;
     FORM *form, *helpform;
-    PAGE_Action MENU_handler(), FORM_handler();
     int i, j, rows, cols, startrow, startcol, longest;
     static int alreadyCentered = FALSE;
 

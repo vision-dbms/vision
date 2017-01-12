@@ -64,10 +64,7 @@ PrivateFnDef int scanChoice (
  *************		MENU_read	*************
  ***************************************************/
 
-PublicFnDef MENU *MENU_read(filename, isBuffer)
-char *filename;
-int isBuffer;
-{
+PublicFnDef MENU *MENU_read(char const *filename, int isBuffer) {
     int i, j, index1, index2;
     char buffer[MENU_MaxLine], string[MENU_MaxLine], 
         *bp, *bp2;
@@ -190,10 +187,6 @@ PrivateVarDef int *Ypos = NULL,   /** current y position of a label **/
 	   LastLabel = -1;  /** last label currently displayed  **/
 
 
-PublicFnDef PAGE_Action MENU_handler(menu, menuWin, action)
-MENU *menu;
-CUR_WINDOW *menuWin;
-PAGE_Action action;
 /*****		Routine to manage user interaction with stack menus
  *
  *  Arguments:
@@ -206,7 +199,9 @@ PAGE_Action action;
  *	PAGE_Action
  *
  *****/
-{
+PublicFnDef PAGE_Action MENU_handler(
+    MENU *menu, CUR_WINDOW *menuWin, PAGE_Action action
+) {
     switch (action)
     {
     case PAGE_Init:
@@ -461,10 +456,7 @@ PrivateFnDef PAGE_Action run_menu (
 
 
 
-PrivateFnDef void ScrollWindow(menu, menuWin)
-MENU *menu;
-CUR_WINDOW *menuWin;
-{
+PrivateFnDef void ScrollWindow(MENU *menu, CUR_WINDOW *menuWin) {
     int label, row, prev, rowContent[CUR_maxScrLines+1];  /* Max number of rows on screen */
 
     /*****  draw the menu border on the screen  *****/
@@ -630,10 +622,9 @@ PrivateFnDef void DisplayOptions (
 }
 
 
-PublicFnDef CUR_WINDOW *MENU_makeWindow(menu, startrow, startcol, maxrows)
-MENU *menu;
-int startrow, startcol, maxrows;
-{
+PublicFnDef CUR_WINDOW *MENU_makeWindow(
+    MENU *menu, int startrow, int startcol, int maxrows
+) {
     int rows, cols, longest = 0, i, j;
     
     for (i = 0; i < MENU_choiceCount(menu); i++)
@@ -652,9 +643,7 @@ int startrow, startcol, maxrows;
 
 PrivateVarDef int	NumChoicesAllocated = 0;
 
-PublicFnDef MENU *MENU_getMenu(message)
-char *message;
-{
+PublicFnDef MENU *MENU_getMenu(char const *message) {
     int i;
     MENU *menu;
     char buffer[RS_MaxLine+1];
@@ -711,9 +700,7 @@ char *message;
     return(menu);
 }
 
-PrivateFnDef MENU *getMainMenu(msg)
-char *msg;
-{
+PrivateFnDef MENU *getMainMenu(char const *msg) {
     int i;
     MENU *menu;
     char buffer[RS_MaxLine+1];

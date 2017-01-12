@@ -14,6 +14,6 @@ PublicFnDecl int toUpper (int ch);
 PublicFnDecl int toLower (int ch);
 PublicFnDecl void strToUpper(char *str);
 PublicFnDecl void strToLower(char *str);
-PublicFnDecl char *eatLeadingAndTrailingSpaces(char *str);
+PublicFnDecl char const *eatLeadingAndTrailingSpaces(char const *str);
 
 #endif

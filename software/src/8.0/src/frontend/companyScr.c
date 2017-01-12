@@ -152,7 +152,6 @@ char *universe;
 int count;
 {
     MENU *actionMenu, *menu;
-    PAGE_Action FORM_handler(), BUF_handler();
     int i, longest, j;
     static int alreadyCentered = FALSE;
 
@@ -333,7 +332,6 @@ PrivateFnDef int execScreen (
 
 PrivateFnDef void priorSubset (void) {
     int i;
-    PAGE_Action BUF_handler();
 
     if (Count <= 1)    
     {
@@ -405,7 +403,6 @@ PrivateFnDef int execPrior(
 PrivateFnDef void displaySubset (void) {
     int i;
     char string[80];
-    PAGE_Action BUF_handler();
     LINEBUFFER *displayBuf;
     CUR_WINDOW *win, *swin;
 

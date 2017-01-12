@@ -210,7 +210,6 @@ char *universe;
 char **itemArray;
 {
     MENU *menu;
-    PAGE_Action FORM_handler(), BUF_handler();
     int i, longest, j;
 
     if( inReport )
@@ -479,7 +478,6 @@ PrivateFnDef int addField()
 PrivateFnDef int insertField()
 {
     int i;
-    PAGE_Action BUF_handler();
 
     if (SPR_fieldCount(Sprsheet) <= 0)    
     {
@@ -557,7 +555,6 @@ PrivateFnDef int execInsert (
 PrivateFnDef int moveField()
 {
     int i;
-    PAGE_Action BUF_handler();
 
     if (SPR_fieldCount(Sprsheet) <= 0)    
     {
@@ -655,7 +652,6 @@ PrivateFnDef int moveIt (
 PrivateFnDef int deleteField()
 {
     int i;
-    PAGE_Action BUF_handler();
 
     if (SPR_fieldCount(Sprsheet) <= 0)    
     {
@@ -728,7 +724,6 @@ PrivateFnDef int execDelete (
 PrivateFnDef int replaceField()
 {
     int i;
-    PAGE_Action BUF_handler();
 
     if (SPR_fieldCount(Sprsheet) <= 0)    
     {
@@ -866,7 +861,6 @@ PrivateFnDef int reportOptions(useOuterPage)
 int	useOuterPage;
 {
     CUR_WINDOW *form1Win, *form2Win;
-    PAGE_Action FORM_handler();
     int i;
 
 /*** create form windows ****/

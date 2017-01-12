@@ -7,6 +7,22 @@
 #include "page.d"
 #include "buffers.d"
 
+PublicFnDecl int BUF_getColFromSCol(
+    LINEBUFFER	*buffer,
+    char	*row,
+    int		scol,
+    int		*nscol
+);
+PublicFnDecl int BUF_getSColFromCol(
+    LINEBUFFER	*buffer,
+    char	*row,
+    int		col
+);
+PublicFnDecl int BUF_setCol(
+    LINEBUFFER	*buffer,
+    CUR_WINDOW	*win,
+    int		col
+);
 PublicFnDecl void BUF_resetScreen(
     LINEBUFFER *buffer,
     CUR_WINDOW *win
@@ -20,7 +36,17 @@ PublicFnDecl void BUF_paintLine(
     CUR_WINDOW *win
 );
 
-PublicFnDecl void BUF_compact(LINEBUFFER *buffer);
+PublicFnDecl int BUF_initBuffer(
+    LINEBUFFER *buffer,
+    int size
+);
+PublicFnDecl int BUF_eraseBuffer(
+    LINEBUFFER *buffer
+);
+PublicFnDecl void BUF_compact(
+    LINEBUFFER *buffer
+);
+
 PublicFnDecl char *BUF_getLine(
     LINEBUFFER *buffer,
     int len
@@ -39,18 +65,11 @@ PublicFnDecl int BUF_deleteLine(
     char *bufrow
 );
 
-PublicFnDecl int BUF_initBuffer(
-    LINEBUFFER *buffer,
-    int size
-);
-PublicFnDecl int BUF_setCol(
+PublicFnDecl int BUF_recalcCols(
     LINEBUFFER	*buffer,
-    CUR_WINDOW	*win,
-    int		col
+    CUR_WINDOW	*win
 );
-PublicFnDecl int BUF_eraseBuffer(
-    LINEBUFFER *buffer
-);
+
 PublicFnDecl int BUF_adjustRow(
     LINEBUFFER *buffer
 );
@@ -82,50 +101,40 @@ PublicFnDecl int BUF_deleteChar(
     CUR_WINDOW *win
 );
 
-PublicFnDecl int
-		BUF_searchString(),
-		BUF_searchNext(),
-		BUF_searchPrev(),
-		BUF_replaceString(),
-		BUF_queryReplaceString(),
-		BUF_forwardWord(),
-		BUF_backwardWord(),
-		BUF_deleteCurrWord(),
-		BUF_deletePrevWord(),
-		BUF_scrollUp1(),
-		BUF_scrollDown1(),
-		BUF_deleteRegion(),
-		BUF_insertRegion(),
-		BUF_appendRegion(),
-		BUF_writeFile(),
-		BUF_appendToFile(),
-		BUF_writeLastOutput(),
-#if 0
-		BUF_saveFile(),
-		BUF_appendFile(),
-#endif
-		BUF_readFile(),
-		BUF_getFile(),
-		BUF_stripTabs();
+PublicFnDecl int BUF_searchString(LINEBUFFER *buffer, CUR_WINDOW *win);
+PublicFnDecl int BUF_searchNext(LINEBUFFER *buffer, CUR_WINDOW *win);
+PublicFnDecl int BUF_searchPrev(LINEBUFFER *buffer, CUR_WINDOW *win);
 
-PublicFnDecl LINEBUFFER *BUF_readBuffer();
-
-PublicFnDecl PAGE_Action BUF_handler();
-
-PublicFnDecl int BUF_getColFromSCol(
-    LINEBUFFER	*buffer,
-    char	*row,
-    int		scol,
-    int		*nscol
+PublicFnDecl int BUF_forwardWord(LINEBUFFER *buffer, CUR_WINDOW *win);
+PublicFnDecl int BUF_backwardWord(LINEBUFFER *buffer, CUR_WINDOW *win);
+PublicFnDecl int BUF_deleteCurrWord(LINEBUFFER *buffer, CUR_WINDOW *win);
+PublicFnDecl int BUF_deletePrevWord(LINEBUFFER *buffer, CUR_WINDOW *win);
+PublicFnDecl int BUF_replaceString(LINEBUFFER *buffer, CUR_WINDOW *win);
+PublicFnDecl int BUF_queryReplaceString(LINEBUFFER *buffer, CUR_WINDOW *win);
+PublicFnDecl int BUF_deleteRegion(
+    LINEBUFFER *buffer, char *startrow, int startcol, char *endrow, int endcol
 );
-PublicFnDecl int BUF_getSColFromCol(
-    LINEBUFFER	*buffer,
-    char	*row,
-    int		col
+PublicFnDecl int BUF_insertRegion(
+    LINEBUFFER *tobuffer, CUR_WINDOW *win, LINEBUFFER *frbuffer
 );
-PublicFnDecl int BUF_recalcCols(
-    LINEBUFFER	*buffer,
-    CUR_WINDOW	*win
+PublicFnDecl int BUF_appendRegion(
+    LINEBUFFER *tobuffer, LINEBUFFER *frbuffer, char *startrow, int startcol, char *endrow, int endcol
+);
+
+PublicFnDecl int BUF_printBuffer (LINEBUFFER *buf, PAGE *page, int defaultPrinter);
+PublicFnDecl int BUF_saveFile(LINEBUFFER *buffer, char const *current_file);
+PublicFnDecl int BUF_appendFile(LINEBUFFER *buffer, char const *current_file);
+PublicFnDecl int BUF_listFile(LINEBUFFER *buffer, char *directory);
+PublicFnDecl int BUF_writeFile(LINEBUFFER *buffer, char const *filename);
+PublicFnDecl int BUF_appendToFile(LINEBUFFER *buffer, char const *filename);
+PublicFnDecl int BUF_writeLastOutput(LINEBUFFER *buffer, char const *filename, char const *mode);
+PublicFnDecl int BUF_stripTabs(char const *source, char *dest, int len);
+PublicFnDecl int BUF_readFile(LINEBUFFER *buffer, char *current_file);
+PublicFnDecl int BUF_getFile(LINEBUFFER *buffer, char *current_file);
+PublicFnDecl LINEBUFFER *BUF_readBuffer(char const *filename, int len, int min, int max);
+
+PublicFnDecl PAGE_Action BUF_handler(
+    LINEBUFFER *buffer, CUR_WINDOW *win, PAGE_Action actionbuffer
 );
 
 

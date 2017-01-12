@@ -8,9 +8,11 @@
 /***** Function Declarations *****/
 PublicFnDecl FORM *FORM_read();
 
-PublicFnDecl PAGE_Action FORM_handler();
+PublicFnDecl PAGE_Action FORM_handler(
+    FORM *form, CUR_WINDOW *win, PAGE_Action action
+);
 
-PublicFnDecl void FORM_menuToForm(void);
+PublicFnDecl void FORM_menuToForm();
 
 PublicFnDecl int FORM_centerFormElts();
 

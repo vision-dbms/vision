@@ -8,11 +8,19 @@
 
 #include "window.d"
 
-PublicFnDecl void WIN_ReverseBox(), 
-		  WIN_LineBox(),
-		  WIN_HighlightBox(),
-		  WIN_RepaintWindow(),
-		  WIN_ShadowBox();
+PublicFnDecl void WIN_LineBox(
+    CUR_WINDOW *win, char const *title, char const *info
+);
+
+PublicFnDecl void WIN_RepaintWindow(CUR_WINDOW *win, int attr);
+
+PublicFnDecl void WIN_HighlightBox(
+    CUR_WINDOW *win, int attr, char const *title, char const *info
+);
+
+PublicFnDecl void WIN_ReverseBox(CUR_WINDOW *win, char const *title);
+
+PublicFnDecl void WIN_ShadowBox(CUR_WINDOW *win);
 		  
 
 #endif

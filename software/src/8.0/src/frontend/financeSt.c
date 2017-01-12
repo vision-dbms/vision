@@ -192,7 +192,6 @@ PublicFnDef PAGE_Action financeSt()
 {
     PAGE *page;
     CUR_WINDOW *form1Win, *form2Win, *form3Win, *form4Win, *tmpWin;
-    PAGE_Action FORM_handler();
     int i, longest, j, exec();
 
     if( inFS )

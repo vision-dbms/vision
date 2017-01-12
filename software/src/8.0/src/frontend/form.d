@@ -26,7 +26,7 @@ typedef struct {
     unsigned int flags;     /** flags for input, scrolling, etc.     **/
     char type;		    /** undefined (probably 'a', 'n', 'm')   **/
     char value[FORM_ValueMaxLen+1]; /** default field value 	     **/
-    char *help;	
+    char const *help;	
     MENU *menu;		    /** pointer to menu, if type == 'm'	     **/
     CHOICE_MenuChoice **choiceArray;
 				    /** pointer to an array of pointers

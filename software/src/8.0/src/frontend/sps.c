@@ -89,8 +89,6 @@ PrivateFnDef int getString (
  **********	Constants and Globals	**********
  *************************************************/
 
-PublicFnDecl char	*eatLeadingAndTrailingSpaces();
-
 #define LINES_PER_PAGE	66
 
 PrivateVarDef char	ErrorString[] = ">>> Selector";

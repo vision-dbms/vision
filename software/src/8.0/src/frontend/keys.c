@@ -19,13 +19,9 @@
 #define	PassthruOFF	0x00
 
 /*****  Forward Declarations  *****/
-PrivateFnDef int getScript (
-    int *			c
-);
+PrivateFnDef int getScript (int *c);
 
-PrivateFnDef int putScript (
-    int				c
-);
+PrivateFnDef int putScript (int	c);
 
 /*****  Globals  *****/
 PrivateVarDef int Cbuf = EMPTY;
@@ -138,10 +134,7 @@ struct StringKey StringKeyTable[NUMSTRINGS] = {
 
 PrivateVarDef char	*KeypadSetString = NULL;
 
-PublicFnDef int
-KEY_setKeypad()
-{
-    extern char	*tgetstr();
+PublicFnDef void KEY_setKeypad() {
     char area[1024], *areap = area;
 
     if( KeypadSetString == NULL )
@@ -157,22 +150,18 @@ KEY_setKeypad()
     	fputs(KeypadSetString,stdout);
 }
 
-PublicFnDef int KEY_initKeyboard()
-{
+PublicFnDef void KEY_initKeyboard() {
 	KEY_setKeypad();
 }
 
-PrivateFnDef void KEY_nodelay(on)
-int on;
-{
+PrivateFnDef void KEY_nodelay(int on) {
     if( KEY_scriptRead || STD_doNotUseNodelay )
 	return;
 
     CUR_nodelay(CUR_stdscr,on);
 }
 
-PublicFnDef int KEY_cready()
-{
+PublicFnDef int KEY_cready() {
     int	i;
 
     if (Cbuf != EMPTY)
@@ -224,9 +213,7 @@ PrivateFnDef int cget()
     return (CUR_wgetch(CUR_stdscr));
 }
 
-PublicFnDef int KEY_getkey(allowRepetition)
-int	allowRepetition;
-{
+PublicFnDef int KEY_getkey(int allowRepetition) {
     int c, i;
 
     c = cget();
@@ -501,15 +488,12 @@ int	allowRepetition;
     
 }
 
-PublicFnDef int KEY_putc(c)
-int c;
-{
+PublicFnDef int KEY_putc(int c) {
     Cbuf = c;
     JustDidPutc = TRUE;
 }
 
-PublicFnDef int KEY_beginScriptWrite()
-{
+PublicFnDef int KEY_beginScriptWrite() {
     char scriptFile[128];
 
     if( KEY_scriptWrite )
@@ -530,8 +514,7 @@ PublicFnDef int KEY_beginScriptWrite()
     return(FALSE);
 }
 
-PublicFnDef int KEY_beginScriptRead()
-{
+PublicFnDef int KEY_beginScriptRead() {
     char scriptFile[128];
 
     if( KEY_scriptRead )
@@ -546,9 +529,7 @@ PublicFnDef int KEY_beginScriptRead()
     return(FALSE);
 }
 
-PublicFnDef int KEY_beginScriptReadF(scriptFile)
-char *scriptFile;
-{
+PublicFnDef int KEY_beginScriptReadF(char const *scriptFile) {
     if( KEY_scriptRead )
     {
 	CUR_beep();
@@ -563,10 +544,7 @@ char *scriptFile;
 PrivateVarDef char Rbuf[256];
 PrivateVarDef int  Rcount = 0, Rindex = 0;
 
-PrivateFnDef int getScript (
-    int *			c
-)
-{
+PrivateFnDef int getScript (int *c) {
     char *b, temp;
     int i;
 
@@ -638,10 +616,7 @@ PrivateFnDef int getScript (
 	}\
 }
 
-PrivateFnDef int putScript (
-    int				c
-)
-{
+PrivateFnDef int putScript (int c) {
     static char buf[256];
     static int	bufidx = 0;
     int i;

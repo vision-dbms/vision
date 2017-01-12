@@ -2,7 +2,7 @@
 #define MONTH_D
 
 typedef struct {
-    char *text;
+    char const *text;
     int day;
 } MONTHTABLE;
 
