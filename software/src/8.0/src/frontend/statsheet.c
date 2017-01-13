@@ -12,6 +12,8 @@
 #include "rsInterface.h"
 #include "choices.h"
 
+#include "statsheet.h"
+
 #define MAXITEMS 100
 #define EST_YEAR(n)	(((YEAR-1 + n) * 10000) + 1231)
 
@@ -23,7 +25,7 @@ PrivateFnDef int getAssumptions (
     char *			dataset
 );
 
-PrivateFnDef int scanItems (
+PrivateFnDef void scanItems (
     char *			line
 );
 
@@ -31,7 +33,7 @@ PrivateFnDef int doAnalysis (
     char			type
 );
 
-PrivateFnDef updateAssumption (
+PrivateFnDef void updateAssumption (
     char *			item,
     int				year,
     char *			value
@@ -46,7 +48,7 @@ PrivateVarDef SPRSHEET	*StatSheet, *AssumptSheet;
 PrivateVarDef CUR_WINDOW	*StatWin, *AssumptWin, *LineWin;
 PrivateVarDef PAGE *ReportPage;
 
-PrivateVarDef int recalc(), printReport(), printReport2();
+PrivateVarDef void recalc(), printReport(), printReport2();
 
 PrivateVarDef MENU_Choice menuChoices[] = {
  " Calc ",	" Recalculate With New Assumptions",	'c', recalc, ON, 
@@ -59,7 +61,7 @@ PrivateVarDef MENU_Choice menuChoices[] = {
  NULL, 
 };
 
-PrivateVarDef int saveAssumptions(), unsaveAssumptions();
+PrivateVarDef void saveAssumptions(), unsaveAssumptions();
 
 PrivateVarDef MENU_Choice saveChoices[] = {
  " Yes ", " Update Assumptions Database With Current Values ",
@@ -69,9 +71,7 @@ PrivateVarDef MENU_Choice saveChoices[] = {
  NULL, 
 };
 
-PublicFnDef statsheet(company, type, rules, dataset)
-char *company, *type, *rules, *dataset;
-{
+PublicFnDef void statsheet(char *company, char *type, char *rules, char *dataset) {
     int i, j, longest;
     MENU *actionMenu, *saveMenu;
     CUR_WINDOW *MenuWin;
@@ -85,9 +85,9 @@ char *company, *type, *rules, *dataset;
     ERR_displayStr(" Writing report, please wait...",FALSE);
 
 /**** create assumptions spread sheet object ****/
-    if (getAssumptions(company, type, rules, dataset)) return TRUE;
+    if (getAssumptions(company, type, rules, dataset)) return;
 
-    if (doAnalysis(type[0])) return TRUE;
+    if (doAnalysis(type[0])) return;
 
 
 /**** create menu object ****/
@@ -139,8 +139,6 @@ char *company, *type, *rules, *dataset;
         free(PlugItems[i]);
 	
     PAGE_deletePage(ReportPage, i);
-
-    return(FALSE);
 }
 
 
@@ -148,13 +146,13 @@ char *company, *type, *rules, *dataset;
 /****************************************************
  *****		menu level functions		*****
  ***************************************************/
-PrivateFnDef int printReport()
+PrivateFnDef void printReport()
 {
     SPR_print(StatSheet, ReportPage);
     SPR_print(AssumptSheet, ReportPage);
 }
 
-PrivateFnDef int printReport2()
+PrivateFnDef void printReport2()
 {
     ERR_displayStr(" Writing report, please wait...",FALSE);
     RS_sendOnly("__tmpCompany displayEarningsHistoryData;");
@@ -164,8 +162,7 @@ PrivateFnDef int printReport2()
     RS_printOutput(ReportPage);
 }
 
-PrivateFnDef int recalc()
-{
+PrivateFnDef void recalc() {
     int row, col, i, j, year;
     char *cell;
     char *item;
@@ -198,14 +195,14 @@ PrivateFnDef int recalc()
         if (FALSE == RS_sendAndCheck("__tmpCompany calcEarnings", "Calc Done"))
 	{
 	    ERR_displayPause(" Error calculating earnings analysis");
-	    return TRUE;
+	    return;
 	}
 	ERR_displayStr(" Reading estimate data...",FALSE);
 	RS_sendLine("__tmpCompany displayEarningsEstimateData");
 	if (SPR_readSSheet(StatSheet))
 	{
 	    ERR_displayPause(" Error reading spread sheet");
-	    return TRUE;
+	    return;
 	}
         break;
 
@@ -214,14 +211,14 @@ PrivateFnDef int recalc()
         if (FALSE == RS_sendAndCheck("__tmpCompany calcFlow", "Calc Done"))
 	{
 	    ERR_displayPause(" Error calculating flow of funds");
-	    return TRUE;
+	    return;
 	}
         ERR_displayStr (" Reading estimate data...",FALSE);
 	RS_sendLine("__tmpCompany displayFlowEstimateData");
 	if (SPR_readSSheet(StatSheet))
 	{
 	    ERR_displayPause(" Error reading spread sheet");
-	    return TRUE;	    
+	    return;	    
 	}
         break;
 
@@ -230,14 +227,14 @@ PrivateFnDef int recalc()
         if (FALSE == RS_sendAndCheck("__tmpCompany calcRR", "Calc Done"))
 	{
 	    ERR_displayPause(" Error calculating reinvestment rate");
-	    return TRUE;
+	    return;
 	}
         ERR_displayStr (" Reading reinvestment rate data...",FALSE);
 	RS_sendLine("__tmpCompany displayRRateEstimateData");
 	if (SPR_readSSheet(StatSheet))
 	{
 	    ERR_displayPause(" Error reading spread sheet");
-	    return TRUE;	    
+	    return;	    
 	}
         break;
 
@@ -247,20 +244,20 @@ PrivateFnDef int recalc()
             RS_sendAndCheck("__tmpCompany calcDividends", "Calc Done"))
 	{
 	    ERR_displayPause(" Error calculating dividends");
-	    return TRUE;
+	    return;
 	}
         ERR_displayStr (" Reading dividend data...",FALSE);
 	RS_sendLine("__tmpCompany displayDividendEstimateData");
 	if (SPR_readSSheet(StatSheet))
 	{
 	    ERR_displayPause(" Error reading spread sheet");
-	    return TRUE;	    
+	    return;	    
 	}
         break;
 
     default:
 	ERR_displayPause(" Unknown analysis type");
-	return TRUE;
+	return;
 
     }
 #endif
@@ -269,8 +266,6 @@ PrivateFnDef int recalc()
     SPR_paintScreen(StatSheet, StatWin);
     CUR_touchwin(StatWin);
     CUR_wrefresh(StatWin);
-    
-    return (0);
 }
 
 #if 0
@@ -339,10 +334,7 @@ PrivateFnDef int getAssumptions (
     return FALSE;
 }
 
-PrivateFnDef int scanItems (
-    char *			line
-)
-{
+PrivateFnDef void scanItems (char *line) {
     char buffer[RS_MaxLine+1];
     int i, j, len;
     
@@ -362,16 +354,13 @@ PrivateFnDef int scanItems (
 	buffer[i] = '\0';
 	if (strlen(buffer) == 0)
 	    break;
-	PlugItems[ColCount] = malloc((strlen(buffer) + 1) * sizeof(char));
+	PlugItems[ColCount] = (char*)malloc((strlen(buffer) + 1) * sizeof(char));
 	strcpy(PlugItems[ColCount++], buffer);
 	while (line[j] == ' ' && j < len) j++;
     }
 }
 
-PrivateFnDef int doAnalysis (
-    char			type
-)
-{
+PrivateFnDef int doAnalysis (char type) {
 #if RSATTACH
 
     SPR_makeSheet(StatSheet, 9, 19, 1, 0, 4);
@@ -499,7 +488,7 @@ PrivateFnDef int doAnalysis (
 
 #if RSATTACH
 
-PrivateFnDef updateAssumption (
+PrivateFnDef void updateAssumption (
     char *			item,
     int				year,
     char *			value
@@ -516,8 +505,7 @@ PrivateFnDef updateAssumption (
 #endif
 
 
-PrivateFnDef int saveAssumptions()
-{
+PrivateFnDef void saveAssumptions() {
     int i, j, row, col, year;
     char *item;
     char *cell;
@@ -542,15 +530,12 @@ PrivateFnDef int saveAssumptions()
 
     RS_save();
 #endif
-    return (FALSE);
 }
 
-PrivateFnDef int unsaveAssumptions()
-{
+PrivateFnDef void unsaveAssumptions() {
     NotDone = FALSE;
 #if RSATTACH
     if (TRUE == RS_sendAndCheck("__tmpCompany rollbackAssumptions", "NA"))
 	    ERR_displayPause(" Error rolling back assumptions");
 #endif
-    return (FALSE);
 }

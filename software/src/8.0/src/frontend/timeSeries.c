@@ -6,6 +6,7 @@
 
 #include "stdcurses.h"
 #include "misc.h"
+#include "edit.h"
 #include "page.h"
 #include "form.h"
 #include "rsInterface.h"
@@ -19,53 +20,31 @@
  **********	Forward Declarations	**********
  *************************************************/
 
-PrivateFnDef int execInsert (
-    void
-);
+PrivateFnDef void execInsert ();
 
-PrivateFnDef int execMove (
-    void
-);
+PrivateFnDef void execMove ();
 
-PrivateFnDef int moveIt (
-    void
-);
+PrivateFnDef void moveIt ();
 
-PrivateFnDef int execDelete (
-    void
-);
+PrivateFnDef void execDelete ();
 
-PrivateFnDef int execReplace (
-    void
-);
+PrivateFnDef void execReplace ();
 
-PrivateFnDef int execOptions (
-    void
-);
+PrivateFnDef void execOptions ();
 
-PrivateFnDef int execExpr (
-    void
-);
+PrivateFnDef void execExpr ();
 
-PrivateFnDef int initTimeSeries (
-    void
-);
+PrivateFnDef void initTimeSeries ();
+PrivateFnDef void initTSSprPage();
 
-PrivateFnDef int validInitial (
-    void
-);
+PrivateFnDef int validInitial ();
+PrivateFnDef void doValidInitial ();
 
-PrivateFnDef int initOptions (
-    void
-);
+PrivateFnDef void initOptions ();
 
-PrivateFnDef int initBuffer (
-    void
-);
+PrivateFnDef void initBuffer ();
 
-PrivateFnDef void itemList (
-    void
-);
+PrivateFnDef void itemList ();
 
 
 /*************************************************
@@ -132,7 +111,7 @@ PrivateVarDef FORM_Field formFields[] = {
 /***************************************************************
  **********	Menu Definitions 		****************
  ***************************************************************/
-PrivateVarDef int addField(), deleteField(), insertField(), replaceField(), 
+PrivateVarDef void addField(), deleteField(), insertField(), replaceField(), 
     moveField(), itemsReportOptions(), clearFields(), specialItem(), lineItem(),
     getItemsParameters(), getOuterParameters(), timeSeriesItems(), 
     outerReportOptions(), getItemsParameters();
@@ -164,11 +143,9 @@ PrivateVarDef MENU_Choice reportChoices[] = {
 
 PrivateVarDef int	firstTime = TRUE, gotInitialInput = FALSE, didExec = FALSE;
 PublicVarDef  int	inTS = FALSE;
-PrivateFnDef int	exec();
+PrivateFnDef void	exec();
 
-PublicFnDef int
-timeSeries()
-{
+PublicFnDef int timeSeries() {
     MENU *menu;
     int i, longest, j;
 
@@ -250,9 +227,7 @@ timeSeries()
 
 PrivateVarDef int	inItemsPage = FALSE;
 
-PrivateFnDef int
-timeSeriesItems()
-{
+PrivateFnDef void timeSeriesItems() {
 	int	i;
 	Win1 = CUR_newwin(9, CUR_COLS, 0, 0);
 	Win2 = CUR_newwin((CUR_LINES-9-1-1), CUR_COLS, 9, 0);
@@ -274,7 +249,6 @@ timeSeriesItems()
 	CUR_delwin (Win2);
 	CUR_delwin (Win3);
 	PAGE_deletePage(ItemsPage, i);
-	return(FALSE);
 }
 
 /************************************************
@@ -283,9 +257,7 @@ timeSeriesItems()
 
 PrivateVarDef PAGE *MenuPage;
 
-PrivateFnDef void newField(fptr)
-SPR_Field *fptr;
-{
+PrivateFnDef void newField(SPR_Field *fptr) {
     
     strcpy(SPR_item(fptr), FORM_fieldValue(ITEM));
     if (isBlank(FORM_fieldValue(HEADING)))
@@ -310,10 +282,7 @@ SPR_Field *fptr;
     FORM_currField(Form) = ITEM_INDX;
 }
 
-PrivateFnDef void printField(fptr, col)
-SPR_Field *fptr;
-int col;
-{
+PrivateFnDef void printField(SPR_Field *fptr, int col) {
     char string[100];
     
 /**** NOTE: col must printed as it is used in insert, delete, etc. ****/
@@ -340,12 +309,11 @@ PrivateFnDef void displayFields()
 /************************************************
  **********	clearFields	*****************
  ***********************************************/
-PrivateFnDef int clearFields()
-{
+PrivateFnDef void clearFields() {
     int i;
     
     if (SPR_fieldCount(Sprsheet) <= 0)
-        return(FALSE);
+        return;
 	
     for (i = 0; i < SPR_fieldCount(Sprsheet); i++)
         free(SPR_field(Sprsheet, i));
@@ -353,22 +321,20 @@ PrivateFnDef int clearFields()
 
     BUF_eraseBuffer(DisplayBuf);
     displayFields();
-    return(FALSE);
 }
 
 
 /************************************************
  **********	addField	*****************
  ***********************************************/
-PrivateFnDef int addField()
-{
+PrivateFnDef void addField() {
     SPR_Field *fptr;
     char *ptr;
 
     if (isBlank(FORM_fieldValue(ITEM)))
     {
         ERR_displayPause(" Please Enter An Item To Print");
-	return(FALSE);
+	return;
     }
     
     SPR_addField(Sprsheet, ptr);
@@ -380,28 +346,25 @@ PrivateFnDef int addField()
     printField(fptr, SPR_fieldCount(Sprsheet));
 
     displayFields();
-
-    return(FALSE);
 }
 
 
 /************************************************
  **********	insertField	*****************
  ***********************************************/
-PrivateFnDef int insertField()
-{
+PrivateFnDef void insertField() {
     int i;
 
     if (SPR_fieldCount(Sprsheet) <= 0)    
     {
         ERR_displayPause(" No Fields To Insert Before");
-	return(FALSE);
+	return;
     }
     
     if (isBlank(FORM_fieldValue(ITEM)))
     {
         ERR_displayPause(" Please Enter An Item To Print");
-	return(FALSE);
+	return;
     }
 
     ERR_clearMsg();
@@ -425,13 +388,9 @@ PrivateFnDef int insertField()
     BUF_status(DisplayBuf) = BUF_Normal;
     CUR_werase(Win3);
     PAGE_deletePage(MenuPage, i);
-    return(FALSE);
 }
 
-PrivateFnDef int execInsert (
-    void
-)
-{
+PrivateFnDef void execInsert () {
     char *ptr;
     int i, field;
     SPR_Field *fptr, *holdfptr;
@@ -464,14 +423,13 @@ PrivateFnDef int execInsert (
 /************************************************
  **********	moveField	*****************
  ***********************************************/
-PrivateFnDef int moveField()
-{
+PrivateFnDef void moveField() {
     int i;
 
     if (SPR_fieldCount(Sprsheet) <= 0)    
     {
         ERR_displayPause(" No Fields To Move");
-	return(FALSE);
+	return;
     }
     
     ERR_clearMsg();
@@ -495,15 +453,11 @@ PrivateFnDef int moveField()
     BUF_status(DisplayBuf) = BUF_Normal;
     CUR_werase(Win3);
     PAGE_deletePage(MenuPage, i);
-    return(FALSE);
 }
 
 PrivateVarDef int FieldToMove;
 
-PrivateFnDef int execMove (
-    void
-)
-{
+PrivateFnDef void execMove () {
     char *ptr;
     
     ptr = BUF_line(BUF_row(DisplayBuf));
@@ -515,13 +469,9 @@ PrivateFnDef int execMove (
 	" Use Arrow Keys To Select MOVE Position, Execute(F2), Quit(F9)");
     PAGE_fkey(MenuPage, 1) = moveIt;
     PAGE_handler(MenuPage);
-    return(FALSE);
 }
 
-PrivateFnDef int moveIt (
-    void
-)
-{
+PrivateFnDef void moveIt () {
     char *ptr;
     int i, insField;
     SPR_Field *fptr, *holdfptr;
@@ -544,7 +494,7 @@ PrivateFnDef int moveIt (
 	SPR_field(Sprsheet, (insField - 1)) = holdfptr;
     }
     else
-	return(FALSE);
+	return;
 	
     BUF_eraseBuffer(DisplayBuf);
     for (i = 0; i < SPR_fieldCount(Sprsheet); i++)
@@ -553,7 +503,6 @@ PrivateFnDef int moveIt (
 	printField(fptr, (i + 1));
     }
     displayFields();
-    return(FALSE);
 }
 
 
@@ -561,14 +510,13 @@ PrivateFnDef int moveIt (
 /**************************************************
  **********	deleteField	*******************
  *************************************************/
-PrivateFnDef int deleteField()
-{
+PrivateFnDef void deleteField() {
     int i;
 
     if (SPR_fieldCount(Sprsheet) <= 0)    
     {
         ERR_displayPause(" No Fields To Delete");
-	return(FALSE);
+	return;
     }
     
     ERR_clearMsg();
@@ -592,13 +540,9 @@ PrivateFnDef int deleteField()
     BUF_status(DisplayBuf) = BUF_Normal;
     CUR_werase(Win3);
     PAGE_deletePage(MenuPage, i);
-    return(FALSE);
 }
 
-PrivateFnDef int execDelete (
-    void
-)
-{
+PrivateFnDef void execDelete () {
     char *ptr;
     int i, field;
     SPR_Field *fptr;
@@ -626,27 +570,25 @@ PrivateFnDef int execDelete (
     }
 
     displayFields();
-    return(FALSE);
 }
 
 
 /************************************************
  **********	replaceField	*****************
  ***********************************************/
-PrivateFnDef int replaceField()
-{
+PrivateFnDef void replaceField() {
     int i;
 
     if (SPR_fieldCount(Sprsheet) <= 0)    
     {
         ERR_displayPause(" No Fields To Replace");
-	return(FALSE);
+	return;
     }
     
     if (isBlank(FORM_fieldValue(ITEM)))
     {
         ERR_displayPause(" Please Enter An Item To Print");
-	return(FALSE);
+	return;
     }
     
     ERR_clearMsg();
@@ -670,13 +612,9 @@ PrivateFnDef int replaceField()
     BUF_status(DisplayBuf) = BUF_Normal;
     CUR_werase(Win3);
     PAGE_deletePage(MenuPage, i);
-    return(FALSE);
 }
 
-PrivateFnDef int execReplace (
-    void
-)
-{
+PrivateFnDef void execReplace () {
     char *ptr;
     int i, field;
     SPR_Field *fptr;
@@ -767,9 +705,7 @@ PrivateVarDef MENU_Choice formChoices[] = {
 };
 
 
-PrivateFnDef int reportOptions(useOuterPage)
-int	useOuterPage;
-{
+PrivateFnDef int reportOptions(int useOuterPage) {
     CUR_WINDOW *form1Win, *form2Win;
     int i;
 
@@ -822,33 +758,23 @@ int	useOuterPage;
 
 PrivateVarDef int	optionsExec = FALSE;
 
-PrivateFnDef int
-outerReportOptions()
-{
+PrivateFnDef void outerReportOptions() {
 	optionsExec = TRUE;
 	reportOptions(TRUE);
 	optionsExec = FALSE;
-	return(FALSE);
 }
 
-PrivateFnDef int
-itemsReportOptions()
-{
+PrivateFnDef void itemsReportOptions() {
 	reportOptions(FALSE);
-	return(FALSE);
 }
 
-PrivateFnDef int execOptions (
-    void
-)
-{
+PrivateFnDef void execOptions () {
     if( optionsExec )
     {
 	FORM_fieldValue(ITEM)[0] = '\0';
     	exec();
     }
     PAGE_status(MenuPage) = PAGE_ExitOnExec;
-    return(FALSE);
 }
 
 
@@ -872,8 +798,7 @@ PrivateVarDef FORM_Field exprFields[] = {
 
 PrivateVarDef FORM *ExprForm;
 
-PrivateFnDef int specialItem()
-{
+PrivateFnDef void specialItem() {
     int i;
     CUR_WINDOW *win, *swin;
     CUR_WINDOW *MenuWin;
@@ -889,7 +814,7 @@ PrivateFnDef int specialItem()
     
     PAGE_createPage(MenuPage, 5, NULL, NULL, NULL, PAGE_noType, i);
     PAGE_fkey(MenuPage, 1) = execExpr;
-    
+
     PAGE_createElement(MenuPage, 0, NULL, Win1, PAGE_Init, NULL, FALSE);
     PAGE_createElement(MenuPage, 1, NULL, Win2, PAGE_Init, NULL, FALSE);
     PAGE_createElement(MenuPage, 2, NULL, MenuWin,
@@ -904,20 +829,16 @@ PrivateFnDef int specialItem()
     CUR_delwin(swin);
     CUR_delwin(win);
     free(ExprForm);
-    return(FALSE);
 }
 
-PrivateFnDef int execExpr (
-    void
-)
-{
+PrivateFnDef void execExpr () {
     char buffer[100];
 
     if (isBlank(FORM_fieldValue(EXPR1)) &&
 	isBlank(FORM_fieldValue(EXPR2)))
     {
         ERR_displayPause (" Please Enter An Expression");
-	return FALSE;
+	return;
     }
     
     PAGE_status(MenuPage) = PAGE_ExitOnExec;
@@ -930,16 +851,13 @@ PrivateFnDef int execExpr (
     "%-*.*s", FORM_fieldLen(ITEM), FORM_fieldLen(ITEM), 
 					FORM_fieldValue(ITEM));
     CUR_wattroff(Win1, FORM_fieldAttr(ITEM));
-    
-    return FALSE;
-
 }
 
 
 /***************************************************
  **********	lineItem		************
  ***************************************************/
-PrivateVarDef int execLine();
+PrivateVarDef void execLine();
 
 PrivateVarDef MENU_Choice lineChoices[] = {
  " Single ",    " Add Single Line To Report Format ", 's', execLine, ON, 
@@ -950,8 +868,7 @@ PrivateVarDef MENU_Choice lineChoices[] = {
 
 PrivateVarDef MENU *LineMenu;
 
-PrivateFnDef int lineItem()
-{
+PrivateFnDef void lineItem() {
     int i, j, longest;
     CUR_WINDOW *SysWin;
     
@@ -962,7 +879,6 @@ PrivateFnDef int lineItem()
     MENU_handler(LineMenu, SysWin, PAGE_Input);
     CUR_delwin(SysWin);
     MENU_deleteMenu(LineMenu, i);
-    return(FALSE);
 }
 
 #define fillField(fld, c)\
@@ -972,8 +888,7 @@ PrivateFnDef int lineItem()
     fld[i] = '\0';\
 }
 
-PrivateFnDef int execLine()
-{
+PrivateFnDef void execLine() {
     int i;
     char *ptr;
     SPR_Field *fptr;
@@ -999,7 +914,7 @@ PrivateFnDef int execLine()
         break;
 
     default:
-	return(FALSE);
+	return;
     }
     
     SPR_fieldType(fptr) = SPR_Line;
@@ -1007,8 +922,6 @@ PrivateFnDef int execLine()
     printField(fptr, SPR_fieldCount(Sprsheet));
 
     displayFields();
-
-    return(FALSE);
 }
 
 
@@ -1168,20 +1081,17 @@ PrivateVarDef MENU_Choice reportChoices[] = {
 };
 #endif
 
-PrivateFnDef int
-reportFileMenu()
+PrivateFnDef void reportFileMenu()
 {
 	EDIT_reportFileMenu(ReportPage,FALSE);
 }
 
-PrivateFnDef int
-applicFileMenu()
+PrivateFnDef void applicFileMenu()
 {
 	EDIT_reportFileMenu(ApplicPage,FALSE);
 }
 
-PrivateFnDef int exec()
-{
+PrivateFnDef void exec() {
     int i, j, longest;
     CUR_WINDOW *win;
     MENU *actionMenu;
@@ -1189,20 +1099,20 @@ PrivateFnDef int exec()
     if (! isBlank (FORM_fieldValue (ITEM)))
     {
         addField ();
-	return(FALSE);
+	return;
     }
 
     if (SPR_fieldCount(Sprsheet) <= 0)
     {
         ERR_displayPause(" Please Enter Items To Print");
-	return(FALSE);
+	return;
     }
 
     if (doValidate)
     {
     	doExec = FALSE;
 	if(!validInitial())
-    	    return(FALSE);
+    	    return;
     	doExec = TRUE;
     }
 
@@ -1210,7 +1120,7 @@ PrivateFnDef int exec()
     ERR_displayStr(" Writing report, please wait...",FALSE);
 
     if (createReport())
-        return(TRUE);
+        return;
     ERR_clearMsg();
     didExec = TRUE;
     PAGE_ExitF8PageParent = FALSE;
@@ -1244,13 +1154,9 @@ PrivateFnDef int exec()
     CUR_delwin(win);
     PAGE_deletePage(ReportPage, i);
 #endif
-    return(FALSE);
-	
 }
 
-int
-initTSSprPage()
-{
+PrivateFnDef void initTSSprPage() {
     int i, j, longest;
 
 	MENU_makeMenu(AppActionMenu,
@@ -1288,8 +1194,6 @@ initTSSprPage()
     CUR_wattroff(StatWin,CUR_A_REVERSE);
     PAGE_createElement(ReportPage, 1, NULL, StatWin, PAGE_Init, NULL, FALSE);
     PAGE_createElement(ApplicPage, 2, NULL, StatWin, PAGE_Init, NULL, FALSE);
-
-    return(FALSE);
 }
 
 
@@ -1324,10 +1228,7 @@ PrivateVarDef FORM_Field initFields[] = {
 -1, 
 };
 
-PrivateFnDef int initTimeSeries (
-    void
-)
-{
+PrivateFnDef void initTimeSeries () {
 	int	i, j, longest;
     
 	FORM_makeForm(InitForm, initFields, i);
@@ -1340,15 +1241,11 @@ PrivateFnDef int initTimeSeries (
 	MENU_makeMenu(DirectionMenu, directionChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
 	MENU_title(DirectionMenu) = " Direction: ";
 	FORM_fieldMenu(DIRECTION) = DirectionMenu;
-	return(FALSE);
 }
 
 PrivateVarDef int	inParamPage = FALSE;
 
-PrivateFnDef int
-getParameters(useOuterPage)
-int	useOuterPage;
-{
+PrivateFnDef int getParameters(int useOuterPage) {
     int i;
 
     CUR_WINDOW *win, *win2;
@@ -1382,7 +1279,7 @@ int	useOuterPage;
     PAGE_createElement(PPage, (i+1), InitForm, win2,
 				 PAGE_Input, FORM_handler, TRUE);
     
-    PAGE_fkey(PPage, 1) = validInitial;
+    PAGE_fkey(PPage, 1) = doValidInitial;
 
     inParamPage = TRUE;
     PAGE_handler(PPage);
@@ -1396,28 +1293,23 @@ int	useOuterPage;
 
 PrivateVarDef int	ParamDoExec = TRUE;
 
-PrivateFnDef int
-getOuterParameters()
-{
+PrivateFnDef void getOuterParameters() {
 	getParameters(TRUE);
-	return(FALSE);
 }
 
-PrivateFnDef int
-getItemsParameters()
-{
+PrivateFnDef void getItemsParameters() {
 	ParamDoExec = FALSE;
 	getParameters(FALSE);
 	ParamDoExec = TRUE;
-	return(FALSE);
 }
 
 PrivateVarDef int UnivFirstTime = TRUE;
 
-PrivateFnDef int validInitial (
-    void
-)
-{
+PrivateFnDef void doValidInitial () {
+    validInitial ();
+}
+
+PrivateFnDef int validInitial () {
     char buffer[80];
 
     ERR_displayStr(" Validating Parameters...",FALSE);
@@ -1477,10 +1369,7 @@ PrivateFnDef int validInitial (
  **********	Misc. Functions		*********
  ***********************************************/
 
-PrivateFnDef int initOptions (
-    void
-)
-{
+PrivateFnDef void initOptions () {
     int i, longest, j;
     MENU *menu;
     
@@ -1549,19 +1438,13 @@ PrivateFnDef int printReport()
 }
 #endif
 
-PrivateFnDef int initBuffer (
-    void
-)
-{
+PrivateFnDef void initBuffer () {
     DisplayBuf = (LINEBUFFER *) malloc(sizeof(LINEBUFFER));
     BUF_maxLineSize(DisplayBuf) = CUR_COLS;
     BUF_initBuffer(DisplayBuf, (10 * BUFFERSIZE));    
 }
 
-PrivateFnDef void itemList (
-    void
-)
-{
+PrivateFnDef void itemList () {
     MENU *menu1, *menu2;
     int choice, i;
     char string[80];
@@ -1577,7 +1460,7 @@ PrivateFnDef void itemList (
     if (menu2 == NULL)
     {
         ERR_displayPause(" No items for category selected");
-	return(FALSE);
+	return;
     }
     
     for (i = 0; i < MENU_choiceCount(menu2); i++)
@@ -1593,5 +1476,4 @@ PrivateFnDef void itemList (
     FORM_fieldMenu(RELATIVE) = menu1;
     CUR_delwin(SysWin);
     MENU_deleteMenu(menu2, i);
-    return(FALSE);
 }

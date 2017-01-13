@@ -126,8 +126,6 @@ PublicFnDef void WIN_HighlightBox(
 }
 
 PublicFnDef void WIN_ReverseBox(CUR_WINDOW *win, char const *title) {
-	void WIN_HighlightBox();
-
 	WIN_HighlightBox(win, CUR_A_REVERSE, title, NULL);
 }
 

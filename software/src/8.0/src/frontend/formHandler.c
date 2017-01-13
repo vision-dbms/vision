@@ -966,7 +966,7 @@ PublicFnDef void FORM_menuToForm() {
 			      FORM_fieldChoiceArray(Xfptr)[Pos[Xfld]], Pos);
 }
 
-PublicFnDef int FORM_centerFormElts(FORM *fptr, int width) {
+PublicFnDef void FORM_centerFormElts(FORM *fptr, int width) {
 	int	i;
 	
 	for( i=0 ; i<FORM_fieldCount(fptr) ; i++ )

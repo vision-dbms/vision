@@ -34,8 +34,8 @@ PrivateVarDef int RS_userSystem,
 /*************************************************
  **********	Menu Declarations	**********
  *************************************************/
-PrivateFnDef void exitSystem(void);
-PrivateFnDef void noExitSystem(void);
+PrivateFnDef void exitSystem();
+PrivateFnDef void noExitSystem();
 
 PrivateVarDef MENU_Choice quitChoices[] = {
     " Yes ",    " Exit System ",	 'y',	    exitSystem,	  ON, 
@@ -87,7 +87,7 @@ PrivateVarDef FORM_Field helpFields[] = {
  -1, 
 };
 
-PublicFnDef int QuitSystem(void) {
+PublicFnDef int QuitSystem() {
     CUR_WINDOW *menuwin;
 
     if( PAGE_ExitSystem )
@@ -98,7 +98,7 @@ PublicFnDef int QuitSystem(void) {
     return(FALSE);
 }
 
-PrivateFnDef int	resetReentrantVars();
+PrivateFnDef void resetReentrantVars();
 
 PrivateFnDef void displayMenu()
 /*****  
@@ -257,12 +257,12 @@ PrivateFnDef void displayMenu()
 }
 
 
-PrivateFnDef void exitSystem(void) {
+PrivateFnDef void exitSystem() {
     PAGE_ExitSystem = TRUE;
     NotDone = FALSE;
 }
 
-PrivateFnDef void noExitSystem(void) {
+PrivateFnDef void noExitSystem() {
     PAGE_ExitSystem = FALSE;
     NotDone = TRUE;
 }
@@ -278,7 +278,7 @@ PrivateFnDef void noExitSystem(void) {
  *	NOTHING	
  *
  *****/
-PublicFnDef int mainmenu(void) {
+PublicFnDef void mainmenu() {
 #if NOTRSATTACH
     CUR_initscr();
     CUR_savetty();
@@ -317,9 +317,7 @@ PublicVarDecl int	inDE;
 PublicVarDecl int	inEditor;
 PublicVarDecl int	inFS;
 
-PrivateFnDef int
-resetReentrantVars()
-{
+PrivateFnDef void resetReentrantVars() {
 	inQueries = FALSE;
 	inProfile = FALSE;
 	inReport = FALSE;

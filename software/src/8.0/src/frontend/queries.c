@@ -13,13 +13,14 @@
 #include "rsInterface.h"
 #include "choices.h"
 
-PrivateFnDef void screen1 (
-    PAGE *			mpage
-);
+#include "queries.h"
 
-PrivateFnDef void getUniverse (
-    PAGE *			mpage
-);
+PrivateFnDef void screen1 (PAGE *mpage);
+PrivateFnDef void screen0 () {
+    screen1 (NULL);
+}
+
+PrivateFnDef void getUniverse (PAGE *mpage);
 
 PrivateFnDef void execUniverse ();
 
@@ -34,7 +35,7 @@ PrivateVarDef PAGE *Page;
 
 PrivateVarDef MENU_Choice menuChoices[] = {
     " Company ",
- 	    " Company Screens", 'c',	screen1, ON, 
+ 	    " Company Screens", 'c', screen0, ON, 
     " Account ",
            " Portfolio Screens", 'p', NULL, ON, 
     " Industry ",
@@ -57,11 +58,12 @@ PrivateVarDef FORM_Field formFields[] = {
 /*************************************************
  **********	Screening Choices	**********
  ************************************************/
-PublicFnDecl int companyScr();
+
+PublicFnDecl int companyScr(char *universe, int count);
 
 typedef struct {
-    int (*function)();
-    char *msgFormat;
+  int (*function)(char*,int);
+    char const *msgFormat;
 } SCREENTYPE;
 
 PrivateVarDef SCREENTYPE ScreenType[] = {
@@ -72,8 +74,7 @@ PrivateVarDef SCREENTYPE ScreenType[] = {
 PrivateVarDef int Index;
 
 
-PublicFnDef int queriesReal(PAGE *mpage) {
-{
+PublicFnDef void queriesReal(PAGE *mpage) {
     MENU *menu;
     FORM *form;
     PAGE *page;
@@ -121,8 +122,6 @@ PublicFnDef int queriesReal(PAGE *mpage) {
     free(form);
     PAGE_deletePage(page, i);
 #endif
-
-    return(FALSE);
 }
 
 
@@ -130,8 +129,7 @@ PublicFnDef int queriesReal(PAGE *mpage) {
  **********	Exec Functions		***************
  *****************************************************/
 
-PrivateFnDef void screen1 (PAGE *mpage) )
-{
+PrivateFnDef void screen1 (PAGE *mpage) {
     Index = 0;
     getUniverse(mpage);
 }
@@ -222,7 +220,6 @@ PrivateFnDef void getUniverse (PAGE *mpage) {
     if( tmpWin != NULL )
     	CUR_delwin(tmpWin);
 /*    free(Form);*/
-    return(FALSE);
 
 }
 

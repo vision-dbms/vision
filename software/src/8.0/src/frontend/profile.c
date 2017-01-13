@@ -12,6 +12,8 @@
 #include "form.h"
 #include "rsInterface.h"
 #include "month.d"
+
+#include "profile.h"
 
 
 /****** Forward Declarations *******/
@@ -27,11 +29,10 @@ PrivateFnDef void execExpr ();
 PrivateVarDef SPRSHEET	*ProfileReport;
 PrivateVarDef PAGE *ProfilePage, *ApplicPage;
 PrivateVarDef CUR_WINDOW  *Win, *tWin, *StatWin;
-PrivateVarDef char *Company;
+PrivateVarDef char const *Company;
 PrivateVarDef MENU *actionMenu;
 
-PrivateFnDef int changeCompany(), 
-    displayItem(), sendExpression(), detailsMenu();
+PrivateFnDef void changeCompany(), displayItem(), sendExpression(), detailsMenu();
 
 PrivateVarDef MENU_Choice menuChoices[] = {
  " Company ",	" New Company For Current Report",	'c', 
@@ -45,22 +46,16 @@ PrivateVarDef MENU_Choice menuChoices[] = {
  NULL, 
 };
 
-PrivateFnDef int
-profileFileMenu()
-{
+PrivateFnDef void profileFileMenu() {
 	EDIT_reportFileMenu(ProfilePage,FALSE);
 }
 
-PrivateFnDef int
-applicFileMenu()
-{
+PrivateFnDef void applicFileMenu() {
 	EDIT_reportFileMenu(ApplicPage,FALSE);
 }
 
 
-PublicFnDef profile (company)
-char *company;
-{
+PublicFnDef void profile (char const *company) {
     int i, j, longest;
     char buffer[RS_MaxLine + 1];
 
@@ -136,8 +131,6 @@ char *company;
     MENU_deleteMenu(actionMenu, i);
     PAGE_deletePage (ApplicPage, i);
     PAGE_deletePage (ProfilePage, i);
-
-    return(FALSE);
 }
 
 
@@ -145,8 +138,7 @@ char *company;
 /****************************************************
  *****		menu level functions		*****
  ***************************************************/
-PrivateFnDef writeReport()
-{
+PrivateFnDef void writeReport() {
     char buffer[200];
     
     ERR_displayStr(" Writing report, please wait...", FALSE);
@@ -158,7 +150,7 @@ PrivateFnDef writeReport()
     if( SPR_readSSheet (ProfileReport) )
     {
 	 ERR_displayPause(" Error reading spread sheet");
-	 return TRUE;
+	 return;
     }
     SPR_handler(ProfileReport, Win, PAGE_Init);
     MENU_status(actionMenu) = MENU_ExitOnExec;
@@ -166,7 +158,6 @@ PrivateFnDef writeReport()
     CUR_touchwin(Win);
     CUR_wrefresh(Win);
 #endif
-    return(FALSE);
 }
 
 
@@ -174,8 +165,7 @@ PrivateFnDef writeReport()
  *********	printReport	*****************
  ************************************************/
 #if 0
-PrivateFnDef int printReport()
-{
+PrivateFnDef void printReport() {
     SPR_print(ProfileReport, ProfilePage);
 }
 #endif
@@ -198,8 +188,7 @@ PrivateVarDef FORM_Field companyFields[] = {
 PrivateVarDef FORM *CompanyForm;
 PrivateVarDef PAGE *CompanyPage;
 
-PrivateFnDef int changeCompany()
-{
+PrivateFnDef void changeCompany() {
     int i;
     CUR_WINDOW *win, *win2;
 /*    CUR_WINDOW *MenuWin;*/
@@ -228,11 +217,9 @@ PrivateFnDef int changeCompany()
     CUR_delwin(win2);
     CUR_delwin(win);
     free(CompanyForm);
-    return(FALSE);
 }
 
-PrivateFnDef void execCompany ()
-{
+PrivateFnDef void execCompany () {
     char buffer[80];
     
     PAGE_status(CompanyPage) = PAGE_Normal;
@@ -307,8 +294,7 @@ PrivateVarDef FORM *ItemForm;
 PrivateVarDef PAGE *ItemPage;
 PrivateVarDef CUR_WINDOW *ItemWin;
 
-PrivateFnDef int displayItem()
-{
+PrivateFnDef void displayItem() {
     MENU *menu1, *menu2;
     int i, j, longest;
     CUR_WINDOW *win;
@@ -356,7 +342,6 @@ PrivateFnDef int displayItem()
     CUR_delwin(ItemWin);
     CUR_delwin(win);
     free(ItemForm);
-    return(FALSE);
 }
 
 PrivateFnDef void execItem () {
@@ -493,8 +478,7 @@ PrivateVarDef FORM *ExprForm;
 PrivateVarDef PAGE *ExprPage;
 PrivateVarDef CUR_WINDOW *ExprWin;
 
-PrivateFnDef int sendExpression()
-{
+PrivateFnDef void sendExpression() {
     int i;
     CUR_WINDOW *win;
 /*    CUR_WINDOW *MenuWin;*/
@@ -526,10 +510,9 @@ PrivateFnDef int sendExpression()
     CUR_delwin(ExprWin);
     CUR_delwin(win);
     free(ExprForm);
-    return(FALSE);
 }
 
-PrivateFnDef execExpr () {
+PrivateFnDef void execExpr () {
     char inbuffer[RS_MaxLine + 1], outbuffer[RS_MaxLine + 1];
 
     if (isBlank(FORM_fieldValue(EXPR1)) &&
@@ -563,7 +546,7 @@ PrivateFnDef execExpr () {
 PrivateVarDef SPRSHEET *DetailReport;
 PrivateVarDef PAGE *DetailPage;
 PrivateVarDef MENU *DetailMenu;
-PrivateVarDef int reportDetails(), printDetails();
+PrivateVarDef void reportDetails(), printDetails();
 
 PrivateVarDef MENU_Choice detailsChoices[] = {
  " Fundamentals ",  " Fundamentals Report",	'f', NULL, ON, 
@@ -582,8 +565,7 @@ PrivateVarDef MENU_Choice detailActions[] = {
  NULL, 
 };
 
-PrivateFnDef int detailsMenu()
-{
+PrivateFnDef void detailsMenu() {
     int i, j, longest;
     CUR_WINDOW *SysWin;
     
@@ -597,21 +579,18 @@ PrivateFnDef int detailsMenu()
 
     CUR_delwin(SysWin);
     MENU_deleteMenu(DetailMenu, i);
-    return(FALSE);
 }
 
-PrivateFnDef int
-detailFileMenu()
-{
+PrivateFnDef void detailFileMenu() {
 	EDIT_reportFileMenu(DetailPage,FALSE);
 }
 
-PrivateFnDef int reportDetails()
-{
+PrivateFnDef void reportDetails() {
     int i, j, longest;
     MENU *menu;
     CUR_WINDOW *win;
-    char buffer[RS_MaxLine + 1], *title;
+    char buffer[RS_MaxLine + 1];
+    char const *title;
 
 /**** determine which report and format message ****/
 
@@ -623,7 +602,7 @@ PrivateFnDef int reportDetails()
         break;
     default:
         ERR_displayPause(" Undefined Report");
-	return(FALSE);
+	return;
     }
 
 /**** send message and read report *****/    
@@ -655,15 +634,12 @@ PrivateFnDef int reportDetails()
     MENU_deleteMenu(menu, i);
     CUR_delwin(win);
     PAGE_deletePage (DetailPage, i);
-
-    return(FALSE);
 }
 
 
 /************************************************
  *********	printDetails	*****************
  ************************************************/
-PrivateFnDef int printDetails()
-{
+PrivateFnDef void printDetails() {
     SPR_print(DetailReport, DetailPage);
 }

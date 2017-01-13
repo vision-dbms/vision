@@ -16,11 +16,15 @@
 #include "misc.h"
 #include "rsInterface.h"
 
+#include "profile.h"
+#include "queries.h"
+#include "report.h"
+
 /**** Page Definitions ****/
 #include "page.h"
 
 /**********  Forward Declarations  **********/
-PrivateFnDef int pageRefresh (PAGE *page);
+PrivateFnDef void pageRefresh (PAGE *page);
 
 PrivateFnDef void pageHelp ();
 
@@ -417,10 +421,7 @@ PublicFnDef void PAGE_handler(PAGE *page) {
     return;					 
 }
 
-PrivateFnDef int pageRefresh (
-    PAGE *			page
-)
-{
+PrivateFnDef void pageRefresh (PAGE *page) {
     int i;
 
     for (i = 0; i < page->elementCount; i++)

@@ -16,7 +16,7 @@ PublicFnDecl void SPS_doClearCell(
 );
 
 PublicFnDecl void SPS_clearInput();
-PublicFnDecl int SPS_doClearInput(
+PublicFnDecl void SPS_doClearInput(
     SPSHEET *spr, CUR_WINDOW *win
 );
 

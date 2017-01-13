@@ -165,7 +165,7 @@ PublicFnDef void GOPT_AcquireOptions (int argc, char *argv[]) {
  *	do NOT touch) or NULL/Nil.
  *
  *****/
-PublicFnDef char *GOPT_GetValueOption (char const *optionName) {
+PublicFnDef char const *GOPT_GetValueOption (char const *optionName) {
     GOPT_OptionDescription *opt;
 
     for (opt = GOPT_OptionDescriptions; opt->name; opt++)
@@ -271,7 +271,7 @@ PublicFnDef void GOPT_SeekExtraArgument (
  *	to point to the next extra argument.
  *
  *****/
-PublicFnDef char *GOPT_GetExtraArgument () {
+PublicFnDef char const *GOPT_GetExtraArgument () {
     return
 	ExtraArgPointer >= 0 && ExtraArgPointer < LocalArgc
 	? LocalArgv[ExtraArgPointer++]
@@ -302,6 +302,6 @@ PublicFnDef int GOPT_GetExtraArgCnt () {
  *	'argv[0]'
  *
  *****/
-PublicFnDef char *GOPT_ProgramName () {
+PublicFnDef char const *GOPT_ProgramName () {
     return LocalArgv[0];
 }

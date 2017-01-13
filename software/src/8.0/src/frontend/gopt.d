@@ -8,7 +8,7 @@
 
 /*****  Global Option Description Type Definition  *****/
 typedef struct {
-    char
+    char const
 	*name,
 	*envVar,
 	*stringValue;

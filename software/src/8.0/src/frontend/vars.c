@@ -413,7 +413,7 @@ PrivateFnDef int getFileName(char const *pstr /* either "write to" or "read from
 
 PublicFnDef int VARS_initProfileVariables() {
 	MENU	*menu;
-	char	*pf;
+	char const *pf;
 	int	i, j, longest;
 	
 	StartupKit[0] = '\0';

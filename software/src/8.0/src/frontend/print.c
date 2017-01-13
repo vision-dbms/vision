@@ -22,7 +22,7 @@ typedef struct
     } commandInfo;
 
 /* Forward function declarations */
-PrivateFnDef int exec ();
+PrivateFnDef void exec ();
 
 /* Public function declarations */
 PublicFnDecl char *strtok ();
@@ -484,7 +484,7 @@ PrivateFnDef char *getPrintStyle(char printer) {
 }
 #endif
 
-PrivateFnDef int exec () {
+PrivateFnDef void exec () {
     char *mode;
     int  i;
 
@@ -555,8 +555,8 @@ PublicFnDef void cleanupPrinters () {
         {
         free (printers[i].command);
 
-        free (printerChoices[i].label);
-        free (printerChoices[i].help);
+        free ((void*)printerChoices[i].label);
+        free ((void*)printerChoices[i].help);
 
         free (PrinterChoices[i][0].choices);
         free (PrinterChoices[i]);
@@ -569,8 +569,8 @@ PublicFnDef void cleanupPrinters () {
         {
         free (types[i].command);
 
-        free (typeChoices[i].label);
-        free (typeChoices[i].help);
+        free ((void*)typeChoices[i].label);
+        free ((void*)typeChoices[i].help);
         }
     free (typeChoices);
     free (types);

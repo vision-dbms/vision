@@ -10,6 +10,7 @@
 #include "stdcurses.h"
 
 /********** /usr/rs/lib/interface **********/
+#include "misc.h"
 #include "page.h"
 #include "window.h"
 #include "keys.h"
@@ -31,7 +32,7 @@ PrivateFnDef void SPS_setHeadingEntry(
     SPS_Heading *h, int flag
 );
 
-PrivateFnDef int SPS_recalcCols (
+PrivateFnDef void SPS_recalcCols (
     SPSHEET *			spr,
     CUR_WINDOW *		win
 );
@@ -154,7 +155,7 @@ PublicFnDef void SPS_clearInput() {
 	MenuOptionSelected = SPS_CLEARINPUT;
 }
 
-PublicFnDef int SPS_doClearInput(
+PublicFnDef void SPS_doClearInput(
     SPSHEET *spr, CUR_WINDOW *win
 ) {
     int x, y, z;
@@ -309,7 +310,7 @@ PublicFnDef SPS_cell *SPS_cellPtrXYZ(
  * Therefore, when scrolling left or right, the number of
  * columns displayed may vary.
  **************************************************************/
-PrivateFnDef int SPS_recalcCols (
+PrivateFnDef void SPS_recalcCols (
     SPSHEET *			spr,
     CUR_WINDOW *		win
 )
@@ -390,11 +391,7 @@ PrivateFnDef void SPS_checkForLockedSheet(SPSHEET *spr) {
 }
 
 
-PrivateFnDef int SPS_goToEOL(spr,win,wrapFlag)
-SPSHEET *spr;
-CUR_WINDOW *win;
-int wrapFlag;
-{
+PrivateFnDef void SPS_goToEOL(SPSHEET *spr, CUR_WINDOW *win, int wrapFlag) {
     int  w, xs, xx, yy, zz, width;
     SPS_DataType type;
     xx = SPS_XCount(spr) - 1;
@@ -432,10 +429,7 @@ int wrapFlag;
 	SPS_keyLeft(spr,win);
 }
 
-PrivateFnDef int SPS_keyDown(spr,win)
-SPSHEET *spr;
-CUR_WINDOW *win;
-{
+PrivateFnDef void SPS_keyDown(SPSHEET *spr, CUR_WINDOW *win) {
   int oldy, oldh, olds;
   int ycount, ycountminus1;
   oldh = SPS_homeY(spr);
@@ -480,10 +474,7 @@ CUR_WINDOW *win;
   }
 }
 
-PrivateFnDef int SPS_keyUp(spr,win)
-SPSHEET *spr;
-CUR_WINDOW *win;
-{
+PrivateFnDef void SPS_keyUp(SPSHEET *spr, CUR_WINDOW *win) {
   int oldy, oldh, olds;
   int ycount, ycountminus1;
   oldh = SPS_homeY(spr);
@@ -636,11 +627,7 @@ PrivateFnDef void SPS_keyRight (
 /*********************************************************
  *********	Cursor Movement Operations	**********
  ********************************************************/
-PrivateFnDef int SPS_moveXHeadingCursor(spr,win,x,lx)
-SPSHEET *spr;
-CUR_WINDOW *win;
-int x, lx;
-{
+PrivateFnDef void SPS_moveXHeadingCursor(SPSHEET *spr, CUR_WINDOW *win, int x, int lx) {
     int  i, w, xx, yy, zz, width;
     SPS_DataType type;
     xx = SPS_homeX(spr);
@@ -658,30 +645,18 @@ int x, lx;
     CUR_wmove(win, minimum(SPS_ZsOnScreen(spr),SPS_ZCount(spr))-1+lx, w+CenteringOffset);
 }
 
-PrivateFnDef int SPS_moveYHeadingCursor(spr,win,y,ls)
-SPSHEET *spr;
-CUR_WINDOW *win;
-int y, ls;
-{
+PrivateFnDef void SPS_moveYHeadingCursor(SPSHEET *spr, CUR_WINDOW *win, int y, int ls) {
     CUR_wmove(win, y+minimum(SPS_ZsOnScreen(spr),SPS_ZCount(spr))+ls-1, CenteringOffset);
 }
 
-PrivateFnDef int SPS_moveZHeadingCursor(spr,win,iz,lz)
-SPSHEET *spr;
-CUR_WINDOW *win;
-int iz, lz;
-{
+PrivateFnDef void SPS_moveZHeadingCursor(SPSHEET *spr, CUR_WINDOW *win, int iz, int lz) {
     if( iz == 0 )
 	CUR_wmove(win, minimum(SPS_ZsOnScreen(spr),SPS_ZCount(spr))-1+lz, CenteringOffset);
     else
 	CUR_wmove(win, minimum(SPS_ZsOnScreen(spr),SPS_ZCount(spr))-1-iz, (iz*4)+CenteringOffset);
 }
 
-PrivateFnDef int SPS_moveCellCursor(spr,win,x,y,ls)
-SPSHEET *spr;
-CUR_WINDOW *win;
-int x, y, ls;
-{
+PrivateFnDef void SPS_moveCellCursor(SPSHEET *spr, CUR_WINDOW *win, int x, int y, int ls) {
     int  i, w, xx, yy, zz, width;
     SPS_DataType type;
     xx = SPS_homeX(spr);
@@ -699,11 +674,7 @@ int x, y, ls;
     CUR_wmove(win, y+minimum(SPS_ZsOnScreen(spr),SPS_ZCount(spr))+ls-1, w+CenteringOffset);
 }
 
-PrivateFnDef int SPS_displayCellCursor(spr,win,x,y,ls)
-SPSHEET *spr;
-CUR_WINDOW *win;
-int x, y, ls;
-{
+PrivateFnDef void SPS_displayCellCursor(SPSHEET *spr, CUR_WINDOW *win, int x, int y, int ls) {
     int  i, w, xx, yy, zz, width;
     SPS_DataType type;
     xx = SPS_homeX(spr);
@@ -808,11 +779,7 @@ PublicFnDef void SPS_delete(SPSHEET *spr) {
  * Based on the given string and width, this procedure will
  * center the string within this range and display it.
  **************************************************************/
-PrivateFnDef int SPS_centeredPrint(win,str,width)
-CUR_WINDOW	*win;
-char		*str;
-int		width;
-{
+PrivateFnDef void SPS_centeredPrint(CUR_WINDOW *win, char const *str, int width) {
     char buf[256];
     int i, len;
 
@@ -1030,7 +997,7 @@ PrivateFnDef void SPS_printCell(
  * the current Y headings.
  **************************************************************/
 
-PrivateFnDef int SPS_printZHeading (
+PrivateFnDef void SPS_printZHeading (
     SPSHEET *			spr,
     CUR_WINDOW *		win,
     int				screenIndex,
@@ -1120,11 +1087,7 @@ PrivateFnDef int SPS_printZHeading (
 /**************************************************************
  * Print the headings on the Y axis.
  **************************************************************/
-PrivateFnDef int SPS_printYHeading(spr,win,index)
-SPSHEET *spr;
-CUR_WINDOW *win;
-int index;
-{
+PrivateFnDef void SPS_printYHeading(SPSHEET *spr, CUR_WINDOW *win, int index) {
     SPS_Heading *h;
     int width, idx, xlines, zz;
     char buf[81], *s, *ptr;
@@ -1160,11 +1123,7 @@ int index;
  * Print the headings on the X axis. They will be centered
  * within their respective widths.
  **************************************************************/
-PrivateFnDef int SPS_printXHeading(spr,win,index)
-SPSHEET *spr;
-CUR_WINDOW *win;
-int index;
-{
+PrivateFnDef void SPS_printXHeading(SPSHEET *spr, CUR_WINDOW *win, int index) {
     SPS_Heading *h;
     SPS_DataType type;
     int width, idx, xlines, l, hlen;
@@ -1722,9 +1681,7 @@ PublicFnDef int SPS_readInteger() {
 	return( i );
 }
 
-PrivateFnDef SPS_DataType SPS_getDataType(str)
-char	*str;
-{
+PrivateFnDef SPS_DataType SPS_getDataType(char const *str) {
 	if( strncmp("VARIES",str,6) == 0 )
 		return(SPS_Variable);
 	if( strncmp("aDouble",str,7) == 0 )
@@ -1747,10 +1704,8 @@ char	*str;
 }
 
 PublicFnDef void SPS_setCellValue(
-    SPS_cell *c, SPS_DataType type, char *str
+    SPS_cell *c, SPS_DataType type, char const *str
 ) {
-	double	atof();
-
 	if( strcmp(str,"NA") == 0 )
 	{
 		SPS_cellStatus(c) = SPS_NA;
@@ -1819,10 +1774,8 @@ PublicFnDef int SPS_readCell(
 }
 
 PublicFnDef void SPS_setItemAndStatus(
-    SPS_Heading *h, char *str
+    SPS_Heading *h, char const *str
 ) {
-	double	atof();
-
 	if( strcmp(str,"NA") == 0 )
 	{
 	    if( (SPS_headingType(h) == SPS_String) ||
@@ -2008,7 +1961,8 @@ PublicFnDef SPSHEET *SPS_readSSheet(char const *list) {
     zcount = SPS_readInteger();
     if( zcount <= 0 )
 	    return((SPSHEET *)NULL);
-    while( RS_readLine(buf,256) ) ;
+    while( RS_readLine(buf,256) )
+      ;
 
     SPS_makeSheet(spr,xcount,ycount,zcount);
 
@@ -2346,7 +2300,6 @@ PrivateFnDef int getIntOrFloat (
     int	i = 0, j, len = 0, c;
     int NotDone, isNA = FALSE, gotDot = FALSE, gotMinus = FALSE;
     char buffer[81];
-    double	atof();
 
     memset(buffer,0,81);
 
@@ -2515,7 +2468,6 @@ PrivateFnDef int getString (
     int	i = 0, j, offset = 0, len = 0, c;
     int NotDone, isNA = FALSE;
     char buffer[SPS_maxItemWidth+1];
-    double	atof();
 
     memset(buffer,0,SPS_maxItemWidth+1);
 

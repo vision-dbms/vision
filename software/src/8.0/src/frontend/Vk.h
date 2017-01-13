@@ -546,7 +546,7 @@ PublicFnDecl void closedir (
  *****  AIX / HP-UX / Sun  *****
  *******************************/
 
-#elif defined(_AIX) || defined(__hp9000s700) || defined(sun) || defined(__linux__)
+#elif defined(_AIX) || defined(__hp9000s700) || defined(sun) || defined(__linux__) || defined(__APPLE__)
 
 typedef struct dirent STD_DirectoryEntryType;
 
@@ -678,7 +678,11 @@ typedef void (*STD_SignalHandlerType) (
  *****  AIX and Solaris  *****
  *****************************/
 
-#elif defined(_AIX) || defined(sun) || defined(__linux__)
+#elif defined(_AIX) || defined(sun) || defined(__linux__) || defined(__APPLE__)
+
+#if defined(__APPLE__)
+#define SIGCLD SIGCHLD
+#endif
 
 /*****  Define names for HP signals  *****/
 #if defined(solaris_1)

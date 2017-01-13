@@ -7,6 +7,7 @@
 #include "stdcurses.h"
 #include "misc.h"
 #include "page.h"
+#include "edit.h"
 #include "form.h"
 #include "rsInterface.h"
 #include "spsheet.h"
@@ -40,6 +41,8 @@ PrivateFnDef void initBuffer ();
 
 PrivateFnDef void itemList ();
 
+PrivateFnDef void initSprPage();
+PrivateFnDef void initUniverse ();
 PrivateFnDef void execUniverse ();
 
 
@@ -54,8 +57,8 @@ PrivateFnDef void execUniverse ();
 #define BUFFERSIZE  2048
 
 typedef struct {
-    char *type;
-    char *format;
+    char const *type;
+    char const *format;
 } TOTTABLE;
 
 PrivateVarDef TOTTABLE Table[] = {
@@ -559,7 +562,6 @@ PrivateFnDef void execMove () {
 	" Use Arrow Keys To Select MOVE Position, Execute(F2), Quit(F9)");
     PAGE_fkey(MenuPage, 1) = moveIt;
     PAGE_handler(MenuPage);
-    return(FALSE);
 }
 
 PrivateFnDef void moveIt () {
@@ -585,7 +587,7 @@ PrivateFnDef void moveIt () {
 	SPR_field(Sprsheet, (insField - 1)) = holdfptr;
     }
     else
-	return(FALSE);
+	return;
 	
     BUF_eraseBuffer(DisplayBuf);
     for (i = 0; i < SPR_fieldCount(Sprsheet); i++)
@@ -594,7 +596,6 @@ PrivateFnDef void moveIt () {
 	printField(fptr, (i + 1));
     }
     displayFields();
-    return(FALSE);
 }
 
 
@@ -662,7 +663,6 @@ PrivateFnDef void execDelete () {
     }
 
     displayFields();
-    return(FALSE);
 }
 
 
@@ -871,7 +871,6 @@ PrivateFnDef void execOptions () {
     	exec();
     }
     PAGE_status(MenuPage) = PAGE_ExitOnExec;
-    return(FALSE);
 }
 
 PrivateFnDef void initOptions () {
@@ -987,7 +986,7 @@ PrivateFnDef void execExpr () {
 	isBlank(FORM_fieldValue(EXPR2)))
     {
         ERR_displayPause (" Please Enter An Expression");
-	return FALSE;
+	return;
     }
     
     PAGE_status(MenuPage) = PAGE_ExitOnExec;
@@ -1000,9 +999,6 @@ PrivateFnDef void execExpr () {
     "%-*.*s", FORM_fieldLen(ITEM), FORM_fieldLen(ITEM), 
 					FORM_fieldValue(ITEM));
     CUR_wattroff(Win1, FORM_fieldAttr(ITEM));
-    
-    return FALSE;
-
 }
 
 
@@ -1069,7 +1065,8 @@ PrivateFnDef void screeningItems() {
 
 PrivateFnDef int createReport() {
     SPR_Field *field;
-    char string[RS_MaxLine], *format, buffer[200];
+    char string[RS_MaxLine], buffer[200];
+    char const *format;
     int n, i, width, flipped, companyCount;
     
     RS_sendOnly("FrontEndTools StandardReport named __tmpReport send: [");
@@ -1203,7 +1200,7 @@ PrivateVarDef MENU_Choice reportChoices[] = {
 };
 #endif
 
-PrivateFnDef int reportFileMenu() {
+PrivateFnDef void reportFileMenu() {
 	EDIT_reportFileMenu(ReportPage,FALSE);
 }
 
@@ -1234,7 +1231,7 @@ PrivateFnDef void exec() {
     ERR_displayStr(" Writing report, please wait...",FALSE);
 
     if (createReport())
-        return(TRUE);
+        return;
     ERR_clearMsg();
     didExec = TRUE;
     PAGE_ExitF8PageParent = FALSE;
@@ -1244,9 +1241,7 @@ PrivateFnDef void exec() {
 	PAGE_status(ItemsPage) = PAGE_ExitOnExec;
 }
 
-int
-initSprPage()
-{
+PrivateFnDef void initSprPage() {
     int i, j, longest;
 
     MENU_makeMenu(AppActionMenu,
@@ -1294,8 +1289,6 @@ initSprPage()
     CUR_delwin(win);
     PAGE_deletePage(ReportPage, i);
 #endif
-    return(FALSE);
-	
 }
 
 
@@ -1340,7 +1333,7 @@ PrivateFnDef void itemList () {
     if (menu2 == NULL)
     {
         ERR_displayPause(" No items for category selected");
-	return(FALSE);
+	return;
     }
     
     for (i = 0; i < MENU_choiceCount(menu2); i++)
@@ -1356,7 +1349,6 @@ PrivateFnDef void itemList () {
     FORM_fieldMenu(SORT) = menu1;
     CUR_delwin(SysWin);
     MENU_deleteMenu(menu2, i);
-    return(FALSE);
 }
 
 
@@ -1370,9 +1362,7 @@ PrivateVarDef FORM_Field getFields[] = {
 -1, 
 };
 
-int
-initUniverse()
-{
+PrivateFnDef void initUniverse() {
 	int	i;
 	MENU	*menu;
 	FORM_makeForm(ParmForm, getFields, i);
@@ -1385,8 +1375,6 @@ initUniverse()
 	}
 	FORM_fieldMenu(UNIVERSE) = menu;
 	FORM_fieldValue(UNIVERSE)[FORM_fieldLen(UNIVERSE)] = '\0';
-
-    return(FALSE);
 }
 
 PrivateVarDef int	inParamPage = FALSE;
@@ -1454,7 +1442,7 @@ PrivateFnDef void execUniverse () {
     if (isBlank(FORM_fieldValue(UNIVERSE)))
     {
         ERR_displayPause (" Please Enter a Starting Universe");
-	return (TRUE);
+	return;
     }
 
    ERR_displayStr(" Validating Universe...",FALSE);
@@ -1475,6 +1463,4 @@ PrivateFnDef void execUniverse () {
 	if( inParamPage )
 	    PAGE_status(PPage) = PAGE_ExitOnExec;
     }
-
-    return(FALSE);
 }

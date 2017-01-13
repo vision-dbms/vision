@@ -8,7 +8,7 @@
 /*****  Function Declarations  *****/
 PublicFnDecl void GOPT_AcquireOptions (int argc, char *argv[]);
 
-PublicFnDecl char *GOPT_GetValueOption (char const *optionName);
+PublicFnDecl char const *GOPT_GetValueOption (char const *optionName);
 PublicFnDecl int GOPT_GetSwitchOption (char const *optionName);
 
 PublicFnDecl void GOPT_SeekExtraArgument (
@@ -16,11 +16,11 @@ PublicFnDecl void GOPT_SeekExtraArgument (
     int				whence
 );
 
-PublicFnDecl char *GOPT_GetExtraArgument ();
+PublicFnDecl char const *GOPT_GetExtraArgument ();
 
 PublicFnDecl int GOPT_GetExtraArgCnt ();
 
-PublicFnDecl char *GOPT_ProgramName ();
+PublicFnDecl char const *GOPT_ProgramName ();
 
 
 #endif
