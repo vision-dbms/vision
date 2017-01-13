@@ -1174,7 +1174,7 @@ PrivateFnDef void twoWindows () {
  **********	File Functions		**********
  *************************************************/
 
-PrivateFnDef int readFilePrime () {
+PrivateFnDef void readFilePrime () {
 	MENU *mptr;
 
 	mptr = FORM_fieldMenu(FORM_field(interfaceForm,DestType));

@@ -9,6 +9,7 @@
 #include "mainmenu.h"
 
 #include "stdcurses.h"
+#include "edit.h"
 #include "page.h"
 #include "form.h"
 #include "rsInterface.h"
@@ -42,9 +43,9 @@ PrivateVarDef MENU_Choice quitChoices[] = {
     NULL, 
 };
 
-PublicFnDecl int statmenu(), queries(), financeSt(), dataEntryModule(), browser();
+PublicFnDecl void statmenu(), queries(), financeSt(), dataEntryModule(), browser();
 
-PublicFnDecl int MAIN_getCompany(), MAIN_getUniverse(), timeSeries();
+PublicFnDecl void MAIN_getCompany(), MAIN_getUniverse(), timeSeries();
 
 #define DataEntryIndex 6
 

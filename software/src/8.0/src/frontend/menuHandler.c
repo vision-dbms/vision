@@ -27,7 +27,7 @@
  **********	Forward Declarations	**********
  *************************************************/
 
-PrivateFnDef int menuInit (
+PrivateFnDef void menuInit (
     MENU *			menu,
     CUR_WINDOW *		menuWin
 );
@@ -37,7 +37,7 @@ PrivateFnDef PAGE_Action run_menu (
     CUR_WINDOW *		menuWin
 );
 
-PrivateFnDef int menuShadow (
+PrivateFnDef void menuShadow (
     MENU *			menu,
     CUR_WINDOW *		win
 );
@@ -48,12 +48,12 @@ PrivateFnDef void DisplayOptions (
     int				direction
 );
 
-PrivateFnDef int scanModuleChoice (
+PrivateFnDef void scanModuleChoice (
     MENU *			menu,
     char *			line
 );
 
-PrivateFnDef int scanChoice (
+PrivateFnDef void scanChoice (
     MENU *			menu,
     char *			line
 );
@@ -226,7 +226,7 @@ PublicFnDef PAGE_Action MENU_handler(
 #define FORWARD		0
 #define BACKWARD	1
 
-PrivateFnDef int menuInit (
+PrivateFnDef void menuInit (
     MENU *			menu,
     CUR_WINDOW *		menuWin
 )
@@ -508,13 +508,13 @@ PrivateFnDef void ScrollWindow(MENU *menu, CUR_WINDOW *menuWin) {
 }
 
 
-PrivateFnDef int menuShadow (
+PrivateFnDef void menuShadow (
     MENU *			menu,
     CUR_WINDOW *		win
 )
 {
     int	i, numActive = 0;
-    char *info;
+    char const *info;
     
     for( i=0 ; i<MENU_choiceCount(menu) ; i++ )
     	if( MENU_choiceActive(menu,i) == ON )
@@ -671,12 +671,12 @@ PublicFnDef MENU *MENU_getMenu(char const *message) {
 	    for (i = 0; i < MENU_choiceCount(menu); i++)
 	    {
 	    	if( MENU_choiceLabel(menu, i) != NULL )
-		    free(MENU_choiceLabel(menu, i));
+		    free((void*)MENU_choiceLabel(menu, i));
 	    	if( MENU_choiceHelp(menu, i) != NULL )
-		    free(MENU_choiceHelp(menu, i));
+		    free((void*)MENU_choiceHelp(menu, i));
 	    }
 	    if( MENU_choiceArray(menu) != NULL )
-	    	free(MENU_choiceArray(menu));
+	    	free((void*)MENU_choiceArray(menu));
 	    free(menu);
 	    return(NULL);
 	}
@@ -693,7 +693,7 @@ PublicFnDef MENU *MENU_getMenu(char const *message) {
     if (MENU_choiceCount(menu) == 0)
     {
 	if( MENU_choiceArray(menu) != NULL )
-	    free(MENU_choiceArray(menu));
+	    free((void*)MENU_choiceArray(menu));
 	free(menu);
 	return(NULL);
     }
@@ -728,12 +728,12 @@ PrivateFnDef MENU *getMainMenu(char const *msg) {
 	    for (i = 0; i < MENU_choiceCount(menu); i++)
 	    {
 	    	if( MENU_choiceLabel(menu, i) != NULL )
-		    free(MENU_choiceLabel(menu, i));
+		    free((void*)MENU_choiceLabel(menu, i));
 	    	if( MENU_choiceHelp(menu, i) != NULL )
-		    free(MENU_choiceHelp(menu, i));
+		    free((void*)MENU_choiceHelp(menu, i));
 	    }
 	    if( MENU_choiceArray(menu) != NULL )
-	    	free(MENU_choiceArray(menu));
+	    	free((void*)MENU_choiceArray(menu));
 	    free(menu);
 	    return(NULL);
 	}
@@ -750,7 +750,7 @@ PrivateFnDef MENU *getMainMenu(char const *msg) {
     if (MENU_choiceCount(menu) == 0)
     {
 	if( MENU_choiceArray(menu) != NULL )
-	    free(MENU_choiceArray(menu));
+	    free((void*)MENU_choiceArray(menu));
 	free(menu);
 	return(NULL);
     }
@@ -776,7 +776,7 @@ PublicFnDef MENU *MENU_getMainMenu()
 #endif
 
 
-PrivateFnDef int scanModuleChoice (
+PrivateFnDef void scanModuleChoice (
     MENU *			menu,
     char *			line
 )
@@ -816,8 +816,7 @@ PrivateFnDef int scanModuleChoice (
     MENU_choice(menu, MENU_choiceCount(menu)) =
 	   (MENU_Choice *)calloc(1, sizeof(MENU_Choice));
 
-    MENU_choiceLabel(menu, MENU_choiceCount(menu)) = 
-				calloc((len + 3), sizeof(char));
+    MENU_choiceLabel(menu, MENU_choiceCount(menu)) = (char*)calloc((len + 3), sizeof(char));
     strcpy(MENU_choiceLabel(menu, MENU_choiceCount(menu)), " ");
     strcat(MENU_choiceLabel(menu, MENU_choiceCount(menu)), buffer);
     strcat(MENU_choiceLabel(menu, MENU_choiceCount(menu)), " ");
@@ -826,8 +825,7 @@ PrivateFnDef int scanModuleChoice (
     while (line[j] == ' ' && line[j] != '\0') j++;
     if ((len = strlen(&line[j])) > 0)
     {
-	MENU_choiceHelp(menu, MENU_choiceCount(menu)) = 
-				calloc((len + 2), sizeof(char));
+      MENU_choiceHelp(menu, MENU_choiceCount(menu)) = (char*)calloc((len + 2), sizeof(char));
 	strcpy(MENU_choiceHelp(menu, MENU_choiceCount(menu)), " ");
 	strcat(MENU_choiceHelp(menu, MENU_choiceCount(menu)), &line[j]);
     }
@@ -843,7 +841,7 @@ PrivateFnDef int scanModuleChoice (
     MENU_choiceCount(menu)++;
 }
 
-PrivateFnDef int scanChoice (
+PrivateFnDef void scanChoice (
     MENU *			menu,
     char *			line
 )
@@ -869,16 +867,14 @@ PrivateFnDef int scanChoice (
     MENU_choice(menu, MENU_choiceCount(menu)) =
 	   (MENU_Choice *)calloc(1, sizeof(MENU_Choice));
 
-    MENU_choiceLabel(menu, MENU_choiceCount(menu)) = 
-				calloc((len + 1), sizeof(char));
+    MENU_choiceLabel(menu, MENU_choiceCount(menu)) = (char*)calloc((len + 1), sizeof(char));
     strcpy(MENU_choiceLabel(menu, MENU_choiceCount(menu)), buffer);
     MENU_choiceLetter(menu, MENU_choiceCount(menu)) = toLower(buffer[0]);
 
     while (line[j] == ' ' && line[j] != '\0') j++;
     if ((len = strlen(&line[j])) > 0)
     {
-	MENU_choiceHelp(menu, MENU_choiceCount(menu)) = 
-				calloc((len + 2), sizeof(char));
+	MENU_choiceHelp(menu, MENU_choiceCount(menu)) = (char*)calloc((len + 2), sizeof(char));
 	strcpy(MENU_choiceHelp(menu, MENU_choiceCount(menu)), " ");
 	strcat(MENU_choiceHelp(menu, MENU_choiceCount(menu)), &line[j]);
     }

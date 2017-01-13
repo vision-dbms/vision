@@ -67,11 +67,7 @@ PrivateVarDef char
  *	The format of 'argc' and 'argv' should be compatible with 'getopt'.
  *
  *****/
-PublicFnDef void GOPT_AcquireOptions (
-    int				argc,
-    char *			argv[]
-)
-{
+PublicFnDef void GOPT_AcquireOptions (int argc, char *argv[]) {
     GOPT_OptionDescription *opt, *optionsIndexedByChar[256];
     char optString[513], *p;
     int i, optChar;
@@ -169,10 +165,7 @@ PublicFnDef void GOPT_AcquireOptions (
  *	do NOT touch) or NULL/Nil.
  *
  *****/
-PublicFnDef char *GOPT_GetValueOption (
-    char *			optionName
-)
-{
+PublicFnDef char *GOPT_GetValueOption (char const *optionName) {
     GOPT_OptionDescription *opt;
 
     for (opt = GOPT_OptionDescriptions; opt->name; opt++)
@@ -195,10 +188,7 @@ PublicFnDef char *GOPT_GetValueOption (
  *	-1 if the option isn't declared.
  *
  *****/
-PublicFnDef int GOPT_GetSwitchOption (
-    char *			optionName
-)
-{
+PublicFnDef int GOPT_GetSwitchOption (char const *optionName) {
     GOPT_OptionDescription *opt;
 
     for (opt = GOPT_OptionDescriptions; opt->name; opt++)
@@ -281,10 +271,7 @@ PublicFnDef void GOPT_SeekExtraArgument (
  *	to point to the next extra argument.
  *
  *****/
-PublicFnDef char *GOPT_GetExtraArgument (
-    void
-)
-{
+PublicFnDef char *GOPT_GetExtraArgument () {
     return
 	ExtraArgPointer >= 0 && ExtraArgPointer < LocalArgc
 	? LocalArgv[ExtraArgPointer++]
@@ -298,10 +285,7 @@ PublicFnDef char *GOPT_GetExtraArgument (
  *	The number of extra arguments.
  *
  *****/
-PublicFnDef int GOPT_GetExtraArgCnt (
-    void
-)
-{
+PublicFnDef int GOPT_GetExtraArgCnt () {
     return
 	(LocalArgc - ExtraArgOrigin); 
 }
@@ -318,9 +302,6 @@ PublicFnDef int GOPT_GetExtraArgCnt (
  *	'argv[0]'
  *
  *****/
-PublicFnDef char *GOPT_ProgramName (
-    void
-)
-{
+PublicFnDef char *GOPT_ProgramName () {
     return LocalArgv[0];
 }

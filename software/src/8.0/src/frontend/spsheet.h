@@ -13,7 +13,7 @@ PublicFnDecl void SPR_eraseFields(SPRSHEET *spr);
 PublicFnDecl PAGE_Action SPR_handler(
     SPRSHEET *spsheet, CUR_WINDOW *win, PAGE_Action action
 );
-PublicFnDecl SPR_paintScreen(SPRSHEET *spr, CUR_WINDOW *win);
+PublicFnDecl int SPR_paintScreen(SPRSHEET *spr, CUR_WINDOW *win);
 PublicFnDecl int SPR_addRow(SPRSHEET *spr, char *buffer);
 PublicFnDecl int SPR_makeDummySheet(SPRSHEET *spr);
 

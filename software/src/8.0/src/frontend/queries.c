@@ -13,17 +13,15 @@
 #include "rsInterface.h"
 #include "choices.h"
 
-PrivateFnDef int screen1 (
+PrivateFnDef void screen1 (
     PAGE *			mpage
 );
 
-PrivateFnDef int getUniverse (
+PrivateFnDef void getUniverse (
     PAGE *			mpage
 );
 
-PrivateFnDef int execUniverse (
-    void
-);
+PrivateFnDef void execUniverse ();
 
 PrivateVarDef CUR_WINDOW *MenuWin, *FormWin;
 PrivateVarDef FORM *Form;
@@ -74,8 +72,7 @@ PrivateVarDef SCREENTYPE ScreenType[] = {
 PrivateVarDef int Index;
 
 
-PublicFnDef int queriesReal(mpage)
-PAGE *mpage;
+PublicFnDef int queriesReal(PAGE *mpage) {
 {
     MENU *menu;
     FORM *form;
@@ -133,9 +130,7 @@ PAGE *mpage;
  **********	Exec Functions		***************
  *****************************************************/
 
-PrivateFnDef int screen1 (
-    PAGE *			mpage
-)
+PrivateFnDef void screen1 (PAGE *mpage) )
 {
     Index = 0;
     getUniverse(mpage);
@@ -159,10 +154,7 @@ PrivateVarDef FORM_Field getFields[] = {
 
 PrivateVarDef int	queriesFirstTime = TRUE;
 
-PrivateFnDef int getUniverse (
-    PAGE *			mpage
-)
-{
+PrivateFnDef void getUniverse (PAGE *mpage) {
     int i;
     char buffer[80];
     CUR_WINDOW *win, *win2, *tmpWin = NULL;
@@ -234,17 +226,14 @@ PrivateFnDef int getUniverse (
 
 }
 
-PrivateFnDef int execUniverse (
-    void
-)
-{
+PrivateFnDef void execUniverse () {
     char buffer[80];
     int count, len;
     
     if (isBlank(FORM_fieldValue(UNIVERSE)))
     {
         ERR_displayPause (" Please Enter a Starting Universe");
-	return (TRUE);
+	return;
     }
 
     ERR_displayStr(" Executing...",FALSE);
@@ -257,7 +246,7 @@ PrivateFnDef int execUniverse (
     if (RS_sendAndCheck(buffer, ">>>"))
     {
 	ERR_displayPause(" Invalid Universe");
-	return(FALSE);
+	return;
     }
 
     strcpy(buffer, "__subset0 count");
@@ -272,6 +261,4 @@ PrivateFnDef int execUniverse (
 	(*ScreenType[Index].function)(FORM_fieldValue(UNIVERSE), count);
 	PAGE_status(Page) = PAGE_ExitOnExec;
     }
-
-    return(FALSE);
 }

@@ -6,6 +6,7 @@
 
 #include "stdcurses.h"
 #include "misc.h"
+#include "edit.h"
 #include "spsheet.h"
 #include "page.h"
 #include "form.h"
@@ -14,19 +15,13 @@
 
 
 /****** Forward Declarations *******/
-PrivateFnDef int execCompany (
-    void
-);
+PrivateFnDef void execCompany ();
 
-PrivateFnDef int execItem (
-    void
-);
+PrivateFnDef void execItem ();
 
-PrivateFnDef void itemList (void);
+PrivateFnDef void itemList ();
 
-PrivateFnDef int execExpr (
-    void
-);
+PrivateFnDef void execExpr ();
 
 /****** Globals *******/
 PrivateVarDef SPRSHEET	*ProfileReport;
@@ -236,9 +231,7 @@ PrivateFnDef int changeCompany()
     return(FALSE);
 }
 
-PrivateFnDef int execCompany (
-    void
-)
+PrivateFnDef void execCompany ()
 {
     char buffer[80];
     
@@ -247,7 +240,7 @@ PrivateFnDef int execCompany (
     if (isBlank(COMPANY))
     {
         ERR_displayPause (" Please Enter A Company Ticker Symbol");
-	return FALSE;
+	return;
     }
 
     ERR_displayStr(" Validating Company...", FALSE);
@@ -262,7 +255,6 @@ PrivateFnDef int execCompany (
 	writeReport();
 	PAGE_status(CompanyPage) = PAGE_ExitOnExec;
     }
-    return FALSE;
 }
 
 
@@ -367,10 +359,7 @@ PrivateFnDef int displayItem()
     return(FALSE);
 }
 
-PrivateFnDef int execItem (
-    void
-)
-{
+PrivateFnDef void execItem () {
     char inbuffer[RS_MaxLine + 1], outbuffer[RS_MaxLine + 1];
     int year, month, dateGiven;
     
@@ -379,7 +368,7 @@ PrivateFnDef int execItem (
     if (isBlank(FORM_fieldValue(ITEM)))
     {
         ERR_displayPause (" Please Enter An Item To Display");
-	return FALSE;
+	return;
     }
 
     ERR_displayStr(" Executing...",FALSE);
@@ -399,7 +388,7 @@ PrivateFnDef int execItem (
     else if (isBlank(FORM_fieldValue(YEAR)))
     {
         ERR_displayPause (" Please Enter Year");
-	return FALSE;
+	return;
     }
     else
 	dateGiven = TRUE;
@@ -410,7 +399,7 @@ PrivateFnDef int execItem (
 	if (month < 1 || month > 12)
 	{
 	    ERR_displayPause (" Please Enter Month (1 - 12)");
-	    return FALSE;
+	    return;
 	}
 	year = atoi(FORM_fieldValue(YEAR));
 	if (year < 100) year += 1900;
@@ -443,12 +432,9 @@ PrivateFnDef int execItem (
 	"%-*.*s", FORM_fieldLen(DISPLAY), FORM_fieldLen(DISPLAY), 
 					FORM_fieldValue(DISPLAY));
     CUR_wattroff(ItemWin, FORM_fieldAttr(DISPLAY));
-
-    return FALSE;
-
 }
 
-PrivateFnDef void itemList (void) {
+PrivateFnDef void itemList () {
     MENU *menu1, *menu2;
     int choice, i;
     char string[80];
@@ -464,7 +450,7 @@ PrivateFnDef void itemList (void) {
     if (menu2 == NULL)
     {
         ERR_displayPause(" No Items For Category Selected");
-	return(FALSE);
+	return;
     }
     
     for (i = 0; i < MENU_choiceCount(menu2); i++)
@@ -477,7 +463,6 @@ PrivateFnDef void itemList (void) {
     FORM_fieldMenu(ITEM) = menu1;
     CUR_delwin(SysWin);
     MENU_deleteMenu(menu2, i);
-    return(FALSE);
 }
 
 
@@ -544,17 +529,14 @@ PrivateFnDef int sendExpression()
     return(FALSE);
 }
 
-PrivateFnDef int execExpr (
-    void
-)
-{
+PrivateFnDef execExpr () {
     char inbuffer[RS_MaxLine + 1], outbuffer[RS_MaxLine + 1];
 
     if (isBlank(FORM_fieldValue(EXPR1)) &&
 	isBlank(FORM_fieldValue(EXPR2)))
     {
         ERR_displayPause (" Please Enter An Expression");
-	return FALSE;
+	return;
     }
 
     ERR_displayStr(" Executing...",FALSE);
@@ -573,8 +555,6 @@ PrivateFnDef int execExpr (
 	"%-*.*s", FORM_fieldLen(RESULT), FORM_fieldLen(RESULT), 
 					FORM_fieldValue(RESULT));
     CUR_wattroff(ExprWin, FORM_fieldAttr(RESULT));
-    return FALSE;
-
 }
 
 /***********************************************

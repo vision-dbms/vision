@@ -97,11 +97,10 @@ PrivateFnDef void abortInitPrinters (int stage) {
             free (PrinterChoices);
             /*drop-through */
         case 2:
-            for (i = 0; i < numPrinters; i++)
-                {
-                free (printerChoices[i].label);
-                free (printerChoices[i].help);
-                free (printers[i].command);
+            for (i = 0; i < numPrinters; i++) {
+		  free ((void*)printerChoices[i].label);
+		  free ((void*)printerChoices[i].help);
+		  free (printers[i].command);
                 }
             free (printerChoices);
             /*drop-through */
@@ -166,11 +165,11 @@ PrivateFnDef int initPrinters () {
     for (i = 0; i < numPrinters; i++)
         {
         tmpBuffer = strtok (buffer, ";");
-        printerChoices[i].label = malloc (strlen (tmpBuffer));
+        printerChoices[i].label = (char*)malloc (strlen (tmpBuffer));
         strcpy (printerChoices[i].label, tmpBuffer);
 
         tmpBuffer = strtok (NULL, ";");
-        printerChoices[i].help = malloc (strlen (tmpBuffer));
+        printerChoices[i].help = (char*)malloc (strlen (tmpBuffer));
         strcpy (printerChoices[i].help, tmpBuffer);
 
         tmpBuffer = strtok (NULL, ";");
@@ -181,7 +180,7 @@ PrivateFnDef int initPrinters () {
 	printerChoices[i].active = ON;
 
         tmpBuffer = strtok (NULL, ";");
-        printers[i].command = malloc (strlen (tmpBuffer));
+        printers[i].command = (char*)malloc (strlen (tmpBuffer));
         /* last character is a newline, which is not wanted */
         strcpy (printers[i].command, tmpBuffer);
 
@@ -256,15 +255,15 @@ PrivateFnDef int initPrinters () {
             PrinterChoices[j] = (CHOICE_MenuChoice *) calloc (2, 
                                               sizeof (CHOICE_MenuChoice));
             PrinterChoices[j][0].subfield = PRINT_N;
-            PrinterChoices[j][0].choices = malloc (numTypes + 1);
+            PrinterChoices[j][0].choices = (char*)malloc (numTypes + 1);
             for (i = 0; i < numTypes; i++)
                 PrinterChoices[j][0].choices[i] = '0';
             PrinterChoices[j][1].subfield = -1;
 
-            typeChoices[offset].label = malloc (strlen (NONElabel));
+            typeChoices[offset].label = (char*)malloc (strlen (NONElabel));
             strcpy (typeChoices[offset].label, NONElabel);
 
-            typeChoices[offset].help = malloc (strlen (NONEhelp));
+            typeChoices[offset].help = (char*)malloc (strlen (NONEhelp));
             strcpy (typeChoices[offset].help, NONEhelp);
 
             typeChoices[offset].letter = tolower (typeChoices[offset].label[0]);
@@ -273,7 +272,7 @@ PrivateFnDef int initPrinters () {
 
             typeChoices[offset].active = ON;
 
-            types[offset].command = malloc (1);
+            types[offset].command = (char*)malloc (1);
             types[offset].command[0] = '\0';
 
             PrinterChoices[j][0].choices[offset++] = '1'; 
@@ -282,7 +281,7 @@ PrivateFnDef int initPrinters () {
 
         PrinterChoices[j] = (CHOICE_MenuChoice *) calloc (2, sizeof (CHOICE_MenuChoice));
         PrinterChoices[j][0].subfield = PRINT_N;
-        PrinterChoices[j][0].choices = malloc (numTypes + 1);
+        PrinterChoices[j][0].choices = (char*)malloc (numTypes + 1);
         for (i = 0; i < numTypes; i++)
             PrinterChoices[j][0].choices[i] = '0';
         PrinterChoices[j][1].subfield = -1;
@@ -297,11 +296,11 @@ PrivateFnDef int initPrinters () {
         for (i = 0; i < typeCount[j]; i++)
             {
             tmpBuffer = strtok (buffer, ";");
-            typeChoices[offset].label = malloc (strlen (tmpBuffer));
+            typeChoices[offset].label = (char*)malloc (strlen (tmpBuffer));
             strcpy (typeChoices[offset].label, tmpBuffer);
 
             tmpBuffer = strtok (NULL, ";");
-            typeChoices[offset].help = malloc (strlen (tmpBuffer));
+            typeChoices[offset].help = (char*)malloc (strlen (tmpBuffer));
             strcpy (typeChoices[offset].help, tmpBuffer);
 
             tmpBuffer = strtok (NULL, ";");
@@ -312,7 +311,7 @@ PrivateFnDef int initPrinters () {
             typeChoices[offset].active = ON;
 
             tmpBuffer = strtok (NULL, ";");
-            types[offset].command = malloc (strlen (tmpBuffer));
+            types[offset].command = (char*)malloc (strlen (tmpBuffer));
             strcpy (types[offset].command, tmpBuffer);
 
             PrinterChoices[j][0].choices[offset++] = '1'; 

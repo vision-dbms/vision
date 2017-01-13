@@ -7,10 +7,10 @@
 #include "edit.h"
 #include "gopt.h"
 
-#include "vars.d"
+#include "vars.h"
 
-PublicFnDecl int statmenu(), queries(), financeSt(), dataEntryModule();
-PublicFnDecl int MAIN_getCompany(), MAIN_getUniverse(), timeSeries(), browser();
+PublicFnDecl void statmenu(), queries(), financeSt(), dataEntryModule();
+PublicFnDecl void MAIN_getCompany(), MAIN_getUniverse(), timeSeries(), browser();
 
 PublicVarDef char	StartupKit[VARS_maxLen];
 PublicVarDef void 	(*StartupModule)(void) = NULL;
@@ -96,10 +96,7 @@ PublicVarDef VARS_Menu NameAndFunc[] = {
 
 PrivateVarDef FORM	*VarsForm = NULL;
 
-PrivateFnDef int
-getVarIndex(name)
-char	*name;
-{
+PrivateFnDef int getVarIndex(char const *name) {
 	int	i = 0;
 
 	if( name == NULL )
@@ -115,10 +112,7 @@ char	*name;
 	return(-1);
 }
 
-PrivateFnDef int
-setCurrChoice(f)
-FORM_Field	*f;
-{
+PrivateFnDef int setCurrChoice(FORM_Field *f) {
 	MENU	*menu;
 	char	*value;
 	int	i;
@@ -138,12 +132,10 @@ FORM_Field	*f;
 	return(FALSE);
 }
 
-PrivateFnDef int
-initVarsForm()
-{
+PrivateFnDef void initVarsForm() {
 	VARS_Type	*vt;
 	FORM_Field	*f;
-	int		i, j, longest, idx, atoi();
+	int		i, j, longest, idx;
 	MENU		*menu;
 
 	if( (menu = VARS_menu(&VarNames[STARTUPMODULE])) == NULL )
@@ -217,12 +209,8 @@ initVarsForm()
 	}
 }
 
-PrivateFnDef int
-processValue(vt, buffer)
-VARS_Type	*vt;
-char		*buffer;
-{
-	int		i, idx, atoi();
+PrivateFnDef void processValue(VARS_Type *vt, char *buffer) {
+	int		i, idx;
 	
 	switch(VARS_valueType(vt))
 	{
@@ -257,10 +245,7 @@ char		*buffer;
 	}
 }
 
-PrivateFnDef int
-processLine(line)
-char	*line;
-{
+PrivateFnDef int processLine(char *line) {
 	int	len, i, j, idx;
 	char	buffer[2*VARS_maxLen];
 	
@@ -303,7 +288,7 @@ char	*line;
 	    (strncmp(buffer,"NA",2) == 0) )
 	{
 		if( VARS_menuString(&VarNames[idx]) != NULL )
-			free(VARS_menuString(&VarNames[idx]));
+		  free((void*)VARS_menuString(&VarNames[idx]));
 		VARS_menuString(&VarNames[idx]) = NULL;
 		if( VARS_menu(&VarNames[idx]) != NULL )
 			MENU_deleteMenu(VARS_menu(&VarNames[idx]), i);
@@ -312,8 +297,8 @@ char	*line;
 	else
 	{
 		if( VARS_menuString(&VarNames[idx]) != NULL )
-			free(VARS_menuString(&VarNames[idx]));
-		VARS_menuString(&VarNames[idx]) = calloc((len+1), sizeof(char));
+			free((void*)VARS_menuString(&VarNames[idx]));
+		VARS_menuString(&VarNames[idx]) = (char const*)calloc((len+1), sizeof(char));
 		strcpy(VARS_menuString(&VarNames[idx]), buffer);
 		if( VARS_menu(&VarNames[idx]) != NULL )
 			MENU_deleteMenu(VARS_menu(&VarNames[idx]), i);
@@ -322,11 +307,8 @@ char	*line;
 	return(FALSE);
 }
 	
-PrivateFnDef int
-VARS_readFile(fname)
-char	*fname;
-{
-	FILE	*fp, *fopen();
+PrivateFnDef int VARS_readFile(char const *fname) {
+	FILE	*fp;
 	char	buf[2*VARS_maxLen];
 	
 	if( (fp = fopen(fname, "r")) == NULL )
@@ -340,12 +322,10 @@ char	*fname;
 	return(FALSE);
 }
 
-PrivateFnDef int
-VARS_writeFile(fname)
-char	*fname;
-{
-	FILE		*fp, *fopen();
-	char		buf[2*VARS_maxLen], *name, value[VARS_maxLen+1], *menu;
+PrivateFnDef int VARS_writeFile(char const *fname) {
+	FILE		*fp;
+	char		buf[2*VARS_maxLen], value[VARS_maxLen+1];
+	char const	*menu;
 	VARS_Type	*vt;
 	int		i, idx;
 	
@@ -354,7 +334,7 @@ char	*fname;
 	for( i=0 ; i<=LASTVARIABLE ; i++ )
 	{
 		vt = &VarNames[i];
-		name = VARS_varName(vt);
+		char const *name = VARS_varName(vt);
 		if( (menu = VARS_menuString(vt)) == NULL )
 			menu = "none";
 		buf[0] = '\0';
@@ -402,10 +382,7 @@ char	*fname;
 
 PrivateVarDef char	startupfile[VARS_maxLen];
 
-PrivateFnDef int 
-getFileName(pstr)
-char *pstr;		/* either "write to" or "read from" */
-{
+PrivateFnDef int getFileName(char const *pstr /* either "write to" or "read from" */) {
     char string[VARS_maxLen], prompt[VARS_maxLen];
     int	error;
 
@@ -434,11 +411,9 @@ char *pstr;		/* either "write to" or "read from" */
     return(FALSE);
 }
 
-PublicFnDef int
-VARS_initProfileVariables()
-{
+PublicFnDef int VARS_initProfileVariables() {
 	MENU	*menu;
-	char	*pf, *getenv();
+	char	*pf;
 	int	i, j, longest;
 	
 	StartupKit[0] = '\0';
@@ -500,10 +475,7 @@ PublicFnDef int VARS_funcFromModuleName(char const *name) {
 	return(-1);
 }
 
-PublicFnDef int
-VARS_moduleNameFromFunc(funcAddr)
-int (*funcAddr)();
-{
+PublicFnDef int VARS_moduleNameFromFunc(void (*funcAddr)()) {
 	int	i = 0;
 
 	if( funcAddr == NULL )
@@ -521,9 +493,7 @@ int (*funcAddr)();
 
 PrivateVarDef PAGE	*vpage;
 
-PrivateFnDef int
-varsExec()
-{
+PrivateFnDef void varsExec() {
 	MENU		*nmenu;
 	int		i;
 	VARS_Type	*vt;
@@ -537,33 +507,27 @@ varsExec()
 	PAGE_status(vpage) = PAGE_ExitOnExec;
 }
 
-PrivateVarDef int
-doWrite()
-{
+PrivateVarDef void doWrite() {
 	if( getFileName("write to") )
-		return(TRUE);
+		return;
 	if( ((access(startupfile, 00) != -1) && (access(startupfile, 02) == -1)) || 
 	    VARS_writeFile(startupfile) )
 	{
 		ERR_displayPause(" Unable To Write To File");
-		return(TRUE);
+		return;
 	}
-	return(FALSE);
 }
 
-PrivateVarDef int
-doRead()
-{
+PrivateVarDef void doRead() {
 	if( getFileName("read from") )
-		return(TRUE);
+		return;
 	if( (access(startupfile, 04) == -1) || VARS_readFile(startupfile) )
 	{
 		ERR_displayPause(" Unable To Read From File");
-		return(TRUE);
+		return;
 	}
 	initVarsForm();
 	FORM_handler(VarsForm,PAGE_window(vpage,PAGE_windowCount(vpage)-1),PAGE_Init);
-	return(FALSE);
 }
 
 PrivateVarDef MENU_Choice fileReportMenu[] = {
@@ -572,9 +536,7 @@ PrivateVarDef MENU_Choice fileReportMenu[] = {
 NULL, 
 };
 
-PrivateFnDef int
-fileMenu()
-{
+PrivateFnDef void fileMenu() {
     int		i, j, longest, sr, sc;
     MENU	*menu;
     CUR_WINDOW	*menuWin;
@@ -602,10 +564,7 @@ fileMenu()
 
 PublicVarDef int	inVars = FALSE;
 
-PublicFnDef int
-VARS_runProfile(page)
-PAGE	*page;
-{
+PublicFnDef int VARS_runProfile(PAGE *page) {
 	int		i;
 	CUR_WINDOW	*win1, *win2;
 
