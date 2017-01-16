@@ -493,7 +493,7 @@ static void Process_NA (
     CheckParse
 	("NA", specRecord, 4,
 	 sscanf (specRecord, " %*s %d %d %1s %s",
-		 &inputOrigin, &fieldWidth, &patternType, pattern));
+		 &inputOrigin, &fieldWidth, patternType, pattern));
 
     (*dv->naHandler)
 	(spec, state, inputOrigin, fieldWidth, *patternType, pattern);
