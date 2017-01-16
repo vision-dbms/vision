@@ -487,7 +487,7 @@ static void Process_NA (
     pointer_t			state
 )
 {
-    char patternType, pattern[BufferSize];
+    char patternType[2], pattern[BufferSize];
     int inputOrigin, fieldWidth;
 
     CheckParse
@@ -496,7 +496,7 @@ static void Process_NA (
 		 &inputOrigin, &fieldWidth, &patternType, pattern));
 
     (*dv->naHandler)
-	(spec, state, inputOrigin, fieldWidth, patternType, pattern);
+	(spec, state, inputOrigin, fieldWidth, *patternType, pattern);
 }
 
 static void Process_OF (
