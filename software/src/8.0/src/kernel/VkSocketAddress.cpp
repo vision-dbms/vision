@@ -73,9 +73,9 @@ bool VkSocketAddress::constructINetAddress (
     VkStatus*			pStatusReturn
 ) {
     struct sockaddr_in *	psockaddr_in = &m_iAddress.inInternetFormat;
-    char			hostName[1024];
+    char			hostName[1025];
     int				serviceOffset;
-    char			serviceName[64];
+    char			serviceName[65];
     int				servicePort;
     struct hostent		*hostent;
     struct servent		*servent;
