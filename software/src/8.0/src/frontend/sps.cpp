@@ -1631,7 +1631,7 @@ PublicFnDef int SPS_readHeadingList(
 
 PublicFnDef int SPS_readStringOnly(char *buf, int len) {
 	int	errlen, errval;
-	char	*ptr;
+	VString ptr;
 
 	errlen = strlen(ErrorString);
 	errval = SPS_NOERROR;
@@ -1647,7 +1647,8 @@ PublicFnDef int SPS_readStringOnly(char *buf, int len) {
 
 PublicFnDef int SPS_readString(char *buf, int len) {
 	int	errlen, errval;
-	char	*ptr, buf2[256];
+	char	buf2[256];
+	VString ptr;
 
 	errlen = strlen(ErrorString);
 	errval = SPS_NOERROR;
@@ -1670,7 +1671,8 @@ PublicFnDef int SPS_readString(char *buf, int len) {
 
 PublicFnDef int SPS_readInteger() {
 	int	i;
-	char	buf[SPS_maxItemWidth+1], *ptr;
+	char	buf[SPS_maxItemWidth+1];
+	VString ptr;
 
 	if( !RS_readLine(buf,SPS_maxItemWidth) )
 		return( SPS_GOTPROMPT );
@@ -1747,8 +1749,9 @@ PublicFnDef void SPS_setCellValue(
 PublicFnDef int SPS_readCell(
     SPS_cell *c, SPS_DataType type
 ) {
-	char	buf[SPS_maxItemWidth+1], *ptr;
+	char	buf[SPS_maxItemWidth+1];
 	int	errlen;
+	VString ptr;
 
 	errlen = strlen(ErrorString);
 	if( !RS_readLine(buf,SPS_maxItemWidth) )

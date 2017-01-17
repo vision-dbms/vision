@@ -1523,7 +1523,7 @@ PrivateFnDef void validateFundamental()
 	return;
     }
 
-    char const *s = eatLeadingAndTrailingSpaces(FORM_fieldValue(IFREQ));
+    VString s (eatLeadingAndTrailingSpaces(FORM_fieldValue(IFREQ)));
     c = *s;
     if( c == 'A' )
 	FrequencyLetter = ' ';

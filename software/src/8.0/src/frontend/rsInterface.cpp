@@ -398,7 +398,7 @@ PublicFnDef int RS_sendAndCheck(
     char const*	input, char const *output
 ) {
     int result, len;
-    char buffer[RS_MaxLine + 1], *outp, *buf;
+    char buffer[RS_MaxLine + 1], *buf;
     
     writeLine(input);
 	
@@ -411,11 +411,11 @@ PublicFnDef int RS_sendAndCheck(
     result = FALSE;
 
 /**** check RSstdout ****/
-    outp = eatLeadingAndTrailingSpaces(output);
+    VString outp (eatLeadingAndTrailingSpaces(output));
     len = strlen(outp);
     while (RS_readLine (buffer, RS_MaxLine))
     {
-    	buf = eatLeadingAndTrailingSpaces(buffer);
+	VString buf (eatLeadingAndTrailingSpaces(buffer));
 	if (0 == strncmp(buf, outp, len))
 	    result = TRUE;
     }

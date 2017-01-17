@@ -2,6 +2,7 @@
 
 #include "stdcurses.h"
 #include "menu.h"
+#include "misc.h"
 #include "form.h"
 #include "page.h"
 #include "edit.h"
@@ -457,19 +458,15 @@ PublicFnDef int VARS_initProfileVariables() {
 }
 
 PublicFnDef int VARS_funcFromModuleName(char const *name) {
- 	char	*nm;
-	int	i = 0;
-
 	if( name == NULL )
 		return(-1);
 
-	nm = eatLeadingAndTrailingSpaces(name);
+	VString nm (eatLeadingAndTrailingSpaces(name));
 	
-	while( VARS_menuName(&NameAndFunc[i]) != NULL )
+	for (int i = 0; VARS_menuName(&NameAndFunc[i]) != NULL; i++)
 	{
 		if( strcmp(nm,VARS_menuName(&NameAndFunc[i])) == 0 )
 			return(i);
-		i++;
 	}
 
 	return(-1);

@@ -30,25 +30,24 @@ PublicFnDef void strToLower(char *str) {
 	str++;
 }
 
-PublicFnDef char const *eatLeadingAndTrailingSpaces(char const *str) {
-	char	*ptr;
-	int	len, i;
+PublicFnDef VString eatLeadingAndTrailingSpaces(char const *str) {
+    VString result;
 
-	if( str == NULL )
-		return(NULL);
-	if( (len = strlen(str)) == 0 )
-		return(str);
-	i = len - 1;
-	while( (i >= 0) && isspace(str[i]) )
-		i--;
-	if( i < 0 )
-	{
-		str[0] = '\0';
-		return( str );
-	}
-	str[i+1] = '\0';
-	ptr = str;
-	while( (*ptr != '\0') && isspace(*ptr) )
-		ptr++;
-	return(ptr);
+//  If there's no input, or the input is empty, return an empty string, ...
+    size_t len = str ? strlen (str) : static_cast<size_t>(0);
+    if ( 0 == len)
+	return result;
+
+    size_t xExtent = len;
+    while( xExtent > 0 && isspace(str[xExtent-1]) )
+	xExtent--;
+
+    size_t xOrigin = 0;
+    while( xOrigin < xExtent && isspace(str[xOrigin]) )
+	xOrigin++;
+
+    if (xExtent > xOrigin)
+	result.setTo (str + xOrigin, xExtent - xOrigin);
+
+    return result;
 }
