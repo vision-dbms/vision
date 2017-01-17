@@ -59,7 +59,7 @@ PublicFnDef pid_t STD_execute (
     char*			args[],
     int *			fdin,
     int *			fdout,
-    int				(*preChildProcessing)(void)
+    void			(*preChildProcessing)(void)
 )
 {
     int	Pfdin[2], Pfdout[2], tmpin, tmpout, tmperr, pid;
@@ -450,7 +450,7 @@ PrivateVarDef int Restart = FALSE;
 
 PrivateFnDef void RS_restoreParentSignals ();
 
-PrivateFnDef int childInitialization () {
+PrivateFnDef void childInitialization () {
 	struct sigvec vec;
 
 	/***** 
@@ -565,7 +565,8 @@ PrivateFnDef void execute_user () {
 
     setupParentSignals ();
 
-    RS_TabSpacing = CUR_tgetnum("it");
+    char it[] = "it";
+    RS_TabSpacing = CUR_tgetnum(it);
     if (RS_TabSpacing <= 0)
 	RS_TabSpacing = 8;
 
@@ -1140,6 +1141,17 @@ PrivateFnDef void displayLogo () {
 /******************************
  ***********  MAIN  ***********
  ******************************/
+
+#ifdef __APPLE__
+PrivateFnDef char *cuserid (char *pResult) {
+    char *pGetLoginResult = getlogin ();
+    if (!pGetLoginResult)
+	return NULL;
+
+    strcpy (pResult, pGetLoginResult);
+    return pResult;
+}
+#endif
 
 PublicFnDef int main (
     int				argc,
