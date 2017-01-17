@@ -9,7 +9,7 @@
 
 #include "Vk.h"
 
-PublicFnDecl void statsheet(char *company, char *type, char *rules, char *dataset);
+PublicFnDecl void statsheet(char const *company, char const *type, char const *rules, char const *dataset);
 
 
 #endif

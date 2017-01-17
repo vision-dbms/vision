@@ -19,10 +19,10 @@
 
 /****** Forward Declarations *******/
 PrivateFnDef int getAssumptions (
-    char *			company,
-    char *			type,
-    char *			rules,
-    char *			dataset
+    char const*			company,
+    char const*			type,
+    char const*			rules,
+    char const*			dataset
 );
 
 PrivateFnDef void scanItems (
@@ -71,7 +71,7 @@ PrivateVarDef MENU_Choice saveChoices[] = {
  NULL, 
 };
 
-PublicFnDef void statsheet(char *company, char *type, char *rules, char *dataset) {
+PublicFnDef void statsheet(char const*company, char const*type, char const*rules, char const*dataset) {
     int i, j, longest;
     MENU *actionMenu, *saveMenu;
     CUR_WINDOW *MenuWin;
@@ -288,10 +288,10 @@ PrivateFnDef int globals()
  ***************************************************/
 
 PrivateFnDef int getAssumptions (
-    char *			company,
-    char *			type,
-    char *			rules,
-    char *			dataset
+    char const*			company,
+    char const*			type,
+    char const*			rules,
+    char const*			dataset
 )
 {
     char buffer[RS_MaxLine + 1];
