@@ -4,6 +4,8 @@
 
 #include "Vk.h"
 
+#include <sys/wait.h>
+
 #include "rsInterface.h"
 
 /***** local includes *****/
@@ -52,7 +54,7 @@ PublicFnDef void STD_syserr (char const *msg) {
 
 
 /*** NOTE: The stderr and stdout are mapped to the same streams ***/
-PublicFnDef int STD_execute (
+PublicFnDef pid_t STD_execute (
     char const*			name,
     char*			args[],
     int *			fdin,
@@ -167,14 +169,14 @@ PrivateVarDef int   BackendIsLocal;
 PrivateVarDef char  BackendHost[256];
 PrivateVarDef char  BackendUser[128];
 PrivateVarDef char  BackendPass[128];
-PrivateVarDef char const *BackendPath;
+PrivateVarDef char const*BackendPath;
 
 PrivateVarDef int AllDone = FALSE;
 PublicVarDef FILE *RSstdin;
 PublicVarDef FILE *RSstdout;
 PublicVarDef int RSfdout;
 PublicVarDef int RSfdin;
-PublicVarDef int RSpid = 0;
+PublicVarDef pid_t RSpid = 0;
 PrivateVarDef int InitializedCurses = FALSE;
 PrivateVarDef int WindowTooSmall = FALSE;
 PrivateVarDef int ASubshellHasBeenSpawned = FALSE;
@@ -297,7 +299,7 @@ PublicFnDef void RS_system (char const *str) {
 
     if (vfork() == 0)
     {
-	execl ("/bin/sh", "sh", "-c", command, 0);
+	execl ("/bin/sh", "sh", "-c", command, NULL);
     }
     STD_sigvector (SIGINT, &ivec, &intvec);
     STD_sigvector (SIGQUIT, &ivec, &quitvec);
@@ -508,6 +510,7 @@ PrivateFnDef void StartBackend (
     }
     else
     {
+#ifdef HAS_REXEC
 	char * pBackendHost = BackendHost;
 	char** ppArg;
 	size_t sCommand = 1;
@@ -528,6 +531,9 @@ PrivateFnDef void StartBackend (
 
 	if (RSfdin < 0)
 	    STD_syswarn ("rexec error");
+#else
+	ERR_fatal (" *** Rexec Not Supported");
+#endif
     }
 
     if (restart) ERR_displayStr (
@@ -724,7 +730,8 @@ PrivateFnDef void parentSignalHandler (
     int				sig
 )
 {
-    int deceased;
+    int deceasedStatus;
+    pid_t deceased;
     struct sigvec vec;
 
     /*if (DEBUG) RS_fprintf (
@@ -772,7 +779,7 @@ PrivateFnDef void parentSignalHandler (
 	 *****/
 
 	/*****  If the dead child is NOT the research system, continue... ***/
-	deceased = wait (0);
+	deceased = wait (&deceasedStatus);
 	if (deceased != RSpid)
 	{
 	/*****
@@ -1140,7 +1147,7 @@ PublicFnDef int main (
 )
 {
     int i;
-    char buf[256], *home, *pHostBreak;
+    char buf[256], *home;
 
     displayLogo();
 
@@ -1149,7 +1156,7 @@ PublicFnDef int main (
 
     for (i = 1; i < argc; i++)
 	RSargs[i] = argv[i];
-    RSargs[i++] = "-E";
+    RSargs[i++] = const_cast<char*>("-E");
     RSargs[i] = NULL;
 
 
@@ -1185,7 +1192,8 @@ PublicFnDef int main (
 
 /***** determine if 'rexec' should be used to run the backend, ...  *****/
     BackendPath += strspn (BackendPath, " \t");
-    if (IsntNil (pHostBreak = strchr (BackendPath, ':')))
+    char const* const pHostBreak = strchr (BackendPath, ':');
+    if (pHostBreak)
     {
 	size_t sBackendHost = (size_t)(pHostBreak - BackendPath);
 
@@ -1235,7 +1243,7 @@ PublicFnDef int main (
  *
  *****
  *****/
-    RSargs[0] = BackendPath;
+    RSargs[0] = const_cast<char*>(BackendPath);
     if (BackendIsLocal && strchr (BackendPath, '/') && access (BackendPath, 1) != 0)
     {
     	fprintf (stderr, "ERROR - cannot run the program: %s\n", BackendPath);

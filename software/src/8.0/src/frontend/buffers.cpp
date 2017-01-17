@@ -643,38 +643,23 @@ PublicFnDef char *BUF_getLine(LINEBUFFER *buffer, int len) {
 *
 ************************************************/
 PublicFnDef char *BUF_appendLine(LINEBUFFER *buffer, char const *str) {
-    int len;
-    char *row;
-     
-    if( BUF_adjustRow(buffer) == ERR_Memory )
+    if (BUF_adjustRow(buffer) == ERR_Memory)
     	return(NULL);
-    if (str == NULL)
-        len = 0;
-    else
-	len = strlen(str);
-    if (len > 0)
-    {
-	if (str[len - 1] == '\n')
-	{
-	    str[len - 1] = '\0';
-	    len--;
-	}
-    }
+
+    size_t len = str ? strlen (str) : static_cast<size_t>(0);
+    if (len > 0 && str[len - 1] == '\n')
+	len--;
 
     if (len > BUF_maxLineSize(buffer))
-    {
         len = BUF_maxLineSize(buffer);
-	str[len] = '\0';
-    }
 	
-    row = BUF_getLine(buffer, len);
+    char *row = BUF_getLine(buffer, len);
     if (NULL == row)
 	return NULL;
 
-    if (len == 0)
-        BUF_line(row)[0] = '\0';
-    else
-	strcpy(BUF_line(row), str);     /** put str into new row **/
+    strncpy(BUF_line(row), str, len);     /** put str into new row **/
+    BUF_line(row)[len] = '\0';
+	
 
     if (BUF_row(buffer) == NULL)  /** this is the first line to **/
     {					/** be put in the buffer.     **/

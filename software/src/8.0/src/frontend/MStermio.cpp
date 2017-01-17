@@ -40,9 +40,11 @@ PublicFnDef void STD_checkTerminalCapabilities() {
 	entryIsntValid = tgetent (entry, term) != 1;
     }
 
+    char dl[] = "dl"; char DL[] = "DL";
+    char al[] = "al"; char AL[] = "AL";
     areap = area;
-    if( ((NULL != tgetstr("dl",&areap)) || (NULL != tgetstr("DL",&areap))) &&
-	((NULL != tgetstr("al",&areap)) || (NULL != tgetstr("AL",&areap))) )
+    if( ((NULL != tgetstr(dl,&areap)) || (NULL != tgetstr(DL,&areap))) &&
+	((NULL != tgetstr(al,&areap)) || (NULL != tgetstr(AL,&areap))) )
     	STD_hasInsertDeleteLine = TRUE;
     else
     	STD_hasInsertDeleteLine = FALSE;

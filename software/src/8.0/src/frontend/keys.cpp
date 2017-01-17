@@ -139,8 +139,9 @@ PrivateVarDef char	*KeypadSetString = NULL;
 PublicFnDef void KEY_setKeypad() {
     char area[1024], *areap = area;
 
+    char ks[] = "ks";
     if( KeypadSetString == NULL )
-	    KeypadSetString = tgetstr("ks",&areap);
+	    KeypadSetString = tgetstr(ks,&areap);
 
 #if defined(__hp9000s700)
     CUR_keypad(CUR_stdscr,TRUE);

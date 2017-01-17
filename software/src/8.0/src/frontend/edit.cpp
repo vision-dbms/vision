@@ -3294,7 +3294,7 @@ PrivateFnDef int illegalDestination () {
 
 PrivateFnDef int	doingSPR = FALSE;
 
-PrivateFnDef int execInterfaceFile (char const *fname) {
+PrivateFnDef int execInterfaceFile (char *fname) {
 	MENU	*menu;
 	char	*dname, tmpName[80], tmpName2[80], *filterOpts;
 	int	error, mode, filterType, realPasteBuf = FALSE;
@@ -3304,7 +3304,7 @@ PrivateFnDef int execInterfaceFile (char const *fname) {
 		ERR_displayPause("Unable to access Source File");
 		return(TRUE);
 	}
-	char const *sname = fname;
+	char *sname = fname;
 	menu = FORM_fieldMenu(FORM_field(interfaceForm,DestType));
 	filterType = MENU_currChoice(FORM_fieldMenu(FORM_field(interfaceForm,FilterType)));
 	filterOpts = FORM_fieldValue(FORM_field(interfaceForm,FilterOpts));
@@ -3676,7 +3676,7 @@ PrivateFnDef int execInterfaceRegion (int whichReg) {
     	return(FALSE);
 }
 			
-PrivateFnDef int execInterfacePC (char const *fname) {
+PrivateFnDef int execInterfacePC (char *fname) {
 	MENU	*menu;
 	char	*dname, *filterOpts;
 	char	tmpName[80], tmpName2[80];
