@@ -288,19 +288,14 @@ PrivateFnDef int processLine(char *line) {
 	    (strncmp(buffer,"none",4) == 0) ||
 	    (strncmp(buffer,"NA",2) == 0) )
 	{
-		if( VARS_menuString(&VarNames[idx]) != NULL )
-		  free((void*)VARS_menuString(&VarNames[idx]));
-		VARS_menuString(&VarNames[idx]) = NULL;
+		VARS_menuString(&VarNames[idx]).clear ();
 		if( VARS_menu(&VarNames[idx]) != NULL )
 			MENU_deleteMenu(VARS_menu(&VarNames[idx]), i);
 		VARS_menu(&VarNames[idx]) = NULL;
 	}
 	else
 	{
-		if( VARS_menuString(&VarNames[idx]) != NULL )
-			free((void*)VARS_menuString(&VarNames[idx]));
-		VARS_menuString(&VarNames[idx]) = (char const*)calloc((len+1), sizeof(char));
-		strcpy(VARS_menuString(&VarNames[idx]), buffer);
+		VARS_menuString(&VarNames[idx]).setTo (buffer);
 		if( VARS_menu(&VarNames[idx]) != NULL )
 			MENU_deleteMenu(VARS_menu(&VarNames[idx]), i);
 		VARS_menu(&VarNames[idx]) = MENU_getMenu(buffer);
@@ -326,7 +321,6 @@ PrivateFnDef int VARS_readFile(char const *fname) {
 PrivateFnDef int VARS_writeFile(char const *fname) {
 	FILE		*fp;
 	char		buf[2*VARS_maxLen], value[VARS_maxLen+1];
-	char const	*menu;
 	VARS_Type	*vt;
 	int		i, idx;
 	
@@ -336,8 +330,7 @@ PrivateFnDef int VARS_writeFile(char const *fname) {
 	{
 		vt = &VarNames[i];
 		char const *name = VARS_varName(vt);
-		if( (menu = VARS_menuString(vt)) == NULL )
-			menu = "none";
+		char const *menu = VARS_menuString(vt).isntEmpty () ? VARS_menuString(vt) : "none";
 		buf[0] = '\0';
 		switch(VARS_valueType(vt))
 		{
@@ -361,7 +354,7 @@ PrivateFnDef int VARS_writeFile(char const *fname) {
 					sprintf(buf,"%s %s| %s",name,VARS_menuName(&NameAndFunc[idx]),menu);
 				break;
 			case VARS_boolType:
-				sprintf(buf,"%s %d| %s",
+				sprintf(buf,"%s %s| %s",
 					name,
 					((VARS_boolean(vt) == TRUE) ? "TRUE" : "FALSE"),
 					menu);

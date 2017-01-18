@@ -1345,10 +1345,7 @@ PrivateFnDef void getObjectAndDate () {
 		" ");
 	if( DateType == UpdateDate )
 	{
-	    sprintf(FORM_fieldHelp(IOBJECT),"%-*.*s",
-		50,
-		50,
-		tbuf);
+	    FORM_fieldHelp(IOBJECT).printf ("%-*.*s", 50, 50, tbuf);
 	}
 
 	if( DateType == EstimateDate )

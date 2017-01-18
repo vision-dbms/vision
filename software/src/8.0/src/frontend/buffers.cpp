@@ -2405,15 +2405,15 @@ PrivateFnDef int file_write(LINEBUFFER *buffer, char const *filename, char const
     return SUCCESS;
 }
 
-PublicFnDef int BUF_writeFile(LINEBUFFER *buffer, char const *filename) {
+PublicFnDef int BUF_writeFile(LINEBUFFER *buffer, char *filename) {
 	return( file_write( buffer, filename, "w" ) );
 }
 
-PublicFnDef int BUF_appendToFile(LINEBUFFER *buffer, char const *filename) {
+PublicFnDef int BUF_appendToFile(LINEBUFFER *buffer, char *filename) {
 	return( file_write( buffer, filename, "a" ) );
 }
 
-PublicFnDef int BUF_writeLastOutput(LINEBUFFER *buffer, char const *filename, char const *mode) {
+PublicFnDef int BUF_writeLastOutput(LINEBUFFER *buffer, char *filename, char const *mode) {
     char *row;
     FILE *fd;
     

@@ -457,7 +457,7 @@ PrivateFnDef PAGE_Action inputForm (FORM *form, CUR_WINDOW *win) {
 	}
 	hilightField(win, Xfptr, idx);
 	limitChoices();
-	if( !ERR_msgDisplayed && !KEY_cready() && (FORM_fieldHelp(Xfptr) != NULL) )
+	if( !ERR_msgDisplayed && !KEY_cready() && FORM_fieldHelp(Xfptr).length () > 0 )
 	    ERR_displayStr(FORM_fieldHelp(Xfptr),FALSE);
 
 	firstKey = TRUE;
@@ -654,8 +654,7 @@ PrivateFnDef PAGE_Action inputForm (FORM *form, CUR_WINDOW *win) {
 			if (Pos[Xfld] >= MENU_choiceCount(mptr))
 			    Pos[Xfld] = 0;
 		    }
-		    strcpy(FORM_fieldValue(Xfptr), 
-			    MENU_choiceLabel(mptr, Pos[Xfld]));
+		    strcpy(FORM_fieldValue(Xfptr), MENU_choiceLabel(mptr, Pos[Xfld]));
 		    if( isS )
 		    {
 		    	tfptr = FORM_field(form,Xfld+2+Pos[Xfld]);
@@ -952,8 +951,7 @@ PublicFnDef void FORM_menuToForm() {
 		Xfptr = fptr;
 	}
     mptr = FORM_fieldMenu(Xfptr);
-    strcpy(FORM_fieldValue(Xfptr),
-         MENU_choiceLabel(mptr, MENU_currChoice(mptr)));
+    strcpy(FORM_fieldValue(Xfptr), MENU_choiceLabel(mptr, MENU_currChoice(mptr)));
     if( isS )
     {
     	tfptr = FORM_field(Form,Xfld+2+MENU_currChoice(mptr));

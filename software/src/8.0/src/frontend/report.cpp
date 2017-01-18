@@ -360,8 +360,7 @@ PrivateFnDef void newField(SPR_Field *fptr) {
     "%-*.*s", FORM_fieldLen(HEADING), FORM_fieldLen(HEADING), 
 					FORM_fieldValue(HEADING));
     CUR_wattroff(Win1, FORM_fieldAttr(HEADING));
-    strcpy(FORM_fieldValue(TOTAL), 
-        MENU_choiceLabel(FORM_fieldMenu(TOTAL), 0));
+    strcpy(FORM_fieldValue(TOTAL), MENU_choiceLabel(FORM_fieldMenu(TOTAL), 0));
     CUR_wattron(Win1, FORM_fieldAttr(TOTAL));
     CUR_wmove(Win1, FORM_fieldY(TOTAL), FORM_fieldX(TOTAL));
     CUR_wprintw(Win1,
@@ -1326,8 +1325,7 @@ PrivateFnDef void itemList () {
     menu1 = FORM_fieldMenu(ITEM);
     choice = MENU_currChoice(menu1);
     
-    sprintf(string,
-         "companyItemCategory%sList", MENU_choiceLabel(menu1, choice));
+    sprintf(string, "companyItemCategory%sList", MENU_choiceLabel(menu1, choice).content ());
     menu2 = MENU_getMenu(string);
     
     if (menu2 == NULL)

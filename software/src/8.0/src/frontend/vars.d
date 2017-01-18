@@ -1,6 +1,8 @@
 #ifndef VARS_D
 #define VARS_D
 
+#include "V_VString.h"
+
 #define	VARS_maxLen	256
 
 #define	VARS_noType	0
@@ -23,7 +25,7 @@ typedef struct {
 	char const	*name;
 	int		type;
 	caddr_t		p;
-	char const	*menustring;
+	VString		menustring;
 	MENU		*m;
 } VARS_Type;
 

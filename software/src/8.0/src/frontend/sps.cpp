@@ -2258,7 +2258,7 @@ PrivateFnDef int getDate (
 		sprintf(buf,"%2.2s%4.4s asDate",buffer,&buffer[2]);
 		break;
 	    case 7:
-		sprintf(buf,"%03.3s%4.4s asDate",buffer,&buffer[3]);
+		sprintf(buf,"%3.3s%4.4s asDate",buffer,&buffer[3]);
 		break;
 	    case 8:
 		sprintf(buf,"%4.4s%4.4s asDate",buffer,&buffer[4]);

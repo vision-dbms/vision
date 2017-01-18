@@ -502,7 +502,7 @@ PrivateFnDef void ScrollWindow(MENU *menu, CUR_WINDOW *menuWin) {
 	CUR_wprintw(menuWin, "%-*.*s", 
 	    	(CUR_WIN_cols(menuWin) - 4),
 	    	(CUR_WIN_cols(menuWin) - 4),
-		MENU_choiceLabel (menu, rowContent[row]));
+		MENU_choiceLabel (menu, rowContent[row]).content ());
 	row++;
     }
 }
@@ -598,7 +598,7 @@ PrivateFnDef void DisplayOptions (
 		  "%-*.*s", 
 		  (CUR_WIN_cols(menuWin) - 4),
 		  (CUR_WIN_cols(menuWin) - 4),
-		  MENU_choiceLabel (menu, LastChoice));
+		  MENU_choiceLabel (menu, LastChoice).content ());
     }
     /* CUR_wattroff(menuWin, MENU_normal(menu)); */
 
@@ -609,8 +609,8 @@ PrivateFnDef void DisplayOptions (
     CUR_wprintw(menuWin, "%-*.*s", 
 		(CUR_WIN_cols(menuWin) - 4),
 		(CUR_WIN_cols(menuWin) - 4),
-		MENU_choiceLabel (menu, i));
-    if( !ERR_msgDisplayed && (MENU_choiceHelp (menu, i) != NULL) )
+		MENU_choiceLabel (menu, i).content ());
+    if( !ERR_msgDisplayed && MENU_choiceHelp (menu, i).isntEmpty () )
     {
 	CUR_werase (ERR_Window);
 	CUR_mvwaddstr(ERR_Window, 0, 0, MENU_choiceHelp (menu, i));
@@ -629,7 +629,7 @@ PublicFnDef CUR_WINDOW *MENU_makeWindow(
     
     for (i = 0; i < MENU_choiceCount(menu); i++)
     {
-	if ((j = strlen(MENU_choiceLabel(menu, i))) > longest)
+	if ((j = MENU_choiceLabel(menu, i).length ()) > longest)
 	    longest = j;
     }
     rows = (MENU_choiceCount(menu) + 4);
@@ -668,13 +668,6 @@ PublicFnDef MENU *MENU_getMenu(char const *message) {
 	if (0 == strncmp(buffer, ">>>", 3))
 	{
 	    while (RS_readLine(buffer, RS_MaxLine));
-	    for (i = 0; i < MENU_choiceCount(menu); i++)
-	    {
-	    	if( MENU_choiceLabel(menu, i) != NULL )
-		    free((void*)MENU_choiceLabel(menu, i));
-	    	if( MENU_choiceHelp(menu, i) != NULL )
-		    free((void*)MENU_choiceHelp(menu, i));
-	    }
 	    if( MENU_choiceArray(menu) != NULL )
 	    	free((void*)MENU_choiceArray(menu));
 	    free(menu);
@@ -725,13 +718,6 @@ PrivateFnDef MENU *getMainMenu(char const *msg) {
 	if (0 == strncmp(buffer, ">>>", 3))
 	{
 	    while (RS_readLine(buffer, RS_MaxLine));
-	    for (i = 0; i < MENU_choiceCount(menu); i++)
-	    {
-	    	if( MENU_choiceLabel(menu, i) != NULL )
-		    free((void*)MENU_choiceLabel(menu, i));
-	    	if( MENU_choiceHelp(menu, i) != NULL )
-		    free((void*)MENU_choiceHelp(menu, i));
-	    }
 	    if( MENU_choiceArray(menu) != NULL )
 	    	free((void*)MENU_choiceArray(menu));
 	    free(menu);
@@ -816,21 +802,21 @@ PrivateFnDef void scanModuleChoice (
     MENU_choice(menu, MENU_choiceCount(menu)) =
 	   (MENU_Choice *)calloc(1, sizeof(MENU_Choice));
 
-    MENU_choiceLabel(menu, MENU_choiceCount(menu)) = (char*)calloc((len + 3), sizeof(char));
-    strcpy(MENU_choiceLabel(menu, MENU_choiceCount(menu)), " ");
-    strcat(MENU_choiceLabel(menu, MENU_choiceCount(menu)), buffer);
-    strcat(MENU_choiceLabel(menu, MENU_choiceCount(menu)), " ");
+    MENU_choiceLabel(menu, MENU_choiceCount(menu)).guarantee (len + 3);
+    MENU_choiceLabel(menu, MENU_choiceCount(menu)).setTo (" ");
+    MENU_choiceLabel(menu, MENU_choiceCount(menu)).append (buffer);
+    MENU_choiceLabel(menu, MENU_choiceCount(menu)).append (" ");
     MENU_choiceLetter(menu, MENU_choiceCount(menu)) = toLower(buffer[0]);
 
     while (line[j] == ' ' && line[j] != '\0') j++;
     if ((len = strlen(&line[j])) > 0)
     {
-      MENU_choiceHelp(menu, MENU_choiceCount(menu)) = (char*)calloc((len + 2), sizeof(char));
-	strcpy(MENU_choiceHelp(menu, MENU_choiceCount(menu)), " ");
-	strcat(MENU_choiceHelp(menu, MENU_choiceCount(menu)), &line[j]);
+	MENU_choiceHelp(menu, MENU_choiceCount(menu)).guarantee (len + 2);
+	MENU_choiceHelp(menu, MENU_choiceCount(menu)).setTo (" ");
+	MENU_choiceHelp(menu, MENU_choiceCount(menu)).append (&line[j]);
     }
     else
-    	MENU_choiceHelp(menu, MENU_choiceCount(menu)) = NULL;
+    	MENU_choiceHelp(menu, MENU_choiceCount(menu)).clear ();
 
     if( func != -1 )    
 	MENU_choiceHandler(menu, MENU_choiceCount(menu)) = VARS_menuFunc(&NameAndFunc[func]);
@@ -867,19 +853,18 @@ PrivateFnDef void scanChoice (
     MENU_choice(menu, MENU_choiceCount(menu)) =
 	   (MENU_Choice *)calloc(1, sizeof(MENU_Choice));
 
-    MENU_choiceLabel(menu, MENU_choiceCount(menu)) = (char*)calloc((len + 1), sizeof(char));
-    strcpy(MENU_choiceLabel(menu, MENU_choiceCount(menu)), buffer);
+    MENU_choiceLabel(menu, MENU_choiceCount(menu)).setTo (buffer);
     MENU_choiceLetter(menu, MENU_choiceCount(menu)) = toLower(buffer[0]);
 
     while (line[j] == ' ' && line[j] != '\0') j++;
     if ((len = strlen(&line[j])) > 0)
     {
-	MENU_choiceHelp(menu, MENU_choiceCount(menu)) = (char*)calloc((len + 2), sizeof(char));
-	strcpy(MENU_choiceHelp(menu, MENU_choiceCount(menu)), " ");
-	strcat(MENU_choiceHelp(menu, MENU_choiceCount(menu)), &line[j]);
+	MENU_choiceHelp(menu, MENU_choiceCount(menu)).guarantee (len + 2);
+	MENU_choiceHelp(menu, MENU_choiceCount(menu)).setTo (" ");
+	MENU_choiceHelp(menu, MENU_choiceCount(menu)).append (&line[j]);
     }
     else
-    	MENU_choiceHelp(menu, MENU_choiceCount(menu)) = NULL;
+    	MENU_choiceHelp(menu, MENU_choiceCount(menu)).clear ();
     MENU_choiceActive(menu, MENU_choiceCount(menu)) = ON;
     
     MENU_choiceCount(menu)++;

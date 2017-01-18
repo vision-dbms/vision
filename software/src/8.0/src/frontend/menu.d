@@ -6,6 +6,8 @@
 #ifndef MENU_D
 #define MENU_D
 
+#include "V_VString.h"
+
 #define MENU_Choices 50
 #define MENU_Quote   042
 #define MENU_MaxLine 200
@@ -17,8 +19,8 @@
 #define	MENU_BackendMenu 0x01
 
 typedef struct {
-    char const *label;
-    char const *help;
+    VString label;
+    VString help;
     char letter;	 
     void (*handler)();
     char active;
@@ -60,10 +62,10 @@ typedef struct {
     MENU_normal(mptr) = (int)norm;\
     MENU_hilight(mptr) = (int)high;\
     i = 0;\
-    while (choices[i].label != NULL) i++;\
+    while (choices[i].label.isntEmpty ()) i++;\
     MENU_choiceArray(mptr) = (MENU_Choice **)calloc(i, sizeof(MENU_Choice *));\
     longest = i = 0;\
-    while (choices[i].label != NULL)\
+    while (choices[i].label.isntEmpty ())\
     {\
         MENU_choice(mptr, i) = (MENU_Choice *)&choices[i];\
 	if ((j = strlen(choices[i].label)) > longest)\
@@ -75,21 +77,9 @@ typedef struct {
     MENU_choiceCount(mptr) = (int)i;\
 }
 
-#define MENU_deleteMenu(mptr, i)\
-{\
-    if (mptr != NULL)\
-    {\
-        if( MENU_IsBackendMenu(mptr) )\
-        {\
-	    for (i = 0; i < MENU_choiceCount(mptr); i++)\
-	    {\
-		if (MENU_choiceLabel(mptr, i) != NULL)\
-		    free((void*)MENU_choiceLabel(mptr, i));\
-		if (MENU_choiceHelp(mptr, i) != NULL)\
-		    free((void*)MENU_choiceHelp(mptr, i));\
-	    }\
-	}\
-	if (MENU_choiceArray(mptr) != NULL)\
+#define MENU_deleteMenu(mptr, i) {\
+    if (mptr != NULL) {\
+	if (MENU_choiceArray(mptr))\
 	    free(MENU_choiceArray(mptr));\
 	free(mptr);\
     }\

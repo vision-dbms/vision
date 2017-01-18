@@ -428,8 +428,7 @@ PrivateFnDef void itemList () {
     menu1 = FORM_fieldMenu(ITEM);
     choice = MENU_currChoice(menu1);
     
-    sprintf(string,
-         "companyItemCategory%sList", MENU_choiceLabel(menu1, choice));
+    sprintf(string, "companyItemCategory%sList", MENU_choiceLabel(menu1, choice).content ());
     menu2 = MENU_getMenu(string);
     
     if (menu2 == NULL)

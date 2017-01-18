@@ -98,8 +98,6 @@ PrivateFnDef void abortInitPrinters (int stage) {
             /*drop-through */
         case 2:
             for (i = 0; i < numPrinters; i++) {
-		  free ((void*)printerChoices[i].label);
-		  free ((void*)printerChoices[i].help);
 		  free (printers[i].command);
                 }
             free (printerChoices);
@@ -165,12 +163,10 @@ PrivateFnDef int initPrinters () {
     for (i = 0; i < numPrinters; i++)
         {
         tmpBuffer = strtok (buffer, ";");
-        printerChoices[i].label = (char*)malloc (strlen (tmpBuffer));
-        strcpy (printerChoices[i].label, tmpBuffer);
+        new (&printerChoices[i].label) VString (tmpBuffer);
 
         tmpBuffer = strtok (NULL, ";");
-        printerChoices[i].help = (char*)malloc (strlen (tmpBuffer));
-        strcpy (printerChoices[i].help, tmpBuffer);
+        new (&printerChoices[i].help) VString (tmpBuffer);
 
         tmpBuffer = strtok (NULL, ";");
         printerChoices[i].letter = tolower (tmpBuffer[0]);
@@ -187,7 +183,7 @@ PrivateFnDef int initPrinters () {
         if (i < (numPrinters - 1))
             RS_readLine (buffer, RS_MaxLine);
         }
-    printerChoices[numPrinters].label = NULL;
+    new (&printerChoices[numPrinters].label) VString ();
     while (RS_readLine (buffer, RS_MaxLine))
         ;
 
@@ -210,7 +206,7 @@ PrivateFnDef int initPrinters () {
     for (i = 0; i < numPrinters; i++)
         {
         sprintf (buffer, "PrinterTools Descriptor Named %s getNumberOfOptions",
-                          printerChoices[i].label);
+                          printerChoices[i].label.content ());
 	RS_sendLine (buffer);
 
         while (RS_readLine (buffer, RS_MaxLine) && (strcmp (buffer, "") == 0))
@@ -260,11 +256,8 @@ PrivateFnDef int initPrinters () {
                 PrinterChoices[j][0].choices[i] = '0';
             PrinterChoices[j][1].subfield = -1;
 
-            typeChoices[offset].label = (char*)malloc (strlen (NONElabel));
-            strcpy (typeChoices[offset].label, NONElabel);
-
-            typeChoices[offset].help = (char*)malloc (strlen (NONEhelp));
-            strcpy (typeChoices[offset].help, NONEhelp);
+            new (&typeChoices[offset].label) VString (NONElabel);
+            new (&typeChoices[offset].help) VString (NONEhelp);
 
             typeChoices[offset].letter = tolower (typeChoices[offset].label[0]);
 
@@ -287,7 +280,7 @@ PrivateFnDef int initPrinters () {
         PrinterChoices[j][1].subfield = -1;
 
         sprintf (buffer, "PrinterTools Descriptor Named %s displayPrinterOptions",
-                         printerChoices[j].label);
+                         printerChoices[j].label.content ());
 	RS_sendLine (buffer);
 
         while (RS_readLine (buffer, RS_MaxLine) && (strcmp (buffer, "") == 0))
@@ -296,12 +289,10 @@ PrivateFnDef int initPrinters () {
         for (i = 0; i < typeCount[j]; i++)
             {
             tmpBuffer = strtok (buffer, ";");
-            typeChoices[offset].label = (char*)malloc (strlen (tmpBuffer));
-            strcpy (typeChoices[offset].label, tmpBuffer);
+            new (&typeChoices[offset].label) VString (tmpBuffer);
 
             tmpBuffer = strtok (NULL, ";");
-            typeChoices[offset].help = (char*)malloc (strlen (tmpBuffer));
-            strcpy (typeChoices[offset].help, tmpBuffer);
+            new (&typeChoices[offset].help) VString (tmpBuffer);
 
             tmpBuffer = strtok (NULL, ";");
             typeChoices[offset].letter = tolower (tmpBuffer[0]);
@@ -323,7 +314,7 @@ PrivateFnDef int initPrinters () {
         while (RS_readLine (buffer, RS_MaxLine))
             ;
         }
-    typeChoices[numTypes].label = NULL;
+    new (&typeChoices[numTypes].label) VString ();
     free (typeCount);
 
     printersDefined = TRUE;
@@ -555,9 +546,6 @@ PublicFnDef void cleanupPrinters () {
         {
         free (printers[i].command);
 
-        free ((void*)printerChoices[i].label);
-        free ((void*)printerChoices[i].help);
-
         free (PrinterChoices[i][0].choices);
         free (PrinterChoices[i]);
         }
@@ -568,9 +556,6 @@ PublicFnDef void cleanupPrinters () {
     for (i = 0; i < numTypes; i++)
         {
         free (types[i].command);
-
-        free ((void*)typeChoices[i].label);
-        free ((void*)typeChoices[i].help);
         }
     free (typeChoices);
     free (types);
@@ -586,8 +571,8 @@ PublicFnDef int checkPrinters () {
         {
         printerChoices = (MENU_Choice *) calloc (2, sizeof (MENU_Choice));
 
-        printerChoices[0].label = NONElabel;
-        printerChoices[0].help = NONEhelp;
+        new (&printerChoices[0].label) VString (NONElabel);
+        new (&printerChoices[0].help) VString (NONEhelp);
         printerChoices[0].letter = tolower (printerChoices[0].label[0]);
         printerChoices[0].handler = FORM_menuToForm;
         printerChoices[0].active = ON;

@@ -171,7 +171,7 @@ PrivateFnDef void displayMenu()
     {
 	longest = 0;
 	for( i=0 ; i<MENU_choiceCount(menu) ; i++ )
-    	    if( (j = strlen(MENU_choiceLabel(menu,i))) > longest )
+    	    if( (j = MENU_choiceLabel(menu,i).length ()) > longest )
     		longest = j;
     }
     rows = MENU_choiceCount(menu) + 4;
