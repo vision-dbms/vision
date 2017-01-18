@@ -43,7 +43,7 @@ PrivateVarDef MENU_Choice menuChoices[] = {
 			    detailsMenu, ON, 
  " Expression ", " Send Expression And Display Results",	'e', 
 			    sendExpression, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 PrivateFnDef void profileFileMenu() {
@@ -177,11 +177,11 @@ PrivateFnDef void printReport() {
 
 PrivateVarDef FORM_Field companyFields[] = {
  2, 5, CUR_A_NORMAL, 18, 0, 'a', "Enter New Company:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  2, 24, (CUR_A_DIM | CUR_A_REVERSE), 18, 1, 'a', "                  ", 
         " Enter Company Ticker Symbol", NULL, NULL, 
  7, 5, CUR_A_NORMAL, 29, 0, 'a', "Execute(F2)  Quit(F9)" , 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
 -1, 
 };
 
@@ -258,21 +258,21 @@ PrivateFnDef void execCompany () {
 
 PrivateVarDef FORM_Field itemFields[] = {
  1, 2, CUR_A_NORMAL, 16, 0, 'a', "Item To Display:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  1, 19, (CUR_A_DIM | CUR_A_REVERSE), 16, 1, 'a', "                ", 
         " Enter Item To Display, or Press F1 For Menu", NULL, NULL, 
  3, 13, CUR_A_NORMAL, 5, 0, 'a', "Year:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  3, 19, (CUR_A_DIM | CUR_A_REVERSE), 4, 1, 'n', "    ", 
         " Enter Year, or Press F1 For Menu", NULL, NULL, 
  3, 27, CUR_A_NORMAL, 6, 0, 'a', "Month:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  3, 34, (CUR_A_DIM | CUR_A_REVERSE), 4, 1, 'n', "    ", 
         " Enter Month, or Press F1 For Menu", NULL, NULL, 
  5, 1, CUR_A_NORMAL, 45, 0, 'a', "                                             ", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  7, 5, CUR_A_NORMAL, 29, 0, 'a', "Execute(F2)  Quit(F9)" , 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
 -1, 
 };
 
@@ -287,7 +287,7 @@ PrivateVarDef MENU_Choice yearChoices[] = {
  "1978", "Year To Display", '8', FORM_menuToForm, ON, 
  "1977", "Year To Display", '7', FORM_menuToForm, ON, 
  "1976", "Year To Display", '6', FORM_menuToForm, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 PrivateVarDef FORM *ItemForm;
@@ -459,17 +459,17 @@ PrivateFnDef void itemList () {
 
 PrivateVarDef FORM_Field exprFields[] = {
  1, 1, CUR_A_NORMAL, 11, 0, 'a', "Expression:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  1, 13, (CUR_A_DIM | CUR_A_REVERSE), 40, 1, 'a',
  "                                        ", " Enter Expression", NULL, NULL, 
  2, 13, (CUR_A_DIM | CUR_A_REVERSE), 40, 1, 'a',
  "                                        ", " Enter Expression", NULL, NULL, 
  5, 5, CUR_A_NORMAL, 7, 0, 'a', "Result:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  5, 13, CUR_A_NORMAL, 40, 0, 'a', "                                        ", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  7, 5, CUR_A_NORMAL, 29, 0, 'a', "Execute(F2)  Quit(F9)" , 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
 -1, 
 };
 
@@ -556,12 +556,12 @@ PrivateVarDef MENU_Choice detailsChoices[] = {
  " Ratings ",	    " Ratings Report",		'r', NULL, ON, 
  " Per Share ",	    " Per Share Report",	's', NULL, ON, 
  " Ratios ",	    " Ratios Report",		'a', NULL, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 PrivateVarDef MENU_Choice detailActions[] = {
  " Print ", " Print Hard Copy Of Report",   'p', printDetails, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 PrivateFnDef void detailsMenu() {

@@ -17,6 +17,12 @@
 #include "keys.h"
 #include "vars.h"
 
+#include "browser.h"
+#include "financeSt.h"
+#include "queries.h"
+#include "statmenu.h"
+#include "timeSeries.h"
+
 PrivateVarDef int NotDone;
 PrivateVarDef CUR_WINDOW *MenuWin, *FormWin, *helpWin;
 PrivateVarDef FORM *Form;
@@ -40,12 +46,10 @@ PrivateFnDef void noExitSystem();
 PrivateVarDef MENU_Choice quitChoices[] = {
     " Yes ",    " Exit System ",	 'y',	    exitSystem,	  ON, 
     " No ",	" Do Not Exit System ",	 'n',	    noExitSystem, ON, 
-    NULL, 
+    static_cast<char const*>(NULL), 
 };
 
-PublicFnDecl void statmenu(), queries(), financeSt(), dataEntryModule(), browser();
-
-PublicFnDecl void MAIN_getCompany(), MAIN_getUniverse(), timeSeries();
+PublicFnDecl void MAIN_getCompany(), MAIN_getUniverse();
 
 #define DataEntryIndex 6
 
@@ -68,22 +72,22 @@ PrivateVarDef MENU_Choice menuChoices[] = {
            " Other Applications and Reports", 'o', NULL, ON, */
     " Browser ",      
            " Browse Through Objects in the System", 'b', browser, ON,
-    NULL, 
+    static_cast<char const*>(NULL), 
 };
 
 PrivateVarDef FORM_Field formFields[] = {
  1, 20, CUR_A_NORMAL, 40, 0, 'a', "                                        ", 
-	NULL, NULL, NULL, 
+	static_cast<char const*>(NULL), NULL, NULL, 
  3, 30, (CUR_A_UNDERLINE | CUR_A_BOLD), 19, 0, 'a', "Analyst Workstation",
-	NULL, NULL, NULL, 
+	static_cast<char const*>(NULL), NULL, NULL, 
  4, 35, (CUR_A_UNDERLINE | CUR_A_BOLD), 9, 0, 'a', "Main Menu", 
-	NULL, NULL, NULL, 
+	static_cast<char const*>(NULL), NULL, NULL, 
  -1, 
 };
 PrivateVarDef FORM_Field helpFields[] = {
- 2, 1, CUR_A_NORMAL, 15, 0, 'a', " F2 -  Execute ", NULL, NULL, NULL, 
- 3, 1, CUR_A_NORMAL, 15, 0, 'a', " F4 -  Editor  ", NULL, NULL, NULL, 
- 4, 1, CUR_A_NORMAL, 15, 0, 'a', " F9 -  Quit    ", NULL, NULL, NULL, 
+ 2, 1, CUR_A_NORMAL, 15, 0, 'a', " F2 -  Execute ", static_cast<char const*>(NULL), NULL, NULL, 
+ 3, 1, CUR_A_NORMAL, 15, 0, 'a', " F4 -  Editor  ", static_cast<char const*>(NULL), NULL, NULL, 
+ 4, 1, CUR_A_NORMAL, 15, 0, 'a', " F9 -  Quit    ", static_cast<char const*>(NULL), NULL, NULL, 
  -1, 
 };
 

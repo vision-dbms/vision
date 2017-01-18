@@ -74,25 +74,25 @@ PrivateVarDef CUR_WINDOW *Win1, *Win2, *Win3;
 
 PrivateVarDef FORM_Field form1Fields[] = {
  1, 32, (CUR_A_BOLD | CUR_A_UNDERLINE), 15, 0, 'a', "COMPANY SCREENS", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  4, 11, CUR_A_NORMAL, 5, 0, 'a', "Item:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  4, 17, (CUR_A_DIM | CUR_A_REVERSE), 16, (FORM_InputFlag|FORM_ScrollFlag), 'a', "                ", 
 	" Enter Item, or Press F1 For Menu ", NULL, NULL, 
  6, 7, CUR_A_NORMAL, 9, 0, 'a', "Operator:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  6, 17, (CUR_A_DIM | CUR_A_REVERSE), 4, 1, 'm', "    ", 
         " Enter Operator, or Press F1 for Menu", NULL, NULL, 
- 8, 7, CUR_A_NORMAL, 9, 0, 'a', "   Value:", NULL, NULL, NULL, 
+ 8, 7, CUR_A_NORMAL, 9, 0, 'a', "   Value:", static_cast<char const*>(NULL), NULL, NULL, 
  8, 17, (CUR_A_DIM | CUR_A_REVERSE), 20, (FORM_InputFlag|FORM_ScrollFlag), 'a', "                    ", 
         " Enter Comparison Value ", NULL, NULL, 
  9, 0, CUR_A_NORMAL, 40, 0, 'a', "----------------------------------------", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  9, 40, CUR_A_NORMAL, 40, 0, 'a', "----------------------------------------", 
-        NULL, NULL, NULL, 
- 11, 31, CUR_A_NORMAL, 17, 0, 'a', "SCREENING HISTORY", NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
+ 11, 31, CUR_A_NORMAL, 17, 0, 'a', "SCREENING HISTORY", static_cast<char const*>(NULL), NULL, NULL, 
  13, 5,  CUR_A_NORMAL, 60, 0, 'a', "                                                            ", 
-	NULL, NULL, NULL, 
+	static_cast<char const*>(NULL), NULL, NULL, 
  -1, 
 };
 
@@ -114,7 +114,7 @@ PrivateVarDef MENU_Choice actionChoices[] = {
      reportWriter, ON, 
  " Statistics ",     " Run Statistics For Specific Item ",    's', NULL, OFF, 
  " File ", " Save/Retrieve Screening Criteria ",	      'f', NULL, OFF, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 PrivateVarDef MENU_Choice operatorChoices[] = {
@@ -124,7 +124,7 @@ PrivateVarDef MENU_Choice operatorChoices[] = {
  " >= ", " Greater Than or Equal To ",  'g', FORM_menuToForm, ON, 
  " <= ", " Less Than or Equal To ",	'l', FORM_menuToForm, ON, 
  " != ", " Not Equal To ",		'n', FORM_menuToForm, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 
@@ -234,7 +234,7 @@ PrivateFnDef void clearSubsets () {
 
 PrivateVarDef FORM_Field exprFields[] = {
  1, 1, CUR_A_NORMAL, 11, 0, 'a', "Expression:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  1, 13, (CUR_A_DIM | CUR_A_REVERSE), 40, 1, 'a',
  "                                        ",
  " Enter Screening Expression", NULL, NULL, 
@@ -242,7 +242,7 @@ PrivateVarDef FORM_Field exprFields[] = {
  "                                        ",
  " Enter Screening Expression", NULL, NULL, 
  7, 5, CUR_A_NORMAL, 29, 0, 'a', "Execute(F2)  Quit(F9)" , 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
 -1, 
 };
 

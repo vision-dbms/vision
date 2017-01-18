@@ -40,16 +40,16 @@ PrivateVarDef MENU_Choice menuChoices[] = {
            " Portfolio Screens", 'p', NULL, ON, 
     " Industry ",
            " Industry Screens",  'i',  NULL, ON, 
-    NULL, 
+    static_cast<char const*>(NULL), 
 };
 
 PrivateVarDef FORM_Field formFields[] = {
  1, 20, CUR_A_NORMAL, 40, 0, 'a', "                                        ", 
-	NULL, NULL, NULL, 
+	static_cast<char const*>(NULL), NULL, NULL, 
  3, 34, (CUR_A_UNDERLINE | CUR_A_BOLD), 12, 0, 'a', "Query Sheets",
-	NULL, NULL, NULL, 
+	static_cast<char const*>(NULL), NULL, NULL, 
  4, 35, (CUR_A_UNDERLINE | CUR_A_BOLD), 9, 0, 'a', "Main Menu", 
-	NULL, NULL, NULL, 
+	static_cast<char const*>(NULL), NULL, NULL, 
  -1, 
 };
 
@@ -142,11 +142,11 @@ PrivateFnDef void screen1 (PAGE *mpage) {
 
 PrivateVarDef FORM_Field getFields[] = {
  2, 8, CUR_A_NORMAL, 15, 0, 'a', "Enter Universe:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  2, 24, (CUR_A_DIM | CUR_A_REVERSE), 18, 1, 'a', "                  ", 
         " Enter Starting Universe, Press F1 For Menu", NULL, NULL, 
  7, 5, CUR_A_NORMAL, 29, 0, 'a', "Execute(F2)  Quit(F9)" , 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
 -1, 
 };
 

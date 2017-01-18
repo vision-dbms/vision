@@ -45,11 +45,11 @@ PrivateVarDef int numTypes = 0;
 PrivateVarDef FORM_Field formFields[] =
     {
     1, 5, CUR_A_NORMAL, 8, 0, 'a', "Printer:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
     1, 14, (CUR_A_DIM | CUR_A_REVERSE), 8, 1, 'm', "        ", 
         " Use Arrow Keys To Select Printer", NULL, NULL, 
     3, 1, CUR_A_NORMAL, 12, 0, 'a', "Print Style:",  
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
     3, 14, (CUR_A_DIM | CUR_A_REVERSE), 15, 1, 'm', "               ", 
         " Use Arrow Keys To Select Print Style", NULL, NULL, 
     -1, 

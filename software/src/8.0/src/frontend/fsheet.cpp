@@ -60,7 +60,7 @@ PrivateVarDef MENU_Choice menuChoices[] = {
 			    changeDates, ON, 
  " Print ",     " Print Hard Copy Of Report",			 'p', 
 			    printReport, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 PrivateVarDef int	didExec = FALSE;
@@ -241,15 +241,15 @@ PrivateFnDef void printReport() {
  ************************************************/
 PrivateVarDef FORM_Field reportFields[] = {
  2, 5, CUR_A_NORMAL, 18, 0, 'a', "Select New Report:" , 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  2, 24, (CUR_A_DIM | CUR_A_REVERSE), 18, 1, 'm', "                  ", 
         " Use Arrow Keys To Select Report Type, or F1 For Menu", NULL, NULL, 
  4, 16, CUR_A_NORMAL, 7, 0, 'a', "  Freq:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  4, 24, (CUR_A_DIM | CUR_A_REVERSE), 18, 1, 'm', "                  ", 
         " Use Arrow Keys To Select Format, or F1 For Menu", NULL, NULL, 
  7, 5, CUR_A_NORMAL, 29, 0, 'a', "Execute(F2)  Quit(F9)" , 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
 -1, 
 };
 
@@ -304,17 +304,17 @@ PrivateFnDef void execReport () {
  ************************************************/
 PrivateVarDef FORM_Field companyFields[] = {
  2, 5, CUR_A_NORMAL, 18, 0, 'a', "Enter New Company:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  2, 24, (CUR_A_DIM | CUR_A_REVERSE), 18, 1, 'a', "                  ", 
         " Enter Company Ticker Symbol", NULL, NULL, 
 /***
  4, 5, CUR_A_NORMAL, 14, 0, 'a', "     Company list:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  4, 24, (CUR_A_DIM | CUR_A_REVERSE), 14, 1, 'a', "              ", 
         " Enter Company List", NULL, NULL, 
 ***/
  7, 5, CUR_A_NORMAL, 29, 0, 'a', "Execute(F2)  Quit(F9)" , 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
 -1, 
 };
 
@@ -384,19 +384,19 @@ PrivateFnDef void execCompany () {
  ************************************************/
 PrivateVarDef FORM_Field dateFields[] = {
  1, 5, CUR_A_NORMAL, 14, 0, 'a', "   Start Year:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  1, 21, (CUR_A_DIM | CUR_A_REVERSE), 14, 1, 'a', "              ", 
         " Enter Starting Date of Report", NULL, NULL, 
  3, 5, CUR_A_NORMAL, 14, 0, 'a', "       Number:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  3, 21, (CUR_A_DIM | CUR_A_REVERSE), 14, 1, 'a', "              ", 
         " Enter the number of periods to display", NULL, NULL, 
  5, 5, CUR_A_NORMAL, 14, 0, 'a', "    Direction:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  5, 21, (CUR_A_DIM | CUR_A_REVERSE), 14, 1, 'a', "              ", 
   " Use Arrow Keys To Select Direction From The Starting Date", NULL, NULL, 
  7, 5, CUR_A_NORMAL, 29, 0, 'a', "Execute(F2)  Quit(F9)" , 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
 -1, 
 };
 

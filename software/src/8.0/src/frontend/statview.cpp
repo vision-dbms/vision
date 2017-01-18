@@ -12,6 +12,8 @@
 #include "choices.h"
 #include "statsheet.h"
 
+#include "statview.h"
+
 /*************************************************
  **********	Forward Declarations	**********
  *************************************************/
@@ -31,20 +33,20 @@ PrivateFnDef void trimString (
 
 PrivateVarDef FORM_Field formFields[] = {
  1, 20, CUR_A_NORMAL, 40, 0, 'a', "                                        ",  
-	NULL, NULL, NULL, 
+	static_cast<char const*>(NULL), NULL, NULL, 
  3, 31, (CUR_A_BOLD | CUR_A_UNDERLINE), 17, 0, 'a', "Stat Sheet - View",  
-	NULL, NULL, NULL, 
+	static_cast<char const*>(NULL), NULL, NULL, 
  8, 24, CUR_A_NORMAL, 15, 0, 'a', "       Company:",
-	NULL, NULL, NULL, 
+	static_cast<char const*>(NULL), NULL, NULL, 
  8, 41, (CUR_A_DIM | CUR_A_REVERSE), 6, 1, 'a', 
         "      ", " Enter Company Ticker Symbol", NULL, NULL, 
- 10, 24, CUR_A_NORMAL, 15, 0, 'a', "         Model:", NULL, NULL, NULL, 
+ 10, 24, CUR_A_NORMAL, 15, 0, 'a', "         Model:", static_cast<char const*>(NULL), NULL, NULL, 
  10, 41, (CUR_A_DIM | CUR_A_REVERSE), 15,  1,  'm', "               ", 
     " Use Arrow Keys To Select Analysis Type, or F1 For Menu", NULL, NULL, 
- 12, 24, CUR_A_NORMAL, 15, 0, 'a', "         Rules:", NULL, NULL, NULL, 
+ 12, 24, CUR_A_NORMAL, 15, 0, 'a', "         Rules:", static_cast<char const*>(NULL), NULL, NULL, 
  12, 41, (CUR_A_DIM | CUR_A_REVERSE), 15, 1, 'm', "               ", 
     " Use Arrow Keys To Select Rules, or F1 For Menu", NULL, NULL, 
- 14, 24, CUR_A_NORMAL, 15, 0, 'a', "   Assumptions:", NULL, NULL, NULL, 
+ 14, 24, CUR_A_NORMAL, 15, 0, 'a', "   Assumptions:", static_cast<char const*>(NULL), NULL, NULL, 
  14, 41, (CUR_A_DIM | CUR_A_REVERSE), 15, 1, 'm', "               ", 
     " Use Arrow Keys To Select Assumptions, or F1 For Menu", NULL, NULL, 
  -1, 
@@ -55,7 +57,7 @@ PrivateVarDef MENU_Choice typeChoices[] = {
  " Flow of Funds ", " Flow of Funds Analysis",	'f', FORM_menuToForm, ON, 
  " Reinvest Rate ", " Reinvestment Rate Analysis",  'r', FORM_menuToForm, ON, 
  " Dividends ",     "Dividend Analysis", 'd', FORM_menuToForm, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 PrivateVarDef MENU_Choice assmptChoices[] = {
@@ -63,14 +65,14 @@ PrivateVarDef MENU_Choice assmptChoices[] = {
  " Left to Right ", " Calculate Left To Right",   'l', FORM_menuToForm, ON, 
  " Tony's Rules  ", " Calculate Using Tony's Rules",  't', 
                                                        FORM_menuToForm, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 PrivateVarDef MENU_Choice ruleChoices[] = {
  " Basic ",	    " Basic Assumptions",	    'b', FORM_menuToForm, ON, 
  " Optimistic ",    " Optimistic Assumptions",	    'o', FORM_menuToForm, ON, 
  " Pessimistic ",   " Pessimistic Assumptions",	    'p', FORM_menuToForm, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 PrivateVarDef char const *Rules;
@@ -89,7 +91,7 @@ PrivateVarDef FORM *Form;
 #define RulesField	(&Form->field[7]->value[1])
 #define DataField	(&Form->field[9]->value[1])
 
-PublicFnDef PAGE_Action statview()
+PublicFnDef void statview()
 {
     MENU *menu1, *menu2, *menu3;
     PAGE *page;
@@ -136,7 +138,7 @@ PublicFnDef PAGE_Action statview()
     CUR_delwin(formWin);
     PAGE_deletePage(page, i);
     
-    return(PAGE_Input);
+    return;
 }
 
 PrivateFnDef void exec () {

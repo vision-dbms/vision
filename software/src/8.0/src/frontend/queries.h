@@ -9,6 +9,7 @@
 
 #include "Vk.h"
 
+PublicFnDecl void queries ();
 PublicFnDecl void queriesReal(PAGE *mpage);
 
 

@@ -58,7 +58,7 @@ PrivateVarDef MENU_Choice menuChoices[] = {
      printReport2, ON, 
  " Worksheet ", " Modify Worksheet Parameters",		'w', NULL, ON, 
  " Globals ",	" View, Modify Stat Sheet Parameters",	'g', NULL, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 PrivateVarDef void saveAssumptions(), unsaveAssumptions();
@@ -68,7 +68,7 @@ PrivateVarDef MENU_Choice saveChoices[] = {
 	     'y', saveAssumptions, ON, 
  " No ",  " Do Not Update the Assumptions Database", 
 	    'n', unsaveAssumptions, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 PublicFnDef void statsheet(char const*company, char const*type, char const*rules, char const*dataset) {

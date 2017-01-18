@@ -10,8 +10,14 @@
 
 #include "vars.h"
 
-PublicFnDecl void statmenu(), queries(), financeSt(), dataEntryModule();
-PublicFnDecl void MAIN_getCompany(), MAIN_getUniverse(), timeSeries(), browser();
+#include "browser.h"
+#include "dataEntry.h"
+#include "financeSt.h"
+#include "queries.h"
+#include "statmenu.h"
+#include "timeSeries.h"
+
+PublicFnDecl void MAIN_getCompany(), MAIN_getUniverse();
 
 PublicVarDef char	StartupKit[VARS_maxLen];
 PublicVarDef void 	(*StartupModule)(void) = NULL;
@@ -27,13 +33,13 @@ PrivateVarDef MENU_Choice VarChoices[] = {
  "StartupKit",	  " Name Of Kit Which Contains List Of Startup Modules", '\0', FORM_menuToForm, ON,
  "StartupModule", " Name of module to execute if no StartupKit exists",  '\0', FORM_menuToForm, ON,
  "DefaultModule", " Name of module to execute when F4 is pressed",  '\0', FORM_menuToForm, ON,
- NULL,
+ static_cast<char const*>(NULL),
 };
 
 PrivateVarDef VARS_Type VarNames[] = {
- "StartupKit",	  VARS_stringType,	(caddr_t)StartupKit,	 NULL,	NULL,
- "StartupModule", VARS_funcType,	(caddr_t)&StartupModule, NULL,	NULL,
- "DefaultModule", VARS_funcType,	(caddr_t)&DefaultModule, NULL,	NULL,
+ "StartupKit",	  VARS_stringType,	(caddr_t)StartupKit,	 static_cast<char const*>(NULL),	NULL,
+ "StartupModule", VARS_funcType,	(caddr_t)&StartupModule, static_cast<char const*>(NULL),	NULL,
+ "DefaultModule", VARS_funcType,	(caddr_t)&DefaultModule, static_cast<char const*>(NULL),	NULL,
  NULL,
 };
 
@@ -51,13 +57,13 @@ PrivateVarDef MENU_Choice moduleChoices[] = {
  "DataEntry",    " Data Entry module",				'd', FORM_menuToForm, ON,
  "Browser",      " Browse Through Objects in the System",	'b', FORM_menuToForm, ON,
  "Editor",	 " System Editor",				'e', FORM_menuToForm, ON,
- NULL,
+ static_cast<char const*>(NULL),
 };
 
 PrivateVarDef MENU_Choice booleanChoices[] = {
  "FALSE",	" FALSE booloean value",	'f', FORM_menuToForm, ON,
  "TRUE",	" TRUE boolean value",		't', FORM_menuToForm, ON,
- NULL,
+ static_cast<char const*>(NULL),
 };
 
 #define VariableName	2
@@ -65,13 +71,13 @@ PrivateVarDef MENU_Choice booleanChoices[] = {
 
 PrivateVarDef FORM_Field formFields[] = {
  1, 1, CUR_A_NORMAL, 9, 0, 'a', "Variable:",
- 	NULL, NULL, NULL,
+ 	static_cast<char const*>(NULL), NULL, NULL,
  3, 1, CUR_A_NORMAL, 6, 0, 'a', "Value:",
- 	NULL, NULL, NULL,
+ 	static_cast<char const*>(NULL), NULL, NULL,
  1, 11, CUR_A_REVERSE, 20, 1, 'S', "                    ",
  	" Use Arrow Keys to Select Variable Name", NULL, NULL,
  3, 11, CUR_A_REVERSE, 30, 1, 'X', "                              ",
- 	NULL, NULL, NULL,
+ 	static_cast<char const*>(NULL), NULL, NULL,
  3, 11, CUR_A_REVERSE, 30, FORM_ScrollFlag, 'A', "                              ",
  	" Enter Startup Kit Name", NULL, NULL,
  3, 11, CUR_A_REVERSE, 30, 0, 'M', "                              ",
@@ -523,7 +529,7 @@ PrivateVarDef void doRead() {
 PrivateVarDef MENU_Choice fileReportMenu[] = {
 " Read ",  " Read Profile Information From A File",	 'r', doRead,  ON, 
 " Write ", " Write Profile Information To A File",	 'w', doWrite, ON, 
-NULL, 
+static_cast<char const*>(NULL), 
 };
 
 PrivateFnDef void fileMenu() {

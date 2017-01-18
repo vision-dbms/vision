@@ -10,7 +10,7 @@ PublicVarDecl PRINTER_Command PRINT_Command;
 PublicVarDecl MENU_Choice *printerChoices;
 
 /***** Function Declarations *****/
-PublicFnDecl char *print (PAGE *currPage, int defaultPrinter);
+PublicFnDecl void print (PAGE *currPage, int defaultPrinter);
 PublicFnDecl void cleanupPrinters ();
 PublicFnDecl int checkPrinters ();
 

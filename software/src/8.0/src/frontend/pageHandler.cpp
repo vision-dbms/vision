@@ -16,9 +16,14 @@
 #include "misc.h"
 #include "rsInterface.h"
 
+#include "browser.h"
+#include "dataEntry.h"
+#include "financeSt.h"
 #include "profile.h"
 #include "queries.h"
 #include "report.h"
+#include "statmenu.h"
+#include "timeSeries.h"
 
 /**** Page Definitions ****/
 #include "page.h"
@@ -481,8 +486,7 @@ PrivateFnDef void doProfile() {
 	SysPage = NULL;
 }
 
-PublicFnDecl void statmenu(), queries(), financeSt(), dataEntryModule(), browser();
-PublicFnDecl void MAIN_getCompany(), MAIN_getUniverse(), timeSeries();
+PublicFnDecl void MAIN_getCompany(), MAIN_getUniverse();
 
 PrivateVarDef MENU_Choice menuChoices[] = {
  " Financial Statements ", " Financial Statement Analysis", 'f', financeSt, ON, 
@@ -494,7 +498,7 @@ PrivateVarDef MENU_Choice menuChoices[] = {
  " Data Entry           ", " Data Entry module", 'd', dataEntryModule, ON,
  " Browser              ", " Browse Through Objects in the System", 'b', browser, ON,
  " Editor               ", " Run the System Editor", 'e', EDIT_main, ON,
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 PrivateFnDef void doModule() {
@@ -521,7 +525,7 @@ PrivateVarDef MENU_Choice sysChoices[] = {
      " Module ",     " Execute a Module",		'm',	doModule, ON, 
      " Editor ",     " Run the System Editor",		'e',	doEdit, ON, 
      " Profile ",    " Profile Variables Editor",	'p',	doProfile, ON, 
-     NULL,
+     static_cast<char const*>(NULL),
 };
 
 PublicFnDef void PAGE_runSysMenu(PAGE *opage) {
@@ -568,11 +572,11 @@ PublicFnDef void queries() {
 
 PrivateVarDef FORM_Field companyFields[] = {
  2, 4, CUR_A_NORMAL, 19, 0, 'a', "Company To Profile:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  2, 24, (CUR_A_DIM | CUR_A_REVERSE), 18, 1, 'a', "                  ", 
         " Enter Company Ticker Symbol", NULL, NULL, 
  7, 5, CUR_A_NORMAL, 29, 0, 'a', "Execute(F2)  Quit(F9)" , 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
 -1, 
 };
 

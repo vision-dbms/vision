@@ -9,6 +9,8 @@
 /*****  System  *****/
 #include "Vk.h"
 
+#include "browser.h"
+
 /*****  Module  *****/
 #include "stdcurses.h"
 #include "page.h"
@@ -128,14 +130,14 @@ PrivateVarDef FORM_Field BackgroundFields[] = {
 PrivateVarDef FORM_Field HelpBannerFields[] = {
  0, 0, (CUR_A_REVERSE), 65, 0, 'a',
 	" Browser:  Execute(F2) Window(F3) Interface(F5) Menu(F8) Quit(F9)",
-	NULL, NULL, NULL, 
+	static_cast<char const*>(NULL), NULL, NULL, 
  -1,
 };
 
 PrivateFnDef void SelectNullMenuEntry ();
 PrivateVarDef MENU_Choice NullMenuChoices[] = {
-    " ", NULL, '\0', SelectNullMenuEntry, ON, 
-    NULL,
+    " ", static_cast<char const*>(NULL), '\0', SelectNullMenuEntry, ON, 
+    static_cast<char const*>(NULL),
 };
 
 /************************************
@@ -150,14 +152,14 @@ PrivateVarDef MENU_Choice F8MenuChoices[] = {
     " Change Context"	, "Change browser class or level"	  , 'c', DetermineContext, ON,
     " Add to Catalog"	, "Add an object or message to a catalog" , 'a', AddToCatalog	 , ON,
     " New Catalog"      , "Create a new object or message catalog", 'n', AddCatalog      , ON,
-    NULL,
+    static_cast<char const*>(NULL),
 };
 
 /*****  Level Menu  *****/
 PrivateVarDef MENU_Choice LevelMenuChoices[] = {
     "Individual", "Operate on individual class instances"	, 'i', FORM_menuToForm, ON,
     "Collection", "Operate on collections of class instances"	, 'c', FORM_menuToForm, ON,
-    NULL,
+    static_cast<char const*>(NULL),
 };
 
 #define LevelMenuIndividualIndex	0
@@ -167,7 +169,7 @@ PrivateVarDef MENU_Choice LevelMenuChoices[] = {
 PrivateVarDef MENU_Choice CTypeMenuChoices[] = {
     "Object" , "Operate on an object catalog"	, 'o', FORM_menuToForm, ON,
     "Message", "Operate on a message catalog"	, 'm', FORM_menuToForm, ON,
-    NULL,
+    static_cast<char const*>(NULL),
 };
 
 #define CTypeObjectIndex		0
@@ -177,7 +179,7 @@ PrivateVarDef MENU_Choice CTypeMenuChoices[] = {
 PrivateVarDef MENU_Choice ETypeMenuChoices[] = {
     "Now"	, "Evaluate the object definition once now"	, 'n', FORM_menuToForm, ON,
     "Later"	, "Evaluate the object definition at each use"	, 'l', FORM_menuToForm, ON,
-    NULL,
+    static_cast<char const*>(NULL),
 };
 
 #define ETypeNowIndex			0
@@ -186,11 +188,11 @@ PrivateVarDef MENU_Choice ETypeMenuChoices[] = {
 /*****  Context Form  *****/
 PrivateVarDef FORM_Field ContextFormFields[] = {
  1,  4, CUR_A_NORMAL, 6, 0, 'a', "Class:",
-        NULL, NULL, NULL,
+        static_cast<char const*>(NULL), NULL, NULL,
  1, 11, (CUR_A_DIM | CUR_A_REVERSE), 16, FORM_InputFlag, 'm', "",
 	" Use Arrow Keys To Select Class, or F1 For Menu", NULL, NULL,
  3,  4, CUR_A_NORMAL, 6, 0, 'a', "Level:",
-        NULL, NULL, NULL,
+        static_cast<char const*>(NULL), NULL, NULL,
  3, 11, (CUR_A_DIM | CUR_A_REVERSE), 16, FORM_InputFlag, 'm', "",
 	" Use Arrow Keys To Select Level, or F1 For Menu", NULL, NULL,
  -1,
@@ -202,19 +204,19 @@ PrivateVarDef FORM_Field ContextFormFields[] = {
 /*****  Add Catalog Form  *****/
 PrivateVarDef FORM_Field AddCatalogFormFields[] = {
  1,  4, CUR_A_NORMAL, 6, 0, 'a', "Class:",
-        NULL, NULL, NULL,
+        static_cast<char const*>(NULL), NULL, NULL,
  1, 11, (CUR_A_DIM | CUR_A_REVERSE), 16, FORM_InputFlag, 'm', "",
 	" Use Arrow Keys To Select Class, or F1 For Menu", NULL, NULL,
  1, 28, CUR_A_NORMAL, 13, 0, 'a', "Catalog Type:",
-        NULL, NULL, NULL,
+        static_cast<char const*>(NULL), NULL, NULL,
  1, 42, (CUR_A_DIM | CUR_A_REVERSE), 16, FORM_InputFlag, 'm', "",
 	" Use Arrow Keys To Select Catalog Type, or F1 For Menu", NULL, NULL,
  3,  4, CUR_A_NORMAL, 6, 0, 'a', "Level:",
-        NULL, NULL, NULL,
+        static_cast<char const*>(NULL), NULL, NULL,
  3, 11, (CUR_A_DIM | CUR_A_REVERSE), 16, FORM_InputFlag, 'm', "",
 	" Use Arrow Keys To Select Level, or F1 For Menu", NULL, NULL,
  3, 28, CUR_A_NORMAL, 13, 0, 'a', "Catalog Name:",
-        NULL, NULL, NULL,
+        static_cast<char const*>(NULL), NULL, NULL,
  3, 42, (CUR_A_DIM | CUR_A_REVERSE), 16, (FORM_InputFlag | FORM_ScrollFlag), 'a', "",
 	" Enter the name of the catalog to be added, or F1 For Menu", NULL, NULL,
  -1,
@@ -228,31 +230,31 @@ PrivateVarDef FORM_Field AddCatalogFormFields[] = {
 /*****  Add Object Form  *****/
 PrivateVarDef FORM_Field AddObjectFormFields[] = {
  1,  4, CUR_A_NORMAL, 6, 0, 'a', "Class:",
-        NULL, NULL, NULL,
+        static_cast<char const*>(NULL), NULL, NULL,
  1, 11, CUR_A_DIM, 16, 0, 'm', "",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  1, 28, CUR_A_NORMAL, 13, 0, 'a', "Catalog Type:",
-        NULL, NULL, NULL,
+        static_cast<char const*>(NULL), NULL, NULL,
  1, 42, CUR_A_DIM, 16, 0, 'a', "Object",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  3,  4, CUR_A_NORMAL, 6, 0, 'a', "Level:",
-        NULL, NULL, NULL,
+        static_cast<char const*>(NULL), NULL, NULL,
  3, 11, CUR_A_DIM, 16, 0, 'm', "",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  3, 28, CUR_A_NORMAL, 13, 0, 'a', "Catalog Name:",
-        NULL, NULL, NULL,
+        static_cast<char const*>(NULL), NULL, NULL,
  3, 42, CUR_A_DIM, 16, 0, 'm', "",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  5,  4, CUR_A_NORMAL,  6, 0, 'a', " Name:",
-        NULL, NULL, NULL,
+        static_cast<char const*>(NULL), NULL, NULL,
  5, 11, (CUR_A_DIM | CUR_A_REVERSE), 20, (FORM_InputFlag | FORM_ScrollFlag), 'a', "",
 	" Enter a name for the object being cataloged", NULL, NULL,
  7,  3, CUR_A_NORMAL,  7, 0, 'a', "Object:",
-        NULL, NULL, NULL,
+        static_cast<char const*>(NULL), NULL, NULL,
  7, 11, (CUR_A_DIM | CUR_A_REVERSE), 50, (FORM_InputFlag | FORM_ScrollFlag), 'a', "",
 	" Enter an expression defining the object being cataloged", NULL, NULL,
  9,  1, CUR_A_NORMAL,  9, 0, 'a', "Evaluate:",
-        NULL, NULL, NULL,
+        static_cast<char const*>(NULL), NULL, NULL,
  9, 11, (CUR_A_DIM | CUR_A_REVERSE), 6, FORM_InputFlag, 'm', "",
 	" Use arrow keys to select an evaluation type, or F1 for menu", NULL, NULL,
  -1,
@@ -268,23 +270,23 @@ PrivateVarDef FORM_Field AddObjectFormFields[] = {
 /*****  Add Message Form  *****/
 PrivateVarDef FORM_Field AddMessageFormFields[] = {
  1,  4, CUR_A_NORMAL, 6, 0, 'a', "Class:",
-        NULL, NULL, NULL,
+        static_cast<char const*>(NULL), NULL, NULL,
  1, 11, CUR_A_DIM, 16, 0, 'm', "",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  1, 28, CUR_A_NORMAL, 13, 0, 'a', "Catalog Type:",
-        NULL, NULL, NULL,
+        static_cast<char const*>(NULL), NULL, NULL,
  1, 42, CUR_A_DIM, 16, 0, 'a', "Message",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  3,  4, CUR_A_NORMAL, 6, 0, 'a', "Level:",
-        NULL, NULL, NULL,
+        static_cast<char const*>(NULL), NULL, NULL,
  3, 11, CUR_A_DIM, 16, 0, 'm', "",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  3, 28, CUR_A_NORMAL, 13, 0, 'a', "Catalog Name:",
-        NULL, NULL, NULL,
+        static_cast<char const*>(NULL), NULL, NULL,
  3, 42, CUR_A_DIM, 16, 0, 'm', "",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  5,  4, CUR_A_NORMAL,  6, 0, 'a', " Name:",
-        NULL, NULL, NULL,
+        static_cast<char const*>(NULL), NULL, NULL,
  5, 11, (CUR_A_DIM | CUR_A_REVERSE), 20, (FORM_InputFlag | FORM_ScrollFlag), 'a', "",
 	" Enter the name of the message being cataloged", NULL, NULL,
  -1,
@@ -1222,16 +1224,14 @@ PrivateFnDef void
  *********************/
 PublicVarDef int	inBrowser = FALSE;
 
-PublicFnDef int
-    browser()
-{
+PublicFnDef void browser() {
     static int firstEntry = TRUE;
 
 /*****  Guard against recursive invocation (the browser is not re-entrant), ...  *****/
     if (inBrowser)
     {
 	ERR_displayPause ("Browser already running");
-	return TRUE;
+	return;
     }
     inBrowser = TRUE;
 
@@ -1255,5 +1255,5 @@ PublicFnDef int
     inBrowser = FALSE;
 
 /*****  ... and exit.  *****/
-    return (FALSE);
+    return;
 }

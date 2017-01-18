@@ -613,7 +613,7 @@ PrivateFnDef void DisplayOptions (
     if( !ERR_msgDisplayed && MENU_choiceHelp (menu, i).isntEmpty () )
     {
 	CUR_werase (ERR_Window);
-	CUR_mvwaddstr(ERR_Window, 0, 0, MENU_choiceHelp (menu, i));
+	CUR_mvwaddstr(ERR_Window, 0, 0, MENU_choiceHelp (menu, i).content ());
 	CUR_touchwin(ERR_Window);
 	CUR_wnoutrefresh(ERR_Window);
     }

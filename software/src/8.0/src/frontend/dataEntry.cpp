@@ -14,6 +14,8 @@
 #include "choices.h"
 #include "error.h"
 #include "sps.h"
+
+#include "dataEntry.h"
 
 
 /*************************************************
@@ -107,7 +109,7 @@ PrivateVarDef MENU_Choice menuChoices1[] = {
     " HouseKeeping         ",
 	   " Scroll To Choice and Push F2; F9 To Quit",
 	   'h',    NULL, ON,
-    NULL,
+    static_cast<char const*>(NULL),
 };
 
 PrivateVarDef MENU_Choice menuChoices2[] = {
@@ -120,7 +122,7 @@ PrivateVarDef MENU_Choice menuChoices2[] = {
     " Miscellaneous        ",
 	   " Scroll To Choice and Push F2; F9 To Quit",
 	   'm',    companyMiscDataEntry, ON,
-    NULL,
+    static_cast<char const*>(NULL),
 };
 
 PrivateVarDef MENU_Choice menuChoices3[] = {
@@ -134,7 +136,7 @@ PrivateVarDef MENU_Choice menuChoices3[] = {
 	   " Annual Dividends per Share", 'd',    dividendsDataEntry, ON,
     " All ",
 	   " All of the Above", 'a',    allDataEntry, ON,
-    NULL,
+    static_cast<char const*>(NULL),
 };
 
 PrivateVarDef MENU_Choice dataChoices[] = {
@@ -154,43 +156,42 @@ PrivateVarDef MENU_Choice dataChoices[] = {
      'n', SPS_incrementZ, ON, 
  " Previous ",	" Decrement Z to the Previous Value (Also ^P) ",
      'p', SPS_decrementZ, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 PrivateVarDef FORM_Field formFields1[] = {
  1, 20, CUR_A_NORMAL, 40, 0, 'a', "                                        ",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  3, 31, (CUR_A_UNDERLINE | CUR_A_BOLD), 17, 0, 'a', "Data Entry Module",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  4, 35, (CUR_A_UNDERLINE | CUR_A_BOLD), 9, 0, 'a', "Main Menu",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  -1,
 };
 
 PrivateVarDef FORM_Field formFields2[] = {
  1, 20, CUR_A_NORMAL, 40, 0, 'a', "                                        ",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  3, 31, (CUR_A_UNDERLINE | CUR_A_BOLD), 17, 0, 'a', "Data Entry Module",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  4, 31, (CUR_A_UNDERLINE | CUR_A_BOLD), 17, 0, 'a', "Company Main Menu",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  -1,
 };
 
 PrivateVarDef FORM_Field formFields3[] = {
  1, 20, CUR_A_NORMAL, 40, 0, 'a', "                                        ",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  3, 31, (CUR_A_UNDERLINE | CUR_A_BOLD), 17, 0, 'a', "Data Entry Module",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  4, 29, (CUR_A_UNDERLINE | CUR_A_BOLD), 21, 0, 'a', "Company Estimate Menu",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  -1,
 };
 
 PublicVarDef int	inDE = FALSE;
 
-PublicFnDef int dataEntryModule()
-{
+PublicFnDef void dataEntryModule() {
     MENU *menu;
     FORM *form;
     PAGE *page;
@@ -202,7 +203,7 @@ PublicFnDef int dataEntryModule()
     if( inDE )
     {
     	ERR_displayPause("Data Entry already running");
-    	return(0);
+    	return;
     }
     inDE = TRUE;
         
@@ -247,7 +248,7 @@ PublicFnDef int dataEntryModule()
     CurrPage = OldPage;
 
     inDE = FALSE;
-    return(FALSE);
+    return;
 }
 
 
@@ -356,53 +357,53 @@ PublicFnDef void estimateDataEntry() {
 
 PrivateVarDef FORM_Field fund1Fields[] = {
  0, 25, (CUR_A_BOLD | CUR_A_UNDERLINE), 29, 0, 'a', "Company Fundamental Worksheet",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  1, 0, (CUR_A_NORMAL), 12, 0, 'a', "Company Name",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  1, 13, (CUR_A_REVERSE), 40, 0, 'a', "                                        ",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  1, 60, (CUR_A_NORMAL), 9, 0, 'a', "Frequency",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  1, 70, (CUR_A_REVERSE), 3, 0, 'a', "   ",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  3, 4, (CUR_A_NORMAL), 8, 0, 'a', "Category",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  3, 13, (CUR_A_REVERSE), 25, 0, 'a', "                         ",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  -1,
 };
 PrivateVarDef FORM_Field est1Fields[] = {
  0, 27, (CUR_A_BOLD | CUR_A_UNDERLINE), 26, 0, 'a', "Company Estimate Worksheet",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  1, 0, (CUR_A_NORMAL), 12, 0, 'a', "Company Name",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  1, 13, (CUR_A_REVERSE), 40, 0, 'a', "                                        ",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  1, 55, CUR_A_NORMAL, 13, 0, 'a', "Estimate Date",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  1, 69, (CUR_A_REVERSE), 10, 0, 'a', "          ",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  -1,
 };
 PrivateVarDef FORM_Field est2Fields[] = {
  0, 0, CUR_A_NORMAL, 40, 0, 'a', "----------------------------------------",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  0, 40, CUR_A_NORMAL, 40, 0, 'a', "----------------------------------------",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  -1,
 };
 PrivateVarDef FORM_Field est3Fields[] = {
  0, 0, CUR_A_NORMAL, 40, 0, 'a', "----------------------------------------",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  0, 40, CUR_A_NORMAL, 40, 0, 'a', "----------------------------------------",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  -1,
 };
 PrivateVarDef FORM_Field est4Fields[] = {
  0, 0, CUR_A_NORMAL, 40, 0, 'a', "----------------------------------------",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  0, 40, CUR_A_NORMAL, 40, 0, 'a', "----------------------------------------",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  -1,
 };
 
@@ -668,15 +669,15 @@ PrivateFnDef void estDataEntry() {
 
 PrivateVarDef FORM_Field miscFields[] = {
  0, 22, (CUR_A_BOLD | CUR_A_UNDERLINE), 36, 0, 'a', "                                    ",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  2, 0, (CUR_A_NORMAL), 13, 0, 'a', " Company Name",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  2, 14, (CUR_A_REVERSE), 40, 0, 'a', "                                        ",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  2, 57, CUR_A_NORMAL, 11, 0, 'a', "Update Date",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  2, 69, (CUR_A_REVERSE), 10, 0, 'a', "          ",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  -1,
 };
 
@@ -1062,84 +1063,84 @@ PrivateFnDef void MiscDataEntry()
 
 PrivateVarDef FORM_Field objUpdFields[] = {
  1, 4, CUR_A_NORMAL, 9, 0, 'a', " Company:",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  1, 14, (CUR_A_BOLD | CUR_A_REVERSE), 20, 1, 'a', "                    ",
 	" Enter Company Ticker Symbol                      ", NULL, NULL,
  3, 3, CUR_A_NORMAL, 10, 0, 'a', "    Update",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  3, 14, CUR_A_NORMAL, 5, 0, 'a', "Date:",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  3, 20, (CUR_A_BOLD | CUR_A_REVERSE), 2, 1, 'n', "  ",
 	" Enter Month", NULL, NULL,
  3, 22, CUR_A_NORMAL, 1, 0, 'a', "/",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  3, 23, (CUR_A_BOLD | CUR_A_REVERSE), 2, 1, 'n', "  ",
 	" Enter Day", NULL, NULL,
  3, 25, CUR_A_NORMAL, 1, 0, 'a', "/",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  3, 26, (CUR_A_BOLD | CUR_A_REVERSE), 4, 1, 'n', "    ",
 	" Enter Year", NULL, NULL,
  5, 5, CUR_A_NORMAL, 29, 0, 'a', "Execute(F2)  Quit(F9)" ,
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
 -1,
 };
 PrivateVarDef FORM_Field objEstFields[] = {
  1, 4, CUR_A_NORMAL, 9, 0, 'a', " Company:",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  1, 14, (CUR_A_BOLD | CUR_A_REVERSE), 20, 1, 'a', "                    ",
 	" Enter Company Ticker Symbol ", NULL, NULL,
  3, 3, CUR_A_NORMAL, 10, 0, 'a', "  Estimate",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  3, 14, CUR_A_NORMAL, 5, 0, 'a', "Date:",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  3, 20, (CUR_A_BOLD | CUR_A_REVERSE), 2, 1, 'n', "  ",
 	" Enter Month", NULL, NULL,
  3, 22, CUR_A_NORMAL, 1, 0, 'a', "/",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  3, 23, (CUR_A_BOLD | CUR_A_REVERSE), 2, 1, 'n', "  ",
 	" Enter Day", NULL, NULL,
  3, 25, CUR_A_NORMAL, 1, 0, 'a', "/",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  3, 26, (CUR_A_BOLD | CUR_A_REVERSE), 4, 1, 'n', "    ",
 	" Enter Year", NULL, NULL,
  5, 6, CUR_A_NORMAL, 7, 0, 'a', "Source:",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  5, 14, (CUR_A_BOLD | CUR_A_REVERSE), 20, 1, 'm', "                    ",
         " Use Arrow Keys to Select Source Type, or F1 For Menu", NULL, NULL, 
  7, 7, CUR_A_NORMAL, 29, 0, 'a', "Execute(F2)  Quit(F9)" ,
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
 -1,
 };
 PrivateVarDef MENU_Choice sourceChoices[] = {
  "INT",	   "Use internal name",	'i', FORM_menuToForm, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 PrivateVarDef FORM_Field fund2Fields[] = {
  1, 6, CUR_A_NORMAL, 8, 0, 'a', "Company:",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  1, 15, (CUR_A_BOLD | CUR_A_REVERSE), 20, 1, 'a', "                    ",
 	" Enter Company Ticker Symbol ", NULL, NULL,
  3, 4, CUR_A_NORMAL, 10, 0, 'a', "Frequency:",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  3, 15, (CUR_A_BOLD | CUR_A_REVERSE), 3, 1, 'm', "   ",
         " Use Arrow Keys to Select Frequency Type, or F1 For Menu", NULL, NULL, 
  5, 5, CUR_A_NORMAL, 9, 0, 'a', "Category:",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  5, 15, (CUR_A_BOLD | CUR_A_REVERSE), 25, 1, 'm', "                         ",
         " Use Arrow Keys to Select Source Type, or F1 For Menu", NULL, NULL, 
  7, 7, CUR_A_NORMAL, 29, 0, 'a', "Execute(F2)  Quit(F9)" ,
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
 -1,
 };
 PrivateVarDef MENU_Choice freqChoices[] = {
  " A",	   " Annual",	'a', FORM_menuToForm, ON, 
  " Q",	   " Quarterly", 'q', FORM_menuToForm, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 PrivateVarDef MENU_Choice categoryChoices[] = {
  "BalanceSheet",   " Balance Sheet", 'b', FORM_menuToForm, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 PrivateFnDef int validateAccount()

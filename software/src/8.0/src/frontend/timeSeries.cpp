@@ -4,6 +4,8 @@
 
 #include "Vk.h"
 
+#include "timeSeries.h"
+
 #include "stdcurses.h"
 #include "misc.h"
 #include "edit.h"
@@ -83,27 +85,27 @@ PrivateVarDef MENU *itemsActionMenu, *AppActionMenu;
 
 PrivateVarDef FORM_Field formFields[] = {
  1, 31, (CUR_A_BOLD | CUR_A_UNDERLINE), 18, 0, 'a', "TIME SERIES REPORT", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  4, 11, CUR_A_NORMAL, 5, 0, 'a', "Item:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  4, 17, (CUR_A_DIM | CUR_A_REVERSE), 16, 1, 'a', 
  "                ", " Use Arrow Keys To Select Item, or F1 For Menu", NULL, NULL, 
  4, 36, CUR_A_NORMAL, 8, 0, 'a', "Heading:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  4, 45, (CUR_A_DIM | CUR_A_REVERSE), 16, 1, 'a', "                ", 
         " Enter Column(Row) Label For Item", NULL, NULL, 
  6, 0, CUR_A_NORMAL, 40, 0, 'a', "----------------------------------------", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  6, 40, CUR_A_NORMAL, 40, 0, 'a', "----------------------------------------", 
-        NULL, NULL, NULL,
+        static_cast<char const*>(NULL), NULL, NULL,
  7, 27, CUR_A_BOLD, 25, 0, 'a', "Current Report Definition",  
-        NULL,  NULL, NULL, 
+        static_cast<char const*>(NULL),  NULL, NULL, 
  8, 5, CUR_A_NORMAL, 3, 0, 'a', "Row", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  8, 12, CUR_A_NORMAL, 4, 0, 'a', "Item", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  8, 29, CUR_A_NORMAL, 7, 0, 'a', "Heading", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  -1, 
 };
 
@@ -131,28 +133,28 @@ PrivateVarDef MENU_Choice actionChoices[] = {
 #if 0
  " File "      , " Save/Retrieve Report Format "       , 'f', NULL	   ,ON,
 #endif
- NULL,
+ static_cast<char const*>(NULL),
 };
 
 PrivateVarDef MENU_Choice reportChoices[] = {
  " Parameters ",   " Change Report Parameters",	'p', getOuterParameters, ON, 
  " Items ",    " Change Report Items to Display", 'i', timeSeriesItems, ON, 
  " Options ",    " Change Report Options", 'o', outerReportOptions, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 PrivateVarDef int	firstTime = TRUE, gotInitialInput = FALSE, didExec = FALSE;
 PublicVarDef  int	inTS = FALSE;
 PrivateFnDef void	exec();
 
-PublicFnDef int timeSeries() {
+PublicFnDef void timeSeries() {
     MENU *menu;
     int i, longest, j;
 
     if( inTS )
     {
     	ERR_displayPause("Time Series already running");
-    	return(0);
+    	return;
     }
     inTS = TRUE;
         
@@ -202,7 +204,7 @@ PublicFnDef int timeSeries() {
 	    PAGE_deletePage(ReportPage, i);
 	    PAGE_deletePage(ApplicPage, i);
 	    inTS = FALSE;
-	    return(FALSE);
+	    return;
 	}
 	else
 	    KEY_putc('i');
@@ -222,7 +224,7 @@ PublicFnDef int timeSeries() {
     PAGE_deletePage(ApplicPage, i);
            
     inTS = FALSE;
-    return (FALSE);
+    return;
 }
 
 PrivateVarDef int	inItemsPage = FALSE;
@@ -648,21 +650,21 @@ PrivateFnDef void execReplace () {
 
 PrivateVarDef FORM_Field form1Fields[] = {
  1, 4, CUR_A_NORMAL, 6, 0, 'a', "Title:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  1, 11, (CUR_A_DIM | CUR_A_REVERSE), 43, (FORM_InputFlag|FORM_ScrollFlag), 'a', 
 "                                        ", " Enter Report Title", NULL, NULL, 
  2, 11, (CUR_A_DIM | CUR_A_REVERSE), 43, (FORM_InputFlag|FORM_ScrollFlag), 'a', 
 "                                        ", " Enter Report Title", NULL, NULL, 
  4, 1, CUR_A_NORMAL, 9, 0, 'a', "Analysis:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  4, 11, (CUR_A_DIM | CUR_A_REVERSE), 12, 1, 'm', "", 
         " Use Arrow Keys To Analysis Type, or F1 For Menu", NULL, NULL, 
  4, 25, CUR_A_NORMAL, 12, 0, 'a', "Relative To:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  4, 38, (CUR_A_DIM | CUR_A_REVERSE), 16, 1, 'a', "", 
         " Enter Item For Analysis, or Press F1 For Menu", NULL, NULL, 
  6, 3, CUR_A_NORMAL, 7, 0, 'a', "Format:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  6, 11, (CUR_A_DIM | CUR_A_REVERSE), 10, 1, 'm', "", 
         " Use Arrow Keys To Select Report Format, or F1 For Menu", NULL, NULL, 
 -1, 
@@ -672,13 +674,13 @@ PrivateVarDef MENU_Choice analysisChoices[] = {
  " Standard ",	 " Standard Analysis",          's', FORM_menuToForm, ON,
  " Percent Of ", " Percent Of Analysis",	'p', FORM_menuToForm, ON,
  " Trend ",	 " Trend Analysis",		't', FORM_menuToForm, ON,
- NULL,
+ static_cast<char const*>(NULL),
 };
 
 PrivateVarDef MENU_Choice directionChoices[] = {
  " Reverse",	" Reverse Order From Start Date",   'r', FORM_menuToForm, ON, 
  " Forward",	" Forward Order From Start Date",   'f', FORM_menuToForm, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 PrivateVarDef MENU_Choice freqChoices[] = {
@@ -693,7 +695,7 @@ PrivateVarDef MENU_Choice freqChoices[] = {
  " monthBeginnings "	, " Monthly Frequency"	, '\0', FORM_menuToForm, ON,
  " days "		, " Daily Frequency"	, '\0', FORM_menuToForm, ON,
  " businessDays "	, " Daily Frequency"	, '\0', FORM_menuToForm, ON,
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 PrivateVarDef MENU_Choice formChoices[] = {
@@ -701,7 +703,7 @@ PrivateVarDef MENU_Choice formChoices[] = {
       FORM_menuToForm, ON, 
  " Flipped ", " Print Items As Columns, Years As Rows", 'f',
       FORM_menuToForm, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 
@@ -786,13 +788,13 @@ PrivateFnDef void execOptions () {
 
 PrivateVarDef FORM_Field exprFields[] = {
  2, 1, CUR_A_NORMAL, 11, 0, 'a', "Expression:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  2, 13, (CUR_A_DIM | CUR_A_REVERSE), 40, 1, 'a',
  "                                        ", " Enter Expression", NULL, NULL, 
  3, 13, (CUR_A_DIM | CUR_A_REVERSE), 40, 1, 'a',
  "                                        ", " Enter Expression", NULL, NULL, 
  7, 5, CUR_A_NORMAL, 29, 0, 'a', "Execute(F2)  Quit(F9)" , 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
 -1, 
 };
 
@@ -863,7 +865,7 @@ PrivateVarDef MENU_Choice lineChoices[] = {
  " Single ",    " Add Single Line To Report Format ", 's', execLine, ON, 
  " Double ",    " Add Double Line To Report Format",  'd', execLine, ON, 
  " Blank ",     " Add Blank Line To Report Format",   'b', execLine, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 PrivateVarDef MENU *LineMenu;
@@ -1077,7 +1079,7 @@ PrivateVarDef MENU_Choice reportChoices[] = {
  " Print ",   " Print Hardcopy Of Report",	'p', printReport, ON, 
  " Save ",    " Save Report Format",		's', NULL, ON, 
  " Download ", " Download Report File To PC",	'd', NULL, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 #endif
 
@@ -1202,27 +1204,27 @@ PrivateFnDef void initTSSprPage() {
  *****************************************************/
 PrivateVarDef FORM_Field initFields[] = {
  1, 4, CUR_A_NORMAL, 8, 0, 'a', "Company:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  1, 13, (CUR_A_DIM | CUR_A_REVERSE), 10, 1, 'a', "", 
 	" Enter Company Ticker Symbol ", NULL, NULL, 
  3, 1, CUR_A_NORMAL, 11, 0, 'a', "Start Date:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  3, 13, (CUR_A_DIM | CUR_A_REVERSE), 9, 1, 'n', "", 
         " Enter Starting Date", NULL, NULL, 
  3, 23, CUR_A_NORMAL, 13, 0, 'a', "Observations:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  3, 37, (CUR_A_DIM | CUR_A_REVERSE), 8, 1, 'n', "5",
         " Enter Number of Observations", NULL, NULL, 
  5, 2, CUR_A_NORMAL, 10, 0, 'a', "Direction:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  5, 13, (CUR_A_DIM | CUR_A_REVERSE), 9, 1, 'm', "", 
 	" Enter Direction, or Press F1 For Menu", NULL, NULL, 
  5, 26, CUR_A_NORMAL, 10, 0, 'a', "Increment:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  5, 37, (CUR_A_DIM | CUR_A_REVERSE), 5, 1, 'n', "1",
 	" Enter Increment Value", NULL, NULL, 
  7, 2, CUR_A_NORMAL, 10, 0, 'a', "Frequency:",
-	NULL, NULL, NULL, 
+	static_cast<char const*>(NULL), NULL, NULL, 
  7, 13, (CUR_A_DIM | CUR_A_REVERSE), 19, 1, 'm', "", 
 	" Enter Frequency, or Press F1 For Menu", NULL, NULL, 
 -1, 

@@ -93,43 +93,43 @@ PrivateVarDef MENU *itemsActionMenu, *AppActionMenu;
 
 PrivateVarDef FORM_Field formFields[] = {
  1, 33, (CUR_A_BOLD | CUR_A_UNDERLINE), 13, 0, 'a', "REPORT WRITER", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  4, 11, CUR_A_NORMAL, 5, 0, 'a', "Item:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  4, 17, (CUR_A_DIM | CUR_A_REVERSE), 16, 1, 'a', 
  "                ", " Use Arrow Keys To Select Item, or F1 For Menu", NULL, NULL, 
  4, 36, CUR_A_NORMAL, 8, 0, 'a', "Heading:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  4, 45, (CUR_A_DIM | CUR_A_REVERSE), 16, 1, 'a', "                ", 
         " Enter Column(Row) Label For Item", NULL, NULL, 
  6, 10, CUR_A_NORMAL, 6, 0, 'a', "Width:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  6, 17, (CUR_A_DIM | CUR_A_REVERSE), 5, 0, 'm', "     ", 
     " Use Arrow Keys To Select Width, or F1 For Menu", NULL, NULL, 
  6, 35, CUR_A_NORMAL, 9, 0, 'a', "Decimals:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  6, 45, (CUR_A_DIM | CUR_A_REVERSE), 5, 0, 'm', "     ", 
     " Use Arrow Keys To Select Decimals Places, or F1 For Menu", NULL, NULL, 
  6, 54, CUR_A_NORMAL, 6, 0, 'a', "Total:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  6, 61, (CUR_A_DIM | CUR_A_REVERSE), 12, 1, 'm', "            ", 
     " Use Arrow Keys To Select Total Type, or F1 For Menu", NULL, NULL, 
  8, 0, CUR_A_NORMAL, 40, 0, 'a', "----------------------------------------", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  8, 40, CUR_A_NORMAL, 40, 0, 'a', "----------------------------------------", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  10, 5, CUR_A_NORMAL, 3, 0, 'a', "Col", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  10, 12, CUR_A_NORMAL, 4, 0, 'a', "Item", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  10, 29, CUR_A_NORMAL, 7, 0, 'a', "Heading", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  10, 46, CUR_A_NORMAL, 5, 0, 'a', "Width", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  10, 56, CUR_A_NORMAL, 8, 0, 'a', "Decimals", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  10, 67, CUR_A_NORMAL, 5, 0, 'a', "Total", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  -1, 
 };
 
@@ -156,24 +156,24 @@ PrivateVarDef MENU_Choice actionChoices[] = {
  " Screen Items ", " Add Screening Items to Report Format", 
 						   's', screeningItems, ON, 
  " File ", " Save/Retrieve Report Format ",	   'f', NULL, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 PrivateVarDef MENU_Choice reportChoices[] = {
  " Parameters ",   " Change Report Parameters",	'p', getOuterUniverse, ON, 
  " Items ",    " Change Report Items to Display", 'i', reportItems, ON, 
  " Options ",    " Change Report Options", 'o', outerReportOptions, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 PrivateVarDef MENU_Choice widthChoices[] = {
  " 12 ", " 12 Character Column Width ",	'1', FORM_menuToForm, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 PrivateVarDef MENU_Choice decimalChoices[] = {
  " 2 ",	" 2 Decimals Places ",	'2', FORM_menuToForm, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 PrivateVarDef MENU_Choice totalChoices[] = {
@@ -182,7 +182,7 @@ PrivateVarDef MENU_Choice totalChoices[] = {
  " Average ",   " Average Of All Companies",	'a', FORM_menuToForm, ON, 
  " Per Share ", " Per Share Total ",		'p', FORM_menuToForm, ON, 
  " Mkt Cap ",   " Market Cap. Total",		'm', FORM_menuToForm, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 PrivateVarDef int	firstTime = TRUE, gotInitialInput = FALSE, didExec = FALSE;
@@ -742,37 +742,37 @@ PrivateFnDef void execReplace () {
 
 PrivateVarDef FORM_Field form1Fields[] = {
  1, 1, CUR_A_NORMAL, 6, 0, 'a', "Title:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  1, 8, (CUR_A_DIM | CUR_A_REVERSE), 50, (FORM_InputFlag|FORM_ScrollFlag), 'a', 
 "                                        ", " Enter Report Title", NULL, NULL, 
  2, 8, (CUR_A_DIM | CUR_A_REVERSE), 50, (FORM_InputFlag|FORM_ScrollFlag), 'a', 
 "                                        ", " Enter Report Title", NULL, NULL, 
  4, 6, CUR_A_NORMAL, 8, 0, 'a', "Sort By:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  4, 15, (CUR_A_DIM | CUR_A_REVERSE), 16, 1, 'a', "                ", 
         " Use Arrow Keys To Select Item, or F1 For Menu", NULL, NULL, 
  4, 35, CUR_A_NORMAL, 6, 0, 'a', "Order:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  4, 42, (CUR_A_DIM | CUR_A_REVERSE), 12, 1, 'm', "            ", 
         " Use Arrow Keys To Select Sort Order, or F1 For Menu", NULL, NULL, 
  6, 6, CUR_A_NORMAL, 8, 0, 'a', "Group 1:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  6, 15, (CUR_A_DIM | CUR_A_REVERSE), 16, 1, 'a', "                ", 
         " Use Arrow Keys To Select Item, or F1 For Menu", NULL, NULL, 
  6, 33, CUR_A_NORMAL, 8, 0, 'a', "Group 2:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  6, 42, (CUR_A_DIM | CUR_A_REVERSE), 16, 1, 'a', "                ", 
         " Use Arrow Keys To Select Item, or F1 For Menu", NULL, NULL, 
  8, 1, CUR_A_NORMAL, 13, 0, 'a', "Group Totals:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  8, 15, (CUR_A_DIM | CUR_A_REVERSE), 5, 1, 'm', "     ", 
         " Use Arrow Keys To Select Yes/No", NULL, NULL, 
  8, 28, CUR_A_NORMAL, 13, 0, 'a', "Grand Totals:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  8, 42, (CUR_A_DIM | CUR_A_REVERSE), 5, 1, 'm', "     ", 
         " Use Arrow Keys To Select Yes/No", NULL, NULL, 
  10, 7, CUR_A_NORMAL, 7, 0, 'a', "Format:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  10, 15, (CUR_A_DIM | CUR_A_REVERSE), 10, 1, 'm', "          ", 
         " Use Arrow Keys To Select Report Format, or F1 For Menu", NULL, NULL, 
 -1, 
@@ -781,7 +781,7 @@ PrivateVarDef FORM_Field form1Fields[] = {
 PrivateVarDef MENU_Choice orderChoices[] = {
  " Ascending ",	 " Sort In Ascending Order",    'a', FORM_menuToForm, ON, 
  " Descending ", " Sort In Descending Order",   'd', FORM_menuToForm, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 PrivateVarDef MENU_Choice formChoices[] = {
@@ -789,13 +789,13 @@ PrivateVarDef MENU_Choice formChoices[] = {
       FORM_menuToForm, ON, 
  " Flipped ", " Print Companies As Columns, Items As Rows", 'f',
       FORM_menuToForm, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 PrivateVarDef MENU_Choice booleanChoices[] = {
-  " No ",   NULL, 'n', FORM_menuToForm, ON, 
-  " Yes ",  NULL, 'y', FORM_menuToForm, ON, 
- NULL, 
+  " No ",   static_cast<char const*>(NULL), 'n', FORM_menuToForm, ON, 
+  " Yes ",  static_cast<char const*>(NULL), 'y', FORM_menuToForm, ON, 
+ static_cast<char const*>(NULL), 
 };
 
 
@@ -933,13 +933,13 @@ PrivateFnDef void deleteOptions()
 
 PrivateVarDef FORM_Field exprFields[] = {
  2, 1, CUR_A_NORMAL, 11, 0, 'a', "Expression:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  2, 13, (CUR_A_DIM | CUR_A_REVERSE), 40, 1, 'a',
  "                                        ", " Enter Expression", NULL, NULL, 
  3, 13, (CUR_A_DIM | CUR_A_REVERSE), 40, 1, 'a',
  "                                        ", " Enter Expression", NULL, NULL, 
  7, 5, CUR_A_NORMAL, 29, 0, 'a', "Execute(F2)  Quit(F9)" , 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
 -1, 
 };
 
@@ -1195,7 +1195,7 @@ PrivateVarDef MENU_Choice reportChoices[] = {
  " Print ",   " Print Hardcopy Of Report",	'p', printReport, ON, 
  " Save ",    " Save Report Format",		's', NULL, ON, 
  " Download ", " Download Report To PRN File PC", 'd', downloadReport, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 #endif
 
@@ -1352,11 +1352,11 @@ PrivateFnDef void itemList () {
 
 PrivateVarDef FORM_Field getFields[] = {
  2, 8, CUR_A_NORMAL, 15, 0, 'a', "Enter Universe:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  2, 24, (CUR_A_DIM | CUR_A_REVERSE), 18, 1, 'a', "                  ", 
         " Enter Starting Universe, Press F1 For Menu", NULL, NULL, 
  7, 5, CUR_A_NORMAL, 29, 0, 'a', "Execute(F2)  Quit(F9)" , 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
 -1, 
 };
 

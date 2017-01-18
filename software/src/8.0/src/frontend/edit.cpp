@@ -23,13 +23,13 @@
 #include "print.h"
 #include "spsheet.h"
 #include "vars.h"
+
+#include "browser.h"
 
 
 /*************************************************
  **********	Forward Declarations	**********
  *************************************************/
-
-PublicFnDef void browser ();
 
 PublicFnDef void ED_subShell ();
 
@@ -173,7 +173,7 @@ PrivateVarDef MENU_Choice fileMenu[] = {
 " Last ",  " Use Last Interface Form",			 'l', runEditorInterface, ON, 
 " Directory ",  " List Files in a given Directory",      'd', listFile, ON,
 " sHell",  " Enter an Operating System Sub-Shell (use 'exit' to return)",      'h', ED_subShell, ON,
-NULL, 
+static_cast<char const*>(NULL), 
 };
 
 PrivateVarDef MENU_Choice regionMenu[] = {
@@ -191,12 +191,12 @@ PrivateVarDef MENU_Choice regionMenu[] = {
 " Lotus ",  " Download a PRN file to the PC from the Region buffer",
 	'l', downloadRegion, ON, 
 #endif
-NULL, 
+static_cast<char const*>(NULL), 
 };
 
 PrivateVarDef MENU_Choice applicMenu[] = {
 " Browser ", " Browse Through Objects In System",	    'b', browser, ON,
-NULL, 
+static_cast<char const*>(NULL), 
 };
 
 PrivateVarDef MENU_Choice windowMenu[] = {
@@ -204,7 +204,7 @@ PrivateVarDef MENU_Choice windowMenu[] = {
 " One ", " Enlarge current window to fill entire screen",   'o', oneWindow, ON, 
 " Two ", " Split the screen between Editor and Output",	    't', twoWindows, ON, 
 " Erase ", " Erase buffer associated with current window",  'e', eraseWindow, ON, 
-NULL, 
+static_cast<char const*>(NULL), 
 };
 
 
@@ -234,11 +234,11 @@ PrivateVarDef int	doInterfaceClear = FALSE;
 
 PrivateVarDef FORM_Field interfaceFields[] = {
  1, 1, CUR_A_NORMAL, 7, 0, 'a', "Source:",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  1, 14, CUR_A_REVERSE, 12, 1, 'S', "            ",
         " Use Arrow Keys to Select Source Type, or F1 For Menu", NULL, NULL, 
  1, 27, CUR_A_REVERSE, 48, 1, 'X', "                                                ",
- 	NULL, NULL, NULL,
+ 	static_cast<char const*>(NULL), NULL, NULL,
  1, 27, CUR_A_REVERSE, 48, (FORM_ScrollFlag), 'A', "                                                ",
  	" Enter Source File Name", NULL, NULL,
  1, 27, CUR_A_REVERSE, 48, 0, 'M', "                                                ",
@@ -252,11 +252,11 @@ PrivateVarDef FORM_Field interfaceFields[] = {
  1, 27, CUR_A_REVERSE, 48, (FORM_ScrollFlag), 'A', "                                                ",
         " Enter Source Paste Buffer Name, or F1 For Menu of existing names", NULL, NULL, 
  3, 1, CUR_A_NORMAL, 12, 0, 'a', "Destination:",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  3, 14, CUR_A_REVERSE, 12, 1, 'S', "            ",
         " Use Arrow Keys to Select Destination Type, or F1 For Menu", NULL, NULL, 
  3, 27, CUR_A_REVERSE, 48, 1, 'X', "                                                ",
- 	NULL, NULL, NULL,
+ 	static_cast<char const*>(NULL), NULL, NULL,
  3, 27, CUR_A_REVERSE, 48, (FORM_ScrollFlag), 'A', "                                                ",
  	" Enter Destination File Name", NULL, NULL,
  3, 27, CUR_A_REVERSE, 48, 0, 'M', "                                                ",
@@ -270,14 +270,14 @@ PrivateVarDef FORM_Field interfaceFields[] = {
  3, 27, CUR_A_REVERSE, 48, (FORM_ScrollFlag), 'A', "                                                ",
         " Enter Destination Paste Buffer Name, or F1 For Menu of existing names", NULL, NULL, 
  5, 1, CUR_A_NORMAL, 7, 0, 'a', "Filter:",
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
  5, 14, CUR_A_REVERSE, 12, 1, 'm', "            ",
         " Use Arrow Keys to Select Filter Type, or F1 For Menu", NULL, NULL, 
  5, 27, CUR_A_REVERSE, 48, (FORM_ScrollFlag|FORM_InputFlag), 'a', "                                                ",
         " Enter Filter Options", NULL, NULL, 
 #if 0
  7, 7, CUR_A_NORMAL, 29, 0, 'a', "Execute(F2)  Quit(F9)" ,
-	NULL, NULL, NULL,
+	static_cast<char const*>(NULL), NULL, NULL,
 #endif
 -1,
 };
@@ -290,7 +290,7 @@ PrivateVarDef MENU_Choice filterChoices[] = {
 "none        ", " Use no intermediate filter for transfer", 'n', FORM_menuToForm, ON,
 "Formatter   ", " Use the VISION report formatter on Source before sending to Destination", 'f', FORM_menuToForm, ON,
 "User Defined", " Use the Command in the Filter Options Field", 'u', FORM_menuToForm, ON,
-NULL,
+static_cast<char const*>(NULL),
 };
 
 PrivateVarDef MENU_Choice srcChoices[] = {
@@ -300,7 +300,7 @@ PrivateVarDef MENU_Choice srcChoices[] = {
 "Printer     ", " Should never get this message",   'p', FORM_menuToForm, OFF, 
 "PC          ", " Read from a text file on the PC", 'c', FORM_menuToForm, ON, 
 "Paste Buffer", " Read from an Apollo Paste Buffer",'\0', FORM_menuToForm, OFF, 
-NULL, 
+static_cast<char const*>(NULL), 
 };
 
 PrivateVarDef MENU_Choice dstChoices[] = {
@@ -310,7 +310,7 @@ PrivateVarDef MENU_Choice dstChoices[] = {
 "Printer     ", " Write to a printer",		   'p', FORM_menuToForm, ON, 
 "PC          ", " Write to a text file on the PC", 'c', FORM_menuToForm, ON, 
 "Paste Buffer", " Write to an Apollo Paste Buffer",'\0', FORM_menuToForm, OFF, 
-NULL, 
+static_cast<char const*>(NULL), 
 };
 
 #define BUFFERedit	0
@@ -325,7 +325,7 @@ PrivateVarDef MENU_Choice intBufferChoices[] = {
 "Temporary      ", " Use temporary (Region) buffer",	't', FORM_menuToForm, ON,
 "Current Report ", " Use Current Report/Profile/Statement", 'c', FORM_menuToForm, ON,
 "Last Browse    ", " Use Last Output from Browse Buffer", 'l', FORM_menuToForm, ON,
-NULL,
+static_cast<char const*>(NULL),
 };
 
 #define REGIONlastoutput	0
@@ -334,7 +334,7 @@ NULL,
 PrivateVarDef MENU_Choice intRegionChoices[] = {
 "Last Output ", " Use last output generated from executing the edit buffer",	'l', FORM_menuToForm, ON,
 "Marked      ", " Use the region between the current region markers (actually Region buffer)",	'm', FORM_menuToForm, ON,
-NULL,
+static_cast<char const*>(NULL),
 };
 
 #define PRINTERsystem	0
@@ -346,7 +346,7 @@ PrivateVarDef MENU_Choice intPrinterChoices[] = {
 "System      ", " Use the system line printer",	's', FORM_menuToForm, ON,
 "Laser       ", " Use the laser printer",	'l', FORM_menuToForm, ON,
 "PC          ", " Use the printer attached to the PC",	'p', FORM_menuToForm, ON,
-NULL,
+static_cast<char const*>(NULL),
 };
 #endif
 
@@ -360,7 +360,7 @@ PrivateVarDef MENU_Choice fileReportMenu[] = {
 " Last ",  " Use Last Interface Form",			 'l', runReportInterface, ON, 
 " Directory ",  " List Files in a given Directory",      'd', listReport, ON,
 " sHell",  " Enter an Operating System Sub-Shell (use 'exit' to return)",      'h', ED_subShell, ON,
-NULL, 
+static_cast<char const*>(NULL), 
 };
 
 /****************************************

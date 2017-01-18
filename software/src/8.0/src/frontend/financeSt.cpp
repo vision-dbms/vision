@@ -10,6 +10,7 @@
 #include "rsInterface.h"
 
 #include "fsheet.h"
+#include "financeSt.h"
 
 /****** defines ******/
 #include "financeSt.d"
@@ -20,27 +21,27 @@ PrivateVarDef MENU *menu1, *menu2, *menu3;
 
 PrivateVarDef FORM_Field form1Fields[] = {
  1, 1, CUR_A_NORMAL, 11, 0, 'a', "   Company:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  1, 13, (CUR_A_DIM | CUR_A_REVERSE), 20, 1, 'a', "                    ", 
         " Enter Company Ticker Symbol", NULL, NULL, 
  3, 1, CUR_A_NORMAL, 11, 0, 'a', "      Type:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  3, 13, (CUR_A_DIM | CUR_A_REVERSE), 20, 1, 'm', "                    ", 
         " Use Arrow Keys To Select Report Type, or F1 For Menu", NULL, NULL, 
  5, 1, CUR_A_NORMAL, 11, 0, 'a', "      Freq:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  5, 13, (CUR_A_DIM | CUR_A_REVERSE), 20, 1, 'm', "                    ", 
         " Use Arrow Keys To Select Frequency, or F1 For Menu", NULL, NULL, 
  7, 1, CUR_A_NORMAL, 11, 0, 'a', "Start Year:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  7, 13, (CUR_A_DIM | CUR_A_REVERSE), 20, 1, 'n', "87     ", 
         " Enter Starting Date of Report", NULL, NULL, 
  9, 1, CUR_A_NORMAL, 11, 0, 'a', "    Number:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  9, 13, (CUR_A_DIM | CUR_A_REVERSE), 20, 1, 'n', "5      ", 
         " Enter The Number of Periods To Display", NULL, NULL, 
  11, 1, CUR_A_NORMAL, 11, 0, 'a', " Direction:", 
-        NULL, NULL, NULL, 
+        static_cast<char const*>(NULL), NULL, NULL, 
  11, 13, (CUR_A_DIM | CUR_A_REVERSE), 20, 1, 'm', "                    ", 
         " Use Arrow Keys To Select Direction From The Starting Date",
         NULL, NULL,
@@ -57,7 +58,7 @@ PrivateVarDef MENU_Choice typeChoices[] = {
  " Consolidated",   " Consolidated Analysis",	'c', FORM_menuToForm, ON, 
  " Share of",	    " Share of Analysis",	's', FORM_menuToForm, ON, 
  " Peer group",	    " Peer Group Analysis",	'p', FORM_menuToForm, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 PrivateVarDef MENU_Choice reportChoices[] = {
@@ -74,19 +75,19 @@ PrivateVarDef MENU_Choice reportChoices[] = {
                                            '3', FORM_menuToForm, ON, 
  " Incm Stmt (Trn)",	" Income Statement (Trend Analysis)",
                                            '4', FORM_menuToForm, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 PrivateVarDef MENU_Choice frequencyChoices[] = {
  " Annual",	" Annual",	'a', FORM_menuToForm, ON, 
  " Quarterly",	" Quarterly",	'q', FORM_menuToForm, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 PrivateVarDef MENU_Choice directionChoices[] = {
  " Reverse",	" Reverse Order From Start Date",   'r', FORM_menuToForm, ON, 
  " Forward",	" Forward Order From Start Date",   'f', FORM_menuToForm, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 
@@ -95,13 +96,13 @@ PrivateVarDef MENU_Choice formatChoices[] = {
  " Standard",	    " Standard Format",	    's', FORM_menuToForm, ON, 
  " Percentage",    " Percentage Analysis Format",  'p', FORM_menuToForm, ON, 
  " Trend",   " Trend Analysis Format", 't', FORM_menuToForm, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 PrivateVarDef MENU_Choice formChoices[] = {
  " Long",	" Long Report Form", 	    'l', FORM_menuToForm, ON, 
  " Short",	" Short Report Form",	    's', FORM_menuToForm, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 PrivateVarDef MENU_Choice yearChoices[] = {
@@ -115,7 +116,7 @@ PrivateVarDef MENU_Choice yearChoices[] = {
  " 1978", "Starting Year", '8', FORM_menuToForm, ON, 
  " 1977", "Starting Year", '7', FORM_menuToForm, ON, 
  " 1976", "Starting Year", '6', FORM_menuToForm, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 PrivateVarDef MENU_Choice numberChoices[] = {
@@ -129,7 +130,7 @@ PrivateVarDef MENU_Choice numberChoices[] = {
   " 2", "2 Years", '2', FORM_menuToForm, ON, 
   " 3", "3 Years", '3', FORM_menuToForm, ON, 
   " 4", "4 Years", '4', FORM_menuToForm, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 *****/
 
@@ -190,8 +191,7 @@ PrivateVarDef CHOICE_MenuChoice *dependencyList[] = {
 PrivateVarDef int	firstTime = TRUE;
 PublicVarDef int	inFS = FALSE;
 
-PublicFnDef PAGE_Action financeSt()
-{
+PublicFnDef void financeSt() {
     PAGE *page;
     CUR_WINDOW *form1Win, *form2Win, *form3Win, *form4Win, *tmpWin;
     int i, longest, j;
@@ -199,7 +199,7 @@ PublicFnDef PAGE_Action financeSt()
     if( inFS )
     {
     	ERR_displayPause("Finance Statement already running");
-    	return(PAGE_Input);
+    	return;
     }
     inFS = TRUE;
         
@@ -264,6 +264,6 @@ PublicFnDef PAGE_Action financeSt()
     PAGE_deletePage (page, i)
 
     inFS = FALSE;
-    return (PAGE_Input);
+    return;
 
 }

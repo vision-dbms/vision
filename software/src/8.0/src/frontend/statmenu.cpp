@@ -4,34 +4,36 @@
 
 #include "Vk.h"
 
+#include "statmenu.h"
+
 #include "stdcurses.h"
 #include "page.h"
 #include "menu.h"
 #include "form.h"
 #include "choices.h"
 #include "rsInterface.h"
-          
-PublicFnDecl void statview();
 
+#include "statview.h"
+          
 PrivateVarDef MENU_Choice menuChoices[] = {
  " View ",	    " View analysis; enter new assumptions",	'v', statview, ON, 
  " Report ",	    " Print report in hard copy",		'r', NULL, ON, 
  " Submit ", " Send private esitmate data to shared data base", 's', NULL, ON, 
  " Maintain rules ", " View, edit or create calculation rules", 'm', NULL, ON, 
- NULL, 
+ static_cast<char const*>(NULL), 
 };
 
 PrivateVarDef FORM_Field formFields[] = {
  1, 20, CUR_A_NORMAL, 40, 0, 'a', "                                        ", 
-	NULL, NULL, NULL, 
- 3, 35, (CUR_A_UNDERLINE | CUR_A_BOLD), 10, 0, 'a', "Stat Sheet", NULL, NULL, NULL, 
- 4, 35, (CUR_A_UNDERLINE | CUR_A_BOLD), 9, 0, 'a', "Main Menu",	NULL, NULL, NULL, 
+	static_cast<char const*>(NULL), NULL, NULL, 
+ 3, 35, (CUR_A_UNDERLINE | CUR_A_BOLD), 10, 0, 'a', "Stat Sheet", static_cast<char const*>(NULL), NULL, NULL, 
+ 4, 35, (CUR_A_UNDERLINE | CUR_A_BOLD), 9, 0, 'a', "Main Menu",	static_cast<char const*>(NULL), NULL, NULL, 
  -1, 
 };
 
 PublicVarDef int	inSM = FALSE;
 
-PublicFnDef int statmenu()
+PublicFnDef void statmenu()
 {
     MENU *menu;
     FORM *form;
@@ -43,7 +45,7 @@ PublicFnDef int statmenu()
     if( inSM )
     {
     	ERR_displayPause("Models already running");
-    	return(0);
+    	return;
     }
     inSM = TRUE;
     
@@ -86,6 +88,6 @@ PublicFnDef int statmenu()
     PAGE_deletePage(page, i);
 
     inSM = FALSE;    
-    return(0);
+    return;
 
 }
