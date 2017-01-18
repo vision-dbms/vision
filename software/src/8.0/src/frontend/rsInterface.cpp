@@ -732,7 +732,7 @@ PublicFnDef void RS_DumpWindowStruct (CUR_WINDOW *win)
  */
 
 #if defined(sun)
-PrivateFnDef void parentSignalHandler (int sig, int code, struct sigcontext *scp)
+PrivateFnDef void parentSignalHandler (int sig, int code = 0, struct sigcontext *scp = 0)
 #else
 PrivateFnDef void parentSignalHandler (int sig)
 #endif
@@ -958,7 +958,7 @@ PrivateFnDef void RS_callSignalHandler (
     if( sig <= 0 )
     	handleTermination(sig);
     else
-	parentSignalHandler (sig, 0, NULL);
+	parentSignalHandler (sig);
 }
 
 /*****  Internal routine to set up handlers for the trapable signals.
