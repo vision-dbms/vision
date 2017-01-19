@@ -570,6 +570,7 @@ PrivateFnDef void execute_user () {
     if (RS_TabSpacing <= 0)
 	RS_TabSpacing = 8;
 
+#if 0
     if( (CUR_COLS < 80) || (CUR_LINES < 24) )
     {
     	CUR_werase(CUR_stdscr);
@@ -589,7 +590,8 @@ PrivateFnDef void execute_user () {
     	WindowTooSmall = TRUE;
     	return;
     }
-    else if( (CUR_COLS > CUR_maxScrCols) || (CUR_LINES > CUR_maxScrLines) )
+#endif
+    if( (CUR_COLS > CUR_maxScrCols) || (CUR_LINES > CUR_maxScrLines) )
     {
     	CUR_werase(CUR_stdscr);
     	CUR_wmove(CUR_stdscr,0,0);
@@ -608,8 +610,7 @@ PrivateFnDef void execute_user () {
     	WindowTooSmall = TRUE;
     	return;
     }
-    else
-    	WindowTooSmall = FALSE;
+    WindowTooSmall = FALSE;
 
     mainmenu ();
 }
