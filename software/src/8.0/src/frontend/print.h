@@ -4,6 +4,8 @@
 /***** Shared Definitions *****/
 #include "print.d"
 
+#include "menu.h"
+
 /***** Variable Declarations *****/
 PublicVarDecl int PRINT_Lines;
 PublicVarDecl PRINTER_Command PRINT_Command;

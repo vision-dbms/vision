@@ -214,7 +214,7 @@ static_cast<char const*>(NULL),
 
 PrivateVarDef PAGE	*interfacePage = NULL, *reportPage = NULL;
 PrivateVarDef FORM	*interfaceForm = NULL;
-PrivateVarDef MENU	*pbufSMenu = NULL, *pbufDMenu = NULL;
+PrivateVarDef MENU::Reference pbufSMenu, pbufDMenu;
 PrivateVarDef CUR_WINDOW *intWin1, *intWin2;
 PrivateVarDef int	doInterfaceClear = FALSE;
 
@@ -234,50 +234,50 @@ PrivateVarDef int	doInterfaceClear = FALSE;
 
 PrivateVarDef FORM_Field interfaceFields[] = {
  1, 1, CUR_A_NORMAL, 7, 0, 'a', "Source:",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  1, 14, CUR_A_REVERSE, 12, 1, 'S', "            ",
-        " Use Arrow Keys to Select Source Type, or F1 For Menu", NULL, NULL, 
+        " Use Arrow Keys to Select Source Type, or F1 For Menu", MENU::Reference(), NULL, 
  1, 27, CUR_A_REVERSE, 48, 1, 'X', "                                                ",
- 	static_cast<char const*>(NULL), NULL, NULL,
+ 	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  1, 27, CUR_A_REVERSE, 48, (FORM_ScrollFlag), 'A', "                                                ",
- 	" Enter Source File Name", NULL, NULL,
+ 	" Enter Source File Name", MENU::Reference(), NULL,
  1, 27, CUR_A_REVERSE, 48, 0, 'M', "                                                ",
-        " Use Arrow Keys to Select Source Buffer, or F1 For Menu", NULL, NULL, 
+        " Use Arrow Keys to Select Source Buffer, or F1 For Menu", MENU::Reference(), NULL, 
  1, 27, CUR_A_REVERSE, 48, 0, 'M', "                                                ",
-        " Use Arrow Keys to Select Source Region, or F1 For Menu", NULL, NULL, 
+        " Use Arrow Keys to Select Source Region, or F1 For Menu", MENU::Reference(), NULL, 
  1, 27, CUR_A_REVERSE, 48, 0, 'M', "                                                ",
-        " Use Arrow Keys to Select Source Printer, or F1 For Menu", NULL, NULL, 
+        " Use Arrow Keys to Select Source Printer, or F1 For Menu", MENU::Reference(), NULL, 
  1, 27, CUR_A_REVERSE, 48, (FORM_ScrollFlag), 'A', "                                                ",
- 	" Enter PC Source File Name", NULL, NULL,
+ 	" Enter PC Source File Name", MENU::Reference(), NULL,
  1, 27, CUR_A_REVERSE, 48, (FORM_ScrollFlag), 'A', "                                                ",
-        " Enter Source Paste Buffer Name, or F1 For Menu of existing names", NULL, NULL, 
+        " Enter Source Paste Buffer Name, or F1 For Menu of existing names", MENU::Reference(), NULL, 
  3, 1, CUR_A_NORMAL, 12, 0, 'a', "Destination:",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  3, 14, CUR_A_REVERSE, 12, 1, 'S', "            ",
-        " Use Arrow Keys to Select Destination Type, or F1 For Menu", NULL, NULL, 
+        " Use Arrow Keys to Select Destination Type, or F1 For Menu", MENU::Reference(), NULL, 
  3, 27, CUR_A_REVERSE, 48, 1, 'X', "                                                ",
- 	static_cast<char const*>(NULL), NULL, NULL,
+ 	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  3, 27, CUR_A_REVERSE, 48, (FORM_ScrollFlag), 'A', "                                                ",
- 	" Enter Destination File Name", NULL, NULL,
+ 	" Enter Destination File Name", MENU::Reference(), NULL,
  3, 27, CUR_A_REVERSE, 48, 0, 'M', "                                                ",
-        " Use Arrow Keys to Select Destination Buffer, or F1 For Menu", NULL, NULL, 
+        " Use Arrow Keys to Select Destination Buffer, or F1 For Menu", MENU::Reference(), NULL, 
  3, 27, CUR_A_REVERSE, 48, 0, 'M', "                                                ",
-        " Use Arrow Keys to Select Destination Region, or F1 For Menu", NULL, NULL, 
+        " Use Arrow Keys to Select Destination Region, or F1 For Menu", MENU::Reference(), NULL, 
  3, 27, CUR_A_REVERSE, 48, 0, 'M', "                                                ",
-        " Use Arrow Keys to Select Destination Printer, or F1 For Menu", NULL, NULL, 
+        " Use Arrow Keys to Select Destination Printer, or F1 For Menu", MENU::Reference(), NULL, 
  3, 27, CUR_A_REVERSE, 48, (FORM_ScrollFlag), 'A', "                                                ",
- 	" Enter PC Destination File Name", NULL, NULL,
+ 	" Enter PC Destination File Name", MENU::Reference(), NULL,
  3, 27, CUR_A_REVERSE, 48, (FORM_ScrollFlag), 'A', "                                                ",
-        " Enter Destination Paste Buffer Name, or F1 For Menu of existing names", NULL, NULL, 
+        " Enter Destination Paste Buffer Name, or F1 For Menu of existing names", MENU::Reference(), NULL, 
  5, 1, CUR_A_NORMAL, 7, 0, 'a', "Filter:",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  5, 14, CUR_A_REVERSE, 12, 1, 'm', "            ",
-        " Use Arrow Keys to Select Filter Type, or F1 For Menu", NULL, NULL, 
+        " Use Arrow Keys to Select Filter Type, or F1 For Menu", MENU::Reference(), NULL, 
  5, 27, CUR_A_REVERSE, 48, (FORM_ScrollFlag|FORM_InputFlag), 'a', "                                                ",
-        " Enter Filter Options", NULL, NULL, 
+        " Enter Filter Options", MENU::Reference(), NULL, 
 #if 0
  7, 7, CUR_A_NORMAL, 29, 0, 'a', "Execute(F2)  Quit(F9)" ,
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
 #endif
 -1,
 };
@@ -406,7 +406,7 @@ PrivateVarDef int	FMWsr, FMWsc, FMWnr, FMWnc,
 			AMWsr, AMWsc, AMWnr, AMWnc,
 			WMWsr, WMWsc, WMWnr, WMWnc;
 
-PrivateVarDef MENU *FileMenu, *RegMenu, *WinMenu, *AppMenu;
+PrivateVarDef MENU::Reference FileMenu, RegMenu, WinMenu, AppMenu;
 
 PrivateVarDef int TwoWin = FALSE;
 
@@ -1175,9 +1175,7 @@ PrivateFnDef void twoWindows () {
  *************************************************/
 
 PrivateFnDef void readFilePrime () {
-	MENU *mptr;
-
-	mptr = FORM_fieldMenu(FORM_field(interfaceForm,DestType));
+	MENU *mptr = FORM_fieldMenu(FORM_field(interfaceForm,DestType));
 	MENU_currChoice(mptr) = BUFFERfield;
 	mptr = FORM_fieldMenu(FORM_field(interfaceForm,DestType+2+BUFFERfield));
 	MENU_currChoice(mptr) = BUFFERedit;
@@ -1275,9 +1273,7 @@ PrivateFnDef int getFileName(char *current_file, char const *pstr) {
 }
 
 PrivateFnDef void saveFilePrime () {
-    MENU *mptr;
-
-    mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType));
+    MENU *mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType));
     MENU_currChoice(mptr) = BUFFERfield;
     mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType+2+BUFFERfield));
     MENU_currChoice(mptr) = (CurrBuffer == Edit ? BUFFERedit : BUFFERoutput);
@@ -1322,9 +1318,7 @@ PrivateFnDef void saveFileInt () {
 }
 
 PrivateFnDef void saveReportInt () {
-    MENU *mptr;
-
-    mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType));
+    MENU *mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType));
     MENU_currChoice(mptr) = BUFFERfield;
     mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType+2+BUFFERfield));
     MENU_currChoice(mptr) = (useBrowser ? BUFFERbrowse : BUFFERreport);
@@ -1340,9 +1334,7 @@ PrivateFnDef void saveReportInt () {
 }
 
 PrivateFnDef void copyPasteBufInt () {
-    MENU *mptr;
-
-    mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType));
+    MENU *mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType));
     MENU_currChoice(mptr) = REGIONfield;
     mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType+2+REGIONfield));
     MENU_currChoice(mptr) = REGIONlastoutput;
@@ -1353,9 +1345,7 @@ PrivateFnDef void copyPasteBufInt () {
 }
 
 PrivateFnDef void copyPasteBufReport () {
-    MENU *mptr;
-
-    mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType));
+    MENU *mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType));
     MENU_currChoice(mptr) = BUFFERfield;
     mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType+2+BUFFERfield));
     MENU_currChoice(mptr) = (useBrowser ? BUFFERbrowse : BUFFERreport);
@@ -1464,9 +1454,7 @@ PrivateFnDef void PrintScreen (int c) {
 #if 0
 PrivateFnDef int appendFilePrime()
 {
-    MENU *mptr;
-
-    mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType));
+    MENU *mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType));
     MENU_currChoice(mptr) = BUFFERfield;
     mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType+2+BUFFERfield));
     MENU_currChoice(mptr) = (CurrBuffer == Edit ? BUFFERedit : BUFFERoutput);
@@ -1817,9 +1805,7 @@ PrivateFnDef int downloadRegion () {
 
 
 PrivateFnDef void saveRegionPrime () {
-    MENU *mptr;
-
-    mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType));
+    MENU *mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType));
     MENU_currChoice(mptr) = REGIONfield;
     mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType+2+REGIONfield));
     MENU_currChoice(mptr) = REGIONmarked;
@@ -1894,9 +1880,7 @@ PrivateFnDef void printRegion () {
     PAGE_deletePage(page, i);
 #endif
 
-    MENU *mptr;
-    
-    mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType));
+    MENU *mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType));
     MENU_currChoice(mptr) = REGIONfield;
     mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType+2+REGIONfield));
     MENU_currChoice(mptr) = REGIONlastoutput;
@@ -2070,9 +2054,7 @@ PrivateFnDef void printBuffer () {
     PAGE_deletePage(page, i);
 #endif
 
-    MENU *mptr;
-    
-    mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType));
+    MENU *mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType));
     MENU_currChoice(mptr) = BUFFERfield;
 
     mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType+2+BUFFERfield));
@@ -2086,9 +2068,7 @@ PrivateFnDef void printBuffer () {
 }
 
 PrivateFnDef void printReportInt () {
-    MENU *mptr;
-    
-    mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType));
+    MENU *mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType));
     MENU_currChoice(mptr) = BUFFERfield;
     mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType+2+BUFFERfield));
     MENU_currChoice(mptr) = (useBrowser ? BUFFERbrowse : BUFFERreport);
@@ -2548,10 +2528,9 @@ PrivateFnDef int session () {
 
 PublicFnDef void EDIT_reportFileMenu (PAGE *page, int doBrowse) {
     int		i, j, longest, sr, sc;
-    MENU	*menu;
     CUR_WINDOW	*menuWin;
 
-    MENU_makeMenu(menu, fileReportMenu, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+    MENU::Reference menu (new MENU (fileReportMenu, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
     MENU_title(menu) =" Interface Menu: ";
     i = MENU_choiceCount(menu) + 4;
     if( i >= CUR_LINES )
@@ -2571,7 +2550,6 @@ PublicFnDef void EDIT_reportFileMenu (PAGE *page, int doBrowse) {
     useBrowser = doBrowse;
     MENU_handler(menu,menuWin,PAGE_Input);
     useBrowser = FALSE;
-    MENU_deleteMenu(menu, i);
     CUR_delwin(menuWin);
 }
 
@@ -2621,9 +2599,7 @@ PrivateFnDef void initEditor() {
         }
 
 /**** initialize menus ****/
-    MENU_makeMenu (
-	FileMenu, fileMenu, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j
-    );
+    FileMenu.setTo (new MENU (fileMenu, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
     MENU_title(FileMenu) =" Interface Menu: ";
     i = MENU_choiceCount(FileMenu) + 4;
     if( i >= CUR_LINES )
@@ -2639,9 +2615,7 @@ PrivateFnDef void initEditor() {
 	j = CUR_COLS - 10;
     }
     FMWnr = i; FMWnc = j; FMWsr = sr; FMWsc = sc;
-    MENU_makeMenu (
-	WinMenu, windowMenu, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j
-    );
+    WinMenu.setTo (new MENU (windowMenu, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
     MENU_title(WinMenu) =" Window Menu: ";
     i = MENU_choiceCount(WinMenu) + 4;
     if( i >= CUR_LINES )
@@ -2657,9 +2631,7 @@ PrivateFnDef void initEditor() {
 	j = CUR_COLS - 10;
     }
     WMWnr = i; WMWnc = j; WMWsr = sr; WMWsc = sc;
-    MENU_makeMenu (
-	RegMenu, regionMenu, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j
-    );
+    RegMenu.setTo (new MENU (regionMenu, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
     MENU_title(RegMenu) =" Region Menu: ";
     i = MENU_choiceCount(RegMenu) + 4;
     if( i >= CUR_LINES )
@@ -2676,9 +2648,7 @@ PrivateFnDef void initEditor() {
     }
     RMWnr = i; RMWnc = j; RMWsr = sr; RMWsc = sc;
 
-    MENU_makeMenu (
-	AppMenu, applicMenu, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j
-    );
+    AppMenu.setTo (new MENU (applicMenu, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
     MENU_title(AppMenu) =" Applications Menu: ";
     i = MENU_choiceCount(AppMenu) + 4;
     if( i >= CUR_LINES )
@@ -2747,30 +2717,6 @@ PrivateFnDef void deleteEditorWindows()
     }
 }
 
-#if 0
-PrivateFnDef void cleanupEditor()
-{
-    int i;
-    BUF_deleteBuffer(Edit);
-    BUF_deleteBuffer(Region);
-    BUF_deleteBuffer(Output);
-    for( i=0 ; i<NUMRECALL ; i++ )
-	BUF_deleteBuffer(RecallBuf[i]);
-    CUR_delwin(TopWin);
-    CUR_delwin(BotWin);
-    CUR_delwin(FullWin);
-    CUR_delwin(FileMenuWin);
-    CUR_delwin(WindowMenuWin);
-    CUR_delwin(RegionMenuWin);
-    CUR_delwin(StWinOne);
-    CUR_delwin(StWinTwo);
-    MENU_deleteMenu((char *)FileMenu, i);
-    MENU_deleteMenu((char *)RegMenu, i);
-    MENU_deleteMenu((char *)WinMenu, i);
-}
-
-#endif
-
 /******************
  *** MAINEDITOR ***
  ******************/
@@ -2818,43 +2764,43 @@ PublicFnDef void EDIT_main () {
  
 PrivateFnDef void initInterface() {
 	int	i, j, longest;
-	MENU	*menu;
+	MENU::Reference menu;
 
 	FORM_makeForm(interfaceForm, interfaceFields, i);
 	
-	MENU_makeMenu(menu, srcChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+	menu.setTo (new MENU (srcChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
 	MENU_title(menu) = " Source ";
 	FORM_fieldMenu(FORM_field(interfaceForm,SourceType)) = menu;
 
-	MENU_makeMenu(menu, dstChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+	menu.setTo (new MENU (dstChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
 	MENU_title(menu) = " Destination ";
 	FORM_fieldMenu(FORM_field(interfaceForm,DestType)) = menu;
 	
-	MENU_makeMenu(menu, intBufferChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+	menu.setTo (new MENU (intBufferChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
 	MENU_title(menu) = " Buffer ";
 	FORM_fieldMenu(FORM_field(interfaceForm,SourceValue+1+BUFFERfield)) = menu;	
 
-	MENU_makeMenu(menu, intBufferChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+	menu.setTo (new MENU (intBufferChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
 	MENU_title(menu) = " Buffer ";
 	FORM_fieldMenu(FORM_field(interfaceForm,DestValue+1+BUFFERfield)) = menu;	
 
-	MENU_makeMenu(menu, intRegionChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+	menu.setTo (new MENU (intRegionChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
 	MENU_title(menu) = " Region ";
 	FORM_fieldMenu(FORM_field(interfaceForm,SourceValue+1+REGIONfield)) = menu;	
 
-	MENU_makeMenu(menu, intRegionChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+	menu.setTo (new MENU (intRegionChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
 	MENU_title(menu) = " Region ";
 	FORM_fieldMenu(FORM_field(interfaceForm,DestValue+1+REGIONfield)) = menu;	
 
-	MENU_makeMenu(menu, printerChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+	menu.setTo (new MENU (printerChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
 	MENU_title(menu) = " Printer ";
 	FORM_fieldMenu(FORM_field(interfaceForm,SourceValue+1+PRINTERfield)) = menu;	
 
-	MENU_makeMenu(menu, printerChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+	menu.setTo (new MENU (printerChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
 	MENU_title(menu) = " Printer ";
 	FORM_fieldMenu(FORM_field(interfaceForm,DestValue+1+PRINTERfield)) = menu;	
 
-	MENU_makeMenu(menu, filterChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+	menu.setTo (new MENU (filterChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
 	MENU_title(menu) = " Filter ";
 	FORM_fieldMenu(FORM_field(interfaceForm,FilterType)) = menu;	
 
@@ -2886,8 +2832,7 @@ PrivateFnDef void runEditorInterface () {
 	PAGE	*editPage;
 	int	i;
 
-	if (TwoWin)
-	{
+	if (TwoWin) {
 		PAGE_createPage(editPage, 4, NULL, NULL, NULL, PAGE_noType, i);
 		PAGE_createElement(editPage, 0, NULL, TopWin, PAGE_Init, NULL, FALSE);
 		PAGE_createElement(editPage, 1, NULL, StWinTwo, PAGE_Init, NULL, FALSE);
@@ -3261,9 +3206,7 @@ PrivateFnDef int eatTrailingSpaces(char *tmpName) {
 		return(TRUE);
 
 PrivateFnDef int illegalDestination () {
-	MENU	*menu;
-	
-	menu = FORM_fieldMenu(FORM_field(interfaceForm,DestType));
+	MENU *menu = FORM_fieldMenu(FORM_field(interfaceForm,DestType));
 	switch( MENU_currChoice(menu) )
 	{
 		case BUFFERfield:
@@ -3295,7 +3238,6 @@ PrivateFnDef int illegalDestination () {
 PrivateFnDef int	doingSPR = FALSE;
 
 PrivateFnDef int execInterfaceFile (char *fname) {
-	MENU	*menu;
 	char	*dname, tmpName[80], tmpName2[80], *filterOpts;
 	int	error, mode, filterType, realPasteBuf = FALSE;
 
@@ -3305,7 +3247,7 @@ PrivateFnDef int execInterfaceFile (char *fname) {
 		return(TRUE);
 	}
 	char *sname = fname;
-	menu = FORM_fieldMenu(FORM_field(interfaceForm,DestType));
+	MENU *menu = FORM_fieldMenu(FORM_field(interfaceForm,DestType));
 	filterType = MENU_currChoice(FORM_fieldMenu(FORM_field(interfaceForm,FilterType)));
 	filterOpts = FORM_fieldValue(FORM_field(interfaceForm,FilterOpts));
 	switch( MENU_currChoice(menu) )
@@ -3400,7 +3342,6 @@ PrivateFnDef int execInterfaceFile (char *fname) {
 }
 	
 PrivateFnDef int execInterfaceBuffer (int whichBuf) {
-	MENU		*menu;
 	char		*dname, tmpName[80], tmpName2[80];
 	int		error, mode, filterType, realPasteBuf = FALSE;
 	LINEBUFFER	*tmp;
@@ -3450,7 +3391,7 @@ PrivateFnDef int execInterfaceBuffer (int whichBuf) {
 		ERR_displayPause("Buffer is empty");
 		return(TRUE);
 	}
-	menu = FORM_fieldMenu(FORM_field(interfaceForm,DestType));
+	MENU *menu = FORM_fieldMenu(FORM_field(interfaceForm,DestType));
 	filterType = MENU_currChoice(FORM_fieldMenu(FORM_field(interfaceForm,FilterType)));
 	if( filterType != FILTERnone )
 	{
@@ -3562,7 +3503,6 @@ PrivateFnDef int execInterfaceBuffer (int whichBuf) {
 }
 			
 PrivateFnDef int execInterfaceRegion (int whichReg) {
-	MENU		*menu;
 	char		*dname, tmpName[80], tmpName2[80];
 	int		error, mode, filterType, realPasteBuf = FALSE;
 
@@ -3573,7 +3513,7 @@ PrivateFnDef int execInterfaceRegion (int whichReg) {
 		ERR_displayPause(" Last output region is empty or invalid");
 		return(TRUE);
 	}
-	menu = FORM_fieldMenu(FORM_field(interfaceForm,DestType));
+	MENU *menu = FORM_fieldMenu(FORM_field(interfaceForm,DestType));
 	filterType = MENU_currChoice(FORM_fieldMenu(FORM_field(interfaceForm,FilterType)));
 	if( filterType != FILTERnone )
 	{
@@ -3677,12 +3617,11 @@ PrivateFnDef int execInterfaceRegion (int whichReg) {
 }
 			
 PrivateFnDef int execInterfacePC (char *fname) {
-	MENU	*menu;
 	char	*dname, *filterOpts;
 	char	tmpName[80], tmpName2[80];
 	int	error, mode, filterType, realPasteBuf = FALSE;
 
-	menu = FORM_fieldMenu(FORM_field(interfaceForm,DestType));
+	MENU *menu = FORM_fieldMenu(FORM_field(interfaceForm,DestType));
 	filterType = MENU_currChoice(FORM_fieldMenu(FORM_field(interfaceForm,FilterType)));
 	filterOpts = FORM_fieldValue(FORM_field(interfaceForm,FilterOpts));
 	switch( MENU_currChoice(menu) )
@@ -3760,7 +3699,6 @@ PrivateFnDef int execInterfacePC (char *fname) {
 }
 	
 PrivateFnDef int execInterfacePasteBuf (char const *fname) {
-	MENU	*menu;
 	char	*dname, tmpName[80], tmpName2[80];
 	int	error, mode, filterType, realPasteBuf = FALSE;
 
@@ -3776,7 +3714,7 @@ PrivateFnDef int execInterfacePasteBuf (char const *fname) {
 		ERR_displayPause("Unable to access Source Paste Buffer");
 		return(TRUE);
 	}
-	menu = FORM_fieldMenu(FORM_field(interfaceForm,DestType));
+	MENU *menu = FORM_fieldMenu(FORM_field(interfaceForm,DestType));
 	filterType = MENU_currChoice(FORM_fieldMenu(FORM_field(interfaceForm,FilterType)));
 	if( filterType != FILTERnone )
 	{
@@ -3848,12 +3786,11 @@ PrivateFnDef int execInterfacePasteBuf (char const *fname) {
 }
 
 PrivateFnDef void execInterface () {
-	MENU	*menu;
 	char	*fname;
 	
 	if( illegalDestination() )
 		return;
-	menu = FORM_fieldMenu(FORM_field(interfaceForm,SourceType));
+	MENU *menu = FORM_fieldMenu(FORM_field(interfaceForm,SourceType));
 	switch( MENU_currChoice(menu) )
 	{
 		case FILEfield:

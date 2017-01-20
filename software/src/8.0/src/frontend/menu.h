@@ -2,11 +2,48 @@
 #ifndef MENU_H
 #define MENU_H
 
-#include "stdcurses.h"
+/*****  Components  ****/
+#include "VReferenceable.h"
+#include "V_VString.h"
+
+/*****  Declarations  *****/
+#include "menu.d"
 #include "page.d"
 
-/***** Shared Definitions *****/
-#include "menu.d"
+/***** Classes and Structures *****/
+struct MENU_Choice {
+    VString label;
+    VString help;
+    char letter;	 
+    void (*handler)();
+    char active;
+};
+
+struct MENU : public VReferenceable {
+    DECLARE_CONCRETE_RTTLITE (MENU,VReferenceable);
+    
+//  Construction
+public:
+    MENU (MENU_Choice *choices, int norm, int high, int &longest, int &i, int &j);
+
+//  Destruction
+private:
+    ~MENU ();
+
+//  Access
+public:
+
+//  State
+public:
+    char const *title;
+    int choiceCount;	   
+    int currChoice;	  
+    int normalAttr;		  
+    int hilightAttr;
+    int status;
+    int flags;
+    MENU_Choice **choice;
+};
 
 /***** Function Declarations *****/
 

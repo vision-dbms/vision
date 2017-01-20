@@ -20,7 +20,7 @@
 #endif
 
 /**** Menu Definitions ****/
-#include "menu.d"
+#include "menu.h"
 
 
 /*************************************************
@@ -57,6 +57,36 @@ PrivateFnDef void scanChoice (
     MENU *			menu,
     char *			line
 );
+
+
+/*****************************************
+ **********	class MENU	**********
+ *****************************************/
+
+MENU::MENU (MENU_Choice *choices, int norm, int high, int &longest, int &i, int &j) {
+    MENU_title(this) = (char *)NULL;
+    MENU_currChoice(this) = 0;
+    MENU_normal(this) = norm;
+    MENU_hilight(this) = high;
+    i = 0;
+    while (choices[i].label.isntEmpty ()) i++;
+    MENU_choiceArray(this) = (MENU_Choice **)calloc(i, sizeof(MENU_Choice *));
+    longest = i = 0;
+    while (choices[i].label.isntEmpty ()) {
+        MENU_choice(this, i) = (MENU_Choice *)&choices[i];
+	if ((j = strlen(choices[i].label)) > longest)
+	    longest = j;
+	i++;
+    }
+    MENU_status(this) = MENU_Normal;
+    MENU_flags(this) = MENU_StaticMenu;
+    MENU_choiceCount(this) = i;
+}
+
+MENU::~MENU () {
+    if (MENU_choiceArray(this))
+	::free(MENU_choiceArray(this));
+}
 
 
 #if 0

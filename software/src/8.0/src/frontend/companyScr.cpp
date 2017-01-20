@@ -74,25 +74,25 @@ PrivateVarDef CUR_WINDOW *Win1, *Win2, *Win3;
 
 PrivateVarDef FORM_Field form1Fields[] = {
  1, 32, (CUR_A_BOLD | CUR_A_UNDERLINE), 15, 0, 'a', "COMPANY SCREENS", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  4, 11, CUR_A_NORMAL, 5, 0, 'a', "Item:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  4, 17, (CUR_A_DIM | CUR_A_REVERSE), 16, (FORM_InputFlag|FORM_ScrollFlag), 'a', "                ", 
-	" Enter Item, or Press F1 For Menu ", NULL, NULL, 
+	" Enter Item, or Press F1 For Menu ", MENU::Reference(), NULL, 
  6, 7, CUR_A_NORMAL, 9, 0, 'a', "Operator:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  6, 17, (CUR_A_DIM | CUR_A_REVERSE), 4, 1, 'm', "    ", 
-        " Enter Operator, or Press F1 for Menu", NULL, NULL, 
- 8, 7, CUR_A_NORMAL, 9, 0, 'a', "   Value:", static_cast<char const*>(NULL), NULL, NULL, 
+        " Enter Operator, or Press F1 for Menu", MENU::Reference(), NULL, 
+ 8, 7, CUR_A_NORMAL, 9, 0, 'a', "   Value:", static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  8, 17, (CUR_A_DIM | CUR_A_REVERSE), 20, (FORM_InputFlag|FORM_ScrollFlag), 'a', "                    ", 
-        " Enter Comparison Value ", NULL, NULL, 
+        " Enter Comparison Value ", MENU::Reference(), NULL, 
  9, 0, CUR_A_NORMAL, 40, 0, 'a', "----------------------------------------", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  9, 40, CUR_A_NORMAL, 40, 0, 'a', "----------------------------------------", 
-        static_cast<char const*>(NULL), NULL, NULL, 
- 11, 31, CUR_A_NORMAL, 17, 0, 'a', "SCREENING HISTORY", static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
+ 11, 31, CUR_A_NORMAL, 17, 0, 'a', "SCREENING HISTORY", static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  13, 5,  CUR_A_NORMAL, 60, 0, 'a', "                                                            ", 
-	static_cast<char const*>(NULL), NULL, NULL, 
+	static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  -1, 
 };
 
@@ -129,7 +129,6 @@ PrivateVarDef MENU_Choice operatorChoices[] = {
 
 
 PublicFnDef int companyScr(char *universe, int count) {
-    MENU *actionMenu, *menu;
     int i, longest, j;
     static int alreadyCentered = FALSE;
 
@@ -143,21 +142,19 @@ PublicFnDef int companyScr(char *universe, int count) {
    	FORM_centerFormElts(Form1, CUR_COLS);
     }
 
-    menu = MENU_getMenu("companyItemCategoryListList");
-    if (menu != NULL)
-    {
+    MENU::Reference menu (MENU_getMenu("companyItemCategoryListList"));
+    if (menu.isntNil ()) {
 	for (i = 0; i < MENU_choiceCount(menu); i++)
 	    MENU_choiceHandler(menu, i) = itemList;
 	MENU_title(menu) = " Item Category: ";
     }
-    FORM_fieldMenu(ITEM) = menu;
+    FORM_fieldMenu(ITEM).setTo (menu);
 	
-    MENU_makeMenu(menu, operatorChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+    menu.setTo (new MENU (operatorChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
     MENU_title(menu) = " Operator: ";
-    FORM_fieldMenu(OPERATOR) = menu;
+    FORM_fieldMenu(OPERATOR).setTo (menu);
 
-    MENU_makeMenu(actionMenu, actionChoices,
-			     CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+    MENU::Reference actionMenu (new MENU (actionChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
 
 /*** create form windows ****/
     Win1 = CUR_newwin(14, CUR_COLS, 0, 0);
@@ -183,14 +180,13 @@ PublicFnDef int companyScr(char *universe, int count) {
            
 /*****  cleanup  *****/
 
-    MENU_deleteMenu(FORM_fieldMenu(ITEM), i);
-    MENU_deleteMenu(FORM_fieldMenu(OPERATOR), i);
+    FORM_fieldMenu(ITEM).clear ();
+    FORM_fieldMenu(OPERATOR).clear ();
     free (Form1);
     CUR_delwin(Win1);
     CUR_delwin(Win2);
     CUR_delwin(Win3);
 
-    MENU_deleteMenu(actionMenu, i);
     PAGE_deletePage (Page, i);
 
     BUF_deleteBuffer(History);
@@ -234,15 +230,15 @@ PrivateFnDef void clearSubsets () {
 
 PrivateVarDef FORM_Field exprFields[] = {
  1, 1, CUR_A_NORMAL, 11, 0, 'a', "Expression:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  1, 13, (CUR_A_DIM | CUR_A_REVERSE), 40, 1, 'a',
  "                                        ",
- " Enter Screening Expression", NULL, NULL, 
+ " Enter Screening Expression", MENU::Reference(), NULL, 
  2, 13, (CUR_A_DIM | CUR_A_REVERSE), 40, 1, 'a',
  "                                        ",
- " Enter Screening Expression", NULL, NULL, 
+ " Enter Screening Expression", MENU::Reference(), NULL, 
  7, 5, CUR_A_NORMAL, 29, 0, 'a', "Execute(F2)  Quit(F9)" , 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
 -1, 
 };
 
@@ -621,5 +617,4 @@ PrivateFnDef void itemList () {
     MENU_handler(menu2, SysWin, PAGE_Input);
     FORM_fieldMenu(ITEM) = menu1;
     CUR_delwin(SysWin);
-    MENU_deleteMenu(menu2, i);
 }

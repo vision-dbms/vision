@@ -51,8 +51,7 @@ PrivateVarDef PAGE_Action MenuAction;
 
 PrivateVarDef PAGE	*CurrentPage = NULL;
 
-#define initFkeys()\
-{\
+#define initFkeys() {\
     if (PAGE_help(page) == NULL)\
          PAGE_fkey(page, 0) = NULL;\
     else\
@@ -68,24 +67,6 @@ PrivateVarDef PAGE	*CurrentPage = NULL;
          PAGE_fkey(page, 7) = pageApplic;\
     PAGE_fkey(page, 8) = pagePrev;\
 }
-
-#if 0
-#define initSysMenu()\
-{\
-    for (i = 0; i < 10; i++)\
-	menuChoices[i].handler = PAGE_fkey(page, i);\
-    k = 0;\
-    MENU_choiceArray(sysMenu) = (MENU_Choice **)calloc(11, sizeof(MENU_Choice *));\
-    for (i = 0; i < 11; i++)\
-        if (menuChoices[i].handler != NULL)\
-	    MENU_choice(sysMenu, k++) = &menuChoices[i];\
-    MENU_choiceCount(sysMenu) = k;\
-    MENU_currChoice(sysMenu) = 0;\
-    MENU_normal(sysMenu) = CUR_A_NORMAL;\
-    MENU_hilight(sysMenu) = CUR_A_REVERSE;\
-    MENU_title(sysMenu) = " System Menu: ";\
-}
-#endif
 
 #ifdef DBMENU
 PrivateFnDef void pageDisplayHelp(char const *helpname) {
@@ -135,7 +116,6 @@ PublicFnDef void PAGE_handler(PAGE *page) {
 	enterCount, 
 	currElement, 
 	notDone;
-    MENU *sysMenu;
     PAGE_Action action;
     PAGE_Status status;
     PAGE	*tmpPage;
@@ -167,10 +147,6 @@ PublicFnDef void PAGE_handler(PAGE *page) {
     }
     
     initFkeys();
-#if 0
-    sysMenu = (MENU *)malloc(sizeof(MENU));
-    initSysMenu();
-#endif
     
 /**** update the screen ****/
     if( !KEY_cready() )
@@ -309,34 +285,6 @@ PublicFnDef void PAGE_handler(PAGE *page) {
 	    break;
 
 	case PAGE_SMenu:
-#if 0
-            if (PAGE_fkey(page, 6) != NULL) 
-	    {
-               MenuAction = PAGE_Input;
-	       syswin = CUR_newwin(10, 20, 5, 5);
-	       MENU_handler(sysMenu, syswin, PAGE_Input);
-	       CUR_delwin(syswin);
-	       switch (MenuAction)
-	       {
-	       case PAGE_Editor:
-	           break;
-	       case PAGE_Profile:
-                   VARS_runProfile(page);
-		   if( STD_delwinDoesNotRefresh && !PAGE_ExitSystem )
-	   		pageRefresh(page);
-		   MenuAction = PAGE_Input;
-	           break;
-	       case PAGE_Module:
-                   
-		   if( STD_delwinDoesNotRefresh && !PAGE_ExitSystem )
-	   		pageRefresh(page);
-		   MenuAction = PAGE_Input;
-	           break;
-	       default:
-		   MenuAction = PAGE_Input;
-	           break;
-	       }  /** switch **/
-#endif
 	       PAGE_runSysMenu(page);
 	       if( STD_delwinDoesNotRefresh && !PAGE_ExitSystem )
 		   pageRefresh(page);
@@ -419,9 +367,6 @@ PublicFnDef void PAGE_handler(PAGE *page) {
 	}
 	
     }
-#if 0    
-    MENU_deleteMenu(sysMenu, i);
-#endif
     CurrentPage = NULL;
     return;					 
 }
@@ -502,11 +447,10 @@ PrivateVarDef MENU_Choice menuChoices[] = {
 };
 
 PrivateFnDef void doModule() {
-	MENU		*menu;
 	int		i, j, longest, rows, cols, startrow, startcol;
 	CUR_WINDOW	*MenuWin;
 
-	MENU_makeMenu(menu, menuChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+	MENU::Reference menu (new MENU (menuChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
 	MENU_title(menu) = " Module Menu: ";
 	rows = MENU_choiceCount(menu) + 4;
 	cols = longest + 4;
@@ -517,7 +461,6 @@ PrivateFnDef void doModule() {
 	MenuWin = CUR_newwin(rows, cols, startrow, startcol);
 	MENU_handler(menu, MenuWin, PAGE_Input);
 	CUR_delwin(MenuWin);
-	MENU_deleteMenu(menu, i);
 	SysPage = NULL;
 }
 
@@ -529,13 +472,12 @@ PrivateVarDef MENU_Choice sysChoices[] = {
 };
 
 PublicFnDef void PAGE_runSysMenu(PAGE *opage) {
-	MENU	*menu;
 	int	i, j, longest;
 	CUR_WINDOW	*MenuWin;
 	PAGE	*tpage = CurrentPage;
 
 	CurrentPage = SysPage = opage;	
-	MENU_makeMenu(menu, sysChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+	MENU::Reference menu (new MENU (sysChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
 	MENU_title(menu) = " System Menu: ";
 	j = longest + 4;
 	if( (size_t)j <= strlen(MENU_title(menu)) )
@@ -543,7 +485,6 @@ PublicFnDef void PAGE_runSysMenu(PAGE *opage) {
 	MenuWin = CUR_newwin(7, j, 5, 5);
 	MENU_handler(menu, MenuWin, PAGE_Input);
 	CUR_delwin(MenuWin);
-	MENU_deleteMenu(menu, i);
 	CurrentPage = tpage;
 	SysPage = NULL;
 }
@@ -572,11 +513,11 @@ PublicFnDef void queries() {
 
 PrivateVarDef FORM_Field companyFields[] = {
  2, 4, CUR_A_NORMAL, 19, 0, 'a', "Company To Profile:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  2, 24, (CUR_A_DIM | CUR_A_REVERSE), 18, 1, 'a', "                  ", 
-        " Enter Company Ticker Symbol", NULL, NULL, 
+        " Enter Company Ticker Symbol", MENU::Reference(), NULL, 
  7, 5, CUR_A_NORMAL, 29, 0, 'a', "Execute(F2)  Quit(F9)" , 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
 -1, 
 };
 

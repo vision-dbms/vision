@@ -80,7 +80,7 @@ PrivateVarDef SPRSHEET *Sprsheet = NULL;
 PrivateVarDef CUR_WINDOW *Win1, *Win2, *Win3, *SprWin, *AppWin, *StatWin;
 PrivateVarDef FORM *Form, *Form1, *Form2, *Form3, *ParmForm;
 PrivateVarDef PAGE *ItemsPage, *ReportPage, *ApplicPage, *PPage;
-PrivateVarDef MENU *itemsActionMenu, *AppActionMenu;
+PrivateVarDef MENU::Reference itemsActionMenu, AppActionMenu;
 
 #define UNIVERSE	(ParmForm->field[1])
 
@@ -93,43 +93,43 @@ PrivateVarDef MENU *itemsActionMenu, *AppActionMenu;
 
 PrivateVarDef FORM_Field formFields[] = {
  1, 33, (CUR_A_BOLD | CUR_A_UNDERLINE), 13, 0, 'a', "REPORT WRITER", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  4, 11, CUR_A_NORMAL, 5, 0, 'a', "Item:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  4, 17, (CUR_A_DIM | CUR_A_REVERSE), 16, 1, 'a', 
- "                ", " Use Arrow Keys To Select Item, or F1 For Menu", NULL, NULL, 
+ "                ", " Use Arrow Keys To Select Item, or F1 For Menu", MENU::Reference(), NULL, 
  4, 36, CUR_A_NORMAL, 8, 0, 'a', "Heading:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  4, 45, (CUR_A_DIM | CUR_A_REVERSE), 16, 1, 'a', "                ", 
-        " Enter Column(Row) Label For Item", NULL, NULL, 
+        " Enter Column(Row) Label For Item", MENU::Reference(), NULL, 
  6, 10, CUR_A_NORMAL, 6, 0, 'a', "Width:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  6, 17, (CUR_A_DIM | CUR_A_REVERSE), 5, 0, 'm', "     ", 
-    " Use Arrow Keys To Select Width, or F1 For Menu", NULL, NULL, 
+    " Use Arrow Keys To Select Width, or F1 For Menu", MENU::Reference(), NULL, 
  6, 35, CUR_A_NORMAL, 9, 0, 'a', "Decimals:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  6, 45, (CUR_A_DIM | CUR_A_REVERSE), 5, 0, 'm', "     ", 
-    " Use Arrow Keys To Select Decimals Places, or F1 For Menu", NULL, NULL, 
+    " Use Arrow Keys To Select Decimals Places, or F1 For Menu", MENU::Reference(), NULL, 
  6, 54, CUR_A_NORMAL, 6, 0, 'a', "Total:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  6, 61, (CUR_A_DIM | CUR_A_REVERSE), 12, 1, 'm', "            ", 
-    " Use Arrow Keys To Select Total Type, or F1 For Menu", NULL, NULL, 
+    " Use Arrow Keys To Select Total Type, or F1 For Menu", MENU::Reference(), NULL, 
  8, 0, CUR_A_NORMAL, 40, 0, 'a', "----------------------------------------", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  8, 40, CUR_A_NORMAL, 40, 0, 'a', "----------------------------------------", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  10, 5, CUR_A_NORMAL, 3, 0, 'a', "Col", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  10, 12, CUR_A_NORMAL, 4, 0, 'a', "Item", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  10, 29, CUR_A_NORMAL, 7, 0, 'a', "Heading", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  10, 46, CUR_A_NORMAL, 5, 0, 'a', "Width", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  10, 56, CUR_A_NORMAL, 8, 0, 'a', "Decimals", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  10, 67, CUR_A_NORMAL, 5, 0, 'a', "Total", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  -1, 
 };
 
@@ -190,7 +190,7 @@ PublicVarDef  int	inReport = FALSE;
 PrivateFnDef void	exec();
 
 PublicFnDef PAGE_Action report(char const *universe, char **itemArray) {
-    MENU *menu;
+    MENU::Reference menu;
     int i, longest, j;
 
     if( inReport )
@@ -203,8 +203,7 @@ PublicFnDef PAGE_Action report(char const *universe, char **itemArray) {
     Universe = universe;
     ScreenItem = itemArray;
 
-    if( firstTime )
-    {
+    if( firstTime ) {
     	ERR_displayStr(" Getting Universes...",FALSE);
     	firstTime = FALSE;    
 	SPR_makeSheet(Sprsheet, COLWIDTH, 1, FIXEDCOLS, TITLEROWS, FIXEDROWS);
@@ -213,31 +212,31 @@ PublicFnDef PAGE_Action report(char const *universe, char **itemArray) {
 /**** create form objects ****/
 	FORM_makeForm(Form, formFields, i);
 
-	MENU_makeMenu(itemsActionMenu,actionChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+	itemsActionMenu.setTo (new MENU (actionChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
 	MENU_title(itemsActionMenu) = " Report Writer:";
 
-	MENU_makeMenu(menu, widthChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+	menu.setTo (new MENU (widthChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
 	MENU_title(menu) = " Width:";
-	FORM_fieldMenu(WIDTH) = menu;
-	MENU_makeMenu(menu, decimalChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+	FORM_fieldMenu(WIDTH).setTo (menu);
+	menu.setTo (new MENU (decimalChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
 	MENU_title(menu) = " Decimals:";
-	FORM_fieldMenu(DECIMAL) = menu;
-	MENU_makeMenu(menu, totalChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+	FORM_fieldMenu(DECIMAL).setTo (menu);
+	menu.setTo (new MENU (totalChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
 	MENU_title(menu) = " Total Type:";
-	FORM_fieldMenu(TOTAL) = menu;
+	FORM_fieldMenu(TOTAL).setTo (menu);
 
 /*** create form windows ****/
 	initBuffer();
 
 /**** initialize option forms and display buffer ****/
 	menu = MENU_getMenu("companyItemCategoryListList");
-	if (menu != NULL)
+	if (menu.isntNil ())
 	{
             MENU_title(menu) = " Item Categories:";
 	    for (i = 0; i < MENU_choiceCount(menu); i++)
 		MENU_choiceHandler(menu, i) = itemList;
 	}
-	FORM_fieldMenu(ITEM) = menu;
+	FORM_fieldMenu(ITEM).setTo (menu);
     
 	initOptions();
 	initUniverse();
@@ -259,7 +258,7 @@ PublicFnDef PAGE_Action report(char const *universe, char **itemArray) {
 	    CUR_delwin(SprWin);
 	    CUR_delwin(AppWin);
 	    CUR_delwin(StatWin);
-	    MENU_deleteMenu(AppActionMenu, i);
+	    AppActionMenu.clear ();
 	    PAGE_deletePage(ReportPage, i);
 	    PAGE_deletePage(ApplicPage, i);
 	    inReport = FALSE;
@@ -277,7 +276,7 @@ PublicFnDef PAGE_Action report(char const *universe, char **itemArray) {
     CUR_delwin(SprWin);
     CUR_delwin(AppWin);
     CUR_delwin(StatWin);
-    MENU_deleteMenu(AppActionMenu, i);
+    AppActionMenu.clear ();
     PAGE_deletePage(ReportPage, i);
     PAGE_deletePage(ApplicPage, i);
 
@@ -311,23 +310,6 @@ PrivateFnDef void reportItems() {
     CUR_delwin (Win2);
     CUR_delwin (Win3);
     PAGE_deletePage(ItemsPage, i);
-#if 0           
-/*****  cleanup  *****/
-    MENU_deleteMenu(FORM_fieldMenu(ITEM), i); 
-    MENU_deleteMenu(FORM_fieldMenu(WIDTH), i);
-    MENU_deleteMenu(FORM_fieldMenu(DECIMAL), i);
-    MENU_deleteMenu(FORM_fieldMenu(TOTAL), i);
-    free (Form);
-    MENU_deleteMenu(actionMenu, i);
-    CUR_delwin (Win1);
-    CUR_delwin (Win2);
-    CUR_delwin (Win3);
-    PAGE_deletePage (page, i)
-
-    SPR_delete(Sprsheet);
-    deleteOptions();
-    BUF_deleteBuffer(DisplayBuf);
-#endif
 }
 
 /************************************************
@@ -742,39 +724,39 @@ PrivateFnDef void execReplace () {
 
 PrivateVarDef FORM_Field form1Fields[] = {
  1, 1, CUR_A_NORMAL, 6, 0, 'a', "Title:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  1, 8, (CUR_A_DIM | CUR_A_REVERSE), 50, (FORM_InputFlag|FORM_ScrollFlag), 'a', 
-"                                        ", " Enter Report Title", NULL, NULL, 
+"                                        ", " Enter Report Title", MENU::Reference(), NULL, 
  2, 8, (CUR_A_DIM | CUR_A_REVERSE), 50, (FORM_InputFlag|FORM_ScrollFlag), 'a', 
-"                                        ", " Enter Report Title", NULL, NULL, 
+"                                        ", " Enter Report Title", MENU::Reference(), NULL, 
  4, 6, CUR_A_NORMAL, 8, 0, 'a', "Sort By:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  4, 15, (CUR_A_DIM | CUR_A_REVERSE), 16, 1, 'a', "                ", 
-        " Use Arrow Keys To Select Item, or F1 For Menu", NULL, NULL, 
+        " Use Arrow Keys To Select Item, or F1 For Menu", MENU::Reference(), NULL, 
  4, 35, CUR_A_NORMAL, 6, 0, 'a', "Order:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  4, 42, (CUR_A_DIM | CUR_A_REVERSE), 12, 1, 'm', "            ", 
-        " Use Arrow Keys To Select Sort Order, or F1 For Menu", NULL, NULL, 
+        " Use Arrow Keys To Select Sort Order, or F1 For Menu", MENU::Reference(), NULL, 
  6, 6, CUR_A_NORMAL, 8, 0, 'a', "Group 1:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  6, 15, (CUR_A_DIM | CUR_A_REVERSE), 16, 1, 'a', "                ", 
-        " Use Arrow Keys To Select Item, or F1 For Menu", NULL, NULL, 
+        " Use Arrow Keys To Select Item, or F1 For Menu", MENU::Reference(), NULL, 
  6, 33, CUR_A_NORMAL, 8, 0, 'a', "Group 2:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  6, 42, (CUR_A_DIM | CUR_A_REVERSE), 16, 1, 'a', "                ", 
-        " Use Arrow Keys To Select Item, or F1 For Menu", NULL, NULL, 
+        " Use Arrow Keys To Select Item, or F1 For Menu", MENU::Reference(), NULL, 
  8, 1, CUR_A_NORMAL, 13, 0, 'a', "Group Totals:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  8, 15, (CUR_A_DIM | CUR_A_REVERSE), 5, 1, 'm', "     ", 
-        " Use Arrow Keys To Select Yes/No", NULL, NULL, 
+        " Use Arrow Keys To Select Yes/No", MENU::Reference(), NULL, 
  8, 28, CUR_A_NORMAL, 13, 0, 'a', "Grand Totals:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  8, 42, (CUR_A_DIM | CUR_A_REVERSE), 5, 1, 'm', "     ", 
-        " Use Arrow Keys To Select Yes/No", NULL, NULL, 
+        " Use Arrow Keys To Select Yes/No", MENU::Reference(), NULL, 
  10, 7, CUR_A_NORMAL, 7, 0, 'a', "Format:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  10, 15, (CUR_A_DIM | CUR_A_REVERSE), 10, 1, 'm', "          ", 
-        " Use Arrow Keys To Select Report Format, or F1 For Menu", NULL, NULL, 
+        " Use Arrow Keys To Select Report Format, or F1 For Menu", MENU::Reference(), NULL, 
 -1, 
 };
 
@@ -874,56 +856,39 @@ PrivateFnDef void execOptions () {
 
 PrivateFnDef void initOptions () {
     int i, longest, j;
-    MENU *menu;
     
 /**** create form objects ****/
     FORM_makeForm(Form1, form1Fields, i);
 
     FORM_fieldMenu(SORT) = FORM_fieldMenu(ITEM);
 	
-    MENU_makeMenu(menu, orderChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+    MENU::Reference menu;
+    menu.setTo (new MENU (orderChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
     MENU_title(menu) = " Sort Order: ";
-    FORM_fieldMenu(ORDER) = menu;
-    MENU_makeMenu(menu, formChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
-    MENU_title(menu) = " Format: ";
-    FORM_fieldMenu(FORMAT) = menu;
+    FORM_fieldMenu(ORDER).setTo (menu);
 
-    menu = MENU_getMenu("companyItemGroupedByList");
-    if (menu != NULL)
-    {
+    menu.setTo (new MENU (formChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
+    MENU_title(menu) = " Format: ";
+    FORM_fieldMenu(FORMAT).setTo (menu);
+
+    menu.setTo (MENU_getMenu("companyItemGroupedByList"));
+    if (menu.isntNil ()) {
 	for (i = 0; i < MENU_choiceCount(menu); i++)
 	    MENU_choiceHandler(menu, i) = FORM_menuToForm;
 	MENU_title(menu) = " Grouping Criteria: ";
     }
-    FORM_fieldMenu(GROUP1) = menu;
-    FORM_fieldMenu(GROUP2) = menu;
+    FORM_fieldMenu(GROUP1).setTo (menu);
+    FORM_fieldMenu(GROUP2).setTo (menu);
 
-    MENU_makeMenu(menu, booleanChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+    menu.setTo (new MENU (booleanChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
     MENU_title(menu) = " Group Total? ";
-    FORM_fieldMenu(SUBTOTAL) = menu;
-    MENU_makeMenu(menu, booleanChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+    FORM_fieldMenu(SUBTOTAL).setTo (menu);
+
+    menu.setTo (new MENU (booleanChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
     MENU_title(menu) = " Grand Total? ";
-    FORM_fieldMenu(GRAND) = menu;
+    FORM_fieldMenu(GRAND).setTo (menu);
 
 }
-
-#if 0
-PrivateFnDef void deleteOptions()
-{
-    int i;
-    
-    MENU_deleteMenu(FORM_fieldMenu(UNIVERSE), i);
-    MENU_deleteMenu(FORM_fieldMenu(GROUP1), i);
-    MENU_deleteMenu(FORM_fieldMenu(GROUP2), i);
-
-    MENU_deleteMenu (FORM_fieldMenu(ORDER), i);
-    MENU_deleteMenu (FORM_fieldMenu(FORMAT), i);
-    MENU_deleteMenu (FORM_fieldMenu(SUBTOTAL), i);
-
-    free (Form1);
-}
-#endif
-
 
 /************************************************
  *********	specialItem	*****************
@@ -933,13 +898,13 @@ PrivateFnDef void deleteOptions()
 
 PrivateVarDef FORM_Field exprFields[] = {
  2, 1, CUR_A_NORMAL, 11, 0, 'a', "Expression:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  2, 13, (CUR_A_DIM | CUR_A_REVERSE), 40, 1, 'a',
- "                                        ", " Enter Expression", NULL, NULL, 
+ "                                        ", " Enter Expression", MENU::Reference(), NULL, 
  3, 13, (CUR_A_DIM | CUR_A_REVERSE), 40, 1, 'a',
- "                                        ", " Enter Expression", NULL, NULL, 
+ "                                        ", " Enter Expression", MENU::Reference(), NULL, 
  7, 5, CUR_A_NORMAL, 29, 0, 'a', "Execute(F2)  Quit(F9)" , 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
 -1, 
 };
 
@@ -1243,8 +1208,7 @@ PrivateFnDef void exec() {
 PrivateFnDef void initSprPage() {
     int i, j, longest;
 
-    MENU_makeMenu(AppActionMenu,
-         reportChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+    AppActionMenu.setTo (new MENU (reportChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
     MENU_title(AppActionMenu) = " Report Writer:";
     longest += 4;
     if( (i = strlen(MENU_title(AppActionMenu))) >= longest )
@@ -1278,16 +1242,6 @@ PrivateFnDef void initSprPage() {
     CUR_wattroff(StatWin,CUR_A_REVERSE);
     PAGE_createElement(ReportPage, 1, NULL, StatWin, PAGE_Init, NULL, FALSE);
     PAGE_createElement(ApplicPage, 2, NULL, StatWin, PAGE_Init, NULL, FALSE);
-#if 0
-/**** call page handler ****/
-    PAGE_handler(ReportPage);
-
-/**** cleanup ****/
-    SPR_erase(Sprsheet);
-    MENU_deleteMenu(actionMenu, i);
-    CUR_delwin(win);
-    PAGE_deletePage(ReportPage, i);
-#endif
 }
 
 
@@ -1346,27 +1300,24 @@ PrivateFnDef void itemList () {
     FORM_fieldMenu(ITEM) = menu1;
     FORM_fieldMenu(SORT) = menu1;
     CUR_delwin(SysWin);
-    MENU_deleteMenu(menu2, i);
 }
 
 
 PrivateVarDef FORM_Field getFields[] = {
  2, 8, CUR_A_NORMAL, 15, 0, 'a', "Enter Universe:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  2, 24, (CUR_A_DIM | CUR_A_REVERSE), 18, 1, 'a', "                  ", 
-        " Enter Starting Universe, Press F1 For Menu", NULL, NULL, 
+        " Enter Starting Universe, Press F1 For Menu", MENU::Reference(), NULL, 
  7, 5, CUR_A_NORMAL, 29, 0, 'a', "Execute(F2)  Quit(F9)" , 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
 -1, 
 };
 
 PrivateFnDef void initUniverse() {
 	int	i;
-	MENU	*menu;
 	FORM_makeForm(ParmForm, getFields, i);
-	menu = MENU_getMenu("companyUniverseListList");
-	if (menu != NULL)
-	{
+	MENU *menu = MENU_getMenu("companyUniverseListList");
+	if (menu != NULL) {
 	    for (i = 0; i < MENU_choiceCount(menu); i++)
 		MENU_choiceHandler(menu, i) = FORM_menuToForm;
 	    MENU_title(menu) = " Universe: ";

@@ -30,14 +30,14 @@ PublicFnDecl char *strtok ();
 /* Public variable declarations */
 PublicVarDef int PRINT_Lines;
 PublicVarDef PRINTER_Command PRINT_Command;
-PublicVarDef MENU_Choice *printerChoices;
+PublicVarDef MENU_Choice *printerChoices = 0;
 
 /* Private variable declarations */
 PrivateVarDef FORM *Form;
 PrivateVarDef int printersDefined = FALSE;
 PrivateVarDef commandInfo *printers;
 PrivateVarDef commandInfo *types;
-PrivateVarDef MENU_Choice *typeChoices;
+PrivateVarDef MENU_Choice *typeChoices = 0;
 PrivateVarDef CHOICE_MenuChoice **PrinterChoices;
 PrivateVarDef int numPrinters = 0;
 PrivateVarDef int numTypes = 0;
@@ -45,13 +45,13 @@ PrivateVarDef int numTypes = 0;
 PrivateVarDef FORM_Field formFields[] =
     {
     1, 5, CUR_A_NORMAL, 8, 0, 'a', "Printer:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
     1, 14, (CUR_A_DIM | CUR_A_REVERSE), 8, 1, 'm', "        ", 
-        " Use Arrow Keys To Select Printer", NULL, NULL, 
+        " Use Arrow Keys To Select Printer", MENU::Reference(), NULL, 
     3, 1, CUR_A_NORMAL, 12, 0, 'a', "Print Style:",  
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
     3, 14, (CUR_A_DIM | CUR_A_REVERSE), 15, 1, 'm', "               ", 
-        " Use Arrow Keys To Select Print Style", NULL, NULL, 
+        " Use Arrow Keys To Select Print Style", MENU::Reference(), NULL, 
     -1, 
     };
 
@@ -100,7 +100,7 @@ PrivateFnDef void abortInitPrinters (int stage) {
             for (i = 0; i < numPrinters; i++) {
 		  free (printers[i].command);
                 }
-            free (printerChoices);
+            delete[] printerChoices;
             /*drop-through */
         case 1:
             free (printers);
@@ -113,8 +113,7 @@ PrivateFnDef void abortInitPrinters (int stage) {
 
 
 PrivateFnDef int initPrinters () {
-    char buffer[RS_MaxLine + 1],
-         *tmpBuffer;
+    char buffer[RS_MaxLine + 1];
     int *typeCount;
     int offset = 0;
     int i,
@@ -147,12 +146,11 @@ PrivateFnDef int initPrinters () {
         abortInitPrinters (0);
         return (FALSE);
         }
-    printerChoices = (MENU_Choice *) calloc (numPrinters + 1, sizeof (MENU_Choice));
-    if (printerChoices == NULL)
-        {
+    printerChoices = new MENU_Choice[numPrinters + 1];
+    if (printerChoices == NULL) {
         abortInitPrinters (1);
         return (FALSE);
-        }
+    }
 
     /* Send query for printer info */
     RS_sendLine ("PrinterTools Descriptor displayPrinterData");
@@ -160,30 +158,20 @@ PrivateFnDef int initPrinters () {
     while (RS_readLine (buffer, RS_MaxLine) && (strcmp (buffer, "") == 0))
         ;
 
-    for (i = 0; i < numPrinters; i++)
-        {
-        tmpBuffer = strtok (buffer, ";");
-        new (&printerChoices[i].label) VString (tmpBuffer);
-
-        tmpBuffer = strtok (NULL, ";");
-        new (&printerChoices[i].help) VString (tmpBuffer);
-
-        tmpBuffer = strtok (NULL, ";");
-        printerChoices[i].letter = tolower (tmpBuffer[0]);
+    for (i = 0; i < numPrinters; i++) {
+        printerChoices[i].label.setTo (strtok (buffer, ";"));
+        printerChoices[i].help.setTo (strtok (NULL, ";"));
+        printerChoices[i].letter = tolower (strtok (NULL, ";")[0]);
 
         printerChoices[i].handler = FORM_menuToForm;
 
 	printerChoices[i].active = ON;
 
-        tmpBuffer = strtok (NULL, ";");
-        printers[i].command = (char*)malloc (strlen (tmpBuffer));
-        /* last character is a newline, which is not wanted */
-        strcpy (printers[i].command, tmpBuffer);
+        printers[i].command = strdup (strtok (NULL, ";"));
 
         if (i < (numPrinters - 1))
             RS_readLine (buffer, RS_MaxLine);
-        }
-    new (&printerChoices[numPrinters].label) VString ();
+    }
     while (RS_readLine (buffer, RS_MaxLine))
         ;
 
@@ -203,8 +191,7 @@ PrivateFnDef int initPrinters () {
         return (FALSE);
         }
 
-    for (i = 0; i < numPrinters; i++)
-        {
+    for (i = 0; i < numPrinters; i++) {
         sprintf (buffer, "PrinterTools Descriptor Named %s getNumberOfOptions",
                           printerChoices[i].label.content ());
 	RS_sendLine (buffer);
@@ -235,18 +222,15 @@ PrivateFnDef int initPrinters () {
         free (typeCount);
         return (FALSE);
         }
-    typeChoices = (MENU_Choice *) calloc (numTypes + 1, sizeof (MENU_Choice));
-    if (typeChoices == NULL)
-        {
+    typeChoices = new MENU_Choice[numTypes + 1];
+    if (typeChoices == NULL) {
         abortInitPrinters (4);
         free (typeCount);
         return (FALSE);
-        }
+    }
 
-    for (j = 0; j < numPrinters; j++)
-        {
-        if (typeCount[j] == 0)
-            {
+    for (j = 0; j < numPrinters; j++) {
+        if (typeCount[j] == 0) {
             typeCount[j]++;
             PrinterChoices[j] = (CHOICE_MenuChoice *) calloc (2, 
                                               sizeof (CHOICE_MenuChoice));
@@ -270,7 +254,7 @@ PrivateFnDef int initPrinters () {
 
             PrinterChoices[j][0].choices[offset++] = '1'; 
             continue;
-            }
+        }
 
         PrinterChoices[j] = (CHOICE_MenuChoice *) calloc (2, sizeof (CHOICE_MenuChoice));
         PrinterChoices[j][0].subfield = PRINT_N;
@@ -286,24 +270,17 @@ PrivateFnDef int initPrinters () {
         while (RS_readLine (buffer, RS_MaxLine) && (strcmp (buffer, "") == 0))
             ;
 
-        for (i = 0; i < typeCount[j]; i++)
-            {
-            tmpBuffer = strtok (buffer, ";");
-            new (&typeChoices[offset].label) VString (tmpBuffer);
+        for (i = 0; i < typeCount[j]; i++) {
+            typeChoices[offset].label.setTo (strtok (buffer, ";"));
+            typeChoices[offset].help.setTo (strtok (NULL, ";"));
 
-            tmpBuffer = strtok (NULL, ";");
-            new (&typeChoices[offset].help) VString (tmpBuffer);
-
-            tmpBuffer = strtok (NULL, ";");
-            typeChoices[offset].letter = tolower (tmpBuffer[0]);
+            typeChoices[offset].letter = tolower (strtok (NULL, ";")[0]);
 
             typeChoices[offset].handler = FORM_menuToForm;
 
             typeChoices[offset].active = ON;
 
-            tmpBuffer = strtok (NULL, ";");
-            types[offset].command = (char*)malloc (strlen (tmpBuffer));
-            strcpy (types[offset].command, tmpBuffer);
+            types[offset].command = strdup (strtok (NULL, ";"));
 
             PrinterChoices[j][0].choices[offset++] = '1'; 
 
@@ -313,8 +290,7 @@ PrivateFnDef int initPrinters () {
 
         while (RS_readLine (buffer, RS_MaxLine))
             ;
-        }
-    new (&typeChoices[numTypes].label) VString ();
+    }
     free (typeCount);
 
     printersDefined = TRUE;
@@ -324,8 +300,6 @@ PrivateFnDef int initPrinters () {
 
 
 PublicFnDef void print (PAGE *currPage, int defaultPrinter) {
-    MENU *menu1,
-         *menu2;
     PAGE *page;
     CUR_WINDOW *win,
                *formWin;
@@ -337,10 +311,10 @@ PublicFnDef void print (PAGE *currPage, int defaultPrinter) {
     PRINT_Command.command[0] ='\0';
     PRINT_Command.initString[0] ='\0';
 
-    MENU_makeMenu (menu1, printerChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+    MENU::Reference menu1 (new MENU (printerChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
     MENU_title(menu1) = "Printer:";
 
-    MENU_makeMenu (menu2, typeChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+    MENU::Reference menu2 (new MENU (typeChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
     MENU_title (menu2) = "Print Style:";
 
     if ((defaultPrinter >= 0) && (defaultPrinter < numPrinters))
@@ -409,8 +383,6 @@ PublicFnDef void print (PAGE *currPage, int defaultPrinter) {
     PAGE_handler (page);
 
 /*** cleanup ***/
-    MENU_deleteMenu (menu1, i);
-    MENU_deleteMenu (menu2, i);
     free (Form);
     CUR_delwin (formWin);
     CUR_delwin (win);
@@ -524,40 +496,37 @@ PublicFnDef void cleanupPrinters () {
     int i;
     char  fname[128];
 
-    if (numPrinters == 0)
-        {
-        free (printerChoices);
+    if (numPrinters == 0) {
+        delete[] printerChoices;
         return;
-        }
+    }
 
     /* if the printers were used,  it is likely that a file
        called /tmp/vision(PID) exists.  If it does,  then it
        is equally as likely that /tmp/viserr(PID) exists.
        Nuke 'em */
     sprintf (fname, "/tmp/vision%d", getpid ());
-    if (access (fname, 0) == 0)
-        {
+    if (access (fname, 0) == 0) {
         remove (fname);
         sprintf (fname, "/tmp/viserr%d", getpid ());
         remove (fname);
-        }
+    }
 
-    for (i = 0; i < numPrinters; i++)
-        {
+    for (i = 0; i < numPrinters; i++) {
         free (printers[i].command);
 
         free (PrinterChoices[i][0].choices);
         free (PrinterChoices[i]);
         }
     free (printers);
-    free (printerChoices);
+    delete[] printerChoices;
     free (PrinterChoices);
 
     for (i = 0; i < numTypes; i++)
         {
         free (types[i].command);
         }
-    free (typeChoices);
+    delete[] typeChoices;
     free (types);
 }
 
@@ -567,18 +536,15 @@ PublicFnDef int checkPrinters () {
     if (printersDefined)
         return (TRUE);
 
-    if (!initPrinters ())
-        {
-        printerChoices = (MENU_Choice *) calloc (2, sizeof (MENU_Choice));
+    if (!initPrinters ()) {
+        printerChoices = new MENU_Choice[2];
 
-        new (&printerChoices[0].label) VString (NONElabel);
-        new (&printerChoices[0].help) VString (NONEhelp);
+        printerChoices[0].label.setTo (NONElabel);
+        printerChoices[0].help.setTo (NONEhelp);
         printerChoices[0].letter = tolower (printerChoices[0].label[0]);
         printerChoices[0].handler = FORM_menuToForm;
         printerChoices[0].active = ON;
-
-        printerChoices[1].label = NULL;
-        }
+    }
 
     return (numPrinters);
 }

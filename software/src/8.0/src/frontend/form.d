@@ -29,7 +29,7 @@ typedef struct {
     char type;		    /** undefined (probably 'a', 'n', 'm')   **/
     char value[FORM_ValueMaxLen+1]; /** default field value 	     **/
     VString help;
-    MENU *menu;		    /** pointer to menu, if type == 'm'	     **/
+    MENU::Reference menu;   /** pointer to menu, if type == 'm'	     **/
     CHOICE_MenuChoice **choiceArray;
 				    /** pointer to an array of pointers
 					to a structure that decides

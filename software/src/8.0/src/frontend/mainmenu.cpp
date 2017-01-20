@@ -27,7 +27,7 @@ PrivateVarDef int NotDone;
 PrivateVarDef CUR_WINDOW *MenuWin, *FormWin, *helpWin;
 PrivateVarDef FORM *Form;
 PrivateVarDef PAGE *MainPage;
-PrivateVarDef MENU *quitMenu;
+PrivateVarDef MENU::Reference quitMenu;
 PrivateVarDef int  quitCols;
 
 #if NOTRSATTACH
@@ -77,17 +77,17 @@ PrivateVarDef MENU_Choice menuChoices[] = {
 
 PrivateVarDef FORM_Field formFields[] = {
  1, 20, CUR_A_NORMAL, 40, 0, 'a', "                                        ", 
-	static_cast<char const*>(NULL), NULL, NULL, 
+	static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  3, 30, (CUR_A_UNDERLINE | CUR_A_BOLD), 19, 0, 'a', "Analyst Workstation",
-	static_cast<char const*>(NULL), NULL, NULL, 
+	static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  4, 35, (CUR_A_UNDERLINE | CUR_A_BOLD), 9, 0, 'a', "Main Menu", 
-	static_cast<char const*>(NULL), NULL, NULL, 
+	static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  -1, 
 };
 PrivateVarDef FORM_Field helpFields[] = {
- 2, 1, CUR_A_NORMAL, 15, 0, 'a', " F2 -  Execute ", static_cast<char const*>(NULL), NULL, NULL, 
- 3, 1, CUR_A_NORMAL, 15, 0, 'a', " F4 -  Editor  ", static_cast<char const*>(NULL), NULL, NULL, 
- 4, 1, CUR_A_NORMAL, 15, 0, 'a', " F9 -  Quit    ", static_cast<char const*>(NULL), NULL, NULL, 
+ 2, 1, CUR_A_NORMAL, 15, 0, 'a', " F2 -  Execute ", static_cast<char const*>(NULL), MENU::Reference(), NULL, 
+ 3, 1, CUR_A_NORMAL, 15, 0, 'a', " F4 -  Editor  ", static_cast<char const*>(NULL), MENU::Reference(), NULL, 
+ 4, 1, CUR_A_NORMAL, 15, 0, 'a', " F9 -  Quit    ", static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  -1, 
 };
 
@@ -117,7 +117,7 @@ PrivateFnDef void displayMenu()
  *
  *****/
 {
-    MENU *menu = NULL;
+    MENU::Reference menu;
     FORM *form, *helpform;
     int i, j, rows, cols, startrow, startcol, longest;
     static int alreadyCentered = FALSE;
@@ -131,16 +131,15 @@ PrivateFnDef void displayMenu()
 /*    menu = MENU_getMainMenu(); */
 
 /*** create quit menu ***/
-    MENU_makeMenu(quitMenu, quitChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+    quitMenu.setTo (new MENU (quitChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
     MENU_title(quitMenu) = " Exit System? ";
     quitCols = longest + 4;
     if( quitCols <= (i = strlen(MENU_title(quitMenu))) )
     	quitCols = i + 1;
     
-    if( menu == NULL )
-    {
+    if( menu.isNil () ) {
 /*    	ERR_displayStr("No Kits Defined.  Using Original Menu", TRUE);*/
-/*	MENU_makeMenu(menu, menuChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);*/
+/*	menu.setTo (new MENU (menuChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));*/
 	EDIT_initEditor();
 
 /***** set the restart position for interrups *****/
@@ -157,8 +156,7 @@ PrivateFnDef void displayMenu()
 	CUR_wrefresh(CUR_stdscr);
 
 	NotDone = TRUE;
-	while (NotDone && !PAGE_ExitSystem)
-	{
+	while (NotDone && !PAGE_ExitSystem) {
 	    if( StartupModule != NULL )
 	    	(*StartupModule)();
 	    else
@@ -168,11 +166,9 @@ PrivateFnDef void displayMenu()
 	}
 
 	PAGE_endScreen();
-	MENU_deleteMenu(quitMenu, i);
+	quitMenu.clear ();
 	return;
-    }
-    else
-    {
+    } else {
 	longest = 0;
 	for( i=0 ; i<MENU_choiceCount(menu) ; i++ )
     	    if( (j = MENU_choiceLabel(menu,i).length ()) > longest )
@@ -191,8 +187,7 @@ PrivateFnDef void displayMenu()
 /**** create form object ****/
     FORM_makeForm(form, formFields, i);
     strcpy(form->field[0]->value, RS_CompanyName);
-    if( !alreadyCentered )
-    {
+    if( !alreadyCentered ) {
     	alreadyCentered = TRUE;
     	FORM_centerFormElts(form,CUR_COLS);
     }
@@ -241,8 +236,7 @@ PrivateFnDef void displayMenu()
 
 /**** call page handler ****/
     NotDone = TRUE;
-    while (NotDone && !PAGE_ExitSystem)
-    {
+    while (NotDone && !PAGE_ExitSystem) {
 	PAGE_handler(MainPage);
 	QuitSystem();
 /*	CUR_clearok(CUR_curscr);*/
@@ -254,8 +248,7 @@ PrivateFnDef void displayMenu()
     CUR_delwin(MenuWin);
     CUR_delwin(FormWin);
     CUR_delwin(helpWin);
-    MENU_deleteMenu(quitMenu, i);
-    MENU_deleteMenu(menu, i);
+    quitMenu.clear ();
     free(form);
     PAGE_deletePage(MainPage, i);
 }

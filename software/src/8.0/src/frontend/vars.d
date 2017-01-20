@@ -2,6 +2,7 @@
 #define VARS_D
 
 #include "V_VString.h"
+#include "menu.h"
 
 #define	VARS_maxLen	256
 
@@ -26,7 +27,7 @@ typedef struct {
 	int		type;
 	caddr_t		p;
 	VString		menustring;
-	MENU		*m;
+	MENU::Reference m;
 } VARS_Type;
 
 #define	VARS_varName(v)		((v)->name)

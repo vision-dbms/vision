@@ -45,11 +45,11 @@ PrivateVarDef MENU_Choice menuChoices[] = {
 
 PrivateVarDef FORM_Field formFields[] = {
  1, 20, CUR_A_NORMAL, 40, 0, 'a', "                                        ", 
-	static_cast<char const*>(NULL), NULL, NULL, 
+	static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  3, 34, (CUR_A_UNDERLINE | CUR_A_BOLD), 12, 0, 'a', "Query Sheets",
-	static_cast<char const*>(NULL), NULL, NULL, 
+	static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  4, 35, (CUR_A_UNDERLINE | CUR_A_BOLD), 9, 0, 'a', "Main Menu", 
-	static_cast<char const*>(NULL), NULL, NULL, 
+	static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  -1, 
 };
 
@@ -75,7 +75,6 @@ PrivateVarDef int Index;
 
 
 PublicFnDef void queriesReal(PAGE *mpage) {
-    MENU *menu;
     FORM *form;
     PAGE *page;
     int i, j, cols, startcol, longest;
@@ -86,7 +85,7 @@ PublicFnDef void queriesReal(PAGE *mpage) {
     screen1 (mpage);
 #else
 /*** create menu object ***/
-    MENU_makeMenu(menu, menuChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+    MENU::Reference menu (new MENU (menuChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
     
 /*** create menu window ***/
     cols = longest + 4;
@@ -118,7 +117,6 @@ PublicFnDef void queriesReal(PAGE *mpage) {
 /**** cleanup page ****/
     CUR_delwin(MenuWin);
     CUR_delwin(FormWin);
-    MENU_deleteMenu(menu, i);
     free(form);
     PAGE_deletePage(page, i);
 #endif
@@ -142,11 +140,11 @@ PrivateFnDef void screen1 (PAGE *mpage) {
 
 PrivateVarDef FORM_Field getFields[] = {
  2, 8, CUR_A_NORMAL, 15, 0, 'a', "Enter Universe:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  2, 24, (CUR_A_DIM | CUR_A_REVERSE), 18, 1, 'a', "                  ", 
-        " Enter Starting Universe, Press F1 For Menu", NULL, NULL, 
+        " Enter Starting Universe, Press F1 For Menu", MENU::Reference(), NULL, 
  7, 5, CUR_A_NORMAL, 29, 0, 'a', "Execute(F2)  Quit(F9)" , 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
 -1, 
 };
 
@@ -213,7 +211,6 @@ PrivateFnDef void getUniverse (PAGE *mpage) {
 #endif
     PAGE_handler(Page);
 
-/*    MENU_deleteMenu(menu, i);*/
     PAGE_deletePage(Page, i);
     CUR_delwin(win2);
     CUR_delwin(win);
