@@ -3310,8 +3310,18 @@ bool VNetworkHandle::Construct (char const *pPathName, bool fReadOnly) {
 #else
     pLinkStream = fopen (pLinkBuffer, "r");
 #endif
-    if (IsNil (pLinkStream));
-    else if (IsntNil (fgets (pLinkBuffer, sizeof (pLinkBuffer), pLinkStream))) {
+/*****  If NDF.OSDPATH doesn't exist, assume the directory in which the NDF lives, ... *****/
+    if (IsNil (pLinkStream)) {
+	char const* pLastSlash = strrchr (m_pNDFPathName, '/');
+	if (!pLastSlash)
+	    m_pOSDPathName = strdup ("");
+	else {
+	    size_t const sDirname = static_cast<size_t>(pLastSlash - m_pNDFPathName);
+	    char  *const pOSDPathName = strndup (m_pNDFPathName, sDirname);
+	    pOSDPathName[sDirname] = '\0';
+	    m_pOSDPathName = pOSDPathName;
+	}
+    } else if (IsntNil (fgets (pLinkBuffer, sizeof (pLinkBuffer), pLinkStream))) {
 	if (IsntNil (pNewLine = strchr (pLinkBuffer, '\n')))
 	    *pNewLine = '\0';
 	m_pOSDPathName = strdup (pLinkBuffer);
