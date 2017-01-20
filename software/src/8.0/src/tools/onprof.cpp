@@ -637,8 +637,18 @@ PrivateFnDef void ResolveNetworkLink (char *pOSDPathName, char const *pNDFPathNa
     pLinkStream = fopen (pLinkBuffer, "r");
 #endif
 
-    if (IsNil (pLinkStream))
+/*****  If NDF.OSDPATH doesn't exist, assume the directory in which the NDF lives, ... *****/
+    if (IsNil (pLinkStream)) {
+	char const* pLastSlash = strrchr (pNDFPathName, '/');
+	if (!pLastSlash)
+	    strcpy (pOSDPathName, "");
+	else {
+	    size_t const sDirname = static_cast<size_t>(pLastSlash - pNDFPathName);
+	    strncpy (pOSDPathName, pNDFPathName, sDirname);
+	    pOSDPathName[sDirname] = '\0';
+	}
 	return;
+    }
 
     if (IsntNil (fgets (pLinkBuffer, sizeof (pLinkBuffer), pLinkStream))) {
 	if (IsntNil (pNewLine = strchr (pLinkBuffer, '\n')))
