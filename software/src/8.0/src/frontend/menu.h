@@ -32,13 +32,18 @@ private:
 
 //  Access
 public:
+    size_t longest () const {
+	return m_longest;
+    }
 
 //  State
+private:
+    size_t m_longest;
 public:
     char const *title;
-    int choiceCount;	   
-    int currChoice;	  
-    int normalAttr;		  
+    int choiceCount;
+    int currChoice;
+    int normalAttr;
     int hilightAttr;
     int status;
     int flags;

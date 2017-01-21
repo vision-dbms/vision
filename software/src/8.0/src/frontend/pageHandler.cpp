@@ -51,28 +51,23 @@ PrivateVarDef PAGE_Action MenuAction;
 
 PrivateVarDef PAGE	*CurrentPage = NULL;
 
-#define initFkeys() {\
-    if (PAGE_help(page) == NULL)\
-         PAGE_fkey(page, 0) = NULL;\
-    else\
-         PAGE_fkey(page, 0) = pageHelp;\
-    if (enterCount <= 1)\
-         PAGE_fkey(page, 2) = NULL;\
-    else\
-         PAGE_fkey(page, 2) = pageWindow;\
-    PAGE_fkey(page, 3) = pageEdit;\
-    if (PAGE_obj(page) == NULL)\
-         PAGE_fkey(page, 7) = NULL;\
-    else\
-         PAGE_fkey(page, 7) = pageApplic;\
-    PAGE_fkey(page, 8) = pagePrev;\
+PublicFnDef void PAGE_initScreen () {
+    CUR_nonl();
+    CUR_cbreak();
+    CUR_noecho();
+    ERR_Window = CUR_newwin(1, CUR_COLS, CUR_LINES - 1, 0);
+}
+
+PublicFnDef void PAGE_endScreen () {
+    CUR_erase();
+    CUR_touchwin(CUR_stdscr);
+    CUR_refresh();
 }
 
 #ifdef DBMENU
-PrivateFnDef void pageDisplayHelp(char const *helpname) {
-
 #define SourceDirEnv 	"VisionLibrary"
 
+PrivateFnDef void pageDisplayHelp(char const *helpname) {
    int c = -1;
    char *SrcDirName, *getenv(), helpfile[80];
    FILE *helpfd;
@@ -146,7 +141,21 @@ PublicFnDef void PAGE_handler(PAGE *page) {
     
     }
     
-    initFkeys();
+/**** init function keys ****/
+    if (PAGE_help(page) == NULL)
+         PAGE_fkey(page, 0) = NULL;
+    else
+         PAGE_fkey(page, 0) = pageHelp;
+    if (enterCount <= 1)
+         PAGE_fkey(page, 2) = NULL;
+    else
+         PAGE_fkey(page, 2) = pageWindow;
+    PAGE_fkey(page, 3) = pageEdit;
+    if (PAGE_obj(page) == NULL)
+         PAGE_fkey(page, 7) = NULL;
+    else
+         PAGE_fkey(page, 7) = pageApplic;
+    PAGE_fkey(page, 8) = pagePrev;
     
 /**** update the screen ****/
     if( !KEY_cready() )
@@ -488,13 +497,12 @@ PublicFnDef void PAGE_runSysMenu(PAGE *opage) {
 	CurrentPage = tpage;
 	SysPage = NULL;
 }
-	
-PublicVarDef int	inQueries = FALSE;
+
+PublicVarDef int inQueries = FALSE;
 
 PublicFnDef void queries() {
-    PAGE	*tpage = CurrentPage;
-    if( inQueries )
-    {
+    PAGE *tpage = CurrentPage;
+    if( inQueries ) {
     	ERR_displayPause("Screening already running");
     	return;
     }
@@ -526,16 +534,13 @@ PrivateVarDef int	firstProfile = TRUE;
 PrivateVarDef PAGE	*Page;
 PrivateVarDef FORM	*Form;
 
-PublicFnDef void MAIN_getCompany()
-{
+PublicFnDef void MAIN_getCompany() {
     PAGE	*tpage = CurrentPage;
     int i;
     CUR_WINDOW *win, *win2, *tmpWin = NULL;
     
-    if( !firstProfile )
-    {
-    	if( inProfile )
-    	{
+    if( !firstProfile ) {
+    	if( inProfile ) {
     		ERR_displayPause("Corporate Profile already running");
     		return;
     	}
@@ -545,8 +550,7 @@ PublicFnDef void MAIN_getCompany()
 	CurrentPage = tpage;
     	return;
     }
-    if( inProfile )
-    {
+    if( inProfile ) {
     	ERR_displayPause("Corporate Profile already running");
     	return;
     }
@@ -611,7 +615,6 @@ PrivateFnDef void execProfile () {
     }
 }
 
-PublicFnDef void MAIN_getUniverse()
-{
+PublicFnDef void MAIN_getUniverse() {
     report(NULL,NULL);
 }

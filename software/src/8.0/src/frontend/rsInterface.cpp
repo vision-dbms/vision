@@ -1324,96 +1324,12 @@ PublicFnDef int RS_getValue (
 
     return (FALSE);
 }
-
-PrivateVarDef int	doPC = FALSE;
-
-#if 0
-PrivateFnDef void systemPrint(
-    void
-)
-{
-    char buffer[RS_MaxLine+1], filename[80];
-    FILE *fd, *fopen();
-
-    ERR_displayStr("Generating report, please wait...",FALSE);
-    sprintf(filename, "/tmp/vision%d", getpid());
-
-    fd = fopen(filename, "w");
-
-    while (RS_readLine(buffer, RS_MaxLine))
-	fputs(buffer, fd);
-
-    fclose(fd);
-
-/***    sprintf(buffer, "lp -c -s -oc < %s", filename);	***/
-/*    sprintf(buffer, "%s < %s", PRINT_Command, filename);*/
-    sprintf(buffer, "/bin/csh -if -c \"%s %c %s\"", 
-	PRINT_Command, 
-	(doPC ? ' ' : '<'),
-	filename);
-
-    RS_system(buffer);
-    remove(filename);
-    CUR_werase(ERR_Window);
-    CUR_clearok(CUR_curscr);	/*** need to repaint the screen ***/
-    CUR_wrefresh(CUR_curscr);
-}
-#endif
-
-#if 0
-PrivateFnDef void pcPrint(
-    void
-)
-{
-    if( isBlank(PRINT_Command) )
-    {
-	ERR_clearMsg();
-	return;
-    }
-    ERR_displayPause("Please Turn On PC Printer");
-    doPC = TRUE;
-    systemPrint();
-    doPC = FALSE;
-
- #if 0
-    char buffer[RS_MaxLine];
-    
-    ERR_displayPause("Please Turn On PC Printer");
-    ERR_displayStr("Printing report, please wait...",FALSE);
-
-    putchar('\020');	/*** toggle printer ***/
-
-    while (RS_readLine(buffer, RS_MaxLine))
-	puts(buffer);
-
-    putchar('\020');	/*** toggle printer ***/
-
-    CUR_werase(ERR_Window);
-    CUR_clearok(CUR_curscr);	/*** need to repaint the screen ***/
-    CUR_wrefresh(CUR_curscr);
- #endif
-}
-#endif
 
 
-PublicFnDef int RS_printOutput (
-    PAGE *			page
-)
-{
+PublicFnDef int RS_printOutput (PAGE *page) {
     char buffer[RS_MaxLine+1],
          filename[80];
     FILE *fd;
-#if 0
-    int c;
-    
-    c = ERR_promptForChar("Print to System or PC (s/p) ? ", "sSpP");
-	
-    if (c == 'p' || c == 'P')    
-	pcPrint();
-    else
-    if (c == 's' || c == 'S')    
-	systemPrint();
-#endif
     print (page,-1);
 
     if (isBlank (PRINT_Command.command))
@@ -1436,14 +1352,6 @@ PublicFnDef int RS_printOutput (
 	fputs (buffer, fd);
 
     fclose (fd);
-    
-#if 0
-    if (0 == strncmp(PRINT_Command, "pc", 2))
-	pcPrint();
-    else
-    if (PRINT_Lines)
-	systemPrint();
-#endif
 
     printFile (filename);
     remove (filename);

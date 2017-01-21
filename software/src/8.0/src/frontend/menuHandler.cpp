@@ -78,6 +78,8 @@ MENU::MENU (MENU_Choice *choices, int norm, int high, int &longest, int &i, int 
 	    longest = j;
 	i++;
     }
+    m_longest = longest;
+
     MENU_status(this) = MENU_Normal;
     MENU_flags(this) = MENU_StaticMenu;
     MENU_choiceCount(this) = i;
