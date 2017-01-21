@@ -17,34 +17,32 @@
 
 PrivateVarDef FORM *Form1;
 
-PrivateVarDef MENU *menu1, *menu2, *menu3;
-
 PrivateVarDef FORM_Field form1Fields[] = {
  1, 1, CUR_A_NORMAL, 11, 0, 'a', "   Company:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  1, 13, (CUR_A_DIM | CUR_A_REVERSE), 20, 1, 'a', "                    ", 
-        " Enter Company Ticker Symbol", NULL, NULL, 
+        " Enter Company Ticker Symbol", MENU::Reference(), NULL, 
  3, 1, CUR_A_NORMAL, 11, 0, 'a', "      Type:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  3, 13, (CUR_A_DIM | CUR_A_REVERSE), 20, 1, 'm', "                    ", 
-        " Use Arrow Keys To Select Report Type, or F1 For Menu", NULL, NULL, 
+        " Use Arrow Keys To Select Report Type, or F1 For Menu", MENU::Reference(), NULL, 
  5, 1, CUR_A_NORMAL, 11, 0, 'a', "      Freq:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  5, 13, (CUR_A_DIM | CUR_A_REVERSE), 20, 1, 'm', "                    ", 
-        " Use Arrow Keys To Select Frequency, or F1 For Menu", NULL, NULL, 
+        " Use Arrow Keys To Select Frequency, or F1 For Menu", MENU::Reference(), NULL, 
  7, 1, CUR_A_NORMAL, 11, 0, 'a', "Start Year:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  7, 13, (CUR_A_DIM | CUR_A_REVERSE), 20, 1, 'n', "87     ", 
-        " Enter Starting Date of Report", NULL, NULL, 
+        " Enter Starting Date of Report", MENU::Reference(), NULL, 
  9, 1, CUR_A_NORMAL, 11, 0, 'a', "    Number:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  9, 13, (CUR_A_DIM | CUR_A_REVERSE), 20, 1, 'n', "5      ", 
-        " Enter The Number of Periods To Display", NULL, NULL, 
+        " Enter The Number of Periods To Display", MENU::Reference(), NULL, 
  11, 1, CUR_A_NORMAL, 11, 0, 'a', " Direction:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  11, 13, (CUR_A_DIM | CUR_A_REVERSE), 20, 1, 'm', "                    ", 
         " Use Arrow Keys To Select Direction From The Starting Date",
-        NULL, NULL,
+        MENU::Reference(), NULL,
  -1, 
 };
 
@@ -208,14 +206,11 @@ PublicFnDef void financeSt() {
 /**** create form objects ****/
 	FORM_makeForm(Form1, form1Fields, i);
 
-	MENU_makeMenu(menu1, reportChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
-	MENU_makeMenu(menu2, frequencyChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
-	MENU_makeMenu(menu3, directionChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
-	ReportMenu = menu1;
+	ReportMenu.setTo (new MENU (reportChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
 	MENU_title(ReportMenu) = " Report Type:";
-	FreqMenu = menu2;
+	FreqMenu.setTo (new MENU (frequencyChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
 	MENU_title(FreqMenu) = " Frequency:";
-	DirMenu = menu3;
+	DirMenu.setTo (new MENU (directionChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
 	MENU_title(DirMenu) = " Direction:";
     }
 
@@ -240,25 +235,10 @@ PublicFnDef void financeSt() {
 	PAGE_createElement(page, 2, Form1, form1Win,
 					 PAGE_Input, FORM_handler, TRUE);
 
-    if( firstTime )
-    {
-    	firstTime = FALSE;
-	fsheet(Form1,page,TRUE);
-    }
-    else
-    	fsheet(Form1,page,FALSE);
+    int bFirstTime = firstTime;
+    firstTime = FALSE;
+    fsheet(Form1,page,bFirstTime);
 
-#if 0
-/**** call page handler ****/
-
-    PAGE_handler(page);
-           
-/*****  cleanup  *****/
-    free (Form1);
-    MENU_deleteMenu (menu1, i);
-    MENU_deleteMenu (menu2, i);
-    MENU_deleteMenu (menu3, i);
-#endif
     CUR_delwin (form1Win);
     CUR_delwin (tmpWin);
     PAGE_deletePage (page, i)

@@ -161,38 +161,37 @@ PrivateVarDef MENU_Choice dataChoices[] = {
 
 PrivateVarDef FORM_Field formFields1[] = {
  1, 20, CUR_A_NORMAL, 40, 0, 'a', "                                        ",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  3, 31, (CUR_A_UNDERLINE | CUR_A_BOLD), 17, 0, 'a', "Data Entry Module",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  4, 35, (CUR_A_UNDERLINE | CUR_A_BOLD), 9, 0, 'a', "Main Menu",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  -1,
 };
 
 PrivateVarDef FORM_Field formFields2[] = {
  1, 20, CUR_A_NORMAL, 40, 0, 'a', "                                        ",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  3, 31, (CUR_A_UNDERLINE | CUR_A_BOLD), 17, 0, 'a', "Data Entry Module",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  4, 31, (CUR_A_UNDERLINE | CUR_A_BOLD), 17, 0, 'a', "Company Main Menu",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  -1,
 };
 
 PrivateVarDef FORM_Field formFields3[] = {
  1, 20, CUR_A_NORMAL, 40, 0, 'a', "                                        ",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  3, 31, (CUR_A_UNDERLINE | CUR_A_BOLD), 17, 0, 'a', "Data Entry Module",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  4, 29, (CUR_A_UNDERLINE | CUR_A_BOLD), 21, 0, 'a', "Company Estimate Menu",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  -1,
 };
 
 PublicVarDef int	inDE = FALSE;
 
 PublicFnDef void dataEntryModule() {
-    MENU *menu;
     FORM *form;
     PAGE *page;
     PAGE *OldPage;
@@ -208,7 +207,7 @@ PublicFnDef void dataEntryModule() {
     inDE = TRUE;
         
 /*** create menu object ***/
-    MENU_makeMenu(menu, menuChoices1, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+    MENU::Reference menu (new MENU (menuChoices1, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
 
 /*** create menu window ***/
     cols = longest + 4;
@@ -242,7 +241,6 @@ PublicFnDef void dataEntryModule() {
 /**** cleanup page ****/
     CUR_delwin(MenuWin);
     CUR_delwin(FormWin);
-    MENU_deleteMenu(menu, i);
     free(form);
     PAGE_deletePage(page, i);
     CurrPage = OldPage;
@@ -256,7 +254,6 @@ PublicFnDef void dataEntryModule() {
  **********	Exec Functions		***************
  *****************************************************/
 PrivateFnDef void companyDataEntry() {
-    MENU *menu;
     FORM *form;
     PAGE *page;
     PAGE *OldPage;
@@ -265,7 +262,7 @@ PrivateFnDef void companyDataEntry() {
     static int alreadyCentered = FALSE;
 
 /*** create menu object ***/
-    MENU_makeMenu(menu, menuChoices2, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+    MENU::Reference menu (new MENU (menuChoices2, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
 
 /*** create menu window ***/
     cols = longest + 4;
@@ -299,14 +296,12 @@ PrivateFnDef void companyDataEntry() {
 /**** cleanup page ****/
     CUR_delwin(MenuWin);
     CUR_delwin(FormWin);
-    MENU_deleteMenu(menu, i);
     free(form);
     PAGE_deletePage(page, i);
     CurrPage = OldPage;
 }
 
 PublicFnDef void estimateDataEntry() {
-    MENU *menu;
     FORM *form;
     PAGE *page;
     PAGE *OldPage;
@@ -315,7 +310,7 @@ PublicFnDef void estimateDataEntry() {
     static int alreadyCentered = FALSE;
 
 /*** create menu object ***/
-    MENU_makeMenu(menu, menuChoices3, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+    MENU::Reference menu (new MENU (menuChoices3, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
 
 /*** create menu window ***/
     cols = longest + 4;
@@ -349,7 +344,6 @@ PublicFnDef void estimateDataEntry() {
 /**** cleanup page ****/
     CUR_delwin(MenuWin);
     CUR_delwin(FormWin);
-    MENU_deleteMenu(menu, i);
     free(form);
     PAGE_deletePage(page, i);
     CurrPage = OldPage;
@@ -357,53 +351,53 @@ PublicFnDef void estimateDataEntry() {
 
 PrivateVarDef FORM_Field fund1Fields[] = {
  0, 25, (CUR_A_BOLD | CUR_A_UNDERLINE), 29, 0, 'a', "Company Fundamental Worksheet",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  1, 0, (CUR_A_NORMAL), 12, 0, 'a', "Company Name",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  1, 13, (CUR_A_REVERSE), 40, 0, 'a', "                                        ",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  1, 60, (CUR_A_NORMAL), 9, 0, 'a', "Frequency",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  1, 70, (CUR_A_REVERSE), 3, 0, 'a', "   ",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  3, 4, (CUR_A_NORMAL), 8, 0, 'a', "Category",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  3, 13, (CUR_A_REVERSE), 25, 0, 'a', "                         ",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  -1,
 };
 PrivateVarDef FORM_Field est1Fields[] = {
  0, 27, (CUR_A_BOLD | CUR_A_UNDERLINE), 26, 0, 'a', "Company Estimate Worksheet",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  1, 0, (CUR_A_NORMAL), 12, 0, 'a', "Company Name",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  1, 13, (CUR_A_REVERSE), 40, 0, 'a', "                                        ",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  1, 55, CUR_A_NORMAL, 13, 0, 'a', "Estimate Date",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  1, 69, (CUR_A_REVERSE), 10, 0, 'a', "          ",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  -1,
 };
 PrivateVarDef FORM_Field est2Fields[] = {
  0, 0, CUR_A_NORMAL, 40, 0, 'a', "----------------------------------------",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  0, 40, CUR_A_NORMAL, 40, 0, 'a', "----------------------------------------",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  -1,
 };
 PrivateVarDef FORM_Field est3Fields[] = {
  0, 0, CUR_A_NORMAL, 40, 0, 'a', "----------------------------------------",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  0, 40, CUR_A_NORMAL, 40, 0, 'a', "----------------------------------------",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  -1,
 };
 PrivateVarDef FORM_Field est4Fields[] = {
  0, 0, CUR_A_NORMAL, 40, 0, 'a', "----------------------------------------",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  0, 40, CUR_A_NORMAL, 40, 0, 'a', "----------------------------------------",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  -1,
 };
 
@@ -485,7 +479,6 @@ PrivateFnDef void allDataEntry () {
 
 PrivateFnDef void estDataEntry() {
     SPSHEET *spr;
-    MENU *actionMenu;
     PAGE *OldPage;
     int i, longest, j;
 
@@ -574,7 +567,7 @@ PrivateFnDef void estDataEntry() {
     else
 	ss1Win = CUR_newwin(15, CUR_COLS, 3, 0);
 
-    MENU_makeMenu(actionMenu, dataChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+    MENU::Reference actionMenu (new MENU (dataChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
     MENU_title(actionMenu) = " Data Entry Options";
     MENU_choiceHandler(actionMenu,0) = getNewEstObject;
     MENU_choiceLabel(actionMenu,0)=" Change Company ";
@@ -669,15 +662,15 @@ PrivateFnDef void estDataEntry() {
 
 PrivateVarDef FORM_Field miscFields[] = {
  0, 22, (CUR_A_BOLD | CUR_A_UNDERLINE), 36, 0, 'a', "                                    ",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  2, 0, (CUR_A_NORMAL), 13, 0, 'a', " Company Name",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  2, 14, (CUR_A_REVERSE), 40, 0, 'a', "                                        ",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  2, 57, CUR_A_NORMAL, 11, 0, 'a', "Update Date",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  2, 69, (CUR_A_REVERSE), 10, 0, 'a', "          ",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  -1,
 };
 
@@ -949,7 +942,6 @@ PrivateFnDef void fundExec () {
 PrivateFnDef void MiscDataEntry()
 {
     PAGE *OldPage;
-    MENU *actionMenu;
     int i, longest, j;
 
     getObjectAndDate();
@@ -1009,7 +1001,7 @@ PrivateFnDef void MiscDataEntry()
     formWin = CUR_newwin(CUR_LINES-1, CUR_COLS, 0, 0);
 
 /**** create menu object ****/
-    MENU_makeMenu(actionMenu, dataChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+    MENU::Reference actionMenu (new MENU (dataChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
     MENU_title(actionMenu) = " Data Entry Options";
     MENU_choiceHandler(actionMenu,0) = getNewMiscObject;
     MENU_choiceActive(actionMenu,3) = OFF;
@@ -1063,52 +1055,52 @@ PrivateFnDef void MiscDataEntry()
 
 PrivateVarDef FORM_Field objUpdFields[] = {
  1, 4, CUR_A_NORMAL, 9, 0, 'a', " Company:",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  1, 14, (CUR_A_BOLD | CUR_A_REVERSE), 20, 1, 'a', "                    ",
-	" Enter Company Ticker Symbol                      ", NULL, NULL,
+	" Enter Company Ticker Symbol                      ", MENU::Reference(), NULL,
  3, 3, CUR_A_NORMAL, 10, 0, 'a', "    Update",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  3, 14, CUR_A_NORMAL, 5, 0, 'a', "Date:",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  3, 20, (CUR_A_BOLD | CUR_A_REVERSE), 2, 1, 'n', "  ",
-	" Enter Month", NULL, NULL,
+	" Enter Month", MENU::Reference(), NULL,
  3, 22, CUR_A_NORMAL, 1, 0, 'a', "/",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  3, 23, (CUR_A_BOLD | CUR_A_REVERSE), 2, 1, 'n', "  ",
-	" Enter Day", NULL, NULL,
+	" Enter Day", MENU::Reference(), NULL,
  3, 25, CUR_A_NORMAL, 1, 0, 'a', "/",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  3, 26, (CUR_A_BOLD | CUR_A_REVERSE), 4, 1, 'n', "    ",
-	" Enter Year", NULL, NULL,
+	" Enter Year", MENU::Reference(), NULL,
  5, 5, CUR_A_NORMAL, 29, 0, 'a', "Execute(F2)  Quit(F9)" ,
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
 -1,
 };
 PrivateVarDef FORM_Field objEstFields[] = {
  1, 4, CUR_A_NORMAL, 9, 0, 'a', " Company:",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  1, 14, (CUR_A_BOLD | CUR_A_REVERSE), 20, 1, 'a', "                    ",
-	" Enter Company Ticker Symbol ", NULL, NULL,
+	" Enter Company Ticker Symbol ", MENU::Reference(), NULL,
  3, 3, CUR_A_NORMAL, 10, 0, 'a', "  Estimate",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  3, 14, CUR_A_NORMAL, 5, 0, 'a', "Date:",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  3, 20, (CUR_A_BOLD | CUR_A_REVERSE), 2, 1, 'n', "  ",
-	" Enter Month", NULL, NULL,
+	" Enter Month", MENU::Reference(), NULL,
  3, 22, CUR_A_NORMAL, 1, 0, 'a', "/",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  3, 23, (CUR_A_BOLD | CUR_A_REVERSE), 2, 1, 'n', "  ",
-	" Enter Day", NULL, NULL,
+	" Enter Day", MENU::Reference(), NULL,
  3, 25, CUR_A_NORMAL, 1, 0, 'a', "/",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  3, 26, (CUR_A_BOLD | CUR_A_REVERSE), 4, 1, 'n', "    ",
-	" Enter Year", NULL, NULL,
+	" Enter Year", MENU::Reference(), NULL,
  5, 6, CUR_A_NORMAL, 7, 0, 'a', "Source:",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  5, 14, (CUR_A_BOLD | CUR_A_REVERSE), 20, 1, 'm', "                    ",
-        " Use Arrow Keys to Select Source Type, or F1 For Menu", NULL, NULL, 
+        " Use Arrow Keys to Select Source Type, or F1 For Menu", MENU::Reference(), NULL, 
  7, 7, CUR_A_NORMAL, 29, 0, 'a', "Execute(F2)  Quit(F9)" ,
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
 -1,
 };
 PrivateVarDef MENU_Choice sourceChoices[] = {
@@ -1118,19 +1110,19 @@ PrivateVarDef MENU_Choice sourceChoices[] = {
 
 PrivateVarDef FORM_Field fund2Fields[] = {
  1, 6, CUR_A_NORMAL, 8, 0, 'a', "Company:",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  1, 15, (CUR_A_BOLD | CUR_A_REVERSE), 20, 1, 'a', "                    ",
-	" Enter Company Ticker Symbol ", NULL, NULL,
+	" Enter Company Ticker Symbol ", MENU::Reference(), NULL,
  3, 4, CUR_A_NORMAL, 10, 0, 'a', "Frequency:",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  3, 15, (CUR_A_BOLD | CUR_A_REVERSE), 3, 1, 'm', "   ",
-        " Use Arrow Keys to Select Frequency Type, or F1 For Menu", NULL, NULL, 
+        " Use Arrow Keys to Select Frequency Type, or F1 For Menu", MENU::Reference(), NULL, 
  5, 5, CUR_A_NORMAL, 9, 0, 'a', "Category:",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  5, 15, (CUR_A_BOLD | CUR_A_REVERSE), 25, 1, 'm', "                         ",
-        " Use Arrow Keys to Select Source Type, or F1 For Menu", NULL, NULL, 
+        " Use Arrow Keys to Select Source Type, or F1 For Menu", MENU::Reference(), NULL, 
  7, 7, CUR_A_NORMAL, 29, 0, 'a', "Execute(F2)  Quit(F9)" ,
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
 -1,
 };
 PrivateVarDef MENU_Choice freqChoices[] = {
@@ -1285,7 +1277,7 @@ PrivateFnDef void validateInitial() {
     GotValidObjectAndDate = TRUE;
 }
 
-PrivateVarDef MENU	*sourceMenu = NULL;
+PrivateVarDef MENU::Reference sourceMenu;
 
 PrivateFnDef void getObjectAndDate () {
 	CUR_WINDOW	*w1, *w2;
@@ -1351,24 +1343,20 @@ PrivateFnDef void getObjectAndDate () {
 
 	if( DateType == EstimateDate )
 	{
-	    if( sourceMenu == NULL )
-	    {
-		if( (sourceMenu = MENU_getMenu("EstimateSource getMenu")) == NULL )
-		{
+	    if( sourceMenu.isNil () ) {
+		sourceMenu.setTo (MENU_getMenu("EstimateSource getMenu"));
+		if( sourceMenu.isNil () ) {
 		    CUR_beep();
-		    MENU_makeMenu(sourceMenu, sourceChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
-		}
-		else
-		{
-		    for( i=0 ; i<MENU_choiceCount(sourceMenu) ; i++ )
-		    {
+		    sourceMenu.setTo (new MENU (sourceChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
+		} else 	{
+		    for( i=0 ; i<MENU_choiceCount(sourceMenu) ; i++ ) {
 			MENU_choiceHandler(sourceMenu,i) = FORM_menuToForm;
 			MENU_choiceActive(sourceMenu,i) = ON;
 		    }
 		}
 		MENU_title(sourceMenu) = " Source:";
 	    }
-	    ObjectForm->field[10]->menu = sourceMenu;
+	    ObjectForm->field[10]->menu.setTo (sourceMenu);
 	}
 
 	if( CurrPage == NULL )
@@ -1390,15 +1378,10 @@ PrivateFnDef void getObjectAndDate () {
 	CUR_delwin(w2);
 	CUR_delwin(w1);
 	free(ObjectForm);
-	/*
-	if( DateType == EstimateDate )
-	    MENU_deleteMenu(sourceMenu, i);
-	*/
 	PAGE_deletePage(ObjectPage,i);
 }
 
 PublicFnDef void fundamentalDataEntry () {
-    MENU *actionMenu;
     PAGE *OldPage;
     int i, longest, j;
     char freqBuf[5];
@@ -1427,7 +1410,7 @@ PublicFnDef void fundamentalDataEntry () {
 /*** create spreadsheets and their windows ***/
     fundSSWin = CUR_newwin(15, CUR_COLS, 5, 0);
 
-    MENU_makeMenu(actionMenu, dataChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+    MENU::Reference actionMenu (new MENU (dataChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
     MENU_title(actionMenu) = " Data Entry Options";
     MENU_choiceHandler(actionMenu,0) = getNewFundamental;
     MENU_choiceLabel(actionMenu,0)=" Change Company ";
@@ -1536,8 +1519,7 @@ PrivateFnDef void validateFundamental()
     GotValidObjectAndDate = TRUE;
 }
 
-PrivateVarDef MENU	*freqMenu = NULL;
-PrivateVarDef MENU	*categoryMenu = NULL;
+PrivateVarDef MENU::Reference categoryMenu;
 
 PrivateFnDef void getFundamental () {
 	CUR_WINDOW	*w1, *w2;
@@ -1550,21 +1532,17 @@ PrivateFnDef void getFundamental () {
 	w2 = CUR_newwin(9,48,11,2);
 	FORM_makeForm(ObjectForm,fund2Fields,i);
 
-	MENU_makeMenu(freqMenu, freqChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+	MENU::Reference freqMenu (new MENU (freqChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
 	MENU_title(freqMenu) = " Frequency:";
-	ObjectForm->field[3]->menu = freqMenu;
+	ObjectForm->field[3]->menu.setTo (freqMenu);
 
-	if( categoryMenu == NULL )
-	{
-	    if( (categoryMenu = MENU_getMenu("CompanyUpdateStructureFundamental categoryList")) == NULL )
-	    {
+	if( categoryMenu.isNil () ) {
+	    categoryMenu.setTo (MENU_getMenu("CompanyUpdateStructureFundamental categoryList"));
+	    if( categoryMenu.isNil () ) {
 		CUR_beep();
-		MENU_makeMenu(categoryMenu, categoryChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
-	    }
-	    else
-	    {
-		for( i=0 ; i<MENU_choiceCount(categoryMenu) ; i++ )
-		{
+		categoryMenu.setTo (new MENU (categoryChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
+	    } else {
+		for( i=0 ; i<MENU_choiceCount(categoryMenu) ; i++ ) {
 		    MENU_choiceHandler(categoryMenu,i) = FORM_menuToForm;
 		    MENU_choiceActive(categoryMenu,i) = ON;
 		}
@@ -1592,6 +1570,5 @@ PrivateFnDef void getFundamental () {
 	CUR_delwin(w2);
 	CUR_delwin(w1);
 	free(ObjectForm);
-	MENU_deleteMenu(freqMenu, i);
 	PAGE_deletePage(ObjectPage,i);
 }

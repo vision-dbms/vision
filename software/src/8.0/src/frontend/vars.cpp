@@ -37,9 +37,9 @@ PrivateVarDef MENU_Choice VarChoices[] = {
 };
 
 PrivateVarDef VARS_Type VarNames[] = {
- "StartupKit",	  VARS_stringType,	(caddr_t)StartupKit,	 static_cast<char const*>(NULL),	NULL,
- "StartupModule", VARS_funcType,	(caddr_t)&StartupModule, static_cast<char const*>(NULL),	NULL,
- "DefaultModule", VARS_funcType,	(caddr_t)&DefaultModule, static_cast<char const*>(NULL),	NULL,
+ "StartupKit",	  VARS_stringType,	(caddr_t)StartupKit,	 static_cast<char const*>(NULL), MENU::Reference (),
+ "StartupModule", VARS_funcType,	(caddr_t)&StartupModule, static_cast<char const*>(NULL), MENU::Reference (),
+ "DefaultModule", VARS_funcType,	(caddr_t)&DefaultModule, static_cast<char const*>(NULL), MENU::Reference (),
  NULL,
 };
 
@@ -71,19 +71,19 @@ PrivateVarDef MENU_Choice booleanChoices[] = {
 
 PrivateVarDef FORM_Field formFields[] = {
  1, 1, CUR_A_NORMAL, 9, 0, 'a', "Variable:",
- 	static_cast<char const*>(NULL), NULL, NULL,
+ 	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  3, 1, CUR_A_NORMAL, 6, 0, 'a', "Value:",
- 	static_cast<char const*>(NULL), NULL, NULL,
+ 	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  1, 11, CUR_A_REVERSE, 20, 1, 'S', "                    ",
- 	" Use Arrow Keys to Select Variable Name", NULL, NULL,
+ 	" Use Arrow Keys to Select Variable Name", MENU::Reference(), NULL,
  3, 11, CUR_A_REVERSE, 30, 1, 'X', "                              ",
- 	static_cast<char const*>(NULL), NULL, NULL,
+ 	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  3, 11, CUR_A_REVERSE, 30, FORM_ScrollFlag, 'A', "                              ",
- 	" Enter Startup Kit Name", NULL, NULL,
+ 	" Enter Startup Kit Name", MENU::Reference(), NULL,
  3, 11, CUR_A_REVERSE, 30, 0, 'M', "                              ",
- 	" Use Arrow Keys to Select Startup Module", NULL, NULL,
+ 	" Use Arrow Keys to Select Startup Module", MENU::Reference(), NULL,
  3, 11, CUR_A_REVERSE, 30, 0, 'M', "                              ",
- 	" Use Arrow Keys to Select Default Module (F4 key)", NULL, NULL,
+ 	" Use Arrow Keys to Select Default Module (F4 key)", MENU::Reference(), NULL,
  -1,
 };
 
@@ -143,29 +143,26 @@ PrivateFnDef void initVarsForm() {
 	VARS_Type	*vt;
 	FORM_Field	*f;
 	int		i, j, longest, idx;
-	MENU		*menu;
 
-	if( (menu = VARS_menu(&VarNames[STARTUPMODULE])) == NULL )
-	{
-	    MENU_makeMenu(
-		menu, moduleChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j
-	    );
+	MENU::Reference menu (VARS_menu(&VarNames[STARTUPMODULE]));
+	if(menu.isNil ()) {
+	    menu.setTo (new MENU (moduleChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
 	    MENU_title(menu) = " Modules:";
 	    MENU_currChoice(menu) = NOMODULE;
 	    VARS_menu(&VarNames[STARTUPMODULE]) = menu;
 	}
 	FORM_fieldMenu (
 	    FORM_field(VarsForm, VariableValue+1+STARTUPMODULE)
-	) = menu;
+	).setTo (menu);
 
-	if( (menu = VARS_menu(&VarNames[DEFAULTMODULE])) == NULL )
-	{
-		MENU_makeMenu(menu, moduleChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
-		MENU_title(menu) = " Modules:";
-		MENU_currChoice(menu) = EDITMODULE;
-		VARS_menu(&VarNames[DEFAULTMODULE]) = menu;
+	menu.setTo (VARS_menu(&VarNames[DEFAULTMODULE]));
+	if( menu.isNil () ) {
+	    menu.setTo (new MENU (moduleChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
+	    MENU_title(menu) = " Modules:";
+	    MENU_currChoice(menu) = EDITMODULE;
+	    VARS_menu(&VarNames[DEFAULTMODULE]).setTo (menu);
 	}
-	FORM_fieldMenu(FORM_field(VarsForm, VariableValue+1+DEFAULTMODULE)) = menu;	
+	FORM_fieldMenu(FORM_field(VarsForm, VariableValue+1+DEFAULTMODULE)).setTo (menu);
 	
 	for( i=0 ; i<=LASTVARIABLE ; i++ )
 	{
@@ -295,16 +292,12 @@ PrivateFnDef int processLine(char *line) {
 	    (strncmp(buffer,"NA",2) == 0) )
 	{
 		VARS_menuString(&VarNames[idx]).clear ();
-		if( VARS_menu(&VarNames[idx]) != NULL )
-			MENU_deleteMenu(VARS_menu(&VarNames[idx]), i);
-		VARS_menu(&VarNames[idx]) = NULL;
+		VARS_menu(&VarNames[idx]).clear ();
 	}
 	else
 	{
 		VARS_menuString(&VarNames[idx]).setTo (buffer);
-		if( VARS_menu(&VarNames[idx]) != NULL )
-			MENU_deleteMenu(VARS_menu(&VarNames[idx]), i);
-		VARS_menu(&VarNames[idx]) = MENU_getMenu(buffer);
+		VARS_menu(&VarNames[idx]).setTo (MENU_getMenu(buffer));
 	}
 	return(FALSE);
 }
@@ -412,7 +405,6 @@ PrivateFnDef int getFileName(char const *pstr /* either "write to" or "read from
 }
 
 PublicFnDef int VARS_initProfileVariables() {
-	MENU	*menu;
 	char const *pf;
 	int	i, j, longest;
 	
@@ -446,9 +438,9 @@ PublicFnDef int VARS_initProfileVariables() {
 		
 	FORM_makeForm(VarsForm, formFields, i);
 
-	MENU_makeMenu(menu, VarChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+	MENU::Reference menu (new MENU (VarChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
 	MENU_title(menu) = " Variables:";
-	FORM_fieldMenu(FORM_field(VarsForm, VariableName)) = menu;
+	FORM_fieldMenu(FORM_field(VarsForm, VariableName)).setTo (menu);
 
 	initVarsForm();
 		
@@ -534,10 +526,9 @@ static_cast<char const*>(NULL),
 
 PrivateFnDef void fileMenu() {
     int		i, j, longest, sr, sc;
-    MENU	*menu;
     CUR_WINDOW	*menuWin;
 
-    MENU_makeMenu(menu, fileReportMenu, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+    MENU::Reference menu (new MENU (fileReportMenu, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
     MENU_title(menu) =" Interface Menu: ";
     i = MENU_choiceCount(menu) + 4;
     if( i >= CUR_LINES )
@@ -554,7 +545,6 @@ PrivateFnDef void fileMenu() {
     }
     menuWin = CUR_newwin(i, j, sr, sc);
     MENU_handler(menu,menuWin,PAGE_Input);
-    MENU_deleteMenu(menu, i);
     CUR_delwin(menuWin);
 }
 

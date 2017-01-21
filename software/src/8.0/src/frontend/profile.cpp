@@ -30,7 +30,6 @@ PrivateVarDef SPRSHEET	*ProfileReport;
 PrivateVarDef PAGE *ProfilePage, *ApplicPage;
 PrivateVarDef CUR_WINDOW  *Win, *tWin, *StatWin;
 PrivateVarDef char const *Company;
-PrivateVarDef MENU *actionMenu;
 
 PrivateFnDef void changeCompany(), displayItem(), sendExpression(), detailsMenu();
 
@@ -54,6 +53,7 @@ PrivateFnDef void applicFileMenu() {
 	EDIT_reportFileMenu(ApplicPage,FALSE);
 }
 
+PrivateVarDef MENU::Reference actionMenu;
 
 PublicFnDef void profile (char const *company) {
     int i, j, longest;
@@ -78,7 +78,7 @@ PublicFnDef void profile (char const *company) {
 	SPR_simulateApplic = TRUE;
     
 /**** create menu object ****/
-	MENU_makeMenu(actionMenu, menuChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+	actionMenu.setTo (new MENU (menuChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
 	MENU_title(actionMenu) = " Corporate Profile:";
 	longest += 4;
 	if( (i = strlen(MENU_title(actionMenu))) >= longest )
@@ -128,7 +128,6 @@ PublicFnDef void profile (char const *company) {
     CUR_delwin(Win);
     CUR_delwin(tWin);
     CUR_delwin(StatWin);
-    MENU_deleteMenu(actionMenu, i);
     PAGE_deletePage (ApplicPage, i);
     PAGE_deletePage (ProfilePage, i);
 }
@@ -177,11 +176,11 @@ PrivateFnDef void printReport() {
 
 PrivateVarDef FORM_Field companyFields[] = {
  2, 5, CUR_A_NORMAL, 18, 0, 'a', "Enter New Company:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  2, 24, (CUR_A_DIM | CUR_A_REVERSE), 18, 1, 'a', "                  ", 
-        " Enter Company Ticker Symbol", NULL, NULL, 
+        " Enter Company Ticker Symbol", MENU::Reference(), NULL, 
  7, 5, CUR_A_NORMAL, 29, 0, 'a', "Execute(F2)  Quit(F9)" , 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
 -1, 
 };
 
@@ -258,21 +257,21 @@ PrivateFnDef void execCompany () {
 
 PrivateVarDef FORM_Field itemFields[] = {
  1, 2, CUR_A_NORMAL, 16, 0, 'a', "Item To Display:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  1, 19, (CUR_A_DIM | CUR_A_REVERSE), 16, 1, 'a', "                ", 
-        " Enter Item To Display, or Press F1 For Menu", NULL, NULL, 
+        " Enter Item To Display, or Press F1 For Menu", MENU::Reference(), NULL, 
  3, 13, CUR_A_NORMAL, 5, 0, 'a', "Year:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  3, 19, (CUR_A_DIM | CUR_A_REVERSE), 4, 1, 'n', "    ", 
-        " Enter Year, or Press F1 For Menu", NULL, NULL, 
+        " Enter Year, or Press F1 For Menu", MENU::Reference(), NULL, 
  3, 27, CUR_A_NORMAL, 6, 0, 'a', "Month:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  3, 34, (CUR_A_DIM | CUR_A_REVERSE), 4, 1, 'n', "    ", 
-        " Enter Month, or Press F1 For Menu", NULL, NULL, 
+        " Enter Month, or Press F1 For Menu", MENU::Reference(), NULL, 
  5, 1, CUR_A_NORMAL, 45, 0, 'a', "                                             ", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  7, 5, CUR_A_NORMAL, 29, 0, 'a', "Execute(F2)  Quit(F9)" , 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
 -1, 
 };
 
@@ -295,7 +294,6 @@ PrivateVarDef PAGE *ItemPage;
 PrivateVarDef CUR_WINDOW *ItemWin;
 
 PrivateFnDef void displayItem() {
-    MENU *menu1, *menu2;
     int i, j, longest;
     CUR_WINDOW *win;
 /*    CUR_WINDOW *MenuWin;*/
@@ -311,17 +309,18 @@ PrivateFnDef void displayItem() {
     FORM_fieldValue(MONTH)[0] = '\0';
     FORM_fieldValue(DISPLAY)[0] = '\0';
     
-    menu1 = MENU_getMenu("companyItemCategoryListList");
-    if (menu1 != NULL)
-    {
-	for (i = 0; i < MENU_choiceCount(menu1); i++)
-	    MENU_choiceHandler(menu1, i) = itemList;
-	MENU_title(menu1) = " Item Category: ";
+    MENU::Reference menu;
+    menu.setTo (MENU_getMenu("companyItemCategoryListList"));
+    if (menu.isntNil ()) {
+	for (i = 0; i < MENU_choiceCount(menu); i++)
+	    MENU_choiceHandler(menu, i) = itemList;
+	MENU_title(menu) = " Item Category: ";
     }
-    FORM_fieldMenu(ITEM) = menu1;
-    MENU_makeMenu(menu2, yearChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
-    MENU_title(menu2) = " Years: ";
-    FORM_fieldMenu(YEAR) = menu2;
+    FORM_fieldMenu(ITEM).setTo (menu);
+    
+    menu.setTo (new MENU (yearChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
+    MENU_title(menu) = " Years: ";
+    FORM_fieldMenu(YEAR).setTo (menu);
 
     PAGE_createPage(ItemPage, 5, NULL, NULL, NULL, PAGE_noType, i);
     PAGE_fkey(ItemPage, 1) = execItem;
@@ -335,8 +334,6 @@ PrivateFnDef void displayItem() {
     PAGE_createElement(ItemPage, 4, NULL, StatWin, PAGE_Init, NULL, FALSE);
     PAGE_handler(ItemPage);
 
-    MENU_deleteMenu(menu1, i);
-    MENU_deleteMenu(menu2, i);
     PAGE_deletePage(ItemPage, i);
 /*    CUR_delwin(MenuWin);*/
     CUR_delwin(ItemWin);
@@ -446,7 +443,6 @@ PrivateFnDef void itemList () {
     MENU_handler(menu2, SysWin, PAGE_Input);
     FORM_fieldMenu(ITEM) = menu1;
     CUR_delwin(SysWin);
-    MENU_deleteMenu(menu2, i);
 }
 
 
@@ -459,17 +455,17 @@ PrivateFnDef void itemList () {
 
 PrivateVarDef FORM_Field exprFields[] = {
  1, 1, CUR_A_NORMAL, 11, 0, 'a', "Expression:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  1, 13, (CUR_A_DIM | CUR_A_REVERSE), 40, 1, 'a',
- "                                        ", " Enter Expression", NULL, NULL, 
+ "                                        ", " Enter Expression", MENU::Reference(), NULL, 
  2, 13, (CUR_A_DIM | CUR_A_REVERSE), 40, 1, 'a',
- "                                        ", " Enter Expression", NULL, NULL, 
+ "                                        ", " Enter Expression", MENU::Reference(), NULL, 
  5, 5, CUR_A_NORMAL, 7, 0, 'a', "Result:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  5, 13, CUR_A_NORMAL, 40, 0, 'a', "                                        ", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  7, 5, CUR_A_NORMAL, 29, 0, 'a', "Execute(F2)  Quit(F9)" , 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
 -1, 
 };
 
@@ -544,7 +540,7 @@ PrivateFnDef void execExpr () {
  **********************************************/
 PrivateVarDef SPRSHEET *DetailReport;
 PrivateVarDef PAGE *DetailPage;
-PrivateVarDef MENU *DetailMenu;
+PrivateVarDef MENU::Reference DetailMenu;
 PrivateVarDef void reportDetails(), printDetails();
 
 PrivateVarDef MENU_Choice detailsChoices[] = {
@@ -569,15 +565,14 @@ PrivateFnDef void detailsMenu() {
     CUR_WINDOW *SysWin;
     
     SysWin = CUR_newwin(10, 20, 5, 5);
-    
-    MENU_makeMenu(DetailMenu,
-	detailsChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+
+    DetailMenu.setTo (new MENU (detailsChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
     MENU_title(DetailMenu) = " Detailed Reports: ";
 
     MENU_handler(DetailMenu, SysWin, PAGE_Input);
 
     CUR_delwin(SysWin);
-    MENU_deleteMenu(DetailMenu, i);
+    DetailMenu.clear ();
 }
 
 PrivateFnDef void detailFileMenu() {
@@ -586,15 +581,13 @@ PrivateFnDef void detailFileMenu() {
 
 PrivateFnDef void reportDetails() {
     int i, j, longest;
-    MENU *menu;
     CUR_WINDOW *win;
     char buffer[RS_MaxLine + 1];
     char const *title;
 
 /**** determine which report and format message ****/
 
-    switch (MENU_choiceLetter(DetailMenu, MENU_currChoice(DetailMenu)))
-    {
+    switch (MENU_choiceLetter(DetailMenu, MENU_currChoice(DetailMenu))) {
     case 'e':
         sprintf(buffer, "Named Company %s detailEstimates", Company);
 	title = " Estimate Details: ";
@@ -611,7 +604,7 @@ PrivateFnDef void reportDetails() {
     RS_sendLine (buffer);
     SPR_readSSheet (DetailReport);
     
-    MENU_makeMenu(menu, detailActions, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+    MENU::Reference menu (new MENU (detailActions, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
     MENU_title(menu) = title;
 
     PAGE_createPage(DetailPage, 2, NULL, menu, NULL, PAGE_menuType, i);
@@ -630,7 +623,6 @@ PrivateFnDef void reportDetails() {
 /*****  cleanup  *****/
     SPR_delete (DetailReport);
     SPR_CurrSPR = ProfileReport;
-    MENU_deleteMenu(menu, i);
     CUR_delwin(win);
     PAGE_deletePage (DetailPage, i);
 }

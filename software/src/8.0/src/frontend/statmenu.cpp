@@ -25,9 +25,9 @@ PrivateVarDef MENU_Choice menuChoices[] = {
 
 PrivateVarDef FORM_Field formFields[] = {
  1, 20, CUR_A_NORMAL, 40, 0, 'a', "                                        ", 
-	static_cast<char const*>(NULL), NULL, NULL, 
- 3, 35, (CUR_A_UNDERLINE | CUR_A_BOLD), 10, 0, 'a', "Stat Sheet", static_cast<char const*>(NULL), NULL, NULL, 
- 4, 35, (CUR_A_UNDERLINE | CUR_A_BOLD), 9, 0, 'a', "Main Menu",	static_cast<char const*>(NULL), NULL, NULL, 
+	static_cast<char const*>(NULL), MENU::Reference(), NULL, 
+ 3, 35, (CUR_A_UNDERLINE | CUR_A_BOLD), 10, 0, 'a', "Stat Sheet", static_cast<char const*>(NULL), MENU::Reference(), NULL, 
+ 4, 35, (CUR_A_UNDERLINE | CUR_A_BOLD), 9, 0, 'a', "Main Menu",	static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  -1, 
 };
 
@@ -35,7 +35,6 @@ PublicVarDef int	inSM = FALSE;
 
 PublicFnDef void statmenu()
 {
-    MENU *menu;
     FORM *form;
     PAGE *page;
     CUR_WINDOW *menuWin, *formWin;
@@ -50,7 +49,7 @@ PublicFnDef void statmenu()
     inSM = TRUE;
     
 /*** create menu object ***/
-    MENU_makeMenu(menu, menuChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+    MENU::Reference menu (new MENU (menuChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
 	
 /*** create menu window ***/
     rows = MENU_choiceCount(menu) + 4;
@@ -81,7 +80,6 @@ PublicFnDef void statmenu()
 /**** call page handler ****/
     PAGE_handler(page);
 
-    MENU_deleteMenu(menu, i);
     free(form);
     CUR_delwin(formWin);
     CUR_delwin(menuWin);

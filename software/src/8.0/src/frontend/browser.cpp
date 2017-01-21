@@ -29,7 +29,7 @@
 
 /*****  Extended Menu  *****/
 typedef struct {
-    MENU	*baseMenu;
+    MENU::Reference baseMenu;
     int		enterable,
 		autoSelect,
 		lastChoice;
@@ -60,12 +60,12 @@ PrivateVarDef FORM		*Background,
 				*AddCatalogForm		= NULL,
 				*AddObjectForm		= NULL,
 				*AddMessageForm		= NULL;
-PrivateVarDef MENU		*NullMenu,
-				*F8Menu,
-				*ClassMenu		= NULL,
-				*LevelMenu		= NULL,
-				*CTypeMenu		= NULL,
-				*ETypeMenu		= NULL;
+PrivateVarDef MENU::Reference	NullMenu,
+				F8Menu,
+				ClassMenu,
+				LevelMenu,
+				CTypeMenu,
+				ETypeMenu;
 PrivateVarDef XMENU		*ObjectCatalog,
 				*ObjectInstance,
 				*MessageCatalog,
@@ -130,7 +130,7 @@ PrivateVarDef FORM_Field BackgroundFields[] = {
 PrivateVarDef FORM_Field HelpBannerFields[] = {
  0, 0, (CUR_A_REVERSE), 65, 0, 'a',
 	" Browser:  Execute(F2) Window(F3) Interface(F5) Menu(F8) Quit(F9)",
-	static_cast<char const*>(NULL), NULL, NULL, 
+	static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  -1,
 };
 
@@ -188,13 +188,13 @@ PrivateVarDef MENU_Choice ETypeMenuChoices[] = {
 /*****  Context Form  *****/
 PrivateVarDef FORM_Field ContextFormFields[] = {
  1,  4, CUR_A_NORMAL, 6, 0, 'a', "Class:",
-        static_cast<char const*>(NULL), NULL, NULL,
+        static_cast<char const*>(NULL), MENU::Reference(), NULL,
  1, 11, (CUR_A_DIM | CUR_A_REVERSE), 16, FORM_InputFlag, 'm', "",
-	" Use Arrow Keys To Select Class, or F1 For Menu", NULL, NULL,
+	" Use Arrow Keys To Select Class, or F1 For Menu", MENU::Reference(), NULL,
  3,  4, CUR_A_NORMAL, 6, 0, 'a', "Level:",
-        static_cast<char const*>(NULL), NULL, NULL,
+        static_cast<char const*>(NULL), MENU::Reference(), NULL,
  3, 11, (CUR_A_DIM | CUR_A_REVERSE), 16, FORM_InputFlag, 'm', "",
-	" Use Arrow Keys To Select Level, or F1 For Menu", NULL, NULL,
+	" Use Arrow Keys To Select Level, or F1 For Menu", MENU::Reference(), NULL,
  -1,
 };
 
@@ -204,21 +204,21 @@ PrivateVarDef FORM_Field ContextFormFields[] = {
 /*****  Add Catalog Form  *****/
 PrivateVarDef FORM_Field AddCatalogFormFields[] = {
  1,  4, CUR_A_NORMAL, 6, 0, 'a', "Class:",
-        static_cast<char const*>(NULL), NULL, NULL,
+        static_cast<char const*>(NULL), MENU::Reference(), NULL,
  1, 11, (CUR_A_DIM | CUR_A_REVERSE), 16, FORM_InputFlag, 'm', "",
-	" Use Arrow Keys To Select Class, or F1 For Menu", NULL, NULL,
+	" Use Arrow Keys To Select Class, or F1 For Menu", MENU::Reference(), NULL,
  1, 28, CUR_A_NORMAL, 13, 0, 'a', "Catalog Type:",
-        static_cast<char const*>(NULL), NULL, NULL,
+        static_cast<char const*>(NULL), MENU::Reference(), NULL,
  1, 42, (CUR_A_DIM | CUR_A_REVERSE), 16, FORM_InputFlag, 'm', "",
-	" Use Arrow Keys To Select Catalog Type, or F1 For Menu", NULL, NULL,
+	" Use Arrow Keys To Select Catalog Type, or F1 For Menu", MENU::Reference(), NULL,
  3,  4, CUR_A_NORMAL, 6, 0, 'a', "Level:",
-        static_cast<char const*>(NULL), NULL, NULL,
+        static_cast<char const*>(NULL), MENU::Reference(), NULL,
  3, 11, (CUR_A_DIM | CUR_A_REVERSE), 16, FORM_InputFlag, 'm', "",
-	" Use Arrow Keys To Select Level, or F1 For Menu", NULL, NULL,
+	" Use Arrow Keys To Select Level, or F1 For Menu", MENU::Reference(), NULL,
  3, 28, CUR_A_NORMAL, 13, 0, 'a', "Catalog Name:",
-        static_cast<char const*>(NULL), NULL, NULL,
+        static_cast<char const*>(NULL), MENU::Reference(), NULL,
  3, 42, (CUR_A_DIM | CUR_A_REVERSE), 16, (FORM_InputFlag | FORM_ScrollFlag), 'a', "",
-	" Enter the name of the catalog to be added, or F1 For Menu", NULL, NULL,
+	" Enter the name of the catalog to be added, or F1 For Menu", MENU::Reference(), NULL,
  -1,
 };
 
@@ -230,33 +230,33 @@ PrivateVarDef FORM_Field AddCatalogFormFields[] = {
 /*****  Add Object Form  *****/
 PrivateVarDef FORM_Field AddObjectFormFields[] = {
  1,  4, CUR_A_NORMAL, 6, 0, 'a', "Class:",
-        static_cast<char const*>(NULL), NULL, NULL,
+        static_cast<char const*>(NULL), MENU::Reference(), NULL,
  1, 11, CUR_A_DIM, 16, 0, 'm', "",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  1, 28, CUR_A_NORMAL, 13, 0, 'a', "Catalog Type:",
-        static_cast<char const*>(NULL), NULL, NULL,
+        static_cast<char const*>(NULL), MENU::Reference(), NULL,
  1, 42, CUR_A_DIM, 16, 0, 'a', "Object",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  3,  4, CUR_A_NORMAL, 6, 0, 'a', "Level:",
-        static_cast<char const*>(NULL), NULL, NULL,
+        static_cast<char const*>(NULL), MENU::Reference(), NULL,
  3, 11, CUR_A_DIM, 16, 0, 'm', "",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  3, 28, CUR_A_NORMAL, 13, 0, 'a', "Catalog Name:",
-        static_cast<char const*>(NULL), NULL, NULL,
+        static_cast<char const*>(NULL), MENU::Reference(), NULL,
  3, 42, CUR_A_DIM, 16, 0, 'm', "",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  5,  4, CUR_A_NORMAL,  6, 0, 'a', " Name:",
-        static_cast<char const*>(NULL), NULL, NULL,
+        static_cast<char const*>(NULL), MENU::Reference(), NULL,
  5, 11, (CUR_A_DIM | CUR_A_REVERSE), 20, (FORM_InputFlag | FORM_ScrollFlag), 'a', "",
-	" Enter a name for the object being cataloged", NULL, NULL,
+	" Enter a name for the object being cataloged", MENU::Reference(), NULL,
  7,  3, CUR_A_NORMAL,  7, 0, 'a', "Object:",
-        static_cast<char const*>(NULL), NULL, NULL,
+        static_cast<char const*>(NULL), MENU::Reference(), NULL,
  7, 11, (CUR_A_DIM | CUR_A_REVERSE), 50, (FORM_InputFlag | FORM_ScrollFlag), 'a', "",
-	" Enter an expression defining the object being cataloged", NULL, NULL,
+	" Enter an expression defining the object being cataloged", MENU::Reference(), NULL,
  9,  1, CUR_A_NORMAL,  9, 0, 'a', "Evaluate:",
-        static_cast<char const*>(NULL), NULL, NULL,
+        static_cast<char const*>(NULL), MENU::Reference(), NULL,
  9, 11, (CUR_A_DIM | CUR_A_REVERSE), 6, FORM_InputFlag, 'm', "",
-	" Use arrow keys to select an evaluation type, or F1 for menu", NULL, NULL,
+	" Use arrow keys to select an evaluation type, or F1 for menu", MENU::Reference(), NULL,
  -1,
 };
 
@@ -270,25 +270,25 @@ PrivateVarDef FORM_Field AddObjectFormFields[] = {
 /*****  Add Message Form  *****/
 PrivateVarDef FORM_Field AddMessageFormFields[] = {
  1,  4, CUR_A_NORMAL, 6, 0, 'a', "Class:",
-        static_cast<char const*>(NULL), NULL, NULL,
+        static_cast<char const*>(NULL), MENU::Reference(), NULL,
  1, 11, CUR_A_DIM, 16, 0, 'm', "",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  1, 28, CUR_A_NORMAL, 13, 0, 'a', "Catalog Type:",
-        static_cast<char const*>(NULL), NULL, NULL,
+        static_cast<char const*>(NULL), MENU::Reference(), NULL,
  1, 42, CUR_A_DIM, 16, 0, 'a', "Message",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  3,  4, CUR_A_NORMAL, 6, 0, 'a', "Level:",
-        static_cast<char const*>(NULL), NULL, NULL,
+        static_cast<char const*>(NULL), MENU::Reference(), NULL,
  3, 11, CUR_A_DIM, 16, 0, 'm', "",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  3, 28, CUR_A_NORMAL, 13, 0, 'a', "Catalog Name:",
-        static_cast<char const*>(NULL), NULL, NULL,
+        static_cast<char const*>(NULL), MENU::Reference(), NULL,
  3, 42, CUR_A_DIM, 16, 0, 'm', "",
-	static_cast<char const*>(NULL), NULL, NULL,
+	static_cast<char const*>(NULL), MENU::Reference(), NULL,
  5,  4, CUR_A_NORMAL,  6, 0, 'a', " Name:",
-        static_cast<char const*>(NULL), NULL, NULL,
+        static_cast<char const*>(NULL), MENU::Reference(), NULL,
  5, 11, (CUR_A_DIM | CUR_A_REVERSE), 20, (FORM_InputFlag | FORM_ScrollFlag), 'a', "",
-	" Enter the name of the message being cataloged", NULL, NULL,
+	" Enter the name of the message being cataloged", MENU::Reference(), NULL,
  -1,
 };
 
@@ -414,9 +414,7 @@ PrivateFnDef void XMENU_ChangeMenu (
     MENU *oldMenu;
     int i;
 
-    if ((oldMenu = XMENU_BaseMenu (xmenu)) != newMenu)
-    {
-	if (oldMenu != NullMenu) MENU_deleteMenu (oldMenu, i);
+    if ((oldMenu = XMENU_BaseMenu (xmenu)) != newMenu) {
 	XMENU_BaseMenu   (xmenu) = newMenu;
 	XMENU_LastChoice (xmenu) = -1;
 	XMENU_handler    (xmenu, window, PAGE_Init);
@@ -890,9 +888,7 @@ PrivateFnDef void ExecuteContextForm () {
 
     messageCatalog =
 	GetCatalogMenu (CTypeMessage, className, messageCatalogAccessMsg, SelectMessageCatalog);
-    if (messageCatalog == NULL)
-    {
-	MENU_deleteMenu (objectCatalog, i);
+    if (messageCatalog == NULL) {
 	ERR_displayPause("Error reading message catalog");
 	PAGE_status(PopupPage) = PAGE_Normal;
 	return /*FALSE*/;
@@ -1191,13 +1187,13 @@ PrivateFnDef void
 {
     int longest, i, j;
 
-    MENU_makeMenu (NullMenu, NullMenuChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+    NullMenu.setTo (new MENU (NullMenuChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
     ObjectCatalog   = XMENU_create (NullMenu, "Select object catalog");
     ObjectInstance  = XMENU_create (NullMenu, "Select object");
     MessageCatalog  = XMENU_create (NullMenu, "Select message catalog");
     MessageInstance = XMENU_create (NullMenu, "Select message");
 
-    MENU_makeMenu (F8Menu, F8MenuChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+    F8Menu.setTo (new MENU (F8MenuChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
     MENU_title    (F8Menu) = " Browser:";
 
     if( (ClassMenu = GetMenu(" Class:", FORM_menuToForm, "FrontEndTools ClassInfo displayMessages")) == NULL )
@@ -1206,13 +1202,13 @@ PrivateFnDef void
 	return;
     }
 
-    MENU_makeMenu (LevelMenu, LevelMenuChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+    LevelMenu.setTo (new MENU (LevelMenuChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
     MENU_title    (LevelMenu) = " Level:";
 
-    MENU_makeMenu (CTypeMenu, CTypeMenuChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+    CTypeMenu.setTo (new MENU (CTypeMenuChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
     MENU_title    (CTypeMenu) = " Catalog Type:";
 
-    MENU_makeMenu (ETypeMenu, ETypeMenuChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+    ETypeMenu.setTo (new MENU (ETypeMenuChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
     MENU_title    (ETypeMenu) = " Evaluation Type:";
 
     FORM_makeForm (Background , BackgroundFields , i);

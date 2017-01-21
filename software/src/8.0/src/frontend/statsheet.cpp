@@ -73,12 +73,11 @@ PrivateVarDef MENU_Choice saveChoices[] = {
 
 PublicFnDef void statsheet(char const*company, char const*type, char const*rules, char const*dataset) {
     int i, j, longest;
-    MENU *actionMenu, *saveMenu;
     CUR_WINDOW *MenuWin;
 
     Type = type[0];
 
-    MENU_makeMenu(saveMenu, saveChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+    MENU::Reference saveMenu (new MENU (saveChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
     MENU_title(saveMenu) = " Save Assumptions ? ";
     
 /**** create the stat sheet ****/
@@ -91,7 +90,7 @@ PublicFnDef void statsheet(char const*company, char const*type, char const*rules
 
 
 /**** create menu object ****/
-    MENU_makeMenu(actionMenu, menuChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
+    MENU::Reference actionMenu (new MENU (menuChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
     
 /**** create page object ****/
     PAGE_createPage(ReportPage, 3, NULL, actionMenu, NULL, PAGE_menuType, i);
@@ -128,8 +127,6 @@ PublicFnDef void statsheet(char const*company, char const*type, char const*rules
 
     CUR_delwin(MenuWin);
 /**** cleanup ****/
-    MENU_deleteMenu(actionMenu, i);
-    MENU_deleteMenu(saveMenu, i);
     SPR_delete(StatSheet);
     SPR_delete(AssumptSheet);
     CUR_delwin(AssumptWin);

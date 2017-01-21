@@ -33,22 +33,22 @@ PrivateFnDef void trimString (
 
 PrivateVarDef FORM_Field formFields[] = {
  1, 20, CUR_A_NORMAL, 40, 0, 'a', "                                        ",  
-	static_cast<char const*>(NULL), NULL, NULL, 
+	static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  3, 31, (CUR_A_BOLD | CUR_A_UNDERLINE), 17, 0, 'a', "Stat Sheet - View",  
-	static_cast<char const*>(NULL), NULL, NULL, 
+	static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  8, 24, CUR_A_NORMAL, 15, 0, 'a', "       Company:",
-	static_cast<char const*>(NULL), NULL, NULL, 
+	static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  8, 41, (CUR_A_DIM | CUR_A_REVERSE), 6, 1, 'a', 
-        "      ", " Enter Company Ticker Symbol", NULL, NULL, 
- 10, 24, CUR_A_NORMAL, 15, 0, 'a', "         Model:", static_cast<char const*>(NULL), NULL, NULL, 
+        "      ", " Enter Company Ticker Symbol", MENU::Reference(), NULL, 
+ 10, 24, CUR_A_NORMAL, 15, 0, 'a', "         Model:", static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  10, 41, (CUR_A_DIM | CUR_A_REVERSE), 15,  1,  'm', "               ", 
-    " Use Arrow Keys To Select Analysis Type, or F1 For Menu", NULL, NULL, 
- 12, 24, CUR_A_NORMAL, 15, 0, 'a', "         Rules:", static_cast<char const*>(NULL), NULL, NULL, 
+    " Use Arrow Keys To Select Analysis Type, or F1 For Menu", MENU::Reference(), NULL, 
+ 12, 24, CUR_A_NORMAL, 15, 0, 'a', "         Rules:", static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  12, 41, (CUR_A_DIM | CUR_A_REVERSE), 15, 1, 'm', "               ", 
-    " Use Arrow Keys To Select Rules, or F1 For Menu", NULL, NULL, 
- 14, 24, CUR_A_NORMAL, 15, 0, 'a', "   Assumptions:", static_cast<char const*>(NULL), NULL, NULL, 
+    " Use Arrow Keys To Select Rules, or F1 For Menu", MENU::Reference(), NULL, 
+ 14, 24, CUR_A_NORMAL, 15, 0, 'a', "   Assumptions:", static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  14, 41, (CUR_A_DIM | CUR_A_REVERSE), 15, 1, 'm', "               ", 
-    " Use Arrow Keys To Select Assumptions, or F1 For Menu", NULL, NULL, 
+    " Use Arrow Keys To Select Assumptions, or F1 For Menu", MENU::Reference(), NULL, 
  -1, 
 };
 
@@ -91,9 +91,7 @@ PrivateVarDef FORM *Form;
 #define RulesField	(&Form->field[7]->value[1])
 #define DataField	(&Form->field[9]->value[1])
 
-PublicFnDef void statview()
-{
-    MENU *menu1, *menu2, *menu3;
+PublicFnDef void statview() {
     PAGE *page;
     CUR_WINDOW *formWin;
     int i, longest, j;
@@ -108,14 +106,14 @@ PublicFnDef void statview()
     	FORM_centerFormElts(Form, CUR_COLS);
     }
     strcpy(Form->field[0]->value, RS_CompanyName);
-    MENU_makeMenu(menu1, typeChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
-    MENU_makeMenu(menu2, assmptChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
-    MENU_makeMenu(menu3, ruleChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);
-    Form->field[5]->menu = menu1;
+
+    Form->field[5]->menu.setTo (new MENU (typeChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
     Form->field[5]->menu->title = " Model Type:";
-    Form->field[7]->menu = menu2;
+
+    Form->field[7]->menu.setTo (new MENU (assmptChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
     Form->field[7]->menu->title = " Rules:";
-    Form->field[9]->menu = menu3;
+
+    Form->field[9]->menu.setTo (new MENU (ruleChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
     Form->field[9]->menu->title = " Assumptions:";
 
 /*** create form window ****/
@@ -132,9 +130,6 @@ PublicFnDef void statview()
 
 /*** cleanup ***/
     free(Form);
-    MENU_deleteMenu(menu1, i);
-    MENU_deleteMenu(menu2, i);
-    MENU_deleteMenu(menu3, i);
     CUR_delwin(formWin);
     PAGE_deletePage(page, i);
     

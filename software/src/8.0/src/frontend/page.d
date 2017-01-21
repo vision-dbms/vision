@@ -9,7 +9,6 @@
 #include "stdcurses.h"
 #include "keys.h"
 #include "error.h"
-#include "menu.d"
 
 #ifndef  DBMENU
 #include "buffers.d"
@@ -70,7 +69,7 @@ typedef struct {
     PAGE_HelpType   *help;
     int		    elementCount;
     PAGE_Element    *element[PAGE_Elements];
-    char	    *obj;
+    void	    *obj;
     CUR_WINDOW	    *objWin;
     int		    objType;
     void	    (*fkeyFunc[10])();
@@ -126,7 +125,7 @@ typedef struct {
         ERR_fatal(" Malloc Error");\
     PAGE_windowCount(pge) = n;\
     PAGE_help(pge) = (PAGE_HelpType *)hlp;\
-    PAGE_obj(pge) = (char *)obj;\
+    PAGE_obj(pge) = (void *)obj;\
     PAGE_objWin(pge) = (CUR_WINDOW *)ow;\
     PAGE_objType(pge) = (int)ot;\
     for (i = 0; i < 10; i++)\
@@ -140,7 +139,7 @@ typedef struct {
     if (NULL == (PAGE_element(pge, n) =\
 		 (PAGE_Element *)malloc(sizeof(PAGE_Element))))\
         ERR_fatal(" Malloc error");\
-    PAGE_object(pge, n) = (char *)obj;\
+    PAGE_object(pge, n) = (void *)obj;\
     PAGE_window(pge, n) = (CUR_WINDOW *)win;\
     PAGE_action(pge, n) = (PAGE_Action)action;\
     PAGE_handlerFn(pge, n) = (PAGE_Handler)(fn);\

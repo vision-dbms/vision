@@ -47,22 +47,6 @@ PrivateVarDef void changeType ();
 PrivateVarDef void changeDates ();
 PrivateVarDef void printReport ();
 
-PrivateVarDef MENU_Choice menuChoices[] = {
- " Report ",	" New Report For Current Company/Time Frame",	'r', 
-			    changeReport, ON, 
- " Company ",	" New Company For Current Report/Time Frame",	'c', 
-			    changeCompany, ON, 
-/***
- " Type ",	" New Type For Current Report/Company",		't', 
-			    changeType, ON, 
-***/
- " Dates ",	" New Time Frame For Current Report/Company",	'd', 
-			    changeDates, ON, 
- " Print ",     " Print Hard Copy Of Report",			 'p', 
-			    printReport, ON, 
- static_cast<char const*>(NULL), 
-};
-
 PrivateVarDef int	didExec = FALSE;
 
 PrivateFnDef void execFsheet() {
@@ -144,16 +128,11 @@ PrivateFnDef void fsheetFileMenu() {
 
 PublicFnDef int fsheet (FORM *form1, PAGE *FSpage, int firstTime) {
     int i, j, longest;
-    MENU *actionMenu;
-
     if( firstTime )
     {
 	Form1 = form1;
 	SPR_makeSheet(FSheet, 9, 14, 3, 4, 3);
 	SPR_makeDummySheet(FSheet);
-
-/*    MENU_makeMenu(actionMenu, menuChoices, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j);*/
-    
     }
 
     FinanceStatementPage = FSpage;
@@ -191,11 +170,6 @@ PublicFnDef int fsheet (FORM *form1, PAGE *FSpage, int firstTime) {
     PAGE_handler(ReportPage);
     PAGE_ExitF8PageParent = FALSE;
 
-#if 0
-/*****  cleanup  *****/
-    SPR_delete (FSheet);
-    free(actionMenu);
-#endif
     CUR_delwin(FWin);
     CUR_delwin(StatWin);
     PAGE_deletePage (ReportPage, i);
@@ -241,15 +215,15 @@ PrivateFnDef void printReport() {
  ************************************************/
 PrivateVarDef FORM_Field reportFields[] = {
  2, 5, CUR_A_NORMAL, 18, 0, 'a', "Select New Report:" , 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  2, 24, (CUR_A_DIM | CUR_A_REVERSE), 18, 1, 'm', "                  ", 
-        " Use Arrow Keys To Select Report Type, or F1 For Menu", NULL, NULL, 
+        " Use Arrow Keys To Select Report Type, or F1 For Menu", MENU::Reference(), NULL, 
  4, 16, CUR_A_NORMAL, 7, 0, 'a', "  Freq:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  4, 24, (CUR_A_DIM | CUR_A_REVERSE), 18, 1, 'm', "                  ", 
-        " Use Arrow Keys To Select Format, or F1 For Menu", NULL, NULL, 
+        " Use Arrow Keys To Select Format, or F1 For Menu", MENU::Reference(), NULL, 
  7, 5, CUR_A_NORMAL, 29, 0, 'a', "Execute(F2)  Quit(F9)" , 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
 -1, 
 };
 
@@ -304,17 +278,17 @@ PrivateFnDef void execReport () {
  ************************************************/
 PrivateVarDef FORM_Field companyFields[] = {
  2, 5, CUR_A_NORMAL, 18, 0, 'a', "Enter New Company:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  2, 24, (CUR_A_DIM | CUR_A_REVERSE), 18, 1, 'a', "                  ", 
-        " Enter Company Ticker Symbol", NULL, NULL, 
+        " Enter Company Ticker Symbol", MENU::Reference(), NULL, 
 /***
  4, 5, CUR_A_NORMAL, 14, 0, 'a', "     Company list:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  4, 24, (CUR_A_DIM | CUR_A_REVERSE), 14, 1, 'a', "              ", 
-        " Enter Company List", NULL, NULL, 
+        " Enter Company List", MENU::Reference(), NULL, 
 ***/
  7, 5, CUR_A_NORMAL, 29, 0, 'a', "Execute(F2)  Quit(F9)" , 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
 -1, 
 };
 
@@ -384,19 +358,19 @@ PrivateFnDef void execCompany () {
  ************************************************/
 PrivateVarDef FORM_Field dateFields[] = {
  1, 5, CUR_A_NORMAL, 14, 0, 'a', "   Start Year:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  1, 21, (CUR_A_DIM | CUR_A_REVERSE), 14, 1, 'a', "              ", 
-        " Enter Starting Date of Report", NULL, NULL, 
+        " Enter Starting Date of Report", MENU::Reference(), NULL, 
  3, 5, CUR_A_NORMAL, 14, 0, 'a', "       Number:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  3, 21, (CUR_A_DIM | CUR_A_REVERSE), 14, 1, 'a', "              ", 
-        " Enter the number of periods to display", NULL, NULL, 
+        " Enter the number of periods to display", MENU::Reference(), NULL, 
  5, 5, CUR_A_NORMAL, 14, 0, 'a', "    Direction:", 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
  5, 21, (CUR_A_DIM | CUR_A_REVERSE), 14, 1, 'a', "              ", 
-  " Use Arrow Keys To Select Direction From The Starting Date", NULL, NULL, 
+  " Use Arrow Keys To Select Direction From The Starting Date", MENU::Reference(), NULL, 
  7, 5, CUR_A_NORMAL, 29, 0, 'a', "Execute(F2)  Quit(F9)" , 
-        static_cast<char const*>(NULL), NULL, NULL, 
+        static_cast<char const*>(NULL), MENU::Reference(), NULL, 
 -1, 
 };
 
