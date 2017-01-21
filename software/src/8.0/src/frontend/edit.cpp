@@ -33,6 +33,9 @@
 
 PublicFnDef void ED_subShell ();
 
+PrivateFnDef void createEditorWindows();
+PrivateFnDef void deleteEditorWindows();
+
 PrivateFnDef void readFile ();
 
 PrivateFnDef void readFileInt ();
@@ -59,79 +62,37 @@ PrivateFnDef void saveRegionInt ();
 
 PrivateFnDef void printRegion ();
 
-#if 0
-PrivateFnDef int uploadRegion (
-    void
-);
-#endif
+PrivateFnDef void beginRegion ();
 
-#if 0
-PrivateFnDef int downloadRegion (
-    void
-);
-#endif
+PrivateFnDef void endRegion ();
 
-PrivateFnDef void beginRegion (
-    void
-);
+PrivateFnDef void clearRegion ();
 
-PrivateFnDef void endRegion (
-    void
-);
+PrivateFnDef void deleteRegion ();
 
-PrivateFnDef void clearRegion (
-    void
-);
+PrivateFnDef void insertRegion ();
 
-PrivateFnDef void deleteRegion (
-    void
-);
+PrivateFnDef void runRegion ();
 
-PrivateFnDef void insertRegion (
-    void
-);
+PrivateFnDef void switchWindow ();
 
-PrivateFnDef void runRegion (
-    void
-);
+PrivateFnDef void oneWindow ();
 
-PrivateFnDef void switchWindow (
-    void
-);
+PrivateFnDef void eraseWindow ();
 
-PrivateFnDef void oneWindow (
-    void
-);
+PrivateFnDef void twoWindows ();
 
-PrivateFnDef void eraseWindow (
-    void
-);
+PrivateFnDef void saveReportInt ();
 
-PrivateFnDef void twoWindows (
-    void
-);
+PrivateFnDef void printReportInt ();
 
-PrivateFnDef void saveReportInt (
-    void
-);
+PrivateFnDef void copyPasteBufReport ();
 
-PrivateFnDef void printReportInt (
-    void
-);
-
-PrivateFnDef void copyPasteBufReport (
-    void
-);
-
-PrivateFnDef void runReportInterface (
-    void
-);
+PrivateFnDef void runReportInterface ();
 
 PrivateFnDef void listReport ();
 
-PrivateFnDef void PrintScreen (
-    int				c
-);
+PrivateFnDef void PrintScreen (int c);
 
 PrivateFnDef int copyFile (
     char const *		fname,
@@ -185,12 +146,6 @@ PrivateVarDef MENU_Choice regionMenu[] = {
 " Run ", " Execute the region buffer",			    'r', runRegion, ON, 
 " Save", " Save the region buffer",			    's', saveRegionInt, ON,
 " Print ",  " Print regions contents",			 'p', printRegion, ON, 
-#if 0
-" UpLoad ",  " Upload a file from the PC into the Region buffer",
-	'\0', uploadRegion, OFF, 
-" Lotus ",  " Download a PRN file to the PC from the Region buffer",
-	'l', downloadRegion, ON, 
-#endif
 static_cast<char const*>(NULL), 
 };
 
@@ -214,8 +169,6 @@ static_cast<char const*>(NULL),
 
 PrivateVarDef PAGE	*interfacePage = NULL, *reportPage = NULL;
 PrivateVarDef FORM	*interfaceForm = NULL;
-PrivateVarDef MENU::Reference pbufSMenu, pbufDMenu;
-PrivateVarDef CUR_WINDOW *intWin1, *intWin2;
 PrivateVarDef int	doInterfaceClear = FALSE;
 
 #define FILEfield	0
@@ -275,10 +228,6 @@ PrivateVarDef FORM_Field interfaceFields[] = {
         " Use Arrow Keys to Select Filter Type, or F1 For Menu", MENU::Reference(), NULL, 
  5, 27, CUR_A_REVERSE, 48, (FORM_ScrollFlag|FORM_InputFlag), 'a', "                                                ",
         " Enter Filter Options", MENU::Reference(), NULL, 
-#if 0
- 7, 7, CUR_A_NORMAL, 29, 0, 'a', "Execute(F2)  Quit(F9)" ,
-	static_cast<char const*>(NULL), MENU::Reference(), NULL,
-#endif
 -1,
 };
 
@@ -401,12 +350,7 @@ PrivateVarDef CUR_WINDOW  *StWinOne,
 		      *CurrStat,
 		      *HelpWin;
 		      
-PrivateVarDef int	FMWsr, FMWsc, FMWnr, FMWnc,
-			RMWsr, RMWsc, RMWnr, RMWnc,
-			AMWsr, AMWsc, AMWnr, AMWnc,
-			WMWsr, WMWsc, WMWnr, WMWnc;
-
-PrivateVarDef MENU::Reference FileMenu, RegMenu, WinMenu, AppMenu;
+PrivateVarDef MENU::Reference FileMenu, RegionMenu, WindowMenu, ApplicMenu;
 
 PrivateVarDef int TwoWin = FALSE;
 
@@ -432,10 +376,112 @@ PublicVarDef LINEBUFFER	*BrowserBuf = NULL, *BrowserInput = NULL;
 #define NOmode		3
 
 PrivateVarDef int	EDIT_fileMode = NOmode;
+
 
-/***********************************
- *** Macro Defines for Editor ******
- ***********************************/
+/******************************
+ ****  Window Management  *****
+ ******************************/
+
+PrivateFnDef CUR_WINDOW *menuWindow (MENU *pMenu, CUR_WINDOW *pWindow) {
+    int i = MENU_choiceCount(pMenu) + 4;
+    if( i >= CUR_LINES )
+	i = CUR_LINES - 1;
+    int j = pMenu->longest () + 4;
+    if( (size_t)j <= strlen(MENU_title(pMenu)) )
+	j = strlen(MENU_title(pMenu)) + 1;
+    int sr = ((CUR_LINES - 1) - i) / 2;
+    int sc = CUR_COLS - 10 - j;
+    if( sc < 0 ) {
+	sc = 5;
+	j = CUR_COLS - 10;
+    }
+
+    if (!pWindow)
+	pWindow = CUR_newwin (i,j,sr,sc);
+    else {
+	wresize (pWindow, i, j);
+	mvwin (pWindow, sr, sc);
+    }
+    return pWindow;
+}
+
+PrivateFnDef void resizeWindows () {
+    int const nUsableLines = CUR_LINES > 4 ? CUR_LINES - 3 : 1;
+    int const nFullLines   = CUR_LINES > 3 ? CUR_LINES - 2 : 1;
+    int const nTopLines    = nUsableLines / 2 > 1 ? nUsableLines / 2 : 1;
+    int const nBotLines    = nUsableLines > nTopLines ? nUsableLines - nTopLines : 1;
+
+    int const nUsableColumns = CUR_COLS > 1 ? CUR_COLS - 1 : 1;
+
+    mvwin (ERR_Window, CUR_LINES > 1 ? CUR_LINES - 1 : 1, 0);
+
+    wresize (TopWin  , nTopLines, nUsableColumns);
+    wresize (BotWin  , nBotLines, nUsableColumns);
+    mvwin   (BotWin  , nTopLines + 1, 0);
+    wresize (FullWin , nFullLines, nUsableColumns);
+    wresize (StWinOne, 1, CUR_COLS);
+    mvwin   (StWinOne, CUR_LINES - 2, 0);
+    wresize (StWinTwo, 1, CUR_COLS);
+    mvwin   (StWinTwo, nTopLines, 0);
+
+    FileMenuWin   = menuWindow (FileMenu, FileMenuWin);
+    RegionMenuWin = menuWindow (RegionMenu, RegionMenuWin);
+    WindowMenuWin = menuWindow (WindowMenu, WindowMenuWin);
+    ApplicMenuWin = menuWindow (ApplicMenu, ApplicMenuWin);
+}
+
+PrivateFnDef void createEditorWindows() {
+    TopWin        = CUR_newwin((CUR_LINES - 3) / 2, CUR_COLS-1, 0, 0);
+    BotWin        = CUR_newwin((CUR_LINES - 3) - ((CUR_LINES - 3) / 2),
+				CUR_COLS-1, ((CUR_LINES - 3) / 2) + 1, 0);
+    FullWin       = CUR_newwin(CUR_LINES - 2, CUR_COLS-1, 0, 0);
+    StWinOne      = CUR_newwin(1, CUR_COLS, CUR_LINES - 2, 0);
+    StWinTwo      = CUR_newwin(1, CUR_COLS, ((CUR_LINES - 3) / 2), 0);
+
+    FileMenuWin   = menuWindow (FileMenu, FileMenuWin);
+    RegionMenuWin = menuWindow (RegionMenu, RegionMenuWin);
+    WindowMenuWin = menuWindow (WindowMenu, WindowMenuWin);
+    ApplicMenuWin = menuWindow (ApplicMenu, ApplicMenuWin);
+
+    if( STD_hasInsertDeleteLine ) {
+	CUR_idlok(TopWin,TRUE);
+	CUR_idlok(BotWin,TRUE);
+	CUR_idlok(FullWin,TRUE);
+    }
+    CUR_wclear(TopWin);
+    CUR_wclear(BotWin);
+    CUR_wclear(FullWin);
+}
+
+PrivateFnDef void deleteWindow (CUR_WINDOW*& rpWindow) {
+    if (rpWindow) {
+	CUR_delwin (rpWindow);
+	rpWindow = 0;
+    }
+}
+
+PrivateFnDef void deleteEditorWindows() {
+    deleteWindow(FileMenuWin);
+    deleteWindow(WindowMenuWin);
+    deleteWindow(RegionMenuWin);
+    deleteWindow(ApplicMenuWin);
+    if( CurrWin == FullWin ) {
+	deleteWindow(TopWin);
+	deleteWindow(BotWin);
+	deleteWindow(StWinTwo);
+	deleteWindow(FullWin);
+	deleteWindow(StWinOne);
+    } else {
+	deleteWindow(FullWin);
+	deleteWindow(TopWin);
+	deleteWindow(StWinTwo);
+	deleteWindow(BotWin);
+	deleteWindow(StWinOne);
+    }
+}
+
+
+/*----------------------------------------------------------------*/
 
 #if defined(_AIX)
 /** AIX curses will leave the terminal in ReverseVideo mode if the
@@ -449,159 +495,152 @@ PrivateVarDef int	EDIT_fileMode = NOmode;
 #define AppendStatusTrailer(win)
 #endif
 
-#define current_settings(win, stat, keys, buffer)\
-{\
-    CurrWin = win;\
-    CurrStat = stat;\
-    CurrKeys = keys;\
-    CurrBuffer = buffer;\
-}\
-
-#define write_stat(update)\
-{ \
-    CUR_werase (CurrStat);\
-    CUR_wattron(CurrStat, CUR_A_REVERSE);\
-    CUR_wmove(CurrStat, 0, 0);\
-    CUR_wprintw(CurrStat, CurrKeys);\
-    CUR_wattroff(CurrStat, CUR_A_REVERSE);\
-    if (!RS_autog)\
-    {\
-	CUR_wattron(CurrStat, CUR_A_BOLD);\
-	CUR_wmove(CurrStat, 0, CUR_WIN_cols(CurrStat)-6);\
-	CUR_wprintw(CurrStat, "DEBUG");\
-	CUR_wattroff(CurrStat, CUR_A_BOLD);\
-    }\
-    AppendStatusTrailer(CurrStat);\
-    CUR_wnoutrefresh(CurrStat);\
-    ((update) ? CUR_doupdate() : 1 );\
+PrivateFnDef void write_stat(int update) {
+    CUR_werase (CurrStat);
+    CUR_wattron(CurrStat, CUR_A_REVERSE);
+    CUR_wmove(CurrStat, 0, 0);
+    CUR_wprintw(CurrStat, CurrKeys);
+    CUR_wattroff(CurrStat, CUR_A_REVERSE);
+    if (!RS_autog) {
+	CUR_wattron(CurrStat, CUR_A_BOLD);
+	CUR_wmove(CurrStat, 0, CUR_WIN_cols(CurrStat)-6);
+	CUR_wprintw(CurrStat, "DEBUG");
+	CUR_wattroff(CurrStat, CUR_A_BOLD);
+    }
+    AppendStatusTrailer(CurrStat);
+    CUR_wnoutrefresh(CurrStat);
+    if (update)
+	CUR_doupdate();
 }
 
-#define init_help()\
-{\
-    HelpWin = CUR_newwin(CUR_LINES,CUR_COLS,0,0);\
-    CUR_werase(HelpWin);\
-    if (NULL != (helpfd=fopen(helpfile, "r")))\
-    {\
-	CUR_wmove(HelpWin, 0, 0);\
-        while (EOF != (c=fgetc(helpfd)))\
-    	    CUR_waddch(HelpWin, c);\
-	fclose(helpfd);\
-    }\
+PrivateFnDef void init_help(char const *helpfile) {
+    HelpWin = CUR_newwin(CUR_LINES,CUR_COLS,0,0);
+    CUR_werase(HelpWin);
+    FILE *const helpfd=fopen(helpfile, "r");
+    if (helpfd) {
+	CUR_wmove(HelpWin, 0, 0);
+	int c;
+        while (EOF != (c=fgetc(helpfd)))
+    	    CUR_waddch(HelpWin, c);
+	fclose(helpfd);
+    }
 }
 
-#define clear_region(do_start,do_end)\
-{ \
-    if (do_start && BUF_startcol(CurrBuffer) != -1 && BUF_startrow(CurrBuffer) != NULL){\
-	BUF_startcol(CurrBuffer) = -1;\
-	BUF_startrow(CurrBuffer) = NULL;\
-	}\
-    if (do_end && BUF_endcol(CurrBuffer) != -1 && BUF_endrow(CurrBuffer) != NULL){\
-	BUF_endcol(CurrBuffer) = -1;\
-	BUF_endrow(CurrBuffer) = NULL;\
-	}\
+PrivateFnDef void clear_region(int do_start,int do_end) {
+    if (do_start && BUF_startcol(CurrBuffer) != -1 && BUF_startrow(CurrBuffer) != NULL){
+	BUF_startcol(CurrBuffer) = -1;
+	BUF_startrow(CurrBuffer) = NULL;
+    }
+    if (do_end && BUF_endcol(CurrBuffer) != -1 && BUF_endrow(CurrBuffer) != NULL){
+	BUF_endcol(CurrBuffer) = -1;
+	BUF_endrow(CurrBuffer) = NULL;
+    }
 }
 
-#define unset_markers(buffer)\
-/* clear region markers */\
-{\
-    BUF_startcol(buffer) = -1;\
-    BUF_startrow(buffer) = NULL;\
-    BUF_endrow(buffer) = NULL;\
-    BUF_endcol(buffer) = -1;\
+PrivateFnDef void unset_markers(LINEBUFFER *buffer) {
+/* clear region markers */
+    BUF_startcol(buffer) = -1;
+    BUF_startrow(buffer) = NULL;
+    BUF_endrow(buffer) = NULL;
+    BUF_endcol(buffer) = -1;
 }
 
-#define one_window()\
-{\
-    CurrWin = FullWin;\
-    BUF_paintWindow(CurrBuffer, CurrWin);\
-    CurrStat = StWinOne;\
-    write_stat(FALSE);\
-    TwoWin = FALSE;\
+PrivateFnDef void one_window() {
+    CurrWin = FullWin;
+    BUF_paintWindow(CurrBuffer, CurrWin);
+    CurrStat = StWinOne;
+    write_stat(FALSE);
+    TwoWin = FALSE;
 }
 
-#define two_windows()\
-{\
-    BUF_paintWindow(Edit, TopWin);\
-    CUR_werase (StWinTwo);\
-    CUR_wattron(StWinTwo, CUR_A_REVERSE);\
-    CUR_wmove(StWinTwo, 0, 0);\
-    CUR_wprintw(StWinTwo, EdKeys);\
-    CUR_wattroff(StWinTwo, CUR_A_REVERSE);\
-    if (!RS_autog)\
-    {\
-	CUR_wattron(StWinTwo, CUR_A_BOLD);\
-	CUR_wmove(StWinTwo, 0, CUR_WIN_cols(StWinTwo)-6);\
-	CUR_wprintw(StWinTwo, "DEBUG");\
-	CUR_wattroff(StWinTwo, CUR_A_BOLD);\
-    }\
-    AppendStatusTrailer (StWinTwo);\
-    BUF_paintWindow(Output, BotWin);\
-    CUR_werase (StWinOne);\
-    CUR_wattron(StWinOne, CUR_A_REVERSE);\
-    CUR_wmove(StWinOne, 0, 0);\
-    CUR_wprintw(StWinOne, OutKeys);\
-    CUR_wattroff(StWinOne, CUR_A_REVERSE);\
-    AppendStatusTrailer (StWinOne);\
-    TwoWin = TRUE;\
-    if (CurrBuffer == Edit)\
-    {\
-        CurrWin = TopWin;\
-	CurrStat = StWinTwo;\
-    }\
-    else\
-    {\
-        CurrWin = BotWin;\
-	CurrStat = StWinOne;\
-    }\
+PrivateFnDef void two_windows() {
+    BUF_paintWindow(Edit, TopWin);
+    CUR_werase (StWinTwo);
+    CUR_wattron(StWinTwo, CUR_A_REVERSE);
+    CUR_wmove(StWinTwo, 0, 0);
+    CUR_wprintw(StWinTwo, EdKeys);
+    CUR_wattroff(StWinTwo, CUR_A_REVERSE);
+    if (!RS_autog) {
+	CUR_wattron(StWinTwo, CUR_A_BOLD);
+	CUR_wmove(StWinTwo, 0, CUR_WIN_cols(StWinTwo)-6);
+	CUR_wprintw(StWinTwo, "DEBUG");
+	CUR_wattroff(StWinTwo, CUR_A_BOLD);
+    }
+    AppendStatusTrailer (StWinTwo);
+    BUF_paintWindow(Output, BotWin);
+    CUR_werase (StWinOne);
+    CUR_wattron(StWinOne, CUR_A_REVERSE);
+    CUR_wmove(StWinOne, 0, 0);
+    CUR_wprintw(StWinOne, OutKeys);
+    CUR_wattroff(StWinOne, CUR_A_REVERSE);
+    AppendStatusTrailer (StWinOne);
+    TwoWin = TRUE;
+    if (CurrBuffer == Edit) {
+        CurrWin = TopWin;
+	CurrStat = StWinTwo;
+    } else {
+        CurrWin = BotWin;
+	CurrStat = StWinOne;
+    }
 }
 
-#define refresh_two()\
-{\
-    CUR_touchwin(TopWin);\
-    CUR_wnoutrefresh(TopWin);\
-    CUR_touchwin(StWinTwo);\
-    CUR_wnoutrefresh(StWinTwo);\
-    CUR_touchwin(BotWin);\
-    CUR_wnoutrefresh(BotWin);\
-    CUR_touchwin(StWinOne);\
-    CUR_wnoutrefresh(StWinOne);\
-    CUR_doupdate();\
+PrivateFnDef void refresh_two() {
+    CUR_touchwin(TopWin);
+    CUR_wnoutrefresh(TopWin);
+    CUR_touchwin(StWinTwo);
+    CUR_wnoutrefresh(StWinTwo);
+    CUR_touchwin(BotWin);
+    CUR_wnoutrefresh(BotWin);
+    CUR_touchwin(StWinOne);
+    CUR_wnoutrefresh(StWinOne);
+    CUR_doupdate();
 }
 
-#define refresh_one()\
-{\
-    CUR_touchwin(FullWin);\
-    CUR_wnoutrefresh(FullWin);\
-    CUR_touchwin(StWinOne);\
-    CUR_wnoutrefresh(StWinOne);\
-    CUR_doupdate();\
+PrivateFnDef void refresh_one() {
+    CUR_touchwin(FullWin);
+    CUR_wnoutrefresh(FullWin);
+    CUR_touchwin(StWinOne);
+    CUR_wnoutrefresh(StWinOne);
+    CUR_doupdate();
 }
 
-#define hold_screen()\
-{\
-    CUR_waddstr(HelpWin, "\n         Hit any key to continue.....");\
-    CUR_touchwin(HelpWin);\
-    CUR_wrefresh(HelpWin);\
-    KEY_getkey(FALSE);\
-    KEY_QuoteNextKey = FALSE;\
-}\
-
-PrivateFnDef int
-copyToPasteBuf()
-{
-    return(FALSE);
+PrivateFnDef void refresh_displayed () {
+    if (TwoWin) {
+	refresh_two();
+    } else {
+	refresh_one();
+    }
 }
-	
+
+PrivateFnDef void hold_screen() {
+    CUR_waddstr(HelpWin, "\n         Hit any key to continue.....");
+    CUR_touchwin(HelpWin);
+    CUR_wrefresh(HelpWin);
+    KEY_getkey(FALSE);
+    KEY_QuoteNextKey = FALSE;
+}
+
+
 /************************************
  *** EDITOR                       ***
  *** When in top window of editor ***
  ************************************/
 
-PrivateFnDef int editor()
-{
+PrivateFnDef void current_settings(
+    CUR_WINDOW *win, CUR_WINDOW *stat, char const *keys, LINEBUFFER *buffer
+) {
+    CurrWin = win;
+    CurrStat = stat;
+    CurrKeys = keys;
+    CurrBuffer = buffer;
+}
+
+PrivateFnDef void copyToPasteBuf() {
+}
+
+PrivateFnDef int editor() {
     int c, i, j, length, error, cursrow, curscol;
     char *ptr, helpfile[BUF_MaxPathNameChars], *SrcDirName;
-    FILE *helpfd;
     
     SrcDirName = getenv(SourceDirEnv);
     if( SrcDirName != NULL )
@@ -682,6 +721,14 @@ PrivateFnDef int editor()
 	case 0:
 	    break;
 
+	case KEY_RESIZE:
+	    resizeWindows ();
+	    if (TwoWin)
+		twoWindows ();
+	    else
+		oneWindow ();
+	    break;
+
 	case KEY_COPYPB:
 	    copyToPasteBuf();
 	    break;
@@ -718,26 +765,17 @@ PrivateFnDef int editor()
 
 	case KEY_ONEWINDOW:
 	    oneWindow();
-	    refresh_one();
 	    RepetitionCount = 0;
 	    break;
 
 	case KEY_TWOWINDOW:
 	    twoWindows();
-	    refresh_two();
 	    RepetitionCount = 0;
 	    break;
 
 	case KEY_ERASEWIN:
 	    eraseWindow();
-	    if (TwoWin) 
-	    {
-		refresh_two();
-	    }
-	    else
-	    {
-		refresh_one();
-	    }
+	    refresh_displayed ();
 	    RepetitionCount = 0;
 	    break;
 
@@ -772,18 +810,15 @@ PrivateFnDef int editor()
 	    break;
 
 	case KEY_HELP:
-	    init_help();
+	    init_help(helpfile);
 	    CUR_touchwin(HelpWin);
 	    CUR_wrefresh(HelpWin);
 	    KEY_getkey(FALSE);
 	    KEY_QuoteNextKey = FALSE;
 	    CUR_delwin(HelpWin);
-	    if (TwoWin) 
-	    {
+	    if (TwoWin)
 		refresh_two();
-	    }
-	    else 
-	    {
+	    else {
 		refresh_one();
 		write_stat (TRUE);
 	    }
@@ -792,15 +827,8 @@ PrivateFnDef int editor()
 	    break;
 	    
 	case KEY_WINDOW:
-	    MENU_handler(WinMenu, WindowMenuWin, PAGE_Input);
-	    if (TwoWin) 
-	    {
-		refresh_two();
-	    }
-	    else
-	    {
-		refresh_one();
-	    }
+	    MENU_handler(WindowMenu, WindowMenuWin, PAGE_Input);
+	    refresh_displayed ();
 	    RepetitionCount = 0;
 	    break;
 	    
@@ -808,14 +836,7 @@ PrivateFnDef int editor()
 	    if( DefaultModule != NULL )
 	    {
 	    	(*DefaultModule)();
-		if (TwoWin) 
-		{
-		    refresh_two();
-		}
-		else
-		{
-		    refresh_one();
-		}
+		refresh_displayed ();
 	    }
 	    else
 		ERR_displayError(ERR_UndefKey);
@@ -824,54 +845,26 @@ PrivateFnDef int editor()
 
 	case KEY_FILES:
 	    MENU_handler(FileMenu, FileMenuWin, PAGE_Input);
-	    if (TwoWin) 
-	    {
-		refresh_two();
-	    }
-	    else
-	    {
-		refresh_one();
-	    }
+	    refresh_displayed ();
 	    RepetitionCount = 0;
 	    break;
 
 	case KEY_REGIONS:
-	    MENU_handler(RegMenu, RegionMenuWin, PAGE_Input);
-	    if (TwoWin) 
-	    {
-		refresh_two();
-	    }
-	    else
-	    {
-		refresh_one();
-	    }
+	    MENU_handler(RegionMenu, RegionMenuWin, PAGE_Input);
+	    refresh_displayed ();
 	    RepetitionCount = 0;
 	    break;
 
 	case KEY_SMENU:
 /*	    ERR_displayError(ERR_UndefKey);*/
 	    runSysMenu();
-	    if (TwoWin) 
-	    {
-		refresh_two();
-	    }
-	    else
-	    {
-		refresh_one();
-	    }
+	    refresh_displayed ();
 	    RepetitionCount = 0;
 	    break;
 
 	case KEY_AMENU:
-	    MENU_handler(AppMenu, ApplicMenuWin, PAGE_Input);
-	    if (TwoWin) 
-	    {
-		refresh_two();
-	    }
-	    else
-	    {
-		refresh_one();
-	    }
+	    MENU_handler(ApplicMenu, ApplicMenuWin, PAGE_Input);
+	    refresh_displayed ();
 	    RepetitionCount = 0;
 	    break;
 
@@ -880,14 +873,7 @@ PrivateFnDef int editor()
 	    QuitSystem();
 	    if( PAGE_ExitSystem )
 		return TRUE;
-	    if (TwoWin) 
-	    {
-		refresh_two();
-	    }
-	    else
-	    {
-		refresh_one();
-	    }
+	    refresh_displayed ();
 	    break;
 
 	case KEY_PREV:
@@ -907,12 +893,7 @@ PrivateFnDef int editor()
 	case KEY_SUBSHELL:
 	    RepetitionCount = 0;
 	    ED_subShell();
-	    if (TwoWin)
-	    {
-	        refresh_two();
-	    }
-	    else
-		refresh_one();    
+	    refresh_displayed ();
 	    break;
 
 	case KEY_BKSP:
@@ -925,8 +906,7 @@ PrivateFnDef int editor()
 	    /* autog should only be off to use the debugger so no users can
 		set it */
 
-	    if (!RS_userSystem)
-	    {
+	    if (!RS_userSystem) {
 		RS_autog = !RS_autog;
 		write_stat (TRUE);
 	    }
@@ -1026,13 +1006,6 @@ PrivateFnDef int editor()
 	    break;
 
 	case KEY_TAB:
-#if 0
-	    i = (((BUF_col(Edit) + RS_TabSpacing) / RS_TabSpacing) *
-			RS_TabSpacing) - BUF_col(Edit);
-	    for( j=0 ; j<i ; j++ )
-		    if (error = BUF_insertChar(Edit, ' ', CurrWin))
-			ERR_displayError(error);		    
-#endif
 	    if (error = BUF_insertChar(Edit, '\t', CurrWin))
 		ERR_displayError(error);		    
 	    break;
@@ -1060,14 +1033,7 @@ PrivateFnDef int editor()
 	case KEY_READFILE:
 	    readFile();
 	    doInterface = FALSE;
-	    if (TwoWin)
-	    {
-		refresh_two();
-	    }
-	    else
-	    {
-		refresh_one();
-	    }
+	    refresh_displayed ();
 	    break;
 
 	case KEY_SAVEFILE:
@@ -1083,14 +1049,7 @@ PrivateFnDef int editor()
 	case KEY_WRITEFILE:
 	    saveFile();
 	    doInterface = FALSE;
-	    if (TwoWin) 
-	    {
-		refresh_two();
-	    }
-	    else
-	    {
-		refresh_one();
-	    }
+	    refresh_displayed ();
 	    RepetitionCount = 0;
 	    break;
 
@@ -1162,6 +1121,7 @@ PrivateFnDef void eraseWindow () {
 
 PrivateFnDef void oneWindow () {
     one_window();
+    refresh_one();
 }
 
 PrivateFnDef void twoWindows () {
@@ -1416,14 +1376,10 @@ PrivateFnDef void listFile () {
 
 	    hold_screen();	/* macro asking user to hit key to cont. */
 	    CUR_delwin(HelpWin);
-	    if( RefreshAfterList )
-	    {
+	    if( RefreshAfterList ) {
    	    	if (TwoWin)
-            	{
 		    refresh_two();
-            	}
-   	    	else
-	    	{
+   	    	else {
 		    refresh_one();
 		    write_stat(TRUE);
 		}
@@ -1449,70 +1405,7 @@ PrivateFnDef void PrintScreen (int c) {
      }  
      CUR_waddch(HelpWin, c);
 }
-/*---------------------------------------------------------------------*/
-
-#if 0
-PrivateFnDef int appendFilePrime()
-{
-    MENU *mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType));
-    MENU_currChoice(mptr) = BUFFERfield;
-    mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType+2+BUFFERfield));
-    MENU_currChoice(mptr) = (CurrBuffer == Edit ? BUFFERedit : BUFFERoutput);
-    mptr = FORM_fieldMenu(FORM_field(interfaceForm,DestType));
-    MENU_currChoice(mptr) = FILEfield;
-    if( strlen(CurrentFile) > 0 )
-	strncpy(FORM_fieldValue(FORM_field(interfaceForm,DestType+2+FILEfield)),
-		CurrentFile,
-		FORM_fieldLen(FORM_field(interfaceForm,DestType+2+FILEfield)));
-    FORM_currField(interfaceForm) = DestValue;
-    EDIT_fileMode = APPENDmode;
-    runEditorInterface();
-    EDIT_fileMode = NOmode;
-}
-
-PrivateFnDef int appendFile () {
-    int error;
-    
-    if( !doInterface && (error = getFileName(CurrentFile,"append")) != ERR_AskedForHelp )
-    {
-    	if( error == 0 )
-    	{
-    		EDIT_fileMode = APPENDmode;
-    		if( checkFileExistence(CurrentFile) == ABORTmode )
-    		{
-    			EDIT_fileMode = NOmode;
-    			return;
-    		}
-		EDIT_fileMode = NOmode;
-    		if( error = BUF_appendToFile(CurrBuffer, CurrentFile) )
-		        ERR_displayError(error);
-		else
-    			ERR_displayMsg(ERR_WroteFile);
-    	}
-        return;
-    }
-    appendFilePrime();
-}
-
-PrivateFnDef int appendFileInt () {
-	doInterface = TRUE;
-	appendFile();
-	doInterface = FALSE;
-}
-#endif
 
-
-/*---------------------------------------------------------------------*/
-#if 0
-PrivateFnDef int currentFile () {
-    char buffer[BUF_MaxPathNameChars + 80];
-    
-    sprintf(buffer, " Current file is: %s ", CurrentFile);
-    ERR_displayPause(buffer);
-    return(FALSE);
-}
-#endif
-/*---------------------------------------------------------------------*/
 
 /*************************************************
  **********	Region Functions	**********
@@ -1528,8 +1421,7 @@ PrivateFnDef void beginRegion () {
 }
 /*---------------------------------------------------------------------*/
 
-PrivateFnDef int test_region()
-{
+PrivateFnDef int test_region() {
  /* Checks:                                                            */
  /*   1) for valid values in the region vars (Ex. no negative numbers) */
  /*   2) that start_region != end_region                               */
@@ -1689,119 +1581,7 @@ PrivateFnDef void runRegion () {
     if (CurrBuffer != Output)
 	    NotDone = FALSE;
 }
-
 /*---------------------------------------------------------------------*/
-
-static char uplTemplate[] = "/tmp/uplXXXXXX" ;
-static char dnlTemplate[] = "/tmp/dnlXXXXXX" ;
-
-#if 0
-PrivateFnDef int uploadRegion () {
-    int error;
-    char	*s, tname[128], pcname[128], *mktemp(), cmd[128];
-    
-    strcpy(tname,uplTemplate);
-    if( !strlen((s = mktemp(tname))) )
-    {
-	ERR_displayError(ERR_OpenError);
-	return(TRUE);
-    }
-
-    if (error = ERR_promptForString("Enter name of file on PC to upload (F9 to abort): ", pcname, TRUE))
-    {
-    	if( error == ERR_AbortedPrompt )
-	    return(FALSE);
-	else
-	    return(error);
-    }
-    else if (!strlen(pcname))
-	return(FALSE);
-    ERR_clearMsg();
-
-    sprintf(cmd,"/bin/csh -if -c \"/usr/local/bin/pcupload %s %s\"",s,pcname);
-    CUR_saveterm();
-    CUR_resetterm();
-    RS_system(cmd);
-    CUR_fixterm();
-    CUR_noecho();
-    CUR_nonl();
-    CUR_cbreak();
-    CUR_clearok(CUR_curscr);
-    CUR_wrefresh(CUR_curscr);
-    if (TwoWin)
-    {
-        refresh_two();
-    }
-    else
-	refresh_one();    
-    ERR_clearMsg();
-    BUF_eraseBuffer(Region);
-    if( (error = BUF_getFile( Region, s )) )
-    {
-	ERR_displayStr(" Unable to access temporary file",TRUE);
-	return(TRUE);
-    }
-    remove(s);
-    return(FALSE);
-}
-#endif
-
-
-#if 0
-PrivateFnDef int downloadRegion () {
-    int error;
-    char	*s, tname[128], pcname[128], *mktemp(), cmd[128];
-    
-    if (BUF_firstLine(Region) == NULL && BUF_lastLine(Region) == NULL)
-    {
-	ERR_displayError(ERR_NoRegion);
-	return(TRUE);
-    }
-
-    strcpy(tname,dnlTemplate);
-    if( !strlen((s = mktemp(tname))) )
-    {
-	ERR_displayError(ERR_OpenError);
-	return(TRUE);
-    }
-    if( (error = BUF_writeFile( Region, s )) )
-    {
-	ERR_displayStr(" Unable to access temporary file",TRUE);
-	return(TRUE);
-    }
-    if (error = ERR_promptForString("Enter name of file (.PRN added automatically) (F9 to abort): ", pcname, TRUE))
-    {
-    	if( error == ERR_AbortedPrompt )
-	    return(FALSE);
-	else
-	    return(error);
-    }
-    else if (!strlen(pcname))
-	return(FALSE);
-    ERR_clearMsg();
-    strcat(pcname,".PRN");
-
-    sprintf(cmd,"/bin/csh -if -c \"/usr/local/bin/pcdownload %s %s\"",s,pcname);
-    CUR_saveterm();
-    CUR_resetterm();
-    RS_system(cmd);
-    CUR_fixterm();
-    CUR_noecho();
-    CUR_nonl();
-    CUR_cbreak();
-    CUR_clearok(CUR_curscr);
-    CUR_wrefresh(CUR_curscr);
-    if (TwoWin)
-    {
-        refresh_two();
-    }
-    else
-	refresh_one();    
-    ERR_clearMsg();
-    remove(s);
-    return(FALSE);
-}
-#endif
 
 
 PrivateFnDef void saveRegionPrime () {
@@ -1855,31 +1635,6 @@ PrivateFnDef void saveRegionInt () {
 }
 
 PrivateFnDef void printRegion () {
-#if 0
-    PAGE *page;
-    int i;
-
-/*** print needs to know the current screen contents,  so make page ***/    
-    if (TwoWin)
-    {
-	PAGE_createPage(page, 4, NULL, NULL, NULL, PAGE_noType, i);
-	PAGE_createElement(page, 0, NULL, TopWin, PAGE_Init, NULL, FALSE);
-	PAGE_createElement(page, 1, NULL, StWinTwo, PAGE_Init, NULL, FALSE);
-	PAGE_createElement(page, 2, NULL, BotWin, PAGE_Init, NULL, FALSE);
-	PAGE_createElement(page, 3, NULL, StWinOne, PAGE_Init, NULL, FALSE);
-    }
-    else
-    {
-	PAGE_createPage(page, 2, NULL, NULL, NULL, PAGE_noType, i);
-	PAGE_createElement(page, 0, NULL, FullWin, PAGE_Init, NULL, FALSE);
-	PAGE_createElement(page, 1, NULL, StWinOne, PAGE_Init, NULL, FALSE);
-    }
-    
-    BUF_printBuffer(Region, page, -1);
-
-    PAGE_deletePage(page, i);
-#endif
-
     MENU *mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType));
     MENU_currChoice(mptr) = REGIONfield;
     mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType+2+REGIONfield));
@@ -2029,31 +1784,6 @@ PrivateFnDef int recall () {
 /*---------------------------------------------------------------------*/
 
 PrivateFnDef void printBuffer () {
-#if 0
-    PAGE *page;
-    int i;
-
-/*** print needs to know the current screen contents,  so make page ***/    
-    if (TwoWin)
-    {
-	PAGE_createPage(page, 4, NULL, NULL, NULL, PAGE_noType, i);
-	PAGE_createElement(page, 0, NULL, TopWin, PAGE_Init, NULL, FALSE);
-	PAGE_createElement(page, 1, NULL, StWinTwo, PAGE_Init, NULL, FALSE);
-	PAGE_createElement(page, 2, NULL, BotWin, PAGE_Init, NULL, FALSE);
-	PAGE_createElement(page, 3, NULL, StWinOne, PAGE_Init, NULL, FALSE);
-    }
-    else
-    {
-	PAGE_createPage(page, 2, NULL, NULL, NULL, PAGE_noType, i);
-	PAGE_createElement(page, 0, NULL, FullWin, PAGE_Init, NULL, FALSE);
-	PAGE_createElement(page, 1, NULL, StWinOne, PAGE_Init, NULL, FALSE);
-    }
-    
-    BUF_printBuffer(CurrBuffer, page, -1);
-
-    PAGE_deletePage(page, i);
-#endif
-
     MENU *mptr = FORM_fieldMenu(FORM_field(interfaceForm,SourceType));
     MENU_currChoice(mptr) = BUFFERfield;
 
@@ -2086,11 +1816,9 @@ PrivateFnDef void printReportInt () {
 PrivateFnDef int session () {
     int c, i, length, cursrow, curscol, error;
     char helpfile[BUF_MaxPathNameChars], *SrcDirName;
-    FILE *helpfd;
 
     SrcDirName = getenv(SourceDirEnv);
-    if( SrcDirName != NULL )
-    {
+    if( SrcDirName != NULL ) {
 	strcpy(helpfile, SrcDirName);
 	strcat(helpfile,"/");
 	strcat(helpfile, OutHelpName);
@@ -2099,13 +1827,10 @@ PrivateFnDef int session () {
     	helpfile[0] = '\0';
 
 /***** initialize, display the windows from top down *****/
-/*    BUF_screenRow(Output) = 0;*/
     current_settings(BotWin, StWinOne, OutKeys, Output);
     twoWindows();
     ERR_clearMsg();
 
-/*    unset_markers(Output);*/
-    
 /***** the input loop *****/
     NotDone = TRUE;
     while (NotDone)
@@ -2145,6 +1870,14 @@ PrivateFnDef int session () {
 
 	case 0:
 	case -1:
+	    break;
+
+	case KEY_RESIZE:
+	    resizeWindows ();
+	    if (TwoWin)
+		twoWindows ();
+	    else
+		oneWindow ();
 	    break;
 
 	case KEY_COPYPB:
@@ -2191,39 +1924,25 @@ PrivateFnDef int session () {
 	case KEY_WRITEFILE:
 	    saveFile();
 	    doInterface = FALSE;
-	    if (TwoWin) 
-	    {
-		refresh_two();
-	    }
-	    else
-	    {
-		refresh_one();
-	    }
+	    refresh_displayed ();
 	    RepetitionCount = 0;
 	    break;
 
 	case KEY_ONEWINDOW:
 	    oneWindow();
-	    refresh_one();
+//	    refresh_one();
 	    RepetitionCount = 0;
 	    break;
 
 	case KEY_TWOWINDOW:
 	    twoWindows();
-	    refresh_two();
+//	    refresh_two();
 	    RepetitionCount = 0;
 	    break;
 
 	case KEY_ERASEWIN:
 	    eraseWindow();
-	    if (TwoWin) 
-	    {
-		refresh_two();
-	    }
-	    else
-	    {
-		refresh_one();
-	    }
+	    refresh_displayed ();
 	    RepetitionCount = 0;
 	    break;
 
@@ -2246,60 +1965,32 @@ PrivateFnDef int session () {
 	    break;
 
 	case KEY_HELP:
-	    init_help();
+	    init_help(helpfile);
 	    CUR_touchwin(HelpWin);
 	    CUR_wrefresh(HelpWin);
 	    KEY_getkey(FALSE);
 	    KEY_QuoteNextKey = FALSE;
 	    CUR_delwin(HelpWin);
-	    if (TwoWin) 
-	    {
-		refresh_two();
-	    }
-	    else
-	    {
-		refresh_one();
-	    }
+	    refresh_displayed ();
 	    ERR_clearMsg();
 	    RepetitionCount = 0;
 	    break;
 
 	case KEY_WINDOW: 
-	    MENU_handler(WinMenu, WindowMenuWin, PAGE_Input);
-	    if (TwoWin) 
-	    {
-		refresh_two();
-	    }
-	    else
-	    {
-		refresh_one();
-	    }
+	    MENU_handler(WindowMenu, WindowMenuWin, PAGE_Input);
+	    refresh_displayed ();
 	    RepetitionCount = 0;
 	    break;
 
 	case KEY_FILES:
 	    MENU_handler(FileMenu, FileMenuWin, PAGE_Input);
-	    if (TwoWin) 
-	    {
-		refresh_two();
-	    }
-	    else
-	    {
-		refresh_one();
-	    }
+	    refresh_displayed ();
 	    RepetitionCount = 0;
 	    break;
 	
 	case KEY_REGIONS:
-	    MENU_handler(RegMenu, RegionMenuWin, PAGE_Input);
-	    if (TwoWin) 
-	    {
-		refresh_two();
-	    }
-	    else
-	    {
-		refresh_one();
-	    }
+	    MENU_handler(RegionMenu, RegionMenuWin, PAGE_Input);
+	    refresh_displayed ();
 	    RepetitionCount = 0;
 	    break;
 
@@ -2307,14 +1998,7 @@ PrivateFnDef int session () {
 	    if( DefaultModule != NULL )
 	    {
 	    	(*DefaultModule)();
-		if (TwoWin) 
-		{
-		    refresh_two();
-		}
-		else
-		{
-		    refresh_one();
-		}
+		refresh_displayed ();
 	    }
 	    else
 		ERR_displayError(ERR_UndefKey);
@@ -2324,27 +2008,13 @@ PrivateFnDef int session () {
 	case KEY_SMENU:
 /*	    ERR_displayError(ERR_UndefKey);*/
 	    runSysMenu();
-	    if (TwoWin) 
-	    {
-		refresh_two();
-	    }
-	    else
-	    {
-		refresh_one();
-	    }
+	    refresh_displayed ();
 	    RepetitionCount = 0;
 	    break;
 
 	case KEY_AMENU:
-	    MENU_handler(AppMenu, ApplicMenuWin, PAGE_Input);
-	    if (TwoWin) 
-	    {
-		refresh_two();
-	    }
-	    else
-	    {
-		refresh_one();
-	    }
+	    MENU_handler(ApplicMenu, ApplicMenuWin, PAGE_Input);
+	    refresh_displayed ();
 	    RepetitionCount = 0;
 	    break;
 
@@ -2353,14 +2023,7 @@ PrivateFnDef int session () {
 	    QuitSystem();
 	    if( PAGE_ExitSystem )
 		return TRUE;
-	    if (TwoWin) 
-	    {
-		refresh_two();
-	    }
-	    else
-	    {
-		refresh_one();
-	    }
+	    refresh_displayed ();
 	    break;
 
 	case KEY_PREV:
@@ -2380,12 +2043,7 @@ PrivateFnDef int session () {
 	case KEY_SUBSHELL:
 	    RepetitionCount = 0;
 	    ED_subShell();
-	    if (TwoWin)
-	    {
-	        refresh_two();
-	    }
-	    else
-		refresh_one();    
+	    refresh_displayed ();
 	    break;
 
 	case KEY_REPAINT:
@@ -2526,37 +2184,8 @@ PrivateFnDef int session () {
     return(FALSE);
 }
 
-PublicFnDef void EDIT_reportFileMenu (PAGE *page, int doBrowse) {
-    int		i, j, longest, sr, sc;
-    CUR_WINDOW	*menuWin;
-
-    MENU::Reference menu (new MENU (fileReportMenu, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
-    MENU_title(menu) =" Interface Menu: ";
-    i = MENU_choiceCount(menu) + 4;
-    if( i >= CUR_LINES )
-	i = CUR_LINES - 1;
-    j = longest + 4;
-    if( (size_t)j <= strlen(MENU_title(menu)) )
-	j = strlen(MENU_title(menu)) + 1;
-    sr = ((CUR_LINES - 1) - i) / 2;
-    sc = CUR_COLS - 10 - j;
-    if( sc < 0 )
-    {
-	sc = 5;
-	j = CUR_COLS - 10;
-    }
-    menuWin = CUR_newwin(i, j, sr, sc);
-    reportPage = page;
-    useBrowser = doBrowse;
-    MENU_handler(menu,menuWin,PAGE_Input);
-    useBrowser = FALSE;
-    CUR_delwin(menuWin);
-}
-
 PrivateFnDef void initEditor() {
-    int longest, i, j, sr, sc;
-
-/*    ERR_displayStr(" Initializing editor...");*/
+    int longest, i, j;
 
 /***** Initialize buffers *****/
     Edit = (LINEBUFFER *) malloc(sizeof(LINEBUFFER));
@@ -2571,8 +2200,7 @@ PrivateFnDef void initEditor() {
     BUF_maxLineSize(BrowserInput) = MAX_OUTPUT_LINE_SIZE;
     BUF_initBuffer(BrowserInput, 4096);
 
-    for( i=0 ; i<NUMRECALL ; i++ )
-    {
+    for( i=0 ; i<NUMRECALL ; i++ ) {
 	RecallBuf[i] = (LINEBUFFER *) malloc(sizeof(LINEBUFFER));
 	BUF_maxLineSize(RecallBuf[i]) = MAX_OUTPUT_LINE_SIZE;
 	BUF_initBuffer(RecallBuf[i], RBUFSIZE);
@@ -2589,133 +2217,47 @@ PrivateFnDef void initEditor() {
     BUF_initBuffer(Output, OBUFSIZE);
 
     /* initialize the printers,  so the menu choices can be turned off */
-    if (checkPrinters () == 0)
-        {
+    if (checkPrinters () == 0) {
         /* turn off the printer choice for each menu */
         fileMenu[2].active = OFF;
         regionMenu[7].active = OFF;
         dstChoices[3].active = OFF;
         fileReportMenu[1].active = OFF;
-        }
+    }
 
 /**** initialize menus ****/
     FileMenu.setTo (new MENU (fileMenu, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
     MENU_title(FileMenu) =" Interface Menu: ";
-    i = MENU_choiceCount(FileMenu) + 4;
-    if( i >= CUR_LINES )
-	i = CUR_LINES - 1;
-    j = longest + 4;
-    if( (size_t)j <= strlen(MENU_title(FileMenu)) )
-	j = strlen(MENU_title(FileMenu)) + 1;
-    sr = ((CUR_LINES - 1) - i) / 2;
-    sc = CUR_COLS - 10 - j;
-    if( sc < 0 )
-    {
-	sc = 5;
-	j = CUR_COLS - 10;
-    }
-    FMWnr = i; FMWnc = j; FMWsr = sr; FMWsc = sc;
-    WinMenu.setTo (new MENU (windowMenu, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
-    MENU_title(WinMenu) =" Window Menu: ";
-    i = MENU_choiceCount(WinMenu) + 4;
-    if( i >= CUR_LINES )
-	i = CUR_LINES - 1;
-    j = longest + 4;
-    if( (size_t)j <= strlen(MENU_title(WinMenu)) )
-	j = strlen(MENU_title(WinMenu)) + 1;
-    sr = ((CUR_LINES - 1) - i) / 2;
-    sc = CUR_COLS - 10 - j;
-    if( sc < 0 )
-    {
-	sc = 5;
-	j = CUR_COLS - 10;
-    }
-    WMWnr = i; WMWnc = j; WMWsr = sr; WMWsc = sc;
-    RegMenu.setTo (new MENU (regionMenu, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
-    MENU_title(RegMenu) =" Region Menu: ";
-    i = MENU_choiceCount(RegMenu) + 4;
-    if( i >= CUR_LINES )
-	i = CUR_LINES - 1;
-    j = longest + 4;
-    if( (size_t)j <= strlen(MENU_title(RegMenu)) )
-	j = strlen(MENU_title(RegMenu)) + 1;
-    sr = ((CUR_LINES - 1) - i) / 2;
-    sc = CUR_COLS - 10 - j;
-    if( sc < 0 )
-    {
-	sc = 5;
-	j = CUR_COLS - 10;
-    }
-    RMWnr = i; RMWnc = j; RMWsr = sr; RMWsc = sc;
 
-    AppMenu.setTo (new MENU (applicMenu, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
-    MENU_title(AppMenu) =" Applications Menu: ";
-    i = MENU_choiceCount(AppMenu) + 4;
-    if( i >= CUR_LINES )
-	i = CUR_LINES - 1;
-    j = longest + 4;
-    if( (size_t)j <= strlen(MENU_title(AppMenu)) )
-	j = strlen(MENU_title(AppMenu)) + 1;
-    sr = ((CUR_LINES - 1) - i) / 2;
-    sc = CUR_COLS - 10 - j;
-    if( sc < 0 )
-    {
-	sc = 5;
-	j = CUR_COLS - 10;
-    }
-    AMWnr = i; AMWnc = j; AMWsr = sr; AMWsc = sc;
+    WindowMenu.setTo (new MENU (windowMenu, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
+    MENU_title(WindowMenu) =" Window Menu: ";
+
+    RegionMenu.setTo (new MENU (regionMenu, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
+    MENU_title(RegionMenu) =" Region Menu: ";
+
+    ApplicMenu.setTo (new MENU (applicMenu, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
+    MENU_title(ApplicMenu) =" Applications Menu: ";
 
     CurrBuffer = Edit;
     
     EDIT_Init = TRUE;    
 }
 
-PrivateFnDef void createEditorWindows() {
-    TopWin        = CUR_newwin((CUR_LINES - 3) / 2, CUR_COLS-1, 0, 0);
-    BotWin        = CUR_newwin((CUR_LINES - 3) - ((CUR_LINES - 3) / 2),
-				CUR_COLS-1, ((CUR_LINES - 3) / 2) + 1, 0);
-    FullWin       = CUR_newwin(CUR_LINES - 2, CUR_COLS-1, 0, 0);
-    StWinOne      = CUR_newwin(1, CUR_COLS, CUR_LINES - 2, 0);
-    StWinTwo      = CUR_newwin(1, CUR_COLS, ((CUR_LINES - 3) / 2), 0);
-    FileMenuWin   = CUR_newwin(FMWnr, FMWnc, FMWsr, FMWsc);
-    RegionMenuWin = CUR_newwin(RMWnr, RMWnc, RMWsr, RMWsc);
-    WindowMenuWin = CUR_newwin(WMWnr, WMWnc, WMWsr, WMWsc);
-    ApplicMenuWin = CUR_newwin(AMWnr, AMWnc, AMWsr, AMWsc);
+PublicFnDef void EDIT_reportFileMenu (PAGE *page, int doBrowse) {
+    int	i, j, longest;
 
-    if( STD_hasInsertDeleteLine )
-    {
-	CUR_idlok(TopWin,TRUE);
-	CUR_idlok(BotWin,TRUE);
-	CUR_idlok(FullWin,TRUE);
-    }
-    CUR_wclear(TopWin);
-    CUR_wclear(BotWin);
-    CUR_wclear(FullWin);
-}
+    MENU::Reference menu (new MENU (fileReportMenu, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
+    MENU_title(menu) =" Interface Menu: ";
 
-PrivateFnDef void deleteEditorWindows()
-{
-    CUR_delwin(FileMenuWin);
-    CUR_delwin(WindowMenuWin);
-    CUR_delwin(RegionMenuWin);
-    CUR_delwin(ApplicMenuWin);
-    if( CurrWin == FullWin )
-    {
-	CUR_delwin(TopWin);
-	CUR_delwin(BotWin);
-	CUR_delwin(StWinTwo);
-	CUR_delwin(FullWin);
-	CUR_delwin(StWinOne);
-    }
-    else
-    {
-	CUR_delwin(FullWin);
-	CUR_delwin(TopWin);
-	CUR_delwin(StWinTwo);
-	CUR_delwin(BotWin);
-	CUR_delwin(StWinOne);
-    }
+    CUR_WINDOW *menuWin = menuWindow (menu, 0);
+
+    reportPage = page;
+    useBrowser = doBrowse;
+    MENU_handler(menu,menuWin,PAGE_Input);
+    useBrowser = FALSE;
+    CUR_delwin(menuWin);
 }
+
 
 /******************
  *** MAINEDITOR ***
@@ -2724,14 +2266,12 @@ PrivateFnDef void deleteEditorWindows()
 PublicVarDef int	inEditor = FALSE;
 
 PublicFnDef void EDIT_main () {
-    if( interfacePage != NULL )
-    {
+    if( interfacePage != NULL ) {
     	ERR_displayPause(" Not allowed to enter editor from Interface Form");
     	return;
     }
 
-    if( inEditor )
-    {
+    if( inEditor ) {
     	ERR_displayPause(" Editor already running");
     	return;
     }
@@ -2868,7 +2408,7 @@ PublicFnDef void EDIT_runInterface(PAGE *iPage) {
 	}
 
 	doInterfaceClear = FALSE;	
-	intWin1 = CUR_newwin(9, 78, ((CUR_LINES - 1) - 9)/2, (CUR_COLS - 78)/2);
+	CUR_WINDOW *intWin1 = CUR_newwin(9, 78, ((CUR_LINES - 1) - 9)/2, (CUR_COLS - 78)/2);
 	WIN_ReverseBox(intWin1,NULL);
 	CUR_wattron(intWin1,CUR_A_REVERSE);
 	CUR_wmove(intWin1,0,32);
@@ -2876,7 +2416,7 @@ PublicFnDef void EDIT_runInterface(PAGE *iPage) {
 	CUR_wmove(intWin1,CUR_WIN_maxy(intWin1),2);
 	CUR_wprintw(intWin1,"Execute(F2)  Quit(F9)");
 	CUR_wattroff(intWin1,CUR_A_REVERSE);
-	intWin2 = CUR_subwin(intWin1, 7, 76, (((CUR_LINES - 1) - 9)/2)+1, ((CUR_COLS - 78)/2)+1);
+	CUR_WINDOW *intWin2 = CUR_subwin(intWin1, 7, 76, (((CUR_LINES - 1) - 9)/2)+1, ((CUR_COLS - 78)/2)+1);
 
 	PAGE_createPage(interfacePage,(PAGE_windowCount(iPage)+2),NULL,NULL,NULL,PAGE_noType,i);
 	for( i=0 ; i<PAGE_windowCount(iPage) ; i++ )
@@ -2907,27 +2447,23 @@ PublicFnDef void EDIT_displayErrorMessage() {
 	errorMessage[0] = '\0';
 }
 
-PrivateFnDef int
-getErrorMessage()
-{
+PrivateFnDef void getErrorMessage() {
 	int	len;
 	FILE	*fp;
 
 	displayErr = FALSE;	
 	errorMessage[0] = '\0';
 	if( (fp = fopen(errorName,"r")) == NULL )
-		return(FALSE);
-	if( fgets(errorMessage, 81, fp) == NULL )
-	{
+		return;
+	if( fgets(errorMessage, 81, fp) == NULL ) {
 		remove(errorName);
-		return(FALSE);
+		return;
 	}
 	len = strlen(errorMessage);
 	if( (len > 0) && (errorMessage[len-1] == '\n') )
 		errorMessage[len-1] = '\0';
 	displayErr = TRUE;
 	remove(errorName);
-	return(FALSE);
 }
 
 PrivateFnDef int doFilter (char const *sname, char *dname, int filter, char *filterOpts) {
@@ -3020,10 +2556,6 @@ PublicFnDef int printFile (char const *fname) {
 
     RS_system (buffer);
     CUR_werase (ERR_Window);
-#if 0
-	CUR_clearok(CUR_curscr);	/*** need to repaint the screen ***/
-	CUR_wrefresh(CUR_curscr);
-#endif
     doInterfaceClear = TRUE;
     if (filtered)
         remove (tmpName);
@@ -3031,8 +2563,9 @@ PublicFnDef int printFile (char const *fname) {
     return (FALSE);
 }
 
-PrivateFnDef int
-pcTransfer(char const *fname, char *pname, int DirFlag, int mode, int filter, char *filterOpts) {
+PrivateFnDef int pcTransfer(
+    char const *fname, char *pname, int DirFlag, int mode, int filter, char *filterOpts
+) {
 	char	buffer[256], buffer2[256], tmpName[256], filterName[256];
 
 	ERR_displayStr("Transfer in process, please wait...",FALSE);
@@ -3477,10 +3010,6 @@ PrivateFnDef int execInterfaceBuffer (int whichBuf) {
 			if (printFile (tmpName))
 				return (TRUE);
 			/* remove (tmpName); */
-#if 0
-			if( BUF_printBuffer(tmp, interfacePage, MENU_currChoice(menu)) )
-				return(TRUE);
-#endif
 			break;
 
 		case PCfield:

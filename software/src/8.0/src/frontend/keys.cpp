@@ -477,6 +477,7 @@ PublicFnDef int KEY_getkey(int allowRepetition) {
     case KEY_QUOTE:    	
     	KEY_QuoteNextKey = TRUE;
     	break;
+
     case STD_CTRL('H'):    	c = KEY_BKSP; break;
     default:		break;
     }			    /*** main switch  ***/

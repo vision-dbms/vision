@@ -104,23 +104,7 @@ typedef struct {
 #define PAGE_pagePrev(page)	    ((*page->fkeyFunc[8])())
 #define PAGE_pageQuit(page)	    ((*page->fkeyFunc[9])())
 
-#define PAGE_initScreen()\
-{\
-    CUR_nonl();\
-    CUR_cbreak();\
-    CUR_noecho();\
-    ERR_Window = CUR_newwin(1, CUR_COLS, CUR_LINES - 1, 0);\
-}\
-
-#define PAGE_endScreen()\
-{\
-    CUR_erase();\
-    CUR_touchwin(CUR_stdscr);\
-    CUR_refresh();\
-}
-
-#define PAGE_createPage(pge, n, hlp, obj, ow, ot, i)\
-{\
+#define PAGE_createPage(pge, n, hlp, obj, ow, ot, i) {\
     if (NULL == (pge = (PAGE *)malloc(sizeof(PAGE))))\
         ERR_fatal(" Malloc Error");\
     PAGE_windowCount(pge) = n;\
@@ -134,8 +118,7 @@ typedef struct {
 }
 
 
-#define PAGE_createElement(pge, n, obj, win, action, fn, enter)\
-{\
+#define PAGE_createElement(pge, n, obj, win, action, fn, enter) {\
     if (NULL == (PAGE_element(pge, n) =\
 		 (PAGE_Element *)malloc(sizeof(PAGE_Element))))\
         ERR_fatal(" Malloc error");\
@@ -146,8 +129,7 @@ typedef struct {
     PAGE_enter(pge, n) = (unsigned int)enter;\
 }
 
-#define PAGE_deletePage(pge, n)\
-{\
+#define PAGE_deletePage(pge, n) {\
     for (n = 0; n < PAGE_windowCount(pge); n++)\
         free(PAGE_element(pge, n));\
     free(pge);\
