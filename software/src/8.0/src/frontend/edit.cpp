@@ -382,18 +382,21 @@ PrivateVarDef int	EDIT_fileMode = NOmode;
  ****  Window Management  *****
  ******************************/
 
-PrivateFnDef CUR_WINDOW *adjustWindow (CUR_WINDOW *pWindow, int ypos, int xpos, int ysize, int xsize) {
+PrivateFnDef void getWindow (CUR_WINDOW *&pWindow, int ysize, int xsize, int ypos, int xpos) {
+    if (!pWindow)
+	pWindow = CUR_newwin (ysize,xsize,ypos,xpos);
+    else {
 #ifdef SVR4_CURSES
-    CUR_delwin (pWindow);
-    pWindow = CUR_newwin (ypos,xpos,ysize,xsize);
+	CUR_delwin (pWindow);
+	pWindow = CUR_newwin (ysize,xsize,ypos,xpos);
 #else
-    wresize (pWindow,ysize,xsize);
-    mvwin (pWindow,ypos,xpos);
+	wresize (pWindow,ysize,xsize);
+	mvwin (pWindow,ypos,xpos);
 #endif
-    return pWindow;
+    }
 }
 
-PrivateFnDef CUR_WINDOW *menuWindow (MENU *pMenu, CUR_WINDOW *pWindow) {
+PrivateFnDef void getMenuWindow (CUR_WINDOW *&pWindow, MENU *pMenu) {
     int i = MENU_choiceCount(pMenu) + 4;
     if( i >= CUR_LINES )
 	i = CUR_LINES - 1;
@@ -406,16 +409,10 @@ PrivateFnDef CUR_WINDOW *menuWindow (MENU *pMenu, CUR_WINDOW *pWindow) {
 	sc = 5;
 	j = CUR_COLS - 10;
     }
-
-    if (!pWindow)
-	pWindow = CUR_newwin (i,j,sr,sc);
-    else {
-	adjustWindow (pWindow, i,j,sr,sc);
-    }
-    return pWindow;
+    getWindow (pWindow,i,j,sr,sc);
 }
 
-PrivateFnDef void resizeWindows () {
+PrivateFnDef void setupWindows () {
     int const nUsableLines = CUR_LINES > 4 ? CUR_LINES - 3 : 1;
     int const nFullLines   = CUR_LINES > 3 ? CUR_LINES - 2 : 1;
     int const nTopLines    = nUsableLines / 2 > 1 ? nUsableLines / 2 : 1;
@@ -423,32 +420,34 @@ PrivateFnDef void resizeWindows () {
 
     int const nUsableColumns = CUR_COLS > 1 ? CUR_COLS - 1 : 1;
 
-    mvwin (ERR_Window, CUR_LINES > 1 ? CUR_LINES - 1 : 1, 0);
+    if (ERR_Window)
+	mvwin (ERR_Window, CUR_LINES > 1 ? CUR_LINES - 1 : 1, 0);
 
-    TopWin   = adjustWindow (TopWin, 0, 0, nTopLines, nUsableColumns);
-    BotWin   = adjustWindow (BotWin, nTopLines + 1, 0, nBotLines, nUsableColumns);
-    FullWin  = adjustWindow (FullWin, 0, 0, nFullLines, nUsableColumns);
-    StWinOne = adjustWindow (StWinOne, CUR_LINES - 2, 0, 1, CUR_COLS);
-    StWinTwo = adjustWindow (StWinTwo, nTopLines, 0, 1, CUR_COLS);
+    getWindow (TopWin, nTopLines, nUsableColumns, 0, 0);
+    getWindow (BotWin, nBotLines, nUsableColumns, nTopLines + 1, 0);
+    getWindow (FullWin, nFullLines, nUsableColumns, 0, 0);
+    getWindow (StWinOne, 1, CUR_COLS, CUR_LINES - 2, 0);
+    getWindow (StWinTwo, 1, CUR_COLS, nTopLines, 0);
 
-    FileMenuWin   = menuWindow (FileMenu, FileMenuWin);
-    RegionMenuWin = menuWindow (RegionMenu, RegionMenuWin);
-    WindowMenuWin = menuWindow (WindowMenu, WindowMenuWin);
-    ApplicMenuWin = menuWindow (ApplicMenu, ApplicMenuWin);
+    getMenuWindow (FileMenuWin  , FileMenu);
+    getMenuWindow (RegionMenuWin, RegionMenu);
+    getMenuWindow (WindowMenuWin, WindowMenu);
+    getMenuWindow (ApplicMenuWin, ApplicMenu);
 }
 
 PrivateFnDef void createEditorWindows() {
-    TopWin        = CUR_newwin((CUR_LINES - 3) / 2, CUR_COLS-1, 0, 0);
-    BotWin        = CUR_newwin((CUR_LINES - 3) - ((CUR_LINES - 3) / 2),
-				CUR_COLS-1, ((CUR_LINES - 3) / 2) + 1, 0);
-    FullWin       = CUR_newwin(CUR_LINES - 2, CUR_COLS-1, 0, 0);
-    StWinOne      = CUR_newwin(1, CUR_COLS, CUR_LINES - 2, 0);
-    StWinTwo      = CUR_newwin(1, CUR_COLS, ((CUR_LINES - 3) / 2), 0);
+    setupWindows ();
+    // TopWin        = CUR_newwin((CUR_LINES - 3) / 2, CUR_COLS-1, 0, 0);
+    // BotWin        = CUR_newwin((CUR_LINES - 3) - ((CUR_LINES - 3) / 2),
+    // 				CUR_COLS-1, ((CUR_LINES - 3) / 2) + 1, 0);
+    // FullWin       = CUR_newwin(CUR_LINES - 2, CUR_COLS-1, 0, 0);
+    // StWinOne      = CUR_newwin(1, CUR_COLS, CUR_LINES - 2, 0);
+    // StWinTwo      = CUR_newwin(1, CUR_COLS, ((CUR_LINES - 3) / 2), 0);
 
-    FileMenuWin   = menuWindow (FileMenu, FileMenuWin);
-    RegionMenuWin = menuWindow (RegionMenu, RegionMenuWin);
-    WindowMenuWin = menuWindow (WindowMenu, WindowMenuWin);
-    ApplicMenuWin = menuWindow (ApplicMenu, ApplicMenuWin);
+    // FileMenuWin   = getMenuWindow (FileMenu, FileMenuWin);
+    // RegionMenuWin = getMenuWindow (RegionMenu, RegionMenuWin);
+    // WindowMenuWin = getMenuWindow (WindowMenu, WindowMenuWin);
+    // ApplicMenuWin = getMenuWindow (ApplicMenu, ApplicMenuWin);
 
     if( STD_hasInsertDeleteLine ) {
 	CUR_idlok(TopWin,TRUE);
@@ -729,7 +728,7 @@ PrivateFnDef int editor() {
 	    break;
 
 	case KEY_RESIZE:
-	    resizeWindows ();
+	    setupWindows ();
 	    if (TwoWin)
 		twoWindows ();
 	    else
@@ -1880,7 +1879,7 @@ PrivateFnDef int session () {
 	    break;
 
 	case KEY_RESIZE:
-	    resizeWindows ();
+	    setupWindows ();
 	    if (TwoWin)
 		twoWindows ();
 	    else
@@ -2256,7 +2255,8 @@ PublicFnDef void EDIT_reportFileMenu (PAGE *page, int doBrowse) {
     MENU::Reference menu (new MENU (fileReportMenu, CUR_A_NORMAL, CUR_A_REVERSE, longest, i, j));
     MENU_title(menu) =" Interface Menu: ";
 
-    CUR_WINDOW *menuWin = menuWindow (menu, 0);
+    CUR_WINDOW *menuWin = 0;
+    getMenuWindow (menuWin, menu);
 
     reportPage = page;
     useBrowser = doBrowse;
