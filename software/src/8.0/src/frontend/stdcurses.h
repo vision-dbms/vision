@@ -20,6 +20,7 @@
 #endif
 #ifdef sun
 #define NOMACROS
+#define SVR4_CURSES
 #endif
 #include <curses.h>
 
@@ -229,6 +230,10 @@ typedef WINDOW CUR_WINDOW;
 #define CUR_KEY_F8	KEY_F(8)
 #define CUR_KEY_F9	KEY_F(9)
 #define CUR_KEY_F10	KEY_F(10)
+
+#ifdef SVR4_CURSES
+#define KEY_RESIZE	(KEY_MAX + 1)
+#endif
 
 #endif  /* defined(__hp9000s700)||defined(solaris_2) */
 

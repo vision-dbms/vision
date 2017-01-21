@@ -382,6 +382,17 @@ PrivateVarDef int	EDIT_fileMode = NOmode;
  ****  Window Management  *****
  ******************************/
 
+PrivateFnDef CUR_WINDOW *adjustWindow (CUR_WINDOW *pWindow, int ypos, int xpos, int ysize, int xsize) {
+#ifdef SVR4_CURSES
+    CUR_delwin (pWindow);
+    pWindow = CUR_newwin (ypos,xpos,ysize,xsize);
+#else
+    wresize (pWindow,ysize,xsize);
+    mvwin (pWindow,ypos,xpos);
+#endif
+    return pWindow;
+}
+
 PrivateFnDef CUR_WINDOW *menuWindow (MENU *pMenu, CUR_WINDOW *pWindow) {
     int i = MENU_choiceCount(pMenu) + 4;
     if( i >= CUR_LINES )
@@ -399,8 +410,7 @@ PrivateFnDef CUR_WINDOW *menuWindow (MENU *pMenu, CUR_WINDOW *pWindow) {
     if (!pWindow)
 	pWindow = CUR_newwin (i,j,sr,sc);
     else {
-	wresize (pWindow, i, j);
-	mvwin (pWindow, sr, sc);
+	adjustWindow (pWindow, i,j,sr,sc);
     }
     return pWindow;
 }
@@ -415,14 +425,11 @@ PrivateFnDef void resizeWindows () {
 
     mvwin (ERR_Window, CUR_LINES > 1 ? CUR_LINES - 1 : 1, 0);
 
-    wresize (TopWin  , nTopLines, nUsableColumns);
-    wresize (BotWin  , nBotLines, nUsableColumns);
-    mvwin   (BotWin  , nTopLines + 1, 0);
-    wresize (FullWin , nFullLines, nUsableColumns);
-    wresize (StWinOne, 1, CUR_COLS);
-    mvwin   (StWinOne, CUR_LINES - 2, 0);
-    wresize (StWinTwo, 1, CUR_COLS);
-    mvwin   (StWinTwo, nTopLines, 0);
+    TopWin   = adjustWindow (TopWin, 0, 0, nTopLines, nUsableColumns);
+    BotWin   = adjustWindow (BotWin, nTopLines + 1, 0, nBotLines, nUsableColumns);
+    FullWin  = adjustWindow (FullWin, 0, 0, nFullLines, nUsableColumns);
+    StWinOne = adjustWindow (StWinOne, CUR_LINES - 2, 0, 1, CUR_COLS);
+    StWinTwo = adjustWindow (StWinTwo, nTopLines, 0, 1, CUR_COLS);
 
     FileMenuWin   = menuWindow (FileMenu, FileMenuWin);
     RegionMenuWin = menuWindow (RegionMenu, RegionMenuWin);
