@@ -339,16 +339,19 @@ PrivateFnDef void editorIO(LINEBUFFER *inbuffer, LINEBUFFER *outbuffer, LINEBUFF
 #define OutKeys \
     " Output: Help(F1) Window(F3) Interface(F5) Regions(F6) Quit(F9) "
 
-PrivateVarDef CUR_WINDOW  *StWinOne, 
-		      *StWinTwo, 
-		      *FileMenuWin, 
-		      *RegionMenuWin, 
-		      *WindowMenuWin, 
-		      *ApplicMenuWin, 
-		      *TopWin, *BotWin, *FullWin, 
-		      *CurrWin, 
-		      *CurrStat,
-		      *HelpWin;
+PrivateVarDef CUR_WINDOW
+    *StWinOne		= NULL,
+    *StWinTwo		= NULL,
+    *FileMenuWin	= NULL,
+    *RegionMenuWin	= NULL,
+    *WindowMenuWin	= NULL,
+    *ApplicMenuWin	= NULL,
+    *TopWin		= NULL,
+    *BotWin		= NULL,
+    *FullWin		= NULL,
+    *CurrWin		= NULL,
+    *CurrStat		= NULL,
+    *HelpWin		= NULL;
 		      
 PrivateVarDef MENU::Reference FileMenu, RegionMenu, WindowMenu, ApplicMenu;
 
@@ -390,6 +393,7 @@ PrivateFnDef void getWindow (CUR_WINDOW *&pWindow, int ysize, int xsize, int ypo
 	CUR_delwin (pWindow);
 	pWindow = CUR_newwin (ysize,xsize,ypos,xpos);
 #else
+	CUR_touchwin (pWindow);
 	wresize (pWindow,ysize,xsize);
 	mvwin (pWindow,ypos,xpos);
 #endif
@@ -420,8 +424,7 @@ PrivateFnDef void setupWindows () {
 
     int const nUsableColumns = CUR_COLS > 1 ? CUR_COLS - 1 : 1;
 
-    if (ERR_Window)
-	mvwin (ERR_Window, CUR_LINES > 1 ? CUR_LINES - 1 : 1, 0);
+    getWindow (ERR_Window, 1, CUR_COLS, CUR_LINES > 1 ? CUR_LINES - 1 : 1, 0);
 
     getWindow (TopWin, nTopLines, nUsableColumns, 0, 0);
     getWindow (BotWin, nBotLines, nUsableColumns, nTopLines + 1, 0);
@@ -437,17 +440,6 @@ PrivateFnDef void setupWindows () {
 
 PrivateFnDef void createEditorWindows() {
     setupWindows ();
-    // TopWin        = CUR_newwin((CUR_LINES - 3) / 2, CUR_COLS-1, 0, 0);
-    // BotWin        = CUR_newwin((CUR_LINES - 3) - ((CUR_LINES - 3) / 2),
-    // 				CUR_COLS-1, ((CUR_LINES - 3) / 2) + 1, 0);
-    // FullWin       = CUR_newwin(CUR_LINES - 2, CUR_COLS-1, 0, 0);
-    // StWinOne      = CUR_newwin(1, CUR_COLS, CUR_LINES - 2, 0);
-    // StWinTwo      = CUR_newwin(1, CUR_COLS, ((CUR_LINES - 3) / 2), 0);
-
-    // FileMenuWin   = getMenuWindow (FileMenu, FileMenuWin);
-    // RegionMenuWin = getMenuWindow (RegionMenu, RegionMenuWin);
-    // WindowMenuWin = getMenuWindow (WindowMenu, WindowMenuWin);
-    // ApplicMenuWin = getMenuWindow (ApplicMenu, ApplicMenuWin);
 
     if( STD_hasInsertDeleteLine ) {
 	CUR_idlok(TopWin,TRUE);
@@ -520,7 +512,7 @@ PrivateFnDef void write_stat(int update) {
 }
 
 PrivateFnDef void init_help(char const *helpfile) {
-    HelpWin = CUR_newwin(CUR_LINES,CUR_COLS,0,0);
+    getWindow (HelpWin,CUR_LINES,CUR_COLS,0,0);
     CUR_werase(HelpWin);
     FILE *const helpfd=fopen(helpfile, "r");
     if (helpfd) {
@@ -599,6 +591,8 @@ PrivateFnDef void refresh_two() {
     CUR_wnoutrefresh(BotWin);
     CUR_touchwin(StWinOne);
     CUR_wnoutrefresh(StWinOne);
+    CUR_touchwin(ERR_Window);
+    CUR_wnoutrefresh(ERR_Window);
     CUR_doupdate();
 }
 
@@ -607,6 +601,8 @@ PrivateFnDef void refresh_one() {
     CUR_wnoutrefresh(FullWin);
     CUR_touchwin(StWinOne);
     CUR_wnoutrefresh(StWinOne);
+    CUR_touchwin(ERR_Window);
+    CUR_wnoutrefresh(ERR_Window);
     CUR_doupdate();
 }
 

@@ -195,7 +195,15 @@ PublicFnDef int KEY_cready() {
     return(TRUE);
 }
 
+PublicFnDef FILE *LOGFILE () {
+    static FILE *pLogFile = fopen ("logfile", "a");
+    return pLogFile;
+}
+
 PrivateFnDef int cget() {
+    FILE *pLogFile = LOGFILE ();
+    static int PREV_LINES = CUR_LINES;
+    static int PREV_COLS = CUR_COLS;
 
     int c;
 
@@ -212,7 +220,12 @@ PrivateFnDef int cget() {
 	    return(c);
     }
 
-    return (CUR_wgetch(CUR_stdscr));
+    c = (CUR_wgetch(CUR_stdscr));
+    if (pLogFile && (CUR_LINES != PREV_LINES || CUR_COLS != PREV_COLS)) {
+	fprintf (pLogFile, "%04o: LINES: %u %u, COLS: %u %u\n", c, CUR_LINES, PREV_LINES, CUR_COLS, PREV_COLS);
+	CUR_COLS = PREV_COLS;
+	CUR_LINES = PREV_LINES;
+    }
 }
 
 PublicFnDef int KEY_getkey(int allowRepetition) {
