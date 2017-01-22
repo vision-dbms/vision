@@ -780,6 +780,10 @@ PrivateFnDef void parentSignalHandler (int sig)
 	break;
 #endif
 
+    case SIGWINCH:
+	KEY_onResizeSignal ();
+	break;
+
     case SIGCLD:
 	/*****
 	 * Note that the child that died may not be the research system. 
@@ -992,11 +996,19 @@ PrivateFnDef void setupParentSignals () {
 )
 
 #else
+#if defined(sun) && defined(CATCH_SIGWINCH)
+#define isaSpecialSignal(sig) (\
+    sig == SIGHUP || sig == SIGQUIT || sig == SIGTERM ||\
+    sig == SIGILL || sig == SIGBUS  || sig == SIGSEGV ||\
+    sig == SIGCLD || sig == SIGWINCH\
+)
+#else
 #define isaSpecialSignal(sig) (\
     sig == SIGHUP || sig == SIGQUIT || sig == SIGTERM ||\
     sig == SIGILL || sig == SIGBUS  || sig == SIGSEGV ||\
     sig == SIGCLD\
 )
+#endif
 
 #define isanIgnoredSignal(sig) (\
     sig == SIGINT || sig == SIGUSR1 || sig == SIGUSR2\

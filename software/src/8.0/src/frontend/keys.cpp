@@ -136,6 +136,12 @@ struct StringKey StringKeyTable[NUMSTRINGS] = {
 
 PrivateVarDef char	*KeypadSetString = NULL;
 
+PrivateVarDef bool ResizeSignaled = false;
+
+PublicFnDef void KEY_onResizeSignal () {
+    ResizeSignaled = true;
+}
+
 PublicFnDef void KEY_setKeypad() {
     char area[1024], *areap = area;
 
@@ -167,7 +173,7 @@ PrivateFnDef void KEY_nodelay(int on) {
 PublicFnDef int KEY_cready() {
     int	i;
 
-    if (Cbuf != EMPTY)
+    if (Cbuf != EMPTY || ResizeSignaled)
 	return(TRUE);
 
     if( KEY_scriptRead )
@@ -195,54 +201,83 @@ PublicFnDef int KEY_cready() {
     return(TRUE);
 }
 
-PublicFnDef FILE *LOGFILE () {
-    static FILE *pLogFile = fopen ("logfile", "a");
-    return pLogFile;
-}
-
 PrivateFnDef int cget() {
-    FILE *pLogFile = LOGFILE ();
-    static int PREV_LINES = CUR_LINES;
-    static int PREV_COLS = CUR_COLS;
-
     int c;
 
-    if (Cbuf != EMPTY)
-    {
+    if (Cbuf != EMPTY) {
 	c = Cbuf;
 	Cbuf = EMPTY;
-	return(c);
+    } else if (KEY_scriptRead && getScript(&c)) {
+    } else {
+	c = CUR_wgetch(CUR_stdscr);
     }
+    return c;
+}
 
-    if( KEY_scriptRead )
-    {
-	if( !getScript(&c) )
-	    return(c);
-    }
+#ifdef sun
+#include <sys/ioctl.h>
+#include <sys/termios.h>
 
-    c = (CUR_wgetch(CUR_stdscr));
-    if (pLogFile && (CUR_LINES != PREV_LINES || CUR_COLS != PREV_COLS)) {
-	fprintf (pLogFile, "%04o: LINES: %u %u, COLS: %u %u\n", c, CUR_LINES, PREV_LINES, CUR_COLS, PREV_COLS);
-	CUR_COLS = PREV_COLS;
-	CUR_LINES = PREV_LINES;
+void UpdateEnvironmentValue (char *pBuffer, size_t sBuffer, char const *pValueName, int iValue) {
+    if (getenv (pValueName)) {
+	snprintf (pBuffer, sBuffer, "%s=%u", pValueName, iValue);
+	putenv (pBuffer);
     }
 }
+#endif
 
 PublicFnDef int KEY_getkey(int allowRepetition) {
     int c, i;
 
-    c = cget();
+//  c = cget();
 
-    if( KEY_QuoteNextKey )
-    {
-    	    KEY_QuoteNextKey = FALSE;
-	    if( !JustDidPutc && KEY_scriptWrite )
-		putScript(c);
-	    if( JustDidPutc )
-		JustDidPutc = FALSE;
-	    return(c);
+    if( KEY_QuoteNextKey ) {
+	c = cget ();
+    	KEY_QuoteNextKey = FALSE;
+	if( !JustDidPutc && KEY_scriptWrite )
+	    putScript(c);
+	if( JustDidPutc )
+	    JustDidPutc = FALSE;
+	return(c);
     }
     
+#ifdef sun
+    /*
+     *  This attempt at resizing on Solaris might be heading in the right 
+     *  direction, however, at the moment, it doesn't work and will not
+     *  be run unless the SIGWINCH signal that triggers its execution is
+     *  caught.  To enable that signal and continue trying to make this
+     *  code work, recompile with -DCATCH_SIGWINCH.
+     *
+     *  Good luck.
+     *
+     */
+    if (ResizeSignaled) {
+	ResizeSignaled = false;
+	struct winsize w;
+	if (ioctl (0, TIOCGWINSZ, &w) != -1) {
+	    /*
+	     * If the 'LINES' or 'COLUMNS' environment variables are set,
+	     * their values can override the dynamic values learned from
+	     * SIGWINCH resizing events.  The workaround is to make sure
+	     * to change the values of the environment variables too.
+	     */
+	    static char LINES_BUFFER[32], COLUMNS_BUFFER[32];
+	    UpdateEnvironmentValue (LINES_BUFFER  , sizeof(LINES_BUFFER)  , "LINES"  , w.ws_row);
+	    UpdateEnvironmentValue (COLUMNS_BUFFER, sizeof(COLUMNS_BUFFER), "COLUMNS", w.ws_col);
+	    CUR_endwin ();
+	    CUR_refresh ();
+	    if (CUR_LINES != w.ws_row)
+		CUR_LINES  = w.ws_row;
+	    if (CUR_COLS != w.ws_col)
+		CUR_COLS  = w.ws_col;
+	    return KEY_RESIZE;
+	}
+    }
+#endif
+
+    c = cget ();
+
     switch (c)	
     {			    /*** main switch	      ***/
     case KEY_ESC:

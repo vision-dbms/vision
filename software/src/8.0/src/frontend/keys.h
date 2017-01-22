@@ -6,6 +6,8 @@
 #include "keys.d"
 
 /*****  Keyboard input routines  *****/
+PublicFnDecl void KEY_onResizeSignal ();
+
 PublicFnDecl void KEY_setKeypad();
 PublicFnDecl void KEY_initKeyboard();
 PublicFnDecl int KEY_cready();
