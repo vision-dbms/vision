@@ -88,8 +88,9 @@ set failed = 0
 ####  results as they compete to build, link, and delete 'auditshell.o'.  Deal
 ####  with that by creating a unique tempfile containing the auditshell's source
 ####  and, by extension, the auditshell's compiled output.
-set AuditShellSource=`mktemp --suffix=.cpp`
-set AuditShellObject=${AuditShellSource:r}.o
+set AuditShellPrefix=`mktemp`
+set AuditShellSource=${AuditShellPrefix}.cpp
+set AuditShellObject=${AuditShellPrefix}.o
 cp $AuditShell $AuditShellSource
 
 if ( -f /bin/hp9000s700) then
@@ -158,6 +159,9 @@ if ( -f $AuditShellObject ) then
 endif
 if ( -f $AuditShellSource ) then
 	"rm" -f $AuditShellSource
+endif
+if ( -f $AuditShellPrefix ) then
+	"rm" -f $AuditShellPrefix
 endif
 
 ####  ... and exit.
