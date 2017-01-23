@@ -327,8 +327,7 @@ PublicFnDef int KEY_getkey(int allowRepetition) {
 		   break;
                 case '3':
 		   c = cget();
-		   switch (c)
-		     {
+		   switch (c) {
 		     case '0':	c = CUR_KEY_F7; cget(); break;
 		     case '1':	c = CUR_KEY_F8; cget(); break;
 		     case '2':	c = CUR_KEY_F9; cget(); break;
@@ -435,8 +434,7 @@ PublicFnDef int KEY_getkey(int allowRepetition) {
 	case '7':
 	case '8':
 	case '9':
-	    if( !allowRepetition )
-	    {
+	    if( !allowRepetition ) {
 	    	c = -1;
 	    	break;
 	    }
@@ -449,7 +447,7 @@ PublicFnDef int KEY_getkey(int allowRepetition) {
 
     case KEY_META:    
 	c = cget();
-	switch (c) 	    /*** switch after META key ***/
+	switch (c) {	    /*** switch after META key ***/
 	case STD_CTRL('B'):	c = KEY_WORDBACK; break;
 	case STD_CTRL('F'):	c = KEY_WORDFORW; break;
 	case STD_CTRL('G'):	c = KEY_WORDDELC; break;
