@@ -278,18 +278,15 @@ PublicFnDef int KEY_getkey(int allowRepetition) {
 
     c = cget ();
 
-    switch (c)	
-    {			    /*** main switch	      ***/
+    switch (c) {	    /*** main switch	      ***/
     case KEY_ESC:
 
 	c = cget();
 
-	switch (c) 
-	{		    /*** switch after ESC key ***/
+	switch (c) {	    /*** switch after ESC key ***/
 	case '[':
 	    c = cget();
-	    switch (c)
-	    {		    /*** switch after [ key ***/
+	    switch (c) {    /*** switch after [ key ***/
 	    case 'A':		c = CUR_KEY_UP; break;
 	    case 'B':		c = CUR_KEY_DOWN; break;
 	    case 'C':	        c = CUR_KEY_RIGHT; break;
@@ -298,8 +295,7 @@ PublicFnDef int KEY_getkey(int allowRepetition) {
 	    /* The following are for X windows on the Apollo */
 	    case '1':
 		c = cget();
-		switch (c)
-		{
+		switch (c) {
 		case '1':	c = CUR_KEY_F1; cget(); break;
 		case '2':	c = CUR_KEY_F2; cget(); break;
 		case '3':	c = CUR_KEY_F3; cget(); break;
@@ -313,8 +309,7 @@ PublicFnDef int KEY_getkey(int allowRepetition) {
 		break;
 	    case '2':
 		c = cget();
-		switch (c)
-		{
+		switch (c) {
 		case '0':	c = CUR_KEY_F9; cget(); break;
 #if defined(sun)
                 case '2':
@@ -356,8 +351,7 @@ PublicFnDef int KEY_getkey(int allowRepetition) {
 
 	case 'O':
 	    c = cget();
-	    switch (c) 
-	    {		    /*** switch after O key ***/
+	    switch (c) {    /*** switch after O key ***/
 	    case 'A':	        c = CUR_KEY_UP; break;
 	    case 'B':	        c = CUR_KEY_DOWN; break;
 	    case 'C':	        c = CUR_KEY_RIGHT; break;
@@ -455,8 +449,7 @@ PublicFnDef int KEY_getkey(int allowRepetition) {
 
     case KEY_META:    
 	c = cget();
-	switch (c) 
-	{		    /*** switch after META key ***/
+	switch (c) 	    /*** switch after META key ***/
 	case STD_CTRL('B'):	c = KEY_WORDBACK; break;
 	case STD_CTRL('F'):	c = KEY_WORDFORW; break;
 	case STD_CTRL('G'):	c = KEY_WORDDELC; break;
@@ -478,8 +471,7 @@ PublicFnDef int KEY_getkey(int allowRepetition) {
 	case '>':	c = KEY_SCRIPTW; break;
 	case STD_CTRL('X'):	c = KEY_SUBSHELL; break;
 	case '?':
-		if( DescribingOn )
-		{
+		if( DescribingOn ) {
 			c = KEY_DESCRIBE;
 			break;
 		}
@@ -490,12 +482,10 @@ PublicFnDef int KEY_getkey(int allowRepetition) {
 		for( i=0 ; i<(NUMSTRINGS-2) ; i++ )
 			if( c == StringKeyTable[i].k )
 					break;
-		if( i >= (NUMSTRINGS-2) )
-		{
+		if( i >= (NUMSTRINGS-2) ) {
 			if( c & ~0x7f )
 				ERR_displayStr("Undefined key",TRUE);
-			else
-			{
+			else {
 				if( (c == STD_CTRL('J')) || (c == STD_CTRL('M')) )
 					sprintf(DescribeBuf,"Newline");
 				else if( isalpha(c) )
@@ -509,8 +499,7 @@ PublicFnDef int KEY_getkey(int allowRepetition) {
 				ERR_displayStr(DescribeBuf,FALSE);
 			}
 		}
-		else
-			ERR_displayStr(StringKeyTable[i].descrip,FALSE);
+		else ERR_displayStr(StringKeyTable[i].descrip,FALSE);
 		ERR_msgDisplayed = FALSE;
 		DescribingOn = FALSE;
 		c = 0;
@@ -527,7 +516,8 @@ PublicFnDef int KEY_getkey(int allowRepetition) {
     	break;
 
     case STD_CTRL('H'):    	c = KEY_BKSP; break;
-    default:		break;
+    case KEY_RESIZE:		refresh (); break;
+    default:			break;
     }			    /*** main switch  ***/
 
     if( !JustDidPutc && KEY_scriptWrite )
