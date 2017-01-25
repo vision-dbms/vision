@@ -3317,7 +3317,7 @@ bool VNetworkHandle::Construct (char const *pPathName, bool fReadOnly) {
 	    m_pOSDPathName = strdup ("");
 	else {
 	    size_t const sDirname = static_cast<size_t>(pLastSlash - m_pNDFPathName);
-	    char  *const pOSDPathName = strndup (m_pNDFPathName, sDirname);
+	    char  *const pOSDPathName = strdup (m_pNDFPathName);
 	    pOSDPathName[sDirname] = '\0';
 	    m_pOSDPathName = pOSDPathName;
 	}
