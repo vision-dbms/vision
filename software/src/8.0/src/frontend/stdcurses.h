@@ -18,11 +18,26 @@
 #ifndef NCURSES_OPAQUE
 #define NCURSES_OPAQUE 0
 #endif
+
+/*****************
+ *  Temporarily use standard curses on Solaris even where 'ncurses' exists.
+ *  Relaxing this restriction requires adding feature testing to 'visionBuilder'.
+ *****************/
 #ifdef sun
-#define NOMACROS
 #define SVR4_CURSES
 #endif
+
+#if !defined(sun)
 #include <curses.h>
+#include <term.h>
+#elif defined(SVR4_CURSES)
+#define NOMACROS
+#include <curses.h>
+#include <term.h>
+#else
+#include <ncurses/curses.h>
+#include <ncurses/term.h>
+#endif
 
 #ifndef TRUE
 #define TRUE 1

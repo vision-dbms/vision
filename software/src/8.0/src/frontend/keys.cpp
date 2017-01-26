@@ -7,7 +7,6 @@
 #include "Vk.h"
 
 #include "stdcurses.h"
-#include <term.h>
 
 #include "error.h"
 

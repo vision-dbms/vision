@@ -4,8 +4,7 @@
 
 #include "V_VString.h"
 
-#include <curses.h>
-#include <term.h>
+#include "stdcurses.h"
 
 #include "SItermio.h"
 

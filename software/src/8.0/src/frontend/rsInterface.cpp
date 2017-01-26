@@ -21,10 +21,6 @@
 #include "error.h"
 #include "mainmenu.h"
 
-#if !defined(solaris_1)
-#include <term.h>
-#endif
-
 PublicVarDef int DEBUG;
 PrivateVarDef int Administrator;
 PrivateVarDef jmp_buf give_up;
