@@ -23,9 +23,9 @@
  *  Temporarily use standard curses on Solaris even where 'ncurses' exists.
  *  Relaxing this restriction requires adding feature testing to 'visionBuilder'.
  *****************/
-#ifdef sun
-#define SVR4_CURSES
-#endif
+/* #ifdef sun */
+/* #define SVR4_CURSES */
+/* #endif */
 
 #if !defined(sun)
 #include <curses.h>
