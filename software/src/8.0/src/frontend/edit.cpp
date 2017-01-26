@@ -389,13 +389,13 @@ PrivateFnDef void getWindow (CUR_WINDOW *&pWindow, int ysize, int xsize, int ypo
     if (!pWindow)
 	pWindow = CUR_newwin (ysize,xsize,ypos,xpos);
     else {
-#ifdef SVR4_CURSES
-	CUR_delwin (pWindow);
-	pWindow = CUR_newwin (ysize,xsize,ypos,xpos);
-#else
+#ifdef USING_NCURSES
 	CUR_touchwin (pWindow);
 	wresize (pWindow,ysize,xsize);
 	mvwin (pWindow,ypos,xpos);
+#else
+	CUR_delwin (pWindow);
+	pWindow = CUR_newwin (ysize,xsize,ypos,xpos);
 #endif
     }
 }

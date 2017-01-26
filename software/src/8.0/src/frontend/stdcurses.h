@@ -19,24 +19,21 @@
 #define NCURSES_OPAQUE 0
 #endif
 
-/*****************
- *  Temporarily use standard curses on Solaris even where 'ncurses' exists.
- *  Relaxing this restriction requires adding feature testing to 'visionBuilder'.
- *****************/
-/* #ifdef sun */
-/* #define SVR4_CURSES */
-/* #endif */
-
 #if !defined(sun)
+//  If we're not compiling on Solaris, just use curses:
 #include <curses.h>
 #include <term.h>
-#elif defined(SVR4_CURSES)
+
+#elif defined(USING_NCURSES)
+//  ... otherwise, if we have Solaris 'ncurses', use it:
+#include <ncurses/curses.h>
+#include <ncurses/term.h>
+
+#else
+//  ... else, drop back to SVR4 curses:
 #define NOMACROS
 #include <curses.h>
 #include <term.h>
-#else
-#include <ncurses/curses.h>
-#include <ncurses/term.h>
 #endif
 
 #ifndef TRUE
@@ -246,7 +243,7 @@ typedef WINDOW CUR_WINDOW;
 #define CUR_KEY_F9	KEY_F(9)
 #define CUR_KEY_F10	KEY_F(10)
 
-#ifdef SVR4_CURSES
+#if defined(sun) && !defined(USING_NCURSES)
 #define KEY_RESIZE	(KEY_MAX + 1)
 #endif
 

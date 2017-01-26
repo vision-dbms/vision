@@ -1,1 +1,4 @@
-LIBS += -lncurses
+CURSES_CDEFS:sh = bash -c 'if [ -f /usr/include/ncurses/curses.h ]; then echo "-DUSING_NCURSES"; else echo ""; fi'
+CURSES_LIBS:sh = bash -c 'if [ -f /usr/include/ncurses/curses.h ]; then echo "-lncurses"; else echo "-lcurses"; fi'
+CDEFS += $(CURSES_CDEFS)
+LIBS += $(CURSES_LIBS)
