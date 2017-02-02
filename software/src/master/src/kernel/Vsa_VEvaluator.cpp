@@ -24,7 +24,9 @@
 
 #include "Vsa_IEvaluatorClient.h"
 #include "Vsa_VGenericEvaluation.h"
+#include "VTransientServices.h"
 
+#include "cam.h"
 
 /***********************************************
  ***********************************************
@@ -326,7 +328,8 @@ Vsa::VEvaluator::VEvaluator ()
 :   m_xNextRequest	(0)
 ,   m_bProcessingQueue  (false)
 ,   m_cQueriesProcessed	(0)
-,   m_cTotalQueryTime	(0)
+,   m_cTotalQueryTime	(0, true, 0.001)
+, 	m_cTotalQueueTime	(0, true, 0.001)
 ,   m_iStatus		(Status_Running)
 ,   m_cSubscribers      (0)
 ,   m_pIEvaluator	(this)
@@ -372,8 +375,6 @@ void Vsa::VEvaluator::hardstop () {
 }
 
 void Vsa::VEvaluator::restart () {
-  notifyAllUpDownSubscribers (true);
-  m_iStatus = Status_Running;
   m_iLastRestarted.setToNow ();
 }
 
@@ -388,10 +389,6 @@ void Vsa::VEvaluator::restart () {
  *****  Vsa::IEvaluator  *****
  *****************************/
 
-void Vsa::VEvaluator::getRole (VReference<IEvaluator>&rpRole) {
-    m_pIEvaluator.getRole (rpRole);
-}
-
 void Vsa::VEvaluator::EvaluateExpression (
     IEvaluator*		pRole,
     IEvaluatorClient*	pClient,
@@ -400,8 +397,11 @@ void Vsa::VEvaluator::EvaluateExpression (
 ) {
   m_iLastUsed.setToNow ();
   if (m_iStatus == Status_Stopped) {
+    VString iMsg ("Evaluator is already stopped");
+    notify (16, "#16: VEvaluator::EvaluateExpression: %s\n", iMsg.content ());
+
     if (pClient)
-      pClient->OnError (0, "Evaluator is already stopped");
+      pClient->OnError (0, iMsg.content ());
   }
   else 
     evaluate (pClient, rPath, rExpression);
@@ -416,13 +416,53 @@ void Vsa::VEvaluator::EvaluateURL (
 ) {
   m_iLastUsed.setToNow ();
   if (m_iStatus == Status_Stopped) {
+    VString iMsg ("Evaluator is already stopped");
+    notify (16, "#16: VEvaluator::EvaluateURL: %s\n", iMsg.content ());
+
     if (pClient)
-      pClient->OnError (0, "Evaluator is already stopped");
+      pClient->OnError (0, iMsg.content ());
   }
-  else 
+  else {
     evaluate (pClient, rPath, rQuery, rEnvironment);
+  }
 }
 
+
+/*****************************************
+ *****  Vsa::IEvaluator_Ex1 Methods  *****
+ *****************************************/
+
+void Vsa::VEvaluator::getRole (VReference<IEvaluator_Ex1>&rpRole) {
+    m_pIEvaluator.getRole (rpRole);
+}
+
+
+void Vsa::VEvaluator::EvaluateExpression_Ex (
+    IEvaluator*		pRole,
+    IEvaluatorClient*	pClient,
+    VString const&	rPath,
+    VString const&	rExpression,
+    VString const&      rID,
+    VString const&      rCID
+) {
+    CAM_OPERATION(co) << "message" << "VEvaluator::EvaluateExpression_Ex() receiving query ID: %qid" << rID;
+    co.stitchParent(rID.content(), rCID.content());
+    EvaluateExpression(pRole, pClient, rPath, rExpression);
+}
+
+void Vsa::VEvaluator::EvaluateURL_Ex (
+    IEvaluator*		pRole,
+    IEvaluatorClient*	pClient,
+    VString const&	rPath,
+    VString const&	rQuery,
+    VString const&	rEnvironment,
+    VString const&      rID,
+    VString const&      rCID
+) {
+    CAM_OPERATION(co) << "message" << "VEvaluator::EvaluateURL_Ex() receiving query ID: %qid" << rID;
+    co.stitchParent(rID.content(), rCID.content());
+    EvaluateURL(pRole, pClient, rPath, rQuery, rEnvironment);
+}
 
 /********************************************
  *****  Vsa::IEvaluatorControl Methods  *****
@@ -430,7 +470,7 @@ void Vsa::VEvaluator::EvaluateURL (
 
 void Vsa::VEvaluator::GetEvaluator (IEvaluatorControl *pRole, IEvaluatorSink *pSink) {
     if (pSink) {
-	VReference<IEvaluator> pIEvaluator;
+	VReference<IEvaluator_Ex1> pIEvaluator;
 	getRole (pIEvaluator);
 	pSink->OnData (pIEvaluator);
     }
@@ -459,6 +499,11 @@ void Vsa::VEvaluator::Stop (IEvaluatorControl *pRole, IVReceiver<bool> *pReceive
     if (pReceiver)
 	pReceiver->OnData (true);
 }
+
+Vca::U32 Vsa::VEvaluator::busyness () {
+	return queueLength();
+}
+
 void Vsa::VEvaluator::GetStatistics (
 	IEvaluatorControl *pRole, IVReceiver<VString const&> *pReceiver
 ) {
@@ -522,14 +567,27 @@ void Vsa::VEvaluator::evaluate (
 
 bool Vsa::VEvaluator::cancel (VEvaluation *pEvaluation) {
     // If there's no evaluation to cancel, do nothing.
-    if (!pEvaluation) return false;
-
+    if (!pEvaluation) {
+	notify (1, "#1: Vsa::VEvaluator::cancel: No evaluation to cancel.\n");
+	return false;
+    }
+    if (thisRequest () == pEvaluation) {
+	pEvaluation->onError(0, "Cancelled.");
+	nextRequest ();
+	notify (1, "#1: VEvaluator::cancel: Cancel the next evaluation.\n");
+	return true;
+    }
     // Find the evaluation in the queue, cancel if found.
     bool bFound = m_iQueue.unlink (pEvaluation);
-    if (bFound) pEvaluation->onError(0, "Cancelled.");
-
+    if (bFound) {
+	notify (1, "#1: VEvaluator::cancel: Cancel the evaluation in the queue.\n");
+	pEvaluation->onError(0, "Cancelled.");
+    }
     // Delegate to subclass.
-    else bFound = cancel_ (pEvaluation);
+    else {
+	notify (1, "#1: VEvaluator::cancel: Request is cancelled in the evaluator.\n");
+	bFound = cancel_ (pEvaluation);
+    }
 
     return bFound;
 }
@@ -590,7 +648,6 @@ void Vsa::VEvaluator::onError (Vca::IError *pError, VString const &rMessage) {
 }
 
 void Vsa::VEvaluator::schedule (VEvaluation *pRequest) {
-
     switch (m_iStatus) {
     case Status_Stopped:
 	pRequest->onError (0, "Evaluator is stopped. Your query is not processed");
@@ -644,10 +701,11 @@ void Vsa::VEvaluator::notifyAllUpDownSubscribers (bool bEvaluatorUp) const {
 }
 
 void Vsa::VEvaluator::updateQueryStatistics (
-    Vca::U32 cQueries, Vca::U64 iQueryTime
+    Vca::U32 cQueries, Vca::U64 iQueryTime, Vca::U64 iQueueTime 
 ) {
     m_cQueriesProcessed += cQueries;
     m_cTotalQueryTime += iQueryTime;
+	m_cTotalQueueTime += iQueueTime;
 }
 
 /**********************
@@ -728,6 +786,12 @@ void Vsa::VEvaluator::getStatistics (VString &rResult) const {
   Vca::U64 iAvgQueryTime = 0;
   if (queriesProcessed () > 0)
     iAvgQueryTime = totalQueryTime ()/ queriesProcessed ();
+  Vca::U64 iAvgQueueTime = 0;
+  if (queriesProcessed () > 0)
+    iAvgQueueTime = totalQueueTime ()/ queriesProcessed ();
+  Vca::U64 iAvgEvalTime = 0;
+  if (queriesProcessed () > 0)
+    iAvgEvalTime = totalEvalTime ()/ queriesProcessed ();
 
   rResult << "\nStarted                        : " << iStarted;
   rResult << "Last Restarted                 : " << iLastRestarted;
@@ -736,6 +800,8 @@ void Vsa::VEvaluator::getStatistics (VString &rResult) const {
   rResult << "Current Queue Length           : " << queueLength () << "\n";
   rResult << "Number of Queries Processed    : " << queriesProcessed () << "\n";
   rResult << "Average Time Per Query         : " << iAvgQueryTime << " milliseconds.\n";
+  rResult << "Average Time In Queue          : " << iAvgQueueTime << " milliseconds.\n";
+  rResult << "Average Time Evaluating        : " << iAvgEvalTime << " milliseconds.\n";
 }
 
 void Vsa::VEvaluator::dumpStats (VString &rResult) const {

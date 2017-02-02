@@ -139,10 +139,9 @@ PrivateVarDef unsigned int
  *******************************/
 
 void rtLINK_Handle::CheckConsistency () {
-    if (rtLINK_L_IsInconsistent ((rtLINK_Type*)ContainerContent ())
-    ) ERR_SignalFault (
+    if (rtLINK_L_IsInconsistent (typecastContent ())) ERR_SignalFault (
 	EC__InternalInconsistency, UTIL_FormatMessage (
-	    "Corrupted link[%d:%d] detected", SpaceIndex (), ContainerIndex ()
+	    "Corrupted link[%d:%d] detected", spaceIndex (), containerIndex ()
 	)
     );
 }
@@ -453,10 +452,10 @@ void rtLINK_CType::DebugPrint () const {
  *	The address of the link constructor allocated.
  *
  *****/
-rtLINK_CType::rtLINK_CType ()
+rtLINK_CType::rtLINK_CType (rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT)
 : BaseClass		(1)
-, m_pPPT		(0)
-, m_pRPT		(0)
+, m_pPPT		(pPPT)
+, m_pRPT		(pRPT)
 , m_pChainHead		(0)
 , m_pChainTail		(0)
 , m_pFinalRRDC		(NewRRDC ())
@@ -486,7 +485,7 @@ rtLINK_CType::rtLINK_CType ()
  *****  Routine to create a referentially initialized link constructor.
  *
  *  Arguments:
- *	refPTokenRefCPD/Index	- a reference to a POP for the P-Token which
+ *	refPTokenRefCPD/POP	- a reference to a POP for the P-Token which
  *				  specifies the referential state of the link
  *				  constructor being created.
  *
@@ -502,25 +501,27 @@ rtLINK_CType::rtLINK_CType ()
 PublicFnDef rtLINK_CType *rtLINK_RefConstructor (
     M_CPD *refPTokenRefCPD, int refPTokenRefIndex
 ) {
-    rtLINK_CType *result = new rtLINK_CType ();
-
-    RefConstructorCount++;
+    VContainerHandle *pRPT;
     if (refPTokenRefIndex >= 0)
-	result->m_pRPT = refPTokenRefCPD->GetCPD (refPTokenRefIndex, RTYPE_C_PToken);
+	pRPT = refPTokenRefCPD->GetContainerHandle (refPTokenRefIndex, RTYPE_C_PToken);
     else {
 	RTYPE_MustBeA (
-	    "rtLINK_RefConstructor", M_CPD_RType (refPTokenRefCPD), RTYPE_C_PToken
+	    "rtLINK_RefConstructor", refPTokenRefCPD->RType (), RTYPE_C_PToken
 	);
-
-	refPTokenRefCPD->retain ();
-	result->m_pRPT = refPTokenRefCPD;
+	pRPT = refPTokenRefCPD->containerHandle ();
     }
+    return rtLINK_RefConstructor (static_cast<rtPTOKEN_Handle*>(pRPT));
+}
+
+PublicFnDef rtLINK_CType *rtLINK_RefConstructor (rtPTOKEN_Handle *pRPT) {
+    RefConstructorCount++;
+    rtLINK_CType *pResult = new rtLINK_CType (0, pRPT);
 
     if (TracingLCAllocator) IO_printf (
-	"...rtLINK_RefConstructor: LC:%08X created.\n", result
+	"...rtLINK_RefConstructor: LC:%08X created.\n", pResult
     );
 
-    return result;
+    return pResult;
 }
 
 
@@ -532,7 +533,7 @@ PublicFnDef rtLINK_CType *rtLINK_RefConstructor (
  *****  Routine to create a positionally initialized link constructor.
  *
  *  Arguments:
- *	posPTokenRefCPD/Index	- a reference to a POP for the P-Token which
+ *	posPTokenRefCPD/POP	- a reference to a POP for the P-Token which
  *				  specifies the positional state of the link
  *				  constructor being created.
  *
@@ -548,25 +549,27 @@ PublicFnDef rtLINK_CType *rtLINK_RefConstructor (
 PublicFnDef rtLINK_CType *rtLINK_PosConstructor (
     M_CPD *posPTokenRefCPD, int posPTokenRefIndex
 ) {
-    rtLINK_CType *result = new rtLINK_CType ();
-
-    PosConstructorCount++;
+    VContainerHandle *pPPT;
     if (posPTokenRefIndex >= 0)
-	result->m_pPPT = posPTokenRefCPD->GetCPD (posPTokenRefIndex, RTYPE_C_PToken);
+	pPPT = posPTokenRefCPD->GetContainerHandle (posPTokenRefIndex, RTYPE_C_PToken);
     else {
 	RTYPE_MustBeA (
-	    "rtLINK_PosConstructor", M_CPD_RType (posPTokenRefCPD), RTYPE_C_PToken
+	    "rtLINK_PosConstructor", posPTokenRefCPD->RType (), RTYPE_C_PToken
 	);
-
-	posPTokenRefCPD->retain ();
-	result->m_pPPT = posPTokenRefCPD;
+	pPPT = posPTokenRefCPD->containerHandle ();
     }
+    return rtLINK_PosConstructor (static_cast<rtPTOKEN_Handle*>(pPPT));
+}
+
+PublicFnDef rtLINK_CType *rtLINK_PosConstructor (rtPTOKEN_Handle *pPPT) {
+    PosConstructorCount++;
+    rtLINK_CType *pResult = new rtLINK_CType (pPPT, 0);
 
     if (TracingLCAllocator) IO_printf (
-	"...rtLINK_PosConstructor: LC:%08X created.\n", result
+	"...rtLINK_PosConstructor: LC:%08X created.\n", pResult
     );
 
-    return result;
+    return pResult;
 }
 
 
@@ -669,7 +672,7 @@ rtLINK_CType *rtLINK_CType::Append (int origin, int count, bool fIsConstant) {
     );
 
 /*****  Validate the input against what is known about the constructor:  *****/
-    if (IsNil (m_pPPT)) {
+    if (m_pPPT.isNil ()) {
 /*****  ... validate the input referentially.  *****/
 	if (newReferenceLimit > ReferenceNil () + 1) ERR_SignalFault (
 	    EC__InternalInconsistency, UTIL_FormatMessage (
@@ -973,7 +976,7 @@ rtLINK_CType *rtLINK_CType::Append (int origin, int count, bool fIsConstant) {
  *****  Routine to close an open link constructor.
  *
  *  Arguments:
- *	pTokenRefCPD/Index	- a reference to a POP for a P-Token for the
+ *	pTokenRefCPD/POP	- a reference to a POP for a P-Token for the
  *				  missing (positional/referential) state of the
  *				  constructor.
  *
@@ -989,20 +992,23 @@ rtLINK_CType *rtLINK_CType::Append (int origin, int count, bool fIsConstant) {
  *	and the number of elements referenced by the RRDC chain.
  *
  *****/
-rtLINK_CType *rtLINK_CType::Close (M_CPD *pTokenCPD) {
+rtLINK_CType *rtLINK_CType::Close (M_CPD *pPTokenRef, int xPTokenRef) {
+    rtPTOKEN_Handle::Reference pPT (
+	static_cast<rtPTOKEN_Handle*>(pPTokenRef->GetContainerHandle (xPTokenRef, RTYPE_C_PToken))
+    );
+    return Close (pPT);
+}
+
+rtLINK_CType *rtLINK_CType::Close (rtPTOKEN_Handle *pPToken) {
     CloseConstructorCount++;
 
-    RTYPE_MustBeA (
-	"rtLINK_CloseConstructor", M_CPD_RType (pTokenCPD), RTYPE_C_PToken
-    );
-
-    M_CPD **pTokenCPDDest;
+    rtPTOKEN_Handle::Reference *pPTokenDest;
     int referenceNil, fillCount;
 
-    if (IsNil (m_pPPT)) {
+    if (m_pPPT.isNil ()) {
 /*****  Validate the constructor's positional state ...  *****/
-	pTokenCPDDest = &m_pPPT;
-	fillCount = rtPTOKEN_CPD_BaseElementCount (pTokenCPD) - ElementCount ();
+	pPTokenDest = &m_pPPT;
+	fillCount = pPToken->cardinality () - ElementCount ();
 	referenceNil = ReferenceNil ();
 	if (fillCount < 0) ERR_SignalFault (
 	    EC__InternalInconsistency,
@@ -1011,9 +1017,9 @@ rtLINK_CType *rtLINK_CType::Close (M_CPD *pTokenCPD) {
     }
     else if (IsNil (m_pRPT)) {
 /*****  ... or validate the constructor's referential state ...  *****/
-	pTokenCPDDest = &m_pRPT;
+	pPTokenDest = &m_pRPT;
 	fillCount = BaseElementCount () - ElementCount ();
-	referenceNil = rtPTOKEN_CPD_BaseElementCount (pTokenCPD);
+	referenceNil = pPToken->cardinality ();
 	if (m_xReferenceLimit > referenceNil + 1) ERR_SignalFault (
 	    EC__InternalInconsistency,
 	    "rtLINK_CloseConstructor: Referential State Inconsistent"
@@ -1037,8 +1043,7 @@ rtLINK_CType *rtLINK_CType::Close (M_CPD *pTokenCPD) {
 	    m_fHasRanges = true;
     }
 
-    pTokenCPD->retain ();
-    *pTokenCPDDest = pTokenCPD;
+    pPTokenDest->setTo (pPToken);
 
     if (TracingLCAllocator) IO_printf (
 	"...rtLINK_CloseConstructor: LC:%08X closed.\n", this
@@ -1075,12 +1080,6 @@ rtLINK_CType::~rtLINK_CType () {
 
     if (MaxRRDCCount < m_iRRDCount)
 	MaxRRDCCount = m_iRRDCount;
-
-/*****  Free the P-Token CPDs  *****/
-    if (m_pPPT)
-	m_pPPT->release ();
-    if (m_pRPT)
-	m_pRPT->release ();
 
 /*****  Free the RRD constructor chain  *****/
     if (IsNil (m_pChainHead)) {
@@ -1180,7 +1179,7 @@ PrivateFnDef void ReconstructLink (
  *****/
 PrivateFnDef rtLINK_CType *LinkToConstructor (M_CPD *linkCPD) {
 /*****  ...allocate the link constructor and final RRDC...  *****/
-    rtLINK_CType *linkc = new rtLINK_CType ();
+    rtLINK_CType *linkc = new rtLINK_CType (0, 0);
     rtLINK_RRDCType *finalRRDC = rtLINK_LC_FinalRRDC (linkc);
 
 /*****  ...initialize traversal pointers and RRD count...  *****/
@@ -1210,8 +1209,8 @@ PrivateFnDef rtLINK_CType *LinkToConstructor (M_CPD *linkCPD) {
 
 /*****  ...allocate the CPD's...  *****/
     rtLINK_LC_Tracking (linkc) = rtLINK_CPD_Tracking (linkCPD);
-    linkc->m_pPPT = rtLINK_CPD_PosPTokenCPD (linkCPD);
-    linkc->m_pRPT = rtLINK_CPD_RefPTokenCPD (linkCPD);
+    linkc->m_pPPT.setTo (static_cast<rtUVECTOR_Handle*>(linkCPD->containerHandle ())->pptHandle ());
+    linkc->m_pRPT.setTo (static_cast<rtUVECTOR_Handle*>(linkCPD->containerHandle ())->rptHandle ());
 
     return linkc;
 }
@@ -1235,8 +1234,7 @@ PrivateFnDef rtLINK_CType *LinkToConstructor (M_CPD *linkCPD) {
  *	'linkCPD'
  *
  *****/
-PublicFnDef M_CPD *rtLINK_AlignLink (M_CPD *linkCPD) {
-    M_CPD*			pTokenCPD;
+PublicFnDef M_CPD *rtLINK_Align (M_CPD *linkCPD) {
     int				currentOff,
 				currentValue,
 				currentCnt;
@@ -1407,7 +1405,7 @@ PublicFnDef M_CPD *rtLINK_AlignLink (M_CPD *linkCPD) {
 #define posHandleInsert(ptOrigin,ptShift) {\
     ERR_SignalFault (\
 	EC__InternalInconsistency,\
-	"rtLINK_AlignLink: The link's positional ptoken has insertions."\
+	"rtLINK_Align: The link's positional ptoken has insertions."\
     );\
 }
 
@@ -1447,74 +1445,68 @@ PublicFnDef M_CPD *rtLINK_AlignLink (M_CPD *linkCPD) {
 
 
 /************************************
- * Main  rtLINK_AlignLink Cody Body *
+ * Main  rtLINK_Align Cody Body *
  ************************************/
 
     AlignLinkCount++;
-    RTYPE_MustBeA ("rtLINK_AlignLink", M_CPD_RType (linkCPD), RTYPE_C_Link);
+    RTYPE_MustBeA ("rtLINK_Align", linkCPD->RType (), RTYPE_C_Link);
     linkCPD->CheckConsistency ();
 
 /*****  If Link's PosPToken isn't current, Align positionally  *****/
+    rtPTOKEN_CType *ptConstructor;
+    if (linkCPD->isntTerminal (rtLINK_CPx_PosPToken, ptConstructor)) {
+	linkCPD->EnableModifications ();
 
-    rtPTOKEN_IsntCurrent (linkCPD, rtLINK_CPx_PosPToken, pTokenCPD);
-    if (IsntNil (pTokenCPD)) {
-/*****  Obtain the collapsed ptoken constructor  *****/
-        rtPTOKEN_CType *ptConstructor = rtPTOKEN_CPDCumAdjustments (pTokenCPD);
-	pTokenCPD->release ();
-	linkCPD->EnableModifications (); {
-	    int ptorig, enddel, adjustment, newOff, x, skipAmt;
+	int ptorig, enddel, adjustment, newOff, x, skipAmt;
 
-	    if (TracingLCAppending) IO_printf (
-		"\n--- in AlignLink Positionally ---\n"
-	    );
+	if (TracingLCAppending) IO_printf (
+	    "\n--- in AlignLink Positionally ---\n"
+	);
 
-	/*****  Initialize the target traversal state variables...  *****/
-	    newOff = adjustment = 0;
-	    rtLINK_RRDType *rrdp = rtLINK_CPD_RRDArray (linkCPD);
-	    rtLINK_RRDType *rrdpl = (rtLINK_CPD_RRDCount (linkCPD) + rrdp);
+    /*****  Initialize the target traversal state variables...  *****/
+	newOff = adjustment = 0;
+	rtLINK_RRDType *rrdp = rtLINK_CPD_RRDArray (linkCPD);
+	rtLINK_RRDType *rrdpl = (rtLINK_CPD_RRDCount (linkCPD) + rrdp);
 
-	    if (rrdp < rrdpl) {
-		currentOff	= rtLINK_RRD_LinkCumulative (rrdp);
-		currentCnt	= rtLINK_RRD_LinkCumulative (rrdp+1)
-				- rtLINK_RRD_LinkCumulative (rrdp);
-		currentValue	= rtLINK_RRD_ReferenceOrigin (rrdp);
-		currentRepeat	= rtLINK_RRD_RepeatedRef (rrdp);
-		}
-	    else currentOff = -999;
+	if (rrdp < rrdpl) {
+	    currentOff	= rtLINK_RRD_LinkCumulative (rrdp);
+	    currentCnt	= rtLINK_RRD_LinkCumulative (rrdp+1)
+			    - rtLINK_RRD_LinkCumulative (rrdp);
+	    currentValue	= rtLINK_RRD_ReferenceOrigin (rrdp);
+	    currentRepeat	= rtLINK_RRD_RepeatedRef (rrdp);
+	    }
+	else currentOff = -999;
 
-	/*****  Create the temporary result link constructor...  *****/
-	    rtLINK_CType *linkc = rtLINK_RefConstructor (linkCPD, rtLINK_CPx_RefPToken);
+    /*****  Create the temporary result link constructor...  *****/
+	rtLINK_CType *linkc = rtLINK_RefConstructor (linkCPD, rtLINK_CPx_RefPToken);
 
-	/***** Traverse the Link... *****/
-	    rtPTOKEN_FTraverseInstructions (
-		ptConstructor, posHandleInsert, posHandleDelete
-	    );
-	    while (notNil)
-		advance;
+    /***** Traverse the Link... *****/
+	rtPTOKEN_FTraverseInstructions (
+	    ptConstructor, posHandleInsert, posHandleDelete
+	);
+	while (notNil)
+	    advance;
 
-	/***** Reconstruct linkCPD from the new linkc...  *****/
-	    linkc->Close (ptConstructor->NextGeneration ());
+    /***** Reconstruct linkCPD from the new linkc...  *****/
+	linkc->Close (ptConstructor->NextGeneration ());
 
-	    rtLINK_CPD_IsInconsistent (linkCPD) = true;
-	    ReconstructLink (linkCPD, linkc);
-	    linkc->release ();
+	rtLINK_CPD_IsInconsistent (linkCPD) = true;
+	ReconstructLink (linkCPD, linkc);
+	linkc->release ();
 
-	/***** Set the link's positional ptoken to be the new one... *****/
-	    linkCPD->StoreReference (
-		rtLINK_CPx_PosPToken, ptConstructor->NextGeneration ()
-	    );
-	    rtLINK_CPD_IsInconsistent (linkCPD) = false;
-	}
+    /***** Set the link's positional ptoken to be the new one... *****/
+	linkCPD->StoreReference (
+	    rtLINK_CPx_PosPToken, ptConstructor->NextGeneration ()
+	);
+	rtLINK_CPD_IsInconsistent (linkCPD) = false;
+
 	ptConstructor->discard ();
     }
 
 
 /*****  If Link's RefPToken isn't current, Align referentially  *****/
-    rtPTOKEN_IsntCurrent (linkCPD, rtLINK_CPx_RefPToken, pTokenCPD);
-    if (IsntNil (pTokenCPD)) {
+    if (linkCPD->isntTerminal (rtLINK_CPx_RefPToken, ptConstructor)) {
 /*****  Obtain the collapsed ptoken constructor  *****/
-        rtPTOKEN_CType *ptConstructor = rtPTOKEN_CPDCumAdjustments (pTokenCPD);
-	pTokenCPD->release ();
 	linkCPD->EnableModifications ();
 
 	/***** Special case empty links ... *****/
@@ -1568,8 +1560,8 @@ PublicFnDef M_CPD *rtLINK_AlignLink (M_CPD *linkCPD) {
 		    rtLINK_CType *linkc = LinkToConstructor (linkCPD);
 
 		    /* Make it look open and set the new referenceNil value */
-		    M_CPD *refPTokenCPD = linkc->RPT ();
-		    linkc->m_pRPT = NilOf (M_CPD*);
+		    rtPTOKEN_Handle::Reference pRPT (linkc->RPT ());
+		    linkc->m_pRPT.clear ();
 
 		    /** decrement the count of the last rrd **/
 		    rtLINK_RRDC_LinkCumulative (rtLINK_LC_FinalRRDC (linkc))--;
@@ -1579,7 +1571,7 @@ PublicFnDef M_CPD *rtLINK_AlignLink (M_CPD *linkCPD) {
 
 		    rtLINK_CPD_IsInconsistent (linkCPD) = true;
 		    ReconstructLink (linkCPD, linkc);
-		    linkc->m_pRPT = refPTokenCPD;
+		    linkc->m_pRPT.claim (pRPT);
 		    linkc->release ();
 		}
 
@@ -1620,9 +1612,7 @@ PublicFnDef M_CPD *rtLINK_AlignLink (M_CPD *linkCPD) {
 
 	    /*****  Create the temporary result positional link constructor...  *****/
 	    /*****  (Make sure it has the new referential element count.) *****/
-		rtLINK_CType *linkc = rtLINK_RefConstructor (
-		    ptConstructor->NextGeneration (), -1
-		);
+		rtLINK_CType *linkc = rtLINK_RefConstructor (ptConstructor->NextGeneration ());
 
 	    /***** Traverse the Link... *****/
 		rtPTOKEN_FTraverseAdjustments (ptConstructor, handleInsert, handleDelete);
@@ -1631,18 +1621,17 @@ PublicFnDef M_CPD *rtLINK_AlignLink (M_CPD *linkCPD) {
 		    advance;
 
 	    /*****  Close the ptoken for the target... *****/
-		M_CPD *newPosPtokenCPD = posPtokenC->ToPToken ();
+		rtPTOKEN_Handle::Reference pNewPPT (posPtokenC->ToPToken ());
 
 	    /***** Reconstruct linkCPD from the new linkc...  *****/
-		linkc->Close (newPosPtokenCPD);
+		linkc->Close (pNewPPT);
 
 		rtLINK_CPD_IsInconsistent (linkCPD) = true;
 		ReconstructLink (linkCPD, linkc);
 		linkc->release ();
 
 		/* set the link's positional ptoken to the new one... */
-		linkCPD->StoreReference (rtLINK_CPx_PosPToken, newPosPtokenCPD);
-		newPosPtokenCPD->release ();
+		linkCPD->StoreReference (rtLINK_CPx_PosPToken, pNewPPT);
 
 	    /***** Set the link's referential ptoken to be the new base ptoken... *****/
 		linkCPD->StoreReference (
@@ -1656,7 +1645,7 @@ PublicFnDef M_CPD *rtLINK_AlignLink (M_CPD *linkCPD) {
 
     return linkCPD;
 
-/***** Remove all the defines used by rtLINK_AlignLink *****/
+/***** Remove all the defines used by rtLINK_Align *****/
 #undef outputSkip
 #undef outputNew
 #undef outputOld
@@ -1671,6 +1660,13 @@ PublicFnDef M_CPD *rtLINK_AlignLink (M_CPD *linkCPD) {
 #undef posLocate
 #undef posHandleInsert
 #undef posHandleDelete
+}
+
+bool rtLINK_Handle::align () {
+    M_CPD *pCPD = GetCPD ();
+    rtLINK_Align (pCPD);
+    pCPD->release ();
+    return true;
 }
 
 
@@ -1878,7 +1874,7 @@ rtLINK_CType *rtLINK_CType::Align () {
 #define posHandleInsert(ptOrigin,ptShift) {\
     ERR_SignalFault (\
 	EC__InternalInconsistency,\
-	"rtLINK_AlignLink: The link's positional ptoken has insertions."\
+	"rtLINK_Align: The link's positional ptoken has insertions."\
     );\
 }
 
@@ -1921,9 +1917,9 @@ rtLINK_CType *rtLINK_CType::Align () {
 
 /*****  If Link's PosPToken isn't current, Align positionally  *****/
 
-    if (!rtPTOKEN_IsCurrent (m_pPPT, -1)) {
+    if (m_pPPT->isntTerminal ()) {
 /*****  Obtain the collapsed ptoken constructor  *****/
-        rtPTOKEN_CType *ptConstructor = rtPTOKEN_CPDCumAdjustments (m_pPPT); {
+        rtPTOKEN_CType *ptConstructor = m_pPPT->getAdjustments (); {
 	    int ptorig, enddel, x, skipAmt;
 
 	    if (TracingLCAppending) IO_printf (
@@ -1943,7 +1939,7 @@ rtLINK_CType *rtLINK_CType::Align () {
 	    else currentOff = -999;
 
 	/*****  Create the temporary result link constructor...  *****/
-	    rtLINK_CType *linkc = rtLINK_RefConstructor (m_pRPT, -1);
+	    rtLINK_CType *linkc = rtLINK_RefConstructor (m_pRPT);
 
 	/***** Traverse the Link... *****/
 	    rtPTOKEN_FTraverseInstructions (
@@ -1966,24 +1962,20 @@ rtLINK_CType *rtLINK_CType::Align () {
 
 /*****  If Link's RefPToken isn't current, Align referentially  *****/
 
-    if (!rtPTOKEN_IsCurrent (m_pRPT, -1)) {
+    if (m_pRPT->isntTerminal ()) {
 /*****  Obtain the collapsed ptoken constructor  *****/
-        rtPTOKEN_CType *ptConstructor = rtPTOKEN_CPDCumAdjustments (m_pRPT);
+        rtPTOKEN_CType *ptConstructor = m_pRPT->getAdjustments ();
 
 /***** Special case an empty link constructor ... *****/
-	if (rtPTOKEN_CPD_BaseElementCount (m_pPPT) == 0 ||
-	    rtPTOKEN_PTC_AltCount (ptConstructor) == 0
-	) {
-	    m_pRPT->release ();
-	    m_pRPT = ptConstructor->NextGeneration ();
-	    m_pRPT->retain ();
+	if (m_pPPT->cardinality () == 0 || rtPTOKEN_PTC_AltCount (ptConstructor) == 0) {
+	    m_pRPT.setTo (ptConstructor->NextGeneration ());
 	    ptConstructor->discard ();
 	    return this;
 	}
 
     /*****	RefAlignLinkConstructorBody  *****/
     /***** If the RefPToken has only been changed at the end ... *****/
-	unsigned int baseCount = rtPTOKEN_CPD_BaseElementCount (m_pRPT);
+	unsigned int baseCount = m_pRPT->cardinality ();
 
 	if (baseCount == (unsigned int)rtPTOKEN_SDC_CurrentOrigin (
 		rtPTOKEN_PTC_ChainTail (ptConstructor)
@@ -2010,9 +2002,7 @@ rtLINK_CType *rtLINK_CType::Align () {
 		if (rtLINK_RRDC_ReferenceOrigin (currentRRDC) == baseCount)
 		    rtLINK_RRDC_ReferenceOrigin (currentRRDC) = newBaseCount;
 		/** Set the ptoken... **/
-		m_pRPT->release ();
-		m_pRPT = ptConstructor->NextGeneration ();
-		m_pRPT->retain ();
+		m_pRPT.setTo (ptConstructor->NextGeneration ());
 	    }
 
 	    /*** a referenceNil value is at the end of a range rrd ***/
@@ -2020,7 +2010,7 @@ rtLINK_CType *rtLINK_CType::Align () {
 		rtLINK_RRDC_ReferenceOrigin (currentRRDC) + count - 1 == baseCount
 	    ) {
 		/*****  ...initialize traversal pointer...  *****/
-		rtLINK_CType *linkc = new rtLINK_CType ();
+		rtLINK_CType *linkc = new rtLINK_CType (0, 0);
 		rtLINK_RRDCType *rrdcs = m_pChainHead;
 		rtLINK_RRDCType *finalRRDC = rtLINK_LC_FinalRRDC (linkc);
 		rtLINK_RRDC_RRD (finalRRDC) = rtLINK_RRDC_RRD (m_pFinalRRDC);
@@ -2048,14 +2038,12 @@ rtLINK_CType *rtLINK_CType::Align () {
 		rtLINK_LC_Tracking (linkc) = m_fTracking;
 		rtLINK_LC_RRDCount (linkc) = m_iRRDCount;
 		/*****  ...allocate the CPD's...  *****/
-		m_pPPT->retain ();
-		m_pRPT->retain ();
-		linkc->m_pPPT = m_pPPT;
-		linkc->m_pRPT = m_pRPT;
+		linkc->m_pPPT.setTo (m_pPPT);
+		linkc->m_pRPT.setTo (m_pRPT);
 
 		/* Make it look open and set the new referenceNil value */
-		M_CPD *refPTokenCPD = linkc->RPT ();
-		linkc->m_pRPT = NilOf (M_CPD*);
+		rtPTOKEN_Handle::Reference pRPT (linkc->RPT ());
+		linkc->m_pRPT.clear ();
 
 		/** decrement the count of the last rrd **/
 		rtLINK_RRDC_LinkCumulative (rtLINK_LC_FinalRRDC (linkc))--;
@@ -2064,14 +2052,12 @@ rtLINK_CType *rtLINK_CType::Align () {
 		linkc->Append (newBaseCount, 1, false);
 
 		ReconstructFrom (linkc);
-		linkc->m_pRPT = refPTokenCPD;
+		linkc->m_pRPT.claim (pRPT);
 		linkc->release ();
 	    }
 	    else {
 	/** no reference nil in this range, so just set the ptoken... **/
-		m_pRPT->release ();
-		m_pRPT = ptConstructor->NextGeneration ();
-		m_pRPT->retain ();
+		m_pRPT.setTo (ptConstructor->NextGeneration ());
 	    }
 	}
 	else {
@@ -2096,13 +2082,11 @@ rtLINK_CType *rtLINK_CType::Align () {
 	    else currentOff = -999;
 
 	/*****  Create a positional ptoken constructor for the link... *****/
-	    rtPTOKEN_CType *posPtokenC = rtPTOKEN_NewShiftPTConstructor (m_pPPT, -1);
+	    rtPTOKEN_CType *posPtokenC = m_pPPT->makeAdjustments ();
 
 	/*****  Create the temporary result positional link constructor...  *****/
 	/*****  (Make sure it has the new referential element count.) *****/
-	    rtLINK_CType *linkc = rtLINK_RefConstructor (
-		ptConstructor->NextGeneration (), -1
-	    );
+	    rtLINK_CType *linkc = rtLINK_RefConstructor (ptConstructor->NextGeneration ());
 
 	/***** Traverse the Link... *****/
 	    rtPTOKEN_FTraverseAdjustments (ptConstructor, handleInsert, handleDelete);
@@ -2110,11 +2094,8 @@ rtLINK_CType *rtLINK_CType::Align () {
 		advance;
 
 	/*****  Close the ptoken for the target... *****/
-	    M_CPD *newPosPtokenCPD = posPtokenC->ToPToken ();
-
 	/***** Reconstruct constructor from the new linkc...  *****/
-	    linkc->Close (newPosPtokenCPD);
-	    newPosPtokenCPD->release ();
+	    linkc->Close (posPtokenC->ToPToken ());
 
 	    ReconstructFrom (linkc);
 	    linkc->release ();
@@ -2160,22 +2141,22 @@ rtLINK_CType *rtLINK_CType::Align () {
  *	The address of a standard CPD for the link created.
  *
  *****/
-PublicFnDef M_CPD *rtLINK_NewRefLink (M_CPD *pPPT, M_CPD *pRPT) {
-    unsigned int iCoCardinality = rtPTOKEN_CPD_BaseElementCount (pRPT);
+PublicFnDef M_CPD *rtLINK_NewRefLink (rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT) {
+    unsigned int iCoCardinality = pRPT->cardinality ();
 
     if (!pPPT)
 	pPPT = pRPT;
-    else if (rtPTOKEN_CPD_BaseElementCount (pPPT) != iCoCardinality) ERR_SignalFault (
+    else if (pPPT->cardinality () != iCoCardinality) ERR_SignalFault (
 	EC__UsageError, UTIL_FormatMessage (
 	    "rtLINK_NewRefLink: Cardinality disagreement: (Dom:%u, Cod:%u).",
-	    rtPTOKEN_CPD_BaseElementCount (pPPT), iCoCardinality
+	    pPPT->cardinality (), iCoCardinality
 	)
     );
 
     M_CPD *result = pPPT->CreateContainer (
 	RTYPE_C_Link,
 	sizeof (rtLINK_Type) + sizeof (rtLINK_RRDType) * (iCoCardinality > 0 ? 1 : 0)
-    );
+    )->NewCPD ();
 
     NewRefLinkCount++;
 
@@ -2241,17 +2222,17 @@ PublicFnDef M_CPD *rtLINK_NewRefLink (M_CPD *pPPT, M_CPD *pRPT) {
  *	The address of a standard CPD for the link created.
  *
  *****/
-PublicFnDef M_CPD *rtLINK_NewEmptyLink (M_CPD *pPPT, M_CPD *pRPT) {
+PublicFnDef M_CPD *rtLINK_NewEmptyLink (rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT) {
     BasicNewEmptyLinkCount++;
 
 /***** Make sure the postional ptoken is empty *****/
-    if (rtPTOKEN_CPD_BaseElementCount (pPPT) != 0) ERR_SignalFault (
+    if (pPPT->cardinality () != 0) ERR_SignalFault (
 	EC__InternalInconsistency,
 	"rtLINK_NewEmptyLink: Positional PToken Must Have Size 0"
     );
 
 /***** Allocate the new link ... *****/
-    M_CPD *result = pPPT->CreateContainer (RTYPE_C_Link, sizeof (rtLINK_Type));
+    M_CPD *result = pPPT->CreateContainer (RTYPE_C_Link, sizeof (rtLINK_Type))->NewCPD ();
 
 /***** Initialize the new cpd ... *****/
     rtLINK_CPD_IsInconsistent (result)   = true;
@@ -2304,23 +2285,23 @@ PublicFnDef M_CPD *rtLINK_NewEmptyLink (M_CPD *pPPT, M_CPD *pRPT) {
  *	The address of a standard CPD for the link created.
  *
  *****/
-PublicFnDef M_CPD *rtLINK_Copy (M_CPD *pSource, M_CPD *pNewPPT) {
+PublicFnDef M_CPD *rtLINK_Copy (M_CPD *pSource, rtPTOKEN_Handle *pNewPPT) {
     CopyLinkCount++;
 
 /***** Align the source link ... *****/
-    rtLINK_AlignLink (pSource);
+    rtLINK_Align (pSource);
 
     unsigned int iDomCardinality = rtLINK_CPD_ElementCount (pSource);
 
-    bool bFreeNewPPT = false;
+    rtPTOKEN_Handle::Reference pLocalPPT;
     if (!pNewPPT) {
-	pNewPPT = rtLINK_CPD_PosPTokenCPD (pSource);
-	bFreeNewPPT = true;
+	pLocalPPT.setTo (static_cast<rtLINK_Handle*>(pSource->containerHandle ())->pptHandle ());
+	pNewPPT = pLocalPPT;
     }
-    else if (iDomCardinality != rtPTOKEN_CPD_BaseElementCount (pNewPPT)) ERR_SignalFault (
+    else if (iDomCardinality != pNewPPT->cardinality ()) ERR_SignalFault (
 	EC__InternalInconsistency, UTIL_FormatMessage (
 	    "rtLINK_Copy: Cardinality disagreement: Current:%u, Proposed:%u.",
-	    iDomCardinality, rtPTOKEN_CPD_BaseElementCount (pNewPPT)
+	    iDomCardinality, pNewPPT->cardinality ()
 	)
     );
 
@@ -2328,7 +2309,7 @@ PublicFnDef M_CPD *rtLINK_Copy (M_CPD *pSource, M_CPD *pNewPPT) {
     M_CPD *pResult = pNewPPT->CreateContainer (
 	RTYPE_C_Link,
 	sizeof (rtLINK_Type) + sizeof (rtLINK_RRDType) * rtLINK_CPD_RRDCount (pSource)
-    );
+    )->NewCPD ();
 
 /***** Initialize the new cpd ... *****/
     rtLINK_CPD_IsInconsistent (pResult)   = true;
@@ -2358,9 +2339,6 @@ PublicFnDef M_CPD *rtLINK_Copy (M_CPD *pSource, M_CPD *pNewPPT) {
     );
 
     rtLINK_CPD_IsInconsistent (pResult) = false;
-
-    if (bFreeNewPPT)
-	pNewPPT->release ();
 
     return pResult;
 }
@@ -2420,7 +2398,7 @@ PublicFnDef void rtLINK_DumpLink (M_CPD *linkCPD) {
  *	The address of a standard CPD for the link created.
  *
  *****/
-M_CPD *rtLINK_CType::ToLink (M_CPD *pNewPPT, bool fDiscard) {
+M_CPD *rtLINK_CType::ToLink (rtPTOKEN_Handle *pNewPPT, bool fDiscard) {
     if (m_iRRDCount >= (unsigned int)(1 << 28)) ERR_SignalFault (
 	EC__UsageError, UTIL_FormatMessage (
 	    "Requested RRD count %d exceeds maximum %d", m_iRRDCount, (1 << 28) - 1
@@ -2433,16 +2411,16 @@ M_CPD *rtLINK_CType::ToLink (M_CPD *pNewPPT, bool fDiscard) {
 
     if (!pNewPPT)
 	pNewPPT = m_pPPT;
-    else if (iDomCardinality != rtPTOKEN_CPD_BaseElementCount (pNewPPT)) ERR_SignalFault (
+    else if (iDomCardinality != pNewPPT->cardinality ()) ERR_SignalFault (
 	EC__InternalInconsistency, UTIL_FormatMessage (
 	    "rtLINK_CType::ToLink: Cardinality disagreement: Current:%u, Proposed:%u.",
-	    iDomCardinality, rtPTOKEN_CPD_BaseElementCount (pNewPPT)
+	    iDomCardinality, pNewPPT->cardinality ()
 	)
     );
 
     M_CPD *result = pNewPPT->CreateContainer (
 	RTYPE_C_Link, sizeof (rtLINK_Type) + sizeof (rtLINK_RRDType) * m_iRRDCount
-    );
+    )->NewCPD ();
 
     rtLINK_CPD_IsInconsistent (result)   = true;
     InitStdCPD (result);
@@ -2499,7 +2477,7 @@ PublicFnDef rtLINK_CType *rtLINK_ToConstructor (M_CPD *linkCPD) {
     ToConstructorCount++;
 
 /*****  Align the link...  *****/
-    rtLINK_AlignLink (linkCPD);
+    rtLINK_Align (linkCPD);
 
 /***** Make the constructor *****/
     return LinkToConstructor (linkCPD);
@@ -2534,7 +2512,7 @@ void rtLINK_CType::AlignForCoerce () {
  *****  extraction index.
  *
  *  Arguments:
- *	sPTokenRefCPD/Index	- a reference to a POP for the P-Token
+ *	pSourceRef/POP		- a reference to a POP for the P-Token
  *				  describing the positional state of the
  *				  object from which elements are to be
  *				  extracted.
@@ -2547,16 +2525,18 @@ void rtLINK_CType::AlignForCoerce () {
  *	referentially related.
  *
  *****/
-void rtLINK_CType::AlignForExtract (M_CPD *sPTokenRefCPD, int sPTokenRefIndex) {
+void rtLINK_CType::AlignForExtract (VContainerHandle *pSourceRef, M_POP const *pSourcePOP) {
 /*****  Align the link constructor...  *****/
     Align ();
 
 /*****  ... check that it is referentially related to the source.  *****/
-    if (sPTokenRefCPD->ReferenceDoesntName (sPTokenRefIndex, m_pRPT)) ERR_SignalFault (
-	EC__InternalInconsistency,
-	"rtLINK_CType::AlignForExtract: Referential Inconsistency.\n\
+    if (RPTDoesntName (pSourceRef, pSourcePOP)) {
+	ERR_SignalFault (
+	    EC__InternalInconsistency,
+	    "rtLINK_CType::AlignForExtract: Referential Inconsistency.\n\
 The ref ptoken of the link is different from the pos ptoken of the source."
-    );
+	);
+    }
 }
 
 
@@ -2569,10 +2549,7 @@ The ref ptoken of the link is different from the pos ptoken of the source."
  *****  distribution index.
  *
  *  Arguments:
- *	this			- the address of the link constructor
- *				  supplying subscripts to the distribution
- *				  operation.
- *	sPTokenRefCPD/Index	- a reference to a POP for the P-Token
+ *	pSourceRef/POP		- a reference to a POP for the P-Token
  *				  describing the positional state of the
  *				  object from which elements are to be
  *				  distributed.
@@ -2585,22 +2562,30 @@ The ref ptoken of the link is different from the pos ptoken of the source."
  *	referentially related.
  *
  *****/
-void rtLINK_CType::AlignForDistribute (M_CPD *sPTokenRefCPD, int sPTokenRefIndex) {
+void rtLINK_CType::AlignForDistribute (VContainerHandle *pSourceRef, M_POP const *pSourcePOP) {
 /*****  Align the link constructor...  *****/
     Align ();
 
-/*****  ... check that it is referentially related to the source.  *****/
-    if (sPTokenRefCPD->ReferenceDoesntName (sPTokenRefIndex, m_pPPT)) {
-	M_CPD* pSourceCPD = sPTokenRefCPD->GetCPD (sPTokenRefIndex);
-	unsigned int space = pSourceCPD->SpaceIndex ();
-	unsigned int cntnr = pSourceCPD->ContainerIndex ();
-	pSourceCPD->release ();
+/*****  ... check that it is positionally related to the source.  *****/
+    if (PPTDoesntName (pSourceRef, pSourcePOP)) {
+	unsigned int space, cntnr;
+	if (pSourcePOP) {
+	    M_CPD* pSourceCPD = pSourceRef->GetCPD (pSourcePOP);
+	    space = pSourceCPD->spaceIndex ();
+	    cntnr = pSourceCPD->containerIndex ();
+	    pSourceCPD->release ();
+	}
+	else {
+	    space = pSourceRef->spaceIndex ();
+	    cntnr = pSourceRef->containerIndex ();
+	}
 	ERR_SignalFault (
 	    EC__InternalInconsistency, UTIL_FormatMessage (
 		"rtLINK_AlignConstructorForDistribute: Referential Inconsistency.\
 \nThe pos ptoken of the link[%d:%d] is different from the pos ptoken of the source[%d:%d].",
-		m_pPPT->SpaceIndex (), m_pPPT->ContainerIndex (), space, cntnr
-		));
+		m_pPPT->spaceIndex (), m_pPPT->containerIndex (), space, cntnr
+	    )
+	);
     }
 }
 
@@ -2614,14 +2599,11 @@ void rtLINK_CType::AlignForDistribute (M_CPD *sPTokenRefCPD, int sPTokenRefIndex
  *****  assignment index.
  *
  *  Arguments:
- *	tPTokenRefCPD/Index	- a reference to a POP for the P-Token
+ *	pTargetRef/POP		- a reference to a POP for the P-Token
  *				  describing the positional state of the
  *				  object into which elements are to be
  *				  assigned.
- *	this			- the address of the link constructor
- *				  supplying subscripts to the assignment
- *				  operation.
- *	sPTokenRefCPD/Index	- a reference to a POP for the P-Token
+ *	pSourceRef/POP		- a reference to a POP for the P-Token
  *				  describing the positional state of the
  *				  object supplying the elements to be
  *				  assigned.
@@ -2636,24 +2618,28 @@ void rtLINK_CType::AlignForDistribute (M_CPD *sPTokenRefCPD, int sPTokenRefIndex
  *
  *****/
 void rtLINK_CType::AlignForAssign (
-    M_CPD *tPTokenRefCPD, int tPTokenRefIndex, M_CPD *sPTokenRefCPD, int sPTokenRefIndex
+    VContainerHandle *pTargetRef, M_POP const *pTargetPOP, VContainerHandle *pSourceRef, M_POP const *pSourcePOP
 ) {
 /*****  Align the link constructor...  *****/
     Align ();
 
 /*****  ... check that it is referentially related to the target...  *****/
-    if (tPTokenRefCPD->ReferenceDoesntName (tPTokenRefIndex, m_pRPT)) ERR_SignalFault (
-	EC__InternalInconsistency,
-	"rtLINK_AlignConstructorForAssign: Referential Inconsistency.\n\
+    if (RPTDoesntName (pTargetRef, pTargetPOP)) {
+	ERR_SignalFault (
+	    EC__InternalInconsistency,
+	    "rtLINK_AlignConstructorForAssign: Referential Inconsistency.\n\
 The ref ptoken of the link is different from the pos ptoken of the target."
-    );
+	);
+    }
 
 /*****  ... and that it is positionally related to the source.  *****/
-    if (sPTokenRefCPD->ReferenceDoesntName (sPTokenRefIndex, m_pPPT)) ERR_SignalFault (
-	EC__InternalInconsistency,
-	"rtLINK_AlignConstructorForAssign: Referential Inconsistency.\n\
+    if (PPTDoesntName (pSourceRef, pSourcePOP)) {
+	ERR_SignalFault (
+	    EC__InternalInconsistency,
+	    "rtLINK_AlignConstructorForAssign: Referential Inconsistency.\n\
 The pos ptoken of the link is different from the pos ptoken of the source."
-    );
+	);
+    }
 }
 
 
@@ -2666,13 +2652,10 @@ The pos ptoken of the link is different from the pos ptoken of the source."
  *****  scalar assignment index.
  *
  *  Arguments:
- *	tPTokenRefCPD/Index	- a reference to a POP for the P-Token
+ *	pTargetRef/POP		- a reference to a POP for the P-Token
  *				  describing the positional state of the
  *				  object into which elements are to be
  *				  assigned.
- *	this			- the address of the link constructor
- *				  supplying subscripts to the assignment
- *				  operation.
  *
  *  Returns:
  *	NOTHING - Executed for side effect and error detection only.
@@ -2682,16 +2665,18 @@ The pos ptoken of the link is different from the pos ptoken of the source."
  *	referentially related.
  *
  *****/
-void rtLINK_CType::AlignForAssign (M_CPD *tPTokenRefCPD, int tPTokenRefIndex) {
+void rtLINK_CType::AlignForAssign (VContainerHandle *pTargetRef, M_POP const *pTargetPOP) {
 /*****  Align the link constructor...  *****/
     Align ();
 
 /*****  ... and check that it is referentially related to the target.  *****/
-    if (tPTokenRefCPD->ReferenceDoesntName (tPTokenRefIndex, m_pRPT)) ERR_SignalFault (
-	EC__InternalInconsistency,
-        "rtLINK_AlignConstructorForScalarAssign: Referential Inconsistency.\n\
+    if (RPTDoesntName (pTargetRef, pTargetPOP)) {
+	ERR_SignalFault (
+	    EC__InternalInconsistency,
+	    "rtLINK_AlignConstructorForScalarAssign: Referential Inconsistency.\n\
 The ref ptoken of the link is different from the pos ptoken of the target."
-    );
+	);
+    }
 }
 
 
@@ -2704,12 +2689,10 @@ The ref ptoken of the link is different from the pos ptoken of the target."
  *****  add source link.
  *
  *  Arguments:
- *	tPTokenRefCPD/Index	- a reference to a POP for the P-Token
+ *	pTargetRef/POP		- a reference to a POP for the P-Token
  *				  describing the referential state of the
  *				  object into which elements are to be
  *				  added.
- *	this			- the address of the link constructor
- *				  supplying the slots to add.
  *
  *  Returns:
  *	NOTHING - Executed for side effect and error detection only.
@@ -2719,16 +2702,18 @@ The ref ptoken of the link is different from the pos ptoken of the target."
  *	referentially related.
  *
  *****/
-void rtLINK_CType::AlignForAdd (M_CPD *tPTokenRefCPD, int tPTokenRefIndex) {
+void rtLINK_CType::AlignForAdd (VContainerHandle *pTargetRef, M_POP const *pTargetPOP) {
 /*****  Align the link constructor...  *****/
     Align ();
 
 /*****  ... and check that it is referentially related to the target.  *****/
-    if (tPTokenRefCPD->ReferenceDoesntName (tPTokenRefIndex, m_pRPT)) ERR_SignalFault (
-	EC__InternalInconsistency,
-	"rtLINK_AlignConstructorForAdd: Referential Inconsistency.\n\
+    if (RPTDoesntName (pTargetRef, pTargetPOP)) {
+	ERR_SignalFault (
+	    EC__InternalInconsistency,
+	    "rtLINK_AlignConstructorForAdd: Referential Inconsistency.\n\
 The ref ptoken of the link is different from the ref ptoken of the target."
-    );
+	);
+    }
 }
 
 
@@ -2837,7 +2822,7 @@ M_CPD *rtLINK_CType::ToRefUV (M_CPD *orderingUV) {
 
 /*****	Align the orderingUV, if it exists...	*****/
     if (orderingUV) {
-	rtREFUV_Align (orderingUV);
+	orderingUV->align ();
 
 	/*****	Check for referential inconsistency	*****/
 	if (orderingUV->ReferenceDoesntName (UV_CPx_PToken, m_pPPT)) ERR_SignalFault (
@@ -2847,15 +2832,12 @@ M_CPD *rtLINK_CType::ToRefUV (M_CPD *orderingUV) {
     }
 
 /*****  ...convert it into a reference u-vector...  *****/
-    M_CPD *ptoken = orderingUV ? UV_CPD_RefPTokenCPD (orderingUV) : m_pPPT;
-    M_CPD *result = rtREFUV_New (
-	ptoken, m_pRPT, -1, InitializeRefUVFromConstructor, this, orderingUV
+    rtPTOKEN_Handle::Reference ptoken (
+	orderingUV ? static_cast<rtUVECTOR_Handle*>(orderingUV->containerHandle ())->rptHandle () : m_pPPT.referent ()
     );
-
-    if (orderingUV)
-	ptoken->release ();
-
-    return result;
+    return rtREFUV_New (
+	ptoken, m_pRPT, InitializeRefUVFromConstructor, this, orderingUV
+    );
 }
 
 
@@ -3138,7 +3120,7 @@ rtLINK_CType *rtLINK_CType::Extract (rtLINK_CType *subscriptLinkC) {
  * 'subscriptLinkC' as an extraction index for 'source'...
  *****/
     Align ();
-    subscriptLinkC->AlignForExtract (m_pPPT, -1);
+    subscriptLinkC->AlignForExtract (m_pPPT, 0);
 
 /*****  ...initialize the source traversal state variables...  *****/
     rtLINK_RRDCType *source, *nextSource;
@@ -3150,7 +3132,7 @@ rtLINK_CType *rtLINK_CType::Extract (rtLINK_CType *subscriptLinkC) {
     }
 
 /*****  ...create the result link constructor...  *****/
-    rtLINK_CType *resultLinkC = rtLINK_RefConstructor (m_pRPT, -1);
+    rtLINK_CType *resultLinkC = rtLINK_RefConstructor (m_pRPT);
 
 /*****  ...traverse the subscript...  *****/
     rtLINK_TraverseRRDCList (subscriptLinkC, handleNil, handleRepetition, handleRange)
@@ -3252,7 +3234,7 @@ PublicFnDef rtLINK_CType *rtLINK_LCExtract (M_CPD *sourceCPD, rtLINK_CType *subs
  * Align 'source' and 'subscriptLinkC' and validate the applicability of
  * 'subscriptLinkC' as an extraction index for 'source'...
  *****/
-    subscriptLinkC->AlignForExtract (rtLINK_AlignLink (sourceCPD), rtLINK_CPx_PosPToken);
+    subscriptLinkC->AlignForExtract (rtLINK_Align (sourceCPD), rtLINK_CPx_PosPToken);
 
 /*****  ...initialize the source traversal state variables...  *****/
     if (IsntNil (source = rtLINK_CPD_RRDArray (sourceCPD))) {
@@ -3404,7 +3386,7 @@ PublicFnDef void rtLINK_RefExtract (
     RefExtractCount++;
 
 /***** Align and check for consistency of PTokens *****/
-    rtLINK_AlignLink (source);
+    rtLINK_Align (source);
     rtREFUV_AlignAndValidateRef (reference, source, rtLINK_CPx_PosPToken);
 
     unsigned int value = rtREFUV_Ref_Element (reference);
@@ -3440,8 +3422,8 @@ PublicFnDef void rtLINK_RefExtract (
 
 /***** Set the result reference's values *****/
 /* IO_printf ("result reference = %d\n", value); */
-    DSC_InitReferenceScalar (
-	*result, rtLINK_CPD_RefPTokenCPD (source), value
+    result->constructReference (
+	static_cast<rtLINK_Handle*>(source->containerHandle ())->rptHandle (), value
     );
 
 #undef access
@@ -3459,7 +3441,7 @@ rtLINK_CType *rtLINK_CType::Complement () {
     Align ();
 
 /*****  Create the result ... *****/
-    rtLINK_CType *result = rtLINK_RefConstructor (m_pRPT, -1);
+    rtLINK_CType *result = rtLINK_RefConstructor (m_pRPT);
 
 /*****  Loop thru this appending anything not in this, ...  *****/
     int next = 0;
@@ -3484,9 +3466,7 @@ rtLINK_CType *rtLINK_CType::Complement () {
 	rtLINK_AppendRange (result, next, refNil - next);
 
 /*****  Close the result linkc ... *****/
-    M_CPD *newPosPToken = rtPTOKEN_New (m_pPPT->ScratchPad (), result->ElementCount ());
-    result->Close (newPosPToken);
-    newPosPToken->release ();
+    result->Close (new rtPTOKEN_Handle (m_pPPT->ScratchPad (), result->ElementCount ()));
 
     return result;
 }
@@ -3663,7 +3643,7 @@ rtLINK_CType *rtLINK_CType::Add (rtLINK_CType *addSourceLinkC, bool additionsMap
  * 'addSourceLinkC' as an extraction index for 'temptargetLinkC'...
  *****/
     Align ();
-    addSourceLinkC->AlignForAdd (m_pRPT, -1);
+    addSourceLinkC->AlignForAdd (m_pRPT, 0);
 
 /*****  Initialize the add source traversal state variables... *****/
     rtLINK_RRDCType *currentRRDCofA = rtLINK_LC_ChainHead (addSourceLinkC);
@@ -3689,15 +3669,15 @@ rtLINK_CType *rtLINK_CType::Add (rtLINK_CType *addSourceLinkC, bool additionsMap
     else currentOff(ofB) = -999;
 
 /*****  Create a ptoken constructor for this... *****/
-    rtPTOKEN_CType *targetPtokenC = rtPTOKEN_NewShiftPTConstructor (m_pPPT, -1);
+    rtPTOKEN_CType *targetPtokenC = m_pPPT->makeAdjustments ();
 
 /*****  Create the result link constructor...  *****/
     rtLINK_CType *pAdditionsMap = additionsMapWanted ? rtLINK_PosConstructor (
-	addSourceLinkC->PPT (), -1
+	addSourceLinkC->PPT ()
     ) : NilOf (rtLINK_CType *);
 
 /*****  Create the temporary target link constructor...  *****/
-    rtLINK_CType *temptargetLinkC = rtLINK_RefConstructor (m_pRPT, -1);
+    rtLINK_CType *temptargetLinkC = rtLINK_RefConstructor (m_pRPT);
 
 /***** Traverse the two LCs...  *****/
     while (notNil(ofA) && notNil(ofB)) {
@@ -3733,20 +3713,19 @@ rtLINK_CType *rtLINK_CType::Add (rtLINK_CType *addSourceLinkC, bool additionsMap
 
 /*****  All done creating the two new constructors.  Now complete them...*****/
 /*****  Close the ptoken for the target... *****/
-    M_CPD *newPosPtokenCPD = targetPtokenC->ToPToken ();
+    rtPTOKEN_Handle::Reference pNewPPT (targetPtokenC->ToPToken ());
 
 /***** Reconstruct this from the temptargetLinkC...  *****/
-    temptargetLinkC->Close (newPosPtokenCPD);
+    temptargetLinkC->Close (pNewPPT);
 
     ReconstructFrom (temptargetLinkC);
 
 /*****  ...close the completed result link constructor...  *****/
     /* the Ref ptoken of the result is the new Pos ptoken of the target */
     if (pAdditionsMap)
-	pAdditionsMap->Close (newPosPtokenCPD);
+	pAdditionsMap->Close (pNewPPT);
 
     temptargetLinkC->release ();
-    newPosPtokenCPD->release ();
 
 /*****  ...and return it.  *****/
     if (TracingLCAppending)
@@ -3823,7 +3802,6 @@ PublicFnDef rtLINK_CType *rtLINK_LCAddLocate (
     int				val,
 				newOff = 0,
 				refNil;
-    M_CPD*			newPosPtokenCPD;
     struct cursor_t {
 	int	_currentOff,
 		_currentValue,
@@ -3839,7 +3817,7 @@ PublicFnDef rtLINK_CType *rtLINK_LCAddLocate (
 
 #define	initFoundLinkC {\
     if (IsNil (foundLinkC))\
-	foundLinkC = rtLINK_RefConstructor (addSourceLinkC->PPT (), -1);\
+	foundLinkC = rtLINK_RefConstructor (addSourceLinkC->PPT ());\
 }
 
 #define outputNew(origin,count,repeat) {\
@@ -4002,7 +3980,7 @@ PublicFnDef rtLINK_CType *rtLINK_LCAddLocate (
  * Align 'targetLinkC' and 'addSourceLinkC' and validate the applicability of
  * 'addSourceLinkC' as an extraction index for 'targetLinkC'...
  *****/
-    rtLINK_AlignLink (targetLinkCPD);
+    rtLINK_Align (targetLinkCPD);
     addSourceLinkC->AlignForAdd (targetLinkCPD, rtLINK_CPx_RefPToken);
 
 /***** Determine the source's referenceNil  *****/
@@ -4018,7 +3996,7 @@ PublicFnDef rtLINK_CType *rtLINK_LCAddLocate (
     else LCAddCount++;
 
 /*****  Create the result link constructor...  *****/
-    resultLinkC = rtLINK_PosConstructor (addSourceLinkC->PPT (), -1);
+    resultLinkC = rtLINK_PosConstructor (addSourceLinkC->PPT ());
 
 /*****  If the source link is empty, close resultLinkC and return ... *****/
     if (addSourceLinkC->ElementCount () == 0) {
@@ -4129,10 +4107,10 @@ PublicFnDef rtLINK_CType *rtLINK_LCAddLocate (
 
 /*****  All done creating the two new constructors.  Now complete them...*****/
 /*****  Close the ptoken for the target... *****/
-    newPosPtokenCPD = targetPtokenC->ToPToken ();
+    rtPTOKEN_Handle::Reference pNewPPT (targetPtokenC->ToPToken ());
 
 /***** Reconstruct targetLinkCPD from the new targetLinkC...  *****/
-    targetLinkC->Close (newPosPtokenCPD);
+    targetLinkC->Close (pNewPPT);
 
     targetLinkCPD->CheckConsistency ();
     targetLinkCPD->EnableModifications ();
@@ -4140,14 +4118,13 @@ PublicFnDef rtLINK_CType *rtLINK_LCAddLocate (
     ReconstructLink (targetLinkCPD, targetLinkC);
 
     /* set the link's positional ptoken to the new one */
-    targetLinkCPD->StoreReference (rtLINK_CPx_PosPToken, newPosPtokenCPD);
+    targetLinkCPD->StoreReference (rtLINK_CPx_PosPToken, pNewPPT);
     rtLINK_CPD_IsInconsistent (targetLinkCPD)   = false;
 
 /*****  ...close the completed result link constructor...  *****/
     /* the Ref ptoken of the result is the new Pos ptoken of the target */
-    resultLinkC->Close (newPosPtokenCPD);
+    resultLinkC->Close (pNewPPT);
 
-    newPosPtokenCPD->release ();
     targetLinkC->release ();
 
 /*****  Close foundLinkC and complement it into addedLinkC, if neccessary...
@@ -4155,11 +4132,9 @@ PublicFnDef rtLINK_CType *rtLINK_LCAddLocate (
     if (locateOrAdd && wantAddedLinkC) {
 	if (IsntNil (foundLinkC)) {
 	    /*** close the linkc ... ***/
-	    newPosPtokenCPD = rtPTOKEN_New (
-		addSourceLinkC->PPT ()->Space (), foundLinkC->ElementCount ()
+	    foundLinkC->Close (
+		new rtPTOKEN_Handle (addSourceLinkC->PPT ()->Space (), foundLinkC->ElementCount ())
 	    );
-	    foundLinkC->Close (newPosPtokenCPD);
-	    newPosPtokenCPD->release ();
 
 	    /*** if the found linkc has less elements than the source ... ***/
 	    if (foundLinkC->ElementCount () != addSourceLinkC->ElementCount ())
@@ -4169,12 +4144,10 @@ PublicFnDef rtLINK_CType *rtLINK_LCAddLocate (
 	    foundLinkC->release ();
 	}
 	else /*** found linkc is empty - so the complement is full...***/ {
-	    *addedLinkC = rtLINK_RefConstructor (addSourceLinkC->PPT (), -1);
+	    *addedLinkC = rtLINK_RefConstructor (addSourceLinkC->PPT ());
 	    unsigned int size = addSourceLinkC->ElementCount ();
 	    rtLINK_AppendRange (*addedLinkC, 0, size);
-	    newPosPtokenCPD = rtPTOKEN_New (addSourceLinkC->PPT ()->Space (), size);
-	    (*addedLinkC)->Close (newPosPtokenCPD);
-	    newPosPtokenCPD->release ();
+	    (*addedLinkC)->Close (new rtPTOKEN_Handle (addSourceLinkC->PPT ()->Space (), size));
 	}
     }
 
@@ -4245,11 +4218,11 @@ PublicFnDef bool rtLINK_LocateOrAddFromRef (
     LocateOrAddFromRefCount++;
 
 /***** Align and validate the source and target ... *****/
-    rtLINK_AlignLink (targetLink);
+    rtLINK_Align (targetLink);
     rtREFUV_AlignAndValidateRef (srcRefp, targetLink, rtLINK_CPx_RefPToken);
 
     unsigned int keyValue = rtREFUV_Ref_Element (srcRefp);
-    if (keyValue == rtPTOKEN_CPD_BaseElementCount (rtREFUV_Ref_RefPTokenCPD (srcRefp))) {
+    if (keyValue == srcRefp->RPTCardinality ()) {
         location    = rtLINK_CPD_ElementCount (targetLink);
 	valueAdded  = false;
     }
@@ -4300,10 +4273,10 @@ PublicFnDef bool rtLINK_LocateOrAddFromRef (
 		targetLinkC->Append (currentValue, currentCnt, currentRepeat);
 
 /*****  Close the ptoken for the target... *****/
-	    M_CPD *newPosPtokenCPD = targetPtokenC->ToPToken ();
+	    rtPTOKEN_Handle::Reference pNewPPT (targetPtokenC->ToPToken ());
 
 /***** Reconstruct targetLink from the new targetLinkC...  *****/
-	    targetLinkC->Close (newPosPtokenCPD);
+	    targetLinkC->Close (pNewPPT);
 
 	    targetLink->CheckConsistency ();
 	    targetLink->EnableModifications ();
@@ -4311,10 +4284,9 @@ PublicFnDef bool rtLINK_LocateOrAddFromRef (
 	    ReconstructLink (targetLink, targetLinkC);
 
 	/* set the link's positional ptoken to the new one */
-	    targetLink->StoreReference (rtLINK_CPx_PosPToken, newPosPtokenCPD);
+	    targetLink->StoreReference (rtLINK_CPx_PosPToken, pNewPPT);
 
 	    rtLINK_CPD_IsInconsistent (targetLink)   = false;
-	    newPosPtokenCPD->release ();
 	    targetLinkC->release ();
 	}
 /***** ... otherwise, no values were added, the target link stays the same
@@ -4323,8 +4295,8 @@ PublicFnDef bool rtLINK_LocateOrAddFromRef (
     }
 
 /***** Initialize the location reference ... *****/
-    DSC_InitReferenceScalar (
-	*locationRefp, rtLINK_CPD_PosPTokenCPD (targetLink), location
+    locationRefp->constructReference (
+	static_cast<rtLINK_Handle*>(targetLink->containerHandle ())->pptHandle (), location
     );
 
     return valueAdded;
@@ -4558,8 +4530,6 @@ PublicFnDef void rtLINK_LookupUsingLCKey (
 	sourceReferenceNil;
     rtLINK_CType*
 	notFoundLinkC = NilOf (rtLINK_CType*);
-    M_CPD*
-	newPosPtokenCPD;
 
 
 #define output(value, count, repeat) {\
@@ -4574,7 +4544,7 @@ PublicFnDef void rtLINK_LookupUsingLCKey (
 	"lookup: OUTPUT-NOTFOUND: val=%d, cnt=%d\n", value, count\
     );\
     if (IsNil (notFoundLinkC))\
-	notFoundLinkC = rtLINK_RefConstructor (keyLinkC->PPT (), -1);\
+	notFoundLinkC = rtLINK_RefConstructor (keyLinkC->PPT ());\
     rtLINK_AppendRange (notFoundLinkC, value, count);\
 }
 
@@ -4655,7 +4625,7 @@ PublicFnDef void rtLINK_LookupUsingLCKey (
  * Align 'sourceLink' and 'keyLinkC' and validate the applicability of
  * 'keyLinkC' as an extraction index for 'sourceLink'...
  *****/
-    rtLINK_AlignLink (sourceLink);
+    rtLINK_Align (sourceLink);
     keyLinkC->AlignForAdd (sourceLink, rtLINK_CPx_RefPToken);
 
 /*****  Initialize the source traversal state variables... *****/
@@ -4683,14 +4653,11 @@ PublicFnDef void rtLINK_LookupUsingLCKey (
 /*****  Done with the traversal  *****/
 /*****  Close notFoundLinkC and complement it into locatedLinkC,
         if neccessary...  *****/
-    if (IsntNil (notFoundLinkC))
-    {
+    if (IsntNil (notFoundLinkC)) {
         /*** close the linkc ... ***/
-	newPosPtokenCPD	= rtPTOKEN_New (
-	    keyLinkC->PPT ()->Space (), notFoundLinkC->ElementCount ()
+	notFoundLinkC->Close (
+	    new rtPTOKEN_Handle (keyLinkC->PPT ()->Space (), notFoundLinkC->ElementCount ())
 	);
-	notFoundLinkC->Close (newPosPtokenCPD);
-	newPosPtokenCPD->release ();
 
 	/*** complement it ... ***/
 	*locatedLinkC = notFoundLinkC->Complement ();
@@ -4759,7 +4726,7 @@ PublicFnDef bool rtLINK_LookupUsingRefKey (
     LookupUsingRefKeyCount++;
 
 /***** Align and validate the source and target ... *****/
-    rtLINK_AlignLink (sourceLink);
+    rtLINK_Align (sourceLink);
     rtREFUV_AlignAndValidateRef (keyRefp, sourceLink, rtLINK_CPx_RefPToken);
 
 /*****  Initialize the source traversal state variables... *****/
@@ -4784,8 +4751,8 @@ PublicFnDef bool rtLINK_LookupUsingRefKey (
     else locate (keyValue);
     checkPartitionSize (keyValue, currentValue, found);
     if (found) {
-	DSC_InitReferenceScalar (
-	    *locationRefp, rtLINK_CPD_PosPTokenCPD (sourceLink), currentOff
+	locationRefp->constructReference (
+	    static_cast<rtLINK_Handle*>(sourceLink->containerHandle ())->pptHandle (), currentOff
 	);
 	return true;
     }
@@ -4834,8 +4801,6 @@ PublicFnDef void rtLINK_DeleteLCSelectedElements (
 	adjustment;
     rtLINK_CType*
 	deletions;
-    M_CPD*
-	ptoken;
 
 
 /*****  Macros ... *****/
@@ -4950,22 +4915,20 @@ PublicFnDef void rtLINK_DeleteLCSelectedElements (
  * Align 'sourceLink' and 'elementLinkC' and validate 'elementLinkC'
  * as an extraction index for 'sourceLink' ...
  *****/
-    rtLINK_AlignLink (sourceLink);
+    rtLINK_Align (sourceLink);
     elementLinkC->AlignForAdd (sourceLink, rtLINK_CPx_RefPToken);
 
 /*****  Create deletedLinkC if neccessary ... *****/
     bool wantsDeletions = (int)(IsntNil (deletedLinkC));
     if (wantsDeletions)
-	deletions = rtLINK_RefConstructor (elementLinkC->PPT (), -1);
+	deletions = rtLINK_RefConstructor (elementLinkC->PPT ());
 
 /*****  Special case the empty cases ... *****/
     if (elementLinkC->BaseElementCount () == 0 ||
 	rtPTOKEN_BaseElementCount (sourceLink, rtLINK_CPx_PosPToken) == 0
     ) {
 	if (wantsDeletions) {
-	    ptoken = rtPTOKEN_New (elementLinkC->PPT ()->Space (), 0);
-	    deletions->Close (ptoken);
-	    ptoken->release ();
+	    deletions->Close (new rtPTOKEN_Handle (elementLinkC->PPT ()->Space (), 0));
 	    *deletedLinkC = deletions;
 	}
 
@@ -4997,15 +4960,12 @@ PublicFnDef void rtLINK_DeleteLCSelectedElements (
 
 /*****  Close the source ptoken constructor ... *****/
     if (IsntNil (sourcePTokenC)) {
-	ptoken = sourcePTokenC->ToPToken ();
-	ptoken->release ();
+	rtPTOKEN_Handle::Reference ptoken (sourcePTokenC->ToPToken ());
     }
 
 /*****  Close deletions if neccessary ... *****/
     if (wantsDeletions) {
-	ptoken = rtPTOKEN_New (elementLinkC->PPT ()->Space (), deletions->ElementCount ());
-	deletions->Close (ptoken);
-	ptoken->release ();
+	deletions->Close (new rtPTOKEN_Handle (elementLinkC->PPT ()->Space (), deletions->ElementCount ()));
 	*deletedLinkC = deletions;
     }
 
@@ -5041,7 +5001,6 @@ PublicFnDef bool rtLINK_DeleteRefSelectedElement (
     int currentOff, currentCnt, currentValue, currentRepeat, deleteValue;
     bool result = false;
     rtLINK_RRDType *rrdp, *rrdpl;
-    M_CPD *ptoken;
 
 
 /*****  Macros ... *****/
@@ -5096,7 +5055,7 @@ PublicFnDef bool rtLINK_DeleteRefSelectedElement (
     DeleteRefElementCount++;
 
 /***** Align and validate 'sourceLink' and 'elementRefp' ... *****/
-    rtLINK_AlignLink (sourceLink);
+    rtLINK_Align (sourceLink);
     rtREFUV_AlignAndValidateRef(elementRefp, sourceLink, rtLINK_CPx_RefPToken);
 
 /*****  Look for 'deleteValue' in the source link ...  *****/
@@ -5122,8 +5081,7 @@ PublicFnDef bool rtLINK_DeleteRefSelectedElement (
 	    sourceLink, rtLINK_CPx_PosPToken
 	);
 	sourcePTokenC->AppendAdjustment (currentOff + 1, -1);
-	ptoken = sourcePTokenC->ToPToken ();
-	ptoken->release ();
+	rtPTOKEN_Handle::Reference ptoken (sourcePTokenC->ToPToken ());
 	result = true;
     }
 
@@ -5208,7 +5166,7 @@ PublicFnDef M_CPD *rtLINK_Distribute (rtLINK_CType *referenceLC, rtLINK_CType *s
 
 /*****  Align and Validate the arguments  *****/
     sourceLC->Align ();
-    referenceLC->AlignForDistribute (sourceLC->PPT (), -1);
+    referenceLC->AlignForDistribute (sourceLC->PPT (), 0);
 
 /*****  Create the result  *****/
     M_CPD *resultuvCPD = rtREFUV_New (referenceLC->RPT (), sourceLC->RPT ());
@@ -5248,7 +5206,7 @@ PublicFnDef M_CPD *rtLINK_Distribute (rtLINK_CType *referenceLC, rtLINK_CType *s
  *
  *****/
 PublicFnDef M_CPD *rtLINK_LCCountReferences (
-    rtLINK_CType *linkc, M_CPD *refPToken, M_CPD *distributionCPD
+    rtLINK_CType *linkc, rtPTOKEN_Handle *refPToken, M_CPD *distributionCPD
 ) {
 /*****  Traverse the linkc counting references  *****/
 #define offset	((distribute) ? distribp [resultPos++] : resultPos++)
@@ -5283,23 +5241,27 @@ PublicFnDef M_CPD *rtLINK_LCCountReferences (
 
     LCCountReferencesCount++;
 
-/***** Align the arguments and set distribute ... *****/
+/***** Align the arguments and set-up the operation... *****/
     bool distribute = IsntNil (distributionCPD);
-    rtREFUV_ElementType	*distribp;
+    rtREFUV_ElementType	*distribp; M_CPD *pResult;
     if (distribute) {
-	rtREFUV_Align (distributionCPD);
+	distributionCPD->align ();
 	linkc->AlignForExtract (distributionCPD, UV_CPx_PToken);
 	distribp = rtREFUV_CPD_Array (distributionCPD);
-    }
-    else linkc->Align ();
 
-/*****  Create the result integer uvector ... *****/
-    M_CPD *resultCPD = distribute
-	? rtINTUV_New (distributionCPD, UV_CPx_RefPToken, refPToken, -1)
-	: rtINTUV_New (linkc->RPT (), refPToken);
+	rtPTOKEN_Handle::Reference pResultPPT (
+	    static_cast<rtUVECTOR_Handle*>(distributionCPD->containerHandle ())->rptHandle ()
+	);
+	pResult = rtINTUV_New (pResultPPT, refPToken);
+    }
+    else {
+	distribp = 0;
+	linkc->Align ();
+	pResult = rtINTUV_New (linkc->RPT (), refPToken);
+    }
 
 /***** Setup for the traversal ... *****/
-    rtINTUV_ElementType	*resultp = rtINTUV_CPD_Array (resultCPD);
+    rtINTUV_ElementType	*resultp = rtINTUV_CPD_Array (pResult);
     unsigned int resultPos = 0;
 
 /***** Do the traversal ... *****/
@@ -5309,7 +5271,7 @@ PublicFnDef M_CPD *rtLINK_LCCountReferences (
     nullFillTo (linkc->ReferenceNil ());
 
 /***** Return the result ... *****/
-    return resultCPD;
+    return pResult;
 
 /***** undef the macros ... *****/
 #undef offset
@@ -5359,23 +5321,22 @@ PublicFnDef M_CPD *rtLINK_ColumnProjection (rtLINK_CType *cartesianLinkC) {
 
 /*****  Align and validate the cartesian linkc ... *****/
     cartesianLinkC->Align ();
-    if (!rtPTOKEN_CPD_IsCartesian (cartesianLinkC->RPT ())) ERR_SignalFault (
+    if (cartesianLinkC->RPT ()->typeIsntCartesian ()) ERR_SignalFault (
 	EC__InternalInconsistency,
 	"rtLINK_ColumnProjection: Not a cartesian link constructor"
     );
 
 /*****  Create the new reference uvector ... *****/
-    M_CPD *result = rtREFUV_New (
-	cartesianLinkC->PPT (), cartesianLinkC->RPT (), rtPTOKEN_CPx_ColPToken
-    );
+    rtPTOKEN_Handle::Reference pResultRPT (cartesianLinkC->RPT ()->colPTokenHandle ());
+    M_CPD *pResult = rtREFUV_New (cartesianLinkC->PPT (), pResultRPT);
 
 /*****  Fill the reference uvector with the column projections ... *****/
-    int const numberOfColumns = rtPTOKEN_BaseElementCount (result, UV_CPx_RefPToken);
-    rtREFUV_ElementType *resultp = rtREFUV_CPD_Array (result);
+    int const numberOfColumns = pResultRPT->cardinality ();
+    rtREFUV_ElementType *resultp = rtREFUV_CPD_Array (pResult);
 
     rtLINK_TraverseRRDCList(cartesianLinkC,handleNil,handleRepeat,handleRange);
 
-    return result;
+    return pResult;
 
 /***** undef the macros ... *****/
 #undef handleNil
@@ -5403,12 +5364,12 @@ PublicFnDef rtLINK_CType *rtLINK_RowProjection (rtLINK_CType *cartesianLinkC) {
 }
 
 #define handleRepeat(pos, count, value) {\
-    rtLINK_AppendRepeat (result, (int)(value / numberOfColumns), count);\
+    rtLINK_AppendRepeat (result, value / numberOfColumns, count);\
 }
 
 #define handleRange(pos, count, value) {\
     while (count-- > 0)\
-	rtLINK_AppendRange (result, (int)(value++ / numberOfColumns), 1);\
+	rtLINK_AppendRange (result, value++ / numberOfColumns, 1);\
 }
 
 /*****  Bump the routine count ... *****/
@@ -5416,21 +5377,18 @@ PublicFnDef rtLINK_CType *rtLINK_RowProjection (rtLINK_CType *cartesianLinkC) {
 
 /*****  Align and validate the cartesian linkc ... *****/
     cartesianLinkC->Align ();
-    if (!rtPTOKEN_CPD_IsCartesian (cartesianLinkC->RPT ())) ERR_SignalFault (
+    if (cartesianLinkC->RPT ()->typeIsntCartesian ()) ERR_SignalFault (
 	EC__InternalInconsistency,
 	"rtLINK_ColumnProjection: Not a cartesian link constructor"
     );
 
 /*****  Create the new link constructor ... *****/
-    rtLINK_CType *result = rtLINK_RefConstructor (
-	cartesianLinkC->RPT (), rtPTOKEN_CPx_RowPToken
-    );
+    rtLINK_CType *result = rtLINK_RefConstructor (cartesianLinkC->RPT ()->rowPTokenHandle ());
 
 /*****  Append the row projections to the linkc ... *****/
-    int const numberOfColumns = rtPTOKEN_BaseElementCount (
-	cartesianLinkC->RPT (), rtPTOKEN_CPx_ColPToken
-    );
-    int const projectionRefNil = rtPTOKEN_CPD_BaseElementCount (result->RPT ());
+    rtPTOKEN_Handle::Reference pColPToken (cartesianLinkC->RPT ()->colPTokenHandle ());
+    unsigned int const numberOfColumns = pColPToken->cardinality ();
+    unsigned int const projectionRefNil = result->RPT ()->cardinality ();
 
     rtLINK_TraverseRRDCList(cartesianLinkC,handleNil,handleRepeat,handleRange);
 
@@ -5470,7 +5428,7 @@ PublicFnDef rtLINK_CType *rtLINK_RowProjection (rtLINK_CType *cartesianLinkC) {
  *
  *****/
 PublicFnDef rtLINK_CType *rtLINK_LinearizeLCrRc (
-    M_CPD *cartesianPT, rtLINK_CType *rowLinkC, rtREFUV_TypePTR_Reference columnRefp
+    rtPTOKEN_Handle *cartesianPT, rtLINK_CType *rowLinkC, rtREFUV_TypePTR_Reference columnRefp
 ) {
 #define handleNil(pos, count, value) {\
     rtLINK_AppendRepeat (result, refNil, count);\
@@ -5490,19 +5448,15 @@ PublicFnDef rtLINK_CType *rtLINK_LinearizeLCrRc (
 /*****  Align and Validate 'rowLinkC' and 'columnRefp'  *****/
     rowLinkC->Align ();
     rtREFUV_AlignReference (columnRefp);
-    rtPTOKEN_CartesianVerification (
-	cartesianPT, rowLinkC->RPT (), rtREFUV_Ref_RefPTokenCPD (columnRefp), -1
-    );
+    cartesianPT->verifyProduct (rowLinkC->RPT (), columnRefp->RPT ());
 
 /*****  Make the result link constructor ... *****/
-    rtLINK_CType *result = rtLINK_PosConstructor (rowLinkC->PPT (), -1);
+    rtLINK_CType *result = rtLINK_PosConstructor (rowLinkC->PPT ());
 
 /*****  Traverse the 'rowLinkC' calculating the linearizations ... *****/
-    int const resultSize = rtPTOKEN_CPD_BaseElementCount (rowLinkC->PPT ());
-    int const refNil = rtPTOKEN_CPD_BaseElementCount (cartesianPT);
-    int const numberOfColumns = rtPTOKEN_CPD_BaseElementCount (
-	rtREFUV_Ref_RefPTokenCPD (columnRefp)
-    );
+    int const resultSize = rowLinkC->PPT ()->cardinality ();
+    int const refNil = cartesianPT->cardinality ();
+    int const numberOfColumns = columnRefp->RPTCardinality ();
     int column = rtREFUV_Ref_Element (columnRefp);
 
     if (column == numberOfColumns)
@@ -5549,7 +5503,7 @@ PublicFnDef rtLINK_CType *rtLINK_LinearizeLCrRc (
  *
  *****/
 PublicFnDef M_CPD *rtLINK_LinearizeLCrUVic (
-    M_CPD*			cartesianPT,
+    rtPTOKEN_Handle*		cartesianPT,
     rtLINK_CType*		rowLinkC,
     M_CPD*			columnUV,
     M_CPD*			columnIndirection
@@ -5585,22 +5539,24 @@ PublicFnDef M_CPD *rtLINK_LinearizeLCrUVic (
 
 /*****  Align and Validate 'rowLinkC' and 'columnLinkC'  *****/
     rowLinkC->Align ();
-    rtREFUV_Align (columnUV);
-    rtPTOKEN_CartesianVerification (
-	cartesianPT, rowLinkC->RPT (), columnUV, UV_CPx_RefPToken
+    columnUV->align ();
+
+    rtPTOKEN_Handle::Reference pColumnRPT (
+	static_cast<rtUVECTOR_Handle*>(columnUV->containerHandle ())->rptHandle ()
     );
+    cartesianPT->verifyProduct (rowLinkC->RPT (), pColumnRPT);
 
 /******  Align and Validate 'columnIndirection'  *****/
     rtREFUV_AlignForAssign (
-	columnUV, UV_CPx_PToken, columnIndirection, rowLinkC->PPT (), -1
+	columnUV, UV_CPx_PToken, columnIndirection, rowLinkC->PPT ()
     );
 
 /*****  Make the result reference UVector ... *****/
     M_CPD *result = rtREFUV_New (rowLinkC->PPT (), cartesianPT);
 
 /*****  Calculate the linearizations ... *****/
-    int const refNil = rtPTOKEN_CPD_BaseElementCount (cartesianPT);
-    int const numberOfColumns = rtPTOKEN_BaseElementCount (columnUV, UV_CPx_RefPToken);
+    int const refNil = cartesianPT->cardinality ();
+    int const numberOfColumns = pColumnRPT->cardinality ();
     int const colpRefNil = rtPTOKEN_BaseElementCount (columnIndirection, UV_CPx_RefPToken);
     rtREFUV_ElementType *colp = rtREFUV_CPD_Array (columnIndirection);
     rtREFUV_ElementType *resultp = rtREFUV_CPD_Array (result);
@@ -5642,7 +5598,7 @@ PublicFnDef M_CPD *rtLINK_LinearizeLCrUVic (
  *
  *****/
 PublicFnDef M_CPD *rtLINK_LinearizeLCrLCic (
-    M_CPD*			cartesianPT,
+    rtPTOKEN_Handle*		cartesianPT,
     rtLINK_CType*		rowLinkC,
     rtLINK_CType*		columnLinkC,
     M_CPD*			columnIndirection
@@ -5684,7 +5640,7 @@ PublicFnDef M_CPD *rtLINK_LinearizeLCrLCic (
 PrivateFnDef void PrintLink (M_CPD *cpd, int recursive) {
     rtLINK_RRDType *rrdp, *rrdl;
 
-    rtLINK_AlignLink (cpd);
+    rtLINK_Align (cpd);
 
     IO_printf ("%s{", RTYPE_TypeIdAsString (RTYPE_C_Link));
     if (recursive) {
@@ -5737,7 +5693,7 @@ PrivateFnDef void ReclaimContainer (
  *****  Internal routine to 'save' a P-Token
  *****/
 bool rtLINK_Handle::PersistReferences () {
-    rtLINK_Type	*link = (rtLINK_Type *)ContainerContent ();
+    rtLINK_Type	*link = typecastContent ();
 
     return Persist (&rtLINK_L_PosPToken (link))
 	&& Persist (&rtLINK_L_RefPToken (link));
@@ -5761,8 +5717,8 @@ bool rtLINK_Handle::PersistReferences () {
  *	NOTHING - Executed for side effect only.
  *
  *****/
-PrivateFnDef void MarkContainers (M_ASD *pSpace, M_CPreamble const *pContainer) {
-    pSpace->Mark ((M_POP const*)(pContainer + 1), 2);
+PrivateFnDef void MarkContainers (M_ASD::GCVisitBase* pGCV, M_ASD* pSpace, M_CPreamble const *pContainer) {
+    pGCV->Mark (pSpace, (M_POP const*)(pContainer + 1), 2);
 }
 
 
@@ -5775,17 +5731,15 @@ PrivateFnDef void MarkContainers (M_ASD *pSpace, M_CPreamble const *pContainer) 
  ********************/
 
 IOBJ_DefineNewaryMethod (NewReferencingDM) {
-    rtLINK_CType *linkc = rtLINK_RefConstructor (RTYPE_QRegisterCPD (parameterArray[1]), -1);
+    rtLINK_CType *linkc = rtLINK_RefConstructor (RTYPE_QRegisterPToken (parameterArray[1]));
 
     if (IOBJ_IsAnInstanceOf (parameterArray[0], IOBJ_IType_Int)) {
-	M_CPD *posPToken = rtPTOKEN_New (IOBJ_ScratchPad, 1);
         rtLINK_AppendRange (linkc, IOBJ_IObjectValueAsInt (parameterArray[0]), 1)->Close (
-	    posPToken
+	    new rtPTOKEN_Handle (IOBJ_ScratchPad, 1)
 	);
-	posPToken->release ();
     }
     else
-	linkc->Close (RTYPE_QRegisterCPD (parameterArray[0]));
+	linkc->Close (RTYPE_QRegisterPToken (parameterArray[0]));
 
     return RTYPE_QRegister (linkc);
 }
@@ -5793,16 +5747,12 @@ IOBJ_DefineNewaryMethod (NewReferencingDM) {
 IOBJ_DefineNewaryMethod (NewPosRefInitDM) {
 /***** Method to make a new link with the ptokens specified and initialize the
    values to a range starting at the number specified by 'init:'. *****/
-    int			refNil, size, cnt, start;
-    M_CPD*		posPToken = NilOf (M_CPD*);
-    rtLINK_CType*	linkc = rtLINK_RefConstructor (
-	RTYPE_QRegisterCPD (parameterArray[1]), -1
-    );
-
-    start = IOBJ_IObjectValueAsInt (parameterArray[2]);
-    posPToken = RTYPE_QRegisterCPD (parameterArray[0]);
-    refNil = rtPTOKEN_CPD_BaseElementCount (RTYPE_QRegisterCPD (parameterArray[1]));
-    size = rtPTOKEN_CPD_BaseElementCount (posPToken);
+    rtPTOKEN_Handle *posPToken = RTYPE_QRegisterPToken (parameterArray[0]);
+    rtLINK_CType *linkc = rtLINK_RefConstructor (RTYPE_QRegisterPToken (parameterArray[1]));
+    unsigned int refNil = RTYPE_QRegisterPToken (parameterArray[1])->cardinality ();
+    unsigned int start = IOBJ_IObjectValueAsInt (parameterArray[2]);
+    unsigned int size = posPToken->cardinality ();
+    unsigned int cnt;
 
     if (start > refNil)
 	cnt = 0;
@@ -5819,15 +5769,15 @@ IOBJ_DefineNewaryMethod (NewPosRefInitDM) {
 }
 
 IOBJ_DefineNewaryMethod (NewRefLinkDM) {
-    M_CPD *pRPT = RTYPE_QRegisterCPD (parameterArray[0]);
+    VContainerHandle *pRPT = RTYPE_QRegisterHandle (parameterArray[0]);
     RTYPE_MustBeA ("'newRefLink:'", pRPT->RType (), RTYPE_C_PToken);
-    return RTYPE_QRegister (rtLINK_NewRefLink (NilOf (M_CPD*), pRPT));
+    return RTYPE_QRegister (rtLINK_NewRefLink (0, static_cast<rtPTOKEN_Handle*>(pRPT)));
 }
 
 IOBJ_DefineNewaryMethod (NewEmptyLinkDM) {
     return RTYPE_QRegister (
 	rtLINK_NewEmptyLink (
-	    RTYPE_QRegisterCPD (parameterArray[0]), RTYPE_QRegisterCPD (parameterArray[1])
+	    RTYPE_QRegisterPToken (parameterArray[0]), RTYPE_QRegisterPToken (parameterArray[1])
 	)
     );
 }
@@ -6064,7 +6014,10 @@ IOBJ_DefineMethod (SetInARutDM) {
  *  'Instance' Methods  *
  ************************/
 
-UV_DefineAlignDM (AlignDM, rtLINK_AlignLink)
+IOBJ_DefineUnaryMethod (AlignDM) {
+    RTYPE_QRegisterHandle (self)->align ();
+    return self;
+}
 
 IOBJ_DefineUnaryMethod (AlignLCDM) {
     return RTYPE_QRegister (LinkToConstructor (RTYPE_QRegisterCPD (self))->Align ());
@@ -6120,19 +6073,16 @@ IOBJ_DefineMethod (AtDM) {
 
     if (IOBJ_IsAnInstanceOf (parameterArray[0], IOBJ_IType_Int)) {
 	rtREFUV_Type_Reference sref, rref;
-        DSC_InitReferenceScalar (
-	    sref,
-	    rtLINK_CPD_PosPTokenCPD (sourceCPD),
+        sref.constructReference (
+	    static_cast<rtLINK_Handle*>(sourceCPD->containerHandle ())->pptHandle (),
 	    IOBJ_IObjectValueAsInt (parameterArray[0])
 	);
 	rtLINK_RefExtract (&rref, sourceCPD, &sref);
 	result = IOBJ_IntIObject (rtREFUV_Ref_D_Element (rref));
-	DSC_ClearScalar (sref);
-	DSC_ClearScalar (rref);
+	sref.destroy ();
+	rref.destroy ();
     }
-    else if (RTYPE_C_RefUV ==
-		(RTYPE_Type)M_CPD_RType
-		    (subscriptCPD = RTYPE_QRegisterCPD (parameterArray[0])))
+    else if (RTYPE_C_RefUV == (subscriptCPD = RTYPE_QRegisterCPD (parameterArray[0]))->RType ())
 /*****  Handle the 'RefUV' case:  *****/
 	result = RTYPE_QRegister (rtLINK_UVExtract (sourceCPD, subscriptCPD));
     else {
@@ -6154,7 +6104,7 @@ IOBJ_DefineMethod (AddlcDM) {
     M_CPD *targetCPD	= RTYPE_QRegisterCPD (self);
     M_CPD *addSourceCPD	= RTYPE_QRegisterCPD (parameterArray[0]);
 
-    if (RTYPE_C_Link == (RTYPE_Type)M_CPD_RType (addSourceCPD)) {
+    if (RTYPE_C_Link == addSourceCPD->RType ()) {
 	rtLINK_CType *linkcd = rtLINK_ToConstructor (targetCPD);
 	rtLINK_CType *linkcs = rtLINK_ToConstructor (addSourceCPD);
 	IOBJ_IObject newself = RTYPE_QRegister (linkcd->Add (linkcs));
@@ -6172,7 +6122,7 @@ IOBJ_DefineMethod (AddDM) {
 	*targetCPD	= RTYPE_QRegisterCPD (self),
 	*addSourceCPD	= RTYPE_QRegisterCPD (parameterArray[0]);
 
-    if (RTYPE_C_Link == (RTYPE_Type)M_CPD_RType (addSourceCPD)) {
+    if (RTYPE_C_Link == addSourceCPD->RType ()) {
 	rtLINK_CType *pSource = rtLINK_ToConstructor (addSourceCPD);
 	rtLINK_CType *pResult = rtLINK_LCAdd (targetCPD, pSource);
 	pSource->release ();
@@ -6188,7 +6138,7 @@ IOBJ_DefineMethod (LocateOrAddDM) {
 	*targetCPD	= RTYPE_QRegisterCPD (self),
 	*addSourceCPD	= RTYPE_QRegisterCPD (parameterArray[0]);
 
-    if (RTYPE_C_Link == (RTYPE_Type)M_CPD_RType (addSourceCPD)) {
+    if (RTYPE_C_Link == addSourceCPD->RType ()) {
 	rtLINK_CType *linkc = rtLINK_ToConstructor (addSourceCPD);
 
 	rtLINK_CType *addedLinkc = NilOf (rtLINK_CType*);
@@ -6210,7 +6160,7 @@ IOBJ_DefineMethod (LocateOrAddNoDM) {
 	*targetCPD	= RTYPE_QRegisterCPD (self),
 	*addSourceCPD	= RTYPE_QRegisterCPD (parameterArray[0]);
 
-    if (RTYPE_C_Link == (RTYPE_Type)M_CPD_RType (addSourceCPD)) {
+    if (RTYPE_C_Link == addSourceCPD->RType ()) {
 	rtLINK_CType *linkc = rtLINK_ToConstructor (addSourceCPD);
 	rtLINK_CType *pResult = rtLINK_LocateOrAddFromLC (
 	    targetCPD, linkc, NilOf (rtLINK_CType **)
@@ -6226,9 +6176,8 @@ IOBJ_DefineMethod (LocateOrAddRefDM) {
     M_CPD*			targetCPD = RTYPE_QRegisterCPD (self);
     rtREFUV_Type_Reference	srcRef, locationRef;
 
-    DSC_InitReferenceScalar (
-	srcRef,
-	rtLINK_CPD_RefPTokenCPD (targetCPD),
+    srcRef.constructReference (
+	static_cast<rtLINK_Handle*>(targetCPD->containerHandle ())->rptHandle (),
 	IOBJ_IObjectValueAsInt (parameterArray[0])
     );
 
@@ -6236,8 +6185,8 @@ IOBJ_DefineMethod (LocateOrAddRefDM) {
 
     IO_printf ("\nValue Added = %s,  position = %d\n",
 	(added) ? "true" : "false", rtREFUV_Ref_Element (&locationRef));
-    DSC_ClearScalar (locationRef);
-    DSC_ClearScalar (srcRef);
+    locationRef.destroy ();
+    srcRef.destroy ();
 
     return (self);
 }
@@ -6250,7 +6199,7 @@ IOBJ_DefineMethod (LookupTypeDM) {
 	parameterArray[1]
     );
 
-    if (RTYPE_C_Link == (RTYPE_Type)M_CPD_RType (keyCPD)) {
+    if (RTYPE_C_Link == keyCPD->RType ()) {
 	rtLINK_CType *linkc = rtLINK_ToConstructor (keyCPD);
 	rtLINK_CType *pResult, *locatedLinkC = NilOf (rtLINK_CType*);
         rtLINK_LookupUsingLCKey (
@@ -6277,9 +6226,8 @@ IOBJ_DefineMethod (LookupRefTypeDM) {
     );
 
     rtREFUV_Type_Reference keyRef;
-    DSC_InitReferenceScalar (
-	keyRef,
-	rtLINK_CPD_RefPTokenCPD (sourceCPD),
+    keyRef.constructReference (
+	static_cast<rtLINK_Handle*>(sourceCPD->containerHandle ())->rptHandle (),
 	IOBJ_IObjectValueAsInt (parameterArray[0])
     );
 
@@ -6289,12 +6237,12 @@ IOBJ_DefineMethod (LookupRefTypeDM) {
 	IO_printf (
 	    "Lookedup Value Found at position = %d\n", rtREFUV_Ref_Element (&locatedRef)
 	);
-	DSC_ClearScalar (locatedRef);
+	locatedRef.destroy ();
     }
     else
 	IO_printf ("Lookedup Value not found\n");
 
-    DSC_ClearScalar (keyRef);
+    keyRef.destroy ();
 
     return self;
 }
@@ -6334,14 +6282,13 @@ IOBJ_DefineMethod (DeleteRefDM) {
     M_CPD *sourceLink = RTYPE_QRegisterCPD (self);
 
     rtREFUV_Type_Reference deleteRef;
-    DSC_InitReferenceScalar (
-	deleteRef,
-	rtLINK_CPD_RefPTokenCPD (sourceLink),
+    deleteRef.constructReference (
+	static_cast<rtLINK_Handle*>(sourceLink->containerHandle ())->rptHandle (),
 	IOBJ_IObjectValueAsInt (parameterArray[0])
     );
 
     bool result = rtLINK_DeleteRefSelectedElement (sourceLink, &deleteRef);
-    DSC_ClearScalar (deleteRef);
+    deleteRef.destroy ();
 
     if (result)
 	IO_printf ("\nElement Deleted\n");
@@ -6362,7 +6309,7 @@ IOBJ_DefineMethod (AtLCRefUVDM) {
 IOBJ_DefineMethod (TestToLinkNewDM) {
 //  ... and return a copy of the link with its new PPT:
     return RTYPE_QRegister (
-	rtLINK_Copy (RTYPE_QRegisterCPD (self), RTYPE_QRegisterCPD (parameterArray[0]))
+	rtLINK_Copy (RTYPE_QRegisterCPD (self), RTYPE_QRegisterPToken (parameterArray[0]))
     );
 }
 
@@ -6378,7 +6325,7 @@ IOBJ_DefineUnaryMethod (LCComplementDM) {
 }
 
 IOBJ_DefineMethod (LCCountReferencesDM) {
-    M_CPD *pRPT = RTYPE_QRegisterCPD (parameterArray[0]);
+    rtPTOKEN_Handle *pRPT = RTYPE_QRegisterPToken (parameterArray[0]);
 
     rtLINK_CType *linkc = rtLINK_ToConstructor (RTYPE_QRegisterCPD (self));
     M_CPD *resultCPD = rtLINK_LCCountReferences (linkc, pRPT, NilOf (M_CPD*));
@@ -6388,7 +6335,7 @@ IOBJ_DefineMethod (LCCountReferencesDM) {
 }
 
 IOBJ_DefineMethod (LCCountReferencesDistribDM) {
-    M_CPD *pRPT = RTYPE_QRegisterCPD (parameterArray[0]);
+    rtPTOKEN_Handle *pRPT = RTYPE_QRegisterPToken (parameterArray[0]);
     M_CPD *distribCPD = RTYPE_QRegisterCPD (parameterArray[1]);
 
     rtLINK_CType *linkc = rtLINK_ToConstructor (RTYPE_QRegisterCPD (self));
@@ -6424,18 +6371,16 @@ IOBJ_DefineMethod (LinearizeLCrRcDM) {
  *
  *****/
     rtLINK_CType *rowLinkc = rtLINK_ToConstructor (RTYPE_QRegisterCPD (self));
-    M_CPD *cartesianPT = RTYPE_QRegisterCPD (parameterArray [0]);
+    rtPTOKEN_Handle *cartesianPT = static_cast<rtPTOKEN_Handle*>(
+	RTYPE_QRegisterHandle (parameterArray [0])
+    );
 
     rtREFUV_Type_Reference columnRef;
-    DSC_InitReferenceScalar (
-	columnRef,
-	rtPTOKEN_CPD_ColPTokenCPD (cartesianPT),
-	IOBJ_IObjectValueAsInt (parameterArray[1])
-    );
+    columnRef.constructReference (cartesianPT->colPTokenHandle (), IOBJ_IObjectValueAsInt (parameterArray[1]));
 
     rtLINK_CType *resultLinkc = rtLINK_LinearizeLCrRc (cartesianPT, rowLinkc, &columnRef);
     rowLinkc->release ();
-    DSC_ClearScalar (columnRef);
+    columnRef.destroy ();
 
     return RTYPE_QRegister (resultLinkc);
 }
@@ -6451,7 +6396,9 @@ IOBJ_DefineMethod (LinearizeLCrUVicDM) {
  *
  *****/
     rtLINK_CType *rowLinkc = rtLINK_ToConstructor (RTYPE_QRegisterCPD (self));
-    M_CPD *cartesianPT = RTYPE_QRegisterCPD (parameterArray [0]);
+    rtPTOKEN_Handle *cartesianPT = static_cast<rtPTOKEN_Handle*>(
+	RTYPE_QRegisterHandle (parameterArray [0])
+    );
     M_CPD *columnUV = RTYPE_QRegisterCPD (parameterArray[1]);
     M_CPD *columnIndirection = RTYPE_QRegisterCPD (parameterArray[2]);
 
@@ -6474,7 +6421,9 @@ IOBJ_DefineMethod (LinearizeLCrLCicDM) {
  *
  *****/
     rtLINK_CType *rowLinkc = rtLINK_ToConstructor (RTYPE_QRegisterCPD (self));
-    M_CPD *cartesianPT = RTYPE_QRegisterCPD (parameterArray [0]);
+    rtPTOKEN_Handle *cartesianPT = static_cast<rtPTOKEN_Handle*>(
+	RTYPE_QRegisterHandle (parameterArray [0])
+    );
     rtLINK_CType *columnLinkc = rtLINK_ToConstructor (RTYPE_QRegisterCPD (parameterArray[1]));
     M_CPD *columnIndirection = RTYPE_QRegisterCPD (parameterArray[2]);
 

@@ -350,6 +350,22 @@ void  Vsa::VPoolAdmin::SetEvaluationAttempts  (
         pSession->SetEvaluationAttempts (cEvaluationAttempt);
 }
 
+void  Vsa::VPoolAdmin::SetEvaluationOnErrorAttempts  (
+    Vca::U32 cEvaluationOnErrorAttempt, VString const &rSession
+) const {
+    Session::Reference pSession;
+    if (getSession (rSession, pSession))
+        pSession->SetEvaluationOnErrorAttempts (cEvaluationOnErrorAttempt);
+}
+
+void  Vsa::VPoolAdmin::SetEvaluationTimeOutAttempts  (
+    Vca::U32 cEvaluationTimeOutAttempt, VString const &rSession
+) const {
+    Session::Reference pSession;
+    if (getSession (rSession, pSession))
+        pSession->SetEvaluationTimeOutAttempts (cEvaluationTimeOutAttempt);
+}
+
 void  Vsa::VPoolAdmin::SetShrinkTimeOut  (
     Vca::U32 iTimeOutMinutes, VString const &rSession
 ) const {
@@ -510,6 +526,33 @@ void Vsa::VPoolAdmin::BroadcastFile (VString const &rFile, Vca::U64 iTimeOutSeco
  ****   Statistics  ****
  ***********************/
 
+void Vsa::VPoolAdmin::StatSum (VString const &name, Vca::U64 timeBefore, Vca::U64 timeRange, VString const &rSession) const {
+	Session::Reference pSession;
+	if (getSession (rSession, pSession))
+		pSession->StatSum (name, timeBefore, timeRange);
+}
+
+void Vsa::VPoolAdmin::StatMax (VString const &name, Vca::U64 timeBefore, Vca::U64 timeRange, VString const &rSession) const {
+	Session::Reference pSession;
+	if (getSession (rSession, pSession))
+		pSession->StatMax (name, timeBefore, timeRange);
+}
+
+void Vsa::VPoolAdmin::StatMin (VString const &name, Vca::U64 timeBefore, Vca::U64 timeRange, VString const &rSession) const {
+	Session::Reference pSession;
+	if (getSession (rSession, pSession))
+		pSession->StatMin (name, timeBefore, timeRange);
+}
+
+void Vsa::VPoolAdmin::StatDivide (VString const &names, Vca::U64 timeBefore, Vca::U64 timeRange, VString const &rSession) const {
+	Session::Reference pSession;
+	if (getSession (rSession, pSession)) {
+		VString name1, name2;
+		names.getPrefix('/', name1, name2);
+		pSession->StatDivide(name1, name2, timeBefore, timeRange);
+	}
+}
+ 
 void Vsa::VPoolAdmin::ServiceStatistics (VString const &rSession) const {
     Session::Reference pSession;
     if (getSession (rSession, pSession))
@@ -690,6 +733,8 @@ void Vsa::VPoolAdmin::processCommandLineArgs (VString const &rServerName) {
         if (pSession) {
 
             Vca::U32 iTimeout = UINT_MAX;
+			Vca::U64 iTimeBefore = 10 * 1000 * 1000; 
+			Vca::U64 iTimeRange = 9.9 * 1000 * 1000;
             bool bAnyData = false;
 
             //  iterate through the command line value options
@@ -752,10 +797,30 @@ void Vsa::VPoolAdmin::processCommandLineArgs (VString const &rServerName) {
                 //  handle tags with values
                 else {
                     Vca::U32 cTagName=pValue-pTag;
-
+					
                     if (!strncasecmp (pTag, "timeout", cTagName)) {
                         iTimeout = atol (pValue+1);
                     }
+					else if (!strncasecmp (pTag, "timeBefore", cTagName)) {
+						iTimeBefore = atol (pValue+1) * 1000 * 1000;
+					} 
+					else if (!strncasecmp (pTag, "timeRange", cTagName)) {
+						iTimeRange = atol (pValue+1) * 1000 * 1000;
+					}
+					else if (!strncasecmp (pTag, "statSum", cTagName)) {
+						VString valString;
+						valString << pValue+1;
+						StatSum (valString, iTimeBefore, iTimeRange);
+					}
+					else if (!strncasecmp (pTag, "statMax", cTagName)) {
+						StatMax (pValue+1, iTimeBefore, iTimeRange);
+					}
+					else if (!strncasecmp (pTag, "statMin", cTagName)) {
+						StatMin (pValue+1, iTimeBefore, iTimeRange);
+					}
+					else if (!strncasecmp (pTag, "statDivide", cTagName)) {
+						StatDivide (pValue+1, iTimeBefore, iTimeRange);
+					}
                     else if (!strncasecmp (pTag, "maxWorkers", cTagName)) {
                         SetWorkerMaximum (atol (pValue+1));
                     }

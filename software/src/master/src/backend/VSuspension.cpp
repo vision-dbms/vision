@@ -203,7 +203,7 @@ unsigned int VSuspension::cardinality_() const {
     return m_pSuspendee->cardinality_();
 }
 
-M_CPD* VSuspension::ptoken_() const {
+rtPTOKEN_Handle *VSuspension::ptoken_() const {
     return m_pSuspendee->ptoken_();
 }
 

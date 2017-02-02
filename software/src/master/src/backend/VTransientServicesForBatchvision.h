@@ -8,6 +8,7 @@
 #include "VTransientServices.h"
 #include "V_VApplicationLog.h"
 #include "V_VPointer.h"
+#include "Vca_VNotifier.h"
 
 /**************************
  *****  Declarations  *****
@@ -17,8 +18,8 @@
  *****  Definitions  *****
  *************************/
 
-class VTransientServicesForBatchvision : public VTransientServices {
-    DECLARE_FAMILY_MEMBERS (VTransientServicesForBatchvision, VTransientServices);
+class VTransientServicesForBatchvision : public Vca::VTransientServicesForNotification {
+    DECLARE_FAMILY_MEMBERS (VTransientServicesForBatchvision, Vca::VTransientServicesForNotification);
 
 //  Construction
 public:
@@ -92,6 +93,12 @@ public:
 	return static_cast<unsigned int> (m_sGCSpread / (1024 * 1024));
     }
     
+// Notification Service
+public:
+    virtual void setNSServer (char const *pServer);
+    virtual void setNSMessage (char const *pMsg);
+
+
 // Usage Logging
 public:
     void usageLogFilePath (VString &rLogFilePath) const {
@@ -135,7 +142,6 @@ public:
     void vlogUsageInfo (char const *pFormat, va_list ap) {
 	m_iUsageLog.vlog (pFormat, ap);
     }
-
 
 //  State
 private:

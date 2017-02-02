@@ -60,41 +60,6 @@
 #include "PFstats.h"
 
 
-/***************************
- *----  M_AND Helpers  ----*
- ***************************/
-
-bool M_AND::ContainerExists (M_POP const *pReference) {
-    M_ASD* pASD = AccessSpace (pReference);
-    unsigned int xContainer = M_POP_ContainerIndex (pReference);
-
-    return IsntNil (pASD)
-	&& xContainer < pASD->cteCount ()
-	&& pASD->cte (xContainer)->isReferenced ();
-}
-
-bool M_AND::ContainerPersists (M_POP const *pReference) {
-    PS_CTE iCTE;
-    return (M_POP_ObjectSpace (pReference) < SpaceCount ()) &&
-	m_pPhysicalAND->AccessSpace(M_POP_ObjectSpace (pReference))->GetLiveCTE (
-	    M_POP_ContainerIndex (pReference), iCTE
-    );
-}
-
-M_CPD *M_AND::SafeGetCPD (M_POP const *pReference) {
-    return ContainerExists (pReference) ? GetCPD (pReference) : 0;
-}
-
-M_CPD *M_AND::SafeGetCPDOfType (M_POP const *pReference, RTYPE_Type xType) {
-    M_CPD *pContainerCPD = SafeGetCPD (pReference);
-    if (pContainerCPD && pContainerCPD->RTypeIsnt (xType)) {
-	pContainerCPD->release ();
-	pContainerCPD = 0;
-    }
-    return pContainerCPD;
-}
-
-
 /*******************************
  *******************************
  *****  Primitive Indices  *****
@@ -339,7 +304,7 @@ PrivateFnDef double GetAllocation (
     M_AND *pNetwork, unsigned int xSpace, bool *spaceValid
 ) {
     M_ASD* asd = pNetwork->AccessSpace (xSpace, spaceValid);
-    return asd ? asd->TransientAllocation () : 0;
+    return asd ? static_cast<double>(asd->TransientAllocation ()) : 0;
 }
 
 PrivateFnDef unsigned int GetCTEntryCount (
@@ -481,7 +446,7 @@ V_DefinePrimitive (SpaceAllocation) {
 	VfGuardTool iGuardTool (V_TOTSC_PToken);
 	pTask->loadDucWithPartialFunction (
 	    iGuardTool, rtDOUBLEUV_New (
-		V_TOTSC_PToken, pTask->codKOT()->TheDoublePTokenCPD (), -1,
+		V_TOTSC_PToken, pTask->codKOT()->TheDoublePTokenHandle (),
 		InitializeDoubleUVWithSpaceAccessor,
 		(M_CPD*)DSC_Descriptor_Value (rCurrent), &iGuardTool, accessor
 	    )
@@ -516,7 +481,7 @@ V_DefinePrimitive (SpaceInformation) {
 	VfGuardTool iGuardTool (V_TOTSC_PToken);
 	pTask->loadDucWithPartialFunction (
 	    iGuardTool, rtINTUV_New (
-		V_TOTSC_PToken, pTask->codKOT()->TheIntegerPTokenCPD (), -1,
+		V_TOTSC_PToken, pTask->codKOT()->TheIntegerPTokenHandle (),
 		InitializeIntUVWithSpaceAccessor,
 		(M_CPD*)DSC_Descriptor_Value (rCurrent), &iGuardTool, accessor
 	    )
@@ -626,7 +591,7 @@ V_DefinePrimitive (PackPOP) {
 	VfGuardTool iGuardTool (V_TOTSC_PToken);
 	pTask->loadDucWithPartialFunction (
 	    iGuardTool, rtINTUV_New (
-		V_TOTSC_PToken, pTask->codKOT()->TheIntegerPTokenCPD (), -1,
+		V_TOTSC_PToken, pTask->codKOT()->TheIntegerPTokenHandle (),
 		InitializeIntUVWithPackedPOP,
 		(M_CPD *)DSC_Descriptor_Value (rCurrent),
 		(M_CPD *)DSC_Descriptor_Value (ADescriptor),
@@ -727,7 +692,7 @@ V_DefinePrimitive (UnpackPOP) {
     }
     else if (rCurrent.holdsNonScalarValues ()) {
 	M_CPD *resultUV = rtINTUV_New (
-	    V_TOTSC_PToken, pTask->codKOT()->TheIntegerPTokenCPD (), -1,
+	    V_TOTSC_PToken, pTask->codKOT()->TheIntegerPTokenHandle (),
 	    InitializeIntUVWithPOPPart, (M_CPD *)DSC_Descriptor_Value (rCurrent), unpacker
 	);
 	pTask->loadDucWithMonotype (resultUV);
@@ -747,23 +712,13 @@ V_DefinePrimitive (UnpackPOP) {
  ***********************/
 
 PrivateFnDef unsigned int GetContainerSize (M_AND *pNetwork, M_POP const *pPOP) {
-    M_CPD *pContainerCPD = pNetwork->GetCPD (pPOP);
-    unsigned int result = M_CPD_Size (pContainerCPD)
-			+ M_SizeOfPreambleType
-			+ M_SizeOfEndMarker;
-
-    pContainerCPD->release ();
-
-    return result;
+    VContainerHandle::Reference pContainerHandle (pNetwork->GetContainerHandle (pPOP));
+    return pContainerHandle->containerSize () + M_SizeOfPreambleType + M_SizeOfEndMarker;
 }
 
 PrivateFnDef unsigned int GetContainerType (M_AND *pNetwork, M_POP const *pPOP) {
-    M_CPD *pContainerCPD = pNetwork->GetCPD (pPOP);
-    unsigned int result = M_CPD_RType (pContainerCPD);
-
-    pContainerCPD->release ();
-
-    return result;
+    VContainerHandle::Reference pContainerHandle (pNetwork->GetContainerHandle (pPOP));
+    return pContainerHandle->RType ();
 }
 
 PrivateFnDef unsigned int GetContainerSegment (M_AND *pNetwork, M_POP const *pPOP) {
@@ -779,13 +734,11 @@ PrivateFnDef unsigned int GetContainerSegmentOffset (M_AND *pNetwork, M_POP cons
 }
 
 PrivateFnDef unsigned int GetContainerAddrType (M_AND *pNetwork, M_POP const *pPOP) {
-    M_DCTE const &cte = *pNetwork->AccessSpace (pPOP)->cte (
-	M_POP_ContainerIndex (pPOP)
-    );
+    M_DCTE const &cte = *pNetwork->AccessSpace (pPOP)->cte (M_POP_ContainerIndex (pPOP));
     unsigned int addrType = cte.addressType ();
 
     if (M_CTEAddressType_CPCC == addrType) {
-	addrType = cte.addressAsContainerHandle ()->IsReadWrite ()
+	addrType = cte.addressAsContainerHandle ()->hasAReadWriteContainer ()
 		   ? M_CTEAddressType_RWContainer
 		   : M_CTEAddressType_ROContainer;
     }
@@ -801,75 +754,8 @@ PrivateFnDef unsigned int GetContainerRefCount (M_AND *pNetwork, M_POP const *pP
 
 
 PrivateFnDef unsigned int GetContainerPOPCnt (M_AND *pNetwork, M_POP const *pPOP) {
-    M_CPD *pContainerCPD = pNetwork->GetCPD (pPOP);
-    unsigned int result;
-
-    switch (pContainerCPD->RType ()) {
-    default:
-	result = 0;
-	break;
-
-    case RTYPE_C_Descriptor:
-	result = 2;
-	break;
-
-    case RTYPE_C_PArray:
-	result = rtPARRAY_CPD_ElementCount (pContainerCPD);
-	break;
-
-    case RTYPE_C_PToken:
-	result = rtPTOKEN_TT_Cartesian == rtPTOKEN_CPD_TokenType (pContainerCPD) ? 3 : 1;
-	break;
-
-    case RTYPE_C_Link:
-	result = 2;
-	break;
-
-    case RTYPE_C_CharUV:
-    case RTYPE_C_DoubleUV:
-    case RTYPE_C_FloatUV:
-    case RTYPE_C_IntUV:
-    case RTYPE_C_RefUV:
-    case RTYPE_C_SelUV:
-    case RTYPE_C_UndefUV:
-    case RTYPE_C_Unsigned64UV:
-    case RTYPE_C_Unsigned96UV:
-    case RTYPE_C_Unsigned128UV:
-	result = 3;
-	break;
-
-    case RTYPE_C_Dictionary:
-    case RTYPE_C_Method:
-    case RTYPE_C_Context:
-    case RTYPE_C_ValueStore:
-    case RTYPE_C_Index:
-	result = POPVECTOR_CPD_ElementCount (pContainerCPD);
-	break;
-
-    case RTYPE_C_Block:
-	result = 1 +  /* LocalEnvironment */
-		 rtBLOCK_PLVector_Count (
-			rtBLOCK_CPD_PLiteralVector (pContainerCPD)
-		 );
-	break;
-
-    case RTYPE_C_Closure:
-	result = 2;
-	break;
-
-    case RTYPE_C_Vector:
-	result = 1 +  /* ptoken */
-		 (rtVECTOR_USD_POPsPerUSD * 
-		  rtVECTOR_CPD_USegArraySize (pContainerCPD));
-	break;
-
-    case RTYPE_C_ListStore:
-	result = 3;
-	break;
-
-    }
-    pContainerCPD->release ();
-    return result;
+    VContainerHandle::Reference pHandle (pNetwork->GetContainerHandle (pPOP));
+    return pHandle->containerAddress () ? pHandle->getPOPCount (): 0;
 }
 
 
@@ -878,7 +764,6 @@ PrivateFnDef unsigned int GetContainerPOPCnt (M_AND *pNetwork, M_POP const *pPOP
  *******************/
 
 typedef unsigned int (*ContainerAccessor) (M_AND *pNetwork, M_POP const *pPOP);
-typedef bool (*ContainerCleaner) (M_AND *pNetwork, M_POP const *pPOP);
 typedef bool (M_AND::*ContainerValidator) (M_POP const *pPOP);
 
 /********************
@@ -991,7 +876,7 @@ V_DefinePrimitive (ContainerInformation) {
 	VfGuardTool iGuardTool (V_TOTSC_PToken);
 	pTask->loadDucWithPartialFunction (
 	    iGuardTool, rtINTUV_New (
-		V_TOTSC_PToken, pTask->codKOT()->TheIntegerPTokenCPD (), -1,
+		V_TOTSC_PToken, pTask->codKOT()->TheIntegerPTokenHandle (),
 		InitializeIntUVWithContainerAccessor,
 		(M_CPD *)DSC_Descriptor_Value (rCurrent), &iGuardTool, accessor, validator
 	    )
@@ -1008,14 +893,14 @@ V_DefinePrimitive (ContainerInformation) {
  *----  Accessors  ----*
  ***********************/
 
-PrivateFnDef bool rtDSC_GetNthPOP (M_CPD *cpd, unsigned int xReference, M_POP *pResult) {
+bool rtDSC_Handle::getPOP (M_POP *pResult, unsigned int xReference) const {
     bool bResultValid = true;
     switch (xReference) {
     case 0:
-	*pResult = *rtDSC_CPD_Store(cpd);
+	*pResult = *storePOP ();
 	break;
     case 1:
-	*pResult = *rtDSC_CPD_Pointer(cpd);
+	*pResult = *pointerPOP ();
 	break;
     default:
 	bResultValid = false;
@@ -1024,24 +909,66 @@ PrivateFnDef bool rtDSC_GetNthPOP (M_CPD *cpd, unsigned int xReference, M_POP *p
     return bResultValid;
 }
 
-PrivateFnDef bool rtPTOKEN_GetNthPOP (M_CPD *cpd, unsigned int xReference, M_POP *pResult) {
+bool rtLINK_Handle::getPOP (M_POP *pResult, unsigned int xReference) const {
     bool bResultValid = true;
     switch (xReference) {
     case 0:
-	*pResult = *rtPTOKEN_CPD_NextGeneration (cpd);
+	*pResult = *pptPOP ();
 	break;
     case 1:
-	if (rtPTOKEN_TT_Cartesian == rtPTOKEN_CPD_TokenType (cpd))
-	    *pResult = *rtPTOKEN_CPD_RowPToken (cpd);
-	else
-	    bResultValid = false;
+	*pResult = *rptPOP ();
+	break;
+    default:
+	bResultValid = false;
+	break;
+    }
+    return bResultValid;
+}
+
+bool rtUVECTOR_Handle::getPOP (M_POP *pResult, unsigned int xReference) const {
+    bool bResultValid = true;
+    switch (xReference) {
+    case 0:
+	*pResult = *pptPOP ();
+	break;
+    case 1:
+	*pResult = *rptPOP ();
 	break;
     case 2:
-	if (rtPTOKEN_TT_Cartesian == rtPTOKEN_CPD_TokenType (cpd))
-	    *pResult = *rtPTOKEN_CPD_ColPToken (cpd);
+	*pResult = *auxPOP ();
+	break;
+    default:
+	bResultValid = false;
+	break;
+    }
+    return bResultValid;
+}
+
+bool rtBLOCK_Handle::getPOP (M_POP *pResult, unsigned int xReference) const {
+    bool bResultValid = true;
+    switch (xReference) {
+    case 0:
+	*pResult = *dictionaryPOP ();
+	break;
+    default:
+	if (xReference <= nestedBlockCount ())
+	    *pResult = *addressOfPOP (xReference - 1);
 	else
 	    bResultValid = false;
 	break;
+    }
+    return bResultValid;
+}
+
+bool rtCLOSURE_Handle::getPOP (M_POP *pResult, unsigned int xReference) const {
+    bool bResultValid = true;
+    switch (xReference) {
+    case 0:
+	*pResult = *m_pContext->containerIdentity ();
+	break;
+    case 1:
+	*pResult = *m_pBlock->containerIdentity ();
+	break;
     default:
 	bResultValid = false;
 	break;
@@ -1049,100 +976,47 @@ PrivateFnDef bool rtPTOKEN_GetNthPOP (M_CPD *cpd, unsigned int xReference, M_POP
     return bResultValid;
 }
 
-PrivateFnDef bool rtLINK_GetNthPOP (M_CPD *cpd, unsigned int xReference, M_POP *pResult) {
+bool rtPARRAY_Handle::getPOP (M_POP *pResult, unsigned int xReference) const {
+    bool bResultValid = xReference < elementCount ();
+    if (bResultValid)
+	*pResult = *element (xReference);
+    return bResultValid;
+}
+
+bool rtPOPVECTOR_Handle::getPOP (M_POP *pResult, unsigned int xReference) const {
+    bool bResultValid = xReference < elementCount ();
+    if (bResultValid)
+	*pResult = *element (xReference);
+    return bResultValid;
+}
+
+bool rtVECTOR_Handle::getPOP (M_POP *pResult, unsigned int xReference) const {
     bool bResultValid = true;
     switch (xReference) {
     case 0:
-	*pResult = *rtLINK_CPD_PosPToken (cpd);
-	break;
-    case 1:
-	*pResult = *rtLINK_CPD_RefPToken (cpd);
+	*pResult = *ptokenPOP ();
 	break;
     default:
-	bResultValid = false;
+	if (xReference <= rtVECTOR_USD_POPsPerUSD * segmentArraySize ())
+	    *pResult = *((M_POP*)segmentArray () + xReference - 1);
+	else
+	    bResultValid = false;
 	break;
     }
     return bResultValid;
 }
 
-PrivateFnDef bool UVECTOR_GetNthPOP (M_CPD *cpd, unsigned int xReference, M_POP *pResult) {
+bool rtLSTORE_Handle::getPOP (M_POP *pResult, unsigned int xReference) const {
     bool bResultValid = true;
     switch (xReference) {
     case 0:
-	*pResult = *UV_CPD_PToken (cpd);
+	*pResult = *rowPTokenPOP ();
 	break;
     case 1:
-	*pResult = *UV_CPD_RefPToken (cpd);
+	*pResult = *contentPOP ();
 	break;
     case 2:
-	*pResult = *UV_CPD_AuxillaryPOP (cpd);
-	break;
-    default:
-	bResultValid = false;
-	break;
-    }
-    return bResultValid;
-}
-
-PrivateFnDef bool rtBLOCK_GetNthPOP (M_CPD *cpd, unsigned int xReference, M_POP *pResult) {
-    bool bResultValid = true;
-    switch (xReference) {
-    case 0:
-	*pResult = *rtBLOCK_CPD_LocalEnvironment (cpd);
-	break;
-    default:
-	if (xReference <= (unsigned int)rtBLOCK_PLVector_Count (rtBLOCK_CPD_PLiteralVector (cpd)))
-	    *pResult = *(rtBLOCK_CPD_PLVectorElement(cpd) + xReference - 1);
-	else
-	    bResultValid = false;
-	break;
-    }
-    return bResultValid;
-}
-
-PrivateFnDef bool rtCLOSURE_GetNthPOP (M_CPD *cpd, unsigned int xReference, M_POP *pResult) {
-    bool bResultValid = true;
-    switch (xReference) {
-    case 0:
-	*pResult = *rtCLOSURE_CPD_Context (cpd);
-	break;
-    case 1:
-	*pResult = *rtCLOSURE_CPD_Block (cpd);
-	break;
-    default:
-	bResultValid = false;
-	break;
-    }
-    return bResultValid;
-}
-
-PrivateFnDef bool rtVECTOR_GetNthPOP (M_CPD *cpd, unsigned int xReference, M_POP *pResult) {
-    bool bResultValid = true;
-    switch (xReference) {
-    case 0:
-	*pResult = *rtVECTOR_CPD_PToken (cpd);
-	break;
-    default:
-	if (xReference <= rtVECTOR_USD_POPsPerUSD * (unsigned int)rtVECTOR_CPD_USegArraySize (cpd))
-	    *pResult = *((M_POP*) rtVECTOR_CPD_USegArray (cpd) + xReference - 1);
-	else
-	    bResultValid = false;
-	break;
-    }
-    return bResultValid;
-}
-
-PrivateFnDef bool rtLSTORE_GetNthPOP (M_CPD *cpd, unsigned int xReference, M_POP *pResult) {
-    bool bResultValid = true;
-    switch (xReference) {
-    case 0:
-	*pResult = *rtLSTORE_CPD_RowPToken (cpd);
-	break;
-    case 1:
-	*pResult = *rtLSTORE_CPD_Content (cpd);
-	break;
-    case 2:
-	*pResult = *rtLSTORE_CPD_ContentPToken (cpd);
+	*pResult = *contentPTokenPOP ();
 	break;
     default:
 	bResultValid = false;
@@ -1155,74 +1029,8 @@ PrivateFnDef bool rtLSTORE_GetNthPOP (M_CPD *cpd, unsigned int xReference, M_POP
 PrivateFnDef bool GetNthPOPFromPOP (
     M_AND *pNetwork, M_POP const *pPOP, unsigned int xReference, M_POP *pResult
 ) {
-    bool bResultValid = false;
-
-    M_CPD *pContainerCPD = pNetwork->SafeGetCPD (pPOP);
-    if (pContainerCPD) {
-	switch (pContainerCPD->RType ()) {
-	default:
-	    break;
-
-	case RTYPE_C_Descriptor:
-	    bResultValid = rtDSC_GetNthPOP (pContainerCPD, xReference, pResult);
-	    break;
-
-	case RTYPE_C_PArray:
-	    if (bResultValid = xReference < rtPARRAY_CPD_ElementCount (pContainerCPD))
-		*pResult = *(rtPARRAY_CPD_ElementArray (pContainerCPD) + xReference);
-	    break;
-
-	case RTYPE_C_PToken:
-	    bResultValid = rtPTOKEN_GetNthPOP (pContainerCPD, xReference, pResult);
-	    break;
-
-	case RTYPE_C_Link:
-	    bResultValid = rtLINK_GetNthPOP (pContainerCPD, xReference, pResult);
-	    break;
-
-	case RTYPE_C_CharUV:
-	case RTYPE_C_DoubleUV:
-	case RTYPE_C_FloatUV:
-	case RTYPE_C_IntUV:
-	case RTYPE_C_RefUV:
-	case RTYPE_C_SelUV:
-	case RTYPE_C_UndefUV:
-	case RTYPE_C_Unsigned64UV:
-	case RTYPE_C_Unsigned96UV:
-	case RTYPE_C_Unsigned128UV:
-	    bResultValid = UVECTOR_GetNthPOP (pContainerCPD, xReference, pResult);
-	    break;
-
-	case RTYPE_C_Dictionary:
-	case RTYPE_C_Method:
-	case RTYPE_C_Context:
-	case RTYPE_C_ValueStore:
-	case RTYPE_C_Index:
-	    if (bResultValid = xReference < POPVECTOR_CPD_ElementCount (pContainerCPD))
-		*pResult = *(POPVECTOR_CPD_Array (pContainerCPD) + xReference);
-	    break;
-
-	case RTYPE_C_Block:
-	    bResultValid = rtBLOCK_GetNthPOP (pContainerCPD, xReference, pResult);
-	    break;
-
-	case RTYPE_C_Closure:
-	    bResultValid = rtCLOSURE_GetNthPOP (pContainerCPD, xReference, pResult);
-	    break;
-
-	case RTYPE_C_Vector:
-	    bResultValid = rtVECTOR_GetNthPOP (pContainerCPD, xReference, pResult);
-	    break;
-
-	case RTYPE_C_ListStore:
-	    bResultValid = rtLSTORE_GetNthPOP (pContainerCPD, xReference, pResult);
-	    break;
-	}
-
-	pContainerCPD->release ();
-    }
-
-    return bResultValid;
+    VContainerHandle::Reference pHandle (pNetwork->SafeGetContainerHandle (pPOP));
+    return pHandle && pHandle->containerAddress () && pHandle->getPOP (pResult, xReference);
 }
 
 
@@ -1306,7 +1114,7 @@ V_DefinePrimitive (GetNthPOP) {
 	VfGuardTool iGuardTool (V_TOTSC_PToken);
 	pTask->loadDucWithPartialFunction (
 	    iGuardTool, rtINTUV_New (
-		V_TOTSC_PToken, pTask->codKOT()->TheIntegerPTokenCPD (), -1,
+		V_TOTSC_PToken, pTask->codKOT()->TheIntegerPTokenHandle (),
 		InitializeIntUVWithNthPOP,
 		(M_CPD *)DSC_Descriptor_Value (rCurrent),
 		(M_CPD *)DSC_Descriptor_Value (ADescriptor),
@@ -1321,57 +1129,14 @@ V_DefinePrimitive (GetNthPOP) {
  *****  Container Maintenance  *****
  ***********************************/
 
-/*************************
- *----  Maintainers  ----*
- *************************/
-
-PrivateFnDef bool CleanDictionary (M_AND *pNetwork, M_POP const *pPOP) {
-    M_CPD *pCPD = pNetwork->SafeGetCPDOfType (pPOP, RTYPE_C_Dictionary);
-    if (pCPD) {
-	bool result = rtDICTIONARY_AlignAll (pCPD, true);
-	pCPD->release ();
-	return result;
-    }
-    return false;
-}
-
-PrivateFnDef bool CleanDescriptor (M_AND *pNetwork, M_POP const *pPOP) {
-    M_CPD *pCPD = pNetwork->SafeGetCPDOfType (pPOP, RTYPE_C_Descriptor);
-    if (pCPD) {
-	bool result = rtDSC_Align (pCPD);
-	pCPD->release ();
-	return result;
-    }
-    return false;
-}
-
-
-/************************
- *----  Primitives  ----*
- ************************/
-
 V_DefinePrimitive (ContainerCleanup) {
-/*****  Determine which alias was invoked ... *****/
-    ContainerCleaner cleaner;
-    switch (V_TOTSC_Primitive) {
-    case XCleanDictionary:
-	cleaner = CleanDictionary;
-	break;
-    case XCleanDescriptor:
-	cleaner = CleanDescriptor;
-	break;
-    default:
-	pTask->raiseUnimplementedAliasException ("ContainerCleanup");
-	break;
-    }
-
-    DSC_Descriptor& rCurrent = pTask->getCurrent ();
+    DSC_Descriptor &rCurrent = pTask->getCurrent ();
     M_AND *pNetwork = rCurrent.codDatabase ();
 
     if (rCurrent.isScalar ()) {
 	M_POP iPOP;
 	M_POP_D_AsInt (iPOP) = DSC_Descriptor_Scalar_Int (rCurrent);
-	pTask->loadDucWithBoolean (cleaner (pNetwork, &iPOP));
+	pTask->loadDucWithBoolean (pNetwork->alignAll (&iPOP));
     }
     else {
 	M_CPD *pSource = DSC_Descriptor_Value (rCurrent);
@@ -1382,7 +1147,7 @@ V_DefinePrimitive (ContainerCleanup) {
 	while (sp < sl) {
 	    M_POP iPOP;
 	    M_POP_D_AsInt (iPOP) = *sp++;
-	    if (cleaner (pNetwork, &iPOP))
+	    if (pNetwork->alignAll (&iPOP))
 		iGuardTool.addNext ();
 	    else
 		iGuardTool.skipNext ();
@@ -1400,64 +1165,45 @@ V_DefinePrimitive (ContainerCleanup) {
  *----  Helper  ----*
  ********************/
 
-PrivateFnDef void ConvertPOPToDsc (
-    VPrimitiveTask *pTask, M_POP const *pPOP, DSC_Descriptor *pResultDsc
+PrivateFnDef bool ConvertPOPToDsc (
+    VPrimitiveTask *pTask, M_POP const *pPOP, DSC_Descriptor &rResult
 ) {
-    M_CPD *pStoreCPD = pTask->codDatabase ()->SafeGetCPD (pPOP);
-    if (pStoreCPD) {
-	M_CPD *pRefPTokenCPD;
-	switch (pStoreCPD->RType ()) {
-	case RTYPE_C_ValueStore:
-	    pRefPTokenCPD = rtVSTORE_CPD_RowPTokenCPD (pStoreCPD);
-	    break;
-	case RTYPE_C_ListStore:
-	    pRefPTokenCPD = rtLSTORE_CPD_RowPTokenCPD (pStoreCPD);
-	    break;
-	case RTYPE_C_Index: {
-		M_CPD *pTmpCPD = rtINDEX_CPD_ListStoreCPD (pStoreCPD);
-		pRefPTokenCPD = rtLSTORE_CPD_RowPTokenCPD (pTmpCPD);
-		pTmpCPD->release ();
-	    }
-	    break;
-	case RTYPE_C_Vector:
-	    pRefPTokenCPD = rtVECTOR_CPD_RowPTokenCPD (pStoreCPD);
-	    break;
-
-	case RTYPE_C_Closure:
-	case RTYPE_C_Method:
-	    V_TOTSC_PToken->retain ();
-	    pResultDsc->constructIdentity (pStoreCPD, V_TOTSC_PToken);
-	    return;
-
-	case RTYPE_C_Block: {
-		VString iSource;
+    bool bResultValid = false;
+    bool bReferenceFirstElement = false;
+    VContainerHandle::Reference pStoreHandle (pTask->codDatabase ()->SafeGetContainerHandle (pPOP));
+    if (pStoreHandle) {
+	if (pStoreHandle->RType () == RTYPE_C_Block) {
+	    VString iSource; {
+		M_CPD *pStoreCPD = pStoreHandle->GetCPD ();
 		RSLANG_Decompile (iSource, pStoreCPD);
 		pStoreCPD->release ();
-		pStoreCPD = rtLSTORE_NewStringStoreWithDelm (
-		    pTask->codScratchPad (), "[", "]", iSource
-		);
-		pRefPTokenCPD = rtLSTORE_CPD_RowPTokenCPD (pStoreCPD);
 	    }
-	    pResultDsc->constructReferenceScalar (pStoreCPD, pRefPTokenCPD, 0);
-	    return;
-	default:
-	    pStoreCPD->release ();
-	    pStoreCPD = NilOf (M_CPD*);
-	    break;
+	    pStoreHandle.setTo (
+		rtLSTORE_NewStringStoreWithDelm (pTask->codScratchPad (), "[", "]", iSource)
+	    );
+	    // This is the implementation of POP asObject.
+	    // Normally, we want to return the referenceNil for the store,
+	    // but in the case of a block, we want to return the source code for the block
+	    // so we special case this type to point at the string and not the referenceNil
+	    bReferenceFirstElement = true;
 	}
 
 /*****
  *  Special case for the 'NA' store. It must be an undefined descriptor
  *  rather than a reference descriptor ...
  *****/
-	if (pStoreCPD && pStoreCPD->NamesTheNAClass ())
-	    pResultDsc->constructScalar (pStoreCPD, pRefPTokenCPD);
-	else if (pStoreCPD) {
-	    pResultDsc->constructReferenceScalar (
-		pStoreCPD, pRefPTokenCPD, rtPTOKEN_CPD_BaseElementCount(pRefPTokenCPD)
+	Vdd::Store::Reference pStore (pStoreHandle->getStore ());
+	if (pStore) {
+	    bResultValid = true;
+	    rtPTOKEN_Handle::Reference pRefPToken (pStore->getPToken ());
+	    if (pStore->NamesTheNAClass ())
+		rResult.constructScalar (pStore, pRefPToken);
+	    else rResult.constructReferenceScalar (
+		pStore, pRefPToken, bReferenceFirstElement ? 0 : pRefPToken->cardinality ()
 	    );
 	}
     }
+    return bResultValid;
 }
 
 
@@ -1466,44 +1212,40 @@ PrivateFnDef void ConvertPOPToDsc (
  ***********************/
 
 V_DefinePrimitive (AccessContainer) {
-    DSC_Descriptor referenceDsc;
-    referenceDsc.construct ();
+    DSC_Descriptor &rCurrent = pTask->getCurrent ();
 
-    DSC_Descriptor& rCurrent = pTask->getCurrent ();
-
-    M_POP iPOP;
     if (rCurrent.isScalar ()) {
+	M_POP iPOP;
 	M_POP_D_AsInt (iPOP) = DSC_Descriptor_Scalar_Int (rCurrent);
 
-	ConvertPOPToDsc (pTask, &iPOP, &referenceDsc);
-
-	if (referenceDsc.isEmpty ())
-	    pTask->loadDucWithNA ();
-	else
+	DSC_Descriptor referenceDsc;
+	if (ConvertPOPToDsc (pTask, &iPOP, referenceDsc))
 	    pTask->loadDucWithMoved (referenceDsc);
+	else
+	    pTask->loadDucWithNA ();
     }
     else {
-	M_CPD *references = rtVECTOR_New (V_TOTSC_PToken);
+	rtVECTOR_Handle::Reference references (new rtVECTOR_Handle (V_TOTSC_PToken));
 
 	DSC_Scalar pReference;
-	DSC_InitReferenceScalar (pReference, V_TOTSC_PToken, 0);
+	pReference.constructReference (V_TOTSC_PToken, 0);
 
 	int *sp = rtINTUV_CPD_Array (DSC_Descriptor_Value (rCurrent));
 	int *sl = sp + UV_CPD_ElementCount (DSC_Descriptor_Value (rCurrent));
 	while (sp < sl) {
+	    M_POP iPOP;
 	    M_POP_D_AsInt (iPOP) = *sp++;
 
-	    ConvertPOPToDsc (pTask, &iPOP, &referenceDsc);
-
-	    if (referenceDsc.isntEmpty ()) {
-		rtVECTOR_Assign (references, &pReference, &referenceDsc);
+	    DSC_Descriptor referenceDsc;
+	    if (ConvertPOPToDsc (pTask, &iPOP, referenceDsc)) {
+		references->setElements (pReference, referenceDsc);
 		referenceDsc.clear ();
 	    }
 	    DSC_Scalar_Int (pReference)++;
 	}
 
 /*****  Ensure that references' undefined usegment is aligned... *****/
-	rtVECTOR_AlignAll (references, true);
+	references->alignAll (true);
 
 /*****  And 'return' result.  *****/
 	pTask->loadDucWithVector (references);
@@ -1519,26 +1261,22 @@ V_DefinePrimitive (AccessContainer) {
  *----  Size Helpers  ----*
  **************************/
 
-PrivateFnDef double ClusterSizeHelper (M_CPD *self);
-
 /***********************************
  *  'Context' Cluster Size Helper  *
  ***********************************/
 
-PrivateFnDef double rtCONTEXT_ClusterSize (M_CPD *self) {
-    double result = M_CPD_Size (self);
+//  Warning::  This routine doesn't account for the size of the descriptor's it really uses.
+unsigned __int64 rtCONTEXT_Handle::getClusterSize () {
+    static unsigned int const xElements[] = {rtCONTEXT_CPx_Current, rtCONTEXT_CPx_Self, rtCONTEXT_CPx_Origin};
 
-    M_CPD *component = rtCONTEXT_CPD_CurrentCPD (self);
-    result += ClusterSizeHelper (component);
-    component->release ();
+    unsigned __int64 result = BaseClass::getClusterSize ();
 
-    component = rtCONTEXT_CPD_SelfCPD (self);
-    result += ClusterSizeHelper (component);
-    component->release ();
-
-    component = rtCONTEXT_CPD_OriginCPD	(self);
-    result += ClusterSizeHelper (component);
-    component->release ();
+    for (unsigned int xElement = 0; xElement < sizeof (xElements) / sizeof (xElements[0]); xElement++) {
+	if (ReferenceIsntNil (xElements[xElement])) {
+	    VContainerHandle::Reference pComponent (elementHandle (xElements[xElement]));
+	    result += pComponent->getClusterSize ();
+	}
+    }
 
     return result;
 }
@@ -1548,38 +1286,26 @@ PrivateFnDef double rtCONTEXT_ClusterSize (M_CPD *self) {
  *  'Closure' Cluster Size Helper  *
  ***********************************/
 
-PrivateFnDef double rtCLOSURE_ClusterSize (M_CPD *self) {
-    double result = M_CPD_Size (self);
-
-    M_CPD *component = rtCLOSURE_CPD_ContextCPD (self);
-    result += ClusterSizeHelper (component);
-    component->release ();
-
-    if (rtCLOSURE_CPD_IsABlockClosure (self)) {
-	component = rtCLOSURE_CPD_BlockCPD (self);
-	result += ClusterSizeHelper (component);
-	component->release ();
-    }
-
-    return result;
+unsigned __int64 rtCLOSURE_Handle::getClusterSize () {
+    return BaseClass::getClusterSize ()
+	 + m_pContext->getClusterSize ()
+	 + (m_pBlock ? m_pBlock->getClusterSize () : 0);
 }
 
 /**************************************
  *  'Descriptor' Cluster Size Helper  *
  **************************************/
 
-PrivateFnDef double rtDSC_ClusterSize (M_CPD *self) {
-    double result = M_CPD_Size (self);
-    switch (rtDSC_CPD_PointerType (self)) {
+unsigned __int64 rtDSC_Handle::getClusterSize () {
+    unsigned __int64 result = BaseClass::getClusterSize ();
+
+    switch (pointerType ()) {
     case DSC_PointerType_Value:
     case DSC_PointerType_Link:
     case DSC_PointerType_Reference: {
-	    M_CPD *component = self->GetCPD (rtDSC_CPx_Pointer);
-	    result += M_CPD_Size (component);
-	    component->release ();
+	    VContainerHandle::Reference pPointerHandle (pointerHandle ());
+	    result += pPointerHandle->getClusterSize ();
 	}
-	break;
-    default:
 	break;
     }
 
@@ -1591,25 +1317,20 @@ PrivateFnDef double rtDSC_ClusterSize (M_CPD *self) {
  *  'Dictionary' Cluster Size Helper  *
  **************************************/
 
-PrivateFnDef double rtDICTIONARY_ClusterSize (M_CPD *self) {
-    double result = M_CPD_Size (self);
-
-    M_CPD *pComponentCPD = rtDICTIONARY_CPD_SelectorsCPD (self);
-    result += ClusterSizeHelper (pComponentCPD);
-    pComponentCPD->release ();
-
-    pComponentCPD = rtDICTIONARY_CPD_ValuesCPD (self);
-    result += ClusterSizeHelper (pComponentCPD);
-    pComponentCPD->release ();
-
-    pComponentCPD = rtDICTIONARY_CPD_PropertySubsetCPD (self);
-    result += ClusterSizeHelper (pComponentCPD);
-    pComponentCPD->release ();
-
-    pComponentCPD = rtDICTIONARY_CPD_PropertyPrototypesCPD (self);
-    result += ClusterSizeHelper (pComponentCPD);
-    pComponentCPD->release ();
-
+unsigned __int64 rtDICTIONARY_Handle::getClusterSize () {
+    unsigned __int64 result = BaseClass::getClusterSize (); {
+	rtSELUV_Handle::Reference pComponent (selectors ());
+	result += pComponent->getClusterSize ();
+    } {
+	rtVECTOR_Handle::Reference pComponent (values ());
+	result += pComponent->getClusterSize ();
+    } {
+	rtLINK_Handle::Reference pComponent (propertySubset ());
+	result += pComponent->getClusterSize ();
+    } {
+	rtVECTOR_Handle::Reference pComponent (propertyPrototypes ());
+	result += pComponent->getClusterSize ();
+    }
     return result;
 }
 
@@ -1618,20 +1339,17 @@ PrivateFnDef double rtDICTIONARY_ClusterSize (M_CPD *self) {
  *  'Index' Cluster Size Helper  *
  *********************************/
 
-PrivateFnDef double rtINDEX_ClusterSize (M_CPD *self) {
-    M_CPD *keys		= self->GetCPD (rtINDEX_CPx_KeyValues);
-    M_CPD *map		= self->GetCPD (rtINDEX_CPx_Map);
-    M_CPD *values	= self->GetCPD (rtINDEX_CPx_Lists);
-
-    double result	= M_CPD_Size (self)
-			+ ClusterSizeHelper (keys)
-			+ ClusterSizeHelper (map)
-			+ ClusterSizeHelper (values);
-
-    keys->release ();
-    map->release ();
-    values->release ();
-
+unsigned __int64 rtINDEX_Handle::getClusterSize () {
+    unsigned __int64 result = BaseClass::getClusterSize (); {
+	VContainerHandle::Reference pComponent (keySetHandle ());
+	result += pComponent->getClusterSize ();
+    } {
+	VContainerHandle::Reference pComponent (keyMapHandle ());
+	result += pComponent->getClusterSize ();
+    } {
+	rtLSTORE_Handle::Reference pComponent (listStoreHandle ());
+	result += pComponent->getClusterSize ();
+    }
     return result;
 }
 
@@ -1639,11 +1357,11 @@ PrivateFnDef double rtINDEX_ClusterSize (M_CPD *self) {
  *  'LStore' Cluster Size Helper  *
  **********************************/
 
-PrivateFnDef double rtLSTORE_ClusterSize (M_CPD *self) {
-    M_CPD *values = rtLSTORE_CPD_ContentCPD (self);
-    double result = M_CPD_Size (self) + ClusterSizeHelper (values);
-    values->release ();
-
+unsigned __int64 rtLSTORE_Handle::getClusterSize () {
+    unsigned __int64 result = BaseClass::getClusterSize (); {
+	VContainerHandle::Reference pComponent (contentHandle ());
+	result += pComponent->getClusterSize ();
+    }
     return result;
 }
 
@@ -1652,11 +1370,11 @@ PrivateFnDef double rtLSTORE_ClusterSize (M_CPD *self) {
  *  'Method' Cluster Size Helper  *
  **********************************/
 
-PrivateFnDef double rtMETHOD_ClusterSize (M_CPD *self) {
-    M_CPD *block = rtMETHOD_CPD_BlockCPD (self);
-    double result = M_CPD_Size (self) + ClusterSizeHelper (block);
-    block->release ();
-
+unsigned __int64 rtMETHOD_Handle::getClusterSize () {
+    unsigned __int64 result = BaseClass::getClusterSize (); {
+	rtBLOCK_Handle::Reference pComponent (blockHandle ());
+	result += pComponent->getClusterSize ();
+    }
     return result;
 }
 
@@ -1664,26 +1382,17 @@ PrivateFnDef double rtMETHOD_ClusterSize (M_CPD *self) {
  *  'Vector' Cluster Size Helper  *
  **********************************/
 
-PrivateFnDef double rtVECTOR_ClusterSize (M_CPD *self) {
-    rtVECTOR_Align (self);
+unsigned __int64 rtVECTOR_Handle::getClusterSize () {
+    align ();
 
-    double result = M_CPD_Size (self);
-
-    unsigned int uSegmentCount = rtVECTOR_CPD_USegArraySize (self);
+    unsigned __int64 result = BaseClass::getClusterSize ();
+    unsigned int uSegmentCount = segmentArraySize ();
 
     for (unsigned int uSegmentIndex = 0; uSegmentIndex < uSegmentCount; uSegmentIndex++) {
-	rtVECTOR_CPD_USD (self) = rtVECTOR_CPD_USegArray (self) + uSegmentIndex;
-
-	rtVECTOR_CPD_SetUSDCursor (self, rtVECTOR_USD_PToken);
-
-//	if (M_POPIsNil (&rtVECTOR_CPD_USD_PToken (self)))
-	if (self->ReferenceIsNil (&rtVECTOR_CPD_USD_PToken (self)))
-	    continue;
-
-	rtVECTOR_CPD_SetUSDCursor (self, rtVECTOR_USD_Values);
-	M_CPD *uvector = self->GetCPD (rtVECTOR_CPx_USDCursor);
-	result += ClusterSizeHelper (uvector);
-	uvector->release ();
+	if (segmentInUse (uSegmentIndex)) {
+	    VContainerHandle::Reference pComponent (segmentPointerHandle (uSegmentIndex));
+	    result += pComponent->getClusterSize ();
+	}
     }
 
     return result;
@@ -1694,26 +1403,21 @@ PrivateFnDef double rtVECTOR_ClusterSize (M_CPD *self) {
  *  'VStore' Cluster Size Helper  *
  **********************************/
 
-PrivateFnDef double rtVSTORE_ClusterSize (M_CPD *self) {
-    rtVSTORE_Align (self);
+unsigned __int64 rtVSTORE_Handle::getClusterSize () {
+    align ();
 
-    double result = M_CPD_Size (self);
-    if (self->ReferenceIsntNil (rtVSTORE_CPx_InheritancePtr)) {
-	M_CPD *column = rtVSTORE_CPD_InheritancePointerCPD (self);
-	result += M_CPD_Size (column);
-	column->release ();
+    unsigned __int64 result = BaseClass::getClusterSize ();
+
+    if (hasAnInheritance ()) {
+	VContainerHandle::Reference pComponent (inheritancePointerHandle ());
+	result += pComponent->getClusterSize ();
     }
 
-    unsigned int n = rtPTOKEN_BaseElementCount (self, rtVSTORE_CPx_ColumnPToken);
-
-    VContainerHandle *pStoreHandle = self->containerHandle ();
-    M_POP const* pColumnArray = rtVSTORE_CPD_ColumnArray (self);
-    for (unsigned int i = 0; i < n; i++) {
-	M_POP const *pColumnPOP = &pColumnArray[i];
-	if (pStoreHandle->ReferenceIsntNil (pColumnPOP)) {
-	    M_CPD *column = pStoreHandle->GetCPD (pColumnPOP);
-	    result += ClusterSizeHelper (column);
-	    column->release ();
+    unsigned int n = rtVSTORE_CPx_Column + rtPTOKEN_BaseElementCount (this, element (rtVSTORE_CPx_ColumnPToken));
+    for (unsigned int i = rtVSTORE_CPx_Column; i < n; i++) {
+	if (ReferenceIsntNil (i)) {
+	    VContainerHandle::Reference pComponent (elementHandle (i));
+	    result += pComponent->getClusterSize ();
 	}
     }
 
@@ -1721,53 +1425,15 @@ PrivateFnDef double rtVSTORE_ClusterSize (M_CPD *self) {
 }
 
 
-/*********************************
- *  Generic Cluster Size Helper  *
- *********************************/
-
-PrivateFnDef double ClusterSizeHelper (M_CPD *self) {
-    switch ((RTYPE_Type)M_CPD_RType (self)) {
-    case RTYPE_C_Context:
-	return rtCONTEXT_ClusterSize	(self);
-    case RTYPE_C_Closure:
-	return rtCLOSURE_ClusterSize	(self);
-    case RTYPE_C_Descriptor:
-	return rtDSC_ClusterSize	(self);
-    case RTYPE_C_Dictionary:
-	return rtDICTIONARY_ClusterSize	(self);
-    case RTYPE_C_Index:
-	return rtINDEX_ClusterSize	(self);
-    case RTYPE_C_ListStore:
-	return rtLSTORE_ClusterSize	(self);
-    case RTYPE_C_Method:
-	return rtMETHOD_ClusterSize	(self);
-    case RTYPE_C_Vector:
-	return rtVECTOR_ClusterSize	(self);
-    case RTYPE_C_ValueStore:
-	return rtVSTORE_ClusterSize	(self);
-    default:
-	return M_CPD_Size (self);
-    }
-}
-
-
 /************************************************
  *----  Cluster Reference Map Size Helpers  ----*
  ************************************************/
-
-/*****************************************
- *  'Closure' Reference Map Size Helper  *
- *****************************************/
-
-PrivateFnDef unsigned int rtCLOSURE_ClusterReferenceMapSize (M_CPD *Unused(self)) {
-    return 0;
-}
 
 /********************************************
  *  'Dictionary' Reference Map Size Helper  *
  ********************************************/
 
-PrivateFnDef unsigned int rtDICTIONARY_ClusterReferenceMapSize (M_CPD *Unused(self)) {
+unsigned int rtDICTIONARY_Handle::getClusterReferenceMapSize () {
     return 2;
 }
 
@@ -1775,51 +1441,40 @@ PrivateFnDef unsigned int rtDICTIONARY_ClusterReferenceMapSize (M_CPD *Unused(se
  *  'Index' Reference Map Size Helper  *
  ***************************************/
 
-PrivateFnDef unsigned int rtINDEX_ClusterReferenceMapSize (M_CPD *self) {
-    return rtINDEX_CPD_IsATimeSeries (self) ? 1 : 2;
+unsigned int rtINDEX_Handle::getClusterReferenceMapSize () {
+    return isATimeSeries () ? 1 : 2;
 }
 
 /****************************************
  *  'LStore' Reference Map Size Helper  *
  ****************************************/
 
-PrivateFnDef unsigned int rtLSTORE_ClusterReferenceMapSize (M_CPD *self) {
-    return rtLSTORE_CPD_StringStore (self) ? 0 : 1;
+unsigned int rtLSTORE_Handle::getClusterReferenceMapSize () {
+    return isAStringStore () ? 0 : 1;
 }
-
-/****************************************
- *  'Method' Reference Map Size Helper  *
- ****************************************/
-
-PrivateFnDef unsigned int rtMETHOD_ClusterReferenceMapSize (M_CPD *Unused(self)) {
-    return 0;
-}
-
 
 /****************************************
  *  'Vector' Reference Map Size Helper  *
  ****************************************/
 
-PrivateFnDef unsigned int rtVECTOR_ClusterReferenceMapSize (M_CPD *self) {
-    rtVECTOR_Align (self);
-    return rtVECTOR_CPD_USegIndexSize (self);
+unsigned int rtVECTOR_Handle::getClusterReferenceMapSize () {
+    align ();
+    return segmentIndexSize ();
 }
 
 /****************************************
  *  'VStore' Reference Map Size Helper  *
  ****************************************/
 
-PrivateFnDef unsigned int rtVSTORE_ClusterReferenceMapSize (M_CPD *self) {
+unsigned int rtVSTORE_Handle::getClusterReferenceMapSize () {
     unsigned int result = 0;
 
-    rtVSTORE_Align (self);
+    align ();
 
-    unsigned int n = rtPTOKEN_BaseElementCount (self, rtVSTORE_CPx_ColumnPToken);
+    unsigned int n = rtVSTORE_CPx_Column + rtPTOKEN_BaseElementCount (this, element (rtVSTORE_CPx_ColumnPToken));
 
-    VContainerHandle *pStoreHandle = self->containerHandle ();
-    M_POP const *pColumnArray = rtVSTORE_CPD_ColumnArray (self);
-    for (unsigned int i = 0; i < n; i++) {
-	if (pStoreHandle->ReferenceIsntNil (pColumnArray + i))
+    for (unsigned int i = rtVSTORE_CPx_Column; i < n; i++) {
+	if (ReferenceIsntNil (i))
 	    result++;
     }
 
@@ -1827,98 +1482,37 @@ PrivateFnDef unsigned int rtVSTORE_ClusterReferenceMapSize (M_CPD *self) {
 }
 
 
-/***************************************
- *  Generic Reference Map Size Helper  *
- ***************************************/
+/*****************************************
+ *----  Cluster V-Store Equivalents  ----*
+ *****************************************/
 
-PrivateFnDef unsigned int ClusterReferenceMapSizeHelper (M_CPD *self) {
-    switch ((RTYPE_Type)M_CPD_RType (self)) {
-    case RTYPE_C_Closure:
-	return rtCLOSURE_ClusterReferenceMapSize    (self);
-    case RTYPE_C_Dictionary:
-	return rtDICTIONARY_ClusterReferenceMapSize (self);
-    case RTYPE_C_Index:
-	return rtINDEX_ClusterReferenceMapSize	    (self);
-    case RTYPE_C_ListStore:
-	return rtLSTORE_ClusterReferenceMapSize	    (self);
-    case RTYPE_C_Method:
-	return rtMETHOD_ClusterReferenceMapSize	    (self);
-    case RTYPE_C_Vector:
-	return rtVECTOR_ClusterReferenceMapSize	    (self);
-    case RTYPE_C_ValueStore:
-	return rtVSTORE_ClusterReferenceMapSize	    (self);
-    default:
-	return 0;
+PrivateFnDef RTYPE_Type ClusterSuperPointerType (DSC_Descriptor const &rSelf) {
+    RTYPE_Type xSuperPointerType = RTYPE_C_Undefined;
+
+    rtVSTORE_Handle::Reference pStoreEquivalent;
+    rSelf.store ()->getCanonicalization (pStoreEquivalent, rSelf.Pointer ());
+
+    if (pStoreEquivalent && pStoreEquivalent->hasAnInheritance ()) {
+	VContainerHandle::Reference pSuperPointer;
+	pStoreEquivalent->getInheritancePointer (pSuperPointer);
+
+	xSuperPointerType = pSuperPointer->RType ();
     }
-}
-
 
-/****************************************
- *----  Cluster V-Store Equivalent  ----*
- ****************************************/
-
-PrivateFnDef M_CPD *ClusterVStoreEquivalent (VPrimitiveTask* pTask, M_CPD *self) {
-    M_CPD *vstoreEquivalent;
-    
-    switch ((RTYPE_Type)M_CPD_RType (self)) {
-    case RTYPE_C_Block:
-	/*****  Use the following approximation...  *****/
-	vstoreEquivalent = self->TheStringClass ();
-	break;
-    case RTYPE_C_Closure:
-	vstoreEquivalent = self->TheClosureClass ();
-	break;
-    case RTYPE_C_Dictionary:
-	vstoreEquivalent = self->TheFixedPropertyClass ();
-	break;
-    case RTYPE_C_Index:
-	vstoreEquivalent = rtINDEX_CPD_IsATimeSeries (self)
-	    ? self->TheTimeSeriesClass () : self->TheIndexedListClass ();
-	break;
-    case RTYPE_C_ListStore:
-	vstoreEquivalent = rtLSTORE_CPD_StringStore (self)
-	    ? self->TheStringClass () : self->TheListClass ();
-	break;
-    case RTYPE_C_Method:
-	vstoreEquivalent = self->TheMethodClass ();
-	break;
-    case RTYPE_C_Vector:
-	vstoreEquivalent = self->TheFixedPropertyClass ();
-	break;
-    case RTYPE_C_ValueStore:
-	vstoreEquivalent = self;
-	break;
-    default:
-	pTask->raiseException (
-	    EC__InternalInconsistency,
-	    "ClusterData: %s Not Recognized As A Valid Store Type",
-	    RTYPE_TypeIdAsString ((RTYPE_Type)M_CPD_RType (self))
-	);
-	break;
-    }
-    return vstoreEquivalent;
-}
-
-
-PrivateFnDef RTYPE_Type ClusterSuperPointerType (VPrimitiveTask* pTask, M_CPD *self) {
-    M_CPD *storeEquivalent = ClusterVStoreEquivalent (pTask, self);
-    M_CPD *superPointer = rtVSTORE_CPD_InheritancePointerCPD (storeEquivalent);
-    RTYPE_Type superPointerType = (RTYPE_Type)M_CPD_RType (superPointer);
-    superPointer->release ();
-
-    return superPointerType;
+    return xSuperPointerType;
 }
 
-PrivateFnDef double ClusterSuperPointerSize (VPrimitiveTask* pTask, M_CPD *self) {
-    M_CPD *storeEquivalent = ClusterVStoreEquivalent (pTask, self);
-    double superPointerSize = 0;
+PrivateFnDef double ClusterSuperPointerSize (DSC_Descriptor const &rSelf) {
+    double superPointerSize = 0.0;
 
-    if (storeEquivalent->ReferenceIsntNil (rtVSTORE_CPx_InheritancePtr)) {
-	M_CPD *superPointer = rtVSTORE_CPD_InheritancePointerCPD (storeEquivalent);
+    rtVSTORE_Handle::Reference pStoreEquivalent;
+    rSelf.store ()->getCanonicalization (pStoreEquivalent, rSelf.Pointer ());
 
-	superPointerSize = M_CPD_Size (superPointer);
-	
-	superPointer->release ();
+    if (pStoreEquivalent && pStoreEquivalent->hasAnInheritance ()) {
+	VContainerHandle::Reference pSuperPointer;
+	pStoreEquivalent->getInheritancePointer (pSuperPointer);
+
+	superPointerSize = pSuperPointer->containerSize ();
     }
 
     return superPointerSize;
@@ -1939,41 +1533,44 @@ V_DefinePrimitive (ClusterData) {
     } result;
 
 /*****  Obtain the selector(s) ... *****/
-    M_CPD *store = pTask->getSelf ().storeCPD ();
+    DSC_Descriptor const &rSelf = pTask->getSelf ();
+
+    VContainerHandle::Reference pStoreHandle;
+    rSelf.store ()->getContainerHandle (pStoreHandle);
 
 /*****  Obtain the result ...  *****/
     switch (V_TOTSC_Primitive) {
     case XObjectSpace:
-	result.asLong = store->SpaceIndex ();
+	result.asLong = pStoreHandle->spaceIndex ();
 	break;
     case XContainerIndex:
-	result.asLong = store->ContainerIndex ();
+	result.asLong = pStoreHandle->containerIndex ();
 	break;
     case XClusterID:
-	result.asLong = M_POP_D_AsInt (M_CPD_POP (store));
+	result.asLong = M_POP_AsInt (pStoreHandle->containerIdentity ());
 	break;
     case XClusterType:
-	result.asLong = M_CPD_RType (store);
+	result.asLong = pStoreHandle->RType ();
 	break;
     case XClusterSize:
 	resultType = isDouble;
-	result.asDouble = ClusterSizeHelper (store);
+	result.asDouble = static_cast<double>(pStoreHandle->getClusterSize ());
 	break;
     case XClusterReferenceMapSize:
-	result.asLong = ClusterReferenceMapSizeHelper (store);
+	result.asLong = pStoreHandle->getClusterReferenceMapSize ();
 	break;
     case XClusterSuperPointerType:
-	result.asLong = ClusterSuperPointerType (pTask, store);
+	result.asLong = ClusterSuperPointerType (rSelf);
 	break;
     case XClusterSuperPointerSize:
 	resultType = isDouble;
-	result.asDouble = ClusterSuperPointerSize (pTask, store);
+	result.asDouble = ClusterSuperPointerSize (rSelf);
 	break;
     case XClusterSchemaID:
 	pTask->loadDucWithSelf (); {
-	    M_CPD *dictionary = pTask->ducDictionary ();
-	    result.asLong = M_POP_D_AsInt (M_CPD_POP (dictionary));
-	    dictionary->release ();
+	    rtDICTIONARY_Handle::Reference pDictionary;
+	    pTask->getDucDictionary (pDictionary);
+	    result.asLong = M_POP_AsInt (pDictionary->containerIdentity ());
 	}
 	break;
     default:
@@ -1996,25 +1593,19 @@ V_DefinePrimitive (ClusterData) {
 
 
 V_DefinePrimitive (ClusterBoolean) {
-    M_CPD *pStore = (
-	V_TOTSC_PrimitiveFlags > 100 ? pTask->getCurrent () : pTask->getSelf ()
-    ).storeCPD ();
+    rtLSTORE_Handle *pLStore = dynamic_cast<rtLSTORE_Handle*> (
+	(V_TOTSC_PrimitiveFlags > 100 ? pTask->getCurrent () : pTask->getSelf ()).store ()
+    );
 
     switch (V_TOTSC_PrimitiveFlags) {
     case  50:
     case 150:	// Is an l-store string cluster
-	pTask->loadDucWithBoolean (
-	    RTYPE_C_ListStore == (RTYPE_Type)M_CPD_RType (pStore)
-	    && rtLSTORE_CPD_StringStore (pStore)
-	);
+	pTask->loadDucWithBoolean (pLStore && pLStore->isAStringStore ());
 	break;
 
     case  51:
     case 151:	// Is an associative string cluster
-	pTask->loadDucWithBoolean (
-	    RTYPE_C_ListStore == (RTYPE_Type)M_CPD_RType (pStore)
-	    && rtLSTORE_StringSet::IsAStringSet (pStore)
-	);
+	pTask->loadDucWithBoolean (pLStore && pLStore->isAStringSet ());
 	break;
 
     default:
@@ -2032,19 +1623,15 @@ V_DefinePrimitive (ClusterBoolean) {
  *  Reference Map Data Type Definition  *
  ****************************************/
 
-class MapEntryData {
+class VContainerHandle::MapEntryData {
 //  Construction
 public:
     MapEntryData (VTask *pTask);
 
 //  Access
 public:
-    M_KOT *codKOT () const {
-	return m_pTask->codKOT ();
-    }
-    M_KOT *domKOT () const {
-	return m_pTask->ptoken ()->KOT ();
-    }
+    M_KOT *codKOT () const;
+    M_KOT *domKOT () const;
 
     VTask *task () const {
 	return m_pTask;
@@ -2061,6 +1648,8 @@ public:
     unsigned int		m_internalSlot;
 };
 
+typedef VContainerHandle::MapEntryData MapEntryData;
+
 #define ReferenceTypeDirect	RTYPE_C_MaxType
 
 MapEntryData::MapEntryData (VTask *pTask)
@@ -2072,18 +1661,12 @@ MapEntryData::MapEntryData (VTask *pTask)
 {
     m_reference.construct ();
 }
-
 
-/*****************************************
- *  'Closure' Reference Map Data Helper  *
- *****************************************/
-
-PrivateFnDef void rtCLOSURE_ClusterReferenceMapData (
-    M_CPD*			Unused(self),
-    unsigned int		Unused(entryIndex),
-    MapEntryData		*Unused(pMapEntryData)
-)
-{
+M_KOT *MapEntryData::codKOT () const {
+    return m_pTask->codKOT ();
+}
+M_KOT *MapEntryData::domKOT () const {
+    return m_pTask->ptoken ()->KOT ();
 }
 
 
@@ -2091,39 +1674,30 @@ PrivateFnDef void rtCLOSURE_ClusterReferenceMapData (
  *  'Index' Reference Map Data Helper  *
  ***************************************/
 
-PrivateFnDef void rtDICTIONARY_ClusterReferenceMapData (
-    M_CPD*			self,
-    unsigned int		entryIndex,
-    MapEntryData		*pMapEntryData
-)
-{
-    M_CPD *referenceStore;
-    M_CPD *referencePToken;
-
-    switch (entryIndex) {
+void rtDICTIONARY_Handle::getClusterReferenceMapData (MapEntryData &rMapEntryData, unsigned int xEntry) {
+    rtVECTOR_Handle::Reference referenceStore;
+    switch (xEntry) {
     case 1:	/* Values */
-	pMapEntryData->m_internalSlot  = rtDICTIONARY_CPx_Values;
-	referenceStore  = rtDICTIONARY_CPD_ValuesCPD (self);
-	referencePToken	= rtVECTOR_CPD_RowPTokenCPD (referenceStore);
+	rMapEntryData.m_internalSlot = rtDICTIONARY_CPx_Values;
+	getValues (referenceStore);
 	break;
     case 2:	/* Property Prototypes */
-	pMapEntryData->m_internalSlot  = rtDICTIONARY_CPx_PropertyPrototypes;
-	referenceStore  = rtDICTIONARY_CPD_PropertyPrototypesCPD (self);
-	referencePToken = rtVECTOR_CPD_RowPTokenCPD (referenceStore);
+	rMapEntryData.m_internalSlot = rtDICTIONARY_CPx_PropertyPrototypes;
+	getPropertyPrototypes (referenceStore);
 	break;
     default:
 	return;
     }
 
+    rtPTOKEN_Handle::Reference referencePToken (referenceStore->getPToken ());
+
 #if 0
-    pMapEntryData->m_referenceType	= ReferenceTypeDirect;
-    pMapEntryData->m_referenceSize	= ClusterSizeHelper (referenceStore);
-    pMapEntryData->m_subsetCardinality	= rtPTOKEN_CPD_BaseElementCount (referencePToken);
+    rMapEntryData.m_referenceType	= ReferenceTypeDirect;
+    rMapEntryData.m_referenceSize	= referenceStore->getClusterSize ();
+    rMapEntryData.m_subsetCardinality	= referencePToken->cardinality ();
 #endif
 
-    pMapEntryData->m_reference.constructReferenceScalar (
-	referenceStore, referencePToken, 0
-    );
+    rMapEntryData.m_reference.constructReferenceScalar (referenceStore, referencePToken, 0);
 }
 
 
@@ -2131,40 +1705,31 @@ PrivateFnDef void rtDICTIONARY_ClusterReferenceMapData (
  *  'Index' Reference Map Data Helper  *
  ***************************************/
 
-PrivateFnDef void rtINDEX_ClusterReferenceMapData (
-    M_CPD*			self,
-    unsigned int		entryIndex,
-    MapEntryData		*pMapEntryData
-)
-{
-    M_CPD *referenceStore;
-    M_CPD *referencePToken;
-
-    switch (entryIndex)
-    {
+void rtINDEX_Handle::getClusterReferenceMapData (MapEntryData &rMapEntryData, unsigned int xEntry) {
+    Vdd::Store::Reference referenceStore;
+    switch (xEntry) {
     case 1:	/* Values */
-	pMapEntryData->m_internalSlot  = rtINDEX_CPx_Lists;
-	referenceStore  = rtINDEX_CPD_ListStoreCPD (self);
-	referencePToken	= rtLSTORE_CPD_RowPTokenCPD (referenceStore);
+	rMapEntryData.m_internalSlot = rtINDEX_CPx_Lists;
+	getListStore (referenceStore);
 	break;
     case 2:	/* Keys */
-	pMapEntryData->m_internalSlot  = rtINDEX_CPx_KeyValues;
-	referenceStore  = self->GetCPD (rtINDEX_CPx_KeyValues, RTYPE_C_Vector);
-	referencePToken = rtVECTOR_CPD_RowPTokenCPD (referenceStore);
+	rMapEntryData.m_internalSlot  = rtINDEX_CPx_KeyValues;
+	if (!getKeySet (referenceStore))
+	    return;
 	break;
     default:
 	return;
     }
 
+    rtPTOKEN_Handle::Reference referencePToken (referenceStore->getPToken ());
+
 #if 0
-    pMapEntryData->m_referenceType	= ReferenceTypeDirect;
-    pMapEntryData->m_referenceSize	= ClusterSizeHelper (referenceStore);
-    pMapEntryData->m_subsetCardinality	= rtPTOKEN_CPD_BaseElementCount (referencePToken);
+    rMapEntryData.m_referenceType	= ReferenceTypeDirect;
+    rMapEntryData.m_referenceSize	= referenceStore->getClusterSize ();
+    rMapEntryData.m_subsetCardinality	= referencePToken->cardinality ();
 #endif
 
-    pMapEntryData->m_reference.constructReferenceScalar (
-	referenceStore, referencePToken, 0
-    );
+    rMapEntryData.m_reference.constructReferenceScalar (referenceStore, referencePToken, 0);
 }
 
 
@@ -2172,43 +1737,25 @@ PrivateFnDef void rtINDEX_ClusterReferenceMapData (
  *  'LStore' Reference Map Data Helper  *
  ****************************************/
 
-PrivateFnDef void rtLSTORE_ClusterReferenceMapData (
-    M_CPD*			self,
-    unsigned int		entryIndex,
-    MapEntryData		*pMapEntryData
-)
-{
-    if (rtLSTORE_CPD_StringStore (self) || entryIndex != 1)
+void rtLSTORE_Handle::getClusterReferenceMapData (MapEntryData &rMapEntryData, unsigned int xEntry) {
+    if (isAStringStore () || xEntry != 1)
 	return;
 
-    pMapEntryData->m_internalSlot  = rtLSTORE_CPx_Content;
-    M_CPD *referenceStore	= rtLSTORE_CPD_ContentCPD	(self);
-    M_CPD *referencePToken	= rtLSTORE_CPD_ContentPTokenCPD	(self);
+    Vdd::Store::Reference referenceStore;
+    getContent (referenceStore);
+
+    rMapEntryData.m_internalSlot = rtLSTORE_CPx_Content;
+
+    rtPTOKEN_Handle::Reference referencePToken;
+    getContentPToken (referencePToken);
 
 #if 0
-    pMapEntryData->m_referenceType	= ReferenceTypeDirect;
-    pMapEntryData->m_referenceSize	= ClusterSizeHelper (referenceStore);
-    pMapEntryData->m_subsetCardinality	= rtPTOKEN_CPD_BaseElementCount (
-	referencePToken
-    );
+    rMapEntryData.m_referenceType	= ReferenceTypeDirect;
+    rMapEntryData.m_referenceSize	= referenceStore->getClusterSize ();
+    rMapEntryData.m_subsetCardinality	= referencePToken->cardinality ();
 #endif
 
-    pMapEntryData->m_reference.constructReferenceScalar (
-	referenceStore, referencePToken, 0
-    );
-}
-
-
-/****************************************
- *  'Method' Reference Map Data Helper  *
- ****************************************/
-
-PrivateFnDef void rtMETHOD_ClusterReferenceMapData (
-    M_CPD*			Unused(self),
-    unsigned int		Unused(entryIndex),
-    MapEntryData		*Unused(pMapEntryData)
-)
-{
+    rMapEntryData.m_reference.constructReferenceScalar (referenceStore, referencePToken, 0);
 }
 
 
@@ -2216,44 +1763,40 @@ PrivateFnDef void rtMETHOD_ClusterReferenceMapData (
  *  'Vector' Reference Map Data Helper  *
  ****************************************/
 
-PrivateFnDef void rtVECTOR_ClusterReferenceMapData (
-    M_CPD*			self,
-    unsigned int		entryIndex,
-    MapEntryData		*pMapEntryData
-)
-{
-    rtVECTOR_Align (self);
-    if (--entryIndex >= (unsigned int)rtVECTOR_CPD_USegIndexSize (self))
+void rtVECTOR_Handle::getClusterReferenceMapData (MapEntryData &rMapEntryData, unsigned int xEntry) {
+    align ();
+
+    if (--xEntry >= segmentIndexSize ())
 	return;
 
-    rtVECTOR_CPD_USD (self) = &rtVECTOR_CPD_USegArray (self)[
-	rtVECTOR_CPD_USegIndex (self)[entryIndex]
-    ];
+    unsigned int xSegment = segmentIndexElement (xEntry);
 
-    rtVECTOR_CPD_SetUSDCursor (self, rtVECTOR_USD_PToken);
-    M_CPD *subsetPToken = self->GetCPD (rtVECTOR_CPx_USDCursor, RTYPE_C_PToken);
+    rtPTOKEN_Handle::Reference pSegmentPToken;
+    getSegmentPToken (pSegmentPToken, xSegment);
 
-    rtVECTOR_CPD_SetUSDCursor (self, rtVECTOR_USD_Values);
-    M_CPD *referencePointer	= self->GetCPD (rtVECTOR_CPx_USDCursor);
-    M_CPD *referencePToken	= UV_CPD_RefPTokenCPD (referencePointer);
+    M_CPD *pSegmentPointer;
+    getSegmentPointer (pSegmentPointer, xSegment);
 
-    rtVECTOR_CPD_SetUSDCursor (self, rtVECTOR_USD_VStore);
-    M_CPD *referenceStore	= self->GetCPD (rtVECTOR_CPx_USDCursor);
-
-    pMapEntryData->m_referenceType	= (RTYPE_Type)M_CPD_RType (referencePointer);
-    pMapEntryData->m_referenceSize	= ClusterSizeHelper (referencePointer);
-    pMapEntryData->m_subsetCardinality	= rtPTOKEN_CPD_BaseElementCount (subsetPToken);
-    pMapEntryData->m_internalSlot	= rtVECTOR_CPD_USegIndex (self)[entryIndex];
-
-    pMapEntryData->m_reference.constructZero (
-	referenceStore,
-	(RTYPE_Type)M_CPD_RType (referencePointer),
-	pMapEntryData->domKOT ()->TheScalarPToken,
-	referencePToken
+    rtPTOKEN_Handle::Reference pSegmentPointerRPT (
+	static_cast<rtUVECTOR_Handle*>(pSegmentPointer->containerHandle ())->rptHandle ()
     );
 
-    subsetPToken->release ();
-    referencePointer->release ();
+    Vdd::Store::Reference pSegmentStore;
+    getSegmentStore (pSegmentStore, xSegment);
+
+    rMapEntryData.m_referenceType	= pSegmentPointer->RType ();
+    rMapEntryData.m_referenceSize	= static_cast<double>(pSegmentPointer->containerHandle ()->getClusterSize ());
+    rMapEntryData.m_subsetCardinality	= pSegmentPToken->cardinality ();
+    rMapEntryData.m_internalSlot	= xSegment;
+
+    rMapEntryData.m_reference.constructZero (
+	pSegmentStore,
+	pSegmentPointer->RType (),
+	rMapEntryData.domKOT ()->TheScalarPTokenHandle (),
+	pSegmentPointerRPT
+    );
+
+    pSegmentPointer->release ();
 }
 
 
@@ -2261,46 +1804,38 @@ PrivateFnDef void rtVECTOR_ClusterReferenceMapData (
  *  'VStore' Reference Map Data Helper  *
  ****************************************/
 
-PrivateFnDef void rtVSTORE_ClusterReferenceMapData (
-    M_CPD*			self,
-    unsigned int		entryIndex,
-    MapEntryData		*pMapEntryData
-)
-{
-    rtVSTORE_Align (self);
+void rtVSTORE_Handle::getClusterReferenceMapData (MapEntryData &rMapEntryData, unsigned int xEntry) {
+    align ();
 
 /*****  Locate the requested column, ...  *****/
-    unsigned int n = rtPTOKEN_BaseElementCount (self, rtVSTORE_CPx_ColumnPToken);
-    if (entryIndex > n)
+    unsigned int n = rtPTOKEN_BaseElementCount (this, element (rtVSTORE_CPx_ColumnPToken));
+    if (xEntry > n)
 	return;
 
-    VContainerHandle *pStoreHandle = self->containerHandle ();
-    M_POP const *pColumn = rtVSTORE_CPD_ColumnArray (self);
-    unsigned int i = 0;
-    while (i < n && entryIndex > 0) {
-	if (pStoreHandle->ReferenceIsNil (pColumn) || --entryIndex > 0)
-	    pColumn++;
+    n += rtVSTORE_CPx_Column;
+    unsigned int i = rtVSTORE_CPx_Column;
+    while (i < n) {
+	if (ReferenceIsntNil (i) && 0 == --xEntry)
+	    break;
 	i++;
     }
-    if (entryIndex > 0)
+    if (xEntry > 0)
 	return;
 
 /*****  ... and retrieve the reference map data:  *****/
-    M_CPD *referenceStore  = pStoreHandle->GetCPD (pColumn);
-    M_CPD *referencePToken = rtVSTORE_CPD_RowPTokenCPD (self);
+    VContainerHandle::Reference pColumn (elementHandle (i));
+    Vdd::Store::Reference referenceStore (pColumn->getStore ());
+
+    rtPTOKEN_Handle::Reference referencePToken (referenceStore->getPToken ());
 
 #if 0
-    pMapEntryData->m_referenceType	= ReferenceTypeDirect;
-    pMapEntryData->m_referenceSize	= ClusterSizeHelper (referenceStore);
-    pMapEntryData->m_subsetCardinality	= rtPTOKEN_CPD_BaseElementCount (
-	referencePToken
-    );
+    rMapEntryData.m_referenceType	= ReferenceTypeDirect;
+    rMapEntryData.m_referenceSize	= referenceStore->getClusterSize ();
+    rMapEntryData.m_subsetCardinality	= referencePToken->cardinality ();
 #endif
-    pMapEntryData->m_internalSlot	= i;
+    rMapEntryData.m_internalSlot	= i - rtVSTORE_CPx_Column + 1;
 
-    pMapEntryData->m_reference.constructReferenceScalar (
-	referenceStore, referencePToken, 0
-    );
+    rMapEntryData.m_reference.constructReferenceScalar (referenceStore, referencePToken, 0);
 }
 
 
@@ -2310,7 +1845,8 @@ PrivateFnDef void rtVSTORE_ClusterReferenceMapData (
 
 V_DefinePrimitive (ClusterReferenceMapData) {
 /*****  Get the store to be analyzed, ...  *****/
-    M_CPD *store = pTask->getSelf ().storeCPD ();
+    VContainerHandle::Reference pStoreHandle;
+    pTask->getSelf ().store ()->getContainerHandle (pStoreHandle);
 
 /*****  Get the collector block argument, ...  *****/
     pTask->loadDucWithNextParameter ();
@@ -2338,45 +1874,7 @@ V_DefinePrimitive (ClusterReferenceMapData) {
     if (rEntryIndicesMonotype.isScalar ()) {
 /*****  ... process the store, ...  *****/
 	MapEntryData entryData (pTask);
-	switch ((RTYPE_Type)M_CPD_RType (store)) {
-	case RTYPE_C_Closure:
-	    rtCLOSURE_ClusterReferenceMapData (
-		store, DSC_Descriptor_Scalar_Int (rEntryIndicesMonotype), &entryData
-	    );
-	    break;
-	case RTYPE_C_Dictionary:
-	    rtDICTIONARY_ClusterReferenceMapData (
-		store, DSC_Descriptor_Scalar_Int (rEntryIndicesMonotype), &entryData
-	    );
-	    break;
-	case RTYPE_C_Index:
-	    rtINDEX_ClusterReferenceMapData (
-		store, DSC_Descriptor_Scalar_Int (rEntryIndicesMonotype), &entryData
-	    );
-	    break;
-	case RTYPE_C_ListStore:
-	    rtLSTORE_ClusterReferenceMapData (
-		store, DSC_Descriptor_Scalar_Int (rEntryIndicesMonotype), &entryData
-	    );
-	    break;
-	case RTYPE_C_Method:
-	    rtMETHOD_ClusterReferenceMapData (
-		store, DSC_Descriptor_Scalar_Int (rEntryIndicesMonotype), &entryData
-	    );
-	    break;
-	case RTYPE_C_Vector:
-	    rtVECTOR_ClusterReferenceMapData (
-		store, DSC_Descriptor_Scalar_Int (rEntryIndicesMonotype), &entryData
-	    );
-	    break;
-	case RTYPE_C_ValueStore:
-	    rtVSTORE_ClusterReferenceMapData (
-		store, DSC_Descriptor_Scalar_Int (rEntryIndicesMonotype), &entryData
-	    );
-	    break;
-	default:
-	    break;
-	}
+	pStoreHandle->getClusterReferenceMapData (entryData, DSC_Descriptor_Scalar_Int (rEntryIndicesMonotype));
 
 /*****  ... push the reference, ...  *****/
 	if (rEntryIndicesMonotype.isEmpty ())
@@ -2402,9 +1900,9 @@ V_DefinePrimitive (ClusterReferenceMapData) {
 	pTask->commitParameter ();
     }
     else {
-	M_CPD *references = rtVECTOR_New (V_TOTSC_PToken);
+	rtVECTOR_Handle::Reference references (new rtVECTOR_Handle (V_TOTSC_PToken));
 	DSC_Scalar pReference;
-	DSC_InitReferenceScalar (pReference, V_TOTSC_PToken, 0);
+	pReference.constructReference (V_TOTSC_PToken, 0);
 
 	M_CPD *referenceTypes = pTask->NewIntUV ();
 	int *pReferenceType = rtINTUV_CPD_Array (referenceTypes);
@@ -2427,35 +1925,11 @@ V_DefinePrimitive (ClusterReferenceMapData) {
 	    xp < xl;
 
 	    xp++
-	)
-	{
+	) {
 	    MapEntryData entryData (pTask);
-	    switch ((RTYPE_Type)M_CPD_RType (store)) {
-	    case RTYPE_C_Closure:
-		rtCLOSURE_ClusterReferenceMapData	(store, *xp, &entryData);
-		break;
-	    case RTYPE_C_Index:
-		rtINDEX_ClusterReferenceMapData		(store, *xp, &entryData);
-		break;
-	    case RTYPE_C_ListStore:
-		rtLSTORE_ClusterReferenceMapData	(store, *xp, &entryData);
-		break;
-	    case RTYPE_C_Method:
-		rtMETHOD_ClusterReferenceMapData	(store, *xp, &entryData);
-		break;
-	    case RTYPE_C_Vector:
-		rtVECTOR_ClusterReferenceMapData	(store, *xp, &entryData);
-		break;
-	    case RTYPE_C_ValueStore:
-		rtVSTORE_ClusterReferenceMapData	(store, *xp, &entryData);
-		break;
-	    default:
-		break;
-	    }
+	    pStoreHandle->getClusterReferenceMapData (entryData, *xp);
 	    if (entryData.m_reference.isntEmpty ()) {
-		rtVECTOR_Assign (
-		    references, &pReference, &entryData.m_reference
-		);
+		references->setElements (pReference, entryData.m_reference);
 		entryData.m_reference.clear ();
 	    }
 	    DSC_Scalar_Int (pReference)++;
@@ -2681,10 +2155,8 @@ PublicFnDef void pfSTATS_InitDispatchVector () {
  *****  Facility Definition  *****
  *********************************/
 
-FAC_DefineFacility
-{
-    switch (FAC_RequestTypeField)
-    {
+FAC_DefineFacility {
+    switch (FAC_RequestTypeField) {
     FAC_FDFCase_FacilityIdAsString (pfSTATS);
     FAC_FDFCase_FacilityDescription ("System Statistics Primitive Function Services");
     default:

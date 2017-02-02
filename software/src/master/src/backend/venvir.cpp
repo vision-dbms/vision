@@ -85,7 +85,7 @@ PrivateVarDef char const*	OSDPathName;
  *  Built-In Objects  *
  **********************/
 
-ENVIR_BuiltInObjectPArray *M_KnownObjectTable::ContainerArray () const {
+ENVIR_BuiltInObjectPArray *M_KOT::ContainerArray () const {
     return (ENVIR_BuiltInObjectPArray *) rtPARRAY_CPD_ElementArray (m_pKOTC);
 }
 
@@ -117,7 +117,7 @@ PublicVarDef rtINDEX_Key*	ENVIR_KTemporalContext_Today = 0;
  **************************
  **************************/
 
-VSession::VSession () : m_pTLEDescriptor (0) {
+VSession::VSession () {
 }
 
 /*************************
@@ -127,12 +127,6 @@ VSession::VSession () : m_pTLEDescriptor (0) {
  *************************/
 
 VSession::~VSession () {
-    ReleaseTLEComponents ();
-}
-
-void VSession::ReleaseTLEComponents () {
-    if (m_pTLEDescriptor)
-	m_pTLEDescriptor->release ();
 }
 
 
@@ -154,7 +148,7 @@ M_AND *VSession::Boot (char const *pNDFPathName) {
     ENVIR_KDsc_TheTmpTLE.construct (ENVIR_KDsc_TheTLE);
 
     ENVIR_KTemporalContext_Today = new rtINDEX_Key (
-	m_pInitialDatabase->TheScalarPToken (), &ENVIR_KDsc_TheTLE
+	m_pInitialDatabase->TheScalarPTokenHandle (), &ENVIR_KDsc_TheTLE
     );
 
     return m_pInitialDatabase;
@@ -174,7 +168,6 @@ M_AND *VSession::Open (
 	m_pInitialDatabase->IncorporateExternalUpdate (pXUSpecPath);
 
 /*****  Access ^global (along with the database's built-in objects)...  *****/
-    ReleaseTLEComponents ();
     m_pInitialDatabase->AccessTheTLE (
 	atoi (pObjectSpaceName), ENVIR_KDsc_TheTLE, &m_pTLEDescriptor
     );
@@ -182,18 +175,16 @@ M_AND *VSession::Open (
 /*****  ... initialize ^tmp. *****/
     M_ASD *pScratchPad = m_pInitialDatabase->ScratchPad ();
 
-    M_CPD *pDictionary = rtDICTIONARY_New (pScratchPad);
-    M_CPD *pInstances = rtPTOKEN_New (pScratchPad, 1);
+    rtDICTIONARY_Handle *pDictionary = new rtDICTIONARY_Handle (pScratchPad);
+    rtPTOKEN_Handle::Reference pInstances (new rtPTOKEN_Handle (pScratchPad, 1));
     M_CPD *pSuperPointer = ENVIR_KDsc_TheTLE.pointerCPD (pInstances);
 
     ENVIR_KDsc_TheTmpTLE.constructCorrespondence (
-	m_pInitialDatabase->TheScalarPToken (), rtVSTORE_NewCluster (
-	    pInstances, pDictionary, ENVIR_KDsc_TheTLE.storeCPD (), pSuperPointer
-	), rtVSTORE_CPx_RowPToken
+	m_pInitialDatabase->TheScalarPTokenHandle (), rtVSTORE_NewCluster (
+	    pInstances, pDictionary, ENVIR_KDsc_TheTLE.store (), pSuperPointer
+	)
     );
     pSuperPointer->release ();
-    pDictionary->release ();
-    pInstances->release ();
 
 /*****  ...initialize ^today...  *****/
     DSC_Descriptor today; int y, m, d;
@@ -201,7 +192,7 @@ M_AND *VSession::Open (
 	m_pInitialDatabase->TheDateClass (), DATES_FindTodaysDate (&y, &m, &d)
     );
     ENVIR_KTemporalContext_Today = new rtINDEX_Key (
-	m_pInitialDatabase->TheScalarPToken (), &today
+	m_pInitialDatabase->TheScalarPTokenHandle (), &today
     );
     today.clear ();
 
@@ -230,7 +221,7 @@ unsigned int VSession::DatabaseActivationCount () const {
  ****************************************/
 
 void VSession::AccumulateAllocationStatistics (
-    double *pAllocationTotal, double *pMappingTotal
+    unsigned __int64 *pAllocationTotal, unsigned __int64 *pMappingTotal
 ) const {
     if (m_pDatabaseFederator)
 	m_pDatabaseFederator->AccumulateAllocationStatistics (
@@ -258,9 +249,9 @@ double VSession::TransientAllocationHighWaterMark () const {
  *********************************************
  *********************************************/
 
-bool VSession::DisposeOfSessionGarbage () const {
+bool VSession::DisposeOfSessionGarbage (bool bAggressive) const {
     return m_pDatabaseFederator.isntNil ()
-	&& m_pDatabaseFederator->DisposeOfSessionGarbage ();
+	&& m_pDatabaseFederator->DisposeOfSessionGarbage (bAggressive);
 }
 
 void VSession::FlushCachedResources () const {
@@ -289,43 +280,22 @@ unsigned int VSession::ReclaimAllSegments () const {
  *****  Known CPD Recording Utility  *****
  *****************************************/
 
-void M_KnownObjectTable::ForwardAndLock (M_CPD* pObject) const {
-    if (pObject->IsInTheScratchPad () && m_pKOTC->IsntInTheScratchPad ())
+void M_KOT::ForwardAndLock (M_CPD* pObject) const {
+    if (pObject->isInTheScratchPad () && m_pKOTC->isntInTheScratchPad ())
 	pObject->ForwardToSpace (m_pKOTC);
 
     pObject->SetGCLock ();
 }
 
-void M_KnownObjectTable::Entry::RegisterObject (M_KnownObjectTable *pKOT, M_CPD *pObject) {
+void M_KOTE::RegisterObject (M_KOT *pKOT, M_CPD *pObject) {
     pKOT->ForwardAndLock (pObject);
 
     m_pObjectCPD = pObject;
     m_pObjectHandle = pObject->containerHandle ();
 
-    switch (pObject->RType ()) {
-    case RTYPE_C_Index: {
-	    M_CPD* pLStoreCPD = rtINDEX_CPD_ListStoreCPD (pObject);
-	    pObject = rtLSTORE_CPD_RowPTokenCPD (pLStoreCPD);
-	    pLStoreCPD->release ();
-	}
-	break;
-    case RTYPE_C_ValueStore:
-	pObject = rtVSTORE_CPD_RowPTokenCPD (pObject);
-	break;
-    case RTYPE_C_Vector:
-	pObject = rtVECTOR_CPD_RowPTokenCPD (pObject);
-	break;
-    default:
-	pObject = NilOf (M_CPD*);
-	break;
+    if (m_pObjectHandle->getStore (m_pStore)) {
+	m_pPTokenHandle.setTo (m_pStore->getPToken ());
     }
-
-    if (m_pPTokenCPD = pObject) {
-	pKOT->ForwardAndLock (pObject);
-	m_pPTokenHandle = pObject->containerHandle ();
-    }
-    else
-	m_pPTokenHandle = NilOf (VContainerHandle*);
 }
 
 
@@ -349,18 +319,23 @@ void M_KnownObjectTable::Entry::RegisterObject (M_KnownObjectTable *pKOT, M_CPD 
  *
  *****/
 #define DefineKnownObject(objectName, pObject) RegisterObject (\
-    (pObject), &M_KnownObjectTable::objectName, &ENVIR_BuiltInObjectPArray::objectName\
+    (pObject), &M_KOT::objectName, &ENVIR_BuiltInObjectPArray::objectName\
 )
 
-void M_KnownObjectTable::RegisterObject (
-    M_CPD					*pObject,
-    M_KOTE	M_KnownObjectTable	      ::*pKOTEM,
-    M_POP	ENVIR_BuiltInObjectPArray     ::*pKOTCM
+void M_KOT::RegisterObject (
+    M_CPD *pObject, M_KOTE M_KOT::*pKOTEM, M_POP ENVIR_BuiltInObjectPArray::*pKOTCM
 ) {
     (this->*pKOTEM).RegisterObject (this, pObject);
 
     rtPARRAY_CPD_Element (m_pKOTC) = &(ContainerArray()->*pKOTCM);
+    m_pKOTC->EnableModifications ();
     m_pKOTC->StoreReference (rtPARRAY_CPx_Element, pObject);
+}
+
+void M_KOT::RegisterObject (
+    VContainerHandle *pObject, M_KOTE M_KOT::*pKOTEM, M_POP ENVIR_BuiltInObjectPArray::*pKOTCM
+) {
+    RegisterObject (pObject->GetCPD (), pKOTEM, pKOTCM);
 }
 
 
@@ -386,18 +361,16 @@ void M_AND::CreateBootStrapObjects () {
     nil->release ();
 
 /*****  ... and create the built-in object vector, ...  *****/
-    m_pKnownObjectTable.setTo (new M_KnownObjectTable (this));
+    m_pKnownObjectTable.setTo (new M_KOT (this));
     m_pKnownObjectTable->completeInitialization ();
 }
 
 
-/****************************************************
- *----  M_KnownObjectTable::M_KnownObjectTable  ----*
- ****************************************************/
+/**************************
+ *----  M_KOT::M_KOT  ----*
+ **************************/
 
-M_KnownObjectTable::M_KnownObjectTable (M_AND *pAND)
-: m_pKOTC (rtPARRAY_New (pAND->ScratchPad (), ENVIR_BuiltInObjectPArraySize))
-{
+M_KOT::M_KOT (M_AND *pAND) : m_pKOTC (rtPARRAY_New (pAND->ScratchPad (), ENVIR_BuiltInObjectPArraySize)) {
 /*****  Create and store the built-in p-array:  *****/
     display (
 	"%s\n", M_UpdateStatusDescription (
@@ -407,46 +380,42 @@ M_KnownObjectTable::M_KnownObjectTable (M_AND *pAND)
     M_ASD *pKOTSpace = m_pKOTC->Space ();
 
 /*****  Create the scalar P-Token, ...  *****/
-    DefineKnownObject (TheScalarPToken, rtPTOKEN_New (pKOTSpace, 1));
+    DefineKnownObject (TheScalarPToken, (new rtPTOKEN_Handle (pKOTSpace, 1))->GetCPD ());
     display ("...'Scalar P-Token' Created\n");
 
 /*****  ... 'SelectorPToken', ...  *****/
-    DefineKnownObject (TheSelectorPToken, rtPTOKEN_New (pKOTSpace, 0));
+    DefineKnownObject (TheSelectorPToken, (new rtPTOKEN_Handle (pKOTSpace, 0))->GetCPD ());
     display ("...'Selector P-Token' Created\n");
 }
 
-void M_KnownObjectTable::completeInitialization () {
+void M_KOT::completeInitialization () {
     M_ASD *pKOTSpace = m_pKOTC->Space ();
 /*****  ... 'ObjectPrototype', ...  *****/
-    M_CPD *pObjectDictionary = rtDICTIONARY_New (pKOTSpace);
-    M_CPD *pObjectPToken = rtPTOKEN_New (pKOTSpace, 0);
+    rtDICTIONARY_Handle::Reference pObjectDictionary (new rtDICTIONARY_Handle (pKOTSpace));
+    rtPTOKEN_Handle::Reference pObjectPToken (new rtPTOKEN_Handle (pKOTSpace, 0));
     DefineKnownObject (
 	TheObjectPrototype, rtVSTORE_NewCluster (
-	    pObjectPToken, pObjectDictionary, NilOf (M_CPD*), NilOf (M_CPD*)
+	    pObjectPToken, pObjectDictionary, NilOf (Vdd::Store*), NilOf (M_CPD*)
 	)
     );
     display ("...'Object' created\n");
 
 /*****  ... 'TheNAClass', ...  *****/
-    M_CPD* pNADictionary = rtDICTIONARY_New (pKOTSpace);
-    M_CPD* pNAPToken = rtPTOKEN_New (pKOTSpace, 0);
-    M_CPD* pNAInheritance = rtLINK_RefConstructor (pObjectPToken, -1)->Close (
+    rtDICTIONARY_Handle::Reference pNADictionary (new rtDICTIONARY_Handle (pKOTSpace));
+    rtPTOKEN_Handle::Reference pNAPToken (new rtPTOKEN_Handle (pKOTSpace, 0));
+    M_CPD* pNAInheritance = rtLINK_RefConstructor (pObjectPToken)->Close (
 	pNAPToken
     )->ToLink ();
 
     DefineKnownObject (
         TheNAClass, rtVSTORE_NewCluster (
-	    pNAPToken, pNADictionary, TheObjectPrototype, pNAInheritance
+	    pNAPToken, pNADictionary, TheObjectPrototype.store (), pNAInheritance
 	)
     );
     display ("...'Undefined' Created\n");
 
 /*****  ...cleanup, and return.  *****/
     pNAInheritance	->release ();
-    pNAPToken		->release ();
-    pNADictionary	->release ();
-    pObjectDictionary	->release ();
-    pObjectPToken	->release ();
     display ("...after Cleanup\n");
 
     display ("DONE\n");
@@ -457,18 +426,18 @@ void M_KnownObjectTable::completeInitialization () {
  *****  Built-In Objects Access Routine  *****
  *********************************************/
 
-/****************************************************
- *----  M_KnownObjectTable::M_KnownObjectTable  ----*
- ****************************************************/
+/**************************
+ *----  M_KOT::M_KOT  ----*
+ **************************/
 
-M_KnownObjectTable::M_KnownObjectTable (M_CPD *pKOTC) : m_pKOTC (pKOTC) {
-    static M_KOTE M_KnownObjectTable::* const P2TKOTEMembers[] = {
+M_KOT::M_KOT (M_CPD *pKOTC) : m_pKOTC (pKOTC) {
+    static M_KOTE M_KOT::* const P2TKOTEMembers[] = {
 	ENVIR_KOTEs(ENVIR_KOTE_IncludeP2TKOTEM, ENVIR_AKOE_IncludeZero)
     };
 
 /*****  Obtain standard CPDs for the objects contained in the KOTC, ...  *****/
     for (unsigned int i = 0; i < ENVIR_BuiltInObjectPArraySize; i++) {
-	M_KOTE M_KnownObjectTable::*pKOTEM = P2TKOTEMembers[i];
+	M_KOTE M_KOT::*pKOTEM = P2TKOTEMembers[i];
 	if (pKOTEM != (M_KOTM)0 && m_pKOTC->ReferenceIsntNil((unsigned int)rtPARRAY_CPx_Element))
 	    (this->*pKOTEM).RegisterObject (this, m_pKOTC->GetCPD (rtPARRAY_CPx_Element));
 	rtPARRAY_CPD_Element (m_pKOTC)++;
@@ -483,7 +452,7 @@ M_KnownObjectTable::M_KnownObjectTable (M_CPD *pKOTC) : m_pKOTC (pKOTC) {
  *----------------------------------------------------------*/
     if (TheSelectorPToken.IsntSet ()) {
 	TheSelectorPToken.RegisterObject (
-	    this, TheSelectorClass.RetainedPTokenCPD ()
+	    this, TheSelectorClass.PTokenHandle ()->GetCPD ()
 	);
     }
 }
@@ -509,24 +478,24 @@ M_KnownObjectTable::M_KnownObjectTable (M_CPD *pKOTC) : m_pKOTC (pKOTC) {
  *
  *****/
 void M_AND::AccessTheTLE (
-    unsigned int xSpace, DSC_Descriptor &rTLE, M_CPD **ppTLEDescriptor
+    unsigned int xSpace, DSC_Descriptor &rTLE, rtDSC_Handle::Reference *ppTLEDescriptor
 ) {
 //  Access the known object table if it hasn't been loaded yet, ...
     if (m_pKnownObjectTable.isNil ()) m_pKnownObjectTable.setTo (
-	new M_KnownObjectTable (
-	    GetCPD (M_KnownSpace_SystemRoot, M_KnownCTI_SpaceRoot, RTYPE_C_PArray)
-	)
+	new M_KOT (GetCPD (M_KnownSpace_SystemRoot, M_KnownCTI_SpaceRoot, RTYPE_C_PArray))
     );
 
 /*****  If a space was specified, ...  *****/
     if (xSpace > 0) {
     /*****  ... access it, ...  *****/
-	M_CPD *pTLEDescriptor = xSpace > 2 ? GetCPD (
-	    xSpace, M_KnownCTI_SpaceRoot, RTYPE_C_Descriptor
-	) : m_pKnownObjectTable->TheRootEnvironment.RetainedObjectCPD ();
+	rtDSC_Handle::Reference pTLEDescriptor (
+	    xSpace > 2 ? static_cast<rtDSC_Handle*>(
+		GetContainerHandle (xSpace, M_KnownCTI_SpaceRoot, RTYPE_C_Descriptor)
+	    ) : static_cast<rtDSC_Handle*>(m_pKnownObjectTable->TheRootEnvironment.ObjectHandle ())
+	);
 
     /*****  ... unpack it, ...  *****/
-        rtDSC_Unpack (pTLEDescriptor, &rTLE);
+	pTLEDescriptor->getValue (rTLE);
 
     /*****  ... and validate it:  *****/
 	if (rTLE.isntScalar ()) ERR_SignalFault (
@@ -538,41 +507,38 @@ void M_AND::AccessTheTLE (
 	);
 
 	if (ppTLEDescriptor)
-	    *ppTLEDescriptor = pTLEDescriptor;
-	else
-	    pTLEDescriptor->release ();
+	    ppTLEDescriptor->claim (pTLEDescriptor);
     }
     else {
     /*****  ... otherwise, access and unpack the 'user' root,  *****/
-	M_CPD *pOS3Descriptor = GetCPD (
-	    M_KnownSpace_UserRoot, M_KnownCTI_SpaceRoot, RTYPE_C_Descriptor
+	rtDSC_Handle::Reference pOS3Descriptor (
+	    static_cast<rtDSC_Handle*>(
+		GetContainerHandle (M_KnownSpace_UserRoot, M_KnownCTI_SpaceRoot, RTYPE_C_Descriptor)
+	    )
 	);
-        rtDSC_Unpack (pOS3Descriptor, &rTLE);
+        pOS3Descriptor->getValue (rTLE);
 
     /*****  ... create a new dictionary, ...  *****/
-	M_CPD *pTLEDictionary = rtDICTIONARY_New (ScratchPad ());
+	rtDICTIONARY_Handle::Reference pTLEDictionary (new rtDICTIONARY_Handle (ScratchPad ()));
 
     /*****
      *  ... and activate that dictionary as the user's top level environment.
      *****/
-	VCPDReference pTLEStore (rTLE.storeCPD ());
-	M_CPD *pTLEInstances = rtPTOKEN_New (ScratchPad (), 1);
+	Vdd::Store::Reference pTLEStore (rTLE.store ());
+	rtPTOKEN_Handle::Reference pTLEInstances (new rtPTOKEN_Handle (ScratchPad (), 1));
 	M_CPD *pTLEPointer = rTLE.pointerCPD (pTLEInstances);
 
 	rTLE.clear ();
 
 	rTLE.constructCorrespondence (
-	    m_pKnownObjectTable->TheScalarPToken, rtVSTORE_NewCluster (
+	    m_pKnownObjectTable->TheScalarPTokenHandle (), rtVSTORE_NewCluster (
 		pTLEInstances, pTLEDictionary, pTLEStore, pTLEPointer
-	    ), rtVSTORE_CPx_RowPToken
+	    )
 	);
 
 	if (ppTLEDescriptor)
-	    *ppTLEDescriptor = rtDSC_Pack (ScratchPad (), &rTLE);
+	    ppTLEDescriptor->setTo (new rtDSC_Handle (ScratchPad (), rTLE));
 
-	pOS3Descriptor->release ();
-	pTLEDictionary->release ();
-	pTLEInstances->release ();
 	pTLEPointer->release ();
     }
 }
@@ -605,19 +571,18 @@ PS_UpdateStatus M_AND::SaveTheTLE (
     );
 
 /*****  Determine the top level environment, ...  *****/
-    VCPDReference pTLEDescriptor;
+    rtDSC_Handle::Reference pTLEDescriptor;
     if (this == ENVIR_Session ()->InitialDatabase ())
 	pTLEDescriptor.setTo (ENVIR_Session ()->TheTLEDescriptor ());
     else {
-	DSC_Descriptor iTLE; M_CPD *pTLE;
-	AccessTheTLE (m_pASDRing->Index (), iTLE, &pTLE);
-	pTLEDescriptor.claim (pTLE);
+	DSC_Descriptor iTLE;
+	AccessTheTLE (m_pASDRing->Index (), iTLE, &pTLEDescriptor);
 	iTLE.clear ();
     }
 
 /*****  Attempt to make the top level environment persistent, ...  *****/
     PS_UpdateStatus xUpdateStatus = PS_UpdateStatus_Incomplete;
-    if (pTLEDescriptor->IsInTheScratchPad ()) {
+    if (pTLEDescriptor->isInTheScratchPad ()) {
 	if (AdministrativeSystem)
 	    xUpdateStatus = pTLEDescriptor->CreateSpace ();
 	else {
@@ -627,7 +592,7 @@ PS_UpdateStatus M_AND::SaveTheTLE (
 	pOutputHandler (
 	    pOutputHandlerData, ">>> %s <<<\n", M_UpdateStatusDescription (
 		xUpdateStatus, string (
-		    "Object Space %u Created", pTLEDescriptor->SpaceIndex ()
+		    "Object Space %u Created", pTLEDescriptor->spaceIndex ()
 		)
 	    )
 	);
@@ -636,7 +601,7 @@ PS_UpdateStatus M_AND::SaveTheTLE (
 /*****
  *  ...  and update the network if the top level environment is persistent.
  *****/
-    if (pTLEDescriptor->IsntInTheScratchPad ()) {
+    if (pTLEDescriptor->isntInTheScratchPad ()) {
 	pTLEDescriptor->Space ()->Distinguish ();
 	xUpdateStatus = UpdateNetwork (AdministrativeSystem);
 	pOutputHandler (
@@ -664,7 +629,7 @@ IOBJ_DefineNilaryMethod (BuiltInObjectPArrayDM) {
 }
 
 IOBJ_DefineNilaryMethod (TheTLEDM) {
-    return RTYPE_QRegister (M_DuplicateCPDPtr (ENVIR_Session ()->TheTLEDescriptor ()));
+    return RTYPE_QRegister (ENVIR_Session ()->TheTLEDescriptor ());
 }
 
 /************

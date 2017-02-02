@@ -45,6 +45,49 @@
 )
 
 
+/******************************
+ ******************************
+ *****  Container Handle  *****
+ ******************************
+ ******************************/
+
+class rtFLOATUV_Handle : public rtUVECTOR_Handle {
+//  Run Time Type
+    DECLARE_CONCRETE_RTT (rtFLOATUV_Handle, rtUVECTOR_Handle);
+
+//  Aliases
+public:
+    typedef rtFLOATUV_ElementType element_t;
+
+//  Construction
+public:
+    static VContainerHandle *Maker (M_CTE &rCTE) {
+	return new rtFLOATUV_Handle (rCTE);
+    }
+protected:
+    rtFLOATUV_Handle (M_CTE &rCTE) : rtUVECTOR_Handle (rCTE) {
+    }
+
+//  Destruction
+private:
+    ~rtFLOATUV_Handle () {
+    }
+
+//  Access
+public:
+    element_t *array () const {
+	return UV_UV_ArrayAsType (typecastContent (), element_t);
+    }
+    element_t element (unsigned int xElement) const {
+	return array ()[xElement];
+    }
+
+//  Alignment
+public:
+    using BaseClass::align;
+};
+
+
 /********************************
  ********************************
  *****  Callable Interface  *****
@@ -52,24 +95,15 @@
  ********************************/
 
 PublicFnDecl M_CPD* __cdecl rtFLOATUV_New (
-    M_CPD*			pPPT,
-    M_CPD*			refPTokenRefCPD,
-    int				refPTokenRefIndex,
-    Ref_UV_Initializer		initFn,
-    ...
+    rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT, Ref_UV_Initializer initFn, ...
 );
 
 PublicFnDecl M_CPD *rtFLOATUV_New (
-    M_CPD *pPPT, M_CPD *pRPTRef, int xRPTRef
+    rtPTOKEN_Handle *pPPT, M_CPD *pRPTRef, int xRPTRef
 );
 
 PublicFnDecl M_CPD* rtFLOATUV_New (
-    M_CPD*			posPToken,
-    M_CPD*			refPToken
-);
-
-PublicFnDecl M_CPD* rtFLOATUV_Align (
-    M_CPD*			cpd
+    rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT
 );
 
 PublicFnDecl void rtFLOATUV_ToSetUV (
@@ -183,43 +217,6 @@ PublicFnDecl bool rtFLOATUV_ScalarLookup (
     rtLINK_LookupCase		lookupCase,
     int				*locationPtr
 );
-
-
-/******************************
- ******************************
- *****  Container Handle  *****
- ******************************
- ******************************/
-
-class rtFLOATUV_Handle : public rtUVECTOR_Handle {
-//  Run Time Type
-    DECLARE_CONCRETE_RTT (rtFLOATUV_Handle, rtUVECTOR_Handle);
-
-//  Construction
-protected:
-    rtFLOATUV_Handle (M_CTE &rCTE) : rtUVECTOR_Handle (rCTE) {
-    }
-
-public:
-    static VContainerHandle *Maker (M_CTE &rCTE) {
-	return new rtFLOATUV_Handle (rCTE);
-    }
-
-//  Destruction
-protected:
-
-//  Access
-public:
-
-//  Query
-public:
-
-//  Callbacks
-protected:
-
-//  State
-protected:
-};
 
 
 #endif

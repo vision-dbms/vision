@@ -85,114 +85,11 @@ PrivateVarDef char const
 
 void DSC_Store::clear () {
 /*** Deallocate the contents... ***/
-    if (m_pPO)
-        m_pPO->release ();
-    if (m_pCPD)
-        m_pCPD->release ();
+    if (m_pStore)
+        m_pStore->release ();
 
 /*** ... and set the fields to Nil ... ***/
     construct ();
-}
-
-
-/******************************
- *****  Closure Decoding  *****
- ******************************/
-
-void DSC_Store::decodeClosure (
-    rtBLOCK_Handle::Reference &rpBlock, unsigned int &rxPrimitive, rtCONTEXT_Constructor **ppContext
-) const {
-    rtCLOSURE_Constructor* pConstructor = (rtCLOSURE_Constructor*)m_pPO;
-    if (pConstructor) {
-	rpBlock.setTo (pConstructor->block ());
-	rxPrimitive = pConstructor->primitive ();
-	if (ppContext) {
-	    *ppContext = pConstructor->context ();
-	    (*ppContext)->retain ();
-	}
-    }
-    else {
-	rpBlock.setTo (
-	    rtCLOSURE_CPD_IsABlockClosure (m_pCPD) ? static_cast <rtBLOCK_Handle*> (
-		m_pCPD->GetContainerHandle (rtCLOSURE_CPx_Block, RTYPE_C_Block)
-	    ) : 0
-	);
-	rxPrimitive = rtCLOSURE_CPD_Primitive (m_pCPD);
-	if (ppContext) {
-	    M_CPD *pContextContainer = rtCLOSURE_CPD_ContextCPD (m_pCPD);
-#if 0
-	    *ppContext = (rtCONTEXT_Constructor*)pContextContainer->TransientExtensionIfA (
-		rtCONTEXT_Constructor::RTT
-	    );
-	    if (*ppContext)
-		(*ppContext)->retain ();
-	    else
-		*ppContext = new rtCONTEXT_Constructor (pContextContainer);
-#else
-	    *ppContext = new rtCONTEXT_Constructor (pContextContainer);
-#endif
-	    pContextContainer->release ();
-	}
-    }
-}
-
-
-/************************************
- *****  Canonical Store Access  *****
- ************************************/
-
-void DSC_Store::getCanonicalStore_(
-    M_CPD *&rpCanonicalStore, bool &rbConvertPointer, DSC_Pointer const &rPointer
-) const {
-    RTYPE_Type xRType = RType ();
-    switch (xRType) {
-    case RTYPE_C_ValueStore:
-	rpCanonicalStore = m_pCPD;
-	rbConvertPointer = false;
-	break;
-    case RTYPE_C_ListStore:
-	rpCanonicalStore = rtLSTORE_CPD_StringStore (m_pCPD)
-	    ? m_pCPD->TheStringClass	()
-	    : m_pCPD->TheListClass	();
-	rbConvertPointer = true;
-	break;
-    case RTYPE_C_Index:
-	rpCanonicalStore = rtINDEX_CPD_IsATimeSeries (m_pCPD)
-	    ? m_pCPD->TheTimeSeriesClass ()
-	    : m_pCPD->TheIndexedListClass();
-	rbConvertPointer = true;
-	break;
-    case RTYPE_C_Dictionary:
-    case RTYPE_C_Vector:
-	rpCanonicalStore = KOT ()->TheFixedPropertyClass;
-	rbConvertPointer = true;
-	break;
-    case RTYPE_C_Closure:
-	rpCanonicalStore = KOT ()->TheClosureClass;
-	rbConvertPointer = true;
-	break;
-    case RTYPE_C_Method:
-	rpCanonicalStore = KOT ()->TheMethodClass;
-	rbConvertPointer = true;
-	break;
-    case RTYPE_C_Block: {
-	    M_CPD* pRPTRef; int xRPTRef;
-	    rPointer.getRPTReference (pRPTRef, xRPTRef);
-	    rpCanonicalStore = pRPTRef->GetBlockEquivalentClassFromPToken (xRPTRef);
-	    rbConvertPointer = true;
-	    pRPTRef->release ();
-	}
-	break;
-    default:
-	rbConvertPointer = false;
-	ERR_SignalFault (
-	    EC__InternalInconsistency, UTIL_FormatMessage (
-		"DSC_Store::getCanonicalStore: Cannot Canonicalize Stores of Type %s",
-		RTYPE_TypeIdAsString (xRType)
-	    )
-	);
-	break;
-    }
 }
 
 
@@ -200,65 +97,14 @@ void DSC_Store::getCanonicalStore_(
  *****  Dictionary Access  *****
  *******************************/
 
-M_CPD *DSC_Store::dictionaryCPD (DSC_Pointer const &rPointer) const {
-    M_CPD *pDictionary;
+void DSC_Store::getDictionary (VReference<rtDICTIONARY_Handle>&rpResult, DSC_Pointer const &rPointer) const {
+    rpResult.setTo (m_pStore->getDictionary (rPointer));
+}
 
-    RTYPE_Type xRType = RType ();
-    switch (xRType) {
-    case RTYPE_C_ValueStore:
-        return rtVSTORE_CPD_DictionaryCPD (m_pCPD);
-
-    case RTYPE_C_Index:
-	pDictionary = rtINDEX_CPD_IsATimeSeries (m_pCPD)
-	    ? m_pCPD->TheTimeSeriesClassDictionary ()
-	    : m_pCPD->TheIndexedListClassDictionary();
-        break;
-
-    case RTYPE_C_ListStore:
-	pDictionary = rtLSTORE_CPD_StringStore (m_pCPD)
-	    ? m_pCPD->TheStringClassDictionary	()
-	    : m_pCPD->TheListClassDictionary	();
-        break;
-
-    case RTYPE_C_Dictionary:
-    case RTYPE_C_Vector:
-	pDictionary = KOT()->TheFixedPropertyClassDictionary;
-	break;
-
-    case RTYPE_C_Closure:
-        pDictionary = KOT()->TheClosureClassDictionary;
-        break;
-
-    case RTYPE_C_Method:
-        pDictionary = KOT()->TheMethodClassDictionary;
-        break;
-
-    case RTYPE_C_Block: {
-	    M_CPD *pRPTRef; int xRPTRef;
-	    rPointer.getRPTReference (pRPTRef, xRPTRef);
-
-	    M_KOT *pKOT = pRPTRef->ReferencedKOT (xRPTRef);
-	    pDictionary = pRPTRef->ReferenceNames (
-		xRPTRef, pKOT->TheStringPTokenCPD ()
-	    ) ? pKOT->TheStringClassDictionary : pKOT->TheSelectorClassDictionary;
-
-	    pRPTRef->release ();
-	}
-        break;
-
-    default:
-        ERR_SignalFault (
-	    EC__InternalInconsistency, UTIL_FormatMessage (
-		"DSC_Store::dictionaryCPD: '%s's do not have dictionaries",
-		RTYPE_TypeIdAsString (xRType)
-	    )
-	);
-        return NilOf (M_CPD*);
-    }
-
-    pDictionary->retain ();
-
-    return pDictionary;
+void DSC_Store::getDictionary(Vdd::Store::Reference &rpResult, DSC_Pointer const &rPointer) const {
+    rtDICTIONARY_Handle::Reference pDictionary;
+    getDictionary (pDictionary, rPointer);
+    rpResult.setTo (pDictionary);
 }
 
 
@@ -298,10 +144,10 @@ void DSC_Reference::raiseMissingComponentException (
 	pMessage = "DSC_Reference::factor: Missing UVector";
 	break;
     case ExceptionSource_GetPPTReference:
-	pMessage = "DSC_Reference::getPPTReference: Missing UVector";
+	pMessage = "DSC_Reference::PPT: Missing UVector";
 	break;
     case ExceptionSource_GetRPTReference:
-	pMessage = "DSC_Reference::getRPTReference: Missing UVector";
+	pMessage = "DSC_Reference::RPT: Missing UVector";
 	break;
     case ExceptionSource_RealizeValues:
 	pMessage = "DSC_Reference::RealizeValues: Missing UVector";
@@ -370,48 +216,63 @@ PublicFnDef void DSC__ComplainAboutEmptyPtrType (char const* pText) {
  *  Scalar Initialization  *
  ***************************/
 
-void DSC_Scalar::constructComposition (unsigned int xSubscript, M_CPD *pSource) {
-/*****  Fill out the fields of the descriptor...  *****/
-    DSC_InitScalar (*this, NilOf (M_CPD*), pSource->RType (), DSC_Scalar_Int, 0);
+void DSC_Scalar::constructComposition (unsigned int xSubscript, VContainerHandle *pSource) {
+/*****  Set the value ... *****/
+    m_xRType = pSource->RType ();
 
-/*****  ... and fill in the value ... *****/
+    pSource->align ();
+    rtUVECTOR_Handle *pUV = 0;
     switch (m_xRType) {
-    case RTYPE_C_CharUV:
-	rtCHARUV_Align (pSource);
-	DSC_Scalar_Char (*this) = rtCHARUV_CPD_Array (pSource)[xSubscript];
+    case RTYPE_C_CharUV: {
+	    rtCHARUV_Handle *pSpecificSource = static_cast<rtCHARUV_Handle*>(pSource);
+	    DSC_Scalar_Char (*this) = pSpecificSource->element (xSubscript);
+	    pUV = pSpecificSource;
+	}
 	break;
-    case RTYPE_C_FloatUV:
-	rtFLOATUV_Align (pSource);
-	DSC_Scalar_Float (*this) = rtFLOATUV_CPD_Array (pSource)[xSubscript];
+    case RTYPE_C_FloatUV: {
+	    rtFLOATUV_Handle *pSpecificSource = static_cast<rtFLOATUV_Handle*>(pSource);
+	    DSC_Scalar_Float (*this) = pSpecificSource->element (xSubscript);
+	    pUV = pSpecificSource;
+	}
 	break;
-    case RTYPE_C_DoubleUV:
-	rtDOUBLEUV_Align (pSource);
-	DSC_Scalar_Double (*this) = reinterpret_cast<double UNALIGNED*>(rtDOUBLEUV_CPD_Array(pSource))[xSubscript];
+    case RTYPE_C_DoubleUV: {
+	    rtDOUBLEUV_Handle *pSpecificSource = static_cast<rtDOUBLEUV_Handle*>(pSource);
+	    DSC_Scalar_Double (*this) = pSpecificSource->element (xSubscript);
+	    pUV = pSpecificSource;
+	}
 	break;
-    case RTYPE_C_IntUV:
-	rtINTUV_Align (pSource);
-	DSC_Scalar_Int (*this) = rtINTUV_CPD_Array (pSource)[xSubscript];
+    case RTYPE_C_IntUV: {
+	    rtINTUV_Handle *pSpecificSource = static_cast<rtINTUV_Handle*>(pSource);
+	    DSC_Scalar_Int (*this) = pSpecificSource->element (xSubscript);
+	    pUV = pSpecificSource;
+	}
 	break;
-    case RTYPE_C_RefUV:
-	rtREFUV_Align (pSource);
-	DSC_Scalar_Int (*this) = xSubscript >= UV_CPD_ElementCount (pSource)
-	    ? rtPTOKEN_BaseElementCount (pSource, UV_CPx_RefPToken)
-	    : UV_CPD_Array (pSource, unsigned int)[xSubscript];
+    case RTYPE_C_RefUV: {
+	    rtREFUV_Handle *pSpecificSource = static_cast<rtREFUV_Handle*>(pSource);
+	    DSC_Scalar_Int (*this) = pSpecificSource->element (xSubscript);
+	    pUV = pSpecificSource;
+	}
 	break;
     case RTYPE_C_UndefUV:
-	rtUNDEFUV_Align (pSource);
+	pUV = static_cast<rtUNDEFUV_Handle*>(pSource);
 	break;
-    case RTYPE_C_Unsigned64UV:
-	rtU64UV_Align (pSource);
-	DSC_Scalar_Unsigned64 (*this) = rtU64UV_CPD_Array (pSource)[xSubscript];
+    case RTYPE_C_Unsigned64UV: {
+	    rtU64UV_Handle *pSpecificSource = static_cast<rtU64UV_Handle*>(pSource);
+	    DSC_Scalar_Unsigned64 (*this) = pSpecificSource->element (xSubscript);
+	    pUV = pSpecificSource;
+	}
 	break;
-    case RTYPE_C_Unsigned96UV:
-	rtU96UV_Align (pSource);
-	DSC_Scalar_Unsigned96 (*this) = rtU96UV_CPD_Array (pSource)[xSubscript];
+    case RTYPE_C_Unsigned96UV: {
+	    rtU96UV_Handle *pSpecificSource = static_cast<rtU96UV_Handle*>(pSource);
+	    DSC_Scalar_Unsigned96 (*this) = pSpecificSource->element (xSubscript);
+	    pUV = pSpecificSource;
+	}
 	break;
-    case RTYPE_C_Unsigned128UV:
-	rtU128UV_Align (pSource);
-	DSC_Scalar_Unsigned128 (*this) = rtU128UV_CPD_Array (pSource)[xSubscript];
+    case RTYPE_C_Unsigned128UV: {
+	    rtU128UV_Handle *pSpecificSource = static_cast<rtU128UV_Handle*>(pSource);
+	    DSC_Scalar_Unsigned128 (*this) = pSpecificSource->element (xSubscript);
+	    pUV = pSpecificSource;
+	}
 	break;
     default:
         ERR_SignalFault (
@@ -421,7 +282,10 @@ void DSC_Scalar::constructComposition (unsigned int xSubscript, M_CPD *pSource) 
 	);
 	break;
     }
-    m_pRPT = UV_CPD_RefPTokenCPD (pSource);
+
+/*****  ... and set the rest of the fields: *****/
+    m_pRPT = pUV->rptHandle ();
+    m_pRPT->retain ();
 }
 
 
@@ -429,15 +293,15 @@ void DSC_Scalar::constructComposition (unsigned int xSubscript, M_CPD *pSource) 
  *  Scalar Container Creation  *
  *******************************/
 
-M_CPD *DSC_Scalar::asContainer (M_CPD *pPPT) {
+M_CPD *DSC_Scalar::asContainer (rtPTOKEN_Handle *pPPT) {
     M_CPD *cpd;
 
     if (!pPPT)
-	pPPT = M_AttachedNetwork->TheScalarPToken ();
-    else if (rtPTOKEN_CPD_BaseElementCount (pPPT) != 1) ERR_SignalFault (
+	pPPT = M_AttachedNetwork->TheScalarPTokenHandle ();
+    else if (pPPT->cardinality () != 1) ERR_SignalFault (
 	EC__InternalInconsistency, UTIL_FormatMessage (
 	    "DSC_Scalar::asContainer: Cardinality disagreement: Current:1, Proposed:%u.",
-	    rtPTOKEN_CPD_BaseElementCount (pPPT)
+	    pPPT->cardinality ()
 	)
     );
 
@@ -460,7 +324,7 @@ M_CPD *DSC_Scalar::asContainer (M_CPD *pPPT) {
 	break;
     case RTYPE_C_RefUV: {
 	    rtREFUV_AlignReference (this);
-	    rtLINK_CType *linkc = rtLINK_RefConstructor (m_pRPT, -1);
+	    rtLINK_CType *linkc = rtLINK_RefConstructor (m_pRPT);
 	    rtLINK_AppendRange (linkc, DSC_Scalar_Int (*this), 1);
 	    linkc->Close (pPPT);
 	    cpd = linkc->ToLink ();
@@ -494,7 +358,7 @@ M_CPD *DSC_Scalar::asContainer (M_CPD *pPPT) {
 }
 
 
-M_CPD *DSC_Scalar::asCoercedContainer (M_CPD *pPPT) {
+M_CPD *DSC_Scalar::asCoercedContainer (rtPTOKEN_Handle *pPPT) {
     M_CPD*		resultCPD;
     rtLINK_CType*	linkc;
     char		*cptr;
@@ -506,7 +370,7 @@ M_CPD *DSC_Scalar::asCoercedContainer (M_CPD *pPPT) {
     VkUnsigned128	*u128ptr;
 
     unsigned int i;
-    unsigned int size = rtPTOKEN_CPD_BaseElementCount (pPPT);
+    unsigned int size = pPPT->cardinality ();
 
     switch (m_xRType) {
     case RTYPE_C_CharUV:
@@ -535,7 +399,7 @@ M_CPD *DSC_Scalar::asCoercedContainer (M_CPD *pPPT) {
 	break;
     case RTYPE_C_RefUV:
 	rtREFUV_AlignReference (this);
-	linkc = rtLINK_PosConstructor (pPPT, -1);
+	linkc = rtLINK_PosConstructor (pPPT);
 	rtLINK_AppendRepeat (linkc, DSC_Scalar_Int (*this), size);
         linkc->Close (m_pRPT);
 	resultCPD = linkc->ToLink ();
@@ -576,10 +440,10 @@ M_CPD *DSC_Scalar::asCoercedContainer (M_CPD *pPPT) {
 
 M_CPD *DSC_Scalar::asUVector () {
     if (holdsAValue ())
-	return asContainer (M_AttachedNetwork->TheScalarPToken ());
+	return asContainer (M_AttachedNetwork->TheScalarPTokenHandle ());
 
     rtREFUV_AlignReference (this);
-    M_CPD *pResult = rtREFUV_New (M_AttachedNetwork->TheScalarPToken (), m_pRPT);
+    M_CPD *pResult = rtREFUV_New (M_AttachedNetwork->TheScalarPTokenHandle (), m_pRPT);
     *rtREFUV_CPD_Array (pResult) = DSC_Scalar_Int (*this);
     return pResult;
 }
@@ -590,7 +454,7 @@ M_CPD *DSC_Scalar::asUVector () {
  ******************/
 
 bool DSC_Scalar::holdsANil () const {
-    return (unsigned int)DSC_Scalar_Int (*this) == rtPTOKEN_CPD_BaseElementCount (m_pRPT);
+    return (unsigned int)DSC_Scalar_Int (*this) == m_pRPT->cardinality ();
 }
 
 
@@ -605,9 +469,9 @@ bool DSC_Scalar::holdsANil () const {
 bool DSC_Value::isACoercedScalar () const {
     bool result;
 
+    m_pValues->align ();
     switch (m_pValues->RType ()) {
-    case RTYPE_C_CharUV:
-    	rtCHARUV_Align (m_pValues); {
+    case RTYPE_C_CharUV: {
 	    rtCHARUV_ElementType const
 	    	*sp = rtCHARUV_CPD_Array (m_pValues),
 	    	*sl = sp + UV_CPD_ElementCount (m_pValues),
@@ -626,8 +490,7 @@ bool DSC_Value::isACoercedScalar () const {
     	}
 	break;
 
-    case RTYPE_C_FloatUV:
-    	rtFLOATUV_Align (m_pValues); {
+    case RTYPE_C_FloatUV: {
 	    rtFLOATUV_ElementType const
 	    	*sp = rtFLOATUV_CPD_Array (m_pValues),
 	    	*sl = sp + UV_CPD_ElementCount (m_pValues),
@@ -646,8 +509,7 @@ bool DSC_Value::isACoercedScalar () const {
     	}
 	break;
 
-    case RTYPE_C_DoubleUV:
-    	rtDOUBLEUV_Align (m_pValues); {
+    case RTYPE_C_DoubleUV: {
 	    rtDOUBLEUV_ElementType const
 	    	*sp = rtDOUBLEUV_CPD_Array (m_pValues),
 	    	*sl = sp + UV_CPD_ElementCount (m_pValues),
@@ -666,8 +528,7 @@ bool DSC_Value::isACoercedScalar () const {
     	}
 	break;
 
-    case RTYPE_C_IntUV:
-    	rtINTUV_Align (m_pValues); {
+    case RTYPE_C_IntUV: {
 	    rtINTUV_ElementType const
 	    	*sp = rtINTUV_CPD_Array (m_pValues),
 	    	*sl = sp + UV_CPD_ElementCount (m_pValues),
@@ -690,8 +551,7 @@ bool DSC_Value::isACoercedScalar () const {
 	result = true;
 	break;
 
-    case RTYPE_C_Unsigned64UV:
-    	rtU64UV_Align (m_pValues); {
+    case RTYPE_C_Unsigned64UV: {
 	    rtU64UV_ElementType const
 	    	*sp = rtU64UV_CPD_Array (m_pValues),
 	    	*sl = sp + UV_CPD_ElementCount (m_pValues),
@@ -710,8 +570,7 @@ bool DSC_Value::isACoercedScalar () const {
     	}
 	break;
 
-    case RTYPE_C_Unsigned96UV:
-    	rtU96UV_Align (m_pValues); {
+    case RTYPE_C_Unsigned96UV: {
 	    rtU96UV_ElementType const
 	    	*sp = rtU96UV_CPD_Array (m_pValues),
 	    	*sl = sp + UV_CPD_ElementCount (m_pValues),
@@ -730,8 +589,7 @@ bool DSC_Value::isACoercedScalar () const {
     	}
 	break;
 
-    case RTYPE_C_Unsigned128UV:
-    	rtU128UV_Align (m_pValues); {
+    case RTYPE_C_Unsigned128UV: {
 	    rtU128UV_ElementType const
 	    	*sp = rtU128UV_CPD_Array (m_pValues),
 	    	*sl = sp + UV_CPD_ElementCount (m_pValues),
@@ -802,7 +660,7 @@ void const *DSC_Pointer::valueArrayOfType (RTYPE_Type const xExpectedType) const
     switch (m_xType) {
     case DSC_PointerType_Scalar: {
 	    DSC_Scalar const& rScalar = m_iContent.as_iScalar;
-	    xActualType = DSC_ScalarRType (rScalar);
+	    xActualType = rScalar.RTypeOfContainer ();
 	    pValueArray = (void const*)&DSC_Scalar_Value (rScalar);
 	}
 	break;
@@ -833,7 +691,7 @@ void const *DSC_Pointer::valueArrayOfType (RTYPE_Type const xExpectedType) const
  *****  Container Creation  *****
  ********************************/
 
-M_CPD *DSC_Pointer::pointerCPD (M_CPD *pPPT) {
+M_CPD *DSC_Pointer::pointerCPD (rtPTOKEN_Handle *pPPT) {
     switch (m_xType) {
     default:
         complainAboutBadPointerType (DSC_N_PointerCPD);
@@ -910,7 +768,7 @@ RTYPE_Type DSC_Pointer::pointerRType () const {
         DSC__ComplainAboutEmptyPtrType (DSC_N_PointerRType);
         break;
     case DSC_PointerType_Scalar:
-        return DSC_ScalarRType (m_iContent.as_iScalar);
+        return m_iContent.as_iScalar.RTypeOfContainer ();
     case DSC_PointerType_Value:
         return m_iContent.as_iValue.RType ();
     case DSC_PointerType_Identity:
@@ -932,61 +790,61 @@ RTYPE_Type DSC_Pointer::pointerRType () const {
  *****  P-Token Access  *****
  ****************************/
 
-void DSC_Pointer::getPPTReference (M_CPD *&pPTokenRef, int &xPTokenRef) const {
+rtPTOKEN_Handle *DSC_Pointer::PPT () const {
+    rtPTOKEN_Handle *pResult = 0;
     switch (m_xType) {
     case DSC_PointerType_Empty:
 	DSC__ComplainAboutEmptyPtrType (DSC_N_PositionalPTOfPtr);
 	break;
     case DSC_PointerType_Scalar:
-	DSC_PositionalPTokenOfScalar (
-	    m_iContent.as_iScalar, pPTokenRef, xPTokenRef
-	);
+	pResult = m_iContent.as_iScalar.PPT ();
 	break;
     case DSC_PointerType_Value:
-	m_iContent.as_iValue.getPPTReference (pPTokenRef, xPTokenRef);
+	pResult = m_iContent.as_iValue.PPT ();
 	break;
     case DSC_PointerType_Identity:
-	m_iContent.as_iIdentity.getPPTReference (pPTokenRef, xPTokenRef);
+	pResult = m_iContent.as_iIdentity.PPT ();
 	break;
     case DSC_PointerType_Link:
-	m_iContent.as_iLink.getPPTReference (pPTokenRef, xPTokenRef);
+	pResult = m_iContent.as_iLink.PPT ();
 	break;
     case DSC_PointerType_Reference:
-	m_iContent.as_iReference.getPPTReference (pPTokenRef, xPTokenRef);
+	pResult = m_iContent.as_iReference.PPT ();
 	break;
     default:
 	complainAboutBadPointerType (DSC_N_PositionalPTOfPtr);
 	break;
     }
+    return pResult;
 }
 
 
-void DSC_Pointer::getRPTReference (M_CPD *&pPTokenRef, int &xPTokenRef) const {
+rtPTOKEN_Handle *DSC_Pointer::RPT () const {
+    rtPTOKEN_Handle *pResult = 0;
     switch (m_xType) {
     case DSC_PointerType_Empty:
 	DSC__ComplainAboutEmptyPtrType (DSC_N_ReferentialPTOfPtr);
 	break;
     case DSC_PointerType_Scalar:
-	DSC_ReferentialPTokenOfScalar (
-	    m_iContent.as_iScalar, pPTokenRef, xPTokenRef
-	);
+	pResult = m_iContent.as_iScalar.RPT ();
 	break;
     case DSC_PointerType_Value:
-	m_iContent.as_iValue.getRPTReference (pPTokenRef, xPTokenRef);
+	pResult = m_iContent.as_iValue.RPT ();
 	break;
     case DSC_PointerType_Identity:
-	m_iContent.as_iIdentity.getRPTReference (pPTokenRef, xPTokenRef);
+	pResult = m_iContent.as_iIdentity.RPT ();
 	break;
     case DSC_PointerType_Link:
-	m_iContent.as_iLink.getRPTReference (pPTokenRef, xPTokenRef);
+	pResult = m_iContent.as_iLink.RPT ();
 	break;
     case DSC_PointerType_Reference:
-	m_iContent.as_iReference.getRPTReference (pPTokenRef, xPTokenRef);
+	pResult = m_iContent.as_iReference.RPT ();
 	break;
     default:
 	complainAboutBadPointerType (DSC_N_ReferentialPTOfPtr);
 	break;
     }
+    return pResult;
 }
 
 
@@ -1007,7 +865,7 @@ void DSC_Pointer::construct (M_CPD *pMonotype) {
     case RTYPE_C_Unsigned96UV:
     case RTYPE_C_Unsigned128UV:
 /*****  If the positional ptoken is the scalar ptoken... *****/
-	if (pMonotype->ReferenceNames (UV_CPx_PToken, &M_KnownObjectTable::TheScalarPToken)) {
+	if (pMonotype->ReferenceNames (UV_CPx_PToken, &M_KOT::TheScalarPToken)) {
 /*****  ... then create a scalar pointer  *****/
 	    constructScalarComposition (0, pMonotype);
 	}
@@ -1024,13 +882,13 @@ void DSC_Pointer::construct (M_CPD *pMonotype) {
 	break;
 
     case RTYPE_C_Link:
-	rtLINK_AlignLink (pMonotype);
+	rtLINK_Align (pMonotype);
 
 /*****  ... If its positional ptoken is the scalar ptoken ... *****/
-	if (pMonotype->ReferenceNames (rtLINK_CPx_PosPToken, &M_KnownObjectTable::TheScalarPToken)) {
+	if (pMonotype->ReferenceNames (rtLINK_CPx_PosPToken, &M_KOT::TheScalarPToken)) {
 /*****  ... then create a scalar reference pointer  *****/
 	    constructReferenceScalar (
-		rtLINK_CPD_RefPTokenCPD (pMonotype),
+		static_cast<rtLINK_Handle*>(pMonotype->containerHandle ())->rptHandle (),
 		rtLINK_RRD_ReferenceOrigin (rtLINK_CPD_RRDArray (pMonotype))
 	    );
 	}
@@ -1054,11 +912,9 @@ void DSC_Pointer::construct (rtLINK_CType *pMonotype) {
 /*****  ... If its positional ptoken is the scalar ptoken ... *****/
     if (pMonotype->PPT ()->NamesTheScalarPToken ()) {
 /*****  ... then create a scalar reference pointer  *****/
-	M_CPD *ptoken = pMonotype->RPT ();
-	int value = rtLINK_RRDC_ReferenceOrigin (rtLINK_LC_ChainHead (pMonotype));
-
-	ptoken->retain ();
-	constructReferenceScalar (ptoken, value);
+	constructReferenceScalar (
+	    pMonotype->RPT (), rtLINK_RRDC_ReferenceOrigin (rtLINK_LC_ChainHead (pMonotype))
+	);
     }
     else {
 /*****  ... else create a link pointer  *****/
@@ -1073,7 +929,7 @@ void DSC_Pointer::construct (rtLINK_CType *pMonotype) {
  *
  *  Arguments:
  *	this			- the pointer to be initialized.
- *	posPTokenCPD		- a standard CPD for the positional P-Token
+ *	pPPT			- a handle for the positional P-Token
  *				  of the pointer being initialized.
  *	p/xRPTReference		- a CPD/Index pair for the referential state
  *				  of this pointer.
@@ -1098,28 +954,25 @@ void DSC_Pointer::construct (rtLINK_CType *pMonotype) {
  *	these conditions is true, an error is generated.
  *
  *****/
-void DSC_Pointer::constructCorrespondence (
-    M_CPD *posPTokenCPD, M_CPD *pRPTReference, unsigned int xRPTReference
-) {
-    M_CPD *refPTokenCPD = pRPTReference->GetCPD (xRPTReference, RTYPE_C_PToken);
-    unsigned int rptCardinality = rtPTOKEN_CPD_BaseElementCount (refPTokenCPD);
+void DSC_Pointer::constructCorrespondence (rtPTOKEN_Handle *pPPT, Vdd::Store *pStore) {
+    rtPTOKEN_Handle::Reference pRPT (pStore->getPToken ());
+
+    unsigned int rptCardinality = pRPT->cardinality ();
 
     if (1 == rptCardinality)
-	constructReferenceConstant (posPTokenCPD, refPTokenCPD, 0);
-    else if (rptCardinality == rtPTOKEN_CPD_BaseElementCount (posPTokenCPD)) {
-	rtLINK_CType *linkc = rtLINK_RefConstructor (refPTokenCPD, -1);
+	constructReferenceConstant (pPPT, pRPT, 0);
+    else if (rptCardinality == pPPT->cardinality ()) {
+	rtLINK_CType *linkc = rtLINK_RefConstructor (pRPT);
 	rtLINK_AppendRange (linkc, 0, rptCardinality);
-	linkc->Close (posPTokenCPD);
+	linkc->Close (pPPT);
 	constructLink (linkc);
-	refPTokenCPD->release ();
     }
     else {
-	refPTokenCPD->release ();
 	ERR_SignalFault (
 	    EC__InternalInconsistency, UTIL_FormatMessage (
 		"%s: |PPT| == %u, |RPT| == %u",
 		"DSC_InitCorrespondenceDescriptor: P-Token Size Difference",
-		rtPTOKEN_CPD_BaseElementCount (posPTokenCPD),
+		pPPT->cardinality (),
 		rptCardinality
 	    )
 	);
@@ -1148,7 +1001,7 @@ void DSC_Pointer::constructComposition (rtLINK_CType *pSubscript, DSC_Pointer &r
 	    if (rScalar.holdsAReference ()) {
 		rtREFUV_AlignReference (&rScalar);
 
-		rtLINK_CType *pResult = rtLINK_PosConstructor (pSubscript->PPT (), -1);
+		rtLINK_CType *pResult = rtLINK_PosConstructor (pSubscript->PPT ());
 
 #		define handleNil(c,n,r)
 #		define handleRef(c,n,r) pResult->AppendRepeat (DSC_Scalar_Int (rScalar), n)
@@ -1158,7 +1011,7 @@ void DSC_Pointer::constructComposition (rtLINK_CType *pSubscript, DSC_Pointer &r
 #		undef handleRef
 #		undef handleNil
 
-		pResult->Close (rScalar.m_pRPT);
+		pResult->Close (rScalar.RPT ());
 		constructLink (pResult);
 	    }
 	    else {
@@ -1211,9 +1064,10 @@ void DSC_Pointer::constructComposition (M_CPD *pSubscript, DSC_Pointer &rSource)
      ********************************************************************************
      ********************************************************************************/
     //  Coerce using the subscript RPT to avoid cross database scalar ptoken problems...
-	    M_CPD *pSourcePPT = UV_CPD_RefPTokenCPD (pSubscript);
+	    rtPTOKEN_Handle::Reference pSourcePPT (
+		static_cast<rtUVECTOR_Handle*>(pSubscript->containerHandle ())->rptHandle ()
+	    );
 	    if (pSourcePPT->DoesntNameTheScalarPToken ()) {
-		pSourcePPT->release ();
 		ERR_SignalFault (
 		    EC__InternalInconsistency,
 		    "DSC_Pointer::constructComposition (U,P): Non-scalar co-domain."
@@ -1229,7 +1083,6 @@ void DSC_Pointer::constructComposition (M_CPD *pSubscript, DSC_Pointer &rSource)
 		m_xType = DSC_PointerType_Value;
 	    }
 	    pSource->release ();
-	    pSourcePPT->release ();
 	}
 	break;
     case DSC_PointerType_Value:
@@ -1263,13 +1116,9 @@ void DSC_Pointer::constructComposition (DSC_Scalar &rSubscript, DSC_Pointer &rSo
         DSC__ComplainAboutEmptyPtrType (DSC_N_RefExtractFromPointer);
         break;
     case DSC_PointerType_Scalar:
-	DSC_DuplicateScalar (
-	    m_iContent.as_iScalar, DSC_Pointer_Scalar (rSource)
-	);
+	m_iContent.as_iScalar.constructFrom (DSC_Pointer_Scalar (rSource));
 	if (rSource.holdsAScalarReference () && DSC_Scalar_Int (rSubscript) != 0) {
-	    DSC_Pointer_Scalar_Int (*this) = rtPTOKEN_CPD_BaseElementCount (
-		DSC_Scalar_RefPToken (m_iContent.as_iScalar)
-	    );
+	    DSC_Pointer_Scalar_Int (*this) = m_iContent.as_iScalar.RPTCardinality ();
 	}
 	break;
 
@@ -1292,7 +1141,7 @@ void DSC_Pointer::constructComposition (DSC_Scalar &rSubscript, DSC_Pointer &rSo
 	break;
 
     case DSC_PointerType_Identity:
-	DSC_DuplicateScalar (m_iContent.as_iScalar, rSubscript);
+	m_iContent.as_iScalar.constructFrom (rSubscript);
 	break;
 
     default:
@@ -1337,12 +1186,10 @@ void DSC_Pointer::constructComposition (DSC_Pointer &rSubscript, DSC_Pointer &rS
 	    constructComposition (DSC_Pointer_Scalar (rSubscript), rSource);
 	else {
 	    DSC_Scalar newScalar;
-	    DSC_DuplicateScalar (newScalar, DSC_Pointer_Scalar (rSubscript));
-	    DSC_Scalar_Int (newScalar) = rtPTOKEN_CPD_BaseElementCount (
-		DSC_Scalar_RefPToken (DSC_Pointer_Scalar (rSubscript))
-	    );
+	    newScalar.constructFrom (DSC_Pointer_Scalar (rSubscript));
+	    DSC_Scalar_Int (newScalar) = DSC_Pointer_Scalar (rSubscript).RPTCardinality ();
 	    constructComposition (newScalar, rSource);
-	    DSC_ClearScalar (newScalar);
+	    newScalar.destroy ();
 	}
 	break;
     }
@@ -1507,7 +1354,7 @@ void DSC_Pointer::construct (DSC_Pointer const& rSource) {
     case DSC_PointerType_Empty:
         break;
     case DSC_PointerType_Scalar:
-	DSC_DuplicateScalar (m_iContent.as_iScalar, DSC_Pointer_Scalar (rSource));
+	m_iContent.as_iScalar.constructFrom (DSC_Pointer_Scalar (rSource));
         break;
     case DSC_PointerType_Value:
 	m_iContent.as_iValue.construct (DSC_Pointer_Value (rSource));
@@ -1535,7 +1382,7 @@ void DSC_Pointer::clear () {
     case DSC_PointerType_Empty:
         break;
     case DSC_PointerType_Scalar:
-	DSC_ClearScalar (m_iContent.as_iScalar);
+	m_iContent.as_iScalar.destroy ();
         break;
     case DSC_PointerType_Value:
 	m_iContent.as_iValue.clear ();
@@ -1561,7 +1408,7 @@ void DSC_Pointer::clear () {
  *****  Coercion  *****
  **********************/
 
-void DSC_Pointer::coerce (M_CPD *pPPT) {
+void DSC_Pointer::coerce (rtPTOKEN_Handle *pPPT) {
     if (isntScalar () || pPPT->NamesTheScalarPToken ())
 	return;
 
@@ -1569,17 +1416,15 @@ void DSC_Pointer::coerce (M_CPD *pPPT) {
 
     if (rScalar.holdsAValue ()) {
 	M_CPD *pCoercedScalar = rScalar.asCoercedContainer (pPPT);
-	DSC_ClearScalar (rScalar);
+	rScalar.destroy ();
 	constructValue (pCoercedScalar);
     }
     else {
 	rtREFUV_AlignReference (&rScalar);
-	rtLINK_CType *pCoercedScalar = rtLINK_PosConstructor (pPPT, -1);
-	rtLINK_AppendRepeat (
-	    pCoercedScalar, DSC_Scalar_Int (rScalar), rtPTOKEN_CPD_BaseElementCount (pPPT)
-	);
-	pCoercedScalar->Close (rScalar.m_pRPT);
-	DSC_ClearScalar (rScalar);
+	rtLINK_CType *pCoercedScalar = rtLINK_PosConstructor (pPPT);
+	rtLINK_AppendRepeat (pCoercedScalar, DSC_Scalar_Int (rScalar), pPPT->cardinality ());
+	pCoercedScalar->Close (rScalar.RPT ());
+	rScalar.destroy ();
 	constructLink (pCoercedScalar);
     }
 }
@@ -1610,8 +1455,9 @@ M_CPD *DSC_Pointer::factor () {
 	    /** now convert to either an identity or link pointer ... **/
 	    if (linkc)
 		constructLink (linkc);
-	    else
-		constructIdentity (UV_CPD_PosPTokenCPD (pDistribution));
+	    else constructIdentity (
+		static_cast<rtUVECTOR_Handle*>(pDistribution->containerHandle ())->pptHandle ()
+	    );
 	}
         break;
     default:
@@ -1682,19 +1528,14 @@ void DSC_Value::distribute (M_CPD *cpd) {
 
 
 void DSC_Pointer::distribute (M_CPD *distribution) {
-    M_CPD *pptrefCPD;
-    int	   pptrefIndex;
-    getPPTReference (pptrefCPD, pptrefIndex);
-    if (pptrefCPD->ReferenceDoesntName (pptrefIndex, distribution, UV_CPx_PToken)) {
-	pptrefCPD->release ();
+    rtPTOKEN_Handle::Reference pPPT (PPT ());
+    if (distribution->ReferenceDoesntName (UV_CPx_PToken, pPPT)) {
         ERR_SignalFault (
 	    EC__InternalInconsistency, UTIL_FormatMessage (
-		"%s: Inconsistent Descriptor Distribution",
-		DSC_N_DistributePointer
+		"%s: Inconsistent Descriptor Distribution", DSC_N_DistributePointer
 	    )
 	);
     }
-    pptrefCPD->release ();
 
     switch (m_xType) {
     case DSC_PointerType_Empty:
@@ -1779,7 +1620,7 @@ void DSC_Pointer::assignToUV (rtLINK_CType *pSubscript, M_CPD *pTarget) {
 	    );
 	    break;
 	case RTYPE_C_UndefUV:
-	    rtUNDEFUV_Align (pTarget);
+	    pTarget->align ();
 	    break;
 	case RTYPE_C_Unsigned64UV:
 	    rtU64UV_LCAssignScalar (
@@ -1832,7 +1673,7 @@ void DSC_Pointer::assignToUV (rtLINK_CType *pSubscript, M_CPD *pTarget) {
 	    rtREFUV_LCAssign (pTarget, pSubscript, m_iContent.as_iValue);
 	    break;
 	case RTYPE_C_UndefUV:
-	    rtUNDEFUV_Align (pTarget);
+	    pTarget->align ();
 	    break;
 	case RTYPE_C_Unsigned64UV:
 	    rtU64UV_LCAssign (pTarget, pSubscript, m_iContent.as_iValue);
@@ -1860,10 +1701,10 @@ void DSC_Pointer::assignToUV (rtLINK_CType *pSubscript, M_CPD *pTarget) {
 	     *   Convert the Identity into a reference uvector initialized to
 	     *   0 to the size of the Identity ptoken.
 	     ***/
-	    M_CPD *ptoken = m_iContent.as_iIdentity.PToken ();
+	    rtPTOKEN_Handle *ptoken = m_iContent.as_iIdentity.PToken ();
 	    M_CPD *refuv = rtREFUV_New (ptoken, ptoken);
 	    rtREFUV_ElementType *ptr = rtREFUV_CPD_Array (refuv);
-	    for (unsigned int i=0; i<rtPTOKEN_CPD_BaseElementCount (ptoken); i++)
+	    for (unsigned int i=0; i<ptoken->cardinality (); i++)
 		*ptr++ = (rtREFUV_ElementType)i;
 	    /*** Do the Assign ***/
 	    rtREFUV_LCAssign (pTarget, pSubscript, refuv);
@@ -1915,39 +1756,38 @@ void DSC_Descriptor::constructMonotype (M_CPD *pMonotype) {
 	break;
     }
 
-    M_CPD *pStore = NilOf (M_CPD*);
+    Vdd::Store *pStore = NilOf (Vdd::Store*);
     switch (xMonotypeType) {
     case RTYPE_C_CharUV:
-	if (pMonotype->ReferenceNames (UV_CPx_RefPToken, pKOT->TheCharacterPTokenCPD ()))
+	if (pMonotype->ReferenceNames (UV_CPx_RefPToken, pKOT->TheCharacterPTokenHandle ()))
 	    pStore = pKOT->TheCharacterClass;
 	break;
     case RTYPE_C_DoubleUV:
-	if (pMonotype->ReferenceNames (UV_CPx_RefPToken, pKOT->TheDoublePTokenCPD ()))
+	if (pMonotype->ReferenceNames (UV_CPx_RefPToken, pKOT->TheDoublePTokenHandle ()))
 	    pStore = pKOT->TheDoubleClass;
 	break;
     case RTYPE_C_FloatUV:
-	if (pMonotype->ReferenceNames (UV_CPx_RefPToken, pKOT->TheFloatPTokenCPD ()))
+	if (pMonotype->ReferenceNames (UV_CPx_RefPToken, pKOT->TheFloatPTokenHandle ()))
 	    pStore = pKOT->TheFloatClass;
 	break;
     case RTYPE_C_IntUV:
-	if (pMonotype->ReferenceNames (UV_CPx_RefPToken, pKOT->TheIntegerPTokenCPD ()))
+	if (pMonotype->ReferenceNames (UV_CPx_RefPToken, pKOT->TheIntegerPTokenHandle ()))
 	    pStore = pKOT->TheIntegerClass;
-	else if (pMonotype->ReferenceNames (UV_CPx_RefPToken, pKOT->TheDatePTokenCPD ()))
+	else if (pMonotype->ReferenceNames (UV_CPx_RefPToken, pKOT->TheDatePTokenHandle ()))
 	    pStore = pKOT->TheDateClass;
 	break;
     case RTYPE_C_UndefUV:
-	if (pMonotype->ReferenceNames (UV_CPx_RefPToken, pKOT->TheNAPTokenCPD ()))
+	if (pMonotype->ReferenceNames (UV_CPx_RefPToken, pKOT->TheNAPTokenHandle ()))
 	    pStore = pKOT->TheNAClass;
-	else if (pMonotype->ReferenceNames (UV_CPx_RefPToken, pKOT->TheTruePTokenCPD ()))
+	else if (pMonotype->ReferenceNames (UV_CPx_RefPToken, pKOT->TheTruePTokenHandle ()))
 	    pStore = pKOT->TheTrueClass;
-	else if (pMonotype->ReferenceNames (UV_CPx_RefPToken, pKOT->TheFalsePTokenCPD ()))
+	else if (pMonotype->ReferenceNames (UV_CPx_RefPToken, pKOT->TheFalsePTokenHandle ()))
 	    pStore = pKOT->TheFalseClass;
     default:
 	break;
     }
 
     if (pStore) {
-	pStore->retain ();
 	constructMonotype (pStore, pMonotype);
     }
     else ERR_SignalFault (
@@ -2013,7 +1853,7 @@ void DSC_Descriptor::constructMonotype (M_CPD *pMonotype) {
  *				  p-token of the zero (assigned).
  */
 void DSC_Descriptor::constructZero (
-    M_CPD *pStore, RTYPE_Type xRType, M_CPD *pPPT, M_CPD *pRPT
+    Store *pStore, RTYPE_Type xRType, rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT
 ) {
     switch (xRType) {
     case RTYPE_C_CharUV:
@@ -2058,21 +1898,18 @@ void DSC_Descriptor::constructZero (
  *  Descriptor Traversal  *
  **************************/
 
-PublicFnDef void DSC__SetupTraversal (
-    DSC_Descriptor* dsc, M_CPD **cpd, rtLINK_CType **linkc
-) {
-    if (dsc->holdsNonScalarValues ()) {
-	*cpd = DSC_Descriptor_Value (*dsc);
-	if ((*cpd)->RType () != RTYPE_C_IntUV)
-	    ERR_SignalFault (
-		EC__UnimplementedCase,
-		"DSC_Traversal: Not Implemented for this descriptor type"
-	    );
+void DSC_Descriptor::__SetupTraversal (M_CPD **cpd, rtLINK_CType **linkc) {
+    if (holdsNonScalarValues ()) {
+	*cpd = DSC_Pointer_Value (m_iPointer);
+	if ((*cpd)->RType () != RTYPE_C_IntUV) ERR_SignalFault (
+	    EC__UnimplementedCase,
+	    "DSC_Traversal: Not Implemented for this descriptor type"
+	);
     }
-    else if (dsc->holdsNonScalarReferences ())
-	*cpd = DSC_Descriptor_Reference (*dsc);
-    else if (dsc->holdsALink ())
-	*linkc = DSC_Descriptor_Link (*dsc);
+    else if (holdsNonScalarReferences ())
+	*cpd = DSC_Pointer_Reference (m_iPointer);
+    else if (holdsALink ())
+	*linkc = DSC_Pointer_Link (m_iPointer);
     else ERR_SignalFault (
 	EC__UnimplementedCase,
 	"DSC_Traversal: Not Implemented for this descriptor type"

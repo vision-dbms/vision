@@ -42,6 +42,8 @@
 
 #include "Vca_VPassiveProcessAgent.h"
 
+#include "VTransientServices.h" 
+
 #include "Vca_CompilerHappyPill.h"
 
 #define VCA_PASSIVE_DISTRIBUTED_CALLBACK 1
@@ -1904,6 +1906,8 @@ void Vca::VcaDirectoryBuilder::Order::parseSessionsFile (
 		xState
 		    = 0 == strcasecmp (pToken, "Connection_Template")
 		    ? ParseState_ExpectingSessionSentinel
+		    : 0 == strcasecmp (pToken, "Notification_Template")
+		    ? ParseState_ExpectingNotificationSentinel
 		    : 0 == strcasecmp (pToken, "Include")
 		    ? ParseState_ExpectingIncludeTarget
 		    : 0 == strcasecmp (pToken, "IncludeIf")
@@ -1920,6 +1924,15 @@ void Vca::VcaDirectoryBuilder::Order::parseSessionsFile (
 		    if (parseSessionTemplate (iSessionsFile, xType, pSession))
 			insertSession (pSession);
 		    xState = ParseState_ExpectingTag;
+		}
+		break;
+	    case ParseState_ExpectingNotificationSentinel:
+		if (strcmp (pToken, "Begin") != 0) {
+		    log ("VcaDirectoryBuilder::Order::parseSessionsFile --> Error: found '%s' when expecting 'Begin' for Notification_Template", pToken);
+		    xState = ParseState_Error;
+		} else {
+		    VTransient::transientServicesProvider ()->parseNotificationTemplate (iSessionsFile);
+		    xState = ParseState_ExpectingTag; 
 		}
 		break;
 	    case ParseState_ExpectingIncludeTarget:
@@ -1948,6 +1961,7 @@ void Vca::VcaDirectoryBuilder::Order::parseSessionsFile (
 	    case ParseState_ExpectingIncludeTarget:
 	    case ParseState_ExpectingIncludeIfTarget:
 	    case ParseState_ExpectingSessionSentinel:
+	    case ParseState_ExpectingNotificationSentinel:
 	    case ParseState_ExpectingUnknown:
 		pBreakSet = g_pRestOfLineBreakSet;
 		break;
@@ -1961,11 +1975,10 @@ void Vca::VcaDirectoryBuilder::Order::parseSessionsFile (
 }
 
 
-bool Vca::VcaDirectoryBuilder::Order::parseSessionTemplate (
-    VSimpleFile &rSessionsFile, SessionType xType, Session::Reference &rpSession
-)  const {
-
-    bool bCompleted = false;
+bool Vca::VcaDirectoryBuilder::Order::parseSessionTemplate(
+	VString &rSessionTemplate, SessionType xType, Session::Reference &rpSession
+) const { 
+	bool bCompleted = false;
 
 	VString iSessionName, iHostName, iUserName, iPassword, iProgram, iDatabase, iPort, iServerFile, iURLBase, iEntryName, iImageName;
 	Session::Fallback::Reference pAliasList, pFallbackList, pNamespace;
@@ -1977,9 +1990,17 @@ bool Vca::VcaDirectoryBuilder::Order::parseSessionTemplate (
 	bool bRetrying = false, bOneOf = false, bPassive = false, bPassiveAgent = false, bThreePipe = true, bPattern = false, bSSH = false, bTimeout = false;
 	double f64; U32 u32;
 
-	VString iBuffer;
-	while (!bCompleted && rSessionsFile.GetLine (iBuffer)) {
-	    ParseState xState = ParseState_ExpectingTag;
+
+	char *pSessionPtr;
+	char const* pNewLines = g_pRestOfLineBreakSet;
+	 for (
+		 char *iBufferChar = strtok_r (rSessionTemplate.storage(), pNewLines, &pSessionPtr);
+		 iBufferChar;
+		 iBufferChar = strtok_r (0, pNewLines, &pSessionPtr)
+	    ) {
+		VString iBuffer = iBufferChar;
+		
+		ParseState xState = ParseState_ExpectingTag;
 	    char const* pBreakSet = g_pWhitespaceBreakSet;
 	    char *pBufferPtr;
 	    for (
@@ -2077,6 +2098,9 @@ bool Vca::VcaDirectoryBuilder::Order::parseSessionTemplate (
 			: 0 == strcasecmp (iCookedToken, "TTL")
 			? ParseState_ExpectingTTL
 
+			: 0 == strcasecmp (iCookedToken, "Notify")
+			? ParseState_ExpectingInfoServer
+			
 			: ParseState_Error;
 		    if (ParseState_Error == xState)
 			log ("VcaDirectoryBuilder::Order::parseSessionTemplate --> Unknown tag '%s'", static_cast <char const *> (iCookedToken.content ()));
@@ -2135,6 +2159,15 @@ bool Vca::VcaDirectoryBuilder::Order::parseSessionTemplate (
 		case ParseState_ExpectingSessionPattern:
 		    bPattern = true;
 		    iSessionName.setTo (iCookedToken);
+		    break;
+		case ParseState_ExpectingInfoServer:
+		    VTransient::transientServicesProvider ()->updateInfoServerEntry (iCookedToken);
+		    xState = ParseState_ExpectingNSTemplate;
+		    // fprintf(stderr, "InofServer: %s\n", iCookedToken.content ());
+		    break;
+		case ParseState_ExpectingNSTemplate:
+		    // fprintf(stderr, "InfoServer Event Action Map: %s\n", iCookedToken.content ());
+		    VTransient::transientServicesProvider ()->parseNSTFile (iCookedToken);
 		    break;
 		case ParseState_ExpectingHostName:
 		    iHostName.setTo (iCookedToken);
@@ -2236,6 +2269,7 @@ bool Vca::VcaDirectoryBuilder::Order::parseSessionTemplate (
 		case ParseState_ExpectingRetryDelay1:
 		case ParseState_ExpectingRetryDelay2:
 		case ParseState_ExpectingTag:
+		case ParseState_ExpectingInfoServer:
 		    pBreakSet = g_pWhitespaceBreakSet;
 		    break;
 		default:
@@ -2244,8 +2278,40 @@ bool Vca::VcaDirectoryBuilder::Order::parseSessionTemplate (
 		}
 	    }
 	    iBuffer.clear ();
-	} 
-    return bCompleted;
+		
+	}
+	return bCompleted;
+	
+}
+
+bool Vca::VcaDirectoryBuilder::Order::parseSessionTemplate (
+    VSimpleFile &rSessionsFile, SessionType xType, Session::Reference &rpSession
+)  const {
+	VString templateString;
+	if(extractSessionTemplateString(rSessionsFile, templateString)) {
+		return parseSessionTemplate(templateString, xType, rpSession);
+	} else {
+		return false;
+	}
+}
+
+bool Vca::VcaDirectoryBuilder::Order::extractSessionTemplateString (
+	VSimpleFile &rSessionsFile, VString &templateString
+) const { 
+	templateString = "";
+	VString iBuffer;
+	bool bCompleted = false;
+        char *pBufferPtr;
+	while (!bCompleted && rSessionsFile.GetLine(iBuffer)) {
+            char *line = strtok_r (iBuffer.storage (), g_pRestOfLineBreakSet, &pBufferPtr);
+            if (line) {
+		templateString << line << "\n";
+		if (0 == strcasecmp (line, "Connection_Template End"))
+			bCompleted = true;
+            }
+            iBuffer.clear();
+	}
+	return bCompleted;
 }
 
 

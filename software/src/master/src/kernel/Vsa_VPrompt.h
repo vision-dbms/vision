@@ -88,6 +88,9 @@ namespace Vsa {
 	bool usingAnyData () const {
 	    return m_bUsingAnyData;
 	}
+	bool exitOnError () const {
+	    return m_bExitOnError;
+	}
 
     //  Control
     public:
@@ -127,6 +130,7 @@ namespace Vsa {
 	VReference<QueryOutput>		m_pLastQuery;
 	bool				m_bUsingExtendedPrompts;
 	bool				m_bUsingAnyData;
+	bool                            m_bExitOnError;
     };
 }
 

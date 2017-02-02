@@ -49,7 +49,7 @@
 
 unsigned int VOutputBuffer::AllocatoR::g_iLocalExtentExpansionCount  = 0;
 unsigned int VOutputBuffer::AllocatoR::g_iGlobalExtentExpansionCount = 0;
-unsigned int VOutputBuffer::AllocatoR::CellBlock::g_iTotalAllocation = 0;
+size_t       VOutputBuffer::AllocatoR::CellBlock::g_iTotalAllocation = 0;
 
 /************************
  *****  Parameters  *****
@@ -881,9 +881,7 @@ void VOutputBuffer::moveOutputTo (
 
     //  ... align and validate the subset and order, ...
 	pCallerSubset->Align ();
-	rtREFUV_AlignForAssign (
-	    pCallerSubset->PPT (), -1, pCallerReordering, ptoken (), -1
-	);
+	rtREFUV_AlignForAssign (pCallerSubset->PPT (), pCallerReordering, ptoken ());
 
     //  ...  invert the order, ...
 	VCPDReference pOrderInverse (0, rtREFUV_Flip (pCallerReordering));
@@ -967,9 +965,7 @@ void VOutputBuffer::moveOutputTo (
 	Cell** pTargetRings = pTarget->rings ();
 
     //  ... align and validate the order, ...
-	rtREFUV_AlignForAssign (
-	    pTarget->ptoken (), -1, pCallerReordering, ptoken (), -1
-	);
+	rtREFUV_AlignForAssign (pTarget->ptoken (), pCallerReordering, ptoken ());
 
     //  ... initialize cached state, ...
 	rtREFUV_ElementType* arrayp = rtREFUV_CPD_Array (pCallerReordering);

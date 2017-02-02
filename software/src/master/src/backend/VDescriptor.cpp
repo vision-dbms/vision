@@ -84,31 +84,15 @@ VDescriptor::~VDescriptor () {
  *  Arguments:
  *	pElementSelector	- a link constructor specifying the set of
  *				  positions to be modified.
- *	pTargetCPD		- the address of a CPD for the object being
- *				  modified.
+ *	pTarget			- the store being modified.
  *---------------------------------------------------------------------------*/
-void VDescriptor::assignTo (
-    rtLINK_CType *pElementSelector, M_CPD *pTargetCPD
-) {
+void VDescriptor::assignTo (rtLINK_CType *pElementSelector, Vdd::Store *pTarget) {
     normalize ();
 
     switch (m_xType) {
     case Type_Std:
-	switch (pTargetCPD->RType ()) {
-	case RTYPE_C_Dictionary:
-	    rtDICTIONARY_Assign (
-		pTargetCPD, pElementSelector, &contentAsMonotype ()
-	    );
-	    break;
-	case RTYPE_C_Vector:
-	    rtVECTOR_Assign (
-		pTargetCPD, pElementSelector, &contentAsMonotype ()
-	    );
-	    break;
-	default:
-	    raiseAssignmentTargetException (pTargetCPD);
-	    break;
-	}
+	if (!pTarget->setElements (pElementSelector, contentAsMonotype ()))
+	    raiseAssignmentTargetException (pTarget);
 	break;
 
     case Type_Vector:
@@ -116,25 +100,12 @@ void VDescriptor::assignTo (
 	/***** No break here *****/
 
     case Type_VectorC:
-	switch (pTargetCPD->RType ()) {
-	case RTYPE_C_Dictionary:
-	    rtDICTIONARY_Assign (
-		pTargetCPD, pElementSelector, contentAsVectorC ()
-	    );
-	    break;
-	case RTYPE_C_Vector:
-	    rtVECTOR_Assign (
-		pTargetCPD, pElementSelector, contentAsVectorC ()
-	    );
-	    break;
-	default:
-	    raiseAssignmentTargetException (pTargetCPD);
-	    break;
-	}
+	if (!pTarget->setElements (pElementSelector, contentAsVectorC ()))
+	    raiseAssignmentTargetException (pTarget);
 	break;
 
     case Type_Fragmentation:
-	contentAsFragmentation ().assignTo (pElementSelector, pTargetCPD);
+	contentAsFragmentation ().assignTo (pElementSelector, pTarget);
 	break;
 
     default:
@@ -148,48 +119,17 @@ void VDescriptor::assignTo (
  *  Arguments:
  *	pElementSelector	- the address of a reference scalar specifying
  *				  the position to be modified.
- *	pTargetCPD		- a standard CPD for the vector to be modified.
+ *	pTarget			- the store being modified.
  *---------------------------------------------------------------------------*/
-void VDescriptor::assignTo (
-    rtREFUV_Type_Reference* pElementSelector, M_CPD *pTargetCPD
-)
-{
+void VDescriptor::assignTo (rtREFUV_Type_Reference &rElementSelector, Vdd::Store *pTarget) {
     normalize ();
 
     if (isStandard ()) {
-	switch (pTargetCPD->RType ()) {
-	case RTYPE_C_Dictionary:
-	    rtDICTIONARY_Assign (
-		pTargetCPD, pElementSelector, &contentAsMonotype ()
-	    );
-	    break;
-	case RTYPE_C_Vector:
-	    rtVECTOR_Assign (
-		pTargetCPD, pElementSelector, &contentAsMonotype ()
-	    );
-	    break;
-	default:
-	    raiseAssignmentTargetException (pTargetCPD);
-	    break;
-	}
+	if (!pTarget->setElements (rElementSelector, contentAsMonotype ()))
+	    raiseAssignmentTargetException (pTarget);
     }
-    else {
-	rtVECTOR_CType* pVectorC = convertToVectorC ();
-	switch (pTargetCPD->RType ()) {
-	case RTYPE_C_Dictionary:
-	    rtDICTIONARY_Assign (
-		pTargetCPD, pElementSelector, pVectorC
-	    );
-	    break;
-	case RTYPE_C_Vector:
-	    rtVECTOR_Assign (
-		pTargetCPD, pElementSelector, pVectorC
-	    );
-	    break;
-	default:
-	    raiseAssignmentTargetException (pTargetCPD);
-	    break;
-	}
+    else if (!pTarget->setElements (rElementSelector, convertToVectorC ())) {
+	raiseAssignmentTargetException (pTarget);
     }
 }
 
@@ -199,22 +139,20 @@ void VDescriptor::assignTo (
  *	rPointer		- the address of a link equivalent descriptor
  *				  pointer specifying the positions to be
  *				  modified.
- *	pTargetCPD		- the address of a CPD for the object being
- *				  modified.
+ *	pTarget			- the store being modified.
  *---------------------------------------------------------------------------*/
-void VDescriptor::assignTo (DSC_Pointer &rPointer, M_CPD *pTargetCPD) {
+void VDescriptor::assignTo (DSC_Pointer &rPointer, Vdd::Store *pTarget) {
     if (rPointer.holdsAScalarReference ())
-        assignTo (&DSC_Pointer_Scalar (rPointer), pTargetCPD);
+        assignTo (DSC_Pointer_Scalar (rPointer), pTarget);
     else if (rPointer.holdsALink ()) {
-	assignTo (DSC_Pointer_Link (rPointer), pTargetCPD);
+	assignTo (DSC_Pointer_Link (rPointer), pTarget);
     }
     else if (rPointer.holdsAnIdentity ()) {
+	rtPTOKEN_Handle::Reference pTargetPToken (pTarget->getPToken ());
         rtLINK_CType *pIdentity = rtLINK_AppendRange (
-	    rtLINK_RefConstructor (pTargetCPD, rtVECTOR_CPx_PToken),
-	    0,
-	    rtPTOKEN_BaseElementCount (pTargetCPD, rtVECTOR_CPx_PToken)
-	)->Close (pTargetCPD, rtVECTOR_CPx_PToken);
-	assignTo (pIdentity, pTargetCPD);
+	    rtLINK_RefConstructor (pTargetPToken), 0, pTargetPToken->cardinality ()
+	)->Close (pTargetPToken);
+	assignTo (pIdentity, pTarget);
 	pIdentity->release ();
     }
     else if (rPointer.holdsNonScalarReferences ()) {
@@ -223,7 +161,7 @@ void VDescriptor::assignTo (DSC_Pointer &rPointer, M_CPD *pTargetCPD) {
 
 	M_CPD *pDistribution = pointer.factor ();
 	if (IsNil (pDistribution))
-	    assignTo (pointer, pTargetCPD);
+	    assignTo (pointer, pTarget);
 	else {
 	    VDescriptor xdsc;
 	    xdsc.setToCopied (*this);
@@ -231,7 +169,7 @@ void VDescriptor::assignTo (DSC_Pointer &rPointer, M_CPD *pTargetCPD) {
 	    xdsc.reorder (pDistribution);
 	    pDistribution->release ();
 
-	    xdsc.assignTo (pointer, pTargetCPD);
+	    xdsc.assignTo (pointer, pTarget);
 	}
 
 	pointer.clear ();
@@ -243,7 +181,7 @@ void VDescriptor::assignTo (DSC_Pointer &rPointer, M_CPD *pTargetCPD) {
  *  Store Subset  *
  ******************/
 
-rtLINK_CType *VDescriptor::subsetInStore (M_CPD *pStore, VDescriptor *pValueReturn) {
+rtLINK_CType *VDescriptor::subsetInStore (Vdd::Store *pStore, VDescriptor *pValueReturn) {
     normalize ();
 
     rtLINK_CType *pSubset = NilOf (rtLINK_CType*);
@@ -253,7 +191,7 @@ rtLINK_CType *VDescriptor::subsetInStore (M_CPD *pStore, VDescriptor *pValueRetu
 	break;
 
     case Type_Vector:
-	pSubset = rtVECTOR_SubsetInStore (contentAsVector (), pStore, pValueReturn);
+	pSubset = contentAsVector ()->subsetInStore (pStore, pValueReturn);
 	break;
 
     case Type_VectorC:
@@ -261,15 +199,14 @@ rtLINK_CType *VDescriptor::subsetInStore (M_CPD *pStore, VDescriptor *pValueRetu
 	break;
 
     case Type_Std:
-	if (contentAsMonotype().storeCPD ()->Names (pStore)) {
+	if (contentAsMonotype().store ()->Names (pStore)) {
 	    if (pValueReturn)
 		pValueReturn->setToCopied (*this);
 	
-	    M_CPD *pPPT = contentAsMonotype ().PPT ();
-	    pSubset = rtLINK_RefConstructor (pPPT, -1)->Append (
-		0, rtPTOKEN_CPD_BaseElementCount (pPPT), false
+	    rtPTOKEN_Handle::Reference pPPT (contentAsMonotype ().PPT ());
+	    pSubset = rtLINK_RefConstructor (pPPT)->Append (
+		0, pPPT->cardinality (), false
 	    )->Close (pPPT);
-	    pPPT->release ();
 	}
 	break;
 
@@ -301,8 +238,8 @@ rtLINK_CType *VDescriptor::subsetOfType (
 	break;
 
     case Type_Vector:
-	pSubset = rtVECTOR_SubsetOfType (
-	    contentAsVector (), pSubsetSpace, pKOTM, pValueReturn
+	pSubset = contentAsVector ()->subsetOfType (
+	    pSubsetSpace, pKOTM, pValueReturn
 	);
 	break;
 
@@ -311,28 +248,28 @@ rtLINK_CType *VDescriptor::subsetOfType (
 	break;
 
     case Type_Std:
-	if (contentAsMonotype().storeCPD ()->Names (pKOTM)) {
-	    M_CPD *pSubsetRPT = contentAsMonotype ().PPT ();
+	if (contentAsMonotype().store ()->Names (pKOTM)) {
+	    rtPTOKEN_Handle::Reference pSubsetRPT (contentAsMonotype ().PPT ());
 	    M_ASD *pThisSpace = pSubsetRPT->Space ();
 
 	//  Use the monotype's domain if the result will be indistinguishable...
 	    bool okToReuseDomain = pThisSpace == pSubsetSpace
 		|| pThisSpace->Database () == pSubsetSpace->Database ();
-	    M_CPD *pSubsetPPT = okToReuseDomain ? pSubsetRPT : rtPTOKEN_New (
-		pSubsetSpace, rtPTOKEN_CPD_BaseElementCount (pSubsetRPT)
+	    rtPTOKEN_Handle::Reference pSubsetPPT (
+		okToReuseDomain ? pSubsetRPT : new rtPTOKEN_Handle (
+		    pSubsetSpace, pSubsetRPT->cardinality ()
+		)
 	    );
-	    pSubset = rtLINK_RefConstructor (pSubsetRPT, -1)->Append (
-		0, rtPTOKEN_CPD_BaseElementCount (pSubsetRPT), false
+	    pSubset = rtLINK_RefConstructor (pSubsetRPT)->Append (
+		0, pSubsetRPT->cardinality (), false
 	    )->Close (pSubsetPPT);
 
 	    if (pSubsetPPT != pSubsetRPT) {
 		if (pValueReturn)
 		    pValueReturn->setToSubset (pSubset, *this);
-		pSubsetPPT->release ();
 	    }
 	    else if (pValueReturn)
 		pValueReturn->setToCopied (*this);
-	    pSubsetRPT->release ();
 	}
 	break;
 
@@ -412,7 +349,7 @@ bool VDescriptor::convertVectorsToMonotypeIfPossible () {
 	break;
 
     case Type_Vector:
-	if (rtVECTOR_SimplifiedToMonotype (contentAsVector (), &dsc)) {
+	if (contentAsVector ()->simplifiedToMonotype (dsc)) {
 	    HomogenizeVectorCount++;
 	    setContentToMoved (dsc);
 	    return true;
@@ -487,18 +424,21 @@ VFragmentation& VDescriptor::convertToFragmentation (bool fCoalescing) {
  *  'convertToVector'  *
  ***********************/
 
-M_CPD *VDescriptor::convertToVector () {
+rtVECTOR_Handle *VDescriptor::convertToVector () {
+    rtVECTOR_Handle::Reference pVector;
     switch (m_xType) {
     case Type_Vector:
         break;
     case Type_VectorC:
-	setContentToVector (contentAsVectorC ()->ToVector (false));
+	contentAsVectorC ()->getVector (pVector);
+	setContentToVector (pVector);
         break;
     case Type_Fragmentation:
-	setContentToVector (contentAsFragmentation ().asVector ());
+	contentAsFragmentation().getVector (pVector);
+	setContentToVector (pVector);
         break;
     case Type_Std:
-	setContentToVector (rtVECTOR_NewFromDescriptor (&contentAsMonotype ()));
+	setContentToVector (rtVECTOR_Handle::NewFrom (contentAsMonotype ()));
         break;
     default:
         raiseTypeException ("convertToVector");
@@ -513,14 +453,16 @@ M_CPD *VDescriptor::convertToVector () {
  *  'convertToVectorC'  *
  ************************/
 
-rtVECTOR_CType* VDescriptor::convertToVectorC () {
+rtVECTOR_CType *VDescriptor::convertToVectorC () {
+    rtVECTOR_Handle::Reference pVector;
     switch (m_xType) {
     case Type_Std:
-	setToVector (rtVECTOR_NewFromDescriptor (&contentAsMonotype ()));
+	setToVector (rtVECTOR_Handle::NewFrom (contentAsMonotype ()));
         break;
 
     case Type_Fragmentation:
-	setContentToVector (contentAsFragmentation ().asVector ());
+	contentAsFragmentation ().getVector (pVector);
+	setContentToVector (pVector);
         break;
 
     default:
@@ -638,11 +580,9 @@ void VDescriptor::setToCopied (VDescriptor const& rSource) {
 	setToCopied (rSource.contentAsMonotype ());
         break;
     case Type_Vector:
-	rSource.contentAsVector ()->retain ();
 	setToVector (rSource.contentAsVector ());
         break;
     case Type_VectorC:
-	rSource.contentAsVectorC ()->retain ();
 	setToVector (rSource.contentAsVectorC ());
         break;
     case Type_Fragmentation:
@@ -711,7 +651,7 @@ void VDescriptor::setToSubset (rtLINK_CType *pSubset, VDescriptor &rSource) {
     if (rSource.isStandard ())
         setToSubset (pSubset, rSource.contentAsMonotype ());
     else
-	rtVECTOR_Extract (rSource.convertToVector (), pSubset, *this);
+	rSource.convertToVector ()->getElements (*this, pSubset);
 }
 
 void VDescriptor::setToSubset (DSC_Pointer &rSubset, VDescriptor &rSource) {
@@ -723,8 +663,8 @@ void VDescriptor::setToSubset (DSC_Pointer &rSubset, VDescriptor &rSource) {
 	    setToSubset (rSubset, rSource.contentAsMonotype ());
 	else {
 	    clear ();
-	    rtVECTOR_RefExtract (
-		rSource.convertToVector (), &DSC_Pointer_Scalar (rSubset), &contentAsMonotype ()
+	    rSource.convertToVector ()->getElements (
+		contentAsMonotype (), DSC_Pointer_Scalar (rSubset)
 	    );
 	    m_xType = Type_Std;
 	}
@@ -746,8 +686,7 @@ void VDescriptor::setToSubset (DSC_Pointer &rSubset, VDescriptor &rSource) {
 	iLink.clear ();
     }
     else {
-	VCPDReference pPPT;
-	pPPT.claim (rSubset.PPT ());
+	rtPTOKEN_Handle::Reference pPPT (rSubset.PPT ());
 
     /*-----------------------------------------------------------------------*
      *  The subset is everywhere undefined, making the composition computed
@@ -771,45 +710,33 @@ void VDescriptor::setToSubset (DSC_Pointer &rSubset, VDescriptor &rSource) {
  **********************************/
 
 void VDescriptor::checkDistribution (M_CPD *pDistribution) const {
-    M_CPD *pptrefCPD; int pptrefIndex;
-    bool pptrefCPDMustBeFreed = false;
-
+    rtPTOKEN_Handle::Reference pPPT;
     switch (m_xType) {
     case Type_Std:
-	contentAsMonotype ().getPPTReference (pptrefCPD, pptrefIndex);
-	pptrefCPDMustBeFreed = true;
+	pPPT.setTo (contentAsMonotype ().PPT ());
 	break;
     case Type_Vector:
-	pptrefCPD = contentAsVector ();
-	pptrefIndex = rtVECTOR_CPx_PToken;
+	pPPT.setTo (contentAsVector ()->getPToken ());
 	break;
     case Type_VectorC:
-	pptrefCPD = contentAsVectorC ()->PPT ();
-	pptrefIndex = (-1);
+	pPPT.setTo (contentAsVectorC ()->PPT ());
 	break;
     case Type_Fragmentation:
-	pptrefCPD = contentAsFragmentation ().ptoken ();
-	pptrefIndex = (-1);
+	pPPT.setTo (contentAsFragmentation ().ptoken ());
 	break;
     default:
 	raiseTypeException ("distribution checking method");
 	break;
     }
 
-    if (pptrefCPD->ReferenceDoesntName (pptrefIndex, pDistribution, UV_CPx_PToken)
-    ) raiseException (
+    if (pDistribution->ReferenceDoesntName (UV_CPx_PToken, pPPT)) raiseException (
 	EC__InternalInconsistency,
 	"Inconsistent Distribution: Dom(Descriptor)=[%u:%u]%u Dom(Distribution)=[%u:%u]%u",
-	M_POP_ObjectSpace	(M_CPD_POPReferenceToPtr (pptrefCPD, pptrefIndex)),
-	M_POP_ContainerIndex	(M_CPD_POPReferenceToPtr (pptrefCPD, pptrefIndex)),
-	rtPTOKEN_BaseElementCount (pptrefCPD, pptrefIndex),
+	pPPT->spaceIndex (), pPPT->containerIndexNC (), pPPT->cardinality (),
 	M_POP_ObjectSpace	(M_CPD_PointerToPOP (pDistribution, UV_CPx_PToken)),
 	M_POP_ContainerIndex	(M_CPD_PointerToPOP (pDistribution, UV_CPx_PToken)),
 	rtPTOKEN_BaseElementCount (pDistribution, UV_CPx_PToken)
     );
-
-    if (pptrefCPDMustBeFreed)
-	pptrefCPD->release ();
 }
 
 
@@ -827,7 +754,7 @@ void VDescriptor::describe (unsigned int xLevel) {
 	break;
 
     case Type_Std:
-	contentAsMonotype ().storeCPD ()->print ();
+	contentAsMonotype ().store ()->describe ();
 	break;
 
     default:
@@ -860,8 +787,8 @@ void VDescriptor::raiseTypeException (char const *pWhere) const {
     );
 }
 
-void VDescriptor::raiseAssignmentTargetException (M_CPD *pTargetCPD) const {
+void VDescriptor::raiseAssignmentTargetException (Vdd::Store *pTarget) const {
     RTYPE_ComplainAboutType (
-	"VDescriptor::assignTo", pTargetCPD->RType (), RTYPE_C_Vector
+	"VDescriptor::assignTo", pTarget->rtype (), RTYPE_C_Vector
     );
 }

@@ -97,7 +97,7 @@ namespace V {
         VThreadedProcessor_()
             : m_xState (State_Running)
             , m_sThreadStack (0) /* -> use default stack size */
-            , m_sWorkerLimit (UINT_MAX) /* -> no limit */
+            , m_sWorkerLimit (32) /* -> limit to 32 unless set explicitly by application for some special reason */
         {
         }
 
@@ -161,6 +161,7 @@ namespace V {
             switch (m_xState) {
             case State_Running:
                 if (m_cWorkersAvailable.isZero () && m_cWorkers < m_sWorkerLimit) {
+		    m_cWorkers.increment ();    // incrementing worker's count here to ensure it won't exceed the limit
                     typename Worker::Reference pNewWorker (new Worker (this));
                     pNewWorker->start ();       // this better succeed or we'll have a lot of impatient customers :-)
                 }
@@ -182,7 +183,6 @@ namespace V {
          * @see Worker::run_()
          */
         void employ (Worker *pWorker) {  // this is heart of a worker's thread procedure (see run_() above for details):
-            m_cWorkers.increment ();
             m_cWorkersAvailable.increment ();
             do {
                 m_iQueueSemaphore.consume ();  // ... wait here for something to do

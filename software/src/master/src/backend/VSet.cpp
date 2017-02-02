@@ -21,6 +21,8 @@
 /************************
  *****  Supporting  *****
  ************************/
+
+#include "RTptoken.h"
 
 
 /**************************
@@ -48,8 +50,8 @@
  ********************/
 
 void VSet::adjustDomain (unsigned int xDomainOrigin, int sDomainAdjustment) {
-    m_pDPT.claim (
-	rtPTOKEN_NewShiftPTConstructor (ptoken (), -1)->AppendAdjustment (
+    m_pDPT.setTo (
+	ptoken ()->makeAdjustments ()->AppendAdjustment (
 	    xDomainOrigin, sDomainAdjustment
 	)->ToPToken ()
     );

@@ -9,18 +9,18 @@
  *  Notes:
  *	This routine replaces the current element array with one edited
  *	using the instructions in the p-token referenced by 'pDPT' and
- *	returns a CPD for the p-token associated with the new set of
- *	elements.  The returned CPD carries a reference which must either
+ *	returns a handle for the p-token associated with the new set of
+ *	elements.  The returned handle carries a reference which must either
  *	be released or claimed by the caller.
  *--------------------------------------------------------------------------
  */
-template <class ElementType> M_CPD* VArrayOf<ElementType>::editUsingDPTChain (M_CPD* pDPT) {
-    if (rtPTOKEN_IsCurrent (pDPT, -1))
+template <class ElementType> rtPTOKEN_Handle *VArrayOf<ElementType>::editUsingDPTChain (rtPTOKEN_Handle *pDPT) {
+    if (pDPT->isTerminal ())
     //  If there are no changes, keep the status quo, ...
 	pDPT->retain ();
     else {
     //  ... otherwise, obtain the editing instructions, ...
-        rtPTOKEN_CType* pDPTC = rtPTOKEN_CPDCumAdjustments (pDPT);
+        rtPTOKEN_CType *pDPTC = pDPT->getAdjustments ();
 
     //  ... allocate a new element array, ...
 	ElementType* pNewElementArray = newElementArray (rtPTOKEN_PTC_BaseCount (pDPTC));

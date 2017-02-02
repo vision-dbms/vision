@@ -38,6 +38,7 @@
 #include "VfLocateGenerator.h"
 #include "VfLocateOrAddGenerator.h"
 
+#include "VAssociativeCursor.h"
 #include "VCollectionOf.h"
 #include "VCollectionOfStrings.h"
 #include "VOrdered.h"
@@ -83,15 +84,8 @@ template class VOrdered<VCollectionOfUnsigned32, unsigned int>;
  *****  Construction  *****
  **************************/
 
-rtSELUV_Set::rtSELUV_Set (M_CPD* pSetRef, int xSetRef)
-: m_pSetCPD		(pSetRef, xSetRef, RTYPE_C_SelUV)
-, m_pStringStorage	(0)
-{
-    align ();
-}
-
-rtSELUV_Set::rtSELUV_Set (M_CPD* pSelectorSetCPD)
-: m_pSetCPD		(pSelectorSetCPD)
+rtSELUV_Set::rtSELUV_Set (rtSELUV_Handle *pSelectors)
+: m_pSetCPD		(0, pSelectors->GetCPD ())
 , m_pStringStorage	(0)
 {
     align ();
@@ -101,17 +95,15 @@ rtSELUV_Set::rtSELUV_Set (M_CPD* pSelectorSetCPD)
  *****  Destruction  *****
  *************************/
 
-rtSELUV_Set::~rtSELUV_Set ()
-{
+rtSELUV_Set::~rtSELUV_Set () {
 }
 
 /*************************************
  *****  Deferred Initialization  *****
  *************************************/
 
-void rtSELUV_Set::initializeDPT ()
-{
-    m_pDPT.claim (UV_CPD_PosPTokenCPD (m_pSetCPD));
+void rtSELUV_Set::initializeDPT () {
+    m_pDPT.setTo (static_cast<rtSELUV_Handle*>(m_pSetCPD->containerHandle ())->pptHandle ());
 }
 
 
@@ -119,8 +111,7 @@ void rtSELUV_Set::initializeDPT ()
  *****  String Space Management  *****
  *************************************/
 
-void rtSELUV_Set::accessStringSpace ()
-{
+void rtSELUV_Set::accessStringSpace () {
     m_pStringSpaceCPD.claim (rtSELUV_CPD_StringSpaceCPD (m_pSetCPD));
     m_pStringStorage = rtCHARUV_CPD_Array (m_pStringSpaceCPD);
 }
@@ -143,16 +134,15 @@ PrivateVarDef int GrowStringSpaceErrorHandler (ERR_ErrorDescription *errorDescri
     return 0;
 }
 
-unsigned int rtSELUV_Set::growStringSpace (unsigned int sGrowth, unsigned int xOrigin)
-{
+unsigned int rtSELUV_Set::growStringSpace (unsigned int sGrowth, unsigned int xOrigin) {
     accessStringSpaceIfNecessary ();
     if (0 == xOrigin) xOrigin = M_CPD_Size (m_pStringSpaceCPD);
     if (xOrigin > rtSELUV_Element_MaxIndex)
 	ERR_SignalFault (
 	     EC__InternalInconsistency,
 	     string ("Dictionary String Space[%d:%d] Size Exceeds Maximum (%d)",
-				  m_pStringSpaceCPD->SpaceIndex (),
-				  m_pStringSpaceCPD->ContainerIndex (),
+				  m_pStringSpaceCPD->spaceIndex (),
+				  m_pStringSpaceCPD->containerIndex (),
 				  rtSELUV_Element_MaxIndex)
 	);
     else if (xOrigin > rtSELUV_Element_MaxIndex - 100000) {
@@ -160,8 +150,8 @@ unsigned int rtSELUV_Set::growStringSpace (unsigned int sGrowth, unsigned int xO
 	ERR_SignalWarning (
 	     EC__InternalInconsistency,
 	     string ("Dictionary String Space[%d:%d] Size (%d) Nearing Maximum (%d)",
-				  m_pStringSpaceCPD->SpaceIndex (),
-				  m_pStringSpaceCPD->ContainerIndex (),
+				  m_pStringSpaceCPD->spaceIndex (),
+				  m_pStringSpaceCPD->containerIndex (),
 				  xOrigin,
 				  rtSELUV_Element_MaxIndex)
 	);
@@ -183,16 +173,14 @@ unsigned int rtSELUV_Set::growStringSpace (unsigned int sGrowth, unsigned int xO
 
 void rtSELUV_Set::Locate (
     VCollectionOfStrings* pKeys, M_CPD*& rpReordering, VAssociativeResult& rResult
-)
-{
+) {
     VAssociativeCursor<rtSELUV_Set,VCollectionOfStrings,char const*> iSetCursor (this);
     iSetCursor.Locate (pKeys, rpReordering, rResult);
 }
 
 void rtSELUV_Set::Locate (
     VCollectionOfUnsigned32* pKeys, M_CPD*& rpReordering, VAssociativeResult& rResult
-)
-{
+) {
     VAssociativeCursor<rtSELUV_Set,VCollectionOfUnsigned32,unsigned int> iSetCursor (this);
     iSetCursor.Locate (pKeys, rpReordering, rResult);
 }
@@ -204,32 +192,28 @@ void rtSELUV_Set::Locate (
 
 void rtSELUV_Set::Insert (
     VCollectionOfStrings* pKeys, M_CPD*& rpReordering, VAssociativeResult& rResult
-)
-{
+) {
     VAssociativeCursor<rtSELUV_Set,VCollectionOfStrings,char const*> iSetCursor (this);
     iSetCursor.Insert (pKeys, rpReordering, rResult);
 }
 
 void rtSELUV_Set::Insert (
     VCollectionOfUnsigned32* pKeys, M_CPD*& rpReordering, VAssociativeResult& rResult
-)
-{
+) {
     VAssociativeCursor<rtSELUV_Set,VCollectionOfUnsigned32,unsigned int> iSetCursor (this);
     iSetCursor.Insert (pKeys, rpReordering, rResult);
 }
 
 void rtSELUV_Set::Delete (
     VCollectionOfStrings* pKeys, M_CPD*& rpReordering, VAssociativeResult& rResult
-)
-{
+) {
     VAssociativeCursor<rtSELUV_Set,VCollectionOfStrings,char const*> iSetCursor (this);
     iSetCursor.Delete (pKeys, rpReordering, rResult);
 }
 
 void rtSELUV_Set::Delete (
     VCollectionOfUnsigned32* pKeys, M_CPD*& rpReordering, VAssociativeResult& rResult
-)
-{
+) {
     VAssociativeCursor<rtSELUV_Set,VCollectionOfUnsigned32,unsigned int> iSetCursor (this);
     iSetCursor.Delete (pKeys, rpReordering, rResult);
 }
@@ -240,26 +224,22 @@ void rtSELUV_Set::Delete (
  *  updated and false if no changes were made.
  *---------------------------------------------------------------------
  */
-bool rtSELUV_Set::Insert (char const* pKey, unsigned int& rxElement)
-{
+bool rtSELUV_Set::Insert (char const* pKey, unsigned int& rxElement) {
     VAssociativeCursor<rtSELUV_Set,VCollectionOfStrings,char const*> iSetCursor (this);
     return iSetCursor.Insert (pKey, rxElement);
 }
 
-bool rtSELUV_Set::Insert (unsigned int xKey, unsigned int& rxElement)
-{
+bool rtSELUV_Set::Insert (unsigned int xKey, unsigned int& rxElement) {
     VAssociativeCursor<rtSELUV_Set,VCollectionOfUnsigned32,unsigned int> iSetCursor (this);
     return iSetCursor.Insert (xKey, rxElement);
 }
 
-bool rtSELUV_Set::Delete (char const* pKey)
-{
+bool rtSELUV_Set::Delete (char const* pKey) {
     VAssociativeCursor<rtSELUV_Set,VCollectionOfStrings,char const*> iSetCursor (this);
     return iSetCursor.Delete (pKey);
 }
 
-bool rtSELUV_Set::Delete (unsigned int xKey)
-{
+bool rtSELUV_Set::Delete (unsigned int xKey) {
     VAssociativeCursor<rtSELUV_Set,VCollectionOfUnsigned32,unsigned int> iSetCursor (this);
     return iSetCursor.Delete (xKey);
 }
@@ -268,11 +248,95 @@ bool rtSELUV_Set::Delete (unsigned int xKey)
 /******************************
  *****  Update Utilities  *****
  ******************************/
+bool rtSELUV_Set::compact () {
+	
+	accessStringSpaceIfNecessary ();
+	bool bWorkDone = false;
+	
+	unsigned int sSelectors = UV_CPD_ElementCount (m_pSetCPD->GetCPD ());	
+	unsigned int sCharUV = UV_CPD_ElementCount (m_pStringSpaceCPD);
+	
+	/*****  If the selector uvector is empty ... *****/   
+	if (sSelectors == 0) {
+		return bWorkDone;
+	}
+	
+	/*****  If the char uvector is small ... *****/
+	//	if (sCharUV <= 10000) {
+	//	    return bWorkDone;
+	//	}
+
+	/*****   Determine where the user defined names start ... *****/
+	unsigned int i;
+	for (i = 0; i < sSelectors; i++) {
+		if (rtSELUV_Element_Type (rtSELUV_CPD_Array (m_pSetCPD) + i) ==
+			SELECTOR_C_DefinedSelector
+		) break;
+	}
+	/*****   There are some user defined names ... *****/
+	unsigned int userNameStart = i < sSelectors ? i : sSelectors;
+	unsigned int userNameCount = sSelectors - userNameStart;
+	
+	unsigned int sNewCharUV = 0;
+	unsigned int sGrowth = 0;
+	
+	/*****   Determine the number of characters we need to create the new string space ... *****/
+	for (int i = userNameStart; i < sSelectors; i++) {	
+		if (rtSELUV_Element_Type (rtSELUV_CPD_Array (m_pSetCPD) + i) == SELECTOR_C_DefinedSelector) {
+			rtSELUV_Type_Element* pElement = rtSELUV_CPD_Array (m_pSetCPD) + i;
+			int index = rtSELUV_Element_Index (pElement);
+			char * name = rtCHARUV_CPD_Array (m_pStringSpaceCPD) + index; 
+			sGrowth = strlen (name) + 1;
+			sNewCharUV += sGrowth;
+		}
+	}
+	
+	/*****  If not saving more than 10% from char uvector, then do nothing ... *****/
+	if ( (sCharUV - sNewCharUV) * 10 < sCharUV) {
+	    return bWorkDone;
+	}
+
+	/*****   create a new stringSpace and stringStorage... *****/
+	rtPTOKEN_Handle::Reference ptokenCPD (new rtPTOKEN_Handle (m_pStringSpaceCPD ->GetCPD ()->Space (), sNewCharUV));
+	M_CPD *newStringSpaceCPD = rtCHARUV_New (ptokenCPD, ptokenCPD);
+	char *m_pNewStringStorage = rtCHARUV_CPD_Array (newStringSpaceCPD);
+	unsigned int xOrigin = 0; 
+
+	for (int i = userNameStart, sGrowth = 0; i < sSelectors; i++) {	
+		if (rtSELUV_Element_Type (rtSELUV_CPD_Array (m_pSetCPD) + i) == SELECTOR_C_DefinedSelector) {
+			/***** Move seluv to read-write space ... *****/
+			m_pSetCPD->EnableModifications ();
+			/***** get the selector ... *****/
+			rtSELUV_Type_Element* pElement = rtSELUV_CPD_Array (m_pSetCPD) + i;
+			/***** get the original index of the selector ... *****/
+			int index = rtSELUV_Element_Index (pElement);
+			/***** access the selector in the old stringSpace ... *****/
+			char * name = rtCHARUV_CPD_Array (m_pStringSpaceCPD) + index; 	
+			/***** copy selector to new stringSpace ... *****/
+			sGrowth = strlen (name) + 1;
+			strcpy ((char*) m_pNewStringStorage + xOrigin, name);
+			/***** update the index ... *****/
+			rtSELUV_Element_Index (pElement) = xOrigin;
+			xOrigin += sGrowth;
+		}
+	}
+
+	m_pSetCPD->EnableModifications ();
+
+	/***** reset and resync ... *****/	
+	m_pSetCPD->StoreReference (rtSELUV_CPx_StringSpace, newStringSpaceCPD);
+	newStringSpaceCPD->release ();
+
+	m_pStringSpaceCPD.claim (rtSELUV_CPD_StringSpaceCPD (m_pSetCPD));
+	m_pStringStorage = rtCHARUV_CPD_Array (m_pStringSpaceCPD);
+	
+	bWorkDone = true;
+	return bWorkDone;
+}
 
 void rtSELUV_Set::install (
     rtLINK_CType* pElements, VOrdered<VCollectionOfStrings,char const*>& rAdditions
-)
-{
+) {
 //  Determine the required string space growth, ...
     accessStringSpaceIfNecessary ();
 
@@ -334,8 +398,7 @@ void rtSELUV_Set::install (
 
 void rtSELUV_Set::install (
     rtLINK_CType* pElements, VOrdered<VCollectionOfUnsigned32,unsigned int>& rAdditions
-)
-{
+) {
 //  Update the set, ...
 #   define handleNil(c, n, r)
 #   define handleRepeat(c, n, r) {\
@@ -414,7 +477,7 @@ DEFINE_CONCRETE_RTT (rtSELUV_Handle);
  *
  *****/
 PrivateFnDef M_CPD *__cdecl rtSELUV_New (
-    M_CPD *pPPT, M_CPD *pRPT, Ref_UV_Initializer initFn, ...
+    rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT, Ref_UV_Initializer initFn, ...
 ) {
 /*****  Acquire the arguments passed to this function  *****/
     V_VARGLIST (initFnAP, initFn);
@@ -444,7 +507,7 @@ PrivateFnDef M_CPD *__cdecl rtSELUV_New (
  *
  *****/
 PrivateFnDef void StringSpaceInit (M_CPD *cpd, size_t Unused(nelements), va_list Unused(ap)) {
-    M_CPD *ptokenCPD = rtPTOKEN_New (cpd->Space (), 0);
+    rtPTOKEN_Handle::Reference ptokenCPD (new rtPTOKEN_Handle (cpd->Space (), 0));
 /*---------------------------------------------------------------------------
  * Passing the same P-Token as both the positional and referential P-Token is
  * a temporary patch which will need to be corrected.
@@ -453,7 +516,6 @@ PrivateFnDef void StringSpaceInit (M_CPD *cpd, size_t Unused(nelements), va_list
     M_CPD *stringSpace = rtCHARUV_New (ptokenCPD, ptokenCPD);
     cpd->StoreReference (rtSELUV_CPx_StringSpace, stringSpace);
 
-    ptokenCPD->release ();
     stringSpace->release ();
 }
 
@@ -473,7 +535,7 @@ PrivateFnDef void StringSpaceInit (M_CPD *cpd, size_t Unused(nelements), va_list
  *	A standard CPD for the SelUV created.
  *
  *****/
-PublicFnDef M_CPD *rtSELUV_New (M_CPD *pPPT, M_CPD *pRPT) {
+PublicFnDef M_CPD *rtSELUV_New (rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT) {
     return rtSELUV_New (pPPT, pRPT, StringSpaceInit);
 }
 
@@ -494,12 +556,12 @@ PublicFnDef M_CPD *rtSELUV_New (M_CPD *pPPT, M_CPD *pRPT) {
  *	'cpd'
  *
  *****/
-PublicFnDef M_CPD *rtSELUV_Align (M_CPD *cpd) {
+PrivateFnDef M_CPD *rtSELUV_Align (M_CPD *cpd) {
 /*****  Validate Argument R-Type  *****/
-    RTYPE_MustBeA ("rtSELUV_Align", M_CPD_RType (cpd), RTYPE_C_SelUV);
+    RTYPE_MustBeA ("rtSELUV_Align", cpd->RType (), RTYPE_C_SelUV);
 
 /*****  Align Positionally  *****/
-    UV_Align (cpd, NilOf (M_CPD::UVShiftProcessor));
+    static_cast<rtSELUV_Handle*>(cpd->containerHandle ())->align ();
 
 /*****  Return the Argument  *****/
     return cpd;
@@ -549,19 +611,18 @@ PrivateFnDef char const *TraverseUserNames (bool reset, va_list ap) {
  *      'pSelectorSetCPD'.
  *
  *****/
-PublicFnDef M_CPD *rtSELUV_Contents (M_ASD *pContainerSpace, M_CPD *pSelectorSetCPD) {
+PublicFnDef void rtSELUV_Contents (rtVECTOR_Handle::Reference &rpResult, M_ASD *pContainerSpace, M_CPD *pSelectorSetCPD) {
 /*****  Make the new vector ... *****/
-    M_CPD *vectorPToken = rtPTOKEN_New (
-	pContainerSpace, rtPTOKEN_BaseElementCount (pSelectorSetCPD, UV_CPx_PToken)
+    rtPTOKEN_Handle::Reference vectorPToken (
+	new rtPTOKEN_Handle (pContainerSpace, rtPTOKEN_BaseElementCount (pSelectorSetCPD, UV_CPx_PToken))
     );
-    M_CPD *vector = rtVECTOR_New (vectorPToken);
+    rpResult.setTo (new rtVECTOR_Handle (vectorPToken));
 
 /*****  If the selector uvector is empty ... *****/
     unsigned int size = UV_CPD_ElementCount (pSelectorSetCPD);
 
     if (size == 0) {
-	vectorPToken->release ();
-	return vector;
+	return;
     }
 
 /*****   Determine where the user defined names start ... *****/
@@ -586,9 +647,8 @@ PublicFnDef M_CPD *rtSELUV_Contents (M_ASD *pContainerSpace, M_CPD *pSelectorSet
 	M_KOTE const &rSelectorKOTE = pSelectorSetCPD->TheSelectorClass ();
 
 /*****  Make a KSI U-Vector for the KSI names... *****/
-	M_CPD *ptoken = rtPTOKEN_New (pContainerSpace, knownNameCount);
-	M_CPD *ksiUV = rtINTUV_New (ptoken, rSelectorKOTE.PTokenCPD ());
-	ptoken->release ();
+	rtPTOKEN_Handle::Reference ptoken (new rtPTOKEN_Handle (pContainerSpace, knownNameCount));
+	M_CPD *ksiUV = rtINTUV_New (ptoken, rSelectorKOTE.PTokenHandle ());
 
 /*****  Fill the KSI uvector ... *****/
 	for (i=0; i < knownNameCount; i++) {
@@ -601,15 +661,15 @@ PublicFnDef M_CPD *rtSELUV_Contents (M_ASD *pContainerSpace, M_CPD *pSelectorSet
 	/***  Make a descriptor with ksiUV ***/
 	ksiUV->retain ();
 	DSC_Descriptor ksiDsc;
-	ksiDsc.constructValue (rSelectorKOTE.RetainedObjectCPD (), ksiUV);
+	ksiDsc.constructValue (rSelectorKOTE.store (), ksiUV);
 
-	/***  Make a link constructor for 'rtVECTOR_Assign' ***/
-	rtLINK_CType *linkc = rtLINK_RefConstructor (vectorPToken, -1);
+	/***  Make a link constructor for 'rtVECTOR_Handle::setElements' ***/
+	rtLINK_CType *linkc = rtLINK_RefConstructor (vectorPToken);
 	rtLINK_AppendRange (linkc, 0, knownNameCount);
 	linkc->Close (ksiUV, UV_CPx_PToken);
 
 	/***  Install the ksiUV into the vector ***/
-	rtVECTOR_Assign (vector, linkc, &ksiDsc);
+	rpResult->setElements (linkc, ksiDsc);
 	ksiUV->release ();
 	linkc->release ();
 	ksiDsc.clear ();
@@ -620,42 +680,40 @@ PublicFnDef M_CPD *rtSELUV_Contents (M_ASD *pContainerSpace, M_CPD *pSelectorSet
  *****/
     if (userNameCount > 0) {
 /*****  Make a string store with the remaining names ... *****/
-	M_CPD *nameStorage = rtSELUV_CPD_StringSpaceCPD (pSelectorSetCPD);
-	int temp;
-	M_CPD *stringStore = rtLSTORE_NewStringStore (
-	    pContainerSpace,
-	    TraverseUserNames,
-	    nameStorage,
-	    pSelectorSetCPD,
-	    knownNameCount,
-	    size,
-	    &temp
-	);
-	nameStorage->release ();
+	rtLSTORE_Handle::Reference pStringStore; {
+	    M_CPD *nameStorage = rtSELUV_CPD_StringSpaceCPD (pSelectorSetCPD);
+	    int temp;
+	    pStringStore.setTo (
+		rtLSTORE_NewStringStore (
+		    pContainerSpace,
+		    TraverseUserNames,
+		    nameStorage,
+		    pSelectorSetCPD,
+		    knownNameCount,
+		    size,
+		    &temp
+		)
+	    );
+	    nameStorage->release ();
+	}
 
 /***** ... put the known selectors into the vector ... *****/
-
 	/***  Make a descriptor containing the known string store ***/
-	M_CPD *ptoken = rtLSTORE_CPD_RowPTokenCPD (stringStore);
-	M_DuplicateCPDPtr (stringStore);
-	DSC_Descriptor stringDsc;
-	stringDsc.constructIdentity (stringStore, ptoken);
+	rtPTOKEN_Handle::Reference pStringStorePToken (pStringStore->getPToken ());
 
-	/***  Make a link constructor for 'rtVECTOR_Assign' ***/
-	rtLINK_CType *linkc = rtLINK_RefConstructor (vectorPToken, -1);
+	DSC_Descriptor stringDsc;
+	stringDsc.constructIdentity (pStringStore, pStringStorePToken);
+
+	/***  Make a link constructor for 'rtVECTOR_Handle::setElements' ***/
+	rtLINK_CType *linkc = rtLINK_RefConstructor (vectorPToken);
 	rtLINK_AppendRange (linkc, knownNameCount, userNameCount);
-	linkc->Close (stringStore, rtLSTORE_CPx_RowPToken);
+	linkc->Close (pStringStorePToken);
 
 	/***  Install the stringStore into the vector ***/
-	rtVECTOR_Assign (vector, linkc, &stringDsc);
+	rpResult->setElements (linkc, stringDsc);
 	linkc->release ();
-	stringStore->release ();
 	stringDsc.clear ();
     }
-
-    vectorPToken->release ();
-
-    return vector;
 }
 
 
@@ -708,31 +766,24 @@ PrivateFnDef int PrintElement (M_CPD *cpd) {
  *  'Type' Methods  *
  ********************/
 
-IOBJ_DefineUnaryMethod (TracesOnDM)
-{
-    TracingLocateOrAdd	    	= true;
-
+IOBJ_DefineUnaryMethod (TracesOnDM) {
+    TracingLocateOrAdd = true;
     return self;
 }
 
-IOBJ_DefineUnaryMethod (TracesOffDM)
-{
-    TracingLocateOrAdd	    	= false;
-
+IOBJ_DefineUnaryMethod (TracesOffDM) {
+    TracingLocateOrAdd = false;
     return self;
 }
 
-IOBJ_DefineNilaryMethod (LocateOrAddTraceDM)
-{
+IOBJ_DefineNilaryMethod (LocateOrAddTraceDM) {
     return IOBJ_SwitchIObject (&TracingLocateOrAdd);
 }
 
-IOBJ_DefineNewaryMethod (NewDM)
-{
+IOBJ_DefineNewaryMethod (NewDM) {
     return RTYPE_QRegister (
 	rtSELUV_New (
-	    RTYPE_QRegisterCPD (parameterArray[0]),
-	    RTYPE_QRegisterCPD (parameterArray[1])
+	    RTYPE_QRegisterPToken (parameterArray[0]), RTYPE_QRegisterPToken (parameterArray[1])
 	)
     );
 }
@@ -743,8 +794,6 @@ IOBJ_DefineNewaryMethod (NewDM)
  ************************/
 
 UV_DefineEPrintDM (PrintElementDM, PrintElement)
-
-UV_DefineAlignDM (AlignDM, rtSELUV_Align)
 
 
 /**************************************************
@@ -764,7 +813,6 @@ RTYPE_DefineHandler(rtSELUV_Handler) {
     IOBJ_BeginMD (instanceMD)
 	UV_StandardDMDEPackage
 	IOBJ_MDE ("eprint"		, PrintElementDM)
-	IOBJ_MDE ("align"		, AlignDM)
     IOBJ_EndMD;
 
     switch (handlerOperation) {

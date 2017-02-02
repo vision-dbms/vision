@@ -109,12 +109,18 @@ namespace Vsa {
 Vsa::VEvaluatorSource::Starter::Starter (
     VEvaluatorSource *pSource, IEvaluatorSink *pSink, IEvaluator *pEvaluator
 ) : m_pSource (pSource), m_pSink (pSink), m_pEvaluator (pEvaluator), m_pIEvaluatorClient (this) {
+    CAM_OPERATION(co) << "message" << "Vsa::VEvaluatorSource::Starter::Starter()";
     retain (); {
 	traceInfo ("Sending StartupQuery");
 	IEvaluatorClient::Reference pClientRole;
 	getRole (pClientRole);
 	m_pEvaluatorEKG.setTo (new interface_monitor_t (this, &ThisClass::signalIEvaluatorEKG, m_pEvaluator));
-        pEvaluator->EvaluateExpression (pClientRole, "", pSource->startupQuery ());
+        if (IEvaluator_Ex1 *const pEvaluator1 = dynamic_cast<IEvaluator_Ex1*>(m_pEvaluator.referent())) {
+            pEvaluator1->EvaluateExpression_Ex (pClientRole, "", pSource->startupQuery (), co.getId().c_str(), co.chainId().c_str());
+        } else {
+            m_pEvaluator->EvaluateExpression (pClientRole, "", pSource->startupQuery ());
+        }
+
     } untain ();
 }
 
@@ -246,9 +252,10 @@ void Vsa::VEvaluatorSource::SetStartupQuery (
  *******************************/
 
 void Vsa::VEvaluatorSource::startEvaluator (IEvaluatorSink *pSink, IEvaluator *pEvaluator) {
-    if (m_iStartupQuery.isEmpty ())
-	pSink->OnData (pEvaluator);
+    if (m_iStartupQuery.isEmpty ()) {
+		pSink->OnData (pEvaluator);
+	}
     else {
-	Starter::Reference pStarter (new Starter (this, pSink, pEvaluator));
+		Starter::Reference pStarter (new Starter (this, pSink, pEvaluator));
     }
 }

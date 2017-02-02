@@ -1,6 +1,6 @@
 /**
- * @file
- * Defines a number of macros and a base class for Vca interfaces, regardless of what library the interfaces are in.
+ * @file Defines a number of macros and a base class for Vca
+ * interfaces, regardless of what library the interfaces are in.
  */
 
 #ifndef Vca_IVUnknown_Interface
@@ -35,6 +35,23 @@ namespace Vca {
     class VMessageManager;
     class VSiteInfo;
     class VRolePlayer;
+
+    template <typename I> class VMessageHolder {
+	public:
+	VMessageHolder(VMessage* message, I* i): m_pMessage(message), m_pInterface(i) {
+	}
+	public:
+	operator I* () const { return m_pInterface; }
+	
+	VMessage* message() const { return m_pMessage; }
+	I* vinterface() const { return m_pInterface; }
+
+	private:
+	VMessage::Reference const m_pMessage;
+	typename I::Reference const m_pInterface;
+    };
+
+
 }
 
 
@@ -131,6 +148,7 @@ class ABSTRACT api##_API VINTERFACE_DEFINITION_NEST(ifName,ifBase)
 #define VINTERFACE_DEFINITION_MEMBERS(ifName)\
     /** @cond VINTERFACE_MEMBERS */\
 public:\
+    typedef ThisClass Interface;\
     /** Vca::VSubscription template for this interface. */\
     typedef Vca::VSubscription<ThisClass> Subscription;\
     virtual Subscription* subscription () const {\
@@ -220,7 +238,7 @@ public:\
     static VINTERFACE_MEMBERTYPE(mname) VINTERFACE_MEMBERINFO(mname);\
 private:\
     /** Delegation method for mname##(), overriden by role subclasses; translates message invocation into method call on implementor. The stock implementation of this method does nothing; the real implementation of this method is actually generated in role subclasses (Role::Implementation). */\
-    virtual void VINTERFACE_MEMBERIMPL(mname)() {}\
+    virtual void VINTERFACE_MEMBERIMPL(mname)(VMessage*) {}\
     /** @endcond */
 
 /**
@@ -241,7 +259,7 @@ public:\
     static VINTERFACE_MEMBERTYPE(mname) VINTERFACE_MEMBERINFO(mname);\
 private:\
     /** Delegation method for mname##(), overriden by role subclasses; translates message invocation into method call on implementor. The stock implementation of this method does nothing; the real implementation of this method is actually generated in role subclasses (Role::Implementation). */\
-    virtual void VINTERFACE_MEMBERIMPL(mname)(P1) {}\
+    virtual void VINTERFACE_MEMBERIMPL(mname)(VMessage*,P1) {}\
     /** @endcond */
 
 /**
@@ -261,7 +279,7 @@ public:\
     static VINTERFACE_MEMBERTYPE(mname) VINTERFACE_MEMBERINFO(mname);\
 private:\
     /** Delegation method for mname##(), overriden by role subclasses; translates message invocation into method call on implementor. The stock implementation of this method does nothing; the real implementation of this method is actually generated in role subclasses (Role::Implementation). */\
-    virtual void VINTERFACE_MEMBERIMPL(mname)(P1,P2) {}\
+    virtual void VINTERFACE_MEMBERIMPL(mname)(VMessage*,P1,P2) {}\
     /** @endcond */
 
 /**
@@ -281,7 +299,7 @@ public:\
     static VINTERFACE_MEMBERTYPE(mname) VINTERFACE_MEMBERINFO(mname);\
 private:\
     /** Delegation method for mname##(), overriden by role subclasses; translates message invocation into method call on implementor. The stock implementation of this method does nothing; the real implementation of this method is actually generated in role subclasses (Role::Implementation). */\
-    virtual void VINTERFACE_MEMBERIMPL(mname)(P1,P2,P3) {}\
+    virtual void VINTERFACE_MEMBERIMPL(mname)(VMessage*,P1,P2,P3) {}\
     /** @endcond */
 
 /**
@@ -301,7 +319,7 @@ public:\
     static VINTERFACE_MEMBERTYPE(mname) VINTERFACE_MEMBERINFO(mname);\
 private:\
     /** Delegation method for mname##(), overriden by role subclasses; translates message invocation into method call on implementor. The stock implementation of this method does nothing; the real implementation of this method is actually generated in role subclasses (Role::Implementation). */\
-    virtual void VINTERFACE_MEMBERIMPL(mname)(P1,P2,P3,P4) {}\
+    virtual void VINTERFACE_MEMBERIMPL(mname)(VMessage*,P1,P2,P3,P4) {}\
     /** @endcond */
 
 /**
@@ -321,7 +339,7 @@ public:\
     static VINTERFACE_MEMBERTYPE(mname) VINTERFACE_MEMBERINFO(mname);\
 private:\
     /** Delegation method for mname##(), overriden by role subclasses; translates message invocation into method call on implementor. The stock implementation of this method does nothing; the real implementation of this method is actually generated in role subclasses (Role::Implementation). */\
-    virtual void VINTERFACE_MEMBERIMPL(mname)(P1,P2,P3,P4,P5) {}\
+    virtual void VINTERFACE_MEMBERIMPL(mname)(VMessage*,P1,P2,P3,P4,P5) {}\
     /** @endcond */
 
 /**
@@ -341,7 +359,7 @@ public:\
     static VINTERFACE_MEMBERTYPE(mname) VINTERFACE_MEMBERINFO(mname);\
 private:\
     /** Delegation method for mname##(), overriden by role subclasses; translates message invocation into method call on implementor. The stock implementation of this method does nothing; the real implementation of this method is actually generated in role subclasses (Role::Implementation). */\
-    virtual void VINTERFACE_MEMBERIMPL(mname)(P1,P2,P3,P4,P5,P6) {}\
+    virtual void VINTERFACE_MEMBERIMPL(mname)(VMessage*,P1,P2,P3,P4,P5,P6) {}\
     /** @endcond */
 
 /**
@@ -361,7 +379,7 @@ public:\
     static VINTERFACE_MEMBERTYPE(mname) VINTERFACE_MEMBERINFO(mname);\
 private:\
     /** Delegation method for mname##(), overriden by role subclasses; translates message invocation into method call on implementor. The stock implementation of this method does nothing; the real implementation of this method is actually generated in role subclasses (Role::Implementation). */\
-    virtual void VINTERFACE_MEMBERIMPL(mname)(P1,P2,P3,P4,P5,P6,P7) {}\
+    virtual void VINTERFACE_MEMBERIMPL(mname)(VMessage*,P1,P2,P3,P4,P5,P6,P7) {}\
     /** @endcond */
 
 /**
@@ -381,7 +399,7 @@ public:\
     static VINTERFACE_MEMBERTYPE(mname) VINTERFACE_MEMBERINFO(mname);\
 private:\
     /** Delegation method for mname##(), overriden by role subclasses; translates message invocation into method call on implementor. The stock implementation of this method does nothing; the real implementation of this method is actually generated in role subclasses (Role::Implementation). */\
-    virtual void VINTERFACE_MEMBERIMPL(mname)(P1,P2,P3,P4,P5,P6,P7,P8) {}\
+    virtual void VINTERFACE_MEMBERIMPL(mname)(VMessage*,P1,P2,P3,P4,P5,P6,P7,P8) {}\
     /** @endcond */
 
 /**
@@ -401,7 +419,7 @@ public:\
     static VINTERFACE_MEMBERTYPE(mname) VINTERFACE_MEMBERINFO(mname);\
 private:\
     /** Delegation method for mname##(), overriden by role subclasses; translates message invocation into method call on implementor. The stock implementation of this method does nothing; the real implementation of this method is actually generated in role subclasses (Role::Implementation). */\
-    virtual void VINTERFACE_MEMBERIMPL(mname)(P1,P2,P3,P4,P5,P6,P7,P8,P9) {}\
+    virtual void VINTERFACE_MEMBERIMPL(mname)(VMessage*,P1,P2,P3,P4,P5,P6,P7,P8,P9) {}\
     /** @endcond */
 
 /**
@@ -421,7 +439,7 @@ public:\
     static VINTERFACE_MEMBERTYPE(mname) VINTERFACE_MEMBERINFO(mname);\
 private:\
     /** Delegation method for mname##(), overriden by role subclasses; translates message invocation into method call on implementor. The stock implementation of this method does nothing; the real implementation of this method is actually generated in role subclasses (Role::Implementation). */\
-    virtual void VINTERFACE_MEMBERIMPL(mname)(P1,P2,P3,P4,P5,P6,P7,P8,P9,P10) {}\
+    virtual void VINTERFACE_MEMBERIMPL(mname)(VMessage*,P1,P2,P3,P4,P5,P6,P7,P8,P9,P10) {}\
     /** @endcond */
 
 /**
@@ -441,7 +459,7 @@ public:\
     static VINTERFACE_MEMBERTYPE(mname) VINTERFACE_MEMBERINFO(mname);\
 private:\
     /** Delegation method for mname##(), overriden by role subclasses; translates message invocation into method call on implementor. The stock implementation of this method does nothing; the real implementation of this method is actually generated in role subclasses (Role::Implementation). */\
-    virtual void VINTERFACE_MEMBERIMPL(mname)(P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11) {}\
+    virtual void VINTERFACE_MEMBERIMPL(mname)(VMessage*,P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11) {}\
     /** @endcond */
 
 /**
@@ -461,7 +479,7 @@ public:\
     static VINTERFACE_MEMBERTYPE(mname) VINTERFACE_MEMBERINFO(mname);\
 private:\
     /** Delegation method for mname##(), overriden by role subclasses; translates message invocation into method call on implementor. The stock implementation of this method does nothing; the real implementation of this method is actually generated in role subclasses (Role::Implementation). */\
-    virtual void VINTERFACE_MEMBERIMPL(mname)(P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12) {}\
+    virtual void VINTERFACE_MEMBERIMPL(mname)(VMessage*,P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12) {}\
     /** @endcond */
 
 /**
@@ -481,7 +499,7 @@ public:\
     static VINTERFACE_MEMBERTYPE(mname) VINTERFACE_MEMBERINFO(mname);\
 private:\
     /** Delegation method for mname##(), overriden by role subclasses; translates message invocation into method call on implementor. The stock implementation of this method does nothing; the real implementation of this method is actually generated in role subclasses (Role::Implementation). */\
-    virtual void VINTERFACE_MEMBERIMPL(mname)(P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12,P13) {}\
+    virtual void VINTERFACE_MEMBERIMPL(mname)(VMessage*,P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12,P13) {}\
     /** @endcond */
 
 /**
@@ -501,7 +519,7 @@ public:\
     static VINTERFACE_MEMBERTYPE(mname) VINTERFACE_MEMBERINFO(mname);\
 private:\
     /** Delegation method for mname##(), overriden by role subclasses; translates message invocation into method call on implementor. The stock implementation of this method does nothing; the real implementation of this method is actually generated in role subclasses (Role::Implementation). */\
-    virtual void VINTERFACE_MEMBERIMPL(mname)(P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12,P13,P14) {}\
+    virtual void VINTERFACE_MEMBERIMPL(mname)(VMessage*,P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12,P13,P14) {}\
     /** @endcond */
 
 /**
@@ -521,7 +539,7 @@ public:\
     static VINTERFACE_MEMBERTYPE(mname) VINTERFACE_MEMBERINFO(mname);\
 private:\
     /** Delegation method for mname##(), overriden by role subclasses; translates message invocation into method call on implementor. The stock implementation of this method does nothing; the real implementation of this method is actually generated in role subclasses (Role::Implementation). */\
-    virtual void VINTERFACE_MEMBERIMPL(mname)(P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12,P13,P14,P15) {}\
+    virtual void VINTERFACE_MEMBERIMPL(mname)(VMessage*,P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12,P13,P14,P15) {}\
     /** @endcond */
 
 /**
@@ -541,7 +559,7 @@ public:\
     static VINTERFACE_MEMBERTYPE(mname) VINTERFACE_MEMBERINFO(mname);\
 private:\
     /** Delegation method for mname##(), overriden by role subclasses; translates message invocation into method call on implementor. The stock implementation of this method does nothing; the real implementation of this method is actually generated in role subclasses (Role::Implementation). */\
-    virtual void VINTERFACE_MEMBERIMPL(mname)(P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12,P13,P14,P15,P16) {}\
+    virtual void VINTERFACE_MEMBERIMPL(mname)(VMessage*,P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12,P13,P14,P15,P16) {}\
     /** @endcond */
 
 /**
@@ -566,6 +584,7 @@ class ifName##_Role : public ifBase::Role<ActorClass,MDI>::Implementation {\
 public:\
     /** Convenience definition for this role's base class, the role for ifName. */\
     typedef typename ifBase::Role<ActorClass,MDI>::Implementation BaseClass;\
+    typedef MDI Interface;\
     USING (BaseClass::actor)\
 protected:\
     /** Empty protected constructor simply prevents us from calling <code>new</code>. */\
@@ -602,8 +621,8 @@ private:
  */
 #define VINTERFACE_ROLE_0(mname)\
 /** Delegation method for mname interface message; translates message invocation into method call on ActorClass. */\
-private: void VINTERFACE_MEMBERIMPL(mname)() {\
-    actor ()->mname (this);\
+private: void VINTERFACE_MEMBERIMPL(mname)(Vca::VMessage* pMessage) {\
+    actor ()->mname (Vca::VMessageHolder<Interface>(pMessage, this));\
 }
 
 /**
@@ -613,8 +632,8 @@ private: void VINTERFACE_MEMBERIMPL(mname)() {\
  */
 #define VINTERFACE_ROLE_1(mname,P1)\
 /** Delegation method for mname interface message; translates message invocation into method call on ActorClass. */\
-private: void VINTERFACE_MEMBERIMPL(mname)(P1 p1) {\
-    actor ()->mname (this,p1);\
+private: void VINTERFACE_MEMBERIMPL(mname)(Vca::VMessage* pMessage,P1 p1) {\
+    actor ()->mname (Vca::VMessageHolder<Interface>(pMessage, this),p1);\
 }
 
 /**
@@ -623,8 +642,8 @@ private: void VINTERFACE_MEMBERIMPL(mname)(P1 p1) {\
  */
 #define VINTERFACE_ROLE_2(mname,P1,P2)\
 /** Delegation method for mname interface message; translates message invocation into method call on ActorClass. */\
-private: void VINTERFACE_MEMBERIMPL(mname)(P1 p1,P2 p2) {\
-    actor ()->mname (this,p1,p2);\
+private: void VINTERFACE_MEMBERIMPL(mname)(Vca::VMessage* pMessage,P1 p1,P2 p2) {\
+    actor ()->mname (Vca::VMessageHolder<Interface>(pMessage, this),p1,p2);\
 }
 
 /**
@@ -633,8 +652,8 @@ private: void VINTERFACE_MEMBERIMPL(mname)(P1 p1,P2 p2) {\
  */
 #define VINTERFACE_ROLE_3(mname,P1,P2,P3)\
 /** Delegation method for mname interface message; translates message invocation into method call on ActorClass. */\
-private: void VINTERFACE_MEMBERIMPL(mname)(P1 p1,P2 p2,P3 p3) {\
-    actor ()->mname (this,p1,p2,p3);\
+private: void VINTERFACE_MEMBERIMPL(mname)(Vca::VMessage* pMessage,P1 p1,P2 p2,P3 p3) {\
+    actor ()->mname (Vca::VMessageHolder<Interface>(pMessage, this),p1,p2,p3);\
 }
 
 /**
@@ -643,8 +662,8 @@ private: void VINTERFACE_MEMBERIMPL(mname)(P1 p1,P2 p2,P3 p3) {\
  */
 #define VINTERFACE_ROLE_4(mname,P1,P2,P3,P4)\
 /** Delegation method for mname interface message; translates message invocation into method call on ActorClass. */\
-private: void VINTERFACE_MEMBERIMPL(mname)(P1 p1,P2 p2,P3 p3,P4 p4) {\
-    actor ()->mname (this,p1,p2,p3,p4);\
+private: void VINTERFACE_MEMBERIMPL(mname)(Vca::VMessage* pMessage,P1 p1,P2 p2,P3 p3,P4 p4) {\
+    actor ()->mname (Vca::VMessageHolder<Interface>(pMessage, this),p1,p2,p3,p4);\
 }
 
 /**
@@ -653,8 +672,8 @@ private: void VINTERFACE_MEMBERIMPL(mname)(P1 p1,P2 p2,P3 p3,P4 p4) {\
  */
 #define VINTERFACE_ROLE_5(mname,P1,P2,P3,P4,P5)\
 /** Delegation method for mname interface message; translates message invocation into method call on ActorClass. */\
-private: void VINTERFACE_MEMBERIMPL(mname)(P1 p1,P2 p2,P3 p3,P4 p4,P5 p5) {\
-    actor ()->mname (this,p1,p2,p3,p4,p5);\
+private: void VINTERFACE_MEMBERIMPL(mname)(Vca::VMessage* pMessage,P1 p1,P2 p2,P3 p3,P4 p4,P5 p5) {\
+    actor ()->mname (Vca::VMessageHolder<Interface>(pMessage, this),p1,p2,p3,p4,p5);\
 }
 
 /**
@@ -663,8 +682,8 @@ private: void VINTERFACE_MEMBERIMPL(mname)(P1 p1,P2 p2,P3 p3,P4 p4,P5 p5) {\
  */
 #define VINTERFACE_ROLE_6(mname,P1,P2,P3,P4,P5,P6)\
 /** Delegation method for mname interface message; translates message invocation into method call on ActorClass. */\
-private: void VINTERFACE_MEMBERIMPL(mname)(P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6) {\
-    actor ()->mname (this,p1,p2,p3,p4,p5,p6);\
+private: void VINTERFACE_MEMBERIMPL(mname)(Vca::VMessage* pMessage,P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6) {\
+    actor ()->mname (Vca::VMessageHolder<Interface>(pMessage, this),p1,p2,p3,p4,p5,p6);\
 }
 
 /**
@@ -673,8 +692,8 @@ private: void VINTERFACE_MEMBERIMPL(mname)(P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6) 
  */
 #define VINTERFACE_ROLE_7(mname,P1,P2,P3,P4,P5,P6,P7)\
 /** Delegation method for mname interface message; translates message invocation into method call on ActorClass. */\
-private: void VINTERFACE_MEMBERIMPL(mname)(P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6,P7 p7) {\
-    actor ()->mname (this,p1,p2,p3,p4,p5,p6,p7);\
+private: void VINTERFACE_MEMBERIMPL(mname)(Vca::VMessage* pMessage,P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6,P7 p7) {\
+    actor ()->mname (Vca::VMessageHolder<Interface>(pMessage, this),p1,p2,p3,p4,p5,p6,p7);\
 }
 
 /**
@@ -683,8 +702,8 @@ private: void VINTERFACE_MEMBERIMPL(mname)(P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6,P
  */
 #define VINTERFACE_ROLE_8(mname,P1,P2,P3,P4,P5,P6,P7,P8)\
 /** Delegation method for mname interface message; translates message invocation into method call on ActorClass. */\
-private: void VINTERFACE_MEMBERIMPL(mname)(P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6,P7 p7,P8 p8) {\
-    actor ()->mname (this,p1,p2,p3,p4,p5,p6,p7,p8);\
+private: void VINTERFACE_MEMBERIMPL(mname)(Vca::VMessage* pMessage,P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6,P7 p7,P8 p8) {\
+    actor ()->mname (Vca::VMessageHolder<Interface>(pMessage, this),p1,p2,p3,p4,p5,p6,p7,p8);\
 }
 
 /**
@@ -693,8 +712,8 @@ private: void VINTERFACE_MEMBERIMPL(mname)(P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6,P
  */
 #define VINTERFACE_ROLE_9(mname,P1,P2,P3,P4,P5,P6,P7,P8,P9)\
 /** Delegation method for mname interface message; translates message invocation into method call on ActorClass. */\
-private: void VINTERFACE_MEMBERIMPL(mname)(P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6,P7 p7,P8 p8,P9 p9) {\
-    actor ()->mname (this,p1,p2,p3,p4,p5,p6,p7,p8,p9);\
+private: void VINTERFACE_MEMBERIMPL(mname)(Vca::VMessage* pMessage,P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6,P7 p7,P8 p8,P9 p9) {\
+    actor ()->mname (Vca::VMessageHolder<Interface>(pMessage, this),p1,p2,p3,p4,p5,p6,p7,p8,p9);\
 }
 
 /**
@@ -703,8 +722,8 @@ private: void VINTERFACE_MEMBERIMPL(mname)(P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6,P
  */
 #define VINTERFACE_ROLE_10(mname,P1,P2,P3,P4,P5,P6,P7,P8,P9,P10)\
 /** Delegation method for mname interface message; translates message invocation into method call on ActorClass. */\
-private: void VINTERFACE_MEMBERIMPL(mname)(P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6,P7 p7,P8 p8,P9 p9,P10 p10) {\
-    actor ()->mname (this,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10);\
+private: void VINTERFACE_MEMBERIMPL(mname)(Vca::VMessage* pMessage,P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6,P7 p7,P8 p8,P9 p9,P10 p10) {\
+    actor ()->mname (Vca::VMessageHolder<Interface>(pMessage, this),p1,p2,p3,p4,p5,p6,p7,p8,p9,p10);\
 }
 
 /**
@@ -713,8 +732,8 @@ private: void VINTERFACE_MEMBERIMPL(mname)(P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6,P
  */
 #define VINTERFACE_ROLE_11(mname,P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11)\
 /** Delegation method for mname interface message; translates message invocation into method call on ActorClass. */\
-private: void VINTERFACE_MEMBERIMPL(mname)(P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6,P7 p7,P8 p8,P9 p9,P10 p10,P11 p11) {\
-    actor ()->mname (this,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11);\
+private: void VINTERFACE_MEMBERIMPL(mname)(Vca::VMessage* pMessage,P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6,P7 p7,P8 p8,P9 p9,P10 p10,P11 p11) {\
+    actor ()->mname (Vca::VMessageHolder<Interface>(pMessage, this),p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11);\
 }
 
 /**
@@ -723,8 +742,8 @@ private: void VINTERFACE_MEMBERIMPL(mname)(P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6,P
  */
 #define VINTERFACE_ROLE_12(mname,P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12)\
 /** Delegation method for mname interface message; translates message invocation into method call on ActorClass. */\
-private: void VINTERFACE_MEMBERIMPL(mname)(P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6,P7 p7,P8 p8,P9 p9,P10 p10,P11 p11,P12 p12) {\
-    actor ()->mname (this,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12);\
+private: void VINTERFACE_MEMBERIMPL(mname)(Vca::VMessage* pMessage,P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6,P7 p7,P8 p8,P9 p9,P10 p10,P11 p11,P12 p12) {\
+    actor ()->mname (Vca::VMessageHolder<Interface>(pMessage, this),p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12);\
 }
 
 /**
@@ -733,8 +752,8 @@ private: void VINTERFACE_MEMBERIMPL(mname)(P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6,P
  */
 #define VINTERFACE_ROLE_13(mname,P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12,P13)\
 /** Delegation method for mname interface message; translates message invocation into method call on ActorClass. */\
-private: void VINTERFACE_MEMBERIMPL(mname)(P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6,P7 p7,P8 p8,P9 p9,P10 p10,P11 p11,P12 p12,P13 p13) {\
-    actor ()->mname (this,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13);\
+private: void VINTERFACE_MEMBERIMPL(mname)(Vca::VMessage* pMessage,P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6,P7 p7,P8 p8,P9 p9,P10 p10,P11 p11,P12 p12,P13 p13) {\
+    actor ()->mname (Vca::VMessageHolder<Interface>(pMessage, this),p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13);\
 }
 
 /**
@@ -743,8 +762,8 @@ private: void VINTERFACE_MEMBERIMPL(mname)(P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6,P
  */
 #define VINTERFACE_ROLE_14(mname,P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12,P13,P14)\
 /** Delegation method for mname interface message; translates message invocation into method call on ActorClass. */\
-private: void VINTERFACE_MEMBERIMPL(mname)(P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6,P7 p7,P8 p8,P9 p9,P10 p10,P11 p11,P12 p12,P13 p13,P14 p14) {\
-    actor ()->mname (this,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14);\
+private: void VINTERFACE_MEMBERIMPL(mname)(Vca::VMessage* pMessage,P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6,P7 p7,P8 p8,P9 p9,P10 p10,P11 p11,P12 p12,P13 p13,P14 p14) {\
+    actor ()->mname (Vca::VMessageHolder<Interface>(pMessage, this),p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14);\
 }
 
 /**
@@ -753,8 +772,8 @@ private: void VINTERFACE_MEMBERIMPL(mname)(P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6,P
  */
 #define VINTERFACE_ROLE_15(mname,P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12,P13,P14,P15)\
 /** Delegation method for mname interface message; translates message invocation into method call on ActorClass. */\
-private: void VINTERFACE_MEMBERIMPL(mname)(P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6,P7 p7,P8 p8,P9 p9,P10 p10,P11 p11,P12 p12,P13 p13,P14 p14,P15 p15) {\
-    actor ()->mname (this,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15);\
+private: void VINTERFACE_MEMBERIMPL(mname)(Vca::VMessage* pMessage,P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6,P7 p7,P8 p8,P9 p9,P10 p10,P11 p11,P12 p12,P13 p13,P14 p14,P15 p15) {\
+    actor ()->mname (Vca::VMessageHolder<Interface>(pMessage, this),p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15);\
 }
 
 /**
@@ -763,8 +782,8 @@ private: void VINTERFACE_MEMBERIMPL(mname)(P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6,P
  */
 #define VINTERFACE_ROLE_16(mname,P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12,P13,P14,P15,P16)\
 /** Delegation method for mname interface message; translates message invocation into method call on ActorClass. */\
-private: void VINTERFACE_MEMBERIMPL(mname)(P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6,P7 p7,P8 p8,P9 p9,P10 p10,P11 p11,P12 p12,P13 p13,P14 p14,P15 p15,P16 p16) {\
-    actor ()->mname (this,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16);\
+private: void VINTERFACE_MEMBERIMPL(mname)(Vca::VMessage* pMessage,P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6,P7 p7,P8 p8,P9 p9,P10 p10,P11 p11,P12 p12,P13 p13,P14 p14,P15 p15,P16 p16) {\
+    actor ()->mname (Vca::VMessageHolder<Interface>(pMessage, this),p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16);\
 }
 
 #define VINTERFACE_ROLE_END /** @endcond */ };

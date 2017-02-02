@@ -23,6 +23,9 @@
 class M_CPD;
 
 class rtLINK_CType;
+class rtPTOKEN_Handle;
+
+class VContainerHandle;
 
 #include "V_VArgList.h"
 
@@ -182,6 +185,7 @@ PublicFnDecl void RTYPE_RPrint (
 );
 
 /*****  General Q-Register Support  *****/
+PublicFnDecl IOBJ_IObject RTYPE_QRegister (VContainerHandle *pHandle);
 PublicFnDecl IOBJ_IObject RTYPE_QRegister (M_CPD *cpd);
 PublicFnDecl IOBJ_IObject RTYPE_QRegister (rtLINK_CType *lc);
 
@@ -191,7 +195,15 @@ PublicFnDecl IOBJ_IObject RTYPE_Browser (
 );
 
 /*****  Debugger Q-Register Support  *****/
-PublicFnDecl M_CPD* RTYPE_QRegisterCPD (
+PublicFnDecl M_CPD *RTYPE_QRegisterCPD (
+    IOBJ_IObject		iObject
+);
+
+PublicFnDecl VContainerHandle *RTYPE_QRegisterHandle (
+    IOBJ_IObject		iObject
+);
+
+PublicFnDecl rtPTOKEN_Handle *RTYPE_QRegisterPToken (
     IOBJ_IObject		iObject
 );
 

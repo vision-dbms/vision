@@ -23,6 +23,8 @@ namespace Vxa {
     class VMapMaker;
     class VResultBuilder;
 
+    Vxa_API    void InitializeStockExportables ();
+
     typedef ICollection::Reference export_return_t;
 
 /***********************************
@@ -34,18 +36,20 @@ namespace Vxa {
 
     //  Construction
     protected:
-	VExportableType ();
+	VExportableType (){
+	};
 
     //  Destruction
     protected:
-	~VExportableType ();
+	~VExportableType (){
+	};
     };
 
 /*****************************************************
  *----  template <typename T> class VExportable  ----*
  *****************************************************/
 
-    template <typename T> class VExportable : virtual public VExportableType {
+    template <typename T> class Vxa_API VExportable : virtual public VExportableType {
 	DECLARE_FAMILY_MEMBERS (VExportable<T>, VExportableType);
 
     //  Construction

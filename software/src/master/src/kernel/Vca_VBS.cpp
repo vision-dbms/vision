@@ -219,6 +219,7 @@ Vca::VBS::VBS (VCohort *pCohort)
 , m_sBytesAcked                 (0) 
 , m_bUnbuffered                 (false)
 , m_bWaitingToClose		(false)
+, m_cNumCheckpoints		(0)
 {
 }
 
@@ -803,7 +804,8 @@ void  Vca::VBS::queueCheckPoint (VCheckPoint *pCheckPoint) {
 	m_pCheckPointTail->m_pSuccessor.setTo (pCheckPoint);
 	pCheckPoint->m_pPredecessor.setTo (m_pCheckPointTail);
 	m_pCheckPointTail.setTo (pCheckPoint);
-    }    
+    }
+    m_cNumCheckpoints++;
 }
 
 void  Vca::VBS::dequeueCheckPoint () {
@@ -814,6 +816,7 @@ void  Vca::VBS::dequeueCheckPoint () {
     
 	if (m_pCheckPointHead.isNil ())
 	    m_pCheckPointTail.setTo (m_pCheckPointHead);
+	m_cNumCheckpoints--;
     }
 }
 

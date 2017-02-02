@@ -28,17 +28,6 @@ namespace V {
     class V_API VCondvar : public VMutex {
 	DECLARE_FAMILY_MEMBERS (VCondvar, VMutex);
 
-    //  Wait Status
-    public:
-        /**
-         * Used as the return type of waitUntil(); indicates the reason for returning.
-         */
-	enum WaitStatus {
-	    WaitStatus_Success, /**< This lock was signaled. */
-            WaitStatus_Failure, /**< There was an error. */
-            WaitStatus_Timeout /**< The given timeout was reached while waiting. */
-	};
-
     //  Construction
     public:
         /** Default constructor takes no arguments. */

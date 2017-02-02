@@ -23,6 +23,10 @@
  ************************/
 
 #include "M_CPD.h"
+
+#include "RTptoken.h"
+
+#include "Vdd_Store.h"
 
 
 /***************************
@@ -31,7 +35,7 @@
  ***************************
  ***************************/
 
-DEFINE_CONCRETE_RTT (M_KnownObjectTable);
+DEFINE_CONCRETE_RTT (M_KOT);
 
 /**************************
  **************************
@@ -39,7 +43,8 @@ DEFINE_CONCRETE_RTT (M_KnownObjectTable);
  **************************
  **************************/
 
-//  See envir.cpp
+M_KOTE::M_KOTE () : m_pObjectCPD (0), m_pObjectHandle (0) {
+}
 
 /*************************
  *************************
@@ -47,17 +52,13 @@ DEFINE_CONCRETE_RTT (M_KnownObjectTable);
  *************************
  *************************/
 
-M_KnownObjectTable::~M_KnownObjectTable () {
+M_KOT::~M_KOT () {
     m_pKOTC->release ();
 }
 
-M_KnownObjectTable::Entry::~Entry () {
+M_KOTE::~M_KOTE () {
     if (m_pObjectCPD) {
 	m_pObjectCPD->ClearGCLock ();
 	m_pObjectCPD->release ();
-    }
-    if (m_pPTokenCPD) {
-	m_pPTokenCPD->ClearGCLock ();
-	m_pPTokenCPD->release ();
     }
 }

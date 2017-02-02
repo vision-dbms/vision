@@ -66,6 +66,45 @@
  ***************************/
 
 DEFINE_CONCRETE_RTT (rtVSTORE_Handle);
+
+/******************************
+ ******************************
+ *****  Canonicalization  *****
+ ******************************
+ ******************************/
+
+void rtVSTORE_Handle::canonicalize (DSC_Pointer &rPointer) const {
+    rtPTOKEN_Handle::Reference pRPT (getPToken ());
+
+    rtPTOKEN_Handle::Reference pPPT (rPointer.PPT ());
+    rPointer.clear ();
+    rPointer.constructReferenceConstant (pPPT, pRPT, pRPT->cardinality ());
+}
+
+bool rtVSTORE_Handle::getCanonicalization_(rtVSTORE_Handle::Reference &rpStore, DSC_Pointer const &rPointer) {
+    rpStore.setTo (this);
+    return false;
+}
+
+/*****************************************
+ *****************************************
+ *****  Transient Extension Support  *****
+ *****************************************
+ *****************************************/
+
+void rtVSTORE_Handle::setTransientExtensionTo (VGroundStore *pExtension) {
+    m_pExtension.setTo (pExtension);
+    setPreciousTo (m_pExtension.isntNil ());
+}
+
+transientx_t *rtVSTORE_Handle::transientExtensionIfA_(VRunTimeType const &rRTT) const {
+    return transientExtensionIsA_(rRTT) ? transientExtension_() : static_cast<transientx_t*>(0);
+}
+
+bool rtVSTORE_Handle::transientExtensionIsA_(VRunTimeType const &rRTT) const {
+    VRunTimeType *const pRTT = m_pExtension ? m_pExtension->rtt () : static_cast<VRunTimeType*>(0);
+    return pRTT && pRTT->isA (rRTT);
+}
 
 
 /****************************
@@ -85,11 +124,11 @@ PrivateVarDef unsigned int
     ForwardCount		    = 0;
 
 
-/***************************
- ***************************
- *****  Instantiation  *****
- ***************************
- ***************************/
+/**************************
+ **************************
+ *****  Construction  *****
+ **************************
+ **************************/
 
 /*---------------------------------------------------------------------------
  *****  Routine to create a new, inheriting value store.
@@ -109,13 +148,13 @@ PrivateVarDef unsigned int
  *	The address of a CPD for the value store created.
  *
  *****/
-PublicFnDef M_CPD* rtVSTORE_NewCluster (
-    M_CPD *pPPT, M_CPD *pDictionary, M_CPD *pSuperStore, M_CPD *pSuperPointer
+PublicFnDef rtVSTORE_Handle *rtVSTORE_NewCluster (
+    rtPTOKEN_Handle *pPPT, rtDICTIONARY_Handle *pDictionary, Vdd::Store *pSuperStore, M_CPD *pSuperPointer
 ) {
     NewCount++;
 
 /*****  Decode the instance inheritance, ...  *****/
-    bool bFreePPT = false;
+    rtPTOKEN_Handle::Reference pLocalPPT;
     if (pSuperStore) {
 	int xRowPTokenRef = -1;
 	switch (pSuperPointer->RType ()) {
@@ -144,293 +183,249 @@ PublicFnDef M_CPD* rtVSTORE_NewCluster (
 
     /*****  ... and obtain a PPT for the new cluster, if necessary:  *****/
 	if (!pPPT) {
-	    pPPT = pSuperPointer->GetCPD (xRowPTokenRef, RTYPE_C_PToken);
-	    bFreePPT = true;
+	    pLocalPPT.setTo (
+		static_cast<rtPTOKEN_Handle*>(pSuperPointer->GetContainerHandle (xRowPTokenRef, RTYPE_C_PToken))
+	    );
+	    pPPT = pLocalPPT;
 	}
     }
 
 /*****  ... Mark the ptoken as contolled by the value store  ... *****/
-    pPPT->EnableModifications ();
-    rtPTOKEN_CPD_Independent (pPPT) = false;
+    pPPT->clearIsIndependent ();
 
 /*****  ... Create the new V-Store ...  *****/
-    M_CPD *pColumnPToken = rtDICTIONARY_CPD_PropertyPTokenCPD (pDictionary);
-
-    M_CPD *pResult = POPVECTOR_New (
-	pPPT->Space (),
-	RTYPE_C_ValueStore,
-	rtVSTORE_CPD_StdPtrCount - 1 + rtPTOKEN_CPD_BaseElementCount (pColumnPToken)
-    )->StoreReference (
-	rtVSTORE_CPx_Dictionary, pDictionary
-    )->StoreReference (
-	rtVSTORE_CPx_RowPToken, pPPT
-    )->StoreReference (
-	rtVSTORE_CPx_ColumnPToken, pColumnPToken
+    rtPTOKEN_Handle::Reference pColumnPToken;
+    pDictionary->getPropertyPToken (pColumnPToken);
+    rtVSTORE_Handle *pResult = new rtVSTORE_Handle (
+	pPPT, pDictionary, pColumnPToken, pSuperStore, pSuperPointer
     );
-    pColumnPToken->release ();
-
-/*****  ... Install the instance and class inheritance, ...  *****/
-    if (pSuperStore) pResult->StoreReference (
-	rtVSTORE_CPx_InheritanceStore, pSuperStore
-    )->StoreReference (
-	rtVSTORE_CPx_InheritancePtr, pSuperPointer
-    );
-
-/*****  ... cleanup, ...  *****/
-    if (bFreePPT)
-	pPPT->release ();
 
 /*****  ... and return:  *****/
     return pResult;
 }
-
 
-PublicFnDef M_CPD *rtVSTORE_NewCluster (M_CPD *pPPT, M_CPD *pPrototype) {
-    CloneCount++;
+rtVSTORE_Handle::rtVSTORE_Handle (
+    rtPTOKEN_Handle *pPPT, rtDICTIONARY_Handle *pDictionary, rtPTOKEN_Handle *pColumnPToken, Vdd::Store *pSuperStore, M_CPD *pSuperPointer
+) : BaseClass (
+    pPPT->Space (), RTYPE_C_ValueStore, rtVSTORE_CPD_StdPtrCount + pColumnPToken->cardinality () - 1
+) {
+    StoreReference (rtVSTORE_CPx_RowPToken   , pPPT);
+    StoreReference (rtVSTORE_CPx_Dictionary  , static_cast<VContainerHandle*>(pDictionary));
+    StoreReference (rtVSTORE_CPx_ColumnPToken, pColumnPToken);
 
-/*****  Process other store types, ...  *****/
-    switch (M_CPD_RType (pPrototype)) {
-    case RTYPE_C_CharUV:
-	return rtCHARUV_New (pPPT, pPrototype, UV_CPx_RefPToken);
-    case RTYPE_C_Index:
-	return rtINDEX_NewCluster (pPPT, pPrototype);
-    case RTYPE_C_ListStore:
-	return rtLSTORE_NewCluster (pPPT, pPrototype);
-    case RTYPE_C_ValueStore:
-	break;
-    case RTYPE_C_Vector:
-        return rtVECTOR_New (pPPT);
-    default:
-	ERR_SignalFault (
-	    EC__InternalInconsistency, UTIL_FormatMessage (
-		"rtVSTORE_NewCluster(Clone): Unexpected R-Type: %s",
-		RTYPE_TypeIdAsString ((RTYPE_Type)M_CPD_RType (pPrototype))
-	    )
-	);
-	break;
+    if (pSuperStore) {
+	StoreReference (rtVSTORE_CPx_InheritanceStore, pSuperStore);
+	StoreReference (rtVSTORE_CPx_InheritancePtr  , pSuperPointer);
     }
-
-/*****  Create a new empty v-store using the prototype's dictionary... *****/
-    M_CPD* pNewVStoreCPD; {
-	M_CPD* pDictionary = rtVSTORE_CPD_DictionaryCPD (pPrototype);
-
-	pNewVStoreCPD = rtVSTORE_NewCluster (
-	    pPPT, pDictionary, NilOf (M_CPD*), NilOf (M_CPD*)
-	);
-
-	pDictionary->release ();
-    }
-
-/*****  Return if this is the end of the inheritance chain, ...  *****/
-    if (pPrototype->ReferenceIsNil (rtVSTORE_CPx_InheritanceStore))
-	return pNewVStoreCPD;
-
-/*****  Otherwise, construct an inheritance for the clone, ...  *****/
-    M_CPD* pPrototypeInstanceInheritanceCPD = rtVSTORE_CPD_InheritancePointerCPD (
-	pPrototype
-    );
-    switch ((RTYPE_Type)M_CPD_RType (pPrototypeInstanceInheritanceCPD)) {
-/*****  ... as a reference to the current inheritance for values, ...  *****/
-    case RTYPE_C_CharUV:
-    case RTYPE_C_DoubleUV:
-    case RTYPE_C_FloatUV:
-    case RTYPE_C_IntUV:
-    case RTYPE_C_UndefUV:
-    case RTYPE_C_Unsigned64UV:
-    case RTYPE_C_Unsigned96UV:
-    case RTYPE_C_Unsigned128UV: {
-	    M_CPD* pNewInstanceInheritanceCPD = UV_New (
-		(RTYPE_Type)M_CPD_RType (pPrototypeInstanceInheritanceCPD),
-		pPPT,
-		pPrototypeInstanceInheritanceCPD,
-		UV_CPx_RefPToken,
-		(size_t)UV_CPD_Granularity (pPrototypeInstanceInheritanceCPD),
-		NilOf (Ref_UV_Initializer),
-		0
-	    );
-
-	    pNewVStoreCPD->StoreReference (
-		rtVSTORE_CPx_InheritanceStore, pPrototype, rtVSTORE_CPx_InheritanceStore
-	    );
-	    pNewVStoreCPD->StoreReference (rtVSTORE_CPx_InheritancePtr, pNewInstanceInheritanceCPD);
-
-	    pNewInstanceInheritanceCPD->release ();
-	}
-	break;
-
-/*****  ... as a reference to a clone of the current inheritance for instances,  ...  *****/
-    case RTYPE_C_Link: {
-	    M_CPD* pNextVStorePTokenCPD = rtPTOKEN_New (pPPT->Space (), 0); {
-		M_CPD* pPrototypeBehaviorInheritanceCPD = rtVSTORE_CPD_InheritanceStoreCPD (
-		    pPrototype
-		);
-		M_CPD* pNextVStoreCPD = rtVSTORE_NewCluster (
-		    pNextVStorePTokenCPD, pPrototypeBehaviorInheritanceCPD
-		);
-
-		pNewVStoreCPD->StoreReference (rtVSTORE_CPx_InheritanceStore, pNextVStoreCPD);
-
-		pNextVStoreCPD->release ();
-		pPrototypeBehaviorInheritanceCPD->release ();
-	    } {
-		M_CPD* pNewInstanceInheritanceCPD = rtLINK_NewEmptyLink (
-		    pPPT, pNextVStorePTokenCPD
-		);
-
-		pNewVStoreCPD->StoreReference (
-		    rtVSTORE_CPx_InheritancePtr, pNewInstanceInheritanceCPD
-		);
-
-		pNewInstanceInheritanceCPD->release ();
-	    }
-	    pNextVStorePTokenCPD->release ();
-	}
-	break;
-
-    default:
-	RTYPE_ComplainAboutType (
-	    "rtVSTORE_NewCluster:Pointer Cloning",
-	    (RTYPE_Type)M_CPD_RType (pPrototypeInstanceInheritanceCPD),
-	    RTYPE_C_ValueStore
-	);
-    }
-    pPrototypeInstanceInheritanceCPD->release ();
-
-    return pNewVStoreCPD;
 }
 
 
-PublicFnDef bool rtVSTORE_ForwardCluster (
-    M_CPD* pTransientStoreCPD, M_CPD* pPersistentStoreCPD
-) {
-//  Check request validity. Only forward from scratch pad to persistent ...
-    if (pTransientStoreCPD->IsntInTheScratchPad () || pPersistentStoreCPD->IsInTheScratchPad ())
-	return false;
+/*****************************
+ *****************************
+ *****  Cluster Cloning  *****
+ *****************************
+ *****************************/
 
-    ForwardCount++;
+bool rtVSTORE_Handle::isACloneOfValueStore (rtVSTORE_Handle const *pOther) const {
+    if (Names (pOther))
+	return true;				//  ... same objects
+    if (ReferenceDoesntName (rtVSTORE_CPx_Dictionary, pOther, pOther->element (rtVSTORE_CPx_Dictionary)))
+	return false;				//  ... mismatched dictionaries
+    if (hasNoInheritance ())
+	return pOther->hasNoInheritance ();	//  ... end of inheritance chain for both?
+    if (pOther->hasNoInheritance ())
+	return false;				//  ... end of inheritance chain for other but not this.
+
+    Vdd::Store::Reference pThisSuper;
+    getInheritanceStore (pThisSuper);
+
+    Vdd::Store::Reference pOtherSuper;
+    pOther->getInheritanceStore (pOtherSuper);
+
+    return pThisSuper->isACloneOf (pOtherSuper);//  ... keep checking.
+}
+
+void rtVSTORE_Handle::clone (Reference &rpResult, rtPTOKEN_Handle *pPPT) const {
+    CloneCount++;
+
+/*****  Create a new empty v-store using the prototype's dictionary... *****/
+    rtDICTIONARY_Handle::Reference pDictionary (getDictionary ());
+    rpResult.setTo (rtVSTORE_NewCluster (pPPT, pDictionary, NilOf (Vdd::Store*), NilOf (M_CPD*)));
 
 
-//  Forward components based on store type, ... 
-    //  After components are forwarded, the new POP is copied into place.
-    //  This is done to reduce the chance that forwarded POP entries will
-    //  remain in the scratch pad container table. Forwarded POPs in the
-    //  scratch pad CT can make some vector operations less efficient.
-    M_CPD* pPTokenCPD;
-    switch (M_CPD_RType (pTransientStoreCPD)) {
-    case RTYPE_C_Index: {
-	//  Forward Top Level Container ...
-	    pTransientStoreCPD->ForwardToSpace (pPersistentStoreCPD);
-	    M_CPD* pListsCPD = rtINDEX_CPD_ListStoreCPD (pTransientStoreCPD);
-	//  Keep the ptoken in the same space with the index if the index is
-	//  independent of a vstore, and if the ptoken is transient ...
-	    pPTokenCPD = rtLSTORE_CPD_RowPTokenCPD (pListsCPD);
-	    if (pPTokenCPD->IsInTheScratchPad () && rtPTOKEN_CPD_Independent (pPTokenCPD)) {
-		pPTokenCPD->ForwardToSpace (pPersistentStoreCPD);
-		pListsCPD->StoreReference (rtLSTORE_CPx_RowPToken, pPTokenCPD);
+/*****  Return if this is the end of the inheritance chain, ...  *****/
+    if (hasAnInheritance ()) {
+    /*****  Otherwise, construct an inheritance for the clone, ...  *****/
+	Vdd::Store::Reference pPrototypeInheritanceStore;
+	getInheritanceStore (pPrototypeInheritanceStore);
+
+	M_CPD *pPrototypeInheritancePointer;
+	getInheritancePointer (pPrototypeInheritancePointer);
+
+	switch (pPrototypeInheritancePointer->RType ()) {
+    /*****  ... as a reference to the current inheritance for values, ...  *****/
+	case RTYPE_C_CharUV:
+	case RTYPE_C_DoubleUV:
+	case RTYPE_C_FloatUV:
+	case RTYPE_C_IntUV:
+	case RTYPE_C_UndefUV:
+	case RTYPE_C_Unsigned64UV:
+	case RTYPE_C_Unsigned96UV:
+	case RTYPE_C_Unsigned128UV: {
+		M_CPD* pCloneInheritancePointer = UV_New (
+		    pPrototypeInheritancePointer->RType (),
+		    pPPT,
+		    pPrototypeInheritancePointer,
+		    UV_CPx_RefPToken,
+		    (size_t)UV_CPD_Granularity (pPrototypeInheritancePointer),
+		    NilOf (Ref_UV_Initializer),
+		    0
+		);
+
+		rpResult->StoreReference (rtVSTORE_CPx_InheritanceStore, pPrototypeInheritanceStore);
+		rpResult->StoreReference (rtVSTORE_CPx_InheritancePtr, pCloneInheritancePointer);
+
+		pCloneInheritancePointer->release ();
 	    }
-	    pPTokenCPD->release ();
-	    pListsCPD->release ();
-	}
-	break;
+	    break;
 
-    case RTYPE_C_ListStore:
-    //  Forward Top Level Container ... 
-	pTransientStoreCPD->ForwardToSpace (pPersistentStoreCPD);
-    //  Keep the ptoken in the same space with the lstore if the lstore is
-    //  independent of a vstore, and if the ptoken is transient ...
-	pPTokenCPD = rtLSTORE_CPD_RowPTokenCPD (pTransientStoreCPD);
-	if (pPTokenCPD->IsInTheScratchPad () &&
-	    (rtPTOKEN_CPD_Independent (pPTokenCPD) || rtLSTORE_CPD_StringStore (pTransientStoreCPD)))
-	{
-	    pPTokenCPD->ForwardToSpace (pPersistentStoreCPD);
-	    pTransientStoreCPD->StoreReference (rtLSTORE_CPx_RowPToken, pPTokenCPD);
-	}
-	pPTokenCPD->release ();
-	break;
-
-    case RTYPE_C_ValueStore: {
-	//  Forward Top Level Container ...
-	    pTransientStoreCPD->ForwardToSpace (pPersistentStoreCPD);
-	    M_CPD* pInheritanceStoreCPD = rtVSTORE_CPD_InheritanceStoreCPD (
-		pTransientStoreCPD
-	    );
-	//  Forward the Inheritance Chain ...
-	    rtVSTORE_ForwardCluster (pInheritanceStoreCPD, pPersistentStoreCPD);
-	    pTransientStoreCPD->StoreReference (rtVSTORE_CPx_InheritanceStore, pInheritanceStoreCPD);
-	//  Forward the Row PToken and update the store's reference to it ....
-	    pPTokenCPD = rtVSTORE_CPD_RowPTokenCPD (pTransientStoreCPD);
-	    if (pPTokenCPD->IsInTheScratchPad ()) {
-		pPTokenCPD->ForwardToSpace (pPersistentStoreCPD);
-		pTransientStoreCPD->StoreReference (rtVSTORE_CPx_RowPToken, pPTokenCPD);
-	    }
-	    pPTokenCPD->release ();
-	//  Update instance inheritance to reference the forwarded ptokens
-	    M_CPD* pInheritancePtrCPD = rtVSTORE_CPD_InheritancePointerCPD (
-		pTransientStoreCPD
-	    );
-	    switch (M_CPD_RType (pInheritancePtrCPD))
-	    {
-	    case RTYPE_C_Link:
-		switch (M_CPD_RType (pInheritanceStoreCPD))
-		{
-		case RTYPE_C_ValueStore:
-		    pInheritancePtrCPD->StoreReference (
-			rtLINK_CPx_RefPToken, pInheritanceStoreCPD, rtVSTORE_CPx_RowPToken
+    /*****  ... as a reference to a clone of the current inheritance for instances,  ...  *****/
+	case RTYPE_C_Link: {
+		rtPTOKEN_Handle::Reference pCloneInheritancePPT (new rtPTOKEN_Handle (pPPT->Space (), 0)); {
+		    Vdd::Store::Reference pCloneInheritanceStore;
+		    pPrototypeInheritanceStore->clone (pCloneInheritanceStore, pCloneInheritancePPT);
+		    rpResult->StoreReference (rtVSTORE_CPx_InheritanceStore, pCloneInheritanceStore);
+		} {
+		    M_CPD *pCloneInheritancePointer = rtLINK_NewEmptyLink (
+			pPPT, pCloneInheritancePPT
 		    );
-		    break;
-		case RTYPE_C_ListStore:
-		    pInheritancePtrCPD->StoreReference (
-			rtLINK_CPx_RefPToken, pInheritanceStoreCPD, rtLSTORE_CPx_RowPToken
-		    );
-		    break;
-		default:
-		    break;
+		    rpResult->StoreReference (rtVSTORE_CPx_InheritancePtr, pCloneInheritancePointer);
+		    pCloneInheritancePointer->release ();
 		}
-		pInheritancePtrCPD->StoreReference (
-		    rtLINK_CPx_PosPToken, pTransientStoreCPD, rtVSTORE_CPx_RowPToken
-		);
-		break;
-	    case RTYPE_C_CharUV:
-	    case RTYPE_C_DoubleUV:
-	    case RTYPE_C_FloatUV:
-	    case RTYPE_C_IntUV:
-	    case RTYPE_C_UndefUV:
-	    case RTYPE_C_Unsigned64UV:
-	    case RTYPE_C_Unsigned96UV:
-	    case RTYPE_C_Unsigned128UV:
-		pInheritancePtrCPD->StoreReference (
-		    UV_CPx_PToken, pTransientStoreCPD, rtVSTORE_CPx_RowPToken
-		);
-		break;
-	    default:
-		break;
 	    }
-	    pInheritancePtrCPD->release ();
-	    pInheritanceStoreCPD->release ();
+	    break;
+
+	default:
+	    RTYPE_ComplainAboutType (
+		"rtVSTORE_NewCluster:Pointer Cloning",
+		pPrototypeInheritancePointer->RType (),
+		RTYPE_C_ValueStore
+	    );
 	}
-	break;
+	pPrototypeInheritancePointer->release ();
+    }
+}
+
 
-    case RTYPE_C_Vector:
-    case RTYPE_C_CharUV:
-    case RTYPE_C_Method:
-    case RTYPE_C_Closure:
-    case RTYPE_C_Block:
-    //  Forward Top Level Container ...
-	pTransientStoreCPD->ForwardToSpace (pPersistentStoreCPD);
-    //  No components need be forwarded ...
-        break;
+/********************************
+ ********************************
+ *****  Cluster Forwarding  *****
+ ********************************
+ ********************************/
 
-    default:
-	ERR_SignalFault (
-	    EC__InternalInconsistency, UTIL_FormatMessage (
-		"rtVSTORE_ForwardCluster: Unexpected R-Type: %s",
-		RTYPE_TypeIdAsString ((RTYPE_Type)M_CPD_RType (pTransientStoreCPD))
-	    )
-	);
-	break;
+bool rtINDEX_Handle::forwardToSpace_(M_ASD *pSpace) {
+//  Forward the top level container, ...
+    if (HandleBase::forwardToSpace_(pSpace)) {
+	ForwardCount++;
+
+//  and its components:
+	rtLSTORE_Handle::Reference pListStore;
+	getListStore (pListStore);
+	if (pListStore->forwardToSpace (pSpace))
+	    StoreReference (rtINDEX_CPx_Lists, static_cast<VContainerHandle*>(pListStore));
+
+	VContainerHandle::Reference pKeySet;
+	getKeySet (pKeySet);
+	if (pKeySet->forwardToSpace (pSpace))
+	    StoreReference (rtINDEX_CPx_KeyValues, pKeySet);
+
+	return true;
+    }
+    return false;
+}
+
+bool rtLINK_Handle::forwardToSpace_(M_ASD *pSpace) {
+//  Forward the top level container, ...
+    if (BaseClass::forwardToSpace_(pSpace)) {
+
+//  and its components:
+	rtPTOKEN_Handle::Reference pPPT (getPPT ());
+	if (pPPT->forwardToSpace (pSpace))
+	    StoreReference (pptPOP (), pPPT);
+
+	return true;
+    }
+    return false;
+}
+
+bool rtUVECTOR_Handle::forwardToSpace_(M_ASD *pSpace) {
+//  Forward the top level container, ...
+    if (BaseClass::forwardToSpace_(pSpace)) {
+
+//  and its components:
+	rtPTOKEN_Handle::Reference pPPT (getPPT ());
+	if (pPPT->forwardToSpace (pSpace))
+	    StoreReference (pptPOP (), pPPT);
+
+	return true;
+    }
+    return false;
+}
+
+bool rtLSTORE_Handle::forwardToSpace_(M_ASD *pSpace) {
+//  Forward the top level container, ...
+    if (HandleBase::forwardToSpace_(pSpace)) {
+	ForwardCount++;
+
+//  and its components:
+    /*----------------------------------------------------------------------*
+     *  Keep the ptoken in the same space as the lstore if the lstore is
+     *  independent of a vstore, and if the ptoken is transient ...
+     *----------------------------------------------------------------------*/
+	rtPTOKEN_Handle::Reference pPToken (getPToken ());
+	if ((pPToken->isIndependent () || isAStringStore ()) && pPToken->forwardToSpace (pSpace))
+	    StoreReference (rowPTokenPOP (), pPToken);
+
+	getContentPToken (pPToken);
+	if (pPToken->forwardToSpace (pSpace))
+	    StoreReference (contentPTokenPOP (), pPToken);
+
+	VContainerHandle::Reference pContent;
+	getContent (pContent);
+	if (pContent->forwardToSpace (pSpace))
+	    StoreReference (contentPOP (), pContent);
+
+	return true;
+    }
+    return false;
+}
+
+bool rtVSTORE_Handle::forwardToSpace_(M_ASD *pSpace) {
+//  Forward the top level container, ...
+    if (HandleBase::forwardToSpace_(pSpace)) {
+	ForwardCount++;
+
+//  and its components:
+	rtPTOKEN_Handle::Reference pRowPToken (getPToken ());
+	if (pRowPToken->forwardToSpace (pSpace))
+	    StoreReference (rtVSTORE_CPx_RowPToken,pRowPToken);
+
+	if (hasAnInheritance ()) {
+	    Vdd::Store::Reference pInheritanceStore;
+	    getInheritanceStore (pInheritanceStore);
+	    if (pInheritanceStore->forwardToSpace (pSpace))
+		StoreReference (rtVSTORE_CPx_InheritanceStore, pInheritanceStore);
+
+	    //  Update instance inheritance to reference the forwarded ptokens
+	    VContainerHandle::Reference pInheritancePointer;
+	    getInheritancePointer (pInheritancePointer);
+	    if (pInheritancePointer->forwardToSpace (pSpace))
+		StoreReference (rtVSTORE_CPx_InheritancePtr, pInheritancePointer);
+	}
+	return true;
     }
 
-    return true;
+    return false;
 }
 
 
@@ -447,92 +442,67 @@ PublicFnDef bool rtVSTORE_ForwardCluster (
 /*---------------------------------------------------------------------------
  *****  Routine to align the columns of a value store
  *
- *  Argument:
- *	cpd		- a CPD for the Value Store to align.
- *
  *  Returns:
- *	'cpd'
+ *	'true' if alignments performed, 'false' otherwise.
  *
  *****/
-PublicFnDef M_CPD* rtVSTORE_Align (M_CPD *pVStoreCPD) {
-    AlignCount++;
+bool rtVSTORE_Handle::align () {
+    bool bAlignmentsPerformed = false;
 
-    /****  Validate RType of parameter  ****/
-    RTYPE_MustBeA ("rtVSTORE_Align", M_CPD_RType (pVStoreCPD), RTYPE_C_ValueStore);
+    AlignCount++;
 
     /****  Align the row dimension of the v-store, ...  ****/
     {
-	M_CPD* pRowPTokenCPD;
-	rtPTOKEN_IsntCurrent (pVStoreCPD, rtVSTORE_CPx_RowPToken, pRowPTokenCPD);
-	if (IsntNil (pRowPTokenCPD))
-	{
-	    M_CPD* pBaseRowPTokenCPD = rtPTOKEN_BasePToken (pRowPTokenCPD, -1);
-	    pVStoreCPD->StoreReference (rtVSTORE_CPx_RowPToken, pBaseRowPTokenCPD);
-	    pBaseRowPTokenCPD->release ();
-	    pRowPTokenCPD->release ();
+	rtPTOKEN_Handle::Reference pRowPToken;
+	if (isntTerminal (element(rtVSTORE_CPx_RowPToken), pRowPToken)) {
+	    pRowPToken.setTo (pRowPToken->basePToken ());
+
+	    EnableModifications ();
+	    StoreReference (rtVSTORE_CPx_RowPToken, pRowPToken);
+
+	    bAlignmentsPerformed = true;
 	}
     }
 
     /****  Align the column dimension of the v-store, ...  ****/
-    rtVSTORE_CPD_Column (pVStoreCPD) = rtVSTORE_CPD_ColumnArray (pVStoreCPD);
-    POPVECTOR_Align (
-	pVStoreCPD,
-	rtVSTORE_CPx_ColumnPToken,
-	rtVSTORE_CPx_Column,
-	rtVSTORE_CPD_ColumnCount (pVStoreCPD)
-    );
-    rtVSTORE_CPD_Column (pVStoreCPD) = rtVSTORE_CPD_ColumnArray (pVStoreCPD);
+    bAlignmentsPerformed = HandleBase::align (
+	rtVSTORE_CPx_ColumnPToken, rtVSTORE_CPx_Column, columnCount ()
+    ) || bAlignmentsPerformed;
 
     /****  Compress the v-store property structure if necessary, ...  ****/
     {
-	M_CPD* pDictionary = rtVSTORE_CPD_DictionaryCPD (pVStoreCPD);
+	rtDICTIONARY_Handle::Reference pDictionary (getDictionary ());
 
 	/*****  Align the dictionary if a property slot compression is suspected, ...  *****/
-	if (pVStoreCPD->ReferenceDoesntName (
-		rtVSTORE_CPx_ColumnPToken, pDictionary, rtDICTIONARY_CPx_PropertyPToken
-	    )
-	) rtDICTIONARY_Align (pDictionary);
+	if (pDictionary->propertyPTokenDoesntName (this, element (rtVSTORE_CPx_ColumnPToken)))
+	    pDictionary->align ();
 
 	/*****  If a property slot compression is needed, ...  *****/
-	if (pVStoreCPD->ReferenceDoesntName (
-		rtVSTORE_CPx_ColumnPToken, pDictionary, rtDICTIONARY_CPx_PropertyPToken
-	    )
-	)
-	{
+	if (pDictionary->propertyPTokenDoesntName (this, element (rtVSTORE_CPx_ColumnPToken))) {
 	    /*****  Get the property subset, ...  *****/
-	    rtLINK_CType* pNonPropertySubsetLC; {
-		M_CPD* pPropertySubsetCPD = rtDICTIONARY_CPD_PropertySubsetCPD (
-		    pDictionary
-		);
-		rtLINK_CType *pPropertySubsetLC = rtLINK_ToConstructor (
-		    pPropertySubsetCPD
-		);
+	    rtLINK_CType *pNonPropertySubsetLC; {
+		M_CPD *pPropertySubsetCPD;
+		pDictionary->getPropertySubset (pPropertySubsetCPD);
 
+		rtLINK_CType *pPropertySubsetLC = rtLINK_ToConstructor (pPropertySubsetCPD);
 		pNonPropertySubsetLC = pPropertySubsetLC->Complement ();
-
 		pPropertySubsetLC->release ();
+
 		pPropertySubsetCPD->release ();
 	    }
 
 	    /*****  ... temporarily change the v-store's column p-token, ...  *****/
+	    EnableModifications ();
 	    rtPTOKEN_CType *pPTConstructor; {
-		M_CPD *pNewColumnPTokenCPD = rtPTOKEN_New (
-		    pVStoreCPD->ScratchPad (),
-		    rtPTOKEN_CPD_BaseElementCount (pNonPropertySubsetLC->RPT ())
+		rtPTOKEN_Handle::Reference pNewColumnPToken (
+		    new rtPTOKEN_Handle (
+			ScratchPad (), pNonPropertySubsetLC->RPT ()->cardinality ()
+		    )
 		);
-
-		pVStoreCPD->StoreReference (rtVSTORE_CPx_ColumnPToken, pNewColumnPTokenCPD);
-		pPTConstructor = rtPTOKEN_NewShiftPTConstructor (
-		    pNewColumnPTokenCPD, -1
-		);
-
-		pNewColumnPTokenCPD->release ();
-	    }
-	    
+		StoreReference (rtVSTORE_CPx_ColumnPToken, pNewColumnPToken);
+		pPTConstructor = pNewColumnPToken->makeAdjustments ();
+	    } {
 	    /*****  ... delete non-properties from the column set, ...  *****/
-	    {
-		unsigned int totalDeleted = 0;
-
 #define		handleNil(position, count, refNil)
 #define		handleRepeat(position, count, origin) {\
 		    pPTConstructor->AppendAdjustment (origin + 1 - totalDeleted++, -1);\
@@ -544,6 +514,7 @@ PublicFnDef M_CPD* rtVSTORE_Align (M_CPD *pVStoreCPD) {
 		    totalDeleted += count;\
 		}
 
+		unsigned int totalDeleted = 0;
 		rtLINK_TraverseRRDCList (
 		    pNonPropertySubsetLC, handleNil, handleRepeat, handleRange
 		);
@@ -553,29 +524,22 @@ PublicFnDef M_CPD* rtVSTORE_Align (M_CPD *pVStoreCPD) {
 #undef		handleRange
 	    }
 
-	    pPTConstructor->ToPToken ()->release ();
+	    pPTConstructor->ToPToken ()->discard ();
 	    pNonPropertySubsetLC->release ();
 
 	    /*****  ... re-align the column dimension of the v-store, ...  ****/
-	    rtVSTORE_CPD_Column (pVStoreCPD) = rtVSTORE_CPD_ColumnArray (pVStoreCPD);
-	    POPVECTOR_Align (
-		pVStoreCPD,
-		rtVSTORE_CPx_ColumnPToken,
-		rtVSTORE_CPx_Column,
-		rtVSTORE_CPD_ColumnCount (pVStoreCPD)
-	    );
-	    rtVSTORE_CPD_Column (pVStoreCPD) = rtVSTORE_CPD_ColumnArray (pVStoreCPD);
+	    HandleBase::align (rtVSTORE_CPx_ColumnPToken, rtVSTORE_CPx_Column, columnCount ());
 
 	    /*****
 	     *  ... and change the column p-token to the dictionary's property p-token.
 	     *****/
-	    pVStoreCPD->StoreReference (
-		rtVSTORE_CPx_ColumnPToken, pDictionary, rtDICTIONARY_CPx_PropertyPToken
+	    StoreReference (
+		rtVSTORE_CPx_ColumnPToken, pDictionary, pDictionary->element (rtDICTIONARY_CPx_PropertyPToken)
 	    );
 	}
-	pDictionary->release ();
     }
-    return pVStoreCPD;
+
+    return bAlignmentsPerformed;
 }
 
 
@@ -587,7 +551,6 @@ PublicFnDef M_CPD* rtVSTORE_Align (M_CPD *pVStoreCPD) {
  *****  Routine to fully align a vstore.
  *
  *  Arguments:
- *	pVStoreCPD		- a standard CPD for the vstore to align.
  *	deletingEmptyUSegments	- a boolean which, when true, requests that
  *				  unreferenced u-segments be deleted from
  *				  vectors.
@@ -596,71 +559,32 @@ PublicFnDef M_CPD* rtVSTORE_Align (M_CPD *pVStoreCPD) {
  *	True if any alignments were done, false otherwise.
  *
  *****/
-PublicFnDef bool rtVSTORE_AlignAll (M_CPD *pVStoreCPD, bool deletingEmptyUSegments) {
+bool rtVSTORE_Handle::alignAll (bool deletingEmptyUSegments) {
     bool result = false;
 
-    switch ((RTYPE_Type)M_CPD_RType (pVStoreCPD)) {
-    case RTYPE_C_ValueStore: {
-	/*****
-	 *  Check for the secret code that this is an Incorporator Updated
-	 *  store. If it is, turn off usegment deletion. Deleting usegments
-	 *  is likely to break the incorporator....
-	 *****/
-	    if (deletingEmptyUSegments &&
-		RTYPE_C_UndefUV == (RTYPE_Type)M_CPreamble_RType (
-		    pVStoreCPD->GetContainerAddress (rtVSTORE_CPx_InheritancePtr)
-		)
-	    ) deletingEmptyUSegments = false;
+/*****
+ *  Check for the secret code that this is an Incorporator Updated
+ *  store. If it is, turn off usegment deletion. Deleting usegments
+ *  is likely to break the incorporator....
+ *****/
+    if (deletingEmptyUSegments && RTYPE_C_UndefUV == (RTYPE_Type)M_CPreamble_RType (
+	    GetContainerAddress (element (rtVSTORE_CPx_InheritancePtr))
+	)
+    ) deletingEmptyUSegments = false;
 
-	/*****  V-Store MUST Be Aligned !!!!!!!!!!!!!!! *****/
-	    rtVSTORE_Align (pVStoreCPD);
+/*****  V-Store MUST Be Aligned !!!!!!!!!!!!!!! *****/
+    align ();
 
-	    unsigned int size = rtPTOKEN_BaseElementCount (
-		pVStoreCPD, rtVSTORE_CPx_ColumnPToken
-	    );
-
-	/*****  Go to the first column ...  *****/
-	    M_POP const *pColumnArray = rtVSTORE_CPD_ColumnArray (pVStoreCPD);
-
-	/*****  ... and align each column ... *****/
-	    VContainerHandle *pVStoreHandle = pVStoreCPD->containerHandle ();
-	    for (unsigned int i=0; i<size; i++) {
-		M_POP const *pColumn = &pColumnArray[i];
-		if (pVStoreHandle->ReferenceIsntNil (pColumn)) {
-		    M_CPD* columnCPD = pVStoreHandle->GetCPD (pColumn);
-
-		    if (rtVSTORE_AlignAll (columnCPD, deletingEmptyUSegments))
-			result = true;
-
-		    columnCPD->release ();
-		}
-	    }
+/*****  ... and align each column ... *****/
+    unsigned int const xColumnLimit = rtVSTORE_CPx_Column + rtPTOKEN_BaseElementCount (
+	this, element (rtVSTORE_CPx_ColumnPToken)
+    );
+    for (unsigned int xColumn = rtVSTORE_CPx_Column; xColumn < xColumnLimit; xColumn++) {
+	if (ReferenceIsntNil (xColumn)) {
+	    VContainerHandle::Reference pColumnHandle (elementHandle (xColumn));
+	    if (pColumnHandle->alignAll (deletingEmptyUSegments))
+		result = true;
 	}
-        break;
-
-    case RTYPE_C_ListStore:
-	result = rtLSTORE_AlignAll (pVStoreCPD, deletingEmptyUSegments);
-        break;
-
-    case RTYPE_C_Index:
-	result = rtINDEX_AlignAll  (pVStoreCPD, deletingEmptyUSegments);
-        break;
-
-    case RTYPE_C_Vector:
-	result = rtVECTOR_AlignAll (pVStoreCPD, deletingEmptyUSegments);
-        break;
-
-    case RTYPE_C_Method:
-	result = rtMETHOD_Align    (pVStoreCPD);
-	break;
-
-    case RTYPE_C_Closure:
-	result = rtCLOSURE_Align   (pVStoreCPD);
-	break;
-
-    default:
-	result = false;
-        break;
     }
 
     return result;
@@ -673,210 +597,132 @@ PublicFnDef bool rtVSTORE_AlignAll (M_CPD *pVStoreCPD, bool deletingEmptyUSegmen
  ***********************************
  ***********************************/
 
-PrivateFnDef rtLINK_CType *AddRowsToPToken (
-    M_CPD*			pTokenRefCPD,
-    int				pTokenRefIndex,
-    M_CPD*			newRowsPToken,
-    int				replacingOriginalPToken
-) {
-    int origin, numRows;
-
-/*****  Add the requested number of 'rows' to the p-token...  *****/
-    rtPTOKEN_CType *ptc = rtPTOKEN_NewShiftPTConstructor (pTokenRefCPD, pTokenRefIndex);
-    M_CPD *vStoreRowPToken = ptc->AppendAdjustment (
-	origin = rtPTOKEN_PTC_BaseCount (ptc),
-	numRows = rtPTOKEN_CPD_BaseElementCount (newRowsPToken)
-    )->ToPToken ();
-
-/*****  ... replace the original if appropriate, ...  *****/
-    if (replacingOriginalPToken)
-	pTokenRefCPD->StoreReference (pTokenRefIndex, vStoreRowPToken);
-
-/*****  ... create a link constructor for the added rows, ...  *****/
-    rtLINK_CType *addedRows = rtLINK_AppendRange (
-	rtLINK_RefConstructor (vStoreRowPToken, -1), origin, numRows
-    )->Close (newRowsPToken);
-
-/*****  ... cleanup, ...  *****/
-    vStoreRowPToken->release ();
-
-/*****  ... and return.  *****/
-    return addedRows;
-}
-
-
-PrivateFnDef rtLINK_CType *AddRowsToIndex (
-    M_CPD*			vStore,
-    M_CPD*			newRowsPToken
-)
-{
-    int instantiable;
-
-    if (rtINDEX_CPD_IsATimeSeries (vStore))
-    {
-	M_CPD* lstore = rtINDEX_CPD_ListStoreCPD (vStore);
-	M_CPD* ptoken = rtLSTORE_CPD_RowPTokenCPD (lstore);
-
-	instantiable = rtPTOKEN_CPD_Independent (ptoken);
-
-	lstore->release ();
-	ptoken->release ();
-
-    }
-    else instantiable = true;
-
-    return
-	instantiable
-	? rtINDEX_AddLists (vStore, newRowsPToken)
-	: NilOf (rtLINK_CType *);
-}
-
-
 /*---------------------------------------------------------------------------
  *****  Routine to add a specified number of rows to the end of a value store.
  *
  *  Arguments:
- *	vStore			- a standard CPD for the head of a value store
+ *	this			- a handle for the head of an inheritance
  *				  chain.  The number of rows specified by the
  *				  'newRowsPToken' will be appended to each
  *				  value store in the chain through the end of
  *				  the chain or the first value store which
  *				  inherits its state via a u-vector.
- *	newRowsPToken		- a standard CPD for a P-Token which
- *				  specifies the number of rows to be added.
+ *	newRowsPToken		- a handle for a P-Token specifying the
+ *				  rows to be added.
  *
  *  Returns:
  *	An link constructor referencing the rows added to the value store.  The
  *	positional P-Token of this link constructor will be 'newRowsPToken'.
  *
  *****/
-PublicFnDef rtLINK_CType *rtVSTORE_AddRows (
-    M_CPD*			vStore,
-    M_CPD*			newRowsPToken
-)
-{
+rtLINK_CType *rtVSTORE_Handle::addInstances_(rtPTOKEN_Handle *newRowsPToken) {
     AddRowsCount++;
 
-/*****  Verify that 'newRowsPToken' is a ptoken, ...  *****/
-    RTYPE_MustBeA (
-	"rtVSTORE_AddRows", M_CPD_RType (newRowsPToken), RTYPE_C_PToken
-    );
-
-/*****  Process non-value-stores specially, ...  *****/
-    switch (M_CPD_RType (vStore)) {
-    default:
-	RTYPE_ComplainAboutType (
-	    "rtVSTORE_AddRows", M_CPD_RType (vStore), RTYPE_C_ValueStore
-	);
-    case RTYPE_C_ValueStore:
-	break;
-    case RTYPE_C_ListStore:
-	return rtLSTORE_AddLists (vStore, newRowsPToken);
-    case RTYPE_C_Index:
-	return AddRowsToIndex (vStore, newRowsPToken);
+/*****  If this is the end of the inheritance chain, ...  *****/
+    M_CPD *pInheritancePointer = 0;
+    bool bTheEndOfTheLine = false;
+    if (hasNoInheritance ())
+	bTheEndOfTheLine = true;
+    else {
+	getInheritancePointer (pInheritancePointer);
+	bTheEndOfTheLine = pInheritancePointer->RType () != RTYPE_C_Link;
     }
 
-/*****  If this is the end of the V-Store chain, ...   *****/
-    M_CPD* valueInheritance = NilOf (M_CPD*);
-    if (vStore->ReferenceIsNil (rtVSTORE_CPx_InheritanceStore) ||
-/*****  ... or the value inheritance is represented by a U-Vector, ...  *****/
-	(RTYPE_Type)M_CPD_RType (
-	    valueInheritance = rtVSTORE_CPD_InheritancePointerCPD (vStore)
-	) != RTYPE_C_Link
-    ) {
 /*****  ... then add rows to this value store's row P-Token:  *****/
-	rtLINK_CType *addedRows = vStore->TransientExtensionIsA (VGroundStore::RTT) &&
-	    !((VGroundStore*)vStore->TransientExtension ())->allowsInsert ()
-	    ? NilOf (rtLINK_CType*)
-	    : AddRowsToPToken (vStore, rtVSTORE_CPx_RowPToken, newRowsPToken, true);
+    if (bTheEndOfTheLine) {
+	rtLINK_CType *pAdditions = 0;
+	if (m_pExtension.isNil () || m_pExtension->allowsInsert ()) {
+	    rtPTOKEN_CType *ptc = getPToken ()->makeAdjustments ();
 
-	if (IsntNil (valueInheritance))
-	    valueInheritance->release ();
+	    unsigned int origin = rtPTOKEN_PTC_BaseCount (ptc);
+	    unsigned int numRows = newRowsPToken->cardinality ();
+	    rtPTOKEN_Handle::Reference pPToken (ptc->AppendAdjustment (origin, numRows)->ToPToken ());
 
-	return addedRows;
+/*****  ... replace the original ptoken, ...  *****/
+	    EnableModifications ();
+	    StoreReference (rtVSTORE_CPx_RowPToken, pPToken);
+
+/*****  ... create a link constructor for the added rows, ...  *****/
+	    pAdditions = rtLINK_AppendRange (
+		rtLINK_RefConstructor (pPToken), origin, numRows
+	    )->Close (newRowsPToken);
+	}
+
+/*****  ...  cleanup, ...  *****/
+	if (pInheritancePointer)
+	    pInheritancePointer->release ();
+
+/*****  ... and return.  *****/
+	return pAdditions;
     }
 
 /*****  ... otherwise, try to add rows to the 'super' of this store:  *****/
-    M_CPD* vStoreInheritance = rtVSTORE_CPD_InheritanceStoreCPD (vStore);
-    rtLINK_CType *inheritedRows = rtVSTORE_AddRows (vStoreInheritance, newRowsPToken);
-    vStoreInheritance->release ();
+    rtLINK_CType *pInheritedAdditions = 0; {
+	Vdd::Store::Reference pInheritanceStore;
+	getInheritanceStore (pInheritanceStore);
+	pInheritedAdditions = pInheritanceStore->addInstances (newRowsPToken);
+    }
 
-/*****  If the addition failed, return:  *****/
-    if (IsNil (inheritedRows))
-	return inheritedRows;
+/*****  If the addition succeeded, update this store...:  *****/
+    rtLINK_CType *pAdditions = 0;
+    if (pInheritedAdditions) {
+	pAdditions = rtLINK_LCAdd (pInheritancePointer, pInheritedAdditions);
+	pInheritedAdditions->release ();
 
-/*****  ... otherwise, update this store, ...  *****/
-    rtLINK_CType *addedRows = rtLINK_LCAdd (valueInheritance, inheritedRows);
-    vStore->StoreReference (rtVSTORE_CPx_RowPToken, addedRows->RPT ());
+	EnableModifications ();
+	StoreReference (rtVSTORE_CPx_RowPToken, pAdditions->RPT ());
+    }
 
 /*****  ... cleanup, ...  *****/
-    valueInheritance->release ();
-    inheritedRows->release ();
+    pInheritancePointer->release ();
 
 /*****  ... and return.  *****/
-    return addedRows;
+    return pAdditions;
 }
 
 
-PublicFnDef rtLINK_CType* rtVSTORE_ExtendRowsTo (
-    rtVSTORE_Extension		xOperation,
-    M_CPD*			pInheritanceStore,
+rtLINK_CType* rtVSTORE_Handle::addExtensions_(
+    Vdd::Store::ExtensionType	xOperation,
+    Vdd::Store*			pInheritanceStore,
     M_CPD*			pInheritancePointer,
-    M_CPD*			pDescendentStore,
     rtLINK_CType*&		rpExtensionGuard,
     rtLINK_CType**		ppLocateOrAddAdditions	// optional locate or add result, nil if not wanted
-)
-{
+) {
 //  Initialize the extension guard return lval:
     rpExtensionGuard = NilOf (rtLINK_CType*);
 
-//  The extension can't be determined if ...
-//  ... the desendent isn't a v-store:
-    if (pDescendentStore->RTypeIsnt (RTYPE_C_ValueStore))
-	return NilOf (rtLINK_CType*);
-
 //  ... the descendent has no inheritance:
-    if (pDescendentStore->ReferenceIsNil (rtVSTORE_CPx_InheritanceStore))
+    if (hasNoInheritance ())
 	return NilOf (rtLINK_CType*);
 
 //  ... or the descendent doesn't inherit through a link:
-    M_CPD* pDescendentInheritance = rtVSTORE_CPD_InheritancePointerCPD (pDescendentStore);
-    if (pDescendentInheritance->RTypeIsnt (RTYPE_C_Link)) {
-	pDescendentInheritance->release ();
+    M_CPD *pThisInheritancePointer;
+    getInheritancePointer (pThisInheritancePointer);
+    if (pThisInheritancePointer->RTypeIsnt (RTYPE_C_Link)) {
+	pThisInheritancePointer->release ();
 	return NilOf (rtLINK_CType*);
     }
 
-    rtLINK_CType* pExtensionInheritance;
 //  If the descendent inherits directly from the inheritance store, ...
-    if (pDescendentStore->ReferenceNames (rtVSTORE_CPx_InheritanceStore, pInheritanceStore))
-	//  ... look here:
-	pExtensionInheritance = rtLINK_ToConstructor (pInheritancePointer);
-    else {
-	//  ... otherwise, recurse:
-	M_CPD* vStoreInheritance = rtVSTORE_CPD_InheritanceStoreCPD (pDescendentStore);
+    Vdd::Store::Reference pThisInheritanceStore;
+    getInheritanceStore (pThisInheritanceStore);
 
-	pExtensionInheritance = rtVSTORE_ExtendRowsTo (
-	    xOperation,
-	    pInheritanceStore,
-	    pInheritancePointer,
-	    vStoreInheritance,
-	    rpExtensionGuard,
-	    NilOf (rtLINK_CType**)
-	);
-
-	vStoreInheritance->release ();
-    }
+    rtLINK_CType *pExtensionInheritance = pThisInheritanceStore->Names (
+	pInheritanceStore
+    ) ? rtLINK_ToConstructor (pInheritancePointer) : pThisInheritanceStore->addExtensions (
+	xOperation, pInheritanceStore, pInheritancePointer, rpExtensionGuard
+    );
 
 //  If we have an extension inheritance to process, process it:
-    rtLINK_CType* pExtension = NilOf (rtLINK_CType*);
+    rtLINK_CType *pExtension = NilOf (rtLINK_CType*);
     if (pExtensionInheritance) {
-	bool fLocateOrAdd = false;
+	bool bLocateOrAdd = false;
 
 	switch (xOperation) {
-	case rtVSTORE_Extension_Locate: {
+	case ExtensionType_Locate: {
 		rtLINK_CType* pExtensionGuard;
 		rtLINK_LookupUsingLCKey (
-		    pDescendentInheritance,
+		    pThisInheritancePointer,
 		    pExtensionInheritance,
 		    rtLINK_LookupCase_EQ,
 		    INT_MAX,
@@ -894,106 +740,66 @@ PublicFnDef rtLINK_CType* rtVSTORE_ExtendRowsTo (
 	    }
 	    break;
 
-	case rtVSTORE_Extension_LocateOrAdd:
-	    fLocateOrAdd = true;
+	case ExtensionType_LocateOrAdd:
+	    bLocateOrAdd = true;
 	    /***** NO BREAK  *****/
 
-	default:    // rtVSTORE_Extension_Add
+	default:    // ExtensionType_Add
 	    pExtension = rtLINK_LCAddLocate (
-		pDescendentInheritance, pExtensionInheritance, fLocateOrAdd, ppLocateOrAddAdditions
+		pThisInheritancePointer, pExtensionInheritance, bLocateOrAdd, ppLocateOrAddAdditions
 	    );
-
-	    pDescendentStore->StoreReference (rtVSTORE_CPx_RowPToken, pExtension->RPT ());
+	    EnableModifications ();
+	    StoreReference (rtVSTORE_CPx_RowPToken, pExtension->RPT ());
 	    break;
 	}
 
 	pExtensionInheritance->release ();
     }
 
-    pDescendentInheritance->release ();
+    pThisInheritancePointer->release ();
 
     return pExtension;
 }
 
 
-/*************************************
- *************************************
- *****  Behaviorial Equivalence  *****
- *************************************
- *************************************/
+/*******************************
+ *******************************
+ *****  Instance Deletion  *****
+ *******************************
+ *******************************/
 
-PublicFnDef int rtVSTORE_AreBehavioriallyEquivalent (
-    M_CPD*			pStore1CPD,
-    M_CPD*			pStore2CPD
-)
-{
-    bool behavioriallyEquivalent = true;
-    bool moreToDo;
+bool rtVSTORE_Handle::doVStoreInstanceDeletionSetup (rtPTOKEN_CType::Reference &rpPTC) {
+    return this != ENVIR_KDsc_TheTLE.store () && (
+	m_pExtension.isNil () || m_pExtension->allowsDelete ()
+    ) && doInstanceDeletionSetup (rpPTC, false);
+}
 
-    pStore1CPD->retain ();
-    pStore2CPD->retain ();
+bool rtVSTORE_Handle::deleteInstances_(DSC_Scalar &pInstances) {
+    rtPTOKEN_CType::Reference pPTC; rtPTOKEN_Handle::Reference pPPT;
+    if (!doVStoreInstanceDeletionSetup (pPTC) || !doInstanceDeletion (pInstances, pPTC, pPPT))
+	return false;
 
-    do {
-	moreToDo = false;
-	if (pStore1CPD->Names (pStore2CPD))
-	    behavioriallyEquivalent = true;
-	else if (M_CPD_RType (pStore1CPD) != M_CPD_RType (pStore2CPD))
-	    behavioriallyEquivalent = false;
-	else switch ((RTYPE_Type)M_CPD_RType (pStore1CPD)) {
-	case RTYPE_C_Block:		/* need a p-token to tell for sure for a block */
-	case RTYPE_C_Closure:
-	case RTYPE_C_Dictionary:
-	case RTYPE_C_ListStore:
-	case RTYPE_C_Method:
-	case RTYPE_C_Vector:
-	    behavioriallyEquivalent = true;
-	    break;
+    /*****  'Align' the store along its vertical dimension  *****/
+    /*****   ... but only if necessary (hence the POP comparison) *****/
+    if (ReferenceDoesntName (rtVSTORE_CPx_RowPToken, pPPT)) {
+	EnableModifications ();
+	StoreReference (rtVSTORE_CPx_RowPToken, pPPT);
+    }
+    return true;
+}
 
-	case RTYPE_C_Index:
-	    behavioriallyEquivalent = pStore1CPD->ReferenceNames (
-		rtINDEX_CPx_KeyStore, pStore2CPD, rtINDEX_CPx_KeyStore
-	    );
-	    break;
-	
-	case RTYPE_C_ValueStore:
-	    if (pStore1CPD->ReferenceDoesntName (
-		    rtVSTORE_CPx_Dictionary, pStore2CPD, rtVSTORE_CPx_Dictionary
-		)
-	    ) behavioriallyEquivalent = false;
-	    else if (
-		pStore1CPD->ReferenceIsNil (rtVSTORE_CPx_InheritanceStore) &&
-		pStore2CPD->ReferenceIsNil (rtVSTORE_CPx_InheritanceStore)
-	    ) behavioriallyEquivalent = true;
-	    else {
-		M_CPD* pInheritance1CPD = rtVSTORE_CPD_InheritanceStoreCPD (pStore1CPD);
-		M_CPD* pInheritance2CPD = rtVSTORE_CPD_InheritanceStoreCPD (pStore2CPD);
+bool rtVSTORE_Handle::deleteInstances_(rtLINK_CType *pInstances, rtLINK_CType *&rpTrues, rtLINK_CType *&rpFalses) {
+    rtPTOKEN_CType::Reference pPTC; rtPTOKEN_Handle::Reference pPPT;
+    if (!doVStoreInstanceDeletionSetup (pPTC) || !doInstanceDeletion (pInstances, pPTC, pPPT, rpTrues, rpFalses))
+	return false;
 
-		pStore1CPD->release ();
-		pStore2CPD->release ();
-
-		pStore1CPD = pInheritance1CPD;
-		pStore2CPD = pInheritance2CPD;
-
-		moreToDo = true;
-	    }
-	    break;
-
-	default:
-	    ERR_SignalFault (
-		EC__InternalInconsistency,
-		UTIL_FormatMessage (
-		    "rtVSTORE_BehaviorallyEquivalent: Unexpected Store R-Type: %s",
-		    RTYPE_TypeIdAsString ((RTYPE_Type)M_CPD_RType (pStore1CPD))
-		)
-	    );
-	    break;
-	}
-    } while (moreToDo);
-
-    pStore1CPD->release ();
-    pStore2CPD->release ();
-
-    return behavioriallyEquivalent;
+    /*****  'Align' the store along its vertical dimension  *****/
+    /*****   ... but only if necessary (hence the POP comparison) *****/
+    if (ReferenceDoesntName (rtVSTORE_CPx_RowPToken, pPPT)) {
+	EnableModifications ();
+	StoreReference (rtVSTORE_CPx_RowPToken, pPPT);
+    }
+    return true;
 }
 
 
@@ -1013,26 +819,23 @@ PublicFnDef int rtVSTORE_AreBehavioriallyEquivalent (
  *	NOTHING
  *
  *****/
-PublicFnDef void rtVSTORE_WriteDBUpdateInfo (
-    M_CPD*			pVStoreCPD
-)
-{
+PublicFnDef void rtVSTORE_WriteDBUpdateInfo (M_CPD *pVStoreCPD) {
 /*****  V-Store MUST Be Aligned !!!!!!!!!!!!!!! *****/
-    rtVSTORE_Align (pVStoreCPD);
+    pVStoreCPD->align ();
 
 /***** Setup to get the item name out of the method dictionary *****/
-    M_CPD* pColumnPTokenCPD	 = rtVSTORE_CPD_ColumnPTokenCPD		(pVStoreCPD);
+    rtPTOKEN_Handle::Reference pColumnPToken;
+    static_cast<rtVSTORE_Handle*>(pVStoreCPD->containerHandle ())->getColumnPToken (pColumnPToken);
 
-    M_CPD* pDictionary	 = rtVSTORE_CPD_DictionaryCPD		(pVStoreCPD);
-    M_CPD* pPropertySubsetCPD = rtDICTIONARY_CPD_PropertySubsetCPD	(pDictionary);
-    M_CPD* pSelectorsCPD	 = rtDICTIONARY_CPD_SelectorsCPD	(pDictionary);
-
+    M_CPD* pDictionary		= rtVSTORE_CPD_DictionaryCPD		(pVStoreCPD);
+    M_CPD* pPropertySubsetCPD	= rtDICTIONARY_CPD_PropertySubsetCPD	(pDictionary);
+    M_CPD* pSelectorsCPD	= rtDICTIONARY_CPD_SelectorsCPD		(pDictionary);
     M_CPD* pStringSpaceCPD	 = rtSELUV_CPD_StringSpaceCPD		(pSelectorsCPD);
 
 /***** Output each column ... *****/
     VContainerHandle *pVStoreHandle = pVStoreCPD->containerHandle ();
     M_POP const *pColumnArray = rtVSTORE_CPD_ColumnArray (pVStoreCPD);
-    for (unsigned int  i = 0; i < rtPTOKEN_CPD_BaseElementCount (pColumnPTokenCPD); i++) {
+    for (unsigned int  i = 0; i < pColumnPToken->cardinality (); i++) {
 	M_POP const *pColumn = &pColumnArray[i];
 	if (pVStoreHandle->ReferenceIsntNil (pColumn)) {
 	    /*** Get the column cpd ... ***/
@@ -1040,8 +843,7 @@ PublicFnDef void rtVSTORE_WriteDBUpdateInfo (
 
 	    /*** Get the item name ***/
 	    rtREFUV_Type_Reference propertySetReference;
-	    pColumnPTokenCPD->retain ();
-	    DSC_InitReferenceScalar (propertySetReference, pColumnPTokenCPD, i);
+	    propertySetReference.constructReference (pColumnPToken, i);
 
 	    rtREFUV_Type_Reference selectorSetReference;
 	    rtLINK_RefExtract (&selectorSetReference, pPropertySubsetCPD, &propertySetReference);
@@ -1050,8 +852,8 @@ PublicFnDef void rtVSTORE_WriteDBUpdateInfo (
 		pSelectorsCPD
 	    ) + rtREFUV_Ref_D_Element (selectorSetReference);
 
-	    DSC_ClearScalar (selectorSetReference);
-	    DSC_ClearScalar (propertySetReference);
+	    selectorSetReference.destroy ();
+	    propertySetReference.destroy ();
 
 	    char const *itemName;
 	    switch (rtSELUV_Element_Type (rtSELUV_CPD_Element (pSelectorsCPD)))
@@ -1075,7 +877,7 @@ PublicFnDef void rtVSTORE_WriteDBUpdateInfo (
 	    }
 	    
 	    /*** Now call the apropriate routine to output the DB Info ...***/
-	    switch ((RTYPE_Type)M_CPD_RType (pColumnVectorCPD))
+	    switch (pColumnVectorCPD->RType ())
 	    {
 	    case RTYPE_C_Vector:
 		rtVECTOR_WriteDBUpdateInfo (pColumnVectorCPD, itemName);
@@ -1097,7 +899,6 @@ PublicFnDef void rtVSTORE_WriteDBUpdateInfo (
     pSelectorsCPD->release ();
     pPropertySubsetCPD->release ();
     pDictionary->release ();
-    pColumnPTokenCPD->release ();
 }
 
 
@@ -1122,10 +923,7 @@ PublicFnDef void rtVSTORE_WriteDBUpdateInfo (
  *	NOTHING - Executed for side effect only.
  *
  *****/
-PrivateFnDef void DumpVStore (
-    M_CPD*			cpd
-)
-{
+PrivateFnDef void DumpVStore (M_CPD *cpd) {
     IO_printf ("%s{\n", RTYPE_TypeIdAsString (RTYPE_C_ValueStore));
 
     IO_printf ("    Row PToken: ");
@@ -1166,12 +964,8 @@ PrivateFnDef void DumpVStore (
  *	NOTHING - Executed for side effect only.
  *
  *****/
-PrivateFnDef void PrintVStore (
-    M_CPD*			cpd
-)
-{
-    rtVSTORE_Align (cpd);
-
+PrivateFnDef void PrintVStore (M_CPD *cpd) {
+    cpd->align ();
     DumpVStore (cpd);
 }
 
@@ -1186,24 +980,30 @@ PrivateFnDef void PrintVStore (
 
 IOBJ_DefineNewaryMethod (NewWithMethodsDM) {
     static char const *const pLocation = "'new:withMethods:'";
-    M_CPD *pPPT = RTYPE_QRegisterCPD (parameterArray[0]);
+    VContainerHandle *pPPT = RTYPE_QRegisterHandle (parameterArray[0]);
     RTYPE_MustBeA (pLocation, pPPT->RType (), RTYPE_C_PToken);
 
-    M_CPD *pDictionary = RTYPE_QRegisterCPD (parameterArray[1]);
+    VContainerHandle *pDictionary = RTYPE_QRegisterHandle (parameterArray[1]);
     RTYPE_MustBeA (pLocation, pDictionary->RType (), RTYPE_C_Dictionary);
 
     return RTYPE_QRegister (
-	rtVSTORE_NewCluster (pPPT, pDictionary, NilOf (M_CPD*), NilOf (M_CPD*))
+	rtVSTORE_NewCluster (
+	    static_cast<rtPTOKEN_Handle*>(pPPT), static_cast<rtDICTIONARY_Handle*>(pDictionary), 0, 0)
     );
 }
 
 IOBJ_DefineNewaryMethod (NewInWithMethodsDM) {
+    Vdd::Store::Reference pSuperStore (RTYPE_QRegisterHandle(parameterArray[1])->getStore ());
+
+    rtDICTIONARY_Handle::Reference pDictionary (
+	static_cast<rtDICTIONARY_Handle*>(RTYPE_QRegisterHandle (parameterArray[2]))
+    );
     return RTYPE_QRegister (
 	rtVSTORE_NewCluster (
-	    NilOf (M_CPD*),
-	    RTYPE_QRegisterCPD (parameterArray[2]), /* pDictionary */
-	    RTYPE_QRegisterCPD (parameterArray[1]), /* pSuperStore */
-	    RTYPE_QRegisterCPD (parameterArray[0])  /* pSuperPointer */
+	    0,
+	    pDictionary,				/* pDictionary */
+	    pSuperStore,				/* pSuperStore */
+	    RTYPE_QRegisterCPD (parameterArray[0])	/* pSuperPointer */
 	)
     );
 }
@@ -1231,7 +1031,7 @@ IOBJ_DefineUnaryMethod (DisplayCountsDM) {
  ************************/
 
 IOBJ_DefineUnaryMethod (AlignDM) {
-    rtVSTORE_Align (RTYPE_QRegisterCPD (self));
+    RTYPE_QRegisterCPD (self)->align ();
     return self;
 }
 
@@ -1256,7 +1056,7 @@ IOBJ_DefineUnaryMethod (ColumnPTokenDM) {
 }
 
 IOBJ_DefineUnaryMethod (AuxiliaryColumnDM) {
-    return RTYPE_Browser (RTYPE_QRegisterCPD (self), rtVSTORE_CPx_AuxillaryColumn);
+    return RTYPE_Browser (RTYPE_QRegisterCPD (self), rtVSTORE_CPx_AuxiliaryColumn);
 }
 
 IOBJ_DefineUnaryMethod (ColumnDM) {
@@ -1266,7 +1066,7 @@ IOBJ_DefineUnaryMethod (ColumnDM) {
 
 IOBJ_DefineMethod (SetAuxiliaryColumnDM) {
     RTYPE_QRegisterCPD (self)->StoreReference (
-	rtVSTORE_CPx_AuxillaryColumn, RTYPE_QRegisterCPD (parameterArray[0])
+	rtVSTORE_CPx_AuxiliaryColumn, RTYPE_QRegisterCPD (parameterArray[0])
     );
 
     return self;
@@ -1295,40 +1095,38 @@ IOBJ_DefineMethod (SetColumnDM) {
 
     return self;
 }
-
 
 IOBJ_DefineMethod (SetColumnPtrDM) {
     VSelectorGenerale selector (RTYPE_QRegisterCPD (parameterArray[0]));
 
-    switch (
-	rtVSTORE_Lookup (RTYPE_QRegisterCPD (self), &selector, NilOf (DSC_Descriptor*))
-    ) {
-    case rtDICTIONARY_LookupResult_FoundProperty:
-	break;
+    M_CPD *pStoreCPD = RTYPE_QRegisterCPD (self);
+    rtVSTORE_Handle *pStore = static_cast<rtVSTORE_Handle*>(pStoreCPD->containerHandle ());
 
-    default:
+    unsigned int xPropertySlot;
+    if (pStore->lookup (selector, xPropertySlot) != Vdd::Store::DictionaryLookup_FoundProperty)
 	IO_printf ("Warning: Property not found, column pointer not set.\n");
-	break;
+    else {
+	rtVSTORE_CPD_Column (pStoreCPD) = rtVSTORE_CPD_ColumnArray (pStoreCPD) + xPropertySlot;
     }
 
     return self;
 }
-
 
 IOBJ_DefineMethod (AddRowsDM) {
     return RTYPE_QRegister (
-	rtVSTORE_AddRows (
-	    RTYPE_QRegisterCPD (self), RTYPE_QRegisterCPD (parameterArray[0])
+	static_cast<rtVSTORE_Handle*>(RTYPE_QRegisterHandle (self))->addInstances (
+	    RTYPE_QRegisterPToken (parameterArray[0])
 	)
     );
 }
 
 IOBJ_DefineUnaryMethod (CloneDM) {
-    M_CPD* pClonePToken = rtPTOKEN_New (IOBJ_ScratchPad, 0);
-    M_CPD* pClonedStore = rtVSTORE_NewCluster (pClonePToken, RTYPE_QRegisterCPD (self));
-    pClonePToken->release ();
+    rtPTOKEN_Handle::Reference pClonePPT (new rtPTOKEN_Handle (IOBJ_ScratchPad, 0));
 
-    return RTYPE_QRegister (pClonedStore);
+    rtVSTORE_Handle::Reference pClone;
+    static_cast<rtVSTORE_Handle*>(RTYPE_QRegisterHandle (self))->clone (pClone, pClonePPT);
+
+    return RTYPE_QRegister (pClone);
 }
 
 
@@ -1390,8 +1188,11 @@ RTYPE_DefineHandler (rtVSTORE_Handler) {
     case RTYPE_PrintObject:
 	PrintVStore (iArgList.arg<M_CPD*>());
         break;
-    case RTYPE_RPrintObject:
-	POPVECTOR_Print (rtVSTORE_Align (iArgList.arg<M_CPD*>()), true);
+    case RTYPE_RPrintObject: {
+	    M_CPD *const pInstance = iArgList.arg<M_CPD*>();
+	    pInstance->align ();
+	    POPVECTOR_Print (pInstance, true);
+	}
         break;
     default:
         return -1;

@@ -79,7 +79,7 @@ public:
 //  Access
 public:
     bool getKSData (unsigned int& xSelector) const;
-    bool getBSData (M_CPD*& rpBlock, unsigned int& rxSelector) const;
+    bool getBSData (rtBLOCK_Handle::Reference &rpBlock, unsigned int& rxSelector) const;
 
     char const *messageName () const;
 
@@ -89,12 +89,6 @@ public:
 
 //  Use
 public:
-    rtDICTIONARY_LookupResult lookup (
-	M_CPD* pStore, DSC_Descriptor* pValue = NilOf (DSC_Descriptor*)
-    ) const {
-	return rtVSTORE_Lookup (pStore, this, pValue);
-    }
-
     bool insertIn (rtSELUV_Set& rSet, unsigned int& rxElement) const; 
     bool locateIn (rtSELUV_Set& rSet, unsigned int& rxElement) const;
 
@@ -111,24 +105,18 @@ protected:
 		pBlock->retain ();
 		m_pBlock = pBlock;
 		m_xSelector = xSelector;
-		m_pBlockCPD = 0;
 	    }
 	    void destroy () {
-		if (m_pBlockCPD)
-		    m_pBlockCPD->release ();
 		m_pBlock->release ();
 	    }
-	    M_CPD *blockCPD () const {
-		if (!m_pBlockCPD)
-		    *const_cast<M_CPD**>(&m_pBlockCPD) = m_pBlock->GetCPD ();
-		return m_pBlockCPD;
+	    rtBLOCK_Handle *block () const {
+		return m_pBlock;
 	    }
 	    char const *messageName () const {
 		return m_pBlock->addressOfString (m_xSelector);
 	    }
 	    rtBLOCK_Handle*	m_pBlock;
 	    unsigned int	m_xSelector;
-	    M_CPD*		m_pBlockCPD;
 	}		as_iBlockMessage;
 	unsigned int	as_xMessageName;
 	char const*	as_pMessageName;

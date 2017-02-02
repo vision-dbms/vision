@@ -41,7 +41,7 @@ class VString;
  *****  Reference Monitoring Macros  *****
  *****************************************/
 
-#if defined(_DEBUG)
+#if defined(_DEBUG) && !defined(_WIN32)
 #define ON_DEBUG_DISCARD() onDebugDiscard ()
 #define ON_DEBUG_RELEASE() onDebugRelease ()
 #define ON_DEBUG_RETAIN()  onDebugRetain  ()

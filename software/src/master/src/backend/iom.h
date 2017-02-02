@@ -9,6 +9,11 @@
  **************************/
 
 class M_CPD;
+
+class rtPTOKEN_Handle;
+class rtVECTOR_Handle;
+
+template <class R> class VReference;
 
 
 /*************************
@@ -74,8 +79,8 @@ enum IOMTrimFormat {
  *********************
  *********************/
 
-PublicVarDecl M_CPD*		IOM_HandlerVector;
-PublicVarDecl M_CPD*		IOM_HandlerPToken;
+PublicVarDecl VReference<rtVECTOR_Handle> IOM_HandlerVector;
+PublicVarDecl VReference<rtPTOKEN_Handle> IOM_HandlerPToken;
 
 
 /***********************

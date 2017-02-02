@@ -118,6 +118,10 @@ namespace V {
 	VTime operator- (U64 sDelta) const {
 	    return VTime (m_iValue - sDelta);
 	}
+	
+	S64 operator+ (VTime const &rOther) const {
+		return (m_iValue + rOther.m_iValue);
+	}
 
 	S64 operator- (VTime const &rOther) const {
 	    return m_iValue - rOther.m_iValue;

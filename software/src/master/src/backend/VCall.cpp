@@ -34,6 +34,8 @@
 #include "RTmethod.h"
 #include "RTvstore.h"
 
+#include "VAssociativeCursor.h"
+
 #include "VFragment.h"
 #include "VBlockTask.h"
 #include "VPrimitiveTask.h"
@@ -113,7 +115,7 @@ public:
 
 //  Construction
 public:
-    VSteppable (M_CPD *pDPT, DSC_Descriptor const &rValue) : m_pDPT (pDPT), m_bPointerIsNil (false), m_cSteppings (0) {
+    VSteppable (rtPTOKEN_Handle *pDPT, DSC_Descriptor const &rValue) : m_pDPT (pDPT), m_bPointerIsNil (false), m_cSteppings (0) {
 	m_iValue.construct (rValue);
 	m_iValue.getCanonicalStore (m_pCanonicalStore, m_bPointerMustBeConverted);
     }
@@ -122,7 +124,7 @@ public:
 public:
     ~VSteppable () {
 	if (m_cSteppings) {
-	    unsigned int sSteppings = m_cSteppings * rtPTOKEN_CPD_BaseElementCount (m_pDPT);
+	    unsigned int sSteppings = m_cSteppings * m_pDPT->cardinality ();
 	    g_cSteppings += m_cSteppings;
 	    g_sSteppings += sSteppings;
 	    if (m_bPointerIsNil) {
@@ -143,35 +145,49 @@ public:
 	return m_iValue;
     }
 
-    M_CPD *canonicalStore () const {
+    rtVSTORE_Handle *canonicalStore () const {
 	return m_pCanonicalStore;
+    }
+
+    bool isSteppable () const {
+	return m_pCanonicalStore->hasAnInheritance ();
+    }
+
+    bool getProperty (unsigned int xPropertySlot, Vdd::Store *pPropertyPrototype) {
+	normalize ();
+	return m_iValue.getProperty (xPropertySlot, pPropertyPrototype);
+    }
+
+    Vdd::Store::DictionaryLookup lookup (
+	VSelector const &rSelector, unsigned int &rxPropertySlot, DSC_Descriptor *pValueReturn = 0
+    ) {
+	return m_pCanonicalStore->lookup (rSelector, rxPropertySlot, pValueReturn);
     }
 
 //  Update
 private:
     void normalize ();
 public:
-    void setStoreTo (M_CPD *pStore);	//  -> convert pointer if necessary
     void step ();
 
 //  State
 private:
-    M_CPD *const	m_pDPT;
-    DSC_Descriptor	m_iValue;
-    Step::Reference	m_pSteppingsHead;
-    Step::Reference	m_pSteppingsTail;
-    unsigned int	m_cSteppings;
-    M_CPD *		m_pCanonicalStore;
-    bool		m_bPointerMustBeConverted;
-    bool		m_bPointerIsNil;
+    rtPTOKEN_Handle::Reference const	m_pDPT;
+    DSC_Descriptor			m_iValue;
+    Step::Reference			m_pSteppingsHead;
+    Step::Reference			m_pSteppingsTail;
+    unsigned int			m_cSteppings;
+    rtVSTORE_Handle::Reference		m_pCanonicalStore;
+    bool				m_bPointerMustBeConverted;
+    bool				m_bPointerIsNil;
 };
 
 DEFINE_CONCRETE_RTT (VSteppable::Step);
 
 void VSteppable::normalize () {
     if (m_bPointerIsNil) {
-	M_CPD *pRPT = m_iValue.RPT ();
-	m_iValue.Pointer().constructReferenceConstant (m_pDPT, pRPT, rtPTOKEN_CPD_BaseElementCount (pRPT));
+	rtPTOKEN_Handle *pRPT = m_iValue.RPT ();
+	m_iValue.Pointer().constructReferenceConstant (m_pDPT, pRPT, pRPT->cardinality ());
     }
     else if (m_pSteppingsHead) {
 	DSC_Pointer iSubscript;
@@ -196,13 +212,6 @@ void VSteppable::normalize () {
     }
 }
 
-void VSteppable::setStoreTo (M_CPD *pStore) {
-    normalize ();
-    if (m_bPointerMustBeConverted)
-	m_iValue.convertPointer (m_pCanonicalStore, m_pDPT);
-    m_iValue.setStoreTo (pStore);
-}
-
 void VSteppable::step () {
     m_cSteppings++;
     if (m_bPointerIsNil) {
@@ -223,10 +232,10 @@ void VSteppable::step () {
     }
 
     DSC_Descriptor iInheritance; {
-	M_CPD *pInheritancePointer = rtVSTORE_CPD_InheritancePointerCPD (m_pCanonicalStore);
-	iInheritance.constructMonotype (
-	    rtVSTORE_CPD_InheritanceStoreCPD (m_pCanonicalStore), pInheritancePointer
-	);
+	Vdd::Store::Reference pInheritanceStore; M_CPD *pInheritancePointer;
+	m_pCanonicalStore->getInheritanceStore (pInheritanceStore);
+	m_pCanonicalStore->getInheritancePointer (pInheritancePointer);
+	iInheritance.constructMonotype (pInheritanceStore, pInheritancePointer);
 	pInheritancePointer->release ();
     }
     m_iValue.setToMoved (iInheritance);
@@ -454,7 +463,7 @@ rtBLOCK_Handle *VCall::boundBlock () const {
 }
 
 unsigned int VCall::cardinality_ () const {
-    return rtPTOKEN_CPD_BaseElementCount (ptoken ());
+    return ptoken ()->cardinality ();
 }
 
 IOMDriver* VCall::channel_ () const {
@@ -489,7 +498,7 @@ void VCall::dumpCallerByteCodes () const {
     m_pCaller->dumpByteCodes (this);
 }
 
-M_CPD* VCall::ptoken () const {
+rtPTOKEN_Handle *VCall::ptoken () const {
     return m_pCallerSubset ? m_pCallerSubset->PPT () : m_pCaller->ptoken ();
 }
 
@@ -540,7 +549,7 @@ bool VCall::csearchOrigin (VDescriptor& rDatum) const {
 
 
 bool VCall::crecipient (VDescriptor& rDatum) const {
-    M_CPD* pPToken = m_pCaller->ptoken ();
+    rtPTOKEN_Handle * pPToken = m_pCaller->ptoken ();
     bool fRecipientAvailable = true;
 
     switch (m_xRecipient) {
@@ -791,25 +800,18 @@ void VCall::evaluate (
 	switch (xMonotypeStoreRType) {
 	case RTYPE_C_Closure: {
 	    //  Decode the closure, ...
-		VReference<rtBLOCK_Handle> pBlock; unsigned int xPrimitive; rtCONTEXT_Constructor *pContext;
+		rtBLOCK_Handle::Reference pBlock; unsigned int xPrimitive; rtCONTEXT_Handle::Reference pContext;
 		rMonotype.decodeClosure (pBlock, xPrimitive, &pContext);
 
 		unsigned int iAttentionMask = rMonotype.storeMask ();
 
 	    //  ... construct a new context if this one can't be used directly, ...
 		if (pBlock || !rMonotype.holdsAnIdentity ()) {
-		    rMonotype.setStoreTo (pContext);
-
-		    DSC_Descriptor iEmpty;
-		    iEmpty.construct ();
-
-		    pContext = new rtCONTEXT_Constructor (iEmpty, iEmpty, iEmpty, rMonotype);
+		    pContext.setTo (new rtCONTEXT_Handle (pContext, rMonotype.Pointer ()));
 		}
 
 	    //  ... and create the task:
-		VTask::ConstructionData iTCData (
-		    this, pSubset, pReordering, pContext, iAttentionMask
-		);
+		VTask::ConstructionData iTCData (this, pSubset, pReordering, pContext, iAttentionMask);
 		if (pBlock) {
 		    pSubtask = new VBlockTask (iTCData, pBlock);
 		}
@@ -821,32 +823,32 @@ void VCall::evaluate (
 	    break;
 
 	case RTYPE_C_Dictionary: {
-		M_CPD* pMonotypeStore = rMonotype.storeCPD ();
-		rMonotype.setStoreTo (rtDICTIONARY_CPD_ValuesCPD (pMonotypeStore));
+		rtVECTOR_Handle::Reference pResultStore;
+		static_cast<rtDICTIONARY_Handle*>(rMonotype.store ())->getValues (pResultStore);
+		rMonotype.setStoreTo (pResultStore);
 	    }
 	    break;
 
 	case RTYPE_C_Index: {
-		M_CPD* pMonotypeStore = rMonotype.storeCPD ();
+		rtINDEX_Handle::Reference pMonotypeStore (
+		    static_cast<rtINDEX_Handle*>(rMonotype.store ())
+		);
 
-		if (!rtINDEX_CPD_IsATimeSeries (pMonotypeStore)) {
+		if (!pMonotypeStore->isATimeSeries ()) {
 		/*****  Return non-time-series without further evaluation, ...  *****/
 		    fDelegationRequired = fDelegationAllowed;
 		    notDone = false;
 		}
 		else if (
-		    (m_pTemporalContext ? m_pTemporalContext : m_pCaller->temporalContext()
-		    )->ConformsToIndex (pMonotypeStore)
+		    (m_pTemporalContext ? m_pTemporalContext : m_pCaller->temporalContext())->ConformsToIndex (
+			pMonotypeStore
+		    )
 		) {
 		/*****  ... do the lookup for conformant time-series, ...  *****/
-		    rtINDEX_Key* pTemporalContext = subtaskTemporalContext (
-			pSubset, pReordering
-		    );
+		    rtINDEX_Key *pTemporalContext = subtaskTemporalContext (pSubset, pReordering);
 
 		    DSC_Descriptor iLookupResult;
-		    rtINDEX_TimeSeriesLookup (
-			&iLookupResult, &rMonotype, pTemporalContext
-		    );
+		    rtINDEX_TimeSeriesLookup (&iLookupResult, &rMonotype, pTemporalContext);
 
 		/***************************************************************
 		 *****  ... index lookup results must be re-factored, ...  *****
@@ -883,31 +885,26 @@ void VCall::evaluate (
 	    break;
 
 	case RTYPE_C_Vector: {
-		M_CPD* pMonotypeStore = rMonotype.storeCPD ();
+		rtVECTOR_Handle::Reference pMonotypeStore (static_cast<rtVECTOR_Handle*> (rMonotype.store ()));
 
 		if (rMonotype.holdsALink ()) {
 		    VDescriptor iResult;
-		    rtVECTOR_Extract (
-			pMonotypeStore, DSC_Descriptor_Link (rMonotype), iResult
-		    );
+		    pMonotypeStore->getElements (iResult, DSC_Descriptor_Link (rMonotype));
 		    loadDucWithMoved (iResult);
 		}
 		else if (rMonotype.holdsAScalarReference ()) {
 		    DSC_Descriptor iResult;
-		    rtVECTOR_RefExtract	(
-			pMonotypeStore, &DSC_Descriptor_Scalar (rMonotype), &iResult
-		    );
+		    pMonotypeStore->getElements (iResult, DSC_Descriptor_Scalar (rMonotype));
 		    loadDucWithMoved (iResult);
 		}
 		else if (rMonotype.holdsAnIdentity ()) {
-		    pMonotypeStore->retain ();
 		    loadDucWithVector (pMonotypeStore);
 		    ConvertDucVectorsToMonotypeIfPossible ();
 		}
 		else {
-		    VCPDReference pPPT;
+		    rtPTOKEN_Handle::Reference pPPT;
 		    if (pReordering)
-			pPPT.claim (UV_CPD_PosPTokenCPD (pReordering));
+			pPPT.setTo (static_cast<rtUVECTOR_Handle*>(pReordering->containerHandle ())->pptHandle ());
 		    else if (pSubset)
 			pPPT.setTo (pSubset->PPT ());
 		    else
@@ -971,9 +968,7 @@ void VCall::evaluate (
 	    iMy.construct (iSelf);
 
 	    VTask::ConstructionData iTCData (
-		this, pSubset, pReordering, new rtCONTEXT_Constructor (
-		    iSelf, iCurrent, iMy
-		)
+		this, pSubset, pReordering, new rtCONTEXT_Handle (iSelf, iCurrent, iMy)
 	    );
 	    start (new VBlockTask (iTCData, boundBlock (), true));
 	}
@@ -994,9 +989,9 @@ void VCall::evaluate (
 	    unsigned int const iInitialSkipCount = iSkipCount;
 
 	/*****  ... obtain the search origin's PPT, ...  *****/
-	    VCPDReference pDispatchPToken;
+	    rtPTOKEN_Handle::Reference pDispatchPToken;
 	    if (pReordering)
-		pDispatchPToken.claim (UV_CPD_PosPTokenCPD (pReordering));
+		pDispatchPToken.setTo (static_cast<rtUVECTOR_Handle*>(pReordering->containerHandle ())->pptHandle ());
 	    else if (pSubset)
 		pDispatchPToken.setTo (pSubset->PPT ());
 	    else
@@ -1006,32 +1001,27 @@ void VCall::evaluate (
 	    VSteppable iCurrent (pDispatchPToken, rSearchOrigin);
 
 	/*****  ... and for each level of inheritance, ...  *****/
-	    rtDICTIONARY_LookupResult xSelectorLookupResult;
+	    Vdd::Store::DictionaryLookup xSelectorLookupResult;
 	    do {
-	    /*****  ... access the store to search, ...  *****/
-		M_CPD *pCanonicalStore = iCurrent.canonicalStore ();
-
-	    /*****  ... look for the selector, ...  *****/
-		DSC_Descriptor iSelectorBehavior;
-		xSelectorLookupResult = rSelector.lookup (
-		    pCanonicalStore, &iSelectorBehavior
-		);
+	    /*****  Look for the selector, ...  *****/
+		unsigned int xPropertySlot; DSC_Descriptor iSelectorBehavior;
+		xSelectorLookupResult = iCurrent.lookup (rSelector, xPropertySlot, &iSelectorBehavior);
 
 	    /*****  ... handling 'super' as though all dictionaries define it, ...  *****/
-		if (rtDICTIONARY_LookupResult_FoundNothing == xSelectorLookupResult && rSelector == KS__Super) {
+		if (Vdd::Store::DictionaryLookup_FoundNothing == xSelectorLookupResult && rSelector == KS__Super) {
 		    iSelectorBehavior.constructScalar (
 			m_pCaller->codKOT()->ThePrimitiveClass, (int)V_KnownPrimitive_Super
 		    );
-		    xSelectorLookupResult = rtDICTIONARY_LookupResult_FoundOther;
+		    xSelectorLookupResult = Vdd::Store::DictionaryLookup_FoundOther;
 		}
 
 	    /*****  ... ignoring finds if the skip count is still positive, ...  *****/
 		if (iSkipCount > 0) {
 		    switch (xSelectorLookupResult) {
-		    case rtDICTIONARY_LookupResult_FoundProperty:
-		    case rtDICTIONARY_LookupResult_FoundOther:
+		    case Vdd::Store::DictionaryLookup_FoundProperty:
+		    case Vdd::Store::DictionaryLookup_FoundOther:
 			iSelectorBehavior.clear ();
-			xSelectorLookupResult = rtDICTIONARY_LookupResult_FoundNothing;
+			xSelectorLookupResult = Vdd::Store::DictionaryLookup_FoundNothing;
 			iSkipCount--;
 			break;
 
@@ -1041,160 +1031,119 @@ void VCall::evaluate (
 		}
 
 	    /*****  ... and processing found selectors:  *****/
-		M_CPD *pSelectorBehavior;
 		switch (xSelectorLookupResult) {
-		case rtDICTIONARY_LookupResult_FoundProperty:
-		    pSelectorBehavior = iSelectorBehavior.storeCPD (); {
-			M_CPD* pProperty;
-			if (pCanonicalStore->ReferenceIsNil (rtVSTORE_CPx_Column))
-			    pProperty = NilOf (M_CPD*);
-			else if (
-			    !rtVSTORE_AreBehavioriallyEquivalent (
-				pProperty = rtVSTORE_CPD_ColumnCPD (pCanonicalStore), pSelectorBehavior
-			    )
-			) {
-			    pProperty->release ();
-			    pProperty = NilOf (M_CPD*);
-			}
-
-		//  Create a new property store of the right type if one does not exist...
-			if (IsNil (pProperty)) {
-			    M_CPD* pCanonicalStorePToken = rtVSTORE_CPD_RowPTokenCPD (
-				pCanonicalStore
-			    );
-			    pProperty = rtVSTORE_NewCluster (
-				pCanonicalStorePToken, pSelectorBehavior
-			    );
-			    pCanonicalStore->StoreReference (rtVSTORE_CPx_Column, pProperty);
-			    pCanonicalStorePToken->release ();
-			}
-
-		//  ... construct a descriptor for the property, ...
-			iCurrent.setStoreTo (pProperty);
-
-		//  ...  and evaluate the result (note the delegation):
-			evaluate (pSubset, pReordering, iCurrent, true);
-		    }
+		case Vdd::Store::DictionaryLookup_FoundProperty:
+		    iCurrent.getProperty (xPropertySlot, iSelectorBehavior.store ());
+		    evaluate (pSubset, pReordering, iCurrent, true);
 		    iSelectorBehavior.clear ();
 		    break;
 
-		case rtDICTIONARY_LookupResult_FoundOther:
-		    pSelectorBehavior = iSelectorBehavior.storeCPD ();
-		    if (RTYPE_C_Method == pSelectorBehavior->RType ()) {
-		    //  Retain the method CPD for use in creating the closure, ...
-			pSelectorBehavior->retain ();
+		case Vdd::Store::DictionaryLookup_FoundOther: {
+			Vdd::Store::Reference pSelectorBehavior (iSelectorBehavior.store ());
+			if (RTYPE_C_Method == pSelectorBehavior->rtype ()) {
+			//  Retain the method CPD for use in creating the closure, ...
+			    rtMETHOD_Handle::Reference pMethod (
+				static_cast<rtMETHOD_Handle*>(pSelectorBehavior.referent ())
+			    );
 
-		    //  Create a block context for the method, ...
-			rtCONTEXT_Constructor* pContext; {
-			    DSC_Descriptor iSelf;
-			    iSelf.construct (rRecipient);
+			//  Create a block context for the method, ...
+			    rtCONTEXT_Handle::Reference pContext; {
+				DSC_Descriptor iSelf;
+				iSelf.construct (rRecipient);
 
+				iSelectorBehavior.coerce (pDispatchPToken);
+				Vdd::Store::Reference pMyStore;
+				pMethod->getMyStore (pMyStore);
+				iSelectorBehavior.setStoreTo (pMyStore);
+
+				pContext.setTo (new rtCONTEXT_Handle (iSelf, iCurrent, iSelectorBehavior));
+			    }
+
+			//  ... and evaluate the method, ...
+			    rtBLOCK_Handle::Reference pBlock;
+			    pMethod->getBlock (pBlock);
+			    if (Return_Intension == m_xReturnCase) {
+				DSC_Descriptor iClosure;
+				iClosure.constructIdentity (
+				    new rtCLOSURE_Handle (
+					pContext, pBlock, pMethod->attentionMask ()
+				    ), pDispatchPToken
+				);
+
+				loadDucWithMoved (iClosure);
+
+				if (pReordering)
+				    m_pDuc->distribute (pReordering);
+			    }
+			    else {
+				VTask::ConstructionData iTCData (
+				    this, pSubset, pReordering, pContext, pMethod->attentionMask ()
+				);
+				start (new VBlockTask (iTCData, pBlock));
+			    }
+			}
+			else if (pSelectorBehavior->NamesThePrimitiveClass ()) {
+			//  Obtain the primitive's index, ...
+			    int xPrimitive = DSC_Descriptor_Scalar_Int (iSelectorBehavior);
+
+			//  Create a block context for the primitive, ...
+			    rtCONTEXT_Handle::Reference pContext; {
+				DSC_Descriptor iSelf;
+				iSelf.construct (rRecipient);
+
+				DSC_Descriptor iEmpty;
+				iEmpty.construct ();
+
+				pContext.setTo (new rtCONTEXT_Handle (iSelf, iCurrent, iEmpty));
+			    }
+
+			//  ... and evaluate the primitive:
+			    if (Return_Intension == m_xReturnCase) {
+				DSC_Descriptor iClosure;
+				iClosure.constructIdentity (
+				    new rtCLOSURE_Handle (
+					pContext, xPrimitive, pSelectorBehavior->attentionMask ()
+				    ), pDispatchPToken
+				);
+
+				loadDucWithMoved (iClosure);
+
+				if (pReordering)
+				    m_pDuc->distribute (pReordering);
+			    }
+			    else {
+				VTask::ConstructionData iTCData (
+				    this, pSubset, pReordering, pContext, pSelectorBehavior->attentionMask ()
+				);
+				start (VPrimitiveTask::Instantiate (iTCData, xPrimitive));
+			    }
+			}
+			else {
+			//  Otherwise, coerce, ...
 			    iSelectorBehavior.coerce (pDispatchPToken);
-			    iSelectorBehavior.setStoreTo (
-				rtMETHOD_CPD_OriginCPD (pSelectorBehavior)
-			    );
 
-			    pContext = new rtCONTEXT_Constructor (iSelf, iCurrent, iSelectorBehavior);
+			//  ... and evaluate the selector definition as a class constant:
+			    evaluate (pSubset, pReordering, iSelectorBehavior, g_bSendingValueMessages);
 			}
-
-		    //  ... and evaluate the method, ...
-			if (Return_Intension == m_xReturnCase) {
-			    pDispatchPToken->retain ();
-
-			    DSC_Descriptor iClosure;
-			    iClosure.constructIdentity (
-				new rtCLOSURE_Constructor (
-				    pContext, static_cast<rtBLOCK_Handle*> (
-					pSelectorBehavior->GetContainerHandle (rtMETHOD_CPx_Block, RTYPE_C_Block)
-				    ), pSelectorBehavior->attentionMask ()
-				), pDispatchPToken
-			    );
-
-			    loadDucWithMoved (iClosure);
-
-			    if (pReordering)
-				m_pDuc->distribute (pReordering);
-			}
-			else {
-			    VTask::ConstructionData iTCData (
-				this, pSubset, pReordering, pContext,
-				pSelectorBehavior->attentionMask ()
-			    );
-			    start (
-				new VBlockTask (
-				    iTCData, static_cast<rtBLOCK_Handle*>(
-					pSelectorBehavior->GetContainerHandle (rtMETHOD_CPx_Block, RTYPE_C_Block)
-				    )
-				)
-			    );
-			    pSelectorBehavior->release ();
-			}
-		    }
-		    else if (pSelectorBehavior->NamesThePrimitiveClass ()) {
-		    //  Obtain the primitive's index, ...
-			int xPrimitive = DSC_Descriptor_Scalar_Int (iSelectorBehavior);
-
-		    //  Create a block context for the primitive, ...
-			rtCONTEXT_Constructor* pContext; {
-			    DSC_Descriptor iSelf;
-			    iSelf.construct (rRecipient);
-
-			    DSC_Descriptor iEmpty;
-			    iEmpty.construct ();
-
-			    pContext = new rtCONTEXT_Constructor (iSelf, iCurrent, iEmpty, iEmpty);
-			}
-
-		    //  ... and evaluate the primitive:
-			if (Return_Intension == m_xReturnCase) {
-			    pDispatchPToken->retain ();
-
-			    DSC_Descriptor iClosure;
-			    iClosure.constructIdentity (
-				new rtCLOSURE_Constructor (
-				    pContext, xPrimitive, pSelectorBehavior->attentionMask ()
-				), pDispatchPToken
-			    );
-
-			    loadDucWithMoved (iClosure);
-
-			    if (pReordering)
-				m_pDuc->distribute (pReordering);
-			}
-			else {
-			    VTask::ConstructionData iTCData (
-				this, pSubset, pReordering, pContext,
-				pSelectorBehavior->attentionMask ()
-			    );
-			    start (VPrimitiveTask::Instantiate (iTCData, xPrimitive));
-			}
-		    }
-		    else {
-		    //  Otherwise, coerce, ...
-			iSelectorBehavior.coerce (pDispatchPToken);
-
-		    //  ... and evaluate the selector definition as a class constant:
-			evaluate (pSubset, pReordering, iSelectorBehavior, g_bSendingValueMessages);
 		    }
 		    iSelectorBehavior.clear ();
 		    break;
 
 		default:
 		//  Selector not found at this level, check the inheritance, ...
-		    if (pCanonicalStore->ReferenceIsntNil (rtVSTORE_CPx_InheritanceStore))
+		    if (iCurrent.isSteppable ())
 			iCurrent.step ();
-		//  ...  or, if no more remain to be searched, fail with a selector not found:
 		    else {
-			xSelectorLookupResult = rtDICTIONARY_LookupResult_FoundOther;
+			xSelectorLookupResult = Vdd::Store::DictionaryLookup_FoundOther;
 
-			rtCONTEXT_Constructor* pContext; {
+			rtCONTEXT_Handle::Reference pContext; {
 			    DSC_Descriptor iSelf;
 			    iSelf.construct (rRecipient);
 
 			    DSC_Descriptor iOrigin;
 			    iOrigin.construct (rSearchOrigin);
 
-			    pContext = new rtCONTEXT_Constructor (iSelf, iCurrent, iOrigin);
+			    pContext.setTo (new rtCONTEXT_Handle (iSelf, iCurrent, iOrigin));
 			}
 
 			VTask::ConstructionData iTCData (this, pSubset, pReordering, pContext);
@@ -1202,7 +1151,7 @@ void VCall::evaluate (
 		    }
 		    break;
 		}
-	    } while (rtDICTIONARY_LookupResult_FoundNothing == xSelectorLookupResult);
+	    } while (Vdd::Store::DictionaryLookup_FoundNothing == xSelectorLookupResult);
 	}
 	break;
     }
@@ -1335,46 +1284,43 @@ void VCall::evaluate (rtLINK_CType* pSubset) {
  ******************************/
 
 /*---------------------------------------------------------------------------
- *****  Routine to look for a selector in a value store.
+ *****  Routine to obtain a selector's dictionary definition.
  *
  *  Arguments:
- *	pVStoreCPD		- the address of a CPD for the value store.  If a property
- *				  was found, the column pointer of this store will be set
- *				  to slot associated with the property.
- *	pSelector		- the address of a 'VSelector'.
- *	pValueReturn		- an optional (Nil to omit) address of a descriptor which
+ *	rSelector		- the address of a 'VSelector'.
+ *	xPropertySlot		- a reference to the return location of the property slot
+ *				  for 'DictionaryLookup_FoundProperty' results.
+ *	pPropertyPrototype	- an optional (Nil to omit) address of a descriptor which
  *				  will be initialized to either the value of the selector
  *				  for non-properties or to the property prototype for
  *				  properties.
  *
  *  Returns:
- *	The appropriate rtDICTIONARY_LookupResult enumeration value.
+ *	The appropriate Vdd::Store::DictionaryLookup enumeration value.
  *
  *****/
-PublicFnDef rtDICTIONARY_LookupResult rtVSTORE_Lookup (
-    M_CPD* pVStoreCPD, VSelector const* pSelector, DSC_Descriptor* pValueReturn
-)
-{
-//    LookupCount++;
+bool rtVSTORE_Handle::getProperty (
+    Vdd::Store::Reference &rpResult, DSC_Pointer &rPointer, unsigned int xPropertySlot, Vdd::Store *pPropertyPrototype
+) {
+    align ();
 
-    M_CPD* pDictionaryCPD = rtVSTORE_CPD_DictionaryCPD (pVStoreCPD);
-
-    int propertySlotOffset;
-    rtDICTIONARY_LookupResult xLookupResult = rtDICTIONARY_Lookup (
-	pDictionaryCPD, pSelector, pValueReturn, &propertySlotOffset
-    );
-
-    if (rtDICTIONARY_LookupResult_FoundProperty == xLookupResult)
-    {
-	rtVSTORE_Align (pVStoreCPD);
-	rtVSTORE_CPD_Column (pVStoreCPD) = rtVSTORE_CPD_ColumnArray (
-	    pVStoreCPD
-	) + propertySlotOffset;
+    xPropertySlot += rtVSTORE_CPx_Column;
+    rpResult.clear ();
+    if (ReferenceIsntNil (xPropertySlot)) {
+	VContainerHandle::Reference pPropertyHandle (elementHandle (xPropertySlot));
+	if (pPropertyHandle->getStore (rpResult) && rpResult->isntACloneOf (pPropertyPrototype))
+	    rpResult.clear ();
     }
 
-    pDictionaryCPD->release ();
+//  Create a new property store of the right type if one does not exist...
+    if (rpResult.isNil ()) {
+	rtPTOKEN_Handle::Reference pPPT (getPToken ());
+	pPropertyPrototype->clone (rpResult, pPPT);
+	EnableModifications ();
+	StoreReference (xPropertySlot, rpResult);
+    }
 
-    return xLookupResult;
+    return true;
 }
 
 
@@ -1418,7 +1364,7 @@ PublicFnDef bool rtLINK_Locate (
     M_CPD *pLink, unsigned int xCoDomainReference, rtREFUV_Type_Reference &iDomainReference
 ) {
 /*****  Align the link, ...  *****/
-    rtLINK_AlignLink (pLink);
+    rtLINK_Align (pLink);
 
 /*****  ... build the key, ...  *****/
     rtLINK_RRDType  iKey[2];
@@ -1442,9 +1388,8 @@ PublicFnDef bool rtLINK_Locate (
     ) return false;
 
 /*****  ... and decode a successful query, ...  *****/
-    DSC_InitReferenceScalar (
-	iDomainReference,
-	rtLINK_CPD_PosPTokenCPD (pLink),
+    iDomainReference.constructReference (
+	static_cast<rtLINK_Handle*>(pLink->containerHandle ())->pptHandle (),
 	xCoDomainReference - rtLINK_RRD_ReferenceOrigin (
 	    pResult
 	) + rtLINK_RRD_LinkCumulative (pResult)
@@ -1466,138 +1411,96 @@ PublicFnDef bool rtLINK_Locate (
  *				  properties.
  *	pOffsetReturn		- an optional (Nil to omit) address which will be set to
  *				  the property slot offset when this routine returns
- *				  rtDICTIONARY_LookupResult_FoundProperty.
+ *				  Vdd::Store::DictionaryLookup_FoundProperty.
  *
  *  Returns:
- *	The appropriate rtDICTIONARY_LookupResult enumeration value.
+ *	The appropriate Vdd::Store::DictionaryLookup enumeration value.
  *
  *****/
-PublicFnDef rtDICTIONARY_LookupResult rtDICTIONARY_Lookup (
-    M_CPD* pDictionaryCPD, VSelector const* pSelector, DSC_Descriptor* pValueReturn, int* pOffsetReturn
-)
-{
-    rtDICTIONARY_LookupResult xLookupResult;
+Vdd::Store::DictionaryLookup rtDICTIONARY_Handle::getElement (
+    VSelector const &rSelector, DSC_Descriptor *pValueReturn, unsigned int *pOffsetReturn
+) {
+    DictionaryLookup xResult = DictionaryLookup_FoundNothing;
 
-    if (rtDICTIONARY_UsingCache)
-	xLookupResult = rtDICTIONARY_Lookup (
-	    M_CPD_CPCC (pDictionaryCPD), pSelector, pValueReturn, pOffsetReturn
-	);
-    else {
-	rtSELUV_Set iSet (pDictionaryCPD, rtDICTIONARY_CPx_Selectors);
+    if (rtDICTIONARY_UsingCache) {
+	rtDICTIONARY_Cache::Reference pCache (cache ());
+	rtSELUV_Set &rSet = pCache->selectors ();
 
 	unsigned int xSelectorReference;
-	if (pSelector->locateIn (iSet, xSelectorReference)) {
-	    M_CPD* pPropertySubsetCPD = rtDICTIONARY_CPD_PropertySubsetCPD (
-		pDictionaryCPD
-	    );
+	if (rSelector.locateIn (rSet, xSelectorReference)) {
+	    M_CPD *pPropertySubsetCPD = pCache->propertySubset ();
 
 	    DSC_Scalar propertyReference;
 	    if (rtLINK_Locate (pPropertySubsetCPD, xSelectorReference, propertyReference)) {
-		xLookupResult = rtDICTIONARY_LookupResult_FoundProperty;
+		xResult = Vdd::Store::DictionaryLookup_FoundProperty;
 
-		if (IsntNil (pValueReturn)) {
-		    M_CPD* pPrototypeVectorCPD = rtDICTIONARY_CPD_PropertyPrototypesCPD (
-			pDictionaryCPD
-		    );
-		    rtVECTOR_RefExtract (pPrototypeVectorCPD, &propertyReference, pValueReturn);
-		    pPrototypeVectorCPD->release ();
+		if (pValueReturn) {
+		    pCache->propertyPrototypes ()->getElements (*pValueReturn, propertyReference);
 		}
 
-		if (IsntNil (pOffsetReturn))
+		if (pOffsetReturn)
 		    *pOffsetReturn = DSC_Scalar_Int (propertyReference);
 
-		DSC_ClearScalar (propertyReference);
+		propertyReference.destroy ();
 	    }
-	    else if (IsntNil (pValueReturn)) {
+	    else if (pValueReturn) {
 	    /*****  ... for everything else:  *****/
-		xLookupResult = rtDICTIONARY_LookupResult_FoundOther;
+		xResult = Vdd::Store::DictionaryLookup_FoundOther;
 
 		DSC_Scalar iSelectorReference;
-		M_CPD* pSetPToken = iSet.ptoken ();
-		pSetPToken->retain ();
-		DSC_InitReferenceScalar (iSelectorReference, pSetPToken, xSelectorReference);
+		iSelectorReference.constructReference (rSet.ptoken (), xSelectorReference);
 
-		M_CPD* pSelectorValuesCPD = rtDICTIONARY_CPD_ValuesCPD (pDictionaryCPD);
-		rtVECTOR_RefExtract (pSelectorValuesCPD, &iSelectorReference, pValueReturn);
+		pCache->bindings ()->getElements (*pValueReturn, iSelectorReference);
 
-		pSelectorValuesCPD->release ();
+		iSelectorReference.destroy ();
+	    }
+	    else xResult = Vdd::Store::DictionaryLookup_FoundOther;
+	}
+    }
+    else {
+	rtSELUV_Set iSet (selectors ());
 
-		DSC_ClearScalar (iSelectorReference);
+	unsigned int xSelectorReference;
+	if (rSelector.locateIn (iSet, xSelectorReference)) {
+	    M_CPD *pPropertySubsetCPD;
+	    getPropertySubset (pPropertySubsetCPD);
+
+	    DSC_Scalar propertyReference;
+	    if (rtLINK_Locate (pPropertySubsetCPD, xSelectorReference, propertyReference)) {
+		xResult = Vdd::Store::DictionaryLookup_FoundProperty;
+
+		if (pValueReturn) {
+		    rtVECTOR_Handle::Reference pPropertyPrototypes;
+		    getPropertyPrototypes (pPropertyPrototypes);
+		    pPropertyPrototypes->getElements (*pValueReturn, propertyReference);
+		}
+
+		if (pOffsetReturn)
+		    *pOffsetReturn = DSC_Scalar_Int (propertyReference);
+
+		propertyReference.destroy ();
+	    }
+	    else if (pValueReturn) {
+	    /*****  ... for everything else:  *****/
+		xResult = Vdd::Store::DictionaryLookup_FoundOther;
+
+		DSC_Scalar iSelectorReference;
+		iSelectorReference.constructReference (iSet.ptoken (), xSelectorReference);
+
+		rtVECTOR_Handle::Reference pSelectorValues;
+		getValues (pSelectorValues);
+		pSelectorValues->getElements (*pValueReturn, iSelectorReference);
+
+		iSelectorReference.destroy ();
 	    }
 	    else {
-		xLookupResult = rtDICTIONARY_LookupResult_FoundOther;
+		xResult = Vdd::Store::DictionaryLookup_FoundOther;
 	    }
 	    pPropertySubsetCPD->release ();
 	}
-	else xLookupResult = rtDICTIONARY_LookupResult_FoundNothing;
     }
 
-    return xLookupResult;
-}
-
-
-/*---------------------------------------------------------------------------
- *****  Routine to extract a method for the given selector
- *
- *  Arguments:
- *	pDictionaryCPD		- the address of a CPD for the dictionary.
- *	pSelector		- the address of a 'VSelector'.
- *	pValueReturn		- an optional (Nil to omit) address of a descriptor which
- *				  will be initialized to either the value of the selector
- *				  for non-properties or to the property prototype for
- *				  properties.
- *	pOffsetReturn		- an optional (Nil to omit) address which will be set to
- *				  the property slot offset when this routine returns
- *				  rtDICTIONARY_LookupResult_FoundProperty.
- *
- *  Returns:
- *	The appropriate rtDICTIONARY_LookupResult enumeration value.
- *
- *****/
-PublicFnDef rtDICTIONARY_LookupResult rtDICTIONARY_Lookup (
-    VContainerHandle* pDictionary, VSelector const* pSelector, DSC_Descriptor* pValueReturn, int* pOffsetReturn
-) {
-    VReference<rtDICTIONARY_Cache> pCache (rtDICTIONARY_Cache::GetCacheOf (pDictionary));
-    rtSELUV_Set &rSet = pCache->selectors ();
-
-    rtDICTIONARY_LookupResult	xLookupResult;
-    unsigned int		xSelectorReference;
-    if (pSelector->locateIn (rSet, xSelectorReference)) {
-	M_CPD* pPropertySubsetCPD = pCache->propertySubset ();
-
-	DSC_Scalar propertyReference;
-	if (rtLINK_Locate (pPropertySubsetCPD, xSelectorReference, propertyReference)) {
-	    xLookupResult = rtDICTIONARY_LookupResult_FoundProperty;
-
-	    if (IsntNil (pValueReturn)) {
-		rtVECTOR_RefExtract (
-		    pCache->propertyPrototypes (), &propertyReference, pValueReturn
-		);
-	    }
-
-	    if (IsntNil (pOffsetReturn))
-		*pOffsetReturn = DSC_Scalar_Int (propertyReference);
-
-	    DSC_ClearScalar (propertyReference);
-	}
-	else if (IsntNil (pValueReturn)) {
-	/*****  ... for everything else:  *****/
-	    xLookupResult = rtDICTIONARY_LookupResult_FoundOther;
-
-	    DSC_Scalar iSelectorReference;
-	    M_CPD* pSetPToken = rSet.ptoken ();
-	    pSetPToken->retain ();
-	    DSC_InitReferenceScalar (iSelectorReference, pSetPToken, xSelectorReference);
-
-	    rtVECTOR_RefExtract (pCache->bindings (), &iSelectorReference, pValueReturn);
-
-	    DSC_ClearScalar (iSelectorReference);
-	}
-	else xLookupResult = rtDICTIONARY_LookupResult_FoundOther;
-    }
-    else xLookupResult = rtDICTIONARY_LookupResult_FoundNothing;
-
-    return xLookupResult;
+    return xResult;
 }
 
 

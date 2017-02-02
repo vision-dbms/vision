@@ -32,6 +32,8 @@
 
 #include "Vsa_VSmartEvaluatorSource.h"
 #include "Vsa_VEvaluatorPool.h"
+
+#include "VTransientServices.h" 
 
 
 /*********************************************************************
@@ -46,9 +48,11 @@ namespace Vsa {
     class VsaDirectoryBuilder::ThisOrder::SpecialPoolSession: public Session {
 	DECLARE_CONCRETE_RTTLITE (SpecialPoolSession, Session);
 
+    typedef VkMapOf<VString, char const*, char const*, Vca::U32> BusynessOverrideMap; 
+        
     //  Constructor
     public:
-	SpecialPoolSession (VString iName, SessionType iType, Vca::VDirectory *pDirectory);
+	SpecialPoolSession (VString iName, SessionType iType);
     
     //  Destructor
     private:
@@ -85,6 +89,13 @@ namespace Vsa {
 	void setEvaluationAttemptMax (Vca::U32 cMax) {
 	    m_cEvaluationAttemptMaximum = cMax;
 	}
+	void setEvaluationOnErrorAttemptMax (Vca::U32 cMax) {
+	    m_cEvaluationOnErrorAttemptMaximum = cMax;
+	}
+	void setEvaluationTimeOutAttemptMax (Vca::U32 cMax) {
+	    m_cEvaluationTimeOutAttemptMaximum = cMax;
+	}
+
 	void setWorkerMinimumAval (Vca::U32 iValue) {
 	    m_iWorkerMinimumAvailable = iValue;
 	}
@@ -108,6 +119,21 @@ namespace Vsa {
 	    m_pDirectory.setTo (pDirectory);
 	}
     
+	void setBusynessThreshold (Vca::U32 iValue) {
+	    m_iBusynessThreshold = iValue;
+	}
+		
+	void setMaxBusynessChecks (Vca::U32 iValue) {
+	    m_iMaxBusynessChecks = iValue;
+	}
+		
+	void addBusynessMapEntry (const VString &iName, Vca::U32 iBusynessOverride) {
+	    unsigned int xIndex;
+	    if(m_iBusynessOverrides.Insert(iName.content(), xIndex)) {
+		m_iBusynessOverrides[xIndex] = iBusynessOverride;
+	    }
+	}
+		
     //  State
     private:
 	VString		m_iPoolInfo;
@@ -116,12 +142,17 @@ namespace Vsa {
 	Vca::U32	m_iWorkersBeingCreatedMaximum;
 	Vca::U64	m_iEvaluationTimeout;
 	Vca::U32	m_cEvaluationAttemptMaximum;
+	Vca::U32	m_cEvaluationOnErrorAttemptMaximum;
+	Vca::U32	m_cEvaluationTimeOutAttemptMaximum;
 	Vca::U32	m_iWorkerMinimumAvailable;
 	Vca::U32	m_iWorkerMaximumAvailable;
 	Vca::U32	m_iWorkerCreationFailureHardLimit;
 	Vca::U32	m_iWorkerCreationFailureSoftLimit;
 	Vca::U32	m_iShrinkTimeOutMins;
 	Vca::U32	m_iStopTimeOutMins;
+	Vca::U32	m_iBusynessThreshold;
+	Vca::U32	m_iMaxBusynessChecks;
+	BusynessOverrideMap m_iBusynessOverrides;
     
 	Vca::VDirectory::Reference m_pDirectory;
     };
@@ -135,19 +166,23 @@ namespace Vsa {
  **************************/
 
 Vsa::VsaDirectoryBuilder::ThisOrder::SpecialPoolSession::SpecialPoolSession (
-   VString iName, SessionType iType, Vca::VDirectory *pDirectory
-) : BaseClass (iName, iType), m_pDirectory (pDirectory)
-, m_iWorkerMaximum		(UINT_MAX)
-, m_iWorkerMinimum		(0)
-, m_iWorkerMinimumAvailable     (0)
-, m_iWorkerMaximumAvailable     (0)
-, m_iWorkersBeingCreatedMaximum (UINT_MAX)
-, m_iEvaluationTimeout          (U64_MAX) 
-, m_cEvaluationAttemptMaximum	(UINT_MAX)
-, m_iWorkerCreationFailureHardLimit (UINT_MAX)
-, m_iWorkerCreationFailureSoftLimit (1)
+   VString iName, SessionType iType
+) : BaseClass (iName, iType)
+, m_iWorkerMaximum		(100)
+, m_iWorkerMinimum		(1)
+, m_iWorkerMinimumAvailable     (m_iWorkerMinimum - 1)
+, m_iWorkerMaximumAvailable     (m_iWorkerMinimum)
+, m_iWorkersBeingCreatedMaximum (1)
+, m_iEvaluationTimeout          (900) 
+, m_cEvaluationAttemptMaximum   (0)
+, m_cEvaluationOnErrorAttemptMaximum	(5)
+, m_cEvaluationTimeOutAttemptMaximum    (0)
+, m_iWorkerCreationFailureHardLimit (11)
+, m_iWorkerCreationFailureSoftLimit (5)
+, m_iBusynessThreshold		(3)
 , m_iShrinkTimeOutMins	        (0)
-, m_iStopTimeOutMins	        (0) {
+, m_iStopTimeOutMins	        (0) 
+, m_iMaxBusynessChecks		(UINT_MAX) {
 }
 
 /****************************
@@ -169,7 +204,8 @@ bool Vsa::VsaDirectoryBuilder::ThisOrder::SpecialPoolSession::supplyObjectSource
 ) const {
   Vca::IDirectory::Reference pDirectory;
   m_pDirectory->getRole (pDirectory);
-  VSmartEvaluatorSource::Reference const pSource (new VSmartEvaluatorSource (pDirectory));
+  VSmartEvaluatorSource::Reference const pSource (new VSmartEvaluatorSource (pDirectory, m_iBusynessThreshold, m_iMaxBusynessChecks));
+  pSource->setBusynessMap(m_iBusynessOverrides);
   pSource->init ();
   IEvaluatorSource::Reference pISource;
   pSource->getRole (pISource);
@@ -182,6 +218,8 @@ bool Vsa::VsaDirectoryBuilder::ThisOrder::SpecialPoolSession::supplyObjectSource
   pSettings->setWorkersBeingCreatedMaximumTo (m_iWorkersBeingCreatedMaximum);
   pSettings->setEvaluationTimeOutTo (m_iEvaluationTimeout);
   pSettings->setEvaluationAttemptMaximumTo (m_cEvaluationAttemptMaximum);
+  pSettings->setEvaluationOnErrorAttemptMaximumTo (m_cEvaluationOnErrorAttemptMaximum);
+  pSettings->setEvaluationTimeOutAttemptMaximumTo (m_cEvaluationTimeOutAttemptMaximum);
   pSettings->setWorkerMinimumAvailableTo (m_iWorkerMinimumAvailable);
   pSettings->setWorkerMaximumAvailableTo (m_iWorkerMaximumAvailable);
   pSettings->setWorkerCreationFailureHardLimitTo (m_iWorkerCreationFailureHardLimit);
@@ -192,7 +230,6 @@ bool Vsa::VsaDirectoryBuilder::ThisOrder::SpecialPoolSession::supplyObjectSource
   pSettings->setWorkerSourceTo (pISource);
 
   pSettings->getRole (rpObjectSource);
-  
   return true;
 }
 
@@ -273,6 +310,8 @@ void Vsa::VsaDirectoryBuilder::ThisOrder::parseSessionsFile (
 		xState
 		    = 0 == strcasecmp (pToken, "Connection_Template")
 		    ? ParseState_ExpectingSessionSentinel
+		    : 0 == strcasecmp (pToken, "Notification_Template")
+		    ? ParseState_ExpectingNotificationSentinel
 		    : 0 == strcasecmp (pToken, "Include")
 		    ? ParseState_ExpectingIncludeTarget
 		    : 0 == strcasecmp (pToken, "IncludeIf")
@@ -287,9 +326,18 @@ void Vsa::VsaDirectoryBuilder::ThisOrder::parseSessionsFile (
 		    xState = ParseState_Error;
 		} else {
 		    Session::Reference pSession;
-		    if (parseSessionTemplate (iSessionsFile, xType, pSession))
+		    if (BaseClass::parseSessionTemplate (iSessionsFile, xType, pSession)) 
 			BaseClass::insertSession (pSession);
 		    xState = ParseState_ExpectingTag;
+		}
+		break;
+	    case ParseState_ExpectingNotificationSentinel:
+		if (strcmp (pToken, "Begin") != 0) {
+		    log ("VsaDirectoryBuilder::ThisOrder::parseSessionsFile --> Error: found '%s' when expecting 'Begin' for Notification_Template", pToken);
+		    xState = ParseState_Error;
+		} else {
+		    VTransient::transientServicesProvider ()->parseNotificationTemplate (iSessionsFile);
+		    xState = ParseState_ExpectingTag; 
 		}
 		break;
 	    case ParseState_ExpectingPoolSessionSentinel:
@@ -298,8 +346,10 @@ void Vsa::VsaDirectoryBuilder::ThisOrder::parseSessionsFile (
 		    xState = ParseState_Error;
 		} else {
 		    Session::Reference pSession;
-		    if (parsePoolSessionTemplate (iSessionsFile, xType, pSession))
+		    if (parsePoolSessionTemplate (iSessionsFile, xType, pSession)) {
+			// Here supplyObjectSource_() is called and VSmartEvaluatorSource is newed
 			BaseClass::insertSession (pSession);
+		    }
 		    xState = ParseState_ExpectingTag; 
 		}
 		break;
@@ -332,6 +382,7 @@ void Vsa::VsaDirectoryBuilder::ThisOrder::parseSessionsFile (
 	    case ParseState_ExpectingIncludeIfTarget:
 	    case ParseState_ExpectingPoolSessionSentinel:
 	    case ParseState_ExpectingSessionSentinel:
+	    case ParseState_ExpectingNotificationSentinel:
 	    case ParseState_ExpectingUnknown:
 		pBreakSet = g_pRestOfLineBreakSet;
 		break;
@@ -349,14 +400,17 @@ bool Vsa::VsaDirectoryBuilder::ThisOrder::parsePoolSessionTemplate (
     VSimpleFile &rSessionsFile, SessionType xType, Session::Reference &rpSession
 ) const {
 
-    bool bCompleted = false;
+    bool bCompleted = false, bOnErrorAttemptsSet = false, bOnTimeoutAttemptsSet = false;
 
-    Vca::U32 iMaxWorkers (UINT_MAX), iMinWorkers (0), iMinAvail (0), iMaxAvail (0);
-    Vca::U32 iEvalAttempts (UINT_MAX) , iWorkerCreationFailureHardLmt (UINT_MAX), iWorkerCreationFailureSoftLmt (1);
+    Vca::U32 iMaxWorkers (100), iMinWorkers (1), iMinAvail (iMinWorkers - 1), iMaxAvail (iMinWorkers);
+    Vca::U32 iEvalAttempts (0) , iEvalOnErrorAttempts (5) , iEvalTimeOutAttempts (0), iWorkerCreationFailureHardLmt (30), iWorkerCreationFailureSoftLmt (1);
     Vca::U32 iWorkersBeingCreated (UINT_MAX), iStopTimeOut (0), iShrinkTimeOut (0);
-    Vca::U64 iEvaluationTimeout (U64_MAX);
+    Vca::U64 iEvaluationTimeout (900);
+    Vca::U32 iBusynessThreshold(3);
+    Vca::U32 iMaxBusynessChecks (UINT_MAX);
 
     VString iSpecialPoolName;
+	SpecialPoolSession::Reference pSPSession;
 
     Vca::VCohort::Claim iClaim (Vca::VCohort::Vca (), false);
     Directory::Reference const pLocalDirectory (new Directory ());
@@ -397,6 +451,10 @@ bool Vsa::VsaDirectoryBuilder::ThisOrder::parsePoolSessionTemplate (
 	    ? ParseState_ExpectingEvaluationTimeout
 	    : 0 == strcasecmp (pToken, "EvaluationAttempts")
 	    ? ParseState_ExpectingEvaluationAttempts
+	    : 0 == strcasecmp (pToken, "EvaluationOnErrorAttempts")
+	    ? ParseState_ExpectingEvaluationOnErrorAttempts
+	    : 0 == strcasecmp (pToken, "EvaluationTimeOutAttempts")
+	    ? ParseState_ExpectingEvaluationTimeOutAttempts
 	    : 0 == strcasecmp (pToken, "WorkerCreationFailureHardLimit")
 	    ? ParseState_ExpectingWorkerCreationFailureHardLmt
 	    : 0 == strcasecmp (pToken, "WorkerCreationFailureSoftLimit")
@@ -405,17 +463,33 @@ bool Vsa::VsaDirectoryBuilder::ThisOrder::parsePoolSessionTemplate (
 	    ? ParseState_ExpectingShrinkTimeOut
 	    : 0 == strcasecmp (pToken, "StopTimeOut")
 	    ? ParseState_ExpectingStopTimeOut
+	    : 0 == strcasecmp (pToken, "BusynessThreshold")
+	    ? ParseState_ExpectingBusynessThreshold 
+	    : 0 == strcasecmp (pToken, "MaxBusynessChecks")
+	    ? ParseState_ExpectingMaxBusynessChecks
 	    : ParseState_Error;  
 	  if (ParseState_Error == xState)
 	      log ("VsaDirectoryBuilder::ThisOrder::parsePoolSessionTemplate --> Unknown tag '%s'", pToken);
 	  break;
 	case ParseState_ExpectingSessionSentinel:
 	  if (strcmp (pToken, "Begin") == 0) {
-	    Session::Reference pSession;
-	    bool bResult = parseSessionTemplate (rSessionsFile, xType, pSession);
-            if (bResult) {
-              pNewOrder->insertSession (pSession);
-            }
+	      if(!pSPSession) {
+		  pSPSession.setTo (new SpecialPoolSession (iSpecialPoolName, xType));
+	      }
+	      VString templateString;
+	      if(extractSessionTemplateString(rSessionsFile, templateString)) {
+		  Vca::U32 busynessOverride;
+		  bool useBusynessOverride = getBusynessFromTemplate(templateString, busynessOverride);
+			
+		  Session::Reference pSession;
+		  bool bResult = BaseClass::parseSessionTemplate (templateString, xType, pSession);
+		  if (bResult) {
+		      pNewOrder->insertSession (pSession);
+		      if(useBusynessOverride) {
+			  pSPSession->addBusynessMapEntry(pSession->getName(), busynessOverride);
+		      }
+		  }
+	      }
           }
 	  else {
 	    log ("VsaDirectoryBuilder::ThisOrder::parsePoolSessionTemplate --> Error: found '%s' when expecting 'Begin'", pToken);
@@ -466,7 +540,22 @@ bool Vsa::VsaDirectoryBuilder::ThisOrder::parsePoolSessionTemplate (
           iEvaluationTimeout = atoll (pToken);
           break;
         case ParseState_ExpectingEvaluationAttempts:
+	  // if the config file is setting this older parameter
           iEvalAttempts = atoi (pToken);
+	  // and the config file hasn't explicitly set the newer
+	  // parameters, set the new parameters to this value.
+	  if (!bOnErrorAttemptsSet)
+	      iEvalOnErrorAttempts = iEvalAttempts;
+	  if (!bOnTimeoutAttemptsSet)
+	      iEvalTimeOutAttempts = iEvalAttempts;
+          break;
+        case ParseState_ExpectingEvaluationOnErrorAttempts:
+	  bOnErrorAttemptsSet = true;
+          iEvalOnErrorAttempts = atoi (pToken);
+          break;
+	case ParseState_ExpectingEvaluationTimeOutAttempts:
+	  bOnTimeoutAttemptsSet = true;
+          iEvalTimeOutAttempts = atoi (pToken);
           break;
         case ParseState_ExpectingWorkerCreationFailureHardLmt:
           iWorkerCreationFailureHardLmt = atoi (pToken);          
@@ -480,6 +569,12 @@ bool Vsa::VsaDirectoryBuilder::ThisOrder::parsePoolSessionTemplate (
         case ParseState_ExpectingStopTimeOut:
           iStopTimeOut = atoi (pToken);
           break;
+	case ParseState_ExpectingBusynessThreshold:
+	    iBusynessThreshold = atoi (pToken);
+	    break;
+	case ParseState_ExpectingMaxBusynessChecks:
+	    iMaxBusynessChecks = atoi (pToken);
+	    break;
 	default:
 	  log ("VsaDirectoryBuilder::ThisOrder::parsePoolSessionTemplate --> Error: unknown parse state %d[%s]", xState, pToken);
   
@@ -522,32 +617,50 @@ bool Vsa::VsaDirectoryBuilder::ThisOrder::parsePoolSessionTemplate (
       iPoolDesc << "\r\nWORKERS IN CREATION LMT: " << iWorkersBeingCreated;
       iPoolDesc << "\r\nEVALUATION TIME OUT (secs): " << iEvaluationTimeout;
       iPoolDesc << "\r\nEVALUATION ATTEMPTS: " << iEvalAttempts;
+      iPoolDesc << "\r\nEVALUATION ATTEMPTS ON ERROR: " << iEvalOnErrorAttempts;
+      iPoolDesc << "\r\nEVALUATION ATTEMPTS Time Out: " << iEvalTimeOutAttempts;
       iPoolDesc << "\r\nWORKER CREATION FAILURE SOFT LMT: " << iWorkerCreationFailureSoftLmt;
       iPoolDesc << "\r\nWORKER CREATION FAILURE HARD LMT: " << iWorkerCreationFailureHardLmt;
       iPoolDesc << "\r\nSHRINK TIMEOUT (mins): " << iShrinkTimeOut;
       iPoolDesc << "\r\nSTOP TIMEOUT (mins): " << iStopTimeOut << "\r\n";
       iPoolDesc << "\r\nPOOL_END: " << iSpecialPoolName << "\r\n";
 
-      SpecialPoolSession::Reference pSession;
-      pSession.setTo (new SpecialPoolSession (iSpecialPoolName, xType, pNewOrder->m_pDirectory));
-      pSession->setPoolInfo (iPoolDesc);
-      pSession->setWorkerMax (iMaxWorkers);
-      pSession->setWorkerMin (iMinWorkers);
-      pSession->setWorkerMinimumAval (iMinAvail);
-      pSession->setWorkerMaximumAvail (iMaxAvail);
-      pSession->setWorkersBeingCreated (iWorkersBeingCreated);
-      pSession->setEvaluationTimeout (iEvaluationTimeoutMicroSecs);
-      pSession->setEvaluationAttemptMax (iEvalAttempts);
-      pSession->setWorkerCreationFailureHardLimit (iWorkerCreationFailureHardLmt);
-      pSession->setWorkerCreationFailureSoftLimit (iWorkerCreationFailureSoftLmt);
-      pSession->setShrinkTimeOut (iShrinkTimeOut);
-      pSession->setStopTimeOut (iStopTimeOut);
-      rpSession.setTo (pSession);
+      pSPSession->setSourceDirectory(pNewOrder->m_pDirectory);
+      pSPSession->setPoolInfo (iPoolDesc);
+      pSPSession->setWorkerMax (iMaxWorkers);
+      pSPSession->setWorkerMin (iMinWorkers);
+      pSPSession->setWorkerMinimumAval (iMinAvail);
+      pSPSession->setWorkerMaximumAvail (iMaxAvail);
+      pSPSession->setWorkersBeingCreated (iWorkersBeingCreated);
+      pSPSession->setEvaluationTimeout (iEvaluationTimeoutMicroSecs);
+      pSPSession->setEvaluationAttemptMax (iEvalAttempts);
+      pSPSession->setEvaluationOnErrorAttemptMax (iEvalOnErrorAttempts);
+      pSPSession->setEvaluationTimeOutAttemptMax (iEvalTimeOutAttempts);
+      pSPSession->setWorkerCreationFailureHardLimit (iWorkerCreationFailureHardLmt);
+      pSPSession->setWorkerCreationFailureSoftLimit (iWorkerCreationFailureSoftLmt);
+      pSPSession->setShrinkTimeOut (iShrinkTimeOut);
+      pSPSession->setStopTimeOut (iStopTimeOut);
+      pSPSession->setBusynessThreshold (iBusynessThreshold);
+      pSPSession->setMaxBusynessChecks (iMaxBusynessChecks);
+      rpSession.setTo (pSPSession);
     }
 
     return bCompleted;
 }
 
+bool Vsa::VsaDirectoryBuilder::ThisOrder::getBusynessFromTemplate (VString &rSessionsString, Vca::U32 &rBusyness) const {
+    VString pre, post;
+    if(rSessionsString.getPrefix("BusynessOverride ",pre, post)) {
+	VString newPre, newPost;
+	post.getPrefix("\n", newPre, newPost);
+	Vca::U32 u32;
+	if (1 == sscanf (newPre, "%u", &u32))  {
+	    rBusyness = u32;
+	    return true;
+	}
+    }
+    return false;
+}
 
 bool Vsa::VsaDirectoryBuilder::ThisOrder::insertSession (Session *pSession) {
   if (pSession) {

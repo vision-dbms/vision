@@ -180,7 +180,7 @@ VString& VString::operator<< (__int64 iValue) {
 
 VString& VString::operator<< (unsigned __int64 iValue) {
     char iWorkBuffer[32];
-    sprintf (iWorkBuffer, "%u", (unsigned int)iValue);
+    sprintf (iWorkBuffer, "%llu", iValue);
     return append (iWorkBuffer);
 }
 
@@ -211,6 +211,39 @@ VString& VString::vprintf (char const *pFormat, va_list ap) {
     vsprintf (iWorkBuffer, pFormat, iArgList);
     *this << iWorkBuffer;
     deallocate (iWorkBuffer);
+    return *this;
+}
+
+VString& VString::vsafeprintf (char const *pFormat, va_list ap) {
+
+    FILE *pSink;
+#if defined (_WIN32)
+    pSink = fopen ("NUL:", "a");
+#else
+    pSink = fopen ("/dev/null", "a");
+#endif
+
+    // There is no buffer size guess work involved in this safe print 
+    if (pSink) {
+	unsigned int size;
+	{
+	    V::VArgList iArgList (ap);
+	    size = vfprintf (pSink, pFormat, iArgList.list ());
+	    fclose (pSink);
+	}
+
+	char *iWorkBuffer = (char*) allocate (size+1);
+
+	V::VArgList iArgList (ap);
+	vsprintf (iWorkBuffer, pFormat, iArgList);
+	*this << iWorkBuffer;
+	deallocate (iWorkBuffer);
+    } else {
+	// Hope it will never reach here, but in case it does happen
+	// at least it can give us some clues what it is trying to print.
+	*this << "The null device cannot be opened so a complete formatted print is not possible,"
+	      << "but here is the partial print : " << pFormat;
+    }
     return *this;
 }
 

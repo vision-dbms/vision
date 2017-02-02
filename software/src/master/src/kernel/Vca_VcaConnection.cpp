@@ -73,7 +73,8 @@ Vca::VcaConnection::VcaConnection (
  *************************/
 
 Vca::VcaConnection::~VcaConnection () {
-    defaultLogger().printf ("+++ VcaConnection[%llp]::~VcaConnection\n", this);
+    if (!isAtExit ())
+	defaultLogger().printf ("+++ VcaConnection[%llp]::~VcaConnection\n", this);
     traceInfo ("Destroying VcaConnection");
 }
 
@@ -193,7 +194,7 @@ void Vca::VcaConnection::suspend (VcaSerializer *pSerializer) {
     }
 }
 
-void Vca::VcaConnection::supply (IPeer::Reference &rpOurside) {
+void Vca::VcaConnection::supplyOurside (IPeer::Reference &rpOurside) {
     m_pOffer->getRole (rpOurside);
 }
 

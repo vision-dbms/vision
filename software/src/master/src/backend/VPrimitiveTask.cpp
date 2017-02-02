@@ -40,6 +40,8 @@
 #include "Vca_IPipeFactory.h"
 
 #include "Vxa_ISingleton.h"
+#include "VTransientServices.h"
+
 
 
 /**********************************
@@ -187,7 +189,7 @@ void VPrimitiveTaskBase::raiseUnimplementedAliasException (char const* pCaller) 
 
 void VPrimitiveTaskBase::accessClientObject () {
     object_gofer_t::Reference pObjectGofer;
-    if (channel()->objectGofer (pObjectGofer))
+    if (getClientObjectGofer (pObjectGofer))
 	accessExternalObject (pObjectGofer);
     else {
 	suspend ();
@@ -209,14 +211,17 @@ void VPrimitiveTaskBase::accessExternalObject (VString const &rObjectName, bool 
 
 void VPrimitiveTaskBase::accessExternalObject (object_gofer_t* pObjectGofer) {
     suspend ();
-    if (!pObjectGofer)
+    if (!pObjectGofer) {
+	notify (22, "#22: VPrimitiveTaskBase::accessExternalObject: Null object gofer.\n");
 	onExternalObject (0);
+    }
     else {
 	pObjectGofer->supplyMembers (this, &ThisClass::onExternalObject, &ThisClass::onExternalError);
     }
 }
 
 void VPrimitiveTaskBase::onExternalError (Vca::IError *pInterface, VString const &rMessage) {
+    notify (23, "#23: VPrimitiveTaskBase::onExternalError: Bridge connection error - %s\n", rMessage.content ());
     loadDucWith (rMessage);
     resume ();
 }
@@ -224,8 +229,10 @@ void VPrimitiveTaskBase::onExternalError (Vca::IError *pInterface, VString const
 void VPrimitiveTaskBase::onExternalObject (Vxa::ISingleton *pInterface) {
     if (pInterface && pInterface->oidr ())
 	pInterface->oidr()->logAsInteresting ("OXO");
-    if (!pInterface)
+    if (!pInterface) {
+	notify (24, "#24: VPrimitiveTaskBase::onExternalObject: Null interface\n");
         loadDucWithNA ();
+    }
     else loadDucWithRepresentative (
 	new VExternalGroundStore (pInterface)
     );

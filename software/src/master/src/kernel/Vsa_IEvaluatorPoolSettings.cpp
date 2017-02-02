@@ -51,8 +51,9 @@ namespace Vsa {
     VINTERFACE_MEMBERINFO_DEFINITION (IEvaluatorPoolSettings, SetWorkerMaximum, 7);
     VINTERFACE_MEMBERINFO_DEFINITION (IEvaluatorPoolSettings, GetWorkerMinimum, 8);
     VINTERFACE_MEMBERINFO_DEFINITION (IEvaluatorPoolSettings, SetWorkerMinimum, 9);
-    VINTERFACE_MEMBERINFO_DEFINITION (IEvaluatorPoolSettings, GetEvaluationAttemptMaximum, 10);
-    VINTERFACE_MEMBERINFO_DEFINITION (IEvaluatorPoolSettings, SetEvaluationAttemptMaximum, 11);
+	
+	VINTERFACE_MEMBERINFO_DEFINITION (IEvaluatorPoolSettings, GetEvaluationAttemptMaximum, 10);
+	VINTERFACE_MEMBERINFO_DEFINITION (IEvaluatorPoolSettings, SetEvaluationAttemptMaximum, 11);
     VINTERFACE_MEMBERINFO_DEFINITION (IEvaluatorPoolSettings, GetWorkerGenerationLimit, 12);
     VINTERFACE_MEMBERINFO_DEFINITION (IEvaluatorPoolSettings, SetWorkerGenerationLimit, 13);
     VINTERFACE_MEMBERINFO_DEFINITION (IEvaluatorPoolSettings, GetWorkerMinimumAvailable, 14);

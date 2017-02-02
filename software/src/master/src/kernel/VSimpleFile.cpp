@@ -9,7 +9,6 @@
 /********************
  *****  System  *****
  ********************/
-
 #include "Vk.h"
 
 /******************
@@ -73,6 +72,39 @@ bool VSimpleFile::Open (char const *pFileName, char const *pFileMode) {
     if (m_pStream)
 	V::SetCloseOnExec (fileno (m_pStream));
     return IsntNil (m_pStream);
+}
+
+bool VSimpleFile::OpenUniqueTemp (VString& rFileName, char const *pPrefix) {
+    close ();
+#if defined (__linux__) && defined (VMS_LINUX_EXPLICIT_COMPAT)
+    String iFileName(FileSpecTranslation::translateVMSFileSpec (pPrefix));
+    pPrefix = iFileName.c_str();
+#endif
+
+#if defined (__linux__)
+    VString fileName(pPrefix);
+    fileName << ".XXXXXX";
+    int fd = -1;
+    m_pStream = NULL;
+
+    if (((fd = mkstemp(fileName.storage())) == -1) ||
+           ((m_pStream = fdopen(fd, g_pTextWriteMode)) == NULL)) {
+
+        // shared cleanup code
+        if (fd != -1) {
+            unlink(fileName.storage());
+            ::close(fd);
+        }
+        m_pStream = NULL; // set to closed state
+    }
+    if (m_pStream) {
+	V::SetCloseOnExec (fileno (m_pStream));
+        rFileName = fileName;
+    }
+    return IsntNil (m_pStream);
+#else
+    return false;
+#endif
 }
 
 bool VSimpleFile::GetLine (VString &rLine) const {

@@ -6,7 +6,7 @@
  *************************************/
 
 template <class ELType, class EVType> void VSetOf<ELType,EVType>::initializeDPT () {
-    m_pDPT.claim (m_iElementArray.newBasePToken ());
+    m_pDPT.setTo (m_iElementArray.newBasePToken ());
     m_pElementArrayDPT.setTo (m_pDPT);
 }
 

@@ -114,7 +114,7 @@ namespace Vsa {
          * Returns true if retries are enabled.
          */
         virtual bool retryable() const {
-            return m_bRetryable;
+            return m_bRetryable && !isCancelled ();
         }
 
         /**
@@ -141,6 +141,10 @@ namespace Vsa {
         void setValidGeneration (Vca::U32 iGeneration) {
             m_iValidGeneration = iGeneration;
         }
+
+	virtual void setRetryable (bool bRetryable) {
+	    m_bRetryable = bRetryable;
+	}
 
     //  State
     protected:

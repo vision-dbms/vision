@@ -72,16 +72,16 @@ public:
 //  Access
 public:
     unsigned int cardinality () const {
-	return rtPTOKEN_CPD_BaseElementCount (m_pDPT);
+	return m_pDPT->cardinality ();
     }
     unsigned int cardinality_() const {
 	return cardinality ();
     }
 
-    M_CPD* ptoken () const {
+    rtPTOKEN_Handle *ptoken () const {
 	return m_pDPT;
     }
-    M_CPD* ptoken_() const {
+    rtPTOKEN_Handle *ptoken_() const {
 	return ptoken ();
     }
 
@@ -97,11 +97,11 @@ public:
 
 //  P-Token Creation
 public:
-    M_CPD *NewPToken (unsigned int iCardinality) const {
-	return rtPTOKEN_New (m_pDPT->Space (), iCardinality);
+    rtPTOKEN_Handle *NewPToken (unsigned int iCardinality) const {
+	return new rtPTOKEN_Handle (m_pDPT->Space (), iCardinality);
     }
-    M_CPD *NewPToken () const {
-	return NewPToken (rtPTOKEN_CPD_BaseElementCount (m_pDPT));
+    rtPTOKEN_Handle *NewPToken () const {
+	return NewPToken (m_pDPT->cardinality ());
     }
 
 //  Path Access
@@ -143,7 +143,7 @@ protected:
     VReference<VTaskDomain> const	m_pParent;
     VLinkCReference const		m_pSubset;
     VCPDReference const			m_pReordering;
-    VCPDReference const			m_pDPT;
+    rtPTOKEN_Handle::Reference const	m_pDPT;
 };
 
 

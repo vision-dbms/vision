@@ -20,7 +20,7 @@ class VAssociativeResult;
 template <class ElementType> class VCollectionOf : public VCollectionOfOrderables {
 //  Construction
 public:
-    VCollectionOf (M_CPD* pDPT, ElementType const* pElementArray)
+    VCollectionOf (rtPTOKEN_Handle *pDPT, ElementType const* pElementArray)
 	: VCollectionOfOrderables (pDPT), m_pElementArray (pElementArray)
     {
     }
@@ -64,9 +64,13 @@ protected:
  ****************************/
 
 class VCollectionOfUnsigned32 : public VCollectionOf<unsigned int> {
+//  Aliases
+public:
+    typedef Vdd::Store Store;
+
 //  Construction
 public:
-    VCollectionOfUnsigned32 (M_CPD* pDPT, unsigned int const* pElementArray)
+    VCollectionOfUnsigned32 (rtPTOKEN_Handle *pDPT, unsigned int const* pElementArray)
 	: VCollectionOf<unsigned int> (pDPT, pElementArray)
     {
     }
@@ -80,13 +84,13 @@ protected:
 //  Use
 public:
     void insertInto (
-	M_CPD* pSet, M_CPD*& rpReordering, VAssociativeResult& rAssociativeResult
+	Store *pSet, M_CPD*& rpReordering, VAssociativeResult& rAssociativeResult
     );
     void locateIn (
-	M_CPD* pSet, M_CPD*& rpReordering, VAssociativeResult& rAssociativeResult
+	Store *pSet, M_CPD*& rpReordering, VAssociativeResult& rAssociativeResult
     );
     void deleteFrom (
-	M_CPD* pSet, M_CPD*& rpReordering, VAssociativeResult& rAssociativeResult
+	Store *pSet, M_CPD*& rpReordering, VAssociativeResult& rAssociativeResult
     );
 };
 

@@ -30,6 +30,7 @@
 #include "RTintuv.h"
 #include "RTrefuv.h"
 
+#include "VAssociativeCursor.h"
 #include "VLinkCReference.h"
 
 
@@ -43,12 +44,16 @@
  *****  Construction Precondition Predicate  *****
  *************************************************/
 
-bool rtLSTORE_StringSet::IsAStringSet (M_CPD* pLStore) {
-    return rtLSTORE_CPD_StringStore (pLStore) && !rtPTOKEN_PT_Independent (
-	M_CPreamble_ContainerBaseAsType (
-	    pLStore->GetContainerAddress (rtLSTORE_CPx_RowPToken), rtPTOKEN_Type
-	)
-    );
+bool rtLSTORE_Handle::isAStringSet () const {
+    if (!isAStringStore ())
+	return false;
+
+    M_CPreamble *pRowPTokenCP = GetContainerAddress (rowPTokenPOP ());
+    if (pRowPTokenCP)
+	return !rtPTOKEN_PT_Independent (M_CPreamble_ContainerBaseAsType (pRowPTokenCP, rtPTOKEN_Type));
+
+    rtPTOKEN_Handle::Reference pRowPToken (rowPTokenHandle ());
+    return pRowPToken->isDependent ();
 }
 
 
@@ -56,28 +61,23 @@ bool rtLSTORE_StringSet::IsAStringSet (M_CPD* pLStore) {
  *****  Construction  *****
  **************************/
 
-rtLSTORE_StringSet::rtLSTORE_StringSet (M_CPD* pSet)
-: m_pStringSet		(pSet)
-, m_pStringSpace	(pSet, rtLSTORE_CPx_Content, RTYPE_C_CharUV)
-{
-    align ();
+rtLSTORE_StringSet::rtLSTORE_StringSet (rtLSTORE_Handle *pSet) {
+    m_pStrings.setTo (pSet);
 }
 
 /*************************
  *****  Destruction  *****
  *************************/
 
-rtLSTORE_StringSet::~rtLSTORE_StringSet ()
-{
+rtLSTORE_StringSet::~rtLSTORE_StringSet () {
 }
 
 /*************************************
  *****  Deferred Initialization  *****
  *************************************/
 
-void rtLSTORE_StringSet::initializeDPT ()
-{
-    m_pDPT.claim (rtLSTORE_CPD_RowPTokenCPD (m_pStringSet));
+void rtLSTORE_StringSet::initializeDPT () {
+    m_pDPT.setTo (m_pStrings.store ()->getPToken ());
 }
 
 
@@ -86,13 +86,13 @@ void rtLSTORE_StringSet::initializeDPT ()
  ********************/
 
 void rtLSTORE_StringSet::Locate (
-    VCollectionOfStrings* pKeys, M_CPD*& rpReordering, VAssociativeResult& rResult
+    VCollectionOfStrings* pKeys, M_CPD *&rpReordering, VAssociativeResult &rResult
 ) {
     VAssociativeCursor<rtLSTORE_StringSet,VCollectionOfStrings,char const*> iSetCursor (this);
     iSetCursor.Locate (pKeys, rpReordering, rResult);
 }
 
-bool rtLSTORE_StringSet::Locate (char const* pKey, unsigned int& rxElement) {
+bool rtLSTORE_StringSet::Locate (char const* pKey, unsigned int &rxElement) {
     VAssociativeCursor<rtLSTORE_StringSet,VCollectionOfStrings,char const*> iSetCursor (this);
     return iSetCursor.Locate (pKey, rxElement);
 }
@@ -102,18 +102,24 @@ bool rtLSTORE_StringSet::Locate (char const* pKey, unsigned int& rxElement) {
  *****  Update  *****
  ********************/
 
+void rtLSTORE_StringSet::align () {
+    refreshCachedPointers ();
+}
+
+void rtLSTORE_StringSet::refreshCachedPointers () {
+    m_pStrings.align ();
+}
+
 void rtLSTORE_StringSet::Insert (
-    VCollectionOfStrings* pKeys, M_CPD*& rpReordering, VAssociativeResult& rResult
-)
-{
+    VCollectionOfStrings* pKeys, M_CPD *&rpReordering, VAssociativeResult &rResult
+) {
     VAssociativeCursor<rtLSTORE_StringSet,VCollectionOfStrings,char const*> iSetCursor (this);
     iSetCursor.Insert (pKeys, rpReordering, rResult);
 }
 
 void rtLSTORE_StringSet::Delete (
-    VCollectionOfStrings* pKeys, M_CPD*& rpReordering, VAssociativeResult& rResult
-)
-{
+    VCollectionOfStrings* pKeys, M_CPD *&rpReordering, VAssociativeResult &rResult
+) {
     VAssociativeCursor<rtLSTORE_StringSet,VCollectionOfStrings,char const*> iSetCursor (this);
     iSetCursor.Delete (pKeys, rpReordering, rResult);
 }
@@ -123,14 +129,12 @@ void rtLSTORE_StringSet::Delete (
  *  updated and false if no changes were made.
  *---------------------------------------------------------------------
  */
-unsigned int rtLSTORE_StringSet::Insert (char const* pKey, unsigned int& rxElement)
-{
+unsigned int rtLSTORE_StringSet::Insert (char const* pKey, unsigned int &rxElement) {
     VAssociativeCursor<rtLSTORE_StringSet,VCollectionOfStrings,char const*> iSetCursor (this);
     return iSetCursor.Insert (pKey, rxElement);
 }
 
-unsigned int rtLSTORE_StringSet::Delete (char const* pKey)
-{
+unsigned int rtLSTORE_StringSet::Delete (char const* pKey) {
     VAssociativeCursor<rtLSTORE_StringSet,VCollectionOfStrings,char const*> iSetCursor (this);
     return iSetCursor.Delete (pKey);
 }
@@ -143,46 +147,41 @@ unsigned int rtLSTORE_StringSet::Delete (char const* pKey)
 void rtLSTORE_StringSet::install (unsigned int xElement, char const* pKey) {
 //  Determine the required string space expansion, ...
     size_t sAddedElement = strlen (pKey) + 1;
-    rtPTOKEN_NewShiftPTConstructor (
-	m_pStringSet, rtLSTORE_CPx_ContentPToken
-    )->AppendAdjustment (origin (xElement), sAddedElement)->ToPToken ()->release ();
+
+    rtPTOKEN_Handle::Reference pContentPToken;
+    m_pStrings.store()->getContentPToken (pContentPToken);
+    pContentPToken->makeAdjustments ()->AppendAdjustment (origin (xElement), sAddedElement)->ToPToken ()->discard ();
 
 //  ... grow the string space, ...
-    rtREFUV_Type_Reference iReference; {
-	M_CPD* pReferenceCod = ptoken ();
-	pReferenceCod->retain ();
-	DSC_InitReferenceScalar (iReference, pReferenceCod, xElement);
-    }
+    rtREFUV_Type_Reference iReference;
+    iReference.constructReference (ptoken (), xElement);
 
-    rtLSTORE_AlignUsingRefSelctList (m_pStringSet, &iReference, sAddedElement);
-    rtCHARUV_Align (m_pStringSpace);
+    m_pStrings.store()->alignUsingSelectedLists (iReference, sAddedElement);
     refreshCachedPointers ();
 
 //  ... install the strings, ...
     strcpy (storage (xElement), pKey);
 
 //  ... and return:
-    DSC_ClearScalar (iReference);
+    iReference.destroy ();
 }
 
 
 void rtLSTORE_StringSet::install (
-    rtLINK_CType* pElements, VOrdered<VCollectionOfStrings,char const*>& rAdditions
+    rtLINK_CType* pElements, VOrdered<VCollectionOfStrings,char const*> &rAdditions
 )
 {
 //  Determine the required string space expansion, ...
     VCPDReference pStringLengths (
-	0, rtINTUV_New (
-	    pElements->PPT (), m_pStringSet->KOT ()->TheIntegerPTokenCPD ()
-	)
+	0, rtINTUV_New (pElements->PPT (), m_pStrings.store()->KOT ()->TheIntegerPTokenHandle ())
     );
     {
 	size_t sPreviousAdditions = 0;
 	int *pStringLength = rtINTUV_CPD_Array (pStringLengths);
 
-	rtPTOKEN_CType* pNewContentDPTConstructor = rtPTOKEN_NewShiftPTConstructor (
-	    m_pStringSet, rtLSTORE_CPx_ContentPToken
-	);
+	rtPTOKEN_Handle::Reference pContentDPT;
+	m_pStrings.store ()->getContentPToken (pContentDPT);
+	rtPTOKEN_CType* pNewContentDPTConstructor = pContentDPT->makeAdjustments ();
 	rAdditions.resetCursor ();
 
 #	define handleNil(c,n,r)
@@ -206,15 +205,14 @@ void rtLSTORE_StringSet::install (
 	}
 
 	rtLINK_TraverseRRDCList (pElements, handleNil, handleRepeat, handleRange);
-	pNewContentDPTConstructor->ToPToken ()->release ();
+	pNewContentDPTConstructor->ToPToken ()->discard ();
     }
 
 #   undef handleRange
 #   undef handleRepeat
 
 //  ... grow the string space, ...
-    rtLSTORE_AlignUsingLCSelctLists (m_pStringSet, pElements, pStringLengths);
-    rtCHARUV_Align (m_pStringSpace);
+    m_pStrings.store ()->alignUsingSelectedLists (pElements, pStringLengths);
     refreshCachedPointers ();
 
 //  ... install the strings, ...
@@ -251,26 +249,6 @@ void rtLSTORE_StringSet::install (
  *************************************/
 
 template class VAssociativeCursor<rtLSTORE_StringSet,VCollectionOfStrings,char const*>;
-
-template void rtDICTIONARY_Insert<VCollectionOfStrings> (
-    M_CPD *pDictionary, VCollectionOfStrings *pKeys, M_CPD *&rpReordering, VAssociativeResult &rAssociation
-);
-template void rtDICTIONARY_Delete<VCollectionOfStrings> (
-    M_CPD *pDictionary, VCollectionOfStrings *pKeys, M_CPD *&rpReordering, VAssociativeResult &rAssociation
-);
-template void rtDICTIONARY_Locate<VCollectionOfStrings> (
-    M_CPD *pDictionary, VCollectionOfStrings *pKeys, M_CPD *&rpReordering, VAssociativeResult &rAssociation
-);
-
-template void rtDICTIONARY_Insert<VCollectionOfUnsigned32> (
-    M_CPD *pDictionary, VCollectionOfUnsigned32 *pKeys, M_CPD *&rpReordering, VAssociativeResult &rAssociation
-);
-template void rtDICTIONARY_Delete<VCollectionOfUnsigned32> (
-    M_CPD *pDictionary, VCollectionOfUnsigned32 *pKeys, M_CPD *&rpReordering, VAssociativeResult &rAssociation
-);
-template void rtDICTIONARY_Locate<VCollectionOfUnsigned32> (
-    M_CPD *pDictionary, VCollectionOfUnsigned32 *pKeys, M_CPD *&rpReordering, VAssociativeResult &rAssociation
-);
 
 
 /************************************
@@ -279,21 +257,19 @@ template void rtDICTIONARY_Locate<VCollectionOfUnsigned32> (
  ************************************
  ************************************/
 
-M_CPD* VCollectionOfStrings::StringOriginsContainer (DSC_Descriptor& rSource) {
-    M_CPD* pStringOriginsContainer = NilOf (M_CPD*);
+M_CPD *VCollectionOfStrings::StringIndexContainer (DSC_Descriptor &rSource) {
+    M_CPD *pStringIndexContainer = NilOf (M_CPD*);
 
-    switch ((RTYPE_Type)M_CPD_RType (m_pStringStore)) {
+    switch (m_pStringStore->rtype ()) {
     case RTYPE_C_Block:
 	switch (rSource.pointerType ()) {
 	case DSC_PointerType_Scalar:
-	    DSC_DuplicateScalar (
-		m_iStringOriginsReference, DSC_Descriptor_Scalar (rSource)
-	    );
+	    m_iStringIndexReference.constructFrom (DSC_Descriptor_Scalar (rSource));
 	    break;
 
 	case DSC_PointerType_Value:
-	    pStringOriginsContainer = DSC_Descriptor_Value (rSource);
-	    pStringOriginsContainer->retain ();
+	    pStringIndexContainer = DSC_Descriptor_Value (rSource);
+	    pStringIndexContainer->retain ();
 	    break;
 
 	default:
@@ -306,62 +282,16 @@ M_CPD* VCollectionOfStrings::StringOriginsContainer (DSC_Descriptor& rSource) {
 	break;
 
     case RTYPE_C_ListStore: {
-	    rtLSTORE_Align (m_pStringStore);
-	    M_CPD* pStoragePToken = rtLSTORE_CPD_ContentPTokenCPD (m_pStringStore);
-
+	    m_pStringStore->align ();
 	    switch (rSource.pointerType ()) {
 	    case DSC_PointerType_Scalar: {
 		    rtREFUV_AlignReference (&DSC_Descriptor_Scalar (rSource));
-
-		    unsigned int xString = DSC_Descriptor_Scalar_Int (rSource);
-		    unsigned int xOrigin = xString < rtPTOKEN_CPD_BaseElementCount (
-			DSC_Scalar_RefPToken (DSC_Descriptor_Scalar (rSource))
-		    ) ? rtLSTORE_CPD_BreakpointArray (m_pStringStore)[xString]
-		    : rtPTOKEN_CPD_BaseElementCount (pStoragePToken);
-
-		    pStoragePToken->retain ();
-		    DSC_InitReferenceScalar (
-			m_iStringOriginsReference, pStoragePToken, xOrigin
-		    );
+		    m_iStringIndexReference.constructFrom (DSC_Descriptor_Scalar (rSource));
 		}
 		break;
 
-	    case DSC_PointerType_Link: {
-		    rtLINK_CType* pStrings = DSC_Descriptor_Link (rSource)->Align ();
-
-		    pStringOriginsContainer = rtREFUV_New (
-			pStrings->PPT (), pStoragePToken
-		    );
-		    unsigned int const* pSourceOrigins = rtLSTORE_CPD_BreakpointArray (
-			m_pStringStore
-		    );
-		    unsigned int* pTargetOrigins = UV_CPD_Array (
-			pStringOriginsContainer, unsigned int
-		    );
-
-#		    define handleRange(c, n, r) {\
-			memcpy (pTargetOrigins, pSourceOrigins + r, n * sizeof (unsigned int));\
-			pTargetOrigins += n;\
-		    }
-#		    define handleRepetition(c, n, r) {\
-			unsigned int xOrigin = pSourceOrigins[r];\
-			while (n-- > 0)\
-			    *pTargetOrigins++ = xOrigin;\
-		    }
-#		    define handleNil(c, n, r) {\
-			unsigned int xOrigin = rtPTOKEN_CPD_BaseElementCount (pStoragePToken);\
-			while (n-- > 0)\
-			    *pTargetOrigins++ = xOrigin;\
-		    }
-
-		    rtLINK_TraverseRRDCList (
-			pStrings, handleNil, handleRepetition, handleRange
-		    );
-
-#		    undef handleRange
-#		    undef handleRepetition
-#		    undef handleNil
-		}
+	    case DSC_PointerType_Link:
+		pStringIndexContainer = DSC_Descriptor_Link (rSource)->ToRefUV ();
 		break;
 
 	    default:
@@ -371,34 +301,15 @@ M_CPD* VCollectionOfStrings::StringOriginsContainer (DSC_Descriptor& rSource) {
 		);
 		break;
 	    }
-	    pStoragePToken->release ();
 	}
 	break;
 
     default:
-	raiseComponentTypeException ("String Store", m_pStringStore);
+	raiseComponentTypeException ("String Store", m_pStringStore->rtype ());
 	break;
     }
 
-    return pStringOriginsContainer;
-}
-
-
-M_CPD* VCollectionOfStrings::StringStorageContainer (DSC_Descriptor& rSource) {
-    M_CPD* pStorageContainer = rSource.storeCPD ();
-
-    switch ((RTYPE_Type)M_CPD_RType (pStorageContainer))
-    {
-    case RTYPE_C_ListStore:
-	pStorageContainer = rtLSTORE_CPD_ContentStringsCPD (pStorageContainer);
-	break;
-
-    default:
-	pStorageContainer->retain ();
-	break;
-    }
-
-    return pStorageContainer;
+    return pStringIndexContainer;
 }
 
 
@@ -408,11 +319,10 @@ M_CPD* VCollectionOfStrings::StringStorageContainer (DSC_Descriptor& rSource) {
  **************************
  **************************/
 
-VCollectionOfStrings::VCollectionOfStrings (M_CPD* pDPT, DSC_Descriptor& rSource)
+VCollectionOfStrings::VCollectionOfStrings (rtPTOKEN_Handle *pDPT, DSC_Descriptor &rSource)
 : VCollectionOfOrderables	(pDPT)
-, m_pStringStore		(rSource.storeCPD ())
-, m_pStringOriginsContainer	(0, StringOriginsContainer (rSource))
-, m_pStringStorageContainer	(0, StringStorageContainer (rSource))
+, m_pStringStore		(rSource.store ())
+, m_pStringIndexContainer	(0, StringIndexContainer (rSource))
 {
     refreshCache ();
 }
@@ -423,11 +333,9 @@ VCollectionOfStrings::VCollectionOfStrings (M_CPD* pDPT, DSC_Descriptor& rSource
  *************************
  *************************/
 
-VCollectionOfStrings::~VCollectionOfStrings ()
-{
-    if (isScalar ())
-    {
-	DSC_ClearScalar (m_iStringOriginsReference);
+VCollectionOfStrings::~VCollectionOfStrings () {
+    if (isScalar ()) {
+	m_iStringIndexReference.destroy ();
     }
 }
 
@@ -438,50 +346,29 @@ VCollectionOfStrings::~VCollectionOfStrings ()
  *******************************
  *******************************/
 
-void VCollectionOfStrings::refreshCache ()
-{
+void VCollectionOfStrings::refreshCache () {
     VCollectionOfOrderables::refreshCache ();
 
-//  Refresh the cached origins array pointer, ...
+//  Refresh the indices array pointers, ...
     if (isScalar ())
-	m_pStringOriginsArray = (unsigned int const*)&DSC_Scalar_Int (m_iStringOriginsReference);
-    else switch ((RTYPE_Type)M_CPD_RType (m_pStringOriginsContainer))
-    {
+	m_pStringIndexArray = (unsigned int const*)&DSC_Scalar_Int (m_iStringIndexReference);
+    else switch (m_pStringIndexContainer->RType ()) {
     case RTYPE_C_RefUV:
-	rtREFUV_Align (m_pStringOriginsContainer);
+	m_pStringIndexContainer->align ();
 	/*****  NO BREAK  *****/
 
     case RTYPE_C_IntUV:
-	m_pStringOriginsArray = UV_CPD_Array (m_pStringOriginsContainer, unsigned int);
+	m_pStringIndexArray = UV_CPD_Array (m_pStringIndexContainer, unsigned int);
 	break;
 
     default:
-	raiseComponentTypeException ("Origins Container", m_pStringOriginsContainer);
+	raiseComponentTypeException ("Origins Container", m_pStringIndexContainer);
 	break;
     }
 
 //  Refresh cached storage array pointer, ...
-    switch ((RTYPE_Type)M_CPD_RType (m_pStringStorageContainer))
-    {
-    case RTYPE_C_CharUV:
-	rtCHARUV_Align (m_pStringStorageContainer);
-	m_pStringStorageArray = rtCHARUV_CPD_Array (m_pStringStorageContainer);
-	m_sStringStorageArray = rtPTOKEN_BaseElementCount (
-	    m_pStringStorageContainer, UV_CPx_PToken
-	);
-	if (isScalar ())
-	    rtREFUV_AlignReference (&m_iStringOriginsReference);
-	break;
-
-    case RTYPE_C_Block:
-	m_pStringStorageArray = rtBLOCK_CPD_StringSpace (m_pStringStorageContainer);
-	m_sStringStorageArray = UINT_MAX;
-	break;
-
-    default:
-	raiseComponentTypeException ("Storage Container", m_pStringStorageContainer);
-	break;
-    }
+    if (!m_pBlockStrings.setTo (m_pStringStore) && !m_pLStoreStrings.setTo (m_pStringStore))
+	raiseComponentTypeException ("Storage Container", m_pStringStore->rtype ());
 }
 
 
@@ -507,8 +394,7 @@ void VCollectionOfStrings::refreshCache ()
  *	This predicate sorts un-real strings after all real strings.
  *
  *****/
-int VCollectionOfStrings::compare (unsigned int xElement1, unsigned int xElement2) const
-{
+int VCollectionOfStrings::compare (unsigned int xElement1, unsigned int xElement2) const {
     char const* pString1;
     char const* pString2;
 
@@ -529,58 +415,64 @@ int VCollectionOfStrings::compare (unsigned int xElement1, unsigned int xElement
  *****************/
 
 void VCollectionOfStrings::insertInto (
-    M_CPD* pSet, M_CPD*& rpReordering, VAssociativeResult& rAssociation
-)
-{
-    switch (M_CPD_RType (pSet)) {
-    case RTYPE_C_Dictionary:
-	rtDICTIONARY_Insert (pSet, this, rpReordering, rAssociation);
-	break;
-    case RTYPE_C_ListStore:
-	if (rtLSTORE_StringSet::IsAStringSet (pSet)) {
-	    rtLSTORE_StringSet iSet (pSet);
-	    iSet.Insert (this, rpReordering, rAssociation);
-	}
-	break;
-    default:
-	break;
+    Store *pSet, M_CPD *&rpReordering, VAssociativeResult &rAssociation
+) {
+    pSet->associativeInsert (this, rpReordering, rAssociation);
+}
+
+void rtDICTIONARY_Handle::associativeInsert_(
+    VCollectionOfStrings *pElements, M_CPD *&rpReordering, VAssociativeResult &rAssociation
+) {
+    Insert (pElements, rpReordering, rAssociation);
+}
+
+void rtLSTORE_Handle::associativeInsert_(
+    VCollectionOfStrings *pElements, M_CPD *&rpReordering, VAssociativeResult &rAssociation
+) {
+    if (isAStringSet ()) {
+	rtLSTORE_StringSet iSet (this);
+	iSet.Insert (pElements, rpReordering, rAssociation);
     }
 }
 
 void VCollectionOfStrings::locateIn (
-    M_CPD* pSet, M_CPD*& rpReordering, VAssociativeResult& rAssociation
-)
-{
-    switch (M_CPD_RType (pSet)) {
-    case RTYPE_C_Dictionary:
-	rtDICTIONARY_Locate (pSet, this, rpReordering, rAssociation);
-	break;
-    case RTYPE_C_ListStore:
-	if (rtLSTORE_StringSet::IsAStringSet (pSet)) {
-	    rtLSTORE_StringSet iSet (pSet);
-	    iSet.Locate (this, rpReordering, rAssociation);
-	}
-	break;
-    default:
-	break;
+    Store *pSet, M_CPD *&rpReordering, VAssociativeResult &rAssociation
+) {
+    pSet->associativeLocate (this, rpReordering, rAssociation);
+}
+
+void rtDICTIONARY_Handle::associativeLocate_(
+    VCollectionOfStrings *pElements, M_CPD *&rpReordering, VAssociativeResult &rAssociation
+) {
+    Locate (pElements, rpReordering, rAssociation);
+}
+
+void rtLSTORE_Handle::associativeLocate_(
+    VCollectionOfStrings *pElements, M_CPD *&rpReordering, VAssociativeResult &rAssociation
+) {
+    if (isAStringSet ()) {
+	rtLSTORE_StringSet iSet (this);
+	iSet.Locate (pElements, rpReordering, rAssociation);
     }
 }
 
 void VCollectionOfStrings::deleteFrom (
-    M_CPD* pSet, M_CPD*& rpReordering, VAssociativeResult& rAssociation
-)
-{
-    switch (M_CPD_RType (pSet)) {
-    case RTYPE_C_Dictionary:
-	rtDICTIONARY_Delete (pSet, this, rpReordering, rAssociation);
-	break;
-    case RTYPE_C_ListStore:
-	if (rtLSTORE_StringSet::IsAStringSet (pSet)) {
-	    rtLSTORE_StringSet iSet (pSet);
-	    iSet.Delete (this, rpReordering, rAssociation);
-	}
-	break;
-    default:
-	break;
+    Store *pSet, M_CPD *&rpReordering, VAssociativeResult &rAssociation
+) {
+    pSet->associativeDelete (this, rpReordering, rAssociation);
+}
+
+void rtDICTIONARY_Handle::associativeDelete_(
+    VCollectionOfStrings *pElements, M_CPD *&rpReordering, VAssociativeResult &rAssociation
+) {
+    Delete (pElements, rpReordering, rAssociation);
+}
+
+void rtLSTORE_Handle::associativeDelete_(
+    VCollectionOfStrings *pElements, M_CPD *&rpReordering, VAssociativeResult &rAssociation
+) {
+    if (isAStringSet ()) {
+	rtLSTORE_StringSet iSet (this);
+	iSet.Delete (pElements, rpReordering, rAssociation);
     }
 }

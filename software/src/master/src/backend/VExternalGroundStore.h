@@ -7,13 +7,13 @@
 
 #include "VGroundStore.h"
 
-#include "VCPDReference.h"
-
 /**************************
  *****  Declarations  *****
  **************************/
 
 #include "Vxa_ICollection.h"
+
+#include "RTptoken.h"
 
 
 /*************************
@@ -29,14 +29,14 @@ public:
     VExternalGroundStore (Vxa::ISingleton *pCollection);
 
 //  Destruction
-protected:
+private:
     ~VExternalGroundStore ();
 
 //  Access
 public:
     unsigned int cardinality_ () const;
 
-    M_CPD *ptoken_() const;
+    rtPTOKEN_Handle *ptoken_() const;
 
     Vxa::ISingleton *getInterface () const {
 	return m_pCollection;
@@ -49,7 +49,7 @@ public:
 //  State
 protected:
     Vxa::ISingleton::Reference const m_pCollection;
-    VCPDReference const m_pPToken;
+    rtPTOKEN_Handle::Reference const m_pPToken;
 };
 
 

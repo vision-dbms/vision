@@ -8,11 +8,12 @@
  *****************************************
  *****************************************/
 
-/***********************
- *****  Component  *****
- ***********************/
+/************************
+ *****  Components  *****
+ ************************/
 
 #include "VContainerHandle.h"
+#include "Vdd_Store.h"
 
 #include "VCPDReference.h"
 
@@ -33,10 +34,14 @@
 #include "RTlink.d"
 #include "RTrefuv.d"
 
-#include "VAssociativeCursor.h"
-#include "VCollectionOf.h"
-#include "VCollectionOfStrings.h"
-#include "VOrdered.h"
+class rtINDEX_Key;
+
+class VAssociativeResult;
+class VCollectionOfStrings;
+class VCollectionOfUnsigned32;
+
+template <class SetClass, class KeyClass, class KeyValueType> class VAssociativeCursor;
+template <class CollectionClass, class ElementType> class VOrdered;
 
 
 /*****************************
@@ -63,9 +68,6 @@
 #define rtLSTORE_CPD_BreakpointCount(cpd) rtLSTORE_LStore_BreakpointCount (\
     rtLSTORE_CPD_Base (cpd)\
 )
-#define rtLSTORE_CPD_IsInconsistent(cpd) rtLSTORE_LStore_IsInconsistent (\
-    rtLSTORE_CPD_Base (cpd)\
-)
 #define rtLSTORE_CPD_BreakpointArray(cpd) rtLSTORE_LStore_BreakpointArray (\
     rtLSTORE_CPD_Base (cpd)\
 )
@@ -81,136 +83,425 @@
 #define rtLSTORE_CPD_Breakpoint(cpd) M_CPD_PointerToCardinal (\
     cpd, rtLSTORE_CPx_Breakpoint\
 )
-
-#define rtLSTORE_CPD_RowPTokenCPD(cpd) (\
-    (cpd)->GetCPD (rtLSTORE_CPx_RowPToken, RTYPE_C_PToken)\
-)
-#define rtLSTORE_CPD_ContentCPD(cpd) (\
-    (cpd)->GetCPD (rtLSTORE_CPx_Content)\
-)
-#define rtLSTORE_CPD_ContentStringsCPD(cpd) (\
-    rtLSTORE_Align (cpd)->GetCPD (rtLSTORE_CPx_Content, RTYPE_C_CharUV)\
-)
-#define rtLSTORE_CPD_ContentPTokenCPD(cpd) (\
-    (cpd)->GetCPD (rtLSTORE_CPx_ContentPToken, RTYPE_C_PToken)\
-)
 
 
-/********************************
- ********************************
- *****  Callable Interface  *****
- ********************************
- ********************************/
+/******************************
+ ******************************
+ *****  Container Handle  *****
+ ******************************
+ ******************************/
 
-typedef char const *(*rtLSTORE_StringEnumerator) (
-    bool restartEnumeration, va_list ap
-);
+class rtLSTORE_Handle : public VStoreContainerHandle {
+    DECLARE_CONCRETE_RTT (rtLSTORE_Handle, VStoreContainerHandle);
 
-PublicFnDef M_CPD *rtLSTORE_NewCluster (
-    M_CPD *pInstancePPT, M_CPD *pContentPrototype, int
-);
+//  Aliases
+public:
+    typedef unsigned int breakpoint_t;
 
-PublicFnDecl M_CPD *rtLSTORE_NewCluster (
-    M_CPD *pInstancePPT, M_CPD *pPrototype
-);
+//  Strings
+public:
+    class Strings {
+    //  Aliases
+    public:
+	typedef Reference			ListStoreReference;
+	typedef rtCHARUV_Handle::Reference	CharStoreReference;
 
-PublicFnDecl M_CPD *rtLSTORE_NewCluster (
-    rtLINK_CType *pContentMap, M_CPD *pContentCluster, bool bDecoupled = false
-);
+    //  Construction
+    public:
+	Strings ();
 
-PublicFnDecl void rtLSTORE_Copy (
-    M_CPD *pSource, M_ASD *pResultSpace, DSC_Descriptor *pResult
-);
+    //  Destruction
+    public:
+	~Strings ();
 
-PublicFnDecl M_CPD *__cdecl rtLSTORE_NewStringStore (
-    M_ASD *pContainerSpace, rtLSTORE_StringEnumerator stringEnumerator, ...
-);
-PublicFnDecl M_CPD *rtLSTORE_NewStringStore (
-    M_ASD *pContainerSpace, char const *pString
-);
+    //  Access
+    public:
+	unsigned int cardinality () const {
+	    return m_sBreakpoints;
+	}
 
-PublicFnDecl M_CPD *__cdecl rtLSTORE_NewStringStoreWithDelm (
-    M_ASD			*pContainerSpace,
-    char const			*ldelim,
-    char const			*rdelim,
-    rtLSTORE_StringEnumerator	 stringEnumerator,
-    ...
-);
-PublicFnDecl M_CPD *rtLSTORE_NewStringStoreWithDelm (
-    M_ASD *pContainerSpace, char const *ldelim, char const *rdelim, char const *pString
-);
+	rtLSTORE_Handle *store () const {
+	    return m_pListStoreHandle;
+	}
 
-PublicFnDecl M_CPD *rtLSTORE_NewStringStoreFromUV (
-    M_CPD*			charUV
-);
+	char const *operator[] (unsigned int xString) const {
+	    return string (xString);
+	}
+	char const *string (unsigned int xString) const {
+	    return xString <= m_sBreakpoints ? m_pCharacters + m_pBreakpoints[xString] : 0;
+	}
+	unsigned int stringOrigin (unsigned int xString) const {
+	    return xString <= m_sBreakpoints ? m_pBreakpoints[xString] : UINT_MAX;
+	}
 
-PublicFnDecl M_CPD *rtLSTORE_Align (
-    M_CPD*			lstore
-);
+    //  Query
+    public:
+	bool isSet () const {
+	    return m_pListStoreHandle.isntNil ();
+	}
+	bool isntSet () const {
+	    return m_pListStoreHandle.isNil ();
+	}
 
-PublicFnDecl bool rtLSTORE_AlignAll (
-    M_CPD*			cpd,
-    bool			deletingEmptyUSegments
-);
+    //  Update
+    public:
+	void align ();
+	void refresh ();
 
-PublicFnDecl M_CPD *rtLSTORE_AlignUsingLCSelctLists (
-    M_CPD*			lstore,
-    rtLINK_CType*		listSelectorLC,
-    M_CPD*			adjustmentUV
-);
+	bool setTo (Vdd::Store *pStore) {
+	    return setTo (dynamic_cast<rtLSTORE_Handle*>(pStore));
+	}
+	bool setTo (rtLSTORE_Handle *pStore);
 
-PublicFnDecl M_CPD *rtLSTORE_AlignUsingRefSelctList (
-    M_CPD*			lstore,
-    rtREFUV_TypePTR_Reference	listSelectorRef,
-    int				adjustment
-);
+    //  State
+    private:
+	ListStoreReference	m_pListStoreHandle;
+	CharStoreReference	m_pCharStoreHandle;
+	unsigned int		m_sBreakpoints;
+	breakpoint_t const*	m_pBreakpoints;
+	char const*		m_pCharacters;
+    };
+    friend class Strings;
 
-PublicFnDecl rtLINK_CType* rtLSTORE_AddLists (
-    M_CPD*			lstore,
-    M_CPD*			newListsPToken
-);
+//  Construction
+public:
+    static VContainerHandle *Maker (M_CTE &rCTE) {
+	return new rtLSTORE_Handle (rCTE);
+    }
+    rtLSTORE_Handle (rtLINK_CType *pPartition, Vdd::Store *pContent, bool bDecoupling = false);
+    rtLSTORE_Handle (rtPTOKEN_Handle *pPPT, Vdd::Store *pContentPrototype = 0, bool bAStringStore = false);
+    rtLSTORE_Handle (unsigned int cStrings, M_CPD *pStringStorage);
+private:
+    rtLSTORE_Handle (M_CTE &rCTE) : BaseClass (rCTE) {
+    }
+    void InitNewLStore (rtPTOKEN_Handle *ptoken, rtLINK_CType *linkc = 0, char const* pStringStorage = 0);
 
-PublicFnDecl int rtLSTORE_RefSelListElementCount (
-    M_CPD*			lstore,
-    rtREFUV_TypePTR_Reference	selectionRef
-);
+//  Destruction
+private:
+    ~rtLSTORE_Handle () {
+    }
 
-PublicFnDecl M_CPD *rtLSTORE_LCSelListElementCount (
-    M_CPD*			lstore,
-    rtLINK_CType*		selectionLC
-);
+//  Canonicalization
+private:
+    virtual /*override*/ bool getCanonicalization_(VReference<rtVSTORE_Handle> &rpStore, DSC_Pointer const &rPointer);
 
-PublicFnDecl void rtLSTORE_Extract (
-    DSC_Descriptor&	rListDescriptor,
-    M_CPD*&			pElementCluster,
-    rtLINK_CType*&		pElementSelector,
-    rtLINK_CType*&		expansionLinkc,
-    M_CPD*&			reOrderingUVector
-);
+//  Cloning
+private:
+    virtual /*override*/ void clone_(Vdd::Store::Reference &rpResult, rtPTOKEN_Handle *pPPT) const {
+	Reference pNewHandle;
+	clone (pNewHandle, pPPT);
+	rpResult.setTo (pNewHandle);
+    }
+    virtual /*override*/ bool isACloneOfListStore_(rtLSTORE_Handle const *pOther) const {
+	return isACloneOfListStore (pOther);
+    }
+public:
+    void clone (Reference &rpResult, rtPTOKEN_Handle *pPPT) const;
+    bool isACloneOfListStore (rtLSTORE_Handle const *pOther) const;
 
-PublicFnDecl void rtLSTORE_Subscript (
-    DSC_Descriptor		*sourceDsc,
-    DSC_Descriptor		*keyDsc,
-    int				keyModifier,
-    DSC_Descriptor		*resultDsc,
-    rtLINK_CType*		*locatedLinkc
-);
+//  Copying
+public:
+    void copy (DSC_Descriptor &rResult, M_ASD *pResultSpace);
 
-PublicFnDecl void rtLSTORE_AppendToLCSelectedList (
-    M_CPD*			lstore,
-    rtLINK_CType*		selectionLC,
-    rtLINK_CType*		*elementLC
-);
+//  Access
+private:
+    rtLSTORE_LStore *typecastContent () const {
+	return reinterpret_cast<rtLSTORE_LStore*>(containerContent ());
+    }
 
-PublicFnDecl void rtLSTORE_AppendToRefSelectdList (
-    M_CPD*			lstore,
-    rtREFUV_TypePTR_Reference	selectionRef,
-    rtREFUV_TypePTR_Reference	elementRef
-);
+    M_POP *contentPOP () const {
+	return &rtLSTORE_LStore_Content (typecastContent ());
+    }
+    VContainerHandle *contentHandle () const {
+	return GetContainerHandle (contentPOP ());
+    }
 
-PublicFnDecl void rtLSTORE_WriteDBUpdateInfo (
-    M_CPD*			lstoreCPD
-);
+    M_POP *contentPTokenPOP () const {
+	return &rtLSTORE_LStore_ContentPToken (typecastContent ());
+    }
+    rtPTOKEN_Handle *contentPTokenHandle () const {
+	return static_cast<rtPTOKEN_Handle*>(GetContainerHandle (contentPTokenPOP (), RTYPE_C_PToken));
+    }
+
+    M_POP *rowPTokenPOP () const {
+	return &rtLSTORE_LStore_RowPToken (typecastContent ());
+    }
+    rtPTOKEN_Handle *rowPTokenHandle () const {
+	return static_cast<rtPTOKEN_Handle*>(GetContainerHandle (rowPTokenPOP (), RTYPE_C_PToken));
+    }
+
+    rtCHARUV_Handle *stringContentHandle () const {
+	return static_cast<rtCHARUV_Handle*> (GetContainerHandle (contentPOP (), RTYPE_C_CharUV));
+    }
+public:
+    unsigned int *breakpointArray () const {
+	return rtLSTORE_LStore_BreakpointArray (typecastContent ());
+    }
+    unsigned int breakpointCount () const {
+	return rtLSTORE_LStore_BreakpointCount (typecastContent ());
+    }
+    unsigned int finalBreakpoint () const {
+	rtLSTORE_LStore *pContent = typecastContent ();
+	return rtLSTORE_LStore_BreakpointArray (pContent)[rtLSTORE_LStore_BreakpointCount (pContent)];
+    }
+private:
+    pointer_t breakpointLimit () const {
+	rtLSTORE_LStore *pContent = typecastContent ();
+	return reinterpret_cast<pointer_t>(
+	    rtLSTORE_LStore_BreakpointArray (pContent) + rtLSTORE_LStore_BreakpointCount (pContent) + 1
+	);
+    }
+public:
+    void getContent (VContainerHandle::Reference &rpResult) const {
+	rpResult.setTo (contentHandle ());
+    }
+    bool getContent (Vdd::Store::Reference &rpResult) const {
+	return contentHandle ()->getStore (rpResult);
+    }
+
+    void getContentPToken (rtPTOKEN_Handle::Reference &rpResult) const {
+	rpResult.setTo (contentPTokenHandle ());
+    }
+
+//  Access Casts
+public:
+    static ThisClass *ifStringStore (Vdd::Store *pHandle) {
+	ThisClass *pThisClass = dynamic_cast<ThisClass*>(pHandle);
+	return pThisClass && pThisClass->isAStringStore () ? pThisClass : 0;
+    }
+
+//  Alignment
+private:
+    bool AlignFromContent ();
+private:
+    virtual /*override*/ bool align_() {
+	return align ();
+    }
+    virtual /*override*/ bool alignAll_(bool bCleaning) {
+	return alignAll (bCleaning);
+    }
+public:
+    bool align ();
+    bool alignAll (bool bCleaning = true);
+    void alignUsingSelectedLists (DSC_Scalar &rInstance, int adjustment);
+    void alignUsingSelectedLists (rtLINK_CType *pInstances, M_CPD *adjustmentUV);
+
+//  Attribute Access
+public:
+    bool isAStringSet () const;
+    bool isAStringStore () const {
+	return rtLSTORE_LStore_StringStore (typecastContent ());
+    }
+    bool isInconsistent () const {
+	return rtLSTORE_LStore_IsInconsistent (typecastContent ());
+    }
+
+//  Attribute Update
+private:
+    void clearIsAStringStore () {
+	setIsAStringStoreTo (false);
+    }
+    void setIsAStringStore () {
+	setIsAStringStoreTo (true);
+    }
+    void setIsAStringStoreTo (bool bValue) {
+	rtLSTORE_LStore_StringStore (typecastContent ()) = bValue;
+    }
+
+    void clearIsInconsistent () {
+	setIsInconsistentTo (false);
+    }
+    void setIsInconsistent () {
+	setIsInconsistentTo (true);
+    }
+    void setIsInconsistentTo (bool bValue) {
+	rtLSTORE_LStore_IsInconsistent (typecastContent ()) = bValue;
+    }
+
+//  Dictionary
+private:
+    rtDICTIONARY_Handle *getDictionary_(DSC_Pointer const &rPointer) const {
+	return static_cast<rtDICTIONARY_Handle*>(
+	    (isAStringStore () ? TheStringClassDictionary () : TheListClassDictionary ()).ObjectHandle ()
+	);
+    }
+
+//  Cluster Access
+private:
+    virtual /*override*/ rtPTOKEN_Handle *getPToken_() const {
+	return getPToken ();
+    }
+public:
+    rtPTOKEN_Handle *getPToken () const {
+	return rowPTokenHandle ();
+    }
+
+//  Cluster Forwarding
+private:
+    virtual /*override*/ bool forwardToSpace_(M_ASD *pSpace);
+
+//  Cluster Update
+private:
+    virtual /*override*/ rtLINK_CType *addInstances_(rtPTOKEN_Handle *pAdditionPPT);
+
+private:
+    void setBreakpointCountTo (unsigned int iValue) {
+	rtLSTORE_LStore_BreakpointCount (typecastContent ()) = iValue;
+    }
+
+//  Cluster Verification
+public:
+    void CheckBreakpointConsistency () const;
+    void CheckConsistency ();
+
+//  Associative Operations
+private:
+    virtual /*override*/ void associativeInsert_(
+	VCollectionOfStrings *pElements, M_CPD *&rpReordering, VAssociativeResult &rAssociation
+    );
+    virtual /*override*/ void associativeInsert_(
+	VCollectionOfUnsigned32 *pElements, M_CPD *&rpReordering, VAssociativeResult &rAssociation
+    ) {
+    }
+    /*****/
+    virtual /*override*/ void associativeLocate_(
+	VCollectionOfStrings *pElements, M_CPD *&rpReordering, VAssociativeResult &rAssociation
+    );
+    virtual void associativeLocate_(
+	VCollectionOfUnsigned32 *pElements, M_CPD *&rpReordering, VAssociativeResult &rAssociation
+    ) {
+    }
+    /*****/
+    virtual /*override*/ void associativeDelete_(
+	VCollectionOfStrings *pElements, M_CPD *&rpReordering, VAssociativeResult &rAssociation
+    );
+    virtual /*override*/ void associativeDelete_(
+	VCollectionOfUnsigned32 *pElements, M_CPD *&rpReordering, VAssociativeResult &rAssociation
+    ) {
+    }
+
+//  Instance Deletion
+private:
+    virtual bool deleteInstances_(DSC_Scalar &pInstances) {
+	return doInstanceDeletion (pInstances);
+    }
+    virtual bool deleteInstances_(rtLINK_CType *pInstances, rtLINK_CType *&rpTrues, rtLINK_CType *&rpFalses) {
+	return doInstanceDeletion (pInstances, rpTrues, rpFalses);
+    }
+
+//  List Cardinality Access
+private:
+    virtual /*override*/ bool getCardinality_(M_CPD *&rpResult, rtLINK_CType *pSubscript) {
+	return getCardinality (rpResult, pSubscript);
+    }
+    virtual /*override*/ bool getCardinality_(unsigned int &rpResult, DSC_Scalar &rSubscript) {
+	return getCardinality (rpResult, rSubscript);
+    }
+public:
+    bool getCardinality (M_CPD *&rpResult, rtLINK_CType *pSubscript);
+    bool getCardinality (unsigned int &rpResult, DSC_Scalar &rSubscript);
+
+//  List Element Access
+private:
+    virtual /*override*/ bool getListElements_(
+	DSC_Descriptor &rResult, rtLINK_CType *pInstances, M_CPD *pSubscript, int keyModifier, rtLINK_CType **ppGuard
+    ) {
+	return getListElements (rResult, pInstances, pSubscript, keyModifier, ppGuard);
+    }
+    virtual /*override*/ bool getListElements_(
+	DSC_Descriptor &rResult, DSC_Scalar &rInstance, int xSubscript, int iModifier
+    ) {
+	return getListElements (rResult, rInstance, xSubscript, iModifier);
+    }
+    virtual /*override*/ bool getListElements_(
+	DSC_Descriptor &rResult, DSC_Pointer &rInstances, DSC_Descriptor &rSubscript, int iModifier, rtLINK_CType **ppGuard
+    ) {
+	return getListElements (rResult, rInstances, rSubscript, iModifier, ppGuard);
+    }
+    virtual /*override*/ bool getListElements_(
+	DSC_Pointer&		rInstances,
+	Vdd::Store::Reference&	rpElementStore,
+	rtLINK_CType*&		rpElementPointer,
+	rtLINK_CType*&		rpExpansion,
+	M_CPD*&			rpDistribution,
+	rtINDEX_Key*&		rpKey
+    ) {
+	rpKey = 0;
+	return getListElements (
+	    rInstances, rpElementStore, rpElementPointer, rpExpansion, rpDistribution
+	);
+    }
+public:
+    void getExpansion (rtLINK_CType *&rpResult, rtLINK_CType *pInstances);
+
+    bool getListElements (
+	DSC_Descriptor &rResult, rtLINK_CType *pInstances, M_CPD *pSubscript, int keyModifier, rtLINK_CType **ppGuard
+    );
+    bool getListElements (
+	DSC_Descriptor &rResult, DSC_Scalar &rInstance, int xSubscript, int iModifier
+    );
+    bool getListElements (
+	DSC_Descriptor &rResult, DSC_Pointer &rInstances, DSC_Descriptor &rSubscript, int iModifier, rtLINK_CType **ppGuard
+    );
+
+    bool getListElements (
+	rtPTOKEN_Handle *ptoken, Vdd::Store::Reference &rpElementStore, rtLINK_CType *&pElementSelection, rtLINK_CType *&pElementExpansion
+    );
+    bool getListElements (
+	DSC_Scalar&		rInstances,
+	Vdd::Store::Reference&	rpElementStore,
+	rtLINK_CType*&		rpElementPointer,
+	rtLINK_CType*&		rpExpansion
+    );
+    bool getListElements (
+	rtLINK_CType*		pInstances,
+	Vdd::Store::Reference&	rpElementStore,
+	rtLINK_CType*&		rpElementPointer,
+	rtLINK_CType*&		rpExpansion,
+	M_CPD*&			rpDistribution
+    );
+    bool getListElements (
+	DSC_Pointer&		rInstances,
+	Vdd::Store::Reference&	rpElementStore,
+	rtLINK_CType*&		rpElementPointer,
+	rtLINK_CType*&		rpExpansion,
+	M_CPD*&			rpDistribution
+    );
+    bool getListElements (
+	DSC_Pointer&		rInstances,
+	Vdd::Store::Reference&	rpElementStore,
+	rtLINK_CType*&		rpElementPointer,
+	rtLINK_CType*&		rpExpansion,
+	M_CPD*&			rpDistribution,
+	rtINDEX_Key*&		rpKey
+    ) {
+	rpKey = 0;
+	return getListElements (
+	    rInstances, rpElementStore, rpElementPointer, rpExpansion, rpDistribution
+	);
+    }
+
+//  List Update
+public:
+    void appendToList (DSC_Scalar &rResult, DSC_Scalar &rInstance);
+    void appendToList (rtLINK_CType *&rpResult, rtLINK_CType *pInstances);
+
+//  Callbacks
+protected:
+    bool PersistReferences ();
+
+//  Display and Inspection
+public:
+    virtual /*override*/ void getClusterReferenceMapData (MapEntryData &rData, unsigned int xReference);
+    virtual /*override*/ unsigned int getClusterReferenceMapSize ();
+
+    virtual /*override*/ unsigned __int64 getClusterSize ();
+
+    virtual /*override*/ bool getPOP (M_POP *pResult, unsigned int xPOP) const;
+    virtual /*override*/ unsigned int getPOPCount () const {
+	return 3;
+    }
+};
 
 
 /********************************
@@ -224,27 +515,15 @@ class rtLSTORE_StringSet : public VSet {
     friend class VAssociativeCursor<rtLSTORE_StringSet, VCollectionOfStrings, char const*>;
     friend class VAssociativeCursor<rtLSTORE_StringSet, VCollectionOfUnsigned32, unsigned int>;
 
-//  Construction Precondition Predicate
-public:
-    static bool IsAStringSet (M_CPD *pLStore);
-
-//  Cache Maintenance
-protected:
-    void refreshCachedPointers () {
-	m_pStringOrigins = rtLSTORE_CPD_BreakpointArray (m_pStringSet);
-	m_pStringStorage = rtCHARUV_CPD_Array (m_pStringSpace);
-    }
-
 //  Alignment
+private:
+    void refreshCachedPointers ();
 public:
-    void align () {
-	rtLSTORE_Align (m_pStringSet);
-	refreshCachedPointers ();
-    }
+    void align ();
 
 //  Construction
 public:
-    rtLSTORE_StringSet (M_CPD *pSet);
+    rtLSTORE_StringSet (rtLSTORE_Handle *pSet);
 
 //  Destruction
 public:
@@ -256,20 +535,19 @@ protected:
 
 //  Access
 protected:
-    unsigned int origin (unsigned int xElement) const {
-	return m_pStringOrigins[xElement];
+    char *storage (unsigned int xElement) const {
+	return const_cast<char*>(m_pStrings[xElement]);
     }
-    char* storage (unsigned int xElement) const {
-	return (char*)m_pStringStorage + origin (xElement);
-    }
-
 public:
     unsigned int cardinality () const {
-	return rtLSTORE_CPD_BreakpointCount (m_pStringSet);
+	return m_pStrings.cardinality ();
     }
 
-    char const* element (unsigned int xElement) const {
-	return m_pStringStorage + origin (xElement);
+    char const *element (unsigned int xElement) const {
+	return m_pStrings[xElement];
+    }
+    unsigned int origin (unsigned int xElement) const {
+	return m_pStrings.stringOrigin (xElement);
     }
 
     int compare (unsigned int xElement, char const* pKey) const {
@@ -303,52 +581,45 @@ protected:
 
 //  State
 protected:
-    VCPDReference const m_pStringSet;
-    VCPDReference const m_pStringSpace;
-    unsigned int*	m_pStringOrigins;
-    char const*		m_pStringStorage;
+    rtLSTORE_Handle::Strings m_pStrings;
 };
 
 
-/******************************
- ******************************
- *****  Container Handle  *****
- ******************************
- ******************************/
+/********************************
+ ********************************
+ *****  Callable Interface  *****
+ ********************************
+ ********************************/
 
-class rtLSTORE_Handle : public VContainerHandle {
-//  Run Time Type
-    DECLARE_CONCRETE_RTT (rtLSTORE_Handle, VContainerHandle);
+typedef char const *(*rtLSTORE_StringEnumerator) (
+    bool restartEnumeration, va_list ap
+);
 
-//  Construction
-protected:
-    rtLSTORE_Handle (M_CTE &rCTE) : VContainerHandle (rCTE) {
-    }
+PublicFnDecl rtLSTORE_Handle *__cdecl rtLSTORE_NewStringStore (
+    M_ASD *pContainerSpace, rtLSTORE_StringEnumerator stringEnumerator, ...
+);
+PublicFnDecl rtLSTORE_Handle *rtLSTORE_NewStringStore (
+    M_ASD *pContainerSpace, char const *pString
+);
 
-public:
-    static VContainerHandle *Maker (M_CTE &rCTE) {
-	return new rtLSTORE_Handle (rCTE);
-    }
+PublicFnDecl rtLSTORE_Handle *__cdecl rtLSTORE_NewStringStoreWithDelm (
+    M_ASD			*pContainerSpace,
+    char const			*ldelim,
+    char const			*rdelim,
+    rtLSTORE_StringEnumerator	 stringEnumerator,
+    ...
+);
+PublicFnDecl rtLSTORE_Handle *rtLSTORE_NewStringStoreWithDelm (
+    M_ASD *pContainerSpace, char const *ldelim, char const *rdelim, char const *pString
+);
 
-//  Destruction
-protected:
+PublicFnDecl rtLSTORE_Handle *rtLSTORE_NewStringStoreFromUV (
+    M_CPD*			charUV
+);
 
-//  Access
-public:
-
-//  Query
-public:
-
-//  Callbacks
-public:
-    void CheckConsistency ();
-
-protected:
-    bool PersistReferences ();
-
-//  State
-protected:
-};
+PublicFnDecl void rtLSTORE_WriteDBUpdateInfo (
+    M_CPD*			lstoreCPD
+);
 
 
 #endif

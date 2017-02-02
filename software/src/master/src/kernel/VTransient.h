@@ -148,6 +148,16 @@ public:
 	return g_pTSP;
     }
 
+//  Notification Service
+public:
+
+    void notify (int xEvent, char const *pFormat, ...) const;
+
+    void notify (bool bWaitingForResp, int xEvent, char const *pFormat, ...) const ;
+
+    void notify (bool bWaitingForResp, int xEvent, char const *pFormat, va_list ap) const;
+
+
 //  Logging 
 public:
     void log (char const *pFormat, ...) const;
