@@ -24,6 +24,7 @@ typedef unsigned __int64 size64_t;
  *****  Supporting  *****
  ************************/
 
+#include "V_VSpinlock.h"
 #include "VkStatus.h"
 
 #include "Vos_VMSMemoryRegion.h"
@@ -110,52 +111,67 @@ static pointer_t	pPool = 0;
 pointer_t V::VAllocatorGranule::getSpace (size_t sSpace) {
     pointer_t pSpace;
     if (g_bFreePoolDisabled)
-	pSpace = static_cast<pointer_t>(VTransient::allocate (sSpace));
+	pSpace = static_cast<pointer_t>(BaseClass::allocate (sSpace));
     else {
-	if (sPool < sSpace) {
-	    size_t sThisAllocation = sNextAllocation;
-	    if (sThisAllocation < sSpace)
-		sThisAllocation = sSpace;
+	static VSpinlock iCriticalSectionMutex;
+	VSpinlock::Claim iCriticalSectionClaim (iCriticalSectionMutex);
+	//  Cache the original pool settings...
+	size_t    const sPoolAtEntry = sPool;
+	pointer_t const pPoolAtEntry = pPool;
+	try {
+	    if (sPool < sSpace) {
+		size_t sThisAllocation = sNextAllocation;
+		if (sThisAllocation < sSpace)
+		    sThisAllocation = sSpace;
 #ifdef __VMS
-	    pointer_t pThisAllocation = 0;
-	    VMSMemoryRegionHandle *pFreePoolRegion = FreePoolRegion ();
-	    if (pFreePoolRegion) {
-		VkStatus iStatus; addr64_t pAllocation; size64_t sAllocation;
-		if (pFreePoolRegion->expandRegion (iStatus, pAllocation, sAllocation, sThisAllocation)) {
-		    pThisAllocation = static_cast<pointer_t>(pAllocation);
-		    sThisAllocation = static_cast<size_t>(sThisAllocation);
+		pointer_t pThisAllocation = 0;
+		VMSMemoryRegionHandle *pFreePoolRegion = FreePoolRegion ();
+		if (pFreePoolRegion) {
+		    VkStatus iStatus; addr64_t pAllocation; size64_t sAllocation;
+		    if (pFreePoolRegion->expandRegion (iStatus, pAllocation, sAllocation, sThisAllocation)) {
+			pThisAllocation = static_cast<pointer_t>(pAllocation);
+			sThisAllocation = static_cast<size_t>(sThisAllocation);
+		    }
 		}
-	    }
-	    if (!pThisAllocation)
-		pThisAllocation = static_cast<pointer_t>(VTransient::allocate (sThisAllocation));
+		if (!pThisAllocation)
+		    pThisAllocation = static_cast<pointer_t>(BaseClass::allocate (sThisAllocation));
 #else
-	    pointer_t pThisAllocation = static_cast<pointer_t>(VTransient::allocate (sThisAllocation));
+		pointer_t pThisAllocation = static_cast<pointer_t>(BaseClass::allocate (sThisAllocation));
 #endif
-	    if (pPool && pPool + sPool == pThisAllocation)
-		sPool += sThisAllocation;
-	    else {
-		g_sFreePoolWaste += sPool;
-		pPool = pThisAllocation;
-		sPool = sThisAllocation;
-	    }
-	    g_sFreePoolTotal += sThisAllocation;
+		if (pPool && pPool + sPool == pThisAllocation)
+		    sPool += sThisAllocation;
+		else {
+		    g_sFreePoolWaste += sPool;
+		    pPool = pThisAllocation;
+		    sPool = sThisAllocation;
+		}
+		g_sFreePoolTotal += sThisAllocation;
 
-	    if (sNextAllocation < sMaximumAllocation && 0 == sThisAdaptiveInterval--) {
-		g_cFreePoolAdaptations++;
-		sNextAllocation *= 2;
-		if (sNextAllocation > sMaximumAllocation)
-		    sNextAllocation = sMaximumAllocation;
-		sThisAdaptiveInterval = sNextAdaptiveInterval;
+		if (sNextAllocation < sMaximumAllocation && 0 == sThisAdaptiveInterval--) {
+		    g_cFreePoolAdaptations++;
+		    sNextAllocation *= 2;
+		    if (sNextAllocation > sMaximumAllocation)
+			sNextAllocation = sMaximumAllocation;
+		    sThisAdaptiveInterval = sNextAdaptiveInterval;
 //		sNextAdaptiveInterval /= 2;
 //		if (sNextAdaptiveInterval < 1)
 //		    sNextAdaptiveInterval = 1;
+		}
 	    }
+	    pSpace = pPool;
+	    pPool += sSpace;
+	    sPool -= sSpace;
+	} catch (...) {
+	    //  Restore the original pool settings, ...
+	    sPool = sPoolAtEntry;
+	    pPool = pPoolAtEntry;
+
+	    //  ... and fail:
+	    pSpace = 0;
 	}
-	pSpace = pPool;
-	pPool += sSpace;
-	sPool -= sSpace;
     }
-    g_sFreeListTotal += sSpace;
+
+    VAtomicOperations_<unsigned int>::fetchAndAdd (g_sFreeListTotal, sSpace);
 
     return pSpace;
 }

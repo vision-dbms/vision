@@ -28,6 +28,7 @@
 
 #include "RTdictionary.h"
 #include "RTstring.h"
+#include "RTvstore.h"
 
 /*****  Self  *****/
 #include "RTblock.h"
@@ -43,13 +44,41 @@
     ((pointer_t) (b) + (o))
 
 
-/******************************
- ******************************
- *****                    *****
- *****  Container Handle  *****
- *****                    *****
- ******************************
- ******************************/
+/*************************************
+ *************************************
+ *****                           *****
+ *****  rtBLOCK_Handle::Strings  *****
+ *****                           *****
+ *************************************
+ *************************************/
+
+rtBLOCK_Handle::Strings::Strings () {
+}
+
+rtBLOCK_Handle::Strings::~Strings () {
+}
+
+bool rtBLOCK_Handle::Strings::setTo (rtBLOCK_Handle *pStoreHandle) {
+    bool bValid = IsntNil (pStoreHandle);
+    if (bValid) {
+	m_pStoreHandle.setTo (pStoreHandle);
+	m_pCharacters = pStoreHandle->addressOfStringSpace ();
+    }
+    else {
+	m_pStoreHandle.clear ();
+	m_pCharacters = 0;
+    }
+    return bValid;
+}
+
+
+/****************************
+ ****************************
+ *****                  *****
+ *****  rtBLOCK_Handle  *****
+ *****                  *****
+ ****************************
+ ****************************/
 
 /***************************
  ***************************
@@ -59,15 +88,80 @@
 
 DEFINE_CONCRETE_RTT (rtBLOCK_Handle);
 
-/*********************************
- *********************************
- *****  Pointer Maintenance  *****
- *********************************
- *********************************/
+/********************************
+ ********************************
+ *****  Handle Maintenance  *****
+ ********************************
+ ********************************/
 
 void rtBLOCK_Handle::AdjustContainerPointers (M_CPreamble *pNewAddress, bool bWritable) {
     BaseClass::AdjustContainerPointers (pNewAddress, bWritable);
     m_pBlockHeader = typecastContent ();
+}
+
+/******************************
+ ******************************
+ *****  Canonicalization  *****
+ ******************************
+ ******************************/
+
+bool rtBLOCK_Handle::getCanonicalization_(rtVSTORE_Handle::Reference &rpStore, DSC_Pointer const &rPointer) {
+    rtPTOKEN_Handle::Reference pRPT (rPointer.RPT ());
+    rpStore.setTo (
+	static_cast<rtVSTORE_Handle*>(pRPT->GetBlockEquivalentClassFromPToken ().ObjectHandle ())
+    );
+    return true;
+}
+
+
+/**************************
+ **************************
+ *****  Store Access  *****
+ **************************
+ **************************/
+
+rtDICTIONARY_Handle *rtBLOCK_Handle::getDictionary_(DSC_Pointer const &rPointer) const {
+    rtPTOKEN_Handle::Reference pRPT (rPointer.RPT ());
+    M_KOT *pKOT = pRPT->KOT ();
+    return static_cast<rtDICTIONARY_Handle*>(
+	(pRPT->Names (pKOT->TheStringPTokenHandle ())
+	    ? pKOT->TheStringClassDictionary
+	    : pKOT->TheSelectorClassDictionary
+	).ObjectHandle ()
+    );
+}
+
+rtPTOKEN_Handle *rtBLOCK_Handle::getPToken_() const {
+    return TheStringClass ().PTokenHandle ();
+}
+
+/*******************************
+ *******************************
+ *****  Store Maintenance  *****
+ *******************************
+ *******************************/
+
+/*---------------------------------------------------------------------------
+ *****  Routine to align a block -- specifically its method dictionary
+ *
+ *  Returns:
+ *	true if alignment performed, false if not
+ *
+ *****/
+bool rtBLOCK_Handle::align () {
+    bool result; {
+	rtDICTIONARY_Handle::Reference pDictionary (getDictionary ());
+	result = pDictionary->alignAll ();
+    }
+
+/*****  Recursively Align any nested blocks  *****/
+    unsigned int nNestedBlocks = nestedBlockCount ();
+    for (unsigned int xNestedBlock = 0; xNestedBlock < nNestedBlocks; xNestedBlock++) {
+	rtBLOCK_Handle::Reference pNestedBlock (nestedBlockHandle (xNestedBlock));
+	result = pNestedBlock->align () || result;
+    }
+
+    return result;
 }
 
 
@@ -136,7 +230,7 @@ PublicFnDef void rtBLOCK_InitStdCPD (M_CPD* cpd) {
 PublicFnDef M_CPD *rtBLOCK_New (M_ASD *pContainerSpace) {
     M_CPD *cpd = pContainerSpace->CreateContainer (
 	RTYPE_C_Block, rtBLOCK_BlockSize + rtBLOCK_InitialBV_Size
-    );
+    )->NewCPD ();
     rtBLOCK_BlockType *blockPtr = rtBLOCK_CPDBase (cpd);
 
 	/**  set the compiler version.... 0 for now  **/
@@ -289,47 +383,6 @@ PublicFnDef void rtBLOCK_AppendELEVector (M_CPD* cpd, int *evaledLEVector, int s
 }
 
 
-/*---------------------------------------------------------------------------
- *****  Routine to align a block -- specifically its method dictionary
- *
- *  Arguments:
- *	cpd 		- the address of a block CPD.
- *
- *  Returns:
- *	true if alignment performed, false if not
- *
- *****/
-PublicFnDef bool rtBLOCK_Align (M_CPD *cpd) {
-/*****  Validate Argument R-Type  *****/
-    RTYPE_MustBeA ("rtBLOCK_Align", M_CPD_RType (cpd), RTYPE_C_Block);
-
-    M_CPD* pDictionary = rtBLOCK_CPD_DictionaryCPD (cpd);
-    
-    bool result = rtDICTIONARY_AlignAll (pDictionary, true);
-
-    pDictionary->release ();
-
-/*****  Recursively Align any nested blocks  *****/
-    int blockIndex, blockCount;
-    for (
-	 blockCount = rtBLOCK_PLVector_Count (rtBLOCK_CPD_PLiteralVector (cpd)),
-	 blockIndex = 0;
-
-	 blockIndex < blockCount;
-
-	 blockIndex++,
-	 rtBLOCK_CPD_PLVectorElement (cpd)++
-    )
-    {
-	M_CPD* pNestedBlockCPD = cpd->GetCPD (rtBLOCK_CPx_PLVElement, RTYPE_C_Block);
-	result |= rtBLOCK_Align (pNestedBlockCPD);
-	pNestedBlockCPD->release ();
-    }
-
-    return result;
-}
-
-
 /*******************************************************************
  *****  Standard Representation Type Handler Service Routines  *****
  *******************************************************************/
@@ -373,7 +426,7 @@ PrivateFnDef void ReclaimContainer (
  *****/
 bool rtBLOCK_Handle::PersistReferences () {
 /*****  Save the local environment...  *****/
-    rtBLOCK_BlockType *block = (rtBLOCK_BlockType*)ContainerContent ();
+    rtBLOCK_BlockType *block = typecastContent ();
     bool result = Persist (&rtBLOCK_localEnvironmentPOP (block));
 
 /*****  ...and the physical literal vector.  *****/
@@ -404,18 +457,18 @@ bool rtBLOCK_Handle::PersistReferences () {
  *	NOTHING - Executed for side effect only.
  *
  *****/
-PrivateFnDef void MarkContainers (M_ASD* pSpace, M_CPreamble const *pContainer) {
+PrivateFnDef void MarkContainers (M_ASD::GCVisitBase* pGCV, M_ASD* pSpace, M_CPreamble const *pContainer) {
     rtBLOCK_BlockType const *block = (rtBLOCK_BlockType const*)(pContainer + 1);
 
 /*****  Save the local environment...  *****/
-    pSpace->Mark (&rtBLOCK_localEnvironmentPOP (block));
+    pGCV->Mark (pSpace, &rtBLOCK_localEnvironmentPOP (block));
 
 /*****  ...and the physical literal vector.  *****/
     if (rtBLOCK_PLVector (block)) {
         rtBLOCK_PLVectorType *plv = (rtBLOCK_PLVectorType *) FindAddress (
 	    block, rtBLOCK_PLVector (block)
 	);
-	pSpace->Mark (rtBLOCK_PLVector_POP (plv), rtBLOCK_PLVector_Count (plv));
+	pGCV->Mark (pSpace, rtBLOCK_PLVector_POP (plv), rtBLOCK_PLVector_Count (plv));
     }
 }
 

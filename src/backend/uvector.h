@@ -25,6 +25,7 @@
  ************************/
 
 #include "M_CPD.h"
+#include "RTptoken.h"
 
 class rtLINK_CType;
 
@@ -66,7 +67,7 @@ enum rtLINK_LookupCase {
 /*****  Standard CPD Pointer Interpretation  *****/
 #define UV_CPx_PToken		(unsigned int)0
 #define UV_CPx_RefPToken	(unsigned int)1
-#define UV_CPx_AuxillaryPOP	(unsigned int)2
+#define UV_CPx_AuxiliaryPOP	(unsigned int)2
 #define UV_CPx_Element		(unsigned int)3
 
 /*****  Standard CPD Access Macros  *****/
@@ -79,8 +80,8 @@ enum rtLINK_LookupCase {
 #define UV_CPD_RefPToken(cpd)\
     M_CPD_PointerToPOP (cpd, UV_CPx_RefPToken)
 
-#define UV_CPD_AuxillaryPOP(cpd)\
-    M_CPD_PointerToPOP (cpd, UV_CPx_AuxillaryPOP)
+#define UV_CPD_AuxiliaryPOP(cpd)\
+    M_CPD_PointerToPOP (cpd, UV_CPx_AuxiliaryPOP)
 
 #define UV_CPD_ElementCount(cpd)\
     UV_UV_ElementCount (UV_CPD_Base (cpd))
@@ -99,23 +100,160 @@ enum rtLINK_LookupCase {
 
 #define UV_CPD_Element(cpd, elementType)\
     M_CPD_PointerToType (cpd, UV_CPx_Element, elementType *)
+
 
-#define UV_CPD_PosPTokenCPD(cpd) (\
-    (cpd)->GetCPD (UV_CPx_PToken, RTYPE_C_PToken)\
-)
+/******************************
+ ******************************
+ *****  Container Handle  *****
+ ******************************
+ ******************************/
 
-#define UV_CPD_RefPTokenCPD(cpd) (\
-    (cpd)->GetCPD (UV_CPx_RefPToken, RTYPE_C_PToken)\
-)
+class ABSTRACT rtUVECTOR_Handle : public VContainerHandle {
+    DECLARE_ABSTRACT_RTT (rtUVECTOR_Handle, VContainerHandle);
+
+//  Construction
+protected:
+    rtUVECTOR_Handle (M_CTE& rCTE) : VContainerHandle (rCTE) {
+    }
+
+//  Destruction
+protected:
+    ~rtUVECTOR_Handle () {
+    }
+
+//  Alignment
+protected:
+    class AlignmentFillProcessor {
+	friend class rtUVECTOR_Handle;
+    protected:
+	AlignmentFillProcessor () {
+	}
+	~AlignmentFillProcessor () {
+	}
+    private:
+	virtual void fill (void *pRegion, unsigned int sRegion) {
+	    memset (pRegion, 0, sRegion);
+	}
+    };
+
+private:
+    virtual /*override*/ bool align_();
+protected:
+    bool align ();
+    bool alignUsing (AlignmentFillProcessor &rFillProcessor);
+
+//  Access
+protected:
+    UV_UVType *typecastContent () const {
+	return reinterpret_cast<UV_UVType*>(containerContent ());
+    }
+    pointer_t arrayBase() const {
+	return UV_UV_ArrayAsType (typecastContent (), char);
+    }
+    M_POP *pptPOP () const {
+	return &UV_UV_PToken (typecastContent ());
+    }
+    M_POP *rptPOP () const {
+	return &UV_UV_RefPToken (typecastContent ());
+    }
+    M_POP *auxPOP () const {
+	return &UV_UV_AuxiliaryPOP (typecastContent ());
+    }
+public:
+    rtPTOKEN_Handle *pptHandle () const {
+	return static_cast<rtPTOKEN_Handle*>(GetContainerHandle (pptPOP (), RTYPE_C_PToken));
+    }
+    rtPTOKEN_Handle *rptHandle () const {
+	return static_cast<rtPTOKEN_Handle*>(GetContainerHandle (rptPOP (), RTYPE_C_PToken));
+    }
+    unsigned int cardinality () const {
+	return UV_UV_ElementCount (typecastContent ());
+    }
+    unsigned int elementCount () const {
+	return UV_UV_ElementCount (typecastContent ());
+    }
+
+    rtPTOKEN_Handle *getPPT () const {
+	return pptHandle ();
+    }
+    rtPTOKEN_Handle *getRPT () const {
+	return rptHandle ();
+    }
+
+    unsigned int granularity () const {
+	return UV_UV_Granularity (typecastContent ());
+    }
+
+//  Attribute Access
+public:
+    bool isASet () const {
+	return UV_UV_IsASetUV (typecastContent ());
+    }
+    bool isInconsistent () const {
+	return UV_UV_IsInconsistent (typecastContent ());
+    }
+
+//  Attribute Update
+protected:
+    void clearIsASet () {
+	setIsASetTo (false);
+    }
+    void setIsASet () {
+	setIsASetTo (true);
+    }
+    void setIsASetTo (bool bValue) {
+	UV_UV_IsASetUV (typecastContent ()) = bValue;
+    }
+
+    void clearIsInconsistent () {
+	setIsInconsistentTo (false);
+    }
+    void setIsInconsistent () {
+	setIsInconsistentTo (true);
+    }
+    void setIsInconsistentTo (bool bValue) {
+	UV_UV_IsInconsistent (typecastContent ()) = bValue;
+    }
+
+//  Forwarding
+private:
+    bool forwardToSpace_(M_ASD *pSpace);
+
+//  Update
+protected:
+    void decrementElementCountBy (unsigned int iValue) {
+	UV_UV_ElementCount (typecastContent ()) -= iValue;
+    }
+    void incrementElementCountBy (unsigned int iValue) {
+	UV_UV_ElementCount (typecastContent ()) += iValue;
+    }
+    void setElementCountTo (unsigned int iValue) {
+	UV_UV_ElementCount (typecastContent ()) = iValue;
+    }
+
+//  Callbacks
+public:
+    void CheckConsistency ();
+
+protected:
+    bool PersistReferences ();
+
+//  Display and Inspection
+public:
+    virtual /*override*/ unsigned int getPOPCount () const {
+	return 3;
+    }
+    virtual /*override*/ bool getPOP (M_POP *pResult, unsigned int xPOP) const;
+};
 
 
 /*********************************
  *****  UVector Copy Macros  *****
  *********************************/
 
-#define UV_Copy(uvectorCPD) UV_BasicCopy (uvectorCPD, NilOf (M_CPD*))
+#define UV_Copy(uvectorCPD) UV_BasicCopy (uvectorCPD, 0)
 
-#define UV_CopyWithNewPToken(uvectorCPD,pTokenCPD) UV_BasicCopy (uvectorCPD, pTokenCPD)
+#define UV_CopyWithNewPToken(uvectorCPD,pToken) UV_BasicCopy (uvectorCPD, pToken)
 
 
 /******************************************************
@@ -139,25 +277,6 @@ enum rtLINK_LookupCase {
 #define UV_DefineEPrintDM(methodName, elementPrinter)\
 IOBJ_DefineUnaryMethod (methodName) {\
     elementPrinter (RTYPE_QRegisterCPD (self));\
-    return self;\
-}
-
-/*---------------------------------------------------------------------------
- * Positional Alignment Debug Method Definition Macro:
- *
- *  Arguments:
- *	methodName		- the name to be given to the debug method.
- *	alignmentFn		- the name of the type's positional alignment
- *				  function.
- *
- *  Syntactic Context:
- *	Function Definition
- *
- *---------------------------------------------------------------------------
- */
-#define UV_DefineAlignDM(methodName, alignmentFn)\
-IOBJ_DefineUnaryMethod (methodName) {\
-    alignmentFn (RTYPE_QRegisterCPD (self));\
     return self;\
 }
 
@@ -214,20 +333,16 @@ IOBJ_DefineMethod (methodName) {\
  *---------------------------------------------------------------------------
  */
 #define UV_DefineAtRefDM(methodName,rfExtractFn,valueType,valueSaver)\
-IOBJ_DefineMethod (methodName)\
-{\
-    valueType			result;\
-    M_CPD*			uv = RTYPE_QRegisterCPD (self);\
-    rtREFUV_Type_Reference	ref;\
-\
-    DSC_InitReferenceScalar (\
-	ref,\
-	UV_CPD_PosPTokenCPD (uv),\
+IOBJ_DefineMethod (methodName) {\
+    M_CPD *uv = RTYPE_QRegisterCPD (self);\
+    rtREFUV_Type_Reference ref;\
+    ref.constructReference (\
+	static_cast<rtUVECTOR_Handle*>(uv->containerHandle ())->pptHandle (),\
 	IOBJ_NumericIObjectValue (parameterArray[0], int)\
     );\
-\
+    valueType result;\
     rfExtractFn (&result, uv, &ref);\
-    DSC_ClearScalar (ref);\
+    ref.destroy ();\
 \
     return valueSaver (result);\
 }
@@ -287,20 +402,16 @@ IOBJ_DefineMethod (methodName) {\
  *---------------------------------------------------------------------------
  */
 #define UV_DefineAtRefPutDM(methodName,rfAssignFn,valueType,valueInitializer)\
-IOBJ_DefineMethod (methodName)\
-{\
-    M_CPD*			uv = RTYPE_QRegisterCPD (self);\
-    valueType			value = (valueInitializer);\
-    rtREFUV_Type_Reference	ref;\
-\
-    DSC_InitReferenceScalar (\
-	ref,\
-	UV_CPD_PosPTokenCPD (uv),\
+IOBJ_DefineMethod (methodName) {\
+    M_CPD *uv = RTYPE_QRegisterCPD (self);\
+    rtREFUV_Type_Reference ref;\
+    ref.constructReference (\
+	static_cast<rtUVECTOR_Handle*>(uv->containerHandle ())->pptHandle (),\
 	IOBJ_NumericIObjectValue (parameterArray[0], int)\
     );\
-\
+    valueType value = (valueInitializer);\
     rfAssignFn (uv, &ref, &value);\
-    DSC_ClearScalar (ref);\
+    ref.destroy ();\
 \
     return self;\
 }
@@ -372,13 +483,11 @@ IOBJ_DefineMethod (methodName) {\
  ********************************
  ********************************/
 
-PublicFnDecl void UV_InitStdCPD (
-    M_CPD*			cpd
-);
+PublicFnDecl void UV_InitStdCPD (M_CPD *cpd);
 
 PublicFnDecl M_CPD* UV_New (
     RTYPE_Type			rType,
-    M_CPD*			pPPT,
+    rtPTOKEN_Handle*		pPPT,
     M_CPD*			refPTokenRefCPD,
     int				refPTokenRefIndex,
     size_t			granularity,
@@ -388,8 +497,8 @@ PublicFnDecl M_CPD* UV_New (
 
 PublicFnDecl M_CPD* UV_New (
     RTYPE_Type			rType,
-    M_CPD*			posPToken,
-    M_CPD*			refPToken,
+    rtPTOKEN_Handle*		posPToken,
+    rtPTOKEN_Handle*		refPToken,
     size_t			granularity,
     Ref_UV_Initializer		initFn,
     va_list			initFnAP
@@ -397,7 +506,7 @@ PublicFnDecl M_CPD* UV_New (
 
 PublicFnDecl M_CPD* UV_BasicCopy (
     M_CPD*			uvectorCPD,
-    M_CPD*			pTokenCPD
+    rtPTOKEN_Handle*		pTokenCPD
 );
 
 PublicFnDecl void UV_ReclaimContainer (
@@ -406,14 +515,9 @@ PublicFnDecl void UV_ReclaimContainer (
 );
 
 PublicFnDecl void UV_MarkContainers (
-    M_ASD			*pSpace,
+    M_ASD::GCVisitBase	*pGCV,
+    M_ASD* pSpace,
     M_CPreamble const		*pContainer
-);
-
-PublicFnDecl M_CPD* __cdecl UV_Align (
-    M_CPD*			sourceCPD,
-    M_CPD::UVShiftProcessor	regionProcessor,
-    ...
 );
 
 PublicFnDecl void UV_InitLCExtractedUV (
@@ -454,6 +558,11 @@ PublicFnDecl void UV_GoToElement (
  *****  Debugger Definitions  *****
  **********************************/
 
+PublicFnDecl IOBJ_IObject __cdecl UV_DM_Align (
+    IOBJ_IObject		self,
+    IOBJ_IObject		paramterArray[]
+);
+
 PublicFnDecl IOBJ_IObject __cdecl UV_DM_PToken (
     IOBJ_IObject		self,
     IOBJ_IObject		paramterArray[]
@@ -464,7 +573,7 @@ PublicFnDecl IOBJ_IObject __cdecl UV_DM_RefPToken (
     IOBJ_IObject		paramterArray[]
 );
 
-PublicFnDecl IOBJ_IObject __cdecl UV_DM_AuxillaryPOP (
+PublicFnDecl IOBJ_IObject __cdecl UV_DM_AuxiliaryPOP (
     IOBJ_IObject		self,
     IOBJ_IObject		paramterArray[]
 );
@@ -511,9 +620,10 @@ PublicFnDecl IOBJ_IObject __cdecl UV_DM_GoToElement (
 
 #define UV_StandardDMDEPackage\
     RTYPE_StandardDMDEPackage\
+    IOBJ_MDE ("align"		, UV_DM_Align)\
     IOBJ_MDE ("ptoken"		, UV_DM_PToken)\
     IOBJ_MDE ("refPToken"	, UV_DM_RefPToken)\
-    IOBJ_MDE ("auxiliaryPOP"	, UV_DM_AuxillaryPOP)\
+    IOBJ_MDE ("auxiliaryPOP"	, UV_DM_AuxiliaryPOP)\
     IOBJ_MDE ("size"		, UV_DM_Size)\
     IOBJ_MDE ("granularity"	, UV_DM_Granularity)\
     IOBJ_MDE ("isInconsistent"	, UV_DM_IsInconsistent)\
@@ -522,42 +632,6 @@ PublicFnDecl IOBJ_IObject __cdecl UV_DM_GoToElement (
     IOBJ_MDE ("next"		, UV_DM_NextElement)\
     IOBJ_MDE ("previous"	, UV_DM_PreviousElement)\
     IOBJ_MDE ("goTo:"		, UV_DM_GoToElement)
-
-
-/******************************
- ******************************
- *****  Container Handle  *****
- ******************************
- ******************************/
-
-class ABSTRACT rtUVECTOR_Handle : public VContainerHandle {
-//  Run Time Type
-    DECLARE_ABSTRACT_RTT (rtUVECTOR_Handle, VContainerHandle);
-
-//  Construction
-protected:
-    rtUVECTOR_Handle (M_CTE& rCTE) : VContainerHandle (rCTE) {
-    }
-
-//  Destruction
-protected:
-
-//  Access
-public:
-
-//  Query
-public:
-
-//  Callbacks
-public:
-    void CheckConsistency ();
-
-protected:
-    bool PersistReferences ();
-
-//  State
-protected:
-};
 
 
 #endif

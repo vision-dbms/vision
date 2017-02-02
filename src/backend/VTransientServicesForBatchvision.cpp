@@ -55,8 +55,8 @@ VTransientServicesForBatchvision::VTransientServicesForBatchvision ()
     , m_sTotalMemoryAllocationHighWaterMark	(0)
     , m_sMemoryAllocationLimit			(0)
     , m_iErrorCount				(0)
-    , m_sInitialGCThreshold			(static_cast<V::U64>(4096) * 1024 * 1024)
-    , m_sGCThreshold				(static_cast<V::U64>(4096) * 1024 * 1024)
+    , m_sInitialGCThreshold			(static_cast<V::U64>(4096) * 1024 * 1024 * 1024)
+    , m_sGCThreshold				(static_cast<V::U64>(4096) * 1024 * 1024 * 1024)
     , m_sGCSpread				(256 * 1024 * 1024)
 {
 #if defined (__linux__) || defined (sun)
@@ -425,7 +425,7 @@ int VTransientServicesForBatchvision::vdisplay (
 
 bool VTransientServicesForBatchvision::garbageCollected () {
     g_bAttemptingToReclaimResources = true;
-    bool result = M_DisposeOfSessionGarbage ();
+    bool result = M_DisposeOfSessionGarbage (true);
     g_bAttemptingToReclaimResources = false;
     return result;
 }
@@ -440,6 +440,19 @@ bool VTransientServicesForBatchvision::mappingsReclaimed () {
 void VTransientServicesForBatchvision::logUsageInfo (char const *pFormat, ...) {
     V_VARGLIST (ap, pFormat);
     m_iUsageLog.vlog (pFormat, ap);
+}
+
+/**************************
+ **************************
+ *****  Notification  *****
+ **************************
+ **************************/
+
+void VTransientServicesForBatchvision::setNSServer (char const *pServer) {
+    m_iNSServer.setTo (pServer);
+}
+void VTransientServicesForBatchvision::setNSMessage (char const *pMsg) {
+    m_iNSMessage.setTo (pMsg);
 }
 
 

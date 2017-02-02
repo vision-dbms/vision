@@ -325,9 +325,7 @@ void Vsa::VEvaluatorPumpSource::onData (
     VEvaluatorPump::Reference pEvaluatorPump (
     	new VEvaluatorPump (evaluatorSettings (), pPipeToPeer, pPipeToHere)
     );
-
-    IEvaluator::Reference pEvaluator;
+    IEvaluator_Ex1::Reference pEvaluator;
     pEvaluatorPump->getRole (pEvaluator);
-
     startEvaluator (pEvaluatorSink, pEvaluator);
 }

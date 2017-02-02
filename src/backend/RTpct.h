@@ -57,17 +57,18 @@ class rtPCT_Handle : public VContainerHandle {
     DECLARE_CONCRETE_RTT (rtPCT_Handle, VContainerHandle);
 
 //  Construction
-protected:
-    rtPCT_Handle (M_CTE &rCTE) : VContainerHandle (rCTE) {
-    }
-
 public:
     static VContainerHandle *Maker (M_CTE &rCTE) {
 	return new rtPCT_Handle (rCTE);
     }
+protected:
+    rtPCT_Handle (M_CTE &rCTE) : VContainerHandle (rCTE) {
+    }
 
 //  Destruction
-protected:
+private:
+    ~rtPCT_Handle () {
+    }
 
 //  Access
 public:

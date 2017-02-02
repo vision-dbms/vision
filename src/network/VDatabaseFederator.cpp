@@ -161,7 +161,7 @@ VDatabaseActivation *VDatabaseFederator::Activate (
  ****************************************/
 
 void VDatabaseFederator::AccumulateAllocationStatistics (
-    double *pAllocationTotal, double *pMappingTotal
+    unsigned __int64 *pAllocationTotal, unsigned __int64 *pMappingTotal
 ) const {
     VDatabaseActivation *pActivation = m_pActivationListHead;
 

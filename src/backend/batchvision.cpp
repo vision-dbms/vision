@@ -59,6 +59,8 @@
 #include "Vca_VLoopbackDeviceFactory.h"
 
 #include "Vsa_IEvaluatorClient.h"
+
+#include "cam.h"
 
 
 /*********************
@@ -324,6 +326,23 @@ void Batchvision::EvaluateURL (
     else if (pClient)
 	pClient->OnError (0, "Batchvision Evaluator Materialization Error");
 }
+
+void Batchvision::EvaluateExpression_Ex (
+	IEvaluator *pRole, IEvaluatorClient *pClient, VString const &rPath, VString const &rExpression, VString const &rID, VString const& rCID
+) {
+    CAM_OPERATION(co) << "message" << "Batchvision::EvaluateExpression_Ex() receiving query ID: %qid" << rID;
+    co.stitchParent(rID.content(), rCID.content());
+    EvaluateExpression(pRole, pClient, rPath, rExpression);
+}
+void Batchvision::EvaluateURL_Ex (
+    IEvaluator *pRole, IEvaluatorClient *pClient, VString const &rPath, VString const &rQuery, VString const &rEnvironment, VString const &rID, VString const& rCID
+) {
+    CAM_OPERATION(co) << "message" << "Batchvision::EvaluateURL_Ex() receiving query ID: %qid" << rID;
+    co.stitchParent(rID.content(), rCID.content());
+    EvaluateURL(pRole, pClient, rPath, rQuery, rEnvironment);
+}
+
+
 
 
 /***************************************

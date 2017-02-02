@@ -62,12 +62,12 @@ namespace Vsa {
 	    Worker_InStartup, /**< Worker has not yet been accepted into a generation. */
 	    Worker_Available, /**< Worker is available for new work. */
 	    Worker_InUse, /**< Worker has a work in progress. */
-            Worker_GoneFishing /**< Worker is retired. */
+	    Worker_GoneFishing /**< Worker is retired. */
 	};
 	enum Worker_Mode {
 	    Worker_Online, /**< Worker is online or has finished starting up. */
-	    Worker_Offline, /**< Worker is offline or has not finished starting up. */
-            Worker_Retired /**< Worker is retired. */
+	    Worker_Offline, /**< Worker is offline */
+	    Worker_Retired /**< Worker is retired. */
 	};
         enum Worker_RetirementCause {
             Worker_Employed, /**< Worker is not retired. */
@@ -112,14 +112,14 @@ namespace Vsa {
          */
 	//  IEvaluatorClient Role
 	private:
-            /** The Vsa::IEvaluatorClient role for this WorkInProgress. */
+	    /** The Vsa::IEvaluatorClient role for this WorkInProgress. */
 	    Vca::VRole<ThisClass,IEvaluatorClient> m_pIEvaluatorClient;
 	public:
-            /**
-             * Retrieves the IEvaluatorClient role for this WorkInProgress.
-             *
-             * @param[out] rpRole the reference that will be used to return the IEvaluatorClient ffor this WorkInProgress.
-             */
+	    /**
+	     * Retrieves the IEvaluatorClient role for this WorkInProgress.
+	     *
+	     * @param[out] rpRole the reference that will be used to return the IEvaluatorClient ffor this WorkInProgress.
+	     */
 	    void getRole (IEvaluatorClient::Reference &rpRole);
 
 	//  IEvaluatorClient Methods
@@ -150,7 +150,17 @@ namespace Vsa {
 	public:
 	    void onTimeOut (Vca::VTrigger<ThisClass> *pTrigger);
 
-        //  OnUpdate
+	//  Cancel query
+	bool remoteIEvaluationCancelled () const {
+	    return m_bRemoteIEvaluationCancelled;
+	}
+	//  Update
+	
+	void setRemoteIEvaluationCancelled(bool cancelled) {
+	    m_bRemoteIEvaluationCancelled = cancelled;
+	}
+			
+    //  OnUpdate
 	public:
 	    void onAnyDataUpdate ();
 	    void onRetryableUpdate ();
@@ -165,28 +175,31 @@ namespace Vsa {
 	//  Utilites
 	private:
 	    bool setTimeOut	 ();
-	    bool retryEvaluation ();
 
+	    bool retryEvaluation (VString);
+	public:
+	    void cancelQuery() ;
+		
 	//  Access
 	public:
 	    Vca::U32 workerId () const {
-		return m_pWorker->identifier ();
+			return m_pWorker->identifier ();
 	    }
   	    VPoolWorker* worker () const {
  	        return m_pWorker;
 	    }
 	    VPoolEvaluation* evaluation () const {
-     	        return m_pRequest;
+     	    return m_pRequest;
 	    }
-            IEvaluation* remoteIEvaluation () const {
-                return m_pRemoteIEvaluation.referent ();
-            }
-
+	    IEvaluation* remoteIEvaluation () const {
+		return m_pRemoteIEvaluation.referent ();
+	    }
+		
 
 	//  Query
 	public:
   	    bool isWorkerOnline () const {
-	      return m_pWorker->isOnline ();
+		return m_pWorker->isOnline ();
 	    }
   	    bool isOnlineWIP () const;
 
@@ -201,35 +214,36 @@ namespace Vsa {
 	    WorkerGeneration		       *m_pGeneration;
 	    VPoolEvaluation::Reference	const	m_pRequest;
 	    State				m_xState;
-    	    VEvaluatorPool	       *const   m_pPool;
+	    VEvaluatorPool	       *const   m_pPool;
 	    IEvaluation::Reference		m_pRemoteIEvaluation;
 
 	    bool				m_bTimedOut;
+	    bool 				m_bRemoteIEvaluationCancelled;
 	    Vca::VTimer::Reference		m_pTimer;
 	    Reference				m_pSuccessor;
 	    Reference				m_pPredecessor;
 	};
 
-        //  CacheUnit
-        class CacheUnit : public VReferenceable {
+    //  CacheUnit
+    class CacheUnit : public VReferenceable {
 	    DECLARE_CONCRETE_RTTLITE (CacheUnit, VReferenceable);
           
         public:
-	    CacheUnit (VPathQuery *pQuery, unsigned int xQuery);
+	    CacheUnit (VPoolEvaluation *pRequest);
 
         private:
 	    ~CacheUnit ();
 
         public:
 	    VPathQuery* getPathQuery () const {
-		return m_pPathQuery;
+		return m_pRequest->query();
 	    }
 
 	    /**
 	     * Returns the query's pool index
 	     */
 	    unsigned int getQueryId () const {
-		return m_xQuery;
+		return m_pRequest->index();
 	    }
 
             /**
@@ -239,9 +253,7 @@ namespace Vsa {
              * @return False if no start time was set, true otherwise.
              */
 	    bool getStartTime (V::VTime &rStartTime) const {
-                if (!m_bStarted) return false;
-                rStartTime.setTo(m_iStartTime);
-                return true;
+		return m_pRequest->getStartTime(rStartTime);
 	    }
 
             /**
@@ -251,35 +263,30 @@ namespace Vsa {
              * @return False if no end time was set, true otherwise.
              */
 	    bool getEndTime (V::VTime &rEndTime) const {
-                if (!m_bFinished) return false;
-                rEndTime.setTo(m_iEndTime);
-                return true;
+		return m_pRequest->getEndTime(rEndTime);
+	    }
+		
+	    /**
+             * Retrieves arrival time, copying into provided VTime reference.
+             * 
+             * @param rArrivalTime reference to the VTime object in which to store the start time.
+             * @return False if no arrival time was set, true otherwise.
+             */
+	    bool getArrivalTime (V::VTime &rArrivalTime) const {
+		return m_pRequest->getArrivalTime(rArrivalTime);
 	    }
 
-            /**
-             * Sets the start time to now.
-             */
-            void setStartTime() {
-                m_bStarted = true;
-                m_iStartTime.setToNow ();
-            }
+	    int queueTime() const {
+		return m_pRequest->queueTime();
+	    }
 
-            /**
-             * Sets the end time to now.
-             */
-            void setEndTime () {
-                m_bFinished = true;
-                m_iEndTime.setToNow ();
-            }
+	    int evaluationTime() const {
+		return m_pRequest->evaluationTime();
+	    }
           
         private:
-	    VPathQuery::Reference const	m_pPathQuery;
-            
-	    /**
-	     * Query's pool id
-	     */
-	    unsigned int const m_xQuery;
-	    
+	    VPoolEvaluation::Reference m_pRequest;
+
             /**
              * Query processing start time.
              */
@@ -288,18 +295,13 @@ namespace Vsa {
             /**
              * Query processing end time.
              */
-            V::VTime m_iEndTime;
-            
-            /**
-             * Whether or not we have an actual start time.
-             */
-            bool m_bStarted;
-            
-            /**
-             * Whether or not we have an actual end time.
-             */
-            bool m_bFinished;
-        };
+            V::VTime m_iEndTime; 
+			
+	    /**
+	     * Query arrival time.
+	     */
+	    V::VTime m_iArrivalTime;
+	};
 
 	typedef V::VQueue<CacheUnit::Reference> WorkerHistoryQueue;        
       
@@ -344,22 +346,28 @@ namespace Vsa {
 	//  Access
 	public:
 	    Vca::U32 identifier () const {
-		return m_iIdentifier;
+			return m_iIdentifier;
 	    }
 	    VString const & pid () const {
-		return m_iPID;
+			return m_iPID;
 	    }
 	    Worker_Status status () const {
-		return m_iStatus;
+			return m_iStatus;
 	    }
-            Worker_Mode workerMode () const {
+	    Worker_Mode workerMode () const {
   	        return m_iMode;
-            }
+	    }
 	    Vca::U32 queriesProcessed () const {
 		return m_cQueriesProcessed;
 	    }
 	    Vca::U64 totalQueryTime () const {
-		return m_cTotalQueryTime; 	//  milli seconds
+		return totalQueueTime() + totalEvalTime(); 	//  milli seconds
+	    }
+	    Vca::U64 totalQueueTime () const {
+		return m_cTotalQueueTime; 	// milli seconds
+	    }
+	    Vca::U64 totalEvalTime () const {
+		return m_cTotalQueryTime;
 	    }
 	    VEvaluatorPool *pool () const {
 		return m_pPool;
@@ -367,16 +375,18 @@ namespace Vsa {
 	    bool isAboutToRetire () const {
 		return m_bAboutToRetire;
 	    }
-            bool getToggleMode () const {
-                return m_bToggleMode;
-            }
+	    bool getToggleMode () const {
+		return m_bToggleMode;
+	    }
 	    VString const& getPID () const { 
-                return m_iPID;
-            }
+		return m_iPID;
+	    }
 
 	//  Query
 	public:
 	    Vca::U32      generationId  () const;
+	    VString	  createTime () const;
+	    VString	  retireTime () const;
 	    IEvaluator*   evaluator () const;
 	    WorkerGeneration *generation () const;
 	    bool  isFlushed () const;
@@ -394,18 +404,19 @@ namespace Vsa {
 		return m_iMode == Worker_Offline;
 	    }
 	    bool hasId (VString const &rId, bool bIsPID) const;
-	    void  getQueryHistory (VString &rHistory, Vca::S32 cQueryLines=-1, Vca::S32 cQueries=-1) const;
+	    void getQueryHistory (VString &rHistory, Vca::S32 cQueryLines=-1, Vca::S32 cQueries=-1) const;
 	    
 	//  Update
 	public:
 	    void setStatus (Worker_Status iStatus) {
 		m_iStatus = iStatus;
 	    }
-	    void updateQueryStatistics (Vca::U32 cQueries, Vca::U64 iQueryTime) {
+	    void updateQueryStatistics (Vca::U32 cQueries, Vca::U64 iQueryTime, Vca::U64 iQueueTime) {
 		m_cQueriesProcessed += cQueries;
 		m_cTotalQueryTime += iQueryTime;
-                m_pCurrentCacheUnit->setEndTime();
+		m_cTotalQueueTime += iQueueTime;
 	    }
+	    void pushCacheUnit (VPoolEvaluation *pRequest);
 	    void setLastQuery (VEvaluation *pRequest);
 
 	    void setOnlineMode () {
@@ -414,28 +425,28 @@ namespace Vsa {
 	    void setOfflineMode () {
 		m_iMode = Worker_Offline;
 	    }
-            void setRetiredMode () {
-                m_iMode = Worker_Retired;
-            }
-            void setToggleMode () {
-                m_bToggleMode = true;
-            }
-            void resetToggleMode () {
-                m_bToggleMode = false;
-            }
+	    void setRetiredMode () {
+		m_iMode = Worker_Retired;
+	    }
+	    void setToggleMode () {
+		m_bToggleMode = true;
+	    }
+	    void resetToggleMode () {
+		m_bToggleMode = false;
+	    }
 
-            /**
-             * Sets this worker to a retired state.
-             * Empties the worker of its IEvaluator reference and sets internal state variables to reflect retirement reason, etc.
-             * Should really only be called from Vsa::VPoolWorkerGeneration::retire() so that generation-specific cleanup can occur first.
-             */
-            void retire (Worker_RetirementCause iCause);
+	    /**
+	     * Sets this worker to a retired state.
+	     * Empties the worker of its IEvaluator reference and sets internal state variables to reflect retirement reason, etc.
+	     * Should really only be called from Vsa::VPoolWorkerGeneration::retire() so that generation-specific cleanup can occur first.
+	     */
+	    void retire (Worker_RetirementCause iCause);
  
 	//  Statistics
 	    void  getStatistics (VString &rResult, Vca::S32 cQueryLines=-1, Vca::S32 cQueries=-1) const;
 	    void  getStat (VString &rResult) const;
-            void  quickStats (VString &rResult) const;
-            static void quickStatsHeader(VString &rResult);
+	    void  quickStats (VString &rResult) const;
+	    static void quickStatsHeader(VString &rResult);
 
 
 	//  Snapshot
@@ -456,24 +467,35 @@ namespace Vsa {
 	    VReference<WorkerGeneration>	m_pGeneration;
 	    VEvaluatorPool		*const	m_pPool;
 
+	    /**
+	     * Thread creation time.
+	     */
+	    V::VTime m_iCreateTime;
+
+	    /**
+	     * Thread retirement time.
+	     */
+	    V::VTime m_iRetireTime;
+
 	    Vca::U32				m_cQueriesProcessed;
 	    Vca::U64				m_cTotalQueryTime;
+	    Vca::U64				m_cTotalQueueTime;
 	    Worker_Status			m_iStatus;
 	    Worker_Mode				m_iMode;
-            Worker_RetirementCause              m_iRetirementCause;
+	    Worker_RetirementCause              m_iRetirementCause;
 	    VString				m_iLastQuery;
 	    WorkerHistoryQueue			m_iHistoryQueue;
-            VReference<CacheUnit>               m_pCurrentCacheUnit;
+	    VReference<CacheUnit>               m_pCurrentCacheUnit;
 
-            /**
-             * The currently executing WorkInProgress.
-             */
-            WorkInProgress::Reference           m_pWIP;
+	    /**
+	     * The currently executing WorkInProgress.
+	     */
+	    WorkInProgress::Reference           m_pWIP;
 
-            /**
-             * Keeps track of the IEvaluator interface, notifies us upon disconnect.
-             */
-            interface_monitor_t::Reference      m_pIEvaluatorEKG;
+	    /**
+	     * Keeps track of the IEvaluator interface, notifies us upon disconnect.
+	     */
+	    interface_monitor_t::Reference      m_pIEvaluatorEKG;
 
 	    Reference				m_pSuccessor;
 	    Reference				m_pPredecessor;
@@ -481,9 +503,9 @@ namespace Vsa {
             /**
              * Used to indicate that the worker mode should be toggled at the end of the currently executing query.
              */
-            bool                                m_bToggleMode;
-	    bool				m_bAboutToRetire;
-	};
+        bool                                m_bToggleMode;
+	bool				m_bAboutToRetire;
+    };
 }
 
 

@@ -57,14 +57,6 @@
 #define rtLINK_CPD_RefPToken(cpd)\
     M_CPD_PointerToPOP (cpd, rtLINK_CPx_RefPToken)
 
-#define rtLINK_CPD_PosPTokenCPD(cpd) (\
-    (cpd)->GetCPD (rtLINK_CPx_PosPToken, RTYPE_C_PToken)\
-)
-
-#define rtLINK_CPD_RefPTokenCPD(cpd) (\
-    (cpd)->GetCPD (rtLINK_CPx_RefPToken, RTYPE_C_PToken)\
-)
-
 #define rtLINK_CPD_Tracking(cpd)\
     rtLINK_L_Tracking (rtLINK_CPD_Base (cpd))
 
@@ -164,9 +156,9 @@ enum rtLINK_AppendState {
  * this 'link'.
  *
  * Link Constructor Field Descriptions:
- *	m_pPPT			- a standard CPD for the position P-Token
+ *	m_pPPT			- a handle for the positional P-Token
  *				  associated with this link constructor.
- *	m_pRPT			- a standard CPD for the referential P-Token
+ *	m_pRPT			- a handle for the referential P-Token
  *				  associated with this link constructor.
  *	m_fHasRepeats		- true if any of the 'rrdc's are repetitions.
  *	m_fHasRanges		- true if any of the 'rrdc's are ranges.
@@ -221,7 +213,7 @@ protected:
 
 //  Construction
 public:
-    rtLINK_CType ();
+    rtLINK_CType (rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT);
 
 //  Destruction
 private:
@@ -240,15 +232,8 @@ public:
     rtLINK_CType *AppendRepeat (int origin, int count) {
 	return Append (origin, count, true);
     }
-
-    rtLINK_CType *Close (M_CPD *pPToken);
-    rtLINK_CType *Close (M_CPD *pPTokenRef, int xPTokenRef) {
-	if (xPTokenRef < 0)
-	    return Close (pPTokenRef);
-
-	VCPDReference pPToken (pPTokenRef, xPTokenRef, RTYPE_C_PToken);
-	return Close (pPToken);
-    }
+    rtLINK_CType *Close (M_CPD *pPTokenRef, int xPTokenRef);
+    rtLINK_CType *Close (rtPTOKEN_Handle *pPToken);
 
 //  Destruction
 protected:
@@ -256,7 +241,7 @@ protected:
 //  Access
 public:
     unsigned int BaseElementCount () const {
-	return rtPTOKEN_CPD_BaseElementCount (m_pPPT);
+	return m_pPPT->cardinality ();
     }
     unsigned int ElementCount () const {
 	return rtLINK_RRDC_LinkCumulative (m_pFinalRRDC);
@@ -269,14 +254,27 @@ public:
 	    : rtLINK_RRDC_ReferenceOrigin (m_pChainTail) + rtLINK_RRDC_N (m_pChainTail) - 1;
     }
     unsigned int ReferenceNil () const {
-	return rtPTOKEN_CPD_BaseElementCount (m_pRPT);
+	return m_pRPT->cardinality ();
     }
 
-    M_CPD *PPT () const {
+    rtPTOKEN_Handle *PPT () const {
 	return m_pPPT;
     }
-    M_CPD *RPT () const {
+    bool PPTNames (VContainerHandle *pThat, M_POP const *pThatPOP) const {
+	return pThatPOP ? pThat->ReferenceNames (pThatPOP, PPT ()) : pThat->Names (PPT ());
+    }
+    bool PPTDoesntName (VContainerHandle *pThat, M_POP const *pThatPOP) const {
+	return pThatPOP ? pThat->ReferenceDoesntName (pThatPOP, PPT ()) : pThat->DoesntName (PPT ());
+    }
+
+    rtPTOKEN_Handle *RPT () const {
 	return m_pRPT;
+    }
+    bool RPTNames (VContainerHandle *pThat, M_POP const *pThatPOP) const {
+	return pThatPOP ? pThat->ReferenceNames (pThatPOP, RPT ()) : pThat->Names (RPT ());
+    }
+    bool RPTDoesntName (VContainerHandle *pThat, M_POP const *pThatPOP) const {
+	return pThatPOP ? pThat->ReferenceDoesntName (pThatPOP, RPT ()) : pThat->DoesntName (RPT ());
     }
 
 //  Query
@@ -287,14 +285,17 @@ public:
 	    rtLINK_RRDC_RepeatedRef (m_pChainTail)
 	    ? rtLINK_RRDC_ReferenceOrigin (m_pChainTail)
 	    : rtLINK_RRDC_ReferenceOrigin (m_pChainTail) + rtLINK_RRDC_N (m_pChainTail) - 1
-	) == rtPTOKEN_CPD_BaseElementCount (m_pRPT);
+	) == m_pRPT->cardinality ();
     }
     bool DoesntContainReferenceNils () const {
 	return !ContainsReferenceNils ();
     }
 
     bool IsOpen () const {
-	return IsNil (m_pPPT) || IsNil (m_pRPT);
+	return m_pPPT.isNil () || m_pRPT.isNil ();
+    }
+    bool IsntOpen () const {
+	return m_pPPT.isntNil () && m_pRPT.isntNil ();
     }
 
 //  Maintenance
@@ -304,16 +305,39 @@ private:
 public:
     rtLINK_CType *Align ();
 
-    void AlignForAdd	(M_CPD *tPTokenRefCPD, int tPTokenRefIndex);
-    void AlignForAssign (M_CPD *tPTokenRefCPD, int tPTokenRefIndex); // Scalar source
+    void AlignForAdd (M_CPD *pTargetRef, int xTargetRef) {
+	AlignForAdd (pTargetRef->containerHandle (), pTargetRef->OutboundPOP (xTargetRef));
+    }
+    void AlignForAdd (VContainerHandle *pTargetRef, M_POP const *pTargetPOP);
+
+    void AlignForAssign (M_CPD *pTargetRef, int xTargetRef) {; // Scalar source
+	AlignForAssign (pTargetRef->containerHandle (), pTargetRef->OutboundPOP (xTargetRef));
+    }
+    void AlignForAssign (VContainerHandle *pTargetRef, M_POP const *pTargetPOP);
+
     void AlignForAssign (
-	M_CPD *tPTokenRefCPD, int tPTokenRefIndex, M_CPD *sPTokenRefCPD, int sPTokenRefIndex
+	M_CPD *pTargetRef, int xTargetRef, M_CPD *pSourceRef, int xSourceRef
+    ) {
+	AlignForAssign (
+	    pTargetRef->containerHandle (), pTargetRef->OutboundPOP (xTargetRef),
+	    pSourceRef->containerHandle (), pSourceRef->OutboundPOP (xSourceRef)
+	);
+    }
+    void AlignForAssign (
+	VContainerHandle *pTargetRef, M_POP const *pTargetPOP, VContainerHandle *pSourceRef, M_POP const *pSourcePOP = 0
     );
 
     void AlignForCoerce ();
 
-    void AlignForDistribute (M_CPD *sPTokenRefCPD, int sPTokenRefIndex);
-    void AlignForExtract    (M_CPD *sPTokenRefCPD, int sPTokenRefIndex);
+    void AlignForDistribute (M_CPD *pSourceRef, int xSourceRef) {
+	AlignForDistribute (pSourceRef->containerHandle (), pSourceRef->OutboundPOP (xSourceRef));
+    }
+    void AlignForDistribute (VContainerHandle *pSourceRef, M_POP const *pSourcePOP);
+
+    void AlignForExtract (M_CPD *pSourceRef, int xSourceRef) {
+	AlignForExtract (pSourceRef->containerHandle (), pSourceRef->OutboundPOP (xSourceRef));
+    }
+    void AlignForExtract (VContainerHandle *pSourceRef, M_POP const *pSourcePOP);
 
 //  Update
 public:
@@ -323,16 +347,15 @@ public:
 public:
     rtLINK_CType *Complement ();
 
-
     rtLINK_CType *Extract (rtLINK_CType *pSubcript);
     M_CPD	 *Extract (M_CPD *pSubscript);
 
-    M_CPD *ToLink (M_CPD *pNewPPT, bool fDiscard);
+    M_CPD *ToLink (rtPTOKEN_Handle *pNewPPT, bool fDiscard);
     M_CPD *ToLink (bool fDiscard) {
-	return ToLink (NilOf (M_CPD*), fDiscard);
+	return ToLink (0, fDiscard);
     }
     M_CPD *ToLink () {
-	return ToLink (NilOf (M_CPD*), true);
+	return ToLink (0, true);
     }
 
     M_CPD *ToRefUV (M_CPD *orderingUV = NilOf (M_CPD*));
@@ -348,17 +371,17 @@ public:
 
 //  State
 public:
-    M_CPD		*m_pPPT,
-			*m_pRPT;
-    unsigned int	m_fTracking		: 1, 
-			m_fHasRepeats		: 1, 
-			m_fHasRanges		: 1, 
-			m_iRRDCount		: 29;
-    int			m_xReferenceLimit;
-    rtLINK_AppendState	m_xAppendState;
-    rtLINK_RRDCType	*m_pChainHead,
-			*m_pChainTail,
-			*m_pFinalRRDC;
+    rtPTOKEN_Handle::Reference	m_pPPT;
+    rtPTOKEN_Handle::Reference	m_pRPT;
+    unsigned int		m_fTracking		: 1, 
+				m_fHasRepeats		: 1, 
+				m_fHasRanges		: 1, 
+				m_iRRDCount		: 29;
+    int				m_xReferenceLimit;
+    rtLINK_AppendState		m_xAppendState;
+    rtLINK_RRDCType*		m_pChainHead;
+    rtLINK_RRDCType*		m_pChainTail;
+    rtLINK_RRDCType*		m_pFinalRRDC;
 };
 
 
@@ -459,7 +482,7 @@ public:
  *---------------------------------------------------------------------------
  */
 #define rtLINK_TraverseRRDCList(linkc, nilRefMacro, repeatedRefMacro, rangeRefMacro) {\
-    int	referenceNil = rtPTOKEN_CPD_BaseElementCount (linkc->RPT ()),\
+    int	referenceNil = linkc->RPT ()->cardinality (),\
 	sendLastNil = false,\
 	c, n, r, t, cc;\
 \
@@ -505,7 +528,7 @@ public:
  *---------------------------------------------------------------------------
  */
 #define rtLINK_TraverseRRDCListExtraArg(linkc, nilRefMacro, repeatedRefMacro, rangeRefMacro, extraArg) {\
-    int	referenceNil = rtPTOKEN_CPD_BaseElementCount (linkc->RPT ()),\
+    int	referenceNil = linkc->RPT ()->cardinality (),\
 	sendLastNil = false,\
 	c, n, r, t, cc;\
 \
@@ -561,21 +584,21 @@ PublicFnDecl void rtLINK_DumpLink (
  *****  Constructor Creation and Deletion  *****
  ***********************************************/
 
+PublicFnDecl rtLINK_CType *rtLINK_PosConstructor (
+    M_CPD *posPTokenRefCPD, int posPTokenRefIndex
+);
 PublicFnDecl rtLINK_CType *rtLINK_RefConstructor (
-    M_CPD*			refPTokenRefCPD,
-    int				refPTokenRefIndex
+    M_CPD *refPTokenRefCPD, int refPTokenRefIndex
 );
 
-PublicFnDecl rtLINK_CType *rtLINK_PosConstructor (
-    M_CPD*			posPTokenRefCPD,
-    int				posPTokenRefIndex
-);
+PublicFnDecl rtLINK_CType *rtLINK_PosConstructor (rtPTOKEN_Handle *pPPT);
+PublicFnDecl rtLINK_CType *rtLINK_RefConstructor (rtPTOKEN_Handle *pRPT);
 
 /**********************
  *****  Aligning  *****
  **********************/
 
-PublicFnDecl M_CPD *rtLINK_AlignLink (
+PublicFnDecl M_CPD *rtLINK_Align (
     M_CPD*			linkCPD
 );
 
@@ -583,11 +606,11 @@ PublicFnDecl M_CPD *rtLINK_AlignLink (
  *****  Link Creation  *****
  ***************************/
 
-PublicFnDecl M_CPD *rtLINK_NewRefLink (M_CPD *pPPT, M_CPD *pRPT);
+PublicFnDecl M_CPD *rtLINK_NewRefLink (rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT);
 
-PublicFnDecl M_CPD *rtLINK_NewEmptyLink (M_CPD *pPPT, M_CPD *pRPT);
+PublicFnDecl M_CPD *rtLINK_NewEmptyLink (rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT);
 
-PublicFnDecl M_CPD *rtLINK_Copy (M_CPD *link, M_CPD *pNewPPT = 0);
+PublicFnDecl M_CPD *rtLINK_Copy (M_CPD *link, rtPTOKEN_Handle *pNewPPT = 0);
 
 /*********************************************
  *****  Link <-> Constructor Conversion  *****
@@ -692,7 +715,7 @@ PublicFnDecl M_CPD *rtLINK_Distribute (
 
 PublicFnDecl M_CPD *rtLINK_LCCountReferences (
     rtLINK_CType*		linkc,
-    M_CPD*			refPToken,
+    rtPTOKEN_Handle*		refPToken,
     M_CPD*			distributionCPD
 );
 
@@ -705,20 +728,20 @@ PublicFnDecl rtLINK_CType *rtLINK_RowProjection (
 );
 
 PublicFnDecl rtLINK_CType *rtLINK_LinearizeLCrRc (
-    M_CPD*			cartesianPT,
+    rtPTOKEN_Handle*		cartesianPT,
     rtLINK_CType*		rowLinkC,
     rtREFUV_TypePTR_Reference	columnRefp
 );
 
 PublicFnDecl M_CPD *rtLINK_LinearizeLCrUVic (
-    M_CPD*			cartesianPT,
+    rtPTOKEN_Handle*		cartesianPT,
     rtLINK_CType*		rowLinkC,
     M_CPD*			columnUV,
     M_CPD*			columnIndirection
 );
 
 PublicFnDecl M_CPD *rtLINK_LinearizeLCrLCic (
-    M_CPD*			cartesianPT,
+    rtPTOKEN_Handle*		cartesianPT,
     rtLINK_CType*		rowLinkC,
     rtLINK_CType*		columnLinkC,
     M_CPD*			columnIndirection
@@ -732,27 +755,70 @@ PublicFnDecl M_CPD *rtLINK_LinearizeLCrLCic (
  ******************************/
 
 class rtLINK_Handle : public VContainerHandle {
-//  Run Time Type
     DECLARE_CONCRETE_RTT (rtLINK_Handle, VContainerHandle);
 
 //  Construction
-protected:
-    rtLINK_Handle (M_CTE &rCTE) : VContainerHandle (rCTE) {
-    }
-
 public:
     static VContainerHandle *Maker (M_CTE &rCTE) {
 	return new rtLINK_Handle (rCTE);
     }
+protected:
+    rtLINK_Handle (M_CTE &rCTE) : VContainerHandle (rCTE) {
+    }
 
 //  Destruction
-protected:
+private:
+    ~rtLINK_Handle () {
+    }
+
+//  Alignment
+private:
+    virtual /*override*/ bool align_() {
+	return align ();
+    }
+public:
+    bool align ();
 
 //  Access
+private:
+    rtLINK_Type *typecastContent () const {
+	return reinterpret_cast<rtLINK_Type*>(containerContent ());
+    }
+    M_POP *pptPOP () const {
+	return &rtLINK_L_PosPToken (typecastContent ());
+    }
+    M_POP *rptPOP () const {
+	return &rtLINK_L_RefPToken (typecastContent ());
+    }
 public:
+    rtPTOKEN_Handle *pptHandle () const {
+	return static_cast<rtPTOKEN_Handle*>(GetContainerHandle (pptPOP (), RTYPE_C_PToken));
+    }
+    rtPTOKEN_Handle *rptHandle () const {
+	return static_cast<rtPTOKEN_Handle*>(GetContainerHandle (rptPOP (), RTYPE_C_PToken));
+    }
+    unsigned int elementCount () const {
+	rtLINK_Type *pContent = typecastContent ();
+	return rtLINK_RRD_LinkCumulative (rtLINK_L_RRDArray (pContent) + rtLINK_L_RRDCount (pContent));
+    }
 
-//  Query
-public:
+    rtPTOKEN_Handle *getPPT () const {
+	return pptHandle ();
+    }
+    rtPTOKEN_Handle *getRPT () const {
+	return rptHandle ();
+    }
+
+    rtLINK_RRDType *rrdArray () const {
+	return rtLINK_L_RRDArray (typecastContent ());
+    }
+    unsigned int rrdCount () const {
+	return rtLINK_L_RRDCount (typecastContent ());
+    }
+
+//  Forwarding
+private:
+    bool forwardToSpace_(M_ASD *pSpace);
 
 //  Callbacks
 public:
@@ -761,8 +827,12 @@ public:
 protected:
     bool PersistReferences ();
 
-//  State
-protected:
+//  Display and Inspection
+public:
+    virtual /*override*/ bool getPOP (M_POP *pResult, unsigned int xPOP) const;
+    virtual /*override*/ unsigned int getPOPCount () const {
+	return 2;
+    }
 };
 
 

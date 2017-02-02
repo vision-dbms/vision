@@ -175,6 +175,7 @@ namespace {
 	    onDone ();
 	}
 	void onError (IError *pInterface, VString const &rMessage) {
+	    cerr << ">>> OnConnect: " << rMessage << endl;
 	    onDone ();
 	}
 
@@ -1137,10 +1138,12 @@ void Vca::Tool::onActivityRequestError (IError *pInterface, VString const &rMess
 }
 
 void Vca::Tool::createTracker (IRequest *pTicket, VString const &rDescription) {
-    Tracker::Reference const pNewTracker (new Tracker (this, pTicket, rDescription));
-    unsigned int xNewTracker;
-    m_sTrackers.Insert (pNewTracker->key (), xNewTracker);
-    m_sTrackers[xNewTracker] = pNewTracker;
+    if (pTicket) {
+	Tracker::Reference const pNewTracker (new Tracker (this, pTicket, rDescription));
+	unsigned int xNewTracker;
+	m_sTrackers.Insert (pNewTracker->key (), xNewTracker);
+	m_sTrackers[xNewTracker] = pNewTracker;
+    }
 }
 
 bool Vca::Tool::deleteTracker (Key const &rTrackerKey) {

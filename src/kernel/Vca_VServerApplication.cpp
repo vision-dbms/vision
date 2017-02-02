@@ -90,6 +90,7 @@ Vca::VServerApplication::ControlRequest::~ControlRequest () {
  **********************/
 
 void Vca::VServerApplication::ControlRequest::Cancel (IRequest *pRole) {
+
 }
 
 /*****************
@@ -683,31 +684,6 @@ void Vca::VServerApplication::Plumber::Ack (IAckReceiver *pRole) {
  *************************************
  *************************************/
 
-/***********************
- ***********************
- *****  ClassInfo  *****
- ***********************
- ***********************/
-
-namespace Vca {
-    VClassInfoHolder &VServerApplication::ClassInfo () {
-	static VClassInfoHolder_<ThisClass> iClassInfoHolder;
-	if (iClassInfoHolder.isntComplete ()) {
-	    iClassInfoHolder
-		.addBase (BaseClass::ClassInfo ())
-
-		.addProperty ("ListenerCount"    , &ThisClass::listenerCount)
-		.addProperty ("ListenerName"     , &ThisClass::listenerName)
-		.addProperty ("OfferCount"       , &ThisClass::activeOfferCountTrackable)
-		.addProperty ("PassiveOfferCount", &ThisClass::passiveOfferCount)
-		.addProperty ("RegistrationCount", &ThisClass::registrationCount)
-
-		.markCompleted ();
-	}
-	return iClassInfoHolder;
-    }
-}
-
 /**************************
  **************************
  *****  Construction  *****
@@ -827,7 +803,7 @@ void Vca::VServerApplication::onActivityCountIsZero () {
 }
 
 void Vca::VServerApplication::onStopCondition () {
-    if (activeOfferCount () > 0 || activityCount () > passiveOfferCount ())
+    if (activeOfferCount () > 0 || activityCount () > passiveOfferCount ()) 
 	return;
 
     log ("Zero offers (connections)...");
@@ -839,20 +815,20 @@ void Vca::VServerApplication::onStopCondition () {
 	U64 const sTimeout = stopTimeout ();
 	if (pDeviceLogMessage)
 	    pDeviceLogMessage->printf (" isAwaitingStop hardstop timeout = %llu", sTimeout);
-	if (sTimeout == 0)
+	if (sTimeout == 0) {
 	    hardstop ();
-	else {
+	} else {
 	    m_pStopTimer.setTo (
-		new VTimer (
+	        new VTimer (
 		    "Stop Timeout", new VTrigger<ThisClass> (this, &ThisClass::onStopTimer), sTimeout*60*1000*1000
-		)
+	        )
 	    );
 	    m_pStopTimer->start ();	    
 	}
     } else if (stoppingOnIdle () && isntStopping () && isntStopped ()) {
 	if (pDeviceLogMessage)
 	    pDeviceLogMessage->printf (" stoppingOnIdle && isntStopping && isntStopped");
-	stop ();
+      stop ();
     }
     if (pDeviceLogMessage)
 	defaultLogger().printf ("+++ onOfferCountIsZero%s.\n", pDeviceLogMessage->content ());
@@ -1019,10 +995,11 @@ bool Vca::VServerApplication::stop_(bool bHardStop) {
 	    m_pRegistrations[0]->retract ();
 
 	log ("Gracefully stopping server.....");
-	setRunStateIf (RunState_Stopping, RunState_AwaitingStop);
 
+	setRunStateIf (RunState_Stopping, RunState_AwaitingStop);
 	onStopCondition ();
-    }
+	}
+
     return isStopping (bHardStop);
 }
 
@@ -1114,7 +1091,7 @@ void Vca::VServerApplication::cancelStopTimer () {
  *************************************
  *************************************/
 
-Vca::VTrackable_count_t const &Vca::VServerApplication::activeOfferCountTrackable () const {
+Vca::VTrackable_count_t const &Vca::VServerApplication::activeOfferCountTrackable () {
     return m_cOffers.trackable ();
 }
 

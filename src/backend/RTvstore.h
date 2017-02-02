@@ -13,6 +13,7 @@
  ***********************/
 
 #include "popvector.h"
+#include "Vdd_Store.h"
 
 /***********************
  *****  Container  *****
@@ -26,10 +27,14 @@
 
 #include "RTdictionary.h"
 
+#include "VGroundStore.h"
+
 class rtLINK_CType;
+class rtVECTOR_Handle;
 
 class DSC_Descriptor;
 
+class VBlockTask;
 class VSelector;
 
 
@@ -47,16 +52,12 @@ class VSelector;
 #define rtVSTORE_CPx_InheritancePtr	(unsigned int)2
 #define rtVSTORE_CPx_ColumnPToken	(unsigned int)3
 #define rtVSTORE_CPx_Dictionary		(unsigned int)4
-#define rtVSTORE_CPx_AuxillaryColumn	(unsigned int)5
+#define rtVSTORE_CPx_AuxiliaryColumn	(unsigned int)5
 #define rtVSTORE_CPx_Column		(unsigned int)6
 
 /*****  Standard CPD Access Macros  *****/
 #define rtVSTORE_CPD_Base(cpd)\
     ((rtVSTORE_Type *)(POPVECTOR_CPD_Array (cpd)))
-
-#define rtVSTORE_CPD_ColumnCount(cpd)\
-    (POPVECTOR_CPD_ElementCount (cpd) -\
-	(sizeof (rtVSTORE_Type) - sizeof (M_POP)) / sizeof (M_POP))
 
 #define rtVSTORE_CPD_ColumnArray(cpd)\
     rtVSTORE_VS_ColumnArray (rtVSTORE_CPD_Base (cpd))
@@ -64,95 +65,9 @@ class VSelector;
 #define rtVSTORE_CPD_Column(cpd)\
     M_CPD_PointerToPOP (cpd, rtVSTORE_CPx_Column)
 
-#define rtVSTORE_CPD_RowPTokenCPD(cpd) (\
-    (cpd)->GetCPD (rtVSTORE_CPx_RowPToken, RTYPE_C_PToken)\
-)
-
-#define rtVSTORE_CPD_InheritanceStoreCPD(cpd) (\
-    (cpd)->GetCPD (rtVSTORE_CPx_InheritanceStore)\
-)
-
-#define rtVSTORE_CPD_InheritancePointerCPD(cpd) (\
-    (cpd)->GetCPD (rtVSTORE_CPx_InheritancePtr)\
-)
-
-#define rtVSTORE_CPD_ColumnPTokenCPD(cpd) (\
-    (cpd)->GetCPD (rtVSTORE_CPx_ColumnPToken, RTYPE_C_PToken)\
-)
-
 #define rtVSTORE_CPD_DictionaryCPD(cpd) (\
     (cpd)->GetCPD (rtVSTORE_CPx_Dictionary, RTYPE_C_Dictionary)\
 )
-
-#define rtVSTORE_CPD_AuxillaryColumnCPD(cpd) (\
-    (cpd)->GetCPD (rtVSTORE_CPx_AuxillaryColumn)\
-)
-
-#define rtVSTORE_CPD_ColumnCPD(cpd) (\
-    (cpd)->GetCPD (rtVSTORE_CPx_Column)\
-)
-
-
-/********************************
- ********************************
- *****  Callable Interface  *****
- ********************************
- ********************************/
-
-PublicFnDecl M_CPD* rtVSTORE_NewCluster (
-    M_CPD *pPPT, M_CPD *pDictionary, M_CPD *pSuperStore, M_CPD *pSuperPointer
-);
-
-PublicFnDecl M_CPD* rtVSTORE_NewCluster (M_CPD *pPPT, M_CPD *pPrototype);
-
-PublicFnDecl bool rtVSTORE_ForwardCluster (
-    M_CPD*			pTransientStoreCPD,
-    M_CPD*			pPersistentStoreCPD
-);
-
-PublicFnDecl M_CPD* rtVSTORE_Align (
-    M_CPD*			pVStoreCPD
-);
-
-PublicFnDecl bool rtVSTORE_AlignAll (
-    M_CPD*			pVStoreCPD,
-    bool			deletingEmptyUSegments
-);
-
-PublicFnDecl rtLINK_CType* rtVSTORE_AddRows (
-    M_CPD*			pVStoreCPD,
-    M_CPD*			newRowsPToken
-);
-
-enum rtVSTORE_Extension {
-    rtVSTORE_Extension_Add,
-    rtVSTORE_Extension_LocateOrAdd,
-    rtVSTORE_Extension_Locate
-};
-
-PublicFnDecl rtLINK_CType* rtVSTORE_ExtendRowsTo (
-    rtVSTORE_Extension		xExtensionOperation,
-    M_CPD*			pInheritanceStore,
-    M_CPD*			pInheritancePointer,
-    M_CPD*			pDescendantStore,
-    rtLINK_CType*&		rpExtensionGuard,
-    rtLINK_CType**		ppLocateOrAddAdditions	// optional locate or add result, nil if not wanted
-);
-
-PublicFnDecl rtDICTIONARY_LookupResult rtVSTORE_Lookup (
-    M_CPD*			pVStoreCPD,
-    VSelector const*		pSelector,
-    DSC_Descriptor*		pValueReturn
-);
-
-PublicFnDecl int rtVSTORE_AreBehavioriallyEquivalent (
-    M_CPD*			pStore1CPD,
-    M_CPD*			pStore2CPD
-);
-
-PublicFnDecl void rtVSTORE_WriteDBUpdateInfo (
-    M_CPD*			pVStoreCPD
-);
 
 
 /******************************
@@ -161,35 +76,264 @@ PublicFnDecl void rtVSTORE_WriteDBUpdateInfo (
  ******************************
  ******************************/
 
-class rtVSTORE_Handle : public rtPOPVECTOR_Handle {
+class rtVSTORE_Handle : public rtPOPVECTOR_StoreHandle {
 //  Run Time Type
-    DECLARE_CONCRETE_RTT (rtVSTORE_Handle, rtPOPVECTOR_Handle);
+    DECLARE_CONCRETE_RTT (rtVSTORE_Handle, rtPOPVECTOR_StoreHandle);
+
+
+    friend class rtVECTOR_Handle;
+    friend class VBlockTask;
+    friend class VGroundStore;
+
+//  Aliases
+public:
+    typedef StoreBase::ExtensionType ExtensionType;
 
 //  Construction
-protected:
-    rtVSTORE_Handle (M_CTE &rCTE) : rtPOPVECTOR_Handle (rCTE) {
-    }
-
 public:
     static VContainerHandle *Maker (M_CTE &rCTE) {
 	return new rtVSTORE_Handle (rCTE);
     }
+    rtVSTORE_Handle (
+	rtPTOKEN_Handle*	pPPT,
+	rtDICTIONARY_Handle*	pDictionary,
+	rtPTOKEN_Handle*	pColumnPToken,
+	Vdd::Store*		pSuperStore,
+	M_CPD*			pSuperPointer
+    );
+private:
+    rtVSTORE_Handle (M_CTE &rCTE) : BaseClass (rCTE) {
+    }
 
 //  Destruction
-protected:
+private:
+    ~rtVSTORE_Handle () {
+	if (m_pExtension)
+	    m_pExtension->detachSurrogate (this);
+    }
+
+//  Alignment
+private:
+    virtual /*override*/ bool align_() {
+	return align ();
+    }
+    virtual /*override*/ bool alignAll_(bool bCleaning) {
+	return alignAll (bCleaning);
+    }
+public:
+    bool align ();
+    bool alignAll (bool bCleaning = true);
+
+//  Canonicalization
+private:
+    virtual /*override*/ bool getCanonicalization_(VReference<rtVSTORE_Handle> &rpStore, DSC_Pointer const &rPointer);
+public:
+    void canonicalize (DSC_Pointer &rPointer) const;
+
+//  Cloning
+private:
+    virtual /*override*/ void clone_(Vdd::Store::Reference &rpResult, rtPTOKEN_Handle *pPPT) const {
+	Reference pHandle;
+	clone (pHandle, pPPT);
+	rpResult.setTo (pHandle);
+    }
+    virtual /*override*/ bool isACloneOfValueStore_(rtVSTORE_Handle const *pOther) const {
+	return isACloneOfValueStore (pOther);
+    }
+    virtual /*override*/ bool isACloneOf_(Vdd::Store const *pOther) const {
+	if (pOther->rtype () == RTYPE_C_ValueStore)
+	    return isACloneOfValueStore (dynamic_cast<rtVSTORE_Handle const*>(pOther));
+	return false;
+    }
+
+public:
+    void clone (Reference &rpResult, rtPTOKEN_Handle *pPPT) const;
+    bool isACloneOfValueStore (rtVSTORE_Handle const *pOther) const;
+
+//  Forwarding
+private:
+    virtual /*override*/ bool forwardToSpace_(M_ASD *pSpace);
+
+//  Dictionary Operations
+public:
+    using BaseClass::lookup;
+    Vdd::Store::DictionaryLookup lookup (VSelector const &rSelector, unsigned int &rxPropertySlot, DSC_Descriptor *pValueReturn = 0);
 
 //  Access
+private:
+    rtPTOKEN_Handle *columnPTokenHandle () const {
+	return static_cast<rtPTOKEN_Handle*>(elementHandle (rtVSTORE_CPx_ColumnPToken, RTYPE_C_PToken));
+    }
+    rtDICTIONARY_Handle *dictionaryHandle () const {
+	return static_cast<rtDICTIONARY_Handle*>(elementHandle (rtVSTORE_CPx_Dictionary, RTYPE_C_Dictionary));
+    }
+    M_POP *ptokenPOP () const {
+	return element (rtVSTORE_CPx_RowPToken);
+    }
+    rtPTOKEN_Handle *ptokenHandle () const {
+	return static_cast<rtPTOKEN_Handle*>(elementHandle (rtVSTORE_CPx_RowPToken, RTYPE_C_PToken));
+    }
+    VContainerHandle *inheritancePointerHandle () const {
+	return elementHandle (rtVSTORE_CPx_InheritancePtr);
+    }
+    VContainerHandle *inheritanceStoreHandle () const {
+	return elementHandle (rtVSTORE_CPx_InheritanceStore);
+    }
 public:
+    unsigned int columnCount () const {
+	return elementCount () - rtVSTORE_CPx_Column;
+    }
+    void getColumnPToken (rtPTOKEN_Handle::Reference &rpResult) const {
+	rpResult.setTo (columnPTokenHandle ());
+    }
+    using BaseClass::getDictionary;
+    void getDictionary (rtDICTIONARY_Handle::Reference &rpResult) const {
+	rpResult.setTo (dictionaryHandle ());
+    }
+    rtDICTIONARY_Handle *getDictionary () const {
+	return dictionaryHandle ();
+    }
+    void getInheritanceStore (VContainerHandle::Reference &rpResult) const {
+	rpResult.setTo (inheritanceStoreHandle ());
+    }
+    bool getInheritanceStore (Vdd::Store::Reference &rpResult) const {
+	return inheritanceStoreHandle ()->getStore (rpResult);
+    }
+    void getInheritancePointer (M_CPD *&rpResult) const {
+	rpResult = inheritancePointerHandle ()->GetCPD ();
+    }
+    void getInheritancePointer (VContainerHandle::Reference &rpResult) const {
+	rpResult.setTo (inheritancePointerHandle ());
+    }
 
 //  Query
 public:
+    bool hasAnInheritance () const {
+	return ReferenceIsntNil (rtVSTORE_CPx_InheritanceStore);
+    }
+    bool hasNoInheritance () const {
+	return ReferenceIsNil (rtVSTORE_CPx_InheritanceStore);
+    }
 
-//  Callbacks
+//  Classification
+public:
+    bool Names (VContainerHandle const *pThat) const {
+	return static_cast<HandleBase const*>(this)->Names (pThat);
+    }
+    virtual /*override*/ bool Names (M_KOTM pKOTM) const {
+	return static_cast<HandleBase const*>(this)->Names (pKOTM);
+    }
+    virtual /*override*/ bool NamesTheDateClass () const {
+	return static_cast<HandleBase const*>(this)->NamesTheDateClass ();
+    }
+    virtual /*override*/ bool NamesTheDoubleClass () const {
+	return static_cast<HandleBase const*>(this)->NamesTheDoubleClass ();
+    }
+    virtual /*override*/ bool NamesTheFloatClass () const {
+	return static_cast<HandleBase const*>(this)->NamesTheFloatClass ();
+    }
+    virtual /*override*/ bool NamesTheIntegerClass () const {
+	return static_cast<HandleBase const*>(this)->NamesTheIntegerClass ();
+    }
+    virtual /*override*/ bool NamesThePrimitiveClass () const {
+	return static_cast<HandleBase const*>(this)->NamesThePrimitiveClass ();
+    }
+    virtual /*override*/ bool NamesTheSelectorClass () const {
+	return static_cast<HandleBase const*>(this)->NamesTheSelectorClass ();
+    }
+    virtual /*override*/ bool NamesTheNAClass () const {
+	return static_cast<HandleBase const*>(this)->NamesTheNAClass ();
+    }
+    virtual /*override*/ bool NamesTheTrueClass () const {
+	return static_cast<HandleBase const*>(this)->NamesTheTrueClass ();
+    }
+    virtual /*override*/ bool NamesTheFalseClass () const {
+	return static_cast<HandleBase const*>(this)->NamesTheFalseClass ();
+    }
+    virtual /*override*/ bool NamesABuiltInNumericClass () const {
+	return static_cast<HandleBase const*>(this)->NamesABuiltInNumericClass ();
+    }
+
+//  Stock Access
+private:
+    virtual /*override*/ rtDICTIONARY_Handle *getDictionary_(DSC_Pointer const &rPointer) const {
+	return getDictionary ();
+    }
+    virtual /*override*/ rtPTOKEN_Handle *getPToken_() const {
+	return getPToken ();
+    }
+public:
+    rtPTOKEN_Handle *getPToken () const {
+	return ptokenHandle ();
+    }
+
+//  Instance Creation
+private:
+    virtual /*override*/ rtLINK_CType *addInstances_(rtPTOKEN_Handle *pAdditionPPT);
+    virtual /*override*/ rtLINK_CType *addExtensions_(
+	ExtensionType	xExtensionType,
+	Vdd::Store*	pInheritanceStore,
+	M_CPD*		pInheritancePointer,
+	rtLINK_CType*&	rpExtensionGuard,
+	rtLINK_CType**	ppLocateOrAddAdditions
+    );
+
+//  Instance Deletion
+private:
+    virtual /*override*/ bool deleteInstances_(DSC_Scalar &rInstances);
+    virtual /*override*/ bool deleteInstances_(
+	rtLINK_CType *pInstances, rtLINK_CType *&rpTrues, rtLINK_CType *&rpFalses
+    );
 protected:
+    bool doVStoreInstanceDeletionSetup (VReference<rtPTOKEN_CType> &rpPTC);
+
+//  Property Management
+private:
+    virtual /*override*/ bool getProperty_(
+	Vdd::Store::Reference &rpResult, DSC_Pointer &rPointer, unsigned int xPropertySlot, Vdd::Store *pPropertyPrototype
+    ) {
+	return getProperty (rpResult, rPointer, xPropertySlot, pPropertyPrototype);
+    }
+public:
+    bool getProperty (
+	Vdd::Store::Reference &rpResult, DSC_Pointer &rPointer, unsigned int xPropertySlot, Vdd::Store *pPropertyPrototype
+    );
+
+//  Transient Extension Support
+private:
+    void setTransientExtensionTo (VGroundStore *pExtension);
+    transientx_t *transientExtension_() const {
+	return m_pExtension;
+    }
+    transientx_t *transientExtensionIfA_(VRunTimeType const &rRTT) const;
+    bool transientExtensionIsA_(VRunTimeType const &rRTT) const;
+
+//  Display and Inspection
+public:
+    virtual /*override*/ void getClusterReferenceMapData (MapEntryData &rData, unsigned int xReference);
+    virtual /*override*/ unsigned int getClusterReferenceMapSize ();
+
+    virtual /*override*/ unsigned __int64 getClusterSize ();
 
 //  State
-protected:
+private:
+    VGroundStore::Reference m_pExtension;
 };
+
+
+/********************************
+ ********************************
+ *****  Callable Interface  *****
+ ********************************
+ ********************************/
+
+PublicFnDecl rtVSTORE_Handle *rtVSTORE_NewCluster (
+    rtPTOKEN_Handle *pPPT, rtDICTIONARY_Handle *pDictionary, Vdd::Store *pSuperStore, M_CPD *pSuperPointer
+);
+
+PublicFnDecl void rtVSTORE_WriteDBUpdateInfo (
+    M_CPD*			pVStoreCPD
+);
 
 
 #endif

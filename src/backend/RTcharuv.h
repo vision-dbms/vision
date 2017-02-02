@@ -45,6 +45,53 @@
 )
 
 
+/******************************
+ ******************************
+ *****  Container Handle  *****
+ ******************************
+ ******************************/
+
+class rtCHARUV_Handle : public rtUVECTOR_Handle {
+//  Run Time Type
+    DECLARE_CONCRETE_RTT (rtCHARUV_Handle, rtUVECTOR_Handle);
+
+//  Aliases
+public:
+    typedef rtCHARUV_ElementType element_t;
+    typedef element_t *string_t;
+
+//  Construction
+public:
+    static VContainerHandle *Maker (M_CTE &rCTE) {
+	return new rtCHARUV_Handle (rCTE);
+    }
+protected:
+    rtCHARUV_Handle (M_CTE &rCTE) : rtUVECTOR_Handle (rCTE) {
+    }
+
+//  Destruction
+private:
+    ~rtCHARUV_Handle () {
+    }
+
+//  Access
+public:
+    element_t *array () const {
+	return UV_UV_ArrayAsType (typecastContent (), element_t);
+    }
+    element_t element (unsigned int xElement) const {
+	return array ()[xElement];
+    }
+    string_t string (unsigned int xString) const {
+	return array () + xString;
+    }
+
+//  Alignment
+public:
+    using BaseClass::align;
+};
+
+
 /********************************
  ********************************
  *****  Callable Interface  *****
@@ -52,24 +99,15 @@
  ********************************/
 
 PublicFnDecl M_CPD* __cdecl rtCHARUV_New (
-    M_CPD*			pPPT,
-    M_CPD*			refPTokenRefCPD,
-    int				refPTokenRefIndex,
-    Ref_UV_Initializer		initFn,
-    ...
+    rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT, Ref_UV_Initializer initFn, ...
 );
 
 PublicFnDecl M_CPD *rtCHARUV_New (
-    M_CPD *pPPT, M_CPD *pRPTRef, int xRPTRef
+    rtPTOKEN_Handle *pPPT, M_CPD *pRPTRef, int xRPTRef
 );
 
 PublicFnDecl M_CPD* rtCHARUV_New (
-    M_CPD*			posPToken,
-    M_CPD*			refPToken
-);
-
-PublicFnDecl M_CPD* rtCHARUV_Align (
-    M_CPD*			cpd
+    rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT
 );
 
 PublicFnDecl void rtCHARUV_ToSetUV (
@@ -167,43 +205,6 @@ PublicFnDecl bool rtCHARUV_ScalarLookup (
     rtLINK_LookupCase		lookupCase,
     int				*locationPtr
 );
-
-
-/******************************
- ******************************
- *****  Container Handle  *****
- ******************************
- ******************************/
-
-class rtCHARUV_Handle : public rtUVECTOR_Handle {
-//  Run Time Type
-    DECLARE_CONCRETE_RTT (rtCHARUV_Handle, rtUVECTOR_Handle);
-
-//  Construction
-protected:
-    rtCHARUV_Handle (M_CTE &rCTE) : rtUVECTOR_Handle (rCTE) {
-    }
-
-public:
-    static VContainerHandle *Maker (M_CTE &rCTE) {
-	return new rtCHARUV_Handle (rCTE);
-    }
-
-//  Destruction
-protected:
-
-//  Access
-public:
-
-//  Query
-public:
-
-//  Callbacks
-protected:
-
-//  State
-protected:
-};
 
 
 #endif

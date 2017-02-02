@@ -10,7 +10,7 @@
  *****  Declarations  *****
  **************************/
 
-class M_CPD;
+#include "RTptoken.h"
 
 #include "VkRadixListSorter.h"
 
@@ -24,8 +24,8 @@ class VfDistributionGenerator {
 public:
     VfDistributionGenerator (M_CPD*& pDistributionCPD);
 
-    void initializeUsingComainPToken (M_CPD* pPTokenCPD);
-    void initializeUsingDomainPToken (M_CPD* pPTokenCPD);
+    void initializeUsingComainPToken (rtPTOKEN_Handle *pPToken);
+    void initializeUsingDomainPToken (rtPTOKEN_Handle *pPToken);
 
 private:
     void initializeDistribution ();
@@ -60,11 +60,11 @@ public:
 
 /*****  Access  *****/
 public:
-    M_CPD* distributionComainPTokenCPD () const {
+    rtPTOKEN_Handle *distributionComainPToken () const {
 	return m_pDistributionComainPToken;
     }
 
-    M_CPD* distributionDomainPTokenCPD () const {
+    rtPTOKEN_Handle *distributionDomainPToken () const {
 	return m_pDistributionDomainPToken;
     }
 
@@ -78,10 +78,10 @@ public:
 
 /*****  State  *****/
 protected:
-    M_CPD*		m_pDistributionComainPToken;
-    M_CPD*		m_pDistributionDomainPToken;
-    M_CPD*&		m_pDistributionCPD;
-    unsigned int*	m_pDistributionArray;
+    rtPTOKEN_Handle::Reference	m_pDistributionComainPToken;
+    rtPTOKEN_Handle::Reference	m_pDistributionDomainPToken;
+    M_CPD*&			m_pDistributionCPD;
+    unsigned int*		m_pDistributionArray;
 };
 
 

@@ -26,7 +26,9 @@
 
 
 class VDescriptor : public VTransient {
-//  Friends
+//  Aliases
+public:
+    typedef Vdd::Store Store;
 
 //  Types & Enumerations...
 public:
@@ -104,20 +106,14 @@ public:
 
 //  Access
 public:
-    void assignTo (
-	rtLINK_CType *linkc, M_CPD *pTargetCPD
-    );
-    void assignTo (
-	rtREFUV_TypePTR_Reference refp, M_CPD *pTargetCPD
-    );
-    void assignTo (
-	DSC_Pointer& rPointer, M_CPD *pTargetCPD
-    );
+    void assignTo (DSC_Pointer &rSubscript, Vdd::Store *pTarget);
+    void assignTo (DSC_Scalar &rSubscript, Vdd::Store *pTarget);
+    void assignTo (rtLINK_CType *pSubscript, Vdd::Store *pTarget);
 
     M_CPD *distribution	() const { return m_pDistribution; }
 
-    rtLINK_CType *subsetInStore (M_CPD *pStore, VDescriptor *pValueReturn);
-    rtLINK_CType *subsetInStore (M_CPD *pStore) {
+    rtLINK_CType *subsetInStore (Store *pStore, VDescriptor *pValueReturn);
+    rtLINK_CType *subsetInStore (Store *pStore) {
 	return subsetInStore (pStore, 0);
     }
     rtLINK_CType *subsetOfType (
@@ -137,7 +133,7 @@ public: //protected:
     VFragmentation const& contentAsFragmentation () const {
 	return m_uContent.asFragmentation;
     }
-    M_CPD *contentAsVector () const {
+    rtVECTOR_Handle *contentAsVector () const {
 	return m_uContent.asVector;
     }
     rtVECTOR_CType *contentAsVectorC () const {
@@ -150,10 +146,10 @@ public: //protected:
     VFragmentation &contentAsFragmentation () {
 	return m_uContent.asFragmentation;
     }
-    M_CPD*& contentAsVector () {
+    rtVECTOR_Handle *&contentAsVector () {
 	return m_uContent.asVector;
     }
-    rtVECTOR_CType*& contentAsVectorC () {
+    rtVECTOR_CType *&contentAsVectorC () {
 	return m_uContent.asVectorC;
     }
 
@@ -215,7 +211,7 @@ public:
 
     VFragmentation &convertToFragmentation (bool fCoalescing = DefragmentationAttemptEnabled);
 
-    M_CPD *convertToVector ();
+    rtVECTOR_Handle *convertToVector ();
 
     rtVECTOR_CType *convertToVectorC ();
 
@@ -226,14 +222,16 @@ protected:
 	rSource.construct ();
 	m_xType = Type_Std;
     }
-    void setContentToVector (M_CPD *vector) {
+    void setContentToVector (rtVECTOR_Handle *pSource) {
+	pSource->retain ();
 	clearContent ();
-	contentAsVector () = vector;
+	contentAsVector () = pSource;
 	m_xType = Type_Vector;
     }
-    void setContentToVector (rtVECTOR_CType *vectorc) {
+    void setContentToVector (rtVECTOR_CType *pSource) {
+	pSource->retain ();
 	clearContent ();
-	contentAsVectorC () = vectorc;
+	contentAsVectorC () = pSource;
 	m_xType = Type_VectorC;
     }
 
@@ -275,18 +273,13 @@ public:
 	m_xType = Type_Std;
     }
 
-    void setToCorrespondence (M_CPD *pPPT, M_CPD *pStore, unsigned int xRPT) {
+    void setToCorrespondence (rtPTOKEN_Handle *pPPT, Store *pStore) {
 	clear ();
-	contentAsMonotype ().constructCorrespondence (pPPT, pStore, xRPT);
+	contentAsMonotype ().constructCorrespondence (pPPT, pStore);
 	m_xType = Type_Std;
     }
 
-    void setToIdentity (M_CPD *pStore, M_CPD *pPToken) {
-	clear ();
-	contentAsMonotype ().constructIdentity (pStore, pPToken);
-	m_xType = Type_Std;
-    }
-    void setToIdentity (VConstructor* pStore, M_CPD *pPToken) {
+    void setToIdentity (Store *pStore, rtPTOKEN_Handle *pPToken) {
 	clear ();
 	contentAsMonotype ().constructIdentity (pStore, pPToken);
 	m_xType = Type_Std;
@@ -296,7 +289,7 @@ public:
      *  setToNA/True/False  *
      ************************/
 
-    void setToNA (M_CPD *pPPT, M_KOT *pKOT) {
+    void setToNA (rtPTOKEN_Handle *pPPT, M_KOT *pKOT) {
 	clear ();
 	contentAsMonotype ().constructNA (pPPT, pKOT);
 	m_xType = Type_Std;
@@ -307,19 +300,19 @@ public:
 	m_xType = Type_Std;
     }
 
-    void setToTrue (M_CPD *pPPT, M_KOT *pKOT) {
+    void setToTrue (rtPTOKEN_Handle *pPPT, M_KOT *pKOT) {
 	clear ();
 	contentAsMonotype ().constructTrue (pPPT, pKOT);
 	m_xType = Type_Std;
     }
 
-    void setToFalse (M_CPD *pPPT, M_KOT *pKOT) {
+    void setToFalse (rtPTOKEN_Handle *pPPT, M_KOT *pKOT) {
 	clear ();
 	contentAsMonotype ().constructFalse (pPPT, pKOT);
 	m_xType = Type_Std;
     }
 
-    void setToBoolean (M_CPD *pPPT, M_KOT *pKOT, bool iBoolean) {
+    void setToBoolean (rtPTOKEN_Handle *pPPT, M_KOT *pKOT, bool iBoolean) {
 	clear ();
 	contentAsMonotype ().constructBoolean (pPPT, pKOT, iBoolean);
 	m_xType = Type_Std;
@@ -329,85 +322,75 @@ public:
      *  setToConstant  *
      *******************/
 
-    void setToConstant (M_CPD *pPPT, M_CPD *pStore, M_CPD *pRPT) {
-	pStore->retain ();
-	pRPT->retain ();
+    void setToConstant (rtPTOKEN_Handle *pPPT, Store *pStore, rtPTOKEN_Handle *pRPT) {
 	clear ();
 	contentAsMonotype ().constructConstant (pPPT, pStore, pRPT);
 	m_xType = Type_Std;
     }
-    void setToConstant (M_CPD *pPPT, M_KOTE const &rKOTE) {
+    void setToConstant (rtPTOKEN_Handle *pPPT, M_KOTE const &rKOTE) {
 	clear ();
 	contentAsMonotype ().constructConstant (pPPT, rKOTE);
 	m_xType = Type_Std;
     }
 
-    void setToConstant (M_CPD *pPPT, M_CPD *pStore, M_CPD *pRPT, char value) {
-	pStore->retain ();
-	pRPT->retain ();
+    void setToConstant (rtPTOKEN_Handle *pPPT, Store *pStore, rtPTOKEN_Handle *pRPT, char value) {
 	clear ();
 	contentAsMonotype ().constructConstant (pPPT, pStore, pRPT, value);
 	m_xType = Type_Std;
     }
-    void setToConstant (M_CPD *pPPT, M_KOTE const &rKOTE, char value) {
+    void setToConstant (rtPTOKEN_Handle *pPPT, M_KOTE const &rKOTE, char value) {
 	clear ();
 	contentAsMonotype ().constructConstant (pPPT, rKOTE, value);
 	m_xType = Type_Std;
     }
-    void setToConstant (M_CPD *pPPT, M_KOT *pKOT, char value) {
+    void setToConstant (rtPTOKEN_Handle *pPPT, M_KOT *pKOT, char value) {
 	setToConstant (pPPT, pKOT->TheCharacterClass, value);
     }
 
-    void setToConstant (M_CPD *pPPT, M_CPD *pStore, M_CPD *pRPT, double value) {
-	pStore->retain ();
-	pRPT->retain ();
+    void setToConstant (rtPTOKEN_Handle *pPPT, Store *pStore, rtPTOKEN_Handle *pRPT, double value) {
 	clear ();
 	contentAsMonotype ().constructConstant (pPPT, pStore, pRPT, value);
 	m_xType = Type_Std;
     }
-    void setToConstant (M_CPD *pPPT, M_KOTE const &rKOTE, double value) {
+    void setToConstant (rtPTOKEN_Handle *pPPT, M_KOTE const &rKOTE, double value) {
 	clear ();
 	contentAsMonotype ().constructConstant (pPPT, rKOTE, value);
 	m_xType = Type_Std;
     }
-    void setToConstant (M_CPD *pPPT, M_KOT *pKOT, double value) {
+    void setToConstant (rtPTOKEN_Handle *pPPT, M_KOT *pKOT, double value) {
 	setToConstant (pPPT, pKOT->TheDoubleClass, value);
     }
 
-    void setToConstant (M_CPD *pPPT, M_CPD *pStore, M_CPD *pRPT, float value) {
-	pStore->retain ();
-	pRPT->retain ();
+    void setToConstant (rtPTOKEN_Handle *pPPT, Store *pStore, rtPTOKEN_Handle *pRPT, float value) {
 	clear ();
 	contentAsMonotype ().constructConstant (pPPT, pStore, pRPT, value);
 	m_xType = Type_Std;
     }
-    void setToConstant (M_CPD *pPPT, M_KOTE const &rKOTE, float value) {
+    void setToConstant (rtPTOKEN_Handle *pPPT, M_KOTE const &rKOTE, float value) {
 	clear ();
 	contentAsMonotype ().constructConstant (pPPT, rKOTE, value);
 	m_xType = Type_Std;
     }
-    void setToConstant (M_CPD *pPPT, M_KOT *pKOT, float value) {
+    void setToConstant (rtPTOKEN_Handle *pPPT, M_KOT *pKOT, float value) {
 	setToConstant (pPPT, pKOT->TheFloatClass, value);
     }
 
-    void setToConstant (M_CPD *pPPT, M_CPD *pStore, M_CPD *pRPT, int value) {
-	pStore->retain ();
-	pRPT->retain ();
+    void setToConstant (rtPTOKEN_Handle *pPPT, Store *pStore, rtPTOKEN_Handle *pRPT, int value) {
 	clear ();
 	contentAsMonotype ().constructConstant (pPPT, pStore, pRPT, value);
 	m_xType = Type_Std;
     }
-    void setToConstant (M_CPD *pPPT, M_KOTE const &rKOTE, int value) {
+    void setToConstant (rtPTOKEN_Handle *pPPT, M_KOTE const &rKOTE, int value) {
 	clear ();
 	contentAsMonotype ().constructConstant (pPPT, rKOTE, value);
 	m_xType = Type_Std;
     }
-    void setToConstant (M_CPD *pPPT, M_KOT *pKOT, int value) {
+    void setToConstant (rtPTOKEN_Handle *pPPT, M_KOT *pKOT, int value) {
 	setToConstant (pPPT, pKOT->TheIntegerClass, value);
     }
 
     void setToReferenceConstant (
-	M_CPD *pPPT, M_CPD *pStore, M_CPD *pRPT, unsigned int value
+	rtPTOKEN_Handle *pPPT, Store *pStore, rtPTOKEN_Handle *pRPT, unsigned int value
     ) {
 	clear ();
 	contentAsMonotype ().constructReferenceConstant (pPPT, pStore, pRPT, value);
@@ -419,39 +402,35 @@ public:
 	contentAsMonotype ().constructMonotype (pMonotype);
 	m_xType = Type_Std;
     }
-    void setToMonotype (M_CPD *pStore, M_CPD *pMonotype) {
-	if (pStore)
-	    pStore->retain ();
-
+    void setToMonotype (Store *pStore, M_CPD *pMonotype) {
 	clear ();
-
 	if (pStore)
 	    contentAsMonotype ().constructMonotype (pStore, pMonotype);
 	else
 	    contentAsMonotype ().constructMonotype (pMonotype);
-
 	m_xType = Type_Std;
     }
 
-    void setToMonotype (M_CPD *pStore, rtLINK_CType *pMonotype) {
-	pStore->retain ();
+    void setToMonotype (Store *pStore, rtLINK_CType *pMonotype) {
 	clear ();
 	contentAsMonotype ().constructMonotype (pStore, pMonotype);
 	m_xType = Type_Std;
     }
 
-    void setToVector (M_CPD *vector) {
+    void setToVector (rtVECTOR_Handle *pSource) {
+	pSource->retain ();
 	clear ();
-	contentAsVector () = vector;
+	contentAsVector () = pSource;
 	m_xType = Type_Vector;
     }
-    void setToVector (rtVECTOR_CType *vectorc) {
+    void setToVector (rtVECTOR_CType *pSource) {
+	pSource->retain ();
 	clear ();
-	contentAsVectorC () = vectorc;
+	contentAsVectorC () = pSource;
 	m_xType = Type_VectorC;
     }
 
-    VFragmentation &setToFragmentation (M_CPD *ptoken) {
+    VFragmentation &setToFragmentation (rtPTOKEN_Handle *ptoken) {
 	clear ();
 	contentAsFragmentation ().construct (ptoken);
 	m_xType = Type_Fragmentation;
@@ -472,7 +451,7 @@ public:
     void raiseTypeException (char const* pWhere = 0) const;
 
 protected:
-    void raiseAssignmentTargetException (M_CPD *pTargetCPD) const;
+    void raiseAssignmentTargetException (Vdd::Store *pStore) const;
 
 //  State
 /*---------------------------------------------------------------------------*
@@ -502,7 +481,7 @@ protected:
     M_CPD*		m_pDistribution;
     union content_t {
 	DSC_Descriptor	    asDescriptor;
-	M_CPD*		    asVector;
+	rtVECTOR_Handle*    asVector;
 	rtVECTOR_CType*	    asVectorC;
 	VFragmentation	    asFragmentation;
     }			m_uContent;

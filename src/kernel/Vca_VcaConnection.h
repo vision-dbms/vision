@@ -92,7 +92,7 @@ namespace Vca {
 
 	//  State
 	private:
-	    unsigned int m_cBytes;
+	    size_t m_cBytes;
 	    unsigned int m_cMessages;
 	};
 
@@ -141,7 +141,7 @@ namespace Vca {
 	void setPeer (VcaSite *pPeer);
 	void suspend (VcaSerializer *pSerializer);
 
-	void supply (IPeer::Reference &rpOurside);
+	void supplyOurside (IPeer::Reference &rpOurside);
 	void onConnect (IPeer *pFarside);
 
     //  Service Query

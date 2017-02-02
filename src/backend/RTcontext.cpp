@@ -28,6 +28,7 @@
 
 /*****  Self  *****/
 #include "RTcontext.h"
+#include "RTvstore.h"
 
 
 /******************************
@@ -45,24 +46,6 @@
  ***************************/
 
 DEFINE_CONCRETE_RTT (rtCONTEXT_Handle);
-
-
-/***********************************
- ***********************************
- *****                         *****
- *****  rtCONTEXT_Constructor  *****
- *****                         *****
- ***********************************
- ***********************************/
-
-/***************************
- ***************************
- *****  Run Time Type  *****
- ***************************
- ***************************/
-
-DEFINE_CONCRETE_RTT (rtCONTEXT_Constructor);
-
 
 /**************************
  **************************
@@ -70,27 +53,20 @@ DEFINE_CONCRETE_RTT (rtCONTEXT_Constructor);
  **************************
  **************************/
 
-rtCONTEXT_Constructor::rtCONTEXT_Constructor (
-    DSC_Descriptor &rSelf, DSC_Descriptor &rCurrent, DSC_Descriptor &rMy, DSC_Descriptor &rParent
-)
-{
-    m_iSelf = rSelf;
-    rSelf.construct ();
+rtCONTEXT_Handle::rtCONTEXT_Handle (
+    rtCONTEXT_Handle *pParentContext, DSC_Pointer &rParentPointer
+) : BaseClass (pParentContext->ScratchPad (), RTYPE_C_Context), m_pParentContext (pParentContext) {
+    m_iSelf	.construct ();
+    m_iCurrent	.construct ();
+    m_iMy	.construct ();
 
-    m_iCurrent = rCurrent;
-    rCurrent.construct ();
-
-    m_iMy = rMy;
-    rMy.construct ();
-
-    m_iParent = rParent;
-    rParent.construct ();
+    m_iParentPointer = rParentPointer;
+    rParentPointer.construct ();
 }
 
-rtCONTEXT_Constructor::rtCONTEXT_Constructor (
+rtCONTEXT_Handle::rtCONTEXT_Handle (
     DSC_Descriptor &rSelf, DSC_Descriptor &rCurrent, DSC_Descriptor &rMy
-)
-{
+) : BaseClass (rCurrent.codScratchPad (), RTYPE_C_Context) {
     m_iSelf = rSelf;
     rSelf.construct ();
 
@@ -100,44 +76,51 @@ rtCONTEXT_Constructor::rtCONTEXT_Constructor (
     m_iMy = rMy;
     rMy.construct ();
 
-    m_iParent.construct ();
+    m_iParentPointer.construct ();
 }
 
-rtCONTEXT_Constructor::rtCONTEXT_Constructor (DSC_Descriptor const &rSelfCurrentAndMy) {
+rtCONTEXT_Handle::rtCONTEXT_Handle (
+    DSC_Descriptor const &rSelfCurrentAndMy
+) : BaseClass (rSelfCurrentAndMy.codScratchPad (), RTYPE_C_Context) {
     m_iSelf	.construct (rSelfCurrentAndMy);
     m_iCurrent	.construct (rSelfCurrentAndMy);
     m_iMy	.construct (rSelfCurrentAndMy);
-    m_iParent	.construct ();
+    m_iParentPointer.construct ();
 }
 
-rtCONTEXT_Constructor::rtCONTEXT_Constructor (M_CPD *pContainer) : VConstructor (pContainer) {
+rtCONTEXT_Handle::rtCONTEXT_Handle (M_CTE &rCTE) : rtPOPVECTOR_Handle (rCTE) {
 /*****  Unpack the components of this container...  *****/
-    M_CPD *dscCPD;
-    
-    rtDSC_Unpack (dscCPD = rtCONTEXT_CPD_CurrentCPD (pContainer), &m_iCurrent);
-    dscCPD->release ();
+    rtDSC_Handle::Reference pDescriptor;
 
-    rtDSC_Unpack (dscCPD = rtCONTEXT_CPD_SelfCPD    (pContainer), &m_iSelf);
-    dscCPD->release ();
+    getCurrent (pDescriptor);
+    pDescriptor->getValue (m_iCurrent);
 
-    rtDSC_Unpack (dscCPD = rtCONTEXT_CPD_OriginCPD  (pContainer), &m_iMy);
-    dscCPD->release ();
+    getSelf (pDescriptor);
+    pDescriptor->getValue (m_iSelf);
 
-    m_iParent.construct ();
+    getMy (pDescriptor);
+    pDescriptor->getValue (m_iMy);
+
+    m_iParentPointer.construct ();
 }
 
 
-/**************************
- **************************
- *****  Construction  *****
- **************************
- **************************/
+/*************************
+ *************************
+ *****  Destruction  *****
+ *************************
+ *************************/
 
-rtCONTEXT_Constructor::~rtCONTEXT_Constructor () {
+rtCONTEXT_Handle::~rtCONTEXT_Handle () {
     m_iSelf	.clear ();
     m_iCurrent  .clear ();
     m_iMy	.clear ();
-    m_iParent   .clear ();
+    m_iParentPointer.clear ();
+}
+
+void rtCONTEXT_Handle::deleteThis () {
+    if (onDeleteThis ())
+	delete this;
 }
 
 
@@ -147,22 +130,17 @@ rtCONTEXT_Constructor::~rtCONTEXT_Constructor () {
  ********************
  ********************/
 
-RTYPE_Type rtCONTEXT_Constructor::RType_() const {
-    return RTYPE_C_Context;
+rtPTOKEN_Handle *rtCONTEXT_Handle::getPToken () const {
+    return m_iCurrent.isntEmpty () ? m_iCurrent.PPT ()
+	 : m_iSelf   .isntEmpty () ? m_iSelf   .PPT ()
+	 : m_iMy     .isntEmpty () ? m_iMy     .PPT ()
+	 : m_iParentPointer.PPT ();
 }
-
-M_ASD *rtCONTEXT_Constructor::Space_() const {
-    return ((rtCONTEXT_Constructor*)(this))->getCurrent ().codSpace ();
-}
-
 
 /*---------------------------------------------------------------------------
- *****  Utility macro to obtain the value of a context component.
+ *****  Utility to obtain a context component.
  *
  *  Arguments:
- *	pThis			- the address of the context psuedo-object
- *				  (i.e., constructor) whose component is
- *				  to be accessed.
  *	rComponent		- the constructor field name for the component
  *				  to be accessed
  *	pAccessRoutine		- the name of the routine to obtain the
@@ -172,20 +150,13 @@ M_ASD *rtCONTEXT_Constructor::Space_() const {
  *	rComponent
  *
  *****/
-DSC_Descriptor &rtCONTEXT_Constructor::Get (DSC_Descriptor rtCONTEXT_Constructor::*pMemberComponent) {
+DSC_Descriptor &rtCONTEXT_Handle::Get (DSC_Descriptor rtCONTEXT_Handle::*pMemberComponent) {
     DSC_Descriptor &rComponent = this->*pMemberComponent;
 
-    rtCONTEXT_Constructor* pParentContext;
-    if (rComponent.isEmpty () &&
-	IsntNil (pParentContext = static_cast<rtCONTEXT_Constructor*> (m_iParent.storePOIfAvailable ()))
-    ) {
-	DSC_Descriptor &rParentComponent = pParentContext->Get (pMemberComponent);
-
-	if (rParentComponent.isntEmpty ()) {
-	    rComponent.constructComposition (
-		DSC_Descriptor_Pointer (m_iParent), rParentComponent
-	    );
-	}
+    if (rComponent.isEmpty () && m_pParentContext.isntNil ()) {
+	DSC_Descriptor &rParentComponent = m_pParentContext->Get (pMemberComponent);
+	if (rParentComponent.isntEmpty ())
+	    rComponent.constructComposition (m_iParentPointer, rParentComponent);
     }
 
     return rComponent;
@@ -209,42 +180,48 @@ DSC_Descriptor &rtCONTEXT_Constructor::Get (DSC_Descriptor rtCONTEXT_Constructor
  *	A standard CPD for the realized context.
  *
  *****/
-M_CPD *rtCONTEXT_Constructor::newRealization () {
-    M_ASD *pContainerSpace = ScratchPad_();
+void rtCONTEXT_Handle::createContainer () {
+    if (hasNoContainer ()) {
+	CreateContainer (rtCONTEXT_Context_POPCount);
 
-/*****  Create the container, ...  *****/
-    M_CPD *pContainer = POPVECTOR_New (
-	pContainerSpace, RTYPE_C_Context, rtCONTEXT_Context_POPCount
-    );
+	rtDSC_Handle::Reference pDescriptor;
 
-/*****  ... pack and store its components, ...  *****/
-    M_CPD *dscCPD = rtDSC_Pack (pContainerSpace, &getCurrent ());
-    pContainer->StoreReference (rtCONTEXT_CPx_Current, dscCPD);
-    dscCPD->release ();
+	pDescriptor.setTo (new rtDSC_Handle (m_pASD, m_iCurrent));
+	StoreReference (rtCONTEXT_CPx_Current, pDescriptor);
 
-    dscCPD = rtDSC_Pack (pContainerSpace, &getSelf ());
-    pContainer->StoreReference (rtCONTEXT_CPx_Self, dscCPD);
-    dscCPD->release ();
+	pDescriptor.setTo (new rtDSC_Handle (m_pASD, m_iSelf));
+	StoreReference (rtCONTEXT_CPx_Self, pDescriptor);
 
-    dscCPD = rtDSC_Pack (pContainerSpace, &getMy ());
-    pContainer->StoreReference (rtCONTEXT_CPx_Origin, dscCPD);
-    dscCPD->release ();
+	pDescriptor.setTo (new rtDSC_Handle (m_pASD, m_iMy));
+	StoreReference (rtCONTEXT_CPx_Origin, pDescriptor);
 
-/*****  ... release the now unneeded parent, ...  *****/
-    m_iParent.clear ();
+    /*****  ... release the now unneeded parent, ...  *****/
+	m_iParentPointer.clear ();
+    }
+}
 
-/*****  ... and return.  *****/
-    return pContainer;
+bool rtCONTEXT_Handle::PersistReferences () {
+    createContainer ();
+    return BaseClass::PersistReferences ();
 }
 
 
-/*********************************
- *********************************
- *****                       *****
- *****  rtCONTEXT_Container  *****
- *****                       *****
- *********************************
- *********************************/
+/********************************
+ ********************************
+ *****  Garbage Collection  *****
+ ********************************
+ ********************************/
+
+void rtCONTEXT_Handle::traverseReferences(visitFunction fp) {
+    if (!(m_pParentContext.isEmpty())) (m_pParentContext.referent()->*fp)();
+
+    if (!(m_iMy.isEmpty()           )) m_iMy.traverseHandleReferences(fp);
+    if (!(m_iSelf.isEmpty()         )) m_iSelf.traverseHandleReferences(fp);
+    if (!(m_iCurrent.isEmpty()      )) m_iCurrent.traverseHandleReferences(fp);
+    // traverse m_iParentPointer in the future?
+
+}
+
 
 /***********************
  ***********************
@@ -255,38 +232,30 @@ M_CPD *rtCONTEXT_Constructor::newRealization () {
 /*---------------------------------------------------------------------------
  *****  Routine to align a context
  *
- *  Arguments:
- *	context			- a standard CPD for the context to be aligned.
- *
  *  Returns:
  *	true if the closure required alignment. false if not.
  *
  *****/
-PublicFnDef bool rtCONTEXT_Align (M_CPD *context) {
-    bool result = false;
-
-/*****  Validate Argument R-Type  *****/
-    RTYPE_MustBeA ("rtCONTEXT_Align", M_CPD_RType (context), RTYPE_C_Context);
+bool rtCONTEXT_Handle::align () {
+    bool bAlignmentsDone = false;
 
 /*****  Align Current  *****/
-    M_CPD *dscCPD = rtCONTEXT_CPD_CurrentCPD (context);
-    if (rtDSC_Align (dscCPD))
-	result = true;
-    dscCPD->release ();
+    rtDSC_Handle::Reference pDescriptor;
+    getCurrent (pDescriptor);
+    if (pDescriptor->align ())
+	bAlignmentsDone = true;
 
 /*****  Align Self  *****/
-    dscCPD = rtCONTEXT_CPD_SelfCPD (context);
-    if (rtDSC_Align (dscCPD))
-	result = true;
-    dscCPD->release ();
+    getSelf (pDescriptor);
+    if (pDescriptor->align ())
+	bAlignmentsDone = true;
 
 /*****  Align Origin  *****/
-    dscCPD = rtCONTEXT_CPD_OriginCPD (context);
-    if (rtDSC_Align (dscCPD))
-	result = true;
-    dscCPD->release ();
+    getMy (pDescriptor);
+    if (pDescriptor->align ())
+	bAlignmentsDone = true;
 
-    return result;
+    return bAlignmentsDone;
 }
 
 

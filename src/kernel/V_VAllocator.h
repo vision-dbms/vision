@@ -146,7 +146,7 @@ namespace V {
     //  Allocation
     private:
 	static size_t allocationSize (size_t sCell) {
-	    unsigned int nCells = 1024 / sCell;
+	    unsigned int nCells = static_cast<unsigned int>(1024 / sCell);
 	    return nCells > 0 ? nCells * sCell : sCell;
 	}
 	static pointer_t getSpace (size_t sCell);
@@ -319,7 +319,7 @@ namespace V {
     //  Grain and Counter Indices
     protected:
 	static unsigned int cellIndex (size_t sObject) {
-	    return sObject <= CellFloor ? 0 : (sObject - CellFloor + CellGrain - 1) / CellGrain;
+	    return sObject <= CellFloor ? 0 : static_cast<unsigned int>((sObject - CellFloor + CellGrain - 1) / CellGrain);
 	}
 	static size_t cellSize (unsigned int xGrain) {
 	    return CellGrain * (xGrain + 1) + CellFloor;

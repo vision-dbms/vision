@@ -78,7 +78,7 @@ protected:
 //  Access
 public:
     M_CT *ct () const {
-	return M_CPreamble_ContainerBaseAsType (m_pContainerAddress, M_CT);
+	return M_CPreamble_ContainerBaseAsType (m_pContainer, M_CT);
     }
 
 //  Query

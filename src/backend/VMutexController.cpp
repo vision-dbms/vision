@@ -109,7 +109,7 @@ void VMutexController::Start () {
 	    m_pProtectedPrimitive = PrimitiveDescriptor (xProtectedPrimitive);
 	break;
     case 1:
-	m_pProtectedContainer.setTo (getSelf().storeHandle ());
+	m_pProtectedContainer.setTo (getSelf().store ());
 	break;
     default:
 	raiseUnimplementedAliasException ("VMutexController::Start");

@@ -56,13 +56,13 @@ namespace Vca {
 
     //  IVUnknown Methods
     private:
-	void VINTERFACE_MEMBERIMPL(QueryInterface) (VTypeInfo *pTypeInfo, IVReceiver<IVUnknown*> *pReceiver) {
+	void VINTERFACE_MEMBERIMPL(QueryInterface) (VMessage *pMessage, VTypeInfo *pTypeInfo, IVReceiver<IVUnknown*> *pReceiver) {
 	    BaseClass::QI (pTypeInfo, pReceiver);
 	}
 
     //  ITrigger Methods
     private:
-	void VINTERFACE_MEMBERIMPL(Process) () {
+	void VINTERFACE_MEMBERIMPL(Process) (VMessage *pMessage) {
 	    (m_pActor.referent()->*m_pAction) (this);
 	}
 

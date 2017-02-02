@@ -52,7 +52,7 @@ void VCollectionOfOrderables::refreshCache ()
  **********************
  **********************/
 
-M_CPD* VCollectionOfOrderables::orderDPT () {
+rtPTOKEN_Handle *VCollectionOfOrderables::orderDPT () {
     if (m_pOrderDPT.isNil ())
 	createOrderingObjects ();
     return m_pOrderDPT;
@@ -73,10 +73,8 @@ unsigned int const* VCollectionOfOrderables::orderingArray () {
 void VCollectionOfOrderables::createOrderingObjects () {
     unsigned int nelements = cardinality ();
     if (nelements > 1) {
-	m_pOrderDPT.claim (rtPTOKEN_New (M_AttachedNetwork->ScratchPad (), nelements));
-	m_pOrdering.claim (
-	    rtREFUV_New (m_pOrderDPT, ptoken (), NilOf (Ref_UV_Initializer))
-	);
+	m_pOrderDPT.setTo (new rtPTOKEN_Handle (M_AttachedNetwork->ScratchPad (), nelements));
+	m_pOrdering.claim (rtREFUV_New (m_pOrderDPT, ptoken (), NilOf (Ref_UV_Initializer)));
 
 	unsigned int *pOrderingArray = UV_CPD_Array (m_pOrdering, unsigned int);
 	for (unsigned int i = 0; i < nelements; i++)

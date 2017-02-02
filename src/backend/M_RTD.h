@@ -28,7 +28,7 @@ typedef VContainerHandle *(*M_Type_HandleMaker) (M_CTE&);
 
 typedef void (*M_Type_CPDInitFn	) (M_CPD*);
 typedef void (*M_Type_ReclaimFn	) (M_ASD*, M_CPreamble const*);
-typedef void (*M_Type_MarkFn	) (M_ASD*, M_CPreamble const*);
+typedef void (*M_Type_MarkFn	) (M_ASD::GCVisitBase*, M_ASD*, M_CPreamble const*);
 
 
 /*---------------------------------------------------------------------------
@@ -86,11 +86,11 @@ public:
 
 //  Access
 public:
-    unsigned int CPDPointerCount () const {
+    unsigned int cpdPointerCount () const {
 	return m_iCPDPointerCount;
     }
 
-    bool CPDReuseable () const {
+    bool cpdReuseable () const {
 	return m_fReuseableCPDs;
     }
 

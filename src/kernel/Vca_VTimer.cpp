@@ -63,7 +63,7 @@ Vca::VTimer::VTimer (VCohort *pCohort, VString const& rPurpose, ITrigger *pTrigg
 {
     defaultLogger().printf ("+++ %p: %s construction\n", this, m_iPurpose.content ());
 
-    traceInfo ("Creating Timer");
+    //    traceInfo ("Creating Timer");
 }
 
 Vca::VTimer::VTimer (VCohort *pCohort, VString const& rPurpose, ITrigger *pTrigger, microseconds_t sDelay, bool bRepeating)
@@ -78,7 +78,7 @@ Vca::VTimer::VTimer (VCohort *pCohort, VString const& rPurpose, ITrigger *pTrigg
 {
     defaultLogger().printf ("+++ %p: %s construction\n", this, m_iPurpose.content ());
 
-    traceInfo ("Creating Timer");
+    //    traceInfo ("Creating Timer");
 }
 
 Vca::VTimer::VTimer (VCohort *pCohort, ITrigger *pTrigger, microseconds_t sDelay1, microseconds_t sDelay2, bool bRepeating)
@@ -93,7 +93,7 @@ Vca::VTimer::VTimer (VCohort *pCohort, ITrigger *pTrigger, microseconds_t sDelay
 {
     defaultLogger().printf ("+++ %p: %s construction\n", this, m_iPurpose.content ());
 
-    traceInfo ("Creating Timer");
+    //    traceInfo ("Creating Timer");
 }
 
 Vca::VTimer::VTimer (VCohort *pCohort, ITrigger *pTrigger, microseconds_t sDelay, bool bRepeating)
@@ -108,7 +108,7 @@ Vca::VTimer::VTimer (VCohort *pCohort, ITrigger *pTrigger, microseconds_t sDelay
 {
     defaultLogger().printf ("+++ %p: %s construction\n", this, m_iPurpose.content ());
 
-    traceInfo ("Creating Timer");
+    //    traceInfo ("Creating Timer");
 }
 
 Vca::VTimer::VTimer (VString const& rPurpose, ITrigger *pTrigger, microseconds_t sDelay, bool bRepeating)
@@ -122,7 +122,7 @@ Vca::VTimer::VTimer (VString const& rPurpose, ITrigger *pTrigger, microseconds_t
 {
     defaultLogger().printf ("+++ %p: %s construction\n", this, m_iPurpose.content ());
 
-    traceInfo ("Creating Timer");
+    //    traceInfo ("Creating Timer");
 }
 
 Vca::VTimer::VTimer (ITrigger *pTrigger, microseconds_t sDelay1, microseconds_t sDelay2, bool bRepeating)
@@ -136,7 +136,7 @@ Vca::VTimer::VTimer (ITrigger *pTrigger, microseconds_t sDelay1, microseconds_t 
 {
     defaultLogger().printf ("+++ %p: %s construction\n", this, m_iPurpose.content ());
 
-    traceInfo ("Creating Timer");
+    //    traceInfo ("Creating Timer");
 }
 
 Vca::VTimer::VTimer (ITrigger *pTrigger, microseconds_t sDelay, bool bRepeating)
@@ -150,7 +150,7 @@ Vca::VTimer::VTimer (ITrigger *pTrigger, microseconds_t sDelay, bool bRepeating)
 {
     defaultLogger().printf ("+++ %p: %s construction\n", this, m_iPurpose.content ());
 
-    traceInfo ("Creating Timer");
+    //    traceInfo ("Creating Timer");
 }
 
 /*************************
@@ -162,7 +162,7 @@ Vca::VTimer::VTimer (ITrigger *pTrigger, microseconds_t sDelay, bool bRepeating)
 Vca::VTimer::~VTimer () {
     defaultLogger().printf ("+++ %p: %s destruction\n", this, m_iPurpose.content ());
 
-    traceInfo ("Destroying Timer");
+    //    traceInfo ("Destroying Timer");
 }
 
 

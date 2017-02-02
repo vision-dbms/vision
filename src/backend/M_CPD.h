@@ -81,8 +81,6 @@
 
 #define M_CPD_Size(cpd) M_CPreamble_Size (M_CPD_PreamblePtr (cpd))
 
-#define M_CPD_RType(cpd) M_CPreamble_RType (M_CPD_PreamblePtr (cpd))
-
 #define M_CPD_POP(cpd) M_CPreamble_POP (M_CPD_PreamblePtr (cpd))
 
 #define M_CPD_PointerToType(cpd,xPointer,type) (\
@@ -243,26 +241,20 @@ public:
     VContainerHandle *containerHandle () const {
 	return m_pContainerHandle;
     }
-    unsigned int ContainerIndex () const {
-	return m_pContainerHandle->ContainerIndex ();
-    }
-    RTYPE_Type ContainerRType () const {
-	return (RTYPE_Type)M_CPreamble_RType (m_pContainerPreamble);
+    unsigned int containerIndex () const {
+	return m_pContainerHandle->containerIndex ();
     }
 
     M_AND *Database () const {
 	return m_pContainerHandle->Database ();
     }
 
-    M_KnownObjectTable *KnownObjectTable () const {
-	return m_pContainerHandle->KnownObjectTable ();
-    }
     M_KOT *KOT () const {
 	return m_pContainerHandle->KOT ();
     }
 
     unsigned int PointerCount () const {
-	return m_pContainerHandle->CPDPointerCount ();
+	return m_pContainerHandle->cpdPointerCount ();
     }
 
     unsigned int ReferenceCount () const {
@@ -273,7 +265,7 @@ public:
 	return m_pContainerHandle->RTD ();
     }
     RTYPE_Type RType () const {
-	return (RTYPE_Type)M_CPreamble_RType (m_pContainerPreamble);
+	return m_pContainerHandle->RType ();
     }
     char const *RTypeName () const {
 	return m_pContainerHandle->RTypeName ();
@@ -286,32 +278,21 @@ public:
     M_ASD *Space () const {
 	return m_pContainerHandle->Space ();
     }
-    unsigned int SpaceIndex () const {
-	return m_pContainerHandle->SpaceIndex ();
+    unsigned int spaceIndex () const {
+	return m_pContainerHandle->spaceIndex ();
     }
 
     M_POP const &TheNilPOP () const {
 	return m_pContainerHandle->TheNilPOP ();
     }
 
-    transientx_t* TransientExtension () const {
-	return m_pContainerHandle->TransientExtension ();
-    }
-    transientx_t* TransientExtensionIfA (VRunTimeType const& rRTT) const {
-	return m_pContainerHandle->TransientExtensionIfA (rRTT);
-    }
-
 //  Query
 public:
-    bool ContainerHasMultipleUses () const {
+    bool hasMultipleUses () const {
 	return m_iReferenceCount > 1
 	    || IsntNil (m_pNext)
 	    || IsntNil (m_pPrev)
-	    || m_pContainerHandle->ContainerHasMultipleUses ();
-    }
-
-    bool HasATransientExtension () const {
-	return m_pContainerHandle->HasATransientExtension ();
+	    || m_pContainerHandle->hasMultipleUses ();
     }
 
     bool isAForwardingTarget () const {
@@ -321,18 +302,11 @@ public:
 	return m_pContainerHandle->isATRefRescanTarget ();
     }
 
-    bool IsInTheScratchPad () const {
-	return m_pContainerHandle->IsInTheScratchPad ();
+    bool isInTheScratchPad () const {
+	return m_pContainerHandle->isInTheScratchPad ();
     }
-    bool IsntInTheScratchPad () const {
-	return m_pContainerHandle->IsntInTheScratchPad ();
-    }
-
-    bool IsReadOnly () const {
-	return m_pContainerHandle->IsReadOnly ();
-    }
-    bool IsReadWrite () const {
-	return m_pContainerHandle->IsReadWrite ();
+    bool isntInTheScratchPad () const {
+	return m_pContainerHandle->isntInTheScratchPad ();
     }
 
     bool RTypeIs (RTYPE_Type xType) const {
@@ -342,14 +316,19 @@ public:
 	return RType () != xType;
     }
 
-    bool TransientExtensionIsA (VRunTimeType const& rRTT) const {
-	return m_pContainerHandle->TransientExtensionIsA (rRTT);
-    }
-
 //  Consistency Checking
 public:
     void CheckConsistency () const {
 	m_pContainerHandle->CheckConsistency ();
+    }
+
+//  Container Maintenance
+public:
+    bool align () const {
+	return m_pContainerHandle->align ();
+    }
+    bool alignAll (bool bCleaning = true) const {
+	return m_pContainerHandle->alignAll (bCleaning);
     }
 
 //  Display
@@ -371,14 +350,14 @@ public:
 
 //  Migration
 public:
-    void ForwardToSpace (M_ASD *pSpace) const {
-	m_pContainerHandle->ForwardToSpace (pSpace);
+    bool ForwardToSpace (M_ASD *pSpace) const {
+	return m_pContainerHandle->ForwardToSpace (pSpace);
     }
-    void ForwardToSpace (VContainerHandle *pHandle) const {
-	m_pContainerHandle->ForwardToSpace (pHandle->Space ());
+    bool ForwardToSpace (VContainerHandle *pHandle) const {
+	return m_pContainerHandle->ForwardToSpace (pHandle->Space ());
     }
-    void ForwardToSpace (M_CPD *pCPD) const {
-	m_pContainerHandle->ForwardToSpace (pCPD->Space ());
+    bool ForwardToSpace (M_CPD *pCPD) const {
+	return m_pContainerHandle->ForwardToSpace (pCPD->Space ());
     }
 
 //  Container Access
@@ -386,43 +365,41 @@ protected:
     M_POP *POP (unsigned int xPointer) const {
 	return M_CPD_PointerToPOP (this, xPointer);
     }
+public:
+    M_POP *OutboundPOP (int xPointer) const {
+	return xPointer < 0 ? NilOf (M_POP*) : POP (xPointer);
+    }
 
 public:
-    M_CPreamble* GetContainerAddress (int xPointer) {
+    M_CPreamble* GetContainerAddress (int xPointer) const {
 	return xPointer < 0
 	    ? m_pContainerPreamble
 	    : m_pContainerHandle->GetContainerAddress (POP (xPointer));
     }
-    M_CPreamble* GetContainerAddress (unsigned int xPointer) {
+    M_CPreamble* GetContainerAddress (unsigned int xPointer) const {
 	return m_pContainerHandle->GetContainerAddress (POP (xPointer));
     }
 
-    VContainerHandle *GetContainerHandle (int xPointer, RTYPE_Type xExpectedType = RTYPE_C_Any) {
+    VContainerHandle *GetContainerHandle (int xPointer, RTYPE_Type xExpectedType = RTYPE_C_Any) const {
 	return xPointer < 0 ? m_pContainerHandle : m_pContainerHandle->GetContainerHandle (
 	    POP (xPointer), xExpectedType
 	);
     }
-    VContainerHandle *GetContainerHandle (unsigned int xPointer, RTYPE_Type xExpectedType = RTYPE_C_Any) {
+    VContainerHandle *GetContainerHandle (unsigned int xPointer, RTYPE_Type xExpectedType = RTYPE_C_Any) const {
 	return m_pContainerHandle->GetContainerHandle (POP (xPointer), xExpectedType);
     }
 
-    M_CPD *GetCPD (int xPointer, RTYPE_Type xExpectedType = RTYPE_C_Any) {
+    M_CPD *GetCPD (int xPointer, RTYPE_Type xExpectedType = RTYPE_C_Any) const {
 	ASSERT_LIVENESS (this, Attach);
 	return xPointer < 0
 	    ? m_pContainerHandle->GetCPD ()
 	    : m_pContainerHandle->GetCPD (POP (xPointer), xExpectedType);
     }
-    M_CPD *GetCPD (unsigned int xPointer, RTYPE_Type xExpectedType = RTYPE_C_Any) {
+    M_CPD *GetCPD (unsigned int xPointer, RTYPE_Type xExpectedType = RTYPE_C_Any) const {
 	ASSERT_LIVENESS (this, Attach);
 	return m_pContainerHandle->GetCPD (POP (xPointer), xExpectedType);
     }
     M_CPD *GetCPD ();
-
-//  Container Creation
-public:
-    M_CPD *CreateContainer (RTYPE_Type xRType, size_t sContainer) const {
-	return m_pContainerHandle->CreateContainer (xRType, sContainer);
-    }
 
 //  Container Modification
 public:
@@ -463,6 +440,28 @@ public:
 	VShiftContainerTail (xPointer, sTail, sShift, bSqueeze);
     }
 
+//  P-Token Terminality
+public:
+    bool isTerminal (unsigned int xReference) {
+	return m_pContainerHandle->isTerminal (POP (xReference));
+    }
+    bool isTerminal (unsigned int xReference, rtPTOKEN_CType *&rpPTC) {
+	return m_pContainerHandle->isTerminal (POP (xReference), rpPTC);
+    }
+    bool isTerminal (unsigned int xReference, VReference<rtPTOKEN_Handle> &rpPTH) {
+	return m_pContainerHandle->isTerminal (POP (xReference), rpPTH);
+    }
+
+    bool isntTerminal (unsigned int xReference) {
+	return m_pContainerHandle->isntTerminal (POP (xReference));
+    }
+    bool isntTerminal (unsigned int xReference, rtPTOKEN_CType *&rpPTC) {
+	return m_pContainerHandle->isntTerminal (POP (xReference), rpPTC);
+    }
+    bool isntTerminal (unsigned int xReference, VReference<rtPTOKEN_Handle> &rpPTH) {
+	return m_pContainerHandle->isntTerminal (POP (xReference), rpPTH);
+    }
+
 //  Reference Access
 public:
     M_KOT *ReferencedKOT (M_POP const *pReference) const {
@@ -498,9 +497,6 @@ public:
     bool Names (M_KOTM pKOTM) const {
 	return m_pContainerHandle->Names (pKOTM);
     }
-    bool NamesPToken (M_KOTM pKOTM) const {
-	return m_pContainerHandle->NamesPToken (pKOTM);
-    }
 
     bool Names (VContainerHandle const *pThat) const {
 	return pThat->Names (m_pContainerHandle);
@@ -530,18 +526,6 @@ public:
 	return xReference < 0 ? m_pContainerHandle->Names (
 	    pKOTM
 	) : m_pContainerHandle->ReferenceNames (POP (xReference), pKOTM);
-    }
-
-    bool ReferenceNamesPToken (M_POP const *pReference, M_KOTM pKOTM) const {
-	return m_pContainerHandle->ReferenceNamesPToken (pReference, pKOTM);
-    }
-    bool ReferenceNamesPToken (unsigned int xReference, M_KOTM pKOTM) const {
-	return m_pContainerHandle->ReferenceNamesPToken (POP (xReference), pKOTM);
-    }
-    bool ReferenceNamesPToken (int xReference, M_KOTM pKOTM) const {
-	return xReference < 0 ? m_pContainerHandle->Names (
-	    pKOTM
-	) : m_pContainerHandle->ReferenceNamesPToken (POP (xReference), pKOTM);
     }
 
     bool ReferenceNames (
@@ -636,9 +620,6 @@ public:
     bool DoesntName (M_KOTM pKOTM) const {
 	return m_pContainerHandle->DoesntName (pKOTM);
     }
-    bool DoesntNamePToken (M_KOTM pKOTM) const {
-	return m_pContainerHandle->DoesntNamePToken (pKOTM);
-    }
 
     bool DoesntName (VContainerHandle const *pThat) const {
 	return pThat->DoesntName (m_pContainerHandle);
@@ -668,18 +649,6 @@ public:
 	return xReference < 0 ? m_pContainerHandle->Names (
 	    pKOTM
 	) : m_pContainerHandle->ReferenceDoesntName (POP (xReference), pKOTM);
-    }
-
-    bool ReferenceDoesntNamePToken (M_POP const *pReference, M_KOTM pKOTM) const {
-	return m_pContainerHandle->ReferenceDoesntNamePToken (pReference, pKOTM);
-    }
-    bool ReferenceDoesntNamePToken (unsigned int xReference, M_KOTM pKOTM) const {
-	return m_pContainerHandle->ReferenceDoesntNamePToken (POP (xReference), pKOTM);
-    }
-    bool ReferenceDoesntNamePToken (int xReference, M_KOTM pKOTM) const {
-	return xReference < 0 ? m_pContainerHandle->Names (
-	    pKOTM
-	) : m_pContainerHandle->ReferenceDoesntNamePToken (POP (xReference), pKOTM);
     }
 
     bool ReferenceDoesntName (
@@ -802,6 +771,9 @@ public:
     bool LocateNameOf (VContainerHandle const *pThat, M_TOP &rName) const {
 	return pThat->LocateNameIn (m_pContainerHandle, rName);
     }
+    bool LocateNameOf (Vdd::Store *pStore, M_TOP &rName) const {
+	return m_pContainerHandle->LocateNameOf (pStore, rName);
+    }
 
     bool LocateNameIn (M_CPD const *pThat, M_TOP &rName) const {
 	return pThat->LocateNameOf (m_pContainerHandle, rName);
@@ -861,8 +833,11 @@ public:
     bool LocateOrAddNameIn (VContainerHandle const *pThat, M_TOP &rName) const {
 	return pThat->LocateOrAddNameOf (m_pContainerHandle, rName);
     }
-    bool LocateOrAddNameOf (VContainerHandle const *pThat, M_TOP &rName) const {
+    bool LocateOrAddNameOf (VContainerHandle *pThat, M_TOP &rName) const {
 	return pThat->LocateOrAddNameIn (m_pContainerHandle, rName);
+    }
+    bool LocateOrAddNameOf (Vdd::Store *pStore, M_TOP &rName) const {
+	return m_pContainerHandle->LocateOrAddNameOf (pStore, rName);
     }
 
     /*-----------------------------------------------------------------------*/
@@ -898,9 +873,9 @@ public:
     }
 
     /*-----------------------------------------------------------------------*/
-    M_CPD *StoreReference (unsigned int xDst, VContainerHandle const *pThat);
-    M_CPD *StoreReference (unsigned int xDst, M_CPD const *sourceCPD) {
-	return StoreReference (xDst, sourceCPD->containerHandle ());
+    M_CPD *StoreReference (unsigned int xDst, VContainerHandle *pThat);
+    M_CPD *StoreReference (unsigned int xDst, M_CPD const *pThat) {
+	return StoreReference (xDst, pThat->containerHandle ());
     }
     M_CPD *StoreReference (unsigned int xDst, M_CPD const *sourceCPD, int xSrc);
     M_CPD *StoreReference (
@@ -909,15 +884,6 @@ public:
 
 //  Known Object Access
 public:
-    M_KOTE const &GetBlockEquivalentClassFromPToken () const {
-	return m_pContainerHandle->GetBlockEquivalentClassFromPToken ();
-    }
-    M_KOTE const &GetBlockEquivalentClassFromPToken (int xReference) const {
-	return xReference < 0
-	    ? m_pContainerHandle->GetBlockEquivalentClassFromPToken ()
-	    : m_pContainerHandle->GetBlockEquivalentClassFromPToken (POP (xReference));
-    }
-
     M_KOTE const &TheNAClass () const {
 	return m_pContainerHandle->TheNAClass ();
     }
@@ -1005,6 +971,12 @@ public:
     M_KOTE const &TheSelectorPToken () const {
 	return m_pContainerHandle->TheSelectorPToken ();
     }
+    rtPTOKEN_Handle *TheScalarPTokenHandle () const {
+	return m_pContainerHandle->TheScalarPTokenHandle ();
+    }
+    rtPTOKEN_Handle *TheSelectorPTokenHandle () const {
+	return m_pContainerHandle->TheSelectorPTokenHandle ();
+    }
 
 //  Known Object Query
 public:
@@ -1082,28 +1054,6 @@ public:
 	return m_pContainerHandle->DoesntNameABuiltInNumericClass ();
     }
 
-//  Mutex Management
-public:
-    bool AcquireMutex (VMutexClaim& rClaim, VComputationUnit* pSupplicant) const {
-	return m_pContainerHandle->AcquireMutex (rClaim, pSupplicant);
-    }
-
-//  Transient Extension Management
-public:
-    void AcquireTransientExtensionAccessLock (transientx_t const* pTransientExtension) const {
-	m_pContainerHandle->AcquireTransientExtensionAccessLock (pTransientExtension);
-    }
-    void ReleaseTransientExtensionAccessLock (transientx_t const* pTransientExtension) const {
-	m_pContainerHandle->ReleaseTransientExtensionAccessLock (pTransientExtension);
-    }
-
-    void ClearTransientExtension () const {
-	m_pContainerHandle->ClearTransientExtension ();
-    }
-    void SetTransientExtensionTo (transientx_t* pTransientExtension) const {
-	m_pContainerHandle->SetTransientExtensionTo (pTransientExtension);
-    }
-
 //  Database Update Support
 public:
     PS_UpdateStatus CreateSpace () {
@@ -1119,6 +1069,12 @@ public:
 public:
     void WriteDBUpdateInfo (bool replace) const {
 	m_pContainerHandle->WriteDBUpdateInfo (replace);
+    }
+
+//  Display andDescription
+public:
+    void describe (bool bVerbose = false) {
+	m_pContainerHandle->describe (bVerbose);
     }
 
 //  State
@@ -1149,18 +1105,8 @@ public:
  *****  Deferred Inline Definitions  *****
  *****************************************/
 
-M_ASD *M_KnownObjectTable::Space () const {
+M_ASD *M_KOT::Space () const {
     return m_pKOTC->Space ();
-}
-
-M_CPD *M_KnownObjectTable::Entry::RetainedObjectCPD () const {
-    m_pObjectCPD->retain ();
-    return m_pObjectCPD;
-}
-
-M_CPD *M_KnownObjectTable::Entry::RetainedPTokenCPD () const {
-    m_pPTokenCPD->retain ();
-    return m_pPTokenCPD;
 }
 
 

@@ -22,7 +22,7 @@
  *****  Supporting  *****
  ************************/
 
-#include "VContainerHandle.h"
+#include "RTpct.h"
 
 
 /**************************
@@ -35,9 +35,7 @@ M_ASD::M_ASD (M_AND* pAND, PS_ASD* pPASD)
 : m_pAND			(pAND)
 , m_pPASD			(pPASD)
 , m_xSpace			(pPASD ? pPASD->spaceIndex () : M_KnownSpace_ScratchPad)
-, m_iTransientAllocation	(0)
-, m_pPCTCPCC			(0)
-, m_pGCQueue			(0)
+, m_sTransientAllocation	(0)
 , m_iCT				(this)
 {
     if (pPASD)
@@ -52,6 +50,17 @@ M_ASD::M_ASD (M_AND* pAND, PS_ASD* pPASD)
 	m_pSuccessor = pAND->m_pASDRing = this;
 
     pAND->m_iASDVector[m_xSpace] = this;
+}
+
+/*************************
+ *************************
+ *****  Destruction  *****
+ *************************
+ *************************/
+
+M_ASD::~M_ASD () {
+    if (m_pGCQueue)
+	delete m_pGCQueue;
 }
 
 

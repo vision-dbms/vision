@@ -33,6 +33,8 @@
 #include "Vsa_VPoolWorkerGeneration.h"
 
 #include "Vsa_VPoolBroadcastEvaluation.h"
+#include "VTransientServices.h"
+
 
 
 /****************************************
@@ -158,6 +160,7 @@ Vsa::VPoolWorker::VPoolWorker (
     m_pPool       (pGeneration->pool ()),
     m_cQueriesProcessed (0),
     m_cTotalQueryTime (0),
+    m_cTotalQueueTime (0),
     m_iStatus (Worker_InStartup),
     m_iMode   (Worker_Offline),
     m_iRetirementCause (Worker_Employed),
@@ -169,6 +172,7 @@ Vsa::VPoolWorker::VPoolWorker (
     retain (); {
 	m_pIEvaluatorEKG->monitor (pEvaluator);
     } untain ();
+	m_iCreateTime.setToNow();
     traceInfo ("Creating VPoolWorker");
     log ("Creating Worker %s [%d] (Generation %d)", m_iPID.content (), m_iIdentifier, generationId ());
 }
@@ -193,6 +197,22 @@ Vsa::VPoolWorker::~VPoolWorker () {
 
 Vca::U32 Vsa::VPoolWorker::generationId () const {
     return m_pGeneration->generationId ();
+}
+
+VString Vsa::VPoolWorker::createTime() const {
+	VString createStr;
+	m_iCreateTime.asString(createStr);	
+	return createStr;
+}
+
+VString Vsa::VPoolWorker::retireTime() const {
+	VString retireStr;
+	if(m_iMode == Worker_Retired) {
+		m_iRetireTime.asString(retireStr);
+	} else {
+		retireStr << "N/A";
+	}
+	return retireStr;
 }
 
 Vsa::IEvaluator* Vsa::VPoolWorker::evaluator () const {
@@ -292,7 +312,6 @@ bool Vsa::VPoolWorker::hasId (VString const &rId, bool bIsPID) const {
  ********************/
 
 void Vsa::VPoolWorker::setLastQuery (VEvaluation *pRequest) {
-
     switch (pRequest->queryType ()) {
         case VEvaluation::QueryType_Expression:
             m_iLastQuery.setTo (pRequest->queryString ());
@@ -323,14 +342,6 @@ void Vsa::VPoolWorker::evaluate (
 }
 
 void Vsa::VPoolWorker::process (VPoolEvaluation *pRequest) {
-    VEvaluatorPool::Reference const pPool (pool ());
-    Vca::U32 const cLim = pPool->workerQueryHistoryLimit ();
-
-    if (m_iHistoryQueue.size () >= cLim)
-      m_iHistoryQueue.dequeue ();
-    m_pCurrentCacheUnit = (new CacheUnit (pRequest->query (), pRequest->index ()));
-    m_iHistoryQueue.enqueue (m_pCurrentCacheUnit);
-
     m_pWIP = (new WorkInProgress (this, pRequest));
 
     setStatus (Worker_InUse);
@@ -338,8 +349,21 @@ void Vsa::VPoolWorker::process (VPoolEvaluation *pRequest) {
       m_pGeneration->incrOnlineWIPs ();
     else
       m_pGeneration->incrOfflineWIPs ();
+      
+    //    pushCacheUnit(pRequest);
     m_pWIP->start ();
 
+}
+
+void Vsa::VPoolWorker::pushCacheUnit (VPoolEvaluation *pRequest) {
+	VEvaluatorPool::Reference const pPool (pool ());
+    Vca::U32 const cLim = pPool->workerQueryHistoryLimit ();
+	
+    if (m_iHistoryQueue.size () >= cLim)
+	m_iHistoryQueue.dequeue ();
+	  
+    m_pCurrentCacheUnit = (new CacheUnit (pRequest));
+    m_iHistoryQueue.enqueue (m_pCurrentCacheUnit);
 }
 
 /*********************
@@ -361,15 +385,19 @@ void Vsa::VPoolWorker::disable () {
 
 /************************
  *****  Statistics  *****
- ************************/
+ ************************/ 
 
 void Vsa::VPoolWorker::getStatistics (VString &rResult, Vca::S32 cQueryLines, Vca::S32 cQueries) const {
-
     VString rState;
     getWorkerMode (rState); rState << ":";
     getWorkerStatus (rState);
-    Vca::U32 iAvgQueryTime = queriesProcessed () > 0 ?
-                             ((Vca::U32)totalQueryTime ()/ queriesProcessed ()) : 0;
+    Vca::U32 iAvgQueryTime = queriesProcessed () > 0?
+			     ((Vca::U32)totalQueryTime ()/ queriesProcessed ()) : 0;
+    Vca::U32 iAvgEvalTime = queriesProcessed () > 0 ?
+                             ((Vca::U32)totalEvalTime ()/ queriesProcessed ()) : 0;
+    Vca::U32 iAvgQueueTime = queriesProcessed () > 0 ?
+			     ((Vca::U32)totalQueueTime ()/ queriesProcessed ()) : 0;
+							  
     VString iHistory; getQueryHistory (iHistory, cQueryLines, cQueries);
     VString iTimeStr; V::VTime iTime;
     iTime.asString (iTimeStr);
@@ -387,6 +415,11 @@ void Vsa::VPoolWorker::getStatistics (VString &rResult, Vca::S32 cQueryLines, Vc
     rResult << "\nWorker Generation          : " << generationId ();
     rResult << "\nNumber of Queries Processed: " << queriesProcessed ();
     rResult << "\nAverage Time Per Query     : " << iAvgQueryTime << " milliseconds";
+    rResult << "\nAverage Time Evaluating    : " << iAvgEvalTime << " milliseconds";
+    rResult << "\nAverage Time in Queue      : " << iAvgQueueTime << " milliseconds";
+    rResult << "\nCreation Time              : " << createTime().content();
+    rResult << "\nRetirement Time	     : " << retireTime().content();
+	
     if (cQueriesInHistory > 1)
       rResult << "\n" << cQueriesInHistory  << " most recent queries in chronological order: " << iHistory;
     else if (cQueriesInHistory == 1)
@@ -440,18 +473,25 @@ void Vsa::VPoolWorker::quickStats (VString &rResult) const {
     getWorkerStatus (iStatus);
     Vca::U32 iAvgQueryTime = queriesProcessed () > 0 ?
                              ((Vca::U32)totalQueryTime ()/ queriesProcessed ()) : 0;
-
+	
+    Vca::U32 iAvgQueueTime = queriesProcessed () > 0 ?
+			     ((Vca::U32)totalQueueTime ()/ queriesProcessed ()) : 0;
+    Vca::U32 iAvgEvalTime = queriesProcessed () > 0 ?
+                             ((Vca::U32)totalEvalTime ()/ queriesProcessed ()) : 0;
+	
     // Format our data.
     VString iResult;
     iResult.printf(
-            "%5d | %5d | %5s | %10s | %12s | %10d | %10d",
+            "%5d | %5d | %5s | %10s | %12s | %10d | %10d | %10d | %10d",
             generationId (),
             m_iIdentifier,
             m_iPID.content (),
             iMode.content (),
             iStatus.content (),
             queriesProcessed (),
-            iAvgQueryTime);
+            iAvgQueryTime,
+	    iAvgQueueTime,
+	    iAvgEvalTime);
 
     // Insert newline as necessary.
     if (rResult.length () > 0) rResult << "\n";
@@ -463,14 +503,16 @@ void Vsa::VPoolWorker::quickStats (VString &rResult) const {
 void Vsa::VPoolWorker::quickStatsHeader (VString &rResult) {
     VString iResult;
     iResult.printf(
-            "%5s | %5s | %5s | %10s | %12s | %10s | %10s",
+            "%5s | %5s | %5s | %10s | %12s | %10s | %10s | %10s | %10s",
             "Gen",
             "ID",
             "PID",
             "Mode",
             "Status",
             "Queries",
-            "Avg Time");
+            "Avg Time",
+	    "Avg Queue",
+	    "Avg Eval");
     rResult.setTo(iResult);
 }
 
@@ -503,6 +545,13 @@ void Vsa::VPoolWorker::getQueryHistory (VString &rHistory, Vca::S32 cQueryLines,
       while (iterator.isNotAtEnd () && cQueries-->0) {
         CacheUnit::Reference pCache;
         if (iterator.current (pCache)) {
+		
+          // Get our arrival time
+	  V::VTime rArrivalTime;
+	  VString iArrivalTimeString;
+	  if (pCache->getArrivalTime (rArrivalTime)) rArrivalTime.asString(iArrivalTimeString);
+	  else iArrivalTimeString = "N/A";
+		  
           // Get our start time.
           V::VTime rStartTime;
           VString iStartTimeString;
@@ -513,7 +562,7 @@ void Vsa::VPoolWorker::getQueryHistory (VString &rHistory, Vca::S32 cQueryLines,
           V::VTime rEndTime;
           VString iEndTimeString;
           if (pCache->getEndTime (rEndTime)) rEndTime.asString (iEndTimeString);
-          else iEndTimeString = "N/A";
+	  else iEndTimeString = "N/A";
 
           // Get our query string.
           VPathQuery::Reference const pQuery (pCache->getPathQuery ());
@@ -532,8 +581,11 @@ void Vsa::VPoolWorker::getQueryHistory (VString &rHistory, Vca::S32 cQueryLines,
           rHistory << "\n================================================================================\n";
           rHistory <<"Query " << pCache->getQueryId () << ":\n";
           rHistory << iTruncatedStr;
+	  rHistory << "\nArrival Time: " << iArrivalTimeString;
           rHistory << "\nStart Time: " << iStartTimeString;
-          rHistory << "\nEnd Time: " << iEndTimeString << "\n";
+          rHistory << "\nEnd Time: " << iEndTimeString; 
+	  rHistory << "\nTime in Queue: " << pCache->queueTime();
+	  rHistory << "\nTime to Evaluate: " << pCache->evaluationTime() << "\n";
         }
         ++iterator;
       }
@@ -553,6 +605,7 @@ void Vsa::VPoolWorker::retire (Worker_RetirementCause iCause) {
     cancelIEvaluatorEKG ();
     m_pEvaluator.clear();
     setStatus(Worker_GoneFishing);
+    m_iRetireTime.setToNow();
 }
 
 
@@ -615,6 +668,8 @@ void Vsa::VPoolWorker::dumpHistory (
 void Vsa::VPoolWorker::signalIEvaluatorEKG () {
     traceInfo ("IEvaluator disappeared.");
     log ("IEvaluator for worker %s [%d] (Generation %d) no longer connected; disabling worker.", m_iPID.content (), m_iIdentifier, generationId ());
+    notify (6, "#6: VPoolWorker::signalIEvaluatorEKG: Evaluator no longer connected - worker %s [%d] (Generation %d)\n",
+	    m_iPID.content (), m_iIdentifier, generationId ());
 
     // Cancel the EKG.
     cancelIEvaluatorEKG ();
@@ -659,6 +714,7 @@ Vsa::VPoolWorker::WorkInProgress::WorkInProgress (
 ,   m_xState            (State_New)
 ,   m_pPool             (pWorker->pool ())
 ,   m_pIEvaluatorClient (this)
+,	m_bRemoteIEvaluationCancelled (false)
 ,   m_bTimedOut         (false)
 {
     aggregate (pRequest->evaluatorClient ());
@@ -710,10 +766,14 @@ void Vsa::VPoolWorker::WorkInProgress::getRole (IEvaluatorClient::Reference &rpR
 void Vsa::VPoolWorker::WorkInProgress::OnAccept (
     IEvaluatorClient *pRole, IEvaluation *pEvaluation, Vca::U32 xQueuePosition
 ) {
-  m_pRemoteIEvaluation.setTo (pEvaluation);
 
-  if (m_pRequest->anyData ())
-    onAnyDataUpdate ();
+	m_pRemoteIEvaluation.setTo (pEvaluation);
+	if (m_bRemoteIEvaluationCancelled) {
+		m_pRemoteIEvaluation->Cancel ();
+		return;
+	}
+	if (m_pRequest->anyData ())
+		onAnyDataUpdate ();
 }
 
 void Vsa::VPoolWorker::WorkInProgress::OnChange (
@@ -733,7 +793,8 @@ void Vsa::VPoolWorker::WorkInProgress::OnResult (
     IEvaluatorClient *pRole, IEvaluationResult *pResult, VString const &rOutput
 ) {
     VString iShortenedOutput;
-    if (m_pPool->resultLogLength()) rOutput.getSummary (iShortenedOutput, m_pPool->resultLogLength ());
+    if (m_pPool->resultLogLength()) 
+		rOutput.getSummary (iShortenedOutput, m_pPool->resultLogLength ());
     log ("Worker(%d) (Generation %d) returned: %s",
         m_pWorker->identifier (),
         m_pWorker->generationId (),
@@ -743,9 +804,10 @@ void Vsa::VPoolWorker::WorkInProgress::OnResult (
     m_xState = State_Completed;
     m_pRemoteIEvaluation.clear ();
     if (isOnlineWIP ())
-      m_pGeneration->decrOnlineWIPs();
+        m_pGeneration->decrOnlineWIPs();
     else
-      m_pGeneration->decrOfflineWIPs ();
+        m_pGeneration->decrOfflineWIPs ();
+	  
     m_pGeneration->detach (this);
 
 
@@ -762,8 +824,8 @@ void Vsa::VPoolWorker::WorkInProgress::OnResult (
         pPoolResult->getRole (pIEvaluationResult);
         m_pRequest->onResult (pIEvaluationResult, rOutput);
     }
-
-    m_pWorker->updateQueryStatistics (1, m_pRequest->evaluationTime ());
+	
+    m_pWorker->updateQueryStatistics (1, m_pRequest->evaluationTime (), m_pRequest->queueTime ());
     m_pWorker->returnToGeneration ();
 }
 
@@ -778,7 +840,8 @@ void Vsa::VPoolWorker::WorkInProgress::OnError (
     log ("Worker(%d) (Generation %d) failed...disabled:%s",
         m_pWorker->identifier (), m_pWorker->generationId (), rText.content ()
     );
-
+    notify (7, "#7: WorkInProgress::OnError: Worker [%d] (Generation %d) - %s\n", 
+	    m_pWorker->identifier (), m_pWorker->generationId (), rText.content ());
     m_xState = State_Failed;
     m_pRemoteIEvaluation.clear ();
     if (isOnlineWIP ())
@@ -796,8 +859,11 @@ void Vsa::VPoolWorker::WorkInProgress::OnError (
     m_pGeneration->hire();
     m_pRequest->incrementEvaluationAttempt ();
 
-    if (!retryEvaluation ())
+    if (!retryEvaluation ("On Error")) {
+	notify (8, "#8: WorkInProgress::OnError: Worker [%d] (Generation %d) - %s, retrying evaluation failed\n", 
+		m_pWorker->identifier (), m_pWorker->generationId (), rText.content ());
         m_pRequest->onError (pError, rText);
+    }
 
     m_pPool->onQueue ();
 }
@@ -810,11 +876,11 @@ void Vsa::VPoolWorker::WorkInProgress::OnError (
  ***********************/
 
 void Vsa::VPoolWorker::WorkInProgress::start () {
+	m_pRequest->setStart();
     m_xState = State_Active;
 
     m_pGeneration->attach (this);
     setTimeOut ();
-
     IEvaluatorClient::Reference pIEvaluatorClient;
     getRole (pIEvaluatorClient);
     m_pWorker->evaluate (pIEvaluatorClient, m_pRequest);
@@ -843,19 +909,30 @@ bool Vsa::VPoolWorker::WorkInProgress::setTimeOut () {
 void Vsa::VPoolWorker::WorkInProgress::onTimeOut (
     Vca::VTrigger<ThisClass> *pTrigger
 ) {
+	if (m_bRemoteIEvaluationCancelled) {
+		if (m_pRemoteIEvaluation.isntNil ()) {
+			m_pRemoteIEvaluation->Cancel ();
+			log ("WIP cancelling remote evaluation");
+		}
+		return;
+	}
     log ("WIP TimedOut (Worker %d)", m_pWorker->identifier ());
-
+    notify (9, "#9: WorkInProgress::onTimeOut: Worker [%d] (Generation %d)\n", 
+	    m_pWorker->identifier (), m_pWorker->generationId ());
     m_bTimedOut = true;
     m_pTimer->cancel ();
     m_pTimer.clear ();
     m_pRequest->incrementEvaluationAttempt ();
 
-    if (m_pRemoteIEvaluation.isntNil ()) {
-	m_pRemoteIEvaluation->Cancel ();
-	log ("WIP cancelling remote evaluation");
-    }
+	if (m_pRemoteIEvaluation.isntNil ()) {
+		m_pRemoteIEvaluation->Cancel ();
+		log ("WIP cancelling remote evaluation");
+		setRemoteIEvaluationCancelled(true);
+	}
 
-    if (!retryEvaluation ()) {
+    if (!retryEvaluation ("Timeout")) {
+	notify (10, "#10: WorkInProgress::onTimeOut: Worker [%d] (Generation %d), retrying evaluation failed\n", 
+		m_pWorker->identifier (), m_pWorker->generationId ());
         log ("Retry attempts completed for request %d...returning ERROR", m_pRequest->index ());
         m_pRequest->onError (0, "Evaluation Timed Out");
         m_pRemoteIEvaluation.clear ();
@@ -863,22 +940,48 @@ void Vsa::VPoolWorker::WorkInProgress::onTimeOut (
     m_pPool->onQueue ();
 }
 
-bool Vsa::VPoolWorker::WorkInProgress::retryEvaluation () {
+bool Vsa::VPoolWorker::WorkInProgress::retryEvaluation (VString retryType) {
     //  evaluation should be a normal pool evaluation (not a broadcast evaluation and
     //  evaluation retry limit shouldnt have reached
     //  evaluation should be retryable
 
-    if (m_pRequest->retryable() &&
-        m_pRequest-> evaluationAttempt () < m_pPool->evaluationAttemptMaximum ()) {
-        log ("Retrying WIP");
-        m_pPool->schedule (m_pRequest);
-        return true;
+    if (m_pRequest->retryable()) {
+		Vca::U32 attemptTimes = 0;
+		
+		if ( retryType == "On Error" ) 
+			attemptTimes = m_pPool->evaluationOnErrorAttemptMaximum();
+		else 
+			attemptTimes = m_pPool->evaluationTimeOutAttemptMaximum();
+		
+		VString tLog;
+		tLog << "Attempt number: " << m_pRequest->evaluationAttempt() << " for Request (" << m_pRequest->index () << ")" ;
+		log(tLog);
+		VString sLog;	
+		sLog << "Maximum attempts for " << retryType << ": " << attemptTimes;
+		log(sLog);
+
+		if (m_pRequest->evaluationAttempt() < attemptTimes) {
+			log ("Retrying WIP");
+			m_pPool->schedule (m_pRequest);
+			return true;
+		}
     }
     return false;
+        
+}
+
+void Vsa::VPoolWorker::WorkInProgress::cancelQuery() {
+	m_pRemoteIEvaluation->Cancel (); 
+	setRemoteIEvaluationCancelled(true);
+	log ("Worker(%d) (Generation %d) being cancelled on Query (%d)", 
+		m_pWorker->identifier (),
+        m_pWorker->generationId (),
+		evaluationIndex ()
+    );
 }
 
 bool Vsa::VPoolWorker::WorkInProgress::isOnlineWIP () const {
-  return m_pGeneration->isOnlineWIP (this);
+	return m_pGeneration->isOnlineWIP (this);
 }
 
 
@@ -917,11 +1020,9 @@ void Vsa::VPoolWorker::WorkInProgress::onRetryableUpdate () {
  **************************
  **************************/
 
-Vsa::VPoolWorker::CacheUnit::CacheUnit (VPathQuery *pQuery, unsigned int xQuery)
-    : m_pPathQuery (pQuery),
-      m_xQuery (xQuery),
-      m_bStarted (true),
-      m_bFinished (false) {
+Vsa::VPoolWorker::CacheUnit::CacheUnit (VPoolEvaluation *pRequest)
+: m_pRequest (pRequest) {
+    traceInfo ("Creating VPoolWorker::CacheUnit");
 }
 /*************************
  *************************
@@ -930,4 +1031,5 @@ Vsa::VPoolWorker::CacheUnit::CacheUnit (VPathQuery *pQuery, unsigned int xQuery)
  *************************/
 
 Vsa::VPoolWorker::CacheUnit::~CacheUnit () {
+    traceInfo ("Destroying VPoolWorker::CacheUnit");
 }

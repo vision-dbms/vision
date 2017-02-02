@@ -94,10 +94,10 @@ public:
     }
 
     rtBLOCK_Handle *fetchedBlockHandle () const {
-	return m_pBlockHandle->getNestedBlockHandle (fetchedLiteral ());
+	return m_pBlockHandle->nestedBlockHandle (fetchedLiteral ());
     }
     M_CPD *fetchedBlockCPD () const {
-	return m_pBlockHandle->getNestedBlockCPD (fetchedLiteral ());
+	return m_pBlockHandle->nestedBlockCPD (fetchedLiteral ());
     }
     double fetchedDouble () const {
 	return m_iImmediateData.as_iFetchedDouble;

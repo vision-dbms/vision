@@ -8,12 +8,12 @@
  *****************************************
  *****************************************/
 
-/***********************
- *****  Component  *****
- ***********************/
+/************************
+ *****  Components  *****
+ ************************/
 
-#include "VConstructor.h"
 #include "VContainerHandle.h"
+#include "Vdd_Store.h"
 
 /***********************
  *****  Container  *****
@@ -54,111 +54,10 @@
 #define rtCLOSURE_CPD_Primitive(cpd)\
     rtCLOSURE_Closure_Primitive (rtCLOSURE_CPD_Base (cpd))
 
-#define rtCLOSURE_CPD_ContextCPD(cpd) (\
-    (cpd)->GetCPD (rtCLOSURE_CPx_Context, RTYPE_C_Context)\
-)
-
-#define rtCLOSURE_CPD_BlockCPD(cpd) (\
-    (cpd)->GetCPD (rtCLOSURE_CPx_Block, RTYPE_C_Block)\
-)
-
 /*****  Content Query Predicates  *****/
 #define rtCLOSURE_CPD_IsABlockClosure(cpd) (\
     (cpd)->ReferenceIsntNil (rtCLOSURE_CPx_Block)\
 )
-
-#define rtCLOSURE_CPD_IsAPrimClosure(cpd) (\
-    (cpd)->ReferenceIsNil (rtCLOSURE_CPx_Block)\
-)
-
-
-/*************************
- *************************
- *****  Constructor  *****
- *************************
- *************************/
-
-/*---------------------------------------------------------------------------
- * Closures associate a context with a function (e.g., block or primitive) to
- * create a runnable object.
- *
- *  Closure Field Descriptions:
- *	header			- a psuedo object header for this closure.
- *				  THIS FIELD MUST ALWAYS BE THE FIRST FIELD
- *				  IN THE CLOSURE.
- *	m_pBlock		- an optional ('Nil' if absent) block handle.
- *				  If specified, this is a block closure; if
- *				  absent, a primitive closure.
- *	m_xPrimitive		- the index of a primitive for primitive closures.
- *				  Ignored for block closures.
- *	m_pContext		- the context associated with this closure.
- *---------------------------------------------------------------------------
- */
-class rtCLOSURE_Constructor : public VConstructor {
-//  Run Time Type
-    DECLARE_CONCRETE_RTT (rtCLOSURE_Constructor, VConstructor);
-
-//  CPD Initialization
-public:
-    static void InitStdCPD (M_CPD* pCPD);
-
-//  Construction
-public:
-    rtCLOSURE_Constructor (
-	rtCONTEXT_Constructor *context, rtBLOCK_Handle *pBlockHandle, unsigned int iAttentionMask = 0
-    );
-    rtCLOSURE_Constructor (
-	rtCONTEXT_Constructor *context, unsigned int xPrimitive, unsigned int iAttentionMask = 0
-    );
-
-//  Destruction
-private:
-    ~rtCLOSURE_Constructor ();
-
-//  Query
-public:
-    bool isABlockClosure () const {
-	return m_pBlock.isntNil ();
-    }
-    bool isAPrimitiveClosure () const {
-	return m_pBlock.isNil ();
-    }
-
-//  Access
-public:
-    rtBLOCK_Handle *block () const {
-	return m_pBlock;
-    }
-    rtCONTEXT_Constructor* context () const {
-	return m_pContext;
-    }
-    unsigned int primitive () const {
-	return m_xPrimitive;
-    }
-
-    RTYPE_Type RType_() const;
-
-    M_ASD *Space_() const;
-
-//  Realization
-protected:
-    M_CPD* newRealization ();
-
-//  State
-protected:
-    rtCONTEXT_Constructor::Reference const	m_pContext;
-    rtBLOCK_Handle::Reference const		m_pBlock;
-    unsigned int const				m_xPrimitive;
-};
-
-
-/********************************
- ********************************
- *****  Callable Interface  *****
- ********************************
- ********************************/
-
-PublicFnDecl bool rtCLOSURE_Align (M_CPD *closure);
 
 
 /******************************
@@ -167,35 +66,117 @@ PublicFnDecl bool rtCLOSURE_Align (M_CPD *closure);
  ******************************
  ******************************/
 
-class rtCLOSURE_Handle : public VContainerHandle {
-//  Run Time Type
-    DECLARE_CONCRETE_RTT (rtCLOSURE_Handle, VContainerHandle);
+class rtCLOSURE_Handle : public VStoreContainerHandle {
+    DECLARE_CONCRETE_RTT (rtCLOSURE_Handle, VStoreContainerHandle);
+
+//  CPD Initialization
+public:
+    static void InitStdCPD (M_CPD* pCPD);
 
 //  Construction
-protected:
-    rtCLOSURE_Handle (M_CTE &rCTE) : VContainerHandle (rCTE) {
-    }
-
 public:
     static VContainerHandle *Maker (M_CTE &rCTE) {
 	return new rtCLOSURE_Handle (rCTE);
     }
+    rtCLOSURE_Handle (
+	rtCONTEXT_Handle *context, rtBLOCK_Handle *pBlockHandle, unsigned int iAttentionMask = 0
+    );
+    rtCLOSURE_Handle (
+	rtCONTEXT_Handle *context, unsigned int xPrimitive, unsigned int iAttentionMask = 0
+    );
+private:
+    rtCLOSURE_Handle (M_CTE &rCTE);
+private:
+    void createContainer ();
 
 //  Destruction
-protected:
+private:
+    ~rtCLOSURE_Handle () {
+    }
+
+//  Alignment
+private:
+    virtual /*override*/ bool align_() {
+	return align ();
+    }
+public:
+    bool align ();
+    using BaseClass::alignAll;
+
+//  Canonicalization
+private:
+    virtual /*override*/ bool getCanonicalization_(VReference<rtVSTORE_Handle> &rpStore, DSC_Pointer const &rPointer);
 
 //  Access
+private:
+    rtCLOSURE_Closure *typecastContent () const {
+	return reinterpret_cast<rtCLOSURE_Closure*> (containerContent ());
+    }
 public:
+    void getBlock (rtBLOCK_Handle::Reference &rpResult) const {
+	rpResult.setTo (m_pBlock);
+    }
+    void getContext (rtCONTEXT_Handle::Reference &rpResult) const {
+	rpResult.setTo (m_pContext);
+    }
+    DSC_Descriptor &getCurrent () const {
+	return m_pContext->getCurrent ();
+    }
+    DSC_Descriptor &getSelf () const {
+	return m_pContext->getSelf ();
+    }
+    DSC_Descriptor &getMy () const {
+	return m_pContext->getMy ();
+    }
+
+    unsigned int primitiveIndex () const {
+	return m_xPrimitive;
+    }
 
 //  Query
 public:
+    bool isABlockClosure () const {
+	return m_pBlock.isntNil ();
+    }
+    bool isAPrimitiveClosure () const {
+	return ReferenceIsNil (&rtCLOSURE_Closure_Block (typecastContent ()));
+    }
 
-//  Callbacks
+//  Dictionary
+private:
+    virtual /*overrride*/ rtDICTIONARY_Handle *getDictionary_(DSC_Pointer const &rPointer) const {
+	return static_cast<rtDICTIONARY_Handle*>(TheClosureClassDictionary ().ObjectHandle ());
+    }
+
+// Garbage collection marking
+public:
+    virtual void traverseReferences(visitFunction fp);
+
+//  Store Access
+private:
+    virtual /*override*/ bool decodeClosure_(
+	rtBLOCK_Handle::Reference &rpBlock, unsigned int &rxPrimitive, rtCONTEXT_Handle::Reference *ppContext
+    ) const;
+    virtual /*override*/ rtPTOKEN_Handle *getPToken_() const;
+
+//  Maintenance
 protected:
     bool PersistReferences ();
 
+//  Display and Inspection
+public:
+    virtual /*override*/ unsigned __int64 getClusterSize ();
+
+    virtual /*override*/ bool getPOP (M_POP *pResult, unsigned int xPOP) const;
+    virtual /*override*/ unsigned int getPOPCount () const {
+	return 2;
+    }
+
 //  State
-protected:
+private:
+    rtCONTEXT_Handle::Reference	const m_pContext;
+    rtBLOCK_Handle::Reference	const m_pBlock;
+    unsigned int 		const m_xPrimitive;
 };
 
 

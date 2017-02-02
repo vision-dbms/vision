@@ -23,7 +23,7 @@
 class VfGuardTool : public VTransient {
 //  Construction
 public:
-    VfGuardTool (M_CPD* pCod);
+    VfGuardTool (rtPTOKEN_Handle *pCod);
 
 //  Destruction
 public:
@@ -48,7 +48,7 @@ public:
 
 //  State
 protected:
-    VCPDReference		m_pCod;
+    rtPTOKEN_Handle::Reference	m_pCod;
     rtLINK_CType*		m_pGuard;
     size_t			m_iDomCardinality;
     size_t			m_iValidRunOrigin;

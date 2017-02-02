@@ -24,6 +24,43 @@
 /************************
  *****  Supporting  *****
  ************************/
+
+#include "Vca_VClassInfoHolder.h"
+
+#include "Vca_VServerApplication.h"
+
+/***********************
+ ***********************
+ *****             *****
+ *****  ClassInfo  *****
+ *****             *****
+ ***********************
+ ***********************/
+
+/*************************************
+ *************************************
+ *****  Vca::VServerApplication  *****
+ *************************************
+ *************************************/
+
+namespace Vca {
+    VClassInfoHolder &VServerApplication::ClassInfo () {
+	static VClassInfoHolder_<ThisClass> iClassInfoHolder;
+	if (iClassInfoHolder.isntComplete ()) {
+	    iClassInfoHolder
+		.addBase (BaseClass::ClassInfo ())
+
+		.addProperty ("ListenerCount"    , &ThisClass::listenerCount)
+		.addProperty ("ListenerName"     , &ThisClass::listenerName)
+		.addProperty ("OfferCount"       , &ThisClass::activeOfferCountTrackable)
+		.addProperty ("PassiveOfferCount", &ThisClass::passiveOfferCount)
+		.addProperty ("RegistrationCount", &ThisClass::registrationCount)
+
+		.markCompleted ();
+	}
+	return iClassInfoHolder;
+    }
+}
 
 
 /*********************

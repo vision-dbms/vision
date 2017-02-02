@@ -103,28 +103,28 @@ private:
 
 //  IVReceiver Methods
 private:
-    void VINTERFACE_MEMBERIMPL(OnData) (Datum iDatum) {
+    void VINTERFACE_MEMBERIMPL(OnData) (Vca::VMessage *pMessage, Datum iDatum) {
 	(m_pActor.referent()->*m_pAction) (this, iDatum);
     }
 
 //  Vca::IClient Methods
 private:
-    void VINTERFACE_MEMBERIMPL(OnEnd) () {
+    void VINTERFACE_MEMBERIMPL(OnEnd) (Vca::VMessage *pMessage) {
 	if (m_bEndAction)
 	    (m_pActor.referent()->*m_pEndAction) (this);
 	else if (m_bErrorAction) {
 	    VString iEOD ("EOD", false);
-	    VINTERFACE_MEMBERIMPL(OnError) (0, iEOD);
+	    VINTERFACE_MEMBERIMPL(OnError) (pMessage, 0, iEOD);
 	}
     }
-    void VINTERFACE_MEMBERIMPL(OnError) (Vca::IError *pError, VString const &rText) {
+    void VINTERFACE_MEMBERIMPL(OnError) (Vca::VMessage *pMessage, Vca::IError *pError, VString const &rText) {
 	if (m_bErrorAction)
 	    (m_pActor.referent()->*m_pErrorAction) (this, pError, rText);
     }
 
 //  IVUnknown Methods
 private:
-    void VINTERFACE_MEMBERIMPL(QueryInterface) (VTypeInfo *pTypeInfo, IVReceiver<IVUnknown*> *pReceiver) {
+    void VINTERFACE_MEMBERIMPL(QueryInterface) (Vca::VMessage *pMessage, VTypeInfo *pTypeInfo, IVReceiver<IVUnknown*> *pReceiver) {
 	BaseClass::QI (pTypeInfo, pReceiver);
     }
 

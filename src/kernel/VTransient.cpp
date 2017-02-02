@@ -233,3 +233,25 @@ void VTransient::vlog (char const *pFormat, va_list ap) const {
 	g_pTSP->vlog (pFormat, ap);
 }
 
+/**************************
+ **************************
+ *****  Notification  *****
+ **************************
+ **************************/
+
+void VTransient::notify (int xEvent, char const *pFormat, ...) const {
+    V_VARGLIST (ap, pFormat);
+    notify (false, xEvent, pFormat, ap);
+}
+
+void VTransient::notify (bool bWaitingForResp, int xEvent, char const *pFormat, ...) const {
+    V_VARGLIST (ap, pFormat);
+    notify (bWaitingForResp, xEvent, pFormat, ap);
+
+}
+
+void VTransient::notify (bool bWaitingForResp, int xEvent, char const *pFormat, va_list ap) const {
+    if (g_pTSP)
+	g_pTSP->notify (bWaitingForResp, xEvent, pFormat, ap);
+}
+

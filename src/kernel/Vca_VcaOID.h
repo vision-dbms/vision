@@ -53,6 +53,7 @@ namespace Vca {
 
 	friend class ::IVUnknown;
 	friend class VcaPeer;
+	friend class VcaSite;
 	friend class VcaSelf;
 
     //  Aliases

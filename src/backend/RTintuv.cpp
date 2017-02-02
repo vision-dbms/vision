@@ -58,13 +58,11 @@ DEFINE_CONCRETE_RTT (rtINTUV_Handle);
  *********************************/
 
 /*---------------------------------------------------------------------------
- *****  Basic IntUV instantiation routine.
+ *****  Basic FloatUV instantiation routine.
  *
  *  Arguments:
- *	pPPT			- a CPD for the PPT of the result.
- *	refPTokenRefCPD/Index	- a reference to a POP for the P-Token which
- *				  will define the referential state of the
- *				  elements of this U-Vector.
+ *	pPPT			- a handle for the PPT of the result.
+ *	pRPT			- a handle for the RPT of the result.
  *	initFn			- the address of an initialization function for
  *				  the new U-Vector.  This function will be
  *				  passed an initialized standard CPD for the
@@ -78,29 +76,17 @@ DEFINE_CONCRETE_RTT (rtINTUV_Handle);
  *				  'initFn'.
  *
  *  Returns:
- *	A standard CPD for the IntUV created.
+ *	A standard CPD for the FloatUV created.
  *
  *****/
 PublicFnDef M_CPD * __cdecl rtINTUV_New (
-    M_CPD*			pPPT,
-    M_CPD*			refPTokenRefCPD,
-    int				refPTokenRefIndex,
-    Ref_UV_Initializer		initFn,
-    ...
+    rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT, Ref_UV_Initializer initFn, ...
 ) {
 /*****  Acquire the arguments passed to this function  *****/
     V_VARGLIST (initFnAP, initFn);
 
-/*****  Create and initialize the IntUV  *****/
-    return UV_New (
-	RTYPE_C_IntUV,
-	pPPT,
-	refPTokenRefCPD,
-	refPTokenRefIndex,
-	sizeof (rtINTUV_ElementType),
-	initFn,
-	initFnAP
-    );
+/*****  Create and initialize the FloatUV  *****/
+    return UV_New (RTYPE_C_IntUV, pPPT, pRPT, sizeof (rtINTUV_ElementType), initFn, initFnAP);
 }
 
 
@@ -108,38 +94,7 @@ PublicFnDef M_CPD * __cdecl rtINTUV_New (
  *****  Standard Instantiator  *****
  ***********************************/
 
-/*---------------------------------------------------------------------------
- *****  Standard IntUV instantiation routine.
- *
- *  Arguments:
- *	posPTokenRefCPD/Index	- a reference to a POP for the P-Token which
- *				  will define the initial positional state of
- *				  this U-Vector.
- *
- *  Returns:
- *	A standard CPD for the IntUV created.
- *
- *****/
-PublicFnDef M_CPD *rtINTUV_New (
-    M_CPD*			posPTokenRefCPD,
-    int				posPTokenRefIndex,
-    M_CPD*			refPTokenRefCPD,
-    int				refPTokenRefIndex
-)
-{
-    VCPDReference pPPT (posPTokenRefCPD, posPTokenRefIndex, RTYPE_C_PToken);
-    return UV_New (
-	RTYPE_C_IntUV,
-	pPPT,
-	refPTokenRefCPD,
-	refPTokenRefIndex,
-	sizeof (rtINTUV_ElementType),
-	NilOf (Ref_UV_Initializer),
-	0
-    );
-}
-
-PublicFnDef M_CPD *rtINTUV_New (M_CPD *pPPT, M_CPD *pRPTRef, int xRPTRef) {
+PublicFnDef M_CPD *rtINTUV_New (rtPTOKEN_Handle *pPPT, M_CPD *pRPTRef, int xRPTRef) {
     return UV_New (
 	RTYPE_C_IntUV,
 	pPPT,
@@ -156,21 +111,16 @@ PublicFnDef M_CPD *rtINTUV_New (M_CPD *pPPT, M_CPD *pRPTRef, int xRPTRef) {
  *****  Standard IntUV instantiation routine.
  *
  *  Arguments:
- *	posPToken		- the positional P-Token of the new uvector.
- *	refPToken		- the referential P-Token of the new uvector.
+ *	pPPT		- the positional P-Token of the new uvector.
+ *	pRPT		- the referential P-Token of the new uvector.
  *
  *  Returns:
  *	A standard CPD for the IntUV created.
  *
  *****/
-PublicFnDef M_CPD *rtINTUV_New (M_CPD *posPToken, M_CPD *refPToken) {
+PublicFnDef M_CPD *rtINTUV_New (rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT) {
     return UV_New (
-	RTYPE_C_IntUV,
-	posPToken,
-	refPToken,
-	sizeof (rtINTUV_ElementType),
-	NilOf (Ref_UV_Initializer),
-	0
+	RTYPE_C_IntUV, pPPT, pRPT, sizeof (rtINTUV_ElementType), NilOf (Ref_UV_Initializer), 0
     );
 }
 
@@ -193,16 +143,12 @@ PublicFnDef M_CPD *rtINTUV_New (M_CPD *posPToken, M_CPD *refPToken) {
  *	'cpd'
  *
  *****/
-PublicFnDef M_CPD *rtINTUV_Align (M_CPD *cpd) {
+PrivateFnDef M_CPD *rtINTUV_Align (M_CPD *cpd) {
 /*****  Validate Argument R-Type  *****/
-    RTYPE_MustBeA ("rtINTUV_Align", M_CPD_RType (cpd), RTYPE_C_IntUV);
+    RTYPE_MustBeA ("rtINTUV_Align", cpd->RType (), RTYPE_C_IntUV);
 
 /*****  Align Positionally  *****/
-/*---------------------------------------------------------------------------
- * This will probably change when P-Tokens are re-implemented !!!!!!!!!!!!!!!
- *---------------------------------------------------------------------------
- */
-    UV_Align (cpd, NilOf (M_CPD::UVShiftProcessor));
+    static_cast<rtINTUV_Handle*>(cpd->containerHandle ())->align ();
 
 /*****  Return the Argument  *****/
     return cpd;
@@ -237,16 +183,17 @@ PublicFnDef void rtINTUV_ToSetUV (
     rtINTUV_Align (sourceCPD);
 
 /*****  ... and access the relevant source data:  *****/
-    VCPDReference pSourcePPT (sourceCPD, UV_CPx_PToken, RTYPE_C_PToken);
+    rtPTOKEN_Handle::Reference pSourcePPT (
+	static_cast<rtUVECTOR_Handle*>(sourceCPD->containerHandle ())->pptHandle ()
+    );
     unsigned int sSource = UV_CPD_ElementCount (sourceCPD);
 
 /*****  If the source is empty, ... *****/
     if (0 == sSource) {
     /*****  ... the result is trivial:  *****/
-	M_CPD *pResultPPT = rtPTOKEN_New (pContainerSpace, 0);
+	rtPTOKEN_Handle::Reference pResultPPT (new rtPTOKEN_Handle (pContainerSpace, 0));
 	*refuvCPD = rtREFUV_New (pSourcePPT, pResultPPT);
 	*resultCPD = rtINTUV_New (pResultPPT, sourceCPD, UV_CPx_RefPToken);
-	pResultPPT->release ();
     }
 /*****  ... otherwise, ...  *****/
     else {
@@ -280,7 +227,7 @@ PublicFnDef void rtINTUV_ToSetUV (
 	}
 
     /*****  ... generate the set's domain,  ...  *****/
-	M_CPD *pResultPPT = rtPTOKEN_New (pContainerSpace, xResultElement + 1);
+	rtPTOKEN_Handle::Reference pResultPPT (new rtPTOKEN_Handle (pContainerSpace, xResultElement + 1));
 
     /*****  ... fix the source->set reference map's codomain, ...  *****/
 	(*refuvCPD)->StoreReference (UV_CPx_RefPToken, pResultPPT);
@@ -305,8 +252,6 @@ PublicFnDef void rtINTUV_ToSetUV (
 	}
 
     /*****  ... and clean up:  *****/
-	pResultPPT->release ();
-
 	UTIL_Free (pSortArray);
     }
 
@@ -368,13 +313,11 @@ PrivateFnDef void InitializeDoubleUVFromIntUV (
 PublicFnDef M_CPD *rtINTUV_AsDoubleUV (M_KOT *pKOT, M_CPD *sourceCPD) {
     rtINTUV_Align (sourceCPD);
 
-    VCPDReference pPPT (sourceCPD, UV_CPx_PToken, RTYPE_C_PToken);
+    rtPTOKEN_Handle::Reference pPPT (
+	static_cast<rtUVECTOR_Handle*>(sourceCPD->containerHandle ())->pptHandle ()
+    );
     return rtDOUBLEUV_New (
-	pPPT,
-	pKOT->TheDoublePTokenCPD (),
-	-1,
-	InitializeDoubleUVFromIntUV,
-	sourceCPD
+	pPPT, pKOT->TheDoublePTokenHandle (), InitializeDoubleUVFromIntUV, sourceCPD
     );
 }
 
@@ -428,13 +371,11 @@ PrivateFnDef void InitializeFloatUVFromIntUV (
 PublicFnDef M_CPD *rtINTUV_AsFloatUV (M_KOT *pKOT, M_CPD *sourceCPD) {
     rtINTUV_Align (sourceCPD);
 
-    VCPDReference pPPT (sourceCPD, UV_CPx_PToken, RTYPE_C_PToken);
+    rtPTOKEN_Handle::Reference pPPT (
+	static_cast<rtUVECTOR_Handle*>(sourceCPD->containerHandle ())->pptHandle ()
+    );
     return rtFLOATUV_New (
-	pPPT,
-	pKOT->TheFloatPTokenCPD (),
-	-1,
-	InitializeFloatUVFromIntUV,
-	sourceCPD
+	pPPT, pKOT->TheFloatPTokenHandle (), InitializeFloatUVFromIntUV, sourceCPD
     );
 }
 
@@ -458,10 +399,13 @@ PublicFnDef M_CPD *rtINTUV_AsFloatUV (M_KOT *pKOT, M_CPD *sourceCPD) {
  *
  *****/
 PublicFnDef M_CPD *rtINTUV_Distribute (M_CPD *refuvCPD, M_CPD *sourceuvCPD) {
-    VCPDReference pPPT (refuvCPD, UV_CPx_RefPToken, RTYPE_C_PToken);
-    return rtINTUV_UVAssign (
-	rtINTUV_New (pPPT, sourceuvCPD, UV_CPx_RefPToken), refuvCPD, sourceuvCPD
+    rtPTOKEN_Handle::Reference pPPT (
+	static_cast<rtUVECTOR_Handle*>(refuvCPD->containerHandle ())->rptHandle ()
     );
+    rtPTOKEN_Handle::Reference pRPT (
+	static_cast<rtUVECTOR_Handle*>(sourceuvCPD->containerHandle ())->rptHandle ()
+    );
+    return rtINTUV_UVAssign (rtINTUV_New (pPPT, pRPT), refuvCPD, sourceuvCPD);
 }
 
 
@@ -501,14 +445,9 @@ PublicFnDef M_CPD *rtINTUV_LCExtract (M_CPD *sourceCPD, rtLINK_CType *linkConstr
     linkConstructor->AlignForExtract (rtINTUV_Align (sourceCPD), UV_CPx_PToken);
 
 /*****  Extract the requested values  *****/
+    rtPTOKEN_Handle::Reference pRPT (static_cast<rtUVECTOR_Handle*>(sourceCPD->containerHandle ())->rptHandle ());
     return rtINTUV_New (
-	linkConstructor->PPT (),
-	sourceCPD,
-	UV_CPx_RefPToken,
-	UV_InitLCExtractedUV,
-	sourceCPD,
-	linkConstructor,
-	NilOf (Ref_UV_Initializer)
+	linkConstructor->PPT (), pRPT, UV_InitLCExtractedUV, sourceCPD, linkConstructor, NilOf (Ref_UV_Initializer)
     );
 }
 
@@ -591,20 +530,12 @@ PublicFnDef M_CPD *rtINTUV_UVExtract (M_CPD *sourceCPD, M_CPD *refuvCPD) {
  * Align 'source' and 'refuv' and validate 'refuv's applicability as an
  * extraction subscript for 'source'.
  *****/
-    rtREFUV_AlignForExtract (
-	rtINTUV_Align (sourceCPD), UV_CPx_PToken, refuvCPD
-    );
+    rtREFUV_AlignForExtract (rtINTUV_Align (sourceCPD), UV_CPx_PToken, refuvCPD);
 
 /*****  Extract and return the requested values  *****/
-    VCPDReference pPPT (refuvCPD, UV_CPx_PToken, RTYPE_C_PToken);
-    return rtINTUV_New (
-	pPPT,
-	sourceCPD,
-	UV_CPx_RefPToken,
-	InitializeExtractedUV,
-	sourceCPD,
-	refuvCPD
-    );
+    rtPTOKEN_Handle::Reference pPPT (static_cast<rtUVECTOR_Handle*>(refuvCPD->containerHandle ())->pptHandle ());
+    rtPTOKEN_Handle::Reference pRPT (static_cast<rtUVECTOR_Handle*>(sourceCPD->containerHandle ())->rptHandle ());
+    return rtINTUV_New (pPPT, pRPT, InitializeExtractedUV, sourceCPD, refuvCPD);
 }
 
 
@@ -645,9 +576,7 @@ PublicFnDef void rtINTUV_RFExtract (
 
 /*****  Extract and return the requested values  *****/
     *resultAddr =
-	(element = rtREFUV_Ref_Element (referenceAddr)) >=
-	    rtPTOKEN_CPD_BaseElementCount
-	        (rtREFUV_Ref_RefPTokenCPD (referenceAddr))
+	(element = rtREFUV_Ref_Element (referenceAddr)) >= referenceAddr->RPTCardinality ()
 	? 0
 	: rtINTUV_CPD_Array (sourceCPD)[element];
 }
@@ -993,7 +922,7 @@ PublicFnDef M_CPD *rtINTUV_PartitndSortIndices (
  *
  *****/
 PublicFnDef M_CPD *rtINTUV_PartitndRanks (
-    rtLINK_CType *partition, M_CPD *sortIndices, M_CPD *pRefPTokenCPD
+    rtLINK_CType *partition, M_CPD *sortIndices, rtPTOKEN_Handle *pRefPTokenCPD
 ) {
 /*---------------------------------------------------------------------------*
  *****  Link Traversal Component Handler Macro Definitions
@@ -1011,7 +940,8 @@ PublicFnDef M_CPD *rtINTUV_PartitndRanks (
  *****  Algorithm
  *---------------------------------------------------------------------------*/
 /*****  Align and validate parameters...  *****/
-    partition->AlignForDistribute (rtREFUV_Align (sortIndices), UV_CPx_RefPToken);
+    sortIndices->align ();
+    partition->AlignForDistribute (sortIndices, UV_CPx_RefPToken);
 
 /*****  Flip the sort indices and create the result 'rank' u-vector...  *****/
     M_CPD *source = rtREFUV_Flip (sortIndices);
@@ -1122,8 +1052,8 @@ PublicFnDef void rtINTUV_PartitndPartition (
     partition->AlignForDistribute (rtINTUV_Align (values), UV_CPx_PToken);
 
 /*****  Create the major and minor partitions...  *****/
-    rtLINK_CType *majorPartition = rtLINK_RefConstructor (partition->RPT (), -1);
-    rtLINK_CType *minorPartition = rtLINK_PosConstructor (partition->PPT (), -1);
+    rtLINK_CType *majorPartition = rtLINK_RefConstructor (partition->RPT ());
+    rtLINK_CType *minorPartition = rtLINK_PosConstructor (partition->PPT ());
 
 /*****  Initialize the traversal pointers...  *****/
     rtINTUV_ElementType	const *valuesPtr = rtINTUV_CPD_Array (values);
@@ -1135,10 +1065,9 @@ PublicFnDef void rtINTUV_PartitndPartition (
     );
 
 /*****  Close and return the partitions created...  *****/
-    M_CPD *groupPToken = rtPTOKEN_New (partition->PPT ()->Space (), minorCount);
+    rtPTOKEN_Handle::Reference groupPToken (new rtPTOKEN_Handle (partition->PPT ()->Space (), minorCount));
     *majorLC = majorPartition->Close (groupPToken);
     *minorLC = minorPartition->Close (groupPToken);
-    groupPToken->release ();
 
 /*---------------------------------------------------------------------------
  *****  Link Traversal Component Handler Macro Deletions
@@ -1229,14 +1158,14 @@ if (notYetInitialized) {\
 
 
 /***** Make sure both the source and target are integer set uvectors ... *****/
-    if (((RTYPE_Type)M_CPD_RType (sourceCPD) != RTYPE_C_IntUV) ||
+    if ((sourceCPD->RType () != RTYPE_C_IntUV) ||
 	!UV_CPD_IsASetUV (sourceCPD)
     ) ERR_SignalFault (
 	EC__InternalInconsistency,
 	"rtINTUV_LocateOrAdd:  Source UVector Must Be An Integer Set"
     );
 
-    if (((RTYPE_Type)M_CPD_RType (targetCPD) != RTYPE_C_IntUV) ||
+    if ((targetCPD->RType () != RTYPE_C_IntUV) ||
 	!UV_CPD_IsASetUV (targetCPD)
     ) ERR_SignalFault (
 	EC__InternalInconsistency,
@@ -1322,11 +1251,9 @@ if (notYetInitialized) {\
     if (resultCount > origTargetCount) {
 	/***** Deal with addedLinkC ... *****/
 	if (wantAddedLinkC) {
-	    M_CPD *ptoken = rtPTOKEN_New (
-		sourceCPD->ScratchPad (), (*addedLinkC)->ElementCount ()
+	    (*addedLinkC)->Close (
+		new rtPTOKEN_Handle (sourceCPD->ScratchPad (), (*addedLinkC)->ElementCount ())
 	    );
-	    (*addedLinkC)->Close (ptoken);
-	    ptoken->release ();
 	}
 
 	/***** Reconstruct the resulting target uvector ... *****/
@@ -1356,11 +1283,9 @@ if (notYetInitialized) {\
 	    *trgp++ = *resultp++;
 
 	/*** Deal with the new positional ptoken ... ***/
-	M_CPD *ptoken = targetPTokenC->ToPToken ();
+	rtPTOKEN_Handle::Reference ptoken (targetPTokenC->ToPToken ());
 
 	targetCPD->StoreReference (UV_CPx_PToken, ptoken);
-
-	ptoken->release ();
     }
 
 
@@ -1408,7 +1333,7 @@ PublicFnDef bool rtINTUV_ScalarLocateOrAdd (
 
 
 /***** Make sure the target is a integer set uvector ... *****/
-    if (((RTYPE_Type)M_CPD_RType (targetCPD) != RTYPE_C_IntUV) ||
+    if ((targetCPD->RType () != RTYPE_C_IntUV) ||
 	!UV_CPD_IsASetUV (targetCPD)
     ) ERR_SignalFault (
 	EC__InternalInconsistency,
@@ -1480,11 +1405,9 @@ PublicFnDef bool rtINTUV_ScalarLocateOrAdd (
 	*(rtINTUV_CPD_Array (targetCPD) + addAt) = value;
 
 	/*** Deal with the new positional ptoken ... ***/
-	M_CPD *ptoken = targetPTokenC->ToPToken ();
+	rtPTOKEN_Handle::Reference ptoken (targetPTokenC->ToPToken ());
 
 	targetCPD->StoreReference (UV_CPx_PToken, ptoken);
-
-	ptoken->release ();
 
 	*locationPtr = addAt;
 	return true;
@@ -1605,14 +1528,14 @@ PublicFnDef void rtINTUV_Lookup (
 
 
 /***** Make sure both the source and key are integer set uvectors ... *****/
-    if (((RTYPE_Type)M_CPD_RType (sourceCPD) != RTYPE_C_IntUV) ||
+    if ((sourceCPD->RType () != RTYPE_C_IntUV) ||
 	!UV_CPD_IsASetUV (sourceCPD)
     ) ERR_SignalFault (
 	EC__InternalInconsistency,
 	"rtINTUV_Lookup:  Source UVector Must Be An Integer Set"
     );
 
-    if (((RTYPE_Type)M_CPD_RType (keyCPD) != RTYPE_C_IntUV) ||
+    if ((keyCPD->RType () != RTYPE_C_IntUV) ||
         !UV_CPD_IsASetUV (keyCPD)
     ) ERR_SignalFault (
 	EC__InternalInconsistency,
@@ -1674,10 +1597,11 @@ PublicFnDef void rtINTUV_Lookup (
 /***** Done with the traversal *****/
 /***** Close the link constructors ... *****/
     if (someNotFound) {
-	M_CPD *ptoken = rtPTOKEN_New (keyCPD->Space (), (*locatedLinkC)->ElementCount ());
+	rtPTOKEN_Handle::Reference ptoken (
+	    new rtPTOKEN_Handle (keyCPD->Space (), (*locatedLinkC)->ElementCount ())
+	);
 	(*locatedLinkC)->Close (ptoken);
 	(*locationsLinkC)->Close (ptoken);
-	ptoken->release ();
     }
     else {
 	/*** all found, so the locatedLinkC is not needed ***/
@@ -1730,7 +1654,7 @@ PublicFnDef bool rtINTUV_ScalarLookup (
     *(rtINTUV_CPD_Array (sourceCPD) + index)
 
 /***** Make sure the source is an integer set uvector ... *****/
-    if (((RTYPE_Type)M_CPD_RType (sourceCPD) != RTYPE_C_IntUV) ||
+    if ((sourceCPD->RType () != RTYPE_C_IntUV) ||
 	!UV_CPD_IsASetUV (sourceCPD)
     ) ERR_SignalFault (
 	EC__InternalInconsistency,
@@ -1852,8 +1776,7 @@ PrivateFnDef int PrintElement (M_CPD *cpd) {
 IOBJ_DefineNewaryMethod (NewDM) {
     return RTYPE_QRegister (
 	rtINTUV_New (
-	    RTYPE_QRegisterCPD (parameterArray[0]),
-	    RTYPE_QRegisterCPD (parameterArray[1])
+	    RTYPE_QRegisterPToken (parameterArray[0]), RTYPE_QRegisterPToken (parameterArray[1])
 	)
     );
 }
@@ -1861,8 +1784,7 @@ IOBJ_DefineNewaryMethod (NewDM) {
 IOBJ_DefineNewaryMethod (NewDistributeDM) {
     return RTYPE_QRegister (
 	rtINTUV_Distribute (
-	    RTYPE_QRegisterCPD (parameterArray[0]),
-	    RTYPE_QRegisterCPD (parameterArray[1])
+	    RTYPE_QRegisterCPD (parameterArray[0]), RTYPE_QRegisterCPD (parameterArray[1])
 	)
     );
 }
@@ -1873,8 +1795,6 @@ IOBJ_DefineNewaryMethod (NewDistributeDM) {
  ************************/
 
 UV_DefineEPrintDM (PrintElementDM, PrintElement)
-
-UV_DefineAlignDM (AlignDM, rtINTUV_Align)
 
 UV_DefineTypeConversionDM (AsDoubleUVDM, rtINTUV_AsDoubleUV)
 
@@ -1934,11 +1854,9 @@ IOBJ_DefineUnaryMethod (CopyDM) {
 }
 
 IOBJ_DefineMethod (CopyWithPTokenDM) {
-    M_CPD *ptokenCPD = RTYPE_QRegisterCPD (parameterArray[0]);
-
-    RTYPE_MustBeA ("rtREFUV CopyWithPToken", M_CPD_RType (ptokenCPD), RTYPE_C_PToken);
-
-    return RTYPE_QRegister (UV_CopyWithNewPToken (RTYPE_QRegisterCPD (self), ptokenCPD));
+    return RTYPE_QRegister (
+	UV_CopyWithNewPToken (RTYPE_QRegisterCPD (self), RTYPE_QRegisterPToken (parameterArray[0]))
+    );
 }
 
 /***  Since this method needs to return 2 uvectors,
@@ -2039,7 +1957,6 @@ RTYPE_DefineHandler(rtINTUV_Handler) {
     IOBJ_BeginMD (instanceMD)
 	UV_StandardDMDEPackage
 	IOBJ_MDE ("eprint"		, PrintElementDM)
-	IOBJ_MDE ("align"		, AlignDM)
 	IOBJ_MDE ("asDoubleUV:"		, AsDoubleUVDM)
 	IOBJ_MDE ("asFloatUV:"		, AsFloatUVDM)
 	IOBJ_MDE ("at"			, AtCurrentDM)

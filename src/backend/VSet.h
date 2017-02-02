@@ -7,13 +7,11 @@
 
 #include "VTransient.h"
 
-#include "VCPDReference.h"
-
 /**************************
  *****  Declarations  *****
  **************************/
 
-#include "VAssociativeResult.h"
+#include "RTptoken.h"
 
 /*********************
  *****  Classes  *****
@@ -40,7 +38,7 @@ public:
 
 //  Access
 public:
-    M_CPD* ptoken () {
+    rtPTOKEN_Handle *ptoken () {
 	if (m_pDPT.isNil ())
 	    initializeDPT ();
 	return m_pDPT;
@@ -50,13 +48,13 @@ public:
 public:	// ...should be protected
     void adjustDomain (unsigned int xDomainOrigin, int sDomainAdjustment);
 
-    void installDPT (M_CPD* pDPT) {
+    void installDPT (rtPTOKEN_Handle *pDPT) {
 	m_pDPT.setTo (pDPT);
     }
 
 //  State
 protected:
-    VCPDReference m_pDPT;
+    rtPTOKEN_Handle::Reference m_pDPT;
 };
 
 

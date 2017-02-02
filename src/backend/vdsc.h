@@ -28,12 +28,6 @@ PublicFnDecl void DSC__ComplainAboutEmptyPtrType (char const* pText);
  *****  Traversal Setup  *****
  *****************************/
 
-PublicFnDecl void DSC__SetupTraversal (
-    DSC_Descriptor		*dsc,
-    M_CPD*			*cpd,
-    rtLINK_CType*		*linkc
-);
-
 PublicFnDecl void DSC__SetupJointTraversal(
     DSC_Descriptor		*dsc1,
     DSC_Descriptor		*dsc2,
