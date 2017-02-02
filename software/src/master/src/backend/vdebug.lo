@@ -1,0 +1,904 @@
+# include "stdio.h"
+#if defined(__cplusplus)
+   extern "C" {
+#endif
+#if (defined(__cplusplus) || defined(__STDC__))
+     extern int debugreject();
+     extern int debugwrap();
+     extern int debuglook();
+     extern int debugback(int *, int);
+     extern int debuginput();
+     extern void debugoutput(int);
+     extern void debugunput(int);
+     extern int debuglex();
+     extern int debugless();
+#ifdef LEXDEBUG
+     extern void allprint();
+     extern void sprint();
+#endif
+#if defined(__cplusplus)
+   }
+#endif
+#endif	/* __cplusplus or __STDC__ */
+# define U(x) x
+# define NLSTATE debugprevious=debugNEWLINE
+# define BEGIN debugbgin = debugsvec + 1 +
+# define INITIAL 0
+# define debugLERR debugsvec
+# define debugSTATE (debugestate-debugsvec-1)
+# define debugOPTIM 1
+# define debugLMAX 200
+# define output(c) putc(c,debugout)
+# define input() (((debugtchar=debugsptr>debugsbuf?U(*--debugsptr):getc(debugin))==10?(debuglineno++,debugtchar):debugtchar)==EOF?0:debugtchar)
+# define unput(c) {debugtchar=(c);if(debugtchar=='\n')debuglineno--;*debugsptr++=(unsigned char)debugtchar;}
+# define debugmore() (debugmorfg=1)
+# define ECHO fprintf(debugout, "%s",debugtext)
+# define REJECT { nstr = debugreject(); goto debugfussy;}
+int debugleng;
+int debuglenguc;
+extern unsigned char debugtextarr[];
+# ifdef debugCHAR_ARRAY
+extern char debugtext[];
+# else
+extern unsigned char debugtext[];
+# endif
+int debugposix_point=0;
+int debugnls16=0;
+int debugnls_wchar=0;
+char const *debuglocale = "C C C C C C";
+int debugmorfg;
+extern unsigned char *debugsptr, debugsbuf[];
+int debugtchar;
+FILE *debugin = (FILE *)0, *debugout = (FILE *)0;
+extern int debuglineno;
+struct debugsvf { 
+	int debugstoff;
+	struct debugsvf *debugother;
+	int *debugstops;};
+struct debugsvf *debugestate;
+extern struct debugsvf debugsvec[], *debugbgin;
+
+/** Make the lex string buffer debugtext larger **/
+#undef	    debugLMAX
+#define	    debugLMAX 512
+
+#undef	    input
+#define	    input() (\
+    (\
+	debugtchar = debugsptr > debugsbuf ? U(*--debugsptr) : NextCharacter ()\
+    )==10\
+    ? (debuglineno++, debugtchar)\
+    : debugtchar\
+)
+
+ /*****************************************
+  *****  Character Class Definitions  *****
+  *****************************************/
+# define debugNEWLINE 10
+int debuglex(){
+   int nstr; extern int debugprevious;
+   while((nstr = debuglook()) >= 0)
+   switch(nstr){
+case 0:
+   if(debugwrap()) return(0); break;
+case 1:
+		{
+					    strncpy (
+						debuglval.name, (char *)debugtext, 47
+					    );
+					    return (IDENTIFIER);
+					}
+break;
+case 2:
+			{
+					    debuglval.iobject = IOBJ_IntIObject (
+						atoi ((char *)debugtext)
+					    );
+					    return (NUMBER);
+					}
+break;
+case 3:
+case 4:
+case 5:
+	{
+					    debuglval.iobject = IOBJ_DoubleIObject (
+						atof ((char *)debugtext)
+					    );
+					    return (NUMBER);
+					}
+break;
+case 6:
+			{
+					    strncpy (
+						debuglval.name, (char *)debugtext, 47
+					    );
+					    return (UNARYSELECTOR);
+					}
+break;
+case 7:
+			{
+					    strncpy (debuglval.name, (char *)debugtext, 47);
+					    return (KEYWORD);
+					}
+break;
+case 8:
+				{
+					    return (ASSIGNMENT_OP);
+					}
+break;
+case 9:
+				{
+					    if (debugtext[debugleng - 1] == '\\')
+					    {
+						debugtext[--debugleng] = '\0';
+						debugmore ();
+					    }
+					    else
+					    {
+						input ();
+
+						debuglval.iobject=RTYPE_QRegister(
+						    rtSTRING_New (
+							(char *)(debugtext + 1)
+						    )
+						);
+						return STRING;
+					    }
+					}
+break;
+case 10:
+			{
+					    debuglval.iobject =
+						IOBJ_CharIObject (debugtext[1]);
+					    return CHARACTER;
+					}
+break;
+case 11:
+				{
+					    return debugtext[0];
+					}
+break;
+case 12:
+			;
+break;
+case 13:
+				{
+					    return (ERRORTOKEN);
+					}
+break;
+case -1:
+break;
+default:
+   fprintf(debugout,"bad switch debuglook %d",nstr);
+} return(0); }
+/* end of debuglex */
+
+#ifndef __cplusplus
+static void __debug__unused() { main(); }
+#endif
+
+/************************** SOURCE FILE HISTORY: ************************/
+/************************************************************************
+  debug.l 1 replace /users/jck/system
+  860318 12:54:14 jck The lex input for the debugger language
+
+ ************************************************************************/
+/************************************************************************
+  debug.l 2 replace /users/jck/system
+  860318 13:40:59 jck Syntax fixed so that history comments don't cause lex to bomb
+
+ ************************************************************************/
+/************************************************************************
+  debug.l 3 replace /users/mjc/system
+  860328 12:52:37 mjc Added 'expression . expression' and empty expression syntax
+
+ ************************************************************************/
+/************************************************************************
+  debug.l 4 replace /users/mjc/system
+  860412 12:32:58 mjc Added string syntax and objects
+
+ ************************************************************************/
+/************************************************************************
+  debug.l 5 replace /users/jck/source
+  860418 00:02:04 jck Expression separator replaced with comma
+Continue prompt removed, YACC bug fixed (ExpressionList type),
+hooks added for editor
+
+ ************************************************************************/
+/************************************************************************
+  debug.l 6 replace /users/jad/system
+  860425 12:08:51 jad changed 'input' to call the prompting input routine
+
+ ************************************************************************/
+/************************************************************************
+  debug.l 7 replace /users/mjc/system
+  860508 18:15:44 mjc Added 'character' syntax
+
+ ************************************************************************/
+/************************************************************************
+  debug.l 8 replace /users/ees/system
+  860528 18:13:27 ees modified call to input routine: ees 5-28-86
+
+ ************************************************************************/
+/************************************************************************
+  debug.l 9 replace /users/jad/system
+  860909 15:05:46 jad make the lex string buffer larger
+
+ ************************************************************************/
+/************************************************************************
+  debug.l 10 replace /users/mjc/translation
+  870524 09:43:06 mjc Shortened all identifiers to <= 31 characters
+
+ ************************************************************************/
+/************************************************************************
+  debug.l 11 replace /users/m2/backend
+  890503 15:03:55 m2 Fix for preprocessor
+
+ ************************************************************************/
+int debugvstop[] = {
+0,
+
+13,
+0,
+
+12,
+13,
+0,
+
+12,
+0,
+
+9,
+13,
+0,
+
+11,
+13,
+0,
+
+13,
+0,
+
+13,
+0,
+
+13,
+0,
+
+2,
+13,
+0,
+
+13,
+0,
+
+13,
+0,
+
+1,
+13,
+0,
+
+9,
+0,
+
+10,
+0,
+
+2,
+0,
+
+4,
+0,
+
+3,
+0,
+
+2,
+0,
+
+7,
+0,
+
+6,
+0,
+
+8,
+0,
+
+1,
+0,
+
+3,
+4,
+0,
+
+5,
+0,
+
+5,
+0,
+
+4,
+0,
+
+3,
+0,
+
+3,
+4,
+0,
+0};
+# define debugTYPE unsigned char
+struct debugwork { debugTYPE verify, advance; } debugcrank[] = {
+{0,0},	{0,0},	{1,3},	{0,0},	
+{0,0},	{0,0},	{0,0},	{0,0},	
+{6,15},	{0,0},	{1,4},	{1,5},	
+{0,0},	{0,0},	{0,0},	{0,0},	
+{6,15},	{6,15},	{0,0},	{0,0},	
+{0,0},	{0,0},	{0,0},	{0,0},	
+{0,0},	{0,0},	{0,0},	{0,0},	
+{0,0},	{0,0},	{0,0},	{8,16},	
+{0,0},	{0,0},	{0,0},	{1,6},	
+{1,7},	{1,8},	{2,8},	{8,16},	
+{8,16},	{6,0},	{6,15},	{0,0},	
+{1,9},	{0,0},	{0,0},	{1,10},	
+{2,10},	{1,11},	{6,15},	{0,0},	
+{13,26},	{15,0},	{0,0},	{6,15},	
+{0,0},	{0,0},	{0,0},	{1,12},	
+{2,12},	{1,13},	{2,13},	{0,0},	
+{8,16},	{8,16},	{1,14},	{0,0},	
+{18,20},	{0,0},	{1,14},	{0,0},	
+{6,15},	{8,16},	{0,0},	{0,0},	
+{6,15},	{9,17},	{8,16},	{9,18},	
+{9,18},	{9,18},	{9,18},	{9,18},	
+{9,18},	{9,18},	{9,18},	{9,18},	
+{9,18},	{0,0},	{0,0},	{18,28},	
+{19,29},	{30,37},	{0,0},	{8,16},	
+{0,0},	{0,0},	{0,0},	{8,16},	
+{10,19},	{10,19},	{10,19},	{10,19},	
+{10,19},	{10,19},	{10,19},	{10,19},	
+{10,19},	{10,19},	{11,20},	{0,0},	
+{11,21},	{11,21},	{11,21},	{11,21},	
+{11,21},	{11,21},	{11,21},	{11,21},	
+{11,21},	{11,21},	{11,22},	{18,28},	
+{19,29},	{30,37},	{0,0},	{0,0},	
+{0,0},	{11,23},	{11,23},	{11,23},	
+{11,23},	{11,24},	{11,23},	{11,23},	
+{11,23},	{11,23},	{11,23},	{11,23},	
+{11,23},	{11,23},	{11,23},	{11,23},	
+{11,23},	{11,23},	{11,23},	{11,23},	
+{11,23},	{11,23},	{11,23},	{11,23},	
+{11,23},	{11,23},	{11,23},	{0,0},	
+{0,0},	{0,0},	{0,0},	{11,23},	
+{0,0},	{11,23},	{11,23},	{11,23},	
+{11,23},	{11,24},	{11,23},	{11,23},	
+{11,23},	{11,23},	{11,23},	{11,23},	
+{11,23},	{11,23},	{11,23},	{11,23},	
+{11,23},	{11,23},	{11,23},	{11,23},	
+{11,23},	{11,23},	{11,23},	{11,23},	
+{11,23},	{11,23},	{11,23},	{12,25},	
+{12,25},	{12,25},	{12,25},	{12,25},	
+{12,25},	{12,25},	{12,25},	{12,25},	
+{12,25},	{0,0},	{0,0},	{0,0},	
+{0,0},	{0,0},	{0,0},	{0,0},	
+{12,25},	{12,25},	{12,25},	{12,25},	
+{12,25},	{12,25},	{12,25},	{12,25},	
+{12,25},	{12,25},	{12,25},	{12,25},	
+{12,25},	{12,25},	{12,25},	{12,25},	
+{12,25},	{12,25},	{12,25},	{12,25},	
+{12,25},	{12,25},	{12,25},	{12,25},	
+{12,25},	{12,25},	{0,0},	{0,0},	
+{0,0},	{0,0},	{12,25},	{0,0},	
+{12,25},	{12,25},	{12,25},	{12,25},	
+{12,25},	{12,25},	{12,25},	{12,25},	
+{12,25},	{12,25},	{12,25},	{12,25},	
+{12,25},	{12,25},	{12,25},	{12,25},	
+{12,25},	{12,25},	{12,25},	{12,25},	
+{12,25},	{12,25},	{12,25},	{12,25},	
+{12,25},	{12,25},	{14,27},	{14,27},	
+{14,27},	{14,27},	{14,27},	{14,27},	
+{14,27},	{14,27},	{14,27},	{14,27},	
+{14,22},	{0,0},	{0,0},	{0,0},	
+{0,0},	{0,0},	{0,0},	{14,27},	
+{14,27},	{14,27},	{14,27},	{14,27},	
+{14,27},	{14,27},	{14,27},	{14,27},	
+{14,27},	{14,27},	{14,27},	{14,27},	
+{14,27},	{14,27},	{14,27},	{14,27},	
+{14,27},	{14,27},	{14,27},	{14,27},	
+{14,27},	{14,27},	{14,27},	{14,27},	
+{14,27},	{0,0},	{0,0},	{0,0},	
+{0,0},	{14,27},	{0,0},	{14,27},	
+{14,27},	{14,27},	{14,27},	{14,27},	
+{14,27},	{14,27},	{14,27},	{14,27},	
+{14,27},	{14,27},	{14,27},	{14,27},	
+{14,27},	{14,27},	{14,27},	{14,27},	
+{14,27},	{14,27},	{14,27},	{14,27},	
+{14,27},	{14,27},	{14,27},	{14,27},	
+{14,27},	{20,30},	{20,30},	{20,30},	
+{20,30},	{20,30},	{20,30},	{20,30},	
+{20,30},	{20,30},	{20,30},	{23,23},	
+{23,23},	{23,23},	{23,23},	{23,23},	
+{23,23},	{23,23},	{23,23},	{23,23},	
+{23,23},	{0,0},	{20,31},	{0,0},	
+{0,0},	{0,0},	{0,0},	{0,0},	
+{23,23},	{23,23},	{23,23},	{23,23},	
+{23,23},	{23,23},	{23,23},	{23,23},	
+{23,23},	{23,23},	{23,23},	{23,23},	
+{23,23},	{23,23},	{23,23},	{23,23},	
+{23,23},	{23,23},	{23,23},	{23,23},	
+{23,23},	{23,23},	{23,23},	{23,23},	
+{23,23},	{23,23},	{20,31},	{0,0},	
+{0,0},	{0,0},	{23,23},	{0,0},	
+{23,23},	{23,23},	{23,23},	{23,23},	
+{23,23},	{23,23},	{23,23},	{23,23},	
+{23,23},	{23,23},	{23,23},	{23,23},	
+{23,23},	{23,23},	{23,23},	{23,23},	
+{23,23},	{23,23},	{23,23},	{23,23},	
+{23,23},	{23,23},	{23,23},	{23,23},	
+{23,23},	{23,23},	{24,32},	{0,0},	
+{24,32},	{0,0},	{0,0},	{24,33},	
+{24,33},	{24,33},	{24,33},	{24,33},	
+{24,33},	{24,33},	{24,33},	{24,33},	
+{24,33},	{24,22},	{0,0},	{0,0},	
+{0,0},	{0,0},	{0,0},	{0,0},	
+{24,23},	{24,23},	{24,23},	{24,23},	
+{24,23},	{24,23},	{24,23},	{24,23},	
+{24,23},	{24,23},	{24,23},	{24,23},	
+{24,23},	{24,23},	{24,23},	{24,23},	
+{24,23},	{24,23},	{24,23},	{24,23},	
+{24,23},	{24,23},	{24,23},	{24,23},	
+{24,23},	{24,23},	{0,0},	{0,0},	
+{0,0},	{0,0},	{24,23},	{0,0},	
+{24,23},	{24,23},	{24,23},	{24,23},	
+{24,23},	{24,23},	{24,23},	{24,23},	
+{24,23},	{24,23},	{24,23},	{24,23},	
+{24,23},	{24,23},	{24,23},	{24,23},	
+{24,23},	{24,23},	{24,23},	{24,23},	
+{24,23},	{24,23},	{24,23},	{24,23},	
+{24,23},	{24,23},	{28,32},	{0,0},	
+{28,32},	{0,0},	{0,0},	{28,34},	
+{28,34},	{28,34},	{28,34},	{28,34},	
+{28,34},	{28,34},	{28,34},	{28,34},	
+{28,34},	{29,35},	{0,0},	{29,35},	
+{0,0},	{0,0},	{29,36},	{29,36},	
+{29,36},	{29,36},	{29,36},	{29,36},	
+{29,36},	{29,36},	{29,36},	{29,36},	
+{31,38},	{0,0},	{31,38},	{0,0},	
+{0,0},	{31,39},	{31,39},	{31,39},	
+{31,39},	{31,39},	{31,39},	{31,39},	
+{31,39},	{31,39},	{31,39},	{32,34},	
+{32,34},	{32,34},	{32,34},	{32,34},	
+{32,34},	{32,34},	{32,34},	{32,34},	
+{32,34},	{33,33},	{33,33},	{33,33},	
+{33,33},	{33,33},	{33,33},	{33,33},	
+{33,33},	{33,33},	{33,33},	{0,0},	
+{0,0},	{0,0},	{0,0},	{0,0},	
+{0,0},	{0,0},	{33,23},	{33,23},	
+{33,23},	{33,23},	{33,23},	{33,23},	
+{33,23},	{33,23},	{33,23},	{33,23},	
+{33,23},	{33,23},	{33,23},	{33,23},	
+{33,23},	{33,23},	{33,23},	{33,23},	
+{33,23},	{33,23},	{33,23},	{33,23},	
+{33,23},	{33,23},	{33,23},	{33,23},	
+{0,0},	{0,0},	{0,0},	{0,0},	
+{33,23},	{0,0},	{33,23},	{33,23},	
+{33,23},	{33,23},	{33,23},	{33,23},	
+{33,23},	{33,23},	{33,23},	{33,23},	
+{33,23},	{33,23},	{33,23},	{33,23},	
+{33,23},	{33,23},	{33,23},	{33,23},	
+{33,23},	{33,23},	{33,23},	{33,23},	
+{33,23},	{33,23},	{33,23},	{33,23},	
+{35,36},	{35,36},	{35,36},	{35,36},	
+{35,36},	{35,36},	{35,36},	{35,36},	
+{35,36},	{35,36},	{37,40},	{0,0},	
+{37,40},	{0,0},	{0,0},	{37,41},	
+{37,41},	{37,41},	{37,41},	{37,41},	
+{37,41},	{37,41},	{37,41},	{37,41},	
+{37,41},	{38,39},	{38,39},	{38,39},	
+{38,39},	{38,39},	{38,39},	{38,39},	
+{38,39},	{38,39},	{38,39},	{40,41},	
+{40,41},	{40,41},	{40,41},	{40,41},	
+{40,41},	{40,41},	{40,41},	{40,41},	
+{40,41},	{0,0},	{0,0},	{0,0},	
+{0,0}};
+struct debugsvf debugsvec[] = {
+{0,	0,	0},
+{-1,	0,		0},	
+{-2,	debugsvec+1,	0},	
+{0,	0,		debugvstop+1},
+{0,	0,		debugvstop+3},
+{0,	0,		debugvstop+6},
+{-7,	0,		debugvstop+8},
+{0,	0,		debugvstop+11},
+{-30,	0,		debugvstop+14},
+{31,	0,		debugvstop+16},
+{52,	0,		debugvstop+18},
+{64,	0,		debugvstop+20},
+{139,	0,		debugvstop+23},
+{7,	0,		debugvstop+25},
+{214,	0,		debugvstop+27},
+{-19,	debugsvec+6,	debugvstop+30},
+{0,	0,		debugvstop+32},
+{0,	debugsvec+10,	0},	
+{22,	debugsvec+9,	debugvstop+34},
+{23,	debugsvec+10,	debugvstop+36},
+{289,	0,		debugvstop+38},
+{0,	debugsvec+11,	debugvstop+40},
+{0,	0,		debugvstop+42},
+{299,	debugsvec+14,	0},	
+{379,	0,		0},	
+{0,	debugsvec+12,	debugvstop+44},
+{0,	0,		debugvstop+46},
+{0,	debugsvec+14,	debugvstop+48},
+{459,	0,		0},	
+{474,	0,		0},	
+{24,	debugsvec+20,	debugvstop+50},
+{489,	0,		0},	
+{499,	0,		0},	
+{509,	debugsvec+14,	debugvstop+53},
+{0,	debugsvec+32,	debugvstop+55},
+{584,	0,		0},	
+{0,	debugsvec+35,	debugvstop+57},
+{599,	0,		0},	
+{609,	0,		0},	
+{0,	debugsvec+38,	debugvstop+59},
+{619,	0,		0},	
+{0,	debugsvec+40,	debugvstop+61},
+{0,	0,	0}};
+struct debugwork *debugtop = debugcrank+676;
+struct debugsvf *debugbgin = debugsvec+1;
+unsigned char debugmatch[] = {
+00  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,011 ,012 ,01  ,011 ,011 ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+011 ,01  ,'"' ,'#' ,01  ,01  ,01  ,01  ,
+'#' ,'#' ,01  ,'+' ,'#' ,'+' ,01  ,01  ,
+'0' ,'0' ,'0' ,'0' ,'0' ,'0' ,'0' ,'0' ,
+'0' ,'0' ,01  ,'#' ,01  ,01  ,01  ,01  ,
+01  ,'A' ,'A' ,'A' ,'A' ,'E' ,'A' ,'A' ,
+'A' ,'A' ,'A' ,'A' ,'A' ,'A' ,'A' ,'A' ,
+'A' ,'A' ,'A' ,'A' ,'A' ,'A' ,'A' ,'A' ,
+'A' ,'A' ,'A' ,01  ,01  ,01  ,01  ,'A' ,
+01  ,'A' ,'A' ,'A' ,'A' ,'E' ,'A' ,'A' ,
+'A' ,'A' ,'A' ,'A' ,'A' ,'A' ,'A' ,'A' ,
+'A' ,'A' ,'A' ,'A' ,'A' ,'A' ,'A' ,'A' ,
+'A' ,'A' ,'A' ,01  ,01  ,01  ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+0};
+unsigned char debugextra[] = {
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0};
+/* @(#) A.10.11 HP C LANGUAGE TOOL (NCFORM) 950421 $      */
+int debuglineno =1;
+# define debugU(x) x
+# define NLSTATE debugprevious=debugNEWLINE
+ 
+#ifdef debugNLS16_WCHAR
+unsigned char debugtextuc[debugLMAX * sizeof(wchar_t)];
+# ifdef debug_PCT_POINT /* for %pointer */
+wchar_t debugtextarr[debugLMAX];
+wchar_t *debugtext;
+# else               /* %array */
+wchar_t debugtextarr[1];
+wchar_t debugtext[debugLMAX];
+# endif
+#else
+unsigned char debugtextuc;
+# ifdef debug_PCT_POINT /* for %pointer */
+unsigned char debugtextarr[debugLMAX];
+unsigned char *debugtext;
+# else               /* %array */
+unsigned char debugtextarr[1];
+# ifdef debugCHAR_ARRAY
+char debugtext[debugLMAX];
+# else
+unsigned char debugtext[debugLMAX];
+# endif
+# endif
+#endif
+
+struct debugsvf *debuglstate [debugLMAX], **debuglsp, **debugolsp;
+unsigned char debugsbuf[debugLMAX];
+unsigned char *debugsptr = debugsbuf;
+int *debugfnd;
+extern struct debugsvf *debugestate;
+int debugprevious = debugNEWLINE;
+int debuglook(){
+	register struct debugsvf *debugstate, **lsp;
+	register struct debugwork *debugt;
+	struct debugsvf *debugz;
+	int debugch, debugfirst;
+	struct debugwork *debugr;
+# ifdef LEXDEBUG
+	int debug;
+# endif
+/*	char *debuglastch;
+ * ***** nls8 ***** */
+	unsigned char *debuglastch;
+	/* start off machines */
+# ifdef LEXDEBUG
+	debug = 0;
+# endif
+	debugfirst=1;
+	if (!debugmorfg)
+#ifdef debugNLS16_WCHAR
+		debuglastch = debugtextuc;
+#else
+# ifdef debugCHAR_ARRAY
+		debuglastch = (unsigned char *)debugtext;
+# else
+		debuglastch = debugtext;
+# endif
+#endif
+	else {
+		debugmorfg=0;
+#ifdef debugNLS16_WCHAR
+		debuglastch = debugtextuc+debuglenguc;
+#else
+# ifdef debugCHAR_ARRAY
+		debuglastch = (unsigned char *)debugtext+debugleng;
+# else
+		debuglastch = debugtext+debugleng;
+# endif
+#endif
+		}
+	for(;;){
+		lsp = debuglstate;
+		debugestate = debugstate = debugbgin;
+		if (debugprevious==debugNEWLINE) debugstate++;
+		for (;;){
+# ifdef LEXDEBUG
+			if(debug)fprintf(debugout,"state %d\n",debugstate-debugsvec-1);
+# endif
+			debugt = &debugcrank[debugstate->debugstoff];
+			if(debugt == debugcrank && !debugfirst){  /* may not be any transitions */
+				debugz = debugstate->debugother;
+				if(debugz == 0)break;
+				if(debugz->debugstoff == 0)break;
+				}
+			debugch = *debuglastch++ = (unsigned char)(input());
+			debugfirst=0;
+		tryagain:
+# ifdef LEXDEBUG
+			if(debug){
+				fprintf(debugout,"char ");
+				allprint(debugch);
+				putchar('\n');
+				}
+# endif
+			debugr = debugt;
+			if ( debugt > debugcrank){
+				debugt = debugr + debugch;
+				if (debugt <= debugtop && debugt->verify+debugsvec == debugstate){
+					if(debugt->advance+debugsvec == debugLERR)	/* error transitions */
+						{unput(*--debuglastch);break;}
+					*lsp++ = debugstate = debugt->advance+debugsvec;
+					goto contin;
+					}
+				}
+# ifdef debugOPTIM
+			else if(debugt < debugcrank) {		/* r < debugcrank */
+				debugt = debugr = debugcrank+(debugcrank-debugt);
+# ifdef LEXDEBUG
+				if(debug)fprintf(debugout,"compressed state\n");
+# endif
+				debugt = debugt + debugch;
+				if(debugt <= debugtop && debugt->verify+debugsvec == debugstate){
+					if(debugt->advance+debugsvec == debugLERR)	/* error transitions */
+						{unput(*--debuglastch);break;}
+					*lsp++ = debugstate = debugt->advance+debugsvec;
+					goto contin;
+					}
+				debugt = debugr + debugU(debugmatch[debugch]);
+# ifdef LEXDEBUG
+				if(debug){
+					fprintf(debugout,"try fall back character ");
+					allprint(debugU(debugmatch[debugch]));
+					putchar('\n');
+					}
+# endif
+				if(debugt <= debugtop && debugt->verify+debugsvec == debugstate){
+					if(debugt->advance+debugsvec == debugLERR)	/* error transition */
+						{unput(*--debuglastch);break;}
+					*lsp++ = debugstate = debugt->advance+debugsvec;
+					goto contin;
+					}
+				}
+			if ((debugstate = debugstate->debugother) && (debugt = &debugcrank[debugstate->debugstoff]) != debugcrank){
+# ifdef LEXDEBUG
+				if(debug)fprintf(debugout,"fall back to state %d\n",debugstate-debugsvec-1);
+# endif
+				goto tryagain;
+				}
+# endif
+			else
+				{unput(*--debuglastch);break;}
+		contin:
+# ifdef LEXDEBUG
+			if(debug){
+				fprintf(debugout,"state %d char ",debugstate-debugsvec-1);
+				allprint(debugch);
+				putchar('\n');
+				}
+# endif
+			;
+			}
+# ifdef LEXDEBUG
+		if(debug){
+			fprintf(debugout,"stopped at %d with ",*(lsp-1)-debugsvec-1);
+			allprint(debugch);
+			putchar('\n');
+			}
+# endif
+		while (lsp-- > debuglstate){
+			*debuglastch-- = 0;
+			if (*lsp != 0 && (debugfnd= (*lsp)->debugstops) && *debugfnd > 0){
+				debugolsp = lsp;
+				if(debugextra[*debugfnd]){		/* must backup */
+					while(debugback((*lsp)->debugstops,-*debugfnd) != 1 && lsp > debuglstate){
+						lsp--;
+						unput(*debuglastch--);
+						}
+					}
+				debugprevious = debugU(*debuglastch);
+				debuglsp = lsp;
+#ifdef debugNLS16_WCHAR
+				debuglenguc = debuglastch-debugtextuc+1;
+				debugtextuc[debuglenguc] = 0;
+#else
+# ifdef debugCHAR_ARRAY
+				debugleng = debuglastch-(unsigned char*)debugtext+1;
+# else
+				debugleng = debuglastch-debugtext+1;
+# endif
+				debugtext[debugleng] = 0;
+#endif
+# ifdef LEXDEBUG
+				if(debug){
+					fprintf(debugout,"\nmatch ");
+#ifdef debugNLS16_WCHAR
+					sprint(debugtextuc);
+#else
+					sprint(debugtext);
+#endif
+					fprintf(debugout," action %d\n",*debugfnd);
+					}
+# endif
+				return(*debugfnd++);
+				}
+			unput(*debuglastch);
+			}
+#ifdef debugNLS16_WCHAR
+		if (debugtextuc[0] == 0  /* && feof(debugin) */)
+#else
+		if (debugtext[0] == 0  /* && feof(debugin) */)
+#endif
+			{
+			debugsptr=debugsbuf;
+			return(0);
+			}
+#ifdef debugNLS16_WCHAR
+		debugprevious = debugtextuc[0] = input();
+#else
+		debugprevious = debugtext[0] = (unsigned char)(input());
+#endif
+		if (debugprevious>0) {
+			output(debugprevious);
+#ifdef debugNLS16
+                        if (debugnls16) {
+			int noBytes;
+                        sec = input();
+                        third = input();
+                        fourth = input();
+#ifdef debugNLS16_WCHAR
+                        noBytes = MultiByte(debugtextuc[0],sec,third,fourth);
+#else 
+                        noBytes = MultiByte(debugtext[0],sec,third,fourth);
+#endif          
+     					switch(noBytes) {
+     					case 2:
+#ifdef debugNLS16_WCHAR
+ 						output(debugprevious=debugtextuc[0]=sec);
+#else
+ 						output(debugprevious=debugtext[0]=sec);
+#endif
+                                                 unput(fourth);
+                                                 unput(third);
+                                                 break;
+     					case 3:
+#ifdef debugNLS16_WCHAR
+ 						output(debugprevious=debugtextuc[0]=sec);
+ 						output(debugprevious=debugtextuc[0]=third);
+#else
+ 						output(debugprevious=debugtext[0]=sec);
+ 						output(debugprevious=debugtext[0]=third);
+#endif
+                                                 unput(fourth);
+                                                 break; 
+                                         case 4:
+#ifdef debugNLS16_WCHAR
+ 						output(debugprevious=debugtextuc[0]=sec);
+ 						output(debugprevious=debugtextuc[0]=third);
+ 						output(debugprevious=debugtextuc[0]=fourth);
+#else
+ 						output(debugprevious=debugtext[0]=sec);
+ 						output(debugprevious=debugtext[0]=third);
+ 						output(debugprevious=debugtext[0]=fourth);
+#endif
+                                                 break;                                                                                            
+					default:
+					        unput(fourth);
+					        unput(third);
+						unput(sec);
+						break;
+						}
+					}
+#endif
+                }
+#ifdef debugNLS16_WCHAR
+		debuglastch=debugtextuc;
+#else
+# ifdef debugCHAR_ARRAY
+		debuglastch=(unsigned char*)debugtext;
+# else
+		debuglastch=debugtext;
+# endif
+#endif
+# ifdef LEXDEBUG
+		if(debug)putchar('\n');
+# endif
+		}
+	}
+
+int debugback(int *p, int m) {
+if (p==0) return(0);
+while (*p)
+	{
+	if (*p++ == m)
+		return(1);
+	}
+return(0);
+}
+	/* the following are only used in the lex library */
+int debuginput(){
+	return(input());
+	
+	}
+
+#if (defined(__cplusplus) || defined(__STDC__))
+void debugoutput(int c)
+#else
+debugoutput(c)
+  int c;
+# endif
+{
+	output(c);
+}
+
+#if (defined(__cplusplus) || defined(__STDC__))
+void debugunput(int c)
+#else
+debugunput(c)
+   int c;
+#endif
+{
+	unput(c);
+}

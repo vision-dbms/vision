@@ -1,0 +1,26 @@
+HKCR
+{
+	VAccess.ExtractWS.1 = s 'ExtractWS Class'
+	{
+		CLSID = s '{1F1F0B5D-3B26-11D4-BEBE-00A0C931D9D4}'
+	}
+	VAccess.ExtractWS = s 'ExtractWS Class'
+	{
+		CLSID = s '{1F1F0B5D-3B26-11D4-BEBE-00A0C931D9D4}'
+		CurVer = s 'VAccess.ExtractWS.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {1F1F0B5D-3B26-11D4-BEBE-00A0C931D9D4} = s 'ExtractWS Class'
+		{
+			ProgID = s 'VAccess.ExtractWS.1'
+			VersionIndependentProgID = s 'VAccess.ExtractWS'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			'TypeLib' = s '{F38D0B7E-36FC-11D4-BEBE-00A0C931D9D4}'
+		}
+	}
+}
