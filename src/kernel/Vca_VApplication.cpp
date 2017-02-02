@@ -27,6 +27,7 @@
 #include "Vca_IPassiveConnector_Gofers.h"
 
 #include "Vca_IPassiveCallback_Gofers.h"
+#include "Vca_IInfoServer.h"
 
 #include "Vca_VBSConsumer.h"
 #include "Vca_VBSProducer.h"
@@ -53,6 +54,20 @@
 #include "VSimpleFile.h"
 #include "VTransientServices.h"
 
+
+/***************************
+ ***************************
+ *****      Globals    *****
+ ***************************
+ ***************************/
+
+#ifdef _WIN32
+#define Vca_Decl Vca_API
+#else
+#define Vca_Decl extern
+#endif
+
+Vca_Decl Vca::VGoferInterface<Vca::IInfoServer>::Reference g_pInfoServerGofer;
 
 /*****************************************
  *****************************************
@@ -209,6 +224,22 @@ Vca::VApplication::VApplication (Context *pContext)
 {
     if (pContext)
 	pContext->incrementApplicationCount ();
+    retain (); {
+	VTransientServices *pTSP = transientServicesProvider ();
+	if (pTSP) {
+	    VString const iNSName (getenv ("NSName"));
+	    VTransientServices::NSEntry::Reference pNSEntry;
+	    if (pTSP->getNSEntry (iNSName, pNSEntry)) {
+		if (pNSEntry.isntEmpty ()) {
+		    VString iEntry;
+		    iEntry.setTo (pNSEntry->infoServer ());
+		    if (iEntry.isntEmpty ()) {
+			g_pInfoServerGofer.setTo (new Gofer::Named<IInfoServer, IDirectory>(iEntry));
+		    }
+		}
+	    }
+	}
+    } untain ();
 }
 
 /*************************
@@ -850,6 +881,6 @@ bool Vca::VApplication::isBackground () const {
  *************************************
  *************************************/
 
-Vca::VTrackable_count_t const &Vca::VApplication::activityCountTrackable () const {
+Vca::VTrackable_count_t const &Vca::VApplication::activityCountTrackable () {
     return m_iActivityCount.trackable ();
 }

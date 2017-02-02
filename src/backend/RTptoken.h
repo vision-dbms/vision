@@ -39,77 +39,6 @@ class M_CPD;
 #define rtPTOKEN_CPx_NextGeneration	(unsigned int)0
 #define rtPTOKEN_CPx_ColPToken		(unsigned int)1
 #define rtPTOKEN_CPx_RowPToken		(unsigned int)2
-
-/*****  Standard CPD Access Macros  *****/
-#define rtPTOKEN_CPD_Base(cpd)\
-    ((rtPTOKEN_Type *)M_CPD_ContainerBase (cpd))
-
-#define rtPTOKEN_CPD_NextGeneration(cpd)\
-    M_CPD_PointerToPOP (cpd, rtPTOKEN_CPx_NextGeneration)
-
-#define rtPTOKEN_CPD_NextGenerationCPD(cpd) (\
-    (cpd)->GetCPD (rtPTOKEN_CPx_NextGeneration, RTYPE_C_PToken)\
-)
-
-#define rtPTOKEN_CPD_ChangeArray(cpd, changeDescriptorType)\
-    rtPTOKEN_PT_ChangeArray(rtPTOKEN_CPD_Base (cpd), changeDescriptorType)
-
-#define rtPTOKEN_CPD_TokenType(cpd)\
-    rtPTOKEN_PT_TokenType (rtPTOKEN_CPD_Base (cpd))
-
-#define rtPTOKEN_CPD_Independent(cpd)\
-    rtPTOKEN_PT_Independent (rtPTOKEN_CPD_Base (cpd))
-
-#define rtPTOKEN_CPD_IsDependent(cpd)\
-    !rtPTOKEN_PT_Independent (rtPTOKEN_CPD_Base (cpd))
-
-#define rtPTOKEN_CPD_Closed(cpd)\
-    rtPTOKEN_PT_Closed (rtPTOKEN_CPD_Base (cpd))
-
-#define rtPTOKEN_CPD_Count(cpd)\
-    rtPTOKEN_PT_Count (rtPTOKEN_CPD_Base (cpd))
-
-#define rtPTOKEN_CPD_BaseElementCount(cpd)\
-    rtPTOKEN_PT_BaseElementCount (rtPTOKEN_CPD_Base (cpd))
-
-/*****  Cartesian PToken Macros  *****/
-#define rtPTOKEN_CPD_CartesianPTokens(cpd)\
-    rtPTOKEN_PT_CartesianPTokens (rtPTOKEN_CPD_Base (cpd))
-
-#define rtPTOKEN_CPD_RowPToken(cpd)\
-    M_CPD_PointerToPOP (cpd, rtPTOKEN_CPx_RowPToken)
-
-#define rtPTOKEN_CPD_ColPToken(cpd)\
-    M_CPD_PointerToPOP (cpd, rtPTOKEN_CPx_ColPToken)
-
-#define rtPTOKEN_CPD_RowPTokenCPD(cpd) (\
-    (cpd)->GetCPD (rtPTOKEN_CPx_RowPToken, RTYPE_C_PToken)\
-)
-
-#define rtPTOKEN_CPD_ColPTokenCPD(cpd) (\
-    (cpd)->GetCPD (rtPTOKEN_CPx_ColPToken, RTYPE_C_PToken)\
-)
-
-/*****  Query Macros  *****/
-#define rtPTOKEN_CPD_IsShift(cpd)\
-    (rtPTOKEN_CPD_TokenType (cpd) == rtPTOKEN_TT_Shift)
-
-#define rtPTOKEN_CPD_IsntShift(cpd)\
-    (!rtPTOKEN_CPD_IsShift (cpd))
-
-#define rtPTOKEN_CPD_IsCartesian(cpd)\
-    (rtPTOKEN_CPD_TokenType (cpd) == rtPTOKEN_TT_Cartesian)
-
-/* This macro returns true only if the ptoken is a base ptoken or is a current
-   cartesian ptoken.  It also forces non current cartesian ptokens to update.
-   Warning: if used improperly, this can cause an infinite update recursive
-   loop. */
-#define rtPTOKEN_CPD_IsTerminal(cpd) (\
-    rtPTOKEN_CPD_TokenType (cpd) == rtPTOKEN_TT_Base\
-    ? true\
-    : rtPTOKEN_CPD_TokenType (cpd) == rtPTOKEN_TT_Shift\
-    ? false\
-    : rtPTOKEN__CartesianPTIsCurrent (cpd, -1, true))
 
 
 /*************************************************
@@ -200,10 +129,15 @@ struct rtPTOKEN_SDCType {
  *				   this P-Token constructor's editting info.
  *---------------------------------------------------------------------------
  */
-class rtPTOKEN_CType : public VTransient {
+class rtPTOKEN_Handle;
+
+class rtPTOKEN_CType : public VBenderenceable {
+//    DECLARE_CONCRETE_RTT (rtPTOKEN_CType, VBenderenceable);
+    DECLARE_VIRTUAL_RTT (rtPTOKEN_CType, VBenderenceable);
+
 //  Construction
 public:
-    rtPTOKEN_CType (M_CPD *pPToken);
+    rtPTOKEN_CType (rtPTOKEN_Handle *pPToken);
 
 private:
     void InsertSDC (int origin, int shift);
@@ -214,14 +148,11 @@ public:
 //  Destruction
 protected:
     ~rtPTOKEN_CType ();
-public:
-    void discard () {
-	delete this;
-    }
+    void deleteThis ();
 
 //  Access
 public:
-    M_CPD *NextGeneration () const {
+    rtPTOKEN_Handle *NextGeneration () const {
 	return m_pNextGeneration;
     }
 
@@ -242,13 +173,13 @@ private:
     void ReverseOrder ();
 
 public:
-    M_CPD *ToPToken ();
+    rtPTOKEN_Handle *ToPToken ();
 
 //  State
 public:
-    M_CPD*			m_pNextGeneration;
-    M_CPD*			m_pRowPToken;
-    M_CPD*			m_pColPToken;
+    VReference<rtPTOKEN_Handle>	m_pNextGeneration;
+    VReference<rtPTOKEN_Handle>	m_pRowPToken;
+    VReference<rtPTOKEN_Handle>	m_pColPToken;
     unsigned int		m_xOrder	:   2,
 				m_cAlterations	:  30,
 				m_iCardinality;
@@ -257,27 +188,11 @@ public:
 };
 
 /*****  Access Macros  *****/
-#define rtPTOKEN_PTC_NextGenCPD(ptcp)		((ptcp)->m_pNextGeneration)
-#define rtPTOKEN_PTC_CartesianRowPTCPD(ptcp)	((ptcp)->m_pRowPToken)
-#define rtPTOKEN_PTC_CartesianColPTCPD(ptcp)	((ptcp)->m_pColPToken)
 #define rtPTOKEN_PTC_Order(ptcp)		((ptcp)->m_xOrder)
 #define rtPTOKEN_PTC_AltCount(ptcp)		((ptcp)->m_cAlterations)
 #define rtPTOKEN_PTC_BaseCount(ptcp)		((ptcp)->m_iCardinality)
 #define rtPTOKEN_PTC_ChainHead(ptcp)		((ptcp)->m_pSDChainHead)
 #define rtPTOKEN_PTC_ChainTail(ptcp)		((ptcp)->m_pSDChainTail)
-
-/*****  Order Query  *****/
-#define rtPTOKEN_PTC_OrderIsUndefined(ptcp) (\
-    rtPTOKEN_PTC_Order (ptcp) == rtPTOKEN_Order_Undefined\
-)
-
-#define rtPTOKEN_PTC_OrderIsForward(ptcp) (\
-    rtPTOKEN_PTC_Order (ptcp) == rtPTOKEN_Order_Forward\
-)
-
-#define rtPTOKEN_PTC_OrderIsBackward(ptcp) (\
-    rtPTOKEN_PTC_Order (ptcp) == rtPTOKEN_Order_Backward\
-)
 
 
 /**********************************
@@ -332,8 +247,7 @@ public:
     }\
 }
 
-#define rtPTOKEN_BTraverseAdjustments2(constructor, insertMacro, deleteMacro)\
-{\
+#define rtPTOKEN_BTraverseAdjustments2(constructor, insertMacro, deleteMacro) {\
     rtPTOKEN_SDCType*		sdcp;\
     int				origin,\
 				shift,\
@@ -388,8 +302,7 @@ public:
 
 
 /*****  Normalization Chain Mapper Macro  *****/
-#define rtPTOKEN_FTraverseAdjustments(constructor, insertMacro, deleteMacro)\
-{\
+#define rtPTOKEN_FTraverseAdjustments(constructor, insertMacro, deleteMacro) {\
     rtPTOKEN_SDCType*		sdcp;\
     int				origin,\
 				shift,\
@@ -423,52 +336,19 @@ public:
  *****  Routines  *****
  **********************/
 
-PublicFnDecl M_CPD *rtPTOKEN__CartsianPTIsntCurrent (
-    M_CPD *pPTokenRef, unsigned int xPTokenRef, bool update
-);
-
-PublicFnDecl bool rtPTOKEN__CartesianPTIsCurrent (
-    M_CPD *pPTokenRef, int xPTokenRef, bool update
-);
-
-PublicFnDecl void rtPTOKEN_CartesianVerification (
-    M_CPD *cartesianPT, M_CPD *pRowPToken, M_CPD *cPTokenRefCPD, int cPTokenRefIndex
-);
-
 PublicFnDecl unsigned int rtPTOKEN_BaseElementCount (
+    M_CPD const *pPTokenRef, int xPTokenRef
+);
+PublicFnDecl unsigned int rtPTOKEN_BaseElementCount (
+    VContainerHandle const *pPTokenRef, M_POP const *pPTokenPOP
+);
+
+PublicFnDecl rtPTOKEN_Handle *rtPTOKEN_BasePToken (
     M_CPD *pPTokenRef, int xPTokenRef
-);
-
-PublicFnDecl bool rtPTOKEN_IsCurrent (
-    M_CPD *pPTokenRef, int xPTokenRef
-);
-
-PublicFnDecl bool rtPTOKEN_IsntCurrent (
-    M_CPD *pPTokenRef, unsigned int xPTokenRef, M_CPD*&rpPTokenReturn
-);
-
-PublicFnDecl M_CPD *rtPTOKEN_BasePToken (
-    M_CPD *pPTokenRef, int xPTokenRef
-);
-
-PublicFnDecl bool rtPTOKEN_AllAlterationsBeyondEnd (
-    M_CPD *pPTokenRef, int xPTokenRef
-);
-
-PublicFnDecl M_CPD *rtPTOKEN_New (
-    M_ASD *pContainerSpace, unsigned int nelements
-);
-
-PublicFnDecl M_CPD *rtPTOKEN_New (
-    M_ASD *pContainerSpace, M_CPD *pRowRef, int xRowRef, M_CPD *pColRef, int xColRef
 );
 
 PublicFnDecl rtPTOKEN_CType *rtPTOKEN_NewShiftPTConstructor (
     M_CPD *currentPTokenRefCPD, int currentPTokenRefIndex
-);
-
-PublicFnDecl rtPTOKEN_CType *rtPTOKEN_CPDCumAdjustments (
-    M_CPD *ptokenCPD
 );
 
 
@@ -479,37 +359,204 @@ PublicFnDecl rtPTOKEN_CType *rtPTOKEN_CPDCumAdjustments (
  ******************************/
 
 class rtPTOKEN_Handle : public VContainerHandle {
-//  Run Time Type
-    DECLARE_CONCRETE_RTT (rtPTOKEN_Handle, VContainerHandle);
+//    DECLARE_CONCRETE_RTT (rtPTOKEN_Handle, VContainerHandle);
+    DECLARE_VIRTUAL_RTT (rtPTOKEN_Handle, VContainerHandle);
+
+    friend class rtPTOKEN_CType;
+    friend class VContainerHandle;
 
 //  Construction
-protected:
-    rtPTOKEN_Handle (M_CTE &rCTE) : VContainerHandle (rCTE) {
-    }
-
 public:
     static VContainerHandle *Maker (M_CTE &rCTE) {
 	return new rtPTOKEN_Handle (rCTE);
     }
+    rtPTOKEN_Handle (M_ASD *pObjectSpace, unsigned int iCardinality);
+    rtPTOKEN_Handle (M_ASD *pObjectSpace, rtPTOKEN_Handle *pRowPToken, rtPTOKEN_Handle *pColPToken);
+private:
+    rtPTOKEN_Handle (M_CTE &rCTE) : VContainerHandle (rCTE), m_iCardinality (
+	rtPTOKEN_PT_BaseElementCount (typecastContent ())
+    ), m_bIndependent (rtPTOKEN_PT_Independent (typecastContent ())) {
+    }
+private:
+    void createContainer ();
 
 //  Destruction
-protected:
+private:
+    ~rtPTOKEN_Handle () {
+    }
+    void deleteThis ();
 
 //  Access
+private:
+    rtPTOKEN_Type *typecastContent () const {
+	return reinterpret_cast<rtPTOKEN_Type*>(containerContent ());
+    }
+    M_POP *nextGenerationPOP () const {
+	return &rtPTOKEN_PT_nextGeneration (typecastContent ());
+    }
+    rtPTOKEN_SDType *sdArray () const {
+	return rtPTOKEN_PT_ChangeArray(typecastContent (), rtPTOKEN_SDType);
+    }
 public:
+    unsigned int sdCount () const {
+	return rtPTOKEN_PT_Count (typecastContent ());
+    }
+private:
+    unsigned int typeFromContainer () const {
+	return rtPTOKEN_PT_TokenType (typecastContent ());
+    }
+    M_POP *colPTokenPOP () const {
+	return &rtPTOKEN_PT_ColPToken(typecastContent ());
+    }
+public/*private*/:
+    M_POP *rowPTokenPOP () const {
+	return &rtPTOKEN_PT_RowPToken(typecastContent ());
+    }
+public:
+    unsigned int cardinality () const {
+	return m_iCardinality;
+    }
+    unsigned int type () const {
+	return hasAContainer () ? typeFromContainer () : rtPTOKEN_TT_Base;
+    }
+    bool typeIsBase () const {
+	return hasNoContainer () || typeFromContainer () == rtPTOKEN_TT_Base;
+    }
+    bool typeIsntBase () const {
+	return !typeIsBase ();
+    }
+    bool typeIsCartesian () const {
+	return hasAContainer () && typeFromContainer () == rtPTOKEN_TT_Cartesian;
+    }
+    bool typeIsntCartesian () const {
+	return !typeIsCartesian ();
+    }
+    bool typeIsShift () const {
+	return hasAContainer () && typeFromContainer () == rtPTOKEN_TT_Shift;
+    }
+    bool typeIsntShift () const {
+	return !typeIsShift ();
+    }
+    char const *typeName () const;
 
-//  Query
+    M_KOTE const &GetBlockEquivalentClassFromPToken () const {
+	return m_pASD->GetBlockEquivalentClassFromPToken (this);
+    }
+
+//  Consistency
+private:
+    bool isClosed () const {
+	return hasNoContainer () || rtPTOKEN_PT_Closed (typecastContent ());
+    }
+    bool isntClosed () const {
+	return !isClosed ();
+    }
+    void clearIsClosed () {
+	setIsClosedTo (false);
+    }
+    void setIsClosed () {
+	setIsClosedTo (true);
+    }
+    void setIsClosedTo (bool bValue) {
+	rtPTOKEN_PT_Closed (typecastContent ()) = bValue;
+    }
+
+//  Independence
 public:
+    bool isDependent () const {
+	return !m_bIndependent;
+    }
+    bool isIndependent () const {
+	return m_bIndependent;
+    }
+    void clearIsIndependent () {
+	setIsIndependentTo (false);
+    }
+    void setIsIndependent () {
+	setIsIndependentTo (true);
+    }
+    void setIsIndependentTo (bool bValue) {
+	m_bIndependent = bValue;
+	if (hasAContainer ()) {
+	    EnableModifications ();
+	    rtPTOKEN_PT_Independent (typecastContent ()) = bValue;
+	}
+    }
+
+//  Product
+private:
+    bool normalizationIsTerminal (ThisClass *pRowPToken, ThisClass *pColPToken);
+    bool productIsTerminal ();
+    bool productIsntTerminal () {
+	return !productIsTerminal ();
+    }
+    void setProductComponentsTo (ThisClass *pRowPToken, ThisClass *pColPToken);
+public:
+    rtPTOKEN_Handle *colPTokenHandle () {
+	return static_cast<ThisClass*>(GetContainerHandle (colPTokenPOP (), RTYPE_C_PToken));
+    }
+    rtPTOKEN_Handle *rowPTokenHandle () {
+	return static_cast<ThisClass*>(GetContainerHandle (rowPTokenPOP (), RTYPE_C_PToken));
+    }
+    void verifyProduct (ThisClass *pRowPToken, ThisClass *pColPToken);
+
+//  Trajectory
+private:
+    rtPTOKEN_CType *asConstructor ();
+    void convertToShift (
+	rtPTOKEN_Handle *pNextGeneration, rtPTOKEN_SDCType const *pSDHead, rtPTOKEN_SDCType const *pSDTail, unsigned int sSDList
+    );
+public:
+    rtPTOKEN_Handle *basePToken ();
+    rtPTOKEN_Handle *nextPToken () const {
+	return ReferenceIsntNil (nextGenerationPOP ()) ? static_cast<ThisClass*>(
+	    GetContainerHandle (nextGenerationPOP (), RTYPE_C_PToken)
+	) : 0;
+    }
+
+    rtPTOKEN_CType *getAdjustments ();
+    rtPTOKEN_CType *makeAdjustments ();
+
+/* This method returns true if the ptoken is a base ptoken or current
+   cartesian ptoken.  It forces non current cartesian ptokens to update.
+   Warning: if used improperly, this can cause an infinite update recursive
+   loop. */
+    using BaseClass::isTerminal;
+    bool isTerminal () {
+	return typeIsBase () || typeIsCartesian () && productIsTerminal ();
+    }
+
+    using BaseClass::isntTerminal;
+    bool isntTerminal () {
+	return !isTerminal ();
+    }
+
+    bool tailAdjustmentsOnly ();
+private:
+    bool tailAdjustmentsOnly (unsigned int xEnd) const;
 
 //  Callbacks
 public:
     void CheckConsistency ();
-
 protected:
     bool PersistReferences ();
 
+//  Display and Inspection
+public:
+    void display (bool bRecursive) const;
+    void displayTokenType () const;
+
+    void dump () const;
+
+    virtual /*override*/ bool getPOP (M_POP *pResult, unsigned int xPOP) const;
+    virtual /*override*/ unsigned int getPOPCount () const {
+	return typeIsCartesian () ? 3 : 1;
+    }
+
 //  State
-protected:
+private:
+    unsigned int const	m_iCardinality;
+    bool		m_bIndependent;
 };
 
 

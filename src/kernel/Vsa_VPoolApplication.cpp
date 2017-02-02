@@ -27,11 +27,14 @@
 #include "Vca_VConnectionPipeSource.h"
 #include "Vca_VProcessFactory.h"
 #include "Vca_VRexecConnectionFactory.h"
+#include "Vca_VNotifier.h"
 
 #include "Vsa_IPoolApplication_Ex2.h"
 #include "Vsa_VEvaluatorPump.h"
 #include "Vsa_VEvaluatorPumpSource.h"
 
+
+Vca::VTransientServicesForNotification g_iTransientServicesForNotification;
 
 /***********************************
  ***********************************
@@ -54,6 +57,7 @@ Vca::VClassInfoHolder &Vsa::VPoolApplication::ClassInfo () {
 	    .addBase (BaseClass::ClassInfo ())
 
 	    .addProperty ("queueLength", &ThisClass::queueLengthTrackable)
+	    .addProperty ("busyness", &ThisClass::busynessTrackable)
 
 	    .markCompleted ();
     }
@@ -187,10 +191,6 @@ void Vsa::VPoolApplication::HardStop (IPoolApplication_Ex2 *pRole) {
  *****  Vsa::IEvaluator  *****
  *****************************/
 
-void Vsa::VPoolApplication::getRole (IEvaluator::Reference &rpRole) {
-  m_pIEvaluator.getRole (rpRole);
-}
-
 void Vsa::VPoolApplication::EvaluateExpression (
     IEvaluator*		pRole,
     IEvaluatorClient*	pClient,
@@ -216,6 +216,32 @@ void Vsa::VPoolApplication::EvaluateURL (
 	pClient->OnError (0, "Evaluator not initialized");
 }
 
+/*****************************
+ *****  Vsa::IEvaluator  *****
+ *****************************/
+
+void Vsa::VPoolApplication::getRole (IEvaluator_Ex1::Reference &rpRole) {
+  m_pIEvaluator.getRole (rpRole);
+}
+
+void Vsa::VPoolApplication::EvaluateExpression_Ex (
+	IEvaluator *pRole, IEvaluatorClient *pClient, VString const &rPath, VString const &rExpression, VString const &rID, VString const &rCID
+
+) {
+    CAM_OPERATION(co) << "message" << "VPoolApplication::EvaluateExpression_Ex() receiving query ID: %qid" << rID;
+    co.stitchParent(rID.content(), rCID.content());
+    EvaluateExpression(pRole, pClient, rPath, rExpression);
+}
+void Vsa::VPoolApplication::EvaluateURL_Ex (
+    IEvaluator *pRole, IEvaluatorClient *pClient, VString const &rPath, VString const &rQuery, VString const &rEnvironment, VString const &rID, VString const &rCID
+) {
+    CAM_OPERATION(co) << "message" << "VPoolApplication::EvaluateURL_Ex() receiving query ID: %qid" << rID;
+    co.stitchParent(rID.content(), rCID.content());
+    EvaluateURL(pRole, pClient, rPath, rQuery, rEnvironment);
+}
+
+
+
 /***********************************
  *****  Vsa::IUpDownPublisher  *****
  **********************************/
@@ -225,8 +251,11 @@ void Vsa::VPoolApplication::getRole (IUpDownPublisher::Reference &rpRole) {
 }
 
 void Vsa::VPoolApplication::Subscribe (IUpDownPublisher *pRole, IUpDownSubscriber *pSub, IVReceiver<ISubscription*> *pRec) {
-    if (m_pEvaluatorPool)
+    if (m_pEvaluatorPool) {
 	m_pEvaluatorPool->Subscribe (pRole, pSub, pRec);
+    } else {
+	pRec->OnError(0, "Pool Not Responding", 0);
+    }
 }
 
 /*********************************
@@ -445,11 +474,6 @@ void Vsa::VPoolApplication::GetGenerationStatistics (IEvaluatorPool_Ex3* pRole, 
  *****  Vsa::IEvaluatorPool_Ex4  *****
  *************************************/
 
-void Vsa::VPoolApplication::getRole (IEvaluatorPool_Ex4::Reference &rpRole) {
-    if (m_pEvaluatorPool)
-	m_pIEvaluatorPool.getRole (rpRole);
-}
-
 void Vsa::VPoolApplication::QueryDetails (IEvaluatorPool_Ex4* pRole, Vca::U32 iID, IVReceiver<VString const &>* pClient) {
   if (m_pEvaluatorPool)
     m_pEvaluatorPool->QueryDetails (pRole, iID, pClient);
@@ -460,6 +484,71 @@ void Vsa::VPoolApplication::QueryDetails (IEvaluatorPool_Ex4* pRole, Vca::U32 iI
 void Vsa::VPoolApplication::CancelQuery (IEvaluatorPool_Ex4* pRole, Vca::U32 iID, IVReceiver<bool>* pClient) {
     if (m_pEvaluatorPool)
         m_pEvaluatorPool->CancelQuery (pRole, iID, pClient);
+}
+
+/*************************************
+ *****  Vsa::IEvaluatorPool_Ex5  *****
+ *************************************/
+
+void Vsa::VPoolApplication::getRole (IEvaluatorPool_Ex5::Reference &rpRole) {
+    if (m_pEvaluatorPool)
+	m_pIEvaluatorPool.getRole (rpRole);
+}
+
+void Vsa::VPoolApplication::StatSum (IEvaluatorPool_Ex5 *pRole, VString name, Vca::U64 timeBefore, Vca::U64 timeRange, IVReceiver<VString const &> *pClient) {
+	if(m_pEvaluatorPool)
+		m_pEvaluatorPool->StatSum(pRole, name, timeBefore, timeRange, pClient);
+	else
+		pClient->OnError (0, "Evaluator not initialized");
+}
+
+void Vsa::VPoolApplication::StatDivide (IEvaluatorPool_Ex5 *pRole, VString name1, VString name2, Vca::U64 timeBefore, Vca::U64 timeRange, IVReceiver<Vca::F64>* pClient) {
+	if(m_pEvaluatorPool)
+		m_pEvaluatorPool->StatDivide(pRole, name1, name2, timeBefore, timeRange, pClient);
+	else
+		pClient->OnError (0, "Evaluator not initialized");
+}
+
+void Vsa::VPoolApplication::StatMax (IEvaluatorPool_Ex5 *pRole, VString name, Vca::U64 timeBefore, Vca::U64 timeRange, IVReceiver<Vca::U32>* pClient, IVReceiver<V::VTime const &>* pClient2) {
+	if(m_pEvaluatorPool)
+		m_pEvaluatorPool->StatMax(pRole, name, timeBefore, timeRange, pClient, pClient2);
+	else
+		pClient->OnError (0, "Evaluator not initialized");
+}
+
+void Vsa::VPoolApplication::StatMin (IEvaluatorPool_Ex5 *pRole, VString name, Vca::U64 timeBefore, Vca::U64 timeRange, IVReceiver<Vca::U32>* pClient, IVReceiver<V::VTime const &>* pClient2) {
+	if(m_pEvaluatorPool)
+		m_pEvaluatorPool->StatMin(pRole, name, timeBefore, timeRange, pClient, pClient2);
+	else
+		pClient->OnError (0, "Evaluator not initialized");
+}
+
+void Vsa::VPoolApplication::StatMinString (IEvaluatorPool_Ex5 *pRole, VString name, Vca::U64 timeBefore, Vca::U64 timeRange, IVReceiver<VString const &> *pClient) {
+	if(m_pEvaluatorPool)
+		m_pEvaluatorPool->StatMinString(pRole, name, timeBefore, timeRange, pClient);
+	else
+		pClient->OnError (0, "Evaluator not initialized");
+}
+
+void Vsa::VPoolApplication::StatMaxString (IEvaluatorPool_Ex5 *pRole, VString name, Vca::U64 timeBefore, Vca::U64 timeRange, IVReceiver<VString const &> *pClient) {
+	if(m_pEvaluatorPool)
+		m_pEvaluatorPool->StatMaxString(pRole, name, timeBefore, timeRange, pClient);
+	else
+		pClient->OnError (0, "Evaluator not initialized");
+}
+
+void Vsa::VPoolApplication::AllStatValues (IEvaluatorPool_Ex5 *pRole, VString name, IVReceiver<VkDynamicArrayOf<Vca::U64> const &> *values, 
+							IVReceiver<VkDynamicArrayOf<V::VTime> const &> *times, IVReceiver<VkDynamicArrayOf<Vca::U64> const &> *maxs, 
+							IVReceiver<VkDynamicArrayOf<Vca::U64>  const &> *mins, IVReceiver<VkDynamicArrayOf<Vca::F64> const &> *sigmas) {
+	if(m_pEvaluatorPool)
+		m_pEvaluatorPool->AllStatValues(pRole, name, values, times, maxs, mins, sigmas);
+	else {
+		values->OnError (0, "Evaluator not initialized");
+		times->OnError (0, "Evaluator not initialized");
+		maxs->OnError (0, "Evaluator not initialized");
+		mins->OnError (0, "Evaluator not initialized");
+		sigmas->OnError (0, "Evaluator not initialized");
+	}
 }
 
 /************************************
@@ -482,12 +571,16 @@ void Vsa::VPoolApplication::Restart (
 bool Vsa::VPoolApplication::GetU32Value_(
     IVReceiver<Vca::U32> *pResult, VString const &rKey
 ) {
-    if (rKey.equalsIgnoreCase("QueryCount")) pResult->OnData(m_pEvaluatorPool->queriesProcessed ());
-    else if (rKey.equalsIgnoreCase ("MinWorkers")) pResult->OnData(m_pEvaluatorPool->workerMinimum ());
-    else if (rKey.equalsIgnoreCase ("MaxWorkers")) pResult->OnData(m_pEvaluatorPool->workerMaximum ());
-    else if (rKey.equalsIgnoreCase ("QueueLength")) pResult->OnData(m_pEvaluatorPool->queueLength ());
-    else if (rKey.equalsIgnoreCase ("ShrinkTimeRemaining")) pResult->OnData(m_pEvaluatorPool->shrinkTimeRemaining());
-    else if (rKey.equalsIgnoreCase ("AssertionsFailed")) pResult->OnData(m_pEvaluatorPool->checkAssertions());
+	if (m_pEvaluatorPool) {
+	if (rKey.equalsIgnoreCase("QueryCount")) pResult->OnData(m_pEvaluatorPool->queriesProcessed ());
+	else if (rKey.equalsIgnoreCase ("MinWorkers")) pResult->OnData(m_pEvaluatorPool->workerMinimum ());
+	else if (rKey.equalsIgnoreCase ("MaxWorkers")) pResult->OnData(m_pEvaluatorPool->workerMaximum ());
+	else if (rKey.equalsIgnoreCase ("QueueLength")) pResult->OnData(m_pEvaluatorPool->queueLength ());
+	else if (rKey.equalsIgnoreCase ("Busyness")) pResult->OnData(m_pEvaluatorPool->busyness ());
+	else if (rKey.equalsIgnoreCase ("ShrinkTimeRemaining")) pResult->OnData(m_pEvaluatorPool->shrinkTimeRemaining());
+	else if (rKey.equalsIgnoreCase ("AssertionsFailed")) pResult->OnData(m_pEvaluatorPool->checkAssertions());
+	else return BaseClass::GetU32Value_(pResult, rKey);
+	}
     else return BaseClass::GetU32Value_(pResult, rKey);
     return true;
 }
@@ -495,53 +588,57 @@ bool Vsa::VPoolApplication::GetU32Value_(
 bool Vsa::VPoolApplication::GetStringValue_(
     IVReceiver<VString const &> *pResult, VString const &rKey
 ) {
-    if (rKey.equalsIgnoreCase ("statDump")) {
-        VString rResult;
-        m_pEvaluatorPool->dumpStats (rResult);
-        pResult->OnData (rResult);
-    } else if (rKey.equalsIgnoreCase ("queueDump")) {
-        VString rResult;
-        m_pEvaluatorPool->queueDump(rResult);
-        pResult->OnData (rResult);
-    } else if (rKey.equalsIgnoreCase ("queueDumpHeader")) {
-        VString rResult;
-        m_pEvaluatorPool->queueDumpHeader(rResult);
-        pResult->OnData (rResult);
-    } else if (rKey.equalsIgnoreCase ("settingsDump")) {
-        VString rResult;
-        m_pEvaluatorPool->dumpSettings (rResult);
-        pResult->OnData (rResult);
-    } else if (rKey.equalsIgnoreCase ("quickStatsHeader")) {
-        VString rResult;
-        char iAppendToResult[13];
-        sprintf(iAppendToResult, " | %10s", "Clients");
-        m_pEvaluatorPool->quickStatsHeader (rResult);
-        rResult << iAppendToResult;
-        pResult->OnData (rResult);
-    } else if (rKey.equalsIgnoreCase ("quickStats")) {
-        VString rResult;
-        char iAppendToResult[13];
-        sprintf(iAppendToResult, " | %10d", activeOfferCount ());
-        m_pEvaluatorPool->quickStats (rResult);
-        rResult << iAppendToResult;
-        pResult->OnData (rResult);
-    } else if (rKey.equalsIgnoreCase ("workerStatsHeader")) {
-        VString rResult;
-        m_pEvaluatorPool->dumpWorkerStatsHeader (rResult);
-        pResult->OnData (rResult);
-    } else if (rKey.equalsIgnoreCase ("workerStats")) {
-        VString rResult;
-        m_pEvaluatorPool->dumpWorkerStats (rResult);
-        pResult->OnData (rResult);
-    } else if (rKey.equalsIgnoreCase ("generationStatsHeader")) {
-        VString rResult;
-        m_pEvaluatorPool->dumpGenerationStatsHeader (rResult);
-        pResult->OnData (rResult);
-    } else if (rKey.equalsIgnoreCase ("generationStats")) {
-        VString rResult;
-        m_pEvaluatorPool->dumpGenerationStats (rResult);
-        pResult->OnData (rResult);
-    } else return BaseClass::GetStringValue_(pResult, rKey);
+    if (m_pEvaluatorPool) {
+	if (rKey.equalsIgnoreCase ("statDump")) {
+		VString rResult;
+		m_pEvaluatorPool->dumpStats (rResult);
+		pResult->OnData (rResult);
+	} else if (rKey.equalsIgnoreCase ("queueDump")) {
+		VString rResult;
+		m_pEvaluatorPool->queueDump(rResult);
+		pResult->OnData (rResult);
+	} else if (rKey.equalsIgnoreCase ("queueDumpHeader")) {
+		VString rResult;
+		m_pEvaluatorPool->queueDumpHeader(rResult);
+		pResult->OnData (rResult);
+	} else if (rKey.equalsIgnoreCase ("settingsDump")) {
+		VString rResult;
+		m_pEvaluatorPool->dumpSettings (rResult);
+		pResult->OnData (rResult);
+	} else if (rKey.equalsIgnoreCase ("quickStatsHeader")) {
+		VString rResult;
+		char iAppendToResult[13];
+		sprintf(iAppendToResult, " | %10s", "Clients");
+		m_pEvaluatorPool->quickStatsHeader (rResult);
+		rResult << iAppendToResult;
+		pResult->OnData (rResult);
+	} else if (rKey.equalsIgnoreCase ("quickStats")) {
+		VString rResult;
+		char iAppendToResult[13];
+		sprintf(iAppendToResult, " | %10d", activeOfferCount ());
+		m_pEvaluatorPool->quickStats (rResult);
+		rResult << iAppendToResult;
+		pResult->OnData (rResult);
+	} else if (rKey.equalsIgnoreCase ("workerStatsHeader")) {
+		VString rResult;
+		m_pEvaluatorPool->dumpWorkerStatsHeader (rResult);
+		pResult->OnData (rResult);
+	} else if (rKey.equalsIgnoreCase ("workerStats")) {
+		VString rResult;
+		m_pEvaluatorPool->dumpWorkerStats (rResult);
+		pResult->OnData (rResult);
+	} else if (rKey.equalsIgnoreCase ("generationStatsHeader")) {
+		VString rResult;
+		m_pEvaluatorPool->dumpGenerationStatsHeader (rResult);
+		pResult->OnData (rResult);
+	} else if (rKey.equalsIgnoreCase ("generationStats")) {
+		VString rResult;
+		m_pEvaluatorPool->dumpGenerationStats (rResult);
+		pResult->OnData (rResult);
+	}
+	else return BaseClass::GetStringValue_(pResult, rKey);
+	}
+	else return BaseClass::GetStringValue_(pResult, rKey);
     return true;
 }
 
@@ -598,8 +695,8 @@ void Vsa::VPoolApplication::GetStatistics (
           char iTimeString[26]; VString iTimeStr ("-\n"); V::VTime iCurrentTime;
           if (iCurrentTime.ctime (iTimeString))
             iTimeStr.setTo (iTimeString);
-          iStat << "\nPool Statistics as of          : " << iTimeStr;
-          iStat << "Number of clients connected    : " << activeOfferCount () << "\n";
+          iStat << "\nPool Statistics as of           : " << iTimeStr;
+          iStat << "Number of clients connected     : " << activeOfferCount () << "\n";
 
 	  m_pEvaluatorPool->getStatistics (iStat);
 	  pReceiver->OnData (iStat);
@@ -612,7 +709,7 @@ void Vsa::VPoolApplication::GetStatistics (
 void Vsa::VPoolApplication::GetEvaluator (
     IEvaluatorControl* pRole, IEvaluatorSink* pSink
 ) {
-    IEvaluator::Reference pIEvaluatorRole;
+    IEvaluator_Ex1::Reference pIEvaluatorRole;
     getRole (pIEvaluatorRole);
     if (pSink)
 	pSink->OnData (pIEvaluatorRole);
@@ -809,15 +906,15 @@ bool Vsa::VPoolApplication::start_() {
 	    pPositionalCommand = iCommandCursor.nextToken ();
 
 
-        //  Evaluation Timeout
-            Vca::U64 cEvaluationTimeoutSecs = U64_MAX; // default
+	//  Evaluation Timeout
+	    Vca::U64 cEvaluationTimeoutSecs = 900; // default
 	    if (pCommand = commandStringValue ("evaluationTimeout", "EvaluationTimeout"))
                 cEvaluationTimeoutSecs = atoll (pCommand);
             else if (pPositionalCommand)
                 cEvaluationTimeoutSecs = atoll (pPositionalCommand);
 	    pPositionalCommand = iCommandCursor.nextToken ();
             
-            //  overf flow check...
+            //  overflow check...
             Vca::U64 cEvaluationTimeoutMicroSecs;
             if (cEvaluationTimeoutSecs > U64_MAX/1000000) 
               cEvaluationTimeoutMicroSecs = U64_MAX;
@@ -825,13 +922,28 @@ bool Vsa::VPoolApplication::start_() {
               cEvaluationTimeoutMicroSecs = cEvaluationTimeoutSecs * 1000000;
 
 
-	//  Evaluation Attempts is set to Maxworkers + 1 to try all existing
-	//  workers and a new worker as a last attempt
-	    Vca::U32 cEvaluationAttempts = cMaxWorkers+1; // default
+	//  Evaluation Attempts was once set to Maxworkers + 1 to try all existing
+	//  workers and a new worker as a last attempt, but that opens the opportunity for a "killer" query
+	//  to wipe out all the workers in a pool. Set to the new default of 1
+	    Vca::U32 cEvaluationAttempts = 1; // default
 	    if (pCommand = commandStringValue ("evaluationAttempts", "EvaluationAttempts"))
 		cEvaluationAttempts = atoi (pCommand);
 	    else if (pPositionalCommand)
 		cEvaluationAttempts = atoi (pPositionalCommand);
+	    pPositionalCommand = iCommandCursor.nextToken ();
+		
+	    Vca::U32 cEvaluationOnErrorAttempts = cEvaluationAttempts; // default
+	    if (pCommand = commandStringValue ("evaluationOnErrorAttempts", "EvaluationOnErrorAttempts"))
+		cEvaluationOnErrorAttempts = atoi (pCommand);
+	    else if (pPositionalCommand)
+		cEvaluationOnErrorAttempts = atoi (pPositionalCommand);
+	    pPositionalCommand = iCommandCursor.nextToken ();
+
+	    Vca::U32 cEvaluationTimeOutAttempts = cEvaluationAttempts; // default
+	    if (pCommand = commandStringValue ("evaluationTimeOutAttempts", "EvaluationTimeOutAttempts"))
+		cEvaluationTimeOutAttempts = atoi (pCommand);
+	    else if (pPositionalCommand)
+		cEvaluationTimeOutAttempts = atoi (pPositionalCommand);
 	    pPositionalCommand = iCommandCursor.nextToken ();
 
 	//  Broadcast InProg Limit
@@ -943,6 +1055,7 @@ bool Vsa::VPoolApplication::start_() {
 			pEvaluatorSource->setStartupQueryTo (iStartupQuery);
 		}
 	    }
+		
 
 
 	//  Create settings for the pool, ...
@@ -954,7 +1067,9 @@ bool Vsa::VPoolApplication::start_() {
 	    pPoolSettings->setWorkerMaximumTo (cMaxWorkers);
 	    pPoolSettings->setWorkersBeingCreatedMaximumTo (cWorkersBeingCreated);
 	    pPoolSettings->setWorkerMinimumTo (cMinWorkers);
-	    pPoolSettings->setEvaluationAttemptMaximumTo (cEvaluationAttempts);
+		pPoolSettings->setEvaluationAttemptMaximumTo (cEvaluationAttempts);
+	    pPoolSettings->setEvaluationOnErrorAttemptMaximumTo (cEvaluationOnErrorAttempts);
+	    pPoolSettings->setEvaluationTimeOutAttemptMaximumTo (cEvaluationTimeOutAttempts);
 	    pPoolSettings->setWorkerMinimumAvailableTo (cMinWorkersAvailable);
 	    pPoolSettings->setWorkerMaximumAvailableTo (cMaxWorkersAvailable);
 	    pPoolSettings->setWorkerCreationFailureHardLimitTo (cWorkerCreationFailureHardLimit);
@@ -964,12 +1079,60 @@ bool Vsa::VPoolApplication::start_() {
 	    pPoolSettings->setWorkerStartupQueryTo (iStartupQuery);
 	    pPoolSettings->setBCEvaluationsInProgressLimit (cBroadcastInProgLmt);
 	    pPoolSettings->setStopTimeOutTo (cStopTimeOut);
-            pPoolSettings->setShrinkTimeOutTo (cShrinkTimeOut);
-            pPoolSettings->setGenerationMaximumTo (cMaxGenerations);
+	    pPoolSettings->setShrinkTimeOutTo (cShrinkTimeOut);
+	    pPoolSettings->setGenerationMaximumTo (cMaxGenerations);
 	    pPoolSettings->setWorkerPIDQueryString (iPIDQuery);
 	    pPoolSettings->setEvaluationTimeOutTo (cEvaluationTimeoutMicroSecs);
+		
+	    // Add all our odometer settings
+	    const size_t numOdos = 6;
+	    VString odometers [numOdos] = {"Workers", "AvailWorkers", "WIPs", "QueriesProcessed", "QueryTime", "QueueTime"};
+	    for(int i = 0; i < numOdos; i++) { 
+		VEvaluatorPool::OdometerSettings::Reference pOdoSettings (
+		    new VEvaluatorPool::OdometerSettings ()
+		);
 
-	//  Create and the pool, ...
+		VString
+		    optionName,
+		    envVarName,
+		    prefix = "VO_";
+		(optionName = "bucketSize_") << odometers[i];
+		envVarName = prefix << "BucketSize_" << odometers[i];
+		if (pCommand = commandStringValue (optionName, envVarName))
+		    pOdoSettings->timerTime = atoi(pCommand);
+		else if (pPositionalCommand)
+		    pOdoSettings->timerTime = atoi(pPositionalCommand);
+		pPositionalCommand = iCommandCursor.nextToken ();
+
+		(optionName = "cBucketSize_") << odometers[i];
+		envVarName = prefix << "CBucketSize_" << odometers[i];
+		if (pCommand = commandStringValue (optionName, envVarName))
+		    pOdoSettings->compressedBucketSize = atoi(pCommand);
+		else if (pPositionalCommand)
+		    pOdoSettings->compressedBucketSize = atoi(pPositionalCommand);
+		pPositionalCommand = iCommandCursor.nextToken ();
+
+		(optionName = "timeRange_") << odometers[i];
+		envVarName = prefix << "TimeRange_" << odometers[i];
+		if (pCommand = commandStringValue (optionName, envVarName))
+		    pOdoSettings->totalTimeRange = atoi(pCommand);
+		else if (pPositionalCommand)
+		    pOdoSettings->totalTimeRange = atoi(pPositionalCommand);
+		pPositionalCommand = iCommandCursor.nextToken ();
+
+		(optionName = "uTimeRange_") << odometers[i];
+		envVarName = prefix << "UTimeRange_" << odometers[i];
+		if (pCommand = commandStringValue (optionName, envVarName))
+		    pOdoSettings->uncompressedTotalTimeRange = atoi(pCommand);
+		else if (pPositionalCommand)
+		    pOdoSettings->uncompressedTotalTimeRange = atoi(pPositionalCommand);
+		pPositionalCommand = iCommandCursor.nextToken ();
+
+		pOdoSettings->name = odometers[i];
+		pPoolSettings->AddOdometerSetting(pOdoSettings);
+	    }
+
+	//  Create the pool, ...
 	    m_pEvaluatorPool.setTo (new VEvaluatorPool (pPoolSettings));
 	}
     }
@@ -995,8 +1158,10 @@ bool Vsa::VPoolApplication::start_() {
 	    "     <MaxWorkersAvailable>          | -maxWorkersAvailable=<workerCount>",
 	    "     <WorkrSpawnHardErrLmt>         | -workerSpawnHardErrorLmt=<count>",
 	    "     <WorkrSpawnSoftErrLmt>         | -workerSpawnSoftErrorLmt=<count>",
-            "     <EvaluationTimeout>            | -evaluationTimeout=<timeout_secs>",
+	    "     <EvaluationTimeout>            | -evaluationTimeout=<timeout_secs>",
 	    "     <EvaluationAttempts>           | -evaluationAttempts=<cAttempts>",
+	    "     <EvaluationOnErrorAttempts>    | -evaluationOnErrorAttempts=<cOnErrorAttempts>",
+            "     <EvaluationTimeOutAttempts>    | -evaluationTimeOutAttempts=<cTimeOutAttempts>",
 	    "     <BcastInProgLmt>               | -bcastInProgLmt=<cLmt>",
 	    "     <StopTimeOut>                  | -stopTimeOut=<cTimeOut>",
 	    "     <UrlClass>                     | -urlClass=<urlClass>",
@@ -1040,17 +1205,21 @@ bool Vsa::VPoolApplication::stop_(bool bHardStop) {
  *          pool WIPs are not active and pool is stopped
  *       3. On callback, Vca::Stop () is called to terminate existing connections
  ****/
+
 //	if (m_pListener)
 //	    m_pListener->stop ();
 
 	Vca::VTrigger<VPoolApplication>::Reference pTrigger;
 	pTrigger.setTo (new Vca::VTrigger<ThisClass> (this, &ThisClass::onPoolStopped));
 
+	setRunStateIf (RunState_Stopping, RunState_AwaitingStop);
+	
 	if (m_pEvaluatorPool) 
 	    m_pEvaluatorPool->hardstop (pTrigger);
 
 	m_pEvaluatorPool.clear ();	// cleared to cause future Pool Interface methods to fail.
     }
+	
     return isStopping (bHardStop);
 }
 
@@ -1068,7 +1237,7 @@ bool Vsa::VPoolApplication::resume_() {
 
 void Vsa::VPoolApplication::onPoolStopped (Vca::VTrigger<ThisClass> *pTrigger) {
     //  stop the application (including existing client connections)
-    BaseClass::stop ();
+	setRunStateIf (RunState_AwaitingStop, RunState_Stopped);
     log ("Pool Application STOP - Completed.");
 }
 

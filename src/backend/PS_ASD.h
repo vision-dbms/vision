@@ -304,7 +304,7 @@ public:
 	return m_bCompactingSmall;
     }
 
-    unsigned long MappedSizeOfSpace (unsigned int *segCount) const;
+	unsigned __int64 MappedSizeOfSpace (unsigned int *segCount) const;
 
     unsigned int TotalSegments () const {
 	return 1 + RootSegment () - m_xBaseSegment;

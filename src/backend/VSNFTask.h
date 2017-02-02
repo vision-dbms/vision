@@ -23,7 +23,7 @@
  **************************/
 
 #include "VkDynamicArrayOf.h"
-
+
 
 /*************************
  *****  Definitions  *****
@@ -102,7 +102,7 @@ public:
 	return m_cSegmentsExpected == m_cSegmentsReceived;
     }
 
-    bool datumAlterable_() const;
+    bool datumAlterable_ () const;
 
 //  Access
 public:
@@ -165,7 +165,7 @@ public:
 //  External Invocation Support
 private:
     VExternalGroundStore *remoteFactoryGS ();
-public:
+    public:
     void createAndCopyToVariant (unsigned int xParameter);
 
     void returnImplementationHandle (
@@ -181,10 +181,10 @@ private:
     bool       wrapupSegment ();
 
     template <typename Source_T, typename Result_T> void ProcessArray (
-	VDescriptor &rResult, M_CPD *pPPT, VkDynamicArrayOf<Source_T> const &rArray, Result_T const *&rpResultArray
+	VDescriptor &rResult, rtPTOKEN_Handle *pPPT, VkDynamicArrayOf<Source_T> const &rArray, Result_T const *&rpResultArray
     ) const;
     void ProcessObjects (
-	VDescriptor &rResult, M_CPD *pPPT, ICollection *pCluster, object_reference_t sCluster, object_reference_array_t const &rxObjects
+	VDescriptor &rResult, rtPTOKEN_Handle *pPPT, ICollection *pCluster, object_reference_t sCluster, object_reference_array_t const &rxObjects
     ) const;
 
 //  External Result Return
@@ -221,7 +221,7 @@ private:
     Continuation		m_pContinuation;
     GroundContinuation		m_pGroundContinuation;
 
-    Queue			m_iQueue;
+    Queue				m_iQueue;
 
     IVSNFTaskImplementation::Reference
 				m_pSNFTaskImplementation;
@@ -229,11 +229,11 @@ private:
     VExternalGroundStore::Reference
 				m_pRemoteFactoryGS;
 
-    unsigned int 		m_xParameter;
+    unsigned int m_xParameter;
     unsigned int		m_cSegmentsExpected;
     unsigned int		m_cSegmentsReceived;
 
-    VString			m_pErrorString;
+    VString m_pErrorString;
     bool			m_bRunning;
 };
 
@@ -260,6 +260,5 @@ void VSNFTask::Queue::dequeue (VSNFTaskParameters::Reference& rpSNFT) {
     VSNFTaskParametersList::pop (rpSNFT);
     resetEnqueueReference ();
 }
-
 
 #endif

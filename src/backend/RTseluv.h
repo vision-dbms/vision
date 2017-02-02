@@ -8,12 +8,13 @@
  *****************************************
  *****************************************/
 
-/***********************
- *****  Component  *****
- ***********************/
+/************************
+ *****  Components  *****
+ ************************/
 
 #include "uvector.h"
 
+#include "VCPDReference.h"
 #include "VSet.h"
 
 /***********************
@@ -28,10 +29,14 @@
 
 #include "selector.h"
 
-#include "VAssociativeCursor.h"
-#include "VCollectionOf.h"
-#include "VCollectionOfStrings.h"
-#include "VOrdered.h"
+class rtVECTOR_Handle;
+
+class VAssociativeResult;
+class VCollectionOfStrings;
+class VCollectionOfUnsigned32;
+
+template <class SetClass, class KeyClass, class KeyValueType> class VAssociativeCursor;
+template <class CollectionClass, class ElementType> class VOrdered;
 
 
 /*****************************
@@ -46,10 +51,10 @@
  */
 
 /*****  Standard CPD Pointer Assignments  ****/
-#define rtSELUV_CPx_StringSpace    UV_CPx_AuxillaryPOP
+#define rtSELUV_CPx_StringSpace    UV_CPx_AuxiliaryPOP
 
 /*****  Standard CPD Access Macros  *****/
-#define rtSELUV_CPD_StringSpace(cpd) UV_CPD_AuxillaryPOP (cpd)
+#define rtSELUV_CPD_StringSpace(cpd) UV_CPD_AuxiliaryPOP (cpd)
 
 #define rtSELUV_CPD_StringSpaceCPD(cpd) (\
     (cpd)->GetCPD (rtSELUV_CPx_StringSpace, RTYPE_C_CharUV)\
@@ -62,17 +67,59 @@
 )
 
 
+/******************************
+ ******************************
+ *****  Container Handle  *****
+ ******************************
+ ******************************/
+
+class rtSELUV_Handle : public rtUVECTOR_Handle {
+//  Run Time Type
+    DECLARE_CONCRETE_RTT (rtSELUV_Handle, rtUVECTOR_Handle);
+
+//  Construction
+public:
+    static VContainerHandle *Maker (M_CTE &rCTE) {
+	return new rtSELUV_Handle (rCTE);
+    }
+protected:
+    rtSELUV_Handle (M_CTE &rCTE) : rtUVECTOR_Handle (rCTE) {
+    }
+
+//  Destruction
+private:
+    ~rtSELUV_Handle () {
+    }
+
+//  Access
+public:
+
+//  Alignment
+public:
+    using BaseClass::align;
+
+//  Query
+public:
+
+//  Callbacks
+protected:
+
+//  State
+protected:
+};
+
+
 /********************************
  ********************************
  *****  Callable Interface  *****
  ********************************
  ********************************/
 
-PublicFnDecl M_CPD *rtSELUV_New (M_CPD *pPPT, M_CPD *pRPT);
+PublicFnDecl M_CPD *rtSELUV_New (rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT);
 
-PublicFnDecl M_CPD *rtSELUV_Align (M_CPD *cpd);
-
-PublicFnDecl M_CPD *rtSELUV_Contents (M_ASD *pContainerSpace, M_CPD *selectorSet);
+PublicFnDecl void rtSELUV_Contents (
+    VReference<rtVECTOR_Handle> &rpResult, M_ASD *pContainerSpace, M_CPD *selectorSet
+);
 
 
 /*******************************
@@ -85,6 +132,7 @@ PublicFnDecl M_CPD *rtSELUV_Contents (M_ASD *pContainerSpace, M_CPD *selectorSet
  *----  rtSELUV_Set  ----*
  *************************/
 
+class rtSELUV_Handle;
 class rtSELUV_Set : public VSet {
 //  Friends
     friend class VAssociativeCursor<rtSELUV_Set, VCollectionOfStrings, char const*>;
@@ -92,8 +140,7 @@ class rtSELUV_Set : public VSet {
 
 //  Construction
 public:
-    rtSELUV_Set (M_CPD *pSetRef, int xSetRef);
-    rtSELUV_Set (M_CPD *pSelectorSetCPD);
+    rtSELUV_Set (rtSELUV_Handle *pSelectors);
 
 //  Destruction
 public:
@@ -120,7 +167,7 @@ protected:
 //  Alignment
 public:
     void align () {
-	rtSELUV_Align (m_pSetCPD);
+	m_pSetCPD->align ();
     }
 
 //  Access
@@ -163,6 +210,8 @@ public:
     bool Delete (unsigned int xSelector);
 
 //  Update Utilities
+public:
+	bool compact ();
 protected:
     void install (unsigned int xElement, unsigned int xSelectorType, unsigned int xSelector) {
 	rtSELUV_Type_Element* pElement  = rtSELUV_CPD_Array (m_pSetCPD) + xElement;
@@ -189,43 +238,6 @@ protected:
     VCPDReference const		m_pSetCPD;
     VCPDReference		m_pStringSpaceCPD;
     char const *		m_pStringStorage;
-};
-
-
-/******************************
- ******************************
- *****  Container Handle  *****
- ******************************
- ******************************/
-
-class rtSELUV_Handle : public rtUVECTOR_Handle {
-//  Run Time Type
-    DECLARE_CONCRETE_RTT (rtSELUV_Handle, rtUVECTOR_Handle);
-
-//  Construction
-protected:
-    rtSELUV_Handle (M_CTE &rCTE) : rtUVECTOR_Handle (rCTE) {
-    }
-
-public:
-    static VContainerHandle *Maker (M_CTE &rCTE) {
-	return new rtSELUV_Handle (rCTE);
-    }
-
-//  Destruction
-protected:
-
-//  Access
-public:
-
-//  Query
-public:
-
-//  Callbacks
-protected:
-
-//  State
-protected:
 };
 
 

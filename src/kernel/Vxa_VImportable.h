@@ -22,6 +22,8 @@ namespace Vxa {
     class VCallType2Importer;
     class VTask;
 
+    Vxa_API    void InitializeStockImportables ();
+
 /***********************************
  *----  class VImportableType  ----*
  ***********************************/
@@ -44,7 +46,7 @@ namespace Vxa {
  *----  template <typename T> class VImportable  ----*
  *****************************************************/
 
-    template <typename T> class VImportable : virtual public VImportableType {
+    template <typename T> class Vxa_API VImportable : virtual public VImportableType {
 	DECLARE_FAMILY_MEMBERS (VImportable<T>, VImportableType);
 
     //  Aliases

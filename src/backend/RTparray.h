@@ -60,24 +60,34 @@ PublicFnDecl M_CPD *rtPARRAY_New (M_ASD *pContainerSpace, unsigned int elementCo
  ******************************/
 
 class rtPARRAY_Handle : public VContainerHandle {
-//  Run Time Type
     DECLARE_CONCRETE_RTT (rtPARRAY_Handle, VContainerHandle);
 
 //  Construction
-protected:
-    rtPARRAY_Handle (M_CTE &rCTE) : VContainerHandle (rCTE) {
-    }
-
 public:
     static VContainerHandle *Maker (M_CTE &rCTE) {
 	return new rtPARRAY_Handle (rCTE);
     }
+private:
+    rtPARRAY_Handle (M_CTE &rCTE) : VContainerHandle (rCTE) {
+    }
 
 //  Destruction
-protected:
+private:
+    ~rtPARRAY_Handle () {
+    }
 
 //  Access
+private:
+    M_POP *element (unsigned int xElement) const {
+	return elementArray () + xElement;
+    }
+    M_POP *elementArray () const {
+	return reinterpret_cast<M_POP*>(containerContent ());
+    }
 public:
+    unsigned int elementCount () const {
+	return containerSize () / sizeof (M_POP);
+    }
 
 //  Query
 public:
@@ -86,8 +96,12 @@ public:
 protected:
     bool PersistReferences ();
 
-//  State
-protected:
+//  Display and Inspection
+public:
+    virtual /*override*/ bool getPOP (M_POP *pResult, unsigned int xPOP) const;
+    virtual /*override*/ unsigned int getPOPCount () const {
+	return elementCount ();
+    }
 };
 
 

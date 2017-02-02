@@ -83,7 +83,10 @@ namespace Vca {
 		ParseState_ExpectingTimeout,
 		ParseState_ExpectingOption,
 
-		ParseState_ExpectingTTL
+		ParseState_ExpectingTTL,
+		ParseState_ExpectingInfoServer,
+		ParseState_ExpectingNSTemplate,
+		ParseState_ExpectingNotificationSentinel
 	    };
             /**
              * Type of a session; used to control UI visibility of sessions.
@@ -438,6 +441,10 @@ namespace Vca {
              * @return true on success, false on failure.
              */
 	    bool parseSessionTemplate (VSimpleFile &rSessionsFile, SessionType iType, Session::Reference &rSession) const;
+		
+	    bool parseSessionTemplate (VString &rSessionsString, SessionType iType, Session::Reference &rSession) const;
+	    
+	    bool extractSessionTemplateString (VSimpleFile &rSessionsFile, VString &rTemplateString) const;
 
             /**
              * Adds a session to the underlying directory being populated.

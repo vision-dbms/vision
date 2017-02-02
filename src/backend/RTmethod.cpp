@@ -23,6 +23,7 @@
 #include "vutil.h"
 
 #include "RTblock.h"
+#include "RTvstore.h"
 
 /*****  Self  *****/
 #include "RTmethod.h"
@@ -43,6 +44,17 @@
  ***************************/
 
 DEFINE_CONCRETE_RTT (rtMETHOD_Handle);
+
+/******************************
+ ******************************
+ *****  Canonicalization  *****
+ ******************************
+ ******************************/
+
+bool rtMETHOD_Handle::getCanonicalization_(rtVSTORE_Handle::Reference &rpStore, DSC_Pointer const &rPointer) {
+    rpStore.setTo (static_cast<rtVSTORE_Handle*>(KOT ()->TheMethodClass.ObjectHandle ()));
+    return true;
+}
 
 
 /**************************
@@ -63,33 +75,25 @@ DEFINE_CONCRETE_RTT (rtMETHOD_Handle);
  *	A CPD for the method created.
  *
  *****/
-PublicFnDef M_CPD *rtMETHOD_New (M_ASD *pContainerSpace, rtBLOCK_Handle *pBlock, M_CPD *pMy) {
-    return POPVECTOR_New (
-	pContainerSpace, RTYPE_C_Method, rtMETHOD_Method_POPCount
-    )->StoreReference (
-	rtMETHOD_CPx_Block, pBlock
-    )->StoreReference (
-	rtMETHOD_CPx_Origin, pMy
-    );
+rtMETHOD_Handle::rtMETHOD_Handle (
+    M_ASD *pContainerSpace, rtBLOCK_Handle *pBlock, Vdd::Store *pMy
+) : BaseClass (pContainerSpace, RTYPE_C_Method, rtMETHOD_Method_POPCount) {
+    StoreReference (rtMETHOD_CPx_Block, static_cast<VContainerHandle*>(pBlock));
+    StoreReference (rtMETHOD_CPx_Origin, pMy);
 }
 
 
 /*---------------------------------------------------------------------------
  *****  Routine to align a method
  *
- *  Argument:
- *	method			- a standard CPD for the method to be aligned.
- *
  *  Returns:
  *	true if an alignment was required, false otherwise
  *
  *****/
-PublicFnDef bool rtMETHOD_Align (M_CPD *method) {
-    M_CPD *block = rtMETHOD_CPD_BlockCPD (method);
-    bool result = rtBLOCK_Align (block);
-    block->release ();
-
-    return result;
+bool rtMETHOD_Handle::align () {
+    rtBLOCK_Handle::Reference pBlock;
+    getBlock (pBlock);
+    return pBlock->align ();
 }
 
 
@@ -125,15 +129,14 @@ PrivateFnDef void PrintMethod (M_CPD *method) {
  ********************/
 
 IOBJ_DefineNewaryMethod (NewWithOriginDM) {
-    M_CPD *pBlock = RTYPE_QRegisterCPD (parameterArray[0]);
-    RTYPE_MustBeA ("'new:withOrigin:'", M_CPD_RType (pBlock), RTYPE_C_Block);
-    return RTYPE_QRegister (
-	rtMETHOD_New (
-	    IOBJ_ScratchPad,
-	    static_cast<rtBLOCK_Handle*>(pBlock->containerHandle ()),
-	    RTYPE_QRegisterCPD (parameterArray[1])
-	)
+    VContainerHandle *pBlock = RTYPE_QRegisterHandle (parameterArray[0]);
+    RTYPE_MustBeA ("'new:withOrigin:'", pBlock->RType (), RTYPE_C_Block);
+
+    Vdd::Store::Reference pMyStore (RTYPE_QRegisterHandle (parameterArray[1])->getStore ());
+    rtMETHOD_Handle::Reference pMethod (
+	new rtMETHOD_Handle (IOBJ_ScratchPad, static_cast<rtBLOCK_Handle*>(pBlock), pMyStore)
     );
+    return RTYPE_QRegister (pMethod);
 }
 
 
@@ -142,11 +145,11 @@ IOBJ_DefineNewaryMethod (NewWithOriginDM) {
  ************************/
 
 IOBJ_DefineUnaryMethod (BlockDM) {
-    return RTYPE_QRegister (rtMETHOD_CPD_BlockCPD (RTYPE_QRegisterCPD (self)));
+    return RTYPE_QRegister (RTYPE_QRegisterCPD (self)->GetCPD (rtMETHOD_CPx_Block, RTYPE_C_Block));
 }
 
 IOBJ_DefineUnaryMethod (OriginDM) {
-    return RTYPE_QRegister (rtMETHOD_CPD_OriginCPD(RTYPE_QRegisterCPD (self)));
+    return RTYPE_QRegister (RTYPE_QRegisterCPD (self)->GetCPD (rtMETHOD_CPx_Origin));
 }
 
 

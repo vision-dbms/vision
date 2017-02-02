@@ -209,6 +209,10 @@ namespace V {
 	    return 0 == iValue;		//  ... memory barrier not needed until we act on this info.
 	}
 
+	static value_t fetchAndAdd (value_t volatile &rValue, value_t iAddend) {
+	    return __ATOMIC_ADD_LONG ((void volatile*)&rValue, iAddend);
+	}
+
 	static value_t fetchAndIncrement (value_t volatile &rValue) {
 	    return __ATOMIC_INCREMENT_LONG ((void volatile*)&rValue);
 	}
@@ -254,6 +258,9 @@ namespace V {
 	    return 0 == iValue;		//  ... memory barrier not needed until we act on this info.
 	}
 
+	static value_t fetchAndAdd (value_t volatile &rValue, value_t iAddend) {
+	    return __ATOMIC_ADD_QUAD ((void volatile*)&rValue, iAddend);
+	}
 	static value_t fetchAndIncrement (value_t volatile &rValue) {
 	    return __ATOMIC_INCREMENT_QUAD ((void volatile*)&rValue);
 	}
@@ -314,6 +321,10 @@ namespace V {
 	    return 0 == iValue;
 	}
 
+	static value_t fetchAndAdd (value_t volatile &rValue, value_t iAddend) {
+	    return InterlockedExchangeAdd ((LONG volatile*)&rValue, iAddend);
+	}
+
 	static value_t fetchAndIncrement (value_t volatile &rValue) {
 	    return InterlockedIncrement ((LONG volatile*)&rValue) - 1;
 	}
@@ -358,6 +369,10 @@ namespace V {
 	    return 0 == iValue;
 	}
 
+	static value_t fetchAndAdd (value_t volatile &rValue, value_t iAddend) {
+	    return InterlockedExchangeAdd64 ((LONGLONG volatile*)&rValue, iAddend);
+	}
+
 	static value_t fetchAndIncrement (value_t volatile &rValue) {
 	    return InterlockedIncrement64 ((LONGLONG volatile*)&rValue) - 1;
 	}
@@ -400,15 +415,6 @@ namespace V {
 	}
 
     //  Operations
-    private:
-	static value_t interlockedAdd (value_t volatile &rValue, value_t iAddend) {
-	    register value_t result;
-	    __asm__ __volatile__ (
-		"lock; xaddl %0,%2"
-		: "=r" (result) : "0" (iAddend), "m" (rValue) : "memory"
-	    );
-	    return result;
-	}
     public:
 	static void increment (value_t volatile &rValue) {
 	    __asm__ __volatile__(
@@ -427,11 +433,20 @@ namespace V {
 	    return 0 == iValue;
 	}
 
+	static value_t fetchAndAdd (value_t volatile &rValue, value_t iAddend) {
+	    register value_t result;
+	    __asm__ __volatile__ (
+		"lock; xaddl %0,%2"
+		: "=r" (result) : "0" (iAddend), "m" (rValue) : "memory"
+	    );
+	    return result;
+	}
+
 	static value_t fetchAndIncrement (value_t volatile &rValue) {
-	    return interlockedAdd (rValue, 1);
+	    return fetchAndAdd (rValue, 1);
 	}
 	static value_t fetchAndDecrement (value_t volatile &rValue) {
-	    return interlockedAdd (rValue, (value_t)-1);
+	    return fetchAndAdd (rValue, (value_t)-1);
 	}
 	static value_t incrementAndFetch (value_t volatile &rValue) {
 	    return fetchAndIncrement (rValue) + 1;
@@ -455,15 +470,6 @@ namespace V {
 	}
 
     //  Operations
-    private:
-	static value_t interlockedAdd (value_t volatile &rValue, value_t iAddend) {
-	    register value_t result;
-	    __asm__ __volatile__ (
-		"lock; xaddq %0,%2"
-		: "=r" (result) : "0" (iAddend), "m" (rValue) : "memory"
-	    );
-	    return result;
-	}
     public:
 	static void increment (value_t volatile &rValue) {
 	    __asm__ __volatile__(
@@ -482,11 +488,20 @@ namespace V {
 	    return 0 == iValue;
 	}
 
+	static value_t fetchAndAdd (value_t volatile &rValue, value_t iAddend) {
+	    register value_t result;
+	    __asm__ __volatile__ (
+		"lock; xaddq %0,%2"
+		: "=r" (result) : "0" (iAddend), "m" (rValue) : "memory"
+	    );
+	    return result;
+	}
+
 	static value_t fetchAndIncrement (value_t volatile &rValue) {
-	    return interlockedAdd (rValue, 1);
+	    return fetchAndAdd (rValue, 1);
 	}
 	static value_t fetchAndDecrement (value_t volatile &rValue) {
-	    return interlockedAdd (rValue, (value_t)-1);
+	    return fetchAndAdd (rValue, (value_t)-1);
 	}
 	static value_t incrementAndFetch (value_t volatile &rValue) {
 	    return fetchAndIncrement (rValue) + 1;
@@ -538,10 +553,6 @@ namespace V {
 	}
 
     //  Operations
-    private:
-	static value_t fetchAndAdd (value_t volatile &rValue, value_t iAddend) {
-	    return fetchAndAdd32 (rValue, iAddend);
-	}
     public:
 	static void increment (value_t volatile &rValue) {
 	    fetchAndIncrement (rValue);
@@ -554,6 +565,10 @@ namespace V {
 	}
 	static bool isZero (value_t iValue) {
 	    return 0 == iValue;
+	}
+
+	static value_t fetchAndAdd (value_t volatile &rValue, value_t iAddend) {
+	    return fetchAndAdd32 (rValue, iAddend);
 	}
 
 	static value_t fetchAndIncrement (value_t volatile &rValue) {
@@ -586,10 +601,6 @@ namespace V {
 	}
 
     //  Operations
-    private:
-	static value_t fetchAndAdd (value_t volatile &rValue, value_t iAddend) {
-	    return fetchAndAdd64 (rValue, iAddend);
-	}
     public:
 	static void increment (value_t volatile &rValue) {
 	    fetchAndIncrement (rValue);
@@ -602,6 +613,10 @@ namespace V {
 	}
 	static bool isZero (value_t iValue) {
 	    return 0 == iValue;
+	}
+
+	static value_t fetchAndAdd (value_t volatile &rValue, value_t iAddend) {
+	    return fetchAndAdd64 (rValue, iAddend);
 	}
 
 	static value_t fetchAndIncrement (value_t volatile &rValue) {

@@ -633,6 +633,17 @@ Vca::VcaOIDR::~VcaOIDR () {
 
     //  This should be done using a Manager::Reference, but MSVC can't compile it...
     m_pManager->release ();
+
+
+
+#ifdef TracingVcaMemoryLeaks
+    if (objectType()->specializes(IPeer::typeInfo())) {
+	log("PoolMemoryLeak ~VcaOIDR site info:: referenceCount: %u exportCount: %u exportedInterfaceCount: %u instantiatedInterfaceCount: %u referencedInterfaceCount: %u", 
+	    m_pObjectSite->referenceCount(), m_pObjectSite->exportCount(), m_pObjectSite->exportedInterfaceCount(), 
+	    m_pObjectSite->instantiatedInterfaceCount(), m_pObjectSite->referencedInterfaceCount()
+	);
+    }
+#endif
 }
 
 

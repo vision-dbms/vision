@@ -26,6 +26,9 @@
  *************************/
 
 namespace Vxa {
+
+    Vxa_API void InitializeRBImportables ();
+
     class Vxa_API VResultBuilder {
 	DECLARE_NUCLEAR_FAMILY (VResultBuilder);
 
@@ -37,11 +40,13 @@ namespace Vxa {
 
 	//  Construction
 	public:
-	    TailHints (VResultBuilder const *pResultBuilder);
-
+	    TailHints (VResultBuilder const *pResultBuilder) : BaseClass (pResultBuilder->cursor ()) {
+		pResultBuilder->attach (this);
+	    }
 	//  Destruction
 	private:
-	    ~TailHints ();
+	    ~TailHints () {
+	    }
 	};
 	friend class TailHints;
 

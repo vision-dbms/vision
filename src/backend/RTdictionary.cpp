@@ -16,7 +16,6 @@
 /*****  Facility  *****/
 #include "m.h"
 #include "popvector.h"
-#include "ts.h"
 
 #include "vdsc.h"
 #include "venvir.h"
@@ -37,6 +36,45 @@
 #include "RTdictionary.h"
 
 
+/********************************
+ ********************************
+ *****                      *****
+ *****  rtDICTIONARY_Cache  *****
+ *****                      *****
+ ********************************
+ ********************************/
+
+/***************************
+ ***************************
+ *****  Run Time Type  *****
+ ***************************
+ ***************************/
+
+DEFINE_CONCRETE_RTT (rtDICTIONARY_Cache);
+
+/***************************
+ ***************************
+ *****  Usage Control  *****
+ ***************************
+ ***************************/
+
+PublicVarDef bool rtDICTIONARY_UsingCache = true;
+
+/**************************
+ **************************
+ *****  Construction  *****
+ **************************
+ **************************/
+
+rtDICTIONARY_Cache::rtDICTIONARY_Cache (rtDICTIONARY_Handle *pDictionary)
+: m_iSelectors		(pDictionary->selectors ())
+, m_pBindings		(pDictionary->values ())
+, m_pPropertyPrototypes	(pDictionary->propertyPrototypes ())
+, m_pPropertySubset	(0, pDictionary->propertySubset ()->GetCPD ())
+{
+}
+
+
 /******************************
  ******************************
  *****                    *****
@@ -54,53 +92,11 @@
 DEFINE_CONCRETE_RTT (rtDICTIONARY_Handle);
 
 
-/*******************************************
- *******************************************
- *****  rtDICTIONARY_Cache Use Switch  *****
- *******************************************
- *******************************************/
-
-PublicVarDef bool rtDICTIONARY_UsingCache = true;
-
-/********************************
- ********************************
- *****  rtDICTIONARY_Cache  *****
- ********************************
- ********************************/
-
-/***************************
- *****  Run Time Type  *****
- ***************************/
-
-DEFINE_CONCRETE_RTT (rtDICTIONARY_Cache);
-
 /**************************
+ **************************
  *****  Construction  *****
+ **************************
  **************************/
-
-rtDICTIONARY_Cache::rtDICTIONARY_Cache (M_CPD *pCPD)
-: m_iSelectors		(pCPD, rtDICTIONARY_CPx_Selectors)
-, m_pBindings		(pCPD, rtDICTIONARY_CPx_Values		  , RTYPE_C_Vector)
-, m_pPropertySubset	(pCPD, rtDICTIONARY_CPx_PropertySubset	  , RTYPE_C_Link)
-, m_pPropertyPrototypes (pCPD, rtDICTIONARY_CPx_PropertyPrototypes, RTYPE_C_Vector)
-{
-    pCPD->SetTransientExtensionTo (this);
-}
-
-/*****************************************
- *****  Transient Extension Support  *****
- *****************************************/
-
-void rtDICTIONARY_Cache::FlushCacheAsTransientExtensionOf (VContainerHandle *pContainerHandle) {
-    pContainerHandle->ClearTransientExtension ();
-}
-
-
-/***************************
- ***************************
- *****  Instantiation  *****
- ***************************
- ***************************/
 
 /*---------------------------------------------------------------------------
  *****  Routine to create a new, empty method dictionary.
@@ -123,34 +119,62 @@ void rtDICTIONARY_Cache::FlushCacheAsTransientExtensionOf (VContainerHandle *pCo
  *	TheSelectorPToken known object to build the Selector class.
  *
  *****/
-PublicFnDef M_CPD *rtDICTIONARY_New (M_ASD *pContainerSpace) {
-    M_CPD *pSelectorPToken = rtPTOKEN_New (pContainerSpace, 0);
-    M_CPD *pSelectorUVector = rtSELUV_New (
-	pSelectorPToken, pContainerSpace->TheSelectorPToken ()
-    );
-    M_CPD *pSelectorValues = rtVECTOR_New (pSelectorPToken);
+rtDICTIONARY_Handle::rtDICTIONARY_Handle (M_ASD *pContainerSpace) : BaseClass (
+    pContainerSpace, RTYPE_C_Dictionary, rtDICTIONARY_FixedElementCount
+) {
+    rtPTOKEN_Handle::Reference pSelectorPToken (new rtPTOKEN_Handle (pContainerSpace, 0));
+    M_CPD *pSelectorUVector = rtSELUV_New (pSelectorPToken, pContainerSpace->TheSelectorPTokenHandle ());
+    rtVECTOR_Handle::Reference pValues (new rtVECTOR_Handle (pSelectorPToken));
 
-    M_CPD *pPropertyPToken = rtPTOKEN_New (pContainerSpace, 0);
+    rtPTOKEN_Handle::Reference pPropertyPToken (new rtPTOKEN_Handle (pContainerSpace, 0));
     M_CPD *pPropertySubset = rtLINK_NewEmptyLink (pPropertyPToken, pSelectorPToken);
-    M_CPD *pPropertyPrototypes = rtVECTOR_New (pPropertyPToken);
+    rtVECTOR_Handle::Reference pPropertyPrototypes (new rtVECTOR_Handle (pPropertyPToken));
 
-    M_CPD *pDictionary = POPVECTOR_New (
-	pContainerSpace, RTYPE_C_Dictionary, rtDICTIONARY_FixedElementCount
-    );
-    pDictionary->StoreReference (rtDICTIONARY_CPx_Selectors		, pSelectorUVector);
-    pDictionary->StoreReference (rtDICTIONARY_CPx_Values		, pSelectorValues);
-    pDictionary->StoreReference (rtDICTIONARY_CPx_PropertyPToken	, pPropertyPToken);
-    pDictionary->StoreReference (rtDICTIONARY_CPx_PropertySubset	, pPropertySubset);
-    pDictionary->StoreReference (rtDICTIONARY_CPx_PropertyPrototypes	, pPropertyPrototypes);
+    StoreReference (rtDICTIONARY_CPx_Selectors		, pSelectorUVector);
+    StoreReference (rtDICTIONARY_CPx_Values		, static_cast<VContainerHandle*>(pValues));
+    StoreReference (rtDICTIONARY_CPx_PropertyPToken	, pPropertyPToken);
+    StoreReference (rtDICTIONARY_CPx_PropertySubset	, pPropertySubset);
+    StoreReference (rtDICTIONARY_CPx_PropertyPrototypes	, static_cast<VContainerHandle*>(pPropertyPrototypes));
 
-    pPropertyPrototypes ->release ();
     pPropertySubset	->release ();
-    pPropertyPToken	->release ();
-    pSelectorValues	->release ();
     pSelectorUVector	->release ();
-    pSelectorPToken	->release ();
+}
 
-    return pDictionary;
+rtDICTIONARY_Handle::rtDICTIONARY_Handle (M_CTE &rCTE) : BaseClass (rCTE) {
+    if (ReferenceIsNil (rtDICTIONARY_CPx_PropertyPToken)) {
+	retain ();
+	CreatePropertySubset ();
+	untain ();
+    }
+}
+
+
+/******************************
+ ******************************
+ *****  Canonicalization  *****
+ ******************************
+ ******************************/
+
+bool rtDICTIONARY_Handle::getCanonicalization_(rtVSTORE_Handle::Reference &rpStore, DSC_Pointer const &rPointer) {
+    rpStore.setTo (static_cast<rtVSTORE_Handle*>(KOT ()->TheFixedPropertyClass.ObjectHandle ()));
+    return true;
+}
+
+/*******************
+ *******************
+ *****  Cache  *****
+ *******************
+ *******************/
+
+rtDICTIONARY_Cache *rtDICTIONARY_Handle::cache () {
+    if (m_pCache.isNil ())
+	m_pCache.setTo (new rtDICTIONARY_Cache (this));
+    return m_pCache;
+}
+
+void rtDICTIONARY_Handle::flushCachedResources_() {
+    m_pCache.clear ();
+    BaseClass::flushCachedResources_();
 }
 
 
@@ -164,41 +188,59 @@ PublicFnDef M_CPD *rtDICTIONARY_New (M_ASD *pContainerSpace) {
  *****  Simple  *****
  ********************/
 
-PublicFnDef M_CPD *rtDICTIONARY_Align (M_CPD *pDictionary) {
-    M_CPD *pPropertySubset = rtDICTIONARY_CPD_PropertySubsetCPD (pDictionary);
+bool rtDICTIONARY_Handle::align () {
+    M_CPD *pPropertySubset;
+    getPropertySubset (pPropertySubset);
 
-    rtLINK_AlignLink (pPropertySubset);
-    if (pDictionary->ReferenceDoesntName (
+    bool bWorkDone = false;
+    rtLINK_Align (pPropertySubset);
+
+    if (ReferenceDoesntName (rtDICTIONARY_CPx_PropertyPToken, pPropertySubset, rtLINK_CPx_PosPToken)) {
+	EnableModifications ();
+	StoreReference (
 	    rtDICTIONARY_CPx_PropertyPToken, pPropertySubset, rtLINK_CPx_PosPToken
-	)
-    ) {
-	pDictionary->StoreReference (
-	    rtDICTIONARY_CPx_PropertyPToken, pPropertySubset, rtLINK_CPx_PosPToken
-       );
+	);
+	bWorkDone = true;
     }
     pPropertySubset->release ();
+    return bWorkDone;
+}
 
-    return pDictionary;
+bool rtDICTIONARY_Handle::compact () {
+
+    bool bWorkDone = false; 
+	
+    if (rtDICTIONARY_UsingCache) {
+	rtDICTIONARY_Cache::Reference pCache (cache ());
+	rtSELUV_Set &rSet = pCache->selectors ();
+	bWorkDone = rSet.compact ();
+	return bWorkDone;
+    } else {
+	rtSELUV_Set iSet (selectors ());
+	bWorkDone = iSet.compact ();
+	return bWorkDone;
+    }
 }
 
 /***********************
  *****  Recursive  *****
  ***********************/
 
-PublicFnDecl bool rtDICTIONARY_AlignAll (
-    M_CPD *pDictionary, bool deletingEmptyUSegments
-) {
-    rtDICTIONARY_Align (pDictionary);
+bool rtDICTIONARY_Handle::alignAll (bool bCleaning) {
+    bool bWorkDone = align ();
 
-    M_CPD *pVector = rtDICTIONARY_CPD_ValuesCPD (pDictionary);
-    bool result = rtVECTOR_AlignAll (pVector, deletingEmptyUSegments);
+    M_CPD *pVector;
+    getValues (pVector);
+    bWorkDone = pVector->alignAll (bCleaning) || bWorkDone;
     pVector->release ();
 
-    pVector = rtDICTIONARY_CPD_PropertyPrototypesCPD (pDictionary);
-    result = rtVECTOR_AlignAll (pVector, deletingEmptyUSegments) || result;
+    getPropertyPrototypes (pVector);
+    bWorkDone = pVector->alignAll (bCleaning) || bWorkDone;
     pVector->release ();
-
-    return result;
+    if (bCleaning) {
+	bWorkDone = compact() || bWorkDone;
+    }
+    return bWorkDone;
 }
 
 
@@ -216,21 +258,27 @@ PublicFnDecl bool rtDICTIONARY_AlignAll (
  *****  Property Subset Maintenance
  *
  *  Argument:
- *	pDictionary		- the address of a CPD for the dictionary.
- *	pSelectorValues		- the address of a CPD for the dictionary's
+ *	pValues			- the address of a CPD for the dictionary's
  *				  value vector (optimization).
  *
  *  Returns:
  *	Nothing
  *
  *****/
-PrivateFnDef void MaintainPropertySubset (M_CPD *pDictionary, M_CPD *pSelectorValues) {
+static M_CPD *NewVector (rtPTOKEN_Handle *pPPT) {
+    return (new rtVECTOR_Handle (pPPT))->GetCPD ();
+}
+
+static M_CPD *NewTimeSeries (rtPTOKEN_Handle *pPPT) {
+    return rtINDEX_NewTimeSeries (pPPT)->GetCPD ();
+}
+
+void rtDICTIONARY_Handle::MaintainPropertySubset (rtVECTOR_Handle *pValues) {
     class WiredPropertyDescriptor {
     //  Type Definitions
     public:
-	typedef M_CPD *(*Factory)(M_CPD*);
-	typedef M_KOTE M_KnownObjectTable::*KOTMM;  //  Known Object Table Mutable Member
-
+	typedef M_CPD *(*Factory)(rtPTOKEN_Handle*);
+	typedef M_KOTE M_KOT::*KOTMM;  //  Known Object Table Mutable Member
 
     //  Construction
     public:
@@ -257,16 +305,16 @@ PrivateFnDef void MaintainPropertySubset (M_CPD *pDictionary, M_CPD *pSelectorVa
 	KOTMM	const	m_pPrototype;
 	Factory	const	m_pFactory;
     };
-    
+
     static WiredPropertyDescriptor iFixedProperty (
-	&M_KnownObjectTable::TheFixedPropertySpecificationClass,
-	&M_KnownObjectTable::TheFixedPropertyPrototype,
-	rtVECTOR_New
+	&M_KOT::TheFixedPropertySpecificationClass,
+	&M_KOT::TheFixedPropertyPrototype,
+	&NewVector
     );
     static WiredPropertyDescriptor iTimeSeriesProperty (
-	&M_KnownObjectTable::TheTimeSeriesPropertySpecificationClass,
-	&M_KnownObjectTable::TheTimeSeriesPropertyPrototype,
-	rtINDEX_NewTimeSeries
+	&M_KOT::TheTimeSeriesPropertySpecificationClass,
+	&M_KOT::TheTimeSeriesPropertyPrototype,
+	&NewTimeSeries
     );
     static WiredPropertyDescriptor const *WiredProperties[] = {
 	&iFixedProperty, &iTimeSeriesProperty
@@ -275,7 +323,7 @@ PrivateFnDef void MaintainPropertySubset (M_CPD *pDictionary, M_CPD *pSelectorVa
 	WiredPropertyCount = sizeof (WiredProperties) / sizeof (WiredProperties[0])
     };
 
-    M_KnownObjectTable *pKOT = pDictionary->KnownObjectTable ();
+    M_KOT *pKOT = KOT ();
 /*---------------------------------------------------------------------------*
  *  This routine will be called during the construction of the known object  *
  *  table when pre-6.x database versions are opened.  Since the KOT isn't    *
@@ -285,18 +333,21 @@ PrivateFnDef void MaintainPropertySubset (M_CPD *pDictionary, M_CPD *pSelectorVa
 	return;
 
     VCPDReference pPropertySubset;
-    VCPDReference pPropertyPrototypes;
+    rtVECTOR_Handle::Reference pPropertyPrototypes;
 
     for (unsigned int i = 0; i < WiredPropertyCount; i++) {
 	WiredPropertyDescriptor const *pWPD = WiredProperties[i];
 
-	rtLINK_CType *pPropertySubsetLC = rtVECTOR_SubsetOfType (
-	    pSelectorValues, pDictionary->ScratchPad (), pWPD->specification ()
+	rtLINK_CType *pPropertySubsetLC = pValues->subsetOfType (
+	    ScratchPad (), pWPD->specification ()
 	);
 /*****  If this property type exists in the dictionary, ...  *****/
 	if (pPropertySubsetLC) {
-	    if (pPropertySubset.isEmpty ())
-		pPropertySubset.claim (rtDICTIONARY_CPD_PropertySubsetCPD (pDictionary));
+	    if (pPropertySubset.isEmpty ()) {
+		M_CPD *pCPD;
+		getPropertySubset (pCPD);
+		pPropertySubset.claim (pCPD);
+	    }
 
 	    rtLINK_CType *pAdditionsLC;
 	    rtLINK_CType *pLocationsLC = rtLINK_LocateOrAddFromLC (
@@ -305,7 +356,8 @@ PrivateFnDef void MaintainPropertySubset (M_CPD *pDictionary, M_CPD *pSelectorVa
 /*****  ... and new occurences of it were added, ...  *****/
 	    if (pAdditionsLC) {
 /*****  ... fix the dictionary's property p-token, ...  *****/
-		pDictionary->StoreReference (
+		EnableModifications ();
+		StoreReference (
 		    rtDICTIONARY_CPx_PropertyPToken, pLocationsLC->RPT ()
 		);
 
@@ -315,27 +367,24 @@ PrivateFnDef void MaintainPropertySubset (M_CPD *pDictionary, M_CPD *pSelectorVa
 /*****  ... construct an appropriate prototype if one doesn't exist, ...  *****/
 		M_KOTE *pPrototypeKOTE = &(pKOT->*(pWPD->prototype ()));
 		if (pPrototypeKOTE->IsntSet ()) {
-		    M_CPD *pPTokenCPD = rtPTOKEN_New (pKOT->Space (), 1);
-		    pPrototypeKOTE->RegisterObject (pKOT, (pWPD->factory ())(pPTokenCPD));
-		    pPTokenCPD->release ();
+		    rtPTOKEN_Handle::Reference pPToken (new rtPTOKEN_Handle (pKOT->Space (), 1));
+		    pPrototypeKOTE->RegisterObject (pKOT, (pWPD->factory ())(pPToken));
 		}
 
 /*****  ... construct a descriptor containing their initial value, ...  *****/
 		DSC_Descriptor prototypeDescriptor;
 		prototypeDescriptor.constructReferenceConstant (
 		    pPrototypeAdditionsLC->PPT (),
-		    pPrototypeKOTE->RetainedObjectCPD (),
-		    pPrototypeKOTE->RetainedPTokenCPD (),
+		    pPrototypeKOTE->store (),
+		    pPrototypeKOTE->PTokenHandle (),
 		    0
 		);
 
 /*****  ... initialize the slots, ...  *****/
-		if (pPropertyPrototypes.isEmpty ()) pPropertyPrototypes.claim (
-		    rtDICTIONARY_CPD_PropertyPrototypesCPD (pDictionary)
-		);
-		rtVECTOR_Assign (
-		    pPropertyPrototypes, pPrototypeAdditionsLC, &prototypeDescriptor
-		);
+		if (pPropertyPrototypes.isEmpty ()) {
+		    getPropertyPrototypes (pPropertyPrototypes);
+		}
+		pPropertyPrototypes->setElements (pPrototypeAdditionsLC, prototypeDescriptor);
 
 /*****  ... release the addition structures, ...  *****/
 		prototypeDescriptor.clear ();
@@ -360,7 +409,79 @@ PrivateFnDef void MaintainPropertySubset (M_CPD *pDictionary, M_CPD *pSelectorVa
  *
  *  Arguments:
  *	pDictionary		- the address of a CPD for the dictionary.
- *	pElementSelector	- a pointer to a link constructor specifying
+ *	pSubscript		- a pointer to a link constructor specifying
+ *				  the elements of 'target' to be updated.
+ *	pSource			- a pointer to a vector constructor supplying
+ *				  the values being assigned.
+ *
+ *  Returns:
+ *	NOTHING - Executed for side effect on the target vector.
+ *
+ *  Notes:
+ *	- This routine performs the equivalent of:
+ *
+ *	    for (i = 0; i < ElementCount (link); i++)
+ *		target[link[i]] = source;
+ *
+ *	  for scalar source values and:
+ *
+ *	    for (i = 0; i < ElementCount (link); i++)
+ *		target[link[i]] = source[i];
+ *
+ *	  for u-vector source values.
+ *
+ *****/
+void rtDICTIONARY_Handle::assign (rtLINK_CType *pSubscript, rtVECTOR_CType *pSource) {
+    rtVECTOR_Handle::Reference pValues;
+    getValues (pValues);
+
+    pValues->setElements (pSubscript, pSource);
+    MaintainPropertySubset (pValues);
+}
+
+
+/*---------------------------------------------------------------------------
+ *****  Element Assignment.
+ *
+ *  Arguments:
+ *	pDictionary		- the address of a CPD for the dictionary.
+ *	pSubscript		- a pointer to a link constructor specifying
+ *				  the elements of 'target' to be updated.
+ *	rSource			- a pointer to a Descriptor supplying
+ *				  the values being assigned.
+ *
+ *  Returns:
+ *	NOTHING - Executed for side effect on the target vector.
+ *
+ *  Notes:
+ *	- This routine performs the equivalent of:
+ *
+ *	    for (i = 0; i < ElementCount (link); i++)
+ *		target[link[i]] = source;
+ *
+ *	  for scalar source values and:
+ *
+ *	    for (i = 0; i < ElementCount (link); i++)
+ *		target[link[i]] = source[i];
+ *
+ *	  for u-vector source values.
+ *
+ *****/
+void rtDICTIONARY_Handle::assign (rtLINK_CType *pSubscript, DSC_Descriptor &rSource) {
+    rtVECTOR_Handle::Reference pValues;
+    getValues (pValues);
+
+    pValues->setElements (pSubscript, rSource);
+    MaintainPropertySubset (pValues);
+}
+
+
+/*---------------------------------------------------------------------------
+ *****  Element Assignment.
+ *
+ *  Arguments:
+ *	pDictionary		- the address of a CPD for the dictionary.
+ *	pSubscript		- a pointer to a link constructor specifying
  *				  the elements of 'target' to be updated.
  *	pValues			- a pointer to a vector constructor supplying
  *				  the values being assigned.
@@ -382,15 +503,12 @@ PrivateFnDef void MaintainPropertySubset (M_CPD *pDictionary, M_CPD *pSelectorVa
  *	  for u-vector source values.
  *
  *****/
-PublicFnDef void rtDICTIONARY_Assign (
-    M_CPD *pDictionary, rtLINK_CType *pElementSelector, rtVECTOR_CType *pValues
-) {
-    M_CPD *pSelectorValues = rtDICTIONARY_CPD_ValuesCPD (pDictionary);
+void rtDICTIONARY_Handle::assign (DSC_Scalar &rSubscript, rtVECTOR_CType *pSource) {
+    rtVECTOR_Handle::Reference pValues;
+    getValues (pValues);
 
-    rtVECTOR_Assign		(pSelectorValues, pElementSelector, pValues);
-    MaintainPropertySubset	(pDictionary, pSelectorValues);
-
-    pSelectorValues->release ();
+    pValues->setElements (rSubscript, pSource);
+    MaintainPropertySubset (pValues);
 }
 
 
@@ -399,87 +517,9 @@ PublicFnDef void rtDICTIONARY_Assign (
  *
  *  Arguments:
  *	pDictionary		- the address of a CPD for the dictionary.
- *	pElementSelector	- a pointer to a link constructor specifying
- *				  the elements of 'target' to be updated.
- *	pValues			- a pointer to a Descriptor supplying
- *				  the values being assigned.
- *
- *  Returns:
- *	NOTHING - Executed for side effect on the target vector.
- *
- *  Notes:
- *	- This routine performs the equivalent of:
- *
- *	    for (i = 0; i < ElementCount (link); i++)
- *		target[link[i]] = source;
- *
- *	  for scalar source values and:
- *
- *	    for (i = 0; i < ElementCount (link); i++)
- *		target[link[i]] = source[i];
- *
- *	  for u-vector source values.
- *
- *****/
-PublicFnDef void rtDICTIONARY_Assign (
-    M_CPD *pDictionary, rtLINK_CType *pElementSelector, DSC_Descriptor *pValues
-) {
-    M_CPD *pSelectorValues = rtDICTIONARY_CPD_ValuesCPD (pDictionary);
- 
-    rtVECTOR_Assign		(pSelectorValues, pElementSelector, pValues);
-    MaintainPropertySubset	(pDictionary, pSelectorValues);
-
-    pSelectorValues->release ();
-}
-
-
-/*---------------------------------------------------------------------------
- *****  Element Assignment.
- *
- *  Arguments:
- *	pDictionary		- the address of a CPD for the dictionary.
- *	pElementSelector	- a pointer to a link constructor specifying
- *				  the elements of 'target' to be updated.
- *	pValues			- a pointer to a vector constructor supplying
- *				  the values being assigned.
- *
- *  Returns:
- *	NOTHING - Executed for side effect on the target vector.
- *
- *  Notes:
- *	- This routine performs the equivalent of:
- *
- *	    for (i = 0; i < ElementCount (link); i++)
- *		target[link[i]] = source;
- *
- *	  for scalar source values and:
- *
- *	    for (i = 0; i < ElementCount (link); i++)
- *		target[link[i]] = source[i];
- *
- *	  for u-vector source values.
- *
- *****/
-PublicFnDef void rtDICTIONARY_Assign (
-    M_CPD *pDictionary, rtREFUV_TypePTR_Reference pElementSelector, rtVECTOR_CType *pValues
-) {
-    M_CPD *pSelectorValues = rtDICTIONARY_CPD_ValuesCPD (pDictionary);
-
-    rtVECTOR_Assign		(pSelectorValues, pElementSelector, pValues);
-    MaintainPropertySubset	(pDictionary, pSelectorValues);
-
-    pSelectorValues->release ();
-}
-
-
-/*---------------------------------------------------------------------------
- *****  Element Assignment.
- *
- *  Arguments:
- *	pDictionary		- the address of a CPD for the dictionary.
- *	pElementSelector	- the address of a reference identifying the
+ *	pSubscript		- the address of a reference identifying the
  *				  element being changed.
- *	pValues			- a pointer to a Descriptor supplying
+ *	rSource			- a pointer to a Descriptor supplying
  *				  the values to be assigned.
  *
  *  Returns:
@@ -497,15 +537,12 @@ PublicFnDef void rtDICTIONARY_Assign (
  *	  for u-vector sources values.
  *
  *****/
-PublicFnDef void rtDICTIONARY_Assign (
-    M_CPD *pDictionary, rtREFUV_TypePTR_Reference pElementSelector, DSC_Descriptor *pValues
-) {
-    M_CPD *pSelectorValues = rtDICTIONARY_CPD_ValuesCPD (pDictionary);
+void rtDICTIONARY_Handle::assign (DSC_Scalar &rSubscript, DSC_Descriptor &rSource) {
+    rtVECTOR_Handle::Reference pValues;
+    getValues (pValues);
 
-    rtVECTOR_Assign		(pSelectorValues, pElementSelector, pValues);
-    MaintainPropertySubset	(pDictionary, pSelectorValues);
-
-    pSelectorValues->release ();
+    pValues->setElements (rSubscript, rSource);
+    MaintainPropertySubset (pValues);
 }
 
 
@@ -521,45 +558,38 @@ PublicFnDef void rtDICTIONARY_Assign (
  *  Arguments:
  *	pDictionary		- the address of a CPD for the dictionary.
  *	pSelector		- the address of a 'VSelector'.
- *	pValue			- the address of the value being assigned to the
+ *	rValue			- the address of the value being assigned to the
  *				  selector.
  *
  *  Returns:
  *	Nothing
  *
  *****/
-PublicFnDef void rtDICTIONARY_Define (
-    M_CPD *pDictionary, VSelector const *pSelector, DSC_Descriptor *pValue
-)
-{
+void rtDICTIONARY_Handle::define (VSelector const &rSelector, DSC_Descriptor &rValue) {
 /*****  Locate the specified selector, ...  *****/
     unsigned int xElement;
-    M_CPD *pSetPToken;
+    rtPTOKEN_Handle::Reference pSetPToken;
     if (rtDICTIONARY_UsingCache) {
-	VReference<rtDICTIONARY_Cache> pCache (
-	    rtDICTIONARY_Cache::GetCacheOf (pDictionary)
-	);
+	rtDICTIONARY_Cache::Reference pCache (cache ());
 	rtSELUV_Set &rSet = pCache->selectors ();
 
-	pSelector->insertIn (rSet, xElement);
+	rSelector.insertIn (rSet, xElement);
 
-	pSetPToken = rSet.ptoken ();
-	pSetPToken->retain ();
+	pSetPToken.setTo (rSet.ptoken ());
     }
     else {
-	rtSELUV_Set iSet (pDictionary, rtDICTIONARY_CPx_Selectors);
+	rtSELUV_Set iSet (selectors ());
 
-	pSelector->insertIn (iSet, xElement);
+	rSelector.insertIn (iSet, xElement);
 
-	pSetPToken = iSet.ptoken ();
-	pSetPToken->retain ();
+	pSetPToken.setTo (iSet.ptoken ());
     }
-    rtREFUV_Type_Reference assignmentRef;
-    DSC_InitReferenceScalar (assignmentRef, pSetPToken, xElement);
+    DSC_Scalar assignmentRef;
+    assignmentRef.constructReference (pSetPToken, xElement);
 
 /*****  ... update the vector, ...  *****/
-    rtDICTIONARY_Assign (pDictionary, &assignmentRef, pValue);
-    DSC_ClearScalar (assignmentRef);
+    assign (assignmentRef, rValue);
+    assignmentRef.destroy ();
 }
 
 
@@ -569,12 +599,9 @@ PublicFnDef void rtDICTIONARY_Define (
  ***************************
  ***************************/
 
-PublicFnDef M_CPD *rtDICTIONARY_SelectorPToken (M_CPD *pDictionary) {
-    M_CPD *pSelectorUVector = rtDICTIONARY_CPD_SelectorsCPD (pDictionary);
-    M_CPD *pSelectorPToken = UV_CPD_PosPTokenCPD (pSelectorUVector);
-    pSelectorUVector->release ();
-
-    return pSelectorPToken;
+rtPTOKEN_Handle *rtDICTIONARY_Handle::getPToken () const {
+    rtSELUV_Handle::Reference pSelectors (selectors ());
+    return pSelectors->getPPT ();
 }
 
 
@@ -582,21 +609,17 @@ PublicFnDef M_CPD *rtDICTIONARY_SelectorPToken (M_CPD *pDictionary) {
  *****  Routine to produce a vector containing all of the names in the
  *****	method dictionary.
  *
- *  Arguments:
- *	pDictionary    - a standard CPD for the method dictionary to be
- *			      queried.
- *
  *  Returns:
  *	A standard CPD for a vector containing all of the names in
  *      'pDictionary'.
  *
  *****/
-PublicFnDef M_CPD *rtDICTIONARY_Contents (M_ASD *pContainerSpace, M_CPD *pDictionary) {
-    M_CPD *pSelectorUVector = rtDICTIONARY_CPD_SelectorsCPD (pDictionary);
-    M_CPD *result = rtSELUV_Contents (pContainerSpace, pSelectorUVector);
-    pSelectorUVector->release ();
+void rtDICTIONARY_Handle::getSelectorVector (rtVECTOR_Handle::Reference &rpResult, M_ASD *pContainerSpace) const {
+    M_CPD *pSelectorUV;
+    getSelectors (pSelectorUV);
 
-    return result;
+    rtSELUV_Contents (rpResult, pContainerSpace, pSelectorUV);
+    pSelectorUV->release ();
 }
 
 
@@ -611,7 +634,7 @@ PublicFnDef M_CPD *rtDICTIONARY_Contents (M_ASD *pContainerSpace, M_CPD *pDictio
  ********************/
 
 IOBJ_DefineNilaryMethod (NewDM) {
-    return RTYPE_QRegister (rtDICTIONARY_New (IOBJ_ScratchPad));
+    return RTYPE_QRegister (new rtDICTIONARY_Handle (IOBJ_ScratchPad));
 }
 
 IOBJ_DefineNilaryMethod (UsingCacheDM) {
@@ -631,7 +654,8 @@ IOBJ_DefineUnaryMethod (DisplayCountsDM) {
  ************************/
 
 IOBJ_DefineUnaryMethod (AlignDM) {
-    return RTYPE_QRegister (rtDICTIONARY_Align (RTYPE_QRegisterCPD (self)));
+    RTYPE_QRegisterCPD (self)->align ();
+    return self;
 }
 
 IOBJ_DefineUnaryMethod (SelectorsDM) {
@@ -648,7 +672,7 @@ IOBJ_DefineUnaryMethod (ValuesDM) {
 
 IOBJ_DefineUnaryMethod (SelectorPTokenDM) {
     return RTYPE_QRegister (
-	rtDICTIONARY_SelectorPToken (RTYPE_QRegisterCPD (self))
+	static_cast<rtDICTIONARY_Handle*>(RTYPE_QRegisterHandle (self))->getPToken ()
     );
 }
 
@@ -673,9 +697,11 @@ IOBJ_DefineUnaryMethod (PropertyPrototypesDM) {
 
 IOBJ_DefineMethod (AtPutDM) {
     DSC_Descriptor value;
-    if (rtDSC_UnpackIObject (IOBJ_ScratchPad, parameterArray[1], &value)) {
+    if (rtDSC_UnpackIObject (IOBJ_ScratchPad, parameterArray[1], value)) {
 	VSelectorGenerale selector (RTYPE_QRegisterCPD (parameterArray[0]));
-	rtDICTIONARY_Define (RTYPE_QRegisterCPD (self), &selector, &value);
+	static_cast<rtDICTIONARY_Handle*>(RTYPE_QRegisterHandle (self))->define (
+	    selector, value
+	);
 	value.clear ();
     }
 
@@ -683,14 +709,13 @@ IOBJ_DefineMethod (AtPutDM) {
 }
 
 IOBJ_DefineMethod (AtDM) {
-    VSelectorGenerale selector (RTYPE_QRegisterCPD (parameterArray[0]));
-    M_CPD *pDictionary = RTYPE_QRegisterCPD (self);
     DSC_Descriptor value;
-    if (rtDICTIONARY_LookupResult_FoundNothing != rtDICTIONARY_Lookup (
-	    pDictionary, &selector, &value, NilOf (int *)
-	)
-    ) {
-        M_CPD *result = rtDSC_Pack (IOBJ_ScratchPad, &value);
+    VSelectorGenerale selector (RTYPE_QRegisterCPD (parameterArray[0]));
+    Vdd::Store::DictionaryLookup xLookupResult = static_cast<rtDICTIONARY_Handle*> (
+	RTYPE_QRegisterHandle (self)
+    )->getElement (selector, &value);
+    if (Vdd::Store::DictionaryLookup_FoundNothing != xLookupResult) {
+	rtDSC_Handle::Reference result (new rtDSC_Handle (IOBJ_ScratchPad, value));
 	value.clear ();
 	return RTYPE_QRegister (result);
     }
@@ -699,15 +724,10 @@ IOBJ_DefineMethod (AtDM) {
 
 IOBJ_DefineMethod (IsDefinedDM) {
     VSelectorGenerale selector (RTYPE_QRegisterCPD (parameterArray [0]));
-    DSC_Descriptor value;
-    if (rtDICTIONARY_LookupResult_FoundNothing != rtDICTIONARY_Lookup (
-	    RTYPE_QRegisterCPD (self), &selector, &value, NilOf (int *)
-	)
-    ) {
- 	value.clear ();
-	return IOBJ_IntIObject (true);
-    }
-    return IOBJ_IntIObject (false);
+    Vdd::Store::DictionaryLookup xLookupResult = static_cast<rtDICTIONARY_Handle*> (
+	RTYPE_QRegisterHandle (self)
+    )->getElement (selector);
+    return IOBJ_IntIObject (Vdd::Store::DictionaryLookup_FoundNothing != xLookupResult);
 }
 
 
@@ -721,39 +741,29 @@ IOBJ_DefineMethod (IsDefinedDM) {
  *  CPD Initialization  *
  ************************/
 
-PublicFnDef void InitStdCPD (M_CPD *pDictionary) {
-    POPVECTOR_InitStdCPD (pDictionary);
+void rtDICTIONARY_Handle::CreatePropertySubset () {
+    rtVECTOR_Handle::Reference pValues;
+    getValues (pValues);
 
-    if (pDictionary->ReferenceIsNil (rtDICTIONARY_CPx_PropertyPToken)) {
-	M_CPD *pSelectorValues = rtDICTIONARY_CPD_ValuesCPD (pDictionary);
-	M_CPD *pSelectorPToken = rtDICTIONARY_SelectorPToken (pDictionary);
+    rtPTOKEN_Handle::Reference pSelectorPToken (getPToken ());
 
-	// The property ptoken is shared with some number of value stores.
-	// We want to ensure that it resides in the same space as the dictionary
-	// responsible for its modifications ...
-	M_CPD *pPropertyPToken = rtPTOKEN_New (pDictionary->Space (), 0);
+    // The property ptoken is shared with some number of value stores.
+    // We want to ensure that it resides in the same space as the dictionary
+    // responsible for its modifications ...
+    rtPTOKEN_Handle::Reference pPropertyPToken (new rtPTOKEN_Handle (Space (), 0));
 
-	M_CPD *pPropertySubset = rtLINK_NewEmptyLink (pPropertyPToken, pSelectorPToken);
-	M_CPD *pPropertyPrototypes = rtVECTOR_New (pPropertyPToken);
+    M_CPD *pPropertySubset = rtLINK_NewEmptyLink (pPropertyPToken, pSelectorPToken);
+    rtVECTOR_Handle::Reference pPropertyPrototypes (new rtVECTOR_Handle (pPropertyPToken));
 
-	pDictionary->StoreReference (
-	    rtDICTIONARY_CPx_PropertyPToken	, pPropertyPToken
-	);
-	pDictionary->StoreReference (
-	    rtDICTIONARY_CPx_PropertySubset	, pPropertySubset
-	);
-	pDictionary->StoreReference (
-	    rtDICTIONARY_CPx_PropertyPrototypes , pPropertyPrototypes
-	);
+    EnableModifications ();
+    StoreReference (rtDICTIONARY_CPx_PropertyPToken, pPropertyPToken);
+    StoreReference (rtDICTIONARY_CPx_PropertySubset, pPropertySubset);
+    StoreReference (
+	rtDICTIONARY_CPx_PropertyPrototypes , static_cast<VContainerHandle*>(pPropertyPrototypes)
+    );
+    MaintainPropertySubset (pValues);
 
-	MaintainPropertySubset (pDictionary, pSelectorValues);
-
-	pPropertyPrototypes->release ();
-	pPropertySubset->release ();
-	pPropertyPToken->release ();
-	pSelectorPToken->release ();
-	pSelectorValues->release ();
-    }
+    pPropertySubset->release ();
 }
 
 
@@ -766,10 +776,10 @@ PrivateFnDef M_CPreamble *ConvertMethodDToDictionary (
 )
 {
 /*****  Allocate a new container, ...  *****/
-    M_CPreamble *pNewDictionaryPreamble = TS_AllocateContainer (
+    M_CPreamble *pNewDictionaryPreamble = pASD->AllocateContainer (
 	RTYPE_C_Dictionary,
 	POPVECTOR_SizeofPVector (rtDICTIONARY_FixedElementCount),
-	M_CPreamble_POP (pOldDictionaryPreamble)
+	M_CPreamble_POPContainerIndex (pOldDictionaryPreamble)
     );
 
 /*****  ... initialize its contents, ...  *****/
@@ -846,7 +856,7 @@ RTYPE_DefineHandler (rtDICTIONARY_Handler) {
 	    M_RTD *rtd = iArgList.arg<M_RTD*>();
 	    rtd->SetCPDReusability	();
 	    rtd->SetCPDPointerCountTo	(rtDICTIONARY_CPD_StdPtrCount);
-	    M_RTD_CPDInitFn		(rtd) = InitStdCPD;
+	    M_RTD_CPDInitFn		(rtd) = POPVECTOR_InitStdCPD;
 	    M_RTD_HandleMaker		(rtd) = &rtDICTIONARY_Handle::Maker;
 	    M_RTD_ReclaimFn		(rtd) = POPVECTOR_ReclaimContainer;
 	    M_RTD_MarkFn		(rtd) = POPVECTOR_MarkContainers;

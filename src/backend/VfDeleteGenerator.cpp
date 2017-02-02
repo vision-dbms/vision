@@ -57,12 +57,9 @@ VfDeleteGenerator::~VfDeleteGenerator ()
  *****************/
 
 void VfDeleteGenerator::initialize (
-    M_CPD* pTargetPTokenRef, int xTargetPTokenRef, M_CPD* pSourcePToken
-)
-{
-    VAssociativeOperator::initialize (
-	pTargetPTokenRef, xTargetPTokenRef, pSourcePToken
-    );
+    rtPTOKEN_Handle *pTargetPToken, rtPTOKEN_Handle *pSourcePToken
+) {
+    VAssociativeOperator::initialize (pTargetPToken, pSourcePToken);
 
     if (m_pTargetDomainAdjustment) {
 	m_pTargetDomainAdjustment->discard ();

@@ -24,6 +24,7 @@
 #include "Vsa_ISubscription.h"
 #include "Vsa_IUpDownSubscriber.h"
 #include "Vsa_IUpDownPublisher.h"
+#include "Vca_IGetter.h"
 
 
 /*************************
@@ -46,6 +47,8 @@ namespace Vsa {
         typedef IVReceiver<IVUnknown*>   ObjectSink;
         typedef VReceiver<ThisClass, VkDynamicArrayOf<VString> const &> StringArraySink;
         typedef Pointer SmartEvaluatorSourcePointer;
+		typedef VkMapOf<VString, char const*, char const*, Vca::U32> BusynessOverrideMap; 
+		typedef BusynessOverrideMap::Iterator Iterator;
     //@}
 
       //  Class
@@ -162,7 +165,7 @@ namespace Vsa {
 
     //  Construction
     public:
-        VSmartEvaluatorSource (Vca::IDirectory *pDirectory);
+        VSmartEvaluatorSource (Vca::IDirectory *pDirectory, Vca::U32 busynessThreshold, Vca::U32 maxBusynessChecks); 
 
     //  Destruction
     protected:
@@ -171,7 +174,7 @@ namespace Vsa {
     //  Startup
     public:
         void init ();
-
+		
     /// @name IEvaluatorSource Implementation
     //@{
     public:
@@ -179,6 +182,7 @@ namespace Vsa {
 
     private:
         void supply (IEvaluatorSink *pSink);
+		void addBusynessMapEntry (VString &iName, Vca::U32 iBusynessOverride);
     //@}
 
     /// @name Update
@@ -190,6 +194,9 @@ namespace Vsa {
         void clearActiveObjectHolder () {
           m_pActiveObjectHolder.clear ();
         }
+        
+        void setBusynessMap(BusynessOverrideMap busynessOverrides);
+        
         void refreshConnectivity ();
     //@}
 
@@ -199,6 +206,11 @@ namespace Vsa {
         ObjectHolder* getActiveObjectHolder () const {
           return m_pActiveObjectHolder;
         }
+        
+   		bool getBusynessOverride (VString entry, Vca::U32 &busynessValue);
+        Vca::U32 GetBusynessThreshold () { return m_iBusynessThreshold; }
+        Vca::U32 GetMaxBusynessChecks () { return m_iMaxBusynessChecks; }
+        
     //@}
 
     /// @name Query
@@ -226,6 +238,9 @@ namespace Vsa {
         ObjectHolder::Reference           m_pActiveObjectHolder;
         ObjectHolder::Reference           m_pObjectHolderList;
         VkDynamicArrayOf<VString>         m_iEntries;
+		Vca::U32						  m_iBusynessThreshold;
+		Vca::U32						  m_iMaxBusynessChecks;
+		BusynessOverrideMap 			  m_iBusynessOverrides;
     };
 }
 

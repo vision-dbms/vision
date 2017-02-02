@@ -144,8 +144,8 @@ void VChannelController::run () {
 		    case IOMChannelType_Stream:
 			beginValueCall (0);
 			loadDucWithIdentity (
-			    new rtCLOSURE_Constructor (
-				new rtCONTEXT_Constructor (ENVIR_KDsc_TheTLE), IOMDriver::XReadEvalPrintController
+			    new rtCLOSURE_Handle (
+				new rtCONTEXT_Handle (ENVIR_KDsc_TheTLE), IOMDriver::XReadEvalPrintController
 			    )
 			);
 			commitRecipient ();

@@ -23,6 +23,10 @@
 /************************
  *****  Supporting  *****
  ************************/
+
+#include "DSC_Scalar.h"
+
+#include "Vdd_Store.h"
 
 
 /*****************************
@@ -57,23 +61,6 @@
 #define rtDSC_CPD_Pointer(cpd) M_CPD_PointerToPOP (cpd, rtDSC_CPx_Pointer)
 
 
-/********************************
- ********************************
- *****  Callable Interface  *****
- ********************************
- ********************************/
-
-PublicFnDecl bool rtDSC_UnpackIObject (
-    M_ASD *pContainerSpace, IOBJ_IObject iObject, DSC_Descriptor *dscPtr
-);
-
-PublicFnDecl M_CPD* rtDSC_Pack (M_ASD *pContainerSpace, DSC_Descriptor *dscPtr);
-
-PublicFnDecl void rtDSC_Unpack (M_CPD *dscCPD, DSC_Descriptor *dscPtr);
-
-PublicFnDecl bool rtDSC_Align (M_CPD *dscCPD);
-
-
 /******************************
  ******************************
  *****  Container Handle  *****
@@ -81,35 +68,130 @@ PublicFnDecl bool rtDSC_Align (M_CPD *dscCPD);
  ******************************/
 
 class rtDSC_Handle : public VContainerHandle {
-//  Run Time Type
     DECLARE_CONCRETE_RTT (rtDSC_Handle, VContainerHandle);
 
 //  Construction
-protected:
-    rtDSC_Handle (M_CTE &rCTE) : VContainerHandle (rCTE) {
-    }
-
 public:
     static VContainerHandle *Maker (M_CTE &rCTE) {
 	return new rtDSC_Handle (rCTE);
     }
+    rtDSC_Handle (M_ASD *pSpace, DSC_Descriptor &rValue);
+protected:
+    rtDSC_Handle (M_CTE &rCTE) : VContainerHandle (rCTE) {
+    }
 
 //  Destruction
-protected:
+private:
+    ~rtDSC_Handle ();    
 
 //  Access
-public:
+private:
+    rtDSC_Descriptor *typecastContent () const {
+	return reinterpret_cast<rtDSC_Descriptor*>(containerContent ());
+    }
+    M_POP *pointerPOP () const {
+	return &rtDSC_Descriptor_Pointer (typecastContent ());
+    }
+    M_POP *storePOP () const {
+	return &rtDSC_Descriptor_Store (typecastContent ());
+    }
 
-//  Query
-public:
+    VContainerHandle *pointerHandle (RTYPE_Type xType = RTYPE_C_Any) const {
+	return GetContainerHandle (pointerPOP (), xType);
+    }
+    M_CPD *pointerCPD (RTYPE_Type xType = RTYPE_C_Any) const {
+	return pointerHandle (xType)->GetCPD ();
+    }
+    DSC_PointerType pointerType () const {
+	return (DSC_PointerType)rtDSC_Descriptor_PointerType (typecastContent ());
+    }
 
-//  Callbacks
+    VContainerHandle *storeHandle () const {
+	return GetContainerHandle (storePOP ());
+    }
+    void getPointer (M_CPD *&rpResult, RTYPE_Type xType = RTYPE_C_Any) const {
+	rpResult = pointerCPD (xType);
+    }
+    void getPointer (VContainerHandle::Reference &rpResult, RTYPE_Type xType = RTYPE_C_Any) const {
+	rpResult.setTo (pointerHandle (xType));
+    }
+    void getScalar (DSC_Scalar &rValue) const {
+	rtDSC_Descriptor *pContent = typecastContent ();
+	rValue.constructFrom (
+	    static_cast<rtPTOKEN_Handle*>(pointerHandle (RTYPE_C_PToken)),
+	    rtDSC_Descriptor_RType (pContent),
+	    rtDSC_Descriptor_ScalarValue (pContent)
+	);
+    }
+
+    bool getStore (Vdd::Store::Reference &rpResult) const {
+	return storeHandle ()->getStore (rpResult);
+    }
+    void getStore (VContainerHandle::Reference &rpResult) const {
+	rpResult.setTo (storeHandle ());
+    }
+
+public:
+    void getValue (DSC_Descriptor &rValue);
+
+//  Update
+private:
+    void setPointerTo (M_CPD *pPointer) {
+	setPointerTo (pPointer->containerHandle ());
+    }
+    void setPointerTo (VContainerHandle *pPointer) {
+	StoreReference (pointerPOP (), pPointer);
+    }
+    void setPointerTypeTo (DSC_PointerType xType) {
+	rtDSC_Descriptor_PointerType (typecastContent ()) = xType;
+    }
+    void setScalarTo (DSC_Scalar const &rValue) {
+	rtDSC_Descriptor *pContent = typecastContent ();
+	rtDSC_Descriptor_RType (pContent) = rValue.RType ();
+	rtDSC_Descriptor_ScalarValue (pContent) = DSC_Scalar_Value (rValue);
+        setPointerTo (rValue.RPT ());
+    }
+    void setStoreTo (Vdd::Store *pStore) {
+	VContainerHandle::Reference pStoreHandle;
+	pStore->getContainerHandle (pStoreHandle);
+	StoreReference (storePOP (), pStoreHandle);
+    }
+
+//  Maintenance
+protected:
+    virtual /*override*/ bool align_() {
+	return align ();
+    }
+    virtual /*override*/ bool alignAll_(bool bCleaning) {
+	return align ();
+    }
+public:
+    bool align ();
+    using BaseClass::alignAll;
+
 protected:
     bool PersistReferences ();
 
-//  State
-protected:
+//  Display and Inspection
+public:
+    virtual /*override*/ unsigned __int64 getClusterSize ();
+
+    virtual /*override*/ bool getPOP (M_POP *pResult, unsigned int xPOP) const;
+    virtual /*override*/ unsigned int getPOPCount () const {
+	return 2;
+    }
 };
+
+
+/********************************
+ ********************************
+ *****  Callable Interface  *****
+ ********************************
+ ********************************/
+
+PublicFnDecl bool rtDSC_UnpackIObject (
+    M_ASD *pContainerSpace, IOBJ_IObject iObject, DSC_Descriptor &rDsc
+);
 
 
 #endif

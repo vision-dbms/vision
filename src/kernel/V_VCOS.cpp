@@ -60,23 +60,27 @@ void V::VCOS::deallocateStorage () {
     m_pStorageOwnershipToken.clear ();
 }
 
+#ifdef VCOS_DEBUG_TRACE
 namespace {
     size_t ReportingThreshold () {
 	char const *const pReportingThreshold = getenv ("VCOSReportingThreshold");
-	return pReportingThreshold ? atoi (pReportingThreshold) : UINT_MAX;
+	return pReportingThreshold ? atoi (pReportingThreshold) : 0;
     }
     static size_t const g_sReportingThreshold = ReportingThreshold ();
 }
+#endif
 
 void V::VCOS::guarantee (size_t sNewStorage, bool bExact) {
     if (storageIsShared ()) {
-	if (sNewStorage >= g_sReportingThreshold) {
+#ifdef VCOS_DEBUG_TRACE
+	if (g_sReportingThreshold > 0 && sNewStorage >= g_sReportingThreshold) {
 	    fprintf (
 		stderr,
 		"+++ %p: Privatized %u byte%s of storage (was %u shared)\n",
 		this, sNewStorage, sNewStorage != 1 ? "s" : "",  m_sStorage
 	    );
 	}
+#endif
 	pointer_t pNewStorage = (pointer_t)allocate (sNewStorage);
 	memcpy (pNewStorage, m_pStorage, V_Min (m_sStorage, sNewStorage));
 	m_pStorage = pNewStorage;

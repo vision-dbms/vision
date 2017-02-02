@@ -8,6 +8,7 @@
  *****************************************
  *****************************************/
 
+class rtDICTIONARY_Handle;
 class VString;
 
 /********************************
@@ -17,20 +18,20 @@ class VString;
  ********************************/
 
 PublicFnDecl M_CPD *RSLANG_Compile (
-    M_ASD	*pContainerSpace,
-    char const	*source,
-    M_CPD	*dictionary,
-    char	*pMessageBuffer	= 0,
-    unsigned int sMessageBuffer	= 0,
-    int		*errorLine	= 0,
-    int		*errorCharacter	= 0
+    M_ASD		*pContainerSpace,
+    char const		*source,
+    rtDICTIONARY_Handle	*dictionary,
+    char		*pMessageBuffer	= 0,
+    unsigned int	 sMessageBuffer	= 0,
+    int			*errorLine	= 0,
+    int			*errorCharacter	= 0
 );
 
 PublicFnDecl void RSLANG_Decompile (
-    VString	&rSourceReturn,
-    M_CPD	*pProgram,
-    unsigned int*pDecompiledPC = 0,
-    unsigned int xPCOffset = UINT_MAX
+    VString		&rSourceReturn,
+    M_CPD		*pProgram,
+    unsigned int	*pDecompiledPC = 0,
+    unsigned int	 xPCOffset = UINT_MAX
 );
 
 

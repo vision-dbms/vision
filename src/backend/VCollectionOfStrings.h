@@ -17,6 +17,8 @@
 
 class VAssociativeResult;
 
+#include "RTblock.h"
+#include "RTlstore.h"
 #include "RTlink.h"
 
 /*************************
@@ -24,14 +26,17 @@ class VAssociativeResult;
  *************************/
 
 class VCollectionOfStrings : public VCollectionOfOrderables {
+//  Aliases
+public:
+    typedef Vdd::Store Store;
+
 //  Construction Helpers
 private:
-    M_CPD* StringOriginsContainer (DSC_Descriptor& rSource);
-    M_CPD* StringStorageContainer (DSC_Descriptor& rSource);
+    M_CPD *StringIndexContainer (DSC_Descriptor &rSource);
 
 //  Construction
 public:
-    VCollectionOfStrings (M_CPD* pDPT, DSC_Descriptor& rSource);
+    VCollectionOfStrings (rtPTOKEN_Handle *pDPT, DSC_Descriptor &rSource);
 
 //  Destruction
 public:
@@ -47,35 +52,35 @@ public:
 
 //  Element Access
 public:
-    bool GetElement (unsigned int xElement, char const*& rElement) const {
-	unsigned int xStringOrigin = m_pStringOriginsArray[xElement];
-	bool fElementIsValid = xStringOrigin < m_sStringStorageArray;
-	if (fElementIsValid)
-	    rElement = m_pStringStorageArray + xStringOrigin;
-	return fElementIsValid;
+    bool GetElement (unsigned int xElement, char const *&rpResult) const {
+	unsigned int xString = m_pStringIndexArray[xElement];
+	rpResult = m_pBlockStrings.isSet () ? m_pBlockStrings[xString]
+		: m_pLStoreStrings.isSet () ? m_pLStoreStrings[xString]
+		: 0;
+	return IsntNil (rpResult);
     }
 
 //  Use
 public:
     void insertInto (
-	M_CPD* pSet, M_CPD*& rpReordering, VAssociativeResult& rAssociativeResult
+	Store *pSet, M_CPD *&rpReordering, VAssociativeResult& rAssociativeResult
     );
     void locateIn (
-	M_CPD* pSet, M_CPD*& rpReordering, VAssociativeResult& rAssociativeResult
+	Store *pSet, M_CPD *&rpReordering, VAssociativeResult& rAssociativeResult
     );
     void deleteFrom (
-	M_CPD* pSet, M_CPD*& rpReordering, VAssociativeResult& rAssociativeResult
+	Store *pSet, M_CPD *&rpReordering, VAssociativeResult& rAssociativeResult
     );
 
 //  State
 protected:
-    VCPDReference const	m_pStringStore;
-    VCPDReference const	m_pStringOriginsContainer;
-    VCPDReference const	m_pStringStorageContainer;
-    DSC_Scalar		m_iStringOriginsReference;
-    unsigned int const*	m_pStringOriginsArray;
-    unsigned int	m_sStringStorageArray;
-    char const*		m_pStringStorageArray;
+    Vdd::Store::Reference	m_pStringStore;
+    rtBLOCK_Handle::Strings	m_pBlockStrings;
+    rtLSTORE_Handle::Strings	m_pLStoreStrings;
+    VCPDReference const		m_pStringIndexContainer;
+    DSC_Scalar			m_iStringIndexReference;
+    unsigned int const*		m_pStringIndexArray;
+    unsigned int		m_sStringStorageArray;
 };
 
 

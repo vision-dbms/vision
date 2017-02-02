@@ -82,7 +82,7 @@ namespace Vsa {
         void FlushWorkers  (VString const &rSession = "default") const;
         void HardRestart   (VString const &rSession = "default") const;
         void HardStop      (VString const &rSession = "default") ;
-
+		
     //  Parameter Setting
         void SetWorkerMinimum   (Vca::U32 workerCount,  VString const &rSession = "default") const;
         void SetWorkerMaximum   (Vca::U32 workerCount,  VString const &rSession = "default") const;
@@ -102,7 +102,10 @@ namespace Vsa {
         void SetLogFileSize    (Vca::U32 iSize,  VString const &rSession = "default") const;
         void SetLogFileBackups (Vca::U32 iCount, VString const &rSession = "default") const;
         void SetEvaluationTimeout    (Vca::U64 sTimeout, VString const &rSession = "default") const;
-        void SetEvaluationAttempts    (Vca::U32 cEvaluationAttempt, VString const &rSession = "default") const;
+		void SetEvaluationAttempts    (Vca::U32 cEvaluationAttempt, VString const &rSession = "default") const;
+        void SetEvaluationOnErrorAttempts    (Vca::U32 cEvaluationOnErrorAttempt, VString const &rSession = "default") const;
+		void SetEvaluationTimeOutAttempts    (Vca::U32 cEvaluationTimeOutAttempt, VString const &rSession = "default") const;
+
         void SetShrinkTimeOut  (Vca::U32 iTimeOutMinutes, VString const &rSession = "default") const;
         void SetBroadcastInProgressLimit  (Vca::U32 iLimit, VString const &rSession = "default") const;
         void SetWorkerQueryHistoryLimit  (Vca::U32 iLimit, VString const &rSession = "default") const;
@@ -127,6 +130,10 @@ namespace Vsa {
         void GetClientCount (VString const &rSession = "default") const;
 
     //  Statistics
+		void StatSum			(VString const &name, Vca::U64 timeBefore, Vca::U64 timeRange, VString const &rSession = "default") const;
+		void StatMin			(VString const &name, Vca::U64 timeBefore, Vca::U64 timeRange, VString const &rSession = "default") const;
+		void StatMax			(VString const &name, Vca::U64 timeBefore, Vca::U64 timeRange, VString const &rSession = "default") const;
+		void StatDivide			(VString const &names, Vca::U64 timeBefore, Vca::U64 timeRange, VString const &rSession = "default") const;
         void ServiceStatistics  (VString const &rSession = "default") const;
         void QueryDetails       (Vca::U32 iID, VString const &rSession = "default") const;
         void StatisticsDump     (VString const &rSession = "default") const;

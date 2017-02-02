@@ -86,8 +86,9 @@ namespace Vsa {
 	bool goodToGo (IEvaluator *pEvaluator, IEvaluatorClient::Reference &rpRole);
 
     //  Monitoring
+    protected:
+	virtual void monitorInterface (IVUnknown *pInterface);
     private:
-	void monitorInterface (IVUnknown *pInterface);
 	void cancelInterfaceMonitor ();
 	void signalInterfaceMonitor ();
 

@@ -947,7 +947,7 @@ PrivateFnDef void adjustTableValues (treenode *node, STD_VISIT order, int Unused
         *((char **)&STD_tdata (node)) += ptrAdjustment;
 }
 
-PrivateVarDef M_CPD *LocalMDCPD = NilOf (M_CPD*);
+PrivateVarDef rtDICTIONARY_Handle::Reference LocalMDCPD;
 
 /*---------------------------------------------------------------------------
  *****  Function passed to the HP_Unix provided twalk routine.
@@ -971,13 +971,15 @@ PrivateFnDef void InsertMethodDEntries (treenode *node, STD_VISIT order, int Unu
 		    g_pPropertySpecification = &g_iPropertySpecification;
 		}
 
-		rtDSC_Unpack (pMDKOT->TheDefaultProperty, g_pPropertySpecification);
+		static_cast<rtDSC_Handle*>(pMDKOT->TheDefaultProperty.ObjectHandle ())->getValue (
+		    *g_pPropertySpecification
+		);
 
 		g_pPropertySpecificationKOT = pMDKOT;
 	    }
 
 	    VSelectorGenerale selector((char const*)STD_tdata (node));
-	    rtDICTIONARY_Define (LocalMDCPD, &selector, g_pPropertySpecification);
+	    LocalMDCPD->define (selector, *g_pPropertySpecification);
 	}
 	break;
     default:
@@ -1408,7 +1410,7 @@ PrivateFnDef void extractSelector (
  *---------------------------------------------------------------------------
  */
 PrivateFnDef M_CPD *buildProgram (
-    M_ASD *pContainerSpace, int root, M_CPD *pDictionary, int Header
+    M_ASD *pContainerSpace, int root, rtDICTIONARY_Handle *pDictionary, int Header
 );
 
 
@@ -1716,8 +1718,8 @@ PrivateFnDef int GenerateCode (
 	real_val;
 
     M_CPD
-	*newProgram,
-	*newEnvCPD;
+	*newProgram;
+    rtDICTIONARY_Handle::Reference pNewDictionary;
 
     InitializeBuffer (&selector);
     InitializeBuffer (&tagbuffer);
@@ -2340,18 +2342,17 @@ PrivateFnDef int GenerateCode (
 	   	environment.
 	****/
 
-        newEnvCPD = rtDICTIONARY_New (pContainerSpace);
+        pNewDictionary.setTo (new rtDICTIONARY_Handle (pContainerSpace));
 
 	/****	Arrange to get a new program built for this block	****/
 
 	justStoredMagicWord = false;
 	newProgram = buildProgram (
-	    pContainerSpace, NonTerminal_SubtreeTail (subTree), newEnvCPD, header
+	    pContainerSpace, NonTerminal_SubtreeTail (subTree), pNewDictionary, header
 	);
 
-	/****	Cleanup newEnvCPD	****/
-	rtDICTIONARY_AlignAll (newEnvCPD, true);
-	newEnvCPD->release ();
+	/****	Cleanup dictionary  ****/
+	pNewDictionary->alignAll ();
 
 	if (IsNil (newProgram))
 	    return -1;
@@ -2589,7 +2590,7 @@ PrivateFnDef int GenerateCode (
  *
  *****/
 PrivateFnDef M_CPD *buildProgram (
-    M_ASD *pContainerSpace, int root, M_CPD *pDictionary, int Header
+    M_ASD *pContainerSpace, int root, rtDICTIONARY_Handle *pDictionary, int Header
 ) {
     int
 	x;
@@ -2765,13 +2766,13 @@ PrivateFnDef M_CPD *buildProgram (
  *	to compile.
  *****/
 PublicFnDef M_CPD *RSLANG_Compile (
-    M_ASD	*pContainerSpace,
-    char const	*source,
-    M_CPD	*dictionary,
-    char	*pMessageBuffer,
-    unsigned int sMessageBuffer,
-    int		*errorLine,
-    int		*errorCharacter
+    M_ASD		*pContainerSpace,
+    char const		*source,
+    rtDICTIONARY_Handle	*dictionary,
+    char		*pMessageBuffer,
+    unsigned int	 sMessageBuffer,
+    int			*errorLine,
+    int			*errorCharacter
 ) {
     if (tracingCompile)
         IO_printf ("Starting ... ");
@@ -3717,11 +3718,11 @@ PublicFnDef void RSLANG_Decompile (
     else if (UINT_MAX == xPCOffset) 
 	pReferenceCPD = pBlockCPD;
     else {
-	pReferenceCPD = pBlockCPD->GetCPD (-1, (RTYPE_Type)M_CPD_RType (pBlockCPD));
+	pReferenceCPD = pBlockCPD->GetCPD (-1);
 	rtBLOCK_CPD_PC (pReferenceCPD) = rtBLOCK_CPD_ByteCodeVector (pReferenceCPD) + xPCOffset;
     }
 
-    pBlockCPD = pBlockCPD->GetCPD (-1, (RTYPE_Type)M_CPD_RType (pBlockCPD));
+    pBlockCPD = pBlockCPD->GetCPD (-1);
 
     /*****  Initialize the string space, ...  *****/
     InitializeStringSpace (&decompiledProgram);

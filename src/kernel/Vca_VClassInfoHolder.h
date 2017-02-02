@@ -223,11 +223,12 @@ namespace Vca {
      *                                                                                                                                          *
      ********************************************************************************************************************************************/
     public:
-	template <class Container_T, typename Value_T>
-	    class Property_<VTrackable<Value_T> const&(Container_T::*)()const> : public Property {
+	template <typename Container_T, typename Value_T>
+	    class Property_<VTrackable<Value_T> const&(Container_T::*)()> : public Property {
 	public:
-	    typedef VTrackable<Value_T> const&(Container_T::*accessor_t)()const;
+	    typedef VTrackable<Value_T> const&(Container_T::*accessor_t)();
 	    typedef Property_<accessor_t> this_t;
+
 	    DECLARE_CONCRETE_RTTLITE (this_t, Property);
 
 	//  Aliases

@@ -200,8 +200,17 @@ bool Vca::Stop (VString *pMessageReturn) {
 ******************************************************************************/
 
 namespace {
+    bool g_bAtExit = false;
     bool s_bStillAlive = true;
     V::VTime s_iAbsoluteStopTime;
+}
+
+void Vca::setAtExit () {
+    g_bAtExit = true;
+}
+
+bool Vca::isAtExit () {
+    return g_bAtExit;
 }
 
 void Vca::Shutdown () {

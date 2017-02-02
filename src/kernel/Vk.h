@@ -144,7 +144,7 @@ typedef __int64 pointer_diff_t;
 typedef ptrdiff_t pointer_diff_t;
 #endif
 
-#ifdef _LP64
+#if defined(_LP64) || defined(_M_X64)
 typedef unsigned __int64 pointer_size_t;
 #else
 typedef unsigned __int32 pointer_size_t;
@@ -272,7 +272,7 @@ namespace V {
  *****  Intel  *****
  *******************/
 
-#if defined(__VMS) || defined(_M_IX86) || defined(__i386) || defined(__i386__) || defined (__x86_64__) || defined (__arm__)
+#if defined(__VMS) || defined(_M_IX86) || defined(_M_X64) || defined(__i386) || defined(__i386__) || defined (__x86_64__) || defined (__arm__)
 
 #define MAXINTDIGITS		11
 #define MAXDOUBLEDIGITS		309

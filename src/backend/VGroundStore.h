@@ -11,8 +11,9 @@
  *****  Declarations  *****
  **************************/
 
-#include "M_CPD.h"
+#include "Vdd_Store.h"
 
+class M_CPD;
 class VSNFTask;
 
 
@@ -23,21 +24,20 @@ class VSNFTask;
 class ABSTRACT VGroundStore : public VBenderenceable {
     DECLARE_ABSTRACT_RTT (VGroundStore, VBenderenceable);
 
+    friend class rtVSTORE_Handle;
+
 //  Construction
 protected:
-
-    VGroundStore () : m_pSurrogateHandle (0) {
-    }
+    VGroundStore ();
 
 //  Destruction
 protected:
-    ~VGroundStore () {
-    }
+    ~VGroundStore ();
 
 //  Access
 public:
     virtual unsigned int cardinality_ () const = 0;
-    virtual M_CPD *ptoken_ () const = 0;
+    virtual rtPTOKEN_Handle *ptoken_ () const = 0;
 
 //  Query
 public:
@@ -45,20 +45,14 @@ public:
     virtual bool allowsDelete () const;
 
     bool hasASurrogate () const {
-	return m_pSurrogateHandle ? true : false;
+	return m_pSurrogate.isntNil ();
     }
 
 //  Surrogate / Transient Extension Management
-protected:
-    void EndRoleAsTransientExtensionOf (VContainerHandle* pClusterHandle);
-
 private:
-    M_CPD *getCPDForNewSurrogate ();
-
+    void detachSurrogate (rtVSTORE_Handle *pSurrogate);
 public:
-    M_CPD *surrogateCPD () {
-	return m_pSurrogateHandle ? m_pSurrogateHandle->GetCPD () : getCPDForNewSurrogate ();
-    }
+    void getSurrogate (VReference<rtVSTORE_Handle> &rpResult);
 
 //  Task Implementation
 
@@ -67,7 +61,7 @@ public:
 
 //  State
 private:
-    VContainerHandle*	m_pSurrogateHandle;
+    V::VAggregatePointer<rtVSTORE_Handle> m_pSurrogate;
 };
 
 

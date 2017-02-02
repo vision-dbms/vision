@@ -18,6 +18,8 @@
  *************************/
 
 template <class DerivedClass> class VPrimitiveTaskController : public VPrimitiveTaskBase {
+    DECLARE_ABSTRACT_RTTLITE (VPrimitiveTaskController<DerivedClass>, VPrimitiveTaskBase);
+
 //  Types
 protected:
     typedef void (DerivedClass::*Continuation) ();
@@ -29,10 +31,7 @@ protected:
 	VPrimitiveDescriptor*	pDescriptor,
 	unsigned short		iFlags,
 	Continuation		pContinuation
-    )
-    : VPrimitiveTaskBase (rTCData, pDescriptor, iFlags)
-    , m_pContinuation (pContinuation)
-    {
+    ) : BaseClass (rTCData, pDescriptor, iFlags), m_pContinuation (pContinuation) {
     }
 
 //  Execution
@@ -56,11 +55,37 @@ protected:
  *****  Template Member Definitions  *****
  *****************************************/
 
-#if defined(_AIX) && defined(__TEMPINC__)
-#pragma implementation("VPrimitiveTaskController.i")
-#else
-#include "VPrimitiveTaskController.i"
-#endif
+template <class DerivedClass> void VPrimitiveTaskController<DerivedClass>::run () {
+    switch (m_xStage) {
+    case Stage_Unrun:
+	if (pausedOnEntry ())
+	    return;
+	/*****  NO BREAK  *****/
+
+    case Stage_Entry:
+	m_xStage = Stage_Running;
+	/*****  NO BREAK  *****/
+
+    case Stage_Running:
+	while (runnable ()) {
+	    if (m_pContinuation) {
+		Continuation pContinuation = m_pContinuation;
+		m_pContinuation = NilOf (Continuation);
+
+		(((DerivedClass*)this)->*pContinuation) ();
+	    }
+	    else if (pausedOnExit ())
+		return;
+	    else
+		exit ();
+	}
+	break;
+
+    default:
+	exit ();
+	break;
+    }
+}
 
 
 #endif

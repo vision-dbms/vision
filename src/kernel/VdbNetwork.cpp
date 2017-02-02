@@ -93,12 +93,10 @@ namespace {
 	g_pConvertedName.value()->setTo(name);
 	return true;
     }
-    // else
-    g_pConvertedName.value()->clear();
     return false;
   }
 
-  extern "C" int from_vms_callback(char* name) {
+  extern "C" int from_vms_callback(char *name) {
     assert (g_pConvertedName != 0);
 
     g_pConvertedName.value()->setTo(name);
@@ -107,29 +105,47 @@ namespace {
 }
 
 namespace V {
-  namespace OS {
-    bool ConvertUnixFileNameToVms (VString &rConvertedName, char const *pFileName) {
-      rConvertedName.clear ();
+    namespace OS {
+	bool ConvertUnixFileNameToVms (VString &rConvertedName, char const *pFileName) {
+	    g_pConvertedName = &rConvertedName;
+	    return decc$to_vms(pFileName, &to_vms_callback, 0, 0) == 1;
+	}
 
-      // translate from unix-style
-      g_pConvertedName = &rConvertedName;
-      decc$to_vms(pFileName, &to_vms_callback, 0, 0);
+	bool ConvertVmsFileNameToUnix (VString &rConvertedName, char const *pFileName) {
+	    g_pConvertedName = &rConvertedName;
+	    return decc$from_vms(pFileName, &from_vms_callback, 0) == 1;
+	}
 
-      //cout << "VMS NDF Name: " << vmsname << endl;
-      return rConvertedName.isntEmpty ();
+	bool ConvertFileNameToVms (VString &rConvertedName, char const *pFileName) {
+	//  Attempt the translation...
+	    if (ConvertUnixFileNameToVms (rConvertedName, pFileName))
+		return true;
+
+	//  Look for the target format...
+	    if (ConvertVmsFileNameToUnix (rConvertedName, pFileName)) {
+		rConvertedName.setTo (pFileName);
+		return true;
+	    }
+
+	//  Fail...
+	    return false;
+	}
+
+	bool ConvertFileNameToUnix (VString &rConvertedName, char const *pFileName) {
+	//  Attempt the translation...
+	    if (ConvertVmsFileNameToUnix (rConvertedName, pFileName))
+		return true;
+
+	//  Look for the target format...
+	    if (ConvertUnixFileNameToVms (rConvertedName, pFileName)) {
+		rConvertedName.setTo (pFileName);
+		return true;
+	    }
+
+	//  Fail...
+	    return false;
+	}
     }
-
-    bool ConvertVmsFileNameToUnix (VString &rConvertedName, char const *pFileName) {
-      rConvertedName.clear ();
-
-      // translate from unix-style
-      g_pConvertedName = &rConvertedName;
-      decc$from_vms(pFileName, &from_vms_callback, 0);
-
-      //cout << "VMS NDF Name: " << vmsname << endl;
-      return rConvertedName.isntEmpty ();
-    }
-  }
 }
 
 
@@ -566,7 +582,7 @@ VMS_LOCKING_CONTENTION_TESTING_LOGGING;
 
     bool GetLockPrefixForUnixName(LockName_t &rLockPrefix, const char* pFileName) {
 	VString vmsname;
-	return V::OS::ConvertUnixFileNameToVms (vmsname, pFileName) && GetLockPrefixForVMSName(rLockPrefix, vmsname);
+	return V::OS::ConvertFileNameToVms (vmsname, pFileName) && GetLockPrefixForVMSName(rLockPrefix, vmsname);
     }
 
     void GetLockName(LockName_t &rLockName, LockName_t const &prefix, unsigned short xLock) {

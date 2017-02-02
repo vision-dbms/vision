@@ -1,6 +1,6 @@
 /*****  Context Representation Type Header File  *****/
-#ifndef rtCONTEXT_H
-#define rtCONTEXT_H
+#ifndef rtCONTEXT_Interface
+#define rtCONTEXT_Interface
 
 /*****************************************
  *****************************************
@@ -16,8 +16,6 @@
 
 #include "DSC_Descriptor.h"
 
-#include "VConstructor.h"
-
 /***********************
  *****  Container  *****
  ***********************/
@@ -27,6 +25,8 @@
 /************************
  *****  Supporting  *****
  ************************/
+
+#include "RTdsc.h"
 
 
 /*****************************
@@ -41,25 +41,13 @@
 #define rtCONTEXT_CPx_Current	(unsigned int)0
 #define rtCONTEXT_CPx_Self	(unsigned int)1
 #define rtCONTEXT_CPx_Origin	(unsigned int)2
-
-#define rtCONTEXT_CPD_CurrentCPD(cpd) (\
-    (cpd)->GetCPD (rtCONTEXT_CPx_Current, RTYPE_C_Descriptor)\
-)
-
-#define rtCONTEXT_CPD_SelfCPD(cpd) (\
-    (cpd)->GetCPD (rtCONTEXT_CPx_Self	, RTYPE_C_Descriptor)\
-)
-
-#define rtCONTEXT_CPD_OriginCPD(cpd) (\
-    (cpd)->GetCPD (rtCONTEXT_CPx_Origin	, RTYPE_C_Descriptor)\
-)
 
 
-/*********************************************
- *********************************************
- *****  rtCONTEXT_Constructor Interface  *****
- *********************************************
- *********************************************/
+/******************************
+ ******************************
+ *****  Container Handle  *****
+ ******************************
+ ******************************/
 
 /*---------------------------------------------------------------------------
  * Contexts define the values of '^current', '^self', and '^my' for a task.
@@ -84,117 +72,105 @@
  *				  value of 'origin' in the 'parent' context.
  *---------------------------------------------------------------------------
  */
-
-
-/*---------------------------*
- *----  Type Definition  ----*
- *---------------------------*/
-
-class rtCONTEXT_Constructor : public VConstructor {
-//  Run Time Type
-    DECLARE_CONCRETE_RTT (rtCONTEXT_Constructor, VConstructor);
-
-//  Construction
-public:
-    rtCONTEXT_Constructor (
-	DSC_Descriptor& rSelf, DSC_Descriptor& rCurrent, DSC_Descriptor& rMy, DSC_Descriptor& rParent
-    );
-    rtCONTEXT_Constructor (
-	DSC_Descriptor& rSelf, DSC_Descriptor& rCurrent, DSC_Descriptor& rMy
-    );
-    rtCONTEXT_Constructor (DSC_Descriptor const& rSelfCurrentAndMy);
-    rtCONTEXT_Constructor (M_CPD*);
-
-//  Destruction
-protected:
-    ~rtCONTEXT_Constructor ();
-
-//  Access
-public:
-    RTYPE_Type RType_() const;
-
-    M_ASD *Space_() const;
-
-protected:
-    DSC_Descriptor& Get (DSC_Descriptor rtCONTEXT_Constructor::*pMemberComponent);
-
-public:
-    DSC_Descriptor& getSelf () {
-	return Get (&rtCONTEXT_Constructor::m_iSelf);
-    }
-    DSC_Descriptor& getCurrent () {
-	return Get (&rtCONTEXT_Constructor::m_iCurrent);
-    }
-    DSC_Descriptor& getMy () {
-	return Get (&rtCONTEXT_Constructor::m_iMy);
-    }
-
-    DSC_Descriptor& self () {
-	return m_iSelf;
-    }
-    DSC_Descriptor& current () {
-	return m_iCurrent;
-    }
-    DSC_Descriptor& my () {
-	return m_iMy;
-    }
-
-//  Realization
-protected:
-    M_CPD* newRealization ();
-
-//  State
-protected:
-    DSC_Descriptor m_iSelf;
-    DSC_Descriptor m_iCurrent;
-    DSC_Descriptor m_iMy;
-    DSC_Descriptor m_iParent;
-};
-
-
-/********************************
- ********************************
- *****  Callable Interface  *****
- ********************************
- ********************************/
-
-PublicFnDecl bool rtCONTEXT_Align (M_CPD* context);
-
-
-/******************************
- ******************************
- *****  Container Handle  *****
- ******************************
- ******************************/
 
 class rtCONTEXT_Handle : public rtPOPVECTOR_Handle {
-//  Run Time Type
-    DECLARE_CONCRETE_RTT (rtCONTEXT_Handle, rtPOPVECTOR_Handle);
+//    DECLARE_CONCRETE_RTT (rtCONTEXT_Handle, rtPOPVECTOR_Handle);
+    DECLARE_VIRTUAL_RTT (rtCONTEXT_Handle, rtPOPVECTOR_Handle);
 
 //  Construction
-protected:
-    rtCONTEXT_Handle (M_CTE &rCTE) : rtPOPVECTOR_Handle (rCTE) {
-    }
-
 public:
     static VContainerHandle *Maker (M_CTE &rCTE) {
 	return new rtCONTEXT_Handle (rCTE);
     }
+    rtCONTEXT_Handle (ThisClass *pParentContext, DSC_Pointer &rParentPointer);
+    rtCONTEXT_Handle (DSC_Descriptor &rSelf, DSC_Descriptor &rCurrent, DSC_Descriptor &rMy);
+    rtCONTEXT_Handle (DSC_Descriptor const& rSelfCurrentAndMy);
+private:
+    rtCONTEXT_Handle (M_CTE &rCTE);
+private:
+    void createContainer ();
 
 //  Destruction
-protected:
+private:
+    ~rtCONTEXT_Handle ();
+    void deleteThis ();
+
+//  Lifetime Management
+public:
+    void protectFromGC (bool bProtect) {
+	setPreciousTo (bProtect);
+    }
 
 //  Access
+private:
+    DSC_Descriptor &Get (DSC_Descriptor rtCONTEXT_Handle::*pMemberComponent);
 public:
+    void getSelf (rtDSC_Handle::Reference &rpResult) {
+	rpResult.setTo (static_cast<rtDSC_Handle*>(elementHandle (rtCONTEXT_CPx_Self)));
+    }
+    void getCurrent (rtDSC_Handle::Reference &rpResult) {
+	rpResult.setTo (static_cast<rtDSC_Handle*>(elementHandle (rtCONTEXT_CPx_Current)));
+    }
+    void getMy (rtDSC_Handle::Reference &rpResult) {
+	rpResult.setTo (static_cast<rtDSC_Handle*>(elementHandle (rtCONTEXT_CPx_Origin)));
+    }
 
-//  Query
+    DSC_Descriptor &getSelf () {
+	return Get (&rtCONTEXT_Handle::m_iSelf);
+    }
+    DSC_Descriptor &getCurrent () {
+	return Get (&rtCONTEXT_Handle::m_iCurrent);
+    }
+    DSC_Descriptor &getMy () {
+	return Get (&rtCONTEXT_Handle::m_iMy);
+    }
+
+    DSC_Descriptor &self () {
+	return m_iSelf;
+    }
+    DSC_Descriptor &current () {
+	return m_iCurrent;
+    }
+    DSC_Descriptor &my () {
+	return m_iMy;
+    }
+
+//  Alignment
+private:
+    virtual /*override*/ bool align_() {
+	return align ();
+    }
+
+// Garbage collection marking
 public:
+  virtual void traverseReferences(visitFunction fp);
+
+public:
+    bool align ();
+    using BaseClass::alignAll;
 
 //  Callbacks
 protected:
 
-//  State
+//  Store Access
+public:
+    rtPTOKEN_Handle *getPToken () const;
+
+//  Display and Inspection
+public:
+    virtual /*override*/ unsigned __int64 getClusterSize ();
+
+//  Maintenance
 protected:
+    bool PersistReferences ();
+
+//  State
+private:
+    DSC_Descriptor	m_iSelf;
+    DSC_Descriptor	m_iCurrent;
+    DSC_Descriptor	m_iMy;
+    Reference		m_pParentContext;
+    DSC_Pointer		m_iParentPointer;
 };
 
 

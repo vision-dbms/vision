@@ -130,7 +130,7 @@ namespace Vca {
 	void createExportOf (IVUnknown *pObject, bool bWeak);
 	void createExportOf (VcaOID *pOID, bool bWeak);
 	void deleteExportOf (
-	    VcaOID *pOID, U32 cExports, U32 cWeakExports, U32 cMessages
+	    VMessageHolder<IPeer_Ex2> const& rMessage, VcaOID *pOID, U32 cExports, U32 cWeakExports, U32 cMessages
 	);
 	bool weakenExportOf (VcaOID *pOID);
     protected:

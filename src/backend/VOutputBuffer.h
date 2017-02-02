@@ -171,7 +171,7 @@ public:
 	/*----  VOutputBuffer::AllocatoR::CellBlock::Cell  ----*/
 	//  Allocation
 	protected:
-	    static unsigned int g_iTotalAllocation;
+	    static size_t g_iTotalAllocation;
 	public:
 	    void* operator new (size_t sStructure, size_t sCellBlock) {
 		g_iTotalAllocation += sCellBlock;
