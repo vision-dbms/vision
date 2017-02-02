@@ -84,29 +84,29 @@
  ********************************************/
 
 V_DefinePrimitive (NewTimeSeries) {
-    VCPDReference pInstancePTokenCPD (0, pTask->NewCodPToken ());
-    M_CPD* pIndexCPD;
+    rtPTOKEN_Handle::Reference pInstancePToken (pTask->NewCodPToken ());
+    rtINDEX_Handle *pIndex;
 
     switch (V_TOTSC_PrimitiveFlags) {
     case 0:
-	pIndexCPD = rtINDEX_NewTimeSeries (pInstancePTokenCPD);
+	pIndex = rtINDEX_NewTimeSeries (pInstancePToken);
         break;
 
     case 1:
-	pIndexCPD = rtINDEX_NewCluster (
-	    pInstancePTokenCPD, &pTask->getCurrent (), NilOf (M_CPD *)
+	pIndex = rtINDEX_NewCluster (
+	    pInstancePToken, &pTask->getCurrent (), NilOf (Vdd::Store*)
 	);
         break;
 
     case 2: {
-	    M_CPD *pStoreCPD = pTask->getSelf ().storeCPD ();
-	    M_KOTE const &rDateKOTE = pStoreCPD->TheDateClass ();
-	    pIndexCPD = rtINDEX_NewCluster (
-		pInstancePTokenCPD,
+	    Vdd::Store *pStore = pTask->getSelf ().store ();
+	    M_KOTE const &rDateKOTE = pStore->kot()->TheDateClass;
+	    pIndex = rtINDEX_NewCluster (
+		pInstancePToken,
 		RTYPE_C_IntUV,
-		rDateKOTE.PTokenCPD (),
-		rDateKOTE,
-		pTask->getSelf ().storeCPD ()
+		rDateKOTE.PTokenHandle (),
+		rDateKOTE.store (),
+		pStore
 	    );
 	}
 	break;
@@ -121,8 +121,8 @@ V_DefinePrimitive (NewTimeSeries) {
 	}
 	pTask->normalizeDuc ();
 
-	pIndexCPD = rtINDEX_NewCluster (
-	    pInstancePTokenCPD, &pTask->getCurrent (), pTask->ducMonotype ().storeCPD ()
+	pIndex = rtINDEX_NewCluster (
+	    pInstancePToken, &pTask->getCurrent (), pTask->ducMonotype ().store ()
 	);
 	break;
 
@@ -135,8 +135,7 @@ V_DefinePrimitive (NewTimeSeries) {
         break;
     }
 
-    pTask->loadDucWithListOrStringStore (rtINDEX_CPD_ListStoreCPD (pIndexCPD));
-    pTask->ducMonotype ().setStoreTo (pIndexCPD);
+    pTask->loadDucWithListOrStringStore (pIndex);
 }
 
 
@@ -147,14 +146,14 @@ V_DefinePrimitive (NewTimeSeries) {
 V_DefinePrimitive (LocateCurrentDate) {
     DSC_Descriptor& rCurrent = pTask->getCurrent ();
 
-    if (pTask->temporalContext ()->ConformsToIndex (&rCurrent)) {
-	DSC_Descriptor resultDescriptor;
+    if (pTask->temporalContext ()->ConformsToIndex (rCurrent)) {
+	DSC_Descriptor iResult;
 
 	rtINDEX_TimeSeriesLookup (
-	    &resultDescriptor, &rCurrent, pTask->temporalContext ()
+	    &iResult, &rCurrent, pTask->temporalContext ()
 	);
 
-	pTask->loadDucWithMoved (resultDescriptor);
+	pTask->loadDucWithMoved (iResult);
     }
     else pTask->sendUnaryMessageToSelf ("valueCellForNonConformantKey");
 }
@@ -182,26 +181,27 @@ V_DefinePrimitive (DetermineIntervalLimit) {
 
     DSC_Descriptor& rCurrent = pTask->getCurrent ();
 
-    if (pTask->temporalContext ()->ConformsToIndex (&rCurrent)) {
-	DSC_Descriptor resultDescriptor;
+    if (pTask->temporalContext ()->ConformsToIndex (rCurrent)) {
+	DSC_Descriptor iResult;
 
 	rtINDEX_IntervalLimits (
-	    &resultDescriptor, &rCurrent, pTask->temporalContext (), xLookupCase
+	    &iResult, &rCurrent, pTask->temporalContext (), xLookupCase
 	);
 
-	pTask->loadDucWithMoved (resultDescriptor);
+	pTask->loadDucWithMoved (iResult);
     }
     else pTask->sendUnaryMessageToSelf (pDelegationMessage);
 }
 
 
 V_DefinePrimitive (TimeZero) {
-    DSC_Descriptor& rCurrent = pTask->getCurrent ();
+    DSC_Descriptor iResult;
 
-    DSC_Descriptor resultDescriptor;
-    rtINDEX_TimeZero (&resultDescriptor, &rCurrent);
+    static_cast<rtINDEX_Handle*>(pTask->getCurrent ().store ())->getTimeZero (
+	iResult, pTask->ptoken ()
+    );
 
-    pTask->loadDucWithMoved (resultDescriptor);
+    pTask->loadDucWithMoved (iResult);
 }
 
 
@@ -212,14 +212,14 @@ V_DefinePrimitive (TimeZero) {
 V_DefinePrimitive (DefineCurrentDate) {
     DSC_Descriptor& rCurrent = pTask->getCurrent ();
 
-    if (pTask->temporalContext ()->ConformsToIndex (&rCurrent)) {
-	DSC_Descriptor resultDescriptor;
+    if (pTask->temporalContext ()->ConformsToIndex (rCurrent)) {
+	DSC_Descriptor iResult;
 
 	rtINDEX_Define (
-	    &resultDescriptor, &rCurrent, pTask->temporalContext ()
+	    &iResult, &rCurrent, pTask->temporalContext ()
 	);
 
-	pTask->loadDucWithMoved (resultDescriptor);
+	pTask->loadDucWithMoved (iResult);
     }
     else pTask->sendUnaryMessageToSelf ("newValueCellForNonConformantKey");
 }
@@ -227,7 +227,7 @@ V_DefinePrimitive (DefineCurrentDate) {
 V_DefinePrimitive (DeleteCurrentDate) {
     DSC_Descriptor& rCurrent = pTask->getCurrent ();
 
-    if (pTask->temporalContext ()->ConformsToIndex (&rCurrent)) {
+    if (pTask->temporalContext ()->ConformsToIndex (rCurrent)) {
 	rtINDEX_Delete (&rCurrent, pTask->temporalContext ());
 	pTask->loadDucWithCopied (rCurrent);
     }
@@ -237,7 +237,7 @@ V_DefinePrimitive (DeleteCurrentDate) {
 V_DefinePrimitive (DeleteDateFromTimeSeries) {
     DSC_Descriptor& rCurrent = pTask->getCurrent ();
 
-    if (pTask->temporalContext ()->ConformsToIndex (&rCurrent)) {
+    if (pTask->temporalContext ()->ConformsToIndex (rCurrent)) {
 	rtINDEX_KeyDelete (&rCurrent, pTask->temporalContext ());
 	pTask->loadDucWithCopied (rCurrent);
     }

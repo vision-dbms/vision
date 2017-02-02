@@ -89,6 +89,11 @@ namespace Vsa {
             Command_GenerationStatDump,
             Command_Workers,
 
+			Command_StatSum,
+			Command_StatMax,
+			Command_StatMin,
+			Command_StatDivide,
+			
             //  Query Operations
             Command_Query,
 
@@ -252,7 +257,70 @@ namespace Vsa {
             VReference<Operation>  m_pSuccessor;
         };
 
+		class OdometerOperation : public Operation {
+		//  Run Time Type
+        DECLARE_CONCRETE_RTTLITE (OdometerOperation, Operation);
 
+        //  Construction
+        public:
+            OdometerOperation (Command iCommand, VString const &name, Vca::U64 timeBefore, Vca::U64 timeRange)
+                : Operation (iCommand)
+				, m_iName (name)
+                , m_iTimeBefore (timeBefore)  
+				, m_iTimeRange (timeRange) {
+            }
+
+        //  Destruction
+        protected:
+            ~OdometerOperation () {
+            }
+			
+        public:
+            VString const name () const {
+                return m_iName;
+            }
+			
+			Vca::U64 timeBefore () const {
+				return m_iTimeBefore;
+			}
+			
+			Vca::U64 timeRange () const {
+				return m_iTimeRange;
+			}
+			
+		//  State
+        private:
+            VString const m_iName;
+			Vca::U64 m_iTimeBefore;
+			Vca::U64 m_iTimeRange;
+        };
+		
+		class StatDivideOperation : public OdometerOperation {
+		//  Run Time Type
+        DECLARE_CONCRETE_RTTLITE (StatDivideOperation, OdometerOperation);
+
+        //  Construction
+        public:
+            StatDivideOperation (VString const &name1, VString const &name2, Vca::U64 timeBefore, Vca::U64 timeRange)
+                : OdometerOperation (Command_StatDivide, name1, timeBefore, timeRange)
+				, m_iName2 (name2) {
+            }
+
+        //  Destruction
+        protected:
+            ~StatDivideOperation () {
+            }
+			
+        public:
+            VString const name2 () const {
+                return m_iName2;
+			}
+			
+		//  State
+        private:
+            VString const m_iName2;
+        };
+		
         class QueryOperation : public Operation {
         //  Run Time Type
             DECLARE_CONCRETE_RTTLITE (QueryOperation, Operation);
@@ -341,9 +409,11 @@ namespace Vsa {
         typedef VReceiver<ThisClass, IVUnknown*> IVUnknownReceiver;
         typedef VReceiver<ThisClass, bool>       BoolReceiver;
         typedef VReceiver<ThisClass, Vca::U32>   U32Receiver;
+		typedef VReceiver<ThisClass, Vca::S64> 	 S64Receiver;
         typedef VReceiver<ThisClass, VString const&> VStringReceiver;
         typedef VReceiver<ThisClass, Vsa::IEvaluatorPoolSettings*> PoolSettingsReceiver;
         typedef VReceiver<ThisClass, Vsa::IEvaluator*> EvaluatorReceiver;
+		typedef VReceiver<ThisClass, Vca::F64> 	F64Receiver;
 
     //  Construction
     public:
@@ -469,16 +539,24 @@ namespace Vsa {
         void SetLogSwitch       (bool bLogSwitch);
         void SetLogFileSize     (Vca::U32 iSize);
         void SetLogFileBackups  (Vca::U32 iCount);
-        void SetEvaluationAttempts  (Vca::U32 cEvaluationAttempt);
+		void SetEvaluationAttempts  (Vca::U32 cEvaluationAttempt);
+        void SetEvaluationOnErrorAttempts  (Vca::U32 cEvaluationOnErrorAttempt);
+		void SetEvaluationTimeOutAttempts  (Vca::U32 cEvaluationTimeOutAttempt);
         void SetShrinkTimeOut (Vca::U32 iTimeOutMinutes);
         void SetBroadcastInProgressLimit (Vca::U32 iLimit);
         void SetWorkerQueryHistoryLimit (Vca::U32 iLimit);
         void SetStopTimeOut (Vca::U32 iTimeOutMins);
         void SetEvaluationTimeout (Vca::U64 iTimeoutSecs);
         void SetGenerationMaximum (Vca::U32 count);
+		void SetQueryLogLength (Vca::U32 iLogLength);
+		void SetResultLogLength (Vca::U32 iResultLength);
 
 
-    //  Pool Query
+		//  Pool Query
+		void StatSum			(VString const &name, Vca::U64 timeBefore, Vca::U64 timeRange);
+		void StatMax			(VString const &name, Vca::U64 timeBefore, Vca::U64 timeRange);
+		void StatMin			(VString const &name, Vca::U64 timeBefore, Vca::U64 timeRange); 
+		void StatDivide			(VString const &name1, VString const &name2, Vca::U64 timeBefore, Vca::U64 timeRange);
         void ServiceStatistics  ();
         void QueryDetails       (Vca::U32 iID);
         void StatisticsDump     ();
@@ -522,10 +600,14 @@ namespace Vsa {
         void onOperationError        (BoolReceiver *pReceiver, Vca::IError *pError, VString const& rText);
         void onResult                (VStringReceiver *pReceiver, VString const& rResult);
         void onError                 (VStringReceiver *pReceiver, Vca::IError *pError, VString const& rText);
-        void onAppSettings               (VStringReceiver *pReceiver, VString const& rStat);
+        void onAppSettings               (VStringReceiver *pReceiver, VString const& rStat); 
         void onWorkerCreationFailureLmtResult (BoolReceiver *pReceiver, bool rResult);
         void onU32Result             (U32Receiver *pReceiver, Vca::U32);
         void onU32Error              (U32Receiver *pReceiver, Vca::IError *pError, VString const& rText);
+		void onS64Result			 (S64Receiver *pReceiver, Vca::S64);
+		void onS64Error				 (S64Receiver *pReceiver, Vca::IError *pError, VString const& rText);
+		void onF64Result			(F64Receiver *pReceiver, Vca::F64);
+		void onF64Error              (F64Receiver *pReceiver, Vca::IError *pError, VString const& rText);
 
     private:
         void onQIComplete ();

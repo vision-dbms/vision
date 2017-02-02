@@ -51,6 +51,62 @@
 template class VPrimitiveTaskController<VReadEvalPrintController>;
 
 
+/****************************************************
+ ****************************************************
+ *****                                          *****
+ *****  VReadEvalPrintController::QueryContext  *****
+ *****                                          *****
+ ****************************************************
+ ****************************************************/
+
+/**************************
+ **************************
+ *****  Construction  *****
+ **************************
+ **************************/
+
+VReadEvalPrintController::QueryContext::QueryContext (VTask *pCaller) : BaseClass (pCaller->context ()) {
+}
+
+/*************************
+ *************************
+ *****  Destruction  *****
+ *************************
+ *************************/
+
+VReadEvalPrintController::QueryContext::~QueryContext () {
+}
+
+/*************************
+ *************************
+ *****  Fulfillment  *****
+ *************************
+ *************************/
+
+bool VReadEvalPrintController::QueryContext::fulfill (GoferOrder const &rOrder) {
+    return m_pQuery ? rOrder.fulfillFromClient (this, m_pQuery) : fulfillPrerequisite (rOrder);
+}
+
+/*************************
+ *************************
+ *****  Transitions  *****
+ *************************
+ *************************/
+
+void VReadEvalPrintController::QueryContext::onQueryInProgress (VReadEvalPrintController *pTask) {
+    if (m_pQuery.isNil ()) {
+	Vsa::VEvaluation::Reference pEvaluation;
+	if (pTask->channel ()->getEvaluation (pEvaluation)) {
+	    m_pQuery.setTo (new Query (pEvaluation));
+	}
+    }
+}
+
+void VReadEvalPrintController::QueryContext::onQueryCompleted (VReadEvalPrintController *pTask) {
+    m_pQuery.clear ();
+}
+
+
 /**************************************
  **************************************
  *****                            *****
@@ -77,22 +133,24 @@ VReadEvalPrintController::VReadEvalPrintController (
     ConstructionData const&	rTCData,
     VPrimitiveDescriptor*	pDescriptor,
     unsigned short		iFlags
-) : VPrimitiveTaskController<VReadEvalPrintController> (
-    rTCData, pDescriptor, iFlags, &VReadEvalPrintController::REPStart
-), m_iStartTime			(0)
-, m_iMidTime			(0)
-, m_iEndTime			(0)
-, m_pInitialOutputBuffer	(m_pOutputBuffer)
-, m_pSelfDictionary		(0, getSelf ().dictionaryCPD ())
-, m_iThisSource			(channel ()->consumedStartupExpression ())
-, m_iExecutionsRemaining	(0)
-, m_bDebuggerEnabled		(scheduler()->debuggerEnabled ())
-, m_bEchoingInput		(false)
-, m_bExecutionLogged		(true) 
-, m_bNeedingSetup		(true)
-, m_bVerboseStats		(true)
+) : BaseClass (rTCData, pDescriptor, iFlags, &VReadEvalPrintController::REPStart)
+  , m_iQueryContext		(rTCData.caller ())
+  , m_iStartTime		(0)
+  , m_iMidTime			(0)
+  , m_iEndTime			(0)
+  , m_pInitialOutputBuffer	(m_pOutputBuffer)
+  , m_iThisSource		(channel ()->consumedStartupExpression ())
+  , m_iExecutionsRemaining	(0)
+  , m_bDebuggerEnabled		(scheduler()->debuggerEnabled ())
+  , m_bEchoingInput		(false)
+  , m_bExecutionLogged		(true) 
+  , m_bNeedingSetup		(true)
+  , m_bVerboseStats		(true)
 {
+    setContextTo (&m_iQueryContext);
+
     if (IsntNil (getenv ("VisionTimingOnly"))) m_bVerboseStats = false;
+    getSelf ().getDictionary (*const_cast<rtDICTIONARY_Handle::Reference*>(&m_pSelfDictionary));
     Batchvision::registerREPController (this);
     loadDucWithNA ();
 }
@@ -466,6 +524,8 @@ void VReadEvalPrintController::ScheduleEvaluation () {
 }
 
 void VReadEvalPrintController::ConcludeEvaluation (bool fDisplayingOutput) {
+    m_iQueryContext.onQueryCompleted (this);
+
     if (m_pOutputBuffer.referent () != m_pInitialOutputBuffer) {
 	if (fDisplayingOutput)
 	    m_pOutputBuffer->moveOutputToChannel ();
@@ -538,7 +598,7 @@ void VReadEvalPrintController::REPRead () {
 		"    ?e         ... to toggle input echo.\n"
 		"    ?w         ... to save the global environment.\n"
 		"\n"
-		"Any thing else will get appended to the current input buffer.\n"
+		"Anything else will get appended to the current input buffer.\n"
 	    );
 
 	if (isAController ())
@@ -556,10 +616,12 @@ void VReadEvalPrintController::REPRead () {
 	if (m_bEchoingInput)
 	    display ("V> %s", pLine);
 
-	if (pLine[0] != '?')
-	    m_iThisSource.append (pLine);
-	else
+	if ('?' == pLine[0])
 	    ProcessCommand (pLine);
+	else {
+	    m_iQueryContext.onQueryInProgress (this);
+	    m_iThisSource.append (pLine);
+	}
 
 	deallocate (pLine);
 	break;

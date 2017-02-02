@@ -27,6 +27,14 @@
 
 /*****  Shared  *****/
 #include "popvector.h"
+
+/*************************************
+ *****  Template Instantiations  *****
+ *************************************/
+
+#ifdef VMS_LINUX_EXPLICIT_COMPAT
+template class VStoreHandle_<rtPOPVECTOR_Handle>;
+#endif
 
 
 /******************************
@@ -54,10 +62,10 @@ DEFINE_ABSTRACT_RTT (rtPOPVECTOR_Handle);
  *****  Routine to check a POP-Vector for corruption.
  *****/
 void rtPOPVECTOR_Handle::CheckConsistency () {
-    if (POPVECTOR_PV_IsInconsistent ((POPVECTOR_PVType*)ContainerContent ())) {
+    if (isInconsistent ()) {
 	ERR_SignalFault (
 	    EC__InternalInconsistency, UTIL_FormatMessage (
-		"Corrupted popvector[%d:%d] detected", SpaceIndex (), ContainerIndex ()
+		"Corrupted popvector[%d:%d] detected", spaceIndex (), containerIndex ()
 	    )
 	);
     }
@@ -114,23 +122,33 @@ PublicFnDef void POPVECTOR_InitStdCPD (M_CPD* cpd) {
  *	cElements		- the number of POPs to be included.
  *
  *  Returns:
- *	A standard CPD for the POP-Vector created.
+ *	A handle for the created constainer.
  *
  *  Note:
  *	The POPs will all be initialized in the standard way.
  *
  *****/
-PublicFnDef M_CPD *POPVECTOR_New (M_ASD *pSpace, RTYPE_Type xType, unsigned int cElements) {
-    M_CPD *cpd = pSpace->CreateContainer (xType, POPVECTOR_SizeofPVector (cElements));
+rtPOPVECTOR_Handle::rtPOPVECTOR_Handle (
+    M_ASD *pSpace, RTYPE_Type xType, unsigned int cElements
+) : BaseClass (pSpace, xType, POPVECTOR_SizeofPVector (cElements)) {
+    constructContainer (cElements);
+}
 
-    POPVECTOR_InitStdCPD (cpd);
+rtPOPVECTOR_Handle::rtPOPVECTOR_Handle (M_ASD *pSpace, RTYPE_Type xType) : BaseClass (pSpace, xType) {
+}
 
-    cpd->constructReferences (0, cElements);
+void rtPOPVECTOR_Handle::CreateContainer (unsigned int cElements) {
+    BaseClass::CreateContainer (POPVECTOR_SizeofPVector (cElements));
+    constructContainer (cElements);
+}
 
-    POPVECTOR_CPD_ElementCount (cpd) = cElements;
-    POPVECTOR_CPD_IsInconsistent (cpd) = false;
+void rtPOPVECTOR_Handle::constructContainer (unsigned int cElements) const {
+    constructReferences (array (), cElements);
 
-    return cpd;
+    POPVECTOR_PVType *pBase = typecastContent ();
+
+    POPVECTOR_PV_ElementCount (pBase) = cElements;
+    POPVECTOR_PV_IsInconsistent (pBase) = false;
 }
 
 
@@ -162,7 +180,7 @@ PublicFnDef void POPVECTOR_ReclaimContainer (
  *****  Routine to 'save' a POP-Vector.
  *****/
 bool rtPOPVECTOR_Handle::PersistReferences () {
-    POPVECTOR_PVType *pv = (POPVECTOR_PVType *)ContainerContent ();
+    POPVECTOR_PVType *pv = typecastContent ();
     return Persist (POPVECTOR_PV_Array (pv), POPVECTOR_PV_ElementCount (pv));
 }
 
@@ -184,10 +202,10 @@ bool rtPOPVECTOR_Handle::PersistReferences () {
  *	NOTHING - Executed for side effect only.
  *
  *****/
-PublicFnDef void POPVECTOR_MarkContainers (M_ASD *pSpace, M_CPreamble const *pContainer) {
+PublicFnDef void POPVECTOR_MarkContainers (M_ASD::GCVisitBase* pGCV, M_ASD* pSpace, M_CPreamble const *pContainer) {
     POPVECTOR_PVType const *pv = (POPVECTOR_PVType const *)(pContainer + 1);
 
-    pSpace->Mark (POPVECTOR_PV_Array (pv), POPVECTOR_PV_ElementCount (pv));
+    pGCV->Mark (pSpace, POPVECTOR_PV_Array (pv), POPVECTOR_PV_ElementCount (pv));
 }
 
 
@@ -230,32 +248,6 @@ PrivateFnDef void InitializePOPs (
 }
 
 
-/********************
- *  Utility Macros  *
- ********************/
-
-#define AlignmentInsertMacro(origin, shift)\
-    AlignmentInsertDeleteMacroBody (origin, shift)
-
-#define AlignmentDeleteMacro(origin, shift)\
-    AlignmentInsertDeleteMacroBody (origin, shift)
-
-#define AlignmentInsertDeleteMacroBody(origin, shift)\
-    M_CPD_PointerToPOP (cpd, alignmentIndex) =\
-	    M_CPD_PointerToPOP (cpd, alignmentIndex - 1) + origin + 1;\
-    cpd->ShiftContainerTail (\
-	alignmentIndex,\
-	(elementCount - origin) * sizeof (M_POP),\
-	(ptrdiff_t)(shift) * sizeof (M_POP),\
-	true,\
-	InitializePOPs,\
-	shift,\
-	origin\
-    );\
-    elementCount += shift;\
-    POPVECTOR_CPD_ElementCount (cpd) += shift
-
-
 /**********************************
  *  Positional Alignment Routine  *
  **********************************/
@@ -264,36 +256,48 @@ PrivateFnDef void InitializePOPs (
  *****  Standard routine to normalize a pop-vector.
  *
  *  Arguments:
- *	cpd			- a standard CPD for the POP-Vector to be
- *				  normalized.
- *	pTokenIndex		- The index into the cpd pointer array which
- *				  points to the POP for the ptoken which will
- *				  control the alignment.
- *	alignmentIndex		- The index into the cpd pointer array which
- *				  marks the alignable portion of the popvector.
- *	elementCount		- The number of alignable elements in this
- *				  popvector.
+ *	xAlignmentPToken	- The index in the popvector of the ptoken
+ *				  controlling the alignment.
+ *	xRegion			- The index in the popvector of the alignment
+ *				  region origin.
+ *	sRegion			- The number of alignable elements in this
+ *				  region.
  *
  *  Returns:
  *	'cpd'
  *
  *****/
-PublicFnDef M_CPD* POPVECTOR_Align (
-    M_CPD* cpd, unsigned int xPToken, unsigned int alignmentIndex, unsigned int elementCount
+bool rtPOPVECTOR_Handle::align (
+    unsigned int xAlignmentPToken, unsigned int xRegion, unsigned int sRegion
 ) {
-/*****  If POP-Vector's ptoken is a chain terminator, Nothing to do  *****/
-    M_CPD* pTokenCPD;
-    rtPTOKEN_IsntCurrent (cpd, xPToken, pTokenCPD);
-    if (IsNil (pTokenCPD))
-        return cpd;
+#define AlignmentInsertMacro(origin, shift)\
+    AlignmentInsertDeleteMacroBody (origin, shift)
 
-/*****  Obtain the constructor  *****/
-    rtPTOKEN_CType *ptConstructor = rtPTOKEN_CPDCumAdjustments (pTokenCPD);
+#define AlignmentDeleteMacro(origin, shift)\
+    AlignmentInsertDeleteMacroBody (origin, shift)
+
+#define AlignmentInsertDeleteMacroBody(origin, shift)\
+    ShiftContainerTail (\
+	reinterpret_cast<pointer_t>(element(xRegion + origin)),\
+	(sRegion - origin) * sizeof (M_POP),\
+	(ptrdiff_t)(shift) * sizeof (M_POP),\
+	true,\
+	InitializePOPs,\
+	shift,\
+	origin\
+    );\
+    sRegion += shift;\
+    adjustElementCountBy (shift)
+
+/*****  If POP-Vector's ptoken is a chain terminator, Nothing to do  *****/
+    rtPTOKEN_CType *ptConstructor;
+    if (isTerminal (element(xAlignmentPToken), ptConstructor))
+        return false;
 
 /*****  ...enable modification of the popvector, ...  *****/
-    cpd->EnableModifications ();
-    cpd->CheckConsistency ();
-    POPVECTOR_CPD_IsInconsistent (cpd) = true;
+    EnableModifications ();
+    CheckConsistency ();
+    setIsInconsistent ();
 
 /*****  Do the normalization  *****/
     rtPTOKEN_BTraverseAdjustments (
@@ -301,14 +305,17 @@ PublicFnDef M_CPD* POPVECTOR_Align (
     );
 
 /*****  Update the the POP-Vector's P-Token  *****/
-    cpd->StoreReference (xPToken, ptConstructor->NextGeneration ());
+    StoreReference (xAlignmentPToken, ptConstructor->NextGeneration ());
 
 /*****  Cleanup  *****/
-    POPVECTOR_CPD_IsInconsistent (cpd) = false;
-    pTokenCPD->release ();
+    clearIsInconsistent ();
     ptConstructor->discard ();
 
-    return cpd;
+    return true;
+
+#undef AlignmentInsertMacro
+#undef AlignmentDeleteMacro
+#undef AlignmentInsertDeleteMacroBody
 }
 
 

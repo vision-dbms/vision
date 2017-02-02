@@ -37,6 +37,13 @@
 #include "Vsa_IPoolEvaluation.h"
 
 #include "Vsa_VEvaluatorClient.h"
+#include "VTransientServices.h"
+
+#include "cam.h"
+
+#include "Vca_VNotifier.h"
+
+extern     Vca::VGoferInterface<Vca::IInfoServer>::Reference g_pInfoServerGofer;
 
 
 /***************************************
@@ -147,6 +154,7 @@ namespace Vsa {
     //  Value Callbacks
     protected:
 	void OnError_(IError* pInterface, VString const& rMessage);
+	void OnResultError (IError* pInterface, VString const& rMessage);
     private:
 	void OnEvaluator (IEvaluator* pEvaluator);
 
@@ -174,6 +182,8 @@ namespace Vsa {
 	void monitorInterface (IVUnknown* pInterface);
 	void cancelInterfaceMonitor();
 	void signalInterfaceMonitor ();
+	void cancelResultMonitor();
+	void signalResultMonitor ();
 
     //  Update
     private:
@@ -185,12 +195,14 @@ namespace Vsa {
 	VString			const	m_iPath;
 	VString			const	m_iQuery;
 	interface_monitor_t::Reference	m_pInterfaceMonitor;
+	interface_monitor_t::Reference	m_pResultMonitor;
 	IEvaluationResult::Reference	m_pResult;
 	VString				m_iOutput;
 	VString				m_iTiming;
 	TimingOutput::Reference		m_pTimingOutput;
 	bool				m_bTimingRequested;
 	bool				m_bTimingValid;
+        CAM::Operation                  m_iCamOp;
     };
 }
 
@@ -209,6 +221,11 @@ Vsa::VPrompt::QueryOutput::QueryOutput (VPrompt* pPrompt, VString const& rPath, 
     , m_bTimingRequested(false)
     , m_bTimingValid	(false)
 {
+    m_iCamOp = (StreamCapture() << "file" << __FILE__ << "line" << __LINE__ 
+        << "label" << "Vsa::VPrompt::QueryOutput::QueryOutput"
+    );
+    m_iCamOp.detachFromCamStack();
+
     aggregate (pPrompt->queryRoleGofer ());
 
     retain (); {
@@ -269,7 +286,7 @@ void Vsa::VPrompt::QueryOutput::requestTimingReport () {
 	    new StringReceiver (this, &ThisClass::onTimingReport, &ThisClass::onTimingReportEnd, &ThisClass::onTimingReportError)
 	);
 
-	monitorInterface (m_pResult);
+	m_pResultMonitor.setTo (new interface_monitor_t (this, &ThisClass::signalResultMonitor, m_pResult));
 	m_pResult->GetTimingReport (pTimingReportReceiver);
     }
 }
@@ -277,7 +294,7 @@ void Vsa::VPrompt::QueryOutput::requestTimingReport () {
 void Vsa::VPrompt::QueryOutput::onTimingReport (
     StringReceiver *pRole, VString const &rTimingReport
 ) {
-    cancelInterfaceMonitor ();
+    cancelResultMonitor ();
     m_iTiming.setTo (rTimingReport);
     satisfyTimingOutput ();
 }
@@ -285,11 +302,11 @@ void Vsa::VPrompt::QueryOutput::onTimingReport (
 void Vsa::VPrompt::QueryOutput::onTimingReportError (
     StringReceiver *pRole, IError* pInterface, VString const& rMessage
 ) {
-    cancelInterfaceMonitor ();
+    cancelResultMonitor ();
 }
 
 void Vsa::VPrompt::QueryOutput::onTimingReportEnd (StringReceiver *pRole) {
-    cancelInterfaceMonitor ();
+    cancelResultMonitor ();
 }
 
 void Vsa::VPrompt::QueryOutput::satisfyTimingOutput () {
@@ -319,7 +336,20 @@ void Vsa::VPrompt::QueryOutput::cancelInterfaceMonitor () {
 }
 
 void Vsa::VPrompt::QueryOutput::signalInterfaceMonitor () {
+    notify (18, "#18: Vsa::VPrompt: pool/batchvision this vprompt was connected to is gone\n");
     OnError_(0, "Disconnected");
+}
+
+void Vsa::VPrompt::QueryOutput::cancelResultMonitor () {
+    interface_monitor_t::Reference pResultMonitor;
+    pResultMonitor.claim (m_pResultMonitor);
+    if (pResultMonitor)
+	pResultMonitor->cancel ();
+}
+
+void Vsa::VPrompt::QueryOutput::signalResultMonitor () {
+    notify (18, "#18: Vsa::VPrompt: Evaluation result monitor is signaled.\n");
+    OnResultError (0, "Result no longer available.");
 }
 
 /********************
@@ -355,6 +385,26 @@ void Vsa::VPrompt::QueryOutput::OnError_(
 
     m_iOutput.setTo (rMessage);
     satisfyTimingOutput ();
+    if (m_pPrompt->exitOnError ()) {
+	fprintf (stderr, "%s\n", rMessage.content ());
+	fflush (stderr);
+	Vca::Exit (V::ExitErrorCode ());
+    }
+    else
+	setStatusToAvailable ();
+}
+
+void Vsa::VPrompt::QueryOutput::OnResultError (
+    IError *pInterface, VString const &rMessage
+) {
+    cancelResultMonitor ();
+
+    VEvaluatorClient::onFailure (pInterface, rMessage);
+
+    display ("\nOnResultError: %s\n", rMessage.content ());
+
+    m_iOutput.setTo (rMessage);
+    satisfyTimingOutput ();
     setStatusToAvailable ();
 }
 
@@ -367,6 +417,11 @@ void Vsa::VPrompt::QueryOutput::OnEvaluator (IEvaluator* pEvaluator) {
  ******************/
 
 void Vsa::VPrompt::QueryOutput::OnAccept_(IEvaluation *pEvaluation, Vca::U32 xQueuePosition) {
+    CAM_OPERATION(co) << "message" << 
+        "Vsa::VPrompt::QueryOutput::OnAccept_ queue position %queuePosition" << xQueuePosition
+    ;
+    co.stitchParent(&m_iCamOp);
+
     IPoolEvaluation::Reference const pPoolEvaluation (dynamic_cast <IPoolEvaluation*> (pEvaluation));
     if (pPoolEvaluation && m_pPrompt->usingAnyData ()) {
 	pPoolEvaluation->UseAnyGenerationWorker ();
@@ -374,6 +429,9 @@ void Vsa::VPrompt::QueryOutput::OnAccept_(IEvaluation *pEvaluation, Vca::U32 xQu
 }
 
 void Vsa::VPrompt::QueryOutput::OnResult_(IEvaluationResult *pResult, VString const &rOutput) {
+    CAM_OPERATION(co) << "message" << "receiving query result of size %size" << rOutput.length();
+    co.stitchParent(&m_iCamOp);
+
     cancelInterfaceMonitor ();
 
     VEvaluatorClient::onSuccess ();
@@ -479,7 +537,8 @@ Vsa::VPrompt::VPrompt (
     m_pEvaluatorGofer		(pEvaluatorGofer),
     m_pOutputSequencer		(new Sequencer (pStreamToPeer)),
     m_bUsingExtendedPrompts	(commandSwitchValue ("E")),
-    m_bUsingAnyData		(commandSwitchValue ("anyData"))
+    m_bUsingAnyData		(commandSwitchValue ("anyData")),
+    m_bExitOnError              (commandSwitchValue ("exitOnError", "VPromptExitOnError"))
 {
     retain (); {
 	m_pOutputSequencer->onEndTrigger (new CallbackTrigger(this, &ThisClass::onEndTrigger));
@@ -607,6 +666,7 @@ void Vsa::VPrompt::outputPrompt () const {
 }
 
 void Vsa::VPrompt::outputQuery (VString const &rQuery) {
+    CAM_OPERATION(co) << "message" << "running query: %query" << rQuery;
     m_pLastQuery.setTo (new QueryOutput (this, m_iPath, rQuery));
 }
 

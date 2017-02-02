@@ -24,6 +24,7 @@
  *****  Supporting  *****
  ************************/
 
+#include "Vca.h"
 #include "Vca_CompilerHappyPill.h"
 
 #include "Vca_VBSConsumer.h"
@@ -88,7 +89,6 @@ namespace Vca {
 
 namespace {
     Vca::counter_t g_xNextIndex;
-    bool g_bAtExit = false;
     bool g_bHalted = false;
 }
 
@@ -470,7 +470,7 @@ void Vca::VCohort::ProcessorRequest::process () {
 	if (iManager.attachCohortEvents ()) {
 	    do {
 		iManager.doEvents (Vca_InfiniteWait);
-	    } while (m_pCohort->needsTending () && !g_bHalted && (!g_bAtExit || m_pCohort->isntVca ())); // If the process is exiting and this loop is processing the Vca cohort, we exit the loop, so that the exit handler can pick up the Vca cohort and process the exit events within.
+	    } while (m_pCohort->needsTending () && !g_bHalted && (!isAtExit () || m_pCohort->isntVca ())); // If the process is exiting and this loop is processing the Vca cohort, we exit the loop, so that the exit handler can pick up the Vca cohort and process the exit events within.
 	}
     }
 }
@@ -517,10 +517,10 @@ Vca::VCohort::Reference Vca::VCohort::g_pVcaCohort;
 
 extern "C" {
     static void AtExitHandler () {
-	if (g_bAtExit)	// ... only do this once.
+	if (Vca::isAtExit ())	// ... only do this once.
 	    return;
 
-	g_bAtExit = true;
+	Vca::setAtExit ();
 
 	if (Vca::ExitCalled ()) {
 	    g_bHalted = true;

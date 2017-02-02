@@ -902,6 +902,7 @@ namespace Vca {
 		.addProperty ("exportCount"                   , &ThisClass::exportCount)
 		.addProperty ("exportedInterfaceCount"        , &ThisClass::exportedInterfaceCount)
 		.addProperty ("instantiatedInterfaceCount"    , &ThisClass::instantiatedInterfaceCount)
+		.addProperty ("referencedInterfaceCount"      , &ThisClass::referencedInterfaceCount)
 		.addProperty ("roleCount"                     , &ThisClass::roleCount)
 		.addProperty ("hasInstantiatedInterfaces"     , &ThisClass::hasInstantiatedInterfaces)
 		.addProperty ("hasExportedInterfaces"         , &ThisClass::hasExportedInterfaces)
@@ -1074,6 +1075,14 @@ Vca::VRoleHolder::count_t Vca::VRolePlayer::instantiatedInterfaceCount () const 
     VRoleHolder::count_t cResult = 0;
     for (VRoleHolder::Pointer pRoleHolder (m_pRoleHolders); pRoleHolder; pRoleHolder.setTo (pRoleHolder->successor ()))
 	if (pRoleHolder->isInstantiated_())
+	    cResult++;
+    return cResult;
+}
+
+Vca::VRoleHolder::count_t Vca::VRolePlayer::referencedInterfaceCount () const {
+    VRoleHolder::count_t cResult = 0;
+    for (VRoleHolder::Pointer pRoleHolder (m_pRoleHolders); pRoleHolder; pRoleHolder.setTo (pRoleHolder->successor ()))
+	if (pRoleHolder->isReferenced_())
 	    cResult++;
     return cResult;
 }

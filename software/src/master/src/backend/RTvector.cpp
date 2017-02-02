@@ -48,13 +48,6 @@
 
 #include "VDescriptor.h"
 #include "VFragment.h"
-
-/*****  Forward Declarations  *****/
-PrivateFnDef int LocateOrAddVectorSegment (
-    M_CPD *pVector, M_CPD *pStore, RTYPE_Type xRType, M_CPD *pRPTRef, int xRPTRef, bool set
-);
-
-PrivateFnDef void ExpandUSegArray (M_CPD *vector, size_t growthIncrement);
 
 
 /*******************************************
@@ -79,7 +72,7 @@ PrivateVarDef rtVECTOR_USDType const *USISortUSDArray;
  *	 1	if VStorePOP (i1) >  VStorePOP (i2)
  *
  *****/
-PrivateFnDef int __cdecl USISortPredicate (int const *i1, int const *i2) {
+static int __cdecl USISortPredicate (int const *i1, int const *i2) {
     return M_ComparePOPs (
 	rtVECTOR_USD_VStore (USISortUSDArray + *i1),
 	rtVECTOR_USD_VStore (USISortUSDArray + *i2)
@@ -102,6 +95,37 @@ PrivateFnDef int __cdecl USISortPredicate (int const *i1, int const *i2) {
  ***************************/
 
 DEFINE_CONCRETE_RTT (rtVECTOR_Handle);
+
+/******************************
+ ******************************
+ *****  Canonicalization  *****
+ ******************************
+ ******************************/
+
+bool rtVECTOR_Handle::getCanonicalization_(rtVSTORE_Handle::Reference &rpStore, DSC_Pointer const &rPointer) {
+    rpStore.setTo (static_cast<rtVSTORE_Handle*>(KOT ()->TheFixedPropertyClass.ObjectHandle ()));
+    return true;
+}
+
+/*********************
+ *********************
+ *****  Cloning  *****
+ *********************
+ *********************/
+
+void rtVECTOR_Handle::clone (Reference &rpResult, rtPTOKEN_Handle *pPPT) const {
+    rpResult.setTo (new rtVECTOR_Handle (pPPT, isASet ()));
+}
+
+/************************
+ ************************
+ *****  Dictionary  *****
+ ************************
+ ************************/
+
+rtDICTIONARY_Handle *rtVECTOR_Handle::getDictionary_(DSC_Pointer const &rPointer) const {
+    return static_cast<rtDICTIONARY_Handle*>(TheFixedPropertyClassDictionary().ObjectHandle ());
+}
 
 
 /**************************************
@@ -199,82 +223,36 @@ PrivateVarDef unsigned int
  *****  Creation  *****
  **********************/
 
-PrivateFnDef M_CPD *NewUVector (
-    RTYPE_Type xRType, M_CPD *pPPT, M_CPD *rptRefCPD, int rptRefIndex
-) {
+PrivateFnDef M_CPD *NewUVector (RTYPE_Type xRType, rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT) {
     switch (xRType) {
     case RTYPE_C_CharUV:
-	return rtCHARUV_New	(pPPT, rptRefCPD, rptRefIndex);
+	return rtCHARUV_New	(pPPT, pRPT);
     case RTYPE_C_DoubleUV:
-	return rtDOUBLEUV_New	(pPPT, rptRefCPD, rptRefIndex);
+	return rtDOUBLEUV_New	(pPPT, pRPT);
     case RTYPE_C_FloatUV:
-	return rtFLOATUV_New	(pPPT, rptRefCPD, rptRefIndex);
+	return rtFLOATUV_New	(pPPT, pRPT);
     case RTYPE_C_IntUV:
-	return rtINTUV_New	(pPPT, rptRefCPD, rptRefIndex);
+	return rtINTUV_New	(pPPT, pRPT);
     case RTYPE_C_RefUV:
     case RTYPE_C_Link:
-	return rtREFUV_New	(pPPT, rptRefCPD, rptRefIndex);
+	return rtREFUV_New	(pPPT, pRPT);
     case RTYPE_C_UndefUV:
-	return rtUNDEFUV_New	(pPPT, rptRefCPD, rptRefIndex);
+	return rtUNDEFUV_New	(pPPT, pRPT);
     case RTYPE_C_Unsigned64UV:
-	return rtU64UV_New	(pPPT, rptRefCPD, rptRefIndex);
+	return rtU64UV_New	(pPPT, pRPT);
     case RTYPE_C_Unsigned96UV:
-	return rtU96UV_New	(pPPT, rptRefCPD, rptRefIndex);
+	return rtU96UV_New	(pPPT, pRPT);
     case RTYPE_C_Unsigned128UV:
-	return rtU128UV_New	(pPPT, rptRefCPD, rptRefIndex);
+	return rtU128UV_New	(pPPT, pRPT);
     default:
 	ERR_SignalFault (
 	    EC__UnknownUVectorRType, UTIL_FormatMessage (
-		"NewUVector: Unsupported U-Vector Type '%s'",
-		RTYPE_TypeIdAsString (xRType)
+		"NewUVector: Unsupported U-Vector Type '%s'", RTYPE_TypeIdAsString (xRType)
 	    )
 	);
     }  /* End of Type Switch */
 
     return NilOf (M_CPD*);
-}
-
-
-/***********************
- *****  Alignment  *****
- ***********************/
-
-PrivateFnDef void AlignUVector (M_CPD *uvector) {
-    switch (M_CPD_RType (uvector)) {
-    case RTYPE_C_CharUV:
-	rtCHARUV_Align (uvector);
-	break;
-    case RTYPE_C_DoubleUV:
-	rtDOUBLEUV_Align (uvector);
-	break;
-    case RTYPE_C_FloatUV:
-	rtFLOATUV_Align (uvector);
-	break;
-    case RTYPE_C_IntUV:
-	rtINTUV_Align (uvector);
-	break;
-    case RTYPE_C_RefUV:
-	rtREFUV_Align (uvector);
-	break;
-    case RTYPE_C_UndefUV:
-	rtUNDEFUV_Align (uvector);
-	break;
-    case RTYPE_C_Unsigned64UV:
-	rtU64UV_Align (uvector);
-	break;
-    case RTYPE_C_Unsigned96UV:
-	rtU96UV_Align (uvector);
-	break;
-    case RTYPE_C_Unsigned128UV:
-	rtU128UV_Align (uvector);
-	break;
-    default:
-	ERR_SignalFault (
-	    EC__InternalInconsistency,
-	    "AlignUVector: Unknown usegment type"
-	);
-	break;
-    }
 }
 
 
@@ -287,138 +265,107 @@ PrivateFnDef void AlignUVector (M_CPD *uvector) {
  *****  into the appropriate locations of a target U-Segment.
  *
  *  Arguments:
- *	targetUVector		- a standard CPD for the target u-vector.  This
- *				  argument can be 'Nil' - if it is, the next
- *				  two arguments will be used to access the
- *				  u-vector to update.
- *	targetVector		- a standard CPD for the target vector.
- *	targetUSegment		- the index of the target U-Segment.
- *	subscriptPosition	- the position in the target U-Segment to be 
+ *	rpTarget		- a standard CPD for the target u-vector.  This
+ *				  argument can be 'Nil'.  If it is, the u-vector
+ *				  will be accessed from the vector.
+ *	xTarget			- the index of the target U-Segment.
+ *	xSubscript		- the position in the target U-Segment to be 
  *				  changed.
- *	sourceDescriptor	- a variable of type 'DSC_Descriptor *'
- *                                supplying the new values.
- *
- *  Returns:
- *	'targetUVector'
+ *	rSource			- the new values.
  *
  *****/
-PrivateFnDef M_CPD *AtUVOffsetPutDescriptor (
-    M_CPD		*targetUVector,
-    M_CPD		*targetVector,
-    int			 targetUSegment,
-    int			 offset,
-    DSC_Descriptor	*sourceDescriptor
+void rtVECTOR_Handle::setSegmentValuesTo (
+    M_CPD *&rpTarget, unsigned int xTarget, unsigned int xSubscript, DSC_Descriptor &rSource
 ) {
     static char const *const Routine = "AtUVOffsetPutDescriptor";
 
-/*****  Obtain a CPD for the target u-vector...  *****/
-    if (IsNil (targetUVector)) {
-	rtVECTOR_CPD_USD (targetVector) =
-	    rtVECTOR_CPD_USegArray (targetVector) + targetUSegment;
-	rtVECTOR_CPD_SetUSDCursor (targetVector, rtVECTOR_USD_Values);
-	targetUVector = targetVector->GetCPD (rtVECTOR_CPx_USDCursor);
+/*****  Obtain the target u-vector...  *****/
+    if (IsNil (rpTarget)) {
+	rpTarget = segmentPointerCPD (xTarget);
     }
 
 /*****  ... and update it:  *****/
-    switch (sourceDescriptor->pointerType ()) {
+    switch (rSource.pointerType ()) {
     default:
-	sourceDescriptor->complainAboutBadPointerType (Routine);
+	rSource.complainAboutBadPointerType (Routine);
 	break;
     case DSC_PointerType_Empty:
 	DSC__ComplainAboutEmptyPtrType (Routine);
 	break;
     case DSC_PointerType_Scalar:
-	switch (DSC_Scalar_RType (DSC_Descriptor_Scalar (*sourceDescriptor))) {
+	rpTarget->align ();
+	switch (DSC_Descriptor_Scalar (rSource).RType ()) {
 	case RTYPE_C_CharUV:
-	    rtCHARUV_Align (targetUVector);
-	    targetUVector->EnableModifications ();
-	    rtCHARUV_CPD_Array (targetUVector)[offset] =
-		DSC_Scalar_Char (DSC_Descriptor_Scalar (*sourceDescriptor));
+	    rpTarget->EnableModifications ();
+	    rtCHARUV_CPD_Array (rpTarget)[xSubscript] =
+		DSC_Scalar_Char (DSC_Descriptor_Scalar (rSource));
 	    break;
 	case RTYPE_C_DoubleUV:
-	    rtDOUBLEUV_Align (targetUVector);
-	    targetUVector->EnableModifications ();
-	    rtDOUBLEUV_CPD_Array (targetUVector)[offset] =
-		DSC_Scalar_Double (DSC_Descriptor_Scalar (*sourceDescriptor));
+	    rpTarget->EnableModifications ();
+	    rtDOUBLEUV_CPD_Array (rpTarget)[xSubscript] =
+		DSC_Scalar_Double (DSC_Descriptor_Scalar (rSource));
 	    break;
 	case RTYPE_C_FloatUV:
-	    rtFLOATUV_Align (targetUVector);
-	    targetUVector->EnableModifications ();
-	    rtFLOATUV_CPD_Array (targetUVector)[offset] =
-		DSC_Scalar_Float (DSC_Descriptor_Scalar (*sourceDescriptor));
+	    rpTarget->EnableModifications ();
+	    rtFLOATUV_CPD_Array (rpTarget)[xSubscript] =
+		DSC_Scalar_Float (DSC_Descriptor_Scalar (rSource));
 	    break;
 	case RTYPE_C_IntUV:
-	    rtINTUV_Align (targetUVector);
-	    targetUVector->EnableModifications ();
-	    rtINTUV_CPD_Array (targetUVector)[offset] =
-		DSC_Scalar_Int (DSC_Descriptor_Scalar (*sourceDescriptor));
+	    rpTarget->EnableModifications ();
+	    rtINTUV_CPD_Array (rpTarget)[xSubscript] =
+		DSC_Scalar_Int (DSC_Descriptor_Scalar (rSource));
 	    break;
 	case RTYPE_C_RefUV:
-	    rtREFUV_Align (targetUVector);
-	    rtREFUV_AlignReference (&DSC_Descriptor_Scalar (*sourceDescriptor));
-	    targetUVector->EnableModifications ();
-	    rtREFUV_CPD_Array (targetUVector)[offset] =
-		DSC_Scalar_Int (DSC_Descriptor_Scalar (*sourceDescriptor));
+	    rtREFUV_AlignReference (&DSC_Descriptor_Scalar (rSource));
+	    rpTarget->EnableModifications ();
+	    rtREFUV_CPD_Array (rpTarget)[xSubscript] =
+		DSC_Scalar_Int (DSC_Descriptor_Scalar (rSource));
 	    break;
 	case RTYPE_C_UndefUV:
-	    rtUNDEFUV_Align (targetUVector);
 	    break;
 	case RTYPE_C_Unsigned64UV:
-	    rtU64UV_Align (targetUVector);
-	    targetUVector->EnableModifications ();
-	    rtU64UV_CPD_Array (targetUVector)[offset] =
-		DSC_Scalar_Unsigned64 (DSC_Descriptor_Scalar (*sourceDescriptor));
+	    rpTarget->EnableModifications ();
+	    rtU64UV_CPD_Array (rpTarget)[xSubscript] =
+		DSC_Scalar_Unsigned64 (DSC_Descriptor_Scalar (rSource));
 	    break;
 	case RTYPE_C_Unsigned96UV:
-	    rtU96UV_Align (targetUVector);
-	    targetUVector->EnableModifications ();
-	    rtU96UV_CPD_Array (targetUVector)[offset] =
-		DSC_Scalar_Unsigned96 (DSC_Descriptor_Scalar (*sourceDescriptor));
+	    rpTarget->EnableModifications ();
+	    rtU96UV_CPD_Array (rpTarget)[xSubscript] =
+		DSC_Scalar_Unsigned96 (DSC_Descriptor_Scalar (rSource));
 	    break;
 	case RTYPE_C_Unsigned128UV:
-	    rtU128UV_Align (targetUVector);
-	    targetUVector->EnableModifications ();
-	    rtU128UV_CPD_Array (targetUVector)[offset] =
-		DSC_Scalar_Unsigned128 (DSC_Descriptor_Scalar (*sourceDescriptor));
+	    rpTarget->EnableModifications ();
+	    rtU128UV_CPD_Array (rpTarget)[xSubscript] =
+		DSC_Scalar_Unsigned128 (DSC_Descriptor_Scalar (rSource));
 	    break;
 	default:
-	    targetUVector->release ();
+	    rpTarget->release ();
 	    ERR_SignalFault (
 		EC__UnknownUVectorRType, UTIL_FormatMessage (
 		    "%s: Unsupported Scalar R-Type %s",
-		    Routine,
-		    RTYPE_TypeIdAsString (
-			DSC_Scalar_RType (DSC_Descriptor_Scalar (*sourceDescriptor))
-		    )
+		    Routine, RTYPE_TypeIdAsString (DSC_Descriptor_Scalar (rSource).RType ())
 		)
 	    );
 	    break;
 	}
 	break;
     case DSC_PointerType_Identity:
-	rtREFUV_Align (targetUVector);
-	targetUVector->EnableModifications ();
-	rtREFUV_CPD_Array (targetUVector)[offset] = rtPTOKEN_CPD_BaseElementCount (
-	    DSC_Descriptor_Identity (*sourceDescriptor).PToken ()
-	) - 1;
+	rpTarget->EnableModifications ();
+	rtREFUV_CPD_Array (rpTarget)[xSubscript] = DSC_Descriptor_Identity (rSource).PToken ()->cardinality () - 1;
 	break;
     case DSC_PointerType_Value:
     case DSC_PointerType_Link:
     case DSC_PointerType_Reference: {
-	    M_CPD *sourcePPTRefCPD; int sourcePPTRefIndex;
-	    sourceDescriptor->getPPTReference (sourcePPTRefCPD, sourcePPTRefIndex);
-	    rtLINK_CType *subscriptLC = rtLINK_AppendRange (
-		rtLINK_RefConstructor (targetUVector, UV_CPx_PToken), offset, 1
-	    )->Close (sourcePPTRefCPD, sourcePPTRefIndex);
-	    sourcePPTRefCPD->release ();
+	    rtPTOKEN_Handle::Reference pSourcePPT (rSource.PPT ());
+	    rtLINK_CType *pSubscript = rtLINK_AppendRange (
+		rtLINK_RefConstructor (rpTarget, UV_CPx_PToken), xSubscript, 1
+	    )->Close (pSourcePPT);
 
-	    sourceDescriptor->assignToUV (subscriptLC, targetUVector);
-	    subscriptLC->release ();
+	    rSource.assignToUV (pSubscript, rpTarget);
+	    pSubscript->release ();
 	}
 	break;
     }
-
-    return targetUVector;
 }
 
 
@@ -427,42 +374,25 @@ PrivateFnDef M_CPD *AtUVOffsetPutDescriptor (
  *****  into the appropriate locations of a target U-Segment.
  *
  *  Arguments:
- *	targetUVector		- a standard CPD for the target u-vector.  This
- *				  argument can be 'Nil' - if it is, the next
- *				  two arguments will be used to access the
- *				  u-vector to update.
- *	targetVector		- a standard CPD for the target vector.
- *	targetUSegment		- the index of the target U-Segment.
- *	subscriptLC		- a link constructor specifying the elements of
+ *	rpTarget		- a standard CPD for the target u-vector.  This
+ *				  argument can be 'Nil'.  If it is, the u-vector
+ *				  will be accessed from the vector.
+ *	xTarget			- the index of the target U-Segment.
+ *	pSubscript		- a link constructor specifying the elements of
  *				  the target U-Segment to be changed.
- *	sourceDescriptor	- a variable of type 'DSC_Descriptor *'
- *                                supplying the new values.
- *
- *  Returns:
- *	'targetUVector'
+ *	rSource			- the new values.
  *
  *****/
-PrivateFnDef M_CPD *AtUVLinkCPositionsPutDescriptor (
-    M_CPD		*targetUVector,
-    M_CPD		*targetVector,
-    int			 targetUSegment,
-    rtLINK_CType	*subscriptLC,
-    DSC_Descriptor	*sourceDescriptor
-)
-{
-/*****  Obtain a CPD for the target u-vector...  *****/
-    if (IsNil (targetUVector)) {
-	rtVECTOR_CPD_USD (targetVector) =
-	    rtVECTOR_CPD_USegArray (targetVector) + targetUSegment;
-	rtVECTOR_CPD_SetUSDCursor (targetVector, rtVECTOR_USD_Values);
-	targetUVector = targetVector->GetCPD (rtVECTOR_CPx_USDCursor);
+void rtVECTOR_Handle::setSegmentValuesTo (
+    M_CPD *&rpTarget, unsigned int xTarget, rtLINK_CType *pSubscript, DSC_Descriptor &rSource
+) {
+/*****  Obtain the target u-vector...  *****/
+    if (IsNil (rpTarget)) {
+	rpTarget = segmentPointerCPD (xTarget);
     }
 
 /***** Do the assignment ... *****/
-    sourceDescriptor->assignToUV (subscriptLC, targetUVector);
-
-/*****  ...and return.  *****/
-    return targetUVector;
+    rSource.assignToUV (pSubscript, rpTarget);
 }
 
 
@@ -471,78 +401,61 @@ PrivateFnDef M_CPD *AtUVLinkCPositionsPutDescriptor (
  *****  appropriate locations of a target U-Segment.
  *
  *  Arguments:
- *	targetUVector		- a standard CPD for the target u-vector.  This
- *				  argument can be 'Nil' - if it is, the next
- *				  two arguments will be used to access the
- *				  u-vector to update.
- *	targetVector		- a standard CPD for the target vector.
- *	targetUSegment		- the index of the target U-Segment.
- *	subscriptLC		- a link constructor specifying the elements of
+ *	rpTarget		- a standard CPD for the target u-vector.  This
+ *				  argument can be 'Nil'.  If it is, the u-vector
+ *				  will be accessed from the vector.
+ *	xTarget			- the index of the target U-Segment.
+ *	pSubscript		- a link constructor specifying the elements of
  *				  the target U-Segment to be changed.
- *	sourceUVector		- a standard CPD for the source U-Vector.
- *
- *  Returns:
- *	'targetUVector'
+ *	pSource			- a standard CPD for the source U-Vector.
  *
  *****/
-PrivateFnDef M_CPD *AtUVLinkCPositionsPutUV (
-    M_CPD		*targetUVector,
-    M_CPD		*targetVector,
-    int			 targetUSegment,
-    rtLINK_CType	*subscriptLC,
-    M_CPD		*sourceUVector
-)
-{
+void rtVECTOR_Handle::setSegmentValuesTo (
+    M_CPD *&rpTarget, unsigned int xTarget, rtLINK_CType *pSubscript, M_CPD *pSource
+) {
 /*****  Obtain a CPD for the target u-vector...  *****/
-    if (IsNil (targetUVector)) {
-	rtVECTOR_CPD_USD (targetVector) =
-	    rtVECTOR_CPD_USegArray (targetVector) + targetUSegment;
-	rtVECTOR_CPD_SetUSDCursor (targetVector, rtVECTOR_USD_Values);
-	targetUVector = targetVector->GetCPD (rtVECTOR_CPx_USDCursor);
+    if (IsNil (rpTarget)) {
+	rpTarget = segmentPointerCPD (xTarget);
     }
 
 /*****  ...perform a case specific assignment...  *****/
-    RTYPE_Type targetUVectorRType = (RTYPE_Type)M_CPD_RType (targetUVector);
-    switch (targetUVectorRType) {
+    switch (rpTarget->RType ()) {
     case RTYPE_C_CharUV:
-        rtCHARUV_LCAssign (targetUVector, subscriptLC, sourceUVector);
+        rtCHARUV_LCAssign (rpTarget, pSubscript, pSource);
 	break;
     case RTYPE_C_DoubleUV:
-        rtDOUBLEUV_LCAssign (targetUVector, subscriptLC, sourceUVector);
+        rtDOUBLEUV_LCAssign (rpTarget, pSubscript, pSource);
 	break;
     case RTYPE_C_FloatUV:
-        rtFLOATUV_LCAssign (targetUVector, subscriptLC, sourceUVector);
+        rtFLOATUV_LCAssign (rpTarget, pSubscript, pSource);
 	break;
     case RTYPE_C_IntUV:
-        rtINTUV_LCAssign (targetUVector, subscriptLC, sourceUVector);
+        rtINTUV_LCAssign (rpTarget, pSubscript, pSource);
 	break;
     case RTYPE_C_RefUV:
-        rtREFUV_LCAssign (targetUVector, subscriptLC, sourceUVector);
+        rtREFUV_LCAssign (rpTarget, pSubscript, pSource);
 	break;
     case RTYPE_C_UndefUV:
-	rtUNDEFUV_Align (targetUVector);
+	rpTarget->align ();
 	break;
     case RTYPE_C_Unsigned64UV:
-        rtU64UV_LCAssign (targetUVector, subscriptLC, sourceUVector);
+        rtU64UV_LCAssign (rpTarget, pSubscript, pSource);
 	break;
     case RTYPE_C_Unsigned96UV:
-        rtU96UV_LCAssign (targetUVector, subscriptLC, sourceUVector);
+        rtU96UV_LCAssign (rpTarget, pSubscript, pSource);
 	break;
     case RTYPE_C_Unsigned128UV:
-        rtU128UV_LCAssign (targetUVector, subscriptLC, sourceUVector);
+        rtU128UV_LCAssign (rpTarget, pSubscript, pSource);
 	break;
     default:
 	ERR_SignalFault (
 	    EC__UnimplementedCase, UTIL_FormatMessage (
 		"AtUVLinkCPositionsPutUV: Unsupported R-Type %s",
-		RTYPE_TypeIdAsString (targetUVectorRType)
+		rpTarget->RTypeName ()
 	    )
 	);
 	break;
     }
-
-/*****  ...and return.  *****/
-    return targetUVector;
 }
 
 
@@ -604,21 +517,16 @@ void rtVECTOR_CType::CompactUSDArray () {
  *	sUSDArray		- an initial size for the USDCr Index array.
  *
  *****/
-rtVECTOR_CType::rtVECTOR_CType (M_CPD *pPPT, unsigned int sUSDArray)
-: BaseClass		(1)
-, m_pPPT		(pPPT)
+rtVECTOR_CType::rtVECTOR_CType (rtPTOKEN_Handle *pPPT, unsigned int sUSDArray)
+: m_pPPT		(pPPT)
 , m_sUSDArray		(sUSDArray)
 , m_pUSDArray		(0)
-, m_fIsASet		(false)
+, m_bASet		(false)
 , m_iPMRDCount		(0)
 , m_pPMRDChainHead	(0)
 , m_pPMRDChainTail	(0)
 {
-    RTYPE_MustBeA ("rtVECTOR_CType::rtVECTOR_CType", M_CPD_RType (pPPT), RTYPE_C_PToken);
-
     AllocateVCCount++;
-
-    pPPT->retain ();
 
     MakeUSDArray ();
 
@@ -649,23 +557,22 @@ rtVECTOR_CType::rtVECTOR_CType (M_CPD *pPPT, unsigned int sUSDArray)
  *	  references.
  *
  *****/
-rtVECTOR_CType::rtVECTOR_CType (M_CPD *pVector)
-: BaseClass		(1)
-, m_pPPT		(rtVECTOR_CPD_RowPTokenCPD (rtVECTOR_Align (pVector)))
-, m_sUSDArray		(cardinality () > 0 ? rtVECTOR_CPD_USegArraySize (pVector) : 0)
+rtVECTOR_CType::rtVECTOR_CType (rtVECTOR_Handle *pVector)
+: m_pPPT		(pVector->alignedPToken ())
+, m_sUSDArray		(cardinality () > 0 ? pVector->segmentArraySize () : 0)
 , m_pUSDArray		(0)
-, m_fIsASet		(rtVECTOR_CPD_IsASet (pVector))
+, m_bASet		(pVector->isASet ())
 , m_iPMRDCount		(0)
 , m_pPMRDChainHead	(0)
 , m_pPMRDChainTail	(0)
 {
     ToConstructorCount++;
 
-    unsigned int *pRelocationArray;
+    unsigned int *pRelocationArray = 0;
     if (g_bPOPOrderingEnabled) {
 	pRelocationArray = (unsigned int *)allocate (m_sUSDArray * sizeof (unsigned int));
-	int *pUSegIndex = rtVECTOR_CPD_USegIndex (pVector);
-	m_sUSDArray = rtVECTOR_CPD_USegIndexSize (pVector);
+	int const *pUSegIndex = pVector->segmentIndex ();
+	m_sUSDArray = pVector->segmentIndexSize ();
 	for (unsigned int x = 0; x < m_sUSDArray; x++) {
 	    pRelocationArray [*pUSegIndex++] = x;
 	}
@@ -673,32 +580,23 @@ rtVECTOR_CType::rtVECTOR_CType (M_CPD *pVector)
     MakeUSDArray ();
 
     /*****  Copy the USDArray...  *****/
-    for (unsigned int xUSDC = 0; xUSDC < m_sUSDArray; xUSDC++) {
-	unsigned int xUSegment;
-	xUSegment = g_bPOPOrderingEnabled ? rtVECTOR_CPD_USegIndex (pVector)[xUSDC] : xUSDC;
-	/* position the vector to the current USD */
-	rtVECTOR_CPD_USD (pVector) = rtVECTOR_CPD_USegArray (pVector) + xUSegment;
-
-	/* copy the UVector into the new USDC */
-	rtVECTOR_CPD_SetUSDCursor (pVector, rtVECTOR_USD_Values);
-	if (pVector->ReferenceIsntNil (rtVECTOR_CPx_USDCursor)) {
-	    M_CPD *pPointer= pVector->GetCPD (rtVECTOR_CPx_USDCursor);
-
+    for (unsigned int xSegment = 0; xSegment < m_sUSDArray; xSegment++) {
+	unsigned int const xUSegment = g_bPOPOrderingEnabled ? pVector->segmentIndexElement (xSegment) : xSegment;
+	if (pVector->segmentInUse (xUSegment)) {
 	    /* copy the VStore into the new USDC */
-	    rtVECTOR_CPD_SetUSDCursor (pVector, rtVECTOR_USD_VStore);
-	    M_CPD *pStore= pVector->GetCPD (rtVECTOR_CPx_USDCursor);
+	    Vdd::Store::Reference pStore;
+	    pVector->getSegmentStore (pStore, xUSegment);
 
 	    /* copy the PToken into the new USDC */
-	    rtVECTOR_CPD_SetUSDCursor (pVector, rtVECTOR_USD_PToken);
-	    M_CPD *pPPT = pVector->GetCPD (rtVECTOR_CPx_USDCursor, RTYPE_C_PToken);
-
-	    NewUSDC (xUSDC, pStore, pPointer, pPPT);
+	    NewUSDC (
+		xSegment, pStore, pVector->segmentPointerCPD (xUSegment), pVector->segmentPTokenHandle (xUSegment)
+	    );
 	}
     }
 
     /***** Copy the PMap... *****/
-    rtVECTOR_PMRDType const *pPMRD = rtVECTOR_CPD_PMap (pVector);
-    rtVECTOR_PMRDType const *const pPMRDLimit = pPMRD + rtVECTOR_CPD_PMapSize (pVector);
+    rtVECTOR_PMRDType const *pPMRD = pVector->pmap ();
+    rtVECTOR_PMRDType const *const pPMRDLimit = pPMRD + pVector->pmapSize ();
     if (g_bPOPOrderingEnabled) {
 	while (pPMRD < pPMRDLimit) {
 	    AppendPMRD (
@@ -718,7 +616,7 @@ rtVECTOR_CType::rtVECTOR_CType (M_CPD *pVector)
     if (TracingVCAllocator) IO_printf (
 	"...rtVECTOR_ToConstructor: VC:%08X created.\n", this
     );
-}
+} 
 
 
 /*************************
@@ -731,12 +629,8 @@ rtVECTOR_USDC::~rtVECTOR_USDC () {
     if (m_pAssociatedLink)
 	m_pAssociatedLink->release ();
 
-    if (m_pStore)
-	m_pStore->release ();
     if (m_pPointer)
 	m_pPointer->release ();
-    if (m_pPPT)
-	m_pPPT->release ();
 }
 
 rtVECTOR_CType::~rtVECTOR_CType () {
@@ -757,10 +651,6 @@ rtVECTOR_CType::~rtVECTOR_CType () {
 /***** Free the Index array ... *****/
     if (m_pUSDArray)
 	deallocate (m_pUSDArray);
-
-/***** Free the ptoken ... *****/
-    if (m_pPPT)
-	m_pPPT->release ();
 
 /***** And free the constructor ... *****/
     FreeVCCount++;
@@ -784,7 +674,7 @@ rtVECTOR_CType::~rtVECTOR_CType () {
  *****/
 void rtVECTOR_CType::Align () {
 /*****  Do nothing if the vector is already current...  *****/
-    if (rtPTOKEN_IsCurrent (m_pPPT, -1))
+    if (m_pPPT->isTerminal ())
 	return;
 
 /*****  Otherwise complain about an unimplemented case for now...  *****/
@@ -860,7 +750,7 @@ void rtVECTOR_CType::MakeConstructorLinks () {
  *	found.
  *
  ******/
-rtLINK_CType *rtVECTOR_CType::subsetInStore (M_CPD *pStore, VDescriptor *pValueReturn) {
+rtLINK_CType *rtVECTOR_CType::subsetInStore (Vdd::Store *pStore, VDescriptor *pValueReturn) {
     VCSubsetInStoreCount++;
 
 /***** Align the vector constructor ... *****/
@@ -885,7 +775,7 @@ rtLINK_CType *rtVECTOR_CType::subsetInStore (M_CPD *pStore, VDescriptor *pValueR
 	pValueReturn->setToMonotype (pStore, pUSDC->pointerCPD ());
 
 /***** ... and compute the subset: *****/
-    rtLINK_CType *pSubset = rtLINK_PosConstructor (pUSDC->PPT (), -1);
+    rtLINK_CType *pSubset = rtLINK_PosConstructor (pUSDC->PPT ());
 
     unsigned int vectorOrigin = 0;
     for (rtVECTOR_PMRDC *pPMRDC = m_pPMRDChainHead; pPMRDC; pPMRDC = pPMRDC->Successor ()) {
@@ -942,7 +832,7 @@ rtLINK_CType *rtVECTOR_CType::subsetOfType (
 	return NilOf (rtLINK_CType*);
 
 /*****  Construct the required sets and subsets, ...  *****/
-    rtLINK_CType *pSubset = rtLINK_RefConstructor (m_pPPT, -1);
+    rtLINK_CType *pSubset = rtLINK_RefConstructor (m_pPPT);
 
     if (pValueReturn && cSegments > 1) {
 	for (xSegment = 0; xSegment < m_sUSDArray; xSegment++) {
@@ -977,19 +867,19 @@ rtLINK_CType *rtVECTOR_CType::subsetOfType (
 	}
     }
 
-    M_CPD *pSubsetPPT = rtPTOKEN_New (pSubsetSpace, sSubset);
+    rtPTOKEN_Handle::Reference pSubsetPPT (new rtPTOKEN_Handle (pSubsetSpace, sSubset));
     pSubset->Close (pSubsetPPT);
 
 /*****  Construct the returned values, if appropriate: *****/
     if (pValueReturn) {
 	if (cSegments == 1) {
 	    rtLINK_CType *pIsolator = rtLINK_RefConstructor (
-		pMonotypeUSDC->PPT (), -1
+		pMonotypeUSDC->PPT ()
 	    )->AppendRange (0, sSubset)->Close (pSubsetPPT);
 
 	    VDescriptor iValueReturn;
 	    iValueReturn.setToMonotype (
-		pMonotypeUSDC->storeCPD (), pMonotypeUSDC->pointerCPD ()
+		pMonotypeUSDC->store (), pMonotypeUSDC->pointerCPD ()
 	    );
 	    pValueReturn->setToSubset (pIsolator, iValueReturn);
 	    pIsolator->release ();
@@ -1002,16 +892,14 @@ rtLINK_CType *rtVECTOR_CType::subsetOfType (
 		if (pLC) {
 		    pLC->Close (pSubsetPPT);
 		    rResult.createFragment (pLC)->datum ().setToMonotype (
-			pUSDC->storeCPD (), pUSDC->pointerCPD ()
+			pUSDC->store (), pUSDC->pointerCPD ()
 		    );
 		}
 	    }
 	}
     }
 
-/*****  And clean-up and return:  *****/
-    pSubsetPPT->release ();
-
+/*****  And return:  *****/
     return pSubset;
 }
 
@@ -1030,10 +918,9 @@ rtLINK_CType *rtVECTOR_CType::subsetOfType (
  *****  Routine to verify an L-Store's consistency.
  *****/
 void rtVECTOR_Handle::CheckConsistency () {
-    if (rtVECTOR_V_IsInconsistent ((rtVECTOR_Type*)ContainerContent ())) ERR_SignalFault (
-	EC__InternalInconsistency,
-	UTIL_FormatMessage (
-	    "Corrupted vector[%d:%d] detected", SpaceIndex (), ContainerIndex ()
+    if (isInconsistent ()) ERR_SignalFault (
+	EC__InternalInconsistency, UTIL_FormatMessage (
+	    "Corrupted vector[%d:%d] detected", spaceIndex (), containerIndex ()
 	)
     );
 }
@@ -1071,41 +958,54 @@ PrivateFnDef void InitStdCPD (M_CPD *pVectorCPD) {
  ************************************
  ************************************/
 
-/**********************************************
- *****  Internal Initialization Routines  *****
- **********************************************/
+/*********************************************
+ *****  Private Initialization Routines  *****
+ *********************************************/
 
 /*---------------------------------------------------------------------------
  *****  Internal routine to initialize a U-Segment array entry.
  *
  *  Arguments:
- *	vector			- a standard CPD for the vector whose U-Segment
- *				  array is to be modified.
- *	uSegArrayLoc		- the index of the U-Segment Array entry to be
+ *	xSegment		- the index of the U-Segment Array entry to be
  *				  initialized.
- *	store			- a standard CPD for the value store to be
- *				  associated with this U-Segment Array entry.
- *	valuesCPD		- a standard CPD for the initial values for the
- *				  U-Segment.
- *	pTokenCPD		- a standard CPD for a P-Token defining the
- *				  positional state to be associated with the
- *				  U-Segment.
+ *	pStore			- a handle for the segment's store.
+ *	pPointer		- a handle for the segment's initial values.
+ *	pToken			- a handle for the segment's positional state.
  *
  *****/
-PrivateFnDef void InitUSegmentArrayEntry (
-    M_CPD *vector, int uSegArrayLoc, M_CPD *store, M_CPD *valuesCPD, M_CPD *pTokenCPD
+void rtVECTOR_Handle::initializeSegment (
+    unsigned int xSegment, Vdd::Store *pStore, VContainerHandle *pPointer, rtPTOKEN_Handle *pPToken
 ) {
-    rtVECTOR_CPD_USD (vector) = rtVECTOR_CPD_USegArray (vector) + uSegArrayLoc;
+    EnableModifications ();
 
-/*****  ...initialize the slot...  *****/
-    rtVECTOR_CPD_SetUSDCursor (vector, rtVECTOR_USD_VStore);
-    vector->StoreReference (rtVECTOR_CPx_USDCursor, store);
+    rtVECTOR_USDType *pUSD = segment (xSegment);
 
-    rtVECTOR_CPD_SetUSDCursor (vector, rtVECTOR_USD_Values);
-    vector->StoreReference (rtVECTOR_CPx_USDCursor, valuesCPD);
+    StoreReference (&rtVECTOR_USD_VStore(pUSD), pStore);
+    StoreReference (&rtVECTOR_USD_Values(pUSD), pPointer);
+    StoreReference (&rtVECTOR_USD_PToken(pUSD), pPToken);
+}
 
-    rtVECTOR_CPD_SetUSDCursor (vector, rtVECTOR_USD_PToken);
-    vector->StoreReference (rtVECTOR_CPx_USDCursor, pTokenCPD);
+void rtVECTOR_Handle::initializeSegment (unsigned int xSegment, SegmentData const *pSegmentData) {
+    if (pSegmentData)
+	initializeSegment (xSegment, pSegmentData->store (), pSegmentData->pointer (), pSegmentData->ptoken ());
+    else {
+	M_KOTE const &rNA = TheNAClass ();
+
+	rtPTOKEN_Handle::Reference pSegmentPPT (new rtPTOKEN_Handle (Space (), elementCount ()));
+
+	SegmentData iSegmentData;
+	iSegmentData.setStoreTo (rNA.store ());
+	iSegmentData.claimPointer (rtUNDEFUV_New (pSegmentPPT, rNA.PTokenHandle ()));
+	iSegmentData.claimPToken (pSegmentPPT);
+
+	initializeSegment (xSegment, &iSegmentData);
+    }
+}					 
+
+size_t rtVECTOR_Handle::initialSizeFrom (rtPTOKEN_Handle *pPPT) {
+    return rtVECTOR_V_SizeofVector (
+	pPPT->cardinality () > 0 ? 1 : 0, rtVECTOR_V_USegArrayInitialSize, 1
+    );
 }
 
 
@@ -1114,37 +1014,25 @@ PrivateFnDef void InitUSegmentArrayEntry (
  *
  *  Arguments:
  *	pPPT			- the positional P-Token of the new vector.
- *	initialUSegmentStore	- the address of a standard CPD for the store
- *				  of the initial u-segment of this vector.
- *				  This argument may be Nil if 'nelements == 0'.
- *	initialUSegmentValues	- the address of a standard CPD for the values
- *				  of the initial u-segment of this vector.
- *				  This argument may be Nil if 'nelements == 0'.
- *	initialUSegmentPToken	- the address of a standard CPD for the ptoken
- *				  of the initial u-segment of this vector.
- *				  This argument may be Nil if 'nelements == 0'.
+ *	bMarkingAsSet		- set 'isAsSet' if feasible.  Defaults to false.
+ *	pInitializationData	- optional value initialization data.  Defaults
+ *				  to NA.
  *
  *  Returns:
- *	The address of a CPD for the vector created.
+ *	A handle for the new vector.
  *
  *****/
-PrivateFnDef M_CPD *NewVector (
-    M_CPD *pPPT,
-    M_CPD *initialUSegmentStore	 = NilOf (M_CPD *),
-    M_CPD *initialUSegmentValues = NilOf (M_CPD *),
-    M_CPD *initialUSegmentPToken = NilOf (M_CPD *)
-) {
+rtVECTOR_Handle::rtVECTOR_Handle (
+    rtPTOKEN_Handle *pPPT, bool bMarkingAsSet, SegmentData const *pInitializationData
+) : BaseClass (pPPT->Space (), RTYPE_C_Vector, initialSizeFrom (pPPT)) {
+    NewCount++;
+
 /*****  Determine the p-map size of the new vector, ...  *****/
-    unsigned int nelements = rtPTOKEN_CPD_BaseElementCount (pPPT);
+    unsigned int nelements = pPPT->cardinality ();
     unsigned int pMapSize = nelements > 0 ? 1 : 0;
 
-/*****  ...  allocate the vector, ...  *****/
-    M_CPD *vector = pPPT->CreateContainer (
-	RTYPE_C_Vector, rtVECTOR_V_SizeofVector (pMapSize, rtVECTOR_V_USegArrayInitialSize, 1)
-    );
-
 /*****  ... and initialize the vector's preamble, ...  *****/
-    rtVECTOR_Type *base = rtVECTOR_CPD_Base (vector);
+    rtVECTOR_Type *base = typecastContent ();
     rtVECTOR_V_IsInconsistent	(base) = true;
     rtVECTOR_V_USegArraySize	(base) = rtVECTOR_V_USegArrayInitialSize;
     rtVECTOR_V_USegFreeBound	(base) =
@@ -1152,32 +1040,27 @@ PrivateFnDef M_CPD *NewVector (
     rtVECTOR_V_PMapSize		(base) = pMapSize;
     rtVECTOR_V_PMapTransition	(base) = 0;
     rtVECTOR_V_ElementCount	(base) = nelements;
-    rtVECTOR_V_IsASet		(base) = false;
+    rtVECTOR_V_IsASet		(base) = bMarkingAsSet;
 
 /*****  ...  last P-Map entry, ...  *****/
     rtVECTOR_PMRD_SegmentIndex	(rtVECTOR_V_PMap (base) + pMapSize) = (-1);
 
-/*****  ...  CPD, ...  *****/
-    InitStdCPD (vector);
-
 /*****  ...  PToken, ...  *****/
-    vector->constructReference (rtVECTOR_CPx_PToken);
-    vector->StoreReference (rtVECTOR_CPx_PToken, pPPT);
+    constructReference (&rtVECTOR_V_PToken(base));
+    StoreReference (&rtVECTOR_V_PToken(base), pPPT);
 
 /*****  ...  USegment Array, ...  *****/
-    vector->constructReferences (
-	rtVECTOR_CPx_USD, rtVECTOR_V_USegArrayInitialSize * rtVECTOR_USD_POPsPerUSD
+    constructReferences (
+	&rtVECTOR_USD_PToken(rtVECTOR_V_USegArray (base)), rtVECTOR_V_USegArrayInitialSize * rtVECTOR_USD_POPsPerUSD
     );
 
 /*****  ... and initial U-Segment:  *****/
     if (pMapSize > 0) {
 	/*****  U-Segment Array...  *****/
-	InitUSegmentArrayEntry (
-	    vector, 0, initialUSegmentStore, initialUSegmentValues, initialUSegmentPToken
-	);
+	initializeSegment (0, pInitializationData);
 
 	/*****  U-Segment Index...  *****/
-	rtVECTOR_CPD_USegIndex (vector)[0] = 0;
+	rtVECTOR_V_USegIndex (base)[0] = 0;
 
 	/*****  P-Map...  *****/
 	rtVECTOR_PMRDType *pmrd0 = rtVECTOR_V_PMap (base);
@@ -1189,11 +1072,8 @@ PrivateFnDef M_CPD *NewVector (
     }
 
 /*****  Finally, mark the vector as valid ...  *****/
-    rtVECTOR_CPD_IsInconsistent	(vector) = false;
-
-/*****  ... and return.  *****/
-    return vector;
-} 
+    rtVECTOR_V_IsInconsistent	(base) = false;
+}
 
 
 /*********************************************
@@ -1208,8 +1088,8 @@ PrivateFnDef M_CPD *NewVector (
  *			  new vector.  This p-token should be identical to
  *			  to the positional p-token of the u-vector argument
  *			  passed to this routine.
- *	uSegmentStore	- a standard CPD for the uvector's store.
- *	uSegmentValues	- a standard CPD for the uvector to install in the
+ *	pSegmentStore	- a standard CPD for the uvector's store.
+ *	pSegmentValues	- a standard CPD for the uvector to install in the
  *                        new vector.  The positional ptoken of this uvector
  *			  will be changed to allow the vector to manage its
  *			  cardinality.
@@ -1218,19 +1098,17 @@ PrivateFnDef M_CPD *NewVector (
  *	The address of a CPD for the vector created.
  *
  *****/
-PublicFnDef M_CPD *rtVECTOR_NewFromUV (
-    M_CPD *pPPT, M_CPD *uSegmentStore, M_CPD *uSegmentValues
+rtVECTOR_Handle *rtVECTOR_Handle::NewFrom (
+    rtPTOKEN_Handle *pPPT, Vdd::Store *pSegmentStore, M_CPD *pSegmentValues
 ) {
-    M_CPD *uSegmentPToken = rtPTOKEN_New (
-	pPPT->Space (), rtPTOKEN_CPD_BaseElementCount (pPPT)
-    );
-    uSegmentValues->StoreReference (UV_CPx_PToken, uSegmentPToken);
+    SegmentData iSegmentData;
+    iSegmentData.setStoreTo	(pSegmentStore);
+    iSegmentData.setPointerTo	(pSegmentValues);
+    iSegmentData.setPTokenTo	(new rtPTOKEN_Handle (pPPT->Space (), pPPT->cardinality ()));
 
-    M_CPD *pResult = NewVector (pPPT, uSegmentStore, uSegmentValues, uSegmentPToken);
+    pSegmentValues->StoreReference (UV_CPx_PToken, iSegmentData.ptoken ());
 
-    uSegmentPToken->release ();
-
-    return pResult;
+    return new rtVECTOR_Handle (pPPT, false, &iSegmentData);
 }
 
 
@@ -1241,104 +1119,35 @@ PublicFnDef M_CPD *rtVECTOR_NewFromUV (
  *	initialValues		- the address of a descriptor supplying the
  *				  initial values of the vector.
  *
- *  Returns:
- *	The address of a standard CPD for the vector created.
- *
  *  NOTES:
  *	This routine is written for use by the VDescriptor form conversion
  *	routines only.
  *
  *****/
-PublicFnDef M_CPD *rtVECTOR_NewFromDescriptor (DSC_Descriptor *initialValues) {
-    M_CPD *pPPT = initialValues->PPT ();
-    unsigned int nelements = rtPTOKEN_CPD_BaseElementCount (pPPT);
-    M_CPD *vector;
+rtVECTOR_Handle *rtVECTOR_Handle::NewFrom (DSC_Descriptor &rInitialValues) {
+    rtPTOKEN_Handle::Reference pPPT (rInitialValues.PPT ());
+
+    unsigned int nelements = pPPT->cardinality ();
+
     if (nelements < 1)
-	vector = NewVector (pPPT);
-    else {
+	return new rtVECTOR_Handle (pPPT);
+
+    rtVECTOR_Handle::SegmentData iSegmentData; {
 	M_CPD *pUSegmentValues;
-	if (initialValues->getUVector (pUSegmentValues)) {
-	    //  The u-vector was just minted.
-	}
-//	else if (pUSegmentValues->ReferenceCount () > 1) // ... this might be enough, but..
-	else if (pUSegmentValues->ContainerHasMultipleUses ())
-	    pUSegmentValues = UV_Copy (pUSegmentValues);
+	if (rInitialValues.getUVector (pUSegmentValues))
+	    iSegmentData.claimPointer (pUSegmentValues); //  The u-vector was just minted.
+//	else if (pUSegmentValues->ReferenceCount () > 1) // ... this might be enough, but...
+	else if (pUSegmentValues->hasMultipleUses ())
+	    iSegmentData.claimPointer (UV_Copy (pUSegmentValues));
 	else
-	    pUSegmentValues->retain ();
-
-	M_CPD *pUSegmentPToken = rtPTOKEN_New (pPPT->Space (), nelements);
-	pUSegmentValues->StoreReference (UV_CPx_PToken, pUSegmentPToken);
-
-	vector = NewVector (
-	    pPPT, initialValues->storeCPD (), pUSegmentValues, pUSegmentPToken
-	);
-
-	pUSegmentValues->release ();
-	pUSegmentPToken->release ();
+	    iSegmentData.setPointerTo (pUSegmentValues);
     }
 
-    pPPT->release ();
+    iSegmentData.setPTokenTo (new rtPTOKEN_Handle (pPPT->Space (), nelements));
+    iSegmentData.pointer ()->StoreReference (UV_CPx_PToken, iSegmentData.ptoken ());
+    iSegmentData.setStoreTo (rInitialValues.store ());
 
-    return vector;
-}
-
-
-/*---------------------------------------------------------------------------
- *****  Routine to create a new vector.
- *
- *  Arguments:
- *	pPPT	    		- a standard CPD for the positional P-Token
- *				  of the new vector.
- *
- *  Returns:
- *	The address of a CPD for the vector created.
- *
- *****/
-PublicFnDef M_CPD *rtVECTOR_New (M_CPD *pPPT) {
-    NewCount++;
-
-    RTYPE_MustBeA ("rtVECTOR_New", M_CPD_RType (pPPT), RTYPE_C_PToken);
-
-    unsigned int nelements = rtPTOKEN_CPD_BaseElementCount (pPPT);
-    if (nelements < 1)
-	return NewVector (pPPT);
-
-    M_KOTE const &rNA = pPPT->TheNAClass ();
-
-    M_CPD *initialUSegmentPToken = rtPTOKEN_New (pPPT->Space (), nelements);
-
-    M_CPD *initialUSegmentValues = rtUNDEFUV_New (
-	initialUSegmentPToken, rNA.PTokenCPD ()
-    );
-
-    M_CPD *vector = NewVector (
-	pPPT, rNA, initialUSegmentValues, initialUSegmentPToken
-    );
-
-    initialUSegmentPToken->release ();
-    initialUSegmentValues->release ();
-
-    return vector;
-}
-
-
-/*---------------------------------------------------------------------------
- *****  Routine to create a new set vector.
- *
- *  Arguments:
- *	pTokenCPD	    	- a standard CPD for the positional p-token of
- *				  the new set vector.
- *
- *  Returns:
- *	The address of a CPD for the vector created.
- *
- *****/
-PublicFnDef M_CPD *rtVECTOR_NewSetVector (M_CPD *pTokenCPD) {
-    M_CPD *result = rtVECTOR_New (pTokenCPD);
-
-    rtVECTOR_CPD_IsASet (result) = true;
-
-    return result;
+    return new rtVECTOR_Handle (pPPT, false, &iSegmentData);
 }
 
 
@@ -1352,89 +1161,77 @@ PublicFnDef M_CPD *rtVECTOR_NewSetVector (M_CPD *pTokenCPD) {
  *  Arguments:
  *	this			- the address of the constructor to be
  *				  converted into a vector.
- *	discarding		- if true the constructor will be discarded
- *	                          by this routine and should NOT be
- *                                subsequently referenced.
- *
  *  Returns:
- *	The address of a standard CPD for the vector.
+ *	A handle for the vector.
  *
  *****/
-M_CPD *rtVECTOR_CType::ToVector (bool discarding) {
+void rtVECTOR_CType::getVector (rtVECTOR_Handle::Reference &rpResult) {
     ToVectorCount++;
 
 /***** Align the constructor... *****/
     Align ();
 
 /***** Create the new vector and set the IsASet bit ... *****/
-    M_CPD *pResult = rtVECTOR_New (m_pPPT);
-    rtVECTOR_CPD_IsASet (pResult) = m_fIsASet;
+    rtVECTOR_Handle *pResult = rpResult = new rtVECTOR_Handle (m_pPPT);
+    pResult->setIsASetTo (m_bASet);
 
 /***** Check for the trivial case *****/
-    if (rtPTOKEN_CPD_BaseElementCount (m_pPPT) == 0) {
-	if (discarding)
-	    release ();
-	return pResult;
-    }
+    if (m_pPPT->cardinality () == 0)
+	return;
 
 /***** Mark the result as inconsistent until modifications are complete  *****/
-    rtVECTOR_CPD_IsInconsistent (pResult) = true;
+    pResult->setIsInconsistent ();
 
 /***** Expand the u-segment array and index, ... *****/
-    if (m_sUSDArray > (unsigned int)rtVECTOR_CPD_USegArraySize (pResult)) {
-	if (TracingUSDCAllocator) IO_printf ("ToVector: Call ExpandUSegArray\n");
-	ExpandUSegArray (pResult, m_sUSDArray - rtVECTOR_CPD_USegArraySize (pResult));
+    if (m_sUSDArray > pResult->segmentArraySize ()) {
+	if (TracingUSDCAllocator)
+	    IO_printf ("rtVECTOR_CType::getVector: Call ExpandSegmentArray\n");
+	pResult->ExpandSegmentArray (m_sUSDArray - pResult->segmentArraySize ());
     }
 
-    rtVECTOR_CPD_USI (pResult) = rtVECTOR_CPD_USegIndex (pResult)
-			       + rtVECTOR_CPD_USegIndexSize (pResult);
     pResult->ShiftContainerTail (
-	rtVECTOR_CPx_USI, 0, (
-	    (ptrdiff_t)m_sUSDArray - rtVECTOR_CPD_USegIndexSize (pResult)
+	pResult->segmentIndexLimit (), 0, (
+	    (ptrdiff_t)m_sUSDArray - pResult->segmentIndexSize ()
 	) * sizeof (int), false
     );
-    rtVECTOR_CPD_USegIndexSize (pResult) = m_sUSDArray;
-    int *pUSDIndex = rtVECTOR_CPD_USI (pResult) = rtVECTOR_CPD_USegIndex (pResult);
+    pResult->setSegmentIndexSizeTo (m_sUSDArray);
+    int *pUSDIndex = pResult->segmentIndex ();
 
 /***** Initialize the u-segment array and index, ... *****/
     for (unsigned int i = 0; i < m_sUSDArray; i++) {
 	rtVECTOR_USDC *pUSDC = m_pUSDArray[i];
 
-	M_CPD *ptoken = UV_CPD_PosPTokenCPD (pUSDC->pointerCPD ());
 	/*** As a consistency check: ***/
 	/*** compare the ptoken above with the rtVECTOR_VC_USDCr_PToken ***/
-	InitUSegmentArrayEntry (
-	    pResult, i, pUSDC->storeCPD (), pUSDC->pointerCPD (), ptoken
+	pResult->initializeSegment (
+	    i, pUSDC->store (), pUSDC->pointerCPD (), static_cast<rtUVECTOR_Handle*>(
+		pUSDC->pointerCPD ()->containerHandle ()
+	    )->pptHandle ()
 	);
-	ptoken->release ();
 
 	pUSDIndex[i] = i;
     }
-    rtVECTOR_CPD_USegFreeBound (pResult) = m_sUSDArray;
+    pResult->setSegmentFreeBoundTo (m_sUSDArray);
 
 /***** Sort the u-segment index, ... *****/
-    USISortUSDArray = rtVECTOR_CPD_USegArray (pResult);
+    USISortUSDArray = pResult->segmentArray ();
     qsort (
-	(char *)rtVECTOR_CPD_USegIndex (pResult),
-	m_sUSDArray, sizeof (int), (VkComparator)USISortPredicate
+	pUSDIndex, m_sUSDArray, sizeof (int), (VkComparator)USISortPredicate
     );
 
 /*****  Adjust the space allocated to the P-Map...  *****/
-    unsigned int oldPMapSize = rtVECTOR_CPD_PMapSize (pResult);
-    rtVECTOR_CPD_PMRD (pResult) = rtVECTOR_CPD_PMap (pResult) + oldPMapSize;
-
     pResult->ShiftContainerTail (
-	rtVECTOR_CPx_PMRD, sizeof (rtVECTOR_PMRDType)
-	    + sizeof (int) * rtVECTOR_CPD_USegIndexSize (pResult)
-	    + sizeof (rtVECTOR_USDType) * rtVECTOR_CPD_USegArraySize (pResult),
-	sizeof (rtVECTOR_PMRDType) * ((ptrdiff_t)m_iPMRDCount - oldPMapSize),
+	pResult->pmapLimit (), sizeof (rtVECTOR_PMRDType)
+	    + sizeof (int) * pResult->segmentIndexSize ()
+	    + sizeof (rtVECTOR_USDType) * pResult->segmentArraySize (),
+	sizeof (rtVECTOR_PMRDType) * ((ptrdiff_t)m_iPMRDCount - pResult->pmapSize ()),
 	true
     );
-    rtVECTOR_CPD_PMapSize (pResult) = m_iPMRDCount;
+    pResult->setPMapSizeTo (m_iPMRDCount);
 
 /*****  ...Set the P-Map values...  *****/
     unsigned int xVectorOrigin = 0;
-    rtVECTOR_PMRDType *pPMRD = rtVECTOR_CPD_PMap (pResult);
+    rtVECTOR_PMRDType *pPMRD = pResult->pmap ();
     for (rtVECTOR_PMRDC *pPMRDC = m_pPMRDChainHead; pPMRDC; pPMRDC = pPMRDC->Successor ()) {
         rtVECTOR_PMRD_VectorOrigin (pPMRD) = xVectorOrigin;
 	rtVECTOR_PMRD_SegmentIndex (pPMRD) = pPMRDC->SegmentIndex ();
@@ -1452,15 +1249,9 @@ M_CPD *rtVECTOR_CType::ToVector (bool discarding) {
 
 /***** Make sure that it has an 'undefined' u-segment... *****/
     M_KOTE const &rNA = pResult->TheNAClass ();
-    LocateOrAddVectorSegment (
-	pResult, rNA, RTYPE_C_UndefUV, rNA.PTokenCPD (), -1, false
-    );
+    pResult->LocateOrAddSegment (rNA.store (), RTYPE_C_UndefUV, rNA.PTokenHandle (), false);
 
-    rtVECTOR_CPD_IsInconsistent (pResult) = false;
-    if (discarding)
-	release ();
-
-    return pResult;
+    pResult->clearIsInconsistent ();
 }
 
 
@@ -1490,7 +1281,7 @@ M_CPD *rtVECTOR_CType::ToVector (bool discarding) {
  *
  *****/
 PrivateFnDef void InitNewUSegmentArraySpace (
-    VContainerHandle* vector, pointer_t pTail, ptrdiff_t expansionBytes, va_list Unused(ap)
+    VContainerHandle *vector, pointer_t pTail, ptrdiff_t expansionBytes, va_list Unused(ap)
 ) {
     vector->constructReferences ((M_POP*)pTail, (size_t)expansionBytes / sizeof (M_POP));
 }
@@ -1504,69 +1295,26 @@ PrivateFnDef void InitNewUSegmentArraySpace (
  *	growthIncrement		- the amount to grow the u-segment array.
  *
  *****/
-PrivateFnDef void ExpandUSegArray (M_CPD *vector, size_t growthIncrement) {
+void rtVECTOR_Handle::ExpandSegmentArray (unsigned int growthIncrement) {
     USegArrayExpansionCount++;
-
-    rtVECTOR_CPD_USD (vector) = rtVECTOR_CPD_USegArray (vector)
-	+ rtVECTOR_CPD_USegArraySize (vector);
 
     growthIncrement = (growthIncrement + rtVECTOR_V_USegArrayGrowthInc - 1)
 	/ rtVECTOR_V_USegArrayGrowthInc
 	* rtVECTOR_V_USegArrayGrowthInc;
 
-    vector->ShiftContainerTail (
-	rtVECTOR_CPx_USD,
-	rtVECTOR_CPD_USegIndexSize (vector) * sizeof (int),
+    EnableModifications ();
+    ShiftContainerTail (
+	segmentArrayLimit (),
+	segmentIndexSize () * sizeof (int),
 	growthIncrement * sizeof (rtVECTOR_USDType),
 	false,
 	InitNewUSegmentArraySpace
     );
 
-    rtVECTOR_CPD_USegArraySize (vector) += growthIncrement;
+    incrementSegmentArraySizeBy (growthIncrement);
+
     if (TracingUSDCAllocator)
-	IO_printf ("ExpandUSegArray by:%u\n",growthIncrement);
-}
-
-
-/*---------------------------------------------------------------------------
- *****  Internal routine to allocate a new vector U-Segment.
- *
- *  Arguments:
- *	vector			- a standard CPD for the vector in which the
- *				  new U-Segment is to be allocated.
- *
- *  Returns:
- *	The index of the U-Segment allocated.
- *
- *****/
-PrivateFnDef int AllocateVectorUSegment (M_CPD *vector) {
-    int				addLocation, uSegArraySize;
-    rtVECTOR_USDType		*uSegArrayPtr;
-
-/*****  Return the first free slot in the current U-Segment array...  *****/
-    for (
-	uSegArraySize	= rtVECTOR_CPD_USegArraySize (vector),
-        uSegArrayPtr	= rtVECTOR_CPD_USegArray (vector) + (
-	    addLocation = rtVECTOR_CPD_USegFreeBound (vector)
-	);
-	addLocation < uSegArraySize;
-	addLocation++, uSegArrayPtr++
-    )
-    {
-	if (rtVECTOR_USD_IsFree (vector, uSegArrayPtr)) {
-	    vector->EnableModifications ();
-	    rtVECTOR_CPD_USegFreeBound (vector) = addLocation;
-	    return addLocation;
-	}
-    }
-
-/*****  ...or, if no free locations were found, grow the array...  *****/
-    if (TracingUSDCAllocator)
-	IO_printf ("AllocateVectorUSegment: Call ExpandUSegArray\n");
-    ExpandUSegArray (vector, 1);
-
-/*****  ...and return the allocated location.  *****/
-    return addLocation;
+	IO_printf ("ExpandSegmentArray by:%u\n",growthIncrement);
 }
 
 
@@ -1578,22 +1326,20 @@ PrivateFnDef int AllocateVectorUSegment (M_CPD *vector) {
  *****  Routine to locate a U-Segment in a Vector.
  *
  *  Arguments:
- *	vector		    	- a standard CPD for the vector to search.
- *	vStoreCPD		- a standard CPD for the store of the segment
- *				  to locate.
- *	uSegment		- an address whose contents will be set to
+ *	pStore			- the store of the segment to locate.
+ *	rxSegment		- an address whose contents will be set to
  *				  either the position of the U-Segment in the
  *				  U-Segment Array if the U-Segment was found
  *				  or desired position of the U-Segment in the
  *				  U-Segment Index if the U-Segment was not
  *				  found.
  *	pStoreIdentity		- the optional address at which the 'vector'
- *				  relative local identity of 'vStoreCPD' will
+ *				  relative local identity of 'pStore' will
  *				  be stored.  If NULL is supplied as the value
- *				  of this argument, '*uSegment' will be set
+ *				  of this argument, 'rxSegment' will be set
  *				  only if the store was found in vector.  If
  *				  a non-null address is supplied as the value
- *				  of this parameter, both '*uSegment' and
+ *				  of this parameter, both 'rxSegment' and
  *				  '*pStoreIdentity' will always be set.  These
  *				  conventions eliminate the need to ask for
  *				  the local identity if it isn't needed or
@@ -1610,26 +1356,23 @@ PrivateFnDef int AllocateVectorUSegment (M_CPD *vector) {
  *	for reference - only identity.
  *
  *****/
-PrivateFnDef bool LocateVectorSegment (
-    M_CPD	*vector,
-    M_CPD	*vStoreCPD,
-    int		*uSegment,
-    M_POP	*pStoreIdentity = NilOf (M_POP *)
+bool rtVECTOR_Handle::LocateSegment (
+    Vdd::Store *pStore, unsigned int &rxSegment, M_POP *pStoreIdentity
 ) {
     //  Obtain the store's alias in the vector's database ...
     M_TOP iStoreTOP;
     M_POP iStorePOP;
     if (pStoreIdentity) {
-	vector->LocateOrAddNameOf (vStoreCPD, iStoreTOP);
+	LocateOrAddNameOf (pStore, iStoreTOP);
 	iStoreTOP.getPOP (iStorePOP);
 	*pStoreIdentity = iStorePOP;
     }
-    else if (vector->LocateNameOf (vStoreCPD, iStoreTOP))
+    else if (LocateNameOf (pStore, iStoreTOP))
 	iStoreTOP.getPOP (iStorePOP);
     else
 	return false;
 
-    rtVECTOR_Type	const * vectorBase	= rtVECTOR_CPD_Base (vector);
+    rtVECTOR_Type	const * vectorBase	= typecastContent ();
     rtVECTOR_USDType	const * uSegArray	= rtVECTOR_V_USegArray (vectorBase);
     int			const * uSegIndex	= rtVECTOR_V_USegIndex (vectorBase);
     unsigned int		uSegIndexSize	= rtVECTOR_V_USegIndexSize (vectorBase);
@@ -1638,17 +1381,17 @@ PrivateFnDef bool LocateVectorSegment (
 // If the store was forwarded, we may have one of its aliases
 // as a usegment store, so we have to do a linear search...
 ///////////////////////////////////////////////////////////////////////
-    if (vStoreCPD->isAForwardingTarget ()) {
+    if (pStore->isAForwardingTarget ()) {
 	USegIndexLSearchCount++;
 	unsigned int xUSXInsert = 0;
 	for (unsigned int xUSXElement = 0; xUSXElement < uSegIndexSize; xUSXElement++) {
 	    unsigned int uSegArrayLoc = uSegIndex [xUSXElement];
 	    M_POP iUSegStorePOP = rtVECTOR_USD_VStore (uSegArray + uSegArrayLoc);
-	    if (vector->ReferencesAreIdentical (&iUSegStorePOP, &iStorePOP)) {
+	    if (ReferencesAreIdentical (&iUSegStorePOP, &iStorePOP)) {
 /*****  Found the store, return its U-Segment Array location ...  *****/
 		USegIndexLSearchComparisons += xUSXElement + 1;
 		USegIndexHitCount++;
-		*uSegment = uSegArrayLoc;
+		rxSegment = uSegArrayLoc;
 		return true;
 	    }
 	    if (M_ComparePOPs (iUSegStorePOP, iStorePOP) < 0)
@@ -1657,7 +1400,7 @@ PrivateFnDef bool LocateVectorSegment (
 /*****  Not found...  *****/
 	USegIndexLSearchComparisons += uSegIndexSize;
 	USegIndexMissCount++;
-	*uSegment = xUSXInsert;
+	rxSegment = xUSXInsert;
 	return false;
     }
 
@@ -1675,7 +1418,7 @@ PrivateFnDef bool LocateVectorSegment (
  * Found the value store, return its U-Segment Array location ...
  *****/
 	    USegIndexHitCount++;
-	    *uSegment = uSegArrayLoc;
+	    rxSegment = uSegArrayLoc;
 	    return true;
 	}
 	if (iComparisonResult < 0)
@@ -1685,7 +1428,7 @@ PrivateFnDef bool LocateVectorSegment (
     }
 /*****  Not found...  *****/
     USegIndexMissCount++;
-    *uSegment = upperSearchBound;
+    rxSegment = upperSearchBound;
     return false;
 }
 
@@ -1695,11 +1438,10 @@ PrivateFnDef bool LocateVectorSegment (
  *****  specified type.
  *
  *  Arguments:
- *	targetVector		- a standard CPD for the vector.
- *	store			- a standard CPD for the u-segment's store.
+ *	pStore			- a standard CPD for the u-segment's store.
  *	xRType			- the R-Type of any U-Vector created in the
  *				  'add' logic of this routine.
- *	rptRefCPD/Index		- the reference P-Token of any U-Vector created
+ *	pRPTRef/Index		- the reference P-Token of any U-Vector created
  *				  in the 'add' logic of this routine.
  *	set			- the 'isASet' flag of any U-Vector created in
  *				  the 'add' logic of this routine.
@@ -1708,67 +1450,70 @@ PrivateFnDef bool LocateVectorSegment (
  *	The index of the U-Segment in the vector's USD array.
  *
  *****/
-PrivateFnDef int LocateOrAddVectorSegment (
-    M_CPD			*targetVector,
-    M_CPD			*store,
-    RTYPE_Type			xRType,
-    M_CPD			*rptRefCPD,
-    int				rptRefIndex,
-    bool			set
-)
-{
+unsigned int rtVECTOR_Handle::LocateOrAddSegment (
+    Vdd::Store *pStore, RTYPE_Type xRType, rtPTOKEN_Handle *pSegmentRPT, bool set
+) {
 /*
  *---------------------------------------------------------------------------
- * PART I: 'LocateOrAddVectorSegment'
+ * PART I: 'rtVECTOR_Handle::LocateOrAddSegment'
  *	Determine if an appropriate U-Segment is already present.
  *---------------------------------------------------------------------------
  */
-    int uSegIndexLoc; M_POP iStoreIdentity;
-    if (LocateVectorSegment (targetVector, store, &uSegIndexLoc, &iStoreIdentity))
-        return uSegIndexLoc;	/*****  U-Segment was Found ... *****/
+    unsigned int xIndexSlot; M_POP iStorePOP;
+    if (LocateSegment (pStore, xIndexSlot, &iStorePOP))
+        return xIndexSlot;	/*****  U-Segment was Found ... *****/
 
 
 /*
  *---------------------------------------------------------------------------
- * PART II: 'LocateOrAddVectorSegment'
+ * PART II: 'rtVECTOR_Handle::LocateOrAddSegment'
  *	Add the U-Segment if it wasn't found.
  *---------------------------------------------------------------------------
  */
+    SegmentData iSegmentData;
+    iSegmentData.setStoreTo (pStore);
+
 /*****  Create the new P-Token...  *****/
-    M_CPD *newPToken = rtPTOKEN_New (targetVector->Space (), 0);
+    rtPTOKEN_Handle::Reference pSegmentPToken (new rtPTOKEN_Handle (Space (), 0));
 
 /*****  Create the new uvector... *****/
-    M_CPD *newValues = NewUVector (xRType, newPToken, rptRefCPD, rptRefIndex);
-
+    iSegmentData.claimPointer (NewUVector (xRType, pSegmentPToken, pSegmentRPT));
+    iSegmentData.claimPToken (pSegmentPToken);
     if (set)
-	UV_CPD_IsASetUV (newValues) = true;
+	UV_CPD_IsASetUV (iSegmentData.pointer ()) = true;
 
 /*****  ...enable modification of the vector, ...  *****/
-    targetVector->EnableModifications ();
-    rtVECTOR_CPD_IsInconsistent (targetVector) = true;
+    EnableModifications ();
+    setIsInconsistent ();
 
 /*****  ...obtain and initialize a new USD Array slot for them...  *****/
-    int uSegArrayLoc = AllocateVectorUSegment (targetVector);
-    InitUSegmentArrayEntry (
-	targetVector, uSegArrayLoc, store, newValues, newPToken
-    );
+    unsigned int xArrayLimit = segmentArraySize ();
+    unsigned int xArraySlot = segmentFreeBound ();
+    while (xArraySlot < xArrayLimit && segmentInUse(xArraySlot))
+	xArraySlot++;
 
-    newPToken->release ();
-    newValues->release ();
+    if (xArraySlot < xArrayLimit) {
+	EnableModifications ();
+	setSegmentFreeBoundTo (xArraySlot);
+    }
+    else {
+	if (TracingUSDCAllocator)
+	    IO_printf ("AllocateVectorUSegment: Call ExpandUSegArray\n");
+	ExpandSegmentArray (1);
+    }
+    initializeSegment (xArraySlot, &iSegmentData);
 
 /*****  ...add the new U-Segment to the U-Segment Index...  *****/
-    rtVECTOR_CPD_USI (targetVector) = rtVECTOR_CPD_USegIndex (targetVector) + uSegIndexLoc;
-    targetVector->ShiftContainerTail (
-	rtVECTOR_CPx_USI,
-	(rtVECTOR_CPD_USegIndexSize (targetVector) - uSegIndexLoc) * sizeof (int),
-	sizeof (int),
-	true
+    unsigned int sSegmentIndex = segmentIndexSize ();
+    ShiftContainerTail (
+	reinterpret_cast<pointer_t>(segmentIndex () + xIndexSlot),
+	(sSegmentIndex - xIndexSlot) * sizeof (int), sizeof (int), true
     );
-    *(rtVECTOR_CPD_USI (targetVector) - 1) = uSegArrayLoc;
-    rtVECTOR_CPD_USegIndexSize (targetVector)++;
+    segmentIndex ()[xIndexSlot] = xArraySlot;
+    incrementSegmentIndexSizeBy (1);
 
 /*****  ...return the USD's U-Segment array location field...  *****/
-    return uSegArrayLoc;
+    return xArraySlot;
 }
 
 
@@ -1804,61 +1549,57 @@ PublicFnDef void rtVECTOR_SetUSegmentCountThreshold (unsigned int count) {
 ///					 pVector's usegment array.
 ///
 ///////
-PrivateFnDef void RemoveEmptyUSegments (M_CPD *pVector, int *pUSegmentRelocationMap, int sUSegmentRelocationMap) {
-    int sUSegmentArray = rtVECTOR_CPD_USegArraySize (pVector);
+void rtVECTOR_Handle::RemoveEmptySegments (int *pUSegmentRelocationMap, unsigned int sUSegmentRelocationMap) {
+    unsigned int sUSegmentArray = segmentArraySize ();
 /*****  Check Arguments for Consistency ....  *****/
-    if (sUSegmentRelocationMap >  sUSegmentArray) {
+    if (sUSegmentRelocationMap > sUSegmentArray) {
 	ERR_SignalFault (
-	    EC__InternalInconsistency,
-	    UTIL_FormatMessage (
-		"RemoveEmptyUSegments: Map/Array size mismatch (%u:%u)",
-		sUSegmentRelocationMap,
-		sUSegmentArray
+	    EC__InternalInconsistency, UTIL_FormatMessage (
+		"RemoveEmptySegments: Map/Array size mismatch (%u:%u)",
+		sUSegmentRelocationMap, sUSegmentArray
 	    )
 	);
     }
 
-    pVector->EnableModifications ();
-    rtVECTOR_CPD_IsInconsistent (pVector) = true;
-    if ((unsigned int) sUSegmentArray > MaxUSegmentCountEncountered) MaxUSegmentCountEncountered = sUSegmentArray;
-    bool fCompactingUSegments = USegmentCountThreshold < (unsigned int) sUSegmentArray;
-    if (TracingUSDCAllocator)
-	IO_printf ("RemoveEmptyUSegments: (%u:%u:%u)\n",
-		   sUSegmentRelocationMap, USegmentCountThreshold, sUSegmentArray);
+    EnableModifications ();
+    setIsInconsistent ();
 
-    if (fCompactingUSegments) {
-	if (TracingUSDCAllocator)
-	    IO_printf ("RemoveEmptyUSegments: rebuild pmap(%u:%u)\n",
-		       sUSegmentRelocationMap, sUSegmentArray);
+    if (sUSegmentArray > MaxUSegmentCountEncountered)
+	MaxUSegmentCountEncountered = sUSegmentArray;
+
+    bool bCompactingSegments = USegmentCountThreshold < sUSegmentArray;
+    if (TracingUSDCAllocator) IO_printf (
+	"RemoveEmptySegments: (%u:%u:%u)\n", sUSegmentRelocationMap, USegmentCountThreshold, sUSegmentArray
+    );
+
+    if (bCompactingSegments) {
+	if (TracingUSDCAllocator) IO_printf (
+	    "RemoveEmptySegments: rebuild pmap(%u:%u)\n", sUSegmentRelocationMap, sUSegmentArray
+	);
+
       /*****  ... rebuild the P-Map:  *****/
-	rtVECTOR_PMRDType *pMapP, *pMapL;
-	for (
-	     pMapP = rtVECTOR_CPD_PMap (pVector),
-	       pMapL = pMapP + rtVECTOR_CPD_PMapSize (pVector);
-	     pMapP < pMapL;
-	     pMapP++
-	 ) rtVECTOR_PMRD_SegmentIndex (pMapP) =
-	     pUSegmentRelocationMap[rtVECTOR_PMRD_SegmentIndex (pMapP)];
+	rtVECTOR_PMRDType *pMapP = pmap ();
+	rtVECTOR_PMRDType *pMapL = pMapP + pmapSize ();
+	while (pMapP < pMapL) {
+	    rtVECTOR_PMRD_SegmentIndex (pMapP) = pUSegmentRelocationMap[rtVECTOR_PMRD_SegmentIndex (pMapP)];
+	    pMapP++;
+	}
 	USegmentCompactionCount++;
     }
 
 /*****  ... rebuild the U-Segment Array:  *****/
-    int uSegmentRIndex, uSegmentWIndex, newUSegmentCount;
-    for (uSegmentRIndex = newUSegmentCount = 0;
-	 uSegmentRIndex < sUSegmentRelocationMap;
-	 uSegmentRIndex++ )
-    {
-	uSegmentWIndex = pUSegmentRelocationMap[uSegmentRIndex];
+    unsigned int newUSegmentCount = 0;
+    unsigned int uSegmentRIndex;
+    for (uSegmentRIndex = newUSegmentCount = 0; uSegmentRIndex < sUSegmentRelocationMap; uSegmentRIndex++) {
+	int uSegmentWIndex = pUSegmentRelocationMap[uSegmentRIndex];
 	if (uSegmentWIndex < 0) {
-	    if (uSegmentRIndex < rtVECTOR_CPD_USegFreeBound (pVector))
-		rtVECTOR_CPD_USegFreeBound (pVector) = uSegmentRIndex;
-	    rtVECTOR_CPD_USD (pVector) =
-		rtVECTOR_CPD_USegArray (pVector) + uSegmentRIndex;
-	    if (pVector->ReferenceIsNil (&rtVECTOR_CPD_USD_PToken (pVector)))
+	    if (uSegmentRIndex < segmentFreeBound ())
+		setSegmentFreeBoundTo (uSegmentRIndex);
+	    if (segmentUnused (uSegmentRIndex))
 		continue;  // already deleted ....
-	    rtVECTOR_CPD_SetUSDCursor (pVector, rtVECTOR_USD_PToken);
 
-	    pVector->ClearReferences (rtVECTOR_CPx_USDCursor, rtVECTOR_USD_POPsPerUSD);
+	    ClearReferences (segmentPTokenPOP (uSegmentRIndex), rtVECTOR_USD_POPsPerUSD);
+
 	    USegmentDeletionCount++;
 	    continue;
 	}
@@ -1867,57 +1608,54 @@ PrivateFnDef void RemoveEmptyUSegments (M_CPD *pVector, int *pUSegmentRelocation
 
 	if (uSegmentWIndex == uSegmentRIndex)
 	    continue;
-	if (fCompactingUSegments) {
-	    rtVECTOR_USDType usd = rtVECTOR_CPD_USegArray (pVector)[uSegmentWIndex];
-	    rtVECTOR_CPD_USegArray (pVector)[uSegmentWIndex] =
-	      rtVECTOR_CPD_USegArray (pVector)[uSegmentRIndex];
-	    rtVECTOR_CPD_USegArray (pVector)[uSegmentRIndex] = usd;
+	if (bCompactingSegments) {
+	    rtVECTOR_USDType usd = *segment (uSegmentWIndex);
+	    *segment(uSegmentWIndex) = *segment(uSegmentRIndex);
+	    *segment(uSegmentRIndex) = usd;
 	}
     }
-    if (fCompactingUSegments) {
-	if (TracingUSDCAllocator)
-	    IO_printf ("RemoveEmptyUSegments: compacting usegments(%u:%u:%u)\n",
-			sUSegmentRelocationMap, sUSegmentArray,newUSegmentCount);
-	rtVECTOR_CPD_USegFreeBound (pVector) = newUSegmentCount;
+    if (bCompactingSegments) {
+	if (TracingUSDCAllocator) IO_printf (
+	    "RemoveEmptySegments: compacting usegments(%u:%u:%u)\n",
+	    sUSegmentRelocationMap, sUSegmentArray,newUSegmentCount
+	);
+	setSegmentFreeBoundTo (newUSegmentCount);
 	if (newUSegmentCount < rtVECTOR_V_USegArrayInitialSize)
 	    newUSegmentCount = rtVECTOR_V_USegArrayInitialSize;
-	rtVECTOR_CPD_USI (pVector) = rtVECTOR_CPD_USegIndex (pVector);
-	pVector->ShiftContainerTail (
-	    rtVECTOR_CPx_USI,
-	    rtVECTOR_CPD_USegIndexSize (pVector) * sizeof (int),
+
+	ShiftContainerTail (
+	    reinterpret_cast<pointer_t>(segmentIndex ()),
+	    segmentIndexSize () * sizeof (int),
 	    ((ptrdiff_t)newUSegmentCount - sUSegmentArray) * sizeof(rtVECTOR_USDType),
 	    true
 	);
-	rtVECTOR_CPD_USegArraySize (pVector) = newUSegmentCount;
+	setSegmentArraySizeTo (newUSegmentCount);
     }
 
 /*****  ... rebuild the U-Segment Index:  *****/
-    int uSegmentCount = rtVECTOR_CPD_USegIndexSize (pVector);
-    for ( uSegmentRIndex = uSegmentWIndex = 0;
-	 uSegmentRIndex < uSegmentCount;
-	 uSegmentRIndex++ )
-    {
-	int index =
-	    pUSegmentRelocationMap [rtVECTOR_CPD_USegIndex (pVector)[uSegmentRIndex]];
+    unsigned int uSegmentCount = segmentIndexSize ();
+    unsigned int uSegmentWIndex = 0;
+    int *uSegmentIndex = segmentIndex ();
+    for (uSegmentRIndex = 0; uSegmentRIndex < uSegmentCount; uSegmentRIndex++) {
+	int index = pUSegmentRelocationMap [uSegmentIndex[uSegmentRIndex]];
 	if (index >= 0)
-	    rtVECTOR_CPD_USegIndex (pVector)[uSegmentWIndex++] =
-	      fCompactingUSegments ? index : rtVECTOR_CPD_USegIndex (pVector)[uSegmentRIndex];
+	    uSegmentIndex[uSegmentWIndex++] = bCompactingSegments ? index : uSegmentIndex[uSegmentRIndex];
     }
 
     if (uSegmentWIndex != uSegmentCount) {
-	rtVECTOR_CPD_USI (pVector) = rtVECTOR_CPD_USegIndex (pVector) + uSegmentCount;
-	pVector->ShiftContainerTail (
-	    rtVECTOR_CPx_USI,
+	ShiftContainerTail (
+	    reinterpret_cast<pointer_t>(uSegmentIndex + uSegmentCount),
 	    0,
 	    ((ptrdiff_t)uSegmentWIndex - uSegmentCount) * sizeof(int),
 	    true
 	);
-	rtVECTOR_CPD_USegIndexSize (pVector) = uSegmentWIndex;
+	setSegmentIndexSizeTo (uSegmentWIndex);
     }
 /*****  ... and mark the Vector as valid:  *****/
-    rtVECTOR_CPD_IsInconsistent (pVector) = false;
+    clearIsInconsistent ();
 }
 
+
 /*********************************************
  *********************************************
  *****  Vector Reconstruction Utilities  *****
@@ -2002,19 +1740,22 @@ enum ReconstructorPurpose {
 };
 
 class VectorReconstructor {
-//  Construction
-protected:
-    void construct (ReconstructorPurpose xPurpose, M_CPD *pVector, int sUSegArray);
+    DECLARE_FAMILY_MEMBERS (VectorReconstructor, void);
 
+//  Construction
 public:
-    static VectorReconstructor *NewReconstructor (
-	ReconstructorPurpose xPurpose, M_CPD *pVector, int maxUSegArrayExpansion
+    VectorReconstructor (
+	rtVECTOR_Handle *pVector, ReconstructorPurpose xPurpose, unsigned int maxUSegArrayExpansion
     );
+
+//  Destruction
+public:
+    ~VectorReconstructor ();
 
 //  Access
 public:
     USegReconstructorType *USegArray () {
-	return m_iUSegArray;
+	return m_pUSegReconArray;
     }
 
 //  Query
@@ -2028,37 +1769,22 @@ public:
 
 //  Segment Location
 public:
-    int LocateReconstructorSegment (
-	M_CPD *store, int *uSegment, M_POP *pStoreIdentity = 0
+    bool LocateReconstructorSegment (
+	Vdd::Store *store, unsigned int &rxSegment, M_POP &rStorePOP
     );
-    int LocateOrAddReconstructorSegment (M_CPD *store);
+    int LocateOrAddReconstructorSegment (Vdd::Store *store);
 
-    int LocateOrAddReconstructorSegmentForRfDsAssignment (DSC_Descriptor *sourceDescriptor);
+    int LocateOrAddReconstructorSegmentForRfDsAssignment (DSC_Descriptor &rSource);
     int LocateOrAddReconstructorSegmentForLcDsAssignment (
-	DSC_Descriptor *sourceDescriptor, M_CPD *sourcePPT
+	DSC_Descriptor &rSource, rtPTOKEN_Handle *sourcePPT
     );
     int LocateOrAddReconstructorSegmentForLcVcAssignment (rtVECTOR_USDC *sourceUSDC);
 
 //  PMap Maintenance
 protected:
-    void AppendPMapEntryToReconstructor (int segment, int count);
-
+    void AppendPMapEntryToReconstructor (unsigned int segment, int count);
 public:
-/*---------------------------------------------------------------------------
- *****  Internal routine to append an entry to a reconstructor's P-Map chain
- *
- *  Arguments:
- *	segment			- the new P-Map entry's segment index.
- *	count			- the new P-Map entry's count.
- *	phase0			- flag which when true means no pmap entries
- *				  have been appended which were not already
- *				  present.
- *
- *  Returns:
- *	'reconstructor'
- *
- *****/
-    void AppendPMapEntryToReconstructor (int segment, int count, bool phase0) {
+    void AppendPMapEntryToReconstructor (unsigned int segment, int count, bool phase0) {
 	if (phase0) {
 	    m_xCurrentVectorOrigin += count;
 	    if (m_cPMRDs++)
@@ -2068,22 +1794,28 @@ public:
 	    AppendPMapEntryToReconstructor (segment, count);
 	}
     }
+    rtVECTOR_PMRDType *thisTargetPMRD () const {
+	return m_pVectorPMRD;
+    }
+    rtVECTOR_PMRDType *nextTargetPMRD () {
+	return ++m_pVectorPMRD;
+    }
 
 //  P-Token Maintenance
 public:
-    M_CPD *NewPToken (unsigned int nElements) const {
-	return rtPTOKEN_New (m_pVector->Space (), nElements);
+    rtPTOKEN_Handle *NewPToken (unsigned int nElements) const {
+	return new rtPTOKEN_Handle (m_pVector->Space (), nElements);
     }
 
-    void AdjustUSegReconstructorPToken (int segment, int count) {
-	USegReconstructorType *uSegReconstructor = m_iUSegArray + segment;
+    void AdjustUSegReconstructorPToken (unsigned int segment, int count) {
+	USegReconstructorType *uSegReconstructor = m_pUSegReconArray + segment;
 	if (USegReconstructorIsNew (uSegReconstructor));
 	else {
 	    rtPTOKEN_CType *pTokenC = USegReconstructorPTC (uSegReconstructor);
 	    if (IsNil (pTokenC)) {
-		rtVECTOR_CPD_USD (m_pVector) = rtVECTOR_CPD_USegArray (m_pVector) + segment;
-		pTokenC = USegReconstructorPTC (uSegReconstructor) =
-		    rtPTOKEN_NewShiftPTConstructor (m_pVector, rtVECTOR_CPx_USD);
+		pTokenC = USegReconstructorPTC (uSegReconstructor) = m_pVector->segmentPTokenHandle (
+		    segment
+		)->makeAdjustments ();
 	    }
 	    pTokenC->AppendAdjustment (
 		USegReconstructorOldPosition (uSegReconstructor), count
@@ -2098,25 +1830,28 @@ public:
 
 //  State
 protected:
-    ReconstructorPurpose	m_xPurpose;
-    M_CPD			*m_pVector;
-    M_CPD			*m_pCPD;
-    int				m_sUSegArray,
-				m_sUSegIndex,
-				m_xUSegFreeBound,
-				m_cUSegAdditions,
-				m_xCurrentVectorOrigin,
-				m_cPMRDs;
-    rtVECTOR_PMRDType		*m_pPMRD;
-    PMapReconstructorType	*m_pPMapChainHead,
-				*m_pPMapChainTail;
-    USegReconstructorType	m_iUSegArray[1];
+    rtVECTOR_Handle::Reference	const	m_pVector;
+    ReconstructorPurpose	const	m_xPurpose;
+    unsigned int			m_sUSegArray,
+					m_sUSegIndex,
+					m_xUSegFreeBound,
+					m_cUSegAdditions,
+					m_xCurrentVectorOrigin,
+					m_cPMRDs;
+    rtVECTOR_PMRDType*			m_pPMRD;
+    rtVECTOR_PMRDType*			m_pVectorPMRD;
+    PMapReconstructorType*		m_pPMapChainHead;
+    PMapReconstructorType*		m_pPMapChainTail;
+    unsigned int		const	m_sUSegReconArray;
+    USegReconstructorType*	const	m_pUSegReconArray;
 };
 
 
-/***************************
- *****  Instantiation  *****
- ***************************/
+/**************************
+ **************************
+ *****  Construction  *****
+ **************************
+ **************************/
 
 /*---------------------------------------------------------------------------
  *****  Internal routine to create a new vector reconstructor.
@@ -2140,29 +1875,26 @@ protected:
  *	The address of the reconstructor created.
  *
  *****/
-void VectorReconstructor::construct (
-    ReconstructorPurpose xPurpose, M_CPD *pVector, int sUSegArray
-) {
+VectorReconstructor::VectorReconstructor (
+    rtVECTOR_Handle *pVector, ReconstructorPurpose xPurpose, unsigned int maxUSegArrayExpansion
+) : m_pVector			(pVector)
+  , m_xPurpose			(xPurpose)
+  , m_sUSegArray		(pVector->segmentArraySize ())
+  , m_sUSegIndex		(pVector->segmentIndexSize ())
+  , m_xUSegFreeBound		(pVector->segmentFreeBound ())
+  , m_cUSegAdditions		(0)
+  , m_xCurrentVectorOrigin	(0)
+  , m_cPMRDs			(0)
+  , m_pPMapChainHead		(0)
+  , m_pPMapChainTail		(0)
+  , m_sUSegReconArray		(m_sUSegArray + maxUSegArrayExpansion)
+  , m_pUSegReconArray		(reinterpret_cast<USegReconstructorType*>(UTIL_Malloc (sizeof (USegReconstructorType) * m_sUSegReconArray)))
+{
     pVector->EnableModifications ();
+    m_pPMRD = m_pVectorPMRD = pVector->pmap ();
 
-    m_xPurpose			= xPurpose;
-    m_pVector			= pVector;
-    m_pCPD			= pVector->GetCPD ();
-    m_pPMRD			= rtVECTOR_CPD_PMap (m_pCPD);
-    m_sUSegArray		= rtVECTOR_CPD_USegArraySize (pVector);
-    m_sUSegIndex		= rtVECTOR_CPD_USegIndexSize (pVector);
-    m_xUSegFreeBound		= rtVECTOR_CPD_USegFreeBound (pVector);
-    m_cUSegAdditions		=
-    m_xCurrentVectorOrigin	=
-    m_cPMRDs			= 0;
-    m_pPMapChainHead		=
-    m_pPMapChainTail		= NilOf (PMapReconstructorType *);
-
-    for (
-	USegReconstructorType *uSegPtr = m_iUSegArray + sUSegArray - 1;
-        uSegPtr >= m_iUSegArray;
-	uSegPtr--
-    ) {
+    USegReconstructorType *uSegPtr = m_pUSegReconArray + m_sUSegReconArray;
+    while (--uSegPtr >= m_pUSegReconArray) {
 	USegReconstructorIsNew		(uSegPtr) = false;
 	USegReconstructorOldPosition	(uSegPtr) =
 	USegReconstructorNewPosition	(uSegPtr) = 0;
@@ -2171,16 +1903,16 @@ void VectorReconstructor::construct (
 	USegReconstructorLC		(uSegPtr) = NilOf (rtLINK_CType*);
     }
 }
+
 
-VectorReconstructor* VectorReconstructor::NewReconstructor (
-    ReconstructorPurpose purpose, M_CPD *pVector, int maxUSegArrayExpansion
-) {
-    int sUSegArray = rtVECTOR_CPD_USegArraySize (pVector) + maxUSegArrayExpansion;
-    VectorReconstructor *result = (VectorReconstructor *)UTIL_Malloc (
-	sizeof (VectorReconstructor) + sizeof (USegReconstructorType) * (sUSegArray - 1)
-    );
-    result->construct (purpose, pVector, sUSegArray);
-    return result;
+/*************************
+ *************************
+ *****  Destruction  *****
+ *************************
+ *************************/
+
+VectorReconstructor::~VectorReconstructor () {
+    UTIL_Free (m_pUSegReconArray);
 }
 
 
@@ -2193,7 +1925,7 @@ VectorReconstructor* VectorReconstructor::NewReconstructor (
  *
  *  Arguments:
  *	store			- a standard CPD for the store to locate.
- *	uSegment		- an address whose contents will be set to
+ *	rxSegment		- an address whose contents will be set to
  *				  either the position of the U-Segment in the
  *				  U-Segment Array if the U-Segment was found
  *				  or desired position of the U-Segment in the
@@ -2211,24 +1943,16 @@ VectorReconstructor* VectorReconstructor::NewReconstructor (
  *	for reference - only identity.
  *
  *****/
-int VectorReconstructor::LocateReconstructorSegment (
-    M_CPD *store, int *uSegment, M_POP *pStoreIdentity
+bool VectorReconstructor::LocateReconstructorSegment (
+    Vdd::Store *store, unsigned int &rxSegment, M_POP &rStorePOP
 ) {
     if (0 == m_cUSegAdditions)
-	return LocateVectorSegment (m_pVector, store, uSegment, pStoreIdentity);
+	return m_pVector->LocateSegment (store, rxSegment, &rStorePOP);
 
     //  Obtain the store's alias in the vector's database ...
     M_TOP iStoreTOP;
-    M_POP iStorePOP;
-    if (pStoreIdentity) {
-	m_pVector->LocateOrAddNameOf (store, iStoreTOP);
-	iStoreTOP.getPOP (iStorePOP);
-	*pStoreIdentity = iStorePOP;
-    }
-    else if (m_pVector->LocateNameOf (store, iStoreTOP))
-	iStoreTOP.getPOP (iStorePOP);
-    else
-	return false;
+    m_pVector->LocateOrAddNameOf (store, iStoreTOP);
+    iStoreTOP.getPOP (rStorePOP);
 
 ///////////////////////////////////////////////////////////////////////
 // If the store was forwarded, we may have one of its aliases
@@ -2240,24 +1964,24 @@ int VectorReconstructor::LocateReconstructorSegment (
 	unsigned int sUSegIndex = m_sUSegIndex;
 	for (unsigned int xUSXElement = 0; xUSXElement < sUSegIndex; xUSXElement++) {
 	    unsigned int uSegArrayLoc = USegReconstructorReverseIndex (
-		m_iUSegArray + xUSXElement
+		m_pUSegReconArray + xUSXElement
 	    );
-	    M_POP iUSegStorePOP = USegReconstructorPOP (m_iUSegArray + uSegArrayLoc);
+	    M_POP iUSegStorePOP = USegReconstructorPOP (m_pUSegReconArray + uSegArrayLoc);
 
-	    if (m_pVector->ReferencesAreIdentical (&iUSegStorePOP, &iStorePOP)) {
+	    if (m_pVector->ReferencesAreIdentical (&iUSegStorePOP, &rStorePOP)) {
 /*****  Found the store, return its U-Segment Array location ...  *****/
 		USegIndexLSearchComparisons += xUSXElement + 1;
 		USegIndexHitCount++;
-		*uSegment = uSegArrayLoc;
+		rxSegment = uSegArrayLoc;
 		return true;
 	    }
-	    if (M_ComparePOPs (iUSegStorePOP, iStorePOP) < 0)
+	    if (M_ComparePOPs (iUSegStorePOP, rStorePOP) < 0)
 		xUSXInsert = xUSXElement + 1;
 	}
 /*****  Not found...  *****/
 	USegIndexLSearchComparisons += sUSegIndex;
 	USegIndexMissCount++;
-	*uSegment = xUSXInsert;
+	rxSegment = xUSXInsert;
 	return false;
     }
 
@@ -2267,16 +1991,16 @@ int VectorReconstructor::LocateReconstructorSegment (
 
     while (upperSearchBound - lowerSearchBound > 1) {
 	int uSegIndexLoc = (upperSearchBound + lowerSearchBound) / 2;
-	int uSegArrayLoc = USegReconstructorReverseIndex(m_iUSegArray + uSegIndexLoc);
+	int uSegArrayLoc = USegReconstructorReverseIndex(m_pUSegReconArray + uSegIndexLoc);
 	int iComparisonResult = M_ComparePOPs (
-	    USegReconstructorPOP (m_iUSegArray + uSegArrayLoc), iStorePOP
+	    USegReconstructorPOP (m_pUSegReconArray + uSegArrayLoc), rStorePOP
 	);
 	if (iComparisonResult == 0) {
 /*****
  * Found the value store, return its U-Segment Array location ...
  *****/
 	    USegIndexHitCount++;
-	    *uSegment = uSegArrayLoc;
+	    rxSegment = uSegArrayLoc;
 	    return true;
 	}
 	if (iComparisonResult < 0)
@@ -2286,7 +2010,7 @@ int VectorReconstructor::LocateReconstructorSegment (
     }
 /*****  Not found...  *****/
     USegIndexMissCount++;
-    *uSegment = upperSearchBound;
+    rxSegment = upperSearchBound;
     return false;
 }
 
@@ -2303,15 +2027,15 @@ int VectorReconstructor::LocateReconstructorSegment (
  *
  *
  *****/
-int VectorReconstructor::LocateOrAddReconstructorSegment (M_CPD *store) {
+int VectorReconstructor::LocateOrAddReconstructorSegment (Vdd::Store *store) {
 /*
  *---------------------------------------------------------------------------
  * PART I: 'LocateOrAddReconstructorSegment'
  *	Determine if an appropriate U-Segment is already present.
  *---------------------------------------------------------------------------
  */
-    int uSegIndexLoc; M_POP iStoreIdentity;
-    if (LocateReconstructorSegment (store, &uSegIndexLoc, &iStoreIdentity))
+    unsigned int uSegIndexLoc; M_POP iStorePOP;
+    if (LocateReconstructorSegment (store, uSegIndexLoc, iStorePOP))
 	return uSegIndexLoc;	/*****  U-Segment was Found ... *****/
 
 
@@ -2323,8 +2047,8 @@ int VectorReconstructor::LocateOrAddReconstructorSegment (M_CPD *store) {
  */
 
 /*****  Add the segment to the reconstructor's U-Segment array...  *****/
-    rtVECTOR_USDType *vectorUSegArray = rtVECTOR_CPD_USegArray (m_pVector);
-    int uSegArrayLoc;
+    rtVECTOR_USDType *vectorUSegArray = m_pVector->segmentArray ();
+    unsigned int uSegArrayLoc;
     for (uSegArrayLoc = m_xUSegFreeBound; uSegArrayLoc < m_sUSegArray; uSegArrayLoc++) {
 	if (rtVECTOR_USD_IsFree (m_pVector, vectorUSegArray + uSegArrayLoc))
 	    break;
@@ -2335,33 +2059,33 @@ int VectorReconstructor::LocateOrAddReconstructorSegment (M_CPD *store) {
 
 /*****  Add the segment to the reconstructor's U-Segment index...  *****/
     if (m_cUSegAdditions > 0) {
-	int i;
-	for (i = m_sUSegIndex; i > uSegIndexLoc; i--)
-	    USegReconstructorReverseIndex (m_iUSegArray + i) =
-	    USegReconstructorReverseIndex (m_iUSegArray + (i - 1));
-	USegReconstructorReverseIndex (m_iUSegArray + i) = uSegArrayLoc;
+	unsigned int xIndexSlot;
+	for (xIndexSlot = m_sUSegIndex; xIndexSlot > uSegIndexLoc; xIndexSlot--)
+	    USegReconstructorReverseIndex (m_pUSegReconArray + xIndexSlot) =
+	    USegReconstructorReverseIndex (m_pUSegReconArray + (xIndexSlot - 1));
+	USegReconstructorReverseIndex (m_pUSegReconArray + xIndexSlot) = uSegArrayLoc;
     }
     else {
-//	vectorUSegArray = rtVECTOR_CPD_USegArray (m_pVector);
-	int i;
-	for (i = 0; i < rtVECTOR_CPD_USegArraySize (m_pVector); i++)
-	    USegReconstructorPOP (m_iUSegArray + i) = rtVECTOR_USD_VStore (vectorUSegArray + i);
+	unsigned int xElement;
+	unsigned int xLimit = m_pVector->segmentArraySize ();
+	for (xElement = 0; xElement < xLimit; xElement++)
+	    USegReconstructorPOP (m_pUSegReconArray + xElement) = rtVECTOR_USD_VStore (vectorUSegArray + xElement);
 
-	int const *vectorUSegIndex = rtVECTOR_CPD_USegIndex (m_pVector);
-	m_sUSegIndex = rtVECTOR_CPD_USegIndexSize (m_pVector);
-	for (i = m_sUSegIndex; i > uSegIndexLoc; i--)
-	    USegReconstructorReverseIndex(m_iUSegArray + i) = vectorUSegIndex[i - 1];
-	USegReconstructorReverseIndex (m_iUSegArray + i) = uSegArrayLoc;
-	while (i-- > 0)
-	    USegReconstructorReverseIndex (m_iUSegArray + i) = vectorUSegIndex[i];
+	int const *vectorUSegIndex = m_pVector->segmentIndex ();
+	m_sUSegIndex = m_pVector->segmentIndexSize ();
+	for (xElement = m_sUSegIndex; xElement > uSegIndexLoc; xElement--)
+	    USegReconstructorReverseIndex(m_pUSegReconArray + xElement) = vectorUSegIndex[xElement - 1];
+	USegReconstructorReverseIndex (m_pUSegReconArray + xElement) = uSegArrayLoc;
+	while (xElement-- > 0)
+	    USegReconstructorReverseIndex (m_pUSegReconArray + xElement) = vectorUSegIndex[xElement];
     }
     m_sUSegIndex++;
     m_cUSegAdditions++;
 
 /*****  ... and update the u-segment reconstructor.  *****/
-    USegReconstructorType *uSegReconstructor = m_iUSegArray + uSegArrayLoc;
+    USegReconstructorType *uSegReconstructor = m_pUSegReconArray + uSegArrayLoc;
     USegReconstructorIsNew	(uSegReconstructor) = true;
-    USegReconstructorPOP	(uSegReconstructor) = iStoreIdentity;
+    USegReconstructorPOP	(uSegReconstructor) = iStorePOP;
 
     return uSegArrayLoc;
 }
@@ -2372,7 +2096,7 @@ int VectorReconstructor::LocateOrAddReconstructorSegment (M_CPD *store) {
  *****  specified type.
  *
  *  Arguments:
- *	sourceDescriptor	- the address of a descriptor containing
+ *	rSource	- the address of a descriptor containing
  *				  the values to be assigned to the segment.
  *
  *  Returns:
@@ -2381,12 +2105,12 @@ int VectorReconstructor::LocateOrAddReconstructorSegment (M_CPD *store) {
  *
  *****/
 int VectorReconstructor::LocateOrAddReconstructorSegmentForRfDsAssignment (
-    DSC_Descriptor *sourceDescriptor
+    DSC_Descriptor &rSource
 ) {
-    int uSegArrayLocation = LocateOrAddReconstructorSegment (sourceDescriptor->storeCPD ());
-    USegReconstructorType *uSegReconstructor = m_iUSegArray + uSegArrayLocation;
+    int uSegArrayLocation = LocateOrAddReconstructorSegment (rSource.store ());
+    USegReconstructorType *uSegReconstructor = m_pUSegReconArray + uSegArrayLocation;
 
-    USegReconstructorDescriptor	(uSegReconstructor) = sourceDescriptor;
+    USegReconstructorDescriptor	(uSegReconstructor) = &rSource;
 
     return uSegArrayLocation;
 }
@@ -2397,7 +2121,7 @@ int VectorReconstructor::LocateOrAddReconstructorSegmentForRfDsAssignment (
  *****  specified type.
  *
  *  Arguments:
- *	sourceDescriptor	- the address of a descriptor containing
+ *	rSource	- the address of a descriptor containing
  *				  the values which will be assigned to
  *				  the new segment once it is created.
  *	sourcePPT		- a standard CPD for the descriptor's
@@ -2411,15 +2135,13 @@ int VectorReconstructor::LocateOrAddReconstructorSegmentForRfDsAssignment (
  *
  *****/
 int VectorReconstructor::LocateOrAddReconstructorSegmentForLcDsAssignment (
-    DSC_Descriptor *sourceDescriptor, M_CPD *sourcePPT
+    DSC_Descriptor &rSource, rtPTOKEN_Handle *sourcePPT
 ) {
-    int uSegArrayLocation = LocateOrAddReconstructorSegment (sourceDescriptor->storeCPD ());
-    USegReconstructorType *uSegReconstructor = m_iUSegArray + uSegArrayLocation;
+    int uSegArrayLocation = LocateOrAddReconstructorSegment (rSource.store ());
+    USegReconstructorType *uSegReconstructor = m_pUSegReconArray + uSegArrayLocation;
 
-    USegReconstructorDescriptor (uSegReconstructor) = sourceDescriptor;
-    USegReconstructorLC		(uSegReconstructor) = rtLINK_PosConstructor (
-	sourcePPT, -1
-    );
+    USegReconstructorDescriptor (uSegReconstructor) = &rSource;
+    USegReconstructorLC		(uSegReconstructor) = rtLINK_PosConstructor (sourcePPT);
 
     return uSegArrayLocation;
 }
@@ -2441,15 +2163,12 @@ int VectorReconstructor::LocateOrAddReconstructorSegmentForLcDsAssignment (
  *****/
 int VectorReconstructor::LocateOrAddReconstructorSegmentForLcVcAssignment (
     rtVECTOR_USDC *sourceUSDC
-)
-{
-    int uSegArrayLocation = LocateOrAddReconstructorSegment (sourceUSDC->storeCPD ());
-    USegReconstructorType *uSegReconstructor = m_iUSegArray + uSegArrayLocation;
+) {
+    int uSegArrayLocation = LocateOrAddReconstructorSegment (sourceUSDC->store ());
+    USegReconstructorType *uSegReconstructor = m_pUSegReconArray + uSegArrayLocation;
 
     USegReconstructorUSDC	(uSegReconstructor) = sourceUSDC;
-    USegReconstructorLC		(uSegReconstructor) = rtLINK_PosConstructor (
-	sourceUSDC->PPT (), -1
-    );
+    USegReconstructorLC		(uSegReconstructor) = rtLINK_PosConstructor (sourceUSDC->PPT ());
 
     return uSegArrayLocation;
 }
@@ -2465,12 +2184,15 @@ int VectorReconstructor::LocateOrAddReconstructorSegmentForLcVcAssignment (
  *  Arguments:
  *	segment			- the new P-Map entry's segment index.
  *	count			- the new P-Map entry's count.
+ *	phase0			- flag which when true means no pmap entries
+ *				  have been appended which were not already
+ *				  present.
  *
  *  Returns:
  *	'reconstructor'
  *
  *****/
-void VectorReconstructor::AppendPMapEntryToReconstructor (int segment, int count) {
+void VectorReconstructor::AppendPMapEntryToReconstructor (unsigned int segment, int count) {
 
 #define OperatingInPhase1 (IsNil (pmapR))
 
@@ -2495,9 +2217,6 @@ void VectorReconstructor::AppendPMapEntryToReconstructor (int segment, int count
     InitPMapReconstructor	(pmapR, pMapEntry);\
 }
 
-
-    rtVECTOR_PMRDType		*vectorPMRD;
-    int				oldSegment;
 
     PMapReconstructorType *pmapR = m_pPMapChainTail;
 
@@ -2535,9 +2254,9 @@ void VectorReconstructor::AppendPMapEntryToReconstructor (int segment, int count
  * Phase 1: Rebuilding pmap in place.
  *---------------------------------------------------------------------------
  */
-        if (pMapEntry == (vectorPMRD = rtVECTOR_CPD_PMRD (m_pVector))) {
+        if (pMapEntry == m_pVectorPMRD) {
 /*---------------------------------------------------------------------------
- * The segments don't match, so the pMapEntry we have to write on is still
+ * The segments don't match, so the pMapEntry we have to write is still
  * needed by whatever operation is driving the reconstruction, so we must
  * enter phase two of the reconstruction process.
  *---------------------------------------------------------------------------
@@ -2554,7 +2273,7 @@ void VectorReconstructor::AppendPMapEntryToReconstructor (int segment, int count
 	        ++m_pPMRD;
 	    BeginPhase2 (pmapR, pMapEntry);
 	}
-	else if (pMapEntry < vectorPMRD) {
+	else if (pMapEntry < m_pVectorPMRD) {
 	    /*---------------------------------------------------------------
 	     * If this pmapEntry has been committed, increment the
 	     * reconstructor's pointer for reasons similar to those given just
@@ -2562,9 +2281,8 @@ void VectorReconstructor::AppendPMapEntryToReconstructor (int segment, int count
 	     *---------------------------------------------------------------
 	     */
 	    pMapEntry = ThisIsTheFirstAdjustment () ? m_pPMRD : ++m_pPMRD;
-	    if ((oldSegment = rtVECTOR_PMRD_SegmentIndex (pMapEntry)) < 0 ||
-	        ( (pMapEntry == vectorPMRD) && (segment != oldSegment) )
-	    )
+	    int oldSegment = rtVECTOR_PMRD_SegmentIndex (pMapEntry); 
+	    if (oldSegment < 0 || (pMapEntry == m_pVectorPMRD && segment != oldSegment)) {
 	    /*---------------------------------------------------------------
 	     *  If the pmap entry now points beyond the end of the pmap or
 	     * points to the entry being examined by the calling operation and
@@ -2572,21 +2290,19 @@ void VectorReconstructor::AppendPMapEntryToReconstructor (int segment, int count
 	     * begin phase 2.
 	     *----------------------------------------------------------------
 	     */
-	    {
 		BeginPhase2 (pmapR, pMapEntry);
 	    }
 	    else
 	    /*----------------------------------------------------------------
-	     * We are modifying the vector itself, so mark it as corrupted.
+	     * We are modifying the vector itself, so mark it as inconsistent.
 	     *----------------------------------------------------------------
 	     */
-		rtVECTOR_CPD_IsInconsistent (m_pCPD) = true;
+		m_pVector->setIsInconsistent ();
 	}
 	else ERR_SignalFault (
-	    EC__InternalInconsistency,
-	    UTIL_FormatMessage (
+	    EC__InternalInconsistency, UTIL_FormatMessage (
 "AppendPMapEntryToReconstructor: PMRD pointers out of order: New:%d, Old:%d",
-		m_pPMRD, rtVECTOR_CPD_PMRD (m_pVector)
+		m_pPMRD, m_pVectorPMRD
 	    )
 	);
     }
@@ -2612,7 +2328,7 @@ void VectorReconstructor::AppendPMapEntryToReconstructor (int segment, int count
 /*****  Initialize any new pmap entries...  *****/
     rtVECTOR_PMRD_SegmentIndex  (pMapEntry) = segment;
     rtVECTOR_PMRD_SegmentOrigin (pMapEntry) = USegReconstructorNewPosition (
-	m_iUSegArray + segment
+	m_pUSegReconArray + segment
     );
     rtVECTOR_PMRD_VectorOrigin   (pMapEntry) = m_xCurrentVectorOrigin;
     m_xCurrentVectorOrigin += count;
@@ -2657,9 +2373,9 @@ void VectorReconstructor::AppendPMapEntryToReconstructor (int segment, int count
  *
  *****/
 void VectorReconstructor::ReconstructVector () {
-    M_CPD			*uSegPToken,
-				*uSegValues,
-				*uSegStore;
+    rtPTOKEN_Handle::Reference	 uSegPToken;
+    M_CPD			*uSegValues;
+    Vdd::Store			*uSegStore;
     RTYPE_Type			uSegRType;
     rtPTOKEN_CType		*ptc;
     PMapReconstructorType	*pMapPtr,
@@ -2675,9 +2391,13 @@ void VectorReconstructor::ReconstructVector () {
  *---------------------------------------------------------------------------*/
 
     unsigned int newPMapSize = m_cPMRDs;
-    unsigned int oldPMapSize = rtVECTOR_CPD_PMapSize (m_pVector);
+    unsigned int oldPMapSize = m_pVector->pmapSize ();
 
-    rtVECTOR_CPD_PMRD (m_pCPD) = m_pPMRD;
+//  Convert m_pPMRD into an offset...
+    unsigned int xPMRD = m_pPMRD - m_pVector->pmap ();
+    if (xPMRD > oldPMapSize)
+	xPMRD = oldPMapSize;
+
 
 
 /*---------------------------------------------------------------------------*
@@ -2685,33 +2405,29 @@ void VectorReconstructor::ReconstructVector () {
  *	 Update the Segment structures.
  *---------------------------------------------------------------------------*/
 
-    rtVECTOR_CPD_IsInconsistent (m_pCPD) = true;
+    m_pVector->setIsInconsistent ();
 
 /*****  If segments were added, ...  *****/
     if (m_cUSegAdditions > 0) {
     /*****  ... expand the vector's U-Segment index ...  *****/
-	rtVECTOR_CPD_USI (m_pVector) = rtVECTOR_CPD_USegIndex (m_pVector)
-	    + rtVECTOR_CPD_USegIndexSize (m_pVector);
 	m_pVector->ShiftContainerTail (
-	    rtVECTOR_CPx_USI, 0, sizeof (int) * m_cUSegAdditions, true
+	    m_pVector->segmentIndexLimit (), 0, sizeof (int) * m_cUSegAdditions, true
 	);
-	uSegIndex = rtVECTOR_CPD_USegIndex (m_pVector);
+	uSegIndex = m_pVector->segmentIndex ();
 	uSegLimit = m_sUSegIndex;
-	for (uSegOffset = 0; uSegOffset < uSegLimit; uSegOffset++) uSegIndex[
-	    uSegOffset
-	] = USegReconstructorReverseIndex (m_iUSegArray + uSegOffset);
-	rtVECTOR_CPD_USegIndexSize (m_pVector) = m_sUSegIndex;
+	for (uSegOffset = 0; uSegOffset < uSegLimit; uSegOffset++)
+	    uSegIndex[uSegOffset] = USegReconstructorReverseIndex (m_pUSegReconArray + uSegOffset);
+	m_pVector->setSegmentIndexSizeTo (m_sUSegIndex);
 
     /*****  ... and the vector's u-segment array (if necessary).  *****/
-	if (m_sUSegArray > rtVECTOR_CPD_USegArraySize (m_pVector)) {
-	    if (TracingUSDCAllocator)
-		IO_printf ("ReconstructVector: Call ExpandUSegArray(%u:%u)\n",
-			   m_sUSegArray,rtVECTOR_CPD_USegArraySize (m_pVector));
-	    ExpandUSegArray (
-		m_pVector, m_sUSegArray - rtVECTOR_CPD_USegArraySize (m_pVector)
+	if (m_sUSegArray > m_pVector->segmentArraySize ()) {
+	    if (TracingUSDCAllocator) IO_printf (
+		"ReconstructVector: Call ExpandUSegArray(%u:%u)\n",
+		m_sUSegArray, m_pVector->segmentArraySize ()
 	    );
+	    m_pVector->ExpandSegmentArray (m_sUSegArray - m_pVector->segmentArraySize ());
 	}
-	rtVECTOR_CPD_USegFreeBound (m_pVector) = m_xUSegFreeBound;
+	m_pVector->setSegmentFreeBoundTo (m_xUSegFreeBound);
     }
 
 /*****  Perform the specified segment adjustments and updates...  *****/
@@ -2721,9 +2437,9 @@ void VectorReconstructor::ReconstructVector () {
     bool fUSegmentDeleted = false;
 
     if (ImplicitPruningOfUSegmentsEnabled) {
-	if (TracingUSDCAllocator)
-	    IO_printf ("ReconstructVector: allocate pUSegmentRelocationMap (%u:%u)\n",
-		       m_sUSegArray,m_xPurpose);
+	if (TracingUSDCAllocator) IO_printf (
+	    "ReconstructVector: allocate pUSegmentRelocationMap (%u:%u)\n", m_sUSegArray,m_xPurpose
+	);
 	pUSegmentRelocationMap = (int *)UTIL_Malloc(sizeof (int) * m_sUSegArray);
     }
     switch (m_xPurpose) {
@@ -2731,8 +2447,9 @@ void VectorReconstructor::ReconstructVector () {
 
     case Alignment:
 	for (uSegOffset = 0; uSegOffset < uSegLimit; uSegOffset++) {
-	    uSegReconstructor = m_iUSegArray + uSegOffset;
-	    if (ImplicitPruningOfUSegmentsEnabled) pUSegmentRelocationMap[uSegOffset] = uSegRetainedCnt++;
+	    uSegReconstructor = m_pUSegReconArray + uSegOffset;
+	    if (ImplicitPruningOfUSegmentsEnabled)
+		pUSegmentRelocationMap[uSegOffset] = uSegRetainedCnt++;
 	    if (USegReconstructorIsNew (uSegReconstructor) &&
 		(0 < USegReconstructorNewPosition (uSegReconstructor) || !ImplicitPruningOfUSegmentsEnabled)) {
 	      // if there are no elements in this new usegment, only do this part of the creation if
@@ -2742,10 +2459,9 @@ void VectorReconstructor::ReconstructVector () {
 		M_KOTE const &rNA = m_pVector->TheNAClass ();
 
 		uSegPToken = NewPToken (USegReconstructorNewPosition (uSegReconstructor));
-		uSegValues = NewUVector (RTYPE_C_UndefUV, uSegPToken, rNA.PTokenCPD () , -1);
-		UV_CPD_IsASetUV (uSegValues) = (unsigned short)rtVECTOR_CPD_IsASet (m_pVector);
-		InitUSegmentArrayEntry (m_pVector, uSegOffset, rNA, uSegValues, uSegPToken);
-		uSegPToken->release ();
+		uSegValues = NewUVector (RTYPE_C_UndefUV, uSegPToken, rNA.PTokenHandle ());
+		UV_CPD_IsASetUV (uSegValues) = m_pVector->isASet ();
+		m_pVector->initializeSegment (uSegOffset, rNA, uSegValues, uSegPToken);
 		uSegValues->release ();
 	    }
 	    else if (IsntNil (ptc = USegReconstructorPTC (uSegReconstructor))) {
@@ -2756,15 +2472,11 @@ void VectorReconstructor::ReconstructVector () {
 		    ptc->discard ();
 		} else {
 		    uSegPToken = ptc->ToPToken ();
-		    rtVECTOR_CPD_USD (m_pVector) = rtVECTOR_CPD_USegArray (m_pVector) + uSegOffset;
-		    rtVECTOR_CPD_SetUSDCursor (m_pVector, rtVECTOR_USD_PToken);
-		    m_pVector->StoreReference (rtVECTOR_CPx_USDCursor, uSegPToken);
-		    uSegPToken->release ();
+		    m_pVector->setSegmentPTokenTo (uSegOffset, uSegPToken);
 		}
 	    }
 	    else if (ImplicitPruningOfUSegmentsEnabled) {
-	        rtVECTOR_CPD_USD (m_pVector) = rtVECTOR_CPD_USegArray (m_pVector) + uSegOffset;
-		if (m_pVector->ReferenceIsNil (&rtVECTOR_CPD_USD_PToken (m_pVector))) {
+		if (m_pVector->segmentUnused (uSegOffset)) {
 		    pUSegmentRelocationMap[uSegOffset] = -1;
 		    uSegRetainedCnt--;
 		    fUSegmentDeleted = true;
@@ -2776,27 +2488,19 @@ void VectorReconstructor::ReconstructVector () {
 
     case RfDsAssignment:
 	for (uSegOffset = 0; uSegOffset < uSegLimit; uSegOffset++) {
-	    uSegReconstructor	= m_iUSegArray + uSegOffset;
+	    uSegReconstructor	= m_pUSegReconArray + uSegOffset;
 	    uSegValues		= NilOf (M_CPD*);
-	    if (ImplicitPruningOfUSegmentsEnabled) pUSegmentRelocationMap[uSegOffset] = uSegRetainedCnt++;
+	    if (ImplicitPruningOfUSegmentsEnabled)
+		pUSegmentRelocationMap[uSegOffset] = uSegRetainedCnt++;
 	    if (USegReconstructorIsNew (uSegReconstructor)) {
 	/***** ... implies 'IsntNil (USegReconstructorDescriptor(...))'  *****/
-		uSegStore = USegReconstructorDescriptor(uSegReconstructor)->storeCPD ();
+		uSegStore = USegReconstructorDescriptor(uSegReconstructor)->store ();
 		uSegRType = USegReconstructorDescriptor(uSegReconstructor)->pointerRType ();
 
-		M_CPD *uSegRPTRefCPD; int uSegRPTRefIndex;
-		USegReconstructorDescriptor(uSegReconstructor)->getRPTReference (
-		    uSegRPTRefCPD, uSegRPTRefIndex
-		);
+		rtPTOKEN_Handle::Reference uSegRPT (USegReconstructorDescriptor(uSegReconstructor)->RPT ());
 		uSegPToken = NewPToken (USegReconstructorNewPosition (uSegReconstructor));
-		uSegValues = NewUVector (
-		    uSegRType ,uSegPToken, uSegRPTRefCPD, uSegRPTRefIndex
-		);
-		InitUSegmentArrayEntry (
-		    m_pVector, uSegOffset, uSegStore, uSegValues, uSegPToken
-		);
-		uSegRPTRefCPD->release ();
-		uSegPToken->release ();
+		uSegValues = NewUVector (uSegRType ,uSegPToken, uSegRPT);
+		m_pVector->initializeSegment (uSegOffset, uSegStore, uSegValues, uSegPToken);
 	    }
 	    else if (IsntNil (ptc = USegReconstructorPTC (uSegReconstructor))) {
 		if (ImplicitPruningOfUSegmentsEnabled && 0 == rtPTOKEN_PTC_BaseCount (ptc)) {
@@ -2806,15 +2510,11 @@ void VectorReconstructor::ReconstructVector () {
 		    ptc->discard ();
 		} else {
 		    uSegPToken = ptc->ToPToken ();
-		    rtVECTOR_CPD_USD (m_pVector) = rtVECTOR_CPD_USegArray (m_pVector) + uSegOffset;
-		    rtVECTOR_CPD_SetUSDCursor (m_pVector, rtVECTOR_USD_PToken);
-		    m_pVector->StoreReference (rtVECTOR_CPx_USDCursor, uSegPToken);
-		    uSegPToken->release ();
+		    m_pVector->setSegmentPTokenTo (uSegOffset, uSegPToken);
 		}
 	    }
 	    else if (ImplicitPruningOfUSegmentsEnabled) {
-	        rtVECTOR_CPD_USD (m_pVector) = rtVECTOR_CPD_USegArray (m_pVector) + uSegOffset;
-		if (m_pVector->ReferenceIsNil (&rtVECTOR_CPD_USD_PToken (m_pVector))) {
+		if (m_pVector->segmentUnused (uSegOffset)) {
 		    pUSegmentRelocationMap[uSegOffset] = -1;
 		    uSegRetainedCnt--;
 		    fUSegmentDeleted = true;
@@ -2822,12 +2522,11 @@ void VectorReconstructor::ReconstructVector () {
 	    }
 
 	    if (IsntNil (USegReconstructorDescriptor (uSegReconstructor))) {
-		uSegValues = AtUVOffsetPutDescriptor (
+		m_pVector->setSegmentValuesTo (
 		    uSegValues,
-		    m_pVector,
 		    uSegOffset,
 		    USegReconstructorOffset (uSegReconstructor),
-		    USegReconstructorDescriptor (uSegReconstructor)
+		    *USegReconstructorDescriptor (uSegReconstructor)
 		);
 		uSegValues->release ();
 	    }
@@ -2837,28 +2536,20 @@ void VectorReconstructor::ReconstructVector () {
 
     case LcDsAssignment:
 	for (uSegOffset = 0; uSegOffset < uSegLimit; uSegOffset++) {
-	    uSegReconstructor	= m_iUSegArray + uSegOffset;
-	    uSegPToken		=
+	    uSegReconstructor	= m_pUSegReconArray + uSegOffset;
 	    uSegValues		= NilOf (M_CPD*);
-	    if (ImplicitPruningOfUSegmentsEnabled) pUSegmentRelocationMap[uSegOffset] = uSegRetainedCnt++;
-	    if (USegReconstructorIsNew (uSegReconstructor))
-	    {
+	    uSegPToken.clear ();
+	    if (ImplicitPruningOfUSegmentsEnabled)
+		pUSegmentRelocationMap[uSegOffset] = uSegRetainedCnt++;
+	    if (USegReconstructorIsNew (uSegReconstructor)) {
 	/***** ... implies 'IsntNil (USegReconstructorDescriptor(...))'  *****/
-		uSegStore = USegReconstructorDescriptor(uSegReconstructor)->storeCPD ();
+		uSegStore = USegReconstructorDescriptor(uSegReconstructor)->store ();
 		uSegRType = USegReconstructorDescriptor(uSegReconstructor)->pointerRType ();
 
-		M_CPD *uSegRPTRefCPD; int uSegRPTRefIndex;
-		USegReconstructorDescriptor(uSegReconstructor)->getRPTReference (
-		    uSegRPTRefCPD, uSegRPTRefIndex
-		);
+		rtPTOKEN_Handle::Reference uSegRPT (USegReconstructorDescriptor(uSegReconstructor)->RPT ());
 		uSegPToken = NewPToken (USegReconstructorNewPosition (uSegReconstructor));
-		uSegValues = NewUVector (
-		    uSegRType ,uSegPToken, uSegRPTRefCPD, uSegRPTRefIndex
-		);
-		InitUSegmentArrayEntry (
-		    m_pVector, uSegOffset, uSegStore, uSegValues, uSegPToken
-		);
-		uSegRPTRefCPD->release ();
+		uSegValues = NewUVector (uSegRType ,uSegPToken, uSegRPT);
+		m_pVector->initializeSegment (uSegOffset, uSegStore, uSegValues, uSegPToken);
 	    }
 	    else if (IsntNil (ptc = USegReconstructorPTC (uSegReconstructor))) {
 		if (ImplicitPruningOfUSegmentsEnabled && 0 == rtPTOKEN_PTC_BaseCount (ptc)) {
@@ -2871,19 +2562,14 @@ void VectorReconstructor::ReconstructVector () {
 			USegReconstructorLC (uSegReconstructor)->release ();
 		} else {
 		    uSegPToken = ptc->ToPToken ();
-		    rtVECTOR_CPD_USD (m_pVector) = rtVECTOR_CPD_USegArray (m_pVector) + uSegOffset;
-		    rtVECTOR_CPD_SetUSDCursor (m_pVector, rtVECTOR_USD_PToken);
-		    m_pVector->StoreReference (rtVECTOR_CPx_USDCursor, uSegPToken);
+		    m_pVector->setSegmentPTokenTo (uSegOffset, uSegPToken);
 		}
 	    }
 	    else if (IsntNil (USegReconstructorDescriptor (uSegReconstructor))) {
-		rtVECTOR_CPD_USD (m_pVector) = rtVECTOR_CPD_USegArray (m_pVector) + uSegOffset;
-		rtVECTOR_CPD_SetUSDCursor (m_pVector, rtVECTOR_USD_PToken);
-		uSegPToken = m_pVector->GetCPD (rtVECTOR_CPx_USDCursor, RTYPE_C_PToken);
+		uSegPToken.setTo (m_pVector->segmentPTokenHandle (uSegOffset));
 	    }
 	    else if (ImplicitPruningOfUSegmentsEnabled) {
-	        rtVECTOR_CPD_USD (m_pVector) = rtVECTOR_CPD_USegArray (m_pVector) + uSegOffset;
-		if (m_pVector->ReferenceIsNil (&rtVECTOR_CPD_USD_PToken (m_pVector))) {
+		if (m_pVector->segmentUnused (uSegOffset)) {
 		    pUSegmentRelocationMap[uSegOffset] = -1;
 		    uSegRetainedCnt--;
 		    fUSegmentDeleted = true;
@@ -2891,44 +2577,36 @@ void VectorReconstructor::ReconstructVector () {
 	    }
 	    if (IsntNil (USegReconstructorDescriptor (uSegReconstructor))) {
 		USegReconstructorLC (uSegReconstructor)->Close (uSegPToken);
-		uSegValues = AtUVLinkCPositionsPutDescriptor (
+		m_pVector->setSegmentValuesTo (
 		    uSegValues,
-		    m_pVector,
 		    uSegOffset,
 		    USegReconstructorLC (uSegReconstructor),
-		    USegReconstructorDescriptor (uSegReconstructor)
+		    *USegReconstructorDescriptor (uSegReconstructor)
 		);
 		USegReconstructorLC (uSegReconstructor)->release ();
 		uSegValues->release ();
 	    }
-	    if (uSegPToken)
-		uSegPToken->release ();
 	}
 	break;
 
 
     case LcVcAssignment:
 	for (uSegOffset = 0; uSegOffset < uSegLimit; uSegOffset++) {
-	    uSegReconstructor	= m_iUSegArray + uSegOffset;
-	    uSegPToken		=
+	    uSegReconstructor	= m_pUSegReconArray + uSegOffset;
 	    uSegValues		= NilOf (M_CPD*);
-	    if (ImplicitPruningOfUSegmentsEnabled) pUSegmentRelocationMap[uSegOffset] = uSegRetainedCnt++;
+	    uSegPToken.clear ();
+	    if (ImplicitPruningOfUSegmentsEnabled)
+		pUSegmentRelocationMap[uSegOffset] = uSegRetainedCnt++;
 	    if (USegReconstructorIsNew (uSegReconstructor)) {
 	/***** ... implies 'IsntNil (USegReconstructorUSDC(...))'  *****/
 		M_CPD *sourceValues = USegReconstructorUSDC (uSegReconstructor)->pointerCPD ();
-		uSegPToken = NewPToken (USegReconstructorNewPosition (uSegReconstructor));
-		uSegValues = NewUVector (
-		    (RTYPE_Type)M_CPD_RType (sourceValues),
-		    uSegPToken,
-		    sourceValues,
-		    UV_CPx_RefPToken
+		rtPTOKEN_Handle::Reference uSegRPT (
+		    static_cast<rtUVECTOR_Handle*>(sourceValues->containerHandle ())->rptHandle ()
 		);
-		InitUSegmentArrayEntry (
-		    m_pVector,
-		    uSegOffset,
-		    USegReconstructorUSDC (uSegReconstructor)->storeCPD (),
-		    uSegValues,
-		    uSegPToken
+		uSegPToken = NewPToken (USegReconstructorNewPosition (uSegReconstructor));
+		uSegValues = NewUVector (sourceValues->RType (), uSegPToken, uSegRPT);
+		m_pVector->initializeSegment (
+		    uSegOffset, USegReconstructorUSDC (uSegReconstructor)->store (), uSegValues, uSegPToken
 		);
 	    }
 	    else if (IsntNil (ptc = USegReconstructorPTC (uSegReconstructor))) {
@@ -2942,19 +2620,14 @@ void VectorReconstructor::ReconstructVector () {
 			USegReconstructorLC (uSegReconstructor)->release ();
 		} else {
 		    uSegPToken = ptc->ToPToken ();
-		    rtVECTOR_CPD_USD (m_pVector) = rtVECTOR_CPD_USegArray (m_pVector) + uSegOffset;
-		    rtVECTOR_CPD_SetUSDCursor (m_pVector, rtVECTOR_USD_PToken);
-		    m_pVector->StoreReference (rtVECTOR_CPx_USDCursor, uSegPToken);
+		    m_pVector->setSegmentPTokenTo (uSegOffset, uSegPToken);
 		}
 	    }
 	    else if (IsntNil (USegReconstructorDescriptor (uSegReconstructor))) {
-		rtVECTOR_CPD_USD (m_pVector) = rtVECTOR_CPD_USegArray (m_pVector) + uSegOffset;
-		rtVECTOR_CPD_SetUSDCursor (m_pVector, rtVECTOR_USD_PToken);
-		uSegPToken = m_pVector->GetCPD (rtVECTOR_CPx_USDCursor, RTYPE_C_PToken);
+		uSegPToken.setTo (m_pVector->segmentPTokenHandle (uSegOffset));
 	    }
 	    else if (ImplicitPruningOfUSegmentsEnabled) {
-	        rtVECTOR_CPD_USD (m_pVector) = rtVECTOR_CPD_USegArray (m_pVector) + uSegOffset;
-		if (m_pVector->ReferenceIsNil (&rtVECTOR_CPD_USD_PToken (m_pVector))) {
+		if (m_pVector->segmentUnused (uSegOffset)) {
 		    pUSegmentRelocationMap[uSegOffset] = -1;
 		    uSegRetainedCnt--;
 		    fUSegmentDeleted = true;
@@ -2962,9 +2635,8 @@ void VectorReconstructor::ReconstructVector () {
 	    }
 	    if (IsntNil (USegReconstructorDescriptor (uSegReconstructor))) {
 		USegReconstructorLC (uSegReconstructor)->Close (uSegPToken);
-		uSegValues = AtUVLinkCPositionsPutUV (
+		m_pVector->setSegmentValuesTo (
 		    uSegValues,
-		    m_pVector,
 		    uSegOffset,
 		    USegReconstructorLC (uSegReconstructor),
 		    USegReconstructorUSDC (uSegReconstructor)->pointerCPD ()
@@ -2972,8 +2644,6 @@ void VectorReconstructor::ReconstructVector () {
 		USegReconstructorLC (uSegReconstructor)->release ();
 		uSegValues->release ();
 	    }
-	    if (uSegPToken)
-		uSegPToken->release ();
 	}
 	break;
 
@@ -2997,22 +2667,22 @@ void VectorReconstructor::ReconstructVector () {
  */
 
 /*****  Adjust the space allocated to the P-Map...  *****/
-    rtVECTOR_CPD_PMRD (m_pVector) = rtVECTOR_CPD_PMap (m_pVector) + oldPMapSize;
     m_pVector->ShiftContainerTail (
-	rtVECTOR_CPx_PMRD,
+	reinterpret_cast<pointer_t>(m_pVector->pmap () + oldPMapSize),
 	sizeof (rtVECTOR_PMRDType)
-	    + sizeof(int) * rtVECTOR_CPD_USegIndexSize (m_pVector)
-	    + sizeof(rtVECTOR_USDType) * rtVECTOR_CPD_USegArraySize(m_pVector),
+	    + sizeof(int) * m_pVector->segmentIndexSize ()
+	    + sizeof(rtVECTOR_USDType) * m_pVector->segmentArraySize (),
 	sizeof (rtVECTOR_PMRDType) * ((ptrdiff_t)newPMapSize - oldPMapSize),
 	true
     );
-    rtVECTOR_CPD_PMapSize (m_pVector) = newPMapSize;
+    m_pVector->setPMapSizeTo (newPMapSize);
+
+    //  Recreate the PMap pointers, ...
+    rtVECTOR_PMRDType *pMap = m_pVector->pmap ();
+    m_pVectorPMRD = pMap + oldPMapSize;
+    m_pPMRD = pMap + xPMRD;
 
 /*****  ...re-create the P-Map...  *****/
-    m_pPMRD = rtVECTOR_CPD_PMRD (m_pCPD);
-    if (m_pPMRD > rtVECTOR_CPD_PMap (m_pVector) + oldPMapSize)
-	m_pPMRD = rtVECTOR_CPD_PMap (m_pVector) + oldPMapSize;
-
     for (pMapPtr = m_pPMapChainHead; pMapPtr; pMapPtr = PMapReconstructorNext (pMapPtr)) {
 	memcpy (
 	    m_pPMRD,
@@ -3022,9 +2692,9 @@ void VectorReconstructor::ReconstructVector () {
 	m_pPMRD += PMapReconstructorNumberOfSlots (pMapPtr);
     }
 
-    rtVECTOR_CPD_IsInconsistent (m_pCPD) = false;
+    m_pVector->clearIsInconsistent ();
     if (fUSegmentDeleted) {
-	RemoveEmptyUSegments (m_pVector, pUSegmentRelocationMap, m_sUSegArray);
+	m_pVector->RemoveEmptySegments (pUSegmentRelocationMap, m_sUSegArray);
     }
 
 
@@ -3044,8 +2714,6 @@ void VectorReconstructor::ReconstructVector () {
 
     if (ImplicitPruningOfUSegmentsEnabled)
 	UTIL_Free (pUSegmentRelocationMap);
-    m_pCPD->release ();
-    UTIL_Free (this);
 }
 
 
@@ -3070,12 +2738,10 @@ void VectorReconstructor::ReconstructVector () {
  *	'vectorCPD'
  *
  *****/
-PublicFnDef M_CPD *rtVECTOR_Align (M_CPD *vectorCPD) {
-
-
+bool rtVECTOR_Handle::align () {
 /*
  *---------------------------------------------------------------------------
- *  Local Definitions: 'rtVECTOR_Align'
+ *  Local Definitions: rtVECTOR_Handle::align ()
  *---------------------------------------------------------------------------
  */
 
@@ -3086,13 +2752,9 @@ PublicFnDef M_CPD *rtVECTOR_Align (M_CPD *vectorCPD) {
     int				targetPosition,
 				targetPMapPosition,
 				nextTargetPMapPosition,
-				targetUSegArrayLoc,
-				undefinedValueUSegArrayLoc;
+				targetUSegArrayLoc;
     bool			notTheFinalTargetPMapEntry,
 				noChangesYet = true;
-    M_CPD			*newPTokenCPD,
-				*pTokenCPD,
-				*undefuvCPD;
 
 
 /*****  Vector P-Map Traversal Macros  *****/
@@ -3100,19 +2762,19 @@ PublicFnDef M_CPD *rtVECTOR_Align (M_CPD *vectorCPD) {
 
 #define advanceTarget() {\
     if (TracingPMapSearches) IO_printf (\
-	"...rtVECTOR_Align[advanceTarget]: OTP:%d, OTR:%d\n",\
+	"...rtVECTOR_Handle::align[advanceTarget]: OTP:%d, OTR:%d\n",\
 	targetPosition, targetRemaining\
     );\
 \
     advanceUSegmentScanPointers (targetRemaining);\
-    setTargetScanPointers (++rtVECTOR_CPD_PMRD (vectorCPD));\
+    setTargetScanPointers (iReconstructor.nextTargetPMRD ());\
 }
 
 #define locateTarget(origin) {\
     while (origin >= nextTargetPMapPosition && notTheFinalTargetPMapEntry)\
 	advanceTarget ();\
     if (TracingPMapSearches) IO_printf (\
-	"...rtVECTOR_Align[locateTarget]: O:%d, TP:%d, TR:%d\n",\
+	"...rtVECTOR_Handle::align[locateTarget]: O:%d, TP:%d, TR:%d\n",\
 	origin, targetPosition, targetRemaining\
     );\
     noChangesYet = false;\
@@ -3123,11 +2785,8 @@ PublicFnDef M_CPD *rtVECTOR_Align (M_CPD *vectorCPD) {
 #define setTargetScanPointers(targetPMapPtr) {\
     rtVECTOR_PMRDType *tPMapPtr;\
 \
-    targetPosition = targetPMapPosition =\
-	rtVECTOR_PMRD_VectorOrigin (tPMapPtr = (targetPMapPtr));\
-    if (notTheFinalTargetPMapEntry =\
-	    (targetUSegArrayLoc = rtVECTOR_PMRD_SegmentIndex (tPMapPtr)) >= 0)\
-    {\
+    targetPosition = targetPMapPosition = rtVECTOR_PMRD_VectorOrigin (tPMapPtr = (targetPMapPtr));\
+    if (notTheFinalTargetPMapEntry = (targetUSegArrayLoc = rtVECTOR_PMRD_SegmentIndex (tPMapPtr)) >= 0) {\
 	nextTargetPMapPosition	= rtVECTOR_PMRD_VectorOrigin (tPMapPtr + 1);\
 	targetUSegReconstructor = uSegReconstructorArray + targetUSegArrayLoc;\
     }\
@@ -3141,7 +2800,7 @@ PublicFnDef M_CPD *rtVECTOR_Align (M_CPD *vectorCPD) {
     int	iCount;\
 \
     if ((iCount = (count)) > 0) {\
-	vectorReconstructor->AppendPMapEntryToReconstructor (\
+	iReconstructor.AppendPMapEntryToReconstructor (\
 	    targetUSegArrayLoc, iCount, noChangesYet\
 	);\
 	USegReconstructorOldPosition (targetUSegReconstructor) += iCount;\
@@ -3153,11 +2812,11 @@ PublicFnDef M_CPD *rtVECTOR_Align (M_CPD *vectorCPD) {
 /*****  P-Token Constructor Traversal Case Handlers  *****/
 #define insertVectorPositions(origin, shift) {\
     locateTarget (origin);\
-    vectorReconstructor->AppendPMapEntryToReconstructor (\
+    iReconstructor.AppendPMapEntryToReconstructor (\
 	undefinedValueUSegArrayLoc, shift, false\
     );\
     USegReconstructorNewPosition (undefinedValueUSegReconstructor)+= shift;\
-    vectorReconstructor->AdjustUSegReconstructorPToken (\
+    iReconstructor.AdjustUSegReconstructorPToken (\
 	undefinedValueUSegArrayLoc, shift\
     );\
 }
@@ -3172,7 +2831,7 @@ PublicFnDef M_CPD *rtVECTOR_Align (M_CPD *vectorCPD) {
     if ((targetCompleted = targetRemaining) > count)\
 	targetCompleted = count;\
     USegReconstructorOldPosition (targetUSegReconstructor) += targetCompleted;\
-    vectorReconstructor->AdjustUSegReconstructorPToken (\
+    iReconstructor.AdjustUSegReconstructorPToken (\
 	targetUSegArrayLoc, -targetCompleted\
     );\
     targetPosition += targetCompleted;\
@@ -3182,7 +2841,7 @@ PublicFnDef M_CPD *rtVECTOR_Align (M_CPD *vectorCPD) {
 	if ((targetCompleted = targetRemaining) > count)\
 	    targetCompleted = count;\
 	USegReconstructorOldPosition (targetUSegReconstructor)+= targetCompleted;\
-	vectorReconstructor->AdjustUSegReconstructorPToken (\
+	iReconstructor.AdjustUSegReconstructorPToken (\
 	    targetUSegArrayLoc, -targetCompleted\
 	);\
 	targetPosition += targetCompleted;\
@@ -3192,67 +2851,60 @@ PublicFnDef M_CPD *rtVECTOR_Align (M_CPD *vectorCPD) {
 
 /*
  *---------------------------------------------------------------------------
- *  Code Body: 'rtVECTOR_Align'
+ *  Code Body: 'rtVECTOR_Handle::align'
  *---------------------------------------------------------------------------
  */
-    RTYPE_MustBeA ("rtVECTOR_Align", M_CPD_RType (vectorCPD), RTYPE_C_Vector);
 
 /*****  Do nothing if the vector is already current...  *****/
-    rtPTOKEN_IsntCurrent (vectorCPD, rtVECTOR_CPx_PToken, pTokenCPD);
-    if (IsNil (pTokenCPD))
-	return vectorCPD;
+    rtPTOKEN_Handle::Reference pPToken;
+    if (isTerminal (ptokenPOP (), pPToken))
+	return false;
 
 /*****  ...otherwise:  *****/
-    vectorCPD->CheckConsistency ();
+    CheckConsistency ();
 
 /*****  ...create a vector reconstructor, ...  *****/
-    VectorReconstructor	*vectorReconstructor = VectorReconstructor::NewReconstructor  (
-	Alignment, vectorCPD, 1
-    );
+    VectorReconstructor iReconstructor (this, Alignment, 1);
 
 /*****  ...insure that the vector has an 'undefined' u-segment, ...  *****/
-    undefinedValueUSegArrayLoc = vectorReconstructor->LocateOrAddReconstructorSegment (
-	vectorCPD->TheNAClass ()
+    unsigned int undefinedValueUSegArrayLoc = iReconstructor.LocateOrAddReconstructorSegment (
+	TheNAClass ().store ()
     );
 
 /*****  ...cache the relevant reconstructor state, ...  *****/
-    uSegReconstructorArray = vectorReconstructor->USegArray ();
-    undefinedValueUSegReconstructor =
-	uSegReconstructorArray + undefinedValueUSegArrayLoc;
+    uSegReconstructorArray = iReconstructor.USegArray ();
+    undefinedValueUSegReconstructor = uSegReconstructorArray + undefinedValueUSegArrayLoc;
 
 /*****  ...initialize the alignment plan construction loop variables...  *****/
-    setTargetScanPointers (
-	rtVECTOR_CPD_PMRD (vectorCPD) = rtVECTOR_CPD_PMap (vectorCPD)
-    );
+    setTargetScanPointers (iReconstructor.thisTargetPMRD ());
 
     if (TracingPMapBrief) {
-	M_CPD *basePToken = rtPTOKEN_BasePToken (pTokenCPD, -1);
+	rtPTOKEN_Handle::Reference basePToken (pPToken->basePToken ());
 	IO_printf (
-	    "rtVECTOR_Align: OrigVectorSize=%d, NewVectorSize=%d, PMapSize=%d\n",
-	    rtPTOKEN_CPD_BaseElementCount (pTokenCPD),
-	    rtPTOKEN_CPD_BaseElementCount (basePToken),
-	    rtVECTOR_CPD_PMapSize (vectorCPD)
+	    "rtVECTOR_Handle:align: OrigVectorSize=%d, NewVectorSize=%d, PMapSize=%d\n",
+	    pPToken->cardinality (),
+	    basePToken->cardinality (),
+	    pmapSize ()
 	);
-	basePToken->release ();
     }
 
 /*****  ...build the alignment plan, ...  *****/
-    rtPTOKEN_CType *ptConstructor = rtPTOKEN_CPDCumAdjustments (pTokenCPD);
-    pTokenCPD->release ();
+    rtPTOKEN_CType *ptConstructor = pPToken->getAdjustments ();
 
     rtPTOKEN_FTraverseInstructions (
 	ptConstructor, insertVectorPositions, deleteVectorPositions
     );
-    locateTarget (rtVECTOR_CPD_ElementCount (vectorCPD));
+    locateTarget (elementCount ());
 
 /*****  ...reset the vector's P-Token and element count, ...  *****/
-    vectorCPD->StoreReference (
-	rtVECTOR_CPx_PToken, newPTokenCPD = ptConstructor->NextGeneration ()
-    );
-    rtVECTOR_CPD_ElementCount (vectorCPD) = rtPTOKEN_CPD_BaseElementCount (newPTokenCPD);
+    EnableModifications ();
+    rtPTOKEN_Handle *newPTokenCPD = ptConstructor->NextGeneration ();
+    StoreReference (ptokenPOP (), newPTokenCPD);
+
+    rtVECTOR_V_ElementCount (typecastContent ()) = newPTokenCPD->cardinality ();
 
 /*****  ...reconstruct the vector, ...  *****/
-    vectorReconstructor->ReconstructVector ();
+    iReconstructor.ReconstructVector ();
 
 /*****  ...cleanup, ...  *****/
     ptConstructor->discard ();
@@ -3270,24 +2922,14 @@ PublicFnDef M_CPD *rtVECTOR_Align (M_CPD *vectorCPD) {
  * operation).  
  */
 
-    if (LocateVectorSegment (vectorCPD, vectorCPD->TheNAClass (), &undefinedValueUSegArrayLoc)) {
-	rtVECTOR_CPD_USD (vectorCPD) = rtVECTOR_CPD_USegArray (vectorCPD)
-	    + undefinedValueUSegArrayLoc;
-	rtVECTOR_CPD_SetUSDCursor (vectorCPD, rtVECTOR_USD_Values);
-
-	undefuvCPD = vectorCPD->GetCPD (rtVECTOR_CPx_USDCursor, RTYPE_C_UndefUV);
-	rtUNDEFUV_Align (undefuvCPD);
+    if (LocateSegment (TheNAClass ().store (), undefinedValueUSegArrayLoc)) {
+	M_CPD *undefuvCPD = segmentPointerCPD (undefinedValueUSegArrayLoc);
+	undefuvCPD->align ();
 	undefuvCPD->release ();
     }
 /*****  ...and return.  *****/
-    return vectorCPD;
-
+    return true;
 
-/*
- *---------------------------------------------------------------------------
- *  Local Macro Deletions: 'rtVECTOR_Align'
- *---------------------------------------------------------------------------
- */
 #undef targetRemaining
 #undef advanceTarget
 #undef locateTarget
@@ -3315,59 +2957,42 @@ PublicFnDef M_CPD *rtVECTOR_Align (M_CPD *vectorCPD) {
  *	True if any alignments were done, false otherwise.
  *
  *****/
-PublicFnDef bool rtVECTOR_AlignAll (M_CPD *vectorCPD, bool deletingEmptyUSegments) {
-    bool	result = false, emptyUSegmentsDeleted = false;
-    int		uSegmentCount, uSegmentRIndex, uSegmentWIndex,
-		*uSegmentRelocationMap;
-
+bool rtVECTOR_Handle::alignAll (bool bDeletingEmptyUSegments) {
 /*****  Align the vector ... *****/
-    if (!rtPTOKEN_IsCurrent (vectorCPD, rtVECTOR_CPx_PToken)) {
-        rtVECTOR_Align (vectorCPD);
-	result = true;
-    }
+    bool result = align ();
 
 /*****  ... and its USegments: *****/
-    uSegmentCount = rtVECTOR_CPD_USegArraySize (vectorCPD);
-    uSegmentRelocationMap = (int *)UTIL_Malloc(sizeof (int) * uSegmentCount);
+    unsigned int uSegmentCount = segmentArraySize ();
+    int *uSegmentRelocationMap = (int *)UTIL_Malloc(sizeof (int) * uSegmentCount);
 
-    for (uSegmentRIndex = uSegmentWIndex = 0;
-	 uSegmentRIndex < uSegmentCount;
-	 uSegmentRIndex++
-    )
-    {
+    bool emptyUSegmentsDeleted = false;
+    unsigned int uSegmentWIndex = 0;
+    for (unsigned int uSegmentRIndex = 0; uSegmentRIndex < uSegmentCount; uSegmentRIndex++) {
 	uSegmentRelocationMap[uSegmentRIndex] = -1;
 
-	rtVECTOR_CPD_USD (vectorCPD) =
-	    rtVECTOR_CPD_USegArray (vectorCPD) + uSegmentRIndex;
-	rtVECTOR_CPD_SetUSDCursor (vectorCPD, rtVECTOR_USD_PToken);
-
-//	if (M_POPIsNil (&rtVECTOR_CPD_USD_PToken (vectorCPD)))
-	if (vectorCPD->ReferenceIsNil (&rtVECTOR_CPD_USD_PToken (vectorCPD)))
+	if (segmentUnused (uSegmentRIndex))
 	    continue;
 
-	if (deletingEmptyUSegments &&
-	    rtPTOKEN_BaseElementCount (vectorCPD, rtVECTOR_CPx_USDCursor) == 0) {
+	if (bDeletingEmptyUSegments && segmentCardinality (uSegmentRIndex) == 0) {
 	    result = emptyUSegmentsDeleted = true;
 	    continue;
 	}
 
 	uSegmentRelocationMap[uSegmentRIndex] = uSegmentWIndex++;
 
-	rtVECTOR_CPD_SetUSDCursor (vectorCPD, rtVECTOR_USD_Values);
-	M_CPD *uvectorCPD = vectorCPD->GetCPD (rtVECTOR_CPx_USDCursor);
-	if (rtPTOKEN_IsCurrent (uvectorCPD, UV_CPx_PToken) &&
-	    rtPTOKEN_IsCurrent (uvectorCPD, UV_CPx_RefPToken)) {
-	  uvectorCPD->release ();
-	  continue;
+	M_CPD *uvectorCPD = segmentPointerCPD (uSegmentRIndex);
+	if (uvectorCPD->isTerminal (UV_CPx_PToken) && uvectorCPD->isTerminal (UV_CPx_RefPToken)) {
+	    uvectorCPD->release ();
+	    continue;
 	}
 	result = true;
-	AlignUVector (uvectorCPD);
+	uvectorCPD->align ();
 	uvectorCPD->release ();
     }
 
 /*****  If u-segments were deleted ... *****/
     if (emptyUSegmentsDeleted) {
-	RemoveEmptyUSegments (vectorCPD, uSegmentRelocationMap, uSegmentCount);
+	RemoveEmptySegments (uSegmentRelocationMap, uSegmentCount);
     }
 
     UTIL_Free (uSegmentRelocationMap);
@@ -3663,7 +3288,7 @@ PublicFnDef bool rtVECTOR_AlignAll (M_CPD *vectorCPD, bool deletingEmptyUSegment
  *				  the elements of 'target' to be updated.
  *				  'Linkc' must be related referentially to
  *				  'target' and positionally to 'source'.
- *	sourceDescriptor	- a pointer to a Value Descriptor supplying
+ *	rSource	- a pointer to a Value Descriptor supplying
  *				  the values to be assigned to 'target'.
  *				  The Value Descriptor allows this routine to
  *                                as a cover for scalar and u-vector values.
@@ -3685,14 +3310,12 @@ PublicFnDef bool rtVECTOR_AlignAll (M_CPD *vectorCPD, bool deletingEmptyUSegment
  *	  for u-vector sources values.
  *
  *****/
-PublicFnDef void rtVECTOR_Assign (
-    M_CPD *targetVector, rtLINK_CType *linkc, DSC_Descriptor *sourceDescriptor
-) {
+bool rtVECTOR_Handle::setElements (rtLINK_CType *linkc, DSC_Descriptor &rValues) {
 
 
 /*
  *---------------------------------------------------------------------------
- *  Local Definitions: 'rtVECTOR_Assign'
+ *  Local Definitions: rtVECTOR_Handle::setElements (rtLINK_CType*, DSC_Descriptor&)
  *---------------------------------------------------------------------------
  */
 
@@ -3720,7 +3343,7 @@ PublicFnDef void rtVECTOR_Assign (
     );\
 \
     advanceUSegmentScanPointers (targetRemaining);\
-    setTargetScanPointers (++rtVECTOR_CPD_PMRD (targetVector));\
+    setTargetScanPointers (iReconstructor.nextTargetPMRD ());\
 }
 
 #define locateTarget(position, count, origin) {\
@@ -3769,16 +3392,16 @@ PublicFnDef void rtVECTOR_Assign (
 	USegReconstructorNewPosition (sourceUSegReconstructor),\
 	count\
     );\
-    vectorReconstructor->AppendPMapEntryToReconstructor (\
+    iReconstructor.AppendPMapEntryToReconstructor (\
 	sourceUSegArrayLoc, count, false\
     );\
     USegReconstructorOldPosition (targetUSegReconstructor)+= count;\
     USegReconstructorNewPosition (sourceUSegReconstructor)+= count;\
     if (sourceUSegArrayLoc != targetUSegArrayLoc) {\
-	vectorReconstructor->AdjustUSegReconstructorPToken (\
+	iReconstructor.AdjustUSegReconstructorPToken (\
 	    targetUSegArrayLoc, -count\
 	);\
-	vectorReconstructor->AdjustUSegReconstructorPToken (\
+	iReconstructor.AdjustUSegReconstructorPToken (\
 	    sourceUSegArrayLoc, count\
 	);\
     }\
@@ -3795,14 +3418,14 @@ PublicFnDef void rtVECTOR_Assign (
 	USegReconstructorNewPosition (sourceUSegReconstructor),\
 	count\
     );\
-    vectorReconstructor->AppendPMapEntryToReconstructor (sourceUSegArrayLoc, 1, false);\
+    iReconstructor.AppendPMapEntryToReconstructor (sourceUSegArrayLoc, 1, false);\
     USegReconstructorOldPosition (targetUSegReconstructor)++;\
     USegReconstructorNewPosition (sourceUSegReconstructor)++;\
     if (sourceUSegArrayLoc != targetUSegArrayLoc) {\
-	vectorReconstructor->AdjustUSegReconstructorPToken (\
+	iReconstructor.AdjustUSegReconstructorPToken (\
 	    targetUSegArrayLoc, -1\
 	);\
-	vectorReconstructor->AdjustUSegReconstructorPToken (\
+	iReconstructor.AdjustUSegReconstructorPToken (\
 	    sourceUSegArrayLoc, 1\
 	);\
     }\
@@ -3818,7 +3441,7 @@ PublicFnDef void rtVECTOR_Assign (
     );\
 \
     if ((iCount = (count)) > 0) {\
-	vectorReconstructor->AppendPMapEntryToReconstructor (\
+	iReconstructor.AppendPMapEntryToReconstructor (\
 	    targetUSegArrayLoc, iCount, noChangesYet\
 	);\
 	USegReconstructorOldPosition (targetUSegReconstructor) += iCount;\
@@ -3848,16 +3471,17 @@ SingleSegmentRepetitionAssign (\
 
 /*
  *---------------------------------------------------------------------------
- *  Code Body: 'rtVECTOR_Assign'
+ *  Code Body: rtVECTOR_Handle::setElements (rtLINK_CType*, DSC_Descriptor&)
  *---------------------------------------------------------------------------
  */
 
-    targetVector->CheckConsistency ();
+    CheckConsistency ();
 /*****
  *  Align the target and link and validate the applicability of link as a
  *  subscript for assignment into target.
  *****/
-    linkc->AlignForExtract (rtVECTOR_Align (targetVector), rtVECTOR_CPx_PToken);
+    align ();
+    linkc->AlignForExtract (this, ptokenPOP ());
 
 /*****  ...increment the operation count...  *****/
     LCAssignFromValueDCount++;
@@ -3865,57 +3489,47 @@ SingleSegmentRepetitionAssign (\
     if (TracingPMapBrief) {
 	IO_printf (
 	    "rtVECTOR_Assign: assigning %d values, linkRRDCount=%d\n",
-	    rtPTOKEN_CPD_BaseElementCount (linkc->PPT ()),
+	    linkc->PPT ()->cardinality (),
 	    rtLINK_LC_RRDCount (linkc)
 	);
 	IO_printf (
 	    "                             vectorSize = %u,  pmapSize=%d\n",
-	    rtPTOKEN_BaseElementCount (targetVector, rtVECTOR_CPx_PToken),
-	    rtVECTOR_CPD_PMapSize (targetVector)
+	    rtPTOKEN_BaseElementCount (this, ptokenPOP ()), pmapSize ()
 	);
     }
 
 /*****  ...create a reconstructor for the vector...  *****/
-    VectorReconstructor *vectorReconstructor = VectorReconstructor::NewReconstructor  (
-	LcDsAssignment, targetVector, 1
-    );
+    VectorReconstructor iReconstructor (this, LcDsAssignment, 1);
 
 /*****  ...insure that a segment exists for the source type...  *****/
-    sourceUSegArrayLoc = vectorReconstructor->LocateOrAddReconstructorSegmentForLcDsAssignment (
-	sourceDescriptor, linkc->PPT ()
+    sourceUSegArrayLoc = iReconstructor.LocateOrAddReconstructorSegmentForLcDsAssignment (
+	rValues, linkc->PPT ()
     );
 
 /*****  ...cache the required reconstructor state...  *****/
-    uSegReconstructorArray  = vectorReconstructor->USegArray ();
+    uSegReconstructorArray  = iReconstructor.USegArray ();
     sourceUSegReconstructor = uSegReconstructorArray + sourceUSegArrayLoc;
     sourceUSegAssociatedLC  = USegReconstructorLC (sourceUSegReconstructor);
 
 /*****
  *  ...initialize the assignment plan construction loop variables...
  *****/
-    setTargetScanPointers (
-	rtVECTOR_CPD_PMRD(targetVector) = rtVECTOR_CPD_PMap(targetVector)
-    );
+    setTargetScanPointers (iReconstructor.thisTargetPMRD ());
 
 /*****  ...build the assignment plan...  *****/
     rtLINK_TraverseRRDCList (
 	linkc, nilAssignCase, repetitionAssignCase, rangeAssignCase
     );
-    locateTarget (linkc->ElementCount (), 0, rtVECTOR_CPD_ElementCount (targetVector));
+    locateTarget (linkc->ElementCount (), 0, elementCount ());
 
 /*****  ...reconstruct the target vector...  *****/
-    vectorReconstructor->ReconstructVector ();
+    iReconstructor.ReconstructVector ();
 
 /*****  ...and return.  *****/
-    rtVECTOR_CPD_IsASet (targetVector) = false;
-    return;
-
+    clearIsASet ();
 
-/*
- *---------------------------------------------------------------------------
- *  Local Macro Deletions: 'rtVECTOR_Assign'
- *---------------------------------------------------------------------------
- */
+    return true;
+
 #undef targetRemaining
 #undef advanceTarget
 #undef locateTarget
@@ -3956,15 +3570,12 @@ SingleSegmentRepetitionAssign (\
  *		target[link[i]] = source[i];
  *
  *****/
-PublicFnDef void rtVECTOR_Assign (
-    M_CPD *targetVector, rtLINK_CType *linkc, rtVECTOR_CType *pSource
-)
-{
+bool rtVECTOR_Handle::setElements (rtLINK_CType *linkc, rtVECTOR_CType *pSource) {
 
 
 /*
  *---------------------------------------------------------------------------
- *  Local Definitions: 'rtVECTOR_Assign'
+ *  Local Definitions: rtVECTOR_Handle::setElements (rtLINK_CType*, rtVECTOR_CType*)
  *---------------------------------------------------------------------------
  */
 
@@ -4018,7 +3629,7 @@ else
     );\
 \
     advanceUSegmentScanPointers (targetRemaining);\
-    setTargetScanPointers (++rtVECTOR_CPD_PMRD (targetVector));\
+    setTargetScanPointers (iReconstructor.nextTargetPMRD ());\
 }
 
 #define locateTarget(position, count, origin) {\
@@ -4069,17 +3680,16 @@ else
 	USegReconstructorNewPosition (sourceUSegReconstructor),\
 	count\
     );\
-    vectorReconstructor->AppendPMapEntryToReconstructor (\
+    iReconstructor.AppendPMapEntryToReconstructor (\
 	sourceUSegArrayLoc, count, false\
     );\
     USegReconstructorOldPosition (targetUSegReconstructor)+= count;\
     USegReconstructorNewPosition (sourceUSegReconstructor)+= count;\
-    if (sourceUSegArrayLoc != targetUSegArrayLoc)\
-    {\
-	vectorReconstructor->AdjustUSegReconstructorPToken (\
+    if (sourceUSegArrayLoc != targetUSegArrayLoc) {\
+	iReconstructor.AdjustUSegReconstructorPToken (\
 	    targetUSegArrayLoc, -count\
 	);\
-	vectorReconstructor->AdjustUSegReconstructorPToken (\
+	iReconstructor.AdjustUSegReconstructorPToken (\
 	    sourceUSegArrayLoc, count\
 	);\
     }\
@@ -4103,17 +3713,17 @@ else
 	USegReconstructorNewPosition (sourceUSegReconstructor),\
 	count\
     );\
-    vectorReconstructor->AppendPMapEntryToReconstructor (\
+    iReconstructor.AppendPMapEntryToReconstructor (\
 	sourceUSegArrayLoc, 1, false\
     );\
     USegReconstructorOldPosition (targetUSegReconstructor)++;\
     USegReconstructorNewPosition (sourceUSegReconstructor)++;\
     if (sourceUSegArrayLoc != targetUSegArrayLoc)\
     {\
-	vectorReconstructor->AdjustUSegReconstructorPToken (\
+	iReconstructor.AdjustUSegReconstructorPToken (\
 	    targetUSegArrayLoc, -1\
 	);\
-	vectorReconstructor->AdjustUSegReconstructorPToken (\
+	iReconstructor.AdjustUSegReconstructorPToken (\
 	    sourceUSegArrayLoc, 1\
 	);\
     }\
@@ -4124,7 +3734,7 @@ else
     int	iCount;\
 \
     if ((iCount = (count)) > 0) {\
-	vectorReconstructor->AppendPMapEntryToReconstructor (\
+	iReconstructor.AppendPMapEntryToReconstructor (\
 	    targetUSegArrayLoc, iCount, noChangesYet\
 	);\
 	USegReconstructorOldPosition (targetUSegReconstructor) += iCount;\
@@ -4162,18 +3772,17 @@ MultiSegmentRepetitionAssign (\
 
 /*
  *---------------------------------------------------------------------------
- *  Code Body: 'rtVECTOR_Assign'
+ *  Code Body: rtVECTOR_Handle::setElements (rtLINK_CType*, rtVECTOR_CType*)
  *---------------------------------------------------------------------------
  */
-    targetVector->CheckConsistency ();
+    CheckConsistency ();
 /*****
  *  Align the target and link and validate the applicability of 'link' as a
  *  subscript for assigning source into target...
  *****/
     pSource->Align ();
-    linkc->AlignForAssign (
-	rtVECTOR_Align (targetVector), rtVECTOR_CPx_PToken, pSource->PPT (), -1
-    );
+    align ();
+    linkc->AlignForAssign (this, ptokenPOP (), pSource->PPT ());
 
 /*****  ...increment the operation count...  *****/
     LCAssignFromVCCount++;
@@ -4181,20 +3790,17 @@ MultiSegmentRepetitionAssign (\
     if (TracingPMapBrief) {
 	IO_printf (
 	    "rtVECTOR_Assign: assigning %d values, linkRRDCount=%d\n",
-	    rtPTOKEN_CPD_BaseElementCount (linkc->PPT ()),
+	    linkc->PPT ()->cardinality (),
 	    rtLINK_LC_RRDCount (linkc)
 	);
 	IO_printf (
 	    "                         vectorSize=%u, pmapSize=%d\n",
-	    rtPTOKEN_BaseElementCount (targetVector, rtVECTOR_CPx_PToken),
-	    rtVECTOR_CPD_PMapSize (targetVector)
+	    rtPTOKEN_BaseElementCount (this, ptokenPOP ()), pmapSize ()
 	);
     }
 
 /*****  ...create a vector reconstructor for the target...  *****/
-    VectorReconstructor *vectorReconstructor = VectorReconstructor::NewReconstructor  (
-	LcVcAssignment, targetVector, pSource->USDCCount ()
-    );
+    VectorReconstructor iReconstructor (this, LcVcAssignment, pSource->USDCCount ());
 
 /*****  ...insure that segments exist for the source types...  *****/
     rtVECTOR_USDC *const *	pSrcUSDCArray = pSource->USDCArray ();
@@ -4202,40 +3808,31 @@ MultiSegmentRepetitionAssign (\
     while (pSrcUSDCArray < pSrcUSDCLimit) {
 	rtVECTOR_USDC *pUSDC = *pSrcUSDCArray++;
 	pUSDC->SetTargetSegmentIndexTo (
-	    vectorReconstructor->LocateOrAddReconstructorSegmentForLcVcAssignment (pUSDC)
+	    iReconstructor.LocateOrAddReconstructorSegmentForLcVcAssignment (pUSDC)
 	);
     }
 
 /*****  ...cache the required reconstructor state...  *****/
-    uSegReconstructorArray = vectorReconstructor->USegArray ();
+    uSegReconstructorArray = iReconstructor.USegArray ();
 
 /*****
  *  ...initialize the assignment plan construction loop variables...
  *****/
     setSourceScanPointers (sourcePMapPtr = pSource->PMRDChainHead ());
-    setTargetScanPointers (
-	rtVECTOR_CPD_PMRD(targetVector) = rtVECTOR_CPD_PMap(targetVector)
-    );
+    setTargetScanPointers (iReconstructor.thisTargetPMRD ());
 
 /*****  ...build the assignment plan...  *****/
-    rtLINK_TraverseRRDCList (
-	linkc, nilAssignCase, repetitionAssignCase, rangeAssignCase
-    );
-    locateTarget (linkc->ElementCount (), 0, rtVECTOR_CPD_ElementCount (targetVector));
+    rtLINK_TraverseRRDCList (linkc, nilAssignCase, repetitionAssignCase, rangeAssignCase);
+    locateTarget (linkc->ElementCount (), 0, elementCount ());
 
 /*****  ...reconstruct the target vector...  *****/
-    vectorReconstructor->ReconstructVector ();
+    iReconstructor.ReconstructVector ();
 
 /*****  ...and return the CPD for the target.  *****/
-    rtVECTOR_CPD_IsASet (targetVector) = false;
-    return;
-
+    clearIsASet ();
 
-/*
- *---------------------------------------------------------------------------
- *  Local Macro Deletions: 'rtVECTOR_Assign'
- *---------------------------------------------------------------------------
- */
+    return true;
+
 #undef advanceSource
 #undef setSourceScanPointers
 #undef targetRemaining
@@ -4256,10 +3853,10 @@ MultiSegmentRepetitionAssign (\
  *
  *  Arguments:
  *	targetVector		- a standard CPD for the vector to be updated.
- *	refp			- a reference for the element to be changed.
+ *	rSubscript		- a reference for the element to be changed.
  *				  The reference must be referentially related
  *				  to the target vector.
- *	sourceDescriptor		- a pointer to a Value Descriptor supplying
+ *	rSource		- a pointer to a Value Descriptor supplying
  *				  the values to be assigned to 'target'.
  *				  The Value Descriptor allows this routine to
  *                                act as a cover for scalar and u-vector
@@ -4280,17 +3877,12 @@ MultiSegmentRepetitionAssign (\
  *	  for u-vector sources values.
  *
  *****/
-PublicFnDef void rtVECTOR_Assign (
-    M_CPD			*targetVector,
-    rtREFUV_TypePTR_Reference	refp,
-    DSC_Descriptor		*sourceDescriptor
-)
-{
+bool rtVECTOR_Handle::setElements (DSC_Scalar &rSubscript, DSC_Descriptor &rValues) {
 
 
 /*
  *---------------------------------------------------------------------------
- *  Local Definitions: 'rtVECTOR_Assign'
+ *  Local Definitions: rtVECTOR_Handle::setElements (DSC_Scalar &rSubscript, DSC_Descriptor &rValues)
  *---------------------------------------------------------------------------
  */
 
@@ -4315,13 +3907,11 @@ PublicFnDef void rtVECTOR_Assign (
 	"...rtVECTOR_Assign[advanceTarget]: OTP:%d, OTR:%d\n",\
 	targetPosition, targetRemaining\
     );\
-\
     advanceUSegmentScanPointers (targetRemaining);\
-    setTargetScanPointers (++rtVECTOR_CPD_PMRD (targetVector));\
+    setTargetScanPointers (iReconstructor.nextTargetPMRD ());\
 }
 
-#define locate(position, count, origin)\
-{\
+#define locate(position, count, origin) {\
     while (origin >= nextTargetPMapPosition && notTheFinalTargetPMapEntry)\
 	advanceTarget ();\
     if (TracingPMapSearches) IO_printf (\
@@ -4333,24 +3923,17 @@ PublicFnDef void rtVECTOR_Assign (
     targetPosition = origin;\
 }
 
-#define setTargetScanPointers(targetPMapPtr)\
-{\
-    rtVECTOR_PMRDType	*tPMapPtr;\
-\
-    targetPosition = targetPMapPosition =\
-	rtVECTOR_PMRD_VectorOrigin (tPMapPtr = (targetPMapPtr));\
-    if (notTheFinalTargetPMapEntry =\
-	    (targetUSegArrayLoc = rtVECTOR_PMRD_SegmentIndex (tPMapPtr)) >= 0)\
-    {\
+#define setTargetScanPointers(targetPMapPtr) {\
+    rtVECTOR_PMRDType *tPMapPtr = (targetPMapPtr);\
+    targetPosition = targetPMapPosition = rtVECTOR_PMRD_VectorOrigin (tPMapPtr);\
+    if (notTheFinalTargetPMapEntry = (targetUSegArrayLoc = rtVECTOR_PMRD_SegmentIndex (tPMapPtr)) >= 0) {\
 	nextTargetPMapPosition	= rtVECTOR_PMRD_VectorOrigin (tPMapPtr + 1);\
 	targetUSegReconstructor = uSegReconstructorArray + targetUSegArrayLoc;\
     }\
-    else\
-    {\
+    else {\
 	nextTargetPMapPosition = targetPMapPosition;\
         targetUSegReconstructor = NilOf (USegReconstructorType *);\
     }\
-\
     if (TracingPMapSearches) IO_printf (\
 	"... rtVECTOR_Assign[setTrgScanPts]: TP:%d, TUSL:%d, NTP:%d\n",\
 	targetPMapPosition, targetUSegArrayLoc, nextTargetPMapPosition\
@@ -4366,34 +3949,29 @@ PublicFnDef void rtVECTOR_Assign (
     );\
     USegReconstructorOffset (sourceUSegReconstructor) =\
 	USegReconstructorNewPosition (sourceUSegReconstructor);\
-    vectorReconstructor->AppendPMapEntryToReconstructor (\
+    iReconstructor.AppendPMapEntryToReconstructor (\
 	sourceUSegArrayLoc, 1, false\
     );\
     USegReconstructorOldPosition (targetUSegReconstructor)++;\
     USegReconstructorNewPosition (sourceUSegReconstructor)++;\
     if (sourceUSegArrayLoc != targetUSegArrayLoc) {\
-	vectorReconstructor->AdjustUSegReconstructorPToken (\
+	iReconstructor.AdjustUSegReconstructorPToken (\
 	    targetUSegArrayLoc, -1\
 	);\
-	vectorReconstructor->AdjustUSegReconstructorPToken (\
+	iReconstructor.AdjustUSegReconstructorPToken (\
 	    sourceUSegArrayLoc, 1\
 	);\
     }\
     targetPosition++;\
 }
 
-#define advanceUSegmentScanPointers(count)\
-{\
+#define advanceUSegmentScanPointers(count) {\
     int	iCount;\
-\
     if (TracingPMapSearches) IO_printf (\
-	"...rtVECTOR_Assign[advUSegScanPts]: cnt:%d\n",\
-	count\
+	"...rtVECTOR_Assign[advUSegScanPts]: cnt:%d\n", count\
     );\
-\
-    if ((iCount = (count)) > 0)\
-    {\
-	vectorReconstructor->AppendPMapEntryToReconstructor (\
+    if ((iCount = (count)) > 0) {\
+	iReconstructor.AppendPMapEntryToReconstructor (\
 	    targetUSegArrayLoc, iCount, noChangesYet\
 	);\
 	USegReconstructorOldPosition (targetUSegReconstructor) += iCount;\
@@ -4404,7 +3982,7 @@ PublicFnDef void rtVECTOR_Assign (
 
 /*
  *---------------------------------------------------------------------------
- *  Code Body: 'rtVECTOR_Assign'
+ *  Code Body: rtVECTOR_Handle::setElements (DSC_Scalar &rSubscript, DSC_Descriptor &rValues)
  *---------------------------------------------------------------------------
  */
 
@@ -4412,67 +3990,55 @@ PublicFnDef void rtVECTOR_Assign (
     RefAssignFromValueDCount++;
 
 /*****  Validate the vector...  *****/
-    targetVector->CheckConsistency ();
+    CheckConsistency ();
 
 /*****
  *  Align the target and subscript and validate the applicability of the
  *  subscript as an assignment index...
  *****/
-    rtREFUV_AlignAndValidateRef (
-	refp, rtVECTOR_Align (targetVector), rtVECTOR_CPx_PToken
-    );
+    align ();
+    rtREFUV_AlignAndValidateRef (&rSubscript, this, ptokenPOP ());
 
     if (TracingPMapBrief) IO_printf (
 	"rtVECTOR_Assign: ref=%d, vectorSize = %d, pmapSize=%d\n",
-	rtREFUV_Ref_Element (refp),
-	rtVECTOR_CPD_ElementCount (targetVector),
-	rtVECTOR_CPD_PMapSize (targetVector)
+	DSC_Scalar_Int (rSubscript), elementCount (), pmapSize ()
     );
 
 /*****  ... if the reference is 'nil', do no more...  *****/
-    if(rtREFUV_Ref_Element(refp) >= rtVECTOR_CPD_ElementCount(targetVector))
-	return;
+    if(DSC_Scalar_Int (rSubscript) >= elementCount ())
+	return true;
 
 /*****  ... otherwise, create a vector reconstructor for the target...  *****/
-    VectorReconstructor *vectorReconstructor = VectorReconstructor::NewReconstructor (
-	RfDsAssignment, targetVector, 1
-    );
+    VectorReconstructor iReconstructor (this, RfDsAssignment, 1);
 
 /*****  ...insure that a segment exists for the source type...  *****/
-    sourceUSegArrayLoc = vectorReconstructor->LocateOrAddReconstructorSegmentForRfDsAssignment (
-	sourceDescriptor
+    sourceUSegArrayLoc = iReconstructor.LocateOrAddReconstructorSegmentForRfDsAssignment (
+	rValues
     );
 
 /*****  ...cache the required reconstructor state...  *****/
-    uSegReconstructorArray  = vectorReconstructor->USegArray ();
+    uSegReconstructorArray  = iReconstructor.USegArray ();
     sourceUSegReconstructor = uSegReconstructorArray + sourceUSegArrayLoc;
 
 /*****
  *  ...initialize the assignment plan construction loop variables...
  *****/
-    setTargetScanPointers (
-	rtVECTOR_CPD_PMRD(targetVector) = rtVECTOR_CPD_PMap(targetVector)
-    );
+    setTargetScanPointers (iReconstructor.thisTargetPMRD ());
 
 /*****  ...build the assignment plan...  *****/
     SingleSegmentRepetitionAssign (
-	0, 1, rtREFUV_Ref_Element (refp), locate, output
+	0, 1, DSC_Scalar_Int (rSubscript), locate, output
     );
-    locate (1, 0, rtVECTOR_CPD_ElementCount (targetVector));
+    locate (1, 0, elementCount ());
 
 /*****  ...reconstruct the target vector...  *****/
-    vectorReconstructor->ReconstructVector ();
+    iReconstructor.ReconstructVector ();
 
 /*****  ...and return.  *****/
-    rtVECTOR_CPD_IsASet (targetVector) = false;
-    return;
-
+    clearIsASet ();
 
-/*
- *---------------------------------------------------------------------------
- *  Local Macro Deletions: 'rtVECTOR_Assign'
- *---------------------------------------------------------------------------
- */
+    return true;
+
 #undef targetRemaining
 #undef setTargetScanPointers
 #undef advanceUSegmentScanPointers
@@ -4490,8 +4056,7 @@ PublicFnDef void rtVECTOR_Assign (
  *****  Vector Element Assignment.
  *
  *  Arguments:
- *	targetVector		- a standard CPD for the vector to be updated.
- *	refp			- a reference for the element to be changed.
+ *	rSubscript		- a reference for the element to be changed.
  *				  The reference must be referentially related
  *				  to the target vector.
  *	sourceVectorC		- a pointer to a vector constructor supplying
@@ -4506,29 +4071,27 @@ PublicFnDef void rtVECTOR_Assign (
  *		target[reference] = source[elementCount (source) - 1];
  *
  *****/
-PublicFnDef void rtVECTOR_Assign (
-    M_CPD *targetVector, rtREFUV_TypePTR_Reference refp, rtVECTOR_CType *sourceVectorC
-) {
+bool rtVECTOR_Handle::setElements (DSC_Scalar &rSubscript, rtVECTOR_CType *sourceVectorC) {
     RefAssignFromVCCount++;
 
 /*****  Align the constructor, ...  *****/
     sourceVectorC->Align ();
 
 /*****  ...turn the reference into a Link Constructor, ...  *****/
-    rtLINK_CType *linkc = rtLINK_RefConstructor (rtREFUV_Ref_RefPTokenCPD (refp), -1);
+    rtLINK_CType *linkc = rtLINK_RefConstructor (rSubscript.RPT ());
     rtLINK_AppendRepeat (
-	linkc,
-	rtREFUV_Ref_Element (refp),
-	rtPTOKEN_CPD_BaseElementCount (sourceVectorC->PPT ())
+	linkc, DSC_Scalar_Int (rSubscript), sourceVectorC->PPT ()->cardinality ()
     );
     linkc->Close (sourceVectorC->PPT ());
 
 /*****  ...perform the assignment, ...  *****/
-    rtVECTOR_Assign (targetVector, linkc, sourceVectorC);
+    bool bDone = setElements (linkc, sourceVectorC);
 
 /*****  ...and clean up.  *****/
-    rtVECTOR_CPD_IsASet (targetVector) = false;
+    clearIsASet ();
     linkc->release ();
+
+    return true;
 }
 
 
@@ -4578,8 +4141,7 @@ PublicFnDef void rtVECTOR_Assign (
  *
  *---------------------------------------------------------------------------
  */
-#define ExtractRange(position,count,origin,sourceRemaining,advanceSource,locateSource,output)\
-{\
+#define ExtractRange(position,count,origin,sourceRemaining,advanceSource,locateSource,output) {\
     locateSource (position, count, origin);\
     int sourceCompleted = sourceRemaining;\
     if (sourceCompleted > count)\
@@ -4628,26 +4190,29 @@ PublicFnDef void rtVECTOR_Assign (
  *****  Extraction Routines  *****
  *********************************/
 
-PrivateFnDef void CheckForReferenceCompatibility (
-    M_CPD *store, M_CPD *uvector, M_CPD *vector
-) {
-    M_CPD *storePToken	= rtPTOKEN_BasePToken (store, rtLSTORE_CPx_RowPToken);
-    M_CPD *refPToken	= rtPTOKEN_BasePToken (uvector, UV_CPx_RefPToken);
+void rtVECTOR_Handle::CheckForReferenceCompatibility (Vdd::Store *pStore, VContainerHandle *pPointer) {
+    if (RTYPE_C_ListStore == pStore->rtype () && static_cast<rtLSTORE_Handle*>(pStore)->isAStringStore ()) {
+	rtPTOKEN_Handle::Reference pStorePToken (pStore->getPToken ());
 
-    if (storePToken->DoesntName (refPToken)) ERR_SignalFault (
-	EC__InternalInconsistency, UTIL_FormatMessage (
-	    "Store [%u:%u] referenced by wrong PToken [%u:%u] in Vector [%u:%u]",
-	    store->SpaceIndex (),
-	    store->ContainerIndex (),
-	    refPToken->SpaceIndex (),
-	    refPToken->ContainerIndex (),
-	    vector->SpaceIndex (),
-	    vector->ContainerIndex ()
-	)
-    );
+	rtPTOKEN_Handle::Reference pRPT (static_cast<rtUVECTOR_Handle*>(pPointer)->getRPT ());
+	pRPT.setTo (pRPT->basePToken ());
 
-    storePToken->release ();
-    refPToken->release ();
+	if (pStorePToken->DoesntName (pRPT)) {
+	    VContainerHandle::Reference pStoreHandle;
+	    pStore->getContainerHandle (pStoreHandle);
+	    ERR_SignalFault (
+		EC__InternalInconsistency, UTIL_FormatMessage (
+		    "Store [%u:%u] referenced by wrong PToken [%u:%u] in Vector [%u:%u]",
+		    pStoreHandle->spaceIndex (),
+		    pStoreHandle->containerIndex (),
+		    pRPT->spaceIndex (),
+		    pRPT->containerIndex (),
+		    spaceIndex (),
+		    containerIndex ()
+		)
+	    );
+	}
+    }
 }
 
 
@@ -4668,36 +4233,32 @@ PrivateFnDef void CheckForReferenceCompatibility (
  *	An instance of the ExtractResult enumeration.
  *
  *****/
-enum ExtractResult {
-    ExtractResult_IsEmpty, ExtractResult_IsAMonotype, ExtractResult_IsSomething
-};
-
-PrivateFnDef ExtractResult SetupExtract (M_CPD *pSource, rtLINK_CType *pSubscript) {
+rtVECTOR_Handle::ExtractResult rtVECTOR_Handle::SetupExtract (rtLINK_CType *pSubscript) {
 /*****  Align the source and link and validate link's use as a subscript *****/
-    pSubscript->AlignForExtract (rtVECTOR_Align (pSource), rtVECTOR_CPx_PToken);
+    rtPTOKEN_Handle::Reference pPPT (alignedPToken ());
+    pSubscript->AlignForExtract (pPPT, 0);
 
     if (TracingPMapBrief) {
 	IO_printf (
 	    "rtVECTOR_LCExtract: extracting %d elements, linkRRDCnt=%d\n",
-	    rtPTOKEN_CPD_BaseElementCount (pSubscript->PPT ()),
+	    pSubscript->PPT ()->cardinality (),
 	    rtLINK_LC_RRDCount (pSubscript)
 	);
 	IO_printf (
 	    "                    vectorSize=%u, pmapSize=%d\n",
-	    rtPTOKEN_BaseElementCount (pSource, rtVECTOR_CPx_PToken),
-	    rtVECTOR_CPD_PMapSize (pSource)
+	    pPPT->cardinality (), pmapSize ()
 	);
     }
 
 /******  Try to predict the form of the result...  *****/
-    if (rtPTOKEN_CPD_BaseElementCount  (pSubscript->PPT ()) == 0)
+    if (pSubscript->PPT ()->cardinality () == 0)
 	return ExtractResult_IsEmpty;
 
 /*****
  *  Special case vectors that have only one pmap entry and
  *  that will not need an undefined usegment in the result ...
  *****/
-    return rtVECTOR_CPD_PMapSize (pSource) == 1 && pSubscript->DoesntContainReferenceNils ()
+    return pmapSize () == 1 && pSubscript->DoesntContainReferenceNils ()
 	? ExtractResult_IsAMonotype : ExtractResult_IsSomething;
 }
 
@@ -4707,76 +4268,6 @@ PrivateFnDef ExtractResult SetupExtract (M_CPD *pSource, rtLINK_CType *pSubscrip
  *****  Simple Vector (one with a single pmap entry).
  *
  *  Arguments:
- *	pSource			- the address of a standard CPD for the vector
- *				  from which elements are to be extracted.
- *	pSubscript			- the address of a link constructor specifying
- *				  the elements to be extracted.  The link
- *				  constructor must be closed and referentially
- *				  related to the vector.
- *
- *  Returns:
- *	The address of a vector constructor containing the extracted elements.
- *
- *****/
-PrivateFnDef void DoSimpleExtract (
-    M_CPD *pSource, rtLINK_CType *pSubscript, M_CPD **ppResultStore, M_CPD **ppResultPointer
-) {
-
-    pSource->CheckConsistency ();
-    SimpleLCExtractCount++;
-
-/*****  Setup for the extract ... *****/
-    rtVECTOR_CPD_USD (pSource) = rtVECTOR_CPD_USegArray (pSource) +
-	rtVECTOR_PMRD_SegmentIndex (rtVECTOR_CPD_PMap (pSource));
-
-/*****  Get the segment's store, ...  *****/
-    rtVECTOR_CPD_SetUSDCursor (pSource, rtVECTOR_USD_VStore);
-    M_CPD *pStore = pSource->GetCPD (rtVECTOR_CPx_USDCursor);
-
-/*****  Get the segment's source pointer, ...  *****/
-    rtVECTOR_CPD_SetUSDCursor (pSource, rtVECTOR_USD_Values);
-    M_CPD *pSourcePointer = pSource->GetCPD (rtVECTOR_CPx_USDCursor);
-
-/*****
- *  If the store is a string store, check for correct ref ptoken in uvector
- *  Potential exists for corruption by incorporator if the incorporator stores
- *  are incorrectly initialized ...
- *****/
-    if (RTYPE_C_ListStore == pStore->RType () && rtLSTORE_CPD_StringStore (pStore))
-	CheckForReferenceCompatibility (pStore, pSourcePointer, pSource);
-
-/*****  (kludge):
- *  Temporarily change the subscript's referential ptoken to match that of the uvector ...
- *****/
-    M_CPD *pSavedSubscriptRPT = pSubscript->RPT ();
-    rtVECTOR_CPD_SetUSDCursor (pSource, rtVECTOR_USD_PToken);
-    pSubscript->m_pRPT = pSource->GetCPD (rtVECTOR_CPx_USDCursor, RTYPE_C_PToken);
-
-/*****  Extract the uvector ...  *****/
-    RTYPE_PerformHandlerOperation (
-	RTYPE_DoLCExtract,
-	pSourcePointer->RType (),
-	ppResultPointer,
-	pSourcePointer,
-	pSubscript
-    );
-    pSourcePointer->release ();
-
-/*****  Restore the subscript's referential ptoken ... *****/
-    pSubscript->RPT ()->release ();
-    pSubscript->m_pRPT = pSavedSubscriptRPT;
-
-/*****  And return:  *****/
-    *ppResultStore = pStore;
-}
-
-
-/*---------------------------------------------------------------------------
- *****  Link Constructor Subscripted Element Extraction Routine.
- *
- *  Arguments:
- *	pSource			- the address of a standard CPD for the vector
- *				  from which elements are to be extracted.
  *	pSubscript		- the address of a link constructor specifying
  *				  the elements to be extracted.  The link
  *				  constructor must be closed and referentially
@@ -4786,7 +4277,64 @@ PrivateFnDef void DoSimpleExtract (
  *	The address of a vector constructor containing the extracted elements.
  *
  *****/
-PrivateFnDef rtVECTOR_CType *DoComplexExtract (M_CPD *pSource, rtLINK_CType *pSubscript) {
+void rtVECTOR_Handle::DoSimpleExtract (
+    rtLINK_CType *pSubscript, Vdd::Store::Reference &rpResultStore, M_CPD *&rpResultPointer
+) {
+
+    CheckConsistency ();
+    SimpleLCExtractCount++;
+
+/*****  Setup for the extract ... *****/
+    unsigned int xSegment = rtVECTOR_PMRD_SegmentIndex (pmap ());
+
+/*****  Get the segment's store, ...  *****/
+    getSegmentStore (rpResultStore, xSegment);
+
+/*****  Get the segment's source pointer, ...  *****/
+    M_CPD *pSourcePointer = segmentPointerCPD (xSegment);
+
+/*****
+ *  If the store is a string store, check for correct ref ptoken in uvector
+ *  Potential exists for corruption by incorporator if the incorporator stores
+ *  are incorrectly initialized ...
+ *****/
+    CheckForReferenceCompatibility (rpResultStore, pSourcePointer);
+
+/*****  (kludge):
+ *  Temporarily change the subscript's referential ptoken to match that of the uvector ...
+ *****/
+    rtPTOKEN_Handle::Reference pSavedSubscriptRPT (pSubscript->RPT ());
+    getSegmentPToken (pSubscript->m_pRPT, xSegment);
+
+/*****  Extract the uvector ...  *****/
+    RTYPE_PerformHandlerOperation (
+	RTYPE_DoLCExtract,
+	pSourcePointer->RType (),
+	&rpResultPointer,
+	pSourcePointer,
+	pSubscript
+    );
+    pSourcePointer->release ();
+
+/*****  Restore the subscript's referential ptoken ... *****/
+    pSubscript->m_pRPT.claim (pSavedSubscriptRPT);
+}
+
+
+/*---------------------------------------------------------------------------
+ *****  Link Constructor Subscripted Element Extraction Routine.
+ *
+ *  Arguments:
+ *	pSubscript		- the address of a link constructor specifying
+ *				  the elements to be extracted.  The link
+ *				  constructor must be closed and referentially
+ *				  related to the vector.
+ *
+ *  Returns:
+ *	The address of a vector constructor containing the extracted elements.
+ *
+ *****/
+void rtVECTOR_Handle::DoComplexExtract (rtLINK_CType *pSubscript, rtVECTOR_CType::Reference &rpResult) {
 
 /*****  Source P-Map Traversal Macros  *****/
 #define extractSourceRemaining\
@@ -4797,7 +4345,7 @@ PrivateFnDef rtVECTOR_CType *DoComplexExtract (M_CPD *pSource, rtLINK_CType *pSu
 
 /*****  Source P-Map Traversal Macros  *****/
 #define setPMRDPosition(pmrd, position)\
-    ((pmrd) = rtVECTOR_CPD_PMap (pSource) + (position))
+    ((pmrd) = pmap () + (position))
 
 #define beginningValue(pmrd)\
     rtVECTOR_PMRD_VectorOrigin (pmrd)
@@ -4816,9 +4364,7 @@ PrivateFnDef rtVECTOR_CType *DoComplexExtract (M_CPD *pSource, rtLINK_CType *pSu
     );\
 \
     setPMRDPosition (currentPMRD, currentPos);\
-    while (beginPos <= endPos && (value < beginningValue (currentPMRD) ||\
-				  value >= endingValue (currentPMRD)))\
-    {\
+    while (beginPos <= endPos && (value < beginningValue (currentPMRD) || value >= endingValue (currentPMRD))) {\
 	LCExtractHuntCount++;\
 	currentPos = (beginPos + endPos) / 2;\
 	setPMRDPosition (currentPMRD, currentPos);\
@@ -4833,8 +4379,8 @@ PrivateFnDef rtVECTOR_CType *DoComplexExtract (M_CPD *pSource, rtLINK_CType *pSu
 	sourcePMapOffset = currentPos;	/*** Found it ***/\
     else sourcePMapOffset = sourcePMapSize;\
 \
-    rtVECTOR_CPD_PMRD (pSource) = rtVECTOR_CPD_PMap (pSource) + sourcePMapOffset;\
-    setVSourceScanPointers (rtVECTOR_CPD_PMRD (pSource));\
+    pSourcePMRD = pmap () + sourcePMapOffset;\
+    setVSourceScanPointers (pSourcePMRD);\
 }
 
 #define advanceVSource() {\
@@ -4844,7 +4390,7 @@ PrivateFnDef rtVECTOR_CType *DoComplexExtract (M_CPD *pSource, rtLINK_CType *pSu
     );\
 \
     sourcePMapOffset++;\
-    setVSourceScanPointers (++rtVECTOR_CPD_PMRD (pSource));\
+    setVSourceScanPointers (++pSourcePMRD);\
 }
 
 #define locateVSource(position, count, origin) {\
@@ -4857,8 +4403,8 @@ PrivateFnDef rtVECTOR_CType *DoComplexExtract (M_CPD *pSource, rtLINK_CType *pSu
     sourcePosition = origin;\
 }
 
-#define setVSourceScanPointers(sourcePMapPtr) {\
-    rtVECTOR_PMRDType *sPMapPtr = (sourcePMapPtr);\
+#define setVSourceScanPointers(pSourcePMRD) {\
+    rtVECTOR_PMRDType *sPMapPtr = (pSourcePMRD);\
 \
     sourcePosition = sourcePMapPosition = rtVECTOR_PMRD_VectorOrigin (sPMapPtr);\
     xSourceUSegment = rtVECTOR_PMRD_SegmentIndex (sPMapPtr);\
@@ -4880,26 +4426,22 @@ PrivateFnDef rtVECTOR_CType *DoComplexExtract (M_CPD *pSource, rtLINK_CType *pSu
  * vector's uvectors so its origin must be relative to the source vector.
  ---------------------------------------------------------------------------*/
 #define output(count, repeat) {\
-    rtVECTOR_USDC *pUSDC = pResult->USDC (xSourceUSegment);\
+    rtVECTOR_USDC *pUSDC = rpResult->USDC (xSourceUSegment);\
     if (xSourceUSegment != xNilUSDC) {\
 	if (!pUSDC) {\
-	    rtVECTOR_CPD_USD (pSource) = rtVECTOR_CPD_USegArray(pSource) + xSourceUSegment;\
-	    rtVECTOR_CPD_SetUSDCursor (pSource, rtVECTOR_USD_VStore);\
-	    pUSDC = pResult->NewUSDC (\
-		xSourceUSegment, pSource->GetCPD (rtVECTOR_CPx_USDCursor)\
-	    );\
-	    pUSDC->ClaimAssociatedLink (\
-		rtLINK_RefConstructor (pSource, rtVECTOR_CPx_USD)\
-	    );\
+	    Vdd::Store::Reference pSegmentStore;\
+	    getSegmentStore (pSegmentStore, xSourceUSegment);\
+	    pUSDC = rpResult->NewUSDC (xSourceUSegment, pSegmentStore);\
+	    pUSDC->ClaimAssociatedLink (rtLINK_RefConstructor (segmentPTokenHandle (xSourceUSegment)));\
 	}\
 	rtLINK_CType *pAssociatedLink = pUSDC->AssociatedLink ();\
-	pResult->AppendPMRD (pUSDC,pAssociatedLink->ElementCount (),count);\
+	rpResult->AppendPMRD (pUSDC,pAssociatedLink->ElementCount (),count);\
 	pAssociatedLink->Append (extractSourceUSegOrigin, count, repeat);\
     }\
     else {\
 	if (!pUSDC)\
-	    pUSDC = pResult->NewUSDC (xNilUSDC, rNA.RetainedObjectCPD ());\
-	pResult->AppendPMRD (pUSDC, iResultNACount, count);\
+	    pUSDC = rpResult->NewUSDC (xNilUSDC, rNA.store ());\
+	rpResult->AppendPMRD (pUSDC, iResultNACount, count);\
 	iResultNACount += count;\
     }\
 }
@@ -4929,7 +4471,7 @@ PrivateFnDef rtVECTOR_CType *DoComplexExtract (M_CPD *pSource, rtLINK_CType *pSu
 
 /*
  *---------------------------------------------------------------------------
- *  Code Body: 'rtVECTOR_LCExtract'
+ *  Code Body: 'rtVECTOR_Handle::DoComplexExtract'
  *---------------------------------------------------------------------------
  */
 
@@ -4937,25 +4479,24 @@ PrivateFnDef rtVECTOR_CType *DoComplexExtract (M_CPD *pSource, rtLINK_CType *pSu
     LCExtractCount++;
 
 /*****  Check the input's consistency...  *****/
-    pSource->CheckConsistency ();
+    CheckConsistency ();
 
 /*****  Initialize the extraction plan variables  *****/
-    unsigned int sResultUSDArray = rtVECTOR_CPD_USegArraySize (pSource);
-    M_KOTE const &rNA = pSource->TheNAClass ();
+    unsigned int sResultUSDArray = segmentArraySize ();
+    M_KOTE const &rNA = kot()->TheNAClass;
     unsigned int xNilUSDC;
-    if (!LocateVectorSegment(pSource, rNA, (int*)&xNilUSDC))
+    if (!LocateSegment (rNA.store (), xNilUSDC))
 	xNilUSDC = sResultUSDArray++;
 
-    rtVECTOR_CType *pResult = new rtVECTOR_CType (pSubscript->PPT (), sResultUSDArray);
+    rpResult.setTo (new rtVECTOR_CType (pSubscript->PPT (), sResultUSDArray));
 
     unsigned int xSourceUSegment, iResultNACount = 0;
     int nextSourcePMapPosition, sourcePosition, sourcePMapPosition, srcPMapSegOrigin;
 
-    int sourcePMapSize = rtVECTOR_CPD_PMapSize (pSource);
+    int sourcePMapSize = pmapSize ();
     int sourcePMapOffset = 0;
-    setVSourceScanPointers (
-	rtVECTOR_CPD_PMRD (pSource) = rtVECTOR_CPD_PMap (pSource)
-    );
+    rtVECTOR_PMRDType *pSourcePMRD = pmap ();
+    setVSourceScanPointers (pSourcePMRD);
 
 /*****  Build the extraction Plan  *****/
 /*****  This step builds the new PMaps and USegments for the result vector as
@@ -4966,27 +4507,22 @@ PrivateFnDef rtVECTOR_CType *DoComplexExtract (M_CPD *pSource, rtLINK_CType *pSu
     rtLINK_TraverseRRDCList (pSubscript, extractNil, extractRepetition, extractRange);
 
 /*****  Do The Extractions  *****/
-    unsigned int const cUSDCs = pResult->USDCCount ();
+    unsigned int const cUSDCs = rpResult->USDCCount ();
     for (unsigned x = 0; x < cUSDCs; x++) {
-	rtVECTOR_USDC *pResultUSDC = pResult->USDC (x);
+	rtVECTOR_USDC *pResultUSDC = rpResult->USDC (x);
 	if (pResultUSDC) {
-	    M_CPD *pSegmentPPT, *pSegmentPointer;
+	    rtPTOKEN_Handle::Reference pSegmentPPT; M_CPD *pSegmentPointer;
 	    if (x != xNilUSDC) {
-		rtVECTOR_CPD_USD (pSource) = rtVECTOR_CPD_USegArray (pSource) + x;
-
-		rtVECTOR_CPD_SetUSDCursor (pSource, rtVECTOR_USD_Values);
-		M_CPD *pSourcePointer = pSource->GetCPD (rtVECTOR_CPx_USDCursor);
+		M_CPD *pSourcePointer = segmentPointerCPD (x);
 	/*****
 	 *  If the store is a string store, check for correct ref ptoken in uvector
 	 *  Potential exists for corruption by incorporator if the incorporator stores
 	 *  are incorrectly initialized ...
 	 *****/
-		M_CPD *pStore = pResultUSDC->storeCPD ();
-		if (pStore->RType () == RTYPE_C_ListStore && rtLSTORE_CPD_StringStore (pStore))
-		    CheckForReferenceCompatibility (pStore, pSourcePointer, pSource);
+		CheckForReferenceCompatibility (pResultUSDC->store (), pSourcePointer);
 
 		rtLINK_CType *pAssociatedLink = pResultUSDC->ClaimedAssociatedLink ();
-		pSegmentPPT = pResult->NewPToken (pAssociatedLink->ElementCount ());
+		pSegmentPPT.setTo (rpResult->NewPToken (pAssociatedLink->ElementCount ()));
 		pAssociatedLink->Close (pSegmentPPT);
 
 		RTYPE_PerformHandlerOperation (
@@ -5000,17 +4536,15 @@ PrivateFnDef rtVECTOR_CType *DoComplexExtract (M_CPD *pSource, rtLINK_CType *pSu
 		pAssociatedLink->release ();
 	    }
 	    else {
-		pSegmentPPT = pResult->NewPToken (iResultNACount);
-		pSegmentPointer = rtUNDEFUV_New (pSegmentPPT, rNA.PTokenCPD ());
+		pSegmentPPT.setTo (rpResult->NewPToken (iResultNACount));
+		pSegmentPointer = rtUNDEFUV_New (pSegmentPPT, rNA.PTokenHandle ());
 	    }
 	    pResultUSDC->SetPointerTo (pSegmentPointer, pSegmentPPT);
 	}
     }
 
 /*****  Compact and return the result...  *****/
-    pResult->CompactUSDArray ();
-
-    return pResult;
+    rpResult->CompactUSDArray ();
 
 #undef extractSourceRemaining
 #undef extractSourceUSegOrigin
@@ -5034,67 +4568,66 @@ PrivateFnDef rtVECTOR_CType *DoComplexExtract (M_CPD *pSource, rtLINK_CType *pSu
  *****  Public rtVECTOR_Extract Routines  *****
  **********************************************/
 
-PublicFnDef void rtVECTOR_Extract (
-    M_CPD *pSource, rtLINK_CType *pSubscript, VDescriptor &rResult
-) {
-    switch (SetupExtract (pSource, pSubscript)) {
+bool rtVECTOR_Handle::getElements (VDescriptor &rResult, rtLINK_CType *pSubscript) {
+    switch (SetupExtract (pSubscript)) {
     case ExtractResult_IsEmpty:
 	rResult.setToVector (new rtVECTOR_CType (pSubscript->PPT (), 0));
 	break;
     case ExtractResult_IsAMonotype: {
-	    M_CPD *pStore, *pPointer;
-	    DoSimpleExtract (pSource, pSubscript, &pStore, &pPointer);
+	    Vdd::Store::Reference pStore; M_CPD *pPointer;
+	    DoSimpleExtract (pSubscript, pStore, pPointer);
 
 	    rResult.setToMonotype (pStore, pPointer);
 
 	    pPointer->release ();
-	    pStore->release ();
 	}
 	break;
     default: {
-	    rtVECTOR_CType *pResult = DoComplexExtract (pSource, pSubscript);
+	    rtVECTOR_CType::Reference pResult;
+	    DoComplexExtract (pSubscript, pResult);
 
 	    DSC_Descriptor iMonotype;
 	    if (!pResult->SimplifiedToMonotype (&iMonotype, false))
 		rResult.setToVector (pResult);
 	    else {
 		rResult.setToMoved (iMonotype);
-		pResult->release ();
 	    }
 	}
 	break;
     }
+    return true;
 }
 
 
-PublicFnDef void rtVECTOR_Extract (
-    M_CPD *pSource, rtLINK_CType *pSubscript, M_CPD **ppResult
-) {
-    switch (SetupExtract (pSource, pSubscript)) {
+bool rtVECTOR_Handle::getElements (rtVECTOR_Handle::Reference &rpResult, rtLINK_CType *pSubscript) {
+    rtPTOKEN_Handle *pPPT = pSubscript->PPT ();
+    switch (SetupExtract (pSubscript)) {
     case ExtractResult_IsEmpty:
-	*ppResult = NewVector (pSubscript->PPT ());
+	rpResult.setTo (new rtVECTOR_Handle (pPPT));
 	break;
     case ExtractResult_IsAMonotype: {
-	    M_CPD *pStore, *pPointer;
-	    DoSimpleExtract (pSource, pSubscript, &pStore, &pPointer);
+	    Vdd::Store::Reference pStore; M_CPD *pPointer;
+	    DoSimpleExtract (pSubscript, pStore, pPointer);
 
-	    *ppResult = rtVECTOR_NewFromUV (pSubscript->PPT (), pStore, pPointer);
+	    rpResult.setTo (rtVECTOR_Handle::NewFrom (pPPT, pStore, pPointer));
 
 	    pPointer->release ();
-	    pStore->release ();
 	}
 	break;
-    default:
-	*ppResult = DoComplexExtract (pSource, pSubscript)->ToVector ();
+    default: {
+	    rtVECTOR_CType::Reference pConstructor;
+	    DoComplexExtract (pSubscript, pConstructor);
+	    pConstructor->getVector (rpResult);
+	}
 	break;
     }
+    return true;
 }
 
 
 /*****************************************
  *  rtVECTOR Extract - Container Result  *
  *****************************************/
-
 
 /****************************************************
  *  Vector Source - Reference Subscript Extraction  *
@@ -5104,24 +4637,20 @@ PublicFnDef void rtVECTOR_Extract (
  *****  Reference Subscripted Element Extraction Routine.
  *
  *  Arguments:
- *	vectorCPD		- the address of a standard CPD for the vector
- *				  from which the element is to be extracted.
- *	refp			- the address of a reference specifying
+ *	rSubscript		- the address of a reference specifying
  *				  the element to be extracted.  The
  *				  reference must be referentially
  *				  related to the vector.
- *	valuep			- a pointer to a value descriptor into which
- *				   the extracted element will be deposited.
+ *	rValues			- a pointer to a value descriptor into which
+ *				  the extracted element will be deposited.
  *
  *  Returns:
  *	Nothing.
  *
  *****/
-PublicFnDef void rtVECTOR_RefExtract (
-    M_CPD *vectorCPD, rtREFUV_TypePTR_Reference refp, DSC_Descriptor *valuep
-) {
+bool rtVECTOR_Handle::getElements (DSC_Descriptor &rResult, DSC_Scalar &rSubscript) {
 #define setPMRDPosition(pmrd, position)\
-    ((pmrd) = rtVECTOR_CPD_PMap (vectorCPD) + (position))
+    ((pmrd) = pmap () + (position))
 
 #define beginningValue(pmrd)\
     rtVECTOR_PMRD_VectorOrigin (pmrd)
@@ -5134,41 +4663,34 @@ PublicFnDef void rtVECTOR_RefExtract (
  *  Align the vector and reference and validate the applicability of the
  *  reference as a subscript for the vector...
  *****/
-    rtREFUV_AlignAndValidateRef	(
-	refp, rtVECTOR_Align (vectorCPD), rtVECTOR_CPx_PToken
-    );
-    vectorCPD->CheckConsistency ();
+    rtPTOKEN_Handle::Reference pPPT (alignedPToken ());
+    rtREFUV_AlignAndValidateRef	(&rSubscript, pPPT, 0);
+    CheckConsistency ();
 /*****  Increment operation count...  *****/
     RefExtractCount++;
 
 /*****  Check for the nil extract case and empty vectors... *****/
-    int position = rtREFUV_Ref_Element (refp);
-    int referenceNil = rtPTOKEN_CPD_BaseElementCount (rtREFUV_Ref_RefPTokenCPD (refp));
+    int position = DSC_Scalar_Int (rSubscript);
+    int referenceNil = rSubscript.RPTCardinality ();
 
     if (position == referenceNil) {
 	/*** return an undefined value descriptor ***/
-	valuep->constructNA (vectorCPD->KOT ());
-	return;
+	rResult.constructNA (kot ());
+	return true;
     }
 
 /*****  Find the PMRD which contains the referenced element  *****/
     int currentPos = 0, beginPos = 0;
-    int endPos = rtVECTOR_CPD_PMapSize (vectorCPD) - 1;
-    rtVECTOR_PMRDType *currentPMRD = rtVECTOR_CPD_PMap (vectorCPD);
+    int endPos = pmapSize () - 1;
+    rtVECTOR_PMRDType *currentPMRD = pmap ();
 
     if (TracingPMapBrief) IO_printf (
 	"rtVECTOR_RefExtract: Looking for:%d, vectorSize=%u, pmapSize=%d\n",
-	position,
-	rtPTOKEN_BaseElementCount (vectorCPD, rtVECTOR_CPx_PToken),
-	rtVECTOR_CPD_PMapSize (vectorCPD)
+	position, pPPT->cardinality (), pmapSize ()
     );
 
     /*****  Binary search for 'position' ... *****/
-    while (beginPos <= endPos &&
-	       (position < beginningValue (currentPMRD) ||
-		position >= endingValue (currentPMRD))
-    )
-    {
+    while (beginPos <= endPos && (position < beginningValue (currentPMRD) || position >= endingValue (currentPMRD))) {
 	RefExtractHuntCount++;
 	currentPos = (beginPos + endPos) / 2;
  	setPMRDPosition (currentPMRD, currentPos);
@@ -5187,31 +4709,26 @@ PublicFnDef void rtVECTOR_RefExtract (
 	       + rtVECTOR_PMRD_SegmentOrigin (currentPMRD);
 
 /*****  Set the U-Segment CPD pointer to the found U-Segment...  *****/
-    rtVECTOR_CPD_USD (vectorCPD) = rtVECTOR_CPD_USegArray (vectorCPD)
-				 + rtVECTOR_PMRD_SegmentIndex (currentPMRD);
+    unsigned int xSegment = rtVECTOR_PMRD_SegmentIndex (currentPMRD);
 
 /*****  Obtain a CPD for the segment's U-Vector...  *****/
-    rtVECTOR_CPD_SetUSDCursor (vectorCPD, rtVECTOR_USD_Values);
-    M_CPD *uvectorCPD = vectorCPD->GetCPD (rtVECTOR_CPx_USDCursor);
+    VContainerHandle::Reference pSegmentPointer (segmentPointerHandle (xSegment));
 
 /*****  Obtain a CPD for the segment's Store...  *****/
-    rtVECTOR_CPD_SetUSDCursor (vectorCPD, rtVECTOR_USD_VStore);
-    M_CPD *vstoreCPD = vectorCPD->GetCPD (rtVECTOR_CPx_USDCursor);
+    Vdd::Store::Reference pSegmentStore;
+    getSegmentStore (pSegmentStore, xSegment);
 
 /*****
  *  If the store is a string store, check for correct ref ptoken in uvector
  *  Potential exists for corruption by incorporator if the incorporator stores
  *  are incorrectly initialized ...
  *****/
-    if (RTYPE_C_ListStore == M_CPD_RType (vstoreCPD) &&
-	rtLSTORE_CPD_StringStore (vstoreCPD))
-	CheckForReferenceCompatibility (vstoreCPD, uvectorCPD, vectorCPD);
+    CheckForReferenceCompatibility (pSegmentStore, pSegmentPointer);
 
 /*****  Extract the result and return in the result descriptor...  *****/
-    valuep->constructScalarComposition (vstoreCPD, offset, uvectorCPD);
+    rResult.constructScalarComposition (pSegmentStore, offset, pSegmentPointer);
 
-/*****  ... and clean up.  *****/
-    uvectorCPD->release ();
+    return true;
 
 #undef setPMRDPosition
 #undef beginningValue
@@ -5246,17 +4763,18 @@ rtVECTOR_CType *rtVECTOR_CType::reorder (M_CPD *refuvCPD) {
     ReOrderVCCount++;
 
     Align ();
-    rtREFUV_AlignForExtract (m_pPPT, -1, refuvCPD);
+    rtREFUV_AlignForExtract (m_pPPT, refuvCPD);
 
 /*****  Create the result, ...  *****/
-    M_CPD *pResultPPT = UV_CPD_PosPTokenCPD (refuvCPD);
-    unsigned int nels = rtPTOKEN_CPD_BaseElementCount (pResultPPT);
+    rtPTOKEN_Handle::Reference pResultPPT (
+	static_cast<rtUVECTOR_Handle*>(refuvCPD->containerHandle ())->pptHandle ()
+    );
+    unsigned int nels = pResultPPT->cardinality ();
     if (nels != rtPTOKEN_BaseElementCount (refuvCPD, UV_CPx_RefPToken)) ERR_SignalFault (
 	EC__InternalInconsistency, "rtVECTOR_CType::reorder: Positional Inconsistency"
     );
 
     rtVECTOR_CType *pResult = new rtVECTOR_CType (pResultPPT, nels ? m_sUSDArray : 0);
-    pResultPPT->release ();
 
 /***** Check for empty results, ... *****/
     if (nels == 0)
@@ -5284,27 +4802,26 @@ rtVECTOR_CType *rtVECTOR_CType::reorder (M_CPD *refuvCPD) {
 	rtVECTOR_USDC *pSrcUSDC = m_pUSDArray[i];
 
 	/* ptoken */
-	M_CPD *pPPT= pResult->NewPToken (pSrcUSDC->cardinality ());
+	rtPTOKEN_Handle::Reference pPPT (pResult->NewPToken (pSrcUSDC->cardinality ()));
 
 	/* pointer */
 	M_CPD *pSrcUVector = pSrcUSDC->pointerCPD ();
-	AlignUVector (pSrcUVector);
-	M_CPD *pDstUVector = NewUVector (
-	    pSrcUVector->RType (), pPPT, pSrcUVector, UV_CPx_RefPToken
+	pSrcUVector->align ();
+
+	rtPTOKEN_Handle::Reference pRPT (
+	    static_cast<rtUVECTOR_Handle*>(pSrcUVector->containerHandle ())->rptHandle ()
 	);
 
-	/* store */
-	M_CPD *pStore = pSrcUSDC->storeCPD ();
-	pStore->retain ();
+	M_CPD *pDstUVector = NewUVector (pSrcUVector->RType (), pPPT, pRPT);
 
 	/* usdc */
-	pResult->NewUSDC (i, pStore, pDstUVector, pPPT);
+	pResult->NewUSDC (i, pSrcUSDC->store (), pDstUVector, pPPT);
 
 	/* set the uvectors array pointers */
 	uVectorsArray[i].srcArray.asAnyPtr = UV_CPD_Array (pSrcUVector, void);
 	uVectorsArray[i].dstArray.asAnyPtr = UV_CPD_Array (pDstUVector, void);
 	uVectorsArray[i].dstCount = 0;
-	uVectorsArray[i].rtype = (RTYPE_Type)M_CPD_RType (pSrcUVector);
+	uVectorsArray[i].rtype = pSrcUVector->RType ();
     }
 
 /***** Create the expanded source PMap *****/
@@ -5414,7 +4931,6 @@ rtVECTOR_CType *rtVECTOR_CType::reorder (M_CPD *refuvCPD) {
  ***** the reference U-Vector.
  *
  *  Arguments:
- *	vectorCPD	- the address of a standard CPD for the source vector.
  *	refuvCPD	- the address of a standard CPD for the reference
  *	                  U-vector specifying the new order.
  *
@@ -5422,13 +4938,10 @@ rtVECTOR_CType *rtVECTOR_CType::reorder (M_CPD *refuvCPD) {
  *	The address of a new vector constructor in the specified order.
  *
  *****/
-PublicFnDef rtVECTOR_CType *rtVECTOR_ReOrder (M_CPD *vectorCPD, M_CPD *refuvCPD) {
+rtVECTOR_CType *rtVECTOR_Handle::reorder (M_CPD *refuvCPD) {
     ReOrderCount++;
-
-    rtVECTOR_CType *vectorC = new rtVECTOR_CType (vectorCPD);
-    rtVECTOR_CType *result = vectorC->reorder (refuvCPD);
-    vectorC->release ();
-    return result;
+    rtVECTOR_CType::Reference vectorC (new rtVECTOR_CType (this));
+    return vectorC->reorder (refuvCPD);
 }
 
 
@@ -5480,7 +4993,6 @@ rtVECTOR_CType *rtVECTOR_CType::distribute (M_CPD *refuvCPD) {
  ***** produces the original vector constructor.
  *
  *  Arguments:
- *	vectorCPD	- the address of a standard CPD for the source vector.
  *	refuvCPD	- the address of a standard CPD for the reference
  *	                  U-vector specifying the new order.
  *
@@ -5488,13 +5000,11 @@ rtVECTOR_CType *rtVECTOR_CType::distribute (M_CPD *refuvCPD) {
  *	The address of a new vector constructor in the specified order.
  *
  *****/
-PublicFnDef rtVECTOR_CType *rtVECTOR_Distribute (M_CPD *vectorCPD, M_CPD *refuvCPD) {
+rtVECTOR_CType *rtVECTOR_Handle::distribute (M_CPD *refuvCPD) {
     DistributeCount++;
 
-    rtVECTOR_CType *vectorC = new rtVECTOR_CType (vectorCPD);
-    rtVECTOR_CType *result = vectorC->distribute (refuvCPD);
-    vectorC->release ();
-    return result;
+    rtVECTOR_CType::Reference vectorC (new rtVECTOR_CType (this));
+    return vectorC->distribute (refuvCPD);
 }
 
 
@@ -5513,7 +5023,6 @@ PublicFnDef rtVECTOR_CType *rtVECTOR_Distribute (M_CPD *vectorCPD, M_CPD *refuvC
  *****  store.
  *
  *  Arguments:
- *	pVector			- the vector.
  *	pStore 			- the store.
  *	pValueReturn		- the optional address ('Nil' if absent) of a
  *				  polytype descriptor that will be set to the
@@ -5524,46 +5033,38 @@ PublicFnDef rtVECTOR_CType *rtVECTOR_Distribute (M_CPD *vectorCPD, M_CPD *refuvC
  *	found.
  *
  ******/
-PublicFnDef rtLINK_CType *rtVECTOR_SubsetInStore (
-    M_CPD *pVector, M_CPD *pStore, VDescriptor *pValueReturn
-) {
+rtLINK_CType *rtVECTOR_Handle::subsetInStore (Vdd::Store *pStore, VDescriptor *pValueReturn) {
     SubsetInStoreCount++;
 
 /***** Align the vector ... *****/
-    rtVECTOR_Align (pVector);
+    align ();
 
 /***** Find the correct U-Segment ... *****/
-    int uSegment;
-    if (!LocateVectorSegment (pVector, pStore, &uSegment))
+    unsigned int xSegment;
+    if (!LocateSegment (pStore, xSegment))
 	return NilOf (rtLINK_CType*);
 
 /***** Verify that it has elements ...  *****/
-    rtVECTOR_CPD_USD (pVector) = rtVECTOR_CPD_USegArray (pVector) + uSegment;
+    rtPTOKEN_Handle::Reference posPToken (segmentPTokenHandle (xSegment));
 
-    rtVECTOR_CPD_SetUSDCursor (pVector, rtVECTOR_USD_PToken);
-    M_CPD *posPToken = pVector->GetCPD (rtVECTOR_CPx_USDCursor, RTYPE_C_PToken);
-
-    if (0 == rtPTOKEN_CPD_BaseElementCount (posPToken)) {
-	posPToken->release ();
+    if (0 == posPToken->cardinality ()) {
 	return NilOf (rtLINK_CType*);
     }
 
 /***** Return the corresponding values if appropriate...  *****/
     if (pValueReturn) {
-	rtVECTOR_CPD_SetUSDCursor (pVector, rtVECTOR_USD_Values);
-	M_CPD *pValues = pVector->GetCPD (rtVECTOR_CPx_USDCursor);
+	M_CPD *pValues = segmentPointerCPD (xSegment);
 	pValueReturn->setToMonotype (pStore, pValues);
 	pValues->release ();
     }
 
 /***** ... and compute the subset:  *****/
-    rtLINK_CType *pSubset = rtLINK_PosConstructor (posPToken, -1);
-    posPToken->release ();
+    rtLINK_CType *pSubset = rtLINK_PosConstructor (posPToken);
 
-    rtVECTOR_PMRDType const *pPMRD = rtVECTOR_CPD_PMap (pVector);
-    rtVECTOR_PMRDType const *const pPMRDLimit = pPMRD + rtVECTOR_CPD_PMapSize (pVector);
+    rtVECTOR_PMRDType const *pPMRD = pmap ();
+    rtVECTOR_PMRDType const *const pPMRDLimit = pPMRD + pmapSize ();
     while (pPMRD < pPMRDLimit) {
-	if (rtVECTOR_PMRD_SegmentIndex (pPMRD) == uSegment) {
+	if (rtVECTOR_PMRD_SegmentIndex (pPMRD) == xSegment) {
 	    unsigned int xOrigin = rtVECTOR_PMRD_VectorOrigin (pPMRD);
 	    rtLINK_AppendRange (
 		pSubset, xOrigin, rtVECTOR_PMRD_VectorOrigin (pPMRD + 1) - xOrigin
@@ -5572,7 +5073,7 @@ PublicFnDef rtLINK_CType *rtVECTOR_SubsetInStore (
 	pPMRD++;
     }
 
-    pSubset->Close (pVector, rtVECTOR_CPx_PToken);
+    pSubset->Close (getPToken ());
 
     return pSubset;
 }
@@ -5596,16 +5097,13 @@ PublicFnDef rtLINK_CType *rtVECTOR_SubsetInStore (
  *	found.
  *
  ******/
-PublicFnDef rtLINK_CType *rtVECTOR_SubsetOfType (
-    M_CPD *pVector, M_ASD *pSubsetSpace, M_KOTM pKOTM, VDescriptor *pValueReturn
+rtLINK_CType *rtVECTOR_Handle::subsetOfType (
+    M_ASD *pSubsetSpace, M_KOTM pKOTM, VDescriptor *pValueReturn
 ) {
     SubsetOfTypeCount++;
 
-    rtVECTOR_CType *pVC = new rtVECTOR_CType (pVector);
-    rtLINK_CType *pSubset = pVC->subsetOfType (pSubsetSpace, pKOTM, pValueReturn);
-    pVC->release ();
-
-    return pSubset;
+    rtVECTOR_CType::Reference pVC (new rtVECTOR_CType (this));
+    return pVC->subsetOfType (pSubsetSpace, pKOTM, pValueReturn);
 }
 
 
@@ -5621,7 +5119,7 @@ PublicFnDef rtLINK_CType *rtVECTOR_SubsetOfType (
  *  Arguments:
  *	this		- the address of the vector constructor to be
  *                        simplified.
- *	fNonDestructive	- a boolean that, when true, requires this routine to
+ *	bNonDestructive	- a boolean that, when true, requires this routine to
  *			  copy the u-segment's u-vector instead of destructively
  *			  changing its positional p-token.
  *	dscp		- a pointer to an unused descriptor which this routine
@@ -5633,7 +5131,7 @@ PublicFnDef rtLINK_CType *rtVECTOR_SubsetOfType (
  *
  *****/
 bool rtVECTOR_CType::SimplifiedToMonotype (
-    DSC_Descriptor *dscp, bool fNonDestructive
+    DSC_Descriptor *dscp, bool bNonDestructive
 ) {
 /***** If cannot simplify, return nil ... *****/
     if (CantBeSimplified ())
@@ -5642,7 +5140,7 @@ bool rtVECTOR_CType::SimplifiedToMonotype (
 /***** Get the uvector and store of the valid usegment ... *****/
     rtVECTOR_USDC *pUSDC = m_pPMRDChainHead->USDC ();
     M_CPD *uvector = pUSDC->pointerCPD ();
-    if (fNonDestructive)
+    if (bNonDestructive)
 	uvector = UV_CopyWithNewPToken (uvector, m_pPPT);
     else {
 	uvector->retain ();
@@ -5650,7 +5148,7 @@ bool rtVECTOR_CType::SimplifiedToMonotype (
     }
 
 /***** Initialize the new descriptor ... *****/
-    dscp->constructMonotype (M_DuplicateCPDPtr (pUSDC->storeCPD ()), uvector);
+    dscp->constructMonotype (pUSDC->store (), uvector);
     uvector->release ();
 
     SimplifyVCToDescriptorCount++;
@@ -5669,8 +5167,7 @@ bool rtVECTOR_CType::SimplifiedToMonotype (
  *****  the routine will do nothing and return false.
  *
  *  Arguments:
- *	vector		- a standard CPD for the vector to be simplified.
- *	fNonDestructive	- a boolean that, when true, requires this routine to
+ *	bNonDestructive	- a boolean that, when true, requires this routine to
  *			  copy the u-segment's u-vector instead of destructively
  *			  changing its positional p-token.
  *	dscp		- a pointer to an unused descriptor which this routine
@@ -5681,38 +5178,33 @@ bool rtVECTOR_CType::SimplifiedToMonotype (
  *	true if a simplification occurred, otherwise false.
  *
  *****/
-PublicFnDef bool rtVECTOR_SimplifiedToMonotype (
-    M_CPD *vector, DSC_Descriptor *dscp, bool fNonDestructive
-) {
+bool rtVECTOR_Handle::simplifiedToMonotype (DSC_Descriptor &rResult, bool bNonDestructive) {
 /***** If cannot simplify, return nil ... *****/
-    if (!rtVECTOR_CPD_CanBeSimplified (vector))
+    if (cantBeSimplifiedToMonotype ())
 	return false;
 
 /***** Get the uvector and store of the valid usegment ... *****/
-    rtVECTOR_CPD_PMRD (vector)	= rtVECTOR_CPD_PMap (vector);
-    rtVECTOR_CPD_USD (vector)	= rtVECTOR_CPD_USegArray (vector)
-				+ rtVECTOR_CPD_PMRD_SegmentIndex (vector);
+    unsigned int xSegment = rtVECTOR_PMRD_SegmentIndex (pmap ());
 
     /*** Copy the uvector with the pos ptoken of the vector ... ***/
-    M_CPD *vectorPPT = rtVECTOR_CPD_RowPTokenCPD (vector);
+    rtPTOKEN_Handle::Reference pVectorPPT (getPToken ());
 
-    rtVECTOR_CPD_SetUSDCursor (vector, rtVECTOR_USD_Values);
-    M_CPD *uvector = vector->GetCPD (rtVECTOR_CPx_USDCursor);
-    if (fNonDestructive) {
-	M_CPD *oldUVector = uvector;
-	uvector = UV_CopyWithNewPToken (oldUVector, vectorPPT);
+    M_CPD *pSegmentPointer = segmentPointerCPD (xSegment);
+    if (bNonDestructive) {
+	M_CPD *oldUVector = pSegmentPointer;
+	pSegmentPointer = UV_CopyWithNewPToken (oldUVector, pVectorPPT);
 	oldUVector->release ();
     }
     else {
-	uvector->StoreReference (UV_CPx_PToken, vectorPPT);
+	pSegmentPointer->StoreReference (UV_CPx_PToken, pVectorPPT);
     }
 
 /***** Initialize the new descriptor ... *****/
-    rtVECTOR_CPD_SetUSDCursor (vector, rtVECTOR_USD_VStore);
-    dscp->constructMonotype (vector->GetCPD (rtVECTOR_CPx_USDCursor), uvector);
+    Vdd::Store::Reference pSegmentStore;
+    getSegmentStore (pSegmentStore, xSegment);
+    rResult.constructMonotype (pSegmentStore, pSegmentPointer);
 
-    uvector->release ();
-    vectorPPT->release ();
+    pSegmentPointer->release ();
 
     SimplifyToDescriptorCount++;
 
@@ -5886,12 +5378,12 @@ M_CPD *rtVECTOR_CType::PartitionedStatistics (
     if (TracingPMapBrief) {
 	IO_printf (
 	    "rtVECTOR_PartitionStats: linkSize=%d, linkRRDCount=%d\n",
-	    rtPTOKEN_CPD_BaseElementCount (pPartition->PPT ()),
+	    pPartition->PPT ()->cardinality (),
 	    rtLINK_LC_RRDCount (pPartition)
 	);
 	IO_printf (
 	    "                          vectorSize=%d, pmapSize=%d\n",
-	    rtPTOKEN_CPD_BaseElementCount (m_pPPT), m_iPMRDCount
+	    m_pPPT->cardinality (), m_iPMRDCount
 	);
     }
 
@@ -5904,12 +5396,12 @@ M_CPD *rtVECTOR_CType::PartitionedStatistics (
     case rtVECTOR_PS_Max:
     case rtVECTOR_PS_Min:
 	resultCPD = rtDOUBLEUV_New (
-	    pPartition->RPT (), pKOT->TheDoublePTokenCPD ()
+	    pPartition->RPT (), pKOT->TheDoublePTokenHandle ()
 	);
 	break;
     case rtVECTOR_PS_NumericCount:
 	resultCPD = rtINTUV_New (
-	    pPartition->RPT (), pKOT->TheIntegerPTokenCPD ()
+	    pPartition->RPT (), pKOT->TheIntegerPTokenHandle ()
 	);
 	break;
     default:
@@ -5942,7 +5434,7 @@ M_CPD *rtVECTOR_CType::PartitionedStatistics (
     }\
 \
     M_CPD *pSrcUVector = srcPMapPtr->pointerCPD ();\
-    RTYPE_Type rtype = (RTYPE_Type)M_CPD_RType (pSrcUVector);\
+    RTYPE_Type rtype = pSrcUVector->RType ();\
     switch (rtype) {\
     case RTYPE_C_IntUV:\
 	iptr = rtINTUV_CPD_Array (pSrcUVector) + sourceUSegOrigin;\
@@ -5996,7 +5488,7 @@ M_CPD *rtVECTOR_CType::PartitionedStatistics (
     }\
 \
     M_CPD *pSrcUVector = srcPMapPtr->pointerCPD ();\
-    RTYPE_Type rtype = (RTYPE_Type)M_CPD_RType (pSrcUVector);\
+    RTYPE_Type rtype = pSrcUVector->RType ();\
     switch (rtype) {\
     case RTYPE_C_IntUV:\
 	iptr = rtINTUV_CPD_Array (pSrcUVector) + sourceUSegOrigin;\
@@ -6051,7 +5543,7 @@ M_CPD *rtVECTOR_CType::PartitionedStatistics (
     }\
 \
     M_CPD *pSrcUVector = srcPMapPtr->pointerCPD ();\
-    RTYPE_Type rtype = (RTYPE_Type)M_CPD_RType (pSrcUVector);\
+    RTYPE_Type rtype = pSrcUVector->RType ();\
     switch (rtype) {\
     case RTYPE_C_IntUV:\
 	iptr = rtINTUV_CPD_Array (pSrcUVector) + sourceUSegOrigin;\
@@ -6111,7 +5603,7 @@ M_CPD *rtVECTOR_CType::PartitionedStatistics (
 	dCalcValue = 0.0;\
 \
     M_CPD *pSrcUVector = srcPMapPtr->pointerCPD ();\
-    RTYPE_Type rtype = (RTYPE_Type)M_CPD_RType (pSrcUVector);\
+    RTYPE_Type rtype = pSrcUVector->RType ();\
     switch (rtype) {\
     case RTYPE_C_IntUV:\
 	iptr = rtINTUV_CPD_Array (pSrcUVector) + sourceUSegOrigin;\
@@ -6178,7 +5670,7 @@ M_CPD *rtVECTOR_CType::PartitionedStatistics (
 	dCalcValue = 0.0;\
 \
     M_CPD *pSrcUVector = srcPMapPtr->pointerCPD ();\
-    RTYPE_Type rtype = (RTYPE_Type)M_CPD_RType (pSrcUVector);\
+    RTYPE_Type rtype = pSrcUVector->RType ();\
     switch (rtype) {\
     case RTYPE_C_IntUV:\
 	iptr = rtINTUV_CPD_Array (pSrcUVector) + sourceUSegOrigin;\
@@ -6246,7 +5738,7 @@ M_CPD *rtVECTOR_CType::PartitionedStatistics (
     }\
 \
     M_CPD *pSrcUVector = srcPMapPtr->pointerCPD ();\
-    RTYPE_Type rtype = (RTYPE_Type)M_CPD_RType (pSrcUVector);\
+    RTYPE_Type rtype = pSrcUVector->RType ();\
     switch (rtype) {\
     case RTYPE_C_IntUV:\
 	iCalcValue += count;\
@@ -6339,7 +5831,7 @@ M_CPD *rtVECTOR_CType::PartitionedSortIndices (
 
 /*****  Align and validate the inputs to this routine...  *****/
     Align ();
-    pPartition->AlignForDistribute (m_pPPT, -1);
+    pPartition->AlignForDistribute (m_pPPT, 0);
 
 /*****
  *  Create reference U-Vectors to hold the sort indices to be returned by
@@ -6366,7 +5858,7 @@ M_CPD *rtVECTOR_CType::PartitionedSortIndices (
 	    rtLINK_CType *segmentPartition = pPartition->Extract (pSegmentSubset);
 
 	    M_CPD *segmentSortIndices;
-	    switch (M_CPD_RType (segmentValues)) {
+	    switch (segmentValues->RType ()) {
 	    case RTYPE_C_CharUV:
 		segmentSortIndices = rtCHARUV_PartitndSortIndices (
 		    segmentPartition, segmentValues, descending
@@ -6416,7 +5908,7 @@ M_CPD *rtVECTOR_CType::PartitionedSortIndices (
 	        ERR_SignalFault (
 		    EC__UnknownUVectorRType, UTIL_FormatMessage (
 			"rtVECTOR_PartitionedSortIndices: %s",
-			RTYPE_TypeIdAsString ((RTYPE_Type)M_CPD_RType (segmentValues))
+			segmentValues->RTypeName ()
 		    )
 		);
 		break;
@@ -6502,30 +5994,20 @@ void rtVECTOR_CType::PartitionedPartition (
 
 /*****  Align and validate the inputs to this routine...  *****/
     Align ();
-    pPartition->AlignForDistribute (m_pPPT, -1);
+    pPartition->AlignForDistribute (m_pPPT, 0);
 
 /*****
  *  Create the major and minor partitions and reordering to be returned by
  *  this routine...
  *****/
     M_ASD *pContainerSpace = m_pPPT->Space();
-    M_CPD *groupPToken = rtPTOKEN_New (pContainerSpace, 0);
-    M_CPD *minorPToken = rtPTOKEN_New (pContainerSpace, 0);
+    rtPTOKEN_Handle::Reference groupPToken (new rtPTOKEN_Handle (pContainerSpace, 0));
+    rtPTOKEN_Handle::Reference minorPToken (new rtPTOKEN_Handle (pContainerSpace, 0));
 
-    rtLINK_CType *majorPartition = *majorLC = rtLINK_RefConstructor (
-	pPartition->RPT (), -1
-    )->Close (groupPToken);
+    rtLINK_CType *majorPartition = *majorLC = rtLINK_RefConstructor (pPartition->RPT ())->Close (groupPToken);
+    rtLINK_CType *minorPartition = *minorLC = rtLINK_RefConstructor (groupPToken)->Close (minorPToken);
 
-    rtLINK_CType *minorPartition = *minorLC = rtLINK_RefConstructor (
-	groupPToken, -1
-    )->Close (minorPToken);
-
-    M_CPD *minorReordering = *reordering = rtREFUV_New (
-	pPartition->PPT (), minorPToken
-    );
-
-    minorPToken->release ();
-    groupPToken->release ();
+    M_CPD *minorReordering = *reordering = rtREFUV_New (pPartition->PPT (), minorPToken);
 
 /*****  Create the constructor links needed by this routine...  *****/
     MakeConstructorLinks ();
@@ -6543,7 +6025,7 @@ void rtVECTOR_CType::PartitionedPartition (
 	    rtLINK_CType *segmentPartition = pPartition->Extract (pSegmentSubset);
 
 	    rtLINK_CType *segmentMajorPartition, *segmentMinorPartition;
-	    switch (M_CPD_RType (segmentValues)) {
+	    switch (segmentValues->RType ()) {
 	    case RTYPE_C_CharUV:
 		rtCHARUV_PartitndPartition (
 		    segmentPartition,
@@ -6620,7 +6102,7 @@ void rtVECTOR_CType::PartitionedPartition (
 	        ERR_SignalFault (
 		    EC__UnknownUVectorRType, UTIL_FormatMessage (
 			"rtVECTOR_PartitionedPartition: %s",
-			RTYPE_TypeIdAsString ((RTYPE_Type)M_CPD_RType (segmentValues))
+			segmentValues->RTypeName ()
 		    )
 		);
 		break;
@@ -6659,25 +6141,6 @@ void rtVECTOR_CType::PartitionedPartition (
  **************************
  **************************/
 
-PrivateFnDef void AdjustPMapEntryVectorOrigins (
-    M_CPD *targetCPD, unsigned int xInitialEntry, int adjustment
-) {
-    rtVECTOR_PMRDType *pMapEntry = rtVECTOR_CPD_PMap (targetCPD);
-    rtVECTOR_PMRDType const *const pMapLimit = pMapEntry + rtVECTOR_CPD_PMapSize (targetCPD);
-
-    pMapEntry += xInitialEntry;
-    while (pMapEntry <= pMapLimit) {
-	rtVECTOR_PMRD_VectorOrigin (pMapEntry++) += adjustment;
-    }
-}
-
-PrivateFnDef M_CPD *GetUSegUVector (M_CPD *vectorCPD, int usegi) {
-    rtVECTOR_CPD_USD (vectorCPD) = rtVECTOR_CPD_USegArray (vectorCPD) + usegi;
-    rtVECTOR_CPD_SetUSDCursor (vectorCPD, rtVECTOR_USD_Values);
-    return vectorCPD->GetCPD (rtVECTOR_CPx_USDCursor);
-}
-
-
 /******************************
  *****  Lookup Utilities  *****
  ******************************/
@@ -6690,7 +6153,7 @@ PrivateFnDef M_CPD *GetUSegUVector (M_CPD *vectorCPD, int usegi) {
  *			  be searched.
  *	keyUV		- a standard CPD for the set uvector containing
  *			  the values to lookup in the 'sourceUV'.
- *	lookupCase	- either: rtLINK_LookupCase_LE,
+ *	xLookupCase	- either: rtLINK_LookupCase_LE,
  *			          rtLINK_LookupCase_EQ, or
  *			          rtLINK_LookupCase_GE.
  *	locationsLinkC 	- a pointer to a link constructor which this routine
@@ -6709,44 +6172,44 @@ PrivateFnDef M_CPD *GetUSegUVector (M_CPD *vectorCPD, int usegi) {
 PrivateFnDef void UVLookup (
     M_CPD			*sourceUV,
     M_CPD			*keyUV,
-    rtLINK_LookupCase		lookupCase,
+    rtLINK_LookupCase		xLookupCase,
     rtLINK_CType		**locationsLinkC,
     rtLINK_CType		**locatedLinkC
 )
 {
-    switch ((RTYPE_Type)M_CPD_RType (sourceUV)) {
+    switch (sourceUV->RType ()) {
     case RTYPE_C_CharUV:
-	rtCHARUV_Lookup	  (sourceUV, keyUV, lookupCase, locationsLinkC, locatedLinkC);
+	rtCHARUV_Lookup	  (sourceUV, keyUV, xLookupCase, locationsLinkC, locatedLinkC);
 	break;
     case RTYPE_C_DoubleUV:
-	rtDOUBLEUV_Lookup (sourceUV, keyUV, lookupCase, locationsLinkC, locatedLinkC);
+	rtDOUBLEUV_Lookup (sourceUV, keyUV, xLookupCase, locationsLinkC, locatedLinkC);
 	break;
     case RTYPE_C_FloatUV:
-	rtFLOATUV_Lookup  (sourceUV, keyUV, lookupCase, locationsLinkC, locatedLinkC);
+	rtFLOATUV_Lookup  (sourceUV, keyUV, xLookupCase, locationsLinkC, locatedLinkC);
 	break;
     case RTYPE_C_IntUV:
-	rtINTUV_Lookup	  (sourceUV, keyUV, lookupCase, locationsLinkC, locatedLinkC);
+	rtINTUV_Lookup	  (sourceUV, keyUV, xLookupCase, locationsLinkC, locatedLinkC);
 	break;
     case RTYPE_C_RefUV:
-	rtREFUV_Lookup	  (sourceUV, keyUV, lookupCase, locationsLinkC, locatedLinkC);
+	rtREFUV_Lookup	  (sourceUV, keyUV, xLookupCase, locationsLinkC, locatedLinkC);
 	break;
     case RTYPE_C_UndefUV:
-	rtUNDEFUV_Lookup  (sourceUV, keyUV, lookupCase, locationsLinkC, locatedLinkC);
+	rtUNDEFUV_Lookup  (sourceUV, keyUV, xLookupCase, locationsLinkC, locatedLinkC);
 	break;
     case RTYPE_C_Unsigned64UV:
-	rtU64UV_Lookup	  (sourceUV, keyUV, lookupCase, locationsLinkC, locatedLinkC);
+	rtU64UV_Lookup	  (sourceUV, keyUV, xLookupCase, locationsLinkC, locatedLinkC);
 	break;
     case RTYPE_C_Unsigned96UV:
-	rtU96UV_Lookup	  (sourceUV, keyUV, lookupCase, locationsLinkC, locatedLinkC);
+	rtU96UV_Lookup	  (sourceUV, keyUV, xLookupCase, locationsLinkC, locatedLinkC);
 	break;
     case RTYPE_C_Unsigned128UV:
-	rtU128UV_Lookup	  (sourceUV, keyUV, lookupCase, locationsLinkC, locatedLinkC);
+	rtU128UV_Lookup	  (sourceUV, keyUV, xLookupCase, locationsLinkC, locatedLinkC);
 	break;
     default:
         ERR_SignalFault (
 	    EC__UnknownUVectorRType, UTIL_FormatMessage (
 		"rtVECTOR UVLookup: Unsupported R-Type %s",
-		RTYPE_TypeIdAsString ((RTYPE_Type)M_CPD_RType (sourceUV))
+		sourceUV->RTypeName ()
 	    )
 	);
 	break;
@@ -6760,9 +6223,9 @@ PrivateFnDef void UVLookup (
  *  Arguments:
  *	sourceUV	- a standard CPD for the set uvector to be
  *			  be searched.
- *	keyDsc		- the address of a scalar descriptor containing the
+ *	rKeyPointer		- the address of a scalar descriptor containing the
  *                        value to lookup in 'sourceUV'.
- *	lookupCase	- either: rtLINK_LookupCase_LE,
+ *	xLookupCase	- either: rtLINK_LookupCase_LE,
  *			          rtLINK_LookupCase_EQ, or
  *			          rtLINK_LookupCase_GE.
  *	locationPtr 	- the address of a scalar which this routine will set
@@ -6775,63 +6238,58 @@ PrivateFnDef void UVLookup (
  *
  *****/
 PrivateFnDef bool ScalarLookup (
-    M_CPD			*sourceUV,
-    DSC_Descriptor		*keyDsc,
-    rtLINK_LookupCase		lookupCase,
-    int				*locationPtr
-)
-{
-    bool found;
+    M_CPD *sourceUV, DSC_Scalar &rKeyPointer, rtLINK_LookupCase	xLookupCase, int *locationPtr
+) {
+    bool found = false;
 
-    switch ((RTYPE_Type)M_CPD_RType (sourceUV)) {
+    switch (sourceUV->RType ()) {
     case RTYPE_C_CharUV:
 	found = rtCHARUV_ScalarLookup (
-	    sourceUV, &(DSC_Descriptor_Scalar_Char (*keyDsc)), lookupCase, locationPtr
+	    sourceUV, &DSC_Scalar_Char (rKeyPointer), xLookupCase, locationPtr
 	);
 	break;
     case RTYPE_C_DoubleUV:
 	found = rtDOUBLEUV_ScalarLookup	(
-	    sourceUV, &(DSC_Descriptor_Scalar_Double (*keyDsc)), lookupCase, locationPtr
+	    sourceUV, &DSC_Scalar_Double (rKeyPointer), xLookupCase, locationPtr
 	);
 	break;
     case RTYPE_C_FloatUV:
 	found = rtFLOATUV_ScalarLookup (
-	    sourceUV, &(DSC_Descriptor_Scalar_Float (*keyDsc)), lookupCase, locationPtr
+	    sourceUV, &DSC_Scalar_Float (rKeyPointer), xLookupCase, locationPtr
 	);
 	break;
     case RTYPE_C_IntUV:
 	found = rtINTUV_ScalarLookup (
-	    sourceUV, &(DSC_Descriptor_Scalar_Int (*keyDsc)), lookupCase, locationPtr
+	    sourceUV, &DSC_Scalar_Int (rKeyPointer), xLookupCase, locationPtr
 	);
 	break;
     case RTYPE_C_RefUV:
 	found = rtREFUV_ScalarLookup (
-	    sourceUV, &(DSC_Descriptor_Scalar_Int (*keyDsc)), lookupCase, locationPtr
+	    sourceUV, &DSC_Scalar_Int (rKeyPointer), xLookupCase, locationPtr
 	);
 	break;
     case RTYPE_C_UndefUV:
-	found = rtUNDEFUV_ScalarLookup (sourceUV, lookupCase, locationPtr);
+	found = rtUNDEFUV_ScalarLookup (sourceUV, xLookupCase, locationPtr);
 	break;
     case RTYPE_C_Unsigned64UV:
 	found = rtU64UV_ScalarLookup (
-	    sourceUV, &(DSC_Descriptor_Scalar_Unsigned64 (*keyDsc)), lookupCase, locationPtr
+	    sourceUV, &DSC_Scalar_Unsigned64 (rKeyPointer), xLookupCase, locationPtr
 	);
 	break;
     case RTYPE_C_Unsigned96UV:
 	found = rtU96UV_ScalarLookup (
-	    sourceUV, &(DSC_Descriptor_Scalar_Unsigned96 (*keyDsc)), lookupCase, locationPtr
+	    sourceUV, &DSC_Scalar_Unsigned96 (rKeyPointer), xLookupCase, locationPtr
 	);
 	break;
     case RTYPE_C_Unsigned128UV:
 	found = rtU128UV_ScalarLookup (
-	    sourceUV, &(DSC_Descriptor_Scalar_Unsigned128 (*keyDsc)), lookupCase, locationPtr
+	    sourceUV, &DSC_Scalar_Unsigned128 (rKeyPointer), xLookupCase, locationPtr
 	);
 	break;
     default:
         ERR_SignalFault (
 	    EC__UnknownUVectorRType, UTIL_FormatMessage (
-		"rtVECTOR ScalarLookup: Unsupported R-Type %s",
-		RTYPE_TypeIdAsString ((RTYPE_Type)M_CPD_RType (sourceUV))
+		"rtVECTOR ScalarLookup: Unsupported R-Type %s", sourceUV->RTypeName ()
 	    )
 	);
 	break;
@@ -6865,10 +6323,9 @@ PrivateFnDef bool ScalarLookup (
  *****  Private routine to lookup a value in a set vector.
  *
  *  Arguments:
- *	sourceCPD	- a standard CPD for the set vector to be searched.
- *	keyDsc		- the address of a scalar descriptor containing
+ *	rKeyPointer		- the address of a scalar descriptor containing
  *			  the value to lookup in 'sourceCPD'.
- *	lookupCase	- either: rtLINK_LookupCase_LE,
+ *	xLookupCase	- either: rtLINK_LookupCase_LE,
  *			          rtLINK_LookupCase_EQ, or
  *			          rtLINK_LookupCase_GE.
  *	locationsDscPointer
@@ -6878,86 +6335,72 @@ PrivateFnDef bool ScalarLookup (
  *		          where the value was found.  If the value was not
  *                        found, then 'locationsDscPointer' will be set to an
  *                        empty descriptor pointer.
- *	locatedDscPointer
- *			- a pointer to a descriptor pointer which this routine
+ *	rLocatedReturn	- a pointer to a descriptor pointer which this routine
  *			  will create ONLY if needed.
  *			  if the value was found -
- *                             then 'locatedDscPointer' will
+ *                             then 'rLocatedReturn' will
  *			       be set to a reference scalar descriptor pointer.
- *                        Otherwise 'locatedDscPointer' will be set to an
+ *                        Otherwise 'rLocatedReturn' will be set to an
  *                             empty descriptor pointer.
  *  Returns:
  *	NOTHING
  *
  *****/
-PrivateFnDef void LookupFromScalarDsc (
-    M_CPD			*sourceCPD,
-    DSC_Descriptor		*keyDsc,
-    rtLINK_LookupCase		lookupCase,
-    DSC_Pointer			*locationsDscPointer,
-    DSC_Pointer			*locatedDscPointer
-)
-{
+void rtVECTOR_Handle::locate (
+    Vdd::Store *pKeyStore, DSC_Scalar &rKeyPointer, rtLINK_LookupCase xLookupCase, DSC_Pointer &rLocationsReturn, DSC_Pointer &rLocatedReturn
+) {
 /****  Align and validate the source set vector and key scalar descriptor ****/
-    rtVECTOR_Align (sourceCPD);
+    align ();
 
-    if (keyDsc->isntScalar ()) ERR_SignalFault (
-	EC__InternalInconsistency,
-	"rtVECTOR LookupFromScalarDescriptor: Key must be a scalar descriptor"
-    );
-
-    if (keyDsc->holdsAScalarReference ()) {
-	rtREFUV_AlignReference (&DSC_Descriptor_Scalar (*keyDsc));
+    if (rKeyPointer.holdsAReference ()) {
+	rtREFUV_AlignReference (&rKeyPointer);
     }
 
-    if (!rtVECTOR_CPD_IsASet (sourceCPD)) ERR_SignalFault (
+    if (!isASet ()) ERR_SignalFault (
 	EC__InternalInconsistency,
-	"rtVECTOR LookupFromScalarDescriptor: Source must be a set vector"
+	"rtVECTOR_Handle::locate: Source must be a set vector"
     );
 
 /*****  Find the key's usegment in the source ... *****/
 /*****  If not in the source ... return empty descriptor pointers ... *****/
-    int srcUSegi;
-    if (!LocateVectorSegment (sourceCPD, keyDsc->storeCPDIfAvailable (), &srcUSegi)) {
-	locationsDscPointer->construct ();
-	locatedDscPointer->construct ();
+    unsigned int srcUSegi;
+    if (!LocateSegment (pKeyStore, srcUSegi)) {
+	rLocationsReturn.construct ();
+	rLocatedReturn.construct ();
 	return;
     }
 
 /*****  Get the src vector origin for 'srcUSegi' ... *****/
-    int srcVectorOrig;
-    for (unsigned int i=0; i < rtVECTOR_CPD_PMapSize (sourceCPD); i++) {
-	rtVECTOR_CPD_PMRD (sourceCPD) = rtVECTOR_CPD_PMap (sourceCPD) + i;
-	if (rtVECTOR_CPD_PMRD_SegmentIndex (sourceCPD) == srcUSegi) {
-	    srcVectorOrig = rtVECTOR_CPD_PMRD_VectorOrigin (sourceCPD);
+    unsigned int sMap = pmapSize ();
+    rtVECTOR_PMRDType *pMap = pmap ();
+
+    unsigned int srcVectorOrig;
+    for (unsigned int i=0; i < sMap; i++) {
+	rtVECTOR_PMRDType *pMapEntry = pMap + i;
+	if (rtVECTOR_PMRD_SegmentIndex (pMapEntry) == srcUSegi) {
+	    srcVectorOrig = rtVECTOR_PMRD_VectorOrigin (pMapEntry);
 	    break;
 	}
     }
 
 /*****  Get the src usegment's uvector *****/
-    M_CPD *srcUVector = GetUSegUVector (sourceCPD, srcUSegi);
+    M_CPD *srcUVector = segmentPointerCPD (srcUSegi);
 
 /*****  Do the lookup *****/
     int location;
-    bool found = ScalarLookup (srcUVector, keyDsc, lookupCase, &location);
+    bool found = ScalarLookup (srcUVector, rKeyPointer, xLookupCase, &location);
     srcUVector->release ();
 
 /*****  If found ... *****/
     if (found) {
-	M_CPD *ptoken = rtVECTOR_CPD_RowPTokenCPD (sourceCPD);
+	rLocationsReturn.constructReferenceScalar (getPToken (), location + srcVectorOrig);
 
-	locationsDscPointer->constructReferenceScalar (ptoken, location + srcVectorOrig);
-
-	ptoken = M_DuplicateCPDPtr (
-	    DSC_Scalar_RefPToken (DSC_Descriptor_Scalar (*keyDsc))
-	);
-
-	locatedDscPointer->constructReferenceScalar (ptoken, 0);
+	rLocatedReturn.constructReferenceScalar (rKeyPointer.RPT (), 0);
     }
 /***** ... else not found ... *****/
     else {
-	locationsDscPointer->construct ();
-	locatedDscPointer->construct ();
+	rLocationsReturn.construct ();
+	rLocatedReturn.construct ();
     }
 }
 
@@ -6966,124 +6409,117 @@ PrivateFnDef void LookupFromScalarDsc (
  *****  Private routine to lookup values in a set vector.
  *
  *  Arguments:
- *	sourceCPD	- a standard CPD for the set vector to be searched.
- *	keyCPD		- a standard CPD for a set uvector containing
+ *	pKeyStore	- the key store.
+ *	pKeyPointer	- a standard CPD for a set uvector containing
  *			  the values to lookup in 'sourceCPD'.
- *	keyVStore	- a standard CPD for the Value Store of 'keyCPD'.
- *	lookupCase	- either: rtLINK_LookupCase_LE,
+ *	xLookupCase	- either: rtLINK_LookupCase_LE,
  *			          rtLINK_LookupCase_EQ, or
  *			          rtLINK_LookupCase_GE.
- *	locationsDscPointer
+ *	rLocationsReturn
  *                      - the address of a descriptor pointer to be created.
- *                        'locationsDscPointer' will be set to a link
+ *                        'rLocationsReturn' will be set to a link
  *                        descriptor pointer.  For each value in the
- *                        'keyCPD', the link will contain
+ *                        'pKeyPointer', the link will contain
  *                        the position in 'sourceCPD' where that value
  *                        was found.
- *	locatedDscPointer
- *			- a pointer to a descriptor pointer which this routine
+ *	rLocatedReturn	- a pointer to a descriptor pointer which this routine
  *			  will create ONLY if needed.
- *			  'locatedDscPointer' will be set to a link
+ *			  'rLocatedReturn' will be set to a link
  *                        descriptor pointer.  The link will contain the
- *                        positions in 'keyCPD' for which a value was
+ *                        positions in 'pKeyPointer' for which a value was
  *                        found in 'sourceCPD'.  If all of the
- *                        values from 'keyCPD' were found, then
- *                        'locatedDscPointer' will be set to an empty
+ *                        values from 'pKeyPointer' were found, then
+ *                        'rLocatedReturn' will be set to an empty
  *                        descriptor pointer.
  *
  *  Returns:
  *	NOTHING
  *
  *****/
-PrivateFnDef void LookupFromUV (
-    M_CPD			*sourceCPD,
-    M_CPD			*keyCPD,
-    M_CPD			*keyVStore,
-    rtLINK_LookupCase		lookupCase,
-    DSC_Pointer			*locationsDscPointer,
-    DSC_Pointer			*locatedDscPointer
-)
-{
+void rtVECTOR_Handle::locate (
+    Vdd::Store *pKeyStore, M_CPD *pKeyPointer, rtLINK_LookupCase xLookupCase, DSC_Pointer &rLocationsReturn, DSC_Pointer &rLocatedReturn
+) {
 /***** Align and validate source set vector and key set UV ... *****/
-    rtVECTOR_Align (sourceCPD);
-    AlignUVector (keyCPD);
+    align ();
+    pKeyPointer->align ();
 
-    if (!rtVECTOR_CPD_IsASet (sourceCPD) || !UV_CPD_IsASetUV (keyCPD)) {
+    if (!isASet () || !UV_CPD_IsASetUV (pKeyPointer)) {
 	ERR_SignalFault (
-	    EC__InternalInconsistency,
-	    "rtVECTOR LookupFromUV:  Source and Key must be sets"
+	    EC__InternalInconsistency, "rtVECTOR_Handle::locate:  Source and Key must be sets"
 	);
     }
 
 /***** Make the location link constructor ... *****/
-    rtLINK_CType *locationsLC = rtLINK_RefConstructor (sourceCPD, rtVECTOR_CPx_PToken);
+    rtPTOKEN_Handle::Reference ptoken (getPToken ());
+    rtLINK_CType *locationsLC = rtLINK_RefConstructor (ptoken);
+
     rtLINK_CType **locationsLinkC = &locationsLC; /* used in AppendToLocations macro */
 
 /***** If the key is empty, close the locations linkc and return ... *****/
-    if (UV_CPD_ElementCount (keyCPD) == 0) {
-	locationsLC->Close (keyCPD, UV_CPx_PToken);
-	locationsDscPointer->constructLink (locationsLC);
-	locatedDscPointer->construct ();
+    if (UV_CPD_ElementCount (pKeyPointer) == 0) {
+	locationsLC->Close (pKeyPointer, UV_CPx_PToken);
+	rLocationsReturn.constructLink (locationsLC);
+	rLocatedReturn.construct ();
 	return;
     }
 
 /*****  Find the key's usegment in the source... *****/
 /*****  If not in the source ... return empty linkc's ... *****/
-    int srcUSegi;
-    if (!LocateVectorSegment (sourceCPD, keyVStore, &srcUSegi)) {
-	rtLINK_CType *locatedLC = rtLINK_RefConstructor (keyCPD, UV_CPx_PToken);
-	M_CPD *ptoken = rtPTOKEN_New (keyCPD->Space (), 0);
+    unsigned int srcUSegi;
+    if (!LocateSegment (pKeyStore, srcUSegi)) {
+	rtLINK_CType *locatedLC = rtLINK_RefConstructor (pKeyPointer, UV_CPx_PToken);
+	ptoken.setTo (new rtPTOKEN_Handle (pKeyPointer->Space (), 0));
 	locatedLC->Close (ptoken);
-	locatedDscPointer->constructLink (locatedLC);
+	rLocatedReturn.constructLink (locatedLC);
 
 	locationsLC->Close (ptoken);
-	locationsDscPointer->constructLink (locationsLC);
-	ptoken->release ();
+	rLocationsReturn.constructLink (locationsLC);
 
 	return;
     }
 
 /*****  Get the src vector origin for 'srcUSegi' ... *****/
-    int srcVectorOrig;
-    for (unsigned int i=0; i<rtVECTOR_CPD_PMapSize (sourceCPD); i++) {
-	rtVECTOR_CPD_PMRD (sourceCPD) = rtVECTOR_CPD_PMap (sourceCPD) + i;
-	if (rtVECTOR_CPD_PMRD_SegmentIndex (sourceCPD) == srcUSegi) {
-	    srcVectorOrig = rtVECTOR_CPD_PMRD_VectorOrigin (sourceCPD);
+    rtVECTOR_PMRDType *pMap = pmap ();
+    unsigned int sMap = pmapSize ();
+
+    unsigned int srcVectorOrig;
+    for (unsigned int i = 0; i < sMap; i++) {
+	rtVECTOR_PMRDType *pMapEntry = pMap + i;
+	if (rtVECTOR_PMRD_SegmentIndex (pMapEntry) == srcUSegi) {
+	    srcVectorOrig = rtVECTOR_PMRD_VectorOrigin (pMapEntry);
 	    break;
 	}
     }
 
 /*****  Get the src usegment's uvector *****/
-    rtVECTOR_CPD_USD (sourceCPD) =rtVECTOR_CPD_USegArray(sourceCPD) + srcUSegi;
-    rtVECTOR_CPD_SetUSDCursor (sourceCPD, rtVECTOR_USD_Values);
-    M_CPD *srcUVector = sourceCPD->GetCPD (rtVECTOR_CPx_USDCursor);
+//    rtVECTOR_CPD_USD (sourceCPD) =rtVECTOR_CPD_USegArray(sourceCPD) + srcUSegi;
+    M_CPD *srcUVector = segmentPointerCPD (srcUSegi);
 
 /*****  Do the lookup *****/
     rtLINK_CType *locatedLC, *uvLocationsLC;
-    UVLookup (srcUVector, keyCPD, lookupCase, &uvLocationsLC, &locatedLC);
-
+    UVLookup (srcUVector, pKeyPointer, xLookupCase, &uvLocationsLC, &locatedLC);
     srcUVector->release ();
 
 /*****  Append to 'locationsLinkC' *****/
-    int adjustment = srcVectorOrig; /* used in AppendToLocations macro */
+    unsigned int adjustment = srcVectorOrig; /* used in AppendToLocations macro */
     AppendToLocations (uvLocationsLC);
 
 /*****  Close the link constructors ... *****/
 
 /*****  If some values were not found ... *****/
     if (locatedLC) {
-	locatedDscPointer->constructLink (locatedLC);
+	rLocatedReturn.constructLink (locatedLC);
 
 	locationsLC->Close (locatedLC->PPT ());
-	locationsDscPointer->constructLink (locationsLC);
+	rLocationsReturn.constructLink (locationsLC);
     }
 
 /***** ... else all values were found ... *****/
     else {
-	locatedDscPointer->construct ();
+	rLocatedReturn.construct ();
 
-	locationsLC->Close (keyCPD, UV_CPx_PToken);
-	locationsDscPointer->constructLink (locationsLC);
+	locationsLC->Close (pKeyPointer, UV_CPx_PToken);
+	rLocationsReturn.constructLink (locationsLC);
     }
 }
 
@@ -7092,90 +6528,75 @@ PrivateFnDef void LookupFromUV (
  *****  Routine to lookup values in a set vector.
  *
  *  Arguments:
- *	sourceCPD	- a standard CPD for the set vector to be searched.
- *	keyDsc		- the address of a descriptor containing
+ *	rKeys		- the address of a descriptor containing
  *			  the values to lookup in 'sourceCPD'.
- *	lookupCase	- either: rtLINK_LookupCase_LE,
+ *	xLookupCase	- either: rtLINK_LookupCase_LE,
  *			          rtLINK_LookupCase_EQ, or
  *			          rtLINK_LookupCase_GE.
- *	locationsDscPointer
+ *	rLocationsReturn
  *                      - the address of a descriptor pointer to be created.
  *
- *	                  If 'keyDsc' is a scalar descriptor, then
- *			  'locationsDscPointer' will be set to a reference
+ *	                  If 'rKeys' is a scalar descriptor, then
+ *			  'rLocationsReturn' will be set to a reference
  *			  scalar pointer containing the position in 'sourceCPD'
  *		          where the value was found.  If the value was not
- *                        found, then 'locationsDscPointer' will be set to an
+ *                        found, then 'rLocationsReturn' will be set to an
  *                        empty descriptor pointer.
  *
- *	                  If 'keyDsc' is not a scalar descriptor, then
- *                        'locationsDscPointer' will be set to a link
+ *	                  If 'rKeys' is not a scalar descriptor, then
+ *                        'rLocationsReturn' will be set to a link
  *                        descriptor pointer.  For each value in the
- *                        'keyDsc', the link will contain
+ *                        'rKeys', the link will contain
  *                        the position in 'sourceCPD' where that value
  *                        was found.
- *	locatedDscPointer
+ *	rLocatedReturn
  *			- a pointer to a descriptor pointer which this routine
  *			  will create ONLY if needed.
  *
- *                        If 'keyDsc' is a scalar descriptor -
+ *                        If 'rKeys' is a scalar descriptor -
  *			    if the value was found -
- *                             then 'locatedDscPointer' will
+ *                             then 'rLocatedReturn' will
  *			       be set to a reference scalar descriptor pointer.
- *                          Otherwise 'locatedDscPointer' will be set to an
+ *                          Otherwise 'rLocatedReturn' will be set to an
  *                             empty descriptor pointer.
  *
- *                        If 'keyDsc' is not a scalar descriptor -
- *			     then 'locatedDscPointer' will be set to a link
+ *                        If 'rKeys' is not a scalar descriptor -
+ *			     then 'rLocatedReturn' will be set to a link
  *                           descriptor pointer.  The link will contain the
- *                           positions in 'keyDsc' for which a value was
+ *                           positions in 'rKeys' for which a value was
  *                           found in 'sourceCPD'.  If all of the
- *                           values from 'keyDsc' were found, then
- *                           'locatedDscPointer' will be set to an empty
+ *                           values from 'rKeys' were found, then
+ *                           'rLocatedReturn' will be set to an empty
  *                           descriptor pointer.
  *
  *  Returns:
  *	NOTHING
  *
  *****/
-PublicFnDef void rtVECTOR_LookupFromValueD (
-    M_CPD			*sourceCPD,
-    DSC_Descriptor		*keyDsc,
-    rtLINK_LookupCase		lookupCase,
-    DSC_Pointer			*locationsDscPointer,
-    DSC_Pointer			*locatedDscPointer
+void rtVECTOR_Handle::locate (
+    DSC_Descriptor &rKeys, rtLINK_LookupCase xLookupCase, DSC_Pointer &rLocationsReturn, DSC_Pointer &rLocatedReturn
 ) {
     LookupFromValueDCount++;
 
 /*****  Decode the key descriptor ... *****/
-    if (keyDsc->isScalar ()) {
-	LookupFromScalarDsc (
-	    sourceCPD, keyDsc, lookupCase, locationsDscPointer, locatedDscPointer
+    if (rKeys.isScalar ()) {
+	locate (
+	    rKeys.store (), DSC_Descriptor_Scalar (rKeys), xLookupCase, rLocationsReturn, rLocatedReturn
 	);
     }
-    else if (keyDsc->holdsNonScalarValues ()) {
-	LookupFromUV (
-	    sourceCPD,
-	    DSC_Descriptor_Value (*keyDsc),
-	    keyDsc->storeCPDIfAvailable (),
-	    lookupCase,
-	    locationsDscPointer,
-	    locatedDscPointer
+    else if (rKeys.holdsNonScalarValues ()) {
+	locate (
+	    rKeys.store (), DSC_Descriptor_Value (rKeys), xLookupCase, rLocationsReturn, rLocatedReturn
 	);
     }
-    else if (keyDsc->holdsNonScalarReferences ()) {
-	LookupFromUV (
-	    sourceCPD,
-	    DSC_Descriptor_Reference (*keyDsc),
-	    keyDsc->storeCPDIfAvailable (),
-	    lookupCase,
-	    locationsDscPointer,
-	    locatedDscPointer
+    else if (rKeys.holdsNonScalarReferences ()) {
+	locate (
+	    rKeys.store (), DSC_Descriptor_Reference (rKeys), xLookupCase, rLocationsReturn, rLocatedReturn
 	);
     }
     else ERR_SignalFault (
 	EC__InternalInconsistency,
-	"rtVECTOR_LookupFromValueD: Unimplemented key descriptor type"
+	"rtVECTOR_Handle::locate: Unimplemented key descriptor type"
     );
 }
 
@@ -7183,6 +6604,10 @@ PublicFnDef void rtVECTOR_LookupFromValueD (
 /***********************************
  *****  LocateOrAdd Utilities  *****
  ***********************************/
+
+/**********************
+ *----  U-Vector  ----*
+ **********************/
 
 /*---------------------------------------------------------------------------
  *****  Routine to locate or add a set of values to a set uvector.
@@ -7218,7 +6643,7 @@ PrivateFnDef void UVLocateOrAdd (
     rtLINK_CType**	locationsLinkC,
     rtLINK_CType**	addedLinkC
 ) {
-    switch ((RTYPE_Type)M_CPD_RType (targetUV)) {
+    switch (targetUV->RType ()) {
     case RTYPE_C_CharUV:
 	rtCHARUV_LocateOrAdd (targetUV, keyUV, locationsLinkC, addedLinkC);
 	break;
@@ -7250,7 +6675,7 @@ PrivateFnDef void UVLocateOrAdd (
         ERR_SignalFault (
 	    EC__UnknownUVectorRType, UTIL_FormatMessage (
 		"rtVECTOR UVLocateOrAdd: Unsupported R-Type %s",
-		RTYPE_TypeIdAsString ((RTYPE_Type)M_CPD_RType (targetUV))
+		targetUV->RTypeName ()
 	    )
 	);
 	break;
@@ -7264,7 +6689,7 @@ PrivateFnDef void UVLocateOrAdd (
  *  Arguments:
  *	targetUV	- a standard CPD for the set uvector for the value
  *			  to be located or added to.
- *	keyDsc		- the address of a scalar descriptor containing the
+ *	rKeys		- the address of a scalar descriptor containing the
  *                        value to locate or add in 'targetUV'.
  *	locationPtr 	- the address of a scalar which this routine will set
  *			  to the location in the target where the looked up
@@ -7276,34 +6701,34 @@ PrivateFnDef void UVLocateOrAdd (
  *
  *****/
 PrivateFnDef bool ScalarLocateOrAdd (
-    M_CPD *targetUV, DSC_Descriptor *keyDsc, int *locationPtr
+    M_CPD *targetUV, DSC_Scalar &rKeyValue, int *locationPtr
 ) {
-    bool added;
+    bool added = false;
 
-    switch ((RTYPE_Type)M_CPD_RType (targetUV)) {
+    switch (targetUV->RType ()) {
     case RTYPE_C_CharUV:
 	added = rtCHARUV_ScalarLocateOrAdd (
-	    targetUV, &(DSC_Descriptor_Scalar_Char (*keyDsc)), locationPtr
+	    targetUV, &DSC_Scalar_Char (rKeyValue), locationPtr
 	);
 	break;
     case RTYPE_C_DoubleUV:
 	added = rtDOUBLEUV_ScalarLocateOrAdd (
-	    targetUV, &(DSC_Descriptor_Scalar_Double (*keyDsc)), locationPtr
+	    targetUV, &DSC_Scalar_Double (rKeyValue), locationPtr
 	);
 	break;
     case RTYPE_C_FloatUV:
 	added = rtFLOATUV_ScalarLocateOrAdd (
-	    targetUV, &(DSC_Descriptor_Scalar_Float (*keyDsc)), locationPtr
+	    targetUV, &DSC_Scalar_Float (rKeyValue), locationPtr
 	);
 	break;
     case RTYPE_C_IntUV:
 	added = rtINTUV_ScalarLocateOrAdd (
-	    targetUV, &(DSC_Descriptor_Scalar_Int (*keyDsc)), locationPtr
+	    targetUV, &DSC_Scalar_Int (rKeyValue), locationPtr
 	);
 	break;
     case RTYPE_C_RefUV:
 	added = rtREFUV_ScalarLocateOrAdd (
-	    targetUV, &(DSC_Descriptor_Scalar_Int (*keyDsc)), locationPtr
+	    targetUV, &DSC_Scalar_Int (rKeyValue), locationPtr
 	);
 	break;
     case RTYPE_C_UndefUV:
@@ -7311,24 +6736,23 @@ PrivateFnDef bool ScalarLocateOrAdd (
 	break;
     case RTYPE_C_Unsigned64UV:
 	added = rtU64UV_ScalarLocateOrAdd (
-	    targetUV, &(DSC_Descriptor_Scalar_Unsigned64 (*keyDsc)), locationPtr
+	    targetUV, &DSC_Scalar_Unsigned64 (rKeyValue), locationPtr
 	);
 	break;
     case RTYPE_C_Unsigned96UV:
 	added = rtU96UV_ScalarLocateOrAdd (
-	    targetUV, &(DSC_Descriptor_Scalar_Unsigned96 (*keyDsc)), locationPtr
+	    targetUV, &DSC_Scalar_Unsigned96 (rKeyValue), locationPtr
 	);
 	break;
     case RTYPE_C_Unsigned128UV:
 	added = rtU128UV_ScalarLocateOrAdd (
-	    targetUV, &(DSC_Descriptor_Scalar_Unsigned128 (*keyDsc)), locationPtr
+	    targetUV, &DSC_Scalar_Unsigned128 (rKeyValue), locationPtr
 	);
 	break;
     default:
         ERR_SignalFault (
 	    EC__UnknownUVectorRType, UTIL_FormatMessage (
-		"rtVECTOR ScalarLocateOrAdd: Unsupported R-Type %s",
-		RTYPE_TypeIdAsString ((RTYPE_Type)M_CPD_RType (targetUV))
+		"rtVECTOR ScalarLocateOrAdd: Unsupported R-Type %s", targetUV->RTypeName ()
 	    )
 	);
 	break;
@@ -7337,6 +6761,10 @@ PrivateFnDef bool ScalarLocateOrAdd (
     return added;
 }
 
+
+/********************
+ *----  Vector  ----*
+ ********************/
 
 /*---------------------------------------------------------------------------
  *****  Private Routine to add a pmap entry to correspond to a newly added
@@ -7355,48 +6783,62 @@ PrivateFnDef bool ScalarLocateOrAdd (
  *  entry.
  *
  *****/
-PrivateFnDef unsigned int AddNewPMapEntryToSetVector (M_CPD *targetCPD, int trgUSegi) {
+unsigned int rtVECTOR_Handle::AddNewPMapEntryToSetVector (int trgUSegi) {
+    EnableModifications ();
+    setIsInconsistent ();
 
 /*****  (1) Determine where to put the new entry *****/
-
-    rtVECTOR_CPD_USI (targetCPD) = rtVECTOR_CPD_USegIndex (targetCPD);
-    rtVECTOR_CPD_PMRD (targetCPD) = rtVECTOR_CPD_PMap (targetCPD);
+    rtVECTOR_PMRDType *pMapEntry = pmap ();
+    int const *pIndexEntry = segmentIndex ();
 
     unsigned int trgPMapi = 0;
-    for (int i=0; i < rtVECTOR_CPD_USegIndexSize (targetCPD); i++) {
-	if (*rtVECTOR_CPD_USI (targetCPD) == trgUSegi)
+
+    unsigned int sIndex = segmentIndexSize ();
+    for (unsigned int i=0; i < sIndex; i++) {
+	if (*pIndexEntry == trgUSegi)
 	    break;
-	if (*rtVECTOR_CPD_USI (targetCPD) == rtVECTOR_CPD_PMRD_SegmentIndex (targetCPD)) {
+	if (*pIndexEntry == rtVECTOR_PMRD_SegmentIndex (pMapEntry)) {
 	    trgPMapi++;
-	    rtVECTOR_CPD_PMRD (targetCPD)++;
+	    pMapEntry++;
 	}
-	rtVECTOR_CPD_USI (targetCPD)++;
+	pIndexEntry++;
     }
 
-    unsigned int trgVectorOrig = rtVECTOR_CPD_PMRD_VectorOrigin (targetCPD);
+    unsigned int trgVectorOrig = rtVECTOR_PMRD_VectorOrigin (pMapEntry);
 
 /*****  (2) move the container tail to make room for the new pmap entry *****/
-
-    targetCPD->ShiftContainerTail (
-	rtVECTOR_CPx_PMRD,
-	sizeof (rtVECTOR_PMRDType) *
-	    (rtVECTOR_CPD_PMapSize (targetCPD) + 1 - trgPMapi) +
-	    sizeof (int) * rtVECTOR_CPD_USegIndexSize (targetCPD) +
-	    sizeof (rtVECTOR_USDType) * rtVECTOR_CPD_USegArraySize (targetCPD),
+    unsigned int sMap = pmapSize ();
+    ShiftContainerTail (
+	reinterpret_cast<pointer_t>(pMapEntry),
+	sizeof (rtVECTOR_PMRDType) * (sMap + 1 - trgPMapi)
+	+ sizeof (int) * sIndex 
+	+ sizeof (rtVECTOR_USDType) * segmentArraySize (),
 	sizeof (rtVECTOR_PMRDType),
 	true
     );
-
-    rtVECTOR_CPD_PMapSize (targetCPD)++;
+    setPMapSizeTo (++sMap);
 
 /*****  (3) fill in the new pmap entry  *****/
-
-    rtVECTOR_CPD_PMRD (targetCPD) = rtVECTOR_CPD_PMap (targetCPD) + trgPMapi;
-    rtVECTOR_CPD_PMRD_VectorOrigin (targetCPD) = trgVectorOrig;
-    rtVECTOR_CPD_PMRD_SegmentOrigin (targetCPD) = 0;
-    rtVECTOR_CPD_PMRD_SegmentIndex (targetCPD) = trgUSegi;
+    pMapEntry = pmap () + trgPMapi;
+    rtVECTOR_PMRD_VectorOrigin  (pMapEntry) = trgVectorOrig;
+    rtVECTOR_PMRD_SegmentOrigin (pMapEntry) = 0;
+    rtVECTOR_PMRD_SegmentIndex  (pMapEntry) = trgUSegi;
 
     return trgPMapi;
+}
+
+
+void rtVECTOR_Handle::AdjustPMapVectorOrigins (unsigned int xInitialEntry, int sAdjustment) {
+    EnableModifications ();
+    setIsInconsistent ();
+
+    rtVECTOR_PMRDType *pMapEntry = pmap ();
+    rtVECTOR_PMRDType const *const pMapLimit = pMapEntry + pmapSize ();
+
+    pMapEntry += xInitialEntry;
+    while (pMapEntry <= pMapLimit) {
+	rtVECTOR_PMRD_VectorOrigin (pMapEntry++) += sAdjustment;
+    }
 }
 
 
@@ -7404,9 +6846,8 @@ PrivateFnDef unsigned int AddNewPMapEntryToSetVector (M_CPD *targetCPD, int trgU
  *****  Private Routine to 'align' the set vector and the affected usegment
  *
  *  Arguments:
- *	vectorCPD		- The set vector being modified
- *	usegi			- The index of the affected usegment.
- *	vectorOrig		- The vector offset for the affected usegment's
+ *	xSegment		- The index of the affected usegment.
+ *	xVectorOrigin		- The vector offset for the affected usegment's
  *				  first position.
  *	uvectorCPD		- The container for the affected usegment's
  *				  values.
@@ -7415,12 +6856,12 @@ PrivateFnDef unsigned int AddNewPMapEntryToSetVector (M_CPD *targetCPD, int trgU
  *	Nothing.
  *
  *****/
-PrivateFnDef void UpdateVectorSetPositionalState (
-    M_CPD *vectorCPD, int usegi, int vectorOrig, M_CPD *uvectorCPD
+void rtVECTOR_Handle::UpdateVectorSetPositionalState (
+    unsigned int xSegment, unsigned int xVectorOrigin, M_CPD *uvectorCPD
 ) {
 #define LocateOrAddHandleInsertion(ptOrigin,ptShift) {\
     /***** modify target ptoken *****/\
-    targetPTokenC->AppendAdjustment (ptOrigin + vectorOrig, ptShift);\
+    targetPTokenC->AppendAdjustment (ptOrigin + xVectorOrigin, ptShift);\
 }
 
 #define LocateOrAddHandleDeletion(ptOrigin,ptShift) {\
@@ -7431,43 +6872,30 @@ PrivateFnDef void UpdateVectorSetPositionalState (
 }
 
 /***** Create a ptoken constructor for the target ... *****/
-    rtPTOKEN_CType *targetPTokenC = rtPTOKEN_NewShiftPTConstructor (
-	vectorCPD, rtVECTOR_CPx_PToken
-    );
+    rtPTOKEN_CType *targetPTokenC = targetPTokenC = getPToken ()->makeAdjustments ();
 
 /*****  Get the modified ptoken for the usegment uvector ... *****/
-    rtVECTOR_CPD_USD (vectorCPD) = rtVECTOR_CPD_USegArray (vectorCPD) + usegi;
-    rtVECTOR_CPD_SetUSDCursor (vectorCPD, rtVECTOR_USD_PToken);
-
-    M_CPD *modifiedPToken;
-    rtPTOKEN_IsntCurrent (vectorCPD, rtVECTOR_CPx_USDCursor, modifiedPToken);
-    if (IsNil (modifiedPToken)) ERR_SignalFault (
+    rtPTOKEN_CType *ptokenC;
+    if (isTerminal (segmentPTokenPOP (xSegment), ptokenC)) ERR_SignalFault (
 	EC__InternalInconsistency,
 	"LocateOrAddFromUV: Modified PToken isnt modified"
     );
 
-/***** Setup for the traversal *****/
-    rtPTOKEN_CType *modifiedPTokenC = rtPTOKEN_CPDCumAdjustments (modifiedPToken);
-    modifiedPToken->release ();
-
 /***** Traverse the modified ptoken *****/
     rtPTOKEN_FTraverseAdjustments (
-	modifiedPTokenC, LocateOrAddHandleInsertion, LocateOrAddHandleDeletion
+	ptokenC, LocateOrAddHandleInsertion, LocateOrAddHandleDeletion
     );
 
-    modifiedPTokenC->discard ();
+    ptokenC->discard ();
 
 /*****  Attach the vector's new positional ptoken ... *****/
-    M_CPD *ptoken = targetPTokenC->ToPToken ();
-    vectorCPD->StoreReference (rtVECTOR_CPx_PToken, ptoken);
-    ptoken->release ();
+    rtPTOKEN_Handle::Reference ptoken (targetPTokenC->ToPToken ());
+    StoreReference (ptokenPOP (), ptoken);
 
 /*****
  *  Update the USegment's PToken ...
  *****/
-
-    rtVECTOR_CPD_SetUSDCursor (vectorCPD, rtVECTOR_USD_PToken);
-    vectorCPD->StoreReference (rtVECTOR_CPx_USDCursor, uvectorCPD, UV_CPx_PToken);
+    setSegmentPTokenTo (xSegment, static_cast<rtUVECTOR_Handle*>(uvectorCPD->containerHandle ())->pptHandle ());
 
 #undef LocateOrAddHandleInsertion
 #undef LocateOrAddHandleDeletion
@@ -7478,121 +6906,103 @@ PrivateFnDef void UpdateVectorSetPositionalState (
  *****  Private routine to locate or add a value to a set vector.
  *
  *  Arguments:
- *	targetCPD	- a standard CPD for the set vector in which the values
- *                        will be located or added.
- *	keyDsc		- the address of a scalar descriptor containing
- *			  the element to locate or add.
- *	locationsDscPointer
+ *	pKeyStore/rKeyPointer
+ *			- the scalar value to locate or add.
+ *	rLocationsReturn
  *                      - the address of a descriptor pointer to be created.
- *			  'locationsDscPointer' will be set to a reference
+ *			  'rLocationsReturn' will be set to a reference
  *			  scalar pointer containing the position in 'targetCPD'
  *		          where the value was found or added.
- *	addedDscPointer - optional (if not requested set to Nil).
+ *	pAdditionsReturn - optional (if not requested set to Nil).
  *                        the address of an uninitialized descriptor pointer
  *		          which will be created iff requested and meaningful.
  *			  If the value was added -
- *                             then 'addedDscPointer' will
+ *                             then 'pAdditionsReturn' will
  *			       be set to a reference scalar descriptor pointer.
- *                        Otherwise 'addedDscPointer' will be set to an
+ *                        Otherwise 'pAdditionsReturn' will be set to an
  *                             empty descriptor pointer.
  *
  *  Returns:
  *	NOTHING
  *
  *****/
-PrivateFnDef void LocateOrAddFromScalarDsc (
-    M_CPD			*targetCPD,
-    DSC_Descriptor		*keyDsc,
-    DSC_Pointer			*locationsDscPointer,
-    DSC_Pointer			*addedDscPointer
-)
-{
-    unsigned int trgPMapi;
+void rtVECTOR_Handle::locateOrAdd (
+    Vdd::Store *pKeyStore, DSC_Scalar &rKeyPointer, DSC_Pointer &rLocationsReturn, DSC_Pointer *pAdditionsReturn
+) {
+/***** Align and validate the target set and keys ... *****/
+    align ();
 
-/***** Align and validate target set vector and keydsc ... *****/
-    rtVECTOR_Align (targetCPD);
-
-    if (keyDsc->holdsAScalarReference ()) {
-	rtREFUV_AlignReference (&DSC_Descriptor_Scalar (*keyDsc));
+    if (rKeyPointer.holdsAReference ()) {
+	rtREFUV_AlignReference (&rKeyPointer);
     }
 
-    if (!rtVECTOR_CPD_IsASet (targetCPD)) ERR_SignalFault (
-	EC__InternalInconsistency,
-	"LocateOrAddFromScalarDsc:  Target must be a set"
+    if (!isASet ()) ERR_SignalFault (
+	EC__InternalInconsistency, "rtVECTOR_Handle::locateOrAdd:  Target must be a set"
     );
-    targetCPD->CheckConsistency ();
-    bool wantAdded = IsntNil (addedDscPointer);
+    CheckConsistency ();
 
-/*****  Find the key's usegment in the target *****/
-    int origUSegSize = rtVECTOR_CPD_USegIndexSize (targetCPD);
-    M_CPD *store = keyDsc->storeCPD ();
-    int trgUSegi = LocateOrAddVectorSegment (
-	targetCPD,
-	store,
-	DSC_Scalar_RType (DSC_Descriptor_Scalar (*keyDsc)),
-	DSC_Scalar_RefPToken (DSC_Descriptor_Scalar (*keyDsc)),
-	-1,
-	true
+    bool wantAdded = IsntNil (pAdditionsReturn);
+
+    /*****  Find the key's usegment in the target *****/
+    unsigned int origUSegSize = segmentIndexSize ();
+    unsigned int trgUSegi = LocateOrAddSegment (
+	pKeyStore, rKeyPointer.RType (), rKeyPointer.RPT (), true
     );
-    bool newPMapEntryNeeded = origUSegSize < rtVECTOR_CPD_USegIndexSize (targetCPD);
 
-/*****  Get the trg usegment's uvector *****/
-    M_CPD *trgUVector = GetUSegUVector (targetCPD, trgUSegi);
+    bool newPMapEntryNeeded = origUSegSize < segmentIndexSize ();
 
-/*****  Do the lookup *****/
+    /*****  Get the trg usegment's uvector *****/
+    M_CPD *trgUVector = segmentPointerCPD (trgUSegi);
+
+    /*****  Do the lookup *****/
     int location;
-    bool added = ScalarLocateOrAdd (trgUVector, keyDsc, &location);
+    bool added = ScalarLocateOrAdd (trgUVector, rKeyPointer, &location);
 
-/***** Make the target writable ... *****/
-    targetCPD->EnableModifications ();
+    /***** Make the target writable ... *****/
+    EnableModifications ();
 
-/*****  Get the PMap index for 'trgUSegi' ... *****/
+    /*****  Get the PMap index for 'trgUSegi' ... *****/
+    unsigned int trgPMapi;
+    rtVECTOR_PMRDType *pMapEntry = pmap ();
     if (!newPMapEntryNeeded) {
-	rtVECTOR_CPD_PMRD (targetCPD) = rtVECTOR_CPD_PMap (targetCPD);
-	for (
-	    trgPMapi = 0;
-	    trgPMapi < rtVECTOR_CPD_PMapSize (targetCPD);
-	    trgPMapi++, rtVECTOR_CPD_PMRD (targetCPD)++
-	) {
-	    if (rtVECTOR_CPD_PMRD_SegmentIndex (targetCPD) == trgUSegi)
+	unsigned int sMap = pmapSize ();
+	for (trgPMapi = 0; trgPMapi < sMap; trgPMapi++, pMapEntry++) {
+	    if (rtVECTOR_PMRD_SegmentIndex (pMapEntry) == trgUSegi)
 		break;
 	}
-	newPMapEntryNeeded = trgPMapi == rtVECTOR_CPD_PMapSize (targetCPD);
+	newPMapEntryNeeded = trgPMapi == sMap;
     }
-    if (newPMapEntryNeeded)
-	trgPMapi = AddNewPMapEntryToSetVector (targetCPD, trgUSegi);
+    if (newPMapEntryNeeded) {
+	trgPMapi = AddNewPMapEntryToSetVector (trgUSegi);
+	pMapEntry = pmap () + trgPMapi;
+    }
 
-    int adjustment = rtVECTOR_CPD_PMRD_VectorOrigin (targetCPD);
+    unsigned int adjustment = rtVECTOR_PMRD_VectorOrigin (pMapEntry);
 
-/*****  If nothing was added ... close locations and return ... *****/
+    /*****  If nothing was added ... close locations and return ... *****/
     if (!added) {
 	if (wantAdded)
-	    addedDscPointer->construct ();
+	    pAdditionsReturn->construct ();
     }
     else {
-    /*****  adjust the vector origin of each subsequent pmap entry  *****/
-	AdjustPMapEntryVectorOrigins (targetCPD, trgPMapi + 1, 1);
+	/*****  adjust the vector origin of each subsequent pmap entry  *****/
+	AdjustPMapVectorOrigins (trgPMapi + 1, 1);
 
-    /*****
-     *  Fix the target vector's positional ptoken ...
-     *****/
+	/*****
+	 *  Fix the target vector's positional ptoken ...
+	 *****/
 
-	UpdateVectorSetPositionalState (
-	    targetCPD, trgUSegi, adjustment, trgUVector
-	);
+	UpdateVectorSetPositionalState (trgUSegi, adjustment, trgUVector);
 
 	if (wantAdded) {
-	    DSC_Scalar_RefPToken (DSC_Descriptor_Scalar (*keyDsc))->retain ();
-	    addedDscPointer->constructReferenceScalar (
-		DSC_Scalar_RefPToken (DSC_Descriptor_Scalar (*keyDsc)), 0
-	    );
+	    pAdditionsReturn->constructReferenceScalar (rKeyPointer.RPT (), 0);
 	}
     }
-    rtVECTOR_CPD_IsInconsistent (targetCPD) = false;
+    if (isInconsistent ())
+	clearIsInconsistent ();
 
-/*** Prepare the locations pointer ... ***/
-    M_CPD *ptoken = rtPTOKEN_BasePToken (targetCPD, rtVECTOR_CPx_PToken);
-    locationsDscPointer->constructReferenceScalar (ptoken, location + adjustment);
+    /*** Prepare the locations pointer ... ***/
+    rLocationsReturn.constructReferenceScalar (alignedPToken (), location + adjustment);
 
     trgUVector->release ();
 }
@@ -7602,28 +7012,26 @@ PrivateFnDef void LocateOrAddFromScalarDsc (
  *****  Private routine to locate or add a set of values to a set vector.
  *
  *  Arguments:
- *	targetCPD	- a standard CPD for the set vector in which the values
- *                        will be located or added.
- *	keyCPD		- a standard CPD for a set uvector containing
+ *	pKeyStore	- the key store
+ *	pKeyPointer	- a standard CPD for a set uvector containing
  *			  the elements to locate or add.
- *	keyVStore	- a standard CPD for the Value Store of 'keyCPD'.
- *	locationsDscPointer
+ *	rLocationsReturn
  *                      - the address of a descriptor pointer to be created.
- *                        'locationsDscPointer' will be set to a link
+ *                        'rLocationsReturn' will be set to a link
  *                        descriptor pointer.  For each value in the
- *                        'keyDsc', the link will contain
- *                        the position in the 'targetCPD' where that value
+ *                        'rKeys', the link will contain
+ *                        the position in the 'this' where that value
  *                        was found or added.
- *	addedDscPointer - optional (if not requested set to Nil).
+ *	pAdditionsReturn - optional (if not requested set to Nil).
  *                        the address of an uninitialized descriptor pointer
  *		          which will be created iff requested and meaningful.
  *
- *			  'addedDscPointer' will be set to a link
+ *			  'pAdditionsReturn' will be set to a link
  *                        descriptor pointer.  The link will contain the
- *                        positions from 'keyDsc' whose values were
+ *                        positions from 'rKeys' whose values were
  *                        added to the target set vector.  If none of the
  *                        values from the key were added, then
- *                        'addedDscPointer' will be set to an empty
+ *                        'pAdditionsReturn' will be set to an empty
  *                        descriptor pointer.
  *
  *  Returns:
@@ -7633,117 +7041,108 @@ PrivateFnDef void LocateOrAddFromScalarDsc (
  *	If additions are returned, they will reside in the key's scratch pad.
  *
  *****/
-PrivateFnDef void LocateOrAddFromUV (
-    M_CPD			*targetCPD,
-    M_CPD			*keyCPD,
-    M_CPD			*keyVStore,
-    DSC_Pointer			*locationsDscPointer,
-    DSC_Pointer			*addedDscPointer
-)
-{
+void rtVECTOR_Handle::locateOrAdd (
+    Vdd::Store *pKeyStore, M_CPD *pKeyPointer, DSC_Pointer &rLocationsReturn, DSC_Pointer *pAdditionsReturn
+) {
     rtLINK_CType *locationsLC, **locationsLinkC, *uvLocationsLC, *addedLC;
     int origUSegSize, trgUSegi, adjustment;
     unsigned int trgPMapi;
 
 /***** Align and validate target set vector and key set UV ... *****/
-    rtVECTOR_Align (targetCPD);
-    AlignUVector (keyCPD);
+    align ();
+    pKeyPointer->align ();
 
-    if (!rtVECTOR_CPD_IsASet (targetCPD) || !UV_CPD_IsASetUV (keyCPD)) {
+    if (!isASet () || !UV_CPD_IsASetUV (pKeyPointer)) {
 	ERR_SignalFault (
 	    EC__InternalInconsistency,
 	    "rtVECTOR LocateOrAddFromUV:  Target and Key must be sets"
 	);
     }
 
-    bool wantAdded = IsntNil (addedDscPointer);
+    bool wantAdded = IsntNil (pAdditionsReturn);
 
 /***** If the key is empty, close the locations linkc and return ... *****/
-    if (UV_CPD_ElementCount (keyCPD) == 0) {
+    if (UV_CPD_ElementCount (pKeyPointer) == 0) {
     /***** Make the location link constructor ... *****/
-	locationsLC = rtLINK_RefConstructor (targetCPD, rtVECTOR_CPx_PToken);
+	locationsLC = rtLINK_RefConstructor (getPToken ());
 
-	locationsLC->Close (keyCPD, UV_CPx_PToken);
-	locationsDscPointer->constructLink (locationsLC);
+	locationsLC->Close (pKeyPointer, UV_CPx_PToken);
+	rLocationsReturn.constructLink (locationsLC);
 
 	if (wantAdded)
-	    addedDscPointer->construct ();
+	    pAdditionsReturn->construct ();
 
 	return;
     }
-    targetCPD->CheckConsistency ();
+    CheckConsistency ();
 
 /*****  Find the key's usegment in the target *****/
-    origUSegSize = rtVECTOR_CPD_USegIndexSize (targetCPD);
-    trgUSegi = LocateOrAddVectorSegment (
-	targetCPD,
-	keyVStore,
-	(RTYPE_Type)M_CPD_RType (keyCPD),
-	keyCPD,
-	UV_CPx_RefPToken,
-	true
+    origUSegSize = segmentIndexSize ();
+
+    rtPTOKEN_Handle::Reference pRPT (
+	static_cast<rtUVECTOR_Handle*>(pKeyPointer->containerHandle ())->rptHandle ()
     );
-    bool newPMapEntryNeeded = origUSegSize < rtVECTOR_CPD_USegIndexSize (targetCPD);
+    trgUSegi = LocateOrAddSegment (pKeyStore, pKeyPointer->RType (), pRPT, true);
+    bool newPMapEntryNeeded = origUSegSize < segmentIndexSize ();
 
 /*****  Get the trg usegment's uvector *****/
-    M_CPD *trgUVector = GetUSegUVector (targetCPD, trgUSegi);
+    M_CPD *trgUVector = segmentPointerCPD (trgUSegi);
 
 /*****  Do the lookup *****/
-    UVLocateOrAdd (trgUVector, keyCPD, &uvLocationsLC, &addedLC);
+    UVLocateOrAdd (trgUVector, pKeyPointer, &uvLocationsLC, &addedLC);
 
 /***** Make the target writable ... *****/
-    targetCPD->EnableModifications ();
+    EnableModifications ();
 
 /*****  Get the PMap index for 'trgUSegi' ... *****/
+    rtVECTOR_PMRDType *pMapEntry = pmap ();
+    unsigned int sMap = pmapSize ();
     if (!newPMapEntryNeeded) {
-	rtVECTOR_CPD_PMRD (targetCPD) = rtVECTOR_CPD_PMap (targetCPD);
-	for (
-	    trgPMapi = 0;
-	    trgPMapi < rtVECTOR_CPD_PMapSize (targetCPD);
-	    trgPMapi++, rtVECTOR_CPD_PMRD (targetCPD)++
-	) {
-	    if (rtVECTOR_CPD_PMRD_SegmentIndex (targetCPD) == trgUSegi)
+	for (trgPMapi = 0; trgPMapi < sMap; trgPMapi++, pMapEntry++) {
+	    if (rtVECTOR_PMRD_SegmentIndex (pMapEntry) == trgUSegi)
 		break;
 	}
-	newPMapEntryNeeded = trgPMapi == rtVECTOR_CPD_PMapSize (targetCPD);
+	newPMapEntryNeeded = trgPMapi == sMap;
     }
-    if (newPMapEntryNeeded)
-	trgPMapi = AddNewPMapEntryToSetVector (targetCPD, trgUSegi);
+    if (newPMapEntryNeeded) {
+	trgPMapi = AddNewPMapEntryToSetVector (trgUSegi);
+	pMapEntry = pmap () + trgPMapi;
+    }
 
-    adjustment = rtVECTOR_CPD_PMRD_VectorOrigin (targetCPD);
+    adjustment = rtVECTOR_PMRD_VectorOrigin (pMapEntry);
 
 /*****  If nothing was added ...  return ... *****/
     if (IsNil (addedLC)) {
 	if (wantAdded)
-	    addedDscPointer->construct ();
+	    pAdditionsReturn->construct ();
     }
     else {
     /*****  adjust the vector origin of each subsequent pmap entry  *****/
-	AdjustPMapEntryVectorOrigins (targetCPD, trgPMapi + 1, addedLC->ElementCount ());
+	AdjustPMapVectorOrigins (trgPMapi + 1, addedLC->ElementCount ());
 
     /*****
      *  Fix the target vector's positional ptoken ...
      *****/
 
-	UpdateVectorSetPositionalState (
-	    targetCPD, trgUSegi, adjustment, trgUVector
-	);
+	UpdateVectorSetPositionalState (trgUSegi, adjustment, trgUVector);
 
 	if (wantAdded)
-	    addedDscPointer->constructLink (addedLC);
+	    pAdditionsReturn->constructLink (addedLC);
 	else
 	    addedLC->release ();
     }
-    rtVECTOR_CPD_IsInconsistent (targetCPD) = false;
+    if (isInconsistent ())
+	clearIsInconsistent ();
 
 /***** Make the location link constructor ... *****/
-    locationsLC = rtLINK_RefConstructor (targetCPD, rtVECTOR_CPx_PToken);
+    locationsLC = rtLINK_RefConstructor (getPToken ());
+
     locationsLinkC = &locationsLC; /* used in AppendToLocations macro */
 
     AppendToLocations (uvLocationsLC);
 
-    locationsLC->Close (keyCPD, UV_CPx_PToken);
-    locationsDscPointer->constructLink (locationsLC);
+    locationsLC->Close (pKeyPointer, UV_CPx_PToken);
+    rLocationsReturn.constructLink (locationsLC);
 
     trgUVector->release ();
 }
@@ -7753,40 +7152,38 @@ PrivateFnDef void LocateOrAddFromUV (
  *****  Routine to locate or add a set of values to a set vector.
  *
  *  Arguments:
- *	targetCPD	- a standard CPD for the set vector in which the values
- *                        will be located or added.
- *	keyDsc		- the address of a descriptor containing
+ *	rKeys		- the address of a descriptor containing
  *			  the elements to locate or add.
- *	locationsDscPointer
+ *	rLocationsReturn
  *                      - the address of a descriptor pointer to be created.
- *	                  If 'keyDsc' is a scalar descriptor, then
- *			  'locationsDscPointer' will be set to a reference
+ *	                  If 'rKeys' is a scalar descriptor, then
+ *			  'rLocationsReturn' will be set to a reference
  *			  scalar pointer containing the position in 'targetCPD'
  *		          where the value was found or added.
- *	                  If 'keyDsc' is not a scalar descriptor, then
- *                        'locationsDscPointer' will be set to a link
+ *	                  If 'rKeys' is not a scalar descriptor, then
+ *                        'rLocationsReturn' will be set to a link
  *                        descriptor pointer.  For each value in the
- *                        'keyDsc', the link will contain
+ *                        'rKeys', the link will contain
  *                        the position in the 'targetCPD' where that value
  *                        was found or added.
- *	addedDscPointer - optional (if not requested set to Nil).
+ *	pAdditionsReturn - optional (if not requested set to Nil).
  *                        the address of an uninitialized descriptor pointer
  *		          which will be created iff requested and meaningful.
  *
- *                        If 'keyDsc' is a scalar descriptor -
+ *                        If 'rKeys' is a scalar descriptor -
  *			    if the value was added -
- *                             then 'addedDscPointer' will
+ *                             then 'pAdditionsReturn' will
  *			       be set to a reference scalar descriptor pointer.
- *                          Otherwise 'addedDscPointer' will be set to an
+ *                          Otherwise 'pAdditionsReturn' will be set to an
  *                             empty descriptor pointer.
  *
- *                        If 'keyDsc' is not a scalar descriptor -
- *			     then 'addedDscPointer' will be set to a link
+ *                        If 'rKeys' is not a scalar descriptor -
+ *			     then 'pAdditionsReturn' will be set to a link
  *                           descriptor pointer.  The link will contain the
- *                           positions from 'keyDsc' whose values were
+ *                           positions from 'rKeys' whose values were
  *                           added to the target set vector.  If none of the
  *                           values from the key were added, then
- *                           'addedDscPointer' will be set to an empty
+ *                           'pAdditionsReturn' will be set to an empty
  *                           descriptor pointer.
  *
  *  Returns:
@@ -7796,41 +7193,30 @@ PrivateFnDef void LocateOrAddFromUV (
  *	If additions are returned, they will reside in the key's scratch pad.
  *
  *****/
-PublicFnDef void rtVECTOR_LocateOrAdd (
-    M_CPD*		targetCPD,
-    DSC_Descriptor*	keyDsc,
-    DSC_Pointer*	locationsDscPointer,
-    DSC_Pointer*	addedDscPointer
+void rtVECTOR_Handle::locateOrAdd (
+    DSC_Descriptor &rKeys, DSC_Pointer &rLocationsReturn, DSC_Pointer *pAdditionsReturn
 ) {
     LocateOrAddFromValueDCount++;
 
 /*****  Decode the key descriptor ... *****/
-    if (keyDsc->isScalar ()) {
-	LocateOrAddFromScalarDsc (
-	    targetCPD, keyDsc, locationsDscPointer, addedDscPointer
+    if (rKeys.isScalar ()) {
+	locateOrAdd (
+	    rKeys.store (), DSC_Descriptor_Scalar (rKeys), rLocationsReturn, pAdditionsReturn
 	);
     }
-    else if (keyDsc->holdsNonScalarValues ()) {
-	LocateOrAddFromUV (
-	    targetCPD,
-	    DSC_Descriptor_Value (*keyDsc),
-	    keyDsc->storeCPDIfAvailable (),
-	    locationsDscPointer,
-	    addedDscPointer
+    else if (rKeys.holdsNonScalarValues ()) {
+	locateOrAdd (
+	    rKeys.store (), DSC_Descriptor_Value (rKeys), rLocationsReturn, pAdditionsReturn
 	);
     }
-    else if (keyDsc->holdsNonScalarReferences ()) {
-	LocateOrAddFromUV (
-	    targetCPD,
-	    DSC_Descriptor_Reference (*keyDsc),
-	    keyDsc->storeCPDIfAvailable (),
-	    locationsDscPointer,
-	    addedDscPointer
+    else if (rKeys.holdsNonScalarReferences ()) {
+	locateOrAdd (
+	    rKeys.store (), DSC_Descriptor_Reference (rKeys), rLocationsReturn, pAdditionsReturn
 	);
     }
     else ERR_SignalFault (
 	EC__InternalInconsistency,
-	"rtVECTOR_LocateOrAdd: Unimplemented key descriptor type"
+	"rtVECTOR_Handle::locateOrAdd: Unimplemented key descriptor type"
     );
 }
 
@@ -7839,7 +7225,6 @@ PublicFnDef void rtVECTOR_LocateOrAdd (
  *****  Routine to determine if a vector is a set.
  *
  *  Arguments:
- *      vectorCPD	- a standard CPD for the vector to check
  *	refNilsLC 	- a pointer to a link constructor this routine will
  *                        create to point out reference Nils which violate
  *                        the definition of a reference Set. Will be set to
@@ -7858,7 +7243,7 @@ PublicFnDef void rtVECTOR_LocateOrAdd (
  *        routine is provided to discover that occurence and to provide
  *        a means (via refNilsLC) to recover from it.
  *****/
-PublicFnDef int rtVECTOR_IsASet (M_CPD *vectorCPD, rtLINK_CType **refNilsLC) {
+bool rtVECTOR_Handle::isASet (rtLINK_CType **refNilsLC) {
 /*-------------------------*
  *  Link Traversal Macros  *
  *-------------------------*/
@@ -7879,28 +7264,26 @@ PublicFnDef int rtVECTOR_IsASet (M_CPD *vectorCPD, rtLINK_CType **refNilsLC) {
     *refNilsLC = NilOf (rtLINK_CType*);
 
     /*****
-     * If vector is not marked as being a set, then the problem
-     * is greater than what would be caused by a referential alignment
-     * of a reference usegment
+     * If vector is not marked as being a set, the problem is larger
+     * than what would be caused by a referential alignment of a
+     * reference usegment
      *****/
-    if (!rtVECTOR_CPD_IsASet (rtVECTOR_Align (vectorCPD)))
+    align ();
+    if (!isASet ())
 	return false;
 
     /***** Unless we learn otherwise, ... *****/
     bool result = true;
-
-    *refNilsLC = rtLINK_RefConstructor (vectorCPD, rtVECTOR_CPx_PToken);
+    *refNilsLC = rtLINK_RefConstructor (getPToken ());
 
     /***** Traverse the PMap, checking each usegment for "setness" *****/
-    rtVECTOR_CPD_PMRD (vectorCPD) = rtVECTOR_CPD_PMap (vectorCPD);
-    for (unsigned int xPMRD = 0; xPMRD < rtVECTOR_CPD_PMapSize (vectorCPD); xPMRD++) {
-	rtVECTOR_CPD_USD (vectorCPD) =
-	    rtVECTOR_CPD_USegArray (vectorCPD) +
-	    rtVECTOR_CPD_PMRD_SegmentIndex (vectorCPD);
-	rtVECTOR_CPD_SetUSDCursor (vectorCPD, rtVECTOR_USD_Values);
-	M_CPD *uvector = vectorCPD->GetCPD (rtVECTOR_CPx_USDCursor);
+    rtVECTOR_PMRDType *pMap = pmap ();
+    unsigned int const xPMRDLimit = pmapSize ();
+    for (unsigned int xPMRD = 0; xPMRD < xPMRDLimit; xPMRD++) {
+	rtVECTOR_PMRDType *pPMRD = pMap + xPMRD;
+	M_CPD *uvector = segmentPointerCPD (rtVECTOR_PMRD_SegmentIndex (pPMRD));
 
-	if (RTYPE_C_RefUV == (RTYPE_Type)M_CPD_RType (uvector)) {
+	if (RTYPE_C_RefUV == uvector->RType ()) {
 	    rtLINK_CType *usegNilsLC = NilOf (rtLINK_CType*);
 	    if (!rtREFUV_IsASet (uvector, &usegNilsLC)) {
 		result = false;
@@ -7908,11 +7291,12 @@ PublicFnDef int rtVECTOR_IsASet (M_CPD *vectorCPD, rtLINK_CType **refNilsLC) {
 		    (*refNilsLC)->release ();
 		    *refNilsLC = NilOf (rtLINK_CType*);
 		    uvector->release ();
-		    vectorCPD->EnableModifications ();
-		    rtVECTOR_CPD_IsASet (vectorCPD) = false;
+		    EnableModifications ();
+		    clearIsASet ();
+		    pMap = pmap ();
 		    break;
 		}
-		int adjustment = rtVECTOR_CPD_PMRD_VectorOrigin (vectorCPD);
+		int adjustment = rtVECTOR_PMRD_VectorOrigin (pPMRD);
 		rtLINK_TraverseRRDCList (
 		    usegNilsLC, handleNil, handleRepeat, handleRange
 		);
@@ -7924,13 +7308,12 @@ PublicFnDef int rtVECTOR_IsASet (M_CPD *vectorCPD, rtLINK_CType **refNilsLC) {
 	    (*refNilsLC)->release ();
 	    *refNilsLC = NilOf (rtLINK_CType*);
 	    uvector->release ();
-	    vectorCPD->EnableModifications ();
-	    rtVECTOR_CPD_IsASet (vectorCPD) = false;
+	    EnableModifications ();
+	    clearIsASet ();
+	    pMap = pmap ();
 	    break;
 	}
 	uvector->release ();
-
-	rtVECTOR_CPD_PMRD (vectorCPD)++;
     }
     if (result || 0 == (*refNilsLC)->ElementCount ()) {
 	result = true;
@@ -7938,11 +7321,8 @@ PublicFnDef int rtVECTOR_IsASet (M_CPD *vectorCPD, rtLINK_CType **refNilsLC) {
 	*refNilsLC = NilOf (rtLINK_CType*);
     }
     if (*refNilsLC != NilOf (rtLINK_CType*)) {
-	M_CPD *ptoken = rtPTOKEN_New (
-	    vectorCPD->ScratchPad (), (*refNilsLC)->ElementCount ()
-	);
+	rtPTOKEN_Handle::Reference ptoken (new rtPTOKEN_Handle (ScratchPad (), (*refNilsLC)->ElementCount ()));
 	(*refNilsLC)->Close (ptoken);
-	ptoken->release ();
     }
 
     return result;
@@ -7952,45 +7332,36 @@ PublicFnDef int rtVECTOR_IsASet (M_CPD *vectorCPD, rtLINK_CType **refNilsLC) {
 #undef handleRepeat
 }
 
+
 /*---------------------------------------------------------------------------
  *****  Routine to determine if a vector is a set, and to restore the
  *      set attribute to it and all its usegments if the criteria for set,
  *      unique and sorted, are met.
  *
- *  Arguments:
- *      vectorCPD	- a standard CPD for the vector to check
- *
  *  Returns:
  *	True if a set, False if not.
  *
  *****/
-PublicFnDef int rtVECTOR_RestoreSetAttribute (M_CPD *vectorCPD) {
-    bool result = true;
+bool rtVECTOR_Handle::restoreSetAttribute () {
     M_POP lastVStorePOP;
 
     // initialize to something (anything) so that compiler doesn't complain ...
-    vectorCPD->containerHandle ()->constructReference (&lastVStorePOP);
+    constructReference (&lastVStorePOP);
 
 /*****
  * Ensure that any positional adjustments are propogated to the usegments
  *****/
-    rtVECTOR_Align (vectorCPD);
+    align ();
 
 /***** Traverse the PMap, checking each usegment for "setness" *****/
-    rtVECTOR_CPD_PMRD (vectorCPD) = rtVECTOR_CPD_PMap (vectorCPD);
-    for (
-	unsigned int xPMRD = 0;
-	xPMRD < rtVECTOR_CPD_PMapSize (vectorCPD) && result;
-	xPMRD++
-    ) {
-	rtVECTOR_CPD_USD (vectorCPD) =
-	    rtVECTOR_CPD_USegArray (vectorCPD) +
-	    rtVECTOR_CPD_PMRD_SegmentIndex (vectorCPD);
+    rtVECTOR_PMRDType *pMap = pmap ();
+    unsigned int const xPMRDLimit = pmapSize ();
+    bool result = true;
+    for (unsigned int xPMRD = 0; xPMRD < xPMRDLimit && result; xPMRD++) {
+	unsigned int xSegment = rtVECTOR_PMRD_SegmentIndex (pMap + xPMRD);
+	M_CPD *uvector = segmentPointerCPD (xSegment);
 
-	rtVECTOR_CPD_SetUSDCursor (vectorCPD, rtVECTOR_USD_Values);
-	M_CPD *uvector = vectorCPD->GetCPD (rtVECTOR_CPx_USDCursor);
-
-	if (RTYPE_C_RefUV == (RTYPE_Type)M_CPD_RType (uvector)) {
+	if (RTYPE_C_RefUV == uvector->RType ()) {
 	    if (!rtREFUV_RestoreSetAttribute (uvector))
 		result = false;
 	}
@@ -8000,17 +7371,18 @@ PublicFnDef int rtVECTOR_RestoreSetAttribute (M_CPD *vectorCPD) {
 	uvector->release ();
 
 /*****  Make sure that usegments are in POP order  *****/
-	M_POP thisVStorePOP = rtVECTOR_CPD_USD_VStore (vectorCPD);
+	M_POP thisVStorePOP = rtVECTOR_USD_VStore (segment (xSegment));
 	if (xPMRD > 0 && M_ComparePOPs (thisVStorePOP, lastVStorePOP) <= 0)
 	    result = false;
 	lastVStorePOP = thisVStorePOP;
-
-	rtVECTOR_CPD_PMRD (vectorCPD)++;
     }
-    vectorCPD->EnableModifications ();
-    rtVECTOR_CPD_IsASet (vectorCPD) = result;
+    if (isASet () != result) {
+	EnableModifications ();
+	setIsASetTo (result);
+    }
     return result;
 }
+
 
 /************************************************************
  *****  Standard Representation Type Services Routines  *****
@@ -8061,7 +7433,7 @@ PrivateFnDef void ReclaimContainer (
  *	transient stores must be disallowed.
  *****/
 bool rtVECTOR_Handle::PersistReferences () {
-    rtVECTOR_Type	*vector = (rtVECTOR_Type *)ContainerContent ();
+    rtVECTOR_Type	*vector = typecastContent ();
     rtVECTOR_USDType	*uSegmentArray = rtVECTOR_V_USegArray (vector);
 
 /*****  Check for validity of vector sets  *****/
@@ -8111,14 +7483,14 @@ bool rtVECTOR_Handle::PersistReferences () {
  *	NOTHING - Executed for side effect only.
  *
  *****/
-PrivateFnDef void MarkContainers (M_ASD *pSpace, M_CPreamble const *pContainer) {
+PrivateFnDef void MarkContainers (M_ASD::GCVisitBase* pGCV, M_ASD* pSpace, M_CPreamble const *pContainer) {
     rtVECTOR_Type const		*vector = (rtVECTOR_Type const *)(pContainer + 1);
     rtVECTOR_USDType const	*uSegmentArray = rtVECTOR_V_USegArray (vector);
 
 /*****  Mark the P-Token and U-Segment Components...  *****/
-    pSpace->Mark (&rtVECTOR_V_PToken (vector));
-    pSpace->Mark (
-	(M_POP const*)(uSegmentArray),
+    pGCV->Mark (pSpace, &rtVECTOR_V_PToken (vector));
+    pGCV->Mark (
+	pSpace, (M_POP const*)(uSegmentArray),
 	rtVECTOR_V_USegArraySize (vector) * rtVECTOR_USD_POPsPerUSD
     );
 }
@@ -8140,7 +7512,7 @@ PublicFnDef void rtVECTOR_WriteDBUpdateInfo (M_CPD *vectorCPD, char const *itemN
 	    break;
     }
 /***** Output the vector DB File Record ... *****/
-    unsigned int vectorIndex = vectorCPD->ContainerIndex ();
+    unsigned int vectorIndex = vectorCPD->containerIndex ();
     DBUPDATE_OutputVectorRecord	(
 	itemName, vectorIndex, M_POP_ContainerIndex (rtVECTOR_CPD_PToken (vectorCPD)), i
     );
@@ -8156,7 +7528,7 @@ PublicFnDef void rtVECTOR_WriteDBUpdateInfo (M_CPD *vectorCPD, char const *itemN
 	M_CPD *uvectorCPD = vectorCPD->GetCPD (rtVECTOR_CPx_USDCursor);
 
 	DBUPDATE_OutputUSegmentRecord (
-	    M_CPD_RType (uvectorCPD),
+	    uvectorCPD->RType (),
 	    M_POP_D_ContainerIndex (rtVECTOR_CPD_USD_Values (vectorCPD)),
 	    M_POP_D_ContainerIndex (rtVECTOR_CPD_USD_PToken (vectorCPD)),
 	    vectorIndex
@@ -8270,8 +7642,7 @@ PrivateFnDef void PrintUSegArray (M_CPD *vectorCPD) {
         i = 0;
         i < uSegArraySize;
 	rtVECTOR_CPD_USD (vectorCPD)++, i++
-    )
-    {
+    ) {
 	IO_printf ("\n%d\tP-Token: ", i);
 	rtVECTOR_CPD_SetUSDCursor (vectorCPD, rtVECTOR_USD_PToken);
 	RTYPE_QPrint (vectorCPD, rtVECTOR_CPx_USDCursor);
@@ -8306,7 +7677,6 @@ PrivateFnDef void PrintPMRDUSegmentValues (M_CPD *vectorCPD) {
 	segmentOrigin	= rtVECTOR_PMRD_SegmentOrigin (pmrd),
 	segmentSize	= rtVECTOR_PMRD_SegmentLength (pmrd);
     M_CPD
-	*pTokenCPD,
 	*valuesCPD,
 	*xValuesCPD;
 
@@ -8322,10 +7692,9 @@ PrivateFnDef void PrintPMRDUSegmentValues (M_CPD *vectorCPD) {
 
 /*****  Create a link for the values to be displayed, ...  *****/
     rtVECTOR_CPD_SetUSDCursor (vectorCPD, rtVECTOR_USD_PToken);
+    rtPTOKEN_Handle::Reference pPPT (new rtPTOKEN_Handle (vectorCPD->ScratchPad (), segmentSize));
     rtLINK_CType *linkc = rtLINK_AppendRange (
-	rtLINK_PosConstructor (
-	    pTokenCPD = rtPTOKEN_New (vectorCPD->ScratchPad (), segmentSize), -1
-	), segmentOrigin, segmentSize
+	rtLINK_PosConstructor (pPPT), segmentOrigin, segmentSize
     )->Close (vectorCPD, rtVECTOR_CPx_USDCursor);
 
 /*****  ...obtain them, ...  *****/
@@ -8335,7 +7704,7 @@ PrivateFnDef void PrintPMRDUSegmentValues (M_CPD *vectorCPD) {
 /*****  ...display them.  *****/
     if (RTYPE_PerformHandlerOperation (
 	    RTYPE_DoLCExtract,
-	    (RTYPE_Type)M_CPD_RType (valuesCPD),
+	    valuesCPD->RType (),
 	    &xValuesCPD,
 	    valuesCPD,
 	    linkc
@@ -8343,7 +7712,6 @@ PrivateFnDef void PrintPMRDUSegmentValues (M_CPD *vectorCPD) {
     ) RTYPE_Print (xValuesCPD, -1);
 
 /*****  ...and clean-up.  *****/
-    pTokenCPD->release ();
     valuesCPD->release ();
     xValuesCPD->release ();
     linkc->release ();
@@ -8367,7 +7735,7 @@ PrivateFnDef void PrintPMRDUSegmentValues (M_CPD *vectorCPD) {
 PrivateFnDef void PrintVector (M_CPD *vectorCPD) {
     int i, n;
 
-    rtVECTOR_Align (vectorCPD);
+    vectorCPD->align ();
 
     IO_printf ("%s{", RTYPE_TypeIdAsString (RTYPE_C_Vector));
     IO_printf ("\nIsASet=%d", rtVECTOR_CPD_IsASet (vectorCPD));
@@ -8400,7 +7768,7 @@ PrivateFnDef void PrintVector (M_CPD *vectorCPD) {
  *
  *****/
 PrivateFnDef void RPrintVector (M_CPD *vectorCPD) {
-    rtVECTOR_Align (vectorCPD);
+    vectorCPD->align ();
 
     IO_printf ("\n********************\n");
     vectorCPD->print ();
@@ -8423,17 +7791,12 @@ PrivateFnDef void RPrintVector (M_CPD *vectorCPD) {
  ********************/
 
 IOBJ_DefineNewaryMethod (NewDM) {
-    return RTYPE_QRegister (
-	rtVECTOR_New (RTYPE_QRegisterCPD (parameterArray[0]))
-    );
+    return RTYPE_QRegister (new rtVECTOR_Handle (RTYPE_QRegisterPToken (parameterArray[0])));
 }
 
 IOBJ_DefineNilaryMethod (NewSetDM) {
-    M_CPD *pPPT = rtPTOKEN_New (IOBJ_ScratchPad, 0);
-    M_CPD *pSet = rtVECTOR_NewSetVector (pPPT);
-    pPPT->release ();
-    
-    return RTYPE_QRegister (pSet);
+    rtPTOKEN_Handle::Reference pPPT (new rtPTOKEN_Handle (IOBJ_ScratchPad, 0));
+    return RTYPE_QRegister (new rtVECTOR_Handle (pPPT, true));
 }
 
 IOBJ_DefineUnaryMethod (TracesOnDM) {
@@ -8654,71 +8017,63 @@ IOBJ_DefineUnaryMethod (ResetCountsDM) {
  *  'Instance' Methods  *
  ************************/
 
-IOBJ_DefineUnaryMethod (ElementCountDM)
-{
+IOBJ_DefineUnaryMethod (ElementCountDM) {
     return IOBJ_IntIObject (
 	rtVECTOR_CPD_ElementCount (RTYPE_QRegisterCPD (self))
     );
 }
 
-IOBJ_DefineUnaryMethod (PTokenDM)
-{
+IOBJ_DefineUnaryMethod (PTokenDM) {
     return RTYPE_Browser (RTYPE_QRegisterCPD (self), rtVECTOR_CPx_PToken);
 }
 
-IOBJ_DefineUnaryMethod (PMapSizeDM)
-{
+IOBJ_DefineUnaryMethod (PMapSizeDM) {
     return IOBJ_IntIObject (rtVECTOR_CPD_PMapSize (RTYPE_QRegisterCPD (self)));
 }
 
-IOBJ_DefineUnaryMethod (USegArraySizeDM)
-{
+IOBJ_DefineUnaryMethod (USegArraySizeDM) {
     return IOBJ_IntIObject (
 	rtVECTOR_CPD_USegArraySize (RTYPE_QRegisterCPD (self))
     );
 }
 
-IOBJ_DefineUnaryMethod (USegFreeBoundDM)
-{
+IOBJ_DefineUnaryMethod (USegFreeBoundDM) {
     return IOBJ_IntIObject (
 	rtVECTOR_CPD_USegFreeBound (RTYPE_QRegisterCPD (self))
     );
 }
 
-IOBJ_DefineUnaryMethod (USegIndexSizeDM)
-{
+IOBJ_DefineUnaryMethod (USegIndexSizeDM) {
     return IOBJ_IntIObject (
 	rtVECTOR_CPD_USegIndexSize (RTYPE_QRegisterCPD (self))
     );
 }
 
 IOBJ_DefineUnaryMethod (AlignDM) {
-    rtVECTOR_Align (RTYPE_QRegisterCPD (self));
-
+    RTYPE_QRegisterCPD (self)->align ();
     return self;
 }
 
 
 IOBJ_DefineMethod (AtDM) {
-    M_CPD *sourceCPD = RTYPE_QRegisterCPD (self), *result;
+    rtVECTOR_Handle::Reference pSource (
+	static_cast<rtVECTOR_Handle*>(RTYPE_QRegisterHandle (self))
+    );
+    M_CPD *result;
 
     if (IOBJ_IsAnInstanceOf (parameterArray[0], IOBJ_IType_Int)) {
-	rtREFUV_Type_Reference ref;
-        DSC_InitReferenceScalar (
-	    ref,
-	    rtVECTOR_CPD_RowPTokenCPD (sourceCPD),
-	    IOBJ_IObjectValueAsInt (parameterArray[0])
-	);
+	DSC_Scalar ref;
+        ref.constructReference (pSource->getPToken (), IOBJ_IObjectValueAsInt (parameterArray[0]));
 
 	DSC_Descriptor resultValueD;
-	rtVECTOR_RefExtract (sourceCPD, &ref, &resultValueD);
-	result = rtDSC_Pack (IOBJ_ScratchPad, &resultValueD);
+	pSource->getElements (resultValueD, ref);
+	result = (new rtDSC_Handle (IOBJ_ScratchPad, resultValueD))->GetCPD ();
 	resultValueD.clear ();
-	DSC_ClearScalar (ref);
+	ref.destroy ();
     }
     else {
 	rtLINK_CType *linkc = rtLINK_ToConstructor (RTYPE_QRegisterCPD (parameterArray[0]));
-	rtVECTOR_Extract (sourceCPD, linkc, &result);
+	pSource->getElements (result, linkc);
 	linkc->release ();
     }
 
@@ -8727,66 +8082,61 @@ IOBJ_DefineMethod (AtDM) {
 
 
 IOBJ_DefineMethod (AtPutDM) {
-    rtREFUV_Type_Reference	ref;
-    rtLINK_CType		*linkc = NilOf (rtLINK_CType*);
-    rtVECTOR_CType		*vectorc;
-    M_CPD			*targetCPD = RTYPE_QRegisterCPD (self),
-				*sourceCPD;
-    DSC_Descriptor		valueD;
+    rtVECTOR_Handle::Reference pTarget (
+	static_cast<rtVECTOR_Handle*>(RTYPE_QRegisterHandle (self))
+    );
 
 /*****  Decode the 'at:' parameter...  *****/
-    if (IOBJ_IsAnInstanceOf (parameterArray[0], IOBJ_IType_Int)) {
-        DSC_InitReferenceScalar (
-	    ref,
-	    rtVECTOR_CPD_RowPTokenCPD (targetCPD),
-	    IOBJ_IObjectValueAsInt (parameterArray[0])
-	)
+    DSC_Scalar ref; rtLINK_CType *linkc = 0;
+    if (!IOBJ_IsAnInstanceOf (parameterArray[0], IOBJ_IType_Int))
+	linkc = rtLINK_ToConstructor (RTYPE_QRegisterCPD (parameterArray[0]));
+    else {
+        ref.constructReference (pTarget->getPToken (), IOBJ_IObjectValueAsInt (parameterArray[0]));
     }
-    else linkc = rtLINK_ToConstructor (RTYPE_QRegisterCPD (parameterArray[0]));
 
 /*****  Decode the 'put:' parameter...  *****/
-    if (rtDSC_UnpackIObject (IOBJ_ScratchPad, parameterArray[1], &valueD))
-	vectorc = NilOf (rtVECTOR_CType *);
-    else switch (M_CPD_RType(sourceCPD=RTYPE_QRegisterCPD(parameterArray[1]))) {
+    M_CPD *pSource = RTYPE_QRegisterCPD(parameterArray[1]);
+    rtVECTOR_CType::Reference pConstructor;
+    DSC_Descriptor valueD;
+    valueD.construct ();
+    if (!rtDSC_UnpackIObject (IOBJ_ScratchPad, parameterArray[1], valueD)) switch (pSource->RType ()) {
     case RTYPE_C_Vector:
-	vectorc = new rtVECTOR_CType (sourceCPD);
+	pConstructor.setTo (
+	    new rtVECTOR_CType (static_cast<rtVECTOR_Handle*>(pSource->containerHandle ()))
+	);
 	break;
     default:
 	if (linkc)
 	    linkc->release ();
 	else
-	    DSC_ClearScalar (ref)
+	    ref.destroy ();
 
         ERR_SignalFault (
 	    EC__UsageError, UTIL_FormatMessage (
-		"'at:put:' Don't know how to handle %s source",
-		RTYPE_TypeIdAsString ((RTYPE_Type)M_CPD_RType (sourceCPD))
+		"'at:put:' Don't know how to handle %s source", pSource->RTypeName ()
 	    )
 	);
 
 	break;
     }
 
-    if (vectorc) {
+    if (pConstructor) {
 	if (linkc)
-	    rtVECTOR_Assign (targetCPD, linkc, vectorc);
+	    pTarget->setElements (linkc, pConstructor);
 	else 
-	    rtVECTOR_Assign (targetCPD, &ref, vectorc);
+	    pTarget->setElements (ref, pConstructor);
     }
     else if (linkc)
-	rtVECTOR_Assign (targetCPD, linkc, &valueD);
+	pTarget->setElements (linkc, valueD);
     else 
-	rtVECTOR_Assign (targetCPD, &ref, &valueD);
+	pTarget->setElements (ref, valueD);
 
-    if (vectorc)
-	vectorc->release ();
-    else
-	valueD.clear ();
+    valueD.clear ();
 
     if (linkc)
 	linkc->release ();
     else {
-	DSC_ClearScalar (ref);
+	ref.destroy ();
     }
 
     return self;
@@ -8832,40 +8182,48 @@ IOBJ_DefineUnaryMethod (GetUSegPTokenDM) {
 
 
 IOBJ_DefineMethod (ReorderDM) {
-    return RTYPE_QRegister (
-	rtVECTOR_ReOrder (
-	    RTYPE_QRegisterCPD (self), RTYPE_QRegisterCPD (parameterArray[0])
-	)->ToVector ()
+    rtVECTOR_CType::Reference pResultConstructor (
+	static_cast<rtVECTOR_Handle*>(RTYPE_QRegisterHandle (self))->reorder (
+	    RTYPE_QRegisterCPD (parameterArray[0])
+	)
     );
+    rtVECTOR_Handle::Reference pResult;
+    pResultConstructor->getVector (pResult);
+    return RTYPE_QRegister (pResult);
 }
 
 IOBJ_DefineMethod (DistributeVCDM) {
-    return RTYPE_QRegister (
-	rtVECTOR_Distribute (
-	    RTYPE_QRegisterCPD (self), RTYPE_QRegisterCPD (parameterArray[0])
-	)->ToVector ()
+    rtVECTOR_CType::Reference pResultConstructor (
+	static_cast<rtVECTOR_Handle*>(RTYPE_QRegisterHandle (self))->distribute (
+	    RTYPE_QRegisterCPD (parameterArray[0])
+	)
     );
+    rtVECTOR_Handle::Reference pResult;
+    pResultConstructor->getVector (pResult);
+    return RTYPE_QRegister (pResult);
 }
 
 
 IOBJ_DefineMethod (PartitionStatsDM) {
-    rtVECTOR_CType *vectorc = new rtVECTOR_CType (RTYPE_QRegisterCPD (self));
+    rtVECTOR_CType::Reference pConstructor (
+	new rtVECTOR_CType (static_cast<rtVECTOR_Handle*>(RTYPE_QRegisterHandle (self)))
+    );
     rtLINK_CType *linkc = rtLINK_ToConstructor (RTYPE_QRegisterCPD (parameterArray[1]));
     rtVECTOR_PS_Type type = (rtVECTOR_PS_Type)IOBJ_IObjectValueAsInt (parameterArray[0]);
 
-    M_CPD *resultCPD = vectorc->PartitionedStatistics (
+    M_CPD *resultCPD = pConstructor->PartitionedStatistics (
 	linkc, type, IOBJ_ScratchPad->KOT ()
     );
     linkc->release ();
-    vectorc->release ();
 
     return RTYPE_QRegister (resultCPD);
 }
 
 IOBJ_DefineMethod (SubsetInStoreDM) {
-    rtLINK_CType *linkc = rtVECTOR_SubsetInStore (
-	RTYPE_QRegisterCPD (self), RTYPE_QRegisterCPD (parameterArray[0])
-    );
+    Vdd::Store::Reference pStore;
+    rtLINK_CType *linkc = RTYPE_QRegisterHandle (
+	parameterArray[0]
+    )->getStore (pStore) ? static_cast<rtVECTOR_Handle*>(RTYPE_QRegisterHandle (self))->subsetInStore (pStore) : 0;
 
     if (linkc)
 	return RTYPE_QRegister (linkc);
@@ -8876,32 +8234,31 @@ IOBJ_DefineMethod (SubsetInStoreDM) {
 
 IOBJ_DefineUnaryMethod (SimplifyToDescriptorDM) {
     DSC_Descriptor dsc;
-    if (rtVECTOR_SimplifiedToMonotype (RTYPE_QRegisterCPD (self), &dsc)) {
-	M_CPD *dscCPD = rtDSC_Pack (IOBJ_ScratchPad, &dsc);
+    if (static_cast<rtVECTOR_Handle*>(RTYPE_QRegisterHandle(self))->simplifiedToMonotype (dsc)) {
+	rtDSC_Handle::Reference pResult (new rtDSC_Handle (IOBJ_ScratchPad, dsc));
 	dsc.clear ();
 
-	return RTYPE_QRegister (dscCPD);
+	return RTYPE_QRegister (pResult);
     }
 
     return self;
 }
 
 IOBJ_DefineMethod (LookupFromUVDM) {
-    M_CPD *store = RTYPE_QRegisterCPD (parameterArray[1]);
-    store->retain ();
+    Vdd::Store::Reference store (RTYPE_QRegisterHandle (parameterArray[1])->getStore ());
 
-    DSC_Descriptor keyDsc;
-    keyDsc.constructMonotype (store, RTYPE_QRegisterCPD (parameterArray[0]));
+    DSC_Descriptor rKeys;
+    rKeys.constructMonotype (store, RTYPE_QRegisterCPD (parameterArray[0]));
 
-    rtLINK_LookupCase lookupCase = (rtLINK_LookupCase)IOBJ_IObjectValueAsInt (
+    rtLINK_LookupCase xLookupCase = (rtLINK_LookupCase)IOBJ_IObjectValueAsInt (
 	parameterArray[2]
     );
 
     DSC_Pointer locatedDscPtr, locationsDscPtr;
-    rtVECTOR_LookupFromValueD (
-	RTYPE_QRegisterCPD (self), &keyDsc, lookupCase, &locationsDscPtr, &locatedDscPtr
+    static_cast<rtVECTOR_Handle*>(RTYPE_QRegisterHandle (self))->locate (
+	rKeys, xLookupCase, locationsDscPtr, locatedDscPtr
     );
-    keyDsc.clear ();
+    rKeys.clear ();
 
     if (locatedDscPtr.isntEmpty ()) {
 	IO_printf ("\nLocated LinkC:\n");
@@ -8916,23 +8273,23 @@ IOBJ_DefineMethod (LookupFromUVDM) {
 }
 
 IOBJ_DefineMethod (LookupFromScalarDM) {
-    DSC_Descriptor keyDsc;
-    if (!rtDSC_UnpackIObject (IOBJ_ScratchPad, parameterArray[0], &keyDsc)) {
+    DSC_Descriptor rKeys;
+    if (!rtDSC_UnpackIObject (IOBJ_ScratchPad, parameterArray[0], rKeys)) {
 	ERR_SignalFault (
 	    EC__UsageError,
 	    "LookupFromScalarDebugMethod: Unknown scalar type"
 	);
     }
 
-    rtLINK_LookupCase lookupCase = (rtLINK_LookupCase)IOBJ_IObjectValueAsInt (
+    rtLINK_LookupCase xLookupCase = (rtLINK_LookupCase)IOBJ_IObjectValueAsInt (
 	parameterArray[1]
     );
 
     DSC_Pointer locatedDscPtr, locationsDscPtr;
-    rtVECTOR_LookupFromValueD (
-	RTYPE_QRegisterCPD (self), &keyDsc, lookupCase, &locationsDscPtr, &locatedDscPtr
+    static_cast<rtVECTOR_Handle*>(RTYPE_QRegisterHandle (self))->locate (
+	rKeys, xLookupCase, locationsDscPtr, locatedDscPtr
     );
-    keyDsc.clear ();
+    rKeys.clear ();
 
     if (locatedDscPtr.isntEmpty ()) {
 	IO_printf ("\nLocated: 0\n");
@@ -8950,17 +8307,16 @@ IOBJ_DefineMethod (LookupFromScalarDM) {
 }
 
 IOBJ_DefineMethod (LocateOrAddFromUVDM) {
-    M_CPD *store = RTYPE_QRegisterCPD (parameterArray[1]);
-    store->retain ();
+    Vdd::Store::Reference store (RTYPE_QRegisterHandle (parameterArray[1])->getStore ());
 
-    DSC_Descriptor keyDsc;
-    keyDsc.constructMonotype (store, RTYPE_QRegisterCPD (parameterArray[0]));
+    DSC_Descriptor rKeys;
+    rKeys.constructMonotype (store, RTYPE_QRegisterCPD (parameterArray[0]));
 
     DSC_Pointer addedDscPtr, locationsDscPtr;
-    rtVECTOR_LocateOrAdd (
-	RTYPE_QRegisterCPD (self), &keyDsc, &locationsDscPtr, &addedDscPtr
+    static_cast<rtVECTOR_Handle*>(RTYPE_QRegisterHandle (self))->locateOrAdd (
+	rKeys, locationsDscPtr, &addedDscPtr
     );
-    keyDsc.clear ();
+    rKeys.clear ();
 
     if (addedDscPtr.isntEmpty ()) {
 	IO_printf ("\nAdded LinkC:\n");

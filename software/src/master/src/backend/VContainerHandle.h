@@ -7,8 +7,6 @@
 
 #include "VBenderenceable.h"
 
-#include "VMutex.h"
-
 /**************************
  *****  Declarations  *****
  **************************/
@@ -23,6 +21,10 @@
 
 class M_CPD;
 class M_CTE;
+
+class rtPTOKEN_CType;
+
+#include "Vdd_Store.h"
 
 
 /*************************
@@ -70,96 +72,124 @@ class VContainerHandle : public VBenderenceable {
 
 //  Aliases
 public:
+    typedef V::VAggregatePointer<M_CPD>		M_CPD_Pointer;
+    typedef V::VAggregatePointer<M_DCTE>	M_DCTE_Pointer;
+    typedef V::VAggregatePointer<M_POP const>	M_POP_Pointer;
     typedef V::VArgList VArgList;
 
 //  Container Processing Callbacks
 public:
-    typedef char *pointer_t;
     typedef void (*ShiftProcessor) (
 	VContainerHandle* cpd, pointer_t pTail, ptrdiff_t sShift, va_list ap
     );
 
 //  Parameters
 public:
-    static bool g_fPreservingHandles;
+    static bool g_bPreservingHandles;
 
 //  Construction
-protected:
-    VContainerHandle (M_CTE &rCTE);
-
 public:
     static VContainerHandle *Maker (M_CTE &rCTE);
+protected:
+    VContainerHandle (M_ASD *pSpace, RTYPE_Type xType, size_t sContainer);
+    VContainerHandle (M_ASD *pSpace, RTYPE_Type xType);
+    VContainerHandle (M_CTE &rCTE);
+private:
+    VContainerHandle *attachTo (M_CTE &rCTE);
 
 //  Destruction
 protected:
     ~VContainerHandle ();
 
-//  Reference Management
-private:
-    void createReference () {
-	BaseClass::retain ();
-    }
-    void deleteReference () {
-	BaseClass::release ();
-    }
+//  Lifetime Management
 public:
-    void retain () {
-	AcquireAccessLock ();
+    bool isPrecious () const {
+	return m_bPrecious;
     }
-    void release () {
-	ReleaseAccessLock ();
+    bool isReferenced () const {
+	return referenceCount () > 0;
+    }
+    bool isntReferenced () const {
+	return referenceCount () == 0;
+    }
+protected:
+    bool onDeleteThis () {
+	if (m_pDCTE.isntNil () && (m_pDCTE->isntReferenced () || !g_bPreservingHandles && m_pContainer && !m_bPrecious)) {
+	    m_pDCTE->setToContainerAddress (m_pContainer, m_bReadWrite);
+	    m_pDCTE->discard (m_pASD, containerIndexNC ());
+	    m_pDCTE.clear ();
+    }
+	return m_pDCTE.isNil ();
+    }
+
+    void setPreciousTo (bool bPrecious) {
+	m_bPrecious = bPrecious;
+    }
+
+
+//  Type Conversion
+private:
+    virtual Vdd::Store *getStore_();
+public:
+    Vdd::Store *getStore () {
+	if (m_pStore.isNil ())
+	    m_pStore.setTo (getStore_());
+	return m_pStore;
+    }
+    bool getStore (VReference<Vdd::Store> &rpResult) {
+	rpResult.setTo (getStore ());
+	return rpResult.isntNil ();
     }
 
 //  Access
 public:
-    unsigned int AccessCount () const {
-	return m_iAccessCount;
-    }
-
     unsigned int attentionMask () const {
-	return m_pDCTE->attentionMask ();
+	return m_pDCTE ? m_pDCTE->attentionMask () : 0;
     }
 
     M_CPreamble *containerAddress () const {
-	return m_pContainerAddress;
+	return m_pContainer;
     }
     pointer_t containerContent () const {
-	return reinterpret_cast<pointer_t>(m_pContainerAddress + 1);
-    }
-    pointer_t ContainerContent () const {
-	return containerContent ();
+	return reinterpret_cast<pointer_t>(m_pContainer + 1);
     }
 
-    M_POP const &containerIdentity () const {
-	return M_CPreamble_POP (m_pContainerAddress);
+    M_POP const *containerIdentity () const {
+	return m_pContainerIdentity;
+    }
+    M_POP const *containerIdentity () {
+	if (m_pContainerIdentity.isNil ()) {
+	    m_pASD->CreateIdentity (m_iContainerIdentity, this);
+	    m_pContainerIdentity.setTo (&m_iContainerIdentity);
+    }
+	return m_pContainerIdentity;
     }
 
-    RTYPE_Type ContainerRType () const {
-	return (RTYPE_Type)M_CPreamble_RType (m_pContainerAddress);
+    unsigned int containerIndexNC () const {
+	return containerIndex ();
+    }
+    unsigned int containerIndex () const {
+	return hasAnIdentity () ? M_POP_ContainerIndex (containerIdentity ()) : UINT_MAX;
+    }
+    unsigned int containerIndex () {
+	return M_POP_ContainerIndex (containerIdentity ());
     }
 
-    unsigned int ContainerSize () const {
-	return M_CPreamble_Size (m_pContainerAddress);
+    unsigned int containerSize () const {
+	return m_pContainer ? M_CPreamble_Size (m_pContainer) : 0;
     }
 
-    unsigned int ContainerIndex () const {
-	return M_CPreamble_POPContainerIndex (m_pContainerAddress);
-    }
-
-    M_CPD* CPDChainHead () const {
+    M_CPD *cpdChainHead () const {
 	return m_pCPDChainHead;
     }
-    unsigned int CPDPointerCount () const {
-	return m_pRTD->CPDPointerCount ();
+    unsigned int cpdPointerCount () const {
+	return m_pRTD->cpdPointerCount ();
     }
 
     M_AND* Database () const {
 	return m_pASD->Database ();
     }
 
-    M_KnownObjectTable *KnownObjectTable () const {
-	return m_pASD->KnownObjectTable ();
-    }
     M_KOT *KOT () const {
 	return m_pASD->KOT ();
     }
@@ -182,7 +212,7 @@ public:
     M_ASD *Space () const {
 	return m_pASD;
     }
-    unsigned int SpaceIndex () const {
+    unsigned int spaceIndex () const {
 	return m_pASD->Index ();
     }
 
@@ -190,44 +220,50 @@ public:
 	return m_pASD->TheNilPOP ();
     }
 
-    transientx_t *TransientExtension () const {
-	return m_pTransientExtension;
-    }
-
-    transientx_t *TransientExtensionIfA (VRunTimeType const& rRTT) const;
-
 //  Query
 public:
-    bool ContainerHasMultipleUses () const {
-	return m_iReferenceCount > 1
-	    || m_iAccessCount > 1
-	    || m_pDCTE->referenceCount () > 1;
+    bool hasMultipleUses () const {
+	return isReferenced () || (m_pDCTE && m_pDCTE->isReferenced ());
+    }
+
+    bool hasAContainer () const {
+	return IsntNil (m_pContainer);
+    }
+    bool hasAnIdentity () const {
+	return m_pContainerIdentity.isntNil ();
+    }
+
+    bool hasAReadOnlyContainer () const {
+	return m_pContainer && !m_bReadWrite;
+    }
+    bool hasAReadWriteContainer () const {
+	return m_pContainer && m_bReadWrite;
+    }
+
+    bool isReadOnly () const {
+	return !m_pContainer || !m_bReadWrite;
+    }
+
+    bool hasNoContainer () const {
+	return IsNil (m_pContainer);
+    }
+    bool hasNoIdentity () const {
+	return m_pContainerIdentity.isNil ();
     }
 
     bool isAForwardingTarget () const {
-	return m_pDCTE->isAForwardingTarget ();
+	return m_pDCTE && m_pDCTE->isAForwardingTarget ();
     }
     bool isATRefRescanTarget () const {
-	return m_pDCTE->isATRefRescanTarget ();
+	return m_pDCTE && m_pDCTE->isATRefRescanTarget ();
     }
 
-    bool IsReadOnly () const {
-	return !m_fIsReadWrite;
-    }
-    bool IsReadWrite () const {
-	return m_fIsReadWrite;
-    }
-
-    bool IsInTheScratchPad () const {
+    bool isInTheScratchPad () const {
 	return m_pASD->IsTheScratchPad ();
     }
 
-    bool IsntInTheScratchPad () const {
+    bool isntInTheScratchPad () const {
 	return m_pASD->IsntTheScratchPad ();
-    }
-
-    bool HasATransientExtension	() const {
-	return m_pTransientExtension.isntEmpty ();
     }
 
     bool RTypeIs (RTYPE_Type xType) const {
@@ -237,8 +273,6 @@ public:
 	return RType () != xType;
     }
 
-    bool TransientExtensionIsA (VRunTimeType const& rRTT) const;
-
 //  Callbacks
 public:
     virtual void CheckConsistency ();
@@ -247,11 +281,6 @@ private:
     virtual bool PersistReferences ();
 
 //  Container Access
-private:
-    void ReleaseCTE ();
-    void AcquireAccessLock ();
-    void ReleaseAccessLock ();
-
 public:
     M_CPreamble *GetContainerAddress (M_POP const *pReference) const {
 	return m_pASD->GetContainerAddress (pReference);
@@ -271,8 +300,12 @@ public:
 
 //  Container Creation
 public:
-    M_CPD *CreateContainer (RTYPE_Type xRType, size_t sContainer) const {
+    VContainerHandle *CreateContainer (RTYPE_Type xRType, size_t sContainer) const {
 	return m_pASD->CreateContainer (xRType, sContainer);
+    }
+protected:
+    void CreateContainer (size_t sContainer) {
+	ReallocateContainer (sContainer);
     }
 
 //  Container Update
@@ -287,7 +320,7 @@ public:
     void ReallocateContainer (size_t newSize);
 
     void GrowContainer (ptrdiff_t sizeChange) {
-	ReallocateContainer ((size_t)(M_CPreamble_Size (m_pContainerAddress) + sizeChange));
+	ReallocateContainer ((size_t)(containerSize () + sizeChange));
     }
 
     //  The following methods work with writeable containers only...
@@ -309,6 +342,22 @@ public:
     );
     void ShiftContainerTail (pointer_t pTail, size_t sTail, ptrdiff_t sShift, bool bSqueeze) {
 	VShiftContainerTail (pTail, sTail, sShift, bSqueeze);
+    }
+
+//  Aligment
+private:
+    virtual bool align_() {
+	return false;
+    }
+    virtual bool alignAll_(bool bCleaning) {
+	return false;
+    }
+public:
+    bool align () {
+	return align_();
+    }
+    bool alignAll (bool bCleaning = true) {
+	return alignAll_(bCleaning);
     }
 
 //  Reference Access
@@ -333,15 +382,12 @@ public:
     bool Names (M_KOTM pKOTM) const {
 	return this == (KOT ()->*pKOTM).ObjectHandle ();
     }
-    bool NamesPToken (M_KOTM pKOTM) const {
-	return this == (KOT ()->*pKOTM).PTokenHandle ();
-    }
 
     bool Names (M_AND *pThat, M_POP const *pThatReference) const {
-	return m_pASD->ReferenceNames (&containerIdentity (), pThat, pThatReference);
+	return hasAnIdentity () && m_pASD->ReferenceNames (containerIdentity (), pThat, pThatReference);
     }
     bool Names (M_ASD *pThat, M_POP const *pThatReference) const {
-	return m_pASD->ReferenceNames (&containerIdentity (), pThat, pThatReference);
+	return hasAnIdentity () && m_pASD->ReferenceNames (containerIdentity (), pThat, pThatReference);
     }
 
     bool ReferencesAreIdentical (	// use for local references only.
@@ -353,23 +399,14 @@ public:
     bool ReferenceNames (M_POP const *pReference, M_KOTM pKOTM) const {
 	return m_pASD->ReferenceNames (pReference, pKOTM);
     }
-    bool ReferenceNamesPToken (M_POP const *pReference, M_KOTM pKOTM) const {
-	return m_pASD->ReferenceNamesPToken (pReference, pKOTM);
-    }
 
-    bool ReferenceNames (
-	M_POP const *pReference, VContainerHandle const *pThat
-    ) const {
-	return m_pASD->ReferenceNames (
-	    pReference, pThat->Space (), &pThat->containerIdentity ()
-	);
+    bool ReferenceNames (M_POP const *pReference, VContainerHandle const *pThat) const {
+	return pThat->Names (m_pASD, pReference);
     }
     bool ReferenceNames (
 	M_POP const *pReference, VContainerHandle const	*pThat, M_POP const *pThatReference
     ) const {
-	return m_pASD->ReferenceNames (
-	    pReference, pThat->Space (), pThatReference
-	);
+	return m_pASD->ReferenceNames (pReference, pThat->Space (), pThatReference);
     }
 
     bool ReferenceIsNil (M_POP const *pReference) const {
@@ -387,15 +424,12 @@ public:
     bool DoesntName (M_KOTM pKOTM) const {
 	return this != (KOT ()->*pKOTM).ObjectHandle ();
     }
-    bool DoesntNamePToken (M_KOTM pKOTM) const {
-	return this != (KOT ()->*pKOTM).PTokenHandle ();
-    }
 
     bool DoesntName (M_AND *pThat, M_POP const *pThatReference) const {
-	return m_pASD->ReferenceDoesntName (&containerIdentity (), pThat, pThatReference);
+	return hasNoIdentity () || m_pASD->ReferenceDoesntName (containerIdentity (), pThat, pThatReference);
     }
     bool DoesntName (M_ASD *pThat, M_POP const *pThatReference) const {
-	return m_pASD->ReferenceDoesntName (&containerIdentity (), pThat, pThatReference);
+	return hasNoIdentity () || m_pASD->ReferenceDoesntName (containerIdentity (), pThat, pThatReference);
     }
 
     bool ReferencesArentIdentical (	// use for local references only.
@@ -407,23 +441,14 @@ public:
     bool ReferenceDoesntName (M_POP const *pReference, M_KOTM pKOTM) const {
 	return m_pASD->ReferenceDoesntName (pReference, pKOTM);
     }
-    bool ReferenceDoesntNamePToken (M_POP const *pReference, M_KOTM pKOTM) const {
-	return m_pASD->ReferenceDoesntNamePToken (pReference, pKOTM);
-    }
 
-    bool ReferenceDoesntName (
-	M_POP const *pReference, VContainerHandle const *pThat
-    ) const {
-	return m_pASD->ReferenceDoesntName (
-	    pReference, pThat->Space (), &pThat->containerIdentity ()
-	);
+    bool ReferenceDoesntName (M_POP const *pReference, VContainerHandle const *pThat) const {
+	return pThat->DoesntName (m_pASD, pReference);
     }
     bool ReferenceDoesntName (
 	M_POP const *pReference, VContainerHandle const	*pThat, M_POP const *pThatReference
     ) const {
-	return m_pASD->ReferenceDoesntName (
-	    pReference, pThat->Space (), pThatReference
-	);
+	return m_pASD->ReferenceDoesntName (pReference, pThat->Space (), pThatReference);
     }
 
     bool ReferenceIsntNil (M_POP const *pReference) const {
@@ -455,11 +480,11 @@ public:
      *----------------------------------------------------------------------------
      */
     bool LocateNameIn (M_AND *pThat, M_TOP &rName) const {
-	return pThat->LocateNameOf (m_pASD, ContainerIndex (), rName);
+	return hasAnIdentity () && pThat->LocateNameOf (m_pASD, containerIndex (), rName);
     }
 
     bool LocateNameIn (M_ASD *pThat, M_TOP &rName) const {
-	return pThat->LocateNameOf (m_pASD, ContainerIndex (), rName);
+	return hasAnIdentity () && pThat->LocateNameOf (m_pASD, containerIndex (), rName);
     }
 
     bool LocateNameOf (M_ASD *pThat, unsigned int xThatName, M_TOP &rName) const {
@@ -467,11 +492,12 @@ public:
     }
 
     bool LocateNameIn (VContainerHandle const *pThat, M_TOP &rName) const {
-	return pThat->LocateNameOf (m_pASD, ContainerIndex (), rName);
+	return hasAnIdentity () && pThat->LocateNameOf (m_pASD, containerIndex (), rName);
     }
     bool LocateNameOf (VContainerHandle const *pThat, M_TOP &rName) const {
 	return pThat->LocateNameIn (m_pASD, rName);
     }
+    bool LocateNameOf (Vdd::Store *pStore, M_TOP &rName) const;
 
     /*-----------------------------------------------------------------------*/
     bool LocateNameIn (M_AND *pThat, M_POP const *pThisName, M_TOP &rName) const {
@@ -498,24 +524,25 @@ public:
     }
 
     /*-----------------------------------------------------------------------*/
-    bool LocateOrAddNameIn (M_AND *pThat, M_TOP &rName) const {
-	return pThat->LocateOrAddNameOf (m_pASD, ContainerIndex (), rName);
+    bool LocateOrAddNameIn (M_AND *pThat, M_TOP &rName) {
+	return pThat->LocateOrAddNameOf (m_pASD, containerIndex (), rName);
     }
 
-    bool LocateOrAddNameIn (M_ASD *pThat, M_TOP &rName) const {
-	return pThat->LocateOrAddNameOf (m_pASD, ContainerIndex (), rName);
+    bool LocateOrAddNameIn (M_ASD *pThat, M_TOP &rName) {
+	return pThat->LocateOrAddNameOf (m_pASD, containerIndex (), rName);
     }
 
     bool LocateOrAddNameOf (M_ASD *pThat, unsigned int xThatName, M_TOP &rName) const {
 	return m_pASD->LocateOrAddNameOf (pThat, xThatName, rName);
     }
 
-    bool LocateOrAddNameIn (VContainerHandle const *pThat, M_TOP &rName) const {
-	return pThat->LocateOrAddNameOf (m_pASD, ContainerIndex (), rName);
+    bool LocateOrAddNameIn (VContainerHandle const *pThat, M_TOP &rName) {
+	return pThat->LocateOrAddNameOf (m_pASD, containerIndex (), rName);
     }
-    bool LocateOrAddNameOf (VContainerHandle const *pThat, M_TOP &rName) const {
+    bool LocateOrAddNameOf (VContainerHandle *pThat, M_TOP &rName) const {
 	return pThat->LocateOrAddNameIn (m_pASD, rName);
     }
+    bool LocateOrAddNameOf (Vdd::Store *pStore, M_TOP &rName) const;
 
     /*-----------------------------------------------------------------------*/
     bool LocateOrAddNameIn (M_AND *pThat, M_POP const *pThisName, M_TOP &rName) const {
@@ -547,21 +574,15 @@ public:
     ) const {
 	m_pASD->StoreReference (pReference, pThat->Space (), pThatReference);
     }
-    void StoreReference (M_POP *pReference, VContainerHandle const *pThat) const {
-	StoreReference (pReference, pThat, &pThat->containerIdentity ());
+    void StoreReference (M_POP *pReference, VContainerHandle *pThat) const {
+	m_pASD->StoreReference (pReference, pThat);
+    }
+    void StoreReference (M_POP *pReference, Vdd::Store *pThat) const {
+	m_pASD->StoreReference (pReference, pThat);
     }
 
 //  Known Object Access
 public:
-    M_KOTE const &GetBlockEquivalentClassFromPToken () const {
-	return m_pASD->GetBlockEquivalentClassFromPToken (this);
-    }
-    M_KOTE const &GetBlockEquivalentClassFromPToken (M_POP const *pReference) const {
-	M_KOT *pKOT = ReferencedKOT (pReference);
-	return ReferenceNames (pReference, pKOT->TheStringPTokenHandle ())
-	    ? pKOT->TheStringClass : pKOT->TheSelectorClass;
-    }
-
     M_KOTE const &TheNAClass () const {
 	return m_pASD->TheNAClass ();
     }
@@ -649,6 +670,12 @@ public:
     M_KOTE const &TheSelectorPToken () const {
 	return m_pASD->TheSelectorPToken ();
     }
+    rtPTOKEN_Handle *TheScalarPTokenHandle () const {
+	return m_pASD->TheScalarPTokenHandle ();
+    }
+    rtPTOKEN_Handle *TheSelectorPTokenHandle () const {
+	return m_pASD->TheSelectorPTokenHandle ();
+    }
 
 //  Known Object Query
 public:
@@ -730,55 +757,82 @@ public:
 	    && DoesntNameTheIntegerClass();
     }
 
-//  Mutex Management
+//  P-Token Terminality
 public:
-    bool AcquireMutex (VMutexClaim& rClaim, VComputationUnit *pSupplicant) {
-	return m_iMutex.acquireClaim (rClaim, pSupplicant, this);
+    bool isTerminal (M_POP const *pPOP);
+    bool isTerminal (M_POP const *pPOP, rtPTOKEN_CType *&rpPTC) {
+	return !isntTerminal (pPOP, rpPTC);
+	}
+    bool isTerminal (M_POP const *pPOP, VReference<rtPTOKEN_Handle> &rpPTH) {
+	return !isntTerminal (pPOP, rpPTH);
     }
 
-//  Transient Extension Management
-public:
-    void AcquireTransientExtensionAccessLock (transientx_t const *pTransientExtension) {
-	if (m_pTransientExtension == pTransientExtension && !m_fTransientExtensionHasAnAccessLock) {
-	    AcquireAccessLock ();
-	    m_fTransientExtensionHasAnAccessLock = true;
-	}
+    bool isntTerminal (M_POP const *pPOP) {
+	return !isTerminal (pPOP);
     }
-    void ReleaseTransientExtensionAccessLock (transientx_t const *pTransientExtension) {
-	if (m_pTransientExtension == pTransientExtension && m_fTransientExtensionHasAnAccessLock) {
-	    m_fTransientExtensionHasAnAccessLock = false;
-	    ReleaseAccessLock ();
-	}
-    }
-
-    void ClearTransientExtension () {
-	if (m_pTransientExtension) {
-	    m_pTransientExtension->EndRoleAsTransientExtensionOf (this);
-	    m_pTransientExtension.clear ();
-	}
-	if (m_fTransientExtensionHasAnAccessLock) {
-	    m_fTransientExtensionHasAnAccessLock = false;
-	    ReleaseAccessLock ();
-	}
-    }
-    void SetTransientExtensionTo (transientx_t *pTransientExtension) {
-	if (pTransientExtension != m_pTransientExtension) {
-	    ClearTransientExtension ();
-	    m_pTransientExtension.setTo (pTransientExtension);
-	}
-    }
+    bool isntTerminal (M_POP const *pPOP, rtPTOKEN_CType *&rpPTC);
+    bool isntTerminal (M_POP const *pPOP, VReference<rtPTOKEN_Handle> &rpPTH);
 
 //  Update
 public:
     void AttachToCTE (M_CTE &rCTE);
+    void DetachFromCTE ();
 
     void setAttentionMaskTo (unsigned int iNewAttentionMask) const {
-	m_pDCTE->setAttentionMaskTo (iNewAttentionMask);
+	if (m_pDCTE)
+	    m_pDCTE->setAttentionMaskTo (iNewAttentionMask);
+	}
+
+// Garbage collection marking
+public:
+    typedef void (ThisClass::*visitFunction)(void);
+    virtual void traverseReferences(visitFunction fp) { }
+
+    void startMark() {
+	if (!m_bVisited) {
+	    m_bVisited = true;
+	    traverseReferences(&ThisClass::mark);
+    }
+	}
+    void mark() {
+	if (m_bVisited == false && m_iHandleRefCount > 0) { //bad
+	    //fprintf(stderr, "non-visited node has aux ref count\n");
     }
 
+	m_iHandleRefCount++;
+
+	if (m_iHandleRefCount == referenceCount()) { // good!
+	    //fprintf(stderr, "found all references for a handle!\n");
+	}
+	if (m_iHandleRefCount > referenceCount()) { // bad
+	    //fprintf(stderr, "reference count exceeded for a handle\n");
+        }
+
+
+	startMark();
+	}
+    void unmark() {
+	if (m_bVisited == false && m_iHandleRefCount > 0) { // bad
+	    //fprintf(stderr, "non-visited node has aux ref count\n");
+    }
+	if (m_bVisited) {
+	    m_bVisited = false;
+	    m_iHandleRefCount = 0;
+	}
+    }
+
+    unsigned int cdReferenceCount() { return m_iHandleRefCount; }
+
 //  Reference Forwarding
+protected:
+    virtual bool forwardToSpace_(M_ASD *pSpace);
 public:
-    void ForwardToSpace (M_ASD *pTargetSpace);
+    bool forwardToSpace (M_ASD *pSpace) {
+	return forwardToSpace_(pSpace);
+    }
+    bool ForwardToSpace (M_ASD *pSpace) {
+	return forwardToSpace (pSpace);
+    }
 
 //  Reference Persistence
 protected:
@@ -790,6 +844,8 @@ protected:
     }
 
 //  Container Enumeration Callbacks
+protected:
+    virtual void flushCachedResources_();
 public:
     bool CallFunction			(VArgList const &rArgList);
     bool CallProcedure			(VArgList const &rArgList);
@@ -816,24 +872,235 @@ public:
 
 //  Incorporator Support
 public:
-    void WriteDBUpdateInfo (bool replace) const {
-	m_pASD->WriteDBUpdateInfo (ContainerIndex (), replace);
+    void WriteDBUpdateInfo (bool replace) {
+	m_pASD->WriteDBUpdateInfo (containerIndex (), replace);
+    }
+
+//  Display and Inspection
+private:
+    virtual void describe_(bool bVerbose);
+public:
+    void describe (bool bVerbose = false) {
+	describe_(bVerbose);
+    }
+
+public:
+    class MapEntryData;
+    virtual void getClusterReferenceMapData (MapEntryData &rData, unsigned int xReference) {
+    }
+    virtual unsigned int getClusterReferenceMapSize () {
+	return 0;
+    }
+    virtual unsigned __int64 getClusterSize () {
+	return containerSize ();
+    }
+    virtual unsigned int getPOPCount () const {
+	return 0;
+    }
+    virtual bool getPOP (M_POP *pResult, unsigned int xPOP) const {
+	return false;
     }
 
 //  State
 protected:
-    M_CPreamble*		m_pContainerAddress;
-    M_RTD *const		m_pRTD;
+    M_CPreamble*		m_pContainer;
     M_ASD*			m_pASD;
-    M_DCTE*			m_pDCTE;
-    M_CPD*			m_pCPDChainHead;
-    VMutex			m_iMutex;
-    transientx_t::Reference	m_pTransientExtension;
-    unsigned short		m_iAccessCount;
-    unsigned int		m_fIsReadWrite				: 1;
-    unsigned int		m_fOwnsAnUnusedAccessLock		: 1;
-    unsigned int		m_fTransientExtensionHasAnAccessLock	: 1;
+private:
+    M_POP_Pointer		m_pContainerIdentity;
+    M_POP			m_iContainerIdentity;
+    M_DCTE_Pointer		m_pDCTE;
+    M_CPD_Pointer		m_pCPDChainHead;
+    Vdd::Store::Pointer		m_pStore;
+    M_RTD *const		m_pRTD;  // ... must follow container address.
+    bool			m_bReadWrite;
+    bool			m_bPrecious;
+    unsigned int                m_iHandleRefCount;
+    bool			m_bVisited;
 };
+
+
+/***************************
+ *----  VStoreHandle_  ----*
+ ***************************/
+
+/****************************************************************************
+ *>>>>  For the benefit of MSVC 6, which has problems with such things  <<<<*
+ ****************************************************************************
+ *                                                                          *
+ *                           >>>>>  WALK  <<<<<                             *
+ *                                                                          *
+ ****************************************************************************/
+template<class Base> class VStoreHandleBase_ : public Base {
+protected:
+    VStoreHandleBase_(
+	M_ASD *pSpace, RTYPE_Type xType, size_t sContainer
+    ) : Base (pSpace, xType, sContainer) {
+    }
+    VStoreHandleBase_(M_ASD *pSpace, RTYPE_Type xType) : Base (pSpace, xType) {
+    }
+    VStoreHandleBase_(M_CTE &rCTE) : Base (rCTE) {
+    }
+    ~VStoreHandleBase_() {
+    }
+};
+
+/****************************************************************************
+ *                                                                          *
+ *                           >>>>>  CHEW  <<<<<                             *
+ *                                                                          *
+ ****************************************************************************/
+template<class Base> class VStoreHandle_ : public VStoreHandleBase_<Base>, public Vdd::Store {
+    DECLARE_ABSTRACT_RTT (VStoreHandle_<Base>, VStoreHandleBase_<Base>);
+
+//  Aliases
+public:
+    typedef VStoreHandleBase_<Base> HandleBase;
+    typedef Vdd::Store StoreBase;
+
+//  Construction
+protected:
+    VStoreHandle_(
+	M_ASD *pSpace, RTYPE_Type xType, size_t sContainer
+    ) : HandleBase (pSpace, xType, sContainer), StoreBase (this) {
+    }
+    VStoreHandle_(M_ASD *pSpace, RTYPE_Type xType) : HandleBase (pSpace, xType), StoreBase (this) {
+    }
+    VStoreHandle_(M_CTE &rCTE) : HandleBase (rCTE), StoreBase (this) {
+    }
+
+//  Destruction
+protected:
+    ~VStoreHandle_() {
+    }
+
+//  Aligment
+public:
+    bool align () {
+	return static_cast<HandleBase*>(this)->align ();
+    }
+    bool alignAll (bool bCleaning = true) {
+	return static_cast<HandleBase*>(this)->alignAll (bCleaning);
+    }
+
+//  Attention Mask
+private:
+    unsigned int attentionMask_() const;
+    virtual /*override*/ void setAttentionMaskTo_(unsigned int iValue);
+public:
+    unsigned int attentionMask () const {
+	return static_cast<HandleBase const*>(this)->attentionMask ();
+    }
+    void setAttentionMaskTo (unsigned int iValue) {
+	static_cast<HandleBase*>(this)->setAttentionMaskTo (iValue);
+    }
+
+//  Database Access
+private:
+    virtual /*override*/ M_AND *database_() const;
+    virtual /*override*/ M_KOT *kot_() const;
+    virtual /*override*/ M_ASD *objectSpace_() const;
+    virtual /*override*/ RTYPE_Type rtype_() const;
+    virtual /*override*/ M_ASD *scratchPad_() const;
+
+//  Database Container Access
+private:
+    void getContainerHandle_(VReference<VContainerHandle>&rpResult);
+
+//  Database Container Management
+private:
+    bool isAForwardingTarget_() const;
+public:
+    bool forwardToSpace (M_ASD *pSpace) {
+	return static_cast<HandleBase*>(this)->forwardToSpace (pSpace);
+    }
+
+//  Store Access
+private:
+    virtual /*override*/ StoreBase *getStore_();
+public:
+    bool getStore (VReference<StoreBase> &rpResult) {
+	rpResult.setTo (getStore ());
+	return rpResult.isntNil ();
+    }
+    StoreBase *getStore () {
+	return static_cast<StoreBase*>(this);
+    }
+public:
+    virtual void traverseHandleReferences(void (VContainerHandle::*visitFunction)(void)) { 
+	(this->*visitFunction)(); 
+    }
+
+};
+
+/************************************************
+ *----  VStoreHandle_<Base>::Run Time Type  ----*
+ ************************************************/
+
+template<class Base> typename DEFINE_CONCRETE_RTT (VStoreHandle_<Base>);
+
+
+/*************************************************
+ *----  VStoreHandle_<Base>::Attention Mask  ----*
+ *************************************************/
+
+template<class Base> unsigned int VStoreHandle_<Base>::attentionMask_() const {
+    return static_cast<HandleBase const*>(this)->attentionMask ();
+}
+template<class Base> void VStoreHandle_<Base>::setAttentionMaskTo_(unsigned int iValue) {
+    static_cast<HandleBase*>(this)->setAttentionMaskTo (iValue);
+}
+
+/**************************************************
+ *----  VStoreHandle_<Base>::Database Access  ----*
+ **************************************************/
+
+template<class Base> M_AND *VStoreHandle_<Base>::database_() const {
+    return static_cast<HandleBase const*>(this)->Database ();
+}
+template<class Base> M_KOT *VStoreHandle_<Base>::kot_() const {
+    return static_cast<HandleBase const*>(this)->KOT ();
+}
+template<class Base> M_ASD *VStoreHandle_<Base>::objectSpace_() const {
+    return static_cast<HandleBase const*>(this)->Space ();
+}
+template<class Base> RTYPE_Type VStoreHandle_<Base>::rtype_() const {
+    return static_cast<HandleBase const*>(this)->RType ();
+}
+template<class Base> M_ASD *VStoreHandle_<Base>::scratchPad_() const {
+    return static_cast<HandleBase const*>(this)->ScratchPad ();
+}
+
+/************************************************************
+ *----  VStoreHandle_<Base>::Database Container Access  ----*
+ ************************************************************/
+
+template<class Base> void VStoreHandle_<Base>::getContainerHandle_(
+    VReference<VContainerHandle>&rpResult
+) {
+    rpResult.setTo (static_cast<BaseClass*>(this));
+}
+
+/****************************************************************
+ *----  VStoreHandle_<Base>::Database Container Management  ----*
+ ****************************************************************/
+
+template<class Base> bool VStoreHandle_<Base>::isAForwardingTarget_() const {
+    return static_cast<HandleBase const*>(this)->isAForwardingTarget ();
+}
+
+/***********************************************
+ *----  VStoreHandle_<Base>::Store Access  ----*
+ ***********************************************/
+
+template<class Base> typename VStoreHandle_<Base>::StoreBase *VStoreHandle_<Base>::getStore_() {
+    return getStore ();
+}
+
+/***********************************
+ *----  VStoreContainerHandle  ----*
+ ***********************************/
+
+typedef VStoreHandle_<VContainerHandle> VStoreContainerHandle;
 
 
 /*****************************************
@@ -844,16 +1111,12 @@ bool M_AND::ReferenceNames (M_POP const *pReference, M_KOTM pKOTM) {
     return ReferencedKOTEObjectHandle (pReference, pKOTM)->Names (this, pReference);
 }
 
-bool M_AND::ReferenceNamesPToken (M_POP const *pReference, M_KOTM pKOTM) {
-    return ReferencedKOTEPTokenHandle (pReference, pKOTM)->Names (this, pReference);
-}
- 
 bool M_AND::ReferenceDoesntName (M_POP const *pReference, M_KOTM pKOTM) {
     return ReferencedKOTEObjectHandle (pReference, pKOTM)->DoesntName (this, pReference);
 }
 
-bool M_AND::ReferenceDoesntNamePToken (M_POP const *pReference, M_KOTM pKOTM) {
-    return ReferencedKOTEPTokenHandle (pReference, pKOTM)->DoesntName (this, pReference);
+void M_AND::StoreReference (M_POP *pReference, VContainerHandle *pThat) {
+    StoreReference (pReference, pThat->Space (), pThat->containerIdentity ());
 }
 
 

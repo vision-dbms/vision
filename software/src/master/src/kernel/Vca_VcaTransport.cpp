@@ -316,7 +316,7 @@ void Vca::VcaSerializerForPlumbing::doPeer (Sequencer *pSequencer) {
     if (!plumbed ())
 	m_pConnection->suspend (this);
     else {
-	m_pConnection->supply (m_pReflection);
+	m_pConnection->supplyOurside (m_pReflection);
 	pSequencer->setActionTo (&ThisClass::doReflection);
     }
 }

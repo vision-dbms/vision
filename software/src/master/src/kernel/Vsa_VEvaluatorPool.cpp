@@ -63,6 +63,8 @@ Vsa::VEvaluatorPool::PoolSettings::PoolSettings (PoolSettings const &rOther)
 , m_iWorkerMinimum              (rOther.m_iWorkerMinimum)
 , m_iWorkersBeingCreatedMaximum (rOther.m_iWorkersBeingCreatedMaximum)
 , m_cEvaluationAttemptMaximum   (rOther.m_cEvaluationAttemptMaximum)
+, m_cEvaluationOnErrorAttemptMaximum   (rOther.m_cEvaluationOnErrorAttemptMaximum)
+, m_cEvaluationTimeOutAttemptMaximum   (rOther.m_cEvaluationTimeOutAttemptMaximum)
 , m_iWorkerMinimumAvailable     (rOther.m_iWorkerMinimumAvailable)
 , m_iWorkerMaximumAvailable     (rOther.m_iWorkerMaximumAvailable)
 , m_iWorkerStartupQuery         (rOther.m_iWorkerStartupQuery)
@@ -83,10 +85,12 @@ Vsa::VEvaluatorPool::PoolSettings::PoolSettings (PoolSettings const &rOther)
 }
 
 Vsa::VEvaluatorPool::PoolSettings::PoolSettings ()
-: m_iWorkerMaximum              (g_iDefaultWorkerMaximum)
+: m_iWorkerMaximum              (100)
 , m_iWorkerMinimum              (1)
 , m_iWorkersBeingCreatedMaximum (g_iDefaultWorkersBeingCreatedMaximum)
-, m_cEvaluationAttemptMaximum   (g_iDefaultWorkerMaximum)
+, m_cEvaluationAttemptMaximum (0)
+, m_cEvaluationOnErrorAttemptMaximum   (5)
+, m_cEvaluationTimeOutAttemptMaximum   (0)
 , m_iWorkerMinimumAvailable     (1)
 , m_iWorkerMaximumAvailable     (1)
 , m_iWorkerCreationFailureHardLimit (1)
@@ -109,6 +113,12 @@ Vsa::VEvaluatorPool::PoolSettings::PoolSettings ()
 }
 
 
+void Vsa::VEvaluatorPool::PoolSettings::AddOdometerSetting(OdometerSettings *settings) {
+	int index = m_Odometers.cardinality();
+	m_Odometers.Append(1);
+	m_Odometers[index] = settings;
+}
+
 /*******************
  *******************
  *****  Roles  *****
@@ -124,7 +134,7 @@ void Vsa::VEvaluatorPool::PoolSettings::MakeControl (
 ) {
     if (pClient) {
         VReference<VEvaluatorPool> pControl (new VEvaluatorPool (this));
-        VReference<IEvaluatorPool_Ex4> pIEvaluatorPool;
+        VReference<IEvaluatorPool_Ex5> pIEvaluatorPool;
         pControl->getRole (pIEvaluatorPool);
         pClient->OnData (pIEvaluatorPool);
     }
@@ -180,17 +190,18 @@ void Vsa::VEvaluatorPool::PoolSettings::SetWorkerMinimum (
 ) {
     setWorkerMinimumTo (iValue);
 }
+
 void Vsa::VEvaluatorPool::PoolSettings::GetEvaluationAttemptMaximum (
-    IEvaluatorPoolSettings *pRole, IVReceiver<Vca::U32> *pClient
+	IEvaluatorPoolSettings *pRole, IVReceiver<Vca::U32> *pClient
 ) {
     if (pClient)
         pClient->OnData (m_cEvaluationAttemptMaximum);
 }
 
 void Vsa::VEvaluatorPool::PoolSettings::SetEvaluationAttemptMaximum (
-    IEvaluatorPoolSettings *pRole, Vca::U32 iValue
+	IEvaluatorPoolSettings *pRole, Vca::U32 iValue
 ) {
-    setEvaluationAttemptMaximumTo (iValue);
+	setEvaluationAttemptMaximumTo (iValue);
 }
 
 void Vsa::VEvaluatorPool::PoolSettings::GetWorkerGenerationLimit (
@@ -407,11 +418,7 @@ void Vsa::VEvaluatorPool::PoolSettings::SetGenerationMaximum (
 /*********************************************
  *****  Vsa::IEvaluatorPoolSettings_Ex7  *****
  *********************************************/
-
-void Vsa::VEvaluatorPool::PoolSettings::getRole (VReference<IEvaluatorPoolSettings_Ex7>&rpRole) {
-    m_pIEvaluatorPoolSettings.getRole (rpRole);
-}
-
+ 
 void Vsa::VEvaluatorPool::PoolSettings::GetQueryLogLength (
     IEvaluatorPoolSettings_Ex7 *pRole, IVReceiver<Vca::U32> *pClient
 ) {
@@ -436,6 +443,44 @@ void Vsa::VEvaluatorPool::PoolSettings::SetResultLogLength (
     setResultLogLengthTo (iValue);
 }
 
+/*********************************************
+ *****  Vsa::IEvaluatorPoolSettings_Ex8  *****
+ *********************************************/
+ 
+void Vsa::VEvaluatorPool::PoolSettings::getRole (VReference<IEvaluatorPoolSettings_Ex8>&rpRole) {
+    m_pIEvaluatorPoolSettings.getRole (rpRole);
+}
+
+void Vsa::VEvaluatorPool::PoolSettings::GetEvaluationOnErrorAttemptMaximum (
+    IEvaluatorPoolSettings_Ex8 *pRole, IVReceiver<Vca::U32> *pClient
+) {
+    if (pClient)
+        pClient->OnData (m_cEvaluationOnErrorAttemptMaximum);
+}
+
+void Vsa::VEvaluatorPool::PoolSettings::GetEvaluationTimeOutAttemptMaximum (
+    IEvaluatorPoolSettings_Ex8 *pRole, IVReceiver<Vca::U32> *pClient
+) {
+    if (pClient)
+        pClient->OnData (m_cEvaluationTimeOutAttemptMaximum);
+}
+
+void Vsa::VEvaluatorPool::PoolSettings::SetEvaluationOnErrorAttemptMaximum (
+    IEvaluatorPoolSettings_Ex8 *pRole, Vca::U32 iValue
+) {
+    setEvaluationOnErrorAttemptMaximumTo (iValue);
+}
+
+void Vsa::VEvaluatorPool::PoolSettings::SetEvaluationTimeOutAttemptMaximum (
+    IEvaluatorPoolSettings_Ex8 *pRole, Vca::U32 iValue
+) {
+    setEvaluationTimeOutAttemptMaximumTo (iValue);
+}
+
+VkDynamicArrayOf<Vsa::VEvaluatorPool::OdometerSettings::Reference> Vsa::VEvaluatorPool::PoolSettings::GetOdometerSettings () const {
+	return m_Odometers;
+}
+
 /***********************************
  ***********************************
  *****  IObjectSource Methods  *****
@@ -455,11 +500,10 @@ void Vsa::VEvaluatorPool::PoolSettings::SetResultLogLength (
 #endif
 
 void Vsa::VEvaluatorPool::PoolSettings::Supply (Vca::IObjectSource *pRole, Vca::IObjectSink *pClient) {
-
   if (pClient) {
     VReference<VEvaluatorPool> pPool (new VEvaluatorPool (this));
 
-    VReference<IEvaluator> pIEvaluator;
+    VReference<IEvaluator_Ex1> pIEvaluator;
     pPool->getRole (pIEvaluator);
     pClient->OnData (pIEvaluator);
   }
@@ -488,24 +532,26 @@ void Vsa::VEvaluatorPool::PoolSettings::getStatistics (VString &rResult) const {
     else
       iEvalTimeoutSecs << evaluationTimeOutInSecs ();
 
-    rResult << "\nWorker Maximum Lmt             : " << m_iWorkerMaximum;
-    rResult << "\nWorker Minimum Lmt             : " << m_iWorkerMinimum;
-    rResult << "\nWorker Minimum Available Lmt   : " << m_iWorkerMinimumAvailable;
-    rResult << "\nWorker Maximum Available Lmt   : " << m_iWorkerMaximumAvailable;
-    rResult << "\nWorkers In Creation Lmt        : " << m_iWorkersBeingCreatedMaximum;
-    rResult << "\nWorkerCreation Failure HARD Lt : " << m_iWorkerCreationFailureHardLimit;
-    rResult << "\nWorkerCreation Failure SOFT Lt : " << m_iWorkerCreationFailureSoftLimit;
-    rResult << "\nWorker Query History Lmt       : " << m_iWorkerQueryHistoryLimit;
-    rResult << "\nEvaluation Timeout (secs)      : " << iEvalTimeoutSecs;
-    rResult << "\nEvaluation Attempt Lmt         : " << m_cEvaluationAttemptMaximum;
-    rResult << "\nShrink Timeout (mins)          : " << m_iShrinkTimeOutMinutes;
-    rResult << "\nStop Timeout (Minutes)         : " << m_iStopTimeOutMins;
-    rResult << "\nBroadcasts InProgress Lmt      : " << m_iBCEvaluationsInProgressLimit;
-    rResult << "\nWorker Startup Query           : " << iQuery;
-    rResult << "\nWorker PID Query               : " << m_iWorkerPIDQueryString;
-    rResult << "\nGeneration Maximum             : " << m_iGenerationMaximum;
-    rResult << "\nQuery Log Length               : " << m_iQueryLogLength;
-    rResult << "\nResult Log Length              : " << m_iResultLogLength;
+    rResult << "\nWorker Maximum Lmt              : " << m_iWorkerMaximum;
+    rResult << "\nWorker Minimum Lmt              : " << m_iWorkerMinimum;
+    rResult << "\nWorker Minimum Available Lmt    : " << m_iWorkerMinimumAvailable;
+    rResult << "\nWorker Maximum Available Lmt    : " << m_iWorkerMaximumAvailable;
+    rResult << "\nWorkers In Creation Lmt         : " << m_iWorkersBeingCreatedMaximum;
+    rResult << "\nWorkerCreation Failure HARD Lt  : " << m_iWorkerCreationFailureHardLimit;
+    rResult << "\nWorkerCreation Failure SOFT Lt  : " << m_iWorkerCreationFailureSoftLimit;
+    rResult << "\nWorker Query History Lmt        : " << m_iWorkerQueryHistoryLimit;
+    rResult << "\nEvaluation Timeout (secs)       : " << iEvalTimeoutSecs;
+	rResult << "\nEvaluation Attempt Lmt          : " << m_cEvaluationAttemptMaximum;
+    rResult << "\nEvaluation On Error Attempt Lmt : " << m_cEvaluationOnErrorAttemptMaximum;
+    rResult << "\nEvaluation Time Out Attempt Lmt : " << m_cEvaluationTimeOutAttemptMaximum;
+    rResult << "\nShrink Timeout (mins)           : " << m_iShrinkTimeOutMinutes;
+    rResult << "\nStop Timeout (Minutes)          : " << m_iStopTimeOutMins;
+    rResult << "\nBroadcasts InProgress Lmt       : " << m_iBCEvaluationsInProgressLimit;
+    rResult << "\nWorker Startup Query            : " << iQuery;
+    rResult << "\nWorker PID Query                : " << m_iWorkerPIDQueryString;
+    rResult << "\nGeneration Maximum              : " << m_iGenerationMaximum;
+    rResult << "\nQuery Log Length                : " << m_iQueryLogLength;
+    rResult << "\nResult Log Length               : " << m_iResultLogLength;
 }
 
 void Vsa::VEvaluatorPool::PoolSettings::dumpSettings (VString &rResult) const {
@@ -525,7 +571,9 @@ void Vsa::VEvaluatorPool::PoolSettings::dumpSettings (VString &rResult) const {
     rResult << "WorkerCreationFailureHardLimit | "  << workerCreationFailureHardLimit () << "\n";
     rResult << "WorkerCreationFailureSoftLimit | "  << workerCreationFailureSoftLimit () << "\n";
     rResult << "WorkerQueryHistoryLimit | "         << workerQueryHistoryLimit () << "\n";
-    rResult << "EvaluationAttemptMaximum | "        << evaluationAttemptMaximum () << "\n";
+    rResult << "EvaluationAttemptMaximum | "        << evaluationAttemptMaximum () << "\n";	
+    rResult << "EvaluationOnErrorAttemptMaximum | "        << evaluationOnErrorAttemptMaximum () << "\n";
+    rResult << "EvaluationTimeOutAttemptMaximum | "        << evaluationTimeOutAttemptMaximum () << "\n";
     rResult << "ShrinkTimeOut | "                   << shrinkTimeOut () << "\n";
     rResult << "StopTimeOut | "                     << getStopTimeOut () << "\n";
     rResult << "BCEvaluationsInProgressLimit | "    << BCEvaluationsInProgressLimit () << "\n";
@@ -574,7 +622,7 @@ Vsa::VEvaluatorPool::VEvaluatorPool (PoolSettings *pSettings)
 {
     traceInfo ("Creating VEvaluatorPool");
     log ("POOL STARTED");
-
+	setupOdometers();
     VReference<WorkerGeneration> pGeneration (new WorkerGeneration (this));
     hire ();
 }
@@ -663,8 +711,9 @@ void Vsa::VEvaluatorPool::restart () {
         new WorkerGeneration (this, iNextGeneration, iNextWorker)
     );
     if (pGeneration.isNil ()) {
-        log ("ERROR RESTARTING POOL (unable to obtain new generation).");
-        return;
+	notify (15, "#15: VEvaluatorPool::restart: unable to obtain new generation for pool restart\n");		
+		log ("ERROR RESTARTING POOL (unable to obtain new generation).");
+		return;
     }
 
     // Retire any started workers that aren't employed yet in the old generation.
@@ -678,16 +727,27 @@ void Vsa::VEvaluatorPool::restart () {
 void Vsa::VEvaluatorPool::hardRestart () {
     traceInfo ("VEvaluatorPool::hardRestart");
     log ("HARD RESTARTING POOL");
+	
+	Vca::VTrigger<VEvaluatorPool> *pOnFlushTrigger;
+	if (m_iStatus == Status_Suspended) {
+		pOnFlushTrigger = new Vca::VTrigger<VEvaluatorPool> (this, &VEvaluatorPool::resumeHardRestartSuspended);
+	} else {
+		suspend ();
+		pOnFlushTrigger = new Vca::VTrigger<VEvaluatorPool> (this, &VEvaluatorPool::resumeHardRestart);
+	}
+	flushWorkers (pOnFlushTrigger);
+}
 
-    suspend ();
-    Vca::VTrigger<VEvaluatorPool> *pOnFlushTrigger =
-        new Vca::VTrigger<VEvaluatorPool> (this, &VEvaluatorPool::resumeHardRestart);
-    flushWorkers (pOnFlushTrigger);
+void Vsa::VEvaluatorPool::resumeHardRestartSuspended (Vca::VTrigger<ThisClass> *pTrigger) {
+    m_pOnFlushTrigger.clear ();
+    restart ();
 }
 
 void Vsa::VEvaluatorPool::resumeHardRestart (Vca::VTrigger<ThisClass> *pTrigger) {
     m_pOnFlushTrigger.clear ();
     restart ();
+	// it is suspended, so need to be resumed
+	resume ();
 }
 
 void Vsa::VEvaluatorPool::triggerOnFlush () {
@@ -765,6 +825,7 @@ void Vsa::VEvaluatorPool::resume () {
 void Vsa::VEvaluatorPool::hardstop (Vca::ITrigger *pTrigger) {
     traceInfo ("VEvaluatorPool::HardStop");
     log ("HARD STOPPING POOL");
+    notify (2, "#2: VEvaluatorPool::hardstop: pool hard stopped\n");
 
     BaseClass::hardstop ();
 
@@ -787,13 +848,21 @@ void Vsa::VEvaluatorPool::hardstop (Vca::ITrigger *pTrigger) {
     Queue::Iterator iterator (m_iQueue);
     while (iterator.isNotAtEnd ()) {
         VEvaluation *pEvaluation = (*iterator)->request ();
+	notify (2, "#2: VEvaluatorPool::hardstop: unprocessed query string - %s\n", pEvaluation->queryString ().content ());		
         pEvaluation->onError (0, "Pool Stopped. Evaluation not processed");
         //  remove this entry
         iterator.Delete ();
     }
+	
+    //  disable future retries of timedout queries....
+	setEvaluationAttemptMaxTo (0);
+	
+    //  disable future retries of error queries....
+    setEvaluationOnErrorAttemptMaxTo (0);
 
     //  disable future retries of timedout queries....
-    setEvaluationAttemptMaxTo (0);
+    setEvaluationTimeOutAttemptMaxTo (0);
+
 
     //  if there is active WIPs wait for its completion...
     if (hasActiveWIPs ()) {
@@ -816,11 +885,27 @@ void Vsa::VEvaluatorPool::add (IEvaluator *pEvaluator) {
 }
 
 void Vsa::VEvaluatorPool::cancelQuery (Vca::U32 iID, BoolReceiver *pClient) {
+    // Check if the query is the current one(between WIP and the queries in the queue).
+    if (m_pThisRequest && m_pThisRequest->index () == iID) {
+		VEvaluation::Reference pThisRequest; 
+		pThisRequest.claim (m_pThisRequest);
+		VPoolEvaluation::Reference pEvaluation (static_cast <VPoolEvaluation*> (pThisRequest.referent ()));
+		pEvaluation->onError (0, "Query cancelled.");
+
+		VString sLog;
+		sLog << "Cancelled current query (" << iID << ").";
+		log (sLog);
+		if (pClient) pClient->OnData (true);
+			return;
+    }
+    
     // Look in the queue for the query.
     Queue::Iterator iterator (m_iQueue);
     while (iterator.isNotAtEnd ()) {
         if ((*iterator)->requestIndex () == iID) {
             VPoolEvaluation::Reference pEvaluation (static_cast <VPoolEvaluation*> ((*iterator)->request ()));
+			VString iQuery (pEvaluation->queryString ());
+			notify (17, "#17: VEvaluatorPool::cancelQuery: cancelled queued query - %s\n", iQuery.content ());
             iterator.Delete ();
             pEvaluation->onError (0, "Query cancelled.");
             VString sLog;
@@ -838,13 +923,21 @@ void Vsa::VEvaluatorPool::cancelQuery (Vca::U32 iID, BoolReceiver *pClient) {
     IEvaluation *pRemoteIEvaluation;
     while (pGeneration) {
         if (pGeneration->isProcessing (iID, pWIP)) {
-            pRemoteIEvaluation = pWIP->remoteIEvaluation ();
-            if (pRemoteIEvaluation) pRemoteIEvaluation->Cancel ();
-            VString sLog;
-            sLog << "Cancelled running query (" << iID << ").";
-            log (sLog);
-            if (pClient) pClient->OnData (true);
-            return;
+	    if (pWIP) {	
+		VString iQuery (pWIP->evaluation ()->queryString ());
+		notify (17, "#17: VEvaluatorPool::cancelQuery: cancelled running query - %s\n", iQuery.content ());
+
+		pRemoteIEvaluation = pWIP->remoteIEvaluation ();
+		if (pRemoteIEvaluation) {
+		    pWIP->cancelQuery ();
+		}
+
+	    }
+	    VString sLog;
+	    sLog << "Cancelled running query (" << iID << ").";
+	    log (sLog);
+	    if (pClient) pClient->OnData (true);
+	    return;
         }
         pGeneration.setTo (pGeneration->m_pSuccessor);
     }
@@ -866,13 +959,16 @@ bool Vsa::VEvaluatorPool::cancel_ (VEvaluation *pEvaluation) {
     IEvaluation *pRemoteIEvaluation;
     while (pGeneration) {
         if (pGeneration->isProcessing (pPoolEvaluation, pWIP)) {
-            pRemoteIEvaluation = pWIP->remoteIEvaluation ();
-            if (pRemoteIEvaluation) pRemoteIEvaluation->Cancel ();
-            VString sLog;
-            sLog << "Cancelled running query (" << pWIP->evaluationIndex () << ").";
-            log (sLog);
-            return true;
-        }
+	    if (pWIP) { 	
+		pRemoteIEvaluation = pWIP->remoteIEvaluation ();	
+		if (pRemoteIEvaluation && (!pWIP->remoteIEvaluationCancelled ())) 
+		    pWIP->cancelQuery ();
+		VString sLog;
+		sLog << "Cancelled running query (" << pWIP->evaluationIndex () << ") successfully.";
+		log (sLog);
+		return true;
+	    } 
+        } 
         pGeneration.setTo (pGeneration->m_pSuccessor);
     }
 
@@ -1006,6 +1102,65 @@ void Vsa::VEvaluatorPool::detachAllGenerations () {
   }
 }
 
+
+/************************
+ ***** Odometers   ******
+ ***********************/
+ void Vsa::VEvaluatorPool::setupOdometers () {
+	unsigned int xIndex;
+	VOdometer<Vca::U32>::Reference pOdometer (&m_cOnlineWorkers);
+    if (m_iOdometers32.Insert ("Workers", xIndex)) {
+        m_iOdometers32[xIndex] = pOdometer;
+	}
+	
+	VOdometer<Vca::U32>::Reference pOdometer2 (&m_cOnlineAvailWorkers);
+    if (m_iOdometers32.Insert ("AvailWorkers", xIndex)) {
+        m_iOdometers32[xIndex] = pOdometer2;
+	}
+	
+	VOdometer<Vca::U32>::Reference pOdometer3 (&m_cOnlineWIPs);
+    if (m_iOdometers32.Insert ("WIPs", xIndex)) {
+        m_iOdometers32[xIndex] = pOdometer3;
+	}
+	
+	VOdometer<Vca::U32>::Reference pOdometer4 (&m_cQueriesProcessed);
+    if (m_iOdometers32.Insert ("QueriesProcessed", xIndex)) {
+        m_iOdometers32[xIndex] = pOdometer4;
+	}
+	
+	VOdometer<Vca::U64>::Reference pOdometer5 (&m_cTotalQueryTime);
+    if (m_iOdometers64.Insert ("QueryTime", xIndex)) {
+        m_iOdometers64[xIndex] = pOdometer5;
+	}
+	
+	VOdometer<Vca::U64>::Reference pOdometer6 (&m_cTotalQueueTime);
+    if (m_iOdometers64.Insert ("QueueTime", xIndex)) {
+        m_iOdometers64[xIndex] = pOdometer6;
+	}
+	
+	for(int i = 0; i < m_pSettings->GetOdometerSettings().cardinality(); i++) {
+		OdometerSettings::Reference odo = m_pSettings->GetOdometerSettings()[i];
+		VString name = odo->name;
+		unsigned int xInstance;
+		if (m_iOdometers32.Locate (name, xInstance)) {
+			 VOdometer<Vca::U32>::Reference odometer = m_iOdometers32[xInstance];
+			 odometer->setUncompressedTotalTimeRange(odo->uncompressedTotalTimeRange);
+			 odometer->setTimerTime(odo->timerTime);
+			 odometer->setTotalTimeRange(odo->totalTimeRange);
+			 odometer->setCompressedBucketSize(odo->compressedBucketSize);
+			 odometer->setTimer();
+		} else if (m_iOdometers64.Locate (name, xInstance)) {
+			 VOdometer<Vca::U64>::Reference odometer = m_iOdometers64[xInstance];
+			 odometer->setUncompressedTotalTimeRange(odo->uncompressedTotalTimeRange);
+			 odometer->setTimerTime(odo->timerTime);
+			 odometer->setTotalTimeRange(odo->totalTimeRange);
+			 odometer->setCompressedBucketSize(odo->compressedBucketSize);
+			 odometer->setTimer();
+		}
+	}
+ }
+
+
 /*****************************
  *****************************
  *****  Query Execution  *****
@@ -1014,7 +1169,6 @@ void Vsa::VEvaluatorPool::detachAllGenerations () {
 
 
 void Vsa::VEvaluatorPool::onQueue_ () {
-
   //  if hardstopped...
   if (Status_Stopped == m_iStatus && m_pHardStopTrigger.isntNil ()) {
     if (!hasActiveWIPs () ) {
@@ -1030,6 +1184,8 @@ void Vsa::VEvaluatorPool::onQueue_ () {
 	// Applications check for the phrase "Worker Creation Failure". Don't change this message until we have a better way of 
 	//   getting this information to the end user ....
         iMsg << "\nWorker Creation Failure HARD Limit (" << m_pGenerationHead->workerCreationHardFailures () <<") reached.\n";
+	notify (4, "#4: VEvaluatorPool::onQueue: %s\n", iMsg.content ());
+
         flushQueue (iMsg);
     }
     bool bProcessedQueries = false;
@@ -1066,7 +1222,6 @@ bool Vsa::VEvaluatorPool::processQueryEvaluations () {
     //  process queries with available workers...
     VPoolEvaluation::Reference pRequest;
     pRequest.setTo (dynamic_cast <VPoolEvaluation*> (thisRequest ()));
-
     VReference<VPoolWorker> pWorker;
     while (pRequest && supplyOnlineWorkerFor (pRequest, pWorker)) {
         VPoolEvaluation::Reference pThisRequest (pRequest);
@@ -1212,7 +1367,7 @@ void Vsa::VEvaluatorPool::GetSettings (
     IEvaluatorPool *pRole, IVReceiver<IEvaluatorPoolSettings*> *pClient
 ) {
     if (pClient) {
-        VReference<IEvaluatorPoolSettings_Ex7> pIEvaluatorPoolSettings;
+        VReference<IEvaluatorPoolSettings_Ex8> pIEvaluatorPoolSettings;
         m_pSettings->getRole (pIEvaluatorPoolSettings);
         pClient->OnData (pIEvaluatorPoolSettings);
     }
@@ -1421,10 +1576,6 @@ void Vsa::VEvaluatorPool::GetGenerationStatistics (
  *****  Vsa::IEvaluatorPool_Ex4 Methods  *****
  *********************************************/
 
-void Vsa::VEvaluatorPool::getRole (VReference<IEvaluatorPool_Ex4>&rpRole) {
-    m_pIEvaluatorPool.getRole (rpRole);
-}
-
 void Vsa::VEvaluatorPool::QueryDetails (IEvaluatorPool_Ex4 *pRole, Vca::U32 iID, IVReceiver<VString const &>* pClient) {
     if (pClient) {
         VString iResult;
@@ -1437,6 +1588,273 @@ void Vsa::VEvaluatorPool::CancelQuery (IEvaluatorPool_Ex4 *pRole, Vca::U32 iID, 
     cancelQuery (iID, pClient);
 }
 
+/*********************************************
+ *****  Vsa::IEvaluatorPool_Ex5 Methods  *****
+ *********************************************/
+void Vsa::VEvaluatorPool::getRole (VReference<IEvaluatorPool_Ex5>&rpRole) {
+    m_pIEvaluatorPool.getRole (rpRole);
+}
+
+void Vsa::VEvaluatorPool::StatSum (IEvaluatorPool_Ex5 *pRole, VString name, Vca::U64 timeBefore, Vca::U64 timeRange, IVReceiver<VString const &> *pClient) {
+	unsigned int xInstance;
+    if (m_iOdometers32.Locate (name, xInstance)) {
+         VOdometer<Vca::U32>::Reference odometer = m_iOdometers32[xInstance];
+		 try {
+			Vca::S64 resultInt = odometer->statSum(timeBefore, timeRange); 
+			VString result;
+			if(odometer->displayMultiplier() == 1)
+				result << resultInt;
+			else
+				result << resultInt * odometer->displayMultiplier();	
+			pClient->OnData(result);
+		} catch (VOdometer<Vca::U32>::OdometerImproperInputException e) {
+			pClient->OnError(0, e.getMessage());
+			return;
+		}
+	} else if (m_iOdometers64.Locate (name, xInstance)) {
+         VOdometer<Vca::U64>::Reference odometer = m_iOdometers64[xInstance];
+		 try {
+			Vca::S64 resultInt = odometer->statSum(timeBefore, timeRange); 
+			VString result;
+			if(odometer->displayMultiplier() == 1)
+				result << resultInt;
+			else
+				result << resultInt * odometer->displayMultiplier();	
+			pClient->OnData(result);
+		} catch (VOdometer<Vca::U64>::OdometerImproperInputException e) {
+			pClient->OnError(0, e.getMessage());
+			return;
+		}
+	} else {
+		pClient->OnError(0, "Pool does not possess an odometer with that name"); 
+	}
+}
+
+void Vsa::VEvaluatorPool::StatDivide (IEvaluatorPool_Ex5 *pRole, VString name1, VString name2, Vca::U64 timeBefore, Vca::U64 timeRange, IVReceiver<Vca::F64> *pClient) {
+	unsigned int xInstance1;
+	unsigned int xInstance2;
+	Vca::F64 sum1;
+	Vca::F64 sum2;
+	if (m_iOdometers32.Locate (name1, xInstance1)) {
+		VOdometer<Vca::U32>::Reference odometer1 = m_iOdometers32[xInstance1];
+		try {
+			sum1 = odometer1->statSum(timeBefore, timeRange);
+		} catch (VOdometer<Vca::U32>::OdometerImproperInputException e) {
+			pClient->OnError(0, e.getMessage());
+			return;
+		}
+	} else if (m_iOdometers64.Locate (name1, xInstance1)) {
+		VOdometer<Vca::U64>::Reference odometer1 = m_iOdometers64[xInstance1];
+		try {
+			sum1 = odometer1->statSum(timeBefore, timeRange);
+		} catch (VOdometer<Vca::U64>::OdometerImproperInputException e) {
+			pClient->OnError(0, e.getMessage());
+			return;
+		}
+	} else {
+		pClient->OnError(0, "Pool does not possess an odometer with that name");
+		return;
+	}
+	
+	if (m_iOdometers32.Locate (name2, xInstance2)) {
+		VOdometer<Vca::U32>::Reference odometer2 = m_iOdometers32[xInstance2];
+		try {
+			sum2 = odometer2->statSum(timeBefore, timeRange);
+		} catch (VOdometer<Vca::U32>::OdometerImproperInputException e) {
+			pClient->OnError(0, e.getMessage());
+			return;
+		}
+	} else if (m_iOdometers64.Locate (name2, xInstance2)) {
+		VOdometer<Vca::U64>::Reference odometer2 = m_iOdometers64[xInstance2];
+		try {
+			sum2 = odometer2->statSum(timeBefore, timeRange);
+		} catch (VOdometer<Vca::U64>::OdometerImproperInputException e) {
+			pClient->OnError(0, e.getMessage());
+			return;
+		}
+	} else {
+		pClient->OnError(0, "Pool does not possess an odometer with that name");
+		return;
+	}
+	pClient->OnData(sum1 / sum2);
+}
+
+void Vsa::VEvaluatorPool::StatMax (IEvaluatorPool_Ex5 *pRole, VString name, Vca::U64 timeBefore, Vca::U64 timeRange, IVReceiver<Vca::U32> *pClient, IVReceiver<V::VTime const &> *pClient2) {
+	unsigned int xInstance;
+    if (m_iOdometers32.Locate (name, xInstance)) {
+		VOdometer<Vca::U32>::Reference odometer = m_iOdometers32[xInstance];
+		 V::VTime time;
+		 try {
+			Vca::U64 result = odometer->statMax(timeBefore, timeRange, time);
+			pClient->OnData(result);
+			pClient2->OnData(time);
+		} catch (VOdometer<Vca::U32>::OdometerImproperInputException e) {
+			pClient->OnError(0, e.getMessage());
+			return;
+		}
+	} else if (m_iOdometers64.Locate (name, xInstance)) {
+         VOdometer<Vca::U64>::Reference odometer = m_iOdometers64[xInstance];
+		 V::VTime time;
+		 try {
+			Vca::U64 result = odometer->statMax(timeBefore, timeRange, time);
+			pClient->OnData(result);
+			pClient2->OnData(time);
+		} catch (VOdometer<Vca::U64>::OdometerImproperInputException e) {
+			pClient->OnError(0, e.getMessage());
+			return;
+		}
+	} else {
+		pClient->OnError(0, "Pool does not possess an odometer with that name");
+	}
+}
+
+void Vsa::VEvaluatorPool::StatMin (IEvaluatorPool_Ex5 *pRole, VString name, Vca::U64 timeBefore, Vca::U64 timeRange, IVReceiver<Vca::U32> *pClient, IVReceiver<V::VTime const &> *pClient2) {
+	unsigned int xInstance;
+    if (m_iOdometers32.Locate (name, xInstance)) {
+		VOdometer<Vca::U32>::Reference odometer = m_iOdometers32[xInstance];
+		 V::VTime time;
+		 try {
+			Vca::U64 result = odometer->statMin(timeBefore, timeRange, time);
+			pClient->OnData(result);
+			pClient2->OnData(time);
+		} catch (VOdometer<Vca::U32>::OdometerImproperInputException e) {
+			pClient->OnError(0, e.getMessage());
+			return;
+		}
+	} else if (m_iOdometers64.Locate (name, xInstance)) {
+         VOdometer<Vca::U64>::Reference odometer = m_iOdometers64[xInstance];
+		 V::VTime time;
+		 try {
+			Vca::U64 result = odometer->statMin(timeBefore, timeRange, time);
+			pClient->OnData(result);
+			pClient2->OnData(time);
+		} catch (VOdometer<Vca::U64>::OdometerImproperInputException e) {
+			pClient->OnError(0, e.getMessage());
+			return;
+		}
+	} else {
+		pClient->OnError(0, "Pool does not possess an odometer with that name");
+	}
+}
+
+void Vsa::VEvaluatorPool::StatMinString (IEvaluatorPool_Ex5 *pRole, VString name, Vca::U64 timeBefore, Vca::U64 timeRange, IVReceiver<VString const &> *pClient) {
+	unsigned int xInstance;
+	if (m_iOdometers32.Locate (name, xInstance)) {
+         VOdometer<Vca::U32>::Reference odometer = m_iOdometers32[xInstance];
+		 V::VTime time;
+		 try {
+			Vca::U64 resultInt = odometer->statMin(timeBefore, timeRange, time);
+			VString result;
+			VString timeString;
+			time.asString(timeString);
+			result << "Min value of " << name << " was ";
+			if(odometer->displayMultiplier() == 1)
+				result << resultInt;
+			else
+				result << resultInt * odometer->displayMultiplier();	
+			result << " occuring at " << timeString;
+			pClient->OnData(result);
+		} catch (VOdometer<Vca::U32>::OdometerImproperInputException e) {
+			pClient->OnError(0, e.getMessage());
+			return;
+		}
+	} else if (m_iOdometers64.Locate (name, xInstance)) {
+         VOdometer<Vca::U64>::Reference odometer = m_iOdometers64[xInstance];
+		 V::VTime time;
+		 try {
+			Vca::U64 resultInt = odometer->statMin(timeBefore, timeRange, time);
+			VString result;
+			VString timeString;
+			time.asString(timeString);
+			result << "Min value of " << name << " was ";
+			if(odometer->displayMultiplier() == 1)
+				result << resultInt;
+			else
+				result << resultInt * odometer->displayMultiplier();	
+			result << " occuring at " << timeString;
+			pClient->OnData(result);
+		} catch (VOdometer<Vca::U64>::OdometerImproperInputException e) {
+			pClient->OnError(0, e.getMessage());
+			return;
+		}
+	} else {
+		pClient->OnError(0, "Pool does not possess an odometer with that name");
+	}
+}
+
+void Vsa::VEvaluatorPool::StatMaxString (IEvaluatorPool_Ex5 *pRole, VString name, Vca::U64 timeBefore, Vca::U64 timeRange, IVReceiver<VString const &> *pClient) {
+	unsigned int xInstance;
+    if (m_iOdometers32.Locate (name, xInstance)) {
+         VOdometer<Vca::U32>::Reference odometer = m_iOdometers32[xInstance];
+		 V::VTime time;
+		 try {
+			Vca::U64 resultInt = odometer->statMax(timeBefore, timeRange, time);
+			VString result;
+			VString timeString;
+			time.asString(timeString);
+			result << "Max value of " << name << " was ";
+			if(odometer->displayMultiplier() == 1)
+				result << resultInt;
+			else
+				result << resultInt * odometer->displayMultiplier();	
+			result << " occuring at " << timeString;
+			pClient->OnData(result);
+		} catch (VOdometer<Vca::U32>::OdometerImproperInputException e) {
+			pClient->OnError(0, e.getMessage());
+			return;
+		}
+	} else if (m_iOdometers64.Locate (name, xInstance)) {
+         VOdometer<Vca::U64>::Reference odometer = m_iOdometers64[xInstance];
+		 V::VTime time;
+		 try {
+			Vca::U64 resultInt = odometer->statMax(timeBefore, timeRange, time);
+			VString result;
+			VString timeString;
+			time.asString(timeString);
+			result << "Max value of " << name << " was ";
+			if(odometer->displayMultiplier() == 1)
+				result << resultInt;
+			else
+				result << resultInt * odometer->displayMultiplier();	
+			result << " occuring at " << timeString;
+			pClient->OnData(result);
+		} catch (VOdometer<Vca::U64>::OdometerImproperInputException e) {
+			pClient->OnError(0, e.getMessage());
+			return;
+		}
+	} else {
+		pClient->OnError(0, "Pool does not possess an odometer with that name");
+	}
+}
+
+void Vsa::VEvaluatorPool::AllStatValues (IEvaluatorPool_Ex5 *pRole, VString name, IVReceiver<VkDynamicArrayOf<Vca::U64> const &> *valuesClient, 
+							IVReceiver<VkDynamicArrayOf<V::VTime> const &> *timesClient, IVReceiver<VkDynamicArrayOf<Vca::U64> const &> *maxsClient, 
+							IVReceiver<VkDynamicArrayOf<Vca::U64> const &> *minsClient, IVReceiver<VkDynamicArrayOf<Vca::F64> const &> *sigmasClient) {
+	unsigned int xInstance;
+	VkDynamicArrayOf<Vca::U64> values, maxs, mins;
+	VkDynamicArrayOf<V::VTime> times;		
+	VkDynamicArrayOf<Vca::F64> sigmas;
+	if (m_iOdometers32.Locate (name, xInstance)) {
+		VOdometer<Vca::U32>::Reference odometer = m_iOdometers32[xInstance];
+		odometer->boxMonsterValues(values, times, maxs, mins, sigmas);
+	} else if (m_iOdometers64.Locate(name, xInstance)){
+		VOdometer<Vca::U64>::Reference odometer = m_iOdometers64[xInstance];
+		odometer->boxMonsterValues(values, times, maxs, mins, sigmas);
+	} else  {
+		valuesClient->OnError(0, "Pool does not possess an odometer with that name");
+		timesClient->OnError(0, "Pool does not possess an odometer with that name");
+		maxsClient->OnError(0, "Pool does not possess an odometer with that name");
+		minsClient->OnError(0, "Pool does not possess an odometer with that name");
+		sigmasClient->OnError(0, "Pool does not possess an odometer with that name");
+		return;
+	}
+	valuesClient->OnData(values);
+	timesClient->OnData(times);
+	maxsClient->OnData(maxs);
+	minsClient->OnData(mins);	
+	sigmasClient->OnData(sigmas);
+}
+
 /**************************
  *****  Trim Workers  *****
  **************************/
@@ -1446,6 +1864,7 @@ void Vsa::VEvaluatorPool::CancelQuery (IEvaluatorPool_Ex4 *pRole, Vca::U32 iID, 
  */
 
 void Vsa::VEvaluatorPool::trimWorkers (Vca::U32 cWorkers, bool bOldOnly) {
+	// First retire idle worker
     VReference<WorkerGeneration> pGeneration (m_pGenerationTail);
     while (pGeneration && cWorkers > 0) {
         if (bOldOnly && pGeneration->isCurrent ())
@@ -1453,6 +1872,7 @@ void Vsa::VEvaluatorPool::trimWorkers (Vca::U32 cWorkers, bool bOldOnly) {
         cWorkers -= pGeneration->trimWorkers (cWorkers, true);
         pGeneration.setTo (pGeneration->m_pPredecessor);
     }
+	// Retire worker in use, mark as excessWorker
     pGeneration.setTo (m_pGenerationTail);
     while (pGeneration && cWorkers > 0) {
         if (bOldOnly && pGeneration->isCurrent ())
@@ -1475,7 +1895,7 @@ void Vsa::VEvaluatorPool::onShrinkTimeOut (Vca::VTrigger<ThisClass> *pTrigger) {
     Vca::U32 cWorkers = excessIdleWorkers ();
     if (m_cTempWorkerMinimum > m_pSettings->workerMinimum ()) {
         // if we are restarting, we won't need as many new workers ...
-	setTempWorkerMinimumTo (m_cTempWorkerMinimum - cWorkers);
+		setTempWorkerMinimumTo (m_cTempWorkerMinimum - cWorkers);
     }
     trimWorkers (cWorkers, false);
 }
@@ -1865,7 +2285,10 @@ void Vsa::VEvaluatorPool::onWorkerCreationFailureHardLmt () {
     // Applications check for the phrase "Worker Creation Failure". Don't change this message until we have a better way of 
     //   getting this information to the end user  ....
     iMsg << "\nWorker Creation Failure HARD Limit (" << m_pGenerationHead->workerCreationHardFailures () <<") reached.\n";
-    if (m_pGenerationHead->onlineWorkerCount () == 0) flushQueue (iMsg);
+    if (m_pGenerationHead->onlineWorkerCount () == 0) {
+	notify (4, "#4: VEvaluatorPool::onWorkerCreationFailureHardLmt: %s\n", iMsg.content ());
+	flushQueue (iMsg);
+    }
 }
 
 void Vsa::VEvaluatorPool::onWorkerCreationFailureSoftLmt () {
@@ -1873,7 +2296,9 @@ void Vsa::VEvaluatorPool::onWorkerCreationFailureSoftLmt () {
         VString iMsg;
 	// Applications check for the phrase "Worker Creation Failure". Don't change this message until we have a better way of 
 	//   getting this information to the end user ....
-        iMsg << "\nWorker Creation Failure SOFT Limit (" << m_pGenerationHead->workerCreationSoftFailures () <<") reached.\n";
+
+	iMsg << "\nWorker Creation Failure SOFT Limit (" << m_pGenerationHead->workerCreationSoftFailures () <<") reached.\n";
+	notify (5, "#5: VEvaluatorPool::onWorkerCreationFailureSoftLmt: %s\n", iMsg.content ());
         m_pThisRequest->onError (0, iMsg);
         m_pThisRequest.clear ();
     }
@@ -1906,10 +2331,10 @@ void Vsa::VEvaluatorPool::getStatistics (VString &rResult) const {
 
     BaseClass::getStatistics (rResult);
 
-    Vca::U32 cHardFailures = m_pGenerationHead->workerCreationHardFailures ();
-    rResult << "WorkerCreation HARD Failures   : " << cHardFailures << " (for generation " << currentGenerationId ();
-    rResult << "\nTemporary Worker Minimum       : " << m_cTempWorkerMinimum;
-    rResult << "\nShrink Operations              : " << m_cShrinkTimerExpirations;
+    Vca::U32 cHardFailures = m_pGenerationHead->workerCreationHardFailures (); 
+    rResult << "WorkerCreation HARD Failures    : " << cHardFailures << " (for generation " << currentGenerationId ();
+    rResult << "\nTemporary Worker Minimum        : " << m_cTempWorkerMinimum;
+    rResult << "\nShrink Operations               : " << m_cShrinkTimerExpirations;
     m_pSettings->getStatistics (rResult);
 
     //  format the online workers count stats...
@@ -2104,10 +2529,12 @@ Vca::U32 Vsa::VEvaluatorPool::checkAssertions () const {
     Vca::U32 toReturn = 0;
     static bool errored = false;
 
-    if (m_cOnlineWIPs > workerMaximum ()) {
+    if (onlineWIPs () > workerMaximum ()) {
         log ("ASSERTION FAILED: WorkersInUse (%d) greater than pool's limit (%d)",
-              m_cOnlineWIPs, workerMaximum ()
+              onlineWIPs (), workerMaximum ()
         );
+	notify (12, "#12: VEvaluatorPool-checkAssertions: WorkersInUse (%d) greater than pool's limit (%d)\n", 
+		onlineWIPs (), workerMaximum ());
         toReturn++;
     }
 
@@ -2115,6 +2542,8 @@ Vca::U32 Vsa::VEvaluatorPool::checkAssertions () const {
         log ("ASSERTION FAILED: WorkersBeingCreated (%d) greater than pool's limit (%d)",
               m_cWorkersBeingCreated, workersBeingCreatedMaximum ()
         );
+	notify (13, "#13: VEvaluatorPool::checkAssertions: WorkersBeingCreated (%d) greater than pool's limit (%d)",
+		m_cWorkersBeingCreated, workersBeingCreatedMaximum ());
         toReturn++;
     }
     //effective worker count may be negative if a starting worker is marked as excess ...
@@ -2124,6 +2553,8 @@ Vca::U32 Vsa::VEvaluatorPool::checkAssertions () const {
         log ("ASSERTION FAILED: Total Effective Workers (%d) in the pool greater than pool's limit (%d)",
             cEffectiveWorkers, sWorkerMaximum
         );
+	notify (14, "#14: VEvaluatorPool::checkAssertions: Total Effective Workers (%d) in the pool greater than pool's limit (%d)",
+		cEffectiveWorkers, sWorkerMaximum);
         toReturn++;
     }
 
@@ -2131,6 +2562,8 @@ Vca::U32 Vsa::VEvaluatorPool::checkAssertions () const {
         log ("ASSERTION FAILED: Total Broadcast Evaluations in progress (%d) is greater than pool's limit (%d)",
             m_cBCEvaluationsInProgress, BCEvaluationsInProgressLimit ()
         );
+	notify (14, "#14: VEvaluatorPool::checkAssertions: Total Broadcast Evaluations in progress (%d) is greater than pool's limit (%d)",
+		m_cBCEvaluationsInProgress, BCEvaluationsInProgressLimit ());
         toReturn++;
     }
 

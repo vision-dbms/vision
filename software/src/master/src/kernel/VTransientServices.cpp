@@ -24,6 +24,7 @@
 
 #include "V_VArgList.h"
 #include "V_VTime.h"
+#include "VkDynamicArrayOf.h"
 
 #if defined(_WIN32)
 static char const *const g_pNullDeviceName = "NUL:";
@@ -37,6 +38,15 @@ extern "C" {
 #else
 static char const *const g_pNullDeviceName = "/dev/null";
 #endif
+
+char const* const VTransientServices::g_pRestOfLineBreakSet = "\r\n";
+char const* const VTransientServices::g_pWhitespaceBreakSet = " \t\r\n";
+char const* VTransientServices::g_iEventNames[24] = {
+    "CANCEL", "HARDSTOP", "CLIENTDISCONNECT", "WORKERHARDLIMIT", "WORKERSOFTLIMIT", "EVALUATORDISCONNECT",
+    "WIPERROR", "WIPRETRYERROR", "WIPTIMEOUT", "WIPRETRYTIMEOUT", "SEFAILCONNECT", "WINUSELIMIT",
+    "WUCLIMIT", "TEFFECTIVEWORKERLIMIT", "NONEWGENERATION", "NOEVALUATOR", "CANCELINQUE", "PROMPTSERVERGONE",
+    "BRIDGEGONE", "LASTRESORT", "NDFERROR", "NULLGOFER", "BRIDGECONNERR", "NULLITF"
+};
 
 
 /**************************
@@ -70,6 +80,181 @@ VTransientServices::~VTransientServices () {
 void VTransientServices::updateBackgroundSwitch (bool bIsBackground) {
     if (bIsBackground)
 	createDaemon ();
+}
+
+/****************************************************
+ ****************************************************
+ *****  Parse Notification Services Table File  ***** 
+ ****************************************************
+ ****************************************************/
+
+void VTransientServices::parseNSTFile (char const *pNSTFileName) {
+    VSimpleFile iNSTFile;
+    if (!pNSTFileName || !iNSTFile.Open (pNSTFileName, "r"))
+	return;
+    log ("VTransientServices::parseNSTFile '%s'", pNSTFileName);
+    VString iBuffer;
+    bool bCompleted = false;
+    VString iEmail;
+    VString iPage;
+    VString iLog;
+    VString iMonster;
+    VString iRPD;
+    int xId;
+    while (!bCompleted && iNSTFile.GetLine (iBuffer)) {
+	ParseState xState = ParseState_ExpectingTag;
+	char const* pBreakSet = g_pWhitespaceBreakSet;
+	char *pBufferPtr;
+	for (
+	    char *pToken = strtok_r (iBuffer.storage(), pBreakSet, &pBufferPtr);
+	    pToken && ParseState_Error != xState;
+	    pToken = strtok_r (0, pBreakSet, &pBufferPtr)
+	) {
+	    pToken += strspn (pToken, g_pWhitespaceBreakSet);
+	    
+	    VString iCookedToken;
+	    iCookedToken.setTo (pToken);
+	    
+	    switch (xState) {
+	    case ParseState_ExpectingTag:
+		xState
+		    = 0 == strcasecmp (iCookedToken, "email")
+		    ? ParseState_ExpectingEmail
+		    
+		    : 0 == strcasecmp (iCookedToken, "page")
+		    ? ParseState_ExpectingPage
+
+		    : 0 == strcasecmp (iCookedToken, "log")
+		    ? ParseState_ExpectingLogPath
+
+		    : 0 == strcasecmp (iCookedToken, "monster")
+		    ? ParseState_ExpectingMonster
+
+		    : 0 == strcasecmp (iCookedToken, "rpd")
+		    ? ParseState_ExpectingRPD
+		    
+		    : ParseState_Error;
+		
+		if (ParseState_Error == xState)
+		    log ("VTransientServices::parseNSTFile --> Unknown tag '%s'", static_cast <char const *> (iCookedToken.content ()));
+		break;
+	    case ParseState_ExpectingLogPath:
+		iLog.setTo (iCookedToken);
+		xState = ParseState_ExpectingLogEventId;
+		//		fprintf(stderr, "Log: %s\n", iCookedToken.content ());
+		break;
+	    case ParseState_ExpectingLogEventId:
+		//		fprintf(stderr, "Id: %s\n", iCookedToken.content ());
+		if (1 == sscanf (iCookedToken, " %d", &xId)) {
+		    if (xId >= 0 && xId <= 1000)
+			m_iNST[xId][0].Insert (iLog);
+		}
+		break;
+	    case ParseState_ExpectingEmail:
+		iEmail.setTo (iCookedToken);
+		xState = ParseState_ExpectingEmailEventId;
+		//		fprintf(stderr, "Email: %s\n", iCookedToken.content ());
+		break;
+	    case ParseState_ExpectingEmailEventId:
+		//		fprintf(stderr, "Id: %s\n", iCookedToken.content ());
+		if (1 == sscanf (iCookedToken, " %d", &xId)) {
+		    if (xId >= 0 && xId <= 1000)
+			m_iNST[xId][1].Insert (iEmail);
+		}
+		break;
+	    case ParseState_ExpectingPage:
+		iPage.setTo (iCookedToken);
+		xState = ParseState_ExpectingPageEventId;
+		break;
+	    case ParseState_ExpectingPageEventId:
+		if (1 == sscanf (iCookedToken, " %d", &xId)) {
+		    if (xId >= 0 && xId <= 1000)
+			m_iNST[xId][2].Insert (iPage);
+		}
+		break;
+
+	    case ParseState_ExpectingMonster:
+		iMonster.setTo (iCookedToken);
+		xState = ParseState_ExpectingMonsterEventId;
+		break;
+	    case ParseState_ExpectingMonsterEventId:
+		if (1 == sscanf (iCookedToken, " %d", &xId)) {
+		    if (xId >= 0 && xId <= 1000)
+			m_iNST[xId][3].Insert (iMonster);
+		}
+		break;
+
+	    case ParseState_ExpectingRPD:
+		iRPD.setTo (iCookedToken);
+		xState = ParseState_ExpectingRPDEventId;
+		break;
+	    case ParseState_ExpectingRPDEventId:
+		if (1 == sscanf (iCookedToken, " %d", &xId)) {
+		    if (xId >= 0 && xId <= 1000)
+			m_iNST[xId][4].Insert (iRPD);
+		}
+		break;
+
+	    default:
+		log ("VTransientServices::parseNSTFile --> Error: unknown parse state %d[%s]", xState, iCookedToken.content ());
+		xState = ParseState_Error;
+		break;
+	    }
+	    switch (xState) {
+	    case ParseState_ExpectingTag:
+	    case ParseState_ExpectingLogPath:
+	    case ParseState_ExpectingLogEventId:
+	    case ParseState_ExpectingEmail:
+	    case ParseState_ExpectingEmailEventId:
+	    case ParseState_ExpectingPage:
+	    case ParseState_ExpectingPageEventId:
+	    case ParseState_ExpectingMonster:
+	    case ParseState_ExpectingMonsterEventId:
+	    case ParseState_ExpectingRPD:
+	    case ParseState_ExpectingRPDEventId:
+		pBreakSet = g_pWhitespaceBreakSet;
+		break;
+	    default:
+		pBreakSet = g_pRestOfLineBreakSet;
+		break;
+	    }
+	} // for
+	iBuffer.clear ();
+    }  // while
+    /*
+    VkDynamicArrayOf<VString> iTargets;
+    for (size_t i = 0; i < 100; ++i) {
+	fprintf (stderr, "\n");
+	for (size_t j = 0; j < 5; ++j) {
+	    fprintf (stderr, "| Number of subscribers: %d |", m_iNST[i][j].cardinality ()); 
+	    if( transientServicesProvider()->getNSTargets (iTargets, i, j)){
+		V::U32 iSize = iTargets.cardinality ();
+		for (V::U32 i = 0; i < iSize; i++) {
+		    fprintf (stderr, " :%s", iTargets[i].content ());
+		}
+	    }
+	    else
+		fprintf (stderr, "no subscribers\n");
+	}
+    }
+    */
+    iNSTFile.close ();
+}
+
+bool VTransientServices::getNSTargets (VkDynamicArrayOf<VString> &rResult, int xEvent, int xType) const {
+    bool bResult = false;
+    if (xEvent >= 0 && xEvent <= 1000 && xType >= 0 && xType < 5) {
+	V::U32 iSize = m_iNST[xEvent][xType].cardinality ();
+	if (iSize > 0) {
+	    bResult = true;
+	    rResult.DeleteAll ();
+	    rResult.Append (iSize);
+	    for (V::U32 i=0;i<iSize; i++) {
+		rResult[i].setTo (m_iNST[xEvent][xType][i].content ());
+	    }
+	}
+    }
+    return bResult;
 }
 
  
@@ -293,7 +478,25 @@ void VTransientServices::logUsageInfo (char const *pFormat, ...) {
 }
 void VTransientServices::vlogUsageInfo (char const *pFormat, va_list ap){
 }
+void VTransientServices::updateCamLogPath (char const *pPath) {
+    if (pPath != 0) {
+	m_iCamLog.updateLogFilePath (pPath);
+    }
+}
 
+/**************************
+ **************************
+ *****  Notification  *****
+ **************************
+ **************************/
+
+VString VTransientServices::getNSMessage () const {
+    return m_iNSMessage;
+}
+void VTransientServices::setNSServer (char const *pServer) {
+}
+void VTransientServices::setNSMessage (char const *pMsg) {
+}
 
 
 /*****************************
@@ -377,3 +580,307 @@ void VTransientServices::redirect_stdout_stderr () {
 	m_iLogFile.redirectStdErrToLog ();
     }
 }
+
+/**********************************
+ **********************************
+ *****  Notification Service  *****
+ **********************************
+ **********************************/
+
+void VTransientServices::notify (bool bWaitingForResp, int xEvent, char const *pFormat, va_list ap) {
+}
+
+bool VTransientServices::parseNotificationTemplate (VSimpleFile &rSessionsFile) {
+
+    bool bCompleted = false;
+
+    VString iBuffer;
+    PlanEntry *pEntry;
+    NSEntry *pNSEntry = new NSEntry ();
+    while (!bCompleted && rSessionsFile.GetLine (iBuffer)) {
+      ParseState xState = ParseState_ExpectingTag;
+      char const *pBreakSet = g_pWhitespaceBreakSet;
+      char *pBufferPtr;
+      for (
+	   char *pToken = strtok_r (iBuffer.storage (), pBreakSet, &pBufferPtr);
+	   pToken && ParseState_Error != xState;
+	   pToken = strtok_r (0, pBreakSet, &pBufferPtr)
+	   ) {
+	pToken += strspn (pToken, g_pWhitespaceBreakSet);
+
+	switch (xState) {
+	case ParseState_ExpectingTag:
+	  xState = 0 == strcasecmp (pToken, "Name")
+            ? ParseState_ExpectingNotificationName
+	    : 0 == strcasecmp (pToken, "Plan_Template")
+	    ? ParseState_ExpectingPlanSentinel
+	    : 0 == strcasecmp (pToken, "Notification_Template")
+	    ? ParseState_ExpectingNotificationSentinel
+	    : 0 == strcasecmp (pToken, "Server")
+	    ? ParseState_ExpectingNotificationServerName
+	    : ParseState_Error;  
+	  if (ParseState_Error == xState)
+	      log ("VTransientServices::parseNotificationTemplate --> Unknown tag '%s'", pToken);
+	  break;
+	case ParseState_ExpectingPlanSentinel:
+	  if (strcmp (pToken, "Begin") == 0) {
+	    pEntry = new PlanEntry ();
+	    bool bResult = parsePlanTemplate (rSessionsFile, pEntry);
+	    if (bResult && (0 != pEntry->name ().length ())) {
+		pNSEntry->insertEntry (pEntry);
+		pEntry = NULL;
+	    } else {
+		log ("VTransientServices::parseNotificationTemplate --> Error: cannot insert Plan entry '%s'", pEntry->name ().content ());
+		delete pEntry;
+		pEntry = NULL;
+		xState = ParseState_Error;
+	    }
+          }
+	  else {
+	    log ("VTransientServices::parseNotificationTemplate --> Error: found '%s' when expecting 'Begin'", pToken);
+	    xState = ParseState_Error;
+	  }
+ 	  break;
+	case ParseState_ExpectingNotificationSentinel:
+	  if (strcmp (pToken, "End") == 0) {
+	      unsigned int xIdx;
+	      if (m_iNSEntries.Insert (pNSEntry->name (), xIdx)) {
+		  m_iNSEntries[xIdx] = pNSEntry;
+		  pNSEntry = NULL;
+		  bCompleted = true;
+	      } else {
+		  log ("VTransientServices::parseNotificationTemplate --> Error: cannot insert NS entry '%s'", pNSEntry->name ().content ());
+		  delete pNSEntry;
+		  pNSEntry = NULL;
+		  xState = ParseState_Error;
+	      }
+	  }
+	  else {
+	    log ("VTransientServices::parseNotificationTemplate --> Error: found '%s' when expecting 'End'", pToken);
+	    xState = ParseState_Error;
+	  }
+	  break;
+	case ParseState_ExpectingNotificationName:
+	  pNSEntry->setName (pToken);
+	  break;
+	case ParseState_ExpectingNotificationServerName:
+	  pNSEntry->setServer (pToken);
+	  break;
+	default:
+	  log ("VTransientServices::parseNotificationTemplate --> Error: unknown parse state %d[%s]", xState, pToken);
+	  xState = ParseState_Error;
+	  break;
+	}
+        //  set the break set to use for next parsing iteration
+	switch (xState) {
+	case ParseState_ExpectingTag:
+	  pBreakSet = g_pWhitespaceBreakSet;
+	  break;
+	default:
+	  pBreakSet = g_pRestOfLineBreakSet;
+	  break;
+	}
+      }      
+      iBuffer.clear ();
+    } 
+    return bCompleted;
+}
+
+bool VTransientServices::parsePlanTemplate (VSimpleFile &rSessionsFile, VTransientServices::PlanEntry *pEntry) {
+
+    int xId;
+    bool bCompleted = false;
+    bool bEventComment = false;
+    VString iPlanName;
+    VString iBuffer;
+    VString iEmail;
+    VString iPage;
+    VString iLog;
+    VString iMonster;
+    VString iRPD;
+    VString iPre;
+    VString iPost;
+
+    while (!bCompleted && rSessionsFile.GetLine (iBuffer)) {
+      bEventComment = false;
+      ParseState xState = ParseState_ExpectingTag;
+      char const *pBreakSet = g_pWhitespaceBreakSet;
+      char *pBufferPtr;
+      for (
+	   char *pToken = strtok_r (iBuffer.storage (), pBreakSet, &pBufferPtr);
+	   pToken && (!bEventComment) && ParseState_Error != xState;
+	   pToken = strtok_r (0, pBreakSet, &pBufferPtr)
+	   ) {
+	pToken += strspn (pToken, g_pWhitespaceBreakSet);
+	VString iCookedToken;
+	iCookedToken.setTo (pToken);
+	switch (xState) {
+	case ParseState_ExpectingTag:
+	  xState = 0 == strcasecmp (pToken, "Name")
+            ? ParseState_ExpectingPlanName
+	    : 0 == strcasecmp (pToken, "Event")
+	    ? ParseState_ExpectingEventId
+	    : 0 == strcasecmp (pToken, "Action")
+	    ? ParseState_ExpectingActionTag
+	    : 0 == strcasecmp (pToken, "Plan_Template")
+	    ? ParseState_ExpectingPlanSentinel
+	    : ParseState_Error;  
+	  if (ParseState_Error == xState)
+	      log ("VTransientServices::parsePlanTemplate --> Unknown tag '%s'", pToken);
+	  break;
+	case ParseState_ExpectingPlanSentinel:
+	  if (strcmp (pToken, "End") == 0) {
+	    bCompleted = true;
+          }
+          else {
+	    log ("VTransientServices::parsePlanTemplate --> Error: found '%s' when expecting 'End'", pToken);
+	    xState = ParseState_Error;
+	  }
+	  break;
+	case ParseState_ExpectingPlanName:
+	  pEntry->setName (pToken);
+	  break;
+	case ParseState_ExpectingEventId:
+	    if (1 == sscanf (iCookedToken, " %d", &xId)) {
+		if (xId >= 0 && xId <= 1000)
+		    pEntry->updateEvents (xId);
+	    } else if (iCookedToken.getPrefix ('#', iPre, iPost)) {
+		bEventComment = true;
+	    } else {
+		bool bValid = false;
+		for (int i = 0; i < 24; i++) {
+		    if (iCookedToken.equalsIgnoreCase (g_iEventNames[i])) {
+			pEntry->updateEvents (i+1);
+			bValid = true;
+			break;
+		    }
+		}
+		if (!bValid) {
+		    log ("VTransientServices::parsePlanTemplate --> Error: found invalid mnemonic '%s'", static_cast <char const *> (iCookedToken.content ()));
+		    xState = ParseState_Error;
+		}
+	    }
+	    break;
+	case ParseState_ExpectingActionTag:
+	    xState
+		= 0 == strcasecmp (iCookedToken, "email")
+		? ParseState_ExpectingEmail
+		
+		: 0 == strcasecmp (iCookedToken, "page")
+		? ParseState_ExpectingPage
+
+		: 0 == strcasecmp (iCookedToken, "log")
+		? ParseState_ExpectingLogPath
+
+		: 0 == strcasecmp (iCookedToken, "monster")
+		? ParseState_ExpectingMonster
+
+		: 0 == strcasecmp (iCookedToken, "rpd")
+		? ParseState_ExpectingRPD
+		    
+		: ParseState_Error;
+		
+	    if (ParseState_Error == xState)
+		log ("VTransientServices::parsePlanTemplate --> Unknown action tag '%s'", static_cast <char const *> (iCookedToken.content ()));
+	    break;
+	case ParseState_ExpectingLogPath:
+	    iLog.setTo (iCookedToken);
+	    pEntry->updateActions (0, iLog);
+	    break;
+	case ParseState_ExpectingEmail:
+	    iEmail.setTo (iCookedToken);
+	    pEntry->updateActions (1, iEmail);
+	    break;
+	case ParseState_ExpectingPage:
+	    iPage.setTo (iCookedToken);
+	    pEntry->updateActions (2, iPage);
+	    break;
+	case ParseState_ExpectingMonster:
+	    iMonster.setTo (iCookedToken);
+	    pEntry->updateActions (3, iMonster);
+	    break;
+	case ParseState_ExpectingRPD:
+	    iRPD.setTo (iCookedToken);
+	    pEntry->updateActions (4, iRPD);
+	    break;
+	default:
+	  log ("VTransientServices::parsePlanTemplate --> Error: unknown parse state %d[%s]", xState, pToken);
+	  xState = ParseState_Error;
+	  break;
+	}
+        //  set the break set to use for next parsing iteration
+	switch (xState) {
+	case ParseState_ExpectingTag:
+	case ParseState_ExpectingActionTag:
+	case ParseState_ExpectingLogPath:
+	case ParseState_ExpectingEmail:
+	case ParseState_ExpectingPage:
+	case ParseState_ExpectingMonster:
+	case ParseState_ExpectingRPD:
+	case ParseState_ExpectingEventId:
+	  pBreakSet = g_pWhitespaceBreakSet;
+	  break;
+	default:
+	  pBreakSet = g_pRestOfLineBreakSet;
+	  break;
+	}
+      }      
+      iBuffer.clear ();
+    } 
+    return bCompleted;
+}
+bool VTransientServices::getNSEntry (VString const &rName, NSEntry::Reference &rEntry) const {
+    unsigned int xEntry;
+    if (m_iNSEntries.Locate (rName, xEntry)){
+	rEntry.setTo (m_iNSEntries[xEntry]);
+	return true;
+    } else
+	return false;
+}
+
+bool VTransientServices::NSEntry::insertEntry (VTransientServices::PlanEntry *pEntry) {
+    unsigned int xIdx;
+    if (m_iPlanEntries.Insert (pEntry->name (), xIdx)) {
+	m_iPlanEntries[xIdx] = pEntry;
+	return true;
+    } else
+	return false;
+}
+void VTransientServices::NSEntry::setName (VString const &rName) {
+    m_iName.setTo (rName);
+}
+void VTransientServices::NSEntry::setServer (VString const &rServer) {
+    m_iInfoServer.setTo (rServer);
+}
+void VTransientServices::NSEntry::getActionInfos (int xEvent, ActionInfos_t *pActionInfos) {
+    PlanIterator iterator (m_iPlanEntries);
+    while (iterator.isNotAtEnd ()) {
+        VString iPlan = iterator.key ();
+        unsigned int xPlan;
+	if (m_iPlanEntries.Locate (iPlan, xPlan))
+	    m_iPlanEntries [xPlan]->getActionInfos (xEvent, pActionInfos);
+	++iterator;
+    }	    
+}
+
+bool VTransientServices::PlanEntry::updateEvents (int xEvent) {
+    return m_iEvents.Insert (xEvent);
+}
+bool VTransientServices::PlanEntry::updateActions (int xIdx, VString const &rAction) {
+    return m_iActionInfos[xIdx].Insert (rAction);
+}
+void VTransientServices::PlanEntry::setName (VString const &rName) {
+    m_iPlanName.setTo (rName);
+}
+void VTransientServices::PlanEntry::getActionInfos (int xEvent, ActionInfos_t *pActionInfos) {
+    if (m_iEvents.Contains (xEvent)) {
+	for (int xType = 0; xType < 5; xType++) {
+	    for (int xElement = 0; xElement < m_iActionInfos[xType].cardinality (); xElement++) {
+		pActionInfos[xType].Insert (m_iActionInfos[xType][xElement]);
+	    }
+	}
+    }
+}
+
+	
+

@@ -22,8 +22,9 @@
  *****  Supporting  *****
  ************************/
 
-#include "Vsa_IEvaluator.h"
+#include "Vsa_IEvaluator_Ex1.h"
 #include "Vsa_IPoolEvaluation.h"
+#include "cam.h"
 
 
 /***********************************
@@ -64,20 +65,32 @@ Vsa::VEvaluatorClient::~VEvaluatorClient () {
  ************************/
 
 bool Vsa::VEvaluatorClient::onQuery (IEvaluator *pEvaluator, VString const &rPath, VString const &rQuery, VString const &rEnvironment) {
+    CAM_OPERATION(co) << "message" << "VEvaluatorClient::onQuery()";
+
     IEvaluatorClient::Reference pClientRole;
     if (!goodToGo (pEvaluator, pClientRole))
 	return false;
 
-    pEvaluator->EvaluateURL (pClientRole, rPath, rQuery, rEnvironment);
+    if (IEvaluator_Ex1 *const pEvaluator1 = dynamic_cast<IEvaluator_Ex1*>(pEvaluator)) {
+        pEvaluator1->EvaluateURL_Ex (pClientRole, rPath, rQuery, rEnvironment, co.getId().c_str(), co.chainId().c_str());
+    } else {
+        pEvaluator->EvaluateURL (pClientRole, rPath, rQuery, rEnvironment);
+    }
     return true;
 }
 
 bool Vsa::VEvaluatorClient::onQuery (IEvaluator *pEvaluator, VString const &rPath, VString const &rQuery) {
+    CAM_OPERATION(co) << "message" << "VEvaluatorClient::onQuery()";
+
     IEvaluatorClient::Reference pClientRole;
     if (!goodToGo (pEvaluator, pClientRole))
 	return false;
 
-    pEvaluator->EvaluateExpression (pClientRole, rPath, rQuery);
+    if (IEvaluator_Ex1 *const pEvaluator1 = dynamic_cast<IEvaluator_Ex1*>(pEvaluator)) {
+        pEvaluator1->EvaluateExpression_Ex (pClientRole, rPath, rQuery, co.getId().c_str(), co.chainId().c_str());
+    } else {
+        pEvaluator->EvaluateExpression (pClientRole, rPath, rQuery);
+    }
     return true;
 }
 
@@ -144,7 +157,6 @@ void Vsa::VEvaluatorClient::OnChange (Vsa::IEvaluatorClient *pRole, Vca::U32 xQu
 
 void Vsa::VEvaluatorClient::OnResult (Vsa::IEvaluatorClient *pRole, Vsa::IEvaluationResult *pResult, VString const &rOutput){
     cancelInterfaceMonitor ();
-
     OnResult_(pResult, rOutput);
     onSuccess ();
 }

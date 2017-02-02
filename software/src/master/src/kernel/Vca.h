@@ -184,6 +184,8 @@ namespace Vca {
     Vca_API bool Stop (VString *pMessageReturn = 0);
     Vca_API void Shutdown ();
     Vca_API bool ShutdownCalled ();
+    Vca_API void setAtExit ();
+    Vca_API bool isAtExit ();
 
     Vca_API bool EventsDisabled (size_t &rsTimeout, V::VTime const &rtLastEvent);
 

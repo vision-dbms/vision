@@ -37,17 +37,66 @@
 #include "RTrefuv.h"
 #include "RTundefuv.h"
 
+#include "VOrdered.h"
+
 /*****  Self  *****/
 #include "RTlstore.h"
 
 
-/******************************
- ******************************
- *****                    *****
- *****  Container Handle  *****
- *****                    *****
- ******************************
- ******************************/
+/**************************************
+ **************************************
+ *****                            *****
+ *****  rtLSTORE_Handle::Strings  *****
+ *****                            *****
+ **************************************
+ **************************************/
+
+rtLSTORE_Handle::Strings::Strings () : m_sBreakpoints (0), m_pBreakpoints (0), m_pCharacters () {
+}
+
+rtLSTORE_Handle::Strings::~Strings () {
+}
+
+void rtLSTORE_Handle::Strings::refresh () {
+    if (m_pListStoreHandle) {
+	m_sBreakpoints = m_pListStoreHandle->breakpointCount ();
+	m_pBreakpoints = m_pListStoreHandle->breakpointArray ();
+	m_pCharacters = m_pCharStoreHandle->array ();
+    }
+}
+
+void rtLSTORE_Handle::Strings::align () {
+    if (m_pListStoreHandle) {
+	m_pListStoreHandle->align ();
+	refresh ();
+    }
+}
+
+bool rtLSTORE_Handle::Strings::setTo (rtLSTORE_Handle *pStoreHandle) {
+    bool bSet = pStoreHandle && pStoreHandle->isAStringStore ();
+    if (bSet) {
+	m_pListStoreHandle.setTo (pStoreHandle);
+	m_pCharStoreHandle.setTo (pStoreHandle->stringContentHandle ());
+	align ();
+    }
+    else {
+	m_pListStoreHandle.clear ();
+	m_pCharStoreHandle.clear ();
+	m_sBreakpoints = 0;
+	m_pBreakpoints = 0;
+	m_pCharacters = 0;
+    }
+    return bSet;
+}
+
+
+/*****************************
+ *****************************
+ *****                   *****
+ *****  rtLSTORE_Handle  *****
+ *****                   *****
+ *****************************
+ *****************************/
 
 /***************************
  ***************************
@@ -56,6 +105,21 @@
  ***************************/
 
 DEFINE_CONCRETE_RTT (rtLSTORE_Handle);
+
+/******************************
+ ******************************
+ *****  Canonicalization  *****
+ ******************************
+ ******************************/
+
+bool rtLSTORE_Handle::getCanonicalization_(rtVSTORE_Handle::Reference &rpStore, DSC_Pointer const &rPointer) {
+    rpStore.setTo (
+	static_cast<rtVSTORE_Handle*>(
+	    (isAStringStore () ? TheStringClass () : TheListClass ()).ObjectHandle ()
+	)
+    );
+    return true;
+}
 
 
 /**************************************
@@ -104,34 +168,26 @@ PrivateVarDef unsigned int
  * A corrupted lstore discovered at EMR inspired the creation of this bit of
  * paranoia. The corruption could never be duplicated, so now the Public
  * functions of RTlstore check for corruption (some via calls to other
- * functions like rtLSTORE_Align
+ * functions like align).
  *---------------------------------------------------------------------------
  */
 
-#define FinalBreakpoint(cpd) rtLSTORE_CPD_BreakpointArray (cpd)[\
-    rtLSTORE_CPD_BreakpointCount (cpd)\
-]
+#define ValidateBreakpointConsistency(lstore) {\
+    static_cast<rtLSTORE_Handle*>(lstore->containerHandle ())->CheckBreakpointConsistency ();\
+}
 
-PrivateFnDef void RaiseContentBreakpointDiscrepancyException () {
-    ERR_SignalFault (
-	EC__InternalInconsistency,
-	"rtLSTORE: Content/Breakpoint size disagreement."
+void rtLSTORE_Handle::CheckBreakpointConsistency () const {
+    if (finalBreakpoint () != rtPTOKEN_BaseElementCount (this, contentPTokenPOP ())) ERR_SignalFault (
+	EC__InternalInconsistency, UTIL_FormatMessage (
+	    "rtLSTORE[%u:%u]: Content/Breakpoint size disagreement.", spaceIndex (), containerIndex ()
+	)
     );
 }
 
-#define ValidateBreakpointConsistency(lstore) {\
-    if (FinalBreakpoint (lstore) != rtPTOKEN_BaseElementCount(\
-	    lstore, rtLSTORE_CPx_ContentPToken\
-	)\
-    ) RaiseContentBreakpointDiscrepancyException ();\
-}
-
 void rtLSTORE_Handle::CheckConsistency () {
-    if (rtLSTORE_LStore_IsInconsistent ((rtLSTORE_LStore*)ContainerContent ())
-    ) ERR_SignalFault (
-	EC__InternalInconsistency,
-	UTIL_FormatMessage (
-	    "Corrupted lstore[%u:%u] detected", SpaceIndex (), ContainerIndex ()
+    if (isInconsistent ()) ERR_SignalFault (
+	EC__InternalInconsistency, UTIL_FormatMessage (
+	    "rtLSTORE[%u:%u]: Corruption detected", spaceIndex (), containerIndex ()
 	)
     );
 }
@@ -173,55 +229,49 @@ PrivateFnDef void InitStdCPD (M_CPD *cpd) {
  *****  Internal routine to initialize the contents of a new L-Store.
  *
  *  Arguments:
- *	cpd			- the address of an uninitialized standard
- *				  CPD for the L-Store being created.
- *	ap			- a <varargs.h> argument pointer referencing
- *				  a standard CPD for the positional P-Token
+ *	ptoken			- a standard CPD for the positional P-Token
  *				  for the new L-Store (the number of elements
  *				  in the breakpoint array is one more than the
- *				  base element count of this P-Token), an
- *				  optional link constructor for link driven
- *				  initialization, and an optional string space
- *				  pointer for char-uv driven initialization.
+ *				  base element count of this P-Token).
+ *	linkc			- an optional link constructor for link driven
+ *				  initialization.
+ *	pStringStorage		- an optional string space pointer for string
+ *				  driven initialization.
  *
- *  Returns:
- *	NOTHING - Executed for side effect only.
  *
  *****/
-PrivateFnDef void InitNewLStore (
-    M_CPD *cpd, M_CPD *ptoken, rtLINK_CType *linkc, char const* pStringStorage
+void rtLSTORE_Handle::InitNewLStore (
+    rtPTOKEN_Handle *ptoken, rtLINK_CType *linkc, char const* pStringStorage
 ) {
-    unsigned int breakpointCount = rtPTOKEN_CPD_BaseElementCount (ptoken);
+    unsigned int cBreakpoints = ptoken->cardinality ();
 
 /*****  Initialize the CPD, ...  *****/
-    rtLSTORE_CPD_IsInconsistent (cpd) = true;
-    InitStdCPD (cpd);
+    setIsInconsistent ();
 
 /*****  ...the POPs, ...  *****/
-    cpd->constructReference (rtLSTORE_CPx_RowPToken);
-    cpd->StoreReference (rtLSTORE_CPx_RowPToken, ptoken);
+    constructReference (rowPTokenPOP ());
+    StoreReference (rowPTokenPOP (), ptoken);
 
-    cpd->constructReference (rtLSTORE_CPx_Content);
-    cpd->constructReference (rtLSTORE_CPx_ContentPToken);
+    constructReference (contentPOP ());
+    constructReference (contentPTokenPOP ());
 
 /*****  ...the string store flag, ...  *****/
-    rtLSTORE_CPD_StringStore (cpd) = false;
+    clearIsAStringStore ();
 
 /*****  ...the breakpoint count, ...  *****/
-    rtLSTORE_CPD_BreakpointCount (cpd) = breakpointCount;
+    setBreakpointCountTo (cBreakpoints);
 
 /*****  ...and the breakpoint array...  *****/
+    unsigned int *pBreakpoints = breakpointArray ();
     if (linkc) {
 	/*****  ... using the link content map: *****/
 	unsigned int totalElementsViewed = 0;
-	unsigned int *breakpointArray = rtLSTORE_CPD_BreakpointArray (cpd);
-	unsigned int *breakpoint = breakpointArray;
+	unsigned int *pBreakpoint = pBreakpoints;
 
 #	define fillSkippedElements(through, with) {\
-	    unsigned int *p;\
-	    for (p = breakpointArray + (through);\
-		 breakpoint < p;\
-		 *breakpoint++ = (with));\
+	    unsigned int *p = pBreakpoints + (through);\
+	    while (pBreakpoint < p)\
+		*pBreakpoint++ = (with);\
 	}
 
 #	define nilReferenceHandler(c, n, r)\
@@ -230,22 +280,19 @@ PrivateFnDef void InitNewLStore (
 
 #	define repeatedReferenceHandler(c, n, r)\
 	fillSkippedElements (r, totalElementsViewed)\
-	*breakpoint++ = totalElementsViewed;\
+	*pBreakpoint++ = totalElementsViewed;\
 	totalElementsViewed += n
 
 #	define rangeReferenceHandler(c, n, r)\
 	fillSkippedElements (r, totalElementsViewed)\
 	while (n-- > 0) {\
-	    *breakpoint++ = totalElementsViewed++;\
+	    *pBreakpoint++ = totalElementsViewed++;\
 	}
 
 	rtLINK_TraverseRRDCList (
-	    linkc,
-	    nilReferenceHandler,
-	    repeatedReferenceHandler,
-	    rangeReferenceHandler
+	    linkc, nilReferenceHandler, repeatedReferenceHandler, rangeReferenceHandler
 	);
-	fillSkippedElements (breakpointCount + 1, totalElementsViewed);
+	fillSkippedElements (cBreakpoints + 1, totalElementsViewed);
 
 #	undef fillSkippedElements
 #	undef nilReferenceHandler
@@ -254,24 +301,19 @@ PrivateFnDef void InitNewLStore (
     }
     else if (pStringStorage) {
 	/*****  ... using the string content: *****/
-	unsigned int *pBreakpointArray = rtLSTORE_CPD_BreakpointArray (cpd);
 	unsigned int xBreakpoint = 0;
 	unsigned int iBreakpoint = 0;
 
-	while (xBreakpoint < breakpointCount) {
-	    pBreakpointArray[xBreakpoint++] = iBreakpoint;
+	while (xBreakpoint < cBreakpoints) {
+	    pBreakpoints[xBreakpoint++] = iBreakpoint;
 	    iBreakpoint += strlen (pStringStorage + iBreakpoint) + 1;
 	}
 
-	pBreakpointArray[xBreakpoint] = iBreakpoint;
+	pBreakpoints[xBreakpoint] = iBreakpoint;
     }
     else {
 	/*****  ... using the p-token's cardinality:  *****/
-	memset (
-	    (void *)rtLSTORE_CPD_BreakpointArray (cpd),
-	    0,
-	    (breakpointCount + 1) * sizeof (unsigned int)
-	);
+	memset (pBreakpoints, 0, (cBreakpoints + 1) * sizeof (unsigned int));
     }
 }
 
@@ -284,62 +326,51 @@ PrivateFnDef void InitNewLStore (
  *****  General L-Store Cluster Creation Routine
  *
  *  Arguments:
- *	pInstancePPT	- the address of a CPD for the new cluster's
+ *	pInstancePPT		- the address of a handle for the new cluster's
  *				  instance set p-token.
- *	pContentPrototypeCPD	- the address of a CPD for the new cluster's
+ *	pContentPrototype	- the address of a CPD for the new cluster's
  *				  content prototype.
- *	--			- a dummy argument used to disambiguate the
- *				  overloading of rtLSTORE_NewCluster.
  *
  *  Returns:
  *	A standard CPD for the L-Store created.
  *
  *****/
-PublicFnDef M_CPD *rtLSTORE_NewCluster (
-    M_CPD *pInstancePPT, M_CPD *pContentPrototypeCPD, int
-)
-{
+rtLSTORE_Handle::rtLSTORE_Handle (
+    rtPTOKEN_Handle *pInstancePPT, Vdd::Store *pContentPrototype, bool bAStringStore
+) : BaseClass (
+    pInstancePPT->Space (), RTYPE_C_ListStore, rtLSTORE_SizeofLStore (pInstancePPT->cardinality ())
+) {
     NewCount++;
 
-/*****  Verify that 'pInstancePPT' is a p-token...  *****/
-    RTYPE_MustBeA (
-	"rtLSTORE_NewCluster", M_CPD_RType (pInstancePPT), RTYPE_C_PToken
-    );
-
 /*****  Create and initialize the L-Store's content...  *****/
-    M_ASD *pContainerSpace = pInstancePPT->Space ();
-    M_CPD *pContentPTokenCPD = rtPTOKEN_New (pContainerSpace, 0);
-    M_CPD *pContentCluster = IsntNil (pContentPrototypeCPD) ? rtVSTORE_NewCluster (
-	pContentPTokenCPD, pContentPrototypeCPD
-    ) : rtVECTOR_New (pContentPTokenCPD);
+    rtPTOKEN_Handle::Reference pContentPPT (new rtPTOKEN_Handle (pInstancePPT->Space (), 0));
+    Vdd::Store::Reference pContentStore;
+    if (pContentPrototype)
+	pContentPrototype->clone (pContentStore, pContentPPT);
+    else if (!bAStringStore) {
+	pContentStore.setTo (new rtVECTOR_Handle (pContentPPT));
+    }
 
 /*****  Create and initialize the L-Store...  *****/
-    M_CPD *pNewCluster = pContainerSpace->CreateContainer (
-	RTYPE_C_ListStore,
-	rtLSTORE_SizeofLStore (rtPTOKEN_CPD_BaseElementCount (pInstancePPT))
-    );
+    InitNewLStore (pInstancePPT);
 
-    InitNewLStore (
-	pNewCluster, pInstancePPT, NilOf (rtLINK_CType*), NilOf (char const*)
-    );
+    rtLSTORE_Type_LStore *pContainerContent = typecastContent ();
 
-    pNewCluster->StoreReference (
-	rtLSTORE_CPx_ContentPToken, pContentPTokenCPD
-    )->StoreReference (
-	rtLSTORE_CPx_Content, pContentCluster
-    );
-    ValidateBreakpointConsistency (pNewCluster);
-    rtLSTORE_CPD_StringStore (pNewCluster) = RTYPE_C_CharUV == (RTYPE_Type)M_CPD_RType (
-	pContentCluster
-    );
-    rtLSTORE_CPD_IsInconsistent (pNewCluster) = false;
+    StoreReference (&rtLSTORE_LStore_ContentPToken (pContainerContent), pContentPPT);
+    if (pContentStore)
+	StoreReference (&rtLSTORE_LStore_Content (pContainerContent), pContentStore);
+    else {
+	M_CPD *pCharUV = rtCHARUV_New (
+	    pContentPPT, pInstancePPT->TheCharacterClass ().PTokenHandle ()
+	);
+	StoreReference (&rtLSTORE_LStore_Content (pContainerContent), pCharUV->containerHandle ());
+	pCharUV->release ();
+    }
 
-/*****  Cleanup...  *****/
-    pContentCluster->release ();
-    pContentPTokenCPD->release ();
+    CheckBreakpointConsistency ();
 
-/*****  Return...  *****/
-    return pNewCluster;
+    pContainerContent->stringStore = pContentStore.isNil () && bAStringStore;
+    pContainerContent->isInconsistent = false;
 }
 
 
@@ -347,7 +378,7 @@ PublicFnDef M_CPD *rtLSTORE_NewCluster (
  *****  Cloned L-Store Cluster Creation Routine.
  *
  *  Arguments:
- *	pInstancePPT	- the address of a CPD for the new cluster's
+ *	pInstancePPT		- the address of a CPD for the new cluster's
  *				  instance set p-token.
  *	pPrototypeIndexCPD	- the address of a CPD for the cluster's
  *				  new prototype.
@@ -356,16 +387,14 @@ PublicFnDef M_CPD *rtLSTORE_NewCluster (
  *	The address of a CPD for the 'Index' created.
  *
  *****/
-PublicFnDef M_CPD *rtLSTORE_NewCluster (
-    M_CPD *pInstancePPT, M_CPD *pPrototypeStoreCPD
-) {
-    M_CPD *pContentPrototypeCPD = rtLSTORE_CPD_ContentCPD (pPrototypeStoreCPD);
-    M_CPD *pNewCluster = rtLSTORE_NewCluster (
-	pInstancePPT, pContentPrototypeCPD, -1
-    );
-    pContentPrototypeCPD->release ();
+bool rtLSTORE_Handle::isACloneOfListStore (rtLSTORE_Handle const *pOther) const {
+    return isAStringStore () == pOther->isAStringStore ();
+}
 
-    return pNewCluster;
+void rtLSTORE_Handle::clone (Reference &rpResult, rtPTOKEN_Handle *pInstancePPT) const {
+    Vdd::Store::Reference pContentPrototype;
+    getContent (pContentPrototype);
+    rpResult.setTo (new rtLSTORE_Handle (pInstancePPT, pContentPrototype, isAStringStore ()));
 }
 
 
@@ -378,42 +407,36 @@ PublicFnDef M_CPD *rtLSTORE_NewCluster (
  *				  positional ptoken defines the total number of elements
  *				  in the L-Store, and whose transitional state defines
  *				  the breakpoint array.
- *	pContentCluster		- the address of a CPD for the l-store's content.
+ *	pContentStore		- the address of a handle for the l-store's content.
  *
  *  Returns:
  *	The address of a CPD for the L-Store created.
  *
  *****/
-PublicFnDef M_CPD *rtLSTORE_NewCluster (
-    rtLINK_CType *pContentMap, M_CPD *pContentCluster, bool bDecoupled
+rtLSTORE_Handle::rtLSTORE_Handle (
+    rtLINK_CType *pContentMap, Vdd::Store *pContentStore, bool bDecoupled
+) : BaseClass (
+    bDecoupled ? pContentStore->objectSpace () : pContentMap->RPT()->Space (), RTYPE_C_ListStore, rtLSTORE_SizeofLStore (
+	pContentMap->RPT()->cardinality ()
+    )
 ) {
     NewUsingLCInitCount++;
 
-    M_CPD *pInstancePPT = pContentMap->RPT ();
-    if (bDecoupled) pInstancePPT = rtPTOKEN_New (
-	pContentCluster->Space (), rtPTOKEN_CPD_BaseElementCount (pInstancePPT)
-    );
-
-    M_CPD *pNewCluster = pInstancePPT->CreateContainer (
-	RTYPE_C_ListStore,
-	rtLSTORE_SizeofLStore (rtPTOKEN_CPD_BaseElementCount (pInstancePPT))
-    );
-
-    InitNewLStore (pNewCluster, pInstancePPT, pContentMap, NilOf (char const*));
-
-    pNewCluster->StoreReference (
-	rtLSTORE_CPx_ContentPToken, pContentMap->PPT ()
-    )->StoreReference (
-	rtLSTORE_CPx_Content, pContentCluster
-    );
-    ValidateBreakpointConsistency (pNewCluster);
-    rtLSTORE_CPD_StringStore (pNewCluster) =  pContentCluster->RTypeIs (RTYPE_C_CharUV);
-    rtLSTORE_CPD_IsInconsistent (pNewCluster) = false;
-
+    rtPTOKEN_Handle::Reference pInstancePPT (pContentMap->RPT ());
     if (bDecoupled)
-	pInstancePPT->release ();
+	pInstancePPT.setTo (new rtPTOKEN_Handle (Space (), pInstancePPT->cardinality ()));
 
-    return pNewCluster;
+    InitNewLStore (pInstancePPT, pContentMap);
+
+    rtLSTORE_Type_LStore *pContainerContent = typecastContent ();
+
+    StoreReference (&rtLSTORE_LStore_ContentPToken (pContainerContent), pContentMap->PPT ());
+    StoreReference (&rtLSTORE_LStore_Content (pContainerContent), pContentStore);
+
+    CheckBreakpointConsistency ();
+
+    pContainerContent->stringStore = false;
+    pContainerContent->isInconsistent = false;
 }
 
 
@@ -422,47 +445,33 @@ PublicFnDef M_CPD *rtLSTORE_NewCluster (
  *
  *  Arguments:
  *	cStrings		- the number of strings present in the content cluster.
- *	pContentCluster	- the address of a CPD for the string store's content.
+ *	pContentCluster		- the address of a CPD for the string store's content.
  *
  *  Returns:
  *	The address of a CPD for the L-Store created.
  *
  *****/
-PrivateFnDef M_CPD *rtLSTORE_NewCluster (
-    unsigned int cContentClusterStrings, M_CPD *pContentCluster
-)
-{
+rtLSTORE_Handle::rtLSTORE_Handle (
+    unsigned int cContentClusterStrings, M_CPD *pContentStore
+) : BaseClass (pContentStore->Space (), RTYPE_C_ListStore, rtLSTORE_SizeofLStore (cContentClusterStrings)) {
 //  Create the required instance p-token, ...
-    M_ASD *pContainerSpace = pContentCluster->Space ();
-    M_CPD *pInstancePPT = rtPTOKEN_New (pContainerSpace, cContentClusterStrings);
+    rtPTOKEN_Handle::Reference pInstancePPT (new rtPTOKEN_Handle (Space (), cContentClusterStrings));
 
 /*****  Create and initialize the L-Store...  *****/
-    M_CPD *pNewCluster = pContainerSpace->CreateContainer (
-	RTYPE_C_ListStore,
-	rtLSTORE_SizeofLStore (rtPTOKEN_CPD_BaseElementCount (pInstancePPT))
+    InitNewLStore (pInstancePPT, 0, rtCHARUV_CPD_Array (pContentStore));
+
+    rtLSTORE_Type_LStore *pContainerContent = typecastContent ();
+
+    rtPTOKEN_Handle::Reference pContentStorePPT (
+	static_cast<rtUVECTOR_Handle*>(pContentStore->containerHandle ())->pptHandle ()
     );
+    StoreReference (&rtLSTORE_LStore_ContentPToken (pContainerContent), pContentStorePPT.referent ());
+    StoreReference (&rtLSTORE_LStore_Content (pContainerContent), pContentStore->containerHandle  ());
 
-    InitNewLStore (
-	pNewCluster,
-	pInstancePPT,
-	NilOf (rtLINK_CType*),
-	rtCHARUV_CPD_Array (pContentCluster)
-    );
+    CheckBreakpointConsistency ();
 
-    pNewCluster->StoreReference (
-	rtLSTORE_CPx_ContentPToken, pContentCluster, UV_CPx_PToken
-    )->StoreReference (
-	rtLSTORE_CPx_Content, pContentCluster
-    );
-    ValidateBreakpointConsistency (pNewCluster);
-    rtLSTORE_CPD_StringStore (pNewCluster) = true;
-    rtLSTORE_CPD_IsInconsistent (pNewCluster) = false;
-
-/*****  Cleanup...  *****/
-    pInstancePPT->release ();
-
-/*****  Return...  *****/
-    return pNewCluster;
+    pContainerContent->stringStore = true;
+    pContainerContent->isInconsistent = false;
 }
 
 
@@ -481,43 +490,46 @@ PrivateFnDef M_CPD *rtLSTORE_NewCluster (
  *	Nothing.
  *
  *****/
-PublicFnDef void rtLSTORE_Copy (
-    M_CPD *pSource, M_ASD *pResultSpace, DSC_Descriptor *pResult
-) {
+void rtLSTORE_Handle::copy (DSC_Descriptor &rResult, M_ASD *pResultSpace) {
 /*****  Align the source, ...  *****/
-    rtLSTORE_Align (pSource);
+    align ();
 
 /*****  ...  copy the content, ...  *****/
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*
  *!!  The Following Code Does Not Support Content Generalized L-Stores  !!*
  *!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
-    M_CPD *pResultContentPPT; M_CPD *pResultContent; {
-	M_CPD *pSourceContent = rtLSTORE_CPD_ContentCPD (pSource);
+    rtPTOKEN_Handle::Reference pResultContentPPT; M_CPD *pResultContent; {
+	VContainerHandle::Reference pSourceContent;
+	getContent (pSourceContent);
 	switch (pSourceContent->RType ()) {
-	case RTYPE_C_Vector:
-	    rtVECTOR_Align (pSourceContent); {
-		M_CPD *pSourceContentPPT = rtVECTOR_CPD_RowPTokenCPD (pSourceContent);
-		unsigned int nElements = rtPTOKEN_CPD_BaseElementCount (pSourceContentPPT);
+	case RTYPE_C_Vector: {
+		rtVECTOR_Handle::Reference pSourceVector (
+		    static_cast<rtVECTOR_Handle*>(pSourceContent.referent ())
+		);
+		pSourceVector->align ();
 
-		pResultContentPPT = rtPTOKEN_New (pResultSpace, nElements);
+		unsigned int nElements = pSourceVector->elementCount ();
+
+		pResultContentPPT.setTo (new rtPTOKEN_Handle (pResultSpace, nElements));
+
 		rtLINK_CType *pElementSelection = rtLINK_RefConstructor (
-		    pSourceContentPPT, -1
+		    pSourceVector->getPToken ()
 		)->AppendRange (0, nElements)->Close (pResultContentPPT);
 
-		rtVECTOR_Extract (pSourceContent, pElementSelection, &pResultContent);
+		pSourceVector->getElements (pResultContent, pElementSelection);
 
 		pElementSelection->release ();
-
-		pSourceContentPPT->release ();
 	    }
 	    break;
 
-	case RTYPE_C_CharUV:
-	    rtCHARUV_Align (pSourceContent);
-	    pResultContentPPT = rtPTOKEN_New (
-		pResultSpace, UV_CPD_ElementCount (pSourceContent)
-	    );
-	    pResultContent = UV_CopyWithNewPToken (pSourceContent, pResultContentPPT);
+	case RTYPE_C_CharUV: {
+		M_CPD *pSourceUVector = pSourceContent->GetCPD ();
+		pResultContentPPT.setTo (
+		    new rtPTOKEN_Handle (pResultSpace, UV_CPD_ElementCount (pSourceUVector))
+		);
+		pResultContent = UV_CopyWithNewPToken (pSourceUVector, pResultContentPPT);
+		pSourceUVector->release ();
+	    }
 	    break;
 
 	default:
@@ -526,52 +538,51 @@ PublicFnDef void rtLSTORE_Copy (
 	    );
 	    break;
 	}
-	pSourceContent->release ();
     }
 
 /*****  ... access and create PPTs for the two l-stores, ...  *****/
-    M_CPD *pSourcePPT = rtLSTORE_CPD_RowPTokenCPD (pSource);
-    unsigned int nLists = rtPTOKEN_CPD_BaseElementCount (pSourcePPT);
+    rtPTOKEN_Handle::Reference pSourcePPT (getPToken ());
 
-    M_CPD *pResultPPT = rtPTOKEN_New (pResultSpace, nLists);
+    unsigned int nLists = pSourcePPT->cardinality ();
+
+    rtPTOKEN_Handle::Reference pResultPPT (new rtPTOKEN_Handle (pResultSpace, nLists));
 
 /*****  ... bulk copy the l-store, ...  *****/
-    size_t cbResult = rtLSTORE_SizeofLStore (rtLSTORE_CPD_BreakpointCount (pSource));
-    M_CPD *pResultLStore = pResultSpace->CreateContainer (RTYPE_C_ListStore, cbResult);
-    memcpy (rtLSTORE_CPD_Base (pResultLStore), rtLSTORE_CPD_Base (pSource), cbResult);
+    size_t cbResult = rtLSTORE_SizeofLStore (breakpointCount ());
+    rtLSTORE_Handle *pResultLStore = static_cast<rtLSTORE_Handle*>(
+	pResultSpace->CreateContainer (RTYPE_C_ListStore, cbResult)
+    );
+    memcpy (pResultLStore->typecastContent (), typecastContent (), cbResult);
 
 /*****  ... fill in the new details, ...  *****/
-    InitStdCPD (pResultLStore);
+    pResultLStore->setIsInconsistent ();
 
-    rtLSTORE_CPD_IsInconsistent (pResultLStore) = true;
-
-    pResultLStore->constructReference (rtLSTORE_CPx_RowPToken);
-    pResultLStore->constructReference (rtLSTORE_CPx_Content);
-    pResultLStore->constructReference (rtLSTORE_CPx_ContentPToken);
+    pResultLStore->constructReference (pResultLStore->rowPTokenPOP ());
+    pResultLStore->constructReference (pResultLStore->contentPOP ());
+    pResultLStore->constructReference (pResultLStore->contentPTokenPOP ());
 
     pResultLStore->StoreReference (
-	rtLSTORE_CPx_RowPToken, pResultPPT
-    )->StoreReference (
-	rtLSTORE_CPx_ContentPToken, pResultContentPPT
-    )->StoreReference (
-	rtLSTORE_CPx_Content, pResultContent
+	pResultLStore->rowPTokenPOP (), pResultPPT
     );
-    ValidateBreakpointConsistency (pResultLStore);
+    pResultLStore->StoreReference (
+	pResultLStore->contentPTokenPOP (), pResultContentPPT
+    );
+    pResultLStore->StoreReference (
+	pResultLStore->contentPOP (), pResultContent->containerHandle ()
+    );
+    pResultLStore->CheckBreakpointConsistency ();
 
-    rtLSTORE_CPD_IsInconsistent (pResultLStore) = false;
+    pResultLStore->clearIsInconsistent ();
 
 /*****  ... manufacture the source to copy relationship, and pack up the result:  *****/
-    rtLINK_CType *pResultMap = rtLINK_PosConstructor (pSourcePPT, -1)->AppendRange (
+    rtLINK_CType *pResultMap = rtLINK_PosConstructor (pSourcePPT)->AppendRange (
 	0, nLists
     )->Close (pResultPPT);
 
-    pResult->constructMonotype (pResultLStore, pResultMap);
+    rResult.constructMonotype (pResultLStore, pResultMap);
 
     pResultMap->release ();
     pResultContent->release ();
-    pResultContentPPT->release ();
-    pResultPPT->release ();
-    pSourcePPT->release ();
 }
 
 
@@ -601,7 +612,7 @@ PublicFnDef void rtLSTORE_Copy (
  *	a standard CPD for the new lstore string store.
  *
  *****/
-PrivateFnDef M_CPD *CreateStringStore (
+PrivateFnDef rtLSTORE_Handle *CreateStringStore (
     M_ASD*			pContainerSpace,
     char const*			ldelim,
     char const*			rdelim,
@@ -627,9 +638,9 @@ PrivateFnDef M_CPD *CreateStringStore (
     }
 
 /*****  Make the character uvector ... *****/
-    M_CPD *sizePToken = rtPTOKEN_New (pContainerSpace, size);
+    rtPTOKEN_Handle::Reference sizePToken (new rtPTOKEN_Handle (pContainerSpace, size));
     M_CPD *charCPD = rtCHARUV_New (
-	sizePToken, pContainerSpace->TheCharacterClass ().PTokenCPD ()
+	sizePToken, pContainerSpace->TheCharacterClass ().PTokenHandle ()
     );
 
 /*****  Second pass to copy the strings, ... *****/
@@ -646,9 +657,8 @@ PrivateFnDef M_CPD *CreateStringStore (
     }
 
 /*****  Make the lstore ... *****/
-    M_CPD *lstore = rtLSTORE_NewCluster (numberOfStrings, charCPD);
+    rtLSTORE_Handle *lstore = new rtLSTORE_Handle (numberOfStrings, charCPD);
     charCPD->release ();
-    sizePToken->release ();
 
     return lstore;
 }
@@ -707,19 +717,19 @@ PrivateFnDef char const *ReturnSingleString (bool reset, va_list ap) {
  *	a standard CPD for the new lstore string store.
  *
  *****/
-PublicFnDef M_CPD *__cdecl rtLSTORE_NewStringStore (
+PublicFnDef rtLSTORE_Handle *__cdecl rtLSTORE_NewStringStore (
     M_ASD *pContainerSpace, rtLSTORE_StringEnumerator pEnumerator, ...
 ) {
     V_VARGLIST (pEnumeratorArgs, pEnumerator);
 
-    M_CPD *result = CreateStringStore (
+    rtLSTORE_Handle *result = CreateStringStore (
 	pContainerSpace, "", "", pEnumerator, pEnumeratorArgs
     );
 
     return result;
 }
 
-PublicFnDef M_CPD *rtLSTORE_NewStringStore (M_ASD *pContainerSpace, char const *pString) {
+PublicFnDef rtLSTORE_Handle *rtLSTORE_NewStringStore (M_ASD *pContainerSpace, char const *pString) {
     bool validString;
     return rtLSTORE_NewStringStore (
 	pContainerSpace, ReturnSingleString, &validString, pString
@@ -753,20 +763,20 @@ PublicFnDef M_CPD *rtLSTORE_NewStringStore (M_ASD *pContainerSpace, char const *
  *	a standard CPD for the new lstore string store.
  *
  *****/
-PublicFnDef M_CPD *__cdecl rtLSTORE_NewStringStoreWithDelm (
+PublicFnDef rtLSTORE_Handle *__cdecl rtLSTORE_NewStringStoreWithDelm (
     M_ASD *pContainerSpace, char const *ldelim, char const *rdelim,
     rtLSTORE_StringEnumerator pEnumerator, ...
 ) {
     V_VARGLIST (pEnumeratorArgs, pEnumerator);
 
-    M_CPD *result = CreateStringStore (
+    rtLSTORE_Handle *result = CreateStringStore (
 	pContainerSpace, ldelim, rdelim, pEnumerator, pEnumeratorArgs
     );
 
     return result;
 }
 
-PublicFnDef M_CPD *rtLSTORE_NewStringStoreWithDelm (
+PublicFnDef rtLSTORE_Handle *rtLSTORE_NewStringStoreWithDelm (
     M_ASD *pContainerSpace, char const *ldelim, char const *rdelim, char const *pString
 ) {
     bool validString;
@@ -787,7 +797,7 @@ PublicFnDef M_CPD *rtLSTORE_NewStringStoreWithDelm (
  *	A standard CPD for the new lstore string store created.
  *
  *****/
-PublicFnDef M_CPD *rtLSTORE_NewStringStoreFromUV (M_CPD *charUV) {
+PublicFnDef rtLSTORE_Handle *rtLSTORE_NewStringStoreFromUV (M_CPD *charUV) {
     NewStringStoreFromUVCount++;
 
 /*****  Determine the number of characters in the uvector ... *****/
@@ -804,7 +814,7 @@ PublicFnDef M_CPD *rtLSTORE_NewStringStoreFromUV (M_CPD *charUV) {
     }
 
 /*****  Make and return the lstore ... *****/
-    return rtLSTORE_NewCluster (numberOfStrings, charUV);
+    return new rtLSTORE_Handle (numberOfStrings, charUV);
 } 
 
 
@@ -815,54 +825,38 @@ PublicFnDef M_CPD *rtLSTORE_NewStringStoreFromUV (M_CPD *charUV) {
 /*---------------------------------------------------------------------------
  *****  Routine to align an L-Store when the content ptoken is not current.
  *
- *  Arguments:
- *	lstore			- a standard CPD for the L-Store to be aligned.
- *
  *  Returns:
- *	'lstore'
+ *	'true' if alignments performed, false otherwise.
  *
  *****/
-PrivateFnDef M_CPD *AlignFromContent (M_CPD *lstore) {
-    M_CPD *pTokenCPD;
-    rtPTOKEN_CType *ptokenc;
-    int adjustment = 0;
-
+bool rtLSTORE_Handle::AlignFromContent () {
 /***** Traversal Macros ... *****/
 
-#define processTo(where)\
-{\
+#define processTo(where) {\
     unsigned int limit = (unsigned int)(where);\
-    while (*rtLSTORE_CPD_Breakpoint (lstore) <= limit)\
-	(*rtLSTORE_CPD_Breakpoint (lstore)++) += adjustment;\
+    while (*pBreakpoint <= limit)\
+	(*pBreakpoint++) += adjustment;\
 }
 
-#define processToEnd()\
-{\
-    while (\
-	rtLSTORE_CPD_Breakpoint (lstore) <= rtLSTORE_CPD_BreakpointArray (\
-	    lstore\
-	) + rtLSTORE_CPD_BreakpointCount (lstore)\
-    ) (*rtLSTORE_CPD_Breakpoint (lstore)++) += adjustment;\
+#define processToEnd() {\
+    while (pBreakpoint < pBreakpointLimit)\
+	(*pBreakpoint++) += adjustment;\
 }
 
-#define handleDelete(ptOrigin, ptShift)\
-{\
+#define handleDelete(ptOrigin, ptShift) {\
     processTo (ptOrigin + ptShift);\
-    while (*rtLSTORE_CPD_Breakpoint (lstore) < (unsigned int)ptOrigin)\
-    {\
-	int size = ptOrigin + ptShift - *rtLSTORE_CPD_Breakpoint (lstore);\
+    while (*pBreakpoint < (unsigned int)ptOrigin) {\
+	int size = ptOrigin + ptShift - *pBreakpoint;\
 	adjustment += size;\
 	ptShift -= size;\
-	*rtLSTORE_CPD_Breakpoint (lstore)++ += adjustment;\
+	*pBreakpoint++ += adjustment;\
     }\
     adjustment += ptShift;\
 }
 
-#define handleInsert(ptOrigin, ptShift)\
-{\
+#define handleInsert(ptOrigin, ptShift) {\
     ERR_SignalFault (\
-	EC__InternalInconsistency,\
-	"AlignFromContent:  Illegal insertion in content ptoken"\
+	EC__InternalInconsistency, "AlignFromContent:  Illegal insertion in content ptoken"\
     );\
 }
 
@@ -873,13 +867,12 @@ PrivateFnDef M_CPD *AlignFromContent (M_CPD *lstore) {
  *---------------------------------------------------------------------------
  */
 /*****  Return if the L-Store is already aligned...  *****/
-    rtPTOKEN_IsntCurrent (lstore, rtLSTORE_CPx_ContentPToken, pTokenCPD);
-    if (IsNil (pTokenCPD))
-	return lstore;
+    rtPTOKEN_Handle::Reference pPToken;
+    if (isTerminal (contentPTokenPOP (), pPToken))
+	return false;
 
 /***** If the row ptoken is also not current, error ... *****/
-    if (!rtPTOKEN_IsCurrent (lstore, rtLSTORE_CPx_RowPToken)) {
-	pTokenCPD->release ();
+    if (isntTerminal (rowPTokenPOP ())) {
 	ERR_SignalFault (
 	    EC__InternalInconsistency,
 	    "AlignFromContent:  Both LStore PTokens are not current"
@@ -888,33 +881,34 @@ PrivateFnDef M_CPD *AlignFromContent (M_CPD *lstore) {
 
     AlignFromContentCount++;
     if (TracingCalls)
-	IO_printf ("AlignFromContent: cpd=%08X\n", lstore);
+	IO_printf ("AlignFromContent: cpd=%08X\n", this);
 
 /***** Get a ptoken constructor for the content ptoken ... *****/
-    ptokenc = rtPTOKEN_CPDCumAdjustments (pTokenCPD);
-    pTokenCPD->release ();
+    rtPTOKEN_CType *ptokenc = pPToken->getAdjustments ();
 
 /***** Don't forget to enable modifications ... *****/
-    lstore->EnableModifications ();
-    lstore->CheckConsistency ();
-    rtLSTORE_CPD_IsInconsistent (lstore) = true;
+    EnableModifications ();
+    CheckConsistency ();
+    setIsInconsistent ();
 
 /***** Traverse the referential ptoken *****/
-    rtLSTORE_CPD_Breakpoint (lstore) = rtLSTORE_CPD_BreakpointArray (lstore);
+    int adjustment = 0;
+    unsigned int *pBreakpoint = breakpointArray ();
+    unsigned int const *const pBreakpointLimit = pBreakpoint + breakpointCount () + 1;
     rtPTOKEN_FTraverseInstructions (ptokenc, handleInsert, handleDelete);
 
 /*** process the remaining values ***/
     processToEnd ();
 
 /***** Now that the row state is adjusted, update the content ptoken  *****/
-    lstore->StoreReference (rtLSTORE_CPx_ContentPToken, ptokenc->NextGeneration ());
-
+    StoreReference (contentPTokenPOP (), ptokenc->NextGeneration ());
     ptokenc->discard ();
-    ValidateBreakpointConsistency (lstore);
-    rtLSTORE_CPD_IsInconsistent (lstore) = false;
+
+    CheckBreakpointConsistency ();
+    clearIsInconsistent ();
 
 /***** All done *****/
-    return lstore;
+    return true;
 
 #undef handleDelete
 #undef handleInsert
@@ -927,46 +921,35 @@ PrivateFnDef M_CPD *AlignFromContent (M_CPD *lstore) {
  *****  Routine to align an L-Store when the row or content ptoken (not both)
  *****  is not current.
  *
- *  Arguments:
- *	lstore			- a standard CPD for the L-Store to be aligned.
- *
  *  Returns:
- *	'lstore'
+ *	true if alignments done, false otherwise.
  *
  *****/
-PublicFnDef M_CPD *rtLSTORE_Align (M_CPD *lstore) {
-    M_CPD			*pTokenCPD;
-    int				size, newSize, contentAdj, origPos, i;
-    unsigned int		*newbp, *newbpstart;
-
+bool rtLSTORE_Handle::align () {
 /***** Traversal Macros ... *****/
 #define output(value)\
     *newbp++ = (value)
 
 #define processTo(newPos) {\
     while (origPos < (newPos))\
-	output((rtLSTORE_CPD_BreakpointArray(lstore)[origPos++])+contentAdj);\
+	output(pBreakpoints[origPos++]+contentAdj);\
 }
 
 #define originalValue(newPos)\
-    (rtLSTORE_CPD_BreakpointArray (lstore)[(newPos)])
+    (pBreakpoints[(newPos)])
 
 #define handleInsert(ptOrigin, ptShift) {\
-    int i, value;\
-\
     processTo (ptOrigin);\
-    value = originalValue (ptOrigin) + contentAdj;\
-    for (i=0; i < ptShift; i++) output (value);\
+    int value = originalValue (ptOrigin) + contentAdj;\
+    for (int i=0; i < ptShift; i++) output (value);\
 }
 
 #define handleDelete(ptOrigin, ptShift) {\
-    int ptorig, at, x, amt;\
-\
-    ptorig = ptOrigin + ptShift;\
+    int ptorig = ptOrigin + ptShift;\
     processTo (ptorig);\
-    at = originalValue (ptorig);\
-    x  = originalValue (ptOrigin);\
-    amt = at - x;\
+    int at = originalValue (ptorig);\
+    int x  = originalValue (ptOrigin);\
+    int amt = at - x;\
     contentPTokenC->AppendAdjustment (x + contentAdj, amt);\
     contentAdj += amt;\
     origPos -= ptShift; /* skip past deleted values */\
@@ -975,106 +958,99 @@ PublicFnDef M_CPD *rtLSTORE_Align (M_CPD *lstore) {
 
 /*
  *---------------------------------------------------------------------------
- *  Code Body of 'rtLSTORE_Align'
+ *  Code Body of 'rtLSTORE_Handle::align ()'
  *---------------------------------------------------------------------------
  */
-    RTYPE_MustBeA (
-	"rtLSTORE_Align", M_CPD_RType (lstore), RTYPE_C_ListStore
-    );
-
-    ValidateBreakpointConsistency (lstore);
+    CheckBreakpointConsistency ();
 
 /*****  Return if the L-Store is already aligned...  *****/
-    rtPTOKEN_IsntCurrent (lstore, rtLSTORE_CPx_RowPToken, pTokenCPD);
-    if (IsNil (pTokenCPD))
-	return AlignFromContent (lstore);
+    rtPTOKEN_Handle::Reference pPToken;
+    if (isTerminal (rowPTokenPOP (), pPToken)) {
+	if (isAStringStore ()) {
+	    VContainerHandle::Reference pContent;
+	    getContent (pContent);
+	    pContent->align ();
+	}
+	return AlignFromContent ();
+    }
 
 /***** If the content ptoken is also not current, error ... *****/
-    if (!rtPTOKEN_IsCurrent (lstore, rtLSTORE_CPx_ContentPToken)) {
-	pTokenCPD->release ();
+    if (isntTerminal (contentPTokenPOP ())) {
 	ERR_SignalFault (
 	    EC__InternalInconsistency,
-	    "rtLSTORE_Align:  Both LStore PTokens are not current"
+	    "rtLSTORE_Handle::align:  Both LStore PTokens are not current"
 	);
     }
 
     AlignCount++;
     if (TracingCalls)
-	IO_printf ("rtLSTORE_Align: cpd=%08X\n", lstore);
+	IO_printf ("rtLSTORE_Handle::align: handle=%08X\n", this);
 
 /***** Get a ptoken constructor for the row ptoken ... *****/
-    rtPTOKEN_CType *ptokenc = rtPTOKEN_CPDCumAdjustments (pTokenCPD);
-    pTokenCPD->release ();
+    rtPTOKEN_CType *ptokenc = pPToken->getAdjustments ();
 
 /***** Make a ptoken constructor for the content ptoken ... *****/
-    rtPTOKEN_CType *contentPTokenC = rtPTOKEN_NewShiftPTConstructor (
-	lstore, rtLSTORE_CPx_ContentPToken
-    );
+    getContentPToken (pPToken);
+    rtPTOKEN_CType *contentPTokenC = pPToken->makeAdjustments ();
 
 /***** Determine the sizes ... *****/
-    size = rtLSTORE_CPD_BreakpointCount (lstore);
-    newSize = rtPTOKEN_CPD_BaseElementCount(ptokenc->NextGeneration ());
+    unsigned int oldSize = breakpointCount ();
+    unsigned int newSize = ptokenc->NextGeneration ()->cardinality ();
 
 /***** Allocate some temporary space for the breakpoint table values ... *****/
 /*** (remember, the breakpoint table is 1 larger than the size.) ***/
-    newbpstart = newbp = (unsigned int *) UTIL_Malloc (
-	(newSize + 1) * sizeof (int)
-    );
+    unsigned int *const newbpstart = (unsigned int*)UTIL_Malloc ((newSize + 1) * sizeof (unsigned int));
+    unsigned int *newbp = newbpstart;
 
 /***** Setup for the traversal *****/
-    contentAdj = 0;
-    origPos = 0;
+    int contentAdj = 0;
+    int origPos = 0;
 
 /***** Traverse the referential ptoken *****/
+    unsigned int *pBreakpoints = breakpointArray ();
     rtPTOKEN_FTraverseInstructions (ptokenc, handleInsert, handleDelete);
     /*** process the remaining values ***/
-    processTo (size + 1);
+    processTo (oldSize + 1);
 
 /***** Reconstruct the breakpoint array ... *****/
-    rtLSTORE_CPD_Breakpoint (lstore) = rtLSTORE_CPD_BreakpointArray (lstore) + size + 1;
+//    rtLSTORE_CPD_Breakpoint (lstore) = rtLSTORE_CPD_BreakpointArray (lstore) + oldSize + 1;
 
 /*****  Don't forget to enable modifications ... *****/
-    lstore->EnableModifications ();
-    lstore->CheckConsistency ();
-    rtLSTORE_CPD_IsInconsistent (lstore) = true;
+    EnableModifications ();
+    CheckConsistency ();
 
-    lstore->ShiftContainerTail (
-	rtLSTORE_CPx_Breakpoint, 0, ((ptrdiff_t)newSize - size) * sizeof (int), true
+    setIsInconsistent ();
+
+    ShiftContainerTail (
+	breakpointLimit (), 0, ((ptrdiff_t)newSize - oldSize) * sizeof (unsigned int), true
     );
 
-    rtLSTORE_CPD_BreakpointCount (lstore) = newSize;
+    setBreakpointCountTo (newSize);
 
     /*** copy in the new values ... ***/
-    newbp = newbpstart;
-    for (i=0; i<=newSize; i++)
-	rtLSTORE_CPD_BreakpointArray (lstore)[i] =
-	    *newbp++;
-
+    memcpy (breakpointArray (), newbpstart, sizeof (unsigned int) * (newSize + 1));
     UTIL_Free (newbpstart);
 
 
 /***** Fix the row ptoken to be the new one ... *****/
-    lstore->StoreReference (rtLSTORE_CPx_RowPToken, ptokenc->NextGeneration ());
-
+    StoreReference (rowPTokenPOP (), ptokenc->NextGeneration ());
     ptokenc->discard ();
 
 /***** Close the content ptoken and copy it into the lstore ... *****/
-    pTokenCPD = contentPTokenC->ToPToken ();
-    lstore->StoreReference (rtLSTORE_CPx_ContentPToken, pTokenCPD);
-    pTokenCPD->release ();
+    pPToken.setTo (contentPTokenC->ToPToken ());
+    StoreReference (contentPTokenPOP (), pPToken);
 
-    ValidateBreakpointConsistency (lstore);
-    rtLSTORE_CPD_IsInconsistent (lstore) = false;
+    CheckBreakpointConsistency ();
+    clearIsInconsistent ();
 
-    if (rtLSTORE_CPD_StringStore (lstore)) {
-	M_CPD *content = lstore->GetCPD (rtLSTORE_CPx_Content, RTYPE_C_CharUV);
-	if (!rtPTOKEN_IsCurrent (content, UV_CPx_PToken))
-	    rtCHARUV_Align (content);
-	content->release ();
+    if (isAStringStore ()) {
+	VContainerHandle::Reference pContent;
+	getContent (pContent);
+	pContent->align ();
     }
 
 /***** All done *****/
-    return lstore;
+    return true;
 }
 
 
@@ -1083,8 +1059,7 @@ PublicFnDef M_CPD *rtLSTORE_Align (M_CPD *lstore) {
  *****  lstore.
  *
  *  Arguments:
- *	pLStoreCPD			- the lstore to align.
- *	deletingEmptyUSegments	- a boolean which, when true, requests that
+ *	bCleaning		- a boolean which, when true, requests that
  *				  unreferenced u-segments be deleted from
  *				  vectors.
  *
@@ -1092,27 +1067,12 @@ PublicFnDef M_CPD *rtLSTORE_Align (M_CPD *lstore) {
  *	true if any alignments were necessary. false otherwise.
  *
  *****/
-PublicFnDef bool rtLSTORE_AlignAll (M_CPD *pLStoreCPD, bool deletingEmptyUSegments) {
-    RTYPE_MustBeA (
-	"rtLSTORE_AlignAll", M_CPD_RType (pLStoreCPD), RTYPE_C_ListStore
-    );
+bool rtLSTORE_Handle::alignAll (bool bCleaning) {
+    bool result = isTerminal (rowPTokenPOP ()) && isTerminal (contentPTokenPOP ()) ? false : align ();
 
-    bool result = rtPTOKEN_IsCurrent (
-	pLStoreCPD, rtLSTORE_CPx_RowPToken
-    ) && rtPTOKEN_IsCurrent (
-	pLStoreCPD, rtLSTORE_CPx_ContentPToken
-    ) ? false : (rtLSTORE_Align (pLStoreCPD), true);
-
-    M_CPD *pContentCPD = rtLSTORE_CPD_ContentCPD (pLStoreCPD);
-    if (RTYPE_C_CharUV != (RTYPE_Type)M_CPD_RType (pContentCPD))
-	result |= rtVSTORE_AlignAll (pContentCPD, deletingEmptyUSegments);
-    else if (!rtPTOKEN_IsCurrent (pContentCPD, UV_CPx_PToken)) {
-	rtCHARUV_Align (pContentCPD);
-	result = true;
-    }
-    pContentCPD->release ();
-
-    return result;
+    VContainerHandle::Reference pContent;
+    getContent (pContent);
+    return pContent->alignAll (bCleaning) || result;
 }
 
 
@@ -1120,46 +1080,33 @@ PublicFnDef bool rtLSTORE_AlignAll (M_CPD *pLStoreCPD, bool deletingEmptyUSegmen
  ***** Routine to align an lstore when the content ptoken is not current.
  *
  *  Arguments:
- *	lstore			- a standard CPD for the lstore to align.
  *	listSelectorLC		- a pointer to a link constructor containing
  *				  the lists which need to be updated.
- *	adjustmentUV		- optional (Nil if ommitted).
- *				a standard CPD for an integer uvector
+ *	adjustmentUV		- optional (Nil if omitted).
+ *				  a standard CPD for an integer uvector
  *				  containing the amount that each list in
  *				  'listSelectorLC' needs to be modified by.
- *				If ommitted, the adjustment amount will a
- *				always be +1.
+ *				  If omitted, the adjustment amount defaults
+ *				  to +1.
  *
  *  Returns:
- *	'lstore'
+ *	Nothing
  *
  *****/
-PublicFnDef M_CPD *rtLSTORE_AlignUsingLCSelctLists (
-    M_CPD *lstore, rtLINK_CType *listSelectorLC, M_CPD *adjustmentUV
-) {
-    M_CPD *newPToken;
-    unsigned int
-	breakpointPos;
-    int noAdjustments,
-	cummulativeAdjustment;
-    rtINTUV_ElementType
-	*adjustmentp;
-
+void rtLSTORE_Handle::alignUsingSelectedLists (rtLINK_CType *listSelectorLC, M_CPD *adjustmentUV) {
 /***** The list selector link constructor traversal macros: *****/
-#define currentAdjustment ((noAdjustments) ? (1) : (*adjustmentp++))
+#define currentAdjustment (bNoAdjustments ? 1 : (*adjustmentp++))
 
 #define outputThru(position) {\
-    while (breakpointPos <= position)\
-	rtLSTORE_CPD_BreakpointArray (lstore)[breakpointPos++]\
-	    += cummulativeAdjustment;\
+    while (xBreakpoint <= position)\
+	pBreakpoints[xBreakpoint++] += cumulativeAdjustment;\
 }
 
 #define handleRange(position, count, value) {\
     outputThru ((unsigned int)value);\
     while (count > 0) {\
-	cummulativeAdjustment += (currentAdjustment);\
-	rtLSTORE_CPD_BreakpointArray (lstore)[breakpointPos++]\
-	    += cummulativeAdjustment;\
+	cumulativeAdjustment += (currentAdjustment);\
+	pBreakpoints[xBreakpoint++] += cumulativeAdjustment;\
 	count--;\
 	value++;\
     }\
@@ -1169,10 +1116,10 @@ PublicFnDef M_CPD *rtLSTORE_AlignUsingLCSelctLists (
     outputThru ((unsigned int)value);\
     /*** add up all of the adjustments and apply once ***/\
     while (count > 0) {\
-	cummulativeAdjustment += (currentAdjustment);\
+	cumulativeAdjustment += (currentAdjustment);\
 	count--;\
     }\
-    rtLSTORE_CPD_BreakpointArray (lstore)[breakpointPos++] += cummulativeAdjustment;\
+    pBreakpoints[xBreakpoint++] += cumulativeAdjustment;\
 }
 
 #define handleNil(position, count, value)\
@@ -1184,15 +1131,14 @@ PublicFnDef M_CPD *rtLSTORE_AlignUsingLCSelctLists (
  *  Code Body of 'rtLSTORE_AlignUsingLCSelctLists'
  *---------------------------------------------------------------------------
  */
-    ValidateBreakpointConsistency (lstore);
+    CheckBreakpointConsistency ();
 
 /*****  Return if the content ptoken is already aligned ...  *****/
-    if (rtPTOKEN_IsCurrent (lstore, rtLSTORE_CPx_ContentPToken))
-	return lstore;
+    if (isTerminal (contentPTokenPOP ()))
+	return;
 
 /***** If the row ptoken is also not current, error ... *****/
-    if (!rtPTOKEN_IsCurrent (lstore, rtLSTORE_CPx_RowPToken)
-    ) ERR_SignalFault (
+    if (isntTerminal (rowPTokenPOP ())) ERR_SignalFault (
 	EC__InternalInconsistency,
 	"rtLSTORE_AlignUsingLCSelectedLists: One P-Token Must Be Current"
     );
@@ -1200,35 +1146,35 @@ PublicFnDef M_CPD *rtLSTORE_AlignUsingLCSelctLists (
     AlignUsingLCListsCount++;
 
 /***** Determine if 'adjustmentUV' was specified ... *****/
-    noAdjustments = IsNil (adjustmentUV) ? true : false;
+    bool bNoAdjustments = IsNil (adjustmentUV) ? true : false;
 
 /***** Align and validate the linkc ... *****/
-    if (noAdjustments)
-	listSelectorLC->AlignForExtract (lstore, rtLSTORE_CPx_RowPToken);
+    rtINTUV_ElementType *adjustmentp = 0;
+    if (bNoAdjustments)
+	listSelectorLC->AlignForExtract (this, rowPTokenPOP ());
     else {
 	listSelectorLC->AlignForAssign (
-	    lstore, rtLSTORE_CPx_RowPToken, adjustmentUV, UV_CPx_PToken
+	    this, rowPTokenPOP (), adjustmentUV->containerHandle (), UV_CPD_PToken (adjustmentUV)
 	);
-
 	adjustmentp = rtINTUV_CPD_Array (adjustmentUV);
     }
 
+    unsigned int cBreakpoints = breakpointCount ();
     if (TracingCalls) IO_printf (
       "rtLSTORE_AlignUseLCLists: cpd=%08X, lsBpaSz=%u, lcSz=%u, lcRRDCnt=%u\n",
-	lstore, rtLSTORE_CPD_BreakpointCount (lstore),
-	listSelectorLC->ElementCount (),
-	rtLINK_LC_RRDCount (listSelectorLC)
+	this, cBreakpoints, listSelectorLC->ElementCount (), rtLINK_LC_RRDCount (listSelectorLC)
     );
 
 /*****  Don't forget to enable modifications ... *****/
-    lstore->EnableModifications ();
-    lstore->CheckConsistency ();
-    rtLSTORE_CPD_IsInconsistent (lstore) = true;
+    EnableModifications ();
+    CheckConsistency ();
+    setIsInconsistent ();
 
 /*****  Modify the break point array ... *****/
 /*****  Traverse the selector linkc ... *****/
-    breakpointPos = 0;
-    cummulativeAdjustment = 0;
+    unsigned int *pBreakpoints = breakpointArray ();
+    unsigned int xBreakpoint = 0;
+    int cumulativeAdjustment = 0;
 
     rtLINK_TraverseRRDCList (
 	listSelectorLC, handleNil, handleRepeat, handleRange
@@ -1238,14 +1184,15 @@ PublicFnDef M_CPD *rtLSTORE_AlignUsingLCSelctLists (
     outputThru (listSelectorLC->ReferenceNil ());
 
 /***** Set the content PToken to the new one ... *****/
-    newPToken = rtPTOKEN_BasePToken (lstore, rtLSTORE_CPx_ContentPToken);
-    lstore->StoreReference (rtLSTORE_CPx_ContentPToken, newPToken);
-    newPToken->release ();
+    rtPTOKEN_Handle::Reference pOldContentPToken;
+    getContentPToken (pOldContentPToken);
+
+    rtPTOKEN_Handle::Reference pNewContentPToken (pOldContentPToken->basePToken ());
+    StoreReference (contentPTokenPOP (), pNewContentPToken);
 
 /***** and return the aligned lstore ... *****/
-    ValidateBreakpointConsistency (lstore);
-    rtLSTORE_CPD_IsInconsistent (lstore) = false;
-    return lstore;
+    CheckBreakpointConsistency ();
+    clearIsInconsistent ();
 
 /***** undef the macros ... *****/
 #undef handleNil
@@ -1260,66 +1207,57 @@ PublicFnDef M_CPD *rtLSTORE_AlignUsingLCSelctLists (
  ***** Routine to align an lstore when the content ptoken is not current.
  *
  *  Arguments:
- *	lstore			- a standard CPD for the lstore to align.
- *	listSelectorRef		- a pointer to a reference specifying which
+ *	rInstance		- a pointer to a reference specifying which
  *				  list needs to be updated.
  *	adjustment		- an integer specifying the amount that the
  *				list needs to be modified by.
  *
- *  Returns:
- *	'lstore'
- *
  *****/
-PublicFnDef M_CPD *rtLSTORE_AlignUsingRefSelctList (
-    M_CPD *lstore, rtREFUV_TypePTR_Reference listSelectorRef, int adjustment
+void rtLSTORE_Handle::alignUsingSelectedLists (
+    DSC_Scalar &rInstance, int adjustment
 ) {
-    int i;
-    M_CPD *newPToken;
-
-    ValidateBreakpointConsistency (lstore);
+    CheckBreakpointConsistency ();
 
 /*****  Return if the content ptoken is already aligned ...  *****/
-    if (rtPTOKEN_IsCurrent (lstore, rtLSTORE_CPx_ContentPToken))
-	return lstore;
+    if (isTerminal (contentPTokenPOP ()))
+	return;
 
 /***** If the row ptoken is also not current, error ... *****/
-    if (!rtPTOKEN_IsCurrent (lstore, rtLSTORE_CPx_RowPToken)
-    ) ERR_SignalFault (
+    if (isntTerminal (rowPTokenPOP ())) ERR_SignalFault (
 	EC__InternalInconsistency,
 	"rtLSTORE_AlignUsingRefSelectedList: One PToken Must Be Current"
     );
 
     AlignUsingRefListCount++;
+
+    unsigned int cBreakpoints = breakpointCount ();
     if (TracingCalls) IO_printf (
-	"rtLSTORE_AlignUseRefList: cpd=%08X, lsBpaSz=%u\n",
-	lstore, rtLSTORE_CPD_BreakpointCount (lstore)
+	"rtLSTORE_AlignUseRefList: cpd=%08X, lsBpaSz=%u\n", this, cBreakpoints
     );
 
 /***** Align and validate the reference ... *****/
-    rtREFUV_AlignAndValidateRef (
-	listSelectorRef, lstore, rtLSTORE_CPx_RowPToken
-    );
+    rtREFUV_AlignAndValidateRef (&rInstance, this, rowPTokenPOP ());
 
 /*****  Don't forget to enable modifications ... *****/
-    lstore->EnableModifications ();
-    lstore->CheckConsistency ();
-    rtLSTORE_CPD_IsInconsistent (lstore) = true;
+    EnableModifications ();
+    CheckConsistency ();
+    setIsInconsistent ();
 
 /*****  Modify the break point array ... *****/
-    for (i= rtREFUV_Ref_Element (listSelectorRef) + 1;
-	 i <= (int) rtLSTORE_CPD_BreakpointCount (lstore);
-	 i++
-    ) rtLSTORE_CPD_BreakpointArray (lstore)[i] += (adjustment);
+    unsigned int *pBreakpoints = breakpointArray ();
+    for (unsigned int i= DSC_Scalar_Int (rInstance) + 1; i <= cBreakpoints; i++)
+	pBreakpoints[i] += (adjustment);
 
 /***** Set the content PToken to the new one ... *****/
-    newPToken =	rtPTOKEN_BasePToken (lstore, rtLSTORE_CPx_ContentPToken);
-    lstore->StoreReference (rtLSTORE_CPx_ContentPToken, newPToken);
-    newPToken->release ();
+    rtPTOKEN_Handle::Reference pOldContentPToken;
+    getContentPToken (pOldContentPToken);
+
+    rtPTOKEN_Handle::Reference pNewContentPToken (pOldContentPToken->basePToken ());
+    StoreReference (contentPTokenPOP (), pNewContentPToken);
 
 /***** and return the aligned lstore ... *****/
-    ValidateBreakpointConsistency (lstore);
-    rtLSTORE_CPD_IsInconsistent (lstore) = false;
-    return lstore;
+    CheckBreakpointConsistency ();
+    clearIsInconsistent ();
 }
 
 
@@ -1331,48 +1269,41 @@ PublicFnDef M_CPD *rtLSTORE_AlignUsingRefSelctList (
  *****  Routine to add a specified number of rows to the end of a list store.
  *
  *  Arguments:
- *	lstore			- a standard CPD for a list store.
- *	newListsPToken		- a standard CPD for a P-Token which
- *				  specifies the number of lists to be added.
+ *	pAdditionsPPT		- a handle for a P-Token specifying the lists
+ *				  to be added.
  *
  *  Returns:
  *	An link constructor referencing the rows added to the list store.  The
- *	positional P-Token of this link constructor will be 'newListsPToken'.
+ *	positional P-Token of this link constructor will be 'pAdditionsPPT'.
  *
  *****/
-PublicFnDef rtLINK_CType *rtLSTORE_AddLists (M_CPD *lstore, M_CPD *newListsPToken) {
+rtLINK_CType *rtLSTORE_Handle::addInstances_(rtPTOKEN_Handle *pAdditionsPPT) {
     AddListsCount++;
     if (TracingCalls)
-	IO_printf ("rtLSTORE_AddLists: cpd=%08X\n", lstore);
-
-/*****  Verify that 'newListsPToken' is a p-token...  *****/
-    RTYPE_MustBeA (
-	"rtLSTORE_AddLists", M_CPD_RType (newListsPToken), RTYPE_C_PToken
-    );
+	IO_printf ("rtLSTORE_AddLists: cpd=%08X\n", this);
 
 /*****  First make sure that the row ptoken is current ...  *****/
-    rtLSTORE_Align (lstore);
+    align ();
 
 /*****  ...  and then modify it ...  *****/
-    rtPTOKEN_CType *ptc = rtPTOKEN_NewShiftPTConstructor (lstore, rtLSTORE_CPx_RowPToken);
-    int origin = rtPTOKEN_PTC_BaseCount (ptc);
-    int numLists = rtPTOKEN_CPD_BaseElementCount (newListsPToken);
+    rtPTOKEN_Handle::Reference pStorePPT (getPToken ());
+    rtPTOKEN_CType *ptc = pStorePPT->makeAdjustments ();
 
-    M_CPD *lstoreRowPToken = ptc->AppendAdjustment (origin, numLists)->ToPToken ();
+    unsigned int origin = rtPTOKEN_PTC_BaseCount (ptc);
+    unsigned int numLists = pAdditionsPPT->cardinality ();
+
+    pStorePPT.setTo (ptc->AppendAdjustment (origin, numLists)->ToPToken ());
 
 /*****  ... cause the rows to be added  ...  *****/
-    rtLSTORE_Align (lstore);
+    align ();
 
 /*****  ...create a link constructor for the added rows...  *****/
-    rtLINK_CType *addedLists = rtLINK_AppendRange (
-	rtLINK_RefConstructor (lstoreRowPToken, -1), origin, numLists
-    )->Close (newListsPToken);
-
-/*****  ...cleanup, ...  *****/
-    lstoreRowPToken->release ();
+    rtLINK_CType *pResult = rtLINK_AppendRange (
+	rtLINK_RefConstructor (pStorePPT), origin, numLists
+    )->Close (pAdditionsPPT);
 
 /*****  ...and return.  *****/
-    return addedLists;
+    return pResult;
 }
 
 
@@ -1384,47 +1315,39 @@ PublicFnDef rtLINK_CType *rtLSTORE_AddLists (M_CPD *lstore, M_CPD *newListsPToke
  *****  Routine to get the number of elements in a list.
  *
  *  Arguments:
- *	lstore			- a standard CPD for the L-Store to be queried.
- *	selectionRef		- a reference specifying which list to be
+ *	rResult			- the address at which the element count
+ *				  will be returned.
+ *	rSubscript		- a reference specifying which list to be
  *				  counted.
  *
  *  Returns:
- *	The element count for the specified list.
+ *	true
  *
  *****/
-PublicFnDef int rtLSTORE_RefSelListElementCount (
-    M_CPD *lstore, rtREFUV_TypePTR_Reference selectionRef
-) {
-    unsigned int
-	*breakpointPtr,
-	referenceValue;
-
+bool rtLSTORE_Handle::getCardinality (unsigned int &rResult, DSC_Scalar &rSubscript) {
     RefListElementCount++;
-    ValidateBreakpointConsistency (lstore);
+
+    CheckBreakpointConsistency ();
     if (TracingCalls) IO_printf (
-	"rtLSTORE_RefSelListElementCount: cpd=%08X", lstore
+	"rtLSTORE_RefSelListElementCount: cpd=%08X", this
     );
 
 /*****  Align the arguments and validate the reference as an extraction *****/
-    rtREFUV_AlignAndValidateRef (
-	selectionRef, rtLSTORE_Align (lstore), rtLSTORE_CPx_RowPToken
-    );
+    align ();
+    rtREFUV_AlignAndValidateRef (&rSubscript, this, rowPTokenPOP ());
 
 /*****  Get the value out of the reference ... *****/
-    referenceValue =(int) rtREFUV_Ref_Element (selectionRef);
-
-    breakpointPtr = rtLSTORE_CPD_BreakpointArray (lstore);
+    unsigned int xElement = DSC_Scalar_Int (rSubscript);
+    unsigned int const *pBreakpoints = breakpointArray ();
 
 /*---------------------------------------------------------------------------
- * If the referenceValue is the Nil value (i.e. equal to the breakpoint count)
+ * If the xElement is the Nil value (i.e. equal to the breakpoint count)
  * return 0; otherwise return the number of elements as calculated via the
  * breakpoint array
  *---------------------------------------------------------------------------
  */
-    return
-	referenceValue == rtLSTORE_CPD_BreakpointCount (lstore)
-	? 0
-	: breakpointPtr[referenceValue + 1] - breakpointPtr [referenceValue];
+    rResult = xElement >= breakpointCount () ? 0 : pBreakpoints[xElement + 1] - pBreakpoints [xElement];
+    return true;
 }
 
 
@@ -1432,29 +1355,28 @@ PublicFnDef int rtLSTORE_RefSelListElementCount (
  *****  Routine to get the number of elements in each of a set of lists.
  *
  *  Arguments:
- *	lstore			- a standard CPD for the L-Store to be queried.
- *	selectionLC		- a reference specifying which list to be
+ *	rpResult		- the address that will receive an integer
+ *				  u-vector containing the element counts of
+ *				  the specified lists.
+ *	pSubscript		- a reference specifying which list to be
  *				  counted.
  *
  *  Returns:
- *	An integer uvector containing the element counts for the specified
- *  lists.
+ *	true
  *
  *****/
-PublicFnDef M_CPD *rtLSTORE_LCSelListElementCount (
-    M_CPD *lstore, rtLINK_CType *selectionLC
-) {
+bool rtLSTORE_Handle::getCardinality (M_CPD *&rpResult, rtLINK_CType *pSubscript) {
 #define nilReferenceHandler(c, n, r)\
     while (n-- > 0)\
 	*resultPtr++ = 0
 
 #define repeatedReferenceHandler(c, n, r)\
     while (n-- > 0)\
-	*resultPtr++ = breakpointArray [r + 1] - breakpointArray [r]
+	*resultPtr++ = pBreakpoints [r + 1] - pBreakpoints [r]
 
 #define rangeReferenceHandler(c, n, r)\
     while (n-- > 0) {\
-	*resultPtr++ = breakpointArray [r + 1] - breakpointArray [r];\
+	*resultPtr++ = pBreakpoints [r + 1] - pBreakpoints [r];\
 	r++;\
     }
 
@@ -1464,31 +1386,29 @@ PublicFnDef M_CPD *rtLSTORE_LCSelListElementCount (
  * Align the arguments and validate the link constructor as an extraction
  * index for the L-Store.
  *****/
-    selectionLC->AlignForExtract (rtLSTORE_Align (lstore), rtLSTORE_CPx_RowPToken);
+    align ();
+    pSubscript->AlignForExtract (this, rowPTokenPOP ());
 
     if (TracingCalls) IO_printf (
 	"rtLSTORE_LCSelListElementCount: cpd=%08X, lsBpaSz=%u, lcSz=%u, lcRRDCnt=%u\n",
-	lstore, rtLSTORE_CPD_BreakpointCount (lstore),
-	selectionLC->ElementCount (),
-	rtLINK_LC_RRDCount (selectionLC)
+	this, breakpointCount (),
+	pSubscript->ElementCount (),
+	rtLINK_LC_RRDCount (pSubscript)
     );
 
 /*****  Create the result uvector  *****/
-    M_CPD *resultUV = rtINTUV_New (
-	selectionLC->PPT (), lstore->KOT ()->TheIntegerPTokenCPD ()
-    );
-
-    rtINTUV_ElementType *resultPtr = rtINTUV_CPD_Array (resultUV);
+    rpResult = rtINTUV_New (pSubscript->PPT (), KOT ()->TheIntegerPTokenHandle ());
+    rtINTUV_ElementType *resultPtr = rtINTUV_CPD_Array (rpResult);
 
 /***** Access the breakpoint array *****/
-    unsigned int *breakpointArray = rtLSTORE_CPD_BreakpointArray (lstore);
+    unsigned int *pBreakpoints = breakpointArray ();
 
 /*****  Do the counting  *****/
     rtLINK_TraverseRRDCList (
-	selectionLC, nilReferenceHandler, repeatedReferenceHandler, rangeReferenceHandler
+	pSubscript, nilReferenceHandler, repeatedReferenceHandler, rangeReferenceHandler
     );
 
-    return resultUV;
+    return true;
 
 #undef nilReferenceHandler
 #undef repeatedReferenceHandler
@@ -1504,16 +1424,14 @@ PublicFnDef M_CPD *rtLSTORE_LCSelListElementCount (
  ***** L-Store Link Constructor Extraction Routine.
  *
  *  Arguments:
- *	lstore			- a standard CPD for the L-Store to extract
- *				from.
- *	linkc			- the address of a link constructor specifying
- *				which lists to extract.
+ *	pInstances		- the address of a link constructor specifying
+ *				  which lists to extract.
  *
  *  Returns:
  *	The element expansion.
  *
  *****/
-PrivateFnDef rtLINK_CType *DetermineLCExpansion (M_CPD *lstore, rtLINK_CType *linkc) {
+void rtLSTORE_Handle::getExpansion (rtLINK_CType *&rpResult, rtLINK_CType *pInstances) {
     unsigned int
 	elementCnt = 0,
 	srcValue,
@@ -1522,13 +1440,13 @@ PrivateFnDef rtLINK_CType *DetermineLCExpansion (M_CPD *lstore, rtLINK_CType *li
 
 /*****  Define the Traversal Macros  *****/
 #define locateSource(subscriptValue) {\
-    srcValue = rtLSTORE_CPD_BreakpointArray (lstore)[(subscriptValue)];\
-    srcCnt = rtLSTORE_CPD_BreakpointArray (lstore)[(subscriptValue) + 1] - srcValue;\
+    srcValue = pBreakpoints[(subscriptValue)];\
+    srcCnt = pBreakpoints[(subscriptValue) + 1] - srcValue;\
 }
 
 #define outputExpansionLinkc(value, cnt) {\
     elementCnt += (cnt);\
-    rtLINK_AppendRepeat (pElementExpansion, value, cnt);\
+    rtLINK_AppendRepeat (rpResult, value, cnt);\
 }
 
 #define handleNil(subscriptOffset, subscriptCnt, subscriptValue)
@@ -1550,7 +1468,7 @@ PrivateFnDef rtLINK_CType *DetermineLCExpansion (M_CPD *lstore, rtLINK_CType *li
 
 
 /*---------------------------------------------------------------------------
- *  Code Body: 'DetermineLCExpansion'
+ *  Code Body: 'rtLSTORE_Handle::getExpansion'
  *---------------------------------------------------------------------------
  */
 
@@ -1558,28 +1476,24 @@ PrivateFnDef rtLINK_CType *DetermineLCExpansion (M_CPD *lstore, rtLINK_CType *li
  *  Align the arguments and validate the link constructor as an extraction
  *  index for the L-Store ...
  *****/
-    linkc->AlignForExtract (rtLSTORE_Align (lstore), rtLSTORE_CPx_RowPToken);
+    align ();
+    pInstances->AlignForExtract (this, rowPTokenPOP ());
 
+    unsigned int cBreakpoints = breakpointCount ();
+    unsigned int*pBreakpoints = breakpointArray ();
     if (TracingCalls) IO_printf (
 	"DetermineLCExpansion: cpd=%08X, lsBpaSz=%u, lcSz=%u, lcRRDCnt=%u\n",
-	lstore, rtLSTORE_CPD_BreakpointCount (lstore),
-	linkc->ElementCount (),
-	rtLINK_LC_RRDCount (linkc)
+	this, cBreakpoints, pInstances->ElementCount (), rtLINK_LC_RRDCount (pInstances)
     );
 
 /***** Create the element expansion ... *****/
-    rtLINK_CType *pElementExpansion = rtLINK_RefConstructor (linkc->PPT (), -1);
+    rpResult = rtLINK_RefConstructor (pInstances->PPT ());
 
 /***** Do the traversal ... *****/
-    rtLINK_TraverseRRDCList (linkc, handleNil, handleRepeat, handleRange);
+    rtLINK_TraverseRRDCList (pInstances, handleNil, handleRepeat, handleRange);
 
-/***** Close the element expansion... *****/
-    M_CPD *newPosPToken = rtPTOKEN_New (lstore->ScratchPad (), elementCnt);
-    pElementExpansion->Close (newPosPToken);
-    newPosPToken->release ();
-
-/*****  And return:  *****/
-    return pElementExpansion;
+/***** Close the element expansion and return... *****/
+    rpResult->Close (new rtPTOKEN_Handle (ScratchPad (), elementCnt));
 
 /***** Delete the DetermineLCExpansion macros ... *****/
 #undef locateSource
@@ -1594,14 +1508,14 @@ PrivateFnDef rtLINK_CType *DetermineLCExpansion (M_CPD *lstore, rtLINK_CType *li
  ***** L-Store Extraction Routine which produces an empty result.
  *
  *  Arguments:
- *	lstore			- a standard CPD for the L-Store of interest.
  *	ptoken			- the address of a cpd for the referential ptoken
  *				  of the element expansion.
- *	pElementSelection	- the address of a link constructor pointer
+ *	rpElementStore		- a reference that will be set to the element store.
+ *	rpElementPointer	- the address of a link constructor pointer
  *				  which will be set to the result of the
  *				  extraction.  Indexes the content p-token
  *				  of the lstore.
- * 	pElementExpansion	- the address of a link constructor pointer
+ * 	rpExpansion		- the address of a link constructor pointer
  *				  which will be set to the position of 'linkc'
  *				  associated with each extracted element.
  *
@@ -1609,30 +1523,30 @@ PrivateFnDef rtLINK_CType *DetermineLCExpansion (M_CPD *lstore, rtLINK_CType *li
  *	NOTHING
  *
  *****/
-PrivateFnDef void CreateEmptyResult (
-    M_CPD	 *lstore,
-    M_CPD	 *ptoken,
-    rtLINK_CType *&pElementSelection,
-    rtLINK_CType *&pElementExpansion
+bool rtLSTORE_Handle::getListElements (
+    rtPTOKEN_Handle *ptoken, Vdd::Store::Reference &rpElementStore, rtLINK_CType *&rpElementPointer, rtLINK_CType *&rpExpansion
 ) {
-/*****
- *  Align the arguments
- *****/
-    rtLSTORE_Align (lstore);
+/*****  Align the arguments  *****/
+    align ();
 
 /*****  Create the element expansion domain p-token, ...  *****/
-    M_CPD *newPosPToken = rtPTOKEN_New (lstore->ScratchPad (), 0);
+    rtPTOKEN_Handle::Reference pNewPPT (new rtPTOKEN_Handle (ScratchPad (), 0));
 
 /***** Create the element expansion ... *****/
-    pElementExpansion = rtLINK_RefConstructor (ptoken, -1);
-    pElementExpansion->Close (newPosPToken);
+    rpExpansion = rtLINK_RefConstructor (ptoken);
+    rpExpansion->Close (pNewPPT);
 
 /*****  Create the element selection ... *****/
-    pElementSelection = rtLINK_RefConstructor (lstore, rtLSTORE_CPx_ContentPToken);
-    pElementSelection->Close (newPosPToken);
+    rtPTOKEN_Handle::Reference pContentPToken;
+    getContentPToken (pContentPToken);
+    rpElementPointer = rtLINK_RefConstructor (pContentPToken);
 
-/***** Cleanup and return ... *****/
-    newPosPToken->release ();
+    rpElementPointer->Close (pNewPPT);
+
+/*****  Get the content store ...  *****/
+    getContent (rpElementStore);
+
+    return true;
 }
 
 
@@ -1640,17 +1554,18 @@ PrivateFnDef void CreateEmptyResult (
  ***** L-Store Link Constructor Extraction Routine.
  *
  *  Arguments:
- *	lstore			- a standard CPD for the L-Store of interest.
  *	linkc			- the address of a link constructor specifying
  *				  which lists to extract.
- *	pElementSelection	- the address of a link constructor pointer
+ *	rpElementStore		- a reference set to the store containing the
+ *				  elements.
+ *	rpElementPointer	- the address of a link constructor pointer
  *				  which will be set to the result of the
  *				  extraction.  Indexes the content p-token
  *				  of the lstore.
- * 	pElementExpansion	- the address of a link constructor pointer
- *				  which will be set to the position of 'linkc'
+ * 	rpExpansion		- the address of a link constructor pointer
+ *				  which will be set to the position of a 'linkc'
  *				  associated with each extracted element.
- *	pElementReordering	- a pointer to a standard CPD for a reference
+ *	rpDistribution	- a pointer to a standard CPD for a reference
  *				  uvector which will be set by the extraction
  *				  process if 'linkc' contains any RRDC's with
  *				  repeats.  Used to reorder the element selection
@@ -1660,10 +1575,10 @@ PrivateFnDef void CreateEmptyResult (
  *	NOTHING
  *
  *  Notes:
- *	DOM (lstore-Content)	= COD (pElementSelection)
- *	DOM (pElementSelection)	= DOM (pElementReordering)
- *	COD (pElementReordering)= DOM (pElementExpansion)
- *	COD (pElementExpansion)	= DOM (linkc)
+ *	DOM (lstore-Content)	= COD (rpElementPointer)
+ *	DOM (rpElementPointer)	= DOM (rpDistribution)
+ *	COD (rpDistribution)= DOM (rpExpansion)
+ *	COD (rpExpansion)	= DOM (linkc)
  *
  *	or, in the APIWATW department:
  *
@@ -1673,12 +1588,12 @@ PrivateFnDef void CreateEmptyResult (
  *	          linkc       expansion     reordering       selector
  *
  *****/
-PrivateFnDef void LCExtract (
-    M_CPD		*lstore,
-    rtLINK_CType	*linkc,
-    rtLINK_CType	*&pElementSelection,
-    rtLINK_CType	*&pElementExpansion,
-    M_CPD		*&pElementReordering
+bool rtLSTORE_Handle::getListElements (
+    rtLINK_CType	*pInstances,
+    Vdd::Store::Reference&rpElementStore,
+    rtLINK_CType	*&rpElementPointer,
+    rtLINK_CType	*&rpExpansion,
+    M_CPD		*&rpDistribution
 ) {
     int
 	repeat = rtLINK_RRDType_Repeat,
@@ -1695,15 +1610,15 @@ PrivateFnDef void LCExtract (
 
 /*****  Define the Traversal Macros  *****/
 #define locateSource(subscriptValue) {\
-    srcValue= rtLSTORE_CPD_BreakpointArray (lstore)[(subscriptValue)];\
-    srcCnt  = rtLSTORE_CPD_BreakpointArray (lstore)[(subscriptValue) + 1] - srcValue;\
+    srcValue= pBreakpoints[(subscriptValue)];\
+    srcCnt  = pBreakpoints[(subscriptValue) + 1] - srcValue;\
 }
 
 #define outputElementSelector(value, cnt, type) {\
     if (type == rtLINK_RRDType_Range)\
-	rtLINK_AppendRange (pElementSelection, value, cnt);\
+	rtLINK_AppendRange (rpElementPointer, value, cnt);\
     else\
-	rtLINK_AppendRepeat (pElementSelection, value, cnt);\
+	rtLINK_AppendRepeat (rpElementPointer, value, cnt);\
     elementCnt += (cnt);\
 }
 
@@ -1729,14 +1644,11 @@ PrivateFnDef void LCExtract (
 
 #define handleRepeat(subscriptOffset, repeatCnt, subscriptValue) {\
     int repetitionNum;\
-\
     origElementCnt = elementCnt;\
     locateSource (subscriptValue);\
-\
     tempValue = srcValue;\
     for (i=0; i<srcCnt; i++)\
 	outputElementSelector (tempValue++, repeatCnt, repeat);\
-\
     for (i=0; i<srcCnt; i++, origElementCnt++) {\
 	for (repetitionNum = 0; repetitionNum < repeatCnt; repetitionNum++) {\
 	    outputReOrderUVector (origElementCnt + repetitionNum * srcCnt, 1);\
@@ -1755,47 +1667,52 @@ PrivateFnDef void LCExtract (
  *  Align the arguments and validate the link constructor as an extraction
  *  index for the L-Store ...
  *****/
-    linkc->AlignForExtract (rtLSTORE_Align (lstore), rtLSTORE_CPx_RowPToken);
+    align ();
+    pInstances->AlignForExtract (this, rowPTokenPOP ());
 
+    unsigned int cBreakpoints = breakpointCount ();
+    unsigned int*pBreakpoints = breakpointArray ();
     if (TracingCalls) IO_printf (
 	"rtLSTORE_LCExtract: cpd=%08X, lsBpaSz=%u, lcSz=%u, lcRRDCnt=%u\n",
-	lstore, rtLSTORE_CPD_BreakpointCount (lstore),
-	linkc->ElementCount (),
-	rtLINK_LC_RRDCount (linkc)
+	this, cBreakpoints, pInstances->ElementCount (), rtLINK_LC_RRDCount (pInstances)
     );
 
 /***** Determine if the subscript link constructor has any repeats ... *****/
-    bool hasRepeats = rtLINK_LC_HasRepeats (linkc);
+    bool hasRepeats = rtLINK_LC_HasRepeats (pInstances);
 
 /***** Create the element expansion ... *****/
-    pElementExpansion = DetermineLCExpansion (lstore, linkc);
+    getExpansion (rpExpansion, pInstances);
 
 /*****  Create the element selection ... *****/
-    pElementSelection = rtLINK_RefConstructor (lstore, rtLSTORE_CPx_ContentPToken);
+    rtPTOKEN_Handle::Reference pContentPToken;
+    getContentPToken (pContentPToken);
+    rpElementPointer = rtLINK_RefConstructor (pContentPToken);
 
-/***** Create the temp space for the pElementReordering if needed ... *****/
-    M_CPD *pElementSelectorPPT;
+/***** Create the temp space for the distribution if needed ... *****/
+    rtPTOKEN_Handle::Reference rpElementPointerPPT;
     if (hasRepeats) {
-	pElementSelectorPPT = rtPTOKEN_New (
-	    lstore->ScratchPad (), pElementExpansion->ElementCount ()
+	rpElementPointerPPT.setTo (
+	    new rtPTOKEN_Handle (ScratchPad (), rpExpansion->ElementCount ())
 	);
-	pElementReordering = rtREFUV_New (
-	    pElementSelectorPPT, pElementExpansion->PPT ()
-	);
-	reOrderUVectorPtr = rtREFUV_CPD_Array (pElementReordering);
+	rpDistribution = rtREFUV_New (rpElementPointerPPT, rpExpansion->PPT ());
+	reOrderUVectorPtr = rtREFUV_CPD_Array (rpDistribution);
     }
     else {
-	pElementSelectorPPT = pElementExpansion->PPT ();
-	pElementReordering = NilOf (M_CPD *);
+	rpElementPointerPPT.setTo (rpExpansion->PPT ());
+	rpDistribution = NilOf (M_CPD *);
     }
 
 /***** Do the traversal ... *****/
-    rtLINK_TraverseRRDCList (linkc, handleNil, handleRepeat, handleRange);
+    rtLINK_TraverseRRDCList (pInstances, handleNil, handleRepeat, handleRange);
 
 /***** Close the element selection ... *****/
-    pElementSelection->Close (pElementSelectorPPT);
-    if (hasRepeats)
-	pElementSelectorPPT->release ();
+    rpElementPointer->Close (rpElementPointerPPT);
+
+/*****  Get the content store ...  *****/
+    getContent (rpElementStore);
+
+/*****  And return:  *****/
+    return true;
 
 /***** Delete the LCExtract macros ... *****/
 #undef locateSource
@@ -1812,13 +1729,13 @@ PrivateFnDef void LCExtract (
  *
  *  Arguments:
  *	lstore			- a standard CPD for the L-Store of interest.
- *	reference 		- the address of a reference specifying
+ *	rInstances 		- the address of a reference specifying
  *				  which list to extract.
  *	pElementSelection	- the address of a link constructor which will
  *				  be set to contain the result of the
  *				  extraction: subscripts into the content of
  *				  the lstore.
- * 	pElementExpansion	- the address of a link constructor which will
+ * 	rpExpansion	- the address of a link constructor which will
  *				  be set to contain a 0 for each extracted
  *				  element.
  *
@@ -1826,50 +1743,57 @@ PrivateFnDef void LCExtract (
  *	NOTHING
  *
  *****/
-PrivateFnDef void RefExtract (
-    M_CPD			*lstore,
-    rtREFUV_Type_Reference	&reference,
-    rtLINK_CType		*&pElementSelection,
-    rtLINK_CType		*&pElementExpansion
+bool rtLSTORE_Handle::getListElements (
+    DSC_Scalar		 &rInstances,
+    Vdd::Store::Reference&rpElementStore,
+    rtLINK_CType	*&pElementSelection,
+    rtLINK_CType	*&rpExpansion
 ) {
     RefExtractCount++;
 
 /*****
  *  Align the arguments and validate the reference as an extraction
  *****/
-    rtREFUV_AlignAndValidateRef (
-	&reference, rtLSTORE_Align (lstore), rtLSTORE_CPx_RowPToken
-    );
+    align ();
+    rtREFUV_AlignAndValidateRef (&rInstances, this, rowPTokenPOP ());
 
+    unsigned int cBreakpoints = breakpointCount ();
+    unsigned int*pBreakpoints = breakpointArray ();
     if (TracingCalls) IO_printf (
-	"rtLSTORE_RefExtract: cpd=%08X, lsBpaSz=%u\n",
-	lstore, rtLSTORE_CPD_BreakpointCount (lstore)
+	"rtLSTORE_RefExtract: cpd=%08X, lsBpaSz=%u\n", this, cBreakpoints
     );
 
 /*****  Create the element selection ... *****/
-    pElementSelection = rtLINK_RefConstructor (lstore, rtLSTORE_CPx_ContentPToken);
+    rtPTOKEN_Handle::Reference pContentPToken;
+    getContentPToken (pContentPToken);
+    pElementSelection = rtLINK_RefConstructor (pContentPToken);
 
 /***** Create the element expansion ... *****/
-    pElementExpansion = rtLINK_RefConstructor (M_AttachedNetwork->TheScalarPToken (), -1);
+    rpExpansion = rtLINK_RefConstructor (M_AttachedNetwork->TheScalarPTokenHandle ());
 
 /***** Do the extraction ... *****/
     unsigned int cElements;
-    unsigned int referenceValue = rtREFUV_Ref_D_Element (reference);
-    if (referenceValue >= rtLSTORE_CPD_BreakpointCount (lstore))
+    unsigned int xList = DSC_Scalar_Int (rInstances);
+    if (xList >= cBreakpoints)
 	cElements = 0;
     else {
-	unsigned int xElements = rtLSTORE_CPD_BreakpointArray (lstore)[(referenceValue)];
-	cElements = rtLSTORE_CPD_BreakpointArray (lstore)[(referenceValue) + 1] - xElements;
+	unsigned int xElements = pBreakpoints[(xList)];
+	cElements = pBreakpoints[(xList) + 1] - xElements;
 
 	rtLINK_AppendRange (pElementSelection, xElements, cElements);
-	rtLINK_AppendRepeat (pElementExpansion, 0, cElements);
+	rtLINK_AppendRepeat (rpExpansion, 0, cElements);
     }
 
-/***** Close the links and return: *****/
-    M_CPD *newPosPToken = rtPTOKEN_New (lstore->ScratchPad (), cElements);
-    pElementSelection->Close (newPosPToken);
-    pElementExpansion->Close (newPosPToken);
-    newPosPToken->release ();
+/***** Close the links... *****/
+    rtPTOKEN_Handle::Reference pNewPPT (new rtPTOKEN_Handle (ScratchPad (), cElements));
+    pElementSelection->Close (pNewPPT);
+    rpExpansion->Close (pNewPPT);
+
+/*****  Get the content store ...  *****/
+    getContent (rpElementStore);
+
+/*****  And return:  *****/
+    return true;
 }
 
 
@@ -1877,13 +1801,12 @@ PrivateFnDef void RefExtract (
  ***** L-Store Extraction Routine.
  *
  *  Arguments:
- *	rSourceDescriptor	- the address of the descriptor that names the
- *				  lists of interest.
- *	pElementCluster		- the return address for a CPD identifying the
+ *	rInstances		- a pointer to the lists of interest.
+ *	rpElementStore		- the return address for a CPD identifying the
  *				  element cluster.
  *	pElementSelection	- the return address for a link constructor
  *				  identifying the list elements of interest.
- * 	pElementExpansion	- the address of a link constructor pointer
+ * 	rpExpansion	- the address of a link constructor pointer
  *				  which will be set to the position of 'linkc'
  *				  associated with each extracted element.
  *	pElementReordering	- a pointer to a standard CPD for a reference
@@ -1896,50 +1819,40 @@ PrivateFnDef void RefExtract (
  *	NOTHING
  *
  *****/
-PublicFnDef void rtLSTORE_Extract (
-    DSC_Descriptor	 &rSourceDescriptor,
-    M_CPD		*&pElementCluster,
-    rtLINK_CType	*&pElementSelection,
-    rtLINK_CType	*&pElementExpansion,
+bool rtLSTORE_Handle::getListElements (
+    DSC_Pointer		 &rInstances,
+    Vdd::Store::Reference&rpElementStore,
+    rtLINK_CType	*&rpElementPointer,
+    rtLINK_CType	*&rpExpansion,
     M_CPD		*&pElementReordering
 ) {
-/*****  Get the lstore out of 'rSourceDescriptor' ... *****/
-    M_CPD *pLStoreCPD = rSourceDescriptor.storeCPD ();
-    ValidateBreakpointConsistency (pLStoreCPD);
+/*****  Get the lstore out of 'rInstances' ... *****/
+    CheckBreakpointConsistency ();
 
 /*****  Decode the descriptor pointer ... *****/
-    if (rSourceDescriptor.holdsALink ()) {
-	LCExtract (
-	    pLStoreCPD,
-	    DSC_Descriptor_Link (rSourceDescriptor),
-	    pElementSelection,
-	    pElementExpansion,
-	    pElementReordering
+    if (rInstances.holdsALink ()) {
+	getListElements (
+	    DSC_Pointer_Link (rInstances), rpElementStore, rpElementPointer, rpExpansion, pElementReordering
 	);
     }
-    else if (rSourceDescriptor.holdsAScalarReference ()) {
-	RefExtract (
-	    pLStoreCPD,
-	    DSC_Descriptor_Scalar (rSourceDescriptor),
-	    pElementSelection,
-	    pElementExpansion
-	);
+    else if (rInstances.holdsAScalarReference ()) {
 	pElementReordering = NilOf (M_CPD *);
+	getListElements (
+	    DSC_Pointer_Scalar (rInstances), rpElementStore, rpElementPointer, rpExpansion
+	);
     }
-    else if (rSourceDescriptor.holdsValuesInAnyForm ()) {
-	M_CPD *pPosPToken = rSourceDescriptor.PPT ();
-
-	CreateEmptyResult (pLStoreCPD, pPosPToken, pElementSelection, pElementExpansion);
+    else if (rInstances.holdsValuesInAnyForm ()) {
 	pElementReordering = NilOf (M_CPD*);
-
-	pPosPToken->release ();
+	rtPTOKEN_Handle::Reference pPPT (rInstances.PPT ());
+	getListElements (pPPT, rpElementStore, rpElementPointer, rpExpansion);
     }
     else ERR_SignalFault (
 	EC__InternalInconsistency, "rtLSTORE_Extract: Invalid Descriptor Type"
     );
 
 /*****  Finally, return a CPD for the element cluster, ... *****/
-    pElementCluster = rtLSTORE_CPD_ContentCPD (pLStoreCPD);
+
+    return true;
 }
 
 
@@ -1947,58 +1860,39 @@ PublicFnDef void rtLSTORE_Extract (
  ***** L-Store Link Constructor Subscript Routine.
  *
  *  Arguments:
- *	lstore		- a standard CPD for the L-Store to subscript in.
- *	linkc		- the address of a link constructor specifying
- *			which lists to subscript in.
- *	keyCPD		- a standard CPD for an integer uvector
- *			specifying the list positions to subscript in
- *			  the selected lists.  'keyCPD' must be positionally
- *			  related to 'linkc'.
- *	keyModifier	- an integer to be added to each value in 'keyCPD'.
- *			  This usually either 0 or -1.  It is used to
- *			  simulate 1 based subscripts.
- *	theResultDsc	- a pointer to a descriptor which this routine
- *			  will set to the result of the subscript.
- *	theLocatedLinkc	- a pointer to a link constructor which this routine
- *			  will create ONLY if needed.  It will not be created
- *			  either if all of the values were found or if all
- *			of the values were not found. (It will be created
- *			if some values were found and some not found).  It
- *			will contain the positions in 'keyCPD' for which a
- *			  value was found.
+ *	rResult		- the location at which the result will be stored.
+ *	pInstances	- the address of a link constructor specifying the
+ *			  the lists to access.
+ *	pSubscript	- an integer uvector specifying the list elements to
+ *			  access.  Must be positionally related to 'pInstances'.
+ *	iModifier	- an integer to be added to each value in 'pSubscript'.
+ *			  Usually either 0 or -1, this argument is used to
+ *			  choose between 0 and 1 origin subscripting.
+ *	ppGuard		- a pointer to a link constructor which this routine
+ *			  will create if some elements were not found.
  *
  *  Returns:
- *	NOTHING
+ *	true
  *
  *****/
-PrivateFnDef void LCSubscript (
-    M_CPD		 *lstore,
-    rtLINK_CType	 *linkc,
-    M_CPD		 *keyCPD,
-    int			 keyModifier,
-    DSC_Descriptor	 *theResultDsc,
-    rtLINK_CType	**theLocatedLinkc
+bool rtLSTORE_Handle::getListElements (
+    DSC_Descriptor &rResult, rtLINK_CType *pInstances, M_CPD *pSubscript, int iModifier, rtLINK_CType **ppGuard
 ) {
 #define locateList(list) {\
-    listOffset = rtLSTORE_CPD_BreakpointArray (lstore)[list];\
-    listCnt =\
-	rtLSTORE_CPD_BreakpointArray (lstore)[(list) + 1] - listOffset;\
+    listOffset = pBreakpoints[list];\
+    listCnt = pBreakpoints[(list) + 1] - listOffset;\
 }
 
 #define outputPosition(list) {\
-    position = keyModifier + *positionPtr++;\
-    if (list >= (int) rtLSTORE_CPD_BreakpointCount (lstore) ||\
-	position < 0 || position >= listCnt\
-    ) {\
-	/*****  Not Found  *****/\
-	/* Do Nothing */\
+    int position = iModifier + *positionPtr++;\
+    if (list >= (int)cBreakpoints || position < 0 || (unsigned int)position >= listCnt) {\
+	/*****  Not Found  *****//* Do Nothing */\
     }\
     else {\
 	/*****  Found  *****/\
-	rtLINK_AppendRange (locatedLinkc, elementCount, 1);\
+	rtLINK_AppendRange (pLocatedSubset, elementCount, 1);\
 	*resultPtr++ = listOffset + position;\
     }\
-\
     elementCount++;\
 }
 
@@ -2015,7 +1909,6 @@ PrivateFnDef void LCSubscript (
 
 #define handleRepeat(subscriptOffset, subscriptCnt, subscriptValue) {\
     locateList (subscriptValue);\
-\
     for (int _i_=0; _i_<(subscriptCnt); _i_++) {\
 	outputPosition (subscriptValue);\
     }\
@@ -2032,96 +1925,87 @@ PrivateFnDef void LCSubscript (
  *  Align the arguments and validate the link constructor as an extraction
  *  index for the L-Store ...
  *****/
-    linkc->AlignForExtract (rtLSTORE_Align (lstore), rtLSTORE_CPx_RowPToken);
+    align ();
+    pInstances->AlignForExtract (this, rowPTokenPOP ());
 
 /*****  Align and validate the key integer uvector ...  *****/
-    RTYPE_MustBeA("rtLSTORE LCSubscript", M_CPD_RType (keyCPD), RTYPE_C_IntUV);
-    rtINTUV_Align (keyCPD);
+    RTYPE_MustBeA("rtLSTORE LCSubscript", pSubscript->RType (), RTYPE_C_IntUV);
+    pSubscript->align ();
 
-/*****  Validate that 'keyCPD' and 'linkc' are positionally related ...  *****/
-    if (keyCPD->ReferenceDoesntName (UV_CPx_PToken, linkc->PPT ())) ERR_SignalFault (
+/*****  Validate that 'pSubscript' and 'pInstances' are positionally related ...  *****/
+    if (pSubscript->ReferenceDoesntName (UV_CPx_PToken, pInstances->PPT ())) ERR_SignalFault (
 	EC__InternalInconsistency, "rtLSTORE LCSubscript: Positional Inconsistency"
     );
 
 /*****  If tracing ...  *****/
     if (TracingCalls) IO_printf (
 	"rtLSTORE_LCSubscript: cpd=%08X, lsBpaSz=%u, lcSz=%u, lcRRDCnt=%u\n",
-	lstore, rtLSTORE_CPD_BreakpointCount (lstore),
-	linkc->ElementCount (),
-	rtLINK_LC_RRDCount (linkc)
+	this, breakpointCount (),
+	pInstances->ElementCount (),
+	rtLINK_LC_RRDCount (pInstances)
     );
 
 /*****  Create the space for the result positions ... *****/
-    unsigned int elementCount = linkc->BaseElementCount ();
+    unsigned int elementCount = pInstances->BaseElementCount ();
     rtREFUV_ElementType *result = (rtREFUV_ElementType *) UTIL_Malloc (
 	sizeof (rtREFUV_ElementType) * elementCount
     );
     rtREFUV_ElementType *resultPtr = result;
 
-/*****  Create 'locatedLinkc' ...  *****/
-    rtLINK_CType *locatedLinkc = *theLocatedLinkc = rtLINK_RefConstructor (
-	linkc->PPT (), -1
-    );
+/*****  Create 'pLocatedSubset' ...  *****/
+    rtLINK_CType *pLocatedSubset = *ppGuard = rtLINK_RefConstructor (pInstances->PPT ());
 
 /***** Do the traversal ... *****/
-    rtINTUV_ElementType *positionPtr = rtINTUV_CPD_Array (keyCPD);
+    rtINTUV_ElementType *positionPtr = rtINTUV_CPD_Array (pSubscript);
     elementCount = 0;
 
-    int listOffset, listCnt, position;
-    rtLINK_TraverseRRDCList (linkc, handleNil, handleRepeat, handleRange);
+    unsigned int listOffset, listCnt;
+    unsigned int cBreakpoints = breakpointCount ();
+    unsigned int*pBreakpoints = breakpointArray ();
+    rtLINK_TraverseRRDCList (pInstances, handleNil, handleRepeat, handleRange);
 
 /*****  Determine how many positions were found ...  *****/
-    unsigned int numFound = locatedLinkc->ElementCount ();
-
+    unsigned int numFound = pLocatedSubset->ElementCount ();
     if (numFound == 0) {
 	/***** NONE FOUND *****/
-
-	theResultDsc->constructNA (linkc->PPT (), lstore->KOT ());
-
-   	locatedLinkc->release ();
-	*theLocatedLinkc = NilOf (rtLINK_CType*);
-	UTIL_Free (result);
-
-	return;
-    }
-
-/*****  Create the locatedLinkc if neccessary (if not all found) ...  *****/
-    bool allFound = elementCount == numFound;
-
-    M_CPD *foundPosPToken;
-    if (allFound) {
-	/*****  All Found  *****/
-	locatedLinkc->release ();
-	*theLocatedLinkc = NilOf (rtLINK_CType*);
+	rResult.constructNA (pInstances->PPT (), KOT ());
     }
     else {
-	/*****  Only Some Found  *****/
-	foundPosPToken = rtPTOKEN_New (keyCPD->ScratchPad (), numFound);
-	locatedLinkc->Close (foundPosPToken);
+	/*****  Create the pLocatedSubset if neccessary (if not all found) ...  *****/
+	bool allFound = elementCount == numFound;
+
+	rtPTOKEN_Handle::Reference foundPosPToken;
+	if (allFound) {
+	    /*****  All Found  *****/
+	    pLocatedSubset->release ();
+	    *ppGuard = NilOf (rtLINK_CType*);
+	}
+	else {
+	    /*****  Only Some Found  *****/
+	    foundPosPToken.setTo (new rtPTOKEN_Handle (pSubscript->ScratchPad (), numFound));
+	    pLocatedSubset->Close (foundPosPToken);
+	}
+
+	/*****  Create the result reference uvector ...  *****/
+	M_CPD *resultUV; {
+	    rtPTOKEN_Handle::Reference pContentPToken;
+	    getContentPToken (pContentPToken);
+
+	    resultUV = rtREFUV_New (allFound ? pInstances->PPT () : foundPosPToken, pContentPToken);
+	}
+
+	memcpy (rtREFUV_CPD_Array (resultUV), result, numFound * sizeof (rtREFUV_ElementType));
+
+	/*****  Create the result descriptor ...  *****/
+	Vdd::Store::Reference pContent;
+	getContent (pContent);
+	rResult.constructMonotype (pContent, resultUV);
+	resultUV->release ();
     }
 
-/*****  Create the result reference uvector ...  *****/
-    M_CPD *resultUV;
-    if (allFound) resultUV = rtREFUV_New (
-	linkc->PPT (), lstore, rtLSTORE_CPx_ContentPToken
-    );
-    else {
-	resultUV = rtREFUV_New (
-	    foundPosPToken, lstore, rtLSTORE_CPx_ContentPToken
-	);
-	foundPosPToken->release ();
-    }
-
-    memcpy (
-	rtREFUV_CPD_Array (resultUV), result, numFound * sizeof (rtREFUV_ElementType)
-    );
     UTIL_Free (result);
 
-/*****  Create the result descriptor ...  *****/
-    theResultDsc->constructMonotype (rtLSTORE_CPD_ContentCPD (lstore), resultUV);
-    resultUV->release ();
-
-    return;
+    return true;
 
 /***** Delete the LCSubscript macros ... *****/
 #undef locateList
@@ -2136,51 +2020,20 @@ PrivateFnDef void LCSubscript (
  ***** L-Store Reference Subscript Routine.
  *
  *  Arguments:
- *	lstore			- a standard CPD for the L-Store to extract
- *				from.
- *	reference 		- the address of a reference specifying
- *				which list to extract.
- *	key			- an integer specifying which position of the
- *				selected list to extract.
- *	keyModifier		- an integer to be added to 'key'.
- *				  This usually either 0 or -1.  It is used to
- *				  simulate 1 based subscripts.
- *	resultDsc		- a pointer to a descriptor which this routine
- *				  will set to the result of the subscript.
+ *	rResult		- the location at which the result will be stored.
+ *	rInstance 	- a reference specifying the list to access.
+ *	xSubscript	- an integer specifying which list element to access.
+ *	iModifier	- an integer to be added to 'xElement'.
+ *			  Usually either 0 or -1, this argument is used to
+ *			  choose between 0 and 1 origin subscripting.
  *
  *  Returns:
  *	NOTHING
  *
  *****/
-PrivateFnDef void RefSubscript (
-    M_CPD			*lstore,
-    rtREFUV_TypePTR_Reference	reference,
-    int				key,
-    int				keyModifier,
-    DSC_Descriptor		*resultDsc
+bool rtLSTORE_Handle::getListElements (
+    DSC_Descriptor &rResult, DSC_Scalar &rInstance, int xSubscript, int iModifier
 ) {
-/*****  Define the Subscript Macros  *****/
-#define NotFound -1
-#define WasntFound(x) (x == NotFound)
-
-#define locate(list, position, result) {\
-    int	listOffset, listCnt;\
-\
-    if ((list) >= (int) rtLSTORE_CPD_BreakpointCount (lstore))\
-	result = NotFound;\
-    else {\
-	listOffset = rtLSTORE_CPD_BreakpointArray (lstore)[(list)];\
-	listCnt   =\
-	    rtLSTORE_CPD_BreakpointArray (lstore)[(list) + 1] - listOffset;\
-\
-	if ((position) < 0 || (position) >= listCnt)\
-	    result = NotFound;\
-	else\
-	    result = listOffset + (position);\
-    }\
-}
-
-
 /*---------------------------------------------------------------------------
  *  Code Body: 'RefSubscript'
  *---------------------------------------------------------------------------
@@ -2190,39 +2043,33 @@ PrivateFnDef void RefSubscript (
 /*****
  *  Align the arguments and validate the reference as an extraction
  *****/
-    rtREFUV_AlignAndValidateRef (
-	reference, rtLSTORE_Align (lstore), rtLSTORE_CPx_RowPToken
-    );
+    align ();
+    rtREFUV_AlignAndValidateRef (&rInstance, this, rowPTokenPOP ());
 
+    unsigned int cBreakpoints = breakpointCount ();
+    unsigned int*pBreakpoints = breakpointArray ();
     if (TracingCalls) IO_printf (
-	"rtLSTORE_RefSubscript: cpd=%08X, lsBpaSz=%u\n",
-	lstore, rtLSTORE_CPD_BreakpointCount (lstore)
+	"rtLSTORE_RefSubscript: cpd=%08X, lsBpaSz=%u\n", this, cBreakpoints
     );
 
-/*****  Get the value out of the reference ... *****/
-    int list = (int) rtREFUV_Ref_Element (reference);
-
-/*****  Do the extraction ... *****/
-    int result;
-    locate (list, key + keyModifier, result);
-
-/*****  Create the result descriptor ...  *****/
-    if (WasntFound (result))
-	resultDsc->constructNA (lstore->KOT ());
+/*****  ... and determine the result: *****/
+    unsigned int xList = DSC_Scalar_Int (rInstance);
+    xSubscript += iModifier;
+    if (xList > cBreakpoints || xSubscript < 0 || (unsigned int)xSubscript >= pBreakpoints[xList + 1] - pBreakpoints[xList])
+	rResult.constructNA (KOT ());
     else {
-	resultDsc->constructReferenceScalar (
-	    rtLSTORE_CPD_ContentCPD (lstore),
-	    rtLSTORE_CPD_ContentPTokenCPD (lstore),
-	    result
+	Vdd::Store::Reference pContent;
+	getContent (pContent);
+
+	rtPTOKEN_Handle::Reference pContentPToken;
+	getContentPToken (pContentPToken);
+
+	rResult.constructReferenceScalar (
+	    pContent, pContentPToken, xSubscript + pBreakpoints[xList]
 	);
     }
 
-    return;
-
-/***** Delete the RefSubscript macros ... *****/
-#undef NotFound
-#undef WasntFound
-#undef locate
+    return true;
 }
 
 
@@ -2230,92 +2077,61 @@ PrivateFnDef void RefSubscript (
  ***** L-Store Subscript Routine.
  *
  *  Arguments:
- *	sourceDsc	- a pointer to a descriptor whose store
- *			  contains the L-Store to extract from.
- *			  The descriptor must be either a Link
- *			Descriptor or a Reference Scalar Descriptor
- *			  whose pointer specifies which lists to
- *			extract.
- *	keyDsc		- a pointer to a descriptor whose Pointer contains
+ *	rResult		- the location at which the result will be stored.
+ *	rInstances	- a pointer identifying the instances to access.
+ *	rSubscript	- a pointer to a descriptor whose Pointer contains
  *			  either an integer scalar pointer or an integer
  *			  value pointer.  This set of integers specifies
  *			  the list positions to subscript in the
- *			  selected lists.  The Pointer in 'keyDsc' must
- *			be positionally related to the Pointer in
- *			'sourceDsc'.
- *	keyModifier	- an integer to be added to each value in 'keyDsc'.
+ *			  selected lists.  The Pointer in 'rSubscript' must
+ *			  be positionally related to the Pointer in
+ *			  'rInstances'.
+ *	iModifier	- an integer to be added to each value in 'rSubscript'.
  *			  This usually either 0 or -1.  It is used to
- *			simulate 1 based subscripts.
- *	resultDsc	- a pointer to a descriptor which this routine will
- *			set to the result of the subscript.
- *	locatedLinkc	- a pointer to a link constructor which this routine
+ *			  simulate 1 based subscripts.
+ *	ppGuard		- a pointer to a link constructor which this routine
  *			  will create ONLY if needed.  It will be created if
  *			  not all of the values were found or not found
- *			(if some were found and some not found).  It will
- *			contain the positions in 'keyDsc' for which a value
+ *			  (if some were found and some not found).  It will
+ *			  contain the positions in 'rSubscript' for which a value
  *			  was found.
  *
  *  Returns:
- *	NOTHING
+ *	true
  *
  *****/
-PublicFnDef void rtLSTORE_Subscript (
-    DSC_Descriptor	 *sourceDsc,
-    DSC_Descriptor	 *keyDsc,
-    int			  keyModifier,
-    DSC_Descriptor	 *resultDsc,
-    rtLINK_CType	**locatedLinkc
+bool rtLSTORE_Handle::getListElements (
+    DSC_Descriptor &rResult, DSC_Pointer &rInstances, DSC_Descriptor &rSubscript, int iModifier, rtLINK_CType **ppGuard
 ) {
-/*****  Get the lstore out of 'sourceDsc' ... *****/
-    M_CPD *pLStoreCPD = sourceDsc->storeCPD ();
-    ValidateBreakpointConsistency (pLStoreCPD);
+    CheckBreakpointConsistency ();
 
 /*****  Decode the descriptor pointer ... *****/
-    if (sourceDsc->holdsALink ()) {
-	if (!keyDsc->holdsNonScalarValues ()) ERR_SignalFault (
-	    EC__InternalInconsistency,
-	    "rtLSTORE_Subscript: the key descriptor must be a value dsc"
-	);
-
-	LCSubscript (
-	    pLStoreCPD, 
-	    DSC_Descriptor_Link (*sourceDsc),
-	    DSC_Descriptor_Value (*keyDsc),
-	    keyModifier,
-	    resultDsc,
-	    locatedLinkc
+    if (rInstances.holdsALink ()) {
+	if (!rSubscript.holdsNonScalarValues ())
+	    ERR_SignalFault (EC__InternalInconsistency, "rtLSTORE_Subscript: the key descriptor must be a value dsc");
+	getListElements (
+	    rResult, DSC_Pointer_Link (rInstances), DSC_Descriptor_Value (rSubscript), iModifier, ppGuard
 	);
     }
-    else if (sourceDsc->holdsAScalarReference ()) {
-	if (keyDsc->isntScalar () || DSC_Scalar_RType (
-		DSC_Descriptor_Scalar (*keyDsc)
-	    ) != RTYPE_C_IntUV
-	) ERR_SignalFault (
-	    EC__InternalInconsistency,
-	    "rtLSTORE_Subscript: Key Descriptor Must Be An Integer Scalar"
+    else if (rInstances.holdsAScalarReference ()) {
+	if (rSubscript.isntScalar () || DSC_Descriptor_Scalar (rSubscript).RType () != RTYPE_C_IntUV)
+	    ERR_SignalFault (EC__InternalInconsistency, "rtLSTORE_Subscript: Key Descriptor Must Be An Integer Scalar");
+	getListElements (
+	    rResult, DSC_Pointer_Scalar (rInstances), DSC_Descriptor_Scalar_Int (rSubscript), iModifier
 	);
-
-	RefSubscript (
-	    pLStoreCPD,
-	    &DSC_Descriptor_Scalar (*sourceDsc),
-	    DSC_Descriptor_Scalar_Int (*keyDsc),
-	    keyModifier,
-	    resultDsc
-	);
-	*locatedLinkc = NilOf (rtLINK_CType*);
+	*ppGuard = NilOf (rtLINK_CType*);
     }
-    else if (sourceDsc->holdsValuesInAnyForm ()) {
-	M_CPD *posPToken = sourceDsc->PPT ();
-
-	resultDsc->constructNA (posPToken, pLStoreCPD->KOT ());
-	*locatedLinkc = NilOf (rtLINK_CType*);
-
-	posPToken->release ();
+    else if (rInstances.holdsValuesInAnyForm ()) {
+	rtPTOKEN_Handle::Reference pPPT (rInstances.PPT ());
+	rResult.constructNA (pPPT, KOT ());
+	*ppGuard = NilOf (rtLINK_CType*);
     }
     else ERR_SignalFault (
 	EC__InternalInconsistency,
 	"rtLSTORE_Subscript: Invalid Descriptor Type"
     );
+
+    return true;
 }
 
 
@@ -2325,14 +2141,12 @@ PublicFnDef void rtLSTORE_Subscript (
 
 /*---------------------------------------------------------------------------
  *****  Routine to append a position at the end of each list selected by
- *****  selectionLC
+ *****  pSubscript
  *
  *  Arguments:
- *	lstore			- a standard CPD for the L-Store containing the
- *				  lists being modified.
- *	selectionLC		- a link constructor selecting the lists to be
+ *	pInstances		- a link constructor selecting the lists to be
  *				  modified.
- *	elementLC		- a link constructor which will be made to
+ *	rpResult		- a link constructor which will be made to
  *				  reference the actual elements that have been
  *				  appended.
  *
@@ -2340,27 +2154,17 @@ PublicFnDef void rtLSTORE_Subscript (
  *	Nothing. Executed for side effects.
  *
  *****/
-PublicFnDef void rtLSTORE_AppendToLCSelectedList (
-    M_CPD *lstore, rtLINK_CType *selectionLC, rtLINK_CType **elementLC
-) {
-
+void rtLSTORE_Handle::appendToList (rtLINK_CType *&rpResult, rtLINK_CType *pInstances) {
 
 /*---------------------------------------------------------------------------
  * AppendToLCSelectedList: Local Definitions
  *---------------------------------------------------------------------------
  */
-    M_CPD*
-	newContentPToken;
-    unsigned int
-	breakpointCount,
-	*breakpointArray,
-	*breakpointPtr,
-	totalElementsInserted;
 
 #define adjustEntries(through, by) for (\
-    unsigned int *p = breakpointArray + (through);\
-    breakpointPtr < p;\
-    *breakpointPtr++ += (by)\
+    unsigned int *p = pBreakpoints + (through);\
+    pBreakpoint < p;\
+    *pBreakpoint++ += (by)\
 )
 
 #define nilReferenceHandler(c, n, r)\
@@ -2368,25 +2172,25 @@ PublicFnDef void rtLSTORE_AppendToLCSelectedList (
 
 #define repeatedReferenceHandler(c, n, r) {\
     adjustEntries (r, totalElementsInserted);\
-    unsigned int oldListSize = breakpointPtr[1] - breakpointPtr[0];\
+    unsigned int oldListSize = pBreakpoint[1] - pBreakpoint[0];\
     unsigned int oldListEnd = oldListSize + (\
-	*breakpointPtr++ += totalElementsInserted\
+	*pBreakpoint++ += totalElementsInserted\
     );\
-    rtLINK_AppendRange (*elementLC, oldListEnd, n);\
-    newContentPTokenC->AppendAdjustment (oldListEnd, n);\
+    rtLINK_AppendRange (rpResult, oldListEnd, n);\
+    pContentPTokenC->AppendAdjustment (oldListEnd, n);\
     totalElementsInserted += n;\
 }
 
 #define rangeReferenceHandler(c, n, ir) {\
     unsigned int ur = ir;\
     adjustEntries (ur, totalElementsInserted);\
-    while (n-- > 0 && ur++ < breakpointCount) {\
-	unsigned int oldListSize = breakpointPtr[1] - breakpointPtr[0];\
+    while (n-- > 0 && ur++ < cBreakpoints) {\
+	unsigned int oldListSize = pBreakpoint[1] - pBreakpoint[0];\
 	unsigned int oldListEnd  = oldListSize + (\
-	    *breakpointPtr++ += totalElementsInserted++\
+	    *pBreakpoint++ += totalElementsInserted++\
 	);\
-	rtLINK_AppendRange (*elementLC, oldListEnd, 1);\
-	newContentPTokenC->AppendAdjustment (oldListEnd, 1);\
+	rtLINK_AppendRange (rpResult, oldListEnd, 1);\
+	pContentPTokenC->AppendAdjustment (oldListEnd, 1);\
     }\
 }
 
@@ -2402,47 +2206,48 @@ PublicFnDef void rtLSTORE_AppendToLCSelectedList (
  * Align the arguments and validate the link constructor as an assignment
  * index for the L-Store,  (note: the use of 'AlignForExtract' is correct)...
  *****/
-    selectionLC->AlignForExtract (rtLSTORE_Align (lstore), rtLSTORE_CPx_RowPToken);
+    align ();
+    pInstances->AlignForExtract (this, rowPTokenPOP ());
 
+    unsigned int cBreakpoints = breakpointCount ();
     if (TracingCalls) IO_printf (
 	"rtLSTORE_AppendToLCSelList: cpd=%08X, lsBpaSz=%u, lcSz=%u, lcRRDCnt=%u\n",
-	lstore, rtLSTORE_CPD_BreakpointCount (lstore),
-	selectionLC->ElementCount (),
-	rtLINK_LC_RRDCount (selectionLC)
+	this, cBreakpoints, pInstances->ElementCount (), rtLINK_LC_RRDCount (pInstances)
     );
 
 /*****  ...create the content assignment link constructor, ...  *****/
-    *elementLC = rtLINK_PosConstructor (selectionLC->PPT (), -1);
+    rpResult = rtLINK_PosConstructor (pInstances->PPT ());
 
 /*****  ...create a constructor for the new content P-Token, ...  *****/
-    rtPTOKEN_CType *newContentPTokenC =	rtPTOKEN_NewShiftPTConstructor (
-	lstore, rtLSTORE_CPx_ContentPToken
-    );
+    rtPTOKEN_Handle::Reference pContentPToken;
+    getContentPToken (pContentPToken);
+    rtPTOKEN_CType *pContentPTokenC = pContentPToken->makeAdjustments ();
 
 /*****  ...enable modification of the L-Store, ...  *****/
-    lstore->EnableModifications ();
-    lstore->CheckConsistency ();
-    rtLSTORE_CPD_IsInconsistent (lstore) = true;
+    EnableModifications ();
+    CheckConsistency ();
+    setIsInconsistent ();
 
 /*****  ...initialize the L-Store traversal variables, ...  *****/
-    breakpointPtr   =
-    breakpointArray = rtLSTORE_CPD_BreakpointArray (lstore);
-    breakpointCount = rtLSTORE_CPD_BreakpointCount (lstore);
-    totalElementsInserted = 0;
+    unsigned int *pBreakpoints = breakpointArray ();
+    unsigned int *pBreakpoint   = pBreakpoints;
+    unsigned int totalElementsInserted = 0;
 
 /*****  ...traverse the link constructor, ...  *****/
     rtLINK_TraverseRRDCList (
-	selectionLC, nilReferenceHandler, repeatedReferenceHandler, rangeReferenceHandler
+	pInstances, nilReferenceHandler, repeatedReferenceHandler, rangeReferenceHandler
     );
 
 /*****  ...adjust remaining breakpoints for the insertions made, ...  *****/
-    adjustEntries (breakpointCount + 1, totalElementsInserted);
+    adjustEntries (cBreakpoints + 1, totalElementsInserted);
 
 /*****  ...close and install the new content P-Token, ...  *****/
-    (*elementLC)->Close (newContentPToken = newContentPTokenC->ToPToken ());
-    lstore->StoreReference (rtLSTORE_CPx_ContentPToken, newContentPToken);
-    rtLSTORE_CPD_IsInconsistent (lstore) = false;
-    newContentPToken->release ();
+    pContentPToken.setTo (pContentPTokenC->ToPToken ());
+    rpResult->Close (pContentPToken);
+
+    StoreReference (contentPTokenPOP (), pContentPToken);
+
+    clearIsInconsistent ();
 
 
 /*---------------------------------------------------------------------------
@@ -2462,100 +2267,73 @@ PublicFnDef void rtLSTORE_AppendToLCSelectedList (
  *****  selectionRef
  *
  *  Arguments:
- *	lstore			- a standard CPD for the L-Store containing the
- *				  lists being modified.
- *	selectionRef		- a reference selecting the lists to be
- *				  modified.
- *	elementRef		- a reference which will be made to
+ *	rResult			- a reference which will be made to
  *				  the particular element that has been
  *				  appended.
+ *	rInstance		- a reference selecting the lists to be
+ *				  modified.
  *
  *  Returns:
  *	Nothing. Executed for side effects.
  *
  *****/
-PublicFnDef void rtLSTORE_AppendToRefSelectdList (
-    M_CPD*			lstore,
-    rtREFUV_TypePTR_Reference	selectionRef,
-    rtREFUV_TypePTR_Reference	elementRef
-)
-{
-
+void rtLSTORE_Handle::appendToList (DSC_Scalar &rResult, DSC_Scalar &rInstance) {
 
 /*---------------------------------------------------------------------------
  * AppendToRefSelectedList: Local Definitions
  *---------------------------------------------------------------------------
  */
-    M_CPD*
-	newContentPToken;
-    unsigned int
-	breakpointCount,
-	*breakpointPtr,
-	*breakpointLimit,
-	referenceValue,
-	insertionPosition;
-
-
     AppendToRefListCount++;
+
+    unsigned int cBreakpoints = breakpointCount ();
     if (TracingCalls) IO_printf (
-	"rtLSTORE_AppendToRefSelList: cpd=%08X, lsBpaSz=%u\n",
-	lstore, rtLSTORE_CPD_BreakpointCount (lstore)
+	"rtLSTORE_AppendToRefSelList: cpd=%08X, lsBpaSz=%u\n", this, cBreakpoints
     );
 
 /*****  Align the arguments and validate the reference as an extraction *****/
-    rtREFUV_AlignAndValidateRef (
-	selectionRef, rtLSTORE_Align (lstore), rtLSTORE_CPx_RowPToken
-    );
+    align ();
+    rtREFUV_AlignAndValidateRef (&rInstance, this, rowPTokenPOP ());
 
 /*****  Access the reference value and breakpoint count, ...  *****/
-    referenceValue  = rtREFUV_Ref_Element (selectionRef);
-    breakpointCount = rtLSTORE_CPD_BreakpointCount (lstore);
+    unsigned int xList = DSC_Scalar_Int (rInstance);
 
-/*****  If selector is reference Nil, do nothing but set elementRef to
+/*****  If selector is reference Nil, do nothing but set rResult to
  *****  reference Nil for the content vector.
  *****/
-    if (referenceValue >= breakpointCount)
-    {
-	DSC_InitReferenceScalar (
-	    *elementRef,
-	    rtLSTORE_CPD_ContentPTokenCPD (lstore),
-	    rtLSTORE_CPD_BreakpointArray (lstore) [breakpointCount]
-	);
+    rtPTOKEN_Handle::Reference pContentPToken;
+    getContentPToken (pContentPToken);
 
+    if (xList >= cBreakpoints) {
+	rResult.constructReference (pContentPToken, breakpointArray ()[cBreakpoints]);
 	return;
     }
 
+/*****  Otherwise, enable modification of the L-Store, ...  *****/
+    EnableModifications ();
+    CheckConsistency ();
+    setIsInconsistent ();
+
 /*****  ...obtain the element insertion position, ...  *****/
-    insertionPosition = rtLSTORE_CPD_BreakpointArray(lstore)[++referenceValue];
+    unsigned int *pBreakpoints = breakpointArray ();
+    unsigned int insertionPosition = pBreakpoints[++xList];
 
 /*****  ...create and install a new content P-Token, ...  *****/
-    rtPTOKEN_CType *newContentPTokenC = rtPTOKEN_NewShiftPTConstructor (
-	lstore, rtLSTORE_CPx_ContentPToken
-    );
-    newContentPTokenC->AppendAdjustment (insertionPosition, 1);
-    newContentPToken = newContentPTokenC->ToPToken ();
+    rtPTOKEN_CType *pContentPTokenC = pContentPToken->makeAdjustments ();
+    pContentPTokenC->AppendAdjustment (insertionPosition, 1);
+    pContentPToken.setTo (pContentPTokenC->ToPToken ());
 
-/*****  ...enable modification of the L-Store, ...  *****/
-    lstore->EnableModifications ();
-    lstore->CheckConsistency ();
-    rtLSTORE_CPD_IsInconsistent (lstore) = true;
-    lstore->StoreReference (rtLSTORE_CPx_ContentPToken, newContentPToken);
-    newContentPToken->release ();
+    StoreReference (contentPTokenPOP (), pContentPToken);
 
-/*****  ...set elementRef to point to the appended element, ...  *****/
-    DSC_InitReferenceScalar (
-	*elementRef,
-	rtLSTORE_CPD_ContentPTokenCPD (lstore),
-	insertionPosition
-    );
+/*****  ...set rResult to point to the appended element, ...  *****/
+    rResult.constructReference (pContentPToken, insertionPosition);
 
 /*****  ...and adjust the remaining breakpoints for the insertion made.  *****/
-    for (breakpointPtr = rtLSTORE_CPD_BreakpointArray (lstore),
-	 breakpointLimit = breakpointPtr + breakpointCount,
-	 breakpointPtr += referenceValue;
-	 breakpointPtr <= breakpointLimit;
-	 ++*breakpointPtr++);
-    rtLSTORE_CPD_IsInconsistent (lstore) = false;
+    unsigned int const * const pBreakpointLimit = pBreakpoints + cBreakpoints;
+    unsigned int *pBreakpoint = pBreakpoints + xList;
+    while (pBreakpoint <= pBreakpointLimit)
+	 ++*pBreakpoint++;
+
+    clearIsInconsistent ();
 }
 
 
@@ -2594,7 +2372,7 @@ PrivateFnDef void ReclaimContainer (
  *****  Routine to save an L-Store.
  *****/
 bool rtLSTORE_Handle::PersistReferences () {
-    rtLSTORE_LStore *lstore = (rtLSTORE_LStore*)ContainerContent ();
+    rtLSTORE_LStore *lstore = typecastContent ();
 
     return Persist (&rtLSTORE_LStore_RowPToken		(lstore))
 	&& Persist (&rtLSTORE_LStore_Content		(lstore))
@@ -2619,8 +2397,8 @@ bool rtLSTORE_Handle::PersistReferences () {
  *	NOTHING - Executed for side effect only.
  *
  *****/
-PrivateFnDef void MarkContainers (M_ASD *pSpace, M_CPreamble const *pContainer) {
-    pSpace->Mark ((M_POP const*)(pContainer + 1), 3);
+PrivateFnDef void MarkContainers (M_ASD::GCVisitBase* pGCV, M_ASD *pSpace, M_CPreamble const *pContainer) {
+    pGCV->Mark (pSpace, (M_POP const*)(pContainer + 1), 3);
 }
 
 
@@ -2633,7 +2411,7 @@ PublicFnDef void rtLSTORE_WriteDBUpdateInfo (M_CPD *lstoreCPD) {
     ValidateBreakpointConsistency (lstoreCPD);
 /***** Output the lstore DB File Record ... *****/
     if (rtLSTORE_CPD_StringStore (lstoreCPD)) {
-	int lstoreIndex = lstoreCPD->ContainerIndex ();
+	int lstoreIndex = lstoreCPD->containerIndex ();
 
 	DBUPDATE_OutputLStoreRecord (
 	    lstoreIndex,
@@ -2666,7 +2444,7 @@ PublicFnDef void rtLSTORE_WriteDBUpdateInfo (M_CPD *lstoreCPD) {
  *
  *****/
 PrivateFnDef void PrintLStore (M_CPD *lstore, bool full) {
-    rtLSTORE_Align (lstore);
+    lstore->align ();
 
     IO_printf ("%s{", RTYPE_TypeIdAsString (RTYPE_C_ListStore));
     if (full) {
@@ -2697,28 +2475,21 @@ PrivateFnDef void PrintLStore (M_CPD *lstore, bool full) {
  ********************/
 
 IOBJ_DefineNewaryMethod (NewDM) {
-    return RTYPE_QRegister (
-	rtLSTORE_NewCluster (RTYPE_QRegisterCPD (parameterArray[0]), NilOf (M_CPD*), -1)
-    );
+    Vdd::Store::Reference pContentPrototype (rtVECTOR_Handle());
+    return RTYPE_QRegister (new rtLSTORE_Handle (RTYPE_QRegisterPToken (parameterArray[0])));
 }
 
 IOBJ_DefineNewaryMethod (NewUsingContentPrototypeDM) {
-    return RTYPE_QRegister (
-	rtLSTORE_NewCluster (
-	    RTYPE_QRegisterCPD (parameterArray[0]),
-	    RTYPE_QRegisterCPD (parameterArray[1]),
-	    -1
-	)
-    );
+    Vdd::Store::Reference pStore (RTYPE_QRegisterHandle (parameterArray[1])->getStore ());
+    return RTYPE_QRegister (new rtLSTORE_Handle (RTYPE_QRegisterPToken (parameterArray[0]), pStore));
 }
 
 IOBJ_DefineNewaryMethod (NewUsingLinkDM) {
     rtLINK_CType *pContentMap = rtLINK_ToConstructor (RTYPE_QRegisterCPD (parameterArray[0]));
-    M_CPD *pContentCluster = rtVECTOR_New (pContentMap->PPT ());
-
-    M_CPD *pNewCluster = rtLSTORE_NewCluster (pContentMap, pContentCluster);
-
-    pContentCluster->release ();
+    rtVECTOR_Handle::Reference pContentCluster (new rtVECTOR_Handle (pContentMap->PPT ()));
+    rtLSTORE_Handle::Reference pNewCluster (
+	new rtLSTORE_Handle (pContentMap, pContentCluster)
+    );
     pContentMap->release ();
 
     return RTYPE_QRegister (pNewCluster);
@@ -2811,63 +2582,59 @@ IOBJ_DefineUnaryMethod (ContentPTokenDM) {
 
 
 IOBJ_DefineUnaryMethod (AlignDM) {
-    rtLSTORE_Align (RTYPE_QRegisterCPD (self));
+    RTYPE_QRegisterCPD (self)->align ();
     return self;
 }
 
 IOBJ_DefineMethod (AlignListAdjustmentDM) {
+    rtLSTORE_Handle *pStore = static_cast<rtLSTORE_Handle*>(RTYPE_QRegisterHandle (self));
+
     rtREFUV_Type_Reference listRef;
-    DSC_InitReferenceScalar (
-	listRef,
-	rtLSTORE_CPD_RowPTokenCPD (RTYPE_QRegisterCPD (self)),
-	IOBJ_IObjectValueAsInt (parameterArray[0])
-    );
+    listRef.constructReference (pStore->getPToken (), IOBJ_IObjectValueAsInt (parameterArray[0]));
     int adjustment = IOBJ_IObjectValueAsInt (parameterArray[1]);
 
-    rtLSTORE_AlignUsingRefSelctList (RTYPE_QRegisterCPD (self), &listRef, adjustment);
+    pStore->alignUsingSelectedLists (listRef, adjustment);
 
-    DSC_ClearScalar (listRef);
+    listRef.destroy ();
     return self;
 }
 
 IOBJ_DefineMethod (AlignListsAdjustmentsDM) {
-    M_CPD *listLink     = RTYPE_QRegisterCPD (parameterArray[0]);
-    M_CPD *adjustmentUV = RTYPE_QRegisterCPD (parameterArray[1]);
-    rtLINK_CType *listLC = rtLINK_ToConstructor (listLink);
-
-    rtLSTORE_AlignUsingLCSelctLists (RTYPE_QRegisterCPD (self), listLC, adjustmentUV);
-
+    rtLINK_CType *listLC = rtLINK_ToConstructor (RTYPE_QRegisterCPD (parameterArray[0]));
+    static_cast<rtLSTORE_Handle*>(RTYPE_QRegisterHandle (self))->alignUsingSelectedLists (
+	listLC, RTYPE_QRegisterCPD (parameterArray[1])
+    );
     listLC->release ();
+
     return self;
 }
 
 IOBJ_DefineMethod (AlignListsDM) {
-    M_CPD *listLink      = RTYPE_QRegisterCPD (parameterArray[0]);
-    rtLINK_CType *listLC = rtLINK_ToConstructor (listLink);
-
-    rtLSTORE_AlignUsingLCSelctLists (
-	RTYPE_QRegisterCPD (self), listLC, NilOf (M_CPD*)
+    rtLINK_CType *listLC = rtLINK_ToConstructor (RTYPE_QRegisterCPD (parameterArray[0]));
+    static_cast<rtLSTORE_Handle*>(RTYPE_QRegisterHandle (self))->alignUsingSelectedLists (
+	listLC, NilOf (M_CPD*)
     );
-
     listLC->release ();
+
     return self;
 }
 
 IOBJ_DefineMethod (LCExtractDM) {
-    M_CPD *lstore = RTYPE_QRegisterCPD (self);
+    rtLSTORE_Handle *lstore = static_cast<rtLSTORE_Handle*>(RTYPE_QRegisterHandle (self));
     rtLINK_CType *linkc = rtLINK_ToConstructor (RTYPE_QRegisterCPD (parameterArray[0]));
 
-    rtLINK_CType *pElementSelection, *pElementExpansion; M_CPD *pElementReordering;
-    LCExtract (lstore, linkc, pElementSelection, pElementExpansion, pElementReordering);
+    Vdd::Store::Reference pElementStore;
+    rtLINK_CType *pElementPointer, *pExpansion; M_CPD *pElementReordering;
+    lstore->getListElements (linkc, pElementStore, pElementPointer, pExpansion, pElementReordering);
 
     IO_printf ("elementSelector:\n");
-    pElementSelection->DebugPrint ();
+    pElementPointer->DebugPrint ();
 
-    IO_printf ("pElementExpansion:\n");
-    pElementExpansion->DebugPrint ();
+    IO_printf ("pExpansion:\n");
+    pExpansion->DebugPrint ();
 
-    pElementSelection->release ();
-    pElementExpansion->release ();
+    pElementPointer->release ();
+    pExpansion->release ();
     linkc->release ();
 
     if (IsntNil (pElementReordering))
@@ -2877,27 +2644,24 @@ IOBJ_DefineMethod (LCExtractDM) {
 }
 
 IOBJ_DefineMethod (RefExtractDM) {
-    M_CPD *lstore = RTYPE_QRegisterCPD (self);
+    rtLSTORE_Handle *lstore = static_cast<rtLSTORE_Handle*>(RTYPE_QRegisterHandle (self));
 
     rtREFUV_Type_Reference reference;
-    DSC_InitReferenceScalar (
-	reference,
-	rtLSTORE_CPD_RowPTokenCPD (lstore),
-	IOBJ_IObjectValueAsInt (parameterArray[0])
-    );
+    reference.constructReference (lstore->getPToken (), IOBJ_IObjectValueAsInt (parameterArray[0]));
 
-    rtLINK_CType *pElementExpansion, *pElementSelection;
-    RefExtract (lstore, reference, pElementSelection, pElementExpansion);
+    Vdd::Store::Reference pElementStore;
+    rtLINK_CType *pExpansion, *pElementPointer;
+    lstore->getListElements (reference, pElementStore, pElementPointer, pExpansion);
 
     IO_printf ("elementSelector:\n");
-    pElementSelection->DebugPrint ();
+    pElementPointer->DebugPrint ();
 
-    IO_printf ("pElementExpansion:\n");
-    pElementExpansion->DebugPrint ();
+    IO_printf ("pExpansion:\n");
+    pExpansion->DebugPrint ();
 
-    pElementSelection->release ();
-    pElementExpansion->release ();
-    DSC_ClearScalar (reference);
+    pElementPointer->release ();
+    pExpansion->release ();
+    reference.destroy ();
 
     return (self);
 }
@@ -2909,8 +2673,8 @@ IOBJ_DefineMethod (AppendToUsingLCDM) {
     );
 
     rtLINK_CType *elementLinkC;
-    rtLSTORE_AppendToLCSelectedList (
-	RTYPE_QRegisterCPD (self), selectionLinkC, &elementLinkC
+    static_cast<rtLSTORE_Handle*>(RTYPE_QRegisterHandle (self))->appendToList (
+	elementLinkC, selectionLinkC
     );
 
     selectionLinkC->release ();
@@ -2918,54 +2682,50 @@ IOBJ_DefineMethod (AppendToUsingLCDM) {
 }
 
 IOBJ_DefineMethod (AppendToUsingRefDM) {
-    M_CPD *lstore = RTYPE_QRegisterCPD (self);
+    rtLSTORE_Handle *pStore = static_cast<rtLSTORE_Handle*>(RTYPE_QRegisterHandle (self));
 
-    rtREFUV_Type_Reference selectionRef;
-    DSC_InitReferenceScalar (
-	selectionRef,
-	rtLSTORE_CPD_RowPTokenCPD (lstore),
-	IOBJ_IObjectValueAsInt (parameterArray[0])
-    );
+    rtREFUV_Type_Reference pInstance;
+    pInstance.constructReference (pStore->getPToken (), IOBJ_IObjectValueAsInt (parameterArray[0]));
 
-    rtREFUV_Type_Reference elementRef;
-    rtLSTORE_AppendToRefSelectdList (
-	RTYPE_QRegisterCPD (self), &selectionRef, &elementRef
-    );
+    rtREFUV_Type_Reference iResult;
+    pStore->appendToList (iResult, pInstance);
 
-    int position = rtREFUV_Ref_Element (&elementRef);
+    int position = rtREFUV_Ref_Element (&iResult);
 
-    DSC_ClearScalar (selectionRef);
-    DSC_ClearScalar (elementRef);
+    pInstance.destroy ();
+    iResult.destroy ();
 
     return IOBJ_IntIObject (position);
 }
 
 
 IOBJ_DefineMethod (ElementCountUsingRefDM) {
-    M_CPD *lstore = RTYPE_QRegisterCPD (self);
+    Vdd::Store::Reference pStore (RTYPE_QRegisterHandle (self)->getStore ());
 
-    rtREFUV_Type_Reference selectionRef;
-    DSC_InitReferenceScalar (
-	selectionRef,
-	rtLSTORE_CPD_RowPTokenCPD (lstore),
-	IOBJ_IObjectValueAsInt (parameterArray[0])
-    );
+    DSC_Scalar iSubscript;
+    iSubscript.constructReference (pStore->getPToken (), IOBJ_IObjectValueAsInt (parameterArray[0]));
 
-    int count = rtLSTORE_RefSelListElementCount (lstore, &selectionRef);
+    unsigned int iResult = 0;
+    pStore->getCardinality (iResult, iSubscript);
 
-    DSC_ClearScalar (selectionRef);
-    return IOBJ_IntIObject (count);
+    iSubscript.destroy ();
+
+    return IOBJ_IntIObject (iResult);
 }
 
 IOBJ_DefineMethod (ElementCountUsingLCDM) {
-    rtLINK_CType *selectionLC = rtLINK_ToConstructor (
+    rtLINK_CType *pSubscript = rtLINK_ToConstructor (
 	RTYPE_QRegisterCPD (parameterArray [0])
     );
 
-    M_CPD *result = rtLSTORE_LCSelListElementCount (RTYPE_QRegisterCPD (self), selectionLC);
+    Vdd::Store::Reference pStore (RTYPE_QRegisterHandle (self)->getStore ());
 
-    selectionLC->release ();
-    return RTYPE_QRegister (result);
+    M_CPD *pResult;
+    pStore->getCardinality (pResult, pSubscript);
+
+    pSubscript->release ();
+
+    return RTYPE_QRegister (pResult);
 }
 
 

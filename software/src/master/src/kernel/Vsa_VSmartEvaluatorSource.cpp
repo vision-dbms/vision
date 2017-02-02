@@ -26,7 +26,7 @@
 #include "V_VTime.h"
 #include "Vca_VDirectory.h"
 #include "VkSocketAddress.h"
-
+#include "VTransientServices.h"
 
 namespace Vsa {
 
@@ -42,12 +42,14 @@ namespace Vsa {
     //  Typedef
     typedef VReceiver<ThisClass, ISubscription*> ISubscriptionSink;
     typedef VReceiver<ThisClass, IVUnknown*> IVUnknownSink;
+	typedef VReceiver<ThisClass, Vca::U32>   U32Receiver;
 
     //  enum
     enum State {
       STATE_NEW,
       STATE_TRYING_PRIMARY,
       STATE_TRYING_PRIMARY_FAILOVERS,
+	  STATE_TRYING_LEAST_BUSY,
       STATE_TRYING_LASTRESORTS,
       STATE_FAILED,
       STATE_SUCCEEDED
@@ -80,6 +82,10 @@ namespace Vsa {
     void tryEntry (VString const &rName);
     void tryNextEntry ();
     void enquireDirectory (VString const &rName);
+	void ReturnLeastBusy();
+	void CheckBusyness();
+	void attemptReturn();
+	bool shouldReturnEvaluator();
 
 
     //  ObjectSink Role
@@ -111,14 +117,18 @@ namespace Vsa {
     //  Sinks
   public:
     void onSubscription (ISubscriptionSink *pSink, ISubscription *pSubscription);
+    void onSubscriptionError (ISubscriptionSink *pSink, Vca::IError *pError, VString const &rText);
     void onUpDownPublisher (IVUnknownSink *pSink, IVUnknown *pIUpDownPublisher);
+    void onGetter (IVUnknownSink *pSink, IVUnknown *pIGetter);
+    void onBusynessResult (U32Receiver *pReceiver, Vca::U32 rResult);
+    void onBusynessError (U32Receiver *pReceiver, Vca::IError *pError, VString const &rText);
 
     //  Query
   protected:
     bool isPrimaryEntry (VString const &rName) const;
     bool isLastResortEntry (VString const &rName) const;
     bool isDone () const {
-      return m_iState == STATE_FAILED || m_iState == STATE_SUCCEEDED;
+        return m_iState == STATE_FAILED || m_iState == STATE_SUCCEEDED;
     }
 
     //  Randomize
@@ -133,7 +143,7 @@ namespace Vsa {
     Vca::IDirectory::Pointer           m_pDirectory; // soft reference to prevent circular reference
     VkDynamicArrayOf<VString>          m_iPrimaryFailoverEntries;
     VkDynamicArrayOf<VString>          m_iLastResortEntries;
-    bool                                m_bHasPrimary;
+    bool                               m_bHasPrimary;
     VString                            m_iPrimarySource;
     V::U32                             m_cPrimaryFailovers;
     V::U32                             m_cLastResorts;
@@ -142,12 +152,16 @@ namespace Vsa {
     V::U32                             m_cPrimaryFailoversTried;
     V::U32                             m_cLastResortsTried;
     V::U32                             m_xNextEntryToTry;
+	
+    V::U32                             m_cBusynessesChecked;
 
     //  Current Try
     VString                            m_iEntryBeingTried;
     IEvaluator::Reference              m_pEvaluatorBeingProbed;
     ISubscription::Reference           m_pEvaluatorSubscription;
     ObjectHolder::Reference            m_pObjectHolderBeingProbed;
+    ObjectHolder::Reference            m_pObjectHolderToReturn;
+    V::U32                             m_xEvaluatorBusyness;
 
     IEvaluatorSink::Reference          m_pClient;
     VSmartEvaluatorSource::Reference   m_pSmartSource;
@@ -182,6 +196,7 @@ Vsa::VSmartEvaluatorSource::Request::Request (
   , m_cLastResorts (0)
   , m_cPrimaryFailoversTried (0)
   , m_cLastResortsTried (0)
+  , m_cBusynessesChecked(0)
   , m_xNextEntryToTry (0)
   , m_iState (STATE_NEW)
   , m_pClient (pSink)
@@ -211,7 +226,6 @@ Vsa::VSmartEvaluatorSource::Request::~Request () {
  ******************/
 
 void Vsa::VSmartEvaluatorSource::Request::init (VkDynamicArrayOf<VString> &rEntries) {
-
   V::U32 iSize = rEntries.cardinality ();
   VString iHost; m_pSmartSource->getHostname (iHost);
 
@@ -256,22 +270,25 @@ void Vsa::VSmartEvaluatorSource::Request::init (VkDynamicArrayOf<VString> &rEntr
  *******************/
 
 
-void Vsa::VSmartEvaluatorSource::Request::start () {
-  
+void Vsa::VSmartEvaluatorSource::Request::start () {  
   m_pSmartSource->refreshConnectivity ();
 
   VReference<ObjectHolder> pObjHolder;
   pObjHolder.setTo (m_pSmartSource->getActiveObjectHolder ());
-  if (pObjHolder) {
-    log ("SmartEvaluatorSource::Request: Cached evaluator already exists...");
-    IEvaluator::Reference pEvaluator;
-    pEvaluator.setTo (static_cast <IEvaluator*> (pObjHolder->getObject ()));
-    m_iState = STATE_SUCCEEDED;
-    m_pClient->OnData (pEvaluator);
-  }
-  else {
-    process ();
-  }
+  if (pObjHolder ) {
+    m_pObjectHolderBeingProbed.setTo (pObjHolder);
+    m_pEvaluatorBeingProbed.setTo(static_cast<IEvaluator*>(pObjHolder->getObject()));
+    m_iEntryBeingTried.setTo(pObjHolder->getName());
+    m_bWait = true;
+    CheckBusyness();
+    //if the busyness return works then we are done
+    if(m_iState == STATE_SUCCEEDED) {
+        log ("SmartEvaluatorSource::Request: Cached unbusy evaluator already exists...");
+        return;
+    }
+  }	else {
+	process ();
+	}
 }
 
 
@@ -286,14 +303,13 @@ void Vsa::VSmartEvaluatorSource::Request::process () {
   if (m_bProcessing == false){
     m_bProcessing = true;
     while (!isDone () && !m_bWait) {
-      tryNextEntry ();
+        tryNextEntry ();
     }
     m_bProcessing = false;
   }
 }
 
 void Vsa::VSmartEvaluatorSource::Request::tryNextEntry () {
-
   //  Perform state transitions and required "edge" actions
   switch (m_iState) {
   case STATE_NEW:
@@ -308,17 +324,24 @@ void Vsa::VSmartEvaluatorSource::Request::tryNextEntry () {
 	  break;
       }
   case STATE_TRYING_PRIMARY_FAILOVERS:
-      if (m_cPrimaryFailoversTried < m_cPrimaryFailovers)
+      if (m_cPrimaryFailoversTried < m_cPrimaryFailovers && m_cBusynessesChecked <= m_pSmartSource->GetMaxBusynessChecks() )
 	  ;// no state change needed
-      else if (m_cLastResorts > 0) {
+      else {
+		m_iState = STATE_TRYING_LEAST_BUSY;
+	  }
+	  break;
+  case STATE_TRYING_LEAST_BUSY:
+	if (m_cLastResorts > 0) {
+	  VString iErrMessage ("Warning: Trying the last resorts for the connection with existing sources");
+	  notify (20, "#20: VSmartEvaluatorSource::Request::tryNextEntry: %s\n", iErrMessage.content ());
 	  m_iState = STATE_TRYING_LASTRESORTS;
 	  m_xNextEntryToTry = getRandomArrayIndex (m_cLastResorts);
       }
       else
-	  m_iState = STATE_FAILED;
+		m_iState = STATE_FAILED;
       break;
   case STATE_TRYING_LASTRESORTS:
-      if (m_cLastResortsTried < m_cLastResorts)
+      if (m_cLastResortsTried < m_cLastResorts) 
 	  ;// no state change needed
       else
 	  m_iState = STATE_FAILED;
@@ -340,9 +363,13 @@ void Vsa::VSmartEvaluatorSource::Request::tryNextEntry () {
     m_xNextEntryToTry = m_xNextEntryToTry+1 < m_cPrimaryFailovers ? m_xNextEntryToTry+1 : 0;
     m_cPrimaryFailoversTried++;
     tryEntry (iCurrentEntry);
-
-  }
+	}
     break;
+	
+  case STATE_TRYING_LEAST_BUSY: {
+	ReturnLeastBusy();
+	break;
+  }
     
   case STATE_TRYING_LASTRESORTS: {
     VString iCurrentEntry = m_iLastResortEntries[m_xNextEntryToTry];
@@ -355,6 +382,7 @@ void Vsa::VSmartEvaluatorSource::Request::tryNextEntry () {
   case STATE_FAILED:
   default:
     VString iErrMessage ("Unable to provide valid connection with existing sources");
+    notify (11, "#11: VSmartEvaluatorSource::Request::tryNextEntry: %s\n", iErrMessage.content ());
     log ("SmartEvaluatorSource::Request: %s", iErrMessage.content ());
     m_pClient->OnError (0, iErrMessage);
     break;
@@ -362,23 +390,22 @@ void Vsa::VSmartEvaluatorSource::Request::tryNextEntry () {
 }
 
 void Vsa::VSmartEvaluatorSource::Request::tryEntry (VString const &rEntryName) {
-
-  VReference<ObjectHolder> pObjHolder;
-  if (m_pSmartSource->getObjectHolder (rEntryName, pObjHolder)) {
-      if (pObjHolder->isObjectUp ()) {
-        m_pSmartSource->setActiveObjectHolder (pObjHolder);
-        IEvaluator::Reference pEvaluator;
-        pEvaluator.setTo (static_cast <IEvaluator*> (pObjHolder->getObject ()));
-        m_iState = STATE_SUCCEEDED;
-        m_pClient->OnData (pEvaluator);
-      }
-      else if (pObjHolder->isObjectReadyForRetry ()) {
-	enquireDirectory (rEntryName);
-      }
-  }
-  else {
-    enquireDirectory (rEntryName);
-  }
+	  VReference<ObjectHolder> pObjHolder;
+	  if (m_pSmartSource->getObjectHolder (rEntryName, pObjHolder)) {
+		  if (pObjHolder->isObjectUp ()) {			
+		    m_pObjectHolderBeingProbed.setTo (pObjHolder);
+			m_pEvaluatorBeingProbed.setTo(static_cast<IEvaluator*>(pObjHolder->getObject()));
+			m_iEntryBeingTried.setTo(rEntryName);
+			m_bWait = true;
+			CheckBusyness();
+		  }
+		  else if (pObjHolder->isObjectReadyForRetry ()) {
+			enquireDirectory (rEntryName);
+		  }
+	  }
+	  else {
+		enquireDirectory (rEntryName);
+	}
 }
 
 void Vsa::VSmartEvaluatorSource::Request::enquireDirectory (VString const &rName) {
@@ -389,6 +416,7 @@ void Vsa::VSmartEvaluatorSource::Request::enquireDirectory (VString const &rName
   m_iEntryBeingTried.setTo (rName);
   m_bWait = true;
   m_pDirectory->GetObject (pObjectSink, rName, Vsa::IEvaluator::typeInfo ());
+  
 }
 
 /*****************************
@@ -396,15 +424,17 @@ void Vsa::VSmartEvaluatorSource::Request::enquireDirectory (VString const &rName
  *****  ObjectSink Role  *****
  *****************************
  *****************************/
-
+ 
 void Vsa::VSmartEvaluatorSource::Request::OnData (ObjectSink *pRole, IVUnknown *pObject) {
-
   if (pObject) {
-    m_pEvaluatorBeingProbed.setTo (static_cast<IEvaluator*> (pObject));
+	m_pEvaluatorBeingProbed.setTo (static_cast<IEvaluator*> (pObject));
+	bool bIsEntryPrimary = (m_iEntryBeingTried == m_iPrimarySource);
+    
     VReference<IVUnknownSink> pSink (new IVUnknownSink (this, &ThisClass::onUpDownPublisher));
     m_pEvaluatorBeingProbed->QueryInterface (Vsa::IUpDownPublisher::typeInfo (), pSink);
   }
   else {
+	m_pEvaluatorBeingProbed = 0;
     log ("SmartEvaluatorSource::Request: Null evaluator obtained for entry %s", m_iEntryBeingTried.content ());
     m_bWait = false;
     process ();
@@ -425,8 +455,7 @@ void Vsa::VSmartEvaluatorSource::Request::OnError_(Vca::IError *pError, VString 
  ******************
  ******************/
 
-void Vsa::VSmartEvaluatorSource::Request::onUpDownPublisher (IVUnknownSink *pSink, IVUnknown *pIUpDownPublisher) {
-  
+ void Vsa::VSmartEvaluatorSource::Request::onUpDownPublisher (IVUnknownSink *pSink, IVUnknown *pIUpDownPublisher) {
   VReference<IUpDownPublisher> pPublisher;
   pPublisher.setTo (static_cast<Vsa::IUpDownPublisher*> (pIUpDownPublisher));
   
@@ -437,7 +466,7 @@ void Vsa::VSmartEvaluatorSource::Request::onUpDownPublisher (IVUnknownSink *pSin
   );
   m_pSmartSource->link (pObjHolder);
   m_pObjectHolderBeingProbed.setTo (pObjHolder);
-
+  
   //  Get the current UP/DOWN status
   if (pPublisher) {
 
@@ -446,23 +475,117 @@ void Vsa::VSmartEvaluatorSource::Request::onUpDownPublisher (IVUnknownSink *pSin
     getRole (pSubscriber);
     
     //  create subscription sink
-    VReference<ISubscriptionSink> pSink (new ISubscriptionSink (this, &ThisClass::onSubscription));
-    
+    VReference<ISubscriptionSink> pSink (new ISubscriptionSink (this, &ThisClass::onSubscription, &ThisClass::onSubscriptionError));
     // subscribe
     pPublisher->Subscribe (pSubscriber, pSink);
   }
   else {
-    //  Remote Evaluator doesnt support IUpDownPublisher interface....Assume its up
-    m_pSmartSource->setActiveObjectHolder (pObjHolder);
-    m_iState = STATE_SUCCEEDED;
-    m_pClient->OnData (m_pEvaluatorBeingProbed);
-    m_bWait = false;
+    CheckBusyness();
   }
+}
+ 
+// Check the busyness of our current m_pEvaluatorBeingProbed
+// First check if there's an override active
+// If we can check its busyness and its the lowest one checked yet, set it as m_pEvaluatorToReturn and store its busyness
+// If we can't check its busyness but we don't have m_pEvaluatorToReturn stored yet, store this one with a max busyness
+void Vsa::VSmartEvaluatorSource::Request::CheckBusyness () {
+	m_cBusynessesChecked++;
+	Vca::U32 busynessOverride;
+	if(m_pSmartSource->getBusynessOverride(m_iEntryBeingTried, busynessOverride)) {
+		log("SmartEvaluatorSource::Request: Found a busyness override for %s", m_iEntryBeingTried.content());
+		onBusynessResult(0, busynessOverride);
+	} else {	
+		VReference<IVUnknownSink> pSink (new IVUnknownSink (this, &ThisClass::onGetter));
+		m_pEvaluatorBeingProbed->QueryInterface (Vca::IGetter_Ex2::typeInfo (), pSink);
+	}
+}
+	
+void Vsa::VSmartEvaluatorSource::Request::onGetter (IVUnknownSink *pSink, IVUnknown *pIGetter) {
+	VReference<Vca::IGetter> pGetter;
+	pGetter.setTo (static_cast<Vca::IGetter*> (pIGetter));
+	if(pGetter) {
+		U32Receiver::Reference pReceiver;
+        pReceiver.setTo (new U32Receiver (this, &ThisClass::onBusynessResult, &ThisClass::onBusynessError));
+		pGetter->GetU32Value (pReceiver, "Busyness");
+	} else {
+		if(!m_pObjectHolderToReturn) {
+			m_pObjectHolderToReturn.setTo(m_pObjectHolderBeingProbed);
+			m_xEvaluatorBusyness = 0;
+			attemptReturn();
+		} else {
+			m_bWait = false;
+			process();
+		}
+	}
+}
+
+void Vsa::VSmartEvaluatorSource::Request::onBusynessResult (U32Receiver *pReceiver, Vca::U32 rResult) {
+	if(!m_pObjectHolderToReturn || rResult < m_xEvaluatorBusyness) {
+		m_pObjectHolderToReturn.setTo(m_pObjectHolderBeingProbed);
+		m_xEvaluatorBusyness = rResult;
+		attemptReturn();
+	} else {
+		m_bWait = false;
+		process();
+	}
+}
+
+void Vsa::VSmartEvaluatorSource::Request::onBusynessError (U32Receiver *pReceiver, Vca::IError *pError, VString const &rText) {
+	if(!m_pObjectHolderToReturn) {
+		m_pObjectHolderToReturn.setTo(m_pObjectHolderBeingProbed);
+		m_xEvaluatorBusyness = 0;
+		attemptReturn();
+	} else {
+		m_bWait = false;
+		process();
+	}
+}
+
+void Vsa::VSmartEvaluatorSource::Request::attemptReturn () {
+	if (shouldReturnEvaluator()) {
+		m_pSmartSource->setActiveObjectHolder (m_pObjectHolderToReturn);
+		IEvaluator::Reference const pEvaluator (
+		static_cast <IEvaluator*> (m_pObjectHolderToReturn->getObject ())
+		);
+		m_iState = STATE_SUCCEEDED;
+		m_bWait = false;
+		m_pClient->OnData (pEvaluator);
+	} else {
+		m_bWait = false;
+		process();
+	}
+}
+
+void Vsa::VSmartEvaluatorSource::Request::ReturnLeastBusy () {
+	if(m_pObjectHolderToReturn) {
+		m_pSmartSource->setActiveObjectHolder (m_pObjectHolderToReturn);
+		m_iState = STATE_SUCCEEDED;
+		IEvaluator::Reference const pEvaluator (
+		static_cast <IEvaluator*> (m_pObjectHolderToReturn->getObject ())
+		);
+		m_bWait = false;
+		m_pClient->OnData (pEvaluator);
+	} else {
+		m_bWait = false;
+		process();
+	}
+}
+
+bool Vsa::VSmartEvaluatorSource::Request::shouldReturnEvaluator() {
+	return (m_pObjectHolderToReturn && m_xEvaluatorBusyness < m_pSmartSource->GetBusynessThreshold()) || 
+		(m_cBusynessesChecked >= m_pSmartSource->GetMaxBusynessChecks()) ||
+		(m_iState == STATE_TRYING_LASTRESORTS);
 }
 
 void Vsa::VSmartEvaluatorSource::Request::onSubscription (ISubscriptionSink *pSink, ISubscription *pSubs) {
   m_pEvaluatorSubscription.setTo (pSubs);
+  m_bWait = false;
 } 
+
+void Vsa::VSmartEvaluatorSource::Request::onSubscriptionError (ISubscriptionSink *pSink, Vca::IError *pError, VString const &rText) {
+	m_bWait = false;
+	process();
+}
 
 /************************************
  ************************************
@@ -471,9 +594,7 @@ void Vsa::VSmartEvaluatorSource::Request::onSubscription (ISubscriptionSink *pSi
  ************************************/
 
 void Vsa::VSmartEvaluatorSource::Request::OnUp (IUpDownSubscriber *pRole) {
-  m_pSmartSource->setActiveObjectHolder (m_pObjectHolderBeingProbed);
-  m_iState = STATE_SUCCEEDED;
-  m_pClient->OnData (m_pEvaluatorBeingProbed);
+  CheckBusyness();
   m_pEvaluatorSubscription->Unsubscribe ();
   m_bWait = false;
 }
@@ -683,8 +804,8 @@ void Vsa::VSmartEvaluatorSource::ObjectHolder::unsubscribe () {
  **************************
  **************************/
 
-Vsa::VSmartEvaluatorSource::VSmartEvaluatorSource (Vca::IDirectory *pDirectory)
-  : m_pDirectory (pDirectory) {
+Vsa::VSmartEvaluatorSource::VSmartEvaluatorSource (Vca::IDirectory *pDirectory, Vca::U32 busynessThreshold, Vca::U32 maxBusynessChecks)
+  : m_pDirectory (pDirectory), m_iBusynessThreshold(busynessThreshold), m_iMaxBusynessChecks(maxBusynessChecks) {
   traceInfo ("Creating Vsa::VSmartEvaluatorSource");
 }
 
@@ -697,7 +818,6 @@ Vsa::VSmartEvaluatorSource::VSmartEvaluatorSource (Vca::IDirectory *pDirectory)
 
 Vsa::VSmartEvaluatorSource::~VSmartEvaluatorSource () {
     traceInfo ("Destroying Vsa::VSmartEvaluatorSource");
-
     //  send unsubscribe message to current publishers and unlink
     ObjectHolder::Reference pObjectHolder (m_pObjectHolderList);
     while (pObjectHolder) {
@@ -714,7 +834,6 @@ Vsa::VSmartEvaluatorSource::~VSmartEvaluatorSource () {
  ******************/
 
 void Vsa::VSmartEvaluatorSource::init () {
-  
   //  seed the random number generator
   V::VTime currentTime;
   time_t time = currentTime; 
@@ -722,6 +841,27 @@ void Vsa::VSmartEvaluatorSource::init () {
   
   VReference<StringArraySink> pSink (new StringArraySink (this, &ThisClass::onEntries));
   m_pDirectory->GetEntries (pSink);
+}
+
+void Vsa::VSmartEvaluatorSource::setBusynessMap (BusynessOverrideMap busynessOverrides) {
+	// temporary until figure out better way to set the map
+	Iterator iterator (busynessOverrides);
+	while (iterator.isNotAtEnd ()) {
+		Vca::U32 xIndex;
+		Vca::U32 busynessOverride;
+		VString session = iterator.key ();
+		busynessOverrides.Locate (session.content(), xIndex);
+		busynessOverride = busynessOverrides [xIndex];
+		addBusynessMapEntry(session, busynessOverride);
+		++iterator;
+	}
+}
+
+void Vsa::VSmartEvaluatorSource::addBusynessMapEntry (VString &iName, Vca::U32 iBusynessOverride) {
+	unsigned int xIndex;
+	if(m_iBusynessOverrides.Insert(iName.content(), xIndex)) {
+		m_iBusynessOverrides[xIndex] = iBusynessOverride;
+	}
 }
 
 /*******************
@@ -782,6 +922,15 @@ void Vsa::VSmartEvaluatorSource::onEntries (StringArraySink* pSink, VkDynamicArr
   }
 }
 
+bool Vsa::VSmartEvaluatorSource::getBusynessOverride(VString entry, Vca::U32 &busynessOverride) {
+	Vca::U32 xIndex;
+	if(m_iBusynessOverrides.Locate (entry.content(), xIndex)) {
+		busynessOverride = m_iBusynessOverrides [xIndex];
+		return true;
+	}
+	return false;
+}
+
 /*********************
  *********************
  *****  Linking  *****
@@ -829,20 +978,9 @@ void Vsa::VSmartEvaluatorSource::Supply (IEvaluatorSource *pRole, IEvaluatorSink
 void Vsa::VSmartEvaluatorSource::supply (IEvaluatorSink *pSink) {
   if (pSink) {
     refreshConnectivity ();
-
-    // if there is cached object return right away
-    if (m_pActiveObjectHolder) {
-      log ("SmartEvaluatorSource: Cached evaluator already exists...");
-      IEvaluator::Reference const pEvaluator (
-	  static_cast <IEvaluator*> (m_pActiveObjectHolder->getObject ())
-      );
-      pSink->OnData (pEvaluator);
-    }
-    else {
       // otherwise create a request object to process request
       Request::Reference const pRequest (new Request (m_pDirectory, m_iEntries, pSink, this));
       pRequest->start ();
-    }
   }
 }
 

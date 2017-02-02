@@ -28,9 +28,6 @@ class VMutexClaim;
 class VReadEvalPrintController;
 class VTask;
 
-#include "Vca_IDirectory.h"
-
-#include "Vca_VGoferInterface.h"
 #include "Vca_VTrigger.h"
 
 #include "VEvaluatorPump.h"
@@ -47,12 +44,10 @@ class ABSTRACT IOMDriver : public Vca::VRolePlayer {
     friend class VChannelController;
     friend class VReadEvalPrintController;
 
-//  Types
-public:
 /*------------------------------*
  *----  IOMDriver::Options  ----*
  *------------------------------*/
-
+public:
     class Options : public VTransient {
     //  Construction
     public:
@@ -65,6 +60,14 @@ public:
 
     //  Access
     public:
+	VEvaluatorPump *evaluator () const {
+	    return m_pEvaluator;
+	}
+	bool getEvaluation (Vsa::VEvaluation::Reference &rpEvaluation) const {
+	    if (m_pEvaluator)
+		rpEvaluation.setTo (m_pEvaluator->incomingClient ());
+	    return rpEvaluation.isntNil ();
+	}
 	unsigned int optionValue (
 	    IOMHandle const* pHandle, IOMDriver const* pDriver
 	) const;
@@ -95,37 +98,6 @@ public:
 	void SetPromptFormatTo (IOMPromptFormat xPromptFormat) {
 	    m_xPromptFormat = xPromptFormat;
 	}
-
-    //  Client Object Access
-    public:
-        template <typename gofer_reference_t> bool objectGofer (gofer_reference_t& rpGofer) const {
-            typedef typename gofer_reference_t::ReferencedClass::interface_t interface_t;
-
-            // Clear existing return parameter.
-            rpGofer.clear ();
-
-            // If we have a server name, get a gofer from there ...
-            VString iServerName;
-            if (objectComesFromServer (iServerName)) {
-                rpGofer.setTo (new Vca::Gofer::Named<interface_t,Vca::IDirectory>(iServerName));
-            }
-
-            // If we came from an evaluator, grab a gofer from there if possible...
-            gofer_reference_t pEvaluatorGofer;
-            if (objectComesFromEvaluator () && m_pEvaluator->clientObjectGofer (pEvaluatorGofer)) {
-            //  ... settting its fallback to the server gofer if we have one...
-                if (rpGofer) {
-                    pEvaluatorGofer->setFallbackTo (rpGofer);
-                    pEvaluatorGofer->setFallbackOnNull ();
-                }
-		rpGofer.claim (pEvaluatorGofer);
-            }
-
-            return rpGofer.isntNil ();
-        }
-    private:
-	bool objectComesFromEvaluator () const;
-	bool objectComesFromServer (VString& rServerName) const;
 
     //  State
     protected:
@@ -187,6 +159,9 @@ public:
     }
 
     bool getInputHandler (DSC_Descriptor& rInputHandler);
+    bool getEvaluation (Vsa::VEvaluation::Reference &rpEvaluation) const {
+	return m_iOptions.getEvaluation (rpEvaluation);
+    }
 
     virtual int	getPeerNameString   (char** ppString, size_t* psString);
     virtual int getSocketNameString (char** ppString, size_t* psString);
@@ -250,12 +225,6 @@ private:
     void detach (VChannelController const *pController) {
 	if (m_pController.referent () == pController)
 	    m_pController.clear ();
-    }
-
-//  Client Object Access
-public:
-    template <typename gofer_reference_t> bool objectGofer (gofer_reference_t& rpGofer) const {
-	return m_iOptions.objectGofer (rpGofer);
     }
 
 //  Control

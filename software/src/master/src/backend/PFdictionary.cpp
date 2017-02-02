@@ -36,6 +36,7 @@
 #include "RTintuv.h"
 #include "RTrefuv.h"
 
+#include "VAssociativeResult.h"
 #include "VCollectionOf.h"
 #include "VCollectionOfStrings.h"
 
@@ -109,34 +110,35 @@
 V_DefinePrimitive (LocateOrAddDictionaryPropertySlot) {
     DSC_Descriptor& rCurrent = pTask->getCurrent ();
 
-    M_CPD *pDictionary = rCurrent.storeCPD ();
+    rtDICTIONARY_Handle *pDictionary = dynamic_cast<rtDICTIONARY_Handle*>(rCurrent.store ());
 
-    if (RTYPE_C_Dictionary != pDictionary->RType ()) {
+    if (!pDictionary) {
 	pTask->loadDucWithNA ();
 	return;
     }
 
     DSC_Descriptor propertySlotDescriptor;
 
-    M_CPD *pPropertySubsetCPD = rtDICTIONARY_CPD_PropertySubsetCPD (pDictionary);
+    M_CPD *pPropertySubsetCPD;
+    pDictionary->getPropertySubset (pPropertySubsetCPD);
+
+    rtVECTOR_Handle::Reference pPropertyPrototypes;
+    pDictionary->getPropertyPrototypes (pPropertyPrototypes);
+
     if (rCurrent.holdsAScalarReference ()) {
 	rtREFUV_Type_Reference propertySlotReference;
 
 	rtLINK_LocateOrAddFromRef (
-	    pPropertySubsetCPD,
-	    &DSC_Descriptor_Scalar (rCurrent),
-	    &propertySlotReference
+	    pPropertySubsetCPD, &DSC_Descriptor_Scalar (rCurrent), &propertySlotReference
 	);
 
 	propertySlotDescriptor.constructConstant (
-	    V_TOTSC_PToken,
-	    rtDICTIONARY_CPD_PropertyPrototypesCPD (pDictionary),
-	    propertySlotReference
+	    V_TOTSC_PToken, pPropertyPrototypes, propertySlotReference
 	);
     }
     else if (rCurrent.holdsALink ()) {
 	propertySlotDescriptor.constructLink (
-	    rtDICTIONARY_CPD_PropertyPrototypesCPD (pDictionary), rtLINK_LocateOrAddFromLC (
+	    pPropertyPrototypes, rtLINK_LocateOrAddFromLC (
 		pPropertySubsetCPD, DSC_Descriptor_Link (rCurrent), NilOf (rtLINK_CType**)
 	    )
 	);
@@ -145,7 +147,7 @@ V_DefinePrimitive (LocateOrAddDictionaryPropertySlot) {
 	rCurrent.complainAboutBadPointerType ("LocateOrAddDictionaryPropertySlot");
 	propertySlotDescriptor.construct ();
     }
-    rtDICTIONARY_Align (pDictionary);
+    pDictionary->align ();
 
     pPropertySubsetCPD->release ();
 
@@ -160,14 +162,20 @@ V_DefinePrimitive (LocateOrAddDictionaryPropertySlot) {
 V_DefinePrimitive (LocateDictionaryPropertySlot) {
     DSC_Descriptor& rCurrent = pTask->getCurrent ();
 
-    M_CPD *pDictionary = rCurrent.storeCPD ();
+    rtDICTIONARY_Handle *pDictionary = dynamic_cast<rtDICTIONARY_Handle*> (rCurrent.store ());
 
-    if (RTYPE_C_Dictionary != pDictionary->RType ()) {
+    if (!pDictionary) {
 	pTask->loadDucWithNA ();
 	return;
     }
 
-    M_CPD *pPropertySubsetCPD = rtDICTIONARY_CPD_PropertySubsetCPD (pDictionary);
+
+    M_CPD *pPropertySubsetCPD;
+    pDictionary->getPropertySubset (pPropertySubsetCPD);
+
+    rtVECTOR_Handle::Reference pPropertyPrototypes;
+    pDictionary->getPropertyPrototypes (pPropertyPrototypes);
+
     if (rCurrent.holdsAScalarReference ()) {
 	rtREFUV_Type_Reference propertySlotReference;
 
@@ -178,13 +186,10 @@ V_DefinePrimitive (LocateDictionaryPropertySlot) {
 		INT_MAX,
 		&propertySlotReference
 	    )
-	)
-	{
+	) {
 	    DSC_Descriptor propertySlotDescriptor;
 	    propertySlotDescriptor.constructConstant (
-		V_TOTSC_PToken,
-		rtDICTIONARY_CPD_PropertyPrototypesCPD (pDictionary),
-		propertySlotReference
+		V_TOTSC_PToken, pPropertyPrototypes, propertySlotReference
 	    );
 	    pTask->loadDucWithMoved (propertySlotDescriptor);
 	}
@@ -206,9 +211,7 @@ V_DefinePrimitive (LocateDictionaryPropertySlot) {
 	VDescriptor* pGuardedDatum = pTask->loadDucWithGuardedDatum (pLocatedLC);
 	if (pGuardedDatum) {
 	    DSC_Descriptor iGuardedDatum;
-	    iGuardedDatum.constructLink (
-		rtDICTIONARY_CPD_PropertyPrototypesCPD (pDictionary), pLocationsLC
-	    );
+	    iGuardedDatum.constructLink (pPropertyPrototypes, pLocationsLC);
 	    pGuardedDatum->setToMoved (iGuardedDatum);
 	}
 	else
@@ -227,14 +230,15 @@ V_DefinePrimitive (LocateDictionaryPropertySlot) {
 V_DefinePrimitive (DeleteDictionaryPropertySlot) {
     DSC_Descriptor& rCurrent = pTask->getCurrent ();
 
-    M_CPD *pDictionary = rCurrent.storeCPD ();
-
-    if (RTYPE_C_Dictionary != pDictionary->RType ()) {
+    rtDICTIONARY_Handle::Reference pDictionary (dynamic_cast<rtDICTIONARY_Handle*>(rCurrent.store ()));
+    if (pDictionary.isNil ()) {
 	pTask->loadDucWithNA ();
 	return;
     }
 
-    M_CPD *pPropertySubsetCPD = rtDICTIONARY_CPD_PropertySubsetCPD (pDictionary);
+    M_CPD *pPropertySubsetCPD;
+    pDictionary->getPropertySubset (pPropertySubsetCPD);
+
     if (rCurrent.holdsAScalarReference ()) {
 	pTask->loadDucWithBoolean (
 	    rtLINK_DeleteRefSelectedElement (
@@ -272,18 +276,13 @@ V_DefinePrimitive (DeleteDictionaryPropertySlot) {
  *
  *****/
 PrivateFnDef void LoadAWithScalarLocateResult (
-    VPrimitiveTask *pTask, M_CPD *pDictionary, VAssociativeResult &rAssociation
+    VPrimitiveTask *pTask, Vdd::Store *pStore, VAssociativeResult &rAssociation
 ) {
     if (!rAssociation.targetReferenceIsValid ())
 	pTask->loadDucWithNA ();
-    else {
-	M_CPD *pDictionaryPToken = rAssociation.targetPToken ();
-	pDictionary->retain ();
-	pDictionaryPToken->retain ();
-	pTask->loadDucWithReference (
-	    pDictionary, pDictionaryPToken, rAssociation.targetReferenceScalar ()
-	);
-    }
+    else pTask->loadDucWithReference (
+	pStore, rAssociation.targetPToken (), rAssociation.targetReferenceScalar ()
+    );
 }
 
 
@@ -311,7 +310,7 @@ PrivateFnDef void LoadAWithScalarLocateResult (
  *****/
 PrivateFnDef void LoadAWithGeneralLocateResult (
     VPrimitiveTask*		pTask,
-    M_CPD*			pDictionary,
+    Vdd::Store*			pStore,
     M_CPD*			pDistribution,
     rtLINK_CType*		pLocatedLC,
     rtLINK_CType*		pLocationsLC
@@ -319,10 +318,8 @@ PrivateFnDef void LoadAWithGeneralLocateResult (
 {
     VDescriptor* pGuardedDatum = pTask->loadDucWithGuardedDatum (pLocatedLC);
     if (pGuardedDatum) {
-	pDictionary->retain ();
-
 	DSC_Descriptor iGuardedDatum;
-	iGuardedDatum.constructLink (pDictionary, pLocationsLC);
+	iGuardedDatum.constructLink (pStore, pLocationsLC);
 
 	pGuardedDatum->setToMoved (iGuardedDatum);
 
@@ -347,14 +344,14 @@ V_DefinePrimitive (LocateOrAddToSet) {
     static char const *const pThisPrimitive = "LocateOrAddToSet";
 
 /*****  Acquire and decode the argument...  *****/
-    M_CPD *pSet;
+    Vdd::Store::Reference pSet;
     switch (V_TOTSC_Primitive) {
     case XLocateOrAddEntryInDictionaryOf:
 	if (!pTask->loadDucWithNextParameterAsMonotype ()) {
 	    pTask->sendBinaryConverseWithCurrent (KS__LocateOrAddDictionaryEntry4);
 	    return;
 	}
-	pSet = pTask->ducDictionary ();
+	pTask->getDucDictionary (pSet);
 	break;
 
     case XLocateOrAddToStringStore:
@@ -362,8 +359,7 @@ V_DefinePrimitive (LocateOrAddToSet) {
 	    pTask->sendBinaryConverseWithCurrent ("clusterInsert:");
 	    return;
 	}
-	pSet = pTask->ducStore ();
-	pSet->retain ();
+	pSet.setTo (pTask->ducStore ());
 	break;
 
     default:
@@ -374,14 +370,14 @@ V_DefinePrimitive (LocateOrAddToSet) {
 /*****  ...decode the key type, ...  *****/
     DSC_Descriptor& rCurrent = pTask->getCurrent ();
 
-    M_CPD *pKeyStore = rCurrent.storeCPD ();
+    Vdd::Store *pKeyStore = rCurrent.store ();
 
     RTYPE_Type xKeyPointerRType = rCurrent.pointerRType ();
 
 /*****  ... perform the operation, ...  *****/
     VAssociativeResult iAssociation (true);
     M_CPD *pDistribution;
-    switch (pKeyStore->RType ()) {
+    switch (pKeyStore->rtype ()) {
     case RTYPE_C_ValueStore:
 	if (RTYPE_C_IntUV == xKeyPointerRType) {
 	    VCollectionOfUnsigned32 iKeys (V_TOTSC_PToken, rCurrent);
@@ -397,12 +393,11 @@ V_DefinePrimitive (LocateOrAddToSet) {
 	break;
 
     default:
-	pSet->release ();
 	pTask->raiseException (
 	    EC__InternalInconsistency,
 	    "%s: Not A String/Selector Store: '%s'",
 	    pThisPrimitive,
-	    pKeyStore->RTypeName ()
+	    pKeyStore->rtypeName ()
 	);
 	break;
     }
@@ -419,7 +414,6 @@ V_DefinePrimitive (LocateOrAddToSet) {
 	NilOf (rtLINK_CType*),
 	iAssociation.claimedTargetReference ()
     );
-    pSet->release ();
 }
 
 
@@ -431,22 +425,21 @@ V_DefinePrimitive (LocateInSet) {
     static char const *const pThisPrimitive = "LocateInSet";
 
 /*****  Acquire and decode the argument...  *****/
-    M_CPD *pSet;
+    Vdd::Store::Reference pSet;
     switch (V_TOTSC_Primitive) {
     case XLocateEntryInDictionaryOf:
 	if (!pTask->loadDucWithNextParameterAsMonotype ()) {
 	    pTask->sendBinaryConverseWithCurrent (KS__LocateDictionaryEntryFor);
 	    return;
 	}
-	pSet = pTask->ducDictionary ();
+	pTask->getDucDictionary (pSet);
 	break;
     case XLocateInStringStore:
 	if (!pTask->loadDucWithNextParameterAsMonotype ()) {
 	    pTask->sendBinaryConverseWithCurrent ("clusterLocate:");
 	    return;
 	}
-	pSet = pTask->ducStore ();
-	pSet->retain ();
+	pSet.setTo (pTask->ducStore ());
 	break;
     default:
 	pTask->raiseUnimplementedAliasException (pThisPrimitive);
@@ -456,14 +449,14 @@ V_DefinePrimitive (LocateInSet) {
 /*****  ...decode the selector type presented to this routine, ...  *****/
     DSC_Descriptor& rCurrent = pTask->getCurrent ();
 
-    M_CPD *pKeyStore = rCurrent.storeCPD ();
+    Vdd::Store *pKeyStore = rCurrent.store ();
 
     RTYPE_Type xKeyPointerRType = rCurrent.pointerRType ();
 
 /*****  ... perform the operation, ...  *****/
     M_CPD *pDistribution;
     VAssociativeResult iAssociation (true);
-    switch (pKeyStore->RType ()) {
+    switch (pKeyStore->rtype ()) {
     case RTYPE_C_ValueStore:
 	if (RTYPE_C_IntUV == xKeyPointerRType) {
 	    VCollectionOfUnsigned32 iKeys (V_TOTSC_PToken, rCurrent);
@@ -479,12 +472,11 @@ V_DefinePrimitive (LocateInSet) {
 	break;
 
     default:
-	pSet->release ();
 	pTask->raiseException (
 	    EC__InternalInconsistency,
 	    "%s: Not A String/Selector Store: '%s'",
 	    pThisPrimitive,
-	    pKeyStore->RTypeName ()
+	    pKeyStore->rtypeName ()
 	);
 	break;
     }
@@ -501,7 +493,6 @@ V_DefinePrimitive (LocateInSet) {
 	iAssociation.claimedSourceReference (),
 	iAssociation.claimedTargetReference ()
     );
-    pSet->release ();
 }
 
 
@@ -513,22 +504,21 @@ V_DefinePrimitive (DeleteFromSet) {
     static char const *const pThisPrimitive = "DeleteFromSet";
 
 /*****  Acquire and decode the argument...  *****/
-    M_CPD *pSet;
+    Vdd::Store::Reference pSet;
     switch (V_TOTSC_Primitive) {
     case XDeleteFromDictionaryOf:
 	if (!pTask->loadDucWithNextParameterAsMonotype ()) {
 	    pTask->sendBinaryConverseWithCurrent (KS__DeleteDictionaryEntryFor);
 	    return;
 	}
-	pSet = pTask->ducDictionary ();
+	pTask->getDucDictionary (pSet);
 	break;
     case XDeleteFromStringStore:
 	if (!pTask->loadDucWithNextParameterAsMonotype ()) {
 	    pTask->sendBinaryConverseWithCurrent ("clusterDelete:");
 	    return;
 	}
-	pSet = pTask->ducStore ();
-	pSet->retain ();
+	pSet.setTo (pTask->ducStore ());
 	break;
     default:
 	pTask->raiseUnimplementedAliasException (pThisPrimitive);
@@ -538,14 +528,14 @@ V_DefinePrimitive (DeleteFromSet) {
 /*****  ...decode the selector type presented to this routine, ...  *****/
     DSC_Descriptor& rCurrent = pTask->getCurrent ();
 
-    M_CPD *pKeyStore = rCurrent.storeCPD ();
+    Vdd::Store *pKeyStore = rCurrent.store ();
 
     RTYPE_Type xKeyPointerRType = rCurrent.pointerRType ();
 
 /*****  ... perform the operation, ...  *****/
     M_CPD *pDistribution;
     VAssociativeResult iAssociation (true);
-    switch (pKeyStore->RType ()) {
+    switch (pKeyStore->rtype ()) {
     case RTYPE_C_ValueStore:
 	if (RTYPE_C_IntUV == xKeyPointerRType) {
 	    VCollectionOfUnsigned32 iKeys (V_TOTSC_PToken, rCurrent);
@@ -562,12 +552,11 @@ V_DefinePrimitive (DeleteFromSet) {
 	break;
 
     default:
-	pSet->release ();
 	pTask->raiseException (
 	    EC__InternalInconsistency,
 	    "%s: Not A String/Selector Store: '%s'",
 	    pThisPrimitive,
-	    pKeyStore->RTypeName ()
+	    pKeyStore->rtypeName ()
 	);
 	break;
     }
@@ -585,7 +574,6 @@ V_DefinePrimitive (DeleteFromSet) {
 	    pDistribution->release ();
 	}
     }
-    pSet->release ();
 }
 
 
@@ -598,27 +586,26 @@ V_DefinePrimitive (DictionaryContents) {
     M_ASD *pContainerSpace = pTask->codScratchPad ();
 
 /*****  Obtain the dictionary's contents, ... *****/
-    M_CPD *pContentVector; {
-	M_CPD *pDictionary = pTask->getSelf ().dictionaryCPD ();
-	pContentVector = rtDICTIONARY_Contents (pContainerSpace, pDictionary);
-	pDictionary->release ();
+    rtVECTOR_Handle::Reference pContentVector; {
+	rtDICTIONARY_Handle::Reference pDictionary;
+	pTask->getSelf ().getDictionary (pDictionary);
+	pDictionary->getSelectorVector (pContentVector, pContainerSpace);
     }
 
 /*****  Create an l-store around the vector, ... *****/
-    M_CPD *pLStorePTokenCPD = rtPTOKEN_New (pContainerSpace, 1);
-    rtLINK_CType *pLStoreDefinitionLC = rtLINK_RefConstructor (pLStorePTokenCPD, -1);
-    rtLINK_AppendRepeat (
-	pLStoreDefinitionLC, 0, rtVECTOR_CPD_ElementCount (pContentVector)
+    rtLINK_CType *pLStoreDefinitionLC = rtLINK_RefConstructor (
+	new rtPTOKEN_Handle (pContainerSpace, 1)
     );
-    pLStoreDefinitionLC->Close (pContentVector, rtVECTOR_CPx_PToken);
+    rtLINK_AppendRepeat (pLStoreDefinitionLC, 0, pContentVector->elementCount ());
 
-    M_CPD *pLStoreCPD = rtLSTORE_NewCluster (pLStoreDefinitionLC, pContentVector);
+    pLStoreDefinitionLC->Close (pContentVector->getPToken ());
 
-    pContentVector->release ();
+/*****  Load the Duc, cleanup, and return ... *****/
+    pTask->loadDucWithReference (
+	new rtLSTORE_Handle (pLStoreDefinitionLC, pContentVector), pLStoreDefinitionLC->RPT (), 0
+    );
+
     pLStoreDefinitionLC->release ();
-
-/*****  Load the Duc and return ... *****/
-    pTask->loadDucWithReference (pLStoreCPD, pLStorePTokenCPD, 0);
 }
 
 

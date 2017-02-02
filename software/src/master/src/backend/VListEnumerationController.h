@@ -93,7 +93,7 @@ protected:
 	loadDucWithInitializedLists (pDefinitionLink, false);
     }
 
-    void loadDucWithNewIndex (M_CPD *pContentPrototype = 0);
+    void loadDucWithNewIndex (Vdd::Store *pContentPrototype = 0);
 
     void loadDucWithSelectedElements (unsigned int iterationFactor = 0);
 

@@ -106,36 +106,6 @@ unsigned int IOMDriver::Options::optionValue (
 	return 0;
     }
 }
-
-bool IOMDriver::Options::objectComesFromEvaluator () const {
-    static bool bUsingEvaluator = IsNil (getenv ("SuppressEvaluatorPump"));
-    return bUsingEvaluator && (m_pEvaluator.isntNil ());
-}
-
-bool IOMDriver::Options::objectComesFromServer (VString& rServerName) const {
-    static char const *const s_pServerName = getenv ("FASTBridgeServer");
-    if (!s_pServerName)
-	return false;
-
-    static VString const s_iServerName (s_pServerName, false);
-    rServerName.setTo (s_iServerName);
-    return true;
-}
-
-#if 0
-void IOMDriver::Options::queryClient (Vca::VInterfaceQuery const &rQuery) const {
-    static char const *const pFASTBridgeServer = getenv ("FASTBridgeServer");
-    static bool bUsingEvaluator = IsNil (getenv ("SuppressEvaluatorPump"));
-    if (bUsingEvaluator && m_pEvaluator)
-	m_pEvaluator->queryClient (rQuery);
-    else if (!pFASTBridgeServer)
-	rQuery.onZero ();
-    else {
-	static VString iFASTBridgeServer (pFASTBridgeServer, false);
-	Vca::GetObject (rQuery, iFASTBridgeServer);
-    }
-}
-#endif
 
 
 /********************
@@ -250,9 +220,7 @@ int IOMDriver::getSocketNameString (char** Unused(ppString), size_t* Unused(psSt
  ********************************/
 
 bool IOMDriver::acquireAutoMutex (VMutexClaim& rClaim, VComputationUnit* pSupplicant) {
-    return !autoMutex () || ENVIR_KDsc_TheTLE.storeHandle ()->AcquireMutex (
-	rClaim, pSupplicant
-    );
+    return !autoMutex () || ENVIR_KDsc_TheTLE.store ()->AcquireMutex (rClaim, pSupplicant);
 }
 
 

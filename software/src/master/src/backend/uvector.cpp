@@ -64,10 +64,9 @@ DEFINE_ABSTRACT_RTT (rtUVECTOR_Handle);
  *****  Routine to check a U-Vector for corruption.
  *****/
 void rtUVECTOR_Handle::CheckConsistency () {
-    if (UV_UV_IsInconsistent ((UV_UVType*)ContainerContent ())) ERR_SignalFault (
-	EC__InternalInconsistency,
-	UTIL_FormatMessage (
-	    "Corrupted uvector[%d:%d] detected", SpaceIndex (), ContainerIndex ()
+    if (isInconsistent ()) ERR_SignalFault (
+	EC__InternalInconsistency, UTIL_FormatMessage (
+	    "Corrupted uvector[%d:%d] detected", spaceIndex (), containerIndex ()
 	)
     );
 }
@@ -90,7 +89,7 @@ void rtUVECTOR_Handle::CheckConsistency () {
  *  Notes:
  *	A standard U-Vector CPD has four pointers.  The first three pointers
  *	should not be moved - they are intended to point to the U-Vector's
- *	P-Token, Reference P-Token, and Auxillary POPs respectively.  The
+ *	P-Token, Reference P-Token, and Auxiliary POPs respectively.  The
  *	fourth pointer is intended as a moveable U-Vector element pointer.
  *
  *****/
@@ -99,7 +98,7 @@ PublicFnDef void UV_InitStdCPD (M_CPD *cpd) {
 
     UV_CPD_PToken	(cpd) = &UV_UV_PToken (uvBase);
     UV_CPD_RefPToken	(cpd) = &UV_UV_RefPToken (uvBase);
-    UV_CPD_AuxillaryPOP	(cpd) = &UV_UV_AuxillaryPOP (uvBase);
+    UV_CPD_AuxiliaryPOP	(cpd) = &UV_UV_AuxiliaryPOP (uvBase);
 
     pointer_t a = UV_UV_Array (uvBase);
     pointer_t *p = (pointer_t *)M_CPD_Pointers (cpd);
@@ -152,7 +151,7 @@ PrivateFnDef void InitUVector (
 
     cpd->constructReference (UV_CPx_PToken);
     cpd->constructReference (UV_CPx_RefPToken);
-    cpd->constructReference (UV_CPx_AuxillaryPOP);
+    cpd->constructReference (UV_CPx_AuxiliaryPOP);
 
 /*****  Zero the U-Vector array area  *****/
     memset (UV_UV_Array (uvBase), 0, (nelements + 1) * granularity);
@@ -202,7 +201,7 @@ PrivateFnDef void InitUVector (
  *****/
 PublicFnDef M_CPD *UV_New (
     RTYPE_Type			rType,
-    M_CPD*			pPPT,
+    rtPTOKEN_Handle*		pPPT,
     M_CPD*			refPTokenRefCPD,
     int				refPTokenRefIndex,
     size_t			granularity,
@@ -210,12 +209,12 @@ PublicFnDef M_CPD *UV_New (
     va_list			initFnArgs
 ) {
 /*****  Obtain the element count for the U-Vector...  *****/
-    size_t nelements = rtPTOKEN_CPD_BaseElementCount (pPPT);
+    size_t nelements = pPPT->cardinality ();
 
 /*****  ... and create the U-Vector  *****/
     M_CPD *result = pPPT->CreateContainer (
 	rType, UV_SizeofUVector (nelements, granularity)
-    );
+    )->NewCPD ();
 
     InitUVector (result, nelements, granularity, initFn, initFnArgs);
 
@@ -263,19 +262,19 @@ PublicFnDef M_CPD *UV_New (
  *****/
 PublicFnDef M_CPD *UV_New (
     RTYPE_Type			rType,
-    M_CPD*			pPPT,
-    M_CPD*			pRPT,
+    rtPTOKEN_Handle*		pPPT,
+    rtPTOKEN_Handle*		pRPT,
     size_t			granularity,
     Ref_UV_Initializer		initFn,
     va_list			initFnArgs
 ) {
 /*****  Obtain the element count for the U-Vector...  *****/
-    size_t nelements = rtPTOKEN_CPD_BaseElementCount (pPPT);
+    size_t nelements = pPPT->cardinality ();
 
 /*****  ... and create the U-Vector  *****/
     M_CPD *result = pPPT->CreateContainer (
 	rType, UV_SizeofUVector (nelements, granularity)
-    );
+    )->NewCPD ();
 
     InitUVector (result, nelements, granularity, initFn, initFnArgs);
 
@@ -309,34 +308,17 @@ PublicFnDef M_CPD *UV_New (
  *	A standard CPD for the new U-Vector.
  *
  *****/
-PublicFnDef M_CPD *UV_BasicCopy (M_CPD *pSource, M_CPD *pNewPPT) {
+PublicFnDef M_CPD *UV_BasicCopy (M_CPD *pSource, rtPTOKEN_Handle *pNewPPT) {
     switch (pSource->RType ()) {
     case RTYPE_C_CharUV:
-	rtCHARUV_Align (pSource);
-	break;
     case RTYPE_C_DoubleUV:
-	rtDOUBLEUV_Align (pSource);
-	break;
     case RTYPE_C_FloatUV:
-	rtFLOATUV_Align (pSource);
-	break;
     case RTYPE_C_IntUV:
-	rtINTUV_Align (pSource);
-	break;
     case RTYPE_C_RefUV:
-	rtREFUV_Align (pSource);
-	break;
     case RTYPE_C_UndefUV:
-	rtUNDEFUV_Align (pSource);
-	break;
     case RTYPE_C_Unsigned64UV:
-	rtU64UV_Align (pSource);
-	break;
     case RTYPE_C_Unsigned96UV:
-	rtU96UV_Align (pSource);
-	break;
     case RTYPE_C_Unsigned128UV:
-	rtU128UV_Align (pSource);
 	break;
     default:
 	ERR_SignalFault (
@@ -345,17 +327,18 @@ PublicFnDef M_CPD *UV_BasicCopy (M_CPD *pSource, M_CPD *pNewPPT) {
 	break;
     }
 
+    pSource->align ();
     unsigned int iDomCardinality = UV_CPD_ElementCount (pSource);
 
-    bool bFreeNewPPT = false;
+    rtPTOKEN_Handle::Reference pLocalPPT;
     if (!pNewPPT) {
-	pNewPPT = UV_CPD_PosPTokenCPD (pSource);
-	bFreeNewPPT = true;
+	pLocalPPT.setTo (static_cast<rtUVECTOR_Handle*>(pSource->containerHandle ())->pptHandle ());
+	pNewPPT = pLocalPPT;
     }
-    else if (iDomCardinality != rtPTOKEN_CPD_BaseElementCount (pNewPPT)) ERR_SignalFault (
+    else if (iDomCardinality != pNewPPT->cardinality ()) ERR_SignalFault (
 	EC__InternalInconsistency, UTIL_FormatMessage (
 	    "UV_Copy: Cardinality disagreement: Current:%u, Proposed:%u.",
-	    iDomCardinality, rtPTOKEN_CPD_BaseElementCount (pNewPPT)
+	    iDomCardinality, pNewPPT->cardinality ()
 	)
     );
 
@@ -369,19 +352,14 @@ PublicFnDef M_CPD *UV_BasicCopy (M_CPD *pSource, M_CPD *pNewPPT) {
 	NilOf (Ref_UV_Initializer),
 	0
     );
-    if (pSource->ReferenceIsntNil (UV_CPx_AuxillaryPOP))
-	pResult->StoreReference (UV_CPx_AuxillaryPOP, pSource, UV_CPx_AuxillaryPOP);
+    if (pSource->ReferenceIsntNil (UV_CPx_AuxiliaryPOP))
+	pResult->StoreReference (UV_CPx_AuxiliaryPOP, pSource, UV_CPx_AuxiliaryPOP);
 
     UV_CPD_IsASetUV (pResult) = UV_CPD_IsASetUV (pSource);
 
     memcpy (
-	UV_CPD_Array (pResult, void),
-	UV_CPD_Array (pSource, void),
-	(iDomCardinality + 1) * granularity
+	UV_CPD_Array (pResult, void), UV_CPD_Array (pSource, void), (iDomCardinality + 1) * granularity
     );
-
-    if (bFreeNewPPT)
-	pNewPPT->release ();
 
     return pResult;
 }
@@ -406,7 +384,7 @@ PublicFnDef void UV_ReclaimContainer (
 
     ownerASD->Release (&UV_UV_PToken		(uv));
     ownerASD->Release (&UV_UV_RefPToken		(uv));
-    ownerASD->Release (&UV_UV_AuxillaryPOP	(uv));
+    ownerASD->Release (&UV_UV_AuxiliaryPOP	(uv));
 }
 
 
@@ -425,11 +403,11 @@ PublicFnDef void UV_ReclaimContainer (
  *
  *****/
 bool rtUVECTOR_Handle::PersistReferences () {
-    UV_UVType *uv = (UV_UVType *)ContainerContent ();
+    UV_UVType *uv = typecastContent ();
 
     return Persist (&UV_UV_PToken	(uv))
 	&& Persist (&UV_UV_RefPToken	(uv))
-	&& Persist (&UV_UV_AuxillaryPOP	(uv));
+	&& Persist (&UV_UV_AuxiliaryPOP	(uv));
 }
 
 
@@ -450,8 +428,8 @@ bool rtUVECTOR_Handle::PersistReferences () {
  *	NOTHING - Executed for side effect only.
  *
  *****/
-PublicFnDef void UV_MarkContainers (M_ASD *pSpace, M_CPreamble const *pContainer) {
-    pSpace->Mark ((M_POP const*) (pContainer + 1), 3);
+PublicFnDef void UV_MarkContainers (M_ASD::GCVisitBase* pGCV, M_ASD* pSpace, M_CPreamble const *pContainer) {
+    pGCV->Mark (pSpace, (M_POP const*) (pContainer + 1), 3);
 }
 
 
@@ -464,20 +442,6 @@ PublicFnDef void UV_MarkContainers (M_ASD *pSpace, M_CPreamble const *pContainer
  ********************/
 
 /*---------------------------------------------------------------------------
- * Utility provided to preserve the interface for 'regionProcessing'
- * functions which resulted from 'UV_Align's previous dependence on
- * 'M_ShiftContainerTail'.
- *---------------------------------------------------------------------------
- */
-PrivateFnDef void __cdecl CallProcessingFunction (
-    M_CPD::UVShiftProcessor regionProcessor, M_CPD *cpd, int whichPointer, int shiftAmount, ...
-) {
-    V_VARGLIST (iArgList, shiftAmount);
-
-    regionProcessor (cpd, whichPointer, shiftAmount, iArgList);
-}
-
-/*---------------------------------------------------------------------------
  * The following macros serve to copy preserved regions of the uvector from the
  * source to the temporary result, and to process/initialize the
  * deleted/inserted regions.
@@ -485,45 +449,26 @@ PrivateFnDef void __cdecl CallProcessingFunction (
  */
 
 #define AlignmentDeleteMacro(origin, shift) {\
-    byteOrigin = (origin) * granularity;\
-    byteShift  = (shift) * granularity;\
-    AlignmentCopyMacro (byteOrigin + byteShift - sourceOrigin);\
-    UV_CPD_Element (sourceCPD, char const) = sourcePtr;\
-    if (regionProcessor) CallProcessingFunction (\
-	regionProcessor,\
-	sourceCPD,\
-	UV_CPx_Element,\
-	byteShift,\
-	shift,\
-	regionProcessorArg\
-    );\
+    unsigned int xByteOrigin = (origin) * sElement;\
+    int sByteShift = (shift) * sElement;\
+    AlignmentCopyMacro (xByteOrigin + sByteShift - xSourceOrigin);\
+    xSourceOrigin = xByteOrigin;\
 }
 
 #define AlignmentInsertMacro(origin, shift) {\
-    byteOrigin = (origin) * granularity;\
-    byteShift  = (shift) * granularity;\
-    UV_CPD_IsASetUV (targetCPD) = false;\
-    AlignmentCopyMacro (byteOrigin - sourceOrigin);\
-    UV_CPD_Element (targetCPD, char) = targetBase + targetOrigin;\
-    if (regionProcessor) CallProcessingFunction (\
-	regionProcessor,\
-	targetCPD,\
-	UV_CPx_Element,\
-	byteShift,\
-	shift,\
-	regionProcessorArg\
-    );\
-    targetOrigin += byteShift;\
+    unsigned int xByteOrigin = (origin) * sElement;\
+    unsigned int sByteShift  = (shift) * sElement;\
+    bStillASet = false;\
+    AlignmentCopyMacro (xByteOrigin - xSourceOrigin);\
+    rFillProcessor.fill (pTargetArray + xTargetOrigin, sByteShift);\
+    xSourceOrigin = xByteOrigin;\
+    xTargetOrigin += sByteShift;\
 }
 
 #define AlignmentCopyMacro(numBytes) {\
-    int iNumBytes = numBytes;\
-    sourcePtr = sourceBase + sourceOrigin;\
-    targetPtr = targetBase + targetOrigin;\
-    UV_CPD_IsInconsistent (targetCPD) = true;\
-    memcpy (targetPtr, sourcePtr, iNumBytes);\
-    targetOrigin += iNumBytes;\
-    sourceOrigin = byteOrigin;\
+    unsigned int sCopy = numBytes;\
+    memcpy (pTargetArray + xTargetOrigin, pSourceArray + xSourceOrigin, sCopy);\
+    xTargetOrigin += sCopy;\
 }
 
 
@@ -532,107 +477,64 @@ PrivateFnDef void __cdecl CallProcessingFunction (
  **********************************/
 
 /*---------------------------------------------------------------------------
- *****  Standard routine to normalize a u-vector.
- *
- *  Arguments:
- *	cpd			- a standard CPD for the U-Vector to be
- *				  normalized.  This CPD will be duplicated for
- *				  use with the normalizer and will therefore
- *				  be left unchanged except for those changes
- *				  implied by the container alterations that
- *				  accompany normalization.
- *	regionProcessor		- the address of a function suitable for
- *				  processing regions inserted into/deleted from
- *				  the u-vector.  This function will be passed
- *				  as its optional parameters 'shift',
- *				  a <varargs.h> argument pointer to
- *				  'regionProcessorArg1', and 'origin'
- *				  'origin' and 'shift' are
- *				  documented in "RTptoken.d".  This strange
- *				  order was selected to minimize the amount
- *				  of <varargs> parameter decoding.  By default,
- *				  deleted regions are quietly discarded,
- *				  inserted regions zero filled.
- *	regionProcessorArg1 ...	- a collection of optional arguments which
- *				  will be passed to 'regionProcessor'.
+ *****  U-Vector positional alignment.
  *
  *  Returns:
- *	'cpd'
+ *	'true' if a positional alignment was done, false otherwise.
  *
  *****/
-PublicFnDef M_CPD *__cdecl UV_Align (
-    M_CPD *sourceCPD, M_CPD::UVShiftProcessor regionProcessor, ...
-) {
-    int			sourceOrigin = 0,
-			targetOrigin = 0,
-			byteOrigin,
-			byteShift;
+bool rtUVECTOR_Handle::align_() {
+    return align ();
+}
 
+bool rtUVECTOR_Handle::align () {
+    AlignmentFillProcessor iFillProcessor;
+    return alignUsing (iFillProcessor);
+}
+
+bool rtUVECTOR_Handle::alignUsing (AlignmentFillProcessor &rFillProcessor) {
 /*****  If U-Vector's ptoken is a chain terminator, Nothing to do  *****/
-    M_CPD *pTokenCPD;
-    rtPTOKEN_IsntCurrent (sourceCPD, UV_CPx_PToken, pTokenCPD);
-    if (IsNil (pTokenCPD))
-        return sourceCPD;
-
-    size_t granularity	= UV_CPD_Granularity (sourceCPD);
-
-/*****  Obtain the constructor  *****/
-    rtPTOKEN_CType *ptConstructor = rtPTOKEN_CPDCumAdjustments (pTokenCPD);
-    pTokenCPD->release ();
-
+    rtPTOKEN_CType *ptConstructor;
+    if (isTerminal (pptPOP (), ptConstructor))
+        return false;
 /*****  Create a temporary result  *****/
-    M_CPD *targetCPD = UV_New (
-	sourceCPD->RType (),
-	ptConstructor->NextGeneration (),
-	sourceCPD,
-	UV_CPx_RefPToken,
-	granularity,
-	NilOf (Ref_UV_Initializer),
-	0
-    );
-
-/*****  Keep state consistent between source and temporary result  *****/
-    UV_CPD_IsASetUV (targetCPD) = UV_CPD_IsASetUV (sourceCPD);
-    if (sourceCPD->ReferenceIsntNil (UV_CPx_AuxillaryPOP))
-	targetCPD->StoreReference (UV_CPx_AuxillaryPOP, sourceCPD, UV_CPx_AuxillaryPOP);
+    unsigned int const sElement = granularity ();
+    unsigned int const sTargetArray = ptConstructor->NextGeneration ()->cardinality ();
+    char *const pTargetArray = static_cast<char*>(UTIL_Malloc (sTargetArray * sElement));
 
 /***** Set up for ptoken traversal  *****/
-    char const *sourceBase = UV_CPD_Array (sourceCPD, char const);
-    char const *sourcePtr;
-    char *targetBase = UV_CPD_Array (targetCPD, char), *targetPtr;
+    bool bStillASet = isASet ();
+    char const *const pSourceArray = arrayBase ();
+
+    unsigned int xSourceOrigin = 0;
+    unsigned int xTargetOrigin = 0;
 
 /*****  Do the normalization  *****/
-    va_list ap;
-    va_start (ap, regionProcessor);
-    int regionProcessorArg = va_arg (ap, int);
     rtPTOKEN_FTraverseInstructions (
 	ptConstructor, AlignmentInsertMacro, AlignmentDeleteMacro
     );
-    va_end (ap);
 
 /*****  Copy the final sequence from source to target  *****/
-    AlignmentCopyMacro (UV_CPD_ElementCount (sourceCPD) * granularity - sourceOrigin);
+    AlignmentCopyMacro (elementCount () * sElement - xSourceOrigin);
 
-    UV_CPD_IsInconsistent (targetCPD) = false;
+/*****  Copy the results of the alignment back to the source  *****/
+    CheckConsistency ();
 
-/*****  Move the results of the normalization back to 'sourceCPD'  *****/
-    sourceCPD->EnableModifications ();
-    sourceCPD->CheckConsistency ();
-    UV_CPD_IsInconsistent (sourceCPD) = true;
-    UV_CPD_ElementCount (sourceCPD) = UV_CPD_ElementCount (targetCPD);
-    UV_CPD_IsASetUV (sourceCPD) = UV_CPD_IsASetUV (targetCPD);
-    sourceCPD->ReallocateContainer (M_CPD_Size (targetCPD));
-    sourceCPD->StoreReference (UV_CPx_PToken, ptConstructor->NextGeneration ());
-    memcpy (
-	UV_CPD_Array (sourceCPD, void), UV_CPD_Array (targetCPD, void), UV_CPD_ElementCount (targetCPD) * granularity
-    );
-    UV_CPD_IsInconsistent (sourceCPD) = false;
+    EnableModifications ();
+
+    setIsInconsistent ();
+    setIsASetTo (bStillASet);
+    setElementCountTo (sTargetArray);
+    StoreReference (pptPOP (), ptConstructor->NextGeneration ());
+    ReallocateContainer (UV_SizeofUVector (sTargetArray, sElement));
+    memcpy (arrayBase (), pTargetArray, sTargetArray * sElement);
+    clearIsInconsistent ();
 
 /*****  Clean up  the work areas  *****/
-    targetCPD->release ();
+    UTIL_Free (pTargetArray);
     ptConstructor->discard ();
 
-    return sourceCPD;
+    return true;
 }
 
 
@@ -696,9 +598,10 @@ PublicFnDef void UV_InitLCExtractedUV (
     size_t			Unused(nelements),
     va_list			ap
 ) {
-    M_CPD*		sourceCPD	= va_arg (ap, M_CPD*);
-    rtLINK_CType	*linkc		= va_arg (ap, rtLINK_CType*);
-    Ref_UV_Initializer	fillFn		= va_arg (ap, Ref_UV_Initializer);
+    V::VArgList iArgList (ap);
+    M_CPD*		sourceCPD	= iArgList.arg<M_CPD*>();
+    rtLINK_CType	*linkc		= iArgList.arg<rtLINK_CType*>();
+    Ref_UV_Initializer	fillFn		= iArgList.arg<Ref_UV_Initializer>();
     int			granularity	= UV_CPD_Granularity (sourceCPD);
     char		*sBaseAsChar,
 			*sPtrAsChar,
@@ -1100,7 +1003,7 @@ PublicFnDef void UV_Print (
 	IO_printf ("\nRefPToken: ");
 	RTYPE_RPrint (uvectorCPD, UV_CPx_RefPToken);
 	IO_printf ("\nAuxObject: ");
-	RTYPE_RPrint (uvectorCPD, UV_CPx_AuxillaryPOP);
+	RTYPE_RPrint (uvectorCPD, UV_CPx_AuxiliaryPOP);
     }
 
     IO_printf ("\n    ");
@@ -1164,6 +1067,11 @@ PublicFnDef void UV_GoToElement (
  *****  Standard U-Vector Debugger Methods  *****
  ************************************************/
 
+IOBJ_DefinePublicUnaryMethod (UV_DM_Align) {
+    RTYPE_QRegisterHandle (self)->align ();
+    return self;
+}
+
 IOBJ_DefinePublicUnaryMethod (UV_DM_PToken) {
     return RTYPE_Browser (RTYPE_QRegisterCPD (self), UV_CPx_PToken);
 }
@@ -1172,8 +1080,8 @@ IOBJ_DefinePublicUnaryMethod (UV_DM_RefPToken) {
     return RTYPE_Browser (RTYPE_QRegisterCPD (self), UV_CPx_RefPToken);
 }
 
-IOBJ_DefinePublicUnaryMethod (UV_DM_AuxillaryPOP) {
-    return RTYPE_Browser (RTYPE_QRegisterCPD (self), UV_CPx_AuxillaryPOP);
+IOBJ_DefinePublicUnaryMethod (UV_DM_AuxiliaryPOP) {
+    return RTYPE_Browser (RTYPE_QRegisterCPD (self), UV_CPx_AuxiliaryPOP);
 }
 
 IOBJ_DefinePublicUnaryMethod (UV_DM_Size) {

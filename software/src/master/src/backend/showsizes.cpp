@@ -257,7 +257,7 @@ public:
 	inheritancePointer,
 	columnPToken,
 	methodDictionary,
-	auxillaryColumn,
+	auxiliaryColumn,
 	columnArray[1];
 };
 

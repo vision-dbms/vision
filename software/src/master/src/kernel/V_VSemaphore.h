@@ -29,6 +29,8 @@
  *************************/
 
 namespace V {
+    class VTime;
+
     class V_API VSemaphore : public VSynchronizationObject {
 	DECLARE_FAMILY_MEMBERS (VSemaphore, VSynchronizationObject);
 
@@ -49,6 +51,7 @@ namespace V {
 	void produce ();
 	void consume ();
 	bool consumeTry ();
+	WaitStatus consumeTry (VTime const &rLimit);
 
     //  State
     private:

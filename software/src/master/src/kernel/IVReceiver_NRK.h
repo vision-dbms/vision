@@ -93,6 +93,9 @@ Vca_IVReceiver_InstantiationsForREFT (VString);
 Vca_IVReceiver_InstantiationsForREFT (V::VTime);
 
 Vca_IVReceiver_InstantiationsForArrayOf (Vca::U32);
+Vca_IVReceiver_InstantiationsForArrayOf (Vca::U64);
+Vca_IVReceiver_InstantiationsForArrayOf (Vca::F64);
+Vca_IVReceiver_InstantiationsForArrayOf (V::VTime);
 Vca_IVReceiver_InstantiationsForArrayOf (VString);
 Vca_IVReceiver_InstantiationsForPODT (Vca::IDataSource<VString const&>*);
 

@@ -24,7 +24,7 @@
  *				  contained in this value store.
  *	methodDictionary	- a method dictionary defining the columns of
  *				  this value store.
- *	auxillaryColumn		- an optional object used by certain classes to
+ *	auxiliaryColumn		- an optional object used by certain classes to
  *				  contain additional information associated
  *				  with the rows of this value store.  This
  *				  object is accessible to primitive methods
@@ -42,7 +42,7 @@ struct rtVSTORE_Type {
 	inheritancePointer,
 	columnPToken,
 	methodDictionary,
-	auxillaryColumn,
+	auxiliaryColumn,
 	columnArray[1];
 };
 
@@ -63,8 +63,8 @@ struct rtVSTORE_Type {
 #define rtVSTORE_VS_MD(vsp)\
     (vsp)->methodDictionary
 
-#define rtVSTORE_VS_AuxillaryColumn(vsp)\
-    (vsp)->auxillaryColumn
+#define rtVSTORE_VS_AuxiliaryColumn(vsp)\
+    (vsp)->auxiliaryColumn
 
 #define rtVSTORE_VS_ColumnArray(vsp)\
     (vsp)->columnArray

@@ -35,6 +35,7 @@
  *************************/
 
 namespace Vca {
+
     class VTypeInfoHolderInstance;
 
     /**
@@ -225,7 +226,7 @@ namespace Vca {
         /**
          * The actual member call type.
          */
-        typedef void (T::*PMember)();
+        typedef void (T::*PMember)(VMessage*);
         struct Initializer : public VInterfaceMember::Initializer {
             Initializer (char const *pName, unsigned int xMember, PMember pMember)
                 : VInterfaceMember::Initializer (pName, xMember), m_pMember (pMember)
@@ -289,13 +290,13 @@ namespace Vca {
 
 		//  Use
 		public:
-		    void evaluateWith (MGR* pMgr) {
+		    void evaluateWith (Message* pMessage, MGR* pMgr) {
 			VMessageScheduler iScheduler;
 			if (defersTo (iScheduler)) {
 			    RPI rpI (new Message (iScheduler,this,pMgr));
 			    iScheduler.schedule (rpI);
 			} else {
-			    (*m_pApplicable)(m_iArguments.f1 (), pMgr);
+			    (*m_pApplicable)(m_iArguments.f1 (), pMgr, pMessage);
 			}
 		    }
 
@@ -336,8 +337,8 @@ namespace Vca {
 
 	    //  Use
 	    public:
-		void evaluateWith (MGR* pMgr) const {
-		    m_pPayload->evaluateWith (pMgr);
+		void evaluateWith (Message* pMessage, MGR* pMgr) const {
+		    m_pPayload->evaluateWith (pMessage, pMgr);
 		}
 
             //  State
@@ -393,10 +394,10 @@ namespace Vca {
 
         //  Evaluation
         private:
-            void evaluate_() const {
+            void evaluate_() {
                 VMessageManager::Reference pManager;
                 subManager (pManager);
-                m_iPayload.evaluateWith (pManager);
+                m_iPayload.evaluateWith (this, pManager);
             }
 
         //  State
@@ -459,7 +460,7 @@ namespace Vca {
          * Uses IVUnknown::defersTo() to decide whether or not to execute using a Message instance and a VMessageScheduler.
          * Otherwise will execute locally (directly).
          */
-        void operator()(T *pT,MGR *pMgr=0) const {
+        void operator()(T *pT, MGR *pMgr=0,Message* pMessage=0) const {
             VMessageScheduler iScheduler;
 	    // Enumerate the 'delegate's of this interface...
 	    for (
@@ -474,7 +475,7 @@ namespace Vca {
 		    iScheduler.schedule (rpI);
 		} else {
 		    // Execute locally.
-		    (static_cast<T*>(pSubscription)->*m_pMember)();
+		    (static_cast<T*>(pSubscription)->*m_pMember)(pMessage);
 		}
 	    }
         }
@@ -522,7 +523,7 @@ namespace Vca {
         /**
          * @copydoc VInterfaceMember_0::PMember
          */
-        typedef void (T::*PMember)(P1);
+        typedef void (T::*PMember)(VMessage*,P1);
         struct Initializer : public VInterfaceMember::Initializer {
             Initializer (char const *pName, unsigned int xMember, PMember pMember)
                 : VInterfaceMember::Initializer (pName, xMember), m_pMember (pMember)
@@ -587,13 +588,13 @@ namespace Vca {
 
 		//  Use
 		public:
-		    void evaluateWith (MGR* pMgr) {
+		    void evaluateWith (Message* pMessage, MGR* pMgr) {
 			VMessageScheduler iScheduler;
 			if (defersTo (iScheduler)) {
 			    RPI rpI (new Message (iScheduler,this,pMgr));
 			    iScheduler.schedule (rpI);
 			} else {
-			    (*m_pApplicable)(m_iArguments.f1 (), m_iArguments.f2 (), pMgr);
+			    (*m_pApplicable)(m_iArguments.f1 (), m_iArguments.f2 (), pMgr, pMessage);
 			}
 		    }
 
@@ -636,8 +637,8 @@ namespace Vca {
 
 	    //  Use
 	    public:
-		void evaluateWith (MGR* pMgr) const {
-		    m_pPayload->evaluateWith (pMgr);
+		void evaluateWith (Message* pMessage, MGR* pMgr) const {
+		    m_pPayload->evaluateWith (pMessage, pMgr);
 		}
 
             //  State
@@ -693,10 +694,10 @@ namespace Vca {
 
         //  Evaluation
         private:
-            void evaluate_() const {
+            void evaluate_() {
                 VMessageManager::Reference pManager;
                 subManager (pManager);
-                m_iPayload.evaluateWith (pManager);
+                m_iPayload.evaluateWith (this, pManager);
             }
 
         //  State
@@ -755,7 +756,7 @@ namespace Vca {
         /**
          * @copydoc VInterfaceMember_0::operator()(T,MGR)
          */
-        void operator()(T *pT,P1 p1,MGR *pMgr=0) const {
+        void operator()(T *pT,P1 p1,MGR *pMgr=0,Message * pMessage = 0) const {
             VMessageScheduler iScheduler;
 	    // Enumerate the 'delegate's of this interface...
 	    for (
@@ -768,7 +769,7 @@ namespace Vca {
 		    RPI rpI (new Message (iScheduler,this,pSubscription,p1,pMgr));
 		    iScheduler.schedule (rpI);
 		} else {
-		    (static_cast<T*>(pSubscription)->*m_pMember)(p1);
+		    (static_cast<T*>(pSubscription)->*m_pMember)(pMessage, p1);
 		}
 	    }
         }
@@ -815,7 +816,7 @@ namespace Vca {
         /**
          * @copydoc VInterfaceMember_0::PMember
          */
-        typedef void (T::*PMember)(P1,P2);
+        typedef void (T::*PMember)(VMessage*,P1,P2);
         struct Initializer : public VInterfaceMember::Initializer {
             Initializer (char const *pName, unsigned int xMember, PMember pMember)
                 : VInterfaceMember::Initializer (pName, xMember), m_pMember (pMember)
@@ -880,13 +881,13 @@ namespace Vca {
 
 		//  Use
 		public:
-		    void evaluateWith (MGR* pMgr) {
+		    void evaluateWith (Message* pMessage, MGR* pMgr) {
 			VMessageScheduler iScheduler;
 			if (defersTo (iScheduler)) {
 			    RPI rpI (new Message (iScheduler,this,pMgr));
 			    iScheduler.schedule (rpI);
 			} else {
-			    (*m_pApplicable)(m_iArguments.f1 (), m_iArguments.f2 (), m_iArguments.f3 (), pMgr);
+			    (*m_pApplicable)(m_iArguments.f1 (), m_iArguments.f2 (), m_iArguments.f3 (), pMgr, pMessage);
 			}
 		    }
 
@@ -929,8 +930,8 @@ namespace Vca {
 
 	    //  Use
 	    public:
-		void evaluateWith (MGR* pMgr) const {
-		    m_pPayload->evaluateWith (pMgr);
+		void evaluateWith (Message* pMessage, MGR* pMgr) const {
+		    m_pPayload->evaluateWith (pMessage, pMgr);
 		}
 
             //  State
@@ -986,10 +987,10 @@ namespace Vca {
 
         //  Evaluation
         private:
-            void evaluate_() const {
+            void evaluate_() {
                 VMessageManager::Reference pManager;
                 subManager (pManager);
-		m_iPayload.evaluateWith (pManager);
+		m_iPayload.evaluateWith (this, pManager);
             }
 
         //  State
@@ -1048,7 +1049,7 @@ namespace Vca {
         /**
          * @copydoc VInterfaceMember_0::operator()(T,MGR)
          */
-        void operator()(T *pT,P1 p1,P2 p2,MGR *pMgr=0) const {
+        void operator()(T *pT,P1 p1,P2 p2,MGR *pMgr=0,Message* pMessage = 0) const {
             VMessageScheduler iScheduler;
 	    // Enumerate the 'delegate's of this interface...
 	    for (
@@ -1061,7 +1062,7 @@ namespace Vca {
 		    RPI rpI (new Message (iScheduler,this,pSubscription,p1,p2,pMgr));
 		    iScheduler.schedule (rpI);
 		} else {
-		    (static_cast<T*>(pSubscription)->*m_pMember)(p1,p2);
+		    (static_cast<T*>(pSubscription)->*m_pMember)(pMessage,p1,p2);
 		}
 	    }
         }
@@ -1108,7 +1109,7 @@ namespace Vca {
         /**
          * @copydoc VInterfaceMember_0::PMember
          */
-        typedef void (T::*PMember)(P1,P2,P3);
+        typedef void (T::*PMember)(VMessage*,P1,P2,P3);
         struct Initializer : public VInterfaceMember::Initializer {
             Initializer (char const *pName, unsigned int xMember, PMember pMember)
                 : VInterfaceMember::Initializer (pName, xMember), m_pMember (pMember)
@@ -1173,14 +1174,14 @@ namespace Vca {
 
 		//  Use
 		public:
-		    void evaluateWith (MGR* pMgr) {
+		    void evaluateWith (Message* pMessage, MGR* pMgr) {
 			VMessageScheduler iScheduler;
 			if (defersTo (iScheduler)) {
 			    RPI rpI (new Message (iScheduler,this,pMgr));
 			    iScheduler.schedule (rpI);
 			} else {
 			    (*m_pApplicable)(
-				m_iArguments.f1 (), m_iArguments.f2 (), m_iArguments.f3 (), m_iArguments.f4 (), pMgr
+				m_iArguments.f1 (), m_iArguments.f2 (), m_iArguments.f3 (), m_iArguments.f4 (), pMgr, pMessage
 			    );
 			}
 		    }
@@ -1224,8 +1225,8 @@ namespace Vca {
 
 	    //  Use
 	    public:
-		void evaluateWith (MGR* pMgr) const {
-		    m_pPayload->evaluateWith (pMgr);
+		void evaluateWith (Message* pMessage, MGR* pMgr) const {
+		    m_pPayload->evaluateWith (pMessage, pMgr);
 		}
 
             //  State
@@ -1281,10 +1282,10 @@ namespace Vca {
 
         //  Evaluation
         private:
-            void evaluate_() const {
+            void evaluate_() {
                 VMessageManager::Reference pManager;
                 subManager (pManager);
-                m_iPayload.evaluateWith (pManager);
+                m_iPayload.evaluateWith (this, pManager);
             }
 
         //  State
@@ -1343,7 +1344,7 @@ namespace Vca {
         /**
          * @copydoc VInterfaceMember_0::operator()(T,MGR)
          */
-        void operator()(T *pT,P1 p1,P2 p2,P3 p3,MGR *pMgr=0) const {
+        void operator()(T *pT,P1 p1,P2 p2,P3 p3,MGR *pMgr=0,Message* pMessage=0) const {
             VMessageScheduler iScheduler;
 	    // Enumerate the 'delegate's of this interface...
 	    for (
@@ -1356,7 +1357,7 @@ namespace Vca {
 		    RPI rpI (new Message (iScheduler,this,pSubscription,p1,p2,p3,pMgr));
 		    iScheduler.schedule (rpI);
 		} else {
-		    (static_cast<T*>(pSubscription)->*m_pMember)(p1,p2,p3);
+		    (static_cast<T*>(pSubscription)->*m_pMember)(pMessage,p1,p2,p3);
 		}
 	    }
         }
@@ -1403,7 +1404,7 @@ namespace Vca {
         /**
          * @copydoc VInterfaceMember_0::PMember
          */
-        typedef void (T::*PMember)(P1,P2,P3,P4);
+        typedef void (T::*PMember)(VMessage*,P1,P2,P3,P4);
         struct Initializer : public VInterfaceMember::Initializer {
             Initializer (char const *pName, unsigned int xMember, PMember pMember)
                 : VInterfaceMember::Initializer (pName, xMember), m_pMember (pMember)
@@ -1468,7 +1469,7 @@ namespace Vca {
 
 		//  Use
 		public:
-		    void evaluateWith (MGR* pMgr) {
+		    void evaluateWith (Message* pMessage, MGR* pMgr) {
 			VMessageScheduler iScheduler;
 			if (defersTo (iScheduler)) {
 			    RPI rpI (new Message (iScheduler,this,pMgr));
@@ -1476,7 +1477,7 @@ namespace Vca {
 			} else {
 			    (*m_pApplicable)(
 				m_iArguments.f1 (), m_iArguments.f2 (), m_iArguments.f3 (), m_iArguments.f4 (),
-				m_iArguments.f5 (), pMgr
+				m_iArguments.f5 (), pMgr, pMessage
 			    );
 			}
 		    }
@@ -1520,8 +1521,8 @@ namespace Vca {
 
 	    //  Use
 	    public:
-		void evaluateWith (MGR* pMgr) const {
-		    m_pPayload->evaluateWith (pMgr);
+		void evaluateWith (Message* pMessage, MGR* pMgr) const {
+		    m_pPayload->evaluateWith (pMessage, pMgr);
 		}
 
             //  State
@@ -1577,10 +1578,10 @@ namespace Vca {
 
         //  Evaluation
         private:
-            void evaluate_() const {
+            void evaluate_() {
                 VMessageManager::Reference pManager;
                 subManager (pManager);
-                m_iPayload.evaluateWith (pManager);
+                m_iPayload.evaluateWith (this, pManager);
             }
 
         //  State
@@ -1639,7 +1640,7 @@ namespace Vca {
         /**
          * @copydoc VInterfaceMember_0::operator()(T,MGR)
          */
-        void operator()(T *pT,P1 p1,P2 p2,P3 p3,P4 p4,MGR *pMgr=0) const {
+        void operator()(T *pT,P1 p1,P2 p2,P3 p3,P4 p4, MGR *pMgr=0,Message* pMessage=0) const {
             VMessageScheduler iScheduler;
 	    // Enumerate the 'delegate's of this interface...
 	    for (
@@ -1652,7 +1653,7 @@ namespace Vca {
 		    RPI rpI (new Message (iScheduler,this,pSubscription,p1,p2,p3,p4,pMgr));
 		    iScheduler.schedule (rpI);
 		} else {
-		    (static_cast<T*>(pSubscription)->*m_pMember)(p1,p2,p3,p4);
+		    (static_cast<T*>(pSubscription)->*m_pMember)(pMessage,p1,p2,p3,p4);
 		}
 	    }
         }
@@ -1699,7 +1700,7 @@ namespace Vca {
         /**
          * @copydoc VInterfaceMember_0::PMember
          */
-        typedef void (T::*PMember)(P1,P2,P3,P4,P5);
+        typedef void (T::*PMember)(VMessage*,P1,P2,P3,P4,P5);
         struct Initializer : public VInterfaceMember::Initializer {
             Initializer (char const *pName, unsigned int xMember, PMember pMember)
                 : VInterfaceMember::Initializer (pName, xMember), m_pMember (pMember)
@@ -1764,7 +1765,7 @@ namespace Vca {
 
 		//  Use
 		public:
-		    void evaluateWith (MGR* pMgr) {
+		    void evaluateWith (Message* pMessage, MGR* pMgr) {
 			VMessageScheduler iScheduler;
 			if (defersTo (iScheduler)) {
 			    RPI rpI (new Message (iScheduler,this,pMgr));
@@ -1772,7 +1773,7 @@ namespace Vca {
 			} else {
 			    (*m_pApplicable)(
 				m_iArguments.f1 (), m_iArguments.f2 (), m_iArguments.f3 (), m_iArguments.f4 (),
-				m_iArguments.f5 (), m_iArguments.f6 (), pMgr
+				m_iArguments.f5 (), m_iArguments.f6 (), pMgr, pMessage
 			    );
 			}
 		    }
@@ -1816,8 +1817,8 @@ namespace Vca {
 
 	    //  Use
 	    public:
-		void evaluateWith (MGR* pMgr) const {
-		    m_pPayload->evaluateWith (pMgr);
+		void evaluateWith (Message* pMessage, MGR* pMgr) const {
+		    m_pPayload->evaluateWith (pMessage, pMgr);
 		}
 
             //  State
@@ -1873,10 +1874,10 @@ namespace Vca {
 
         //  Evaluation
         private:
-            void evaluate_() const {
+            void evaluate_() {
                 VMessageManager::Reference pManager;
                 subManager (pManager);
-                m_iPayload.evaluateWith (pManager);
+                m_iPayload.evaluateWith (this, pManager);
             }
 
         //  State
@@ -1935,7 +1936,7 @@ namespace Vca {
         /**
          * @copydoc VInterfaceMember_0::operator()(T,MGR)
          */
-        void operator()(T *pT,P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,MGR *pMgr=0) const {
+        void operator()(T *pT,P1 p1,P2 p2,P3 p3,P4 p4,P5 p5, MGR *pMgr=0,Message* pMessage=0) const {
             VMessageScheduler iScheduler;
 	    // Enumerate the 'delegate's of this interface...
 	    for (
@@ -1948,7 +1949,7 @@ namespace Vca {
 		    RPI rpI (new Message (iScheduler,this,pSubscription,p1,p2,p3,p4,p5,pMgr));
 		    iScheduler.schedule (rpI);
 		} else {
-		    (static_cast<T*>(pSubscription)->*m_pMember)(p1,p2,p3,p4,p5);
+		    (static_cast<T*>(pSubscription)->*m_pMember)(pMessage,p1,p2,p3,p4,p5);
 		}
 	    }
         }
@@ -1995,7 +1996,7 @@ namespace Vca {
         /**
          * @copydoc VInterfaceMember_0::PMember
          */
-        typedef void (T::*PMember)(P1,P2,P3,P4,P5,P6);
+        typedef void (T::*PMember)(VMessage*,P1,P2,P3,P4,P5,P6);
         struct Initializer : public VInterfaceMember::Initializer {
             Initializer (char const *pName, unsigned int xMember, PMember pMember)
                 : VInterfaceMember::Initializer (pName, xMember), m_pMember (pMember)
@@ -2060,7 +2061,7 @@ namespace Vca {
 
 		//  Use
 		public:
-		    void evaluateWith (MGR* pMgr) {
+		    void evaluateWith (Message* pMessage, MGR* pMgr) {
 			VMessageScheduler iScheduler;
 			if (defersTo (iScheduler)) {
 			    RPI rpI (new Message (iScheduler,this,pMgr));
@@ -2068,7 +2069,7 @@ namespace Vca {
 			} else {
 			    (*m_pApplicable)(
 				m_iArguments.f1 (), m_iArguments.f2 (), m_iArguments.f3 (), m_iArguments.f4 (),
-				m_iArguments.f5 (), m_iArguments.f6 (), m_iArguments.f7 (), pMgr
+				m_iArguments.f5 (), m_iArguments.f6 (), m_iArguments.f7 (), pMgr, pMessage
 			    );
 			}
 		    }
@@ -2112,8 +2113,8 @@ namespace Vca {
 
 	    //  Use
 	    public:
-		void evaluateWith (MGR* pMgr) const {
-		    m_pPayload->evaluateWith (pMgr);
+		void evaluateWith (Message* pMessage, MGR* pMgr) const {
+		    m_pPayload->evaluateWith (pMessage, pMgr);
 		}
 
             //  State
@@ -2169,10 +2170,10 @@ namespace Vca {
 
         //  Evaluation
         private:
-            void evaluate_() const {
+            void evaluate_() {
                 VMessageManager::Reference pManager;
                 subManager (pManager);
-                m_iPayload.evaluateWith (pManager);
+                m_iPayload.evaluateWith (this, pManager);
             }
 
         //  State
@@ -2231,7 +2232,7 @@ namespace Vca {
         /**
          * @copydoc VInterfaceMember_0::operator()(T,MGR)
          */
-        void operator()(T *pT,P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6,MGR *pMgr=0) const {
+        void operator()(T *pT,P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6, MGR *pMgr=0,Message* pMessage=0) const {
             VMessageScheduler iScheduler;
 	    // Enumerate the 'delegate's of this interface...
 	    for (
@@ -2244,7 +2245,7 @@ namespace Vca {
 		    RPI rpI (new Message (iScheduler,this,pSubscription,p1,p2,p3,p4,p5,p6,pMgr));
 		    iScheduler.schedule (rpI);
 		} else {
-		    (static_cast<T*>(pSubscription)->*m_pMember)(p1,p2,p3,p4,p5,p6);
+		    (static_cast<T*>(pSubscription)->*m_pMember)(pMessage,p1,p2,p3,p4,p5,p6);
 		}
 	    }
         }
@@ -2292,7 +2293,7 @@ namespace Vca {
         /**
          * @copydoc VInterfaceMember_0::PMember
          */
-        typedef void (T::*PMember)(P1,P2,P3,P4,P5,P6,P7);
+        typedef void (T::*PMember)(VMessage*,P1,P2,P3,P4,P5,P6,P7);
         struct Initializer : public VInterfaceMember::Initializer {
             Initializer (char const *pName, unsigned int xMember, PMember pMember)
                 : VInterfaceMember::Initializer (pName, xMember), m_pMember (pMember)
@@ -2357,7 +2358,7 @@ namespace Vca {
 
 		//  Use
 		public:
-		    void evaluateWith (MGR* pMgr) {
+		    void evaluateWith (Message* pMessage, MGR* pMgr) {
 			VMessageScheduler iScheduler;
 			if (defersTo (iScheduler)) {
 			    RPI rpI (new Message (iScheduler,this,pMgr));
@@ -2365,7 +2366,7 @@ namespace Vca {
 			} else {
 			    (*m_pApplicable)(
 				m_iArguments.f1 (), m_iArguments.f2 (), m_iArguments.f3 (), m_iArguments.f4 (),
-				m_iArguments.f5 (), m_iArguments.f6 (), m_iArguments.f7 (), m_iArguments.f8 (), pMgr
+				m_iArguments.f5 (), m_iArguments.f6 (), m_iArguments.f7 (), m_iArguments.f8 (), pMgr, pMessage
 			    );
 			}
 		    }
@@ -2409,8 +2410,8 @@ namespace Vca {
 
 	    //  Use
 	    public:
-		void evaluateWith (MGR* pMgr) const {
-		    m_pPayload->evaluateWith (pMgr);
+		void evaluateWith (Message* pMessage, MGR* pMgr) const {
+		    m_pPayload->evaluateWith (pMessage, pMgr);
 		}
 
             //  State
@@ -2466,10 +2467,10 @@ namespace Vca {
 
         //  Evaluation
         private:
-            void evaluate_() const {
+            void evaluate_() {
                 VMessageManager::Reference pManager;
                 subManager (pManager);
-                m_iPayload.evaluateWith (pManager);
+                m_iPayload.evaluateWith (this, pManager);
             }
 
         //  State
@@ -2528,7 +2529,7 @@ namespace Vca {
         /**
          * @copydoc VInterfaceMember_0::operator()(T,MGR)
          */
-        void operator()(T *pT,P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6,P7 p7,MGR *pMgr=0) const {
+        void operator()(T *pT,P1 p1,P2 p2,P3 p3,P4 p4,P5 p5,P6 p6,P7 p7, MGR *pMgr=0,Message* pMessage=0) const {
             VMessageScheduler iScheduler;
 	    // Enumerate the 'delegate's of this interface...
 	    for (
@@ -2541,7 +2542,7 @@ namespace Vca {
 		    RPI rpI (new Message (iScheduler,this,pSubscription,p1,p2,p3,p4,p5,p6,p7,pMgr));
 		    iScheduler.schedule (rpI);
 		} else {
-		    (static_cast<T*>(pSubscription)->*m_pMember)(p1,p2,p3,p4,p5,p6,p7);
+		    (static_cast<T*>(pSubscription)->*m_pMember)(pMessage,p1,p2,p3,p4,p5,p6,p7);
 		}
 	    }
         }

@@ -24,7 +24,7 @@
 class VCollection : public VTransient {
 //  Construction
 protected:
-    VCollection (M_CPD* pDPT) : m_pDPT (pDPT) {
+    VCollection (rtPTOKEN_Handle *pDPT) : m_pDPT (pDPT) {
     }
 
 //  Destruction
@@ -39,21 +39,26 @@ public:
     }
 
     unsigned int cardinality () const {
-	return rtPTOKEN_CPD_BaseElementCount (m_pDPT);
+	return m_pDPT->cardinality ();
     }
-    M_CPD* ptoken () const {
+    rtPTOKEN_Handle *ptoken () const {
 	return m_pDPT;
     }
 
 //  Exception Generation
 protected:
     void raiseComponentTypeException (
-	char const* pComponentName, M_CPD* pComponent
+	char const *pComponentName, M_CPD *pComponent
+    ) const {
+	raiseComponentTypeException (pComponentName, pComponent->RType ());
+    }
+    void raiseComponentTypeException (
+	char const *pComponentName, RTYPE_Type xComponentType
     ) const;
 
 //  State
 protected:
-    VCPDReference m_pDPT;
+    rtPTOKEN_Handle::Reference m_pDPT;
 };
 
 #endif

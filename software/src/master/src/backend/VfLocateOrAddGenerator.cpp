@@ -42,8 +42,7 @@ VfLocateOrAddGenerator::VfLocateOrAddGenerator (VAssociativeResult& rAssociative
  *************************
  *************************/
 
-VfLocateOrAddGenerator::~VfLocateOrAddGenerator ()
-{
+VfLocateOrAddGenerator::~VfLocateOrAddGenerator () {
     if (m_pTargetDomainAdjustment)
 	m_pTargetDomainAdjustment->discard ();
 }
@@ -56,15 +55,11 @@ VfLocateOrAddGenerator::~VfLocateOrAddGenerator ()
  *****************/
 
 void VfLocateOrAddGenerator::initialize (
-    M_CPD* pTargetPTokenRef, int xTargetPTokenRef, M_CPD* pSourcePToken
-)
-{
-    VAssociativeOperator::initialize (
-	pTargetPTokenRef, xTargetPTokenRef, pSourcePToken
-    );
+    rtPTOKEN_Handle *pTargetPToken, rtPTOKEN_Handle *pSourcePToken
+) {
+    VAssociativeOperator::initialize (pTargetPToken, pSourcePToken);
 
-    if (m_pTargetDomainAdjustment)
-    {
+    if (m_pTargetDomainAdjustment) {
 	m_pTargetDomainAdjustment->discard ();
 	m_pTargetDomainAdjustment = NilOf (rtPTOKEN_CType*);
 	m_sTargetDomainAdjustment = 0;

@@ -37,6 +37,10 @@ public:
     static void DisplayCSymBindings ();
 
 //  Meta Maker
+private:
+    unsigned int referenceCountMetaMakerWorkaround () const {
+	return referenceCount ();
+    }
 protected:
     static void MetaMaker ();
 

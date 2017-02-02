@@ -46,6 +46,7 @@ namespace Vca {
 	virtual void getRole_(IVUnknown::Reference &rpRole, IVUnknown *pController) = 0;
 	virtual bool isExported_() const = 0;
 	virtual bool isInstantiated_() const = 0;
+	virtual bool isReferenced_() const = 0;
 	virtual VTypeInfo *typeInfo_() const = 0;
 
     protected:
@@ -334,6 +335,10 @@ namespace Vca {
 	bool isInstantiated_() const {
 	    return m_pRole ? true : false;
 	}
+	bool isReferenced_() const {
+	    return m_pRole && m_pRole->referencesActor();
+	}
+
 
 	VTypeInfo *typeInfo_() const {
 	    return Interface::typeInfo ();

@@ -169,50 +169,29 @@ void VListEnumerationController::startup () {
 /*****  Obtain a CPD for the store...  *****/
     DSC_Descriptor& rCurrent = getCurrent ();
 
-    M_CPD *store = rCurrent.storeCPD ();
-
 /*****
  *  Obtain the links and u-vectors specifying the elements to be operated
  *  upon...
  *****/
-    M_CPD *pElementCluster = NilOf (M_CPD*);
-    rtLINK_CType *pElementSelector;
-    switch (store->RType ()) {
-    case RTYPE_C_ListStore: {
-	    rtLINK_CType *pExpansionLink; M_CPD *pExpansionReordering;
-	    rtLSTORE_Extract (
-		rCurrent, pElementCluster, pElementSelector, pExpansionLink, pExpansionReordering
-	    );
-	    m_pExpansionLink.claim (pExpansionLink);
-	    m_pExpansionReordering.claim (pExpansionReordering);
-	}
-	break;
-    case RTYPE_C_Index: {
-	    rtLINK_CType *pExpansionLink; M_CPD *pExpansionReordering;
-	    rtINDEX_Extract (
-		rCurrent,
-		pElementCluster,
-		pElementSelector,
-		pExpansionLink,
-		pExpansionReordering,
-		m_pTemporalContext
-	    );
-	    m_pExpansionLink.claim (pExpansionLink);
-	    m_pExpansionReordering.claim (pExpansionReordering);
-	}
-	break;
-    default:
+    Vdd::Store::Reference pElementStore;
+    rtLINK_CType *pElementSelector, *pExpansionLink; M_CPD *pExpansionReordering;
+    bool bDone = rCurrent.store()->getListElements (
+	rCurrent.Pointer (), pElementStore, pElementSelector, pExpansionLink, pExpansionReordering, m_pTemporalContext
+    );
+    if (bDone) {
+	m_pExpansionLink.claim (pExpansionLink);
+	m_pExpansionReordering.claim (pExpansionReordering);
+    }
+    else {
 	clearContinuation ();
 	rCurrent.complainAboutBadPointerType ("Iterate In Context");
-	break;
     }
 
-    if (RTYPE_C_Vector == pElementCluster->RType ())
-	rtVECTOR_Extract (pElementCluster, pElementSelector, m_iSelectedElements);
-    else
-	m_iSelectedElements.setToMonotype (pElementCluster, pElementSelector);
-
-    pElementCluster->release ();
+    if (RTYPE_C_Vector == pElementStore->rtype ())
+	static_cast<rtVECTOR_Handle*>(pElementStore.referent ())->getElements (m_iSelectedElements, pElementSelector);
+    else {
+	m_iSelectedElements.setToMonotype (pElementStore, pElementSelector);
+    }
     pElementSelector->release ();
 
 /*****  Send the block invocation message...  *****/
@@ -264,9 +243,7 @@ void VListEnumerationController::returnSubset () {
 /*****
  *  Obtain a link identifying the subset of 'true's in the result...
  *****/
-	rtLINK_CType *pSubset = duc ().subsetOfType (
-	    codScratchPad (), &M_KnownObjectTable::TheTrueClass
-	);
+	rtLINK_CType *pSubset = duc ().subsetOfType (codScratchPad (), &M_KOT::TheTrueClass);
 
 /*****  If 'true's were found, ...  *****/
 	if (pSubset) {
@@ -319,12 +296,8 @@ void VListEnumerationController::returnSubset () {
 *-----------------------------------------------------------------------*/
 
     else {
-/*****  Obtain the 'store' of the result...   *****/
-	M_CPD *resultStore = ducStore ();
-
-/*****  If result is 'true', ...  *****/
-	if (resultStore->NamesTheTrueClass ()) {
-    /*****  ...then return copies of the original lists:  *****/
+/*****  If all results are 'true', return copies of the original lists ...  *****/
+	if (ducStore ()->NamesTheTrueClass ()) {
 	    loadDucWithCopied (m_iSelectedElements);
 	    if (m_pExpansionReordering.isntNil ())
 		distributeDuc (m_pExpansionReordering);
@@ -392,9 +365,9 @@ void VListEnumerationController::returnSummary () {
 
 void VListEnumerationController::returnGroup () {
 /*****  Obtain the grouping partitions and group indices...  *****/
-    rtVECTOR_CType* pVectorC = convertDucToVectorC ();
+    rtVECTOR_CType::Reference pVectorC (convertDucToVectorC ());
     M_CPD *pSortIndices = pVectorC->PartitionedSortIndices (m_pExpansionLink, false);
-    pVectorC = pVectorC->reorder (pSortIndices);
+    pVectorC.setTo (pVectorC->reorder (pSortIndices));
 
     rtLINK_CType *majorPartition;
     rtLINK_CType *minorPartition;
@@ -405,7 +378,7 @@ void VListEnumerationController::returnGroup () {
     loadDucWithVector (pVectorC);
     distributeDuc (elementDistribution);
 
-    M_CPD *groupIndices = rtVECTOR_New (minorPartition->RPT ());
+    rtVECTOR_Handle::Reference groupIndices (new rtVECTOR_Handle (minorPartition->RPT ()));
     duc ().assignTo (minorPartition, groupIndices);
 
 /*****  Set up the post collector continuation...  *****/
@@ -517,7 +490,7 @@ void VListEnumerationController::returnOrder () {
 /*****  Obtain the duc's double's:  *****/
     VDescriptor iValues;
     rtLINK_CType *pSubset = duc ().subsetOfType (
-	ptoken ()->ScratchPad (), &M_KnownObjectTable::TheDoubleClass, &iValues
+	ptoken ()->ScratchPad (), &M_KOT::TheDoubleClass, &iValues
     );
     
 /*****  Set up the post collector continuation...  *****/
@@ -558,14 +531,14 @@ void VListEnumerationController::returnOrder () {
 
 	    pResult.claim (
 		rtINTUV_PartitndRanks (
-		    pPartition, pSortIndices, codKOT ()->TheIntegerPTokenCPD ()
+		    pPartition, pSortIndices, codKOT ()->TheIntegerPTokenHandle ()
 		)
 	    );
 	}
 	else {
 	    pResult.claim (
 		rtDOUBLEUV_PartitndCumulative (
-		    pPartition, pValues, codKOT ()->TheDoublePTokenCPD ()
+		    pPartition, pValues, codKOT ()->TheDoublePTokenHandle ()
 		)
 	    );
 	    pValues->release ();
@@ -609,10 +582,9 @@ void VListEnumerationController::loadDucWithInitializedLists (
     rtLINK_CType *pDefinitionLink, bool fLStoreDesired
 ) {
 /*****  Manufacture a new content vector for the L-Store...  *****/
-    M_CPD *pPToken = pDefinitionLink->PPT ();
-    M_CPD *pVector = rtVECTOR_New (pPToken);
+    rtPTOKEN_Handle *pPToken = pDefinitionLink->PPT ();
+    rtVECTOR_Handle::Reference pVector (new rtVECTOR_Handle (pPToken));
 
-    pPToken->retain ();
     DSC_Pointer assignmentPointer;
     assignmentPointer.constructIdentity (pPToken);
 
@@ -621,21 +593,12 @@ void VListEnumerationController::loadDucWithInitializedLists (
     DSC_Pointer_Identity (assignmentPointer).clear ();
 
 /*****  Manufacture a new indexed or sequenced L-Store...  *****/
-    if (fLStoreDesired || IsNil (m_pTemporalContext)) {
-	loadDucWithListOrStringStore (
-	    rtLSTORE_NewCluster (pDefinitionLink, pVector, true), pDefinitionLink->RPT ()
-	);
-    }
-    else {
-	M_CPD *pIndex = rtINDEX_NewCluster (pDefinitionLink, pVector, m_pTemporalContext);
-	loadDucWithListOrStringStore (
-	    rtINDEX_CPD_ListStoreCPD (pIndex), pDefinitionLink->RPT ()
-	);
-	ducMonotype ().setStoreTo (pIndex);
-    }
-
-/*****  And clean up.  *****/
-    pVector->release ();
+    if (fLStoreDesired || IsNil (m_pTemporalContext)) loadDucWithListOrStringStore (
+	new rtLSTORE_Handle (pDefinitionLink, pVector, true), pDefinitionLink->RPT ()
+    );
+    else loadDucWithListOrStringStore (
+	rtINDEX_NewCluster (pDefinitionLink, pVector, m_pTemporalContext), pDefinitionLink->RPT ()
+    );
 }
 
 
@@ -643,25 +606,22 @@ void VListEnumerationController::loadDucWithInitializedLists (
  *****  Utility to load the accumulator with a descriptor for a new Index.
  *
  *  Arguments:
- *	pContentPrototypeCPD	- the address of a CPD for the new cluster's
+ *	pContentPrototype	- the address of a CPD for the new cluster's
  *				  content prototype (Nil for Vector).
  *
  *  Returns:
  *	NOTHING - Executed for side effect only.
  *
  *****/
-void VListEnumerationController::loadDucWithNewIndex (M_CPD *pContentPrototypeCPD) {
+void VListEnumerationController::loadDucWithNewIndex (Vdd::Store *pContentPrototype) {
     m_pTemporalContext->RealizeSet ();
 
-    VCPDReference pInstancePTokenCPD (0, NewCodPToken ());
-
-    M_CPD *pIndexCPD = rtINDEX_NewCluster (
-	pInstancePTokenCPD, &rtINDEX_Key_Set (m_pTemporalContext), pContentPrototypeCPD
+    rtPTOKEN_Handle::Reference pInstancePToken (NewCodPToken ());
+    loadDucWithListOrStringStore (
+	rtINDEX_NewCluster (
+	    pInstancePToken, &rtINDEX_Key_Set (m_pTemporalContext), pContentPrototype
+	)
     );
-
-    loadDucWithListOrStringStore (rtINDEX_CPD_ListStoreCPD (pIndexCPD));
-	
-    ducMonotype ().setStoreTo (pIndexCPD);
 }
 
 

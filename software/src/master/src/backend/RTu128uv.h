@@ -44,6 +44,49 @@
 )
 
 
+/******************************
+ ******************************
+ *****  Container Handle  *****
+ ******************************
+ ******************************/
+
+class rtU128UV_Handle : public rtUVECTOR_Handle {
+//  Run Time Type
+    DECLARE_CONCRETE_RTT (rtU128UV_Handle, rtUVECTOR_Handle);
+
+//  Aliases
+public:
+    typedef rtU128UV_ElementType element_t;
+
+//  Construction
+public:
+    static VContainerHandle *Maker (M_CTE &rCTE) {
+	return new rtU128UV_Handle (rCTE);
+    }
+protected:
+    rtU128UV_Handle (M_CTE &rCTE) : rtUVECTOR_Handle (rCTE) {
+    }
+
+//  Destruction
+private:
+    ~rtU128UV_Handle () {
+    }
+
+//  Access
+public:
+    element_t *array () const {
+	return UV_UV_ArrayAsType (typecastContent (), element_t);
+    }
+    element_t element (unsigned int xElement) const {
+	return array ()[xElement];
+    }
+
+//  Alignment
+public:
+    using BaseClass::align;
+};
+
+
 /********************************
  ********************************
  *****  Callable Interface  *****
@@ -51,24 +94,15 @@
  ********************************/
 
 PublicFnDecl M_CPD* __cdecl rtU128UV_New (
-    M_CPD*			pPPT,
-    M_CPD*			refPTokenRefCPD,
-    int				refPTokenRefIndex,
-    Ref_UV_Initializer		initFn,
-    ...
+    rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT, Ref_UV_Initializer initFn, ...
 );
 
 PublicFnDecl M_CPD *rtU128UV_New (
-    M_CPD *pPPT, M_CPD *pRPTRef, int xRPTRef
+    rtPTOKEN_Handle *pPPT, M_CPD *pRPTRef, int xRPTRef
 );
 
 PublicFnDecl M_CPD* rtU128UV_New (
-    M_CPD*			posPToken,
-    M_CPD*			refPToken
-);
-
-PublicFnDecl M_CPD* rtU128UV_Align (
-    M_CPD*			cpd
+    rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT
 );
 
 PublicFnDecl void rtU128UV_ToSetUV (
@@ -166,43 +200,6 @@ PublicFnDecl bool rtU128UV_ScalarLookup (
     rtLINK_LookupCase		lookupCase,
     int				*locationPtr
 );
-
-
-/******************************
- ******************************
- *****  Container Handle  *****
- ******************************
- ******************************/
-
-class rtU128UV_Handle : public rtUVECTOR_Handle {
-//  Run Time Type
-    DECLARE_CONCRETE_RTT (rtU128UV_Handle, rtUVECTOR_Handle);
-
-//  Construction
-protected:
-    rtU128UV_Handle (M_CTE &rCTE) : rtUVECTOR_Handle (rCTE) {
-    }
-
-public:
-    static VContainerHandle *Maker (M_CTE &rCTE) {
-	return new rtU128UV_Handle (rCTE);
-    }
-
-//  Destruction
-protected:
-
-//  Access
-public:
-
-//  Query
-public:
-
-//  Callbacks
-protected:
-
-//  State
-protected:
-};
 
 
 #endif

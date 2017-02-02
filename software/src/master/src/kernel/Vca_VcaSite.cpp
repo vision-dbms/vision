@@ -46,15 +46,24 @@
  **************************
  **************************/
 
+unsigned int Vca::VcaSite::m_iCreatedCount = 0;
+unsigned int Vca::VcaSite::m_iCurrentCount = 0;
+
 Vca::VcaSite::VcaSite (
     VcaSite* pParent, Characteristics const &rCharacteristics
-) : m_pParent (pParent), m_iCharacteristics (rCharacteristics), m_pIPeer (this) {
+) : m_pParent (pParent), m_iCharacteristics (rCharacteristics), m_pIPeer (this), m_iReleaseMessageSequenceNumber(0){
+    m_iCreatedCount++;
+    m_iCurrentCount++;
 }
 
-Vca::VcaSite::VcaSite () : m_pParent (this), m_pIPeer (this) {
+Vca::VcaSite::VcaSite () : m_pParent (this), m_pIPeer (this), m_iReleaseMessageSequenceNumber (0){
     unsigned int xInstance;
     m_iSiteSet.Insert (uuid (), xInstance);
     m_iSiteSet[xInstance].setTo (this);
+
+    m_iCreatedCount++;
+    m_iCurrentCount++;
+
 }
 
 /*************************
@@ -64,6 +73,7 @@ Vca::VcaSite::VcaSite () : m_pParent (this), m_pIPeer (this) {
  *************************/
 
 Vca::VcaSite::~VcaSite () {
+    m_iCurrentCount--;
 }
 
 
@@ -88,11 +98,12 @@ Vca::VcaSite::~VcaSite () {
  *
  ****************************************************************************/
 void Vca::VcaSite::ReleaseExportEx (
-    IPeer2 *pRole, uuid_t const &rObjectSite, VcaSSID const &rObjectSSID, U32 cExports, U32 cWeakExports, U32 cMessages
+    VMessageHolder<IPeer_Ex2> const& rMessage, uuid_t const &rObjectSite, 
+    VcaSSID const &rObjectSSID, U32 cExports, U32 cWeakExports, U32 cMessages
 ) {
     VcaOID::Reference pOID;
     if (getObject (pOID, rObjectSSID, rObjectSite))
-	deleteExportOf (pOID, cExports, cWeakExports, cMessages); 
+	deleteExportOf (rMessage, pOID, cExports, cWeakExports, cMessages); 
 }
 
 
@@ -161,12 +172,12 @@ void Vca::VcaSite::SinkInterface (IPeer *pRole, IVUnknown* pUnknown) {
  *
  ****************************************************************************/
 void Vca::VcaSite::ReleaseExport (
-    IPeer *pRole, uuid_t const &rObjectSite, VcaSSID const &rObjectSSID,
-    U32 cExports, U32 cMessages
+    VMessageHolder<IPeer_Ex2> const& rMessage, uuid_t const &rObjectSite, 
+    VcaSSID const &rObjectSSID, U32 cExports, U32 cMessages
 ) {
     VcaOID::Reference pOID;
     if (getObject (pOID, rObjectSSID, rObjectSite))
-	deleteExportOf (pOID, cExports, 0, cMessages);
+	deleteExportOf (rMessage, pOID, cExports, 0, cMessages);
 
     // In Vca interactions involving more than two sites, this is better
     // characterized as "late" than "bogus" ...
@@ -298,9 +309,23 @@ void Vca::VcaSite::GetLocalInterfaceFor (
  *  OnDone is the last message a peer sends prior to exiting and is a
  *  request that we terminate our use of and connections to the peer.
  *----------------------------------------------------------------------------*/
-void Vca::VcaSite::OnDone (IPeer *pRole) {
+void Vca::VcaSite::OnDone (VMessageHolder<IPeer_Ex2> const& rMessage) {
+    Vca::VcaPeer* pPeer = dynamic_cast<Vca::VcaPeer*>(this);
+    if (m_iReleaseMessageSequenceNumber > 0 && pPeer) {
+#ifdef TracingVcaMemoryLeaks
+	log("PoolMemoryLeak VcaSite::OnDone reported message increment by %u", 
+	    rMessage.message()->sequenceNumber() - m_iReleaseMessageSequenceNumber + 1); 
+#endif
+	// update the number of ReleaseExportEx messages that were involved 
+	// in tearing down this connection.  Their message count will not have
+	// been kept up to date once the remote reflection was itself Release(ExportEx)ed
+	rMessage.vinterface()->oid()->deleteExportTo (pPeer, 0, 0,
+	    rMessage.message()->sequenceNumber() - m_iReleaseMessageSequenceNumber + 1);
+    }
+
     markDefunct ();
 }
+
 
 void Vca::VcaSite::MakeConnection (
     IPeer *pRole, IVReceiver<IConnection*> *pClient, VString const &rDestination
@@ -519,8 +544,14 @@ Vca::VcaSite::SiteSet const &Vca::VcaSite::children () const {
 
 Vca::VcaSite *Vca::VcaSite::child (Characteristics const &rCharacteristics) {
     unsigned int xInstance;
-    if (m_iSiteSet.Insert (rCharacteristics, xInstance))
+    if (m_iSiteSet.Insert (rCharacteristics, xInstance)) {
 	m_iSiteSet[xInstance] = new VcaPeer (this, rCharacteristics);
+
+#ifdef TracingVcaMemoryLeaks
+	log("PoolMemoryLeak current: %u vs. created: %u vs. site set: %u", 
+	    m_iCurrentCount, m_iCreatedCount, m_iSiteSet.cardinality());
+#endif	    
+    }
     return m_iSiteSet[xInstance];
 }
 

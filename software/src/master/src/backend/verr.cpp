@@ -396,6 +396,7 @@ PublicFnDef int ERR_BasicSignalError (
     errorDescription.noReturn		= noReturn;
 
 /*****  Attempt to find a handler  *****/
+    ENTER_DEBUGGER ();
     for (efp = ErrorFrameStack; efp; efp = efp->previousErrorFrame) {
         nextSearchCode = errorCode;
 	do {

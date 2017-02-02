@@ -32,12 +32,12 @@
  **********************************/
 
 void VCollection::raiseComponentTypeException (
-    char const* pComponentName, M_CPD* pComponent
+    char const* pComponentName, RTYPE_Type xComponentType
 ) const {
     raiseException (
 	EC__InternalInconsistency,
 	"VCollectionOfStrings: Unexpected %s %s Component",
-	RTYPE_TypeIdAsString ((RTYPE_Type)M_CPD_RType (pComponent)),
+	RTYPE_TypeIdAsString (xComponentType),
 	pComponentName
     );
 }

@@ -65,7 +65,7 @@ bool VFragmentation::TracingFragmentationOps = false;
  **************************/
 
 void VFragmentation::construct (VFragmentation const &rSource) {
-    construct (rSource.m_pPToken);
+    construct (rSource.m_pPPT);
 
     for (
 	VFragment *pFragment = rSource.m_pFragmentList;
@@ -96,7 +96,7 @@ void VFragmentation::construct (rtVECTOR_CType *vectorc) {
 	rtLINK_CType *linkc = pUSDC->ClaimedAssociatedLink ();
 	if (linkc) {
 	    createFragment (linkc)->datum ().setToMonotype (
-		pUSDC->storeCPD (), pUSDC->pointerCPD ()
+		pUSDC->store (), pUSDC->pointerCPD ()
 	    );
 	}
     }
@@ -105,23 +105,20 @@ void VFragmentation::construct (rtVECTOR_CType *vectorc) {
 
 void VFragmentation::construct (DSC_Descriptor &rSource, unsigned int iFragmentSize) {
     MakeFragFromDscCount++; {
-	M_CPD *pFragmentationPToken = rSource.PPT ();
+	rtPTOKEN_Handle::Reference pFragmentationPToken (rSource.PPT ());
 	construct (pFragmentationPToken);
-	pFragmentationPToken->release ();
     }
 
     m_fLock = true;  // disable automatic coalescing 
 
-    unsigned int dscSize = rtPTOKEN_CPD_BaseElementCount (m_pPToken);
+    unsigned int dscSize = m_pPPT->cardinality ();
     unsigned int amtLeft = dscSize;
 
     for (unsigned int origin = 0; origin < dscSize; origin += iFragmentSize) {
 	unsigned int sThisFragment = V_Min (iFragmentSize, amtLeft);
-	M_CPD *pFragmentPToken = NewPToken (sThisFragment);
         rtLINK_CType *pFragmentSubset = rtLINK_AppendRange (
-	    rtLINK_RefConstructor (m_pPToken, -1), origin, sThisFragment
-	)->Close (pFragmentPToken);
-	pFragmentPToken->release ();
+	    rtLINK_RefConstructor (m_pPPT), origin, sThisFragment
+	)->Close (NewPToken (sThisFragment));
 
 	createFragment (pFragmentSubset)->datum ().setToSubset (pFragmentSubset, rSource);
 	amtLeft -= sThisFragment;
@@ -141,12 +138,12 @@ void VFragmentation::construct (DSC_Descriptor &rSource, unsigned int iFragmentS
  *  'assignTo'  *
  ****************/
 
-void VFragmentation::assignTo (rtLINK_CType *pElementSelector, M_CPD *pTargetCPD) {
+void VFragmentation::assignTo (rtLINK_CType *pElementSelector, Vdd::Store *pTarget) {
     Flatten ();
     goToFirstFragment ();
     while (m_pCurrentFragment) {
 	rtLINK_CType *pNewLC = pElementSelector->Extract (m_pCurrentFragment->subset ());
-	m_pCurrentFragment->datum ().assignTo (pNewLC, pTargetCPD);
+	m_pCurrentFragment->datum ().assignTo (pNewLC, pTarget);
 	pNewLC->release ();
 
 	goToNextFragment ();
@@ -154,23 +151,21 @@ void VFragmentation::assignTo (rtLINK_CType *pElementSelector, M_CPD *pTargetCPD
 }
 
 
-/****************
- *  'asVector'  *
- ****************/
+/*****************
+ *  'getVector'  *
+ *****************/
 
-M_CPD *VFragmentation::asVector () {
+void VFragmentation::getVector (rtVECTOR_Handle::Reference &rpResult) {
     MakeVectorFromFragCount++;
 
-    M_CPD *pVectorCPD = rtVECTOR_New (m_pPToken);
+    rpResult.setTo (new rtVECTOR_Handle (m_pPPT));
 
     goToFirstFragment ();
 
     while (m_pCurrentFragment) {
-	m_pCurrentFragment->datum ().assignTo (m_pCurrentFragment->subset (), pVectorCPD);
+	m_pCurrentFragment->datum ().assignTo (m_pCurrentFragment->subset (), rpResult);
 	goToNextFragment ();
     }
-
-    return pVectorCPD;
 }
 
 
@@ -188,7 +183,7 @@ void VFragmentation::goToNextFragment () {
  *  'subsetInStore'  *
  *********************/
 
-rtLINK_CType *VFragmentation::subsetInStore (M_CPD *pStore, VDescriptor *pValueReturn) {
+rtLINK_CType *VFragmentation::subsetInStore (Vdd::Store *pStore, VDescriptor *pValueReturn) {
     Flatten ();
 
     goToFirstFragment ();
@@ -205,7 +200,7 @@ rtLINK_CType *VFragmentation::subsetInStore (M_CPD *pStore, VDescriptor *pValueR
 	rtLINK_CType *pSubsetContribution = NilOf (rtLINK_CType *);
 	if (rFragmentDatum.isStandard ()) {
 	/*****  Obtain the 'store' of the result...   *****/
-	    if (rFragmentDatum.contentAsMonotype ().storeCPD ()->Names (pStore)) {
+	    if (rFragmentDatum.contentAsMonotype ().store ()->Names (pStore)) {
 		pSubsetContribution = m_pCurrentFragment->subset ();
 		pSubsetContribution->retain ();
 
@@ -242,8 +237,8 @@ rtLINK_CType *VFragmentation::subsetInStore (M_CPD *pStore, VDescriptor *pValueR
 	    else {
 	    //  The second contribution must decouple the first, ...
 		if (bSubsetSharedWithSource) {
-		    M_CPD *pNewPPT = rtPTOKEN_New (pSubset->PPT ()->Space (), 0);
-		    rtLINK_CType *pNewSubset = rtLINK_PosConstructor (pNewPPT, -1)->Close (
+		    rtPTOKEN_Handle::Reference pNewPPT (new rtPTOKEN_Handle (pSubset->PPT ()->Space (), 0));
+		    rtLINK_CType *pNewSubset = rtLINK_PosConstructor (pNewPPT)->Close (
 			pSubset->RPT ()
 		    );
 
@@ -259,7 +254,6 @@ rtLINK_CType *VFragmentation::subsetInStore (M_CPD *pStore, VDescriptor *pValueR
 
 		    pSubset->release ();
 		    pSubset = pNewSubset;
-		    pNewPPT->release ();
 
 		    bSubsetSharedWithSource = false;
 		}
@@ -273,10 +267,7 @@ rtLINK_CType *VFragmentation::subsetInStore (M_CPD *pStore, VDescriptor *pValueR
 		    )->datum ().setToMoved (iDatumContribution);
 
 		//  patch the value return fragmentation p-token to accomodate the Add...
-		    M_CPD *pNewValueReturnPPT = pSubset->PPT ();
-		    pNewValueReturnPPT->retain ();
-		    rResult.m_pPToken->release ();
-		    rResult.m_pPToken = pNewValueReturnPPT; 
+		    rResult.setPPT (pSubset->PPT ());
 		}
 	    }
 
@@ -352,8 +343,8 @@ rtLINK_CType *VFragmentation::subsetOfType (
 	    else {
 	    //  The second contribution must decouple the first, ...
 		if (bSubsetSharedWithSource) {
-		    M_CPD *pNewPPT = rtPTOKEN_New (pSubsetSpace, 0);
-		    rtLINK_CType *pNewSubset = rtLINK_PosConstructor (pNewPPT, -1)->Close (
+		    rtPTOKEN_Handle::Reference pNewPPT (new rtPTOKEN_Handle (pSubsetSpace, 0));
+		    rtLINK_CType *pNewSubset = rtLINK_PosConstructor (pNewPPT)->Close (
 			pSubset->RPT ()
 		    );
 
@@ -369,7 +360,6 @@ rtLINK_CType *VFragmentation::subsetOfType (
 
 		    pSubset->release ();
 		    pSubset = pNewSubset;
-		    pNewPPT->release ();
 
 		    bSubsetSharedWithSource = false;
 		}
@@ -383,10 +373,7 @@ rtLINK_CType *VFragmentation::subsetOfType (
 		    )->datum ().setToMoved (iDatumContribution);
 
 		//  patch the value return fragmentation p-token to accomodate the Add...
-		    M_CPD *pNewValueReturnPPT = pSubset->PPT ();
-		    pNewValueReturnPPT->retain ();
-		    rResult.m_pPToken->release ();
-		    rResult.m_pPToken = pNewValueReturnPPT; 
+		    rResult.setPPT (pSubset->PPT ());
 		}
 	    }
 
@@ -523,11 +510,10 @@ void VFragmentation::Coalesce () {
 		    pFastMergeRangeOrigins, pFastMergeSortIndices, iFastMergeArraySize
 		);
 
-		pNewSubset = rtLINK_RefConstructor (m_pPToken, -1);
+		pNewSubset = rtLINK_RefConstructor (m_pPPT);
 
 		unsigned int xNewSubsetOrigin = 0;
-		for (unsigned int xSortIndex = 0; xSortIndex < iFastMergeArraySize; xSortIndex++)
-		{
+		for (unsigned int xSortIndex = 0; xSortIndex < iFastMergeArraySize; xSortIndex++) {
 		    unsigned int xRange		= pFastMergeSortIndices[xSortIndex];
 		    unsigned int iRangeSize	= pFastMergeRangeSizes[xRange];
 
@@ -539,12 +525,11 @@ void VFragmentation::Coalesce () {
 		    xNewSubsetOrigin += iRangeSize;
 		}
 
-		M_CPD *pNewSubsetPToken = NewPToken (xNewSubsetOrigin);
+		rtPTOKEN_Handle::Reference pNewSubsetPToken (NewPToken (xNewSubsetOrigin));
 		pNewSubset->Close (pNewSubsetPToken);
 		for (xDescriptor = xMergeOrigin; xDescriptor < xMergeLimit; xDescriptor++) {
 		    pDescriptorArray[xDescriptor].fastMergeEnd (pNewSubsetPToken);
 		}
-		pNewSubsetPToken->release ();
 
 		UTIL_Free (pFastMergeSortIndices);
 		UTIL_Free (pFastMergeRangeSizes);
@@ -552,13 +537,8 @@ void VFragmentation::Coalesce () {
 		UTIL_Free (pFastMergeDescriptors);
 	    }
 	    else {
-		nonDJU = true; {
-		    M_CPD *pNewSubsetPToken = NewPToken (0);
-		    pNewSubset = rtLINK_PosConstructor (pNewSubsetPToken, -1)->Close (
-			m_pPToken
-		    );
-		    pNewSubsetPToken->release ();
-		}
+		nonDJU = true;
+		pNewSubset = rtLINK_PosConstructor (NewPToken (0))->Close (m_pPPT);
 
 		for (xDescriptor = xMergeOrigin; xDescriptor < xMergeLimit; xDescriptor++)
 		    pDescriptorArray[xDescriptor].buildSubset (pNewSubset);
@@ -674,7 +654,7 @@ void VFragmentation::Flatten () {
  *************/
 
 void VFragmentation::clear () {
-    m_pPToken->release ();
+    m_pPPT->release ();
     m_pFragmentList->discard ();
 }
 
@@ -721,8 +701,7 @@ void VFragmentation::distribute (M_CPD *pDistribution) {
     }
 
 /*****  Set a new PToken for the fragmentation ... *****/
-    m_pPToken->release ();
-    m_pPToken = UV_CPD_RefPTokenCPD (pDistribution);
+    setPPT (static_cast<rtUVECTOR_Handle*>(pDistribution->containerHandle ())->rptHandle ());
 }
 
 
@@ -734,7 +713,7 @@ void VFragmentation::distribute (M_CPD *pDistribution) {
 
 void VFragmentation::describe (unsigned int xLevel) {
     IO_printf ("(nf:%d)", m_iFragmentCount);
-    IO_printf ("(pt:[%d:%d])", m_pPToken->SpaceIndex (), m_pPToken->ContainerIndex ());
+    IO_printf ("(pt:[%d:%d])", m_pPPT->spaceIndex (), m_pPPT->containerIndex ());
     goToFirstFragment ();
     while (m_pCurrentFragment) {
 	IO_printf("\n%*s", xLevel * 2, " "); 

@@ -8,12 +8,12 @@
 #include "Vca_VServerApplication.h"
 
 #include "Vsa_IEvaluator.h"
-#include "Vsa_IEvaluatorPool_Ex4.h"
+#include "Vsa_IEvaluatorPool_Ex5.h"
 
-#include "Vsa_IPoolApplication.h"
+#include "Vsa_IPoolApplication.h" 
 #include "Vsa_IPoolApplication_Ex2.h"
 
-#include "Vsa_IUpDownPublisher.h"
+#include "Vsa_IUpDownPublisher.h" 
 
 /**************************
  *****  Declarations  *****
@@ -94,9 +94,9 @@ namespace Vsa {
 
     //  IEvaluator Role
     private:
-	Vca::VRole<ThisClass,IEvaluator> m_pIEvaluator;
+	Vca::VRole<ThisClass,IEvaluator_Ex1> m_pIEvaluator;
     public:
-	void getRole (VReference<IEvaluator>&rpRole);
+	void getRole (VReference<IEvaluator_Ex1>&rpRole);
 
 	void EvaluateExpression (
 	    IEvaluator*		pRole,
@@ -111,6 +111,26 @@ namespace Vsa {
 	    VString const&	rPath,
 	    VString const&	rQuery,
 	    VString const&	rEnvironment
+	);
+
+    //  IEvaluator_Ex1 Role
+	void EvaluateExpression_Ex (
+	    IEvaluator*		pRole,
+	    IEvaluatorClient*	pClient,
+	    VString const&	rPath,
+	    VString const&	rExpression,
+	    VString const&	rID,
+	    VString const&	rCID
+	);
+
+	void EvaluateURL_Ex (
+	    IEvaluator*		pRole,
+	    IEvaluatorClient*	pClient,
+	    VString const&	rPath,
+	    VString const&	rQuery,
+	    VString const&	rEnvironment,
+	    VString const&	rID,
+	    VString const&	rCID
 	);
 
       //  IUpDownPublisher Role
@@ -140,7 +160,7 @@ namespace Vsa {
     public:
 	void BroadcastExpression (IEvaluatorPool_Ex2*, IEvaluatorClient*, VString const &, VString const &);
 	void BroadcastURL        (IEvaluatorPool_Ex2*, IEvaluatorClient*, VString const &, VString const &, VString const &);
-    	
+
     // IEvaluatorPool_Ex3 Role
     public:
         void TakeWorkerOffline (IEvaluatorPool_Ex3*, VString const &, bool, IVReceiver<VString const &>*);
@@ -154,15 +174,28 @@ namespace Vsa {
 	void GetWorker_Ex  (IEvaluatorPool_Ex3*, VString const &, bool, IVReceiver<IVUnknown*>*);
         void GetWorkersStatistics (IEvaluatorPool_Ex3*, IVReceiver<VString const &>*);
         void GetGenerationStatistics (IEvaluatorPool_Ex3*, Vca::U32, IVReceiver<VString const &>*);
-    	
-    // IEvaluatorPool_Ex4 Role
-    private:
-	Vca::VRole<ThisClass,IEvaluatorPool_Ex4> m_pIEvaluatorPool;
-    public:
-	void getRole (VReference<IEvaluatorPool_Ex4>&rpRole);
 
+    // IEvaluatorPool_Ex4 Role
+    public:
         void QueryDetails (Vsa::IEvaluatorPool_Ex4 *pRole, Vca::U32 iID, IVReceiver<const VString&>* pClient);
         void CancelQuery (Vsa::IEvaluatorPool_Ex4 *pRole, Vca::U32 iID, IVReceiver<bool>* pClient);
+
+	// IEvaluatorPool_Ex5 Role
+	private:
+		Vca::VRole<ThisClass,IEvaluatorPool_Ex5> m_pIEvaluatorPool;
+	public:
+        void getRole (VReference<IEvaluatorPool_Ex5>&rpRole);
+
+        void StatSum (IEvaluatorPool_Ex5 *pRole, VString, Vca::U64, Vca::U64, IVReceiver<VString const &>*);
+        void StatDivide (IEvaluatorPool_Ex5 *pRole, VString, VString, Vca::U64, Vca::U64, IVReceiver<Vca::F64>*);
+        void StatMax (IEvaluatorPool_Ex5 *pRole, VString, Vca::U64, Vca::U64, IVReceiver<Vca::U32>*, IVReceiver<V::VTime const &>*);
+        void StatMin (IEvaluatorPool_Ex5 *pRole, VString, Vca::U64, Vca::U64, IVReceiver<Vca::U32>*, IVReceiver<V::VTime const &>*);
+        void StatMaxString (IEvaluatorPool_Ex5 *pRole, VString, Vca::U64, Vca::U64, IVReceiver<VString const &>*);
+        void StatMinString (IEvaluatorPool_Ex5 *pRole, VString, Vca::U64, Vca::U64, IVReceiver<VString const &>*);
+        void AllStatValues (IEvaluatorPool_Ex5 *pRole, VString, IVReceiver<VkDynamicArrayOf<Vca::U64> const &>*, 
+                            IVReceiver<VkDynamicArrayOf<V::VTime> const &>*, IVReceiver<VkDynamicArrayOf<Vca::U64> const &>*, 
+                            IVReceiver<VkDynamicArrayOf<Vca::U64>  const &>*, IVReceiver<VkDynamicArrayOf<Vca::F64> const &>*);
+
 
     //  IEvaluatorControl Methods:
     public:
@@ -196,8 +229,12 @@ namespace Vsa {
 
     //  Query
     public:
-	VEvaluatorPool::trackable_count_t const &queueLengthTrackable () const {
+	VEvaluatorPool::trackable_count_t const &queueLengthTrackable () {
 	    return m_pEvaluatorPool->queueLengthTrackable ();
+	}
+	
+	VEvaluatorPool::trackable_count_t const &busynessTrackable () {
+		return m_pEvaluatorPool->busynessTrackable ();
 	}
 
 	Vca::U32 stopTimeout () const {

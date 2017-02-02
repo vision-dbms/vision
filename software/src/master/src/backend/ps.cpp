@@ -29,7 +29,6 @@
 /*****  Facility  *****/
 #include "gopt.h"
 #include "m.h"
-#include "ts.h"
 
 #include "vdbupdate.h"
 #include "verr.h"
@@ -43,6 +42,8 @@
 #include "V_VAllocator.h"
 #include "V_VString.h"
 #include "V_VTime.h"
+#include "VTransientServices.h"
+#include "batchvision.h"
 
 #include "VSimpleFile.h"
 
@@ -55,6 +56,8 @@
 #include <unixlib.h>
 
 #endif
+
+Vca_Decl Vca::VGoferInterface<Vca::IInfoServer>::Reference g_pInfoServerGofer;
 
 
 
@@ -110,7 +113,12 @@ PrivateVarDef void const*
 				MappedAddressThreshold	= 0;
 #endif
 
-PrivateVarDef unsigned int	MappedSegmentLimit	= INT_MAX,
+PrivateVarDef unsigned int
+#ifdef __VMS
+				MappedSegmentLimit	= 500,
+#else
+				MappedSegmentLimit	= INT_MAX,
+#endif
 				NDFSyncRetries		= 10,
 				SegmentSyncRetries	= 10,
 				SegmentOpenRetries	= 5,
@@ -1693,7 +1701,7 @@ unsigned int PS_AND::ReclaimSegments () {
 	    {
     /*****
      *  Container table allocation and copy is explicit (instead of via
-     *  TS_CopyContainer) to allow the container table to be retained if
+     *  CopyContainer) to allow the container table to be retained if
      *  space for it cannot be allocated.
      *****/
 		M_CPreamble* oldCTPreamble = (M_CPreamble*)(PS_ASD_CT (asd)) - 1;
@@ -1710,7 +1718,7 @@ unsigned int PS_AND::ReclaimSegments () {
 		    );
 		    PS_ASD_CTIsMapped (asd) = false;
 		    PS_PCTPrivatizations++;
-		    pLASD->AdjustAllocation (ctsize );
+		    pLASD->IncrementAllocation (ctsize );
 		}
 	    }
 #else
@@ -1908,7 +1916,26 @@ void PS_AND::VLogError (char const *format, VArgList const &rArgList) {
 	sleep (1);
 	file = fopen (NLFPathName (), "a");
     }
-    
+
+    VString iErrMsg;
+    iErrMsg.printf (
+	"***** %08X.%08X.%08X %*.*s %s [%d %d %d %d]\n",
+        PS_TID_High             (TransactionId),
+        PS_TID_Low              (TransactionId),
+        PS_TID_Sequence (TransactionId),
+        strlen (timestring) - 1,
+        strlen (timestring) - 1,
+        timestring,
+        IsntNil (username) ? username : "User?",
+        PS_UID_RealUID  (userid),
+        PS_UID_EffectiveUID     (userid),
+        PS_UID_RealGID  (userid),
+        PS_UID_EffectiveGID     (userid)
+    );
+    VArgList iArgList (rArgList);
+    iErrMsg.vprintf (format, iArgList.list ());
+    g_pInfoServerGofer.notify (21, "#21: \n%s\n", iErrMsg.content ());
+
     if (file) {
 	UNWIND_Try {
 	    IO_fprintf (
@@ -2539,7 +2566,7 @@ PS_AND::PS_AND (
 , m_pSRDArray		((PS_SRD*)UTIL_Malloc (sizeof (PS_SRD) * m_iSpaceCount))
 , m_pSVDArray		((PS_SVD*)UTIL_Malloc (sizeof (PS_SVD) * m_iSpaceCount))
 , m_xScanGeneration	(0)
-, m_xSegmentMemoryShare	(VkMemory::Share_Private)
+, m_xSegmentMemoryShare	(VkMemory::Share_Group)
 {
 /*****  ... initialize it, ...  *****/
     ReadSRV (
@@ -2778,10 +2805,10 @@ PS_ASD::PS_ASD (PS_AND *pAND, unsigned int xSpace, PS_CT* pCT)
  *	The total size of all mapped segments in the specified space.
  *
  *****/
-unsigned long PS_ASD::MappedSizeOfSpace (unsigned int *segCount) const {
+unsigned __int64 PS_ASD::MappedSizeOfSpace (unsigned int *segCount) const {
     *segCount = 0;
 
-    unsigned long totalSize = 0;
+    unsigned __int64 totalSize = 0;
     unsigned int totalSegments = TotalSegments ();
 
     for (unsigned int segmentIndex = 0; segmentIndex < totalSegments; segmentIndex++) {
@@ -2974,15 +3001,18 @@ void PS_ASD::ReleaseContainer (unsigned int xContainer, unsigned int sContainer)
 bool PS_AND::LockOp (int xLock, VdbNetworkLockOperation xOperation) {
     VkStatus iStatus;
 
-    m_iNetworkHandle.Lock (xLock, xOperation, &iStatus);
+    for (int retryCount = 0; retryCount < NDFSyncRetries; retryCount++) {
+	m_iNetworkHandle.Lock (xLock, xOperation, &iStatus);
 
-    switch (iStatus.Type()) {
-    case VkStatusType_Completed:
-	return true;
-    case VkStatusType_Blocked:
-	return false;
+	switch (iStatus.Type()) {
+	    case VkStatusType_Completed:
+		return true;
+	    case VkStatusType_Blocked:
+		return false;
+	    default:
+		sleep (5);
+	}
     }
-
     ERR_SignalFault (
 	EC__SystemFault, UTIL_FormatMessage (
 	    "Lock Select [%d:%d]: %s", xLock, xOperation, iStatus.CodeDescription ()
@@ -3877,7 +3907,7 @@ bool PS_ASD::BeginSpaceUpdate () {
  *****/
 bool VContainerHandle::StoreContainer (VArgList const&) {
 /*****  Don't save the container table, ...  *****/
-    M_CPreamble* cp = m_pContainerAddress;
+    M_CPreamble* cp = m_pContainer;
     unsigned int ci = M_CPreamble_POPContainerIndex (cp);
     if (M_KnownCTI_ContainerTable == ci)
 	return true;
@@ -3907,7 +3937,7 @@ bool VContainerHandle::StoreContainer (VArgList const&) {
 	    PS_ASD_UpdateFD (asd), &PS_ASD_UpdateChecksum (asd), cp
 	);
 	PS_CT_Entry (PS_ASD_UpdateCT (asd), ci).setSegmentAndOffset (
-	    PS_ASD_UpdateSegment (asd), containerOffset, IsReadOnly ()
+	    PS_ASD_UpdateSegment (asd), containerOffset, isReadOnly ()
 	);
 
 	m_pDCTE->setReferenceCountToInfinity ();
@@ -3932,7 +3962,7 @@ bool VContainerHandle::StoreContainer (VArgList const&) {
  *****/
 bool VContainerHandle::StoreLargeContainer (VArgList const &rArgList) {
     VArgList iArgList (rArgList);
-    return ContainerSize () < iArgList.arg<unsigned int>() || StoreContainer (iArgList);
+    return containerSize () < iArgList.arg<unsigned int>() || StoreContainer (iArgList);
 }
 
 /*---------------------------------------------------------------------------
@@ -3949,9 +3979,10 @@ bool VContainerHandle::StoreLargeContainer (VArgList const &rArgList) {
  *****/
 bool VContainerHandle::StoreSmallContainer (VArgList const &rArgList) {
     VArgList iArgList (rArgList);
-    return ContainerSize () >= iArgList.arg<unsigned int>() || StoreContainer (iArgList);
+    return containerSize () >= iArgList.arg<unsigned int>() || StoreContainer (iArgList);
 }
 
+
 /**********************************************
  *****  Space Update Termination Routine  *****
  **********************************************/
@@ -4089,7 +4120,7 @@ void PS_ASD::DetermineCompactionPlan () {
 		xMinSMD1	= smdIndex + 1;
 	    }
 	    if (TracingCompaction ()) IO_printf (
-		"%7d%12.0f%9d%9d%12.0f%12.0f\n",
+		"%8d%14.0f%11d%11d%14.0f%14.0f\n",
 		m_xBaseSegment + smdIndex,
 		rr,
 		PS_SMD_SegmentSize		(smd),
@@ -4223,18 +4254,37 @@ bool M_ASD::PersistStructures (VArgList const&) {
  *	NOTHING
  *
  *****/
-void PS_AND::PersistReferences (M_AND *pLogicalAND) {
-    if (UpdateIsntWell ())
-	return;
+bool M_ASD::HasTransientReferences (VArgList const &rArgList) {
+    bool const bTrue = IsntTheScratchPad () && hasTransientReferences ();
+    VArgList iArgList (rArgList);
+    *iArgList.arg<bool*>() = bTrue;
+    return !bTrue;
+}
 
-    pLogicalAND->EnumerateModifiedSpaces (&M_ASD::PersistReferences);
+bool M_AND::HasTransientReferences () const {
+    bool bTrue = false;
+    EnumerateModifiedSpaces (&M_ASD::HasTransientReferences, &bTrue);
+    return bTrue;
+}
+
+void M_AND::PersistReferences () {
+    do {
+	EnumerateModifiedSpaces (&M_ASD::PersistReferences);
+    } while (UpdateIsWell () && HasTransientReferences ());
+}
+
+void M_AND::PersistStructures () {
+    EnumerateModifiedSpaces (&M_ASD::PersistStructures);
+}
+
+void PS_AND::PersistReferences (M_AND *pLogicalAND) {
+    if (UpdateIsWell ())
+        pLogicalAND->PersistReferences ();
 }
 
 void PS_AND::PersistStructures (M_AND *pLogicalAND) {
-    if (UpdateIsntWell ())
-	return;
-
-    pLogicalAND->EnumerateModifiedSpaces (&M_ASD::PersistStructures);
+    if (UpdateIsWell ())
+        pLogicalAND->PersistStructures ();
 }
 
 
@@ -4590,6 +4640,9 @@ void PS_AND::UpdateNetwork (M_AND *pLogicalAND) {
  *	This routine reuses an internal static structure with each call.
  *
  *****/
+#if defined(__GNUC__) && defined(VMS_LINUX_EXPLICIT_COMPAT)
+#pragma GCC diagnostic warning "-Wattributes"
+#endif
 PrivateFnDef PS_CT* PseudoCT (unsigned int spaceIndex) {
     typedef struct M_CPreamble M_CPreamble;
     typedef struct PS_CT PS_CT;
@@ -4627,6 +4680,9 @@ PrivateFnDef PS_CT* PseudoCT (unsigned int spaceIndex) {
     return t;
 }
 
+#if defined(__GNUC__) && defined(VMS_LINUX_EXPLICIT_COMPAT)
+#pragma GCC diagnostic error "-Wattributes"
+#endif
 
 /*---------------------------------------------------------------------------
  *****  Internal routine to create an ASD for a new, empty space.

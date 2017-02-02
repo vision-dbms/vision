@@ -49,32 +49,29 @@ protected:
 	    raiseScalaricityException (iCardinality);
     }
 
-    void initialize (
-	M_CPD* pTargetPTokenRef, int xTargetPTokenRef, M_CPD* pSourcePToken
-    );
+    void initialize (rtPTOKEN_Handle *pTargetPToken, rtPTOKEN_Handle *pSourcePToken);
 
     void createTargetBoundTargetReference () {
 	if (!m_fIsScalar)
-	    m_pTargetReference = rtLINK_RefConstructor (m_pTargetPToken, -1);
+	    m_pTargetReference = rtLINK_RefConstructor (m_pTargetPToken);
     }
 
     void createSourceBoundTargetReference () {
 	if (!m_fIsScalar)
-	    m_pTargetReference = rtLINK_PosConstructor (m_pSourcePToken, -1);
+	    m_pTargetReference = rtLINK_PosConstructor (m_pSourcePToken);
     }
 
     void createSourceReference () {
 	if (!m_fIsScalar)
-	    m_pSourceReference = rtLINK_RefConstructor (m_pSourcePToken, -1);
+	    m_pSourceReference = rtLINK_RefConstructor (m_pSourcePToken);
     }
 
-    void createTargetTrajectory (rtPTOKEN_CType*& rpTrajectory) {
-	rpTrajectory = rtPTOKEN_NewShiftPTConstructor (m_pTargetPToken, -1);
+    void createTargetTrajectory (rtPTOKEN_CType *&rpTrajectory) {
+	rpTrajectory = m_pTargetPToken->makeAdjustments ();
     }
 
     void appendTargetRepeat (unsigned int xElementOrigin, unsigned int sRepetition) {
-	if (m_fIsScalar)
-	{
+	if (m_fIsScalar) {
 	    assertScalaricity (sRepetition);
 	    m_xTargetReference = xElementOrigin;
 	    m_fTargetReferenceValid = true;
@@ -82,8 +79,7 @@ protected:
 	else rtLINK_AppendRepeat (m_pTargetReference, xElementOrigin, sRepetition);
     }
     void appendSourceRange (unsigned int xRangeOrigin, unsigned int sRange) {
-	if (m_fIsScalar)
-	{
+	if (m_fIsScalar) {
 	    assertScalaricity (sRange);
 	    m_xSourceReference = xRangeOrigin;
 	    m_fSourceReferenceValid = true;
@@ -114,14 +110,14 @@ public:
     }
 
     unsigned int targetCardinality () const {
-    	return rtPTOKEN_CPD_BaseElementCount (m_pTargetPToken);
+    	return m_pTargetPToken->cardinality ();
     }
     unsigned int sourceCardinality () const {
-	return rtPTOKEN_CPD_BaseElementCount (m_pSourcePToken);
+	return m_pSourcePToken->cardinality ();
     }
 
-    M_CPD* targetPToken () const { return m_pTargetPToken; }
-    M_CPD* sourcePToken () const { return m_pSourcePToken; }
+    rtPTOKEN_Handle *targetPToken () const { return m_pTargetPToken; }
+    rtPTOKEN_Handle *sourcePToken () const { return m_pSourcePToken; }
 
     rtLINK_CType* targetReference () const { return m_pTargetReference; }
     rtLINK_CType* sourceReference () const { return m_pSourceReference; }
@@ -146,8 +142,8 @@ protected:
 
 //  State
 protected:
-    VCPDReference	m_pTargetPToken;
-    VCPDReference	m_pSourcePToken;
+    rtPTOKEN_Handle::Reference m_pTargetPToken;
+    rtPTOKEN_Handle::Reference m_pSourcePToken;
     rtLINK_CType*	m_pTargetReference;
     rtLINK_CType*	m_pSourceReference;
     unsigned int const	m_fScalarModeEnabled	: 1;
@@ -182,17 +178,15 @@ public:
     unsigned int targetCardinality () const { return m_rResult.targetCardinality (); }
     unsigned int sourceCardinality () const { return m_rResult.sourceCardinality (); }
 
-    M_CPD* targetPToken () const { return m_rResult.targetPToken (); }
-    M_CPD* sourcePToken () const { return m_rResult.sourcePToken (); }
+    rtPTOKEN_Handle *targetPToken () const { return m_rResult.targetPToken (); }
+    rtPTOKEN_Handle *sourcePToken () const { return m_rResult.sourcePToken (); }
 
     rtLINK_CType* targetReference () const { return m_rResult.targetReference (); }
     rtLINK_CType* sourceReference () const { return m_rResult.sourceReference (); }
 
 //  Use
 public:
-    virtual void initialize (
-	M_CPD* pTargetPTokenRef, int xTargetPTokenRef, M_CPD* pSourcePToken
-    ) = 0;
+    virtual void initialize (rtPTOKEN_Handle *pTargetPToken, rtPTOKEN_Handle *pSourcePToken) = 0;
 
 protected:
     void createTargetBoundTargetReference () {

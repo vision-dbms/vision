@@ -21,6 +21,18 @@
 /************************
  *****  Supporting  *****
  ************************/
+
+#include "M_CPD.h"
+
+#include "Vdd_Store.h"
+
+/*************************************
+ *****  Template Instantiations  *****
+ *************************************/
+
+#ifdef VMS_LINUX_EXPLICIT_COMPAT
+template class VStoreHandle_<VContainerHandle>;
+#endif
 
 
 /***************************
@@ -30,41 +42,6 @@
  ***************************/
 
 DEFINE_CONCRETE_RTT (VContainerHandle);
-
-/********************
- ********************
- *****  Access  *****
- ********************
- ********************/
-
-void VContainerHandle::AcquireAccessLock () {
-    if (m_fOwnsAnUnusedAccessLock)
-	m_fOwnsAnUnusedAccessLock = false;
-    else if (0 == m_iAccessCount++)
-	m_pDCTE->retain ();
-}
-
-void VContainerHandle::ReleaseAccessLock () {
-    m_fOwnsAnUnusedAccessLock = false;
-    if (0 == --m_iAccessCount) {
-	if (g_fPreservingHandles || m_pTransientExtension.isntEmpty ())
-	    createReference ();
-	else {
-	    m_pDCTE->setToContainerAddress (m_pContainerAddress, m_fIsReadWrite);
-	}
-	m_pDCTE->release (m_pASD, ContainerIndex ());
-	deleteReference ();
-    }
-}
-
-transientx_t *VContainerHandle::TransientExtensionIfA (VRunTimeType const& rRTT) const {
-    return TransientExtensionIsA (rRTT) ? TransientExtension () : static_cast<transientx_t*>(0);
-}
-
-bool VContainerHandle::TransientExtensionIsA (VRunTimeType const& rRTT) const {
-    VRunTimeType *const pRTT = m_pTransientExtension ? m_pTransientExtension->rtt () : static_cast<VRunTimeType*>(0);
-    return pRTT && pRTT->isA (rRTT);
-}
 
 /**********************************
  **********************************
@@ -90,4 +67,41 @@ bool VContainerHandle::CallProcedure (VArgList const &rArgList) {
 
 bool VContainerHandle::DoNothing (VArgList const&) {
     return true;
+}
+
+/*****************************
+ *****************************
+ *****  Type Conversion  *****
+ *****************************
+ *****************************/
+
+Vdd::Store *VContainerHandle::getStore_() {
+    return 0;
+}
+
+bool VContainerHandle::LocateNameOf (Vdd::Store *pStore, M_TOP &rIdentity) const {
+    VContainerHandle::Reference pStoreHandle;
+    pStore->getContainerHandle (pStoreHandle);
+    return LocateNameOf (pStoreHandle, rIdentity);
+}
+
+bool VContainerHandle::LocateOrAddNameOf (Vdd::Store *pStore, M_TOP &rIdentity) const {
+    VContainerHandle::Reference pStoreHandle;
+    pStore->getContainerHandle (pStoreHandle);
+    return LocateOrAddNameOf (pStoreHandle, rIdentity);
+}
+
+/*************************
+ *************************
+ *****  Description  *****
+ *************************
+ *************************/
+
+void VContainerHandle::describe_(bool bVerbose) {
+    M_CPD *pCPD = GetCPD ();
+    if (bVerbose)
+	RTYPE_Print (pCPD, -1);
+    else
+	RTYPE_RPrint (pCPD, -1);
+    pCPD->release ();
 }

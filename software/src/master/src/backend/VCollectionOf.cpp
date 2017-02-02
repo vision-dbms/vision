@@ -61,40 +61,37 @@ void VCollectionOfUnsigned32::sortOrderingArray (
  *****************/
 
 void VCollectionOfUnsigned32::insertInto (
-    M_CPD *pSet, M_CPD *&rpReordering, VAssociativeResult &rAssociation
-)
-{
-    switch (M_CPD_RType (pSet)) {
-    case RTYPE_C_Dictionary:
-        rtDICTIONARY_Insert (pSet, this, rpReordering, rAssociation);
-	break;
-    default:
-	break;
-    }
+    Store *pSet, M_CPD *&rpReordering, VAssociativeResult &rAssociation
+) {
+    pSet->associativeInsert (this, rpReordering, rAssociation);
+}
+
+void rtDICTIONARY_Handle::associativeInsert_(
+    VCollectionOfUnsigned32 *pElements, M_CPD *&rpReordering, VAssociativeResult &rAssociation
+) {
+    Insert (pElements, rpReordering, rAssociation);
 }
 
 void VCollectionOfUnsigned32::locateIn (
-    M_CPD *pSet, M_CPD *&rpReordering, VAssociativeResult &rAssociation
-)
-{
-    switch (M_CPD_RType (pSet)) {
-    case RTYPE_C_Dictionary:
-	rtDICTIONARY_Locate (pSet, this, rpReordering, rAssociation);
-	break;
-    default:
-	break;
-    }
+    Store *pSet, M_CPD *&rpReordering, VAssociativeResult &rAssociation
+) {
+    pSet->associativeLocate (this, rpReordering, rAssociation);
+}
+
+void rtDICTIONARY_Handle::associativeLocate_(
+    VCollectionOfUnsigned32 *pElements, M_CPD *&rpReordering, VAssociativeResult &rAssociation
+) {
+    Locate (pElements, rpReordering, rAssociation);
 }
 
 void VCollectionOfUnsigned32::deleteFrom (
-    M_CPD *pSet, M_CPD *&rpReordering, VAssociativeResult &rAssociation
-)
-{
-    switch (M_CPD_RType (pSet)) {
-    case RTYPE_C_Dictionary:
-	rtDICTIONARY_Delete (pSet, this, rpReordering, rAssociation);
-	break;
-    default:
-	break;
-    }
+    Store *pSet, M_CPD *&rpReordering, VAssociativeResult &rAssociation
+) {
+    pSet->associativeDelete (this, rpReordering, rAssociation);
+}
+
+void rtDICTIONARY_Handle::associativeDelete_(
+    VCollectionOfUnsigned32 *pElements, M_CPD *&rpReordering, VAssociativeResult &rAssociation
+) {
+    Delete (pElements, rpReordering, rAssociation);
 }

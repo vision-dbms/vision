@@ -482,7 +482,7 @@ public:
  ********************************************/
 
 static struct NetworkDescriptor Network;
-static VkMemory::Share SegmentMemoryShare = VkMemory::Share_Private;
+static VkMemory::Share SegmentMemoryShare = VkMemory::Share_Group;
 
 #define NetworkNDFPathName		Network.ndfPathName
 #define NetworkOSDPathName		Network.osdPathName
@@ -521,7 +521,12 @@ static VkMemory::Share SegmentMemoryShare = VkMemory::Share_Private;
  *************/
 
 static unsigned int		MappedSegmentCount	= 0,
+#ifdef __VMS
+				MappedSegmentLimit	= 500;
+#else
 				MappedSegmentLimit	= INT_MAX;
+#endif
+
 static void const*
 #if defined(sun) && !defined(_LP64)
 				MappedAddressThreshold	= (void const*)0x20000000;
@@ -1091,6 +1096,9 @@ static void ProcessLStore (M_CPreamble *container) {
     MarkPOP (rtLSTORE_LStore_ContentPToken	(cp));
 }
 
+#if defined(__GNUC__) && defined(VMS_LINUX_EXPLICIT_COMPAT)
+#pragma GCC diagnostic warning "-Wattributes"
+#endif
 static void ProcessDescriptor0 (M_CPreamble *container) {
     struct Descriptor0 {
 	DSC_PointerType		pointerType;
@@ -1103,6 +1111,9 @@ static void ProcessDescriptor0 (M_CPreamble *container) {
     MarkPOP (cp->store);
     MarkPOP (cp->pointer);
 }
+#if defined(__GNUC__) && defined(VMS_LINUX_EXPLICIT_COMPAT)
+#pragma GCC diagnostic error "-Wattributes"
+#endif
 
 static void ProcessDescriptor (M_CPreamble *container) {
     rtDSC_Descriptor* cp = M_CPreamble_ContainerBaseAsType (container, struct rtDSC_Descriptor);
@@ -1116,7 +1127,7 @@ static void ProcessUVector (M_CPreamble *container, SpaceDescriptor &rSpace) {
 
     MarkPOP (UV_Preamble_D_PToken	(*cp));
     MarkPOP (UV_Preamble_D_RefPT	(*cp));
-    MarkPOP (UV_Preamble_D_AuxillaryPOP	(*cp));
+    MarkPOP (UV_Preamble_D_AuxiliaryPOP	(*cp));
 
     switch (M_CPreamble_RType (container)) {
     case RTYPE_C_DoubleUV:

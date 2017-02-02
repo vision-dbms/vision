@@ -87,13 +87,13 @@
 
 V_DefinePrimitive (NewAList) {
 /*****  Create the index cluster, ...  *****/
-    M_CPD *pContentPrototypeCPD = NilOf (M_CPD*);
+    Vdd::Store *pContentPrototype = 0;
     switch (V_TOTSC_PrimitiveFlags) {
     case 0:
         break;
 
     case 2:
-	pContentPrototypeCPD = pTask->getSelf ().storeCPD ();
+	pContentPrototype = pTask->getSelf ().store ();
 	break;
 
     default:
@@ -102,16 +102,13 @@ V_DefinePrimitive (NewAList) {
 	);
         break;
     }
-    M_CPD *pIndexCPD; {
-	M_CPD* pInstancePTokenCPD = pTask->NewCodPToken ();
-	pIndexCPD = rtINDEX_NewCluster (pInstancePTokenCPD, pContentPrototypeCPD, -1);
-	pInstancePTokenCPD->release ();
+    rtINDEX_Handle::Reference pIndex; {
+	rtPTOKEN_Handle::Reference pInstancePToken (pTask->NewCodPToken ());
+	pIndex.setTo (rtINDEX_NewCluster (pInstancePToken, pContentPrototype));
     }
 
 /*****  ... and load the accumulator with it.  *****/
-    pTask->loadDucWithListOrStringStore (rtINDEX_CPD_ListStoreCPD (pIndexCPD));
-
-    ADescriptor.setStoreTo (pIndexCPD);
+    pTask->loadDucWithCorrespondence (pIndex);
 }
 
 
@@ -124,11 +121,11 @@ V_DefinePrimitive (NewAListInStore) {
     pTask->loadDucWithCurrent ();
 
 /*****  Validate that its store is an Index...  *****/
-    M_CPD* index = pTask->ducStore ();
-    RTYPE_MustBeA ("NewAListInStore", index->RType (), RTYPE_C_Index);
+    Vdd::Store *index = pTask->ducStore ();
+    RTYPE_MustBeA ("NewAListInStore", index->rtype (), RTYPE_C_Index);
 
 /*****  Manufacture a new collection of instances...  *****/
-    rtLINK_CType* newALists = rtINDEX_AddLists (index, V_TOTSC_PToken);
+    rtLINK_CType *newALists = index->addInstances (V_TOTSC_PToken);
 
 /*****  Return them...  *****/
     DSC_Descriptor_Pointer (ADescriptor).setTo (newALists);
@@ -207,10 +204,8 @@ V_DefinePrimitive (AccessAList) {
  ***************************************/
 
 V_DefinePrimitive (GetKeyMapType) {
-    M_CPD *pStoreCPD = pTask->getCurrent ().storeCPD ();
-
     RTYPE_Type xKeyMapType;
-    rtINDEX_GetKeyMapType (pStoreCPD, xKeyMapType);
+    static_cast<rtINDEX_Handle*>(pTask->getCurrent ().store ())->getKeyMapType (xKeyMapType);
 
     int result;
     switch (xKeyMapType) {
@@ -243,7 +238,7 @@ V_DefinePrimitive (SetKeyMapType) {
 	break;
     }
 
-    rtINDEX_SetKeyMapType (pTask->getCurrent ().storeCPD (), xKeyMapType);
+    static_cast<rtINDEX_Handle*>(pTask->getCurrent ().store ())->setKeyMapType (xKeyMapType);
 
     pTask->loadDucWithSelf ();
 }

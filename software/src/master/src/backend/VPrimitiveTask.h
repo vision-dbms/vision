@@ -12,8 +12,6 @@
  **************************/
 
 #include "VPrimitiveDescriptor.h"
-
-#include "Vca_VGoferInterface.h"
 
 
 /*************************
@@ -71,7 +69,7 @@ public:
 protected:
     VPrimitiveTaskBase (
 	ConstructionData const& rTCData, VPrimitiveDescriptor *pDescriptor, unsigned short iFlags
-    ) : VTask (rTCData), m_pDescriptor (pDescriptor), m_iFlags (iFlags) {
+    ) : BaseClass (rTCData), m_pDescriptor (pDescriptor), m_iFlags (iFlags) {
 	PrimitiveTaskCount++;
 
 //	if (pDescriptor->breakOnEntryIsSet ())
@@ -123,7 +121,6 @@ protected:
  ****************************/
 
 class VPrimitiveTask : public VPrimitiveTaskBase {
-//  Run Time Type
     DECLARE_CONCRETE_RTT (VPrimitiveTask, VPrimitiveTaskBase);
 
 //  Types
@@ -140,10 +137,7 @@ public:
 	ConstructionData const& rTCData,
 	VPrimitiveDescriptor*	pDescriptor,
 	unsigned short		iFlags
-    )
-    : VPrimitiveTaskBase(rTCData, pDescriptor, iFlags)
-    , m_pContinuation	(pDescriptor->continuation ())
-    {
+    ) : BaseClass (rTCData, pDescriptor, iFlags), m_pContinuation (pDescriptor->continuation ()) {
     }
 
 //  Access
@@ -176,19 +170,6 @@ protected:
 /*******************************************************
  *****  Miscellaneous Supporting Types And Macros  *****
  *******************************************************/
-
-/*******************
- *  String Access  *
- *******************/
-
-#define V_BlockString(stringStore,value) (\
-    rtBLOCK_CPD_StringSpace (stringStore) + (value)\
-)
-
-#define V_LStoreString(stringStore,charCPD,value) (\
-    rtCHARUV_CPD_Array (charCPD) +\
-    rtLSTORE_CPD_BreakpointArray (stringStore)[value]\
-)
 
 /****************************
  *  8-Byte Type Definition  *

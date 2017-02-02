@@ -81,8 +81,8 @@ public:
 
 //  Operator Initialization
 protected:
-    void initializeGenerator (VAssociativeOperator& rOperator, M_CPD* pSourcePToken) {
-	rOperator.initialize (m_pSet->ptoken (), -1, pSourcePToken);
+    void initializeGenerator (VAssociativeOperator& rOperator, rtPTOKEN_Handle *pSourcePToken) {
+	rOperator.initialize (m_pSet->ptoken (), pSourcePToken);
     }
 
 //  Use

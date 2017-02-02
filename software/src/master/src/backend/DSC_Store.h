@@ -9,14 +9,16 @@
  *****  Declarations  *****
  **************************/
 
-#include "M_CPD.h"
+#include "Vdd_Store.h"
 
-#include "VConstructor.h"
+#include "M_CPD.h"
 
 class DSC_Pointer;
 
 class rtBLOCK_Handle;
-class rtCONTEXT_Constructor;
+class rtCONTEXT_Handle;
+class rtDICTIONARY_Handle;
+class rtVSTORE_Handle;
 
 
 /*************************
@@ -24,31 +26,27 @@ class rtCONTEXT_Constructor;
  *************************/
 
 class DSC_Store {
+//  Aliases
+public:
+    typedef Vdd::Store Store;
+
 //  Construction
 public:
     void construct () {
-	m_pPO = NilOf (VConstructor*);
-	m_pCPD = NilOf (M_CPD*);
+	m_pStore = NilOf (Store*);
     }
-    void construct (M_CPD *pCPD) {
-	m_pPO = NilOf (VConstructor*);
-	m_pCPD = pCPD;
-    }
-    void construct (VConstructor *pPO) {
-	m_pPO = pPO;
-	m_pCPD = NilOf (M_CPD*);
+    void construct (Store *pStore) {
+	if (m_pStore = pStore)
+	    m_pStore->retain ();
     }
     void construct (DSC_Store const &rSource) {
-	if (m_pPO = rSource.m_pPO)
-	    m_pPO->retain ();
-	if (m_pCPD = rSource.m_pCPD)
-	    m_pCPD->retain ();
+	if (m_pStore = rSource.m_pStore)
+	    m_pStore->retain ();
     }
 
     void construct (M_KOTE const &rKOTE) {
-	m_pPO = NilOf (VConstructor*);
-	m_pCPD = rKOTE;
-	m_pCPD->retain ();
+	m_pStore = rKOTE;
+	m_pStore->retain ();
     }
 
 //  Destruction
@@ -57,31 +55,15 @@ public:
 
 //  Access
 public:
+    operator Store* () const {
+	return m_pStore;
+    }
     unsigned int attentionMask () const {
-	return m_pCPD ? m_pCPD->attentionMask ()
-	    :  m_pPO  ? m_pPO ->attentionMask ()
-	    :  0;
-    }
-
-    /*---------------------------------------------------------------------------*
-     *	This method will cause the instantiation of uninstantiated psuedo-objects.
-     *---------------------------------------------------------------------------*/
-    M_CPD *cpd () {
-	if (IsNil (m_pCPD)) {
-	    m_pCPD = m_pPO->realization ();
-	    m_pCPD->retain ();
-	}
-	return m_pCPD;
-    }
-    M_CPD *cpdIfAvailable () const {
-	return m_pCPD;
-    }
-    VContainerHandle *containerHandle () {
-	return cpd ()->containerHandle ();
+	return m_pStore ? m_pStore->attentionMask () : 0;
     }
 
     M_AND *Database () const {
-	return m_pCPD ? m_pCPD->Database () : m_pPO->Database_();
+	return m_pStore->database ();
     }
 
     /*---------------------------------------------------------------------------
@@ -96,82 +78,88 @@ public:
      *				  a primitive for primitive closures.
      *
      *****/
-    void decodeClosure (
-	VReference<rtBLOCK_Handle> &rpBlock, unsigned int &rxPrimitive, rtCONTEXT_Constructor **ppContext = 0
-    ) const;
-
-    M_CPD *dictionaryCPD (DSC_Pointer const &rPointer) const;
-
-    void getCanonicalStore_(
-	M_CPD *&rpCanonicalStore, bool &rbConvertPointer, DSC_Pointer const &rPointer
-    ) const;
+    bool decodeClosure (
+	VReference<rtBLOCK_Handle> &rpBlock, unsigned int &rxPrimitive, VReference<rtCONTEXT_Handle> *ppContext = 0
+    ) const {
+	return m_pStore->decodeClosure (rpBlock, rxPrimitive, ppContext);
+    }
 
     void getCanonicalStore (
-	M_CPD *&rpCanonicalStore, bool &rbConvertPointer, DSC_Pointer const &rPointer
+	VReference<rtVSTORE_Handle> &rpStore, bool &rbConvertPointer, DSC_Pointer const &rPointer
     ) const {
-	if (m_pCPD && RTYPE_C_ValueStore == (RTYPE_Type)M_CPD_RType (m_pCPD)) {
-	    rpCanonicalStore = m_pCPD;
-	    rbConvertPointer = false;
+	rbConvertPointer = m_pStore->getCanonicalization (rpStore, rPointer);
+    }
+
+    void getDictionary (VReference<rtDICTIONARY_Handle>&rpResult, DSC_Pointer const &rPointer) const;
+    void getDictionary (Vdd::Store::Reference &rpResult, DSC_Pointer const &rPointer) const;
+
+    bool getInheritance (DSC_Pointer &rPointer) {
+	Vdd::Store::Reference pInheritance;
+	if (m_pStore->getInheritance (pInheritance, rPointer)) {
+	    setTo (pInheritance);
+	    return true;
 	}
-	else getCanonicalStore_(rpCanonicalStore, rbConvertPointer, rPointer);
+	return false;
+    }
+    bool getProperty (DSC_Pointer &rPointer, unsigned int xPropertySlot, Vdd::Store *pPropertyPrototype) {
+	Vdd::Store::Reference pProperty;
+	if (m_pStore->getProperty (pProperty, rPointer, xPropertySlot, pPropertyPrototype)) {
+	    setTo (pProperty);
+	    return true;
+	}
+	return false;
+    }
+
+    Vdd::Store::DictionaryLookup lookup (
+	VSelector const &rSelector, DSC_Pointer const &rPointer, unsigned int &rxPropertySlot, DSC_Descriptor *pValueReturn = 0
+    ) {
+	return m_pStore->lookup (rSelector, rPointer, rxPropertySlot, pValueReturn);
     }
 
     M_KOT *KOT () const {
-	return m_pCPD ? m_pCPD->KOT () : m_pPO->KOT_();
-    }
-
-    VConstructor *poIfAvailable () const {
-	return m_pPO;
+	return m_pStore->kot ();
     }
 
     RTYPE_Type RType () const {
-	return m_pCPD ? m_pCPD->RType () : m_pPO->RType_();
+	return m_pStore->rtype ();
     }
 
     M_ASD *ScratchPad () const {
-	return m_pCPD ? m_pCPD->ScratchPad () : m_pPO->ScratchPad_();
+	return m_pStore->scratchPad ();
     }
     M_ASD *Space () const {
-	return m_pCPD ? m_pCPD->Space () : m_pPO->Space_();
+	return m_pStore->objectSpace ();
     }
 
-    transientx_t *TransientExtension () const {
-	return m_pCPD ? m_pCPD->TransientExtension () : 0;
+    transientx_t *transientExtension () const {
+	return m_pStore ? m_pStore->transientExtension () : 0;
     }
-    transientx_t *TransientExtensionIfA (VRunTimeType const &rRTT) const {
-	return m_pCPD ? m_pCPD->TransientExtensionIfA (rRTT) : 0;
+    transientx_t *transientExtensionIfA (VRunTimeType const &rRTT) const {
+	return m_pStore ? m_pStore->transientExtensionIfA (rRTT) : 0;
     }
-
-    bool HasATransientExtension () const {
-	return m_pCPD ? m_pCPD->HasATransientExtension () : false;
-    }
-    bool TransientExtensionIsA (VRunTimeType const &rRTT) const {
-	return m_pCPD ? m_pCPD->TransientExtensionIsA (rRTT) : false;
+    bool transientExtensionIsA (VRunTimeType const &rRTT) const {
+	return m_pStore && m_pStore->transientExtensionIsA (rRTT);
     }
 
+    void traverseHandleReferences(void (VContainerHandle::*visitFunction)(void)) { 
+	if (m_pStore) m_pStore->traverseHandleReferences(visitFunction);
+    }
 //  Update
 public:
     void setAttentionMaskTo (unsigned int iNewAttentionMask) {
-	if (m_pCPD)
-	    m_pCPD->setAttentionMaskTo (iNewAttentionMask);
-	else if (m_pPO)
-	    m_pPO ->setAttentionMaskTo (iNewAttentionMask);
+	m_pStore->setAttentionMaskTo (iNewAttentionMask);
     }
 
-    void setTo (M_CPD *pStore) {
-	clear ();
-	construct (pStore);
-    }
-
-    void setTo (VConstructor *pStore) {
-	clear ();
-	construct (pStore);
+    void setTo (Store *pStore) {
+	if (m_pStore != pStore) {
+	    clear ();
+	    construct (pStore);
+	}
     }
 
 //  State
-public:
-    VConstructor*	m_pPO;
-    M_CPD*		m_pCPD;
+private:
+    Store *m_pStore;
 };
 
 

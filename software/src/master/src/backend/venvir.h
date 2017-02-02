@@ -13,6 +13,8 @@
  **************************/
 
 #include "DSC_Descriptor.h"
+
+#include "RTdsc.h"
 #include "RTindex.h"
 
 #include "venvir.d"
@@ -25,14 +27,15 @@ class VDatabaseFederatorForBatchvision;
  *************************/
 
 class VSession : public VTransient {
+//  Aliases
+public:
+    typedef VDatabaseFederatorForBatchvision Federator;
+
 //  Construction
 public:
     VSession ();
 
 //  Destruction
-private:
-    void ReleaseTLEComponents ();
-
 public:
     ~VSession ();
 
@@ -55,7 +58,7 @@ public:
 	return m_pInitialDatabase;
     }
 
-    M_CPD *TheTLEDescriptor () const {
+    rtDSC_Handle *TheTLEDescriptor () const {
 	return m_pTLEDescriptor;
     }
 
@@ -68,7 +71,7 @@ public:
 //  Resource Utilization Queries
 public:
     void AccumulateAllocationStatistics (
-	double *pAllocationTotal, double *pMappingTotal
+	unsigned __int64 *pAllocationTotal, unsigned __int64 *pMappingTotal
     ) const;
 
     double CurrentTransientAllocationLevel () const;
@@ -76,7 +79,7 @@ public:
 
 //  Resource Utilization Management
 public:
-    bool DisposeOfSessionGarbage () const;
+    bool DisposeOfSessionGarbage (bool bAggressive = false) const;
 
     void FlushCachedResources () const;
 
@@ -85,9 +88,9 @@ public:
 
 //  State
 protected:
-    VReference<VDatabaseFederatorForBatchvision> m_pDatabaseFederator;
-    VReference<M_AND> m_pInitialDatabase;
-    M_CPD *m_pTLEDescriptor;
+    VReference<Federator>	m_pDatabaseFederator;
+    VReference<M_AND>		m_pInitialDatabase;
+    rtDSC_Handle::Reference	m_pTLEDescriptor;
 };
 
 
