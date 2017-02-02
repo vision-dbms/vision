@@ -1,0 +1,980 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{07F5ADDB-56DE-4070-AC6B-AB71096AA20C}</ProjectGuid>
+    <RootNamespace>Vca</RootNamespace>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccProvider>
+    </SccProvider>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+    <Import Project="..\V\Paths.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+    <Import Project="..\V\Paths.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\../Release/Vca.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/Zm1000  %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>NDEBUG;VCA_EXPORTS;_WINDOWS;_WIN32;WIN32;_WIN32_WINNT=0x0502;WINVER=0x0502;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <PrecompiledHeaderOutputFile>.\./Release/Vca.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)vc70.pdb</ProgramDataBaseFileName>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DisableSpecificWarnings>4910</DisableSpecificWarnings>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ProgramDatabaseFile>.\../Release/Vca.pdb</ProgramDatabaseFile>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapFileName>.\./Release/Vca.map</MapFileName>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>false</OptimizeReferences>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>.\../Release/Vca.lib</ImportLibrary>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\../Debug/Vca.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/Zm1000  %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_DEBUG;VCA_EXPORTS;_WINDOWS;_WIN32;WIN32;_WIN32_WINNT=0x0502;WINVER=0x0502;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <PrecompiledHeaderOutputFile>.\./Debug/Vca.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)vc70.pdb</ProgramDataBaseFileName>
+      <BrowseInformation>
+      </BrowseInformation>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4910</DisableSpecificWarnings>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>.\../Debug/Vca.pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>false</OptimizeReferences>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>.\../Debug/Vca.lib</ImportLibrary>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\kernel\IVReceiver.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\IVUnknown.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_IAckReceiver.cpp" />
+    <ClCompile Include="..\kernel\Vca_IActivity.cpp" />
+    <ClCompile Include="..\kernel\Vca_IActivityProxy.cpp" />
+    <ClCompile Include="..\kernel\Vca_IActivitySink.cpp" />
+    <ClCompile Include="..\kernel\Vca_IActivitySource.cpp" />
+    <ClCompile Include="..\kernel\Vca_IApplication.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_IBinding.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_IBSClient.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_IBSConsumer.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_IBSConsumerClient.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_IBSProducer.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_IBSProducerClient.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_IClient.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_IConnection.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_IConnectionFactory.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_IConnectionRequest.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_IDataSource.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_IDevice.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_IDirectory.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_IDirectoryEntry.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_IError.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_IEvent.cpp" />
+    <ClCompile Include="..\kernel\Vca_IEventSink.cpp" />
+    <ClCompile Include="..\kernel\Vca_IGetter.cpp" />
+    <ClCompile Include="..\kernel\Vca_IGetter_Ex2.cpp" />
+    <ClCompile Include="..\kernel\Vca_IListener.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_IListenerClient.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_IListenerFactory.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_INamespace.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_INeedYou.cpp" />
+    <ClCompile Include="..\kernel\Vca_IPassiveCall.cpp" />
+    <ClCompile Include="..\kernel\Vca_IPassiveCallback.cpp" />
+    <ClCompile Include="..\kernel\Vca_IPassiveCallback_Gofers.cpp" />
+    <ClCompile Include="..\kernel\Vca_IPassiveClient.cpp" />
+    <ClCompile Include="..\kernel\Vca_IPassiveConnector.cpp" />
+    <ClCompile Include="..\kernel\Vca_IPassiveConnector_Gofers.cpp" />
+    <ClCompile Include="..\kernel\Vca_IPassiveServer.cpp" />
+    <ClCompile Include="..\kernel\Vca_IPassiveServer_Gofers.cpp" />
+    <ClCompile Include="..\kernel\Vca_IPeek.cpp" />
+    <ClCompile Include="..\kernel\Vca_IPeer.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_IPeer_Ex1.cpp" />
+    <ClCompile Include="..\kernel\Vca_IPeer_Ex2.cpp" />
+    <ClCompile Include="..\kernel\Vca_IPipeFactory.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_IPipeSource.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_IPipeSource_Gofers.cpp" />
+    <ClCompile Include="..\kernel\Vca_IPipeSourceClient.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_IProcess.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_IProcessFactory.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_IProcessFactoryClient.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_IProcessInfo.cpp" />
+    <ClCompile Include="..\kernel\Vca_IProcessInfoSink.cpp" />
+    <ClCompile Include="..\kernel\Vca_IRequest.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_IResource.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_IResourceClient.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_IRexecConnectionFactory.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_IRoleProvider.cpp" />
+    <ClCompile Include="..\kernel\Vca_IRoleProvider2.cpp" />
+    <ClCompile Include="..\kernel\Vca_IServerApplication.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_ISSHConnectionFactory.cpp" />
+    <ClCompile Include="..\kernel\Vca_IStdPipeSource.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_IStdPipeSourceClient.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_ITrigger.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_Registry.cpp" />
+    <ClCompile Include="..\kernel\Vca_Registry_IAccess.cpp" />
+    <ClCompile Include="..\kernel\Vca_Registry_IAuthority.cpp" />
+    <ClCompile Include="..\kernel\Vca_Registry_IContact.cpp" />
+    <ClCompile Include="..\kernel\Vca_Registry_IRegistration.cpp" />
+    <ClCompile Include="..\kernel\Vca_Registry_IRegistry.cpp" />
+    <ClCompile Include="..\kernel\Vca_Registry_IUpdate.cpp" />
+    <ClCompile Include="..\kernel\Vca_Registry_IUpdater.cpp" />
+    <ClCompile Include="..\kernel\Vca_Registry_VAuthority.cpp" />
+    <ClCompile Include="..\kernel\Vca_Registry_VRegistry.cpp" />
+    <ClCompile Include="..\kernel\Vca_VActivity.cpp" />
+    <ClCompile Include="..\kernel\Vca_VActivityFilter.cpp" />
+    <ClCompile Include="..\kernel\Vca_VActivityModel.cpp" />
+    <ClCompile Include="..\kernel\Vca_VActivityMonitor.cpp" />
+    <ClCompile Include="..\kernel\Vca_VActivityRelay.cpp" />
+    <ClCompile Include="..\kernel\Vca_VActivitySink.cpp" />
+    <ClCompile Include="..\kernel\Vca_VBS.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VBSConnector.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VBSConsumer.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VBSManager.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VBSProducer.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VBSProducerBitBucket.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VcaConnection.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VcaCredentialsProvider.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VcaDirectoryBuilder.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VcaGofer.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VcaListener.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VCallbackTicket.cpp" />
+    <ClCompile Include="..\kernel\Vca_VcaOffer.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VcaOID.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VcaOIDL.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VcaOIDR.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VcaPeer.cpp" />
+    <ClCompile Include="..\kernel\Vca_VcaPeerCharacteristics.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VcaProxyFacilitator.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VcaRouteStatistics.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VcaSelf.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VcaSerializer.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VcaSerializer_.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VcaSite.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VcaThreadState.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VcaTransport.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VClassInfoHolder.cpp" />
+    <ClCompile Include="..\kernel\Vca_VCohort.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VConnection.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VConnectionFactory.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VConnectionPipeSource.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VConnectionRequest.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VDevice.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VDeviceFactory.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VDeviceImplementation.cpp" />
+    <ClCompile Include="..\kernel\Vca_VDeviceManager.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VDirectory.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VDirectoryBuilder.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VEvent.cpp" />
+    <ClCompile Include="..\kernel\Vca_VFDIODeviceImplementation.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VFilterDeviceFactory.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VFilterDeviceImplementation.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VGofer.cpp" />
+    <ClCompile Include="..\kernel\Vca_VInterfaceMember.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VInterfaceQuery.cpp" />
+    <ClCompile Include="..\kernel\Vca_VLineGrabber.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VListener.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VListenerFactory.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VLoopbackDeviceFactory.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VLoopbackDeviceImplementation.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VManager.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VMessage.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VMessageManager.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VMessageScheduler.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VNullDeviceFactory.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VNullDeviceImplementation.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VOutputSequencer.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VPassiveAgent.cpp" />
+    <ClCompile Include="..\kernel\Vca_VPassiveCallback.cpp" />
+    <ClCompile Include="..\kernel\Vca_VPassiveConnector.cpp" />
+    <ClCompile Include="..\kernel\Vca_VPassiveDirectiveAgent.cpp" />
+    <ClCompile Include="..\kernel\Vca_VPassiveProcessAgent.cpp" />
+    <ClCompile Include="..\kernel\Vca_VPipeSource.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VProcess.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VProcessFactory.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VPublication.cpp" />
+    <ClCompile Include="..\kernel\Vca_VPublisher.cpp" />
+    <ClCompile Include="..\kernel\Vca_VRexecConnectionFactory.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VRoleHolder.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VRolePlayer.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VSiteInfo.cpp" />
+    <ClCompile Include="..\kernel\Vca_VSSHConnectionFactory.cpp" />
+    <ClCompile Include="..\kernel\Vca_VStatus.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VStdPipeSource.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VStockDeviceFactory.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VStreamSink.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VStreamSource.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VSubscriptionManager.cpp" />
+    <ClCompile Include="..\kernel\Vca_VTimer.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VTriggerableTicket.cpp" />
+    <ClCompile Include="..\kernel\Vca_VTriggerSet.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\Vca_VTriggerTicket.cpp" />
+    <ClCompile Include="..\kernel\Vca_VTypeInfoHolder.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\VkSocketAddress.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\VPath.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\VPeerData.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\VPeerDataArray.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+    <ClCompile Include="..\kernel\VTypeInfo.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Vca.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\kernel\IVReceiver.h" />
+    <ClInclude Include="..\kernel\IVReceiver_NRK.h" />
+    <ClInclude Include="..\kernel\IVUnknown.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="..\kernel\Vca.h" />
+    <ClInclude Include="..\kernel\Vca_CompilerHappyPill.h" />
+    <ClInclude Include="..\kernel\Vca_IAckReceiver.h" />
+    <ClInclude Include="..\kernel\Vca_IActivity.h" />
+    <ClInclude Include="..\kernel\Vca_IActivityProxy.h" />
+    <ClInclude Include="..\kernel\Vca_IActivitySink.h" />
+    <ClInclude Include="..\kernel\Vca_IActivitySource.h" />
+    <ClInclude Include="..\kernel\Vca_IApplication.h" />
+    <ClInclude Include="..\kernel\Vca_IBinding.h" />
+    <ClInclude Include="..\kernel\Vca_IBSClient.h" />
+    <ClInclude Include="..\kernel\Vca_IBSConsumer.h" />
+    <ClInclude Include="..\kernel\Vca_IBSConsumerClient.h" />
+    <ClInclude Include="..\kernel\Vca_IBSProducer.h" />
+    <ClInclude Include="..\kernel\Vca_IBSProducerClient.h" />
+    <ClInclude Include="..\kernel\Vca_IClient.h" />
+    <ClInclude Include="..\kernel\Vca_IClient_NRK.h" />
+    <ClInclude Include="..\kernel\Vca_IConnection.h" />
+    <ClInclude Include="..\kernel\Vca_IConnectionFactory.h" />
+    <ClInclude Include="..\kernel\Vca_IConnectionRequest.h" />
+    <ClInclude Include="..\kernel\Vca_IDataSource.h" />
+    <ClInclude Include="..\kernel\Vca_IDataSource_NRK.h" />
+    <ClInclude Include="..\kernel\Vca_IDevice.h" />
+    <ClInclude Include="..\kernel\Vca_IDirectory.h" />
+    <ClInclude Include="..\kernel\Vca_IDirectoryEntry.h" />
+    <ClInclude Include="..\kernel\Vca_IError.h" />
+    <ClInclude Include="..\kernel\Vca_IEvent.h" />
+    <ClInclude Include="..\kernel\Vca_IEventSink.h" />
+    <ClInclude Include="..\kernel\Vca_IGetter.h" />
+    <ClInclude Include="..\kernel\Vca_IGetter_Ex2.h" />
+    <ClInclude Include="..\kernel\Vca_IListener.h" />
+    <ClInclude Include="..\kernel\Vca_IListenerClient.h" />
+    <ClInclude Include="..\kernel\Vca_IListenerFactory.h" />
+    <ClInclude Include="..\kernel\Vca_INamespace.h" />
+    <ClInclude Include="..\kernel\Vca_INeedYou.h" />
+    <ClInclude Include="..\kernel\Vca_IPassiveCall.h" />
+    <ClInclude Include="..\kernel\Vca_IPassiveCallback.h" />
+    <ClInclude Include="..\kernel\Vca_IPassiveCallback_Gofers.h" />
+    <ClInclude Include="..\kernel\Vca_IPassiveClient.h" />
+    <ClInclude Include="..\kernel\Vca_IPassiveConnector.h" />
+    <ClInclude Include="..\kernel\Vca_IPassiveConnector_Gofers.h" />
+    <ClInclude Include="..\kernel\Vca_IPassiveServer.h" />
+    <ClInclude Include="..\kernel\Vca_IPassiveServer_Gofers.h" />
+    <ClInclude Include="..\kernel\Vca_IPeek.h" />
+    <ClInclude Include="..\kernel\Vca_IPeer.h" />
+    <ClInclude Include="..\kernel\Vca_IPeer_Ex1.h" />
+    <ClInclude Include="..\kernel\Vca_IPeer_Ex2.h" />
+    <ClInclude Include="..\kernel\Vca_IPipeFactory.h" />
+    <ClInclude Include="..\kernel\Vca_IPipeSource.h" />
+    <ClInclude Include="..\kernel\Vca_IPipeSource_Gofers.h" />
+    <ClInclude Include="..\kernel\Vca_IPipeSourceClient.h" />
+    <ClInclude Include="..\kernel\Vca_IProcess.h" />
+    <ClInclude Include="..\kernel\Vca_IProcessFactory.h" />
+    <ClInclude Include="..\kernel\Vca_IProcessFactoryClient.h" />
+    <ClInclude Include="..\kernel\Vca_IProcessInfo.h" />
+    <ClInclude Include="..\kernel\Vca_IProcessInfoSink.h" />
+    <ClInclude Include="..\kernel\Vca_IRequest.h" />
+    <ClInclude Include="..\kernel\Vca_IResource.h" />
+    <ClInclude Include="..\kernel\Vca_IResourceClient.h" />
+    <ClInclude Include="..\kernel\Vca_IRexecConnectionFactory.h" />
+    <ClInclude Include="..\kernel\Vca_IRoleProvider.h" />
+    <ClInclude Include="..\kernel\Vca_IRoleProvider2.h" />
+    <ClInclude Include="..\kernel\Vca_IServerApplication.h" />
+    <ClInclude Include="..\kernel\Vca_ISSHConnectionFactory.h" />
+    <ClInclude Include="..\kernel\Vca_IStdPipeSource.h" />
+    <ClInclude Include="..\kernel\Vca_IStdPipeSourceClient.h" />
+    <ClInclude Include="..\kernel\Vca_ITrigger.h" />
+    <ClInclude Include="..\kernel\Vca_Registry.h" />
+    <ClInclude Include="..\kernel\Vca_Registry_IAccess.h" />
+    <ClInclude Include="..\kernel\Vca_Registry_IAuthority.h" />
+    <ClInclude Include="..\kernel\Vca_Registry_IContact.h" />
+    <ClInclude Include="..\kernel\Vca_Registry_IRegistration.h" />
+    <ClInclude Include="..\kernel\Vca_Registry_IRegistry.h" />
+    <ClInclude Include="..\kernel\Vca_Registry_IUpdate.h" />
+    <ClInclude Include="..\kernel\Vca_Registry_IUpdater.h" />
+    <ClInclude Include="..\kernel\Vca_Registry_VAuthority.h" />
+    <ClInclude Include="..\kernel\Vca_Registry_VRegistry.h" />
+    <ClInclude Include="..\kernel\Vca_VActivity.h" />
+    <ClInclude Include="..\kernel\Vca_VActivityFilter.h" />
+    <ClInclude Include="..\kernel\Vca_VActivityModel.h" />
+    <ClInclude Include="..\kernel\Vca_VActivityMonitor.h" />
+    <ClInclude Include="..\kernel\Vca_VActivityRelay.h" />
+    <ClInclude Include="..\kernel\Vca_VActivitySink.h" />
+    <ClInclude Include="..\kernel\Vca_VBS.h" />
+    <ClInclude Include="..\kernel\Vca_VBSConnector.h" />
+    <ClInclude Include="..\kernel\Vca_VBSConsumer.h" />
+    <ClInclude Include="..\kernel\Vca_VBSConsumerDevice_.h" />
+    <ClInclude Include="..\kernel\Vca_VBSManager.h" />
+    <ClInclude Include="..\kernel\Vca_VBSProducer.h" />
+    <ClInclude Include="..\kernel\Vca_VBSProducerBitBucket.h" />
+    <ClInclude Include="..\kernel\Vca_VBSProducerConsumerDevice_.h" />
+    <ClInclude Include="..\kernel\Vca_VBSProducerDevice_.h" />
+    <ClInclude Include="..\kernel\Vca_VcaConnection.h" />
+    <ClInclude Include="..\kernel\Vca_VcaCredentialsProvider.h" />
+    <ClInclude Include="..\kernel\Vca_VcaDirectoryBuilder.h" />
+    <ClInclude Include="..\kernel\Vca_VcaGofer.h" />
+    <ClInclude Include="..\kernel\Vca_VcaGofer_OneOf.h" />
+    <ClInclude Include="..\kernel\Vca_VcaGofer_Retried.h" />
+    <ClInclude Include="..\kernel\Vca_VcaGofer_Timeout.h" />
+    <ClInclude Include="..\kernel\Vca_VcaGofer_Weakened.h" />
+    <ClInclude Include="..\kernel\Vca_VcaListener.h" />
+    <ClInclude Include="..\kernel\Vca_VCallbackTicket.h" />
+    <ClInclude Include="..\kernel\Vca_VcaOffer.h" />
+    <ClInclude Include="..\kernel\Vca_VcaOID.h" />
+    <ClInclude Include="..\kernel\Vca_VcaOIDL.h" />
+    <ClInclude Include="..\kernel\Vca_VcaOIDR.h" />
+    <ClInclude Include="..\kernel\Vca_VcaPeer.h" />
+    <ClInclude Include="..\kernel\Vca_VcaPeerCharacteristics.h" />
+    <ClInclude Include="..\kernel\Vca_VcaProxyFacilitator.h" />
+    <ClInclude Include="..\kernel\Vca_VcaRouteStatistics.h" />
+    <ClInclude Include="..\kernel\Vca_VcaSelf.h" />
+    <ClInclude Include="..\kernel\Vca_VcaSerializer.h" />
+    <ClInclude Include="..\kernel\Vca_VcaSerializer_.h" />
+    <ClInclude Include="..\kernel\Vca_VcaSerializerForVkDynamicArrayOf_.h" />
+    <ClInclude Include="..\kernel\Vca_VcaSerializerForVkSetOf_.h" />
+    <ClInclude Include="..\kernel\Vca_VcaSite.h" />
+    <ClInclude Include="..\kernel\Vca_VcaThreadState.h" />
+    <ClInclude Include="..\kernel\Vca_VcaTransport.h" />
+    <ClInclude Include="..\kernel\Vca_VClassInfoHolder.h" />
+    <ClInclude Include="..\kernel\Vca_VCohort.h" />
+    <ClInclude Include="..\kernel\Vca_VConnection.h" />
+    <ClInclude Include="..\kernel\Vca_VConnectionFactory.h" />
+    <ClInclude Include="..\kernel\Vca_VConnectionPipeSource.h" />
+    <ClInclude Include="..\kernel\Vca_VConnectionRequest.h" />
+    <ClInclude Include="..\kernel\Vca_VDevice.h" />
+    <ClInclude Include="..\kernel\Vca_VDevice_.h" />
+    <ClInclude Include="..\kernel\Vca_VDeviceFactory.h" />
+    <ClInclude Include="..\kernel\Vca_VDeviceImplementation.h" />
+    <ClInclude Include="..\kernel\Vca_VDeviceManager.h" />
+    <ClInclude Include="..\kernel\Vca_VDirectory.h" />
+    <ClInclude Include="..\kernel\Vca_VDirectoryBuilder.h" />
+    <ClInclude Include="..\kernel\Vca_VEvent.h" />
+    <ClInclude Include="..\kernel\Vca_VFDIODeviceImplementation.h" />
+    <ClInclude Include="..\kernel\Vca_VFilterDeviceFactory.h" />
+    <ClInclude Include="..\kernel\Vca_VFilterDeviceFactory_.h" />
+    <ClInclude Include="..\kernel\Vca_VFilterDeviceImplementation.h" />
+    <ClInclude Include="..\kernel\Vca_VFilterPipeSource_.h" />
+    <ClInclude Include="..\kernel\Vca_VFilterPipeSourceTransaction_.h" />
+    <ClInclude Include="..\kernel\Vca_VGofer.h" />
+    <ClInclude Include="..\kernel\Vca_VGoferExogenous.h" />
+    <ClInclude Include="..\kernel\Vca_VGoferExogenousInterface.h" />
+    <ClInclude Include="..\kernel\Vca_VGofering.h" />
+    <ClInclude Include="..\kernel\Vca_VGoferInstance.h" />
+    <ClInclude Include="..\kernel\Vca_VGoferInterface.h" />
+    <ClInclude Include="..\kernel\Vca_VInstanceHolder.h" />
+    <ClInclude Include="..\kernel\Vca_VInstanceOf.h" />
+    <ClInclude Include="..\kernel\Vca_VInstanceOfInterface.h" />
+    <ClInclude Include="..\kernel\Vca_VInstanceSource.h" />
+    <ClInclude Include="..\kernel\Vca_VInterfaceEKG.h" />
+    <ClInclude Include="..\kernel\Vca_VInterfaceMember.h" />
+    <ClInclude Include="..\kernel\Vca_VInterfaceQuery.h" />
+    <ClInclude Include="..\kernel\Vca_VInterfaceSource_.h" />
+    <ClInclude Include="..\kernel\Vca_VLineGrabber.h" />
+    <ClInclude Include="..\kernel\Vca_VListener.h" />
+    <ClInclude Include="..\kernel\Vca_VListenerFactory.h" />
+    <ClInclude Include="..\kernel\Vca_VListeningDevice_.h" />
+    <ClInclude Include="..\kernel\Vca_VLoopbackDeviceFactory.h" />
+    <ClInclude Include="..\kernel\Vca_VLoopbackDeviceImplementation.h" />
+    <ClInclude Include="..\kernel\Vca_VManager.h" />
+    <ClInclude Include="..\kernel\Vca_VMessage.h" />
+    <ClInclude Include="..\kernel\Vca_VMessageManager.h" />
+    <ClInclude Include="..\kernel\Vca_VMessageScheduler.h" />
+    <ClInclude Include="..\kernel\Vca_VMessageStarter.h" />
+    <ClInclude Include="..\kernel\Vca_VNullDeviceFactory.h" />
+    <ClInclude Include="..\kernel\Vca_VNullDeviceImplementation.h" />
+    <ClInclude Include="..\kernel\Vca_VOutputSequencer.h" />
+    <ClInclude Include="..\kernel\Vca_VPassiveAgent.h" />
+    <ClInclude Include="..\kernel\Vca_VPassiveCallback.h" />
+    <ClInclude Include="..\kernel\Vca_VPassiveConnector.h" />
+    <ClInclude Include="..\kernel\Vca_VPassiveDirectiveAgent.h" />
+    <ClInclude Include="..\kernel\Vca_VPassiveProcessAgent.h" />
+    <ClInclude Include="..\kernel\Vca_VPipeSource.h" />
+    <ClInclude Include="..\kernel\Vca_VProcess.h" />
+    <ClInclude Include="..\kernel\Vca_VProcessFactory.h" />
+    <ClInclude Include="..\kernel\Vca_VPublication.h" />
+    <ClInclude Include="..\kernel\Vca_VPublisher.h" />
+    <ClInclude Include="..\kernel\Vca_VReceiver.h" />
+    <ClInclude Include="..\kernel\Vca_VRexecConnectionFactory.h" />
+    <ClInclude Include="..\kernel\Vca_VRoleHolder.h" />
+    <ClInclude Include="..\kernel\Vca_VRolePlayer.h" />
+    <ClInclude Include="..\kernel\Vca_VSiteInfo.h" />
+    <ClInclude Include="..\kernel\Vca_VSSHConnectionFactory.h" />
+    <ClInclude Include="..\kernel\Vca_VSSHDeviceImplementation.h" />
+    <ClInclude Include="..\kernel\Vca_VStatus.h" />
+    <ClInclude Include="..\kernel\Vca_VStdPipeSource.h" />
+    <ClInclude Include="..\kernel\Vca_VStockDeviceFactory.h" />
+    <ClInclude Include="..\kernel\Vca_VStockDeviceFactory_.h" />
+    <ClInclude Include="..\kernel\Vca_VStreamSink.h" />
+    <ClInclude Include="..\kernel\Vca_VStreamSource.h" />
+    <ClInclude Include="..\kernel\Vca_VSubscription.h" />
+    <ClInclude Include="..\kernel\Vca_VSubscriptionManager.h" />
+    <ClInclude Include="..\kernel\Vca_VTimer.h" />
+    <ClInclude Include="..\kernel\Vca_VTrigger.h" />
+    <ClInclude Include="..\kernel\Vca_VTriggerableTicket.h" />
+    <ClInclude Include="..\kernel\Vca_VTriggerSet.h" />
+    <ClInclude Include="..\kernel\Vca_VTriggerTicket.h" />
+    <ClInclude Include="..\kernel\Vca_VTuple.h" />
+    <ClInclude Include="..\kernel\Vca_VTypeInfoHolder.h" />
+    <ClInclude Include="..\kernel\Vca_VTypeInfoHolderFor.h" />
+    <ClInclude Include="..\kernel\Vca_VTypeInfoHolderForArrayOf.h" />
+    <ClInclude Include="..\kernel\Vca_VTypeInfoHolderForReferenceable.h" />
+    <ClInclude Include="..\kernel\Vca_VTypeInfoHolderForSerializable.h" />
+    <ClInclude Include="..\kernel\Vca_VTypeInfoHolderForSetOf.h" />
+    <ClInclude Include="..\kernel\Vca_VTypeInfoHolderFromSerializer.h" />
+    <ClInclude Include="..\kernel\Vca_VTypePattern.h" />
+    <ClInclude Include="..\kernel\VkSocketAddress.h" />
+    <ClInclude Include="..\kernel\VPath.h" />
+    <ClInclude Include="..\kernel\VPeerData.h" />
+    <ClInclude Include="..\kernel\VPeerDataArray.h" />
+    <ClInclude Include="..\kernel\VReceiver.h" />
+    <ClInclude Include="..\kernel\VTypeInfo.h" />
+    <ClInclude Include="..\kernel\VTypeTraits.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\V\V.vcxproj">
+      <Project>{1624b0e1-7102-494e-b04d-2983dc18947d}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

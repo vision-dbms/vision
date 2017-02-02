@@ -1,0 +1,45 @@
+#########################################################
+#		Local Compiler Rules			#
+#########################################################
+
+#--objectrule--#	$(CXX) $(CFLAGS) $(CDEFS) $(CINCS) -o $@ -c
+#--linkerrule--#	$(LINKER) $@ $(CFLAGS) $(LFLAGS) -install_name @executable_path/$@ *.o$B $(LIBS)
+#--objectsuffix--#	$B
+#--targetprefix--#	../lib$D/
+#--targetsuffix--#	.dylib
+#--buildtargets--#	targets
+
+.SUFFIXES :
+
+B	=
+%-dbg	: B = -dbg
+
+D	=
+%-dbg	: D = /dbg
+
+
+CDEFS	= 
+CINCS	=
+CBASE	= -fexceptions -frtti -Wno-trigraphs -fPIC -Wno-undefined-bool-conversion -Wno-format -Wno-logical-op-parentheses -Wno-switch -Wno-shift-op-parentheses -Wno-shift-negative-value -Wno-parentheses -Wno-deprecated-declarations
+CDBG	= -g -fno-limit-debug-info
+CREL	= -O2
+CVER	= ${CREL}
+
+CFLAGS	= ${CVER} ${CBASE}
+
+LINKER	= VLINK-CC
+LIBS	= ${LOCALLIBS} -lpthread
+LBASE	= -dynamiclib
+LFLAGS	= ${LBASE} -L ../lib$D
+
+release : targets
+
+debug : targets-dbg
+
+targets-dbg :
+	@$(MAKE) B=-dbg D=/dbg CVER="${CDBG}" targets
+
+clean-dbg :
+	@$(MAKE) B=-dbg D=/dbg clean
+	
+clean-all : clean clean-dbg

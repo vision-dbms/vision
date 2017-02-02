@@ -1,0 +1,40 @@
+################
+
+Object createSubclass: "ProfileTools";
+
+ProfileTools createSubclass: "Experiment" at: ProfileTools;
+ProfileTools createSubclass: "Record" at: ProfileTools Experiment;
+
+################
+ProfileTools Experiment
+defineFixedProperty: "description".
+defineFixedProperty: "records".
+
+do: [
+   :description <- "Default";
+   :records <- ^my IndexedList new;
+];
+
+################
+ProfileTools Experiment Record
+defineFixedProperty: "experiment".
+defineFixedProperty: "children".
+
+defineFixedProperty: "frameNumber".	# 2
+defineFixedProperty: "caller".		# 3
+defineFixedProperty: "creator".		# 4
+defineFixedProperty: "elapsed".		# 5
+defineFixedProperty: "user".		# 6
+defineFixedProperty: "system".		# 7
+defineFixedProperty: "pageflts".	# 8
+defineFixedProperty: "dirio".		# 9
+defineFixedProperty: "bufio".		# 10
+defineFixedProperty: "filecnt".		# 11
+defineFixedProperty: "cardinality".	# 12
+defineFixedProperty: "frameType".	# 13
+defineFixedProperty: "selector".	# 14
+defineFixedProperty: "context".
+
+do: [
+    :children <- ^my IndexedList new;
+];

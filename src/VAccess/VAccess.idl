@@ -1,0 +1,853 @@
+// VAccess.idl : IDL source for VAccess.dll
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (VAccess.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+//=====================
+//++++  Constants  ++++
+//=====================
+
+[
+    helpstring ("A collection of constants that specify the desired return type of an item.")
+] typedef enum ItemType {
+    [ helpstring ("An item type constant that requests values returned using the most appropriate type.")
+    ] ItemType_Unspecified,
+
+    [ helpstring ("An item type constant that requests values returned as integers or NA.")
+    ] ItemType_Integer,
+
+    [ helpstring ("An item type constant that requests values returned as doubles or NA.")
+    ] ItemType_Real,
+
+    [ helpstring ("An item type constant that requests values returned as strings.")
+    ] ItemType_String
+} ItemType;
+
+[   helpstring ("A collection of constants that indicate how an extract workspace's rows and columns are specified.")
+] typedef enum ExtractListType {
+    [ helpstring ("An extract workspace constant that indicates that a row or column list has not been specified.")
+    ] ExtractListType_Unspecified,
+
+    [ helpstring ("An extract workspace constant that indicates that a row or column list is an array created using an 'add...' method.")
+    ] ExtractListType_Array,
+
+    [ helpstring ("An extract workspace constant that indicates that a row or column list is a string of comma separated values.")
+    ] ExtractListType_String,
+
+    [ helpstring ("An extract workspace constant that indicates that a row or column list is dynamically generated using a Vision expression.")
+    ] ExtractListType_Expression
+} ExtractListType;
+
+[   helpstring ("A collection of constants that specify the interpretation of an extract workspace's rows and columns.")
+] typedef enum ExtractOrientation {
+    [ helpstring ("An extract workspace constant that requests a data matrix with entity rows and item columns.")
+    ] ExtractOrientation_EI,
+
+    [ helpstring ("An extract workspace constant that requests a data matrix with entity rows and time columns.")
+    ] ExtractOrientation_ET,
+
+    [ helpstring ("An extract workspace constant that requests a data matrix with item rows and entity columns.")
+    ] ExtractOrientation_IE,
+
+    [ helpstring ("An extract workspace constant that requests a data matrix with item rows and time columns.")
+    ] ExtractOrientation_IT,
+
+    [ helpstring ("An extract workspace constant that requests a data matrix with time rows and entity columns.")
+    ] ExtractOrientation_TE,
+
+    [ helpstring ("An extract workspace constant that requests a data matrix with time rows and item columns.")
+    ] ExtractOrientation_TI
+} ExtractOrientation;
+
+//======================
+//++++  Interfaces  ++++
+//======================
+
+interface IConnection;
+interface IConnectionUse;
+interface IDatumArray;
+interface IExtractWS;
+interface IFormatSettings;
+
+//--------------------------------
+//----  Connection
+//--------------------------------
+[   object,
+    uuid(F38D0B8F-36FC-11D4-BEBE-00A0C931D9D4),
+    dual,
+    helpstring("IConnection Interface"),
+    pointer_default(unique)
+] interface IConnection : IDispatch {
+    [ propget
+    , id(2)
+    , helpstring ("A boolean property whose value is non-zero if this Connection is attached to a Vision session.")
+    ] HRESULT IsConnected(
+	[out, retval] BOOL *pVal
+    );
+
+    [ propget
+    , id(3)
+    , helpstring ("A property whose value is the FormatSettings object associated with this Connection.")
+    ] HRESULT FormatSettings(
+	[out, retval] IFormatSettings* *pVal
+    );
+
+    [ id(4)
+    , helpstring ("A method that attaches this Connection to an existing, shared Vision session running on 'hostname' at 'port'.")
+    ] HRESULT Connect(
+	[in] BSTR hostname, [in] long port
+    );
+
+    [ id(5)
+    , helpstring ("A method that attaches this Connection to a new, private Vision session running on 'hostname' for user 'username'.")
+    ] HRESULT Login(
+	[in] BSTR hostname, [in] BSTR username, [in] BSTR password, [in,optional] VARIANT command
+    );
+
+    [ id(6)
+    , helpstring ("A method that disconnects this Connection from its Vision session.")
+    ] HRESULT Disconnect();
+
+    [ id(7)
+    , helpstring ("A method that loads the Vision code contained in the remote file named 'remoteFileName' into the attached Vision session.")
+    ] HRESULT Include(
+	[in] BSTR remoteFileName
+    );
+
+    [ id(8)
+    , helpstring ("A function that creates and returns a new extract workspace object.")
+    ] HRESULT NewExtractWS(
+	[out, retval] IExtractWS** ppExtractWS
+    );
+
+    [ id(9)
+    , helpstring ("A method that executes a Vision 'expression' as of an optional 'date' and 'currency'.  Output produced executing 'expression' is discarded.")
+    ] HRESULT Execute(
+	[in] BSTR expression, [in, optional] VARIANT date, [in, optional] VARIANT currency
+    );
+
+    [ id(10)
+    , helpstring ("A function that executes a Vision 'expression' as of an optional 'date' and 'currency'.  Output produced executing 'expression' is returned as the string value of this function.")
+    ] HRESULT Submit(
+	[in] BSTR expression,
+	[in, optional] VARIANT date,
+	[in, optional] VARIANT currency,
+	[in, optional] VARIANT replyBufferInitialSize,
+	[in, optional] VARIANT replyBufferSizeIncrement,
+	[out, retval] BSTR* reply
+    );
+
+    [ id(11)
+    , helpstring ("A function that retrieves a value for a single entity and item as of an optional date and currency.  The boolean result returned by this function indicates whether the retrieval was successful.")
+    ] HRESULT GetValue(
+	[out] VARIANT* result,
+	[in] BSTR entityType,
+	[in] BSTR entity,
+	[in] BSTR item,
+	[in,optional] VARIANT date,
+	[in, optional] VARIANT currency,
+	[out,retval] BOOL* pSuccessful
+    );
+
+    [ id(12)
+    , helpstring ("A function that retrieves a double value for a single entity and item as of an optional date and currency.  The boolean result returned by this function indicates whether the retrieval and conversion to a double was successful.")
+    ] HRESULT GetDouble(
+	[out] double* result,
+	[in] BSTR entityType,
+	[in] BSTR entity,
+	[in] BSTR item,
+	[in,optional] VARIANT date,
+	[in,optional] VARIANT currency,
+	[out,retval] BOOL* pSuccessful
+    );
+
+    [ id(13)
+    , helpstring ("A function that retrieves an integer value for a particular entity and item as of an optional date and currency.  The boolean result returned by this function indicates whether the retrieval and conversion to an integer was successful.")
+    ] HRESULT GetLong(
+	[out] long* result,
+	[in] BSTR entityType,
+	[in] BSTR entity,
+	[in] BSTR item,
+	[in,optional]VARIANT date,
+	[in,optional] VARIANT currency,
+	[out,retval] BOOL* pSuccessful
+    );
+
+    [ id(14)
+    , helpstring ("A function that retrieves a string value for a particular entity and item as of an optional date and currency.  The boolean result returned by this function indicates whether the retrieval was successful.")
+    ] HRESULT GetString(
+	[out] BSTR* result,
+	[in] BSTR entityType,
+	[in] BSTR entity,
+	[in] BSTR item,
+	[in,optional] VARIANT date,
+	[in,optional] VARIANT currency,
+	[out,retval] BOOL* pSuccessful
+    );
+
+    [ id(15)
+    , helpstring ("A method that attaches this Connection to a new, private Vision session running on 'hostname' for user 'username'.")
+    ] HRESULT Rexec(
+	[in] BSTR hostname, [in] BSTR username, [in] BSTR password, [in,optional] VARIANT command
+    );
+
+    [ propget
+    , id(16)
+    , helpstring ("A string containing a newline-delimited list of session names.")
+    ] HRESULT SessionNames(
+	[out, retval] BSTR *sessionNames
+    );
+
+};
+
+//--------------------------------
+//----  IConnectionUse
+//--------------------------------
+[
+    object,
+    uuid(1F1F0B61-3B26-11D4-BEBE-00A0C931D9D4),
+    dual,
+    helpstring("IConnectionUse Interface"),
+    pointer_default(unique),
+    hidden
+]
+interface IConnectionUse : IDispatch {
+    [ propget
+    , id(1)
+    , helpstring ("A property whose value is the Connection this object uses.")
+    ] HRESULT Connection (
+	[out, retval] IConnection** ppConnection
+    );
+
+    [ propget
+    , id(2)
+    , helpstring ("A boolean property whose value is non-zero if this object's Connection is attached to a Vision session.")
+    ] HRESULT IsConnected (
+	[out, retval] BOOL *pVal
+    );
+
+    [ propget
+    , id(3)
+    , helpstring ("A property whose value is the FormatSettings object associated with this object.")
+    ] HRESULT FormatSettings (
+	[out, retval] IFormatSettings* *pVal
+    );
+};
+
+//--------------------------------
+//----  DatumArray
+//--------------------------------
+[
+    object,
+    uuid(1F1F0B59-3B26-11D4-BEBE-00A0C931D9D4),
+    dual,
+    helpstring("IDatumArray Interface"),
+    pointer_default(unique)
+]
+interface IDatumArray : IDispatch {
+    [ propget
+    , id(1)
+    , helpstring ("A property whose value is the FormatSettings object associated with this DatumArray.")
+    ] HRESULT FormatSettings (
+	[out, retval] IFormatSettings* *pVal
+    );
+
+    [ propget
+    , id(2)
+    , helpstring ("A property whose value is the number of dimensions in this DatumArray.  For DatumArray objects holding ExtractWS structured results, this property's value is always 2.")
+    ] HRESULT DimensionCount (
+	[out, retval] long *pVal
+    );
+
+    [ propget
+    , id(3)
+    , helpstring ("A property whose value is the number of elements along the axis specified by 'dimension' (0 <= dimension < DimensionCount).")
+    ] HRESULT ElementCount(
+	[in] long dimension, [out, retval] long *pVal
+    );
+
+    [ id(4)
+    , helpstring ("A method that returns the elements of a DatumArray as an array of doubles.  Elements not representable as doubles are returned as the DoubleNaN value of this DatumArray's FormatSettings property.")
+    ] HRESULT GetDoubleArray(
+	[out] SAFEARRAY(double)* array
+    );
+
+    [ id(5)
+    , helpstring ("A method that returns the elements of a DatumArray as an array of long integers.  Elements not representable as long integers are returned as the LongNaN value of this DatumArray's FormatSettings property.")
+    ] HRESULT GetLongArray(
+	[out] SAFEARRAY(long)* array
+    );
+
+    [ id(6)
+    , helpstring ("A method that returns the elements of a DatumArray as an array of strings.")
+    ] HRESULT GetStringArray(
+	[out] SAFEARRAY(BSTR) *array
+    );
+
+    [ id(7)
+    , helpstring ("A method that returns the elements of a DatumArray as an array of variants.")
+    ] HRESULT GetVariantArray(
+	[out] SAFEARRAY(VARIANT) *array
+    );
+
+    [ id(8)
+    , helpstring ("A function that returns the elements of a DatumArray as an array of doubles.  Elements not representable as doubles are returned as the DoubleNaN value of this DatumArray's FormatSettings property.")
+    ] HRESULT AsDoubleArray(
+	[out,retval] SAFEARRAY(double)* ppArray
+    );
+
+    [ id(9)
+    , helpstring ("A function that returns the elements of a DatumArray as an array of long integers.  Elements not representable as long integers are returned as the LongNaN value of this DatumArray's FormatSettings property.")
+    ] HRESULT AsLongArray(
+	[out,retval] SAFEARRAY(long)* ppArray
+    );
+
+    [ id(10)
+    , helpstring ("A function that returns the elements of a DatumArray as an array of strings.")
+    ] HRESULT AsStringArray(
+	[out,retval] SAFEARRAY(BSTR)* ppArray
+    );
+
+    [ id(11)
+    , helpstring ("A function that returns the elements of a DatumArray as an array of variants.")
+    ] HRESULT AsVariantArray(
+	[out,retval] SAFEARRAY(VARIANT)* ppArray
+    );
+};
+
+//--------------------------------
+//----  ExtractWS
+//--------------------------------
+[
+    object,
+    uuid(1F1F0B5C-3B26-11D4-BEBE-00A0C931D9D4),
+    dual,
+    helpstring("IExtractWS Interface"),
+    pointer_default(unique)
+]
+interface IExtractWS : IConnectionUse {
+    [ id(100)
+    , helpstring ("A method that makes a copy of this extract workspace and all of its settings.")
+    ] HRESULT Copy (
+	[out,retval]IExtractWS** ppExtractWS
+    );
+
+    [ id(101)
+    , helpstring ("A method that sets the default 'as-of' date for all queries using this extract workspace.  See the 'Date' property for another way to do this.")
+    ] HRESULT SetDateTo(
+	[in] BSTR date
+    );
+
+    [ id(102)
+    , helpstring ("A method that sets the default currency for all queries using this extract workspace.  See the 'Currency' property for another way to do this.")
+    ] HRESULT SetCurrencyTo(
+	[in] BSTR currency
+    );
+
+    [ id(103)
+    , helpstring ("A method that sets the interpretation of the row, column, and scalar dimensions of this extract workspace.  See the 'Orientation' property for another way to do this.")
+    ] HRESULT SetOrientationTo(
+	[in] ExtractOrientation orientation
+    );
+
+    [ id(104)
+    , helpstring ("A method that sets the orientation of this extract workspace to entity rows, item columns, and scalar date.")
+    ] HRESULT SetOrientationToEI();
+
+    [ id(105)
+    , helpstring ("A method that sets the orientation of this extract workspace to entity rows, time columns, and scalar item.")
+    ] HRESULT SetOrientationToET();
+
+    [ id(106)
+    , helpstring ("A method that sets the orientation of this extract workspace to item rows, entity columns, and scalar date.")
+    ] HRESULT SetOrientationToIE();
+
+    [ id(107)
+    , helpstring ("A method that sets the orientation of this extract workspace to item rows, time columns, and scalar entity.")
+    ] HRESULT SetOrientationToIT();
+
+    [ id(108)
+    , helpstring ("A method that sets the orientation of this extract workspace to time rows, entity columns, and scalar item.")
+    ] HRESULT SetOrientationToTE();
+
+    [ id(109)
+    , helpstring ("A method that sets the orientation of this extract workspace to time rows, item columns, and scalar entity.")
+    ] HRESULT SetOrientationToTI();
+
+    [ id(110)
+    , helpstring ("A method that requests that the first row of data matrices generated using this extract workspace contain column labels.  Useful for columns dynamically generated by Vision.  See the 'ColumnLabelsOn' property for another way to do this.")
+    ] HRESULT SetColumnLabelsOn();
+
+    [ id(111)
+    , helpstring ("A method that cancels the generation of column labels requested by 'SetColumnLabelsOn'.  See the 'ColumnLabelsOn' property for another way to do this.")
+    ] HRESULT SetColumnLabelsOff();
+
+    [ id(112)
+    , helpstring ("A method that requests that the first column of data matrices generated using this extract workspace contain row labels.  Useful for rows dynamically generated by Vision.  See the 'RowLabelsOn' property for another way to do this.")
+    ] HRESULT SetRowLabelsOn();
+
+    [ id(113)
+    , helpstring ("A method that cancels the generation of rows labels requested by 'SetRowLabelsOn'.  See the 'RowLabelsOn' property for another way to do this.")
+    ] HRESULT SetRowLabelsOff();
+
+    [ id(114)
+    , helpstring ("A method that requests that the first cell of data matrices generated with this extract workspace contain a scalar label.  See the 'ScalarLabelOn' property for another way to do this.")
+    ] HRESULT SetScalarLabelOn();
+
+    [ id(115)
+    , helpstring ("A method that cancels the generation of the scalar label requested by 'SetScalarLabelOn'.  See the 'ScalarLabelOn' property for another way to do this.")
+    ] HRESULT SetScalarLabelOff();
+
+    [ id(116)
+    , helpstring ("A method that sets the internal delimiter used to separate data values sent from Vision.  In normal use, this method does not need to be called.  See the 'Delimiter' property for another way to do this.")
+    ] HRESULT SetDelimiterTo(
+	[in] BSTR delimiter
+    );
+
+    [ id(117)
+    , helpstring ("A method that sets the name of the Vision entity class being accessed.  See the 'EntityType' property for another way to do this.")
+    ] HRESULT SetEntityTypeTo(
+	[in] BSTR entityType
+    );
+
+    [ id(118)
+    , helpstring ("A method that sets the single entity for which item by time matrices are retrieved.  See the 'Entity' property for another way to do this.")
+    ] HRESULT SetEntityTo(
+	[in] BSTR entity
+    );
+
+    [ id(119)
+    , helpstring ("A method that sets the entity list used in entity by 'X' and 'X' by entity queries to a string containing a comma separated list of entity names.  See the 'EntityListString' property for another way to do this.")
+    ] HRESULT SetEntityListTo(
+	[in] BSTR entityList
+    );
+
+    [ id(120)
+    , helpstring ("A method that sets the entity list used in entity by 'X' and 'X' by entity queries to a Vision expression used to generate a dynamic list of entities.  See the 'EntityListExpression' property for another way to do this.")
+    ] HRESULT SetEntityListExpressionTo(
+	[in] BSTR entityListExpression
+    );
+
+    [ id(121)
+    , helpstring ("A method that adds the name of an entity to an array of entity names used in entity by 'X' and 'X' by entity queries.")
+    ] HRESULT AddEntity(
+	[in] BSTR entity
+    );
+
+    [ id(122)
+    , helpstring ("A method that clears the entity list used by entity by 'X' and 'X' by entity queries.")
+    ] HRESULT ClearEntityList();
+
+    [ id(123)
+    , helpstring ("A method that sets the single item for which entity by time data matrices are retrieved.  See the 'Item' property for another way to do this.")
+    ] HRESULT SetItemTo(
+	[in] BSTR item
+    );
+
+    [ id(124)
+    , helpstring ("A method that sets the single item, along with a required data type, for which entity by time data matrices are retrieved.  See the 'Item' and 'ItemType' properties for another way to do this.")
+    ] HRESULT SetTypedItemTo(
+	[in] BSTR item, [in] ItemType itemType
+    );
+
+    [ id(125)
+    , helpstring ("A method that adds an item to an array of items used in item by 'X' and 'X' by item queries.")
+    ] HRESULT AddItem(
+	[in] BSTR item
+    );
+
+    [ id(126)
+    , helpstring ("A method that adds a typed item to an array of items used in item by 'X' and 'X' by item queries.")
+    ] HRESULT AddTypedItem(
+	[in] BSTR item, [in] ItemType itemType
+    );
+
+    [ id(127)
+    , helpstring ("A method that clears the item list used in item by 'X' and 'X' by item queries.")
+    ] HRESULT ClearItemList(
+    );
+
+    [ id(80)
+    , helpstring ("A method that sets the date list used in time by 'X' and 'X' by time queries to a string containing a comma separated list of dates.  See the 'DateListString' property for another way to do this.")
+    ] HRESULT SetDateListTo(
+	[in] BSTR dateList
+    );
+
+    [ id(81)
+    , helpstring ("A method that sets the date list used in time by 'X' and 'X' by time queries to a Vision expression used to generate a dynamic list of dates.  See the 'DateListExpression' property for another way to do this.")
+    ] HRESULT SetDateListExpressionTo(
+	[in] BSTR dateListExpression
+    );
+
+    [ id(128)
+    , helpstring ("A method that adds a date to an array of dates used in time by 'X' and 'X' by time queries.")
+    ] HRESULT AddDate(
+	[in] BSTR date
+    );
+
+    [ id(129)
+    , helpstring ("A method that clears the date list used in time by 'X' and 'X' by time queries.")
+    ] HRESULT ClearDateList();
+
+    [ id(130)
+    , helpstring ("A method that retrieves a matrix of data based on the current settings of this extract workspace.")
+    ] HRESULT Run(
+	[out,retval] IDatumArray** ppResultDatumArray
+    );
+
+    [ propget
+    , id(131)
+    , helpstring ("A property whose value is the default 'as-of' date for all queries using this extract workspace.")
+    ] HRESULT Date (
+	[out, retval] BSTR *pVal
+    );
+    [ propput, id(131) ] HRESULT Date (
+	[in] BSTR newVal
+    );
+
+    [ propget
+    , id(132)
+    , helpstring ("A property whose value is the default currency for all queries using this extract workspace.")
+    ] HRESULT Currency (
+	[out, retval] BSTR *pVal
+    );
+    [ propput, id(132) ] HRESULT Currency (
+	[in] BSTR newVal
+    );
+
+    [ propget
+    , id(133)
+    , helpstring ("A property whose value specifies the interpretation of the row, column, and scalar dimensions of this extract workspace.")
+    ] HRESULT Orientation(
+	[out, retval] ExtractOrientation *pVal
+    );
+    [ propput, id(133)] HRESULT Orientation(
+	[in] ExtractOrientation newVal
+    );
+
+    [ propget
+    , id(134)
+    , helpstring ("A boolean property whose value controls whether the first row of data matrices generated using this extract workspace contain column labels.  Useful for columns dynamically generated by Vision.")
+    ] HRESULT ColumnLabelsOn (
+	[out, retval] BOOL *pVal
+    );
+    [ propput, id(134) ] HRESULT ColumnLabelsOn(
+	[in] BOOL newVal
+    );
+
+    [ propget
+    , id(135)
+    , helpstring ("A boolean property whose value controls whether the first column of data matrices generated using this extract workspace contain row labels.  Useful for rows dynamically generated by Vision.")
+    ] HRESULT RowLabelsOn (
+	[out, retval] BOOL *pVal
+    );
+    [ propput, id(135) ] HRESULT RowLabelsOn(
+	[in] BOOL newVal
+    );
+
+    [ propget
+    , id(136)
+    , helpstring ("A boolean property whose value controls whether the first cell of data matrices generated using this extract workspace contain a scalar label.")
+    ] HRESULT ScalarLabelOn (
+	[out, retval] BOOL *pVal
+    );
+    [ propput, id(136) ] HRESULT ScalarLabelOn(
+	[in] BOOL newVal
+    );
+
+    [ propget
+    , id(137)
+    , helpstring ("A property whose value is the internal delimiter used to separate data values sent from Vision.  In normal use, this property does not need to be changed.")
+    ] HRESULT Delimiter(
+	[out, retval] BSTR *pVal
+    );
+    [ propput, id(137) ] HRESULT Delimiter(
+	[in] BSTR newVal
+    );
+
+    [ propget
+    , id(138)
+    , helpstring ("A property whose value contains the name of the Vision entity class being accessed.")
+    ] HRESULT EntityType(
+	[out, retval] BSTR *pVal
+    );
+    [ propput, id(138) ] HRESULT EntityType(
+	[in] BSTR newVal
+    );
+
+    [ propget
+    , id(139)
+    , helpstring ("A property whose value contains the single entity for which item by time matrices are retrieved.")
+    ] HRESULT Entity(
+	[out, retval] BSTR *pVal
+    );
+    [ propput, id(139) ] HRESULT Entity(
+	[in] BSTR newVal
+    );
+
+    [ propget
+    , id(140)
+    , helpstring ("A property whose value contains the single item for which entity by time data matrices are retrieved.")
+    ] HRESULT Item (
+	[out, retval] BSTR *pVal
+    );
+    [ propput, id(140) ] HRESULT Item (
+	[in] BSTR newVal
+    );
+
+    [ propget
+    , id(141)
+    , helpstring ("A property whose value contains the required data type of the single item for which entity by time data matrices are retrieved.")
+    ] HRESULT ItemType(
+	[out, retval] ItemType *pVal
+    );
+    [ propput, id(141) ] HRESULT ItemType(
+	[in] ItemType newVal
+    );
+
+    [ propget
+    , id(142)
+    , helpstring ("A property whose value is the kind of date list held in this extract workspace.")
+    ] HRESULT DateListType (
+	[out, retval] ExtractListType *pVal
+    );
+
+    [ propget
+    , id(143)
+    , helpstring ("A property whose value is the kind of entity list held in this extract workspace.")
+    ] HRESULT EntityListType (
+	[out, retval] ExtractListType *pVal
+    );
+
+    [ propget
+    , id(144)
+    , helpstring ("A property whose value is the kind of item list held in this extract workspace.")
+    ] HRESULT ItemListType (
+	[out, retval] ExtractListType *pVal
+    );
+
+    [ propget
+    , id(145)
+    , helpstring ("A property whose value is a comma separated list of dates used in time by 'X' and 'X' by time queries.")
+    ] HRESULT DateListString (
+	[out, retval] BSTR *pVal
+    );
+    [ propput, id(145) ] HRESULT DateListString(
+	[in] BSTR newVal
+    );
+
+    [ propget
+    , id(146)
+    , helpstring ("A property whose value is a Vision expression used to generate a dynamic list of dates in time by 'X' and 'X' by time queries.")
+    ] HRESULT DateListExpression(
+	[out, retval] BSTR *pVal
+    );
+    [ propput, id(146) ] HRESULT DateListExpression (
+	[in] BSTR newVal
+    );
+
+    [ propget
+    , id(147)
+    , helpstring ("A property whose value is a comma separated list of entity names used in entity by 'X' and 'X' by entity queries.")
+    ] HRESULT EntityListString (
+	[out, retval] BSTR *pVal
+    );
+    [ propput, id(147) ] HRESULT EntityListString (
+	[in] BSTR newVal
+    );
+
+    [ propget
+    , id(148)
+    , helpstring ("A property whose value is a Vision expression used to generate a dynamic list of entities in entity by 'X' and 'X' by entity queries.")
+    ] HRESULT EntityListExpression (
+	[out, retval] BSTR *pVal
+    );
+    [ propput, id(148) ] HRESULT EntityListExpression (
+	[in] BSTR newVal
+    );
+};
+
+//--------------------------------
+//----  FormatSettings
+//--------------------------------
+[
+    object,
+    uuid(D2C878CB-420C-11D4-BEBF-00A0C931D9D4),
+    dual,
+    helpstring("IFormatSettings Interface"),
+    pointer_default(unique)
+]
+interface IFormatSettings : IDispatch {
+    [ propget
+    , id(1)
+    , helpstring ("A property whose value is the FormatSettings object from which this FormatSettings object inherits values it does not explicitly set.")
+    ] HRESULT ParentSettings(
+	[out, retval] IFormatSettings* *pVal
+    );
+
+    [ propget
+    , id(2)
+    , helpstring ("A property whose value is the FormatSettings object from which all FormatSettings objects ultimately inherit values they do not explicit set.")
+    ] HRESULT GlobalSettings(
+	[out, retval] IFormatSettings* *pVal
+    );
+
+    [ propget
+    , id(3)
+    , helpstring ("A property whose value is returned in place of unavailable or unrepresentable double item values.  By default, this property's value is the IEEE quiet NaN.")
+    ] HRESULT DoubleNaN(
+	[out, retval] double *pVal
+    );
+    [ propput, id(3) ] HRESULT DoubleNaN(
+	[in] double newVal
+    );
+
+    [ propget
+    , id(4)
+    , helpstring ("A boolean property whose value indicates whether DoubleNaN is set in this object.  Setting this property to False causes this FormatSettings object to inherit DoubleNaN from its parent.  To set this property to TRUE, set DoubleNaN.")
+    ] HRESULT SetsDoubleNaN (
+	[out, retval] BOOL *pVal
+    );
+    [ propput, id(4) ] HRESULT SetsDoubleNaN(
+	[in] BOOL newVal
+    );
+
+    [ propget
+    , id(5)
+    , helpstring ("A property whose value is returned in place of unavailable or unrepresentable integer item values.  By default, this property's value is the smallest possible integer (-2147483648).")
+    ] HRESULT LongNaN(
+	[out, retval] long *pVal
+    );
+    [ propput, id(5) ] HRESULT LongNaN(
+	[in] long newVal
+    );
+
+    [ propget
+    , id(6)
+    , helpstring ("A boolean property whose value indicates whether LongNaN is set in this object.  Setting this property to False causes this FormatSettings object to inherit LongNaN from its parent.  To set this property to True, set LongNaN.")
+    ] HRESULT SetsLongNaN(
+	[out, retval] BOOL *pVal
+    );
+    [ propput, id(6) ] HRESULT SetsLongNaN(
+	[in] BOOL newVal
+    );
+
+    [ propget
+    , id(7)
+    , helpstring ("A boolean property whose value indicates whether strings are returned as Unicode (True) or ANSI (False).  This property is provided to accommodate some older COM clients that do not understand Unicode.  By default, this property's value is True.")
+    ] HRESULT ReturningUnicode(
+	[out, retval] BOOL *pVal
+    );
+    [ propput, id(7) ] HRESULT ReturningUnicode(
+	[in] BOOL newVal
+    );
+
+    [ propget
+    , id(8)
+    , helpstring ("A boolean property whose value indicates whether ReturningUnicode is set in this object.  Setting this property to False causes this FormatSettings object to inherit ReturningUnicode from its parent.  To set this property to True, set ReturningUnicode.")
+    ] HRESULT SetsReturningUnicode(
+	[out, retval] BOOL *pVal
+    );
+    [ propput, id(8) ] HRESULT SetsReturningUnicode(
+	[in] BOOL newVal
+    );
+};
+
+//========================
+//++++  Type Library  ++++
+//========================
+
+[
+    uuid(F38D0B7E-36FC-11D4-BEBE-00A0C931D9D4),
+    version(1.1),
+    helpstring("VAccess 1.1 Type Library")
+] library VACCESSLib {
+    importlib("stdole32.tlb");
+    importlib("stdole2.tlb");
+
+//--------------------------------
+//----  Other Imports
+//--------------------------------
+
+//--------------------------------
+//----  Connection
+//--------------------------------
+    [	uuid(F38D0B91-36FC-11D4-BEBE-00A0C931D9D4),
+        helpstring("_IConnectionEvents Interface")
+    ] dispinterface _IConnectionEvents {
+	properties:
+	methods:
+    };
+
+    [	uuid(F38D0B90-36FC-11D4-BEBE-00A0C931D9D4),
+	helpstring ("A class of objects used to provide basic Vision expression execution and data point retrieval operations.  Any use of VAccess begins with at least one instance of this class.")
+    ] coclass Connection {
+	[default] interface IConnection;
+	[default, source] dispinterface _IConnectionEvents;
+    };
+
+//--------------------------------
+//----  _IIConnectionUseEvents
+//--------------------------------
+    [	object,
+	uuid(1F1F0B63-3B26-11D4-BEBE-00A0C931D9D4),
+	helpstring("_IConnectionUseEvents Internal Interface")
+    ] interface _IIConnectionUseEvents {
+    };
+
+//--------------------------------
+//----  DatumArray
+//--------------------------------
+    [	uuid(1F1F0B5B-3B26-11D4-BEBE-00A0C931D9D4),
+	helpstring("_IDatumArrayEvents Interface")
+    ] dispinterface _IDatumArrayEvents {
+	properties:
+	methods:
+    };
+
+    [	uuid(1F1F0B5A-3B26-11D4-BEBE-00A0C931D9D4),
+	helpstring ("A class of objects used to hold the results of matrix structured Vision queries."),
+	noncreatable
+    ] coclass DatumArray {
+	[default] interface IDatumArray;
+	[default, source] dispinterface _IDatumArrayEvents;
+    };
+
+//--------------------------------
+//----  ExtractWS
+//--------------------------------
+
+    [	object,
+	uuid(0806ba92-3bd4-11d4-bebe-00a0c931d9d4),
+	helpstring("_IExtractWSEvents Internal Interface")
+    ] interface _IIExtractWSEvents : _IIConnectionUseEvents {
+    };
+
+    [	uuid(1F1F0B5E-3B26-11D4-BEBE-00A0C931D9D4),
+	helpstring("_IExtractWSEvents Interface")
+    ] dispinterface _IExtractWSEvents {
+	interface _IIExtractWSEvents;
+    };
+
+    [	uuid(1F1F0B5D-3B26-11D4-BEBE-00A0C931D9D4),
+	helpstring ("A class of objects used to specify matrix structured Vision queries."),
+	noncreatable
+    ] coclass ExtractWS {
+	[default] interface IExtractWS;
+	[default, source] dispinterface _IExtractWSEvents;
+    };
+
+//--------------------------------
+//----  FormatSettings
+//--------------------------------
+    [	uuid(D2C878CC-420C-11D4-BEBF-00A0C931D9D4),
+	helpstring ("A class of objects used to hold the control parameters and default values used to format results returned from this library."),
+	noncreatable
+    ] coclass FormatSettings {
+	[default] interface IFormatSettings;
+    };
+};

@@ -1,0 +1,26 @@
+HKCR
+{
+	VAccess.Connection.1 = s 'Connection Class'
+	{
+		CLSID = s '{F38D0B90-36FC-11D4-BEBE-00A0C931D9D4}'
+	}
+	VAccess.Connection = s 'Connection Class'
+	{
+		CLSID = s '{F38D0B90-36FC-11D4-BEBE-00A0C931D9D4}'
+		CurVer = s 'VAccess.Connection.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {F38D0B90-36FC-11D4-BEBE-00A0C931D9D4} = s 'Connection Class'
+		{
+			ProgID = s 'VAccess.Connection.1'
+			VersionIndependentProgID = s 'VAccess.Connection'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			'TypeLib' = s '{F38D0B7E-36FC-11D4-BEBE-00A0C931D9D4}'
+		}
+	}
+}
