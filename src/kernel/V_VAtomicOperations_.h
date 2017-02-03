@@ -15,6 +15,18 @@
  *****  Templates  *****
  ***********************/
 
+/************************************************************************************************
+*****  NOTE:
+*****    In determining the RETURN value of any of the camel-cased FUNCTION names that follow,
+*****
+*****                                  WORD ORDER MATTERS
+*****
+*****    For the function named 'fetchAndIncrement', the value returned is the OLD value of the
+*****    memory location (think, fetch THEN increment, like x++).  For the 'incrementAndFetch',
+*****    the return value is the NEW value of the memory location (increment THEN fetch, ++x)
+*****
+*************************************************************************************************/
+
 namespace V {
     /*---------------------------*
      *----  No Interlocking  ----*
@@ -112,6 +124,10 @@ namespace V {
 	    return 0 == iValue;
 	}
 
+	static value_t fetchAndAdd (value_t volatile &rValue, value_t iAddend) {
+	  return OSAtomicAdd32 (iAddend, reinterpret_cast<int32_t volatile*>(&rValue)) - iAddend;
+	}
+
 	static value_t fetchAndIncrement (value_t volatile &rValue) {
 	    return OSAtomicIncrement32 (reinterpret_cast<int32_t volatile*>(&rValue)) - 1;
 	}
@@ -152,6 +168,10 @@ namespace V {
 	}
 	static bool isZero (value_t iValue) {
 	    return 0 == iValue;
+	}
+
+	static value_t fetchAndAdd (value_t volatile &rValue, value_t iAddend) {
+	  return OSAtomicAdd64 (iAddend, reinterpret_cast<OSAtomic_int64_aligned64_t volatile*>(&rValue)) - iAddend;
 	}
 
 	static value_t fetchAndIncrement (value_t volatile &rValue) {
@@ -669,6 +689,10 @@ namespace V {
 	    return 0 == iValue;
 	}
 
+	static value_t fetchAndAdd (value_t volatile &rValue, value_t iAddend) {
+	    return atomic_add_32_nv (&rValue, iAddend) - iAddend;
+	}
+
 	static value_t fetchAndIncrement (value_t volatile &rValue) {
 	    return atomic_inc_32_nv (&rValue) - 1;
 	}
@@ -711,6 +735,10 @@ namespace V {
 	}
 	static bool isZero (value_t iValue) {
 	    return 0 == iValue;
+	}
+
+	static value_t fetchAndAdd (value_t volatile &rValue, value_t iAddend) {
+	    return atomic_add_64_nv (&rValue, iAddend) - iAddend;
 	}
 
 	static value_t fetchAndIncrement (value_t volatile &rValue) {
