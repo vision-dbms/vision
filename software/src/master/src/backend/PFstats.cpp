@@ -165,7 +165,7 @@
 #ifdef VisionBuild
 // The following struct is defined in maketools/templates/auditshell.c
 PublicVarDecl struct program_description_t {
-    char const *auditFile, *auditEntry, *compilationLogin, *compilationDate, *platform, *release;
+    char const *auditFile, *auditEntry, *compilationLogin, *compilationDate, *platform, *release, *source;
 } ProgramDescription;
 
 V_DefinePrimitive (VersionInformation) {
@@ -210,6 +210,13 @@ V_DefinePrimitive (VersionInformation) {
 	pTask->loadDucWithListOrStringStore (
 	    rtLSTORE_NewStringStore (
 		pTask->codScratchPad (), ProgramDescription.release
+	    )
+	);
+	break;
+    case 6:
+	pTask->loadDucWithListOrStringStore (
+	    rtLSTORE_NewStringStore (
+		pTask->codScratchPad (), ProgramDescription.source
 	    )
 	);
 	break;

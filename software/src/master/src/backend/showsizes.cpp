@@ -47,6 +47,16 @@
 
 #define DisplaySizeLabelWidth 50
 
+#ifdef _LP64
+#define DisplaySize(x) printf ("sizeof (%*.*s) = %lu\n", DisplaySizeLabelWidth, DisplaySizeLabelWidth, #x, sizeof (x))
+#define DisplaySizes(t1,t2) printf (\
+    "sizeof (%*.*s) = %2lu %s %2lu - %lu\n",\
+    DisplaySizeLabelWidth, DisplaySizeLabelWidth, #t1,\
+    sizeof (t1),\
+    sizeof (t1) ==  sizeof (t2) - sizeof (t2::BaseClass) ? "==" : "!=",\
+    sizeof (t2), sizeof (t2::BaseClass)\
+)
+#else
 #define DisplaySize(x) printf ("sizeof (%*.*s) = %u\n", DisplaySizeLabelWidth, DisplaySizeLabelWidth, #x, sizeof (x))
 #define DisplaySizes(t1,t2) printf (\
     "sizeof (%*.*s) = %2u %s %2u - %u\n",\
@@ -55,6 +65,7 @@
     sizeof (t1) ==  sizeof (t2) - sizeof (t2::BaseClass) ? "==" : "!=",\
     sizeof (t2), sizeof (t2::BaseClass)\
 )
+#endif
 
 
 /********************************

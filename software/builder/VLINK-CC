@@ -30,6 +30,10 @@ if ( ! $?AuditShell ) then
 	set AuditShell	= $cwd/../../../../builder/templates/auditshell.c
 endif
 
+if ( ! $?AuditSource ) then
+	set AuditSource = "`sourceControlSummary`"
+endif
+
 ####  ... initialize audit parameter definition strings, ...
 set AuditFile_		= \"AUDITINFO:AuditFile:$AuditFile\"
 set AuditEntry_		= \"AUDITINFO:AuditEntry:$AuditEntry\"
@@ -37,9 +41,11 @@ set CompLogin_		= \"AUDITINFO:CompilationLogin:$LOGNAME\"
 set CompDate_		= \"AUDITINFO:CompilationDate:`date`\"
 set Platform_		= \"AUDITINFO:BuildPlatform:`uname -srp`\"
 set Release_		= \"AUDITINFO:ReleaseID:$AuditRelease\"
+set Source_		= \"AUDITINFO:Source:$AuditSource\"
 
 ####  ... determine the compiler to use, ...
 set OSType = `uname -s`
+
 switch ($OSType)
 case AIX:
     set Compiler = xlC
@@ -104,6 +110,7 @@ if ( -f /bin/hp9000s700) then
 	"-DCompilationDate_=$CompDate_"\
 	"-DPlatform_=$Platform_"\
 	"-DRelease_=$Release_"\
+	"-DSource_=$Source_"\
 	$AuditShellSource
     if ( $status != 0 ) then
         set failed = 1
@@ -131,6 +138,7 @@ else
 	"-DCompilationDate_=$CompDate_"\
 	"-DPlatform_=$Platform_"\
 	"-DRelease_=$Release_"\
+	"-DSource_=$Source_"\
 	$AuditShellSource\
 	$argv[2-]
     if ( $status != 0 ) then
