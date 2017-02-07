@@ -101,7 +101,7 @@ foreach dir ($dirs)
         if ( $?platformdir ) then
             foreach i ($platformdir/*)
 		#  If this is a 'generator' file, run it to create a make.defs file, ...
-		if ( "_$i:e" = ".gen" ) then
+		if ( "_$i:e" == "_.gen" ) then
 		    set resultFile = "$i:r"
 		    ./$i > $resultFile
 		#  ... otherwise, simply link to it:
