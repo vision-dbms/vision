@@ -100,16 +100,16 @@ foreach dir ($dirs)
 	endif
         if ( $?platformdir ) then
             foreach i ($platformdir/*)
+		set resultFile = `basename $i`
 		#  If this is a 'generator' file, run it to create a make.defs file, ...
-		if ( "_$i:e" == "_.gen" ) then
-		    set resultFile = "$i:r"
+		if ( "_$i:e" == "_gen" ) then
+		    set resultFile = "$resultFile:r"
 		    ./$i > $resultFile
 		#  ... otherwise, simply link to it:
 		else
-		    set resultFile = "$i"
 		    ln -s -f "$i"
 		endif
-		echo `basename $resultFile` >> visionBuilder.scrubFiles
+		echo "$resultFile" >> visionBuilder.scrubFiles
             end
         endif
         
