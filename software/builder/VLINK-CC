@@ -22,16 +22,16 @@ if ( ! $?AuditFile ) then
 	set AuditFile	= $cwd/AUDIT
 endif
 
+if ( ! $?AuditSource ) then
+	set AuditSource = "`sourceControlSummary`"
+endif
+
 if ( ! $?AuditRelease ) then
-	set AuditRelease = "NA"
+	set AuditRelease = "$AuditSource"
 endif
 
 if ( ! $?AuditShell ) then
 	set AuditShell	= $cwd/../../../../builder/templates/auditshell.c
-endif
-
-if ( ! $?AuditSource ) then
-	set AuditSource = "`sourceControlSummary`"
 endif
 
 ####  ... initialize audit parameter definition strings, ...
