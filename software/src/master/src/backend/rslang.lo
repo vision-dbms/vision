@@ -1,0 +1,1112 @@
+# include "stdio.h"
+#if defined(__cplusplus)
+   extern "C" {
+#endif
+#if (defined(__cplusplus) || defined(__STDC__))
+     extern int rslangreject();
+     extern int rslangwrap();
+     extern int rslanglook();
+     extern int rslangback(int *, int);
+     extern int rslanginput();
+     extern void rslangoutput(int);
+     extern void rslangunput(int);
+     extern int rslanglex();
+     extern int rslangless();
+#ifdef LEXDEBUG
+     extern void allprint();
+     extern void sprint();
+#endif
+#if defined(__cplusplus)
+   }
+#endif
+#endif	/* __cplusplus or __STDC__ */
+# define U(x) x
+# define NLSTATE rslangprevious=rslangNEWLINE
+# define BEGIN rslangbgin = rslangsvec + 1 +
+# define INITIAL 0
+# define rslangLERR rslangsvec
+# define rslangSTATE (rslangestate-rslangsvec-1)
+# define rslangOPTIM 1
+# define rslangLMAX 200
+# define output(c) putc(c,rslangout)
+# define input() (((rslangtchar=rslangsptr>rslangsbuf?U(*--rslangsptr):getc(rslangin))==10?(rslanglineno++,rslangtchar):rslangtchar)==EOF?0:rslangtchar)
+# define unput(c) {rslangtchar= (c);if(rslangtchar=='\n')rslanglineno--;*rslangsptr++=rslangtchar;}
+# define rslangmore() (rslangmorfg=1)
+# define ECHO fprintf(rslangout, "%s",rslangtext)
+# define REJECT { nstr = rslangreject(); goto rslangfussy;}
+int rslangleng;
+int rslanglenguc;
+extern unsigned char rslangtextarr[];
+# ifdef rslangCHAR_ARRAY
+extern char rslangtext[];
+# else
+extern unsigned char rslangtext[];
+# endif
+int rslangposix_point=0;
+int rslangnls16=0;
+int rslangnls_wchar=0;
+char const *rslanglocale = "C C C C C C";
+int rslangmorfg;
+extern unsigned char *rslangsptr, rslangsbuf[];
+int rslangtchar;
+FILE *rslangin = (FILE *)0, *rslangout = (FILE *)0;
+extern int rslanglineno;
+struct rslangsvf { 
+	int rslangstoff;
+	struct rslangsvf *rslangother;
+	int *rslangstops;};
+struct rslangsvf *rslangestate;
+extern struct rslangsvf rslangsvec[], *rslangbgin;
+
+/*---------------------------------------------------------------------------
+ * The following redefintion of rslangLMAX is an attempt to avoid a hard limit on
+ * the size of a token. Note that it moves the limit well beyond the range of
+ * a reasonable size for a token, but that a hard limit still exists. A
+ * programmer who attempts to compile a vision program with an identifier,
+ * say, of more than rslangLMAX characters will find a segmentation fault to be
+ * the likely result.  Short of writing our own lexical analyzer, this limit
+ * cannot be removed, only enlarged (which has a cost in memory).
+ *---------------------------------------------------------------------------
+ */
+
+#undef rslangLMAX
+#define rslangLMAX 1024
+
+/*---------------------------------------------------------------------------
+ * The redefinitions of input and unput effectively remove a hard limit on the
+ * length of an input line which is imposed by lex
+ *---------------------------------------------------------------------------
+ */
+
+#undef input
+#define input() ((rslangtchar = rsSOURCE [CurrentScanPointer++]) == '\n'\
+		 ? rslanglineno++, rslangtchar : rslangtchar)
+
+#undef unput
+#define unput(c) {\
+    int aPlaceToPutTheUnputToEndCompilerComplaints = (c);\
+    if (rsSOURCE [--CurrentScanPointer] == '\n')\
+	 rslanglineno--;\
+}
+
+
+ /*****************************************
+  *****  Character Class Definitions  *****
+  *****************************************/
+ /*******************
+  *****  Rules  *****
+  *******************/
+# define rslangNEWLINE 10
+int rslanglex(){
+   int nstr; extern int rslangprevious;
+   while((nstr = rslanglook()) >= 0)
+   switch(nstr){
+case 0:
+   if(rslangwrap()) return(0); break;
+case 1:
+			{
+	/*****  Intensional Message Qualifier  *****/
+	if (IntensionalOp)
+	{
+	    ReturnNode (_Error, TS_Error);
+	}
+	IntensionalOp = true;
+    }
+break;
+case 2:
+	{
+	/*****  Identifier  *****/
+	ReturnSelector
+	    (_Identifier,
+	     _IntensionalIdentifier,
+	     TS_Identifier,
+	     TS_IntensionalIdentifier);
+    }
+break;
+case 3:
+	{
+	/*****  Keyword  *****/
+	ReturnSelector
+	    (_Keyword,
+	     _IntensionalKeyword,
+	     TS_Keyword,
+	     TS_IntensionalKeyword);
+    }
+break;
+case 4:
+			{
+	ReturnSelector
+	    (_LeftAssignment,
+	     _IntensionalLeftAssignment,
+	     TS_LeftAssignmentOp,
+	     TS_IntensionalLeftAssignmentOp);
+    }
+break;
+case 5:
+			{
+
+	ReturnSelector
+	    (_RightAssignment,
+	     _IntensionalRightAssignment,
+	     TS_RightAssignmentOp,
+	     TS_IntensionalRightAssignmentOp);
+    }
+break;
+case 6:
+			{
+	ReturnSelector
+	    (_ConcatOp,
+	     _IntensionalConcatOp,
+	     TS_ConcatOp,
+	     TS_IntensionalConcatOp);
+    }
+break;
+case 7:
+			{
+	ReturnSelector
+	    (_LessThanP,
+	     _IntensionalLessThanP,
+	     TS_RelationalOp,
+	     TS_IntensionalRelationalOp);
+    }
+break;
+case 8:
+			{
+	ReturnSelector
+	    (_LessThanOrEqualP,
+	     _IntensionalLessThanOrEqualP,
+	     TS_RelationalOp,
+	     TS_IntensionalRelationalOp);
+    }
+break;
+case 9:
+			{
+	ReturnSelector
+	    (_GreaterThanOrEqualP,
+	     _IntensionalGreaterThanOrEqualP,
+	     TS_RelationalOp,
+	     TS_IntensionalRelationalOp);
+    }
+break;
+case 10:
+			{
+	ReturnSelector
+	    (_GreaterThanP,
+	     _IntensionalGreaterThanP,
+	     TS_RelationalOp,
+	     TS_IntensionalRelationalOp);
+    }
+break;
+case 11:
+			{
+	ReturnSelector
+	    (_EqualP,
+	     _IntensionalEqualP,
+	     TS_RelationalOp,
+	     TS_IntensionalRelationalOp);
+    }
+break;
+case 12:
+			{
+	ReturnSelector
+	    (_IdenticalP,
+	     _IntensionalIdenticalP,
+	     TS_RelationalOp,
+	     TS_IntensionalRelationalOp);
+    }
+break;
+case 13:
+			{
+	ReturnSelector
+	    (_NotEqualP,
+	     _IntensionalNotEqualP,
+	     TS_RelationalOp,
+	     TS_IntensionalRelationalOp);
+    }
+break;
+case 14:
+			{
+	ReturnSelector
+	    (_NotIdenticalP,
+	     _IntensionalNotIdenticalP,
+	     TS_RelationalOp,
+	     TS_IntensionalRelationalOp);
+    }
+break;
+case 15:
+			{
+	ReturnSelector
+	    (_Or,
+	     _IntensionalOr,
+	     TS_DisjunctiveOp,
+	     TS_IntensionalDisjunctiveOp);
+    }
+break;
+case 16:
+			{
+	ReturnSelector
+	    (_And,
+	     _IntensionalAnd,
+	     TS_ConjunctiveOp,
+	     TS_IntensionalConjunctiveOp);
+    }
+break;
+case 17:
+			{
+	ReturnSelector
+	    (_Plus,
+	     _IntensionalPlus,
+	     TS_AdditiveOp,
+	     TS_IntensionalAdditiveOp);
+    }
+break;
+case 18:
+			{
+	ReturnSelector
+	    (_Minus,
+	     _IntensionalMinus,
+	     TS_AdditiveOp,
+	     TS_IntensionalAdditiveOp);
+    }
+break;
+case 19:
+			{
+	ReturnSelector
+	    (_Times,
+	     _IntensionalTimes,
+	     TS_MultiplicativeOp,
+	     TS_IntensionalMultiplicativeOp);
+    }
+break;
+case 20:
+			{
+	ReturnSelector
+	    (_Divide,
+	     _IntensionalDivide,
+	     TS_MultiplicativeOp,
+	     TS_IntensionalMultiplicativeOp);
+    }
+break;
+case 21:
+		{
+	/*****  Integers  *****/
+	if (IntensionalOp)
+	{
+	    ReturnNode (_Error, TS_Error);
+	}
+	ReturnNode (_Integer, TS_Number);
+    }
+break;
+case 22:
+		{
+	/*****  Hexadecimal Integers  *****/
+	if (IntensionalOp)
+	{
+	    ReturnNode (_Error, TS_Error);
+	}
+	ReturnNode (_HexInteger, TS_Number);
+    }
+break;
+case 23:
+case 24:
+case 25:
+		{
+	/*****  Reals  *****/
+	if (IntensionalOp)
+	{
+	    ReturnNode (_Error, TS_Error);
+	}
+	ReturnNode (_Real, TS_Number);
+    }
+break;
+case 26:
+		{
+	/*****  Strings *****/
+	rslangleng = CurrentScanPointer - 1;
+
+	for (;;)
+	{
+	    	while (input () != '\"' &&
+		       rsSOURCE [CurrentScanPointer - 1] != '\0');
+
+		if (rsSOURCE [CurrentScanPointer - 1] == '\0') 
+		{
+		    rslangerror ("End of File encountered in String");
+		    ReturnNode (_Error, TS_Error);
+		}
+		if (rsSOURCE [CurrentScanPointer - 2] != '\\') break;
+	}
+	
+
+	rslangleng = CurrentScanPointer - rslangleng;
+	
+
+	    if (IntensionalOp)
+	    {
+		ReturnNode (_Error, TS_Error);
+	    }
+    	    ReturnNode (_String, TS_String);
+
+    }
+break;
+case 27:
+		{
+	/*****  Comments *****/
+
+        /*****
+	 *    Eat up the characters explicitly. 
+         *    Don't let lex accumulate as a token since comments 
+         *    can become too big (greater than rslangLMAX) 
+         *****/
+	rslangleng = CurrentScanPointer - 1;
+    	while (input () != '\n' &&
+		       rsSOURCE [CurrentScanPointer - 1] != '\0');
+	rslangleng = CurrentScanPointer - rslangleng;
+	
+    }
+break;
+case 28:
+		{
+	/*****  Special Symbols  *****/
+	if (IntensionalOp)
+	{
+	    ReturnNode (_Error, TS_Error);
+	}
+	return rslangtext[0];
+    }
+break;
+case 29:
+		{
+	/******  Whitespace  *****/
+    }
+break;
+case -1:
+break;
+default:
+   fprintf(rslangout,"bad switch rslanglook %d",nstr);
+} return(0); }
+/* end of rslanglex */
+
+#ifndef __cplusplus
+static void __rslang__unused() { main(); }
+#endif
+/************************** SOURCE FILE HISTORY: ************************/
+/************************************************************************
+  rslang.l 1 replace /users/mjc/system
+  860226 16:27:02 mjc create
+
+ ************************************************************************/
+/************************************************************************
+  rslang.l 2 replace /users/mjc/system
+  860226 17:27:31 mjc Added %% to terminate rules section
+
+ ************************************************************************/
+/************************************************************************
+  rslang.l 3 replace /users/mjc/system
+  860317 18:12:42 mjc Replace parser to allow release of new lex/yacc make rules
+
+ ************************************************************************/
+/************************************************************************
+  rslang.l 4 replace /users/jck/system
+  860404 17:29:22 jck Partially completed release
+
+ ************************************************************************/
+/************************************************************************
+  rslang.l 5 replace /users/jck/source
+  860418 00:03:17 jck Code Generator version release
+
+ ************************************************************************/
+/************************************************************************
+  rslang.l 6 replace /users/jck/system
+  860430 17:44:01 jck Customized string recognizer to allow arbitrarily
+long strings -- circumventing use of rslangtext buffer
+
+ ************************************************************************/
+/************************************************************************
+  rslang.l 7 replace /users/mjc/system
+  861224 11:28:43 mjc Add form feed to whitespace set, add escaped characters to selectors
+
+ ************************************************************************/
+/************************************************************************
+  rslang.l 8 replace /users/mjc/translation
+  870524 09:43:15 mjc Shortened all identifiers to <= 31 characters
+
+ ************************************************************************/
+/************************************************************************
+  rslang.l 9 replace /users/mjc/Workbench/system
+  880210 15:17:34 mjc Moved recognition of negative numbers from lexical to syntactic analysis
+
+ ************************************************************************/
+/************************************************************************
+  rslang.l 10 replace /users/jck/system
+  881011 14:10:10 jck Made the handling of large vision inputs more robust
+
+ ************************************************************************/
+int rslangvstop[] = {
+0,
+
+28,
+0,
+
+29,
+0,
+
+28,
+0,
+
+26,
+28,
+0,
+
+27,
+28,
+0,
+
+28,
+0,
+
+19,
+28,
+0,
+
+17,
+28,
+0,
+
+6,
+28,
+0,
+
+18,
+28,
+0,
+
+28,
+0,
+
+20,
+28,
+0,
+
+21,
+28,
+0,
+
+21,
+28,
+0,
+
+1,
+28,
+0,
+
+7,
+28,
+0,
+
+11,
+28,
+0,
+
+10,
+28,
+0,
+
+2,
+28,
+0,
+
+28,
+0,
+
+28,
+0,
+
+13,
+0,
+
+16,
+0,
+
+5,
+0,
+
+24,
+0,
+
+23,
+0,
+
+21,
+0,
+
+4,
+0,
+
+8,
+0,
+
+12,
+0,
+
+9,
+0,
+
+2,
+0,
+
+3,
+0,
+
+15,
+0,
+
+14,
+0,
+
+23,
+24,
+0,
+
+25,
+0,
+
+22,
+0,
+
+24,
+0,
+
+23,
+0,
+
+23,
+24,
+0,
+0};
+# define rslangTYPE unsigned char
+struct rslangwork { rslangTYPE verify, advance; } rslangcrank[] = {
+{0,0},	{0,0},	{1,3},	{0,0},	
+{0,0},	{0,0},	{0,0},	{0,0},	
+{0,0},	{0,0},	{1,4},	{1,4},	
+{0,0},	{0,0},	{4,4},	{4,4},	
+{0,0},	{4,4},	{4,4},	{38,0},	
+{0,0},	{0,0},	{0,0},	{0,0},	
+{0,0},	{0,0},	{0,0},	{0,0},	
+{0,0},	{0,0},	{0,0},	{0,0},	
+{0,0},	{0,0},	{1,5},	{1,6},	
+{1,7},	{4,4},	{0,0},	{1,8},	
+{8,25},	{0,0},	{0,0},	{1,9},	
+{1,10},	{1,11},	{1,12},	{1,13},	
+{1,14},	{1,15},	{1,16},	{1,16},	
+{1,16},	{1,16},	{1,16},	{1,16},	
+{1,16},	{1,16},	{1,16},	{1,17},	
+{18,32},	{1,18},	{1,19},	{1,20},	
+{5,24},	{12,26},	{1,21},	{19,34},	
+{20,35},	{24,40},	{1,21},	{0,0},	
+{1,21},	{0,0},	{0,0},	{0,0},	
+{18,33},	{0,0},	{2,5},	{2,6},	
+{2,7},	{0,0},	{0,0},	{2,8},	
+{0,0},	{0,0},	{27,41},	{2,9},	
+{42,49},	{2,11},	{2,12},	{2,13},	
+{2,14},	{1,22},	{2,16},	{2,16},	
+{2,16},	{2,16},	{2,16},	{2,16},	
+{2,16},	{2,16},	{2,16},	{2,17},	
+{0,0},	{2,18},	{2,19},	{2,20},	
+{13,27},	{13,27},	{13,27},	{13,27},	
+{13,27},	{13,27},	{13,27},	{13,27},	
+{13,27},	{13,27},	{27,41},	{0,0},	
+{42,49},	{0,0},	{0,0},	{0,0},	
+{15,28},	{1,23},	{15,29},	{15,29},	
+{15,29},	{15,29},	{15,29},	{15,29},	
+{15,29},	{15,29},	{15,29},	{15,29},	
+{23,39},	{2,22},	{0,0},	{0,0},	
+{0,0},	{0,0},	{0,0},	{0,0},	
+{0,0},	{0,0},	{0,0},	{15,30},	
+{16,28},	{0,0},	{16,29},	{16,29},	
+{16,29},	{16,29},	{16,29},	{16,29},	
+{16,29},	{16,29},	{16,29},	{16,29},	
+{0,0},	{0,0},	{0,0},	{0,0},	
+{0,0},	{0,0},	{0,0},	{0,0},	
+{0,0},	{2,23},	{0,0},	{16,30},	
+{0,0},	{0,0},	{0,0},	{0,0},	
+{0,0},	{0,0},	{0,0},	{15,30},	
+{0,0},	{0,0},	{0,0},	{0,0},	
+{0,0},	{0,0},	{0,0},	{21,36},	
+{21,36},	{21,36},	{21,36},	{21,36},	
+{21,36},	{21,36},	{21,36},	{21,36},	
+{21,36},	{21,37},	{15,31},	{0,0},	
+{0,0},	{0,0},	{0,0},	{16,30},	
+{21,36},	{21,36},	{21,36},	{21,36},	
+{21,36},	{21,36},	{21,36},	{21,36},	
+{21,36},	{21,36},	{21,36},	{21,36},	
+{21,36},	{21,36},	{21,36},	{21,36},	
+{21,36},	{21,36},	{21,36},	{21,36},	
+{21,36},	{21,36},	{21,36},	{21,36},	
+{21,36},	{21,36},	{0,0},	{21,38},	
+{0,0},	{0,0},	{21,36},	{0,0},	
+{21,36},	{21,36},	{21,36},	{21,36},	
+{21,36},	{21,36},	{21,36},	{21,36},	
+{21,36},	{21,36},	{21,36},	{21,36},	
+{21,36},	{21,36},	{21,36},	{21,36},	
+{21,36},	{21,36},	{21,36},	{21,36},	
+{21,36},	{21,36},	{21,36},	{21,36},	
+{21,36},	{21,36},	{22,36},	{0,0},	
+{0,0},	{0,0},	{0,0},	{0,0},	
+{0,0},	{0,0},	{22,36},	{22,0},	
+{28,42},	{28,42},	{28,42},	{28,42},	
+{28,42},	{28,42},	{28,42},	{28,42},	
+{28,42},	{28,42},	{0,0},	{0,0},	
+{0,0},	{0,0},	{0,0},	{0,0},	
+{0,0},	{30,44},	{0,0},	{30,44},	
+{0,0},	{28,43},	{30,45},	{30,45},	
+{30,45},	{30,45},	{30,45},	{30,45},	
+{30,45},	{30,45},	{30,45},	{30,45},	
+{22,36},	{41,47},	{0,0},	{41,47},	
+{0,0},	{22,36},	{41,48},	{41,48},	
+{41,48},	{41,48},	{41,48},	{41,48},	
+{41,48},	{41,48},	{41,48},	{41,48},	
+{0,0},	{0,0},	{0,0},	{0,0},	
+{0,0},	{28,43},	{22,36},	{0,0},	
+{0,0},	{0,0},	{22,36},	{0,0},	
+{22,36},	{31,46},	{31,46},	{31,46},	
+{31,46},	{31,46},	{31,46},	{31,46},	
+{31,46},	{31,46},	{31,46},	{0,0},	
+{0,0},	{0,0},	{0,0},	{0,0},	
+{0,0},	{0,0},	{31,46},	{31,46},	
+{31,46},	{31,46},	{31,46},	{31,46},	
+{43,50},	{0,0},	{43,50},	{0,0},	
+{0,0},	{43,51},	{43,51},	{43,51},	
+{43,51},	{43,51},	{43,51},	{43,51},	
+{43,51},	{43,51},	{43,51},	{44,45},	
+{44,45},	{44,45},	{44,45},	{44,45},	
+{44,45},	{44,45},	{44,45},	{44,45},	
+{44,45},	{0,0},	{31,46},	{31,46},	
+{31,46},	{31,46},	{31,46},	{31,46},	
+{47,48},	{47,48},	{47,48},	{47,48},	
+{47,48},	{47,48},	{47,48},	{47,48},	
+{47,48},	{47,48},	{49,52},	{0,0},	
+{49,52},	{0,0},	{0,0},	{49,53},	
+{49,53},	{49,53},	{49,53},	{49,53},	
+{49,53},	{49,53},	{49,53},	{49,53},	
+{49,53},	{50,51},	{50,51},	{50,51},	
+{50,51},	{50,51},	{50,51},	{50,51},	
+{50,51},	{50,51},	{50,51},	{52,53},	
+{52,53},	{52,53},	{52,53},	{52,53},	
+{52,53},	{52,53},	{52,53},	{52,53},	
+{52,53},	{0,0},	{0,0},	{0,0},	
+{0,0}};
+struct rslangsvf rslangsvec[] = {
+{0,	0,	0},
+{-1,	0,		0},	
+{-45,	rslangsvec+1,	0},	
+{0,	0,		rslangvstop+1},
+{5,	0,		rslangvstop+3},
+{3,	0,		rslangvstop+5},
+{0,	0,		rslangvstop+7},
+{0,	0,		rslangvstop+10},
+{2,	0,		rslangvstop+13},
+{0,	0,		rslangvstop+15},
+{0,	0,		rslangvstop+18},
+{0,	0,		rslangvstop+21},
+{3,	0,		rslangvstop+24},
+{60,	0,		rslangvstop+27},
+{0,	0,		rslangvstop+29},
+{78,	0,		rslangvstop+32},
+{102,	0,		rslangvstop+35},
+{0,	0,		rslangvstop+38},
+{15,	0,		rslangvstop+41},
+{6,	0,		rslangvstop+44},
+{7,	0,		rslangvstop+47},
+{139,	0,		rslangvstop+50},
+{-261,	0,		rslangvstop+53},
+{12,	0,		rslangvstop+55},
+{8,	0,		rslangvstop+57},
+{0,	0,		rslangvstop+59},
+{0,	0,		rslangvstop+61},
+{17,	rslangsvec+13,	rslangvstop+63},
+{224,	0,		rslangvstop+65},
+{0,	rslangsvec+16,	rslangvstop+67},
+{246,	0,		0},	
+{285,	0,		0},	
+{0,	0,		rslangvstop+69},
+{0,	0,		rslangvstop+71},
+{0,	0,		rslangvstop+73},
+{0,	0,		rslangvstop+75},
+{0,	rslangsvec+21,	rslangvstop+77},
+{0,	0,		rslangvstop+79},
+{-9,	rslangsvec+22,	0},	
+{0,	0,		rslangvstop+81},
+{0,	0,		rslangvstop+83},
+{262,	0,		0},	
+{19,	rslangsvec+28,	rslangvstop+85},
+{313,	0,		0},	
+{323,	0,		0},	
+{0,	rslangsvec+44,	rslangvstop+88},
+{0,	rslangsvec+31,	rslangvstop+90},
+{340,	0,		0},	
+{0,	rslangsvec+47,	rslangvstop+92},
+{355,	0,		0},	
+{365,	0,		0},	
+{0,	rslangsvec+50,	rslangvstop+94},
+{375,	0,		0},	
+{0,	rslangsvec+52,	rslangvstop+96},
+{0,	0,	0}};
+struct rslangwork *rslangtop = rslangcrank+432;
+struct rslangsvf *rslangbgin = rslangsvec+1;
+unsigned char rslangmatch[] = {
+00  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,011 ,012 ,01  ,011 ,011 ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+011 ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,01  ,01  ,'+' ,01  ,'+' ,01  ,01  ,
+'0' ,'0' ,'0' ,'0' ,'0' ,'0' ,'0' ,'0' ,
+'0' ,'0' ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,'A' ,'A' ,'A' ,'A' ,'E' ,'A' ,'G' ,
+'G' ,'G' ,'G' ,'G' ,'G' ,'G' ,'G' ,'G' ,
+'G' ,'G' ,'G' ,'G' ,'G' ,'G' ,'G' ,'G' ,
+'G' ,'G' ,'G' ,01  ,01  ,01  ,01  ,'G' ,
+01  ,'A' ,'A' ,'A' ,'A' ,'E' ,'A' ,'G' ,
+'G' ,'G' ,'G' ,'G' ,'G' ,'G' ,'G' ,'G' ,
+'G' ,'G' ,'G' ,'G' ,'G' ,'G' ,'G' ,'G' ,
+'G' ,'G' ,'G' ,01  ,01  ,01  ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+01  ,01  ,01  ,01  ,01  ,01  ,01  ,01  ,
+0};
+unsigned char rslangextra[] = {
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,
+0};
+/* @(#) A.10.11 HP C LANGUAGE TOOL (NCFORM) 950421 $      */
+int rslanglineno =1;
+# define rslangU(x) x
+# define NLSTATE rslangprevious=rslangNEWLINE
+ 
+#ifdef rslangNLS16_WCHAR
+unsigned char rslangtextuc[rslangLMAX * sizeof(wchar_t)];
+# ifdef rslang_PCT_POINT /* for %pointer */
+wchar_t rslangtextarr[rslangLMAX];
+wchar_t *rslangtext;
+# else               /* %array */
+wchar_t rslangtextarr[1];
+wchar_t rslangtext[rslangLMAX];
+# endif
+#else
+unsigned char rslangtextuc;
+# ifdef rslang_PCT_POINT /* for %pointer */
+unsigned char rslangtextarr[rslangLMAX];
+unsigned char *rslangtext;
+# else               /* %array */
+unsigned char rslangtextarr[1];
+# ifdef rslangCHAR_ARRAY
+char rslangtext[rslangLMAX];
+# else
+unsigned char rslangtext[rslangLMAX];
+# endif
+# endif
+#endif
+
+struct rslangsvf *rslanglstate [rslangLMAX], **rslanglsp, **rslangolsp;
+unsigned char rslangsbuf[rslangLMAX];
+unsigned char *rslangsptr = rslangsbuf;
+int *rslangfnd;
+extern struct rslangsvf *rslangestate;
+int rslangprevious = rslangNEWLINE;
+int rslanglook(){
+	register struct rslangsvf *rslangstate, **lsp;
+	register struct rslangwork *rslangt;
+	struct rslangsvf *rslangz;
+	int rslangch, rslangfirst;
+	struct rslangwork *rslangr;
+# ifdef LEXDEBUG
+	int debug;
+# endif
+/*	char *rslanglastch;
+ * ***** nls8 ***** */
+	unsigned char *rslanglastch;
+	/* start off machines */
+# ifdef LEXDEBUG
+	debug = 0;
+# endif
+	rslangfirst=1;
+	if (!rslangmorfg)
+#ifdef rslangNLS16_WCHAR
+		rslanglastch = rslangtextuc;
+#else
+# ifdef rslangCHAR_ARRAY
+		rslanglastch = (unsigned char *)rslangtext;
+# else
+		rslanglastch = rslangtext;
+# endif
+#endif
+	else {
+		rslangmorfg=0;
+#ifdef rslangNLS16_WCHAR
+		rslanglastch = rslangtextuc+rslanglenguc;
+#else
+# ifdef rslangCHAR_ARRAY
+		rslanglastch = (unsigned char *)rslangtext+rslangleng;
+# else
+		rslanglastch = rslangtext+rslangleng;
+# endif
+#endif
+		}
+	for(;;){
+		lsp = rslanglstate;
+		rslangestate = rslangstate = rslangbgin;
+		if (rslangprevious==rslangNEWLINE) rslangstate++;
+		for (;;){
+# ifdef LEXDEBUG
+			if(debug)fprintf(rslangout,"state %d\n",rslangstate-rslangsvec-1);
+# endif
+			rslangt = &rslangcrank[rslangstate->rslangstoff];
+			if(rslangt == rslangcrank && !rslangfirst){  /* may not be any transitions */
+				rslangz = rslangstate->rslangother;
+				if(rslangz == 0)break;
+				if(rslangz->rslangstoff == 0)break;
+				}
+			rslangch = *rslanglastch++ = (unsigned char)(input());
+			rslangfirst=0;
+		tryagain:
+# ifdef LEXDEBUG
+			if(debug){
+				fprintf(rslangout,"char ");
+				allprint(rslangch);
+				putchar('\n');
+				}
+# endif
+			rslangr = rslangt;
+			if ( rslangt > rslangcrank){
+				rslangt = rslangr + rslangch;
+				if (rslangt <= rslangtop && rslangt->verify+rslangsvec == rslangstate){
+					if(rslangt->advance+rslangsvec == rslangLERR)	/* error transitions */
+						{unput(*--rslanglastch);break;}
+					*lsp++ = rslangstate = rslangt->advance+rslangsvec;
+					goto contin;
+					}
+				}
+# ifdef rslangOPTIM
+			else if(rslangt < rslangcrank) {		/* r < rslangcrank */
+				rslangt = rslangr = rslangcrank+(rslangcrank-rslangt);
+# ifdef LEXDEBUG
+				if(debug)fprintf(rslangout,"compressed state\n");
+# endif
+				rslangt = rslangt + rslangch;
+				if(rslangt <= rslangtop && rslangt->verify+rslangsvec == rslangstate){
+					if(rslangt->advance+rslangsvec == rslangLERR)	/* error transitions */
+						{unput(*--rslanglastch);break;}
+					*lsp++ = rslangstate = rslangt->advance+rslangsvec;
+					goto contin;
+					}
+				rslangt = rslangr + rslangU(rslangmatch[rslangch]);
+# ifdef LEXDEBUG
+				if(debug){
+					fprintf(rslangout,"try fall back character ");
+					allprint(rslangU(rslangmatch[rslangch]));
+					putchar('\n');
+					}
+# endif
+				if(rslangt <= rslangtop && rslangt->verify+rslangsvec == rslangstate){
+					if(rslangt->advance+rslangsvec == rslangLERR)	/* error transition */
+						{unput(*--rslanglastch);break;}
+					*lsp++ = rslangstate = rslangt->advance+rslangsvec;
+					goto contin;
+					}
+				}
+			if ((rslangstate = rslangstate->rslangother) && (rslangt = &rslangcrank[rslangstate->rslangstoff]) != rslangcrank){
+# ifdef LEXDEBUG
+				if(debug)fprintf(rslangout,"fall back to state %d\n",rslangstate-rslangsvec-1);
+# endif
+				goto tryagain;
+				}
+# endif
+			else
+				{unput(*--rslanglastch);break;}
+		contin:
+# ifdef LEXDEBUG
+			if(debug){
+				fprintf(rslangout,"state %d char ",rslangstate-rslangsvec-1);
+				allprint(rslangch);
+				putchar('\n');
+				}
+# endif
+			;
+			}
+# ifdef LEXDEBUG
+		if(debug){
+			fprintf(rslangout,"stopped at %d with ",*(lsp-1)-rslangsvec-1);
+			allprint(rslangch);
+			putchar('\n');
+			}
+# endif
+		while (lsp-- > rslanglstate){
+			*rslanglastch-- = 0;
+			if (*lsp != 0 && (rslangfnd= (*lsp)->rslangstops) && *rslangfnd > 0){
+				rslangolsp = lsp;
+				if(rslangextra[*rslangfnd]){		/* must backup */
+					while(rslangback((*lsp)->rslangstops,-*rslangfnd) != 1 && lsp > rslanglstate){
+						lsp--;
+						unput(*rslanglastch--);
+						}
+					}
+				rslangprevious = rslangU(*rslanglastch);
+				rslanglsp = lsp;
+#ifdef rslangNLS16_WCHAR
+				rslanglenguc = rslanglastch-rslangtextuc+1;
+				rslangtextuc[rslanglenguc] = 0;
+#else
+# ifdef rslangCHAR_ARRAY
+				rslangleng = rslanglastch-(unsigned char*)rslangtext+1;
+# else
+				rslangleng = rslanglastch-rslangtext+1;
+# endif
+				rslangtext[rslangleng] = 0;
+#endif
+# ifdef LEXDEBUG
+				if(debug){
+					fprintf(rslangout,"\nmatch ");
+#ifdef rslangNLS16_WCHAR
+					sprint(rslangtextuc);
+#else
+					sprint(rslangtext);
+#endif
+					fprintf(rslangout," action %d\n",*rslangfnd);
+					}
+# endif
+				return(*rslangfnd++);
+				}
+			unput(*rslanglastch);
+			}
+#ifdef rslangNLS16_WCHAR
+		if (rslangtextuc[0] == 0  /* && feof(rslangin) */)
+#else
+		if (rslangtext[0] == 0  /* && feof(rslangin) */)
+#endif
+			{
+			rslangsptr=rslangsbuf;
+			return(0);
+			}
+#ifdef rslangNLS16_WCHAR
+		rslangprevious = rslangtextuc[0] = input();
+#else
+		rslangprevious = rslangtext[0] = (unsigned char)(input());
+#endif
+		if (rslangprevious>0) {
+			output(rslangprevious);
+#ifdef rslangNLS16
+                        if (rslangnls16) {
+			int noBytes;
+                        sec = input();
+                        third = input();
+                        fourth = input();
+#ifdef rslangNLS16_WCHAR
+                        noBytes = MultiByte(rslangtextuc[0],sec,third,fourth);
+#else 
+                        noBytes = MultiByte(rslangtext[0],sec,third,fourth);
+#endif          
+     					switch(noBytes) {
+     					case 2:
+#ifdef rslangNLS16_WCHAR
+ 						output(rslangprevious=rslangtextuc[0]=sec);
+#else
+ 						output(rslangprevious=rslangtext[0]=sec);
+#endif
+                                                 unput(fourth);
+                                                 unput(third);
+                                                 break;
+     					case 3:
+#ifdef rslangNLS16_WCHAR
+ 						output(rslangprevious=rslangtextuc[0]=sec);
+ 						output(rslangprevious=rslangtextuc[0]=third);
+#else
+ 						output(rslangprevious=rslangtext[0]=sec);
+ 						output(rslangprevious=rslangtext[0]=third);
+#endif
+                                                 unput(fourth);
+                                                 break; 
+                                         case 4:
+#ifdef rslangNLS16_WCHAR
+ 						output(rslangprevious=rslangtextuc[0]=sec);
+ 						output(rslangprevious=rslangtextuc[0]=third);
+ 						output(rslangprevious=rslangtextuc[0]=fourth);
+#else
+ 						output(rslangprevious=rslangtext[0]=sec);
+ 						output(rslangprevious=rslangtext[0]=third);
+ 						output(rslangprevious=rslangtext[0]=fourth);
+#endif
+                                                 break;                                                                                            
+					default:
+					        unput(fourth);
+					        unput(third);
+						unput(sec);
+						break;
+						}
+					}
+#endif
+                }
+#ifdef rslangNLS16_WCHAR
+		rslanglastch=rslangtextuc;
+#else
+# ifdef rslangCHAR_ARRAY
+		rslanglastch=(unsigned char*)rslangtext;
+# else
+		rslanglastch=rslangtext;
+# endif
+#endif
+# ifdef LEXDEBUG
+		if(debug)putchar('\n');
+# endif
+		}
+	}
+
+int rslangback(int *p, int m) {
+if (p==0) return(0);
+while (*p)
+	{
+	if (*p++ == m)
+		return(1);
+	}
+return(0);
+}
+	/* the following are only used in the lex library */
+int rslanginput(){
+	return(input());
+	
+	}
+
+#if (defined(__cplusplus) || defined(__STDC__))
+void rslangoutput(int c)
+#else
+rslangoutput(c)
+  int c;
+# endif
+{
+	output(c);
+}
+
+#if (defined(__cplusplus) || defined(__STDC__))
+void rslangunput(int c)
+#else
+rslangunput(c)
+   int c;
+#endif
+{
+	unput(c);
+}
