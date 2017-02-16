@@ -9,7 +9,6 @@
 #include "stdcurses.h"
 #include "keys.h"
 #include "error.h"
-#include "menu.d"
 
 #ifndef  DBMENU
 #include "buffers.d"
@@ -18,7 +17,7 @@
 #define PAGE_Elements 10
 
 typedef enum	{PAGE_Normal, 
-		 PAGE_ExitOnExec, 
+		 PAGE_ExitOnExec
 } PAGE_Status;
 
 typedef enum   {PAGE_Init, 
@@ -42,7 +41,7 @@ typedef enum   {PAGE_Init,
 		PAGE_RefreshAndNext,  
 		PAGE_Profile,  
 		PAGE_Editor, 
-		PAGE_Module, 
+		PAGE_Module
 } PAGE_Action;
 
 #define	PAGE_noType	0
@@ -50,11 +49,13 @@ typedef enum   {PAGE_Init,
 #define	PAGE_formType	2
 #define	PAGE_pageType	3
 
+typedef PAGE_Action (*PAGE_Handler)(void*,CUR_WINDOW*,PAGE_Action);
+
 typedef struct {
-    char	    *object;
+    void	    *object;
     CUR_WINDOW	    *window;
     PAGE_Action	    action;
-    PAGE_Action	    (*handler)();
+    PAGE_Handler    handler;
     unsigned int    enter;
 } PAGE_Element;
 
@@ -68,10 +69,10 @@ typedef struct {
     PAGE_HelpType   *help;
     int		    elementCount;
     PAGE_Element    *element[PAGE_Elements];
-    char	    *obj;
+    void	    *obj;
     CUR_WINDOW	    *objWin;
     int		    objType;
-    int		    (*fkeyFunc[10])();
+    void	    (*fkeyFunc[10])();
     PAGE_Status	    status;
 } PAGE;
 
@@ -103,50 +104,32 @@ typedef struct {
 #define PAGE_pagePrev(page)	    ((*page->fkeyFunc[8])())
 #define PAGE_pageQuit(page)	    ((*page->fkeyFunc[9])())
 
-#define PAGE_initScreen()\
-{\
-    CUR_nonl();\
-    CUR_cbreak();\
-    CUR_noecho();\
-    ERR_Window = CUR_newwin(1, CUR_COLS, CUR_LINES - 1, 0);\
-}\
-
-#define PAGE_endScreen()\
-{\
-    CUR_erase();\
-    CUR_touchwin(CUR_stdscr);\
-    CUR_refresh();\
-}
-
-#define PAGE_createPage(pge, n, hlp, obj, ow, ot, i)\
-{\
+#define PAGE_createPage(pge, n, hlp, obj, ow, ot, i) {\
     if (NULL == (pge = (PAGE *)malloc(sizeof(PAGE))))\
         ERR_fatal(" Malloc Error");\
     PAGE_windowCount(pge) = n;\
     PAGE_help(pge) = (PAGE_HelpType *)hlp;\
-    PAGE_obj(pge) = (char *)obj;\
+    PAGE_obj(pge) = (void *)obj;\
     PAGE_objWin(pge) = (CUR_WINDOW *)ow;\
     PAGE_objType(pge) = (int)ot;\
     for (i = 0; i < 10; i++)\
-        PAGE_fkey(pge, i) = (int (*)())NULL;\
+        PAGE_fkey(pge, i) = (void(*)())NULL;\
     PAGE_status(pge) = PAGE_Normal;\
 }
 
 
-#define PAGE_createElement(pge, n, obj, win, action, fn, enter)\
-{\
+#define PAGE_createElement(pge, n, obj, win, action, fn, enter) {\
     if (NULL == (PAGE_element(pge, n) =\
 		 (PAGE_Element *)malloc(sizeof(PAGE_Element))))\
         ERR_fatal(" Malloc error");\
-    PAGE_object(pge, n) = (char *)obj;\
+    PAGE_object(pge, n) = (void *)obj;\
     PAGE_window(pge, n) = (CUR_WINDOW *)win;\
     PAGE_action(pge, n) = (PAGE_Action)action;\
-    PAGE_handlerFn(pge, n) = (fn);\
+    PAGE_handlerFn(pge, n) = (PAGE_Handler)(fn);\
     PAGE_enter(pge, n) = (unsigned int)enter;\
 }
 
-#define PAGE_deletePage(pge, n)\
-{\
+#define PAGE_deletePage(pge, n) {\
     for (n = 0; n < PAGE_windowCount(pge); n++)\
         free(PAGE_element(pge, n));\
     free(pge);\

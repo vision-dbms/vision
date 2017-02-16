@@ -6,6 +6,8 @@
 #ifndef FORM_D
 #define FORM_D
 
+#include "V_VString.h"
+
 #include "menu.h"
 #include "choices.d"
 
@@ -26,8 +28,8 @@ typedef struct {
     unsigned int flags;     /** flags for input, scrolling, etc.     **/
     char type;		    /** undefined (probably 'a', 'n', 'm')   **/
     char value[FORM_ValueMaxLen+1]; /** default field value 	     **/
-    char *help;	
-    MENU *menu;		    /** pointer to menu, if type == 'm'	     **/
+    VString help;
+    MENU::Reference menu;   /** pointer to menu, if type == 'm'	     **/
     CHOICE_MenuChoice **choiceArray;
 				    /** pointer to an array of pointers
 					to a structure that decides

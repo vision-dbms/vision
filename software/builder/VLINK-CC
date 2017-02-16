@@ -81,6 +81,18 @@ endif
 
 ####  ... compile the audit module and generate an executable, ...
 set failed = 0
+
+####  Some versions of parallel make (Solaris x86) actually build all of their
+####  top level targets in parallel.  When those versions of make are run in
+####  directories with multiple top targets (e.g., backend,tools,etc.), a race
+####  results as they compete to build, link, and delete 'auditshell.o'.  Deal
+####  with that by creating a unique tempfile containing the auditshell's source
+####  and, by extension, the auditshell's compiled output.
+set AuditShellPrefix=`mktemp`
+set AuditShellSource=${AuditShellPrefix}.cpp
+set AuditShellObject=${AuditShellPrefix}.o
+cp $AuditShell $AuditShellSource
+
 if ( -f /bin/hp9000s700) then
     set debugFlag = ""
     set stripFlag = ""
@@ -92,7 +104,7 @@ if ( -f /bin/hp9000s700) then
 	"-DCompilationDate_=$CompDate_"\
 	"-DPlatform_=$Platform_"\
 	"-DRelease_=$Release_"\
-	$AuditShell
+	$AuditShellSource
     if ( $status != 0 ) then
         set failed = 1
         echo ">>> Failed to compile \$AuditShell."
@@ -105,7 +117,7 @@ if ( -f /bin/hp9000s700) then
 	if ($argv[$i] == "-G") set gprofFlag = '-G'
 	@ i = $i + 1
     end
-    $Compiler $debugFlag $stripFlag $gprofFlag -o $Target auditshell.o $argv[$i-]
+    $Compiler $debugFlag $stripFlag $gprofFlag -o $Target $AuditShellObject $argv[$i-]
     if ( $status != 0 ) then
         set failed = 1
         goto cleanup
@@ -119,7 +131,7 @@ else
 	"-DCompilationDate_=$CompDate_"\
 	"-DPlatform_=$Platform_"\
 	"-DRelease_=$Release_"\
-	$AuditShell\
+	$AuditShellSource\
 	$argv[2-]
     if ( $status != 0 ) then
         set failed = 1
@@ -142,16 +154,14 @@ endif
 ####  ... delete the audit shell output file, ...
 cleanup:
 
-################
-#===  'csh' does not accept qualifiers like ':t' on environment variables.  Because there's
-#===  a very good chance that AuditShell is an envionment variable, copy its value into a
-#===  regular 'csh' variable that can be qualifed:
-################
-set AS = $AuditShell
-set AuditShellObj = ${AS:t}
-set AuditShellObj = ${AuditShellObj:r}.o
-if ( -f $AuditShellObj ) then
-	"rm" -f $AuditShellObj
+if ( -f $AuditShellObject ) then
+	"rm" -f $AuditShellObject
+endif
+if ( -f $AuditShellSource ) then
+	"rm" -f $AuditShellSource
+endif
+if ( -f $AuditShellPrefix ) then
+	"rm" -f $AuditShellPrefix
 endif
 
 ####  ... and exit.

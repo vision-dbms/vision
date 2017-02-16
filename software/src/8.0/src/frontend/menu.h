@@ -2,19 +2,66 @@
 #ifndef MENU_H
 #define MENU_H
 
-#include "stdcurses.h"
+/*****  Components  ****/
+#include "VReferenceable.h"
+#include "V_VString.h"
+
+/*****  Declarations  *****/
+#include "menu.d"
 #include "page.d"
 
-/***** Shared Definitions *****/
-#include "menu.d"
+/***** Classes and Structures *****/
+struct MENU_Choice {
+    VString label;
+    VString help;
+    char letter;	 
+    void (*handler)();
+    char active;
+};
+
+struct MENU : public VReferenceable {
+    DECLARE_CONCRETE_RTTLITE (MENU,VReferenceable);
+    
+//  Construction
+public:
+    MENU (MENU_Choice *choices, int norm, int high, int &longest, int &i, int &j);
+
+//  Destruction
+private:
+    ~MENU ();
+
+//  Access
+public:
+    size_t longest () const {
+	return m_longest;
+    }
+
+//  State
+private:
+    size_t m_longest;
+public:
+    char const *title;
+    int choiceCount;
+    int currChoice;
+    int normalAttr;
+    int hilightAttr;
+    int status;
+    int flags;
+    MENU_Choice **choice;
+};
 
 /***** Function Declarations *****/
 
-PublicFnDecl MENU *MENU_read(), *MENU_getMenu(), *MENU_getMainMenu();
+PublicFnDecl MENU *MENU_read(char const *filename, int isBuffer);
+PublicFnDecl PAGE_Action MENU_handler(
+    MENU *menu, CUR_WINDOW *menuWin, PAGE_Action action
+);
+PublicFnDecl CUR_WINDOW *MENU_makeWindow(
+    MENU *menu, int startrow, int startcol, int maxrows
+);
 
-PublicFnDecl PAGE_Action MENU_handler();
-
-PublicFnDecl CUR_WINDOW *MENU_makeWindow();
+PublicFnDecl MENU *MENU_getMenu(char const *message);
+PublicFnDecl MENU *MENU_getMainMenu();
 
 #endif
 

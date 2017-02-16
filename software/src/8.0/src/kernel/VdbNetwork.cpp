@@ -693,9 +693,20 @@ void VdbNetwork::ResolveNetworkLink () {
     FILE *pLinkStream = fopen (pLinkBuffer, "r");
 #endif
 
-    if (IsNil (pLinkStream))
+/*****  If NDF.OSDPATH doesn't exist, assume the directory in which the NDF lives, ... *****/
+    if (IsNil (pLinkStream)) {
+	char const* pLastSlash = strrchr (m_pNDFPathName, '/');
+	if (!pLastSlash)
+	    strcpy (m_pOSDPathName, "");
+	else {
+	    size_t const sDirname = static_cast<size_t>(pLastSlash - m_pNDFPathName);
+	    strncpy (m_pOSDPathName, m_pNDFPathName, sDirname);
+	    m_pOSDPathName[sDirname] = '\0';
+	}
 	return;
+    }
 
+/*****  ... otherwise, read the OSDPathName from NDF.OSDPATH as always:  *****/
     if (IsntNil (fgets (pLinkBuffer, sizeof (pLinkBuffer), pLinkStream))) {
 	char *pNewLine = strchr (pLinkBuffer, '\n');
 	if (pNewLine)

@@ -15,13 +15,32 @@
 #undef FALSE
 #endif
 
+#ifndef NCURSES_OPAQUE
+#define NCURSES_OPAQUE 0
+#endif
+
+#if !defined(sun)
+//  If we're not compiling on Solaris, just use curses:
 #include <curses.h>
+#include <term.h>
+
+#elif defined(USING_NCURSES)
+//  ... otherwise, if we have Solaris 'ncurses', use it:
+#include <ncurses/curses.h>
+#include <ncurses/term.h>
+
+#else
+//  ... else, drop back to SVR4 curses:
+#define NOMACROS
+#include <curses.h>
+#include <term.h>
+#endif
 
 #ifndef TRUE
 #define TRUE 1
 #endif
 #ifndef FALSE
-#define FALSE
+#define FALSE 0
 #endif
 
 
@@ -52,7 +71,6 @@ typedef WINDOW CUR_WINDOW;
 #define CUR_getyx(win,y,x)		getyx(win,y,x)
 #define CUR_initscr()			initscr()
 #define CUR_mvwaddch(win,y,x,ch)	mvwaddch(win,y,x,ch)
-#define CUR_mvwaddstr(win,y,x,str)	mvwaddstr(win,y,x,str)
 #define CUR_wprintw			wprintw
 #define CUR_newwin(num_lines,num_cols,beg_y,beg_x)\
 					newwin(num_lines,num_cols,beg_y,beg_x)
@@ -65,9 +83,16 @@ typedef WINDOW CUR_WINDOW;
 					subwin(win,lines,cols,beg_y,beg_x)
 #define CUR_touchwin(win)		touchwin(win)
 #define CUR_waddch(win,ch)		waddch(win,ch)
-#define CUR_waddstr(win,str)		waddstr(win,str)
 #define CUR_werase(win)			werase(win)
 #define CUR_wmove(win,y,x)		wmove(win,y,x)
+
+#ifdef sun
+#define CUR_mvwaddstr(win,y,x,str)	mvwaddstr(win,y,x,(char*)(str))
+#define CUR_waddstr(win,str)		waddstr(win,(char*)(str))
+#else
+#define CUR_mvwaddstr(win,y,x,str)	mvwaddstr(win,y,x,str)
+#define CUR_waddstr(win,str)		waddstr(win,str)
+#endif
 
 /***************************************************************/
 /* CURses.h                                                    */
@@ -217,6 +242,10 @@ typedef WINDOW CUR_WINDOW;
 #define CUR_KEY_F8	KEY_F(8)
 #define CUR_KEY_F9	KEY_F(9)
 #define CUR_KEY_F10	KEY_F(10)
+
+#if defined(sun) && !defined(USING_NCURSES)
+#define KEY_RESIZE	(KEY_MAX + 1)
+#endif
 
 #endif  /* defined(__hp9000s700)||defined(solaris_2) */
 

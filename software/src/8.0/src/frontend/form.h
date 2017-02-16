@@ -6,13 +6,16 @@
 #include "form.d"
 
 /***** Function Declarations *****/
-PublicFnDecl FORM *FORM_read();
+PublicFnDecl FORM *FORM_read(char const *filename, int isBuffer);
 
-PublicFnDecl PAGE_Action FORM_handler();
+PublicFnDecl PAGE_Action FORM_handler(
+    FORM *form, CUR_WINDOW *win, PAGE_Action action
+);
 
-PublicFnDecl int FORM_menuToForm();
+PublicFnDecl void FORM_menuToForm();
 
-PublicFnDecl int FORM_centerFormElts();
+PublicFnDecl void FORM_centerFormElts(FORM *fptr, int width);
+
 
 #endif
 

@@ -45,14 +45,14 @@
 #define PARTIAL		1
 
 typedef enum {	SPS_Normal, SPS_NA, SPS_Modified, SPS_ModifiedNA,
-		SPS_Saved, SPS_SavedNA,
+		SPS_Saved, SPS_SavedNA
 } SPS_CellStatus;
 
 typedef enum {	SPS_Variable, SPS_String, SPS_Float, SPS_Int,
-		SPS_Date, SPS_RString, SPS_CString, SPS_Unknown,
+		SPS_Date, SPS_RString, SPS_CString, SPS_Unknown
 } SPS_DataType;
 
-typedef enum { SPS_Display, SPS_Input, SPS_Locked,
+typedef enum { SPS_Display, SPS_Input, SPS_Locked
 } SPS_IOType;
 
 typedef struct {

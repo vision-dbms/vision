@@ -7,13 +7,13 @@
 #define SPR_initsize    200
 #define SPR_addsize     200
 
-typedef enum { SPR_Empty, SPR_Normal, SPR_Error, SPR_Modified, 
+typedef enum { SPR_Empty, SPR_Normal, SPR_Error, SPR_Modified
 } SPR_CellStatus;
 
-typedef enum {SPR_Norm, SPR_InitBottom, 
+typedef enum {SPR_Norm, SPR_InitBottom
 } SPR_SheetStatus;
 
-typedef enum {SPR_Item, SPR_Line, 
+typedef enum {SPR_Item, SPR_Line
 } SPR_FieldType;
 
 typedef struct {
@@ -110,7 +110,7 @@ typedef struct {
     }\
     if (SPR_fieldCount(spr) >= SPR_fieldsSize(spr))\
     {\
-        if (NULL == (ptr = realloc(spr->fields,\
+        if (NULL == (ptr = (char*)realloc(spr->fields,\
 	(SPR_fieldsSize(spr) + 10) * sizeof(SPR_Field *))))\
 	    ERR_fatal(" Error allocating space");\
 	spr->fields = (SPR_Field **)ptr;\

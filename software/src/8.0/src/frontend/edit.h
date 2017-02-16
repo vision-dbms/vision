@@ -3,13 +3,19 @@
 
 #include "buffers.h"
 
-PublicFnDecl int EDIT_main(),
-                 EDIT_initEditor(),
-                 EDIT_runInterface();
+PublicFnDecl void EDIT_reportFileMenu (PAGE *page, int doBrowse);
 
-PublicFnDecl void ED_unsetMarkers();
+PublicFnDecl void EDIT_main();
+PublicFnDecl void EDIT_initEditor();
+PublicFnDecl void EDIT_runInterface(PAGE *iPage);
+PublicFnDecl void EDIT_displayErrorMessage();
 
-PublicFnDecl int ED_subShell(), EDIT_browserIO();
+PublicFnDecl void ED_unsetMarkers(LINEBUFFER *buffer);
+
+PublicFnDecl void ED_subShell();
+PublicFnDecl void EDIT_browserIO();
+
+PublicFnDecl int printFile (char const *fname);
 
 PublicVarDecl LINEBUFFER *BrowserBuf, *BrowserInput;
 

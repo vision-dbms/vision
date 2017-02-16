@@ -15,7 +15,15 @@
 PublicVarDecl int	PAGE_ExitSystem, PAGE_ToNextEltOnExec,
 			PAGE_ExitF8PageParent;
 
-PublicFnDecl int	PAGE_runSysMenu();
+PublicFnDecl void PAGE_initScreen ();
+PublicFnDecl void PAGE_endScreen ();
+
+PublicFnDecl void PAGE_handler(PAGE *page);
+PublicFnDecl void PAGE_runSysMenu(PAGE *opage);
+PublicFnDecl void queries ();
+PublicFnDecl void MAIN_getCompany ();
+PublicFnDecl void MAIN_getUniverse ();
+
 
 #endif
 

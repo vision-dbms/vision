@@ -4,13 +4,15 @@
 /***** Shared Definitions *****/
 #include "print.d"
 
+#include "menu.h"
+
 /***** Variable Declarations *****/
 PublicVarDecl int PRINT_Lines;
 PublicVarDecl PRINTER_Command PRINT_Command;
 PublicVarDecl MENU_Choice *printerChoices;
 
 /***** Function Declarations *****/
-PublicFnDecl char *print ();
+PublicFnDecl void print (PAGE *currPage, int defaultPrinter);
 PublicFnDecl void cleanupPrinters ();
 PublicFnDecl int checkPrinters ();
 
