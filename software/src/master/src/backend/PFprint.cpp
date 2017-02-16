@@ -657,28 +657,7 @@ PrivateFnDef bool FindPeriod (char const **string) {
 	 (double)(value));\
     iOutputGenerator.advance ();\
 }
-
 
-/*
- *---------------------------------------------------------------------------
- * This macro is passed as an argument to 'DSC_Traverse' by the PrintOf
- * primitives.
- *
- *  Function:
- *	The 'DSC_Traverse' macro does its traverse calling this macro with
- *	each 'value' that it finds.  This macro formats the string specified
- *	by 'value' and stores the result.
- *
- *---------------------------------------------------------------------------
- */
-#define PrintOfHandleBlockStrings(value) {\
-    if (lastFormat != *fmtp) {\
-	ProduceFormatForString (resultFormat, *fmtp);\
-    }\
-\
-    PrintWithoutCommas (resultFormat, V_BlockString (stringStore, value));\
-    lastFormat = *fmtp++;\
-}
 
 /*
  *---------------------------------------------------------------------------
@@ -692,11 +671,11 @@ PrivateFnDef bool FindPeriod (char const **string) {
  *
  *---------------------------------------------------------------------------
  */
-#define PrintOfHandleLStoreStrings(value) {\
+#define PrintOfHandleStrings(value) {\
     if (lastFormat != *fmtp) {\
 	ProduceFormatForString (resultFormat, *fmtp);\
     }\
-    PrintWithoutCommas (resultFormat, V_LStoreString (stringStore, charCPD, value));\
+    PrintWithoutCommas (resultFormat, pStrings [value]);\
     lastFormat = *fmtp++;\
 }
 
@@ -717,7 +696,6 @@ PrivateFnDef bool FindPeriod (char const **string) {
     if (lastFormat != *fmtp) {\
 	ProduceFormatForString (resultFormat, *fmtp);\
     }\
-\
     PrintWithoutCommas (resultFormat, KS__ToString (value));\
     lastFormat = *fmtp++;\
 }
@@ -935,7 +913,6 @@ void nicePrintRealNumber (VOutputGenerator &rOutputGenerator, int iFieldWidth, i
  ***** left justifies strings.
  *****/
 V_DefinePrimitive (IntegerPrintOf) {
-    RTYPE_Type	 rtype;
     bool	 withCommas, bNice = false, bCompact = false;
     unsigned int converseMessageSelector;
     FMTType	 resultFormat;
@@ -983,17 +960,16 @@ V_DefinePrimitive (IntegerPrintOf) {
     DSC_Descriptor& rCurrent = pTask->getCurrent ();
 
     pTask->normalizeDuc ();
-    M_CPD* stringStore = pTask->ducStore ();
+    rtBLOCK_Handle::Strings pBlockStrings;
+    rtLSTORE_Handle::Strings pLStoreStrings;
 
 /*****  Do the scalar case ... *****/
     if (DucIsAScalar) {
 	rtINTUV_ElementType size = DSC_Descriptor_Scalar_Int (rCurrent);
 
-	rtype = ADescriptor.pointerRType ();
-
 	VOutputGenerator iOutputGenerator (pTask);
 
-	switch (rtype) {
+	switch (ADescriptor.pointerRType ()) {
 	case RTYPE_C_CharUV:
 	    ProduceFormatForChar (resultFormat, size);
 	    PrintWithoutCommas (resultFormat, DSC_Descriptor_Scalar_Char (ADescriptor));
@@ -1026,32 +1002,23 @@ V_DefinePrimitive (IntegerPrintOf) {
 	    break;
 
 	case RTYPE_C_Link:
-	    if (rtLSTORE_CPD_StringStore (stringStore)) {
-		M_CPD *charCPD = rtLSTORE_CPD_ContentStringsCPD (stringStore);
+	    if (pLStoreStrings.setTo (pTask->ducStore ())) {
 		ProduceFormatForString (resultFormat, size);
 		PrintWithoutCommas (
-		    resultFormat, V_LStoreString (
-			stringStore, charCPD, DSC_Descriptor_Scalar_Int (ADescriptor)
-		    )
+		    resultFormat, pLStoreStrings [DSC_Descriptor_Scalar_Int (ADescriptor)]
 		);
-		charCPD->release ();
 	    }
 	    break;
 
 	case RTYPE_C_IntUV:
-	    rtype = pTask->ducStoreRType ();
-	    if (rtype == RTYPE_C_Block) {
+	    if (pBlockStrings.setTo (pTask->ducStore ())) {
 	    /***** String Case *****/
 		ProduceFormatForString (resultFormat, size);
 		PrintWithoutCommas (
-		    resultFormat, V_BlockString (
-			stringStore, DSC_Descriptor_Scalar_Int (ADescriptor)
-		    )
+		    resultFormat, pBlockStrings [DSC_Descriptor_Scalar_Int (ADescriptor)]
 		);
 	    }
-	    else if (
-		rtype == RTYPE_C_ValueStore && stringStore->NamesTheSelectorClass ()
-	    ) {
+	    else if (pTask->ducStore ()->NamesTheSelectorClass ()) {
 	    /***** Selector Case *****/
 		ProduceFormatForString (resultFormat, size);
 		PrintWithoutCommas (
@@ -1078,29 +1045,28 @@ V_DefinePrimitive (IntegerPrintOf) {
 	    *fmtp = rtINTUV_CPD_Array (fmtuv),
 	    *fmtlp = fmtp + UV_CPD_ElementCount (fmtuv);
 
-	RTYPE_Type xStoreRType = pTask->ducStoreRType ();
-	rtype = ADescriptor.pointerRType ();
-
 	VOutputGenerator iOutputGenerator (pTask);
 
-	if (RTYPE_C_CharUV == rtype) {
-	    M_CPD *uv = DSC_Descriptor_Value (ADescriptor);
-	    rtCHARUV_ElementType
-		*uvp = rtCHARUV_CPD_Array (uv),
-		*uvl = uvp + UV_CPD_ElementCount (uv);
+	switch (ADescriptor.pointerRType ()) {
+	case RTYPE_C_CharUV: {
+		M_CPD *uv = DSC_Descriptor_Value (ADescriptor);
+		rtCHARUV_ElementType
+		    *uvp = rtCHARUV_CPD_Array (uv),
+		    *uvl = uvp + UV_CPD_ElementCount (uv);
 
-	    lastFormat = *fmtp;
-	    ProduceFormatForChar (resultFormat, *fmtp);
+		lastFormat = *fmtp;
+		ProduceFormatForChar (resultFormat, *fmtp);
 
-	    while (uvp < uvl) {
-		if (lastFormat != *fmtp) {
-		    ProduceFormatForChar (resultFormat, *fmtp);
+		while (uvp < uvl) {
+		    if (lastFormat != *fmtp) {
+			ProduceFormatForChar (resultFormat, *fmtp);
+		    }
+		    PrintWithoutCommas (resultFormat, *uvp++);
+		    lastFormat = *fmtp++;
 		}
-		PrintWithoutCommas (resultFormat, *uvp++);
-		lastFormat = *fmtp++;
 	    }
-	}
-	else if (RTYPE_C_DoubleUV == rtype) {
+	    break;
+	case RTYPE_C_DoubleUV: {
 	    M_CPD *uv = DSC_Descriptor_Value (ADescriptor);
 	    rtDOUBLEUV_ElementType
 		*uvp = rtDOUBLEUV_CPD_Array (uv),
@@ -1133,7 +1099,8 @@ V_DefinePrimitive (IntegerPrintOf) {
 		}
 	    }
 	}
-	else if (RTYPE_C_FloatUV == rtype) {
+	    break;
+	case RTYPE_C_FloatUV: {
 	    M_CPD *uv = DSC_Descriptor_Value (ADescriptor);
 	    rtFLOATUV_ElementType
 		*uvp = rtFLOATUV_CPD_Array (uv),
@@ -1165,55 +1132,56 @@ V_DefinePrimitive (IntegerPrintOf) {
 		}
 	    }
 	}
-	/*****  Either kind of string  *****/
-	else if ((RTYPE_C_IntUV == rtype && xStoreRType == RTYPE_C_Block) ||
-		 ((RTYPE_C_Link == rtype || RTYPE_C_RefUV == rtype) &&
-			(xStoreRType == RTYPE_C_ListStore) &&
-			 rtLSTORE_CPD_StringStore (stringStore)))
-	{
-	    if (rtype == RTYPE_C_IntUV) {
+	    break;
+	case RTYPE_C_Link:
+	    if (pLStoreStrings.setTo (pTask->ducStore ())) {
 		lastFormat = *fmtp;
 		ProduceFormatForString (resultFormat, *fmtp);
 
-		DSC_Traverse (ADescriptor, PrintOfHandleBlockStrings);
+#define pStrings pLStoreStrings
+		DSC_Traverse (ADescriptor, PrintOfHandleStrings);
+#undef pStrings
 	    }
-	    else {
-		M_CPD *charCPD = rtLSTORE_CPD_ContentStringsCPD (stringStore);
+	    break;
+	case RTYPE_C_IntUV:
+	    if (pBlockStrings.setTo (pTask->ducStore ())) {
+	    /*****  String Case *****/
 		lastFormat = *fmtp;
 		ProduceFormatForString (resultFormat, *fmtp);
-		DSC_Traverse (ADescriptor, PrintOfHandleLStoreStrings);
-		charCPD->release ();
+
+#define pStrings pBlockStrings
+		DSC_Traverse (ADescriptor, PrintOfHandleStrings);
+#undef pStrings
 	    }
-	}
-	else if (
-	    RTYPE_C_IntUV == rtype &&
-	    xStoreRType == RTYPE_C_ValueStore &&
-	    stringStore->NamesTheSelectorClass ()
-	) {
+	    else if (pTask->ducStore ()->NamesTheSelectorClass ()) {
 	    /***** Selector Case *****/
-	    lastFormat = *fmtp;
-	    ProduceFormatForString (resultFormat, *fmtp);
+		lastFormat = *fmtp;
+		ProduceFormatForString (resultFormat, *fmtp);
 
-	    DSC_Traverse (ADescriptor, PrintOfHandleSelectors);
-    	}
-        else if (rtype == RTYPE_C_IntUV) {
+		DSC_Traverse (ADescriptor, PrintOfHandleSelectors);
+    	    }
+	    else {
 	    /***** Integer U-Vector Case *****/
-	    M_CPD *uv = DSC_Descriptor_Value (ADescriptor);
-	    rtINTUV_ElementType
-		*uvp = rtINTUV_CPD_Array (uv),
-		*uvl = uvp + UV_CPD_ElementCount (uv);
+		M_CPD *uv = DSC_Descriptor_Value (ADescriptor);
+		rtINTUV_ElementType
+		    *uvp = rtINTUV_CPD_Array (uv),
+		    *uvl = uvp + UV_CPD_ElementCount (uv);
 
-	    lastFormat = *fmtp;
-	    ProduceFormatForInteger (resultFormat, *fmtp, withCommas);
+		lastFormat = *fmtp;
+		ProduceFormatForInteger (resultFormat, *fmtp, withCommas);
 
-	    while (uvp < uvl) {
-		if (lastFormat != *fmtp) {
-		    ProduceFormatForInteger (resultFormat, *fmtp, withCommas);
+		while (uvp < uvl) {
+		    if (lastFormat != *fmtp) {
+			ProduceFormatForInteger (resultFormat, *fmtp, withCommas);
+		    }
+		    PrintInteger (resultFormat, *uvp); uvp++;
+		    lastFormat = *fmtp++;
 		}
-		PrintInteger (resultFormat, *uvp); uvp++;
-		lastFormat = *fmtp++;
-	    }
-	} /* end integer case */
+	    } /* end integer case */
+	    break;
+	default:
+	    break;
+	}
     } /* end non scalar case */
 }
 
@@ -1224,7 +1192,6 @@ V_DefinePrimitive (DoublePrintOf) {
  ***** strings.  If the format is positive, it right justifies numbers and
  ***** left justifies strings.
  *****/
-    RTYPE_Type rtype;
     FMTType resultFormat;
 
 
@@ -1273,17 +1240,17 @@ V_DefinePrimitive (DoublePrintOf) {
     DSC_Descriptor& rCurrent = pTask->getCurrent ();
 
     pTask->normalizeDuc ();
-    M_CPD* stringStore = pTask->ducStore ();
+
+    rtBLOCK_Handle::Strings pBlockStrings;
+    rtLSTORE_Handle::Strings pLStoreStrings;
 
 /*****  Do the scalar case ... *****/
     if (DucIsAScalar) {
-	rtDOUBLEUV_ElementType
-	    size = DSC_Descriptor_Scalar_Double (rCurrent);
+	rtDOUBLEUV_ElementType size = DSC_Descriptor_Scalar_Double (rCurrent);
 
-	rtype = ADescriptor.pointerRType ();
 	VOutputGenerator iOutputGenerator (pTask);
 
-	switch (rtype) {
+	switch (ADescriptor.pointerRType ()) {
 	case RTYPE_C_CharUV:
 	    ProduceFormatForChar (resultFormat, size);
 	    PrintWithoutCommas (resultFormat, DSC_Descriptor_Scalar_Char (ADescriptor));
@@ -1316,36 +1283,23 @@ V_DefinePrimitive (DoublePrintOf) {
 	    break;
 
 	case RTYPE_C_Link:
-	    if (rtLSTORE_CPD_StringStore (stringStore)) {
-		M_CPD *charCPD = rtLSTORE_CPD_ContentStringsCPD (stringStore);
+	    if (pLStoreStrings.setTo (pTask->ducStore ())) {
 		ProduceFormatForString (resultFormat, size);
 		PrintWithoutCommas (
-		    resultFormat,
-		    V_LStoreString (
-			stringStore,
-			charCPD,
-			DSC_Descriptor_Scalar_Int (ADescriptor)
-		    )
+		    resultFormat, pLStoreStrings[DSC_Descriptor_Scalar_Int (ADescriptor)]
 		);
-		charCPD->release ();
 	    }
 	    break;
 
 	case RTYPE_C_IntUV:
-	    rtype = pTask->ducStoreRType ();
-	    if (rtype == RTYPE_C_Block) {
+	    if (pBlockStrings.setTo (pTask->ducStore ())) {
 	    /***** String Case *****/
 		ProduceFormatForString (resultFormat, size);
 		PrintWithoutCommas (
-		    resultFormat,
-		    V_BlockString (
-			stringStore, DSC_Descriptor_Scalar_Int (ADescriptor)
-		    )
+		    resultFormat, pBlockStrings[DSC_Descriptor_Scalar_Int (ADescriptor)]
 		);
 	    }
-	    else if (
-		rtype == RTYPE_C_ValueStore && stringStore->NamesTheSelectorClass ()
-	    ) {
+	    else if (pTask->ducStore ()->NamesTheSelectorClass ()) {
 	    /***** Selector Case *****/
 		ProduceFormatForString (resultFormat, size);
 		PrintWithoutCommas (
@@ -1372,29 +1326,28 @@ V_DefinePrimitive (DoublePrintOf) {
 	    *fmtp = rtDOUBLEUV_CPD_Array (fmtuv),
 	    *fmtlp = fmtp + UV_CPD_ElementCount (fmtuv);
 
-	RTYPE_Type xStoreRType = pTask->ducStoreRType ();
-	rtype = ADescriptor.pointerRType ();
-
 	VOutputGenerator iOutputGenerator (pTask);
 
-	if (RTYPE_C_CharUV == rtype) {
-	    M_CPD* uv = DSC_Descriptor_Value (ADescriptor);
-	    rtCHARUV_ElementType
-		*uvp = rtCHARUV_CPD_Array (uv),
-		*uvl = uvp + UV_CPD_ElementCount (uv);
+	switch (ADescriptor.pointerRType ()) {
+	case RTYPE_C_CharUV: {
+		M_CPD* uv = DSC_Descriptor_Value (ADescriptor);
+		rtCHARUV_ElementType
+		    *uvp = rtCHARUV_CPD_Array (uv),
+		    *uvl = uvp + UV_CPD_ElementCount (uv);
 
-	    lastFormat = *fmtp;
-	    ProduceFormatForChar (resultFormat, *fmtp);
+		lastFormat = *fmtp;
+		ProduceFormatForChar (resultFormat, *fmtp);
 
-	    while (uvp < uvl) {
-		if (lastFormat != *fmtp) {
-		    ProduceFormatForChar (resultFormat, *fmtp);
+		while (uvp < uvl) {
+		    if (lastFormat != *fmtp) {
+			ProduceFormatForChar (resultFormat, *fmtp);
+		    }
+		    PrintWithoutCommas (resultFormat, *uvp++);
+		    lastFormat = *fmtp++;
 		}
-		PrintWithoutCommas (resultFormat, *uvp++);
-		lastFormat = *fmtp++;
 	    }
-	}
-	else if (RTYPE_C_DoubleUV == rtype) {
+	    break;
+	case RTYPE_C_DoubleUV: {
 	    M_CPD* uv = DSC_Descriptor_Value (ADescriptor);
 	    rtDOUBLEUV_ElementType
 		*uvp = rtDOUBLEUV_CPD_Array (uv),
@@ -1427,7 +1380,8 @@ V_DefinePrimitive (DoublePrintOf) {
 		}
 	    }
 	}
-	else if (RTYPE_C_FloatUV == rtype) {
+	    break;
+	case RTYPE_C_FloatUV: {
 	    M_CPD* uv = DSC_Descriptor_Value (ADescriptor);
 	    rtFLOATUV_ElementType
 		*uvp = rtFLOATUV_CPD_Array (uv),
@@ -1460,54 +1414,54 @@ V_DefinePrimitive (DoublePrintOf) {
 		}
 	    }
 	}
-	/*****  Either kind of string  *****/
-	else if ((RTYPE_C_IntUV == rtype && xStoreRType == RTYPE_C_Block) ||
-		 ((RTYPE_C_Link == rtype || RTYPE_C_RefUV == rtype) &&
-			(xStoreRType == RTYPE_C_ListStore) &&
-			 rtLSTORE_CPD_StringStore (stringStore)))
-	{
-	    if (rtype == RTYPE_C_IntUV)
-	    {
+	    break;
+	case RTYPE_C_Link:
+	    if (pLStoreStrings.setTo (pTask->ducStore ())) {
+		lastFormat = *fmtp;
+		ProduceFormatForString (resultFormat, *fmtp);
+#define pStrings pLStoreStrings
+		DSC_Traverse (ADescriptor, PrintOfHandleStrings);
+#undef pStrings
+	    }
+	    break;
+	case RTYPE_C_IntUV:
+	    if (pBlockStrings.setTo (pTask->ducStore ())) {
+	    /*****  String case *****/
 		lastFormat = *fmtp;
 		ProduceFormatForString (resultFormat, *fmtp);
 
-		DSC_Traverse (ADescriptor, PrintOfHandleBlockStrings);
+#define pStrings pBlockStrings
+		DSC_Traverse (ADescriptor, PrintOfHandleStrings);
+#undef pStrings
 	    }
-	    else {
-		M_CPD *charCPD = rtLSTORE_CPD_ContentStringsCPD (stringStore);
-		lastFormat = *fmtp;
-		ProduceFormatForString (resultFormat, *fmtp);
-		DSC_Traverse (ADescriptor, PrintOfHandleLStoreStrings);
-		charCPD->release ();
-	    }
-	}
-	else if (RTYPE_C_IntUV == rtype &&
-		 xStoreRType == RTYPE_C_ValueStore &&
-		 stringStore->NamesTheSelectorClass ())
-    	{
+	    else if (pTask->ducStore ()->NamesTheSelectorClass ()) {
 	    /***** Selector Case *****/
-	    lastFormat = *fmtp;
-	    ProduceFormatForString (resultFormat, *fmtp);
-	    DSC_Traverse (ADescriptor, PrintOfHandleSelectors);
-    	}
-        else if (rtype == RTYPE_C_IntUV) {
-	    /***** Integer U-Vector Case *****/
-	    M_CPD *uv = DSC_Descriptor_Value (ADescriptor);
-	    rtINTUV_ElementType
-		*uvp = rtINTUV_CPD_Array (uv),
-		*uvl = uvp + UV_CPD_ElementCount (uv);
+		lastFormat = *fmtp;
+		ProduceFormatForString (resultFormat, *fmtp);
+		DSC_Traverse (ADescriptor, PrintOfHandleSelectors);
+    	    }
+	    else {
+		/***** Integer U-Vector Case *****/
+		M_CPD *uv = DSC_Descriptor_Value (ADescriptor);
+		rtINTUV_ElementType
+		    *uvp = rtINTUV_CPD_Array (uv),
+		    *uvl = uvp + UV_CPD_ElementCount (uv);
 
-	    lastFormat = *fmtp;
-	    ProduceFormatForInteger (resultFormat, *fmtp, withCommas);
+		lastFormat = *fmtp;
+		ProduceFormatForInteger (resultFormat, *fmtp, withCommas);
 
-	    while (uvp < uvl) {
-		if (lastFormat != *fmtp) {
-		    ProduceFormatForInteger (resultFormat, *fmtp, withCommas);
+		while (uvp < uvl) {
+		    if (lastFormat != *fmtp) {
+			ProduceFormatForInteger (resultFormat, *fmtp, withCommas);
+		    }
+		    PrintInteger (resultFormat, *uvp); uvp++;
+		    lastFormat = *fmtp++;
 		}
-		PrintInteger (resultFormat, *uvp); uvp++;
-		lastFormat = *fmtp++;
-	    }
-	} /* end integer case */
+	    } /* end integer case */
+	    break;
+	default:
+	    break;
+	}
     } /* end non scalar case */
 }
 
@@ -1518,28 +1472,23 @@ V_DefinePrimitive (DoublePrintOf) {
 
 PrivateVarDef char SprintTmpBuffer[MaxFormatFieldWidth + 1];
 
-#define SPrintRealNumber(fmtStruct, value)\
-{\
+#define SPrintRealNumber(fmtStruct, value) {\
     if (FMT_PrintWithCommas (fmtStruct))\
 	SPrintWithCommas (fmtStruct, value)\
     else\
 	SPrintWithoutCommas (fmtStruct, value)\
 }
 
-#define SPrintInteger(fmtStruct, value)\
-{\
+#define SPrintInteger(fmtStruct, value) {\
     if (FMT_PrintWithCommas (fmtStruct))\
 	SPrintWithCommas (fmtStruct, value)\
     else\
 	SPrintWithoutCommas (fmtStruct, value)\
 }
 
-#define SPrintWithoutCommas(fmtStruct, value)\
-{\
+#define SPrintWithoutCommas(fmtStruct, value) {\
     /*****  SPrint into SprintTmpBuffer because it may overflow  *****/\
-    if ((STD_sprintf (SprintTmpBuffer, FMT_String (fmtStruct), value))\
-	     > FMT_FieldWidth (fmtStruct))\
-\
+    if ((STD_sprintf (SprintTmpBuffer, FMT_String (fmtStruct), value)) > FMT_FieldWidth (fmtStruct))\
 	/*****  ... if overflow, return '*'s ...  *****/\
 	memset (sprintResultp, '*', FMT_FieldWidth (fmtStruct));\
     else\
@@ -1551,19 +1500,18 @@ PrivateVarDef char SprintTmpBuffer[MaxFormatFieldWidth + 1];
     *sprintResultp++ = '\0';\
 }
 
-#define SPrintWithCommas(fmtStruct, value)\
-{\
+#define SPrintWithCommas(fmtStruct, value) {\
 /*****\
  *  The 'UTIL_FormatNumberWithCommas' function guarantees that only\
  *  'FieldWidth' characters will be written to 'sprintResultp'.\
  *****/\
-    UTIL_FormatNumberWithCommas\
-	(sprintResultp,\
-	 FMT_MaxOutputSize (fmtStruct),\
-	 '*',\
-	 FMT_FieldSpecification (fmtStruct),\
-	 FMT_Precision (fmtStruct),\
-	 (double)(value));\
+    UTIL_FormatNumberWithCommas (\
+	sprintResultp,\
+	FMT_MaxOutputSize (fmtStruct),\
+	'*',\
+	FMT_FieldSpecification (fmtStruct),\
+	FMT_Precision (fmtStruct),\
+	(double)(value));\
     sprintResultp += FMT_FieldWidth (fmtStruct) + 1;\
 }
 
@@ -1580,40 +1528,14 @@ PrivateVarDef char SprintTmpBuffer[MaxFormatFieldWidth + 1];
  *
  *---------------------------------------------------------------------------
  */
-#define SPrintHandleBlockStrings(value) {\
+#define SPrintHandleStrings(value) {\
     if (lastFormat != *fmtp) {\
 	ProduceFormatForString (resultFormat, *fmtp);\
     }\
-\
-    SPrintWithoutCommas (resultFormat, V_BlockString (stringStore, value));\
+    SPrintWithoutCommas (resultFormat, pStrings[value]);\
     lastFormat = *fmtp++;\
 }
 
-/*
- *---------------------------------------------------------------------------
- * This macro is passed as an argument to 'DSC_Traverse' by the SPrint
- * primitives.
- *
- *  Function:
- *	The 'DSC_Traverse' macro does its traverse calling this macro with
- *	each 'value' that it finds.  This macro formats the string specified
- *	by 'value' and stores the result.
- *
- *---------------------------------------------------------------------------
- */
-#define SPrintHandleLStoreStrings(value)\
-{\
-    if (lastFormat != *fmtp)\
-    {\
-	ProduceFormatForString (resultFormat, *fmtp);\
-    }\
-    SPrintWithoutCommas (\
-	resultFormat, V_LStoreString (stringStore, charCPD, value)\
-    );\
-    lastFormat = *fmtp++;\
-}
-
-
 /*
  *---------------------------------------------------------------------------
  * This macro is passed as an argument to 'DSC_Traverse' by the SPrint
@@ -1626,18 +1548,14 @@ PrivateVarDef char SprintTmpBuffer[MaxFormatFieldWidth + 1];
  *
  *---------------------------------------------------------------------------
  */
-#define SPrintHandleSelectors(value)\
-{\
-    if (lastFormat != *fmtp)\
-    {\
+#define SPrintHandleSelectors(value) {\
+    if (lastFormat != *fmtp) {\
 	ProduceFormatForString (resultFormat, *fmtp);\
     }\
-\
     SPrintWithoutCommas (resultFormat, KS__ToString (value));\
     lastFormat = *fmtp++;\
 }
 
-
 /*---------------------------------------------------------------------------
  *  Macros to manage the resulting SPrint structures.
  *
@@ -1659,16 +1577,13 @@ PrivateVarDef char SprintTmpBuffer[MaxFormatFieldWidth + 1];
  * Macro to setup for SPrint scalar output.
  *---------------------------------------------------------------------------
  */
-#define SPrintInitializeForScalar(format)\
-{\
+#define SPrintInitializeForScalar(format) {\
     FMTType fmtStruct;\
-\
     FMT_RealizeFields (fmtStruct, format);\
     sprintScalarBuffer = (char *)UTIL_Malloc (FMT_FieldWidth (fmtStruct) + 1);\
     sprintResultp = sprintScalarBuffer;\
 }
 
-
 /*
  *---------------------------------------------------------------------------
  * Macro to setup for SPrint list output.
@@ -1692,7 +1607,6 @@ PrivateVarDef char SprintTmpBuffer[MaxFormatFieldWidth + 1];
     /*** Initialize 'sprintResultp' for later ***/\
     sprintResultp = rtCHARUV_CPD_Array (sprintResultCharUV);\
 }
-
 
 /*---------------------------------------------------------------------------
  * Macro to return the SPrint scalar result.
@@ -1723,11 +1637,8 @@ PrivateVarDef char SprintTmpBuffer[MaxFormatFieldWidth + 1];
  ***** strings.  If the format is positive, it right justifies numbers and
  ***** left justifies strings.
  *****/
-V_DefinePrimitive (IntegerSPrint)
-{
+V_DefinePrimitive (IntegerSPrint) {
     M_CPD *sprintResultCharUV;
-    RTYPE_Type
-	rtype;
     int
 	withCommas,
 	converseMessageSelector;
@@ -1768,16 +1679,17 @@ V_DefinePrimitive (IntegerSPrint)
     DSC_Descriptor& rCurrent = pTask->getCurrent ();
 
     pTask->normalizeDuc ();
-    M_CPD* stringStore = pTask->ducStore ();
+
+    rtBLOCK_Handle::Strings pBlockStrings;
+    rtLSTORE_Handle::Strings pLStoreStrings;
 
 /*****  Do the scalar case ... *****/
     if (DucIsAScalar) {
 	rtINTUV_ElementType size = DSC_Descriptor_Scalar_Int (rCurrent);
 
 	SPrintInitializeForScalar (size);
-	rtype = ADescriptor.pointerRType ();
 
-	switch (rtype) {
+	switch (ADescriptor.pointerRType ()) {
 	case RTYPE_C_CharUV:
 	    ProduceFormatForChar (resultFormat, size);
 	    SPrintWithoutCommas (resultFormat, DSC_Descriptor_Scalar_Char (ADescriptor));
@@ -1794,32 +1706,23 @@ V_DefinePrimitive (IntegerSPrint)
 	    break;
 
 	case RTYPE_C_Link:
-	    if (rtLSTORE_CPD_StringStore (stringStore)) {
-		M_CPD *charCPD = rtLSTORE_CPD_ContentStringsCPD (stringStore);
+	    if (pLStoreStrings.setTo (pTask->ducStore ())) {
 		ProduceFormatForString (resultFormat, size);
 		SPrintWithoutCommas (
-		    resultFormat, V_LStoreString (
-			stringStore, charCPD, DSC_Descriptor_Scalar_Int (ADescriptor)
-		    )
+		    resultFormat, pLStoreStrings[DSC_Descriptor_Scalar_Int (ADescriptor)]
 		);
-		charCPD->release ();
 	    }
 	    break;
 
 	case RTYPE_C_IntUV:
-	    rtype = pTask->ducStoreRType ();
-	    if (rtype == RTYPE_C_Block) {
+	    if (pBlockStrings.setTo (pTask->ducStore ())) {
 	    /***** String Case *****/
 		ProduceFormatForString (resultFormat, size);
 		SPrintWithoutCommas (
-		    resultFormat, V_BlockString (
-			stringStore, DSC_Descriptor_Scalar_Int (ADescriptor)
-		    )
+		    resultFormat, pBlockStrings [DSC_Descriptor_Scalar_Int (ADescriptor)]
 		);
 	    }
-	    else if (
-		rtype == RTYPE_C_ValueStore && stringStore->NamesTheSelectorClass ()
-	    ) {
+	    else if (pTask->ducStore ()->NamesTheSelectorClass ()) {
 	    /***** Selector Case *****/
 		ProduceFormatForString (resultFormat, size);
 		SPrintWithoutCommas (
@@ -1848,120 +1751,117 @@ V_DefinePrimitive (IntegerSPrint)
 	    *fmtp = rtINTUV_CPD_Array (fmtuv),
 	    *fmtlp = fmtp + UV_CPD_ElementCount (fmtuv);
 
-	RTYPE_Type xStoreRType = pTask->ducStoreRType ();
-	rtype = ADescriptor.pointerRType ();
-
 	SPrintInitializeForList ();
 	fmtp = rtINTUV_CPD_Array (fmtuv); /* reset fmtp */
 
-	if (RTYPE_C_CharUV == rtype) {
-	    M_CPD *uv = DSC_Descriptor_Value (ADescriptor);
-	    rtCHARUV_ElementType
-		*uvp = rtCHARUV_CPD_Array (uv),
-		*uvl = uvp + UV_CPD_ElementCount (uv);
+	switch (ADescriptor.pointerRType ()) {
+	case RTYPE_C_CharUV: {
+		M_CPD *uv = DSC_Descriptor_Value (ADescriptor);
+		rtCHARUV_ElementType
+		    *uvp = rtCHARUV_CPD_Array (uv),
+		    *uvl = uvp + UV_CPD_ElementCount (uv);
 
-	    lastFormat = *fmtp;
-	    ProduceFormatForChar (resultFormat, *fmtp);
+		lastFormat = *fmtp;
+		ProduceFormatForChar (resultFormat, *fmtp);
 
-	    while (uvp < uvl) {
-		if (lastFormat != *fmtp) {
-		    ProduceFormatForChar (resultFormat, *fmtp);
+		while (uvp < uvl) {
+		    if (lastFormat != *fmtp) {
+			ProduceFormatForChar (resultFormat, *fmtp);
+		    }
+		    SPrintWithoutCommas (resultFormat, *uvp++);
+		    lastFormat = *fmtp++;
 		}
-		SPrintWithoutCommas (resultFormat, *uvp++);
-		lastFormat = *fmtp++;
 	    }
-	}
-	else if (RTYPE_C_DoubleUV == rtype) {
-	    M_CPD *uv = DSC_Descriptor_Value (ADescriptor);
-	    rtDOUBLEUV_ElementType
-		*uvp = rtDOUBLEUV_CPD_Array (uv),
-		*uvl = uvp + UV_CPD_ElementCount (uv);
+	    break;
+	case RTYPE_C_DoubleUV: {
+		M_CPD *uv = DSC_Descriptor_Value (ADescriptor);
+		rtDOUBLEUV_ElementType
+		    *uvp = rtDOUBLEUV_CPD_Array (uv),
+		    *uvl = uvp + UV_CPD_ElementCount (uv);
 
-	    lastFormat = *fmtp;
-	    ProduceIntegerFormatForDouble
-		(resultFormat, *fmtp, withCommas);
+		lastFormat = *fmtp;
+		ProduceIntegerFormatForDouble
+		    (resultFormat, *fmtp, withCommas);
 
-	    while (uvp < uvl) {
-		if (lastFormat != *fmtp) {
-		    ProduceIntegerFormatForDouble
-			(resultFormat, *fmtp, withCommas);
+		while (uvp < uvl) {
+		    if (lastFormat != *fmtp) {
+			ProduceIntegerFormatForDouble
+			    (resultFormat, *fmtp, withCommas);
+		    }
+		    SPrintRealNumber (resultFormat, *uvp); uvp++;
+		    lastFormat = *fmtp++;
 		}
-		SPrintRealNumber (resultFormat, *uvp); uvp++;
-		lastFormat = *fmtp++;
 	    }
-	}
-	else if (RTYPE_C_FloatUV == rtype) {
-	    M_CPD *uv = DSC_Descriptor_Value (ADescriptor);
-	    rtFLOATUV_ElementType
-		*uvp = rtFLOATUV_CPD_Array (uv),
-		*uvl = uvp + UV_CPD_ElementCount (uv);
+	    break;
+	case RTYPE_C_FloatUV: {
+		M_CPD *uv = DSC_Descriptor_Value (ADescriptor);
+		rtFLOATUV_ElementType
+		    *uvp = rtFLOATUV_CPD_Array (uv),
+		    *uvl = uvp + UV_CPD_ElementCount (uv);
 
-	    lastFormat = *fmtp;
-	    ProduceIntegerFormatForDouble
-		(resultFormat, *fmtp, withCommas);
+		lastFormat = *fmtp;
+		ProduceIntegerFormatForDouble
+		    (resultFormat, *fmtp, withCommas);
 
-	    while (uvp < uvl)
-	    {
-		if (lastFormat != *fmtp)
-		{
-		    ProduceIntegerFormatForDouble
-			(resultFormat, *fmtp, withCommas);
+		while (uvp < uvl) {
+		    if (lastFormat != *fmtp) {
+			ProduceIntegerFormatForDouble
+			    (resultFormat, *fmtp, withCommas);
+		    }
+		    SPrintRealNumber (resultFormat, *uvp); uvp++;
+		    lastFormat = *fmtp++;
 		}
-		SPrintRealNumber (resultFormat, *uvp); uvp++;
-		lastFormat = *fmtp++;
 	    }
-	}
-	/*****  Either kind of string  *****/
-	else if ((RTYPE_C_IntUV == rtype && xStoreRType == RTYPE_C_Block) ||
-		 ((RTYPE_C_Link == rtype || RTYPE_C_RefUV == rtype) &&
-			(xStoreRType == RTYPE_C_ListStore) &&
-			 rtLSTORE_CPD_StringStore (stringStore)))
-	{
-	    if (rtype == RTYPE_C_IntUV)
-	    {
+	    break;
+	case RTYPE_C_Link:
+	    if (pLStoreStrings.setTo (pTask->ducStore ())) {
 		lastFormat = *fmtp;
 		ProduceFormatForString (resultFormat, *fmtp);
 
-		DSC_Traverse (ADescriptor, SPrintHandleBlockStrings);
+#define pStrings pLStoreStrings
+		DSC_Traverse (ADescriptor, SPrintHandleStrings);
+#undef pStrings
 	    }
-	    else
-	    {
-		M_CPD *charCPD = rtLSTORE_CPD_ContentStringsCPD (stringStore);
+	    break;
+	case RTYPE_C_IntUV:
+	    if (pBlockStrings.setTo (pTask->ducStore ())) {
+	    /*****  String case  *****/
 		lastFormat = *fmtp;
 		ProduceFormatForString (resultFormat, *fmtp);
-		DSC_Traverse (ADescriptor, SPrintHandleLStoreStrings);
-		charCPD->release ();
+
+#define pStrings pBlockStrings
+		DSC_Traverse (ADescriptor, SPrintHandleStrings);
+#undef pStrings
 	    }
-	}
-	else if (RTYPE_C_IntUV == rtype &&
-		 xStoreRType == RTYPE_C_ValueStore &&
-		 stringStore->NamesTheSelectorClass ())
-    	{
-	    /***** Selector Case *****/
-	    lastFormat = *fmtp;
-	    ProduceFormatForString (resultFormat, *fmtp);
+	    else if (pTask->ducStore ()->NamesTheSelectorClass ()) {
+		/***** Selector Case *****/
+		lastFormat = *fmtp;
+		ProduceFormatForString (resultFormat, *fmtp);
 
-	    DSC_Traverse (ADescriptor, SPrintHandleSelectors);
-    	}
-        else if (rtype == RTYPE_C_IntUV) {
-	    /***** Integer U-Vector Case *****/
-	    M_CPD *uv = DSC_Descriptor_Value (ADescriptor);
-	    rtINTUV_ElementType
-		*uvp = rtINTUV_CPD_Array (uv),
-		*uvl = uvp + UV_CPD_ElementCount (uv);
+		DSC_Traverse (ADescriptor, SPrintHandleSelectors);
+    	    }
+	    else {
+		/***** Integer U-Vector Case *****/
+		M_CPD *uv = DSC_Descriptor_Value (ADescriptor);
+		rtINTUV_ElementType
+		    *uvp = rtINTUV_CPD_Array (uv),
+		    *uvl = uvp + UV_CPD_ElementCount (uv);
 
-	    lastFormat = *fmtp;
-	    ProduceFormatForInteger (resultFormat, *fmtp, withCommas);
+		lastFormat = *fmtp;
+		ProduceFormatForInteger (resultFormat, *fmtp, withCommas);
 
-	    while (uvp < uvl) {
-		if (lastFormat != *fmtp) {
-		    ProduceFormatForInteger (resultFormat, *fmtp, withCommas);
+		while (uvp < uvl) {
+		    if (lastFormat != *fmtp) {
+			ProduceFormatForInteger (resultFormat, *fmtp, withCommas);
+		    }
+		    SPrintInteger (resultFormat, *uvp); uvp++;
+		    lastFormat = *fmtp++;
 		}
-		SPrintInteger (resultFormat, *uvp); uvp++;
-		lastFormat = *fmtp++;
-	    }
-	} /* end integer case */
-
+	    } /* end integer case */
+	    break;
+	default:
+	    break;
+	}
 	SPrintOutputListResult;
     } /* end non scalar case */
 }
@@ -1974,8 +1874,6 @@ V_DefinePrimitive (IntegerSPrint)
  *****/
 V_DefinePrimitive (DoubleSPrint) {
     M_CPD *sprintResultCharUV;
-    RTYPE_Type
-	rtype;
     bool 
 	withCommas;
     int	
@@ -2017,19 +1915,17 @@ V_DefinePrimitive (DoubleSPrint) {
     DSC_Descriptor& rCurrent = pTask->getCurrent ();
 
     pTask->normalizeDuc ();
-    M_CPD* stringStore = pTask->ducStore ();
+
+    rtBLOCK_Handle::Strings pBlockStrings;
+    rtLSTORE_Handle::Strings pLStoreStrings;
 
 /*****  Do the scalar case ... *****/
-    if (DucIsAScalar)
-    {
-	rtDOUBLEUV_ElementType
-	    size = DSC_Descriptor_Scalar_Double (rCurrent);
+    if (DucIsAScalar) {
+	rtDOUBLEUV_ElementType size = DSC_Descriptor_Scalar_Double (rCurrent);
 
 	SPrintInitializeForScalar (size);
-	rtype = ADescriptor.pointerRType ();
 
-	switch (rtype)
-	{
+	switch (ADescriptor.pointerRType ()) {
 	case RTYPE_C_CharUV:
 	    ProduceFormatForChar (resultFormat, size);
 	    SPrintWithoutCommas (resultFormat, DSC_Descriptor_Scalar_Char (ADescriptor));
@@ -2048,43 +1944,27 @@ V_DefinePrimitive (DoubleSPrint) {
 	    break;
 
 	case RTYPE_C_Link:
-	    if (rtLSTORE_CPD_StringStore (stringStore))
-	    {
-		M_CPD *charCPD = rtLSTORE_CPD_ContentStringsCPD (stringStore);
+	    if (pLStoreStrings.setTo (pTask->ducStore ())) {
 		ProduceFormatForString (resultFormat, size);
 		SPrintWithoutCommas (
-		    resultFormat,
-		    V_LStoreString (
-			stringStore,
-			charCPD,
-			DSC_Descriptor_Scalar_Int (ADescriptor)
-		    )
+		    resultFormat, pLStoreStrings[DSC_Descriptor_Scalar_Int (ADescriptor)]
 		);
-		charCPD->release ();
 	    }
 	    break;
 
 	case RTYPE_C_IntUV:
-	    rtype = pTask->ducStoreRType ();
-	    if (rtype == RTYPE_C_Block) {
+	    if (pBlockStrings.setTo (pTask->ducStore ())) {
 	    /***** String Case *****/
 		ProduceFormatForString (resultFormat, size);
 		SPrintWithoutCommas (
-		    resultFormat,
-		    V_BlockString (
-			stringStore, DSC_Descriptor_Scalar_Int (ADescriptor)
-		    )
+		    resultFormat, pBlockStrings[DSC_Descriptor_Scalar_Int (ADescriptor)]
 		);
 	    }
-	    else if (
-		rtype == RTYPE_C_ValueStore && stringStore->NamesTheSelectorClass ()
-	    )
-	    {
+	    else if (pTask->ducStore ()->NamesTheSelectorClass ()) {
 	    /***** Selector Case *****/
 		ProduceFormatForString (resultFormat, size);
 		SPrintWithoutCommas (
-		    resultFormat,
-		    KS__ToString (DSC_Descriptor_Scalar_Int (ADescriptor))
+		    resultFormat, KS__ToString (DSC_Descriptor_Scalar_Int (ADescriptor))
 		);
 	    }
 	    else {
@@ -2111,117 +1991,116 @@ V_DefinePrimitive (DoubleSPrint) {
 	    *fmtp = rtDOUBLEUV_CPD_Array (fmtuv),
 	    *fmtlp = fmtp + UV_CPD_ElementCount (fmtuv);
 
-	RTYPE_Type xStoreRType = pTask->ducStoreRType ();
-	rtype = ADescriptor.pointerRType ();
-
 	SPrintInitializeForList ();
 	fmtp = rtDOUBLEUV_CPD_Array (fmtuv); /* reset fmtp */
 
-	if (RTYPE_C_CharUV == rtype) {
-	    M_CPD *uv = DSC_Descriptor_Value (ADescriptor);
-	    rtCHARUV_ElementType
-		*uvp = rtCHARUV_CPD_Array (uv),
-		*uvl = uvp + UV_CPD_ElementCount (uv);
+	switch (ADescriptor.pointerRType ()) {
+	case RTYPE_C_CharUV: {
+		M_CPD *uv = DSC_Descriptor_Value (ADescriptor);
+		rtCHARUV_ElementType
+		    *uvp = rtCHARUV_CPD_Array (uv),
+		    *uvl = uvp + UV_CPD_ElementCount (uv);
 
-	    lastFormat = *fmtp;
-	    ProduceFormatForChar (resultFormat, *fmtp);
+		lastFormat = *fmtp;
+		ProduceFormatForChar (resultFormat, *fmtp);
 
-	    while (uvp < uvl) {
-		if (lastFormat != *fmtp) {
-		    ProduceFormatForChar (resultFormat, *fmtp);
+		while (uvp < uvl) {
+		    if (lastFormat != *fmtp) {
+			ProduceFormatForChar (resultFormat, *fmtp);
+		    }
+		    SPrintWithoutCommas (resultFormat, *uvp++);
+		    lastFormat = *fmtp++;
 		}
-		SPrintWithoutCommas (resultFormat, *uvp++);
-		lastFormat = *fmtp++;
 	    }
-	}
-	else if (RTYPE_C_DoubleUV == rtype) {
-	    M_CPD *uv = DSC_Descriptor_Value (ADescriptor);
-	    rtDOUBLEUV_ElementType
-		*uvp = rtDOUBLEUV_CPD_Array (uv),
-		*uvl = uvp + UV_CPD_ElementCount (uv);
+	    break;
+	case RTYPE_C_DoubleUV: {
+		M_CPD *uv = DSC_Descriptor_Value (ADescriptor);
+		rtDOUBLEUV_ElementType
+		    *uvp = rtDOUBLEUV_CPD_Array (uv),
+		    *uvl = uvp + UV_CPD_ElementCount (uv);
 
-	    lastFormat = *fmtp;
-	    ProduceDoubleFormatForDouble
-		(resultFormat, *fmtp, withCommas);
+		lastFormat = *fmtp;
+		ProduceDoubleFormatForDouble (resultFormat, *fmtp, withCommas);
 
-	    while (uvp < uvl) {
-		if (lastFormat != *fmtp) {
-		    ProduceDoubleFormatForDouble
-			(resultFormat, *fmtp, withCommas);
+		while (uvp < uvl) {
+		    if (lastFormat != *fmtp) {
+			ProduceDoubleFormatForDouble
+			    (resultFormat, *fmtp, withCommas);
+		    }
+		    SPrintRealNumber (resultFormat, *uvp); uvp++;
+		    lastFormat = *fmtp++;
 		}
-		SPrintRealNumber (resultFormat, *uvp); uvp++;
-		lastFormat = *fmtp++;
 	    }
-	}
-	else if (RTYPE_C_FloatUV == rtype) {
-	    M_CPD *uv = DSC_Descriptor_Value (ADescriptor);
-	    rtFLOATUV_ElementType
-		*uvp = rtFLOATUV_CPD_Array (uv),
-		*uvl = uvp + UV_CPD_ElementCount (uv);
+	    break;
+	case RTYPE_C_FloatUV: {
+		M_CPD *uv = DSC_Descriptor_Value (ADescriptor);
+		rtFLOATUV_ElementType
+		    *uvp = rtFLOATUV_CPD_Array (uv),
+		    *uvl = uvp + UV_CPD_ElementCount (uv);
 
-	    lastFormat = *fmtp;
-	    ProduceDoubleFormatForDouble
-		(resultFormat, *fmtp, withCommas);
+		lastFormat = *fmtp;
+		ProduceDoubleFormatForDouble (resultFormat, *fmtp, withCommas);
 
-	    while (uvp < uvl) {
-		if (lastFormat != *fmtp) {
-		    ProduceDoubleFormatForDouble
-			(resultFormat, *fmtp, withCommas);
+		while (uvp < uvl) {
+		    if (lastFormat != *fmtp) {
+			ProduceDoubleFormatForDouble
+			    (resultFormat, *fmtp, withCommas);
+		    }
+		    SPrintRealNumber (resultFormat, *uvp); uvp++;
+		    lastFormat = *fmtp++;
 		}
-		SPrintRealNumber (resultFormat, *uvp); uvp++;
-		lastFormat = *fmtp++;
 	    }
-	}
-	/*****  Either kind of string  *****/
-	else if ((RTYPE_C_IntUV == rtype && xStoreRType == RTYPE_C_Block) ||
-		 ((RTYPE_C_Link == rtype || RTYPE_C_RefUV == rtype) &&
-			(xStoreRType == RTYPE_C_ListStore) &&
-			 rtLSTORE_CPD_StringStore (stringStore)))
-	{
-	    if (rtype == RTYPE_C_IntUV)
-	    {
+	    break;
+
+	case RTYPE_C_Link:
+	    if (pLStoreStrings.setTo (pTask->ducStore ())) {
 		lastFormat = *fmtp;
 		ProduceFormatForString (resultFormat, *fmtp);
 
-		DSC_Traverse (ADescriptor, SPrintHandleBlockStrings);
+#define pStrings pLStoreStrings
+		DSC_Traverse (ADescriptor, SPrintHandleStrings);
+#undef pStrings
 	    }
-	    else
-	    {
-		M_CPD *charCPD = rtLSTORE_CPD_ContentStringsCPD (stringStore);
+	    break;
+	case RTYPE_C_IntUV:
+	    if (pBlockStrings.setTo (pTask->ducStore ())) {
+	    /*****  String case *****/
 		lastFormat = *fmtp;
 		ProduceFormatForString (resultFormat, *fmtp);
-		DSC_Traverse (ADescriptor, SPrintHandleLStoreStrings);
-		charCPD->release ();
+
+#define pStrings pBlockStrings
+		DSC_Traverse (ADescriptor, SPrintHandleStrings);
+#undef pStrings
 	    }
-	}
-	else if (RTYPE_C_IntUV == rtype &&
-		 xStoreRType == RTYPE_C_ValueStore &&
-		 stringStore->NamesTheSelectorClass ())
-    	{
-	    /***** Selector Case *****/
-	    lastFormat = *fmtp;
-	    ProduceFormatForString (resultFormat, *fmtp);
+	    else if (pTask->ducStore()->NamesTheSelectorClass ()) {
+		/***** Selector Case *****/
+		lastFormat = *fmtp;
+		ProduceFormatForString (resultFormat, *fmtp);
 
-	    DSC_Traverse (ADescriptor, SPrintHandleSelectors);
-    	}
-        else if (rtype == RTYPE_C_IntUV) {
-	    /***** Integer U-Vector Case *****/
-	    M_CPD *uv = DSC_Descriptor_Value (ADescriptor);
-	    rtINTUV_ElementType
-		*uvp = rtINTUV_CPD_Array (uv),
-		*uvl = uvp + UV_CPD_ElementCount (uv);
+		DSC_Traverse (ADescriptor, SPrintHandleSelectors);
+    	    }
+	    else {
+		/***** Integer U-Vector Case *****/
+		M_CPD *uv = DSC_Descriptor_Value (ADescriptor);
+		rtINTUV_ElementType
+		    *uvp = rtINTUV_CPD_Array (uv),
+		    *uvl = uvp + UV_CPD_ElementCount (uv);
 
-	    lastFormat = *fmtp;
-	    ProduceFormatForInteger (resultFormat, *fmtp, withCommas);
+		lastFormat = *fmtp;
+		ProduceFormatForInteger (resultFormat, *fmtp, withCommas);
 
-	    while (uvp < uvl) {
-		if (lastFormat != *fmtp) {
-		    ProduceFormatForInteger (resultFormat, *fmtp, withCommas);
+		while (uvp < uvl) {
+		    if (lastFormat != *fmtp) {
+			ProduceFormatForInteger (resultFormat, *fmtp, withCommas);
+		    }
+		    SPrintInteger (resultFormat, *uvp); uvp++;
+		    lastFormat = *fmtp++;
 		}
-		SPrintInteger (resultFormat, *uvp); uvp++;
-		lastFormat = *fmtp++;
-	    }
-	} /* end integer case */
+	    } /* end integer case */
+	    break;
+	default:
+	    break;
+	}
 
 	SPrintOutputListResult;
     } /* end non scalar case */
@@ -2248,83 +2127,57 @@ V_DefinePrimitive (DoubleSPrint) {
  *
  *****/
 PrivateFnDef void PrintAAsStrings (VPrimitiveTask* pTask, int size) {
-    RTYPE_Type			rtype;
-    char			format[32];
 
-#define handleBlockStrings(value) {\
-    iOutputGenerator.printf (\
-	size == 0 ? strlen (V_BlockString (stringStore, value)) : size,\
-	format,\
-	V_BlockString (stringStore, value)\
-    );\
-    iOutputGenerator.advance ();\
-}
+#   define handleString(xString) {\
+	char const *pString = pStrings[xString];\
+	iOutputGenerator.printf (\
+	    size == 0 ? strlen (pString) : size, format, pString\
+	);\
+	iOutputGenerator.advance ();\
+    }
 
-#define handleLStoreStrings(value)\
-{\
-    iOutputGenerator.printf (\
-	size == 0 ? strlen(V_LStoreString(stringStore, charCPD, value)) : size,\
-	format,\
-	V_LStoreString (stringStore, charCPD, value)\
-    );\
-    iOutputGenerator.advance ();\
-}
-
-
+    char format[32];
     STD_sprintf (format, size == 0 ? "%%s" : "%%-%d.%ds", size, size);
-    M_CPD* stringStore = pTask->ducStore ();
-    rtype = ADescriptor.pointerRType ();
 
-    if (DucIsAScalar) {
-	if (rtype == RTYPE_C_IntUV) pTask->outputBufferPrintScalar (
-	    size == 0 ? strlen (
-		V_BlockString (
-		    stringStore, DSC_Descriptor_Scalar_Int (ADescriptor)
-		)
-	    ) : size,
-	    format,
-	    V_BlockString (
-		stringStore, DSC_Descriptor_Scalar_Int (ADescriptor)
-	    )
-	);
-	else if (
-	    rtype == RTYPE_C_Link && rtLSTORE_CPD_StringStore (stringStore)
-	)
-	{
-	    M_CPD* charCPD = rtLSTORE_CPD_ContentStringsCPD (stringStore);
-	    pTask->outputBufferPrintScalar (
-		size == 0 ? strlen (
-		    V_LStoreString (
-			stringStore,
-			charCPD,
-			DSC_Descriptor_Scalar_Int (ADescriptor)
-		    )
-		) : size,
-		format,
-		V_LStoreString (
-		    stringStore,
-		    charCPD,
-		    DSC_Descriptor_Scalar_Int (ADescriptor)
-		)
-	    );
-	    charCPD->release ();
+    switch (ADescriptor.pointerRType ()) {
+    case RTYPE_C_IntUV: {
+	    rtBLOCK_Handle::Strings pStrings;
+	    if (!pStrings.setTo (pTask->ducStore ())) {
+	    }
+	    else if (DucIsAScalar) {
+		char const *pString = pStrings[DSC_Descriptor_Scalar_Int (ADescriptor)];
+		pTask->outputBufferPrintScalar (
+		    size == 0 ? strlen (pString) : size, format, pString
+		);
+	    }
+	    else {
+		VOutputGenerator iOutputGenerator (pTask);
+		DSC_Traverse (ADescriptor, handleString);
+	    }
 	}
-    }
-    else if (rtype == RTYPE_C_IntUV)
-    {
-	VOutputGenerator iOutputGenerator (pTask);
-	DSC_Traverse (ADescriptor, handleBlockStrings);
-    }
-    else if (rtype == RTYPE_C_Link && rtLSTORE_CPD_StringStore (stringStore))
-    {
-	M_CPD* charCPD = rtLSTORE_CPD_ContentStringsCPD (stringStore);
-	VOutputGenerator iOutputGenerator (pTask);
-	DSC_Traverse (ADescriptor, handleLStoreStrings);
-	charCPD->release ();
+	break;
+
+    case RTYPE_C_Link: {
+	    rtLSTORE_Handle::Strings pStrings;
+	    if (!pStrings.setTo (pTask->ducStore ())) {
+	    }
+	    else if (DucIsAScalar) {
+		char const *pString = pStrings[DSC_Descriptor_Scalar_Int (ADescriptor)];
+		pTask->outputBufferPrintScalar (
+		    size == 0 ? strlen (pString) : size, format, pString
+		);
+	    }
+	    else  {
+		VOutputGenerator iOutputGenerator (pTask);
+		DSC_Traverse (ADescriptor, handleString);
+	    }
+	}
+	break;
+    default:
+	break;
     }
 
-#undef handleBlockStrings
-#undef handleLStoreStrings
+#undef handleString
 }
 
 
@@ -2460,8 +2313,7 @@ PrivateFnDef void PrintAAsPrimitiveFunctions (VPrimitiveTask* pTask) {
  *****  block closure indices.
  *
  *  Arguments:
- *	block			- a standard CPD for the block of the block
- *				  closure.
+ *	pBlock			- a handle for the block of the block closure.
  *	lbracket		- a character containing the left bracket to
  *				  be used in printing the block.
  *	rbracket		- a character containing the right bracket to
@@ -2472,10 +2324,11 @@ PrivateFnDef void PrintAAsPrimitiveFunctions (VPrimitiveTask* pTask) {
  *
  *****/
 PrivateFnDef void PrintAAsBlockClosureIndices (
-    VPrimitiveTask *pTask, M_CPD *block, int lbracket, int rbracket
+    VPrimitiveTask *pTask, rtBLOCK_Handle *pBlock, int lbracket, int rbracket
 ) {
+    VCPDReference pBlockCPD (0, pBlock->GetCPD ());
     VString iSource;
-    RSLANG_Decompile (iSource, block);
+    RSLANG_Decompile (iSource, pBlockCPD);
     pTask->printf (
 	iSource.length () + 2, "%c%s%c", lbracket, (char const*)iSource, rbracket
     );
@@ -2535,8 +2388,7 @@ PrivateFnDef void SPrintAAsPrimitiveFunctions (VPrimitiveTask* pTask) {
  *****  block closure indices and return the result strings in the accumulator.
  *
  *  Arguments:
- *	block			- a standard CPD for the block of the block
- *				  closure.
+ *	pBlock			- a handle for the block of the block closure.
  *	lbracket		- a string containing the left bracket to
  *				  be used in printing the block.
  *	rbracket		- a string containing the right bracket to
@@ -2547,10 +2399,11 @@ PrivateFnDef void SPrintAAsPrimitiveFunctions (VPrimitiveTask* pTask) {
  *
  *****/
 PrivateFnDef void SPrintAAsBlockClosureIndices (
-    VPrimitiveTask *pTask, M_CPD *block, char const *lbracket, char const *rbracket
+    VPrimitiveTask *pTask, rtBLOCK_Handle *pBlock, char const *lbracket, char const *rbracket
 ) {
+    VCPDReference pBlockCPD (0, pBlock->GetCPD ());
     VString iSource;
-    RSLANG_Decompile (iSource, block);
+    RSLANG_Decompile (iSource, pBlockCPD);
     pTask->loadDucWithListOrStringStore (
 	rtLSTORE_NewStringStoreWithDelm (
 	    pTask->codScratchPad (), lbracket, rbracket, iSource
@@ -2579,39 +2432,36 @@ V_DefinePrimitive (PrintPrimitive) {
 
 V_DefinePrimitive (PrintMethod) {
     pTask->loadDucWithCurrent ();
-    M_CPD* method = pTask->ducStore ();
-    M_CPD* block = rtMETHOD_CPD_BlockCPD (method);
+
+    rtBLOCK_Handle::Reference pBlock;
+    static_cast<rtMETHOD_Handle*>(pTask->ducStore ())->getBlock (pBlock);
 
 /*****  SPrint Block  *****/
     if (V_TOTSC_Primitive == XSPrintMethod) {
-        SPrintAAsBlockClosureIndices (pTask, block, "{", "}");
+        SPrintAAsBlockClosureIndices (pTask, pBlock, "{", "}");
     }
 /*****  Print Block  *****/
     else {
-        PrintAAsBlockClosureIndices (pTask, block, '{', '}');
+        PrintAAsBlockClosureIndices (pTask, pBlock, '{', '}');
         pTask->loadDucWithSelf ();
     }
-
-    block->release ();
 }
 
 
 V_DefinePrimitive (PrintClosure) {
     pTask->loadDucWithCurrent ();
 
-    rtBLOCK_Handle::Reference block; unsigned int primitive;
-    pTask->decodeClosureInDuc (block, primitive);
+    rtBLOCK_Handle::Reference pBlock; unsigned int primitive;
+    pTask->decodeClosureInDuc (pBlock, primitive);
 
-    if (block) {
-	VCPDReference pBlockCPD (0, block->GetCPD ());
-
+    if (pBlock) {
 	/*****  SPrint Block  *****/
 	if (V_TOTSC_Primitive == XSPrintClosure) {
-	    SPrintAAsBlockClosureIndices (pTask, pBlockCPD, "[", "]");
+	    SPrintAAsBlockClosureIndices (pTask, pBlock, "[", "]");
 	}
 	/*****  Print Block  *****/
 	else {
-	    PrintAAsBlockClosureIndices (pTask, pBlockCPD, '[', ']');
+	    PrintAAsBlockClosureIndices (pTask, pBlock, '[', ']');
 	    pTask->loadDucWithSelf ();
 	}
     }

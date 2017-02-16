@@ -279,15 +279,11 @@ public:
 	return UV_CPD_ElementCount (m_pValues);
     }
 
-    void getPPTReference (M_CPD *&pPTokenRef, int &xPTokenRef) const {
-	m_pValues->retain ();
-	pPTokenRef = m_pValues;
-	xPTokenRef = UV_CPx_PToken;
+    rtPTOKEN_Handle *PPT () const {
+	return static_cast<rtUVECTOR_Handle*>(m_pValues->containerHandle ())->pptHandle ();
     }
-    void getRPTReference (M_CPD *&pPTokenRef, int &xPTokenRef) const {
-	m_pValues->retain ();
-	pPTokenRef = m_pValues;
-	xPTokenRef = UV_CPx_RefPToken;
+    rtPTOKEN_Handle *RPT () const {
+	return static_cast<rtUVECTOR_Handle*>(m_pValues->containerHandle ())->rptHandle ();
     }
 
     RTYPE_Type RType () const {
@@ -307,7 +303,7 @@ public:
 
 //  Container Creation
 public:
-    M_CPD *asContainer (M_CPD *pPPT) const {
+    M_CPD *asContainer (rtPTOKEN_Handle *pPPT) const {
 	return UV_BasicCopy (m_pValues, pPPT);
     }
 
@@ -330,7 +326,7 @@ protected:
  * with another collection.  Identities are represented by a p-token.
  *
  *  Identity Field Descriptions:
- *	m_pPToken			- a CPD for the P-Token denoting this identity.
+ *	m_pPToken			- a handle for the P-Token denoting this identity.
  *---------------------------------------------------------------------------
  */
 
@@ -487,7 +483,8 @@ public:
 	m_pPToken->retain ();
     }
 
-    void construct (M_CPD *pPToken) {
+    void construct (rtPTOKEN_Handle *pPToken) {
+	pPToken->retain ();
 	m_pPToken = pPToken;
     }
 
@@ -495,28 +492,23 @@ public:
 public:
     void clear () {
 	m_pPToken->release ();
-	m_pPToken = NilOf (M_CPD*);
+	m_pPToken = 0;
     }
 
 //  Access
 public:
     unsigned int cardinality () const {
-	return rtPTOKEN_CPD_BaseElementCount (m_pPToken);
+	return m_pPToken->cardinality ();
     }
 
-    void getPTokenReference (M_CPD *&pPTokenRef, int &xPTokenRef) const {
-	m_pPToken->retain ();
-	pPTokenRef = m_pPToken;
-	xPTokenRef = -1;
+    rtPTOKEN_Handle *PPT () const {
+	return m_pPToken;
     }
-    void getPPTReference (M_CPD *&pPTokenRef, int &xPTokenRef) const {
-	getPTokenReference (pPTokenRef, xPTokenRef);
-    }
-    void getRPTReference (M_CPD *&pPTokenRef, int &xPTokenRef) const {
-	getPTokenReference (pPTokenRef, xPTokenRef);
+    rtPTOKEN_Handle *RPT () const {
+	return m_pPToken;
     }
 
-    M_CPD *PToken () const {
+    rtPTOKEN_Handle *PToken () const {
 	return m_pPToken;
     }
 
@@ -532,7 +524,7 @@ public:
 
 //  Container Creation
 public:
-    M_CPD *asContainer (M_CPD *pPPT) const {
+    M_CPD *asContainer (rtPTOKEN_Handle *pPPT) const {
 	return rtLINK_NewRefLink (pPPT, m_pPToken);
     }
 
@@ -546,8 +538,8 @@ public:
     }
 
 //  State
-protected:
-    M_CPD *m_pPToken;
+private:
+    rtPTOKEN_Handle *m_pPToken;
 };
 
 
@@ -805,7 +797,7 @@ public:
 public:
     rtLINK_CType *realizedConstructor () {
 	if (!m_pConstructor)
-	    m_pConstructor = rtLINK_ToConstructor (rtLINK_AlignLink (m_pContainer));
+	    m_pConstructor = rtLINK_ToConstructor (rtLINK_Align (m_pContainer));
 	return m_pConstructor;
     }
     M_CPD *realizedContainer () {
@@ -822,27 +814,15 @@ public:
 	);
     }
 
-    void getPPTReference (M_CPD *&pPTokenRef, int &xPTokenRef) const {
-	if (m_pConstructor) {
-	    pPTokenRef = m_pConstructor->PPT ();
-	    xPTokenRef = -1;
+    rtPTOKEN_Handle *PPT () const {
+	return m_pConstructor ? m_pConstructor->PPT () : static_cast<rtLINK_Handle*>(
+	    m_pContainer->containerHandle ()
+	)->pptHandle ();
 	}
-	else {
-	    pPTokenRef = m_pContainer;
-	    xPTokenRef = rtLINK_CPx_PosPToken;
-	}
-	pPTokenRef->retain ();
-    }
-    void getRPTReference (M_CPD *&pPTokenRef, int &xPTokenRef) const {
-	if (m_pConstructor) {
-	    pPTokenRef	= m_pConstructor->RPT ();
-	    xPTokenRef	= -1;
-	}
-	else {
-	    pPTokenRef	= m_pContainer;
-	    xPTokenRef	= rtLINK_CPx_RefPToken;
-	}
-	pPTokenRef->retain ();
+    rtPTOKEN_Handle *RPT () const {
+	return m_pConstructor ? m_pConstructor->RPT () : static_cast<rtLINK_Handle*>(
+	    m_pContainer->containerHandle ()
+	)->rptHandle ();
     }
 
     static RTYPE_Type RType () {
@@ -858,7 +838,7 @@ public:
 
 //  Container Creation
 public:
-    M_CPD *asContainer (M_CPD *pPPT) const {
+    M_CPD *asContainer (rtPTOKEN_Handle *pPPT) const {
 	return m_pConstructor
 	    ? m_pConstructor->Align ()->ToLink (pPPT, false)
 	    : rtLINK_Copy (m_pContainer, pPPT);
@@ -1359,42 +1339,38 @@ public:
 	);
     }
 
-    void getPPTReference (M_CPD *&pPTokenRef, int &xPTokenRef) const {
+    rtPTOKEN_Handle *PPT () const {
+	rtPTOKEN_Handle *pResult = 0;
 	if (m_pValues) {
-	    m_pValues->retain ();
-	    pPTokenRef = m_pValues;
-	    xPTokenRef = UV_CPx_PToken;
+	    pResult = static_cast<rtUVECTOR_Handle*>(m_pValues->containerHandle ())->pptHandle ();
 	}
 	else if (m_pRedistribution) {
-	    m_pRedistribution->retain ();
-	    pPTokenRef = m_pRedistribution;
-	    xPTokenRef = UV_CPx_RefPToken;
+	    pResult = static_cast<rtUVECTOR_Handle*>(m_pRedistribution->containerHandle ())->rptHandle ();
 	}
 	else if (m_pReordering) {
-	    m_pReordering->retain ();
-	    pPTokenRef = m_pReordering;
-	    xPTokenRef = UV_CPx_PToken;
+	    pResult = static_cast<rtUVECTOR_Handle*>(m_pReordering->containerHandle ())->pptHandle ();
 	}
-	else raiseMissingComponentException (ExceptionSource_GetPPTReference);
+	else {
+	    raiseMissingComponentException (ExceptionSource_GetPPTReference);
+	}
+	return pResult;
     }
 
-    void getRPTReference (M_CPD *&pPTokenRef, int &xPTokenRef) const {
+    rtPTOKEN_Handle *RPT () const {
+	rtPTOKEN_Handle *pResult = 0;
 	if (m_pSubset) {
-	    pPTokenRef = m_pSubset->RPT ();
-	    pPTokenRef->retain ();
-	    xPTokenRef = (-1);
+	    pResult = m_pSubset->RPT ();
 	}
 	else if (m_pValues) {
-	    m_pValues->retain ();
-	    pPTokenRef = m_pValues;
-	    xPTokenRef = UV_CPx_RefPToken;
+	    pResult = static_cast<rtUVECTOR_Handle*>(m_pValues->containerHandle ())->rptHandle ();
 	}
 	else if (m_pRedistribution) {
-	    m_pRedistribution->retain ();
-    	    pPTokenRef = m_pRedistribution;
-	    xPTokenRef = UV_CPx_PToken;
+	    pResult = static_cast<rtUVECTOR_Handle*>(m_pRedistribution->containerHandle ())->pptHandle ();
 	}
-	else raiseMissingComponentException (ExceptionSource_GetRPTReference);
+	else {
+	    raiseMissingComponentException (ExceptionSource_GetRPTReference);
+	}
+	return pResult;
     }
 
     static RTYPE_Type RType () {
@@ -1410,7 +1386,7 @@ public:
 
 //  Container Creation
 public:
-    M_CPD *asContainer (M_CPD *pPPT) {
+    M_CPD *asContainer (rtPTOKEN_Handle *pPPT) {
 	return UV_BasicCopy (realizedValues (), pPPT);
     }
 
@@ -1660,11 +1636,10 @@ protected:
  *
  *  Arguments:
  *	pointer			- the Pointer to be initialized.
- *	pToken			- a CPD for the P-Token denoting the identity.
- *	                          ASSIGNED directly into the identity.
+ *	pToken			- a handle for the P-Token denoting the identity.
  *
  *  Syntactic Context:
- *	See DSC_Pointer::constructIdentity (M_CPD *pPToken)
+ *	See DSC_Pointer::constructIdentity (rtPTOKEN_Handle *pPToken)
  *
  *****/
 
@@ -1919,7 +1894,7 @@ protected:
  *	pPPT			- the new positional ptoken (Not Assigned).
  *
  *  New Identity:
- *	void DSC_Pointer::coerce (M_CPD *pPPT)
+ *	void DSC_Pointer::coerce (rtPTOKEN_Handle *pPPT)
  *
  *****/
 
@@ -1960,11 +1935,9 @@ public:
 	M_ASD *pContainerSpace, M_CPD *&rpEnumeration, DSC_Pointer &rSource
     );
 
-    void constructCorrespondence (
-	M_CPD *pPPT, M_CPD *pRPTReference, unsigned int xRPTReference
-    );
+    void constructCorrespondence (rtPTOKEN_Handle *pPPT, Vdd::Store *pStore);
 
-    void constructIdentity (M_CPD *pPToken) {
+    void constructIdentity (rtPTOKEN_Handle *pPToken) {
 	m_iContent.as_iIdentity.construct (pPToken);
 	m_xType = DSC_PointerType_Identity;
     }
@@ -1996,157 +1969,161 @@ public:
         m_iContent.as_iScalar.constructComposition (xSubscript, pSource);
 	m_xType = DSC_PointerType_Scalar;
     }
+    void constructScalarComposition (unsigned int xSubscript, VContainerHandle *pSource) {
+        m_iContent.as_iScalar.constructComposition (xSubscript, pSource);
+	m_xType = DSC_PointerType_Scalar;
+    }
 
     void constructScalar (DSC_Scalar const &rValue) {
 	m_iContent.as_iScalar = rValue;
 	m_xType = DSC_PointerType_Scalar;
     }
-    void constructConstant (M_CPD *pPPT, DSC_Scalar const &rValue) {
+    void constructConstant (rtPTOKEN_Handle *pPPT, DSC_Scalar const &rValue) {
 	constructScalar (rValue);
 	coerce (pPPT);
     }
 
-    void constructScalar (M_CPD *pRPT) {
-	DSC_InitUndefinedScalar (m_iContent.as_iScalar, pRPT);
+    void constructScalar (rtPTOKEN_Handle *pRPT) {
+	m_iContent.as_iScalar.constructValue (pRPT);
 	m_xType = DSC_PointerType_Scalar;
     }
     void constructScalar (M_KOTE const &rKOTE) {
-	constructScalar (rKOTE.RetainedPTokenCPD ());
+	constructScalar (rKOTE.PTokenHandle ());
     }
 
-    void constructConstant (M_CPD *pPPT, M_CPD *pRPT) {
+    void constructConstant (rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT) {
 	constructScalar (pRPT);
 	coerce (pPPT);
     }
-    void constructConstant (M_CPD *pPPT, M_KOTE const &rKOTE) {
+    void constructConstant (rtPTOKEN_Handle *pPPT, M_KOTE const &rKOTE) {
 	constructScalar (rKOTE);
 	coerce (pPPT);
     }
 
-    void constructScalar (M_CPD *pRPT, char iValue) {
-	DSC_InitCharScalar (m_iContent.as_iScalar, pRPT, iValue);
+    void constructScalar (rtPTOKEN_Handle *pRPT, char iValue) {
+	m_iContent.as_iScalar.constructValue (pRPT, iValue);
 	m_xType = DSC_PointerType_Scalar;
     }
     void constructScalar (M_KOTE const &rKOTE, char iValue) {
-	constructScalar (rKOTE.RetainedPTokenCPD (), iValue);
+	constructScalar (rKOTE.PTokenHandle (), iValue);
     }
     void constructScalar (M_KOT *pKOT, char iValue) {
 	constructScalar (pKOT->TheCharacterClass, iValue);
     }
 
-    void constructConstant (M_CPD *pPPT, M_CPD *pRPT, char iValue) {
+    void constructConstant (rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT, char iValue) {
 	constructScalar (pRPT, iValue);
 	coerce (pPPT);
     }
-    void constructConstant (M_CPD *pPPT, M_KOTE const &rKOTE, char iValue) {
+    void constructConstant (rtPTOKEN_Handle *pPPT, M_KOTE const &rKOTE, char iValue) {
 	constructScalar (rKOTE, iValue);
 	coerce (pPPT);
     }
-    void constructConstant (M_CPD *pPPT, M_KOT *pKOT, char iValue) {
+    void constructConstant (rtPTOKEN_Handle *pPPT, M_KOT *pKOT, char iValue) {
 	constructConstant (pPPT, pKOT->TheCharacterClass, iValue);
     }
 
-    void constructScalar (M_CPD *pRPT, double iValue) {
-	DSC_InitDoubleScalar (m_iContent.as_iScalar, pRPT, iValue);
+    void constructScalar (rtPTOKEN_Handle *pRPT, double iValue) {
+	m_iContent.as_iScalar.constructValue (pRPT, iValue);
 	m_xType = DSC_PointerType_Scalar;
     }
     void constructScalar (M_KOTE const &rKOTE, double iValue) {
-	constructScalar (rKOTE.RetainedPTokenCPD (), iValue);
+	constructScalar (rKOTE.PTokenHandle (), iValue);
     }
     void constructScalar (M_KOT *pKOT, double iValue) {
 	constructScalar (pKOT->TheDoubleClass, iValue);
     }
 
-    void constructConstant (M_CPD *pPPT, M_CPD *pRPT, double iValue) {
+    void constructConstant (rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT, double iValue) {
 	constructScalar (pRPT, iValue);
 	coerce (pPPT);
     }
-    void constructConstant (M_CPD *pPPT, M_KOTE const &rKOTE, double iValue) {
+    void constructConstant (rtPTOKEN_Handle *pPPT, M_KOTE const &rKOTE, double iValue) {
 	constructScalar (rKOTE, iValue);
 	coerce (pPPT);
     }
-    void constructConstant (M_CPD *pPPT, M_KOT *pKOT, double iValue) {
+    void constructConstant (rtPTOKEN_Handle *pPPT, M_KOT *pKOT, double iValue) {
 	constructConstant (pPPT, pKOT->TheDoubleClass, iValue);
     }
 
-    void constructScalar (M_CPD *pRPT, float iValue) {
-	DSC_InitFloatScalar (m_iContent.as_iScalar, pRPT, iValue);
+    void constructScalar (rtPTOKEN_Handle *pRPT, float iValue) {
+	m_iContent.as_iScalar.constructValue (pRPT, iValue);
 	m_xType = DSC_PointerType_Scalar;
     }
     void constructScalar (M_KOTE const &rKOTE, float iValue) {
-	constructScalar (rKOTE.RetainedPTokenCPD (), iValue);
+	constructScalar (rKOTE.PTokenHandle (), iValue);
     }
     void constructScalar (M_KOT *pKOT, float iValue) {
 	constructScalar (pKOT->TheFloatClass, iValue);
     }
 
-    void constructConstant (M_CPD *pPPT, M_CPD *pRPT, float iValue) {
+    void constructConstant (rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT, float iValue) {
 	constructScalar (pRPT, iValue);
 	coerce (pPPT);
     }
-    void constructConstant (M_CPD *pPPT, M_KOTE const &rKOTE, float iValue) {
+    void constructConstant (rtPTOKEN_Handle *pPPT, M_KOTE const &rKOTE, float iValue) {
 	constructScalar (rKOTE, iValue);
 	coerce (pPPT);
     }
-    void constructConstant (M_CPD *pPPT, M_KOT *pKOT, float iValue) {
+    void constructConstant (rtPTOKEN_Handle *pPPT, M_KOT *pKOT, float iValue) {
 	constructConstant (pPPT, pKOT->TheFloatClass, iValue);
     }
 
-    void constructScalar (M_CPD *pRPT, int iValue) {
-	DSC_InitIntegerScalar (m_iContent.as_iScalar, pRPT, iValue);
+    void constructScalar (rtPTOKEN_Handle *pRPT, int iValue) {
+	m_iContent.as_iScalar.constructValue (pRPT, iValue);
 	m_xType = DSC_PointerType_Scalar;
     }
     void constructScalar (M_KOTE const &rKOTE, int iValue) {
-	constructScalar (rKOTE.RetainedPTokenCPD (), iValue);
+	constructScalar (rKOTE.PTokenHandle (), iValue);
     }
     void constructScalar (M_KOT *pKOT, int iValue) {
 	constructScalar (pKOT->TheIntegerClass, iValue);
     }
 
-    void constructConstant (M_CPD *pPPT, M_CPD *pRPT, int iValue) {
+    void constructConstant (rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT, int iValue) {
 	constructScalar (pRPT, iValue);
 	coerce (pPPT);
     }
-    void constructConstant (M_CPD *pPPT, M_KOTE const &rKOTE, int iValue) {
+    void constructConstant (rtPTOKEN_Handle *pPPT, M_KOTE const &rKOTE, int iValue) {
 	constructScalar (rKOTE, iValue);
 	coerce (pPPT);
     }
-    void constructConstant (M_CPD *pPPT, M_KOT *pKOT, int iValue) {
+    void constructConstant (rtPTOKEN_Handle *pPPT, M_KOT *pKOT, int iValue) {
 	constructConstant (pPPT, pKOT->TheIntegerClass, iValue);
     }
 
-    void constructScalar (M_CPD *pRPT, VkUnsigned64 const &iValue) {
-	DSC_InitUnsigned64Scalar (m_iContent.as_iScalar, pRPT, iValue);
+    void constructScalar (rtPTOKEN_Handle *pRPT, VkUnsigned64 const &iValue) {
+	m_iContent.as_iScalar.constructValue (pRPT, iValue);
 	m_xType = DSC_PointerType_Scalar;
     }
-    void constructConstant (M_CPD *pPPT, M_CPD *pRPT, VkUnsigned64 const &iValue) {
+    void constructConstant (rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT, VkUnsigned64 const &iValue) {
 	constructScalar (pRPT, iValue);
 	coerce (pPPT);
     }
 
-    void constructScalar (M_CPD *pRPT, VkUnsigned96 const &iValue) {
-	DSC_InitUnsigned96Scalar (m_iContent.as_iScalar, pRPT, iValue);
+    void constructScalar (rtPTOKEN_Handle *pRPT, VkUnsigned96 const &iValue) {
+	m_iContent.as_iScalar.constructValue (pRPT, iValue);
 	m_xType = DSC_PointerType_Scalar;
     }
-    void constructConstant (M_CPD *pPPT, M_CPD *pRPT, VkUnsigned96 const &iValue) {
+    void constructConstant (rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT, VkUnsigned96 const &iValue) {
 	constructScalar (pRPT, iValue);
 	coerce (pPPT);
     }
 
-    void constructScalar (M_CPD *pRPT, VkUnsigned128 const &iValue) {
-	DSC_InitUnsigned128Scalar (m_iContent.as_iScalar, pRPT, iValue);
+    void constructScalar (rtPTOKEN_Handle *pRPT, VkUnsigned128 const &iValue) {
+	m_iContent.as_iScalar.constructValue (pRPT, iValue);
 	m_xType = DSC_PointerType_Scalar;
     }
-    void constructConstant (M_CPD *pPPT, M_CPD *pRPT, VkUnsigned128 const &iValue) {
+    void constructConstant (rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT, VkUnsigned128 const &iValue) {
 	constructScalar (pRPT, iValue);
 	coerce (pPPT);
     }
 
-    void constructReferenceScalar (M_CPD *pRPT, unsigned int iValue) {
-	DSC_InitReferenceScalar (m_iContent.as_iScalar, pRPT, iValue);
+    void constructReferenceScalar (rtPTOKEN_Handle *pRPT, unsigned int iValue) {
+	m_iContent.as_iScalar.constructReference (pRPT, iValue);
 	m_xType = DSC_PointerType_Scalar;
     }
-    void constructReferenceConstant (M_CPD *pPPT, M_CPD *pRPT, unsigned int iValue) {
+    void constructReferenceConstant (rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT, unsigned int iValue) {
 	constructReferenceScalar (pRPT, iValue);
 	coerce (pPPT);
     }
@@ -2172,42 +2149,19 @@ public:
 	}
     }
 
-    void getPPTReference (M_CPD *&pPTokenRef, int &xPTokenRef) const;
-    void getRPTReference (M_CPD *&pPTokenRef, int &xPTokenRef) const;
+    rtPTOKEN_Handle *getPPT () const {
+	return PPT ();
+    }
+    rtPTOKEN_Handle *getRPT () const {
+	return RPT ();
+    }
 
     bool isACoercedScalar () const;
 
     RTYPE_Type pointerRType () const;
 
-    M_CPD *PPT () const {
-	M_CPD* pPTokenRef = 0; int xPTokenRef = 0;
-	getPPTReference (pPTokenRef, xPTokenRef);
-
-	M_CPD* pPTokenCPD;
-	if (xPTokenRef < 0)
-	    pPTokenCPD = pPTokenRef;
-	else {
-	    pPTokenCPD = pPTokenRef->GetCPD (xPTokenRef, RTYPE_C_PToken);
-	    pPTokenRef->release ();
-	}
-
-	return pPTokenCPD;
-    }
-
-    M_CPD *RPT () const {
-	M_CPD* pPTokenRef = 0; int xPTokenRef = 0;
-	getRPTReference (pPTokenRef, xPTokenRef);
-
-	M_CPD* pPTokenCPD;
-	if (xPTokenRef < 0)
-	    pPTokenCPD = pPTokenRef;
-	else {
-	    pPTokenCPD = pPTokenRef->GetCPD (xPTokenRef, RTYPE_C_PToken);
-	    pPTokenRef->release ();
-	}
-
-	return pPTokenCPD;
-    }
+    rtPTOKEN_Handle *PPT () const;
+    rtPTOKEN_Handle *RPT () const;
 
     DSC_PointerType Type () const {
 	return m_xType;
@@ -2294,9 +2248,7 @@ public:
 public:
     void clear ();
 
-    void coerce (M_CPD *pPPT);
-
-    void convert (M_CPD *pEffectiveStoreCPD, M_CPD *pPPT);
+    void coerce (rtPTOKEN_Handle *pPPT);
 
     M_CPD *factor ();
     void distribute (M_CPD *distribution);
@@ -2311,9 +2263,19 @@ public:
 	construct (pMonotype);
     }
 
+    void setToCopied (DSC_Pointer const& rSource) {
+	clear ();
+	construct (rSource);
+    }
+    void setToMoved (DSC_Pointer &rSource) {
+	clear ();
+	*this = rSource;
+	rSource.construct ();
+    }
+
 //  Container Creation
 public:
-    M_CPD *pointerCPD (M_CPD *PPT);
+    M_CPD *pointerCPD (rtPTOKEN_Handle *PPT);
 
     // Returns true if the u-vector must be freed by the caller
     bool getUVector (M_CPD *&rpUVector);

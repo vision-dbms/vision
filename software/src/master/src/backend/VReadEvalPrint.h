@@ -15,26 +15,47 @@
  *****  Declarations  *****
  **************************/
 
-#include "IOMDriver.h"
-#include "Vca_VTimer.h"
-
-
 /*************************
  *****  Definitions  *****
  *************************/
 
-namespace Vca {
-    class VTimer;
-    class ITrigger;
-    template<class Actor> class VTrigger;
-}
-
 class VReadEvalPrintController : public VPrimitiveTaskController<VReadEvalPrintController> {
-//  Run Time Type
     DECLARE_CONCRETE_RTT (
 	VReadEvalPrintController,VPrimitiveTaskController<VReadEvalPrintController>
     );
 
+/************************************************************************/
+//  class VReadEvalPrintController::QueryContext
+/************************************************************************/
+public:
+    class QueryContext : public Context {
+	DECLARE_FAMILY_MEMBERS (QueryContext, Context);
+
+    //  Construction
+    public:
+	QueryContext (VTask *pCaller);
+
+    //  Destruction
+    public:
+	~QueryContext ();
+
+    //  Fulfillment
+    public:
+	bool fulfill (GoferOrder const &rOrder);
+
+    //  Transitions
+    public:
+	void onQueryInProgress (VReadEvalPrintController *pTask);
+	void onQueryCompleted (VReadEvalPrintController *pTask);
+
+    //  State
+    private:
+	Query::Reference m_pQuery;
+    };
+
+/************************************************************************/
+//  class VReadEvalPrintController
+/************************************************************************/
 //  Construction
 public:
     VReadEvalPrintController (
@@ -42,6 +63,11 @@ public:
 	VPrimitiveDescriptor*	pDescriptor,
 	unsigned short		iFlags
     );
+
+//  Destruction
+private:
+    ~VReadEvalPrintController () {
+    }
 
 //  Query
 protected:
@@ -80,8 +106,9 @@ private:
 
 //  State
 protected:
+    QueryContext                        m_iQueryContext;
     VOutputBuffer::Reference const	m_pInitialOutputBuffer;
-    VCPDReference const			m_pSelfDictionary;
+    VReference<rtDICTIONARY_Handle>const m_pSelfDictionary;
     VString				m_iLastSource;
     VString				m_iThisSource;
     VCPDReference			m_pBlock;

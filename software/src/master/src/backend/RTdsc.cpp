@@ -15,7 +15,6 @@
 
 /*****  Facility  *****/
 #include "m.h"
-#include "ts.h"
 #include "uvector.h"
 
 #include "vdsc.h"
@@ -60,9 +59,251 @@
 DEFINE_CONCRETE_RTT (rtDSC_Handle);
 
 
-/*************************************************
- *****  Standard CPD Initialization Routine  *****
- *************************************************/
+/**************************
+ **************************
+ *****  Construction  *****
+ **************************
+ **************************/
+
+/*---------------------------------------------------------------------------
+ *****  Routine to pack a descriptor into a container.
+ *
+ *  Argument:
+ *	rDsc			- the address of the descriptor to pack.
+ *
+ *  Returns:
+ *	The address of a standard CPD for the packed descriptor container.
+ *
+ *****/
+rtDSC_Handle::rtDSC_Handle (
+    M_ASD *pSpace, DSC_Descriptor &rDsc
+) : BaseClass (pSpace, RTYPE_C_Descriptor, sizeof (rtDSC_Descriptor)) {
+    bool hasAStore = true;
+
+/*****
+ *  Create and basically initialize a new instance of R-Type 'descriptor', ...
+ *****/
+    constructReference (storePOP ());
+    constructReference (pointerPOP ());
+
+/*****  ...decode the descriptor's pointer, ...  *****/
+    switch (rDsc.pointerType ()) {
+    case DSC_PointerType_Empty:
+        hasAStore = false;
+        break;
+    case DSC_PointerType_Scalar:
+	setScalarTo (rDsc.m_iPointer.m_iContent.as_iScalar);
+        break;
+    case DSC_PointerType_Value:
+        setPointerTo (rDsc.m_iPointer.m_iContent.as_iValue);
+        break;
+    case DSC_PointerType_Identity:
+	setPointerTo (rDsc.m_iPointer.m_iContent.as_iIdentity.PToken ());
+        break;
+    case DSC_PointerType_Link:
+    //  Changed to share rather than create a new link container (mjc, 3/2/01):
+	setPointerTo (rDsc.m_iPointer.m_iContent.as_iLink.realizedContainer ());
+        break;
+    case DSC_PointerType_Reference:
+        setPointerTo (rDsc.m_iPointer.m_iContent.as_iReference);
+        break;
+    default:
+        rDsc.complainAboutBadPointerType ("rtDSC_Pack");
+        break;
+    }
+
+/*****  ... install a POP for the store, ...  *****/
+    if (hasAStore)
+	setStoreTo (rDsc.store ());
+
+/*****  ... set the descriptor type, ...  *****/
+    setPointerTypeTo (rDsc.m_iPointer.m_xType);
+}
+
+
+/*************************
+ *************************
+ *****  Destruction  *****
+ *************************
+ *************************/
+
+rtDSC_Handle::~rtDSC_Handle () {
+}
+
+
+/***********************
+ ***********************
+ *****  Alignment  *****
+ ***********************
+ ***********************/
+
+bool rtDSC_Handle::align () {
+    bool bAlignmentsDone = false;
+
+    rtPTOKEN_Handle::Reference pPToken;
+
+    switch (pointerType ()) {
+    case DSC_PointerType_Scalar: {
+	    DSC_Scalar iScalar;
+	    getScalar (iScalar);
+	    if (iScalar.RType () != RTYPE_C_RefUV)
+		pPToken.setTo (iScalar.RPT ());
+	    else {
+		rtPTOKEN_Handle::Reference pOldRPT (iScalar.RPT ());
+		rtREFUV_AlignReference (&iScalar);
+		if (iScalar.RPT () != pOldRPT) {
+		    EnableModifications ();
+		    setScalarTo (iScalar);
+		    bAlignmentsDone = true;
+		}
+	    }
+	    iScalar.destroy ();
+	}
+	break;
+    case DSC_PointerType_Identity:
+	pPToken.setTo (static_cast<rtPTOKEN_Handle*>(pointerHandle ()));
+	break;
+    case DSC_PointerType_Value:
+    case DSC_PointerType_Link:
+    case DSC_PointerType_Reference: {
+	    VContainerHandle::Reference pPointer;
+	    getPointer (pPointer);
+	    bAlignmentsDone = pPointer->align ();
+	}
+	break;
+    default:
+	break;
+    }
+
+    if (pPToken) {
+	rtPTOKEN_Handle::Reference pBasePToken (pPToken->basePToken ());
+	if (pPToken->DoesntName (pBasePToken)) {
+	    EnableModifications ();
+	    setPointerTo (pBasePToken);
+	    bAlignmentsDone = true;
+	}
+    }
+
+    return bAlignmentsDone;
+}
+
+
+/********************
+ ********************
+ *****  Access  *****
+ ********************
+ ********************/
+
+/*---------------------------------------------------------------------------
+ *****  Routine to unpack a descriptor container into a 'Descriptor'
+ *
+ *  Arguments:
+ *	dscCPD			- a standard CPD for the descriptor to be
+ *				  unpacked.
+ *	rDsc			- the address to be initialized as a
+ *				  'Descriptor'.  This location is assumed to
+ *				  NOT contain a currently valid descriptor.
+ *
+ *  Returns:
+ *	NOTHING - Executed for side effect only.
+ *
+ *****/
+void rtDSC_Handle::getValue (DSC_Descriptor &rDsc) {
+    rDsc.construct ();
+
+/*****  Decode the descriptor's type, ...  *****/
+    bool hasAStore = true;
+
+    switch (rDsc.m_iPointer.m_xType = pointerType ()) {
+    case DSC_PointerType_Empty:
+        hasAStore = false;
+        break;
+    case DSC_PointerType_Scalar:
+	getScalar (rDsc.m_iPointer.m_iContent.as_iScalar);
+        break;
+    case DSC_PointerType_Value:
+	rDsc.m_iPointer.m_iContent.as_iValue.construct (pointerCPD ());
+        break;
+    case DSC_PointerType_Identity:
+	rDsc.m_iPointer.m_iContent.as_iIdentity.construct (
+	    static_cast<rtPTOKEN_Handle*>(pointerHandle (RTYPE_C_PToken))
+	);
+        break;
+    case DSC_PointerType_Link:
+	rDsc.m_iPointer.m_iContent.as_iLink.construct (pointerCPD (RTYPE_C_Link));
+        break;
+    case DSC_PointerType_Reference:
+	rDsc.m_iPointer.m_iContent.as_iReference.construct (pointerCPD (RTYPE_C_RefUV));
+        break;
+    default:
+        rDsc.complainAboutBadPointerType ("rtDSC_Handle::getValue");
+        break;
+    }
+
+/*****  ... and unpack the store and return.  *****/
+    if (hasAStore) {
+        rDsc.setStoreTo (storeHandle ()->getStore ());
+    }
+}
+
+
+/****************************************
+ *****  I-Object Unpacking Routine  *****
+ ****************************************/
+
+/*---------------------------------------------------------------------------
+ *****  Routine to attempt to unpack an I-Object into a descriptor.
+ *
+ *  Arguments:
+ *	iObject			- the I-Object to be unpacked.
+ *	rDsc			- the address of an uninitialized or empty
+ *				  descriptor to be unpacked.
+ *
+ *  Returns:
+ *	true if the I-Object was successfully unpacked, false otherwise.
+ *
+ *****/
+PublicFnDef bool rtDSC_UnpackIObject (
+    M_ASD *pContainerSpace, IOBJ_IObject iObject, DSC_Descriptor &rDsc
+) {
+    M_CPD *sourceCPD;
+    bool result = true;
+
+    if (IOBJ_IsAnInstanceOf (iObject, IOBJ_IType_Int)) rDsc.constructScalar (
+	pContainerSpace->KOT (), IOBJ_IObjectValueAsInt (iObject)
+    );
+    else if (IOBJ_IsAnInstanceOf (iObject, IOBJ_IType_Double)) rDsc.constructScalar (
+	pContainerSpace->KOT (), IOBJ_IObjectValueAsDouble (iObject)
+    );
+    else if (IOBJ_IsAnInstanceOf (iObject, PRIMFNS_PrimitiveIType)) rDsc.constructScalar (
+	pContainerSpace->ThePrimitiveClass (),
+	(int)PRIMFNS_UnpackPrimitiveIObject (iObject)
+    );
+    else switch ((sourceCPD = RTYPE_QRegisterCPD (iObject))->RType ()) {
+    case RTYPE_C_Descriptor:
+        static_cast<rtDSC_Handle*>(sourceCPD->containerHandle ())->getValue (rDsc);
+        break;
+    case RTYPE_C_DoubleUV:
+    case RTYPE_C_FloatUV:
+    case RTYPE_C_IntUV:
+	rDsc.constructMonotype (sourceCPD);
+        break;
+    default:
+	result = false;
+        break;
+    }
+
+    return result;
+}
+
+
+/********************************************************************
+ *****  Standard Representation Type Services Handler Routines  *****
+ ********************************************************************/
+
+/********************************
+ *----  CPD Initialization  ----*
+ ********************************/
 
 /*---------------------------------------------------------------------------
  *****  Internal routine to initialize a standard 'Descriptor' CPD.
@@ -80,309 +321,10 @@ PrivateFnDef void InitStdCPD (M_CPD* cpd) {
     rtDSC_CPD_Store	(cpd) = &rtDSC_Descriptor_Store		(base);
     rtDSC_CPD_Pointer	(cpd) = &rtDSC_Descriptor_Pointer	(base);
 }
-
 
-/****************************************
- *****  Descriptor Packing Routine  *****
- ****************************************/
-
-/*---------------------------------------------------------------------------
- *****  Routine to pack a descriptor into a container.
- *
- *  Argument:
- *	dscPtr			- the address of the descriptor to pack.
- *
- *  Returns:
- *	The address of a standard CPD for the packed descriptor container.
- *
- *****/
-PublicFnDef M_CPD *rtDSC_Pack (M_ASD *pContainerSpace, DSC_Descriptor *dscPtr) {
-    bool hasAStore = true;
-
-/*****
- *  Create and basically initialize a new instance of R-Type 'descriptor', ...
- *****/
-    M_CPD *dscCPD = pContainerSpace->CreateContainer (
-	RTYPE_C_Descriptor, sizeof (rtDSC_Descriptor)
-    );
-
-    InitStdCPD (dscCPD);
-
-    dscCPD->constructReference (rtDSC_CPx_Store);
-    dscCPD->constructReference (rtDSC_CPx_Pointer);
-
-/*****  ...decode the descriptor's pointer, ...  *****/
-    switch (dscPtr->pointerType ()) {
-    case DSC_PointerType_Empty:
-        hasAStore = false;
-        break;
-    case DSC_PointerType_Scalar:
-	rtDSC_CPD_RType(dscCPD) = DSC_Scalar_RType (dscPtr->m_iPointer.m_iContent.as_iScalar);
-//	rtDSC_CPD_ScalarValue (dscCPD) = DSC_Scalar_Value (dscPtr->m_iPointer.m_iContent.as_iScalar);
-	memcpy (
-	    &rtDSC_CPD_ScalarValue (dscCPD),
-	    &DSC_Scalar_Value (dscPtr->m_iPointer.m_iContent.as_iScalar),
-	    sizeof (rtDSC_CPD_ScalarValue(dscCPD))
-	);
-        dscCPD->StoreReference (
-	    rtDSC_CPx_Pointer, DSC_Scalar_RefPToken (dscPtr->m_iPointer.m_iContent.as_iScalar)
-	);
-        break;
-    case DSC_PointerType_Value:
-        dscCPD->StoreReference (rtDSC_CPx_Pointer, dscPtr->m_iPointer.m_iContent.as_iValue);
-        break;
-    case DSC_PointerType_Identity:
-        dscCPD->StoreReference (
-	    rtDSC_CPx_Pointer, dscPtr->m_iPointer.m_iContent.as_iIdentity.PToken ()
-	);
-        break;
-    case DSC_PointerType_Link:
-    //  Changed to share rather than create a new link container (mjc, 3/2/01):
-	dscCPD->StoreReference (
-	    rtDSC_CPx_Pointer, dscPtr->m_iPointer.m_iContent.as_iLink.realizedContainer ()
-	);
-        break;
-    case DSC_PointerType_Reference:
-        dscCPD->StoreReference (
-	    rtDSC_CPx_Pointer, dscPtr->m_iPointer.m_iContent.as_iReference
-	);
-        break;
-    default:
-	dscCPD->release ();
-        dscPtr->complainAboutBadPointerType ("rtDSC_Pack");
-        break;
-    }
-
-/*****  ... install a POP for the store, ...  *****/
-    if (hasAStore)
-	dscCPD->StoreReference (rtDSC_CPx_Store, dscPtr->storeCPD ());
-
-/*****  ... set the descriptor type, ...  *****/
-    rtDSC_CPD_PointerType (dscCPD) = dscPtr->m_iPointer.m_xType;
-
-/*****  ... and return.  *****/
-    return dscCPD;
-}
-
-
-/******************************************
- *****  Descriptor Unpacking Routine  *****
- ******************************************/
-
-/*---------------------------------------------------------------------------
- *****  Routine to unpack a descriptor container into a 'Descriptor'
- *
- *  Arguments:
- *	dscCPD			- a standard CPD for the descriptor to be
- *				  unpacked.
- *	dscPtr			- the address to be initialized as a
- *				  'Descriptor'.  This location is assumed to
- *				  NOT contain a currently valid descriptor.
- *
- *  Returns:
- *	NOTHING - Executed for side effect only.
- *
- *****/
-PublicFnDef void rtDSC_Unpack (M_CPD *dscCPD, DSC_Descriptor *dscPtr) {
-    bool hasAStore = true;
-
-/*****  Decode the descriptor's type, ...  *****/
-    switch (dscPtr->m_iPointer.m_xType = rtDSC_CPD_PointerType (dscCPD)) {
-    case DSC_PointerType_Empty:
-        hasAStore = false;
-        break;
-    case DSC_PointerType_Scalar: {
-	    DSC_ScalarValue iValueFromContainer;
-	    memcpy (&iValueFromContainer, &rtDSC_CPD_ScalarValue (dscCPD), sizeof (iValueFromContainer));
-	    DSC_InitScalar (
-		dscPtr->m_iPointer.m_iContent.as_iScalar,
-		dscCPD->GetCPD (rtDSC_CPx_Pointer, RTYPE_C_PToken),
-		rtDSC_CPD_RType (dscCPD), DSC_Scalar_Value, iValueFromContainer
-	    );
-	} break;
-    case DSC_PointerType_Value:
-	dscPtr->m_iPointer.m_iContent.as_iValue.construct (dscCPD->GetCPD (rtDSC_CPx_Pointer));
-        break;
-    case DSC_PointerType_Identity:
-	dscPtr->m_iPointer.m_iContent.as_iIdentity.construct (
-	    dscCPD->GetCPD (rtDSC_CPx_Pointer, RTYPE_C_PToken)
-	);
-        break;
-    case DSC_PointerType_Link:
-	dscPtr->m_iPointer.m_iContent.as_iLink.construct (
-	    dscCPD->GetCPD (rtDSC_CPx_Pointer, RTYPE_C_Link)
-	);
-        break;
-    case DSC_PointerType_Reference:
-	dscPtr->m_iPointer.m_iContent.as_iReference.construct (
-	    dscCPD->GetCPD (rtDSC_CPx_Pointer, RTYPE_C_RefUV)
-	);
-        break;
-    default:
-        dscPtr->complainAboutBadPointerType ("rtDSC_Unpack");
-        break;
-    }
-
-/*****  ... and unpack the store and return.  *****/
-    if (hasAStore)
-        dscPtr->store ().construct (dscCPD->GetCPD (rtDSC_CPx_Store));
-    else
-        dscPtr->store ().construct ();
-}
-
-
-/******************************************
- *****  Descriptor Alignment Routine  *****
- ******************************************/
-
-/*---------------------------------------------------------------------------
- *****  Routine to align a 'Descriptor'
- *
- *  Arguments:
- *	dscCPD			- a standard CPD for the descriptor to be
- *				  aligned.
- *
- *  Returns:
- *	true if the descriptor required alignment. false if not.
- *
- *****/
-PublicFnDef bool rtDSC_Align (M_CPD* dscCPD) {
-    M_CPD* tmpCPD;
-    bool result = false;
-
-/*****  Validate Argument R-Type  *****/
-    RTYPE_MustBeA ("rtDsc_Align", M_CPD_RType (dscCPD), RTYPE_C_Descriptor);
-
-    M_CPD* pPointerCPD = dscCPD->GetCPD (rtDSC_CPx_Pointer);
-
-    switch (M_CPD_RType (pPointerCPD)) {
-    case RTYPE_C_PToken:
-	if (rtPTOKEN_IsCurrent (pPointerCPD, -1))
-	    break;
-	result = true;
-	if (RTYPE_C_RefUV != rtDSC_CPD_RType(dscCPD))
-	    tmpCPD = rtPTOKEN_BasePToken (pPointerCPD, -1);
-	else {
-	    rtREFUV_Type_Reference ref;
-	    pPointerCPD->retain ();
-	    rtREFUV_Ref_D_RefPTokenCPD (ref) = pPointerCPD;
-	    rtREFUV_Ref_D_Element (ref) =
-		DSC_ScalarValue_Int (rtDSC_CPD_ScalarValue (dscCPD));
-	    rtREFUV_AlignReference (&ref);
-	    tmpCPD = rtREFUV_Ref_D_RefPTokenCPD (ref);
-	    dscCPD->EnableModifications ();
-	    DSC_ScalarValue_Int (rtDSC_CPD_ScalarValue (dscCPD)) =
-		rtREFUV_Ref_D_Element (ref);
-	}
-	dscCPD->StoreReference (rtDSC_CPx_Pointer, tmpCPD, -1);
-	tmpCPD->release ();
-	break;
-    case RTYPE_C_Link:
-	rtLINK_AlignLink (pPointerCPD);
-	result = pPointerCPD->IsReadWrite ();
-	break;
-    case RTYPE_C_RefUV:
-	rtREFUV_Align (pPointerCPD);
-	result = pPointerCPD->IsReadWrite ();
-	break;
-    case RTYPE_C_IntUV:
-	rtINTUV_Align (pPointerCPD);
-	result = pPointerCPD->IsReadWrite ();
-	break;
-    case RTYPE_C_DoubleUV:
-	rtDOUBLEUV_Align (pPointerCPD);
-	result = pPointerCPD->IsReadWrite ();
-	break;
-    case RTYPE_C_FloatUV:
-	rtFLOATUV_Align (pPointerCPD);
-	result = pPointerCPD->IsReadWrite ();
-	break;
-    case RTYPE_C_CharUV:
-	rtCHARUV_Align (pPointerCPD);
-	result = pPointerCPD->IsReadWrite ();
-	break;
-    case RTYPE_C_UndefUV:
-	rtUNDEFUV_Align (pPointerCPD);
-	result = pPointerCPD->IsReadWrite ();
-	break;
-    case RTYPE_C_Unsigned64UV:
-	rtU64UV_Align (pPointerCPD);
-	result = pPointerCPD->IsReadWrite ();
-	break;
-    case RTYPE_C_Unsigned96UV:
-	rtU96UV_Align (pPointerCPD);
-	result = pPointerCPD->IsReadWrite ();
-	break;
-    case RTYPE_C_Unsigned128UV:
-	rtU128UV_Align (pPointerCPD);
-	result = pPointerCPD->IsReadWrite ();
-	break;
-    default:
-	break;
-    }
-
-    pPointerCPD->release ();
-    return result;
-}
-
-
-/****************************************
- *****  I-Object Unpacking Routine  *****
- ****************************************/
-
-/*---------------------------------------------------------------------------
- *****  Routine to attempt to unpack an I-Object into a descriptor.
- *
- *  Arguments:
- *	iObject			- the I-Object to be unpacked.
- *	dscPtr			- the address of an uninitialized or empty
- *				  descriptor to be unpacked.
- *
- *  Returns:
- *	true if the I-Object was successfully unpacked, false otherwise.
- *
- *****/
-PublicFnDef bool rtDSC_UnpackIObject (
-    M_ASD *pContainerSpace, IOBJ_IObject iObject, DSC_Descriptor *dscPtr
-) {
-    M_CPD *sourceCPD;
-    bool result = true;
-
-    if (IOBJ_IsAnInstanceOf (iObject, IOBJ_IType_Int)) dscPtr->constructScalar (
-	pContainerSpace->KOT (), IOBJ_IObjectValueAsInt (iObject)
-    );
-    else if (IOBJ_IsAnInstanceOf (iObject, IOBJ_IType_Double)) dscPtr->constructScalar (
-	pContainerSpace->KOT (), IOBJ_IObjectValueAsDouble (iObject)
-    );
-    else if (IOBJ_IsAnInstanceOf (iObject, PRIMFNS_PrimitiveIType)) dscPtr->constructScalar (
-	pContainerSpace->ThePrimitiveClass (),
-	(int)PRIMFNS_UnpackPrimitiveIObject (iObject)
-    );
-    else switch (M_CPD_RType (sourceCPD = RTYPE_QRegisterCPD (iObject))) {
-    case RTYPE_C_Descriptor:
-        rtDSC_Unpack (sourceCPD, dscPtr);
-        break;
-    case RTYPE_C_DoubleUV:
-    case RTYPE_C_FloatUV:
-    case RTYPE_C_IntUV:
-	dscPtr->constructMonotype (sourceCPD);
-        break;
-    default:
-	result = false;
-        break;
-    }
-
-    return result;
-}
-
-
-/********************************************************************
- *****  Standard Representation Type Services Handler Routines  *****
- ********************************************************************/
-
-/***************************
- *  Container Reclamation  *
- ***************************/
+/***********************************
+ *----  Container Reclamation  ----*
+ ***********************************/
 
 /*---------------------------------------------------------------------------
  *****  Routine to reclaim the contents of a container.
@@ -404,15 +346,15 @@ PrivateFnDef void ReclaimContainer (
 }
 
 
-/***********
- *  Saver  *
- ***********/
+/*******************
+ *----  Saver  ----*
+ *******************/
 
 /*---------------------------------------------------------------------------
  *****  Routine to 'save' a Descriptor.
  *****/
 bool rtDSC_Handle::PersistReferences () {
-    rtDSC_Descriptor *dsc = (rtDSC_Descriptor*)ContainerContent ();
+    rtDSC_Descriptor *dsc = typecastContent ();
 
     return Persist (&rtDSC_Descriptor_Store   (dsc))
 	&& Persist (&rtDSC_Descriptor_Pointer (dsc));
@@ -436,13 +378,13 @@ bool rtDSC_Handle::PersistReferences () {
  *	NOTHING - Executed for side effect only.
  *
  *****/
-PrivateFnDef void MarkContainers (M_ASD* pSpace, M_CPreamble const *pContainer) {
+PrivateFnDef void MarkContainers (M_ASD::GCVisitBase* pGCV, M_ASD* pSpace, M_CPreamble const *pContainer) {
     rtDSC_Descriptor const *dsc = (rtDSC_Descriptor const *)M_CPreamble_ContainerBase (
 	pContainer
     );
 
-    pSpace->Mark (&rtDSC_Descriptor_Store	(dsc));
-    pSpace->Mark (&rtDSC_Descriptor_Pointer	(dsc));
+    pGCV->Mark (pSpace, &rtDSC_Descriptor_Store	(dsc));
+    pGCV->Mark (pSpace, &rtDSC_Descriptor_Pointer	(dsc));
 }
 
 
@@ -522,12 +464,12 @@ PrivateFnDef void PrintDescriptor (M_CPD* cpd, int full) {
  ***************/
 
 PrivateFnDef M_CPreamble* ConvertOldDescriptor (
-    M_ASD *Unused(pASD), M_CPreamble const *oldDescriptorPreamble
+    M_ASD *pASD, M_CPreamble const *oldDescriptorPreamble
 ) {
-    M_CPreamble* newDescriptorPreamble = TS_AllocateContainer (
+    M_CPreamble *newDescriptorPreamble = pASD->AllocateContainer (
 	RTYPE_C_Descriptor,
 	sizeof (rtDSC_Descriptor),
-	M_CPreamble_POP (oldDescriptorPreamble)
+	M_CPreamble_POPContainerIndex (oldDescriptorPreamble)
     );
     rtDSC_Descriptor* newDescriptor = M_CPreamble_ContainerBaseAsType (
 	newDescriptorPreamble, rtDSC_Descriptor
@@ -622,8 +564,8 @@ PrivateFnDef M_CPreamble* ConvertOldDescriptor (
 
 IOBJ_DefineNewaryMethod (NewDM) {
     DSC_Descriptor descriptor;
-    if (rtDSC_UnpackIObject (IOBJ_ScratchPad, parameterArray[0], &descriptor)) {
-        M_CPD *result = rtDSC_Pack (IOBJ_ScratchPad, &descriptor);
+    if (rtDSC_UnpackIObject (IOBJ_ScratchPad, parameterArray[0], descriptor)) {
+	rtDSC_Handle::Reference result (new rtDSC_Handle (IOBJ_ScratchPad, descriptor));
 	descriptor.clear ();
 	return RTYPE_QRegister (result);
     }
@@ -639,54 +581,49 @@ IOBJ_DefineNewaryMethod (NewInDM) {
  *	If this test is removed, the scalar decoding cases below may fail.
  *---------------------------------------------------------------------------
  */
-    M_CPD *store = RTYPE_QRegisterCPD (parameterArray[1]);
-    if (IOBJ_IsAnInstanceOf (parameterArray[0], IOBJ_IType_Char)   ||
-	IOBJ_IsAnInstanceOf (parameterArray[0], IOBJ_IType_Double) ||
-	IOBJ_IsAnInstanceOf (parameterArray[0], IOBJ_IType_Int)    ||
+    VContainerHandle *pStoreHandle = RTYPE_QRegisterHandle (parameterArray[1]);
+    Vdd::Store::Reference pStore;
+    if (!pStoreHandle->getStore (pStore)				||
+	IOBJ_IsAnInstanceOf (parameterArray[0], IOBJ_IType_Char)	||
+	IOBJ_IsAnInstanceOf (parameterArray[0], IOBJ_IType_Double)	||
+	IOBJ_IsAnInstanceOf (parameterArray[0], IOBJ_IType_Int)		||
 	IOBJ_IsAnInstanceOf (parameterArray[0], PRIMFNS_PrimitiveIType)
-    )
-    {
+    ) {
 	RTYPE_MustBeA (
-	    "rtDSC[new:in:]", M_CPD_RType (store), RTYPE_C_ValueStore
+	    "rtDSC[new:in:]", pStoreHandle->RType (), RTYPE_C_ValueStore
 	);
     }
+
+    rtPTOKEN_Handle::Reference pStorePToken (pStore->getPToken ());
 
 /*****  Decode the I-Type of the 'new:' parameter...  *****/
     DSC_Descriptor descriptor;
     if (IOBJ_IsAnInstanceOf (parameterArray[0], IOBJ_IType_Char)) {
 	descriptor.constructScalar (
-	    store, rtVSTORE_CPD_RowPTokenCPD (store),
-	    (char)IOBJ_IObjectValueAsInt (parameterArray[0])
+	    pStore, pStorePToken, (char)IOBJ_IObjectValueAsInt (parameterArray[0])
 	);
     }
     else if (IOBJ_IsAnInstanceOf (parameterArray[0], IOBJ_IType_Double)) {
-	store->retain ();
 	descriptor.constructScalar (
-	    store, rtVSTORE_CPD_RowPTokenCPD (store),
-	    IOBJ_IObjectValueAsDouble (parameterArray[0])
+	    pStore, pStorePToken, IOBJ_IObjectValueAsDouble (parameterArray[0])
 	);
     }
     else if (IOBJ_IsAnInstanceOf (parameterArray[0], IOBJ_IType_Int)) {
-	store->retain ();
 	descriptor.constructScalar (
-	    store, rtVSTORE_CPD_RowPTokenCPD (store),
-	    IOBJ_IObjectValueAsInt (parameterArray[0])
+	    pStore, pStorePToken, IOBJ_IObjectValueAsInt (parameterArray[0])
 	);
     }
     else if (IOBJ_IsAnInstanceOf (parameterArray[0], PRIMFNS_PrimitiveIType)) {
-	store->retain ();
 	descriptor.constructScalar (
-	    store, rtVSTORE_CPD_RowPTokenCPD (store),
-	    (int)PRIMFNS_UnpackPrimitiveIObject (parameterArray[0])
+	    pStore, pStorePToken, (int)PRIMFNS_UnpackPrimitiveIObject (parameterArray[0])
 	);
     }
     else {
-	store->retain ();
-	descriptor.constructMonotype (store, RTYPE_QRegisterCPD (parameterArray[0]));
+	descriptor.constructMonotype (pStore, RTYPE_QRegisterCPD (parameterArray[0]));
     }
 
 /*****  ...pack the resulting value descriptor, ...  *****/
-    M_CPD *result = rtDSC_Pack (IOBJ_ScratchPad, &descriptor);
+    rtDSC_Handle::Reference result (new rtDSC_Handle (IOBJ_ScratchPad, descriptor));
 
 /*****  ...cleanup and return.  *****/
     descriptor.clear ();

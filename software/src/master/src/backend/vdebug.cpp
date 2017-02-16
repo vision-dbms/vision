@@ -62,7 +62,6 @@ PublicVarDef bool DEBUG_TestdeckTracing = false;
     FacilityId (PS)\
     FacilityId (RSLANG)\
     FacilityId (RTYPE)\
-    FacilityId (TS)\
     FacilityId (VMACHINE)
 
 /*****  'FAC_DeclareFacility' Facility Declarations  *****/
@@ -119,11 +118,18 @@ PrivateFnDef int __cdecl CompareLiterals (LTEntry const *l1, LTEntry  const *l2)
  *  Accessors and Generators  *
  ******************************/
 
-typedef char const *(*Ref_IDNameAccessor) (unsigned long id);
+#ifdef _M_X64
+typedef unsigned long long IDValue;
+typedef char const *(*Ref_IDNameAccessor) (IDValue id);
+typedef IOBJ_IObject (*Ref_IDObjectAccessor) (IDValue id);
+typedef IDValue (*Ref_IDListGenerator) (void *pGenerator);
+#else
+typedef unsigned long IDValue;
+typedef char const *(*Ref_IDNameAccessor) (IDValue id);
+typedef IOBJ_IObject (*Ref_IDObjectAccessor) (IDValue id);
+typedef IDValue (*Ref_IDListGenerator) (void *pGenerator);
+#endif
 
-typedef IOBJ_IObject (*Ref_IDObjectAccessor) (unsigned long id);
-
-typedef unsigned long (*Ref_IDListGenerator) (void *pGenerator);
 
 
 /******************
@@ -162,13 +168,13 @@ typedef unsigned long (*Ref_IDListGenerator) (void *pGenerator);
 PrivateFnDef void AddToLTUsingGenerator (
     Ref_IDNameAccessor		idAsStringFn,
     Ref_IDObjectAccessor	idAsObjectFn,
-    unsigned int		idListTerminator,
+    IDValue			idListTerminator,
     Ref_IDListGenerator		idListGenerator,
     void *			idListParameter
 )
 {
 /*****  Add new entries to the literal table...  *****/
-    unsigned long id = (*idListGenerator)(idListParameter);
+    IDValue id = (*idListGenerator)(idListParameter);
     while (id != idListTerminator) {
 	char const *name = (*idAsStringFn)(id);
 	if (name) {
@@ -203,8 +209,8 @@ PrivateFnDef void AddToLTUsingGenerator (
  *	pArgList->arg<unsigned long>
  *
  *****/
-PrivateFnDef unsigned long AddEnumeratedLiteralsGenerator (V::VArgList *pArgList) {
-    return pArgList->arg<unsigned long>();
+PrivateFnDef IDValue AddEnumeratedLiteralsGenerator (V::VArgList *pArgList) {
+    return pArgList->arg<IDValue>();
 }
 
 /*---------------------------------------------------------------------------
@@ -233,7 +239,7 @@ PrivateFnDef unsigned long AddEnumeratedLiteralsGenerator (V::VArgList *pArgList
 PrivateFnDef void __cdecl AddEnumeratedLiteralsToLT (
     Ref_IDNameAccessor		idAsStringFn,
     Ref_IDObjectAccessor	idAsObjectFn,
-    unsigned int		idListTerminator,
+    IDValue			idListTerminator,
     ...
 ) {
     V_VARGLIST (ap, idListTerminator);

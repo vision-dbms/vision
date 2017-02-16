@@ -42,10 +42,10 @@ public:
 	return m_pDomain;
     }
 
-    M_CPD* ptoken () const {
+    rtPTOKEN_Handle *ptoken () const {
 	return m_pDomain->ptoken ();
     }
-    M_CPD* ptoken_() const {
+    rtPTOKEN_Handle *ptoken_() const {
 	return ptoken ();
     }
 

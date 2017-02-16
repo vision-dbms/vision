@@ -18,6 +18,8 @@
 #include "PS_ASD.h"
 
 class M_CTE;
+
+class rtPCT_Handle;
 
 
 /*************************
@@ -162,10 +164,10 @@ class M_CTE;
  *				  space's read/write containers.
  *	m_iTRefRescanRegion	- the container table index bounds of this
  *				  space's transient reference rescan targets.
- *	m_iLiveReferencedRegion	- the container table index bounds of this
+ *	m_iLiveReferenceRegion	- the container table index bounds of this
  *				  space's entries with live pointers.
  *	m_pGCQueue		- garbage collection management
- *	m_iTransientAllocation	- an approximate count of the number of
+ *	m_sTransientAllocation	- an approximate count of the number of
  *				  bytes currently allocated to private
  *				  containers. 
  *	m_pPCTCPCC		- the address of a CPCC for the persistent
@@ -183,6 +185,10 @@ class M_ASD : public VTransient {
 
     friend class PS_ASD;
     friend class PS_AND;
+
+    friend class VContainerHandle;
+
+    class GCVisitBase;
 
 //  Aliases
 public:
@@ -254,6 +260,7 @@ public:
 	    //  Friends
 		friend class CT;
 		friend class Page;
+		friend class M_ASD;
 		friend class M_CTE;
 		friend class VContainerHandle;
 
@@ -268,7 +275,10 @@ public:
 		    m_iReferenceCount		= (unsigned short)iInitialReferenceCount;
 		    m_fIsNew			=
 		    m_fUnderConstruction	=
+		    m_bGcVisited                =
+		    m_bCdVisited                =
 		    m_fHasBeenAccessed		= true;
+		    m_bFoundAllReferences	=
 		    m_fIsAForwardingTarget	=
 		    m_fIsATRefRescanTarget	=
 		    m_fMustStayMapped		= 
@@ -278,6 +288,9 @@ public:
 
 		void initializeForOldContainer () {
 		    setReferenceCountToInfinity ();
+		    m_bGcVisited                =
+		    m_bCdVisited                = true;
+		    m_bFoundAllReferences       =
 		    m_fIsNew			=
 		    m_fUnderConstruction	=
 		    m_fHasBeenAccessed		=
@@ -290,8 +303,8 @@ public:
 		    m_iAddress.asContainerAddress = NilOf (M_CPreamble*);
 		}
 
-		void setToContainerAddress (M_CPreamble *pAddress, bool isReadWrite) {
-		    m_xAddressType = isReadWrite;
+		void setToContainerAddress (M_CPreamble *pAddress, bool bReadWrite) {
+		    m_xAddressType = bReadWrite;
 		    m_iAddress.asContainerAddress = pAddress;
 		}
 		void clearContainerAddress () {
@@ -314,7 +327,9 @@ public:
 
 		void setToFreeListEntry (unsigned int xNextEntry) {
 		    m_fHasBeenAccessed = false;
+		    m_fUnderConstruction = false;
 		    m_iReferenceCount = 0;
+		    m_bFoundAllReferences = false;
 		    m_iAddress.asCTI = xNextEntry;
 		    m_xAddressType = M_CTEAddressType_ForwardingPOP;
 		}
@@ -347,6 +362,9 @@ public:
 			m_fIsAForwardingTarget = false;
 		    return m_fIsAForwardingTarget;
 		}
+		bool isASweepTarget () const {
+		    return isntReferenced () && isntUnderConstruction ();
+		}
 		bool isATRefRescanTarget () const {
 		    return m_fIsATRefRescanTarget;
 		}
@@ -377,6 +395,9 @@ public:
 
 		bool underConstruction () const {
 		    return m_fUnderConstruction;
+		}
+		bool isntUnderConstruction () const {
+		    return !m_fUnderConstruction;
 		}
 
 		bool isReferenced () const {
@@ -421,7 +442,10 @@ public:
 		    m_fIsAForwardingTarget = m_fIsATRefRescanTarget = true;
 		}
 
-		void clearIsATRefRescanTarget () {
+		void setTRefFlags () {
+		    m_fIsATRefRescanTarget = true;
+		}
+		void clearTRefFlags () {
 		    m_fIsATRefRescanTarget = false;
 		}
 
@@ -445,11 +469,19 @@ public:
 	    //  Reference Management
 	    private:
 		//  'mark' returns true for first visits, false for return visits
-		bool mark (M_ASD *pASD, unsigned int xContainer);
+		bool mark (GCVisitBase*, M_ASD *pASD, unsigned int xContainer);
 
 		void reclaim (M_ASD *pASD, unsigned int xContainer);
 
 	    public:
+		void retain () {
+		    if (m_iReferenceCount < M_CTE_MaxReferenceCount)
+			m_iReferenceCount++;
+		}
+		void untain () {
+		    if (m_iReferenceCount < M_CTE_MaxReferenceCount)
+			m_iReferenceCount--;
+		}
 		void release (M_ASD *pASD, unsigned int xContainer) {
 		    if (m_iReferenceCount < M_CTE_MaxReferenceCount) {
 			g_bPotentialSessionGarbage = true;
@@ -457,9 +489,15 @@ public:
 			    reclaim (pASD, xContainer);
 		    }
 		}
-		void retain () {
-		    if (m_iReferenceCount < M_CTE_MaxReferenceCount)
-			m_iReferenceCount++;
+		void discard (M_ASD *pASD, unsigned int xContainer) {
+		    if (0 == m_iReferenceCount) {
+			g_bPotentialSessionGarbage = true;
+			reclaim (pASD, xContainer);
+		    }
+		}
+		void discard (M_ASD *pASD, unsigned int xContainer, M_CPreamble *pContainerAddress, bool bReadWrite) {
+		    setToContainerAddress (pContainerAddress, bReadWrite);
+		    discard (pASD, xContainer);
 		}
 
 		void setReferenceCountToZero () {
@@ -472,6 +510,26 @@ public:
 		    m_iReferenceCount = M_CTE_MaxReferenceCount;
 		}
 
+		bool gcVisited() {
+		    return m_bGcVisited;
+		}
+		void gcVisited(bool visited) {
+		    m_bGcVisited = visited;
+		}
+
+		bool cdVisited() {
+		    return m_bCdVisited;
+		}
+		void cdVisited (bool visited) {
+		    m_bCdVisited = visited;
+		}
+		bool foundAllReferences() {
+		    return m_bFoundAllReferences;
+		}
+		void foundAllReferences (bool foundAll) {
+		    m_bFoundAllReferences = foundAll;
+		}
+
 	    //  State
 	    private:
 		union address_t {
@@ -481,6 +539,9 @@ public:
 		    int			asCTI;
 		} m_iAddress;
 		unsigned short		m_iReferenceCount;
+		bool                    m_bGcVisited;
+                bool                    m_bCdVisited;
+                bool                    m_bFoundAllReferences;
 		unsigned short		m_xAddressType		: 2,
 					m_iAttentionMask	: 3,
 					m_fIsAForwardingTarget	: 1,
@@ -655,6 +716,8 @@ public:
 //  GCQueue
 public:
     class GCQueue : public VTransient {
+	DECLARE_FAMILY_MEMBERS (GCQueue, VTransient);
+
     // GCQueue::Entry
     public:
 	struct Entry {
@@ -691,16 +754,39 @@ public:
 	Entry  *m_pHead, *m_pTail, *m_pFree;
     };
 
+
+// GC Traversal Controllers: GCTraverseMarkBase
+public:
+    class GCVisitBase {
+    public:
+	void Mark (M_ASD* pASD, M_POP const *pPOP) { this->Mark_(pASD, pPOP); }
+	void Mark (M_ASD* pASD, M_POP const *pReferences, unsigned int cReferences)
+	  { this->Mark_(pASD, pReferences, cReferences); }
+
+    private: 
+	virtual void Mark_ (M_ASD* pASD, M_POP const *pPOP) { }
+	virtual void Mark_ (M_ASD* pASD, M_POP const *pReferences, unsigned int cReferences) { }
+
+    };
+    class GCVisitMark : public GCVisitBase {
+    private:
+	virtual void Mark_ (M_ASD* pASD, M_POP const *pPOP);
+	virtual void Mark_ (M_ASD* pASD, M_POP const *pReferences, unsigned int cReferences);
+    };
+    class GCVisitCycleDetect : public GCVisitBase {
+    private:
+	virtual void Mark_ (M_ASD* pASD, M_POP const *pPOP);
+	virtual void Mark_ (M_ASD* pASD, M_POP const *pReferences, unsigned int cReferences);
+    };
+
+
 //  Construction
 public:
     M_ASD (M_AND* pAND, PS_ASD* pPhysicalASD);
 
 //  Destruction
 public:
-    ~M_ASD () {
-	if (m_pGCQueue)
-	    delete m_pGCQueue;
-    }
+    ~M_ASD ();
 
 //  Access
 public:
@@ -715,13 +801,14 @@ public:
 	return m_pAND;
     }
 
+    void recordGCReference (unsigned int xSpace, bool bFirstVisit) {
+	m_pAND->GCMetricsForSpace (m_xSpace)->recordReference (xSpace, bFirstVisit);
+    }
+
     unsigned int Index () const {
 	return m_xSpace;
     }
 
-    M_KnownObjectTable *KnownObjectTable () const {
-	return m_pAND->KnownObjectTable ();
-    }
     M_KOT *KOT () const {
 	return m_pAND->KOT ();
     }
@@ -747,8 +834,8 @@ public:
 	return m_pAND->TheNilPOP ();
     }
 
-    double TransientAllocation () const {
-	return m_iTransientAllocation;
+    unsigned __int64 TransientAllocation () const {
+	return m_sTransientAllocation;
     }
 
 //  Query
@@ -760,19 +847,19 @@ public:
 	return M_KnownSpace_ScratchPad != m_xSpace;
     }
 
-    bool SpaceHasChanged () const {
+    bool hasActiveContainerReferences () const {
+	return m_iLiveReferenceRegion.isntEmpty ();
+    }
+
+    bool hasChanged () const {
 	return m_iReadWriteRegion.isntEmpty ();
     }
-    bool SpaceHasntChanged () const {
+    bool hasntChanged () const {
 	return m_iReadWriteRegion.isEmpty ();
     }
 
-    bool SpaceHasTRefRescanTargets () const {
+    bool hasTransientReferences () const {
 	return m_iTRefRescanRegion.isntEmpty ();
-    }
-
-    bool SpaceHasActiveContainerReferences () const {
-	return m_iLiveReferencedRegion.isntEmpty ();
     }
 
     bool TracingContainerMarking () const {
@@ -835,6 +922,9 @@ public:
     void retainCTE (unsigned int xContainer) const {
 	cte (xContainer)->retain ();
     }
+    void untainCTE (unsigned int xContainer) const {
+	cte (xContainer)->untain ();
+    }
     void releaseCTE (unsigned int xContainer) {
 	cte (xContainer)->release (this, xContainer);
     }
@@ -854,16 +944,12 @@ public:
     void ResetTRBounds ();
     void ResetLiveRefBounds ();
 
-    void AdjustAllocation (int sAdjustment) {
-	m_iTransientAllocation += sAdjustment;
-	m_pAND->AdjustAllocationLevel (sAdjustment);
-    }
     void IncrementAllocation (size_t sIncrease) {
-	m_iTransientAllocation += sIncrease;
+	m_sTransientAllocation += sIncrease;
 	m_pAND->IncrementAllocationLevel (sIncrease);
     }
     void DecrementAllocation (size_t sDecrease) {
-	m_iTransientAllocation -= sDecrease;
+	m_sTransientAllocation -= sDecrease;
 	m_pAND->DecrementAllocationLevel (sDecrease);
     }
 
@@ -907,9 +993,6 @@ public:
     bool ReferenceNames (M_POP const *pReference, M_KOTM pKOTM) const {
 	return m_pAND->ReferenceNames (pReference, pKOTM);
     }
-    bool ReferenceNamesPToken (M_POP const *pReference, M_KOTM pKOTM) const {
-	return m_pAND->ReferenceNamesPToken (pReference, pKOTM);
-    }
 
     bool ReferenceNames (
 	M_POP const *pReference, M_AND *pThatSpace, M_POP const *pThatName
@@ -924,9 +1007,6 @@ public:
 
     bool ReferenceDoesntName (M_POP const *pReference, M_KOTM pKOTM) const {
 	return m_pAND->ReferenceDoesntName (pReference, pKOTM);
-    }
-    bool ReferenceDoesntNamePToken (M_POP const *pReference, M_KOTM pKOTM) const {
-	return m_pAND->ReferenceDoesntNamePToken (pReference, pKOTM);
     }
 
     bool ReferenceDoesntName (
@@ -980,9 +1060,6 @@ public:
     }
 
     /*-----------------------------------------------------------------------*/
-    void Mark (M_POP const *pReference);
-    void Mark (M_POP const *pReferences, unsigned int cReferences);
-
     bool Persist (M_POP *pReference);
     bool Persist (M_POP *pReferences, unsigned int cReferences);
 
@@ -993,15 +1070,19 @@ public:
 	m_pAND->Release (pReferences, cReferences);
     }
 
-    void StoreReference (
-	M_POP *pReference, M_ASD *pThatSpace, M_POP const *pThatName
-    ) const {
+    void StoreReference (M_POP *pReference, M_ASD *pThatSpace, M_POP const *pThatName) const {
 	m_pAND->StoreReference (pReference, pThatSpace, pThatName);
+    }
+    void StoreReference (M_POP *pReference, VContainerHandle *pThat) const {
+	m_pAND->StoreReference (pReference, pThat);
+    }
+    void StoreReference (M_POP *pReference, Vdd::Store *pThat) const {
+	m_pAND->StoreReference (pReference, pThat);
     }
 
 //  Known Object Access
 public:
-    M_KOTE const &GetBlockEquivalentClassFromPToken (VContainerHandle const *pHandle) const {
+    M_KOTE const &GetBlockEquivalentClassFromPToken (rtPTOKEN_Handle const *pHandle) const {
 	return m_pAND->GetBlockEquivalentClassFromPToken (pHandle);
     }
 
@@ -1092,19 +1173,39 @@ public:
     M_KOTE const &TheSelectorPToken () const {
 	return m_pAND->TheSelectorPToken ();
     }
+    rtPTOKEN_Handle *TheScalarPTokenHandle () const {
+	return m_pAND->TheScalarPTokenHandle ();
+    }
+    rtPTOKEN_Handle *TheSelectorPTokenHandle () const {
+	return m_pAND->TheSelectorPTokenHandle ();
+    }
 
 //  Container Management
-private:
+public:
     void GCQueueInsert (unsigned int xContainer);
-
+private:
     unsigned int GCQueueRemove () {
 	return m_pGCQueue->Remove ();
     }
 
+private:
+    void CreateIdentity (M_POP &rResult, VContainerHandle *pHandle);
 public:
-    M_CPD *CreateContainer (RTYPE_Type xType, size_t sContainer);
+    static size_t RoundContainerSize (size_t sContainer) {
+	return static_cast<size_t>(sContainer + 3 & ~3);
+    }
+
+    M_CPreamble *AllocateContainer (RTYPE_Type type, size_t size, unsigned int xContainer);
+    M_CPreamble *ReallocateContainer (M_CPreamble *containerAddress, size_t newSize);
+
+    VContainerHandle *CreateContainer (RTYPE_Type xType, size_t sContainer) {
+	return CreateContainer (xType, sContainer, 0);
+    }
+    VContainerHandle *CreateContainer (RTYPE_Type xType, size_t sContainer, VContainerHandle *pHandle);
 
     void DestroyContainer (M_CPreamble *containerAddress);
+private:
+    void DeallocateContainer (M_CPreamble *containerAddress);
 
 //  Container Enumeration
 public:
@@ -1137,14 +1238,20 @@ public:
     bool DisplayRetentionInfoForSpace	(VArgList const &rArgList);
     bool DisplaySpaceMappingInfo	(VArgList const &rArgList);
     bool FlushCachedResources		(VArgList const &rArgList);
+    bool HasTransientReferences		(VArgList const &rArgList); //  sets va_arg (pArguments,bool*), returns false when true;
     bool InitializeSpaceForGC		(VArgList const &rArgList);
     bool InitializeSpaceForTransientGC	(VArgList const &rArgList);
+    bool EnqueuePossibleCycles	        (VArgList const &rArgList);
+    bool EnqueueOmittingCycles	        (VArgList const &rArgList);
+    bool TraverseAndDetectCycles	(VArgList const &rArgList);
     bool LockSpace			(VArgList const &rArgList);
     bool MarkContainersInQueue		(VArgList const &rArgList);
     bool SweepUp			(VArgList const &rArgList);
     bool PersistReferences		(VArgList const &rArgList);
     bool PersistStructures		(VArgList const &rArgList);
     bool ValidateSpaceConsistency	(VArgList const &rArgList);
+
+    void ConsiderContainersInQueue(M_ASD::GCVisitBase* pGCV);
 
 //  Database Component Access
 public:
@@ -1181,17 +1288,20 @@ public:
 
 //  State
 private:
-    M_AND* const	m_pAND;
-    PS_ASD* const	m_pPASD;
-    unsigned int const	m_xSpace;
-    M_ASD*		m_pSuccessor;
-    double		m_iTransientAllocation;
-    Region		m_iReadWriteRegion,
-			m_iTRefRescanRegion,
-			m_iLiveReferencedRegion;
-    VContainerHandle*	m_pPCTCPCC;
-    GCQueue*		m_pGCQueue;
-    CT			m_iCT;
+    M_AND* const		m_pAND;
+    PS_ASD* const		m_pPASD;
+    unsigned int const		m_xSpace;
+    M_ASD*			m_pSuccessor;
+    unsigned __int64		m_sTransientAllocation;
+    Region			m_iReadWriteRegion,
+				m_iTRefRescanRegion,
+				m_iLiveReferenceRegion;
+    VReference<rtPCT_Handle>	m_pPCTCPCC;
+    GCQueue::Pointer		m_pGCQueue;
+    CT				m_iCT;
+
+    static GCVisitMark		m_GCMarker;
+    static GCVisitCycleDetect   m_GCCycleDetect;
 };
 
 
@@ -1326,5 +1436,6 @@ char const *M_ASD::CT::ndfPathName () const {
 unsigned int M_ASD::CT::spaceIndex () const {
     return m_pASD->Index ();
 }
+
 
 #endif

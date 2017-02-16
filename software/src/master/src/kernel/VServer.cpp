@@ -40,8 +40,9 @@
 
 Vca::VServer::VServer (Context *pContext) : BaseClass (pContext), VActivityRelay (this) {
 //  If requested, offer one of my directory entries, ...
-    if (char const* pOfferName = commandStringValue ("offerEntry"))
+    if (char const* pOfferName = commandStringValue ("offerEntry")) {
 	aggregate (new Gofer::Named<IVUnknown,IDirectory>(pOfferName));
+    }
 
 //  If requested, offer a/my directory, ...
     if (commandSwitchValue ("offerDirectory")) {

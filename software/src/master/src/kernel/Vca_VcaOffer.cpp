@@ -61,6 +61,12 @@ Vca::VcaOffer::VcaOffer (
 
 Vca::VcaOffer::~VcaOffer () {
     traceInfo ("Destroying VcaOffer");
+#ifdef TracingVcaMemoryLeaks
+    log("PoolMemoryLeak ~VcaOffer site info:: referenceCount: %u exportCount: %u exportedInterfaceCount: %u instantiatedInterfaceCount: %u referencedInterfaceCount: %u", 
+	m_pSiteObject->referenceCount(), m_pSiteObject->exportCount(), m_pSiteObject->exportedInterfaceCount(), 
+	m_pSiteObject->instantiatedInterfaceCount(), m_pSiteObject->referencedInterfaceCount()
+    );
+#endif
 }
 
 /******************************
@@ -77,6 +83,11 @@ void Vca::VcaOffer::incrementOfferCount () {
 void Vca::VcaOffer::decrementOfferCount () {
     if (m_bOffered.clearIfSet ())
 	m_iOffering.decrementOfferCount (this);
+
+#ifdef TracingVcaMemoryLeaks
+    log("PoolMemoryLeak VcaOffer::decrementOfferCount referenceCount: %u exportCount: %u exportedInterfaceCount: %u instantiatedInterfaceCount: %u referencedInterfaceCount: %u", 
+	referenceCount(), exportCount(), exportedInterfaceCount(), instantiatedInterfaceCount(), referencedInterfaceCount());
+#endif
 }
 
 
@@ -87,10 +98,10 @@ void Vca::VcaOffer::decrementOfferCount () {
  ****************************/
 
 void Vca::VcaOffer::ReleaseExportEx (
-    IPeer2 *pRole, uuid_t const &rObjectSite, VcaSSID const &rObjectSSID,
-    U32 cExports, U32 cWeakExports, U32 cMessages
+    VMessageHolder<IPeer_Ex2> const& rMessage, uuid_t const &rObjectSite, 
+    VcaSSID const &rObjectSSID, U32 cExports, U32 cWeakExports, U32 cMessages
 ) {
-    m_pSiteInterface->ReleaseExportEx (rObjectSite, rObjectSSID, cExports, cWeakExports, cMessages);
+    m_pSiteObject->ReleaseExportEx (rMessage, rObjectSite, rObjectSSID, cExports, cWeakExports, cMessages);
 }
 
 /****************************
@@ -135,13 +146,13 @@ void Vca::VcaOffer::SinkInterface (IPeer *pRole, IVUnknown* pUnknown) {
 }
 
 void Vca::VcaOffer::ReleaseExport (
-    IPeer*		pRole,
+    VMessageHolder<IPeer_Ex2> const& rMessage,
     uuid_t const&	rObjectSite,
     VcaSSID const&	rObjectSSID,
     U32			cExports,
     U32			cMessages
 ) {
-    m_pSiteInterface->ReleaseExport (rObjectSite, rObjectSSID, cExports, cMessages);
+    m_pSiteObject->ReleaseExport (rMessage, rObjectSite, rObjectSSID, cExports, cMessages);
 }
 
 void Vca::VcaOffer::ReleaseImport (
@@ -193,8 +204,12 @@ void Vca::VcaOffer::GetLocalInterfaceFor (
     m_pSiteInterface->GetLocalInterfaceFor (pPeer, pReceiver);
 }	
 
-void Vca::VcaOffer::OnDone (IPeer *pRole) {
-    m_pSiteInterface->OnDone ();
+void Vca::VcaOffer::OnDone (VMessageHolder<IPeer_Ex2> const& rMessage) {
+    m_pSiteObject->OnDone (rMessage);
+#ifdef TracingVcaMemoryLeaks
+    log("PoolMemoryLeak VcaOffer::OnDone sequence number: %u referenceCount: %u exportCount: %u exportedInterfaceCount: %u instantiatedInterfaceCount: %u referencedInterfaceCount: %u", 
+	rMessage.message()->sequenceNumber(), referenceCount(), exportCount(), exportedInterfaceCount(), instantiatedInterfaceCount(), referencedInterfaceCount());
+#endif
 }
 
 void Vca::VcaOffer::MakeConnection (

@@ -361,7 +361,7 @@ void Vca::VcaOID::logIfInteresting (char const *pWhere) const {
 
 void Vca::VcaOID::logIt (char const *pWhere) const {
     static bool bTracingOIDs (V::GetEnvironmentBoolean ("TracingOIDs"));
-    if (bTracingOIDs && isInteresting ()) {
+    if (bTracingOIDs && isInteresting () && !isAtExit ()) {
 	static V::VLogger const iLogger (VString () << "p_" << getpid () << "_oid.log");
 
 	static V::VTwiddler bInitialized;

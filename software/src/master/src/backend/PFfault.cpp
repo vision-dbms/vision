@@ -110,15 +110,15 @@
  *	NOTHING
  *
  *****/
-PrivateFnDef void LoadAWithNilRefedStore (
-    VPrimitiveTask *pTask, M_CPD *store, int ptokenRefIndex
-) {
-    rtLINK_CType* linkc = rtLINK_PosConstructor (V_TOTSC_PToken, -1);
+PrivateFnDef void LoadAWithNilRefedStore (VPrimitiveTask *pTask, Vdd::Store *pStore) {
+    rtPTOKEN_Handle::Reference pStorePPT (pStore->getPToken ());
+
+    rtLINK_CType *linkc = rtLINK_PosConstructor (V_TOTSC_PToken);
     rtLINK_AppendRepeat (
-	linkc, rtPTOKEN_BaseElementCount (store, ptokenRefIndex), pTask->cardinality ()
+	linkc, pStorePPT->cardinality (), pTask->cardinality ()
     );
-    linkc->Close (store, ptokenRefIndex);
-    pTask->loadDucWithMonotype (store, linkc);
+    linkc->Close (pStorePPT);
+    pTask->loadDucWithMonotype (pStore, linkc);
     linkc->release ();
 }
 
@@ -153,12 +153,11 @@ V_DefinePrimitive (AccessFaultStringField) {
     }
 
 /*****  Make the lstore ... *****/
-    M_CPD *lstore = rtLSTORE_NewStringStoreFromUV (charuv);
+    rtLSTORE_Handle::Reference lstore (rtLSTORE_NewStringStoreFromUV (charuv));
     charuv->release ();
 
 /*****  Load the accumulator with the store .....,  *****/
-    LoadAWithNilRefedStore (pTask, lstore, rtLSTORE_CPx_RowPToken);
-    lstore->release ();
+    LoadAWithNilRefedStore (pTask, lstore);
 }
 
 
@@ -177,29 +176,28 @@ V_DefinePrimitive (AccessFaultIntegerField) {
     }
 
 /*****  Create a vector containing the integer uvector ...  *****/
-    M_CPD *ptoken = pTask->NewCodPToken (UV_CPD_ElementCount (intuv));
-    M_CPD *vector = rtVECTOR_New (ptoken);
-    ptoken->release ();
+    rtPTOKEN_Handle::Reference ptoken (pTask->NewCodPToken (UV_CPD_ElementCount (intuv)));
+    rtVECTOR_Handle::Reference vector (new rtVECTOR_Handle (ptoken));
 
     DSC_Descriptor sourceDsc;
     sourceDsc.constructMonotype (intuv);
-    intuv->release ();
 
 /*	ref = pos of vector
 	pos = pos of src	*/
-    rtLINK_CType *linkc = rtLINK_RefConstructor (vector, rtVECTOR_CPx_PToken);
+    rtLINK_CType *linkc = rtLINK_RefConstructor (ptoken);
     rtLINK_AppendRange (
 	linkc, 0, rtPTOKEN_BaseElementCount (intuv, UV_CPx_PToken)
     );
     linkc->Close (intuv, UV_CPx_PToken);
 
-    rtVECTOR_Assign (vector, linkc, &sourceDsc);
+    vector->setElements (linkc, sourceDsc);
+
+    intuv->release ();
     linkc->release ();
     sourceDsc.clear ();
 
 /*****  Load the accumulator with the result ...  *****/
-    LoadAWithNilRefedStore (pTask, vector, rtVECTOR_CPx_PToken);
-    vector->release ();
+    LoadAWithNilRefedStore (pTask, vector);
 }
 
 

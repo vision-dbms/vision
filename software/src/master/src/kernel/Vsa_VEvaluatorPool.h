@@ -19,12 +19,13 @@
 
 #include "Vca_IDataSource.h"
 #include "Vca_VTimer.h"
-#include "Vsa_IEvaluatorPool_Ex4.h"
-#include "Vsa_IEvaluatorPoolSettings_Ex7.h"
+#include "Vsa_IEvaluatorPool_Ex5.h"
+#include "Vsa_IEvaluatorPoolSettings_Ex8.h"
 #include "Vsa_IEvaluatorSourceControl.h"
 #include "Vsa_VPoolBroadcast.h"
 #include "Vsa_VPoolWorker.h"
 #include "Vsa_VPoolWorkerGeneration.h"
+#include "Vsa_VOdometer.h"
 
 #include "Vca_VTrigger.h"
 
@@ -59,9 +60,28 @@ namespace Vsa {
         typedef Vca::VTrigger<ThisClass>    FlushTrigger;
         typedef IVReceiver<VString const&>  VStringReceiver;
         typedef IVReceiver<bool>            BoolReceiver;
+	typedef VkMapOf<VString, char const*, char const*, VOdometer<Vca::U32>::Reference> OdometerTable32; 
+	typedef VkMapOf<VString, char const*, char const*, VOdometer<Vca::U64>::Reference> OdometerTable64; 
 
     //  PoolSettings
     public:
+	class Vsa_API OdometerSettings : public VEvaluator::Settings {
+	    DECLARE_CONCRETE_RTTLITE (OdometerSettings, VEvaluator::Settings);
+	public:
+	    Vca::U64 timerTime;
+	    Vca::U64 compressedBucketSize;
+	    Vca::U64 totalTimeRange;
+	    Vca::U64 uncompressedTotalTimeRange;
+	    VString name;
+
+	    OdometerSettings() {
+		timerTime = 5;					//  5 seconds
+		compressedBucketSize = 30;			// 30 seconds
+		totalTimeRange = 8 * 60 * 60;			//  8 hours
+		uncompressedTotalTimeRange = 8 * 60 * 60;	//  8 hours
+	    }
+	};
+	
         /**
          * Settings object abstracts pool configuration.
          */
@@ -99,7 +119,10 @@ namespace Vsa {
             ~PoolSettings () {
                 traceInfo ("Destroying VEvaluatorPool::PoolSettings");
             }
-
+			
+		public:
+			void AddOdometerSetting(OdometerSettings *settings); 
+			
         /// @name IObjectSource Role
         //@{
         private:
@@ -112,15 +135,14 @@ namespace Vsa {
         //  IObjectSource Methods
         public:
           void Supply (Vca::IObjectSource *pRole, Vca::IObjectSink *pClient);
-
-
-        /// @name IEvaluatorPoolSettings_Ex7 Role
+		
+		/// @name IEvaluatorPoolSettings_Ex8 Role
         //@{
         private:
-            Vca::VRole<ThisClass,IEvaluatorPoolSettings_Ex7> m_pIEvaluatorPoolSettings;
+            Vca::VRole<ThisClass,IEvaluatorPoolSettings_Ex8> m_pIEvaluatorPoolSettings;
         public:
-            void getRole (IEvaluatorPoolSettings_Ex7::Reference &rpRole);
-
+            void getRole (IEvaluatorPoolSettings_Ex8::Reference &rpRole);	
+			
         //  IEvaluatorPoolSettings Methods
         public:
             void MakeControl (
@@ -151,12 +173,14 @@ namespace Vsa {
             );
             void SetWorkerMinimum (IEvaluatorPoolSettings *pRole, Vca::U32 iValue);
 
-            void GetEvaluationAttemptMaximum (
-                IEvaluatorPoolSettings *pRole, IVReceiver<Vca::U32> *pClient
-            );
-            void SetEvaluationAttemptMaximum (
-                 IEvaluatorPoolSettings *pRole, Vca::U32 iValue
-            );
+			void GetEvaluationAttemptMaximum (
+				IEvaluatorPoolSettings *pRole, IVReceiver<Vca::U32> *pClient
+			);
+			
+			void SetEvaluationAttemptMaximum (
+				IEvaluatorPoolSettings *pRole, Vca::U32 iValue
+			);
+			
             void GetWorkerGenerationLimit (
                 IEvaluatorPoolSettings *pRole, IVReceiver<Vca::U32> *pClient
             );
@@ -258,7 +282,18 @@ namespace Vsa {
             void GetResultLogLength (IEvaluatorPoolSettings_Ex7 *pRole, IVReceiver<Vca::U32> *pClient);
             void SetResultLogLength (IEvaluatorPoolSettings_Ex7 *pRole, Vca::U32 iValue);
         //@}
-
+		
+		//  IEvaluatorPoolSettings_Ex8 Methods
+        public:
+            void GetEvaluationOnErrorAttemptMaximum (IEvaluatorPoolSettings_Ex8 *pRole, IVReceiver<Vca::U32> *pClient);
+            void SetEvaluationOnErrorAttemptMaximum (IEvaluatorPoolSettings_Ex8 *pRole, Vca::U32 iValue);
+            void GetEvaluationTimeOutAttemptMaximum (IEvaluatorPoolSettings_Ex8 *pRole, IVReceiver<Vca::U32> *pClient);
+            void SetEvaluationTimeOutAttemptMaximum (IEvaluatorPoolSettings_Ex8 *pRole, Vca::U32 iValue);
+        //@}
+		
+		public:
+			VkDynamicArrayOf<OdometerSettings::Reference> GetOdometerSettings () const;
+		
         /// @name Query
         //@{
         public:
@@ -285,9 +320,17 @@ namespace Vsa {
             Vca::U32 workerMinimum () const {
                 return m_iWorkerMinimum;
             }
-            Vca::U32 evaluationAttemptMaximum () const {
-                return m_cEvaluationAttemptMaximum;
+			Vca::U32 evaluationAttemptMaximum () const {
+				return m_cEvaluationAttemptMaximum;
+			}
+			
+            Vca::U32 evaluationOnErrorAttemptMaximum () const {
+                return m_cEvaluationOnErrorAttemptMaximum;
             }
+            Vca::U32 evaluationTimeOutAttemptMaximum () const {
+                return m_cEvaluationTimeOutAttemptMaximum;
+            }
+
             Vca::U32 workerMinimumAvailable () const {
                 return m_iWorkerMinimumAvailable;
             }
@@ -328,7 +371,7 @@ namespace Vsa {
                 return m_iResultLogLength;
             }
         //@}
-
+		
         /// @name Update
         //@{
         public:
@@ -347,8 +390,19 @@ namespace Vsa {
             void setWorkerMinimumTo (Vca::U32 iValue) {
                 m_iWorkerMinimum = iValue;
             }
-            void setEvaluationAttemptMaximumTo (Vca::U32 cMax) {
-                m_cEvaluationAttemptMaximum = cMax;
+	    void setEvaluationAttemptMaximumTo (Vca::U32 cMax) {
+		m_cEvaluationAttemptMaximum = cMax;
+	    }
+            void setEvaluationOnErrorAttemptMaximumTo (Vca::U32 cMax) {
+                m_cEvaluationOnErrorAttemptMaximum = cMax;
+            }
+            void setEvaluationTimeOutAttemptMaximumTo (Vca::U32 cMax) {
+                // m_cEvaluationTimeOutAttemptMaximum = cMax;
+		//    Disallow Timeout retries. A timeout generates a cancel which generates an error. 
+		//      in the present design, the cancel error cannot be distinguished from a true error
+		//      and the timeout retry may be abandoned or duplicated depending on the onErrorAttempt setting.
+
+                m_cEvaluationTimeOutAttemptMaximum = 0;
             }
             void setWorkerMinimumAvailableTo (Vca::U32 iValue) {
                  m_iWorkerMinimumAvailable = iValue;
@@ -412,8 +466,13 @@ namespace Vsa {
             Vca::U32                    m_iWorkerMinimum;
             /** Maximum number of workers to simultaneously spawn. */
             Vca::U32                    m_iWorkersBeingCreatedMaximum;
+			/** Maximum number of retries that a query should go through before an error should be returned. */
+			Vca::U32                    m_cEvaluationAttemptMaximum;
             /** Maximum number of retries that a query should go through before an error should be returned. */
-            Vca::U32                    m_cEvaluationAttemptMaximum;
+            Vca::U32                    m_cEvaluationOnErrorAttemptMaximum;
+			/** Maximum number of retries that a query should go through before an time out should be returned. */
+            Vca::U32                    m_cEvaluationTimeOutAttemptMaximum;
+
             /** Minimum number of workers that should be available at all times. */
             Vca::U32                    m_iWorkerMinimumAvailable;
             /** Maximum number of available workers before firing should occur. */
@@ -440,6 +499,8 @@ namespace Vsa {
             Vca::U32                    m_iQueryLogLength;
             /** Maximum length of result string in log messages (controls truncation of result strings in logs). */
             Vca::U32                    m_iResultLogLength;
+			/** Table of odometer settings for each individual odometer */
+			VkDynamicArrayOf<OdometerSettings::Reference> 	m_Odometers;
         };
         friend class PoolSettings;
 
@@ -456,7 +517,7 @@ namespace Vsa {
     //  Destruction
     private:
         ~VEvaluatorPool ();
-
+	
     //  Base Class Roles
     public:
         using BaseClass::getRole;
@@ -475,7 +536,7 @@ namespace Vsa {
     //@}
 
     /// @name IEvaluatorPool
-    //@{
+    //@{ 
     public:
         void GetSettings   (IEvaluatorPool *pRole, IVReceiver<IEvaluatorPoolSettings*>*pClient);
         void AddEvaluator  (IEvaluatorPool *pRole, IEvaluator *pEvaluator);
@@ -517,14 +578,29 @@ namespace Vsa {
 
     /// @name IEvaluatorPool_Ex4
     //@{
-    private:
-        Vca::VRole<ThisClass,IEvaluatorPool_Ex4> m_pIEvaluatorPool;
     public:
-        void getRole (IEvaluatorPool_Ex4::Reference &rpRole);
-
         void QueryDetails (Vsa::IEvaluatorPool_Ex4 *pRole, Vca::U32 iID, IVReceiver<const VString&>* pClient);
         void CancelQuery (Vsa::IEvaluatorPool_Ex4 *pRole, Vca::U32 iID, BoolReceiver *pClient);
     //@}
+    
+    /// @name IEvaluatorPool_Ex5
+    // @{
+	private:
+		Vca::VRole<ThisClass,IEvaluatorPool_Ex5> m_pIEvaluatorPool;
+	public:
+        void getRole (IEvaluatorPool_Ex5::Reference &rpRole);
+	
+        void StatSum (IEvaluatorPool_Ex5 *pRole, VString, Vca::U64, Vca::U64, IVReceiver<VString const &>*);
+        void StatDivide (IEvaluatorPool_Ex5 *pRole, VString, VString, Vca::U64, Vca::U64, IVReceiver<Vca::F64>*);
+        void StatMax (IEvaluatorPool_Ex5 *pRole, VString, Vca::U64, Vca::U64, IVReceiver<Vca::U32>*, IVReceiver<V::VTime const &>*);
+        void StatMin (IEvaluatorPool_Ex5 *pRole, VString, Vca::U64, Vca::U64, IVReceiver<Vca::U32>*, IVReceiver<V::VTime const &>*);
+        void StatMaxString (IEvaluatorPool_Ex5 *pRole, VString, Vca::U64, Vca::U64, IVReceiver<VString const &>*);
+        void StatMinString (IEvaluatorPool_Ex5 *pRole, VString, Vca::U64, Vca::U64, IVReceiver<VString const &>*);
+		
+        void AllStatValues (IEvaluatorPool_Ex5 *pRole, VString, IVReceiver<VkDynamicArrayOf<Vca::U64> const &>*, 
+                            IVReceiver<VkDynamicArrayOf<V::VTime> const &>*, IVReceiver<VkDynamicArrayOf<Vca::U64> const &>*, 
+                            IVReceiver<VkDynamicArrayOf<Vca::U64> const &>*, IVReceiver<VkDynamicArrayOf<Vca::F64> const &>*); 
+		
 
     /// @name Evaluation Creation
     //@{
@@ -576,8 +652,14 @@ namespace Vsa {
         Vca::U32 workerCreationFailureSoftLimit () const {
             return m_pSettings->workerCreationFailureSoftLimit ();
         }
-        Vca::U32 evaluationAttemptMaximum () const {
-            return m_pSettings->evaluationAttemptMaximum ();
+		Vca::U32 evaluationAttemptMaximum () const {
+			return m_pSettings->evaluationAttemptMaximum ();
+		}
+        Vca::U32 evaluationOnErrorAttemptMaximum () const {
+            return m_pSettings->evaluationOnErrorAttemptMaximum ();
+        }
+        Vca::U32 evaluationTimeOutAttemptMaximum () const {
+            return m_pSettings->evaluationTimeOutAttemptMaximum ();
         }
         Vca::U64 evaluationTimeOut () const {
             return m_pSettings->evaluationTimeOut ();
@@ -606,9 +688,19 @@ namespace Vsa {
         bool exceedsIdleWorkers () const {
             return excessIdleWorkers() > 0;
         }
+        /**
+         * If the number of available workers is greater than the number
+         * specified by the tuning parameter, then we may have an excess number
+	 * of idle workers, and be in a state where the pool can think about
+	 * shrinking to maxAvailable. The number of excess workers is the smaller value of
+	 * (1) the difference between the number of available workers and the maxAvailable setting and
+	 * (2) the difference between the total number of workers and the minWorker setting.
+	 *
+	 * @return the number of excess idle workers
+         */
         Vca::U32 excessIdleWorkers () const {
-            return (onlineAvailWorkers () > workerMaximumAvailable () && onlineAvailWorkers () > workerMinimum ()) ?
-		V_Min (onlineAvailWorkers () - workerMaximumAvailable (), onlineAvailWorkers () - workerMinimum ()) :
+            return onlineAvailWorkers () > workerMaximumAvailable () ?
+		V_Min (onlineAvailWorkers () - workerMaximumAvailable (), m_cOnlineWorkers - workerMinimum ()) :
 		0;
         }
         bool hasMaxBCEvaluationsInProgress () const {
@@ -632,6 +724,13 @@ namespace Vsa {
         }
     //@}
 
+	
+	/// @name OdometerManagement
+	//@{
+	protected:
+		void setupOdometers ();   
+	//@}
+	
     /// @name Access
     //@{
     public:
@@ -682,9 +781,16 @@ namespace Vsa {
         void setWorkerSourceTo (IEvaluatorSource *pWorkerSource) {
             m_pSettings->setWorkerSourceTo (pWorkerSource);
         }
-        void setEvaluationAttemptMaxTo (Vca::U32 cMax) {
-            m_pSettings->setEvaluationAttemptMaximumTo (cMax);
+		void setEvaluationAttemptMaxTo (Vca::U32 cMax) {
+			m_pSettings->setEvaluationAttemptMaximumTo (cMax);	
+		}
+        void setEvaluationOnErrorAttemptMaxTo (Vca::U32 cMax) {
+            m_pSettings->setEvaluationOnErrorAttemptMaximumTo (cMax);
         }
+		void setEvaluationTimeOutAttemptMaxTo (Vca::U32 cMax) {
+            m_pSettings->setEvaluationTimeOutAttemptMaximumTo (cMax);
+        }
+
         void setTempWorkerMinimumTo (Vca::U32 cMin) {
 	    // Should never be less than the configured minimum .. may be greater..
             m_cTempWorkerMinimum = V_Max (cMin, m_pSettings->workerMinimum ());
@@ -819,6 +925,7 @@ namespace Vsa {
         void resume  ();
         void flushWorkers (Vca::VTrigger<VEvaluatorPool> *pTrigger=0);
         void hardRestart       ();
+		void resumeHardRestartSuspended (Vca::VTrigger<ThisClass> *pTrigger);
         void resumeHardRestart (Vca::VTrigger<ThisClass> *pTrigger);
         void add     (IEvaluator *pEvaluator);
         void hardstop (Vca::ITrigger *pTrigger=0);
@@ -1002,21 +1109,21 @@ namespace Vsa {
     //@}
 
     //  State
-    protected:
+    protected:	
         /**
          * Count of currently online workers across all generations.
          */
-        Vca::U32            m_cOnlineWorkers;
+        VOdometer<Vca::U32>            m_cOnlineWorkers; 
 
         /**
          * Count of currently online available workers across all generations.
          */
-        Vca::U32            m_cOnlineAvailWorkers;
+        VOdometer<Vca::U32>           m_cOnlineAvailWorkers;
 
         /**
          * Count of currently online works in progress across all generations.
          */
-        Vca::U32            m_cOnlineWIPs;
+        VOdometer<Vca::U32>           m_cOnlineWIPs;
 
         /**
          * Count of workers currently being created across all generations.
@@ -1031,7 +1138,7 @@ namespace Vsa {
         /**
          * Count of retired workers across all generations.
          */
-        Vca::U32            m_cWorkersRetired;
+        VOdometer<Vca::U32>          m_cWorkersRetired;
 
         /**
          * Count of offline workers across all generations.
@@ -1113,6 +1220,9 @@ namespace Vsa {
 
         /** Trigger used to defer hard stop events. */
         Vca::ITrigger::Reference        m_pHardStopTrigger;
+	
+		OdometerTable32					m_iOdometers32;
+		OdometerTable64					m_iOdometers64;
     };
 }
 

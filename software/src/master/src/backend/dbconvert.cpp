@@ -654,6 +654,7 @@ PrivateVarDef struct time OperationEndTime;
 
 PrivateVarDef bool NoCleanup	= false;
 PrivateVarDef bool Verbose	= false;
+PrivateVarDef bool CleanupOnly	= false;
 
 
 /*************************************
@@ -1888,8 +1889,15 @@ PrivateFnDef bool ExplicitConverter () {
     GOPT_SeekExtraArgument (0, 0);
     while (IsntNil (pSegmentPathName = GOPT_GetExtraArgument ())) {
 	bool fSegmentForRemoval = false;
-
 	fExplicitSegmentsSpecified = true;
+
+	if (IsntNil (GOPT_GetValueOption ("SlaveNDFPathName")) ||
+	    IsntNil (GOPT_GetValueOption ("MasterNDFPathName"))) {
+	    RaiseApplicationException (
+	       "Mode Ambiguity: NDF option specified and explicit segment (%s) conversion requested -- Exiting.",
+	       pSegmentPathName
+	   );
+	}
 	
 	if (chmod (pSegmentPathName, 0644) < 0) MessageType_DisplaySystemMessage (
 	    MessageType_Warning, "Segment %s: Could Not Mark Read-Write", pSegmentPathName
@@ -2745,6 +2753,11 @@ void VNetworkHandle::CleanupOSD () const {
     unsigned int		xSpace;
     VSpaceHandle*		pSpaceHandle;
 
+    if (Verbose) MessageType_DisplayApplicationMessage (
+	MessageType_Info,
+	"Starting OSD Cleanup ... (move segments to dsegs)"
+    );
+
     for (xSpace = 0; xSpace <= M_POP_MaxObjectSpace; xSpace++)
 	if (IsntNil (pSpaceHandle = m_pSpaceHandle[xSpace]))
 	    pSpaceHandle->CleanupOSD ();
@@ -3467,7 +3480,8 @@ void VConversionAgent::ProcessSlave () {
 	return;
     }
 
-    m_pNetworkHandle->FindOrRetrieveSegments ();
+    if (!CleanupOnly)
+	m_pNetworkHandle->FindOrRetrieveSegments ();
 
     if (NoCleanup)
 	return;
@@ -3794,6 +3808,9 @@ GOPT_BeginOptionDescriptions
     GOPT_SwitchOptionDescription (
 	"VerboseMode"		, 'v', NilOf (char*)
     )
+    GOPT_SwitchOptionDescription (
+	"CleanupOnly"		, 'c', NilOf (char*)
+    )
 
 GOPT_EndOptionDescriptions;
 
@@ -3827,6 +3844,10 @@ int main (int argc, char* argv[]) {
 
     NoCleanup	= GOPT_GetSwitchOption ("NoCleanup") > 0;
     Verbose	= GOPT_GetSwitchOption ("VerboseMode") > 0;
+    CleanupOnly = GOPT_GetSwitchOption ("CleanupOnly") > 0;
+
+    if (NoCleanup && CleanupOnly)
+	RaiseApplicationException ("NoCleanup(-p) and CleanupOnly(-c) both specified");
 
     if (!ExplicitConverter ()) {
 	g_iConversionAgent.Construct ();

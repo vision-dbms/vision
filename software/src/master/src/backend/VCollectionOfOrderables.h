@@ -25,7 +25,7 @@ protected:
 
 //  Construction
 protected:
-    VCollectionOfOrderables (M_CPD* pDPT) : VCollection (pDPT) {
+    VCollectionOfOrderables (rtPTOKEN_Handle *pDPT) : VCollection (pDPT) {
     }
 
 //  Destruction
@@ -39,8 +39,8 @@ public:
 
 //  Ordering
 public:
-    M_CPD* orderDPT ();
-    M_CPD* ordering ();
+    rtPTOKEN_Handle *orderDPT ();
+    M_CPD *ordering ();
 
     unsigned int const* orderingArray ();
 
@@ -63,9 +63,9 @@ public:
 
 //  State
 protected:
-    VCPDReference	m_pOrderDPT;
-    VCPDReference	m_pOrdering;
-    unsigned int const*	m_pOrderingArray;
+    rtPTOKEN_Handle::Reference	m_pOrderDPT;
+    VCPDReference		m_pOrdering;
+    unsigned int const*		m_pOrderingArray;
 };
 
 

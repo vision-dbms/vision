@@ -33,6 +33,8 @@
 #include "Vxa_IVSNFTaskImplementation3NC.h"
 
 #include "V_VLogger.h"
+#include "VTransientServices.h"
+
 
 
 /************************
@@ -325,10 +327,14 @@ void VSNFTaskHolder::GetParameter (IVSNFTaskHolder *pRole, unsigned int xParamet
 //  ... and return it ...
 	    rVDatum.normalize ();
 	    DSC_Descriptor& rDatum = rVDatum.contentAsMonotype ();
-	    M_CPD *const store = rDatum.storeCPD ();
+
+	    Vdd::Store *store = rDatum.store ();
 	    RTYPE_Type const rtype = rDatum.pointerRType ();
 	    RTYPE_Type const xStoreRType = rDatum.storeRType ();
 	    unsigned int const elementCount = taskCardinality ();
+
+	    rtBLOCK_Handle::Strings pBlockStrings;
+	    rtLSTORE_Handle::Strings pLStoreStrings;
 
 	    VString sWhere;
 	    if (g_iLogger.isActive ())
@@ -376,28 +382,15 @@ void VSNFTaskHolder::GetParameter (IVSNFTaskHolder *pRole, unsigned int xParamet
 
 		pImplementation->SetToDouble (xParameter, dynamicArray);
     // ... string, ...
-	    } else if ((xStoreRType == RTYPE_C_Block && rtype == RTYPE_C_IntUV) || 
-		       (xStoreRType == RTYPE_C_ListStore &&
-			(rtype == RTYPE_C_Link || rtype == RTYPE_C_RefUV) &&
-			rtLSTORE_CPD_StringStore (store)))
-	    {
-		if(m_pSNFTask->isScalar	()) { /*****  Scalar Case  *****/
-		    M_CPD *const charCPD = RTYPE_C_ListStore == (RTYPE_Type)M_CPD_RType (store)
-			             ? rtLSTORE_CPD_ContentStringsCPD (store) : NilOf (M_CPD*);
-		    unsigned int sValue = DSC_Descriptor_Scalar_Int (rDatum);
-		    char const *const pString = charCPD
-			? (rtCHARUV_CPD_Array (charCPD) + rtLSTORE_CPD_BreakpointArray (store)[sValue])
-			: (rtBLOCK_CPD_StringSpace (store) + (sValue));
-		    VkDynamicArrayOf<VString> dynamicArray (1);
-		    dynamicArray[0].append (pString);
-
-		    if (g_iLogger.isActive ())
-			g_iLogger.log (taskId (), sWhere, dynamicArray);
-
+	    } else if (pBlockStrings.setTo (store) || pLStoreStrings.setTo (store)) {
+		if (m_pSNFTask->isScalar ()) { /*****  Scalar Case  *****/
+		    VkDynamicArrayOf<VString> dynamicArray(1);
+		    dynamicArray[0].append (
+			pBlockStrings.isSet ()
+			? pBlockStrings[DSC_Descriptor_Scalar_Int (rDatum)]
+			: pLStoreStrings[DSC_Descriptor_Scalar_Int (rDatum)]
+		    );
 		    pImplementation->SetToVString (xParameter, dynamicArray );
-		    /*****  cleanup ... *****/
-		    if (charCPD)
-			charCPD->release ();
 		} else { /*****  Non-scalar case  *****/
 		    //	size_t sValue = DSC_Descriptor_Scalar_Int (rDatum);
 		    unsigned int arraySize = 0;
@@ -406,12 +399,12 @@ void VSNFTaskHolder::GetParameter (IVSNFTaskHolder *pRole, unsigned int xParamet
 		    #define CalcLStoreTotalSize(value)	arraySize ++
                     #define CalcBlockTotalSize(value)	arraySize ++
                     #define LStoreFill(value) {\
-                        dynamicArray[arrayIndex].append(V_LStoreString (store, charCPD, value));\
-                        arrayIndex ++;\
+			dynamicArray[arrayIndex].append(pLStoreStrings[value]);\
+                        arrayIndex++;\
                     }
                     #define BlockFill(value) {\
-                        dynamicArray[arrayIndex].append(V_BlockString (store, value));\
-                        arrayIndex ++;\
+                        dynamicArray[arrayIndex].append(pBlockStrings[value]);\
+                        arrayIndex++;\
                     }
 
 		    RTYPE_Type const rtype = rDatum.pointerRType ();
@@ -419,28 +412,24 @@ void VSNFTaskHolder::GetParameter (IVSNFTaskHolder *pRole, unsigned int xParamet
 
 		    VkDynamicArrayOf<VString> dynamicArray;
 
-		    if (!sourceIsBlockString) {/*****  LStore Strings  *****/
-			M_CPD *const charCPD = rtLSTORE_CPD_ContentStringsCPD (store);
-
-			/*****  Calculate the total size of dynamic array ... *****/
+		    
+		    if (!sourceIsBlockString) { //  ... LStore strings
+		    //  Calculate the size of dynamic array ... 
 			DSC_Traverse (rDatum, CalcLStoreTotalSize);
 
-			/*****  Append the new dynamic array ... *****/
+		    //  ... preallocate it, ...
 			dynamicArray.Append (arraySize);
 
-			/*****  Fill the character uvector ... *****/
+		    //  ... and set its content:
 			DSC_Traverse (rDatum, LStoreFill);
-
-			/*****  cleanup ... *****/
-			charCPD->release ();
-		    } else {/*****  Block Strings  *****/
-			/*****  Calculate the total size of dynamic array ... *****/
+		    } else { //  ... Block strings
+		    //  Calculate the size of dynamic array ...
 			DSC_Traverse (rDatum, CalcBlockTotalSize);
 
-			/*****  Append the new dynamic array ... *****/
+		    //  ... pre-allocate it, ...
 			dynamicArray.Append (arraySize);
 
-			/*****  Fill the character uvector ... *****/
+		    //  ... and set its content:
 			DSC_Traverse (rDatum, BlockFill);
 		    }
 
@@ -834,6 +823,8 @@ void VSNFTaskHolder::start (ICollection *pExternalObject) {
 
 void VSNFTaskHolder::onDeadPeer (Trigger *pTrigger) {
     static bool const bSuppressException = V::GetEnvironmentBoolean ("VAcceptExtIntError");
+
+    notify (19, "#19: VSNFTaskHolder::onDeadPeer: Bridge peer process is disconnected\n");
     onError (0, "Object Disconnected");
     if (!bSuppressException)
 	raiseException (EC__ExternalInterfaceError, "Object Disconnected");

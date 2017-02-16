@@ -47,7 +47,7 @@ protected:
 
     //  Construction
     public:
-	Descriptor () : m_pStoreHandle (0), m_pAssignmentLinkc (0) {
+	Descriptor () : m_pAssignmentLinkc (0) {
 	}
 
     //  Destruction
@@ -64,22 +64,22 @@ protected:
     //  Comparison
     public:
 	bool operator <  (Descriptor const& rOther) const {
-	    return m_pStoreHandle <  rOther.m_pStoreHandle;
+	    return m_pStore <  rOther.m_pStore;
 	}
 	bool operator <= (Descriptor const& rOther) const {
-	    return m_pStoreHandle <= rOther.m_pStoreHandle;
+	    return m_pStore <= rOther.m_pStore;
 	}
 	bool operator == (Descriptor const& rOther) const {
-	    return m_pStoreHandle == rOther.m_pStoreHandle;
+	    return m_pStore == rOther.m_pStore;
 	}
 	bool operator != (Descriptor const& rOther) const {
-	    return m_pStoreHandle != rOther.m_pStoreHandle;
+	    return m_pStore != rOther.m_pStore;
 	}
 	bool operator >= (Descriptor const& rOther) const {
-	    return m_pStoreHandle >= rOther.m_pStoreHandle;
+	    return m_pStore >= rOther.m_pStore;
 	}
 	bool operator >  (Descriptor const& rOther) const {
-	    return m_pStoreHandle >  rOther.m_pStoreHandle;
+	    return m_pStore >  rOther.m_pStore;
 	}
 
     //  Query
@@ -100,7 +100,7 @@ protected:
 	    rtLINK_AppendRange (m_pAssignmentLinkc, iOrigin, iSize);
 	}
 
-	void fastMergeEnd (M_CPD* pAssignmentLinkRPT) {
+	void fastMergeEnd (rtPTOKEN_Handle *pAssignmentLinkRPT) {
 	    m_pAssignmentLinkc->Close (pAssignmentLinkRPT);
 	}
 
@@ -115,10 +115,9 @@ protected:
 
     //  State
     protected:
-	VFragment		*m_pFragment;
-	VCPDReference		 m_pStoreCPD;
-	VContainerHandle	*m_pStoreHandle;
-	rtLINK_CType		*m_pAssignmentLinkc;
+	VFragment*		m_pFragment;
+	Vdd::Store::Reference	m_pStore;
+	rtLINK_CType*		m_pAssignmentLinkc;
     };
 
     static int __cdecl CompareDescriptors (
@@ -153,9 +152,7 @@ protected:
 //  Coalesce
 protected:
     bool IsACoalesceCandidate () const {
-	return m_iDatum.isStandard () && IsntNil (
-	    m_iDatum.contentAsMonotype ().storeCPDIfAvailable ()
-	);
+	return m_iDatum.isStandard ();
     }
 
     void initializeDescriptor (Descriptor& rDescriptor) {

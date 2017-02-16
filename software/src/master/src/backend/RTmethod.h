@@ -13,6 +13,7 @@
  ***********************/
 
 #include "popvector.h"
+#include "Vdd_Store.h"
 
 /***********************
  *****  Container  *****
@@ -41,30 +42,6 @@ class rtBLOCK_Handle;
 
 #define rtMETHOD_CPx_Block	(unsigned int)0
 #define rtMETHOD_CPx_Origin	(unsigned int)1
-
-/*****  Standard CPD Access Macros  *****/
-#define rtMETHOD_CPD_Base(cpd)\
-    ((rtMETHOD_Type *)M_ContainerBase (cpd))
-
-/*****  Method Decoding Macros  *****/
-#define rtMETHOD_CPD_BlockCPD(cpd) (\
-    (cpd)->GetCPD (rtMETHOD_CPx_Block, RTYPE_C_Block)\
-)
-
-#define rtMETHOD_CPD_OriginCPD(cpd) (\
-    (cpd)->GetCPD (rtMETHOD_CPx_Origin)\
-)
-
-
-/********************************
- ********************************
- *****  Callable Interface  *****
- ********************************
- ********************************/
-
-PublicFnDecl M_CPD *rtMETHOD_New (M_ASD *pContainerSpace, rtBLOCK_Handle *pBlock, M_CPD *pMy);
-
-PublicFnDecl bool rtMETHOD_Align (M_CPD *method);
 
 
 /******************************
@@ -73,34 +50,73 @@ PublicFnDecl bool rtMETHOD_Align (M_CPD *method);
  ******************************
  ******************************/
 
-class rtMETHOD_Handle : public rtPOPVECTOR_Handle {
-//  Run Time Type
-    DECLARE_CONCRETE_RTT (rtMETHOD_Handle, rtPOPVECTOR_Handle);
+class rtMETHOD_Handle : public rtPOPVECTOR_StoreHandle {
+    DECLARE_CONCRETE_RTT (rtMETHOD_Handle, rtPOPVECTOR_StoreHandle);
 
 //  Construction
-protected:
-    rtMETHOD_Handle (M_CTE &rCTE) : rtPOPVECTOR_Handle (rCTE) {
-    }
-
 public:
     static VContainerHandle *Maker (M_CTE &rCTE) {
 	return new rtMETHOD_Handle (rCTE);
     }
+    rtMETHOD_Handle (M_ASD *pContainerSpace, rtBLOCK_Handle *pBlock, Vdd::Store *pMy);
+protected:
+    rtMETHOD_Handle (M_CTE &rCTE) : BaseClass (rCTE) {
+    }
 
 //  Destruction
-protected:
+private:
+    ~rtMETHOD_Handle () {
+    }
+
+//  Canonicalization
+private:
+    virtual /*override*/ bool getCanonicalization_(VReference<rtVSTORE_Handle> &rpStore, DSC_Pointer const &rPointer);
 
 //  Access
+private:
+    rtBLOCK_Handle *blockHandle () const {
+	return static_cast<rtBLOCK_Handle*> (elementHandle (rtMETHOD_CPx_Block));
+    }
+    VContainerHandle *myStoreHandle () const {
+	return elementHandle (rtMETHOD_CPx_Origin);
+    }
 public:
+    void getBlock (rtBLOCK_Handle::Reference &rpResult) const {
+	rpResult.setTo (blockHandle ());
+    }
+    void getMyStore (VContainerHandle::Reference &rpResult) const {
+	rpResult.setTo (myStoreHandle ());
+    }
+    bool getMyStore (Vdd::Store::Reference &rpResult) const {
+	return myStoreHandle ()->getStore (rpResult);
+    }
 
-//  Query
+//  Dictionary
+private:
+    virtual /*override*/ rtDICTIONARY_Handle *getDictionary_(DSC_Pointer const &rPointer) const {
+	return static_cast<rtDICTIONARY_Handle*>(TheMethodClassDictionary().ObjectHandle ());
+    }
+    virtual /*override*/ rtPTOKEN_Handle *getPToken_() const {
+	Vdd::Store::Reference pMyStore;
+	getMyStore (pMyStore);
+	return pMyStore->getPToken ();
+    }
+
+//  Maintenance
+private:
+    virtual /*override*/ bool align_() {
+	return align ();
+    }
 public:
+    bool align ();
+    using BaseClass::alignAll;
 
 //  Callbacks
 protected:
 
-//  State
-protected:
+//  Display and Inspection
+public:
+    virtual /*override*/ unsigned __int64 getClusterSize ();
 };
 
 

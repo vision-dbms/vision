@@ -51,28 +51,6 @@ VEvaluatorPump::Evaluation::Evaluation (
 
 VEvaluatorPump::Evaluation::~Evaluation () {
 }
-
-/**********************************
- **********************************
- *****  Client Object Gofers  *****
- **********************************
- **********************************/
-
-bool VEvaluatorPump::Evaluation::fulfill (icollection_gofer_t::Reference& rpGofer) {
-    return cachedClientObjectGofer (rpGofer, m_pICollectionGofer);
-}
-
-bool VEvaluatorPump::Evaluation::fulfill (isingleton_gofer_t::Reference& rpGofer) {
-    return cachedClientObjectGofer (rpGofer, m_pISingletonGofer);
-}
-
-bool VEvaluatorPump::Evaluation::createClientObjectGofer (icollection_gofer_t::Reference &rpGofer) {
-    return createClientRootObjectGofer (rpGofer);
-}
-
-bool VEvaluatorPump::Evaluation::createClientObjectGofer (isingleton_gofer_t::Reference &rpGofer) {
-    return createClientRootObjectGofer (rpGofer);
-}
 
 
 /****************************

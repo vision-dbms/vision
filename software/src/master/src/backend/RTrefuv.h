@@ -66,12 +66,64 @@
 typedef class DSC_Scalar rtREFUV_Type_Reference, *rtREFUV_TypePTR_Reference;
 
 /*****  Direct Access Macros  *****/
-#define rtREFUV_Ref_D_RefPTokenCPD(ref)	DSC_Scalar_RefPToken (ref)
 #define rtREFUV_Ref_D_Element(ref)	DSC_Scalar_Int (ref)
 
 /*****  Indirect Access Macros  *****/
-#define rtREFUV_Ref_RefPTokenCPD(p)	rtREFUV_Ref_D_RefPTokenCPD(*(p))
 #define rtREFUV_Ref_Element(p)		rtREFUV_Ref_D_Element(*(p))
+
+
+/******************************
+ ******************************
+ *****  Container Handle  *****
+ ******************************
+ ******************************/
+
+class rtREFUV_Handle : public rtUVECTOR_Handle {
+//  Run Time Type
+    DECLARE_CONCRETE_RTT (rtREFUV_Handle, rtUVECTOR_Handle);
+
+//  Aliases
+public:
+    typedef /*rtREFUV_ElementType*/ unsigned int element_t;
+
+//  Alignment Fill Processor
+public:
+    class AlignmentProcessor;
+
+//  Construction
+public:
+    static VContainerHandle *Maker (M_CTE &rCTE) {
+	return new rtREFUV_Handle (rCTE);
+    }
+protected:
+    rtREFUV_Handle (M_CTE &rCTE) : rtUVECTOR_Handle (rCTE) {
+    }
+
+//  Destruction
+private:
+    ~rtREFUV_Handle () {
+    }
+
+//  Alignment
+private:
+    virtual /*override*/ bool align_() {
+	return align ();
+    }
+public:
+    bool align (bool bReferentialAlignmentRequired = true);
+
+//  Access
+public:
+    element_t *array () const {
+	return UV_UV_ArrayAsType (typecastContent (), element_t);
+    }
+    element_t element (unsigned int xElement) const {
+	return xElement < elementCount () ? array ()[xElement] : referenceNil ();
+    }
+    element_t referenceNil () const {
+	return rtPTOKEN_BaseElementCount (this, rptPOP ());
+    }
+};
 
 
 /********************************
@@ -110,34 +162,15 @@ typedef class DSC_Scalar rtREFUV_Type_Reference, *rtREFUV_TypePTR_Reference;
  **************************************/
 
 PublicFnDecl M_CPD *__cdecl rtREFUV_New (
-    M_CPD*			pPPT,
-    M_CPD*			refPTokenRefCPD,
-    int				refPTokenRefIndex,
-    Ref_UV_Initializer		initFn,
-    ...
-);
-
-PublicFnDecl M_CPD *__cdecl rtREFUV_New (
-    M_CPD*			pToken,
-    M_CPD*			rToken,
-    Ref_UV_Initializer		initFn,
-    ...
+    rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT, Ref_UV_Initializer initFn, ...
 );
 
 PublicFnDecl M_CPD *rtREFUV_New (
-    M_CPD*			pTokenRefCPD,
-    int				pTokenRefIndex,
-    M_CPD*			rTokenRefCPD,
-    int				rTokenRefIndex
+    rtPTOKEN_Handle *pPPT, M_CPD *pRPTRef, int xRPTRef
 );
 
 PublicFnDecl M_CPD *rtREFUV_New (
-    M_CPD *pPPT, M_CPD *pRPTRef, int xRPTRef
-);
-
-PublicFnDecl M_CPD *rtREFUV_New (
-    M_CPD*			pToken,
-    M_CPD*			rToken
+    rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT
 );
 
 PublicFnDecl M_CPD *rtREFUV_NewInitWithPrtitnBounds (
@@ -154,19 +187,20 @@ PublicFnDecl rtREFUV_TypePTR_Reference rtREFUV_AlignReference (
 );
 
 PublicFnDecl void rtREFUV_AlignAndValidateRef (
-    rtREFUV_TypePTR_Reference	refp,
-    M_CPD*			pTokenRefCPD,
-    int				pTokenRefIndex
+    DSC_Scalar *refp, M_CPD *pTokenRef, int xTokenRef
 );
-
-PublicFnDecl M_CPD *rtREFUV_Align (
-    M_CPD*			cpd,
-    int				referentialAlignmentRequired = true
+PublicFnDecl void rtREFUV_AlignAndValidateRef (
+    DSC_Scalar *refp, VContainerHandle *pTokenRef, M_POP const *pTokenPOP
 );
 
 PublicFnDecl void rtREFUV_AlignForExtract (
     M_CPD*			sPTokenRefCPD,
     int				sPTokenRefIndex,
+    M_CPD*			refuvCPD
+);
+
+PublicFnDecl void rtREFUV_AlignForExtract (
+    rtPTOKEN_Handle*		sPToken,
     M_CPD*			refuvCPD
 );
 
@@ -176,6 +210,19 @@ PublicFnDecl void rtREFUV_AlignForAssign (
     M_CPD*			refuvCPD,
     M_CPD*			sPTokenRefCPD,
     int				sPTokenRefIndex
+);
+
+PublicFnDecl void rtREFUV_AlignForAssign (
+    M_CPD*			tPTokenRefCPD,
+    int				tPTokenRefIndex,
+    M_CPD*			refuvCPD,
+    rtPTOKEN_Handle*		sPToken
+);
+
+PublicFnDecl void rtREFUV_AlignForAssign (
+    rtPTOKEN_Handle*		tPToken,
+    M_CPD*			refuvCPD,
+    rtPTOKEN_Handle*		sPToken
 );
 
 PublicFnDecl void rtREFUV_AlignForScalarAssign (
@@ -276,7 +323,7 @@ PublicFnDecl void rtREFUV_PartitndPartition (
 
 PublicFnDecl void rtREFUV_LinearizeRrRc (
     rtREFUV_TypePTR_Reference	resultRefp,
-    M_CPD*			cartesianPT,
+    rtPTOKEN_Handle*		cartesianPT,
     rtREFUV_TypePTR_Reference	rowRefp,
     rtREFUV_TypePTR_Reference	columnRefp
 );
@@ -395,44 +442,6 @@ PublicFnDecl void rtREFUV_PartitionedDelete (
 PublicFnDecl void rtREFUV_SetCodomainDomainRatio (
     double			ratio
 );
-
-
-
-/******************************
- ******************************
- *****  Container Handle  *****
- ******************************
- ******************************/
-
-class rtREFUV_Handle : public rtUVECTOR_Handle {
-//  Run Time Type
-    DECLARE_CONCRETE_RTT (rtREFUV_Handle, rtUVECTOR_Handle);
-
-//  Construction
-protected:
-    rtREFUV_Handle (M_CTE &rCTE) : rtUVECTOR_Handle (rCTE) {
-    }
-
-public:
-    static VContainerHandle *Maker (M_CTE &rCTE) {
-	return new rtREFUV_Handle (rCTE);
-    }
-
-//  Destruction
-protected:
-
-//  Access
-public:
-
-//  Query
-public:
-
-//  Callbacks
-protected:
-
-//  State
-protected:
-};
 
 
 #endif

@@ -302,7 +302,7 @@ V_DefinePrimitive (BlockMagic) {
 	    iDelegateMonotype.construct (pTask->getSelf ());
 
 	    DSC_Pointer& rDelegatePointer = DSC_Descriptor_Pointer (iDelegateMonotype);
-	    M_CPD* pDelegateRPT = rDelegatePointer.RPT ();
+	    rtPTOKEN_Handle::Reference pDelegateRPT (rDelegatePointer.RPT ());
 
 	    rDelegatePointer.clear ();
 	    rDelegatePointer.constructReferenceScalar (pDelegateRPT, 0);
@@ -486,7 +486,7 @@ PrivateFnDef char const *IOMDescriptionHelper (bool reset, va_list argList) {
  *!!!!!!!!!!!!!!!!!!!*/
 
 V_DefinePrimitive (IOMDescription) {
-    M_CPD* stringStore = NilOf (M_CPD*);
+    rtLSTORE_Handle *stringStore = NilOf (rtLSTORE_Handle*);
 
     pTask->getCurrent ();
 
@@ -817,18 +817,8 @@ PrivateFnDef void CreateHelper (
  *!!!!!!!!!!!!!!!!!!!*/
 
 V_DefinePrimitive (Create) {
-#define handleBlockString(stringIndex) {\
-    CreateHelper (\
-	handleCursor++, options, V_BlockString (recipientStore, stringIndex)\
-    );\
-}
-
-#define handleLStoreString(stringIndex) {\
-    CreateHelper (\
-	handleCursor++,\
-	options,\
-	V_LStoreString (recipientStore, recipientStrings, stringIndex)\
-    );\
+#define handleString(xString) {\
+    CreateHelper (handleCursor++, options, pStrings[xString]);\
 }
 
 /*****  Initialize the default connection driver options, ...  *****/
@@ -836,26 +826,23 @@ V_DefinePrimitive (Create) {
 
 /*****  ... process the command strings, ...  *****/
     DSC_Descriptor& rCurrent = pTask->getCurrent ();
-    M_CPD* recipientStore = rCurrent.storeCPD ();
-    RTYPE_Type recipientStoreType = (RTYPE_Type)M_CPD_RType (recipientStore);
 
+    rtBLOCK_Handle::Strings pBlockStrings;
+    rtLSTORE_Handle::Strings pLStoreStrings;
     IOMHandle* handleCursor;
     if (rCurrent.isScalar ()) {
 	IOMHandle handle;
 	handleCursor = &handle;
 
-	if (recipientStoreType == RTYPE_C_Block) {
-	    handleBlockString (DSC_Descriptor_Scalar_Int (rCurrent));
+	if (pBlockStrings.setTo (rCurrent.store ())) {
+#define pStrings pBlockStrings
+	    handleString (DSC_Descriptor_Scalar_Int (rCurrent));
+#undef pStrings
 	}
-	else if (
-	    recipientStoreType == RTYPE_C_ListStore
-	    && rtLSTORE_CPD_StringStore (recipientStore)
-	) {
-	    M_CPD *recipientStrings = rtLSTORE_CPD_ContentStringsCPD (
-		recipientStore
-	    );
-	    handleLStoreString (DSC_Descriptor_Scalar_Int (rCurrent));
-	    recipientStrings->release ();
+	else if (pLStoreStrings.setTo (rCurrent.store ())) {
+#define pStrings pLStoreStrings
+	    handleString (DSC_Descriptor_Scalar_Int (rCurrent));
+#undef pStrings
 	}
 
 	pTask->loadDucWithDouble (*(double *)&handle);
@@ -864,28 +851,22 @@ V_DefinePrimitive (Create) {
 	M_CPD* handles = pTask->NewDoubleUV ();
 	handleCursor = (IOMHandle*)rtDOUBLEUV_CPD_Array (handles);
 
-	if (recipientStoreType == RTYPE_C_Block)
-	{
-	    DSC_Traverse (rCurrent, handleBlockString);
+	if (pBlockStrings.setTo (rCurrent.store ())) {
+#define pStrings pBlockStrings
+	    DSC_Traverse (rCurrent, handleString);
+#undef pStrings
 	}
-	else if (
-	    recipientStoreType == RTYPE_C_ListStore
-	    && rtLSTORE_CPD_StringStore (recipientStore)
-	)
-	{
-	    M_CPD *recipientStrings = rtLSTORE_CPD_ContentStringsCPD (
-		recipientStore
-	    );
-	    DSC_Traverse (rCurrent, handleLStoreString);
-	    recipientStrings->release ();
+	else if (pLStoreStrings.setTo (rCurrent.store ())) {
+#define pStrings pLStoreStrings
+	    DSC_Traverse (rCurrent, handleString);
+#undef pStrings
 	}
 
 	pTask->loadDucWithMonotype (handles);
 	handles->release ();
     }
 
-#undef handleBlockString
-#undef handleLStoreString
+#undef handleString
 }
 
 
@@ -1619,11 +1600,8 @@ PrivateFnDef void InitializeHandlerPointer (
 	IOMHandle *pHandle = (IOMHandle*)&DSC_Descriptor_Scalar_Double (rCurrent);
 	unsigned int xDriver = pHandle->index ();
 
-	IOM_HandlerPToken->retain ();
 	rHandlerPointer.constructReferenceScalar (
-	    IOM_HandlerPToken, xDriver > 0 ? xDriver - 1 : rtPTOKEN_CPD_BaseElementCount (
-		IOM_HandlerPToken
-	    )
+	    IOM_HandlerPToken, xDriver > 0 ? xDriver - 1 : IOM_HandlerPToken->cardinality ()
 	);
 
 	if (bSettingHandler)
@@ -1641,9 +1619,7 @@ PrivateFnDef void InitializeHandlerPointer (
 	    IOMHandle *pHandle = huvp++;
 	    unsigned int xDriver = pHandle->index ();
 
-	    *ruvp++ = xDriver > 0 ? xDriver - 1 : rtPTOKEN_CPD_BaseElementCount (
-		IOM_HandlerPToken
-	    );
+	    *ruvp++ = xDriver > 0 ? xDriver - 1 : IOM_HandlerPToken->cardinality ();
 
 	    if (bSettingHandler)
 		pHandle->setWiredHandler (false);
@@ -1667,7 +1643,7 @@ V_DefinePrimitive (SetHandler) {
     pTask->duc ().assignTo (iHandlerPointer, IOM_HandlerVector);
     iHandlerPointer.clear ();
 
-    rtVECTOR_AlignAll (IOM_HandlerVector, true);
+    IOM_HandlerVector->alignAll (true);
 
     pTask->loadDucWithSelf ();
 }
@@ -1677,7 +1653,6 @@ V_DefinePrimitive (SetHandler) {
  *!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
 V_DefinePrimitive (GetHandler) {
-    IOM_HandlerVector->retain ();
     DSC_Descriptor iHandlerDescriptor; {
 	DSC_Pointer iHandlerPointer;
 	InitializeHandlerPointer (iHandlerPointer, pTask, false);
@@ -1882,13 +1857,11 @@ V_DefinePrimitive (GetNumber) {
 	    if (validRun > 0) rtLINK_AppendRange (
 		resultLinkC, totalRun - validRun, validRun
 	    );
-	    M_CPD* linkPPT = pTask->NewDomPToken (resultLinkC->ElementCount ());
-	    resultLinkC->Close (linkPPT);
+	    resultLinkC->Close (pTask->NewDomPToken (resultLinkC->ElementCount ()));
 
 	    pTask->loadDucWithPartialFunction (resultLinkC, resultUVector);
 
 	    resultLinkC->release ();
-	    linkPPT->release ();
 	}
 	else if (validRun == totalRun) 	/* ... total function ... */
 	    pTask->loadDucWithMonotype (resultUVector);
@@ -1962,7 +1935,7 @@ protected:
  ******************/
 
 StringCache::StringCache (VPrimitiveTask *pTask) : m_pTask (pTask) {
-    m_tcount	= rtPTOKEN_CPD_BaseElementCount (m_pTask->ptoken ());
+    m_tcount	= m_pTask->ptoken ()->cardinality ();
     m_scount	=
     m_ccount	=
     m_totalRun	=
@@ -2058,9 +2031,7 @@ void StringCache::Commit () {
 	if (m_validRun > 0) rtLINK_AppendRange (
 	    m_pSubset, m_totalRun - m_validRun, m_validRun
 	);
-	M_CPD *linkPPT = m_pTask->NewDomPToken (m_scount);
-	m_pSubset->Close (linkPPT);
-	linkPPT->release ();
+	m_pSubset->Close (m_pTask->NewDomPToken (m_scount));
     }
 
 /*****  Construct and return the string store, ...  *****/
@@ -2081,7 +2052,7 @@ void StringCache::Commit () {
 	}
 
 	m_pTask->loadDucWithPartialCorrespondence (
-	    rtLSTORE_NewStringStoreFromUV (uvector), rtLSTORE_CPx_RowPToken, m_pSubset
+	    rtLSTORE_NewStringStoreFromUV (uvector), m_pSubset
 	);
 
 	if (m_pSubset)
@@ -2360,16 +2331,8 @@ V_DefinePrimitive (PutString) {
     IOMHandle*			pHandle;
     int *			pResult;
 
-#define handleBlockString(stringIndex) {\
-    *pResult++ = pHandle++->putString (\
-	V_BlockString (recipientStore, stringIndex)\
-    );\
-}
-
-#define handleLStoreString(stringIndex) {\
-    *pResult++ = pHandle++->putString (\
-	V_LStoreString (recipientStore, recipientStrings, stringIndex)\
-    );\
+#define handleString(stringIndex) {\
+    *pResult++ = pHandle++->putString (pStrings[stringIndex]);\
 }
 
     if (!GetArguments (pTask, RTYPE_C_DoubleUV)) {
@@ -2380,8 +2343,8 @@ V_DefinePrimitive (PutString) {
 /*****  Get the data argument in '^current', ...  *****/
     DSC_Descriptor& rCurrent = pTask->getCurrent ();
 
-    M_CPD* recipientStore = rCurrent.storeCPD ();
-    RTYPE_Type recipientStoreType = (RTYPE_Type)M_CPD_RType (recipientStore);
+    rtBLOCK_Handle::Strings pBlockStrings;
+    rtLSTORE_Handle::Strings pLStoreStrings;
 
     if (rCurrent.isScalar ()) {
 	int result;
@@ -2389,19 +2352,15 @@ V_DefinePrimitive (PutString) {
 	pResult = &result;
 	pHandle = (IOMHandle*)&DSC_Descriptor_Scalar_Double (ADescriptor);
 
-	if (recipientStoreType == RTYPE_C_Block) {
-	    handleBlockString (DSC_Descriptor_Scalar_Int (rCurrent));
+	if (pBlockStrings.setTo (rCurrent.store ())) {
+#define pStrings pBlockStrings
+	    handleString (DSC_Descriptor_Scalar_Int (rCurrent));
+#undef pStrings
 	}
-	else if (
-	    recipientStoreType == RTYPE_C_ListStore
-	    && rtLSTORE_CPD_StringStore (recipientStore)
-	)
-	{
-	    M_CPD *recipientStrings = rtLSTORE_CPD_ContentStringsCPD (
-		recipientStore
-	    );
-	    handleLStoreString (DSC_Descriptor_Scalar_Int (rCurrent));
-	    recipientStrings->release ();
+	else if (pLStoreStrings.setTo (rCurrent.store ())) {
+#define pStrings pLStoreStrings
+	    handleString (DSC_Descriptor_Scalar_Int (rCurrent));
+#undef pStrings
 	}
 
 	pTask->loadDucWithInteger (result);
@@ -2412,26 +2371,22 @@ V_DefinePrimitive (PutString) {
 	pResult = rtINTUV_CPD_Array (resultUVector);
 	pHandle = (IOMHandle*)rtDOUBLEUV_CPD_Array (DSC_Descriptor_Value (ADescriptor));
 
-	if (recipientStoreType == RTYPE_C_Block) {
-	    DSC_Traverse (rCurrent, handleBlockString);
+	if (pBlockStrings.setTo (rCurrent.store ())) {
+#define pStrings pBlockStrings
+	    DSC_Traverse (rCurrent, handleString);
+#undef pStrings
 	}
-	else if (
-	    recipientStoreType == RTYPE_C_ListStore
-	    && rtLSTORE_CPD_StringStore (recipientStore)
-	) {
-	    M_CPD *recipientStrings = rtLSTORE_CPD_ContentStringsCPD (
-		recipientStore
-	    );
-	    DSC_Traverse (rCurrent, handleLStoreString);
-	    recipientStrings->release ();
+	else if (pLStoreStrings.setTo (rCurrent.store ())) {
+#define pStrings pLStoreStrings
+	    DSC_Traverse (rCurrent, handleString);
+#undef pStrings
 	}
 
 	pTask->loadDucWithMonotype (resultUVector);
 	resultUVector->release ();
     }
 
-#undef handleBlockString
-#undef handleLStoreString
+#undef handleString
 }
 
 
@@ -2467,15 +2422,15 @@ PrivateFnDef int CopyFileToOutputBuffer (
 /*******************************
  *  Output->File Copy Handler  *
  *******************************/
-
-PrivateFnDef int CopyOutputToFile (
+ 
+PrivateFnDef int CopyOutputToFileGeneral (
     VOutputGenerator&		rOutputGenerator,
     char const*			pOutput,
-    char *			pFileName,
+    char const*			pFileName,
     int				openFlags,
-    int				unlinkOnError
+    int				unlinkOnError,
+	int 			fd
 ) {
-    int fd = open (pFileName, openFlags, 0666);
     if (fd < 0) {
 	if (IsNil (pOutput)) // do something with data in the buffer
 	    rOutputGenerator.outputBuffer()->moveOutputTo ();
@@ -2489,6 +2444,7 @@ PrivateFnDef int CopyOutputToFile (
 	}
 	rOutputGenerator.outputBuffer()->moveOutputTo (stream, "\377");
 	fclose (stream);
+	return 0;
     }
     else while (*pOutput) { // output is contained in this string
 	switch (*pOutput) {
@@ -2511,6 +2467,31 @@ PrivateFnDef int CopyOutputToFile (
     close (fd);
     return 0;
 }
+#ifndef _WIN32
+// currently filterOutputOf:[] does not work on Windows ... To make it work, we will have to provide a Windows version of
+// mkstemp ... possibly using GetTempFileName
+PrivateFnDef int CopyOutputToFile (
+    VOutputGenerator&		rOutputGenerator,
+    char const*			pOutput,
+    char*			pFileName,
+    int				openFlags,
+    int				unlinkOnError
+) {
+    int fd = mkstemp (pFileName);
+    return CopyOutputToFileGeneral (rOutputGenerator, pOutput, pFileName, openFlags, unlinkOnError, fd);
+}
+#endif
+
+PrivateFnDef int CopyOutputToFile (
+    VOutputGenerator&		rOutputGenerator,
+    char const*			pOutput,
+    char const*			pFileName,
+    int				openFlags,
+    int				unlinkOnError
+) {
+    int fd = open (pFileName, openFlags, 0666);
+    return CopyOutputToFileGeneral (rOutputGenerator, pOutput, pFileName, openFlags, unlinkOnError, fd);
+}
 
 
 /*********************
@@ -2524,7 +2505,7 @@ PrivateFnDef int CopyOutputToFile (
 PrivateFnDef int FilterOutput1 (
     VOutputGenerator&		rOutputGenerator,
     char const*			output,
-    char *			command,
+    char const*			command,
     int				Unused(openFlags),
     int				Unused(unlinkOnError)
 ) {
@@ -2535,7 +2516,7 @@ PrivateFnDef int FilterOutput1 (
 PrivateFnDef int FilterOutput1 (
     VOutputGenerator&		rOutputGenerator,
     char const*			output,
-    char *			command,
+    char const*			command,
     int				Unused(openFlags),
     int				Unused(unlinkOnError)
 ) {
@@ -2547,9 +2528,9 @@ PrivateFnDef int FilterOutput1 (
 
 /*****  Create the input file ...  *****/
     char inputFileName [1024];
-    tmpnam (inputFileName);
+    strncpy (inputFileName, "/tmp/fileXXXXXX", 1024);
     int result = CopyOutputToFile (
-	rOutputGenerator, output, inputFileName, O_WRONLY | O_CREAT | O_TRUNC, true
+	rOutputGenerator, output, inputFileName, O_WRONLY | O_CREAT | O_TRUNC | O_EXCL, true
     );
     if (result != 0)
 	return result;
@@ -2563,8 +2544,8 @@ PrivateFnDef int FilterOutput1 (
 
 /*****  Create the output file ...  *****/
     char outputFileName [1024];
-    tmpnam (outputFileName);
-    int ofd = creat (outputFileName, 0666);
+    strncpy (outputFileName, "/tmp/XXXXXX", 1024);
+    int ofd = mkstemp (outputFileName);
     if (ofd < 0) {
 	close	(ifd);
 	unlink	(inputFileName);
@@ -2628,7 +2609,7 @@ PrivateFnDef int FilterOutput1 (
 PrivateFnDef int FilterOutput2 (
     VOutputGenerator&		rOutputGenerator,
     char const*			pOutput,
-    char *			pCommandLine,
+    char const*			pCommandLine,
     int				Unused(openFlags),
     int				Unused(unlinkOnError)
 )
@@ -2711,22 +2692,11 @@ PrivateFnDef int FilterOutput2 (
  **********************************/
 
 V_DefinePrimitive (OutputDirectorContinuation) {
-#define handleBlockString(stringIndex) {\
+#define handleString(stringIndex) {\
     *errorCodeCursor++ = handler (\
 	iOutputGenerator,\
 	outputString,\
-	V_BlockString (recipientStore, stringIndex),\
-	handlerOpenFlags,\
-	false\
-    );\
-    if (IsntNil (outputString)) outputString += strlen (outputString) + 1;\
-}
-
-#define handleLStoreString(stringIndex) {\
-    *errorCodeCursor++ = handler (\
-	iOutputGenerator,\
-	outputString,\
-	V_LStoreString (recipientStore, recipientStrings, stringIndex),\
+	pStrings[stringIndex],\
 	handlerOpenFlags,\
 	false\
     );\
@@ -2754,7 +2724,7 @@ V_DefinePrimitive (OutputDirectorContinuation) {
 
 /*****  ... determine the output processor to apply, ...  *****/
     int handlerOpenFlags;
-    int (*handler) (VOutputGenerator&, char const*, char *, int, int);
+    int (*handler) (VOutputGenerator&, char const*, char const*, int, int);
     switch (V_TOTSC_Primitive) {
     case XFilterOutput:
 	handler			= FilterOutput1;
@@ -2778,27 +2748,23 @@ V_DefinePrimitive (OutputDirectorContinuation) {
     }
 
 /*****  ... process the command strings, ...  *****/
-
-    M_CPD* recipientStore = rCurrent.storeCPD ();
-
-    RTYPE_Type recipientStoreType = (RTYPE_Type)M_CPD_RType (recipientStore);
+    rtBLOCK_Handle::Strings pBlockStrings;
+    rtLSTORE_Handle::Strings pLStoreStrings;
 
     VOutputGenerator iOutputGenerator (pTask);
     if (rCurrent.isScalar ()) {
 	int errorCode;
 	int* errorCodeCursor = &errorCode;
 
-	if (recipientStoreType == RTYPE_C_Block) {
-	    handleBlockString (DSC_Descriptor_Scalar_Int (rCurrent));
+	if (pBlockStrings.setTo (rCurrent.store ())) {
+#define pStrings pBlockStrings
+	    handleString (DSC_Descriptor_Scalar_Int (rCurrent));
+#undef pStrings
 	}
-	else if (recipientStoreType == RTYPE_C_ListStore &&
-		 rtLSTORE_CPD_StringStore (recipientStore))
-	{
-	    M_CPD *recipientStrings = rtLSTORE_CPD_ContentStringsCPD (
-		recipientStore
-	    );
-	    handleLStoreString (DSC_Descriptor_Scalar_Int (rCurrent));
-	    recipientStrings->release ();
+	else if (pLStoreStrings.setTo (rCurrent.store ())) {
+#define pStrings pLStoreStrings
+	    handleString (DSC_Descriptor_Scalar_Int (rCurrent));
+#undef pStrings
 	}
 
 	pTask->loadDucWithInteger (errorCode);
@@ -2807,17 +2773,15 @@ V_DefinePrimitive (OutputDirectorContinuation) {
 	M_CPD* errorCodes = pTask->NewIntUV ();
 	int *errorCodeCursor = rtINTUV_CPD_Array (errorCodes);
 
-	if (recipientStoreType == RTYPE_C_Block) {
-	    DSC_Traverse (rCurrent, handleBlockString);
+	if (pBlockStrings.setTo (rCurrent.store ())) {
+#define pStrings pBlockStrings
+	    DSC_Traverse (rCurrent, handleString);
+#undef pStrings
 	}
-	else if (recipientStoreType == RTYPE_C_ListStore &&
-		 rtLSTORE_CPD_StringStore (recipientStore))
-	{
-	    M_CPD *recipientStrings = rtLSTORE_CPD_ContentStringsCPD (
-		recipientStore
-	    );
-	    DSC_Traverse (rCurrent, handleLStoreString);
-	    recipientStrings->release ();
+	else if (pLStoreStrings.setTo (rCurrent.store ())) {
+#define pStrings pLStoreStrings
+	    DSC_Traverse (rCurrent, handleString);
+#undef pStrings
 	}
 
 	pTask->loadDucWithMonotype (errorCodes);
@@ -2836,8 +2800,7 @@ V_DefinePrimitive (OutputDirectorContinuation) {
     }
 /*****  ... and return.  *****/
 
-#undef handleBlockString
-#undef handleLStoreString
+#undef handleString
 }
 
 
@@ -2921,28 +2884,28 @@ V_DefinePrimitive (EchoToFile) {
     }
 
 /*****  Determine the output filename ... *****/
-    RTYPE_Type rtype = ADescriptor.pointerRType ();
-    M_CPD* stringStore = pTask->ducStore ();
-
-    char const* pFileName;
-    if (rtype == RTYPE_C_IntUV && M_CPD_RType (stringStore) == RTYPE_C_Block)
-	pFileName = V_BlockString (stringStore, DSC_Descriptor_Scalar_Int (ADescriptor));
-    else if (rtype == RTYPE_C_Link && rtLSTORE_CPD_StringStore (stringStore)) {
-	M_CPD *charCPD = rtLSTORE_CPD_ContentStringsCPD (stringStore);
-	pFileName = V_LStoreString (
-	    stringStore, charCPD, DSC_Descriptor_Scalar_Int (ADescriptor)
-	);
-	charCPD->release ();
+    char const* pFileName = 0;
+    switch (ADescriptor.pointerRType ()) {
+    case RTYPE_C_IntUV: {
+	    rtBLOCK_Handle::Strings pStrings;
+	    if (pStrings.setTo (pTask->ducStore ()))
+		pFileName = pStrings[DSC_Descriptor_Scalar_Int (ADescriptor)];
+	}
+	break;
+    case RTYPE_C_Link: {
+	    rtLSTORE_Handle::Strings pStrings;
+	    if (pStrings.setTo (pTask->ducStore ()))
+		pFileName = pStrings[DSC_Descriptor_Scalar_Int (ADescriptor)];
+	}
+	break;
     }
+    if (pFileName)
+	IO_EchoToFile (pFileName);
     else {
 	ERR_PushErrorHandler (EC__UsageError, EchoToFileErrorHandler);
 	ERR_SignalWarning (EC__UsageError, "EchoToFile: argument must be a string");
 	ERR_PopErrorHandler (EC__UsageError);
-	pTask->loadDucWithSelf ();
-	return;
     }
-
-    IO_EchoToFile (pFileName);
     pTask->loadDucWithSelf ();
 }
 

@@ -99,19 +99,34 @@ Vca::VApplicationContext::VApplicationContext (
 
     //  Logging Information
 	bool bLogging = pTSP->logSwitch () || commandSwitchValue ("logSwitchOn", "LogSwitchOn");
-	pTSP->updateLogSwitch (bLogging);
+	    pTSP->updateLogSwitch (bLogging);
 
+        char const *camPath = commandStringValue ("camLogPath", "VisionCamLogPath");
+        pTSP->updateCamLogPath (camPath);
+ 
 	char const *pPath = commandStringValue ("logFilePath", "LogFilePath");
 	if (pPath) 
-	pTSP->updateLogFilePath (pPath);
+	    pTSP->updateLogFilePath (pPath);
         
 	char const *pSize = commandStringValue ("logFileSize", "LogFileSize");
 	if (pSize) 
-	pTSP->updateLogFileSize (atoi (pSize));
-        
+	    pTSP->updateLogFileSize (atoi (pSize));
+       
 	char const *pBackups = commandStringValue ("logFileBackups", "LogFileBackups");
 	if (pBackups) 
-	pTSP->updateLogFileBackups (atoi (pBackups));
+	    pTSP->updateLogFileBackups (atoi (pBackups));
+
+        char const *pInfoServer = commandStringValue ("infoServer", "InfoServer");
+        if (pInfoServer)
+            pTSP->updateInfoServerEntry (pInfoServer);
+
+        char const *pInfoLogger = commandStringValue ("infoLogger", "InfoLogger");
+        if (pInfoLogger)
+            pTSP->updateInfoLogger (pInfoLogger);
+
+        char const *pInfoSubscriber = commandStringValue ("infoSubscriber", "InfoSubscriber");
+        if (pInfoSubscriber)
+            pTSP->updateInfoSubscriber (pInfoSubscriber);
     }
 }
 

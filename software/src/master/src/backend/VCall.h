@@ -145,8 +145,8 @@ public:
 	return parameterCount ();
     }
 
-    M_CPD* ptoken () const;
-    M_CPD* ptoken_() const {
+    rtPTOKEN_Handle *ptoken () const;
+    rtPTOKEN_Handle *ptoken_() const {
 	return ptoken ();
     }
 

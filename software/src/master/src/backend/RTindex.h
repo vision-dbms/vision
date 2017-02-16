@@ -8,13 +8,14 @@
  *************************
  *************************/
 
-/***********************
- *****  Component  *****
- ***********************/
+/************************
+ *****  Components  *****
+ ************************/
 
 #include "VBenderenceable.h"
 
 #include "popvector.h"
+#include "Vdd_Store.h"
 
 /***********************
  *****  Container  *****
@@ -27,7 +28,9 @@
  ************************/
 
 #include "DSC_Descriptor.h"
+#include "RTdictionary.h"
 #include "RTlink.h"
+#include "RTlstore.h"
 
 
 /*****************************
@@ -45,15 +48,8 @@
 #define rtINDEX_CPx_Map		(unsigned int)3
 
 /*****  Standard CPD Access Macros  *****/
-#define rtINDEX_CPD_Base(cpd)\
-    ((rtINDEX_Type *)(POPVECTOR_CPD_Array (cpd)))
-
 #define rtINDEX_CPD_IsATimeSeries(cpd) (\
     (cpd)->ReferenceIsntNil (rtINDEX_CPx_KeyStore)\
-)
-
-#define rtINDEX_CPD_ListStoreCPD(cpd) (\
-    (cpd)->GetCPD (rtINDEX_CPx_Lists, RTYPE_C_ListStore)\
 )
 
 /***************************
@@ -124,7 +120,7 @@ PublicFnDecl void rtINDEX_SetDefaultKeyMapType (
  *				    Future	... a key expressed as a
  *						    reordered subset of
  *						    another key.
- *	m_pPToken		- a CPD for the positional p-token of the
+ *	m_pPToken		- a handle for the positional p-token of the
  *				  sequence of elements found in this key.
  *	m_iSequence		- a standard descriptor containing the SEQUENCE
  *				  of values held in this key.  Valid for 'Set'
@@ -192,6 +188,8 @@ enum rtINDEX_KeyType {
     rtINDEX_KeyType_Future
 };
 
+class rtINDEX_Handle;
+
 class rtINDEX_Key : public VBenderenceable {
     DECLARE_CONCRETE_RTT (rtINDEX_Key, VBenderenceable);
 
@@ -200,7 +198,7 @@ private:
     rtINDEX_Key (rtINDEX_Key *parent, rtLINK_CType *subset, M_CPD *reordering);
 
 public:
-    rtINDEX_Key (M_CPD *ptoken, DSC_Descriptor *source);
+    rtINDEX_Key (rtPTOKEN_Handle *ptoken, DSC_Descriptor *source);
 
     rtINDEX_Key *NewFutureKey (rtLINK_CType *subset, M_CPD *reordering);
 
@@ -235,21 +233,18 @@ public:
 	return m_xType == rtINDEX_KeyType_Future;
     }
 
-    bool HoldsKeysInStore (M_CPD *pStoreRefCPD, int xStoreRef);
-
-    bool ConformsToIndex (M_CPD *pIndexCPD);
-
-    bool ConformsToIndex (DSC_Descriptor *pIndexDescriptor);
+    bool ConformsToIndex (rtINDEX_Handle *pIndex);
+    bool ConformsToIndex (DSC_Descriptor const &rIndexDescriptor);
 
 //  State
 public:
-    rtINDEX_KeyType	 m_xType;
-    M_CPD		*m_pPPT;
-    DSC_Descriptor	 m_iSequence,
-			 m_iSet;
-    M_CPD		*enumeratorOrReordering;
-    rtLINK_CType	*m_pSubset;
-    rtINDEX_Key		*m_pParent;
+    rtINDEX_KeyType		m_xType;
+    rtPTOKEN_Handle::Reference	m_pPPT;
+    DSC_Descriptor		m_iSequence,
+				m_iSet;
+    M_CPD*			enumeratorOrReordering;
+    rtLINK_CType*		m_pSubset;
+    rtINDEX_Key*		m_pParent;
 };
 
 /*****  Key Access Macros  *****/
@@ -261,113 +256,272 @@ public:
 #define rtINDEX_Key_Parent(key)		((key)->m_pParent)
 
 
+/******************************
+ ******************************
+ *****  Container Handle  *****
+ ******************************
+ ******************************/
+
+class rtINDEX_Handle : public rtPOPVECTOR_StoreHandle {
+    DECLARE_CONCRETE_RTT (rtINDEX_Handle, rtPOPVECTOR_StoreHandle);
+
+//  Construction
+public:
+    static VContainerHandle *Maker (M_CTE &rCTE) {
+	return new rtINDEX_Handle (rCTE);
+    }
+    rtINDEX_Handle (
+	M_ASD *pSpace, rtLSTORE_Handle *pLStore, M_CPD *pKeyMap, M_CPD *pKeySet, Vdd::Store *pKeyStore
+    );
+private:
+    rtINDEX_Handle (M_CTE &rCTE) : BaseClass (rCTE) {
+    }
+
+//  Destruction
+private:
+    ~rtINDEX_Handle () {
+    }
+
+//  Alignment
+private:
+    virtual /*override*/ bool align_() {
+	return align ();
+    }
+    virtual /*override*/ bool alignAll_(bool bCleaning) {
+	return alignAll(bCleaning);
+    }
+public:
+    bool align (bool bDeletingKeyMapNils = false);
+    bool alignAll (bool bCleaning = true);
+
+    void deleteUnusedKeys ();
+
+//  Canonicalization
+private:
+    virtual /*override*/ bool getCanonicalization_(VReference<rtVSTORE_Handle> &rpStore, DSC_Pointer const &rPointer);
+
+//  Cloning
+private:
+    virtual /*override*/ void clone_(Vdd::Store::Reference &rpResult, rtPTOKEN_Handle *pPPT) const {
+	Reference pHandle;
+	clone (pHandle, pPPT);
+	rpResult.setTo (pHandle);
+    }
+    virtual /*override*/ bool isACloneOfIndex_(rtINDEX_Handle const *pOther) const {
+	return isACloneOfIndex (pOther);
+    }
+public:
+    void clone (Reference &rpResult, rtPTOKEN_Handle *pPPT) const;
+    bool isACloneOfIndex (rtINDEX_Handle const *pOther) const;
+
+//  Component Access
+private:
+    VContainerHandle *keyMapHandle () const {
+	return elementHandle (rtINDEX_CPx_Map);
+    }
+    VContainerHandle *keySetHandle () const {
+	return elementHandle (rtINDEX_CPx_KeyValues);
+    }
+    VContainerHandle *keyStoreHandle () const {
+	return elementHandle (rtINDEX_CPx_KeyStore);
+    }
+    rtLSTORE_Handle *listStoreHandle () const {
+	return static_cast <rtLSTORE_Handle*>(elementHandle (rtINDEX_CPx_Lists, RTYPE_C_ListStore));
+    }
+public:
+    void getKeyMap (M_CPD *&rpResult) const {
+	rpResult = keyMapHandle ()->GetCPD ();
+    }
+    void getKeyMap (VContainerHandle::Reference &rpResult) const {
+	rpResult.setTo (keyMapHandle ());
+    }
+
+    void getKeySet (M_CPD *&rpResult) const {
+	rpResult = keySetHandle ()->GetCPD ();
+    }
+    void getKeySet (VContainerHandle::Reference &rpResult) const {
+	rpResult.setTo (keySetHandle ());
+    }
+    bool getKeySet (Vdd::Store::Reference &rpResult) const {
+	return keySetHandle ()->getStore (rpResult);
+    }
+
+    void getKeyStore (VContainerHandle::Reference &rpResult) const {
+	rpResult.setTo (keyStoreHandle ());
+    }
+    bool getKeyStore (Vdd::Store::Reference &rpResult) const {
+	return keyStoreHandle ()->getStore (rpResult);
+    }
+
+    void getListStore (M_CPD *&rpResult) const {
+	rpResult = listStoreHandle ()->GetCPD ();
+    }
+    void getListStore (rtLSTORE_Handle::Reference &rpResult) const {
+	rpResult.setTo (listStoreHandle ());
+    }
+    void getListStore (Vdd::Store::Reference &rpResult) const {
+	rpResult.setTo (listStoreHandle ());
+    }
+
+//  Key Map Type
+public:
+    void getKeyMapType (RTYPE_Type&rxKeyMapType) const;
+    void setKeyMapType (RTYPE_Type  xKeyMapType);
+
+//  Dictionary Access
+private:
+    virtual /*override*/ rtDICTIONARY_Handle *getDictionary_(DSC_Pointer const &rPointer) const {
+	return static_cast<rtDICTIONARY_Handle*> (
+	    (isATimeSeries () ? TheTimeSeriesClassDictionary () : TheIndexedListClassDictionary()).ObjectHandle ()
+	);
+    }
+
+//  Cluster Access
+private:
+    virtual /*override*/ rtPTOKEN_Handle *getPToken_() const {
+	return getPToken ();
+    }
+public:
+    rtPTOKEN_Handle *getPToken () const {
+	rtLSTORE_Handle::Reference pListStore (listStoreHandle ());
+	return pListStore->getPToken ();
+    }
+
+//  Cluster Forwarding
+private:
+    virtual /*override*/ bool forwardToSpace_(M_ASD *pSpace);
+
+//  Cluster Update
+private:
+    virtual /*override*/ rtLINK_CType *addInstances_(rtPTOKEN_Handle *pAdditionPPT);
+
+//  Instance Deletion
+private:
+    virtual bool deleteInstances_(DSC_Scalar &pInstances) {
+	return doInstanceDeletion (pInstances);
+    }
+    virtual bool deleteInstances_(rtLINK_CType *pInstances, rtLINK_CType *&rpTrues, rtLINK_CType *&rpFalses) {
+	return doInstanceDeletion (pInstances, rpTrues, rpFalses);
+    }
+
+//  List Cardinality Access
+private:
+    virtual /*override*/ bool getCardinality_(M_CPD *&rpResult, rtLINK_CType *pSubscript) {
+	return getCardinality (rpResult, pSubscript);
+    }
+    virtual /*override*/ bool getCardinality_(unsigned int &rpResult, DSC_Scalar &rSubscript) {
+	return getCardinality (rpResult, rSubscript);
+    }
+public:
+    bool getCardinality (M_CPD *&rpResult, rtLINK_CType *pSubscript);
+    bool getCardinality (unsigned int &rpResult, DSC_Scalar &rSubscript);
+
+
+//  List Element Access
+private:
+    virtual /*override*/ bool getListElements_(
+	DSC_Descriptor &rResult, rtLINK_CType *pInstances, M_CPD *pSubscript, int keyModifier, rtLINK_CType **ppGuard
+    ) {
+	return getListElements (rResult, pInstances, pSubscript, keyModifier, ppGuard);
+    }
+    virtual /*override*/ bool getListElements_(
+	DSC_Descriptor &rResult, DSC_Scalar &rInstance, int xSubscript, int iModifier
+    ) {
+	return getListElements (rResult, rInstance, xSubscript, iModifier);
+    }
+    virtual /*override*/ bool getListElements_(
+	DSC_Descriptor &rResult, DSC_Pointer &rInstances, DSC_Descriptor &rSubscript, int iModifier, rtLINK_CType **ppGuard
+    ) {
+	return getListElements (rResult, rInstances, rSubscript, iModifier, ppGuard);
+    }
+    virtual /*override*/ bool getListElements_(
+	DSC_Pointer&		rInstances,
+	Vdd::Store::Reference&	rpElementStore,
+	rtLINK_CType*&		rpElementPointer,
+	rtLINK_CType*&		rpExpansion,
+	M_CPD*&			rpDistribution,
+	rtINDEX_Key*&		rpKey
+    ) {
+	return getListElements (
+	    rInstances, rpElementStore, rpElementPointer, rpExpansion, rpDistribution, rpKey
+	);
+    }
+public:
+    bool getListElements (
+	DSC_Descriptor &rResult, rtLINK_CType *pInstances, M_CPD *pSubscript, int keyModifier, rtLINK_CType **ppGuard
+    );
+    bool getListElements (
+	DSC_Descriptor &rResult, DSC_Scalar &rInstance, int xSubscript, int iModifier
+    );
+    bool getListElements (
+	DSC_Descriptor &rResult, DSC_Pointer &rInstances, DSC_Descriptor &rSubscript, int iModifier, rtLINK_CType **ppGuard
+    );
+    bool getListElements (
+	DSC_Pointer&		rInstances,
+	Vdd::Store::Reference&	rpElementStore,
+	rtLINK_CType*&		rpElementPointer,
+	rtLINK_CType*&		rpExpansion,
+	M_CPD*&			rpDistribution,
+	rtINDEX_Key*&		rpKey
+    );
+
+//  Time Series Specifics
+public:
+    bool isATimeSeries () const {
+	return ReferenceIsntNil (rtINDEX_CPx_KeyStore);
+    }
+    bool getTimeZero (DSC_Descriptor &rResult, rtPTOKEN_Handle *pResultPPT);
+
+//  Store Verification
+public:
+    void EnsureIndexKeyMeetsSetDefinition ();
+
+//  Display and Inspection
+public:
+    virtual /*override*/ void getClusterReferenceMapData (MapEntryData &rData, unsigned int xReference);
+    virtual /*override*/ unsigned int getClusterReferenceMapSize ();
+
+    virtual /*override*/ unsigned __int64 getClusterSize ();
+};
+
+
 /*************************************
  *************************************
  *****  Index Manager Interface  *****
  *************************************
  *************************************/
 
-PublicFnDecl M_CPD* rtINDEX_NewCluster (
-    M_CPD*			pInstancePTokenCPD,
+PublicFnDecl rtINDEX_Handle *rtINDEX_NewCluster (
+    rtPTOKEN_Handle*		pInstancePToken,
     RTYPE_Type			xKeySetRType,
-    M_CPD*			pKeySetRefPTokenCPD,
-    M_CPD*			pKeyStoreCPD,
-    M_CPD*			pContentPrototypeCPD
+    rtPTOKEN_Handle*		pKeySetRefPToken,
+    Vdd::Store*			pKeyStore,
+    Vdd::Store*			pContentPrototype
 );
 /*---------------------*/
 
-PublicFnDecl M_CPD* rtINDEX_NewCluster (
-    M_CPD*			pInstancePTokenCPD,
-    M_CPD*			pContentPrototypeCPD,
-    int
+PublicFnDecl rtINDEX_Handle *rtINDEX_NewCluster (
+    rtPTOKEN_Handle*		pInstancePToken,
+    Vdd::Store*			pContentPrototype = 0 // -> vector
 );
 /*---------------------*/
 
-PublicFnDecl M_CPD* rtINDEX_NewCluster (
-    M_CPD*			pInstancePTokenCPD,
+PublicFnDecl rtINDEX_Handle *rtINDEX_NewCluster (
+    rtPTOKEN_Handle*		pInstancePToken,
     DSC_Descriptor*		pKeySetPrototype,
-    M_CPD*			pContentPrototypeCPD
+    Vdd::Store*			pContentPrototype
 );
 /*---------------------*/
 
-PublicFnDecl M_CPD* rtINDEX_NewCluster (
-    M_CPD*			pInstancePTokenCPD,
-    M_CPD*			pPrototypeIndexCPD
-);
-/*---------------------*/
-
-PublicFnDecl M_CPD* rtINDEX_NewCluster (
+PublicFnDecl rtINDEX_Handle *rtINDEX_NewCluster (
     rtLINK_CType*		pContentPartition,
-    M_CPD*			pContent,
+    Vdd::Store*			pContent,
     rtINDEX_Key*		pKey
 );
 /*---------------------*/
 
-PublicFnDecl M_CPD* rtINDEX_NewTimeSeries (
-    M_CPD*			pInstancePTokenCPD
-);
-/*---------------------*/
-
-PublicFnDecl M_CPD* rtINDEX_Align (
-    M_CPD*			pIndexCPD,
-    bool			fDeletingKeyMapNils
-);
-
-PublicFnDecl M_CPD* rtINDEX_Align (
-    M_CPD*			pIndexCPD
-);
-/*---------------------*/
-
-PublicFnDecl bool rtINDEX_AlignAll (
-    M_CPD*			pIndexCPD,
-    bool			deletingEmptyUSegments
-);
-/*---------------------*/
-
-PublicFnDecl void rtINDEX_GetKeyMapType (
-    M_CPD*			pIndexCPD,
-    RTYPE_Type&			xKeyMapType
-);
-
-PublicFnDecl void rtINDEX_SetKeyMapType (
-    M_CPD*			pIndexCPD,
-    RTYPE_Type			xKeyMapType
-);
-/*---------------------*/
-
-PublicFnDecl rtLINK_CType* rtINDEX_AddLists (
-    M_CPD*			pIndexCPD,
-    M_CPD*			newListsPToken
-);
-/*---------------------*/
-
-PublicFnDecl void rtINDEX_Subscript (
-    DSC_Descriptor*		sourceDsc,
-    DSC_Descriptor*		keyDsc,
-    int				keyModifier,
-    DSC_Descriptor*		resultDsc,
-    rtLINK_CType*		*locatedLinkc
-);
-/*---------------------*/
-
-PublicFnDecl void rtINDEX_TimeZero (
-    DSC_Descriptor*		pResultDsc,
-    DSC_Descriptor*		pIndexSelectorDsc
-);
-/*---------------------*/
-
-PublicFnDecl void rtINDEX_DeleteUnusedKeys (
-    M_CPD*			pIndexCPD
-);
-/*---------------------*/
-
-PublicFnDecl void rtINDEX_Extract (
-    DSC_Descriptor&		rIndexDescriptor,
-    M_CPD*&			pElementCluster,
-    rtLINK_CType*&		elementSelector,
-    rtLINK_CType*&		expansionLinkc,
-    M_CPD*&			elementDistribution,
-    rtINDEX_Key*&		pKey
+PublicFnDecl rtINDEX_Handle *rtINDEX_NewTimeSeries (
+    rtPTOKEN_Handle*		pInstancePToken
 );
 /*---------------------*/
 
@@ -405,43 +559,6 @@ PublicFnDecl void rtINDEX_KeyDelete (
     rtINDEX_Key*		pKey
 );
 /*---------------------*/
-
-
-/******************************
- ******************************
- *****  Container Handle  *****
- ******************************
- ******************************/
-
-class rtINDEX_Handle : public rtPOPVECTOR_Handle {
-//  Run Time Type
-    DECLARE_CONCRETE_RTT (rtINDEX_Handle, rtPOPVECTOR_Handle);
-
-//  Construction
-protected:
-    rtINDEX_Handle (M_CTE &rCTE) : rtPOPVECTOR_Handle (rCTE) {
-    }
-
-public:
-    static VContainerHandle *Maker (M_CTE &rCTE) {
-	return new rtINDEX_Handle (rCTE);
-    }
-
-//  Destruction
-protected:
-
-//  Access
-public:
-
-//  Query
-public:
-
-//  Callbacks
-protected:
-
-//  State
-protected:
-};
 
 
 #endif

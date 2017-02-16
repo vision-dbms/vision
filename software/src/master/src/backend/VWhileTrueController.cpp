@@ -94,10 +94,10 @@ void VWhileTrueController::conditionContinuation () {
 
     VDescriptor &rDuc = duc ();
     if (rDuc.convertVectorsToMonotypeIfPossible ())
-	bodyShouldBeEvaluated = rDuc.contentAsMonotype ().storeCPD ()->NamesTheTrueClass ();
+	bodyShouldBeEvaluated = rDuc.contentAsMonotype ().store ()->NamesTheTrueClass ();
     else {
 	rtLINK_CType *pSubset = rDuc.subsetOfType (
-	    ptoken ()->ScratchPad (), &M_KnownObjectTable::TheTrueClass
+	    ptoken ()->ScratchPad (), &M_KOT::TheTrueClass
 	);
 	if (pSubset) {
 	    restrict (pSubset);

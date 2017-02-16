@@ -29,7 +29,7 @@ class VFragment;
  * mutually exclusive, collectively exhaustive subsets.
  *
  *  Fragmentation Field Descriptions:
- *	m_pPToken		- a standard CPD for a P-Token defining the
+ *	m_pPPT			- a handle for a P-Token defining the
  *				  positional state of the fragmentation.
  *	m_pFragmentList		- the head of a list of fragments defining
  *				  the elements of the fragmentation's object
@@ -61,8 +61,8 @@ public:
 
 //  Construction
 protected:
-    M_CPD *NewPToken (unsigned int nElements) const {
-	return rtPTOKEN_New (m_pPToken->Space (), nElements);
+    rtPTOKEN_Handle *NewPToken (unsigned int nElements) const {
+	return new rtPTOKEN_Handle (m_pPPT->Space (), nElements);
     }
 
 public:
@@ -71,9 +71,9 @@ public:
      *				  positional state of the fragmentation.  The
      *				  CPD's retention count will be incremented.
      *---------------------------------------------------------------------------*/
-    void construct (M_CPD *pPToken) {
+    void construct (rtPTOKEN_Handle *pPToken) {
 	pPToken->retain ();
-	m_pPToken		= pPToken;
+	m_pPPT		= pPToken;
 	m_pFragmentList		=
 	m_pCurrentFragment	= NilOf (VFragment*);
 	m_iFragmentCount	=
@@ -87,7 +87,7 @@ public:
 
 //  Query
 public:
-    M_CPD*		ptoken			() const { return m_pPToken; }
+    rtPTOKEN_Handle*	ptoken			() const { return m_pPPT; }
     VFragment*		fragmentList		() const { return m_pFragmentList;}
     unsigned int	fragmentCount		() const { return m_iFragmentCount; }
     VFragment*		currentFragment		() const { return m_pCurrentFragment; }
@@ -96,11 +96,9 @@ public:
 
 //  Access
 public:
-    void assignTo (
-	rtLINK_CType *pElementSelector, M_CPD *pTarget
-    );
+    void assignTo (rtLINK_CType *pElementSelector, Vdd::Store *pTarget);
 
-    M_CPD *asVector ();
+    void getVector (rtVECTOR_Handle::Reference &rpResult);
 
     void goToFirstFragment () {
 	m_pCurrentFragment = m_pFragmentList;
@@ -108,8 +106,8 @@ public:
     }
     void goToNextFragment ();
 
-    rtLINK_CType *subsetInStore (M_CPD *pStore, VDescriptor *pValueReturn);
-    rtLINK_CType *subsetInStore (M_CPD *pStore) {
+    rtLINK_CType *subsetInStore (Vdd::Store *pStore, VDescriptor *pValueReturn);
+    rtLINK_CType *subsetInStore (Vdd::Store *pStore) {
 	return subsetInStore (pStore, 0);
     }
 
@@ -126,6 +124,12 @@ public:
     void Flatten ();
 
 //  Update
+private:
+    void setPPT (rtPTOKEN_Handle *pNewPPT) {
+	pNewPPT->retain ();
+	m_pPPT->release ();
+	m_pPPT = pNewPPT;
+    }
 public:
     void clear ();
 
@@ -143,7 +147,7 @@ protected:
 
 //  State
 protected:
-    M_CPD*			m_pPToken;
+    rtPTOKEN_Handle*		m_pPPT;
     VFragment*			m_pFragmentList;
     unsigned int		m_iFragmentCount;
     VFragment*			m_pCurrentFragment;

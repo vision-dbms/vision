@@ -14,6 +14,7 @@
 
 #include "VBenderenceable.h"
 #include "VContainerHandle.h"
+#include "Vdd_Store.h"
 
 /***********************
  *****  Container  *****
@@ -29,7 +30,9 @@
 #include "RTlink.h"
 #include "RTrefuv.h"
 
+class VBlockTask;
 class VDescriptor;
+class VectorReconstructor;
 
 /**********************************************
  *****  PartitionedStatistics Statistics  *****
@@ -69,10 +72,6 @@ enum rtVECTOR_PS_Type {
 #define rtVECTOR_CPD_PToken(cpd)\
     M_CPD_PointerToPOP (cpd, rtVECTOR_CPx_PToken)
 
-#define rtVECTOR_CPD_RowPTokenCPD(cpd) (\
-    (cpd)->GetCPD (rtVECTOR_CPx_PToken, RTYPE_C_PToken)\
-)
-
 #define rtVECTOR_CPD_IsASet(cpd)\
     rtVECTOR_V_IsASet (rtVECTOR_CPD_Base (cpd))
 
@@ -81,9 +80,6 @@ enum rtVECTOR_PS_Type {
 
 #define rtVECTOR_CPD_IsInconsistent(cpd)\
     rtVECTOR_V_IsInconsistent (rtVECTOR_CPD_Base (cpd))
-
-#define rtVECTOR_CPD_PMapTransition(cpd)\
-    rtVECTOR_V_PMapTransition (rtVECTOR_CPD_Base (cpd))
 
 #define rtVECTOR_CPD_USegArraySize(cpd)\
     rtVECTOR_V_USegArraySize (rtVECTOR_CPD_Base (cpd))
@@ -102,10 +98,6 @@ enum rtVECTOR_PS_Type {
 
 #define rtVECTOR_CPD_USegIndex(cpd)\
     rtVECTOR_V_USegIndex (rtVECTOR_CPD_Base (cpd))
-
-/*****  Can be Simplified Query  *****/
-#define rtVECTOR_CPD_CanBeSimplified(cpd)\
-    (rtVECTOR_CPD_PMapSize (cpd) == 1)
     
 /*****
  * The following macro does not expand into efficient code.  Use a different
@@ -117,15 +109,6 @@ enum rtVECTOR_PS_Type {
 /*----  P-Map Entry Access Macros  ----*/
 #define rtVECTOR_CPD_PMRD(cpd)\
     M_CPD_PointerToType (cpd, rtVECTOR_CPx_PMRD, rtVECTOR_PMRDType *)
-
-#define rtVECTOR_CPD_PMRD_VectorOrigin(cpd)\
-    rtVECTOR_PMRD_VectorOrigin (rtVECTOR_CPD_PMRD (cpd))
-
-#define rtVECTOR_CPD_PMRD_SegmentIndex(cpd)\
-    rtVECTOR_PMRD_SegmentIndex (rtVECTOR_CPD_PMRD (cpd))
-
-#define rtVECTOR_CPD_PMRD_SegmentOrigin(cpd)\
-    rtVECTOR_PMRD_SegmentOrigin (rtVECTOR_CPD_PMRD (cpd))
 
 
 /*----  U-Segment Descriptor Access Macros  ----*/
@@ -140,9 +123,6 @@ enum rtVECTOR_PS_Type {
 
 #define rtVECTOR_CPD_USD_PToken(cpd)\
     rtVECTOR_USD_PToken (rtVECTOR_CPD_USD (cpd))
-
-#define rtVECTOR_CPD_USD_VStore(cpd)\
-    rtVECTOR_USD_VStore (rtVECTOR_CPD_USD (cpd))
 
 #define rtVECTOR_CPD_USD_Values(cpd)\
     rtVECTOR_USD_Values (rtVECTOR_CPD_USD (cpd))
@@ -204,7 +184,7 @@ public:
 
 //  Construction
 public:
-    rtVECTOR_USDC (unsigned int xSegment, M_CPD *pStore, M_CPD *pPointer, M_CPD *pPPT)
+    rtVECTOR_USDC (unsigned int xSegment, Vdd::Store *pStore, M_CPD *pPointer, rtPTOKEN_Handle *pPPT)
 	: m_xSegment		(xSegment)
 	, m_pPPT		(pPPT)
 	, m_pStore		(pStore)
@@ -214,13 +194,11 @@ public:
 	g_cAllocations++;
     }
 
-    void SetPointerTo (M_CPD *pPointer, M_CPD *pPPT) {
+    void SetPointerTo (M_CPD *pPointer, rtPTOKEN_Handle *pPPT) {
 	if (m_pPointer)
 	    m_pPointer->release ();
 	m_pPointer = pPointer;
-	if (m_pPPT)
-	    m_pPPT->release ();
-	m_pPPT = pPPT;
+	m_pPPT.setTo (pPPT);
     }
 
 //  Destruction
@@ -234,10 +212,10 @@ public:
     }
 
     unsigned int cardinality () const {
-	return rtPTOKEN_CPD_BaseElementCount (m_pPPT);
+	return m_pPPT->cardinality ();
     }
 
-    M_CPD *PPT () const {
+    rtPTOKEN_Handle *PPT () const {
 	return m_pPPT;
     }
 
@@ -252,11 +230,11 @@ public:
 	return m_xSegment;
     }
 
-    M_CPD *storeCPD () const {
+    Vdd::Store *store () const {
 	return m_pStore;
     }
     RTYPE_Type storeRType () const {
-	return m_pStore->RType ();
+	return m_pStore->rtype ();
     }
 
     unsigned int TargetSegmentIndex () const {
@@ -265,7 +243,7 @@ public:
 
 //  Query
 public:
-    bool Names (M_CPD *pStore) const {
+    bool Names (Vdd::Store *pStore) const {
 	return m_pStore->Names (pStore);
     }
     bool Names (M_KOTM pKOTM) const {
@@ -286,13 +264,13 @@ public:
     }
 
     void MakeCodAssociatedLink () {
-	ClaimAssociatedLink (cardinality () ? rtLINK_RefConstructor (m_pPPT, -1) : 0);
+	ClaimAssociatedLink (cardinality () ? rtLINK_RefConstructor (m_pPPT) : 0);
     }
     void MakeDomAssociatedLink () {
-	ClaimAssociatedLink (cardinality () ? rtLINK_PosConstructor (m_pPPT, -1) : 0);
+	ClaimAssociatedLink (cardinality () ? rtLINK_PosConstructor (m_pPPT) : 0);
     }
 
-    void CloseAssociatedLink (M_CPD *pPPT) const {
+    void CloseAssociatedLink (rtPTOKEN_Handle *pPPT) const {
 	if (m_pAssociatedLink)
 	    m_pAssociatedLink->Close (pPPT);
     }
@@ -309,12 +287,12 @@ public:
 
 //  State
 protected:
-    unsigned int	m_xSegment;
-    M_CPD		*m_pPPT, 
-			*m_pStore, 
-			*m_pPointer;
-    rtLINK_CType	*m_pAssociatedLink;
-    unsigned int	m_xTargetSegment;
+    unsigned int		m_xSegment;
+    Vdd::Store::Reference	m_pStore;
+    rtPTOKEN_Handle::Reference	m_pPPT;
+    M_CPD*			m_pPointer;
+    rtLINK_CType*		m_pAssociatedLink;
+    unsigned int		m_xTargetSegment;
 };
 
 
@@ -391,8 +369,8 @@ public:
     M_CPD *pointerCPD () const {
 	return m_pUSDC->pointerCPD ();
     }
-    M_CPD *storeCPD () const {
-	return m_pUSDC->storeCPD ();
+    Vdd::Store *store () const {
+	return m_pUSDC->store ();
     }
 
     rtVECTOR_PMRDC *Successor () const {
@@ -435,14 +413,14 @@ protected:
 
 /*---------------------------------------------------------------------------
  * Vector Constructor Field Descriptions:
- *	m_pPPT			- a standard CPD for the P-Token defining the
+ *	m_pPPT			- a handle for the P-Token defining the
  *				  positional state of this vector constructor.
  *	m_sUSDArray		- the number of USDCr's in the USDCr list.
  *	m_pUSDArray		- a pointer to an array of pointers to USDCr's
  *				  contained in the above list.  This array is
  *				  ordered for binary search by the homogeneity
  *				  defining routines.
- *	m_fIsASet		- true if the vector constructor is a set, F
+ *	m_bASet			- true if the vector constructor is a set, F
  *                                false otherwise.
  *	m_iPMRDCount		- the number of PMRDCr's in the PMRDCr list.
  *	m_pPMRDChainHead	- a pointer to the first real PMRDCr in the
@@ -452,6 +430,7 @@ protected:
  *				  of PMRDCr's associated with this constructor.
  *---------------------------------------------------------------------------
  */
+class rtVECTOR_Handle;
 class rtVECTOR_CType : public VBenderenceable {
     DECLARE_CONCRETE_RTT (rtVECTOR_CType, VBenderenceable);
 
@@ -460,8 +439,8 @@ private:
     void MakeUSDArray ();
 
 public:
-    rtVECTOR_CType (M_CPD *pPPT, unsigned int sUSDArray);
-    rtVECTOR_CType (M_CPD *pVector);
+    rtVECTOR_CType (rtPTOKEN_Handle *pPPT, unsigned int sUSDArray);
+    rtVECTOR_CType (rtVECTOR_Handle *pVector);
 
     void AppendPMRD (rtVECTOR_USDC *pUSDC, unsigned int xOrigin, unsigned int sRun) {
 	rtVECTOR_PMRDC *pNewPMRD = m_pPMRDChainTail->Append (pUSDC, xOrigin, sRun);
@@ -484,11 +463,11 @@ public:
     }
 
     rtVECTOR_USDC *NewUSDC (
-	unsigned int xSegment, M_CPD *pStore, M_CPD *pPointer, M_CPD *pPPT
+	unsigned int xSegment, Vdd::Store *pStore, M_CPD *pPointer, rtPTOKEN_Handle *pPPT
     ) {
 	return m_pUSDArray[xSegment] = new rtVECTOR_USDC (xSegment, pStore, pPointer, pPPT);
     }
-    rtVECTOR_USDC *NewUSDC (unsigned int xSegment, M_CPD *pStore) {
+    rtVECTOR_USDC *NewUSDC (unsigned int xSegment, Vdd::Store *pStore) {
 	return NewUSDC (xSegment, pStore, 0, 0);
     }
 
@@ -500,15 +479,20 @@ protected:
 
 //  Access
 public:
+    rtPTOKEN_Handle *alignedPToken () {
+	Align ();
+	return m_pPPT;
+    }
+
     unsigned int cardinality () const {
-	return rtPTOKEN_CPD_BaseElementCount (m_pPPT);
+	return m_pPPT->cardinality ();
     }
 
     rtVECTOR_PMRDC *PMRDChainHead () const {
 	return m_pPMRDChainHead;
     }
 
-    M_CPD *PPT () const {
+    rtPTOKEN_Handle *PPT () const {
 	return m_pPPT;
     }
 
@@ -538,7 +522,7 @@ public:
 	return m_iPMRDCount != 1;
     }
     bool IsASet () const {
-	return m_fIsASet;
+	return m_bASet;
     }
 
 //  Use
@@ -550,8 +534,8 @@ public:
 
     void MakeConstructorLinks ();
 
-    M_CPD *NewPToken (unsigned int nElements) const {
-	return rtPTOKEN_New (m_pPPT->Space (), nElements);
+    rtPTOKEN_Handle *NewPToken (unsigned int nElements) const {
+	return new rtPTOKEN_Handle (m_pPPT->Space (), nElements);
     }
 
     M_CPD *PartitionedStatistics (
@@ -572,8 +556,8 @@ public:
 	return SimplifiedToMonotype (dscp, true);
     }
 
-    rtLINK_CType *subsetInStore (M_CPD *pStore, VDescriptor *pValueReturn);
-    rtLINK_CType *subsetInStore (M_CPD *pStore) {
+    rtLINK_CType *subsetInStore (Vdd::Store *pStore, VDescriptor *pValueReturn);
+    rtLINK_CType *subsetInStore (Vdd::Store *pStore) {
 	return subsetInStore (pStore, 0);
     }
 
@@ -584,20 +568,497 @@ public:
 	return subsetOfType (pSubsetSpace, pKOTM, 0);
     }
 
-    M_CPD *ToVector (bool fRelease);
-    M_CPD *ToVector () {
-	return ToVector (true);
-    }
+    void getVector (VReference<rtVECTOR_Handle> &rpResult);
 
 //  State
 protected:
-    M_CPD		 *m_pPPT;
-    unsigned int	  m_sUSDArray;
-    rtVECTOR_USDC	**m_pUSDArray;
-    unsigned int	  m_fIsASet	: 1, 
-			  m_iPMRDCount	: 31;
-    rtVECTOR_PMRDC	 *m_pPMRDChainHead,
-			 *m_pPMRDChainTail;
+    rtPTOKEN_Handle::Reference	m_pPPT;
+    unsigned int		m_sUSDArray;
+    rtVECTOR_USDC**		m_pUSDArray;
+    rtVECTOR_PMRDC*		m_pPMRDChainHead;
+    rtVECTOR_PMRDC*		m_pPMRDChainTail;
+    unsigned int		m_iPMRDCount;
+    bool			m_bASet;
+};
+
+
+/******************************
+ ******************************
+ *****  Container Handle  *****
+ ******************************
+ ******************************/
+
+class rtVECTOR_Handle : public VStoreContainerHandle {
+    DECLARE_CONCRETE_RTT (rtVECTOR_Handle, VStoreContainerHandle);
+
+    friend class rtVECTOR_CType;
+    friend class VBlockTask;
+    friend class VDescriptor;
+    friend class VectorReconstructor;
+
+//  Constants
+    enum ExtractResult {
+	ExtractResult_IsEmpty, ExtractResult_IsAMonotype, ExtractResult_IsSomething
+    };
+
+//  Segment Data
+public:
+    class SegmentData {
+    public:
+	SegmentData () {
+	}
+	~SegmentData () {
+	}
+    public:
+	Vdd::Store *store () const {
+	    return m_pStore;
+	}
+	M_CPD *pointer () const {
+	    return m_pPointer;
+	}
+	rtPTOKEN_Handle *ptoken () const {
+	    return m_pPToken;
+	}
+    public:
+	void setStoreTo (Vdd::Store *pStore) {
+	    m_pStore.setTo (pStore);
+	}
+
+	void setPointerTo (M_CPD *pPointer) {
+	    m_pPointer.setTo (pPointer);
+	}
+	void claimPointer (M_CPD *pPointer) {
+	    m_pPointer.claim (pPointer);
+	}
+
+	void setPTokenTo (rtPTOKEN_Handle *pPToken) {
+	    m_pPToken.setTo (pPToken);
+	}
+	void claimPToken (rtPTOKEN_Handle::Reference &rpPToken) {
+	    m_pPToken.claim (rpPToken);
+	}
+
+    private:
+	Vdd::Store::Reference		m_pStore;
+	VCPDReference			m_pPointer;
+	rtPTOKEN_Handle::Reference	m_pPToken;
+    };
+
+//  Construction Utilities
+private:
+    static size_t initialSizeFrom (rtPTOKEN_Handle *pPPT);
+
+    void initializeSegment (
+	unsigned int xSegment, Vdd::Store *pStore, M_CPD *pPointer, rtPTOKEN_Handle *pPToken
+    ) {
+	initializeSegment (xSegment, pStore, pPointer->containerHandle (), pPToken);
+    }
+    void initializeSegment (
+	unsigned int xSegment, Vdd::Store *pStore, VContainerHandle *pPointer, rtPTOKEN_Handle *pPToken
+    );
+    void initializeSegment (unsigned int xSegment, rtVECTOR_USDC *pUSDC) {
+	initializeSegment (xSegment, pUSDC->store (), pUSDC->pointerCPD (), pUSDC->PPT ());
+    }
+    void initializeSegment (unsigned int xSegment, SegmentData const *pInitializationData = 0);
+
+//  Construction
+public:
+    static VContainerHandle *Maker (M_CTE &rCTE) {
+	return new rtVECTOR_Handle (rCTE);
+    }
+
+public:
+    static rtVECTOR_Handle *NewFrom (
+	rtPTOKEN_Handle *pPPT, Vdd::Store *pSegmentStore, M_CPD *pSegmentValues
+    );
+private:
+    static rtVECTOR_Handle *NewFrom (DSC_Descriptor &rInitialValues);
+
+public:
+    rtVECTOR_Handle (rtVECTOR_CType *pConstructor);
+    rtVECTOR_Handle (rtPTOKEN_Handle *pPPT, bool bMarkingAsSet = false, SegmentData const *pInitialSegmentData = 0);
+private:
+    rtVECTOR_Handle (M_CTE &rCTE) : BaseClass (rCTE) {
+    }
+
+//  Destruction
+private:
+    ~rtVECTOR_Handle () {
+    }
+
+//  Alignment
+private:
+    virtual /*override*/ bool align_() {
+	return align ();
+    }
+    virtual /*override*/ bool alignAll_(bool bCleaning) {
+	return alignAll (bCleaning);
+    }
+public:
+    bool align ();
+    bool alignAll (bool bCleaning = true);
+
+//  Canonicalization
+private:
+    virtual /*override*/ bool getCanonicalization_(VReference<rtVSTORE_Handle> &rpStore, DSC_Pointer const &rPointer);
+
+//  Cloning
+private:
+    virtual /*override*/ void clone_(StoreBase::Reference &rpResult, rtPTOKEN_Handle *pPPT) const {
+	Reference pHandle;
+	clone (pHandle, pPPT);
+	rpResult.setTo (pHandle);
+    }
+public:
+    void clone (Reference &rpResult, rtPTOKEN_Handle *pPPT) const;
+
+//  Attribute Access
+public:
+    bool isASet () const {
+	return rtVECTOR_V_IsASet (typecastContent ());
+    }
+    bool isInconsistent () const {
+	return rtVECTOR_V_IsInconsistent (typecastContent ());
+    }
+
+//  Attribute Update
+private:
+    void clearIsASet () {
+	setIsASetTo (false);
+    }
+    void setIsASet () {
+	setIsASetTo (true);
+    }
+    void setIsASetTo (bool bValue) {
+	rtVECTOR_V_IsASet (typecastContent ()) = bValue;
+    }
+    void clearIsInconsistent () {
+	setIsInconsistentTo (false);
+    }
+    void setIsInconsistent () {
+	setIsInconsistentTo (true);
+    }
+    void setIsInconsistentTo (bool bValue) {
+	rtVECTOR_V_IsInconsistent (typecastContent ()) = bValue;
+    }
+
+//  Component Access
+private:
+    virtual /*overrride*/ rtDICTIONARY_Handle *getDictionary_(DSC_Pointer const &rPointer) const;
+    virtual /*overrride*/ rtPTOKEN_Handle *getPToken_() const {
+	return getPToken ();
+    }
+public:
+    rtPTOKEN_Handle *alignedPToken () {
+	align ();
+	return ptokenHandle ();
+    }
+    rtPTOKEN_Handle *getPToken () const {
+	return ptokenHandle ();
+    }
+
+//  Component Access
+private:
+    rtVECTOR_Type *typecastContent () const {
+	return reinterpret_cast<rtVECTOR_Type *>(containerContent ());
+    }
+    M_POP *ptokenPOP () const {
+	return &rtVECTOR_V_PToken (typecastContent ());
+    }
+    rtPTOKEN_Handle *ptokenHandle () const {
+	return static_cast<rtPTOKEN_Handle*>(GetContainerHandle (ptokenPOP (), RTYPE_C_PToken));
+    }
+    rtVECTOR_PMRDType *pmap () const {
+	return rtVECTOR_V_PMap (typecastContent ());
+    }
+    unsigned int pmapSize () const {
+	return rtVECTOR_V_PMapSize (typecastContent ());
+    }
+    pointer_t pmapLimit () const {
+	rtVECTOR_Type *pContent = typecastContent ();
+	return reinterpret_cast<pointer_t>(rtVECTOR_V_PMap (pContent) + rtVECTOR_V_PMapSize (pContent));
+    }
+    rtVECTOR_USDType *segmentArray () const {
+	return rtVECTOR_V_USegArray (typecastContent ());
+    }
+public:
+    unsigned int segmentArraySize () const {
+	return rtVECTOR_V_USegArraySize (typecastContent ());
+    }
+private:
+    pointer_t segmentArrayLimit () const {
+	rtVECTOR_Type *pContent = typecastContent ();
+	return reinterpret_cast<pointer_t>(rtVECTOR_V_USegArray (pContent) + rtVECTOR_V_USegArraySize (pContent));
+    }
+    unsigned int segmentFreeBound () const {
+	return rtVECTOR_V_USegFreeBound (typecastContent ());
+    }
+    int *segmentIndex () const {
+	return rtVECTOR_V_USegIndex (typecastContent ());
+    }
+public:
+    unsigned int segmentIndexElement (unsigned int xElement) const {
+	return segmentIndex ()[xElement];
+    }
+    unsigned int segmentIndexSize () const {
+	return rtVECTOR_V_USegIndexSize (typecastContent ());
+    }
+private:
+    pointer_t segmentIndexLimit () const {
+	rtVECTOR_Type *pContent = typecastContent ();
+	return (pointer_t)(rtVECTOR_V_USegIndex (pContent) + rtVECTOR_V_USegIndexSize (pContent));
+    }
+    rtVECTOR_USDType *segment (unsigned int xSegment) const {
+	return segmentArray() + xSegment;
+    }
+    rtPTOKEN_Handle *segmentPTokenHandle (unsigned int xSegment) const {
+	return static_cast<rtPTOKEN_Handle*>(
+	    GetContainerHandle (segmentPTokenPOP (xSegment), RTYPE_C_PToken)
+	);
+    }
+    M_CPD *segmentPointerCPD (unsigned int xSegment) const {
+	return segmentPointerHandle (xSegment)->GetCPD ();
+    }
+    VContainerHandle *segmentPointerHandle (unsigned int xSegment) const {
+	return GetContainerHandle (segmentPointerPOP (xSegment));
+    }
+    VContainerHandle *segmentStoreHandle (unsigned int xSegment) const {
+	return GetContainerHandle (segmentStorePOP (xSegment));
+    }
+    M_POP *segmentPTokenPOP (unsigned int xSegment) const {
+	return &rtVECTOR_USD_PToken (segment (xSegment));
+    }
+    M_POP *segmentPointerPOP (unsigned int xSegment) const {
+	return &rtVECTOR_USD_Values (segment (xSegment));
+    }
+    M_POP *segmentStorePOP (unsigned int xSegment) const {
+	return &rtVECTOR_USD_VStore (segment (xSegment));
+    }
+
+public:
+    void getSegmentPToken (rtPTOKEN_Handle::Reference &rpResult, unsigned int xSegment) const {
+	rpResult.setTo (segmentPTokenHandle (xSegment));
+    }
+
+    void getSegmentPointer (M_CPD *&rpResult, unsigned int xSegment) const {
+	rpResult = segmentPointerHandle (xSegment)->GetCPD ();
+    }
+    void getSegmentPointer (VContainerHandle::Reference &rpResult, unsigned int xSegment) const {
+	rpResult.setTo (segmentPointerHandle (xSegment));
+    }
+
+    void getSegmentStore (VContainerHandle::Reference &rpResult, unsigned int xSegment) const {
+	rpResult.setTo (segmentStoreHandle (xSegment));
+    }
+    bool getSegmentStore (Vdd::Store::Reference &rpResult, unsigned int xSegment) const {
+	return segmentStoreHandle (xSegment)->getStore (rpResult);
+    }
+
+    unsigned int segmentCardinality (unsigned int xSegment) const {
+	return rtPTOKEN_BaseElementCount (this, segmentPTokenPOP (xSegment));
+    }
+
+//  Component Query
+public:
+    bool segmentInUse (unsigned int xSegment) const {
+	return ReferenceIsntNil (segmentPTokenPOP (xSegment));
+    }
+    bool segmentUnused (unsigned int xSegment) const {
+	return ReferenceIsNil (segmentPTokenPOP (xSegment));
+    }
+
+//  Element Access Support
+private:
+    void CheckForReferenceCompatibility (Vdd::Store *pStore, M_CPD *pPointer) {
+	CheckForReferenceCompatibility (pStore, pPointer->containerHandle ());
+    }
+    void CheckForReferenceCompatibility (Vdd::Store *pStore, VContainerHandle *pPointer);
+
+    unsigned int LocateOrAddSegment (
+	Vdd::Store *pStore, RTYPE_Type xRType, rtPTOKEN_Handle *pSegmentRPT, bool bASet
+    );
+    bool LocateSegment (Vdd::Store *pStore, unsigned int &rxSegment, M_POP *pIdentityReturn = 0);
+
+    ExtractResult SetupExtract (rtLINK_CType *pSubscript);
+    void DoSimpleExtract (
+	rtLINK_CType *pSubscript, Vdd::Store::Reference &rpResultStore, M_CPD *&rpResultPointer
+    );
+    void DoComplexExtract (rtLINK_CType *pSubscript, rtVECTOR_CType::Reference &rpResult);
+
+//  Element Access
+private:
+    virtual bool getElements_(VReference<rtVECTOR_Handle> &rpResult, rtLINK_CType *pSubscript) {
+	return getElements (rpResult, pSubscript);
+    }
+    virtual bool getElements_(VDescriptor &rResult, rtLINK_CType *pSubscript) {
+	return getElements (rResult, pSubscript);
+    }
+    virtual bool getElements_(DSC_Descriptor &rResult, DSC_Scalar &rSubscript) {
+	return getElements (rResult, rSubscript);
+    }
+public:
+    unsigned int elementCount () const {
+	return rtVECTOR_V_ElementCount (typecastContent ());
+    }
+
+    void getElements (M_CPD *&rpResult, rtLINK_CType *pSubscript) {
+	rtVECTOR_Handle::Reference pResult;
+	getElements (pResult, pSubscript);
+	rpResult = pResult->GetCPD ();
+    }
+    bool getElements (rtVECTOR_Handle::Reference &rpResult, rtLINK_CType *pSubscript);
+    bool getElements (VDescriptor &rResult, rtLINK_CType *pSubscript);
+    bool getElements (DSC_Descriptor &rResult, DSC_Scalar &rSubscript);
+
+    rtVECTOR_CType *reorder (M_CPD *pReordering);
+    rtVECTOR_CType *distribute (M_CPD *pDistribution);
+
+    bool canBeSimplifiedToMonotype () const {
+	return pmapSize () == 1;
+    }
+    bool cantBeSimplifiedToMonotype () const {
+	return pmapSize () != 1;
+    }
+    bool simplifiedToMonotype (DSC_Descriptor &rpResult, bool bNonDestructive = true); // return = true if successful, else false
+
+//  Element Update Support
+private:
+    void setSegmentPTokenTo (unsigned int xSegment, rtPTOKEN_Handle *pSegmentPPT) {
+	StoreReference (segmentPTokenPOP (xSegment), pSegmentPPT);
+    }
+    void setSegmentValuesTo (
+	M_CPD *&rpTarget, unsigned int xTarget, unsigned int xSubscript, DSC_Descriptor &rSource
+    );
+    void setSegmentValuesTo (
+	M_CPD *&rpTarget, unsigned int xTarget, rtLINK_CType*pSubscript, DSC_Descriptor &rSource
+    );
+    void setSegmentValuesTo (
+	M_CPD *&rpTarget, unsigned int xTarget, rtLINK_CType*pSubscript, M_CPD *pSource
+    );
+
+    void ExpandSegmentArray (unsigned int sExpansion);
+    void RemoveEmptySegments (int *pRelocationMap, unsigned int sRelocationMap);
+
+    void decrementSegmentArraySizeBy (unsigned int sChange) {
+	rtVECTOR_V_USegArraySize (typecastContent ()) -= sChange;
+    }
+    void decrementSegmentIndexSizeBy (unsigned int sChange) {
+	rtVECTOR_V_USegIndexSize (typecastContent ()) -= sChange;
+    }
+    void decrementPMapSizeBy (unsigned int sChange) {
+	rtVECTOR_V_PMapSize (typecastContent ()) -= sChange;
+    }
+    
+    void incrementSegmentArraySizeBy (unsigned int sChange) {
+	rtVECTOR_V_USegArraySize (typecastContent ()) += sChange;
+    }
+    void incrementSegmentIndexSizeBy (unsigned int sChange) {
+	rtVECTOR_V_USegIndexSize (typecastContent ()) += sChange;
+    }
+    void incrementPMapSizeBy (unsigned int sChange) {
+	rtVECTOR_V_PMapSize (typecastContent ()) += sChange;
+    }
+
+    void setSegmentArraySizeTo (unsigned int sArray) {
+	rtVECTOR_V_USegArraySize (typecastContent ()) = sArray;
+    }
+    void setSegmentIndexSizeTo (unsigned int sIndex) {
+	rtVECTOR_V_USegIndexSize (typecastContent ()) = sIndex;
+    }
+    void setPMapSizeTo (unsigned int sPMap) {
+	rtVECTOR_V_PMapSize (typecastContent ()) = sPMap;
+    }
+
+    void setSegmentFreeBoundTo (unsigned int xBound) {
+	rtVECTOR_V_USegFreeBound (typecastContent ()) = xBound;
+    }
+
+//  Element Update
+private:
+    virtual /*override*/ bool setElements_(rtLINK_CType *pSubscript, DSC_Descriptor &rValues) {
+	return setElements (pSubscript, rValues);
+    }
+    virtual /*override*/ bool setElements_(rtLINK_CType *pSubscript, rtVECTOR_CType *pValues) {
+	return setElements (pSubscript, pValues);
+    }
+    virtual /*override*/ bool setElements_(DSC_Scalar &rSubscript, DSC_Descriptor &rValues) {
+	return setElements (rSubscript, rValues);
+    }
+    virtual /*override*/ bool setElements_(DSC_Scalar &rSubscript, rtVECTOR_CType *pValues) {
+	return setElements (rSubscript, pValues);
+    }
+public:
+    bool setElements (rtLINK_CType *pSubscript, DSC_Descriptor &rValues);
+    bool setElements (rtLINK_CType *pSubscript, rtVECTOR_CType *pValues);
+    bool setElements (DSC_Scalar &rSubscript, DSC_Descriptor &rValues);
+    bool setElements (DSC_Scalar &rSubscript, rtVECTOR_CType *pValues);
+
+//  Instance Deletion
+private:
+    virtual bool deleteInstances_(DSC_Scalar &pInstances) {
+	return doInstanceDeletion (pInstances);
+    }
+    virtual bool deleteInstances_(rtLINK_CType *pInstances, rtLINK_CType *&rpTrues, rtLINK_CType *&rpFalses) {
+	return doInstanceDeletion (pInstances, rpTrues, rpFalses);
+    }
+
+//  Instance Locate
+public:
+    void locate (
+	Vdd::Store *pKeyStore, DSC_Scalar &rKeyPointer, rtLINK_LookupCase xLookupCase, DSC_Pointer &rLocationsReturn, DSC_Pointer &rLocatedReturn
+    );
+    void locate (
+	Vdd::Store *pKeyStore, M_CPD *pKeyPointer, rtLINK_LookupCase xLookupCase, DSC_Pointer &rLocationsReturn, DSC_Pointer &rLocatedReturn
+    );
+    void locate (
+	DSC_Descriptor &rKey, rtLINK_LookupCase xLookupCase, DSC_Pointer &rLocationsReturn, DSC_Pointer &rLocatedReturn
+    );
+
+//  Instance LocateOrAdd
+private:
+    unsigned int AddNewPMapEntryToSetVector (int xSegmentIndex);
+    void AdjustPMapVectorOrigins (unsigned int xInitialEntry, int sAdjustment);
+    void UpdateVectorSetPositionalState (unsigned int xSegment, unsigned int xVectorOrigin, M_CPD *pNewSegmentPointer);
+public:
+    void locateOrAdd (
+	Vdd::Store *pKeyStore, DSC_Scalar &rKeyPointer, DSC_Pointer &rLocationsReturn, DSC_Pointer *pAdditionsReturn = 0
+    );
+    void locateOrAdd (
+	Vdd::Store *pKeyStore, M_CPD *pKeyPointer, DSC_Pointer &rLocationsReturn, DSC_Pointer *pAdditionsReturn = 0
+    );
+    void locateOrAdd (DSC_Descriptor &rKey, DSC_Pointer &rLocationsReturn, DSC_Pointer *pAdditionsReturn = 0);
+
+//  Instance Set Maintenance
+ public:
+    bool isASet (rtLINK_CType **refNilsLC);
+    bool restoreSetAttribute ();
+
+//  Instance Subsets
+public:
+    rtLINK_CType *subsetInStore (Vdd::Store *pStore, VDescriptor *pValueReturn = 0);
+    rtLINK_CType *subsetOfType (M_ASD *pSubsetSpace, M_KOTM pKOTM, VDescriptor *pValueReturn = 0);
+
+//  Kludges
+private:
+    void setPTokenTo (rtVSTORE_Handle *pStore);
+
+//  Callbacks
+public:
+    void CheckConsistency ();
+protected:
+    bool PersistReferences ();
+
+//  Display and Inspection
+public:
+    virtual /*override*/ void getClusterReferenceMapData (MapEntryData &rData, unsigned int xReference);
+    virtual /*override*/ unsigned int getClusterReferenceMapSize ();
+
+    virtual /*override*/ unsigned __int64 getClusterSize ();
+
+    virtual /*override*/ unsigned int getPOPCount () const {
+	return 1/*ptoken*/ + rtVECTOR_USD_POPsPerUSD * segmentArraySize ();
+    }
+    virtual /*override*/ bool getPOP (M_POP *pResult, unsigned int xPOP) const;
 };
 
 
@@ -606,145 +1067,6 @@ protected:
  *****  Callable Interface  *****
  ********************************
  ********************************/
-
-/**********************************
- *****  Vector Instantiation  *****
- **********************************/
-
-PublicFnDecl M_CPD *rtVECTOR_NewFromUV (
-    M_CPD*			resultPToken,
-    M_CPD*			uSegmentStore,
-    M_CPD*			uSegmentValues
-);
-
-PublicFnDecl M_CPD *rtVECTOR_NewFromDescriptor (
-    DSC_Descriptor		*initialValues
-);
-
-PublicFnDecl M_CPD *rtVECTOR_New (
-    M_CPD*			pTokenCPD
-);
-
-PublicFnDecl M_CPD *rtVECTOR_NewSetVector (
-    M_CPD*			pTokenCPD
-);
-
-/*******************
- *****  Align  *****
- *******************/
-
-PublicFnDecl M_CPD *rtVECTOR_Align (
-    M_CPD*			vectorCPD
-);
-
-PublicFnDecl bool rtVECTOR_AlignAll (
-    M_CPD*			vectorCPD,
-    bool			deletingEmptyUSegments
-);
-
-/********************
- *****  Assign  *****
- ********************/
-
-PublicFnDecl void rtVECTOR_Assign (
-    M_CPD*			targetVector,
-    rtLINK_CType*		linkc,
-    DSC_Descriptor		*sourceDescriptor
-);
-
-PublicFnDecl void rtVECTOR_Assign (
-    M_CPD*			targetVector,
-    rtLINK_CType*		linkc,
-    rtVECTOR_CType*		sourceVectorC
-);
-
-PublicFnDecl void rtVECTOR_Assign (
-    M_CPD*			targetVector,
-    rtREFUV_TypePTR_Reference	refp,
-    DSC_Descriptor		*sourceDescriptor
-);
-
-PublicFnDecl void rtVECTOR_Assign (
-    M_CPD*			targetVector,
-    rtREFUV_TypePTR_Reference	refp,
-    rtVECTOR_CType*		sourceVectorC
-);
-
-/*********************
- *****  Extract  *****
- *********************/
-
-PublicFnDecl void rtVECTOR_Extract (
-    M_CPD *pVector, rtLINK_CType *pSubscript, VDescriptor &rResult
-);
-
-PublicFnDecl void rtVECTOR_Extract (
-    M_CPD *pVector, rtLINK_CType *pSubscript, M_CPD **ppResult
-);
-    
-PublicFnDecl void rtVECTOR_RefExtract (
-    M_CPD*			vectorCPD,
-    rtREFUV_TypePTR_Reference	refp,
-    DSC_Descriptor		*valuep
-);
-
-/********************************
- *****  Reorder/Distribute  *****
- ********************************/
-
-PublicFnDecl rtVECTOR_CType *rtVECTOR_ReOrder (
-    M_CPD*			vectorCPD,
-    M_CPD*			refuvCPD
-);
-
-PublicFnDecl rtVECTOR_CType *rtVECTOR_Distribute (
-    M_CPD*			vectorCPD,
-    M_CPD*			refuvCPD
-);
-
-/*****************************
- *****  Type Operations  *****
- *****************************/
-
-PublicFnDecl rtLINK_CType *rtVECTOR_SubsetInStore (
-    M_CPD *pThis, M_CPD *pStore, VDescriptor *pValueReturn = 0
-);
-
-PublicFnDecl rtLINK_CType *rtVECTOR_SubsetOfType (
-    M_CPD *pThis, M_ASD *pSubsetSpace, M_KOTM pKOTM, VDescriptor *pValueReturn = 0
-);
-
-PublicFnDecl bool rtVECTOR_SimplifiedToMonotype (
-    M_CPD *vector, DSC_Descriptor *dscp, bool fNonDestructive = true
-);
-
-/****************************
- *****  Set Operations  *****
- ****************************/
-
-PublicFnDecl void rtVECTOR_LookupFromValueD (
-    M_CPD*			sourceCPD,
-    DSC_Descriptor		*keyDsc,
-    rtLINK_LookupCase		lookupCase,
-    DSC_Pointer			*locationsDscPointer,
-    DSC_Pointer			*locatedDscPointer
-);
-
-PublicFnDecl void rtVECTOR_LocateOrAdd (
-    M_CPD*			targetCPD,
-    DSC_Descriptor*		keyDsc,
-    DSC_Pointer*		locationsDscPointer,
-    DSC_Pointer*		addedDscPointer = 0
-);
-
-PublicFnDecl int rtVECTOR_IsASet (
-    M_CPD*			vectorCPD,
-    rtLINK_CType*		*refNilsLC
-);
-
-PublicFnDecl int rtVECTOR_RestoreSetAttribute (
-    M_CPD*			vectorCPD
-);
 
 /************************************
  *****  Incorporator Interface  *****
@@ -758,51 +1080,10 @@ PublicFnDecl void rtVECTOR_WriteDBUpdateInfo (
 /*********************************
  *****  Maintenance Control  *****
  *********************************/
+
 PublicFnDecl void rtVECTOR_EnablePOPOrdering (bool flag);
 PublicFnDecl void rtVECTOR_SetImplicitCleanupFlag (bool flag);
 PublicFnDecl void rtVECTOR_SetUSegmentCountThreshold (unsigned int count);
-
-
-
-/******************************
- ******************************
- *****  Container Handle  *****
- ******************************
- ******************************/
-
-class rtVECTOR_Handle : public VContainerHandle {
-//  Run Time Type
-    DECLARE_CONCRETE_RTT (rtVECTOR_Handle, VContainerHandle);
-
-//  Construction
-protected:
-    rtVECTOR_Handle (M_CTE &rCTE) : VContainerHandle (rCTE) {
-    }
-
-public:
-    static VContainerHandle *Maker (M_CTE &rCTE) {
-	return new rtVECTOR_Handle (rCTE);
-    }
-
-//  Destruction
-protected:
-
-//  Access
-public:
-
-//  Query
-public:
-
-//  Callbacks
-public:
-    void CheckConsistency ();
-
-protected:
-    bool PersistReferences ();
-
-//  State
-protected:
-};
 
     
 #endif

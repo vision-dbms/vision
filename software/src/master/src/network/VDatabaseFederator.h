@@ -61,7 +61,7 @@ public:
 //  Resource Utilization Query
 public:
     void AccumulateAllocationStatistics (
-	double *pAllocationTotal, double *pMappingTotal
+	unsigned __int64 *pAllocationTotal, unsigned __int64 *pMappingTotal
     ) const;
 
 //  Resource Utilization Management
@@ -81,12 +81,6 @@ public:
     }
 //  Statistics Maintenance
  public:
-    void AdjustAllocationLevel (int sAdjustment) {
-	m_iTransientAllocationLevel += sAdjustment;
-	if (m_iTransientAllocationLevel > m_iTransientAllocationHighWaterMark)
-	    m_iTransientAllocationHighWaterMark =
-		m_iTransientAllocationLevel;
-    }
     void IncrementAllocationLevel (size_t sIncrease) {
 	m_iTransientAllocationLevel += sIncrease;
 	if (m_iTransientAllocationLevel > m_iTransientAllocationHighWaterMark)

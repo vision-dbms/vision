@@ -20,12 +20,13 @@
  *****  Declarations  *****
  **************************/
 
-#include "Vsa_IEvaluator.h"
+#include "Vsa_IEvaluator_Ex1.h"
 #include "Vsa_IEvaluatorControl.h"
 #include "Vsa_IEvaluatorSettings.h"
 #include "Vsa_IUpDownPublisher.h"
 #include "Vsa_ISubscription.h"
 #include "Vsa_IUpDownSubscriber.h"
+#include "Vsa_VOdometer.h" 
 
 /*************************
  *****  Definitions  *****
@@ -199,7 +200,7 @@ namespace Vsa {
 
 	//  Access
 	public:
-	    trackable_count_t const &lengthTrackable () const {
+	    trackable_count_t const &lengthTrackable () {
 		return m_sQueue.trackable ();
 	    }
 	    count_t length () const {
@@ -297,9 +298,9 @@ namespace Vsa {
 
     //  IEvaluator Role
     private:
-	Vca::VRole<ThisClass,IEvaluator> m_pIEvaluator;
+	Vca::VRole<ThisClass,IEvaluator_Ex1> m_pIEvaluator;
     public:
-	void getRole (VReference<IEvaluator>&rpRole);
+	void getRole (VReference<IEvaluator_Ex1>&rpRole);
 
     //  IUpDownPublisher Role
     private:
@@ -323,6 +324,25 @@ namespace Vsa {
 	    VString const&	rQuery,
 	    VString const&	rEnvironment
 	);
+
+        void EvaluateExpression_Ex (
+            IEvaluator*		pRole,
+            IEvaluatorClient*	pClient,
+            VString const&	rPath,
+            VString const&	rExpression,
+            VString const&      rID,
+            VString const&      rCID
+        );
+
+        void EvaluateURL_Ex (
+            IEvaluator*		pRole,
+            IEvaluatorClient*	pClient,
+            VString const&	rPath,
+            VString const&	rQuery,
+            VString const&	rEnvironment,
+            VString const&      rID,
+            VString const&      rCID
+        );
 
     //  IEvaluatorControl Methods:
 
@@ -348,7 +368,13 @@ namespace Vsa {
 
     //  Access
     public:
-	trackable_count_t const &queueLengthTrackable () const {
+	trackable_count_t const &queueLengthTrackable () {
+	    return m_iQueue.lengthTrackable ();
+	}
+	
+	trackable_count_t const &busynessTrackable () {
+//	    return busyness();
+//  make busyness a real trackable when it is more than just queue length
 	    return m_iQueue.lengthTrackable ();
 	}
 
@@ -410,11 +436,19 @@ namespace Vsa {
 
     //  Query
     public:
+	Vca::U32 busyness ();
+	
 	Vca::U32 queriesProcessed () const {
 	    return m_cQueriesProcessed;
 	}
 	Vca::U64 totalQueryTime () const {
-	    return m_cTotalQueryTime; 	//  milli seconds
+	    return m_cTotalQueryTime + m_cTotalQueueTime; 	//  milli seconds
+	}
+	Vca::U64 totalQueueTime () const {
+		return m_cTotalQueueTime;
+	}
+	Vca::U64 totalEvalTime () const {
+		return m_cTotalQueryTime;
 	}
 	Status status () const {
 	    return m_iStatus;
@@ -460,7 +494,7 @@ namespace Vsa {
 
     //  Update
     public:
-      void updateQueryStatistics (Vca::U32 cQueries, Vca::U64 iQueryTime);
+      void updateQueryStatistics (Vca::U32 cQueries, Vca::U64 iQueryTime, Vca::U64 iQueueTime);
       
     //  Control
     protected:
@@ -484,18 +518,19 @@ namespace Vsa {
     protected:
 	Vca::U32		m_xNextRequest;
 	Queue			m_iQueue;
-        bool                     m_bProcessingQueue;
+    bool                     m_bProcessingQueue;
 	VReference<VEvaluation>	m_pThisRequest;
 
-	Vca::U32		m_cQueriesProcessed;
-	Vca::U64		m_cTotalQueryTime;
+	VOdometer<Vca::U32>		m_cQueriesProcessed;
+	VOdometer<Vca::U64>		m_cTotalQueryTime;
+	VOdometer<Vca::U64>		m_cTotalQueueTime;
 	Status			m_iStatus;
 	V::VTime    const	m_iStarted;
 	V::VTime		m_iLastRestarted;
 	V::VTime		m_iLastUsed; // for evaluating queries
       
 	Subscriber::Pointer     m_pSubscriberList;
-        Vca::U32                m_cSubscribers;
+    Vca::U32                m_cSubscribers;
     };
 }
 

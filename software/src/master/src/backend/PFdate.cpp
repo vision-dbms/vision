@@ -169,9 +169,7 @@ PrivateVarDef int datePrimsLastNa;
 	    datePrimsLastNa + 1,\
 	    datePrimsCount - datePrimsLastNa - 1\
 	);\
-	M_CPD *pPPT = pTask->NewDomPToken (datePrimsGoodLinkc->ElementCount ());\
-        datePrimsGoodLinkc->Close (pPPT);\
-	pPPT->release ();\
+        datePrimsGoodLinkc->Close (pTask->NewDomPToken (datePrimsGoodLinkc->ElementCount ()));\
     }\
 }
 
@@ -435,8 +433,7 @@ V_DefinePrimitive (IncrementOrDecrementDate) {
 	return;
     }
 
-    M_CPD* dateStore = pTask->ducStore ();
-    if (dateStore->DoesntNameTheDateClass()) {
+    if (pTask->ducStore ()->DoesntNameTheDateClass ()) {
         pTask->sendBinaryConverseWithCurrent (
 	    dateIncrementDirection < 0 ? KS__Minus : KS__Plus
 	);

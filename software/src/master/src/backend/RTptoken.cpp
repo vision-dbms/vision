@@ -55,8 +55,8 @@ PrivateVarDef bool
     TracingPTCAllocator		= false,
     TracingSDCInsertion		= false,
     TracingSDCAllocator	    	= false;
-
 
+
 /****************************
  *****  Usage Counters  *****
  ****************************/
@@ -94,10 +94,10 @@ PrivateVarDef unsigned int
  *****  Internal routine to check a P-Token for consistency
  *****/
 void rtPTOKEN_Handle::CheckConsistency () {
-    if (!rtPTOKEN_PT_Closed ((rtPTOKEN_Type*)ContainerContent ())) ERR_SignalFault (
+    if (isntClosed ()) ERR_SignalFault (
 	EC__InternalInconsistency,
 	UTIL_FormatMessage (
-	    "Corrupted ptoken[%u:%u] detected", SpaceIndex (), ContainerIndex ()
+	    "Corrupted ptoken[%u:%u] detected", spaceIndex (), containerIndex ()
 	)
     );
 }
@@ -107,33 +107,64 @@ void rtPTOKEN_Handle::CheckConsistency () {
  *  Display  *
  *************/
 
-PrivateFnDef void DumpPTokenCPD (M_CPD *cpd) {
-    int ttype;
-
+void rtPTOKEN_Handle::dump () const {
     IO_printf ("PTOKEN DUMP:\n");
     IO_printf (
 	"  type:%s, closed=%u, count=%u, baseElementCount=%u\n",
-	(((ttype = rtPTOKEN_CPD_TokenType (cpd)) == rtPTOKEN_TT_Base)
-	    ? "Base"
-	    : (ttype == rtPTOKEN_TT_Shift)
-	    ? "Shift"
-	    : (ttype == rtPTOKEN_TT_Cartesian)
-	    ? "Cartesian"
-	    : "Unknown"
-	),
-	rtPTOKEN_CPD_Closed (cpd),
-	rtPTOKEN_CPD_Count (cpd),
-	rtPTOKEN_CPD_BaseElementCount (cpd)
+	typeName (), isClosed (), sdCount (), cardinality ()
     );
 
-    if (cpd->ReferenceIsntNil (rtPTOKEN_CPx_NextGeneration))
-    {
-	M_CPD *nextCPD = rtPTOKEN_CPD_NextGenerationCPD (cpd);
+    if (typeIsntShift ())
+	IO_printf ("  next Generation: Nil\n");
+    else {
 	IO_printf ("  next Generation: \n");
-	DumpPTokenCPD (nextCPD);
-	nextCPD->release ();
+	rtPTOKEN_Handle::Reference pNextGeneration (nextPToken ());
+	pNextGeneration->dump ();
     }
-    else IO_printf ("  next Generation: Nil\n");
+}
+
+char const *rtPTOKEN_Handle::typeName () const {
+    if (hasNoContainer ())
+	return "Base";
+    else switch (type ()) {
+    case rtPTOKEN_TT_Base:
+	return "Base";
+    case rtPTOKEN_TT_Shift:
+	return "Shift";
+    case rtPTOKEN_TT_Cartesian:
+	return "Cartesian";
+    default:
+	return "Unknown";
+    }
+}
+
+bool rtPTOKEN_Handle::getPOP (M_POP *pResult, unsigned int xReference) const {
+    bool bResultValid = true;
+
+    rtPTOKEN_Handle* self = const_cast<rtPTOKEN_Handle*>(this);
+    self->createContainer();
+
+    switch (xReference) {
+    case 0:
+	*pResult = *nextGenerationPOP ();
+	break;
+    case 1:
+	if (typeIsCartesian ())
+	    *pResult = *rowPTokenPOP ();
+	else
+	    bResultValid = false;
+	break;
+    case 2:
+	if (typeIsCartesian ())
+	    *pResult = *colPTokenPOP ();
+	else
+	    bResultValid = false;
+	break;
+    default:
+	bResultValid = false;
+	break;
+    }
+    return bResultValid;
 }
 
 
@@ -156,11 +187,11 @@ PrivateFnDef void DumpPTokenCPD (M_CPD *cpd) {
  *
  *****/
 PrivateFnDef void InitStdCPD (M_CPD *cpd) {
-    rtPTOKEN_Type *base = rtPTOKEN_CPD_Base (cpd);
+    rtPTOKEN_Type *base = M_CPD_ContainerBaseAsType (cpd, rtPTOKEN_Type);
 
-    rtPTOKEN_CPD_NextGeneration (cpd) = &rtPTOKEN_PT_nextGeneration (base);
-    rtPTOKEN_CPD_ColPToken	(cpd) = &rtPTOKEN_PT_ColPToken	    (base);
-    rtPTOKEN_CPD_RowPToken	(cpd) = &rtPTOKEN_PT_RowPToken	    (base);
+    M_CPD_PointerToPOP (cpd, rtPTOKEN_CPx_NextGeneration) = &rtPTOKEN_PT_nextGeneration	(base);
+    M_CPD_PointerToPOP (cpd, rtPTOKEN_CPx_ColPToken	) = &rtPTOKEN_PT_ColPToken	(base);
+    M_CPD_PointerToPOP (cpd, rtPTOKEN_CPx_RowPToken	) = &rtPTOKEN_PT_RowPToken	(base);
 }
 
 
@@ -172,34 +203,24 @@ PrivateFnDef void InitStdCPD (M_CPD *cpd) {
  *****  Private routine to modify a cartesian ptoken when its not current.
  *
  *  Arguments:
- *	cpd		- a standard CPD for the cartesian ptoken to update.
- *	rowPTokenCPD	- optional (Nil if ommitted).
- *			  a standard CPD for the 'not current' ptoken that
+ *	pRowPToken	- optional (Nil if ommitted).
+ *			  a handle for the 'not current' ptoken that
  *                        correspounds to the cartesian ptoken's rows.
  *		          (If this ptoken is current it should be Nil.)
- *	colPTokenCPD	- optional (Nil if ommitted).
- *			  a standard CPD for the 'not current' ptoken that
+ *	pColPToken	- optional (Nil if ommitted).
+ *			  a handle for the 'not current' ptoken that
  *                        correspounds to the cartesian ptoken's columns.
  *		          (If this ptoken is current it should be Nil.)
- *	isCurrent	- the address of an integer where this routine will
- *			  store true if the ptoken is now current and false
- *			  otherwise.
  *
  *  Returns:
- *	NOTHING
+ *	true if the ptoken is now current and false otherwise
  *
  *  Warning:
  *	Be very careful to not call anything that tries to update the
  *      cartesian ptoken during this update !!!
  *
  *****/
-PrivateFnDef void UpdateCartesianPToken (
-    M_CPD*			cpd,
-    M_CPD*			rowPTokenCPD,
-    M_CPD*			colPTokenCPD,
-    bool			*isCurrent
-)
-{
+bool rtPTOKEN_Handle::normalizationIsTerminal (rtPTOKEN_Handle *pRowPToken, rtPTOKEN_Handle *pColPToken) {
     int
 	origNumberOfColumns, newNumberOfColumns,
 	currentRow, currentColumn, /* used by oldMatrixPos to determine the
@@ -316,30 +337,26 @@ PrivateFnDef void UpdateCartesianPToken (
 
 /*
  *---------------------------------------------------------------------------
- *  Code Body of 'UpdateCartesianPToken'
+ *  Code Body of 'normalizationIsTerminal'
  *---------------------------------------------------------------------------
  */
 
     UpdateCartesianPTokenCount++;
 
-    *isCurrent = false;
-
-    bool rowsNotCurrent = IsntNil (rowPTokenCPD);
-    bool colsNotCurrent = IsntNil (colPTokenCPD);
+    bool rowsNotCurrent = IsntNil (pRowPToken);
+    bool colsNotCurrent = IsntNil (pColPToken);
 
 /*****  If both are current, return ... *****/
     if (!rowsNotCurrent && !colsNotCurrent) {
-	*isCurrent = true;
-	return;
+	return true;
     }
 
-/*****  Make a ptoken constructor for cpd ... *****/
-    rtPTOKEN_CType *pTokenConstructor = rtPTOKEN_NewShiftPTConstructor (cpd, -1);
+/*****  Make a ptoken constructor for the product  ... *****/
+    rtPTOKEN_CType *pTokenConstructor = makeAdjustments ();
 
 /***** Determine the original number of rows ... *****/
     unsigned int origNumberOfRows = rowsNotCurrent
-	? rtPTOKEN_CPD_BaseElementCount (rowPTokenCPD)
-	: rtPTOKEN_BaseElementCount (cpd, rtPTOKEN_CPx_RowPToken);
+	? pRowPToken->cardinality () : rtPTOKEN_BaseElementCount (this, rowPTokenPOP ());
 
 /***** If the column ptoken isn't current, collapse it ... *****/
     if (colsNotCurrent) {
@@ -350,35 +367,27 @@ PrivateFnDef void UpdateCartesianPToken (
 	    colsNotCurrent = false;
 
 	    /*** Store the new column ptoken here for the ToPToken routine ***/
-	    rtPTOKEN_PTC_CartesianColPTCPD (pTokenConstructor) =
-		rtPTOKEN_BasePToken (colPTokenCPD, -1);
+	    pTokenConstructor->m_pColPToken.setTo (pColPToken->basePToken ());
 
-	    origNumberOfColumns = rtPTOKEN_CPD_BaseElementCount (
-		rtPTOKEN_PTC_CartesianColPTCPD (pTokenConstructor)
-	    );
+	    origNumberOfColumns = pTokenConstructor->m_pColPToken->cardinality ();
 	}
 
 	/*** Need to do the traversal ... ***/
 	else {
-	    colPTConstructor = rtPTOKEN_CPDCumAdjustments (colPTokenCPD);
+	    colPTConstructor = pColPToken->getAdjustments ();
 
 	    /*** Store the new column ptoken here for the ToPToken routine ***/
-	    rtPTOKEN_PTC_CartesianColPTCPD (pTokenConstructor) =
-		M_DuplicateCPDPtr (colPTConstructor->NextGeneration ());
+	    pTokenConstructor->m_pColPToken.setTo (colPTConstructor->NextGeneration ());
 
-	    origNumberOfColumns = rtPTOKEN_CPD_BaseElementCount (colPTokenCPD);
-	    newNumberOfColumns = rtPTOKEN_CPD_BaseElementCount (
-		colPTConstructor->NextGeneration ()
-	    );
+	    origNumberOfColumns = pColPToken->cardinality ();
+	    newNumberOfColumns = colPTConstructor->NextGeneration ()->cardinality ();
 	}
     }
     else {
 	/*** Store the column ptoken here for the ToPToken routine ***/
-	rtPTOKEN_PTC_CartesianColPTCPD (pTokenConstructor) = rtPTOKEN_CPD_ColPTokenCPD (cpd);
+	pTokenConstructor->m_pColPToken.setTo (colPTokenHandle ());
 
-	origNumberOfColumns = rtPTOKEN_CPD_BaseElementCount (
-	    rtPTOKEN_PTC_CartesianColPTCPD (pTokenConstructor)
-	);
+	origNumberOfColumns = pTokenConstructor->m_pColPToken->cardinality ();
     }
 
 /***** If the row ptoken isnt current, collapse it ... *****/
@@ -390,35 +399,29 @@ PrivateFnDef void UpdateCartesianPToken (
 	    rowsNotCurrent = false;
 
 	    /*** Store the new row ptoken here for the ToPToken routine ***/
-	    rtPTOKEN_PTC_CartesianRowPTCPD (pTokenConstructor) =
-		rtPTOKEN_BasePToken (rowPTokenCPD, -1);
+	    pTokenConstructor->m_pRowPToken.setTo (pRowPToken->basePToken ());
 
 	    /*** currentRow = the last row (the number of rows - 1) ***/
-	    currentRow = rtPTOKEN_CPD_BaseElementCount (
-		rtPTOKEN_PTC_CartesianRowPTCPD (pTokenConstructor)
-	    ) - 1;
+	    currentRow = pTokenConstructor->m_pRowPToken->cardinality () - 1;
 	}
 
 	/*** Need to do the traversal ***/
 	else {
-	    rowPTConstructor = rtPTOKEN_CPDCumAdjustments (rowPTokenCPD);
+	    rowPTConstructor = pRowPToken->getAdjustments ();
 
 	    /*** Store the new row ptoken here for the ToPToken routine ***/
-	    rtPTOKEN_PTC_CartesianRowPTCPD (pTokenConstructor) =
-		M_DuplicateCPDPtr (rowPTConstructor->NextGeneration ());
+	    pTokenConstructor->m_pRowPToken.setTo (rowPTConstructor->NextGeneration ());
 
 	    /*** currentRow = the last row(the original number of rows -1) ***/
-	    currentRow = rtPTOKEN_CPD_BaseElementCount (rowPTokenCPD) - 1;
+	    currentRow = pRowPToken->cardinality () - 1;
 	}
     }
     else {
 	/*** Store the row ptoken here for the ToPToken routine ***/
-	rtPTOKEN_PTC_CartesianRowPTCPD (pTokenConstructor) = rtPTOKEN_CPD_RowPTokenCPD (cpd);
+	pTokenConstructor->m_pRowPToken.setTo (rowPTokenHandle ());
 
 	/*** currentRow = the last row (the original number of rows - 1) ***/
-	currentRow = rtPTOKEN_CPD_BaseElementCount (
-	    rtPTOKEN_PTC_CartesianRowPTCPD (pTokenConstructor)
-	) - 1;
+	currentRow = pTokenConstructor->m_pRowPToken->cardinality () - 1;
     }
 
 /***** Do the traversal ... *****/
@@ -451,8 +454,7 @@ PrivateFnDef void UpdateCartesianPToken (
     }
 
 /***** If no adjustments were added, the ptoken will now be current *****/
-    if (rtPTOKEN_PTC_AltCount (pTokenConstructor) == 0)
-	*isCurrent = true;
+    bool bCurrent = rtPTOKEN_PTC_AltCount (pTokenConstructor) == 0;
 
 /***** Discard the constructors ... *****/
     if (rowPTConstructor)
@@ -461,7 +463,9 @@ PrivateFnDef void UpdateCartesianPToken (
 	colPTConstructor->discard ();
 
 /***** Finish the cartesian ptoken ... *****/
-    pTokenConstructor->ToPToken ()->release ();
+    pTokenConstructor->ToPToken ()->discard ();
+
+    return bCurrent;
 
 /***** undef the macros ... *****/
 #undef oldMatrixPos
@@ -479,105 +483,28 @@ PrivateFnDef void UpdateCartesianPToken (
 
 
 /*---------------------------------------------------------------------------
- ***** Private routine to determine if a cartesian ptoken is current.
- *
- *  Arguments:
- *	pTokenRefCPD/Index 	- a CPD/Index pair for the P-Token whose
- *                                state is to be determined.
- *	update			- if true and the ptoken isnt current, update
- *                                the cartesian ptoken.  If false do not
- *                                update the cartesian ptoken.
- *
- *  Returns:
- *	If the ptoken is current the value: NilOf (M_CPD*) is returned.
- *	If the ptoken isn't current a standard CPD for the PToken is returned.
- *
+ ***** Private routine to determine if a cartesian ptoken is terminal.
  *****/
-PublicFnDef M_CPD *rtPTOKEN__CartsianPTIsntCurrent (
-    M_CPD *pTokenRefCPD, unsigned int pTokenRefIndex, bool update
-) {
-    bool isCurrent = false;
+bool rtPTOKEN_Handle::productIsTerminal () {
+    bool bTerminal = true;
 
-    M_CPD *cpd = pTokenRefCPD->GetCPD (pTokenRefIndex, RTYPE_C_PToken);
+    rtPTOKEN_Handle::Reference pRowPToken;
+    if (isntTerminal (rowPTokenPOP (), pRowPToken))
+	bTerminal = false;
 
-    M_CPD *rowPTokenCPD;
-    rtPTOKEN_IsntCurrent (cpd, rtPTOKEN_CPx_RowPToken, rowPTokenCPD);
+    rtPTOKEN_Handle::Reference pColPToken;
+    if (isntTerminal (colPTokenPOP (), pColPToken))
+	bTerminal = false;
 
-    M_CPD *colPTokenCPD;
-    rtPTOKEN_IsntCurrent (cpd, rtPTOKEN_CPx_ColPToken, colPTokenCPD);
-
-/***** It is current *****/
-    if (IsNil (rowPTokenCPD) && IsNil (colPTokenCPD)) {
-	cpd->release ();
-	return NilOf (M_CPD*);
-    }
-
-/***** It is not current ... *****/
-    else {
-	if (update)
-	    UpdateCartesianPToken (cpd, rowPTokenCPD, colPTokenCPD, &isCurrent);
-
-	if (rowPTokenCPD)
-	    rowPTokenCPD->release ();
-	if (colPTokenCPD)
-	    colPTokenCPD->release ();
-
-	if (isCurrent) {
-	    cpd->release ();
-	    return NilOf (M_CPD*);
-	}
-	else
-	    return cpd;
-    }
+    return bTerminal || normalizationIsTerminal (pRowPToken, pColPToken);
 }
-
 
-/*---------------------------------------------------------------------------
- ***** Private Routine to determine if a cartesian ptoken is current.
- *
- *  Arguments:
- *	pTokenRefCPD/Index	- a CPD/Index pair for the ptoken to examine.
- *	update			- if true and the ptoken isnt current, update
- *                                the cartesian ptoken.  If false do not
- *                                update the cartesian ptoken.
- *
- *  Returns:
- *	true if the ptoken is current, false otherwise.
- *
- *****/
-PublicFnDef bool rtPTOKEN__CartesianPTIsCurrent (
-    M_CPD *pTokenRefCPD, int pTokenRefIndex, bool update
-) {
-    bool isCurrent = false;
-
-    M_CPD *cpd = pTokenRefCPD->GetCPD (pTokenRefIndex, RTYPE_C_PToken);
-
-    M_CPD *rowPTokenCPD;
-    rtPTOKEN_IsntCurrent (cpd, rtPTOKEN_CPx_RowPToken, rowPTokenCPD);
-
-    M_CPD *colPTokenCPD;
-    rtPTOKEN_IsntCurrent (cpd, rtPTOKEN_CPx_ColPToken, colPTokenCPD);
-
-/***** It is current *****/
-    if (IsNil (rowPTokenCPD) && IsNil (colPTokenCPD)) {
-	cpd->release ();
-	return true;
-    }
-
-/***** It is not current ... *****/
-    else {
-	if (update) UpdateCartesianPToken (
-	    cpd, rowPTokenCPD, colPTokenCPD, &isCurrent
-	);
-
-	cpd->release ();
-	if (rowPTokenCPD)
-	    rowPTokenCPD->release ();
-	if (colPTokenCPD)
-	    colPTokenCPD->release ();
-
-	return isCurrent;
-    }
+void rtPTOKEN_Handle::setProductComponentsTo (rtPTOKEN_Handle *pRowPToken, rtPTOKEN_Handle *pColPToken) {
+    EnableModifications ();
+    clearIsClosed ();
+    StoreReference (rowPTokenPOP (), pRowPToken);
+    StoreReference (colPTokenPOP (), pColPToken);
+    setIsClosed ();
 }
 
 
@@ -586,9 +513,9 @@ PublicFnDef bool rtPTOKEN__CartesianPTIsCurrent (
  *****  the cartesian ptoken.
  *
  *  Arguments:
- *	cartesianPT		- the cartesian ptoken.
+ *	pProduct		- the cartesian ptoken.
  *	pRowPToken		- the row P-Token.
- *	cPTokenRefCPD/Index	- a reference to a POP for the column P-Token.
+ *	pColPTokenRef/Index	- a reference to a POP for the column P-Token.
  *
  *  Returns:
  *	NOTHING - Executed for side effect and error detection only.
@@ -598,30 +525,18 @@ PublicFnDef bool rtPTOKEN__CartesianPTIsCurrent (
  *	match the row and column ptokens of the cartesian ptoken.
  *
  *****/
-PublicFnDef void rtPTOKEN_CartesianVerification (
-    M_CPD*			cartesianPT,
-    M_CPD*			pRowPToken,
-    M_CPD*			cPTokenRefCPD,
-    int				cPTokenRefIndex
-)
-{
-    if (!rtPTOKEN_CPD_IsCartesian (cartesianPT)) ERR_SignalFault (
+void rtPTOKEN_Handle::verifyProduct (rtPTOKEN_Handle *pRowPToken, rtPTOKEN_Handle *pColPToken) {
+    if (typeIsntCartesian ()) ERR_SignalFault (
 	EC__InternalInconsistency,
 	"rtPTOKEN_CartesianVerification: Not a Cartesian PToken"
     );
 
-    if (cartesianPT->ReferenceDoesntName (
-	    rtPTOKEN_CPx_RowPToken, pRowPToken
-	)
-    ) ERR_SignalFault (
+    if (ReferenceDoesntName (rowPTokenPOP (), pRowPToken)) ERR_SignalFault (
 	EC__InternalInconsistency,
 	"rtPTOKEN_CartesianVerification: Row Inconsistency"
     );
 
-    if (cartesianPT->ReferenceDoesntName (
-	    rtPTOKEN_CPx_ColPToken, cPTokenRefCPD, cPTokenRefIndex
-	)
-    ) ERR_SignalFault (
+    if (ReferenceDoesntName (colPTokenPOP (), pColPToken)) ERR_SignalFault (
 	EC__InternalInconsistency,
 	"rtPTOKEN_CartesianVerification: Column Inconsistency"
     );
@@ -645,20 +560,38 @@ PublicFnDef void rtPTOKEN_CartesianVerification (
  *	error will be signalled if the POP does not reference a P-Token.
  *
  *****/
-PublicFnDef unsigned int rtPTOKEN_BaseElementCount (M_CPD *pPTokenRef, int xPTokenRef) {
+PublicFnDef unsigned int rtPTOKEN_BaseElementCount (M_CPD const *pPTokenRef, int xPTokenRef) {
+    return rtPTOKEN_BaseElementCount (pPTokenRef->containerHandle (), pPTokenRef->OutboundPOP (xPTokenRef));
+}
+
+PublicFnDef unsigned int rtPTOKEN_BaseElementCount (VContainerHandle const *pPTokenRef, M_POP const *pPTokenPOP) {
     BaseElementCount++;
 
-    M_CPreamble const *ptokenPreamble = pPTokenRef->GetContainerAddress (xPTokenRef);
+    VContainerHandle::Reference pHandle; rtPTOKEN_Type *pCC; RTYPE_Type xRT;
+    M_CPreamble const *pCP = 0;
+    if (pPTokenPOP) {
+	pCP = pPTokenRef->GetContainerAddress (pPTokenPOP);
+	if (pCP) {
+	    xRT = (RTYPE_Type)(M_CPreamble_RType (pCP));
+	    pCC = M_CPreamble_ContainerBaseAsType (pCP, rtPTOKEN_Type);
+	}
+	else {
+	    pHandle.setTo (pPTokenRef->GetContainerHandle (pPTokenPOP));
+	    pPTokenRef = pHandle;
+	    xRT = pPTokenRef->RType ();
+	    pCC = 0;
+	}
+    }
+    else {
+	xRT = pPTokenRef->RType ();
+	pCC = 0;
+    }
 
-    RTYPE_MustBeA (
-	"rtPTOKEN_BaseElementCount",
-	M_CPreamble_RType (ptokenPreamble),
-	RTYPE_C_PToken
-    );
+    RTYPE_MustBeA ("rtPTOKEN_BaseElementCount", xRT, RTYPE_C_PToken);
 
-    return rtPTOKEN_PT_BaseElementCount (
-	M_CPreamble_ContainerBaseAsType (ptokenPreamble, rtPTOKEN_Type)
-    );
+    return pCC
+	? rtPTOKEN_PT_BaseElementCount (pCC)
+	: static_cast<rtPTOKEN_Handle const*>(pPTokenRef)->cardinality ();
 }
 
 
@@ -675,35 +608,42 @@ PublicFnDef unsigned int rtPTOKEN_BaseElementCount (M_CPD *pPTokenRef, int xPTok
  *	base object.  false otherwise.
  *
  *****/
-PublicFnDef bool rtPTOKEN_IsCurrent (M_CPD *pPTokenRef, int xPTokenRef) {
+bool VContainerHandle::isTerminal (M_POP const *pPTokenPOP) {
     IsCurrentCount++;
 
-    M_CPreamble const *ptokenPreamble = pPTokenRef->GetContainerAddress (xPTokenRef);
-
-    RTYPE_MustBeA (
-	"rtPTOKEN_IsCurrent",
-	M_CPreamble_RType (ptokenPreamble),
-	RTYPE_C_PToken
-    );
-
-    unsigned int ttype = rtPTOKEN_PT_TokenType (
-	M_CPreamble_ContainerBaseAsType (ptokenPreamble, rtPTOKEN_Type)
-    );
-    switch (ttype) {
-    default:
-    case rtPTOKEN_TT_Base:
-	return true;
-    case rtPTOKEN_TT_Shift:
-	return false;
-    case rtPTOKEN_TT_Cartesian:
-	return rtPTOKEN__CartesianPTIsCurrent (pPTokenRef, xPTokenRef, true);
+    VContainerHandle::Reference pHandle; rtPTOKEN_Type *pCC; RTYPE_Type xRT;
+    M_CPreamble const *pCP = 0;
+    if (pPTokenPOP) {
+	pCP = GetContainerAddress (pPTokenPOP);
+	if (pCP) {
+	    xRT = (RTYPE_Type)(M_CPreamble_RType (pCP));
+	    pCC = M_CPreamble_ContainerBaseAsType (pCP, rtPTOKEN_Type);
+	}
+	else {
+	    pHandle.setTo (GetContainerHandle (pPTokenPOP, RTYPE_C_PToken));
+	    xRT = pHandle->RType ();
+	    pCC = 0;
+	}
     }
-}
-
+    else {
+	xRT = RType ();
+	pCC = 0;
+    }
 
-/*******************************
- *****  IsntCurrent Macro  *****
- *******************************/
+    RTYPE_MustBeA ("VContainerHandle::isTerminal", xRT, RTYPE_C_PToken);
+
+    unsigned int xTT = pCC
+	? rtPTOKEN_PT_TokenType (pCC)
+	: static_cast<rtPTOKEN_Handle*>(pHandle ? pHandle.referent () : this)->type ();
+
+    if (rtPTOKEN_TT_Cartesian != xTT)
+	return rtPTOKEN_TT_Base == xTT;
+
+    if (pHandle.isNil ())
+	pHandle.setTo (pPTokenPOP ? GetContainerHandle (pPTokenPOP, RTYPE_C_PToken) : this);
+
+    return static_cast<rtPTOKEN_Handle*>(pHandle.referent ())->productIsTerminal ();
+}
 
 /*---------------------------------------------------------------------------
  *****  Macro to determine if the P-Token represents the current postional
@@ -712,51 +652,85 @@ PublicFnDef bool rtPTOKEN_IsCurrent (M_CPD *pPTokenRef, int xPTokenRef) {
  *  Arguments:
  *	pPTokenRef/Index	- a reference to a POP for the P-Token whose
  *				  base element count is desired.
- *	resultPTokenCPD		- a standard cpd for the ptoken.
+ *	rpResult		- a standard cpd for the ptoken.
  *
  *  Returns:
  *	true if the referenced p-token isn't current, false otherwise.
  *
- *	in 'resultPTokenCPD:
+ *	in 'rpResult:
  *	If the ptoken is current the value: NilOf (M_CPD*) is returned.
- *	If the ptoken isn't current a standard CPD for the PToken is returned.
+ *	If the ptoken isn't current a handle for the PToken is returned.
  *
  *****/
-PublicFnDef bool rtPTOKEN_IsntCurrent (
-    M_CPD *pPTokenRef, unsigned int xPTokenRef, M_CPD *&resultPTokenCPD
-) {
+bool VContainerHandle::isntTerminal (M_POP const *pPTokenPOP, rtPTOKEN_Handle::Reference &rpResult) {
     IsntCurrentCount++;
 
-    M_CPreamble* ptokenPreamble = pPTokenRef->GetContainerAddress (xPTokenRef);
+    VContainerHandle::Reference pHandle; rtPTOKEN_Type *pCC; RTYPE_Type xRT; unsigned int xSpace, xCntnr;
+    M_CPreamble const *pCP = 0;
+    if (pPTokenPOP) {
+	pCP = GetContainerAddress (pPTokenPOP);
+	if (pCP) {
+	    xRT = (RTYPE_Type)(M_CPreamble_RType (pCP));
+	    M_POP const *pPOP = &M_CPreamble_POP (pCP);
+	    xSpace = M_POP_ObjectSpace (pPOP);
+	    xCntnr = M_POP_ContainerIndex (pPOP);
+	    pCC = M_CPreamble_ContainerBaseAsType (pCP, rtPTOKEN_Type);
+	}
+	else {
+	    pHandle.setTo (GetContainerHandle (pPTokenPOP));
+	    xRT = pHandle->RType ();
+	    xSpace = pHandle->spaceIndex ();
+	    xCntnr = pHandle->containerIndexNC ();
+	    pCC = 0;
+	}
+    }
+    else {
+	xRT = RType ();
+	xSpace = spaceIndex ();
+	xCntnr = containerIndexNC ();
+	pCC = 0;
+    }
 
     RTYPE_MustBeA (
-	UTIL_FormatMessage (
-	    "rtPTOKEN_IsntCurrent [%d:%d]",
-	    M_CPreamble_POPObjectSpace    (ptokenPreamble),
-	    M_CPreamble_POPContainerIndex (ptokenPreamble)
-	),
-	M_CPreamble_RType (ptokenPreamble), RTYPE_C_PToken
+	UTIL_FormatMessage ("VContainerHandle::isntTerminal [%d:%d]", xSpace, xCntnr), xRT, RTYPE_C_PToken
     );
 
-    switch (
-	rtPTOKEN_PT_TokenType (
-	    M_CPreamble_ContainerBaseAsType (ptokenPreamble, rtPTOKEN_Type)
-	)
-    ) {
-    case rtPTOKEN_TT_Base:
-	resultPTokenCPD = NilOf (M_CPD*);
-	break;
+    unsigned int xTT = pCC
+	? rtPTOKEN_PT_TokenType (pCC)
+	: static_cast<rtPTOKEN_Handle*>(pHandle ? pHandle.referent () : this)->type ();
+
+    switch (xTT) {
     case rtPTOKEN_TT_Shift:
-	resultPTokenCPD = pPTokenRef->GetCPD (xPTokenRef, RTYPE_C_PToken);
+	rpResult.setTo (
+	    static_cast<rtPTOKEN_Handle*>(
+		pHandle ? pHandle.referent () : pPTokenPOP ? GetContainerHandle (pPTokenPOP, RTYPE_C_PToken) : this
+	    )
+	);
 	break;
     case rtPTOKEN_TT_Cartesian:
-	resultPTokenCPD = rtPTOKEN__CartsianPTIsntCurrent (
-	    pPTokenRef, xPTokenRef, true
+	rpResult.setTo (
+	    static_cast<rtPTOKEN_Handle*>(
+		pHandle ? pHandle.referent () : pPTokenPOP ? GetContainerHandle (pPTokenPOP, RTYPE_C_PToken) : this
+	    )
 	);
+	if (rpResult->productIsTerminal ())
+	    rpResult.clear ();
+	break;
+    default:
+	rpResult.clear ();
 	break;
     }
 
-    return IsntNil (resultPTokenCPD);
+    return rpResult.isntNil ();
+}
+
+bool VContainerHandle::isntTerminal (M_POP const *pPTokenPOP, rtPTOKEN_CType *&rpResult) {
+    rtPTOKEN_Handle::Reference pPToken;
+    if (isntTerminal (pPTokenPOP, pPToken)) {
+	rpResult = pPToken->getAdjustments ();
+	return true;
+    }
+    return false;
 }
 
 
@@ -768,46 +742,41 @@ PublicFnDef bool rtPTOKEN_IsntCurrent (
  *				  P-Token whose base P-Token is desired.
  *
  *  Returns:
- *	A standard CPD for the base P-Token in the chain.
+ *	A handle for the base P-Token in the chain.
  *
  *****/
-PublicFnDef M_CPD *rtPTOKEN_BasePToken (M_CPD *pTokenRefCPD, int pTokenRefIndex) {
-    M_CPD *result;
-
+PublicFnDef rtPTOKEN_Handle *rtPTOKEN_BasePToken (M_CPD *pPTokenRef, int xPTokenRef) {
     BasePTokenCount++;
 
-    if (pTokenRefIndex < 0) {
-	RTYPE_MustBeA ("rtPTOKEN_BasePToken", M_CPD_RType (pTokenRefCPD), RTYPE_C_PToken);
-	result = pTokenRefCPD;
-	result->retain ();
+    rtPTOKEN_Handle *pResult;
+    if (xPTokenRef >= 0)
+	pResult = static_cast<rtPTOKEN_Handle*>(pPTokenRef->GetContainerHandle (xPTokenRef, RTYPE_C_PToken));
+    else {
+	RTYPE_MustBeA ("rtPTOKEN_BasePToken", pPTokenRef->RType (), RTYPE_C_PToken);
+	pResult = static_cast<rtPTOKEN_Handle*>(pPTokenRef->containerHandle ());
     }
-    else
-	result = pTokenRefCPD->GetCPD (pTokenRefIndex, RTYPE_C_PToken);
+    return pResult->basePToken ();
+}
 
-    while (!rtPTOKEN_CPD_IsTerminal (result)) {
-	M_CPD *lastPToken = result;
-	result = rtPTOKEN_CPD_NextGenerationCPD (lastPToken);
-	lastPToken->release ();
+rtPTOKEN_Handle *rtPTOKEN_Handle::basePToken () {
+    rtPTOKEN_Handle *pResult = this;
+    while (pResult->isntTerminal ()) {
+	rtPTOKEN_Handle *pPrior = pResult;
+	pResult = pPrior->nextPToken ();
+	pPrior->discard ();
     }
-
-    return result;
+    return pResult;
 }
 
 
-PrivateFnDef bool AllAlterationsBeyondEnd (
-    M_CPD*			shiftPToken,
-    int				endPosition
-)
-{
+bool rtPTOKEN_Handle::tailAdjustmentsOnly (unsigned int xEnd) const {
     bool result = true;
-    int alterationCount = rtPTOKEN_CPD_Count (shiftPToken);
-    rtPTOKEN_SDType* changeDesc =
-	rtPTOKEN_CPD_ChangeArray (shiftPToken, rtPTOKEN_SDType);
+    unsigned int alterationCount = sdCount ();
+    rtPTOKEN_SDType *changeDesc = sdArray ();
 
-    while (alterationCount--)
-    {
-	if (endPosition > rtPTOKEN_SD_Origin (changeDesc) ||
-	    endPosition > rtPTOKEN_SD_Origin (changeDesc) +
+    while (alterationCount--) {
+	if (xEnd > rtPTOKEN_SD_Origin (changeDesc) ||
+	    xEnd > rtPTOKEN_SD_Origin (changeDesc) +
 	    		  rtPTOKEN_SD_Shift (changeDesc))
 	{
 	    result = false;
@@ -818,40 +787,19 @@ PrivateFnDef bool AllAlterationsBeyondEnd (
 
     return result;
 }
-
-PublicFnDef bool rtPTOKEN_AllAlterationsBeyondEnd (
-    M_CPD *pTokenRefCPD, int pTokenRefIndex
-)
-{
-    bool result = true;
-    int endPosition;
-    M_CPD *thisPToken;
 
-    if (pTokenRefIndex < 0) {
-	RTYPE_MustBeA ("rtPTOKEN_BasePToken",
-	M_CPD_RType (pTokenRefCPD),
-	RTYPE_C_PToken
-	);
+bool rtPTOKEN_Handle::tailAdjustmentsOnly () {
+    unsigned int const xEnd = cardinality ();
 
-	thisPToken = pTokenRefCPD;
-	thisPToken-> retain ();
-    }
-    else
-	thisPToken = pTokenRefCPD->GetCPD (pTokenRefIndex, RTYPE_C_PToken);
+    rtPTOKEN_Handle::Reference pCurrentPToken (this);
 
-    endPosition = rtPTOKEN_CPD_BaseElementCount (thisPToken);
-    while (!rtPTOKEN_CPD_IsTerminal (thisPToken)) {
-	if (false == (result = AllAlterationsBeyondEnd (thisPToken, endPosition)))
-	    break;
-
-	M_CPD *lastPToken = thisPToken;
-	thisPToken = rtPTOKEN_CPD_NextGenerationCPD (lastPToken);
-	lastPToken->release ();
+    while (pCurrentPToken->isntTerminal ()) {
+	if (!pCurrentPToken->tailAdjustmentsOnly (xEnd))
+	    return false;
+	pCurrentPToken.setTo (pCurrentPToken->nextPToken ());
     }
 
-    thisPToken->release ();
-    return result;
-
+    return true;
 }
 
 
@@ -859,31 +807,10 @@ PublicFnDef bool rtPTOKEN_AllAlterationsBeyondEnd (
  *****  Instantiation Routines  *****
  ************************************/
 
-/**************************************
- *  Internal Initialization Routines  *
- **************************************/
-
-/*---------------------------------------------------------------------------
- *****  Internal routine to initialize a new 'Cartesian' P-Token.
- *
- *  Arguments:
- *	cpd			- the address of an un-initialized standard
- *				  'P-Token' CPD.
- *	ap			- a <varargs.h> argument pointer pointing to
- *                                3 variables:
- *				    1) the number of elements in
- *                                  the positionally accessible object
- *                                  described by this P-Token.
- *				    2) a standard CPD for the row ptoken.
- *				    3) a standard CPD for the column ptoken.
- *
- *  Returns:
- *	NOTHING - Executed for side effect only.
- *
- *****/
-PrivateFnDef void InitializeNewCartesianPToken (M_CPD *cpd, va_list ap) {
+void rtPTOKEN_Handle::deleteThis () {
+    if (onDeleteThis ())
+	delete this;
 }
-
 
 /********************************
  *  External Creation Routines  *
@@ -903,24 +830,10 @@ PrivateFnDef void InitializeNewCartesianPToken (M_CPD *cpd, va_list ap) {
  *	NOTHING - Executed for side effect only.
  *
  *****/
-PublicFnDef M_CPD *rtPTOKEN_New (M_ASD *pContainerSpace, unsigned int nelements) {
+rtPTOKEN_Handle::rtPTOKEN_Handle (
+    M_ASD *pContainerSpace, unsigned int nelements
+) : BaseClass (pContainerSpace, RTYPE_C_PToken), m_iCardinality (nelements), m_bIndependent (true) {
     NewBasePTokenCount++;
-
-    M_CPD *cpd = pContainerSpace->CreateContainer (
-	RTYPE_C_PToken, rtPTOKEN_PT_SizeofBasePToken
-    );
-
-    InitStdCPD (cpd);
-
-    cpd->constructReference (rtPTOKEN_CPx_NextGeneration);
-
-    rtPTOKEN_CPD_TokenType	    (cpd) = rtPTOKEN_TT_Base;
-    rtPTOKEN_CPD_Independent	    (cpd) = true;
-    rtPTOKEN_CPD_Closed		    (cpd) = true;
-    rtPTOKEN_CPD_Count		    (cpd) = 0;
-    rtPTOKEN_CPD_BaseElementCount   (cpd) = nelements;
-
-    return cpd;
 }
 
 
@@ -929,53 +842,52 @@ PublicFnDef M_CPD *rtPTOKEN_New (M_ASD *pContainerSpace, unsigned int nelements)
  *****  or u-vector.
  *
  *  Arguments:
- *	p/xRowPPTRef		- a CPD/Index pair for the ptoken representing
- *				  the rows of the new cartesian ptoken.
- *	p/xColPPTRef		- a CPD/Index pair for the ptoken representing
- *				  the columns of the new cartesian ptoken.
- *
- *  Returns:
- *	NOTHING - Executed for side effect only.
+ *	pRowPToken		- a handle for the row ptoken of the product.
+ *	pColPToken		- a handle for the column ptoken of the product.
  *
  *****/
-PublicFnDef M_CPD *rtPTOKEN_New (
-    M_ASD *pContainerSpace,
-    M_CPD *pRowPPTRef, int xRowPPTRef,
-    M_CPD *pColPPTRef, int xColPPTRef
-) {
+rtPTOKEN_Handle::rtPTOKEN_Handle (
+    M_ASD *pContainerSpace, rtPTOKEN_Handle *pRowPToken, rtPTOKEN_Handle *pColPToken
+) : BaseClass (pContainerSpace, RTYPE_C_PToken, rtPTOKEN_PT_SizeofCartesianPT), m_iCardinality (
+    pRowPToken->cardinality () * pColPToken->cardinality ()
+), m_bIndependent (true) {
     NewCartesianPTokenCount++;
 
-    M_CPD *rowPTokenCPD = rtPTOKEN_BasePToken (pRowPPTRef, xRowPPTRef);
-    M_CPD *colPTokenCPD = rtPTOKEN_BasePToken (pColPPTRef, xColPPTRef);
+    rtPTOKEN_Type *pCC = typecastContent ();
+    rtPTOKEN_PT_Closed (pCC) = false;
 
-    M_CPD *cpd = pContainerSpace->CreateContainer (
-	RTYPE_C_PToken, rtPTOKEN_PT_SizeofCartesianPT
-    );
+    constructReference (&rtPTOKEN_PT_nextGeneration (pCC));
 
-    InitStdCPD (cpd);
+    constructReference (&rtPTOKEN_PT_RowPToken (pCC));
+    StoreReference (&rtPTOKEN_PT_RowPToken (pCC), pRowPToken);
 
-    cpd->constructReference (rtPTOKEN_CPx_NextGeneration);
+    constructReference (&rtPTOKEN_PT_ColPToken (pCC));
+    StoreReference (&rtPTOKEN_PT_ColPToken (pCC), pColPToken);
 
-    rtPTOKEN_CPD_Closed		    (cpd) = false;
-    rtPTOKEN_CPD_TokenType	    (cpd) = rtPTOKEN_TT_Cartesian;
-    rtPTOKEN_CPD_Count		    (cpd) = 0;
-    rtPTOKEN_CPD_BaseElementCount   (cpd) =
-	rtPTOKEN_CPD_BaseElementCount (rowPTokenCPD) *
-	rtPTOKEN_CPD_BaseElementCount (colPTokenCPD);
+    rtPTOKEN_PT_TokenType	(pCC) = rtPTOKEN_TT_Cartesian;
+    rtPTOKEN_PT_Independent	(pCC) = true;
+    rtPTOKEN_PT_Count		(pCC) = 0;
+    rtPTOKEN_PT_BaseElementCount(pCC) = pRowPToken->cardinality () * pColPToken->cardinality ();
 
+    rtPTOKEN_PT_Closed		(pCC) = true;
+}
 
-    cpd->constructReference (rtPTOKEN_CPx_RowPToken);
-    cpd->StoreReference (rtPTOKEN_CPx_RowPToken, rowPTokenCPD);
+void rtPTOKEN_Handle::createContainer () {
+    if (hasNoContainer ()) {
+	CreateContainer (rtPTOKEN_PT_SizeofBasePToken);
 
-    cpd->constructReference (rtPTOKEN_CPx_ColPToken);
-    cpd->StoreReference (rtPTOKEN_CPx_ColPToken, colPTokenCPD);
+	rtPTOKEN_Type *pCC = typecastContent ();
+	rtPTOKEN_PT_Closed (pCC) = false;
 
-    rtPTOKEN_CPD_Closed		    (cpd) = true;
+	constructReference (&rtPTOKEN_PT_nextGeneration (pCC));
 
-    rowPTokenCPD->release ();
-    colPTokenCPD->release ();
+	rtPTOKEN_PT_TokenType       (pCC) = rtPTOKEN_TT_Base;
+	rtPTOKEN_PT_Independent     (pCC) = m_bIndependent;
+	rtPTOKEN_PT_Count           (pCC) = 0;
+	rtPTOKEN_PT_BaseElementCount(pCC) = m_iCardinality;
 
-    return cpd;
+	rtPTOKEN_PT_Closed (pCC) = true;
+    }
 }
 
 
@@ -1022,9 +934,14 @@ PrivateFnDef rtPTOKEN_SDCType* AllocateSDConstructor () {
  *	The address of the P-Token constructor allocated.
  *
  *****/
-rtPTOKEN_CType::rtPTOKEN_CType (M_CPD *pNextGeneration)
+DEFINE_CONCRETE_RTT (rtPTOKEN_CType);
+void rtPTOKEN_CType::deleteThis () {
+    delete this;
+}
+
+rtPTOKEN_CType::rtPTOKEN_CType (rtPTOKEN_Handle *pNextGeneration)
 : m_pNextGeneration	(pNextGeneration)
-, m_iCardinality	(rtPTOKEN_CPD_BaseElementCount (pNextGeneration))
+, m_iCardinality	(pNextGeneration->cardinality ())
 , m_pRowPToken		(0)
 , m_pColPToken		(0)
 , m_pSDChainHead	(0)
@@ -1055,28 +972,24 @@ PublicFnDef rtPTOKEN_CType *rtPTOKEN_NewShiftPTConstructor (
 ) {
     NewShiftPTConstructorCount++;
 
-    if (xCurrentPTokenRef < 0) {
-	RTYPE_MustBeA (
-	    "rtPTOKEN_NewShiftPTConstructor",
-	    M_CPD_RType (pCurrentPTokenRef),
-	    RTYPE_C_PToken
-	);
-	pCurrentPTokenRef->retain ();
-    }
+    rtPTOKEN_Handle::Reference pPToken;
+    if (xCurrentPTokenRef >= 0) pPToken.setTo (
+	static_cast<rtPTOKEN_Handle*>(pCurrentPTokenRef->GetContainerHandle (xCurrentPTokenRef, RTYPE_C_PToken))
+    );
     else {
-	pCurrentPTokenRef = pCurrentPTokenRef->GetCPD (xCurrentPTokenRef, RTYPE_C_PToken);
-	xCurrentPTokenRef = -1;
-    }
-
-    if (rtPTOKEN_CPD_IsShift (pCurrentPTokenRef)) {
-	pCurrentPTokenRef->release ();
-        ERR_SignalFault (
-	    EC__InternalInconsistency,
-	    "_NewShiftPTConstructor: Attempt to attach to a shift ptoken"
+	RTYPE_MustBeA (
+	    "rtPTOKEN_NewShiftPTConstructor", pCurrentPTokenRef->RType (), RTYPE_C_PToken
 	);
+	pPToken.setTo (static_cast<rtPTOKEN_Handle*>(pCurrentPTokenRef->containerHandle ()));
     }
+    return pPToken->makeAdjustments ();
+}
 
-    return new rtPTOKEN_CType (pCurrentPTokenRef);
+rtPTOKEN_CType *rtPTOKEN_Handle::makeAdjustments () {
+    if (typeIsShift ()) ERR_SignalFault (
+	EC__InternalInconsistency, "_NewShiftPTConstructor: Attempt to attach to a shift ptoken"
+    );
+    return new rtPTOKEN_CType (this);
 }
 
 
@@ -1098,8 +1011,7 @@ PublicFnDef rtPTOKEN_CType *rtPTOKEN_NewShiftPTConstructor (
  *****/
 PrivateFnDef int HandleAdjacency (
     rtPTOKEN_SDCType* lastInstruction, int origin, int shift
-)
-{
+) {
     int
 	lookingBack = false,
 	origin2,
@@ -1545,14 +1457,6 @@ Origin:%d, Shift:%d, PrevOrigin:%d, PrevShift:%d, Order(%c)\n",
 rtPTOKEN_CType::~rtPTOKEN_CType () {
     DiscardConstructorCount++;
 
-/*****  Free the P-Token CPDs  *****/
-    if (m_pNextGeneration)
-	m_pNextGeneration->release ();
-    if (m_pRowPToken)
-	m_pRowPToken->release ();
-    if (m_pColPToken)
-	m_pColPToken->release ();
-
 /*****  Free the SD constructor chain  *****/
     rtPTOKEN_SDCType *sdc = m_pSDChainHead;
     while (sdc) {
@@ -1613,47 +1517,37 @@ void rtPTOKEN_CType::ReverseOrder () {
  *				  to be converted.
  *
  *  Returns:
- *	The address of a standard CPD for the ptoken created.
+ *	The address of a handle for the ptoken created.
  *
  *****/
-M_CPD *rtPTOKEN_CType::ToPToken () {
+rtPTOKEN_Handle *rtPTOKEN_CType::ToPToken () {
     BasicToPTokenCount++;
 
 /*****  Validate the integrity of the this...  *****/
     m_pNextGeneration->CheckConsistency ();
-    if (rtPTOKEN_CPD_IsShift (m_pNextGeneration)) ERR_SignalFault (
+    if (m_pNextGeneration->typeIsShift ()) ERR_SignalFault (
 	EC__InternalInconsistency,
 	"rtPTOKEN_CType::ToPToken: Attempt to attach to a shift p-token"
     );
 
 /*****  Validate the new row and col cpd's for cartesian ptokens ... *****/
-    if (rtPTOKEN_CPD_TokenType (m_pNextGeneration) == rtPTOKEN_TT_Cartesian && (
-	    IsNil (m_pRowPToken) || IsNil (m_pColPToken)
-	)
-    ) ERR_SignalFault (
+    if (m_pNextGeneration->typeIsCartesian () && (m_pRowPToken.isNil () || m_pColPToken.isNil ())) ERR_SignalFault (
 	EC__InternalInconsistency, "rtPTOKEN_CType::ToPToken: Nil Cartesian PTokens"
     );
 
 /*****  If no alterations were made, ...  *****/
     if (m_cAlterations == 0) {
     /*****  ... return the current generation:  *****/
-	M_CPD *result = m_pNextGeneration;
-	result->retain ();
-
 	/*** If it is a cartesian ptoken, update the pop's ... ***/
-	if (rtPTOKEN_CPD_TokenType (result) == rtPTOKEN_TT_Cartesian) {
-	    result->EnableModifications ();
-	    rtPTOKEN_CPD_Closed (result) = false;
-	    result->StoreReference (
-		rtPTOKEN_CPx_RowPToken, m_pRowPToken
-	    )->StoreReference (
-		rtPTOKEN_CPx_ColPToken, m_pColPToken
-	    );
-	    rtPTOKEN_CPD_Closed (result) = true;
+	rtPTOKEN_Handle *result = m_pNextGeneration;
+	if (result->typeIsCartesian ()) {
+	    result->setProductComponentsTo (m_pRowPToken, m_pColPToken);
 	}
 
+    //  ... and return the constructed p-token
+	result->retain ();
 	discard ();
-
+	result->untain ();
 	return result;
     }
 
@@ -1661,20 +1555,20 @@ M_CPD *rtPTOKEN_CType::ToPToken () {
 	EC__UsageError, UTIL_FormatMessage (
 	    "Requested alteration count %u exceeds maximum %u [%u:%u]",
 	    m_cAlterations, (1 << 24) - 1,
-	    m_pNextGeneration->SpaceIndex (),
-	    m_pNextGeneration->ContainerIndex ()
+	    m_pNextGeneration->spaceIndex (),
+	    m_pNextGeneration->containerIndex ()
 	)
     );
 
 /*****  ...  otherwise, manufacture a new P-Token:  *****/
-    M_CPD *result = rtPTOKEN_CPD_TokenType (m_pNextGeneration) == rtPTOKEN_TT_Cartesian
-	? rtPTOKEN_New (
-	    m_pNextGeneration->Space (), m_pRowPToken, -1, m_pColPToken, -1
-	) : rtPTOKEN_New (
+    rtPTOKEN_Handle *result = m_pNextGeneration->typeIsCartesian ()
+	? new rtPTOKEN_Handle (
+	    m_pNextGeneration->Space (), m_pRowPToken, m_pColPToken
+	) : new rtPTOKEN_Handle (
 	    m_pNextGeneration->Space (), m_iCardinality
 	);
 
-    rtPTOKEN_CPD_Independent (result) = rtPTOKEN_CPD_Independent (m_pNextGeneration);
+    result->setIsIndependentTo (m_pNextGeneration->isIndependent ());
 
 /*---------------------------------------------------------------------------
  * The following function was inserted into the routine originally to keep
@@ -1709,58 +1603,60 @@ M_CPD *rtPTOKEN_CType::ToPToken () {
  *---------------------------------------------------------------------------
  */
 
-/*****  Modify the extant ptoken  *****/
-    m_pNextGeneration->EnableModifications ();
-    rtPTOKEN_CPD_Closed (m_pNextGeneration) = false;
-    m_pNextGeneration->StoreReference (rtPTOKEN_CPx_NextGeneration, result);
-
 /*****  Initialize the SD array  *****/
     if (OrderIsForward ())
         ReverseOrder ();
 
-/*****  If m_pNextGeneration is a cartesian ptoken, clear its pops and take into account
-	its larger size, and set its type to base ... *****/
-    unsigned int xSize = 0;
-    if (rtPTOKEN_CPD_TokenType (m_pNextGeneration) == rtPTOKEN_TT_Cartesian) {
-	m_pNextGeneration->ClearReference (rtPTOKEN_CPx_RowPToken);
-	m_pNextGeneration->ClearReference (rtPTOKEN_CPx_ColPToken);
-
-	xSize = sizeof (rtPTOKEN_CartesianType);
-	rtPTOKEN_CPD_TokenType (m_pNextGeneration) = rtPTOKEN_TT_Base;
-    }
-
-    m_pNextGeneration->GrowContainer (
-	sizeof(rtPTOKEN_SDType) * m_cAlterations - xSize
-    );
-
-    rtPTOKEN_SDCType *srcp = m_pSDChainHead;
-    if (srcp) {
-	rtPTOKEN_SDType *dest = rtPTOKEN_CPD_ChangeArray (
-	    m_pNextGeneration, rtPTOKEN_SDType
-	);
-	unsigned int x = 0;
-	while (srcp != m_pSDChainTail) {
-	    if (TracingConversion) IO_printf (
-	    "...InitializePToken: SDiter:%d srcp:%08X dest:%08X srcl:%08X\n",
-	        x++, srcp, dest, m_pSDChainTail
-	    );
-	    *dest++ = rtPTOKEN_SDC_SD (srcp);
-	    srcp = rtPTOKEN_SDC_NextSDC (srcp);
-	}
-        if (TracingConversion) IO_printf (
-	    "...InitializePToken: SDiter:%d srcp:%08X dest:%08X srcl:%08X\n",
-	    x, srcp, dest, m_pSDChainTail
-	);
-	*dest = rtPTOKEN_SDC_SD (srcp);
-    }
-
-    rtPTOKEN_CPD_TokenType	(m_pNextGeneration) = rtPTOKEN_TT_Shift;
-    rtPTOKEN_CPD_Count		(m_pNextGeneration) = m_cAlterations;
-    rtPTOKEN_CPD_Closed		(m_pNextGeneration) = true;
+/*****  Modify the extant ptoken  *****/
+    m_pNextGeneration->convertToShift (result, m_pSDChainHead, m_pSDChainTail, m_cAlterations);
 
     discard ();
 
     return result;
+}
+
+void rtPTOKEN_Handle::convertToShift (
+    rtPTOKEN_Handle *pNextGeneration, rtPTOKEN_SDCType const *pSDHead, rtPTOKEN_SDCType const *pSDTail, unsigned int sSDList
+) {
+    if (hasAContainer ())
+	EnableModifications ();
+    else
+	createContainer ();
+    clearIsClosed ();
+    StoreReference (nextGenerationPOP (), pNextGeneration);
+
+/*****  If this is a cartesian ptoken, clear its pops and take its larger size into account...  *****/
+    unsigned int xSize = sizeof(rtPTOKEN_SDType) * sSDList;
+    if (typeIsCartesian ()) {
+	ClearReference (rowPTokenPOP ());
+	ClearReference (colPTokenPOP ());
+
+	xSize -= sizeof (rtPTOKEN_CartesianType);
+    }
+    GrowContainer (xSize);
+
+    if (pSDHead) {
+	rtPTOKEN_SDType *dest = sdArray ();
+	unsigned int x = 0;
+	while (pSDHead != pSDTail) {
+	    if (TracingConversion) IO_printf (
+	    "...InitializePToken: SDiter:%d srcp:%08X dest:%08X srcl:%08X\n",
+	        x++, pSDHead, dest, pSDTail
+	    );
+	    *dest++ = rtPTOKEN_SDC_SD (pSDHead);
+	    pSDHead = rtPTOKEN_SDC_NextSDC (pSDHead);
+	}
+        if (TracingConversion) IO_printf (
+	    "...InitializePToken: SDiter:%d srcp:%08X dest:%08X srcl:%08X\n",
+	    x, pSDHead, dest, pSDTail
+	);
+	*dest = rtPTOKEN_SDC_SD (pSDHead);
+    }
+
+    rtPTOKEN_Type *pCC = typecastContent ();
+    rtPTOKEN_PT_TokenType	(pCC) = rtPTOKEN_TT_Shift;
+    rtPTOKEN_PT_Count		(pCC) = sSDList;
+    rtPTOKEN_PT_Closed		(pCC) = true;
 }
 
 
@@ -1771,45 +1667,36 @@ M_CPD *rtPTOKEN_CType::ToPToken () {
 /*---------------------------------------------------------------------------
  *****  Routine to convert a ptoken into a ptoken constructor.
  *
- *  Argument:
- *	ptokenCPD		- the address of a standard CPD for the ptoken
- *				  to be converted.
- *
  *  Returns:
  *	The address of a ptoken constructor.
  *
  *****/
-PrivateFnDef rtPTOKEN_CType *rtPTOKEN_ToConstructor (M_CPD *ptokenCPD) {
+rtPTOKEN_CType *rtPTOKEN_Handle::asConstructor () {
     rtPTOKEN_SDCType *chainHead, *chainTail, *newSDC;
-    unsigned int x;
     int adjustment = 0, shift;
 
     ToConstructorCount++;
 
 /*****  The ptoken must be a shift ptoken  *****/
-    if (rtPTOKEN_CPD_IsntShift (ptokenCPD)) ERR_SignalFault (
+    if (typeIsntShift ()) ERR_SignalFault (
 	EC__InternalInconsistency,
 	"rtPTOKEN_ToConstructor:  Must be a shift p-token"
     );
 
 /*****  ...initialize traversal pointers and SD count...  *****/
-    unsigned int alt = rtPTOKEN_CPD_Count (ptokenCPD);
+    unsigned int alt = sdCount ();
 
-    rtPTOKEN_CType *ptokenc = new rtPTOKEN_CType (
-	rtPTOKEN_CPD_NextGenerationCPD (ptokenCPD)
-    );
+    rtPTOKEN_CType *ptokenc = new rtPTOKEN_CType (nextPToken ());
 
     rtPTOKEN_PTC_Order (ptokenc) = rtPTOKEN_Order_Backward;
     rtPTOKEN_PTC_AltCount (ptokenc) = alt;
 
 /*** Force cartesian ptokens to update themselves ***/
-    if (rtPTOKEN_CPD_TokenType (ptokenc->NextGeneration ()) == rtPTOKEN_TT_Cartesian)
-	rtPTOKEN__CartesianPTIsCurrent (ptokenc->NextGeneration (), -1, true);
+    if (ptokenc->NextGeneration ()->typeIsCartesian ())
+	ptokenc->NextGeneration ()->productIsTerminal ();
 
 /*****  ...allocate the SD chain...  *****/
-    rtPTOKEN_SDType *sdp = alt > 0 ? rtPTOKEN_CPD_ChangeArray (
-	ptokenCPD, rtPTOKEN_SDType
-    ) : 0;
+    rtPTOKEN_SDType *sdp = sdArray ();
     rtPTOKEN_SDType *sdl = sdp + alt;
 
     if (sdp < sdl) {
@@ -1823,12 +1710,8 @@ PrivateFnDef rtPTOKEN_CType *rtPTOKEN_ToConstructor (M_CPD *ptokenCPD) {
 	rtPTOKEN_PTC_ChainHead (ptokenc) = chainHead;
 	rtPTOKEN_PTC_ChainTail (ptokenc) = chainTail;
     }
-    for (
-	x = 0, newSDC = chainTail;
-        x < alt;
-	x++, newSDC = rtPTOKEN_SDC_PrevSDC (newSDC)
-    )
-    {
+    unsigned int x;
+    for (x = 0, newSDC = chainTail; x < alt; x++, newSDC = rtPTOKEN_SDC_PrevSDC (newSDC)) {
         rtPTOKEN_SDC_CurrentOrigin (newSDC) = rtPTOKEN_SDC_Origin (newSDC)
 	    + adjustment
 	    + (((shift = rtPTOKEN_SDC_Shift (newSDC)) < 0) ? shift : 0);
@@ -1928,35 +1811,29 @@ PrivateFnDef int Compare (rtPTOKEN_SDCType* sdc1, rtPTOKEN_SDCType* sdc2) {
 	shift2;
 
     if (TracingCollapse) IO_printf (">Compare\n");
-    if (IsNil (sdc1) && IsNil (sdc2))
-    {
+    if (IsNil (sdc1) && IsNil (sdc2)) {
 	if (TracingCollapse) IO_printf ("Compare=0(both nil)\n");
         return 0;
     }
 
-    if (IsNil (sdc1))
-    {
+    if (IsNil (sdc1)) {
 	if (TracingCollapse) IO_printf ("Compare=-1(sdc1 nil)\n");
         return -1;
     }
 
-    if (IsNil (sdc2))
-    {
+    if (IsNil (sdc2)) {
 	if (TracingCollapse) IO_printf ("Compare=1(sdc2 nil)\n");
         return 1;
     }
 
     rangeBottom1 = rtPTOKEN_SDC_CurrentOrigin (sdc1);
-    rangeTop1 = rangeBottom1 + ((shift = rtPTOKEN_SDC_Shift (sdc1)) > 0 ?
-			    shift : 0);
+    rangeTop1 = rangeBottom1 + ((shift = rtPTOKEN_SDC_Shift (sdc1)) > 0 ? shift : 0);
 
-    if ((shift2 = rtPTOKEN_SDC_Shift(sdc2)) > 0)
-    {
+    if ((shift2 = rtPTOKEN_SDC_Shift(sdc2)) > 0) {
         rangeBottom2 = rtPTOKEN_SDC_Origin (sdc2);
 	rangeTop2 =  rtPTOKEN_SDC_Origin (sdc2) + rtPTOKEN_SDC_Shift(sdc2);
     }
-    else
-    {
+    else {
         rangeTop2 = rtPTOKEN_SDC_Origin (sdc2);
 	rangeBottom2 =  rtPTOKEN_SDC_Origin (sdc2) + rtPTOKEN_SDC_Shift(sdc2);
     }
@@ -1967,20 +1844,17 @@ PrivateFnDef int Compare (rtPTOKEN_SDCType* sdc1, rtPTOKEN_SDCType* sdc2) {
 	rangeTop1, rangeBottom1, shift, rangeTop2, rangeBottom2, shift2
     );
 
-    if (rangeBottom1 > rangeTop2)
-    {
+    if (rangeBottom1 > rangeTop2) {
 	if (TracingCollapse) IO_printf ("Compare=1\n");
 	return 1;
     }
 
-    if (rangeBottom2 > rangeTop1)
-    {
+    if (rangeBottom2 > rangeTop1) {
 	if (TracingCollapse) IO_printf ("Compare=-1\n");
         return -1;
     }
 
-    if (shift > 0 && shift2 > 0 && rangeBottom2 < rangeBottom1)
-    {
+    if (shift > 0 && shift2 > 0 && rangeBottom2 < rangeBottom1) {
 	if (TracingCollapse) IO_printf ("Compare=1\n");
 	return 1;
     }
@@ -2001,8 +1875,7 @@ PrivateFnDef void ComputeNewCurrents (rtPTOKEN_CType* ptc) {
 	rtPTOKEN_SDCType* nextSDC = rtPTOKEN_PTC_ChainTail (ptc);
         IsntNil (nextSDC);
 	x++, nextSDC = rtPTOKEN_SDC_PrevSDC (nextSDC)
-    )
-    {
+    ) {
 	int shift = rtPTOKEN_SDC_Shift (nextSDC);
         rtPTOKEN_SDC_CurrentOrigin (nextSDC) = rtPTOKEN_SDC_Origin (nextSDC) +
 				adjustment + (shift < 0 ? shift : 0);
@@ -2095,7 +1968,7 @@ PrivateFnDef InstructionRelationship GetRelationship (
  ***** Routine to collapse a chain of ptokens into a single ptoken constructor.
  *
  *  Arguments:
- *	ptokenCPD		-  The reference to the head of the ptoken
+ *	pThis		-  The reference to the head of the ptoken
  *				   chain whose instructions are to be
  *				   accumulated in the returned ptoken
  *				   constructor.
@@ -2105,28 +1978,24 @@ PrivateFnDef InstructionRelationship GetRelationship (
  *	adjustments to the base object needed to make it current.
  *
  *****/
-PublicFnDef rtPTOKEN_CType* rtPTOKEN_CPDCumAdjustments (M_CPD *ptokenCPD) {
+rtPTOKEN_CType *rtPTOKEN_Handle::getAdjustments () {
     int rel, adjustment;
 
     CumulativeAdjustmentsCount++;
 
 /*****  The ptoken chain must start with a shift ptoken  *****/
-    if (rtPTOKEN_CPD_IsntShift (ptokenCPD)) ERR_SignalFault (
+    if (typeIsntShift ()) ERR_SignalFault (
 	EC__InternalInconsistency,
 	"rtPTOKEN_CumulativeAdjustments:  Must be a shift p-token"
     );
 
 /*****  Obtain a constructor for the current generation  *****/
-    rtPTOKEN_CType *ptokenc = rtPTOKEN_ToConstructor (ptokenCPD);
+    rtPTOKEN_CType *ptokenc = asConstructor ();
 
 /*****  Traverse the ptoken chain, accumulating instructions in ptokenc  *****/
-    M_CPD *nextGenCPD;
-    while (
-	IsntNil (nextGenCPD = ptokenc->NextGeneration ()) &&
-	rtPTOKEN_CPD_TokenType (nextGenCPD) == rtPTOKEN_TT_Shift
-    )
-    {
-        rtPTOKEN_CType *nextPTC = rtPTOKEN_ToConstructor (nextGenCPD);
+    rtPTOKEN_Handle *pNextGeneration;
+    while (IsntNil (pNextGeneration = ptokenc->NextGeneration ()) && pNextGeneration->typeIsShift ()) {
+        rtPTOKEN_CType *nextPTC = pNextGeneration->asConstructor ();
 
 	rtPTOKEN_SDCType *sdc1 = rtPTOKEN_PTC_ChainHead (ptokenc);
 	rtPTOKEN_SDCType *sdc2 = rtPTOKEN_PTC_ChainHead (nextPTC);
@@ -2284,13 +2153,12 @@ PublicFnDef rtPTOKEN_CType* rtPTOKEN_CPDCumAdjustments (M_CPD *ptokenCPD) {
 	    }/*	end if */
 
 	}/* end for */
-	ptokenc->NextGeneration ()->release ();
-	rtPTOKEN_PTC_NextGenCPD (ptokenc) = M_DuplicateCPDPtr (nextPTC->NextGeneration ());
+	ptokenc->m_pNextGeneration.setTo (nextPTC->NextGeneration ());
 	ComputeNewCurrents (ptokenc);
 	nextPTC->discard ();
 
     }/* end while */
-    rtPTOKEN_PTC_BaseCount (ptokenc) = rtPTOKEN_CPD_BaseElementCount (nextGenCPD);
+    rtPTOKEN_PTC_BaseCount (ptokenc) = pNextGeneration->cardinality ();
 
     return ptokenc;
 }
@@ -2304,45 +2172,39 @@ PublicFnDef rtPTOKEN_CType* rtPTOKEN_CPDCumAdjustments (M_CPD *ptokenCPD) {
  *  Printers  *
  **************/
 
-PrivateFnDef void PrintTokenType (M_CPD *cpd) {
+void rtPTOKEN_Handle::displayTokenType () const {
     rtPTOKEN_SDType *sdp, *sdl;
 
-    switch (rtPTOKEN_CPD_TokenType (cpd))
-    {
+    M_CPD *pCPD = 0;
+    switch (type ()) {
     case rtPTOKEN_TT_Base:
-        IO_printf ("[Base:%d:%s]",
-		    rtPTOKEN_CPD_BaseElementCount (cpd),
-		    rtPTOKEN_CPD_Independent (cpd) ? "I" : "D");
+        IO_printf ("[Base:%d:%s]", cardinality (), isIndependent () ? "I" : "D");
         break;
     case rtPTOKEN_TT_Shift:
-        IO_printf ("[Shift:%d:%s]",
-		    rtPTOKEN_CPD_BaseElementCount (cpd),
-		    rtPTOKEN_CPD_Independent (cpd) ? "I" : "D");
-	for (sdl =
-		rtPTOKEN_CPD_Count (cpd) +
-		    (sdp = rtPTOKEN_CPD_ChangeArray (cpd, rtPTOKEN_SDType));
-	     sdp < sdl;
-	     sdp++)
-	    IO_printf
-	        (" %d:%d", rtPTOKEN_SD_Origin (sdp), rtPTOKEN_SD_Shift (sdp));
+        IO_printf ("[Shift:%d:%s]", cardinality (), isIndependent () ? "I" : "D");
+	for (sdl = sdCount () + (sdp = sdArray ()); sdp < sdl; sdp++)
+	    IO_printf (" %d:%d", rtPTOKEN_SD_Origin (sdp), rtPTOKEN_SD_Shift (sdp));
         break;
     case rtPTOKEN_TT_Cartesian:
-        IO_printf ("[Cartesian:%d]", rtPTOKEN_CPD_BaseElementCount (cpd));
+        IO_printf ("[Cartesian:%d]", cardinality ());
 
+	pCPD->GetCPD ();
  	IO_printf ("\n  Row PToken: ");
-	RTYPE_QPrint (cpd, rtPTOKEN_CPx_RowPToken);
+	RTYPE_QPrint (pCPD, rtPTOKEN_CPx_RowPToken);
 	IO_printf (" ");
-	RTYPE_Print (cpd, rtPTOKEN_CPx_RowPToken);
+	RTYPE_Print (pCPD, rtPTOKEN_CPx_RowPToken);
 
  	IO_printf ("\n  Col PToken: ");
-	RTYPE_QPrint (cpd, rtPTOKEN_CPx_ColPToken);
+	RTYPE_QPrint (pCPD, rtPTOKEN_CPx_ColPToken);
 	IO_printf (" ");
-	RTYPE_Print (cpd, rtPTOKEN_CPx_ColPToken);
+	RTYPE_Print (pCPD, rtPTOKEN_CPx_ColPToken);
         break;
     default:
-        IO_printf ("[UnknownTT#%d]", rtPTOKEN_CPD_TokenType (cpd));
+        IO_printf ("[UnknownTT#%d]", type ());
         break;
     }
+    if (pCPD)
+	pCPD->release ();
 }
 
 
@@ -2350,7 +2212,7 @@ PrivateFnDef void PrintTokenType (M_CPD *cpd) {
  *****  Routine to display a P-Token.
  *
  *  Arguments:
- *	cpd			- the address of a standard CPD for the P-Token
+ *	cpd			- the address of a handle for the P-Token
  *				  to be printed.
  *	recursive		- a boolean which when true requests recursive
  *				  display of the P-Token.
@@ -2359,22 +2221,17 @@ PrivateFnDef void PrintTokenType (M_CPD *cpd) {
  *	NOTHING - Executed for side effect only.
  *
  *****/
-PrivateFnDef void PrintPToken (
-    M_CPD*			cpd,
-    int				recursive
-)
-{
+PrivateFnDef void PrintPToken (M_CPD *cpd, bool recursive) {
     IO_printf ("P-Token{");
-    if (recursive)
-    {
+    if (recursive) {
 	RTYPE_QPrint (cpd, -1);
 	IO_printf (" ");
     }
 
-    PrintTokenType (cpd);
 
-    if (recursive)
-    {
+    static_cast<rtPTOKEN_Handle*>(cpd->containerHandle ())->displayTokenType ();
+
+    if (recursive) {
 	IO_printf ("\n");
 	RTYPE_RPrint (cpd, rtPTOKEN_CPx_NextGeneration);
     }
@@ -2386,7 +2243,7 @@ PrivateFnDef void PrintPToken (
  *****  Routine to display a P-Token.
  *
  *  Arguments:
- *	cpd			- the address of a standard CPD for the P-Token
+ *	cpd			- the address of a handle for the P-Token
  *				  to be printed.
  *	recursive		- a boolean which when true requests recursive
  *				  display of the P-Token.
@@ -2399,20 +2256,15 @@ PrivateFnDef void PrintPToken (
  *	This is needed for the testdeck scripts.
  *
  *****/
-PrivateFnDef void DisplayPToken (
-    M_CPD*			cpd,
-    int				recursive
-)
-{
+void rtPTOKEN_Handle::display (bool recursive) const {
     IO_printf ("P-Token{");
 
-    PrintTokenType (cpd);
+    displayTokenType ();
 
-    if (recursive && cpd->ReferenceIsntNil (rtPTOKEN_CPx_NextGeneration)) {
+    if (recursive && typeIsShift ()) {
 	IO_printf ("\n");
-	M_CPD *nextCPD = rtPTOKEN_CPD_NextGenerationCPD (cpd);
-	DisplayPToken (nextCPD, true);
-	nextCPD->release ();
+	Reference pNext (nextPToken ());
+	pNext->display (true);
     }
     IO_printf ("}");
 }
@@ -2466,11 +2318,8 @@ VPOPReclaimer::~VPOPReclaimer () {
  *	a non-recursive reaper, the tail recursion is avoided.
  *
  *****/
-PrivateFnDef void ReclaimContainer (
-    M_ASD *pOwner, M_CPreamble const *preambleAddress
-)
-{
-    rtPTOKEN_Type const *ptoken = (rtPTOKEN_Type const *)(preambleAddress + 1);
+PrivateFnDef void ReclaimContainer (M_ASD *pOwner, M_CPreamble const *preambleAddress) {
+    rtPTOKEN_Type const *ptoken = reinterpret_cast<rtPTOKEN_Type const *>(preambleAddress + 1);
 
 //  Create reclaimer objects for the POPs referenced by this p-token, ...
     VReference<VPOPReclaimer> pPOPReclamationQueueHead;
@@ -2507,7 +2356,9 @@ PrivateFnDef void ReclaimContainer (
  *****  Internal routine to 'save' a P-Token
  *****/
 bool rtPTOKEN_Handle::PersistReferences () {
-    rtPTOKEN_Type *ptoken = (rtPTOKEN_Type *)ContainerContent ();
+    createContainer ();
+
+    rtPTOKEN_Type *ptoken = typecastContent ();
 
     bool result = Persist (&rtPTOKEN_PT_nextGeneration (ptoken));
 
@@ -2535,13 +2386,13 @@ bool rtPTOKEN_Handle::PersistReferences () {
  *	NOTHING - Executed for side effect only.
  *
  *****/
-PrivateFnDef void MarkContainers (M_ASD *pSpace, M_CPreamble const *pContainer) {
-    rtPTOKEN_Type const *ptoken = (rtPTOKEN_Type const *)(pContainer + 1);
+PrivateFnDef void MarkContainers (M_ASD::GCVisitBase* pGCV, M_ASD* pSpace, M_CPreamble const *pContainer) {
+    rtPTOKEN_Type const *ptoken = reinterpret_cast<rtPTOKEN_Type const *>(pContainer + 1);
 
-    pSpace->Mark (&rtPTOKEN_PT_nextGeneration (ptoken));
+    pGCV->Mark (pSpace, &rtPTOKEN_PT_nextGeneration (ptoken));
 
     if (rtPTOKEN_PT_TokenType (ptoken) == rtPTOKEN_TT_Cartesian)
-	pSpace->Mark ((M_POP const*)rtPTOKEN_PT_CartesianPTokens (ptoken), 2);
+	pGCV->Mark (pSpace, (M_POP const*)rtPTOKEN_PT_CartesianPTokens (ptoken), 2);
 }
 
 
@@ -2570,7 +2421,7 @@ PrivateFnDef int ReadInt (char const* prompt) {
 
 IOBJ_DefineNewaryMethod (NewDM) {
     return RTYPE_QRegister (
-	rtPTOKEN_New (
+	new rtPTOKEN_Handle (
 	    IOBJ_ScratchPad, IOBJ_NumericIObjectValue (parameterArray[0], unsigned int)
 	)
     );
@@ -2578,10 +2429,10 @@ IOBJ_DefineNewaryMethod (NewDM) {
 
 IOBJ_DefineNewaryMethod (NewCartesianDM) {
     return RTYPE_QRegister (
-	rtPTOKEN_New (
+	new rtPTOKEN_Handle (
 	    IOBJ_ScratchPad,
-	    RTYPE_QRegisterCPD (parameterArray[0]), -1,	// rowPToken
-	    RTYPE_QRegisterCPD (parameterArray[1]), -1	// colPToken
+	    RTYPE_QRegisterPToken (parameterArray[0]),	// rowPToken
+	    RTYPE_QRegisterPToken (parameterArray[1])	// colPToken
 	)
     );
 }
@@ -2679,50 +2530,40 @@ IOBJ_DefineUnaryMethod (DisplayCountsDM) {
  ************************/
 
 IOBJ_DefineUnaryMethod (SizeDM) {
-    return IOBJ_IntIObject (rtPTOKEN_CPD_Count (RTYPE_QRegisterCPD (self)));
+    return IOBJ_IntIObject (RTYPE_QRegisterPToken (self)->sdCount ());
 }
 
 IOBJ_DefineUnaryMethod (BaseElementCountDM) {
-    return IOBJ_IntIObject (
-	rtPTOKEN_BaseElementCount (RTYPE_QRegisterCPD (self), -1)
+    return IOBJ_IntIObject (RTYPE_QRegisterPToken (self)->cardinality ()
     );
 }
 
 IOBJ_DefineUnaryMethod (IsCurrentDM) {
-    return IOBJ_IntIObject(rtPTOKEN_IsCurrent (RTYPE_QRegisterCPD (self), -1));
+    return IOBJ_IntIObject(RTYPE_QRegisterPToken (self)->isTerminal ());
 }
 
 IOBJ_DefineUnaryMethod (NextGenerationDM) {
-    return RTYPE_Browser (
-	RTYPE_QRegisterCPD (self), rtPTOKEN_CPx_NextGeneration
-    );
+    return RTYPE_Browser (RTYPE_QRegisterCPD (self), rtPTOKEN_CPx_NextGeneration);
 }
 
 IOBJ_DefineUnaryMethod (BasePTokenDM) {
-    return RTYPE_QRegister (
-	rtPTOKEN_BasePToken (RTYPE_QRegisterCPD (self), -1)
-    );
+    return RTYPE_QRegister (RTYPE_QRegisterPToken (self)->basePToken ());
 }
 
 IOBJ_DefineUnaryMethod (ToggleIndependenceFlagDM) {
-    M_CPD *cpd = RTYPE_QRegisterCPD (self);
-
-    cpd->EnableModifications ();
-    rtPTOKEN_CPD_Independent (cpd) = rtPTOKEN_CPD_IsDependent (cpd);
+    rtPTOKEN_Handle *pPTH = RTYPE_QRegisterPToken (self);
+    pPTH->setIsIndependentTo (pPTH->isDependent ());
 
     return self;
 }
 
 
 IOBJ_DefineUnaryMethod (NewShiftPTokenDM) {
-
-    return RTYPE_QRegister (
-	rtPTOKEN_NewShiftPTConstructor (RTYPE_QRegisterCPD (self), -1)->ToPToken ()
-    );
+    return RTYPE_QRegister (RTYPE_QRegisterPToken (self)->makeAdjustments ()->ToPToken ());
 }
 
 IOBJ_DefineUnaryMethod (AddSDCTestDM) {
-    rtPTOKEN_CType* constructor = rtPTOKEN_NewShiftPTConstructor (RTYPE_QRegisterCPD (self), -1);
+    rtPTOKEN_CType *constructor = RTYPE_QRegisterPToken (self)->makeAdjustments ();
 
     int iter = ReadInt ("Iterations> ");
 
@@ -2745,7 +2586,7 @@ IOBJ_DefineUnaryMethod (AddSDCTestDM) {
     IO_printf (" %d:%d", origin, shift)
 
 IOBJ_DefineUnaryMethod (CollapseDM) {
-    rtPTOKEN_CType* constructor = rtPTOKEN_CPDCumAdjustments (RTYPE_QRegisterCPD (self));
+    rtPTOKEN_CType* constructor = RTYPE_QRegisterPToken (self)->getAdjustments ();
 
     IO_printf ("P-Token{[Shift:%d]", rtPTOKEN_PTC_BaseCount (constructor));
     rtPTOKEN_BTraverseAdjustments (constructor, CollapseMacro, CollapseMacro);
@@ -2755,9 +2596,7 @@ IOBJ_DefineUnaryMethod (CollapseDM) {
 }
 
 IOBJ_DefineUnaryMethod (AddSDCVolumeWCTestDM) {
-    rtPTOKEN_CType* constructor = rtPTOKEN_NewShiftPTConstructor (
-	RTYPE_QRegisterCPD (self), -1
-    );
+    rtPTOKEN_CType* constructor = RTYPE_QRegisterPToken (self)->makeAdjustments ();
     int iter = ReadInt ("Iterations> ");
 
     for (int i = 0; i < iter; i++) {
@@ -2771,9 +2610,7 @@ IOBJ_DefineUnaryMethod (AddSDCVolumeWCTestDM) {
 }
 
 IOBJ_DefineUnaryMethod (AddSDCVolumeBCTestDM) {
-    rtPTOKEN_CType* constructor = rtPTOKEN_NewShiftPTConstructor (
-	RTYPE_QRegisterCPD (self), -1
-    );
+    rtPTOKEN_CType* constructor = RTYPE_QRegisterPToken (self)->makeAdjustments ();
     int iter = ReadInt ("Iterations> ");
 
     for (int i = iter; i > 0; i--) {
@@ -2786,12 +2623,12 @@ IOBJ_DefineUnaryMethod (AddSDCVolumeBCTestDM) {
 }
 
 IOBJ_DefineUnaryMethod (DisplayDM) {
-    DisplayPToken (RTYPE_QRegisterCPD (self), true);
+    RTYPE_QRegisterPToken (self)->display (true);
     return self;
 }
 
 IOBJ_DefineUnaryMethod (DumpDM) {
-    DumpPTokenCPD (RTYPE_QRegisterCPD (self));
+    RTYPE_QRegisterPToken (self)->dump ();
     return self;
 }
 
@@ -3027,7 +2864,7 @@ rtPTOKEN_CPDCumAdjustments which used together eliminate a CPD in Aligns
  ************************************************************************/
 /************************************************************************
   RTptoken.c 30 replace /users/jck/system
-  870420 10:36:15 jck Freed a CPD in UpdateCartesianPToken
+  870420 10:36:15 jck Freed a CPD in normalizationIsTerminal
 
  ************************************************************************/
 /************************************************************************

@@ -15,7 +15,6 @@
 
 /*****  Facility  *****/
 #include "m.h"
-#include "ts.h"
 
 #include "verr.h"
 #include "vfac.h"
@@ -61,7 +60,7 @@ DEFINE_CONCRETE_RTT (rtUNDEF_Handle);
  *
  *****/
 PublicFnDef M_CPD *rtUNDEF_New (M_ASD *pContainerSpace) {
-    return pContainerSpace->CreateContainer (RTYPE_C_Undefined, 0);
+    return pContainerSpace->CreateContainer (RTYPE_C_Undefined, 0)->NewCPD ();
 }
 
 
@@ -74,9 +73,9 @@ PublicFnDef M_CPD *rtUNDEF_New (M_ASD *pContainerSpace) {
  ***************/
 
 PrivateFnDef M_CPreamble* ConvertUndefined0 (
-    M_ASD* Unused(pASD), M_CPreamble const *oldPreamble
+    M_ASD *pASD, M_CPreamble const *oldPreamble
 ) {
-    return TS_AllocateContainer (RTYPE_C_Undefined, 0, M_CPreamble_POP (oldPreamble));
+    return pASD->AllocateContainer (RTYPE_C_Undefined, 0, M_CPreamble_POPContainerIndex (oldPreamble));
 }
 
 

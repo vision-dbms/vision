@@ -109,9 +109,9 @@ bool VSelector::getKSData (unsigned int& xSelector) const {
     return false;
 }
 
-bool VSelector::getBSData (M_CPD*& rpBlock, unsigned int& rxSelector) const {
+bool VSelector::getBSData (rtBLOCK_Handle::Reference &rpBlock, unsigned int& rxSelector) const {
     if (isABlockSelector ()) {
-	rpBlock = m_iValue.as_iBlockMessage.blockCPD ();
+	rpBlock.setTo (m_iValue.as_iBlockMessage.block ());
 	rxSelector = m_iValue.as_iBlockMessage.m_xSelector;
 	return true;
     }

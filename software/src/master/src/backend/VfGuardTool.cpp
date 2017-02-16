@@ -35,7 +35,7 @@
  **************************
  **************************/
 
-VfGuardTool::VfGuardTool (M_CPD* pCod)
+VfGuardTool::VfGuardTool (rtPTOKEN_Handle *pCod)
 : m_pCod (pCod), m_pGuard (0), m_iDomCardinality (0), m_iValidRunOrigin (0), m_iValidRunSize (0)
 {
 }
@@ -65,7 +65,7 @@ VfGuardTool::~VfGuardTool () {
 
 void VfGuardTool::endValidRun () {
     if (IsNil (m_pGuard))
-	m_pGuard = rtLINK_RefConstructor (m_pCod, -1);
+	m_pGuard = rtLINK_RefConstructor (m_pCod);
     if (m_iValidRunSize > 0) {
 	rtLINK_AppendRange (m_pGuard, m_iValidRunOrigin, m_iValidRunSize);
 	m_iDomCardinality += m_iValidRunSize;
@@ -90,9 +90,7 @@ rtLINK_CType *VfGuardTool::commit () {
 	rtLINK_AppendRange (m_pGuard, m_iValidRunOrigin, m_iValidRunSize);
 	m_iDomCardinality += m_iValidRunSize;
     }
-    M_CPD* pDom = rtPTOKEN_New (m_pCod->ScratchPad (), m_iDomCardinality);
-    m_pGuard->Close (pDom);
-    pDom->release ();
+    m_pGuard->Close (new rtPTOKEN_Handle (m_pCod->ScratchPad (), m_iDomCardinality));
 
 //  ... and return the guard:
     rtLINK_CType *pGuard = m_pGuard;

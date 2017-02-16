@@ -51,6 +51,8 @@ namespace V {
 	    return Open (pFileName, g_pTextAppendMode);
 	}
 
+	bool OpenUniqueTemp (VString& rFileName, char const *pPrefix);
+
 	bool GetLine (VString &rLine) const;
 	bool GetLine (VString &rLine, char const *pFileName) {
 	    return OpenForTextRead (pFileName) && GetLine (rLine);
