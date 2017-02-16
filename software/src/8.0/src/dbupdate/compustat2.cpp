@@ -615,7 +615,7 @@ PrivateVarDef struct load_data loaddata[] = {
 
 PrivateFnDef int open_params_file(char const* loadname) {
 	FILE	*fp;
-	char	buf[128], name[20];
+	char	buf[128], name[21];
 	int	pos, width, i;
 
 	if( (fp = fopen(loadname, "r")) == NULL )
@@ -624,7 +624,7 @@ PrivateFnDef int open_params_file(char const* loadname) {
 	{
 		if( buf[0] == '#' )
 			continue;
-		if( sscanf(buf,"%s %d %d",name,&pos,&width) == -1 )
+		if( sscanf(buf,"%20s %d %d",name,&pos,&width) == -1 )
 			continue;
 		i=0;
 		while( *loaddata[i].name != '\0' )
@@ -704,7 +704,7 @@ GOPT_EndOptionDescriptions;
  *  Main Program  *
  ******************/
 
-main (
+int main (
     int				argc,
     char *			argv[]
 )

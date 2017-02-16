@@ -2,6 +2,12 @@
 #ifndef VkLongUnsigneds_Interface
 #define VkLongUnsigneds_Interface
 
+/*********************
+*****  Library  *****
+*********************/
+
+#include "V.h"
+
 /************************
  *****  Components  *****
  ************************/

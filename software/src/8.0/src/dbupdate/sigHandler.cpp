@@ -92,9 +92,9 @@ PublicFnDef void handle_signal (
 	display_error ("*** user defined signal 2 signal received ***");
 	break;
 	
-    case SIGPWR:
-	display_error ("*** power fail signal received ***");
-	break;
+//     case SIGPWR:
+// 	display_error ("*** power fail signal received ***");
+// 	break;
 	
     case SIGVTALRM:
 	display_error ("*** virtual timer alarm signal received ***");
@@ -108,9 +108,9 @@ PublicFnDef void handle_signal (
 	display_error ("*** SIGIO signal received ***");
 	break;
 	
-    case SIGWINDOW:
-	display_error ("*** window or mouse signal received ***");
-	break;
+//     case SIGWINDOW:
+// 	display_error ("*** window or mouse signal received ***");
+// 	break;
 	
     case SIGCHLD:
         display_error ("*** child status has changed ***");
@@ -176,11 +176,14 @@ PublicFnDef int set_signals (
 	STD_sigvector (SIGTERM,  &vec, 0) == -1 ||
 	STD_sigvector (SIGUSR1,  &vec, 0) == -1 ||
 	STD_sigvector (SIGUSR2,  &vec, 0) == -1 ||
+/****
 	STD_sigvector (SIGPWR,  &vec, 0) == -1 ||
+****/
 	STD_sigvector (SIGVTALRM,  &vec, 0) == -1 ||
 	STD_sigvector (SIGPROF,  &vec, 0) == -1 ||
-	STD_sigvector (SIGIO,  &vec, 0) == -1 ||
-	STD_sigvector (SIGWINDOW, &vec, 0) == -1 ) {
+	STD_sigvector (SIGIO,  &vec, 0) == -1 // ||
+//	STD_sigvector (SIGWINDOW, &vec, 0) == -1
+    ) {
 	    return(0);
 	    }
 /****  Block Hangup, Interrupt and Quit ****/

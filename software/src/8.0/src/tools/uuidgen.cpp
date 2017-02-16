@@ -35,7 +35,7 @@
 int main (int argc, char *argv[]) {
 //  Create and format a UUID...
     VkUUIDGenerate const iUUID;
-    uuid_t const &rUUID = iUUID;
+    V::uuid_t const &rUUID = iUUID;
     VString iUUIDString;
     iUUID.GetString (iUUIDString);
 
@@ -45,21 +45,19 @@ int main (int argc, char *argv[]) {
 //  ... and Vca (a.k.a, OLECREATE format) if requested:
     V::VCommandLine const iCommandLine (argc, argv);
     if (iCommandLine.switchValue ("vca")) {
-	stduuid_t const &rStdUUID = *reinterpret_cast<stduuid_t const*>(&rUUID);
-
 	printf (
 	    "0x%08x, 0x%04x, 0x%04x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x\n",
-	    rStdUUID.time_low,
-	    rStdUUID.time_mid,
-	    rStdUUID.time_hi_and_version,
-	    rStdUUID.clock_seq_hi_and_reserved,
-	    rStdUUID.clock_seq_low,
-	    rStdUUID.node[0],
-	    rStdUUID.node[1],
-	    rStdUUID.node[2],
-	    rStdUUID.node[3],
-	    rStdUUID.node[4],
-	    rStdUUID.node[5]
+	    rUUID.time_low,
+	    rUUID.time_mid,
+	    rUUID.time_hi_and_version,
+	    rUUID.clock_seq_hi_and_reserved,
+	    rUUID.clock_seq_low,
+	    rUUID.node[0],
+	    rUUID.node[1],
+	    rUUID.node[2],
+	    rUUID.node[3],
+	    rUUID.node[4],
+	    rUUID.node[5]
 	);
     }
 

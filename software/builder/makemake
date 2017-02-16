@@ -49,8 +49,9 @@ end
 
 set buildtargets = targets
 set objectrule = ""
+set linkerrule = ""
 
-foreach metatag (buildtargets objectrule)
+foreach metatag (buildtargets objectrule linkerrule)
     set metatokens = (`grep "#--$metatag--#" make.defs.*`)
     if ($#metatokens > 1) then
 	set $metatag = ($metatokens[2-])
@@ -84,6 +85,8 @@ foreach target ($targets)
     echo $mungedtarget : $mungedobjects >> makefile
     if ( -f make.rule.${target} ) then
 	cat make.rule.${target} >> makefile
+    else if ( "${linkerrule}" != "" ) then
+	echo "	${linkerrule}" >> makefile
     else
 	set mungedobjects = ()
 	foreach object ($objects)

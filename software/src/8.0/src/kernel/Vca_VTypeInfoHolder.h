@@ -393,7 +393,7 @@ Vca_VTypeInfoHolder_InstantiationsForPODT (Vca::VcaSite*);
 Vca_VTypeInfoHolder_InstantiationsForPODT (Vca::VInterfaceMember const*);
 Vca_VTypeInfoHolder_InstantiationsForPODT (VTypeInfo*);
 
-Vca_VTypeInfoHolder_InstantiationsForREFT (uuid_t);
+Vca_VTypeInfoHolder_InstantiationsForREFT (V::uuid_t);
 Vca_VTypeInfoHolder_InstantiationsForREFT (V::VBlob);
 Vca_VTypeInfoHolder_InstantiationsForREFTX(VString);
 Vca_VTypeInfoHolder_InstantiationsForREFT (V::VTime);

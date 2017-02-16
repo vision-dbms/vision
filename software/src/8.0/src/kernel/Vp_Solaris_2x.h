@@ -18,6 +18,9 @@
 #include <search.h>
 #include <unistd.h>
 
+#ifndef isfinite
+#define isfinite(r) finite(r)
+#endif
 #define NaNQ quiet_nan (0)
 
 #define _sysconf sysconf
@@ -37,10 +40,16 @@
 
 #define gethostid		Vk_gethostid
 
+#ifndef _LP64
 #define __int64			long long
+#else
+#define __int64			long
+#endif
 #define __int32			int
 #define __int16			short
 #define __int8			char
+
+#define USING(x) using x;
 
 #define DECLSPEC_DLLEXPORT
 #define DECLSPEC_DLLIMPORT

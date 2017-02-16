@@ -26,7 +26,7 @@ namespace Vxa {
     class VImportableType;
 
     class VCallAgent : public VRolePlayer {
-	DECLARE_CONCRETE_RTTLITE (VCallAgent, VRolePlayer);
+	DECLARE_ABSTRACT_RTTLITE (VCallAgent, VRolePlayer);
 
     //  Aliases
     public:
@@ -206,7 +206,7 @@ namespace Vxa {
 
     /*****************************************************************/
     //  Construction
-    public:
+    protected:
 	VCallAgent (VTask *pTask, unsigned int cParameters);
 
     //  Destruction

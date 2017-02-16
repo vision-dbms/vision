@@ -136,7 +136,7 @@ PrivateVarDef argv_t LocalArgv = NilOf (argv_t);
  *
  *****/
 PublicFnDef V_API void GOPT_AcquireOptions (int argc, argv_t argv) {
-    GOPT_OptionDescription *opt, *optionsIndexedByChar[256];
+    GOPT_OptionDescription *optionsIndexedByChar[256];
     int i, optChar;
 
 /*****  Initialize Global Variables  *****/
@@ -147,7 +147,7 @@ PublicFnDef V_API void GOPT_AcquireOptions (int argc, argv_t argv) {
     for (i = 0; i < 256; i++)
         optionsIndexedByChar[i] = NilOf (GOPT_OptionDescription *);
 
-    for (opt = OptionDescriptions; opt->name; opt++)
+    for (GOPT_OptionDescription *opt = OptionDescriptions; opt->name; opt++)
         optionsIndexedByChar[opt->argSpecLetter] = opt;
 
 /*****  Construct the 'getopt' 'optstring'  *****/
@@ -161,7 +161,8 @@ PublicFnDef V_API void GOPT_AcquireOptions (int argc, argv_t argv) {
 #pragma __pointer_size __restore
 #endif
     for (i = 0, p = optString; i < 256; i++) {
-	if (opt = optionsIndexedByChar[i]) {
+	GOPT_OptionDescription *const opt = optionsIndexedByChar[i];
+	if (opt) {
 	    *p++ = (char)i;
 	    switch (opt->optionType) {
 	    case GOPT_ValueOption:
@@ -176,7 +177,8 @@ PublicFnDef V_API void GOPT_AcquireOptions (int argc, argv_t argv) {
 
 /*****  Extract those options specified by 'argc' and 'argv'  *****/
     while ((optChar = getopt (argc, argv, optString)) != EOF) {
-	if (IsNil (opt = optionsIndexedByChar[optChar]))
+	GOPT_OptionDescription *const opt = optionsIndexedByChar[optChar];
+	if (IsNil (opt))
 	    continue;
 	switch (opt->optionType) {
 	case GOPT_SwitchOption:
@@ -196,7 +198,7 @@ PublicFnDef V_API void GOPT_AcquireOptions (int argc, argv_t argv) {
     ExtraArgOrigin = optind;
 
 /*****  Pick up any uninitialized arguments from the environment  *****/
-    for (opt = OptionDescriptions; opt->name; opt++) {
+    for (GOPT_OptionDescription *opt = OptionDescriptions; opt->name; opt++) {
         if (!opt->valueSet &&
 	    !IsNil (opt->envVar) &&
 	    !IsNil (p = getenv (opt->envVar)))
@@ -233,9 +235,7 @@ PublicFnDef V_API void GOPT_AcquireOptions (int argc, argv_t argv) {
  *
  *****/
 PublicFnDef V_API char const *GOPT_GetValueOption (char const * optionName) {
-    GOPT_OptionDescription *opt;
-
-    for (opt = OptionDescriptions; opt->name; opt++)
+    for (GOPT_OptionDescription *opt = OptionDescriptions; opt->name; opt++)
         if (strcmp (optionName, opt->name) == 0)
 	    return opt->stringValue;
     
@@ -256,9 +256,7 @@ PublicFnDef V_API char const *GOPT_GetValueOption (char const * optionName) {
  *
  *****/
 PublicFnDef V_API int GOPT_GetSwitchOption (char const *optionName) {
-    GOPT_OptionDescription *opt;
-
-    for (opt = OptionDescriptions; opt->name; opt++)
+    for (GOPT_OptionDescription *opt = OptionDescriptions; opt->name; opt++)
         if (strcmp (optionName, opt->name) == 0)
 	    return opt->switchValue;
     return -1;

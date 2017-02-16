@@ -450,7 +450,7 @@ void Vsa::VEvaluatorPool::PoolSettings::SetResultLogLength (
   ****/
 
 
-#if defined (sun)
+#if defined (__sparc)
 #pragma weak "__1cDVsaOVEvaluatorPoolMPoolSettingsGSupply6MpnDVcaLIDataSource4CpnJIVUnknown___pnKIVReceiver4C5___v_" = "__1cDVsaOVEvaluatorPoolMPoolSettingsGSupply6MpnDVcaLIDataSource4CpnJIVUnknown___pnKIVReceiver4Cp4___v_"
 #endif
 

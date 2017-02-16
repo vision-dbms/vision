@@ -122,6 +122,103 @@ namespace V {
     };
 
 
+#elif defined(__APPLE__)
+    /*-----------------*
+     *----  Apple  ----*
+     *-----------------*/
+
+    template<unsigned int Size> class VAtomicMemoryOperations_ : public VAtomicMemoryOperations {
+    };
+
+    template<> class VAtomicMemoryOperations_<(size_t)4> : public VAtomicMemoryOperations {
+    //  Family Values
+    public:
+	typedef unsigned __int32 value_t;
+	enum {
+	    Size = sizeof (value_t)
+	};
+
+    //  Operations
+    public:
+	static value_t interlockedExchange (value_t volatile *pMemory, value_t iNew) {
+	    value_t iOld = *pMemory;
+	    while (!interlockedSetIf (pMemory, iOld, iNew)) {
+		iOld = *pMemory;
+	    }
+	    return iOld;
+	}
+	static value_t interlockedExchange (void volatile *pMemory, value_t iNew) {
+	    return interlockedExchange ((value_t volatile*)pMemory, iNew);
+	}
+
+	static bool interlockedSetIf (value_t volatile *pMemory, value_t iExpected, value_t iNew) {
+	    //  returns true if memory set, false otherwise
+	    return OSAtomicCompareAndSwap32 (
+		static_cast<int32_t>(iExpected),
+		static_cast<int32_t>(iNew),
+		reinterpret_cast<int32_t volatile*>(pMemory)
+	    );
+	}
+	static bool interlockedSetIf (void volatile *pMemory, value_t iExpected, value_t iNew) {
+	    //  returns true if memory set, false otherwise
+	    return interlockedSetIf ((value_t volatile*)pMemory, iExpected, iNew);
+	}
+#if !defined(_LP64)
+	static value_t interlockedExchange (void volatile *pMemory, void *iNew) {
+	    return interlockedExchange (pMemory, (value_t)iNew);
+	}
+	static bool interlockedSetIf (void volatile *pMemory, void const *iExpected, void *iNew) {
+	    //  returns true if memory set, false otherwise
+	    return interlockedSetIf (pMemory, (value_t)iExpected, (value_t)iNew);
+	}
+#endif // !defined(_LP64)
+    };
+
+    template<> class VAtomicMemoryOperations_<(size_t)8> : public VAtomicMemoryOperations {
+    //  Family Values
+    public:
+	typedef unsigned __int64 value_t;
+	enum {
+	    Size = sizeof (value_t)
+	};
+
+    //  Operations
+    public:
+	static value_t interlockedExchange (value_t volatile *pMemory, value_t iNew) {
+	    value_t iOld = *pMemory;
+	    while (!interlockedSetIf (pMemory, iOld, iNew)) {
+		iOld = *pMemory;
+	    }
+	    return iOld;
+	}
+	static value_t interlockedExchange (void volatile *pMemory, value_t iNew) {
+	    return interlockedExchange ((value_t volatile*)pMemory, iNew);
+	}
+
+	static bool interlockedSetIf (value_t volatile *pMemory, value_t iExpected, value_t iNew) {
+	    //  returns true if memory set, false otherwise
+	    return OSAtomicCompareAndSwap64 (
+		static_cast<int64_t>(iExpected),
+		static_cast<int64_t>(iNew),
+		reinterpret_cast<OSAtomic_int64_aligned64_t volatile*>(pMemory)
+	    );
+	}
+	static bool interlockedSetIf (void volatile *pMemory, value_t iExpected, value_t iNew) {
+	    //  returns true if memory set, false otherwise
+	    return interlockedSetIf ((value_t volatile*)pMemory, iExpected, iNew);
+	}
+#if defined(_LP64)
+	static value_t interlockedExchange (void volatile *pMemory, void *iNew) {
+	    return interlockedExchange (pMemory, (value_t)iNew);
+	}
+	static bool interlockedSetIf (void volatile *pMemory, void const *iExpected, void *iNew) {
+	    //  returns true if memory set, false otherwise
+	    return interlockedSetIf (pMemory, (value_t)iExpected, (value_t)iNew);
+	}
+#endif // defined(_LP64)
+    };
+
+
 #elif defined(__VMS)
     /*-------------------------*
      *----  OpenVMS/Alpha  ----*
@@ -225,7 +322,7 @@ namespace V {
 	static value_t interlockedExchange (void volatile *pMemory, value_t iNew) {
 	    return InterlockedExchange ((LONG volatile*)pMemory, iNew);
 	}
-	static void *interlockedExchange (void volatile *pMemory, void *iNew) { // TODO: should iNew be pNew?
+	static void *interlockedExchange (void *volatile *pMemory, void *iNew) { // TODO: should iNew be pNew?
 #ifdef __ATLCONV_H__
 		// Direct from atlconv.h -- we can't call InterlockedExchangePointer() from there because of volatile->non-volatile casts.
 		return( reinterpret_cast<void*>(static_cast<LONG_PTR>(::InterlockedExchange(reinterpret_cast<LONG volatile *>(pMemory), static_cast<LONG>(reinterpret_cast<LONG_PTR>(iNew))))) );
@@ -259,7 +356,7 @@ namespace V {
 	static value_t interlockedExchange (void volatile *pMemory, value_t iNew) {
 	    return InterlockedExchange64 ((LONGLONG volatile*)pMemory, iNew);
 	}
-	static void *interlockedExchange (void volatile *pMemory, void *iNew) {
+	static void *interlockedExchange (void *volatile *pMemory, void *iNew) {
 #ifdef __ATLCONV_H__
 		// Direct from atlconv.h -- we can't call InterlockedExchangePointer() from there because of volatile->non-volatile casts.
 		return( reinterpret_cast<void*>(static_cast<LONG_PTR>(::InterlockedExchange(reinterpret_cast<LONG volatile *>(pMemory), static_cast<LONG>(reinterpret_cast<LONG_PTR>(iNew))))) );
@@ -393,9 +490,9 @@ namespace V {
 
 
 #elif defined(sun)
-    /*-------------------------*
-     *----  Solaris/Sparc  ----*
-     *-------------------------*/
+    /*-----------------------*
+     *----  Sun/Solaris  ----*
+     *-----------------------*/
 
     template<unsigned int Size> class VAtomicMemoryOperations_ : public VAtomicMemoryOperations {
     };
@@ -423,7 +520,11 @@ namespace V {
 
 	static bool interlockedSetIf (value_t volatile *pMemory, value_t iExpected, value_t iNew) {
 	    //  returns true if memory set, false otherwise
+#ifdef USING_LEGACY_SPARC_ATOMICS
 	    return compareAndSwap32 (pMemory, iExpected, iNew) == iExpected;
+#else
+	    return atomic_cas_32 (pMemory, iExpected, iNew) == iExpected;
+#endif
 	}
 	static bool interlockedSetIf (void volatile *pMemory, value_t iExpected, value_t iNew) {
 	    //  returns true if memory set, false otherwise
@@ -437,7 +538,7 @@ namespace V {
 	    //  returns true if memory set, false otherwise
 	    return interlockedSetIf (pMemory, (value_t)iExpected, (value_t)iNew);
 	}
-#endif
+#endif // !defined(_LP64)
     };
 
     template<> class VAtomicMemoryOperations_<(size_t)8> : public VAtomicMemoryOperations {
@@ -463,7 +564,11 @@ namespace V {
 
 	static bool interlockedSetIf (value_t volatile *pMemory, value_t iExpected, value_t iNew) {
 	    //  returns true if memory set, false otherwise
+#ifdef USING_LEGACY_SPARC_ATOMICS
 	    return compareAndSwap64 (pMemory, iExpected, iNew) == iExpected;
+#else
+	    return atomic_cas_64 (reinterpret_cast<uint64_t volatile*>(pMemory), iExpected, iNew) == iExpected;
+#endif
 	}
 	static bool interlockedSetIf (void volatile *pMemory, value_t iExpected, value_t iNew) {
 	    //  returns true if memory set, false otherwise
@@ -477,7 +582,7 @@ namespace V {
 	    //  returns true if memory set, false otherwise
 	    return interlockedSetIf (pMemory, (value_t)iExpected, (value_t)iNew);
 	}
-#endif
+#endif // defined(_LP64)
     };
 
 #endif

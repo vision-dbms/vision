@@ -1,4 +1,5 @@
 /*****  Long Unsigneds Implementation  *****/
+#define V_VLongUnsigneds
 
 /************************
  ************************

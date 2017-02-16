@@ -10,7 +10,7 @@
 #if defined(_WIN32)
 #define V_MUTEX_IMPLEMENTED_USING_WIN32_MUTEX
 
-#elif defined(__VMS) || defined(sun) || defined(__linux__)
+#elif defined(__VMS) || defined(sun) || defined(__linux__) || defined(__APPLE__)
 #include <pthread.h>
 #define V_MUTEX_IMPLEMENTED_USING_POSIX_MUTEX
 

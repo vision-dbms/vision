@@ -56,6 +56,7 @@ public:
     typedef Vca::VInterfaceMember VInterfaceMember;
     typedef Vca::VTypeInfoHolderInstance VTypeInfoHolderInstance;
     typedef VkUUIDHolder UUIDHolder;
+    typedef V::uuid_t uuid_t;
 
 //  Friends
     friend class Vca::VTypeInfoHolderInstance;
