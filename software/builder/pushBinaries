@@ -21,7 +21,10 @@ foreach dir ($destDir/lib $destDir/bin)
   endif
 end
 
-cp -fd $sourceDir/lib/* $destDir/lib
+# It seems that '-d' only works on Linux and that '-R -P' is the more
+# portable (Linux+Solaris+Mac) way to preserve symbolic links (mjc)...
+# cp -fd $sourceDir/lib/* $destDir/lib
+cp -RPf $sourceDir/lib/* $destDir/lib
 
 cp -f $sourceDir/tools/makemvscript $destDir/bin
 cp -f $sourceDir/tools/format $destDir/bin
@@ -68,4 +71,3 @@ endif
 
 set visionHelp = $sourceDir/frontend/VisionHelp
 cp -rf $visionHelp/* $destDir/lib
-
