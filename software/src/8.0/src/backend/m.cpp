@@ -2746,11 +2746,13 @@ M_CPD* M_ASD::CreateContainer (RTYPE_Type type, size_t size) {
     AllocateContainerCount++;
 
 //  ... adjust the relevant counts and bounds, ...
-    IncrementAllocation (size);
+    IncrementAllocation (
+	M_CPreamble_Size (cte.addressAsContainerAddress ())
+    );
     AdjustRWBounds (cte.containerIndex ());
 
 //  ... attach a CPCC, and allocate and return a CPD:
-//      disabling GC while container table entries are being modifed ...
+//      disabling GC while container table entries are being modified ...
     g_bMayBeginGarbageCollection = false;
     M_CPD *pResult = cte.MakeHandle ()->NewCPD ();
     g_bMayBeginGarbageCollection = true;
