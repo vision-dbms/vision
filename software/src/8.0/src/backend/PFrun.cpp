@@ -788,7 +788,7 @@ PrivateFnDef void CreateHelper (
 
     bool notOk = false;
     int details = 0;
-    char service[64], options[256];
+    char service[65], options[257];
     if (2 == STD_sscanf (
 	    openTarget, " %64[^,], %256[^:]: %n", service, options, &details
 	) && details > 0

@@ -26,6 +26,10 @@ class ABSTRACT VDatabaseFederator : public VReferenceable {
 //  Run Time Type
     DECLARE_ABSTRACT_RTT (VDatabaseFederator, VReferenceable);
 
+//  Aliases
+public:
+    typedef V::uuid_t uuid_t;
+
 //  Friends
     friend class VDatabaseActivation;
 

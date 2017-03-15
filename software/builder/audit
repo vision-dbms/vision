@@ -19,6 +19,11 @@ if ( ! -d $AuditLogs ) then
 	exit 1
 endif
 
+####  ... get source control data, ...
+if ( ! $?AuditSource ) then
+	setenv AuditSource "`sourceControlSummary`"
+endif
+
 ####  ... write the audit file header, ...
 touch $AuditFile
 echo >> $AuditFile
@@ -30,6 +35,7 @@ echo "+++Command: " $argv[*] >> $AuditFile
 # Commented out... needs a different command on Linux...
 # CC -V >>& $AuditFile
 echo "+++Platform: `uname -a`" >> $AuditFile
+echo "+++Source:   $AuditSource" >> $AuditFile
 
 ####  ... write the audit comment, ...
 #echo "+++User Comments:" >> $AuditFile

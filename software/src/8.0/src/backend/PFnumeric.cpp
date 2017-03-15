@@ -163,8 +163,7 @@ extern "C" {
  ******************************************
  ******************************************/
 
-#if defined (__HP_aCC)
-#if __cplusplus >= 199707L
+#if defined(__APPLE__) || (defined (__HP_aCC) && __cplusplus >= 199707L)
 struct exception {
     int type;
     char *name;
@@ -172,7 +171,6 @@ struct exception {
     double arg2;
     double retval;
 };
-#endif
 #endif
 
 /*---------------------------------------------------------------------------
@@ -197,7 +195,7 @@ int __cdecl matherr (
 #endif
 ) {
     static const double iNaN (NaNQ);
-    if (finite (pException->retval))
+    if (isfinite (pException->retval))
 	pException->retval = iNaN;
     return true;
 }

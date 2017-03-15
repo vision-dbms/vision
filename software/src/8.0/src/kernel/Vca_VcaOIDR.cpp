@@ -669,7 +669,7 @@ Vca::VcaOIDR *Vca::VcaOIDR::oidr_() {
     return oidr ();
 }
 
-uuid_t const &Vca::VcaOIDR::objectSiteUUID () const {
+V::uuid_t const &Vca::VcaOIDR::objectSiteUUID () const {
     return m_pObjectSite->uuid ();
 }
 

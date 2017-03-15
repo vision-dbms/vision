@@ -603,7 +603,7 @@ public:
     }
 
     void loadDucWithGuardedDouble (double iValue) const {
-	if (finite (iValue))
+	if (isfinite (iValue))
 	    loadDucWithDouble (iValue);
 	else
 	    loadDucWithNA ();

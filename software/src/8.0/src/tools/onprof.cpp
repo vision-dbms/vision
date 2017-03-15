@@ -637,8 +637,18 @@ PrivateFnDef void ResolveNetworkLink (char *pOSDPathName, char const *pNDFPathNa
     pLinkStream = fopen (pLinkBuffer, "r");
 #endif
 
-    if (IsNil (pLinkStream))
+/*****  If NDF.OSDPATH doesn't exist, assume the directory in which the NDF lives, ... *****/
+    if (IsNil (pLinkStream)) {
+	char const* pLastSlash = strrchr (pNDFPathName, '/');
+	if (!pLastSlash)
+	    strcpy (pOSDPathName, "");
+	else {
+	    size_t const sDirname = static_cast<size_t>(pLastSlash - pNDFPathName);
+	    strncpy (pOSDPathName, pNDFPathName, sDirname);
+	    pOSDPathName[sDirname] = '\0';
+	}
 	return;
+    }
 
     if (IsntNil (fgets (pLinkBuffer, sizeof (pLinkBuffer), pLinkStream))) {
 	if (IsntNil (pNewLine = strchr (pLinkBuffer, '\n')))
@@ -1325,12 +1335,12 @@ static void AccumulateStatistics (ConnectivityStatistics *dst, ConnectivityStati
 
 static void DisplayStatistics (ConnectivityStatistics const *stats, bool bProfiling, bool bShowingMisalignments) {
     printf ("\
-\tReachable Segments  . . . %14"FMT64"u\n\
-\tReachable Containers  . . %14"FMT64"u%14"FMT64"u%14"FMT64"u\n\
-\t          Bytes . . . . . %14"FMT64"u%14"FMT64"u%14"FMT64"u\n\
-\tUnreachable Containers  . %14"FMT64"u%14"FMT64"u%14"FMT64"u\n\
-\t            Bytes . . . . %14"FMT64"u%14"FMT64"u%14"FMT64"u\n\
-\tFree Containers . . . . . %14"FMT64"u\n",
+\tReachable Segments  . . . %14" FMT64 "u\n\
+\tReachable Containers  . . %14" FMT64 "u%14" FMT64 "u%14" FMT64 "u\n\
+\t          Bytes . . . . . %14" FMT64 "u%14" FMT64 "u%14" FMT64 "u\n\
+\tUnreachable Containers  . %14" FMT64 "u%14" FMT64 "u%14" FMT64 "u\n\
+\t            Bytes . . . . %14" FMT64 "u%14" FMT64 "u%14" FMT64 "u\n\
+\tFree Containers . . . . . %14" FMT64 "u\n",
 
 	stats->reachableSegments,
 	stats->reachableCount,
@@ -1352,15 +1362,15 @@ static void DisplayStatistics (ConnectivityStatistics const *stats, bool bProfil
 		 
     if (stats->unreasonableCount) {
 	printf (
-	    ">>>\tUnreasonable Containers . %14"FMT64"u\n", stats->unreasonableCount
+	    ">>>\tUnreasonable Containers . %14" FMT64 "u\n", stats->unreasonableCount
 	);
     }
     if (bShowingMisalignments && stats->misalignedContainers) {
 	printf (
-	    ">>>\tMisaligned Containers . . %14"FMT64"u\n", stats->misalignedContainers
+	    ">>>\tMisaligned Containers . . %14" FMT64 "u\n", stats->misalignedContainers
 	);
 	printf (
-	    ">>>\tMisaligned Values . . . . %14"FMT64"u\n", stats->misalignedValues
+	    ">>>\tMisaligned Values . . . . %14" FMT64 "u\n", stats->misalignedValues
 	);
     }
 
@@ -1385,7 +1395,7 @@ static void DisplayStatistics (ConnectivityStatistics const *stats, bool bProfil
 	) continue;
 
 	printf (
-	    "%-16.16s %10"FMT64"u %19"FMT64"u %10"FMT64"u %19"FMT64"u\n",
+	    "%-16.16s %10" FMT64 "u %19" FMT64 "u %10" FMT64 "u %19" FMT64 "u\n",
 	    RTypeName ((RTYPE_Type)i),
 	    stats->rtype[i].reachableCount,
 	    stats->rtype[i].reachableBytes,

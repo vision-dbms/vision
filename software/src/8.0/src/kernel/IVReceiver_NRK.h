@@ -87,7 +87,7 @@ Vca_IVReceiver_InstantiationsForPODT (Vca::VBSConsumer*);
 Vca_IVReceiver_InstantiationsForPODT (Vca::VBSProducer*);
 Vca_IVReceiver_InstantiationsForPODT (VTypeInfo*);
 
-Vca_IVReceiver_InstantiationsForREFT (uuid_t);
+Vca_IVReceiver_InstantiationsForREFT (V::uuid_t);
 Vca_IVReceiver_InstantiationsForREFT (V::VBlob);
 Vca_IVReceiver_InstantiationsForREFT (VString);
 Vca_IVReceiver_InstantiationsForREFT (V::VTime);

@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [ -f /usr/include/ncurses/curses.h ]; then
+    echo "CDEFS += -DUSING_NCURSES";
+    echo "LIBS  += -lncurses";
+else
+    echo "LIBS  += -lcurses";
+fi
+

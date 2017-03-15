@@ -272,7 +272,7 @@ namespace V {
  *****  Intel  *****
  *******************/
 
-#if defined(__VMS) || defined(_M_IX86) || defined(__i386__) || defined (__x86_64__) || defined (__arm__)
+#if defined(__VMS) || defined(_M_IX86) || defined(__i386) || defined(__i386__) || defined (__x86_64__) || defined (__arm__)
 
 #define MAXINTDIGITS		11
 #define MAXDOUBLEDIGITS		309
@@ -303,8 +303,8 @@ namespace V {
  *****  SPARC  *****
  *******************/
 
-#elif defined (sun)
-				/*****  Sun  *****/
+#elif defined (__sparc)
+				/*****  Sun/Sparc  *****/
 
 #define MAXINTDIGITS		11
 #define MAXDOUBLEDIGITS		309
@@ -660,12 +660,15 @@ typedef void (*STD_SignalHandlerType) (
  *****  AIX/Linux/Solaris  *****
  *******************************/
 
-#elif defined(__VMS) || defined(_AIX) || defined(__linux__) || defined(sun)
+#elif defined(__VMS) || defined(_AIX) || defined(__linux__) || defined(sun) || defined(__APPLE__)
 
 /*****  Define names for unsupported signals  *****/
 #if defined(__linux__)
 #define SIGEMT SIGUNUSED+1 /* Linux doesn't have this one */
 #define SIGWINDOW SIGUNUSED+2 /* Linux doesn't have this one */
+
+#elif defined(__APPLE__)
+#define SIGCLD SIGCHLD
 
 #else
 #define	SIGWINDOW 41

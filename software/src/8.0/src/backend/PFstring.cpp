@@ -13,7 +13,7 @@
 /*****  System  *****/
 #include "Vk.h"
 
-#if defined(__VMS) || defined(__linux__) || defined(_WIN32)
+#if defined(__VMS) || defined(__linux__) || defined(_WIN32) || defined(__APPLE__)
 #define UsingVkRegularExpressions
 #endif
 

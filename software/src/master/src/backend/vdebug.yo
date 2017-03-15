@@ -1,0 +1,1007 @@
+
+// # line 2 "debug.y"
+
+PrivateVarDef char selector [512], temp_string [512];
+PrivateVarDef IOBJ_IObject *parameters;
+PrivateVarDef IdTableEntry idtab, *idtabp;
+PrivateVarDef LTEntry ltk, *ltp;
+
+double atof ();
+
+
+// # line 14 "debug.y"
+typedef union 	{
+	int ival;
+	char name [48];
+	IOBJ_IObject iobject;
+	} debugSTYPE;
+#ifdef __cplusplus
+// #  include <stdio.h>
+// #  include "yacc.h"
+#endif	/* __cplusplus */ 
+# define ERRORTOKEN 257
+# define NUMBER 258
+# define STRING 259
+# define CHARACTER 260
+# define IDENTIFIER 261
+# define UNARYSELECTOR 262
+# define KEYWORD 263
+# define ASSIGNMENT_OP 264
+#define debugclearin debugchar = -1
+#define debugerrok debugerrflag = 0
+extern int debugchar;
+#ifndef debugMAXDEPTH
+#define debugMAXDEPTH 150
+#endif
+
+/* __debugSCLASS defines the scoping/storage class for global objects
+ * that are NOT renamed by the -p option.  By default these names
+ * are going to be 'static' so that multi-definition errors
+ * will not occur with multiple parsers.
+ * If you want (unsupported) access to internal names you need
+ * to define this to be null so it implies 'extern' scope.
+ * This should not be used in conjunction with -p.
+ */
+#ifndef __debugSCLASS
+# define __debugSCLASS static
+#endif
+debugSTYPE debuglval;
+__debugSCLASS debugSTYPE debugval;
+typedef int debugtabelem;
+# define debugERRCODE 256
+
+// # line 322 "debug.y"
+
+
+/************************** SOURCE FILE HISTORY: ************************/
+/************************************************************************
+  debug.y 1 replace /users/jck/system
+  860318 12:54:52 jck The yacc input for the debugger language
+
+ ************************************************************************/
+/************************************************************************
+  debug.y 2 replace /users/mjc/system
+  860325 16:09:15 mjc Removed requirement for ':' in unary selectors
+
+ ************************************************************************/
+/************************************************************************
+  debug.y 3 replace /users/mjc/system
+  860328 12:52:41 mjc Added 'expression . expression' and empty expression syntax
+
+ ************************************************************************/
+/************************************************************************
+  debug.y 4 replace /users/mjc/system
+  860412 12:33:01 mjc Added string syntax and objects
+
+ ************************************************************************/
+/************************************************************************
+  debug.y 5 replace /users/jck/source
+  860418 00:02:07 jck Expression separator replaced with comma
+Continue prompt removed, YACC bug fixed (ExpressionList type),
+hooks added for editor
+
+ ************************************************************************/
+/************************************************************************
+  debug.y 6 replace /users/jad/system
+  860425 12:09:52 jad added a print stmt for the error: no id table
+
+ ************************************************************************/
+/************************************************************************
+  debug.y 7 replace /users/mjc/system
+  860508 18:15:47 mjc Added 'character' syntax
+
+ ************************************************************************/
+/************************************************************************
+  debug.y 8 replace /users/mjc/maketest
+  860713 17:09:33 mjc Fixed cascading to make it Smalltalk like
+
+ ************************************************************************/
+/************************************************************************
+  debug.y 9 replace /users/mjc/translation
+  870524 09:43:10 mjc Shortened all identifiers to <= 31 characters
+
+ ************************************************************************/
+/************************************************************************
+  debug.y 10 replace /users/m2/backend
+  890927 15:24:36 m2 dummyiobj added
+
+ ************************************************************************/
+__debugSCLASS debugtabelem debugexca[] ={
+-1, 1,
+	0, -1,
+	-2, 0,
+	};
+# define debugNPROD 37
+# define debugLAST 231
+__debugSCLASS debugtabelem debugact[]={
+
+    15,    38,    37,    39,    15,    19,    32,    27,    24,    19,
+    31,    30,    29,    28,    42,    26,    25,    21,    45,     2,
+    20,    11,     5,     4,    14,     6,    23,    22,    13,     8,
+    12,     7,    10,    34,    35,    41,    35,     3,    33,    43,
+    40,    44,     1,     0,     0,     0,     0,     0,     0,     0,
+     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+     0,     0,     0,     0,     0,     0,     0,     0,    31,    30,
+     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+     0,     0,     0,    16,    17,    18,     9,    16,    17,    18,
+    36 };
+__debugSCLASS debugtabelem debugpact[]={
+
+   -35,   -27, -3000,   -35, -3000, -3000,  -255,   -43,   -44,  -257,
+  -249,   -53,   -31,  -260,   -31,  -247, -3000, -3000, -3000,   -35,
+ -3000,   -35, -3000, -3000, -3000, -3000, -3000, -3000, -3000, -3000,
+ -3000, -3000, -3000,  -255, -3000,  -251, -3000, -3000, -3000, -3000,
+  -255, -3000, -3000,   -23, -3000, -3000 };
+__debugSCLASS debugtabelem debugpgo[]={
+
+     0,    42,    19,    37,    23,    25,    32,    21,    31,    30,
+    29,    28,    24,    22,    20 };
+__debugSCLASS debugtabelem debugr1[]={
+
+     0,     1,     1,     1,     1,     2,     2,     3,     3,    13,
+     4,     4,     4,     5,     5,     6,     6,     6,     6,     6,
+     6,     7,     7,     7,     7,     8,     9,     9,    14,    10,
+    10,    10,    11,    11,    11,    12,    12 };
+__debugSCLASS debugtabelem debugr2[]={
+
+     0,     1,     2,     4,     6,     5,     3,     3,     5,     5,
+     3,     3,     3,     3,     3,     3,     5,     2,     2,     2,
+     7,     5,     5,     5,     5,     5,     3,     5,     5,     5,
+     5,     5,     5,     5,     5,     5,     5 };
+__debugSCLASS debugtabelem debugchk[]={
+
+ -3000,    -1,    -2,    -3,    -4,   -13,    -5,    -8,   -10,   261,
+    -6,    -7,    -9,   -11,   -12,    35,   258,   259,   260,    40,
+   -14,    44,    -4,   -13,   263,    59,    59,   264,   262,   261,
+   262,   261,    59,    -5,   -14,    -7,   261,   262,   261,   263,
+    -5,   -14,   261,    -2,    -2,    41 };
+__debugSCLASS debugtabelem debugdef[]={
+
+     1,    -2,     2,     0,     6,     7,    10,    11,    12,    15,
+    13,    14,     0,     0,     0,     0,    17,    18,    19,     0,
+    26,     3,     5,     8,    28,    33,    34,     9,    21,    22,
+    23,    24,    32,    25,    27,    14,    15,    29,    30,    35,
+    31,    36,    16,     0,     4,    20 };
+typedef struct { char *t_name; int t_val; } debugtoktype;
+#ifndef debugDEBUG
+#	define debugDEBUG	0	/* don't allow debugging */
+#endif
+
+#if debugDEBUG
+
+__debugSCLASS debugtoktype debugtoks[] =
+{
+	"ERRORTOKEN",	257,
+	"NUMBER",	258,
+	"STRING",	259,
+	"CHARACTER",	260,
+	"IDENTIFIER",	261,
+	"UNARYSELECTOR",	262,
+	"KEYWORD",	263,
+	"ASSIGNMENT_OP",	264,
+	"-unknown-",	-1	/* ends search */
+};
+
+__debugSCLASS char * debugreds[] =
+{
+	"-no such reduction-",
+	"expressionList : /* empty */",
+	"expressionList : expression",
+	"expressionList : expressionList ','",
+	"expressionList : expressionList ',' expression",
+	"expression : assignmentList valueGenerator",
+	"expression : valueGenerator",
+	"assignmentList : assignment",
+	"assignmentList : assignmentList assignment",
+	"assignment : IDENTIFIER ASSIGNMENT_OP",
+	"valueGenerator : simpleObject",
+	"valueGenerator : keywordExpression",
+	"valueGenerator : cascadedExpression",
+	"simpleObject : primary",
+	"simpleObject : unaryExpression",
+	"primary : IDENTIFIER",
+	"primary : '#' IDENTIFIER",
+	"primary : NUMBER",
+	"primary : STRING",
+	"primary : CHARACTER",
+	"primary : '(' expression ')'",
+	"unaryExpression : primary UNARYSELECTOR",
+	"unaryExpression : primary IDENTIFIER",
+	"unaryExpression : unaryExpression UNARYSELECTOR",
+	"unaryExpression : unaryExpression IDENTIFIER",
+	"keywordExpression : keywordTermList simpleObject",
+	"keywordTermList : keywordTerm",
+	"keywordTermList : keywordTermList keywordTerm",
+	"keywordTerm : simpleObject KEYWORD",
+	"cascadedExpression : cascadedExpressionRoot UNARYSELECTOR",
+	"cascadedExpression : cascadedExpressionRoot IDENTIFIER",
+	"cascadedExpression : cascadedKeywordTermList simpleObject",
+	"cascadedExpressionRoot : unaryExpression ';'",
+	"cascadedExpressionRoot : keywordExpression ';'",
+	"cascadedExpressionRoot : cascadedExpression ';'",
+	"cascadedKeywordTermList : cascadedExpressionRoot KEYWORD",
+	"cascadedKeywordTermList : cascadedKeywordTermList keywordTerm",
+};
+#endif /* debugDEBUG */
+#define debugFLAG  (-3000)
+/* @(#) $Revision: 70.7 $ */    
+
+/*
+** Skeleton parser driver for yacc output
+*/
+
+#if defined(NLS) && !defined(NL_SETN)
+#include <msgbuf.h>
+#endif
+
+#ifndef nl_msg
+#define nl_msg(i,s) (s)
+#endif
+
+/*
+** yacc user known macros and defines
+*/
+#define debugERROR		goto debugerrlab
+
+#ifndef __RUNTIME_debugMAXDEPTH
+#define debugACCEPT	return(0)
+#define debugABORT		return(1)
+#else
+#define debugACCEPT	{free_stacks(); return(0);}
+#define debugABORT		{free_stacks(); return(1);}
+#endif
+
+#define debugBACKUP( newtoken, newvalue )\
+{\
+	if ( debugchar >= 0 || ( debugr2[ debugtmp ] >> 1 ) != 1 )\
+	{\
+		debugerror( (nl_msg(30001,"syntax error - cannot backup")) );\
+		goto debugerrlab;\
+	}\
+	debugchar = newtoken;\
+	debugstate = *debugps;\
+	debuglval = newvalue;\
+	goto debugnewstate;\
+}
+#define debugRECOVERING()	(!!debugerrflag)
+#ifndef debugDEBUG
+#	define debugDEBUG	1	/* make debugging available */
+#endif
+
+/*
+** user known globals
+*/
+int debugdebug;			/* set to 1 to get debugging */
+
+/*
+** driver internal defines
+*/
+/* define for debugFLAG now generated by yacc program. */
+/*#define debugFLAG		(FLAGVAL)*/
+
+/*
+** global variables used by the parser
+*/
+# ifndef __RUNTIME_debugMAXDEPTH
+__debugSCLASS debugSTYPE debugv[ debugMAXDEPTH ];	/* value stack */
+__debugSCLASS int debugs[ debugMAXDEPTH ];		/* state stack */
+# else
+__debugSCLASS debugSTYPE *debugv;			/* pointer to malloc'ed value stack */
+__debugSCLASS int *debugs;			/* pointer to malloc'ed stack stack */
+
+#if defined(__STDC__) || defined (__cplusplus)
+#include <stdlib.h>
+#else
+	extern char *malloc();
+	extern char *realloc();
+	extern void free();
+#endif /* __STDC__ or __cplusplus */
+
+
+static int allocate_stacks(); 
+static void free_stacks();
+# ifndef debugINCREMENT
+# define debugINCREMENT (debugMAXDEPTH/2) + 10
+# endif
+# endif	/* __RUNTIME_debugMAXDEPTH */
+long  debugmaxdepth = debugMAXDEPTH;
+
+__debugSCLASS debugSTYPE *debugpv;			/* top of value stack */
+__debugSCLASS int *debugps;			/* top of state stack */
+
+__debugSCLASS int debugstate;			/* current state */
+__debugSCLASS int debugtmp;			/* extra var (lasts between blocks) */
+
+int debugnerrs;			/* number of errors */
+__debugSCLASS int debugerrflag;			/* error recovery flag */
+int debugchar;			/* current input token number */
+
+
+
+/*
+** debugparse - return 0 if worked, 1 if syntax error not recovered from
+*/
+int
+debugparse()
+{
+	register debugSTYPE *debugpvt;	/* top of value stack for $vars */
+
+	/*
+	** Initialize externals - debugparse may be called more than once
+	*/
+# ifdef __RUNTIME_debugMAXDEPTH
+	if (allocate_stacks()) debugABORT;
+# endif
+	debugpv = debugv;
+	debugpv--;
+	debugps = debugs;
+	debugps--;
+	debugstate = 0;
+	debugtmp = 0;
+	debugnerrs = 0;
+	debugerrflag = 0;
+	debugchar = -1;
+
+	{
+		register debugSTYPE *debug_pv;	/* top of value stack */
+		register int *debug_ps;		/* top of state stack */
+		register int debug_state;		/* current state */
+		register int  debug_n;		/* internal state number info */
+
+		goto debugstack;
+
+		/*
+		** get globals into registers.
+		** branch to here only if debugBACKUP was called.
+		debug_pv = debugpv;
+		debug_ps = debugps;
+		debug_state = debugstate;
+		goto debug_newstate;
+		*/
+
+		/*
+		** get globals into registers.
+		** either we just started, or we just finished a reduction
+		*/
+	debugstack:
+		debug_pv = debugpv;
+		debug_ps = debugps;
+		debug_state = debugstate;
+
+		/*
+		** top of for (;;) loop while no reductions done
+		*/
+	debug_stack:
+		/*
+		** put a state and value onto the stacks
+		*/
+#if debugDEBUG
+		/*
+		** if debugging, look up token value in list of value vs.
+		** name pairs.  0 and negative (-1) are special values.
+		** Note: linear search is used since time is not a real
+		** consideration while debugging.
+		*/
+		if ( debugdebug )
+		{
+			register int debug_i;
+
+			printf( "State %d, token ", debug_state );
+			if ( debugchar == 0 )
+				printf( "end-of-file\n" );
+			else if ( debugchar < 0 )
+				printf( "-none-\n" );
+			else
+			{
+				for ( debug_i = 0; debugtoks[debug_i].t_val >= 0;
+					debug_i++ )
+				{
+					if ( debugtoks[debug_i].t_val == debugchar )
+						break;
+				}
+				printf( "%s\n", debugtoks[debug_i].t_name );
+			}
+		}
+#endif /* debugDEBUG */
+		if ( ++debug_ps >= &debugs[ debugmaxdepth ] )	/* room on stack? */
+		{
+# ifndef __RUNTIME_debugMAXDEPTH
+			debugerror( (nl_msg(30002,"yacc stack overflow")) );
+			debugABORT;
+# else
+			/* save old stack bases to recalculate pointers */
+			debugSTYPE * debugv_old = debugv;
+			int * debugs_old = debugs;
+			debugmaxdepth += debugINCREMENT;
+			debugs = (int *) realloc(debugs, debugmaxdepth * sizeof(int));
+			debugv = (debugSTYPE *) realloc(debugv, debugmaxdepth * sizeof(debugSTYPE));
+			if (debugs==0 || debugv==0) {
+			    debugerror( (nl_msg(30002,"yacc stack overflow")) );
+			    debugABORT;
+			    }
+			/* Reset pointers into stack */
+			debug_ps = (debug_ps - debugs_old) + debugs;
+			debugps = (debugps - debugs_old) + debugs;
+			debug_pv = (debug_pv - debugv_old) + debugv;
+			debugpv = (debugpv - debugv_old) + debugv;
+# endif
+
+		}
+		*debug_ps = debug_state;
+		*++debug_pv = debugval;
+
+		/*
+		** we have a new state - find out what to do
+		*/
+	debug_newstate:
+		if ( ( debug_n = debugpact[ debug_state ] ) <= debugFLAG )
+			goto debugdefault;		/* simple state */
+#if debugDEBUG
+		/*
+		** if debugging, need to mark whether new token grabbed
+		*/
+		debugtmp = debugchar < 0;
+#endif
+		if ( ( debugchar < 0 ) && ( ( debugchar = debuglex() ) < 0 ) )
+			debugchar = 0;		/* reached EOF */
+#if debugDEBUG
+		if ( debugdebug && debugtmp )
+		{
+			register int debug_i;
+
+			printf( "Received token " );
+			if ( debugchar == 0 )
+				printf( "end-of-file\n" );
+			else if ( debugchar < 0 )
+				printf( "-none-\n" );
+			else
+			{
+				for ( debug_i = 0; debugtoks[debug_i].t_val >= 0;
+					debug_i++ )
+				{
+					if ( debugtoks[debug_i].t_val == debugchar )
+						break;
+				}
+				printf( "%s\n", debugtoks[debug_i].t_name );
+			}
+		}
+#endif /* debugDEBUG */
+		if ( ( ( debug_n += debugchar ) < 0 ) || ( debug_n >= debugLAST ) )
+			goto debugdefault;
+		if ( debugchk[ debug_n = debugact[ debug_n ] ] == debugchar )	/*valid shift*/
+		{
+			debugchar = -1;
+			debugval = debuglval;
+			debug_state = debug_n;
+			if ( debugerrflag > 0 )
+				debugerrflag--;
+			goto debug_stack;
+		}
+
+	debugdefault:
+		if ( ( debug_n = debugdef[ debug_state ] ) == -2 )
+		{
+#if debugDEBUG
+			debugtmp = debugchar < 0;
+#endif
+			if ( ( debugchar < 0 ) && ( ( debugchar = debuglex() ) < 0 ) )
+				debugchar = 0;		/* reached EOF */
+#if debugDEBUG
+			if ( debugdebug && debugtmp )
+			{
+				register int debug_i;
+
+				printf( "Received token " );
+				if ( debugchar == 0 )
+					printf( "end-of-file\n" );
+				else if ( debugchar < 0 )
+					printf( "-none-\n" );
+				else
+				{
+					for ( debug_i = 0;
+						debugtoks[debug_i].t_val >= 0;
+						debug_i++ )
+					{
+						if ( debugtoks[debug_i].t_val
+							== debugchar )
+						{
+							break;
+						}
+					}
+					printf( "%s\n", debugtoks[debug_i].t_name );
+				}
+			}
+#endif /* debugDEBUG */
+			/*
+			** look through exception table
+			*/
+			{
+				register int *debugxi = debugexca;
+
+				while ( ( *debugxi != -1 ) ||
+					( debugxi[1] != debug_state ) )
+				{
+					debugxi += 2;
+				}
+				while ( ( *(debugxi += 2) >= 0 ) &&
+					( *debugxi != debugchar ) )
+					;
+				if ( ( debug_n = debugxi[1] ) < 0 )
+					debugACCEPT;
+			}
+		}
+
+		/*
+		** check for syntax error
+		*/
+		if ( debug_n == 0 )	/* have an error */
+		{
+			/* no worry about speed here! */
+			switch ( debugerrflag )
+			{
+			case 0:		/* new error */
+				debugerror( (nl_msg(30003,"syntax error")) );
+				debugnerrs++;
+				goto skip_init;
+				/*
+				** get globals into registers.
+				** we have a user generated syntax type error
+				debug_pv = debugpv;
+				debug_ps = debugps;
+				debug_state = debugstate;
+				debugnerrs++;
+				*/
+			skip_init:
+			case 1:
+			case 2:		/* incompletely recovered error */
+					/* try again... */
+				debugerrflag = 3;
+				/*
+				** find state where "error" is a legal
+				** shift action
+				*/
+				while ( debug_ps >= debugs )
+				{
+					debug_n = debugpact[ *debug_ps ] + debugERRCODE;
+					if ( debug_n >= 0 && debug_n < debugLAST &&
+						debugchk[debugact[debug_n]] == debugERRCODE)					{
+						/*
+						** simulate shift of "error"
+						*/
+						debug_state = debugact[ debug_n ];
+						goto debug_stack;
+					}
+					/*
+					** current state has no shift on
+					** "error", pop stack
+					*/
+#if debugDEBUG
+#	define _POP_ "Error recovery pops state %d, uncovers state %d\n"
+					if ( debugdebug )
+						printf( _POP_, *debug_ps,
+							debug_ps[-1] );
+#	undef _POP_
+#endif
+					debug_ps--;
+					debug_pv--;
+				}
+				/*
+				** there is no state on stack with "error" as
+				** a valid shift.  give up.
+				*/
+				debugABORT;
+			case 3:		/* no shift yet; eat a token */
+#if debugDEBUG
+				/*
+				** if debugging, look up token in list of
+				** pairs.  0 and negative shouldn't occur,
+				** but since timing doesn't matter when
+				** debugging, it doesn't hurt to leave the
+				** tests here.
+				*/
+				if ( debugdebug )
+				{
+					register int debug_i;
+
+					printf( "Error recovery discards " );
+					if ( debugchar == 0 )
+						printf( "token end-of-file\n" );
+					else if ( debugchar < 0 )
+						printf( "token -none-\n" );
+					else
+					{
+						for ( debug_i = 0;
+							debugtoks[debug_i].t_val >= 0;
+							debug_i++ )
+						{
+							if ( debugtoks[debug_i].t_val
+								== debugchar )
+							{
+								break;
+							}
+						}
+						printf( "token %s\n",
+							debugtoks[debug_i].t_name );
+					}
+				}
+#endif /* debugDEBUG */
+				if ( debugchar == 0 )	/* reached EOF. quit */
+					debugABORT;
+				debugchar = -1;
+				goto debug_newstate;
+			}
+		}/* end if ( debug_n == 0 ) */
+		/*
+		** reduction by production debug_n
+		** put stack tops, etc. so things right after switch
+		*/
+#if debugDEBUG
+		/*
+		** if debugging, print the string that is the user's
+		** specification of the reduction which is just about
+		** to be done.
+		*/
+		if ( debugdebug )
+			printf( "Reduce by (%d) \"%s\"\n",
+				debug_n, debugreds[ debug_n ] );
+#endif
+		debugtmp = debug_n;			/* value to switch over */
+		debugpvt = debug_pv;			/* $vars top of value stack */
+		/*
+		** Look in goto table for next state
+		** Sorry about using debug_state here as temporary
+		** register variable, but why not, if it works...
+		** If debugr2[ debug_n ] doesn't have the low order bit
+		** set, then there is no action to be done for
+		** this reduction.  So, no saving & unsaving of
+		** registers done.  The only difference between the
+		** code just after the if and the body of the if is
+		** the goto debug_stack in the body.  This way the test
+		** can be made before the choice of what to do is needed.
+		*/
+		{
+			/* length of production doubled with extra bit */
+			register int debug_len = debugr2[ debug_n ];
+
+			if ( !( debug_len & 01 ) )
+			{
+				debug_len >>= 1;
+				debugval = ( debug_pv -= debug_len )[1];	/* $$ = $1 */
+				debug_state = debugpgo[ debug_n = debugr1[ debug_n ] ] +
+					*( debug_ps -= debug_len ) + 1;
+				if ( debug_state >= debugLAST ||
+					debugchk[ debug_state =
+					debugact[ debug_state ] ] != -debug_n )
+				{
+					debug_state = debugact[ debugpgo[ debug_n ] ];
+				}
+				goto debug_stack;
+			}
+			debug_len >>= 1;
+			debugval = ( debug_pv -= debug_len )[1];	/* $$ = $1 */
+			debug_state = debugpgo[ debug_n = debugr1[ debug_n ] ] +
+				*( debug_ps -= debug_len ) + 1;
+			if ( debug_state >= debugLAST ||
+				debugchk[ debug_state = debugact[ debug_state ] ] != -debug_n )
+			{
+				debug_state = debugact[ debugpgo[ debug_n ] ];
+			}
+		}
+					/* save until reenter driver code */
+		debugstate = debug_state;
+		debugps = debug_ps;
+		debugpv = debug_pv;
+	}
+	/*
+	** code supplied by user is placed in this switch
+	*/
+	switch( debugtmp )
+	{
+		
+case 1:
+// # line 45 "debug.y"
+{ debugval.iobject = IOBJ_TheNilIObject;} break;
+case 5:
+// # line 52 "debug.y"
+{
+				while (debugpvt[-1].ival--)
+				{
+				    
+				    strcpy (idtab.name, PopString ());
+				    idtabp = (IdTableEntry *)bsearch (
+					(char *)&idtab,
+					(char *)IdTable, 
+					IdsInUse, 
+					sizeof (IdTableEntry), 
+					(VkComparator)CompareIds
+				    );
+				    idtabp->value = debugpvt[-0].iobject;
+				    
+				}
+				
+				debugval.iobject = debugpvt[-0].iobject; 
+			        /*** printf ("expression\n"); ***/    
+			    } break;
+case 6:
+// # line 74 "debug.y"
+{	
+				debugval.iobject = debugpvt[-0].iobject;
+				/*** printf ("expression\n"); ***/    
+			    } break;
+case 7:
+// # line 81 "debug.y"
+{
+				debugval.ival = 1;
+			        /*** printf ("assignmentList : assignment\n"); ***/
+			    } break;
+case 8:
+// # line 87 "debug.y"
+{
+				debugval.ival = debugpvt[-1].ival + 1;
+			        /*** printf ("assignmentList :assignmentList assignment\n"); ***/
+			    } break;
+case 9:
+// # line 94 "debug.y"
+{
+				    PushString (debugpvt[-1].name);
+				    strcpy (idtab.name, debugpvt[-1].name);
+				    idtabp = (IdTableEntry *)bsearch (
+					(char *)&idtab,
+					(char *)IdTable, 
+					IdsInUse, 
+					sizeof (IdTableEntry), 
+					(VkComparator)CompareIds
+				    );
+				if (IsNil (idtabp))
+				{
+				    AddToIdTable (debugpvt[-1].name, IOBJ_TheNilIObject );
+				}
+				
+			        /*** printf ("assignment\n"); ***/
+			    } break;
+case 10:
+// # line 115 "debug.y"
+{
+				debugval.iobject = debugpvt[-0].iobject;
+			        /*** printf ("valueGenerator\n"); ***/
+			    } break;
+case 11:
+// # line 120 "debug.y"
+{
+				debugval.iobject = debugpvt[-0].iobject;
+			        /*** printf ("valueGenerator\n"); ***/
+			    } break;
+case 12:
+// # line 125 "debug.y"
+{
+				debugval.iobject = debugpvt[-0].iobject;
+			        /*** printf ("valueGenerator\n"); ***/
+			    } break;
+case 13:
+// # line 132 "debug.y"
+{
+				debugval.iobject = debugpvt[-0].iobject;
+			        /*** printf ("simpleObject\n"); ***/
+			    } break;
+case 14:
+// # line 137 "debug.y"
+{
+				debugval.iobject = debugpvt[-0].iobject;
+			        /*** printf ("simpleObject\n"); ***/
+			    } break;
+case 15:
+// # line 144 "debug.y"
+{
+				    strcpy (idtab.name, debugpvt[-0].name);
+				    idtabp = (IdTableEntry *)bsearch (
+					(char *)&idtab,
+					(char *)IdTable, 
+					IdsInUse, 
+					sizeof (IdTableEntry), 
+					(VkComparator)CompareIds
+				    );
+				if (IsNil (idtabp)){
+				    IO_fprintf
+				        (stderr,
+					 "** Undefined Identifier: %s\n",
+					 idtab.name);
+				    return 1;
+				    }
+				else debugval.iobject = idtabp->value;
+				
+ 
+			        /*** printf ("primary\n"); ***/
+			    } break;
+case 16:
+// # line 167 "debug.y"
+{
+				    ltk.name = debugpvt[-0].name;
+				    ltp = (LTEntry *)bsearch (
+					(char *)&ltk,
+					(char *)LT, 
+					LiteralsInUse, 
+					sizeof (LTEntry),
+					(VkComparator)CompareLiterals
+				    );
+				if (IsNil (ltp))
+				{
+				    IO_fprintf
+					(stderr,
+					 "** Unknown Literal: #%s.\n",
+					 ltk.name);
+				    return 1;
+				}
+				else debugval.iobject = ltp->value;
+			        /*** printf ("primary\n"); ***/
+			    } break;
+case 20:
+// # line 192 "debug.y"
+{
+				debugval.iobject = debugpvt[-1].iobject;
+			        /*** printf ("primary\n"); ***/
+			    } break;
+case 21:
+// # line 199 "debug.y"
+{
+				debugval.iobject = IOBJ_SendMessage (debugpvt[-1].iobject,  debugpvt[-0].name,  NilOf (Ref_IOBJ_IObject));
+			        /*** printf ("unaryExpression\n"); ***/
+			    } break;
+case 22:
+// # line 204 "debug.y"
+{
+				debugval.iobject = IOBJ_SendMessage (debugpvt[-1].iobject,  debugpvt[-0].name,  NilOf (Ref_IOBJ_IObject));
+			        /*** printf ("unaryExpression\n"); ***/
+			    } break;
+case 23:
+// # line 209 "debug.y"
+{
+				debugval.iobject = IOBJ_SendMessage (debugpvt[-1].iobject,  debugpvt[-0].name,  NilOf (Ref_IOBJ_IObject));
+			        /*** printf ("unaryExpression\n"); ***/
+			    } break;
+case 24:
+// # line 214 "debug.y"
+{
+				debugval.iobject = IOBJ_SendMessage (debugpvt[-1].iobject,  debugpvt[-0].name,  NilOf (Ref_IOBJ_IObject));
+			        /*** printf ("unaryExpression\n"); ***/
+			    } break;
+case 25:
+// # line 221 "debug.y"
+{
+				Push (debugpvt[-0].iobject);
+				selector [0] = '\0';
+				parameters = PopN (debugpvt[-1].ival);
+				while (debugpvt[-1].ival--)
+				{
+				    strcpy (temp_string, PopString ());
+				    strcat (temp_string, selector);
+				    strcpy (selector, temp_string);
+				}
+				    
+				    
+				    
+				debugval.iobject = IOBJ_SendMessage (Pop (), selector, parameters);
+			        /*** printf ("keywordExpression\n"); ***/
+			    } break;
+case 26:
+// # line 240 "debug.y"
+{
+				debugval.ival = 1;
+			        /*** printf ("keywordTermList :keywordTerm\n"); ***/
+			    } break;
+case 27:
+// # line 245 "debug.y"
+{
+				debugval.ival = debugpvt[-1].ival + 1;
+			        /*** printf ("keywordTermList :keywordTermlist keywordTerm\n"); ***/
+			    } break;
+case 28:
+// # line 252 "debug.y"
+{
+				Push (debugpvt[-1].iobject);
+				PushString (debugpvt[-0].name);
+			        /*** printf ("keywordTerm\n"); ***/
+			    } break;
+case 29:
+// # line 260 "debug.y"
+{
+				IOBJ_SendMessage (debugpvt[-1].iobject,  debugpvt[-0].name,  NilOf (Ref_IOBJ_IObject));
+				debugval.iobject = debugpvt[-1].iobject;
+			        /*** printf ("cascadedExpression\n"); ***/
+			    } break;
+case 30:
+// # line 266 "debug.y"
+{
+				IOBJ_SendMessage (debugpvt[-1].iobject,  debugpvt[-0].name,  NilOf (Ref_IOBJ_IObject));
+				debugval.iobject = debugpvt[-1].iobject;
+			        /*** printf ("cascadedExpression\n"); ***/
+			    } break;
+case 31:
+// # line 272 "debug.y"
+{
+				Push (debugpvt[-0].iobject);
+				selector [0] = '\0';
+				parameters = PopN (debugpvt[-1].ival);
+				while (debugpvt[-1].ival--)
+				{
+				    strcpy (temp_string, PopString ());
+				    strcat (temp_string, selector);
+				    strcpy (selector, temp_string);
+				}
+				    
+				IOBJ_SendMessage
+				    (debugval.iobject = Pop (), selector, parameters);
+			        /*** printf ("cascadedExpression\n"); ***/
+			    } break;
+case 32:
+// # line 290 "debug.y"
+{
+				debugval.iobject = debugpvt[-1].iobject;
+			        /*** printf ("cascadedExpressionRoot\n"); ***/
+			    } break;
+case 33:
+// # line 295 "debug.y"
+{
+				debugval.iobject = debugpvt[-1].iobject;
+			        /*** printf ("cascadedExpressionRoot\n"); ***/
+			    } break;
+case 34:
+// # line 300 "debug.y"
+{
+				debugval.iobject = debugpvt[-1].iobject;
+			        /*** printf ("cascadedExpressionRoot\n"); ***/
+			    } break;
+case 35:
+// # line 308 "debug.y"
+{
+				Push (debugpvt[-1].iobject);
+				PushString (debugpvt[-0].name);
+				debugval.ival = 1;
+			        /*** printf ("cascadedKeywordTermList KEYWORD\n"); ***/
+			    } break;
+case 36:
+// # line 315 "debug.y"
+{
+    				debugval.ival = debugpvt[-1].ival + 1;
+			        /*** printf ("cascadedKeywordTermList keywordTerm\n"); ***/
+			    } break;
+	}
+	goto debugstack;		/* reset registers in driver code */
+}
+
+# ifdef __RUNTIME_debugMAXDEPTH
+
+static int allocate_stacks() {
+	/* allocate the debugs and debugv stacks */
+	debugs = (int *) malloc(debugmaxdepth * sizeof(int));
+	debugv = (debugSTYPE *) malloc(debugmaxdepth * sizeof(debugSTYPE));
+
+	if (debugs==0 || debugv==0) {
+	   debugerror( (nl_msg(30004,"unable to allocate space for yacc stacks")) );
+	   return(1);
+	   }
+	else return(0);
+
+}
+
+
+static void free_stacks() {
+	if (debugs!=0) free((char *) debugs);
+	if (debugv!=0) free((char *) debugv);
+}
+
+# endif  /* defined(__RUNTIME_debugMAXDEPTH) */
+

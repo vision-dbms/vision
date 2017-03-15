@@ -22,6 +22,7 @@ end
 
 ####  Determine the platform, ...
 set os = `uname -s`
+set op = `uname -p`
 set ov = `uname -r`
 
 set vp = "_"
@@ -31,6 +32,9 @@ case SunOS:
     breaksw
 case Linux:
     set vp = "Linux"
+    breaksw
+case Darwin:
+    set vp = "Darwin"
     breaksw
 default:
     echo ">>> Unsupported Platform: $os"
@@ -85,15 +89,27 @@ foreach dir ($dirs)
         echo "make.defs.clean" >> visionBuilder.scrubFiles
 
         # Link in platform-dependent make.defs files.
-	if (-d M_${os}_${ov}) then
+	if (-d M_${os}_${op}_${ov}) then
+            set platformdir = "M_${os}_${op}_${ov}"
+	else if (-d M_${os}_${op}) then
+            set platformdir = "M_${os}_${op}"
+	else if (-d M_${os}_${ov}) then
             set platformdir = "M_${os}_${ov}"
 	else if (-d M_${os}) then
             set platformdir = "M_${os}"
 	endif
         if ( $?platformdir ) then
             foreach i ($platformdir/*)
-                ln -s -f $i
-                echo `basename $i` >> visionBuilder.scrubFiles
+		set resultFile = `basename $i`
+		#  If this is a 'generator' file, run it to create a make.defs file, ...
+		if ( "_$i:e" == "_gen" ) then
+		    set resultFile = "$resultFile:r"
+		    ./$i > $resultFile
+		#  ... otherwise, simply link to it:
+		else
+		    ln -s -f "$i"
+		endif
+		echo "$resultFile" >> visionBuilder.scrubFiles
             end
         endif
         
@@ -112,7 +128,7 @@ foreach dir ($dirs)
 	    if (-e $sourcedir/make.linkallsrc) then
                 # TODO: Reduce the following find as much as possible, hopefully to nonexistence.
 		set sFiles = (`find $sourcedir -type f -name "*.[ly]" -o -name "*.[ly]o" -o -name "make.defs.*"`)
-		if ("$os" == "SunOS") then
+		if ("$os" == "SunOS" && "$op" != "i386" ) then
 		    set sFiles = ($sFiles `find $sourcedir -type f -name "sun.*.il"`)
 		endif
 	    endif

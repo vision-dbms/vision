@@ -197,7 +197,7 @@ size_t IOMFile::GetByteCount (IOMHandle const* pHandle) {
     if (IsntNil (m_mappingBase))
 	return m_mappingSize - seekOffset;
 		  
-#if defined(__VMS) || defined(_WIN32) || defined(sun) || defined (__linux__)
+#if defined(__VMS) || defined(_WIN32) || defined(sun) || defined (__linux__) || defined(__APPLE__)
     struct stat stats;
     return fstat (m_filefd, &stats) >= 0
 	&& (size_t)stats.st_size > seekOffset

@@ -926,7 +926,7 @@ Vca::VTypeInfoHolderForInterface<ifClass > ifClass::g_iTypeInfoHolder
  ***************************************************************************/
 
 /** We don't want extern template instantiations on VMS or Solaris as they're not supported there. */
-#if defined(__VMS) || defined(sun)
+#if defined(__VMS) || defined(sun) || defined(__APPLE__)
 
 /**
  * Internal use only. Do not invoke.

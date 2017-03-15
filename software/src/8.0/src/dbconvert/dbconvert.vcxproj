@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -23,10 +23,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -34,10 +36,12 @@
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+    <Import Project="..\V\Paths.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+    <Import Project="..\V\Paths.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
@@ -134,24 +138,24 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\dbconvert.cpp">
+    <ClCompile Include="..\backend\dbconvert.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
     </ClCompile>
-    <ClCompile Include="..\VkEvent.cpp" />
-    <ClCompile Include="..\VkMessage.cpp" />
-    <ClCompile Include="..\VkStream.cpp" />
-    <ClCompile Include="..\VkStreamAgent.cpp" />
+    <ClCompile Include="..\kernel\VkEvent.cpp" />
+    <ClCompile Include="..\kernel\VkMessage.cpp" />
+    <ClCompile Include="..\kernel\VkStream.cpp" />
+    <ClCompile Include="..\kernel\VkStreamAgent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="dbconvert.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\VkEvent.h" />
-    <ClInclude Include="..\VkMessage.h" />
-    <ClInclude Include="..\VkStream.h" />
-    <ClInclude Include="..\VkStreamAgent.h" />
+    <ClInclude Include="..\kernel\VkEvent.h" />
+    <ClInclude Include="..\kernel\VkMessage.h" />
+    <ClInclude Include="..\kernel\VkStream.h" />
+    <ClInclude Include="..\kernel\VkStreamAgent.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Vca\Vca.vcxproj">

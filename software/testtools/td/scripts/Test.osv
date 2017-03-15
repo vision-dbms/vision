@@ -30,12 +30,17 @@ if ($#argv > 1) then
     setenv NDFPathName $argv[2]
 endif
     
-
 set ReleaseDirectory	= $cwd
 set ReleaseExecutable	= $DBbatchvision
 set ReleaseOutput	= $ReleaseDirectory/component.$TDVersion
 set LogFile             = $ReleaseDirectory/LOG.$TDVersion
 
+set Release = "`strings $ReleaseExecutable | grep AUDITINFO:Source`"
+if ( "_$Release" != "_") then
+    set Release = "`echo $Release | sed 's/AUDITINFO:Source:git://'`"
+endif
+
+set Tag = "$HostName $Release $TestDate"
 
 cat /dev/null > $LogFile
 echo	 "********************************************************">> $LogFile
@@ -43,6 +48,7 @@ echo	 "*  Test Suite Execution"			>> $LogFile
 echo	 "*    Test Date . . . . . . . $TestDate"	>> $LogFile 
 echo	 "*    Machine . . . . . . . . $HostId"		>> $LogFile 
 echo	 "*    OS Version. . . . . . . $OSVersion"	>> $LogFile 
+echo     "*    Release Name. . . . . . $Release"        >> LOG.$TDVersion
 echo	 "*    Test Suite Version. . . $TDVersion"	>> $LogFile
 echo     "*    Components Directory. . $TDComponentsUpperDir" >> $LogFile 
 
@@ -63,6 +69,8 @@ cd $TDComponents
 limit datasize 2000000
 
 $ReleaseExecutable -d >>& $LogFile << @@@EOD@@@
+!id <- "$Tag";
+?g
 ^tmp define: 'componentOutput' toBe: "$ReleaseOutput";
 ?g
 ?? component.set
