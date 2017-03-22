@@ -118,7 +118,7 @@ protected:
 	    m_pDCTE->setToContainerAddress (m_pContainer, m_bReadWrite);
 	    m_pDCTE->discard (m_pASD, containerIndexNC ());
 	    m_pDCTE.clear ();
-    }
+	}
 	return m_pDCTE.isNil ();
     }
 
@@ -161,7 +161,7 @@ public:
 	if (m_pContainerIdentity.isNil ()) {
 	    m_pASD->CreateIdentity (m_iContainerIdentity, this);
 	    m_pContainerIdentity.setTo (&m_iContainerIdentity);
-    }
+	}
 	return m_pContainerIdentity;
     }
 
@@ -781,40 +781,48 @@ public:
     void setAttentionMaskTo (unsigned int iNewAttentionMask) const {
 	if (m_pDCTE)
 	    m_pDCTE->setAttentionMaskTo (iNewAttentionMask);
-	}
+    }
 
 // Garbage collection marking
 public:
     typedef void (ThisClass::*visitFunction)(void);
-    virtual void traverseReferences(visitFunction fp) { }
-
+private:
+    virtual void traverseReferences(visitFunction fp) {
+    }
     void startMark() {
 	if (!m_bVisited) {
 	    m_bVisited = true;
 	    traverseReferences(&ThisClass::mark);
-    }
 	}
-    void mark() {
-	if (m_bVisited == false && m_iHandleRefCount > 0) { //bad
-	    //fprintf(stderr, "non-visited node has aux ref count\n");
     }
+public:
+    void mark() {
+#if defined(DEBUG_GC_CYCLE_DETECTION)
+	if (!m_bVisited && m_iHandleRefCount > 0) { //bad
+	    fprintf(stderr, "non-visited node has aux ref count\n");
+	}
+#endif
 
 	m_iHandleRefCount++;
 
+#if defined(DEBUG_GC_CYCLE_DETECTION)
 	if (m_iHandleRefCount == referenceCount()) { // good!
-	    //fprintf(stderr, "found all references for a handle!\n");
-	}
-	if (m_iHandleRefCount > referenceCount()) { // bad
-	    //fprintf(stderr, "reference count exceeded for a handle\n");
+	    fprintf(stderr, "found all references for a handle!\n");
+	} else if (m_iHandleRefCount > referenceCount()) { // bad
+	    fprintf(stderr, "reference count exceeded for a handle\n");
         }
+#endif
 
 
 	startMark();
-	}
-    void unmark() {
-	if (m_bVisited == false && m_iHandleRefCount > 0) { // bad
-	    //fprintf(stderr, "non-visited node has aux ref count\n");
     }
+
+    void unmark() {
+#if defined(DEBUG_GC_CYCLE_DETECTION)
+	if (!m_bVisited && m_iHandleRefCount > 0) { // bad
+	    fprintf(stderr, "non-visited node has aux ref count\n");
+	}
+#endif
 	if (m_bVisited) {
 	    m_bVisited = false;
 	    m_iHandleRefCount = 0;

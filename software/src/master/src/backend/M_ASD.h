@@ -759,13 +759,18 @@ public:
 public:
     class GCVisitBase {
     public:
-	void Mark (M_ASD* pASD, M_POP const *pPOP) { this->Mark_(pASD, pPOP); }
-	void Mark (M_ASD* pASD, M_POP const *pReferences, unsigned int cReferences)
-	  { this->Mark_(pASD, pReferences, cReferences); }
+	void Mark (M_ASD* pASD, M_POP const *pPOP) {
+	    Mark_(pASD, pPOP);
+	}
+	void Mark (M_ASD* pASD, M_POP const *pReferences, unsigned int cReferences) {
+	    Mark_(pASD, pReferences, cReferences);
+	}
 
     private: 
-	virtual void Mark_ (M_ASD* pASD, M_POP const *pPOP) { }
-	virtual void Mark_ (M_ASD* pASD, M_POP const *pReferences, unsigned int cReferences) { }
+	virtual void Mark_ (M_ASD* pASD, M_POP const *pPOP) {
+	}
+	virtual void Mark_ (M_ASD* pASD, M_POP const *pReferences, unsigned int cReferences) {
+	}
 
     };
     class GCVisitMark : public GCVisitBase {
