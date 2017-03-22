@@ -527,7 +527,7 @@ PublicFnDef char *BUF_getLine(LINEBUFFER *buffer, int len) {
     /****        rounded to the nearest word                                    ****/
 
     need = ((((2 * sizeof(char *)) + sizeof(int) + ((len + 1) * sizeof(char)))
-		/ sizeof(int)) + 1) * sizeof(int);
+		/ sizeof(char *)) + 1) * sizeof(char *);
 
     if (need <= BUF_whiteSpace(buffer))     /* take line from end,  */
     { 					    /* adjust white ptr.    */
