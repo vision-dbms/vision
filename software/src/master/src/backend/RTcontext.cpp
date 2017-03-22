@@ -213,11 +213,12 @@ bool rtCONTEXT_Handle::PersistReferences () {
  ********************************/
 
 void rtCONTEXT_Handle::traverseReferences(visitFunction fp) {
-    if (!(m_pParentContext.isEmpty())) (m_pParentContext.referent()->*fp)();
+    if (m_pParentContext.isntEmpty())
+	(m_pParentContext.referent()->*fp)();
 
-    if (!(m_iMy.isEmpty()           )) m_iMy.traverseHandleReferences(fp);
-    if (!(m_iSelf.isEmpty()         )) m_iSelf.traverseHandleReferences(fp);
-    if (!(m_iCurrent.isEmpty()      )) m_iCurrent.traverseHandleReferences(fp);
+    m_iMy.traverseHandleReferences(fp);
+    m_iSelf.traverseHandleReferences(fp);
+    m_iCurrent.traverseHandleReferences(fp);
     // traverse m_iParentPointer in the future?
 
 }

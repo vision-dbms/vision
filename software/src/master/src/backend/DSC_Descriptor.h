@@ -744,8 +744,10 @@ public:
     }
 
 public:
-    void traverseHandleReferences(void (VContainerHandle::*visitFunction)(void)) { 
-	m_iStore.traverseHandleReferences(visitFunction);
+    void traverseHandleReferences(void (VContainerHandle::*visitFunction)(void)) {
+	if (isntEmpty ()) {
+	    m_iStore.traverseHandleReferences(visitFunction);
+	}
     }
 //  State
 private:
