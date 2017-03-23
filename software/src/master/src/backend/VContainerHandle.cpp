@@ -68,6 +68,56 @@ bool VContainerHandle::CallProcedure (VArgList const &rArgList) {
 bool VContainerHandle::DoNothing (VArgList const&) {
     return true;
 }
+
+
+/***********************************
+ ***********************************
+ *****  Marking and Traversal  *****
+ ***********************************
+ ***********************************/
+
+void VContainerHandle::traverseReferences (visitFunction fp) {
+}
+
+void VContainerHandle::startMark() {
+    if (!m_bVisited) {
+	m_bVisited = true;
+	traverseReferences(&ThisClass::mark);
+    }
+}
+
+void VContainerHandle::mark() {
+#if defined(DEBUG_GC_CYCLE_DETECTION)
+    if (!m_bVisited && m_iHandleRefCount > 0) { //bad
+	fprintf(stderr, "non-visited node has aux ref count\n");
+    }
+#endif
+
+    m_iHandleRefCount++;
+
+#if defined(DEBUG_GC_CYCLE_DETECTION)
+    if (m_iHandleRefCount == referenceCount()) { // good!
+	fprintf(stderr, "found all references for a handle!\n");
+    } else if (m_iHandleRefCount > referenceCount()) { // bad
+	fprintf(stderr, "reference count exceeded for a handle\n");
+    }
+#endif
+
+    startMark();
+}
+
+void VContainerHandle::unmark() {
+#if defined(DEBUG_GC_CYCLE_DETECTION)
+    if (!m_bVisited && m_iHandleRefCount > 0) { // bad
+	fprintf(stderr, "non-visited node has aux ref count\n");
+    }
+#endif
+    if (m_bVisited) {
+	m_bVisited = false;
+	m_iHandleRefCount = 0;
+    }
+}
+
 
 /*****************************
  *****************************

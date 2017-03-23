@@ -785,51 +785,18 @@ public:
 
 // Garbage collection marking
 public:
-    typedef void (ThisClass::*visitFunction)(void);
+    typedef void (ThisClass::*visitFunction)();
 private:
-    virtual void traverseReferences(visitFunction fp) {
-    }
-    void startMark() {
-	if (!m_bVisited) {
-	    m_bVisited = true;
-	    traverseReferences(&ThisClass::mark);
-	}
-    }
+    virtual void traverseReferences(visitFunction fp);
+    void startMark();
+
 public:
-    void mark() {
-#if defined(DEBUG_GC_CYCLE_DETECTION)
-	if (!m_bVisited && m_iHandleRefCount > 0) { //bad
-	    fprintf(stderr, "non-visited node has aux ref count\n");
-	}
-#endif
+    void mark();
+    void unmark();
 
-	m_iHandleRefCount++;
-
-#if defined(DEBUG_GC_CYCLE_DETECTION)
-	if (m_iHandleRefCount == referenceCount()) { // good!
-	    fprintf(stderr, "found all references for a handle!\n");
-	} else if (m_iHandleRefCount > referenceCount()) { // bad
-	    fprintf(stderr, "reference count exceeded for a handle\n");
-        }
-#endif
-
-
-	startMark();
+    unsigned int cdReferenceCount() const {
+	return m_iHandleRefCount;
     }
-
-    void unmark() {
-#if defined(DEBUG_GC_CYCLE_DETECTION)
-	if (!m_bVisited && m_iHandleRefCount > 0) { // bad
-	    fprintf(stderr, "non-visited node has aux ref count\n");
-	}
-#endif
-	if (m_bVisited) {
-	    m_bVisited = false;
-	    m_iHandleRefCount = 0;
-	}
-    }
-
-    unsigned int cdReferenceCount() { return m_iHandleRefCount; }
 
 //  Reference Forwarding
 protected:
@@ -922,8 +889,8 @@ private:
     M_RTD *const		m_pRTD;  // ... must follow container address.
     bool			m_bReadWrite;
     bool			m_bPrecious;
-    unsigned int                m_iHandleRefCount;
     bool			m_bVisited;
+    unsigned int                m_iHandleRefCount;
 };
 
 
