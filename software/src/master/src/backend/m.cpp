@@ -467,16 +467,7 @@ public:
 public:
     void ForwardToSpace (M_ASD* pTargetSpace);
 
-    M_POP const *FollowForwardings () {
-	M_POP const *pPOP = 0;
-	while (holdsAForwardingPOP ()) {
-	    pPOP = &addressAsPOP ();
-	    m_pASD = m_pASD->AccessASD (pPOP);
-	    m_xContainer = M_POP_ContainerIndex (pPOP);
-	    m_pDCTE = m_pASD->cte (m_xContainer);
-	}
-	return pPOP;
-    }
+    M_POP const *FollowForwardings ();
 
 //  Positioning
 public:
@@ -634,6 +625,17 @@ public:
     unsigned int	m_xContainer;
     M_DCTE*		m_pDCTE;
 };
+
+M_POP const *M_CTE::FollowForwardings () {
+  M_POP const *pPOP = 0;
+  while (holdsAForwardingPOP ()) {
+    pPOP = &addressAsPOP ();
+    m_pASD = m_pASD->AccessASD (pPOP);
+    m_xContainer = M_POP_ContainerIndex (pPOP);
+    m_pDCTE = m_pASD->cte (m_xContainer);
+  }
+  return pPOP;
+}
 
 
 /*****************************
@@ -3728,21 +3730,37 @@ bool M_ASD::InitializeSpaceForTransientGC (VArgList const &rArgList) {
 		    GCQueueInsert (cte.containerIndex ());
 		    cte.gcVisited(true); 
 		    cSelfReferences++;
-		}		    
-		else {
-		    if (cte.isNew()) {
-			cte.setReferenceCountToZero ();
-			cte.gcVisited(false);
-		    }
-
-		    if (pHandle->hasAReadWriteContainer ()) {
-			if (cte.isntNew ()) {
-			    GCQueueInsert (cte.containerIndex ());
-			    cte.gcVisited(true); 
-			    cSelfReferences++;
-			}
-		    }
 		}
+		else if (cte.isNew()) {
+		    cte.setReferenceCountToZero ();
+		    cte.gcVisited(false);
+		}
+		else if (pHandle->hasAReadWriteContainer ()) {
+		    GCQueueInsert (cte.containerIndex ());
+		    cte.gcVisited(true);
+		    cSelfReferences++;
+		}
+/*****
+ *  The preceding 'else if' clauses replace and simplify the following...
+ *****
+ *		else {
+ *		    if (cte.isNew()) {
+ *			cte.setReferenceCountToZero ();
+ *			cte.gcVisited(false);
+ *		    }
+ *
+ *		    if (pHandle->hasAReadWriteContainer ()) {
+ *			if (cte.isntNew ()) {
+ *			    GCQueueInsert (cte.containerIndex ());
+ *			    cte.gcVisited(true);
+ *			    cSelfReferences++;
+ *			}
+ *		    }
+ *		}
+ *****
+ *  ... and makes the flow of the container handle logic parallel the flow of the
+ *      'M_CTEAddressType_RWContainer' logic it mirrors.
+ *****/
 	    }
 		break;
 
@@ -3806,9 +3824,11 @@ bool M_ASD::EnqueueOmittingCycles (VArgList const &rArgList) {
 		    if (!cte.foundAllReferences()) {
 			GCQueueInsert (cte.containerIndex ());
 			cte.gcVisited(true);
-		    } 
-		    else {
-			//fprintf(stderr, "omitted something\n");
+#if defined(DEBUG_GC_CYCLE_DETECTION)
+		    } else {
+			fprintf(stderr, "omitted something\n");
+			fflush (stderr);
+#endif
 		    }
 		}
 	    }
@@ -4081,7 +4101,6 @@ bool M_ASD::SweepUp (VArgList const &rArgList) {
 		 *  are referenced.
 		 *************************************************************/
 		    VContainerHandle *pHandle = cte.addressAsContainerHandle ();
-
 		    if (pHandle->isReferenced () && !cte.foundAllReferences())
 			bOkToReclaim = false;
 		    else {
@@ -4256,7 +4275,8 @@ void M_ASD::GCVisitCycleDetect::Mark_ (M_ASD* pASD, M_POP const *pReferences, un
 void M_ASD::GCVisitCycleDetect::Mark_ (M_ASD* pASD, M_POP const *pPOP) {
     M_CTE cte (pASD->Database(), pPOP);
 
-    if (cte.gcVisited()) return; /* Might be in a cycle, but won't be removed */
+    if (cte.gcVisited())
+	return; /* Might be in a cycle, but won't be removed */
 
     bool isAReturnVisit = cte.cdVisited();
 
@@ -4266,13 +4286,13 @@ void M_ASD::GCVisitCycleDetect::Mark_ (M_ASD* pASD, M_POP const *pPOP) {
 	    Mark (cte.space(), &cte.addressAsPOP ());
 	    break;
 	case M_CTEAddressType_CPCC:
-            #if 0
+#if defined(DEBUG_GC_CYCLE_DETECTION)
 	    fprintf(stderr, "  examining [%d: %d]: refcount: %d type: %s\n", 
 		cte.space(), cte.containerIndex(), 
                 cte.addressAsContainerHandle()->referenceCount(),
                 cte.addressAsContainerHandle()->RTypeName()
 	    );
-            #endif
+#endif
 
 	    cte.addressAsContainerHandle()->mark();
 	    /* no break */
@@ -4454,14 +4474,38 @@ bool VDatabaseFederatorForBatchvision::EnqueueOmittingCycles () const {
 }
 
 bool M_AND::DoGCCycleElimination () { 
+/*********************************
+ *****  Disable buggy handle cycle detection, forcing the garbage collector to
+ *****  assume all referenced handles are referenced from outside the container
+ *****  mesh and therefore must be retained.  While that might not be obvious
+ *****  from the names of the routines involved, the cycle collection algorithm
+ *****  operates by attempting to identify the source of all handle references,
+ *****  preserving those handles for which all references could not be found.
+ *****  By disabling the identification search as is done here, no reference
+ *****  sources will be found so all referenced handles will be preserved...
+
     EnqueuePossibleCycles();
     TraverseAndDetectCycles();
+
+ *********************************/
     return EnqueueOmittingCycles();
 }
  
 bool VDatabaseFederatorForBatchvision::DoGCCycleElimination() const { 
+/*********************************
+ *****  Disable buggy handle cycle detection, forcing the garbage collector to
+ *****  assume all referenced handles are referenced from outside the container
+ *****  mesh and therefore must be retained.  While that might not be obvious
+ *****  from the names of the routines involved, the cycle collection algorithm
+ *****  operates by attempting to identify the source of all handle references,
+ *****  preserving those handles for which all references could not be found.
+ *****  By disabling the identification search as is done here, no reference
+ *****  sources will be found so all referenced handles will be preserved...
+
     EnqueuePossibleCycles();
     TraverseAndDetectCycles();
+
+ *********************************/
     return EnqueueOmittingCycles();
 }
 
@@ -4510,7 +4554,7 @@ bool VDatabaseFederatorForBatchvision::DisposeOfSessionGarbage (bool bAggressive
 
 	    DoTransientGCSetup ();
 	    DoTransientGCMarking ();
-            DoGCCycleElimination();
+	    DoGCCycleElimination();
 	    DoTransientGCMarking (); // new second mark phase
 	    result = DoTransientGCSweep ();
 	    if (TracingSessionGC) {
