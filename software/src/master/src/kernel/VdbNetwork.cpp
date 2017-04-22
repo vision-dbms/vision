@@ -697,7 +697,7 @@ void VdbNetwork::ResolveNetworkLink () {
     if (IsNil (pLinkStream)) {
 	char const* pLastSlash = strrchr (m_pNDFPathName, '/');
 	if (!pLastSlash)
-	    strcpy (m_pOSDPathName, "");
+	    strcpy (m_pOSDPathName, ".");
 	else {
 	    size_t const sDirname = static_cast<size_t>(pLastSlash - m_pNDFPathName);
 	    strncpy (m_pOSDPathName, m_pNDFPathName, sDirname);

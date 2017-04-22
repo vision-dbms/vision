@@ -641,7 +641,7 @@ PrivateFnDef void ResolveNetworkLink (char *pOSDPathName, char const *pNDFPathNa
     if (IsNil (pLinkStream)) {
 	char const* pLastSlash = strrchr (pNDFPathName, '/');
 	if (!pLastSlash)
-	    strcpy (pOSDPathName, "");
+	    strcpy (pOSDPathName, ".");
 	else {
 	    size_t const sDirname = static_cast<size_t>(pLastSlash - pNDFPathName);
 	    strncpy (pOSDPathName, pNDFPathName, sDirname);
