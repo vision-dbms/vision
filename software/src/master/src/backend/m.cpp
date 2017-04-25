@@ -2268,7 +2268,12 @@ void M_ASD::ScanSegments () {
  ******************************************/
 
 void VContainerHandle::flushCachedResources_() {
-    if (referenceCount () == 1 && m_pContainer && !m_bPrecious)
+/*****
+  Cached handles have a reference count of zero; however, this test used to
+  check for a referenceCount () == 1.  Wonder what kind of dangling references
+  that generated...
+ *****/
+    if (referenceCount () == 0 && m_pContainer && !m_bPrecious)
 	DetachFromCTE ();
 }
 
