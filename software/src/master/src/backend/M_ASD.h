@@ -510,20 +510,20 @@ public:
 		    m_iReferenceCount = M_CTE_MaxReferenceCount;
 		}
 
-		bool gcVisited() {
+		bool gcVisited() const {
 		    return m_bGcVisited;
 		}
 		void gcVisited(bool visited) {
 		    m_bGcVisited = visited;
 		}
 
-		bool cdVisited() {
+		bool cdVisited() const {
 		    return m_bCdVisited;
 		}
 		void cdVisited (bool visited) {
 		    m_bCdVisited = visited;
 		}
-		bool foundAllReferences() {
+		bool foundAllReferences() const {
 		    return m_bFoundAllReferences;
 		}
 		void foundAllReferences (bool foundAll) {
