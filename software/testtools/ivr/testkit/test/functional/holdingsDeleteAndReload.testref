@@ -1,0 +1,1118 @@
+
+
+                  ---  Begin Reconcile for PropertySetup  ---                   
+
+  Upload Feed:   PropertySetup
+  Total Records:         0
+  Bad Field Ids:         0
+  Not Processed:         0
+  Other Status:          0
+
+
+                   ---  End Reconcile for PropertySetup  ---                    
+
+
+
+Class SecuritySnapshot created.
+Setting 'entity' on Default SecuritySnapshot to Default Security
+Property link between Security and SecuritySnapshot via snapshot defined. 
+Use Entity Extender SecuritySnapshotFeed to update properties.
+
+
+                  ---  Begin Reconcile for PropertySetup  ---                   
+
+  Upload Feed:   PropertySetup
+  Total Records:         2
+  Bad Field Ids:         0
+  Not Processed:         0
+  Other Status:          2
+
+        2 new properties created. 
+SecuritySnapshot mcap (FP ) Double       NA   
+SecuritySnapshot shares (FP ) Double       NA   
+
+
+                   ---  End Reconcile for PropertySetup  ---                    
+
+
+
+
+
+                  ---  Begin Reconcile for PropertySetup  ---                   
+
+  Upload Feed:   PropertySetup
+  Total Records:         2
+  Bad Field Ids:         0
+  Not Processed:         0
+  Other Status:          2
+
+        2 new properties created. 
+IndexAccount mcapFactor (FP ) Double       NA   
+IndexAccount sharesFactor (FP ) Double       NA   
+
+
+                   ---  End Reconcile for PropertySetup  ---                    
+
+
+
+Class Type created.
+Use MasterFeed TypeMaster for instance creation.
+Members Via: indexAccountList
+Group Via: Type
+Two-way link between IndexAccount and Type defined.
+Use MembershipFeed IndexAccountToType for membership updates.
+
+
+                    ---  Begin Reconcile for TypeMaster  ---                    
+
+  Upload Feed:   TypeMaster
+  Total Records:         1
+  Bad Field Ids:         0
+  Not Processed:         0
+  Other Status:          1
+
+        1 new Type instances created. 
+WithAccountRules    WithAccountRules                             
+
+
+                     ---  End Reconcile for TypeMaster  ---                     
+
+
+
+IVR loading file: 
+
+                            --- Current Globals ---                             
+delimiter :->  	|
+fieldOrderList :->  id, name, sharesFactor, mcapFactor, , 
+headerLineNumber :->          1
+maxRecords :->          0
+naTest :->  NA
+requiredFields :->          0
+skipBottom :->          0
+skipTop :->          0
+
+
+                ---  Begin Reconcile for IndexAccountMaster  ---                
+
+  Upload Feed:   IndexAccountMaster
+  Total Records:         1
+  Bad Field Ids:         0
+  Not Processed:         0
+  Other Status:          1
+
+        1 new IndexAccount instances created. 
+ACCOUNT1            Account One                                  
+
+
+                 ---  End Reconcile for IndexAccountMaster  ---                 
+
+
+
+IVR loading file: 
+
+                            --- Current Globals ---                             
+delimiter :->  	|
+fieldOrderList :->  memberId, , , , groupId, 
+headerLineNumber :->          1
+maxRecords :->          0
+naTest :->  NA
+requiredFields :->          0
+skipBottom :->          0
+skipTop :->          0
+
+
+                ---  Begin Reconcile for IndexAccountToType  ---                
+
+  Upload Feed:   IndexAccountToType
+  Total Records:         1
+  Bad Field Ids:         0
+  Not Processed:         0
+  Other Status:          0
+Dates present:            NA  
+
+                 ---  End Reconcile for IndexAccountToType  ---                 
+
+
+
+IVR loading file: 
+
+                            --- Current Globals ---                             
+delimiter :->  	|
+fieldOrderList :->  id, date, name, , , 
+headerLineNumber :->          1
+maxRecords :->          0
+naTest :->  NA
+requiredFields :->          0
+skipBottom :->          0
+skipTop :->          0
+
+
+                  ---  Begin Reconcile for SecurityMaster  ---                  
+
+  Upload Feed:   SecurityMaster
+  Total Records:         8
+  Bad Field Ids:         0
+  Not Processed:         0
+  Other Status:          2
+
+        2 new Security instances created. 
+1                   Security One                                 
+2                   Security Two                                 
+
+...  Rebuilding Company Cusip6 Cross Reference.
+...  Rebuilding Company -> Security Cross Reference.
+
+
+                   ---  End Reconcile for SecurityMaster  ---                   
+
+
+
+IVR loading file: 
+
+                            --- Current Globals ---                             
+currency :->  USD
+delimiter :->  	|
+fieldOrderList :->  id, date, , shares, mcap, 
+headerLineNumber :->          1
+maxRecords :->          0
+naTest :->  NA
+requiredFields :->          0
+skipBottom :->          0
+skipTop :->          0
+
+
+               ---  Begin Reconcile for SecuritySnapshotFeed  ---               
+
+  Upload Feed:   SecuritySnapshotFeed
+  Total Records:         8
+  Bad Field Ids:         0
+  Not Processed:         0
+  Other Status:          0
+
+
+                ---  End Reconcile for SecuritySnapshotFeed  ---                
+
+
+
+
+IVR Holdings Summary:
+Date: 11/20/2009    Total Holdings:               1
+Accounts:            1 total /         1 considered /          1 included 
+Securities:          3 total /         1 considered /          1 included 
+              1 changed memberLists
+              1 changed constituents shares
+
+
+IVR Holdings Summary:
+Date: 11/21/2009    Total Holdings:               2
+Accounts:            1 total /         1 considered /          1 included 
+Securities:          3 total /         2 considered /          2 included 
+              1 changed memberLists
+              2 changed constituents shares
+
+
+IVR Holdings Summary:
+Date: 11/22/2009    Total Holdings:               2
+Accounts:            1 total /         1 considered /          1 included 
+Securities:          3 total /         2 considered /          2 included 
+              0 changed memberLists
+              0 changed constituents shares
+
+
+IVR Holdings Summary:
+Date: 11/23/2009    Total Holdings:               2
+Accounts:            1 total /         1 considered /          1 included 
+Securities:          3 total /         2 considered /          2 included 
+              0 changed memberLists
+              0 changed constituents shares
+
+
+IVR Holdings Summary:
+Date: 11/24/2009    Total Holdings:               1
+Accounts:            1 total /         1 considered /          1 included 
+Securities:          3 total /         1 considered /          1 included 
+              1 changed memberLists
+              0 changed constituents shares
+
+
+
+After Initial Holdings Build: 
+ ACCOUNT1  ACCOUNT1  Account One
+  account totals: 
+    :_totalMarketValue
+      11/20/2009       25.00
+      11/21/2009       77.50
+      11/22/2009      105.00
+      11/23/2009       60.00
+      11/24/2009       30.00
+    :_totalMarketValueCash
+      11/20/2009         NA 
+      11/21/2009         NA 
+      11/22/2009         NA 
+      11/23/2009         NA 
+      11/24/2009         NA 
+    :_totalMarketValueEquity
+      11/20/2009       25.00
+      11/21/2009       77.50
+      11/22/2009      105.00
+      11/23/2009       60.00
+      11/24/2009       30.00
+    :_totalMarketValueFixed
+      11/20/2009         NA 
+      11/21/2009         NA 
+      11/22/2009         NA 
+      11/23/2009         NA 
+      11/24/2009         NA 
+    :_totalCost
+      11/20/2009        0.00
+      11/21/2009        0.00
+      11/22/2009        0.00
+      11/23/2009        0.00
+      11/24/2009        0.00
+  holdingsSeries
+    1/1/1
+    11/20/2009
+      50.00     50.00     25.00     Security One
+    11/21/2009
+      75.00     75.00     27.50     Security One
+      100.00    100.00    50.00     Security Two
+    11/22/2009
+      75.00     75.00     30.00     Security One
+      100.00    100.00    75.00     Security Two
+    11/23/2009
+      75.00     75.00     30.00     Security One
+      100.00    100.00    30.00     Security Two
+    11/24/2009
+      75.00     75.00     30.00     Security One
+  memberList
+    1/1/1
+    11/20/2009
+      Security One
+    11/21/2009
+      Security One
+      Security Two
+    11/24/2009
+      Security One
+  constituents
+    Security One
+      11/20/2009        50.00    50.00
+      11/21/2009        75.00    75.00
+    Security Two
+      11/21/2009       100.00   100.00
+      11/24/2009          NA       NA 
+
+
+                  ---  Holdings Deletions for HoldingsFeed ---                  
+
+  Upload Feed:   HoldingsFeed
+  Total Records:         1
+  Bad Field Ids:         0
+  Not Processed:         0
+  Other Status:          0
+
+--->  The following deletes were processed: 
+IndexAccount        ACCOUNT1  Account One               -- 11/21/2009
+
+
+After 20091121 deletion: 
+ ACCOUNT1  ACCOUNT1  Account One
+  account totals: 
+    :_totalMarketValue
+      11/20/2009       25.00
+      11/22/2009      105.00
+      11/23/2009       60.00
+      11/24/2009       30.00
+    :_totalMarketValueCash
+      11/20/2009         NA 
+      11/22/2009         NA 
+      11/23/2009         NA 
+      11/24/2009         NA 
+    :_totalMarketValueEquity
+      11/20/2009       25.00
+      11/22/2009      105.00
+      11/23/2009       60.00
+      11/24/2009       30.00
+    :_totalMarketValueFixed
+      11/20/2009         NA 
+      11/22/2009         NA 
+      11/23/2009         NA 
+      11/24/2009         NA 
+    :_totalCost
+      11/20/2009        0.00
+      11/22/2009        0.00
+      11/23/2009        0.00
+      11/24/2009        0.00
+  holdingsSeries
+    1/1/1
+    11/20/2009
+      50.00     50.00     25.00     Security One
+    11/22/2009
+      75.00     75.00     30.00     Security One
+      100.00    100.00    75.00     Security Two
+    11/23/2009
+      75.00     75.00     30.00     Security One
+      100.00    100.00    30.00     Security Two
+    11/24/2009
+      75.00     75.00     30.00     Security One
+  memberList
+    1/1/1
+    11/20/2009
+      Security One
+    11/22/2009
+      Security One
+      Security Two
+    11/24/2009
+      Security One
+  constituents
+    Security One
+      11/20/2009        50.00    50.00
+      11/22/2009        75.00    75.00
+    Security Two
+      11/22/2009       100.00   100.00
+      11/24/2009          NA       NA 
+
+
+                  ---  Holdings Deletions for HoldingsFeed ---                  
+
+  Upload Feed:   HoldingsFeed
+  Total Records:         1
+  Bad Field Ids:         0
+  Not Processed:         0
+  Other Status:          0
+
+--->  The following deletes were processed: 
+IndexAccount        ACCOUNT1  Account One               -- 11/22/2009
+
+
+After 20091122 deletion: 
+ ACCOUNT1  ACCOUNT1  Account One
+  account totals: 
+    :_totalMarketValue
+      11/20/2009       25.00
+      11/23/2009       60.00
+      11/24/2009       30.00
+    :_totalMarketValueCash
+      11/20/2009         NA 
+      11/23/2009         NA 
+      11/24/2009         NA 
+    :_totalMarketValueEquity
+      11/20/2009       25.00
+      11/23/2009       60.00
+      11/24/2009       30.00
+    :_totalMarketValueFixed
+      11/20/2009         NA 
+      11/23/2009         NA 
+      11/24/2009         NA 
+    :_totalCost
+      11/20/2009        0.00
+      11/23/2009        0.00
+      11/24/2009        0.00
+  holdingsSeries
+    1/1/1
+    11/20/2009
+      50.00     50.00     25.00     Security One
+    11/23/2009
+      75.00     75.00     30.00     Security One
+      100.00    100.00    30.00     Security Two
+    11/24/2009
+      75.00     75.00     30.00     Security One
+  memberList
+    1/1/1
+    11/20/2009
+      Security One
+    11/23/2009
+      Security One
+      Security Two
+    11/24/2009
+      Security One
+  constituents
+    Security One
+      11/20/2009        50.00    50.00
+      11/23/2009        75.00    75.00
+    Security Two
+      11/23/2009       100.00   100.00
+      11/24/2009          NA       NA 
+
+
+IVR Holdings Summary:
+Date: 11/21/2009    Total Holdings:               2
+Accounts:            1 total /         1 considered /          1 included 
+Securities:          3 total /         2 considered /          2 included 
+              1 changed memberLists
+              2 changed constituents shares
+
+
+IVR Holdings Summary:
+Date: 11/22/2009    Total Holdings:               2
+Accounts:            1 total /         1 considered /          1 included 
+Securities:          3 total /         2 considered /          2 included 
+              0 changed memberLists
+              0 changed constituents shares
+
+
+IVR Holdings Summary:
+Date: 11/23/2009    Total Holdings:               2
+Accounts:            1 total /         1 considered /          1 included 
+Securities:          3 total /         2 considered /          2 included 
+              0 changed memberLists
+              0 changed constituents shares
+
+After 20091121 and 20091122 rebuild: 
+ ACCOUNT1  ACCOUNT1  Account One
+  account totals: 
+    :_totalMarketValue
+      11/20/2009       25.00
+      11/21/2009       77.50
+      11/22/2009      105.00
+      11/23/2009       60.00
+      11/24/2009       30.00
+    :_totalMarketValueCash
+      11/20/2009         NA 
+      11/21/2009         NA 
+      11/22/2009         NA 
+      11/23/2009         NA 
+      11/24/2009         NA 
+    :_totalMarketValueEquity
+      11/20/2009       25.00
+      11/21/2009       77.50
+      11/22/2009      105.00
+      11/23/2009       60.00
+      11/24/2009       30.00
+    :_totalMarketValueFixed
+      11/20/2009         NA 
+      11/21/2009         NA 
+      11/22/2009         NA 
+      11/23/2009         NA 
+      11/24/2009         NA 
+    :_totalCost
+      11/20/2009        0.00
+      11/21/2009        0.00
+      11/22/2009        0.00
+      11/23/2009        0.00
+      11/24/2009        0.00
+  holdingsSeries
+    1/1/1
+    11/20/2009
+      50.00     50.00     25.00     Security One
+    11/21/2009
+      75.00     75.00     27.50     Security One
+      100.00    100.00    50.00     Security Two
+    11/22/2009
+      75.00     75.00     30.00     Security One
+      100.00    100.00    75.00     Security Two
+    11/23/2009
+      75.00     75.00     30.00     Security One
+      100.00    100.00    30.00     Security Two
+    11/24/2009
+      75.00     75.00     30.00     Security One
+  memberList
+    1/1/1
+    11/20/2009
+      Security One
+    11/21/2009
+      Security One
+      Security Two
+    11/24/2009
+      Security One
+  constituents
+    Security One
+      11/20/2009        50.00    50.00
+      11/21/2009        75.00    75.00
+    Security Two
+      11/21/2009       100.00   100.00
+      11/24/2009          NA       NA 
+
+
+                  ---  Holdings Deletions for HoldingsFeed ---                  
+
+  Upload Feed:   HoldingsFeed
+  Total Records:         2
+  Bad Field Ids:         0
+  Not Processed:         0
+  Other Status:          0
+
+--->  The following deletes were processed: 
+IndexAccount        ACCOUNT1  Account One               -- 11/21/2009
+IndexAccount        ACCOUNT1  Account One               -- 11/22/2009
+
+
+After 20091121 and 20091122 deletion: 
+ ACCOUNT1  ACCOUNT1  Account One
+  account totals: 
+    :_totalMarketValue
+      11/20/2009       25.00
+      11/23/2009       60.00
+      11/24/2009       30.00
+    :_totalMarketValueCash
+      11/20/2009         NA 
+      11/23/2009         NA 
+      11/24/2009         NA 
+    :_totalMarketValueEquity
+      11/20/2009       25.00
+      11/23/2009       60.00
+      11/24/2009       30.00
+    :_totalMarketValueFixed
+      11/20/2009         NA 
+      11/23/2009         NA 
+      11/24/2009         NA 
+    :_totalCost
+      11/20/2009        0.00
+      11/23/2009        0.00
+      11/24/2009        0.00
+  holdingsSeries
+    1/1/1
+    11/20/2009
+      50.00     50.00     25.00     Security One
+    11/23/2009
+      75.00     75.00     30.00     Security One
+      100.00    100.00    30.00     Security Two
+    11/24/2009
+      75.00     75.00     30.00     Security One
+  memberList
+    1/1/1
+    11/20/2009
+      Security One
+    11/23/2009
+      Security One
+      Security Two
+    11/24/2009
+      Security One
+  constituents
+    Security One
+      11/20/2009        50.00    50.00
+      11/23/2009        75.00    75.00
+    Security Two
+      11/23/2009       100.00   100.00
+      11/24/2009          NA       NA 
+
+
+IVR Holdings Summary:
+Date: 11/21/2009    Total Holdings:               2
+Accounts:            1 total /         1 considered /          1 included 
+Securities:          3 total /         2 considered /          2 included 
+              1 changed memberLists
+              2 changed constituents shares
+
+
+IVR Holdings Summary:
+Date: 11/22/2009    Total Holdings:               2
+Accounts:            1 total /         1 considered /          1 included 
+Securities:          3 total /         2 considered /          2 included 
+              0 changed memberLists
+              0 changed constituents shares
+
+
+IVR Holdings Summary:
+Date: 11/23/2009    Total Holdings:               2
+Accounts:            1 total /         1 considered /          1 included 
+Securities:          3 total /         2 considered /          2 included 
+              0 changed memberLists
+              0 changed constituents shares
+
+After 20091121, 20091122 and 20091123 rebuild: 
+ ACCOUNT1  ACCOUNT1  Account One
+  account totals: 
+    :_totalMarketValue
+      11/20/2009       25.00
+      11/21/2009       77.50
+      11/22/2009      105.00
+      11/23/2009       60.00
+      11/24/2009       30.00
+    :_totalMarketValueCash
+      11/20/2009         NA 
+      11/21/2009         NA 
+      11/22/2009         NA 
+      11/23/2009         NA 
+      11/24/2009         NA 
+    :_totalMarketValueEquity
+      11/20/2009       25.00
+      11/21/2009       77.50
+      11/22/2009      105.00
+      11/23/2009       60.00
+      11/24/2009       30.00
+    :_totalMarketValueFixed
+      11/20/2009         NA 
+      11/21/2009         NA 
+      11/22/2009         NA 
+      11/23/2009         NA 
+      11/24/2009         NA 
+    :_totalCost
+      11/20/2009        0.00
+      11/21/2009        0.00
+      11/22/2009        0.00
+      11/23/2009        0.00
+      11/24/2009        0.00
+  holdingsSeries
+    1/1/1
+    11/20/2009
+      50.00     50.00     25.00     Security One
+    11/21/2009
+      75.00     75.00     27.50     Security One
+      100.00    100.00    50.00     Security Two
+    11/22/2009
+      75.00     75.00     30.00     Security One
+      100.00    100.00    75.00     Security Two
+    11/23/2009
+      75.00     75.00     30.00     Security One
+      100.00    100.00    30.00     Security Two
+    11/24/2009
+      75.00     75.00     30.00     Security One
+  memberList
+    1/1/1
+    11/20/2009
+      Security One
+    11/21/2009
+      Security One
+      Security Two
+    11/24/2009
+      Security One
+  constituents
+    Security One
+      11/20/2009        50.00    50.00
+      11/21/2009        75.00    75.00
+    Security Two
+      11/21/2009       100.00   100.00
+      11/24/2009          NA       NA 
+
+
+IVR Holdings Summary:
+Date: 11/22/2009    Total Holdings:               3
+Accounts:            1 total /         1 considered /          1 included 
+Securities:          4 total /         3 considered /          3 included 
+              1 changed memberLists
+              1 changed constituents shares
+
+
+
+After 20091122 'Security Three' addition: 
+ ACCOUNT1  ACCOUNT1  Account One
+  account totals: 
+    :_totalMarketValue
+      11/20/2009       25.00
+      11/21/2009       77.50
+      11/22/2009      180.00
+      11/23/2009       60.00
+      11/24/2009       30.00
+    :_totalMarketValueCash
+      11/20/2009         NA 
+      11/21/2009         NA 
+      11/22/2009         NA 
+      11/23/2009         NA 
+      11/24/2009         NA 
+    :_totalMarketValueEquity
+      11/20/2009       25.00
+      11/21/2009       77.50
+      11/22/2009      180.00
+      11/23/2009       60.00
+      11/24/2009       30.00
+    :_totalMarketValueFixed
+      11/20/2009         NA 
+      11/21/2009         NA 
+      11/22/2009         NA 
+      11/23/2009         NA 
+      11/24/2009         NA 
+    :_totalCost
+      11/20/2009        0.00
+      11/21/2009        0.00
+      11/22/2009        0.00
+      11/23/2009        0.00
+      11/24/2009        0.00
+  holdingsSeries
+    1/1/1
+    11/20/2009
+      50.00     50.00     25.00     Security One
+    11/21/2009
+      75.00     75.00     27.50     Security One
+      100.00    100.00    50.00     Security Two
+    11/22/2009
+      75.00     75.00     30.00     Security One
+      100.00    100.00    75.00     Security Two
+      100.00    100.00    75.00     Security Three
+    11/23/2009
+      75.00     75.00     30.00     Security One
+      100.00    100.00    30.00     Security Two
+    11/24/2009
+      75.00     75.00     30.00     Security One
+  memberList
+    1/1/1
+    11/20/2009
+      Security One
+    11/21/2009
+      Security One
+      Security Two
+    11/22/2009
+      Security One
+      Security Two
+      Security Three
+    11/23/2009
+      Security One
+      Security Two
+    11/24/2009
+      Security One
+  constituents
+    Security One
+      11/20/2009        50.00    50.00
+      11/21/2009        75.00    75.00
+    Security Two
+      11/21/2009       100.00   100.00
+      11/24/2009          NA       NA 
+    Security Three
+      11/22/2009       100.00   100.00
+      11/23/2009          NA       NA 
+
+
+IVR Holdings Summary:
+Date: 11/22/2009    Total Holdings:               3
+Accounts:            1 total /         1 considered /          1 included 
+Securities:          4 total /         3 considered /          3 included 
+              1 changed memberLists
+              2 changed constituents shares
+
+
+
+After 20091122 'Security One' Revision: 
+ ACCOUNT1  ACCOUNT1  Account One
+  account totals: 
+    :_totalMarketValue
+      11/20/2009       25.00
+      11/21/2009       77.50
+      11/22/2009      180.00
+      11/23/2009       60.00
+      11/24/2009       30.00
+    :_totalMarketValueCash
+      11/20/2009         NA 
+      11/21/2009         NA 
+      11/22/2009         NA 
+      11/23/2009         NA 
+      11/24/2009         NA 
+    :_totalMarketValueEquity
+      11/20/2009       25.00
+      11/21/2009       77.50
+      11/22/2009      180.00
+      11/23/2009       60.00
+      11/24/2009       30.00
+    :_totalMarketValueFixed
+      11/20/2009         NA 
+      11/21/2009         NA 
+      11/22/2009         NA 
+      11/23/2009         NA 
+      11/24/2009         NA 
+    :_totalCost
+      11/20/2009        0.00
+      11/21/2009        0.00
+      11/22/2009        0.00
+      11/23/2009        0.00
+      11/24/2009        0.00
+  holdingsSeries
+    1/1/1
+    11/20/2009
+      50.00     50.00     25.00     Security One
+    11/21/2009
+      75.00     75.00     27.50     Security One
+      100.00    100.00    50.00     Security Two
+    11/22/2009
+      150.00    150.00    30.00     Security One
+      100.00    100.00    75.00     Security Two
+      100.00    100.00    75.00     Security Three
+    11/23/2009
+      75.00     75.00     30.00     Security One
+      100.00    100.00    30.00     Security Two
+    11/24/2009
+      75.00     75.00     30.00     Security One
+  memberList
+    1/1/1
+    11/20/2009
+      Security One
+    11/21/2009
+      Security One
+      Security Two
+    11/22/2009
+      Security One
+      Security Two
+      Security Three
+    11/23/2009
+      Security One
+      Security Two
+    11/24/2009
+      Security One
+  constituents
+    Security One
+      11/20/2009        50.00    50.00
+      11/21/2009        75.00    75.00
+      11/22/2009       150.00   150.00
+      11/23/2009        75.00    75.00
+    Security Two
+      11/21/2009       100.00   100.00
+      11/24/2009          NA       NA 
+    Security Three
+      11/22/2009       100.00   100.00
+      11/23/2009          NA       NA 
+
+
+IVR Holdings Summary:
+Date: 11/23/2009    Total Holdings:               1
+Accounts:            1 total /         1 considered /          1 included 
+Securities:          4 total /         1 considered /          1 included 
+              1 changed memberLists
+              1 changed constituents shares
+
+
+
+After 20091123 'Security Two' Delete: 
+ ACCOUNT1  ACCOUNT1  Account One
+  account totals: 
+    :_totalMarketValue
+      11/20/2009       25.00
+      11/21/2009       77.50
+      11/22/2009      180.00
+      11/23/2009       30.00
+      11/24/2009       30.00
+    :_totalMarketValueCash
+      11/20/2009         NA 
+      11/21/2009         NA 
+      11/22/2009         NA 
+      11/23/2009         NA 
+      11/24/2009         NA 
+    :_totalMarketValueEquity
+      11/20/2009       25.00
+      11/21/2009       77.50
+      11/22/2009      180.00
+      11/23/2009       30.00
+      11/24/2009       30.00
+    :_totalMarketValueFixed
+      11/20/2009         NA 
+      11/21/2009         NA 
+      11/22/2009         NA 
+      11/23/2009         NA 
+      11/24/2009         NA 
+    :_totalCost
+      11/20/2009        0.00
+      11/21/2009        0.00
+      11/22/2009        0.00
+      11/23/2009        0.00
+      11/24/2009        0.00
+  holdingsSeries
+    1/1/1
+    11/20/2009
+      50.00     50.00     25.00     Security One
+    11/21/2009
+      75.00     75.00     27.50     Security One
+      100.00    100.00    50.00     Security Two
+    11/22/2009
+      150.00    150.00    30.00     Security One
+      100.00    100.00    75.00     Security Two
+      100.00    100.00    75.00     Security Three
+    11/23/2009
+      75.00     75.00     30.00     Security One
+    11/24/2009
+      75.00     75.00     30.00     Security One
+  memberList
+    1/1/1
+    11/20/2009
+      Security One
+    11/21/2009
+      Security One
+      Security Two
+    11/22/2009
+      Security One
+      Security Two
+      Security Three
+    11/23/2009
+      Security One
+    11/24/2009
+      Security One
+  constituents
+    Security One
+      11/20/2009        50.00    50.00
+      11/21/2009        75.00    75.00
+      11/22/2009       150.00   150.00
+      11/23/2009        75.00    75.00
+    Security Two
+      11/21/2009       100.00   100.00
+      11/23/2009          NA       NA 
+    Security Three
+      11/22/2009       100.00   100.00
+      11/23/2009          NA       NA 
+
+
+
+After 20091130 addition
+ ACCOUNT1  ACCOUNT1  Account One
+  account totals: 
+    :_totalMarketValue
+      11/20/2009       25.00
+      11/21/2009       77.50
+      11/22/2009      180.00
+      11/23/2009       30.00
+      11/24/2009       30.00
+      11/30/2009       30.00
+    :_totalMarketValueCash
+      11/20/2009         NA 
+      11/21/2009         NA 
+      11/22/2009         NA 
+      11/23/2009         NA 
+      11/24/2009         NA 
+      11/30/2009         NA 
+    :_totalMarketValueEquity
+      11/20/2009       25.00
+      11/21/2009       77.50
+      11/22/2009      180.00
+      11/23/2009       30.00
+      11/24/2009       30.00
+      11/30/2009       30.00
+    :_totalMarketValueFixed
+      11/20/2009         NA 
+      11/21/2009         NA 
+      11/22/2009         NA 
+      11/23/2009         NA 
+      11/24/2009         NA 
+      11/30/2009         NA 
+    :_totalCost
+      11/20/2009        0.00
+      11/21/2009        0.00
+      11/22/2009        0.00
+      11/23/2009        0.00
+      11/24/2009        0.00
+      11/30/2009        0.00
+  holdingsSeries
+    1/1/1
+    11/20/2009
+      50.00     50.00     25.00     Security One
+    11/21/2009
+      75.00     75.00     27.50     Security One
+      100.00    100.00    50.00     Security Two
+    11/22/2009
+      150.00    150.00    30.00     Security One
+      100.00    100.00    75.00     Security Two
+      100.00    100.00    75.00     Security Three
+    11/23/2009
+      75.00     75.00     30.00     Security One
+    11/24/2009
+      75.00     75.00     30.00     Security One
+    11/30/2009
+      75.00     75.00     30.00     Security One
+  memberList
+    1/1/1
+    11/20/2009
+      Security One
+    11/21/2009
+      Security One
+      Security Two
+    11/22/2009
+      Security One
+      Security Two
+      Security Three
+    11/23/2009
+      Security One
+    11/24/2009
+      Security One
+  constituents
+    Security One
+      11/20/2009        50.00    50.00
+      11/21/2009        75.00    75.00
+      11/22/2009       150.00   150.00
+      11/23/2009        75.00    75.00
+    Security Two
+      11/21/2009       100.00   100.00
+      11/23/2009          NA       NA 
+    Security Three
+      11/22/2009       100.00   100.00
+      11/23/2009          NA       NA 
+
+
+
+After 20091127 expiration
+ ACCOUNT1  ACCOUNT1  Account One
+  account totals: 
+    :_totalMarketValue
+      11/20/2009       25.00
+      11/21/2009       77.50
+      11/22/2009      180.00
+      11/23/2009       30.00
+      11/24/2009       30.00
+      11/25/2009         NA 
+      11/30/2009       30.00
+    :_totalMarketValueCash
+      11/20/2009         NA 
+      11/21/2009         NA 
+      11/22/2009         NA 
+      11/23/2009         NA 
+      11/24/2009         NA 
+      11/25/2009         NA 
+      11/30/2009         NA 
+    :_totalMarketValueEquity
+      11/20/2009       25.00
+      11/21/2009       77.50
+      11/22/2009      180.00
+      11/23/2009       30.00
+      11/24/2009       30.00
+      11/25/2009         NA 
+      11/30/2009       30.00
+    :_totalMarketValueFixed
+      11/20/2009         NA 
+      11/21/2009         NA 
+      11/22/2009         NA 
+      11/23/2009         NA 
+      11/24/2009         NA 
+      11/25/2009         NA 
+      11/30/2009         NA 
+    :_totalCost
+      11/20/2009        0.00
+      11/21/2009        0.00
+      11/22/2009        0.00
+      11/23/2009        0.00
+      11/24/2009        0.00
+      11/25/2009         NA 
+      11/30/2009        0.00
+  holdingsSeries
+    1/1/1
+    11/20/2009
+      50.00     50.00     25.00     Security One
+    11/21/2009
+      75.00     75.00     27.50     Security One
+      100.00    100.00    50.00     Security Two
+    11/22/2009
+      150.00    150.00    30.00     Security One
+      100.00    100.00    75.00     Security Two
+      100.00    100.00    75.00     Security Three
+    11/23/2009
+      75.00     75.00     30.00     Security One
+    11/24/2009
+      75.00     75.00     30.00     Security One
+    11/25/2009
+    11/30/2009
+      75.00     75.00     30.00     Security One
+  memberList
+    1/1/1
+    11/20/2009
+      Security One
+    11/21/2009
+      Security One
+      Security Two
+    11/22/2009
+      Security One
+      Security Two
+      Security Three
+    11/23/2009
+      Security One
+    11/24/2009
+      Security One
+    11/25/2009
+    11/30/2009
+      Security One
+  constituents
+    Security One
+      11/20/2009        50.00    50.00
+      11/21/2009        75.00    75.00
+      11/22/2009       150.00   150.00
+      11/23/2009        75.00    75.00
+      11/25/2009          NA       NA 
+      11/30/2009        75.00    75.00
+    Security Two
+      11/21/2009       100.00   100.00
+      11/23/2009          NA       NA 
+    Security Three
+      11/22/2009       100.00   100.00
+      11/23/2009          NA       NA 
+
+

@@ -1,0 +1,14 @@
+# Tests hard restart operation.
+# Hammer pool with 6 queries to build a queue and HardRestart pool to see if pool will wait till restart finishes to start handling queries.
+
+# Pre-Execs
+pre_exec: start -c $POOLTESTERDIR/configs/baseline.ptc -w
+
+# Hammer thread.
+thread:main, repetitions: 1
+operation_on_thread:main, run:hammer -c 6 -d 6
+operation_on_thread:main, run:sleep 3 # Making sure query sent before hardRestart
+operation_on_thread:main, run:hardRestart -w
+
+# Post-Execs
+post_exec: stop

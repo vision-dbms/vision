@@ -1,0 +1,137 @@
+IVR File: security primary class: Security
+5 DataSet(s)
+  Feed: SecurityMaster
+    date           date                
+    id             id                  
+  Feed: SecurityAliases
+    1              ID1                 
+    2              ID2                 
+    date                            NA 
+    id                              NA 
+    oldId          id                  
+  Feed: SecurityToA
+    date           date                
+    groupId        industry            
+    id                              NA 
+    memberId       id                  
+  Feed: SecurityToB
+    date           date                
+    groupId        many                
+    id                              NA 
+    memberId       id                  
+  Feed: SecurityCFeed
+    anItem         BLAH                
+    date           date                
+    id             id                  
+1     Master
+2     Alias
+3     A
+4     B
+5     C
+
+move 1 to 6: FALSE
+1     Master
+2     Alias
+3     A
+4     B
+5     C
+
+move 0 to 2: FALSE
+1     Master
+2     Alias
+3     A
+4     B
+5     C
+
+move 4 to 4: TRUE
+1     Master
+2     Alias
+3     A
+4     B
+5     C
+
+move 3 to 5: TRUE
+1     Master
+2     Alias
+3     C
+4     B
+5     A
+
+move 5 to 1: TRUE
+1     A
+2     Alias
+3     C
+4     B
+5     Master
+
+move 2 to 3: TRUE
+1     A
+2     C
+3     Alias
+4     B
+5     Master
+
+move 2 to 5: TRUE
+1     A
+2     Master
+3     Alias
+4     B
+5     C
+
+move 1 to 3: TRUE
+1     Alias
+2     Master
+3     A
+4     B
+5     C
+
+move 2 to 1: TRUE
+1     Master
+2     Alias
+3     A
+4     B
+5     C
+
+Before Profile = After Move Profile?: TRUE
+
+delete 0: FALSE
+1     Master
+2     Alias
+3     A
+4     B
+5     C
+
+delete 6: FALSE
+1     Master
+2     Alias
+3     A
+4     B
+5     C
+
+delete -6: FALSE
+1     Master
+2     Alias
+3     A
+4     B
+5     C
+
+delete 5: TRUE
+1     Master
+2     Alias
+3     A
+4     B
+
+delete 1: TRUE
+1     Alias
+2     A
+3     B
+
+delete 2: TRUE
+1     Alias
+2     B
+
+delete 2: TRUE
+1     Alias
+
+delete 1: TRUE
+

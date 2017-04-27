@@ -1,0 +1,96 @@
+"testkit/lib/test/order.vis" asFileContents evaluate;
+
+[ 
+
+"source/datafeed/prepfeed.vis" asFileContents evaluate;
+"source/datafeed/membershipFeed.vis" asFileContents evaluate;
+"source/datafeed/hierarchy.vis" asFileContents evaluate;
+
+CoreWorkspace Interface BatchFeedManager 
+  createManyToMany: "SecurityToIndustry"
+  withGroupType: "Industry" via: "securityList"
+  andMemberType: "Security" via: "industryList"
+  asTS: FALSE;
+
+SecurityMaster updateFromString:
+"id
+AAAAA
+BBBBB
+CCCCC
+";
+
+IndustryMaster updateFromString: 
+"id
+T200
+1000
+2000
+3000
+";
+
+] debugOutput;
+
+GlobalsFeed updateFromString: 
+"fieldOrderList | memberId,date,T200,,,1000,2000,3000
+repeatingItems | memberId,date
+dataItemName | groupId
+underlyingFeed | SecurityToIndustry
+prepDebugPrint | TRUE
+";
+
+PrepIsonFeed updateFromString: 
+"blah|blah|blah|blah|blah
+AAAAA|20070101|NA|NA|YES|1|TRUE|YUPPERS|1.0
+BBBBB|20070101|YES|NA|YES|1|TRUE|YUPPERS|1.0
+CCCCC|20070101|YES|NA|YES|1|TRUE|YUPPERS|1.0
+";
+
+
+Named Industry send: [ T200, \1000, \2000, \3000  ] .
+  do: [ 
+    printNL;
+    securityList printNL;
+    securityList do: [ printNL; ];
+    newLine print;
+  ];
+
+newLine print;
+"=" fill: 60 . printNL;
+"Missing repeatingItems.  Everything becomes one row here.  " printNL;
+"This is a reasonable failure mode." printNL;
+"=" fill: 60 . printNL;
+newLine print;
+
+GlobalsFeed updateFromString: 
+"fieldOrderList | memberId,date,T200,,,1000,2000,3000
+dataItemName | groupId
+underlyingFeed | SecurityToIndustry
+";
+
+PrepIsonFeed updateFromString: 
+"blah|blah|blah|blah|blah
+AAAAA|20070101|NA|NA|YES|1|TRUE|YUPPERS|1.0
+BBBBB|20070101|YES|NA|YES|1|TRUE|YUPPERS|1.0
+CCCCC|20070101|YES|NA|YES|1|TRUE|YUPPERS|1.0
+";
+
+newLine print;
+"=" fill: 60 . printNL;
+"Missing dataItemName.  Results in a missing header field." printNL;
+"This is a reasonable failure mode." printNL;
+"=" fill: 60 . printNL;
+newLine print;
+
+
+GlobalsFeed updateFromString: 
+"fieldOrderList | memberId,date,T200,,,1000,2000,3000
+repeatingItems | memberId,date
+underlyingFeed | SecurityToIndustry
+";
+
+PrepIsonFeed updateFromString: 
+"blah|blah|blah|blah|blah
+AAAAA|20070101|NA|NA|YES|1|TRUE|YUPPERS|1.0
+BBBBB|20070101|YES|NA|YES|1|TRUE|YUPPERS|1.0
+CCCCC|20070101|YES|NA|YES|1|TRUE|YUPPERS|1.0
+";
+

@@ -1,0 +1,151 @@
+
+CoreWorkspace respondsTo: 'PrepFeed' . ifFalse: [
+  DataFeed createSubclass: "PrepFeed";
+
+  DataFeedSetup createSubclass: "PrepFeedSetup"; 
+  PrepFeedSetup define: "feedClassType" toBe: PrepFeed;
+];
+
+PrepFeed defineMethod: [|omitEmptyFields|
+  ^self fieldOrderList numberElements nonDefaults send: [ position ]
+];
+
+PrepFeed defineMethod: [| initializeKeys: inputs| 
+  !newOne <- ^self asSelf; 
+  !todo <- newOne updateBlocksToDo; 
+  newOne usesLocalFields ifFalse: [
+      newOne :valueList <- CoreWorkspace IndexedList new; 
+    ]; 
+    newOne :valueList <- inputs 
+    send: [
+      !input <- ^self; 
+      !noValue <- ^self isDefault || [
+          ^my newOne naTest any: [^my input send: asSelf]]; 
+      noValue 
+        ifTrue: [NA]
+        ifFalse: [^self stripLeadingBlanks stripTrailingBlanks]
+    ]; 
+  newOne usesLocalFields 
+  ifFalse: [
+      !todo <- newOne localOnlyBlocks; 
+      todo 
+      do: [!block <- asSelf; 
+          !value <- ^my newOne valueList at: itemNum; 
+          value isntDefault 
+            ifTrue: [^my newOne send: block .<- value copyString]
+            else: [NA]; 
+         ]; 
+     ]; 
+  newOne
+];
+
+PrepFeed defineMethod: [|runWrapup| 
+  !self <- ^self;
+
+  !underlyingFeed <- self getGlobalOption: "underlyingFeed" . 
+    else: [ "" ] . asClass;
+
+  !feedString <- self getPreppedString;
+
+  self getGlobalOption: "prepDebugPrint" . isntNA ifTrue: [
+    newLine print;
+    "Prepped feed string: " printNL;
+    "*" fill: 60 . printNL;
+    feedString printNL;
+    "*" fill: 60 . printNL;
+  ];
+
+  underlyingFeed isntNA ifTrue: [
+    self resetRunTimeAttributes; 
+    underlyingFeed updateFromString: feedString;
+  ];
+];
+
+PrepFeed defineMethod: [|displayExceptionSummary|
+  !feed <- ^self asSelf; 
+  !list <- feed masterList; 
+  !notDone <- list select: [isntProcessed]; 
+  !otherStatus <- list select: [hasStatusInfo]; 
+  "  Upload Feed:   " print; feed whatAmI printNL; 
+  "  Total Records: " print; list count printNL; 
+  "  Not Processed: " print; 0 printNL;
+  "  Other Status:  " print; otherStatus count printNL; 
+  ^self
+];
+
+PrepFeed defineMethod: [|getPreppedString|];
+
+
+PrepFeedSetup updateFromString:
+"feedId         | baseClassId
+PrepIsonFeed    | DataFeed
+PrepCleanupFeed | DataFeed
+";
+
+PrepIsonFeed  defineMethod: [|omitEmptyFields|
+  !self <- ^self;
+  !reservedNames <- self getGlobalOption: "repeatingItems" . 
+    else: "" . breakOn: ",";
+  fieldOrderList numberElements nonDefaults reject: [ 
+      ^my reservedNames includesElement: ^self
+    ] . 
+    send: [ position ]
+];
+
+
+PrepIsonFeed defineMethod: [|getPreppedString|
+  !self <- ^self;
+
+  !reservedNames <- self getGlobalOption: "repeatingItems" . 
+    else: "" . breakOn: ",";
+  !newColName <- self getGlobalOption: "dataItemName" . else: "";
+
+  !reservedList <- fieldOrderList numberElements 
+    select: [ ^self isntDefault ] .
+    select: [ ^my reservedNames includesElement: ^self ];
+  !expandList <- fieldOrderList numberElements 
+    select: [ ^self isntDefault ] .
+    reject: [ ^my reservedList includesElement: ^self ];
+
+  !preppedString <- [
+      reservedList do: [ print; "|" print; ];
+      newColName printNL;
+
+      ^self currentStore masterList do: [ 
+        !reservedList <- ^my reservedList;
+        !row <- ^self;
+        ^my expandList 
+          select: [ ^my row valueList at: position . isntNA ] .
+          do: [ 
+            !row <- ^my row;
+            ^my reservedList do: [ 
+              ^my row valueList at: position . print; "|" print;
+            ];
+            ^self printNL;
+          ];
+      ];
+    ] divertOutput;
+
+  preppedString
+];
+
+PrepCleanupFeed defineMethod: [|getPreppedString|
+  !self <- ^self;
+
+  !fields <- fieldOrderList numberElements select: [ ^self isntDefault ];
+
+  !preppedString <- [
+      fields do: [ print; "|" print; ];
+      newLine print;
+
+      ^self currentStore masterList do: [ 
+        ^my fields do: [ 
+          ^my valueList at: position . else: [ "" ] . print; "|" print;
+        ];
+        newLine print;
+      ];
+    ] divertOutput;
+
+  preppedString
+];
+

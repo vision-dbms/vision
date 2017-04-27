@@ -1,0 +1,40 @@
+?? testkit/lib/test/order.vis
+
+newLine printNL;
+
+!baseline <- "workCache/saves/baseline";
+!proposed <- "workCache/saves/proposed";
+
+baseline fileExists 
+  ifFalse: [
+    ">>> Error: baseline not found (" print; baseline print;
+    ").  Aborting!" printNL;
+  ] 
+  else: [
+    proposed fileExists ifTrue: [
+        ">>> Error: proposed exists (" print; proposed print; 
+        ").  Aborting!" printNL;
+      ]
+      else: [
+        Utility Test runAndSaveAllTestsAs: "proposed";
+        Utility Test
+          diffAllIn:   "proposed"
+          and:         "baseline" 
+          withConfig:  "testkit/lib/diff/templates/everything.vis"
+          doInstances: TRUE
+          doClasses:   FALSE
+        ;
+        Utility Test
+          diffAllIn:   "proposed"
+          and:         "baseline" 
+          withConfig:  "testkit/lib/diff/templates/everything.vis"
+          doInstances: FALSE
+          doClasses:   TRUE
+        ;
+
+      ];
+  ];
+
+?g
+Utility Test abortIfError;
+?g

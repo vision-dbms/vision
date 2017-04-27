@@ -1,0 +1,189 @@
+Object createSubclass: "Diff";
+
+# different networks
+Diff defineFixedRWStringProperty: 'lhsPath';
+Diff defineFixedRWStringProperty: 'rhsPath';
+Diff defineFixedRWProperty: 'lhsDb';
+Diff defineFixedRWProperty: 'rhsDb';
+
+# More things to save between diff setup and execution
+Diff defineFixedRWProperty: 'dateToRun';
+
+# Date to operate on
+Diff defineFixedRWProperty: 'dateQuery';
+Diff defineFixedRWProperty: 'lhsStartData';
+Diff defineFixedRWProperty: 'rhsStartData';
+
+
+# Rcompare depth
+Diff defineFixedRWProperty: 'rcompareDepth';
+Diff setRcompareDepthTo: 5;
+
+# Rcompare Options!
+Diff defineFixedRWProperty: 'roptionsList';
+Diff define: 'roptionsListPrototype' toBe: List new;
+Diff defineMethod: [|roptionsList|
+  ^self _roptionsList else: [ ^self roptionsListPrototype ]
+];
+
+Diff defineMethod: [|setRoption: index to: val|
+  !self <- ^self;
+
+  self roptionsListPrototype = self roptionsList ifTrue: [ 
+    self setRoptionsListTo: self roptionsListPrototype clusterNew; 
+  ];
+ 
+  self roptionsList at: index put: val;
+
+  self
+];
+
+Diff defineMethod: [|addRoption: val|
+  !self <- ^self;
+
+  self roptionsListPrototype = self roptionsList ifTrue: [ 
+    self setRoptionsListTo: self roptionsListPrototype clusterNew; 
+  ];
+
+  _roptionsList, val;
+
+  self
+];
+
+Diff defineMethod: [|addRoptionFile: file|
+  !self <- ^self;
+
+  self addRoption: (
+    "\"" concat: file . concat: "\" asFileContents evaluateIn: ^self"
+  ) asBlock;
+
+  self
+];
+
+
+# Rcompare instances
+Diff defineFixedRWProperty: 'rcompareInstances';
+
+
+Diff defineMethod: [|setupDiff|
+  !diff <- ^self;
+
+  diff setLhsDbTo: diff lhsPath openDatabase;
+  diff setRhsDbTo: diff rhsPath openDatabase;
+
+  !lhsUuid <- lhsDb ndfPathName concat: ".UUID" . asFileContents;
+  !rhsUuid <- rhsDb ndfPathName concat: ".UUID" . asFileContents;
+
+  lhsUuid = rhsUuid ifTrue: [ 
+    ">>> Database UUIDs are identical!  Results are invalid!" printNL;
+  ];
+
+  CoreWorkspace do: [
+    "vsrc/misc/classBuilder.vis" asFileContents evaluateIn: ^self;
+    "vsrc/misc/utils.vis" asFileContents evaluateIn: ^self;
+    "vsrc/diff/rcompare.vis" asFileContents evaluateIn: ^self;
+    "vsrc/diff/classDiff.vis" asFileContents evaluateIn: ^self;
+    RCompareTools define: 'verbosity' toBe: 1;
+  ];
+
+
+  lhsDb do: [
+    "vsrc/misc/classBuilder.vis" asFileContents evaluateIn: ^self;
+    "vsrc/misc/utils.vis" asFileContents evaluateIn: ^self;
+    "vsrc/diff/rcompare.vis" asFileContents evaluateIn: ^self;
+    "vsrc/diff/classDiff.vis" asFileContents evaluateIn: ^self;
+    RCompareTools define: 'verbosity' toBe: 1;
+  ];
+
+  rhsDb do: [
+    "vsrc/misc/classBuilder.vis" asFileContents evaluateIn: ^self;
+    "vsrc/misc/utils.vis" asFileContents evaluateIn: ^self;
+    "vsrc/diff/rcompare.vis" asFileContents evaluateIn: ^self;
+    "vsrc/diff/classDiff.vis" asFileContents evaluateIn: ^self;
+    RCompareTools define: 'verbosity' toBe: 1;
+  ];
+
+  GlobalWorkspace RCompareTools enableOneDay;
+
+  roptionsList do: [ 
+    ^my lhsDb do: ^self ;
+    ^my rhsDb do: ^self ;
+  ];
+
+
+  # rcompare reset
+  GlobalWorkspace RCompareTools reset;
+
+  # Get the data to compare
+  diff setDateToRunTo: (diff send: diff dateQuery);
+    
+  dateToRun isDate ifFalse: [
+    ">>> date query did not return a date, aborting" printNL
+  ]
+  else: [
+    dateToRun evaluate: [
+      diff setLhsStartDataTo: (lhsDb send: diff rcompareInstances);
+      diff setRhsStartDataTo: (rhsDb send: diff rcompareInstances);
+    ]
+  ];
+
+  diff
+];
+
+Diff defineMethod: [|runInstanceDiff|
+  !diff <- ^self asSelf;
+  dateToRun isDate ifFalse: [
+    ">>> date query did not return a date, aborting" printNL;
+    FALSE
+  ]
+  else: [
+    dateToRun evaluate: [
+      # instance diff
+      lhsStartData rcompareByString: rhsStartData depth: diff rcompareDepth
+    ]
+  ]
+];
+
+Diff defineMethod: [|runClassDiff|
+  dateToRun isDate ifFalse: [
+    ">>> date query did not return a date, aborting" printNL;
+    FALSE
+  ]
+  else: [
+    dateToRun evaluate: [
+      GlobalWorkspace RCompareTools 
+        subclassDiff: lhsDb Object
+        and:          rhsDb Object
+    ]
+  ]
+];
+
+Diff defineMethod: [|runDiff|
+  ^self setupDiff;
+  !return <- ^self runInstanceDiff;
+  GlobalWorkspace RCompareTools reset;
+  return && ^self runClassDiff
+];
+
+Diff define: 'OptionsSetup' toBe: Dictionary new;
+Diff OptionsSetup at: "everything" put: "vsrc/diff/templates/everything.vis";
+Diff OptionsSetup at: "ivr102" put: "projects/ivr102/diffExclusions.vis";
+
+Diff define: 'DateQuery' toBe: Dictionary new;
+Diff DateQuery at: "holdings" put: [[
+  !lhsDate <- lhsDb Security masterList send: [ :holdingsSeries lastDate ] . 
+    sortDown: [ ^self ] . at: 1;
+  !rhsDate <- rhsDb Security masterList send: [ :holdingsSeries lastDate ] . 
+    sortDown: [ ^self ] . at: 1;
+
+  lhsDate = rhsDate 
+    ifTrue: [ lhsDate ]
+    else:   [ NA ]
+]];
+
+Diff define: 'Instances' toBe: Dictionary new;
+Diff Instances at: "allEntities" put: [[ 
+  "vsrc/diff/templates/everythingGetData.vis" asFileContents evaluateIn: ^self
+]];
+
+

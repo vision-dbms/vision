@@ -1,0 +1,27 @@
+
+^tmp respondsTo: 'ivrSourcePath' . ifFalse: [ 
+  ^tmp define: 'ivrSourcePath' toBe: "";
+];
+
+^tmp ivrSourcePath concat: "source/" . do: [
+  ^self concat: "misc/classBuilder.vis" . asFileContents evaluate;
+  ^self concat: "misc/utils.vis" . asFileContents evaluate;
+
+  ^self concat: "benchmark/memberListStoreManagement.vis" . asFileContents 
+      evaluate;
+  ^self concat: "benchmark/holdingsEnhancements.vis" . asFileContents evaluate;
+  ^self concat: "benchmark/benchmarkStitch.vis" . asFileContents evaluate;
+  ^self concat: "benchmark/sharesCache.vis" . asFileContents evaluate;
+
+  ^self concat: "datafeed/prepfeed.vis" . asFileContents evaluate;
+  ^self concat: "datafeed/masterfeed.vis" . asFileContents evaluate;
+  ^self concat: "datafeed/membershipFeed.vis" . asFileContents evaluate;
+  ^self concat: "datafeed/hierarchy.vis" . asFileContents evaluate;
+
+  ^self concat: "ivr/INIIVR.vis" . asFileContents evaluate;
+  ^self concat: "ivr/DEFIVR.vis" . asFileContents evaluate;
+
+  !scaffold <- ^self concat: "ivr/DEFIVR_Scaffold.vis";
+  scaffold fileExists ifTrue: [ scaffold asFileContents evaluate ];
+];
+

@@ -1,0 +1,93 @@
+"testkit/lib/test/order.vis" asFileContents evaluate;
+
+[
+  "source/order.vis" asFileContents evaluate;
+] debugOutput;
+
+20071204 asDate evaluate: [
+
+Interface BatchFeedManager 
+  buildHierarchy: "GICS" 
+  withComponents: "GICSSector", "GICSIndustryGroup", 
+                  "GICSIndustry", "GICSSubIndustry"
+  asTS:           TRUE
+  manyToMany:     TRUE
+  usingBaseClass: "ClassificationIVR";
+
+Utility Test updateIfEnabled;
+
+GICSFeed updateFromString:
+" | 2 | 3 | 4 | 1
+X | 1010 | 101010 | 10101010 | 10
+X | 2020 | 202020 | 20202020 | 20
+X | 3030 | 303030 | 30303030 | 30
+X | 4040 | 404040 | 40404040 | 40
+X | 1010 | 151515 | 15151515 | 10
+";
+
+Named GICSSubIndustry \30303030 do: [ 
+  parentList anElement parentList anElement parentList anElement displayInfo;
+  parentList anElement parentList anElement displayInfo;
+  parentList anElement displayInfo;
+  displayInfo;
+];
+
+newLine printNL;
+GICSFeed updateFromString: " 
+date | 1 | 2 | 3 | 4 
+20070105 | 10 | 1010 | 101010 | 10101010 
+20070105 | 20 | 2020 | 202020 | 20202020
+20070105 | 30 | 3030 | 303030 | 30303030
+20070105 | 40 | 4040 | 404040 | 40404040
+20070105 | 40 | 4040 | 404040 | 40404050
+";
+
+"Lets examine the data on the feed date, not the date in context" printNL;
+GICSSector masterList append: GICSIndustry masterList . do: [ 
+  printNL;
+  :childList do: [ 
+    "  " print;
+    ^date asInteger print: 13;
+    " :  " print;
+    ^self do: [ print; " " print; ];
+    newLine print;
+  ];
+];
+
+newLine printNL;
+"Do an incomplete upload:" printNL;
+
+GICSFeed updateFromString: " 
+date | 1 | | shares | 3 | 4 
+20080105 | 50 | 1010 | 1010 | 505050 | 50505010 
+20080105 | 50 | 1010 | 2020 | 505050 | 50505020
+20080105 | 50 | 1010 | 3030 | 505050 | 50505030
+20080105 | 50 | 1010 | 4040 | 606060 | 60606010
+";
+
+
+newLine printNL;
+"Done with GICS, this is the single level corner case" printNL;
+
+Interface BatchFeedManager 
+  buildHierarchy: "VendorGeography" 
+  withComponents: "VendorCountry"
+  asTS:           FALSE
+  manyToMany:     FALSE
+  usingBaseClass: "ClassificationIVR";
+
+
+VendorGeographyFeed updateFromString: " 
+date     | 1 
+20070105 | US
+20070105 | CA
+20070105 | GB
+20070105 | VE
+20070105 | DE
+";
+
+"Automatically created countries" printNL;
+VendorCountry masterList do: [ "  " print; code printNL; ];
+
+
+];

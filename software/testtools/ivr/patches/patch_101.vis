@@ -1,0 +1,16 @@
+# Only install in non-federated sessions
+GlobalWorkspace == CoreWorkspace ifTrue: [
+
+  # Default ivr source location
+  ^tmp respondsTo: 'ivrSourcePath' . ifFalse: [ 
+    ^tmp define: 'ivrSourcePath' toBe: (
+      ProcessControlTools getEnvFor: "FastAdmin" .
+        concat: "/core/ivr/"
+    );
+  ];
+
+  # run the patch that does the upgrading
+  ^tmp ivrSourcePath concat: "patches/101/upgrade.vis" . 
+    asFileContents evaluateIn: CoreWorkspace;
+
+];
