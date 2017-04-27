@@ -35,6 +35,10 @@ class VCollectionOfUnsigned32;
 class VContainerHandle;
 class VDescriptor;
 class VSelector;
+
+namespace V {
+    class VSimpleFile;
+}
 
 
 /*************************
@@ -495,7 +499,10 @@ namespace Vdd {
 	    describe_(bVerbose);
 	}
     public:
-	virtual void traverseHandleReferences(void (VContainerHandle::*visitFunction)(void)) = 0;
+	virtual void visitUsing (void (VContainerHandle::*visitor)()) = 0;
+	virtual void visitReferencesUsing (void (VContainerHandle::*visitor)()) = 0;
+	virtual void generateReferenceReport (V::VSimpleFile &rOutputFile, unsigned int xLevel) const = 0;
+
     //  State
     private:
 	VMutex m_iMutex;

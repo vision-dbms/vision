@@ -143,7 +143,8 @@ private:
 
 // Garbage collection marking
 public:
-  virtual void traverseReferences(visitFunction fp);
+    virtual /*override*/ void visitReferencesUsing (visitFunction visitor);
+    virtual /*override*/ void generateReferenceReport (V::VSimpleFile &rOutputFile, unsigned int xLevel) const;
 
 public:
     bool align ();

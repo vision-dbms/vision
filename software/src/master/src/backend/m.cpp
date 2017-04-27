@@ -3799,6 +3799,7 @@ bool M_ASD::EnqueuePossibleCycles (VArgList const &rArgList) {
 		{
 		    GCQueueInsert (cte.containerIndex ());
 		    cte.cdVisited(true);
+		    pHandle->generateLogRecord ("EnqueuePC");
 		}
 	    }
         }
@@ -3821,14 +3822,12 @@ bool M_ASD::EnqueueOmittingCycles (VArgList const &rArgList) {
 		pHandle->unmark();
 
 		if (cte.referenceCount() == 0 && pHandle->isReferenced()) {
-		    if (!cte.foundAllReferences()) {
+		    if (cte.foundAllReferences()) {
+			pHandle->generateLogRecord ("Omit");
+		    } else {
 			GCQueueInsert (cte.containerIndex ());
 			cte.gcVisited(true);
-#if defined(DEBUG_GC_CYCLE_DETECTION)
-		    } else {
-			fprintf(stderr, "omitted something\n");
-			fflush (stderr);
-#endif
+			pHandle->generateLogRecord ("Keep");
 		    }
 		}
 	    }
@@ -4101,9 +4100,11 @@ bool M_ASD::SweepUp (VArgList const &rArgList) {
 		 *  are referenced.
 		 *************************************************************/
 		    VContainerHandle *pHandle = cte.addressAsContainerHandle ();
-		    if (pHandle->isReferenced () && !cte.foundAllReferences())
+		    if (pHandle->isReferenced () && !cte.foundAllReferences()) {
 			bOkToReclaim = false;
-		    else {
+			pHandle->generateLogRecord ("Preserve");
+		    } else {
+			pHandle->generateLogRecord ("Reclaim");
 			if (pHandle->hasAReadWriteContainer ())
 			    pAddress = pHandle->containerAddress ();
 			else {
