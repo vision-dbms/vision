@@ -1,0 +1,333 @@
+[ 
+  !start <- CoreWorkspace Utility;
+  !toolkitName <- "System";
+
+  (start respondsTo: toolkitName) ifFalse: [
+    # Operating System
+    !system <- start createSubclass: toolkitName at: start;
+
+
+    # Aliases
+    start define: 'OS' toBe: system;
+
+
+    # Implementations
+    !unix    <- system createSubclass: "Unix"    at: system;
+    !vms     <- system createSubclass: "VMS"     at: system;
+    !windows <- system createSubclass: "Windows" at: system;
+  ];
+
+] value;
+
+
+Utility System defineMethod: [|getImpl|
+
+  # These are not the best tests.  But, they'll do for now I guess
+  !winFile <- "file,r:/windows/system.ini" asOpenVisionChannel;
+  !winFileStatus <- winFile status;
+  winFile close;
+
+  !visionServerType <- 
+    GlobalWorkspace ProcessControlTools Environment at: "visionServerType";
+
+  !system <- 
+    GlobalWorkspace Utility hostId = 0 ifTrue: [ 
+      VMS 
+    ] .
+    elseIf: [ 
+        winFileStatus = CoreWorkspace OpenVision Channel Status Completed 
+    ] then: [
+      Windows
+    ] .
+    elseIf: [ visionServerType = "UNIX" ] then: [
+      Unix
+    ] .
+    else: [
+      NA
+    ];
+
+  system
+];
+
+
+Utility System defineMethod: [|createVirtualMethod: name|
+  !self <- ^self asSelf;
+  
+  # interface method
+  super defineMethod: (
+    "[|" concat: name . concat: "| getImpl " .  concat: name . concat: "]"
+  );
+
+  # implementations (if one is empty, infinite recursion)
+  super subclassList do: [
+    !className <- ^self whatAmI;
+    ^self defineMethod: (
+      "[|" concat: ^my name . concat: "| \">>> " . 
+      concat: ^my name . concat: " unimplemented at " .
+      concat: className . concat: "\" printNL; " .
+      concat: " NA ]"
+    ) ;
+  ];
+];
+
+Utility System defineMethod: [|defaultNDFLocation|
+  "/localvision/network/NDF"
+];
+
+Utility System createVirtualMethod: "visionCmdString";
+
+Utility System Unix defineMethod: [|visionCmdString|
+  "batchvision " 
+];
+
+Utility System Windows defineMethod: [|visionCmdString|
+  "cmd /C batchvision " 
+];
+
+Utility System VMS defineMethod: [|visionCmdString|
+  "mcr batchvision " 
+];
+
+
+Utility System defineMethod: [|directoryContents: path|
+  !impl <- getImpl;
+  !contents <- CoreWorkspace List new;
+
+  # since we've got to iterate, let's not do any repeats.  Collect the 
+  # operations by 'path' and 'impl'
+  ^current basicDoOnceNoContext: [ 
+      # now force the unique pairs to iterate
+      !current <- ^current;
+      0 asReferenceTo: current . == current ifTrue: [
+        current instanceList iterate: [ 
+          :contents <- impl directoryContents: path;
+        ];
+      ];
+    ]
+    basedOnCriteria: [ impl ], [ path ]
+    propagateUsing: [ 
+      ^self :contents <- groupResult contents;
+    ];
+
+  contents
+];
+
+Utility System Unix defineMethod: [|directoryContents: path|
+  path fileExists ifTrue: [
+    "\\ls " concat: path . asProgramWith: [ ] .
+      asLines
+  ] 
+  else: [ CoreWorkspace List new ]
+];
+
+Utility System VMS defineMethod: [|directoryContents: path|
+  # Black Magic!
+  # interpolated by vision then DCL and evaluated by perl
+  !sp <- "process:perl -e \"foreach (glob(\"\"" 
+    concat: path .
+    concat: "*\"\")) { print \"\"$_%\"\"}; print \"\"%ENDTOKEN%\"\";\" " .
+      asOpenVisionChannel;
+
+  !result <- sp getStringThroughPrompt: "%ENDTOKEN%";
+  !status <- sp status;
+  sp close;
+
+  (status == CoreWorkspace OpenVision Channel Status Closed ||
+    status == CoreWorkspace OpenVision Channel Status Failed)
+    ifTrue: [ CoreWorkspace List new ]
+    else: [
+      :result <- result breakOn: "%" . linkElements;
+      !end <- result select: [ prior = "" && next = "" ] .
+        anElement position decrement;
+
+      # Return as a list of just the file names
+      result select: [ position < ^my end ] .
+        send: [ 
+          !file <- ^self breakOn: "/" . last: 1 . anElement;
+          (file from: (file count - 3) asInteger to: file count) = ".dir"
+            ifTrue: [ file drop: -4 ]
+            else:   [ file ]
+        ] .
+    ]
+];
+
+Utility System Windows defineMethod: [|directoryContents: path|
+  # Prepare the outgoing path!
+  !hack <- "\\ " stripBoundingBlanks;
+  :path <- path translateString: "/" to: hack;
+
+  !error;
+  !result <- [ 
+    !program <- "cmd /C dir /b " concat: path;
+    :error <- CoreWorkspace Utility System runProgram: program with: [ ];
+  ] divertOutput;
+
+  error = 0 
+    ifTrue: [ result asLines send: [ stripBoundingBlanks ] . nonDefaults ] 
+    else:   [ CoreWorkspace List new ]
+];
+
+String defineMethod: [|directoryContents|
+  CoreWorkspace Utility System directoryContents: ^self
+];
+
+Utility System defineMethod: [|runVisionWith: code onNetwork: network|
+  ^self getImpl runVisionWithImpl: code onNetwork: network
+];
+
+Utility System Unix defineMethod: [|runVisionWithImpl: code onNetwork: network |
+  !block <- code;
+  code isBlock ifFalse: [
+    :block <- [ 
+      code printNL;
+      newLine print;
+      "?g" printNL;
+    ];
+  ];
+  
+  visionCmdString concat: " -n " . concat: network . asProgramWith: block
+];
+
+Utility System defineMethod: [|runVisionWithImpl: code onNetwork: network|
+  !self <- ^self;
+  !block <- code;
+  code isBlock ifFalse: [
+    :block <- [ 
+      code printNL;
+      newLine print;
+      "?g" printNL;
+    ];
+  ];
+
+  :block <- block divertOutput;
+
+  !sp <- "process:" concat: self visionCmdString . 
+    concat: " -n " . concat: network .  asOpenVisionChannel;
+  sp initializeBV;
+  !result <- sp getBVResultFor: block;
+  !status <- sp status;
+  sp close;
+
+  status != sp Status Closed && status != sp Status Failed 
+    ifTrue: [ result ]
+    else:   [ "OpenVision Batchvision FAILED" ]
+];
+
+Utility System defineMethod: [|runVisionWith: code|
+  !network <- ndfPathName ifDefault: [ defaultNDFLocation ];
+  ^self runVisionWith: code onNetwork: network
+];
+
+Utility System defineMethod: [|info|
+  ^current getImpl whatAmI printNL;
+];
+
+###
+# A bit more verbose error printing
+###
+String defineMethod: [|asProgramWith: inputBlock|
+  [ CoreWorkspace Utility System runProgram: asSelf with: inputBlock ] divertOutput
+];
+Utility System defineMethod: [|runProgram: program with: inputBlock|
+  !impl <- ^current getImpl;
+
+  !error; 
+  !block <- inputBlock else: []; 
+  !out <- [:error <- impl runProgramImpl: program with: block]divertOutput; 
+  error = 0 
+    ifTrue:  [ out print ]
+    ifFalse:  [[
+      ">>> Error " print; error asString printNL; 
+      "    Processing Program: " print; program printNL; 
+      inputBlock isntNA 
+        ifTrue: [
+          "    with " print; inputBlock printNL; 
+          " whose value is {" print; 
+          inputBlock value; "}" printNL;
+      ]; 
+      out isntDefault 
+        ifTrue: [
+          "... Output: " printNL; 
+          out printNL; 
+        ]; 
+    ] print ];
+    error
+];
+
+Utility System defineMethod: [|runProgramImpl: program with: inputBlock|
+  !status <- -1;
+  !output <- "";
+
+  !input <- inputBlock divertOutput;
+  program isString ifTrue: [
+    !ovChannel <- "process:" concat: program . asOpenVisionChannel;
+    ovChannel isAStreamChannel ifTrue:[
+      ovChannel putString: input;
+      :status <- 0; # success, I guess
+
+      :output <- ovChannel getString else: "";
+      [ovChannel isntAtEndOfInput ] whileTrue: [
+        ovChannel wait;
+        :output <- output concat: (ovChannel getString else: "");
+      ];
+    ] ifFalse: [
+      ">>> Unable to run program: " print; program print; " <<<" printNL;
+      :status <- -1;
+    ];
+    ovChannel close;
+  ] ifFalse: [
+    ">>> Argument to 'runProgramImpl:' must be a string <<<" printNL;
+    :status <- -1;
+  ];
+  output print;
+  status
+];
+
+Utility System Unix defineMethod: [|runProgramImpl: program with: inputBlock|
+  program filterOutputOf: inputBlock
+];
+
+
+
+OpenVision  Channel defineMethod: [| getStringThroughPrompt: prompt |
+  !channel <- ^self;
+
+  !string <- ^self getString else: "";
+  !status <- channel status;
+  [ string take: prompt count negated. != prompt && 
+    status != Status Closed &&
+    status != Status Failed
+  ] whileTrue: [
+      channel wait: 1;
+      :status <- channel status;
+      :string <- string concat: (channel getString else: "");
+  ];
+
+  status != Status Closed && status != Status Failed 
+    ifTrue: [ string ]
+    else:   [ NA ]
+];
+
+OpenVision Channel defineMethod: [|getBVResultFor: queryString|
+  !channel <- ^self;
+  !lines <- queryString asLines;
+  !result <- "";
+
+  lines iterate: [ 
+    # ^self printNL;
+    ^my channel putStringNL: ^self;
+    !s <- ^my channel getStringThroughPrompt: "V> ";
+    # s printNL;
+    s isntNA && ^my result isntNA
+      ifTrue: [ ^my :result <- ^my result concat: s ]
+      else:   [ ^my :result <- NA ]
+  ];
+
+  result
+];
+OpenVision Channel defineMethod: [|initializeBV| 
+  ^self getStringThroughPrompt: "V> ";
+  ^self
+];
+
+

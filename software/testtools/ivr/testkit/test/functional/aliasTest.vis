@@ -1,0 +1,60 @@
+"testkit/lib/test/order.vis" asFileContents evaluate;
+[
+"source/order.vis" asFileContents evaluate;
+
+
+
+IVR File registerFile: "industry" . relateTo: Industry .
+  setIdField: "id" .
+  setDateField: "date" .
+  do: [ 
+    ^self addMaster;
+
+    ^self addItem: "ignoreMe", "empty2";
+
+    ^self addAlias
+      addItem: "cusip"  , "anAlias" .
+      addItem: "sedol"  , "anotherAlias" .
+      addItem: "ticker" , "finalAlias" .
+    ;
+  ];
+
+IVR File locateId: "industry" . buildRecipients uploadString:
+"id | shares | anAlias | anotherAlias | mcap      | empty | empty2 | finalAlias
+TJK | 10     | Alias1  | SecondAlias  | NotAlias  | NA    | junk   | LastAlias
+";
+
+IVR File locateId: "industry" . uploadString:
+"id | date     | ignoreMe
+TJK | 20010101 | ignoredValue
+";
+
+# try really hard to upload NA, hopefully FAIL
+IVR File locateId: "industry" . uploadString:
+"id | shares | anAlias | anotherAlias | finalAlias
+TJK | NA     | NA      |              ||
+";
+
+] debugOutput;
+
+"These 4 should be found" printNL;
+"Alias1", "SecondAlias", "LastAlias", "TJK" 
+  send: [ CoreWorkspace Named Industry at: ^self ] .
+  do: [ displayInfo; ];
+
+newLine printNL;
+
+"These 4 should not be found" printNL;
+"10", "NotAlias", "NA", "junk" 
+  send: [ CoreWorkspace Named Industry at: ^self ] .
+  do: [ displayInfo; ];
+
+newLine printNL;
+
+"These 2 should not be found" printNL;
+"20010101", "ignoredValue"
+  send: [ CoreWorkspace Named Industry at: ^self ] .
+  do: [ displayInfo; ];
+
+
+

@@ -1,0 +1,70 @@
+"testkit/lib/test/order.vis" asFileContents evaluate;
+[ "source/order.vis" asFileContents evaluate; ] debugOutput;
+
+IndexAccountMaster updateFromString:
+"id      | name
+ACCOUNT1 | Account One
+";
+
+SecurityMaster updateFromString:
+"id | name
+1   | Security One
+";
+
+SplitsFeed updateFromString:
+"id | date     | rate
+1   | 20091110 | 2
+";
+
+HoldingsFeed updateFromString:
+"acctId | secId | date     | shares
+ACCOUNT1| 1     | 20091107 | 10
+ACCOUNT1| 1     | 20091108 | 10
+";
+
+HoldingsFeed updateFromString:
+"acctId | secId | date     | shares
+ACCOUNT1| 1     | 20091109 | 10
+";
+
+HoldingsFeed updateFromString:
+"acctId | secId | date     | shares
+ACCOUNT1| 1     | 20091110 | 10
+";
+
+
+20091120 evaluate: [
+  GlobalsFeed updateFromString: "autoExpireIndexAccounts | 5 businessDays";
+  HoldingsFeed expireIndexAccounts;
+];
+
+Named IndexAccount at: "ACCOUNT1" . do: [ 
+  displayInfo;
+
+  "  holdingsSeries" printNL;
+  :holdingsSeries do: [ 
+    "    " print; ^date printNL;
+    ^self do: [ 
+      "      " print;
+      shares print: -10; security name printNL;
+    ];
+  ];
+
+
+  "  memberList" printNL;
+  :memberList do: [ 
+    "    " print; ^date printNL;
+    ^self do: [ "      " print; name printNL;; ];
+  ];
+
+  "  constituents" printNL;
+  constituents do: [ 
+    "    " print; index name printNL;
+    :_shares do: [ 
+      "      " print;
+      ^date print: 13;  ^self print: 10; ^my shares printNL;
+    ];
+  ];
+  newLine print;
+
+];

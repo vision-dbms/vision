@@ -1,0 +1,1183 @@
+
+
+Utility defineMethod: [|basicUpdateNetwork|
+  ">>> Diff Module Installed: Network updates disabled" printNL;
+  FALSE
+];
+
+
+CoreWorkspace respondsTo: "RCompareTools" . ifFalse: [
+  Object createSubclass: "RCompareTools";
+  Object createSubclass: "ROptions";
+
+  ROptions defineFixedRWProperty: 'includeList';
+  ROptions defineFixedRWProperty: 'excludeList';
+  ROptions defineFixedRWProperty: 'compareList';
+  ROptions defineFixedRWProperty: 'lookupBlock';
+  ROptions defineFixedRWProperty: 'class';
+
+  ROptions defineFixedRWProperty: 'compareOverrides';
+
+  # Clustered strings instead of dictionaries
+  ROptions 
+    define: 'stringCluster' 
+    toBe: ("" insertIntoCluster: String newAssociativeCluster);
+  ROptions defineMethod: [|clusteredString: s|
+    s insertIntoCluster: ^self stringCluster 
+  ];
+
+  # Set Object level options, carefully
+  !objectRoptions <- ROptions new;
+  objectRoptions setClassTo: Object;
+  'roptions' deleteFromDictionaryOf: Object;
+  Object __define: 'roptions' toBe: objectRoptions;
+  Object roptions setExcludeListTo: List new;
+  Object roptions setLookupBlockTo: [ ^self whatAmI concat: ^self asString ];
+  Object roptions excludeList, "roptions";
+
+  # Compare all history by default
+  RCompareTools defineEnableDisable: 'oneDay';
+  RCompareTools disableOneDay;
+
+  # use asOf mode by default
+  RCompareTools defineEnableDisable: 'asOfMode';
+  RCompareTools enableAsOfMode;
+
+  # Lists should be in the same order in many cases
+  RCompareTools defineEnableDisable: 'compareListsAsCollections';
+  RCompareTools disableCompareListsAsCollections;
+
+  # IndexedLists can be compared by key as well as value.  But, 
+  # key comparisons are very slow because extendIndex is very slow
+  #
+  # *** in one example a normally one minute comparison took an hour 
+  #     with disableCompareIndexedListsAsCollections ***
+  RCompareTools defineEnableDisable: 'compareIndexedListsAsCollections';
+  RCompareTools enableCompareIndexedListsAsCollections;
+
+  # You can customize the Double tolerance globally
+  RCompareTools defineFixedRWProperty: 'doubleTolerance';
+  RCompareTools defineMethod: [ |doubleTolerance| 
+    _doubleTolerance ifNA: [ 0.00001 ] 
+  ]; 
+
+  RCompareTools defineFixedRWProperty: 'compCacheLimit';
+  RCompareTools define: 'verbosity' toBe: 0;
+];
+
+RCompareTools defineMethod: [|reset|
+  ^self defineFixedProperty: 'compCache' 
+        withDefault:         CoreWorkspace IndexedList new;
+  :compCache rcleanStoreAndDictionary;
+  ^self rcleanStoreAndDictionary;
+  ^global Utility collectSessionGarbage;
+
+  ^self
+];
+RCompareTools reset;
+
+
+RCompareTools defineMethod: [|getEntry: lhs and: rhs|
+  !self <- ^self;
+  !levelOne;
+
+  ^current basicDoOnceNoContext: [ 
+      :levelOne <- self compCache at: lhs;
+      levelOne isNA ifTrue: [ 
+        self compCache at: lhs put: self compCache clusterNew;
+        :levelOne <- self compCache at: lhs;
+      ];
+    ]
+    basedOnCriteria: [ lhs ]
+    propagateUsing: [ :levelOne <- groupResult levelOne; ];
+
+  levelOne
+];
+
+RCompareTools defineMethod: [|startCompareOf: lhs and: rhs depth: depth|
+  !entry <- ^self getEntry: lhs and: rhs;
+  !cachedDepth <- entry at: rhs;
+  !winner <- FALSE;
+
+  # need to figure out a way to pick the winner with the highest depth?
+  !current <- ^current;
+  0 asReferenceTo: current . doOnceNoContext: [
+    current instanceList groupedByCriteria: [lhs], [rhs] .
+      do: [ 
+        groupList sortDown: [ depth ] . at: 1 . :winner <- TRUE;
+      ];
+  ];
+
+# Debugging
+# 0 asReferenceTo: ^current . sendOnceNoContext: [
+#   ^tmp respondsTo: 'networkList' . ifFalse: [
+#     ^tmp define: 'networkList' toBe: ^global IndexedList new;
+#   ];
+#   ^tmp networkList at: lhs CoreWorkspace put: lhs CoreWorkspace;
+#   ^tmp networkList at: rhs CoreWorkspace put: rhs CoreWorkspace;
+#
+#   "diffLog.txt" appendOutputOf: [
+#     " " fill: (6 - depth) . print;
+#     lhs whatAmI print: (25 + depth);
+#     depth print: 2;
+#     " -> " print;
+#     ^self compCache count print: 9;
+#     ^self instanceList select: [ 
+#       (cachedDepth isNA || [ cachedDepth < depth ]) && winner 
+#     ] . count print: 7;
+#     ^global send: [ 
+#       AdminTools objectSpaceList  
+#         total: [ ^self totalSpaceAllocation / 1024 / 1024 ] . print: 5.0;
+#     ];
+#     ^global send: [ 
+#       ^my lhs CoreWorkspace AdminTools objectSpaceList 
+#         total: [ ^self totalSpaceAllocation / 1024 / 1024 ] . print: 5.0;
+#     ];
+#     ^global send: [ 
+#       ^my rhs CoreWorkspace AdminTools objectSpaceList 
+#         total: [ ^self totalSpaceAllocation / 1024 / 1024 ] . print: 5.0;
+#     ];
+#     (CoreWorkspace AdminTools totalNetworkAllocation / 1024 / 1024) 
+#       print: 5.0;
+#     newLine print;
+#   ];
+# ];
+
+  (cachedDepth isNA || [ cachedDepth < depth ]) && winner ifTrue: [
+
+    # update the cache if we haven't exceeded the cache size limit
+    cachedDepth isntNA || ^self compCacheLimit isNA || 
+    [ ^self compCache rclusterSize < ^self compCacheLimit ]
+      ifTrue: [ entry at: rhs put: depth; ];
+
+    TRUE
+  ] 
+  else: [
+    # don't do the compare
+    FALSE
+  ]
+];
+
+
+# Hey, sometimes "=" works!
+Object defineMethod: [|rcompare: rhs depth: depth |
+  !lhs <- ^self;
+  lhs isDefault 
+    ifTrue: [ rhs isDefault ] 
+    else:   [ 
+      lhs super == lhs && rhs super == rhs ifTrue: [
+        TRUE # no real way to compare "Object" instances
+      ]
+      else: [ lhs = rhs ]
+    ]
+];
+
+NA defineMethod: [|rcompare: rhs depth: depth |
+  rhs isNA
+];
+
+Boolean defineMethod: [|rcompare: rhs depth: depth |
+  ^self asString = rhs asString
+];
+
+OpenVision Constant defineMethod: [|rcompare: rhs depth: depth |
+  ^self asString = rhs asString
+];
+
+OpenVision Channel defineMethod: [|rcompare: rhs depth: depth |
+  # Not sure these can be compared
+  ^self asString = rhs asString
+];
+
+
+Utility SessionAttribute defineMethod: [|rcompare: rhs depth: depth |
+  ^self asString = rhs asString
+];
+
+# Covers ComputedFunction, Block, Method, Primitive, EnumeratedFunction
+Function defineMethod: [|rcompare: rhs depth: depth |
+  ^self asString = rhs asString
+];
+
+# FIXME - investigate this comparison further
+Value defineMethod: [|rcompare: rhs depth: depth |
+  !lhs <- ^self;
+  rhs isValue ifTrue: [
+    depth > 0 
+      ifTrue: [ lhs value rcompare: rhs value depth: depth decrement ]
+      else:   [ TRUE ]
+    ]
+  else: [ FALSE ]
+];
+
+Ordinal defineMethod: [|rcompare: rhs depth: depth|
+  ^self asString = rhs asString
+];
+
+Date defineMethod: [|rcompare: rhs depth: depth|
+  ^self = rhs 
+];
+
+Number defineMethod: [|rcompareWithTolerance: rhs depth: depth |
+  !lhs <- ^self;
+  !doubleTolerance <- ^global RCompareTools doubleTolerance;
+
+  rhs isNumber ifFalse: [ FALSE ] 
+    else: [ 
+      !match <- lhs pctChangeTo: rhs . absoluteValue;
+      match isNA 
+        ifTrue: [ lhs = rhs ] 
+        else:   [ match < doubleTolerance ]
+    ]
+];
+
+Integer defineMethod: [|rcompare: rhs depth: depth|
+  ^self = rhs 
+];
+
+Double defineMethod: [|rcompare: rhs depth: depth |
+  ^self rcompareWithTolerance: rhs depth: depth
+];
+
+Float defineMethod: [|rcompare: rhs depth: depth |
+  ^self rcompareWithTolerance: rhs depth: depth
+];
+
+Selector defineMethod: [|rcompare: rhs depth: depth|
+  ^self asString = rhs asString
+];
+
+AdminTools defineMethod: [|rcompare: rhs depth: depth|
+  ^self asString = rhs asString
+];
+
+AdminTools ClusterType defineMethod: [|rcompare: rhs depth: depth |
+  !lhs <- ^self;
+  depth > 0 ifTrue: [ 
+    rhs isClusterType  ifTrue: [
+      lhs isDefault ifTrue: [ 
+        rhs isDefault
+      ] 
+      else: [
+        lhs rcompareTable: rhs depth: depth 
+      ]
+    ] 
+    else: [ FALSE ]
+  ]
+  else: [ TRUE ]
+];
+
+TimeSeries defineMethod: [|rcompare: rhs depth: depth |
+  !lhs <- ^self;
+
+  rhs isTimeSeries ifTrue: [
+    depth > 0 ifTrue: [
+      ^global RCompareTools oneDay ifTrue: [
+        !lvalue; !rvalue;
+        ^global RCompareTools asOfMode ifTrue: [
+          :lvalue <- lhs asOf: ^date;
+          :rvalue <- rhs asOf: ^date;
+          lvalue isTimeSeries && rvalue isTimeSeries ifTrue: [
+            # Handle TS of TS
+            :lvalue <- lvalue asOf: ^date;
+            :rvalue <- rvalue asOf: ^date;
+          ];
+        ]
+        else: [ 
+          :lvalue <- lhs on: ^date;
+          :rvalue <- rhs on: ^date;
+          (lhs asOf: ^date . isTimeSeries) && (rhs asOf: ^date . isTimeSeries) 
+            ifTrue: [
+              # Handle TS of TS
+              :lvalue <- lhs asOf: ^date . on: ^date;
+              :rvalue <- rhs asOf: ^date . on: ^date;
+            ];
+        ];
+        lvalue rcompare: rvalue depth: depth decrement
+      ] 
+      else: [
+        !dates <- lhs send: [ ^date ] . append: (rhs send: [ ^date ]) . unique;
+        dates extendBy: [ 
+            !lvalue <- ^my lhs on: ^self;
+            !rvalue <- ^my rhs on: ^self;
+
+            !result <- lvalue rcompare: rvalue depth: ^my depth decrement;
+          ] . 
+          all: [ result isTrue ]
+      ]
+    ]
+    else: [ TRUE ]
+  ] 
+  else: [ FALSE ] 
+];
+
+Collection defineMethod: [|matchWith: rhs|
+  !lhs <- ^self;
+
+  # need to work with a concrete list type
+  lhs isList ifFalse: [
+    !tmpList <- GlobalWorkspace List new;
+    lhs do: [ ^my tmpList, ^self ];
+    :lhs <- tmpList;
+  ];
+  rhs isList ifFalse: [
+    !tmpList <- GlobalWorkspace List new;
+    rhs do: [ ^my tmpList, ^self ];
+    :rhs <- tmpList;
+  ];
+
+  # cluster the keys and index by those keys.  Also, collect a unique
+  # list of all the keys for comparison usage.
+  !cluster <- GlobalWorkspace String newAssociativeCluster;
+  !allKeys <- GlobalWorkspace IndexedList new;
+
+  !lhsIndex <- GlobalWorkspace IndexedList new;
+  lhs extendBy: [
+      !returnValue <- ^self;
+      !clusteredKey <- returnValue key asString insertIntoCluster: ^my cluster;
+      ^my allKeys at: clusteredKey put: clusteredKey;
+    ] .
+    groupedBy:  [ clusteredKey ] .
+    do:         [ ^my lhsIndex at: ^self super put: groupList; ];
+
+  !rhsIndex <- GlobalWorkspace IndexedList new;
+  rhs extendBy: [
+      !returnValue <- ^self;
+      !clusteredKey <- returnValue key asString insertIntoCluster: ^my cluster;
+      ^my allKeys at: clusteredKey put: clusteredKey;
+    ] .
+    groupedBy:  [ clusteredKey ] .
+    do:         [ ^my rhsIndex at: ^self super put: groupList; ];
+
+  !lhsOnly <- GlobalWorkspace List new;
+  !rhsOnly <- GlobalWorkspace List new;
+
+  !compares <- allKeys send: [
+      !key <- ^self;
+
+      !lhsEntry <- ^my lhsIndex at: key;
+      lhsEntry == GlobalWorkspace NA 
+        ifTrue: [ :lhsEntry <- GlobalWorkspace List new; ] 
+        else:   [ :lhsEntry <- lhsEntry send: [ returnValue ] ];
+
+      !rhsEntry <- ^my rhsIndex at: key;
+      rhsEntry == GlobalWorkspace NA 
+        ifTrue: [ :rhsEntry <- GlobalWorkspace List new; ]
+        else:   [ :rhsEntry <- rhsEntry send: [ returnValue ] ];
+
+      !lowCount <- lhsEntry count > rhsEntry count
+        ifTrue: [ rhsEntry count ]
+        else:   [ lhsEntry count ];
+
+      !lhsOnly <- ^my lhsOnly;
+      lhsEntry count > lowCount ifTrue: [
+        !for <- lhsEntry count - lowCount;
+        for sequence do: [
+          ^my lhsOnly, (^my lhsEntry at: (^self + ^my lowCount) asInteger)
+        ];
+      ];
+
+      !rhsOnly <- ^my rhsOnly;
+      rhsEntry count > lowCount ifTrue: [
+        !for <- rhsEntry count - lowCount;
+        for sequence do: [
+          ^my rhsOnly, (^my rhsEntry at: (^self + ^my lowCount) asInteger)
+        ];
+      ];
+
+      # we're in a send, just return lhs and rhs please
+      lowCount sequence extendBy: [
+        !lhs <- ^my lhsEntry at: ^self;
+        !rhs <- ^my rhsEntry at: ^self;
+      ]
+    ] . collectListElementsFrom: [ ^self ];
+
+
+  GlobalWorkspace Object basicExtend: [
+    !compares <- ^my compares;
+    !lhsOnly  <- ^my lhsOnly;
+    !rhsOnly  <- ^my rhsOnly;
+  ]
+];
+
+Collection defineMethod: [
+| matchHelper: rhs 
+  lhsPrint: lhsBlock 
+  rhsPrint: rhsBlock
+  depth: depth
+|
+  !lhs <- ^self;
+  !results <- lhs matchWith: rhs;
+
+  results lhsOnly count > 0 ifTrue: [
+    (6 - depth) sequence do: [ "  " print; ];
+    " -> Could not find: " print;
+    results lhsOnly do: lhsBlock;
+    newLine print;
+  ];
+
+  results rhsOnly count > 0 ifTrue: [
+    (6 - depth) sequence do: [ "  " print; ];
+    " -> Found extras: " print;
+    results rhsOnly do: rhsBlock;
+    newLine print;
+  ];
+
+  results
+];
+
+Collection defineMethod: [|rcompareByString: rhs depth: depth|
+  !lhs <- ^self;
+
+  depth > 0 ifTrue: [
+    :lhs <- lhs extendBy: 
+      [ !key <- ^self basicSend: ^self roptions lookupBlock ];
+    :rhs <- rhs extendBy:
+      [ !key <- ^self basicSend: ^self roptions lookupBlock ];
+
+    !results <- lhs matchHelper: rhs 
+      lhsPrint: [ ^self key print; " " print; ]
+      rhsPrint: [ ^self key print; " " print; ]
+      depth: depth
+    ;
+
+    results :compares <- results compares extendBy: [
+      !match <- (lhs send: [ ^self super ])
+        rcompare: (rhs send: [ ^self super ])
+        depth: ^my depth decrement;
+    ];
+
+    results compares all: [ match isTrue ] . && 
+      results rhsOnly count = 0 && 
+      results lhsOnly count = 0
+  ] else: [ TRUE ]
+];
+
+Collection defineMethod: [|rcompare: rhs depth: depth |
+  !lhs <- ^self;
+
+  rhs isCollection ifTrue: [
+    depth > 0 ifTrue: [
+      lhs rcompareByString: rhs depth: depth
+    ] 
+    else: [ TRUE ]
+  ] 
+  else: [ FALSE ]
+];
+
+IndexedList defineMethod: [|rcompare: rhs depth: depth |
+  !lhs <- ^self;
+
+  # IndexedLists need an extra layer of depth for their
+  # search algorithm
+  rhs isIndexedList ifTrue: [
+    depth > 0 ifTrue: [
+      GlobalWorkspace RCompareTools compareIndexedListsAsCollections ifFalse: [
+
+        :lhs <- lhs extendIndexOpt extendBy: [ 
+          !key <- ^self index basicSend: ^self index roptions lookupBlock;
+          !val <- ^self super;
+        ];
+        :rhs <- rhs extendIndexOpt extendBy: [ 
+          !key <- ^self index basicSend: ^self index roptions lookupBlock;
+          !val <- ^self super;
+        ];
+
+        !results <- lhs matchHelper: rhs 
+          lhsPrint: [ key print; "->" print; val print; " " print; ]
+          rhsPrint: [ key print; "->" print; val print; " " print; ]
+          depth:    depth
+        ;
+
+        results :compares <- results compares extendBy: [
+          !matchIndex <- (lhs send: [ ^self index ])
+            rcompare: (rhs send: [ ^self index ])
+            depth: ^my depth decrement;
+          !matchValue <- (lhs send: [ ^self val ])
+            rcompare: (rhs send: [ ^self val ])
+            depth: ^my depth decrement;
+        ];
+
+        results compares all: [ matchIndex isTrue && matchValue isTrue ] . && 
+          results rhsOnly count = 0 && 
+          results lhsOnly count = 0
+      ]
+      else: [
+        lhs rcompareByString: rhs depth: depth
+      ]
+    ] 
+    else: [ TRUE ]
+  ] 
+  else: [ FALSE ]
+];
+
+List defineMethod: [|rcompare: rhs depth: depth |
+  !lhs <- ^self;
+
+  GlobalWorkspace RCompareTools compareListsAsCollections ifTrue: [
+    depth > 0 ifTrue: [
+      rhs isList ifTrue: [ 
+        lhs rcompareByString: rhs depth: depth
+      ]
+      else: [ FALSE ]
+    ]
+    else: [ TRUE ]
+  ] .
+  else: [
+    depth > 0 ifTrue: [
+      rhs isList ifTrue: [ 
+
+        # group by store to keep memory consumption down
+        !compareResult <- lhs count sequence
+          groupedBy: [ !store <- 0 asReferenceTo: (^my lhs at: ^self); store ] .
+          extendBy: [ !result ] .
+          iterate: [
+            !rhs <- ^my rhs;
+            !lhs <- ^my lhs;
+            !depth <- ^my depth;
+            :result <- groupList send: [
+                !lvalue <- ^my lhs at: ^self;
+                !rvalue <- ^my rhs at: ^self;
+
+                lvalue rcompare: rvalue depth: ^my depth decrement
+              ] .
+              all: [ ^self isTrue ];
+          ] .
+          all: [ result isTrue ];
+
+        compareResult isTrue && lhs count = rhs count
+      ]
+      else: [ FALSE ]
+    ]
+    else: [ TRUE ]
+  ]
+];
+
+
+# Indexed Lists and Dictionaries need key comparison, instead of simple
+# set comparison
+Dictionary defineMethod: [|rcompare: rhs depth: depth |
+  !lhs <- ^self;
+
+  rhs isDictionary ifTrue: [
+    depth > 0 ifTrue: [
+      ^global RCompareTools startCompareOf: lhs and: rhs depth: depth . 
+        ifTrue: [
+          :lhs <- lhs selectorList extendBy: [ 
+            !key <- ^self asString;
+            !val <- ^my lhs at: ^self;
+          ];
+          :rhs <- rhs selectorList extendBy: [ 
+            !key <- ^self asString;
+            !val <- ^my rhs at: ^self;
+          ];
+
+          !results <- lhs matchHelper: rhs 
+            lhsPrint: [ key print; "->" print; val print; " " print; ]
+            rhsPrint: [ key print; "->" print; val print; " " print; ]
+            depth:    depth
+          ;
+
+          results :compares <- results compares extendBy: [
+            !matchIndex <- (lhs send: [ ^self key ])
+              rcompare: (rhs send: [ ^self key ])
+              depth: ^my depth decrement;
+            !matchValue <- (lhs send: [ ^self val ])
+              rcompare: (rhs send: [ ^self val ])
+              depth: ^my depth decrement;
+          ];
+
+          results compares all: [ matchIndex isTrue && matchValue isTrue ] . && 
+            results rhsOnly count = 0 && 
+            results lhsOnly count = 0
+        ] 
+        else: [ TRUE ]
+    ] 
+    else: [ TRUE ]
+  ] 
+  else: [ FALSE ]
+];
+
+
+
+# "=" is insufficent for Entities
+Entity defineMethod: [|rcompare: rhs depth: depth |
+  !lhs <- ^self;
+  depth > 0 ifTrue: [ 
+    rhs isEntity ifTrue: [
+      lhs isDefault ifTrue: [ 
+        rhs isDefault
+      ] 
+      else: [
+        lhs rcompareTable: rhs depth: depth 
+      ]
+    ] 
+    else: [ FALSE ]
+  ]
+  else: [ TRUE ]
+];
+
+# "=" is insufficent for DataRecords
+DataRecord defineMethod: [|rcompare: rhs depth: depth |
+  !lhs <- ^self;
+  depth > 0 ifTrue: [ 
+    rhs isDataRecord ifTrue: [
+      ^self isDefault ifTrue: [ 
+        rhs isDefault
+      ] 
+      else: [
+        ^self rcompareTable: rhs depth: depth 
+      ]
+    ]
+    else: [ FALSE ]
+  ]
+  else: [ TRUE ]
+];
+
+Holding defineMethod: [|rcompare: rhs depth: depth |
+  depth > 0 ifTrue: [ 
+    rhs isHolding ifTrue: [
+      ^self isDefault ifTrue: [ 
+        rhs isDefault
+      ] 
+      else: [
+        ^global RCompareTools compCacheLimit isntNA 
+          ifTrue: [ ^self doRcompareTable: rhs depth: depth ]
+          else:   [ ^self rcompareTable: rhs depth: depth ]
+      ]
+    ]
+    else: [ FALSE ]
+  ]
+  else: [ TRUE ]
+];
+
+Bridge defineMethod: [|rcompare: rhs depth: depth |
+  depth > 0 ifTrue: [ 
+    rhs isBridge ifTrue: [
+      ^self isDefault ifTrue: [ 
+        rhs isDefault
+      ] 
+      else: [
+        ^self rcompareTable: rhs depth: depth 
+      ]
+    ]
+    else: [ FALSE ]
+  ]
+  else: [ TRUE ]
+];
+
+Schema defineMethod: [|rcompare: rhs depth: depth |
+  !lhs <- ^self;
+  depth > 0 ifTrue: [ 
+    rhs isSchema ifTrue: [
+      lhs isDefault ifTrue: [ 
+        rhs isDefault
+      ] 
+      else: [
+        lhs rcompareTable: rhs depth: depth 
+      ]
+    ] 
+    else: [ FALSE ]
+  ]
+  else: [ TRUE ]
+];
+
+MiscTools defineMethod: [|rcompare: rhs depth: depth |
+  !lhs <- ^self;
+  depth > 0 ifTrue: [ 
+    rhs isMiscTools ifTrue: [
+      lhs isDefault ifTrue: [ 
+        rhs isDefault
+      ] 
+      else: [
+        lhs rcompareTable: rhs depth: depth 
+      ]
+    ] 
+    else: [ FALSE ]
+  ]
+  else: [ TRUE ]
+];
+
+Utility defineMethod: [|rcompare: rhs depth: depth |
+  !lhs <- ^self;
+  depth > 0 ifTrue: [ 
+    rhs isUtility ifTrue: [
+      lhs isDefault ifTrue: [ 
+        rhs isDefault
+      ] 
+      else: [
+        (lhs rcompareTable: rhs depth: depth) && lhs asString = rhs asString
+      ]
+    ] 
+    else: [ FALSE ]
+  ]
+  else: [ TRUE ]
+];
+
+^current respondsTo: "IVR" . ifTrue: [
+  IVR defineMethod: [|rcompare: rhs depth: depth |
+    !lhs <- ^self;
+    depth > 0 ifTrue: [ 
+      rhs isIVR ifTrue: [
+        lhs isDefault ifTrue: [ 
+          rhs isDefault
+        ] 
+        else: [
+          lhs rcompareTable: rhs depth: depth
+        ]
+      ] 
+      else: [ FALSE ]
+    ]
+    else: [ TRUE ]
+  ];
+];
+
+LayoutTools defineMethod: [|rcompare: rhs depth: depth |
+  !lhs <- ^self;
+  depth > 0 ifTrue: [ 
+    rhs isLayoutTools  ifTrue: [
+      lhs isDefault ifTrue: [ 
+        rhs isDefault
+      ] 
+      else: [
+        lhs rcompareTable: rhs depth: depth 
+      ]
+    ] 
+    else: [ FALSE ]
+  ]
+  else: [ TRUE ]
+];
+
+PrinterTools Descriptor defineMethod: [|rcompare: rhs depth: depth |
+  !lhs <- ^self;
+  depth > 0 ifTrue: [ 
+    rhs isDescriptor  ifTrue: [
+      lhs isDefault ifTrue: [ 
+        rhs isDefault
+      ] 
+      else: [
+        lhs rcompareTable: rhs depth: depth 
+      ]
+    ] 
+    else: [ FALSE ]
+  ]
+  else: [ TRUE ]
+];
+
+Descriptor defineMethod: [|rcompare: rhs depth: depth |
+  !lhs <- ^self;
+  depth > 0 ifTrue: [ 
+    rhs isDescriptor  ifTrue: [
+      lhs isDefault ifTrue: [ 
+        rhs isDefault
+      ] 
+      else: [
+        lhs rcompareTable: rhs depth: depth 
+      ]
+    ] 
+    else: [ FALSE ]
+  ]
+  else: [ TRUE ]
+];
+
+Object defineMethod: [|getSelectorListX|
+  !l <- ^self selectorList;
+
+  ^self == ^self super ifFalse: [ 
+    :l <- l append: ^self super getSelectorListX; 
+  ];
+
+  l
+];
+
+Object defineMethod: [|getPropertiesX|
+  0 asReferenceTo: ^self . sendOnceNoContext: [ getPropertiesXImpl ]
+];
+
+Object defineMethod: [|getPropertiesXImpl|
+  !class <- ^self; 
+
+  !l <- ^self selectorList 
+    reject: [ asString = "selectorList" ] . # skip selectorList!
+    extendBy: [ !type <- ^my class getPropertyPrototypeFor: ^self ].
+    select:   [ type isntNA ];
+
+  :l <- l send: [ 
+      type isTimeSeries 
+        ifTrue:  [ ":" concat: ^self ]
+        else:    [ ^self ]
+    ];
+
+  ^self == ^self super ifFalse: [ 
+    :l <- l append: ^self super getPropertiesXImpl; 
+  ];
+
+  l send: [ asString ]
+];
+
+Object defineMethod: [|rexclusion: list|
+  !self <- ^self;
+
+  self super != self ifTrue: [
+    :list <- self super rexclusion: list;
+  ];
+
+  self hasROptions ifTrue: [
+    self localROptions compareList isntNA 
+      ifTrue: [ self localROptions compareList ]
+      else: [
+        !exclude <- self localROptions excludeList;
+        exclude isntNA ifTrue: [
+          :list <- list reject: [ ^my exclude includesElement: ^self ];
+        ];
+      ];
+  ];
+
+  list
+];
+
+Object defineMethod: [|rinclusionExclusion: list|
+  !self <- ^self;
+
+  self super != self ifTrue: [
+    :list <- self super rinclusionExclusion: list;
+  ];
+
+  self hasROptions ifTrue: [
+    self localROptions compareList isntNA 
+      ifTrue: [ self localROptions compareList ]
+      else: [
+        !exclude <- self localROptions excludeList;
+        exclude isntNA ifTrue: [
+          :list <- list reject: [ ^my exclude includesElement: ^self ];
+        ];
+
+        !include <- self localROptions includeList;
+        include isList ifTrue: [
+          :list <- list append: include;
+        ];
+      ];
+  ];
+
+  list
+];
+
+ROptions defineMethod: [|lookupBlockImpl|
+  !self <- ^self;
+
+  ^self _lookupBlock isNA && self class super != self class 
+    ifTrue: [ self class super roptions lookupBlockImpl ]
+    else:   [ self _lookupBlock ]
+];
+
+ROptions defineMethod: [|lookupBlock|
+  !self <- ^self;
+  !lb <- NA;
+
+  ^current 
+    basicDoOnceNoContext: [ :lb <- self lookupBlockImpl; ]
+    basedOnCriteria: [ self ]
+    propagateUsing: [ :lb <- groupResult lb; ]
+  ;
+
+  lb
+];
+
+Object defineMethod: [|compareOverridesImpl|
+  !self <- ^self;
+
+  !dict    <- CoreWorkspace IndexedList new;
+
+  self super != self ifTrue: [
+    !return  <- self super compareOverridesImpl;
+    :dict    <- return dict;
+  ];
+
+  # ROptions defineFixedRWProperty: 'compareOverrides';
+  self hasROptions ifTrue: [
+    !compareOverrides <- self localROptions compareOverrides;
+    compareOverrides isntNA ifTrue: [
+      compareOverrides extendIndex
+        do: [ 
+          ^my dict at: index put: ^self super
+        ];
+    ];
+  ];
+
+  CoreWorkspace Object basicExtend: [
+    !dict    <- ^my dict;
+  ]
+];
+
+Object defineMethod: [|compareOverrides|
+  0 asReferenceTo: ^self . sendOnceNoContext: [ compareOverridesImpl ]
+];
+
+Object defineMethod: [|overrideFor: msg|
+  !self <- ^self;
+
+  !ret     <- self compareOverrides;
+  !dict    <- ret dict;
+
+  dict at: (
+    msg asString insertIntoCluster: CoreWorkspace ROptions stringCluster
+  )
+];
+
+Object defineMethod: [|getCompareProperties|
+  !props <- ^self getPropertiesX 
+    groupedByString: [ ^self ] . send: [ super ];
+
+  ^self rinclusionExclusion: props
+];
+
+Object defineMethod: [|isLocal: prop|
+  prop asSelector locateInDictionaryOf: ^self . isntNA
+];
+
+Object defineMethod: [|hasROptions|
+  ^self isLocal: "roptions" . 
+];
+
+Object defineMethod: [|localROptions|
+  !self <- ^self asSelf;
+
+  self isLocal: "roptions" . 
+    ifTrue: [ self roptions ]
+    else: [
+      'roptions' deleteFromDictionaryOf: self;
+      self __define: 'roptions' toBe: CoreWorkspace ROptions new; 
+      self roptions setClassTo: self;
+      self roptions
+    ]
+];
+
+Object defineMethod: [|includeMessages: str|
+  !self <- ^self;
+
+  self localROptions includeList isNA ifTrue: [
+    self localROptions setIncludeListTo: CoreWorkspace List new;
+  ];
+
+  str do: [ 
+    !self <- ^my self;
+    ^self breakOn: "," . do: [ 
+      ^my self localROptions includeList, ^self;
+    ];
+  ];
+
+  ^self
+];
+
+Object defineMethod: [|excludeMessages: str|
+  !self <- ^self;
+
+  self localROptions excludeList isNA ifTrue: [
+    self localROptions setExcludeListTo: CoreWorkspace List new;
+  ];
+
+  str do: [ 
+    !self <- ^my self;
+    ^self breakOn: "," . do: [ 
+      ^my self localROptions excludeList, ^self;
+    ];
+  ];
+
+  ^self
+];
+
+Object defineMethod: [|compareMessages: str|
+  !self <- ^self;
+
+  self localROptions compareList isNA ifTrue: [
+    self localROptions setCompareListTo: CoreWorkspace List new;
+  ];
+
+  str do: [ 
+    !self <- ^my self;
+    str breakOn: "," . do: [ 
+      ^my self localROptions compareList, ^self;
+    ];
+  ];
+
+  ^self
+];
+
+Object defineMethod: [|compareOverride: selector with: block|
+  !self <- ^self;
+
+  self localROptions compareOverrides isNA ifTrue: [
+    self localROptions setCompareOverridesTo: 
+      CoreWorkspace IndexedList new;
+  ];
+
+  !s <- self localROptions clusteredString: selector;
+  self localROptions compareOverrides at: s put: block;
+
+  ^self
+];
+
+
+Object defineMethod: [|intersectPropertiesImpl: rhs|
+  !lhs <- ^self;
+
+  !lhsProps <- lhs getCompareProperties;
+  !rhsProps <- lhs rinclusionExclusion: rhs getCompareProperties;
+  
+  !cluster <- CoreWorkspace String newAssociativeCluster;
+  !toCompare <- lhsProps append: rhsProps . 
+    extendBy:  [ !strName <- ^self insertIntoCluster: ^my cluster; ] .
+    groupedBy: [ strName ] .
+    select: [ groupList count > 1 ] .
+    send: [ super ];
+
+  :toCompare <- toCompare extendBy: [ 
+      !compBlock <- ^my lhs overrideFor: ^self;
+    ];
+
+  CoreWorkspace Object basicExtend: [
+    !both   <- ^my toCompare;
+    !lhs    <- ^my lhsProps reject: [ ^my both includesElement: ^self ];
+    !rhs    <- ^my rhsProps reject: [ ^my both includesElement: ^self ];
+  ]
+];
+ 
+Object defineMethod: [|intersectProperties: rhs|
+  !lhs <- ^self;
+
+  !lhsIdentity <- 0 asReferenceTo: lhs;
+  !rhsIdentity <- 0 asReferenceTo: rhs;
+
+  !return;
+
+  ^current basicDoOnceNoContext: [ 
+      :return <- lhs intersectPropertiesImpl: rhs;
+    ]
+    basedOnCriteria: [ lhsIdentity ], [ rhsIdentity ]
+    propagateUsing: [ 
+      ^self :return <- groupResult return; 
+    ];
+
+  return
+];
+
+Object defineMethod: [|rcompareTable: rhs depth: depth|
+  !lhs <- ^self;
+
+  # do comparison if not already done, caching done here
+  ^global RCompareTools startCompareOf: lhs and: rhs depth: depth . 
+    ifTrue: [ lhs doRcompareTable: rhs depth: depth ]
+    else: [ TRUE ]
+];
+
+Object defineMethod: [|doRcompareTable: rhs depth: depth|
+  !lhs <- ^self;
+
+  !verbosity <- ^global RCompareTools verbosity;
+  !propertyInfo <- lhs intersectProperties: rhs;
+  !comparable <- propertyInfo both;
+
+  # saving all these results is a suspect for extensive 
+  # memory consumption
+  !results <- comparable iextendBy: [
+      !lvalue;
+      !rvalue;
+      !result;
+
+      !info <- [ 
+        compBlock isNA ifTrue: [
+          # default comparison
+          :lvalue <- ^my lhs send: ^self clusteredAsBlock;
+          :rvalue <- ^my rhs send: ^self clusteredAsBlock;
+
+          :result <- lvalue rcompare: rvalue depth: ^my depth decrement;
+        ] 
+        else: [
+          # overriden comparison
+          !ret <- compBlock 
+                    valueWith: ^my lhs 
+                    and:       ^my rhs 
+                    and:       ^my depth;
+
+          ret isList ifTrue: [
+            # compare override that passes back r and l values
+            :lvalue <- ret at: 1;
+            :rvalue <- ret at: 2;
+            :result <- ret at: 3;
+          ] 
+          else: [
+            # simple compare override, true or false;
+            :result <- ret;
+          ]
+        ]
+      ] divertOutput;
+
+      # save memory, get rid of the value pointers if possible
+      (^my verbosity < 1) || (^my verbosity < 2 && result isTrue) ifTrue: [
+        :lvalue <- NA; :rvalue <- NA; :info <- NA;
+      ];
+    ];
+
+  !result <- 
+    (results all: [ result isTrue ]) && 
+    (propertyInfo lhs count = 0) &&
+    (propertyInfo rhs count = 0);
+
+  verbosity > 0 ifTrue: [
+    (result isFalse || verbosity > 1) ifTrue: [
+      (6 - depth) sequence do: [ "  " print; ];
+      result ifTrue: [ 
+          "match(" print; 
+          depth asString print; 
+          "): " print; 
+      ] 
+      else: [ "mismatch: " print; ];
+
+      ^self whatAmI print; " -> " print; ^self printNL;
+    ];
+
+    !skippedProps <- propertyInfo lhs append: propertyInfo rhs;
+    skippedProps count > 0 ifTrue: [
+      (6 - depth) sequence do: [ "  " print; ];
+      "  skipped messages: " print;
+      skippedProps linkElements do: [ 
+        print; next isntDefault ifTrue: [ ", " print; ]; 
+      ];
+      newLine print;
+    ];
+
+    (result isFalse || verbosity > 1) ifTrue: [
+      !presults <- results;
+      verbosity < 2 ifTrue: [ 
+        :presults <- presults select: [ result isTrue not ];
+      ];
+
+      presults do: [ 
+        (6 - ^my depth) sequence do: [ "  " print; ];
+
+        result ifTrue: [ 
+            "  +++ match(" print; 
+            ^my depth decrement asString print; 
+            ") on " print; 
+        ] 
+        else: [ "  --- mismatch on " print; ];
+
+        ^self print;
+        " : " print;
+        lvalue print;
+        result 
+          ifTrue: [ " == " print; ] 
+          else:   [ " != " print; ];
+        rvalue print;
+        newLine print;
+        info print;
+      ];
+    ];
+  ];
+
+  result
+];
+
+
+
+

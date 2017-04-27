@@ -1,0 +1,269 @@
+
+###
+# Performance improvement to createHoldingsFrom respondsTo code
+###
+Account defineMethod: [|createHoldingsFrom: xsecList| 
+  !acct <- ^self; 
+  !record <- xsecList reject: [ isNA ] . at: 1;
+  !includesPrice    <- FALSE;
+  !includesCurrency <- FALSE;
+  !includesADate    <- FALSE;
+
+  # speeding up the responds to!
+  record isntNA ifTrue: [
+    :includesPrice <- 0 asReferenceTo: record .
+      sendOnceNoContext: [ ^self respondsTo: "accountingPrice" ];
+    :includesCurrency <- 0 asReferenceTo: record .
+      sendOnceNoContext: [ ^self respondsTo: "accountingCurrency" ];
+    :includesADate <- 0 asReferenceTo: record .
+      sendOnceNoContext: [ ^self respondsTo: "adjustmentDate" ];
+  ];
+
+  ^self initializeDailyHoldingsBasedValues; 
+  :holdingsSeries <- holdingsPrototype clusterNew; 
+  !tmpHoldings <- xsecList 
+    groupedBy: [security].
+    send: [
+      !hold <- CoreWorkspace Holding 
+          createInSecurity: asSelf 
+          andAccount: ^my acct .  
+          initializeFrom: groupList; 
+      !record <- groupList at: 1; 
+      ^my includesPrice isTrue 
+      ifTrue: [hold :_accountingPrice <- record accountingPrice]; 
+      ^my includesCurrency 
+      isTrue && [
+          record accountingCurrency isntDefault]
+      ifTrue: [hold setBaseCurrencyTo: record accountingCurrency]; 
+      ^my includesADate isTrue && [record adjustmentDate isntDefault]
+      ifTrue: [hold setAdjustmentDateTo: record adjustmentDate]; 
+      hold
+    ]; 
+  tmpHoldings do: [^my holdingsSeries , ^self]; 
+  ^self computeAccountTotals; 
+];
+
+###
+# holdingsSeries List store management hooks and code
+###
+Security defineMethod: [|rebuildHoldings|
+  ^self manageHoldingsPrototype;
+
+  ^self asSelf masterList do: [
+    deleteCurrentHoldings; 
+    :holdingsSeries put: holdingsPrototype; 
+  ]; 
+
+  !validAccounts <- CoreWorkspace Account masterList 
+    select: [holdingsSeries count > 0 && [holdingsDate = ^date]]; 
+  !holdings <- validAccounts collectListElementsFrom: [holdingsSeries]; 
+  :holdings <- holdings groupedBy: [security asSelf]; 
+
+  :holdings cleanStore; 
+
+  holdings do: [
+    :holdingsSeries put: holdingsPrototype clusterNew; 
+    groupList do: [^my holdingsSeries , ^self]; 
+  ]; 
+
+  asSelf masterList 
+    select: [holdingsSeries isDefault].
+    select: [:holdingsSeries lag: 1 days .isDefault].
+    do: [:holdingsSeries delete: ^date]; 
+];
+
+Account defineMethod: [|initializeDailyHoldingsBasedValues|
+  ^self manageHoldingsPrototype;
+  ^self deleteCurrentHoldings; 
+  :holdingsSeries put: holdingsPrototype; 
+  :_totalMarketValue put: NA; 
+  :_totalMarketValueCash put: NA; 
+  :_totalMarketValueEquity put: NA; 
+  :_totalMarketValueFixed put: NA; 
+  :_totalCost put: NA; 
+];
+
+Account defineMethod: [|manageHoldingsPrototype|
+  !acct <- ^current super; # ALWAYS operate at the Account level!
+
+  acct defaultInstance sendOnceNoContext: [
+    ^my acct holdingsPrototype memberVectorCardinality > 2000000000 ifTrue: [
+      ^my acct define: 'holdingsPrototype' toBe: CoreWorkspace List new;
+    ];
+  ];
+
+  ^self
+];
+
+Security defineMethod: [|manageHoldingsPrototype|
+  !sec <- ^current super; # ALWAYS operate at the Security level!
+
+  sec defaultInstance sendOnceNoContext: [
+    ^my sec holdingsPrototype memberVectorCardinality > 2000000000 ifTrue: [
+      ^my sec define: 'holdingsPrototype' toBe: CoreWorkspace List new;
+    ];
+  ];
+
+  ^self
+];
+
+List defineMethod: [|getMemberVector|
+  ^self asPOP getNthPOP: 1 . asObject
+];
+
+List defineMethod: [|memberVectorCardinality|
+  ^self getMemberVector clusterCardinality
+];
+
+###
+# - Create a version of expireIndexAccounts that takes a parameter
+# - Call Account expireHoldings so expirations can be done outside this feed
+###
+HoldingsFeed defineMethod: [|expireIndexAccounts: rule|
+  !feed <- ^self asSelf;
+  !expireCutoff <- rule;
+  expireCutoff isntNA
+  ifTrue: [
+    :expireCutoff <- 
+      expireCutoff isDateOffset 
+        ifTrue: [ expireCutoff ] .
+      elseIf: [ expireCutoff isString ] 
+        then: [ expireCutoff as: CoreWorkspace DateOffset ] .
+      elseIf: [expireCutoff asNumber isNumber] 
+        then: [ expireCutoff asNumber asInteger businessDays ];
+
+    expireCutoff isDateOffset not
+      ifTrue: [:expireCutoff <- 5 businessDays];
+
+    !todo <- CoreWorkspace IndexAccount activeList
+      select: [hasHoldings].
+      select: [holdingsDate + ^my expireCutoff <= ^date];
+
+    todo do: [
+      holdingsDate + 1 businessDays evaluate: [ ^self expireHoldings; ];
+    ];
+  ];
+];
+
+HoldingsFeed defineMethod: [|expireIndexAccounts|
+  !feed <- ^self asSelf;
+  !expireCutoff <- ^self getGlobalOption: "autoExpireIndexAccounts";
+  feed expireIndexAccounts: expireCutoff;
+];
+
+IndexAccount defineMethod: [|expireHoldings|
+  ^super expireHoldings;
+
+  :memberList put: ^self memberListPrototype;
+  ^self checkNextDateMembership;
+
+  updatesSharesCache isTrue ifTrue: [ updateSharesCache; ];
+];
+
+Account defineMethod: [|expireHoldings|
+  ^self initializeDailyHoldingsBasedValues;
+];
+
+###
+# Holding store management
+###
+Holding defineMethod: [| createNewStoreAsOf: date at: ospace| 
+  !existingStore <- ^self :storeXRef on: date;
+  !store;
+
+  # return the existing store if there is already one on this date
+  existingStore isntNA ifTrue: [ :store <- existingStore; ] 
+    else: [
+      :store <- ^self newPrototype new 
+        do: [
+          :defaultFlag <- TRUE; 
+          :account <- CoreWorkspace Named Account Default; 
+          :security <- CoreWorkspace Named Security Default; 
+          :baseCurrency <- CoreWorkspace Named Currency Default; 
+          :date <- ^my date; 
+        ]; 
+
+      !location <- ospace isntNA 
+        ifTrue:  [ ospace                      ]
+        ifFalse: [ ^self :storeXRef asOf: date ]; 
+
+      location objectSpace > 0 
+        ifTrue: [store establishResidenceInSpaceOf: location]; 
+
+      ospace isntNA 
+        ifTrue: [ospace define: 'Holding' toBe: store]; 
+
+      ^self :storeXRef asOf: date put: store; 
+    ];
+
+  store
+];
+
+###
+# Holding purging
+###
+IndexAccount defineMethod: [|purgeHoldings|
+  ^super purgeHoldings;
+  ^self clearMembershipDate;
+  updatesSharesCache isTrue ifTrue: [ 
+    ^self deleteSharesCache; 
+  ];
+  ^self
+];
+
+IndexAccount defineMethod: [|clearMembershipDate|
+  !acct <- ^self asSelf;
+
+  # delete the memberlist if we can
+  (:memberList on: ^date .isntNA) ifTrue: [ 
+    acct memberList != acct memberListPrototype 
+      ifTrue: [ ^self memberList rdelete; ];
+    acct :memberList delete: ^date;
+  ];
+
+  acct checkNextDateMembership;
+  ^self
+];
+
+IndexAccount defineMethod: [|checkNextDateMembership|
+  !acct <- ^self asSelf;
+
+  # check the following memberList, if applicable
+  !nextDate <- acct :holdingsSeries nextDateAsOf: ^date;
+  nextDate isntNA ifTrue: [ nextDate evaluate: [ 
+    !secs <- holdingsSeries send: [ security ];
+    memberList isntEquivalentTo: secs .|| [universe isntDefault]
+    ifTrue: [
+        ^self setSecuritiesTo: secs asOf: ^date; 
+       ]; 
+  ]; ];
+  ^self
+];
+
+Account defineMethod: [|purgeHoldings|
+  (:holdingsSeries on: ^date . isntNA) ifTrue: [
+
+    # holdings deletion
+    holdingsSeries do: [^self rdelete]; 
+    holdingsSeries != holdingsPrototype 
+      ifTrue: [holdingsSeries rdelete]; 
+    :holdingsSeries delete: ^date; 
+
+    # other required cleanup
+    ^self deleteAccountTotals;
+    CoreWorkspace Security doOnce: [ ^self rebuildHoldings ];
+  ];
+  ^self
+];
+
+Account defineMethod: [|deleteAccountTotals|
+  :_totalMarketValue delete: ^date;
+  :_totalMarketValueCash delete: ^date;
+  :_totalMarketValueEquity delete: ^date;
+  :_totalMarketValueFixed delete: ^date;
+  :_totalCost delete: ^date;
+  ^self
+];
+
+
+

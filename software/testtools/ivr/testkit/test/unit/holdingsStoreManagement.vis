@@ -1,0 +1,41 @@
+"testkit/lib/test/order.vis" asFileContents evaluate;
+
+[
+  "source/order.vis" asFileContents evaluate;
+] debugOutput;
+
+
+
+!newStores <- List new;
+
+# Create 2 new stores,
+newStores, 
+  (Holding createNewStoreAsOf: 20091101 asDate at: 4 asObjectSpace getSpace),
+  (Holding createNewStoreAsOf: 20091101 asDate at: 5 asObjectSpace getSpace),
+  (Holding createNewStoreAsOf: 20091102 asDate at: 6 asObjectSpace getSpace)
+;
+
+3 sequence do: [ 
+  ^my newStores do: [ ^self clusterNew; ];
+];
+
+"New Stores (should all be TRUE, referenced): " printNL;
+newStores do: [ 
+  !self <- ^self;
+  (^my Holding :storeXRef select: [ ^self = ^my self ] . count = 1) print: 6;
+  ^self clusterCardinality print: 10;
+  " OS:" print;
+  ^self objectSpace asString printNL;
+];
+newLine print;
+
+"By storeXRef:" printNL;
+Holding :storeXRef do: [ 
+  ^date print: 13; ^self clusterCardinality print: 10; 
+  " OS:" print;
+  ^self objectSpace asString printNL;
+];
+
+
+
+

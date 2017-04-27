@@ -1,0 +1,8 @@
+pre_exec: start -c $POOLTESTERDIR/configs/max1.ptc
+
+thread:flush, repetitions:10
+
+operation_on_thread:flush, run:hardRestart
+operation_on_thread:flush, run:query -q $POOLTESTERDIR/queries/TestQuery01.vis -a -w
+
+post_exec: stop

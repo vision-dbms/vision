@@ -1,0 +1,72 @@
+#!/bin/bash
+#
+# Driver
+#
+
+# Set up this script's environment.
+[[ -f ~/.poolTester ]] && source ~/.poolTester
+[[ -f .poolTester && "`pwd`" != "$HOME" ]] && source .poolTester
+: ${POOLTESTERDIR:=`dirname ${BASH_SOURCE[0]}`}
+: ${scratchSpace:=$POOLTESTERDIR/../scratch}
+: ${includes:=$POOLTESTERDIR/include}
+
+# Pull in our includes.
+for i in $includes/*.sh; do
+    source $i
+done
+
+# Get our command-line options.
+OPTIND=1
+while getopts 'cdhp:r:s:v' OPTION; do
+    case $OPTION in
+        c)
+            debug_inform "Enabling colorization."
+            COLORIZE=true
+            ;;
+        d)
+            debug_inform "Setting DEBUG=true"
+            DEBUG=true
+            ;;
+        h)
+            help
+            exit
+            ;;
+        p)
+            debug_inform "Setting poolIdx=$OPTARG"
+            poolIdx="$OPTARG"
+            ;;
+        r)
+            debug_inform "Setting remoteHost=$OPTARG"
+            remoteHost="$OPTARG"
+            ;;
+        s)
+            debug_inform "Setting sessionName=$OPTARG"
+            sessionName="$OPTARG"
+            ;;
+        v)
+            debug_inform "Setting VERBOSE=true"
+            VERBOSE=true
+            ;;
+        ?)
+            error "Argument parse error."
+            ;;
+    esac
+done
+shift $(($OPTIND - 1))
+OPTIND=1
+
+# Get our operation.
+operation="$1"
+shift
+
+# Make sure that we have the correct parameters to proceed.
+if [[ -z "$operation" ]]; then
+    error "Operation parameter expected. Try '$POOLTESTER help'."
+fi
+
+# Make sure that the given operation exists.
+operation_exists $operation || error "No operation '$operation' found."
+
+# Operation exists. Execute with arguments.
+debug_inform "Running operation '$operation' with arguments '$@'."
+$operation $@

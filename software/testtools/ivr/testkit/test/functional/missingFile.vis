@@ -1,0 +1,15 @@
+"testkit/lib/test/order.vis" asFileContents evaluate;
+[
+"source/order.vis" asFileContents evaluate;
+
+IVR File registerFile: "security" . relateTo: Security .
+  setIdField: "id" .
+  setDateField: "date" .
+  do: [ 
+    ^self addMaster;
+  ];
+
+] debugOutput;
+  
+IVR File locateId: "security" . uploadFile: "nonExistentFile.txt";
+

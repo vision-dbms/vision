@@ -1,0 +1,76 @@
+"testkit/lib/test/order.vis" asFileContents evaluate;
+[ 
+  "source/order.vis" asFileContents evaluate; 
+  "testkit/test/helpers/holdingsHelpers.vis" asFileContents evaluate;
+] debugOutput;
+
+!sec <- IVR File registerFile: "Security" . relateTo: Security .
+  setIdField: "id" .
+  setDateField: "date" .
+  do: [ 
+    ^self addMaster 
+      addItem: "name", "name" .
+      addItem: "holdingsShares"  , "holdingsShares" , "Double" .
+      addItem: "holdingsMcap"    , "holdingsMcap"   , "Double" .
+    ;
+  ];
+
+!acct <- IVR File registerFile: "IndexAccount" . relateTo: IndexAccount .
+  setIdField: "id" .
+  setDateField: "date" .
+  do: [ 
+    ^self addMaster 
+      addItem: "name", "name" .
+      addItem: "sharesFactor"  , "sharesFactor" , "Double" .
+      addItem: "mcapFactor"    , "mcapFactor"   , "Double" .
+    ;
+
+    ^self addMembership: "Type" .
+      addFeedOptions: "enableUploadDefault" . 
+      withForeignId: "type" .
+    ;
+  ];
+
+sec buildRecipients;
+acct buildRecipients;
+
+20091120 evaluate: [
+
+TypeMaster updateFromString:
+"id              | securityCriteria   | weightFormula | sharesFormula
+WithAccountRules | holdingsShares > 0 | holdingsMcap  | holdingsShares
+";
+Type locateId: "WithAccountRules" . do: [ 
+  :weightFormula <- [|:account| holdingsMcap   * account mcapFactor    ];
+  :sharesFormula <- [|:account| holdingsShares * account sharesFactor  ];
+];
+
+acct uploadString: 
+"id      | name        | sharesFactor | mcapFactor | type 
+ACCOUNT1 | Account One | 5            | 0.5        | WithAccountRules
+";
+
+sec uploadString:
+"id | name         | holdingsShares | holdingsMcap
+1   | Security One | 10             | 50
+";
+
+
+
+
+
+IVR Holdings 
+  setClassificationListTo: [type];
+;
+
+IVR Holdings doit;
+
+!account1 <- Named IndexAccount at: "ACCOUNT1" ;
+^tmp displayAccountHoldings: account1;
+
+IVR Holdings auditBuildFor: account1;
+
+];
+
+
+

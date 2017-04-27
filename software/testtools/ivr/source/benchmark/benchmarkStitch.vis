@@ -1,0 +1,257 @@
+#########################################################################
+#
+# patch.benchmarkStitch.vis - 20070130
+#
+# Created by: tjk 
+#
+# Description:
+#
+#
+# Audit:
+#   20070130 - initial revision
+#
+#########################################################################
+
+
+##########
+# New Method
+#
+# Description:
+#   For a given property (updateBlock) that is a TimeSeries take all of the
+#   points from the source (recipient) Entity and move them onto the TimeSeries
+#   of the target Entity.  Then modify the "entity" references at the
+#   DataRecord from the source to the target entity.
+##########
+Entity defineMethod: [| switchTSDataRecord: updateBlock to: target |
+  !newEntity <- target asSelf;
+  !oldEntity <- ^self asSelf;
+
+  oldEntity basicSend: updateBlock . do: [ 
+    !newTS <- ^my newEntity basicSend: ^my updateBlock;
+    !oldTS <- ^my oldEntity basicSend: ^my updateBlock;
+
+    newTS on: ^date . isNA ifTrue: [ 
+        newTS asOf: ^date put: ^self;
+        oldTS delete: ^date;
+
+        :entity <- ^my newEntity;
+      ] .
+    elseIf: [ ^self isntDefault ] then: [ 
+        # Report collisions, keeping the current entry for target
+        # The data at the source will continue to be accessible.
+        ">>> Conflict: Not Moving " print;
+        ^my updateBlock print;
+        " from " print; 
+        ^my oldEntity print; 
+        " to " print;
+        ^my newEntity print;
+        " on " print;
+        ^date printNL;
+      ];
+  ];
+
+  ^self
+];
+
+##########
+# New Method
+#
+# Description:
+#   Locate all of the relevant properties on a DataRecord that are a TimeSeries
+#   that should point to a DataRecord, according to the SchemaTools.  
+##########
+Entity defineMethod: [| findTSDataRecords |
+  !target <- ^self;
+  ^self getMessagesX select: [ 
+      returnObjectType class isDataRecord &&
+      type isTimeSeriesProperty
+    ] .
+    # Return a list of updateable TimeSeries that matched the criteria
+    send: [ code asUpdateBlock ] .
+];
+
+##########
+# New Method
+#
+# Description:
+#   Find all of the TimeSeries DataRecords and move data to the target entity.
+#   The two previous methods are used and discuss the details.
+##########
+Entity defineMethod: [| stitchTSDataRecordsTo: target |
+  !source <- ^self;
+
+  ^self findTSDataRecords do: [ 
+    ^my source switchTSDataRecord: ^self to: ^my target 
+  ];
+
+  ^self
+];
+
+
+##########
+# New Method
+#
+# Description:
+#   Test if two securities can be stitched together without encountering
+#   conflicts.  If this is possible, stitch them.  Otherwise report the error
+#   to the user using standard output.
+##########
+Security defineMethod: [| stitchHoldingsTo: target |
+  !newSec <- target asSelf;
+  !oldSec <- ^self asSelf;
+
+  # This simple holdings stitch does not work if there are duplicate dates.
+  # Here we detect these dates
+  !dateList <- oldSec :holdingsSeries nonDefaults send: [ ^date ] .
+    append: (newSec :holdingsSeries nonDefaults send: [ ^date ]);
+
+  !duplicates <- dateList groupedBy: [ ^self ] .
+    select: [ groupList count > 1 ];
+
+  duplicates count > 0 ifTrue: [
+    ">>> Overlapping Dates Deteced.  Not Moving Holdings from " print;
+    oldSec print;
+    " to " print;
+    newSec print;
+    ". Dates of overlap:" print;
+    duplicates do: [ " " print; ^self print; ];
+    ^self
+  ] 
+  else: [
+    # No conflicting dates have been detected.  We can proceed with this
+    # Holdings stitch.
+
+    # Switch the memberList references at IndexAccount :memberList
+    oldSec :holdingsSeries do: [ 
+      !newSec <- ^my newSec;
+      ^self 
+        select: [ account respondsTo: ":memberList" ] . # check for memberList
+        extendBy: [ 
+          !ml <- account :memberList on: ^date;
+        ] .
+        select: [ ml isntNA ] . # only modify existing TS points
+        do: [ 
+          ml delete: security;
+          ml at: ^my newSec put: ^my newSec;
+        ];
+    ];
+
+    # Switch the Security :holdingsSeries
+    oldSec :holdingsSeries do: [ 
+      !newSec <- ^my newSec;
+
+      # This could be destructive (orphaning) if the dates overlap
+      # (there is a check for this earlier, this is a triple check!)
+      #
+      # Note that we check isDefault, not isNA.  This is to allow us to 
+      # overwrite exipration entries with actual holdings (though, any default
+      # record would be considered an expiration here).
+      !newHoldings <- ^my newSec :holdingsSeries on: ^date;
+      newHoldings isDefault ifTrue: [ 
+
+          # Don't orphan old lists (right now the holdings list store only has
+          # one store - this is not the Holding instance!).
+          newHoldings isntNA && [ newHoldings != newSec holdingsPrototype ]
+            ifTrue: [
+              newHoldings rdelete;
+            ];
+
+          ^my newSec :holdingsSeries asOf: ^date put: ^self;
+
+          # Leave the empty list on the earliest possible date.  This is 
+          # supposed to be a deleted security anyway, but it might be 
+          # Unstitched in the future so don't violate invariants.
+          ^date != earliestPossibleDate ifTrue: [
+            ^my oldSec :holdingsSeries delete: ^date;
+          ];
+
+          # Switch the security property at Holding.  This is the only 
+          # place this method actually modifies a Holding instance
+          ^self do: [ :security <- ^my newSec; ]; 
+        ] .
+      elseIf: [ ^self isntDefault ] then: [ 
+          ">>> SHOULD NOT GET HERE!!  Not Moving holdings for " print; 
+          ^my oldSec print; " on " print;
+          ^date printNL;
+        ];
+    ];
+    ^self
+  ]
+];
+
+##########
+# New Method
+#
+# Description:
+#   The method at SecurityCorrectionFeed that will display output similar to
+#   that of existing SecurityCorrectionFeeds, sharing naming conventions.
+#   Ultimately it calls stitchHoldingsTo: for the Securities being stitched.
+##########
+SecurityCorrectionFeed defineMethod: [| reloadHoldingsFor: list | 
+  newLine print;
+  "Moving holdings from source to target security. " printNL;
+  "Source" print: 20;
+  "  " print;
+  "Target" printNL: 20;
+
+  list do: [ 
+    sourceSecurity print: 20;
+    "  " print;
+    targetSecurity printNL: 20;
+  ];
+
+  
+  list do: [ sourceSecurity stitchHoldingsTo: targetSecurity; ];
+];
+
+
+##########
+# New Method
+#
+# Description:
+#   The method at SecurityCorrectionFeed that will display output similar to
+#   that of existing SecurityCorrectionFeeds, sharing naming conventions.
+#   Ultimately it calls stitchTSDataRecordsTo: for the Securities being
+#   stitched.
+##########
+SecurityCorrectionFeed defineMethod: [| reloadTSDataRecordsFor: list | 
+  newLine print;
+  "Moving time series data records from source to target security. " printNL;
+  "Source" print: 20;
+  "  " print;
+  "Target" printNL: 20;
+
+  list do: [ 
+    sourceSecurity print: 20;
+    "  " print;
+    targetSecurity printNL: 20;
+  ];
+
+
+  list do: [ sourceSecurity stitchTSDataRecordsTo: targetSecurity; ];
+];
+
+##########
+# New Method
+#
+# Description:
+#   This is the hook into StitchSecurityFeed.  This calls the helper methods
+#   for Benchmark stitches that have been placed at SecurityCorrectionFeed
+##########
+StitchSecurityFeed defineMethod: [|reloadData|
+  ^self resetRunTimeAttributes; 
+  !list <- ^self masterList select: [isProcessed].
+  extendBy: [
+    !sourceSecurity <- securityToMove; 
+    !targetSecurity <- securityToKeep; 
+  ]; 
+  ^self reloadPricesFor: list purgeSource: FALSE; 
+  ^self reloadSplitsFor: list purgeSource: FALSE; 
+  ^self reloadDivsFor: list purgeSource: FALSE; 
+
+  ^self reloadHoldingsFor: list; # New for Benchmarks
+  ^self reloadTSDataRecordsFor: list; # New for Benchmarks
+
+  reloadOtherData; 
+];
+

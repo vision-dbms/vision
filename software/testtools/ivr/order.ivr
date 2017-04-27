@@ -1,0 +1,17 @@
+####################
+# $DateTime: 2017/03/29 18:04:00 $
+# $Revision: #2 $
+#
+# The script adds full IVR protocol to empty bootstrap.
+####################
+
+[
+  ^tmp define: 'ivrSourcePath' toBe: (
+    ProcessControlTools getEnvFor: "FastAdmin" .
+      concat: "/core/ivr/"
+  );
+] value;
+
+^tmp ivrSourcePath concat: "source/order.vis" . asFileContents evaluate;
+^tmp ivrSourcePath concat: "INITpatch.ivr" . asFileContents evaluate;
+

@@ -1,0 +1,38 @@
+RCompareTools define: 'verbosity' toBe: 1;
+
+Object     excludeMessages: "creationDate";
+Object     excludeMessages: "lastModifiedByFeed";
+DataItem   excludeMessages: "baseClass";
+
+DataFeed   excludeMessages: "lastUpdateTime";
+
+Schema     excludeMessages: "number"; # number based on creation order?
+Schema     excludeMessages: "primaryStringCluster";
+
+Schema localROptions setLookupBlockTo: [ ^self whatAmI concat: ^self code ];
+Schema ClassDescriptor localROptions setLookupBlockTo: 
+  [ ^self class asString concat: ^self code . concat: ^self whatAmI ];
+
+# stub for CAccessRules, this should be expanded further
+CoreWorkspace respondsTo: 'CAccessRule' . ifTrue: [
+  CAccessRule defineMethod: [|rcompare: rhs depth: depth |
+    ^self code = rhs code
+  ];
+];
+
+CoreWorkspace respondsTo: 'PatchTable' . ifTrue: [
+  PatchTable excludeMessages: "lastPatchTime";
+];
+
+[ 
+  !startList <- CoreWorkspace List new;
+
+  startList, Entity;
+  CoreWorkspace respondsTo: "IVR" . ifTrue: [ startList, IVR ];
+  
+  startList collectListElementsFrom: [ 
+      ^self subclassList collectListElementsFrom: [ ^self instanceList ] .
+        send: [ ^self asBaseObject ]
+    ] . sortUp: [ ^self whatAmI ]
+] value
+

@@ -1,0 +1,26 @@
+Pool Tester README
+
+INTRODUCTION
+
+This utility is designed to aid in automated/routine testing of vpool and associated utilities.
+
+USAGE
+
+See on-line help.
+    
+CONFIGURATION
+
+The following environment variables can be used to override configuration defaults. In addition to these, environment variables used by vpool and associated programs can also be manually defined/overwritten. For a list of all configuration variables including default values, see include/config.sh.
+
+Tools: Where to find executables.
+NDFPathName: Path to the Vision network used for each worker.
+ 
+RUNTIME DEPENDENCIES
+
+In order to start pools with workers, a Vision network is necessary. By default, a usable network is expected in $HOME/vision-testtools/scratch/testNetwork-`uname`/NDF. In most cases, any network will do, since workers are typically not expected to actually query the network for any useful data.
+
+In order to use vcatool, said utility must be available in your $PATH.
+
+DEVELOPER DOCUMENTATION
+
+Additional operations can be added to the include directory by creating a new .sh file there and defining within it a function named after your new operation. This function must then be followed by an appropriate call to register_operation. You are also encouraged to provide a <operation>_help function in the same file. Operations should always begin with a lowercase alpha character.

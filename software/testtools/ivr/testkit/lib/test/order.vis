@@ -1,0 +1,1077 @@
+###
+# Testing Module
+###
+
+###
+# Include Requirements
+###
+"source/misc/classBuilder.vis" asFileContents evaluate;
+"testkit/lib/system/order.vis" asFileContents evaluate;
+"source/misc/utils.vis" asFileContents evaluate;
+
+###
+# Class Structure Setup
+### 
+[ 
+  !start <- CoreWorkspace Utility;
+  !toolkitName <- "Test";
+
+  (start respondsTo: toolkitName) ifFalse: [
+    # The test workspace
+    !test        <- start createSubclass: toolkitName at: start;
+                    test createSubclass: "UnitTest" at: start;
+                    test createSubclass: "FunctionalTest" at: start;
+    !commappTest <- test createSubclass: "CommappTest" at: start;
+                    commappTest createSubclass: "CommappAutoTest" at: start;
+                    test        createSubclass: "CommappTestParent" at: start;
+
+    !run <- start createSubclass: "TestRun" at: start;
+            run   createSubclass: "TestRunPersistent" at: start;
+            run   createSubclass: "TestRunTransient" at: start;
+
+    ###
+    # Properties
+    ###
+    Utility Test defineFixedRWStringProperty: "saveName"; # delete this
+    Utility Test define: 'encounteredErrors' toBe: NA;
+
+    start CommappAutoTest defineFixedRWProperty: "parent";
+    start TestRun defineFixedRWProperty: "testId";
+    start TestRun defineFixedRWProperty: "stats";
+    start TestRun defineFixedRWProperty: "startTime";
+    start TestRun defineFixedRWStringProperty: "result";
+    start TestRunPersistent defineFixedRWStringProperty: "runSet";
+
+    # Kludge for subprocesses.  When we can realize runs from
+    # disk in subprocesses the run will know about it's ability to update
+    start TestRun defineEnableDisable: 'networkUpdates';
+    start TestRun disableNetworkUpdates;
+
+
+    start TestRun define: 'updatesEnabled' toBe: FALSE;
+  ];
+
+] value;
+
+
+###
+# Overriding the normal environment
+###
+
+# Verbose output from SNFs please
+Utility SessionAttribute enableVerboseSelectorNotFound;
+
+###
+# debugOutput.  This output does not show up in batch mode but it does
+# in normal mode 
+###
+Block respondsTo: "debugOutput" . ifFalse: [
+  Block defineMethod: [|debugOutput|
+    ^self value
+  ];
+];
+
+###
+# Get rid of the dang V>'s
+###
+String defineMethod: [|cleanupVPrompt|
+  ^self translateString: "V> " to: ""
+];
+
+String defineMethod: [|chop|
+  ^self from: 1 to: ^self count decrement
+];
+
+String defineMethod: [|chomp|
+  (^self from: ^self count to: ^self count) = newLine 
+    ifTrue: [ ^self from: 1 to: ^self count decrement ]
+    else:   [ ^self ]
+];
+
+String defineMethod: [|concatNL: rhs|
+  ^self concat: newLine . concat: rhs
+];
+
+String defineMethod: [|fixReadNewlines|
+  ^self translateString: "" to: "" . 
+];
+
+###
+# Get pissy when somebody uses a non-local filepath or a filepath that doesn't
+# conform to unix, vms and windows standards
+###
+String defineMethod: [|asFileContents|
+  !fname <- ^self breakOn: "/" . last: 1 . anElement;
+  (^self at: 1 . = "/") ifTrue: [
+    ">>> Non local filename attempted: \"" print; 
+    ^self print; "\"" printNL;
+  ] .
+  elseIf: [fname breakOn: "." . count > 2] then: [
+    ">>> Invalid filename attempted: \"" print; 
+    ^self print; "\"" printNL;
+  ] .
+  else: [
+    !ovc <- "file:" concat: ^self .asOpenVisionChannel; 
+    !result <- ovc status != ovc status Failed ifTrue: [
+      !result <- ovc getString; 
+      result isNA ifTrue: [""]ifFalse: [result]
+    ]; 
+    ovc close; 
+    result
+  ]
+];
+
+
+###
+# Actual "Utility Test" class methods
+###
+ClassBuilder Utility defineCodeAccessorFor: Utility Test;
+
+Utility Test defineMethod: [|initializeKeys: keys|
+  !self <- ^self;
+
+  self setCodeTo:       (keys at: 1);
+
+  ^self
+];
+
+Utility Test defineMethod: [|shortName|
+  code breakOn: "\\/" . last: 1 . anElement
+];
+
+Utility CommappTest defineMethod: [|shortName|
+  !components <- code breakOn: "\\/" . last: 2;
+
+  components at: 1 . concat: "-" . concat: (components at: 2)
+];
+
+Utility Test defineMethod: [|testFileName|
+  code concat: ".vis"
+];
+
+Utility CommappAutoTest defineMethod: [|testFileName|
+  code concat: ".autotest"
+];
+
+Utility Test defineMethod: [|testOutputName|
+  code concat: ".testout"
+];
+
+Utility Test defineMethod: [|testRefName|
+  code concat: ".testref"
+];
+
+Utility CommappAutoTest defineMethod: [|dateFromString: string|
+  !fields <- string breakOn: "/";
+  fields at: fields count . asDate
+];
+
+Utility CommappAutoTest defineMethod: [|dateFromCode|
+  ^self dateFromString: ^self code
+];
+
+Utility TestRun defineMethod: [|canUpdate|
+  ^self savePath isntNA
+];
+
+Utility TestRun           define: 'savePath' toBe: NA;
+Utility TestRunPersistent define: 'savePath' toBe: "workCache/saves/";
+
+Utility TestRun defineMethod: [|ndfPath| NA ];
+Utility TestRun defineMethod: [|networkPath| NA ];
+Utility TestRun defineMethod: [|usageLogFile| NA ];
+
+Utility TestRunPersistent defineMethod: [|ndfPath|
+  ^self networkPath concat: "/NDF"
+];
+Utility TestRunPersistent defineMethod: [|networkPath|
+  ^self savePath concat: "/" . 
+    concat: runSet . concat: "/" . 
+    concat: testId
+];
+Utility TestRunPersistent defineMethod: [|morePath|
+  ^self networkPath concat: "/more/"
+];
+Utility TestRunPersistent defineMethod: [|testOutFile|
+  ^self morePath concat: testId . concat: ".testout"
+];
+Utility TestRunPersistent defineMethod: [|statsFile|
+  ^self morePath concat: "statistics.txt"
+];
+Utility TestRunPersistent defineMethod: [|usageLogFile|
+  ^self morePath concat: "usageLog.txt"
+];
+
+
+
+Utility TestRun defineMethod: [|getOrCreate: keys|
+  keys isList ifFalse: [ :keys <- keys asList ];
+
+  keys count = 1 
+    ifTrue: [ TestRunTransient createInstance: keys ]
+    else:   [ TestRunPersistent createInstance: keys ]
+];
+
+Utility TestRunTransient defineMethod: [|initializeKeys: keys|
+  ^self setTestIdTo: (keys at: 1);
+  ^self
+];
+
+Utility TestRunPersistent defineMethod: [|initializeKeys: keys|
+  ^self setRunSetTo: (^self getClusteredString: (keys at: 2));
+  ^self setTestIdTo: (keys at: 1);
+  ^self
+];
+
+Utility TestRun defineMethod: [|setup| ^self ];
+Utility TestRunPersistent defineMethod: [|setup|
+  ^self setupRunDirectory;
+  ^self
+];
+
+Utility TestRunPersistent defineMethod: [|setupRunDirectory|
+  !self <- ^self;
+  self savePath fileExists ifFalse: [
+    "mkdir " concat: self savePath . asProgramWith: [];
+  ];
+
+  self savePath fileExists ifFalse: [ 
+    ">>> unable to create required directory: " print;
+    self savePath print; " (is 'workCache' present?)" printNL;
+  ];
+
+  !fullPath <- self savePath concat: self runSet . concat: "/";
+  fullPath fileExists ifFalse: [ 
+    "mkdir " concat: fullPath . asProgramWith: [];
+  ];
+
+  self copyNetworkTo: networkPath;
+
+  self morePath fileExists ifFalse: [ 
+    "mkdir " concat: self morePath . asProgramWith: [];
+  ];
+
+  ^self
+];
+
+Utility TestRunPersistent defineMethod: [|copyNetworkTo: path|
+  !self <- ^self;
+  path fileExists ifFalse: [ 
+    !currentNetwork <- osdPathName;
+
+    # copy from osdPathName to myNetwork
+    "cp -r " concat: currentNetwork . concat: " " .
+      concat: path . asProgramWith: [];
+
+    # delete NDF.UUID
+    "rm " concat: path . concat: "/NDF.UUID" .  asProgramWith: [];
+
+    # update NDF.OSDPATH
+    path concat: "/NDF.OSDPATH" . substituteOutputOf: [ path printNL ];
+
+    # update the NDF.GURL (this is my network)
+    !user <- "whoami" asProgramWith: [];
+    path concat: "/NDF.GURL" .  substituteOutputOf: [ user print; ];
+  ]
+  else: [
+    newLine print;
+    "+++ Warning: Network exists: " print; path printNL;
+  ];
+
+  ^self
+];
+
+Utility TestRun defineMethod: [|runVision: toRun|
+  !self <- ^self asSelf;
+  !externalStart <- CoreWorkspace HighResolutionTime localTimeNow;
+  !result <- CoreWorkspace Utility OS runVisionWith: toRun;
+  !externalEnd <- CoreWorkspace HighResolutionTime localTimeNow;
+
+  self addStatistic: "externalTime" value: (
+    externalStart countSecondsTo: externalEnd
+  );
+  self save;
+
+  result
+];
+Utility TestRunPersistent defineMethod: [|runVision: toRun|
+  !self <- ^self asSelf;
+  !ndf <- self ndfPath;
+
+  ndf fileExists ifTrue: [
+    :toRun <- 
+      "\"testkit/lib/test/setBatchMode.vis\" asFileContents evaluate;" concatNL:
+      "\"testkit/lib/test/order.vis\" asFileContents evaluate;" . 
+      concatNL: "^tmp define: \"test\" toBe: (Utility TestRun getOrCreate: \"" . 
+      concat: testId .  concat: "\", \"" . concat: runSet . 
+      concat: "\" . start);" .  concatNL: toRun .  concatNL: "^tmp test finish;";
+
+    !externalStart <- CoreWorkspace HighResolutionTime localTimeNow;
+    !result <- CoreWorkspace Utility OS runVisionWith: toRun onNetwork: ndf;
+    !externalEnd <- CoreWorkspace HighResolutionTime localTimeNow;
+
+    self load;
+
+    !usageLog <- self usageLogFile asFileContents asLines extendBy: [ 
+      !fields  <- ^self breakOn: "|" . send: [ stripBoundingBlanks ];
+      !elapsed <- (fields at: 7 . asNumber) / 1000;
+      !user    <- (fields at: 8 . asNumber) / 1000;
+      !system  <- (fields at: 9 . asNumber) / 1000;
+    ] ;
+
+    self addStatistic: "usageElapsedTime" value: (usageLog total: [ elapsed ]);
+    self addStatistic: "usageUserTime"    value: (usageLog total: [ user    ]);
+    self addStatistic: "usageSystemTime"  value: (usageLog total: [ system  ]);
+
+    self addStatistic: "externalTime" value: (
+      externalStart countSecondsTo: externalEnd
+    );
+
+    self save;
+
+    result
+  ] else: [
+    ""
+  ]
+];
+
+Utility TestRun defineMethod: [|addStatistic: name value: val|
+  !self <- ^self;
+  self setStatsTo: (
+    self stats else: [ "" ] . concat: [ 
+      name print; " | " print; val printNL: 40.11;
+    ] divertOutput
+  );
+  self
+];
+
+Utility TestRun defineMethod: [|save| ^self ];
+Utility TestRunPersistent defineMethod: [|save| 
+  !self <- ^self;
+
+  self stats isntDefault ifTrue: [ 
+    self statsFile substituteOutputOf: [
+      self stats print;
+    ];
+  ];
+
+  ^self
+];
+
+Utility TestRun defineMethod: [|load| ^self ];
+Utility TestRunPersistent defineMethod: [|load| 
+  !self <- ^self;
+  !save <- self stats;
+
+  self statsFile fileExists ifTrue: [
+    self setStatsTo: self statsFile asFileContents;
+    save isntDefault ifTrue: [
+      self setStatsTo: (save concatNL: self stats);
+    ];
+  ];
+  self result; # this will load the result
+
+  ^self
+];
+
+Utility TestRun defineMethod: [|start|
+  !self <- ^self;
+
+  self usageLogFile isntNA ifTrue: [ 
+    self usageLogFile substituteOutputOf: [];
+    CoreWorkspace Utility SessionAttribute visionLogPath <- self usageLogFile;
+    CoreWorkspace Utility SessionAttribute visionLogDelimiter <- "|";
+  ];
+
+  self setStartTimeTo: CoreWorkspace HighResolutionTime localTimeNow;
+  self
+];
+  
+Utility TestRun defineMethod: [|finish|
+  !self <- ^self;
+  !endTime <- CoreWorkspace HighResolutionTime localTimeNow;
+
+  self addStatistic: "finishAllocation" value:
+    CoreWorkspace AdminTools totalNetworkAllocation;
+  self addStatistic: "maxAllocation" value: 
+    CoreWorkspace AdminTools sessionAllocationHighWaterMark;
+  self addStatistic: "mappedAddressSpaceLevel" value: 
+    CoreWorkspace AdminTools sessionMappedAddressSpaceLevel;
+  self addStatistic: "elapsedTime" value: 
+    (startTime countSecondsTo: endTime);
+
+  self save;
+  self
+];
+
+# Things to measure
+HighResolutionTime defineMethod: [|localTimeNow|
+  !self <- ^self;
+  !usClass <- CoreWorkspace Utility UnixSeconds;
+  usClass passCurrentTimeToCollector: [|:seconds :microseconds|
+    !us <- seconds asPointerTo: usClass;
+    us passDecodedLocalTimeToCollector: [
+      | :year :mon :day :hour :min :sec :yday :wday :isdst|
+        self
+          fromYear: year + 1900
+          month: mon + 1
+          day: day
+          hours: hour
+          minutes: min
+          seconds: sec asDouble
+          andFemtoseconds: (microseconds * 1000000000)
+    ]
+  ]
+];
+AdminTools define: 'sessionAllocationHighWaterMark' toBePrimitive: 600 withControlValue: 1;
+AdminTools define: 'sessionAllocationResourceLimit' toBePrimitive: 600 withControlValue: 2;
+AdminTools define: 'sessionMappedAddressSpaceLevel' toBePrimitive: 600 withControlValue: 3;
+
+Utility SessionAttribute
+  define: 'visionLogPath' 
+  toBe: (281 asPointerTo: Utility SessionAttribute).
+
+  define: 'visionLogDelimiter' 
+  toBe: (283 asPointerTo: Utility SessionAttribute).
+
+  define: 'visionLogTag'
+  toBe: (282 asPointerTo: Utility SessionAttribute)
+;
+
+# Manage reads and writes to disk.  This is a SET ONCE, either from
+# disk or via one run and to disk
+Utility TestRunPersistent defineMethod: [|setResultTo: result| 
+  !self <- ^self;
+  _result isNA ifTrue: [
+    ^super setResultTo: result;
+    self testOutFile substituteOutputOf: [ self _result print; ];
+  ]
+  else: [
+    ">>> Utility TestRunPersistent setResultTo: result already set" printNL;
+  ];
+  ^self
+];
+Utility TestRun defineMethod: [|result| 
+  !self <- ^self;
+  _result isNA ifTrue: [ 
+    self testOutFile fileExists ifTrue: [
+      :_result <- self getClusteredString: (self testOutFile asFileContents);
+    ];
+  ];
+  _result
+];
+
+Utility Test defineMethod: [|setupString|
+  "\"testkit/lib/test/setBatchMode.vis\" asFileContents evaluate;" concatNL:
+  "\"testkit/lib/test/order.vis\" asFileContents evaluate;" . concat: newLine
+];
+
+Utility Test defineMethod: [|testString|
+  !script <- ^self testFileName;
+
+  ^self setupString concatNL: script asFileContents . concat: ";"
+];
+
+Utility CommappAutoTest defineMethod: [|setupString|
+   "##### AUTO GENERATED TEST!  Edit at your own risk!" concatNL: 
+  newLine . concatNL: ^super setupString . concatNL:
+  "\"" . concat: ^self parent testHelper . concat: "\" asFileContents evaluate;" . 
+  concat: newLine 
+];
+
+Utility CommappAutoTest defineMethod: [|testString|
+  ^self setupString concatNL: 
+  "\"" . concat: ^self dateFromCode asString . concat: "\" asDate evaluate: [" . concatNL:
+  "  ^tmp testSteps iterate: [ ^self value ];" . concatNL: 
+  "];"
+];
+
+Utility Test defineMethod: [|testUpdateString|
+  !script <- ^self testFileName;
+
+  ^self setupString concatNL: 
+  "Utility TestRun enableNetworkUpdates;" . concatNL: 
+  script asFileContents . concat: ";" . concatNL:
+  "Utility Test quietUpdate;" 
+];
+
+Utility CommappAutoTest defineMethod: [|testUpdateString|
+  ""
+];
+
+Utility CommappAutoTest defineMethod: [|testUpdateStringForStep: step|
+  ^self setupString concatNL: 
+  "Utility TestRun enableNetworkUpdates;" . concatNL:
+  "\"" . concat: ^self dateFromCode asString . concat: "\" asDate evaluate: [" . concatNL:
+  "  ^tmp testSteps at: " . concat: step asString . concat: " . value;" . concatNL:
+  "];" . concatNL:
+  "Utility Test quietUpdate;" 
+];
+
+Utility UnitTest defineMethod: [|testUpdateString|
+  NA
+];
+
+Utility Test defineMethod: [|getResultUsing: save|
+  !self <- ^self;
+  !string <- save canUpdate 
+    ifTrue: [ self testUpdateString ] 
+    else:   [ self testString ];
+  save runVision: string . cleanupVPrompt
+];
+
+Utility CommappAutoTest defineMethod: [|getResultUsing: save|
+  !self <- ^self;
+  save canUpdate 
+    ifFalse: [ ^super getResultUsing: save ]
+    else: [ 
+      !result <- "";
+      parent numberOfSteps sequence iterate: [
+        ^my :result <- ^my result concat: (
+          ^my save runVision: (^my self testUpdateStringForStep: ^self) .
+            cleanupVPrompt chomp
+        );
+      ];
+      result concat: newLine
+    ]
+];
+
+Utility CommappTestParent defineMethod: [|testHelperFor: directory|
+  directory concat: "helpers/setupTest.vis"
+];
+
+Utility CommappTestParent defineMethod: [|testHelper|
+  ^self testHelperFor: code 
+];
+
+Utility CommappTestParent defineMethod: [|numberOfStepsFor: directory|
+  !self <- ^self asSelf;
+  !helper <- self testHelperFor: directory;
+
+  # this just runs in a subprocess, it doesn't need the TestRun (right?)
+  !result <- CoreWorkspace Utility OS runVisionWith: (
+      "[ " concatNL:
+      ^self setupString . concatNL:
+      "\"" . concat: helper . concat: "\" asFileContents evaluate;" . concatNL:
+      "] divertOutput; " . concatNL: 
+      "^tmp testSteps count printNL;" . concatNL:
+      "?g" .
+    ) . cleanupVPrompt;
+
+  !lines <- result asLines select: [ ^self stripBoundingBlanks != "" ];
+  lines count = 1 
+    ifTrue: [ lines at: 1 . asNumber ]
+    else:   [ NA ]
+];
+
+Utility CommappTestParent defineMethod: [|numberOfSteps|
+  ^self numberOfStepsFor: code
+];
+
+Utility Test defineMethod: [|runTest|
+  !run <- CoreWorkspace Utility TestRun getOrCreate: ^self shortName . setup;
+  !result <- ^self getResultUsing: run;
+  run setResultTo: result;
+  ^self verifyResult: result
+];
+
+Utility CommappAutoTest defineMethod: [|runTest|
+  ^self testFileName substituteOutputOf: ^self testString;
+  ^super runTest
+];
+
+Utility CommappTestParent defineMethod: [|runTest|
+  TRUE
+];
+
+Utility Test defineMethod: [|runTestInSession|
+  !run <- CoreWorkspace Utility TestRun getOrCreate: ^self shortName . setup;
+  !result <- [ ^self testString evaluate; newLine print; ] divertOutput;
+  run setResultTo: result;
+
+  ^self verifyResult: result saveBadOutput: FALSE
+];
+
+Utility Test defineMethod: [|runAndSaveTestAs: saveName|
+  !run <- CoreWorkspace Utility TestRun 
+    getOrCreate: (^self shortName, saveName) . setup;
+
+  !result <- ^self getResultUsing: run;
+  run setResultTo: result;
+  ^self verifyResult: result
+];
+
+Utility UnitTest defineMethod: [|runAndSaveTestAs: saveName|
+  ^self runTest
+];
+
+Utility CommappTestParent defineMethod: [|runAndSaveTestAs: saveName| ];
+
+Utility CommappTestParent defineMethod: [|autoTestList|
+  !self <- ^self asSelf;
+  CommappAutoTest masterList select: [ parent = ^my self ] 
+];
+
+Utility CommappTestParent defineMethod: [|combineSubTests: name|
+  !self <- ^self;
+  !run <- CoreWorkspace Utility TestRun getOrCreate: (self, name) . setup;
+
+  !subTests <- ^self autoTestList;
+  !result <- "";
+
+  self numberOfSteps sequence iterate: [
+    !step     <- ^self;
+    !my       <- ^my;
+
+    ^my subTests iterate: [ 
+      !subTest <- ^self;
+      ^my my :result <- ^my my result concat: (
+        ^my my run runVision: (subTest testUpdateStringForStep: ^my step) .
+          cleanupVPrompt chomp
+      );
+    ];
+  ];
+  :result <- result concat: newLine;
+  run setResultTo: result;
+  result
+];
+
+Utility Test defineMethod: [|verifyResult: resultString|
+  ^self verifyResult: resultString saveBadOutput: TRUE
+];
+
+Utility Test defineMethod: [|verifyResult: resultString saveBadOutput: doSave|
+  !testref <- ^self testRefName;
+  testref fileExists ifTrue: [
+    testref asFileContents fixReadNewlines = resultString ifTrue: [
+      "Passed: " print; code print; newLine print;
+      TRUE
+    ]
+    else: [
+      ^self reportError: [ 
+        ">>> Failed: " print; code print; newLine print;
+        doSave isTrue ifTrue: [ 
+          ^self testOutputName substituteOutputOf: [ resultString print; ];
+          ">>> For more information diff " print; testref print;
+          " and " print; ^self testOutputName print;
+        ] 
+        else: [ 
+          resultString print;
+        ];
+      ];
+      FALSE
+    ]
+  ]
+  else: [
+    resultString asLines send: [ stripBoundingBlanks ] .
+      all: [ ^self = "" ] . 
+      ifTrue: [
+        "Passed: " print; code print; newLine print;
+        TRUE
+      ] 
+      else: [
+        ^self reportError: [
+          "Failed: " print; code print; newLine print;
+          doSave isTrue ifTrue: [ 
+            ^self testOutputName substituteOutputOf: [ resultString print; ];
+            ">>> For more information see: " print; ^self testOutputName print;
+          ] 
+          else: [ 
+            resultString print;
+          ];
+        ];
+        FALSE
+      ]
+  ]
+];
+
+Utility Test defineMethod: [|buildTestObjectsFrom: directory|
+  !class <- ^self asSelf;
+
+  directory directoryContents select: [ ^self contains: ".vis" ] .
+  do: [ 
+    !cleanName <- ^self translateString: ".vis" to: "";
+    :cleanName <- ^my directory concat: cleanName;
+    ^my class createInstance: cleanName asList;
+  ];
+
+  ^self
+];
+
+Utility CommappTest defineMethod: [|buildTestObjectsFrom: directory|
+  !class <- ^current asSelf;
+
+  directory directoryContents do: [ 
+    !class <- ^my class;
+    !path <- ^my directory concat: ^self . concat: "/";
+
+    path directoryContents select: [ ^self contains: ".vis" ] . 
+    do: [ 
+      !cleanName <- ^self translateString: ".vis" to: "";
+      :cleanName <- ^my path concat: cleanName;
+      ^my class createInstance: cleanName asList;
+    ];
+  ];
+
+  ^self
+];
+
+
+Utility CommappTestParent defineMethod: [|getOrCreateInstanceFrom: path|
+  !matches <- ^self masterList select: [ code = ^my path ];
+
+  matches count > 0 
+    ifTrue: [ matches at: 1 ]
+    else:   [ ^self createInstance: path asList ]
+];
+
+Utility CommappTestParent defineMethod: [|findParent: path|
+  !self <- ^self asSelf;
+  !commapp <- NA;
+
+  # do some searching for the helper
+  !testHelper <- path concat: "helpers/setupTest.vis";
+  testHelper fileExists ifTrue: [
+    self numberOfStepsFor: path . isntNA ifTrue: [
+      :commapp <- self getOrCreateInstanceFrom: path;
+    ]
+  ] .
+  elseIf: [ path from: 1 to: 6 . = "local/" ] then: [
+    :path <- path from: 7 to: path count;
+    :testHelper <- path concat: "helpers/setupTest.vis";
+    testHelper fileExists ifTrue: [
+      self numberOfStepsFor: path . isntNA ifTrue: [
+        :commapp <- self getOrCreateInstanceFrom: path;
+      ]
+    ];
+  ];
+ 
+  commapp
+];
+
+Utility CommappAutoTest defineMethod: [|buildTestObjectsFrom: directory|
+  !class <- ^current asSelf;
+  !testParentClass <- CommappTestParent;
+
+  directory directoryContents do: [ 
+    !class <- ^my class;
+    !commappName <- ^self;
+    !path <- ^my directory concat: ^self . concat: "/";
+
+    !commapp <- ^my testParentClass findParent: path;
+
+    path directoryContents select: [ ^self contains: ".autotest" ] . 
+    do: [ 
+      !cleanName <- ^self translateString: ".autotest" to: "";
+      :cleanName <- ^my path concat: cleanName;
+
+      ^my class dateFromString: cleanName . isntNA ifTrue: [ 
+        ^my commapp isntNA ifTrue: [ 
+          ^my class createInstance: cleanName asList .
+            setParentTo: ^my commapp;
+        ]
+        else: [
+          ">>> AutoTest \"" print; cleanName print; "\" not created: " print;
+          "invalid setup script (helpers/setupTest.vis)" printNL;
+        ];
+      ] 
+      else: [
+           ">>> AutoTest \"" print; cleanName print; 
+          "\" not created: could not find date in name!" printNL;
+      ];
+    ];
+  ];
+
+  ^self
+];
+
+Utility Test defineMethod: [|buildTestObjects|
+  ^self asSelf instanceList nonDefaults count = 0 ifTrue: [
+    # Local first
+    UnitTest        buildTestObjectsFrom: "local/testkit/test/unit/";
+    FunctionalTest  buildTestObjectsFrom: "local/testkit/test/functional/";
+    CommappTest     buildTestObjectsFrom: "local/testkit/test/commapp/";
+    CommappAutoTest buildTestObjectsFrom: "local/testkit/test/commapp/";
+
+    # Standard Tests
+    UnitTest        buildTestObjectsFrom: "testkit/test/unit/";
+    FunctionalTest  buildTestObjectsFrom: "testkit/test/functional/";
+    CommappTest     buildTestObjectsFrom: "testkit/test/commapp/";
+    CommappAutoTest buildTestObjectsFrom: "testkit/test/commapp/";
+  ];
+];
+
+Utility Test defineMethod: [|runAllTests|
+  buildTestObjects;
+
+  ^self masterList nonDefaults iterate: [ ^self runTest ];
+];
+
+Utility Test defineMethod: [|runAndSaveAllTestsAs: saveName|
+  buildTestObjects;
+
+  ^self masterList nonDefaults iterate: [ 
+    ^self runAndSaveTestAs: ^my saveName 
+  ];
+];
+
+
+Utility Test defineMethod: [|locateId: code|
+  !self <- ^self asSelf;
+  self buildTestObjects;
+
+  self masterList dictBy: [ code ] . at: code . ifDefault: [
+    self masterList dictBy: [ shortName ] . at: code
+  ]
+];
+
+Utility Test defineMethod: [|displayAll|
+  ^self asSelf masterList nonDefaults do: [ code printNL; ];
+  ^self
+];
+
+Utility Test defineMethod: [|quietUpdate|
+  !status <- [ CoreWorkspace Utility updateNetwork; ] divertOutput;
+  status asLines at: 1 . = ">>> Object Network Updated <<<" 
+    ifFalse: [ status printNL; ];
+
+  ^self
+];
+
+# This should live at the TestRun in the batchvision subprocess!
+Utility Test defineMethod: [|networkUpdates|
+  CoreWorkspace Utility TestRun networkUpdates
+];
+
+Utility Test defineMethod: [|updateIfEnabled|
+  ^self networkUpdates isTrue ifTrue: [ 
+    ^self quietUpdate;
+  ];
+
+  ^self
+];
+
+Utility Test defineMethod: [|reportError: err|
+  ^self recordError: err . printNL
+];
+
+Utility Test defineMethod: [|recordError: err|
+  !errString; 
+
+  # convert to a printable error
+  err isString ifTrue: [ :errString <- err; ];
+  err isBlock ifTrue: [ :errString <- err divertOutput; ];
+
+  # try harder, and then default
+  errString isNA ifTrue: [ :errString <- [ err print; ] divertOutput; ];
+  errString isDefault ifTrue: [ :errString <- "Unspecified Error"; ];
+  
+  # "^current super" will be "CoreWorkspace Utility Test"
+  ^current super define: 'encounteredErrors' toBe: (
+    encounteredErrors else: [ "" ] .  concat: newLine . concat: errString
+  );
+
+  errString
+];
+
+Utility Test defineMethod: [|abortIfError|
+  ^self encounteredErrors isntNA ifTrue: [ 
+    encounteredErrors printNL;
+
+    CoreWorkspace Utility respondsTo: '_exit' . ifFalse: [ 
+      CoreWorkspace Utility SessionAttribute define:'exitValue' 
+        toBe: (512 asPointerTo: CoreWorkspace Utility SessionAttribute);
+      CoreWorkspace Utility define:'_exit' toBePrimitive: 3 withControlValue: 1;
+    ];
+    CoreWorkspace Utility SessionAttribute exitValue <- 1;  # MAKE THIS PORTABLE
+    CoreWorkspace Utility _exit;
+  ];
+];
+
+Utility Test defineMethod: [
+| setupDiffNetworks: lhsPath 
+  and:               rhsPath 
+|
+  [
+    "!lhsPath <- \"" print; lhsPath print; "\";" printNL;
+    "!rhsPath <- \"" print; rhsPath print; "\";" printNL;
+    "
+      !lhsDb <- lhsPath openDatabase;
+      !rhsDb <- rhsPath openDatabase;
+    " printNL;
+  ] divertOutput
+];
+
+Utility Test defineMethod: [| configureVdbDiffString: setupFile |
+  [
+    "!setupFile <- \"" print; setupFile print; "\";" printNL;
+    "
+      \"source/misc/classBuilder.vis\" asFileContents evaluateIn: CoreWorkspace;
+      \"source/misc/utils.vis\" asFileContents evaluateIn: CoreWorkspace;
+      \"testkit/lib/diff/rcompare.vis\" asFileContents 
+        evaluateIn: CoreWorkspace;
+      \"testkit/lib/diff/classDiff.vis\" asFileContents 
+        evaluateIn: CoreWorkspace;
+      setupFile asFileContents evaluateIn: CoreWorkspace;
+
+      !lhsData <- lhsDb send: [
+        \"source/misc/classBuilder.vis\" asFileContents evaluateIn: ^self;
+        \"source/misc/utils.vis\" asFileContents evaluateIn: ^self;
+        \"testkit/lib/diff/rcompare.vis\" asFileContents evaluateIn: ^self;
+        \"testkit/lib/diff/classDiff.vis\" asFileContents evaluateIn: ^self;
+        ^my setupFile asFileContents evaluateIn: ^self
+      ];
+
+      !rhsData <- rhsDb send: [
+        \"source/misc/classBuilder.vis\" asFileContents evaluateIn: ^self;
+        \"source/misc/utils.vis\" asFileContents evaluateIn: ^self;
+        \"testkit/lib/diff/rcompare.vis\" asFileContents evaluateIn: ^self;
+        \"testkit/lib/diff/classDiff.vis\" asFileContents evaluateIn: ^self;
+        ^my setupFile asFileContents evaluateIn: ^self
+      ];
+    " printNL;
+  ] divertOutput
+];
+
+Utility Test defineMethod: [|classDiffString|
+  newLine concat: 
+  "
+    !classResult <- CoreWorkspace RCompareTools 
+      subclassDiff: lhsDb Object
+      and:          rhsDb Object
+    ;
+  " . concat: newLine 
+];
+
+Utility Test defineMethod: [|instanceDiffString|
+  newLine concat: 
+  "!instanceResult <- lhsData rcompareByString: rhsData depth: 5;" 
+  . concat: newLine
+];
+
+Utility Test defineMethod: [
+| diffNetwork: lhsPath 
+  and:         rhsPath 
+  withConfig:  cfg
+  doInstances: instanceFlag
+  doClasses:   classFlag
+|
+  !runString <- 
+    (^self setupDiffNetworks: lhsPath and: rhsPath) concat:
+    (^self configureVdbDiffString: cfg)
+  ;
+
+  instanceFlag ifTrue: [
+    :runString <- runString concat: ^self instanceDiffString;
+  ];
+
+  classFlag ifTrue: [
+    :runString <- runString concat: ^self classDiffString;
+  ];
+   
+  !ret <- CoreWorkspace Utility OS runVisionWith: runString . cleanupVPrompt;
+
+  !fail <- ret asLines any: [ stripBoundingBlanks isntDefault ];
+  fail isTrue ifTrue: [ 
+    ^self recordError: [ 
+      "Diff of " print; lhsPath print; " and " print; rhsPath print;
+      " failed" printNL;
+    ];
+  ];
+
+  ret
+];
+
+Utility Test defineMethod: [
+| upgradeNetwork:  lhsPath 
+  andCompareWith:  rhsPath 
+  withDiffConfig:  cfg
+  andUpdateString: updateString
+  andOutputFile:   outputFileName
+|
+  !runString <- ^self setupDiffNetworks: lhsPath and: rhsPath;
+
+  :runString <- runString concat: updateString;
+
+  :runString <- runString concat: (
+    ^self configureVdbDiffString: "testkit/lib/diff/templates/everything.vis"
+  );
+
+  :runString <- runString concat: ^self classDiffString;
+  :runString <- runString concat: ^self instanceDiffString;
+
+
+  outputFileName substituteOutputOf: [ 
+    "=" fill: 60 . printNL;
+    "Upgrade Code: " printNL;
+    "=" fill: 60 . printNL;
+    runString printNL;
+
+    "=" fill: 60 . printNL;
+    "Upgrade Output: " printNL;
+    "=" fill: 60 . printNL;
+    CoreWorkspace Utility OS runVisionWith: runString . cleanupVPrompt print;
+  ];
+
+  "Upgrade complete, see: " print; outputFileName printNL;
+];
+
+
+Utility Test defineMethod: [|sharedNetworks: lhsName and: rhsName|
+  !lhsPath <- "workCache/saves/" concat: lhsName . concat: "/";
+  !rhsPath <- "workCache/saves/" concat: rhsName . concat: "/";
+
+  !toDiff <- lhsPath directoryContents append: rhsPath directoryContents .
+    groupedByString: [ ^self ] . 
+    select: [ groupList count > 1 ] .
+    send: [ super ];
+
+  :toDiff <- toDiff extendBy: [ 
+      !lhsPath <- ^my lhsPath concat: ^self . concat: "/NDF";
+      !rhsPath <- ^my rhsPath concat: ^self . concat: "/NDF";
+    ] .
+    select: [ lhsPath fileExists && rhsPath fileExists ];
+
+  toDiff
+];
+
+Utility Test defineMethod: [
+| diffAllIn:   lhsName 
+  and:         rhsName 
+  withConfig:  cfg
+  doInstances: instanceFlag
+  doClasses:   classFlag
+|
+  !lhsPath <- "workCache/saves/" concat: lhsName . concat: "/";
+  !rhsPath <- "workCache/saves/" concat: rhsName . concat: "/";
+
+  !toDiff <- ^self sharedNetworks: lhsName and: rhsName;
+
+  toDiff iextendBy: [ 
+      !status <- ^my 
+        diffNetwork: lhsPath 
+        and:         rhsPath 
+        withConfig:  ^my cfg
+        doInstances: ^my instanceFlag
+        doClasses:   ^my classFlag
+      ;
+
+      !differences <- status asLines any: [ stripBoundingBlanks isntDefault ];
+
+      # Print the status in the iterate, earlier results.
+      differences isFalse ifTrue: [
+        "Diff passed: " print; ^self printNL;
+      ]
+      else: [
+        !diffFile <- ^my lhsPath concat: ^self . concat: ".diffout";
+        diffFile substituteOutputOf: [ status print; ];
+
+        ">>> Diff failed: " print; ^self print; " using config " print;
+        ^my cfg printNL;
+        ">>> see vdbDiff output for details: " print; diffFile printNL;
+      ];
+    ] .
+    all: [ differences isFalse ]
+];
+
+
