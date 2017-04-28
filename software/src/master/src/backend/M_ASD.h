@@ -759,6 +759,9 @@ public:
 public:
     class GCVisitBase {
     public:
+	virtual void processContainerAddress (M_CTE &rCTE, M_CPreamble *pAddress);
+	virtual void processContainerHandle  (M_CTE &rCTE, VContainerHandle *pHandle);
+
 	void Mark (M_ASD* pASD, M_POP const *pPOP) {
 	    Mark_(pASD, pPOP);
 	}
@@ -766,22 +769,20 @@ public:
 	    Mark_(pASD, pReferences, cReferences);
 	}
 
-    private: 
-	virtual void Mark_ (M_ASD* pASD, M_POP const *pPOP) {
-	}
-	virtual void Mark_ (M_ASD* pASD, M_POP const *pReferences, unsigned int cReferences) {
-	}
+    protected:
+	virtual void Mark_(M_ASD* pASD, M_POP const *pPOP);
+	virtual void Mark_(M_ASD* pASD, M_POP const *pReferences, unsigned int cReferences);
 
     };
+
     class GCVisitMark : public GCVisitBase {
-    private:
-	virtual void Mark_ (M_ASD* pASD, M_POP const *pPOP);
-	virtual void Mark_ (M_ASD* pASD, M_POP const *pReferences, unsigned int cReferences);
+    protected:
+	virtual void Mark_(M_ASD* pASD, M_POP const *pPOP);
     };
+
     class GCVisitCycleDetect : public GCVisitBase {
-    private:
-	virtual void Mark_ (M_ASD* pASD, M_POP const *pPOP);
-	virtual void Mark_ (M_ASD* pASD, M_POP const *pReferences, unsigned int cReferences);
+    protected:
+	virtual void Mark_(M_ASD* pASD, M_POP const *pPOP);
     };
 
 

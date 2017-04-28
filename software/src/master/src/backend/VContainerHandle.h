@@ -21,8 +21,11 @@
 
 class M_CPD;
 class M_CTE;
-
 class rtPTOKEN_CType;
+
+namespace V {
+    class VSimpleFile;
+}
 
 #include "Vdd_Store.h"
 
@@ -783,11 +786,18 @@ public:
 	    m_pDCTE->setAttentionMaskTo (iNewAttentionMask);
     }
 
-// Garbage collection marking
+//  Visiting
 public:
     typedef void (ThisClass::*visitFunction)();
+
+    void visitUsing (visitFunction visitor) {
+	(this->*visitor)();
+    }
+
+    virtual void visitReferencesUsing (visitFunction visitor);
+
+// Garbage collection marking
 private:
-    virtual void traverseReferences(visitFunction fp);
     void startMark();
 
 public:
@@ -796,6 +806,18 @@ public:
 
     unsigned int cdReferenceCount() const {
 	return m_iHandleRefCount;
+    }
+    bool cdVisited () const {
+	return m_bVisited;
+    }
+    bool exceededReferenceCount () const {
+	return cdReferenceCount () > referenceCount ();
+    }
+    bool foundAllReferences () const {
+	return cdReferenceCount () == referenceCount ();
+    }
+    bool missedSomeReferences () const {
+	return cdReferenceCount () < referenceCount ();
     }
 
 //  Reference Forwarding
@@ -858,6 +880,10 @@ public:
     void describe (bool bVerbose = false) {
 	describe_(bVerbose);
     }
+
+    void generateLogRecord (char const *pWhere) const;
+
+    virtual void generateReferenceReport (V::VSimpleFile &rOutputFile, unsigned int xLevel) const;
 
 public:
     class MapEntryData;
@@ -1001,8 +1027,14 @@ public:
 	return static_cast<StoreBase*>(this);
     }
 public:
-    virtual void traverseHandleReferences(void (VContainerHandle::*visitFunction)(void)) { 
-	(this->*visitFunction)(); 
+    virtual /*override*/ void visitUsing (VContainerHandle::visitFunction visitor) {
+	BaseClass::visitUsing (visitor);
+    }
+    virtual /*override*/ void visitReferencesUsing (VContainerHandle::visitFunction visitor) {
+	BaseClass::visitReferencesUsing (visitor);
+    }
+    virtual /*override*/ void generateReferenceReport (V::VSimpleFile &rOutputFile, unsigned int xLevel) const {
+	BaseClass::generateReferenceReport (rOutputFile, xLevel);
     }
 
 };

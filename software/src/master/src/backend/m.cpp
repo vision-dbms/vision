@@ -2268,7 +2268,12 @@ void M_ASD::ScanSegments () {
  ******************************************/
 
 void VContainerHandle::flushCachedResources_() {
-    if (referenceCount () == 1 && m_pContainer && !m_bPrecious)
+/*****
+  Cached handles have a reference count of zero; however, this test used to
+  check for a referenceCount () == 1.  Wonder what kind of dangling references
+  that generated...
+ *****/
+    if (referenceCount () == 0 && m_pContainer && !m_bPrecious)
 	DetachFromCTE ();
 }
 
@@ -3799,6 +3804,7 @@ bool M_ASD::EnqueuePossibleCycles (VArgList const &rArgList) {
 		{
 		    GCQueueInsert (cte.containerIndex ());
 		    cte.cdVisited(true);
+		    pHandle->generateLogRecord ("EnqueuePC");
 		}
 	    }
         }
@@ -3821,14 +3827,12 @@ bool M_ASD::EnqueueOmittingCycles (VArgList const &rArgList) {
 		pHandle->unmark();
 
 		if (cte.referenceCount() == 0 && pHandle->isReferenced()) {
-		    if (!cte.foundAllReferences()) {
+		    if (cte.foundAllReferences()) {
+			pHandle->generateLogRecord ("Omit");
+		    } else {
 			GCQueueInsert (cte.containerIndex ());
 			cte.gcVisited(true);
-#if defined(DEBUG_GC_CYCLE_DETECTION)
-		    } else {
-			fprintf(stderr, "omitted something\n");
-			fflush (stderr);
-#endif
+			pHandle->generateLogRecord ("Keep");
 		    }
 		}
 	    }
@@ -3896,7 +3900,6 @@ void M_ASD::ConsiderContainersInQueue(M_ASD::GCVisitBase* pGCV) {
 	}
 
 /****  Next, access the container's address  ****/
-	M_CPreamble *pAddress = 0;
 	switch (cte.addressType ()) {
 	case M_CTEAddressType_ForwardingPOP:
 /****
@@ -3908,51 +3911,18 @@ void M_ASD::ConsiderContainersInQueue(M_ASD::GCVisitBase* pGCV) {
 	    );
 	    break;
 	case M_CTEAddressType_CPCC:
-	    pAddress = cte.addressAsContainerHandle ()->containerAddress ();
+	    pGCV->processContainerHandle (cte, cte.addressAsContainerHandle ());
 	    break;
 	case M_CTEAddressType_ROContainer:
 	case M_CTEAddressType_RWContainer:
 	    cte.InitializeCTEContainerAddress ();
-	    pAddress = cte.addressAsContainerAddress ();
+	    pGCV->processContainerAddress (cte, cte.addressAsContainerAddress ());
 	    break;
 	default:
 	    ERR_SignalFault (
 		EC__MError, "MarkContainersInQueue: Unknown CTE type"
 	    );
 	    break;
-	}
-
-/****
- *  Call the rtype handler to insert the containers it references into the
- *  appropriate marking queue
- ****/
-	if (pAddress) {	// ... nil for objects whose container creation has been deferred.
-/****
- * Since we are pulling out an address to be used by the marking function
- * we need to protect it. Within the marking function, a new segment might be
- * accessed which could trigger a segment remapping. If that happens, then
- * pAddress would perhaps become invalid.
- ****/
-	    M_Type_MarkFn pMarkingFunction = M_RTD_MarkFn (
-		M_RTDPtr (M_CPreamble_RType (pAddress))
-	    );
-	    if (pMarkingFunction) {
-		cte.setMustStayMapped ();
-
-                #if defined(DEBUG_SESSION_GC)
-                    fprintf(stderr, "marking [%d: %d] new: %d type: %d refHandle: %d refcount: %d\n", 
-                        Index(), cIndex, cte.isNew(), cte.addressType(), 
-                        ( cte.addressType() == M_CTEAddressType_CPCC &&
-                          cte.addressAsContainerHandle()->isReferenced()
-                        ), 
-                        cte.referenceCount()
-                    );
-                #endif
-
-		pMarkingFunction (pGCV, this, pAddress);
-/**** We are done with pAddress now, so we can remove the protection. ****/
-		cte.clearMustStayMapped ();
-	    }
 	}
     }
 }
@@ -4101,9 +4071,11 @@ bool M_ASD::SweepUp (VArgList const &rArgList) {
 		 *  are referenced.
 		 *************************************************************/
 		    VContainerHandle *pHandle = cte.addressAsContainerHandle ();
-		    if (pHandle->isReferenced () && !cte.foundAllReferences())
+		    if (pHandle->isReferenced () && !cte.foundAllReferences()) {
 			bOkToReclaim = false;
-		    else {
+			pHandle->generateLogRecord ("Preserve");
+		    } else {
+			pHandle->generateLogRecord ("Reclaim");
 			if (pHandle->hasAReadWriteContainer ())
 			    pAddress = pHandle->containerAddress ();
 			else {
@@ -4227,27 +4199,6 @@ bool M_DCTE::mark (M_ASD::GCVisitBase* pGCV, M_ASD *pASD, unsigned int xContaine
 
 
 /*---------------------------------------------------------------------------
- * Quasi-public routine to mark a container as referenced and if
- * the container has not been visited, to initiate marking of the
- * containers it references.
- *
- *  Arguments:
- *	pPOP		-  A pointer to a POP for the container to Mark.
- *
- *  Returns:
- *	NOTHING - Executed for side effect only.
- *
- *---------------------------------------------------------------------------
- */
-void M_ASD::GCVisitMark::Mark_ (M_ASD* pASD, M_POP const *pPOP) {
-  if (M_POP_ObjectSpace (pPOP) != 1) {
-    M_CTE cte (pASD->Database(), pPOP);
-    pASD->recordGCReference (
-	M_POP_ObjectSpace (pPOP), cte.Mark (this)
-    );
-  }
-}
-/*---------------------------------------------------------------------------
  * Quasi-public routine to mark an array of containers as referenced and for
  * each container that has not been visited, to initiate marking of the
  * containers it references.
@@ -4261,18 +4212,37 @@ void M_ASD::GCVisitMark::Mark_ (M_ASD* pASD, M_POP const *pPOP) {
  *	NOTHING - Executed for side effect only.
  *---------------------------------------------------------------------------
  */
-void M_ASD::GCVisitMark::Mark_ (M_ASD* pASD, M_POP const *pReferences, unsigned int cReferences) {
+void M_ASD::GCVisitBase::Mark_(M_ASD* pASD, M_POP const *pReferences, unsigned int cReferences) {
     while (cReferences-- > 0)
 	Mark (pASD, pReferences++);
 }
 
-
-void M_ASD::GCVisitCycleDetect::Mark_ (M_ASD* pASD, M_POP const *pReferences, unsigned int cReferences) {
-    while (cReferences-- > 0)
-	Mark_ (pASD, pReferences++);
+/*---------------------------------------------------------------------------
+ * Quasi-public routine to mark a container as referenced and if
+ * the container has not been visited, to initiate marking of the
+ * containers it references.
+ *
+ *  Arguments:
+ *	pPOP		-  A pointer to a POP for the container to Mark.
+ *
+ *  Returns:
+ *	NOTHING - Executed for side effect only.
+ *
+ *---------------------------------------------------------------------------
+ */
+void M_ASD::GCVisitBase::Mark_(M_ASD* pASD, M_POP const *pPOP) {
 }
 
-void M_ASD::GCVisitCycleDetect::Mark_ (M_ASD* pASD, M_POP const *pPOP) {
+void M_ASD::GCVisitMark::Mark_(M_ASD* pASD, M_POP const *pPOP) {
+  if (M_POP_ObjectSpace (pPOP) != 1) {
+    M_CTE cte (pASD->Database(), pPOP);
+    pASD->recordGCReference (
+	M_POP_ObjectSpace (pPOP), cte.Mark (this)
+    );
+  }
+}
+
+void M_ASD::GCVisitCycleDetect::Mark_(M_ASD* pASD, M_POP const *pPOP) {
     M_CTE cte (pASD->Database(), pPOP);
 
     if (cte.gcVisited())
@@ -4304,6 +4274,51 @@ void M_ASD::GCVisitCycleDetect::Mark_ (M_ASD* pASD, M_POP const *pPOP) {
     }
 }
 
+
+/*---------------------------------------------------------------------------
+ *---------------------------------------------------------------------------
+ */
+void M_ASD::GCVisitBase::processContainerHandle (M_CTE &rCTE, VContainerHandle *pHandle) {
+    processContainerAddress (rCTE, pHandle->containerAddress ());
+}
+
+void M_ASD::GCVisitBase::processContainerAddress (M_CTE &rCTE, M_CPreamble *pAddress) {
+/****
+ *  Call the rtype handler to insert the containers it references into the
+ *  appropriate marking queue
+ ****/
+    if (pAddress) {	// ... nil for objects whose container creation has been deferred.
+/****
+ * Since we are pulling out an address to be used by the marking function
+ * we need to protect it. Within the marking function, a new segment might be
+ * accessed which could trigger a segment remapping. If that happens, then
+ * pAddress would perhaps become invalid.
+ ****/
+	M_Type_MarkFn pMarkingFunction = M_RTD_MarkFn (
+	    M_RTDPtr (M_CPreamble_RType (pAddress))
+	);
+	if (pMarkingFunction) {
+	    rCTE.setMustStayMapped ();
+
+#if defined(DEBUG_SESSION_GC)
+	    fprintf(stderr, "marking [%d: %d] new: %d type: %d refHandle: %d refcount: %d\n", 
+		    rCTE.spaceIndex(), cIndex, rCTE.isNew(), rCTE.addressType(), 
+		    ( rCTE.holdsACPCC () && rCTE.addressAsContainerHandle()->isReferenced()), 
+		    rCTE.referenceCount()
+	    );
+#endif
+
+	    pMarkingFunction (this, rCTE.space (), pAddress);
+/**** We are done with pAddress now, so we can remove the protection. ****/
+	    rCTE.clearMustStayMapped ();
+	}
+    }
+}
+
+/*---------------------------------------------------------------------------
+ *---------------------------------------------------------------------------
+ */
+
 M_ASD::GCVisitMark 	  M_ASD::m_GCMarker;
 M_ASD::GCVisitCycleDetect M_ASD::m_GCCycleDetect;
 
