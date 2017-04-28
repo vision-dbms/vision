@@ -4489,38 +4489,16 @@ bool VDatabaseFederatorForBatchvision::EnqueueOmittingCycles () const {
 }
 
 bool M_AND::DoGCCycleElimination () { 
-/*********************************
- *****  Disable buggy handle cycle detection, forcing the garbage collector to
- *****  assume all referenced handles are referenced from outside the container
- *****  mesh and therefore must be retained.  While that might not be obvious
- *****  from the names of the routines involved, the cycle collection algorithm
- *****  operates by attempting to identify the source of all handle references,
- *****  preserving those handles for which all references could not be found.
- *****  By disabling the identification search as is done here, no reference
- *****  sources will be found so all referenced handles will be preserved...
-
     EnqueuePossibleCycles();
     TraverseAndDetectCycles();
 
- *********************************/
     return EnqueueOmittingCycles();
 }
  
 bool VDatabaseFederatorForBatchvision::DoGCCycleElimination() const { 
-/*********************************
- *****  Disable buggy handle cycle detection, forcing the garbage collector to
- *****  assume all referenced handles are referenced from outside the container
- *****  mesh and therefore must be retained.  While that might not be obvious
- *****  from the names of the routines involved, the cycle collection algorithm
- *****  operates by attempting to identify the source of all handle references,
- *****  preserving those handles for which all references could not be found.
- *****  By disabling the identification search as is done here, no reference
- *****  sources will be found so all referenced handles will be preserved...
-
     EnqueuePossibleCycles();
     TraverseAndDetectCycles();
 
- *********************************/
     return EnqueueOmittingCycles();
 }
 
