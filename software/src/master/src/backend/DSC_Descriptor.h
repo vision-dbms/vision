@@ -744,10 +744,18 @@ public:
     }
 
 public:
-    void traverseHandleReferences(void (VContainerHandle::*visitFunction)(void)) { 
-	m_iStore.traverseHandleReferences(visitFunction);
+    void visitReferencesUsing (VContainerHandle::visitFunction visitor) {
+	if (isntEmpty ()) {
+	    m_iStore.visitReferencesUsing (visitor);
+	}
     }
-//  State
+    void generateReferenceReport (V::VSimpleFile &rOutputFile, unsigned int xLevel) const {
+	if (isntEmpty ()) {
+	    m_iStore.generateReferenceReport (rOutputFile, xLevel);
+	}
+    }
+
+    //  State
 private:
     DSC_Store	m_iStore;
 public:

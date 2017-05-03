@@ -510,20 +510,20 @@ public:
 		    m_iReferenceCount = M_CTE_MaxReferenceCount;
 		}
 
-		bool gcVisited() {
+		bool gcVisited() const {
 		    return m_bGcVisited;
 		}
 		void gcVisited(bool visited) {
 		    m_bGcVisited = visited;
 		}
 
-		bool cdVisited() {
+		bool cdVisited() const {
 		    return m_bCdVisited;
 		}
 		void cdVisited (bool visited) {
 		    m_bCdVisited = visited;
 		}
-		bool foundAllReferences() {
+		bool foundAllReferences() const {
 		    return m_bFoundAllReferences;
 		}
 		void foundAllReferences (bool foundAll) {
@@ -759,24 +759,30 @@ public:
 public:
     class GCVisitBase {
     public:
-	void Mark (M_ASD* pASD, M_POP const *pPOP) { this->Mark_(pASD, pPOP); }
-	void Mark (M_ASD* pASD, M_POP const *pReferences, unsigned int cReferences)
-	  { this->Mark_(pASD, pReferences, cReferences); }
+	virtual void processContainerAddress (M_CTE &rCTE, M_CPreamble *pAddress);
+	virtual void processContainerHandle  (M_CTE &rCTE, VContainerHandle *pHandle);
 
-    private: 
-	virtual void Mark_ (M_ASD* pASD, M_POP const *pPOP) { }
-	virtual void Mark_ (M_ASD* pASD, M_POP const *pReferences, unsigned int cReferences) { }
+	void Mark (M_ASD* pASD, M_POP const *pPOP) {
+	    Mark_(pASD, pPOP);
+	}
+	void Mark (M_ASD* pASD, M_POP const *pReferences, unsigned int cReferences) {
+	    Mark_(pASD, pReferences, cReferences);
+	}
+
+    protected:
+	virtual void Mark_(M_ASD* pASD, M_POP const *pPOP);
+	virtual void Mark_(M_ASD* pASD, M_POP const *pReferences, unsigned int cReferences);
 
     };
+
     class GCVisitMark : public GCVisitBase {
-    private:
-	virtual void Mark_ (M_ASD* pASD, M_POP const *pPOP);
-	virtual void Mark_ (M_ASD* pASD, M_POP const *pReferences, unsigned int cReferences);
+    protected:
+	virtual void Mark_(M_ASD* pASD, M_POP const *pPOP);
     };
+
     class GCVisitCycleDetect : public GCVisitBase {
-    private:
-	virtual void Mark_ (M_ASD* pASD, M_POP const *pPOP);
-	virtual void Mark_ (M_ASD* pASD, M_POP const *pReferences, unsigned int cReferences);
+    protected:
+	virtual void Mark_(M_ASD* pASD, M_POP const *pPOP);
     };
 
 

@@ -21,8 +21,11 @@
 
 class M_CPD;
 class M_CTE;
-
 class rtPTOKEN_CType;
+
+namespace V {
+    class VSimpleFile;
+}
 
 #include "Vdd_Store.h"
 
@@ -118,7 +121,7 @@ protected:
 	    m_pDCTE->setToContainerAddress (m_pContainer, m_bReadWrite);
 	    m_pDCTE->discard (m_pASD, containerIndexNC ());
 	    m_pDCTE.clear ();
-    }
+	}
 	return m_pDCTE.isNil ();
     }
 
@@ -161,7 +164,7 @@ public:
 	if (m_pContainerIdentity.isNil ()) {
 	    m_pASD->CreateIdentity (m_iContainerIdentity, this);
 	    m_pContainerIdentity.setTo (&m_iContainerIdentity);
-    }
+	}
 	return m_pContainerIdentity;
     }
 
@@ -781,47 +784,41 @@ public:
     void setAttentionMaskTo (unsigned int iNewAttentionMask) const {
 	if (m_pDCTE)
 	    m_pDCTE->setAttentionMaskTo (iNewAttentionMask);
-	}
+    }
+
+//  Visiting
+public:
+    typedef void (ThisClass::*visitFunction)();
+
+    void visitUsing (visitFunction visitor) {
+	(this->*visitor)();
+    }
+
+    virtual void visitReferencesUsing (visitFunction visitor);
 
 // Garbage collection marking
+private:
+    void startMark();
+
 public:
-    typedef void (ThisClass::*visitFunction)(void);
-    virtual void traverseReferences(visitFunction fp) { }
+    void mark();
+    void unmark();
 
-    void startMark() {
-	if (!m_bVisited) {
-	    m_bVisited = true;
-	    traverseReferences(&ThisClass::mark);
+    unsigned int cdReferenceCount() const {
+	return m_iHandleRefCount;
     }
-	}
-    void mark() {
-	if (m_bVisited == false && m_iHandleRefCount > 0) { //bad
-	    //fprintf(stderr, "non-visited node has aux ref count\n");
+    bool cdVisited () const {
+	return m_bVisited;
     }
-
-	m_iHandleRefCount++;
-
-	if (m_iHandleRefCount == referenceCount()) { // good!
-	    //fprintf(stderr, "found all references for a handle!\n");
-	}
-	if (m_iHandleRefCount > referenceCount()) { // bad
-	    //fprintf(stderr, "reference count exceeded for a handle\n");
-        }
-
-
-	startMark();
-	}
-    void unmark() {
-	if (m_bVisited == false && m_iHandleRefCount > 0) { // bad
-	    //fprintf(stderr, "non-visited node has aux ref count\n");
+    bool exceededReferenceCount () const {
+	return cdReferenceCount () > referenceCount ();
     }
-	if (m_bVisited) {
-	    m_bVisited = false;
-	    m_iHandleRefCount = 0;
-	}
+    bool foundAllReferences () const {
+	return cdReferenceCount () == referenceCount ();
     }
-
-    unsigned int cdReferenceCount() { return m_iHandleRefCount; }
+    bool missedSomeReferences () const {
+	return cdReferenceCount () < referenceCount ();
+    }
 
 //  Reference Forwarding
 protected:
@@ -884,6 +881,10 @@ public:
 	describe_(bVerbose);
     }
 
+    void generateLogRecord (char const *pWhere) const;
+
+    virtual void generateReferenceReport (V::VSimpleFile &rOutputFile, unsigned int xLevel) const;
+
 public:
     class MapEntryData;
     virtual void getClusterReferenceMapData (MapEntryData &rData, unsigned int xReference) {
@@ -914,8 +915,8 @@ private:
     M_RTD *const		m_pRTD;  // ... must follow container address.
     bool			m_bReadWrite;
     bool			m_bPrecious;
-    unsigned int                m_iHandleRefCount;
     bool			m_bVisited;
+    unsigned int                m_iHandleRefCount;
 };
 
 
@@ -1026,8 +1027,14 @@ public:
 	return static_cast<StoreBase*>(this);
     }
 public:
-    virtual void traverseHandleReferences(void (VContainerHandle::*visitFunction)(void)) { 
-	(this->*visitFunction)(); 
+    virtual /*override*/ void visitUsing (VContainerHandle::visitFunction visitor) {
+	BaseClass::visitUsing (visitor);
+    }
+    virtual /*override*/ void visitReferencesUsing (VContainerHandle::visitFunction visitor) {
+	BaseClass::visitReferencesUsing (visitor);
+    }
+    virtual /*override*/ void generateReferenceReport (V::VSimpleFile &rOutputFile, unsigned int xLevel) const {
+	BaseClass::generateReferenceReport (rOutputFile, xLevel);
     }
 
 };

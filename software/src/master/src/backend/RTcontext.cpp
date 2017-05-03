@@ -212,14 +212,26 @@ bool rtCONTEXT_Handle::PersistReferences () {
  ********************************
  ********************************/
 
-void rtCONTEXT_Handle::traverseReferences(visitFunction fp) {
-    if (!(m_pParentContext.isEmpty())) (m_pParentContext.referent()->*fp)();
+void rtCONTEXT_Handle::visitReferencesUsing (visitFunction visitor) {
+    if (m_pParentContext)
+	m_pParentContext->visitUsing (visitor);
 
-    if (!(m_iMy.isEmpty()           )) m_iMy.traverseHandleReferences(fp);
-    if (!(m_iSelf.isEmpty()         )) m_iSelf.traverseHandleReferences(fp);
-    if (!(m_iCurrent.isEmpty()      )) m_iCurrent.traverseHandleReferences(fp);
+    m_iMy.visitReferencesUsing (visitor);
+    m_iSelf.visitReferencesUsing (visitor);
+    m_iCurrent.visitReferencesUsing (visitor);
     // traverse m_iParentPointer in the future?
 
+}
+
+
+void rtCONTEXT_Handle::generateReferenceReport (V::VSimpleFile &rOutputFile, unsigned int xLevel) const {
+    BaseClass::generateReferenceReport (rOutputFile, xLevel++);
+    if (m_pParentContext.isntEmpty())
+	m_pParentContext->generateReferenceReport (rOutputFile, xLevel);
+
+    m_iMy.generateReferenceReport (rOutputFile, xLevel);
+    m_iSelf.generateReferenceReport (rOutputFile, xLevel);
+    m_iCurrent.generateReferenceReport (rOutputFile, xLevel);
 }
 
 
