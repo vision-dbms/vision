@@ -4264,7 +4264,7 @@ void M_ASD::GCVisitCycleDetect::Mark_(M_ASD* pASD, M_POP const *pPOP) {
 	    );
 #endif
 
-	    cte.addressAsContainerHandle()->mark();
+	    cte.addressAsContainerHandle()->startMark();
 	    /* no break */
 	default:
 	    cte.space()->GCQueueInsert (cte.containerIndex());
