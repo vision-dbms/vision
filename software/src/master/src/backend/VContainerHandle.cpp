@@ -183,7 +183,7 @@ void VContainerHandle::generateReferenceReport (V::VSimpleFile &rOutputFile, uns
 	rOutputFile.printf ("%12u:", xLevel);
     }
 
-    rOutputFile.printf ("%p %2s", this, hasAContainer () ? "C" : "");
+    rOutputFile.printf ("%2s", hasAContainer () ? "C" : "");
 
     if (m_pDCTE) { // Implies 'hasAnIdentity'
 	rOutputFile.printf (
