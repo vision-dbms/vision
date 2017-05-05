@@ -346,6 +346,9 @@ public:
     bool holdsAContainerAddress () const {
 	return m_pDCTE->holdsAContainerAddress ();
     }
+    bool holdsAContainerHandle () const {
+	return m_pDCTE->holdsAContainerHandle ();
+    }
     bool holdsACPCC () const {
 	return m_pDCTE->holdsACPCC ();
     }
@@ -4280,6 +4283,11 @@ void M_ASD::GCVisitCycleDetect::Mark_(M_ASD* pASD, M_POP const *pPOP) {
  */
 void M_ASD::GCVisitBase::processContainerHandle (M_CTE &rCTE, VContainerHandle *pHandle) {
     processContainerAddress (rCTE, pHandle->containerAddress ());
+}
+
+void M_ASD::GCVisitMark::processContainerHandle (M_CTE &rCTE, VContainerHandle *pHandle) {
+    BaseClass::processContainerHandle (rCTE, pHandle);
+    pHandle->visitReferencesUsing (&VContainerHandle::gcMark);
 }
 
 void M_ASD::GCVisitBase::processContainerAddress (M_CTE &rCTE, M_CPreamble *pAddress) {

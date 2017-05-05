@@ -801,7 +801,8 @@ private:
     void startMark();
 
 public:
-    void mark();
+    void cdMark();
+    void gcMark();
     void unmark();
 
     unsigned int cdReferenceCount() const {
