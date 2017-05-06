@@ -797,9 +797,6 @@ public:
     virtual void visitReferencesUsing (visitFunction visitor);
 
 // Garbage collection marking
-private:
-    void startMark();
-
 public:
     void cdMark();
     void gcMark();

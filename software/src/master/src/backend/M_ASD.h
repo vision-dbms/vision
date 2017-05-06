@@ -794,7 +794,8 @@ public:
 	DECLARE_FAMILY_MEMBERS (GCVisitCycleDetect,GCVisitBase);
 
     protected:
-	virtual void Mark_(M_ASD* pASD, M_POP const *pPOP);
+	virtual void processContainerAddress (M_CTE &rCTE, M_CPreamble *pAddress);
+	virtual void processContainerHandle  (M_CTE &rCTE, VContainerHandle *pHandle);
     };
 
 

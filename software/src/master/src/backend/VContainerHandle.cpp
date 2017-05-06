@@ -81,18 +81,19 @@ bool VContainerHandle::DoNothing (VArgList const&) {
 void VContainerHandle::visitReferencesUsing (visitFunction visitor) {
 }
 
-void VContainerHandle::startMark() {
-    if (!m_bVisited) {
-	m_bVisited = true;
-	visitReferencesUsing (&ThisClass::cdMark);
-    }
-}
-
 void VContainerHandle::cdMark() {
     m_iHandleRefCount++;
     generateLogRecord ("CDMark");
 
-    startMark();
+    if (m_bVisited)
+	return;
+
+    m_bVisited = true;
+    if (hasNoIdentity ()) { // no identity -> no CTE -> can't be queued -> must visit now
+	visitReferencesUsing (&ThisClass::cdMark);
+    } else {
+	m_pASD->GCQueueInsert (containerIndex ());
+    }
 }
 
 void VContainerHandle::gcMark () {

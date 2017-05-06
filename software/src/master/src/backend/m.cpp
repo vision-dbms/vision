@@ -4244,38 +4244,6 @@ void M_ASD::GCVisitMark::Mark_(M_ASD* pASD, M_POP const *pPOP) {
     );
   }
 }
-
-void M_ASD::GCVisitCycleDetect::Mark_(M_ASD* pASD, M_POP const *pPOP) {
-    M_CTE cte (pASD->Database(), pPOP);
-
-    if (cte.gcVisited())
-	return; /* Might be in a cycle, but won't be removed */
-
-    bool isAReturnVisit = cte.cdVisited();
-
-    if (!isAReturnVisit) {
-	switch (cte.addressType()) {
-	case M_CTEAddressType_ForwardingPOP:
-	    Mark (cte.space(), &cte.addressAsPOP ());
-	    break;
-	case M_CTEAddressType_CPCC:
-#if defined(DEBUG_GC_CYCLE_DETECTION)
-	    fprintf(stderr, "  examining [%d: %d]: refcount: %d type: %s\n", 
-		cte.space(), cte.containerIndex(), 
-                cte.addressAsContainerHandle()->referenceCount(),
-                cte.addressAsContainerHandle()->RTypeName()
-	    );
-#endif
-
-	    cte.addressAsContainerHandle()->startMark();
-	    /* no break */
-	default:
-	    cte.space()->GCQueueInsert (cte.containerIndex());
-	    cte.cdVisited(true);
-	    break;
-	}
-    }
-}
 
 
 /*---------------------------------------------------------------------------
@@ -4321,6 +4289,13 @@ void M_ASD::GCVisitBase::processContainerAddress (M_CTE &rCTE, M_CPreamble *pAdd
 	    rCTE.clearMustStayMapped ();
 	}
     }
+}
+
+void M_ASD::GCVisitCycleDetect::processContainerAddress (M_CTE &rCTE, M_CPreamble *pAddress) {
+}
+
+void M_ASD::GCVisitCycleDetect::processContainerHandle (M_CTE &rCTE, VContainerHandle *pHandle) {
+    pHandle->visitReferencesUsing (&VContainerHandle::cdMark);
 }
 
 /*---------------------------------------------------------------------------
