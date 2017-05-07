@@ -91,7 +91,8 @@ void VContainerHandle::cdMark() {
     m_bVisited = true;
     if (hasNoIdentity ()) { // no identity -> no CTE -> can't be queued -> must visit now
 	visitReferencesUsing (&ThisClass::cdMark);
-    } else {
+    } else if (!m_pDCTE->cdVisited ()) {
+	m_pDCTE->cdVisited (true);
 	m_pASD->GCQueueInsert (containerIndex ());
     }
 }
@@ -200,7 +201,7 @@ void VContainerHandle::generateReferenceReport (V::VSimpleFile &rOutputFile, uns
     rOutputFile.printf (
 	"%s%s RC:%u CDRC:%u: %s\n",
 	cdVisited () ? " CDV" : "",
-	exceededReferenceCount () ? " EXCESS" : foundAllReferences () ? " FA+" : " FA-",
+	exceededReferenceCount () ? " EXCESS" : foundAllReferences () || m_pDCTE && m_pDCTE->foundAllReferences () ? " FA+" : " FA-",
 	referenceCount (),
 	cdReferenceCount (),
 	RTypeName ()
