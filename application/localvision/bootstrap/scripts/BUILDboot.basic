@@ -24,7 +24,8 @@ $MAIN -bad << @@@EOF@@@
 ?? $scriptDir/BootStrap.boot
 @@@EOF@@@
 
-echo "---> Installing BuiltInClasses"
+set comment = "---> Installing BuiltInClasses"
+echo "--->" $comment
 date
 $MAIN -adU2 <<@@@EOF@@@
 ?? $scriptDir/NameBuiltIns.boot
@@ -68,12 +69,13 @@ $MAIN -adU2 <<@@@EOF@@@
 ?? $scriptDir/INIT.bi
 ?? $scriptDir/CLEAN.bi
 
-Utility basicUpdateNetwork ;
+Utility updateNetworkWithAnnotation: "$comment" ;
 ?g
 
 @@@EOF@@@
 
-echo "---> Installing Core Classes and Protocol"
+set comment = "Installing Core Classes and Protocol"
+echo "--->" $comment
 date
 $MAIN -adU3 <<@@@EOF@@@
 ?? $scriptDir/Space.core
@@ -96,70 +98,77 @@ $MAIN -adU3 <<@@@EOF@@@
 ?? $scriptDir/Dict.core2
 ?? $scriptDir/ToolKit.core2
 
-Utility basicUpdateNetwork ;
+Utility updateNetworkWithAnnotation: "$comment" ;
 ?g
 
 @@@EOF@@@
 
 
-echo "---> Installing DDMS Object Space"
+set comment = "Installing DDMS Object Space"
+echo "--->" $comment
 date
 $MAIN -ad <<@@@EOF@@@
 ?? $scriptDir/DDMSsetup.G
-Utility createSpaceInNetworkWithAnnotation: "DDMS Object Space Creation" ;
+Utility createSpaceInNetworkWithAnnotation: "$comment" ;
 ?g
 
 @@@EOF@@@
 
-echo "---> Installing Schema Support Classes"
+set comment = "Installing Schema Support Classes"
+echo "--->" $comment
 date
 $MAIN -adU3 <<@@@EOF@@@
 ?? $scriptDir/INSTschema.G
-Utility updateNetwork ;
+Utility updateNetworkWithAnnotation: "$comment" ;
 ?g
 
 @@@EOF@@@
 
-echo "---> Installing Schema Classes "
+set comment = "Installing Schema Classes "
+echo "--->" $comment
 date
 $MAIN -ad <<@@@EOF@@@
 ?? $scriptDir/INIschema.G
 ?? $scriptDir/EXTcore.schema
 ?? $scriptDir/DEFschema.G
-Utility createSpaceInNetworkWithAnnotation: "Schema Object Space Creation" ;
+Utility createSpaceInNetworkWithAnnotation: "$comment" ;
 ?g
 
 @@@EOF@@@
 
 
-echo "---> Installing Schema Protocol"
+set comment = "Installing Schema Protocol"
+echo "--->" $comment
 date
 $MAIN -adU3 <<@@@EOF@@@
 ?? $scriptDir/INITschema.G
-Utility updateNetwork ;
+Utility updateNetworkWithAnnotation: "$comment" ;
 ?g
 
 @@@EOF@@@
 
-echo "---> Installing DataFeed Object Space"
+set comment = "Installing DataFeed Object Space"
+echo "--->" $comment
 date
 $MAIN -ad <<@@@EOF@@@
 ?? $scriptDir/DataFeedSetup.G
-Utility createSpaceInNetworkWithAnnotation: "DataFeed Object Space Creation" ;
+Utility createSpaceInNetworkWithAnnotation: "$comment" ;
 ?g
 
 @@@EOF@@@
 
-echo "---> Installing Default DataRecord Object Space"
+set comment = "Installing Default DataRecord Object Space"
+echo "--->" $comment
 date
 $MAIN -ad <<@@@EOF@@@
 ?? $scriptDir/DataRecordSetup.G
-Utility createSpaceInNetworkWithAnnotation: "DataRecord Object Space Creation" ;
+Utility createSpaceInNetworkWithAnnotation: "$comment" ;
 ?g
 
 @@@EOF@@@
 
-echo "---> Installing OpenVision Protocol"
+set comment = "Installing OpenVision Protocol"
+echo "--->" $comment
 date
 $MAIN -adU3 <<@@@EOF@@@
 ?? $scriptDir/INIov.G
@@ -169,12 +178,13 @@ $MAIN -adU3 <<@@@EOF@@@
 Object showInheritance ; 
 Schema processAllMessages ;
 
-Utility updateNetwork ;
+Utility updateNetworkWithAnnotation: "$comment" ;
 ?g
 
 @@@EOF@@@
 
-echo "---> Installing AdminTools Protocol"
+set comment = "Installing AdminTools Protocol"
+echo "--->" $comment
 date
 $MAIN -adU3 <<@@@EOF@@@
 ?? $scriptDir/INIadmin.G
@@ -183,12 +193,13 @@ $MAIN -adU3 <<@@@EOF@@@
 Object showInheritance ; 
 Schema processAllMessages ;
 
-Utility updateNetwork ;
+Utility updateNetworkWithAnnotation: "$comment" ;
 ?g
 
 @@@EOF@@@
 
-echo "---> Installing Interface Protocol"
+set comment = "Installing Interface Protocol"
+echo "--->" $comment
 date
 $MAIN -adU3 <<@@@EOF@@@
 ?? $scriptDir/INIcore.format
@@ -207,12 +218,13 @@ $MAIN -adU3 <<@@@EOF@@@
 Object showInheritance ; 
 Schema processAllMessages ;
 
-Utility updateNetwork ;
+Utility updateNetworkWithAnnotation: "$comment" ;
 ?g
 
 @@@EOF@@@
 
-echo "---> Installing Incorporator Class Tools"
+set comment = "Installing Incorporator Class Tools"
+echo "--->" $comment
 date
 $MAIN -adU3 <<@@@EOF@@@
 ?? $scriptDir/INIdbs.core
@@ -221,12 +233,13 @@ $MAIN -adU3 <<@@@EOF@@@
 Object showInheritance ; 
 Schema processAllMessages ;
 
-Utility updateNetwork ;
+Utility updateNetworkWithAnnotation: "$comment" ;
 ?g
 
 @@@EOF@@@
 
-echo "---> Installing 6.0 Protocol"
+set comment = "Installing 6.0 Protocol"
+echo "--->" $comment
 date
 $MAIN -adU3 <<@@@EOF@@@
 #--"$scriptDir/EXTnumber.6.0" asFileContents evaluate ;
@@ -255,12 +268,13 @@ $MAIN -adU3 <<@@@EOF@@@
 Object showInheritance ; 
 Schema processAllMessages ;
 
-Utility updateNetwork ;
+Utility updateNetworkWithAnnotation: "$comment" ;
 ?g
 
 @@@EOF@@@
 
-echo "---> Installing EXTcore.patch, EXTcore.INI, EXTcore.DEF"
+set comment = "Installing EXTcore.patch, EXTcore.INI, EXTcore.DEF"
+echo "--->" $comment
 date
 $MAIN -adU3 <<@@@EOF@@@
 ?? $scriptDir/EXTcore.patch
@@ -271,11 +285,12 @@ $MAIN -adU3 <<@@@EOF@@@
 Object showInheritance ; 
 Schema processAllMessages ;
 
-Utility updateNetwork ;
+Utility updateNetworkWithAnnotation: "$comment" ;
 ?g
 
 @@@EOF@@@
-echo "---> Installing Documentation"
+set comment = "Installing Documentation"
+echo "--->" $comment
 date
 $MAIN -adU3 <<@@@EOF@@@
 ?? $scriptDir/DOCclass.G
@@ -302,12 +317,13 @@ do: [ ^self setFunctionTypeTo: "Descriptive" ] ;
 Object showInheritance ; 
 Schema processAllMessages ;
 
-Utility updateNetwork ;
+Utility updateNetworkWithAnnotation: "$comment" ;
 ?g
 
 @@@EOF@@@
 
-echo "---> Installing CLEANschema.G"
+set comment = "Installing CLEANschema.G"
+echo "--->" $comment
 date
 $MAIN -adU3 <<@@@EOF@@@
 ?? $scriptDir/CLEANschema.G
@@ -316,12 +332,13 @@ $MAIN -adU3 <<@@@EOF@@@
 Object showInheritance ; 
 Schema processAllMessages ;
 
-Utility updateNetwork ;
+Utility updateNetworkWithAnnotation: "$comment" ;
 ?g
 
 @@@EOF@@@
 
-echo "---> Installing Matrix.core"
+set comment = "Installing Matrix.core"
+echo "--->" $comment
 date
 $MAIN -adU3 <<@@@EOF@@@
 ?? $scriptDir/Matrix.core
@@ -329,12 +346,13 @@ $MAIN -adU3 <<@@@EOF@@@
 Object showInheritance ; 
 Schema processAllMessages ;
 
-Utility updateNetwork ;
+Utility updateNetworkWithAnnotation: "$comment" ;
 ?g
 
 @@@EOF@@@
 
-echo "---> Installing DataFeed protocol"
+set comment = "Installing DataFeed protocol"
+echo "--->" $comment
 date
 $MAIN -adU3 <<@@@EOF@@@
 ?? $scriptDir/INIfeeds.G
@@ -345,13 +363,14 @@ $MAIN -adU3 <<@@@EOF@@@
 Object showInheritance ; 
 Schema processAllMessages ;
 
-Utility updateNetwork ;
+Utility updateNetworkWithAnnotation: "$comment" ;
 ?g
 
 @@@EOF@@@
 
 
-echo "---> Installing Navigator Application"
+set comment = "Installing Navigator Application"
+echo "--->" $comment
 date
 $MAIN -adU3 <<@@@EOF@@@
 ?? $scriptDir/APPspecs.nav
@@ -361,7 +380,7 @@ $MAIN -adU3 <<@@@EOF@@@
 Object showInheritance ; 
 Schema processAllMessages ;
 
-Utility updateNetwork ;
+Utility updateNetworkWithAnnotation: "$comment" ;
 ?g
 
 @@@EOF@@@
