@@ -63,8 +63,8 @@ PrivateVarDef bool NetworkUpdateIsAdministrative = false;
  *****  Session GC State  *****
  ******************************/
 
-PrivateVarDef bool GarbageCollectionRunning = false;
-PrivateVarDef bool NetworkGarbageCollectedInSession = false;
+bool M_AND::g_bGarbageCollectionRunning = false;
+bool M_AND::g_bNetworkGarbageCollectedInSession = false;
 
 bool M_DCTE::g_bPotentialSessionGarbage = false;
 
@@ -1315,7 +1315,7 @@ PS_UpdateStatus M_AND::UpdateNetwork (bool globalUpdate) {
 
     if (globalUpdate)
 	m_pPhysicalAND->UpdateNetwork (this);
-    else if (NetworkGarbageCollectedInSession)
+    else if (NetworkGarbageCollectedInSession ())
 	m_pPhysicalAND->SetUpdateStatusTo (PS_UpdateStatus_NotSeparable);
     else
 	m_pASDRing->persistentASD ()->UpdateSpace ();
@@ -2292,7 +2292,7 @@ bool M_ASD::FlushCachedResources (VArgList const&) {
 
 void M_AND::FlushCachedResources () {
 //  Don't do anything that could change the set of accessed containers if a GC is running, ...
-    if (GarbageCollectionRunning)
+    if (GarbageCollectionRunning ())
 	return;
 
     bool InitialHandlePreservationFlag = VContainerHandle::g_bPreservingHandles;
@@ -4353,8 +4353,8 @@ bool M_AND::DisposeOfNetworkGarbage () {
 
     bool result = false;
     UNWIND_Try {
-	NetworkGarbageCollectedInSession =
-	GarbageCollectionRunning	 = true;
+	g_bNetworkGarbageCollectedInSession =
+	g_bGarbageCollectionRunning	    = true;
 
 	GCInvocationCount++;
 	GCRevisitCount = GCFirstVisitCount = 0;
@@ -4372,7 +4372,7 @@ bool M_AND::DisposeOfNetworkGarbage () {
 
 	M_DCTE::g_bPotentialSessionGarbage = false;
     } UNWIND_Finally {
-	GarbageCollectionRunning	= false;
+	g_bGarbageCollectionRunning	= false;
     } UNWIND_EndTryFinally;
 
     return result;
@@ -4537,12 +4537,12 @@ bool VDatabaseFederatorForBatchvision::DisposeOfSessionGarbage (bool bAggressive
     // Don't run if the network garbage collector is running and only
     // bother if garbage could have potentially been created since
     // last disposal ....
-    if (!GarbageCollectionRunning && M_DCTE::g_bPotentialSessionGarbage) {
+    if (!M_AND::GarbageCollectionRunning () && M_DCTE::g_bPotentialSessionGarbage) {
 	if (bAggressive)
 	    FlushCachedResources ();
 
 	UNWIND_Try {
-	    GarbageCollectionRunning = true;
+	    M_AND::g_bGarbageCollectionRunning = true;
 
 	    GCInvocationCount++;
 	    GCRevisitCount = GCFirstVisitCount = 0;
@@ -4564,7 +4564,7 @@ bool VDatabaseFederatorForBatchvision::DisposeOfSessionGarbage (bool bAggressive
 	    }
 
 	} UNWIND_Finally {
-	    GarbageCollectionRunning = false;
+	    M_AND::g_bGarbageCollectionRunning = false;
 	} UNWIND_EndTryFinally;
     }
     return result;
