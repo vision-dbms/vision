@@ -1,0 +1,18 @@
+# PoolTester master script runs test suite of poolTester scripts.
+
+# Main thread.
+thread:main, repetitions: 1
+operation_on_thread:main, poolIdx: $poolIdx/script$operationID, run: runScript -s $POOLTESTERDIR/scripts/flushWorkers
+operation_on_thread:main, poolIdx: $poolIdx/script$operationID, run: runScript -s $POOLTESTERDIR/scripts/hardRestart
+operation_on_thread:main, poolIdx: $poolIdx/script$operationID, run: runScript -s $POOLTESTERDIR/scripts/killPlumbedWorker
+operation_on_thread:main, poolIdx: $poolIdx/script$operationID, run: runScript -s $POOLTESTERDIR/scripts/replaceIdleFirst
+operation_on_thread:main, poolIdx: $poolIdx/script$operationID, run: runScript -s $POOLTESTERDIR/scripts/restartFullHouse
+operation_on_thread:main, poolIdx: $poolIdx/script$operationID, run: runScript -s $POOLTESTERDIR/scripts/shrink
+operation_on_thread:main, poolIdx: $poolIdx/script$operationID, run: runScript -s $POOLTESTERDIR/scripts/restartWithPeriodicQueries
+operation_on_thread:main, poolIdx: $poolIdx/script$operationID, run: runScript -s $POOLTESTERDIR/scripts/deferredWorkerActivation
+operation_on_thread:main, poolIdx: $poolIdx/script$operationID, run: runScript -s $POOLTESTERDIR/scripts/fastFlush
+operation_on_thread:main, poolIdx: $poolIdx/script$operationID, run: runScript -s $POOLTESTERDIR/scripts/fastHardRestart
+operation_on_thread:main, poolIdx: $poolIdx/script$operationID, run: runScript -s $POOLTESTERDIR/scripts/hardStop
+operation_on_thread:main, poolIdx: $poolIdx/script$operationID, run: runScript -s $POOLTESTERDIR/scripts/stop
+operation_on_thread:main, poolIdx: $poolIdx/script$operationID, run: runScript -s $POOLTESTERDIR/scripts/hardRestartNoResume
+operation_on_thread:main, poolIdx: $poolIdx/script$operationID, run: runScript -s $POOLTESTERDIR/scripts/checkProperties

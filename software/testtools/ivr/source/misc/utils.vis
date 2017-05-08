@@ -1,0 +1,250 @@
+
+Collection defineMethod: [ | indexBy: block |
+  !ilist <- CoreWorkspace IndexedList new ;
+  ^self extendBy: [!value <- ^self basicSend: ^my block ] .
+      do: [ ^my ilist at: value put: ^self super ] ;
+  ilist
+];
+
+
+Collection defineMethod: [ | dictBy: block |
+  !ilist <- CoreWorkspace Dictionary basicSpecialized ;
+  ^self collect: block .
+      do: [ ^my ilist at: value put: ^self super ] ;
+  ilist
+];
+
+Collection defineMethod: [|dictBy: block into: stringStore|
+  !ilist <- CoreWorkspace IndexedList new;
+  ^self extendBy: [ 
+      !item <- ^self;
+      !key <- ^self basicSend: ^my block . insertIntoCluster: ^my stringStore;
+    ] .
+    groupedBy: [ key ] . do: [ 
+      ^my ilist at: ^self super put: (groupList send: [ item ]);
+    ];
+  ilist
+];
+
+List defineMethod: [| fAt: position put: value|
+  !list <- ^self;
+
+  !appendcount <- position - list count;
+
+  appendcount sequence do: [ ^my list, NA ];
+
+  list at: position put: value;
+
+  list
+];
+
+List defineMethod: [|positionOf: object|
+  ^self positionsOf: object . at: 1
+];
+
+List defineMethod: [|positionsOf: object|
+  # Could be optimized for doOnce
+  ^self numberElements select: [ ^self super = ^my object ] . 
+    send: [ position ] 
+];
+
+Collection defineMethod: [|iextendBy: block|
+  ^self extendBy: [ !v ] . 
+    iterate: [ :v <- ^self super basicExtend: ^my block; ] .
+    send: [ v ] 
+];
+
+  
+Object defineMethod: [|ifNA: object|
+  ^self isntNA ifTrue: [^self]ifFalse: [object value]
+];
+
+Object defineMethod: [|ifIsntNA: object|
+  ^self isNA ifTrue: [^self]ifFalse: [object value]
+];
+
+Object defineMethod: [|
+    basicDoOnce:    onceBlock 
+    basedOn:        groupBlock 
+    propagateUsing: resultBlock
+  |
+
+  !thread <- ^current;
+  !local  <- ^local;
+  !date   <- ^date;
+  !self   <- ^self;
+
+  0 asReferenceTo: ^current. == ^current ifTrue: [
+    thread instanceList groupedBy: [date]. do: [
+      ^self super evaluate: [
+        groupList groupedBy: [local]. do: [
+          ^self super asLocalContextFor: [
+              groupList groupedBy: [self basicSend: groupBlock ]. do: [
+                !result <- groupList at: 1 . self basicDo: (
+                    groupList at: 1 . onceBlock
+                );
+                groupList extendBy: [ !groupResult <- ^my result ] .
+                  do: (groupList at: 1 . resultBlock);
+              ];
+          ];
+        ];
+      ];
+    ];
+  ];
+  !thread <- NA; :thread cleanStore; # remove circular reference
+
+  ^self
+];
+
+IndexedList, List, TimeSeries do: [
+  ^self defineMethod: [|iterateOrDo: block by: count|
+    !self <- ^self;
+    count isInteger ifTrue: [
+      count < 1 ifTrue: [ :count <- 1 ];
+      self iterate: block by: count;
+    ] 
+    else: [
+      self do: block;
+    ];
+
+    self
+  ];
+];
+
+Object defineMethod: [|
+    basicDoOnceNoContext: onceBlock 
+    basedOnCriteria:      groupBlock 
+    propagateUsing:       resultBlock
+    by:                   iterateSize
+  |
+
+  !thread <- ^current;
+  !local  <- ^local;
+  !date   <- ^date;
+  !self   <- ^self;
+
+  0 asReferenceTo: ^current. == ^current ifTrue: [
+    !gb <- thread groupBlock;
+    thread instanceList send: [ 
+        !swap <- ^self; # swap self to what is expected
+        self basicExtend: [ !swap <- ^my swap ] 
+      ] .
+      groupedByCriteria: gb . 
+      send: [ 
+        :groupList <- groupList send: [ swap ]; # swap self back
+        groupList at: 1 . basicExtend: [ 
+          !groupList <- ^my groupList 
+        ] 
+      ] .
+      iterateOrDo: [
+        !result <- groupList at: 1 . self basicDo: (
+            groupList at: 1 . onceBlock
+        );
+        groupList send: [ self ] .
+          extendBy: [ !groupResult <- ^my result ] .
+          do: (groupList at: 1 . resultBlock);
+      ] by: thread iterateSize;
+  ];
+  !thread <- NA; :thread cleanStore; # remove circular reference
+
+  ^self
+];
+
+Object defineMethod: [|
+    basicDoOnceNoContext: onceBlock 
+    basedOnCriteria:      groupBlock 
+    propagateUsing:       resultBlock
+  |
+  ^self basicDoOnceNoContext: onceBlock
+        basedOnCriteria:      groupBlock
+        propagateUsing:       resultBlock
+        by:                   NA
+  ;
+
+  ^self
+];
+
+
+Object defineMethod: [|
+    basicDoOnce:     onceBlock 
+    basedOnCriteria: groupBlock 
+    propagateUsing:  resultBlock
+  |
+
+  !self   <- ^self basicExtend: [ !local <- ^local; !date <- ^date ];
+
+  groupBlock isList ifFalse: [ :groupBlock <- groupBlock asList ];
+  :groupBlock <- [date],[local] append: groupBlock;
+
+  self basicDoOnceNoContext: [
+      ^self super basicDo: ^my onceBlock
+    ]
+    basedOnCriteria: groupBlock
+    propagateUsing: [
+      :groupResult <- groupResult super;
+      ^self super super basicExtend: [ !groupResult <- ^my groupResult ] .
+        basicDo: ^my resultBlock;
+    ];
+
+  # cleanup
+  :groupBlock <- NA; :self <- NA;
+
+  ^self
+];
+
+String defineMethod: [|clusteredAsBlock|
+  !cluster <- ^self newAssociativeCluster;
+  ^self insertIntoCluster: cluster . sendOnceNoContext: [ asBlock ]
+];
+
+IndexedList defineMethod: [|extendIndexOpt|
+  !origList <- ^self asSelf;
+  !result;
+
+  # asObject is very slow in list context.  Make sure you only do this once
+  # per IndexedList "key" container
+  !keyList <- 0 asReferenceTo: origList . sendOnceNoContext: [
+    ^self asPOP getNthPOP: 2 . asObject instanceList send: [value]
+  ];
+
+  !listCluster <- CoreWorkspace IndexedList newPrototype;
+
+  # The cross product of keyList and all of the lists this is called for
+  # can be enormous.  Limit this cross product to be around 100 megs using
+  # iterate[] by: a precomputed value.
+  !iterateSize <- (5000000 / keyList count) asInteger;
+  iterateSize = 0  ifTrue: [ :iterateSize <- iterateSize increment; ];
+  iterateSize isNA ifTrue: [ :iterateSize <- 500000; ];
+
+  ^current basicDoOnceNoContext: [
+      !nilValue <- origList valueCell: "newKeyWithNoValue";
+      !hitList <- keyList extendBy: [ # The very large X-product
+            !index <- ^self;
+            !myValue <- ^my origList valueCell: index;
+        ] .
+        select: [ myValue != ^my nilValue ];
+      :result <- listCluster clusterNew;
+      hitList do: [
+        ^my result at: index put: (
+          ^my origList at: index .  basicExtend: [!index <- ^my index]
+        );
+      ];
+    ]
+    basedOnCriteria: [ origList ]
+    propagateUsing: [
+      # copy the results if it wasn't one of the ones populated initially,
+      # each gets it's own copy of the list
+      result isNA ifTrue: [ 
+        :result <- listCluster clusterNew;
+        groupResult result do: [ ^my result at: index put: ^self ];
+      ];
+    ]
+    by: iterateSize
+  ;
+
+  result
+];
+
+
+
+

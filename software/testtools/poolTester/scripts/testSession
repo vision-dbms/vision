@@ -1,0 +1,5 @@
+# Pre-Execs
+pre_exec:getPOPSession -n querypool -n querypool -p visdeva05 -p pool1 -p pool2 -p pool3 -p pool4 -p pool5 -p pool6 -p pool7 -p pool8 -p LASTRESORT_pool2 -c popConfigs/basic
+
+thread:main, repetitions:5
+operation_on_thread:main, sessionName:querypool, run:hammer -c 5 -d 5

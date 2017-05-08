@@ -1,0 +1,73 @@
+
+Utility SessionAttribute enableVerboseSelectorNotFound;
+
+!baseline <- "workCache/saves/baseline/";
+!upgrade <- "workCache/saves/upgrade/";
+
+!baselineDb <- baseline concat: "/topix-20080630/NDF" . openDatabase;
+!upgradeDb <- upgrade concat: "/topix-20080630/NDF" . openDatabase;
+
+String defineMethod: [|asClass|
+  !id <- ^self stripChar: " "; 
+  !capId <- id capitalize; 
+
+  !cws <- ^my upgradeDb CoreWorkspace;
+
+  cws respondsTo: id .  ifTrue: [
+    id evaluateIn: cws 
+  ] .
+  elseIf: [cws respondsTo: capId] then: [ 
+    capId evaluateIn: cws 
+  ] . 
+  else: [
+    cws getMessage: id . isntDefault: [ message evaluateIn: cws ]
+      else: [
+        ^my cws getMessage: ^my capId .
+          isntDefault: [message evaluateIn: ^my cws ]
+          else: [NA]
+      ]
+  ]
+];
+
+"patches/102/upgrade.vis",
+"patches/102/sharesCacheExpiration.vis"
+  iterate: [ ^self asFileContents evaluateIn: ^my upgradeDb; ];
+
+
+# now do the class level diff
+"source/misc/classBuilder.vis"   asFileContents evaluate;
+"source/misc/utils.vis"          asFileContents evaluate;
+"testkit/lib/diff/rcompare.vis"  asFileContents evaluate;
+"testkit/lib/diff/classDiff.vis" asFileContents evaluate;
+
+"source/misc/classBuilder.vis"   asFileContents evaluateIn: baselineDb;
+"source/misc/utils.vis"          asFileContents evaluateIn: baselineDb;
+"testkit/lib/diff/rcompare.vis"  asFileContents evaluateIn: baselineDb;
+"testkit/lib/diff/classDiff.vis" asFileContents evaluateIn: baselineDb;
+
+"source/misc/classBuilder.vis"   asFileContents evaluateIn: upgradeDb;
+"source/misc/utils.vis"          asFileContents evaluateIn: upgradeDb;
+"testkit/lib/diff/rcompare.vis"  asFileContents evaluateIn: upgradeDb;
+"testkit/lib/diff/classDiff.vis" asFileContents evaluateIn: upgradeDb;
+
+
+CoreWorkspace, baselineDb, upgradeDb do: [
+  Object     excludeMessages: "creationDate";
+  Object     excludeMessages: "lastModifiedByFeed";
+  DataItem   excludeMessages: "baseClass";
+
+  DataFeed   excludeMessages: "lastUpdateTime";
+
+  Schema     excludeMessages: "number"; # number based on creation order?
+  Schema     excludeMessages: "primaryStringCluster";
+
+  Schema localROptions setLookupBlockTo: [ ^self whatAmI concat: ^self code ];
+  Schema ClassDescriptor localROptions setLookupBlockTo: 
+    [ ^self class asString concat: ^self code . concat: ^self whatAmI ];
+
+  RCompareTools define: 'verbosity' toBe: 1;
+];
+
+RCompareTools subclassDiff: baselineDb Object and: upgradeDb Object
+
+

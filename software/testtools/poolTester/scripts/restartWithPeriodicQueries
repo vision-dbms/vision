@@ -1,0 +1,31 @@
+# Tests that older generation workers will continue to handle anyData
+# queries after a restart is initiated and before any new generation
+# workers complete their startup
+
+# Pre-Execs
+pre_exec: start -c $POOLTESTERDIR/configs/fma.ptc -w
+
+# Hammer thread.
+thread:main, repetitions: 1
+operation_on_thread:main, run:restart
+operation_on_thread:main, run:hammer -c 1 -d 0 -a -w
+operation_on_thread:main, run:hammer -c 1 -d 0 -a -w
+operation_on_thread:main, run:hammer -c 1 -d 0 -a -w
+operation_on_thread:main, run:hammer -c 1 -d 0 -a -w
+operation_on_thread:main, run:hammer -c 1 -d 0 -a -w
+operation_on_thread:main, run:hammer -c 1 -d 0 -a -w
+operation_on_thread:main, run:hammer -c 1 -d 0 -a -w
+operation_on_thread:main, run:hammer -c 1 -d 0 -a -w
+operation_on_thread:main, run:hammer -c 1 -d 0 -a -w
+operation_on_thread:main, run:hammer -c 1 -d 0 -a -w
+operation_on_thread:main, run:hammer -c 1 -d 0 -a -w
+operation_on_thread:main, run:hammer -c 1 -d 0 -a -w
+operation_on_thread:main, run:hammer -c 1 -d 0 -a -w
+operation_on_thread:main, run:hammer -c 1 -d 0 -a -w
+operation_on_thread:main, run:hammer -c 1 -d 0 -a -w
+operation_on_thread:main, run:hammer -c 1 -d 0 -a -w
+operation_on_thread:main, run:hammer -c 1 -d 0 -a -w
+
+# Post-Execs
+post_exec: waitForStat -t 120 -c WorkersBeingCreated=0
+post_exec: stop

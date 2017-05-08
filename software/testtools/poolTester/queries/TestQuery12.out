@@ -1,0 +1,2536 @@
+V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> V> 
+Beginning file: PFprint.S ...
+
+
+
+*********************************************************
+(PART 1)
+--------  Test 'sprint' for Primitives, 	 --------
+--------  Methods, and Closures.		 --------
+*********************************************************
+
+
+### Test the scalar cases ...
+### 1. Method
+
+{|sales|_sales}
+String
+{|sales|_sales}
+
+### 2. Primitive
+
+      NA 
+
+>>> Selector 'sprint' Not Found <<<
+Undefined
+      NA 
+
+### 3. Closure 
+
+[|sales|_sales]
+Block
+[|sales|_sales]
+<ToLStoreString>
+Block
+<ToLStoreString>
+
+###  Setup for list tests ...
+
+
+### 1&2. Methods and Primitives
+
+<StringLessThan>
+
+<StringLessThanOrEqual>
+
+{| >= aString| aString asString <= super}
+
+{| > aString| aString asString < super}
+
+<StringEqual>
+
+{| != aString| (aString = super) not}
+
+<PrintString>
+
+{| breakString: aString| aString breakOn: super}
+
+{| cbreakString: aString| aString cbreakOn: super}
+
+{| 
+prefixSpannedIn: aString| 
+aString prefixSpannedBy: super}
+
+{| 
+prefixNotSpannedIn: aString| 
+aString prefixNotSpannedBy: super}
+
+{| matchesString: aString| aString basicContains: super}
+
+{| print: aFormat| aFormat printOf: super}
+
+{| prefixWith: aString| aString concat: super}
+
+<Create>
+
+<DBUpdateAppendDump>
+
+<AppendOutput>
+
+{|asBlock|(
+"[ " concat: ^self .concat: " ] ") evaluate}
+
+{| 
+asBlockIn: object| (
+"[ " concat: ^self .concat: " ] ") evaluateIn: object}
+
+{|asCSVRecords|
+^self asFileContents translate: "," to: "	" .
+asLines select: [count > 0].
+send: [
+    !quotes <- ^self breakOn: "\"" .numberElements; [
+        quotes 
+        do: [
+            position mod: 2 .= 1 ifTrue: [print]
+            ifFalse: [^self translate: "	" to: "," .print]; 
+           ]; 
+       ]divertOutput].
+extendBy: [!fields <- ^self breakOn: "	"]}
+
+{|asCells|
+!delimiter <- "	ÿ"; 
+^self asCellsOn: delimiter}
+
+{| 
+asCellsOn: delimiter| 
+^self breakOn: newLine .
+select: [count > 0].
+select: [^self contains: "@@@" .not].
+extendBy: [
+    !cells <- ^self breakOn: ^my delimiter .
+    select: [count > 0].
+    select: [^self contains: "" .not]; 
+   ].
+select: [cells count > 0]}
+
+{|asCurrency|
+^global Named Currency uniformAt: ^self asString}
+
+{|asFileContents|
+!ovc <- "file:" concat: ^self .asOpenVisionChannel; 
+!result <- ovc getString; 
+ovc close; 
+result}
+
+{|asInteger|
+^self asNumber asInteger}
+
+{|asLines|
+^self breakOn: newLine .
+select: [count > 0]}
+
+{|asNumber|
+!d <- toDouble; 
+!i <- d round; 
+d = i ifTrue: [i]ifFalse: [d]}
+
+{|asOpenVisionChannel|
+^self __asOpenVisionChannel asPointerTo: ^global OpenVision Channel}
+
+{|asOpenVisionChannelToVision|
+^self asOpenVisionChannel consumeVisionPrompt}
+
+{|asQuotedString|
+"\"" concat: ^self .concat: "\""}
+
+{|asRecords|
+^self asFileContents asLines select: [count > 0]}
+
+<ReturnCurrent>
+
+<ReturnCurrent>
+
+{|asUpperLowerWords|
+!word <- ^self; 
+!list <- ^global List new; [
+    word count > 0]
+whileTrue: [
+    !boundary <- (
+    word drop: 1 .
+    prefixNotSpannedBy: "ABCDEFGHIJKLMNOPQRSTUVWXYZ" .+ 
+    1) asInteger; 
+    list , (word take: boundary .capitalize); 
+    :word <- word drop: boundary; 
+   ]; 
+list}
+
+{|asWords|
+^self breakOn: 
+" 	
+" .select: [count > 0]}
+
+{| 
+at: n| 
+n isNumber && n > 0 && n <= ^self count ifTrue: [^self drop: n - 1 .take: 1]
+ifFalse: [""]}
+
+{| 
+at: n put: s| 
+n isNumber ifTrue: [
+    !prefix <- n <= 1 
+    ifTrue: [0].elseIf: n > count 
+    then: [count].
+    else: [(n - 1) asInteger]; 
+    ^self take: prefix .concat: s asString .concat: (^self drop: prefix)]
+ifFalse: [^self]}
+
+<StringConcat>
+
+<StringMatch>
+
+<StringDrop>
+
+<StringFill>
+
+<StringTake>
+
+<StringBreak>
+
+<EncodeStringAsDouble>
+
+{|capitalize|
+!firstChar <- ^self take: 1; 
+!upper <- UpperCaseDictionary at: firstChar; 
+upper isNA ifTrue: [:upper <- firstChar]; 
+upper concat: (^self drop: 1)}
+
+<StringCBreak>
+
+{| 
+center: aWidth| [
+    !blanks <- ((aWidth - count) / 2) asInteger; 
+    blanks > 0 ifTrue: [
+        " " print: blanks; 
+        ^self print: (aWidth - 2 * blanks); 
+        " " print: blanks; 
+       ]
+    ifFalse: [^self print: aWidth]; 
+   ]divertOutput}
+
+{| 
+centerNL: aWidth| 
+^self center: aWidth .concat: newLine}
+
+{| 
+concat: string| 
+string isString ifTrue: [^self basicConcat: string asString]
+ifFalse: [^self basicConcat: string asString stripBoundingBlanks]}
+
+{| contains: string| ^self basicContains: string asString}
+
+<StringMatch>
+
+{| 
+containsSubstring: substring| 
+^self findSubstringOrigin: substring .< ^self count}
+
+{|convertToNumber|
+!prefix <- ^self prefixNotSpannedBy: "0123456789.-+"; 
+!string <- ^self drop: prefix; 
+!suffix <- string reverse prefixNotSpannedBy: "0123456789.-+"; 
+:string <- string drop: (-1 * suffix) asInteger; 
+string contains: "\." .ifTrue: [string stripCommas asNumber asDouble]
+ifFalse: [string stripCommas asNumber]}
+
+<StringSize>
+
+<DeleteFromDictionaryOf>
+
+{| drop: n| ^self basicDrop: n asInteger}
+
+{|evaluate|^self evaluateIn: ^global}
+
+{| 
+evaluateIn: anObject| 
+^self evaluateWithCompilationErrorHandler: [| 
+    :string :errorLine :errorCharacter| 
+    "Error at line/character [" print; 
+    errorLine print; "/" print; errorCharacter print; 
+    "] of <" print; 
+    string print; 
+    ">" printNL; 
+   ]
+in: anObject}
+
+<StringEvaluate>
+
+{| fill: n| ^self basicFill: n asInteger}
+
+<FilterOutput>
+
+<PatternExtent>
+
+<PatternOrigin>
+
+{| 
+findPatternSuffix: pattern| ((
+^self 
+findPatternOrigin: pattern) + (
+^self findPatternExtent: pattern)) 
+asInteger}
+
+{| 
+findSubstringExtent: substring| 
+!substringOrigin <- ^self findSubstringOrigin: substring; 
+substringOrigin < ^self count ifTrue: [substring count]
+ifFalse: [0]}
+
+<SubstringOrigin>
+
+{| 
+findSubstringSuffix: substring| 
+!substringOrigin <- ^self findSubstringOrigin: substring; 
+substringOrigin < ^self count ifTrue: [(substringOrigin + substring count) asInteger]
+ifFalse: [^self count]}
+
+<ToLStoreString>
+
+{|formatForExcel|[
+    ^self asCells 
+    do: [cells 
+        do: [^self stripBoundingBlanks = "NA" ifTrue: ["" print]
+            ifFalse: [print]; 
+            "	" print; 
+           ]; 
+        newLine print; 
+       ]; 
+   ]divertOutput}
+
+{|formatForPRN|[
+    ^self asCells 
+    do: [cells 
+        do: [!number <- ^self convertToNumber; 
+            number isNumber ifTrue: [number print; " " print]
+            ifFalse: [
+                "\"" print; 
+                ^self stripBoundingBlanks = "NA" ifTrue: [" " print]
+                ifFalse: [print]; 
+                "\"" print; " " print; 
+               ]; 
+           ]; 
+        newLine print; 
+       ]; 
+   ]divertOutput}
+
+{| 
+from: pos for: count| 
+!start <- pos max: 1; 
+!end <- count > 0 ifTrue: [pos + count - 1]
+ifFalse: [pos + count + 1]; 
+start < end ifTrue: [^self from: start to: end]
+ifFalse: [^self from: end to: start]}
+
+{| 
+from: pos1 to: pos2| 
+!start <- pos1 max: 1; 
+!end <- pos2 max: 1; 
+!count <- (end - start) absoluteValue + 1; 
+!drop <- start min: end .- 1; 
+!result <- ^self drop: drop .take: count; 
+start <= end ifTrue: [result]ifFalse: [result reverse]}
+
+{|isBlank|
+" " take: (^self count) .= ^self asSelf}
+
+{| 
+isBlankFor: n| 
+^self take: n .= (" " take: n)}
+
+{|isDefault|^self count = 0}
+
+<LocateEntryInDictionaryOf>
+
+<LocateOrAddEntryInDictionaryOf>
+
+{|lowercase|
+!firstChar <- ^self take: 1; 
+!lower <- LowerCaseDictionary at: firstChar; 
+lower isNA ifTrue: [:lower <- firstChar]; 
+lower concat: (^self drop: 1)}
+
+{|notifyAsComment|
+"   ...  " print; 
+print; 
+newLine print; 
+}
+
+{|notifyAsError|
+"   >>>   " print; 
+print; 
+"   <<<" print; 
+newLine print; 
+}
+
+{|notifyAsWarning|
+"   ==> WARNING:  " print; 
+print; 
+newLine print; 
+}
+
+{| 
+orderUsingDictionary: dictionary| 
+"." concat: super .locateOrAddInDictionaryOf: dictionary}
+
+{| 
+patternExtentIn: string| 
+string findPatternExtent: super}
+
+{| 
+patternOriginIn: string| 
+string findPatternOrigin: super}
+
+<StringCSpan>
+
+<StringSpan>
+
+{|printPRN|
+"\"" print; 
+^self print; 
+"\"" print; 
+^self}
+
+{| 
+printPRN: aFormat| 
+"\"" print; 
+^self print: aFormat; 
+"\"" print; 
+^self}
+
+<PutString>
+
+<DBUpdateReplaceDump>
+
+<StringReverse>
+
+{| sprint: aFormat| aFormat sprintOf: super}
+
+{| 
+startingPositionOf: subString| 
+!matches <- ^self startingPositionsOf: subString; 
+matches isntNA ifTrue: [matches at: 1]}
+
+{| 
+startingPositionsOf: subString| 
+!searchString <- ^self; 
+searchString contains: subString .
+ifTrue: [
+    !firstChar <- subString take: 1; 
+    !length <- subString count; 
+    !entryPoints <- searchString breakOn: firstChar .
+    runningTotal: [1 + ^self count].
+    extendBy: [
+        !startingPosition <- (runningTotal - 1) asInteger; 
+        !matchString <- 
+        ^my searchString drop: startingPosition .take: ^my length; 
+       ]; 
+    !matches <- entryPoints select: [matchString = ^my subString]; 
+    matches send: [(startingPosition + 1) asInteger]]}
+
+{|stripBoundingBlanks|
+^self stripLeadingBlanks stripTrailingBlanks}
+
+{| 
+stripChar: char| [
+    ^self breakOn: char .do: [print]]
+divertOutput}
+
+{|stripCommas|[
+    ^self breakOn: "," .
+    do: [print]]
+divertOutput}
+
+{|stripLeadingBlanks|
+^self drop: (^self prefixSpannedBy: " ")}
+
+{|stripTrailingBlanks|
+^self reverse stripLeadingBlanks reverse}
+
+<WriteOutput>
+
+{| 
+substringOriginIn: string| 
+string findSubstringOrigin: super}
+
+{| take: n| ^self basicTake: n asInteger}
+
+<ToDouble>
+
+{|toList|
+!string <- ^self; 
+^self count sequence0 
+send: [^my string drop: ^self .take: 1]}
+
+{|toLower|[
+    ^self toList 
+    do: [^self lowercase print]]
+divertOutput}
+
+{|toUpper|[
+    ^self toList 
+    do: [^self capitalize print]]
+divertOutput}
+
+{| 
+translate: char to: string| [
+    ^self breakOn: char .do: [print; ^my string print;]]
+divertOutput drop: string count * -1}
+
+      113
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+Undefined
+Undefined
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+Undefined
+String
+String
+String
+String
+String
+String
+Undefined
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+Undefined
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+String
+Undefined
+<StringLessThan>
+<StringLessThanOrEqual>
+{| >= aString| aString asString <= super}
+{| > aString| aString asString < super}
+<StringEqual>
+{| != aString| (aString = super) not}
+<PrintString>
+{| breakString: aString| aString breakOn: super}
+{| cbreakString: aString| aString cbreakOn: super}
+{| 
+prefixSpannedIn: aString| 
+aString prefixSpannedBy: super}
+{| 
+prefixNotSpannedIn: aString| 
+aString prefixNotSpannedBy: super}
+{| matchesString: aString| aString basicContains: super}
+{| print: aFormat| aFormat printOf: super}
+{| prefixWith: aString| aString concat: super}
+      NA 
+      NA 
+<Create>
+<DBUpdateAppendDump>
+<AppendOutput>
+{|asBlock|(
+"[ " concat: ^self .concat: " ] ") evaluate}
+{| 
+asBlockIn: object| (
+"[ " concat: ^self .concat: " ] ") evaluateIn: object}
+{|asCSVRecords|
+^self asFileContents translate: "," to: "	" .
+asLines select: [count > 0].
+send: [
+    !quotes <- ^self breakOn: "\"" .numberElements; [
+        quotes 
+        do: [
+            position mod: 2 .= 1 ifTrue: [print]
+            ifFalse: [^self translate: "	" to: "," .print]; 
+           ]; 
+       ]divertOutput].
+extendBy: [!fields <- ^self breakOn: "	"]}
+{|asCells|
+!delimiter <- "	ÿ"; 
+^self asCellsOn: delimiter}
+{| 
+asCellsOn: delimiter| 
+^self breakOn: newLine .
+select: [count > 0].
+select: [^self contains: "@@@" .not].
+extendBy: [
+    !cells <- ^self breakOn: ^my delimiter .
+    select: [count > 0].
+    select: [^self contains: "" .not]; 
+   ].
+select: [cells count > 0]}
+{|asCurrency|
+^global Named Currency uniformAt: ^self asString}
+{|asFileContents|
+!ovc <- "file:" concat: ^self .asOpenVisionChannel; 
+!result <- ovc getString; 
+ovc close; 
+result}
+{|asInteger|
+^self asNumber asInteger}
+{|asLines|
+^self breakOn: newLine .
+select: [count > 0]}
+{|asNumber|
+!d <- toDouble; 
+!i <- d round; 
+d = i ifTrue: [i]ifFalse: [d]}
+{|asOpenVisionChannel|
+^self __asOpenVisionChannel asPointerTo: ^global OpenVision Channel}
+{|asOpenVisionChannelToVision|
+^self asOpenVisionChannel consumeVisionPrompt}
+{|asQuotedString|
+"\"" concat: ^self .concat: "\""}
+{|asRecords|
+^self asFileContents asLines select: [count > 0]}
+<ReturnCurrent>
+<ReturnCurrent>
+{|asUpperLowerWords|
+!word <- ^self; 
+!list <- ^global List new; [
+    word count > 0]
+whileTrue: [
+    !boundary <- (
+    word drop: 1 .
+    prefixNotSpannedBy: "ABCDEFGHIJKLMNOPQRSTUVWXYZ" .+ 
+    1) asInteger; 
+    list , (word take: boundary .capitalize); 
+    :word <- word drop: boundary; 
+   ]; 
+list}
+{|asWords|
+^self breakOn: 
+" 	
+" .select: [count > 0]}
+{| 
+at: n| 
+n isNumber && n > 0 && n <= ^self count ifTrue: [^self drop: n - 1 .take: 1]
+ifFalse: [""]}
+{| 
+at: n put: s| 
+n isNumber ifTrue: [
+    !prefix <- n <= 1 
+    ifTrue: [0].elseIf: n > count 
+    then: [count].
+    else: [(n - 1) asInteger]; 
+    ^self take: prefix .concat: s asString .concat: (^self drop: prefix)]
+ifFalse: [^self]}
+<StringConcat>
+<StringMatch>
+<StringDrop>
+<StringFill>
+<StringTake>
+<StringBreak>
+<EncodeStringAsDouble>
+{|capitalize|
+!firstChar <- ^self take: 1; 
+!upper <- UpperCaseDictionary at: firstChar; 
+upper isNA ifTrue: [:upper <- firstChar]; 
+upper concat: (^self drop: 1)}
+<StringCBreak>
+{| 
+center: aWidth| [
+    !blanks <- ((aWidth - count) / 2) asInteger; 
+    blanks > 0 ifTrue: [
+        " " print: blanks; 
+        ^self print: (aWidth - 2 * blanks); 
+        " " print: blanks; 
+       ]
+    ifFalse: [^self print: aWidth]; 
+   ]divertOutput}
+{| 
+centerNL: aWidth| 
+^self center: aWidth .concat: newLine}
+      NA 
+{| 
+concat: string| 
+string isString ifTrue: [^self basicConcat: string asString]
+ifFalse: [^self basicConcat: string asString stripBoundingBlanks]}
+{| contains: string| ^self basicContains: string asString}
+<StringMatch>
+{| 
+containsSubstring: substring| 
+^self findSubstringOrigin: substring .< ^self count}
+{|convertToNumber|
+!prefix <- ^self prefixNotSpannedBy: "0123456789.-+"; 
+!string <- ^self drop: prefix; 
+!suffix <- string reverse prefixNotSpannedBy: "0123456789.-+"; 
+:string <- string drop: (-1 * suffix) asInteger; 
+string contains: "\." .ifTrue: [string stripCommas asNumber asDouble]
+ifFalse: [string stripCommas asNumber]}
+<StringSize>
+      NA 
+<DeleteFromDictionaryOf>
+{| drop: n| ^self basicDrop: n asInteger}
+{|evaluate|^self evaluateIn: ^global}
+{| 
+evaluateIn: anObject| 
+^self evaluateWithCompilationErrorHandler: [| 
+    :string :errorLine :errorCharacter| 
+    "Error at line/character [" print; 
+    errorLine print; "/" print; errorCharacter print; 
+    "] of <" print; 
+    string print; 
+    ">" printNL; 
+   ]
+in: anObject}
+<StringEvaluate>
+{| fill: n| ^self basicFill: n asInteger}
+<FilterOutput>
+<PatternExtent>
+<PatternOrigin>
+{| 
+findPatternSuffix: pattern| ((
+^self 
+findPatternOrigin: pattern) + (
+^self findPatternExtent: pattern)) 
+asInteger}
+{| 
+findSubstringExtent: substring| 
+!substringOrigin <- ^self findSubstringOrigin: substring; 
+substringOrigin < ^self count ifTrue: [substring count]
+ifFalse: [0]}
+<SubstringOrigin>
+{| 
+findSubstringSuffix: substring| 
+!substringOrigin <- ^self findSubstringOrigin: substring; 
+substringOrigin < ^self count ifTrue: [(substringOrigin + substring count) asInteger]
+ifFalse: [^self count]}
+<ToLStoreString>
+{|formatForExcel|[
+    ^self asCells 
+    do: [cells 
+        do: [^self stripBoundingBlanks = "NA" ifTrue: ["" print]
+            ifFalse: [print]; 
+            "	" print; 
+           ]; 
+        newLine print; 
+       ]; 
+   ]divertOutput}
+{|formatForPRN|[
+    ^self asCells 
+    do: [cells 
+        do: [!number <- ^self convertToNumber; 
+            number isNumber ifTrue: [number print; " " print]
+            ifFalse: [
+                "\"" print; 
+                ^self stripBoundingBlanks = "NA" ifTrue: [" " print]
+                ifFalse: [print]; 
+                "\"" print; " " print; 
+               ]; 
+           ]; 
+        newLine print; 
+       ]; 
+   ]divertOutput}
+{| 
+from: pos for: count| 
+!start <- pos max: 1; 
+!end <- count > 0 ifTrue: [pos + count - 1]
+ifFalse: [pos + count + 1]; 
+start < end ifTrue: [^self from: start to: end]
+ifFalse: [^self from: end to: start]}
+{| 
+from: pos1 to: pos2| 
+!start <- pos1 max: 1; 
+!end <- pos2 max: 1; 
+!count <- (end - start) absoluteValue + 1; 
+!drop <- start min: end .- 1; 
+!result <- ^self drop: drop .take: count; 
+start <= end ifTrue: [result]ifFalse: [result reverse]}
+{|isBlank|
+" " take: (^self count) .= ^self asSelf}
+{| 
+isBlankFor: n| 
+^self take: n .= (" " take: n)}
+{|isDefault|^self count = 0}
+      NA 
+<LocateEntryInDictionaryOf>
+<LocateOrAddEntryInDictionaryOf>
+{|lowercase|
+!firstChar <- ^self take: 1; 
+!lower <- LowerCaseDictionary at: firstChar; 
+lower isNA ifTrue: [:lower <- firstChar]; 
+lower concat: (^self drop: 1)}
+{|notifyAsComment|
+"   ...  " print; 
+print; 
+newLine print; 
+}
+{|notifyAsError|
+"   >>>   " print; 
+print; 
+"   <<<" print; 
+newLine print; 
+}
+{|notifyAsWarning|
+"   ==> WARNING:  " print; 
+print; 
+newLine print; 
+}
+{| 
+orderUsingDictionary: dictionary| 
+"." concat: super .locateOrAddInDictionaryOf: dictionary}
+{| 
+patternExtentIn: string| 
+string findPatternExtent: super}
+{| 
+patternOriginIn: string| 
+string findPatternOrigin: super}
+<StringCSpan>
+<StringSpan>
+{|printPRN|
+"\"" print; 
+^self print; 
+"\"" print; 
+^self}
+{| 
+printPRN: aFormat| 
+"\"" print; 
+^self print: aFormat; 
+"\"" print; 
+^self}
+<PutString>
+<DBUpdateReplaceDump>
+<StringReverse>
+{| sprint: aFormat| aFormat sprintOf: super}
+{| 
+startingPositionOf: subString| 
+!matches <- ^self startingPositionsOf: subString; 
+matches isntNA ifTrue: [matches at: 1]}
+{| 
+startingPositionsOf: subString| 
+!searchString <- ^self; 
+searchString contains: subString .
+ifTrue: [
+    !firstChar <- subString take: 1; 
+    !length <- subString count; 
+    !entryPoints <- searchString breakOn: firstChar .
+    runningTotal: [1 + ^self count].
+    extendBy: [
+        !startingPosition <- (runningTotal - 1) asInteger; 
+        !matchString <- 
+        ^my searchString drop: startingPosition .take: ^my length; 
+       ]; 
+    !matches <- entryPoints select: [matchString = ^my subString]; 
+    matches send: [(startingPosition + 1) asInteger]]}
+{|stripBoundingBlanks|
+^self stripLeadingBlanks stripTrailingBlanks}
+{| 
+stripChar: char| [
+    ^self breakOn: char .do: [print]]
+divertOutput}
+{|stripCommas|[
+    ^self breakOn: "," .
+    do: [print]]
+divertOutput}
+{|stripLeadingBlanks|
+^self drop: (^self prefixSpannedBy: " ")}
+{|stripTrailingBlanks|
+^self reverse stripLeadingBlanks reverse}
+<WriteOutput>
+{| 
+substringOriginIn: string| 
+string findSubstringOrigin: super}
+{| take: n| ^self basicTake: n asInteger}
+<ToDouble>
+{|toList|
+!string <- ^self; 
+^self count sequence0 
+send: [^my string drop: ^self .take: 1]}
+{|toLower|[
+    ^self toList 
+    do: [^self lowercase print]]
+divertOutput}
+{|toUpper|[
+    ^self toList 
+    do: [^self capitalize print]]
+divertOutput}
+{| 
+translate: char to: string| [
+    ^self breakOn: char .do: [print; ^my string print;]]
+divertOutput drop: string count * -1}
+      NA 
+
+### 3. Closures 
+
+[|print|^self code print; ^self]
+[|print|^self code print; ^self]
+<PrintString>
+<PrintCurrentAsPointer>
+<PrintString>
+______________
+        5
+String
+String
+String
+String
+String
+[|print|^self code print; ^self]
+[|print|^self code print; ^self]
+<PrintString>
+<PrintCurrentAsPointer>
+<PrintString>
+
+###  Test original use of V_LoadAWithStringStore ...
+
+hellohello
+therethere
+worldworld
+
+
+
+*********************************************************
+(PART 2)
+--------  IntegerPrintOf and DoublePrintOf  	 --------
+--------  Primitives. 				 --------
+*********************************************************
+
+
+-----------------------------
+-----  Integer PrintOf  -----
+-----------------------------
+
+
+-----  Test each scalar data type 
+
+###  Character
+
+
+### Double
+
+    123.46
+-123.46   
+****
+
+
+### float
+
+
+### lstore string
+
+hello there    
+    hello there
+hell
+
+
+### block string
+
+hello there    
+    hello there
+hell
+
+
+### selector
+
+value     
+     value
+valu
+
+
+### integer
+
+      1234
+-1234     
+1234
+***
+
+ 11111111111.00
+
+-----  Test each list data type   -----
+
+### character
+
+
+### double
+
+    123.46
+ -10234.10
+     10.00
+
+123.46    
+-10234.10 
+10.00     
+
+ 123.46
+*******
+  10.00
+
+**
+**
+**
+
+
+
+
+
+    123.45
+123.45    
+****
+
+
+
+### double, packed with specification of 10 decimal places
+
+      123.4560000000   -10234.1000000000       10.0000000000        4.4773368145
+
+### float, packed with specification of 10 decimal places
+
+      123.4560012817   -10234.0996093750       10.0000000000        4.4773368835
+
+### multi-type, packed with specification of 10 decimal places
+
+                 123   -10234.1000000000       10.000000000088log               
+
+### float
+not accessed
+
+
+### block strings
+
+hello     
+there     
+everyone  
+
+     hello
+     there
+  everyone
+
+hell
+ther
+ever
+
+
+
+
+
+hello     
+     hello
+hell
+hello
+
+
+
+### lstore strings
+
+hello     
+there     
+everyone  
+
+     hello
+     there
+  everyone
+
+hell
+ther
+ever
+
+hell
+ther
+ever
+
+
+
+
+
+hello     
+     hello
+hell
+hello
+
+
+
+### selectors
+
+aselector 
+another   
+
+ aselector
+   another
+
+asel
+anot
+
+asele
+anoth
+
+asele
+anoth
+
+
+
+
+value     
+     value
+valu
+value
+
+
+
+### integers
+
+          12345
+         -12345
+              0
+             10
+ 11111111111.00
+
+12345     
+-12345    
+0         
+10        
+**********
+
+****
+****
+0   
+10  
+****
+
+12345
+*****
+    0
+   10
+*****
+
+
+
+
+
+
+
+     12345
+12345     
+****
+12345
+
+
+
+----------------------------
+-----  Double PrintOf  -----
+----------------------------
+
+
+-----  Test each scalar data type 
+
+###  Character
+
+
+### Double
+
+    -123.5
+123.4560000000000031                                                                                          
+ 123
+
+
+### float
+
+
+### lstore string
+
+hello there    
+    hello there
+hell
+
+
+### block string
+
+hello there    
+    hello there
+hell
+
+
+### selector
+
+value     
+     value
+valu
+
+
+### integer
+
+     -1234
+1234      
+1234
+***
+
+***************
+
+-----  Test each list data type   -----
+
+### character
+
+
+### double
+
+     123.5
+  -10234.1
+      10.0
+
+123.45600000000          
+-10234.10000000000       
+10.00000000000           
+
+123.456
+*******
+ 10.000
+
+****
+****
+****
+
+
+
+
+
+    123.45
+123.45000000000                         
+****
+
+
+
+### float
+not accessed
+
+
+### block strings
+
+hello     
+there     
+everyone  
+
+     hello
+     there
+  everyone
+
+hell
+ther
+ever
+
+
+
+
+
+hello     
+     hello
+hell
+hello
+
+
+
+### lstore strings
+
+hello     
+there     
+everyone  
+
+     hello
+     there
+  everyone
+
+hell
+ther
+ever
+
+
+
+
+
+hello     
+     hello
+hell
+hello
+
+
+
+### selectors
+
+aselector 
+another   
+
+ aselector
+   another
+
+asel
+anot
+
+
+
+
+value     
+     value
+valu
+value
+
+
+
+### integers
+
+          12345
+         -12345
+              0
+             10
+    11111111111
+
+12345     
+-12345    
+0         
+10        
+**********
+
+****
+****
+   0
+  10
+****
+
+12345
+*****
+    0
+   10
+*****
+
+
+
+
+
+
+
+     12345
+12345     
+****
+12345
+12345
+
+
+
+-----------------------------
+-----  PrintWithCommas  -----
+-----------------------------
+
+
+-----  Test each scalar data type 
+
+###  Character
+
+
+### float
+
+
+### lstore string
+
+hello there    
+hello there    
+howdee         
+ho
+
+    howdee
+howdee         
+ho
+
+    howdee
+howdee  
+everyone
+howdee  
+everyone
+
+
+### block string
+
+hello there    
+hello there    
+howdee         
+ho
+
+    howdee
+howdee         
+ho
+
+    howdee
+howdee  
+everyone
+howdee  
+everyone
+
+
+### selector
+
+value     
+value     
+value          
+va
+
+     value
+value          
+va
+
+     value
+a       
+b       
+a       
+b       
+
+### Double and Integer
+
+1,234
+123.46    
+1,234.56  
+123.45600 
+**********
+1,234.56000
+
+     1,234
+123       
+1,234     
+
+ 12,345.23
+
+****
+12,345.2 
+    12,345
+
+****
+12,345   
+  1,234.23
+    123.90
+**********
+  1,234.23
+    123.90
+**********
+ 12,345.23
+
+****
+12,345.23
+    12,345
+
+****
+12,345   
+     1,234
+       123
+ 1,234,567
+     1,234
+       123
+ 1,234,567
+     1,234
+   123,456
+  -123,456
+ 1,234,567
+       123
+ 123.45000
+****
+    123.00    123.46   -123.46**** -1,234.00
+--------------------------------
+-----  Test PrintOf limits  ----
+--------------------------------
+
+**********
+                                                                                         89000000000000001376304724927144494480312698220175256453251759870901759310880675955517741164653086277156105304578983756762804721369893727406680835865068713115666141064576678259271900422850952852078706463759448485330610236238306006755163255274343715507048787142496960945133885950106215541419347332801700560896.00
+**********
+                                                                          -89000000000000001376304724927144494480312698220175256453251759870901759310880675955517741164653086277156105304578983756762804721369893727406680835865068713115666141064576678259271900422850952852078706463759448485330610236238306006755163255274343715507048787142496960945133885950106215541419347332801700560896.0000000000000000
+**********
+                                                                                         89000000000000001376304724927144494480312698220175256453251759870901759310880675955517741164653086277156105304578983756762804721369893727406680835865068713115666141064576678259271900422850952852078706463759448485330610236238306006755163255274343715507048787142496960945133885950106215541419347332801700560896.00
+
+**********
+                                                                                          89000000000000001376304724927144494480312698220175256453251759870901759310880675955517741164653086277156105304578983756762804721369893727406680835865068713115666141064576678259271900422850952852078706463759448485330610236238306006755163255274343715507048787142496960945133885950106215541419347332801700560896.0
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         102.340
+102.34000000000
+102.340                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+102.340                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+102.34000000000
+102.3400000000000034
+1,102.340                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+1,102          
+                       1,102.34000000000
+1,102.3399999999999181                  
+1102           
+                        1102.34000000000
+1102.3399999999999181                   
+1234
+1234.5
+             89,000,000,000,000,001,376,304,724,927,144,494,480,312,698,220,175,256,453,251,759,870,901,759,310,880,675,955,517,741,164,653,086,277,156,105,304,578,983,756,762,804,721,369,893,727,406,680,835,865,068,713,115,666,141,064,576,678,259,271,900,422,850,952,852,078,706,463,759,448,485,330,610,236,238,306,006,755,163,255,274,343,715,507,048,787,142,496,960,945,133,885,950,106,215,541,419,347,332,801,700,560,896.0
+57133839564458504888431685060296571931908532210186455865803960270646722738367142315408067529343188252533443527449112321315901238165762616382826568957034327205350825860530274233419660272647262828623211661421621408605336881542803886698113566366770204591606248505344.00
+                                                                                                                                        380892263763056705811136141833522425137514385751868304010542956307075176251718228045906283126532953271985000927766812114035827564207030130478704704445729496636065706086834330069514775449771957075699222592227134926930682005840657790068696726539328538276446339072.00
+13462012475717519819847898602483572772785942779053266294204164012183983644350927175471346936359448170093286451958987464383447351877780220340502288456989443556198703030739598463763326272818229296891356013880372933891760495343606298734365769728.00
+                                                                                                                                                              96157231969410858830469292126874942877955258679849089375295760272644279457618873519719488472145244087241652473083013555172592905662465855458936793656810422352997966047648025240162819560668696943209934966889030842329469247533077202458378240.00
+6466855489220471639133779215212205525559279171173784945748885246884175267930021854820560154819298873452752638826991163393530815561567449679940440106707432852165916389487114202627157806178434289901761832829076706196193280.00
+                                                                                                                                                                                   49745042224772854994195754995984321775186454084690957642505438343827531881449744562988642485879033169319782753375155346294398792685964119093522997953845956522259835078533620164534957519928786364433332294535208318795776.00
+6689502913449123933681342530579439120523775756341546089360093784620090324126011858610763674005344861930779387322735825049576193801545269664994272835560837966773424760538449951889918907707412713570304.00
+                                                                                                                                                                                                        55745857612076033333946596938961053806019179795001037546326945837492339367137742780510072138432293369384101420636637780506186496519649138194305750351243690774695184219682241207240231351096375771136.00
+15882455415227421289655392351515189289144558208272049215939288190702874949438682229949505800912531174854106019567414459205248903105897894971654398555177121848553771682648345804800.00
+                                                                                                                                                                                                                            144385958320249281895211638114231048758962740708165300332574711789391685278558717651905972808586720726491483073402144430319927168280381361555797909879849011686559753441596407808.00
+93326215443944102188325606108575267240944254854960571509166910400407995064242937148632694030450512898042989296944474898258737204311236641477561877016501813248.00
+                                                                                                                                                                                                                                                 933262154439440960911604687726529403237621654151826305939361630078862160424520003803285166480957861005701317510617187267217623578139262988057343784065695744.00
+1485715964481760688598126444658390468648504385338494631194665214503009929244428884407664620677918947601692538663274334960161140774153486336.00
+                                                                                                                                                                                                                                                                    16507955160908452497218052643056785820348586593118454131228292379023767876373998621963681432374396360185860939835599722920061648806871040.00
+71569457046263778832073404098641551692451427821500630228331524401978643519022131505852398484420816675798776564959674368.00
+                                                                                                                                                                                                                                                                                        894618213078297291394536105678124660091699861979864830895281485890971416487504167917951760559283842969422038852173824.00
+11978571669969890269925854460558840225267029209529303278944419871214396524861374498691473966836482048.00
+                                                                                                                                                                                                                                                                                                          171122452428141297375735434272073448876652721480628511030304905066123383956194496253690059725733888.00
+8320987112741391580056396102959641077457945541076708813599085350531187384917164032.00
+                                                                                                                                                                                                                                                                                                                            138683118545689864933221185143853352853533809868133429504739525869642019130834944.00
+30414093201713375576366966406747986832057064836514787179557289984.00
+                                                                                                                                                                                                                                                                                                                                              608281864034267522488601608116731623168777542102418391010639872.00
+815915283247897683795548521301193790359984930816.00
+                                                                                                                                                                                                                                                                                                                                                              20397882081197441587828472941238084160318341120.00
+265252859812191032188804700045312.00
+                                                                                                                                                                                                                                                                                                                                                                              8841761993739700772720181510144.00
+2432902008176640000.00
+                                                                                                                                                                                                                                                                                                                                                                                           121645100408832000.00
+3628800.00
+                                                                                                                                                                                                                                                                                                                                                                                                       362880.00
+        1
+                                                                                                                                                                                                                                                                                                                                                                                                             NA 
+
+
+
+*********************************************************
+(PART 3)
+--------  IntegerSPrint and DoubleSPrint  	 --------
+--------  Primitives. 				 --------
+*********************************************************
+
+
+-----------------------------
+-----  Integer SPrint   -----
+-----------------------------
+
+
+-----  Test each scalar data type 
+
+###  Character
+
+
+### Double
+
+       10
+    123.46
+
+       10
+-123.46   
+
+        4
+****
+
+        0
+
+
+
+### float
+
+
+### lstore string
+
+       15
+hello there    
+
+       15
+    hello there
+
+        4
+hell
+
+        0
+
+
+
+### block string
+
+       15
+hello there    
+
+       15
+    hello there
+
+        4
+hell
+
+        0
+
+
+
+### selector
+
+       10
+value     
+
+       10
+     value
+
+        4
+valu
+
+        0
+
+
+
+### integer
+
+       10
+      1234
+
+       10
+-1234     
+
+        4
+1234
+
+        3
+***
+
+        0
+
+
+       15
+ 11111111111.00
+
+
+-----  Test each list data type   -----
+
+### character
+
+
+### double
+
+       10
+    123.46
+
+       10
+ -10234.10
+
+       10
+     10.00
+
+
+        4
+****
+
+        4
+****
+
+        4
+****
+
+
+        0
+
+
+        0
+
+
+        0
+
+
+
+       10
+    123.45
+
+       10
+123.45    
+
+        4
+****
+
+        0
+
+
+
+
+### float
+not accessed
+
+
+### block strings
+
+       10
+hello     
+
+       10
+there     
+
+       10
+everyone  
+
+
+        4
+hell
+
+        4
+ther
+
+        4
+ever
+
+
+        0
+
+
+        0
+
+
+        0
+
+
+
+       10
+hello     
+
+       10
+     hello
+
+        4
+hell
+
+        5
+hello
+
+        0
+
+
+
+
+### lstore strings
+
+       10
+     hello
+
+       10
+     there
+
+       10
+  everyone
+
+
+        5
+hello
+
+        5
+there
+
+        5
+every
+
+
+        0
+
+
+        0
+
+
+        0
+
+
+
+       10
+hello     
+
+       10
+     hello
+
+        4
+hell
+
+        5
+hello
+
+        0
+
+
+
+
+### selectors
+
+       10
+ aselector
+
+       10
+   another
+
+
+        4
+asel
+
+        4
+anot
+
+
+        0
+
+
+        0
+
+
+
+       10
+     value
+
+        5
+value
+
+        0
+
+
+
+
+### integers
+
+       15
+          12345
+
+       15
+         -12345
+
+       15
+              0
+
+       15
+             10
+
+       15
+ 11111111111.00
+
+
+        5
+12345
+
+        5
+*****
+
+        5
+    0
+
+        5
+   10
+
+        5
+*****
+
+
+        0
+
+
+        0
+
+
+        0
+
+
+        0
+
+
+        0
+
+
+
+       10
+     12345
+
+       10
+12345     
+
+        4
+****
+
+        5
+12345
+
+        0
+
+
+
+
+----------------------------
+-----  Double PrintOf  -----
+----------------------------
+
+
+-----  Test each scalar data type 
+
+###  Character
+
+
+### Double
+
+       10
+     123.5
+
+      110
+123.4560000000000031                                                                                          
+
+        4
+ 123
+
+        0
+
+
+
+### float
+
+
+### lstore string
+
+       15
+hello there    
+
+       15
+    hello there
+
+        4
+hell
+
+        0
+
+
+
+### block string
+
+       15
+hello there    
+
+       15
+    hello there
+
+        4
+hell
+
+        0
+
+
+
+### selector
+
+
+       10
+value     
+
+
+       10
+     value
+
+
+        4
+valu
+
+
+        0
+
+
+
+### integer
+
+       10
+-1234     
+
+        3
+***
+
+        0
+
+
+       15
+***************
+
+
+-----  Test each list data type   -----
+
+### character
+
+
+### double
+
+       10
+     123.5
+
+       10
+  -10234.1
+
+       10
+      10.0
+
+
+       25
+123.45600000000          
+
+       25
+-10234.10000000000       
+
+       25
+10.00000000000           
+
+
+        4
+ 123
+
+        4
+****
+
+        4
+  10
+
+
+        0
+
+
+        0
+
+
+        0
+
+
+
+       10
+    123.45
+
+       40
+123.45000000000                         
+
+        4
+****
+
+        0
+
+
+
+
+### float
+not accessed
+
+
+### block strings
+
+       10
+hello     
+
+       10
+there     
+
+       10
+everyone  
+
+
+        4
+hell
+
+        4
+ther
+
+        4
+ever
+
+
+        0
+
+
+        0
+
+
+        0
+
+
+
+       10
+hello     
+
+       10
+     hello
+
+        4
+hell
+
+        5
+hello
+
+        0
+
+
+
+
+### lstore strings
+
+       10
+     hello
+
+       10
+     there
+
+       10
+  everyone
+
+
+        4
+hell
+
+        4
+ther
+
+        4
+ever
+
+
+        0
+
+
+        0
+
+
+        0
+
+
+
+       10
+hello     
+
+       10
+     hello
+
+        4
+hell
+
+        5
+hello
+
+        0
+
+
+
+
+### selectors
+
+       10
+ aselector
+
+       10
+   another
+
+
+        4
+asel
+
+        4
+anot
+
+
+        0
+
+
+        0
+
+
+
+       10
+     value
+
+        5
+value
+
+        0
+
+
+
+
+### integers
+
+       15
+          12345
+
+       15
+         -12345
+
+       15
+              0
+
+       15
+             10
+
+       15
+    11111111111
+
+
+       10
+12345     
+
+       10
+-12345    
+
+       10
+0         
+
+       10
+10        
+
+       10
+**********
+
+
+        5
+12345
+
+        5
+*****
+
+        5
+    0
+
+        5
+   10
+
+        5
+*****
+
+
+        0
+
+
+        0
+
+
+        0
+
+
+        0
+
+
+        0
+
+
+
+       10
+     12345
+
+       10
+12345     
+
+        4
+****
+
+        5
+12345
+
+        0
+
+
+
+
+-----------------------------
+-----  SPrintWithCommas  -----
+-----------------------------
+
+
+-----  Test each scalar data type 
+
+###  Character
+
+
+### float
+
+
+### lstore string
+
+hello there    
+
+hello there    
+
+        8
+howdee  
+
+        8
+everyone
+
+
+        8
+howdee  
+
+        8
+everyone
+
+
+
+
+### block string
+
+hello there    
+
+hello there    
+
+        8
+howdee  
+
+        8
+everyone
+
+
+        8
+howdee  
+
+        8
+everyone
+
+
+
+
+### selector
+
+value     
+
+value     
+
+        8
+a       
+
+        8
+b       
+
+
+        8
+a       
+
+        8
+b       
+
+
+
+### Double and Integer
+
+       20
+            1,234.46
+
+       20
+               1,234
+
+        5
+1,234
+
+        0
+
+       20
+           1,234,567
+
+       20
+           1,234,567
+
+        5
+*****
+
+        0
+
+
+       20
+           12,345.23
+
+        4
+****
+
+        0
+
+
+        9
+12,345.2 
+
+
+       20
+           12,345.23
+
+        4
+****
+
+        0
+
+
+        9
+12,345.23
+
+
+       20
+              12,345
+
+        4
+****
+
+        0
+
+
+        9
+12,345   
+
+
+       20
+              12,345
+
+        4
+****
+
+        0
+
+
+        9
+12,345   
+
+
+
+---------------------------------
+-----  Test SPrintOf limits  ----
+---------------------------------
+
+       10
+**********
+
+      400
+                                                                                         89000000000000001376304724927144494480312698220175256453251759870901759310880675955517741164653086277156105304578983756762804721369893727406680835865068713115666141064576678259271900422850952852078706463759448485330610236238306006755163255274343715507048787142496960945133885950106215541419347332801700560896.00
+
+       10
+**********
+
+       10
+     10.20
+
+
+      400
+                                                                          -89000000000000001376304724927144494480312698220175256453251759870901759310880675955517741164653086277156105304578983756762804721369893727406680835865068713115666141064576678259271900422850952852078706463759448485330610236238306006755163255274343715507048787142496960945133885950106215541419347332801700560896.0000000000000000
+
+       10
+**********
+
+       10
+     10.20
+
+
+       10
+**********
+       10
+**********
+        5
+*****
+
+        6
+******
+
+      200
+********************************************************************************************************************************************************************************************************
+
+      420
+         -89,000,000,000,000,001,376,304,724,927,144,494,480,312,698,220,175,256,453,251,759,870,901,759,310,880,675,955,517,741,164,653,086,277,156,105,304,578,983,756,762,804,721,369,893,727,406,680,835,865,068,713,115,666,141,064,576,678,259,271,900,422,850,952,852,078,706,463,759,448,485,330,610,236,238,306,006,755,163,255,274,343,715,507,048,787,142,496,960,945,133,885,950,106,215,541,419,347,332,801,700,560,896
+
+
+        5
+*****
+
+        6
+******
+
+      200
+********************************************************************************************************************************************************************************************************
+
+      420
+       89,000,000,000,000,001,376,304,724,927,144,494,480,312,698,220,175,256,453,251,759,870,901,759,310,880,675,955,517,741,164,653,086,277,156,105,304,578,983,756,762,804,721,369,893,727,406,680,835,865,068,713,115,666,141,064,576,678,259,271,900,422,850,952,852,078,706,463,759,448,485,330,610,236,238,306,006,755,163,255,274,343,715,507,048,787,142,496,960,945,133,885,950,106,215,541,419,347,332,801,700,560,896.00
+
+
+    10000
+1234.560                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+
+       20
+********************
+
+    10000
+1,234.560                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+
+       20
+********************
+
+
+End of file: PFprint.S
+
+
+V> V> 

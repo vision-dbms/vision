@@ -1,0 +1,32 @@
+"testkit/lib/test/order.vis" asFileContents evaluate;
+[
+"source/order.vis" asFileContents evaluate;
+
+Utility Test updateIfEnabled;
+
+IVR File registerFile: "security" . relateTo: Security .
+  setIdField: "id" .
+  setDateField: "date" .
+  do: [ 
+    ^self addMaster setDefaultCurrency: "USD"; 
+
+    ^self addDataRecord: "Snapshot" .
+      setDefaultCurrency: "USD" .
+      addItem: "blah", "blah", "Double" .
+    ;
+  ];
+
+IVR File locateId: "security" . buildRecipients uploadString:
+"id|blah
+TJK|1.0
+TLH|2.0
+";
+
+] debugOutput;
+
+Security masterList do: [ 
+  id print: 10;
+  baseCurrency print: 10;
+  snapshot baseCurrency print: 10;
+  newLine print;
+];

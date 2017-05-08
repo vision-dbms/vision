@@ -1,0 +1,16 @@
+"testkit/lib/test/order.vis" asFileContents evaluate;
+
+[
+  "source/order.vis" asFileContents evaluate;
+] debugOutput;
+
+
+IVR File registerFile: "account" . relateTo: IndexAccount .
+  addItem: "id", "file" .
+  do: [ 
+    ^self addMembership: "One" .  
+      withForeignId: "groupId" .
+      getItem: "id" . excluded printNL;
+    ; 
+  ];
+

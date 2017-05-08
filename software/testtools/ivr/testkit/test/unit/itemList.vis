@@ -1,0 +1,32 @@
+"testkit/lib/test/order.vis" asFileContents evaluate;
+
+[
+  "source/order.vis" asFileContents evaluate;
+] debugOutput;
+
+
+IVR File registerFile: "account" . relateTo: IndexAccount .
+  addItem: "a", "file" .
+  addItem: "b", "file" .
+  addItem: "c", "file" .
+  addItem: "d", "file", NA, NA, NA, NA, TRUE .
+  do: [ 
+    ^self addDataSet: "One" .  
+      addItem: "e", "one" .
+      addItem: "n", "one" .
+      addItem: "c", "one" .
+      addItem: "d", "one" .
+    ; 
+
+     ^self addDataRecord: "Two" .  
+      addItem: "a", "two" .
+      addItem: "b", "two" .
+      addItem: "d", "two" .
+      getItem: "d" . excluded printNL;
+    ; 
+    
+    ^self getItem: "d" . excluded printNL;
+
+    profile;
+  ];
+

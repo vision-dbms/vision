@@ -1,0 +1,130 @@
+"testkit/lib/test/order.vis" asFileContents evaluate;
+[
+  "source/order.vis" asFileContents evaluate;
+] debugOutput;
+
+
+IVR File registerFile: "security" . relateTo: Security .
+  setIdField: "id" .
+  setDateField: "date" .
+  do: [ 
+    ^self addMaster;
+
+    ^self addAlias
+      addItem: "1"   , "ID1" .
+      addItem: "2"   , "ID2" .
+    ;
+
+    ^self addMembership: "A" .
+      withForeignId: "industry" .
+    ;
+
+    ^self addRelationship: "B" .
+      enableTimeSeries
+      withForeignId: "many" .
+    ;
+
+    ^self addDataRecord: "C" .
+      enableTimeSeries
+      addItem: "anItem", "BLAH", "Double" . 
+    ;
+
+  ];
+
+!beforeProf <- [ IVR File :_dataSetList displayClusterProfile; ] divertOutput;
+
+!sec <- IVR File locateId: "security";
+
+sec profile;
+sec dataSetList displayAll;
+
+newLine print;
+"move 1 to 6: " print;
+sec moveDataSet: 1 to: 6 . printNL;
+sec dataSetList displayAll;
+
+newLine print;
+"move 0 to 2: " print;
+sec moveDataSet: 0 to: 2 . printNL;
+sec dataSetList displayAll;
+
+newLine print;
+"move 4 to 4: " print;
+sec moveDataSet: 4 to: 4 . printNL;
+sec dataSetList displayAll;
+
+newLine print;
+"move 3 to 5: " print;
+sec moveDataSet: 3 to: 5 . printNL;
+sec dataSetList displayAll;
+
+newLine print;
+"move 5 to 1: " print;
+sec moveDataSet: 5 to: 1 . printNL;
+sec dataSetList displayAll;
+
+newLine print;
+"move 2 to 3: " print;
+sec moveDataSet: 2 to: 3 . printNL;
+sec dataSetList displayAll;
+
+newLine print;
+"move 2 to 5: " print;
+sec moveDataSet: 2 to: 5 . printNL;
+sec dataSetList displayAll;
+
+newLine print;
+"move 1 to 3: " print;
+sec moveDataSet: 1 to: 3 . printNL;
+sec dataSetList displayAll;
+
+newLine print;
+"move 2 to 1: " print;
+sec moveDataSet: 2 to: 1 . printNL;
+sec dataSetList displayAll;
+
+newLine print;
+"Before Profile = After Move Profile?: " print;
+([ IVR File :_dataSetList displayClusterProfile ] divertOutput = beforeProf ) 
+  printNL;
+
+newLine print;
+"delete 0: " print;
+sec deleteDataSet: 0 . printNL;
+sec dataSetList displayAll;
+
+newLine print;
+"delete 6: " print;
+sec deleteDataSet: 6 . printNL;
+sec dataSetList displayAll;
+
+newLine print;
+"delete -6: " print;
+sec deleteDataSet: -6 . printNL;
+sec dataSetList displayAll;
+
+newLine print;
+"delete 5: " print;
+sec deleteDataSet: 5 . printNL;
+sec dataSetList displayAll;
+
+newLine print;
+"delete 1: " print;
+sec deleteDataSet: 1 . printNL;
+sec dataSetList displayAll;
+
+newLine print;
+"delete 2: " print;
+sec deleteDataSet: 2 . printNL;
+sec dataSetList displayAll;
+
+newLine print;
+"delete 2: " print;
+sec deleteDataSet: 2 . printNL;
+sec dataSetList displayAll;
+
+newLine print;
+"delete 1: " print;
+sec deleteDataSet: 1 . printNL;
+sec dataSetList displayAll;
+

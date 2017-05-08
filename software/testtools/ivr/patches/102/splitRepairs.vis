@@ -1,0 +1,30 @@
+
+# Down to 50 minutes in MSCI.  Find the suspects in a do:
+# and complete the rebuild iterating by holdings store
+IndexAccount masterList collectListElementsFrom: [  
+    !ia <- ^self;
+    constituents collectListElementsFrom: [
+        !rec <- ^self;
+        index :adjustmentFactor send: [ ^date ] .
+          select: [ ^my rec _shares isntNA ] .
+          select: [ ^my rec :_shares on: ^date . isNA ] .
+          select: [ ^my rec entity :holdingsSeries on: ^date . isntDefault ] .
+      ] . 
+      extendBy: [ 
+        !date <- ^self;
+        !ia <- ^my ia;
+      ]
+  ] .
+  groupedBy: [ CoreWorkspace Holding :storeXRef asOf: date ] .
+  iterate: [ # iterate by holdings store for rebuild
+    groupList groupedBy: [ date ] .
+    do: [ 
+      ^self print: 13; " updating " print; groupList count print: 10;
+      " new allocation " print;
+      CoreWorkspace AdminTools totalNetworkAllocation printWithCommasNL: 20;
+      groupList do: [ date evaluate: [ ia updateSharesCache ]; ];
+    ];
+  ];
+
+# cleanup any duplicates that were created out of order
+IndexAccount cleanupSharesCacheTSAll;

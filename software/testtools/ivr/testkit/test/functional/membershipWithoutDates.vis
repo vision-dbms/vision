@@ -1,0 +1,62 @@
+"testkit/lib/test/order.vis" asFileContents evaluate;
+[
+  "source/order.vis" asFileContents evaluate;
+] debugOutput;
+
+20110101 asDate evaluate: [
+IVR File registerFile: "security" . relateTo: Security .
+  setIdField: "id" .
+  setDateField: "date" .
+  do: [ 
+    ^self addMaster;
+
+    ^self addMembership: "TestIndustry" .
+      enableTimeSeries
+      addFeedOptions: "disableFirstValueInit" .
+      withForeignId: "industry" .
+    ;
+  ];
+];
+
+!sec <- IVR File locateId: "security";
+sec buildRecipients;
+
+TestIndustryMaster updateFromString:
+"id
+I1
+I2
+";
+Utility Test updateIfEnabled; 
+
+20110301 asDate evaluate: [
+# These uploads should upload to the same dates and overwrite one another.
+# Wrong default dates keep this from happening.  This test is a test and a
+# canary
+IVR File locateId: "security" . uploadString: 
+"id | industry
+S1  | I1
+S2  | I1
+S3  | I1
+";
+
+
+# this option is sticky!
+IVR File locateId: "security" . getDataSet: "TestIndustry" . 
+  setGlobalOption: "asOfDate" to: ^date; 
+IVR File locateId: "security" . uploadString: 
+"id | industry
+S1  | I2
+S2  | I2
+S3  | I2
+";
+];
+
+
+Security masterList do: [ 
+  displayInfo; 
+  :testIndustry do: [ 
+    "  " print;
+    ^date print: 13;
+    displayInfo;
+  ];
+];

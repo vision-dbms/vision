@@ -1,0 +1,12 @@
+# PoolTester script for testing the flushWorkers operation.
+
+# Pre-Execs
+pre_exec: start -c $POOLTESTERDIR/configs/baseline.ptc -w
+
+# Hammer thread.
+thread:main, repetitions: 1
+operation_on_thread:main, run:flushWorkers
+operation_on_thread:main, run:waitForStat -t 5 -c OnlineWorkers=0
+
+# Post-Execs
+post_exec: stop

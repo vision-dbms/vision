@@ -63,6 +63,12 @@ cp -f $sourceDir/vcaservicemanager/vcaservicemanager $destDir/bin
 cp -f $destDir/bin/onprof $destDir/bin/onck
 
 
+# aliases
+pushd $destDir/bin >& /dev/null
+  ln -s vcaservicemanager vpool
+  ln -s vsaprompt vprompt
+popd >& /dev/null
+
 
 set editor = $sourceDir/frontend/frontend
 if (-f $editor) then

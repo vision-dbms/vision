@@ -1,0 +1,56 @@
+# PoolTester script for testing that load balancing is working correctly.
+# Queries should go to the primary pool until it reaches the busyness threshold (3)
+# Queries should then be directed towards secondary pools until they all reach the busyness threshold
+# Queries should then go to whichever primary or secondary pool has the lowest busyness
+# Finally, we kill primary and secondary pools and ensure queries go to the last resort
+
+# ASSUMES: QUEUE LENGTH = BUSYNESS
+
+## Testing BusynessOverride 
+
+# Pre-Execs
+pre_exec:echo `./startPools.sh`
+
+thread:main, repetitions: 1
+operation_on_thread:main, run:echo `./sleep.sh 10 60 LoadBalanceTest6`
+operation_on_thread:main, run:echo Secondary pool 2 and 3 should have queue length 4. Others are 0. LR: 0
+
+operation_on_thread:main, run:sleep 2
+operation_on_thread:main, poolIdx:LBTest_1, run:getStat QueueLength
+operation_on_thread:main, poolIdx:LBTest_2, run:getStat QueueLength
+operation_on_thread:main, poolIdx:LBTest_3, run:getStat QueueLength
+operation_on_thread:main, poolIdx:LBTest_LastResort, run:getStat QueueLength
+
+operation_on_thread:main, run:echo `./sleep.sh 10 60 LoadBalanceTest6`
+operation_on_thread:main, run:echo Secondary pool 2 and 3 should have queue length 9. Others are 0. LR: 0
+
+operation_on_thread:main, run:sleep 1
+operation_on_thread:main, poolIdx:LBTest_1, run:getStat QueueLength
+operation_on_thread:main, poolIdx:LBTest_2, run:getStat QueueLength
+operation_on_thread:main, poolIdx:LBTest_3, run:getStat QueueLength
+operation_on_thread:main, poolIdx:LBTest_LastResort, run:getStat QueueLength
+
+operation_on_thread:main, run:echo `./sleep.sh 10 60 LoadBalanceTest6`
+operation_on_thread:main, run:echo Secondary pool 2 and 3 should have queue length 14. Others are 0. LR: 0
+
+operation_on_thread:main, run:sleep 1
+operation_on_thread:main, poolIdx:LBTest_1, run:getStat QueueLength
+operation_on_thread:main, poolIdx:LBTest_2, run:getStat QueueLength
+operation_on_thread:main, poolIdx:LBTest_3, run:getStat QueueLength
+operation_on_thread:main, poolIdx:LBTest_LastResort, run:getStat QueueLength
+
+operation_on_thread:main, run:echo `./sleep.sh 4 60 LoadBalanceTest6`
+operation_on_thread:main, run:echo Secondary pool 2 and 3 should have queue length not greater than 15. Pool 1 have queue length greater than 1. LR: 0
+
+operation_on_thread:main, run:sleep 1
+operation_on_thread:main, poolIdx:LBTest_1, run:getStat QueueLength
+operation_on_thread:main, poolIdx:LBTest_2, run:getStat QueueLength
+operation_on_thread:main, poolIdx:LBTest_3, run:getStat QueueLength
+operation_on_thread:main, poolIdx:LBTest_LastResort, run:getStat QueueLength
+
+operation_on_thread:main, run:echo Stopping all pools
+operation_on_thread:main, poolIdx:LBTest_1, run:hardStop
+operation_on_thread:main, poolIdx:LBTest_2, run:hardStop
+operation_on_thread:main, poolIdx:LBTest_3, run:hardStop
+operation_on_thread:main, poolIdx:LBTest_LastResort, run:hardStop
+
