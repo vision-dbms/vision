@@ -3820,15 +3820,12 @@ bool M_ASD::EnqueueOmittingCycles (VArgList const &rArgList) {
     unsigned int xUB = cteCount () - 1;
     for (unsigned int cti = 0; cti <= xUB; cti++) {
 	M_CTE cte (this, cti);
-        if (!cte.gcVisited()) {
-	    switch (cte.addressType ()) {
-	    case M_CTEAddressType_CPCC:
-		VContainerHandle *pHandle = cte.addressAsContainerHandle ();
-
-		// check out the handle's status after cycle detection and reset
-		cte.foundAllReferences(pHandle->cdReferenceCount() == pHandle->referenceCount());
-		pHandle->unmark();
-
+	switch (cte.addressType ()) {
+	case M_CTEAddressType_CPCC:
+	    VContainerHandle *pHandle = cte.addressAsContainerHandle ();
+	    // record the handle's status after cycle detection...
+	    cte.foundAllReferences(pHandle->foundAllReferences());
+	    if (!cte.gcVisited()) {
 		if (cte.referenceCount() == 0 && pHandle->isReferenced()) {
 		    if (cte.foundAllReferences()) {
 			pHandle->generateLogRecord ("Omit");
@@ -3839,6 +3836,8 @@ bool M_ASD::EnqueueOmittingCycles (VArgList const &rArgList) {
 		    }
 		}
 	    }
+	    // ... and reset the cycle detection markers
+	    pHandle->unmark ();
 	}
     } 
 
