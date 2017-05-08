@@ -632,6 +632,17 @@ public:
 
     bool DisposeOfNetworkGarbage ();
 
+    static bool GarbageCollectionRunning () {
+	return g_bGarbageCollectionRunning;
+    }
+    static bool NetworkGarbageCollectedInSession () {
+	return g_bNetworkGarbageCollectedInSession;
+    }
+
+private:
+    static bool g_bGarbageCollectionRunning;
+    static bool g_bNetworkGarbageCollectedInSession;
+
 //  Settings Control
 public:
     void SetDoingCompactionTo (bool iValue) const {
