@@ -169,7 +169,10 @@ void VContainerHandle::generateLogRecord (char const *pWhere) const {
     if (bFirst) {
 	bFirst = false;
 	char const *pLogName = getenv ("VisionHandleLog");
-	bValid = pLogName && sFile.OpenForTextAppend (pLogName) && sFile.PutLine ("================");
+	bValid = pLogName
+	    && sFile.OpenForTextAppend (pLogName)
+	    && sFile.PutString ("================ ")
+	    && sFile.PutLine (Space ()->UpdateAnnotation ());
     }
     if (bValid) {
 	sFile.printf ("%-12s:", pWhere);
@@ -199,7 +202,7 @@ void VContainerHandle::generateReferenceReport (V::VSimpleFile &rOutputFile, uns
     rOutputFile.printf (
 	"%s%s RC:%u CDRC:%u: %s\n",
 	cdVisited () ? " CDV" : "",
-	exceededReferenceCount () ? " EXCESS" : foundAllReferences () ? " FA+" : " FA-",
+	exceededReferenceCount () ? " EXCESS" : foundAllReferences () || m_pDCTE && m_pDCTE->foundAllReferences () ? " FA+" : " FA-",
 	referenceCount (),
 	cdReferenceCount (),
 	RTypeName ()
