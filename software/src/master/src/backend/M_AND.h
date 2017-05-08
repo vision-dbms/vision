@@ -294,6 +294,10 @@ public:
 	return m_pPhysicalAND->TracingCompaction ();
     }
 
+    VString const &UpdateAnnotation () const {
+	return m_pPhysicalAND->UpdateAnnotation ();
+    }
+
 //  Update
 public:
     void IncrementAllocationLevel (size_t sIncrease) {

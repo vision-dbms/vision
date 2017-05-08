@@ -857,6 +857,10 @@ public:
 	return m_sTransientAllocation;
     }
 
+    VString const &UpdateAnnotation () const {
+	return m_pAND->UpdateAnnotation ();
+    }
+
 //  Query
 public:
     bool IsTheScratchPad () const {
