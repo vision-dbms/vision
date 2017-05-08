@@ -1,0 +1,167 @@
+"testkit/lib/test/order.vis" asFileContents evaluate;
+[
+"source/order.vis" asFileContents evaluate;
+
+
+
+IVR File registerFile: "security" . relateTo: Security .
+  setIdField: "id" .
+  setDateField: "date" .
+  do: [ 
+    ^self addMaster;
+
+    ^self addMembership: "TestIndustry" .
+      enableTimeSeries
+      addFeedOptions: "enableUploadDefault" . 
+      withForeignId: "industry" .
+    ;
+
+    ^self addRelationship: "TestIndustry2" .
+      enableTimeSeries
+      addFeedOptions: "enableUploadDefault" . 
+      addFeedOptions: "setUpdateModeToReplace" .
+      withForeignId: "many" .
+    ;
+
+  ];
+
+!sec <- IVR File locateId: "security";
+
+sec buildRecipients;
+
+TestIndustryMaster updateFromString:
+"id | name
+10  | Ten
+20  | Twenty
+30  | Thirty
+";
+
+TestIndustry2Master updateFromString:
+"id | name
+40  | Forty
+50  | Fifty
+60  | Sixty
+";
+
+
+sec uploadString:
+"id | date     | industry | many
+TJK | 20080101 | 10       | 40
+TJK | 20080101 | 10       | 50
+ALL | 20080101 | 10       | 40
+ALL | 20080101 | 10       | 50
+ALL | 20080101 | 10       | 60
+NONE| 20080101 |          | 
+";
+
+sec uploadString:
+"id | date     | industry | many
+TJK | 20080103 | 30       | 40
+ALL | 20080103 | 10       | 40
+    | 20080103 | 10       | 50
+    | 20080103 | 10       | 60
+";
+
+sec uploadString:
+"id | date     | industry | many
+TJK | 20080110 | 20       | 50
+TJK | 20080110 | 20       | 60
+ALL | 20080110 | 10       | 40
+ALL | 20080110 | 10       | 50
+ALL | 20080110 | 10       | 60
+";
+
+sec uploadString:
+"id | date     | industry | many 
+TJK | 20080210 | 30       | 60
+ALL | 20080210 | 10       | 40
+ALL | 20080210 | 10       | 50
+ALL | 20080210 | 10       | 60
+";
+
+sec uploadString:
+"id | date     | industry | many
+TJK | 20080214 |          |
+ALL | 20080214 | 10       | 40
+ALL | 20080214 | 10       | 50
+ALL | 20080214 | 10       | 60
+";
+
+sec uploadString:
+"id | date     | industry | many
+TJK | 20080301 | 10       | 40
+TJK | 20080301 | 10       | 50
+TJK | 20080301 | 10 
+ALL | 20080301 | 10       | 40
+ALL | 20080301 | 10       | 50
+ALL | 20080301 | 10       | 60
+";
+
+sec uploadString:
+"id | date     | industry | many
+    | 20080311 | 10       | 40
+    | 20080311 | 10       | 50
+    | 20080311 | 10       | 60
+";
+
+
+] debugOutput;
+
+!sec <- Named Security NONE;
+sec displayInfo;
+sec :testIndustry do: [ 
+  ^date print: 13; " one to many: " print; ^self print: 5;
+  " - many to many: " print; ^my sec testIndustry2List do: [ ^self print: 5;];
+  newLine print;
+];
+
+newLine printNL;
+
+
+!tjk <- Named Security TJK;
+tjk displayInfo;
+tjk :testIndustry do: [ 
+  ^date print: 13; " one to many: " print; ^self print: 5;
+  " - many to many: " print; ^my tjk testIndustry2List do: [ ^self print: 5;];
+  newLine print;
+];
+
+newLine printNL;
+"10", "20", "30", "Default" send: [ ^my TestIndustry locateId: ^self ] .
+  do: [
+    displayInfo;
+    :securityList do: [ 
+      ^date print: 13; 
+      ^self do: [ ^self print: 5; "  " print; ];
+      newLine print;
+    ];
+    newLine print;
+  ];
+
+newLine printNL;
+"40", "50", "60", "Default" send: [ ^my TestIndustry2 locateId: ^self ] .
+  do: [
+    displayInfo;
+    :securityList do: [ 
+      ^date print: 13; 
+      ^self do: [ ^self print: 5; "  " print; ];
+      newLine print;
+    ];
+    newLine print;
+  ];
+
+newLine printNL;
+"Many to many invariant violators: " print;
+TestIndustry2 masterList total: [ 
+    :securityList total: [ ^self select: [ isNA ] . count ]
+  ] . printNL;
+
+newLine printNL;
+"One to many invariant violators: " print;
+TestIndustry masterList total: [ 
+    :securityList total: [ ^self select: [ isNA ] . count ]
+  ] . printNL;
+"One to many invariant violators xref: " print;
+Security masterList total: [ 
+    :testIndustry select: [ isNA ] . count
+  ] . printNL;

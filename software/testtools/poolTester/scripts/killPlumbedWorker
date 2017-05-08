@@ -1,0 +1,18 @@
+# Kills a plumbed worker that is working on a query, testing the query failover and dead-worker-reaping logic.
+# Also tests for worker carcass reaping after MaxGenerations has been reached.
+
+# Pre-Execs
+pre_exec: start -p -c $POOLTESTERDIR/configs/baseline.ptc -D MaxWorkers=1 -D MaxGenerations=3 -w
+
+# Hammer thread.
+thread:main, repetitions: 1
+operation_on_thread:main, run:hammer -c 1 -d 5
+operation_on_thread:main, run:waitForStat -c OnlineWIPs\>=1
+operation_on_thread:main, run:killWorker 1
+operation_on_thread:main, run:waitForStat -c QueriesProcessed\>=1
+operation_on_thread:main, run:restart -w
+operation_on_thread:main, run:restart -w
+operation_on_thread:main, run:restart -w
+
+# Post-Execs
+post_exec: stop

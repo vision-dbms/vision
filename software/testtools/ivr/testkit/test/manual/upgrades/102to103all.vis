@@ -1,0 +1,43 @@
+
+"testkit/lib/test/order.vis" asFileContents evaluate;
+!toDiff <- Utility Test sharedNetworks: "upgrade" and: "baseline";
+
+toDiff iterate: [
+  !updateString <- "
+    String defineMethod: [|asClass|
+      !id <- ^self stripChar: \" \";
+      !capId <- id capitalize;
+
+      !cws <- ^my lhsDb CoreWorkspace;
+
+      cws respondsTo: id .  ifTrue: [
+        id evaluateIn: cws
+      ] .
+      elseIf: [cws respondsTo: capId] then: [
+        capId evaluateIn: cws
+      ] .
+      else: [
+        cws getMessage: id . isntDefault: [ message evaluateIn: cws ]
+          else: [
+            ^my cws getMessage: ^my capId .
+              isntDefault: [message evaluateIn: ^my cws ]
+              else: [NA]
+          ]
+      ]
+    ];
+
+    lhsDb CoreWorkspace respondsTo: 'IVR' . ifTrue: [
+      \"patches/103/upgrade.vis\" asList
+        iterate: [ ^self asFileContents evaluateIn: ^my lhsDb; ];
+    ];
+  " concat: newLine;
+
+  CoreWorkspace Utility Test
+    upgradeNetwork:  lhsPath
+    andCompareWith:  rhsPath
+    withDiffConfig:  "testkit/lib/diff/templates/everything.vis"
+    andUpdateString: updateString
+    andOutputFile:   ("upgrade." concat: ^self)
+  ;
+];
+

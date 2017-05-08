@@ -1,0 +1,194 @@
+
+RCompareTools defineMethod: [|subclassDiff: lhsParent and: rhsParent|
+  !nameStringCluster <- GlobalWorkspace String newAssociativeCluster;
+
+  !lhsClasses <- GlobalWorkspace IndexedList new;
+  lhsParent classDescriptor getAllChildren 
+    reject: [ code = "Primitive" ] .
+    send: [ ^self class defaultInstance ] .
+    append: lhsParent .
+    do: [ 
+      !key <- ^self whatAmI insertIntoCluster: ^my nameStringCluster ;
+      ^my lhsClasses at: key put: ^self;
+    ];
+
+  !rhsClasses <- GlobalWorkspace IndexedList new;
+  rhsParent classDescriptor getAllChildren 
+    reject: [ code = "Primitive" ] .
+    send: [ ^self class defaultInstance ] .
+    append: rhsParent .
+    do: [ 
+      !key <- ^self whatAmI insertIntoCluster: ^my nameStringCluster ;
+      ^my rhsClasses at: key put: ^self;
+    ];
+
+  !classesToDo <- lhsClasses send: [ ^self whatAmI ] .
+    append: (rhsClasses send: [ ^self whatAmI ]). 
+    send: [ ^self insertIntoCluster: ^my nameStringCluster ] . unique
+    extendBy: [
+      !key <- ^self;
+      !lhs <- ^my lhsClasses at: key;
+      !rhs <- ^my rhsClasses at: key;
+    ];
+
+  !notFound <- classesToDo select: [ rhs == GlobalWorkspace NA ];
+  !extra    <- classesToDo select: [ lhs == GlobalWorkspace NA ];
+
+
+  extra count > 0 || notFound count > 0 ifTrue: [
+    lhsParent whatAmI print; 
+    " lhs subclasses differ from " print; rhsParent whatAmI print; 
+    " rhs subclasses" printNL;
+
+    extra count > 0 ifTrue: [
+      "  rhs has the following extra subclasses : " printNL;
+      extra do: [ 
+        "    " print; ^self key printNL; 
+      ];
+    ];
+
+    notFound count > 0 ifTrue: [
+      "  The following classes were not found on rhs: " printNL;
+      notFound do: [ 
+        "    " print; ^self key printNL; 
+      ];
+    ];
+  ];
+
+  newLine printNL;
+
+  :classesToDo <- classesToDo 
+    reject: [ rhs == GlobalWorkspace NA || lhs == GlobalWorkspace NA ];
+
+
+  !mismatches <- classesToDo 
+    select: [ CoreWorkspace RCompareTools classDiff: lhs and: rhs . isFalse ];
+
+
+  mismatches count = 0 && notFound count = 0 && extra count = 0
+];
+
+RCompareTools defineMethod: [|classDiff: lhs and: rhs|
+  # give RCompareTools a global string cluster?
+  !nameStringCluster <- GlobalWorkspace String newAssociativeCluster;
+
+  !lhsSelectors <- lhs selectorList reject: [ ^self = "selectorList" ] .
+    send: [ ^self asString insertIntoCluster: ^my nameStringCluster ];
+
+  !rhsSelectors <- rhs selectorList reject: [ ^self = "selectorList" ] .
+    send: [ ^self asString insertIntoCluster: ^my nameStringCluster ];
+
+  # diff the instance level props for the defaultInstance too
+  !selfMatch;
+  !selfOutput <- [ :selfMatch <- lhs rcompare: rhs depth: 3; ] divertOutput;
+
+  # use roptions to help determine selectors here
+  :lhsSelectors <- lhs rexclusion: lhsSelectors;
+  :rhsSelectors <- lhs rexclusion: rhsSelectors;
+
+  # find mismatching selectors
+  !selectors <- lhsSelectors intersect: rhsSelectors;
+
+  !notFound <- lhsSelectors exclude: selectors;
+  !extra <- rhsSelectors exclude: selectors;
+
+  # mismatching instance vs. class level properties
+  !typeMismatches <- selectors extendBy: [ 
+      !lhsIsClassLevel <- ^my lhs getPropertyPrototypeFor: ^self . isNA;
+      !rhsIsClassLevel <- ^my rhs getPropertyPrototypeFor: ^self . isNA;
+    ] .
+    select: [ 
+      (lhsIsClassLevel && rhsIsClassLevel not) ||
+      (lhsIsClassLevel not && rhsIsClassLevel)
+    ];
+
+  # diff the results of the matching selectors
+  !mismatches <- selectors select: [ 
+      (^my lhs getPropertyPrototypeFor: ^self . isNA) &&
+      (^my rhs getPropertyPrototypeFor: ^self . isNA)
+    ] .
+    extendBy: [ 
+      !origSelector <- ^self;
+      !fullSelector <- ^self;
+
+      fullSelector = "=" || fullSelector = "+" || fullSelector = "-" ||
+      fullSelector = "!=" || fullSelector = "<" || fullSelector = ">" ||
+      fullSelector = "<-" || fullSelector = "<=" || fullSelector = ">=" ||
+      fullSelector = "->" || fullSelector = "!==" || fullSelector = "==" ||
+      fullSelector = "*" || fullSelector = "/" || fullSelector = "," ||
+      fullSelector = "||" || fullSelector = "&&" 
+        ifTrue: [
+          :fullSelector <- "^self :" concat: fullSelector . concat: " 0"
+        ] 
+        else: [
+          :fullSelector <- ("^self :" concat: 
+              (^self translateString: ":" to: ":0"));
+        ];
+
+      # fullSelector print; " -> " print; fullSelector asBlock printNL;
+
+      !lhsValue <- ^my lhs basicSend: fullSelector clusteredAsBlock;
+      !rhsValue <- ^my rhs basicSend: fullSelector clusteredAsBlock;
+
+      !match;
+      !diffOutput <- [
+        :match <- lhsValue rcompare: rhsValue depth: 3;
+      ] divertOutput;
+    ] .
+    select: [ match isFalse ];
+
+
+  !foundMismatch <- 
+    mismatches count > 0 || notFound count > 0 || extra count > 0 || 
+    selfMatch isFalse || typeMismatches count > 0 
+  ;
+  
+  foundMismatch ifTrue: [
+    lhs whatAmI print; " on lhs and " print;
+    rhs whatAmI print; " on rhs differ" printNL;
+
+    notFound count > 0 ifTrue: [
+      "  rhs missing messages: " printNL;
+      notFound do: [ 
+        "    " print; printNL;
+      ];
+    ];
+
+    extra count > 0 ifTrue: [
+      "  rhs extra messages:" printNL;
+      extra do: [ 
+        "    " print; printNL;
+      ];
+    ];
+
+    typeMismatches count > 0 ifTrue: [
+      "  class level vs. instance level mismatch:" printNL;
+      typeMismatches do: [ 
+        "    " print; printNL;
+      ];
+    ];
+
+    mismatches count > 0 ifTrue: [
+      "  mismatched class data: " printNL;
+      mismatches do: [ 
+        "    " print; origSelector printNL;
+        diffOutput isntDefault ifTrue: [
+          diffOutput asLines do: [ "      " print; ^self printNL; ];
+        ];
+      ];
+    ];
+
+    selfMatch isFalse ifTrue: [
+      "  mismatched default instance data (rcompare): " printNL;
+      selfOutput isntDefault ifTrue: [
+        selfOutput asLines do: [ "  " print; ^self printNL; ];
+      ];
+    ];
+    newLine print;
+
+  ];
+
+  foundMismatch isFalse
+];
+
+

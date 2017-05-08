@@ -1,0 +1,221 @@
+
+CoreWorkspace respondsTo: 'HierarchyFeed' . ifFalse: [
+  DataFeed createSubclass: "WrapperFeed";      # New Placeholder
+  WrapperFeed createSubclass: "HierarchyFeed"; # Methods here
+
+  DataFeedSetup createSubclass: "HierarchyFeedSetup"; 
+  HierarchyFeedSetup define: "feedClassType" toBe: HierarchyFeed;
+
+  # Hierarchy feed is abstract, these should always be NA at HierarchyFeed
+  # and filled in at it's subclasses.
+  HierarchyFeed define: 'memberMasters' toBe: NA;
+  HierarchyFeed define: 'relationshipFeeds' toBe: NA;
+];
+
+WrapperFeed defineMethod: [| initializeKeys: inputs| 
+  !newOne <- ^self asSelf; 
+  !todo <- newOne updateBlocksToDo; 
+  newOne usesLocalFields ifFalse: [
+      newOne :valueList <- CoreWorkspace IndexedList new; 
+    ]; 
+  newOne :valueList <- inputs 
+    send: [
+      !input <- ^self; 
+      !noValue <- ^self isDefault || [
+          ^my newOne naTest any: [^my input send: asSelf]]; 
+      noValue 
+        ifTrue: [NA]
+        ifFalse: [^self stripLeadingBlanks stripTrailingBlanks]
+    ]; 
+  newOne usesLocalFields 
+  ifFalse: [
+      !todo <- newOne localOnlyBlocks; 
+      todo 
+      do: [!block <- asSelf; 
+          !value <- ^my newOne valueList at: itemNum; 
+          value isntDefault 
+            ifTrue: [^my newOne send: block .<- value copyString]
+            else: [NA]; 
+         ]; 
+     ]; 
+  newOne
+];
+
+HierarchyFeed defineMethod: [|runWrapup|
+  !hierarchy <- ^self asSelf;
+  !todo <- hierarchy currentStore masterList;
+
+  !dataMap <- hierarchy fieldOrderList numberElements 
+    reject: [ ^self asNumber isDefault ] . 
+    indexBy: [ ^self asNumber ];
+
+  !datePosition <- hierarchy fieldOrderList numberElements 
+    select: [ ^self toLower = "date" ] .
+    at: 1;
+
+  datePosition isntNA ifTrue: 
+    [ :datePosition <- datePosition basicSend: [ position ]; ];
+
+  hierarchy memberMasters numberElements iterate: [ 
+    !todo <- ^my todo;
+    !hierarchy <- ^my hierarchy;
+    !dataMap <- ^my dataMap;
+
+    dataMap at: position . isntNA ifTrue: [ # upload this one
+      !dataIndex <- dataMap at: position . send: [ position ];
+      !datePosition <- ^my datePosition;
+
+      hierarchy resetRunTimeAttributes; 
+
+      hierarchy memberMasters at: position . 
+        enableAllowDuplicates 
+        disableDisplayBadEntities
+        updateFromString: [
+          "id" printNL;
+          todo do: [ ^self valueList at: ^my dataIndex . printNL; ];
+        ] divertOutput ;
+
+      !relationship <- hierarchy relationshipFeeds at: position decrement;
+      !priorDataIndex <- dataMap at: position decrement;
+      :priorDataIndex <- priorDataIndex ifIsntNA: [ priorDataIndex position ];
+
+      # make sure we have a relationship and the second data index to do the 
+      # linking
+      relationship isntNA && priorDataIndex isntNA ifTrue: [
+        !priorDataIndex <- dataMap at: position decrement . send: [ position ];
+
+        relationship updateFromString: [
+          "groupId | memberId | date" printNL;
+          todo do: [ 
+            ^self valueList at: ^my priorDataIndex . print;  " | " print;
+            ^self valueList at: ^my dataIndex . print; " | " print;
+            ^my datePosition isntNA 
+              ifTrue: [ valueList at: ^my datePosition . print; ]
+              else:   [ ^date print; ] .
+            newLine print;
+          ];
+        ] divertOutput;
+      ];
+    ];
+  ];
+
+  ^self
+];
+
+HierarchyFeed defineMethod: [|displayExceptionSummary|
+  !feed <- ^self asSelf; 
+  !list <- feed masterList; 
+  !notDone <- list select: [isntProcessed]; 
+  !otherStatus <- list select: [hasStatusInfo]; 
+  "  Upload Feed:   " print; feed whatAmI printNL; 
+  "  Total Records: " print; list count printNL; 
+  "  Not Processed: " print; 0 printNL;
+  "  Other Status:  " print; otherStatus count printNL; 
+  ^self
+];
+
+HierarchyFeed defineMethod: [|omitEmptyFields|
+  !feed <- ^self;
+  !uploads <- feed memberMasters count sequence send: [ asString ];
+
+  feed fieldOrderList numberElements nonDefaults select: [
+      ^my uploads includesElement: ^self
+    ] . send: [ position ] .
+];
+
+Interface BatchFeedManager defineMethod: [
+  |
+    buildHierarchy: name 
+    withComponents: componentList 
+    asTS: tsFlag
+    usingBaseClass: baseClass
+  |
+  ^self buildHierarchy: name 
+    withComponents:     componentList 
+    asTS:               tsFlag 
+    manyToMany:         FALSE
+    usingBaseClass:     baseClass
+];
+
+
+Interface BatchFeedManager defineMethod: [
+  |
+    buildHierarchy: name 
+    withComponents: componentList 
+    asTS: tsFlag
+    manyToMany: manyFlag
+    usingBaseClass: baseClass
+  |
+
+  :componentList <- componentList isList 
+      ifTrue: [ componentList ] 
+      else: [ componentList asList ];
+
+  !newHierarchy <- super 
+      createCoreClass: name 
+                 from: baseClass 
+                   as: CoreWorkspace Classification; 
+
+  name asClass isntNA ifTrue: [
+    !base <- name asClass;
+
+    # Classification has non-TS relationships by default, make them timeSeries
+    # if we need them
+    tsFlag isTrue && manyFlag isFalse ifTrue: [
+      base define: "parent" withDefault: base;
+      base define: "childList" withDefault: CoreWorkspace IndexedList new;
+    ];
+
+    !upload <- [
+      "feedId | baseClassId" printNL; 
+      name print; "Feed | " print; name printNL; 
+    ]divertOutput; 
+    CoreWorkspace HierarchyFeedSetup updateFromString: upload;
+
+    !newFeed <- CoreWorkspace send: (name concat: "Feed") asBlock;
+
+    newFeed isntNA ifTrue: [
+
+      newFeed define: "memberMasters"     toBe: CoreWorkspace List new;
+      newFeed define: "relationshipFeeds" toBe: CoreWorkspace List new;
+
+      # Must preserve order!
+      componentList linkElements iterate: [ 
+        CoreWorkspace Interface BatchFeedManager 
+          createEntityClass: ^self 
+          from: ^my newHierarchy whatAmI;
+
+        !masterFeed <- CoreWorkspace send: (^self concat: "Master") asBlock;
+
+        masterFeed isntNA ifTrue: [
+          ^my newFeed memberMasters, masterFeed;
+
+          prior isntNA ifTrue: [
+            !relationshipName <- prior concat: "To" . concat: ^self ;
+
+            CoreWorkspace respondsTo: relationshipName . ifFalse: [
+              ^my manyFlag ifTrue: [ 
+                CoreWorkspace Interface BatchFeedManager 
+                  createManyToMany: relationshipName
+                  withGroupType: prior via: "childList"
+                  andMemberType: ^self via: "parentList"
+                  asTS: ^my tsFlag;
+              ] 
+              else: [
+                CoreWorkspace Interface BatchFeedManager 
+                  createRelationship: relationshipName
+                  withGroupType: prior via: "childList"
+                  andMemberType: ^self via: "parent"
+                  asTS: ^my tsFlag;
+              ];
+            ];
+
+            !relationship <- CoreWorkspace send: relationshipName asBlock;
+            ^my newFeed relationshipFeeds, relationship;
+          ];
+        ];
+      ];
+    ];
+  ];
+];
+

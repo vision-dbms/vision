@@ -1,0 +1,26 @@
+# Hammers a pool with queries, restarting intermittently until the queries have all run.
+
+# Pre-Execs
+#pre_exec: start
+
+# Hammer thread.
+thread:hammer, repetitions:1
+operation_on_thread:hammer, run:hammer -c 50 -d 4 -w
+
+# Checks thread.
+thread:checks, repetitions:infinite
+operation_on_thread:checks, run:sleep 5
+operation_on_thread:checks, run:checkAssertions || error "assertions check failed"
+
+# Restart thread.
+thread:restart, repetitions:infinite
+operation_on_thread:restart, run:sleep 5
+operation_on_thread:restart, run:restart
+
+# Stats thread.
+#thread:stats, repetitions: 2
+#operation_on_thread:stats, run:sleep 7
+#operation_on_thread:stats, run:dumpStats
+
+# Post-Execs
+#post_exec:stop

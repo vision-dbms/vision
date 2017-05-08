@@ -1,0 +1,191 @@
+
+
+                  ---  Begin Reconcile for PropertySetup  ---                   
+
+  Upload Feed:   PropertySetup
+  Total Records:         2
+  Bad Field Ids:         0
+  Not Processed:         0
+  Other Status:          2
+
+        2 new properties created. 
+Security holdingsMcap (FP ) Double       NA   
+Security holdingsShares (FP ) Double       NA   
+
+
+                   ---  End Reconcile for PropertySetup  ---                    
+
+
+
+
+
+                  ---  Begin Reconcile for PropertySetup  ---                   
+
+  Upload Feed:   PropertySetup
+  Total Records:         2
+  Bad Field Ids:         0
+  Not Processed:         0
+  Other Status:          2
+
+        2 new properties created. 
+IndexAccount mcapFactor (FP ) Double       NA   
+IndexAccount sharesFactor (FP ) Double       NA   
+
+
+                   ---  End Reconcile for PropertySetup  ---                    
+
+
+
+Class Type created.
+Use MasterFeed TypeMaster for instance creation.
+Members Via: indexAccountList
+Group Via: Type
+Two-way link between IndexAccount and Type defined.
+Use MembershipFeed IndexAccountToType for membership updates.
+
+
+                    ---  Begin Reconcile for TypeMaster  ---                    
+
+  Upload Feed:   TypeMaster
+  Total Records:         1
+  Bad Field Ids:         0
+  Not Processed:         0
+  Other Status:          1
+
+        1 new Type instances created. 
+WithAccountRules    WithAccountRules                             
+
+
+                     ---  End Reconcile for TypeMaster  ---                     
+
+
+
+IVR loading file: 
+
+                            --- Current Globals ---                             
+delimiter :->  	|
+fieldOrderList :->  id, name, sharesFactor, mcapFactor, , 
+headerLineNumber :->          1
+maxRecords :->          0
+naTest :->  NA
+requiredFields :->          0
+skipBottom :->          0
+skipTop :->          0
+
+
+                ---  Begin Reconcile for IndexAccountMaster  ---                
+
+  Upload Feed:   IndexAccountMaster
+  Total Records:         1
+  Bad Field Ids:         0
+  Not Processed:         0
+  Other Status:          1
+
+        1 new IndexAccount instances created. 
+ACCOUNT1            Account One                                  
+
+
+                 ---  End Reconcile for IndexAccountMaster  ---                 
+
+
+
+IVR loading file: 
+
+                            --- Current Globals ---                             
+delimiter :->  	|
+fieldOrderList :->  memberId, , , , groupId, 
+headerLineNumber :->          1
+maxRecords :->          0
+naTest :->  NA
+requiredFields :->          0
+skipBottom :->          0
+skipTop :->          0
+
+
+                ---  Begin Reconcile for IndexAccountToType  ---                
+
+  Upload Feed:   IndexAccountToType
+  Total Records:         1
+  Bad Field Ids:         0
+  Not Processed:         0
+  Other Status:          0
+Dates present:            NA  
+
+                 ---  End Reconcile for IndexAccountToType  ---                 
+
+
+
+IVR loading file: 
+
+                            --- Current Globals ---                             
+delimiter :->  	|
+fieldOrderList :->  id, name, holdingsShares, holdingsMcap, 
+headerLineNumber :->          1
+maxRecords :->          0
+naTest :->  NA
+requiredFields :->          0
+skipBottom :->          0
+skipTop :->          0
+
+
+                  ---  Begin Reconcile for SecurityMaster  ---                  
+
+  Upload Feed:   SecurityMaster
+  Total Records:         1
+  Bad Field Ids:         0
+  Not Processed:         0
+  Other Status:          1
+
+        1 new Security instances created. 
+1                   Security One                                 
+
+...  Rebuilding Company Cusip6 Cross Reference.
+...  Rebuilding Company -> Security Cross Reference.
+
+
+                   ---  End Reconcile for SecurityMaster  ---                   
+
+
+
+
+IVR Holdings Summary:
+Date: 11/20/2009    Total Holdings:               1
+Accounts:            1 total /         1 considered /          1 included 
+Securities:          2 total /         2 considered /          1 included 
+              1 changed memberLists
+              1 changed constituents shares
+
+ ACCOUNT1  ACCOUNT1  Account One
+  account totals: 
+    :_totalMarketValue
+      11/20/2009       25.00
+    :_totalMarketValueCash
+      11/20/2009         NA 
+    :_totalMarketValueEquity
+      11/20/2009       25.00
+    :_totalMarketValueFixed
+      11/20/2009         NA 
+    :_totalCost
+      11/20/2009        0.00
+  holdingsSeries
+    1/1/1
+    11/20/2009
+      50.00     50.00     25.00     Security One
+  memberList
+    1/1/1
+    11/20/2009
+      Security One
+  constituents
+    Security One
+      11/20/2009        50.00    50.00
+
+Holdings audit for:  ACCOUNT1  ACCOUNT1  Account One
+  using security: 1            1            Security One
+  selection from masterList ->        2 (TRUE ) 
+    default filter ->                 2 (TRUE ) [TRUE] 
+    filter: Type::WithAccountRules -> 1 (TRUE ) [holdingsShares > 0] 
+  weight winner: Type::WithAccountRules -> 25             [| :account| holdingsMcap * account mcapFactor] 
+    adjustment: Type::WithAccountRules ->  25 * 1.00 = 25 NA 
+  shares winner: Type::WithAccountRules -> 50             [| :account| holdingsShares * account sharesFactor] 
+    adjustment: Type::WithAccountRules ->  50 * 1.00 = 50 NA 
+

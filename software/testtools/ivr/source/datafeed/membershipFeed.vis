@@ -1,0 +1,316 @@
+# Membership Feed Changes
+#   Fixes
+#    - Fix the updateGroupsUsing method to correctly handle group 
+#      updates when not a TimeSeries.  It wasn't failing but it was getting
+#      the wrong data.
+#   Enhancements
+#    - enableUploadDefault option, to delete a membership upon upload on the
+#      member side.
+#    - Allow createRelationship to build memberships correctly when on a 
+#      bridge
+#    - Encapsulated the manyToMany relationship conventions in a 
+#      createRelationship variant
+
+Interface BatchFeedManager defineMethod: 
+[ | 
+    createRelationship: id 
+    withGroupType:      groupId   via: groupPath 
+    andMemberType:      memberId  via: memberPath 
+    asTS:               tsFlag
+  | 
+    ^self createRelationship: id
+      withGroupType:          groupId via: groupPath
+      andMemberType:          memberId  via: memberPath 
+      asTS:                   tsFlag
+      manyToMany:             FALSE
+];
+
+Interface BatchFeedManager defineMethod: 
+[ | 
+    createManyToMany: id 
+    withGroupType:      groupId   via: groupPath 
+    andMemberType:      memberId  via: memberPath 
+    asTS:               tsFlag
+  | 
+    ^self createRelationship: id
+      withGroupType:          groupId via: groupPath
+      andMemberType:          memberId  via: memberPath 
+      asTS:                   tsFlag
+      manyToMany:             TRUE
+];
+
+
+Interface BatchFeedManager defineMethod: 
+[ | 
+    createRelationship: id 
+    withGroupType:      groupId   via: groupPath 
+    andMemberType:      memberId  via: memberPath 
+    asTS:               tsFlag
+    manyToMany:         manyFlag
+  | 
+    # Lets be able to ask the entities questions
+    !groupClass  <- groupId asClass;
+    !memberClass <- memberId asClass;
+
+    !groupEntity <- groupId;
+    groupClass isEntity ifFalse: [
+      groupClass baseClass isEntity ifTrue: [ 
+        :groupEntity <- groupClass baseClass whatAmI;
+      ];
+    ];
+
+    !memberEntity <- memberId;
+    memberClass isEntity ifFalse: [
+      memberClass baseClass isEntity ifTrue: [ 
+        :memberEntity <- memberClass baseClass whatAmI;
+      ];
+    ];
+
+    # Properties in ManyToMany are not created through feeds
+    manyFlag isTrue ifTrue: [
+      tsFlag ifTrue: [
+        groupClass
+          define: groupPath 
+          withDefault: CoreWorkspace IndexedList new;
+      ] 
+      else: [
+        groupClass
+          defineFixedProperty: groupPath 
+          withDefault: CoreWorkspace IndexedList new;
+      ];
+
+      # Define the memberProperty accesor, this is a cover method
+      memberClass defineMethod: (
+        "|" concat: memberPath .
+        concat: "| !self <- ^self asSelf; CoreWorkspace " .
+        concat: groupId . concat: " masterList " .
+        concat: "select: [ " . concat: groupPath . 
+        concat: " at: ^my self . isntNA ] . indexBy: [ ^self ]" 
+      ) asBlock;
+
+    ]
+    else: [
+      !feed <- CoreWorkspace PropertySetup; 
+      !upload <- [
+          "classId	property	tsFlag	defaultValue	propertyXRef" printNL; 
+          memberId print; "	" print; 
+          memberPath print; "	" print; 
+          tsFlag print; "	" print; 
+          groupId print; "	" print; 
+          groupPath print; "	" printNL; 
+        ] divertOutput; 
+      ^self setRowLimitTo: 0; 
+      ^self runExpression: [feed updateFromString: upload]; 
+    ];
+
+    "Two-way link between " print; memberId print; 
+    " and " print; groupId print; " defined." printNL; 
+
+    !feed <- CoreWorkspace MembershipFeedSetup; 
+    !upload <- [
+        "feedId	groupId	groupPath	memberId	memberPath" printNL; 
+        id capitalize print; "	" print; 
+        groupEntity print; "	" print; groupPath print; "	" print; 
+        memberEntity print; "	" print; 
+
+        # in the case of many-to-many, force it to use the group side update
+        # see MembershipFeed updateGroupsUsing:
+        manyFlag ifTrue: [ NA ] else: [ memberPath ] . print; 
+
+        newLine print;
+      ] divertOutput; 
+    ^self setRowLimitTo: 0; 
+    ^self runExpression: [feed updateFromString: upload]; 
+
+    !feedClass <- id capitalize asClass;
+    feedClass isMembershipFeed ifTrue: [
+        "Use MembershipFeed " print; id capitalize print; 
+        " for membership updates." printNL; 
+      ] 
+      ifFalse: [
+        ">>> No MembershipFeed class created." printNL; 
+      ]; 
+
+    feedClass isMembershipFeed && groupClass isEntity not ifTrue: [
+      groupClass baseClass isEntity ifTrue: [
+        groupClass whatAmI print; " is a bridge.  Path updated." printNL;
+
+        !path <- groupClass updateBlock asUndelimitedString stripChar: ":"; 
+        feedClass setGroupBridgePathTo: path;
+      ]
+    ];
+
+    feedClass isMembershipFeed && memberClass isEntity not ifTrue: [
+      memberClass baseClass isEntity ifTrue: [
+        memberClass whatAmI print; " is a bridge.  Path updated." printNL;
+
+        !path <- memberClass updateBlock asUndelimitedString stripChar: ":"; 
+        feedClass setMemberBridgePathTo: path;
+      ]
+    ];
+
+  ^self
+];
+
+
+MembershipFeed defineMethod: [| updateGroupsUsing: list| 
+  !feed <- ^self; 
+  !groupBlock <- feed groupUpdateBlock; 
+  !groupIsTimeSeries <- feed groupType send: groupBlock .isTimeSeries; 
+  !dateList <- list groupedBy: [updateDate else: earliestPossibleDate]; 
+  dateList do: [
+    !date <- ^self asDate; 
+    !feed <- ^my feed; 
+    !groupBlock <- ^my groupBlock; 
+    !groupIsTimeSeries <- ^my groupIsTimeSeries; 
+    date evaluate: [
+      groupList groupedBy: [group] . nonDefaults do: [
+        !groupEntity <- ^self;
+        !groupSeries <- ^self send: ^my groupBlock; 
+        !currentDate <- ^my groupIsTimeSeries 
+            ifTrue: [groupSeries effectiveDate]
+            ifFalse: [^date]; 
+        !listHasChanged <- 
+          groupList send: [member]. isntEquivalentTo: groupSeries value;
+
+        listHasChanged ifTrue: [
+          !defaultList <- ^self defaultInstance basicSend: ^my groupBlock . 
+              value;
+
+          ^my groupIsTimeSeries ifTrue: [
+            currentDate != ^date || groupSeries value == defaultList ifTrue: [
+              groupSeries put: groupSeries value clusterNew;
+            ];
+          ]
+          else: [
+            groupSeries value == defaultList ifTrue: [
+              groupSeries <- groupSeries value clusterNew;
+            ];
+          ];
+
+          !members <- groupSeries value; 
+          ^my feed updateMode = "Replace" ifTrue: [
+            members do: [^my members delete: ^self]
+          ]; 
+          groupList do: [
+            member isntNA ifTrue: [
+              ^my members at: member put: member; 
+            ];
+            :membershipChange <- TRUE; 
+          ]; 
+        ]; 
+      ]; 
+    ]; 
+  ]; 
+  feed deleteDuplicateMembershipsFor: dateList; 
+];
+
+#####
+# If the feed has this uploadDefault enabled and an NA or empty record
+# is passed in, the member property will have it's value set to the default
+# group, instead of ignoring the empty record
+#
+# Not sticky.
+#####
+MembershipFeed defineMethod: [ | enableUploadDefault | 
+  ^self define: 'uploadDefaultFlag' toBe: TRUE ;
+  ^self
+] ;
+
+MembershipFeed defineMethod: [ | disableUploadDefault | 
+  ^self define: 'uploadDefaultFlag' toBe: NA ;
+  ^self
+] ;
+
+# not sticky, set this value to it's default and reset in resetRunTimeAttributes
+MembershipFeed disableUploadDefault;
+MembershipFeed defineMethod: [|resetRunTimeAttributes|
+  CoreWorkspace GlobalsFeed setDefaultGlobals; 
+  ^self disablePurge; 
+  ^self disableUploadDefault; 
+  ^self
+];
+
+#####
+# By default, the first time a given member property (containing a group) 
+# that is a timeseries is set by MembershipFeed, the feed will place a copy
+# of the value at 1/1/1 in the TimeSeries.  
+#
+# For example, the first time you run:
+#   AMembershipFeed updateFromString: 
+#   "groupId | memberId | date
+#   G1       | M1       | 20010101
+#   ";
+#
+# the member property will get a G1 entry on 20010101 and 1/1/1 
+# (earlistPossibleDate).
+# 
+# This option disables that feature.
+#
+# Sticky.
+#####
+MembershipFeed defineMethod: [ | enableFirstValueInit | 
+  ^self define: 'firstValueInitFlag' toBe: TRUE ;
+  ^self
+] ;
+
+MembershipFeed defineMethod: [ | disableFirstValueInit | 
+  ^self define: 'firstValueInitFlag' toBe: FALSE ;
+  ^self
+] ;
+
+# set default only if not already initialized
+MembershipFeed respondsTo: 'firstValueInitFlag' . ifFalse: [
+  MembershipFeed enableFirstValueInit;
+];
+
+
+MembershipFeed defineMethod: [|runUpdate|
+  !feed <- ^self asSelf; 
+  !groupBlock <- feed groupUpdateBlock; 
+
+  !list <- feed instanceList reject: [ isDefault ];
+  feed uploadDefaultFlag isTrue not ifTrue: [
+    :list <- list select: [ member isntNA && group isntNA];
+  ];
+  :list <- list extendBy: [!updateDate <- evaluationDate; ]; 
+
+  feed trackedAtMember 
+    ifTrue:  [feed updateMembersUsing: list]
+    ifFalse: [feed updateGroupsUsing: list]; 
+
+  list do: [:isProcessed <- TRUE]; 
+  ^self
+];
+
+MembershipFeed defineMethod: [| updateGroupAssignmentsOn: date using: list| 
+  !feed <- ^self; 
+  !memberBlock <- feed memberUpdateBlock; 
+  !membersAreTimeSeries <- feed memberType send: memberBlock .isTimeSeries; 
+  !evalDate <- date else: earliestPossibleDate; 
+  
+  # if the group is NA insert the default instead
+  !groupDefault <- feed groupType defaultInstance;
+
+  evalDate evaluate: [
+    list select: [member isntDefault ].
+      do: [
+        group isNA ifTrue: [ :group <- ^my groupDefault ];
+
+        ^my onlyUpdateOnChangeFlag isTrue && ^my membersAreTimeSeries ifTrue: [
+            ^my feed firstValueInitFlag isTrue
+              ifTrue: [ member send: ^my memberBlock . updateWith: group ]
+              else:   [ 
+                # updateWith will not updateOnChange.  But it does the silly
+                # "update 1/1/1" thing.  So we have to check for a change.
+                (member send: ^my memberBlock . value asSelf) != group 
+                  ifTrue: [ 
+                    member setProperty: ^my memberBlock to: group;
+                  ];
+              ];
+          ]
+          ifFalse: [ member setProperty: ^my memberBlock to: group ]; 
+       ]; 
+  ]; 
+];
+

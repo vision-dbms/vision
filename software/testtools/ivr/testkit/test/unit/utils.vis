@@ -1,0 +1,7 @@
+"source/misc/utils.vis" asFileContents evaluate;
+
+!object <- Object new;
+!list   <- 1, 2, 3, 4, 5, object;
+
+list positionOf: 3 . ifNA: [ ">>> Error in positionOf: " printNL; ];
+list positionOf: object . ifNA: [ ">>> Error in positionOf: " printNL; ];

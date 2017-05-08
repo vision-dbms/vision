@@ -1,0 +1,16 @@
+
+#####
+# Expiration of shares cache to match holdingsSeries and memberList.  Release
+# 102 should keep them in sync going forward, this is the historical 
+# correction script.
+#####
+
+
+IndexAccount masterList do: [ 
+  :holdingsSeries from: (earliestPossibleDate + 1 days ) .
+    select: [ isDefault ] . 
+    select: [ ^my :memberList on: ^date . isDefault ] .
+    do: [ 
+      ^my expireSharesCache; # use the existing expire method
+    ];
+];

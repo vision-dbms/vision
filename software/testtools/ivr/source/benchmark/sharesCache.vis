@@ -1,0 +1,180 @@
+
+CoreWorkspace respondsTo: 'ConstituentData' . ifFalse: [
+  Interface BatchFeedManager
+    createIndexedDataRecordClass: "ConstituentData"
+    from:     "IndexedDataRecord"
+    linkedTo: "IndexAccount"
+    via:      "constituents"
+    by:       "Security"
+  ;
+
+  CoreWorkspace PropertySetup updateFromString:
+  "property  | classID         | dataType | tsFlag
+  _shares    | ConstituentData | Double   | TRUE
+  ";
+
+  # by default, this value is on
+  CoreWorkspace IndexAccount define: 'updatesSharesCache' toBe: TRUE; 
+];
+
+# Adjustment override (IndexedDataFeed doesn't adjust properly yet)
+ConstituentData defineMethod: [|shares|
+  index getAdjustedSharesDataFor: :_shares
+];
+
+# Hook into the holdings update; through HoldingsFeed or IVR Holdings build.
+IndexAccount defineMethod: [| createHoldingsFrom: xsecList| 
+  ^super createHoldingsFrom: xsecList; 
+  !secs <- xsecList send: [security]; 
+  !oldList <- memberList; 
+  oldList isntEquivalentTo: secs .|| [universe isntDefault]
+  ifTrue: [
+      ^self setUniverseTo: CoreWorkspace Universe .setStyleTo: "Manual"; 
+      ^self setSecuritiesTo: secs asOf: ^date; 
+     ]; 
+
+  ^self checkNextDateMembership;
+
+  ^self updatesSharesCache isTrue ifTrue: [
+    ^self updateSharesCache;
+  ];
+];
+
+IndexAccount defineMethod: [|getOrCreateConstituentsCacheFor: sec |
+  !acct <- ^self asSelf;
+  :sec <- sec asSelf;
+
+  acct constituents == acct defaultInstance constituents ifTrue: [
+    acct sendOnceNoContext: [ # ensure one IndexedList per account
+      ^self :constituents <- ^self defaultInstance constituents clusterNew;
+    ];
+  ];
+
+  !rec <- acct constituents at: sec;
+
+  rec isNA ifTrue: [
+    # ensure one data record per account-security pair
+    ^current basicDoOnceNoContext: [ 
+        :rec <- CoreWorkspace ConstituentData createInstance: acct, sec;
+        acct constituents at: sec put: rec;
+      ]
+      basedOnCriteria: [ acct ], [ sec ]
+      propagateUsing: [ ^self :rec <- groupResult rec ];
+  ];
+
+  rec
+];
+IndexAccount defineMethod: [|updateSharesCacheValues|
+  !acct <- ^self asSelf;
+  !hldgs <- acct :holdingsSeries on: ^date;
+
+  hldgs isntNA ifTrue: [
+    hldgs do: [ 
+      !hldg <- ^self;
+      !rec <- ^my acct getOrCreateConstituentsCacheFor: hldg security;
+
+      (rec _shares != hldg _shares) || (rec shares != hldg shares) ifTrue: [
+        rec :_shares asOf: ^date put: hldg _shares;
+      ];
+    ];
+  ];
+
+  ^self
+];
+
+
+IndexAccount defineMethod: [|updateSharesCache|
+  !acct <- ^self asSelf;
+  
+  acct updateSharesCacheValues;
+  acct expireSharesCache;
+  acct cleanupSharesCache;
+  acct checkNextDateSharesCache;
+
+  ^self
+];
+
+IndexAccount defineMethod: [|expireSharesCache|
+  !acct <- ^self asSelf;
+  !ml <- acct memberList;
+  ^self constituents select: [ _shares isntDefault ] .
+    select: [ ^my ml at: index . isDefault ] .
+    do: [ 
+      :_shares asOf: ^date put: NA;
+    ];
+
+  ^self
+];
+
+IndexAccount defineMethod: [|deleteSharesCache|
+  !acct <- ^self asSelf;
+  acct constituents select: [ :_shares on: ^date . isntNA ] .
+    do: [ 
+      :_shares delete: ^date;
+    ];
+
+  acct checkNextDateSharesCache;
+
+  ^self
+];
+
+IndexAccount defineMethod: [|checkNextDateSharesCache|
+  !acct <- ^self asSelf;
+
+  !nextDate <- acct :holdingsSeries nextDateAsOf: ^date;
+  nextDate isntNA ifTrue: [ nextDate evaluate: [ 
+    acct updateSharesCacheValues;
+    acct expireSharesCache;
+    acct cleanupSharesCache;
+  ]; ];
+
+  ^self
+];
+
+IndexAccount defineMethod: [|updateSharesCacheAll|
+  ^self masterList 
+    do: [ 
+      ^self updateSharesCache;
+    ];
+
+  ^self
+];
+
+IndexAccount defineMethod: [|cleanupSharesCache|
+  ^self constituents do: [ 
+    !rec <- ^self;
+
+    ( (rec :_shares lag: 1 days) = rec _shares &&
+      (rec :shares lag: 1 days) = rec shares 
+    )
+    ifTrue: [
+      rec :_shares delete: ^date;
+    ];
+  ];
+
+  ^self;
+];
+
+IndexAccount defineMethod: [|cleanupSharesCacheTS|
+  !acct <- ^self asSelf;
+
+  acct constituents do: [ 
+    !c <- ^self;
+
+    !toDelete <- :_shares select: [ 
+      ^self = (^my c :_shares lag: 1 days) &&
+      ^my c shares = (^my c :shares lag: 1 days)
+    ];
+    toDelete do: [ ^my c :_shares delete: ^date; ];
+  ];
+
+  ^self
+];
+
+IndexAccount defineMethod: [|cleanupSharesCacheTSAll|
+  ^self masterList do: [ ^self cleanupSharesCacheTS; ];
+
+  ^self
+];
+
+

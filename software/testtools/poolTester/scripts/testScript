@@ -1,0 +1,43 @@
+# Test script for poolTester.
+
+# Pre-Execs
+pre_exec: start
+
+# Query thread.
+thread:query, repetitions:1
+operation_on_thread:query, run:checkAssertions || error "assertions check failed in test thread"
+operation_on_thread:query, run:[[ `getStat QueueLength` -eq 0 ]] && inform "Queue length is 0."
+operation_on_thread:query, run:query -q ~/vision-testtools/poolTester/queries/TestQuery01.vis
+operation_on_thread:query, run:query -q ~/vision-testtools/poolTester/queries/TestQuery02.vis
+operation_on_thread:query, run:query -q ~/vision-testtools/poolTester/queries/TestQuery03.vis
+operation_on_thread:query, run:query -q ~/vision-testtools/poolTester/queries/TestQuery04.vis
+operation_on_thread:query, run:query -q ~/vision-testtools/poolTester/queries/TestQuery05.vis
+operation_on_thread:query, run:query -q ~/vision-testtools/poolTester/queries/TestQuery06.vis
+operation_on_thread:query, run:query -q ~/vision-testtools/poolTester/queries/TestQuery07.vis
+operation_on_thread:query, run:query -q ~/vision-testtools/poolTester/queries/TestQuery08.vis
+operation_on_thread:query, run:query -q ~/vision-testtools/poolTester/queries/TestQuery09.vis
+operation_on_thread:query, run:query -q ~/vision-testtools/poolTester/queries/TestQuery10.vis
+operation_on_thread:query, run:query -q ~/vision-testtools/poolTester/queries/TestQuery11.vis
+operation_on_thread:query, run:query -q ~/vision-testtools/poolTester/queries/TestQuery12.vis
+operation_on_thread:query, run:query -q ~/vision-testtools/poolTester/queries/TestQuery13.vis
+operation_on_thread:query, run:query -q ~/vision-testtools/poolTester/queries/TestQuery14.vis
+operation_on_thread:query, run:query -q ~/vision-testtools/poolTester/queries/TestQuery15.vis
+operation_on_thread:query, run:query -q ~/vision-testtools/poolTester/queries/TestQuery16.vis
+operation_on_thread:query, run:query -q ~/vision-testtools/poolTester/queries/TestQuery17.vis
+operation_on_thread:query, run:query -q ~/vision-testtools/poolTester/queries/TestQuery18.vis
+operation_on_thread:query, run:query -q ~/vision-testtools/poolTester/queries/TestQuery19.vis
+operation_on_thread:query, run:query -q ~/vision-testtools/poolTester/queries/TestQuery20.vis
+operation_on_thread:query, run:query -q ~/vision-testtools/poolTester/queries/TestQuery21.vis
+
+# Restart thread.
+thread:restart, repetitions:4
+operation_on_thread:restart, run:sleep 2
+operation_on_thread:restart, run:restart
+
+# Stats thread.
+thread:stats, repetitions: 3
+operation_on_thread:stats, run:sleep 7
+operation_on_thread:stats, run:dumpStats
+
+# Post-Execs
+post_exec:stop

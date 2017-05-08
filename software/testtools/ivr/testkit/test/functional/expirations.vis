@@ -1,0 +1,69 @@
+"testkit/lib/test/order.vis" asFileContents evaluate;
+
+[
+"source/order.vis" asFileContents evaluate;
+Utility Test updateIfEnabled;
+
+IVR File registerFile: "security" . relateTo: Security .
+  setIdField: "id" .
+  setDateField: "date" .
+  do: [ 
+    ^self addMaster;
+
+    ^self addDataRecord: "Sparse" .
+      setGlobalOption: "autoExpire" to: 1 days .
+      addItem: "shares", "shares", "Double", NA, "TRUE" .
+    ;
+
+    ^self addDataRecord: "Daily" .
+      enableTimeSeries
+      setGlobalOption: "autoExpire" to: 1 days .
+      addItem: "marketCap", "marketCap", "Double" .
+    ;
+
+    ^self addDataRecord: "Monthly" . 
+      enableTimeSeries
+      setGlobalOption:   "autoExpire" to: 1 monthEnds .
+      addItem: "eps", "eps", "Double" .
+    ;
+  ];
+] debugOutput;
+
+IVR File locateId: "security" . buildRecipients; 
+
+
+IVR File locateId: "security" . uploadString:
+"id   | date     | shares | marketCap | eps
+ONE   | 20080101 | 1.0    | 1.0       | 1.0
+TWO   | 20080101 | 2.0    | 2.0       | 2.0
+THREE | 20080101 | 3.0    | 3.0       | 3.0
+";
+
+Named Security send: [ \ONE, \TWO, \THREE ] . do: [
+  displayInfo;
+  "  shares" printNL;
+  sparse :shares do: [ "    " print; ^date print: 13; printNL; ];
+  "  marketCap" printNL;
+  :daily send: [ marketCap ] . do: [ "    " print; ^date print: 13; printNL; ];
+  "  eps" printNL;
+  :monthly send: [ eps ] . do: [ "    " print; ^date print: 13; printNL; ];
+  newLine print;
+];
+
+
+IVR File locateId: "security" . uploadString:
+"id   | date     | shares | marketCap | eps
+ONE   | 20080103 | 1.0    | 1.0       | 1.0
+";
+
+Named Security send: [ \ONE, \TWO, \THREE ] . do: [
+  displayInfo;
+  "  shares" printNL;
+  sparse :shares do: [ "    " print; ^date print: 13; printNL; ];
+  "  marketCap" printNL;
+  :daily send: [ marketCap ] . do: [ "    " print; ^date print: 13; printNL; ];
+  "  eps" printNL;
+  :monthly send: [ eps ] . do: [ "    " print; ^date print: 13; printNL; ];
+  newLine print;
+];
+

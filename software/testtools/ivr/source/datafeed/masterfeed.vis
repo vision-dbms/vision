@@ -1,0 +1,50 @@
+MasterFeed defineMethod: [ | enableDisplayBadEntities |
+  ^self define: 'displayBadEntities' toBe: TRUE ;
+  ^self
+] ;
+
+MasterFeed defineMethod: [ | disableDisplayBadEntities |
+  ^self define: 'displayBadEntities' toBe: NA ;
+  ^self
+] ;
+
+MasterFeed defineMethod: [|resetRunTimeAttributes|
+  ^super resetRunTimeAttributes;
+  ^self enableEntityCreation;
+  ^self disableAllowDuplicates;
+  ^self enableDisplayBadEntities;
+  ^self
+];
+
+MasterFeed enableDisplayBadEntities;
+ 
+MasterFeed defineMethod: [|displayBadOnes|
+  !badOnes <- ^self asSelf masterList select: [isntProcessed].
+    select: [underlyingRecord isDefault]; 
+  badOnes count > 0 ifTrue: [
+    newLine print; 
+    ^self allowEntityCreation ifTrue: ["Bad entityId supplied." print]
+    ifFalse: [">>> Entity Creation Disabled." print]; 
+    badOnes count print; " not processed.  " printNL; 
+    ^self displayBadEntities isntNA ifTrue: [
+      badOnes do: [displayInfo]; 
+    ];
+  ]; 
+  !dups <- ^self asSelf masterList select: [flaggedAsDuplicate isntNA].
+    groupedBy: [flaggedAsDuplicate]; 
+  dups count > 0 ifTrue: [
+    newLine print; 
+    "---> Two or more feed records for the same entity: " printNL; 
+    dups do: [
+      newLine print; 
+      "Entity: " print; underlyingRecord displayInfo; 
+      groupList do: [
+        "   Feed: " print; 
+        getValueList do: [print; " | " print;]; 
+        newLine print; 
+      ]; 
+   ]; 
+  ]; 
+];
+
+

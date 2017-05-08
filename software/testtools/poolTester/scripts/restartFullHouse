@@ -1,0 +1,13 @@
+# Starts a pool and hammers it with 5 10-second queries in order to get the worker count up, then restarts the pool, then stops it.
+# Used to test the restart machinery; particularly re-hiring workers to replace the previous generation.
+
+# Pre-Execs
+pre_exec: start -c $POOLTESTERDIR/configs/baseline.ptc -D WorkersInCreation=1 -w
+
+# Hammer thread.
+thread:main, repetitions: 1
+operation_on_thread:main, run:hammer -c 5 -d 10 -w
+operation_on_thread:main, run:restart -w
+
+# Post-Execs
+post_exec: stop

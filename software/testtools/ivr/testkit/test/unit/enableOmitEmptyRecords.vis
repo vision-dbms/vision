@@ -1,0 +1,29 @@
+"testkit/lib/test/order.vis" asFileContents evaluate;
+
+[
+SecurityMaster enableOmitEmptyRecords updateFromString:
+"id | name | ticker
+TEST1 | My Security | TJ
+TEST2 
+";
+] debugOutput;
+
+newLine print;
+"Created Security: " print;
+Named Security at: "TEST1" . displayInfo;
+"But not Security TEST2? " print;
+Named Security at: "TEST2" . isNA printNL;
+
+[
+SecurityMaster enablePurge updateFromString: 
+"id 
+TEST1
+";
+] debugOutput;
+
+newLine print;
+"=" fill: 60 . printNL;
+"Test with enablePurge" printNL;
+"Purge Success? " print;
+Named Security at: "TEST1" . isNA printNL;
+

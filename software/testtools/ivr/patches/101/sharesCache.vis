@@ -1,0 +1,10 @@
+
+IndexAccount masterList 
+  collectListElementsFrom: [ :holdingsSeries nonDefaults send: [ ^date ] ] .
+  unique iterate: [ 
+    "Building sharesCache for: " print; ^self printNL;
+    ^self asDate evaluate: [ CoreWorkspace IndexAccount updateSharesCacheAll ];
+  ];
+
+# Activate shares cache building going forward
+CoreWorkspace IndexAccount define: 'updatesSharesCache' toBe: TRUE;

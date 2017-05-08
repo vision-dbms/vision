@@ -1,0 +1,16 @@
+# PoolTester script for testing the hiring of new workers while all workers in the oldest generation are busy but there are idle workers ready to be replaced in less old generations. Proper functionality with vpool 7.1.6+ is to retire the not-as-old idle workers first instead of waiting for the older non-idle worker to return.
+
+# Pre-Execs
+pre_exec: start -c $POOLTESTERDIR/configs/baseline.ptc -w
+
+# Hammer thread.
+thread:main, repetitions: 1
+operation_on_thread:main, run:hammer -c 1 -d 30
+operation_on_thread:main, run:waitForStat -c OnlineWIPs=1
+operation_on_thread:main, run:restart -w
+operation_on_thread:main, run:hammer -c 2 -d 1
+operation_on_thread:main, run:waitForStat -c QueriesProcessed=2
+operation_on_thread:main, run:restart -w
+
+# Post-Execs
+post_exec: stop -t 30

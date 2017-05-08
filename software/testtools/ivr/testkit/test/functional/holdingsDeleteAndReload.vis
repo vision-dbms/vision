@@ -1,0 +1,220 @@
+
+"testkit/lib/test/order.vis" asFileContents evaluate;
+[ 
+  "source/order.vis" asFileContents evaluate; 
+  "testkit/test/helpers/holdingsHelpers.vis" asFileContents evaluate;
+] debugOutput;
+
+Utility Test updateIfEnabled;
+
+!sec <- IVR File registerFile: "Security" . relateTo: Security .
+  setIdField: "id" .
+  setDateField: "date" .
+  do: [ 
+    ^self addMaster 
+      addItem: "name", "name" .
+    ;
+
+    ^self addDataRecord: "Snapshot" .  
+      setDefaultCurrency: "USD" .
+      enableTimeSeries
+
+      addItem: "shares"  , "shares" , "Double" .
+      addItem: "mcap"    , "mcap"   , "Double" .
+    ;
+
+  ];
+
+!acct <- IVR File registerFile: "IndexAccount" . relateTo: IndexAccount .
+  setIdField: "id" .
+  setDateField: "date" .
+  do: [ 
+    ^self addMaster 
+      addItem: "name", "name" .
+      addItem: "sharesFactor"  , "sharesFactor" , "Double" .
+      addItem: "mcapFactor"    , "mcapFactor"   , "Double" .
+    ;
+
+    ^self addMembership: "Type" .
+      addFeedOptions: "enableUploadDefault" . 
+      withForeignId: "type" .
+    ;
+  ];
+
+sec buildRecipients;
+acct buildRecipients;
+
+TypeMaster updateFromString:
+"id              | securityCriteria    | weightFormula  | sharesFormula
+WithAccountRules | snapshot shares > 0 | snapshot mcap  | snapshot shares
+";
+Type locateId: "WithAccountRules" . do: [ 
+  :weightFormula <- [|:account| snapshot mcap   * account mcapFactor    ];
+  :sharesFormula <- [|:account| snapshot shares * account sharesFactor  ];
+];
+
+acct uploadString: 
+"id      | name        | sharesFactor | mcapFactor | type 
+ACCOUNT1 | Account One | 5            | 0.5        | WithAccountRules
+";
+
+sec uploadString:
+"id | date     | name         | shares | mcap
+1   | 20091120 | Security One | 10     | 50
+1   | 20091121 | Security One | 15     | 55 
+2   | 20091121 | Security Two | 20     | 100
+1   | 20091122 | Security One | 15     | 60
+2   | 20091122 | Security Two | 20     | 150
+1   | 20091123 | Security One | 15     | 60
+2   | 20091123 | Security Two | 20     | 60
+1   | 20091124 | Security One | 15     | 60
+";
+
+
+
+IVR Holdings 
+  setSecurityFilterTo: [ :snapshot on: ^date . isntDefault ] .
+  setClassificationListTo: [type];
+;
+
+IVR Holdings buildHoldingsForDates: 
+  20091120, 20091121, 20091122, 20091123, 20091124;
+
+newLine printNL;
+"After Initial Holdings Build: " printNL;
+!fullHoldingsDump <- [
+    ^tmp displayAllAccountHoldings;
+    ^tmp showAllHoldingsExceptions;
+  ] divertOutput print;
+
+
+
+HoldingsFeed enablePurge updateFromString:
+"acctId  | date
+ACCOUNT1 | 20091121
+";
+
+newLine printNL;
+"After 20091121 deletion: " printNL;
+^tmp displayAllAccountHoldings;
+^tmp showAllHoldingsExceptions;
+
+HoldingsFeed enablePurge updateFromString:
+"acctId  | date
+ACCOUNT1 | 20091122
+";
+
+newLine printNL;
+"After 20091122 deletion: " printNL;
+!afterBothDeletions <- [
+    ^tmp displayAllAccountHoldings;
+    ^tmp showAllHoldingsExceptions;
+  ] divertOutput print;
+
+
+IVR Holdings buildHoldingsForDates: 20091121, 20091122, 20091123;
+
+"After 20091121 and 20091122 rebuild: " printNL;
+!holdingsDump <- [
+    ^tmp displayAllAccountHoldings;
+    ^tmp showAllHoldingsExceptions;
+  ] divertOutput print;
+holdingsDump != fullHoldingsDump ifTrue: [
+  ">>> Should have matched original holdings and doesn't!" printNL;
+];
+
+HoldingsFeed enablePurge updateFromString:
+"acctId  | date
+ACCOUNT1 | 20091121
+ACCOUNT1 | 20091122
+";
+
+newLine printNL;
+"After 20091121 and 20091122 deletion: " printNL;
+!holdingsDump <- [
+    ^tmp displayAllAccountHoldings;
+    ^tmp showAllHoldingsExceptions;
+  ] divertOutput print;
+holdingsDump != afterBothDeletions ifTrue: [
+  ">>> Should have matched after two deletions and does not" printNL;
+];
+
+
+IVR Holdings buildHoldingsForDates: 20091121, 20091122, 20091123;
+
+"After 20091121, 20091122 and 20091123 rebuild: " printNL;
+!holdingsDump <- [
+    ^tmp displayAllAccountHoldings;
+    ^tmp showAllHoldingsExceptions;
+  ] divertOutput print;
+holdingsDump != fullHoldingsDump ifTrue: [
+  ">>> Should have matched original holdings and doesn't!" printNL;
+];
+
+
+[ 
+sec uploadString:
+"id | date     | name           | shares | mcap
+3   | 20091122 | Security Three | 20     | 150
+";
+] debugOutput;
+IVR Holdings buildHoldingsForDates: 20091122 asList;
+
+newLine printNL;
+"After 20091122 'Security Three' addition: " printNL;
+^tmp displayAllAccountHoldings;
+^tmp showAllHoldingsExceptions;
+
+[
+sec uploadString:
+"id | date     | name           | shares
+1   | 20091122 | Security One   | 30      
+";
+] debugOutput;
+IVR Holdings buildHoldingsForDates: 20091122 asList;
+
+newLine printNL;
+"After 20091122 'Security One' Revision: " printNL;
+^tmp displayAllAccountHoldings;
+^tmp showAllHoldingsExceptions;
+
+[
+SecuritySnapshotFeed enablePurge updateFromString: 
+"id | date    
+2   | 20091123
+";
+] debugOutput;
+IVR Holdings buildHoldingsForDates: 20091123 asList;
+
+newLine printNL;
+"After 20091123 'Security Two' Delete: " printNL;
+^tmp displayAllAccountHoldings;
+^tmp showAllHoldingsExceptions;
+
+
+
+[
+sec uploadString:
+"id | date     | name         | shares | mcap
+1   | 20091130 | Security One | 15     | 60
+";
+IVR Holdings buildHoldingsForDates: 20091130 asList;
+] debugOutput;
+
+newLine printNL;
+"After 20091130 addition" printNL;
+^tmp displayAllAccountHoldings;
+^tmp showAllHoldingsExceptions;
+
+[
+  20091127 evaluate: [
+    HoldingsFeed expireIndexAccounts: 2 businessDays;
+  ];
+] debugOutput;
+
+newLine printNL;
+"After 20091127 expiration" printNL;
+^tmp displayAllAccountHoldings;
+^tmp showAllHoldingsExceptions;
+
+

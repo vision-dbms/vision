@@ -1,0 +1,126 @@
+
+^tmp respondsTo: 'ivrSourcePath' . ifFalse: [ 
+  # calling this script directly, the default path is different!
+  ^tmp define: 'ivrSourcePath' toBe: "";
+];
+
+#####
+# Install new code
+#####
+  "misc/patch.feed.indexedFeed", # switch to depend on core
+  "benchmark/memberListStoreManagement.vis", 
+  "benchmark/holdingsEnhancements.vis", 
+  "benchmark/sharesCache.vis"
+    send: [ ^tmp ivrSourcePath concat: "source/" . concat: ^self ] .
+    iterate: [ ^self asFileContents evaluateIn: ^my ];
+
+
+#####
+# rerun modified rerunable files to update the patching database
+#####
+  "misc/classBuilder.vis",
+  "misc/utils.vis",
+  "datafeed/membershipFeed.vis",
+  "datafeed/hierarchy.vis",
+  "datafeed/omitEmptyRecords.vis",
+  "ivr/DEFIVR.vis"
+    send: [ ^tmp ivrSourcePath concat: "source/" . concat: ^self ] .
+    iterate: [ ^self asFileContents evaluateIn: ^my; ];
+
+#####
+# methods that need to be deleted
+#####
+IndexAccount deleteMessage: "manageMemberlistStore";
+
+
+#####
+# Data Migration
+#####
+
+### IVR Global Options Storage Migration
+
+IVR DataSet respondsTo: '_globalOptions' . ifTrue: [
+  # new storage for global options
+  IVR DataSet defineFixedRWProperty: 'globalOptionsList';
+  IVR DataSet define: 'globalOptionsListPrototype' toBe: IndexedList new;
+
+  # Migrate old data storage to new data storage
+  ((IVR DataSet subclassList), IVR DataSet)
+    collectListElementsFrom: [
+      ^self instanceList send: [ ^self asBaseObject asSelf ]
+    ] .
+    select: [ _globalOptions isntNA ] .
+    do: [
+      !dataSet <- ^self;
+      "Migrating Options for: " print; dataSet displayInfo;
+      globalOptions asLines nonDefaults do: [
+        "  " print; ^self printNL;
+        ^my dataSet addGlobalOption: ^self;
+      ];
+    ];
+
+  # Remove old storage
+  IVR DataSet deleteMessage: '_globalOptions';     # property
+  IVR DataSet deleteMessage: 'globalOptions';      # reader
+  IVR DataSet deleteMessage: 'setGlobalOptionsTo:'; # writer
+];
+
+# display global options in new structure:
+newLine printNL;
+((IVR DataSet subclassList), IVR DataSet)
+  collectListElementsFrom: [
+    ^self instanceList send: [ ^self asBaseObject asSelf ]
+  ] .
+  reject: [ globalOptionsList isDefault ] .
+  do: [
+    ^self displayInfo;
+    ^self globalOptionsList extendIndex do: [
+      "  " print; index print; " -> " print; ^self super printNL;
+    ];
+    newLine print;
+  ];
+
+
+### DataFeed enableOmitEmptyRecords migration, NA to FALSE
+DataFeed subclassList select: [ omitEmptyRecordsFlag isNA ] .
+  do: [ ^self disableOmitEmptyRecords; ];
+
+
+### IVR Alias dataset code property updates, the new default is Alias
+IVR Alias instanceList select: [ code isDefault ] .
+  do: [ ^self :code <- "Alias"; ];
+
+### Extraneous IVR Utility File removal
+IVR Utility File instanceList select: [ ^self isntDefault ] .
+  do: [ ^self rdelete; ];
+
+
+##### 
+# IVR Property additions
+#####
+
+IVR DataSet defineFixedRWStringProperty: 'className';
+
+IVR DataSet defineFixedRWStringProperty: 'sourceClass';
+IVR DataSet define: 'sourceClassDefault' toBe: "";
+IVR DataRecord define: 'sourceClassDefault' toBe: "DataRecord";
+IVR Membership define: 'sourceClassDefault' toBe: "ClassificationIVR";
+
+ClassificationIVR define: 'securityPath' toBe: NA;
+ClassificationIVR define: 'securityListPath' toBe: NA;
+
+
+##### 
+# Value changes 
+#####
+
+# IVR's new default is 200 million element memberlists 
+IndexAccount define: 'memberListMaxSize' toBe: 200000000;
+
+# Don't build the sharesCache when the patch is installed, make upgraded
+# applications enable it explicitly
+IndexAccount respondsTo: 'updatesSharesCache' . ifFalse: [
+  IndexAccount define: 'updatesSharesCache' toBe: FALSE;
+];
+
+

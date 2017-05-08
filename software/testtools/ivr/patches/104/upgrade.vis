@@ -1,0 +1,35 @@
+
+^tmp respondsTo: 'ivrSourcePath' . ifFalse: [ 
+  # calling this script directly, the default path is different!
+  ^tmp define: 'ivrSourcePath' toBe: "";
+];
+#####
+# Install new code
+#####
+
+#####
+# rerun modified rerunable files to update the patching database
+#####
+  "misc/utils.vis",
+  "ivr/DEFIVR.vis"
+    send: [ ^tmp ivrSourcePath concat: "source/" . concat: ^self ] .
+    iterate: [ ^self asFileContents evaluateIn: ^my; ];
+
+#####
+# methods that need to be deleted
+#####
+
+#####
+# Data Migration
+#####
+
+##### 
+# IVR Property additions
+#####
+IVR Item defineEnableDisable: 'holdingProp';
+
+##### 
+# Value changes 
+#####
+
+
