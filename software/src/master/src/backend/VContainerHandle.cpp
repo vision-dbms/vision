@@ -171,7 +171,10 @@ void VContainerHandle::generateLogRecord (char const *pWhere) const {
     if (bFirst) {
 	bFirst = false;
 	char const *pLogName = getenv ("VisionHandleLog");
-	bValid = pLogName && sFile.OpenForTextAppend (pLogName) && sFile.PutLine ("================");
+	bValid = pLogName
+	    && sFile.OpenForTextAppend (pLogName)
+	    && sFile.PutString ("================ ")
+	    && sFile.PutLine (Space ()->UpdateAnnotation ());
     }
     if (bValid) {
 	sFile.printf ("%-12s:", pWhere);
