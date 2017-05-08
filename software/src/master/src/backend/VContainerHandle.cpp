@@ -84,15 +84,35 @@ void VContainerHandle::visitReferencesUsing (visitFunction visitor) {
 void VContainerHandle::startMark() {
     if (!m_bVisited) {
 	m_bVisited = true;
-	visitReferencesUsing (&ThisClass::mark);
+	visitReferencesUsing (&ThisClass::cdMark);
     }
 }
 
-void VContainerHandle::mark() {
+void VContainerHandle::cdMark() {
     m_iHandleRefCount++;
     generateLogRecord ("CDMark");
 
     startMark();
+}
+
+void VContainerHandle::gcMark () {
+    generateLogRecord ("GCMark");
+
+    if (hasNoIdentity ()) { // no identity -> no CTE -> can't be queued -> must visit now
+/*****************
+ *  Because containers with no identity have no container table entry to mark as
+ *  'gcVisited', the following 'visitReferencesUsing' will be executed once for
+ *  each handle that references this handle.  While redundant, it is safe because
+ *  of the idempotency of the queue insertion of 'else if' clause that follows and
+ *  that ultimately terminates the recusion.  Adding a gc marking guard such as a
+ *  gc generation number to handles (which is something we ultimately ought to do)
+ *  will eliminate the wasteful visits, but for now...
+ *****************/
+	visitReferencesUsing (&ThisClass::gcMark);
+    } else if (!m_pDCTE->gcVisited ()) {
+	m_pDCTE->gcVisited (true);
+	m_pASD->GCQueueInsert (containerIndex ());
+    }
 }
 
 void VContainerHandle::unmark() {
@@ -163,7 +183,7 @@ void VContainerHandle::generateReferenceReport (V::VSimpleFile &rOutputFile, uns
 	rOutputFile.printf ("%12u:", xLevel);
     }
 
-    rOutputFile.printf ("%p %2s", this, hasAContainer () ? "C" : "");
+    rOutputFile.printf ("%2s", hasAContainer () ? "C" : "");
 
     if (m_pDCTE) { // Implies 'hasAnIdentity'
 	rOutputFile.printf (
