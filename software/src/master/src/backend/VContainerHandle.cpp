@@ -45,6 +45,24 @@ template class VStoreHandle_<VContainerHandle>;
 
 DEFINE_CONCRETE_RTT (VContainerHandle);
 
+/*********************************
+ *********************************
+ *****  Lifetime Management  *****
+ *********************************
+ *********************************/
+
+bool VContainerHandle::onDeleteThis () {
+    if (m_pDCTE.isntNil () && (m_pDCTE->isntReferenced () || !g_bPreservingHandles && m_pContainer && !m_bPrecious)) {
+	if (M_AND::GarbageCollectionRunning ()) {
+	    generateLogRecord ("DeleteInGC");
+	}
+	m_pDCTE->setToContainerAddress (m_pContainer, m_bReadWrite);
+	m_pDCTE->discard (m_pASD, containerIndexNC ());
+	m_pDCTE.clear ();
+    }
+    return m_pDCTE.isNil ();
+}
+
 /**********************************
  **********************************
  *****  Enumeration Handlers  *****
