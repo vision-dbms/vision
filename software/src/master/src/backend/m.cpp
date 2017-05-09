@@ -4073,7 +4073,7 @@ bool M_ASD::SweepUp (VArgList const &rArgList) {
 		 *  are referenced.
 		 *************************************************************/
 		    VContainerHandle *pHandle = cte.addressAsContainerHandle ();
-		    if (pHandle->isReferenced () && !cte.foundAllReferences()) {
+		    if (cte.gcVisited () || pHandle->isReferenced() && !cte.foundAllReferences()) {
 			bOkToReclaim = false;
 			pHandle->generateLogRecord ("Preserve");
 		    } else {
@@ -4094,27 +4094,25 @@ bool M_ASD::SweepUp (VArgList const &rArgList) {
 	    }
 
 	    if (bOkToReclaim) {
-                #if defined(DEBUG_SESSION_GC)
-                    fprintf(stderr, "  reclaiming [%d: %d] new: %d type: %d "
-                        "refHandle: %d refcount: %d\n", 
-                        Index(), ctIndex, cte.isNew(), cte.addressType(), 
-                        ( cte.addressType() == M_CTEAddressType_CPCC &&
-                          cte.addressAsContainerHandle()->isReferenced()
-                        ), 
-                        cte.referenceCount()
-                    );
-                #endif
+#if defined(DEBUG_SESSION_GC)
+		fprintf(stderr, "  reclaiming [%d: %d] new: %d type: %d "
+			"refHandle: %d refcount: %d\n", 
+			Index(), ctIndex, cte.isNew(), cte.addressType(), 
+			cte.holdsACPCC() && cte.addressAsContainerHandle()->isReferenced(), 
+			cte.referenceCount()
+		);
+#endif
 
 
-	    if (pAddress) {
+		if (pAddress) {
 		    DeallocateContainer (pAddress);
 		    bReclaimedContainers = true;
-		if (cte.isntNew ())
+		    if (cte.isntNew ())
 			bReclaimedPersistentContainers = true;
-	    }
+		}
 		cte.DeallocateCTE ();
+	    }
 	}
-    }
     }
 
     // cleanup CTE flags
