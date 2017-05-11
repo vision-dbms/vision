@@ -63,6 +63,7 @@ PrivateVarDef bool NetworkUpdateIsAdministrative = false;
  *****  Session GC State  *****
  ******************************/
 
+M_AND::GenIndex_t M_AND::g_xGCGeneration = 0;
 bool M_AND::g_bGarbageCollectionRunning = false;
 bool M_AND::g_bNetworkGarbageCollectedInSession = false;
 
@@ -1404,8 +1405,6 @@ VContainerHandle::VContainerHandle (M_ASD *pContainerSpace, RTYPE_Type xContaine
 , m_pRTD		(M_RTDPtr (xContainerType))
 , m_bReadWrite		(true)
 , m_bPrecious		(false)
-, m_iHandleRefCount	(0)
-, m_bVisited		(false)
 {
     pContainerSpace->CreateContainer (xContainerType, sContainer, this); 
     M_RTD_HandleCreateCount (m_pRTD)++;
@@ -1418,8 +1417,6 @@ VContainerHandle::VContainerHandle (M_ASD *pContainerSpace, RTYPE_Type xContaine
 , m_pRTD		(M_RTDPtr (xContainerType))
 , m_bReadWrite		(false)
 , m_bPrecious		(false)
-, m_iHandleRefCount	(0)
-, m_bVisited		(false)
 {
     M_RTD_HandleCreateCount (m_pRTD)++;
 }
@@ -1432,8 +1429,6 @@ VContainerHandle::VContainerHandle (M_CTE &rCTE)
 , m_pRTD		(M_RTDPtr (M_CPreamble_RType (m_pContainer)))
 , m_bReadWrite		(rCTE.addressType () == M_CTEAddressType_RWContainer)
 , m_bPrecious		(false)
-, m_iHandleRefCount	(0)
-, m_bVisited		(false)
 {
     M_RTD_HandleCreateCount (m_pRTD)++;
 }
@@ -3836,8 +3831,6 @@ bool M_ASD::EnqueueOmittingCycles (VArgList const &rArgList) {
 		    }
 		}
 	    }
-	    // ... and reset the cycle detection markers
-	    pHandle->unmark ();
 	}
     } 
 
@@ -4325,8 +4318,8 @@ bool M_AND::DisposeOfNetworkGarbage () {
 
     bool result = false;
     UNWIND_Try {
-	g_bNetworkGarbageCollectedInSession =
-	g_bGarbageCollectionRunning	    = true;
+	OnGCStart ();
+	g_bNetworkGarbageCollectedInSession = true;
 
 	GCInvocationCount++;
 	GCRevisitCount = GCFirstVisitCount = 0;
@@ -4344,7 +4337,7 @@ bool M_AND::DisposeOfNetworkGarbage () {
 
 	M_DCTE::g_bPotentialSessionGarbage = false;
     } UNWIND_Finally {
-	g_bGarbageCollectionRunning	= false;
+	OnGCFinish ();
     } UNWIND_EndTryFinally;
 
     return result;
@@ -4514,7 +4507,7 @@ bool VDatabaseFederatorForBatchvision::DisposeOfSessionGarbage (bool bAggressive
 	    FlushCachedResources ();
 
 	UNWIND_Try {
-	    M_AND::g_bGarbageCollectionRunning = true;
+	    M_AND::OnGCStart ();
 
 	    GCInvocationCount++;
 	    GCRevisitCount = GCFirstVisitCount = 0;
@@ -4536,7 +4529,7 @@ bool VDatabaseFederatorForBatchvision::DisposeOfSessionGarbage (bool bAggressive
 	    }
 
 	} UNWIND_Finally {
-	    M_AND::g_bGarbageCollectionRunning = false;
+	    M_AND::OnGCFinish ();
 	} UNWIND_EndTryFinally;
     }
     return result;

@@ -632,6 +632,12 @@ public:
 
     bool DisposeOfNetworkGarbage ();
 
+    typedef unsigned int GenIndex_t;
+
+    static GenIndex_t CurrentGeneration () {
+	return g_xGCGeneration;
+    }
+
     static bool GarbageCollectionRunning () {
 	return g_bGarbageCollectionRunning;
     }
@@ -640,6 +646,15 @@ public:
     }
 
 private:
+    static void OnGCStart () {
+	g_xGCGeneration++;
+	g_bGarbageCollectionRunning = true;
+    }
+    static void OnGCFinish () {
+	g_bGarbageCollectionRunning = false;
+    }
+
+    static GenIndex_t g_xGCGeneration;
     static bool g_bGarbageCollectionRunning;
     static bool g_bNetworkGarbageCollectedInSession;
 
