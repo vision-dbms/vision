@@ -17,6 +17,8 @@
 
 #include "PS_ASD.h"
 
+#include "Vdd_Object.h"
+
 class M_CTE;
 
 class rtPCT_Handle;
@@ -760,7 +762,7 @@ public:
 
 // GC Traversal Controllers : GCVisitBase
 public:
-    class GCVisitBase {
+   class GCVisitBase : public Vdd::Object::Visitor {
 	friend class M_ASD;
 
     public:
@@ -787,6 +789,8 @@ public:
 	virtual void Mark_(M_ASD* pASD, M_POP const *pPOP);
 
 	virtual void processContainerHandle  (M_CTE &rCTE, VContainerHandle *pHandle);
+
+	virtual /*override*/ void visitHandle (VContainerHandle *pHandle);
     };
 
 // GC Traversal Controllers : GCVisitCycleDetect
@@ -796,6 +800,8 @@ public:
     protected:
 	virtual void processContainerAddress (M_CTE &rCTE, M_CPreamble *pAddress);
 	virtual void processContainerHandle  (M_CTE &rCTE, VContainerHandle *pHandle);
+
+	virtual /*override*/ void visitHandle (VContainerHandle *pHandle);
     };
 
 

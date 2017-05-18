@@ -18,6 +18,10 @@
 #include "M_KnownObjectTable.h"
 
 class rtPTOKEN_Handle;
+
+namespace V {
+    class VSimpleFile;
+}
 
 
 /*************************
@@ -37,6 +41,13 @@ namespace Vdd {
     public:
 	typedef VBenderenceable Referenceable;
 	typedef VReference<ThisClass> Reference;
+
+    //  Visitor
+    public:
+	class Visitor {
+	public:
+	    virtual void visitHandle (VContainerHandle *pHandle) = 0;
+	};
 
     //  Construction
     protected:
@@ -157,6 +168,15 @@ namespace Vdd {
 	bool alignAll (bool bCleaning = true) {
 	    return alignAll_(bCleaning);
 	}
+
+    //  Reference Reporting and Visitor Support
+    public:
+	virtual void generateReferenceReport (V::VSimpleFile &rOutputFile, unsigned int xLevel) const = 0;
+	virtual void visitReferencesUsing (Visitor *visitor) = 0;
+
+    //  Visitor Support
+    public:
+	virtual void visitUsing (Visitor *visitor) = 0;
     };
 }
 

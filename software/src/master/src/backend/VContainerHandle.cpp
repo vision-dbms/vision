@@ -96,17 +96,17 @@ bool VContainerHandle::DoNothing (VArgList const&) {
  ***********************************
  ***********************************/
 
-void VContainerHandle::visitReferencesUsing (visitFunction visitor) {
+void VContainerHandle::visitReferencesUsing (Visitor *visitor) {
 }
 
-void VContainerHandle::cdMark() {
+void VContainerHandle::cdMarkFor(M_ASD::GCVisitCycleDetect *visitor) {
     m_iGCState.incrementInterhandleReferenceCount ();
     generateLogRecord ("CDMark");
 
     if (m_iGCState.onFirstCDVisit ()) {
 	if (hasNoIdentity ()) {
 	    // no identity -> no CTE -> can't be queued -> must visit now
-	    visitReferencesUsing (&ThisClass::cdMark);
+	    visitReferencesUsing (visitor);
 	} else if (!m_pDCTE->cdVisited ()) {
 	    m_pDCTE->cdVisited (true);
 	    m_pASD->GCQueueInsert (containerIndex ());
@@ -114,13 +114,13 @@ void VContainerHandle::cdMark() {
     }
 }
 
-void VContainerHandle::gcMark () {
+void VContainerHandle::gcMarkFor (M_ASD::GCVisitMark *visitor) {
     generateLogRecord ("GCMark");
 
     if (m_iGCState.onFirstGCVisit ()) {
 	if (hasNoIdentity ()) {
 	    // no identity -> no CTE -> can't be queued -> must visit now
-	    visitReferencesUsing (&ThisClass::gcMark);
+	    visitReferencesUsing (visitor);
 	} else if (!m_pDCTE->gcVisited ()) {
 	    m_pDCTE->gcVisited (true);
 	    m_pASD->GCQueueInsert (containerIndex ());

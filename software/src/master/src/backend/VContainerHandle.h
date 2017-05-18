@@ -80,6 +80,8 @@ public:
     typedef V::VAggregatePointer<M_POP const>	M_POP_Pointer;
     typedef V::VArgList VArgList;
 
+    typedef Vdd::Object::Visitor Visitor;
+
 //  class GCState
 public:
     template <typename GenMaster> class GCState {
@@ -862,16 +864,16 @@ public:
 public:
     typedef void (ThisClass::*visitFunction)();
 
-    void visitUsing (visitFunction visitor) {
-	(this->*visitor)();
+    void visitUsing (Visitor *visitor) {
+	visitor->visitHandle (this);
     }
 
-    virtual void visitReferencesUsing (visitFunction visitor);
+    virtual void visitReferencesUsing (Visitor *visitor);
 
 // Garbage collection marking
 public:
-    void cdMark();
-    void gcMark();
+    void cdMarkFor(M_ASD::GCVisitCycleDetect *visitor);
+    void gcMarkFor(M_ASD::GCVisitMark *visitor);
 
     unsigned int cdReferenceCount() const {
 	return m_iGCState.interhandleReferenceCount ();
@@ -1029,6 +1031,8 @@ public:
     typedef VStoreHandleBase_<Base> HandleBase;
     typedef Vdd::Store StoreBase;
 
+    typedef typename StoreBase::Visitor Visitor;
+
 //  Construction
 protected:
     VStoreHandle_(
@@ -1097,17 +1101,21 @@ public:
     StoreBase *getStore () {
 	return static_cast<StoreBase*>(this);
     }
+
+//  Reference Reporting and Visitor Support
 public:
-    virtual /*override*/ void visitUsing (VContainerHandle::visitFunction visitor) {
-	BaseClass::visitUsing (visitor);
-    }
-    virtual /*override*/ void visitReferencesUsing (VContainerHandle::visitFunction visitor) {
-	BaseClass::visitReferencesUsing (visitor);
-    }
     virtual /*override*/ void generateReferenceReport (V::VSimpleFile &rOutputFile, unsigned int xLevel) const {
 	BaseClass::generateReferenceReport (rOutputFile, xLevel);
     }
+    virtual /*override*/ void visitReferencesUsing (Visitor *visitor) {
+	BaseClass::visitReferencesUsing (visitor);
+    }
 
+//  Visitor Support
+public:
+    virtual /*override*/ void visitUsing (Visitor *visitor) {
+	BaseClass::visitUsing (visitor);
+    }
 };
 
 /************************************************

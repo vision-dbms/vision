@@ -4236,18 +4236,9 @@ void M_ASD::GCVisitMark::Mark_(M_ASD* pASD, M_POP const *pPOP) {
 }
 
 
-/*---------------------------------------------------------------------------
- *---------------------------------------------------------------------------
- */
-void M_ASD::GCVisitBase::processContainerHandle (M_CTE &rCTE, VContainerHandle *pHandle) {
-    processContainerAddress (rCTE, pHandle->containerAddress ());
-}
-
-void M_ASD::GCVisitMark::processContainerHandle (M_CTE &rCTE, VContainerHandle *pHandle) {
-    BaseClass::processContainerHandle (rCTE, pHandle);
-    pHandle->visitReferencesUsing (&VContainerHandle::gcMark);
-}
-
+/*--------------------------------*
+ *  M_ASD::GCVisitBase
+ *--------------------------------*/
 void M_ASD::GCVisitBase::processContainerAddress (M_CTE &rCTE, M_CPreamble *pAddress) {
 /****
  *  Call the rtype handler to insert the containers it references into the
@@ -4281,11 +4272,33 @@ void M_ASD::GCVisitBase::processContainerAddress (M_CTE &rCTE, M_CPreamble *pAdd
     }
 }
 
+void M_ASD::GCVisitBase::processContainerHandle (M_CTE &rCTE, VContainerHandle *pHandle) {
+    processContainerAddress (rCTE, pHandle->containerAddress ());
+}
+
+/*--------------------------------*
+ *  M_ASD::GCVisitMark
+ *--------------------------------*/
+void M_ASD::GCVisitMark::processContainerHandle (M_CTE &rCTE, VContainerHandle *pHandle) {
+    BaseClass::processContainerHandle (rCTE, pHandle);
+    pHandle->visitReferencesUsing (this);
+}
+void M_ASD::GCVisitMark::visitHandle (VContainerHandle *pHandle) {
+    pHandle->gcMarkFor (this);
+}
+
+/*--------------------------------*
+ *  M_ASD::GCVisitCycleDetect
+ *--------------------------------*/
 void M_ASD::GCVisitCycleDetect::processContainerAddress (M_CTE &rCTE, M_CPreamble *pAddress) {
 }
 
 void M_ASD::GCVisitCycleDetect::processContainerHandle (M_CTE &rCTE, VContainerHandle *pHandle) {
-    pHandle->visitReferencesUsing (&VContainerHandle::cdMark);
+    pHandle->visitReferencesUsing (this);
+}
+
+void M_ASD::GCVisitCycleDetect::visitHandle (VContainerHandle *pHandle) {
+    pHandle->cdMarkFor (this);
 }
 
 /*---------------------------------------------------------------------------
