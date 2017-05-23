@@ -141,7 +141,7 @@ public:
 	return m_pStore && m_pStore->transientExtensionIsA (rRTT);
     }
 
-    void visitReferencesUsing (VContainerHandle::Visitor *visitor) { 
+    void visitReferencesUsing (VContainerHandle::Visitor *visitor) {
 	if (m_pStore)
 	    m_pStore->visitUsing (visitor);
     }
