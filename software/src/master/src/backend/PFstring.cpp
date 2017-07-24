@@ -148,52 +148,64 @@ typedef char VkRegExp;
 PrivateFnDef bool ParameterReferencesAStringStore (VPrimitiveTask* pTask) {
     DSC_Descriptor &rParameter = ADescriptor;
 
-    RTYPE_Type xStoreRType = rParameter.storeRType ();
+    Vdd::Store *pStore = rParameter.store ();
+    RTYPE_Type xPointerRType = rParameter.pointerRType ();
 
-    RTYPE_Type rtype = rParameter.pointerRType ();
-
-    M_CPD* stringStore = rParameter.storeCPD ();
-
-    return (xStoreRType == RTYPE_C_Block && rtype == RTYPE_C_IntUV) || (
-	    xStoreRType == RTYPE_C_ListStore &&
-	    (rtype == RTYPE_C_Link || rtype == RTYPE_C_RefUV) &&
-	    rtLSTORE_CPD_StringStore (stringStore)
-	);
+    bool bTrue = false;
+    switch (pStore->rtype ()) {
+    case RTYPE_C_Block:
+	bTrue = xPointerRType == RTYPE_C_IntUV;
+	break;
+    case RTYPE_C_ListStore:
+	bTrue = (
+	    xPointerRType == RTYPE_C_Link || xPointerRType == RTYPE_C_RefUV
+	) && static_cast<rtLSTORE_Handle*>(pStore)->isAStringStore ();
+	break;
+    }
+    return bTrue;
 }
 
 
 PrivateFnDef bool ParameterReferencesAStringStoreExtension (VPrimitiveTask* pTask) {
     DSC_Descriptor &rParameter = ADescriptor;
 
-    VCPDReference pCandidateStore (rParameter.storeCPD ());
-    RTYPE_Type xCandidateStoreRType = (RTYPE_Type)M_CPD_RType (pCandidateStore);
+    Vdd::Store::Reference pCandidateStore (rParameter.store ());
+    RTYPE_Type xCandidateStoreRType = pCandidateStore->rtype ();
 
     RTYPE_Type rtype = rParameter.pointerRType ();
 
     while (RTYPE_C_ValueStore == xCandidateStoreRType) {
-	M_CPD* pSuperStore = rtVSTORE_CPD_InheritanceStoreCPD (pCandidateStore);
-
-	xCandidateStoreRType = (RTYPE_Type)M_CPD_RType (pSuperStore);
+	rtVSTORE_Handle::Reference pCandidateVStore (
+	    static_cast<rtVSTORE_Handle*>(pCandidateStore.referent ())
+	);
+	Vdd::Store::Reference pSuperStore;
+	if (pCandidateVStore->getInheritanceStore (pSuperStore)) {
+	    xCandidateStoreRType = pSuperStore->rtype ();
 	switch (xCandidateStoreRType) {
 	case RTYPE_C_Undefined:
 	case RTYPE_C_ValueStore:
 	    break;
 
 	default: {
-		M_CPD* inheritancePtr = rtVSTORE_CPD_InheritancePointerCPD (pCandidateStore);
-		rtype = (RTYPE_Type)M_CPD_RType (inheritancePtr);
-		inheritancePtr->release();
+		    VContainerHandle::Reference pSuperPointer;
+		    pCandidateVStore->getInheritancePointer (pSuperPointer);
+		    rtype = pSuperPointer->RType ();
 	    }
 	    break;
 	}
-
 	pCandidateStore.claim (pSuperStore);
+	} else {
+	    xCandidateStoreRType = RTYPE_C_Undefined;
+	    pCandidateStore.clear ();
+	}
     }
 
-    return (xCandidateStoreRType == RTYPE_C_Block && rtype == RTYPE_C_IntUV) || (
-	    xCandidateStoreRType == RTYPE_C_ListStore &&
-	    (rtype == RTYPE_C_Link || rtype == RTYPE_C_RefUV) &&
-	    rtLSTORE_CPD_StringStore (pCandidateStore)
+    return (
+	xCandidateStoreRType == RTYPE_C_Block && rtype == RTYPE_C_IntUV
+    ) || (
+	xCandidateStoreRType == RTYPE_C_ListStore && (
+	    rtype == RTYPE_C_Link || rtype == RTYPE_C_RefUV
+	) && static_cast<rtLSTORE_Handle*>(pCandidateStore.referent ())->isAStringStore ()
 	);
 }
 
@@ -218,16 +230,14 @@ public:
     }
 
     char const *string (unsigned int xString) const {
-	return m_pStoreStrings
-	    ? V_LStoreString (m_pStringStore, m_pStoreStrings, xString)
-	    : V_BlockString  (m_pStringStore, xString);
+	return m_pLStoreStrings.isSet () ? m_pLStoreStrings[xString] : m_pBlockStrings[xString];
     }
 
 //  State
 protected:
     DSC_Descriptor&	m_rMonotype;
-    M_CPD*		m_pStringStore;
-    M_CPD*		m_pStoreStrings;
+    rtLSTORE_Handle::Strings	m_pLStoreStrings;
+    rtBLOCK_Handle::Strings	m_pBlockStrings;
 };
 
 
@@ -235,13 +245,9 @@ protected:
  *  Construction  *
  ******************/
 
-StringStoreDescriptor::StringStoreDescriptor (DSC_Descriptor &rMonotype)
-: m_rMonotype (rMonotype), m_pStringStore (rMonotype.storeCPD ()), m_pStoreStrings (
-    RTYPE_C_ListStore == (RTYPE_Type)M_CPD_RType (m_pStringStore)
-	? rtLSTORE_CPD_ContentStringsCPD (m_pStringStore)
-	: NilOf (M_CPD*)
-)
-{
+StringStoreDescriptor::StringStoreDescriptor (DSC_Descriptor &rMonotype) : m_rMonotype (rMonotype) {
+    if (!m_pLStoreStrings.setTo (rMonotype.store ()))
+	m_pBlockStrings.setTo (rMonotype.store ());
 }
 
 
@@ -250,8 +256,6 @@ StringStoreDescriptor::StringStoreDescriptor (DSC_Descriptor &rMonotype)
  *****************/
 
 StringStoreDescriptor::~StringStoreDescriptor () {
-    if (m_pStoreStrings)
-	m_pStoreStrings->release ();
 }
 
 
@@ -603,10 +607,16 @@ public:
 	return m_pTask->isScalar ();
     }
 
-    unsigned int flags		() const { return m_pTask->flags (); }
-    unsigned int primitive	() const { return m_pTask->primitive (); }
+    unsigned int flags () const { 
+	return m_pTask->flags ();
+    }
+    unsigned int primitive () const {
+	return m_pTask->primitive ();
+    }
 
-    M_CPD*	 ptoken		() const { return m_pTask->ptoken (); }
+    rtPTOKEN_Handle *ptoken () const {
+	return m_pTask->ptoken ();
+    }
 
     DSC_Descriptor &recipientMonotype () const {
 	return m_iRecipientStrings.monotype ();
@@ -665,38 +675,29 @@ StringPrimitive::~StringPrimitive () {
 
 V_DefinePrimitive (StringSize) {
 /***** Traversal Macros ... *****/
-#define handleBlockStrings(value)\
-    *rptr++ = strlen (V_BlockString (stringStore, value))
-
-#define handleLStoreStrings(value)\
-    *rptr++ = strlen (V_LStoreString (stringStore, charCPD, value))
+#define handleString(value)\
+    *rptr++ = strlen (pStrings[value])
 
 
 /*****  Obtain the strings ...  *****/
     pTask->loadDucWithCurrent ();
 
-    M_CPD* stringStore = pTask->ducStore ();
+    rtBLOCK_Handle::Strings pBlockStrings;
+    rtLSTORE_Handle::Strings pLStoreStrings;
 
 /*****  Determine the sizes ...  *****/
     if (DucIsAScalar) {
-	int size;
+	int size = 0;
 
-	RTYPE_Type rtype = ADescriptor.pointerRType ();
-	if (rtype == RTYPE_C_IntUV) size = strlen (
-	    V_BlockString (
-		stringStore, DSC_Descriptor_Scalar_Int (ADescriptor)
-	    )
-	);
-	else if(rtype == RTYPE_C_Link && rtLSTORE_CPD_StringStore(stringStore)) {
-	    M_CPD* charCPD = rtLSTORE_CPD_ContentStringsCPD (stringStore);
-
-	    size = strlen (
-		V_LStoreString (
-		    stringStore, charCPD, DSC_Descriptor_Scalar_Int (ADescriptor)
-		)
-	    );
-
-	    charCPD->release ();
+	switch (ADescriptor.pointerRType ()) {
+	case RTYPE_C_IntUV:
+	    if (pBlockStrings.setTo (ADescriptor.store ()))
+		size = strlen (pBlockStrings[DSC_Descriptor_Scalar_Int (ADescriptor)]);
+	    break;
+	case RTYPE_C_Link:
+	    if (pLStoreStrings.setTo (ADescriptor.store ()))
+		size = strlen (pLStoreStrings[DSC_Descriptor_Scalar_Int (ADescriptor)]);
+	    break;
 	}
 
 	pTask->loadDucWithInteger (size);
@@ -707,24 +708,21 @@ V_DefinePrimitive (StringSize) {
         int *rptr = rtINTUV_CPD_Array (resultuv);
 
 /*****  Determine the kind of string ... *****/
-	RTYPE_Type rtype = ADescriptor.pointerRType ();
+	switch (ADescriptor.pointerRType ()) {
+	case RTYPE_C_IntUV:
+	    if (pBlockStrings.setTo (ADescriptor.store ())) {
+#define pStrings pBlockStrings
+	    DSC_Traverse (ADescriptor, handleString);
+#undef pStrings
+	    }
+	    break;
 
-/*****  Block type string  *****/
-	if (rtype == RTYPE_C_IntUV) {
-	    /*****  Calculate the sizes ...   *****/
-	    DSC_Traverse (ADescriptor, handleBlockStrings);
+	case RTYPE_C_Link:
+	    if (pLStoreStrings.setTo (ADescriptor.store ())) {
+#define pStrings pLStoreStrings
+		DSC_Traverse (ADescriptor, handleString);
 	}
-
-/*****  LStore type string  *****/
-	else
-	if (rtype == RTYPE_C_Link && rtLSTORE_CPD_StringStore (stringStore))
-	{
-	    M_CPD *charCPD = rtLSTORE_CPD_ContentStringsCPD (stringStore);
-
-	    /*** Calculate the sizes ... ***/
-	    DSC_Traverse (ADescriptor, handleLStoreStrings);
-
-	    charCPD->release ();
+#undef pStrings
 	}
 
 
@@ -734,8 +732,7 @@ V_DefinePrimitive (StringSize) {
     }
 
 /***** Undef the traversal macros ... *****/
-#undef handleBlockStrings
-#undef handleLStoreStrings
+#undef handleString
 }
 
 
@@ -743,18 +740,13 @@ V_DefinePrimitive (StringSize) {
  *****  Numeric Encoding Primitive (Obsolete)  *****
  ***************************************************/
 
-#define EncodeString(string, encodedString)\
-{\
-    char *p, c;\
-    int i;\
-\
+#define EncodeString(string, encodedString) {\
+    char const *p; char c; unsigned int i;\
     for (i=0, encodedString = 0.0, p = (string);\
-\
 	 i<12;\
-\
 	 i++,\
-	 encodedString = encodedString * 38 +\
-	    ((!*p) ? (0) :\
+	 encodedString = encodedString * 38 + (\
+	    (!*p) ? 0 :\
 	    islower(c= *p++) ? c-'a'+1 : isupper (c) ? c-'A'+1 : isdigit(c) ?\
 	    c-'0'+27 : isspace(c) ? 0 : 37));\
 }
@@ -762,51 +754,34 @@ V_DefinePrimitive (StringSize) {
 
 V_DefinePrimitive (EncodeStringAsDouble) {
 /*****  Traversal macros ... *****/
-#define handleBlockStrings(value) {\
-    EncodeString (V_BlockString (stringStore, value), encodedString);\
+#define handleString(value) {\
+    EncodeString (pStrings[value], encodedString);\
     *rptr++ = encodedString;\
 }
-
-#define handleLStoreStrings(value) {\
-    EncodeString (V_LStoreString(stringStore, charCPD, value), encodedString);\
-    *rptr++ = encodedString;\
-}
-
 
 /*****  Obtain the strings ...  *****/
     pTask->loadDucWithCurrent ();
 
-    M_CPD *stringStore = pTask->ducStore ();
-
     if (DucIsAScalar) {
-	double encodedString;
+	double encodedString = 0.0;
 
-	RTYPE_Type rtype = ADescriptor.pointerRType ();
-	if (rtype == RTYPE_C_IntUV) {
-	    EncodeString (
-		V_BlockString (
-		    stringStore, DSC_Descriptor_Scalar_Int (ADescriptor)
-		),
-		encodedString
-	    );
+	switch (ADescriptor.pointerRType ()) {
+	case RTYPE_C_IntUV: {
+		rtBLOCK_Handle::Strings pStrings;
+		if (pStrings.setTo (ADescriptor.store ()))
+		    EncodeString (pStrings[DSC_Descriptor_Scalar_Int (ADescriptor)], encodedString);
+	    }
+	    break;
+	case RTYPE_C_Link: {
+		rtLSTORE_Handle::Strings pStrings;
+		if (pStrings.setTo (ADescriptor.store ()))
+		    EncodeString (pStrings[DSC_Descriptor_Scalar_Int (ADescriptor)], encodedString);
 	}
-	else if(rtype == RTYPE_C_Link && rtLSTORE_CPD_StringStore(stringStore)) {
-	    M_CPD* charCPD = rtLSTORE_CPD_ContentStringsCPD (stringStore);
-
-	    EncodeString (
-		V_LStoreString (
-		    stringStore, charCPD, DSC_Descriptor_Scalar_Int (ADescriptor)
-		), encodedString
-	    );
-
-	    charCPD->release ();
 	}
-
 	pTask->loadDucWithDouble (encodedString);
     }
     else {
 	double encodedString;
-
 
 /******  Make the result Double UVector  ... *****/
 	M_CPD *resultuv = pTask->NewDoubleUV ();
@@ -814,20 +789,21 @@ V_DefinePrimitive (EncodeStringAsDouble) {
 	double *rptr = rtDOUBLEUV_CPD_Array (resultuv);
 
 /*****  Determine the type of string ... *****/
-	RTYPE_Type rtype = ADescriptor.pointerRType ();
-
-/*****  Block type string  *****/
-	if (rtype == RTYPE_C_IntUV) {
-	    DSC_Traverse (ADescriptor, handleBlockStrings);
+	switch (ADescriptor.pointerRType ()) {
+	case RTYPE_C_IntUV: {
+		rtBLOCK_Handle::Strings pStrings;
+		if (pStrings.setTo (ADescriptor.store ())) {
+		    DSC_Traverse (ADescriptor, handleString);
+		}
+	    }
+	    break;
+	case RTYPE_C_Link: {
+		rtLSTORE_Handle::Strings pStrings;
+		if (pStrings.setTo (ADescriptor.store ())) {
+		    DSC_Traverse (ADescriptor, handleString);
+		}
 	}
-
-/*****  LStore type string  *****/
-	else if(rtype == RTYPE_C_Link && rtLSTORE_CPD_StringStore(stringStore)) {
-	    M_CPD *charCPD = rtLSTORE_CPD_ContentStringsCPD (stringStore);
-
-	    DSC_Traverse (ADescriptor, handleLStoreStrings);
-
-	    charCPD->release ();
+	    break;
 	}
 
 /*****  Put the result into the accumulator ... *****/
@@ -836,8 +812,7 @@ V_DefinePrimitive (EncodeStringAsDouble) {
     }
 
 /*****  Undef the traversal macros ... *****/
-#undef handleLStoreStrings
-#undef handleBlockStrings
+#undef handleString
 }
 
 
@@ -917,9 +892,7 @@ PrivateVarDef int StringPrimsLastNa;
 	    StringPrimsLastNa + 1,\
 	    StringPrimsCount - StringPrimsLastNa - 1\
 	);\
-	M_CPD *posPToken = pTask->NewDomPToken (StringPrimsGoodLinkc->ElementCount ());\
-        StringPrimsGoodLinkc->Close (posPToken);\
-	posPToken->release ();\
+        StringPrimsGoodLinkc->Close (pTask->NewDomPToken (StringPrimsGoodLinkc->ElementCount ()));\
     }\
 }
 
@@ -937,16 +910,8 @@ PrivateVarDef int StringPrimsLastNa;
 
 V_DefinePrimitive (ToDouble) {
 /*****  Traversal macros ... *****/
-#define handleBlockStrings(value) {\
-    ConvertStringToDouble (V_BlockString (stringStore, value), result);\
-    *rptr++ = result;\
-    StringPrimsCount++;\
-}
-
-#define handleLStoreStrings(value) {\
-    ConvertStringToDouble (\
-	V_LStoreString (stringStore, charCPD, value), result\
-    );\
+#define handleString(value) {\
+    ConvertStringToDouble (pStrings[value], result);\
     *rptr++ = result;\
     StringPrimsCount++;\
 }
@@ -955,34 +920,28 @@ V_DefinePrimitive (ToDouble) {
 /***** Setup ... *****/
     StringPrimsInitialize ();
     pTask->loadDucWithCurrent ();
-    M_CPD *stringStore = pTask->ducStore ();
 
 /***** Single Case ... *****/
     if (StringPrimsScalarCase = (DucIsAScalar)) {
 	double result;
 
-	RTYPE_Type rtype = ADescriptor.pointerRType ();
-	if (rtype == RTYPE_C_IntUV) {
+	switch (ADescriptor.pointerRType ()) {
+	case RTYPE_C_IntUV: {
+		rtBLOCK_Handle::Strings pStrings;
+		if (pStrings.setTo (ADescriptor.store ())) {
 	    DEBUG_TraceTestdeck ("stringPrims (1B)");
-	    ConvertStringToDouble (
-		V_BlockString (
-		    stringStore, DSC_Descriptor_Scalar_Int (ADescriptor)
-		),
-		result
-	    );
+		    ConvertStringToDouble (pStrings[DSC_Descriptor_Scalar_Int (ADescriptor)], result);
+		}
 	}
-	else if(rtype == RTYPE_C_Link && rtLSTORE_CPD_StringStore(stringStore)) {
+	    break;
+	case RTYPE_C_Link: {
+		rtLSTORE_Handle::Strings pStrings;
+		if (pStrings.setTo (ADescriptor.store ())) {
 	    DEBUG_TraceTestdeck ("stringPrims (1C)");
-
-	    M_CPD *charCPD = rtLSTORE_CPD_ContentStringsCPD (stringStore);
-
-	    ConvertStringToDouble (
-		V_LStoreString (
-		    stringStore, charCPD, DSC_Descriptor_Scalar_Int (ADescriptor)
-		), result
-	    );
-
-	    charCPD->release ();
+		    ConvertStringToDouble (pStrings[DSC_Descriptor_Scalar_Int (ADescriptor)], result);
+		}
+	    }
+	    break;
 	}
 
 	if (StringPrimsFoundNa)
@@ -998,24 +957,23 @@ V_DefinePrimitive (ToDouble) {
 	double result;
 
 /*****  Determine the type of string ... *****/
-	RTYPE_Type rtype = ADescriptor.pointerRType ();
-
-/*****  Block type string  *****/
-	if (rtype == RTYPE_C_IntUV)
-	{
+	switch (ADescriptor.pointerRType ()) {
+	case RTYPE_C_IntUV: {
+		rtBLOCK_Handle::Strings pStrings;
+		if (pStrings.setTo (ADescriptor.store ())) {
 	    DEBUG_TraceTestdeck ("stringPrims (1D)");
-	    DSC_Traverse (ADescriptor, handleBlockStrings);
+		    DSC_Traverse (ADescriptor, handleString);
+		}
 	}
-
-/*****  LStore type string  *****/
-	else if(rtype == RTYPE_C_Link && rtLSTORE_CPD_StringStore(stringStore))
-	{
+	    break;
+	case RTYPE_C_Link: {
+		rtLSTORE_Handle::Strings pStrings;
+		if (pStrings.setTo (ADescriptor.store ())) {
 	    DEBUG_TraceTestdeck ("stringPrims (1E)");
-	    M_CPD* charCPD = rtLSTORE_CPD_ContentStringsCPD (stringStore);
-
-	    DSC_Traverse (ADescriptor, handleLStoreStrings);
-
-	    charCPD->release ();
+		    DSC_Traverse (ADescriptor, handleString);
+		}
+	    }
+	    break;
 	}
 
 /*****  Close the linkc if necessary ... *****/
@@ -1031,8 +989,7 @@ V_DefinePrimitive (ToDouble) {
     } /* end of non-scalar case */
 
 /*****  Undef the traversal macros ... *****/
-#undef handleLStoreStrings
-#undef handleBlockStrings
+#undef handleString
 }
 
 
@@ -1617,45 +1574,36 @@ void StringPrimitiveBreak::execute () {
     m_pResultEndpoint = rtCHARUV_CPD_Array (pCharUV);
     m_xResultList = 0;
 
-    M_CPD *pResultListPPT = m_pTask->NewCodPToken ();
-    m_pResultListPartition = rtLINK_RefConstructor (pResultListPPT, -1);
+    m_pResultListPartition = rtLINK_RefConstructor (m_pTask->NewCodPToken ());
 
     breakStrings ();
 
 /*****  ... create the string store ...  *****/
-    M_CPD *pStringStore = rtLSTORE_NewStringStoreFromUV (pCharUV);
+    rtLSTORE_Handle *pStringStore = rtLSTORE_NewStringStoreFromUV (pCharUV);
     pCharUV->release ();
 
 /*****  ... create the result list store ...  *****/
-    M_CPD *pStringStorePPT = rtLSTORE_CPD_RowPTokenCPD (pStringStore);
+    rtPTOKEN_Handle::Reference pStringStorePPT (pStringStore->getPToken ());
 
-    M_CPD *pContentPPT = m_pTask->NewCodPToken (
-	rtPTOKEN_CPD_BaseElementCount (pStringStorePPT)
-    );
-    M_CPD *pContent = rtVECTOR_New (pContentPPT);
+    rtPTOKEN_Handle::Reference pContentPPT (m_pTask->NewCodPToken (pStringStorePPT->cardinality ()));
+    rtVECTOR_Handle::Reference pContent (new rtVECTOR_Handle (pContentPPT));
     rtLINK_CType *pContentLC = rtLINK_AppendRange (
-	rtLINK_RefConstructor (pContentPPT, -1),
-	0,
-	rtPTOKEN_CPD_BaseElementCount (pStringStorePPT)
+	rtLINK_RefConstructor (pContentPPT), 0, pStringStorePPT->cardinality ()
     )->Close (pStringStorePPT);
 
     DSC_Descriptor iStringStoreDSC;
     iStringStoreDSC.constructIdentity (pStringStore, pStringStorePPT);
-    rtVECTOR_Assign (pContent, pContentLC, &iStringStoreDSC);
+    pContent->setElements (pContentLC, iStringStoreDSC);
     pContentLC->release ();
     iStringStoreDSC.clear ();
 
     m_pResultListPartition->Close (pContentPPT);
-    pContentPPT->release ();
 
     m_pTask->loadDucWithListOrStringStore (
-	rtLSTORE_NewCluster (m_pResultListPartition, pContent)
+	new rtLSTORE_Handle (m_pResultListPartition, pContent)
     );
-    pContent->release ();
 
     m_pResultListPartition->release ();
-    pResultListPPT->release ();
-
 }
 
 
@@ -2166,46 +2114,35 @@ PrivateFnDef void Uncapitalize (char *dst, char const *src) {
  *	reversed strings.
  *
  *****/
-PrivateFnDef M_CPD *CopyAndProcessStrings (
+PrivateFnDef rtLSTORE_Handle *CopyAndProcessStrings (
     VPrimitiveTask *pTask, void (*pStringProcessor)(char* dst, char const *src)
-)
-{
-    M_CPD *uvector, *lstore;
+) {
+    M_CPD *uvector = 0;
     rtCHARUV_ElementType *uvp;
     size_t size = 0;
 
-#define CalcLStoreTotalSize(value)\
-    size += strlen (V_LStoreString (stringStore, charCPD, value)) + 1
+#define CalcTotalSize(value)\
+    size += strlen (pStrings[value]) + 1
 
-#define CalcBlockTotalSize(value)\
-    size += strlen (V_BlockString (stringStore, value)) + 1
-
-#define LStoreFill(value) {\
-    pStringProcessor (uvp, V_LStoreString (stringStore, charCPD, value));\
-    uvp += strlen (V_LStoreString (stringStore, charCPD, value)) + 1;\
-}
-
-#define BlockFill(value) {\
-    pStringProcessor (uvp, V_BlockString (stringStore, value));\
-    uvp += strlen (V_BlockString (stringStore, value)) + 1;\
+#define Fill(value) {\
+    pStringProcessor (uvp, pStrings[value]);\
+    uvp += strlen (pStrings[value]) + 1;\
 }
 
     DSC_Descriptor &rCurrent = pTask->getCurrent ();
-    M_CPD *stringStore = rCurrent.storeCPD ();
-
-    RTYPE_Type rtype = rCurrent.pointerRType ();
-    int sourceIsBlockString = (rtype == RTYPE_C_IntUV);
 
 /*****  LStore Strings  *****/
-    if (!sourceIsBlockString) {
-	M_CPD *charCPD = rtLSTORE_CPD_ContentStringsCPD (stringStore);
+    rtLSTORE_Handle::Strings pLStoreStrings;
+    rtBLOCK_Handle::Strings pBlockStrings;
+    if (pLStoreStrings.setTo (rCurrent.store ())) {
+#define pStrings pLStoreStrings
 
 	/*****  Calculate the total number of characters ... *****/
 	if (rCurrent.isScalar ()) {
-	    CalcLStoreTotalSize (DSC_Descriptor_Scalar_Int (rCurrent));
+	    CalcTotalSize (DSC_Descriptor_Scalar_Int (rCurrent));
 	}
 	else {
-	    DSC_Traverse (rCurrent, CalcLStoreTotalSize);
+	    DSC_Traverse (rCurrent, CalcTotalSize);
 	}
 
 	/*****  Create the new character uvector ... *****/
@@ -2214,24 +2151,25 @@ PrivateFnDef M_CPD *CopyAndProcessStrings (
 	/*****  Fill the character uvector ... *****/
 	uvp = rtCHARUV_CPD_Array (uvector);
 	if (rCurrent.isScalar ()) {
-	    LStoreFill (DSC_Descriptor_Scalar_Int (rCurrent));
+	    Fill (DSC_Descriptor_Scalar_Int (rCurrent));
 	}
 	else {
-	    DSC_Traverse (rCurrent, LStoreFill);
+	    DSC_Traverse (rCurrent, Fill);
 	}
 
-	/*****  cleanup ... *****/
-	charCPD->release ();
+#undef pStrings
     }
 
 /*****  Block Strings  *****/
-    else {
+    else if (pBlockStrings.setTo (rCurrent.store ())) {
+#define pStrings pBlockStrings
+
 	/*****  Calculate the total number of characters ... *****/
 	if (rCurrent.isScalar ()) {
-	    CalcBlockTotalSize (DSC_Descriptor_Scalar_Int (rCurrent));
+	    CalcTotalSize (DSC_Descriptor_Scalar_Int (rCurrent));
 	}
 	else {
-	    DSC_Traverse (rCurrent, CalcBlockTotalSize);
+	    DSC_Traverse (rCurrent, CalcTotalSize);
 	}
 
 
@@ -2241,39 +2179,36 @@ PrivateFnDef M_CPD *CopyAndProcessStrings (
 	/*****  Fill the character uvector ... *****/
 	uvp = rtCHARUV_CPD_Array (uvector);
 	if (rCurrent.isScalar ()) {
-	    BlockFill (DSC_Descriptor_Scalar_Int (rCurrent));
+	    Fill (DSC_Descriptor_Scalar_Int (rCurrent));
 	}
 	else {
-	    DSC_Traverse (rCurrent, BlockFill);
+	    DSC_Traverse (rCurrent, Fill);
 	}
+
+#undef pStrings
     }
 
     /*****  Make the lstore ... *****/
-    lstore = rtLSTORE_NewStringStoreFromUV (uvector);
+    rtLSTORE_Handle *lstore = rtLSTORE_NewStringStoreFromUV (uvector);
     uvector->release ();
 
     return lstore;
 
-#undef CalcLStoreTotalSize
-#undef CalcBlockTotalSize
-#undef LStoreFill
-#undef BlockFill
+#undef CalcTotalSize
+#undef Fill
 }
 
 
-V_DefinePrimitive (StringReverse)
-{
+V_DefinePrimitive (StringReverse) {
     void (*pStringProcessor)(char*, char const*) = 0;
 
-    switch (V_TOTSC_Primitive)
-    {
+    switch (V_TOTSC_Primitive) {
     case XStringReverse:
 	pStringProcessor = Reverse;
 	break;
 
     case XStringProcessor:
-	switch (V_TOTSC_PrimitiveFlags)
-	{
+	switch (V_TOTSC_PrimitiveFlags) {
 	case 1:
 	    pStringProcessor = ToUpper;
 	    break;
@@ -2313,7 +2248,8 @@ V_DefinePrimitive (StringReverse)
 
 PrivateFnDef char const *TraverseStrings (bool reset, va_list ap) {
     V::VArgList iArgList (ap);
-    M_CPD* stringStore	= iArgList.arg<M_CPD*>();
+    rtBLOCK_Handle::Strings *pStrings =  iArgList.arg<rtBLOCK_Handle::Strings*>();
+
     int* beginPtr	= iArgList.arg<int *>();
     int* endPtr		= iArgList.arg<int *>();
     int**workPtr	= iArgList.arg<int **>();
@@ -2323,7 +2259,7 @@ PrivateFnDef char const *TraverseStrings (bool reset, va_list ap) {
 	return NilOf (char const*);
     }
     else if (*workPtr < endPtr)
-	return V_BlockString (stringStore, *(*workPtr)++);
+	return (*pStrings)[*(*workPtr)++];
     else
 	return NilOf (char const*);
 }
@@ -2334,18 +2270,13 @@ V_DefinePrimitive (ToLStoreString) {
 
     DSC_Descriptor &rDucMonotype = pTask->ducMonotype ();
 
-    M_CPD* stringStore = rDucMonotype.storeCPD ();
-
-    RTYPE_Type rtype = rDucMonotype.pointerRType ();
-
-    if (rtype != RTYPE_C_IntUV) {
+    rtBLOCK_Handle::Strings pStrings;
+    if (rDucMonotype.pointerRType () != RTYPE_C_IntUV || !pStrings.setTo (rDucMonotype.store ())) {
     }
     else if (DucIsAScalar) {
 	pTask->loadDucWithListOrStringStore (
 	    rtLSTORE_NewStringStore (
-		pTask->codScratchPad (), V_BlockString (
-		    stringStore, DSC_Descriptor_Scalar_Int (rDucMonotype)
-		)
+		pTask->codScratchPad (), pStrings[DSC_Descriptor_Scalar_Int (rDucMonotype)]
 	    )
 	);
     }
@@ -2356,7 +2287,7 @@ V_DefinePrimitive (ToLStoreString) {
 	    rtLSTORE_NewStringStore (
 		pTask->codScratchPad (),
 		TraverseStrings,
-		stringStore,
+		&pStrings,
 		rtINTUV_CPD_Array (DSC_Descriptor_Value (rDucMonotype)),
 		rtINTUV_CPD_Array (DSC_Descriptor_Value (rDucMonotype))
 		+ UV_CPD_ElementCount (DSC_Descriptor_Value (rDucMonotype)),
@@ -2558,9 +2489,7 @@ V_DefinePrimitive (StringStrip)
 	int
 	    prefixSize, suffixSize, totalSize = 0;
 	char const
-	    *stringp;
-	M_CPD
-	    *charCPD = NilOf (M_CPD *);
+	    *pString;
 
 /*****  Determine the size argument's value ...  *****/
 	int* prefixSizesp = &prefixSize;
@@ -2573,14 +2502,11 @@ V_DefinePrimitive (StringStrip)
 
 	if (fAlwaysCopy || ((prefixSize + suffixSize) != 0))  {
 
-	    stringp = iRecipientStrings.string (DSC_Descriptor_Scalar_Int (iRecipientStrings.monotype ()));
+	    pString = iRecipientStrings.string (DSC_Descriptor_Scalar_Int (iRecipientStrings.monotype ()));
 
 	    newCharUV = pTask->NewCharUV ((unsigned int)totalSize);
 
-	    DropString (const_cast<char*>(stringp), rtCHARUV_CPD_Array (newCharUV), prefixSize, suffixSize);
-
-	    if (IsntNil (charCPD))
-		charCPD->release ();
+	    DropString (const_cast<char*>(pString), rtCHARUV_CPD_Array (newCharUV), prefixSize, suffixSize);
 
 	    pTask->loadDucWithListOrStringStore (rtLSTORE_NewStringStoreFromUV (newCharUV));
 	    newCharUV->release ();
@@ -2592,8 +2518,7 @@ V_DefinePrimitive (StringStrip)
     {
 	M_CPD
 	    *prefixSizeUV,
-	    *suffixSizeUV,
-	    *charCPD = NilOf (M_CPD *);
+	    *suffixSizeUV;
 	int
 	    totalSize = 0;
 	rtCHARUV_ElementType
@@ -2618,8 +2543,8 @@ V_DefinePrimitive (StringStrip)
 		iRecipientStrings.monotype (), iParameterStrings.monotype (), ComputeSpanAndTotalSize
 	    );
 	} else {
-	    zeroSpanLink    = rtLINK_RefConstructor (V_TOTSC_PToken, -1);
-	    nonZeroSpanLink = rtLINK_RefConstructor (V_TOTSC_PToken, -1);
+	    zeroSpanLink    = rtLINK_RefConstructor (V_TOTSC_PToken);
+	    nonZeroSpanLink = rtLINK_RefConstructor (V_TOTSC_PToken);
 
 	    lastLink = nonZeroSpanLink;
 	    origin   =
@@ -2645,15 +2570,10 @@ V_DefinePrimitive (StringStrip)
 	    DSC_Traverse (iRecipientStrings.monotype (), HandleDrop)
 	}
 
-	/*****  cleanup ... *****/
-	if (IsntNil (charCPD))
-	    charCPD->release ();
-
 	prefixSizeUV->release ();
 	suffixSizeUV->release ();
 
 	/*****  Make the lstore ... *****/
-
 	if (fAlwaysCopy )  {
 		pTask->loadDucWithListOrStringStore (rtLSTORE_NewStringStoreFromUV (newCharUV)); 
 		newCharUV->release ();
@@ -2670,20 +2590,19 @@ V_DefinePrimitive (StringStrip)
 		newCharUV->release ();
 	    } else {
 		VFragmentation& rFragmentation = pTask->loadDucWithFragmentation ();
-		M_CPD				*fragmentPToken1;
-		M_CPD				*fragmentPToken2;
-
-		fragmentPToken1 = pTask->NewDomPToken (nonZeroSpanLink->ElementCount ());
-		nonZeroSpanLink->Close (fragmentPToken1);
+		rtPTOKEN_Handle::Reference pFragmentPPT (
+		    pTask->NewDomPToken (nonZeroSpanLink->ElementCount ())
+		);
+		nonZeroSpanLink->Close (pFragmentPPT);
 		rFragmentation.createFragment (nonZeroSpanLink)->datum ().setToCorrespondence (
-		    fragmentPToken1, rtLSTORE_NewStringStoreFromUV (newCharUV), rtLSTORE_CPx_RowPToken);
-		fragmentPToken1->release ();
+		    pFragmentPPT, rtLSTORE_NewStringStoreFromUV (newCharUV)
+		);
 		newCharUV->release ();
 
-		fragmentPToken2 = pTask->NewDomPToken (zeroSpanLink->ElementCount ());
-		zeroSpanLink->Close (fragmentPToken2);
-		rFragmentation.createFragment (zeroSpanLink)->datum ().setToSubset (zeroSpanLink, iRecipientStrings.monotype ());	    
-		fragmentPToken2->release ();
+		zeroSpanLink->Close (pTask->NewDomPToken (zeroSpanLink->ElementCount ()));
+		rFragmentation.createFragment (zeroSpanLink)->datum ().setToSubset (
+		    zeroSpanLink, iRecipientStrings.monotype ()
+		);	    
 	    }
 	}
     }
@@ -2712,79 +2631,73 @@ V_DefinePrimitive (StringStrip)
  *	strings.
  *
  *****/
-PrivateFnDef M_CPD *CopyStrings (VPrimitiveTask *pTask) {
+PrivateFnDef rtLSTORE_Handle *CopyStrings (VPrimitiveTask *pTask) {
     size_t size = 0;
 
-#define CalcLStoreTotalSize(value)\
-    size += strlen (V_LStoreString (stringStore, charCPD, value)) + 1
+#define CalcTotalSize(value)\
+    size += strlen (pStrings[value]) + 1
 
-#define CalcBlockTotalSize(value)\
-    size += strlen (V_BlockString (stringStore, value)) + 1
-
-#define LStoreFill(value) {\
-    strcpy (uvp, V_LStoreString (stringStore, charCPD, value));\
-    uvp += strlen (V_LStoreString (stringStore, charCPD, value)) + 1;\
-}
-
-#define BlockFill(value) {\
-    strcpy (uvp, V_BlockString (stringStore, value));\
-    uvp += strlen (V_BlockString (stringStore, value)) + 1;\
+#define Fill(value) {\
+    strcpy (uvp, pStrings[value]);\
+    uvp += strlen (pStrings[value]) + 1;\
 }
 
 
     DSC_Descriptor &rCurrent = pTask->getCurrent ();
-    M_CPD *stringStore = rCurrent.storeCPD ();
-
-    RTYPE_Type rtype = rCurrent.pointerRType ();
-    int sourceIsBlockString = (rtype == RTYPE_C_IntUV);
 
 /*****  LStore Strings  *****/
-    M_CPD *uvector;
-    if (!sourceIsBlockString) {
-	M_CPD *charCPD = rtLSTORE_CPD_ContentStringsCPD (stringStore);
+    M_CPD *uvector = 0;
+
+    rtLSTORE_Handle::Strings pLStoreStrings;
+    rtBLOCK_Handle::Strings pBlockStrings;
+
+    if (pLStoreStrings.setTo (rCurrent.store ())) {
+#define pStrings pLStoreStrings
 
 	/*****  Calculate the total number of characters ... *****/
-	DSC_Traverse (rCurrent, CalcLStoreTotalSize);
+	DSC_Traverse (rCurrent, CalcTotalSize);
 
 	/*****  Create the new character uvector ... *****/
 	uvector = pTask->NewCharUV (size);
 
 	/*****  Fill the character uvector ... *****/
 	rtCHARUV_ElementType *uvp = rtCHARUV_CPD_Array (uvector);
-	DSC_Traverse (rCurrent, LStoreFill);
+	DSC_Traverse (rCurrent, Fill);
 
-	/*****  cleanup ... *****/
-	charCPD->release ();
+#undef pStrings
     }
 
 /*****  Block Strings  *****/
-    else {
+    else if (pBlockStrings.setTo (rCurrent.store ())) {
+#define pStrings pBlockStrings
+
 	/*****  Calculate the total number of characters ... *****/
-	DSC_Traverse (rCurrent, CalcBlockTotalSize);
+	DSC_Traverse (rCurrent, CalcTotalSize);
 
 	/*****  Create the new character uvector ... *****/
 	uvector = pTask->NewCharUV (size);
 
 	/*****  Fill the character uvector ... *****/
 	rtCHARUV_ElementType *uvp = rtCHARUV_CPD_Array (uvector);
-	DSC_Traverse (rCurrent, BlockFill);
+	DSC_Traverse (rCurrent, Fill);
+
+#undef pStrings
     }
 
     /*****  Make the lstore ... *****/
-    M_CPD *lstore = rtLSTORE_NewStringStoreFromUV (uvector);
+    rtLSTORE_Handle *lstore = rtLSTORE_NewStringStoreFromUV (uvector);
     uvector->release ();
 
     return lstore;
 
-#undef CalcLStoreTotalSize
-#undef CalcBlockTotalSize
-#undef LStoreFill
-#undef BlockFill
+#undef CalcTotalSize
+#undef Fill
 }
 
 
 V_DefinePrimitive (StringFillTakeDrop) {
-    M_CPD *lstore, *newCharUV;
+    rtLSTORE_Handle *lstore;
+    M_CPD *newCharUV;
 
 
 /************************************************
@@ -2963,42 +2876,19 @@ V_DefinePrimitive (StringFillTakeDrop) {
 
 /*****  Macros which fill in the character uvector  *****/
 
-#define HandleBlockStringFill(value) {\
-    FillString (V_BlockString (stringStore, value), newCharp, *sizesp);\
+#define HandleStringFill(value) {\
+    FillString (pStrings[value], newCharp, *sizesp);\
     newCharp += (abs (*sizesp++) + 1);\
 }
 
-#define HandleLStoreStringFill(value) {\
-    FillString (\
-	V_LStoreString (stringStore, charCPD, value), newCharp, *sizesp\
-    );\
+#define HandleStringTake(value) {\
+    TakeString (pStrings[value], newCharp, *sizesp);\
     newCharp += (abs (*sizesp++) + 1);\
 }
 
-#define HandleBlockStringTake(value) {\
-    TakeString (V_BlockString (stringStore, value), newCharp, *sizesp);\
-    newCharp += (abs (*sizesp++) + 1);\
-}
-
-#define HandleLStoreStringTake(value) {\
-    TakeString (\
-	V_LStoreString (stringStore, charCPD, value), newCharp, *sizesp\
-    );\
-    newCharp += (abs (*sizesp++) + 1);\
-}
-
-#define HandleBlockStringDrop(value) {\
-    DropString (V_BlockString (stringStore, value), newCharp, *sizesp);\
-    itemp = strlen (V_BlockString (stringStore, value));\
-    newCharp += (itemp - min (abs (*sizesp), itemp) + 1);\
-    sizesp++;\
-}
-
-#define HandleLStoreStringDrop(value) {\
-    DropString (\
-	V_LStoreString (stringStore, charCPD, value), newCharp, *sizesp\
-    );\
-    itemp = strlen (V_LStoreString (stringStore, charCPD, value));\
+#define HandleStringDrop(value) {\
+    DropString (pStrings[value], newCharp, *sizesp);\
+    itemp = strlen (pStrings[value]);\
     newCharp += (itemp - min (abs (*sizesp), itemp) + 1);\
     sizesp++;\
 }
@@ -3006,21 +2896,14 @@ V_DefinePrimitive (StringFillTakeDrop) {
 
 /*****  Macros to determine the total size needed for the result ... *****/
 
-#define CalcBlockStringDropTotalSize(value) {\
-    size_t origSize = strlen (V_BlockString (stringStore, value));\
-    totalSize += (origSize - min ((size_t)abs (*sizesp), origSize) + 1);\
-    sizesp++;\
-}
-
-#define CalcLStoreStringDropTotalSize(value) {\
-    size_t origSize = strlen (V_LStoreString (stringStore, charCPD, value));\
+#define CalcStringDropTotalSize(value) {\
+    size_t origSize = strlen (pStrings[value]);\
     totalSize += (origSize - min ((size_t)abs (*sizesp), origSize) + 1);\
     sizesp++;\
 }
 
 #define CalcNewTotalSize {\
     unsigned int count;\
-\
     switch (V_TOTSC_Primitive) {\
     case XStringFill:\
     case XStringTake:\
@@ -3031,12 +2914,7 @@ V_DefinePrimitive (StringFillTakeDrop) {
 	break;\
     case XStringDrop:\
         totalSize = 0;\
-	if (sourceIsBlockString) {\
-	    DSC_Traverse (rCurrent, CalcBlockStringDropTotalSize);\
-	}\
-	else {\
-	    DSC_Traverse (rCurrent, CalcLStoreStringDropTotalSize);\
-	}\
+	DSC_Traverse (rCurrent, CalcStringDropTotalSize);\
 	break;\
     default:\
 	pTask->raiseUnimplementedAliasException ("StringFillTakeDrop");\
@@ -3079,65 +2957,51 @@ V_DefinePrimitive (StringFillTakeDrop) {
 /*****  Otherwise, acquire both operands of the binary...  *****/
     DSC_Descriptor &rCurrent = pTask->getCurrent ();
 
-    M_CPD *stringStore = rCurrent.storeCPD ();
-
     pTask->normalizeDuc ();
     DSC_Descriptor &rDucMonotype = pTask->ducMonotype ();
 
 /*****  Scalar Case *****/
     if (DucIsAScalar) {
 	size_t origSize, totalSize;
-	int sizeArg;
-	char const *stringp;
-	M_CPD *charCPD = NilOf (M_CPD *);
-
 
 /*****  Determine the size argument's value ...  *****/
-	RTYPE_Type rtype = rDucMonotype.pointerRType ();
-
-	M_CPD* store = rDucMonotype.storeCPD ();
-	if (rDucMonotype.holdsAScalarValue () &&
-	    rtype == RTYPE_C_IntUV &&
-	    store->NamesTheIntegerClass ()
-	) sizeArg = DSC_Descriptor_Scalar_Int (rDucMonotype);
-	else sizeArg = 0;
+	int sizeArg = rDucMonotype.holdsAScalarValue () && rDucMonotype.store ()->NamesTheIntegerClass ()
+	    ? DSC_Descriptor_Scalar_Int (rDucMonotype) : 0;
 
 /*****  Set a pointer to the actual string ... *****/
-	rtype = rCurrent.pointerRType ();
-	if (rtype == RTYPE_C_IntUV) {
-	    stringp = V_BlockString (
-		stringStore, DSC_Descriptor_Scalar_Int (rCurrent)
-	    );
+	char const *pString = "";
+	switch (rCurrent.pointerRType ()) {
+	case RTYPE_C_IntUV: {
+		rtBLOCK_Handle::Strings pStrings;
+		if (pStrings.setTo (rCurrent.store ()))
+		    pString = pStrings[DSC_Descriptor_Scalar_Int (rCurrent)];
+	    }
+	    break;
+	case RTYPE_C_Link: {
+		rtLSTORE_Handle::Strings pStrings;
+		if (pStrings.setTo (rCurrent.store ()))
+		    pString = pStrings[DSC_Descriptor_Scalar_Int (rCurrent)];
 	}
-	else {
-	    charCPD = rtLSTORE_CPD_ContentStringsCPD (stringStore);
-	    stringp = V_LStoreString (
-		stringStore,
-		charCPD,
-		DSC_Descriptor_Scalar_Int (rCurrent)
-	    );
+	    break;
 	}
 
 /*****  Create the new character uvector and fill it ... *****/
 	switch (V_TOTSC_Primitive) {
 	case XStringFill:
 	    newCharUV = pTask->NewCharUV ((unsigned int)abs (sizeArg) + 1);
-	    FillString (stringp, rtCHARUV_CPD_Array (newCharUV), sizeArg);
+	    FillString (pString, rtCHARUV_CPD_Array (newCharUV), sizeArg);
 	    break;
 	case XStringTake:
 	    newCharUV = pTask->NewCharUV ((unsigned int)abs (sizeArg) + 1);
-	    TakeString (stringp, rtCHARUV_CPD_Array (newCharUV), sizeArg);
+	    TakeString (pString, rtCHARUV_CPD_Array (newCharUV), sizeArg);
 	    break;
 	case XStringDrop:
-	    origSize = strlen (stringp);
+	    origSize = strlen (pString);
 	    totalSize = origSize - min ((unsigned int)abs (sizeArg), origSize) + 1;
 	    newCharUV = pTask->NewCharUV (totalSize);
-	    DropString (stringp, rtCHARUV_CPD_Array (newCharUV), sizeArg);
+	    DropString (pString, rtCHARUV_CPD_Array (newCharUV), sizeArg);
 	    break;
 	}
-
-	if (IsntNil (charCPD))
-	    charCPD->release ();
 
         lstore = rtLSTORE_NewStringStoreFromUV (newCharUV);
 	newCharUV->release ();
@@ -3145,38 +3009,33 @@ V_DefinePrimitive (StringFillTakeDrop) {
 
 /***** Non-Scalar case *****/
     else {
-	M_CPD *sizesUV, *charCPD = NilOf (M_CPD*);
-	bool sourceIsBlockString;
+	M_CPD *sizesUV;
 	size_t totalSize;
 	int *sizesp;
 	rtCHARUV_ElementType *newCharp;
 
 
 /*****  If the size argument is valid ... *****/
-	RTYPE_Type rtype = rDucMonotype.pointerRType ();
-
-	M_CPD* store = rDucMonotype.storeCPD ();
-
-	if (rDucMonotype.holdsNonScalarValues () &&
-	    rtype == RTYPE_C_IntUV &&
-	    store->NamesTheIntegerClass ()
-	)
-	{
+	if (rDucMonotype.holdsNonScalarValues () && rDucMonotype.store ()->NamesTheIntegerClass ()) {
 	    int itemp;
-
-	    /*****  Determine the type of source strings ... *****/
-	    rtype = rCurrent.pointerRType ();
-	    sourceIsBlockString = (rtype == RTYPE_C_IntUV);
-	    if (!sourceIsBlockString) charCPD = rtLSTORE_CPD_ContentStringsCPD (
-		stringStore
-	    );
 
 	    /*****  Set up the size argument uvector ... *****/
 	    sizesUV = DSC_Descriptor_Value (rDucMonotype);
 	    sizesp  = rtINTUV_CPD_Array (sizesUV);
 
-	    /*****  Determine the total size needed for the result ... *****/
+	    /*****  Determine the type of source strings ... *****/
+	    rtBLOCK_Handle::Strings pBlockStrings;
+	    rtLSTORE_Handle::Strings pLStoreStrings;
+	    if (pBlockStrings.setTo (rCurrent.store ())) {
+#define pStrings pBlockStrings
+		CalcNewTotalSize;
+#undef pStrings
+	    }
+	    else if (pLStoreStrings.setTo (rCurrent.store ())) {
+#define pStrings pLStoreStrings
 	    CalcNewTotalSize;
+#undef pStrings
+	    }
 
 	    /*****  Create the new character uvector ... *****/
 	    newCharUV = pTask->NewCharUV (totalSize);
@@ -3185,36 +3044,36 @@ V_DefinePrimitive (StringFillTakeDrop) {
 	    /*****  fill in the new character uvector ... *****/
 	    sizesp = rtINTUV_CPD_Array (sizesUV);
 
-	    if (sourceIsBlockString) {
+	    if (pBlockStrings.isSet ()) {
+#define pStrings pBlockStrings
 		switch (V_TOTSC_Primitive) {
 		case XStringFill:
-		    DSC_Traverse (rCurrent, HandleBlockStringFill);
+		    DSC_Traverse (rCurrent, HandleStringFill);
 		    break;
 		case XStringTake:
-		    DSC_Traverse (rCurrent, HandleBlockStringTake);
+		    DSC_Traverse (rCurrent, HandleStringTake);
 		    break;
 		case XStringDrop:
-		    DSC_Traverse (rCurrent, HandleBlockStringDrop);
+		    DSC_Traverse (rCurrent, HandleStringDrop);
 		    break;
 		}
+#undef pStrings
 	    }
 	    else {
+#define pStrings pLStoreStrings
 		switch (V_TOTSC_Primitive) {
 		case XStringFill:
-		    DSC_Traverse (rCurrent, HandleLStoreStringFill);
+		    DSC_Traverse (rCurrent, HandleStringFill);
 		    break;
 		case XStringTake:
-		    DSC_Traverse (rCurrent, HandleLStoreStringTake);
+		    DSC_Traverse (rCurrent, HandleStringTake);
 		    break;
 		case XStringDrop:
-		    DSC_Traverse (rCurrent, HandleLStoreStringDrop);
+		    DSC_Traverse (rCurrent, HandleStringDrop);
 		    break;
 		}
+#undef pStrings
 	    }
-
-	    /*****  cleanup ... *****/
-	    if (IsntNil (charCPD))
-		charCPD->release ();
 
 	    /*****  Make the lstore ... *****/
 	    lstore = rtLSTORE_NewStringStoreFromUV (newCharUV);
@@ -3253,15 +3112,11 @@ V_DefinePrimitive (StringFillTakeDrop) {
 #undef FillString
 #undef TakeString
 #undef DropString
-#undef HandleBlockStringFill
-#undef HandleLStoreStringFill
-#undef HandleBlockStringTake
-#undef HandleLStoreStringTake
-#undef HandleBlockStringDrop
-#undef HandleLStoreStringDrop
+#undef HandleStringFill
+#undef HandleStringTake
+#undef HandleStringDrop
 #undef FillInTheCharacterUVector
-#undef CalcBlockStringDropTotalSize
-#undef CalcLStoreStringDropTotalSize
+#undef CalcStringDropTotalSize
 #undef CalcNewTotalSize
 }
 
@@ -3450,7 +3305,7 @@ V_DefinePrimitive (GetEnv) {
 	    StringPrimsFinishAndCloseLinkc ();
 
 /*****  Return the LStore in the accumulator ... *****/
-	    pTask->loadDucWithPartialCorrespondence (rtLSTORE_NewStringStoreFromUV (pCharUV), rtLSTORE_CPx_RowPToken, StringPrimsGoodLinkc);
+	    pTask->loadDucWithPartialCorrespondence (rtLSTORE_NewStringStoreFromUV (pCharUV), StringPrimsGoodLinkc);
 	    pCharUV->release ();
 	    if (StringPrimsGoodLinkc) StringPrimsGoodLinkc->release();
 	} else

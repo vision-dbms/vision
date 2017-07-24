@@ -165,7 +165,8 @@ namespace Vca {
     //  IPeer2 Methods
     public:
 	void ReleaseExportEx (
-	    IPeer2 *pRole, uuid_t const &rObjectSite, VcaSSID const &rObjectSSID, U32 cExports, U32 cWeakExports, U32 cMessages
+	    VMessageHolder<IPeer_Ex2> const& rMessage, uuid_t const &rObjectSite, 
+	    VcaSSID const &rObjectSSID, U32 cExports, U32 cWeakExports, U32 cMessages
 	);
 
     //  IPeer1 Role
@@ -187,7 +188,8 @@ namespace Vca {
 	void SinkInterface (IPeer *pRole, IVUnknown *pObject);
 
 	void ReleaseExport (
-	    IPeer *pRole, uuid_t const &rPeerUUID, VcaSSID const &rObjectSSID, U32 cExports, U32 cMessages
+	    VMessageHolder<IPeer_Ex2> const& rMessage, uuid_t const &rPeerUUID, 
+	    VcaSSID const &rObjectSSID, U32 cExports, U32 cMessages
 	);
 	void ReleaseImport (IPeer *pRole, uuid_t const &rUUID, VcaSSID const &rSSID);
 
@@ -230,7 +232,7 @@ namespace Vca {
 	    IPeer *pRole, IVReceiver<IConnection*> *pClient, VString const &rDestination
 	);
 
-	void OnDone (IPeer *pRole);
+	void OnDone (VMessageHolder<IPeer_Ex2>const& rMessage);
 
     //  State
     private:

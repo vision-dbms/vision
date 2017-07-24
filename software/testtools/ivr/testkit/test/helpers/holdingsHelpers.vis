@@ -1,0 +1,93 @@
+
+^tmp defineMethod: [|displayAccountHoldings: acct|
+  acct do: [ 
+    !acct <- ^self;
+    displayInfo;
+    "  account totals: " printNL;
+    ":_totalMarketValue", ":_totalMarketValueCash", ":_totalMarketValueEquity",
+      ":_totalMarketValueFixed", ":_totalCost"
+        do: [ 
+          "    " print; ^self printNL;
+          ^my acct send: ^self clusteredAsBlock . do: [ 
+            "      " print; ^date print: 13; ^self printNL;
+          ];
+        ];
+
+    "  holdingsSeries" printNL;
+    :holdingsSeries do: [ 
+      "    " print; ^date printNL;
+      ^self do: [ 
+        "      " print;
+        _shares print: -10; 
+        shares print: -10; 
+        totalMarketValue print: -10; 
+        security name printNL;
+      ];
+    ];
+
+
+    "  memberList" printNL;
+    :memberList do: [ 
+      "    " print; ^date printNL;
+      ^self do: [ "      " print; name printNL;; ];
+    ];
+
+    "  constituents" printNL;
+    constituents do: [ 
+      "    " print; index name printNL;
+      :_shares do: [ 
+        "      " print;
+        ^date print: 13;  ^self print: 10; ^my shares printNL;
+      ];
+    ];
+    newLine print;
+  ];
+  ^self
+];
+
+^tmp defineMethod: [|displayAllAccountHoldings|
+  CoreWorkspace IndexAccount masterList 
+    select: [ :holdingsSeries nonDefaults count > 0 ] .
+    do: [ 
+      ^tmp displayAccountHoldings: ^self;
+    ];
+];
+
+^tmp defineMethod: [|showHoldingsException: acct|
+  acct do: [ 
+    !acct <- ^my acct;
+    !dates <- 
+      constituents collectListElementsFrom: [ :_shares send: [ ^date ] .] .
+        append: (:holdingsSeries send: [ ^date ]) .
+        append: (:memberList send: [ ^date ] ) .
+        unique;
+
+    dates do: [ ^self evaluate: [ ^my acct do: [
+      !acct <- ^self;
+      !diff <- holdings send: [ security ] . difference: memberList ;
+      (diff at: 1 . count > 0) || (diff at: 2 . count > 0) ifTrue: [
+        "memberList inconsistency on " print; ^date printNL;
+      ];
+
+      :diff <- holdings send: [ security ] .
+        difference: (constituents select: [ _shares isntNA ] . send: [ index ]);
+      
+      !badShares <- holdings select: [ 
+          _shares != (^my constituents at: security . _shares) ||
+          shares != (^my constituents at: security . shares)
+        ];
+      (diff at: 1 . count > 0) || (diff at: 2 . count > 0) || 
+        (badShares count > 0)
+          ifTrue: [
+            "constituents inconsistency on " print; ^date printNL;
+          ];
+
+    ]; ]; ];
+  ];
+];
+
+^tmp defineMethod: [|showAllHoldingsExceptions|
+  CoreWorkspace IndexAccount masterList 
+    do: [ ^tmp showHoldingsException: ^self];
+];
+  

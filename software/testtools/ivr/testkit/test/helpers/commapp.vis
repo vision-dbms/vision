@@ -1,0 +1,41 @@
+^tmp defineMethod: [|commappGarbageCollection|
+  [
+    CoreWorkspace Utility Test networkUpdates isTrue ifTrue: [
+      !oldThreshold <- ^tmp allocationThreshold;
+
+      AdminTools setAllocationThresholdTo: 80000000;
+      AdminTools cleanNetwork;
+      Utility updateNetworkWithAnnotation: "Clean Network";
+
+      Utility collectGarbage
+        ifTrue: [ Utility updateNetworkWithAnnotation: "GC" ]
+        ifFalse: [">>>  Garbage Collection Failed  <<<" printNL];
+
+      AdminTools setAllocationThresholdTo: oldThreshold;
+    ];
+  ] debugOutput;
+  ^self
+];
+
+^tmp defineMethod: [|commappFullCompaction|
+  [
+    CoreWorkspace Utility Test networkUpdates isTrue ifTrue: [
+      Utility do: [
+        # just like fullCompact except it doesn't turn on debugging output
+        !att <- SessionAttribute; 
+        1024 sequence 
+          do: [^my att updateFlagOfSpace: ^self .<- TRUE]; 
+        !result <- ^self 
+          updateAndCompactNetworkAsBaseVersionWithAnnotation: "Full Compaction"; 
+        result
+      ];
+    ];
+  ] debugOutput;
+  ^self
+];
+
+^tmp defineMethod: [|commappNetmaint|
+  commappGarbageCollection
+  commappFullCompaction
+];
+

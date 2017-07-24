@@ -1157,7 +1157,7 @@ void Vca::VcaPeer::attach_(VcaTransportOutbound *pTransport) {
 void Vca::VcaPeer::detach_(VcaTransportInbound *pTransport) {
     pTransport->onDetach (this);
 
-    if (TracingAtDt ()) {
+    if (TracingAtDt () && !isAtExit ()) {
 	VString iMyName;
 	getUUID (iMyName);
 	Logger().printf ("%s: incoming transport detached (ccr=%u).\n", iMyName.content (), m_cConnectionRequests);
@@ -1171,12 +1171,14 @@ void Vca::VcaPeer::detach_(VcaTransportInbound *pTransport) {
      */
 //    if (incomingTransportCount () == 0 && isntDisconnectable ())
 //	markDefunct ();
+    if (isDefunct()) 
+	deleteEvaluators();
 }
 
 void Vca::VcaPeer::detach_(VcaTransportOutbound *pTransport) {
     pTransport->onDetach (this);
 
-    if (TracingAtDt ()) {
+    if (TracingAtDt () && !isAtExit ()) {
 	VString iMyName;
 	getUUID (iMyName);
 	Logger().printf ("%s: outgoing transport detached (ccr=%u).\n", iMyName.content (), m_cConnectionRequests);
@@ -1334,7 +1336,12 @@ void Vca::VcaPeer::markDefunct_() {
 //  And cleanup everything else...
     triggerNoRouteToPeerCallbacks ();
 
-/*  m_pRemoteReflection.clear (); */
+// clear remote reflection
+    m_pRemoteReflection.clear();
+    m_pRemoteReflectionV1.clear();
+    m_pRemoteReflectionV2.clear();
+    m_pRemoteReflectionGofer->setTo(0);
+
     VcaOIDR::onDefunctPeer (this);
 
     unstance ();
@@ -1343,6 +1350,10 @@ void Vca::VcaPeer::markDefunct_() {
     deleteEvaluators ();
 
     BaseClass::markDefunct_();
+#ifdef TracingVcaMemoryLeaks
+    log("PoolMemoryLeak VcaSite::markDefunct referenceCount: %u exportCount: %u exportedInterfaceCount: %u instantiatedInterfaceCount: %u referencedInterfaceCount: %u", 
+	referenceCount(), exportCount(), exportedInterfaceCount(), instantiatedInterfaceCount(), referencedInterfaceCount());
+#endif
 }
 
 /*--------------------------------------------*
@@ -1478,8 +1489,15 @@ void Vca::VcaPeer::createExportOf (VcaOID *pOID, bool bWeak) {
 }
 
 void Vca::VcaPeer::deleteExportOf (
-    VcaOID *pOID, U32 cExports, U32 cWeakExports, U32 cMessages
+    VMessageHolder<IPeer_Ex2> const& rMessage, VcaOID *pOID, U32 cExports, U32 cWeakExports, U32 cMessages
 ) {
+    if (rMessage.vinterface()->oid() == pOID) {
+#ifdef TracingVcaMemoryLeaks
+	log("PoolMemoryLeak VcaPeer::deleteExportOf 'this' message sequence number capture"); 
+#endif
+	m_iReleaseMessageSequenceNumber = rMessage.message()->sequenceNumber();
+    } 
+
     pOID->deleteExportTo (this, cExports, cWeakExports, cMessages);
 }
 

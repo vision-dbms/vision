@@ -670,13 +670,17 @@ void Vsa::VEvaluatorPump::crankIncomingPump (IBSClient *pClientRole, size_t sTra
 		    m_iIncomingAllocator.nextSize (m_sIncomingString + sFragment)
 		);
 	    }
+	    if (sFragment > 0) {
+		memcpy (incomingFreeArea (), m_iIncomingFifo.consumerArea (), sFragment);
+		m_iIncomingFifo.consume (sFragment);
 
-	    memcpy (incomingFreeArea (), m_iIncomingFifo.consumerArea (), sFragment);
-	    m_iIncomingFifo.consume (sFragment);
-
-	    m_sIncomingString += sFragment;
-	    incomingFreeArea ()[0] = '\0';
-
+		m_sIncomingString += sFragment;
+		incomingFreeArea ()[0] = '\0';
+	    } else if (!bPromptFound && m_iIncomingFifo.consumerAreaSize () > 0) {
+		// We have a NULL character embedded in the consumerArea
+		// Consume it to prevent an infinite loop
+		m_iIncomingFifo.consume (1);
+	    }
 	    if (bPromptFound) {
 		m_iIncomingFifo.consume (sPrompt);
 		switch (--m_cIncomingPrompts) {

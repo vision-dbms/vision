@@ -54,7 +54,7 @@ struct UV_PreambleType {
 /*****  Access Macros  *****/
 #define UV_Preamble_D_PToken(preamble)		((preamble).pToken)
 #define UV_Preamble_D_RefPT(preamble)		((preamble).refPToken)
-#define UV_Preamble_D_AuxillaryPOP(preamble)	((preamble).auxiliaryPOP)
+#define UV_Preamble_D_AuxiliaryPOP(preamble)	((preamble).auxiliaryPOP)
 #define UV_Preamble_D_ElementCount(preamble)	((preamble).elementCount)
 #define UV_Preamble_D_Granularity(preamble)	((preamble).granularity)
 #define UV_Preamble_D_IsInconsistent(preamble)	((preamble).isInconsistent)
@@ -96,7 +96,7 @@ struct UV_UVType {
     UV_UV_Preamble (p)\
 )
 
-#define UV_UV_AuxillaryPOP(p) UV_Preamble_D_AuxillaryPOP (\
+#define UV_UV_AuxiliaryPOP(p) UV_Preamble_D_AuxiliaryPOP (\
     UV_UV_Preamble (p)\
 )
 

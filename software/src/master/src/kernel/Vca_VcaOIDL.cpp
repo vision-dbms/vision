@@ -162,6 +162,10 @@ void Vca::VcaOIDL::Evaluator::onDefunctPeer () {
 
     m_pOIDL->detach (this);
 //  No member access beyond this point - 'this' may have just been reclaimed !!!
+
+#ifdef TracingVcaMemoryLeaks
+    log("PoolMemoryLeak VcaOIDL::Evaluator::onDefunctPeer() referenceCount: %u ", referenceCount());
+#endif
 }
 
 void Vca::VcaOIDL::Evaluator::removeFromSiteList () {
@@ -174,6 +178,7 @@ void Vca::VcaOIDL::Evaluator::removeFromSiteList () {
 	m_pSiteListSuccessor->m_pSiteListPredecessor.claim (m_pSiteListPredecessor);
 	m_pSiteListSuccessor.clear ();
     }
+    m_pSiteListPredecessor.clear();
 }
 
 
@@ -297,6 +302,13 @@ void Vca::VcaOIDL::supplyInterface_(VReference<IVUnknown>&rpInterface) {
  ***************************/
 
 void Vca::VcaOIDL::onFinalExport () {
+#ifdef TracingVcaMemoryLeaks
+    if (dynamic_cast<IPeer*>(m_pObject.referent()) != 0) {
+	log("PoolMemoryLeak VcaOIDL::onFinalExport() referenceCount: %u evaluators: %u reported: %u processed: %u received: %u", 
+	    referenceCount(), m_iEvaluators.cardinality(), m_cMessagesReported, m_cMessagesProcessed, m_cMessagesReceived);
+    }
+#endif
+
     if (allMessagesProcessed ()) {
 	Reference const iRetainer (this);
 	m_iEvaluators.DeleteAll ();

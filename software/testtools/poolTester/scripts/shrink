@@ -1,0 +1,13 @@
+# Tests the shrink functionality in pools by setting the shrink timeout, hammering the pool so as to increase worker count and then waiting for a shrink to occur.
+
+# Pre-Execs
+pre_exec: start -c $POOLTESTERDIR/configs/shrink.ptc
+
+# Hammer thread.
+thread:main, repetitions: 1
+operation_on_thread:main, run:hammer -c 5 -d 10 -w
+operation_on_thread:main, run:waitForStat -t 62 -c OnlineWorkers\<3
+
+# Post-Execs
+post_exec: stop
+post_exec: unset -v ShrinkTimeOut

@@ -1,0 +1,973 @@
+#**********************************************************
+#		Test: PFprint 
+#
+#  Test to primitives in the PFprint module.
+#
+#  PART 1 - Sprint for Primitives, Blocks, and Closures
+#  PART 2 - IntegerPrintOf and DoublePrintOf primitives
+#  PART 3 - IntegerSPrint and DoubleSprint primitives
+#
+#  May 9, 1988		jad
+#**********************************************************
+#**********************************************************
+
+
+newLine print; "Beginning file: PFprint.S ..." printNL;
+###########################################################
+#		Tests Begin Here ...                      #
+
+
+
+"
+
+
+*********************************************************
+(PART 1)
+--------  Test 'sprint' for Primitives, 	 --------
+--------  Methods, and Closures.		 --------
+*********************************************************
+" printNL;
+
+"
+### Test the scalar cases ...
+### 1. Method
+" printNL;
+'sales' locateInDictionaryOf: Company . value printNL;
+!s <- 'sales' locateInDictionaryOf: Company . value sprint;
+s whatAmI printNL;
+s printNL;
+
+"
+### 2. Primitive
+" printNL;
+'print12' locateInDictionaryOf: "" . value printNL;
+!s <- 'print12' locateInDictionaryOf: "" . value sprint;
+s whatAmI printNL;
+s printNL;
+
+"
+### 3. Closure 
+" printNL;
+
+### 3A. Block Closure
+Company :sales printNL;
+!s <- Company :sales;
+s whatAmI printNL;
+s printNL;
+
+### 3B. Primitive Closure
+"" :fixed printNL;
+!s <- "" :fixed;
+s whatAmI printNL;
+s printNL;
+
+
+
+"
+###  Setup for list tests ...
+" printNL;
+Object defineMethod: 
+[|pDisplay|
+# Display all selectors which are methods along with their implementation
+!class <- ^self ;
+class selectorList do:
+[ !selector <- ^self ;
+  selector locateInDictionaryOf: ^my class . 
+   do: [ (value whatAmI = "Method"  ||
+	  value whatAmI = "Primitive")
+                ifTrue: [ value printNL;
+                          newLine print; ]
+       ]
+]];
+
+
+Object defineMethod: 
+[|sDisplay|
+# Display all selectors which are methods along with their implementation
+!class <- ^self ;
+class selectorList 
+    send:
+	[ !selector <- ^self ;
+	  selector locateInDictionaryOf: ^my class . 
+	  send: 
+		[ (value whatAmI = "Method" || 
+		   value whatAmI = "Primitive")
+          	  ifTrue: [ value sprint]
+       ]
+]];
+
+"
+### 1&2. Methods and Primitives
+" printNL;
+"" pDisplay;
+!s <- "" sDisplay;
+s count printNL;
+s do: [whatAmI printNL];
+s do: [printNL];
+
+"
+### 3. Closures 
+" printNL;
+
+!list <- Company, Company, "", 42, "";
+list do: [^self :print printNL];
+"______________" printNL;
+!s <- list send:
+    [!x <- ^self :print;
+      x sprint];
+s count printNL;
+s do: [whatAmI printNL];
+s do: [^self printNL];
+
+
+"
+###  Test original use of V_LoadAWithStringStore ...
+" printNL;
+
+!list <- "hello", "there", "world";
+list send: [^self fill: 10] . do: [printNL];
+
+
+
+"
+
+
+*********************************************************
+(PART 2)
+--------  IntegerPrintOf and DoublePrintOf  	 --------
+--------  Primitives. 				 --------
+*********************************************************
+" printNL;
+
+"
+-----------------------------
+-----  Integer PrintOf  -----
+-----------------------------
+" printNL;
+
+"
+-----  Test each scalar data type 
+
+###  Character
+" printNL;
+### not reached
+
+
+"
+### Double
+" printNL;
+123.456 printNL: 10;
+-123.456 printNL: -10;
+123.456 printNL: 4;
+123.456 printNL: 0;
+
+"
+### float
+" printNL;
+# not used
+
+"
+### lstore string
+" printNL;
+"hello there" fixed printNL: 15;
+"hello there" fixed printNL: -15;
+"hello there" fixed printNL: 4;
+"hello there" fixed printNL: 0;
+
+"
+### block string
+" printNL;
+"hello there" printNL: 15;
+"hello there" printNL: -15;
+"hello there" printNL: 4;
+"hello there" printNL: 0;
+
+"
+### selector
+" printNL;
+### 'print:' is defined to be 'print' for selectors - must use 'printOf:' to
+### really reach the primitive.
+10 printOf: 'value';"" printNL;
+-10 printOf: 'value';"" printNL;
+4 printOf: 'value';"" printNL;
+0 printOf: 'value';"" printNL;
+
+
+"
+### integer
+" printNL;
+1234 printNL: 10;
+-1234 printNL: -10;
+1234 printNL: 4;
+1234 printNL: 3;
+1234 printNL: 0;
+11111111111 printNL: 15;
+
+
+"
+-----  Test each list data type   -----
+
+### character
+" printNL;
+### not reached
+
+
+"
+### double
+" printNL;
+123.456,-10234.1,10.0 do: [^self printNL: 10];"" printNL;
+123.456,-10234.1,10.0 do: [^self printNL: -10];"" printNL;
+123.456,-10234.1,10.0 do: [^self printNL: 7];"" printNL;
+123.456,-10234.1,10.0 do: [^self printNL: 2];"" printNL;
+123.456,-10234.1,10.0 do: [^self printNL: 0];"" printNL;
+
+10,-10,4,0 do: [123.45 printNL: ^self];"" printNL;
+
+
+"
+### double, packed with specification of 10 decimal places
+" printNL;
+123.456,-10234.1,10.0,88log do: [^self print: 20 with: 10];"" printNL;
+
+"
+### float, packed with specification of 10 decimal places
+" printNL;
+123.456,-10234.1,10.0,88log do: [asFloat print: 20 with: 10];"" printNL;
+
+"
+### multi-type, packed with specification of 10 decimal places
+" printNL;
+123,-10234.1,10.0,"88log" do: [^self print: 20 with: 10];"" printNL;
+
+
+"
+### float
+not accessed
+" printNL;
+
+"
+### block strings
+" printNL;
+
+"hello", "there","everyone" do: [^self printNL: 10];"" printNL;
+"hello", "there","everyone" do: [^self printNL: -10];"" printNL;
+"hello", "there","everyone" do: [^self printNL: -4];"" printNL;
+"hello", "there","everyone" do: [^self printNL: 0];"" printNL;
+
+10,-10,4,5,0 do: ["hello" printNL: ^self];"" printNL;
+
+"
+### lstore strings
+" printNL;
+
+!l <- "hello","there","everyone" send: [^self fixed];
+l do: [^self printNL: 10];"" printNL;
+l do: [^self printNL: -10];"" printNL;
+l do: [^self printNL: 4];"" printNL;
+l do: [^self printNL: -4];"" printNL;
+l do: [^self printNL: 0];"" printNL;
+
+10,-10,4,5,0 do: ["hello" fixed printNL: ^self];"" printNL;
+
+"
+### selectors
+" printNL;
+
+'aselector','another' do: [10 printOf: ^self;"" printNL];"" printNL;
+'aselector','another' do: [-10 printOf: ^self;"" printNL];"" printNL;
+'aselector','another' do: [4 printOf: ^self;"" printNL];"" printNL;
+'aselector','another' do: [-5 printOf: ^self;"" printNL];"" printNL;
+'aselector','another' do: [5 printOf: ^self;"" printNL];"" printNL;
+'aselector','another' do: [0 printOf: ^self;"" printNL];"" printNL;
+
+10,-10,4,5,0 do: [^self printOf: 'value';"" printNL];"" printNL;
+
+
+"
+### integers
+" printNL;
+12345,-12345,0,10,11111111111 do: [^self printNL: 15];"" printNL;
+12345,-12345,0,10,11111111111 do: [^self printNL: -10];"" printNL;
+12345,-12345,0,10,11111111111 do: [^self printNL: -4];"" printNL;
+12345,-12345,0,10,11111111111 do: [^self printNL: 5];"" printNL;
+12345,-12345,0,10,11111111111 do: [^self printNL: 0];"" printNL;
+
+10,-10,4,5,0 do: [12345 printNL: ^self];"" printNL;
+
+
+"
+----------------------------
+-----  Double PrintOf  -----
+----------------------------
+" printNL;
+
+"
+-----  Test each scalar data type 
+
+###  Character
+" printNL;
+### not reached
+
+"
+### Double
+" printNL;
+-123.456 printNL: 10.1;
+123.456 printNL: -110.101;
+123.456 printNL: 4.0;
+123.456 printNL: 0.0;
+
+"
+### float
+" printNL;
+# not used
+
+"
+### lstore string
+" printNL;
+"hello there" fixed printNL: 15.3;
+"hello there" fixed printNL: -15.0;
+"hello there" fixed printNL: 4.2;
+"hello there" fixed printNL: 0.0;
+
+"
+### block string
+" printNL;
+"hello there" printNL: 15.3;
+"hello there" printNL: -15.2;
+"hello there" printNL: 4.0;
+"hello there" printNL: 0.0;
+
+"
+### selector
+" printNL;
+### 'print:' is defined to be 'print' for selectors - must use 'printOf:' to
+### really reach the primitive.
+10.2 printOf: 'value';"" printNL;
+-10.0 printOf: 'value';"" printNL;
+4.22 printOf: 'value';"" printNL;
+0.0 printOf: 'value';"" printNL;
+
+"
+### integer
+" printNL;
+-1234 printNL: 10.33;
+1234 printNL: -10.0;
+1234 printNL: 4.1;
+1234 printNL: 3.0;
+1234 printNL: 0.0;
+11111111111 printNL: 15.55;
+
+
+"
+-----  Test each list data type   -----
+
+### character
+" printNL;
+### not reached
+
+"
+### double
+" printNL;
+123.456,-10234.1,10.0 do: [^self printNL: 10.1];"" printNL;
+123.456,-10234.1,10.0 do: [^self printNL: -25.11];"" printNL;
+123.456,-10234.1,10.0 do: [^self printNL: 7.3];"" printNL;
+123.456,-10234.1,10.0 do: [^self printNL: 4.22];"" printNL;
+123.456,-10234.1,10.0 do: [^self printNL: 0.0];"" printNL;
+
+10.2,-40.11,4.1,0.0 do: [123.45 printNL: ^self];"" printNL;
+
+
+"
+### float
+not accessed
+" printNL;
+
+"
+### block strings
+" printNL;
+
+"hello", "there","everyone" do: [^self printNL: 10.0];"" printNL;
+"hello", "there","everyone" do: [^self printNL: -10.9];"" printNL;
+"hello", "there","everyone" do: [^self printNL: -4.0];"" printNL;
+"hello", "there","everyone" do: [^self printNL: 0.0];"" printNL;
+
+10.2,-10.0,4.9,5.2,0.0 do: ["hello" printNL: ^self];"" printNL;
+
+"
+### lstore strings
+" printNL;
+
+!l <- "hello","there","everyone" send: [^self fixed];
+l do: [^self printNL: 10];"" printNL;
+l do: [^self printNL: -10.0];"" printNL;
+l do: [^self printNL: -4.2];"" printNL;
+l do: [^self printNL: 0.0];"" printNL;
+
+10.3,-10.0,4.4,5.0,0.0 do: ["hello" fixed printNL: ^self];"" printNL;
+
+"
+### selectors
+" printNL;
+
+'aselector','another' do: [10.0 printOf: ^self;"" printNL];"" printNL;
+'aselector','another' do: [-10.4 printOf: ^self;"" printNL];"" printNL;
+'aselector','another' do: [4.22 printOf: ^self;"" printNL];"" printNL;
+'aselector','another' do: [0.0 printOf: ^self;"" printNL];"" printNL;
+
+10.0,-10.3,4.1,5.22,0.0 do: [^self printOf: 'value';"" printNL];"" printNL;
+
+"
+### integers
+" printNL;
+12345,-12345,0,10,11111111111 do: [^self printNL: 15.0];"" printNL;
+12345,-12345,0,10,11111111111 do: [^self printNL: -10.5];"" printNL;
+12345,-12345,0,10,11111111111 do: [^self printNL: 4.99];"" printNL;
+12345,-12345,0,10,11111111111 do: [^self printNL: 5.0];"" printNL;
+12345,-12345,0,10,11111111111 do: [^self printNL: 0.0];"" printNL;
+
+10.2,-10.0,4.99,5.4,5.2,0.0 do: [12345 printNL: ^self];"" printNL;
+
+
+"
+-----------------------------
+-----  PrintWithCommas  -----
+-----------------------------
+" printNL;
+
+"
+-----  Test each scalar data type 
+
+###  Character
+" printNL;
+### Not Accessed 
+
+"
+### float
+" printNL;
+# not used
+
+"
+### lstore string
+" printNL;
+15 printWithCommasOf: ("hello there" fixed);"" printNL;
+15.2 printWithCommasOf: ("hello there" fixed);"" printNL;
+15,2,0,-10 do: [^self printWithCommasOf: ("howdee" fixed);"" printNL];
+15.1,2.2,0.0,-10.9 do: [^self printWithCommasOf: ("howdee" fixed);"" printNL];
+!l <- "howdee","everyone" send: [^self fixed];
+l do: [8 printWithCommasOf: ^self; "" printNL];
+l do: [8.0 printWithCommasOf: ^self; "" printNL];
+
+
+"
+
+### block string
+" printNL;
+15 printWithCommasOf: "hello there";"" printNL;
+15.2 printWithCommasOf: "hello there";"" printNL;
+15,2,0,-10 do: [^self printWithCommasOf: "howdee"; "" printNL];
+15.1,2.2,0.0,-10.9 do: [^self printWithCommasOf: "howdee"; "" printNL];
+"howdee","everyone" do: [8 printWithCommasOf: ^self; "" printNL];
+"howdee","everyone" do: [8.0 printWithCommasOf: ^self; "" printNL];
+
+"
+
+### selector
+" printNL;
+### 'print:' is defined to be 'print' for selectors - must use 'printOf:' to
+### really reach the primitive.
+10 printWithCommasOf: 'value';"" printNL;
+10.2 printWithCommasOf: 'value';"" printNL;
+15,2,0,-10 do: [^self printWithCommasOf: 'value'; "" printNL];
+15.1,2.2,0.0,-10.9 do: [^self printWithCommasOf: 'value'; "" printNL];
+'a','b' do: [8 printWithCommasOf: ^self; "" printNL];
+'a','b' do: [8.0 printWithCommasOf: ^self; "" printNL];
+
+
+
+"
+### Double and Integer
+" printNL;
+
+### try some simple ones first ...
+1234.4 printWithCommas: 5.0;"" printNL;
+123.456 printWithCommas: -10;"" printNL;
+1234.56 printWithCommas: -10;"" printNL;
+123.456 printWithCommas: -10.5;"" printNL;
+1234.56 printWithCommas: -10.5;"" printNL;
+1234.56 printWithCommas: -11.5;"" printNL;
+1234.56 printWithCommas: 0.0;"" printNL;
+
+1234 printWithCommas: 10;"" printNL;
+123 printWithCommas: -10.0;"" printNL;
+1234 printWithCommas: -10;"" printNL;
+1234 printWithCommas: 0.0;"" printNL;
+
+### non-scalar double numbers
+10.2,0.0,4.0,-9.1 do: [12345.23 printWithCommas: ^self; "" printNL];
+10.2,0.0,4.0,-9.1 do: [12345 printWithCommas: ^self; "" printNL];
+1234.23,123.9,1234567.11 do: [10.2 printWithCommasOf: ^self; "" printNL];
+1234.23,123.9,1234567.11 do: [10 printWithCommasOf: ^self; "" printNL];
+
+### non-scalar integer numbers
+10,0,4,-9 do: [12345.23 printWithCommas: ^self; "" printNL];
+10,0,4,-9 do: [12345 printWithCommas: ^self; "" printNL];
+1234,123,1234567 do: [10.2 printWithCommasOf: ^self; "" printNL];
+1234,123,1234567 do: [10 printWithCommasOf: ^self; "" printNL];
+
+### test that the right number of commas show up ...
+1234 printWithCommas: 10.1;"" printNL;
+123456 printWithCommas: 10.1;"" printNL;
+-123456 printWithCommas: 10;"" printNL;
+1234567 printWithCommas: 10;"" printNL;
+
+### Test UTIL_FormatNumberWithCommas ...
+### Step 1:
+123.45 printWithCommas: 10.0;"" printNL;
+123.45 printWithCommas: 10.5;"" printNL;
+123.45 printWithCommas: 4.2;"" printNL;
+
+### Step 2:
+### calculate the number of whole digits...
+123.0 printWithCommas: 10;
+123.456 printWithCommas: 10;
+-123.456 printWithCommas: 10;
+1234.0 printWithCommas: 4;
+-1234.0 printWithCommas: 10;
+### Step 3 - output the number covered by the other cases.
+
+
+"
+--------------------------------
+-----  Test PrintOf limits  ----
+--------------------------------
+" printNL;
+
+###
+#  Test Max Double as the value
+###
+8.9e307 printNL: 10;
+8.9e307 printNL: 400;
+8.9e307 printNL: 10.10;
+-8.9e307 printNL: 400.21;
+10,400 do: [8.9e307 asDouble printNL: ^self];"" printNL;
+10.2,400.1 do: [8.9e307 asDouble printNL: ^self];"" printNL;
+
+###
+#  Test the Maximum Formats
+###
+
+### Test RealizeFields 4 cases:
+102.34 printNL: 8.9e307;
+102.34 printNL: 15.11;
+102.34 printNL: -8.9e307;
+102.34 printNL: -10000.7;
+102.34 printNL: -15.11;
+102.34 printNL: -20.555555555;
+
+### Test ProduceDoubleFormatForDouble:
+### withCommas:
+1102.34 printWithCommas: -15000.11;"" printNL;
+1102.34 printWithCommas: -15.0;"" printNL;
+1102.34 printWithCommas: 40.11;"" printNL;
+1102.34 printWithCommas: -40.25;"" printNL;
+### withoutCommas:
+1102.34 printNL: -15.0;
+1102.34 printNL: 40.11;
+1102.34 printNL: -40.25;
+
+### test exactly the correct field width
+1234 printNL: 4;
+1234.5 printNL: -6.1;
+
+### test for the right number of commas
+8.9e307 printWithCommas: 425.1; "" printNL;
+
+### test printing factorial results
+3 defineMethod: 
+	[|factorial|
+	    ^self > 1 ifTrue: [ ^self * ((^self - 1) asInteger factorial) ]
+		      ifFalse: [1]
+	];
+
+150,140,130,120,110,100,90,80,70,60,50,40,30,20,10,0
+	do: [factorial printNL; factorial/^self printNL:400];
+
+
+"
+
+
+*********************************************************
+(PART 3)
+--------  IntegerSPrint and DoubleSPrint  	 --------
+--------  Primitives. 				 --------
+*********************************************************
+" printNL;
+
+"
+-----------------------------
+-----  Integer SPrint   -----
+-----------------------------
+" printNL;
+
+"
+-----  Test each scalar data type 
+
+###  Character
+" printNL;
+### not reached
+
+
+"
+### Double
+" printNL;
+!s <- 123.456 sprint: 10;s count printNL;s printNL;"" printNL;
+!s <- -123.456 sprint: -10;s count printNL;s printNL;"" printNL;
+!s <- 123.456 sprint: 4;s count printNL;s printNL;"" printNL;
+!s <- 123.456 sprint: 0;s count printNL;s printNL;"" printNL;
+
+"
+### float
+" printNL;
+# not used
+
+"
+### lstore string
+" printNL;
+!s <- "hello there" fixed sprint: 15;s count printNL;s printNL;"" printNL;
+!s <- "hello there" fixed sprint: -15;s count printNL;s printNL;"" printNL;
+!s <- "hello there" fixed sprint: 4;s count printNL;s printNL;"" printNL;
+!s <- "hello there" fixed sprint: 0;s count printNL;s printNL;"" printNL;
+
+"
+### block string
+" printNL;
+!s <- "hello there" sprint: 15;s count printNL;s printNL;"" printNL;
+!s <- "hello there" sprint: -15;s count printNL;s printNL;"" printNL;
+!s <- "hello there" sprint: 4;s count printNL;s printNL;"" printNL;
+!s <- "hello there" sprint: 0;s count printNL;s printNL;"" printNL;
+
+"
+### selector
+" printNL;
+### 'print:' is defined to be 'print' for selectors - must use 'printOf:' to
+### really reach the primitive.
+!s <- 10 sprintOf: 'value';s count printNL;s printNL;"" printNL;
+!s <- -10 sprintOf: 'value';s count printNL;s printNL;"" printNL;
+!s <- 4 sprintOf: 'value';s count printNL;s printNL;"" printNL;
+!s <- 0 sprintOf: 'value';s count printNL;s printNL;"" printNL;
+
+
+"
+### integer
+" printNL;
+!s <- 1234 sprint: 10;s count printNL;s printNL;"" printNL;
+!s <- -1234 sprint: -10;s count printNL;s printNL;"" printNL;
+!s <- 1234 sprint: 4;s count printNL;s printNL;"" printNL;
+!s <- 1234 sprint: 3;s count printNL;s printNL;"" printNL;
+!s <- 1234 sprint: 0;s count printNL;s printNL;"" printNL;
+!s <- 11111111111 sprint: 15;s count printNL;s printNL;"" printNL;
+
+
+"
+-----  Test each list data type   -----
+
+### character
+" printNL;
+### not reached
+Object defineMethod: 
+[|dumpStringList| ^self do: [^self count printNL; ^self printNL; "" printNL]];
+
+"
+### double
+" printNL;
+!s <- 123.456,-10234.1,10.0 send: [^self sprint: 10];s dumpStringList;"" printNL;
+!s <- 123.456,-10234.1,10.0 send: [^self sprint: 4];s dumpStringList;"" printNL;
+!s <- 123.456,-10234.1,10.0 send: [^self sprint: 0];s dumpStringList;"" printNL;
+
+!s <- 10,-10,4,0 send: [123.45 sprint: ^self];s dumpStringList;"" printNL;
+
+
+"
+### float
+not accessed
+" printNL;
+
+"
+### block strings
+" printNL;
+
+!s <- "hello", "there","everyone" send: [^self sprint: 10];s dumpStringList;"" printNL;
+!s <- "hello", "there","everyone" send: [^self sprint: -4];s dumpStringList;"" printNL;
+!s <- "hello", "there","everyone" send: [^self sprint: 0];s dumpStringList;"" printNL;
+
+!s <- 10,-10,4,5,0 send: ["hello" sprint: ^self];s dumpStringList;"" printNL;
+
+"
+### lstore strings
+" printNL;
+
+!l <- "hello","there","everyone" send: [^self fixed];
+!s <- l send: [^self sprint: -10];s dumpStringList;"" printNL;
+!s <- l send: [^self sprint: 5];s dumpStringList;"" printNL;
+!s <- l send: [^self sprint: 0];s dumpStringList;"" printNL;
+
+!s <- 10,-10,4,5,0 send: ["hello" fixed sprint: ^self];s dumpStringList;"" printNL;
+
+"
+### selectors
+" printNL;
+
+!s <- 'aselector','another' send: [-10 sprintOf: ^self];s dumpStringList;"" printNL;
+!s <- 'aselector','another' send: [4 sprintOf: ^self];s dumpStringList;"" printNL;
+!s <- 'aselector','another' send: [0 sprintOf: ^self];s dumpStringList;"" printNL;
+
+!s <- -10,5,0 send: [^self sprintOf: 'value'];s dumpStringList;"" printNL;
+
+
+
+"
+### integers
+" printNL;
+!s <- 12345,-12345,0,10,11111111111 send: [^self sprint: 15];s dumpStringList;"" printNL;
+!s <- 12345,-12345,0,10,11111111111 send: [^self sprint: 5];s dumpStringList;"" printNL;
+!s <- 12345,-12345,0,10,11111111111 send: [^self sprint: 0];s dumpStringList;"" printNL;
+
+!s <- 10,-10,4,5,0 send: [12345 sprint: ^self];s dumpStringList;"" printNL;
+
+
+"
+----------------------------
+-----  Double PrintOf  -----
+----------------------------
+" printNL;
+
+"
+-----  Test each scalar data type 
+
+###  Character
+" printNL;
+### not reached
+
+"
+### Double
+" printNL;
+!s <- 123.456 sprint: 10.1;s count printNL;s printNL;"" printNL;
+!s <- 123.456 sprint: -110.101;s count printNL;s printNL;"" printNL;
+!s <- 123.456 sprint: 4.0;s count printNL;s printNL;"" printNL;
+!s <- 123.456 sprint: 0.0;s count printNL;s printNL;"" printNL;
+
+"
+### float
+" printNL;
+# not used
+
+"
+### lstore string
+" printNL;
+!s <- "hello there" fixed sprint: 15.3;s count printNL;s printNL;"" printNL;
+!s <- "hello there" fixed sprint: -15.0;s count printNL;s printNL;"" printNL;
+!s <- "hello there" fixed sprint: 4.2;s count printNL;s printNL;"" printNL;
+!s <- "hello there" fixed sprint: 0.0;s count printNL;s printNL;"" printNL;
+
+"
+### block string
+" printNL;
+!s <- "hello there" sprint: 15.3;s count printNL;s printNL;"" printNL;
+!s <- "hello there" sprint: -15.2;s count printNL;s printNL;"" printNL;
+!s <- "hello there" sprint: 4.0;s count printNL;s printNL;"" printNL;
+!s <- "hello there" sprint: 0.0;s count printNL;s printNL;"" printNL;
+
+"
+### selector
+" printNL;
+### 'print:' is defined to be 'print' for selectors - must use 'printOf:' to
+### really reach the primitive.
+!s <- 10.2 sprintOf: 'value';"" printNL;s count printNL;s printNL;"" printNL;
+!s <- -10.0 sprintOf: 'value';"" printNL;s count printNL;s printNL;"" printNL;
+!s <- 4.22 sprintOf: 'value';"" printNL;s count printNL;s printNL;"" printNL;
+!s <- 0.0 sprintOf: 'value';"" printNL;s count printNL;s printNL;"" printNL;
+
+"
+### integer
+" printNL;
+!s <- -1234 sprint: -10.2;s count printNL;s printNL;"" printNL;
+!s <- 1234 sprint: 3.3;s count printNL;s printNL;"" printNL;
+!s <- 1234 sprint: 0.0;s count printNL;s printNL;"" printNL;
+!s <- 11111111111 sprint: 15.55;s count printNL;s printNL;"" printNL;
+
+
+"
+-----  Test each list data type   -----
+
+### character
+" printNL;
+### not reached
+
+"
+### double
+" printNL;
+!s <- 123.456,-10234.1,10.0 send: [^self sprint: 10.1];s dumpStringList;"" printNL;
+!s <- 123.456,-10234.1,10.0 send: [^self sprint: -25.11];s dumpStringList;"" printNL;
+!s <- 123.456,-10234.1,10.0 send: [^self sprint: 4.0];s dumpStringList;"" printNL;
+!s <- 123.456,-10234.1,10.0 send: [^self sprint: 0.0];s dumpStringList;"" printNL;
+
+!s <- 10.2,-40.11,4.1,0.0 send: [123.45 sprint: ^self];s dumpStringList;"" printNL;
+
+
+"
+### float
+not accessed
+" printNL;
+
+"
+### block strings
+" printNL;
+
+!s <- "hello", "there","everyone" send: [^self sprint: 10.0];s dumpStringList;"" printNL;
+!s <- "hello", "there","everyone" send: [^self sprint: -4.3];s dumpStringList;"" printNL;
+!s <- "hello", "there","everyone" send: [^self sprint: 0.0];s dumpStringList;"" printNL;
+
+!s <- 10.2,-10.0,4.9,5.2,0.0 send: ["hello" sprint: ^self];s dumpStringList;"" printNL;
+
+"
+### lstore strings
+" printNL;
+
+!l <- "hello","there","everyone" send: [^self fixed];
+!s <- l send: [^self sprint: -10.0];s dumpStringList;"" printNL;
+!s <- l send: [^self sprint: -4.2];s dumpStringList;"" printNL;
+!s <- l send: [^self sprint: 0.0];s dumpStringList;"" printNL;
+
+!s <- 10.3,-10.0,4.4,5.0,0.0 send: ["hello" fixed sprint: ^self];s dumpStringList;"" printNL;
+
+"
+### selectors
+" printNL;
+
+!s <- 'aselector','another' send: [-10.4 sprintOf: ^self];s dumpStringList;"" printNL;
+!s <- 'aselector','another' send: [4.22 sprintOf: ^self];s dumpStringList;"" printNL;
+!s <- 'aselector','another' send: [0.0 sprintOf: ^self];s dumpStringList;"" printNL;
+
+!s <- -10.3,5.22,0.0 send: [^self sprintOf: 'value'];s dumpStringList;"" printNL;
+
+"
+### integers
+" printNL;
+!s <- 12345,-12345,0,10,11111111111 send: [^self sprint: 15.0];s dumpStringList;"" printNL;
+!s <- 12345,-12345,0,10,11111111111 send: [^self sprint: -10.5];s dumpStringList;"" printNL;
+!s <- 12345,-12345,0,10,11111111111 send: [^self sprint: 5.99];s dumpStringList;"" printNL;
+!s <- 12345,-12345,0,10,11111111111 send: [^self sprint: 0.0];s dumpStringList;"" printNL;
+
+!s <- 10.2,-10.0,4.99,5.4,0.0 send: [12345 sprint: ^self];s dumpStringList;"" printNL;
+
+
+"
+-----------------------------
+-----  SPrintWithCommas  -----
+-----------------------------
+" printNL;
+
+"
+-----  Test each scalar data type 
+
+###  Character
+" printNL;
+### Not Accessed 
+
+"
+### float
+" printNL;
+# not used
+
+"
+### lstore string
+" printNL;
+!s <- 15 sprintWithCommasOf: ("hello there" fixed);s printNL;"" printNL;
+!s <- 15.0 sprintWithCommasOf: ("hello there" fixed);s printNL;"" printNL;
+!l <- "howdee","everyone" send: [^self fixed];
+!s <- l send: [8 sprintWithCommasOf: ^self];s dumpStringList; "" printNL;
+!s <- l send: [8.0 sprintWithCommasOf: ^self];s dumpStringList; "" printNL;
+
+
+"
+
+### block string
+" printNL;
+!s <- 15 sprintWithCommasOf: "hello there";s printNL;"" printNL;
+!s <- 15.2 sprintWithCommasOf: "hello there";s printNL;"" printNL;
+!s <- "howdee","everyone" send: [8 sprintWithCommasOf: ^self];s dumpStringList; "" printNL;
+!s <- "howdee","everyone" send: [8.0 sprintWithCommasOf: ^self];s dumpStringList; "" printNL;
+
+"
+
+### selector
+" printNL;
+### 'print:' is defined to be 'print' for selectors - must use 'printOf:' to
+### really reach the primitive.
+!s <- 10 sprintWithCommasOf: 'value';s printNL;"" printNL;
+!s <- 10.2 sprintWithCommasOf: 'value';s printNL;"" printNL;
+!s <- 'a','b' send: [8 sprintWithCommasOf: ^self];s dumpStringList;"" printNL;
+!s <- 'a','b' send: [8.0 sprintWithCommasOf: ^self];s dumpStringList;"" printNL;
+
+
+
+"
+### Double and Integer
+" printNL;
+
+!s <- 1234.456 sprintWithCommas: 20;s count printNL;s printNL;"" printNL;
+!s <- 1234.456 sprintWithCommas: 20.0;s count printNL;s printNL;"" printNL;
+!s <- 1234.4 sprintWithCommas: 5.0;s count printNL;s printNL;"" printNL;
+!s <- 1234.3 sprintWithCommas: 0;s count printNL;s printNL;
+
+!s <- 1234567 sprintWithCommas: 20;s count printNL;s printNL;"" printNL;
+!s <- 1234567 sprintWithCommas: 20.0;s count printNL;s printNL;"" printNL;
+!s <- 1234567 sprintWithCommas: 5.0;s count printNL;s printNL;"" printNL;
+!s <- 1234 sprintWithCommas: 0;s count printNL;s printNL;"" printNL;
+
+### non-scalar double numbers
+!s <- 20.2,4.0,0,-9.1 send: [12345.23 sprintWithCommas: ^self];s dumpStringList;"" printNL;
+!s <- 20,4,0,-9 send: [12345.23 sprintWithCommas: ^self];s dumpStringList;"" printNL;
+
+### non-scalar integer numbers
+!s <- 20.2,4.0,0,-9.1 send: [12345 sprintWithCommas: ^self];s dumpStringList;"" printNL;
+!s <- 20,4,0,-9 send: [12345 sprintWithCommas: ^self];s dumpStringList;"" printNL;
+
+"
+---------------------------------
+-----  Test SPrintOf limits  ----
+---------------------------------
+" printNL;
+
+###
+#  Test the Maximum Double Number as the value
+###
+
+!s <- 8.9e307 sprint: 10;s count printNL;s printNL;"" printNL;
+!s <- 8.9e307 sprint: 400;s count printNL;s printNL;"" printNL;
+!s <- 8.9e307, 10.2 send: [^self sprint: 10];s dumpStringList;"" printNL;
+!s <- -8.9e307 sprint: 400.51;s count printNL;s printNL;"" printNL;
+!s <- 8.9e307 asDouble, 10.2 send: [^self sprint: 10.2];s dumpStringList;"" printNL;
+!s <- 8.9e307 sprintWithCommas: 10.0;s count printNL;s printNL;
+!s <- 8.9e307 sprintWithCommas: 10;s count printNL;s printNL;
+!s <- 5.2,6.0,200.0,420.0 send: [-8.9e307 sprintWithCommas: ^self];s dumpStringList;"" printNL;
+!s <- 5,6,200,420 send: [8.9e307 sprintWithCommas: ^self];s dumpStringList;"" printNL;
+
+### 
+#  Test the Maximum Formats
+###
+!s <- 1234.56 sprint: -8.9e307;s count printNL;s printNL;"" printNL;
+!s <- 1234.56 sprint: 20.5555555;s count printNL;s printNL;"" printNL;
+
+!s <- 1234.56 sprintWithCommas: -8.9e307;s count printNL;s printNL;"" printNL;
+!s <- 1234.56 sprintWithCommas: 20.5555555;s count printNL;s printNL;"" printNL;
+
+
+
+
+###########################################################
+#		End of tests ...			  #
+###########################################################
+newLine print; "End of file: PFprint.S" printNL; newLine print;
+?g
+

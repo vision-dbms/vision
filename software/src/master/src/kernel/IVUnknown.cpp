@@ -209,7 +209,9 @@ void Vca::VcaSerializerForInterface::wrapupIncomingSerialization () {
 
     default: {
 	    RTTI iRTTI (this);
-	    raiseUnimplementedOperationException (
+	    // Is this really worth dying for???
+	    //	    raiseUnimplementedOperationException (
+	    log (
 		"%s::wrapupIncomingSerialization: Unrecognized Site # %u", iRTTI.name (), m_xObjectSite
 	    );
 	 }

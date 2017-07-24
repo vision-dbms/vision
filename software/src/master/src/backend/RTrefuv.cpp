@@ -145,7 +145,7 @@ PublicFnDef void rtREFUV_SetCodomainDomainRatio (double ratio) {
  *
  *****/
 PublicFnDef M_CPD * __cdecl rtREFUV_New (
-    M_CPD*			pPPT,
+    rtPTOKEN_Handle*		pPPT,
     M_CPD*			rTokenRefCPD,
     int				rTokenRefIndex,
     Ref_UV_Initializer		initFn,
@@ -170,7 +170,7 @@ PublicFnDef M_CPD * __cdecl rtREFUV_New (
 
 
 PublicFnDef M_CPD * __cdecl rtREFUV_New (
-    M_CPD *pPPT, M_CPD *pRPT, Ref_UV_Initializer initFn, ...
+    rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT, Ref_UV_Initializer initFn, ...
 ) {
     NewCount++;
 
@@ -233,9 +233,8 @@ PrivateFnDef void InitializeRefUV (M_CPD *cpd, size_t nelements, va_list ap) {
  *****  Standard RefUV instantiation routine.
  *
  *  Arguments:
- *	pTokenRefCPD/Index	- a reference to a POP for the P-Token which
- *				  will define the initial positional state of
- *				  this U-Vector.
+ *	pPPT			- the positional p-token of the result.
+ *	pRPT			- the referential p-token of the result.
  *	rTokenRefCPD/Index	- a reference to a POP for a P-Token associated
  *				  with the positional state referenced by the
  *				  elements of this U-Vector.
@@ -244,49 +243,14 @@ PrivateFnDef void InitializeRefUV (M_CPD *cpd, size_t nelements, va_list ap) {
  *	A standard CPD for the RefUV created.
  *
  *****/
-PublicFnDef M_CPD *rtREFUV_New (
-    M_CPD*			pTokenRefCPD,
-    int				pTokenRefIndex,
-    M_CPD*			rTokenRefCPD,
-    int				rTokenRefIndex
-)
-{
-    VCPDReference pPPT (pTokenRefCPD, pTokenRefIndex, RTYPE_C_PToken);
+PublicFnDef M_CPD *rtREFUV_New (rtPTOKEN_Handle *pPPT, M_CPD *pRPTRef, int xRPTRef) {
     return rtREFUV_New (
-	pPPT,
-	rTokenRefCPD,
-	rTokenRefIndex,
-	InitializeRefUV,
-	rtPTOKEN_BaseElementCount (rTokenRefCPD, rTokenRefIndex)
+	pPPT, pRPTRef, xRPTRef, InitializeRefUV, rtPTOKEN_BaseElementCount (pRPTRef, xRPTRef)
     );
 }
 
-PublicFnDef M_CPD *rtREFUV_New (M_CPD *pPPT, M_CPD *pRPTRef, int xRPTRef) {
-    return rtREFUV_New (
-	pPPT,
-	pRPTRef,
-	xRPTRef,
-	InitializeRefUV,
-	rtPTOKEN_BaseElementCount (pRPTRef, xRPTRef)
-    );
-}
-
-
-/*---------------------------------------------------------------------------
- *****  Standard RefUV instantiation routine.
- *
- *  Arguments:
- *	posPToken		- the positional P-Token of the new uvector.
- *	refPToken		- the referential P-Token of the new uvector.
- *
- *  Returns:
- *	A standard CPD for the RefUV created.
- *
- *****/
-PublicFnDef M_CPD *rtREFUV_New (M_CPD *pPPT, M_CPD *pRPT) {
-    return rtREFUV_New (
-	pPPT, pRPT, InitializeRefUV, rtPTOKEN_CPD_BaseElementCount (pRPT)
-    );
+PublicFnDef M_CPD *rtREFUV_New (rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT) {
+    return rtREFUV_New (pPPT, pRPT, InitializeRefUV, pRPT->cardinality ());
 }
 
 
@@ -417,8 +381,7 @@ PublicFnDef void rtREFUV_ComplainAboutElementVal (
  *****/
 PublicFnDef rtREFUV_TypePTR_Reference rtREFUV_AlignReference (
     rtREFUV_TypePTR_Reference	refp
-)
-{
+) {
     int value, refNil, theEnd, x, begindel, enddel, adjustment;
 
 #define outputValue\
@@ -459,13 +422,13 @@ PublicFnDef rtREFUV_TypePTR_Reference rtREFUV_AlignReference (
     AlignReferenceCount++;
 
 /*****  Return if no alignment is needed...  *****/
-    if (rtREFUV_Ref_RefPTokenCPD (refp)->ReferenceIsNil (rtPTOKEN_CPx_NextGeneration))
+    if (refp->RPT ()->isTerminal ())
 	return refp;
 
 /***** Otherwise - referentially align it... *****/
 
 /***** Setup for the traversal *****/
-    rtPTOKEN_CType *ptokenc = rtPTOKEN_CPDCumAdjustments (rtREFUV_Ref_RefPTokenCPD (refp));
+    rtPTOKEN_CType *ptokenc = refp->RPT ()->getAdjustments ();
     refNil = rtPTOKEN_PTC_BaseCount (ptokenc);
 
     theEnd = false;
@@ -478,10 +441,7 @@ PublicFnDef rtREFUV_TypePTR_Reference rtREFUV_AlignReference (
 	outputValue;
 
 /***** Set the refuv's referential ptoken to the new updated one *****/
-    rtREFUV_Ref_RefPTokenCPD (refp)->release ();
-
-    rtREFUV_Ref_RefPTokenCPD (refp) =
-	M_DuplicateCPDPtr (ptokenc->NextGeneration ());
+    refp->setRPT (ptokenc->NextGeneration ());
 
     ptokenc->discard ();
 
@@ -503,7 +463,7 @@ PublicFnDef rtREFUV_TypePTR_Reference rtREFUV_AlignReference (
  *
  *  Arguments:
  *	refp			- the address of a reference.
- *	pTokenRefCPD/Index	- a CPD/Index pair referencing the P-Token
+ *	pTokenRef/Index		- a CPD/Index pair referencing the P-Token
  *				  for the positional state of the source or
  *				  target.
  *
@@ -512,20 +472,25 @@ PublicFnDef rtREFUV_TypePTR_Reference rtREFUV_AlignReference (
  *
  *****/
 PublicFnDef void rtREFUV_AlignAndValidateRef (
-    rtREFUV_TypePTR_Reference	refp, M_CPD *pTokenRefCPD, int pTokenRefIndex
-)
-{
+    DSC_Scalar *refp, M_CPD *pPTokenRef, int xPTokenRef
+) {
+    rtREFUV_AlignAndValidateRef (refp, pPTokenRef->containerHandle (), pPTokenRef->OutboundPOP (xPTokenRef));
+}
+
+PublicFnDef void rtREFUV_AlignAndValidateRef (
+    DSC_Scalar *refp, VContainerHandle *pPTokenRef, M_POP const *pPTokenPOP
+) {
 /*****  Align the reference...  *****/
     rtREFUV_AlignReference (refp);
 
 /*****  ...and check that it is referentially related to the source.  *****/
-    if (pTokenRefCPD->ReferenceDoesntName (
-	    pTokenRefIndex, rtREFUV_Ref_RefPTokenCPD (refp)
-	)
-    ) ERR_SignalFault (
+    rtPTOKEN_Handle *pRPT = refp->RPT ();
+    if (pPTokenPOP ? pPTokenRef->ReferenceDoesntName (pPTokenPOP, pRPT) : pPTokenRef->DoesntName (pRPT)) {
+	ERR_SignalFault (
 	EC__InternalInconsistency,
 	"rtREFUV_AlignAndValidateReference: Referential Inconsistency"
     );
+}
 }
 
 
@@ -550,26 +515,38 @@ PublicFnDef void rtREFUV_AlignAndValidateRef (
  *	shiftAmount		- the number of bytes in the affected region.
  *				  Values < 0 imply deletions, > 0 insertions.
  *	ap			- a <varargs.h> argument pointer referencing
- *				  the 'shift' and 'regionProcessorArg' defined by UV_Align.
+ *				  the 'shift', 'pAlignAP', 'origin', and
+ *				  'undo' values defined by UV_Align.
  *
  *  Returns:
  *	NOTHING - Executed for side effect only.
  *
  *****/
-PrivateFnDef void FillPAlignmentGap (
-    M_CPD *cpd, unsigned int Unused(index), ptrdiff_t Unused(shiftAmount), va_list ap
-) {
-/*****  Do nothing if this is a deletion...  *****/
-    rtREFUV_ElementType	const shift = va_arg(ap, int);
-    if (shift < 0)
-	return;
+class rtREFUV_Handle::AlignmentProcessor : public AlignmentFillProcessor {
+//  Construction
+public:
+    AlignmentProcessor (rtREFUV_Handle *pUV) : m_xReferenceNil (pUV->referenceNil ()) {
+    }
+//  Destruction
+public:
+    ~AlignmentProcessor () {
+    }
 
-/*****  Otherwise, fill the new region...  *****/
-    rtREFUV_ElementType const referenceNil = va_arg(ap, int);
-    rtREFUV_ElementType *p, *pl;
-    for (pl = shift + (p = rtREFUV_CPD_Element (cpd));
-         p < pl;
-	 *p++ = referenceNil);
+//  Use
+private:
+    void fill (void *pRegion, unsigned int sRegion);
+
+//  State
+private:
+    unsigned int const m_xReferenceNil;
+};
+
+void rtREFUV_Handle::AlignmentProcessor::fill (void *pRegion, unsigned int sRegion) {
+    element_t *pElement = reinterpret_cast<element_t*>(pRegion);
+    element_t const * const pLimit = pElement + sRegion / sizeof (element_t);
+
+    while (pElement < pLimit)
+	*pElement++ = m_xReferenceNil;
 }
 
 
@@ -578,17 +555,17 @@ PrivateFnDef void FillPAlignmentGap (
  ********************************/
 
 /*---------------------------------------------------------------------------
- *****  Routine to positionally AND referentially align a RefUV.
+ *****  Routine to align a reference u-vector.
  *
  *  Argument:
- *	cpd			- a CPD for the RefUV to be aligned.
+ *	bRequiringReferenceAlignment	- true if reference alignment must be
+ *					  done, false if not.
  *
  *  Returns:
- *	'cpd'
+ *	'true' if alignments were done, false otherwise
  *
  *****/
-PublicFnDef M_CPD *rtREFUV_Align (M_CPD *cpd, int referentialAlignmentRequired) {
-
+bool rtREFUV_Handle::align (bool bRequiringReferenceAlignment) {
 #define locate(x) {\
     int locateX = (x);\
     while (notEnd && locateX > currentValue) {\
@@ -607,7 +584,7 @@ PublicFnDef M_CPD *rtREFUV_Align (M_CPD *cpd, int referentialAlignmentRequired) 
     locate (ptOrigin + ptShift - adjustment);\
     while (notEnd && currentValue <= enddel) {\
 	currentValue = refNil;\
-	UV_CPD_IsASetUV (cpd) = false;\
+	clearIsASet ();\
 	goToNext;\
     }\
     adjustment += ptShift;\
@@ -616,16 +593,12 @@ PublicFnDef M_CPD *rtREFUV_Align (M_CPD *cpd, int referentialAlignmentRequired) 
 
 /*****  Validate Argument R-Type  *****/
     AlignCount++;
-    RTYPE_MustBeA ("rtREFUV_Align", M_CPD_RType (cpd), RTYPE_C_RefUV);
 
 /*------------------------------*/
 /*****  Align Positionally  *****/
 /*------------------------------*/
-    UV_Align (
-	cpd,
-	FillPAlignmentGap,
-	rtPTOKEN_BaseElementCount (cpd, UV_CPx_RefPToken)
-    );
+    AlignmentProcessor iAlignmentFillProcessor (this);
+    bool bChangesMade = alignUsing (iAlignmentFillProcessor);
 
 /*-------------------------------*/
 /*****  Align Referentially  *****/
@@ -633,28 +606,29 @@ PublicFnDef M_CPD *rtREFUV_Align (M_CPD *cpd, int referentialAlignmentRequired) 
 
 /***** if this is an unmodified uvector, and we aren't explictly asked ...  *****/
 /***** ... let's not do it!!!  *****/
-    if (cpd->IsReadOnly () && !referentialAlignmentRequired)
-	return cpd;
+    if (isReadOnly () && !bRequiringReferenceAlignment)
+	return bChangesMade;
 
 /***** if the referencial ptoken is current, all done... *****/
-    M_CPD *pTokenCPD;
-    rtPTOKEN_IsntCurrent (cpd, UV_CPx_RefPToken, pTokenCPD);
-    if (IsNil (pTokenCPD))
-	return cpd;
+    rtPTOKEN_Handle::Reference pOldRPT;
+    if (isTerminal (rptPOP (), pOldRPT))
+	return bChangesMade;
 
     RefAlignCount++;
 /***** if all alterations are beyond the uvector end, fix the ptoken and return... *****/
-    unsigned int size = UV_CPD_ElementCount (cpd);
-    if (0 == size || rtPTOKEN_AllAlterationsBeyondEnd (pTokenCPD, -1)) {
+    unsigned int size = elementCount ();
+    if (0 == size || pOldRPT->tailAdjustmentsOnly ()) {
         RefAlignEndOnlyCount++;
-	M_CPD *newPToken = rtPTOKEN_BasePToken (cpd, UV_CPx_RefPToken);
+	rtPTOKEN_Handle::Reference pNewRPT (pOldRPT->basePToken ());
 	/* Set the refuv's referential ptoken to the terminal p-token */
-	cpd->StoreReference (UV_CPx_RefPToken, newPToken);
+
+	EnableModifications ();
+	StoreReference (rptPOP (), pNewRPT);
 	/*  Update any reference nils that exist in the uvector */
 
-	int oldRefNil = rtPTOKEN_CPD_BaseElementCount (pTokenCPD);
-	int newRefNil = rtPTOKEN_CPD_BaseElementCount (newPToken);
-	int *arrayp = rtREFUV_CPD_Array (cpd);
+	element_t oldRefNil = pOldRPT->cardinality ();
+	element_t newRefNil = pNewRPT->cardinality ();
+	element_t *arrayp = array ();
 	unsigned int i = 0;
 	while (i < size) {
 	    if (*arrayp >= oldRefNil)
@@ -662,33 +636,32 @@ PublicFnDef M_CPD *rtREFUV_Align (M_CPD *cpd, int referentialAlignmentRequired) 
 	     i++;
 	     arrayp++;
 	}
-	newPToken->release ();
-	pTokenCPD->release ();
 
-	return cpd;
+	return true;
     }
 
 /***** We really need to do a referential alignment ... *****/
 /***** Setup for the traversal *****/
-    int sCodomain = rtPTOKEN_CPD_BaseElementCount(pTokenCPD);
+    unsigned int sCodomain = pOldRPT->cardinality ();
     double dCodomainDomainRatio = (double) sCodomain/size;
 
-    rtPTOKEN_CType *ptokenc = rtPTOKEN_CPDCumAdjustments (pTokenCPD);
-    pTokenCPD->release ();
+    rtPTOKEN_CType *ptokenc = pOldRPT->getAdjustments ();
 
-    int refNil = rtPTOKEN_PTC_BaseCount (ptokenc);
+    unsigned int refNil = rtPTOKEN_PTC_BaseCount (ptokenc);
 
     bool notEnd = true;
     int adjustment = 0;
 
-    if (fTracingRefAlign) IO_printf ("rtREFUV_RefAlign:[%d:%d] CDRatio=%g(%d/%d) CDCriticalRatio= %g\n",
-        cpd->SpaceIndex (), cpd->ContainerIndex (), dCodomainDomainRatio, sCodomain, size, CodomainDomainCriticalRatio);
+    if (fTracingRefAlign) IO_printf (
+	"rtREFUV_RefAlign:[%d:%d] CDRatio=%g(%d/%d) CDCriticalRatio= %g\n",
+        spaceIndex (), containerIndex (), dCodomainDomainRatio, sCodomain, size, CodomainDomainCriticalRatio
+    );
 
     if (dCodomainDomainRatio > CodomainDomainCriticalRatio) {
 	#define currentValue *arrayp 
 	#define goToNext {\
 	    if (notEnd = (++index < indexEnd))\
-    		arrayp = rtREFUV_CPD_Array (cpd) + *index;\
+    		arrayp = array () + *index;\
 	} 
 
         RefAlignRadixSortCount++;
@@ -698,12 +671,12 @@ PublicFnDef M_CPD *rtREFUV_Align (M_CPD *cpd, int referentialAlignmentRequired) 
 	unsigned int* const indexEnd = indexStart + size;
 	unsigned int* index = indexStart;
 
-        UTIL_RadixListSort ((unsigned int const *)rtREFUV_CPD_Array (cpd), index, size);
+        UTIL_RadixListSort ((unsigned int const *)array (), index, size);
 
 	/*****  Enable modifications of the U-Vector  *****/
-	cpd->EnableModifications ();
+	EnableModifications ();
 
-        int *arrayp = rtREFUV_CPD_Array (cpd) + *index;
+        element_t *arrayp = array () + *index;
 
 	/***** Traverse the referential ptoken *****/
 	rtPTOKEN_FTraverseAdjustments (ptokenc, handleInsertion, handleDeletion);
@@ -736,7 +709,7 @@ PublicFnDef M_CPD *rtREFUV_Align (M_CPD *cpd, int referentialAlignmentRequired) 
 	}
 
 	/*****  Enable modifications of the U-Vector  *****/
-	cpd->EnableModifications ();
+	EnableModifications ();
 
 	pCodomainArray = pCodomainArrayStart;
 
@@ -748,7 +721,7 @@ PublicFnDef M_CPD *rtREFUV_Align (M_CPD *cpd, int referentialAlignmentRequired) 
 	locate (refNil - adjustment + 1);
 
 	/*** Change the U-Vector according to the new values of codomain array ***/
-	int *arrayp = rtREFUV_CPD_Array (cpd);
+	element_t *arrayp = array ();
 	unsigned int tmpSize = size;
 	while (tmpSize--) {
 	    *arrayp = *(pCodomainArrayStart+*arrayp);
@@ -762,12 +735,12 @@ PublicFnDef M_CPD *rtREFUV_Align (M_CPD *cpd, int referentialAlignmentRequired) 
     }
 
     /***** Set the refuv's referential ptoken to the new updated one *****/
-    cpd->StoreReference (UV_CPx_RefPToken, ptokenc->NextGeneration ());
+    StoreReference (rptPOP (), ptokenc->NextGeneration ());
 
     ptokenc->discard ();
 
 /*****  Return the Aligned Reference UVector. *****/
-    return cpd;
+    return true;
 
 /***** Cleanup the traversal macros *****/
 
@@ -810,11 +783,20 @@ PublicFnDef void rtREFUV_AlignForExtract (
     M_CPD *sPTokenRefCPD, int sPTokenRefIndex, M_CPD *refuvCPD
 ) {
 /*****  Align the reference u-vector...  *****/
-    rtREFUV_Align (refuvCPD);
+    refuvCPD->align ();
 
 /*****  ... check that it is referentially related to the source.  *****/
-    if (sPTokenRefCPD->ReferenceDoesntName (sPTokenRefIndex, refuvCPD, UV_CPx_RefPToken)
-    ) ERR_SignalFault (
+    if (refuvCPD->ReferenceDoesntName (UV_CPx_RefPToken, sPTokenRefCPD, sPTokenRefIndex)) ERR_SignalFault (
+	EC__InternalInconsistency, "rtREFUV_AlignForExtract: Referential Inconsistency"
+    );
+}
+
+PublicFnDef void rtREFUV_AlignForExtract (rtPTOKEN_Handle *sPToken, M_CPD *refuvCPD) {
+/*****  Align the reference u-vector...  *****/
+    refuvCPD->align ();
+
+/*****  ... check that it is referentially related to the source.  *****/
+    if (refuvCPD->ReferenceDoesntName (UV_CPx_RefPToken, sPToken)) ERR_SignalFault (
 	EC__InternalInconsistency, "rtREFUV_AlignForExtract: Referential Inconsistency"
     );
 }
@@ -856,21 +838,61 @@ PublicFnDef void rtREFUV_AlignForAssign (
     M_CPD*			refuvCPD,
     M_CPD*			sPTokenRefCPD,
     int				sPTokenRefIndex
-)
-{
+) {
 /*****  Align the reference u-vector...  *****/
-    rtREFUV_Align (refuvCPD);
+    refuvCPD->align ();
 
 /*****  ... check that it is referentially related to the target...  *****/
-    if (tPTokenRefCPD->ReferenceDoesntName (tPTokenRefIndex, refuvCPD, UV_CPx_RefPToken)
-    ) ERR_SignalFault (
+    if (refuvCPD->ReferenceDoesntName (UV_CPx_RefPToken, tPTokenRefCPD, tPTokenRefIndex)) ERR_SignalFault (
 	EC__InternalInconsistency,
 	"rtREFUV_AlignForAssign: Referential Inconsistency"
     );
 
 /*****  ... and that it is positionally related to the source.  *****/
-    if (sPTokenRefCPD->ReferenceDoesntName (sPTokenRefIndex, refuvCPD, UV_CPx_PToken)
-    ) ERR_SignalFault (
+    if (refuvCPD->ReferenceDoesntName (UV_CPx_PToken, sPTokenRefCPD, sPTokenRefIndex)) ERR_SignalFault (
+	EC__InternalInconsistency,
+	"rtREFUV_AlignForAssign: Referential Inconsistency"
+    );
+}
+
+PublicFnDef void rtREFUV_AlignForAssign (
+    M_CPD*			tPTokenRefCPD,
+    int				tPTokenRefIndex,
+    M_CPD*			refuvCPD,
+    rtPTOKEN_Handle*		sPToken
+) {
+/*****  Align the reference u-vector...  *****/
+    refuvCPD->align ();
+
+/*****  ... check that it is referentially related to the target...  *****/
+    if (refuvCPD->ReferenceDoesntName (UV_CPx_RefPToken, tPTokenRefCPD, tPTokenRefIndex)) ERR_SignalFault (
+	EC__InternalInconsistency,
+	"rtREFUV_AlignForAssign: Referential Inconsistency"
+    );
+
+/*****  ... and that it is positionally related to the source.  *****/
+    if (refuvCPD->ReferenceDoesntName (UV_CPx_PToken, sPToken)) ERR_SignalFault (
+	EC__InternalInconsistency,
+	"rtREFUV_AlignForAssign: Referential Inconsistency"
+    );
+}
+
+PublicFnDef void rtREFUV_AlignForAssign (
+    rtPTOKEN_Handle*		tPToken,
+    M_CPD*			refuvCPD,
+    rtPTOKEN_Handle*		sPToken
+) {
+/*****  Align the reference u-vector...  *****/
+    refuvCPD->align ();
+
+/*****  ... check that it is referentially related to the target...  *****/
+    if (refuvCPD->ReferenceDoesntName (UV_CPx_RefPToken, tPToken)) ERR_SignalFault (
+	EC__InternalInconsistency,
+	"rtREFUV_AlignForAssign: Referential Inconsistency"
+    );
+
+/*****  ... and that it is positionally related to the source.  *****/
+    if (refuvCPD->ReferenceDoesntName (UV_CPx_PToken, sPToken)) ERR_SignalFault (
 	EC__InternalInconsistency,
 	"rtREFUV_AlignForAssign: Referential Inconsistency"
     );
@@ -907,7 +929,7 @@ PublicFnDef void rtREFUV_AlignForScalarAssign (
 )
 {
 /*****  Align the reference u-vector...  *****/
-    rtREFUV_Align (refuvCPD);
+    refuvCPD->align ();
 
 /*****  ... check that it is referentially related to the target...  *****/
     if (tPTokenRefCPD->ReferenceDoesntName (tPTokenRefIndex, refuvCPD, UV_CPx_RefPToken)
@@ -943,19 +965,20 @@ PublicFnDef void rtREFUV_ToSetUV (
     M_ASD *pContainerSpace, M_CPD *sourceCPD, M_CPD **resultCPD, M_CPD **refuvCPD
 ) {
 /*****  Align the source uvector ... *****/
-    rtREFUV_Align (sourceCPD);
+    sourceCPD->align ();
 
 /*****  ... and access the relevant source data:  *****/
-    VCPDReference pSourcePPT (sourceCPD, UV_CPx_PToken, RTYPE_C_PToken);
+    rtPTOKEN_Handle::Reference pSourcePPT (
+	static_cast<rtUVECTOR_Handle*>(sourceCPD->containerHandle ())->pptHandle ()
+    );
     unsigned int sSource = UV_CPD_ElementCount (sourceCPD);
 
 /*****  If the source is empty, ... *****/
     if (0 == sSource) {
     /*****  ... the result is trivial:  *****/
-	M_CPD *pResultPPT = rtPTOKEN_New (pContainerSpace, 0);
+	rtPTOKEN_Handle::Reference pResultPPT (new rtPTOKEN_Handle (pContainerSpace, 0));
 	*refuvCPD = rtREFUV_New (pSourcePPT, pResultPPT);
 	*resultCPD = rtREFUV_New (pResultPPT, sourceCPD, UV_CPx_RefPToken);
-	pResultPPT->release ();
     }
 /*****  ... otherwise, ...  *****/
     else {
@@ -989,7 +1012,7 @@ PublicFnDef void rtREFUV_ToSetUV (
 	}
 
     /*****  ... generate the set's domain,  ...  *****/
-	M_CPD *pResultPPT = rtPTOKEN_New (pContainerSpace, xResultElement + 1);
+	rtPTOKEN_Handle::Reference pResultPPT (new rtPTOKEN_Handle (pContainerSpace, xResultElement + 1));
 
     /*****  ... fix the source->set reference map's codomain, ...  *****/
 	(*refuvCPD)->StoreReference (UV_CPx_RefPToken, pResultPPT);
@@ -1014,8 +1037,6 @@ PublicFnDef void rtREFUV_ToSetUV (
 	}
 
     /*****  ... and clean up:  *****/
-	pResultPPT->release ();
-
 	UTIL_Free (pSortArray);
     }
 
@@ -1052,7 +1073,8 @@ PublicFnDef int rtREFUV_IsASet (M_CPD *refuvCPD, rtLINK_CType **refNilsLC) {
 
     *refNilsLC = NilOf (rtLINK_CType *);
 
-    if (UV_CPD_IsASetUV (rtREFUV_Align (refuvCPD)))
+    refuvCPD->align ();
+    if (UV_CPD_IsASetUV (refuvCPD))
 	return true;
 
 /***** Make the location link constructor ... *****/
@@ -1092,11 +1114,8 @@ PublicFnDef int rtREFUV_IsASet (M_CPD *refuvCPD, rtLINK_CType **refNilsLC) {
 	
 	return true;
     }
-    M_CPD *ptoken = rtPTOKEN_New (refuvCPD->ScratchPad (), (*refNilsLC)->ElementCount ());
-    (*refNilsLC)->Close (ptoken);
-    ptoken->release ();
+    (*refNilsLC)->Close (new rtPTOKEN_Handle (refuvCPD->ScratchPad (), (*refNilsLC)->ElementCount ()));
     return false;
-
 }
 
 /*---------------------------------------------------------------------------
@@ -1111,7 +1130,8 @@ PublicFnDef int rtREFUV_IsASet (M_CPD *refuvCPD, rtLINK_CType **refNilsLC) {
  *
  *****/
 PublicFnDef int rtREFUV_RestoreSetAttribute (M_CPD *refuvCPD) {
-    if (UV_CPD_IsASetUV (rtREFUV_Align (refuvCPD)))
+    refuvCPD->align ();
+    if (UV_CPD_IsASetUV (refuvCPD))
 	return true;
     
     int *refPtr = rtREFUV_CPD_Array (refuvCPD);
@@ -1150,10 +1170,13 @@ PublicFnDef int rtREFUV_RestoreSetAttribute (M_CPD *refuvCPD) {
  *
  *****/
 PublicFnDef M_CPD *rtREFUV_Distribute (M_CPD *refuvCPD, M_CPD *sourceuvCPD) {
-    VCPDReference pPPT (refuvCPD, UV_CPx_RefPToken, RTYPE_C_PToken);
-    return rtREFUV_UVAssign (
-	rtREFUV_New (pPPT, sourceuvCPD, UV_CPx_RefPToken), refuvCPD, sourceuvCPD
+    rtPTOKEN_Handle::Reference pPPT (
+	static_cast<rtUVECTOR_Handle*>(refuvCPD->containerHandle ())->rptHandle ()
     );
+    rtPTOKEN_Handle::Reference pRPT (
+	static_cast<rtUVECTOR_Handle*>(sourceuvCPD->containerHandle ())->rptHandle ()
+    );
+    return rtREFUV_UVAssign (rtREFUV_New (pPPT, pRPT), refuvCPD, sourceuvCPD);
 }
 
 
@@ -1191,21 +1214,16 @@ PublicFnDef M_CPD *rtREFUV_LCExtract (M_CPD *sourceCPD, rtLINK_CType* linkConstr
  *  Align the link constructor and validate its applicability as an extraction
  *  subscript for 'source'
  *****/
-    linkConstructor->AlignForExtract (rtREFUV_Align (sourceCPD, false), UV_CPx_PToken);
+    static_cast<rtREFUV_Handle*>(sourceCPD->containerHandle ())->align (false);
+    linkConstructor->AlignForExtract (sourceCPD, UV_CPx_PToken);
 
 /*****  Extract the requested values  *****/
-    return rtREFUV_Align (
-	rtREFUV_New (
-	    linkConstructor->PPT (),
-	    sourceCPD,
-	    UV_CPx_RefPToken,
-	    UV_InitLCExtractedUV,
-	    sourceCPD,
-	    linkConstructor,
-	    InitializeRefUV,
-	    rtPTOKEN_BaseElementCount (sourceCPD, UV_CPx_RefPToken)
-	)
+    rtPTOKEN_Handle::Reference pRPT (static_cast<rtUVECTOR_Handle*>(sourceCPD->containerHandle ())->rptHandle ());
+    M_CPD *pResult = rtREFUV_New (
+	linkConstructor->PPT (), pRPT, UV_InitLCExtractedUV, sourceCPD, linkConstructor, InitializeRefUV, pRPT->cardinality ()
     );
+    pResult->align ();
+    return pResult;
 }
 
 
@@ -1290,22 +1308,15 @@ PublicFnDef M_CPD *rtREFUV_UVExtract (M_CPD *sourceCPD, M_CPD *refuvCPD) {
  * Align 'source' and 'refuv' and validate 'refuv's applicability as an
  * extraction subscript for 'source'.
  *****/
-    rtREFUV_AlignForExtract (
-	rtREFUV_Align (sourceCPD, false), UV_CPx_PToken, refuvCPD
-    );
+    static_cast<rtREFUV_Handle*>(sourceCPD->containerHandle ())->align (false);
+    rtREFUV_AlignForExtract (sourceCPD, UV_CPx_PToken, refuvCPD);
 
 /*****  Extract and return the requested values  *****/
-    VCPDReference pPPT (refuvCPD, UV_CPx_PToken, RTYPE_C_PToken);
-    return rtREFUV_Align (
-	rtREFUV_New (
-	    pPPT,
-	    sourceCPD,
-	    UV_CPx_RefPToken,
-	    InitializeExtractedUV,
-	    sourceCPD,
-	    refuvCPD
-	)
-    );
+    rtPTOKEN_Handle::Reference pPPT (static_cast<rtUVECTOR_Handle*>(refuvCPD->containerHandle ())->pptHandle ());
+    rtPTOKEN_Handle::Reference pRPT (static_cast<rtUVECTOR_Handle*>(sourceCPD->containerHandle ())->rptHandle ());
+    M_CPD *pResult = rtREFUV_New (pPPT, pRPT, InitializeExtractedUV, sourceCPD, refuvCPD);
+    static_cast<rtREFUV_Handle*>(pResult->containerHandle ())->align ();
+    return pResult;
 }
 
 
@@ -1343,24 +1354,19 @@ PublicFnDef void rtREFUV_RFExtract (
  *****/
     RFExtractCount++;
 
-    rtREFUV_AlignAndValidateRef (
-	referenceAddr, rtREFUV_Align (sourceCPD, false), UV_CPx_PToken
-    );
+    static_cast<rtREFUV_Handle*>(sourceCPD->containerHandle ())->align (false);
+    rtREFUV_AlignAndValidateRef (referenceAddr, sourceCPD, UV_CPx_PToken);
 
 /*****  Extract and return the requested values  *****/
-    DSC_InitReferenceScalar (
-	*resultAddr,
- 	UV_CPD_RefPTokenCPD (sourceCPD),
+    resultAddr->constructReference (
+ 	static_cast<rtUVECTOR_Handle*>(sourceCPD->containerHandle ())->rptHandle (),
 	rtREFUV_CPD_Array (sourceCPD) [
 	    element = rtREFUV_Ref_Element (referenceAddr)
 	]
     );
     rtREFUV_AlignReference (resultAddr);
-    if (element >=
-	rtPTOKEN_CPD_BaseElementCount(rtREFUV_Ref_RefPTokenCPD (referenceAddr))
-    ) rtREFUV_Ref_Element (resultAddr) = rtPTOKEN_CPD_BaseElementCount (
-	rtREFUV_Ref_RefPTokenCPD (resultAddr)
-    );
+    if (element >= referenceAddr->RPTCardinality ())
+	rtREFUV_Ref_Element (resultAddr) = resultAddr->RPTCardinality ();
 }
 
 
@@ -1399,8 +1405,8 @@ PublicFnDef M_CPD *rtREFUV_LCAssign (
  *****/
     LCAssignCount++;
 
-    rtREFUV_Align (targetCPD);
-    rtREFUV_Align (sourceCPD);
+    targetCPD->align ();
+    sourceCPD->align ();
 
     if (sourceCPD->ReferenceDoesntName (UV_CPx_RefPToken, targetCPD, UV_CPx_RefPToken)
     ) ERR_SignalFault (
@@ -1450,8 +1456,8 @@ PublicFnDef M_CPD *rtREFUV_UVAssign (M_CPD *targetCPD, M_CPD *refuvCPD, M_CPD *s
  *****/
     UVAssignCount++;
 
-    rtREFUV_Align (targetCPD);
-    rtREFUV_Align (sourceCPD);
+    targetCPD->align ();
+    sourceCPD->align ();
 
     if (sourceCPD->ReferenceDoesntName (UV_CPx_RefPToken, targetCPD, UV_CPx_RefPToken)
     ) ERR_SignalFault (
@@ -1518,15 +1524,11 @@ PublicFnDef void rtREFUV_RFAssign (
  * Align 'target' and 'reference' and validate the applicability of
  * 'reference' as subscript for assignment into 'target'.
  *****/
-    rtREFUV_AlignAndValidateRef (
-	reference, rtREFUV_Align (targetCPD), UV_CPx_PToken
-    );
+    targetCPD->align ();
+    rtREFUV_AlignAndValidateRef (reference, targetCPD, UV_CPx_PToken);
 
 /*****  Validate the source and target referentially  *****/
-    if (targetCPD->ReferenceDoesntName (
-	    UV_CPx_RefPToken, rtREFUV_Ref_RefPTokenCPD (value)
-	)
-    ) ERR_SignalFault (
+    if (targetCPD->ReferenceDoesntName (UV_CPx_RefPToken, value->RPT ())) ERR_SignalFault (
 	EC__InternalInconsistency,
 	"rtREFUV_RFAssign: Source And Target Referentially Incompatible"
     );
@@ -1571,10 +1573,9 @@ PublicFnDef M_CPD *rtREFUV_LCAssignScalar (
     LCAssignScalarCount++;
 
 /*****  Align the reference and 'target' and perform the assignment  *****/
+    targetCPD->align ();
     return UV_LCAssignScalar (
-	rtREFUV_Align (targetCPD),
-	linkConstructor,
-	(pointer_t)&rtREFUV_Ref_Element (rtREFUV_AlignReference (valuePtr))
+	targetCPD, linkConstructor, (pointer_t)&rtREFUV_Ref_Element (rtREFUV_AlignReference (valuePtr))
     );
 }
 
@@ -1619,9 +1620,8 @@ PublicFnDef M_CPD *rtREFUV_UVAssignScalar (
  *****/
     UVAssignScalarCount++;
 
-    rtREFUV_AlignForScalarAssign (
-	rtREFUV_Align (targetCPD), UV_CPx_PToken, refuvCPD
-    );
+    targetCPD->align ();
+    rtREFUV_AlignForScalarAssign (targetCPD, UV_CPx_PToken, refuvCPD);
 
 /*****  Do the assignment and return  *****/
     targetCPD->EnableModifications ();
@@ -1697,7 +1697,7 @@ PublicFnDef M_CPD *rtREFUV_AscendingSortIndices (M_CPD *refuvCPD, bool fResultRe
     AscendingSortIndicesCount++;
 
 /*****  First align the u-vector to be sorted...  *****/
-    rtREFUV_Align (refuvCPD);
+    refuvCPD->align ();
 
 /*****  Create a new P-Token for the positional state of the result  *****/
     unsigned int cElements = UV_CPD_ElementCount (refuvCPD);
@@ -1708,11 +1708,10 @@ PublicFnDef M_CPD *rtREFUV_AscendingSortIndices (M_CPD *refuvCPD, bool fResultRe
     ) return NilOf (M_CPD*);
 
 /*****  Create and initialize the sort indices  *****/
-    M_CPD *pResultPPT = rtPTOKEN_New (refuvCPD->ScratchPad (), cElements);
+    rtPTOKEN_Handle::Reference pResultPPT (new rtPTOKEN_Handle (refuvCPD->ScratchPad (), cElements));
     M_CPD *pResult = rtREFUV_New (
 	pResultPPT, refuvCPD, UV_CPx_PToken, SortRefUV, &iSorter
     );
-    pResultPPT->release ();
 
     return pResult;
 }
@@ -1733,15 +1732,17 @@ PublicFnDef M_CPD *rtREFUV_AscendingSortIndices (M_CPD *refuvCPD, bool fResultRe
 PublicFnDef M_CPD *rtREFUV_Flip (M_CPD *refuvCPD) {
     FlipCount++;
 
-    rtREFUV_Align (refuvCPD);	//  ... alignment call is new as of 6.3.0
+    refuvCPD->align ();	//  ... alignment call is new as of 6.3.0
 
-    unsigned int size = rtPTOKEN_BaseElementCount (refuvCPD, UV_CPx_RefPToken);
+    rtPTOKEN_Handle::Reference pPPT (static_cast<rtUVECTOR_Handle*>(refuvCPD->containerHandle ())->pptHandle ());
+    rtPTOKEN_Handle::Reference pRPT (static_cast<rtUVECTOR_Handle*>(refuvCPD->containerHandle ())->rptHandle ());
+
+    unsigned int size = pRPT->cardinality ();
     if (size != UV_CPD_ElementCount (refuvCPD)) ERR_SignalFault (
-	EC__InternalInconsistency,
-	"rtREFUV_Flip: The size of the two ptokens is different"
+	EC__InternalInconsistency, "rtREFUV_Flip: The size of the two ptokens is different"
     );
 
-    M_CPD *newuvCPD = rtREFUV_New (refuvCPD, UV_CPx_RefPToken, refuvCPD, UV_CPx_PToken);
+    M_CPD *newuvCPD = rtREFUV_New (pRPT, pPPT);
 
     rtREFUV_ElementType const *pSourceArray = rtREFUV_CPD_Array (refuvCPD);
     rtREFUV_ElementType *pResultArray = rtREFUV_CPD_Array (newuvCPD);
@@ -1811,7 +1812,8 @@ PublicFnDef M_CPD *rtREFUV_PartitndSortIndices (
  *****  Algorithm
  *---------------------------------------------------------------------------*/
 /*****  Align and validate parameters...  *****/
-    partition->AlignForDistribute (rtREFUV_Align (values), UV_CPx_PToken);
+    values->align ();
+    partition->AlignForDistribute (values, UV_CPx_PToken);
 
 /*****  Create the sort indices...  *****/
     M_CPD *result = rtREFUV_New (partition->PPT (), partition->PPT ());
@@ -1883,11 +1885,10 @@ PublicFnDef M_CPD *rtREFUV_PartitndAssign (
  *****  Algorithm
  *---------------------------------------------------------------------------*/
 /*****  Align and validate parameters...  *****/
-    rtREFUV_AlignForExtract (rtREFUV_Align (target), UV_CPx_PToken, origins);
-
-    partition->AlignForAssign (
-	origins, UV_CPx_PToken, rtREFUV_Align (source), UV_CPx_PToken
-    );
+    target->align ();
+    rtREFUV_AlignForExtract (target, UV_CPx_PToken, origins);
+    source->align ();
+    partition->AlignForAssign (origins, UV_CPx_PToken, source, UV_CPx_PToken);
 
 /*****  Initialize the traversal pointers...  *****/
     rtREFUV_ElementType	*originArray = rtREFUV_CPD_Array (origins);
@@ -1991,11 +1992,12 @@ PublicFnDef void rtREFUV_PartitndPartition (
  *****  Algorithm
  *---------------------------------------------------------------------------*/
 /*****  Align and validate parameters...  *****/
-    partition->AlignForDistribute (rtREFUV_Align (values), UV_CPx_PToken);
+    values->align ();
+    partition->AlignForDistribute (values, UV_CPx_PToken);
 
 /*****  Create the major and minor partitions...  *****/
-    rtLINK_CType *majorPartition = rtLINK_RefConstructor (partition->RPT (), -1);
-    rtLINK_CType *minorPartition = rtLINK_PosConstructor (partition->PPT (), -1);
+    rtLINK_CType *majorPartition = rtLINK_RefConstructor (partition->RPT ());
+    rtLINK_CType *minorPartition = rtLINK_PosConstructor (partition->PPT ());
 
 /*****  Initialize the traversal pointers...  *****/
     rtREFUV_ElementType	const *valuesPtr = rtREFUV_CPD_Array (values);
@@ -2007,10 +2009,9 @@ PublicFnDef void rtREFUV_PartitndPartition (
     );
 
 /*****  Close and return the partitions created...  *****/
-    M_CPD *groupPToken = rtPTOKEN_New (partition->PPT ()->Space (), minorCount);
+    rtPTOKEN_Handle::Reference groupPToken (new rtPTOKEN_Handle (partition->PPT ()->Space (), minorCount));
     *majorLC = majorPartition->Close (groupPToken);
     *minorLC = minorPartition->Close (groupPToken);
-    groupPToken->release ();
 
 /*---------------------------------------------------------------------------
  *****  Link Traversal Component Handler Macro Deletions
@@ -2033,9 +2034,9 @@ PublicFnDef void rtREFUV_PartitndPartition (
  *	cartesianPT	- a standard CPD for the cartesian PToken whose row
  *                        PToken must correspond referentially to 'rowRefp'
  *			  and whose column PToken must correspond referentially
- *                        to 'columnRefp'.
+ *                        to 'colRefp'.
  *	rowRefp	    	- a pointer to a reference whose element is the row.
- *	columnRefp	- a pointer to a reference whose element is the column.
+ *	colRefp		- a pointer to a reference whose element is the column.
  *
  *  Returns:
  *	NOTHING
@@ -2043,45 +2044,33 @@ PublicFnDef void rtREFUV_PartitndPartition (
  *****/
 PublicFnDef void rtREFUV_LinearizeRrRc (
     rtREFUV_TypePTR_Reference	resultRefp,
-    M_CPD			*cartesianPT,
+    rtPTOKEN_Handle*		cartesianPT,
     rtREFUV_TypePTR_Reference	rowRefp,
-    rtREFUV_TypePTR_Reference	columnRefp
+    rtREFUV_TypePTR_Reference	colRefp
 )
 {
-    int	numberOfColumns, numberOfRows, result;
-
     LinearizeRrRcCount++;
 
-/*****  Align and Validate 'rowRefp' and 'columnRefp'  *****/
+/*****  Align and Validate 'rowRefp' and 'colRefp'  *****/
     rtREFUV_AlignReference (rowRefp);
-    rtREFUV_AlignReference (columnRefp);
-    rtPTOKEN_CartesianVerification (
-	cartesianPT,
-	rtREFUV_Ref_RefPTokenCPD (rowRefp),
-	rtREFUV_Ref_RefPTokenCPD (columnRefp),
-	-1
-    );
+    rtREFUV_AlignReference (colRefp);
+    cartesianPT->verifyProduct (rowRefp->RPT (), colRefp->RPT ());
 
 /*****  Calculate the linearization ... *****/
-    numberOfColumns = rtPTOKEN_CPD_BaseElementCount (
-	rtREFUV_Ref_RefPTokenCPD (columnRefp)
-    );
-    numberOfRows = rtPTOKEN_CPD_BaseElementCount (
-	rtREFUV_Ref_RefPTokenCPD (rowRefp)
-    );
+    unsigned int numberOfCols = colRefp->RPTCardinality ();
+    unsigned int numberOfRows = rowRefp->RPTCardinality ();
 
     /*** If either the row or column are the reference nil value, the result
      *** is the cartesian reference nil.
      ***/
-    result =
+    unsigned int result =
 	(rtREFUV_Ref_Element (rowRefp) == numberOfRows ||
-	 rtREFUV_Ref_Element (columnRefp) == numberOfColumns)
-	    ? rtPTOKEN_CPD_BaseElementCount (cartesianPT)
-	    :  (rtREFUV_Ref_Element (rowRefp) * numberOfColumns
-		    + rtREFUV_Ref_Element (columnRefp));
+	 rtREFUV_Ref_Element (colRefp) == numberOfCols)
+	    ? cartesianPT->cardinality ()
+	    :  (rtREFUV_Ref_Element (rowRefp) * numberOfCols
+		    + rtREFUV_Ref_Element (colRefp));
 
-    cartesianPT->retain ();
-    DSC_InitReferenceScalar (*resultRefp, cartesianPT, result);
+    resultRefp->constructReference (cartesianPT, result);
 
     return;
 }
@@ -2171,14 +2160,14 @@ PublicFnDef void rtREFUV_LocateOrAdd (
     LocateOrAddCount++;
 
 /***** Make sure both the source and target are reference set uvectors ... *****/
-    if (((RTYPE_Type)M_CPD_RType (sourceCPD) != RTYPE_C_RefUV) ||
+    if ((sourceCPD->RType () != RTYPE_C_RefUV) ||
 	!UV_CPD_IsASetUV (sourceCPD)
     ) ERR_SignalFault (
 	EC__InternalInconsistency,
 	"rtREFUV_LocateOrAdd:  Source UVector Must Be A Reference Set"
     );
 
-    if (((RTYPE_Type)M_CPD_RType (targetCPD) != RTYPE_C_RefUV) ||
+    if ((targetCPD->RType () != RTYPE_C_RefUV) ||
 	!UV_CPD_IsASetUV (targetCPD)
     ) ERR_SignalFault (
 	EC__InternalInconsistency,
@@ -2186,8 +2175,8 @@ PublicFnDef void rtREFUV_LocateOrAdd (
     );
 
 /***** Align and validate source and target uvectors ... *****/
-    rtREFUV_Align (sourceCPD);
-    rtREFUV_Align (targetCPD);
+    sourceCPD->align ();
+    targetCPD->align ();
     if (sourceCPD->ReferenceDoesntName (UV_CPx_RefPToken, targetCPD, UV_CPx_RefPToken)
     ) ERR_SignalFault (
 	EC__InternalInconsistency,
@@ -2264,11 +2253,9 @@ PublicFnDef void rtREFUV_LocateOrAdd (
     if (resultCount > origTargetCount) {
 	/***** Deal with addedLinkC ... *****/
 	if (wantAddedLinkC) {
-	    M_CPD *ptoken = rtPTOKEN_New (
-		sourceCPD->ScratchPad (), (*addedLinkC)->ElementCount ()
+	    (*addedLinkC)->Close (
+		new rtPTOKEN_Handle (sourceCPD->ScratchPad (), (*addedLinkC)->ElementCount ())
 	    );
-	    (*addedLinkC)->Close (ptoken);
-	    ptoken->release ();
 	}
 
 	/***** Reconstruct the resulting target uvector ... *****/
@@ -2297,11 +2284,9 @@ PublicFnDef void rtREFUV_LocateOrAdd (
 	    *trgp++ = *resultp++;
 
 	/*** Deal with the new positional ptoken ... ***/
-	M_CPD *ptoken = targetPTokenC->ToPToken ();
+	rtPTOKEN_Handle::Reference ptoken (targetPTokenC->ToPToken ());
 
 	targetCPD->StoreReference (UV_CPx_PToken, ptoken);
-
-	ptoken->release ();
     }
 
 
@@ -2350,7 +2335,7 @@ PublicFnDef bool rtREFUV_ScalarLocateOrAdd (
     ScalarLocateOrAddCount++;
 
 /***** Make sure the target is a reference set uvector ... *****/
-    if (((RTYPE_Type)M_CPD_RType (targetCPD) != RTYPE_C_RefUV) ||
+    if ((targetCPD->RType () != RTYPE_C_RefUV) ||
 	!UV_CPD_IsASetUV (targetCPD)
     ) ERR_SignalFault (
 	EC__InternalInconsistency,
@@ -2358,7 +2343,7 @@ PublicFnDef bool rtREFUV_ScalarLocateOrAdd (
     );
 
 /***** Align target uvector ... *****/
-    rtREFUV_Align (targetCPD);
+    targetCPD->align ();
 
 /*****  ...	binary Search for the value, ...  *****/
     size = UV_CPD_ElementCount (targetCPD);
@@ -2420,11 +2405,9 @@ PublicFnDef bool rtREFUV_ScalarLocateOrAdd (
 	*(rtREFUV_CPD_Array (targetCPD) + addAt) = value;
 
 	/*** Deal with the new positional ptoken ... ***/
-	M_CPD *ptoken = targetPTokenC->ToPToken ();
+	rtPTOKEN_Handle::Reference ptoken (targetPTokenC->ToPToken ());
 
 	targetCPD->StoreReference (UV_CPx_PToken, ptoken);
-
-	ptoken->release ();
 
 	*locationPtr = addAt;
 	return true;
@@ -2528,14 +2511,14 @@ PublicFnDef void rtREFUV_Lookup (
     LookupCount++;
 
 /***** Make sure both the source and key are reference set uvectors ... *****/
-    if (((RTYPE_Type)M_CPD_RType (sourceCPD) != RTYPE_C_RefUV) ||
+    if ((sourceCPD->RType () != RTYPE_C_RefUV) ||
 	!UV_CPD_IsASetUV (sourceCPD)
     ) ERR_SignalFault (
 	EC__InternalInconsistency,
 	"rtREFUV_Lookup:  Source UVector Must Be A Reference Set"
     );
 
-    if (((RTYPE_Type)M_CPD_RType (keyCPD) != RTYPE_C_RefUV) ||
+    if ((keyCPD->RType () != RTYPE_C_RefUV) ||
         !UV_CPD_IsASetUV (keyCPD)
     ) ERR_SignalFault (
 	EC__InternalInconsistency,
@@ -2543,8 +2526,8 @@ PublicFnDef void rtREFUV_Lookup (
     );
 
 /***** Align and validate source and key uvectors ... *****/
-    rtREFUV_Align (sourceCPD);
-    rtREFUV_Align (keyCPD);
+    sourceCPD->align ();
+    keyCPD->align ();
     if (sourceCPD->ReferenceDoesntName (UV_CPx_RefPToken, keyCPD, UV_CPx_RefPToken)
     ) ERR_SignalFault (
 	EC__InternalInconsistency,
@@ -2599,10 +2582,11 @@ PublicFnDef void rtREFUV_Lookup (
 /***** Done with the traversal *****/
 /***** Close the link constructors ... *****/
     if (someNotFound) {
-	M_CPD *ptoken = rtPTOKEN_New (keyCPD->Space (), (*locatedLinkC)->ElementCount ());
+	rtPTOKEN_Handle::Reference ptoken (
+	    new rtPTOKEN_Handle (keyCPD->Space (), (*locatedLinkC)->ElementCount ())
+	);
 	(*locatedLinkC)->Close (ptoken);
 	(*locationsLinkC)->Close (ptoken);
-	ptoken->release ();
     }
     else {
 	/*** all found, so the locatedLinkC is not needed ***/
@@ -2655,7 +2639,7 @@ PublicFnDef bool rtREFUV_ScalarLookup (
     ScalarLookupCount++;
 
 /***** Make sure the source is a reference set uvector ... *****/
-    if (((RTYPE_Type)M_CPD_RType (sourceCPD) != RTYPE_C_RefUV) ||
+    if ((sourceCPD->RType () != RTYPE_C_RefUV) ||
 	!UV_CPD_IsASetUV (sourceCPD)
     ) ERR_SignalFault (
 	EC__InternalInconsistency,
@@ -2663,7 +2647,7 @@ PublicFnDef bool rtREFUV_ScalarLookup (
     );
 
 /***** Align the source uvector ... *****/
-    rtREFUV_Align (sourceCPD);
+    sourceCPD->align ();
 
 /*****  ...	binary Search for the value, ...  *****/
     size = UV_CPD_ElementCount (sourceCPD);
@@ -2731,7 +2715,7 @@ PublicFnDef bool rtREFUV_ScalarLookup (
  ************************************/
 
 PublicFnDef int rtREFUV_DeleteNils (M_CPD *pTargetCPD) {
-    rtREFUV_Align (pTargetCPD);
+    pTargetCPD->align ();
     unsigned int const* pTargetArray = (unsigned int *)rtREFUV_CPD_Array (pTargetCPD);
 
     rtPTOKEN_CType *pTargetAdjustment = NilOf (rtPTOKEN_CType *);
@@ -2761,8 +2745,8 @@ PublicFnDef int rtREFUV_DeleteNils (M_CPD *pTargetCPD) {
 	pTargetAdjustment->AppendAdjustment ((int)xRunOrigin, -(int)sRunExtent);
 
     if (pTargetAdjustment) {
-	pTargetAdjustment->ToPToken ()->release ();
-	rtREFUV_Align (pTargetCPD);
+	pTargetAdjustment->ToPToken ()->discard ();
+	pTargetCPD->align ();
 
 	return true;
     }
@@ -2838,7 +2822,7 @@ rtREFUV_PartitionedOperationDriver::rtREFUV_PartitionedOperationDriver (
     M_CPD *pTarget, unsigned int const* pTargetPartition
 ) : m_pTarget(pTarget) , m_pTargetPartition(pTargetPartition)
 {
-    rtREFUV_Align (m_pTarget);
+    m_pTarget->align ();
     m_pTargetArray = (unsigned int const*)rtREFUV_CPD_Array (m_pTarget);
 
     m_xTargetComainNil = rtPTOKEN_BaseElementCount (m_pTarget, UV_CPx_RefPToken);
@@ -3110,7 +3094,7 @@ rtREFUV_MultiKeyPartitionedLocateOrAddDriver::rtREFUV_MultiKeyPartitionedLocateO
     pTargetReferenceDistribution
 )
 {
-    rtREFUV_Align (m_pSource);
+    m_pSource->align ();
     m_pSourceArray = (unsigned int const*)rtREFUV_CPD_Array (m_pSource);
 }
 
@@ -3199,13 +3183,15 @@ inline void rtREFUV_MultiKeyPartitionedLocateOrAddDriver::handleTraversalRepetit
  *  Operation  *
  ***************/
 
-void rtREFUV_MultiKeyPartitionedLocateOrAddDriver::operate ()
-{
+void rtREFUV_MultiKeyPartitionedLocateOrAddDriver::operate () {
     m_iDistributionGenerator.initializeUsingComainPToken (
 	m_pSourcePartition->PPT ()
     );
+    rtPTOKEN_Handle::Reference pTargetPPT (
+	static_cast<rtUVECTOR_Handle*>(m_pTarget->containerHandle ())->pptHandle ()
+    );
     m_iLocateOrAddGenerator.initialize (
-	m_pTarget, UV_CPx_PToken, m_iDistributionGenerator.distributionDomainPTokenCPD ()
+	pTargetPPT, m_iDistributionGenerator.distributionDomainPToken ()
     );
 
     rtLINK_TraverseRRDCList (
@@ -3404,9 +3390,10 @@ inline void rtREFUV_CoercedKeyPartitionedLocateOrAddDriver::handleTraversalRepet
  ***************/
 
 void rtREFUV_CoercedKeyPartitionedLocateOrAddDriver::operate () {
-    m_iLocateOrAddGenerator.initialize (
-	m_pTarget, UV_CPx_PToken, m_pSourcePartition->PPT ()
+    rtPTOKEN_Handle::Reference pTargetPPT (
+	static_cast<rtUVECTOR_Handle*>(m_pTarget->containerHandle ())->pptHandle ()
     );
+    m_iLocateOrAddGenerator.initialize (pTargetPPT, m_pSourcePartition->PPT ());
 
     rtLINK_TraverseRRDCList (
 	m_pSourcePartition, handleTraversalNil, handleTraversalRepetition, handleTraversalRange
@@ -3537,13 +3524,13 @@ rtREFUV_ScalarPartitionedLocateOrAddDriver::rtREFUV_ScalarPartitionedLocateOrAdd
  ***************/
 
 void rtREFUV_ScalarPartitionedLocateOrAddDriver::operate () {
-    M_CPD *pTargetDomainPToken = UV_CPD_PosPTokenCPD (m_pTarget);
+    rtPTOKEN_Handle::Reference pTargetDomainPToken (
+	static_cast<rtUVECTOR_Handle*>(m_pTarget->containerHandle ())->pptHandle ()
+    );
 
     if (m_pSourcePartition.holdsANil ()) {
-	DSC_InitReferenceScalar (
-	    m_pTargetReference,
-	    pTargetDomainPToken,
-	    rtPTOKEN_CPD_BaseElementCount (pTargetDomainPToken)
+	m_pTargetReference.constructReference (
+	    pTargetDomainPToken, pTargetDomainPToken->cardinality ()
 	);
 	m_fTargetReferenceNotFound = false;
 	return;
@@ -3555,21 +3542,15 @@ void rtREFUV_ScalarPartitionedLocateOrAddDriver::operate () {
 	(unsigned int)DSC_Scalar_Int (m_pSource), m_fTargetReferenceNotFound
     );
 
-    DSC_InitReferenceScalar (
-	m_pTargetReference,
-	m_fTargetReferenceNotFound ? rtPTOKEN_NewShiftPTConstructor (
-	    pTargetDomainPToken, -1
-	)->AppendAdjustment (
+    m_pTargetReference.constructReference (
+	m_fTargetReferenceNotFound ? pTargetDomainPToken->makeAdjustments ()->AppendAdjustment (
 	    xTargetRegionLowerBound (), 1
-	)->ToPToken () : M_DuplicateCPDPtr (pTargetDomainPToken),
-	xTargetRegionLowerBound ()
+	)->ToPToken () : pTargetDomainPToken, xTargetRegionLowerBound ()
     );
 
     if (m_fTargetReferenceNotFound) rtREFUV_RFAssign (
 	m_pTarget, &m_pTargetReference, &m_pSource
     );
-
-    pTargetDomainPToken->release ();
 }
 
 
@@ -3775,7 +3756,7 @@ rtREFUV_MultiKeyPartitionedLocateDriver::rtREFUV_MultiKeyPartitionedLocateDriver
     pTargetReferenceDistribution
 )
 {
-    rtREFUV_Align (m_pSource);
+    m_pSource->align ();
     m_pSourceArray = (unsigned int const*)rtREFUV_CPD_Array (m_pSource);
 }
 
@@ -3828,8 +3809,7 @@ inline void rtREFUV_MultiKeyPartitionedLocateDriver::handleTraversalRepetition (
 
     setTargetRegionToPartition (xComainRegion);
 
-    while (sDomainRegion-- > 0)
-    {
+    while (sDomainRegion-- > 0) {
 	unsigned int xSourceComainElement = m_pSourceArray[
 	    m_iDistributionGenerator.at (xDomainRegion)
 	];
@@ -3838,8 +3818,7 @@ inline void rtREFUV_MultiKeyPartitionedLocateDriver::handleTraversalRepetition (
 	    sDomainRegion > 0 && xSourceComainElement == m_pSourceArray[
 		m_iDistributionGenerator.at (xDomainRegion + sSourceComainElementRun)
 	    ]
-	)
-	{
+	) {
 	    sDomainRegion--;
 	    sSourceComainElementRun++;
 	}
@@ -3868,8 +3847,11 @@ void rtREFUV_MultiKeyPartitionedLocateDriver::operate () {
     m_iDistributionGenerator.initializeUsingComainPToken (
 	m_pSourcePartition->PPT ()
     );
+    rtPTOKEN_Handle::Reference pTargetPPT (
+	static_cast<rtUVECTOR_Handle*>(m_pTarget->containerHandle ())->pptHandle ()
+    );
     m_iLocateGenerator.initialize (
-	m_pTarget, UV_CPx_PToken, m_iDistributionGenerator.distributionDomainPTokenCPD ()
+	pTargetPPT, m_iDistributionGenerator.distributionDomainPToken ()
     );
 
     rtLINK_TraverseRRDCList (
@@ -4059,9 +4041,10 @@ inline void rtREFUV_CoercedKeyPartitionedLocateDriver::handleTraversalRepetition
  ***************/
 
 void rtREFUV_CoercedKeyPartitionedLocateDriver::operate () {
-    m_iLocateGenerator.initialize (
-	m_pTarget, UV_CPx_PToken, m_pSourcePartition->PPT ()
+    rtPTOKEN_Handle::Reference pTargetPPT (
+	static_cast<rtUVECTOR_Handle*>(m_pTarget->containerHandle ())->pptHandle ()
     );
+    m_iLocateGenerator.initialize (pTargetPPT, m_pSourcePartition->PPT ());
 
     rtLINK_TraverseRRDCList (
 	m_pSourcePartition, handleTraversalNil, handleTraversalRepetition, handleTraversalRange
@@ -4202,9 +4185,8 @@ void rtREFUV_ScalarPartitionedLocateDriver::operate () {
     if (fTargetReferenceNotFound)
 	m_fTargetReferenceIsValid = false;
     else {
-	DSC_InitReferenceScalar (
-	    m_pTargetReference,
-	    UV_CPD_PosPTokenCPD (m_pTarget),
+	m_pTargetReference.constructReference (
+	    static_cast<rtUVECTOR_Handle*>(m_pTarget->containerHandle ())->pptHandle (),
 	    xTargetRegionLowerBound ()
 	);
 	m_fTargetReferenceIsValid = true;
@@ -4349,10 +4331,10 @@ inline void rtREFUV_PartitionedDeleteDriver::deleteComainElement (
 
 void rtREFUV_PartitionedDeleteDriver::commit () {
     if (m_pTargetTrajectory) {
-	m_pTargetTrajectory->ToPToken ()->release ();
+	m_pTargetTrajectory->ToPToken ()->discard ();
 	m_pTargetTrajectory = NilOf (rtPTOKEN_CType *);
 
-	rtREFUV_Align (m_pTarget);
+	m_pTarget->align ();
     }
 }
 
@@ -4463,7 +4445,7 @@ rtREFUV_MultiKeyPartitionedDeleteDriver::rtREFUV_MultiKeyPartitionedDeleteDriver
     pTargetReferenceDistribution
 )
 {
-    rtREFUV_Align (m_pSource);
+    m_pSource->align ();
     m_pSourceArray = (unsigned int const*)rtREFUV_CPD_Array (m_pSource);
 }
 
@@ -4837,7 +4819,7 @@ PrivateFnDef int PrintElement (M_CPD *cpd) {
 IOBJ_DefineNewaryMethod (NewDM) {
     return RTYPE_QRegister (
 	rtREFUV_New (
-	    RTYPE_QRegisterCPD (parameterArray[0]), RTYPE_QRegisterCPD (parameterArray[1])
+	    RTYPE_QRegisterPToken (parameterArray[0]), RTYPE_QRegisterPToken (parameterArray[1])
 	)
     );
 }
@@ -4910,8 +4892,6 @@ IOBJ_DefineUnaryMethod (DisplayCountsDM) {
  ************************/
 
 UV_DefineEPrintDM (PrintElementDM, PrintElement)
-
-UV_DefineAlignDM (AlignDM, rtREFUV_Align)
 
 UV_DefineAtDM (AtDM, rtREFUV_LCExtract, rtREFUV_UVExtract)
 
@@ -5005,13 +4985,13 @@ IOBJ_DefineUnaryMethod (SortDM) {
 IOBJ_DefineMethod (TestRefAlignDM) {
     rtREFUV_ElementType val = IOBJ_NumericIObjectValue (parameterArray[0], int);
     rtREFUV_Type_Reference ref;
-    DSC_InitReferenceScalar (
-	ref, UV_CPD_RefPTokenCPD (RTYPE_QRegisterCPD (self)), val
+    ref.constructReference (
+	static_cast<rtUVECTOR_Handle*>(RTYPE_QRegisterHandle (self))->pptHandle (), val
     );
     rtREFUV_AlignReference (&ref);
     IO_printf ("Result Reference Value = %d\n", rtREFUV_Ref_Element (&ref));
 
-    DSC_ClearScalar (ref);
+    ref.destroy ();
     return (self);
 }
 
@@ -5029,11 +5009,13 @@ IOBJ_DefineUnaryMethod (CopyDM) {
 }
 
 IOBJ_DefineMethod (CopyWithPTokenDM) {
-    M_CPD *ptokenCPD = RTYPE_QRegisterCPD (parameterArray[0]);
+    VContainerHandle *pPToken = RTYPE_QRegisterHandle (parameterArray[0]);
 
-    RTYPE_MustBeA ("rtREFUV CopyWithPToken", M_CPD_RType (ptokenCPD), RTYPE_C_PToken);
+    RTYPE_MustBeA ("rtREFUV CopyWithPToken", pPToken->RType (), RTYPE_C_PToken);
 
-    return RTYPE_QRegister (UV_CopyWithNewPToken (RTYPE_QRegisterCPD (self), ptokenCPD));
+    return RTYPE_QRegister (
+	UV_CopyWithNewPToken (RTYPE_QRegisterCPD (self), static_cast<rtPTOKEN_Handle*>(pPToken))
+    );
 }
 
 /*****
@@ -5051,27 +5033,25 @@ IOBJ_DefineMethod (CopyWithPTokenDM) {
 IOBJ_DefineMethod (TestLinearizeDM) {
     rtREFUV_Type_Reference	resultRef, rowRef, columnRef;
 
-    M_CPD *cartesianPT = RTYPE_QRegisterCPD (parameterArray [0]);
-
-    DSC_InitReferenceScalar (
-	rowRef,
-	rtPTOKEN_CPD_RowPTokenCPD (cartesianPT),
-	IOBJ_NumericIObjectValue (parameterArray[1], unsigned int)
+    rtPTOKEN_Handle *cartesianPT = static_cast<rtPTOKEN_Handle*>(
+	RTYPE_QRegisterHandle (parameterArray [0])
     );
 
-    DSC_InitReferenceScalar (
-	columnRef,
-	rtPTOKEN_CPD_ColPTokenCPD (cartesianPT),
-	IOBJ_NumericIObjectValue (parameterArray[2], unsigned int)
+    rowRef.constructReference (
+	cartesianPT->rowPTokenHandle (), IOBJ_NumericIObjectValue (parameterArray[1], unsigned int)
+    );
+
+    columnRef.constructReference (
+	cartesianPT->colPTokenHandle (), IOBJ_NumericIObjectValue (parameterArray[2], unsigned int)
     );
 
     rtREFUV_LinearizeRrRc (&resultRef, cartesianPT, &rowRef, &columnRef);
     IO_printf
 	("\nResult Linearization: %d\n", rtREFUV_Ref_Element (&resultRef));
 
-    DSC_ClearScalar (resultRef);
-    DSC_ClearScalar (rowRef);
-    DSC_ClearScalar (columnRef);
+    resultRef.destroy ();
+    rowRef.destroy ();
+    columnRef.destroy ();
 
     return self;
 }
@@ -5101,7 +5081,7 @@ IOBJ_DefineUnaryMethod (MarkAsSetDM) {
 	lastRef;
 
     /* Make sure this RefUV meets the definition of 'set' */
-    rtREFUV_Align (cpd);
+    cpd->align ();
     if (1 < size) /* we have to check for uniqueness and sortedness */ {
 	for (i = 1, lastRef = *ptr++; i < size; i++, ptr++) {
 	    if (lastRef >= *ptr)
@@ -5222,7 +5202,6 @@ RTYPE_DefineHandler(rtREFUV_Handler) {
 	IOBJ_MDE ("put:"		, AtCurrentPutDM)
 	IOBJ_MDE ("at:"			, AtDM)
 	IOBJ_MDE ("at:put:"		, AtPutDM)
-	IOBJ_MDE ("align"		, AlignDM)
 	IOBJ_MDE ("sort"		, SortDM)
 	IOBJ_MDE ("asLink"		, AsLinkDM)
 	IOBJ_MDE ("testRefAlign:"	, TestRefAlignDM)
@@ -5257,10 +5236,14 @@ RTYPE_DefineHandler(rtREFUV_Handler) {
         *iArgList.arg<IOBJ_MD *>() = instanceMD;
         break;
     case RTYPE_PrintObject:
-	UV_Print (rtREFUV_Align (iArgList.arg<M_CPD*>()), false, PrintElement);
+	sourceCPD = iArgList.arg<M_CPD*>();
+	sourceCPD->align ();
+	UV_Print (sourceCPD, false, PrintElement);
         break;
     case RTYPE_RPrintObject:
-	UV_Print (rtREFUV_Align (iArgList.arg<M_CPD*>()), true, PrintElement);
+	sourceCPD = iArgList.arg<M_CPD*>();
+	sourceCPD->align ();
+	UV_Print (sourceCPD, true, PrintElement);
         break;
     case RTYPE_DoLCExtract:
         resultCPD   = iArgList.arg<M_CPD **>();

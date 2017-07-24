@@ -25,30 +25,64 @@
  ************************/
 
 
+/******************************
+ ******************************
+ *****  Container Handle  *****
+ ******************************
+ ******************************/
+
+class rtUNDEFUV_Handle : public rtUVECTOR_Handle {
+//  Run Time Type
+    DECLARE_CONCRETE_RTT (rtUNDEFUV_Handle, rtUVECTOR_Handle);
+
+//  Construction
+public:
+    static VContainerHandle *Maker (M_CTE &rCTE) {
+	return new rtUNDEFUV_Handle (rCTE);
+    }
+protected:
+    rtUNDEFUV_Handle (M_CTE &rCTE) : rtUVECTOR_Handle (rCTE) {
+    }
+
+//  Destruction
+private:
+    ~rtUNDEFUV_Handle () {
+    }
+
+//  Alignment
+private:
+    virtual /*override*/ bool align_() {
+	return align ();
+    }
+public:
+    bool align ();
+
+//  Access
+public:
+
+//  Query
+public:
+
+//  Callbacks
+protected:
+
+//  State
+protected:
+};
+
+
 /********************************
  ********************************
  *****  Callable Interface  *****
  ********************************
  ********************************/
 
-PublicFnDecl M_CPD* rtUNDEFUV_New (
-    M_CPD*			posPTokenRefCPD,
-    int				posPTokenRefIndex,
-    M_CPD*			refPTokenRefCPD,
-    int				refPTokenRefIndex
-);
-
 PublicFnDecl M_CPD *rtUNDEFUV_New (
-    M_CPD *pPPT, M_CPD *pRPTRef, int xRPTRef
+    rtPTOKEN_Handle *pPPT, M_CPD *pRPTRef, int xRPTRef
 );
 
 PublicFnDecl M_CPD* rtUNDEFUV_New (
-    M_CPD*			posPToken,
-    M_CPD*			refPToken
-);
-
-PublicFnDecl M_CPD* rtUNDEFUV_Align (
-    M_CPD*			cpd
+    rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT
 );
 
 PublicFnDecl void rtUNDEFUV_ToSetUV (
@@ -144,43 +178,6 @@ PublicFnDecl bool rtUNDEFUV_ScalarLookup (
     rtLINK_LookupCase		lookupCase,
     int				*locationPtr
 );
-
-
-/******************************
- ******************************
- *****  Container Handle  *****
- ******************************
- ******************************/
-
-class rtUNDEFUV_Handle : public rtUVECTOR_Handle {
-//  Run Time Type
-    DECLARE_CONCRETE_RTT (rtUNDEFUV_Handle, rtUVECTOR_Handle);
-
-//  Construction
-protected:
-    rtUNDEFUV_Handle (M_CTE &rCTE) : rtUVECTOR_Handle (rCTE) {
-    }
-
-public:
-    static VContainerHandle *Maker (M_CTE &rCTE) {
-	return new rtUNDEFUV_Handle (rCTE);
-    }
-
-//  Destruction
-protected:
-
-//  Access
-public:
-
-//  Query
-public:
-
-//  Callbacks
-protected:
-
-//  State
-protected:
-};
 
 
 #endif

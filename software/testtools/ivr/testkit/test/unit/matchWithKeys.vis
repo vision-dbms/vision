@@ -1,0 +1,64 @@
+
+[ "testkit/lib/test/order.vis" asFileContents evaluate; ] divertOutput;
+[ "testkit/lib/diff/rcompare.vis" asFileContents evaluate; ] debugOutput;
+
+
+# Simple method for dumping out compare results
+Object defineMethod: [|dumpMatchResult|
+  "Will compare: " printNL;
+  ^self compares do: [ 
+    "  '" print; lhs asString print; "' to: '" print;
+    rhs asString print; 
+    "'" printNL;
+  ];
+  newLine print;
+
+  "lhs only: " print;
+  ^self lhsOnly linkElements do: [ print; next isntNA ifTrue: [ ", " print; ]; ];
+  newLine print;
+
+  "rhs only: " print;
+  ^self rhsOnly linkElements do: [ print; next isntNA ifTrue: [ ", " print; ]; ];
+  newLine print;
+];
+
+newLine printNL;
+"perfect match, multiple types: " printNL;
+!lhs <- (2, 3, 4, "five", 6.09) extendBy: [ !key <- asString ];
+!rhs <- (2, 3, 4, "five", 6.09) extendBy: [ !key <- asString ];
+lhs matchWith: rhs . dumpMatchResult;
+
+
+newLine printNL;
+"lhs has many more elements" printNL;
+!lhs <- (2, 3, 4.0, "five", Named Security, DataRecord) 
+  extendBy: [ !key <- asString ];
+!rhs <- (2, "five", 6.0) extendBy: [ !key <- asString ];
+lhs matchWith: rhs . dumpMatchResult;
+
+newLine printNL;
+"rhs has many more elements" printNL;
+!lhs <- (2, "five", 6.0) extendBy: [ !key <- asString ];
+!rhs <- (2, 3, 4.0, "five", Named Security, DataRecord) 
+  extendBy: [ !key <- asString ];
+lhs matchWith: rhs . dumpMatchResult;
+
+
+newLine printNL;
+"key collisions" printNL;
+!lhs <- (5.0, 4.0, 3.0, 2.0) extendBy: [ !key <- asInteger asString ];
+!rhs <- (  5,   4,   3,   2 ) extendBy: [ !key <- asInteger asString ];
+lhs matchWith: rhs . dumpMatchResult;
+
+newLine printNL;
+"key collisions AND duplicates" printNL;
+!lhs <- (5.0, 4.0, 3.0, 2.0, 2) extendBy: [ !key <- asInteger asString ];
+!rhs <- (  5,   4,   3,   2, 2, 2, 2, 4 ) extendBy: [ !key <- asInteger asString ];
+lhs matchWith: rhs . dumpMatchResult;
+
+newLine printNL;
+"key collisions AND duplicates reversed" printNL;
+!lhs <- (  5,   4,   3,   2, 2, 2, 2, 4) extendBy: [ !key <- asInteger asString ];
+!rhs <- (5.0, 4.0, 3.0, 2.0, 2, 5) extendBy: [ !key <- asInteger asString ];
+lhs matchWith: rhs . dumpMatchResult;
+

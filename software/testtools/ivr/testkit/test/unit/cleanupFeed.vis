@@ -1,0 +1,17 @@
+"testkit/lib/test/order.vis" asFileContents evaluate;
+[ 
+"source/datafeed/prepfeed.vis" asFileContents evaluate;
+
+GlobalsFeed updateFromString:
+"fieldOrderList | ONE,,THREE,,,SIX";
+
+PrepCleanupFeed updateFromString: 
+"ignored
+1 | 2 | 3 | 4 | 5 | 6 |
+one | two | three | four | five | six
+uno | due | tre | quattro | cinque | sei
+";
+
+] debugOutput;
+
+PrepCleanupFeed getPreppedString printNL;

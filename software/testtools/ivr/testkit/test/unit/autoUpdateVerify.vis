@@ -1,0 +1,33 @@
+"testkit/lib/test/order.vis" asFileContents evaluate;
+
+[
+  "source/order.vis" asFileContents evaluate;
+] divertOutput;
+
+
+# "Fixture" method.  We don't actually want to save here - so break saving.
+AdminTools defineMethod: [|updateNetworkIfSpaceIsLow|
+  ">>> Fake Network Update" printNL;
+  "Current Threshold: " print;  ^tmp allocationThreshold printNL;
+  TRUE
+];
+
+"No Save here not setup in this session" printNL;
+IVR Utility checkResources;
+newLine print;
+
+"Just setting the Threshold will not trigger a save either" printNL;
+IVR Settings setAllocationThresholdTo: 10;
+IVR Utility checkResources;
+newLine print;
+
+"This should force a save no matter what with a threshhold of 10" printNL;
+IVR Settings enableAutoUpdate;
+IVR Utility checkResources;
+newLine print;
+
+
+"No Save here even though the threshold is small enough" printNL;
+IVR Settings disableAutoUpdate;
+IVR Utility checkResources;
+"Threshold: " print; IVR Settings allocationThreshold printNL;

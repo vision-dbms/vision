@@ -578,6 +578,10 @@ PublicFnDef IOBJ_IObject RTYPE_QRegister (M_CPD *cpd) {
     return result;
 }
 
+PublicFnDef IOBJ_IObject RTYPE_QRegister (VContainerHandle *pHandle) {
+    return RTYPE_QRegister (pHandle->GetCPD ());
+}
+
 PublicFnDef IOBJ_IObject RTYPE_QRegister (rtLINK_CType *lc) {
     return RTYPE_QRegister (lc->ToLink ());
 }
@@ -641,6 +645,16 @@ PublicFnDef M_CPD *RTYPE_QRegisterCPD (IOBJ_IObject iObject) {
     );
 
     return QRegisters [qr];
+}
+
+PublicFnDef VContainerHandle *RTYPE_QRegisterHandle (IOBJ_IObject iObject) {
+    return RTYPE_QRegisterCPD (iObject)->containerHandle ();
+}
+
+PublicFnDef rtPTOKEN_Handle *RTYPE_QRegisterPToken (IOBJ_IObject iObject) {
+    VContainerHandle *pHandle = RTYPE_QRegisterHandle (iObject);
+    RTYPE_MustBeA ("QRegisterPToken", pHandle->RType (), RTYPE_C_PToken);
+    return static_cast<rtPTOKEN_Handle*>(pHandle);
 }
 
 

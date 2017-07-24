@@ -323,7 +323,7 @@ namespace V {
 	    return InterlockedExchange ((LONG volatile*)pMemory, iNew);
 	}
 	static void *interlockedExchange (void *volatile *pMemory, void *iNew) { // TODO: should iNew be pNew?
-#ifdef __ATLCONV_H__
+#if defined(__ATLCONV_H__) || defined(_M_X64)
 		// Direct from atlconv.h -- we can't call InterlockedExchangePointer() from there because of volatile->non-volatile casts.
 		return( reinterpret_cast<void*>(static_cast<LONG_PTR>(::InterlockedExchange(reinterpret_cast<LONG volatile *>(pMemory), static_cast<LONG>(reinterpret_cast<LONG_PTR>(iNew))))) );
 #else
@@ -357,7 +357,7 @@ namespace V {
 	    return InterlockedExchange64 ((LONGLONG volatile*)pMemory, iNew);
 	}
 	static void *interlockedExchange (void *volatile *pMemory, void *iNew) {
-#ifdef __ATLCONV_H__
+#if defined(__ATLCONV_H__) || defined(_M_X64)
 		// Direct from atlconv.h -- we can't call InterlockedExchangePointer() from there because of volatile->non-volatile casts.
 		return( reinterpret_cast<void*>(static_cast<LONG_PTR>(::InterlockedExchange(reinterpret_cast<LONG volatile *>(pMemory), static_cast<LONG>(reinterpret_cast<LONG_PTR>(iNew))))) );
 #else

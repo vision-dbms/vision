@@ -66,7 +66,7 @@ VTaskConstructionData::VTaskConstructionData (
     VCall			*pCall,
     rtLINK_CType		*pSubset,
     M_CPD			*pReordering,
-    rtCONTEXT_Constructor	*pContext,
+    rtCONTEXT_Handle		*pContext,
     unsigned int		iAttentionMask
 ) : m_pCall (pCall), m_pSubset (pSubset), m_pReordering (pReordering), m_pContext (pContext), m_iAttentionMask (iAttentionMask) {
 }
@@ -210,7 +210,7 @@ VTask::VTask (ConstructionData const &rTCData)
 , m_pCodSpace		(0)
 {
 //  Look for task size outliers, ...
-    unsigned int taskSize = rtPTOKEN_CPD_BaseElementCount (ptoken ());
+    unsigned int taskSize = ptoken ()->cardinality ();
     if (taskSize > largeTaskSize ())
         LargeTaskCount++;
     MaxTaskSize = V_Max (MaxTaskSize, taskSize);
@@ -225,7 +225,6 @@ VTask::VTask (
 )
 : VComputationUnit	(pContext, rDatum, pScheduler)
 , m_pDomain		(pSpawningTask ? pSpawningTask->domain () : VTaskDomain::groundDomain ())
-, m_pBlockContext	(0)
 , m_pLocalContext (
     pSpawningTask ? pSpawningTask->getLocalContext () : new VReferenceableMonotype (
 	ENVIR_KDsc_TheTmpTLE
@@ -254,9 +253,6 @@ M_ASD *VTask::getCodSpace () {
 
 VTask::~VTask () {
     m_pTemporalContext->release ();
-
-    if (m_pBlockContext)
-	m_pBlockContext->release ();
 }
 
 
@@ -653,11 +649,11 @@ void VTask::sendBinaryConverseWithCurrent (unsigned int xMessageName) {
  ********************************/
 
 bool VTask::myAvailable () const {
-    return IsntNil (m_pBlockContext) && getMy ().isntEmpty ();
+    return m_pBlockContext.isntNil () && getMy ().isntEmpty ();
 }
 
 bool VTask::recipientAvailable_ () const {
-    return IsntNil (m_pBlockContext);
+    return m_pBlockContext.isntNil ();
 }
 
 bool VTask::cgetSelf (VDescriptor &rResultHolder) const {
@@ -797,17 +793,8 @@ void VTask::loadDucWithSuper () const {
 /*****  Load accumulator with 'self'...  *****/
     loadDucWithSelf ();
 
-/*****  ...decode 'self's store type...  *****/
-    DSC_Descriptor& rDucMonotype = m_pDuc->contentAsMonotype ();
-
-    M_CPD *selfStore; bool selfPointerRequiresConversion;
-    rDucMonotype.getCanonicalStore (selfStore, selfPointerRequiresConversion);
-
-/*****  If an inheritance 'superior' of 'self' exists, ...  *****/
-    if (selfStore->ReferenceIsntNil (rtVSTORE_CPx_InheritanceStore)) {
-    /*****  ... replace the accumulator with it.  *****/
-	rDucMonotype.Step (selfStore, selfPointerRequiresConversion, ptoken ());
-    }
+/*****  ... and get the inheritance:  *****/
+    m_pDuc->contentAsMonotype ().getInheritance ();
 }
 
 
@@ -838,23 +825,23 @@ void VTask::loadDucWithCoerced (DSC_Descriptor& rValue) const {
     m_pDuc->contentAsMonotype ().coerce (ptoken ());
 }
 
-void VTask::loadDucWithRepresentative (VGroundStore *pStore, unsigned int xRepresentative) const {
-    if (IsNil (pStore))
+void VTask::loadDucWithRepresentative (VGroundStore *pGroundStore, unsigned int xRepresentative) const {
+    if (IsNil (pGroundStore))
 	loadDucWithNA ();
     else {
-	M_CPD *pRPT = pStore->ptoken_();
-	pRPT->retain ();
-	loadDucWithReference (pStore->surrogateCPD (), pRPT, xRepresentative);
+	rtVSTORE_Handle::Reference pSurrogate;
+	pGroundStore->getSurrogate (pSurrogate);
+	loadDucWithReference (pSurrogate, pGroundStore->ptoken_(), xRepresentative);
     }
 }
 
-void VTask::loadDucWithIdentity (M_CPD *pStore, M_CPD *pPPT) const {
-    pPPT->retain ();
-    m_pDuc->setToIdentity (pStore, pPPT);
+void VTask::loadDucWith (VGroundStore *pGroundStore) const {
+    rtVSTORE_Handle::Reference pSurrogate;
+    pGroundStore->getSurrogate (pSurrogate);
+    loadDucWithIdentity (pSurrogate, pGroundStore->ptoken_());
 }
 
-void VTask::loadDucWithIdentity (VConstructor *pStore, M_CPD *pPPT) const {
-    pPPT->retain ();
+void VTask::loadDucWithIdentity (Store *pStore, rtPTOKEN_Handle *pPPT) const {
     m_pDuc->setToIdentity (pStore, pPPT);
 }
 
@@ -863,20 +850,20 @@ void VTask::loadDucWithIdentity (VConstructor *pStore, M_CPD *pPPT) const {
  *****  Utility to load the accumulator with a descriptor for a new L-Store.
  *
  *  Arguments:
- *	pContentPrototypeCPD	- the address of a CPD for the new cluster's
+ *	pContentPrototype	- the address of a CPD for the new cluster's
  *				  content prototype (Nil for Vector).
  *
  *  Returns:
  *	NOTHING - Executed for side effect only.
  *
  *****/
-void VTask::loadDucWithNewLStore (M_CPD *pContentPrototypeCPD) const {
+void VTask::loadDucWithNewLStore (Store *pContentPrototype) const {
 /*****  Create the L-store PToken...  *****/
-    VCPDReference pInstancePTokenCPD (0, NewCodPToken ());
+    rtPTOKEN_Handle::Reference pInstancePToken (NewCodPToken ());
 
 /*****  ... and create and return the new L-Store:  *****/
     loadDucWithListOrStringStore (
-	rtLSTORE_NewCluster (pInstancePTokenCPD, pContentPrototypeCPD, -1)
+	new rtLSTORE_Handle (pInstancePToken, pContentPrototype)
     );
 }
 
@@ -889,13 +876,13 @@ void VTask::loadDucWith (char const *pString) const {
     if (IsNil (pString))
 	loadDucWithNA ();
     else {
-	VCPDReference pPPT (0, NewCodPToken (strlen (pString) + 1));
+	rtPTOKEN_Handle::Reference pPPT (NewCodPToken (strlen (pString) + 1));
 	VCPDReference pCUV (0, NewCharUV (pPPT));
 
 	strcpy (rtCHARUV_CPD_Array (pCUV), pString);
 
-	M_CPD *pLStore = rtLSTORE_NewStringStoreFromUV (pCUV);
-	loadDucWithReference (pLStore, rtLSTORE_CPD_RowPTokenCPD (pLStore), 0);
+	rtLSTORE_Handle::Reference pLStore (rtLSTORE_NewStringStoreFromUV (pCUV));
+	loadDucWithReference (pLStore, pLStore->getPToken (), 0);
     }
 }
 
@@ -910,7 +897,7 @@ void VTask::loadDucWith (VSelector const &rSelector) const {
 	return;
     }
 
-    M_CPD *pBlock;
+    rtBLOCK_Handle::Reference pBlock;
     if (rSelector.getBSData (pBlock, xSelector)) {
 	loadDucWithSelector (pBlock, xSelector);
 	return;
@@ -924,7 +911,7 @@ void VTask::loadDucWith (VSelector const &rSelector) const {
  *****  loadDucWith... Other Polytypes  *****
  ********************************************/
 
-VFragmentation &VTask::loadDucWithFragmentation (M_CPD *pPPT) const {
+VFragmentation &VTask::loadDucWithFragmentation (rtPTOKEN_Handle *pPPT) const {
     return m_pDuc->setToFragmentation (pPPT);
 }
 
@@ -1005,9 +992,7 @@ void VTask::loadDucWithBoolean (rtLINK_CType *pTrueSubset) const {
  *
  *  Arguments:
  *	pStore			- a standard CPD for the string store to be
- *				  returned.  It will be ASSIGNED.
- *	xRPT			- the index of the store's PPT (positional
- *				  p-token).
+ *				  returned.
  *	pSubset			- Optional (Nil if omitted) address of a link
  *				  constructor specifying the 'ptoken ()'
  *				  subset to which 'pStore' applies.
@@ -1016,20 +1001,18 @@ void VTask::loadDucWithBoolean (rtLINK_CType *pTrueSubset) const {
  *	NOTHING - Executed for side effect on the accumulator only.
  *
  *****/
-void VTask::loadDucWithPartialCorrespondence (
-    M_CPD *pStore, unsigned int xRPT, rtLINK_CType *pSubset
-) const {
+void VTask::loadDucWithPartialCorrespondence (Vdd::Store *pStore, rtLINK_CType *pSubset) const {
     if (IsntNil (pSubset) && 0 == pSubset->ElementCount ()) {
 	loadDucWithNA ();
 
 	if (pStore)
-	    pStore->release ();
+	    pStore->discard ();
 
 	return;
     }
     
     VDescriptor *pDSC;
-    M_CPD *ddPT;
+    rtPTOKEN_Handle *ddPT;
 
     if (IsntNil (pSubset)) {
 	VFragmentation &rFragmentation = loadDucWithFragmentation ();
@@ -1048,7 +1031,7 @@ void VTask::loadDucWithPartialCorrespondence (
 	ddPT = ptoken ();
     }
 
-    pDSC->setToCorrespondence (ddPT, pStore, xRPT);
+    pDSC->setToCorrespondence (ddPT, pStore);
 }
 
 
@@ -1126,25 +1109,33 @@ void VTask::loadDucWithPartialFunction (VfGuardTool &rGuard, M_CPD *pUVector) co
  *
  *****/
 void VTask::loadDucWithPredicateResult (
-    M_KOTM pKOTM1, rtLINK_CType *pLink1, M_KOTM pKOTM2, rtLINK_CType *pLink2
+    rtLINK_CType *pTrueSubset, rtLINK_CType *pFalseSubset
 ) const {
-    M_CPD *fragmentPToken;
+    M_KOTM pTrueKOTM  = &M_KOT::TheTrueClass;
+    M_KOTM pFalseKOTM = &M_KOT::TheFalseClass;
+    loadDucWithPredicateResult (pTrueSubset, pFalseSubset, pTrueKOTM, pFalseKOTM);
+}
+
+void VTask::loadDucWithPredicateResult (
+    rtLINK_CType *pLink1, rtLINK_CType *pLink2, M_KOTM pKOTM1, M_KOTM pKOTM2
+) const {
+    rtPTOKEN_Handle::Reference fragmentPToken;
+    M_KOT *pCodKOT = codKOT ();
 
     VFragmentation &rFragmentation = loadDucWithFragmentation (pLink1->RPT ());
 
 /*****  Create a fragment for 'store/ptoken/link' set #1 ...  *****/
     size_t elementCount = pLink1->ElementCount ();
     if (elementCount > 0) {
-	if (pLink1->IsOpen ())
-	    pLink1->Close (fragmentPToken = NewDomPToken (elementCount));
-	else
-	    fragmentPToken = M_DuplicateCPDPtr (pLink1->PPT ());
-
+	if (pLink1->IsntOpen ())
+	    fragmentPToken.setTo (pLink1->PPT ());
+	else {
+	    fragmentPToken.setTo (NewDomPToken (elementCount));
+	    pLink1->Close (fragmentPToken);
+	}
 	rFragmentation
 	    .createFragment (pLink1)->datum ()
-	    .setToConstant (fragmentPToken, codKOT()->*pKOTM1);
-
-	fragmentPToken->release ();
+	    .setToConstant (fragmentPToken, pCodKOT->*pKOTM1);
     }
     else {
         pLink1->release ();
@@ -1152,16 +1143,15 @@ void VTask::loadDucWithPredicateResult (
 
 /*****  Create a fragment for 'store/ptoken/link' set #2 ...  *****/
     if ((elementCount = pLink2->ElementCount ()) > 0) {
-	if (pLink2->IsOpen ())
-	    pLink2->Close (fragmentPToken = NewDomPToken (elementCount));
-	else
-	    fragmentPToken = M_DuplicateCPDPtr (pLink2->PPT ());
-
+	if (pLink2->IsntOpen ())
+	    fragmentPToken.setTo (pLink2->PPT ());
+	else {
+	    fragmentPToken.setTo (NewDomPToken (elementCount));
+	    pLink2->Close (fragmentPToken);
+	}
 	rFragmentation
 	    .createFragment (pLink2)->datum ()
-	    .setToConstant (fragmentPToken, codKOT()->*pKOTM2);
-
-	fragmentPToken->release ();
+	    .setToConstant (fragmentPToken, pCodKOT->*pKOTM2);
     }
     else {
         pLink2->release ();
@@ -1212,7 +1202,7 @@ void VTask::process (VNumericBinary& rOperator) {
 	normalizeDuc ();
 	DSC_Descriptor& rOperand = ducMonotype ();
 
-	M_CPD *pOperandStore = rOperand.storeCPD ();
+	Vdd::Store *pOperandStore = rOperand.store ();
 	RTYPE_Type xOperandRType = rOperand.pointerRType ();
 
 	DSC_Descriptor& rCurrent = getCurrent ();
@@ -1469,7 +1459,7 @@ void VTask::reportInfoHeader (unsigned int xLevel) const {
 
 void VTask::reportTraceHeader (char const *pWhatKindOfTaskAmI) const {
     report (
-	"***** %4s%7d ", pWhatKindOfTaskAmI, rtPTOKEN_CPD_BaseElementCount (ptoken ())
+	"***** %4s%7d ", pWhatKindOfTaskAmI, ptoken ()->cardinality ()
     );
 }
 

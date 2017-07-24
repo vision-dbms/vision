@@ -1,0 +1,108 @@
+
+[ 
+  !toolkitName <- "IVR";
+
+  (CoreWorkspace respondsTo: toolkitName) ifFalse: [
+    !base <- ToolKit createSubclass: toolkitName at: CoreWorkspace;
+
+    !input <- base createSubclass: "Input" at: base;
+    input createSubclass: "Item" at: base;
+    input createSubclass: "File" at: base;
+
+    !dataSet <- input createSubclass: "DataSet" at: base;
+    dataSet createSubclass: "DataRecord" at: base;
+    dataSet createSubclass: "Alias" at: base;
+    !membership <- dataSet createSubclass: "Membership" at: base;
+    membership createSubclass: "Relationship" at: base;
+    membership createSubclass: "Hierarchy" at: base;
+
+    !utility <- base createSubclass: "Utility" at: base;
+    utility createSubclass: "File" at: utility;
+    utility createSubclass: "Scaffold" at: utility;
+    utility createSubclass: "Ngen" at: utility;
+
+    !holdings <- base createSubclass: "Holdings" at: base;
+    !holdings <- base createSubclass: "Settings" at: base;
+
+
+    #####
+    # IVR Feed default settings
+    #####
+    #EntityExtenderFeed enableOptimization;
+    MembershipFeed disableFirstValueInit;
+
+  ];
+] value;
+
+# Input
+IVR Input defineFixedRWProperty: 'propertyParent';
+IVR Input defineFixedRWProperty: 'feedOptions';
+
+IVR Item defineFixedRWStringProperty: 'dataType';
+IVR Item defineFixedRWStringProperty: 'sourceField';
+IVR Item defineFixedRWProperty: 'dataSet';
+IVR Item defineFixedRWProperty: 'isAlias';
+IVR Item defineFixedRWProperty: 'defaultValue';
+IVR Item defineFixedRWProperty: 'excluded';
+IVR Item defineFixedRWStringProperty: 'adjustments';
+IVR Item defineFixedRWStringProperty: 'sourceFormula';
+IVR Item defineEnableDisable: 'timeSeries';
+IVR Item defineEnableDisable: 'holdingProp';
+
+IVR DataSet defineFixedRWStringProperty: 'feedName';
+IVR DataSet defineFixedRWStringProperty: 'classSuffix';
+IVR DataSet defineFixedRWStringProperty: 'className';
+IVR DataSet defineFixedRWStringProperty: 'prepFeed';
+IVR DataSet defineFixedRWStringProperty: 'bridge';
+IVR DataSet defineFixedRWStringProperty: 'sourceClass';
+IVR DataSet defineFixedRWProperty: 'globalOptionsList';
+IVR DataSet define: 'globalOptionsListPrototype' toBe: IndexedList new;
+IVR DataSet define: 'sourceClassDefault' toBe: "";
+
+IVR DataRecord defineEnableDisable: 'timeSeries';
+IVR DataRecord define: 'sourceClassDefault' toBe: "DataRecord";
+
+IVR Membership defineFixedRWStringProperty: 'memberType';
+IVR Membership defineFixedRWStringProperty: 'groupType';
+IVR Membership defineEnableDisable: 'manyToMany';
+IVR Membership defineEnableDisable: 'timeSeries';
+IVR Membership define: 'sourceClassDefault' toBe: "ClassificationIVR";
+
+IVR File defineFixedRWProperty: 'class';
+IVR File defineFixedRWProperty: 'dataSetList';
+IVR File defineFixedRWStringProperty: 'sourceString';
+IVR File define: 'dataSetListPrototype' toBe: List new;
+
+# Utility
+IVR Utility File defineFixedRWStringProperty: 'name';
+
+# Holdings
+IVR Holdings defineFixedRWProperty: 'accountFilter';
+IVR Holdings defineFixedRWProperty: 'securityFilter';
+IVR Holdings defineFixedRWProperty: 'classificationList';
+IVR Holdings defineFixedRWProperty: 'modifiedIndices';
+
+IVR Settings defineFixedRWProperty: 'allocationThreshold';
+
+
+Interface BatchFeedManager
+  createEntityClass: "ClassificationIVR"
+  from: "Classification";
+Interface BatchFeedManager
+  createEntityClass: "HierarchyIVR"
+  from: "ClassificationIVR";
+
+# Can I define securityList here without screwing up the memberships?
+PropertySetup updateFromString:
+" property       | classID           | dataType
+securityCriteria | ClassificationIVR | Block
+weightFormula    | ClassificationIVR | Block
+weightAdjustment | ClassificationIVR | Block
+sharesFormula    | ClassificationIVR | Block
+sharesAdjustment | ClassificationIVR | Block    
+";
+
+ClassificationIVR define: 'securityCriteriaDefault' toBe: NA;
+ClassificationIVR define: 'securityPath' toBe: NA;
+ClassificationIVR define: 'securityListPath' toBe: NA;
+

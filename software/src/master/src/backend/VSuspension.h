@@ -84,7 +84,7 @@ public:
 public:
     unsigned int cardinality_() const;
 
-    M_CPD *ptoken_() const;
+    rtPTOKEN_Handle *ptoken_() const;
 
 //  Access
 public:

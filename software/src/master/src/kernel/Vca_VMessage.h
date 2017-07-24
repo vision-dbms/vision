@@ -112,7 +112,7 @@ namespace Vca {
     private:
 	void evaluate ();
 
-	virtual void evaluate_() const = 0;
+	virtual void evaluate_() = 0;
 	void evaluateIncomingFrom (VcaSite *pSite);
 
 	virtual void run_() {

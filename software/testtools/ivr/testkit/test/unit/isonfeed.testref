@@ -1,0 +1,235 @@
+
+
+                   ---  Begin Reconcile for GlobalsFeed  ---                    
+
+  Upload Feed:   GlobalsFeed
+  Total Records:         5
+  Bad Field Ids:         0
+  Not Processed:         0
+  Other Status:          0
+
+                            --- Current Globals ---                             
+dataItemName :->  groupId
+delimiter :->  	|
+fieldOrderList :->  memberId,date,T200,,,1000,2000,3000
+headerLineNumber :->          1
+maxRecords :->          0
+naTest :->  NA
+prepDebugPrint :->  TRUE
+repeatingItems :->  memberId,date
+requiredFields :->          0
+skipBottom :->          0
+skipTop :->          0
+underlyingFeed :->  SecurityToIndustry
+
+
+                    ---  End Reconcile for GlobalsFeed  ---                     
+
+
+
+
+
+                   ---  Begin Reconcile for PrepIsonFeed  ---                   
+
+  Upload Feed:   PrepIsonFeed
+  Total Records:         3
+  Not Processed:         0
+  Other Status:          0
+
+Prepped feed string: 
+************************************************************
+memberId|date|groupId
+AAAAA|20070101|1000
+AAAAA|20070101|2000
+AAAAA|20070101|3000
+BBBBB|20070101|T200
+BBBBB|20070101|1000
+BBBBB|20070101|2000
+BBBBB|20070101|3000
+CCCCC|20070101|T200
+CCCCC|20070101|1000
+CCCCC|20070101|2000
+CCCCC|20070101|3000
+
+************************************************************
+
+
+                ---  Begin Reconcile for SecurityToIndustry  ---                
+
+  Upload Feed:   SecurityToIndustry
+  Total Records:        11
+  Bad Field Ids:         0
+  Not Processed:         0
+  Other Status:          0
+Dates present:      1/1/2007 
+
+                 ---  End Reconcile for SecurityToIndustry  ---                 
+
+
+
+
+
+                    ---  End Reconcile for PrepIsonFeed  ---                    
+
+
+
+T200
+IndexedList of 2
+BBBBB
+CCCCC
+
+1000
+IndexedList of 3
+AAAAA
+BBBBB
+CCCCC
+
+2000
+IndexedList of 3
+AAAAA
+BBBBB
+CCCCC
+
+3000
+IndexedList of 3
+AAAAA
+BBBBB
+CCCCC
+
+
+============================================================
+Missing repeatingItems.  Everything becomes one row here.  
+This is a reasonable failure mode.
+============================================================
+
+
+
+                   ---  Begin Reconcile for GlobalsFeed  ---                    
+
+  Upload Feed:   GlobalsFeed
+  Total Records:         3
+  Bad Field Ids:         0
+  Not Processed:         0
+  Other Status:          0
+
+                            --- Current Globals ---                             
+dataItemName :->  groupId
+delimiter :->  	|
+fieldOrderList :->  memberId,date,T200,,,1000,2000,3000
+headerLineNumber :->          1
+maxRecords :->          0
+naTest :->  NA
+requiredFields :->          0
+skipBottom :->          0
+skipTop :->          0
+underlyingFeed :->  SecurityToIndustry
+
+
+                    ---  End Reconcile for GlobalsFeed  ---                     
+
+
+
+
+
+                   ---  Begin Reconcile for PrepIsonFeed  ---                   
+
+  Upload Feed:   PrepIsonFeed
+  Total Records:         3
+  Not Processed:         0
+  Other Status:          0
+
+
+                ---  Begin Reconcile for SecurityToIndustry  ---                
+
+  Upload Feed:   SecurityToIndustry
+  Total Records:        17
+  Bad Field Ids:         0
+  Not Processed:        17
+  Other Status:          0
+
+       17 bad memberships.
+
+Group date not defined  --  has 3 members.
+Group memberId not defined  --  has 3 members.
+Member       NA  not defined --  in  17 groups.
+
+Dates present:      
+
+                 ---  End Reconcile for SecurityToIndustry  ---                 
+
+
+
+
+
+                    ---  End Reconcile for PrepIsonFeed  ---                    
+
+
+
+
+============================================================
+Missing dataItemName.  Results in a missing header field.
+This is a reasonable failure mode.
+============================================================
+
+
+
+                   ---  Begin Reconcile for GlobalsFeed  ---                    
+
+  Upload Feed:   GlobalsFeed
+  Total Records:         3
+  Bad Field Ids:         0
+  Not Processed:         0
+  Other Status:          0
+
+                            --- Current Globals ---                             
+delimiter :->  	|
+fieldOrderList :->  memberId,date,T200,,,1000,2000,3000
+headerLineNumber :->          1
+maxRecords :->          0
+naTest :->  NA
+repeatingItems :->  memberId,date
+requiredFields :->          0
+skipBottom :->          0
+skipTop :->          0
+underlyingFeed :->  SecurityToIndustry
+
+
+                    ---  End Reconcile for GlobalsFeed  ---                     
+
+
+
+
+
+                   ---  Begin Reconcile for PrepIsonFeed  ---                   
+
+  Upload Feed:   PrepIsonFeed
+  Total Records:         3
+  Not Processed:         0
+  Other Status:          0
+
+
+                ---  Begin Reconcile for SecurityToIndustry  ---                
+
+  Upload Feed:   SecurityToIndustry
+  Total Records:        11
+  Bad Field Ids:         0
+  Not Processed:        11
+  Other Status:          0
+
+       11 bad memberships.
+
+Group       NA  not defined  --  has 11 members.
+
+Dates present:      
+
+                 ---  End Reconcile for SecurityToIndustry  ---                 
+
+
+
+
+
+                    ---  End Reconcile for PrepIsonFeed  ---                    
+
+
+
+

@@ -22,33 +22,32 @@
  *******************************************/
 
 VfDistributionGenerator::VfDistributionGenerator (
-    M_CPD*& pDistributionCPD
-) : m_pDistributionCPD (pDistributionCPD)
-{
-    m_pDistributionCPD		=
-    m_pDistributionComainPToken	=
-    m_pDistributionDomainPToken	= NilOf (M_CPD*);
+    M_CPD *&pDistributionCPD
+) : m_pDistributionCPD (pDistributionCPD) {
+    m_pDistributionCPD = NilOf (M_CPD*);
 }
 
-void VfDistributionGenerator::initializeUsingComainPToken (M_CPD* pPTokenCPD) {
+void VfDistributionGenerator::initializeUsingComainPToken (rtPTOKEN_Handle *pPToken) {
     releaseContent ();
 
-    m_pDistributionComainPToken = rtPTOKEN_BasePToken (pPTokenCPD, -1);
-    m_pDistributionDomainPToken = rtPTOKEN_New (
-	M_AttachedNetwork->ScratchPad (),
-	rtPTOKEN_CPD_BaseElementCount (m_pDistributionComainPToken)
+    m_pDistributionComainPToken.setTo (pPToken->basePToken ());
+    m_pDistributionDomainPToken.setTo (
+	new rtPTOKEN_Handle (
+	    M_AttachedNetwork->ScratchPad (), m_pDistributionComainPToken->cardinality ()
+	)
     );
 
     initializeDistribution ();
 }
 
-void VfDistributionGenerator::initializeUsingDomainPToken (M_CPD* pPTokenCPD) {
+void VfDistributionGenerator::initializeUsingDomainPToken (rtPTOKEN_Handle *pPToken) {
     releaseContent ();
 
-    m_pDistributionDomainPToken = rtPTOKEN_BasePToken (pPTokenCPD, -1);
-    m_pDistributionComainPToken = rtPTOKEN_New (
-	M_AttachedNetwork->ScratchPad (),
-	rtPTOKEN_CPD_BaseElementCount (m_pDistributionDomainPToken)
+    m_pDistributionDomainPToken.setTo (pPToken->basePToken ());
+    m_pDistributionComainPToken.setTo (
+	new rtPTOKEN_Handle (
+	    M_AttachedNetwork->ScratchPad (), m_pDistributionDomainPToken->cardinality ()
+	)
     );
 
     initializeDistribution ();
@@ -75,8 +74,6 @@ VfDistributionGenerator::~VfDistributionGenerator ()
 }
 
 void VfDistributionGenerator::releaseContent () {
-    if (m_pDistributionComainPToken)
-	m_pDistributionComainPToken->release ();
-    if (m_pDistributionDomainPToken)
-	m_pDistributionDomainPToken->release ();
+    m_pDistributionComainPToken.clear ();
+    m_pDistributionDomainPToken.clear ();
 }

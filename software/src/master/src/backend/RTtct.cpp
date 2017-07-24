@@ -174,7 +174,7 @@ PrivateFnDef void PrintCT (
 {
     int	i, n;
 
-    IO_printf ("#%s{\n", RTYPE_TypeIdAsString ((RTYPE_Type)M_CPD_RType (cpd)));
+    IO_printf ("#%s{\n", cpd->RTypeName ());
     for (i = 0, n = rtTCT_CPD_EntryCount (cpd);
 	 i < n;
 	 i++, rtTCT_CPD_Entry (cpd)++)

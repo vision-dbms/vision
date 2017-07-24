@@ -176,12 +176,14 @@ bool Vsa::VPoolWorkerGeneration::canProcess (VPoolEvaluation const *pEvaluation)
 bool Vsa::VPoolWorkerGeneration::isProcessing (Vca::U32 xEvaluation, VReference<WIP> &rpWIP) const {
     bool bIsProcessing = false;
     VReference<WIP> pWIP (m_pOnlineWIPHead);
-    while (!bIsProcessing && pWIP) {
-        if (xEvaluation == pWIP->evaluationIndex ()) {
-            rpWIP.setTo (pWIP);
-            bIsProcessing = true;
-        }
-        pWIP.setTo (pWIP->m_pSuccessor);
+    while (pWIP) {
+	if (xEvaluation == pWIP->evaluationIndex () ) {
+	    if (!pWIP->remoteIEvaluationCancelled() ) {
+		bIsProcessing = true;
+		rpWIP.setTo (pWIP);
+	    }
+	}
+	pWIP.setTo (pWIP->m_pSuccessor);
     }
     return bIsProcessing;
 }
@@ -552,7 +554,7 @@ void Vsa::VPoolWorkerGeneration::onWorker (WorkerRequest *pRequest, Worker *pWor
 
     // Trim away an old worker if there are any from a previous generation, or if we've hit our maximum.
     if (m_pPool->hasMaximumWorkers () ||
-	(m_pPool->queueLength () == 0 && onlineWorkerCount () < m_pPool->onlineWorkerCount ())) {
+	(onlineWorkerCount () < m_pPool->onlineWorkerCount ())) {
         m_pPool->trimWorkers(1);
     }
 
@@ -626,7 +628,6 @@ void Vsa::VPoolWorkerGeneration::onWorkerError (WorkerRequest *pRequest, VString
 bool Vsa::VPoolWorkerGeneration::returnWorker (Worker *pWorker) {
 
     bool bReturned = false;
-
     //  logging info
     VString iMsg;
     iMsg << "Worker " << pWorker->pid () << "[" << pWorker->identifier () << "]";
@@ -638,18 +639,18 @@ bool Vsa::VPoolWorkerGeneration::returnWorker (Worker *pWorker) {
 	 pWorker->status () == Worker::Worker_InStartup ||
 	 !m_pPool->hasStartedWorkers ())) {
         bReturned = true;
-	iMsg << ": Employed";
-	switch (pWorker->status ()) {
-	case Worker::Worker_InStartup:
-	    incrOnlineWorkers ();
-	    break;
-	default:
-	    break;
-	}
+		iMsg << ": Employed";
+		switch (pWorker->status ()) {
+			case Worker::Worker_InStartup:
+				incrOnlineWorkers ();
+				break;
+			default:
+				break;
+		}
         employ (pWorker);
     }
     else {
-      bReturned = false;
+        bReturned = false;
         retire (pWorker);
         iMsg << ": Retired";
     }
@@ -710,31 +711,31 @@ void Vsa::VPoolWorkerGeneration::retire (Worker *pWorker, Worker::Worker_Retirem
     if (pWorker->workerMode () == Worker::Worker_Retired) return;
 
     switch (pWorker->workerMode ()) {
-    case Worker::Worker_Online:
-	if (pWorker->status () != Worker::Worker_InStartup)
-	    decrOnlineWorkers ();
+		case Worker::Worker_Online:
+			if (pWorker->status () != Worker::Worker_InStartup)
+				decrOnlineWorkers ();
 
-	// If the worker is still available, remove it from the available list.
-	if (pWorker->status () == Worker::Worker_Available) {
-	    detach(pWorker, WorkerList_Online);
-	}
-	if (m_cOnlineExcessWorkers > 0)
-	    decrOnlineExcessWorkers ();
-	if (pWorker->isFlushed ())
-	    m_pPool->decrementToBeFlushedWorkers ();
+			// If the worker is still available, remove it from the available list.
+			if (pWorker->status () == Worker::Worker_Available) {
+				detach(pWorker, WorkerList_Online);
+			}
+			if (m_cOnlineExcessWorkers > 0)
+				decrOnlineExcessWorkers ();
+			if (pWorker->isFlushed ())
+				m_pPool->decrementToBeFlushedWorkers ();
 
-	break;
-    case Worker::Worker_Offline:
-	decrOfflineWorkers ();
+		break;
+		case Worker::Worker_Offline:
+			decrOfflineWorkers ();
 
-	if (pWorker->status () == Worker::Worker_Available) {
-	    detach(pWorker, WorkerList_Offline);
-	}
+			if (pWorker->status () == Worker::Worker_Available) {
+				detach(pWorker, WorkerList_Offline);
+			}
 
-	if (m_cOfflineExcessWorkers > 0)
-	    decrOfflineExcessWorkers ();
+			if (m_cOfflineExcessWorkers > 0)
+				decrOfflineExcessWorkers ();
 
-	break;
+		break;
     }
 
     // Keep the worker's corpse around.
@@ -890,46 +891,46 @@ bool Vsa::VPoolWorkerGeneration::makeWorkerOnline  (Worker *pWorker, IVReceiver<
         Vca::U32 iID (pWorker->identifier ());
 
         switch (pWorker->workerMode ()) {
-        case Worker::Worker_Offline:
-            switch (pWorker->status ()) {
-            case Worker::Worker_Available: {
-                VReference<Worker> rpWorker;
-                detach (WorkerList_Offline, rpWorker, pWorker->identifier ());
-                decrOfflineWorkers ();
-                incrOnlineWorkers ();
-                pWorker->setOnlineMode ();
+			case Worker::Worker_Offline:
+				switch (pWorker->status ()) {
+					case Worker::Worker_Available: {
+						VReference<Worker> rpWorker;
+						detach (WorkerList_Offline, rpWorker, pWorker->identifier ());
+						decrOfflineWorkers ();
+						incrOnlineWorkers ();
+						pWorker->setOnlineMode ();
 
-                //  do not directly attach to avail list, return the worker so that its added when
-                //  if required.
-                bMadeOnline = returnWorker (pWorker);
-                if (bMadeOnline)
-                        iResult.printf ("Worker %s [%d] is taken online", iPID.content (), iID);
-                else
-                        iResult.printf ("Worker %s [%d] is retired to satisfy pool settings", iPID.content (), iID);
-                break;
-            }
-            case Worker::Worker_InUse:
-                  pWorker->setToggleMode ();
-                  iResult.printf ("Worker %s [%d] will be online after it finishes its current offline query.", iPID.content (), iID);
-                  break;
-            case Worker::Worker_InStartup:
-                  iResult.printf ("Worker %s [%d] is being created", iPID.content (), iID);
-                  break;
-            default:
-                 break;
-            }
-            break;
-        case Worker::Worker_Online:
-            if (pWorker->status () == Worker::Worker_InStartup) {
-                bMadeOnline = returnWorker (pWorker);
-                if (bMadeOnline)
-                    iResult.printf ("Worker %s [%d] has been employed and taken online", iPID.content (), iID);
-                else
-                    iResult.printf ("Worker %s [%d] was employed but subsequently retired to satisfy pool settings", iPID.content (), iID);
-                break;
-            }
-            else iResult.printf ("Worker %s [%d] is already online", iPID.content (), iID);
-            break;
+						//  do not directly attach to avail list, return the worker so that its added when
+						//  if required.
+						bMadeOnline = returnWorker (pWorker);
+						if (bMadeOnline)
+								iResult.printf ("Worker %s [%d] is taken online", iPID.content (), iID);
+						else
+								iResult.printf ("Worker %s [%d] is retired to satisfy pool settings", iPID.content (), iID);
+						break;
+					}
+					case Worker::Worker_InUse:
+						  pWorker->setToggleMode ();
+						  iResult.printf ("Worker %s [%d] will be online after it finishes its current offline query.", iPID.content (), iID);
+						  break;
+					case Worker::Worker_InStartup:
+						  iResult.printf ("Worker %s [%d] is being created", iPID.content (), iID);
+						  break;
+					default:
+						 break;
+				}
+				break;
+			case Worker::Worker_Online:
+				if (pWorker->status () == Worker::Worker_InStartup) {
+					bMadeOnline = returnWorker (pWorker);
+					if (bMadeOnline)
+						iResult.printf ("Worker %s [%d] has been employed and taken online", iPID.content (), iID);
+					else
+						iResult.printf ("Worker %s [%d] was employed but subsequently retired to satisfy pool settings", iPID.content (), iID);
+					break;
+				}
+				else iResult.printf ("Worker %s [%d] is already online", iPID.content (), iID);
+			break;
         }
         if (pClient)
             pClient->OnData (iResult);
@@ -981,7 +982,7 @@ void Vsa::VPoolWorkerGeneration::evaluateUsingOfflineWorker (
             break;
         }
     }
-
+	
 }
 
 void Vsa::VPoolWorkerGeneration::retireOfflineWorker (Worker *pWorker, IVReceiver<VString const&> *pClient) {
@@ -993,23 +994,23 @@ void Vsa::VPoolWorkerGeneration::retireOfflineWorker (Worker *pWorker, IVReceive
         switch (pWorker->workerMode ()) {
 
         case Worker::Worker_Offline:
-              switch (pWorker->status ()) {
-              case Worker::Worker_Available: {
-                    retire (pWorker);
-                    iResult.printf ("Worker %s [%d] retired", iPID.content (), iID);
-                    break;
-             }
-             case Worker::Worker_InUse:
-                  pWorker->m_bAboutToRetire = true;
-                  iResult.printf ("Worker %s [%d] will be retired after it finishes its current offline query.", iPID.content (), iID);
-                  break;
-             case Worker::Worker_InStartup:
-                  iResult.printf ("Worker %s [%d] is being created", iPID.content (), iID);
-                  break;
-             default:
-                  break;
-              }
-              break;
+			switch (pWorker->status ()) {
+				case Worker::Worker_Available: {
+					retire (pWorker);
+					iResult.printf ("Worker %s [%d] retired", iPID.content (), iID);
+					break;
+				}
+				case Worker::Worker_InUse:
+					pWorker->m_bAboutToRetire = true;
+					iResult.printf ("Worker %s [%d] will be retired after it finishes its current offline query.", iPID.content (), iID);
+					break;
+				case Worker::Worker_InStartup:
+				    iResult.printf ("Worker %s [%d] is being created", iPID.content (), iID);
+				    break;
+				default:
+				    break;
+				}
+			break;
         case Worker::Worker_Online:
               iResult.printf ("Worker %s [%d] is online. Make it offline and then retire", iPID.content (), iID);
               break;
@@ -1244,6 +1245,8 @@ void Vsa::VPoolWorkerGeneration::detach (WIP *pWIP) {
             pTail.setTo (pWIP->m_pPredecessor);
         }
     }
+    pWIP->m_pSuccessor.clear ();
+    pWIP->m_pPredecessor.clear ();
 }
 
 void Vsa::VPoolWorkerGeneration::detachRetiredWorkers () {
@@ -1649,41 +1652,46 @@ Vsa::VPoolWorkerGeneration::WorkerRequest::~WorkerRequest () {
  ***************************/
 
 void Vsa::VPoolWorkerGeneration::WorkerRequest::start () {
-  if (m_pEvaluator.isNil ()) {
-    VReference<IEvaluatorSink> pIEvaluatorSink;
-    getRole (pIEvaluatorSink);
-    VReference<IEvaluatorSource> pSource (m_pPool->workerSource ());
-    pSource->Supply (pIEvaluatorSink);
-  }
-  else {
-    VString iPIDQuery;
-    m_pPool->workerPIDQuery (iPIDQuery);
-    if (iPIDQuery.isEmpty () ||
-	m_pPool->isStopped ()) {
-      returnNewWorker ("");
-    }
-    else {
-      VReference<IEvaluatorClient> pClient;
-      getRole (pClient);
+	if (m_pEvaluator.isNil ()) {
+		VReference<IEvaluatorSink> pIEvaluatorSink;
+		getRole (pIEvaluatorSink);
+		VReference<IEvaluatorSource> pSource (m_pPool->workerSource ());
+		pSource->Supply (pIEvaluatorSink);
+	}
+	else {
+        CAM_OPERATION(co) << "message" << "Vsa::VPoolWorkerGeneration::WorkerRequest::start()";
+		VString iPIDQuery;
+		m_pPool->workerPIDQuery (iPIDQuery);
+		if (iPIDQuery.isEmpty () ||
+		m_pPool->isStopped ()) {
+		    returnNewWorker ("");
+		}
+		else {
+			VReference<IEvaluatorClient> pClient;
+			getRole (pClient);
 
-      //  get pid of worker...
-      m_pEvaluatorEKG.setTo (new interface_monitor_t (this, &ThisClass::signalIEvaluatorEKG, m_pEvaluator));
-      m_pEvaluator->EvaluateExpression (pClient, "", iPIDQuery);
-    }
-  }
+			//  get pid of worker...
+			m_pEvaluatorEKG.setTo (new interface_monitor_t (this, &ThisClass::signalIEvaluatorEKG, m_pEvaluator));
+            if (IEvaluator_Ex1 *const pEvaluator1 = dynamic_cast<IEvaluator_Ex1*>(m_pEvaluator.referent())) {
+                pEvaluator1->EvaluateExpression_Ex (pClient, "", iPIDQuery, co.getId().c_str(), co.chainId().c_str());
+            } else {
+                m_pEvaluator->EvaluateExpression (pClient, "", iPIDQuery);
+            }
+		}
+	}
 }
 
 void Vsa::VPoolWorkerGeneration::WorkerRequest::returnNewWorker(VString const &rPID) {
-      m_pWorker.setTo (new Worker (m_iWorkerId, rPID, m_pGeneration, m_pEvaluator));
-      // Set worker mode to online, signifying that the worker has started up.
-      m_pWorker->setOnlineMode ();
+	m_pWorker.setTo (new Worker (m_iWorkerId, rPID, m_pGeneration, m_pEvaluator));
+	// Set worker mode to online, signifying that the worker has started up.
+	m_pWorker->setOnlineMode ();
 
-      // Send the worker to the generation.
-      m_pGeneration->onWorker (this, m_pWorker);
+	// Send the worker to the generation.
+	m_pGeneration->onWorker (this, m_pWorker);
 
-      // Clear state references that we won't need anymore.
-      m_pGeneration.clear ();
-      m_pEvaluator.clear ();
+	// Clear state references that we won't need anymore.
+	m_pGeneration.clear ();
+	m_pEvaluator.clear ();
 }
 
 

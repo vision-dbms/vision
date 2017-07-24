@@ -99,11 +99,8 @@
 
 
 #define DSC_Traverse(dsc, workMacro) {\
-    M_CPD*		cpd = NilOf (M_CPD*);\
-    rtLINK_CType*	linkc = NilOf (rtLINK_CType*);\
-\
-    DSC__SetupTraversal (&dsc, &cpd, &linkc);\
-\
+    M_CPD *cpd = NilOf (M_CPD*); rtLINK_CType *linkc = NilOf (rtLINK_CType*);\
+    dsc.__SetupTraversal (&cpd, &linkc);\
     if (IsntNil (cpd)) {\
 	for (unsigned int ii=0; ii < UV_CPD_ElementCount (cpd); ii++) {\
 	    workMacro (rtINTUV_CPD_Array (cpd)[ii]);\
@@ -205,6 +202,10 @@
  **********************/
 
 class DSC_Descriptor {
+//  Aliases
+public:
+    typedef Vdd::Store Store;
+
 //  Construction
 public:
     void construct () {
@@ -216,7 +217,7 @@ public:
 	m_iStore.construct (rSource.m_iStore);
 	m_iPointer.construct (rSource.m_iPointer);
     }
-    void construct (M_CPD *pStore, DSC_Pointer const &rPointer) {
+    void construct (Store *pStore, DSC_Pointer const &rPointer) {
 	m_iStore.construct (pStore);
 	m_iPointer.construct (rPointer);
     }
@@ -239,10 +240,16 @@ public:
     }
 
     void constructScalarComposition (
-	M_CPD *pStore, unsigned int xSubscript, M_CPD *pSourceUV
+	Store *pStore, unsigned int xSubscript, M_CPD *pSource
     ) {
 	m_iStore.construct (pStore);
-	m_iPointer.constructScalarComposition (xSubscript, pSourceUV);
+	m_iPointer.constructScalarComposition (xSubscript, pSource);
+    }
+    void constructScalarComposition (
+	Store *pStore, unsigned int xSubscript, VContainerHandle *pSource
+    ) {
+	m_iStore.construct (pStore);
+	m_iPointer.constructScalarComposition (xSubscript, pSource);
     }
 
     void constructSet (
@@ -252,69 +259,61 @@ public:
 	m_iPointer.constructSet (pContainerSpace, rpEnumeration, rSource.m_iPointer);
     }
 
-    void constructCorrespondence (M_CPD *pPPT, M_CPD *pStore, unsigned int xRPTReference) {
+    void constructCorrespondence (rtPTOKEN_Handle *pPPT, Store *pStore) {
 	m_iStore.construct (pStore);
-	m_iPointer.constructCorrespondence (pPPT, pStore, xRPTReference);
+	m_iPointer.constructCorrespondence (pPPT, pStore);
     }
 
-    void constructIdentity (VConstructor *pStore, M_CPD *pPToken) {
-	m_iStore.construct (pStore);
-	m_iPointer.constructIdentity (pPToken);
-    }
-    void constructIdentity (M_CPD *pStore, M_CPD *pPToken) {
+    void constructIdentity (Store *pStore, rtPTOKEN_Handle *pPToken) {
 	m_iStore.construct (pStore);
 	m_iPointer.constructIdentity (pPToken);
     }
 
-    void constructLink (VConstructor *pStore, rtLINK_CType *pLink) {
+    void constructLink (Store *pStore, rtLINK_CType *pLink) {
 	m_iStore.construct (pStore);
 	m_iPointer.constructLink (pLink);
     }
-    void constructLink (M_CPD *pStore, M_CPD *pLink) {
-	m_iStore.construct (pStore);
-	m_iPointer.constructLink (pLink);
-    }
-    void constructLink (M_CPD *pStore, rtLINK_CType *pLink) {
+    void constructLink (Store *pStore, M_CPD *pLink) {
 	m_iStore.construct (pStore);
 	m_iPointer.constructLink (pLink);
     }
 
-    void constructReference (M_CPD *pStore, M_CPD *pValues) {
+    void constructReference (Store *pStore, M_CPD *pValues) {
 	m_iStore.construct (pStore);
 	m_iPointer.constructReference (pValues);
     }
-    void constructReference (M_CPD *pStore, M_CPD *pDistribution, rtLINK_CType *pSubset) {
+    void constructReference (Store *pStore, M_CPD *pDistribution, rtLINK_CType *pSubset) {
 	m_iStore.construct (pStore);
 	m_iPointer.constructReference (pDistribution, pSubset);
     }
 
-    void constructValue (M_CPD *pStore, M_CPD *pValueMonotype) {
+    void constructValue (Store *pStore, M_CPD *pValueMonotype) {
 	m_iStore.construct (pStore);
 	m_iPointer.constructValue (pValueMonotype);
     }
 
     void constructMonotype (M_CPD *pMonotype);
 
-    void constructMonotype (M_CPD *pStore, M_CPD *pMonotype) {
+    void constructMonotype (Store *pStore, M_CPD *pMonotype) {
 	m_iStore.construct (pStore);
 	m_iPointer.construct (pMonotype);
     }
 
-    void constructMonotype (M_CPD *pStore, rtLINK_CType *pMonotype) {
+    void constructMonotype (Store *pStore, rtLINK_CType *pMonotype) {
 	m_iStore.construct (pStore);
 	m_iPointer.construct (pMonotype);
     }
 
-    void constructConstant (M_CPD *pPPT, M_CPD *pStore, DSC_Scalar const &rValue) {
+    void constructConstant (rtPTOKEN_Handle *pPPT, Store *pStore, DSC_Scalar const &rValue) {
 	m_iStore.construct (pStore);
 	m_iPointer.constructConstant (pPPT, rValue);
     }
-    void constructScalar (M_CPD *pStore, DSC_Scalar const &rValue) {
+    void constructScalar (Store *pStore, DSC_Scalar const &rValue) {
 	m_iStore.construct (pStore);
 	m_iPointer.constructScalar (rValue);
     }
 
-    void constructScalar (M_CPD *pStore, M_CPD *pRPT) {
+    void constructScalar (Store *pStore, rtPTOKEN_Handle *pRPT) {
 	m_iStore.construct (pStore);
 	m_iPointer.constructScalar (pRPT);
     }
@@ -323,44 +322,44 @@ public:
 	m_iPointer.constructScalar (rKOTE);
     }
 
-    void constructConstant (M_CPD *pPPT, M_CPD *pStore, M_CPD *pRPT) {
+    void constructConstant (rtPTOKEN_Handle *pPPT, Store *pStore, rtPTOKEN_Handle *pRPT) {
 	m_iStore.construct (pStore);
 	m_iPointer.constructConstant (pPPT, pRPT);
     }
-    void constructConstant (M_CPD *pPPT, M_KOTE const &rKOTE) {
+    void constructConstant (rtPTOKEN_Handle *pPPT, M_KOTE const &rKOTE) {
 	m_iStore.construct (rKOTE);
 	m_iPointer.constructConstant (pPPT, rKOTE);
     }
 
-    void constructNA (M_CPD *pPPT, M_KOT *pKOT) {
+    void constructNA (rtPTOKEN_Handle *pPPT, M_KOT *pKOT) {
 	constructConstant (pPPT, pKOT->TheNAClass);
     }
     void constructNA (M_KOT *pKOT) {
 	constructScalar (pKOT->TheNAClass);
     }
 
-    void constructTrue (M_CPD *pPPT, M_KOT *pKOT) {
+    void constructTrue (rtPTOKEN_Handle *pPPT, M_KOT *pKOT) {
 	constructConstant (pPPT, pKOT->TheTrueClass);
     }
     void constructTrue (M_KOT *pKOT) {
 	constructScalar (pKOT->TheTrueClass);
     }
 
-    void constructFalse (M_CPD *pPPT, M_KOT *pKOT) {
+    void constructFalse (rtPTOKEN_Handle *pPPT, M_KOT *pKOT) {
 	constructConstant (pPPT, pKOT->TheFalseClass);
     }
     void constructFalse (M_KOT *pKOT) {
 	constructScalar (pKOT->TheFalseClass);
     }
 
-    void constructBoolean (M_CPD *pPPT, M_KOT *pKOT, bool iBoolean) {
+    void constructBoolean (rtPTOKEN_Handle *pPPT, M_KOT *pKOT, bool iBoolean) {
 	constructConstant (pPPT, iBoolean ? pKOT->TheTrueClass : pKOT->TheFalseClass);
     }
     void constructBoolean (M_KOT *pKOT, bool iBoolean) {
 	constructScalar (iBoolean ? pKOT->TheTrueClass : pKOT->TheFalseClass);
     }
 
-    void constructScalar (M_CPD *pStore, M_CPD *pRPT, char value) {
+    void constructScalar (Store *pStore, rtPTOKEN_Handle *pRPT, char value) {
 	m_iStore.construct (pStore);
 	m_iPointer.constructScalar (pRPT, value);
     }
@@ -372,19 +371,19 @@ public:
 	constructScalar (pKOT->TheCharacterClass, value);
     }
 
-    void constructConstant (M_CPD *pPPT, M_CPD *pStore, M_CPD *pRPT, char value) {
+    void constructConstant (rtPTOKEN_Handle *pPPT, Store *pStore, rtPTOKEN_Handle *pRPT, char value) {
 	m_iStore.construct (pStore);
 	m_iPointer.constructConstant (pPPT, pRPT, value);
     }
-    void constructConstant (M_CPD *pPPT, M_KOTE const &rKOTE, char value) {
+    void constructConstant (rtPTOKEN_Handle *pPPT, M_KOTE const &rKOTE, char value) {
 	m_iStore.construct (rKOTE);
 	m_iPointer.constructConstant (pPPT, rKOTE, value);
     }
-    void constructConstant (M_CPD *pPPT, M_KOT *pKOT, char value) {
+    void constructConstant (rtPTOKEN_Handle *pPPT, M_KOT *pKOT, char value) {
 	constructConstant (pPPT, pKOT->TheCharacterClass, value);
     }
 
-    void constructScalar (M_CPD *pStore, M_CPD *pRPT, double value) {
+    void constructScalar (Store *pStore, rtPTOKEN_Handle *pRPT, double value) {
 	m_iStore.construct (pStore);
 	m_iPointer.constructScalar (pRPT, value);
     }
@@ -396,19 +395,19 @@ public:
 	constructScalar (pKOT->TheDoubleClass, value);
     }
 
-    void constructConstant (M_CPD *pPPT, M_CPD *pStore, M_CPD *pRPT, double value) {
+    void constructConstant (rtPTOKEN_Handle *pPPT, Store *pStore, rtPTOKEN_Handle *pRPT, double value) {
 	m_iStore.construct (pStore);
 	m_iPointer.constructConstant (pPPT, pRPT, value);
     }
-    void constructConstant (M_CPD *pPPT, M_KOTE const &rKOTE, double value) {
+    void constructConstant (rtPTOKEN_Handle *pPPT, M_KOTE const &rKOTE, double value) {
 	m_iStore.construct (rKOTE);
 	m_iPointer.constructConstant (pPPT, rKOTE, value);
     }
-    void constructConstant (M_CPD *pPPT, M_KOT *pKOT, double value) {
+    void constructConstant (rtPTOKEN_Handle *pPPT, M_KOT *pKOT, double value) {
 	constructConstant (pPPT, pKOT->TheDoubleClass, value);
     }
 
-    void constructScalar (M_CPD *pStore, M_CPD *pRPT, float value) {
+    void constructScalar (Store *pStore, rtPTOKEN_Handle *pRPT, float value) {
 	m_iStore.construct (pStore);
 	m_iPointer.constructScalar (pRPT, value);
     }
@@ -420,19 +419,19 @@ public:
 	constructScalar (pKOT->TheFloatClass, value);
     }
 
-    void constructConstant (M_CPD *pPPT, M_CPD *pStore, M_CPD *pRPT, float value) {
+    void constructConstant (rtPTOKEN_Handle *pPPT, Store *pStore, rtPTOKEN_Handle *pRPT, float value) {
 	m_iStore.construct (pStore);
 	m_iPointer.constructConstant (pPPT, pRPT, value);
     }
-    void constructConstant (M_CPD *pPPT, M_KOTE const &rKOTE, float value) {
+    void constructConstant (rtPTOKEN_Handle *pPPT, M_KOTE const &rKOTE, float value) {
 	m_iStore.construct (rKOTE);
 	m_iPointer.constructConstant (pPPT, rKOTE, value);
     }
-    void constructConstant (M_CPD *pPPT, M_KOT *pKOT, float value) {
+    void constructConstant (rtPTOKEN_Handle *pPPT, M_KOT *pKOT, float value) {
 	constructConstant (pPPT, pKOT->TheFloatClass, value);
     }
 
-    void constructScalar (M_CPD *pStore, M_CPD *pRPT, int value) {
+    void constructScalar (Store *pStore, rtPTOKEN_Handle *pRPT, int value) {
 	m_iStore.construct (pStore);
 	m_iPointer.constructScalar (pRPT, value);
     }
@@ -444,63 +443,63 @@ public:
 	constructScalar (pKOT->TheIntegerClass, value);
     }
 
-    void constructConstant (M_CPD *pPPT, M_CPD *pStore, M_CPD *pRPT, int value) {
+    void constructConstant (rtPTOKEN_Handle *pPPT, Store *pStore, rtPTOKEN_Handle *pRPT, int value) {
 	m_iStore.construct (pStore);
 	m_iPointer.constructConstant (pPPT, pRPT, value);
     }
-    void constructConstant (M_CPD *pPPT, M_KOTE const &rKOTE, int value) {
+    void constructConstant (rtPTOKEN_Handle *pPPT, M_KOTE const &rKOTE, int value) {
 	m_iStore.construct (rKOTE);
 	m_iPointer.constructConstant (pPPT, rKOTE, value);
     }
-    void constructConstant (M_CPD *pPPT, M_KOT *pKOT, int value) {
+    void constructConstant (rtPTOKEN_Handle *pPPT, M_KOT *pKOT, int value) {
 	constructConstant (pPPT, pKOT->TheIntegerClass, value);
     }
 
-    void constructScalar (M_CPD *pStore, M_CPD *pRPT, VkUnsigned64 const &value) {
+    void constructScalar (Store *pStore, rtPTOKEN_Handle *pRPT, VkUnsigned64 const &value) {
 	m_iStore.construct (pStore);
 	m_iPointer.constructScalar (pRPT, value);
     }
     void constructConstant (
-	M_CPD *pPPT, M_CPD *pStore, M_CPD *pRPT, VkUnsigned64 const &value
+	rtPTOKEN_Handle *pPPT, Store *pStore, rtPTOKEN_Handle *pRPT, VkUnsigned64 const &value
     ) {
 	m_iStore.construct (pStore);
 	m_iPointer.constructConstant (pPPT, pRPT, value);
     }
 
-    void constructScalar (M_CPD *pStore, M_CPD *pRPT, VkUnsigned96 const &value) {
+    void constructScalar (Store *pStore, rtPTOKEN_Handle *pRPT, VkUnsigned96 const &value) {
 	m_iStore.construct (pStore);
 	m_iPointer.constructScalar (pRPT, value);
     }
     void constructConstant (
-	M_CPD *pPPT, M_CPD *pStore, M_CPD *pRPT, VkUnsigned96 const &value
+	rtPTOKEN_Handle *pPPT, Store *pStore, rtPTOKEN_Handle *pRPT, VkUnsigned96 const &value
     ) {
 	m_iStore.construct (pStore);
 	m_iPointer.constructConstant (pPPT, pRPT, value);
     }
 
-    void constructScalar (M_CPD *pStore, M_CPD *pRPT, VkUnsigned128 const &value) {
+    void constructScalar (Store *pStore, rtPTOKEN_Handle *pRPT, VkUnsigned128 const &value) {
 	m_iStore.construct (pStore);
 	m_iPointer.constructScalar (pRPT, value);
     }
     void constructConstant (
-	M_CPD *pPPT, M_CPD *pStore, M_CPD *pRPT, VkUnsigned128 const &value
+	rtPTOKEN_Handle *pPPT, Store *pStore, rtPTOKEN_Handle *pRPT, VkUnsigned128 const &value
     ) {
 	m_iStore.construct (pStore);
 	m_iPointer.constructConstant (pPPT, pRPT, value);
     }
 
-    void constructReferenceScalar (M_CPD *pStore, M_CPD *pRPT, unsigned int value) {
+    void constructReferenceScalar (Store *pStore, rtPTOKEN_Handle *pRPT, unsigned int value) {
 	m_iStore.construct (pStore);
 	m_iPointer.constructReferenceScalar (pRPT, value);
     }
     void constructReferenceConstant (
-	M_CPD *pPPT, M_CPD *pStore, M_CPD *pRPT, unsigned int value
+	rtPTOKEN_Handle *pPPT, Store *pStore, rtPTOKEN_Handle *pRPT, unsigned int value
     ) {
 	m_iStore.construct (pStore);
 	m_iPointer.constructReferenceConstant (pPPT, pRPT, value);
     }
 
-    void constructZero (M_CPD *pStore, RTYPE_Type xRType, M_CPD *pPPT, M_CPD *pRPT);
+    void constructZero (Store *pStore, RTYPE_Type xRType, rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT);
 
 //  Store Access and Query
 public:
@@ -517,58 +516,55 @@ public:
 	return m_iStore.Space ();
     }
 
-    void decodeClosure (
-	VReference<rtBLOCK_Handle> &rpBlock, unsigned int& rxPrimitive, rtCONTEXT_Constructor** ppContext = 0
+    bool decodeClosure (
+	VReference<rtBLOCK_Handle> &rpBlock, unsigned int& rxPrimitive, VReference<rtCONTEXT_Handle>* ppContext = 0
     ) const {
-	m_iStore.decodeClosure (rpBlock, rxPrimitive, ppContext);
+	return m_iStore.decodeClosure (rpBlock, rxPrimitive, ppContext);
     }
 
-    M_CPD *dictionaryCPD () const {
-	return m_iStore.dictionaryCPD (m_iPointer);
-    }
-
-    void getCanonicalStore (M_CPD *&rpCanonicalStore, bool &rbConvertPointer) const {
+    void getCanonicalStore (VReference<rtVSTORE_Handle>  &rpCanonicalStore, bool &rbConvertPointer) const {
 	m_iStore.getCanonicalStore (rpCanonicalStore, rbConvertPointer, m_iPointer);
     }
 
-    DSC_Store const &store () const {
-	return m_iStore;
+    void getDictionary (VReference<rtDICTIONARY_Handle> &rpResult) const {
+	m_iStore.getDictionary (rpResult, m_iPointer);
     }
-    DSC_Store &store () {
+    void getDictionary (Vdd::Store::Reference &rpResult) const {
+	m_iStore.getDictionary (rpResult, m_iPointer);
+    }
+
+    bool getInheritance () {
+	return m_iStore.getInheritance (m_iPointer);
+    }
+
+    bool getProperty (unsigned int xPropertySlot, Vdd::Store *pPropertyPrototype) {
+	return m_iStore.getProperty (m_iPointer, xPropertySlot, pPropertyPrototype);
+    }
+    Vdd::Store::DictionaryLookup lookup (
+	VSelector const &rSelector, unsigned int &rxPropertySlot, DSC_Descriptor *pValueReturn = 0
+    ) {
+	return m_iStore.lookup (rSelector, m_iPointer, rxPropertySlot, pValueReturn);
+    }
+
+    Store *store () const {
 	return m_iStore;
     }
 
-    M_CPD *storeCPD () {
-	return m_iStore.cpd ();
-    }
-    M_CPD *storeCPDIfAvailable () const {
-	return m_iStore.cpdIfAvailable ();
-    }
-    VContainerHandle *storeHandle () {
-	return m_iStore.containerHandle ();
-    }
     unsigned int storeMask () const {
 	return m_iStore.attentionMask ();
-    }
-    VConstructor *storePOIfAvailable () const {
-	return m_iStore.poIfAvailable ();
     }
     RTYPE_Type storeRType () const {
 	return m_iStore.RType ();
     }
 
     transientx_t *storeTransientExtension () const {
-	return m_iStore.TransientExtension ();
+	return m_iStore.transientExtension ();
     }
     transientx_t *storeTransientExtensionIfA (VRunTimeType const& rRTT) const {
-	return m_iStore.TransientExtensionIfA (rRTT);
-    }
-
-    bool storeHasATransientExtension () const {
-	return m_iStore.HasATransientExtension ();
+	return m_iStore.transientExtensionIfA (rRTT);
     }
     bool storeTransientExtensionIsA (VRunTimeType const& rRTT) const {
-	return m_iStore.TransientExtensionIsA (rRTT);
+	return m_iStore.transientExtensionIsA (rRTT);
     }
 
 //  Pointer Access and Query
@@ -585,13 +581,12 @@ public:
 	return m_iPointer.cardinality ();
     }
 
-    void getPPTReference (M_CPD *&pTokenRefCPD, int &pTokenRefIndex) const {
-	m_iPointer.getPPTReference (pTokenRefCPD, pTokenRefIndex);
+    rtPTOKEN_Handle *getPPT () const {
+	return m_iPointer.getPPT ();
     }
-    void getRPTReference (M_CPD *&pTokenRefCPD, int &pTokenRefIndex) const {
-	m_iPointer.getRPTReference (pTokenRefCPD, pTokenRefIndex);
+    rtPTOKEN_Handle *getRPT () const {
+	return m_iPointer.getRPT ();
     }
-
     // Returns true if the u-vector must be freed by the caller
     bool getUVector (M_CPD *&rpUVector) {
 	return m_iPointer.getUVector (rpUVector);
@@ -654,7 +649,7 @@ public:
 	return m_iPointer;
     }
 
-    M_CPD *pointerCPD (M_CPD *pPPT) {
+    M_CPD *pointerCPD (rtPTOKEN_Handle *pPPT) {
 	return m_iPointer.pointerCPD (pPPT);
     }
 
@@ -666,11 +661,11 @@ public:
 	return m_iPointer.Type ();
     }
 
-    M_CPD *PPT () const {
+    rtPTOKEN_Handle *PPT () const {
 	return m_iPointer.PPT ();
     }
 
-    M_CPD *RPT () const {
+    rtPTOKEN_Handle *RPT () const {
 	return m_iPointer.RPT ();
     }
 
@@ -706,12 +701,8 @@ public:
 	m_iPointer.clear ();
     }
 
-    void coerce (M_CPD *pPPT) {
+    void coerce (rtPTOKEN_Handle *pPPT) {
 	m_iPointer.coerce (pPPT);
-    }
-
-    void convertPointer (M_CPD *pEffectiveStoreCPD, M_CPD *pPPT) {
-	m_iPointer.convert (pEffectiveStoreCPD, pPPT);
     }
 
     void distribute (M_CPD *distribution) {
@@ -728,21 +719,8 @@ public:
 	m_iStore.setAttentionMaskTo (iNewAttentionMask);
     }
 
-    void setStoreTo (M_CPD *pStore) {
+    void setStoreTo (Store *pStore) {
 	m_iStore.setTo (pStore);
-    }
-    void setStoreTo (VConstructor *pStore) {
-	m_iStore.setTo (pStore);
-    }
-
-    void setTo (M_CPD *pStore, M_CPD *pMonotype) {
-	clear ();
-	constructMonotype (pStore, pMonotype);
-    }
-
-    void setTo (M_CPD *pStore, rtLINK_CType *pMonotype) {
-	clear ();
-	constructMonotype (pStore, pMonotype);
     }
 
     void setToCopied (DSC_Descriptor const& rSource) {
@@ -755,7 +733,9 @@ public:
 	rSource.construct ();
     }
 
-    void Step (M_CPD *pEffectiveStore, bool fRequiresConversion, M_CPD *pPPT);
+//  Traversal
+public:
+    void __SetupTraversal (M_CPD **cpd, rtLINK_CType **linkc);
 
 //  Exception Generation
 public:
@@ -763,6 +743,10 @@ public:
 	m_iPointer.complainAboutBadPointerType (pText);
     }
 
+public:
+    void traverseHandleReferences(void (VContainerHandle::*visitFunction)(void)) { 
+	m_iStore.traverseHandleReferences(visitFunction);
+    }
 //  State
 private:
     DSC_Store	m_iStore;

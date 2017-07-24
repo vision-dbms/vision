@@ -26,6 +26,7 @@
 
 #include "RTblock.h"
 #include "RTcontext.h"
+#include "RTvstore.h"
 
 /*****  Self  *****/
 #include "RTclosure.h"
@@ -46,23 +47,6 @@
  ***************************/
 
 DEFINE_CONCRETE_RTT (rtCLOSURE_Handle);
-
-
-/***********************************
- ***********************************
- *****                         *****
- *****  rtCLOSURE_Constructor  *****
- *****                         *****
- ***********************************
- ***********************************/
-
-/***************************
- ***************************
- *****  Run Time Type  *****
- ***************************
- ***************************/
-
-DEFINE_CONCRETE_RTT (rtCLOSURE_Constructor);
 
 /********************************
  ********************************
@@ -80,7 +64,7 @@ DEFINE_CONCRETE_RTT (rtCLOSURE_Constructor);
  *	'cpd'
  *
  *****/
-void rtCLOSURE_Constructor::InitStdCPD (M_CPD* cpd) {
+void rtCLOSURE_Handle::InitStdCPD (M_CPD* cpd) {
     rtCLOSURE_Closure* closure = rtCLOSURE_CPD_Base (cpd);
 
     rtCLOSURE_CPD_Context	(cpd) = &rtCLOSURE_Closure_Context (closure);
@@ -109,27 +93,39 @@ void rtCLOSURE_Constructor::InitStdCPD (M_CPD* cpd) {
  *	xPrimitive		- the index of a primitive for primitive closures.
  *
  *****/
-rtCLOSURE_Constructor::rtCLOSURE_Constructor (
-    rtCONTEXT_Constructor *pContext, rtBLOCK_Handle *pBlock, unsigned int iAttentionMask
-) : VConstructor (iAttentionMask), m_pBlock (pBlock), m_xPrimitive (0), m_pContext (pContext) {
-    pContext->release ();
+rtCLOSURE_Handle::rtCLOSURE_Handle (
+    rtCONTEXT_Handle *pContext, rtBLOCK_Handle *pBlock, unsigned int iAttentionMask
+) : BaseClass (pContext->Space (), RTYPE_C_Closure), m_pBlock (pBlock), m_xPrimitive (0), m_pContext (pContext) {
+    setAttentionMaskTo (iAttentionMask);
+    createContainer ();
 }
 
-rtCLOSURE_Constructor::rtCLOSURE_Constructor (
-    rtCONTEXT_Constructor *pContext, unsigned int xPrimitive, unsigned int iAttentionMask
-) : VConstructor (iAttentionMask), m_xPrimitive (xPrimitive), m_pContext (pContext) {
-    pContext->release ();
+rtCLOSURE_Handle::rtCLOSURE_Handle (
+    rtCONTEXT_Handle *pContext, unsigned int xPrimitive, unsigned int iAttentionMask
+) : BaseClass (pContext->Space (), RTYPE_C_Closure), m_xPrimitive (xPrimitive),m_pContext (pContext) {
+    setAttentionMaskTo (iAttentionMask);
+    createContainer ();
 }
 
-/*************************
- *************************
- *****  Destruction  *****
- *************************
- *************************/
-
-rtCLOSURE_Constructor::~rtCLOSURE_Constructor () {
+rtCLOSURE_Handle::rtCLOSURE_Handle (M_CTE &rCTE) : BaseClass (rCTE), m_pContext (
+    static_cast<rtCONTEXT_Handle*> (GetContainerHandle (&rtCLOSURE_Closure_Context (typecastContent()), RTYPE_C_Context))
+), m_pBlock (
+    ReferenceIsntNil (&rtCLOSURE_Closure_Block (typecastContent ())) ? static_cast<rtBLOCK_Handle*>(
+	GetContainerHandle(&rtCLOSURE_Closure_Block (typecastContent ()), RTYPE_C_Block)
+    ) : 0
+), m_xPrimitive (rtCLOSURE_Closure_Primitive (typecastContent ())) {
 }
-
+
+/******************************
+ ******************************
+ *****  Canonicalization  *****
+ ******************************
+ ******************************/
+
+bool rtCLOSURE_Handle::getCanonicalization_(rtVSTORE_Handle::Reference &rpStore, DSC_Pointer const &rPointer) {
+    rpStore.setTo (static_cast<rtVSTORE_Handle*>(KOT ()->TheClosureClass.ObjectHandle ()));
+    return true;
+}
 
 /********************
  ********************
@@ -137,12 +133,19 @@ rtCLOSURE_Constructor::~rtCLOSURE_Constructor () {
  ********************
  ********************/
 
-RTYPE_Type rtCLOSURE_Constructor::RType_() const {
-    return RTYPE_C_Closure;
+bool rtCLOSURE_Handle::decodeClosure_(
+    rtBLOCK_Handle::Reference &rpBlock, unsigned int &rxPrimitive, rtCONTEXT_Handle::Reference *ppContext
+) const {
+    rpBlock.setTo (m_pBlock);
+    rxPrimitive = m_xPrimitive;
+    if (ppContext) {
+	ppContext->setTo (m_pContext);
+    }
+    return true;
 }
 
-M_ASD *rtCLOSURE_Constructor::Space_() const {
-    return m_pContext->Space_();
+rtPTOKEN_Handle *rtCLOSURE_Handle::getPToken_() const {
+    return m_pContext->getPToken ();
 }
 
 
@@ -159,30 +162,38 @@ M_ASD *rtCLOSURE_Constructor::Space_() const {
  *	A standard CPD for the realized closure.
  *
  *****/
-M_CPD *rtCLOSURE_Constructor::newRealization () {
-/*****  Create the realized closure...  *****/
-    M_CPD *result = ScratchPad_()->CreateContainer (
-	RTYPE_C_Closure, sizeof (rtCLOSURE_Closure)
-    );
+void rtCLOSURE_Handle::createContainer () {
+    if (hasNoContainer ()) {
+	CreateContainer (sizeof (rtCLOSURE_Closure));
 
-    InitStdCPD (result);
+	rtCLOSURE_Closure *pContainer = typecastContent ();
+	constructReference (&rtCLOSURE_Closure_Context (pContainer));
+	constructReference (&rtCLOSURE_Closure_Block (pContainer));
 
-    result->constructReference (rtCLOSURE_CPx_Context);
-    result->constructReference (rtCLOSURE_CPx_Block);
+	StoreReference (
+	    &rtCLOSURE_Closure_Context (pContainer), static_cast<VContainerHandle*> (m_pContext.referent ())
+	);
 
-/*****  ... realize and record the closure's context, ...  *****/
-    result->StoreReference (rtCLOSURE_CPx_Context, m_pContext->realization ());
-
-/*****  ... decode the function, ...  *****/
-    if (isABlockClosure ())
-	result->StoreReference (rtCLOSURE_CPx_Block, m_pBlock);
-    else
-        rtCLOSURE_CPD_Primitive (result) = m_xPrimitive;
-
-/*****  ... and return the realized closure.  *****/
-    return result;
+	if (isABlockClosure ()) StoreReference (
+	    &rtCLOSURE_Closure_Block (pContainer), static_cast<VContainerHandle*> (m_pBlock.referent ())
+	);
+	else
+	    rtCLOSURE_Closure_Primitive (typecastContent ()) = m_xPrimitive;
+    }
 }
 
+
+/********************************
+ ********************************
+ *****  Garbage Collection  *****
+ ********************************
+ ********************************/
+
+void rtCLOSURE_Handle::traverseReferences(visitFunction fp) {
+    if (m_pContext) (m_pContext.referent ()->*fp)();
+    if (m_pBlock)   (m_pBlock.referent ()->*fp)();
+}
+
 
 /*********************************
  *********************************
@@ -199,28 +210,21 @@ M_CPD *rtCLOSURE_Constructor::newRealization () {
 /*---------------------------------------------------------------------------
  *****  Routine to align a closure.
  *
- *  Arguments:
- *	closure			- a standard CPD for the closure to be
- *				  aligned.
- *
  *  Returns:
  *	true if the closure required alignment. false if not.
  *
  *****/
-PublicFnDef bool rtCLOSURE_Align (M_CPD* closure) {
-/*****  Validate Argument R-Type  *****/
-    RTYPE_MustBeA ("rtCLOSURE_Align", M_CPD_RType (closure), RTYPE_C_Closure);
+bool rtCLOSURE_Handle::align () {
+    bool result; {
+	rtCONTEXT_Handle::Reference pContext;
+	getContext (pContext);
+	result = pContext->align ();
+    }
 
-    M_CPD* context = rtCLOSURE_CPD_ContextCPD (closure);
-
-    bool result = rtCONTEXT_Align (context);
-
-    context->release ();
-
-    if (rtCLOSURE_CPD_IsABlockClosure (closure)) {
-	M_CPD* block = rtCLOSURE_CPD_BlockCPD (closure);
-	result |= rtBLOCK_Align (block);
-	block->release ();
+    if (isABlockClosure ()) {
+	rtBLOCK_Handle::Reference pBlock;
+	getBlock (pBlock);
+	result = pBlock->align () || result;
     }
 
     return result;
@@ -263,7 +267,9 @@ PrivateFnDef void ReclaimContainer (
  *****  Internal routine to 'save' a Closure.
  *****/
 bool rtCLOSURE_Handle::PersistReferences () {
-    rtCLOSURE_Closure *closure = (rtCLOSURE_Closure*)ContainerContent ();
+    createContainer ();
+
+    rtCLOSURE_Closure *closure = typecastContent ();
 
     return Persist (&rtCLOSURE_Closure_Context (closure))
 	&& Persist (&rtCLOSURE_Closure_Block   (closure));
@@ -287,8 +293,8 @@ bool rtCLOSURE_Handle::PersistReferences () {
  *	NOTHING - Executed for side effect only.
  *
  *****/
-PrivateFnDef void MarkContainers (M_ASD* pSpace, M_CPreamble const *pContainer) {
-    pSpace->Mark ((M_POP const*) M_CPreamble_ContainerBase (pContainer), 2);
+PrivateFnDef void MarkContainers (M_ASD::GCVisitBase* pGCV, M_ASD* pSpace, M_CPreamble const *pContainer) {
+    pGCV->Mark (pSpace, (M_POP const*) M_CPreamble_ContainerBase (pContainer), 2);
 }
 
 
@@ -359,7 +365,7 @@ RTYPE_DefineHandler (rtCLOSURE_Handler) {
 	    M_RTD *rtd = iArgList.arg<M_RTD*>();
 	    rtd->SetCPDReusability	();
 	    rtd->SetCPDPointerCountTo	(rtCLOSURE_CPD_StdPtrCount);
-	    M_RTD_CPDInitFn		(rtd) = &rtCLOSURE_Constructor::InitStdCPD;
+	    M_RTD_CPDInitFn		(rtd) = &rtCLOSURE_Handle::InitStdCPD;
 	    M_RTD_HandleMaker		(rtd) = &rtCLOSURE_Handle::Maker;
 	    M_RTD_ReclaimFn		(rtd) = ReclaimContainer;
 	    M_RTD_MarkFn		(rtd) = MarkContainers;

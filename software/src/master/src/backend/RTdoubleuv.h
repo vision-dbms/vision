@@ -45,6 +45,49 @@
 )
 
 
+/******************************
+ ******************************
+ *****  Container Handle  *****
+ ******************************
+ ******************************/
+
+class rtDOUBLEUV_Handle : public rtUVECTOR_Handle {
+//  Run Time Type
+    DECLARE_CONCRETE_RTT (rtDOUBLEUV_Handle, rtUVECTOR_Handle);
+
+//  Aliases
+public:
+    typedef rtDOUBLEUV_ElementType element_t;
+
+//  Construction
+public:
+    static VContainerHandle *Maker (M_CTE &rCTE) {
+	return new rtDOUBLEUV_Handle (rCTE);
+    }
+protected:
+    rtDOUBLEUV_Handle (M_CTE &rCTE) : rtUVECTOR_Handle (rCTE) {
+    }
+
+//  Destruction
+private:
+    ~rtDOUBLEUV_Handle () {
+    }
+
+//  Access
+public:
+    element_t *array () const {
+	return UV_UV_ArrayAsType (typecastContent (), element_t);
+    }
+    element_t element (unsigned int xElement) const {
+	return array ()[xElement];
+    }
+
+//  Alignment
+public:
+    using BaseClass::align;
+};
+
+
 /********************************
  ********************************
  *****  Callable Interface  *****
@@ -52,24 +95,15 @@
  ********************************/
 
 PublicFnDecl M_CPD* __cdecl rtDOUBLEUV_New (
-    M_CPD*			pPPT,
-    M_CPD*			refPTokenRefCPD,
-    int				refPTokenRefIndex,
-    Ref_UV_Initializer		initFn,
-    ...
+    rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT, Ref_UV_Initializer initFn, ...
 );
 
 PublicFnDecl M_CPD *rtDOUBLEUV_New (
-    M_CPD *pPPT, M_CPD *pRPTRef, int xRPTRef
+    rtPTOKEN_Handle *pPPT, M_CPD *pRPTRef, int xRPTRef
 );
 
 PublicFnDecl M_CPD* rtDOUBLEUV_New (
-    M_CPD*			posPToken,
-    M_CPD*			refPToken
-);
-
-PublicFnDecl M_CPD* rtDOUBLEUV_Align (
-    M_CPD*			cpd
+    rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT
 );
 
 PublicFnDecl void rtDOUBLEUV_ToSetUV (
@@ -152,7 +186,7 @@ PublicFnDecl M_CPD* rtDOUBLEUV_PartitndSortIndices (
 PublicFnDecl M_CPD* rtDOUBLEUV_PartitndCumulative (
     rtLINK_CType*		partition,
     M_CPD*			values,
-    M_CPD*			refPToken
+    rtPTOKEN_Handle*		refPToken
 );
 
 PublicFnDecl void rtDOUBLEUV_PartitndPartition (
@@ -189,43 +223,6 @@ PublicFnDecl bool rtDOUBLEUV_ScalarLookup (
     rtLINK_LookupCase		lookupCase,
     int				*locationPtr
 );
-
-
-/******************************
- ******************************
- *****  Container Handle  *****
- ******************************
- ******************************/
-
-class rtDOUBLEUV_Handle : public rtUVECTOR_Handle {
-//  Run Time Type
-    DECLARE_CONCRETE_RTT (rtDOUBLEUV_Handle, rtUVECTOR_Handle);
-
-//  Construction
-protected:
-    rtDOUBLEUV_Handle (M_CTE &rCTE) : rtUVECTOR_Handle (rCTE) {
-    }
-
-public:
-    static VContainerHandle *Maker (M_CTE &rCTE) {
-	return new rtDOUBLEUV_Handle (rCTE);
-    }
-
-//  Destruction
-protected:
-
-//  Access
-public:
-
-//  Query
-public:
-
-//  Callbacks
-protected:
-
-//  State
-protected:
-};
 
 
 #endif

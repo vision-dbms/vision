@@ -6,6 +6,13 @@
  ************************
  ************************/
 
+/****************************
+ ***** Shutdown System  *****
+ ****************************/
+
+#define V_USING_FAST_SHUTDOWN_HEADERS 1
+#include "VConfig.h"
+
 /********************
  *****  System  *****
  ********************/
@@ -30,9 +37,12 @@
 #include "Vca_VBSProducer.h"
 
 #include "Vca_VDeviceFactory.h"
+#include "Vca_VNotifier.h"
 
 #include "Vsa_VPrompt.h"
 
+
+Vca::VTransientServicesForNotification g_iTransientServicesForNotification;
 
 /*************************************
  *************************************
@@ -139,5 +149,13 @@ void Vsa::VPromptApplication::onGoferValue (IEvaluator *pEvaluator) {
 
 int main (int argc, char *argv[]) {
     Vca::VOneAppMain_<Vsa::VPromptApplication> iMain (argc, argv);
+
+#if defined(__VMS)
+    if (IsntNil(getenv("EnableVPromptLog"))) { 
+	ON_BLOCK_EXIT(invoke_fast_shutdown, 0);
+	return iMain.processEvents ();
+    }
+    else 
+#endif
     return iMain.processEvents ();
 }

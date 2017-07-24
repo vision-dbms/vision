@@ -26,9 +26,16 @@ class M_ASD;
 class M_CPD;
 class M_TOP;
 
+class rtDSC_Handle;
+class rtPTOKEN_Handle;
+
 class VContainerHandle;
 
 class VDatabaseFederatorForBatchvision;
+
+namespace Vdd {
+    class Store;
+}
 
 
 /*************************
@@ -233,15 +240,13 @@ public:
     );
 
     void AccessTheTLE (
-	unsigned int xSpace, DSC_Descriptor &rTLE, M_CPD **ppTLEDescriptor = 0
+	unsigned int xSpace, DSC_Descriptor &rTLE, VReference<rtDSC_Handle> *ppTLEDescriptor = 0
     );
 
     void CreateBootStrapObjects ();
 
     void RegisterObject (
-	M_CPD					*pObject,
-	M_KOTE	M_KnownObjectTable	      ::*pKOTE,
-	M_POP	ENVIR_BuiltInObjectPArray     ::*pKOTCE
+	M_CPD *pObject, M_KOTE M_KOT::*pKOTE, M_POP ENVIR_BuiltInObjectPArray::*pKOTCE
     ) const {
 	m_pKnownObjectTable->RegisterObject (pObject, pKOTE, pKOTCE);
     }
@@ -257,10 +262,6 @@ public:
     }
 
     VDatabase *database_() const;
-
-    M_KnownObjectTable *KnownObjectTable () const {
-	return m_pKnownObjectTable;
-    }
 
     M_KOT *KOT () const {
 	return m_pKnownObjectTable;
@@ -295,9 +296,6 @@ public:
 
 //  Update
 public:
-    void AdjustAllocationLevel (int sAdjustment) {
-	m_pFederator->AdjustAllocationLevel (sAdjustment);
-    }
     void IncrementAllocationLevel (size_t sIncrease) {
 	m_pFederator->IncrementAllocationLevel (sIncrease);
     }
@@ -308,7 +306,7 @@ public:
 
 //  Known Object Access
 public:
-    M_KOTE const &GetBlockEquivalentClassFromPToken (VContainerHandle const *pHandle) const {
+    M_KOTE const &GetBlockEquivalentClassFromPToken (rtPTOKEN_Handle const *pHandle) const {
 	return m_pKnownObjectTable->GetBlockEquivalentClassFromPToken (pHandle);
     }
 
@@ -399,6 +397,12 @@ public:
     M_KOTE const &TheSelectorPToken () const {
 	return m_pKnownObjectTable->TheSelectorPToken;
     }
+    rtPTOKEN_Handle *TheScalarPTokenHandle () const {
+	return m_pKnownObjectTable->TheScalarPTokenHandle ();
+    }
+    rtPTOKEN_Handle *TheSelectorPTokenHandle () const {
+	return m_pKnownObjectTable->TheSelectorPTokenHandle ();
+    }
 
 //  Space Access
 public:// protected:
@@ -458,8 +462,13 @@ public:
     bool ContainerExists (M_POP const *pReference);
     bool ContainerPersists (M_POP const *pReference);
 
-    M_CPD *SafeGetCPD (M_POP const *pReference);
-    M_CPD *SafeGetCPDOfType (M_POP const *pReference, RTYPE_Type xType);
+    VContainerHandle *SafeGetContainerHandle (M_POP const *pReference);
+    VContainerHandle *SafeGetContainerHandle (M_POP const *pReference, RTYPE_Type xType);
+
+//  Container Maintenance
+public:
+    bool align (M_POP const *pReference);
+    bool alignAll (M_POP const *pReference, bool bCleaning = true);
 
 //  Reference Access
 public:
@@ -476,14 +485,11 @@ public:
     M_CPD *ReferencedKOTEObjectCPD (M_POP const *pReference, M_KOTM pKOTM) {
 	return ReferencedKOTE (pReference, pKOTM).ObjectCPD ();
     }
-    M_CPD *ReferencedKOTEPTokenCPD (M_POP const *pReference, M_KOTM pKOTM) {
-	return ReferencedKOTE (pReference, pKOTM).PTokenCPD ();
-    }
 
     VContainerHandle *ReferencedKOTEObjectHandle (M_POP const *pReference, M_KOTM pKOTM) {
 	return ReferencedKOTE (pReference, pKOTM).ObjectHandle ();
     }
-    VContainerHandle *ReferencedKOTEPTokenHandle (M_POP const *pReference, M_KOTM pKOTM) {
+    rtPTOKEN_Handle *ReferencedKOTEPTokenHandle (M_POP const *pReference, M_KOTM pKOTM) {
 	return ReferencedKOTE (pReference, pKOTM).PTokenHandle ();
     }
 
@@ -508,7 +514,6 @@ public:
     }
 
     inline bool ReferenceNames (M_POP const *pReference, M_KOTM pKOTM);
-    inline bool ReferenceNamesPToken (M_POP const *pReference, M_KOTM pKOTM);
 
     bool ReferenceNames (
 	M_POP const *pReference, M_AND *pThat, M_POP const *pThatReference
@@ -519,7 +524,6 @@ public:
     }
 
     inline bool ReferenceDoesntName (M_POP const *pReference, M_KOTM pKOTM);
-    inline bool ReferenceDoesntNamePToken (M_POP const *pReference, M_KOTM pKOTM);
 
     bool ReferenceDoesntName (
 	M_POP const *pReference, M_AND *pThat, M_POP const* pThatReference
@@ -567,9 +571,17 @@ public:
     inline bool LocateOrAddNameOf (M_ASD *pThat, M_POP const *pThatName, M_TOP &rName);
 
     void StoreReference (M_POP *pReference, M_ASD *pThatSpace, M_POP const *pThatName);
+    inline void StoreReference (M_POP *pReference, VContainerHandle *pHandle);
+    void StoreReference (M_POP *pReference, Vdd::Store *pThat);
 
 //  Database Update
+private:
+    void PersistReferences ();
+    void PersistStructures ();
+
 public:
+    bool HasTransientReferences () const;
+
     PS_UpdateStatus IncorporateExternalUpdate (char const *xuSpecPathName);
 
     PS_UpdateStatus SaveTheTLE (
@@ -601,6 +613,11 @@ private:
 
     void PerformMarkPhaseOfGC	();
     bool PerformSweepPhaseOfGC	();
+
+    bool DoGCCycleElimination   ();
+    bool EnqueuePossibleCycles  ();
+    bool TraverseAndDetectCycles();
+    bool EnqueueOmittingCycles  ();
 
     void DoTransientGCSetup	();
     bool DoTransientGCMarking	();
@@ -638,7 +655,7 @@ public:
 //  Resource Utilization Query
 public:
     void AccumulateAllocationStatistics (
-	double *pAllocationTotal, double *pMappingTotal
+	unsigned __int64 *pAllocationTotal, unsigned __int64 *pMappingTotal
     ) const;
 
 //  Resource Utilization Management
@@ -658,13 +675,13 @@ public:
 
 //  State
 protected:
-    PS_AND*			const	m_pPhysicalAND;
-    unsigned int			m_cActiveSpaces;
-    M_KnownObjectTable::Reference	m_pKnownObjectTable;
-    M_POP				m_iNilPOP;
-    GCMetrics*				m_pGCMetrics;
-    M_ASD*				m_pASDRing;
-    M_ASD*				m_iASDVector [M_POP_MaxObjectSpace];
+    PS_AND *const	m_pPhysicalAND;
+    unsigned int	m_cActiveSpaces;
+    VReference<M_KOT>	m_pKnownObjectTable;
+    M_POP		m_iNilPOP;
+    GCMetrics*		m_pGCMetrics;
+    M_ASD*		m_pASDRing;
+    M_ASD*		m_iASDVector [M_POP_MaxObjectSpace];
 };
 
 PublicVarDecl VReference<M_AND> M_AttachedNetwork;

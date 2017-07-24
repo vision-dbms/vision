@@ -43,8 +43,8 @@ PrivateVarDef unsigned int	MaxSlotToClean = 0;
 PrivateVarDef size_t		DriverTableSize	 = 0;
 PrivateVarDef IOMDriver**	DriverTable	 = NilOf (IOMDriver**);
 
-PublicVarDef M_CPD		*IOM_HandlerVector = NilOf (M_CPD*),
-				*IOM_HandlerPToken = NilOf (M_CPD*);
+PublicVarDef rtPTOKEN_Handle::Reference IOM_HandlerPToken;
+PublicVarDef rtVECTOR_Handle::Reference IOM_HandlerVector;
 
 
 /***********************
@@ -167,18 +167,11 @@ bool IOMDriver::getInputHandler (DSC_Descriptor& rInputHandler) {
 	return false;
 
     DSC_Scalar handlerPointer;
-    DSC_InitScalar (
-	handlerPointer,
-	IOM_HandlerPToken,
-	RTYPE_C_RefUV,
-	DSC_Scalar_Int,
-	m_xDriver
-    );
-    rtVECTOR_RefExtract (
-	IOM_HandlerVector, &handlerPointer, &rInputHandler
-    );
+    handlerPointer.constructReference (IOM_HandlerPToken, m_xDriver);
+    IOM_HandlerVector->getElements (rInputHandler, handlerPointer);
+    handlerPointer.destroy ();
 
-    m_fHandlerWired = rInputHandler.storeCPD ()->NamesTheNAClass ();
+    m_fHandlerWired = rInputHandler.store ()->NamesTheNAClass ();
     if (m_fHandlerWired) {
 	rInputHandler.clear ();
 	return false;
@@ -599,7 +592,7 @@ PrivateFnDef void CleanupDriverTable () {
 	}
 
 	unsigned int	cEmptySlots = 0;
-	rtLINK_CType*	pEmptySlots = rtLINK_RefConstructor (IOM_HandlerPToken, -1);
+	rtLINK_CType*	pEmptySlots = rtLINK_RefConstructor (IOM_HandlerPToken);
 
 	for (unsigned int xDriver = MinSlotToClean; xDriver <= MaxSlotToClean; xDriver++) {
 	    if (IsNil (DriverTable[xDriver])) {
@@ -608,13 +601,11 @@ PrivateFnDef void CleanupDriverTable () {
 	    }
 	}
 
-	M_CPD* pEmptySlotPPT = rtPTOKEN_New (M_AttachedNetwork->ScratchPad (), cEmptySlots);
-	pEmptySlots->Close (pEmptySlotPPT);
+	pEmptySlots->Close (new rtPTOKEN_Handle (M_AttachedNetwork->ScratchPad (), cEmptySlots));
 
-	rtVECTOR_Assign   (IOM_HandlerVector, pEmptySlots, &iNA.contentAsMonotype ());
-	rtVECTOR_AlignAll (IOM_HandlerVector, true);
+	IOM_HandlerVector->setElements (pEmptySlots, iNA.contentAsMonotype ());
+	IOM_HandlerVector->alignAll (true);
 
-	pEmptySlotPPT->release ();
 	pEmptySlots->release ();
 
 	DriverTableCleanupNeeded = false;
@@ -637,21 +628,20 @@ void IOMDriver::AttachToDriverTable () {
 	DriverTableSize += 16;
 
 	if (DriverTable) {
-	    M_CPD* newHandlerPToken = rtPTOKEN_NewShiftPTConstructor (
-		IOM_HandlerPToken, -1
-	    )->AppendAdjustment (xDriver, DriverTableSize - xDriver)->ToPToken ();
-	    IOM_HandlerPToken->release ();
-	    IOM_HandlerPToken = newHandlerPToken;
-
+	    IOM_HandlerPToken.setTo (
+		IOM_HandlerPToken->makeAdjustments ()->AppendAdjustment (
+		    xDriver, DriverTableSize - xDriver
+		)->ToPToken ()
+	    );
 	    DriverTable = (IOMDriver**)reallocate (
 		DriverTable, DriverTableSize * sizeof (IOMDriver**)
 	    );
 	}
 	else {
-	    IOM_HandlerPToken = rtPTOKEN_New (
-		M_AttachedNetwork->ScratchPad (), DriverTableSize
+	    IOM_HandlerPToken.setTo (
+		new rtPTOKEN_Handle (M_AttachedNetwork->ScratchPad (), DriverTableSize)
 	    );
-	    IOM_HandlerVector = rtVECTOR_New (IOM_HandlerPToken);
+	    IOM_HandlerVector.setTo (new rtVECTOR_Handle (IOM_HandlerPToken));
 
 	    DriverTable = (IOMDriver**)allocate (
 		DriverTableSize * sizeof (IOMDriver**)

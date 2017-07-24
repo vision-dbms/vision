@@ -32,22 +32,7 @@
 #include "Vxa_VExportableDatum.h"
 
 #include "Vxa_VInfiniteSetOf.h"
-
-
-/**********************************
- **********************************
- *****                        *****
- *****  Vxa::VExportableType  *****
- *****                        *****
- **********************************
- **********************************/
-
-Vxa::VExportableType::VExportableType () {
-}
-
-Vxa::VExportableType::~VExportableType () {
-}
-
+#include "Vxa_VResultBuilder.h"
 
 /******************************
  ******************************
@@ -71,7 +56,7 @@ namespace Vxa {
 
     template <
 	typename Val_T, typename Var_T = typename Vca::VTypePattern<Val_T>::var_t
-    > class VStockExportable : public VExportable<Val_T> {
+    > class Vxa_API VStockExportable : public VExportable<Val_T> {
 	typedef VStockExportable<Val_T,Var_T> this_t;
 	DECLARE_FAMILY_MEMBERS (this_t, VExportable<Val_T>);
 
@@ -146,6 +131,12 @@ namespace Vxa {
 	    return m_pUniverse;
 	}
 
+    public:
+	static ThisClass *ThisStockExportable () {
+	    static ThisClass *pSE = new ThisClass ();
+	    return pSE;
+	}
+
     //  Result Generation
     private:
 	virtual bool createMethod (method_return_t &rResult, VString const &rName, Val_T const &rValue) {
@@ -164,17 +155,16 @@ namespace Vxa {
     private:
 	typename universe_t::Reference mutable m_pUniverse;
     };
-}
-
-namespace {
-    Vxa::VStockExportable<bool>				g_iExportable_bool;
-    Vxa::VStockExportable<short>			g_iExportable_short;
-    Vxa::VStockExportable<unsigned short>		g_iExportable_unsigned_short;
-    Vxa::VStockExportable<int>				g_iExportable_int;
-    Vxa::VStockExportable<unsigned int>			g_iExportable_unsigned_int;
-    Vxa::VStockExportable<float>			g_iExportable_float;
-    Vxa::VStockExportable<double>			g_iExportable_double;
-
-    Vxa::VStockExportable<char const*,VString>		g_iExportable_char_const_p;
-    Vxa::VStockExportable<VString>			g_iExportable_VString;
+    
+    void InitializeStockExportables () {
+	Vxa::VStockExportable<bool>::ThisStockExportable ();
+	Vxa::VStockExportable<short>::ThisStockExportable ();
+	Vxa::VStockExportable<unsigned short>::ThisStockExportable ();
+	Vxa::VStockExportable<int>::ThisStockExportable ();
+	Vxa::VStockExportable<unsigned int>::ThisStockExportable ();
+	Vxa::VStockExportable<float>::ThisStockExportable ();
+	Vxa::VStockExportable<double>::ThisStockExportable ();
+	Vxa::VStockExportable<char const*, VString>::ThisStockExportable ();
+	Vxa::VStockExportable<VString>::ThisStockExportable ();
+    }
 }

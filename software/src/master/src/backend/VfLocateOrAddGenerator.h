@@ -1,4 +1,3 @@
-/*****  VfLocateOrAddGenerator Interface  *****/
 #ifndef VfLocateOrAddGenerator_Interface
 #define VfLocateOrAddGenerator_Interface
 
@@ -34,9 +33,7 @@ public:
 
 //  Use
 public:
-    void initialize (
-	M_CPD* pTargetPTokenRef, int xTargetPTokenRef, M_CPD* pSourcePToken
-    );
+    void initialize (rtPTOKEN_Handle *pTargetPToken, rtPTOKEN_Handle *pSourcePToken);
     inline void emitReference (
 	unsigned int xSourceDomainRegion,
 	unsigned int sSourceDomainRegion,

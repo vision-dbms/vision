@@ -21,6 +21,8 @@
 
 #include "Vca_VInterfaceEKG.h"
 
+#include "cam.h"
+
 /**************************
  *****  Declarations  *****
  **************************/
@@ -135,6 +137,13 @@ namespace Vsa {
 	    return m_xEvaluationAttempt;
 	}
 	Vca::U64 evaluationTime () const;
+	Vca::U64 queueTime() const;
+
+	bool getArrivalTime (V::VTime &rArrivalTime) const;
+	bool getStartTime (V::VTime &rStartTime) const;
+	bool getEndTime (V::VTime &rEndTime) const; 
+	
+	void setStart();
 
 
     //  Update
@@ -142,6 +151,8 @@ namespace Vsa {
 	void incrementEvaluationAttempt () {
 	    m_xEvaluationAttempt++;
 	}
+
+	virtual void setRetryable (bool bRetryable) {}
 
     //  Client Access
     public:
@@ -151,7 +162,7 @@ namespace Vsa {
 	    );
 	    return true;
 	}
-	bool fulfill (GoferOrder &rOrder);
+	bool fulfill (GoferOrder &rOrder); 
 
     //  Delegation
     public:
@@ -183,9 +194,12 @@ namespace Vsa {
 	QueryType			const	m_xQueryType;
 	VPathQuery::Reference		const	m_pQuery;
 
-	V::VTime			const	m_iStartTime;
+	V::VTime			const	m_iArrivalTime; 
+	V::VTime				m_iStartTime;
 	V::VTime				m_iEndTime;
 	Vca::U32				m_xEvaluationAttempt;
+
+        CAM::Operation                          m_iCamOp;
 
         /**
          * Keeps track of the IEvaluatorClient interface, notifies us upon disconnect.

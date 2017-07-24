@@ -351,13 +351,14 @@ void VSNFTask::DoAnOldFashionedSNF () {
     issueWarningMessage ("Selector", &selector (), "Not Found");
 
     if (verboseSelectorNotFound ()) {
-	M_CPD* pRecipientStore = self().storeCPD ();
+	VContainerHandle::Reference pRecipientStore;
+	self().store ()->getContainerHandle (pRecipientStore);
 
 	report (
 	    "\n    Selector Recipient: #%s[%u:%u]\n\n",
 	    pRecipientStore->RTypeName (),
-	    pRecipientStore->SpaceIndex (),
-	    pRecipientStore->ContainerIndex ()
+	    pRecipientStore->spaceIndex (),
+	    pRecipientStore->containerIndex ()
 	);
 
 	unsigned int xLevel = 1;
@@ -479,7 +480,7 @@ void VSNFTask::startExternalInvocation (ISingleton *pISingleton) {
 	VSNFTaskHolder::Reference const pSNFTaskHolder (new VSNFTaskHolder (this, pISingleton));
     }
 }
-
+
 VExternalGroundStore *VSNFTask::remoteFactoryGS () {
     if (m_pRemoteFactoryGS.isNil ())
 	m_pRemoteFactoryGS.setTo (new VExternalGroundStore (m_pRemoteFactory));
@@ -517,7 +518,7 @@ void VSNFTask::returnImplementationHandle (
     m_pSNFTaskImplementation = pImplementation;
     m_pRemoteFactory = rRemoteFactoryArray[0];
 }
-
+
 
 /********************************************
  ********************************************
@@ -530,7 +531,7 @@ void VSNFTask::returnImplementationHandle (
  *****************************************/
 
 VFragment *VSNFTask::createSegment (object_reference_array_t const &rInjector) {
-    rtLINK_CType *const pInjector = rtLINK_RefConstructor (ptoken (), -1);
+    rtLINK_CType *const pInjector = rtLINK_RefConstructor (ptoken ());
     unsigned int const sInjector = rInjector.cardinality ();
     if (sInjector > 0) {
 	unsigned int xRange = rInjector[0];
@@ -548,9 +549,7 @@ VFragment *VSNFTask::createSegment (object_reference_array_t const &rInjector) {
 	if (sRange > 0)
 	    pInjector->AppendRange (xRange,sRange);
     }
-    M_CPD *const pInjectorPPT = NewDomPToken (sInjector);
-    pInjector->Close (pInjectorPPT);
-    pInjectorPPT->release ();
+    pInjector->Close (NewDomPToken (sInjector));
 
     return (
 	0 == m_cSegmentsReceived++ ? loadDucWithFragmentation () : duc().contentAsFragmentation ()
@@ -576,7 +575,7 @@ bool VSNFTask::SetSegmentCountTo (unsigned int cSegments) {
  ******************************************************/
 
 template <typename Source_T, typename Result_T> void VSNFTask::ProcessArray (
-    VDescriptor &rResult, M_CPD *pPPT, VkDynamicArrayOf<Source_T> const &rSourceArray, Result_T const *&rpResultArray
+    VDescriptor &rResult, rtPTOKEN_Handle *pPPT, VkDynamicArrayOf<Source_T> const &rSourceArray, Result_T const *&rpResultArray
 ) const {
     unsigned int const count = rSourceArray.cardinality ();
     if(count==1) {
@@ -593,18 +592,18 @@ template <typename Source_T, typename Result_T> void VSNFTask::ProcessArray (
 	rpResultArray = pResultArray;
     }
 }
-template void VSNFTask::ProcessArray<bool,int>           (VDescriptor&, M_CPD*, VkDynamicArrayOf<bool> const&, int const*&) const;
+template void VSNFTask::ProcessArray<bool,int>           (VDescriptor&, rtPTOKEN_Handle*, VkDynamicArrayOf<bool> const&, int const*&) const;
 
-template void VSNFTask::ProcessArray<char,int>           (VDescriptor&, M_CPD*, VkDynamicArrayOf<char> const&, int const*&) const;
-template void VSNFTask::ProcessArray<short,int>          (VDescriptor&, M_CPD*, VkDynamicArrayOf<short> const&, int const*&) const;
-template void VSNFTask::ProcessArray<int,int>            (VDescriptor&, M_CPD*, VkDynamicArrayOf<int> const&, int const*&) const;
+template void VSNFTask::ProcessArray<char,int>           (VDescriptor&, rtPTOKEN_Handle*, VkDynamicArrayOf<char> const&, int const*&) const;
+template void VSNFTask::ProcessArray<short,int>          (VDescriptor&, rtPTOKEN_Handle*, VkDynamicArrayOf<short> const&, int const*&) const;
+template void VSNFTask::ProcessArray<int,int>            (VDescriptor&, rtPTOKEN_Handle*, VkDynamicArrayOf<int> const&, int const*&) const;
 
-template void VSNFTask::ProcessArray<unsigned char,int>  (VDescriptor&, M_CPD*, VkDynamicArrayOf<unsigned char> const&, int const*&) const;
-template void VSNFTask::ProcessArray<unsigned short,int> (VDescriptor&, M_CPD*, VkDynamicArrayOf<unsigned short> const&, int const*&) const;
-template void VSNFTask::ProcessArray<unsigned int,int>   (VDescriptor&, M_CPD*, VkDynamicArrayOf<unsigned int> const&, int const*&) const;
+template void VSNFTask::ProcessArray<unsigned char,int>  (VDescriptor&, rtPTOKEN_Handle*, VkDynamicArrayOf<unsigned char> const&, int const*&) const;
+template void VSNFTask::ProcessArray<unsigned short,int> (VDescriptor&, rtPTOKEN_Handle*, VkDynamicArrayOf<unsigned short> const&, int const*&) const;
+template void VSNFTask::ProcessArray<unsigned int,int>   (VDescriptor&, rtPTOKEN_Handle*, VkDynamicArrayOf<unsigned int> const&, int const*&) const;
 
-template void VSNFTask::ProcessArray<float,float>        (VDescriptor&, M_CPD*, VkDynamicArrayOf<float> const&, float const*&) const;
-template void VSNFTask::ProcessArray<double,double>      (VDescriptor&, M_CPD*, VkDynamicArrayOf<double> const&, double const*&) const;
+template void VSNFTask::ProcessArray<float,float>        (VDescriptor&, rtPTOKEN_Handle*, VkDynamicArrayOf<float> const&, float const*&) const;
+template void VSNFTask::ProcessArray<double,double>      (VDescriptor&, rtPTOKEN_Handle*, VkDynamicArrayOf<double> const&, double const*&) const;
 
 
 static char const * DynamicArrayStringAccessFn(bool reset, va_list pArgs) {
@@ -622,54 +621,51 @@ static char const * DynamicArrayStringAccessFn(bool reset, va_list pArgs) {
 }
 
 template<> void VSNFTask::ProcessArray<VString,VString> (
-    VDescriptor &rResult, M_CPD *pPPT, VkDynamicArrayOf<VString> const &rSourceArray, VString const *&rpResultArray
+    VDescriptor &rResult, rtPTOKEN_Handle *pPPT, VkDynamicArrayOf<VString> const &rSourceArray, VString const *&rpResultArray
 ) const {
     rResult.setToCorrespondence (
 	pPPT, rtLSTORE_NewStringStore (
             codScratchPad (), DynamicArrayStringAccessFn, &rSourceArray
-        ), rtLSTORE_CPx_RowPToken
+        )
     );
     rpResultArray = 0;
 }
 
 template<> void VSNFTask::ProcessArray<Vxa::ISingleton::Reference,Vxa::ISingleton::Reference> (
-    VDescriptor &rResult, M_CPD *pPPT, VkDynamicArrayOf<Vxa::ISingleton::Reference> const &rSourceArray, Vxa::ISingleton::Reference const *&rpResultArray
+    VDescriptor &rResult, rtPTOKEN_Handle *pPPT, VkDynamicArrayOf<Vxa::ISingleton::Reference> const &rSourceArray, Vxa::ISingleton::Reference const *&rpResultArray
 ) const {
     unsigned int const count = rSourceArray.cardinality ();
     if (count==1) {
 //	loadDucWithRepresentative (new VExternalGroundStore (rSourceArray[0]));
-	VExternalGroundStore *const pXGS = new VExternalGroundStore (rSourceArray[0]);
-	M_CPD *const pXGSPToken = pXGS->ptoken_();
+	VExternalGroundStore::Reference const pXGS (new VExternalGroundStore (rSourceArray[0]));
+	rtVSTORE_Handle::Reference pSurrogate;
+	pXGS->getSurrogate (pSurrogate);
 
 	// Return reference to object
-	pXGSPToken -> retain ();
-	rResult.setToReferenceConstant (pPPT, pXGS->surrogateCPD(), pXGSPToken, 0);
+	rResult.setToReferenceConstant (pPPT, pSurrogate, pXGS->ptoken_(), 0);
     } else {
 	VFragmentation &rFragmentation = loadDucWithFragmentation ();
 	for (unsigned int xElement=0; xElement<count; xElement++) {
             // Create a task subset of "1"
-	    rtLINK_CType *const pSubset = rtLINK_RefConstructor (pPPT, -1);
+	    rtLINK_CType *const pSubset = rtLINK_RefConstructor (pPPT);
 	    pSubset->AppendRange(xElement,1);
-	    M_CPD *const pSubsetDomain = NewDomPToken (1);
+	    rtPTOKEN_Handle::Reference pSubsetDomain (NewDomPToken (1));
 	    pSubset->Close (pSubsetDomain);
 
             // Create the external ground store
-	    VExternalGroundStore *const pXGS = new VExternalGroundStore (rSourceArray[xElement]);
-	    M_CPD *const pXGSPToken = pXGS->ptoken_();
+	    VExternalGroundStore::Reference const pXGS (new VExternalGroundStore (rSourceArray[xElement]));
+	    rtVSTORE_Handle::Reference pSurrogate;
+	    pXGS->getSurrogate (pSurrogate);
 
             // Return reference to object
-	    pXGSPToken -> retain ();
 	    rFragmentation.createFragment (pSubset)->datum ().setToReferenceConstant (
-		pSubsetDomain, pXGS->surrogateCPD(), pXGSPToken, 0
+		pSubsetDomain, pSurrogate, pXGS->ptoken_(), 0
 	    );
-
-            // Cleanup
-	    pSubsetDomain->release ();
         }
     }
     rpResultArray = 0;
 }
-
+
 
 /*****************************************************
  *----  VSNFTask::ReturnArray<Source_T,Result_T> ----*
@@ -742,7 +738,7 @@ template void VSNFTask::ReturnSingleton<int>         (int);
 template void VSNFTask::ReturnSingleton<double>      (double);
 template void VSNFTask::ReturnSingleton<float>       (float);
 template void VSNFTask::ReturnSingleton<char const*> (char const*);
-
+
 
 /********************************
  *----  VSNFTask::ReturnNA  ----*
@@ -759,22 +755,23 @@ bool VSNFTask::ReturnNA (object_reference_array_t const &rInjector) {
  ***************************************/
 
 void VSNFTask::ProcessObjects (
-    VDescriptor &rResult, M_CPD *pPPT, ICollection *pCluster, object_reference_t sCluster, object_reference_array_t const &rxObjects
+    VDescriptor &rResult, rtPTOKEN_Handle *pPPT, ICollection *pCluster, object_reference_t sCluster, object_reference_array_t const &rxObjects
 ) const {
-    VExternalGroundStore *const pXGS = new VExternalGroundStore (codSpace (), pCluster, sCluster);
-    M_CPD *const pXGSPToken = pXGS->ptoken_();
+    VExternalGroundStore::Reference const pXGS (new VExternalGroundStore (codSpace (), pCluster, sCluster));
+    rtVSTORE_Handle::Reference pSurrogate;
+    pXGS->getSurrogate (pSurrogate);
+
     unsigned int const count = rxObjects.cardinality ();
     if (count == 1) {
 //	loadDucWithRepresentative (pXGS, rxObjects[0]);
-	pXGSPToken -> retain ();
-	rResult.setToReferenceConstant (pPPT, pXGS->surrogateCPD(), pXGSPToken, rxObjects[0]);
+	rResult.setToReferenceConstant (pPPT, pSurrogate, pXGS->ptoken_(), rxObjects[0]);
     } else {
-	M_CPD *const pResultUV = rtREFUV_New (pPPT, pXGSPToken);
+	M_CPD *const pResultUV = rtREFUV_New (pPPT, pXGS->ptoken_());
 	rtREFUV_ElementType *const pResultArray = rtREFUV_CPD_Array (pResultUV);
-	for (unsigned int xElement = 0; xElement < count; xElement++) {
+	for (unsigned int xElement = 0; xElement<count; xElement++) {
 	    pResultArray[xElement] = rxObjects[xElement];
 	}
-	rResult.setToMonotype (pXGS->surrogateCPD (), pResultUV);
+	rResult.setToMonotype (pSurrogate, pResultUV);
 	pResultUV->release ();
     }
 }
@@ -785,7 +782,7 @@ bool VSNFTask::ReturnObjects (
     VFragment *const pFragment = createSegment (rInjector);
     ProcessObjects (pFragment->datum (), pFragment->subset ()->PPT (), pCluster, sCluster, rxObjects);
     return wrapupSegment ();
-}
+    }
 
 void VSNFTask::ReturnObjects (ICollection *pCluster, object_reference_t sCluster, object_reference_array_t const &rxObjects) {
     ProcessObjects (duc (), ptoken (), pCluster, sCluster, rxObjects);
@@ -809,7 +806,7 @@ void VSNFTask::ReturnError (VString const &rMessage) {
     loadDucWithNA ();
     resume();
 }
-
+
 			     
 /*******************
  *----  Other  ----*

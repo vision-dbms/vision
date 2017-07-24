@@ -1,0 +1,19 @@
+# Tests fixed hard restart operation
+# If pool is suspended, hard restart will not resume the pool;
+
+# Pre-Execs
+pre_exec: start -c $POOLTESTERDIR/configs/baseline.ptc -p -w
+
+# Hard Restart thread
+thread:hardrestart, repetitions:1
+operation_on_thread:hardrestart, run:suspend
+operation_on_thread:hardrestart, run:hardRestart
+operation_on_thread:hardrestart, run:query -q queries/TestQuery01.vis -r NA
+operation_on_thread:hardrestart, run:waitForStat -c RetiredWorkers=1 -t 5
+operation_on_thread:hardrestart, run:waitForStat -c QueriesProcessed=0 -t 5
+operation_on_thread:hardrestart, run:resume
+operation_on_thread:hardrestart, run:waitForStat -c QueriesProcessed=2 -t 5
+
+# Post-Execs
+post_exec: stop
+

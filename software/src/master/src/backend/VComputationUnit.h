@@ -9,9 +9,13 @@
 
 #include "VComputationTrigger.h"
 
+#include "Vca_VActivity.h"
+
 /**************************
  *****  Declarations  *****
  **************************/
+
+#include "IOMDriver.h"
 
 #include "vsignal.h"
 
@@ -32,6 +36,16 @@ class VSuspension;
 class VTask;
 
 class VWaitTaskTrigger;
+
+/****************/
+#include "Vxa_ICollection.h"
+#include "Vxa_ISingleton.h"
+
+#include "Vsa_VEvaluation.h"
+
+#include "Vca_IDirectory.h"
+#include "Vca_VcaGofer.h"
+/****************/
 
 
 /*************************
@@ -40,6 +54,10 @@ class VWaitTaskTrigger;
 
 class ABSTRACT VComputationUnit : public VInternalGroundStore {
     DECLARE_ABSTRACT_RTT (VComputationUnit, VInternalGroundStore);
+
+//  Aliases
+public:
+    typedef Vdd::Store Store;
 
 //  Friends
     friend class VComputationList;
@@ -58,7 +76,6 @@ class ABSTRACT VComputationUnit : public VInternalGroundStore {
 //  Meta Maker
 protected:
     static void MetaMaker ();
-
 
 //  Return Case Enumeration
 /*---------------------------------------------------------------------------*
@@ -102,9 +119,9 @@ public:
     static char const *NameFor (State xState);
 
 
-/************************************************************************/
+/****************************************************************************************/
 //  class VComputationUnit::Context
-/************************************************************************/
+/****************************************************************************************/
 /*----------------------------------------------------------------------*
  *  Computation contexts provide a shallow-binding mechanism useful	*
  *  for caching frequently accessed and infrequently rebound stack	*
@@ -115,10 +132,160 @@ public:
  *  delegate the request to their caller.				*
  *----------------------------------------------------------------------*/
 public:
-    class Context : public VTransient {
-	DECLARE_FAMILY_MEMBERS (Context, VTransient);
+    class Context {
+	DECLARE_NUCLEAR_FAMILY (Context);
 
-    //  Control Points Class
+/****************************************************************************************/
+//  class VComputationUnit::Context::Query
+/****************************************************************************************/
+    public:
+	class Query : public Vca::VActivity {
+	    DECLARE_CONCRETE_RTTLITE (Query, VActivity);
+
+	//  Aliases
+	public:
+	    typedef Vxa::ICollection ICollection;
+	    typedef Vxa::ISingleton  ISingleton;
+
+	    typedef Vca::IDataSource<ICollection*> ICollectionSource;
+	    typedef Vca::IDataSource<ISingleton*>  ISingletonSource;
+
+	    typedef Vca::VGoferInterface<ICollection> icollection_gofer_t;
+	    typedef Vca::VGoferInterface<ISingleton>  isingleton_gofer_t;
+	
+	//  Construction
+	public:
+	    Query (Vsa::VEvaluation *pEvaluation);
+
+	//  Destruction
+	protected:
+	    ~Query ();
+
+	//  Gofer Order Fulfillment
+	public:
+	    template <typename gofer_reference_t> bool getClientObjectGofer (gofer_reference_t &rpGofer, Context *pContext) {
+		return createClientObjectGofer (rpGofer, pContext);
+	    }
+	    bool getClientObjectGofer (icollection_gofer_t::Reference &rpGofer, Context *pContext);
+	    bool getClientObjectGofer (isingleton_gofer_t::Reference &rpGofer, Context *pContext);
+	private:
+	    template <typename gofer_reference_t> bool cachedClientObjectGofer (
+		gofer_reference_t &rpResultGofer, gofer_reference_t &rpCachedGofer, Context *pContext
+	    ) {
+		if (rpCachedGofer.isNil ())
+		    createClientObjectGofer (rpCachedGofer, pContext);
+		rpResultGofer.setTo (rpCachedGofer);
+		return rpResultGofer.isntNil ();
+	    }
+
+	    template <typename gofer_reference_t> bool createClientObjectGofer (gofer_reference_t &rpGofer, Context *pContext) {
+		typedef typename gofer_reference_t::ReferencedClass::interface_t interface_t;
+
+		GoferOrder_<gofer_reference_t> myPrerequisite (rpGofer);
+		pContext->fulfillPrerequisite (myPrerequisite);
+
+		if (m_pEvaluation && pContext->objectComesFromClient ()) {
+		    gofer_reference_t pObjectGofer (0);
+		    if (m_pEvaluation->newClientObjectGofer (pObjectGofer)) {
+			if (rpGofer) {
+			    pObjectGofer->setFallbackTo (rpGofer);
+			    pObjectGofer->setFallbackOnNull ();
+			}
+			rpGofer.claim (pObjectGofer);
+		    }
+
+		    typename Vca::VGoferInterface<Vca::IDataSource<interface_t*> >::Reference pSourceGofer;
+		    if (m_pEvaluation->newClientObjectGofer (pSourceGofer)) {
+			pObjectGofer.setTo (new Vca::Gofer::Sourced<interface_t> (pSourceGofer));
+			if (rpGofer) {
+			    pObjectGofer->setFallbackTo (rpGofer);
+			    pObjectGofer->setFallbackOnNull ();
+			}
+			rpGofer.claim (pObjectGofer);
+		    }
+		}
+		return rpGofer.isntNil ();
+	    }
+		
+
+	    //  State
+	private:
+	    Vsa::VEvaluation::Reference   const m_pEvaluation;         
+	    icollection_gofer_t::Reference	m_pICollectionGofer;
+	    isingleton_gofer_t::Reference	m_pISingletonGofer;
+	};
+
+/****************************************************************************************/
+//  class VComputationUnit::Context::GoferOrder
+/****************************************************************************************/
+    public:
+	class GoferOrder {
+	    DECLARE_NUCLEAR_FAMILY (GoferOrder);
+
+	//  Construction
+	public:
+	    GoferOrder () {
+	    }
+
+	//  Destruction
+	public:
+	    ~GoferOrder () {
+	    }
+
+	//  Fulfillment
+	public:
+	    virtual bool fulfillFromClient (Context *pContext, Query *pQuery) const;
+	    virtual bool fulfillFromServer (Context *pContext) const;
+
+	    virtual bool unfulfill () const = 0;
+	};
+
+/****************************************************************************************/
+//  template <typename gofer_reference_t> class VComputationUnit::Context::GoferOrder_
+/****************************************************************************************/
+	template <typename gofer_reference_t> class GoferOrder_ : public GoferOrder {
+	    DECLARE_FAMILY_MEMBERS (GoferOrder_<gofer_reference_t>, GoferOrder);
+
+	//  Construction
+	public:
+	    GoferOrder_(gofer_reference_t &rpGofer) : m_rpGofer (rpGofer) {
+	    }
+
+	//  Destruction
+	public:
+	    ~GoferOrder_() {
+	    }
+
+	//  Fulfillment
+	public:
+	    bool fulfillFromClient (Context *pContext, Query *pQuery) const {
+		return pQuery->getClientObjectGofer (m_rpGofer, pContext);
+	    }
+	    bool fulfillFromServer (Context *pContext) const {
+		typedef typename gofer_reference_t::ReferencedClass::interface_t interface_t;
+		VString iServerName;
+		if (pContext->objectComesFromServer (iServerName)) {
+		    m_rpGofer.setTo (
+			new Vca::Gofer::Named<interface_t,Vca::IDirectory>(iServerName)
+		    );
+		    return true;
+		}
+		return unfulfill ();
+	    }
+	    bool unfulfill () const {
+		m_rpGofer.clear ();
+		return false;
+	    }
+
+	//  State
+	private:
+	    gofer_reference_t &m_rpGofer;
+	};
+
+
+/****************************************************************************************/
+//  class VComputationUnit::Context::ControlPoints
+/****************************************************************************************/
     public:
 	class ControlPoints : public VControlPointController {
 	    DECLARE_FAMILY_MEMBERS (ControlPoints, VControlPointController);
@@ -202,7 +369,11 @@ public:
 	    ControlPoints *const	m_pPredecessor;
 	    VControlPoint		m_iControlPoints[ControlPoint__COUNT];
 	};
+
 
+/****************************************************************************************/
+//  class VComputationUnit::Context (continued)
+/****************************************************************************************/
     //  Global Tuning Parameters
     public:
 	static bool g_fVerboseSelectorNotFound;
@@ -210,7 +381,8 @@ public:
 
     //  Construction
     protected:
-	Context (ControlPoints& rControlPoints, Context *pParent = 0);
+	Context (ControlPoints &rControlPoints, Context *pParent = 0);
+	Context (ThisClass *pParent);
 
     //  Access
     public:
@@ -249,6 +421,15 @@ public:
 	    m_rControlPoints.triggerExitSubscriptions (pSource);
 	}
 
+    //  Order Fulfillment
+    public:
+	virtual bool fulfill (GoferOrder const &rOrder);
+	virtual bool fulfillPrerequisite (GoferOrder const &rOrder);
+
+
+	bool objectComesFromClient () const;
+	bool objectComesFromServer (VString& rServerName) const;
+
     //  State
     protected:
 	Context *const	m_pParent;
@@ -257,9 +438,9 @@ public:
     };
 
 
-/************************************************************************/
+/****************************************************************************************/
 //  class VComputationUnit::Extension
-/************************************************************************/
+/****************************************************************************************/
 public:
     class Profiler;
     class Extension : public VControlPointController {
@@ -374,7 +555,7 @@ public:
 
 
 /************************************************************************/
-//  class VComputationUnit
+//  class VComputationUnit (continued)
 /************************************************************************/
 
 //  Construction
@@ -383,6 +564,10 @@ protected:
 
     VComputationUnit (Context *pContext, VDescriptor &rDatum, VComputationScheduler *pScheduler);
 
+    void setContextTo (Context *pContext) {
+	//  Remove the 'const'
+	*const_cast<Context**>(&m_pContext) = pContext;
+    }
     void markAsInterior () {
 	if (!m_fIsInterior) {
 	    m_pCreator->m_cUnrunInteriorChildren++;
@@ -429,6 +614,9 @@ public:
 	return *m_pDuc;
     }
 
+    bool getEvaluation (Vsa::VEvaluation::Reference &rpEvaluation) const {
+	return channel_()->getEvaluation (rpEvaluation);
+    }
     unsigned int largeTaskSize () const {
 	return m_pContext->largeTaskSize ();
     }
@@ -557,8 +745,11 @@ public:
      *	    monotype.
      *
      *****/
-    M_CPD *ducDictionary () const {
-	return ducMonotype ().dictionaryCPD ();
+    void getDucDictionary (VReference<rtDICTIONARY_Handle> &rpResult) const {
+	ducMonotype ().getDictionary (rpResult);
+    }
+    void getDucDictionary (Vdd::Store::Reference &rpResult) const {
+	ducMonotype ().getDictionary (rpResult);
     }
 
     /*---------------------------------------------------------------------------
@@ -570,17 +761,17 @@ public:
      *	  - CPD's are shared with the DUC.
      *
      *****/
-    M_CPD *ducStore () const {
-	return ducMonotype ().storeCPD ();
+    Store *ducStore () const {
+	return ducMonotype ().store ();
     }
     RTYPE_Type ducStoreRType () const {
 	return ducMonotype ().storeRType ();
     }
 
-    void decodeClosureInDuc (
-	VReference<rtBLOCK_Handle> &rpBlock, unsigned int& rxPrimitive, rtCONTEXT_Constructor **ppContext = 0
+    bool decodeClosureInDuc (
+	VReference<rtBLOCK_Handle> &rpBlock, unsigned int& rxPrimitive, VReference<rtCONTEXT_Handle> *ppContext = 0
     ) const {
-	ducMonotype ().decodeClosure (rpBlock, rxPrimitive, ppContext);
+	return ducMonotype ().decodeClosure (rpBlock, rxPrimitive, ppContext);
     }
 
 //  Duc Update
@@ -589,7 +780,7 @@ public:
 	m_pDuc->normalize ();
     }
 
-    M_CPD *convertDucToVector () const {
+    rtVECTOR_Handle *convertDucToVector () const {
 	return m_pDuc->convertToVector ();
     }
 
@@ -619,10 +810,9 @@ public:
 	m_pDuc->setToMoved (rValue);
     }
 
-    void loadDucWithVector (M_CPD *pVector) const {
+    void loadDucWithVector (rtVECTOR_Handle *pVector) const {
 	m_pDuc->setToVector (pVector);
     }
-
     void loadDucWithVector (rtVECTOR_CType *pVector) const {
 	m_pDuc->setToVector (pVector);
     }
@@ -890,6 +1080,13 @@ public:
     }
 
     bool untilCompletionSuspend (VSNFTask *pSuspendee);
+
+//  Client Object Access
+public:
+    template <typename gofer_reference_t> bool getClientObjectGofer (gofer_reference_t& rpGofer) const {
+	Context::GoferOrder_<gofer_reference_t> const myOrder (rpGofer);
+	return m_pContext && m_pContext->fulfill (myOrder);
+    }
 
 //  State
 protected:

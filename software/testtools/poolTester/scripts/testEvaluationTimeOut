@@ -1,0 +1,15 @@
+# Pre-Execs
+# Start the pool first
+pre_exec:start -p
+
+# Query thread
+thread:main, repetitions:1
+operation_on_thread:main, sessionName:vservertest, run:getVPrompt 
+#operation_on_thread:main, run:~/poolTesterTest/scratch/testpool1/vprompt -directory vservertest
+operation_on_thread:main, sessionName:vservertest, run:query -q queries/TestQueryInfiniteLoop.vis -w
+operation_on_thread:main, sessionName:vservertest, run:sleep 48
+operation_on_thread:main, sessionName:vservertest, run:./poolTester dumpLog
+
+# Post-Execs
+# End the pool
+post_exec: stop 

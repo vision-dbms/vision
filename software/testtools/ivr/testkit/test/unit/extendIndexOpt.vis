@@ -1,0 +1,169 @@
+"testkit/lib/test/order.vis" asFileContents evaluate;
+
+[
+  "source/misc/utils.vis" asFileContents evaluate;
+
+  Utility SessionAttribute enableVerboseSelectorNotFound;
+
+  AdminTools define:'sessionAllocationHighWaterMark' toBePrimitive: 600 withControlValue: 1;
+  AdminTools define:'sessionAllocationResourceLimit' toBePrimitive: 600 withControlValue: 2;
+  AdminTools define:'sessionMappedAddressSpaceLevel' toBePrimitive: 600 withControlValue: 3;
+
+  AdminTools defineMethod: [|displayMemoryStats|
+     "  Current allocation level:    " print;
+     totalNetworkAllocation printWithCommasNL: 15.000000;
+     "  Session maximum:             " print;
+     sessionAllocationHighWaterMark printWithCommasNL: 15.000000;
+     "  Heap limit:                  " print;
+     sessionAllocationResourceLimit printWithCommasNL: 15.000000;
+     "  Total size of mapped segments" print;
+     sessionMappedAddressSpaceLevel printWithCommasNL: 15.000000;
+  ];
+] debugOutput;
+
+[
+
+SecurityMaster updateFromString: 
+"id 
+TJK
+IBM
+YOURMOMMA
+";
+
+IndexAccountMaster updateFromString: 
+"id 
+R1000
+";
+
+] debugOutput;
+
+
+
+# put some lists into the first store for testing
+!testData <- List new;
+
+!aList <- List new;
+!bList <- aList clusterNew;
+aList, Security, 5, 6, "twelve", (Named Security at: "TJK");
+bList, 9, 1, (Named Security at: "IBM");
+
+!il <- IndexedList new;
+il at: 3 put: 3;
+il at: "two" put: "two";
+il at: aList put: 9;
+il at: bList put: aList;
+testData, il;
+
+:il <- il clusterNew;
+il at: 3 put: 3;
+il at: "two" put: "two";
+il at: (Named Security at: "IBM") put: 4;
+il at: 6 put: (Named Security at: "TJK");
+testData, il;
+
+
+# 20 more Lists into this store
+20 sequence do: [ 
+  !il <- ^my il clusterNew;
+  il at: ^self asDouble put: ^self;
+  il at: ^self asString put: ^self;
+  ^my testData, il;
+];
+
+# put a reasonably large list into the cluster to operate on
+:il <- il clusterNew;
+100 sequence do: [ 
+  ^my il at: ^self put: asString;
+  ^my il at: asDouble put: ^self;
+];
+testData, il;
+
+# put a lot of keys in the store, but don't actually operate on this list
+:il <- il clusterNew;
+200000 sequence do: [ 
+  ^my il at: ^self put: asString;
+  ^my il at: asDouble put: ^self;
+];
+
+# Add a second store of IndexedLists
+!il <- IndexedList new;
+il at: 4 put: 4;
+il at: "one" put: "one";
+il at: 7 put: (Named IndexAccount at: "R1000");
+il at: "pfft" put: IndexAccount;
+il at: "pfft" put: bList;
+il at: bList put: "fourteen";
+il at: bList put: "one";
+il at: aList put: "a";
+testData, il;
+
+# put many copies of this list into the data to test
+25 sequence do: [ 
+  ^my testData, ^my il;
+];
+
+[ AdminTools displayMemoryStats; newLine print; ] debugOutput;
+
+10 sequence do: [ 
+  ^my :testData <- ^my testData extendBy: [ 
+    !resultsOpt <- ^self extendIndexOpt
+  ];
+];
+
+[ AdminTools displayMemoryStats; newLine print; ] debugOutput;
+
+
+2 sequence do: [
+  ^my :testData <- ^my testData extendBy: [ 
+    !resultsOrig <- ^self extendIndex
+  ];
+];
+
+[ AdminTools displayMemoryStats; newLine print; ] debugOutput;
+
+
+
+newLine printNL;
+
+"Failures for Opt" printNL;
+testData do: [ 
+  resultsOrig reject: [ 
+      !self <- ^self;
+      (^my resultsOpt at: index . index == index) &&
+        (^my resultsOpt at: index . super == self super)
+    ] . count print;
+  " of " print; resultsOrig count printNL;
+];
+
+newLine printNL;
+
+
+"Do we get unique lists from each orig operation? " print;
+((testData send: [ resultsOrig ] . count) = 
+  (testData send: [ resultsOrig ] . groupedBy: [ ^self ] . count)) printNL;
+
+"Do we get unique lists from each opt operation?  " print;
+((testData send: [ resultsOpt ] . count) = 
+  (testData send: [ resultsOpt ] . groupedBy: [ ^self ] . count)) printNL;
+
+
+newLine print;
+"Orig clusters: " printNL;
+testData groupedBy: [ 0 asReferenceTo: resultsOrig ] .
+  do: [ 
+    groupList count print: 10;
+    ^self super instanceList count print: 10;
+    ^self super clusterCardinality print: 10;
+    newLine print;
+  ];
+
+"Opt result clusters: " printNL;
+testData groupedBy: [ 0 asReferenceTo: resultsOpt ] .
+  do: [ 
+    groupList count print: 10;
+    ^self super instanceList count print: 10;
+    ^self super clusterCardinality print: 10;
+    newLine print;
+  ];
+
+newLine print;

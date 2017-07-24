@@ -88,7 +88,7 @@ template class Vsi_f0_c<VInternalGroundStore, VRunTimeType*>;
 void VInternalGroundStore::MetaMaker () {
     static Vsi_f0_c<VInternalGroundStore, unsigned int> const
 	si_cardinality		(&VInternalGroundStore::cardinality_),
-	si_referenceCount	(&VInternalGroundStore::referenceCount);
+	si_referenceCount	(&VInternalGroundStore::referenceCountMetaMakerWorkaround);
 
     static Vsi_f0<VInternalGroundStore, unsigned int> const
 	si_tuid32		(&VInternalGroundStore::tuid32);

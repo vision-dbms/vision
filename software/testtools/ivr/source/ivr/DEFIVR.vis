@@ -1,0 +1,1705 @@
+IVR Input defineMethod: [|newItem: keys|
+  Item createInstance: keys . setDataSetTo: ^self asSelf
+];
+
+IVR Input defineMethod: [|newItem|
+  ^self newItem: CoreWorkspace List new 
+];
+
+IVR Input defineMethod: [|addItem: keys|
+  ^self newItem: keys;
+  ^self
+];
+
+IVR Input defineMethod: [|setIdField: str|
+  ^self addItem: "id", str;
+  ^self
+];
+
+IVR Input defineMethod: [|setDateField: str|
+  ^self addItem: "date", str;
+  ^self
+];
+
+IVR Input defineMethod: [|getFeedOptions|
+  # this recursion may be able to be abstracted out
+  !ret <- ^self feedOptions;
+  ret isNA && propertyParent isntNA ifTrue: [ 
+    :ret <- propertyParent getFeedOptions; 
+  ];
+
+  ret isNA ifTrue: [ "" ] else: [ ret ]
+];
+
+IVR Input defineMethod: [|addFeedOptions: str|
+  ^self setFeedOptionsTo:  (^self getFeedOptions concat: "," . concat: str);
+  ^self 
+];
+
+IVR Input defineMethod: [|itemIndexedList: stringCluster|
+  !self <- ^self asSelf;
+
+  !items <- propertyParent isntDefault 
+    ifTrue: [ propertyParent itemIndexedList: stringCluster ]
+    else:   [ CoreWorkspace IndexedList new ];
+
+  Item masterList select: [ dataSet = ^my self ] .
+    do: [ 
+      !item <- ^self;
+      !key <- code insertIntoCluster: ^my stringCluster;
+      ^my items at: key . isNA 
+        ifTrue: [ ^my items at: key put: CoreWorkspace List new; ];
+      (^my items at: key), item;
+    ];
+
+  items 
+];
+
+IVR Input defineMethod: [|itemList|
+  ^self itemIndexedList: CoreWorkspace String newAssociativeCluster . 
+    send: [ ^self at: ^self count ] .
+];
+
+
+IVR Input defineMethod: [|itemsToDo|
+  !self <- ^self asSelf;
+
+  self itemList select: [ excluded not ]
+];
+
+IVR Input defineMethod: [|getItem: str|
+  ^self itemList dictBy: [ code ] . at: str
+];
+
+IVR Input defineMethod: [|print| ^self code print; ^self ];
+
+
+IVR DataSet defineMethod: [|belongsTo| propertyParent ];
+
+IVR DataSet defineMethod: [|globalOptionsList|
+  ^self _globalOptionsList else: [ ^self globalOptionsListPrototype ]
+];
+
+IVR DataSet defineMethod: [|setGlobalOption: name to: val|
+  !self <- ^self;
+
+  self globalOptionsListPrototype = self globalOptionsList ifTrue: [ 
+    self setGlobalOptionsListTo: self globalOptionsListPrototype clusterNew; 
+  ];
+ 
+  self globalOptionsList at: (self getClusteredString: name) put: val;
+
+  self
+];
+
+IVR DataSet defineMethod: [|addGlobalOption: str|
+  !self <- ^self;
+
+  !key <- str breakOn: "	|" . at: 1 . stripBoundingBlanks;
+  !val <- str breakOn: "	|" . at: 2 . stripBoundingBlanks;
+
+  self setGlobalOption: key to: val;
+
+  self
+];
+
+IVR DataSet defineMethod: [|setDefaultCurrency: str|
+  ^self addGlobalOption: ("currency|" concat: str);
+  ^self 
+];
+
+IVR DataSet defineMethod: [|setInputFile: infile|
+  ^self setPropertyParentTo: infile;
+  ^self
+];
+
+IVR DataSet defineMethod: [|getClassSuffix|
+  ^self classSuffix ifNA: [ code ]
+];
+
+IVR DataSet defineMethod: [|getSourceClass|
+  ^self sourceClass ifNA: [ ^self sourceClassDefault ]
+];
+
+IVR DataSet defineMethod: [|getClassName|
+  !self <- ^self;
+  self className ifDefault: [
+    self belongsTo relatedTo whatAmI concat: self getClassSuffix
+  ]
+];
+
+IVR DataSet defineMethod: [|getFeedName|
+  ^self feedName ifDefault: [ ^self getClassName concat: "Feed" ]
+];
+
+
+IVR DataSet defineMethod: [|profile|
+  "  Feed: " print;
+  ^self getFeedName print;
+  newLine print;
+  ^self itemList do: [ "    " print; displayInfo; ];
+  ^self
+];  
+
+IVR DataSet defineMethod: [|itemPositionMap: file|
+  !self <- ^self asSelf;
+  !list <- CoreWorkspace IndexedList new;
+  self itemsToDo extendBy: [ 
+    !field <- ^self;
+    !number <- ^my file columnsDictionary at: ^self sourceField;
+    ^my list at: number put: field;
+  ];
+
+  list
+];
+
+IVR DataSet defineMethod: [|uploadFile: file|
+  !self <- ^self asSelf;
+
+  !feed <- CoreWorkspace send: ^self getFeedName asBlock;
+
+  # A copy of global options
+  !options <- CoreWorkspace IndexedList new;
+  self globalOptionsList extendIndex do: [
+    ^my options at: index put: ^self super;
+  ];
+
+  # GAHH, WELCOME TO UGLYTOWN
+  !fieldOrderList <- [ 
+      !list <- self itemPositionMap: file;
+      file columnsCount sequence do: [ 
+        !field <- ^my list at: ^self;
+        field isntDefault ifTrue: [ field code print; ];
+        ", " print;
+      ];
+    ] divertOutput;
+  options at: (self getClusteredString: "fieldOrderList") 
+      put: fieldOrderList;
+
+  # Generic prep feed, can it be this easy?
+  prepFeed isntDefault ifTrue: [
+    :feed <- CoreWorkspace send: ^self prepFeed asBlock;
+    options at: (self getClusteredString: "underlyingFeed") 
+        put: self getFeedName;
+  ];
+
+  CoreWorkspace GlobalsFeed setDefaultGlobals;
+  options extendIndex select: [ index isntDefault ] .
+    do: [
+      CoreWorkspace GlobalsFeed setGlobalOption: index to: ^self super;
+    ];
+
+  ^self getFeedOptions breakOn: "," . 
+    send: [ stripBoundingBlanks ] . nonDefaults
+    do: [ 
+      # Need the ^self here, else the prop is defined at the anon 
+      # class and lost immediately
+      # Vision can be so funny sometimes
+      ^my feed send: ("^self " concat: ^self) asBlock; 
+    ];
+
+  "IVR loading file: " print;
+  file name printNL;
+  newLine print;
+  CoreWorkspace GlobalsFeed showGlobals;
+
+  feed updateFromString: file contentsAsString;
+  feed cleanupCurrentInstances;
+
+  self
+];  
+
+IVR DataSet defineMethod: [|buildRecipients|
+  ^self buildProperties
+];
+
+IVR DataSet defineMethod: [|buildProperties|
+  !self <- ^self asSelf;
+  !class <- self getClassName;
+
+  # This should use the feed upload properties, but I don't know how 
+  # to do that
+  !feedDefault <- CoreWorkspace send: self getFeedName asBlock .
+    send: [ baseObject ];
+  !classToUpdate <- class asClass; # use IVR's class, not the feeds!
+
+  !propsToAdd <- self itemsToDo
+    reject: [ ^my feedDefault getActualMessageFor: code . isntDefault ] .
+    reject: [ ^my classToUpdate respondsTo: code ] .
+    reject: [ code toLower = "date" ] .
+    reject: [ code toLower = "id" ];
+
+  # report invalid properites here
+  !badNameBlock <- [ code stripBoundingBlanks at: 1 . contains: "[0-9]" ];
+  !badNames   <- propsToAdd select: badNameBlock;
+  :propsToAdd <- propsToAdd reject: badNameBlock;
+
+  badNames count > 0 ifTrue: [
+    newLine print;
+    ">>> invalid properties will not be created: " print;
+    badNames do: [ code print; " " print; ];
+    newLine print;
+  ];
+
+  ^today evaluate: [
+    CoreWorkspace PropertySetup updateFromString: [
+      "property     | classID   | dataType | defaultValue | " print; 
+      "adjustments | tsFlag" printNL;
+      propsToAdd do: [ 
+        code print; " | " print;
+        ^my class print; " | " print;
+        getDataType print; " | " print;
+        defaultValue print; " | " print;
+        adjustments print; " | " print;
+        timeSeries print; " | " print;
+        newLine print;
+      ];
+    ] divertOutput;
+  ];
+
+  ^self
+];
+
+IVR File defineMethod: [|addAlias|
+  ^self addAlias: "Alias" 
+];
+IVR File defineMethod: [|addAlias: id|
+  !set <- Alias createInstance: id .
+    setInputFile: ^self;
+
+  ^self dataSetList, set;
+
+  # You got a better idea for how to find the default?
+  !idField <- set getItem: "id";
+  idField ifIsntNA: [ set addItem: "oldId", idField sourceField ];
+
+  # exclude every inherited field that isn't oldId
+  set itemsToDo reject: [ code = "oldId" ] . do: [ 
+    ^my set newItem setCodeTo: ^self code . setExcludedTo: TRUE;
+  ];
+
+  # This feed behaves differently than most.  Account for this.
+  set setPrepFeedTo: "PrepCleanupFeed";
+
+  set
+];
+
+IVR Alias defineMethod: [|getClassSuffix|
+  ^self classSuffix ifNA: [ "" ]
+];
+
+IVR Alias defineMethod: [|getFeedName|
+  ^self feedName ifDefault: [ ^self getClassName concat: "Aliases" ]
+];
+
+IVR Alias defineMethod: [|buildRecipients|
+  !self <- ^self asSelf;
+
+  !feedString <- "feedId          | baseClassId" concat: newLine;
+  :feedString <- feedString concat: self getFeedName . concat: "|";
+  :feedString <- feedString concat: self getClassName . concat: newLine;
+
+  CoreWorkspace AliasFeedSetup updateFromString: feedString;
+
+  ^self
+];
+
+IVR DataSet defineMethod: [|buildMyBridge|
+  !self <- ^self;
+  !bridgeClassName <- "";
+
+  self bridge isntDefault ifTrue: [
+    :bridgeClassName <- self belongsTo relatedTo whatAmI concat: bridge;
+    !linkedTo <- self belongsTo relatedTo whatAmI;
+
+    CoreWorkspace respondsTo: bridgeClassName . ifFalse: [
+      CoreWorkspace Interface BatchFeedManager 
+        createBridgeClass:  bridgeClassName
+        from:               "Bridge"
+        linkedTo:           linkedTo
+        via:                bridge lowercase
+        asTS:               "NO"
+      ;
+    ];
+  ];
+
+  bridgeClassName
+];
+
+IVR DataRecord defineMethod: [|buildRecipients|
+  !self <- ^self asSelf;
+  !class <- self getClassName;
+
+  !linkedTo <- belongsTo relatedTo whatAmI;
+
+  # dont build if already present
+  CoreWorkspace respondsTo: self getFeedName . ifFalse: [
+
+    # If a bridge is supplied, use it
+    !bridgeClass <- self buildMyBridge;
+    bridgeClass isntDefault ifTrue: [ :linkedTo <- bridgeClass; ];
+
+    CoreWorkspace Interface BatchFeedManager 
+      createDataRecordClass:  class
+      from:                   self getSourceClass
+      linkedTo:               linkedTo
+      via:                    self code lowercase
+      asTS:                   timeSeries
+    ;
+  ];
+
+  self buildProperties;
+
+  ^self
+];
+
+
+ClassBuilder Utility defineCodeAccessorFor: IVR Membership;
+
+IVR File defineMethod: [|addMembership: id|
+  !feedDefault <- class whatAmI concat: "To" . concat: id;
+
+  !set <- Membership createInstance: id, id, class whatAmI, 
+    feedDefault, ^self;
+  ^self dataSetList, set;
+
+  # You got a better idea for how to find the default?
+  !id <- set getItem: "id";
+  id ifIsntNA: [ set addItem: "memberId", id sourceField ];
+  set newItem setCodeTo: "id" . setExcludedTo: TRUE;
+
+  set
+];
+
+IVR Membership defineMethod: [|initializeKeys: keys|
+  !self <- ^self;
+
+  self setCodeTo:       (keys at: 1);
+  self setGroupTypeTo:  (keys at: 2);
+  self setMemberTypeTo: (keys at: 3);
+  self setFeedNameTo:   (keys at: 4);
+  self setInputFile:    (keys at: 5);
+
+  ^self
+];
+
+IVR Membership defineMethod: [|buildRecipients|
+  !self <- ^self asSelf;
+  !class <- self getClassName;
+
+  # dont build if already present
+  CoreWorkspace respondsTo: self getFeedName . ifFalse: [
+    CoreWorkspace respondsTo: self groupType . ifFalse: [
+      CoreWorkspace Interface BatchFeedManager 
+        createEntityClass: self groupType
+        from: self getSourceClass;
+    ];
+    !membersVia <- memberType lowercase concat: "List";
+    !groupVia <- groupType lowercase;
+
+    "Members Via: " print; membersVia printNL;
+    "Group Via: " print; groupType printNL;
+
+    !linkedAt <- memberType;
+
+    !bridgeClass <- self buildMyBridge;
+    bridgeClass isntDefault 
+      ifTrue: [ :linkedAt <- bridgeClass ];
+
+    CoreWorkspace Interface BatchFeedManager 
+      createRelationship: self getFeedName
+      withGroupType: groupType via: membersVia
+      andMemberType: linkedAt via: groupVia
+      asTS: timeSeries;
+  ];
+
+  ^self
+];
+
+IVR Membership defineMethod: [|withForeignId: str|
+  ^self addItem: "groupId", str
+];
+
+IVR File defineMethod: [|addRelationship: id|
+  !feedDefault <- class whatAmI concat: "To" . concat: id;
+
+  !set <- Relationship createInstance: id, id, class whatAmI, 
+    feedDefault, ^self;
+  ^self dataSetList, set;
+
+  # You got a better idea for how to find the default?
+  !id <- set getItem: "id";
+  id ifIsntNA: [ set addItem: "memberId", id sourceField ];
+  set newItem setCodeTo: "id" . setExcludedTo: TRUE;
+
+  set
+];
+
+
+IVR Relationship defineMethod: [|buildRecipients|
+  !self <- ^self asSelf;
+  !class <- self getClassName;
+
+  # dont build if already present
+  CoreWorkspace respondsTo: self getFeedName . ifFalse: [
+    CoreWorkspace respondsTo: self groupType . ifFalse: [
+      CoreWorkspace Interface BatchFeedManager 
+        createEntityClass: self groupType
+        from: self getSourceClass;
+    ];
+    !membersVia <- memberType lowercase concat: "List";
+    !groupVia <- groupType lowercase concat: "List";
+
+    "Members Via: " print; membersVia printNL;
+    "Group Via: " print; groupType printNL;
+
+    CoreWorkspace Interface BatchFeedManager 
+      createManyToMany: self getFeedName
+      withGroupType: groupType via: membersVia
+      andMemberType: memberType via: groupVia
+      asTS: timeSeries;
+  ];
+
+  ^self
+];
+
+IVR Membership defineMethod: [|setPrepIson|
+  ^self 
+    setPrepFeedTo:     "PrepIsonFeed" .
+    addGlobalOption:   "repeatingItems | memberId,date" .
+    addGlobalOption:   "dataItemName | groupId" .
+];
+
+IVR Utility defineMethod: [
+  |
+    buildHierarchy: name 
+    withComponents: componentList 
+    asTS: tsFlag
+  |
+
+  CoreWorkspace Interface BatchFeedManager 
+    buildHierarchy: name
+    withComponents: componentList
+    asTS:           tsFlag 
+    usingBaseClass: "HierarchyIVR"
+];
+
+IVR Utility defineMethod: [
+  |
+    buildHierarchy: name 
+    withComponents: componentList 
+    asTS: tsFlag
+    manyToMany: manyFlag
+  |
+
+  CoreWorkspace Interface BatchFeedManager 
+    buildHierarchy: name
+    withComponents: componentList
+    asTS:           tsFlag 
+    manyToMany:     manyFlag
+    usingBaseClass: "HierarchyIVR"
+];
+
+IVR File defineMethod: [|addHierarchy: id|
+  !set <- Hierarchy createInstance: id, id, class whatAmI, NA, ^self;
+  ^self dataSetList, set;
+
+  # You got a better idea for how to find the default?
+  !id <- set getItem: "id";
+  set newItem setCodeTo: "id" . setExcludedTo: TRUE;
+
+  set
+];
+
+IVR Hierarchy defineMethod: [|getFeedName|
+  ^self feedName ifDefault: [ ^self code concat: "Feed" ]
+];
+
+IVR Hierarchy defineMethod: [|buildRecipients|
+  ^self
+];
+
+IVR Hierarchy defineMethod: [|fields: string|
+  !hierarchy <- ^self asSelf;
+  string breakOn: "," . numberElements reject: [ ^self toLower = "na" ] .
+    do: [ 
+      ^my hierarchy addItem: (position asString, ^self);
+    ];
+
+  ^self
+];
+
+
+IVR File defineMethod: [|registerFile: pname |
+  ^self createInstance: pname
+];
+
+IVR File defineMethod: [|initializeGlobalInstanceProperties|
+  ^self :baseObject <- ^self; 
+  ^self :creationDate <- ^today; 
+  ^self initLists;
+  ^self
+];
+
+IVR File defineMethod: [|initLists|
+  !self <- ^self asSelf;
+  self setDataSetListTo: dataSetListPrototype clusterNew;
+];
+
+IVR File defineMethod: [|relateTo: pclass|
+  ^self setClassTo: pclass;
+  ^self
+];
+
+IVR File defineMethod: [|relatedTo|
+  ^self class 
+];
+
+IVR File defineMethod: [|addDataSet: id|
+  !set <- DataSet createInstance: id .
+    setInputFile: ^self;
+
+  ^self dataSetList, set;
+  set
+];
+
+
+IVR File defineMethod: [|addMaster|
+  !self <- ^self asSelf;
+  !set  <- self addDataSet: "Master";
+
+  set setFeedNameTo: (self class whatAmI concat: "Master") .
+    setClassSuffixTo: "" .
+    setFeedOptionsTo: "enableAllowDuplicates";
+
+  set
+];
+
+
+IVR File defineMethod: [|addDataRecord: id|
+  !set <- DataRecord createInstance: id .
+    setInputFile: ^self;
+
+  ^self dataSetList, set;
+  set
+];
+
+IVR File defineMethod: [|getDataSets|
+  dataSetList
+];
+
+IVR File defineMethod: [|getDataSet: id|
+  ^self getDataSets dictBy: [ code ] . at: id
+];
+
+IVR File defineMethod: [|allItemList|
+  !self <- ^self;
+
+  self dataSetList collectListElementsFrom: [ ^self itemsToDo ] .
+];
+
+IVR File defineMethod: [|profile|
+  "IVR File: " print;
+  code print;
+  " primary class: " print;
+  class whatAmI printNL;
+
+  !ds <- ^self getDataSets;
+  ds count asString print;
+  " DataSet(s)" printNL;
+
+  ds iterate: [ ^self profile ];
+  ^self 
+];
+
+IVR File defineMethod: [|buildRecipients|
+  !self <- ^self asSelf;
+
+  ^self getDataSets iterate: [ 
+    ^self buildRecipients
+  ];
+
+  ^self
+];
+
+IVR File defineMethod: [|uploadFiles: fileNameList|
+  !self <- ^self asSelf;
+
+  fileNameList iterate: [ 
+    ^my self uploadFile: ^self;
+  ];
+
+  ^self
+];
+
+# Here we fake a Utility File object from a string object.  Strangely enough, 
+# this is currently a misnomer within IVR.  Right now "Utility File objects" 
+# are simply a cached string version of the file.  
+# 
+# Eventually there will be a "source" type at Utility.  A string or a file
+# will be able to be converted into such a source.  This will allow IVR to 
+# break both files and strings down into optimal chunks and avoid having the 
+# DataFeeds repeatedly parse the same data.  So, our interfaces will be the 
+# same and the mechanisim for moving the data around should be much improved.
+IVR File defineMethod: [|uploadString: string|
+  !self <- ^self asSelf;
+
+  !file <- Utility File fromString: string;
+
+  ^self getDataSets iterate: [ 
+    Utility checkResources;
+    ^self uploadFile: ^my file;
+  ];
+
+  ^self
+];
+
+IVR File defineMethod: [|uploadFile: fileName|
+  !self <- ^self asSelf;
+
+  !file <- Utility File setNameTo: fileName;
+  file hasData ifFalse: [
+    ">>> IVR: File: '" print;
+    fileName print;
+    "' has no data?" printNL;
+  ];
+
+  ^self getDataSets iterate: [ 
+    Utility checkResources;
+    ^self uploadFile: ^my file;
+  ];
+
+  ^self
+];
+
+IVR File defineMethod: [|locateId: id|
+  ^self instanceList dictBy: [ code ] . at: id
+];
+
+IVR File defineMethod: [|findDataSetIndexByCode: code|
+  !indexes <- _dataSetList count sequence select: [ 
+    ^my dataSetList at: ^self . code = ^my code 
+  ];
+
+  indexes count = 1 
+    ifTrue: [ indexes anElement ]
+    else:   [ NA ]
+];
+
+IVR File defineMethod: [|deleteDataSet: idx|
+  idx isInteger && [ idx > 0 && idx <= dataSetList count ] ifTrue: [
+    !oldList <- dataSetList;
+    ^self setDataSetListTo: dataSetListPrototype clusterNew;
+
+    oldList count sequence reject: [ ^self = ^my idx ] . do: [ 
+      ^my dataSetList, (^my oldList at: ^self);
+    ];
+
+    oldList rdelete;
+    TRUE
+  ]
+  else: [ FALSE ]
+];
+
+IVR File defineMethod: [|moveDataSet: fromIdx to: toIdx|
+  !size <- dataSetList count;
+  fromIdx isInteger && toIdx isInteger && 
+  [ fromIdx > 0 && fromIdx <= size && toIdx > 0 && toIdx <= size ]
+    ifTrue: [
+      !oldList <- dataSetList;
+      ^self setDataSetListTo: dataSetListPrototype clusterNew;
+
+      oldList count sequence iterate: [ 
+        ^self = ^my toIdx ifTrue: [ 
+          ^my dataSetList, (^my oldList at: ^my fromIdx)
+        ] .
+        elseIf: [ ^self = ^my fromIdx ] then: [
+          ^my dataSetList, (^my oldList at: ^my toIdx);
+        ] .
+        else: [
+          ^my dataSetList, (^my oldList at: ^self)
+        ];
+      ];
+      
+      oldList rdelete;
+      TRUE
+    ]
+    else: [ FALSE ]
+];
+
+###
+# Corrections "file" procesing code
+###
+IVR defineMethod: [|considerCorrectionOf: source withContent: stringData|
+  !toUpload <- File locateBySource: source;
+
+  toUpload isntDefault ifTrue: [ 
+    !dates <- toUpload extendBy: [ 
+        !ivrFile <- ^self;
+        !dates <- CoreWorkspace List new; 
+        !rebuildHoldings;
+      ] .
+      iterate: [ 
+        !idItem   <- ivrFile getItem: "id";
+        !dateItem <- ivrFile getItem: "date";
+
+        !file <- CoreWorkspace IVR Utility File fromString: ^my stringData;
+        !uploadItems <- file columnsDictionary selectorList 
+          extendBy: [
+            !item  <- ^self;
+            !items <- ^my ivrFile locateItemsBySource: ^self;
+            !loadItems <- ^my ivrFile locateItemsBySource: ^self .
+              reject: [ excluded ];
+            !holdingItems <- loadItems select: [ holdingProp ];
+          ] .
+          reject: [ item = ^my dateItem sourceField ] .
+          reject: [ item = ^my idItem sourceField ] .
+          select: [ loadItems count > 0 ];
+
+        uploadItems count > 0 ifTrue: [
+          ^self uploadString: ^my stringData; # this will re-fetch the file :(
+
+          uploadItems any: [ holdingItems count > 0 ] .
+            ifTrue: [ 
+              # process dates if we need to rebuild holdings
+              !dateIdx <- NA;
+              dateItem isntDefault ifTrue: [ 
+                :dateIdx <- file columnsDictionary at: dateItem sourceField;
+              ];
+
+              :dates <- dateIdx isntNA ifTrue: [ 
+                  file getData asLines send: [ 
+                    ^self breakOn: "	" . at: ^my dateIdx . send: [ asDate ] 
+                  ] 
+                ]
+                else: [ CoreWorkspace List new ];
+            ];
+        ];
+      ] .
+      collectListElementsFrom: [ dates ] . 
+      select: [ isDate ] .
+      unique;
+
+    !iaChanges <- dates select: [ isDate ] .
+      extendBy: [ !modifiedIndices <- CoreWorkspace List new; ] .
+      iterate: [ 
+        ^my Holdings buildFor: ^self; 
+        ^my Holdings modifiedIndices do: [ ^my modifiedIndices, ^self ];
+      ];
+
+    # how would we like to output these?
+    iaChanges do: [ 
+      "changes on: " print; ^self printNL;
+      modifiedIndices do: [ "  " print; displayInfo; ];
+    ];
+  ];
+  ^self
+];
+
+IVR File defineMethod: [|locateItemsBySource: string|
+  getDataSets collectListElementsFrom: [ 
+      ^self locateItemsBySource: ^my string
+    ]
+];
+
+IVR DataSet defineMethod: [|locateItemsBySource: string|
+  !stringStore <- CoreWorkspace String newAssociativeCluster;
+  !dict <- ^self itemList select: [ sourceField isntDefault ] .
+    dictBy: [ sourceField ] into: stringStore;
+
+  :string <- string insertIntoCluster: stringStore;
+
+  dict at: string . ifNA: [ CoreWorkspace List new ]
+];
+
+IVR File defineMethod: [|locateBySource: srcString|
+  !items <- CoreWorkspace IndexedList new;
+  !keys <- CoreWorkspace String newAssociativeCluster;
+
+  ^self masterList select: [ sourceStrings count > 0 ] .
+    do: [ 
+      !file <- ^self asSelf;
+      !items <- ^my items;
+      !keys <- ^my keys;
+
+      sourceStrings nonDefaults do: [ 
+        !key <- ^self insertIntoCluster: ^my keys ;
+        ^my items at: key . isNA 
+          ifTrue: [ ^my items at: key put: CoreWorkspace List new; ];
+        (^my items at: key), ^my file;
+      ];
+    ];
+
+  !ret <- CoreWorkspace List new;
+
+  :srcString <- srcString insertIntoCluster: keys;
+  items at: srcString . isntNA ifTrue: [ 
+    items at: srcString . do: [ ^my ret, ^self ];
+  ];
+
+  ret
+];
+
+IVR File defineMethod: [|sourceStrings|
+  ^self sourceString isntNA 
+    ifTrue: [ ^self sourceString breakOn: "," . nonDefaults ]
+    else:   [ CoreWorkspace List new ]
+];
+
+
+IVR Item defineMethod: [ |setIsAlias|
+    ^self :isAlias <- TRUE;
+  ] .
+  defineMethod: [|setIsntAlias|
+    ^self :isAlias <- FALSE;
+  ];
+  
+IVR Item defineMethod: [|getDataType|
+  ^self dataType ifDefault: [ "Undefined" ] 
+];
+
+IVR Item defineMethod: [|excluded|
+  ^self _excluded ifNA: [ FALSE ]
+];
+
+IVR Item defineMethod: [|timeSeries|
+  ^self _timeSeries ifNA: [ FALSE ]
+];
+
+IVR Item defineMethod: [|displayInfo|
+  ^self dataSet code print: -10;
+  ":" print;
+  ^self code print: 10;
+  ^self getDataType print: 12;
+  ^self name printNL;
+];
+
+ClassBuilder Utility defineCodeAccessorFor: IVR Item;
+
+IVR Item defineMethod: [|initializeKeys: keys|
+  !self <- ^self asSelf;
+  
+  self setCodeTo:          (keys at:  1);
+  self setSourceFieldTo:   (keys at:  2);
+  self setDataTypeTo:      (keys at:  3);
+  self setDefaultValueTo:  (keys at:  4);
+  self setTimeSeriesTo:    (keys at:  5);
+  self setAdjustmentsTo:   (keys at:  6);
+  self setExcludedTo:      (keys at:  7);
+  self setIsAliasTo:       (keys at:  8);
+  self setDataSetTo:       (keys at:  9);
+  self setSourceFormulaTo: (keys at: 10);
+  self setHoldingPropTo:   (keys at: 11);
+
+  self
+];
+
+IVR Item defineMethod: [|displayInfo| 
+  code print: 15; sourceField printNL: 20; 
+];
+
+IVR Utility File defineMethod: [|fromString: string|
+  !self <- ^self asSelf;
+
+  # For now this is a hack to get strings to work.  See 
+  # "IVR File uploadString:" for more details
+  self setNameTo: "";
+  ^tmp define: 'ivrUtilityCacheFileName' toBe: "";
+  ^tmp define: 'ivrUtilityCacheFileContents' toBe: string;
+  
+  self cacheHeader;
+
+  ^self
+];
+
+IVR Utility File defineMethod: [|isCached|
+  !self <- ^self;
+  !cached <- FALSE;
+
+  ^tmp respondsTo: 'ivrUtilityCacheFileName' . ifTrue: [
+    (^tmp ivrUtilityCacheFileName = self name) ifTrue: [
+      :cached <- TRUE;
+    ];
+  ];
+
+  cached
+];
+
+IVR Utility File defineMethod: [|cacheMe|
+  !self <- ^self asSelf;
+
+  self isCached ifFalse: [
+    ^tmp define: 'ivrUtilityCacheFileName' toBe: self name;
+    ^tmp define: 'ivrUtilityCacheFileContents' toBe: self name asFileContents;
+
+    self cacheHeader;
+  ];
+  
+  ^self
+];
+
+IVR Utility File defineMethod: [|cacheHeader|
+  !header <- CoreWorkspace List new;
+  !contents <- ^tmp ivrUtilityCacheFileContents;
+  
+  contents isntDefault ifTrue: [ 
+    :header <- ^tmp ivrUtilityCacheFileContents asLines 
+        send: [ ^self stripBoundingBlanks ] .
+        select: [ ^self isntDefault ] .
+        at: 1 .
+        breakOn: "	|,"
+      ;
+  ];
+
+  ^tmp define: 'ivrUtilityCacheFileHeader' toBe: header;
+  ^self
+];
+
+IVR Utility File defineMethod: [|getHeader|
+  ^self cacheMe;
+  ^tmp ivrUtilityCacheFileHeader
+];
+
+IVR Utility File defineMethod: [|getDataImpl|
+  ^self cacheMe;
+  ^tmp ivrUtilityCacheFileContents
+];
+
+IVR Utility File defineMethod: [|getData|
+  ^self asSelf sendOnceNoContext: [ getDataImpl ]
+];
+
+IVR Utility File defineMethod: [|contentsAsString|
+  ^self getData
+];
+
+IVR Utility File defineMethod: [|hasData|
+  ^self getHeader isntDefault
+];
+
+IVR Utility File defineMethod: [|columnsCount|
+  !file <- ^self asSelf;
+
+  file sendOnceNoContext: [
+    ^self hasData ifTrue: [
+      ^self getHeader count
+    ]
+    else: [ 0 ]
+  ]
+];
+
+IVR Utility File defineMethod: [|columnsDictionary|
+  !file <- ^self asSelf;
+
+  file sendOnceNoContext: [
+    !dict <- CoreWorkspace Dictionary basicSpecialized;
+    ^self hasData ifTrue: [
+      ^self getHeader numberElements
+        do: [ ^my dict at: ^self super stripBoundingBlanks put: position ];
+    ];
+
+    dict
+  ]
+];
+
+HierarchyIVR defineMethod: [|hasDescendant: e|
+  !self <- ^self asSelf;
+  !found <- FALSE;
+
+  !search <- self asList;
+
+  [(search count > 0) && (found not)] whileTrue: [
+    :found <- search includesElement: e;
+
+    :search <- search collectListElementsFrom: [ childList ];
+  ];
+
+  found
+];
+
+ClassificationIVR defineMethod: [|getFilter|
+  !self <- ^self asSelf;
+
+  self securityPath
+    else: [ self securityListPath ] .
+    elseIf: [ self respondsTo: 'securityList' ] then: [ [ "X securityList" ] ] .
+    else: [ self securityCriteria ] .
+    else: [ self securityCriteriaDefault ] .
+    else: [ [ TRUE ] ]
+];
+
+###
+# Holdings Builder
+###
+ClassificationIVR defineMethod: [ |filterSecurities: secs|
+  !self <- ^self asSelf;
+  !remainingSecs <- CoreWorkspace List new;
+
+  self securityPath isntNA || self securityListPath isntNA ifTrue: [
+    :remainingSecs <- self filterSecuritiesClass: secs;
+  ]
+  else: [
+    :remainingSecs <- self filterSecuritiesInstance: secs;
+  ];
+
+  remainingSecs
+];
+
+
+ClassificationIVR defineMethod: [ |filterSecuritiesInstance: secs|
+  !self <- ^self asSelf;
+  !remainingSecs <- CoreWorkspace List new;
+
+  ^current basicDoOnce: [ 
+      :remainingSecs <- 
+        self respondsTo: 'securityList' . ifTrue: [ 
+            secs intersect: self securityList
+        ] .
+        elseIf: [ self securityCriteria isBlock ] then: [
+          secs extendBy: [ !classification <- ^my self ] . 
+            select: self securityCriteria .
+            send: [ ^self super ] 
+        ] .
+        elseIf: [ self securityCriteriaDefault isBlock ] then: [
+          secs extendBy: [ !classification <- ^my self ] . 
+            select: self securityCriteriaDefault .
+            send: [ ^self super ] 
+        ] .
+        else: [ secs ];
+    ]
+    basedOnCriteria: [ self ], [ secs ]
+    propagateUsing: [ 
+      ^self :remainingSecs <- groupResult remainingSecs;
+    ];
+
+  remainingSecs
+];
+
+ClassificationIVR defineMethod: [ |filterSecuritiesClass: secs|
+  !self <- ^self asSelf;
+  !classDefault <- 0 asReferenceTo: self;
+  !remainingSecs <- CoreWorkspace List new;
+  !groups <- CoreWorkspace IndexedList new;
+
+  ^current basicDoOnce: [ 
+      self securityPath isntNA ifTrue: [
+        :groups <- secs groupedBy: self securityPath . 
+          indexBy: [ ^self asSelf ];
+      ] .
+      elseIf: [ self securityListPath isntNA ] then: [
+        :groups <- secs mgroupedBy: self securityListPath . 
+          do: [ :groupList <- groupList send: [ ^self super ]; ] .
+          indexBy: [ ^self asSelf ];
+      ];
+    ]
+    basedOnCriteria: [ classDefault ], [ secs ]
+    propagateUsing: [ 
+      !result <- groupResult groups at: ^self self;
+      result isntNA ifTrue: [ 
+        ^self :remainingSecs <- result groupList;
+      ];
+    ];
+
+  remainingSecs
+];
+
+ClassificationIVR defineMethod: [|weightFor: account and: security|
+  !self <- ^self;
+
+  security isSecurity ifTrue: [ 
+    security send: self weightFormula with: account
+  ] else: [ NA ]
+];
+
+ClassificationIVR defineMethod: [|weightAdjustmentFor: account and: security|
+  !self <- ^self;
+
+  self weightAdjustment isBlock && self weightAdjustment isntNA && security isSecurity
+    ifTrue: [ security send: self weightAdjustment with: account ]
+    else:   [ 1.0 ]
+];
+
+ClassificationIVR defineMethod: [|sharesFor: account and: security|
+  !self <- ^self;
+
+  security isntNA ifTrue: [
+    security send: self sharesFormula with: account
+  ] else: [ NA ]
+];
+
+ClassificationIVR defineMethod: [|sharesAdjustmentFor: account and: security|
+  !self <- ^self;
+
+  self sharesAdjustment isBlock && self sharesAdjustment isntNA && security isSecurity
+    ifTrue: [ security send: self sharesAdjustment with: account ]
+    else:   [ 1.0 ]
+];
+
+IVR Holdings defineMethod: [|buildHoldingsForDates: dateList|
+  !self <- ^self asSelf;
+
+  dateList iterate: [ 
+    ^my self Utility checkResources;
+    ^my self doitFor: ^self;
+  ];
+
+  ^self
+];
+
+IVR Holdings defineMethod: [|buildFor: date|
+  ^self doitFor: date
+];
+
+IVR Holdings defineMethod: [|doitFor: date|
+  date asDate evaluate: [ ^self doit ];
+  ^self
+];
+
+IVR Holdings defineMethod: [|accountFilter|
+  _accountFilter isntNA 
+    ifTrue: [ _accountFilter ]
+    else:   [ [ TRUE ] ]
+];
+
+IVR Holdings defineMethod: [|securityFilter|
+  _securityFilter isntNA 
+    ifTrue: [ _securityFilter ]
+    else:   [ [ TRUE ] ]
+];
+ 
+IVR Holdings defineMethod: [|manageHoldingsStore|
+  !currentStore <- CoreWorkspace Holding :storeXRef asOf: ^date;
+  currentStore instanceList count > 5000000 ifTrue: [ 
+    CoreWorkspace Holding createNewStoreAsOf: ^date at: currentStore 
+  ];
+];
+
+IVR Holdings defineMethod: [|getClassificationsFor: account|
+  !self <- ^self;
+  !classifications <- self classificationList send: [ 
+      ^my account send: ^self
+    ] . 
+    nonDefaults;
+
+  # expand classifications that are lists here
+  classifications select: [ isCollection ] .
+    iterate: [ 
+      !classifications <- ^my classifications;
+      ^self do: [ ^my classifications, ^self ];
+    ];
+  :classifications <- classifications reject: [ isCollection ];
+
+  classifications
+];
+
+IVR Holdings defineMethod: [|getSharesClassificationFor: account|
+  !classifications <- ^self getClassificationsFor: account;
+
+  classifications 
+    select: [ ^self sharesFormula isntDefault && ^self sharesFormula isBlock ] .
+    last: 1 . anElement
+];
+
+IVR Holdings defineMethod: [|getWeightClassificationFor: account|
+  !classifications <- ^self getClassificationsFor: account;
+
+  classifications 
+    select: [ ^self weightFormula isntDefault && ^self weightFormula isBlock ] .
+    last: 1 . anElement
+];
+
+IVR Holdings defineMethod: [|securitiesToConsider|
+  !securityFilter <- ^self securityFilter;
+  CoreWorkspace sendOnce: [ 
+    CoreWorkspace Security masterList select: ^my securityFilter
+  ]
+];
+
+IVR Holdings defineMethod: [|doit|  
+  !builder <- ^self;
+
+  # New Holdings Store creation - create new store if needed
+  builder manageHoldingsStore;
+  builder rebuild;
+  builder summary;
+
+  ^self
+];
+
+IVR Holdings defineMethod: [|rebuild| 
+  ^self rebuildAccounts: CoreWorkspace IndexAccount masterList
+];  
+
+IVR Holdings defineMethod: [|rebuildAccounts: accts|  
+  ^self forceRebuildAccounts: (accts select: ^self accountFilter)
+];
+
+IVR Holdings defineMethod: [|forceRebuildAccounts: accts|  
+  !builder <- ^self;
+
+  # naive store management, gc will reclaim the old when we make 
+  # this new one
+  builder setModifiedIndicesTo: CoreWorkspace List new;
+
+  accts extendBy: [
+      !builder <- ^my builder;
+      !account <- ^self;
+
+      # Get a weight and shares method
+      !weightWinner <- builder getWeightClassificationFor: account;
+      !sharesWinner <- builder getSharesClassificationFor: account;
+    ] .
+    select: [ weightWinner isntDefault ] . # must have a weight formula
+    extendBy: [
+      # Global Security Filter
+      !secs <- builder securitiesToConsider; 
+      # classifcations for security filtering
+      !classifications <- builder getClassificationsFor: account;
+
+      classifications iterate: [ 
+        ^my :secs <- ^self filterSecurities: ^my secs;
+      ];
+    ] .
+    select: [ secs count > 0 ] .
+    do: [
+      :secs <- secs extendBy: [
+        !security <- ^self asSelf;
+        !totalMarketValue;
+        !shares;
+        !totalCost <- 0.0;
+        !accountingPrice;
+      ];
+
+      weightWinner isntDefault ifTrue: [
+        secs do: [ 
+          :totalMarketValue <- 
+            ^my weightWinner weightFor: ^my account and: security;
+        ];
+
+        classifications iterate: [ 
+          !c <- ^self;
+          !account <- ^my account;
+          ^my secs do: [ 
+            !adj <- ^my c weightAdjustmentFor: ^my account and: security;
+            :totalMarketValue <- totalMarketValue * adj;
+          ];
+        ];
+      ];
+
+      # Shares if we've got them
+      sharesWinner isntDefault ifTrue: [
+        secs do: [ 
+          :shares <- ^my sharesWinner sharesFor: ^my account and: security;
+        ];
+
+        classifications iterate: [ 
+          !c <- ^self;
+          !account <- ^my account;
+          ^my secs do: [ 
+            !adj <- ^my c sharesAdjustmentFor: ^my account and: security;
+            :shares <- shares * adj;
+          ];
+        ];
+      ];
+
+    ] .
+    do: [ 
+      # will we change anything?
+      account :holdingsSeries on: ^date . isNA 
+        ifTrue: [ ^my modifiedIndices, account ]
+        else: [
+          holdingsSeries count != secs count
+            ifTrue: [ ^my modifiedIndices, account ] 
+            else:[
+              # we're out of easy checks
+              !newHoldings <- secs indexBy: [ security ];
+              holdingsSeries extendBy: [
+                  !newHolding <- ^my newHoldings at: security;
+                ] .
+                any: [ 
+                  newHolding isNA ||
+                  [ totalMarketValue != newHolding totalMarketValue ] ||
+                  [ shares != newHolding shares ]
+                ] . 
+                ifTrue: [ ^my modifiedIndices, account ];
+            ]
+        ];
+
+      # if we skip unmodified accounts can the change
+      # checking above be used to speed up rebuilds?
+      account createHoldingsFrom: secs;
+    ];
+
+  CoreWorkspace Security rebuildHoldings;
+
+  ^self
+];
+
+IVR Holdings defineMethod: [|summary|
+  ^self summaryFor: CoreWorkspace IndexAccount masterList
+];
+
+IVR Holdings defineMethod: [|summaryFor: accts|
+  !self <- ^self;
+  !secs <- CoreWorkspace Security masterList;
+
+  newLine print;
+  "IVR Holdings Summary:" printNL;
+  "Date: " print;
+  ^date print: 13;
+  " Total Holdings: " print;
+  accts total: [ holdings count ] . printWithCommas: 15.0;
+  CoreWorkspace Holding :storeXRef on: ^date . isntNA ifTrue: [
+    " New Holding store created."
+  ];
+  newLine print;
+
+  "Accounts:   " print;
+  accts count printWithCommas: 10.0; " total /" print;
+  accts select: self accountFilter . count printWithCommas: 10.0;
+  " considered / " print;
+  accts select: [ holdings count > 0 ] . count printWithCommas: 10.0;
+  " included " printNL;
+
+  "Securities: " print;
+  secs count printWithCommas: 10.0; " total /" print;
+  secs select: self securityFilter . count printWithCommas: 10.0;
+  " considered / " print;
+  accts collectListElementsFrom: [ memberList ] . unique count 
+    printWithCommas: 10.0;
+  " included " printNL;
+
+  accts select: [ :memberList on: ^date . isntNA ] . 
+    count printWithCommas: 15.0;
+  " changed memberLists" printNL;
+  accts collectListElementsFrom: [ 
+      constituents select: [ :_shares on: ^date . isntNA ] .
+    ] . count printWithCommas: 15.0;
+  " changed constituents shares" printNL;
+
+  newLine print;
+  ^self
+];
+
+IVR Holdings defineMethod: [|auditBuildFor: account|
+  ^self auditBuildFor: account security: NA;
+  ^self
+];
+
+IVR Holdings defineMethod: [|auditBuildFor: account security: security|
+  !builder <- ^self;
+
+  account isAccount ifFalse: [ 
+    account isString ifTrue: [
+      :account <- CoreWorkspace Account locateId: account;
+    ];
+  ];
+
+  security isSecurity ifFalse: [
+    security isString ifTrue: [
+      :security <- CoreWorkspace Security locateId: security;
+    ];
+  ];
+
+  security isNA ifTrue: [ :security <- builder selectAuditSecurity: account ];
+
+  "Holdings audit for: " print;
+  account displayInfo;
+  "  using security: " print;
+  security displayInfo;
+
+  builder auditCheckAccountFilter: account;
+  builder auditSecuritySelection: account security: security;
+  builder auditWeightBuild:       account security: security;
+  builder auditSharesBuild:       account security: security;
+ 
+  ^self
+];
+
+IVR Holdings defineMethod: [|auditCheckAccountFilter: account|
+  !builder <- ^self;
+
+  account asList select: builder accountFilter . count != 1 ifTrue: [
+    "  *** WARNING: Account " print; account code asString print; 
+    " failed account filter.  " print; 
+    "Are you running in the right ^date context?" printNL;
+  ];
+];
+
+IVR Holdings defineMethod: [|selectAuditSecurity: account |
+  account holdings isntDefault 
+    ifTrue: [ account holdings anElement security ]
+    else:   [ NA ]
+];
+
+IVR Holdings defineMethod: [|auditSecuritySelection: account security: security|
+  !builder <- ^self;
+
+  !classifications <- builder getClassificationsFor: account;
+  :classifications <- classifications extendBy: [ 
+    !line <- [
+      "    filter: " print; 
+      ^self whatAmI print; "::" print; ^self code print;
+      " -> " print; 
+      ] divertOutput;
+  ];
+
+  !defaultLine <- [
+    "    default filter -> " print; 
+    ] divertOutput;
+
+  !maxLength <- classifications max: [ line count ] . else: [ 0 ];
+  (maxLength < defaultLine count) ifTrue: [ :maxLength <- defaultLine count; ];
+  (maxLength < 31) ifTrue: [ :maxLength <- 31; ];
+
+  !secs <- CoreWorkspace Security sendOnce: [ masterList ];
+  !countLength <- secs count asString count;
+
+  "  selection from masterList -> " print: maxLength; 
+  secs count print: countLength;  
+  :secs <- secs sendOnceNoContext: [ ^self indexBy: [ ^self ] ];
+  " (" print; secs at: security . isntNA asString print: 5; ") " print;
+  newLine print;
+
+  defaultLine print: maxLength;
+  :secs <- builder securitiesToConsider;
+  secs count print: countLength;
+  :secs <- secs sendOnceNoContext: [ ^self indexBy: [ ^self ] ];
+  " (" print; secs at: security . isntNA asString print: 5; ") " print;
+  builder securityFilter asString stripBoundingBlanks 
+    asLines do: [ print; " " print;];
+  newLine print;
+
+  classifications iterate: [
+    ^my :secs <- ^self filterSecurities: ^my secs;
+    line print: ^my maxLength;
+    ^my secs count print: ^my countLength;
+    ^my :secs <- ^my secs sendOnceNoContext: [ ^self indexBy: [ ^self ] ];
+    " (" print; ^my secs at: ^my security . isntNA asString print: 5;
+    ") " print;
+    ^self getFilter asString stripBoundingBlanks asLines 
+      do: [print; " " print;];
+    newLine print;
+  ];
+
+  # Verify the holdings selection!
+  account :holdingsSeries on: ^date . isntNA ifTrue: [
+    !match <- account holdings send: [ security ] . append: secs .
+      groupedBy: [ ^self ];
+    match all: [ groupList count = 2 ] . 
+      ifFalse: [
+        ">>> Security selection mismatches published holdings.  For"   printNL;
+        ">>> reason the audit has failed.  Either the audit is broken" printNL;
+        ">>> or something has changed since holdings were built"       printNL;
+      ];
+  ];
+
+  ^self
+];
+
+IVR Holdings defineMethod: [|auditAllSelectionForSecurity: sec|
+  !self <- ^self;
+  CoreWorkspace IndexAccount masterList do: [ 
+    displayInfo;
+    ^my self auditSecuritySelection: ^self security: ^my sec;
+  ];
+];
+
+IVR Holdings defineMethod: [|auditWeightBuild: account security: security|
+  !builder <- ^self;
+
+  !classifications <- builder getClassificationsFor: account;
+  :classifications <- classifications extendBy: [ 
+    !line <- [
+      "    adjustment: " print; 
+      ^self whatAmI print; "::" print; ^self code print;
+      " -> " print; 
+      ] divertOutput;
+
+    !adj <- ^self weightAdjustmentFor: ^my account and: ^my security;
+  ];
+
+  !weightWinner <- builder getWeightClassificationFor: account;
+
+  weightWinner isntNA ifTrue: [
+    !defaultLine <- [
+      "  weight winner: " print; 
+      weightWinner whatAmI print; "::" print; weightWinner code print;
+      " -> " print;
+      ] divertOutput;
+
+    !maxLength <- classifications max: [ line count ];
+    maxLength < defaultLine count ifTrue: [ :maxLength <- defaultLine count; ];
+
+    !weight <- weightWinner weightFor: account and: security;
+
+    !weightLength <- weight isNumber 
+      ifTrue: [ weight asString stripBoundingBlanks count - 3 ]
+      else:   [ weight asString stripBoundingBlanks count ];
+    !adjLength <- classifications 
+      max: [ adj asString stripBoundingBlanks count ] . asInteger;
+
+    defaultLine print: maxLength;
+    weight print: weightLength;
+    " " print: (weightLength + adjLength + 7); 
+    weightWinner weightFormula asString stripBoundingBlanks asLines 
+      do: [ print; " " print;];
+    newLine print;
+
+    classifications iterate: [
+      !newWeight <- ^my weight * adj;
+
+      line print: ^my maxLength;
+      ^my weight print: ^my weightLength;
+      " * " print; adj print: ^my adjLength;
+      " = " print; newWeight print: ^my weightLength;
+      " " print; 
+      ^self weightAdjustment asString stripBoundingBlanks asLines 
+        do: [ print; " " print;];
+      newLine print;
+
+      ^my :weight <- newWeight;
+    ];
+
+    # Verify the holdings selection!
+    account :holdingsSeries on: ^date . isntNA ifTrue: [
+      !hldg <- account holdings indexBy: [ security ] . at: security;
+      hldg isNA || [ hldg _totalMarketValue != weight ] ifTrue: [
+        ">>> Saved weight does not match audit calculated weight."  printNL;
+        ">>> Has the underlying data changed?  If not the audit is "  printNL;
+        ">>> suspect and there is probably a bigger problem"  printNL;
+      ];
+    ];
+
+  ];
+
+  ^self
+];
+
+IVR Holdings defineMethod: [|auditSharesBuild: account security: security|
+  !builder <- ^self;
+
+  !classifications <- builder getClassificationsFor: account;
+  :classifications <- classifications extendBy: [ 
+    !line <- [
+      "    adjustment: " print; 
+      ^self whatAmI print; "::" print; ^self code print;
+      " -> " print; 
+      ] divertOutput;
+
+    !adj <- ^self sharesAdjustmentFor: ^my account and: ^my security;
+  ];
+
+  !sharesWinner <- builder getSharesClassificationFor: account;
+
+  sharesWinner isntNA ifTrue: [
+    !defaultLine <- [
+      "  shares winner: " print; 
+      sharesWinner whatAmI print; "::" print; sharesWinner code print;
+      " -> " print;
+      ] divertOutput;
+
+    !maxLength <- classifications max: [ line count ];
+    maxLength < defaultLine count ifTrue: [ :maxLength <- defaultLine count; ];
+
+    !shares <- sharesWinner sharesFor: account and: security;
+
+    !sharesLength <- shares isNumber 
+      ifTrue: [ shares asString stripBoundingBlanks count - 3 ]
+      else:   [ shares asString stripBoundingBlanks count ];
+    !adjLength <- classifications 
+      max: [ adj asString stripBoundingBlanks count ] . asInteger;
+
+    defaultLine print: maxLength;
+    shares print: sharesLength;
+    " " print: (sharesLength + adjLength + 7); 
+    sharesWinner sharesFormula asString stripBoundingBlanks asLines 
+      do: [ print; " " print;];
+    newLine print;
+
+    classifications iterate: [
+      !newShares <- ^my shares * adj;
+
+      line print: ^my maxLength;
+      ^my shares print: ^my sharesLength;
+      " * " print; adj print: ^my adjLength;
+      " = " print; newShares print: ^my sharesLength;
+      " " print; 
+      ^self sharesAdjustment asString stripBoundingBlanks asLines 
+        do: [ print; " " print;];
+      newLine print;
+
+      ^my :shares <- newShares;
+    ];
+
+    # Verify the holdings selection!
+    account :holdingsSeries on: ^date . isntNA ifTrue: [
+      !hldg <- account holdings indexBy: [ security ] . at: security;
+      hldg isNA || [ hldg _shares != shares ] ifTrue: [
+        ">>> holding shares does not match audit calculated shares."  printNL;
+        ">>> Has the underlying data changed?  If not the audit is "  printNL;
+        ">>> suspect and there is probably a bigger problem"  printNL;
+      ];
+    ];
+
+  ];
+
+  ^self
+];
+
+
+IVR Holdings defineMethod: [| setClassificationListTo: arg| 
+  arg isCollection ifFalse: [ :arg <- arg asList ];
+  :_classificationList <- arg; 
+  ^self
+];
+
+IVR Utility defineMethod: [|setupAutoUpdate|
+  !self <- ^self asSelf;
+
+  Settings allocationThreshold isNumber ifTrue: [
+    ^tmp respondsTo: 'oldAllocationThreshold' . ifFalse: [
+      ^tmp define: 'oldAllocationThreshold' toBe: ^tmp allocationThreshold;
+      ^tmp define: 'allocationThreshold' toBe: Settings allocationThreshold;
+    ];
+  ];
+
+  ^self
+];
+
+IVR Utility defineMethod: [|restoreAutoUpdate|
+  !self <- ^self asSelf;
+
+  ^tmp respondsTo: 'oldAllocationThreshold' . ifTrue: [
+    ^tmp define: 'allocationThreshold' toBe: ^tmp oldAllocationThreshold;
+    ^tmp deleteMessage: 'oldAllocationThreshold';
+  ];
+
+  ^self
+];
+
+IVR Settings defineMethod: [|enableAutoUpdate|
+  ^tmp define: 'ivrAutoUpdate' toBe: TRUE;
+  ^self
+];
+
+IVR Settings defineMethod: [|disableAutoUpdate|
+  ^tmp define: 'ivrAutoUpdate' toBe: FALSE;
+  ^self
+];
+
+IVR Settings defineMethod: [|autoUpdate|
+  ^tmp respondsTo: 'ivrAutoUpdate' . 
+    ifTrue: [ ^tmp ivrAutoUpdate ] 
+    else:   [ FALSE ]
+];
+
+IVR Utility defineMethod: [|checkResources|
+  Settings autoUpdate ifTrue: [
+    setupAutoUpdate;
+    CoreWorkspace AdminTools updateNetworkIfSpaceIsLow;
+    restoreAutoUpdate;
+  ];
+];
+
+   

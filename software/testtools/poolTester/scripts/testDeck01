@@ -1,0 +1,155 @@
+# Test script for poolTester based on Charlie's pre-poolTester test deck.
+# Hammers the pool with 'real' test queries in several threads simultaneously, restarting intermittently.
+# Dumps statistics after running to show final pool state.
+
+# Pre-Execs
+pre_exec: start
+
+# Query thread 1.
+thread:query1, repetitions:10
+operation_on_thread:query1, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query1, run:query -q ~/vision-testtools/poolTester/queries/TestQuery01.vis
+operation_on_thread:query1, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query1, run:query -q ~/vision-testtools/poolTester/queries/TestQuery02.vis
+operation_on_thread:query1, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query1, run:query -q ~/vision-testtools/poolTester/queries/TestQuery03.vis
+operation_on_thread:query1, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query1, run:query -q ~/vision-testtools/poolTester/queries/TestQuery04.vis
+operation_on_thread:query1, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query1, run:query -q ~/vision-testtools/poolTester/queries/TestQuery05.vis
+operation_on_thread:query1, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query1, run:query -q ~/vision-testtools/poolTester/queries/TestQuery06.vis
+operation_on_thread:query1, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query1, run:query -q ~/vision-testtools/poolTester/queries/TestQuery07.vis
+operation_on_thread:query1, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query1, run:query -q ~/vision-testtools/poolTester/queries/TestQuery08.vis
+operation_on_thread:query1, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query1, run:query -q ~/vision-testtools/poolTester/queries/TestQuery09.vis
+operation_on_thread:query1, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query1, run:query -q ~/vision-testtools/poolTester/queries/TestQuery10.vis
+operation_on_thread:query1, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query1, run:query -q ~/vision-testtools/poolTester/queries/TestQuery11.vis
+operation_on_thread:query1, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query1, run:query -q ~/vision-testtools/poolTester/queries/TestQuery12.vis
+operation_on_thread:query1, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query1, run:query -q ~/vision-testtools/poolTester/queries/TestQuery13.vis
+operation_on_thread:query1, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query1, run:query -q ~/vision-testtools/poolTester/queries/TestQuery14.vis
+operation_on_thread:query1, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query1, run:query -q ~/vision-testtools/poolTester/queries/TestQuery15.vis
+operation_on_thread:query1, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query1, run:query -q ~/vision-testtools/poolTester/queries/TestQuery16.vis
+operation_on_thread:query1, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query1, run:query -q ~/vision-testtools/poolTester/queries/TestQuery17.vis
+operation_on_thread:query1, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query1, run:query -q ~/vision-testtools/poolTester/queries/TestQuery18.vis
+operation_on_thread:query1, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query1, run:query -q ~/vision-testtools/poolTester/queries/TestQuery19.vis
+operation_on_thread:query1, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query1, run:query -q ~/vision-testtools/poolTester/queries/TestQuery20.vis
+operation_on_thread:query1, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query1, run:query -q ~/vision-testtools/poolTester/queries/TestQuery21.vis
+operation_on_thread:query1, run:checkAssertions || error "Assertions check failed in query thread."
+
+# Query thread 2.
+thread:query2, repetitions:10
+operation_on_thread:query2, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query2, run:query -q ~/vision-testtools/poolTester/queries/TestQuery01.vis
+operation_on_thread:query2, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query2, run:query -q ~/vision-testtools/poolTester/queries/TestQuery02.vis
+operation_on_thread:query2, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query2, run:query -q ~/vision-testtools/poolTester/queries/TestQuery03.vis
+operation_on_thread:query2, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query2, run:query -q ~/vision-testtools/poolTester/queries/TestQuery04.vis
+operation_on_thread:query2, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query2, run:query -q ~/vision-testtools/poolTester/queries/TestQuery05.vis
+operation_on_thread:query2, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query2, run:query -q ~/vision-testtools/poolTester/queries/TestQuery06.vis
+operation_on_thread:query2, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query2, run:query -q ~/vision-testtools/poolTester/queries/TestQuery07.vis
+operation_on_thread:query2, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query2, run:query -q ~/vision-testtools/poolTester/queries/TestQuery08.vis
+operation_on_thread:query2, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query2, run:query -q ~/vision-testtools/poolTester/queries/TestQuery09.vis
+operation_on_thread:query2, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query2, run:query -q ~/vision-testtools/poolTester/queries/TestQuery10.vis
+operation_on_thread:query2, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query2, run:query -q ~/vision-testtools/poolTester/queries/TestQuery11.vis
+operation_on_thread:query2, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query2, run:query -q ~/vision-testtools/poolTester/queries/TestQuery12.vis
+operation_on_thread:query2, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query2, run:query -q ~/vision-testtools/poolTester/queries/TestQuery13.vis
+operation_on_thread:query2, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query2, run:query -q ~/vision-testtools/poolTester/queries/TestQuery14.vis
+operation_on_thread:query2, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query2, run:query -q ~/vision-testtools/poolTester/queries/TestQuery15.vis
+operation_on_thread:query2, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query2, run:query -q ~/vision-testtools/poolTester/queries/TestQuery16.vis
+operation_on_thread:query2, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query2, run:query -q ~/vision-testtools/poolTester/queries/TestQuery17.vis
+operation_on_thread:query2, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query2, run:query -q ~/vision-testtools/poolTester/queries/TestQuery18.vis
+operation_on_thread:query2, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query2, run:query -q ~/vision-testtools/poolTester/queries/TestQuery19.vis
+operation_on_thread:query2, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query2, run:query -q ~/vision-testtools/poolTester/queries/TestQuery20.vis
+operation_on_thread:query2, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query2, run:query -q ~/vision-testtools/poolTester/queries/TestQuery21.vis
+operation_on_thread:query2, run:checkAssertions || error "Assertions check failed in query thread."
+
+# Query thread 3, runs with anydata.
+thread:query3, repetitions:10
+operation_on_thread:query3, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query3, run:query -a -q ~/vision-testtools/poolTester/queries/TestQuery01.vis
+operation_on_thread:query3, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query3, run:query -a -q ~/vision-testtools/poolTester/queries/TestQuery02.vis
+operation_on_thread:query3, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query3, run:query -a -q ~/vision-testtools/poolTester/queries/TestQuery03.vis
+operation_on_thread:query3, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query3, run:query -a -q ~/vision-testtools/poolTester/queries/TestQuery04.vis
+operation_on_thread:query3, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query3, run:query -a -q ~/vision-testtools/poolTester/queries/TestQuery05.vis
+operation_on_thread:query3, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query3, run:query -a -q ~/vision-testtools/poolTester/queries/TestQuery06.vis
+operation_on_thread:query3, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query3, run:query -a -q ~/vision-testtools/poolTester/queries/TestQuery07.vis
+operation_on_thread:query3, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query3, run:query -a -q ~/vision-testtools/poolTester/queries/TestQuery08.vis
+operation_on_thread:query3, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query3, run:query -a -q ~/vision-testtools/poolTester/queries/TestQuery09.vis
+operation_on_thread:query3, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query3, run:query -a -q ~/vision-testtools/poolTester/queries/TestQuery10.vis
+operation_on_thread:query3, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query3, run:query -a -q ~/vision-testtools/poolTester/queries/TestQuery11.vis
+operation_on_thread:query3, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query3, run:query -a -q ~/vision-testtools/poolTester/queries/TestQuery12.vis
+operation_on_thread:query3, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query3, run:query -a -q ~/vision-testtools/poolTester/queries/TestQuery13.vis
+operation_on_thread:query3, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query3, run:query -a -q ~/vision-testtools/poolTester/queries/TestQuery14.vis
+operation_on_thread:query3, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query3, run:query -a -q ~/vision-testtools/poolTester/queries/TestQuery15.vis
+operation_on_thread:query3, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query3, run:query -a -q ~/vision-testtools/poolTester/queries/TestQuery16.vis
+operation_on_thread:query3, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query3, run:query -a -q ~/vision-testtools/poolTester/queries/TestQuery17.vis
+operation_on_thread:query3, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query3, run:query -a -q ~/vision-testtools/poolTester/queries/TestQuery18.vis
+operation_on_thread:query3, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query3, run:query -a -q ~/vision-testtools/poolTester/queries/TestQuery19.vis
+operation_on_thread:query3, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query3, run:query -a -q ~/vision-testtools/poolTester/queries/TestQuery20.vis
+operation_on_thread:query3, run:checkAssertions || error "Assertions check failed in query thread."
+operation_on_thread:query3, run:query -a -q ~/vision-testtools/poolTester/queries/TestQuery21.vis
+operation_on_thread:query3, run:checkAssertions || error "Assertions check failed in query thread."
+
+# Restart thread.
+thread:restart, repetitions:infinite
+operation_on_thread:restart, run:sleep 20
+operation_on_thread:restart, run:restart
+
+# Post-Execs
+post_exec:dumpStats
+post_exec:generationStats
+post_exec:workerStats
+post_exec:stop

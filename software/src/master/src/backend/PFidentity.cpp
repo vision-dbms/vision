@@ -164,19 +164,17 @@
  ***********************************/
 
 PrivateFnDef void loadDucWithSelfSpecialization (
-    VTask* pTask, M_CPD *pDictionary, bool bPrototypeOnly
-)
-{
+    VTask* pTask, rtDICTIONARY_Handle *pDictionary, bool bPrototypeOnly
+) {
 /*****  Obtain a descriptor for the objects to be specialized...  *****/
     DSC_Descriptor& rSelf = pTask->getSelf ();
 
 /*****  ...obtain the store of and a pointer to those objects...  *****/
-    M_CPD *pInstances;
-    M_CPD *pSuperPointer;
+    rtPTOKEN_Handle::Reference pInstances; M_CPD *pSuperPointer;
     if (bPrototypeOnly) {
-	pInstances = pTask->NewCodPToken (0);
+	rtPTOKEN_Handle::Reference pInstances (pTask->NewCodPToken (0));
 
-	rtLINK_CType *emptyLinkc = rtLINK_PosConstructor (pInstances, -1)->Close (
+	rtLINK_CType *emptyLinkc = rtLINK_PosConstructor (pInstances)->Close (
 	    V_TOTSC_PToken
 	);
 
@@ -188,26 +186,24 @@ PrivateFnDef void loadDucWithSelfSpecialization (
 	emptyLinkc->release ();
     }
     else {
-	pInstances = pTask->NewCodPToken ();
+	pInstances.setTo (pTask->NewCodPToken ());
 	pSuperPointer = rSelf.pointerCPD (pInstances);
     }
 
 /*****  ...create a new value store...  *****/
-    M_CPD *pSpecialization = rtVSTORE_NewCluster (
-	pInstances, pDictionary, rSelf.storeCPD (), pSuperPointer
+    rtVSTORE_Handle *pSpecialization = rtVSTORE_NewCluster (
+	pInstances, pDictionary, rSelf.store (), pSuperPointer
     );
 
 /*****  ...load the accumulator with a descriptor for it...  *****/
-    if (bPrototypeOnly)
-	pTask->loadDucWithReference (
-	    pSpecialization, rtVSTORE_CPD_RowPTokenCPD (pSpecialization), 0
-	);
-    else
-	pTask->loadDucWithCorrespondence (pSpecialization, rtVSTORE_CPx_RowPToken);
+    if (!bPrototypeOnly)
+	pTask->loadDucWithCorrespondence (pSpecialization);
+    else {
+	pTask->loadDucWithReference (pSpecialization, pSpecialization->getPToken (), 0);
+    }
 
 /*****  ... and clean up:  *****/
     pSuperPointer->release ();
-    pInstances->release ();
 }
 
 
@@ -352,7 +348,7 @@ PrivateFnDef void FindCorrespondencesInRefUV (
     int
 	i, origin, count, currentCase, newCase;
 
-    rtREFUV_Align (uv);
+    uv->align ();
 
     uvp = rtREFUV_CPD_Array (uv);
     uvl = uvp + UV_CPD_ElementCount (uv);
@@ -463,7 +459,7 @@ PrivateFnDef void FindIdentElementsInLCAndRefUV (
     rtLINK_CType *linkc, M_CPD *refuv, rtLINK_CType *identityLink, rtLINK_CType *nonIdentityLink
 ) {
     M_CPD *tempuv = linkc->ToRefUV ();
-    rtREFUV_Align (refuv);
+    refuv->align ();
 
     FindIdenticalElementsInRefUVectors (
 	tempuv, refuv, identityLink, nonIdentityLink
@@ -508,12 +504,12 @@ V_DefinePrimitive (TestForIdentity) {
     M_KOTM pIdentityKOTM, pNonIdentityKOTM;
     switch (V_TOTSC_Primitive) {
     case XIsIdenticalTo:
-	pIdentityKOTM		= &M_KnownObjectTable::TheTrueClass;
-	pNonIdentityKOTM	= &M_KnownObjectTable::TheFalseClass;
+	pIdentityKOTM		= &M_KOT::TheTrueClass;
+	pNonIdentityKOTM	= &M_KOT::TheFalseClass;
 	break;
     case XIsntIdenticalTo:
-	pIdentityKOTM		= &M_KnownObjectTable::TheFalseClass;
-	pNonIdentityKOTM	= &M_KnownObjectTable::TheTrueClass;
+	pIdentityKOTM		= &M_KOT::TheFalseClass;
+	pNonIdentityKOTM	= &M_KOT::TheTrueClass;
 	break;
     default:
         pTask->raiseUnimplementedAliasException ("TestForIdentity");
@@ -526,9 +522,6 @@ V_DefinePrimitive (TestForIdentity) {
  *  If the operands don't live in the same store or their pointer R-Types
  *  differ, they're NOT equivalent...
  *****/
-    M_CPD *selfStore = rSelf.storeCPD ();
-    M_CPD *parameterStore = pTask->ducStore ();
-
     RTYPE_Type selfPointerRType = rSelf.pointerRType ();
     if (RTYPE_C_Link == selfPointerRType)
         selfPointerRType = RTYPE_C_RefUV;
@@ -537,7 +530,7 @@ V_DefinePrimitive (TestForIdentity) {
     if (RTYPE_C_Link == parameterPointerRType)
         parameterPointerRType = RTYPE_C_RefUV;
 
-    if (selfStore->DoesntName (parameterStore) || selfPointerRType != parameterPointerRType) {
+    if (rSelf.store ()->DoesntName (pTask->ducStore ()) || selfPointerRType != parameterPointerRType) {
         pTask->loadDucWithUndefined (pNonIdentityKOTM);
 	return;
     }
@@ -707,7 +700,7 @@ V_DefinePrimitive (TestForIdentity) {
 	    break;
 	}
 	pTask->loadDucWithPredicateResult (
-	    pIdentityKOTM, identityLink, pNonIdentityKOTM, nonIdentityLink
+	    identityLink, nonIdentityLink, pIdentityKOTM, pNonIdentityKOTM
 	);
         break;
 
@@ -734,7 +727,7 @@ V_DefinePrimitive (TestForIdentity) {
 		DSC_Descriptor_Link (ADescriptor), identityLink, nonIdentityLink
 	    );
 	    pTask->loadDucWithPredicateResult (
-		pIdentityKOTM, identityLink, pNonIdentityKOTM, nonIdentityLink
+		identityLink, nonIdentityLink, pIdentityKOTM, pNonIdentityKOTM
 	    );
 	    break;
 	case DSC_PointerType_Reference:
@@ -744,7 +737,7 @@ V_DefinePrimitive (TestForIdentity) {
 		DSC_Descriptor_Reference (ADescriptor), identityLink, nonIdentityLink
 	    );
 	    pTask->loadDucWithPredicateResult (
-		pIdentityKOTM, identityLink, pNonIdentityKOTM, nonIdentityLink
+		identityLink, nonIdentityLink, pIdentityKOTM, pNonIdentityKOTM
 	    );
 	    break;
 	default:
@@ -795,7 +788,7 @@ V_DefinePrimitive (TestForIdentity) {
 	    break;
 	}
 	pTask->loadDucWithPredicateResult (
-	    pIdentityKOTM, identityLink, pNonIdentityKOTM, nonIdentityLink
+	    identityLink, nonIdentityLink, pIdentityKOTM, pNonIdentityKOTM
 	);
         break;
     }
@@ -938,15 +931,11 @@ V_DefinePrimitive (LongValueSetPartContinuation) {
 	pTask->loadDucWithCurrent ();
     else {
 /*****  ... determine the result's behavior, ...  *****/
-	M_CPD *pRefStoreCPD = rCurrent.storeCPD ();
+	Vdd::Store *pRefStore = rCurrent.store ();
 
 /*****  ... determine the result's reference p-token, ...  *****/
-	M_CPD *pRPT; {
-	    M_CPD *pRPTReference; int xRPTReference;
-	    rCurrent.getRPTReference (pRPTReference, xRPTReference);
-	    pRPT = rtPTOKEN_BasePToken (pRPTReference, xRPTReference);
-	    pRPTReference->release ();
-	}
+	rtPTOKEN_Handle::Reference pRPT (rCurrent.RPT ());
+	pRPT.setTo (pRPT->basePToken ());
 
 /*****  ... decode the destination type, ...  *****/
 	RTYPE_Type xLongValueRType = rCurrent.pointerRType ();
@@ -962,9 +951,8 @@ V_DefinePrimitive (LongValueSetPartContinuation) {
 		    V_TOTSC_PrimitiveFlags
 		] = (unsigned int)DSC_Descriptor_Scalar_Double (ADescriptor);
 		DSC_Descriptor resultDescriptor;
-		pRefStoreCPD->retain ();
 		resultDescriptor.constructConstant (
-		    V_TOTSC_PToken, pRefStoreCPD, pRPT, iLongValue
+		    V_TOTSC_PToken, pRefStore, pRPT, iLongValue
 		);
 		pTask->loadDucWithMoved (resultDescriptor);
 	    }
@@ -989,9 +977,8 @@ V_DefinePrimitive (LongValueSetPartContinuation) {
 		    ] = (unsigned int)*pPartCursor++;
 		}
 
-		pTask->loadDucWithMonotype (pRefStoreCPD, pResultUVCPD);
+		pTask->loadDucWithMonotype (pRefStore, pResultUVCPD);
 		pResultUVCPD->release ();
-		pRPT->release ();
 	    }
 	    break;
 	case RTYPE_C_Unsigned96UV:
@@ -1003,9 +990,8 @@ V_DefinePrimitive (LongValueSetPartContinuation) {
 		    V_TOTSC_PrimitiveFlags
 		] = (unsigned int)DSC_Descriptor_Scalar_Double (ADescriptor);
 		DSC_Descriptor resultDescriptor;
-		pRefStoreCPD->retain ();
 		resultDescriptor.constructConstant (
-		    V_TOTSC_PToken, pRefStoreCPD, pRPT, iLongValue
+		    V_TOTSC_PToken, pRefStore, pRPT, iLongValue
 		);
 		pTask->loadDucWithMoved (resultDescriptor);
 	    }
@@ -1030,9 +1016,8 @@ V_DefinePrimitive (LongValueSetPartContinuation) {
 		    ] = (unsigned int)*pPartCursor++;
 		}
 
-		pTask->loadDucWithMonotype (pRefStoreCPD, pResultUVCPD);
+		pTask->loadDucWithMonotype (pRefStore, pResultUVCPD);
 		pResultUVCPD->release ();
-		pRPT->release ();
 	    }
 	    break;
 	case RTYPE_C_Unsigned128UV:
@@ -1044,9 +1029,8 @@ V_DefinePrimitive (LongValueSetPartContinuation) {
 		    V_TOTSC_PrimitiveFlags
 		] = (unsigned int)DSC_Descriptor_Scalar_Double (ADescriptor);
 		DSC_Descriptor resultDescriptor;
-		pRefStoreCPD->retain ();
 		resultDescriptor.constructConstant (
-		    V_TOTSC_PToken, pRefStoreCPD, pRPT, iLongValue
+		    V_TOTSC_PToken, pRefStore, pRPT, iLongValue
 		);
 		pTask->loadDucWithMoved (resultDescriptor);
 	    }
@@ -1071,13 +1055,11 @@ V_DefinePrimitive (LongValueSetPartContinuation) {
 		    ] = (unsigned int)*pPartCursor++;
 		}
 
-		pTask->loadDucWithMonotype (pRefStoreCPD, pResultUVCPD);
+		pTask->loadDucWithMonotype (pRefStore, pResultUVCPD);
 		pResultUVCPD->release ();
-		pRPT->release ();
 	    }
 	    break;
 	default:
-	    pRPT->release ();
 	    rCurrent.complainAboutBadPointerType ("LongValueSetPart");
 	    break;
 	}
@@ -1112,15 +1094,9 @@ V_DefinePrimitive (LongValueSetPart) {
 V_DefinePrimitive (ZeroPointer) {
     DSC_Descriptor& rSelf = pTask->getSelf ();
 
-    M_CPD *pRefStoreCPD = rSelf.storeCPD ();
-    pRefStoreCPD->retain ();
+    Vdd::Store *pRefStore = rSelf.store ();
 
-    M_CPD *pRPT; {
-	M_CPD *pRPTReference; int xRPTReference;
-	rSelf.getRPTReference (pRPTReference, xRPTReference);
-	pRPT = rtPTOKEN_BasePToken (pRPTReference, xRPTReference);
-	pRPTReference->release ();
-    }
+    rtPTOKEN_Handle::Reference pRPT (rSelf.RPT ());
 
 /*************************************************************************************/
 /*  Flag Encoding:
@@ -1146,17 +1122,17 @@ V_DefinePrimitive (ZeroPointer) {
 	switch (V_TOTSC_PrimitiveFlags % 8192) {
 	case 3:		/* Unsigned-64 (unsigned long long) */
 	    result.constructConstant (
-		V_TOTSC_PToken, pRefStoreCPD, pRPT, VkUnsigned64::Zero ()
+		V_TOTSC_PToken, pRefStore, pRPT, VkUnsigned64::Zero ()
 	    );
 	    break;
 	case 4:		/* Unsigned-96 */
 	    result.constructConstant (
-		V_TOTSC_PToken, pRefStoreCPD, pRPT, VkUnsigned96::Zero ()
+		V_TOTSC_PToken, pRefStore, pRPT, VkUnsigned96::Zero ()
 	    );
 	    break;
 	case 5:		/* Unsigned-128 */
 	    result.constructConstant (
-		V_TOTSC_PToken, pRefStoreCPD, pRPT, VkUnsigned128::Zero ()
+		V_TOTSC_PToken, pRefStore, pRPT, VkUnsigned128::Zero ()
 	    );
 	    break;
 	default:
@@ -1168,10 +1144,10 @@ V_DefinePrimitive (ZeroPointer) {
     case 1:	/* Signed Integers */
 	switch (V_TOTSC_PrimitiveFlags % 8192) {
 	case 0:		/* Signed-8 (char) */
-	    result.constructConstant (V_TOTSC_PToken, pRefStoreCPD, pRPT, '\0');
+	    result.constructConstant (V_TOTSC_PToken, pRefStore, pRPT, '\0');
 	    break;
 	case 2:		/* Signed-32 (int) */
-	    result.constructConstant (V_TOTSC_PToken, pRefStoreCPD, pRPT, 0);
+	    result.constructConstant (V_TOTSC_PToken, pRefStore, pRPT, 0);
 	    break;
 	default:
 	    notProcessed = true;
@@ -1182,10 +1158,10 @@ V_DefinePrimitive (ZeroPointer) {
     case 2:	/* Floating Point Numbers */
 	switch (V_TOTSC_PrimitiveFlags % 8192) {
 	case 2:		/* Real-32 (float) */
-	    result.constructConstant (V_TOTSC_PToken, pRefStoreCPD, pRPT, (float)0.0);
+	    result.constructConstant (V_TOTSC_PToken, pRefStore, pRPT, (float)0.0);
 	    break;
 	case 3:		/* Real-64 (double) */
-	    result.constructConstant (V_TOTSC_PToken, pRefStoreCPD, pRPT, 0.0);
+	    result.constructConstant (V_TOTSC_PToken, pRefStore, pRPT, 0.0);
 	    break;
 	default:
 	    notProcessed = true;
@@ -1196,7 +1172,7 @@ V_DefinePrimitive (ZeroPointer) {
     case 3:	/* Object References */
 	switch (V_TOTSC_PrimitiveFlags % 8192) {
 	case 2:		/* Ref-32  */
-	    result.constructReferenceConstant (V_TOTSC_PToken, pRefStoreCPD, pRPT, 0);
+	    result.constructReferenceConstant (V_TOTSC_PToken, pRefStore, pRPT, 0);
 	    break;
 	default:
 	    notProcessed = true;
@@ -1210,8 +1186,6 @@ V_DefinePrimitive (ZeroPointer) {
     }
 
     if (notProcessed) {
-	pRPT->release ();
-	pRefStoreCPD->release ();
 	pTask->raiseException (
 	    EC__InternalInconsistency,
 	    "ZeroPointer: Unrecognized Pointer Type Code %u",
@@ -1248,14 +1222,14 @@ V_DefinePrimitive (IntegerAsReferenceTo) {
 /*****
  *  Otherwise, construct references to the objects in the accumulator...
  *****/
+    rtPTOKEN_Handle::Reference pRPT (ADescriptor.RPT ());
     if (DucIsAScalar) {
     /*****
      *  Obtain the reference p-token and value of the new reference...
      *****/
-	M_CPD *pRPT = ADescriptor.RPT ();
 	int element = DSC_Descriptor_Scalar_Int (rCurrent);
-	if (element < 0 || (size_t)element > rtPTOKEN_CPD_BaseElementCount (pRPT))
-	    element = rtPTOKEN_CPD_BaseElementCount (pRPT);
+	if (element < 0 || (size_t)element > pRPT->cardinality ())
+	    element = pRPT->cardinality ();
 
     /*****  ... and initialize the reference.  *****/
 	DSC_Descriptor_Pointer (ADescriptor).clear ();
@@ -1269,33 +1243,26 @@ V_DefinePrimitive (IntegerAsReferenceTo) {
      *  Obtain the reference P-Token and reference Nil of the reference
      *  target...
      *****/
-
-    	M_CPD *refPTokenRefCPD; int refPTokenRefIndex;
-	ADescriptor.getRPTReference (refPTokenRefCPD, refPTokenRefIndex);
-	int refNil = rtPTOKEN_BaseElementCount(refPTokenRefCPD, refPTokenRefIndex);
+	unsigned int refNil = pRPT->cardinality ();
 
     /*****  Obtain the integers to be converted to references...  *****/
 	M_CPD *iuv = DSC_Descriptor_Value (rCurrent);
 
     /*****  Manufacture a new reference u-vector...  *****/
-	M_CPD *ruv = rtREFUV_New (V_TOTSC_PToken, refPTokenRefCPD, refPTokenRefIndex);
+	M_CPD *ruv = rtREFUV_New (V_TOTSC_PToken, pRPT);
 	int *iuvp, *iuvl, *ruvp;
 	for (
 	    iuvl = UV_CPD_ElementCount (iuv)+(iuvp = rtINTUV_CPD_Array (iuv)),
 	    ruvp = rtREFUV_CPD_Array (ruv);
 	    iuvp < iuvl;
-	)
-	{
-	    int element = *iuvp++;
-	    *ruvp++ = element < 0 || element > refNil ? refNil : element;
+	) {
+	    unsigned int element = *iuvp++;
+	    *ruvp++ = element > refNil ? refNil : element;
 	}
 
     /*****  ...install it in the descriptor to be returned.  *****/
 	DSC_Descriptor_Pointer (ADescriptor).setTo (ruv);
 	ruv->release ();
-
-    /*****  ...and clean up.  *****/
-	refPTokenRefCPD->release ();
     }
 }
 
@@ -1314,23 +1281,16 @@ V_DefinePrimitive (ValueAsPointerTo) {
     DSC_Descriptor& rCurrent = pTask->getCurrent ();
 
 /*****  ... and create a new descriptor:  *****/
+    rtPTOKEN_Handle::Reference pRPT (ADescriptor.RPT ());
     if (rCurrent.holdsAScalarValue ()) {
     /*****
      *  Stuff '^current's scalar VALUE into the accumulator, preserving
      *  the reference P-Token of the accumulator...
      *****/
-	M_CPD *pRPT;
-
-	if (ADescriptor.holdsAScalarIdentity ()) {
-	    /* Prepare for conversion to Scalar Descriptor */
-	    pRPT = DSC_Descriptor_Identity (ADescriptor).PToken ();
-	    DSC_Descriptor_Type (ADescriptor) = DSC_PointerType_Scalar;
-	}
-	else
-	    pRPT = DSC_Scalar_RefPToken (DSC_Descriptor_Scalar (ADescriptor));
-
-	DSC_Descriptor_Scalar (ADescriptor) = DSC_Descriptor_Scalar (rCurrent);
-	DSC_Scalar_RefPToken (DSC_Descriptor_Scalar (ADescriptor)) = pRPT;
+	Vdd::Store::Reference pAStore (ADescriptor.store ());
+	pTask->loadDucWithCopied (rCurrent);
+	ADescriptor.setStoreTo (pAStore);
+	DSC_Descriptor_Scalar(ADescriptor).setRPT (pRPT);
     }
     else if (rCurrent.holdsNonScalarValues ()) {
     /*****
@@ -1342,12 +1302,7 @@ V_DefinePrimitive (ValueAsPointerTo) {
 	M_CPD *uvectorCopy = UV_CopyWithNewPToken (
 	    DSC_Descriptor_Value (rCurrent), V_TOTSC_PToken
 	);
-
-	M_CPD *refPTokenRefCPD; int refPTokenRefIndex;
-	ADescriptor.getRPTReference (refPTokenRefCPD, refPTokenRefIndex);
-	uvectorCopy->StoreReference (UV_CPx_RefPToken, refPTokenRefCPD, refPTokenRefIndex);
-	refPTokenRefCPD->release ();
-
+	uvectorCopy->StoreReference (UV_CPx_RefPToken, pRPT);
 	DSC_Descriptor_Pointer (ADescriptor).setTo (uvectorCopy);
 	uvectorCopy->release ();
     }
@@ -1394,17 +1349,14 @@ V_DefinePrimitive (PointerAsValue) {
     }
 
     if (rResult.holdsAScalarValue ()) {
-	rResult.setStoreTo (pKOTE->RetainedObjectCPD ());
-
-	M_CPD *pOldRPT = DSC_Scalar_RefPToken (DSC_Descriptor_Scalar (rResult));
-	DSC_Scalar_RefPToken (DSC_Descriptor_Scalar (rResult)) = pKOTE->RetainedPTokenCPD ();
-	pOldRPT->release ();
+	rResult.setStoreTo (pKOTE->store ());
+	DSC_Descriptor_Scalar (rResult).setRPT (pKOTE->PTokenHandle ());
     }
 
     else if (rResult.holdsNonScalarValues ()) {
 	M_CPD *uvectorCopy = UV_Copy (DSC_Descriptor_Value (rResult));
-	uvectorCopy->StoreReference (UV_CPx_RefPToken, pKOTE->PTokenCPD ());
-	pTask->loadDucWithMonotype (pKOTE->ObjectCPD (), uvectorCopy);
+	uvectorCopy->StoreReference (UV_CPx_RefPToken, pKOTE->PTokenHandle ());
+	pTask->loadDucWithMonotype (pKOTE->store (), uvectorCopy);
 	uvectorCopy->release ();
     }
 }
@@ -1419,14 +1371,14 @@ V_DefinePrimitive (NewInstance) {
     pTask->loadDucWithSelf ();
 
 /*****  Validate that its store is a V-Store...  *****/
-    M_CPD *selfStore = pTask->ducStore ();
+    Vdd::Store *selfStore = pTask->ducStore ();
 
 /*****  Do not manufacture a new instance of a value...  *****/
     if (pTask->ducMonotype ().holdsValuesInAnyForm ())
 	return;
 
 /*****  Manufacture a new collection of instances...  *****/
-    rtLINK_CType* newInstances = rtVSTORE_AddRows (selfStore, V_TOTSC_PToken);
+    rtLINK_CType *newInstances = selfStore->addInstances (V_TOTSC_PToken);
 
 /*****  and return them.  *****/
     if (IsNil (newInstances))
@@ -1440,18 +1392,18 @@ V_DefinePrimitive (NewInstance) {
 
 V_DefinePrimitive (ExtendTo) {
 /*****  Decode the flags used to invoke this primitive, ...  *****/
-    char const*		pConverseName = "addExtensionOf:";
-    rtVSTORE_Extension	xExtensionOp = rtVSTORE_Extension_Add;
+    char const *pConverseName = "addExtensionOf:";
+    Vdd::Store::ExtensionType xExtensionType = Vdd::Store::ExtensionType_Add;
     switch (pTask->flags ()) {
     case 0:	//  ... add instance extension
 	break;
     case 2:	//  ... locate or add instance extension
 	pConverseName = "locateOrAddExtensionOf:";
-	xExtensionOp = rtVSTORE_Extension_LocateOrAdd;
+	xExtensionType = Vdd::Store::ExtensionType_LocateOrAdd;
 	break;
     case 3:	//  ... locate instance extension
 	pConverseName = "locateExtensionOf:";
-	xExtensionOp = rtVSTORE_Extension_Locate;
+	xExtensionType = Vdd::Store::ExtensionType_Locate;
 	break;
     default:
 	pTask->raiseUnimplementedAliasException ("ExtendTo");
@@ -1474,22 +1426,18 @@ V_DefinePrimitive (ExtendTo) {
     }
 
 /*****  Obtain the descendent store, ...  *****/
-    M_CPD *pDescendentStore = pTask->ducMonotype ().storeCPD ();
+    // ... must retain store since duc may change
+    Vdd::Store::Reference pDescendentStore (pTask->ducStore ());
 
-    DSC_Descriptor& rSelf = pTask->getSelf ();
-    rtLINK_CType *pInstances, *pInstanceGuard; {
-/*****  Obtain ^self's store and pointer, ...  *****/
-	M_CPD *pInheritanceStore = rSelf.storeCPD ();
+    DSC_Descriptor &rSelf = pTask->getSelf ();
+    rtLINK_CType *pInstances = 0;
+    rtLINK_CType *pInstanceGuard = 0; {
+/*****  Obtain ^self's pointer, ...  *****/
 	M_CPD *pInheritancePointer = rSelf.pointerCPD (pTask->ptoken ());
 
 /*****  ... locate or create the requested extensions, ...  *****/
-	pInstances = rtVSTORE_ExtendRowsTo (
-	    xExtensionOp,
-	    pInheritanceStore,
-	    pInheritancePointer,
-	    pDescendentStore,
-	    pInstanceGuard,
-	    NilOf (rtLINK_CType**)
+	pInstances = pDescendentStore->addExtensions (
+	    xExtensionType, rSelf.store (), pInheritancePointer, pInstanceGuard
 	);
 
 	pInheritancePointer->release ();
@@ -1497,11 +1445,9 @@ V_DefinePrimitive (ExtendTo) {
 
 /*****  and return them.  *****/
     if (pInstances) {
-	pDescendentStore->retain (); // ... must retain store since duc may change
 	VDescriptor *pGuardedDatum = pTask->loadDucWithGuardedDatum (pInstanceGuard);
 	if (pGuardedDatum)
 	    pGuardedDatum->setToMonotype (pDescendentStore, pInstances);
-	pDescendentStore->release ();
 	pInstances->release ();
     }
     else if (pInstanceGuard) {
@@ -1514,41 +1460,31 @@ V_DefinePrimitive (ExtendTo) {
 
 
 V_DefinePrimitive (NewPrototype) {
-/*****  Obtain '^self'...  *****/
-    DSC_Descriptor& rSelf = pTask->getSelf ();
-    M_CPD *pPrototypeStoreCPD = rSelf.storeCPD ();
-
-/*****  ...and clone it:  *****/
-    M_CPD *pClonedStorePTokenCPD = pTask->NewCodPToken (0);
+/*****  Clone ^self:  *****/
+    rtPTOKEN_Handle::Reference pClonePPT (pTask->NewCodPToken (0));
     if (pTask->flags () % 2)
-	rtPTOKEN_CPD_Independent (pClonedStorePTokenCPD) = false;
+	pClonePPT->clearIsIndependent ();
 
-    pTask->loadDucWithReference (
-	rtVSTORE_NewCluster (pClonedStorePTokenCPD, pPrototypeStoreCPD),
-	pClonedStorePTokenCPD,
-	0
-    );
+    Vdd::Store::Reference pClone;
+    if (pTask->getSelf ().store ()->clone (pClone, pClonePPT))
+	pTask->loadDucWithReference (pClone, pClonePPT, 0);
+    else {
+	pTask->loadDucWithSelf ();
+    }
 }
 
 
 V_DefinePrimitive (EstablishResidence) {
-/*****
- *  Send this primitive's converse message to the parameter if the
- *  parameter is polymorphic...
- *****/
+/*****  Send this primitive's converse message if the parameter is polymorphic...  *****/
     if (!pTask->loadDucWithNextParameterAsMonotype ()) {
         pTask->sendBinaryConverseWithSelf ("provideResidenceFor:");
 	return;
     }
 
-/*****  Obtain destination ... *****/
-    M_CPD *pPersistentStore = pTask->ducStore ();
-
-/*****  Obtain '^self'...  *****/
-    M_CPD *pTransientStore = pTask->getSelf ().storeCPD ();
-
-/*****  ...and forward it:  *****/
-    pTask->loadDucWithBoolean (rtVSTORE_ForwardCluster (pTransientStore, pPersistentStore));
+/*****  ... otherwise forward the store:  *****/
+    pTask->loadDucWithBoolean (
+	pTask->getSelf ().store ()->forwardToSpace (pTask->ducStore ()->objectSpace ())
+    );
 }
 
 
@@ -1557,120 +1493,25 @@ V_DefinePrimitive (EstablishResidence) {
  **********************/
 
 V_DefinePrimitive (DeleteInstance) {
-#define handleNil(position, count, refNil) {\
-    rtLINK_AppendRange (undeletedLinkC, position, count);\
-}
-
-#define handleRepeat(position, count, origin) {\
-    rtLINK_AppendRepeat (deletedLinkC, position, count);\
-    ptConstructor->AppendAdjustment (origin + 1 - totalDeleted++, -1);\
-}
-
-#define handleRange(position, count, origin) {\
-    rtLINK_AppendRange (deletedLinkC, position, count);\
-    ptConstructor->AppendAdjustment (origin + count - totalDeleted, -count);\
-    totalDeleted += count;\
-}
-
-    unsigned int	elementPos,
-			totalDeleted = 0;
-    RTYPE_Type		rtype;
-
 /*****  Obtain '^self'...  *****/
-    pTask->loadDucWithSelf ();
+    DSC_Descriptor &rSelf = pTask->getSelf ();
 
 /*****  Validate its store  *****/
-    M_CPD *store = pTask->ducStore ();
-
-    /***  Disallow deletion in ground stores that disallow deletions  ***/
-    if (store->TransientExtensionIsA (VGroundStore::RTT) &&
-	!((VGroundStore*)store->TransientExtension ())->allowsDelete ()
-    ) {
-	pTask->loadDucWithFalse ();
-	return;
-    }
-
-    switch (rtype = (RTYPE_Type)M_CPD_RType (store)) {
-    case RTYPE_C_ValueStore:
-    /***  Disallow deletion of top level environment  ***/
-	if (store->Names (ENVIR_KDsc_TheTLE.storeCPD ())) {
-	    pTask->loadDucWithFalse ();
-	    return;
-	}
-
-    case RTYPE_C_Dictionary:
-    case RTYPE_C_ListStore:
-    case RTYPE_C_Index:
-    case RTYPE_C_Vector:
-        break;
-
-    default:
-    /***  Indicate via the accumulator that deletion failed ***/
-	pTask->loadDucWithFalse ();
-        return;
-    }
-
-/*****  Get the ptoken to be edited *****/
-    M_CPD *ptokenRefCPD; int ptokenRefIndex;
-    ADescriptor.getRPTReference (ptokenRefCPD, ptokenRefIndex);
-    M_CPD *pRPT = rtPTOKEN_BasePToken (ptokenRefCPD, ptokenRefIndex);
-    rtPTOKEN_CType *ptConstructor = rtPTOKEN_NewShiftPTConstructor (pRPT, -1);
-
-/*****  Ensure that V-Stores remain in control of their properties  *****/
-    if (rtPTOKEN_CPD_IsDependent (pRPT) && rtype != RTYPE_C_ValueStore) {
-        ptConstructor->discard ();
-	ptokenRefCPD->release ();
-	pRPT->release ();
-    /***  Indicate via the accumulator that deletion failed ***/
-	pTask->loadDucWithFalse ();
-	return;
-    }
-
-    ptokenRefCPD->release ();
-    pRPT->release ();
+    Vdd::Store *pSelfStore = rSelf.store ();
 
 /*****  Do the editing ...  *****/
-    if (ADescriptor.holdsAScalarReference () && rtPTOKEN_PTC_BaseCount (ptConstructor) > (
-	    elementPos = DSC_Scalar_Int (
-		*rtREFUV_AlignReference (&DSC_Descriptor_Scalar (ADescriptor))
-	    )
-	)
-    )
-    {
-	ptConstructor->AppendAdjustment (elementPos + 1, -1);
+    if (rSelf.holdsAScalarReference () && pSelfStore->deleteInstances (DSC_Descriptor_Scalar (rSelf))) {
 	pTask->loadDucWithTrue ();
-    }
-    else if (ADescriptor.holdsALink ()) {
-        rtLINK_CType *linkc = DSC_Descriptor_Link(ADescriptor)->Align();
-	rtLINK_CType *deletedLinkC = pTask->NewSubset ();
-	rtLINK_CType *undeletedLinkC = pTask->NewSubset ();
-
-	rtLINK_TraverseRRDCList (linkc, handleNil, handleRepeat, handleRange);
-
-	pTask->loadDucWithPredicateResult (deletedLinkC, undeletedLinkC);
-    }
-    else {
-    /*****  It is a value and should not be deleted  *****/
-        ptConstructor->discard ();
-    /***  Indicate via the accumulator that deletion failed ***/
-	pTask->loadDucWithFalse ();
 	return;
     }
 
-    pRPT = ptConstructor->ToPToken ();
-
-    if (rtype == RTYPE_C_ValueStore &&
-	store->ReferenceDoesntName (rtVSTORE_CPx_RowPToken, pRPT))
-    {
-    /*****  'Align' the store along its vertical dimension  *****/
-    /*****   ... but only if necessary (hence the POP comparison) *****/
-	store->StoreReference (rtVSTORE_CPx_RowPToken, pRPT);
+    rtLINK_CType *pDeletedSubset = 0, *pUndeletedSubset = 0;
+    if (rSelf.holdsALink () && pSelfStore->deleteInstances (DSC_Descriptor_Link (rSelf), pDeletedSubset, pUndeletedSubset)) {
+	pTask->loadDucWithPredicateResult (pDeletedSubset, pUndeletedSubset);
+	return;
     }
-    pRPT->release ();
 
-#undef handleNil
-#undef handleRepeat
-#undef handleRange
+    pTask->loadDucWithFalse ();
 }
 
 
@@ -1694,13 +1535,12 @@ V_DefinePrimitive (Specialize) {
     }
 
 /*****  ...create a new method dictionary...  *****/
-    M_CPD *pDictionary = rtDICTIONARY_New (pTask->codScratchPad ());
+    rtDICTIONARY_Handle::Reference pDictionary (
+	new rtDICTIONARY_Handle (pTask->codScratchPad ())
+    );
 
-/*****  ...create the specialization...  *****/
+/*****  ...and create the specialization...  *****/
     loadDucWithSelfSpecialization (pTask, pDictionary, bPrototypeOnly);
-
-/*****  ...and clean up.  *****/
-    pDictionary->release ();
 }
 
 V_DefinePrimitive (SpecializeBy) {
@@ -1736,13 +1576,11 @@ V_DefinePrimitive (SpecializeBy) {
     }
 
 //  Otherwise, obtain the specialization's dictionary, ...
-    M_CPD *pDictionary = ADescriptor.dictionaryCPD ();
+    rtDICTIONARY_Handle::Reference pDictionary;
+    ADescriptor.getDictionary (pDictionary);
 
 //  ... create the extension, ...
     loadDucWithSelfSpecialization (pTask, pDictionary, bPrototypeOnly);
-
-//  ... and clean up:
-    pDictionary->release ();
 }
 
 
@@ -1755,98 +1593,79 @@ V_DefinePrimitive (InstanceListCount) {
     DSC_Descriptor& rSelf = pTask->getSelf ();
 
 /*****  Obtain the referential ptoken ... *****/
-    M_CPD *pRPT; {
-	M_CPD *pRPTReference; int xRPTReference;
-	rSelf.getRPTReference (pRPTReference, xRPTReference);
-	pRPT = rtPTOKEN_BasePToken (pRPTReference, xRPTReference);
-	pRPTReference->release ();
-    }
+    rtPTOKEN_Handle::Reference pRPT (rSelf.RPT ());
+    pRPT.setTo (pRPT->basePToken ());
 
 /*****  Return the instance list cardinality ... *****/
     RTYPE_Type referenceType = rSelf.pointerRType ();
 
     pTask->loadDucWithInteger (
-	0 == rtPTOKEN_CPD_BaseElementCount (pRPT) ||
+	0 == pRPT->cardinality () ||
 	    RTYPE_C_Link != referenceType && RTYPE_C_RefUV != referenceType
-	? 0 : rtPTOKEN_CPD_BaseElementCount (pRPT)
+	? 0 : pRPT->cardinality ()
     );
-
-/*****  And cleanup...  *****/
-    pRPT->release ();
 }
 
 
 V_DefinePrimitive (InstanceList) {
 /***** Obtain the store ... *****/
     DSC_Descriptor& rSelf = pTask->getSelf ();
-    M_CPD *pStoreCPD = rSelf.storeCPD ();
+    Vdd::Store *pStore = rSelf.store ();
 
 /*****  Obtain the referential ptoken ... *****/
-    M_CPD *pRPT; {
-	M_CPD *pRPTReference; int xRPTReference;
-	rSelf.getRPTReference (pRPTReference, xRPTReference);
-	pRPT = rtPTOKEN_BasePToken (pRPTReference, xRPTReference);
-	pRPTReference->release ();
-    }
+    rtPTOKEN_Handle::Reference pRPT (rSelf.RPT ());
+    pRPT.setTo (pRPT->basePToken ());
 
 /*****  Special case the Block case ... *****/
-    if ((RTYPE_Type)M_CPD_RType (pStoreCPD) == RTYPE_C_Block)
-	pStoreCPD = pRPT->GetBlockEquivalentClassFromPToken ();
+    if (pStore->rtype () == RTYPE_C_Block)
+	pStore = pRPT->GetBlockEquivalentClassFromPToken ();
 
 /***** Make the content vector ... *****/
-    M_CPD *vectorPToken, *vector;
+    rtPTOKEN_Handle::Reference vectorPToken;
+    rtVECTOR_Handle::Reference vector;
 
     RTYPE_Type referenceType = rSelf.pointerRType ();
-    if (0 == rtPTOKEN_CPD_BaseElementCount (pRPT) ||
+    if (0 == pRPT->cardinality () ||
 	RTYPE_C_Link != referenceType && RTYPE_C_RefUV != referenceType
-    )
-    {
-	vectorPToken = pTask->NewCodPToken (0);
-	vector = rtVECTOR_New (vectorPToken);
-	pRPT->release ();
+    ) {
+	vectorPToken.setTo (pTask->NewCodPToken (0));
+	vector.setTo (new rtVECTOR_Handle (vectorPToken));
     }
     else {
-	vectorPToken = pTask->NewCodPToken (rtPTOKEN_CPD_BaseElementCount (pRPT));
-	vector = rtVECTOR_New (vectorPToken);
+	vectorPToken.setTo (pTask->NewCodPToken (pRPT->cardinality ()));
+	vector.setTo (new rtVECTOR_Handle (vectorPToken));
 
-	rtLINK_CType *assignmentLinkc = rtLINK_RefConstructor (vectorPToken, -1);
-	rtLINK_AppendRange (
-	    assignmentLinkc, 0, rtPTOKEN_CPD_BaseElementCount (vectorPToken)
-	);
+	rtLINK_CType *assignmentLinkc = rtLINK_RefConstructor (vectorPToken);
+	rtLINK_AppendRange (assignmentLinkc, 0, vectorPToken->cardinality ());
 	assignmentLinkc->Close (pRPT);
 
-	pStoreCPD->retain ();
 	DSC_Descriptor elementDsc;
-	elementDsc.constructIdentity (pStoreCPD, pRPT);
+	elementDsc.constructIdentity (pStore, pRPT);
 
-	rtVECTOR_Assign (vector, assignmentLinkc, &elementDsc);
+	vector->setElements (assignmentLinkc, elementDsc);
 
 	assignmentLinkc->release ();
 	elementDsc.clear ();
     }
 
 /***** Make the lstore ... *****/
-    M_CPD *lstorePToken = pTask->NewCodPToken (1);
+    rtPTOKEN_Handle::Reference lstorePToken (pTask->NewCodPToken (1));
 
-    rtLINK_CType *definitionLinkc = rtLINK_RefConstructor (lstorePToken, -1);
-    rtLINK_AppendRepeat (
-	definitionLinkc, 0, rtPTOKEN_CPD_BaseElementCount (vectorPToken)
-    );
+    rtLINK_CType *definitionLinkc = rtLINK_RefConstructor (lstorePToken);
+    rtLINK_AppendRepeat (definitionLinkc, 0, vectorPToken->cardinality ());
     definitionLinkc->Close (vectorPToken);
 
-    M_CPD *lstore = rtLSTORE_NewCluster (definitionLinkc, vector);
+/****** Load the new lstore into the accumulator ... *****/
+    pTask->loadDucWithReference (
+	new rtLSTORE_Handle (definitionLinkc, vector), lstorePToken, 0
+    );
 
     definitionLinkc->release ();
-    vector->release ();
-    vectorPToken->release ();
-
-/****** Load the new lstore into the accumulator ... *****/
-    pTask->loadDucWithReference (lstore, lstorePToken, 0);
 }
 
 
 V_DefinePrimitive (SelectedInstanceList) {
-    int currentRow, firstRow, numberOfRows, totalSize;
+    int currentRow, firstRow, numberOfRows;
 
 /***** Acquire the operand of this primitive ...  *****/
 /*****
@@ -1858,20 +1677,17 @@ V_DefinePrimitive (SelectedInstanceList) {
     }
 
 /***** Obtain the store ... *****/
-    M_CPD *pStoreCPD = pTask->ducStore ();
+    Vdd::Store *pStore = pTask->ducStore ();
 
 /*****  Obtain the referential ptoken ... *****/
-    M_CPD *pRPT; {
-	M_CPD *pRPTReference; int xRPTReference;
-	ADescriptor.getRPTReference (pRPTReference, xRPTReference);
-	pRPT = rtPTOKEN_BasePToken (pRPTReference, xRPTReference);
-	pRPTReference->release ();
-    }
-    totalSize = rtPTOKEN_CPD_BaseElementCount (pRPT);
+    rtPTOKEN_Handle::Reference pRPT (ADescriptor.RPT ());
+    pRPT.setTo (pRPT->basePToken ());
+
+    unsigned int totalSize = pRPT->cardinality ();
 
 /*****  Special case the Block case ... *****/
-    if ((RTYPE_Type)M_CPD_RType (pStoreCPD) == RTYPE_C_Block)
-	pStoreCPD = pRPT->GetBlockEquivalentClassFromPToken ();
+    if (pStore->rtype () == RTYPE_C_Block)
+	pStore = pRPT->GetBlockEquivalentClassFromPToken ();
 
 /*****  Access ^current ... *****/
     DSC_Descriptor& rCurrent = pTask->getCurrent ();
@@ -1901,54 +1717,43 @@ V_DefinePrimitive (SelectedInstanceList) {
     }
 
 /***** Make the content vector ... *****/
-    M_CPD *vectorPToken = pTask->NewCodPToken (numberOfRows);
-    M_CPD *vector = rtVECTOR_New (vectorPToken);
+    rtPTOKEN_Handle::Reference vectorPToken (pTask->NewCodPToken (numberOfRows));
+    rtVECTOR_Handle::Reference vector (new rtVECTOR_Handle (vectorPToken));
 
     RTYPE_Type referenceType = ADescriptor.pointerRType ();
-    if (totalSize != 0 && (
-	    RTYPE_C_Link == referenceType || RTYPE_C_RefUV == referenceType
-	)
-    )
-    {
-	rtLINK_CType* sourceLinkc = rtLINK_RefConstructor (pRPT, -1);
+    if (totalSize != 0 && (RTYPE_C_Link == referenceType || RTYPE_C_RefUV == referenceType)) {
+	rtLINK_CType* sourceLinkc = rtLINK_RefConstructor (pRPT);
 	rtLINK_AppendRange (sourceLinkc, firstRow, numberOfRows);
 	sourceLinkc->Close (vectorPToken);
 
-	pStoreCPD->retain ();
-
 	DSC_Descriptor elementDsc;
-	elementDsc.constructMonotype (pStoreCPD, sourceLinkc);
+	elementDsc.constructMonotype (pStore, sourceLinkc);
 	sourceLinkc->release ();
 
-	rtLINK_CType* assignmentLinkc = rtLINK_RefConstructor (vectorPToken, -1);
+	rtLINK_CType* assignmentLinkc = rtLINK_RefConstructor (vectorPToken);
 	rtLINK_AppendRange (assignmentLinkc, 0, numberOfRows);
 	assignmentLinkc->Close (vectorPToken);
 
-	rtVECTOR_Assign (vector, assignmentLinkc, &elementDsc);
+	vector->setElements (assignmentLinkc, elementDsc);
 
 	assignmentLinkc->release ();
 
 	elementDsc.clear ();
     }
-    pRPT->release ();
 
 /***** Make the lstore ... *****/
-    M_CPD *lstorePToken = pTask->NewCodPToken (1);
+    rtPTOKEN_Handle::Reference lstorePToken (pTask->NewCodPToken (1));
 
-    rtLINK_CType *definitionLinkc = rtLINK_RefConstructor (lstorePToken, -1);
-    rtLINK_AppendRepeat (
-	definitionLinkc, 0, rtPTOKEN_CPD_BaseElementCount (vectorPToken)
-    );
+    rtLINK_CType *definitionLinkc = rtLINK_RefConstructor (lstorePToken);
+    rtLINK_AppendRepeat (definitionLinkc, 0, vectorPToken->cardinality ());
     definitionLinkc->Close (vectorPToken);
 
-    M_CPD *lstore = rtLSTORE_NewCluster (definitionLinkc, vector);
+/****** Load the new lstore into the accumulator ... *****/
+    pTask->loadDucWithReference (
+	new rtLSTORE_Handle (definitionLinkc, vector), lstorePToken, 0
+    );
 
     definitionLinkc->release ();
-    vector->release ();
-    vectorPToken->release ();
-
-/****** Load the new lstore into the accumulator ... *****/
-    pTask->loadDucWithReference (lstore, lstorePToken, 0);
 } 
 
 

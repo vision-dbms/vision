@@ -41,6 +41,23 @@
 
 DEFINE_ABSTRACT_RTT (VGroundStore);
 
+/**************************
+ **************************
+ *****  Construction  *****
+ **************************
+ **************************/
+
+VGroundStore::VGroundStore () {
+}
+
+/*************************
+ *************************
+ *****  Destruction  *****
+ *************************
+ *************************/
+
+VGroundStore::~VGroundStore () {
+}
 
 /**************************
  **************************
@@ -57,23 +74,22 @@ bool VGroundStore::allowsDelete () const {
 }
 
 
-/********************************************************
- ********************************************************
- *****  Surrogate / Transient Extension Management  *****
- ********************************************************
- ********************************************************/
+/**********************************
+ **********************************
+ *****  Surrogate Management  *****
+ **********************************
+ **********************************/
 
-void VGroundStore::EndRoleAsTransientExtensionOf (VContainerHandle* pContainerHandle) {
-    if (m_pSurrogateHandle == pContainerHandle)
-	m_pSurrogateHandle = 0;
+void VGroundStore::detachSurrogate (rtVSTORE_Handle *pSurrogate) {
+    if (m_pSurrogate->Names (pSurrogate))
+	m_pSurrogate.clear ();
 }
 
-M_CPD *VGroundStore::getCPDForNewSurrogate () {
-    M_CPD *pPPT = ptoken_();
-    M_CPD *pSurrogateCPD = rtVSTORE_NewCluster (pPPT, pPPT->TheObjectPrototype ());
+void VGroundStore::getSurrogate (rtVSTORE_Handle::Reference &rpResult) {
+    rtPTOKEN_Handle *pPPT = ptoken_();
 
-    m_pSurrogateHandle = pSurrogateCPD->containerHandle ();
-    m_pSurrogateHandle->SetTransientExtensionTo (this);
+    static_cast<rtVSTORE_Handle*>(pPPT->TheObjectPrototype ().ObjectHandle ())->clone (rpResult, pPPT);
 
-    return pSurrogateCPD;
+    m_pSurrogate.setTo (rpResult);
+    m_pSurrogate->setTransientExtensionTo (this);
 }

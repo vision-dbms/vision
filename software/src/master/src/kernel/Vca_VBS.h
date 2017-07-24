@@ -487,6 +487,7 @@ namespace Vca {
 
 	VReference<VCheckPoint> m_pCheckPointHead;	//  CheckPoint (CP) Queue
 	VReference<VCheckPoint> m_pCheckPointTail;
+	count_t			m_cNumCheckpoints;
 
 	VBSManager::Reference	m_pManager;
 	bool			m_bUnbuffered;

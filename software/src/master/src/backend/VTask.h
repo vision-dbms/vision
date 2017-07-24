@@ -13,6 +13,7 @@
  *****  Declarations  *****
  **************************/
 
+#include "RTblock.h"
 #include "RTcontext.h"
 #include "RTindex.h"
 #include "RTlstore.h"
@@ -51,7 +52,7 @@ public:
 	VCall			*pCall,
 	rtLINK_CType		*pSubset,
 	M_CPD			*pReordering,
-	rtCONTEXT_Constructor	*pContext = 0,
+	rtCONTEXT_Handle	*pContext = 0,
 	unsigned int		iAttentionMask = 0
     );
 
@@ -69,7 +70,7 @@ public:
     M_CPD *reordering () const {
 	return m_pReordering;
     }
-    rtCONTEXT_Constructor *context () const {
+    rtCONTEXT_Handle *context () const {
 	return m_pContext;
     }
     unsigned int attentionMask () const {
@@ -89,7 +90,7 @@ protected:
     VCall			* const m_pCall;
     rtLINK_CType		* const m_pSubset;
     M_CPD			* const m_pReordering;
-    rtCONTEXT_Constructor	* const m_pContext;
+    VReference<rtCONTEXT_Handle>  const m_pContext;
     unsigned int		  const m_iAttentionMask;
 };
 
@@ -99,8 +100,11 @@ protected:
  *******************/
 
 class ABSTRACT VTask : public VComputationUnit {
-//  Run Time Type
     DECLARE_ABSTRACT_RTT (VTask, VComputationUnit);
+
+//  Aliases
+public:
+    typedef Vdd::Store Store;
 
 //  Meta Maker
 protected:
@@ -179,7 +183,7 @@ public:
 
 //  Access
 public:
-    rtCONTEXT_Constructor *blockContext () const {
+    rtCONTEXT_Handle *blockContext () const {
 	return m_pBlockContext;
     }
 
@@ -267,10 +271,10 @@ public:
 	return parameterCount ();
     }
 
-    M_CPD *ptoken () const {
+    rtPTOKEN_Handle *ptoken () const {
 	return m_pDomain->ptoken ();
     }
-    M_CPD *ptoken_() const {
+    rtPTOKEN_Handle *ptoken_() const {
 	return ptoken ();
     }
 
@@ -404,71 +408,69 @@ public:
 
 //  Domain Prep
 public:
-    M_CPD *NewDomPToken (unsigned int iCardinality) const {
+    rtPTOKEN_Handle *NewDomPToken (unsigned int iCardinality) const {
 	return m_pDomain->NewPToken (iCardinality);
     }
-    M_CPD *NewDomPToken () const {
+    rtPTOKEN_Handle *NewDomPToken () const {
 	return m_pDomain->NewPToken ();
     }
 
 //  Duc Prep
 public:
-    M_CPD *NewCodPToken (unsigned int iCardinality) const {
-	return rtPTOKEN_New (codScratchPad (), iCardinality);
+    rtPTOKEN_Handle *NewCodPToken (unsigned int iCardinality) const {
+	return new rtPTOKEN_Handle (codScratchPad (), iCardinality);
     }
-    M_CPD *NewCodPToken () const {
+    rtPTOKEN_Handle *NewCodPToken () const {
 	return NewCodPToken (cardinality ());
     }
 
     rtLINK_CType *NewSubset () const {
-	return rtLINK_RefConstructor (ptoken (), -1);
+	return rtLINK_RefConstructor (ptoken ());
     }
 
-    M_CPD *NewUV (M_CPD *pPPT, char *&rpElements) const {
+    M_CPD *NewUV (rtPTOKEN_Handle *pPPT, char *&rpElements) const {
 	M_CPD *pUV = NewCharUV (pPPT);
 	rpElements = rtCHARUV_CPD_Array (pUV);
 	return pUV;
     }
-    M_CPD *NewUV (M_CPD *pPPT, double *&rpElements) const {
+    M_CPD *NewUV (rtPTOKEN_Handle *pPPT, double *&rpElements) const {
 	M_CPD *pUV = NewDoubleUV (pPPT);
 	rpElements = rtDOUBLEUV_CPD_Array (pUV);
 	return pUV;
     }
-    M_CPD *NewUV (M_CPD *pPPT, float *&rpElements) const {
+    M_CPD *NewUV (rtPTOKEN_Handle *pPPT, float *&rpElements) const {
 	M_CPD *pUV = NewFloatUV (pPPT);
 	rpElements = rtFLOATUV_CPD_Array (pUV);
 	return pUV;
     }
-    M_CPD *NewUV (M_CPD *pPPT, int *&rpElements) const {
+    M_CPD *NewUV (rtPTOKEN_Handle *pPPT, int *&rpElements) const {
 	M_CPD *pUV = NewIntUV (pPPT);
 	rpElements = rtINTUV_CPD_Array (pUV);
 	return pUV;
     }
 
-    M_CPD *NewCharUV (M_CPD *pPPT) const {
-	return rtCHARUV_New (pPPT, codKOT ()->TheCharacterPTokenCPD ());
+    M_CPD *NewCharUV (rtPTOKEN_Handle *pPPT) const {
+	return rtCHARUV_New (pPPT, codKOT ()->TheCharacterPTokenHandle ());
     }
-    M_CPD *NewDateUV (M_CPD *pPPT) const {
-	return rtINTUV_New (pPPT, codKOT ()->TheDatePTokenCPD ());
+    M_CPD *NewDateUV (rtPTOKEN_Handle *pPPT) const {
+	return rtINTUV_New (pPPT, codKOT ()->TheDatePTokenHandle ());
     }
-    M_CPD *NewDoubleUV (M_CPD *pPPT) const {
-	return rtDOUBLEUV_New (pPPT, codKOT ()->TheDoublePTokenCPD ());
+    M_CPD *NewDoubleUV (rtPTOKEN_Handle *pPPT) const {
+	return rtDOUBLEUV_New (pPPT, codKOT ()->TheDoublePTokenHandle ());
     }
-    M_CPD *NewFloatUV (M_CPD *pPPT) const {
-	return rtFLOATUV_New (pPPT, codKOT ()->TheFloatPTokenCPD ());
+    M_CPD *NewFloatUV (rtPTOKEN_Handle *pPPT) const {
+	return rtFLOATUV_New (pPPT, codKOT ()->TheFloatPTokenHandle ());
     }
-    M_CPD *NewIntUV (M_CPD *pPPT) const {
-	return rtINTUV_New (pPPT, codKOT ()->TheIntegerPTokenCPD ());
+    M_CPD *NewIntUV (rtPTOKEN_Handle *pPPT) const {
+	return rtINTUV_New (pPPT, codKOT ()->TheIntegerPTokenHandle ());
     }
-    M_CPD *NewUndefUV (M_CPD *pPPT) const {
-	return rtUNDEFUV_New (pPPT, codKOT ()->TheNAPTokenCPD ());
+    M_CPD *NewUndefUV (rtPTOKEN_Handle *pPPT) const {
+	return rtUNDEFUV_New (pPPT, codKOT ()->TheNAPTokenHandle ());
     }
 
     M_CPD *NewCharUV (unsigned int nElements) const {
-	M_CPD *pPPT = NewCodPToken (nElements);
-	M_CPD *pUV = NewCharUV (pPPT);
-	pPPT->release ();
-	return pUV;
+	rtPTOKEN_Handle::Reference pPPT (NewCodPToken (nElements));
+	return NewCharUV (pPPT);
     }
 
     M_CPD *NewCharUV () const {
@@ -504,9 +506,6 @@ public:
     void loadDucWithCoerced	(rtINDEX_Key *pTemporalContext) const;
     void loadDucWithCoerced	(DSC_Descriptor &rValue) const;
 
-    void loadDucWithDouble (M_CPD *pStore, M_CPD *pRPT, double iValue) const {
-	m_pDuc->setToConstant (ptoken (), pStore, pRPT, iValue);
-    }
     void loadDucWithDouble (M_KOT *pKOT, double iValue) const {
 	m_pDuc->setToConstant (ptoken (), pKOT, iValue);
     }
@@ -514,9 +513,6 @@ public:
 	loadDucWithDouble (codKOT (), iValue);
     }
 
-    void loadDucWithFloat (M_CPD *pStore, M_CPD *pRPT, float iValue) const {
-	m_pDuc->setToConstant (ptoken (), pStore, pRPT, iValue);
-    }
     void loadDucWithFloat (M_KOT *pKOT, float iValue) const {
 	m_pDuc->setToConstant (ptoken (), pKOT, iValue);
     }
@@ -524,7 +520,7 @@ public:
 	loadDucWithFloat (codKOT (), iValue);
     }
 
-    void loadDucWithInteger (M_CPD *pStore, M_CPD *pRPT, int iValue) const {
+    void loadDucWithInteger (Store *pStore, rtPTOKEN_Handle *pRPT, int iValue) const {
 	m_pDuc->setToConstant (ptoken (), pStore, pRPT, iValue);
     }
     void loadDucWithInteger (M_KOT *pKOT, int iValue) const {
@@ -548,8 +544,8 @@ public:
 	loadDucWithPrimitive (codKOT (), xPrimitive);
     }
 
-    void loadDucWithSelector (M_CPD *pBlock, unsigned int xSelector) const {
-	loadDucWithInteger (pBlock, pBlock->TheSelectorPToken (), xSelector);
+    void loadDucWithSelector (rtBLOCK_Handle *pBlock, unsigned int xSelector) const {
+	loadDucWithInteger (pBlock, pBlock->TheSelectorPTokenHandle (), xSelector);
     }
     void loadDucWithSelector (M_KOT *pKOT, unsigned int xSelector) const {
 	m_pDuc->setToConstant (ptoken (), pKOT->TheSelectorClass, (int)xSelector);
@@ -558,7 +554,7 @@ public:
 	loadDucWithSelector (codKOT (), xSelector);
     }
 
-    void loadDucWithReference (M_CPD *pStore, M_CPD *pRPT, unsigned int iValue) const {
+    void loadDucWithReference (Store *pStore, rtPTOKEN_Handle *pRPT, unsigned int iValue) const {
 	m_pDuc->setToReferenceConstant (ptoken (), pStore, pRPT, iValue);
     }
 
@@ -609,52 +605,41 @@ public:
 	    loadDucWithNA ();
     }
 
-protected:
-    void loadDucWithCorrespondence (M_CPD *pStore, unsigned int xRPT, M_CPD *pPPT) const {
-	m_pDuc->setToCorrespondence (pPPT, pStore, xRPT);
-    }
 public:
-    void loadDucWithCorrespondence (M_CPD *pStore, unsigned int xRPT) const {
-	m_pDuc->setToCorrespondence (ptoken (), pStore, xRPT);
+    void loadDucWithCorrespondence (Store *pStore) const {
+	m_pDuc->setToCorrespondence (ptoken (), pStore);
     }
 
 protected:
-    void loadDucWithIdentity (M_CPD *pStore, M_CPD *pPPT) const;
+    void loadDucWithIdentity (Store *pStore, rtPTOKEN_Handle *pPPT) const;
 public:
-    void loadDucWithIdentity (M_CPD *pStore) const {
+    void loadDucWithIdentity (Store *pStore) const {
 	loadDucWithIdentity (pStore, ptoken ());
     }
 
 protected:
-    void loadDucWithIdentity (VConstructor* pStore, M_CPD *pPPT) const;
-public:
-    void loadDucWithIdentity (VConstructor* pStore) const {
-	loadDucWithIdentity (pStore, ptoken ());
-    }
-
-protected:
-    void loadDucWithListOrStringStore (M_CPD *pStore, M_CPD *pPPT) const {
-	loadDucWithCorrespondence (pStore, rtLSTORE_CPx_RowPToken, pPPT);
+    void loadDucWithListOrStringStore (Store *pStore, rtPTOKEN_Handle *pPPT) const {
+	m_pDuc->setToCorrespondence (pPPT, pStore);
     }
 public:
-    void loadDucWithListOrStringStore (M_CPD *pStore) const {
-	loadDucWithCorrespondence (pStore, rtLSTORE_CPx_RowPToken);
+    void loadDucWithListOrStringStore (Store *pStore) const {
+	loadDucWithCorrespondence (pStore);
     }
 
-    void loadDucWithNewLStore (M_CPD *pContentPrototypeCPD = 0) const;
+    void loadDucWithNewLStore (Store *pContentPrototypeCPD = 0) const;
 
     void loadDucWithMonotype (M_CPD *pMonotype) const {
 	m_pDuc->setToMonotype (pMonotype);
     }
-    void loadDucWithMonotype (M_CPD *pStore, M_CPD *pMonotype) const {
+    void loadDucWithMonotype (Store *pStore, M_CPD *pMonotype) const {
 	m_pDuc->setToMonotype (pStore, pMonotype);
     }
-    void loadDucWithMonotype (M_CPD *pStore, rtLINK_CType *pMonotype) const {
+    void loadDucWithMonotype (Store *pStore, rtLINK_CType *pMonotype) const {
 	m_pDuc->setToMonotype (pStore, pMonotype);
     }
 
 protected:
-    VFragmentation &loadDucWithFragmentation (M_CPD *pPPT) const;
+    VFragmentation &loadDucWithFragmentation (rtPTOKEN_Handle *pPPT) const;
 public:
     VFragmentation &loadDucWithFragmentation () const {
 	return loadDucWithFragmentation (ptoken ());
@@ -664,25 +649,18 @@ public:
 
     void loadDucWithBoolean (rtLINK_CType *pTrueSubset) const;
 
-    void loadDucWithPartialCorrespondence (
-	M_CPD *pStore, unsigned int xRPT, rtLINK_CType *pSubset
-    ) const;
+    void loadDucWithPartialCorrespondence (Store *pStore, rtLINK_CType *pSubset) const;
 
     void loadDucWithPartialFunction (rtLINK_CType *pLink, M_CPD *pUVector) const;
     void loadDucWithPartialFunction (VfGuardTool &rGuard, M_CPD *pUVector) const;
 
     void loadDucWithPredicateResult (
-	M_KOTM pKOTM1, rtLINK_CType *pLink1, M_KOTM pKOTM2, rtLINK_CType *pLink2
+	rtLINK_CType *pLink1, rtLINK_CType *pLink2, M_KOTM pKOTM1, M_KOTM pKOTM2
     ) const;
 
     void loadDucWithPredicateResult (
 	rtLINK_CType *pTrueSubset, rtLINK_CType *pFalseSubset
-    ) const {
-	loadDucWithPredicateResult (
-	    &M_KnownObjectTable::TheTrueClass , pTrueSubset,
-	    &M_KnownObjectTable::TheFalseClass, pFalseSubset
-	);
-    }
+    ) const;
 
     void loadDucWithParameter (unsigned int xParameter) const;
 
@@ -718,9 +696,7 @@ public:
     void loadDucWith (DSC_Descriptor const& rValue) const {
 	loadDucWithCopied (rValue);
     }
-    void loadDucWith (VGroundStore* pGroundStore) const {
-	loadDucWithIdentity (pGroundStore->surrogateCPD (), pGroundStore->ptoken_ ());
-    }
+    void loadDucWith (VGroundStore *pStore) const;
 
 //  Operator Processing
 public:
@@ -828,7 +804,7 @@ public:
 //  State
 protected:
     VReference<VTaskDomain> const	m_pDomain;
-    rtCONTEXT_Constructor *const	m_pBlockContext;
+    VReference<rtCONTEXT_Handle> const	m_pBlockContext;
     rtINDEX_Key *const			m_pTemporalContext;
     VReference<VReferenceableMonotype>	m_pLocalContext;
     M_ASD*				m_pCodSpace;

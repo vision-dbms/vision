@@ -216,6 +216,7 @@ namespace Vca {
 	VRoleHolder::count_t exportCount () const;
 	VRoleHolder::count_t exportedInterfaceCount () const;
 	VRoleHolder::count_t instantiatedInterfaceCount () const;
+	VRoleHolder::count_t referencedInterfaceCount () const;
 	VRoleHolder::count_t roleCount () const;
 	bool hasInstantiatedInterfaces () const;
 	bool hasExportedInterfaces () const;

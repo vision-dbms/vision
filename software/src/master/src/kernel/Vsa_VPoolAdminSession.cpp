@@ -19,9 +19,9 @@
 #include "VSimpleFile.h"
 
 #include "Vsa_IEvaluator.h"
-#include "Vsa_IEvaluatorPool_Ex4.h"
+#include "Vsa_IEvaluatorPool_Ex5.h"
 #include "Vsa_IPoolEvaluation.h"
-#include "Vsa_IEvaluatorPoolSettings_Ex6.h"
+#include "Vsa_IEvaluatorPoolSettings_Ex8.h"
 #include "Vsa_IPoolWorker.h"
 #include "Vsa_IPoolApplication_Ex2.h"
 
@@ -595,6 +595,88 @@ void Vsa::VPoolAdminSession::FlushWorkers () {
         displayResult (g_pMessages[Null_IEvaluatorPool]);
 }
 
+void Vsa::VPoolAdminSession::StatSum (VString const &name, Vca::U64 timeBefore, Vca::U64 timeRange) {
+	if (isntInitialized ()) {
+        enqueue (new OdometerOperation (Command_StatSum, name, timeBefore, timeRange));
+        return;
+    }
+
+    if (m_pPool) {
+		if(IEvaluatorPool_Ex5 *const pPool = dynamic_cast<IEvaluatorPool_Ex5*>(m_pPool.referent())) {
+			m_bSuspend = true;
+			
+			VStringReceiver::Reference pReceiver;
+			pReceiver.setTo (new VStringReceiver (this, &ThisClass::onResult, &ThisClass::onError)); 
+			pPool->StatSum(name, timeBefore, timeRange, pReceiver);	
+		} else
+			displayResult (g_pMessages[Pool_Operation_Not_Supported]);
+	}
+	else
+		displayResult (g_pMessages[Null_IEvaluatorPool]);
+}
+
+void Vsa::VPoolAdminSession::StatMax (VString const &name, Vca::U64 timeBefore, Vca::U64 timeRange) {
+	if (isntInitialized ()) {
+        enqueue (new OdometerOperation (Command_StatMax, name, timeBefore, timeRange));
+        return;
+    }
+
+    if (m_pPool) {
+		if(IEvaluatorPool_Ex5 *const pPool = dynamic_cast<IEvaluatorPool_Ex5*>(m_pPool.referent())) {
+			m_bSuspend = true;
+		
+			VStringReceiver::Reference pReceiver;
+			pReceiver.setTo (new VStringReceiver (this, &ThisClass::onResult, &ThisClass::onError));
+			pPool->StatMaxString(name, timeBefore, timeRange, pReceiver);		
+		} else
+			displayResult (g_pMessages[Pool_Operation_Not_Supported]);
+	}
+	else
+		displayResult (g_pMessages[Null_IEvaluatorPool]);
+}
+
+void Vsa::VPoolAdminSession::StatMin (VString const &name, Vca::U64 timeBefore, Vca::U64 timeRange) {
+	if (isntInitialized ()) {
+        enqueue (new OdometerOperation (Command_StatMin, name, timeBefore, timeRange));
+        return;
+    }
+
+    if (m_pPool) {
+		if(IEvaluatorPool_Ex5 *const pPool = dynamic_cast<IEvaluatorPool_Ex5*>(m_pPool.referent())) {
+			m_bSuspend = true;
+		
+			VStringReceiver::Reference pReceiver;
+			pReceiver.setTo (new VStringReceiver (this, &ThisClass::onResult, &ThisClass::onError));
+			pPool->StatMinString(name, timeBefore, timeRange, pReceiver);		
+		} else
+			displayResult (g_pMessages[Pool_Operation_Not_Supported]);
+	}
+	else
+		displayResult (g_pMessages[Null_IEvaluatorPool]);
+}
+
+void Vsa::VPoolAdminSession::StatDivide (VString const &name1, VString const &name2, Vca::U64 timeBefore, Vca::U64 timeRange) {
+	if (isntInitialized ()) {
+        enqueue (new StatDivideOperation (name1, name2, timeBefore, timeRange));
+        return;
+    }
+
+    if (m_pPool) {
+		if(IEvaluatorPool_Ex5 *const pPool = dynamic_cast<IEvaluatorPool_Ex5*>(m_pPool.referent())) {
+			m_bSuspend = true;
+		
+			F64Receiver::Reference pReceiver;
+			pReceiver.setTo (new F64Receiver (this, &ThisClass::onF64Result, &ThisClass::onF64Error));
+			pPool->StatDivide(name1, name2, timeBefore, timeRange, pReceiver);		
+		} else
+			displayResult (g_pMessages[Pool_Operation_Not_Supported]);
+	}
+	else
+		displayResult (g_pMessages[Null_IEvaluatorPool]);
+}
+
+
+
 void Vsa::VPoolAdminSession::ServiceStatistics  () {
     if (isntInitialized ()) {
         enqueue (new Operation (Command_Statistics));
@@ -604,7 +686,7 @@ void Vsa::VPoolAdminSession::ServiceStatistics  () {
     if (m_pPool) {
         m_bSuspend = true;
         VStringReceiver::Reference pReceiver;
-        pReceiver.setTo (new VStringReceiver (this, &ThisClass::onResult));
+        pReceiver.setTo (new VStringReceiver (this, &ThisClass::onResult, &ThisClass::onError));
         m_pPool->GetStatistics (pReceiver);
     }
     else
@@ -1162,11 +1244,35 @@ void Vsa::VPoolAdminSession::SetEvaluationAttempts  (Vca::U32 cEvaluationAttempt
         displayResult (g_pMessages[Null_IEvaluatorPoolSettings]);
 }
 
+void Vsa::VPoolAdminSession::SetEvaluationOnErrorAttempts  (Vca::U32 cEvaluationOnErrorAttempt) {
+    if (m_pPoolSettings.isntNil ())  {
+		if (IEvaluatorPoolSettings_Ex8 *const pSettings = dynamic_cast<IEvaluatorPoolSettings_Ex8*>(m_pPoolSettings.referent ())) {
+			pSettings->SetEvaluationOnErrorAttemptMaximum (cEvaluationOnErrorAttempt);
+			displayResult (g_pMessages[Message_Sent]);
+		} else 
+			displayResult (g_pMessages[Pool_Operation_Not_Supported]);
+    }
+    else
+        displayResult (g_pMessages[Null_IEvaluatorPoolSettings]);
+}
+
+void Vsa::VPoolAdminSession::SetEvaluationTimeOutAttempts  (Vca::U32 cEvaluationTimeOutAttempt) {
+    if (m_pPoolSettings.isntNil ())  {
+		if (IEvaluatorPoolSettings_Ex8 *const pSettings = dynamic_cast<IEvaluatorPoolSettings_Ex8*>(m_pPoolSettings.referent ())) {
+			pSettings->SetEvaluationTimeOutAttemptMaximum (cEvaluationTimeOutAttempt);
+			displayResult (g_pMessages[Message_Sent]);
+		} else 
+			displayResult (g_pMessages[Pool_Operation_Not_Supported]);
+    }
+    else
+        displayResult (g_pMessages[Null_IEvaluatorPoolSettings]);
+}
+
 void Vsa::VPoolAdminSession::SetWorkerMaximumAvailable (Vca::U32 workerCount) {
     if (m_pPoolSettings.isntNil ()) {
         if (IEvaluatorPoolSettings_Ex1 *const pSettings = dynamic_cast<IEvaluatorPoolSettings_Ex1*>(m_pPoolSettings.referent ())) {
             pSettings->SetWorkerMaximumAvailable (workerCount);
-	    displayResult (g_pMessages[Message_Sent]);
+			displayResult (g_pMessages[Message_Sent]);
         }
         else
             displayResult (g_pMessages[Pool_Operation_Not_Supported]);
@@ -1272,6 +1378,30 @@ void Vsa::VPoolAdminSession::SetGenerationMaximum (Vca::U32 count) {
     }
     else
         displayResult (g_pMessages[Null_IEvaluatorPoolSettings]);
+}
+
+void Vsa::VPoolAdminSession::SetQueryLogLength (Vca::U32 iLogLength) {
+	if (m_pPoolSettings.isntNil ())  {
+		if (IEvaluatorPoolSettings_Ex7 *const pSettings = dynamic_cast<IEvaluatorPoolSettings_Ex7*>(m_pPoolSettings.referent ())) {
+			pSettings->SetQueryLogLength (iLogLength);
+			displayResult (g_pMessages[Message_Sent]);
+		} else 
+			displayResult (g_pMessages[Pool_Operation_Not_Supported]);
+	}
+	else
+		displayResult (g_pMessages[Null_IEvaluatorPoolSettings]);
+}
+
+void Vsa::VPoolAdminSession::SetResultLogLength (Vca::U32 iResultLength) {
+	if (m_pPoolSettings.isntNil ())  {
+		if (IEvaluatorPoolSettings_Ex7 *const pSettings = dynamic_cast<IEvaluatorPoolSettings_Ex7*>(m_pPoolSettings.referent ())) {
+			pSettings->SetResultLogLength (iResultLength);
+			displayResult (g_pMessages[Message_Sent]);
+		} else 
+			displayResult (g_pMessages[Pool_Operation_Not_Supported]);
+	}
+	else
+		displayResult (g_pMessages[Null_IEvaluatorPoolSettings]);
 }
 
 void Vsa::VPoolAdminSession::CancelQuery (Vca::U32 iID) {
@@ -1516,6 +1646,30 @@ void Vsa::VPoolAdminSession::triggerQueuedOperations () {
                 );
                 QuerySession (pQueryOpn->query ());
             } break;
+		case Command_StatSum: {
+				OdometerOperation::Reference pOdoOpn (
+					static_cast <OdometerOperation*> (m_pPendingOperation.referent ())
+				);
+				StatSum (pOdoOpn->name(), pOdoOpn->timeBefore(), pOdoOpn->timeRange());
+			} break;
+		case Command_StatMin: {
+				OdometerOperation::Reference pOdoOpn (
+					static_cast <OdometerOperation*> (m_pPendingOperation.referent ())
+				);
+				StatMin (pOdoOpn->name(), pOdoOpn->timeBefore(), pOdoOpn->timeRange());
+			} break;
+		case Command_StatMax: {
+				OdometerOperation::Reference pOdoOpn (
+					static_cast <OdometerOperation*> (m_pPendingOperation.referent ())
+				);
+				StatMax (pOdoOpn->name(), pOdoOpn->timeBefore(), pOdoOpn->timeRange());
+			} break;
+		case Command_StatDivide: {
+				StatDivideOperation::Reference pSdOpn (
+					static_cast <StatDivideOperation*> (m_pPendingOperation.referent ())
+				);
+				StatDivide (pSdOpn->name(), pSdOpn->name2(), pSdOpn->timeBefore(), pSdOpn->timeRange());
+			} break;
         case Command_TotalWorkers:
             GetTotalWorkers ();
             break;
@@ -1733,6 +1887,36 @@ void Vsa::VPoolAdminSession::onU32Error (
     displayResult (iResult);
     onOperationComplete ();
 }
+
+void Vsa::VPoolAdminSession::onS64Result (
+    S64Receiver *pReceiver, Vca::S64 rResult
+) {
+    display("%d\n", rResult);
+    onOperationComplete();
+}
+
+void Vsa::VPoolAdminSession::onS64Error (
+    S64Receiver *pReceiver, Vca::IError *pError, VString const &rText
+) {
+    VString iResult = "Error: "; iResult << rText;
+    displayResult (iResult);
+    onOperationComplete ();
+}
+
+void Vsa::VPoolAdminSession::onF64Result (
+	F64Receiver *pReceiver, Vca::F64 rResult
+) {
+	display("%f\n", rResult);
+	onOperationComplete();
+}
+
+void Vsa::VPoolAdminSession::onF64Error (
+	F64Receiver *pReceiver, Vca::IError *pError, VString const &rText
+) {
+    VString iResult = "Error: "; iResult << rText;
+    displayResult (iResult);
+    onOperationComplete ();
+}	
 
 /*********************
  ****   Display   ****

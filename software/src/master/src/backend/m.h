@@ -29,7 +29,7 @@ PublicFnDecl void M_AccumulateAllocationStatistics (
     double *pAllocationTotal, double *pMappingTotal
 );
 
-PublicFnDecl bool M_DisposeOfSessionGarbage ();
+PublicFnDecl bool M_DisposeOfSessionGarbage (bool bAggressive = false);
 
 PublicFnDecl void M_FlushCachedResources ();
 

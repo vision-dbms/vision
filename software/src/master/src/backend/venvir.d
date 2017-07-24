@@ -121,45 +121,41 @@
  *	TheScalarPToken		- a P-Token for the set of all scalars in the
  *				  system.  Used to control the packing and
  *				  unpacking of value descriptors.
- *	TheDefaultProperty	- a P-Token for a value descriptor identifying
+ *	TheDefaultProperty	- an rtDSC identifying
  *				  the instance of class 'Property' used to
  *				  create all non-time-varying properties in the
  *				  absence of other information.
- *	TheDefaultListProperty	- a P-Token for a value descriptor identifying
+ *	TheDefaultListProperty	- an rtDSC identifying
  *				  the instance of class 'ListProperty' used to
  *				  create all non-time-varying list valued
  *				  properties in the absence of other
  *				  information.
- *	TheDefaultAListProperty	- a P-Token for a value descriptor identifying
+ *	TheDefaultAListProperty	- an rtDSC identifying
  *				  the instance of class 'AListProperty' used to
  *				  create all non-time-varying alist valued
  *				  properties in the absence of other
  *				  information.
  *	TheDefaultStringProperty
- *				- a P-Token for a value descriptor identifying
+ *				- an rtDSC identifying
  *				  the instance of class 'StringProperty' used
  *				  to create all non-time-varying string valued
  *				  properties in the absence of other
  *				  information.
- *	TheDefaultTVProperty
- *				- a P-Token for a value descriptor identifying
+ *	TheDefaultTVProperty	- an rtDSC identifying
  *				  the instance of class 'TimeVaryingProperty'
  *				  used to create all time varying properties in
  *				  absence of other information.
- *	TheDefaultTVListProp
- *				- a P-Token for a value descriptor identifying
+ *	TheDefaultTVListProp	- an rtDSC identifying
  *				  the instance of 'TimeVaryingListProperty'
  *				  used to create all time varying list valued
  *				  properties in the absence of other
  *				  information.
- *	TheDefaultTVAListProp
- *				- a P-Token for a value descriptor identifying
+ *	TheDefaultTVAListProp	- an rtDSC identifying
  *				  the instance of 'TimeVaryingAListProperty'
  *				  used to create all time varying alist valued
  *				  properties in the absence of other
  *				  information.
- *	TheDefaultTVStringProp
- *				- a P-Token for a value descriptor identifying
+ *	TheDefaultTVStringProp	- an rtDSC identifying
  *				  the instance of 'TimeVaryingStringProperty'
  *				  used to create all time varying string valued
  *				  properties in the absence of other
@@ -258,7 +254,7 @@
  ******************************************/
 
 #define ENVIR_KOTE_Include(n) n
-#define ENVIR_KOTE_IncludeP2TKOTEM(n) &M_KnownObjectTable::n
+#define ENVIR_KOTE_IncludeP2TKOTEM(n) &M_KOT::n
 
 #define ENVIR_AKOE_Exclude(n)
 #define ENVIR_AKOE_Include(n) _available_##n,

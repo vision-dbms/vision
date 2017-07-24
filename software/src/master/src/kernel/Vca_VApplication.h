@@ -893,7 +893,7 @@ namespace Vca {
     /// @name Tracking and Trackables
     //@{
     public:
-	VTrackable_count_t const &activityCountTrackable () const;
+	VTrackable_count_t const &activityCountTrackable ();
     //@}
 
     /// @name State

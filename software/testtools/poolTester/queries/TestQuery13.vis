@@ -1,0 +1,2090 @@
+#**********************************************************
+#**********************************************************
+#		Test: RTindex module
+#
+#	An attempt is made herein to systematically test the operations of the
+# indexed list data type.  No claim for comprehensive testing is being made and
+# some explanation of what has been left out and why will be forthcoming. The
+# strategy for testing can be split into three phases. The first phase consists
+# of building a suitable set of indexed lists. The second consists of performing
+# the lookup, delete and define operations on each of those lists using a
+# variety of parameters, and the third consists of testing some operations with
+# a set of special parameters.
+#
+#	The indexed lists built for testing were chosen for their various
+# values along a number of dimensions.  The first dimension is the number of
+# columns. Zero, one and several were chosen as the three points along this
+# dimension. The row dimension is next and is similarly treated. The third
+# dimension is the number of rows which are not empty. Because of the way
+# indexed lists are implemented (an optimization), there can be no empty
+# columns.  Therefore not all rows can be empty. The values chosen for this
+# dimension are therefore 'all but one', 'some' and 'none' empty. The
+# uniformity of type for the content provides the next dimension with the two
+# values being polymorphic and homomorhic. The representation of the column
+# dimension in the index can be a uniform vector (as in time series), a
+# homomorphic vector, or a polymorhic vector.  The final dimension has to do
+# with the arrangement of used and unused cells in a row. The values chosen
+# were 'all full', 'some middle columns empty', 'high columns empty', 'low
+# columns empty'. As a practical matter for testing, one row is always full to
+# insure that all columns are present and then all the other rows have the
+# same arrangement.  In the VISION code, the variables have been named to
+# indicate their values along the various dimensions. "INDEX_MN0PUF" is an
+# index with several(M) columns, several(N) rows, 0 empty rows, polymorphic
+# content, a uniform key (a time series), and with all columns full.
+#
+#	The lookup, interval lookup (for time series only), delete and define
+# operations are performed a cell at a time, several cells in a column at a
+# time, and several cells in several columns at a time on each of these
+# indexed lists.  In addition, they are performed on the reference Nil row
+# and for column values less than or greater than the those present in the
+# indexed list.
+#
+#	Finally some special inputs were tested, specifically those where rows
+# are selected by reference descriptors or by value descriptors. The handling
+# of these special cases is independent of the index type, so they are tested
+# on one indexed list only.
+#
+# Some of what is not tested:
+#	1)  Indexed Lists as elements of Indexed Lists.  This probably should
+# be added as, historically, bugs have shown up in this kind of situation.
+#	2)  Extensions to indexed lists.  Again, because this has been a cause
+# of problems in the past, playing with extended alists would make the test
+# more substantial.
+#	3)  The internal patterns of data have been inexhaustively fabricated.
+# There is really no way around this, but I believe the important ones are
+# present.  General indexed lists use equality as the comparison operation and
+# thus need only find/place/remove something or not. The surrounding data
+# points are not of much consequence. Time series though will use less than or
+# equal and greater than for some of its operations and the surrounding
+# pattern now becomes important. Of special significance are empty points at
+# the ends of the time series. We must be sure that an inequality comparison
+# limits its range to the target time series and does not run over into
+# another, physically contiguous, one.
+# 
+# This test takes about 2 hours to run.
+#  3/2/88		jck
+#**********************************************************
+#**********************************************************
+
+
+newLine print; "Beginning file: RTindex.S ..." printNL;
+###########################################################
+#		Tests Begin Here ...                      #
+###########################################################
+
+"
+#----------------------------------------------------------
+#  Setup (RTindex)
+#----------------------------------------------------------
+" printNL;
+#####################
+#  General Support  #
+#####################
+
+^current defineMethod: [|printBorder|
+"----------------------------------------------------------------" printNL];
+
+Prototypical Integer defineMethod: [|isEven|
+					(^self/2) asInteger = ^self/2];
+Prototypical Date defineMethod:    [|genInt|
+					(^self asInteger - 
+					 19880201 asDate asInteger) asInteger
+				   ];
+
+Prototypical IndexedList 
+    defineMethod:
+	[|generatePolymorphicRowFor: aList|
+	    !index <- ^self;
+	    aList do: [
+		   ^my index
+			at: ^self 
+			put: (^self isInteger
+				ifTrue: [^self isEven 
+					    ifTrue: [^self] 
+					    ifFalse:[^self/2]
+					]
+				ifFalse:[^self]);
+	    	  ];
+	].
+   defineMethod:
+	[|generateHomomorphicRowFor: aList|
+	    !index <- ^self;
+	    aList do: [
+		   ^my index
+			at: ^self 
+			put: ^self asInteger
+	    	  ];
+	];
+
+Object	define:'asInteger' toBe: 19531216;
+!NewEntity <- Entity new ; 
+NewEntity :code <- " GM" ;
+NewEntity :name <- "GENERAL MOTORS CORP" ;
+Entity defineMethod: [|print:f| ^self print ] ;
+!NA_Printer <- NA :print;
+NA	defineMethod: [|print| " NA" print; ^self];
+
+########################
+#  Column Definitions  #
+########################
+!ScalarDate <-
+	19880204 asDate;
+!StartDate <-
+	19880202 asDate;
+!EndDate <-
+	19880205 asDate;
+!UniformKeyListFull <- 
+	StartDate to: EndDate by: 1 days;
+!UniformKeyListMid <- 
+	StartDate to: EndDate by: 3 days;
+!UniformKeyListHigh <- 
+	StartDate to: EndDate - 1 days by: 1 days;
+!UniformKeyListLow <- 
+	StartDate + 1 days to: EndDate by: 1 days;
+
+!ScalarKeyValue <-
+	1;
+!HomomorphicKeyListFull <-  
+	1, 2, 3, 4, 5, 6, 7;
+!HomomorphicKeyListMid <- 
+	1, 2, 4, 7;
+!HomomorphicKeyListHigh <- 
+	1, 2, 3, 4;
+!HomomorphicKeyListLow <- 
+	3, 4, 5, 6, 7;
+
+!PolymorphicKeyListFull <-  
+	ScalarDate, 2.0, 3.0, 1, 6, 7, ScalarDate asInteger, NewEntity;
+!PolymorphicKeyListMid <- 
+	ScalarDate, 1, 6, NewEntity;
+!PolymorphicKeyListHigh <- 
+	ScalarDate, 2.0, 3.0, 1, 6, 7;
+!PolymorphicKeyListLow <- 
+	2.0, 3.0, 1, 6, 7, ScalarDate asInteger, NewEntity;
+
+#####################
+#  Row Definitions  #
+#####################
+!store1 <- Object basicSpecialized;
+!storeN <- Object basicSpecialized;
+
+!ForAllDefinedRows <- 1,2,3,4;
+ForAllDefinedRows do:[^my storeN new];
+
+!ForTheSpecifiedRows <- ForAllDefinedRows select: [^self isEven];
+
+#####################################################
+#####		The Index Definitions		#####
+#####################################################
+
+"
+# 0 columns, 0 rows, Uniform key
+" 
+
+print;
+!INDEX_00__U <- Prototypical TimeSeries new;
+INDEX_00__U delete;
+INDEX_00__U instanceList count printNL;
+INDEX_00__U do:[^date print; ^self printNL];
+
+"
+# 0 columns, 0 rows, Homomorphic vector key
+" 
+
+print;
+!INDEX_00__H <- Prototypical IndexedList new;
+INDEX_00__H delete;
+INDEX_00__H instanceList count printNL;
+INDEX_00__H do:[^date print; ^self printNL];
+
+"
+# 0 columns, 1 row, Uniform key
+" 
+
+print;
+store1 __define: 'INDEX_01__U';
+!tempList <- store1 :INDEX_01__U instanceList;
+tempList count printNL;
+tempList do:["-" print;
+      ^self do:[^date print; ^self printNL]; newLine print];
+
+"
+# 0 columns, 1 row, Homomorphic vector key
+" 
+
+print;
+!INDEX_01__H <- Prototypical IndexedList new;
+INDEX_01__H instanceList count printNL;
+!tempList <- INDEX_01__H instanceList;
+tempList do:["-" print;
+      ^self do:[^self printNL]; newLine print];
+
+"
+# 1 column, 1 row, Uniform key
+" 
+
+print;
+store1 __define: 'INDEX_11__U';
+!tempList <- store1 :INDEX_11__U instanceList;
+tempList do:[^self at: ^my ScalarDate put: 2];
+tempList do:["-" print;
+      ^self do:["["print;^date print; ^self print:6; "], "print]; newLine print];
+
+"
+# 1 column, 1 row, Homomorphic vector key
+" 
+
+print;
+!INDEX_11__H <- Prototypical IndexedList new;
+!tempList <- INDEX_11__H instanceList;
+tempList do:[^self at: ^my ScalarKeyValue put: 2];
+tempList do:["-" print;
+      ^self do:[ ^self print:10;]; newLine print];
+
+"
+# 1 column, N rows, All rows but one empty, Uniform key
+" 
+
+print;
+storeN __define: 'INDEX_1NA_U';
+!tempList <- storeN :INDEX_1NA_U instanceList;
+storeN :INDEX_1NA_U at:ScalarDate put: 2;
+tempList do:["-" print;
+      ^self do:["["print;^date print; ^self print:6; "], "print]; newLine print];
+
+"
+# 1 columns, N rows, All rows but one empty, Homomorphic vector key
+"
+
+print;
+!INDEX_1NA_H <- Prototypical IndexedList new;
+ForAllDefinedRows do:[^my INDEX_1NA_H clusterNew];
+!tempList <- INDEX_1NA_H instanceList;
+INDEX_1NA_H at: ScalarKeyValue put: 3;
+tempList do:["-" print;
+      ^self do:[ ^self print:10;]; newLine print];
+
+
+"
+# 1 column, N rows, Some rows empty, Homomorphic content, Uniform key
+"
+
+print;
+storeN __define: 'INDEX_1NSHU';
+!tempList <- storeN :INDEX_1NSHU instanceList;
+storeN :INDEX_1NSHU at:ScalarDate put: 2;
+2 asReferenceTo: storeN . :INDEX_1NSHU at:ScalarDate put: 4;
+tempList do:["-" print;
+      ^self do:["["print;^date print; ^self print:6; "], "print]; newLine print];
+
+"
+# 1 column, N rows, Some rows empty, Homomorphic content,
+#				     Homomorphic vector key
+"
+
+print;
+!INDEX_1NSHH <- Prototypical IndexedList new;
+ForAllDefinedRows do:[^my INDEX_1NSHH clusterNew];
+!tempList <- INDEX_1NSHH instanceList;
+INDEX_1NSHH at: ScalarKeyValue put: 1;
+3 asReferenceTo: INDEX_1NSHH. at: ScalarKeyValue put: 3;
+tempList do:["-" print;
+      ^self do:[ ^self print:10;]; newLine print];
+
+
+"
+# 1 column, N rows, Some rows empty, Polymorphic content, Uniform key
+" 
+
+print;
+storeN __define: 'INDEX_1NSPU';
+!tempList <- storeN :INDEX_1NSPU instanceList;
+storeN :INDEX_1NSPU at:ScalarDate put: 2;
+2 asReferenceTo: storeN . :INDEX_1NSPU at:ScalarDate put: 4.5;
+tempList do:["-" print;
+      ^self do:["["print;^date print; ^self print:6; "], "print]; newLine print];
+
+"
+# 1 column, N rows, 0 rows empty, Homomorphic content, Uniform key
+" 
+
+print;
+storeN __define: 'INDEX_1N0HU';
+!tempList <- storeN :INDEX_1N0HU instanceList;
+!tempListX <- tempList rankUp: [1];
+tempListX do:[^self at: ^my ScalarDate put: rank];
+tempList do:["-" print;
+      ^self do:["["print;^date print; ^self print:6; "], "print]; newLine print];
+
+"
+# 1 column, N rows, 0 rows empty, Homomorphic content, Homomorphic vector key
+"
+
+print;
+!INDEX_1N0HH <- Prototypical IndexedList new;
+ForAllDefinedRows do:[^my INDEX_1N0HH clusterNew];
+!tempList <- INDEX_1N0HH instanceList;
+!tempListX <- tempList rankUp: [1];
+tempListX do: [^self at: ^my ScalarKeyValue put: rank];
+tempList do:["-" print;
+      ^self do:[ ^self print:10;]; newLine print];
+
+"
+# 1 column, N rows, 0 rows empty, Polymorphic content, Uniform key
+" 
+
+print;
+storeN __define: 'INDEX_1N0PU';
+!tempList <- storeN :INDEX_1N0PU instanceList;
+!tempListX <- tempList rankUp: [1];
+tempListX do:[^self 
+	at: ^my ScalarDate 
+	put: (rank isEven 
+		ifTrue:[rank] 
+		ifFalse:[rank/2])
+      ];
+tempList do:["-" print;
+      ^self do:["["print;^date print; ^self print:6; "], "print]; newLine print];
+
+"
+# M columns, 1 row, Homomorphic content, Uniform key
+"
+
+print;
+store1 __define: 'INDEX_M1_HU';
+UniformKeyListFull evaluate: [store1 :INDEX_M1_HU at: ^date put: ^date genInt];
+store1 :INDEX_M1_HU do:["["print;^date print; ^self print:6; "], "print];
+
+
+"
+# M columns, 1 row, Homomorphic content,  Homomorphic vector key
+"
+
+print;
+!INDEX_M1_HH <- Prototypical IndexedList new;
+INDEX_M1_HH generateHomomorphicRowFor: HomomorphicKeyListFull;
+INDEX_M1_HH do:[ ^self print:10;];
+
+"
+# M columns, 1 row, Homomorphic content,  Polymorphic vector key
+"
+
+print;
+!INDEX_M1_HP <- Prototypical IndexedList new;
+INDEX_M1_HP generateHomomorphicRowFor: PolymorphicKeyListFull;
+INDEX_M1_HP do:[ ^self print:10;];
+
+"
+# M columns, 1 row, Polymorphic content, Uniform key
+"
+
+print;
+store1 __define: 'INDEX_M1_PU';
+UniformKeyListFull
+	 evaluate: 
+	 	[store1 :INDEX_M1_PU 
+			at: ^date 
+			put: (^date asInteger isEven
+				ifTrue: [^date genInt]
+				ifFalse:[^date genInt/2])
+		];
+store1 :INDEX_M1_PU do:["["print;^date print; ^self print:6; "], "print];
+
+"
+# M columns, 1 row, Polymorphic content, Polymorphic vector key
+"
+
+print;
+!INDEX_M1_PP <- Prototypical IndexedList new;
+INDEX_M1_PP generatePolymorphicRowFor: PolymorphicKeyListFull;
+INDEX_M1_PP do:[ ^self print:10;];
+
+"
+# M columns, N rows, All rows but one empty, Homomorphic content, 
+# 					     Uniform key
+"
+
+print;
+storeN __define: 'INDEX_MNAHU';
+!tempList <- storeN :INDEX_MNAHU instanceList;
+UniformKeyListFull evaluate: [storeN :INDEX_MNAHU at:^date put: ^date genInt];
+tempList do:["-" print;
+      ^self do:["["print;^date print; ^self print:6; "], "print];newLine print];
+
+"
+# M columns, N rows, All rows but one empty, Homomorphic content, 
+# 					     Homomorphic vector key
+"
+
+print;
+!INDEX_MNAHH <- Prototypical IndexedList new;
+ForAllDefinedRows do:[^my INDEX_MNAHH clusterNew];
+!tempList <- INDEX_MNAHH instanceList;
+INDEX_MNAHH generateHomomorphicRowFor: HomomorphicKeyListFull;
+tempList do:["-" print;
+      ^self do:[ ^self print:10;]; newLine print];
+
+"
+# M columns, N rows, All rows but one empty, Homomorphic content, 
+# 					     Polymorphic vector key
+"
+
+print;
+!INDEX_MNAHP <- Prototypical IndexedList new;
+ForAllDefinedRows do:[^my INDEX_MNAHP clusterNew];
+!tempList <- INDEX_MNAHP instanceList;
+INDEX_MNAHP generateHomomorphicRowFor: PolymorphicKeyListFull;
+tempList do:["-" print;
+      ^self do:[ ^self print:10;]; newLine print];
+
+"
+# M columns, N rows, All rows but one empty, Polymorphic content, 
+#					     Uniform key
+" 
+
+print;
+storeN __define: 'INDEX_MNAPU';
+!tempList <- storeN :INDEX_MNAPU instanceList;
+UniformKeyListFull evaluate:
+		[
+		 storeN :INDEX_MNAPU 
+		 	at:^date 
+			put: (^date asInteger isEven
+				ifTrue: [^date genInt]
+				ifFalse:[^date genInt/2])
+		];
+tempList do:["-" print;
+      ^self do:["["print;^date print; ^self print:6; "], "print];newLine print];
+"
+# M columns, N rows, All rows but one empty, Polymorphic content, 
+#					     Polymorphic vector key
+" 
+
+print;
+!INDEX_MNAPP <- Prototypical IndexedList new;
+ForAllDefinedRows do:[^my INDEX_MNAPP clusterNew];
+!tempList <- INDEX_MNAPP instanceList;
+INDEX_MNAPP generatePolymorphicRowFor: PolymorphicKeyListFull;
+tempList do:["-" print;
+      ^self do:[ ^self print:10;]; newLine print];
+
+"
+# M columns, N rows, Some empty rows, Homomorphic content, Uniform key, Full
+" 
+
+print;
+storeN __define: 'INDEX_MNSHUF';
+!tempList <- storeN :INDEX_MNSHUF instanceList;
+ForTheSpecifiedRows do:
+	[
+	    ^my UniformKeyListFull evaluate: 
+	    	[
+		    ^self asReferenceTo: ^my storeN. :INDEX_MNSHUF
+			 at:^date 
+			 put: (^date genInt + ^self) asInteger
+		]
+	];
+tempList do:["-" print;
+      ^self do:["["print;^date print; ^self print:6; "], "print];newLine print];
+
+"
+# M columns, N rows, Some empty rows, Homomorphic content, Uniform key, 
+#							   Middle columns empty
+" 
+
+print;
+storeN __define: 'INDEX_MNSHUM';
+!tempList <- storeN :INDEX_MNSHUM instanceList;
+UniformKeyListFull evaluate: [storeN :INDEX_MNSHUM at:^date put: ^date genInt];
+ForTheSpecifiedRows do:
+	[
+	    ^my UniformKeyListMid evaluate: 
+	    	[
+		    ^self asReferenceTo: ^my storeN. :INDEX_MNSHUM
+			 at:^date 
+			 put: (^date genInt + ^self) asInteger
+		]
+	];
+tempList do:["-" print;
+      ^self do:["["print;^date print; ^self print:6; "], "print];newLine print];
+
+"
+# M columns, N rows, Some empty rows, Homomorphic content, Uniform key
+#							   High columns empty
+" 
+
+print;
+storeN __define: 'INDEX_MNSHUH';
+!tempList <- storeN :INDEX_MNSHUH instanceList;
+UniformKeyListFull evaluate: [storeN :INDEX_MNSHUH at:^date put: ^date genInt];
+ForTheSpecifiedRows do:
+	[
+	    ^my UniformKeyListHigh evaluate: 
+	    	[
+		    ^self asReferenceTo: ^my storeN. :INDEX_MNSHUH
+			 at:^date 
+			 put: (^date genInt + ^self) asInteger
+		]
+	];
+tempList do:["-" print;
+      ^self do:["["print;^date print; ^self print:6; "], "print];newLine print];
+
+"
+# M columns, N rows, Some empty rows, Homomorphic content, Uniform key
+#							   Low columns empty
+" 
+
+print;
+storeN __define: 'INDEX_MNSHUL';
+!tempList <- storeN :INDEX_MNSHUL instanceList;
+UniformKeyListFull evaluate: [storeN :INDEX_MNSHUL at:^date put: ^date genInt];
+ForTheSpecifiedRows do:
+	[
+	    ^my UniformKeyListLow evaluate: 
+	    	[
+		    ^self asReferenceTo: ^my storeN. :INDEX_MNSHUL
+			 at:^date 
+			 put: (^date genInt + ^self) asInteger
+		]
+	];
+tempList do:["-" print;
+      ^self do:["["print;^date print; ^self print:6; "], "print];newLine print];
+
+"
+# M columns, N rows, Some empty rows, Homomorphic content, 
+#				      Homomorphic vector key, Full
+" 
+
+print;
+!INDEX_MNSHHF <- Prototypical IndexedList new;
+ForAllDefinedRows do:[^my INDEX_MNSHHF clusterNew];
+!tempList <- INDEX_MNSHHF instanceList;
+ForTheSpecifiedRows do:
+	[ ^self asReferenceTo: ^my INDEX_MNSHHF. 
+		generateHomomorphicRowFor: ^my HomomorphicKeyListFull
+	];
+tempList do:["-" print;
+      ^self do:[ ^self print:10;]; newLine print];
+
+
+"
+# M columns, N rows, Some empty rows, Homomorphic content, 
+#				   Homomorphic vector key, Middle columns empty
+" 
+
+print;
+!INDEX_MNSHHM <- Prototypical IndexedList new;
+ForAllDefinedRows do:[^my INDEX_MNSHHM clusterNew];
+!tempList <- INDEX_MNSHHM instanceList;
+INDEX_MNSHHM generateHomomorphicRowFor: HomomorphicKeyListFull;
+ForTheSpecifiedRows do:
+	[ ^self asReferenceTo: ^my INDEX_MNSHHM. 
+		generateHomomorphicRowFor: ^my HomomorphicKeyListMid
+	];
+tempList do:["-" print;
+      ^self do:[ ^self print:10;]; newLine print];
+
+
+"
+# M columns, N rows, Some empty rows, Homomorphic content, 
+#				     Homomorphic vector key, High columns empty
+" 
+
+print;
+!INDEX_MNSHHH <- Prototypical IndexedList new;
+ForAllDefinedRows do:[^my INDEX_MNSHHH clusterNew];
+!tempList <- INDEX_MNSHHH instanceList;
+INDEX_MNSHHH generateHomomorphicRowFor: HomomorphicKeyListFull;
+ForTheSpecifiedRows do:
+	[ ^self asReferenceTo: ^my INDEX_MNSHHH. 
+		generateHomomorphicRowFor: ^my HomomorphicKeyListHigh
+	];
+tempList do:["-" print;
+      ^self do:[ ^self print:10;]; newLine print];
+
+
+"
+# M columns, N rows, Some empty rows, Homomorphic content, 
+#				      Homomorphic vector key, Low columns empty
+" 
+
+print;
+!INDEX_MNSHHL <- Prototypical IndexedList new;
+ForAllDefinedRows do:[^my INDEX_MNSHHL clusterNew];
+!tempList <- INDEX_MNSHHL instanceList;
+INDEX_MNSHHL generateHomomorphicRowFor: HomomorphicKeyListFull;
+ForTheSpecifiedRows do:
+	[ ^self asReferenceTo: ^my INDEX_MNSHHL. 
+		generateHomomorphicRowFor: ^my HomomorphicKeyListLow
+	];
+tempList do:["-" print;
+      ^self do:[ ^self print:10;]; newLine print];
+
+
+"
+# M columns, N rows, Some empty rows, Homomorphic content, 
+#				      Polymorphic vector key, Full
+" 
+
+print;
+!INDEX_MNSHPF <- Prototypical IndexedList new;
+ForAllDefinedRows do:[^my INDEX_MNSHPF clusterNew];
+!tempList <- INDEX_MNSHPF instanceList;
+ForTheSpecifiedRows do:
+	[ ^self asReferenceTo: ^my INDEX_MNSHPF. 
+		generateHomomorphicRowFor: ^my PolymorphicKeyListFull
+	];
+tempList do:["-" print;
+      ^self do:[ ^self print:10;]; newLine print];
+
+"
+# M columns, N rows, Some empty rows, Homomorphic content, 
+#				   Polymorphic vector key, Middle columns empty
+" 
+
+print;
+!INDEX_MNSHPM <- Prototypical IndexedList new;
+ForAllDefinedRows do:[^my INDEX_MNSHPM clusterNew];
+!tempList <- INDEX_MNSHPM instanceList;
+INDEX_MNSHPM generateHomomorphicRowFor: PolymorphicKeyListFull;
+ForTheSpecifiedRows do:
+	[ ^self asReferenceTo: ^my INDEX_MNSHPM. 
+		generateHomomorphicRowFor: ^my PolymorphicKeyListMid
+	];
+tempList do:["-" print;
+      ^self do:[ ^self print:10;]; newLine print];
+
+
+"
+# M columns, N rows, Some empty rows, Homomorphic content, 
+#				    Polymorphic vector key, High columns empty
+" 
+
+print;
+!INDEX_MNSHPH <- Prototypical IndexedList new;
+ForAllDefinedRows do:[^my INDEX_MNSHPH clusterNew];
+!tempList <- INDEX_MNSHPH instanceList;
+INDEX_MNSHPH generateHomomorphicRowFor: PolymorphicKeyListFull;
+ForTheSpecifiedRows do:
+	[ ^self asReferenceTo: ^my INDEX_MNSHPH. 
+		generateHomomorphicRowFor: ^my PolymorphicKeyListHigh
+	];
+tempList do:["-" print;
+      ^self do:[ ^self print:10;]; newLine print];
+
+"
+# M columns, N rows, Some empty rows, Homomorphic content, 
+#				      Polymorphic vector key, Low columns empty
+" 
+
+print;
+!INDEX_MNSHPL <- Prototypical IndexedList new;
+ForAllDefinedRows do:[^my INDEX_MNSHPL clusterNew];
+!tempList <- INDEX_MNSHPL instanceList;
+INDEX_MNSHPL generateHomomorphicRowFor: PolymorphicKeyListFull;
+ForTheSpecifiedRows do:
+	[ ^self asReferenceTo: ^my INDEX_MNSHPL. 
+		generateHomomorphicRowFor: ^my PolymorphicKeyListLow
+	];
+tempList do:["-" print;
+      ^self do:[ ^self print:10;]; newLine print];
+
+"
+# M columns, N rows, Some empty rows, Polymorphic content, Uniform key, Full
+" 
+
+print;
+storeN __define: 'INDEX_MNSPUF';
+!tempList <- storeN :INDEX_MNSPUF instanceList;
+ForTheSpecifiedRows do:
+	[
+	    ^my UniformKeyListFull evaluate: 
+	    	[
+		    ^self asReferenceTo: ^my storeN. :INDEX_MNSPUF
+			 at:  ^date 
+			 put: ((^date genInt + ^self) asInteger isEven
+			 	ifTrue: [^date genInt + ^self]
+				ifFalse:[(^date genInt + ^self) asInteger])
+		]
+	];
+tempList do:["-" print;
+      ^self do:["["print;^date print; ^self print:6; "], "print];newLine print];
+
+"
+# M columns, N rows, Some empty rows, Polymorphic content, Uniform key
+#							   Middle columns empty
+" 
+
+print;
+storeN __define: 'INDEX_MNSPUM';
+!tempList <- storeN :INDEX_MNSPUM instanceList;
+UniformKeyListFull evaluate:
+		[
+		 storeN :INDEX_MNSPUM
+		 	at:^date 
+			put: (^date asInteger isEven
+				ifTrue: [^date genInt]
+				ifFalse:[^date genInt/2])
+		];
+ForTheSpecifiedRows do:
+	[
+	    ^my UniformKeyListMid evaluate: 
+	    	[
+		    ^self asReferenceTo: ^my storeN. :INDEX_MNSPUM
+			 at:  ^date 
+			 put: ((^date genInt + ^self) asInteger isEven
+			 	ifTrue: [^date genInt + ^self]
+				ifFalse:[(^date genInt + ^self) asInteger])
+		]
+	];
+tempList do:["-" print;
+      ^self do:["["print;^date print; ^self print:6; "], "print];newLine print];
+
+"
+# M columns, N rows, Some empty rows, Polymorphic content, Uniform key
+#							   High columns empty
+" 
+
+print;
+storeN __define: 'INDEX_MNSPUH';
+!tempList <- storeN :INDEX_MNSPUH instanceList;
+UniformKeyListFull evaluate:
+		[
+		 storeN :INDEX_MNSPUH
+		 	at:^date 
+			put: (^date asInteger isEven
+				ifTrue: [^date genInt]
+				ifFalse:[^date genInt/2])
+		];
+ForTheSpecifiedRows do:
+	[
+	    ^my UniformKeyListHigh evaluate: 
+	    	[
+		    ^self asReferenceTo: ^my storeN. :INDEX_MNSPUH
+			 at:  ^date 
+			 put: ((^date genInt + ^self) asInteger isEven
+			 	ifTrue: [^date genInt + ^self]
+				ifFalse:[(^date genInt + ^self) asInteger])
+		]
+	];
+tempList do:["-" print;
+      ^self do:["["print;^date print; ^self print:6; "], "print];newLine print];
+
+"
+# M columns, N rows, Some empty rows, Polymorphic content, Uniform key
+#							   Low columns empty
+" 
+
+print;
+storeN __define: 'INDEX_MNSPUL';
+!tempList <- storeN :INDEX_MNSPUL instanceList;
+UniformKeyListFull evaluate:
+		[
+		 storeN :INDEX_MNSPUL
+		 	at:^date 
+			put: (^date asInteger isEven
+				ifTrue: [^date genInt]
+				ifFalse:[^date genInt/2])
+		];
+ForTheSpecifiedRows do:
+	[
+	    ^my UniformKeyListLow evaluate: 
+	    	[
+		    ^self asReferenceTo: ^my storeN. :INDEX_MNSPUL
+			 at:  ^date 
+			 put: ((^date genInt + ^self) asInteger isEven
+			 	ifTrue: [^date genInt + ^self]
+				ifFalse:[(^date genInt + ^self) asInteger])
+		]
+	];
+tempList do:["-" print;
+      ^self do:["["print;^date print; ^self print:6; "], "print];newLine print];
+
+
+"
+# M columns, N rows, Some empty rows, Polymorphic content, 
+#				      Polymorphic vector key, Full
+" 
+
+print;
+!INDEX_MNSPPF <- Prototypical IndexedList new;
+ForAllDefinedRows do:[^my INDEX_MNSPPF clusterNew];
+!tempList <- INDEX_MNSPPF instanceList;
+ForTheSpecifiedRows do:
+	[ ^self asReferenceTo: ^my INDEX_MNSPPF. 
+		generatePolymorphicRowFor: ^my PolymorphicKeyListFull
+	];
+tempList do:["-" print;
+      ^self do:[ ^self print:10;]; newLine print];
+
+"
+# M columns, N rows, Some empty rows, Polymorphic content, 
+#				   Polymorphic vector key, Middle columns empty
+" 
+
+print;
+!INDEX_MNSPPM <- Prototypical IndexedList new;
+ForAllDefinedRows do:[^my INDEX_MNSPPM clusterNew];
+!tempList <- INDEX_MNSPPM instanceList;
+INDEX_MNSPPM generatePolymorphicRowFor: PolymorphicKeyListFull;
+ForTheSpecifiedRows do:
+	[ ^self asReferenceTo: ^my INDEX_MNSPPM. 
+		generatePolymorphicRowFor: ^my PolymorphicKeyListMid
+	];
+tempList do:["-" print;
+      ^self do:[ ^self print:10;]; newLine print];
+
+"
+# M columns, N rows, Some empty rows, Polymorphic content, 
+#				    Polymorphic vector key, High columns empty
+" 
+
+print;
+!INDEX_MNSPPH <- Prototypical IndexedList new;
+ForAllDefinedRows do:[^my INDEX_MNSPPH clusterNew];
+!tempList <- INDEX_MNSPPH instanceList;
+INDEX_MNSPPH generatePolymorphicRowFor: PolymorphicKeyListFull;
+ForTheSpecifiedRows do:
+	[ ^self asReferenceTo: ^my INDEX_MNSPPH. 
+		generatePolymorphicRowFor: ^my PolymorphicKeyListHigh
+	];
+tempList do:["-" print;
+      ^self do:[ ^self print:10;]; newLine print];
+
+"
+# M columns, N rows, Some empty rows, Polymorphic content, 
+#				      Polymorphic vector key, Low columns empty
+" 
+
+print;
+!INDEX_MNSPPL <- Prototypical IndexedList new;
+ForAllDefinedRows do:[^my INDEX_MNSPPL clusterNew];
+!tempList <- INDEX_MNSPPL instanceList;
+INDEX_MNSPPL generatePolymorphicRowFor: PolymorphicKeyListFull;
+ForTheSpecifiedRows do:
+	[ ^self asReferenceTo: ^my INDEX_MNSPPL. 
+		generatePolymorphicRowFor: ^my PolymorphicKeyListLow
+	];
+tempList do:["-" print;
+      ^self do:[ ^self print:10;]; newLine print];
+
+"
+# M columns, N rows, 0 empty rows, Homomorphic content, Uniform key, Full
+" 
+
+print;
+storeN __define: 'INDEX_MN0HUF';
+!tempList <- storeN :INDEX_MN0HUF instanceList;
+tempList do:[^my UniformKeyListFull evaluate: [^self at: ^date put: ^date genInt]];
+tempList do:["-" print;
+      ^self do:["["print;^date print; ^self print:6; "], "print]; newLine print];
+
+"
+# M columns, N rows, 0 empty rows, Homomorphic content, Uniform key,
+#							Middle columns empty
+" 
+
+print;
+storeN __define: 'INDEX_MN0HUM';
+!tempList <- storeN :INDEX_MN0HUM instanceList;
+UniformKeyListFull evaluate: [storeN :INDEX_MN0HUM at: ^date put: ^date genInt];
+tempList do:[^my UniformKeyListMid evaluate: [^self at: ^date put: ^date genInt]];
+tempList do:["-" print;
+      ^self do:["["print;^date print; ^self print:6; "], "print]; newLine print];
+
+"
+# M columns, N rows, 0 empty rows, Homomorphic content, Uniform key,
+#							High columns empty
+" 
+
+print;
+storeN __define: 'INDEX_MN0HUH';
+!tempList <- storeN :INDEX_MN0HUH instanceList;
+UniformKeyListFull evaluate: [storeN :INDEX_MN0HUH at: ^date put: ^date genInt];
+tempList do:[^my UniformKeyListHigh evaluate: [^self at: ^date put: ^date genInt]];
+tempList do:["-" print;
+      ^self do:["["print;^date print; ^self print:6; "], "print]; newLine print];
+
+"
+# M columns, N rows, 0 empty rows, Homomorphic content, Uniform key,
+#							Low columns empty
+" 
+
+print;
+storeN __define: 'INDEX_MN0HUL';
+!tempList <- storeN :INDEX_MN0HUL instanceList;
+UniformKeyListFull evaluate: [storeN :INDEX_MN0HUL at: ^date put: ^date genInt];
+tempList do:[^my UniformKeyListLow evaluate: [^self at: ^date put: ^date genInt]];
+tempList do:["-" print;
+      ^self do:["["print;^date print; ^self print:6; "], "print]; newLine print];
+
+"
+# M columns, N rows, 0 empty rows, Homomorphic content, Homomorphic vector key
+#							Full
+" 
+
+print;
+!INDEX_MN0HHF <- Prototypical IndexedList new;
+ForAllDefinedRows do:[^my INDEX_MN0HHF clusterNew];
+!tempList <- INDEX_MN0HHF instanceList;
+tempList do: [ ^self generateHomomorphicRowFor: ^my HomomorphicKeyListFull];
+tempList do:["-" print;
+      ^self do:[ ^self print:10;]; newLine print];
+
+"
+# M columns, N rows, 0 empty rows, Homomorphic content, Homomorphic vector key
+#							Middle columns empty
+" 
+
+print;
+!INDEX_MN0HHM <- Prototypical IndexedList new;
+ForAllDefinedRows do:[^my INDEX_MN0HHM clusterNew];
+!tempList <- INDEX_MN0HHM instanceList;
+INDEX_MN0HHM generateHomomorphicRowFor: HomomorphicKeyListFull;
+tempList do: [ ^self generateHomomorphicRowFor: ^my HomomorphicKeyListMid];
+tempList do:["-" print;
+      ^self do:[ ^self print:10;]; newLine print];
+
+"
+# M columns, N rows, 0 empty rows, Homomorphic content, Homomorphic vector key
+#							High columns empty
+" 
+
+print;
+!INDEX_MN0HHH <- Prototypical IndexedList new;
+ForAllDefinedRows do:[^my INDEX_MN0HHH clusterNew];
+!tempList <- INDEX_MN0HHH instanceList;
+INDEX_MN0HHH generateHomomorphicRowFor: HomomorphicKeyListFull;
+tempList do: [ ^self generateHomomorphicRowFor: ^my HomomorphicKeyListHigh];
+tempList do:["-" print;
+      ^self do:[ ^self print:10;]; newLine print];
+
+"
+# M columns, N rows, 0 empty rows, Homomorphic content, Homomorphic vector key
+#							Low columns empty
+" 
+
+print;
+!INDEX_MN0HHL <- Prototypical IndexedList new;
+ForAllDefinedRows do:[^my INDEX_MN0HHL clusterNew];
+!tempList <- INDEX_MN0HHL instanceList;
+INDEX_MN0HHL generateHomomorphicRowFor: HomomorphicKeyListFull;
+tempList do: [ ^self generateHomomorphicRowFor: ^my HomomorphicKeyListLow];
+tempList do:["-" print;
+      ^self do:[ ^self print:10;]; newLine print];
+
+
+"
+# M columns, N rows, 0 empty rows, Homomorphic content, Polymorphic vector key
+#							Full
+" 
+
+print;
+!INDEX_MN0HPF <- Prototypical IndexedList new;
+ForAllDefinedRows do:[^my INDEX_MN0HPF clusterNew];
+!tempList <- INDEX_MN0HPF instanceList;
+tempList do: [ ^self generateHomomorphicRowFor: ^my PolymorphicKeyListFull];
+tempList do:["-" print;
+      ^self do:[ ^self print:10;]; newLine print];
+
+"
+# M columns, N rows, 0 empty rows, Homomorphic content, Polymorphic vector key
+#							Middle columns empty
+" 
+
+print;
+!INDEX_MN0HPM <- Prototypical IndexedList new;
+ForAllDefinedRows do:[^my INDEX_MN0HPM clusterNew];
+!tempList <- INDEX_MN0HPM instanceList;
+INDEX_MN0HPM generateHomomorphicRowFor: PolymorphicKeyListFull;
+tempList do: [ ^self generateHomomorphicRowFor: ^my PolymorphicKeyListMid];
+tempList do:["-" print;
+      ^self do:[ ^self print:10;]; newLine print];
+
+"
+# M columns, N rows, 0 empty rows, Homomorphic content, Polymorphic vector key
+#							High columns empty
+" 
+
+print;
+!INDEX_MN0HPH <- Prototypical IndexedList new;
+ForAllDefinedRows do:[^my INDEX_MN0HPH clusterNew];
+!tempList <- INDEX_MN0HPH instanceList;
+INDEX_MN0HPH generateHomomorphicRowFor: PolymorphicKeyListFull;
+tempList do: [ ^self generateHomomorphicRowFor: ^my PolymorphicKeyListHigh];
+tempList do:["-" print;
+      ^self do:[ ^self print:10;]; newLine print];
+
+"
+# M columns, N rows, 0 empty rows, Homomorphic content, Polymorphic vector key
+#							Low columns empty
+" 
+
+print;
+!INDEX_MN0HPL <- Prototypical IndexedList new;
+ForAllDefinedRows do:[^my INDEX_MN0HPL clusterNew];
+!tempList <- INDEX_MN0HPL instanceList;
+INDEX_MN0HPL generateHomomorphicRowFor: PolymorphicKeyListFull;
+tempList do: [ ^self generateHomomorphicRowFor: ^my PolymorphicKeyListLow];
+tempList do:["-" print;
+      ^self do:[ ^self print:10;]; newLine print];
+
+
+"
+# M columns, N rows, 0 empty rows, Polymorphic content, Uniform key,
+#							Full
+" 
+
+print;
+storeN __define: 'INDEX_MN0PUF';
+!tempList <- storeN :INDEX_MN0PUF instanceList;
+!tempListX <- tempList rankUp:[1];
+tempListX do:	[
+	    ^my UniformKeyListFull evaluate: 
+	    	[
+		    ^self
+			 at:  ^date 
+			 put: ((^date genInt) asInteger isEven
+			 	ifTrue: [^date genInt * rank]
+				ifFalse:[(^date genInt * rank) asInteger])
+		]
+	];
+tempList do:["-" print;
+      ^self do:["["print;^date print; ^self print:6; "], "print]; newLine print];
+
+
+"
+# M columns, N rows, 0 empty rows, Polymorphic content, Uniform key,
+#							Middle columns empty
+" 
+
+print;
+storeN __define: 'INDEX_MN0PUM';
+!tempList <- storeN :INDEX_MN0PUM instanceList;
+!tempListX <- tempList rankUp:[1];
+UniformKeyListFull evaluate:
+		[
+		 storeN :INDEX_MN0PUM
+		 	at:^date 
+			put: (^date asInteger isEven
+				ifTrue: [^date genInt]
+				ifFalse:[^date genInt/2])
+		];
+tempListX do:	[
+	    ^my UniformKeyListMid evaluate: 
+	    	[
+		    ^self
+			 at:  ^date 
+			 put: ((^date genInt) asInteger isEven
+			 	ifTrue: [^date genInt * rank]
+				ifFalse:[(^date genInt * rank) asInteger])
+		]
+	];
+tempList do:["-" print;
+      ^self do:["["print;^date print; ^self print:6; "], "print]; newLine print];
+
+
+"
+# M columns, N rows, 0 empty rows, Polymorphic content, Uniform key,
+#							High columns empty
+" 
+
+print;
+storeN __define: 'INDEX_MN0PUH';
+!tempList <- storeN :INDEX_MN0PUH instanceList;
+!tempListX <- tempList rankUp:[1];
+UniformKeyListFull evaluate:
+		[
+		 storeN :INDEX_MN0PUH
+		 	at:^date 
+			put: (^date asInteger isEven
+				ifTrue: [^date genInt]
+				ifFalse:[^date genInt/2])
+		];
+tempListX do:	[
+	    ^my UniformKeyListHigh evaluate: 
+	    	[
+		    ^self
+			 at:  ^date 
+			 put: ((^date genInt) asInteger isEven
+			 	ifTrue: [^date genInt * rank]
+				ifFalse:[(^date genInt * rank) asInteger])
+		]
+	];
+tempList do:["-" print;
+      ^self do:["["print;^date print; ^self print:6; "], "print]; newLine print];
+
+
+"
+# M columns, N rows, 0 empty rows, Polymorphic content, Uniform key,
+#							Low columns empty
+" 
+
+print;
+storeN __define: 'INDEX_MN0PUL';
+!tempList <- storeN :INDEX_MN0PUL instanceList;
+!tempListX <- tempList rankUp:[1];
+UniformKeyListFull evaluate:
+		[
+		 storeN :INDEX_MN0PUL
+		 	at:^date 
+			put: (^date asInteger isEven
+				ifTrue: [^date genInt]
+				ifFalse:[^date genInt/2])
+		];
+tempListX do:	[
+	    ^my UniformKeyListLow evaluate: 
+	    	[
+		    ^self
+			 at:  ^date 
+			 put: ((^date genInt) asInteger isEven
+			 	ifTrue: [^date genInt * rank]
+				ifFalse:[(^date genInt * rank) asInteger])
+		]
+	];
+tempList do:["-" print;
+      ^self do:["["print;^date print; ^self print:6; "], "print]; newLine print];
+
+
+"
+# M columns, N rows, 0 empty rows, Polymorphic content, Polymorphic vector key
+#							Full
+" 
+
+print;
+!INDEX_MN0PPF <- Prototypical IndexedList new;
+ForAllDefinedRows do:[^my INDEX_MN0PPF clusterNew];
+!tempList <- INDEX_MN0PPF instanceList;
+tempList do: [ ^self generatePolymorphicRowFor: ^my PolymorphicKeyListFull];
+tempList do:["-" print;
+      ^self do:[ ^self print:10;]; newLine print];
+
+"
+# M columns, N rows, 0 empty rows, Polymorphic content, Polymorphic vector key
+#							Middle columns empty
+" 
+
+print;
+!INDEX_MN0PPM <- Prototypical IndexedList new;
+ForAllDefinedRows do:[^my INDEX_MN0PPM clusterNew];
+!tempList <- INDEX_MN0PPM instanceList;
+INDEX_MN0PPM generatePolymorphicRowFor: PolymorphicKeyListFull;
+tempList do: [ ^self generatePolymorphicRowFor: ^my PolymorphicKeyListMid];
+tempList do:["-" print;
+      ^self do:[ ^self print:10;]; newLine print];
+
+"
+# M columns, N rows, 0 empty rows, Polymorphic content, Polymorphic vector key
+#							High columns empty
+" 
+
+print;
+!INDEX_MN0PPH <- Prototypical IndexedList new;
+ForAllDefinedRows do:[^my INDEX_MN0PPH clusterNew];
+!tempList <- INDEX_MN0PPH instanceList;
+INDEX_MN0PPH generatePolymorphicRowFor: PolymorphicKeyListFull;
+tempList do: [ ^self generatePolymorphicRowFor: ^my PolymorphicKeyListHigh];
+tempList do:["-" print;
+      ^self do:[ ^self print:10;]; newLine print];
+
+"
+# M columns, N rows, 0 empty rows, Polymorphic content, Polymorphic vector key
+#							Low columns empty
+" 
+
+print;
+!INDEX_MN0PPL <- Prototypical IndexedList new;
+ForAllDefinedRows do:[^my INDEX_MN0PPL clusterNew];
+!tempList <- INDEX_MN0PPL instanceList;
+INDEX_MN0PPL generatePolymorphicRowFor: PolymorphicKeyListFull;
+tempList do: [ ^self generatePolymorphicRowFor: ^my PolymorphicKeyListLow];
+tempList do:["-" print;
+      ^self do:[ ^self print:10;]; newLine print];
+"
+#----------------------------------------------------------
+#  Lookup Tests (RTindex)
+#----------------------------------------------------------
+" printNL;
+
+
+Prototypical TimeSeries defineMethod:
+	[|defineDeleteAt: key|
+		!result <- ^self at: key;
+		!effectiveDate <- ^self effectiveDateAsOf: key;
+		!nextDate <- ^self nextDateAsOf: key;
+		^self at: key put: ^my SpecialValue;
+		^self at: key. print;
+
+		effectiveDate print;
+		nextDate print;
+
+		^self delete: key;
+		^self at: key. print;
+
+		effectiveDate == key
+			ifTrue: [^self at: key put: result];
+		result
+	];
+
+Prototypical TimeSeries defineMethod:
+[|tsLookupTest_R|
+	!ts <- ^self;
+	!l <- ts instanceList;
+	!count <- l count asInteger;
+	!lastRow <- (count - 1) asInteger;
+	!instance1 <- 0 asReferenceTo: ts;
+	!instance2 <- lastRow asReferenceTo: ts;
+	!instance3 <- count asReferenceTo: ts;
+
+	^my printBorder;
+
+"SKeyRefList 'defineDeleteAt:'" printNL;
+	^global ScalarDate print;
+	(instance3 defineDeleteAt:^global ScalarDate) print;
+	(instance1 defineDeleteAt:^global ScalarDate) print;
+	(instance2 defineDeleteAt:^global ScalarDate) printNL;
+
+	^global StartDate print;
+	(instance3 defineDeleteAt:^global StartDate) print;
+	(instance1 defineDeleteAt:^global StartDate) print;
+	(instance2 defineDeleteAt:^global StartDate) printNL;
+
+	^global EndDate print;
+	(instance3 defineDeleteAt:^global EndDate) print;
+	(instance1 defineDeleteAt:^global EndDate) print;
+	(instance2 defineDeleteAt:^global EndDate) printNL;
+
+	(^global EndDate + 1 days) print;
+	(instance3 defineDeleteAt:^global EndDate + 1 days) print;
+	(instance1 defineDeleteAt:^global EndDate + 1 days) print;
+	(instance2 defineDeleteAt:^global EndDate + 1 days) printNL;
+
+	(^global StartDate - 1 days) print;
+	(instance3 defineDeleteAt:^global StartDate - 1 days) print;
+	(instance1 defineDeleteAt:^global StartDate - 1 days) print;
+	(instance2 defineDeleteAt:^global StartDate - 1 days) printNL;
+];
+Prototypical TimeSeries defineMethod:
+[|tsLookupTest_RS|
+	!ts <- ^self;
+	!l <- ts instanceList;
+	!count <- l count asInteger;
+	!lastRow <- (count - 1) asInteger;
+	!instance1 <- 0 asReferenceTo: ts;
+	!instance2 <- lastRow asReferenceTo: ts;
+	!instance3 <- count asReferenceTo: ts;
+	!instance4 <- 2 asReferenceTo: ts;
+
+	^my printBorder;
+
+"SKeyRefList 'defineDeleteAt:'" printNL;
+	^global ScalarDate print;
+	(instance1 defineDeleteAt:^global ScalarDate) print;
+	(instance2 defineDeleteAt:^global ScalarDate) print;
+	(instance3 defineDeleteAt:^global ScalarDate) print;
+	(instance4 defineDeleteAt:^global ScalarDate) printNL;
+
+	^global StartDate print;
+	(instance1 defineDeleteAt:^global StartDate) print;
+	(instance2 defineDeleteAt:^global StartDate) print;
+	(instance3 defineDeleteAt:^global StartDate) print;
+	(instance4 defineDeleteAt:^global StartDate) printNL;
+
+	^global EndDate print;
+	(instance1 defineDeleteAt:^global EndDate) print;
+	(instance2 defineDeleteAt:^global EndDate) print;
+	(instance3 defineDeleteAt:^global EndDate) print;
+	(instance4 defineDeleteAt:^global EndDate) printNL;
+
+	(^global EndDate + 1 days) print;
+	(instance1 defineDeleteAt:^global EndDate + 1 days) print;
+	(instance2 defineDeleteAt:^global EndDate + 1 days) print;
+	(instance3 defineDeleteAt:^global EndDate + 1 days) print;
+	(instance4 defineDeleteAt:^global EndDate + 1 days) printNL;
+
+	(^global StartDate - 1 days) print;
+	(instance1 defineDeleteAt:^global StartDate - 1 days) print;
+	(instance2 defineDeleteAt:^global StartDate - 1 days) print;
+	(instance3 defineDeleteAt:^global StartDate - 1 days) print;
+	(instance4 defineDeleteAt:^global StartDate - 1 days) printNL;
+];
+Prototypical TimeSeries defineMethod:
+[|tsLookupTest_S|
+	!l <- ^self instanceList;
+	l, (-1 asReferenceTo: ^self); # add ReferenceNil to list
+
+	^my printBorder;
+"SKeyLCList 'defineDeleteAt:'" printNL;
+	^global ScalarDate print;
+	l do:[^self defineDeleteAt:^global ScalarDate. print];
+	newLine print;
+	^global StartDate print;
+	l do:[^self defineDeleteAt:^global StartDate. print];
+	newLine print;
+	^global EndDate print;
+	l do:[^self defineDeleteAt:^global EndDate. print];
+	newLine print;
+	(^global EndDate + 1 days) print;
+	l do:[^self defineDeleteAt:^global EndDate + 1 days. print];
+	newLine print;
+	(^global StartDate - 1 days) print;
+	l do:[^self defineDeleteAt:^global StartDate - 1 days. print];
+	newLine print;
+];
+Prototypical TimeSeries defineMethod:
+[|tsLookupTest_NS|
+	!l <- ^self instanceList;
+	l, (-1 asReferenceTo: ^self); # add ReferenceNil to list
+
+	^my printBorder;
+	^global UniformKeyListFull evaluate:[^date print;^my SpecialValue print];
+	newLine print;
+
+"NSKeyLCList 'defineDeleteAt:'" printNL;
+	l do:[
+	    ^global UniformKeyListFull evaluate:[^self defineDeleteAt:^date. print];
+	    newLine print;
+	     ];
+];
+Prototypical TimeSeries defineMethod:
+[|deleteColumnTest_NS|
+	!l <- ^self instanceList;
+	l, (-1 asReferenceTo: ^self); # add ReferenceNil to list
+
+	^my printBorder;
+	^global UniformKeyListFull evaluate:[^date print;];
+	newLine print;
+
+" 'deleteColumn:'" printNL;
+ 
+   ^global UniformKeyListMid evaluate:[^self deleteColumn];
+
+	l do:[
+	    ^self do:[];
+	    ^global UniformKeyListFull evaluate: [^self asOf: ^date. print];
+	    newLine print;
+	     ];
+
+   ^global UniformKeyListFull evaluate:[^self deleteColumn];
+
+	l do:[
+	    ^self do:[];
+	    ^global UniformKeyListFull evaluate: [^self asOf: ^date. print];
+	    newLine print;
+	     ];
+];
+
+!DoubleKeyValue <- 2.0;
+!EntityKeyValue <- NewEntity;
+!NegativeKeyValue <- -100;
+!HugeKeyValue <- 2000000;
+!SpecialValue <- "---";
+
+Prototypical IndexedList defineMethod:
+	[|defineDeleteAt: key|
+		!result <- ^self at: key;
+		^self at: key put: ^my SpecialValue;
+		^self at: key. print;
+		^self delete: key;
+		^self at: key. print;
+		result isntNA
+			ifTrue: [^self at: key put: result];
+		result
+	];
+Prototypical IndexedList defineMethod:
+[|indexLookupTest_R|
+	!index <- ^self;
+	!l <- index instanceList;
+	!count <- l count asInteger;
+	!lastRow <- (count - 1) asInteger;
+	!instance1 <- 0 asReferenceTo: index;
+	!instance2 <- lastRow asReferenceTo: index;
+	!instance3 <- count asReferenceTo: index;
+
+	^my printBorder;
+
+"SKeyRefList 'defineDeleteAt:'" printNL;
+	^global ScalarKeyValue print;
+	(instance3 defineDeleteAt:^global ScalarKeyValue) print;
+	(instance1 defineDeleteAt:^global ScalarKeyValue) print;
+	(instance2 defineDeleteAt:^global ScalarKeyValue) printNL;
+
+	^global DoubleKeyValue print;
+	(instance3 defineDeleteAt:^global DoubleKeyValue) print;
+	(instance1 defineDeleteAt:^global DoubleKeyValue) print;
+	(instance2 defineDeleteAt:^global DoubleKeyValue) printNL;
+
+	^global EntityKeyValue name print;
+	(instance3 defineDeleteAt:^global EntityKeyValue) print;
+	(instance1 defineDeleteAt:^global EntityKeyValue) print;
+	(instance2 defineDeleteAt:^global EntityKeyValue) printNL;
+
+	(^global NegativeKeyValue) print;
+	(instance3 defineDeleteAt:^global NegativeKeyValue) print;
+	(instance1 defineDeleteAt:^global NegativeKeyValue) print;
+	(instance2 defineDeleteAt:^global NegativeKeyValue) printNL;
+
+	(^global HugeKeyValue) print;
+	(instance3 defineDeleteAt:^global HugeKeyValue) print;
+	(instance1 defineDeleteAt:^global HugeKeyValue) print;
+	(instance2 defineDeleteAt:^global HugeKeyValue) printNL;
+];
+Prototypical IndexedList defineMethod:
+[|indexLookupTest_RS|
+	!index <- ^self;
+	!l <- index instanceList;
+	!count <- l count asInteger;
+	!lastRow <- (count - 1) asInteger;
+	!instance1 <- 0 asReferenceTo: index;
+	!instance2 <- lastRow asReferenceTo: index;
+	!instance3 <- count asReferenceTo: index;
+	!instance4 <- 2 asReferenceTo: index;
+
+	^my printBorder;
+
+"SKeyRefList 'defineDeleteAt:'" printNL;
+	^global ScalarKeyValue print;
+	(instance1 defineDeleteAt:^global ScalarKeyValue) print;
+	(instance2 defineDeleteAt:^global ScalarKeyValue) print;
+	(instance3 defineDeleteAt:^global ScalarKeyValue) print;
+	(instance4 defineDeleteAt:^global ScalarKeyValue) printNL;
+
+	^global DoubleKeyValue print;
+	(instance1 defineDeleteAt:^global DoubleKeyValue) print;
+	(instance2 defineDeleteAt:^global DoubleKeyValue) print;
+	(instance3 defineDeleteAt:^global DoubleKeyValue) print;
+	(instance4 defineDeleteAt:^global DoubleKeyValue) printNL;
+
+	^global EntityKeyValue name print;
+	(instance1 defineDeleteAt:^global EntityKeyValue) print;
+	(instance2 defineDeleteAt:^global EntityKeyValue) print;
+	(instance3 defineDeleteAt:^global EntityKeyValue) print;
+	(instance4 defineDeleteAt:^global EntityKeyValue) printNL;
+
+	(^global NegativeKeyValue) print;
+	(instance1 defineDeleteAt:^global NegativeKeyValue) print;
+	(instance2 defineDeleteAt:^global NegativeKeyValue) print;
+	(instance3 defineDeleteAt:^global NegativeKeyValue) print;
+	(instance4 defineDeleteAt:^global NegativeKeyValue) printNL;
+
+	(^global HugeKeyValue) print;
+	(instance1 defineDeleteAt:^global HugeKeyValue) print;
+	(instance2 defineDeleteAt:^global HugeKeyValue) print;
+	(instance3 defineDeleteAt:^global HugeKeyValue) print;
+	(instance4 defineDeleteAt:^global HugeKeyValue) printNL;
+];
+Prototypical IndexedList defineMethod:
+[|indexLookupTest_S|
+	!l <- ^self instanceList;
+	l, (-1 asReferenceTo: ^self); # add ReferenceNil to list
+
+	^my printBorder;
+"SKeyLCList 'defineDeleteAt:'" printNL;
+	^global ScalarKeyValue print;
+	l do:[^self defineDeleteAt:^global ScalarKeyValue. print];
+	newLine print;
+	^global DoubleKeyValue print;
+	l do:[^self defineDeleteAt:^global DoubleKeyValue. print];
+	newLine print;
+#  This actually does an NSKey lookup
+#	^global EntityKeyValue name print;
+#	l do:[^self defineDeleteAt:^global EntityKeyValue. print];
+#	newLine print;
+	(^global NegativeKeyValue) print;
+	l do:[^self defineDeleteAt:^global NegativeKeyValue. print];
+	newLine print;
+	(^global HugeKeyValue) print;
+	l do:[^self defineDeleteAt:^global HugeKeyValue. print];
+	newLine print;
+];
+Prototypical IndexedList defineMethod:
+[|indexLookupTest_NS|
+	!l <- ^self instanceList;
+	l, (-1 asReferenceTo: ^self); # add ReferenceNil to list
+
+	^my printBorder;
+	^global PolymorphicKeyListFull do:[print;];
+	newLine print;
+
+"NSKeyLCList 'defineDeleteAt:'" printNL;
+	l do:[
+	    !list <- ^self;
+	    ^global PolymorphicKeyListFull do:[^my list defineDeleteAt:^self. print];
+	    newLine print;
+	     ];
+
+"NSKeyLCList 'defineDeleteAt:' (converse)" printNL;
+	l do:[
+	    !list <- ^self;
+	    ^global HomomorphicKeyListFull do:[^my list defineDeleteAt:
+	    					(^self isEven 
+						       ifTrue: [^self asDouble]
+						       ifFalse:[^self]). print];
+	    newLine print;
+	     ];
+];
+Prototypical IndexedList defineMethod:
+[|deleteColumnTest_NS|
+	!l <- ^self instanceList;
+	l, (-1 asReferenceTo: ^self); # add ReferenceNil to list
+	!store <- ^self;
+
+	^my printBorder;
+	^global PolymorphicKeyListFull do:[print;];
+	newLine print;
+
+"NSKeyLCList 'deleteColumn:'" printNL;
+	^global PolymorphicKeyListMid do:[^my store deleteColumn:^self];
+
+	l do:[
+	    !list <- ^self do:[];
+	    ^global PolymorphicKeyListFull do:[^my list at: ^self.print];
+	    "		" print;
+	    ^global HomomorphicKeyListFull do:[^my list at: ^self.print];
+	    newLine print;
+	     ];
+
+	^global HomomorphicKeyListMid do:[^my store deleteColumn:
+						(^self isEven 
+						   ifTrue: [^self asDouble]  
+						   ifFalse:[^self])];
+
+	l do:[
+	    !list <- ^self do:[];
+	    ^global PolymorphicKeyListFull do:[^my list at: ^self.print];
+	    "		" print;
+	    ^global HomomorphicKeyListFull do:[^my list at: ^self.print];
+	    newLine print;
+	     ];
+
+	^global PolymorphicKeyListFull do:[^my store deleteColumn:^self];
+	newLine print;
+	l do:[
+	    !list <- ^self do:[];
+	    ^global PolymorphicKeyListFull do:[^my list at: ^self.print];
+	    "		" print;
+	    ^global HomomorphicKeyListFull do:[^my list at: ^self.print];
+	    newLine print;
+	     ];
+];
+
+"Set Up times:
+"print;
+
+ "_00__U" print; INDEX_00__U tsLookupTest_R;
+ "_01__U" print; store1 :INDEX_01__U tsLookupTest_R;
+ "_11__U" print; store1 :INDEX_11__U tsLookupTest_R;
+ "_1NA_U" print; storeN :INDEX_1NA_U tsLookupTest_R;
+ "_1NSHU" print; storeN :INDEX_1NSHU tsLookupTest_R;
+ "_1NSPU" print; storeN :INDEX_1NSPU tsLookupTest_R;
+ "_1N0HU" print; storeN :INDEX_1N0HU tsLookupTest_R;
+ "_1N0PU" print; storeN :INDEX_1N0PU tsLookupTest_R;
+ "_M1_HU" print; store1 :INDEX_M1_HU tsLookupTest_R;
+ "_M1_PU" print; store1 :INDEX_M1_PU tsLookupTest_R;
+ "_MNAHU" print; storeN :INDEX_MNAHU tsLookupTest_R;
+ "_MNAPU" print; storeN :INDEX_MNAPU tsLookupTest_R;
+ "MNSHUF" print; storeN :INDEX_MNSHUF tsLookupTest_RS;
+ "MNSHUM" print; storeN :INDEX_MNSHUM tsLookupTest_RS;
+ "MNSHUH" print; storeN :INDEX_MNSHUH tsLookupTest_RS;
+ "MNSHUL" print; storeN :INDEX_MNSHUL tsLookupTest_RS;
+ "MNSPUF" print; storeN :INDEX_MNSPUF tsLookupTest_RS;
+ "MNSPUM" print; storeN :INDEX_MNSPUM tsLookupTest_RS;
+ "MNSPUH" print; storeN :INDEX_MNSPUH tsLookupTest_RS;
+ "MNSPUL" print; storeN :INDEX_MNSPUL tsLookupTest_RS;
+ "MN0HUF" print; storeN :INDEX_MN0HUF tsLookupTest_R;
+ "MN0HUM" print; storeN :INDEX_MN0HUM tsLookupTest_R;
+ "MN0HUH" print; storeN :INDEX_MN0HUH tsLookupTest_R;
+ "MN0HUL" print; storeN :INDEX_MN0HUL tsLookupTest_R;
+ "MN0PUF" print; storeN :INDEX_MN0PUF tsLookupTest_R;
+ "MN0PUM" print; storeN :INDEX_MN0PUM tsLookupTest_R;
+ "MN0PUH" print; storeN :INDEX_MN0PUH tsLookupTest_R;
+ "MN0PUL" print; storeN :INDEX_MN0PUL tsLookupTest_R;
+
+" Ref Lookup times:
+" print;
+
+ "_00__U" print; INDEX_00__U  tsLookupTest_S;
+ "_01__U" print; store1 :INDEX_01__U  tsLookupTest_S;
+ "_11__U" print; store1 :INDEX_11__U  tsLookupTest_S;
+ "_1NA_U" print; storeN :INDEX_1NA_U  tsLookupTest_S;
+ "_1NSHU" print; storeN :INDEX_1NSHU  tsLookupTest_S;
+ "_1NSPU" print; storeN :INDEX_1NSPU  tsLookupTest_S;
+ "_1N0HU" print; storeN :INDEX_1N0HU  tsLookupTest_S;
+ "_1N0PU" print; storeN :INDEX_1N0PU  tsLookupTest_S;
+ "_M1_HU" print; store1 :INDEX_M1_HU  tsLookupTest_S;
+ "_M1_PU" print; store1 :INDEX_M1_PU  tsLookupTest_S;
+ "_MNAHU" print; storeN :INDEX_MNAHU  tsLookupTest_S;
+ "_MNAPU" print; storeN :INDEX_MNAPU  tsLookupTest_S;
+ "MNSHUF" print; storeN :INDEX_MNSHUF tsLookupTest_S;
+ "MNSHUM" print; storeN :INDEX_MNSHUM tsLookupTest_S;
+ "MNSHUH" print; storeN :INDEX_MNSHUH tsLookupTest_S;
+ "MNSHUL" print; storeN :INDEX_MNSHUL tsLookupTest_S;
+ "MNSPUF" print; storeN :INDEX_MNSPUF tsLookupTest_S;
+ "MNSPUM" print; storeN :INDEX_MNSPUM tsLookupTest_S;
+ "MNSPUH" print; storeN :INDEX_MNSPUH tsLookupTest_S;
+ "MNSPUL" print; storeN :INDEX_MNSPUL tsLookupTest_S;
+ "MN0HUF" print; storeN :INDEX_MN0HUF tsLookupTest_S;
+ "MN0HUM" print; storeN :INDEX_MN0HUM tsLookupTest_S;
+ "MN0HUH" print; storeN :INDEX_MN0HUH tsLookupTest_S;
+ "MN0HUL" print; storeN :INDEX_MN0HUL tsLookupTest_S;
+ "MN0PUF" print; storeN :INDEX_MN0PUF tsLookupTest_S;
+ "MN0PUM" print; storeN :INDEX_MN0PUM tsLookupTest_S;
+ "MN0PUH" print; storeN :INDEX_MN0PUH tsLookupTest_S;
+ "MN0PUL" print; storeN :INDEX_MN0PUL tsLookupTest_S;
+
+" SLC Lookup times:
+" print;
+
+ "_00__U" print; INDEX_00__U  tsLookupTest_NS;
+ "_01__U" print; store1 :INDEX_01__U  tsLookupTest_NS;
+ "_11__U" print; store1 :INDEX_11__U  tsLookupTest_NS;
+ "_1NA_U" print; storeN :INDEX_1NA_U  tsLookupTest_NS;
+ "_1NSHU" print; storeN :INDEX_1NSHU  tsLookupTest_NS;
+ "_1NSPU" print; storeN :INDEX_1NSPU  tsLookupTest_NS;
+ "_1N0HU" print; storeN :INDEX_1N0HU  tsLookupTest_NS;
+ "_1N0PU" print; storeN :INDEX_1N0PU  tsLookupTest_NS;
+ "_M1_HU" print; store1 :INDEX_M1_HU  tsLookupTest_NS;
+ "_M1_PU" print; store1 :INDEX_M1_PU  tsLookupTest_NS;
+ "_MNAHU" print; storeN :INDEX_MNAHU  tsLookupTest_NS;
+ "_MNAPU" print; storeN :INDEX_MNAPU  tsLookupTest_NS;
+ "MNSHUF" print; storeN :INDEX_MNSHUF tsLookupTest_NS;
+ "MNSHUM" print; storeN :INDEX_MNSHUM tsLookupTest_NS;
+ "MNSHUH" print; storeN :INDEX_MNSHUH tsLookupTest_NS;
+ "MNSHUL" print; storeN :INDEX_MNSHUL tsLookupTest_NS;
+ "MNSPUF" print; storeN :INDEX_MNSPUF tsLookupTest_NS;
+ "MNSPUM" print; storeN :INDEX_MNSPUM tsLookupTest_NS;
+ "MNSPUH" print; storeN :INDEX_MNSPUH tsLookupTest_NS;
+ "MNSPUL" print; storeN :INDEX_MNSPUL tsLookupTest_NS;
+ "MN0HUF" print; storeN :INDEX_MN0HUF tsLookupTest_NS;
+ "MN0HUM" print; storeN :INDEX_MN0HUM tsLookupTest_NS;
+ "MN0HUH" print; storeN :INDEX_MN0HUH tsLookupTest_NS;
+ "MN0HUL" print; storeN :INDEX_MN0HUL tsLookupTest_NS;
+ "MN0PUF" print; storeN :INDEX_MN0PUF tsLookupTest_NS;
+ "MN0PUM" print; storeN :INDEX_MN0PUM tsLookupTest_NS;
+ "MN0PUH" print; storeN :INDEX_MN0PUH tsLookupTest_NS;
+ "MN0PUL" print; storeN :INDEX_MN0PUL tsLookupTest_NS;
+ 
+ " NSLC Lookup times:
+ " print;
+
+ "_00__H" print; INDEX_00__H indexLookupTest_R;
+ "_01__H" print; INDEX_01__H indexLookupTest_R;
+ "_11__H" print; INDEX_11__H indexLookupTest_R;
+ "_1NA_H" print; INDEX_1NA_H indexLookupTest_R;
+ "_1NSHH" print; INDEX_1NSHH indexLookupTest_R;
+ "_1N0HH" print; INDEX_1N0HH indexLookupTest_R;
+ "_M1_HH" print; INDEX_M1_HH indexLookupTest_R;
+ "_MNAHH" print; INDEX_MNAHH indexLookupTest_R;
+ "_MNSHHF" print; INDEX_MNSHHF indexLookupTest_RS;
+ "_MNSHHM" print; INDEX_MNSHHM indexLookupTest_RS;
+ "_MNSHHH" print; INDEX_MNSHHH indexLookupTest_RS;
+ "_MNSHHL" print; INDEX_MNSHHL indexLookupTest_RS;
+ "_MNSHPF" print; INDEX_MNSHPF indexLookupTest_RS;
+ "_MNSHPM" print; INDEX_MNSHPM indexLookupTest_RS;
+ "_MNSHPH" print; INDEX_MNSHPH indexLookupTest_RS;
+ "_MNSHPL" print; INDEX_MNSHPL indexLookupTest_RS;
+ "_MNSPPF" print; INDEX_MNSPPF indexLookupTest_RS;
+ "_MNSPPM" print; INDEX_MNSPPM indexLookupTest_RS;
+ "_MNSPPH" print; INDEX_MNSPPH indexLookupTest_RS;
+ "_MNSPPL" print; INDEX_MNSPPL indexLookupTest_RS;
+ "_MN0HHF" print; INDEX_MN0HHF indexLookupTest_R;
+ "_MN0HHM" print; INDEX_MN0HHM indexLookupTest_R;
+ "_MN0HHH" print; INDEX_MN0HHH indexLookupTest_R;
+ "_MN0HHL" print; INDEX_MN0HHL indexLookupTest_R;
+ "_MN0HPF" print; INDEX_MN0HPF indexLookupTest_R;
+ "_MN0HPM" print; INDEX_MN0HPM indexLookupTest_R;
+ "_MN0HPH" print; INDEX_MN0HPH indexLookupTest_R;
+ "_MN0HPL" print; INDEX_MN0HPL indexLookupTest_R;
+ "_MN0PPF" print; INDEX_MN0PPF indexLookupTest_R;
+ "_MN0PPM" print; INDEX_MN0PPM indexLookupTest_R;
+ "_MN0PPH" print; INDEX_MN0PPH indexLookupTest_R;
+ "_MN0PPL" print; INDEX_MN0PPL indexLookupTest_R;
+
+"
+Ref Lookup times:
+" print;
+
+ "_00__H" print; INDEX_00__H indexLookupTest_S;
+ "_01__H" print; INDEX_01__H indexLookupTest_S;
+ "_11__H" print; INDEX_11__H indexLookupTest_S;
+ "_1NA_H" print; INDEX_1NA_H indexLookupTest_S;
+ "_1NSHH" print; INDEX_1NSHH indexLookupTest_S;
+ "_1N0HH" print; INDEX_1N0HH indexLookupTest_S;
+ "_M1_HH" print; INDEX_M1_HH indexLookupTest_S;
+ "_MNAHH" print; INDEX_MNAHH indexLookupTest_S;
+ "_MNSHHF" print; INDEX_MNSHHF indexLookupTest_S;
+ "_MNSHHM" print; INDEX_MNSHHM indexLookupTest_S;
+ "_MNSHHH" print; INDEX_MNSHHH indexLookupTest_S;
+ "_MNSHHL" print; INDEX_MNSHHL indexLookupTest_S;
+ "_MNSHPF" print; INDEX_MNSHPF indexLookupTest_S;
+ "_MNSHPM" print; INDEX_MNSHPM indexLookupTest_S;
+ "_MNSHPH" print; INDEX_MNSHPH indexLookupTest_S;
+ "_MNSHPL" print; INDEX_MNSHPL indexLookupTest_S;
+ "_MNSPPF" print; INDEX_MNSPPF indexLookupTest_S;
+ "_MNSPPM" print; INDEX_MNSPPM indexLookupTest_S;
+ "_MNSPPH" print; INDEX_MNSPPH indexLookupTest_S;
+ "_MNSPPL" print; INDEX_MNSPPL indexLookupTest_S;
+ "_MN0HHF" print; INDEX_MN0HHF indexLookupTest_S;
+ "_MN0HHM" print; INDEX_MN0HHM indexLookupTest_S;
+ "_MN0HHH" print; INDEX_MN0HHH indexLookupTest_S;
+ "_MN0HHL" print; INDEX_MN0HHL indexLookupTest_S;
+ "_MN0PPF" print; INDEX_MN0PPF indexLookupTest_S;
+ "_MN0PPM" print; INDEX_MN0PPM indexLookupTest_S;
+ "_MN0PPH" print; INDEX_MN0PPH indexLookupTest_S;
+ "_MN0PPL" print; INDEX_MN0PPL indexLookupTest_S;
+ 
+ "
+ SLC Lookup times:
+ " print;
+
+ "_00__H" print; INDEX_00__H indexLookupTest_NS;
+ "_01__H" print; INDEX_01__H indexLookupTest_NS;
+ "_11__H" print; INDEX_11__H indexLookupTest_NS;
+ "_1NA_H" print; INDEX_1NA_H indexLookupTest_NS;
+ "_1NSHH" print; INDEX_1NSHH indexLookupTest_NS;
+ "_1N0HH" print; INDEX_1N0HH indexLookupTest_NS;
+ "_M1_HH" print; INDEX_M1_HH indexLookupTest_NS;
+ "_MNAHH" print; INDEX_MNAHH indexLookupTest_NS;
+ "_MNSHHF" print; INDEX_MNSHHF indexLookupTest_NS;
+ "_MNSHHM" print; INDEX_MNSHHM indexLookupTest_NS;
+ "_MNSHHH" print; INDEX_MNSHHH indexLookupTest_NS;
+ "_MNSHHL" print; INDEX_MNSHHL indexLookupTest_NS;
+ "_MNSHPF" print; INDEX_MNSHPF indexLookupTest_NS;
+ "_MNSHPM" print; INDEX_MNSHPM indexLookupTest_NS;
+ "_MNSHPH" print; INDEX_MNSHPH indexLookupTest_NS;
+ "_MNSHPL" print; INDEX_MNSHPL indexLookupTest_NS;
+ "_MNSPPF" print; INDEX_MNSPPF indexLookupTest_NS;
+ "_MNSPPM" print; INDEX_MNSPPM indexLookupTest_NS;
+ "_MNSPPH" print; INDEX_MNSPPH indexLookupTest_NS;
+ "_MNSPPL" print; INDEX_MNSPPL indexLookupTest_NS;
+ "_MN0HHF" print; INDEX_MN0HHF indexLookupTest_NS;
+ "_MN0HHM" print; INDEX_MN0HHM indexLookupTest_NS;
+ "_MN0HHH" print; INDEX_MN0HHH indexLookupTest_NS;
+ "_MN0HHL" print; INDEX_MN0HHL indexLookupTest_NS;
+ "_MN0HPF" print; INDEX_MN0HPF indexLookupTest_NS;
+ "_MN0HPM" print; INDEX_MN0HPM indexLookupTest_NS;
+ "_MN0HPH" print; INDEX_MN0HPH indexLookupTest_NS;
+ "_MN0HPL" print; INDEX_MN0HPL indexLookupTest_NS;
+ "_MN0PPF" print; INDEX_MN0PPF indexLookupTest_NS;
+ "_MN0PPM" print; INDEX_MN0PPM indexLookupTest_NS;
+ "_MN0PPH" print; INDEX_MN0PPH indexLookupTest_NS;
+ "_MN0PPL" print; INDEX_MN0PPL indexLookupTest_NS;
+
+#### Lookup with 'NA' as the key after deletes have been done  ####
+ INDEX_MN0PPF at: NA. printNL;
+"
+NSLC Lookup times:
+" print;
+
+
+###############################################
+####  Test the 'Unusual' descriptor types  ####
+###############################################
+
+####  Reference  ####
+
+storeN __defineFixedProperty: 'indirect';
+0 asReferenceTo: storeN. :indirect <- 2 asReferenceTo: storeN;
+1 asReferenceTo: storeN. :indirect <- 4 asReferenceTo: storeN;
+2 asReferenceTo: storeN. :indirect <- 1 asReferenceTo: storeN;
+3 asReferenceTo: storeN. :indirect <- 3 asReferenceTo: storeN;
+4 asReferenceTo: storeN. :indirect <- 0 asReferenceTo: storeN;
+
+storeN instanceList do:["-"print;
+			^my UniformKeyListFull 
+			      evaluate: [indirect INDEX_MN0PUF print];
+			indirect INDEX_MN0PUF print;
+			newLine print;
+		       ];
+UniformKeyListFull 
+      evaluate: [storeN indirect INDEX_MN0PUF print];
+newLine print;
+
+####  Value  ####
+NA, 3, 2.2 do: [^self define:'___tmpTS___'];
+
+NA, NA, 2, 3, 4.4, 5.5 do:[:___tmpTS___ at: ^today put:5];
+NA, NA, 2, 3, 4.4, 5.5 do:[:___tmpTS___ effectiveDateAsOf: ^today. print];
+newLine print;
+NA, NA, 2, 3, 4.4, 5.5 do:[:___tmpTS___ nextDateAsOf: ^today. print];
+newLine print;
+NA, NA, 2, 3, 4.4, 5.5 do:[:___tmpTS___ at: ^today. print];
+newLine print;
+NA, NA, 2, 3, 4.4, 5.5 do:[:___tmpTS___ do: [print]. count print;];
+newLine print;
+NA, NA, 2, 3, 4.4, 5.5 do:[:___tmpTS___ delete: ^today. print];
+newLine print;
+NA, NA, 2, 3, 4.4, 5.5 do:[:___tmpTS___ do: [print]. count print;];
+newLine print;
+
+####  Value Scalar  ####
+NA  :___tmpTS___ at: ^today put: 10;
+2   :___tmpTS___ at: ^today put: 10;
+1.1 :___tmpTS___ at: ^today put: 10;
+
+NA  :___tmpTS___ at: ^today. print;
+2   :___tmpTS___ at: ^today. print;
+1.1 :___tmpTS___ at: ^today. print;
+
+NA  :___tmpTS___ effectiveDateAsOf: ^today. print;
+2   :___tmpTS___ effectiveDateAsOf: ^today. print;
+1.1 :___tmpTS___ effectiveDateAsOf: ^today. print;
+
+NA  :___tmpTS___ nextDateAsOf: ^today. print;
+2   :___tmpTS___ nextDateAsOf: ^today. print;
+1.1 :___tmpTS___ nextDateAsOf: ^today. print;
+newLine print;
+
+NA  :___tmpTS___ do: [print]. count print;
+2   :___tmpTS___ do: [print]. count print;
+1.1 :___tmpTS___ do: [print]. count print;
+newLine print;
+
+NA  :___tmpTS___ delete: ^today. print;
+2   :___tmpTS___ delete: ^today. print;
+1.1 :___tmpTS___ delete: ^today. print;
+newLine print;
+
+NA  :___tmpTS___ do: [print]. count print;
+2   :___tmpTS___ do: [print]. count print;
+1.1 :___tmpTS___ do: [print]. count print;
+newLine print;NA, 3, 2.2 do: ['___tmpTS___' deleteFromDictionaryOf: ^self];
+
+###########################################################
+#	Test termination edge in rtLINK_Lookup		  #
+###########################################################
+!lookupEdgeTest <- Object basicSpecialized;
+
+lookupEdgeTest __define: 'ts';
+lookupEdgeTest __defineFixedProperty:'date';
+lookupEdgeTest new new new new new new new new new new new;
+0 asReferenceTo: lookupEdgeTest . :ts asOf:    10101 asDate put: 0;
+0 asReferenceTo: lookupEdgeTest . :ts asOf: 19880102 asDate put: 1;
+0 asReferenceTo: lookupEdgeTest . :ts asOf: 19880104 asDate put: 1;
+1 asReferenceTo: lookupEdgeTest . :ts asOf: 19880103 asDate put: 2;
+1 asReferenceTo: lookupEdgeTest . :ts asOf: 19880105 asDate put: 3;
+2 asReferenceTo: lookupEdgeTest . :ts asOf: 19880101 asDate put: 4;
+2 asReferenceTo: lookupEdgeTest . :ts asOf: 19880103 asDate put: 5;
+2 asReferenceTo: lookupEdgeTest . :ts asOf: 19880105 asDate put: 6;
+3 asReferenceTo: lookupEdgeTest . :ts asOf: 19880101 asDate put: 7;
+4 asReferenceTo: lookupEdgeTest . :ts asOf: 19880102 asDate put: 8;
+4 asReferenceTo: lookupEdgeTest . :ts asOf: 19880104 asDate put: 9;
+5 asReferenceTo: lookupEdgeTest . :ts asOf:    10101 asDate put: 10;
+5 asReferenceTo: lookupEdgeTest . :ts asOf: 19880102 asDate put: 11;
+5 asReferenceTo: lookupEdgeTest . :ts asOf: 19880104 asDate put: 12;
+6 asReferenceTo: lookupEdgeTest . :ts asOf:    10101 asDate put: 13;
+6 asReferenceTo: lookupEdgeTest . :ts asOf: 19880102 asDate put: 14;
+6 asReferenceTo: lookupEdgeTest . :ts asOf: 19880104 asDate put: 15;
+7 asReferenceTo: lookupEdgeTest . :ts asOf: 19880101 asDate put: 16;
+7 asReferenceTo: lookupEdgeTest . :ts asOf: 19880103 asDate put: 17;
+7 asReferenceTo: lookupEdgeTest . :ts asOf: 19880105 asDate put: 18;
+8 asReferenceTo: lookupEdgeTest . :ts asOf: 19880101 asDate put: 19;
+8 asReferenceTo: lookupEdgeTest . :ts asOf: 19880103 asDate put: 20;
+8 asReferenceTo: lookupEdgeTest . :ts asOf: 19880105 asDate put: 21;
+9 asReferenceTo: lookupEdgeTest . :ts asOf: 19880101 asDate put: 22;
+9 asReferenceTo: lookupEdgeTest . :ts asOf: 19880103 asDate put: 23;
+9 asReferenceTo: lookupEdgeTest . :ts asOf: 19880105 asDate put: 24;
+10 asReferenceTo: lookupEdgeTest . :ts asOf: 19880101 asDate put: 25;
+10 asReferenceTo: lookupEdgeTest . :ts asOf: 19880103 asDate put: 26;
+10 asReferenceTo: lookupEdgeTest . :ts asOf: 19880105 asDate put: 27;
+11 asReferenceTo: lookupEdgeTest . :ts asOf: 19880101 asDate put: 28;
+11 asReferenceTo: lookupEdgeTest . :ts asOf: 19880103 asDate put: 29;
+11 asReferenceTo: lookupEdgeTest . :ts asOf: 19880105 asDate put: 30;
+
+0 asReferenceTo: lookupEdgeTest . :date <- 19880105 asDate;
+3 asReferenceTo: lookupEdgeTest . :date <- 19880102 asDate;
+
+!list <- (0 asReferenceTo: lookupEdgeTest),
+	 (3 asReferenceTo: lookupEdgeTest);
+
+"Answer should be:
+       1       7
+"print;
+list do: [ :ts asOf: date . print];
+#################################################################
+#		Nested and Extended Time Series			#
+#################################################################
+^current define: 'TS';
+
+!TSG <- Object basicSpecialized;
+
+TSG __define: 'ts'. __defineMethod: [ | newTS | ^self new :ts ];
+
+:TS asOf: 10101 asDate put: TSG newTS;
+:TS asOf: 19871231 asDate put:
+    (TSG newTS basicSend: [^self asOf: 19870430 asDate put: 3;
+    			   ^self asOf: 19870531 asDate put: 13;
+			   ^self asOf: 19870630 asDate put: 23;
+    			   ^self]);
+:TS asOf: 19881231 asDate put:
+    (TSG newTS basicSend: [^self asOf: 19870430 asDate put: 6;
+    			   ^self asOf: 19870531 asDate put: 26;
+			   ^self asOf: 19870630 asDate put: 46;
+    			   ^self]);
+:TS asOf: 19891231 asDate put:
+    (TSG newTS basicSend: [^self asOf: 19870430 asDate put: 9;
+    			   ^self asOf: 19870531 asDate put: 39;
+			   ^self asOf: 19870630 asDate put: 69;
+    			   ^self]);
+
+!NTS <- :TS send: [^self send: [^self]];
+!XTS <- :TS extend: [^self send: [^self]];
+"... DATA" printNL;
+:TS do: [^date printNL; ^self do: ["    " print; ^date print: 10; printNL]];
+XTS do: [^date printNL; ^self do: ["    " print; ^date print: 10; printNL]];
+newLine print;
+
+"... asOf: 87 . asOf: ^today" printNL;
+:TS asOf: 87 . asOf: ^today . print;
+XTS asOf: 87 . asOf: ^today . printNL;
+
+:TS asOf: 88 . asOf: ^today . print;
+XTS asOf: 88 . asOf: ^today . printNL;
+
+:TS asOf: 89 . asOf: ^today . print;
+XTS asOf: 89 . asOf: ^today . printNL;
+newLine print;
+
+"...  asOf: ^today" printNL;
+:TS do: [^date print: 10; ^self asOf: ^today . printNL];
+XTS do: [^date print: 10; ^self asOf: ^today . printNL];
+newLine print;
+
+
+"... at: 87 . asOf: ^today" printNL;
+:TS at: 87 . asOf: ^today . print;
+XTS at: 87 . asOf: ^today . printNL;
+
+:TS at: 88 . asOf: ^today . print;
+XTS at: 88 . asOf: ^today . printNL;
+
+:TS at: 89 . asOf: ^today . print;
+XTS at: 89 . asOf: ^today . printNL;
+newLine print;
+
+"...  at: ^today" printNL;
+:TS do: [^date print: 10; ^self at: ^today . printNL];
+XTS do: [^date print: 10; ^self at: ^today . printNL];
+newLine print;
+
+
+"... at: 87 . at: ^today" printNL;
+:TS at: 87 . at: ^today . print;
+XTS at: 87 . at: ^today . printNL;
+
+:TS at: 88 . at: ^today . print;
+XTS at: 88 . at: ^today . printNL;
+
+:TS at: 89 . at: ^today . print;
+XTS at: 89 . at: ^today . printNL;
+newLine print;
+
+"...  deleteDate: 19881231 from extended time series" printNL;
+XTS deleteDate: 19881231 asDate;
+
+:TS do: [^date printNL; ^self do: ["    " print; ^date print: 10; printNL]];
+XTS do: [^date printNL; ^self do: ["    " print; ^date print: 10; printNL]];
+newLine print;
+"...  deleteDate: 19870531 from nested time series" printNL;
+XTS asOf: 87 .deleteDate: 19870531 asDate;
+
+:TS do: [^date printNL; ^self do: ["    " print; ^date print: 10; printNL]];
+XTS do: [^date printNL; ^self do: ["    " print; ^date print: 10; printNL]];
+NTS do: [^date printNL; ^self do: ["    " print; ^date print: 10; printNL]];
+newLine print;
+
+"...  extendBy: " printNL;
+!XTS <- NTS extendBy:[!value <- ^self asOf: 870430];
+XTS do: [^date printNL; ^self do: ["    " print; ^date print: 10; printNL]];
+
+NTS deleteDate:88;
+XTS do: [^date print; value printNL; ^self do: ["    " print; ^date print: 10; printNL]];
+NTS do: [^date printNL; ^self do: ["    " print; ^date print: 10; printNL]];
+newLine print;
+
+NTS asOf:^today . deleteDate:870430;
+XTS do: [^date print; value printNL; ^self do: ["    " print; ^date print: 10; printNL]];
+NTS do: [^date printNL; ^self do: ["    " print; ^date print: 10; printNL]];
+newLine print;
+
+"Nested and Extended Time Series tests times:" printNL;
+
+#################################################################
+#		Delete Column Tests				#
+#################################################################
+"_00__U" print; INDEX_00__U  deleteColumnTest_NS;
+"_01__U" print; store1 :INDEX_01__U  deleteColumnTest_NS;
+"_11__U" print; store1 :INDEX_11__U  deleteColumnTest_NS;
+"_1NA_U" print; storeN :INDEX_1NA_U  deleteColumnTest_NS;
+"_1NSHU" print; storeN :INDEX_1NSHU  deleteColumnTest_NS;
+"_1NSPU" print; storeN :INDEX_1NSPU  deleteColumnTest_NS;
+"_1N0HU" print; storeN :INDEX_1N0HU  deleteColumnTest_NS;
+"_1N0PU" print; storeN :INDEX_1N0PU  deleteColumnTest_NS;
+"_M1_HU" print; store1 :INDEX_M1_HU  deleteColumnTest_NS;
+"_M1_PU" print; store1 :INDEX_M1_PU  deleteColumnTest_NS;
+"_MNAHU" print; storeN :INDEX_MNAHU  deleteColumnTest_NS;
+"_MNAPU" print; storeN :INDEX_MNAPU  deleteColumnTest_NS;
+"MNSHUF" print; storeN :INDEX_MNSHUF deleteColumnTest_NS;
+"MNSHUM" print; storeN :INDEX_MNSHUM deleteColumnTest_NS;
+"MNSHUH" print; storeN :INDEX_MNSHUH deleteColumnTest_NS;
+"MNSHUL" print; storeN :INDEX_MNSHUL deleteColumnTest_NS;
+"MNSPUF" print; storeN :INDEX_MNSPUF deleteColumnTest_NS;
+"MNSPUM" print; storeN :INDEX_MNSPUM deleteColumnTest_NS;
+"MNSPUH" print; storeN :INDEX_MNSPUH deleteColumnTest_NS;
+"MNSPUL" print; storeN :INDEX_MNSPUL deleteColumnTest_NS;
+"MN0HUF" print; storeN :INDEX_MN0HUF deleteColumnTest_NS;
+"MN0HUM" print; storeN :INDEX_MN0HUM deleteColumnTest_NS;
+"MN0HUH" print; storeN :INDEX_MN0HUH deleteColumnTest_NS;
+"MN0HUL" print; storeN :INDEX_MN0HUL deleteColumnTest_NS;
+"MN0PUF" print; storeN :INDEX_MN0PUF deleteColumnTest_NS;
+"MN0PUM" print; storeN :INDEX_MN0PUM deleteColumnTest_NS;
+"MN0PUH" print; storeN :INDEX_MN0PUH deleteColumnTest_NS;
+"MN0PUL" print; storeN :INDEX_MN0PUL deleteColumnTest_NS;
+
+" TimeSeries DeleteColumn times:
+" print;
+
+"_00__H" print; INDEX_00__H deleteColumnTest_NS;
+"_01__H" print; INDEX_01__H deleteColumnTest_NS;
+"_11__H" print; INDEX_11__H deleteColumnTest_NS;
+"_1NA_H" print; INDEX_1NA_H deleteColumnTest_NS;
+"_1NSHH" print; INDEX_1NSHH deleteColumnTest_NS;
+"_1N0HH" print; INDEX_1N0HH deleteColumnTest_NS;
+"_M1_HH" print; INDEX_M1_HH deleteColumnTest_NS;
+"_MNAHH" print; INDEX_MNAHH deleteColumnTest_NS;
+"_MNSHHF" print; INDEX_MNSHHF deleteColumnTest_NS;
+"_MNSHHM" print; INDEX_MNSHHM deleteColumnTest_NS;
+"_MNSHHH" print; INDEX_MNSHHH deleteColumnTest_NS;
+"_MNSHHL" print; INDEX_MNSHHL deleteColumnTest_NS;
+"_MNSHPF" print; INDEX_MNSHPF deleteColumnTest_NS;
+"_MNSHPM" print; INDEX_MNSHPM deleteColumnTest_NS;
+"_MNSHPH" print; INDEX_MNSHPH deleteColumnTest_NS;
+"_MNSHPL" print; INDEX_MNSHPL deleteColumnTest_NS;
+"_MNSPPF" print; INDEX_MNSPPF deleteColumnTest_NS;
+"_MNSPPM" print; INDEX_MNSPPM deleteColumnTest_NS;
+"_MNSPPH" print; INDEX_MNSPPH deleteColumnTest_NS;
+"_MNSPPL" print; INDEX_MNSPPL deleteColumnTest_NS;
+"_MN0HHF" print; INDEX_MN0HHF deleteColumnTest_NS;
+"_MN0HHM" print; INDEX_MN0HHM deleteColumnTest_NS;
+"_MN0HHH" print; INDEX_MN0HHH deleteColumnTest_NS;
+"_MN0HHL" print; INDEX_MN0HHL deleteColumnTest_NS;
+"_MN0HPF" print; INDEX_MN0HPF deleteColumnTest_NS;
+"_MN0HPM" print; INDEX_MN0HPM deleteColumnTest_NS;
+"_MN0HPH" print; INDEX_MN0HPH deleteColumnTest_NS;
+"_MN0HPL" print; INDEX_MN0HPL deleteColumnTest_NS;
+"_MN0PPF" print; INDEX_MN0PPF deleteColumnTest_NS;
+"_MN0PPM" print; INDEX_MN0PPM deleteColumnTest_NS;
+"_MN0PPH" print; INDEX_MN0PPH deleteColumnTest_NS;
+"_MN0PPL" print; INDEX_MN0PPL deleteColumnTest_NS;
+
+"
+NS deleteColumn times:
+" print;
+
+###########################################################
+#		End of tests ...			  #
+###########################################################
+newLine print; "End of file: RTindex.S" printNL; newLine print;
+NA	define: 'print' toBe: NA_Printer asMethod;
+
+?g

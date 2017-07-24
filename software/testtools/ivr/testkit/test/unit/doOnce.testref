@@ -1,0 +1,225 @@
+
+Basic do once
+thread cardinality        30
+  called for:         1, one
+  called for:         1, two
+  called for:         2, one
+  called for:         2, two
+  called for:         3, one
+  called for:         3, two
+  called for:         4, one
+  called for:         4, two
+  called for:         5, one
+  called for:         5, two
+  called for:         1, one
+  called for:         1, two
+  called for:         2, one
+  called for:         2, two
+  called for:         3, one
+  called for:         3, two
+  called for:         4, one
+  called for:         4, two
+  called for:         5, one
+  called for:         5, two
+  called for:         1, one
+  called for:         1, two
+  called for:         2, one
+  called for:         2, two
+  called for:         3, one
+  called for:         3, two
+  called for:         4, one
+  called for:         4, two
+  called for:         5, one
+  called for:         5, two
+
+thread cardinality         6
+  called for: one
+  called for: two
+  called for: one
+  called for: two
+  called for: one
+  called for: two
+
+thread cardinality        15
+  called for:         1
+  called for:         2
+  called for:         3
+  called for:         4
+  called for:         5
+  called for:         1
+  called for:         2
+  called for:         3
+  called for:         4
+  called for:         5
+  called for:         1
+  called for:         2
+  called for:         3
+  called for:         4
+  called for:         5
+
+
+Basic do once "layer" check:
+---> String
+------> Ordinal
+---------> Object
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+---> String
+------> Ordinal
+---------> Object
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+---> String
+------> Ordinal
+---------> Object
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+
+basicDoOnceNoContext
+thread cardinality        10
+  called for:         1, one
+  called for:         1, two
+  called for:         2, one
+  called for:         2, two
+  called for:         3, one
+  called for:         3, two
+  called for:         4, one
+  called for:         4, two
+  called for:         5, one
+  called for:         5, two
+
+thread cardinality         2
+  called for: one
+  called for: two
+
+thread cardinality         5
+  called for:         1
+  called for:         2
+  called for:         3
+  called for:         4
+  called for:         5
+
+
+basicDoOnceNoContext "layer" check:
+---> String
+------> Ordinal
+---------> Object
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+
+basicDoOnceNoContext: by:
+thread cardinality         3
+  called for:         1, one
+  called for:         1, two
+  called for:         2, one
+thread cardinality         3
+  called for:         2, two
+  called for:         3, one
+  called for:         3, two
+thread cardinality         3
+  called for:         4, one
+  called for:         4, two
+  called for:         5, one
+thread cardinality         1
+  called for:         5, two
+
+thread cardinality         2
+  called for: one
+  called for: two
+
+thread cardinality         3
+  called for:         1
+  called for:         2
+  called for:         3
+thread cardinality         2
+  called for:         4
+  called for:         5
+
+
+basicDoOnceNoContext: by: "layer" check:
+---> String
+------> Ordinal
+---------> Object
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+one, one -> TRUE  TRUE
+one, two -> FALSE TRUE
+

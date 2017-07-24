@@ -73,10 +73,10 @@ public:
 
     VSuspension* nextSuspension ();
 
-    M_CPD *ptoken () const {
-	return M_AttachedNetwork->TheScalarPToken ();
+    rtPTOKEN_Handle *ptoken () const {
+	return M_AttachedNetwork->TheScalarPTokenHandle ();
     }
-    M_CPD *ptoken_() const {
+    rtPTOKEN_Handle *ptoken_() const {
 	return ptoken ();
     }
 
