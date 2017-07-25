@@ -21,8 +21,11 @@
 
 class M_CPD;
 class M_CTE;
-
 class rtPTOKEN_CType;
+
+namespace V {
+    class VSimpleFile;
+}
 
 #include "Vdd_Store.h"
 
@@ -77,6 +80,87 @@ public:
     typedef V::VAggregatePointer<M_POP const>	M_POP_Pointer;
     typedef V::VArgList VArgList;
 
+    typedef Vdd::Object::Visitor Visitor;
+
+//  class GCState
+public:
+    template <typename GenMaster> class GCState {
+    //  Aliases
+    public:
+	typedef typename GenMaster::GenIndex_t GenIndex_t;
+
+    //  Construction
+    public:
+	GCState () {
+	    reset ();
+	}
+
+    //  Access
+    public:
+	GenIndex_t currentGeneration () const {
+	    return m_xGeneration;
+	}
+	static GenIndex_t masterGeneration () {
+	    return GenMaster::CurrentGeneration ();
+	}
+
+	unsigned int interhandleReferenceCount () const {
+	    refresh ();
+	    return m_cInterhandleReferences;
+	}
+
+	bool cdVisited () const {
+	    refresh ();
+	    return m_bCDVisited;
+	}
+	bool gcVisited () const {
+	    refresh ();
+	    return m_bGCVisited;
+	}
+
+    //  First Visit
+    public:
+	bool onFirstGCVisit () {
+	    return onFirstVisit (m_bGCVisited);
+	}
+	bool onFirstCDVisit () {
+	    return onFirstVisit (m_bCDVisited);
+	}
+    private:
+	bool onFirstVisit (bool &rbVisited) {
+	    refresh ();
+	    bool const bFirstVisit = !rbVisited;
+	    rbVisited = true;
+	    return bFirstVisit;
+	}
+
+    // Update
+    public:
+	void incrementInterhandleReferenceCount () {
+	    refresh ();
+	    m_cInterhandleReferences++;
+	}
+
+    //  Refresh
+    private:
+	void refresh () const {
+	    if (currentGeneration () != masterGeneration ())
+		reset ();
+	}
+	void reset () const {
+	    m_xGeneration = GenMaster::CurrentGeneration ();
+	    m_bGCVisited = m_bCDVisited = false;
+	    m_cInterhandleReferences = 0;
+	}
+
+    //  State
+    private:
+	GenIndex_t mutable	m_xGeneration;
+	bool mutable		m_bGCVisited;
+	bool mutable		m_bCDVisited;
+	unsigned int mutable	m_cInterhandleReferences;
+    };
+
 //  Container Processing Callbacks
 public:
     typedef void (*ShiftProcessor) (
@@ -113,14 +197,7 @@ public:
 	return referenceCount () == 0;
     }
 protected:
-    bool onDeleteThis () {
-	if (m_pDCTE.isntNil () && (m_pDCTE->isntReferenced () || !g_bPreservingHandles && m_pContainer && !m_bPrecious)) {
-	    m_pDCTE->setToContainerAddress (m_pContainer, m_bReadWrite);
-	    m_pDCTE->discard (m_pASD, containerIndexNC ());
-	    m_pDCTE.clear ();
-	}
-	return m_pDCTE.isNil ();
-    }
+    bool onDeleteThis ();
 
     void setPreciousTo (bool bPrecious) {
 	m_bPrecious = bPrecious;
@@ -783,19 +860,38 @@ public:
 	    m_pDCTE->setAttentionMaskTo (iNewAttentionMask);
     }
 
-// Garbage collection marking
+//  Visiting
 public:
     typedef void (ThisClass::*visitFunction)();
-private:
-    virtual void traverseReferences(visitFunction fp);
-    void startMark();
 
+    void visitUsing (Visitor *visitor) {
+	visitor->visitHandle (this);
+    }
+
+    virtual void visitReferencesUsing (Visitor *visitor);
+
+// Garbage collection marking
 public:
-    void mark();
-    void unmark();
+    void cdMarkFor(M_ASD::GCVisitCycleDetect *visitor);
+    void gcMarkFor(M_ASD::GCVisitMark *visitor);
 
     unsigned int cdReferenceCount() const {
-	return m_iHandleRefCount;
+	return m_iGCState.interhandleReferenceCount ();
+    }
+    bool cdVisited () const {
+	return m_iGCState.cdVisited ();
+    }
+    bool gcVisited () const {
+	return m_iGCState.gcVisited ();
+    }
+    bool exceededReferenceCount () const {
+	return cdReferenceCount () > referenceCount ();
+    }
+    bool foundAllReferences () const {
+	return cdReferenceCount () == referenceCount ();
+    }
+    bool missedSomeReferences () const {
+	return cdReferenceCount () < referenceCount ();
     }
 
 //  Reference Forwarding
@@ -859,6 +955,10 @@ public:
 	describe_(bVerbose);
     }
 
+    void generateLogRecord (char const *pWhere) const;
+
+    virtual void generateReferenceReport (V::VSimpleFile &rOutputFile, unsigned int xLevel) const;
+
 public:
     class MapEntryData;
     virtual void getClusterReferenceMapData (MapEntryData &rData, unsigned int xReference) {
@@ -887,10 +987,9 @@ private:
     M_CPD_Pointer		m_pCPDChainHead;
     Vdd::Store::Pointer		m_pStore;
     M_RTD *const		m_pRTD;  // ... must follow container address.
+    GCState<M_AND>		m_iGCState;
     bool			m_bReadWrite;
     bool			m_bPrecious;
-    bool			m_bVisited;
-    unsigned int                m_iHandleRefCount;
 };
 
 
@@ -931,6 +1030,8 @@ template<class Base> class VStoreHandle_ : public VStoreHandleBase_<Base>, publi
 public:
     typedef VStoreHandleBase_<Base> HandleBase;
     typedef Vdd::Store StoreBase;
+
+    typedef typename StoreBase::Visitor Visitor;
 
 //  Construction
 protected:
@@ -1000,11 +1101,21 @@ public:
     StoreBase *getStore () {
 	return static_cast<StoreBase*>(this);
     }
+
+//  Reference Reporting and Visitor Support
 public:
-    virtual void traverseHandleReferences(void (VContainerHandle::*visitFunction)(void)) { 
-	(this->*visitFunction)(); 
+    virtual /*override*/ void generateReferenceReport (V::VSimpleFile &rOutputFile, unsigned int xLevel) const {
+	BaseClass::generateReferenceReport (rOutputFile, xLevel);
+    }
+    virtual /*override*/ void visitReferencesUsing (Visitor *visitor) {
+	BaseClass::visitReferencesUsing (visitor);
     }
 
+//  Visitor Support
+public:
+    virtual /*override*/ void visitUsing (Visitor *visitor) {
+	BaseClass::visitUsing (visitor);
+    }
 };
 
 /************************************************
