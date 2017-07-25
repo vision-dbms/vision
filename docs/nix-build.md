@@ -110,6 +110,18 @@ Diff passed: membershipDeletion
 Diff passed: membershipWithoutDates
 Diff passed: missingFile
 Diff passed: simpleHoldings
+Diff passed: aliasTest
+Diff passed: constituentData
+Diff passed: dataSetChanges
+Diff passed: defaultCurrency
+Diff passed: emptyTest
+Diff passed: expirations
+Diff passed: hierarchyFeed
+Diff passed: holdingsDeleteAndReload
+Diff passed: membershipDeletion
+Diff passed: membershipWithoutDates
+Diff passed: missingFile
+Diff passed: simpleHoldings
 ```
    
    
