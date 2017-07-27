@@ -190,7 +190,12 @@ void VContainerHandle::generateReferenceReport (V::VSimpleFile &rOutputFile, uns
 	rOutputFile.printf ("%12u:", xLevel);
     }
 
-    rOutputFile.printf ("%2s", hasAContainer () ? "C" : "");
+    rOutputFile.printf (
+	" %u/%u %2s",
+	m_iGCState.masterGeneration (),
+	m_iGCState.currentGeneration (),
+	hasAContainer () ? "C" : ""
+    );
 
     if (m_pDCTE) { // Implies 'hasAnIdentity'
 	rOutputFile.printf (
