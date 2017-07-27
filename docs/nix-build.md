@@ -11,6 +11,7 @@ In this example we'll be building `release-8.1` on Linux from a fresh clone of t
    * `cd software`
    * ``setenv PATH `pwd`/builder/:$PATH``
 1. Perform the build
+   * `cd src/master/src/`
    * `buildRelease 8.1.0` in this case or
    * `visionBuilder` or
    * `visionBuilder debug`
