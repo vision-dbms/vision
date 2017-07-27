@@ -1,0 +1,75 @@
+
+"source/misc/utils.vis" asFileContents evaluate;
+
+Object defineMethod: [|
+    basicDoOnce:     onceBlock 
+    basedOnCriteria: groupBlock 
+    propagateUsing:  resultBlock
+  |
+
+  !self   <- ^self basicExtend: [ !local <- ^local; !date <- ^date ];
+
+  groupBlock isList ifFalse: [ :groupBlock <- groupBlock asList ];
+  :groupBlock <- [date],[local] append: groupBlock;
+
+  self basicDoOnceNoContext: [
+      ^self super basicDo: ^my onceBlock
+    ]
+    basedOnCriteria: groupBlock
+    propagateUsing: [
+      :groupResult <- groupResult super;
+      ^self super super basicExtend: [ !groupResult <- ^my groupResult ] .
+        basicDo: ^my resultBlock;
+    ];
+
+  # NO CLEANUP HERE!
+  # :groupBlock <- NA; :self <- NA;
+
+  ^self
+];
+
+Security define: 'someBlocks' toBe: List new;
+Security someBlocks, [ ^self mod:  2 . asInteger ];
+Security someBlocks, [ ^self mod: 10 . asInteger ];
+Security someBlocks, [ ^self mod: 50 . asInteger ];
+
+Security defineMethod: [|filter: list by: block|
+  !result;
+  ^current basicDoOnce: [
+      :result <- list groupedBy: block . anElement groupList
+    ]
+    basedOnCriteria: [ list ], [block]
+    propagateUsing: [
+      :result <- groupResult result;
+    ];
+
+  result
+];
+
+Utility collectSessionGarbage;
+!beforeMemory <- AdminTools totalNetworkAllocation;
+
+!startList <- 5000000 sequence;
+Security instanceList extendBy: [
+  !result <- ^my startList;
+
+  ^self someBlocks iterate: [ 
+    ^my :result <- ^my filter: ^my result by: ^self;
+  ];
+];
+:startList <- NA;
+
+!afterMemory   <- AdminTools totalNetworkAllocation;
+Utility collectSessionGarbage;
+!afterGcMemory <- AdminTools totalNetworkAllocation;
+
+
+(afterGcMemory - beforeMemory) > 10000000 ifTrue: [
+  "Memory leak suspected: " printNL;
+  "Before:      " print; beforeMemory  printWithCommasNL: 20;
+  "After Query: " print; afterMemory   printWithCommasNL: 20;
+  "After GC:    " print; afterGcMemory printWithCommasNL: 20;
+
+  "This is a small case that catches a memory leak that is a big" printNL;
+  "problem for DataFeed loads via Interface BatchFeedManager" printNL;
+];

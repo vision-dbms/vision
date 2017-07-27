@@ -1,0 +1,212 @@
+
+"source/misc/utils.vis" asFileContents evaluate;
+
+!list <- 1, 2, 3, 4, 5;
+
+Object defineMethod: [|parallelismReport|
+  !thread <- ^current;
+  0 asReferenceTo: thread . doOnceNoContext: [
+    "thread cardinality " print; thread clusterCardinality printNL;
+  ];
+];
+
+newLine print;
+"Basic do once" printNL;
+20081201 asDate to: 20081203 asDate by: 1 businessDays . evaluate: [
+  list do: [ 
+    !number <- ^self;
+    "one", "two" do: [
+      !number <- ^my number;
+      !string <- ^self;
+
+      ^current basicDoOnce: [
+          parallelismReport;
+          "  called for: " print; number print; ", " print; ^self printNL;
+        ]
+        basedOnCriteria: [ number ], [ string ]
+        propagateUsing: [ ];
+      0 asReferenceTo: ^current . doOnceNoContext: [ newLine print; ];
+
+      ^current basicDoOnce: [
+          parallelismReport;
+          "  called for: " print; ^self printNL;
+        ]
+        basedOnCriteria: [ string ]
+        propagateUsing: [];
+      0 asReferenceTo: ^current . doOnceNoContext: [ newLine print; ];
+ 
+      ^current basicDoOnce: [
+          parallelismReport;
+          "  called for: " print; ^self number printNL;
+        ]
+        basedOnCriteria: [ number ]
+        propagateUsing: [];
+      0 asReferenceTo: ^current . doOnceNoContext: [ newLine print; ];
+ 
+    ];
+  ];
+];
+
+newLine print;
+"Basic do once \"layer\" check:" printNL;
+20081201 asDate to: 20081203 asDate by: 1 businessDays . evaluate: [
+  list do: [ 
+    !number <- ^self;
+    "one", "two" do: [
+      !number <- ^my number;
+      !string <- ^self;
+      ^self basicDoOnce: [
+          ^self displayInheritance;
+          ^self
+        ]
+        basedOnCriteria: [ 
+          ^self whatAmI = "String" && ^self super whatAmI = "Ordinal" 
+        ] 
+        propagateUsing: [ 
+          groupResult print; ", " print; ^self print; " -> " print;
+          # self extended by groupResult
+          (^self super == groupResult) print: 6; 
+
+          (groupResult whatAmI = "String" && 
+            groupResult super whatAmI = "Ordinal") printNL;
+        ];
+    ];
+  ];
+];
+
+newLine print;
+"basicDoOnceNoContext" printNL;
+20081201 asDate to: 20081203 asDate by: 1 businessDays . evaluate: [
+  list do: [ 
+    !number <- ^self;
+    "one", "two" do: [
+      !number <- ^my number;
+      !string <- ^self;
+
+      ^current basicDoOnceNoContext: [
+          parallelismReport;
+          "  called for: " print; number print; ", " print; ^self printNL;
+        ]
+        basedOnCriteria: [ number ] , [ string ]
+        propagateUsing: [];
+      0 asReferenceTo: ^current . doOnceNoContext: [ newLine print; ];
+      
+      ^current basicDoOnceNoContext: [
+          parallelismReport;
+          "  called for: " print; ^self printNL;
+        ]
+        basedOnCriteria: [ string ]
+        propagateUsing: [];
+      0 asReferenceTo: ^current . doOnceNoContext: [ newLine print; ];
+
+      ^current basicDoOnceNoContext: [
+          parallelismReport;
+          "  called for: " print; ^self number printNL;
+        ]
+        basedOnCriteria: [ number ]
+        propagateUsing: [];
+      0 asReferenceTo: ^current . doOnceNoContext: [ newLine print; ];
+
+    ];
+  ];
+];
+
+newLine print;
+"basicDoOnceNoContext \"layer\" check:" printNL;
+20081201 asDate to: 20081203 asDate by: 1 businessDays . evaluate: [
+  list do: [ 
+    !number <- ^self;
+    "one", "two" do: [
+      !number <- ^my number;
+      !string <- ^self;
+      ^self basicDoOnceNoContext: [
+          ^self displayInheritance;
+          ^self
+        ]
+        basedOnCriteria: [ 
+          ^self whatAmI = "String" && ^self super whatAmI = "Ordinal" 
+        ] 
+        propagateUsing: [ 
+          groupResult print; ", " print; ^self print; " -> " print;
+
+          # self extended by groupResult
+          (^self super == groupResult) print: 6; 
+
+          (groupResult whatAmI = "String" && 
+            groupResult super whatAmI = "Ordinal") printNL;
+        ];
+    ];
+  ];
+];
+
+
+newLine print;
+"basicDoOnceNoContext: by:" printNL;
+20081201 asDate to: 20081203 asDate by: 1 businessDays . evaluate: [
+  list do: [ 
+    !number <- ^self;
+    "one", "two" do: [
+      !number <- ^my number;
+      !string <- ^self;
+
+      ^current basicDoOnceNoContext: [
+          parallelismReport;
+          "  called for: " print; number print; ", " print; ^self printNL;
+        ]
+        basedOnCriteria: [ number ] , [ string ]
+        propagateUsing: [] 
+        by: 3;
+      0 asReferenceTo: ^current . doOnceNoContext: [ newLine print; ];
+      
+      ^current basicDoOnceNoContext: [
+          parallelismReport;
+          "  called for: " print; ^self printNL;
+        ]
+        basedOnCriteria: [ string ]
+        propagateUsing: [] 
+        by: 3;
+      0 asReferenceTo: ^current . doOnceNoContext: [ newLine print; ];
+
+      ^current basicDoOnceNoContext: [
+          parallelismReport;
+          "  called for: " print; ^self number printNL;
+        ]
+        basedOnCriteria: [ number ]
+        propagateUsing: [] 
+        by: 3;
+      0 asReferenceTo: ^current . doOnceNoContext: [ newLine print; ];
+    ];
+  ];
+];
+
+newLine print;
+"basicDoOnceNoContext: by: \"layer\" check:" printNL;
+20081201 asDate to: 20081203 asDate by: 1 businessDays . evaluate: [
+  list do: [ 
+    !number <- ^self;
+    "one", "two" do: [
+      !number <- ^my number;
+      !string <- ^self;
+      ^self basicDoOnceNoContext: [
+          ^self displayInheritance;
+          ^self
+        ]
+        basedOnCriteria: [ 
+          ^self whatAmI = "String" && ^self super whatAmI = "Ordinal" 
+        ] 
+        propagateUsing: [ 
+          groupResult print; ", " print; ^self print; " -> " print;
+
+          # self extended by groupResult
+          (^self super == groupResult) print: 6; 
+
+          (groupResult whatAmI = "String" && 
+            groupResult super whatAmI = "Ordinal") printNL;
+        ]
+        by: 3;
+    ];
+  ];
+];
+
+
+

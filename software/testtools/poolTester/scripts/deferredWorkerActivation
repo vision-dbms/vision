@@ -1,0 +1,39 @@
+# PoolTester script for testing that workers that have completed startup after a restart operation but
+# have been deferred because the maximum number of workers are in use will be brought online if one of
+# those busy workers exits on error.
+
+# Pre-Execs
+pre_exec: start -c $POOLTESTERDIR/configs/shortStart.ptc -p -w
+
+# Hammer thread.
+thread:main, repetitions: 1
+operation_on_thread:main, run:hammer -c 1 -d 30
+operation_on_thread:main, run:sleep 1
+operation_on_thread:main, run:hammer -c 1 -d 30
+operation_on_thread:main, run:sleep 1
+operation_on_thread:main, run:hammer -c 1 -d 30
+operation_on_thread:main, run:sleep 1
+operation_on_thread:main, run:hammer -c 1 -d 30
+operation_on_thread:main, run:sleep 1
+operation_on_thread:main, run:hammer -c 1 -d 30
+operation_on_thread:main, run:waitForStat -c OnlineWIPs=5
+operation_on_thread:main, run:restart
+operation_on_thread:main, run:hammer -c 1 -d 0
+operation_on_thread:main, run:hammer -c 1 -d 0
+operation_on_thread:main, run:sleep 1
+operation_on_thread:main, run:restart
+operation_on_thread:main, run:sleep 2
+operation_on_thread:main, run:killWorker 1
+operation_on_thread:main, run:sleep 1
+operation_on_thread:main, run:killWorker 2
+operation_on_thread:main, run:sleep 1
+operation_on_thread:main, run:killWorker 3
+operation_on_thread:main, run:sleep 1
+operation_on_thread:main, run:killWorker 4
+operation_on_thread:main, run:sleep 1
+operation_on_thread:main, run:killWorker 5
+operation_on_thread:main, run:hammer -c 1 -d 1
+
+# Post-Execs
+post_exec: waitForStat -c QueriesProcessed=8 
+post_exec: stop -t 60

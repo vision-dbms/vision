@@ -1,0 +1,110 @@
+[ 
+  !toolkitName <- "ClassBuilder";
+
+  (CoreWorkspace respondsTo: toolkitName) ifFalse: [
+    !base <- ToolKit createSubclass: toolkitName at: CoreWorkspace;
+
+    !input <- base createSubclass: "Utility" at: base;
+  ];
+] value;
+
+Object defineMethod: [|defineFixedROProperty: str|
+  !class <- ^self;
+
+  !propertyName <- "_" concat: str;
+  !messageName <- str;
+
+  # only define the property if it's not already defined
+  propertyName asSelector locateInDictionaryOf: class . isNA ifTrue: [
+    class defineFixedProperty: propertyName;
+  ];
+
+  # don't overwrite an existing method, but allow overrides!
+  messageName asSelector locateInDictionaryOf: class . isNA ifTrue: [
+    class defineMethod: (
+        "|" concat: messageName . concat: "| ^self _" . concat: str 
+      ) asBlock;
+  ];
+
+  ^self
+];
+ 
+Object defineMethod: [|defineFixedRWProperty: str|
+  !class <- ^self;
+
+  class defineFixedROProperty: str ;
+
+  !messageName <- "set" concat: str asString capitalize . concat: "To:" ;
+
+  # only override the method if it isn't defined locally
+  messageName locateInDictionaryOf: class . isNA ifTrue: [
+    class defineMethod: (
+        "| " concat: messageName .  concat: " arg| :_" . concat: str . 
+        concat: " <- arg;  ^self" 
+      ) asBlock;
+  ];
+
+  class
+];
+ 
+Object defineMethod: [|defineEnableDisable: str|
+  !class <- ^self;
+
+  class defineFixedRWProperty: str;
+
+  !enableName <- "enable" concat: str asString capitalize;
+  !disableName <- "disable" concat: str asString capitalize;
+
+  enableName locateInDictionaryOf: class . isNA ifTrue: [
+    class defineMethod: (
+        "| " concat: enableName .  concat: "| ^self :_" . concat: str . 
+        concat: " <- TRUE;  ^self" 
+      ) asBlock;
+  ];
+
+  disableName locateInDictionaryOf: class . isNA ifTrue: [
+    class defineMethod: (
+        "| " concat: disableName .  concat: "| ^self :_" . concat: str . 
+        concat: " <- FALSE;  ^self" 
+      ) asBlock;
+  ];
+
+  ^self
+];
+
+Object defineMethod: [|defineFixedRWStringProperty: str|
+  !class <- ^self;
+
+  !propertyName <- "_" concat: str;
+  !readerName <- str;
+  !writerName <- "set" concat: str asString capitalize . concat: "To:";
+
+  propertyName locateInDictionaryOf: class . isNA ifTrue: [
+    class defineFixedProperty: ("_" concat: str);
+  ];
+
+  writerName locateInDictionaryOf: class . isNA ifTrue: [
+    class defineMethod: (
+        "| " concat: writerName .  concat: " arg| :_" . concat: str . 
+        concat: " <- ^self getClusteredString: arg;  ^self" 
+      ) asBlock;
+  ];
+
+  readerName locateInDictionaryOf: class . isNA ifTrue: [
+    class defineMethod: (
+        "|" concat: readerName . concat: "| _" . concat: str 
+      ) asBlock;
+  ];
+
+  class
+];
+ 
+
+ClassBuilder Utility defineMethod: [|defineCodeAccessorFor: class|
+  class defineMethod: [|setCodeTo: str| 
+    :code <- ^self getClusteredString: str;
+    ^self
+  ];
+  ^self
+];
+  

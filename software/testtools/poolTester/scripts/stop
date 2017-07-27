@@ -1,0 +1,26 @@
+# Script to test behavior of pool stop
+# Make sure stopTimeOut is 1 minute. Even pool finishes its last query after stop or there is no client connecting to it, it still exists until time is up to stopTimeOut.
+# Make sure after stop and within stopTimeout, pool is available to be connected by other clients.
+
+pre_exec: start -c $POOLTESTERDIR/configs/hardStop.ptc -p
+
+thread:hardstop, repetitions:1
+
+operation_on_thread:hardstop, run:poolSetting -t 2 -c StopTimeOut\>0
+operation_on_thread:hardstop, run:poolConnectivity -t 2 -c 0
+operation_on_thread:hardstop, run:query -q $POOLTESTERDIR/queries/TestQuerySleep8.vis
+operation_on_thread:hardstop, run:sleep 2 #Making sure query is sent before stop
+operation_on_thread:hardstop, run:stop -q
+operation_on_thread:hardstop, run:sleep 2
+operation_on_thread:hardstop, run:poolConnectivity -t 2 -c 0
+operation_on_thread:hardstop, run:sleep 15
+operation_on_thread:hardstop, run:poolConnectivity -t 2 -c 0
+operation_on_thread:hardstop, run:query -q $POOLTESTERDIR/queries/TestQuerySleep8.vis
+operation_on_thread:hardstop, run:sleep 10
+operation_on_thread:hardstop, run:poolConnectivity -t 2 -c 0
+operation_on_thread:hardstop, run:doesPoolExist -c 0
+operation_on_thread:hardstop, run:sleep 62
+operation_on_thread:hardstop, run:poolConnectivity -t 2 -c 1
+operation_on_thread:hardstop, run:doesPoolExist -c 1
+
+#post_exec: stop

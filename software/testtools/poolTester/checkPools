@@ -1,0 +1,5 @@
+#!/bin/csh
+foreach pool ( `poolTester list` )
+   echo "$pool --"
+   poolTester -p $pool quickStats
+end

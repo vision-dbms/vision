@@ -1,0 +1,70 @@
+"testkit/lib/test/order.vis" asFileContents evaluate;
+
+[
+
+CoreWorkspace Interface BatchFeedManager 
+  createDataRecordClass:  "SecuritySparse"
+  from:                   "DataRecord"
+  linkedTo:               "Security"
+  via:                    "sparse"
+  asTS:                   FALSE;
+
+PropertySetup updateFromString:
+"property  | classID          | dataType | tsFlag
+timeSeries | SecuritySparse | String   | TRUE
+";
+
+SecurityMaster updateFromString:
+"id 
+ONE
+TWO
+";
+
+SecuritySparseFeed updateFromString:
+"id | date     | timeSeries
+ONE | 20071225 | Christmas
+";
+
+SecuritySparseFeed updateFromString:
+"id | date     | timeSeries
+ONE | 20071122 | Thanksgiving
+";
+
+
+EntityExtenderFeed enableOptimization;
+
+SecuritySparseFeed updateFromString:
+"id | date     | timeSeries
+TWO | 20071225 | Christmas
+";
+
+SecuritySparseFeed updateFromString:
+"id | date     | timeSeries
+TWO | 20071122 | Thanksgiving
+";
+
+] debugOutput;
+
+
+"The results here are just wrong.  enableOptimization does not handle" printNL;
+"TimeSeries properties correctly.  I hope this gets fixed sometime" printNL;
+"soon.  If you see Christmas reappear in the optimization section" printNL;
+"update the testref, check it in and do a victory dance." printNL;
+newLine print;
+"PS: take out this comment if that happens" printNL;
+newLine printNL;
+
+
+"No Optimization: " printNL;
+Named Security ONE sparse do: [ 
+  :timeSeries displayAll;
+];
+newLine print;
+
+"Optimization: " printNL;
+Named Security TWO sparse do: [ 
+  :timeSeries displayAll;
+];
+newLine print;
+
+

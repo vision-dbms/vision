@@ -1,0 +1,21 @@
+
+IndexAccount respondsTo: 'memberListMaxSize' . ifFalse: [
+  IndexAccount define: 'memberListMaxSize' toBe: 200000000;
+];
+
+IndexAccount defineMethod: [|initializeNewMembershipDate|
+  manageMemberListStore;
+( :memberList on: ^date .isntNA) && memberList != memberListPrototype ifTrue: [memberList do: [^my memberList delete: asSelf];]
+ifFalse: [:memberList put: memberListPrototype clusterNew]; 
+^self];
+
+IndexAccount defineMethod: [|manageMemberListStore|
+  !self <- ^self asSelf;
+  0 asReferenceTo: ^current . == ^current ifTrue: [
+    memberListPrototype clusterSize > memberListMaxSize ifTrue: [
+      self define: 'memberListPrototype' toBe: CoreWorkspace IndexedList new;
+    ];
+  ];
+];
+
+
