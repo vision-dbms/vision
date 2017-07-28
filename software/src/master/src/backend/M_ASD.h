@@ -786,6 +786,7 @@ public:
 	DECLARE_FAMILY_MEMBERS (GCVisitMark,GCVisitBase);
 
     protected:
+	using BaseClass::Mark_;
 	virtual void Mark_(M_ASD* pASD, M_POP const *pPOP);
 
 	virtual void processContainerHandle  (M_CTE &rCTE, VContainerHandle *pHandle);
