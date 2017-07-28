@@ -189,9 +189,20 @@ void rtCLOSURE_Handle::createContainer () {
  ********************************
  ********************************/
 
-void rtCLOSURE_Handle::traverseReferences(visitFunction fp) {
-    if (m_pContext) (m_pContext.referent ()->*fp)();
-    if (m_pBlock)   (m_pBlock.referent ()->*fp)();
+void rtCLOSURE_Handle::visitReferencesUsing (Visitor *visitor) {
+    BaseClass::visitReferencesUsing (visitor);
+    if (m_pContext) 
+	m_pContext->visitUsing (visitor);
+    if (m_pBlock)
+	m_pBlock->visitUsing (visitor);
+}
+
+void rtCLOSURE_Handle::generateReferenceReport (V::VSimpleFile &rOutputFile, unsigned int xLevel) const {
+    BaseClass::generateReferenceReport (rOutputFile, xLevel++);
+    if (m_pContext)
+	m_pContext->generateReferenceReport (rOutputFile, xLevel);
+    if (m_pBlock)
+	m_pBlock->generateReferenceReport (rOutputFile, xLevel);
 }
 
 
