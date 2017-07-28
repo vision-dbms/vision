@@ -34,8 +34,7 @@ This presupposes you have a NDFPathName pointing to a valid vision network and t
    * `setenv UserOSI 3`
    * `setenv VisionAdm 1`
 1. Run the test suite
-   * `batchvision < testkit/scripts/buildBaseline`
-   * `batchvision < testkit/scripts/checkProposed`
+   * `batchvision < testkit/scripts/buildBaseline && batchvision < testkit/scripts/checkProposed`
    
 Should look something like:
 
