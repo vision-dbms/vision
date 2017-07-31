@@ -3,7 +3,7 @@
 In this example we'll be building `release-8.1` on Linux from a fresh clone of the repository at `https://github.com/VCommitter/vision.git`.  
 
 1. Get the source (here we'll use directory `vision-open-source`)
-   * `git pull https://github.com/VCommitter/vision.git vision-open-source`
+   * `git clone https://github.com/VCommitter/vision.git vision-open-source`
    * `cd vision-open-source`
 1. Switch to the branch you want to build
    * `git checkout release-8.1`
