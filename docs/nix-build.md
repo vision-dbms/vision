@@ -12,13 +12,13 @@ In this example we'll be building `release-8.1` on Linux from a fresh clone of t
    * ``setenv PATH `pwd`/builder/:$PATH``
 1. Perform the build
    * `cd src/master/src/`
-   * `buildRelease 8.1.0` in this case or
+   * `setenv VERSION "8.1.0" && buildRelease $VERSION` in this case or
    * `visionBuilder` or
    * `visionBuilder debug`
 1. Build the binary directory
-   * `pushBinaries ../ ../../../../software/builds/8.1.0/Linux_x86_64`
+   * `pushBinaries ../ ../../../../software/builds/$VERSION/Linux_x86_64`
 1. Add those binaries to your path
-   * `cd ../../../../software/builds/8.1.0/Linux_x86_64/bin`
+   * `cd ../../../../software/builds/$VERSION/Linux_x86_64/bin`
    * ``setenv PATH `pwd`:$PATH``
    
    
