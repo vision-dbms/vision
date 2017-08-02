@@ -11,7 +11,7 @@
  *****  Components  *****
  ************************/
 
-#include "VStaticTransient.h"
+#include "VTransient.h"
 
 /**************************
  *****  Declarations  *****
@@ -24,8 +24,8 @@
  *************************/
 
 namespace Vxa {
-    class Vxa_API VType : virtual public VStaticTransient {
-	DECLARE_FAMILY_MEMBERS (VType, VStaticTransient);
+    class Vxa_API VType : virtual public VTransient {
+	DECLARE_FAMILY_MEMBERS (VType, VTransient);
 
     //  Construction
     protected:
@@ -34,10 +34,6 @@ namespace Vxa {
     //  Destruction
     protected:
 	~VType ();
-
-    //  Initialization
-    protected:
-	void initialize ();
 
     //  Description
     protected:

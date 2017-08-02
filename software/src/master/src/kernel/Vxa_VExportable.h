@@ -23,8 +23,6 @@ namespace Vxa {
     class VMapMaker;
     class VResultBuilder;
 
-    Vxa_API    void InitializeStockExportables ();
-
     typedef ICollection::Reference export_return_t;
 
 /***********************************
@@ -109,6 +107,7 @@ namespace Vxa {
     private:
 	static ThisClass *g_pTraits;
     };
+
     template <typename T> VExportable<T>* VExportable<T>::g_pTraits = 0;
 
 /*********************************************************************

@@ -22,8 +22,6 @@ namespace Vxa {
     class VCallType2Importer;
     class VTask;
 
-    Vxa_API    void InitializeStockImportables ();
-
 /***********************************
  *----  class VImportableType  ----*
  ***********************************/

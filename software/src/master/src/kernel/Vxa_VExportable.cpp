@@ -33,6 +33,7 @@
 
 #include "Vxa_VInfiniteSetOf.h"
 #include "Vxa_VResultBuilder.h"
+
 
 /******************************
  ******************************
@@ -131,12 +132,6 @@ namespace Vxa {
 	    return m_pUniverse;
 	}
 
-    public:
-	static ThisClass *ThisStockExportable () {
-	    static ThisClass *pSE = new ThisClass ();
-	    return pSE;
-	}
-
     //  Result Generation
     private:
 	virtual bool createMethod (method_return_t &rResult, VString const &rName, Val_T const &rValue) {
@@ -155,16 +150,26 @@ namespace Vxa {
     private:
 	typename universe_t::Reference mutable m_pUniverse;
     };
-    
-    void InitializeStockExportables () {
-	Vxa::VStockExportable<bool>::ThisStockExportable ();
-	Vxa::VStockExportable<short>::ThisStockExportable ();
-	Vxa::VStockExportable<unsigned short>::ThisStockExportable ();
-	Vxa::VStockExportable<int>::ThisStockExportable ();
-	Vxa::VStockExportable<unsigned int>::ThisStockExportable ();
-	Vxa::VStockExportable<float>::ThisStockExportable ();
-	Vxa::VStockExportable<double>::ThisStockExportable ();
-	Vxa::VStockExportable<char const*, VString>::ThisStockExportable ();
-	Vxa::VStockExportable<VString>::ThisStockExportable ();
-    }
+}
+
+
+/************************************************
+ ************************************************
+ *****                                      *****
+ *****  Vxa::VExportable Run Time Metadata  *****
+ *****                                      *****
+ ************************************************
+ ************************************************/
+
+namespace {
+    Vxa::VStockExportable<bool>				g_iExportable_bool;
+    Vxa::VStockExportable<short>			g_iExportable_short;
+    Vxa::VStockExportable<unsigned short>		g_iExportable_unsigned_short;
+    Vxa::VStockExportable<int>				g_iExportable_int;
+    Vxa::VStockExportable<unsigned int>			g_iExportable_unsigned_int;
+    Vxa::VStockExportable<float>			g_iExportable_float;
+    Vxa::VStockExportable<double>			g_iExportable_double;
+
+    Vxa::VStockExportable<char const*,VString>		g_iExportable_char_const_p;
+    Vxa::VStockExportable<VString>			g_iExportable_VString;
 }

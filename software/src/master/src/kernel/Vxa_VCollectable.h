@@ -30,25 +30,15 @@
  *****  Definitions  *****
  *************************/
 
-#define DEFINE_VXA_INIT(T,CLASS)\
-    void T::Init () {\
-        T##CLASS::Init ();\
-    }
-
-#define DEFINE_VXA_COLLECTABLEBASE(T)\
+#define DEFINE_VXA_COLLECTABLE(T)\
     template class Vxa_API Vxa::VExportable<T*>;\
     template class Vxa_API Vxa::VImportable<T*>
 
-#define DEFINE_VXA_COLLECTABLE(T)\
-    DEFINE_VXA_INIT (T, Class)\
-    DEFINE_VXA_COLLECTABLEBASE(T)
-
 #define DEFINE_VXA_TEMPLATED_COLLECTABLE(T)\
-    DEFINE_VXA_COLLECTABLEBASE(T);\
+    DEFINE_VXA_COLLECTABLE(T);\
     template class Vxa_API T
 
 namespace Vxa {
-
     template <typename T> class VCollectable
 	: public VClass
 	, public VExportable<T*>

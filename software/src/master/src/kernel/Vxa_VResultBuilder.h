@@ -26,9 +26,6 @@
  *************************/
 
 namespace Vxa {
-
-    Vxa_API void InitializeRBImportables ();
-
     class Vxa_API VResultBuilder {
 	DECLARE_NUCLEAR_FAMILY (VResultBuilder);
 

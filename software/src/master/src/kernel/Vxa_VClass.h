@@ -11,13 +11,12 @@
  *****  Components  *****
  ************************/
 
-#include "VStaticTransient.h"
+#include "Vxa_VExportable.h"
 
 /**************************
  *****  Declarations  *****
  **************************/
 
-#include "Vxa_VExportable.h"
 #include "Vxa_VMethod.h"
 
 /*************************
@@ -25,8 +24,8 @@
  *************************/
 
 namespace Vxa {
-    class Vxa_API VClass : virtual public VStaticTransient, virtual public VExportableType {
-	DECLARE_FAMILY_MEMBERS (VClass, VStaticTransient);
+    class Vxa_API VClass : virtual public VExportableType {
+	DECLARE_FAMILY_MEMBERS (VClass, VExportableType);
 
     //  Aliases
     public:
@@ -39,11 +38,6 @@ namespace Vxa {
     //  Destruction
     protected:
 	~VClass ();
-
-    //  Initialization
-    protected:
-	void initialize () {
-	}
 
     //  Accounting and Labeling
     public:
