@@ -167,6 +167,15 @@ namespace V {
 	operator T& () {
 	    return *tbagAddress();
 	}
+	T * operator-> () {
+	    T & content = *tbagAddress();
+	    return &content;
+	}
+	T const * operator-> () const {
+	    T const & content = *tbagAddress();
+	    return &content;
+	}
+
     private:
 	TBag const* tbagAddress () const{
 	    return reinterpret_cast<TBag const*>(m_iT.asMemory);
