@@ -48,7 +48,7 @@ DEFINE_ABSTRACT_RTT (V::VThread);
  *************************
  *************************/
 
-V::VThreadSpecific::Key const V::VThread::g_iTLSKey;
+V::VThread::EternalKey V::VThread::g_iTLSKey;
 
 /**************************
  **************************
@@ -128,7 +128,7 @@ pthread_id_t V::VThread::CurrentThreadId () {
 
 V::VThread::Reference V::VThread::Here () {
     BaseClass::Reference pSpecific; Reference pThisInstance;
-    if (g_iTLSKey.getSpecific (pSpecific) && pSpecific.isntNil ())
+    if (g_iTLSKey->getSpecific (pSpecific) && pSpecific.isntNil ())
 	pThisInstance.setTo (static_cast<ThisClass*>(pSpecific.referent ()));
     else
 	pThisInstance.setTo (new VUnmanagedThread ());
