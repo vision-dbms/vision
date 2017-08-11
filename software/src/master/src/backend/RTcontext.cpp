@@ -212,7 +212,8 @@ bool rtCONTEXT_Handle::PersistReferences () {
  ********************************
  ********************************/
 
-void rtCONTEXT_Handle::visitReferencesUsing (visitFunction visitor) {
+void rtCONTEXT_Handle::visitReferencesUsing (Visitor *visitor) {
+    BaseClass::visitReferencesUsing (visitor);
     if (m_pParentContext)
 	m_pParentContext->visitUsing (visitor);
 

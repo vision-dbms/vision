@@ -45,6 +45,24 @@ template class VStoreHandle_<VContainerHandle>;
 
 DEFINE_CONCRETE_RTT (VContainerHandle);
 
+/*********************************
+ *********************************
+ *****  Lifetime Management  *****
+ *********************************
+ *********************************/
+
+bool VContainerHandle::onDeleteThis () {
+    if (m_pDCTE.isntNil () && (m_pDCTE->isntReferenced () || !g_bPreservingHandles && m_pContainer && !m_bPrecious)) {
+	if (M_AND::GarbageCollectionRunning ()) {
+	    generateLogRecord ("DeleteInGC");
+	}
+	m_pDCTE->setToContainerAddress (m_pContainer, m_bReadWrite);
+	m_pDCTE->discard (m_pASD, containerIndexNC ());
+	m_pDCTE.clear ();
+    }
+    return m_pDCTE.isNil ();
+}
+
 /**********************************
  **********************************
  *****  Enumeration Handlers  *****
@@ -78,29 +96,35 @@ bool VContainerHandle::DoNothing (VArgList const&) {
  ***********************************
  ***********************************/
 
-void VContainerHandle::visitReferencesUsing (visitFunction visitor) {
+void VContainerHandle::visitReferencesUsing (Visitor *visitor) {
 }
 
-void VContainerHandle::startMark() {
-    if (!m_bVisited) {
-	m_bVisited = true;
-	visitReferencesUsing (&ThisClass::mark);
+void VContainerHandle::cdMarkFor(M_ASD::GCVisitCycleDetect *visitor) {
+    m_iGCState.incrementInterhandleReferenceCount ();
+    generateLogRecord ("CDMark");
+
+    if (m_iGCState.onFirstCDVisit ()) {
+	if (hasNoIdentity ()) {
+	    // no identity -> no CTE -> can't be queued -> must visit now
+	    visitReferencesUsing (visitor);
+	} else if (!m_pDCTE->cdVisited ()) {
+	    m_pDCTE->cdVisited (true);
+	    m_pASD->GCQueueInsert (containerIndex ());
+	}
     }
 }
 
-void VContainerHandle::mark() {
-    m_iHandleRefCount++;
-    generateLogRecord ("CDMark");
+void VContainerHandle::gcMarkFor (M_ASD::GCVisitMark *visitor) {
+    generateLogRecord ("GCMark");
 
-    startMark();
-}
-
-void VContainerHandle::unmark() {
-    generateLogRecord ("Unmark");
-
-    if (m_bVisited) {
-	m_bVisited = false;
-	m_iHandleRefCount = 0;
+    if (m_iGCState.onFirstGCVisit ()) {
+	if (hasNoIdentity ()) {
+	    // no identity -> no CTE -> can't be queued -> must visit now
+	    visitReferencesUsing (visitor);
+	} else if (!m_pDCTE->gcVisited ()) {
+	    m_pDCTE->gcVisited (true);
+	    m_pASD->GCQueueInsert (containerIndex ());
+	}
     }
 }
 
@@ -149,7 +173,10 @@ void VContainerHandle::generateLogRecord (char const *pWhere) const {
     if (bFirst) {
 	bFirst = false;
 	char const *pLogName = getenv ("VisionHandleLog");
-	bValid = pLogName && sFile.OpenForTextAppend (pLogName) && sFile.PutLine ("================");
+	bValid = pLogName
+	    && sFile.OpenForTextAppend (pLogName)
+	    && sFile.PutString ("================ ")
+	    && sFile.PutLine (Space ()->UpdateAnnotation ());
     }
     if (bValid) {
 	sFile.printf ("%-12s:", pWhere);
@@ -163,7 +190,12 @@ void VContainerHandle::generateReferenceReport (V::VSimpleFile &rOutputFile, uns
 	rOutputFile.printf ("%12u:", xLevel);
     }
 
-    rOutputFile.printf ("%p %2s", this, hasAContainer () ? "C" : "");
+    rOutputFile.printf (
+	" %u/%u %2s",
+	m_iGCState.masterGeneration (),
+	m_iGCState.currentGeneration (),
+	hasAContainer () ? "C" : ""
+    );
 
     if (m_pDCTE) { // Implies 'hasAnIdentity'
 	rOutputFile.printf (
@@ -179,7 +211,7 @@ void VContainerHandle::generateReferenceReport (V::VSimpleFile &rOutputFile, uns
     rOutputFile.printf (
 	"%s%s RC:%u CDRC:%u: %s\n",
 	cdVisited () ? " CDV" : "",
-	exceededReferenceCount () ? " EXCESS" : foundAllReferences () ? " FA+" : " FA-",
+	exceededReferenceCount () ? " EXCESS" : foundAllReferences () || m_pDCTE && m_pDCTE->foundAllReferences () ? " FA+" : " FA-",
 	referenceCount (),
 	cdReferenceCount (),
 	RTypeName ()

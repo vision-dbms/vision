@@ -150,7 +150,7 @@ private:
 
 // Garbage collection marking
 public:
-    virtual /*override*/ void visitReferencesUsing (visitFunction visitor);
+    virtual /*override*/ void visitReferencesUsing (Visitor *visitor);
     virtual /*override*/ void generateReferenceReport (V::VSimpleFile &rOutputFile, unsigned int xLevel) const;
 
 //  Store Access

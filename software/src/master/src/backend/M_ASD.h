@@ -17,6 +17,8 @@
 
 #include "PS_ASD.h"
 
+#include "Vdd_Object.h"
+
 class M_CTE;
 
 class rtPCT_Handle;
@@ -381,6 +383,9 @@ public:
 		}
 		bool holdsAContainerAddress () const {
 		    return m_xAddressType < M_CTEAddressType_CPCC;
+		}
+		bool holdsAContainerHandle () const {
+		    return holdsACPCC ();
 		}
 		bool holdsACPCC () const {
 		    return m_xAddressType == M_CTEAddressType_CPCC;
@@ -755,13 +760,12 @@ public:
     };
 
 
-// GC Traversal Controllers: GCTraverseMarkBase
+// GC Traversal Controllers : GCVisitBase
 public:
-    class GCVisitBase {
-    public:
-	virtual void processContainerAddress (M_CTE &rCTE, M_CPreamble *pAddress);
-	virtual void processContainerHandle  (M_CTE &rCTE, VContainerHandle *pHandle);
+   class GCVisitBase : public Vdd::Object::Visitor {
+	friend class M_ASD;
 
+    public:
 	void Mark (M_ASD* pASD, M_POP const *pPOP) {
 	    Mark_(pASD, pPOP);
 	}
@@ -773,16 +777,32 @@ public:
 	virtual void Mark_(M_ASD* pASD, M_POP const *pPOP);
 	virtual void Mark_(M_ASD* pASD, M_POP const *pReferences, unsigned int cReferences);
 
+	virtual void processContainerAddress (M_CTE &rCTE, M_CPreamble *pAddress);
+	virtual void processContainerHandle  (M_CTE &rCTE, VContainerHandle *pHandle);
     };
 
+// GC Traversal Controllers : GCVisitMark
     class GCVisitMark : public GCVisitBase {
+	DECLARE_FAMILY_MEMBERS (GCVisitMark,GCVisitBase);
+
     protected:
+	using BaseClass::Mark_;
 	virtual void Mark_(M_ASD* pASD, M_POP const *pPOP);
+
+	virtual void processContainerHandle  (M_CTE &rCTE, VContainerHandle *pHandle);
+
+	virtual /*override*/ void visitHandle (VContainerHandle *pHandle);
     };
 
+// GC Traversal Controllers : GCVisitCycleDetect
     class GCVisitCycleDetect : public GCVisitBase {
+	DECLARE_FAMILY_MEMBERS (GCVisitCycleDetect,GCVisitBase);
+
     protected:
-	virtual void Mark_(M_ASD* pASD, M_POP const *pPOP);
+	virtual void processContainerAddress (M_CTE &rCTE, M_CPreamble *pAddress);
+	virtual void processContainerHandle  (M_CTE &rCTE, VContainerHandle *pHandle);
+
+	virtual /*override*/ void visitHandle (VContainerHandle *pHandle);
     };
 
 
@@ -842,6 +862,10 @@ public:
 
     unsigned __int64 TransientAllocation () const {
 	return m_sTransientAllocation;
+    }
+
+    VString const &UpdateAnnotation () const {
+	return m_pAND->UpdateAnnotation ();
     }
 
 //  Query

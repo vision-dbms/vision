@@ -744,7 +744,7 @@ public:
     }
 
 public:
-    void visitReferencesUsing (VContainerHandle::visitFunction visitor) {
+    void visitReferencesUsing (VContainerHandle::Visitor *visitor) {
 	if (isntEmpty ()) {
 	    m_iStore.visitReferencesUsing (visitor);
 	}

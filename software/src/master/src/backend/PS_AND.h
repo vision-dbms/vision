@@ -9,6 +9,8 @@
 #include "VkMemory.h"
 #include "VdbNetwork.h"
 
+#include "V_VString.h"
+
 /**************************
  *****  Declarations  *****
  **************************/
@@ -240,6 +242,10 @@ public:
 	return m_iTID;
     }
 
+    VString const &UpdateAnnotation () const {
+	return m_pUpdateAnnotation;
+    }
+
     PS_Type_FO UpdateFO () const {
 	return m_iUpdateFO;
     }
@@ -432,7 +438,7 @@ protected:
     PS_Type_FO			m_iUpdateFO;
     PS_NVD			m_iUpdateNVD;
     PS_UpdateStatus		m_xUpdateStatus;
-    char const*			m_pUpdateAnnotation;
+    VString			m_pUpdateAnnotation;
     PS_ASD*			m_pUngrantedASD;
     unsigned int		m_xScanGeneration;
     unsigned int		m_bDoingCompaction	:  1,

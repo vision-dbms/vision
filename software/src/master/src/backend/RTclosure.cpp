@@ -189,7 +189,8 @@ void rtCLOSURE_Handle::createContainer () {
  ********************************
  ********************************/
 
-void rtCLOSURE_Handle::visitReferencesUsing (visitFunction visitor) {
+void rtCLOSURE_Handle::visitReferencesUsing (Visitor *visitor) {
+    BaseClass::visitReferencesUsing (visitor);
     if (m_pContext) 
 	m_pContext->visitUsing (visitor);
     if (m_pBlock)

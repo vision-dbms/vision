@@ -32,13 +32,8 @@ class rtVSTORE_Handle;
 class VAssociativeResult;
 class VCollectionOfStrings;
 class VCollectionOfUnsigned32;
-class VContainerHandle;
 class VDescriptor;
 class VSelector;
-
-namespace V {
-    class VSimpleFile;
-}
 
 
 /*************************
@@ -498,10 +493,6 @@ namespace Vdd {
 	void describe (bool bVerbose = false) {
 	    describe_(bVerbose);
 	}
-    public:
-	virtual void visitUsing (void (VContainerHandle::*visitor)()) = 0;
-	virtual void visitReferencesUsing (void (VContainerHandle::*visitor)()) = 0;
-	virtual void generateReferenceReport (V::VSimpleFile &rOutputFile, unsigned int xLevel) const = 0;
 
     //  State
     private:
