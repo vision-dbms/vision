@@ -122,15 +122,12 @@ namespace Vxa {
     //  Method Definition
     public:
 	template <typename Signature> bool defineMethod (VString const &rName, Signature pMember) {
-	    m_iHelpInfo << rName << "\n";
 	    typename VCollectableMethod<Signature>::Reference pMethod (
 		new VCollectableMethod<Signature> (rName, pMember)
 	    );
 	    return defineMethod (pMethod);
 	}
-	bool defineMethod (method_t *pMethod) {
-	    return BaseClass::defineMethod (pMethod);
-	}
+	using BaseClass::defineMethod;
 
     //  Parameter Acquistion
     private:

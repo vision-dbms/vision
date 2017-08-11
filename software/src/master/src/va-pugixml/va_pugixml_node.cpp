@@ -56,6 +56,20 @@ VA::PugiXML::Node::Node (
     Document *pDocument, pugi::xml_node const &rPugiNode
 ) : m_pDocument (pDocument), m_iPugiNode (rPugiNode) {
 }
+VA::PugiXML::Node::Node () {
+}
+void VA::PugiXML::Node::setPugiNodeTo (pugi::xml_node const &rPugiNode) {
+    m_iPugiNode = rPugiNode;
+}
+
+/*************************
+ *************************
+ *****  Destruction  *****
+ *************************
+ *************************/
+
+VA::PugiXML::Node::~Node () {
+}
 
 
 /************************************
@@ -105,9 +119,9 @@ void VA::PugiXML::Node::returnNonEmpty (Vxa::VResultBuilder &rRB, pugi::xml_attr
 	rRB = new Attribute (this, rPugiAttribute);
 }
 
-void VA::PugiXML::Node::returnNonEmpty (Vxa::VResultBuilder &rRB, pugi::xml_node const &rPugiNode) {
-    //    if (!rPugiNode.empty ())
-	rRB = new Node (m_pDocument, rPugiNode);
+void VA::PugiXML::Node::returnNonEmpty (Vxa::VResultBuilder &rRB, pugi::xml_node const &iPugiNode) {
+    //    if (!iPugiNode.empty ())
+	rRB = new Node (m_pDocument, iPugiNode);
 }
 
 
@@ -184,39 +198,7 @@ void VA::PugiXML::Node::getLastAttribute (Vxa::VResultBuilder &rRB) {
 
 namespace VA {
     namespace PugiXML {
-	class NodeClass : public Vxa::VCollectable<Node> {
-	public:
-	    NodeClass () {
-		VString iHelpInfo ("The class PugiXML::Node supports the following methods:\nhelp\n");
-
-		defineMethod ("isEmpty", &Node::getIsEmpty);
-		
-		defineMethod ("attributeCount", &Node::getAttributeCount);
-		defineMethod ("childCount", &Node::getChildCount);
-
-		defineMethod ("getName", &Node::getName);
-		defineMethod ("getValue", &Node::getValue);
-
-		defineMethod ("childValue", &Node::getChildValue);
-		defineMethod ("childValueOf:", &Node::getChildValueOf);
-
-		defineMethod ("parent", &Node::getParent);
-
-		defineMethod ("getChild:", &Node::getChild);
-
-		defineMethod ("firstChild", &Node::getFirstChild);
-		defineMethod ("lastChild", &Node::getLastChild);
-		defineMethod ("nextSibling", &Node::getNextSibling);
-		defineMethod ("previousSibling", &Node::getPreviousSibling);
-
-		defineMethod ("getAttribute:", &Node::getAttribute);
-
-		defineMethod ("firstAttribute", &Node::getFirstAttribute);
-		defineMethod ("lastAttribute", &Node::getLastAttribute);
-
-		defineConstant ("help", (iHelpInfo << m_iHelpInfo));
-	    }
-	} g_iNodeClass;
+	Node::Class<Node> g_iNodeClass;
     }
 }
 

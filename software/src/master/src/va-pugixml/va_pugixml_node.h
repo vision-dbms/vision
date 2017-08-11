@@ -7,14 +7,13 @@
  ************************/
 
 #include "Vxa_VCollectableObject.h"
+#include "Vxa_VCollectable.h"
 
 #include <pugixml.hpp>
 
 /**************************
  *****  Declarations  *****
  **************************/
-
-#include "va_pugixml_document.h"
 
 namespace Vxa {
     class VResultBuilder;
@@ -29,10 +28,14 @@ namespace VA {
     namespace PugiXML {
 	typedef unsigned int count_t;
 
-	class Attribute;
+	class Attribute; class Document;
 
 	class Node : public Vxa::VCollectableObject {
 	    DECLARE_CONCRETE_RTTLITE (Node, Vxa::VCollectableObject);
+
+	//  Class
+	public:
+	    template <class Derived> class Class;
 
 	//  Aliases
 	public:
@@ -41,14 +44,15 @@ namespace VA {
 	//  Construction
 	public:
 	    Node (Document *pDocument, pugi::xml_node const &rPugiNode);
+	protected:
+	    Node ();
+	    void setPugiNodeTo (pugi::xml_node const &rPugiNode);
 
 	//  Destruction
 	protected:
-	    ~Node () {
-	    }
+	    ~Node ();
 
 	//  Helpers
-	public:
 	public:
 	    bool isEmpty () const {
 		return m_iPugiNode.empty ();
@@ -62,7 +66,7 @@ namespace VA {
 
 	private:
 	    void returnNonEmpty (Vxa::VResultBuilder &rRB, pugi::xml_attribute const &rPugiAttribute);
-	    void returnNonEmpty (Vxa::VResultBuilder &rRB, pugi::xml_node const &rPugiNode);
+	    void returnNonEmpty (Vxa::VResultBuilder &rRB, pugi::xml_node const &iPugiNode);
 
 	//  Methods
 	public:
@@ -93,8 +97,41 @@ namespace VA {
 
 	//  State
 	private:
-	    Document::Reference const m_pDocument;
-	    pugi::xml_node            m_iPugiNode;
+	    VReference<Document> const m_pDocument;
+	    pugi::xml_node             m_iPugiNode;
+	};
+
+	template <class Derived> class Node::Class : public Vxa::VCollectable<Derived> {
+	    DECLARE_FAMILY_MEMBERS (Class<Derived>,Vxa::VCollectable<Derived>);
+	public:
+	    Class () {
+		BaseClass::defineMethod ("isEmpty", &Derived::getIsEmpty);
+
+		BaseClass::defineMethod ("attributeCount", &Derived::getAttributeCount);
+		BaseClass::defineMethod ("childCount", &Derived::getChildCount);
+
+		BaseClass::defineMethod ("getName", &Derived::getName);
+		BaseClass::defineMethod ("getValue", &Derived::getValue);
+
+		BaseClass::defineMethod ("childValue", &Derived::getChildValue);
+		BaseClass::defineMethod ("childValueOf:", &Derived::getChildValueOf);
+
+		BaseClass::defineMethod ("parent", &Derived::getParent);
+
+		BaseClass::defineMethod ("getChild:", &Derived::getChild);
+
+		BaseClass::defineMethod ("firstChild", &Derived::getFirstChild);
+		BaseClass::defineMethod ("lastChild", &Derived::getLastChild);
+		BaseClass::defineMethod ("nextSibling", &Derived::getNextSibling);
+		BaseClass::defineMethod ("previousSibling", &Derived::getPreviousSibling);
+
+		BaseClass::defineMethod ("getAttribute:", &Derived::getAttribute);
+
+		BaseClass::defineMethod ("firstAttribute", &Derived::getFirstAttribute);
+		BaseClass::defineMethod ("lastAttribute", &Derived::getLastAttribute);
+
+		BaseClass::defineHelp ("PugiXML::Node");
+	    }
 	};
     }
 }

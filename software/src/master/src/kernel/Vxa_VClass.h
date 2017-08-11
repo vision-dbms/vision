@@ -56,7 +56,6 @@ namespace Vxa {
     //  Method Definition
     private:
 	template <typename T> bool defineConstantImpl (VString const &rName, T const &rConstant) {
-	    m_iHelpInfo << rName << "\n";
 	    VMethod::Reference pMethod;
 	    return VExportable<T>::CreateMethod (pMethod, rName, rConstant) && defineMethod (pMethod);
 	}
@@ -71,6 +70,7 @@ namespace Vxa {
 	}
 
 	bool defineMethod (VMethod *pMethod);
+	bool defineHelp (char const *pWhere);
 
     //  Method Execution
     public:
