@@ -66,7 +66,8 @@ namespace V {
 
     //  Key
     private:
-        static Key const g_iTLSKey;
+        typedef V::VEternal<Key const> EternalKey;
+        static EternalKey g_iTLSKey;
 
     //  State
     public:
@@ -192,7 +193,7 @@ namespace V {
          * Attaches this descriptor to the thread-local storage map.
          */
         bool becomeSpecific () {
-            return g_iTLSKey.setSpecific (this);
+            return g_iTLSKey->setSpecific (this);
         }
 
     //  State
