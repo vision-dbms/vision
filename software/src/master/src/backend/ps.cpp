@@ -2561,7 +2561,6 @@ PS_AND::PS_AND (
 , m_iNetworkHandle	(pDatabaseNDF->ndfPathName (), osdPathName, -1)
 , m_pASDList		(0)
 , m_iGeneration		(PS_NDH_Generation (ndh))
-, m_pUpdateAnnotation	(0)
 , m_iSpaceCount		(NDFReadCountedArrayElementCount (ndfd, PS_NVD_SRV (nvd)))
 , m_pSRDArray		((PS_SRD*)UTIL_Malloc (sizeof (PS_SRD) * m_iSpaceCount))
 , m_pSVDArray		((PS_SVD*)UTIL_Malloc (sizeof (PS_SVD) * m_iSpaceCount))
@@ -3593,34 +3592,26 @@ void PS_AND::WriteCommitJournalEntry (PS_Type_FO nvdfo) {
     );
 
 //  ... and write it if an annotation was not supplied:
-    if (IsNil (m_pUpdateAnnotation))
+    if (m_pUpdateAnnotation.isEmpty ())
 	WriteJournalEntry (pBasicCommitEntry);
 //  Otherwise, ...
-    else
-    {
-    //  ... allocate a buffer for the annotated message, ...
-	char *pAnnotatedCommitEntry = (char *)UTIL_Malloc (
-	    strlen (pBasicCommitEntry) + strlen (m_pUpdateAnnotation) + 5
-	);
+    else {
+	VString pAnnotatedCommitEntry (strlen (pBasicCommitEntry) + m_pUpdateAnnotation.length () + 5);
 
     //  ... format the annotated message, ...
-	sprintf (
-	    pAnnotatedCommitEntry, "%s<%s>", pBasicCommitEntry, m_pUpdateAnnotation
+	pAnnotatedCommitEntry.printf (
+	    "%s<%s>", pBasicCommitEntry, m_pUpdateAnnotation.content ()
 	);
 
     //  ... convert newlines to spaces, ...
-	char *pNextSubstring = pAnnotatedCommitEntry;
-	while (*(pNextSubstring += strcspn (pNextSubstring, "\r\n")))
-	    *pNextSubstring = ' ';
+	pAnnotatedCommitEntry.replaceSubstring ("\r", " ");
+	pAnnotatedCommitEntry.replaceSubstring ("\n", " ");
 
     //  ... append a terminating new line, ...
-	strcpy (pNextSubstring, "\n");
+	pAnnotatedCommitEntry.append ("\n");
 
     //  ... write the annotated commit message, ...
 	WriteJournalEntry (pAnnotatedCommitEntry);
-
-    //  ... and free the buffer containing it.
-	UTIL_Free (pAnnotatedCommitEntry);
     }
 }
 
@@ -4364,7 +4355,7 @@ void PS_AND::CommitUpdate () {
 /*****  Display trace message, ...  *****/
     if (m_bTracingUpdate) IO_printf (
 	"+++ Starting commit processing with annotation <%s>...\n",
-	m_pUpdateAnnotation ? m_pUpdateAnnotation : ""
+	m_pUpdateAnnotation.content ()
     );
 
 /*****  Lock the object network, ...  *****/
@@ -4451,7 +4442,7 @@ void PS_AND::CommitUpdate () {
     PS_NVD_TID			(nvd) = m_iTID;
 
 
-    if (m_pUpdateAnnotation)
+    if (m_pUpdateAnnotation.isntEmpty ())
 	PS_NVD_Annotation	(nvd) = WriteString (pNDF, m_pUpdateAnnotation);
     else
 	PS_NVD_Annotation	(nvd) = PS_FO_Nil;
@@ -4483,10 +4474,7 @@ void PS_AND::CommitUpdate () {
     );
 
 /*****  ... clear the annotation, ...  *****/
-    if (m_pUpdateAnnotation) {
-	UTIL_Free ((void*)m_pUpdateAnnotation);
-	m_pUpdateAnnotation = NilOf (char const*);
-    }
+    m_pUpdateAnnotation.clear ();
 
 /*****  ... update the process update thread, ...  *****/
     m_iUpdateFO	 = PS_NDH_CurrentNetworkVersion (ndh);

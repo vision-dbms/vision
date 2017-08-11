@@ -141,9 +141,15 @@ public:
 	return m_pStore && m_pStore->transientExtensionIsA (rRTT);
     }
 
-    void traverseHandleReferences(void (VContainerHandle::*visitFunction)(void)) { 
-	if (m_pStore) m_pStore->traverseHandleReferences(visitFunction);
+    void visitReferencesUsing (VContainerHandle::Visitor *visitor) {
+	if (m_pStore)
+	    m_pStore->visitUsing (visitor);
     }
+    void generateReferenceReport (V::VSimpleFile &rOutputFile, unsigned int xLevel) const {
+	if (m_pStore)
+	    m_pStore->generateReferenceReport (rOutputFile, xLevel);
+    }
+
 //  Update
 public:
     void setAttentionMaskTo (unsigned int iNewAttentionMask) {

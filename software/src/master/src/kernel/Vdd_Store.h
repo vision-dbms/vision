@@ -32,7 +32,6 @@ class rtVSTORE_Handle;
 class VAssociativeResult;
 class VCollectionOfStrings;
 class VCollectionOfUnsigned32;
-class VContainerHandle;
 class VDescriptor;
 class VSelector;
 
@@ -494,8 +493,7 @@ namespace Vdd {
 	void describe (bool bVerbose = false) {
 	    describe_(bVerbose);
 	}
-    public:
-	virtual void traverseHandleReferences(void (VContainerHandle::*visitFunction)(void)) = 0;
+
     //  State
     private:
 	VMutex m_iMutex;
