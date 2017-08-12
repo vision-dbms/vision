@@ -59,6 +59,18 @@ namespace Vxa {
 
 	typedef typename importable_t::scalar_return_t scalar_return_t;
 
+    //  Class Builder
+    private:
+	class CBuilder : public T::ClassBuilder {
+	public:
+	    typedef typename T::ClassBuilder base_t;
+	public:
+	    CBuilder (VClass *pClass) : base_t (pClass) {
+		base_t::defineConstant ("rttiName", collectable_t::RTTIName ());
+		base_t::defineHelp (collectable_t::RTTIName ());
+	    }
+	};
+
     //  Datum
     public:
 	class Datum : public VExportableDatum_<VClass> {
@@ -89,24 +101,37 @@ namespace Vxa {
 	};
 
     //  Construction
-    protected:
+    public:
 	VCollectable () {
-	    V::VRTTI iRTTI (typeid(*this)); {
-		VString iClassID (iRTTI.name ());
-		BaseClass::setIdentificationTo (iClassID);
-	    }
-	    defineConstant ("rttiName", iRTTI.name ());
 	}
 
     //  Destruction
-    protected:
+    public:
 	~VCollectable () {
+	}
+
+    //  RTTI Info
+    public:
+	static V::VRTTI RTTI () {
+	    static V::VRTTI iRTTI (typeid (T));
+	    return iRTTI;
+	}
+	static VString RTTIName () {
+	    static VString iRTTIName (RTTI ().name ());
+	    return iRTTIName;
+	}
+
+    //  Class Materialization
+    public:
+	VClass *thisAsClass () {
+	    static CBuilder iBuilder (this);
+	    return this;
 	}
 
     //  Export Creation
     private:
 	virtual bool createExport (export_return_t &rpResult, val_t const &rpInstance) {
-	    (new collection_t (this, 0, rpInstance))->getRole (rpResult);
+	    (new collection_t (thisAsClass (), 0, rpInstance))->getRole (rpResult);
 	    return rpResult.isntNil ();
 	}
 
@@ -118,16 +143,6 @@ namespace Vxa {
 	    rpResult.setTo (new VConstant<val_t,var_t> (rName, rpInstance));
 	    return rpResult.isntNil ();
 	}
-
-    //  Method Definition
-    public:
-	template <typename Signature> bool defineMethod (VString const &rName, Signature pMember) {
-	    typename VCollectableMethod<Signature>::Reference pMethod (
-		new VCollectableMethod<Signature> (rName, pMember)
-	    );
-	    return defineMethod (pMethod);
-	}
-	using BaseClass::defineMethod;
 
     //  Parameter Acquistion
     private:
@@ -144,7 +159,7 @@ namespace Vxa {
     //  Result Generation
     private:
 	virtual bool returnResult (VResultBuilder *pResultBuilder, val_t const &rpResult) {
-	    Datum const iDatum (this, rpResult);
+	    Datum const iDatum (thisAsClass (), rpResult);
 	    return pResultBuilder->returnResult (iDatum);
 	}
     };

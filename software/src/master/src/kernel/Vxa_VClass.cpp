@@ -89,16 +89,7 @@ bool Vxa::VClass::defineMethod (VMethod *pMethod) {
     unsigned int xElement;
     m_iDictionary.Insert (pMethod->name (), xElement);
     m_iDictionary.value(xElement).setTo (pMethod);
-
-    m_iHelpInfo << pMethod->name () << "\n";
-
     return true;
-}
-
-bool Vxa::VClass::defineHelp (char const *pWhere) {
-    VString iHelpInfo;
-    iHelpInfo << "The class " << pWhere << " supports the following methods:\nhelp\n" << m_iHelpInfo;
-    defineConstant ("help", iHelpInfo);
 }
 
 /*******************************

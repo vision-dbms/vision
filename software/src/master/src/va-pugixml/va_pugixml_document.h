@@ -6,7 +6,6 @@
  *****  Components  *****
  ************************/
 
-//#include "Vxa_VCollectableObject.h"
 #include "va_pugixml_node.h"
 
 /**************************
@@ -27,9 +26,12 @@ namespace VA {
 	class Document : public Node {
 	    DECLARE_CONCRETE_RTTLITE (Document, Node);
 
-	//  Aliases
+	//  Class Builder
 	public:
-	    typedef Vxa::VResultBuilder VResultBuilder;
+	    class ClassBuilder : public Node::ClassBuilder {
+	    protected:
+		ClassBuilder (Vxa::VClass *pClass);
+	    };
 
 	//  Construction
 	public:

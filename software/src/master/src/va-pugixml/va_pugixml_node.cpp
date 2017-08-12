@@ -196,10 +196,41 @@ void VA::PugiXML::Node::getLastAttribute (Vxa::VResultBuilder &rRB) {
     returnNonEmpty (rRB, m_iPugiNode.last_attribute ());
 }
 
-namespace VA {
-    namespace PugiXML {
-	Node::Class<Node> g_iNodeClass;
-    }
+/***************************
+ ***************************
+ *****  Class Builder  *****
+ ***************************
+ ***************************/
+
+VA::PugiXML::Node::ClassBuilder::ClassBuilder (Vxa::VClass *pClass) : Object::ClassBuilder (pClass) {
+    defineMethod ("isEmpty", &Node::getIsEmpty);
+
+    defineMethod ("attributeCount", &Node::getAttributeCount);
+    defineMethod ("childCount", &Node::getChildCount);
+
+    defineMethod ("getName", &Node::getName);
+    defineMethod ("getValue", &Node::getValue);
+
+    defineMethod ("childValue", &Node::getChildValue);
+    defineMethod ("childValueOf:", &Node::getChildValueOf);
+
+    defineMethod ("parent", &Node::getParent);
+
+    defineMethod ("getChild:", &Node::getChild);
+
+    defineMethod ("firstChild", &Node::getFirstChild);
+    defineMethod ("lastChild", &Node::getLastChild);
+    defineMethod ("nextSibling", &Node::getNextSibling);
+    defineMethod ("previousSibling", &Node::getPreviousSibling);
+
+    defineMethod ("getAttribute:", &Node::getAttribute);
+
+    defineMethod ("firstAttribute", &Node::getFirstAttribute);
+    defineMethod ("lastAttribute", &Node::getLastAttribute);
+}
+
+namespace {
+    Vxa::VCollectable<VA::PugiXML::Node> g_iNodeMeta;
 }
 
 DEFINE_VXA_COLLECTABLE(VA::PugiXML::Node);

@@ -66,23 +66,22 @@ VA::PugiXML::Root::Root () {
  ************************************
  ************************************/
 
-void VA::PugiXML::Root::loadDocument (VResultBuilder &rRB, VString const &rFilename) {
+void VA::PugiXML::Root::loadDocument (Vxa::VResultBuilder &rRB, VString const &rFilename) {
     rRB = new Document (rFilename);
 }
 
-namespace VA {
-    namespace PugiXML {
-	class RootClass : public Vxa::VCollectable<Root> {
-	public:
-	    RootClass () {
-		VString iHelpInfo ("The class PugiXML::Root supports the following methods:\nhelp\n");
+/***************************
+ ***************************
+ *****  Class Builder  *****
+ ***************************
+ ***************************/
 
-		defineMethod   ("load:", &Root::loadDocument);
+VA::PugiXML::Root::ClassBuilder::ClassBuilder (Vxa::VClass *pClass) : Object::ClassBuilder (pClass) {
+    defineMethod ("load:", &Root::loadDocument);
+}
 
-		defineConstant ("help", (iHelpInfo << m_iHelpInfo));
-	    }
-	} g_iRootClass;
-    }
+namespace {
+    Vxa::VCollectable<VA::PugiXML::Root> g_iRootMeta;
 }
 
 DEFINE_VXA_COLLECTABLE(VA::PugiXML::Root);

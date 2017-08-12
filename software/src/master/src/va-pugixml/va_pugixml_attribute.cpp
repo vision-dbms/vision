@@ -87,23 +87,22 @@ void VA::PugiXML::Attribute::getPreviousSibling (Vxa::VResultBuilder &rRB) {
     returnNonEmpty (rRB, m_iPugiAttribute.previous_attribute ());
 }
 
-namespace VA {
-    namespace PugiXML {
-	class AttributeClass : public Vxa::VCollectable<Attribute> {
-	public:
-	    AttributeClass () {
-		VString iHelpInfo ("The class PugiXML::Attribute supports the following methods:\nhelp\n");
+/***************************
+ ***************************
+ *****  Class Builder  *****
+ ***************************
+ ***************************/
 
-		defineMethod ("getName", &Attribute::getName);
-		defineMethod ("getValue", &Attribute::getValue);
+VA::PugiXML::Attribute::ClassBuilder::ClassBuilder (Vxa::VClass *pClass) : Object::ClassBuilder (pClass) {
+    defineMethod ("getName", &Attribute::getName);
+    defineMethod ("getValue", &Attribute::getValue);
 
-		defineMethod ("nextSibling", &Attribute::getNextSibling);
-		defineMethod ("previousSibling", &Attribute::getPreviousSibling);
+    defineMethod ("nextSibling", &Attribute::getNextSibling);
+    defineMethod ("previousSibling", &Attribute::getPreviousSibling);
+}
 
-		defineConstant ("help", (iHelpInfo << m_iHelpInfo));
-	    }
-	} g_iAttributeClass;
-    }
+namespace {
+    Vxa::VCollectable<VA::PugiXML::Attribute> g_iAttributeMeta;
 }
 
 DEFINE_VXA_COLLECTABLE(VA::PugiXML::Attribute);

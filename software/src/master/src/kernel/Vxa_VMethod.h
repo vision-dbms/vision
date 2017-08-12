@@ -38,6 +38,7 @@ namespace Vxa {
     //  Construction
     protected:
 	VMethod (VString const &rName);
+	VMethod (char const *pName);
 
     //  Destruction
     protected:

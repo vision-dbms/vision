@@ -26,9 +26,12 @@ namespace VA {
 	class ParseResult : public Vxa::VCollectableObject {
 	    DECLARE_CONCRETE_RTTLITE (ParseResult, Vxa::VCollectableObject);
 
-	//  Aliases
+	//  Class Builder
 	public:
-	    typedef Vxa::VResultBuilder VResultBuilder;
+	    class ClassBuilder : public Object::ClassBuilder {
+	    protected:
+		ClassBuilder (Vxa::VClass *pClass);
+	    };
 
 	//  Construction
 	public:
@@ -41,8 +44,6 @@ namespace VA {
 
 	//  Methods
 	public:
-//	    void getCalendar	(VResultBuilder &rRB);
-//	    void setCalendar_ 	(VResultBuilder &rRB, VString const & rCalender);
 
 	//  State
 	private:

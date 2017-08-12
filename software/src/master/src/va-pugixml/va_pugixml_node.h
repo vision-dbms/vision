@@ -33,13 +33,12 @@ namespace VA {
 	class Node : public Vxa::VCollectableObject {
 	    DECLARE_CONCRETE_RTTLITE (Node, Vxa::VCollectableObject);
 
-	//  Class
+	//  Class Builder
 	public:
-	    template <class Derived> class Class;
-
-	//  Aliases
-	public:
-	    typedef Vxa::VResultBuilder VResultBuilder;
+	    class ClassBuilder : public Object::ClassBuilder {
+	    protected:
+		ClassBuilder (Vxa::VClass *pClass);
+	    };
 
 	//  Construction
 	public:
@@ -99,39 +98,6 @@ namespace VA {
 	private:
 	    VReference<Document> const m_pDocument;
 	    pugi::xml_node             m_iPugiNode;
-	};
-
-	template <class Derived> class Node::Class : public Vxa::VCollectable<Derived> {
-	    DECLARE_FAMILY_MEMBERS (Class<Derived>,Vxa::VCollectable<Derived>);
-	public:
-	    Class () {
-		BaseClass::defineMethod ("isEmpty", &Derived::getIsEmpty);
-
-		BaseClass::defineMethod ("attributeCount", &Derived::getAttributeCount);
-		BaseClass::defineMethod ("childCount", &Derived::getChildCount);
-
-		BaseClass::defineMethod ("getName", &Derived::getName);
-		BaseClass::defineMethod ("getValue", &Derived::getValue);
-
-		BaseClass::defineMethod ("childValue", &Derived::getChildValue);
-		BaseClass::defineMethod ("childValueOf:", &Derived::getChildValueOf);
-
-		BaseClass::defineMethod ("parent", &Derived::getParent);
-
-		BaseClass::defineMethod ("getChild:", &Derived::getChild);
-
-		BaseClass::defineMethod ("firstChild", &Derived::getFirstChild);
-		BaseClass::defineMethod ("lastChild", &Derived::getLastChild);
-		BaseClass::defineMethod ("nextSibling", &Derived::getNextSibling);
-		BaseClass::defineMethod ("previousSibling", &Derived::getPreviousSibling);
-
-		BaseClass::defineMethod ("getAttribute:", &Derived::getAttribute);
-
-		BaseClass::defineMethod ("firstAttribute", &Derived::getFirstAttribute);
-		BaseClass::defineMethod ("lastAttribute", &Derived::getLastAttribute);
-
-		BaseClass::defineHelp ("PugiXML::Node");
-	    }
 	};
     }
 }

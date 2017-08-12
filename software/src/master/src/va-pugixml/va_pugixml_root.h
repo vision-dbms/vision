@@ -28,9 +28,12 @@ namespace VA {
 	class Root : public Vxa::VCollectableObject {
 	    DECLARE_CONCRETE_RTTLITE (Root, Vxa::VCollectableObject);
 
-	//  Aliases
+	//  Class Builder
 	public:
-	    typedef Vxa::VResultBuilder VResultBuilder;
+	    class ClassBuilder : public Object::ClassBuilder {
+	    protected:
+		ClassBuilder (Vxa::VClass *pClass);
+	    };
 
 	//  Construction
 	public:
@@ -46,7 +49,7 @@ namespace VA {
 
 	//  Methods
 	public:
-	    void loadDocument (VResultBuilder &rRB, VString const &rFilename);
+	    void loadDocument (Vxa::VResultBuilder &rRB, VString const &rFilename);
 
 	//  State
 	private:

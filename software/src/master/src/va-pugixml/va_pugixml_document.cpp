@@ -85,21 +85,20 @@ void VA::PugiXML::Document::getParseDescription (Vxa::VResultBuilder &rRB) {
     rRB = parseDescription ();
 }
 
-namespace VA {
-    namespace PugiXML {
-	class DocumentClass : public Node::Class<Document> {
-	    DECLARE_FAMILY_MEMBERS (DocumentClass, Node::Class<Document>);
+/***************************
+ ***************************
+ *****  Class Builder  *****
+ ***************************
+ ***************************/
 
-	public:
-	    DocumentClass () {
-		defineMethod ("parsedOK", &Document::getParsedOK);
-		defineMethod ("parseStatus", &Document::getParseStatus);
-		defineMethod ("parseDescription", &Document::getParseDescription);
+VA::PugiXML::Document::ClassBuilder::ClassBuilder (Vxa::VClass *pClass) : Node::ClassBuilder (pClass) {
+    defineMethod ("parsedOK", &Document::getParsedOK);
+    defineMethod ("parseStatus", &Document::getParseStatus);
+    defineMethod ("parseDescription", &Document::getParseDescription);
+}
 
-		defineHelp ("PugiXML::Document");
-	    }
-	} g_iDocumentClass;
-    }
+namespace {
+    Vxa::VCollectable<VA::PugiXML::Document> g_iDocumentMeta;
 }
 
 DEFINE_VXA_COLLECTABLE(VA::PugiXML::Document);

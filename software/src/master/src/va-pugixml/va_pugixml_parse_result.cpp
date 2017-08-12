@@ -59,25 +59,11 @@ VA::PugiXML::ParseResult::ParseResult () {
  ************************************
  ************************************/
 
-// void VA::PugiXML::ParseResult::getCalendar (VResultBuilder &rRB) {
-//     m_pFQLFetchObject->getCalendar (rRB);
-// }
+VA::PugiXML::ParseResult::ClassBuilder::ClassBuilder (Vxa::VClass *pClass) : Object::ClassBuilder (pClass) {
+}
 
-// void VA::PugiXML::ParseResult::setCalendar_(VResultBuilder &rRB, VString const &rCalender) {
-//     m_pFQLFetchObject->setCalendar_(rRB, rCalender);
-// }
-
-namespace VA {
-    namespace PugiXML {
-	class ParseResultClass : public Vxa::VCollectable<ParseResult> {
-	public:
-	    ParseResultClass () {
-		VString iHelpInfo ("The class PugiXML::ParseResult supports the following methods:\nhelp\n");
-
-		defineConstant ("help", (iHelpInfo << m_iHelpInfo));
-	    }
-	} g_iParseResultClass;
-    }
+namespace {
+    Vxa::VCollectable<VA::PugiXML::ParseResult> g_iParseResultMeta;
 }
 
 DEFINE_VXA_COLLECTABLE(VA::PugiXML::ParseResult);
