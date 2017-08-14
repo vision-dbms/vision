@@ -45,9 +45,3 @@ Then you have two choices on how to proceed:
 * Break up the transaction and do `rcleanStore` in between parts of the transaction
 * change the mapping type of the underlying map to Partition mapped so it doesn't have this limit
    * Changing the mapping type is covered here: [[TomorrowsEmergencyErrorMessageLookup]]
-
-## In the wild
-
-* Nothing to fix
-   * An FMA uncommitted transient "load" got too many IDs and hit this error #25661
-* Invesco required a rollback to fix an error like this years ago :(
