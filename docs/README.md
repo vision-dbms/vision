@@ -1,3 +1,7 @@
-## Vision Web Documentation
+## Vision Documentation
 
-* [Unix & Linux Build Instructions](nix-build.html)
+* Vision Executables
+   * [Unix & Linux Build Instructions](nix-build.html)
+* Troubleshooting
+   * [Debug an Update Malloc Error](update-malloc-debugging.html)
+   * [Vision Database Scan](VdbScan)
