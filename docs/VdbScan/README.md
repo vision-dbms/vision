@@ -35,6 +35,10 @@ The main goal of `VdbScan.vis` is to alert teams using vision to problems in the
 ################################################################################
 ```
 
+## Getting the File
+
+[`VdbScan.vis` can be downloaded here.](https://github.com/vision-dbms/vision/blob/master/application/localvision/bootstrap/protocol/utilities/VdbScan.vis)
+
 ## What can be detected
 
 * Product Mapped Index Cartesian Space Exceeded
