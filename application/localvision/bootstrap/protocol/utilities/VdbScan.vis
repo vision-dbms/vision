@@ -1,0 +1,2618 @@
+################################################################################
+# VdbScan.vis
+#
+# USAGE: 
+#   Run this report EVERY DAY if possible.  Any output from this script should
+#   be evaluated per the instructions here: 
+#   https://vision-dbms.github.io/vision/VdbScan/
+#
+#   Most days this script will not produce any output.  We suggest scripting 
+#   around this script such that it sends an email to your vision developers 
+#   every day that it produces output.
+#
+# EXAMPLE VISION SCRIPT:
+#   "/path/to/VdbScan.vis" asFileContents evaluate;
+#   AdminTools vdbScan;
+#   ?g
+#   AdminTools vdbScanExtraInformation;
+#   ?g
+#
+# OPTIONS:
+#   If you have exceptions you'd like to include load them after you load 
+#   VdbScan.vis and before you call AdminTools vdbScan .
+#
+################################################################################
+
+^tmp define: 'teId' toBe: "$Id: //depot/common/tkowalczyk/VdbScan/VdbScan.vis#1 $";
+
+### Definitely print my SNF errors
+(^tmp respondsTo: 'VdbScanVerboseSNF') &&
+    [ ^tmp VdbScanVerboseSNF isFalse ]
+  ifFalse: [
+    ^tmp define: 'VdbScanVerboseSNF' toBe: TRUE;
+    CoreWorkspace Utility SessionAttribute enableVerboseSelectorNotFound;
+  ];
+
+^tmp define: "timeStart" toBe: 
+  Utility UnixSeconds currentTime asLowResolutionTime;
+
+
+#######################################################
+#
+#            Time Series profiling
+#
+#######################################################
+
+AdminTools _POP
+
+defineMethod:
+[| profileTimeSeries: prefix inFull: verbose|
+
+!pop <- ^self;
+!listPop <- pop getNthPOP:0;
+!keyPop <- pop getNthPOP:2;
+!mapPop <- pop getNthPOP:3;
+
+!productMapped <- mapPop containerType == mapPop Named ClusterType Link;
+
+prefix print;
+"TimeSeries ID: "print; pop printNL;
+prefix print;
+"Number of TimeSeries in Store: "print; listPop count printNL;
+prefix print;
+"Number of TimePoints in Store: "print; (keyPop count + 1) asInteger printNL;
+prefix print;
+productMapped ifTrue:[
+"Size of Cartesian Space:       "print; ((keyPop count + 1) *listPop count) asInteger printNL;
+prefix print;
+"Number of MapTransitions:      "print; mapPop count printNL;
+prefix print;
+];
+"TimeSeries LStore profile:" printNL;
+listPop profileLStore: (prefix concat:"  ") inFull: verbose;
+^self
+].
+#######################################################
+#
+#            Indexed List profiling
+#
+#######################################################
+
+defineMethod:
+[| profileIndexedList: prefix inFull: verbose|
+
+!pop <- ^self;
+!listPop <- pop getNthPOP:0;
+!keyPop <- pop getNthPOP:2;
+!mapPop <- pop getNthPOP:3;
+
+prefix print;
+"IList ID: "print; pop printNL;
+prefix print;
+"Number of IndexedLists in Store: "print; listPop count printNL;
+prefix print;
+"Number of MapTransitions:      "print; mapPop count printNL;
+prefix print;
+"IndexedList Key profile:" printNL;
+keyPop profileVector: (prefix concat:"  ") inFull: verbose;
+prefix print;
+"IndexedList LStore profile:" printNL;
+listPop profileLStore: (prefix concat:"  ") inFull: verbose;
+^self
+].
+
+#######################################################
+#
+#            LStore profiling
+#
+#######################################################
+
+defineMethod:
+[| profileLStore: prefix inFull: verbose|
+
+!pop <- ^self;
+!contentPop <- pop getNthPOP:1;
+
+prefix print;
+"LStore ID: "print; pop printNL;
+prefix print;
+"Number of Lists in Store: "print; pop count printNL;
+prefix print;
+"LStore Content profile:" printNL;
+contentPop containerType isProperty ifTrue: [
+     contentPop profileVector: (prefix concat:"  ") inFull: verbose;
+] ifFalse: [
+     contentPop displayContainerInfo;
+];
+^self
+].
+
+#######################################################
+#
+#            Vector profiling
+#
+#######################################################
+
+defineMethod:
+[| profileVector: prefix inFull: verbose|
+
+!pop <- ^self;
+!popCnt <- pop containerPOPCount;
+!popList <- (popCnt - 1) sequence
+            send: [ ^my pop getNthPOP: ^self ] .
+            select:[
+                containerType != Named ClusterType INA
+                                                        #RTYPE_C_Undefined
+            ];
+!usegCnt;
+!transitionCount;
+!unalignedUsegCnt;
+pop getUSegCount: :usegCnt
+    andTransCount: :transitionCount
+    andUSegAligns: :unalignedUsegCnt;
+prefix print; "Vector ID: " print; pop printNL;
+prefix print; "Number of elements: "print:45;
+        ^self asObject clusterCardinality printNL;
+prefix print; "Number of usegments: "print:45;
+        usegCnt printNL;
+prefix print; "Number needing alignment: "print:45;
+        unalignedUsegCnt printNL;
+prefix print; "Number of transitions: "print:45;
+        transitionCount printNL;
+
+### Profile usegments ...
+verbose ifTrue: [
+!useg <- 0;
+!elementCount <- 0;
+!outOfAlignmentCnt <- 0;
+!lstoreCount <- 0;
+!listCount <- 0;
+!listContentElementCount <- 0;
+!listContentUSegCount <- 0;
+!listContentUSegUnalignCnt <- 0;
+!listContentTransCount <- 0;
+!vstoreCount <- 0;
+!indexCount <- 0;
+!blockCount <- 0;
+!closureCount <- 0;
+!methodCount <- 0;
+
+[useg < usegCnt] whileTrue: [
+   !storePOP <- popList at: (useg * 3 + 2) asInteger;
+   !uvectorPOP <- popList at: (useg * 3 + 3) asInteger;
+
+   :elementCount <- elementCount + uvectorPOP count;
+   :outOfAlignmentCnt <- outOfAlignmentCnt + uvectorPOP needsAlignment;
+   storePOP containerType == storePOP Named ClusterType Table
+        ifTrue: [ :vstoreCount <- vstoreCount + 1 ];
+   storePOP containerType == storePOP Named ClusterType Index
+        ifTrue: [ :indexCount <- indexCount + 1 ];
+   storePOP containerType == storePOP Named ClusterType Block
+        ifTrue: [ :blockCount <- blockCount + 1 ];
+   storePOP containerType == storePOP Named ClusterType Closure
+        ifTrue: [ :closureCount <- closureCount + 1 ];
+   storePOP containerType == storePOP Named ClusterType Method
+        ifTrue: [ :methodCount <- methodCount + 1 ];
+   storePOP containerType == storePOP Named ClusterType List
+        ifTrue: [
+                :lstoreCount <- lstoreCount + 1;
+                :listCount <- listCount + storePOP count;
+                !contentPop <- storePOP getNthPOP:1;
+                contentPop containerType ==
+                                contentPop Named ClusterType Property
+                ifTrue: [
+                        !contentUSegCount;
+                        !contentTransCount;
+                        !contentUSegAlignments;
+                        contentPop getUSegCount: :contentUSegCount
+                                   andTransCount: :contentTransCount
+                                   andUSegAligns: :contentUSegAlignments;
+                        :listContentUSegCount <- listContentUSegCount +
+                                contentUSegCount;
+                        :listContentUSegUnalignCnt <- listContentUSegUnalignCnt +
+                                contentUSegAlignments;
+                        :listContentTransCount <- listContentTransCount +
+                                contentTransCount;
+                        :listContentElementCount <- listContentElementCount +
+                                contentPop asObject clusterCardinality;
+                ];
+                contentPop containerType == contentPop Named ClusterType Char
+                ifTrue: [
+                        :listContentElementCount <- listContentElementCount +
+                                contentPop count;
+                ];
+        ];
+   :useg <- (useg + 1) asInteger;
+];
+prefix print; "Number of defined elements: "print:45;
+        elementCount asInteger printNL;
+prefix print; "Number of referenced VStores: "print:45;
+        vstoreCount asInteger printNL;
+prefix print; "Number of referenced Indexed LStores: "print:45;
+        indexCount asInteger printNL;
+prefix print; "Number of referenced LStores: "print:45;
+        lstoreCount asInteger printNL;
+(0 < lstoreCount asInteger) ifTrue: [
+  prefix print; "  Number of lists in referenced LStores: "print:45;
+        listCount asInteger printNL;
+  prefix print; "  Number of elements in referenced LStores: "print:45;
+        listContentElementCount asInteger printNL;
+  prefix print; "  Number of usegments in referenced LStores: "print:45;
+        listContentUSegCount asInteger printNL;
+  prefix print; "  Number of usegments not aligned: "print:45;
+        listContentUSegUnalignCnt asInteger printNL;
+  prefix print; "  Number of transitions in referenced LStores: "print:45;
+        listContentTransCount asInteger printNL;
+];
+prefix print; "Number of referenced Blocks: "print:45;
+        blockCount asInteger printNL;
+prefix print; "Number of referenced Closures: "print:45;
+        closureCount asInteger printNL;
+prefix print; "Number of referenced Methods: "print:45;
+        methodCount asInteger printNL;
+];
+^self
+].
+
+defineMethod:
+
+[| profile |
+!rtype <- ^self containerType;
+rtype == Named ClusterType List
+ifTrue: [ ^self profileLStore: "" inFull: TRUE ];
+rtype == Named ClusterType Property
+ifTrue: [ ^self profileVector: "" inFull: TRUE ];
+rtype == Named ClusterType Index && [^self asObject isTimeSeries]
+ifTrue: [ ^self profileTimeSeries: "" inFull: TRUE ];
+rtype == Named ClusterType Index && [^self asObject isIndexedList]
+ifTrue: [ ^self profileIndexedList: "" inFull: TRUE ];
+^self
+].
+
+defineMethod:
+
+[| briefProfile |
+!rtype <- ^self containerType;
+rtype == Named ClusterType List
+ifTrue: [ ^self profileLStore: "" inFull: FALSE ];
+rtype == Named ClusterType Property
+ifTrue: [ ^self profileVector: "" inFull: FALSE ];
+rtype == Named ClusterType Index && [^self asObject isTimeSeries]
+ifTrue: [ ^self profileTimeSeries: "" inFull: FALSE ];
+rtype == Named ClusterType Index && [^self asObject isIndexedList]
+ifTrue: [ ^self profileIndexedList: "" inFull: FALSE ];
+^self
+].
+
+defineMethod:
+[| count |
+
+!containerOverhead <- 16; #bytes
+!rtypeOverhead <- 0;
+!rtypeGranularity <- 0;
+
+!rtype <- ^self containerType;
+!size <- ^self containerSize;
+!result <- 0;
+
+rtype == Named ClusterType PToken
+ifTrue:[ :rtypeOverhead <- 12; :rtypeGranularity <- 8; ];#Cartesian ignored
+rtype == Named ClusterType Link
+ifTrue:[ :rtypeOverhead <- 20; :rtypeGranularity <- 8; ];
+rtype == Named ClusterType Char
+ifTrue:[ :rtypeOverhead <- 21; :rtypeGranularity <- 1; ];
+rtype == Named ClusterType Double
+ifTrue:[ :rtypeOverhead <- 28; :rtypeGranularity <- 8; ];
+rtype == Named ClusterType Float
+ifTrue:[ :rtypeOverhead <- 24; :rtypeGranularity <- 4; ];
+rtype == Named ClusterType Integer
+ifTrue:[ :rtypeOverhead <- 24; :rtypeGranularity <- 4; ];
+rtype == Named ClusterType Pointer
+ifTrue:[ :rtypeOverhead <- 24; :rtypeGranularity <- 4; ];
+rtype == Named ClusterType Selector
+ifTrue:[ :rtypeOverhead <- 24; :rtypeGranularity <- 4; ];
+rtype == Named ClusterType Undefined
+ifTrue:[ :rtypeOverhead <- 20; :rtypeGranularity <- 0; ];
+rtype == Named ClusterType List
+ifTrue:[ :rtypeOverhead <- 20; :rtypeGranularity <- 4; ];
+
+rtypeGranularity != 0
+ifTrue:
+  [ :result <- (size - containerOverhead - rtypeOverhead)/rtypeGranularity];
+
+result asInteger
+].
+
+defineMethod:
+
+[| needsAlignment |
+
+!rtype <- ^self containerType;
+!size <- ^self containerSize;
+!result <- 0;
+
+rtype == Named ClusterType Char         ||
+rtype == Named ClusterType Double       ||
+rtype == Named ClusterType Float        ||
+rtype == Named ClusterType Integer      ||
+rtype == Named ClusterType Pointer      ||
+rtype == Named ClusterType Selector     ||
+rtype == Named ClusterType Undefined
+ifTrue:[^self getNthPOP:0 . count > 0 ifTrue:[:result <- 1]];
+
+rtype == Named ClusterType Pointer
+ifTrue:[^self getNthPOP:1 . count > 0 ifTrue:[:result <- 1]];
+result asInteger
+].
+
+defineMethod: [|getUSegCount: usegCnt
+                andTransCount: transCnt
+                andUSegAligns: alignCnt|
+
+usegCnt <- NA;
+transCnt <- NA;
+alignCnt <- NA;
+containerType == Named ClusterType Property ifTrue:[
+!pop <- ^self asSelf;
+!popCnt <- pop containerPOPCount;
+!popList <- (popCnt - 1) sequence
+            send: [ ^my pop getNthPOP: ^self ] .
+            select:[
+                containerType != Named ClusterType INA    #RTYPE_C_Undefined
+            ];
+usegCnt <- ( popList count / 3) # 3 POPs per useg
+             asInteger;
+transCnt <-
+                ((pop containerSize -
+                  16    -                    # general container overhead
+                  84    -                    # minimum vector size
+                  (popCnt - 13) * 4 -        # extra pops at 4 bytes each
+                  usegCnt value * 4) /       # 4 bytes per usegment
+                  12)                        # size of each transition.
+             asInteger;
+!useg <- 0;
+alignCnt <- 0;
+[useg < usegCnt value] whileTrue:
+[
+   !uvectorPOP <- popList at: (useg * 3 + 3) asInteger;
+   alignCnt <- (alignCnt value + uvectorPOP needsAlignment) asInteger;
+   :useg <- (useg + 1) asInteger;
+];
+];
+].
+
+
+defineMethod:
+
+[|displayLocalVisionReferents|
+^tmp define:"localVisionReferentHistory" toBe: ^global List new;
+^tmp cleanDictionary;
+^self displayVisionReferentsInSpace: extractSpace;
+].
+
+defineMethod: [| displayVisionReferentsInSpace: space |
+ ^self displayVisionReferentsInList:
+        (^self potentialReferentsInSpace: space)
+] .
+
+defineMethod: [| displayVisionReferentsInList: list|
+!pop <- ^self;
+^tmp localVisionReferentHistory, pop;
+!listReferencingThisPOP <- pop referentsInList: list .
+    exclude: ^tmp localVisionReferentHistory;
+list count print; listReferencingThisPOP count printNL;
+pop containerType isDictionary ifTrue: [
+    :listReferencingThisPOP <- listReferencingThisPOP select: [
+        containerType isTable
+    ] . first: 1 . standardize;
+];
+listReferencingThisPOP
+  iterate: [
+    !pop <- ^my pop displayContainerInfo;
+    ^self containerType isTable && [pop containerType isTable not] ifTrue: [
+        !referencingObject <- ^self asObject;
+        referencingObject isntNA ifTrue: [
+            referencingObject
+            do: [!pop <- ^my pop;
+                ^self whatAmI print; " " print;
+                ^my print;
+                !prop <- ^self clusterReferenceMap select: [
+                            ^self referenceTarget clusterID = ^my pop
+                        ];
+                prop count > 0 ifTrue: [
+                    prop do: [
+                        " '" print; name print; "'" print;
+                    ];
+                ];
+                newLine print;
+#               pop asObject isntNA ifTrue: [
+#                       pop briefProfile isntNA
+#                                       ifTrue:  [newLine print; ]
+#                                       ifFalse: [pop displayContainerInfo;]
+#               ] ifFalse: [
+#                       pop displayContainerInfo;
+#               ];
+            ]
+        ] ifFalse: [
+            "***  Unidentified Table Object  ***" printNL;
+            pop printNL; newLine print;
+        ];
+    ] ifFalse: [
+       ^my pop containerType isPToken && [^self containerType isPToken not] ifTrue: [
+            ^self displayVisionReferentsInSpace: extractSpace
+       ] ifFalse: [
+            ^self displayVisionReferentsInList: ^my list
+       ]
+    ];
+  ];
+ listReferencingThisPOP count = 0 ifTrue:[
+    "End of Chain:" print; displayContainerInfo;
+ ];
+  ^self
+].
+
+defineMethod: [ | referentsInSpace: space |
+  ^self referentsInList: (^self potentialReferentsInSpace: space)
+]  .
+
+defineMethod: [| potentialReferentsInSpace: space |
+  !pop <- ^self;
+  !potentialReferents <- space asObjectSpace bareContainerList;
+  pop containerSegment isNA ifTrue: [
+      :potentialReferents <- potentialReferents select: [containerAddrType > 0];
+  ];
+  pop containerType isNA || [pop containerType isPToken] ifFalse: [
+      :potentialReferents <- potentialReferents select: [
+          containerType referencesPTokensOnly not
+      ]. extendBy: [
+            !popList <- ^self popList select:[containerType != Named ClusterType INA].
+      ];
+      potentialReferents do: [
+            !space <- ^my space;
+            !pop <- ^my pop;
+            :popList <- popList select:[extractSpace == ^my space asObjectSpace ||
+                                        [extractSpace == ^my pop extractSpace] ];
+            :popList cleanStore;
+      ];
+  ];
+  potentialReferents
+]  .
+
+defineMethod: [| referentsInList: list |
+  !pop <- ^self;
+  list select: [
+      !pop <- ^my pop;
+      popList select: [ ^self = ^my pop ] . count > 0
+  ]
+]  .
+
+defineMethod: [| displayContainerInfo |
+
+    extractSpace print:-3;
+    extractContainerIndex print:8;
+    containerAddrType print: 3;
+    containerType print: -12;
+    containerSize printWithCommas: 12.0;
+    containerSegment print: 8;
+    containerSegmentOffset printWithCommas: 12.0;
+    containerPOPCount printWithCommas: 8.0;
+    newLine print;
+    ^self
+].
+
+defineMethod:[| displayContainerInfoWithReferences |
+    displayContainerInfo;
+    displayReferences
+].
+
+defineMethod: [| displayReferents |
+  !pop <- ^self;
+  objectSpaceList select: [
+    (^self == 0 asObjectSpace) not
+  ] . iterate: [
+    ^my pop displayReferentsInSpace: ^self
+  ];
+  ^self
+].
+defineMethod: [| displayReferentsInSpace: space|
+   ^self referentsInSpace: space . do:[
+      "  " print; displayContainerInfo
+   ];
+   ^self
+].
+
+defineMethod:[| displayReferences |
+  !pop <- ^self;
+  containerPOPCount sequence0 ### extendBy:[!xxx] .
+  do: [
+    ^my pop getNthPOP:^self . do: ["    :" print;
+                                   displayContainerInfo]
+  ];
+  ^self
+].
+
+defineMethod: [| displayReferentsInSpace: space toLevel: level|
+  !pop <- ^self asSelf;
+  space asObjectSpace bareContainerList do: [
+      !level <- ^my level;
+      !cntnr <- ^self;
+      !pop <- ^my pop;
+      cntnr containerPOPCount sequence0 select: [
+        (^my cntnr getNthPOP: ^self) = ^my pop
+      ] . count > 0
+          ifTrue: [
+                   level print: 10 - level;
+                   cntnr displayContainerInfo;
+                   level > 1
+                   ifTrue:[ cntnr displayReferentsInSpace: cntnr extractSpace
+                                  toLevel: (level - 1) asInteger
+                          ]
+                  ]
+  ];
+  ^self
+].
+
+defineMethod:[ | findPTokenTail |
+
+  ^self containerType isPToken ifTrue:[
+    !ptList <- ^self extractSpace containerList
+        select:[type isPToken].
+        select:[containerSize > 28].
+        select:[containerPOPCount = 1].
+        extend:[!referencedPOP <- ^self getNthPOP:0];
+    !currentPOP <- ^self;
+    !nextPOP <- ^self;
+    !chainLength <- 0;
+    [nextPOP isntNA] whileTrue: [
+        :currentPOP <- nextPOP;
+        :nextPOP <- currentPOP findPOPinList: ptList;
+#       currentPOP displayContainerInfo;
+        :chainLength <- chainLength + 1;
+    ];
+    "Chain length: " print; chainLength printWithCommasNL:7.0;
+    currentPOP
+  ] else: [NA]
+].
+
+defineMethod:[ | findPOPinList: pops |
+
+  !pop <- ^self asSelf;
+  !result <- pops select:[
+        referencedPOP = ^my pop
+  ];
+
+  result count > 0 ifTrue:[ result at:1] else:[NA]
+].
+
+## Redefine print to my taste ....
+defineMethod: [|print|
+  "[" print;
+  extractSpace print:3;
+  ":" print;
+  extractContainerIndex print:7;
+  "]" print;
+].
+
+
+defineMethod: [|= object|
+  ^self asNumber = object
+].
+
+defineMethod: [ | totalSizeOfReferencedSegments |
+   popList groupedBy:[extractSpace].
+   total:[!space <- ^self;
+          groupList groupedBy:[containerSegment].
+          total:[^my space ascertainSegmentSize: ^self]
+   ].
+] .
+
+defineMethod: [ | displayTotalSizeOfReferencedSegments |
+ totalSizeOfReferencedSegments printWithCommas:15.0;
+] .
+
+defineMethod: [ | numberOfReferencedSegments |
+   popList groupedBy:[extractSpace].
+   total:[
+          groupList groupedBy:[containerSegment]. count
+   ].
+
+] .
+
+defineMethod: [ | displayNumberOfReferencedSegments |
+   numberOfReferencedSegments printWithCommas:12.0;
+] .
+;
+
+#######################################################
+#
+#            Object Space profiling
+#
+#######################################################
+
+AdminTools ObjectSpace
+
+defineMethod:
+[ | profile |
+  !containersInSpace <- ^self bareContainerList extendBy:[!containerSize <- ^self containerSize;
+                                                          !containerType <- ^self containerType];
+  !bigContainersInSpace <-containersInSpace select:[containerSize > 10000];
+
+  !containerCount <- containersInSpace count;
+  !bigContainerCount <- bigContainersInSpace count;
+  !totalSize <- containersInSpace total:[containerSize];
+  !bigSize <- bigContainersInSpace total:[containerSize];
+  bigSize isNA ifTrue:[:bigSize <- 0];
+
+  !containersByType <- containersInSpace groupedBy: [containerType];
+
+  "Profile of ObjectSpace " print;
+  ^self print:3; ": " print;
+  spaceName printNL;
+  newLine print;
+
+  "  Total Size (in bytes): " print:35; totalSize printWithCommas:20.0;
+        newLine print;
+  "        (containers > 10,000): " print:35; bigSize printWithCommas:20.0;
+        newLine print;
+  "        (containers < 10,000): " print:35;
+        (totalSize - bigSize) printWithCommas:20.0;
+        newLine print;
+  "  Number of Containers:  " print:35; containerCount printWithCommas:20.0;
+        newLine print;
+  "         (containers > 10,000):  " print:35;
+        bigContainerCount printWithCommas:20.0;
+        newLine print;
+  "         (containers < 10,000):  " print:35;
+        (containerCount - bigContainerCount) printWithCommas:20.0;
+        newLine print;
+  "  Unused Container Table Slots:  " print:35;
+        (containerTableSize - containerCount) printWithCommas:20.0;
+        newLine print;
+  newLine print;
+
+  "  Type         Count         Total     %         Max         Min     Average      Median" printNL;
+  newLine print;
+
+  containersByType
+  do: [
+        ^self print:12;
+        groupList count printWithCommas: 8;
+        !tot <- groupList total:[containerSize]. printWithCommas:14.0;
+        tot / ^my totalSize * 100 print: 6.1 ;
+        groupList max:[containerSize]. printWithCommas:12.0;
+        groupList min:[containerSize]. printWithCommas:12.0;
+        groupList average:[containerSize]. printWithCommas:12.0;
+        groupList median:[containerSize]. printWithCommas:12.0;
+        newLine print;
+        ^self isPToken ifTrue:[
+                "  Shift" print:12;
+                groupList select:[containerSize > 28 &&
+                                  containerPOPCount = 1].
+                          count printWithCommas: 8;
+                newLine print;
+                "  Cartesian" print:12;
+                groupList select:[containerSize > 24 &&
+                                  containerPOPCount > 1].
+                          count printWithCommas: 8;
+                newLine print;
+        ];
+        ^self isList ifTrue:[
+                "  SStore" print:12;
+                !sslist <-
+                groupList select:[^self getNthPOP:1 .
+                                        containerType isFixedProperty not];
+                sslist count printWithCommas: 8;
+                !tot <- sslist total:[containerSize]. printWithCommas:14.0;
+                tot / ^my totalSize * 100 print: 6.1 ;
+                sslist max:[containerSize]. printWithCommas:12.0;
+                sslist min:[containerSize]. printWithCommas:12.0;
+                sslist average:[containerSize]. printWithCommas:12.0;
+                sslist median:[containerSize]. printWithCommas:12.0;
+                newLine print;
+                "  LStore" print:12;
+                !lslist <-
+                groupList select:[^self getNthPOP:1 .
+                                        containerType isFixedProperty];
+                lslist count printWithCommas: 8;
+                !tot <- lslist total:[containerSize]. printWithCommas:14.0;
+                tot / ^my totalSize * 100 print: 6.1 ;
+                lslist max:[containerSize]. printWithCommas:12.0;
+                lslist min:[containerSize]. printWithCommas:12.0;
+                lslist average:[containerSize]. printWithCommas:12.0;
+                lslist median:[containerSize]. printWithCommas:12.0;
+                newLine print;
+        ];
+        ^self isIndex  ifTrue:[
+                "  TimeS" print:12;
+                groupList select:[^self getNthPOP:1 .
+                                        containerType isTable].
+                          count printWithCommas: 8;
+                newLine print;
+                "  IList" print:12;
+                groupList select:[^self getNthPOP:1 .
+                                        containerType isTable not].
+                          count printWithCommas: 8;
+                newLine print;
+        ];
+  ];
+
+].
+
+defineMethod: [| bareContainerList |
+!space <- ^self;
+containerTableSize sequence0
+send: [^my space packPOP: asSelf].
+select: [containerAddrType isntNA].sortUp:[containerSegment]
+] .
+
+defineMethod: [| containerList |
+!space <- ^self;
+bareContainerList extendBy: [!space <- ^my space;
+    !type <- containerType;
+   ].
+].
+
+defineMethod:
+[ | compactionStats |
+
+^self compactionStats: ^tmp osdPath
+
+].
+
+defineMethod:
+[ | compactionStats: osd |
+
+^self compactionStatsIn: osd usingReclaimCoefficient: 1 andCopyCoefficient: 1 afterLite: FALSE
+
+].
+
+defineMethod:
+[ | compactionStatsIn:       osd
+    usingReclaimCoefficient: rc
+    andCopyCoefficient:      cc
+    afterLite:               al
+  |
+  !              space <- ^self;
+  !containersBySegment <- ^self containerList groupedBy:[containerSegment] .
+                                              select:   [isntNA];
+  !            nextSeg <- containersBySegment at:1;
+  !             copied <- 0;
+  !          reclaimed <- 0;
+  !                 rr <- 0;
+  !              maxRR <- 0;
+  !             maxSeg <- nextSeg - 1;
+  !          maxCopied <- 0;
+  !       maxReclaimed <- 0;
+  "+++  Compaction Statistics For Space " print; osd print; "/" print; space print; ":" printNL;
+  "+++      Using ReclaimCoefficient:" print; rc print;
+        " and CopyCoefficient:" print; cc printNL;
+  newLine print;
+
+  containersBySegment
+        iterate:[
+            [^self > ^my nextSeg] whileTrue: [
+
+                !segmentSize <- ^my al ifTrue: [0]
+                                   ifFalse:
+                                   [
+                                    ^my space ascertainSegmentSize: ^my nextSeg
+                                              fromNetwork: ^my osd
+                                   ];
+                ^my :reclaimed <- (^my reclaimed + segmentSize);
+                ^my :rr <- ((^my reclaimed - ^my copied) * ^my rc) -
+                           (^my copied * ^my cc);
+
+                (^my rr > ^my maxRR) ifTrue: [
+                        ^my :maxRR <- ^my rr;
+                        ^my :maxCopied <- ^my copied;
+                        ^my :maxReclaimed <- ^my reclaimed;
+                        ^my :maxSeg <- ^my nextSeg;
+                ];
+
+                ^my nextSeg print:8;
+                ^my rr printWithCommas:16.0;
+                segmentSize printWithCommas:14;
+                0 printWithCommas:14;
+                ^my reclaimed printWithCommas:16.0;
+                ^my copied printWithCommas:16.0;
+                newLine print;
+                ^my :nextSeg <- (^my nextSeg + 1) asInteger;
+            ];
+            !usedSize <- (groupList total:[containerSize] . + 32) asInteger;
+            !segmentSize <- ^my space
+                                ascertainSegmentSize: ^my nextSeg
+                                fromNetwork: ^my osd;
+
+            ^my :reclaimed <- (^my reclaimed + segmentSize);
+            ^my :copied <- (^my copied + usedSize);
+            ^my :rr <- ((^my reclaimed - ^my copied) * ^my rc) -
+                       (^my copied * ^my cc);
+
+
+            (^my rr > ^my maxRR) ifTrue: [
+                ^my :maxRR <- ^my rr;
+                ^my :maxCopied <- ^my copied;
+                ^my :maxReclaimed <- ^my reclaimed;
+                ^my :maxSeg <- ^my nextSeg;
+            ];
+
+            ^self print:8;
+            ^my rr printWithCommas:16.0;
+            segmentSize printWithCommas:14;
+            usedSize printWithCommas:14;
+            ^my reclaimed printWithCommas:16.0;
+            ^my copied printWithCommas:16.0;
+            newLine print;
+            ^my :nextSeg <- (^my nextSeg + 1) asInteger;
+        ];
+  "    MSS = " print;    (maxSeg + 1) asInteger print;
+  " [Reclaimed ="  print; maxReclaimed printWithCommas:16.0;
+  "; Copied = " print;    maxCopied printWithCommas:16.0; "]" printNL;
+  newLine print;
+].
+
+defineMethod:[|ascertainSegmentSize: segmentNum |
+    ^self ascertainSegmentSize: segmentNum fromNetwork: ^tmp osdPath
+].
+
+defineMethod:[|ascertainSegmentSize: segmentNum fromNetwork: osdPathName|
+    !segSize;
+#   make sure we stay under the file descriptor limit!
+  0 asReferenceTo: ^current . doOnceNoContext: [
+    ^self instanceList iterate:
+    [
+      !segment <- ("file:" concat: osdPathName . concat:"/" .
+                 concat: ^self .concat:"/".concat: segmentNum)
+                asOpenVisionChannel;
+
+      :segSize <- segment byteCount;
+
+      segment close;
+    ] by: fdLimit;
+  ];
+    segSize
+].
+
+defineMethod:[|deleteSegment: segmentNum |
+    ^self deleteSegment: segmentNum fromNetwork: ^tmp osdPath
+].
+
+defineMethod:[|deleteSegment: segmentNum fromNetwork: osdPathName|
+    !segmentPath <- osdPathName  concat:"/" .
+                 concat: ^self .concat:"/".concat: segmentNum;
+    !dsegsPath   <- osdPathName  concat:"/" .
+                 concat: ^self .concat:"/".concat: ".dsegs";
+
+    "mv -f " concat: segmentPath . concat:" " . concat: dsegsPath . filterOutputOf:[];
+    "touch " concat: segmentPath . filterOutputOf:[];
+    ^self
+].
+
+defineMethod:[|segmentExists: segmentNum|
+    ^self segmentExists: segmentNum inNetwork:^tmp osdPath
+].
+
+defineMethod:[|segmentExists: segmentNum inNetwork: osdPathName|
+    !segment <- ("file:" concat: osdPathName . concat:"/" .
+                 concat: ^self .concat:"/".concat: segmentNum)
+                asOpenVisionChannel;
+
+    !result <- segment state != segment State Unused;
+    segment close;
+    result
+]
+;
+
+AdminTools
+
+defineMethod: [ | fdLimit |
+^tmp sendOnceNoContext: [
+    (["tcsh -c \"limit descriptors\"" filterOutputOf:[]] divertOutput
+        breakOn: " " .select: [asInteger isntNA]. at:1 . asInteger - 10) asInteger else:[30]
+]
+] .
+
+defineMethod: [ | networkProfileSummary |
+
+!ospaces <- (spacesInNetwork -1) sequence
+  send: [ asObjectSpace extendBy: [ !containers <- ^self bareContainerList ]
+        ] ;
+
+"Profile of Network" printNL ;
+
+"  Total Size (in bytes): " print: 35;
+ospaces total: [ containers total: [ containerSize ] ] .
+   printWithCommasNL: 20.0 ;
+"  Number of Containers:  " print: 35;
+ospaces total: [ containers count ] . printWithCommasNL: 20.0 ;
+ospaces
+] .
+
+defineMethod: [ | objectNetworkProfile |
+
+networkProfileSummary
+iterate:
+  [ newLine print; "=" fill: 70 .printNL; newLine print;
+    getSpace whatAmI print; "  -  " print;
+    profile;
+  ];
+];
+
+AdminTools ClusterType
+
+defineMethod:
+[ |referencesPTokensOnly|
+  number ==  6  ||  # ptoken
+ [number ==  7] ||  # link
+ [number ==  8] ||  # charuv
+ [number ==  9] ||  # doubleuv
+ [number == 10] ||  # floatuv
+ [number == 11] ||  # intuv
+ [number == 12] ||  # refuv
+ [number == 14] ||  # undefuv
+ [number == 46] ||  # unsigned32uv
+ [number == 47] ||  # unsigned64uv
+ [number == 48] ||  # unsigned96uv
+ [number == 49]     # unsigned128uv
+];
+
+AdminTools ObjectSpace defineMethod:[| referencedSegmentList |
+    bareContainerList groupedBy:[containerSegment] .
+                      send:[asSelf]. sortUp:[^self]. select:[isntNA]
+];
+# Note: a container's segment will be NA if it is has never been committed ...
+
+AdminTools ObjectSpace defineMethod:[| unreferencedSegmentList |
+!referencedSegments <- referencedSegmentList;
+!minSeg <- referencedSegments at: 1; # should be obtained from NDF
+!maxSeg <- referencedSegments at: referencedSegments count;
+!totalSegments <- (maxSeg - minSeg + 1) asInteger sequence0 send:[(^self + ^my minSeg) asInteger];
+!segmentDifferences <- totalSegments difference: referencedSegments;
+segmentDifferences at:2 .count != 0 ifTrue: [
+        "Error calculating unreferenced segments:"print; segmentDifferences at:2 .count printNL;
+        ^global List new
+] else: [
+        segmentDifferences at: 1
+]
+];
+
+AdminTools ObjectSpace defineMethod:[| missingSegmentList |
+    !space <- ^self;
+    referencedSegmentList select:[^my space segmentExists: ^self . not]
+];
+
+AdminTools ObjectSpace defineMethod:[| displayUnreferencedSegments |
+^self validPath: ^tmp osdPath . ifTrue: [
+  !space <- ^self;
+  !total <- unreferencedSegmentList total:[
+        ^self print;
+        ^my space ascertainSegmentSize: ^self. printWithCommasNL:15.0
+  ];
+  "Total:" print:-9; total printWithCommas:15.0;
+];
+^self
+];
+
+AdminTools defineMethod:[| createDirectory: pathName |
+"mkdir -p " concat: pathName . filterOutputOf:[];
+^self
+];
+
+AdminTools ObjectSpace defineMethod:[| deleteUnreferencedSegments |
+^self validPath: ^tmp osdPath . ifTrue: [
+  !space <- ^self;
+  !targetSegmentList <- unreferencedSegmentList select: [
+        ^my space ascertainSegmentSize: ^self . > 0
+  ];
+  targetSegmentList count > 0 ifTrue: [
+    !dsegsPath   <- ^tmp osdPath  concat:"/" .
+                     concat: ^self .concat:"/".concat: ".dsegs";
+    ^self createDirectory: dsegsPath;
+
+    targetSegmentList do:[
+        ^my space deleteSegment: ^self
+    ];
+  ];
+];
+^self
+];
+
+AdminTools ObjectSpace defineMethod:[| totalSizeOfSegments: segs |
+!space <- ^self;
+segs total:[^my space ascertainSegmentSize: ^self]. else: 0
+];
+
+AdminTools ObjectSpace defineMethod:[| totalSizeOfUnreferencedSegments |
+^self totalSizeOfSegments: unreferencedSegmentList
+];
+
+AdminTools ObjectSpace defineMethod:[| totalSizeOfReferencedSegments |
+^self totalSizeOfSegments: referencedSegmentList
+];
+
+AdminTools ObjectSpace defineMethod:[| displaySegmentProfile |
+^self validPath: ^tmp osdPath . ifTrue: [
+  !dummy; displaySegmentProfileHeader;
+  ^self displaySegmentProfileWithRSizeAcc: :dummy uSizeAcc: :dummy rCntAcc: :dummy uCntAcc: :dummy
+]
+];
+
+AdminTools ObjectSpace defineMethod:[| displaySegmentProfileWithRSizeAcc: trsize uSizeAcc: tusize rCntAcc: trcount uCntAcc: tucount |
+        !ulist <- unreferencedSegmentList;
+        !rlist <- referencedSegmentList;
+        !usize <- ^self totalSizeOfSegments: ulist;
+        !rsize <- ^self totalSizeOfSegments: rlist;
+        ^self print:6; rlist count printWithCommas:8.0; rsize printWithCommas:18.0; ulist count printWithCommas:8.0;
+         usize printWithCommas:18.0; rlist count +ulist count printWithCommas:8.0; rsize + usize printWithCommasNL:18.0;
+        usize isntNA ifTrue:[ tusize <- tusize value + usize; tucount <- tucount value + ulist count];
+        rsize isntNA ifTrue:[ trsize <- trsize value + rsize; trcount <- trcount value + rlist count];
+        rsize isNA || [usize isNA] ifTrue:[^self print; " failed"printNL];
+];
+
+AdminTools defineMethod:
+[ | validPath: pathName |
+    !file <- ("file:" concat: pathName )
+                asOpenVisionChannel;
+
+    !result <- file state != file State Unused;
+    file close;
+    result ifFalse:[">>> Can't open "print; pathName print; " <<<" printNL];
+    result
+];
+
+
+AdminTools defineMethod:[| persistentSpaceList |
+(spacesInNetwork - 1) sequence send:[^self asObjectSpace]
+];
+
+AdminTools defineMethod:[| displayContainerInfoHeader |
+"Spc" print; "Index" print:-8; "R/W" print: -4; "Type" print:-11; "Size" print: -12; "SegNum" print:-8; "SegOffset" print:-12; "Refs" printNL:-8;
+];
+
+AdminTools defineMethod:[| displaySegmentProfileHeader |
+  " Space" print; "Ref'd" print:-8; "Size" print: -12; "UnRef'd" print: -15; "Size" print: -11; "Total" print: -14; "Size" printNL: -14;
+  "-" fill:84 .printNL;
+];
+
+AdminTools defineMethod:[| displayTotalSizeOfUnreferencedSegments |
+!result <- 0;
+ persistentSpaceList iterate:[
+        !size <- totalSizeOfUnreferencedSegments;
+        ^self print; size printWithCommasNL:16.0;
+        size isntNA ifTrue:[ ^my :result <- ^my result + size];
+        size isNA ifTrue:[^self print; " failed"printNL];
+ ];
+"Total:" print:-9; result printWithCommas:18.0;
+
+];
+
+AdminTools defineMethod:[| displayTotalSizeOfReferencedSegments |
+!result <- 0;
+ persistentSpaceList iterate:[
+        !size <- totalSizeOfReferencedSegments;
+        ^self print; size printWithCommasNL:16.0;
+        size isntNA ifTrue:[ ^my :result <- ^my result + size];
+        size isNA ifTrue:[^self print; " failed"printNL];
+ ];
+"Total:" print:-9; result printWithCommas:18.0;
+
+];
+
+AdminTools defineMethod:[| displaySegmentProfile |
+^self validPath: ^tmp osdPath . ifTrue: [
+  !tusize <- 0; !tucount <- 0;
+  !trsize <- 0; !trcount <- 0;
+  displaySegmentProfileHeader;
+  persistentSpaceList iterate:[
+     ^self displaySegmentProfileWithRSizeAcc: ^my :trsize uSizeAcc: ^my :tusize rCntAcc: ^my :trcount uCntAcc: ^my :tucount
+  ];
+  "Total:" print; trcount printWithCommas:8.0; trsize printWithCommas:18.0; tucount printWithCommas:8.0;
+  tusize printWithCommas:18.0; trcount + tucount printWithCommas:8.0; trsize + tusize printWithCommas:18.0;
+];
+];
+
+AdminTools defineMethod:[| displayMissingSegments |
+ "Missing Segments:" printNL;
+ persistentSpaceList iterate:[
+    "    Space" print; ^self print;":" print;
+    missingSegmentList do:[print];
+    newLine print;
+ ];
+];
+
+AdminTools defineMethod:[| deleteUnreferencedSegments |
+ "Deleting Segments:" printNL;
+ ^self validPath: ^tmp osdPath . ifTrue: [
+   persistentSpaceList iterate:[
+    "    Space" print; ^self print:4;":     " print;
+    ^global Utility UnixSeconds currentTime printNL;
+    deleteUnreferencedSegments;
+   ];
+  "Completed:    " print;
+  ^global Utility UnixSeconds currentTime printNL;
+ ];
+];
+
+
+
+#--------------------
+#  New stuff after May 2002
+#--------------------
+
+Object defineMethod: [|displayStoreInheritance|
+!count <- 0;
+!obj <- ^self;
+
+"Class Name" center:42 .print;
+"Cardinality" print:-12;
+"Cluster Size" printNL:-16;
+
+
+[obj !== obj super]
+  whileTrue: [:count <- count + 3;
+    "-" fill: count asInteger .concat: "> " .print;
+    obj whatAmI print: 40 - count;
+    obj clusterCardinality printWithCommas: 12.0;
+    obj clusterSize printWithCommas: 16.0; " " print;
+    obj displayPOP;
+    :obj <- obj super;
+  ];
+"-" fill: (count + 3) asInteger .concat: "> " .print;
+obj whatAmI print: 37 - count;
+obj clusterCardinality printWithCommas: 12.0;
+obj clusterSize printWithCommas: 16.0; " " print;
+obj displayPOP;
+];
+
+AdminTools ClusterType defineMethod:[|isSelector| number = 13];
+
+AdminTools ObjectSpace defineMethod:[|dictionariesWithTopStringRatios|
+^self containerList
+        select:[type isSelector].
+        extendBy:[!ratio <- (^self getNthPOP:2 . containerSize)/containerSize].sortDown:[ratio].
+        first:10 .
+        do:[ratio print:8.2;" "print; displayContainerInfoWithReferences];
+^self
+];
+
+AdminTools ObjectSpace defineMethod:[|topNdictionaryWastelands:count|
+containerList
+        select:[type isTable].
+        groupedBy:[^self getNthPOP:4].
+
+        extendBy:[
+                !dictionaryAmtUsed <- groupList at:1 .asObject selectorList select:[isString]. total:[count + 1];
+                !dictionaryStringSize <- ^self getNthPOP:0 .getNthPOP:2 . containerSize;
+                !excess <- dictionaryStringSize - dictionaryAmtUsed;
+                !pctUsed <- (dictionaryAmtUsed/dictionaryStringSize)*100;
+        ].
+        select: [excess isntNA]. sortDown:[excess].
+        first: count .
+        do:[ groupList at:1 .do:[ print; asObject whatAmI print:50];
+             excess printWithCommas:15.0; 100 - pctUsed print:8.2; "%" printNL;
+#            ^self getNthPOP:0 .displayContainerInfoWithReferences
+        ];
+^self
+];
+
+AdminTools ObjectSpace defineMethod:[|topNdictionaryWastelandsI:count|
+containerList
+        select:[type isTable].
+        groupedBy:[^self getNthPOP:4].
+
+        extendBy:[
+                !table <- groupList at:1 .asObject;
+                !dictionaryAmtUsed;
+                0 asReferenceTo: ^current . doOnceNoContext:[
+                    ^self instanceList iterate:[
+                        :dictionaryAmtUsed <-  table selectorList select:[isString]. total:[count + 1];
+                    ]
+                ];
+                !dictionaryStringSize <- ^self getNthPOP:0 .getNthPOP:2 . containerSize;
+                !excess <- dictionaryStringSize - dictionaryAmtUsed;
+                !pctUsed <- (dictionaryAmtUsed/dictionaryStringSize)*100;
+        ].
+        select: [excess isntNA]. sortDown:[excess].
+        first: count .
+        do:[ groupList at:1 .do:[ print; asObject whatAmI print:50];
+             excess printWithCommas:15.0; 100 - pctUsed print:8.2; "%" printNL;
+#            ^self getNthPOP:0 .displayContainerInfoWithReferences
+        ];
+^self
+];
+
+AdminTools ObjectSpace defineMethod:[|displayDictionariesWithStringSpaceLargerThan: size|
+containerList
+        select:[type isTable].
+        groupedBy:[^self getNthPOP:4].
+
+        extendBy:[
+                !dictionaryStringSize <- ^self getNthPOP:0 .getNthPOP:2 . containerSize;
+        ].
+        select: [dictionaryStringSize > ^my size]. sortDown:[dictionaryStringSize].
+        do:[ groupList at:1 .do:[ print; asObject whatAmI print:50];
+             dictionaryStringSize  printWithCommas:15.0;
+             dictionaryStringSize > (2 toThe: 28) ifTrue: [ " *** Corrupted! ***" print;];
+             "" printNL;
+        ];
+^self
+];
+
+AdminTools ObjectSpace defineMethod:[|displayCorruptedDictionaries|
+^self displayDictionariesWithStringSpaceLargerThan: (2 toThe: 28);
+^self
+];
+
+AdminTools defineMethod:[|displayCorruptedDictionaries|
+ persistentSpaceList iterate:[
+    ^self displayDictionariesWithStringSpaceLargerThan: (2 toThe: 28);
+];
+];
+
+AdminTools ObjectSpace defineMethod: [|containerTableProfile: containers|
+^self print:5; ":" print;
+containerTableSize printWithCommas:12;
+containers count printWithCommas:12;
+(containerTableSize - (containers max:[extractContainerIndex]) - 1) asInteger printWithCommasNL:12
+];
+
+AdminTools ObjectSpace defineMethod: [|containerTableProfile|
+^self containerTableProfile: bareContainerList
+];
+
+AdminTools defineMethod: [|containerTableProfile|
+!totalSlots <- 0;
+!totalUsed <- 0;
+!totalEnds <- 0;
+"Space " print;
+"ctSize" print:-12;
+"Used" print:-12;
+"End Xtra" printNL:-12;
+ persistentSpaceList iterate:[
+    !containers <- bareContainerList;
+    ^my :totalSlots <- ^my totalSlots + containerTableSize;
+    ^my :totalUsed  <- ^my totalUsed  + containers count;
+    ^my :totalEnds  <- ^my totalEnds  + (^self containerTableProfile: containers)
+];
+"Total:" print;
+totalSlots printWithCommas: 12.0;
+totalUsed printWithCommas: 12.0;
+totalEnds asInteger printWithCommas: 12
+];
+
+#####
+# START: system/order.vis
+#####
+
+[ 
+  !start <- CoreWorkspace Utility;
+  !toolkitName <- "System";
+
+  (start respondsTo: toolkitName) ifFalse: [
+    # Operating System
+    !system <- start createSubclass: toolkitName at: start;
+
+
+    # Aliases
+    start define: 'OS' toBe: system;
+
+
+    # Implementations
+    !unix    <- system createSubclass: "Unix"    at: system;
+    !vms     <- system createSubclass: "VMS"     at: system;
+    !windows <- system createSubclass: "Windows" at: system;
+  ];
+
+] value;
+
+
+Utility System defineMethod: [|getImpl|
+
+  # Give a best guess as to what system we're on
+  !winFile <- "file,r:/windows/system.ini" asOpenVisionChannel;
+  !winFileStatus <- winFile status;
+  winFile close;
+
+  !visionServerType <- 
+    GlobalWorkspace ProcessControlTools Environment at: "visionServerType";
+
+  !system <- 
+    GlobalWorkspace Utility hostId = 0 ifTrue: [ 
+      VMS 
+    ] .
+    elseIf: [ 
+        winFileStatus = CoreWorkspace OpenVision Channel Status Completed 
+    ] then: [
+      Windows
+    ] .
+    elseIf: [ visionServerType = "UNIX" ] then: [
+      Unix
+    ] .
+    else: [
+      NA
+    ];
+
+  system
+];
+
+
+Utility System defineMethod: [|createVirtualMethod: name|
+  !self <- ^self asSelf;
+  
+  # interface method
+  super defineMethod: (
+    "[|" concat: name . concat: "| getImpl " .  concat: name . concat: "]"
+  );
+
+  # implementations (if one is empty, infinite recursion)
+  super subclassList do: [
+    !className <- ^self whatAmI;
+    ^self defineMethod: (
+      "[|" concat: ^my name . concat: "| \">>> " . 
+      concat: ^my name . concat: " unimplemented at " .
+      concat: className . concat: "\" printNL; " .
+      concat: " NA ]"
+    ) ;
+  ];
+];
+
+Utility System defineMethod: [|defaultNDFLocation|
+  "/localvision/network/NDF"
+];
+
+Utility System createVirtualMethod: "visionCmdString";
+
+Utility System Unix defineMethod: [|visionCmdString|
+  "batchvision " 
+];
+
+Utility System Windows defineMethod: [|visionCmdString|
+  "cmd /C batchvision " 
+];
+
+Utility System VMS defineMethod: [|visionCmdString|
+  "mcr batchvision " 
+];
+
+
+Utility System defineMethod: [|directoryContents: path|
+  !impl <- getImpl;
+  !contents <- CoreWorkspace List new;
+
+  # since we've got to iterate, let's not do any repeats.  Collect the 
+  # operations by 'path' and 'impl'
+  ^current basicDoOnceNoContext: [ 
+      # now force the unique pairs to iterate
+      !current <- ^current;
+      0 asReferenceTo: current . == current ifTrue: [
+        current instanceList iterate: [ 
+          :contents <- impl directoryContents: path;
+        ];
+      ];
+    ]
+    basedOnCriteria: [ impl ], [ path ]
+    propagateUsing: [ 
+      ^self :contents <- groupResult contents;
+    ];
+
+  contents
+];
+
+Utility System Unix defineMethod: [|directoryContents: path|
+  path fileExists ifTrue: [
+    "\\ls " concat: path . asProgramWith: [ ] .
+      asLines
+  ] 
+  else: [ CoreWorkspace List new ]
+];
+
+Utility System VMS defineMethod: [|directoryContents: path|
+  # Black Magic!
+  # interpolated by vision then DCL and evaluated by perl
+  !sp <- "process:perl -e \"foreach (glob(\"\"" 
+    concat: path .
+    concat: "*\"\")) { print \"\"$_%\"\"}; print \"\"%ENDTOKEN%\"\";\" " .
+      asOpenVisionChannel;
+
+  !result <- sp getStringThroughPrompt: "%ENDTOKEN%";
+  !status <- sp status;
+  sp close;
+
+  (status == CoreWorkspace OpenVision Channel Status Closed ||
+    status == CoreWorkspace OpenVision Channel Status Failed)
+    ifTrue: [ CoreWorkspace List new ]
+    else: [
+      :result <- result breakOn: "%" . linkElements;
+      !end <- result select: [ prior = "" && next = "" ] .
+        anElement position decrement;
+
+      # Return as a list of just the file names
+      result select: [ position < ^my end ] .
+        send: [ 
+          !file <- ^self breakOn: "/" . last: 1 . anElement;
+          (file from: (file count - 3) asInteger to: file count) = ".dir"
+            ifTrue: [ file drop: -4 ]
+            else:   [ file ]
+        ] .
+    ]
+];
+
+Utility System Windows defineMethod: [|directoryContents: path|
+  # Prepare the outgoing path!
+  !hack <- "\\ " stripBoundingBlanks;
+  :path <- path translateString: "/" to: hack;
+
+  !error;
+  !result <- [ 
+    !program <- "cmd /C dir /b " concat: path;
+    :error <- CoreWorkspace Utility System runProgram: program with: [ ];
+  ] divertOutput;
+
+  error = 0 
+    ifTrue: [ result asLines send: [ stripBoundingBlanks ] . nonDefaults ] 
+    else:   [ CoreWorkspace List new ]
+];
+
+String defineMethod: [|directoryContents|
+  CoreWorkspace Utility System directoryContents: ^self
+];
+
+Utility System defineMethod: [|runVisionWith: code onNetwork: network|
+  ^self getImpl runVisionWithImpl: code onNetwork: network
+];
+
+Utility System Unix defineMethod: [|runVisionWithImpl: code onNetwork: network |
+  !block <- code;
+  code isBlock ifFalse: [
+    :block <- [ 
+      code printNL;
+      newLine print;
+      "?g" printNL;
+    ];
+  ];
+  
+  visionCmdString concat: " -n " . concat: network . asProgramWith: block
+];
+
+Utility System defineMethod: [|runVisionWithImpl: code onNetwork: network|
+  !self <- ^self;
+  !block <- code;
+  code isBlock ifFalse: [
+    :block <- [ 
+      code printNL;
+      newLine print;
+      "?g" printNL;
+    ];
+  ];
+
+  :block <- block divertOutput;
+
+  !sp <- "process:" concat: self visionCmdString . 
+    concat: " -n " . concat: network .  asOpenVisionChannel;
+  sp initializeBV;
+  !result <- sp getBVResultFor: block;
+  !status <- sp status;
+  sp close;
+
+  status != sp Status Closed && status != sp Status Failed 
+    ifTrue: [ result ]
+    else:   [ "OpenVision Batchvision FAILED" ]
+];
+
+Utility System defineMethod: [|runVisionWith: code|
+  !network <- ndfPathName ifDefault: [ defaultNDFLocation ];
+  ^self runVisionWith: code onNetwork: network
+];
+
+Utility System defineMethod: [|info|
+  ^current getImpl whatAmI printNL;
+];
+
+###
+# A bit more verbose error printing
+###
+String defineMethod: [|asProgramWith: inputBlock|
+  [ CoreWorkspace Utility System runProgram: asSelf with: inputBlock ] divertOutput
+];
+Utility System defineMethod: [|runProgram: program with: inputBlock|
+  !impl <- ^current getImpl;
+
+  !error; 
+  !block <- inputBlock else: []; 
+  !out <- [:error <- impl runProgramImpl: program with: block]divertOutput; 
+  error = 0 
+    ifTrue:  [ out print ]
+    ifFalse:  [[
+      ">>> Error " print; error asString printNL; 
+      "    Processing Program: " print; program printNL; 
+      inputBlock isntNA 
+        ifTrue: [
+          "    with " print; inputBlock printNL; 
+          " whose value is {" print; 
+          inputBlock value; "}" printNL;
+      ]; 
+      out isntDefault 
+        ifTrue: [
+          "... Output: " printNL; 
+          out printNL; 
+        ]; 
+    ] print ];
+    error
+];
+
+Utility System defineMethod: [|runProgramImpl: program with: inputBlock|
+  !status <- -1;
+  !output <- "";
+
+  !input <- inputBlock divertOutput;
+  program isString ifTrue: [
+    !ovChannel <- "process:" concat: program . asOpenVisionChannel;
+    ovChannel isAStreamChannel ifTrue:[
+      ovChannel putString: input;
+      :status <- 0; # success, I guess
+
+      :output <- ovChannel getString else: "";
+      [ovChannel isntAtEndOfInput ] whileTrue: [
+        ovChannel wait;
+        :output <- output concat: (ovChannel getString else: "");
+      ];
+    ] ifFalse: [
+      ">>> Unable to run program: " print; program print; " <<<" printNL;
+      :status <- -1;
+    ];
+    ovChannel close;
+  ] ifFalse: [
+    ">>> Argument to 'runProgramImpl:' must be a string <<<" printNL;
+    :status <- -1;
+  ];
+  output print;
+  status
+];
+
+Utility System Unix defineMethod: [|runProgramImpl: program with: inputBlock|
+  program filterOutputOf: inputBlock
+];
+
+
+
+OpenVision  Channel defineMethod: [| getStringThroughPrompt: prompt |
+  !channel <- ^self;
+
+  !string <- ^self getString else: "";
+  !status <- channel status;
+  [ string take: prompt count negated. != prompt && 
+    status != Status Closed &&
+    status != Status Failed
+  ] whileTrue: [
+      channel wait: 1;
+      :status <- channel status;
+      :string <- string concat: (channel getString else: "");
+  ];
+
+  status != Status Closed && status != Status Failed 
+    ifTrue: [ string ]
+    else:   [ NA ]
+];
+
+OpenVision Channel defineMethod: [|getBVResultFor: queryString|
+  !channel <- ^self;
+  !lines <- queryString asLines;
+  !result <- "";
+
+  lines iterate: [ 
+    # ^self printNL;
+    ^my channel putStringNL: ^self;
+    !s <- ^my channel getStringThroughPrompt: "V> ";
+    # s printNL;
+    s isntNA && ^my result isntNA
+      ifTrue: [ ^my :result <- ^my result concat: s ]
+      else:   [ ^my :result <- NA ]
+  ];
+
+  result
+];
+OpenVision Channel defineMethod: [|initializeBV| 
+  ^self getStringThroughPrompt: "V> ";
+  ^self
+];
+
+#####
+# END: system/order.vis
+#####
+
+
+#####
+# START: displayMemoryStats
+#####
+
+AdminTools respondsTo: 'displayMemoryStats' . ifFalse: [ 
+  AdminTools define:'sessionAllocationHighWaterMark' toBePrimitive: 600 withControlValue: 1;
+  AdminTools define:'sessionAllocationResourceLimit' toBePrimitive: 600 withControlValue: 2;
+  AdminTools define:'sessionMappedAddressSpaceLevel' toBePrimitive: 600 withControlValue: 3;
+
+  AdminTools defineMethod: [|displayMemoryStats|
+    "  Current allocation level:    " print;
+    totalNetworkAllocation printWithCommasNL: 15.000000;
+    "  Session maximum:             " print;
+    sessionAllocationHighWaterMark printWithCommasNL: 15.000000;
+    "  Heap limit:                  " print;
+    sessionAllocationResourceLimit printWithCommasNL: 15.000000;
+    "  Total size of mapped segments" print;
+    sessionMappedAddressSpaceLevel printWithCommasNL: 15.000000;
+  ];
+];
+
+#####
+# END: displayMemoryStats
+#####
+
+
+#####
+# START: Code to get Information from NDFTool
+#####
+
+[ 
+  !start <- CoreWorkspace AdminTools;
+  !toolkitName <- "NDFTool";
+
+  (start respondsTo: toolkitName) ifFalse: [
+    !top <- start createSubclass: toolkitName at: start;
+
+    !record  <- top createSubclass: "Record"   at: top;
+    !clean   <- top createSubclass: "Clean"    at: top;
+    !clean   <- top createSubclass: "NewSpace" at: top;
+  ];
+
+  ^tmp define: "adminToolsNDFToolCleanOngoingHours" toBe: 0.5;
+
+  CoreWorkspace AdminTools NDFTool Record basicDo: [ 
+    ^self defineFixedProperty: "version";
+    ^self defineFixedProperty: "space";
+    ^self defineFixedProperty: "segment";
+    ^self defineFixedProperty: "timestamp";
+    ^self defineFixedProperty: "hoursAgo";
+    ^self defineFixedProperty: "prior";
+    ^self defineFixedProperty: "next";
+    ^self defineFixedProperty: "line";
+  ];
+
+  CoreWorkspace AdminTools NDFTool NewSpace basicDo: [ 
+    ^self defineFixedProperty: "record";
+  ];
+
+  CoreWorkspace AdminTools NDFTool Clean basicDo: [ 
+    ^self defineFixedProperty: "_records";
+    ^self define: "recordsPrototype" toBe: CoreWorkspace List new;
+
+    ^self defineMethod: [|records|
+      ^self _records isNA ifTrue: [ 
+        ^self :_records <- ^self recordsPrototype clusterNew;
+      ];
+
+      ^self _records
+    ];
+
+    ^self defineMethod: [|isPartialAlignmentRec: rec|
+      CoreWorkspace AdminTools NDFTool partialAlignmentMatchStrings 
+        any: [ ^my rec line containsSubstring: ^self ]
+    ];
+    ^self defineMethod: [|isAlignmentRec: rec|
+      CoreWorkspace AdminTools NDFTool alignmentMatchStrings 
+        any: [ ^my rec line containsSubstring: ^self ]
+    ];
+
+    ^self defineMethod: [|completions|
+      !cleanClass <- ^current super;
+      records select: [ ^my cleanClass isAlignmentRec: ^self ]
+    ];
+
+    ^self defineMethod: [|completedSpaces|
+      ^self completions send: [ space ] . unique
+    ];
+
+    ^self defineMethod: [|missedSpaces|
+      !alignedSpaces <- ^self completions send: [ space ] . unique;
+      !allSpaces <- CoreWorkspace AdminTools NDFTool 
+        objectSpaceListAsOf: startTimestamp . send: [ asNumber ];
+
+      !diffs <- allSpaces difference: alignedSpaces;
+      !lhs <- diffs at: 1;
+      !rhs <- diffs at: 2;
+
+      lhs reject: [ ^self = 0 || ^self = 1 ]
+    ];
+
+    ^self defineMethod: [|isComplete|
+      !alignedSpaces <- ^self completions send: [ space ] . unique;
+      !allSpaces <- CoreWorkspace AdminTools NDFTool 
+        objectSpaceListAsOf: startTimestamp . send: [ asNumber ];
+
+
+      !diffs <- allSpaces difference: alignedSpaces;
+      !lhs <- diffs at: 1;
+      !rhs <- diffs at: 2;
+
+      rhs count = 0 && lhs count = 2 && [ lhs at: 1 . == 0 ] && [ lhs at: 2 . == 1 ]
+    ];
+
+    ^self defineMethod: [|displayInfo|
+      "spaces cleaned: " print;
+      ^self completedSpaces count print;
+      " - complete: " print;
+      ^self isComplete asString printNL: 5;
+      ^self records count > 0 ifTrue: [ 
+        ^self completions do: [ displayInfo; ];
+      ] 
+      else: [ 
+        newLine print;
+      ];
+    ];
+
+    ^self defineMethod: [|incompleteCleans|
+      ^self masterList reject: [ isComplete ] . 
+        reject: [ possiblyOngoing ]
+    ];
+
+    ^self defineMethod: [|startTimestamp|
+      ^self records sortUp: [ timestamp ] . at: 1 . timestamp
+    ];
+
+
+    ^self defineMethod: [|possiblyOngoing|
+      !lastRecord <- ^self lastRecord;
+      (lastRecord next isNA) && (lastRecord hoursAgo < ^tmp adminToolsNDFToolCleanOngoingHours)
+    ];
+
+    ^self defineMethod: [|lastRecord|
+      ^self records sortDown: [ timestamp ] . at: 1 . 
+    ];
+
+  ];
+
+  CoreWorkspace AdminTools NDFTool Record basicDo: [ 
+    ^self defineMethod: [|displayInfo| ^self line printNL; ];
+  ];
+
+  CoreWorkspace AdminTools NDFTool NewSpace basicDo: [ 
+    ^self defineMethod: [|displayInfo| ^self record displayInfo; ];
+
+    ^self defineMethod: [|creationTimestamp|
+      ^self record timestamp
+    ];
+
+  ];
+
+
+  CoreWorkspace AdminTools NDFTool basicDo: [
+    ^self define: "alignmentMatchStrings" toBe: (
+      "Cleanup/RunDaily:  Clean Space", "Cleanup of Space"
+    );
+    ^self define: "partialAlignmentMatchStrings" toBe: (
+      CoreWorkspace List new, "updateNetworkIfSpaceIsLow"
+    );
+
+    ^self define: '_records' toBe: CoreWorkspace List new;
+
+
+    ^self defineMethod:[|getNRecords: baseVersions|
+      ^self _records isDefault ifTrue: [
+        # Only the first call will load records
+        !ndftoolLines <- "ndftool -v -b" concat: baseVersions asString;
+        :ndftoolLines <- ndftoolLines concat: " -n ";
+        :ndftoolLines <- ndftoolLines concat: CoreWorkspace ndfPathName;
+        :ndftoolLines <- ndftoolLines asProgramWith: 0 . asLines;
+
+        ndftoolLines 
+          extendBy: [ !line <- ^self; !version; !rec ] .
+          select: [ 
+            :version <- line breakOn: " " . at: 1 . asInteger;
+            version isntNA
+          ] .
+          do: [ 
+            # 99360577  Valid     46/1      12/15/16:12:05:10
+            # 99359905  Valid     46/0      12/15/16:12:05:09 Holding Space Setup 2017
+            # 99359505  Valid      2/37318  12/14/16:22:34:37 Cleanup/RunDaily:  Schema
+            # 99359505  Valid      5/34534  12/14/16:22:34:37 Cleanup/RunDaily:  Schema
+            # 99358989  Valid     45/14878  12/14/16:22:34:17 Cleanup/RunDaily:  Clean Space 45
+            # 99358585  Valid     44/10562  12/14/16:22:34:13 Cleanup/RunDaily:  Clean Space 44
+            # 212756456 Valid      3/2953456 12/16/16:11:58:40 DailyReturn (IndexAccount Master and IndexDailyReturn Master) for 20161128
+
+            :rec <- ^my Record new;
+            rec :line <- ^self line;
+            rec :version <- ^self version;
+
+            rec :space <- line breakOn: "/" . at: 1; 
+            rec :space <- rec space 
+              from: (rec space count - 4) 
+              to: (rec space count) . 
+              asInteger;
+
+            !segment <- line breakOn: "/" . at: 2 . breakOn: " " . at: 1;
+            rec :segment <- segment asInteger;
+
+            !date  <- line breakOn: ":" . at: 1 . breakOn: " ";
+            :date  <- date at: date count . asDate;
+
+            !time    <- line breakOn: ":" . ;
+            !hour    <- time at: 2 . asInteger;
+            !minute  <- time at: 3 . asInteger;
+            !second  <- time at: 4 . to: 3 . asInteger;
+
+            rec :timestamp <- CoreWorkspace LowResolutionTime 
+              fromYear: date year
+              month: date month 
+              day: date day
+              hours: hour 
+              minutes: minute 
+              andSeconds: second
+            ;
+
+            !tn <- ^tmp timeStart;
+            !ts <- rec timestamp;
+            # tn print; " - ts: " print; ts printNL; 
+            !daysTo  <- tn asDate countDaysTo: ts asDate;
+            !hoursTo <- (tn hours + tn minutes / 60 + tn seconds / 3600) 
+              - (ts hours + ts minutes / 60 + tn seconds / 3600);
+            rec :hoursAgo <- daysTo * 24 + hoursTo;
+          ] .
+          linkElements do: [ 
+            # "Adding " print; rec version asString print; " at " print; position asString printNL;
+            ^my _records, rec;
+            next  isntNA ifTrue: [ rec :prior <- next  rec ];
+            prior isntNA ifTrue: [ rec :next  <- prior rec ];
+          ];
+
+        ^self collectParentOperations;
+      ];
+
+      ^self _records
+    ];
+
+    ^self defineMethod:[|getRecords|
+      ^self getNRecords: 10
+    ];
+
+    ^self defineMethod:[|displayNDFToolOutput|
+      ^self getRecords do: [ line printNL; ];
+    ];
+
+    ^self defineMethod:[|collectParentOperations|
+      ^self collectCleans;
+      ^self collectNewSpaces;
+    ];
+
+
+    ^self defineMethod:[|collectCleans|
+      !ndfTool <- ^current super;
+
+      !cleans <- ^self _records
+        extendBy: [ !rec <- ^self; !cleanParent; ] . 
+        linkElements
+        iterate: [ 
+          # line printNL;
+          cleanParent isNA ifTrue: [ 
+            !record <- ^self;
+            !parent <- record;
+
+            [ (record isntNA) && [ record cleanParent isNA ] &&
+              [^my ndfTool Clean isPartialAlignmentRec: record ] ||
+              [^my ndfTool Clean isAlignmentRec: record ]
+            ] 
+            whileTrue: [
+              # "Setting cleanParent of: " print; record version print; 
+              # " to: " print; parent version print;
+              # " --> " print; record line print; newLine print;
+              record :cleanParent <- parent;
+              :record <- record next;
+            ];
+          ];
+        ] .
+        select: [ cleanParent isntNA ] .
+        groupedBy: [ cleanParent ];
+
+      cleans
+        extendBy: [ 
+          !records <- groupList send: [ rec ];
+        ] .
+        reject: [ 
+          # not an Alignment/Clean
+          !ndfTool <- ^my ndfTool;
+          records all: [ ^my ndfTool Clean isPartialAlignmentRec: ^self ] 
+        ] . 
+        do: [ 
+          !clean <- ^my ndfTool Clean new;
+          records do: [ ^my clean records, ^self ];
+
+        ];
+    ];
+
+    ^self defineMethod:[|collectNewSpaces|
+      !ndfTool <- ^current super;
+
+      ^self _records select: [ segment = 0 ] .
+        do: [ 
+          !newSpace <- ^my ndfTool NewSpace new; 
+          newSpace :record <- ^self;
+        ];
+    ];
+
+    ^self defineMethod: [|objectSpaceListAsOf: timestamp|
+      # only accurate relatively speaking.  If you only ask for this asOf 
+      # timestamps we pulled from ndftool you'll always get correct
+      # answers.  If you ask for any arbitrary timestamp you get back
+      # a result that might not be accurate.
+
+      # !allSpaces <- CoreWorkspace AdminTools objectSpaceList send: [ asNumber ];
+      !currentSpaceCount <- CoreWorkspace AdminTools spacesInNetwork;
+
+      !decrementCount <- ^self NewSpace masterList
+        select: [ ^self creationTimestamp > ^my timestamp ] .
+        count;
+
+      (currentSpaceCount - decrementCount) asInteger sequence0 send: [ ^self asObjectSpace ] 
+    ];
+
+  ];
+] value;
+
+#####
+# END: Code to get Information from NDFTool
+#####
+
+
+
+#----------------------------------------------------------------
+#  Methods to support analysis of Indexed ListStores
+#
+#  To run the report on all the suspect stores in a network:
+#    AdminTools displayWorrisomeIndexes;
+#
+#  To run the report for a single space:
+#    3 asObjectSpace displayWorrisomeIndexes;
+#
+#  The following two parameters define what is meant by
+#    "worrisome".
+#----------------------------------------------------------------
+
+
+^tmp define:'mapSizeThreshold' toBe: 100000000;
+^tmp define:'criticalMapSizeThreshold' toBe: 1000000000;
+^tmp define:'cartesianSpaceSizeThreshold' toBe: 900000000;
+^tmp define:'criticalCartesianSpaceSizeThreshold' toBe: 1700000000;
+^tmp define:'criticalNDFSizeThreshold' toBe: 800000000;
+^tmp define:'teNDFBytesToRead' toBe: 5000000;
+^tmp define:'hugeContainerSizeThreshold' toBe: 1000000000;
+^tmp define:'criticalContainerTableThreshold' toBe: 3400000;
+
+### Absurdly Small Test overrides
+# ^tmp define:'mapSizeThreshold' toBe: 1000000;
+# ^tmp define:'criticalMapSizeThreshold' toBe: 10000000;
+# ^tmp define:'cartesianSpaceSizeThreshold' toBe: 900000;
+# ^tmp define:'criticalCartesianSpaceSizeThreshold' toBe: 1700000;
+# ^tmp define:'criticalNDFSizeThreshold' toBe: 20000000;
+# ^tmp define:'teNDFBytesToRead' toBe: 5000000;
+# ^tmp define:'hugeContainerSizeThreshold' toBe: 30000000;
+# ^tmp define:'criticalContainerTableThreshold' toBe: 100000;
+
+
+
+
+AdminTools defineMethod:[| persistentSpaceList |
+    (spacesInNetwork - 1) sequence send:[^self asObjectSpace]
+];
+
+#----------------------------------------------------------------
+#  These methods do not attempt to associate a Vision name
+#     to the stores identified as worrisome. This is for
+#     two reasons. First because such indentification can
+#     be very expensive. Second because it is not necessary.
+#
+#  If an indexed list store's map can be reduced substantially in
+#     size by conversion, it should be reduced. Only in situations
+#     where a conversion will not reduce the size of the map, or
+#     reduces it by less than 25-30%, is it prudent to discover the
+#     Vision identity of a store. Then other avenues can be
+#     explored to reduce the store's size. Or, if the
+#     reduction by conversion is small, then tests can be run
+#     to determine if it is worthwhile.
+#----------------------------------------------------------------
+
+
+#----------------------------------------------------------------
+#  This method calculates and displays statistics about an
+#    indexed list store that is named by the recipient POP.
+#    It takes a boolean argument, convert. Wnen convert is
+#    TRUE, this method may try to convert a partition mapped
+#    store to a product mapped one. This is made available
+#    as an option because it is the only way to see how big
+#    the product map would be for this store. It is not done
+#    automatically since it modifies the store and could
+#    potentially require a great deal of memory/address space
+#    to build. 
+#
+#  Therefore, the scanning methods below use this method with
+#    convert set to FALSE.
+#
+#  If percent full is greater than 50%, there is a good chance
+#    that converting from partition to product would reduce 
+#    the size of the map. If greater than 66%, converting will
+#    reduce the size of the map. But, even if only 1% full, there
+#    is still a small chance that the map size could be reduced,
+#    perhaps substantially. 
+#----------------------------------------------------------------
+
+AdminTools _POP defineMethod:[|analyzeIndexedListMap: convert|
+   containerType isIndex ifTrue:[
+      !keys <- ^self getNthPOP:2;
+      !map <- ^self getNthPOP:3;
+      !rowCount <- asObject clusterCardinality;
+      !columnCount <- keys containerType isFixedProperty
+                        ifTrue: [keys asObject clusterCardinality]
+                       ifFalse: [keys count];
+      !elementCount <- asObject instanceList total:[count];
+      !cartesianSpaceSize <- rowCount * columnCount;
+      !percentFull <- (elementCount / cartesianSpaceSize) * 100;
+
+      print;
+      keys containerType isProperty ifTrue: [
+          "  Indexed List" print:22;
+      ] ifFalse: [
+          "  Time Series" print:22;
+      ]; asObject clusterSize printWithCommasNL:20.0;
+      "   Rows: " print:35; rowCount printWithCommasNL:20.0;
+      "   Columns: " print:35; columnCount printWithCommasNL:20.0;
+      "   Elements: " print:35; elementCount printWithCommasNL:20.0;
+      map containerType number = 7 ifTrue: [
+         "   Indexing Type: Product Mapped" printNL;
+         "   Cartesian Space Size: " print:35;
+         cartesianSpaceSize printWithCommasNL:20.0;
+         "   Percent Full: " print:35;
+         percentFull printWithCommas:20.0; "%" printNL;
+         "   -- If converted to Partition Mapped: " printNL;
+         "      Map Size: " print:35;
+         elementCount * 4 + 40 printWithCommasNL:20.0;
+      ] ifFalse: [
+         "   Indexing Type: Partition Mapped" printNL;
+         cartesianSpaceSize > 2140000000 ifTrue: [
+             "   -- Conversion to ProductMapped Not Possible:" printNL;
+         ] ifFalse: [
+             "   -- If converted to Product Mapped: " printNL;
+         ];
+         "      Cartesian Space Size: " print:35;
+         cartesianSpaceSize printWithCommasNL:20.0;
+         "      Percent Full: " print:35;
+         percentFull printWithCommas:20.0; "%" printNL;
+         "      Map Size: " print:35;
+         convert && [cartesianSpaceSize < ^tmp cartesianSpaceSizeThreshold] ifTrue: [
+             asObject __setIndexingTypeToProductMapped;
+             ^self getNthPOP:3 .containerSize printWithCommasNL:20.0;
+         ] ifFalse: [
+            "NA" printNL:-20
+         ];
+      ];
+      "   Map Size: " print:35; 
+      map containerSize printWithCommasNL:20.0;
+      "-" fill:55 .printNL;
+   ];
+   ^self
+];
+
+AdminTools _POP defineMethod:[|analyzeIndexedListMap|
+   ^self analyzeIndexedListMap: FALSE
+];
+
+
+Object defineMethod: [|isntNA: block|
+  ^self basicSend: block
+];
+NA defineMethod: [|isntNA: block| ^self ];
+
+AdminTools _POP defineMethod: [|extendAsIndexingType|
+  (^self containerType isntNA && [ ^self containerType isIndex ]) ifTrue:[
+    ^self respondsTo: '_cartesianSpaceSize' . ifFalse: [
+      # do extensions here
+      ^self basicExtend: [ 
+        !_keys <- ^self getNthPOP:2;
+        !_map <- ^self getNthPOP:3;
+        !_rowCount <- asObject clusterCardinality;
+        !_columnCount <- _keys containerType isFixedProperty
+                          ifTrue: [_keys asObject clusterCardinality]
+                         ifFalse: [_keys count];
+        !_elementCount <- asObject instanceList total:[count];
+        !_cartesianSpaceSize <- (_rowCount * _columnCount) asInteger;
+      ]
+    ] else: [ ^self ] # already extended :)
+  ] else: [ NA  ] # not an indexing type
+];
+
+
+AdminTools _POP defineMethod: [|indexingTypeIsProductMapped|
+  ^self extendAsIndexingType isntNA: [ 
+    _map containerType number = 7 ifTrue: [ TRUE ] else: [ FALSE ]
+  ]
+];
+
+AdminTools _POP defineMethod: [|indexingTypeMapSize|
+  ^self extendAsIndexingType isntNA: [ 
+    _map containerSize
+  ]
+];
+
+
+AdminTools _POP defineMethod: [|cartesianSpaceSize|
+  ^self extendAsIndexingType isntNA: [ ^self _cartesianSpaceSize ]
+];
+
+AdminTools ObjectSpace defineMethod:[|worrisomeIndexes|
+  containerList select: [ type isIndex ] .
+    extendBy: [ !passed; ] .
+    iterate: [
+      !map <- ^self getNthPOP:3;
+      !keys <- ^self getNthPOP:2;
+      !rowCount <- asObject clusterCardinality;
+      !columnCount <- keys containerType isFixedProperty
+                      ifTrue: [keys asObject clusterCardinality]
+                     ifFalse: [keys count ];
+      :passed <- (
+        (map containerSize > ^tmp mapSizeThreshold) ||
+        [map _containerType = 7 && [rowCount * columnCount > ^tmp cartesianSpaceSizeThreshold]]
+      );
+    ] . 
+    select: [ passed ] .
+    send: [ ^self super ] .
+    sortUp:[ ^self getNthPOP:3 . containerSize]
+];
+
+AdminTools defineMethod:[|worrisomeIndexes|
+   !result <- ^my List new;
+   persistentSpaceList iterate:[
+      !result <- ^my result;
+      worrisomeIndexes do:[^my result, ^self];
+   ];
+   result sortUp:[ ^self getNthPOP:3 . containerSize]
+];
+
+AdminTools defineMethod:[|savedWorrisomeIndexes|
+  (^tmp respondsTo: '_savedWorrisomeIndexes') ifFalse: [
+    ^tmp define: '_savedWorrisomeIndexes' toBe: ^self worrisomeIndexes;
+  ];
+
+  ^tmp _savedWorrisomeIndexes
+];
+
+AdminTools defineMethod:[|containersToInvestigate|
+  !self <- CoreWorkspace AdminTools;
+  0 asReferenceTo: self . doOnceNoContext: [
+    (^self respondsTo: '_containersToInvestigate') ifFalse: [
+      ^self define: '_containersToInvestigate' toBe: CoreWorkspace List new;
+    ];
+  ];
+
+  self _containersToInvestigate
+];
+
+AdminTools defineMethod:[| displayWorrisomeIndexes |
+   !result <- ^self worrisomeIndexes;
+   "-" fill:80 .printNL;
+   "Indexed List Stores with Maps larger than" print:43; ^tmp mapSizeThreshold printWithCommas:13.0; " bytes or " printNL;
+   "               Cartesian Spaces larger than" print:43; ^tmp cartesianSpaceSizeThreshold printWithCommas:13.0;" cells:" print:10;
+   result count printWithCommasNL:14.0; 
+   "-" fill:80 .printNL;
+   result do: [ analyzeIndexedListMap ]
+];
+
+AdminTools defineMethod: [|criticalCartesianSpaceExceeded|
+  ^self savedWorrisomeIndexes select: [ indexingTypeIsProductMapped ] .
+    select: [ ^self cartesianSpaceSize > ^tmp criticalCartesianSpaceSizeThreshold ] .
+];
+
+AdminTools defineMethod: [|criticalIndexMapSizeExceeded|
+  ^self savedWorrisomeIndexes 
+    select: [ ^self indexingTypeMapSize > ^tmp criticalMapSizeThreshold ] .
+];
+
+
+AdminTools defineMethod: [|displayCriticalIndexes|
+  !outOfCartesianSpace <- ^self criticalCartesianSpaceExceeded;
+
+  outOfCartesianSpace count > 0 ifTrue: [
+    displayVdbScanHeader;
+    vdbScanFlagError;
+    
+    "--> Running out of Cartesian Space For:" printNL;
+    outOfCartesianSpace do: [ 
+      ^self analyzeIndexedListMap;
+      ^my containersToInvestigate, ^self;
+    ];
+    newLine printNL;
+  ];
+
+  !hugeMaps <- ^self criticalIndexMapSizeExceeded;
+
+  hugeMaps count > 0 ifTrue: [
+    displayVdbScanHeader;
+    vdbScanFlagError;
+    
+    "--> Running out of Map Space For:" printNL;
+    hugeMaps do: [ 
+      ^self analyzeIndexedListMap;
+      ^my containersToInvestigate, ^self;
+    ];
+    newLine printNL;
+  ];
+
+];
+
+AdminTools defineMethod: [|displayCriticalNDFSize|
+  !ndfSize;
+  [
+    !ndf <- "file:" concat: ndfPathName . asOpenVisionChannel;
+    :ndfSize <- ndf byteCount;
+    ndf close;
+  ] value;
+
+  ndfSize > ^tmp criticalNDFSizeThreshold ifTrue: [
+    displayVdbScanHeader;
+    vdbScanFlagError;
+    
+    "--> NDF is getting dangerously large.  Size: " print; 
+    ndfSize printWithCommasNL: 15.0;
+  ];
+];
+
+String defineMethod: [|monthStringToInteger|
+  !str <- ^self;
+
+  ^self = "Jan" ifTrue: [ 1 ] . 
+    elseIf: [ "Feb" = str ] then: [  2 ] .
+    elseIf: [ "Mar" = str ] then: [  3 ] .
+    elseIf: [ "Apr" = str ] then: [  4 ] .
+    elseIf: [ "May" = str ] then: [  5 ] .
+    elseIf: [ "Jun" = str ] then: [  6 ] .
+    elseIf: [ "Jul" = str ] then: [  7 ] .
+    elseIf: [ "Aug" = str ] then: [  8 ] .
+    elseIf: [ "Sep" = str ] then: [  9 ] .
+    elseIf: [ "Oct" = str ] then: [ 10 ] .
+    elseIf: [ "Nov" = str ] then: [ 11 ] .
+    elseIf: [ "Dec" = str ] then: [ 12 ]
+];
+
+AdminTools defineMethod: [|displayCriticalNDFErrors|
+  !ndfErrors;
+  ndfPathName concat: ".ERRORS" . fileExists ifTrue: [
+    !ndfeFile <- "file:" concat: ndfPathName . concat: ".ERRORS" . asOpenVisionChannel;
+    !ndfeSize <- ndfeFile byteCount;
+
+    !toRead <- ndfeSize;
+    !offset <- 0;
+    toRead > ^tmp teNDFBytesToRead ifTrue: [ 
+      :toRead <- ^tmp teNDFBytesToRead;
+      :offset <- ndfeSize - ^tmp teNDFBytesToRead;
+    ];
+
+    :ndfErrors <- ndfeFile getString: toRead asInteger at: offset + 1 ;
+    ^tmp define: 'ndfErrorsContents' toBe: ndfErrors;
+
+    ndfeFile close;
+  ];
+
+  ndfErrors isDefault ifTrue: [ :ndfErrors <- "" ];
+    
+  !criticalErrorList <- CoreWorkspace List new;
+
+  !errorList <- CoreWorkspace List new;
+  errorList, "Positional Token Representation Type Handler [1667]";
+  # errorList, "Private Memory Re-Allocation Error";
+  # errorList, "Requested Size exceeds Maximum (4Gb)";
+
+  errorList do: [ 
+    !criticalErrorList <- ^my criticalErrorList;
+    !error <- ^self;
+    ^my ndfErrors asLines linkElements 
+      select: [ ^self containsSubstring: ^my error ] .
+      do: [ ^my criticalErrorList, ^self ];
+  ];
+
+  :criticalErrorList <- criticalErrorList extendBy: [ 
+      !allLines <- "";
+      !line <- ^self;
+
+      [(line prior isntNA) && ((line stripBoundingBlanks = "") not)] whileTrue: 
+        [ :line <- line prior ];
+
+      line next isntNA ifTrue: [ :line <- line next ];
+
+      [(line isntNA) && [(line stripBoundingBlanks = "") not]] whileTrue: [
+        allLines != "" ifTrue: [ :allLines <- allLines concat: newLine; ];
+        :allLines <- allLines concat: line;
+        :line <- line next;
+      ];
+
+      !date;
+    ] .
+    do: [
+      !dateLine <- allLines asLines at: 2;
+      !year  <- dateLine from: 54 for: 4;
+      !month <- dateLine from: 38 for: 3;
+      !day   <- dateLine from: 42 for: 2 . stripBoundingBlanks;
+
+      :month <- month monthStringToInteger asString;
+      month count = 1 ifTrue: [ :month <- "0" concat: month; ];
+
+      day count = 1 ifTrue: [ :day <- "0" concat: day; ];
+
+      !dateString <- year concat: month . concat: day;
+      :date <- dateString asDate;
+    ];
+
+  ((^tmp respondsTo: 'criticalErrorCutoffDate') && 
+    [ ^tmp criticalErrorCutoffDate isDate]
+  )
+  ifTrue: [
+    :criticalErrorList <- criticalErrorList 
+      select: [ date > ^tmp criticalErrorCutoffDate] ;
+  ];
+
+  criticalErrorList count > 0 ifTrue: [ 
+    displayVdbScanHeader;
+    vdbScanFlagError;
+
+    "--> Notable NDF.ERRORS contents:" printNL; 
+    criticalErrorList do: [ ^self allLines printNL; newLine print; ];
+  ];
+];
+
+AdminTools defineMethod: [|displayCriticalContainers|
+  !bigContainers <- ^self objectSpaceList
+    reject: [ ^self == 0 asObjectSpace ] .
+    extendBy: [ !bigContainers ] .
+    iterate: [ 
+      :bigContainers <- bareContainerList 
+        select: [ (containerSize isntNA) ] . 
+        sortDown: [ containerSize ] . 
+        first: 20;
+    ] .
+    collectListElementsFrom: [ bigContainers ] .
+    select: [ containerSize > ^tmp hugeContainerSizeThreshold ] .
+    sortDown: [ containerSize ];
+
+  bigContainers count > 0 ifTrue: [ 
+    displayVdbScanHeader;
+    vdbScanFlagError;
+
+    "--> Huge Containers Found:" printNL; 
+    bigContainers do: [ 
+      ^my containersToInvestigate, ^self;
+      ^self containerSize print: 15.0; 
+      "  " print; print; 
+      newLine print;
+    ];
+  ];
+];
+
+AdminTools defineMethod:[|spacesToInvestigate|
+  !self <- ^current super;
+  0 asReferenceTo: self . doOnceNoContext: [
+    (^self respondsTo: '_spacesToInvestigate') ifFalse: [
+      ^self define: '_spacesToInvestigate' toBe: CoreWorkspace List new;
+    ];
+  ];
+
+  # remove duplicates.  There is only one List so don't cluster
+  # and let the old list get garbage collected
+  self define: '_spacesToInvestigate' toBe: self _spacesToInvestigate unique; 
+
+  self _spacesToInvestigate
+];
+
+AdminTools defineMethod: [|displayCriticalContainerTables|
+  !bigContainerTables <- ^self persistentSpaceList
+    reject: [ ^self == 0 asObjectSpace ] .
+    extendBy: [ !containerListSize ] .
+    iterate: [ 
+      :containerListSize <- bareContainerList count;
+    ] .
+    select: [ containerListSize > ^tmp criticalContainerTableThreshold ];
+
+  bigContainerTables count > 0 ifTrue: [ 
+    displayVdbScanHeader;
+    vdbScanFlagError;
+
+    "--> Container Table Running out of Space:" printNL; 
+    bigContainerTables do: [ 
+      ^my spacesToInvestigate, ^self;
+
+      ^self containerListSize printWithCommas: 10.0; 
+      " ObjectSpace " print;
+       ^self print:3; ": " print;
+       spaceName printNL;
+    ];
+  ];
+
+];
+
+AdminTools defineMethod: [|displayCriticalCleans|
+  !incomplete <- NDFTool Clean incompleteCleans;
+
+  incomplete count > 0 ifTrue: [ 
+    displayVdbScanHeader;
+    vdbScanFlagError;
+
+    newLine print;
+    "--> Clean has FAILED for spaces:" printNL; 
+    incomplete do: [ 
+      ^self missedSpaces do: [ 
+        ^my spacesToInvestigate, ^self asObjectSpace 
+      ];
+
+      "  " print;
+      ^self displayInfo;
+    ];
+    newLine print;
+  ];
+
+];
+
+
+AdminTools defineMethod: [|vdbScanFlagError|
+  ^tmp respondsTo: 'teFoundErrors' . ifFalse: [
+    ^tmp define: 'teFoundErrors' toBe: TRUE;
+  ];
+];
+
+AdminTools defineMethod: [|vdbScanFoundErrors|
+  ^tmp respondsTo: 'teFoundErrors' . ifTrue: [
+    ^tmp teFoundErrors
+  ] 
+  else: [ FALSE ]
+];
+
+AdminTools defineMethod: [|displayContainersToInvestigate|
+  ^self containersToInvestigate count > 0 ifTrue: [
+    "--> Containers flagged for further investigation:" printNL; 
+    ^self containersToInvestigate iterate: [ 
+       "*** " print; print; newLine print;
+       ^self displayLocalVisionReferents;
+       newLine print;
+    ];
+  ];
+];
+
+AdminTools defineMethod: [|displaySpacesToInvestigate|
+  ^self spacesToInvestigate count > 0 ifTrue: [
+    newLine print;
+    "--> Spaces flagged for further investigation:" printNL; 
+    ^self spacesToInvestigate send: [ ^self asObjectSpace ] . 
+      iterate: [ 
+        "*** ObjectSpace " print;
+         ^self print:3; ": " print;
+         spaceName printNL;
+
+         ^self profile;
+         newLine print;
+      ];
+  ];
+];
+
+
+AdminTools defineMethod: [|displayNDFErrors|
+  ^tmp respondsTo: 'ndfErrorsContents' . ifTrue: [
+    ^tmp ndfErrorsContents printNL;
+  ];
+];
+
+
+AdminTools defineMethod: [|displayVdbScanHeader|
+  ^tmp respondsTo: '_VdbScanHeaderDisplayed' . ifFalse: [
+    ^tmp define: '_VdbScanHeaderDisplayed' toBe: TRUE;
+    "=" fill:80 . printNL;
+    "Please see this page for next steps:" printNL;
+    "https://vision-dbms.github.io/vision/VdbScan/" printNL;
+    newLine print;
+    "Generated by VdbScan.vis" printNL; 
+    ^tmp teId printNL;  
+    "Generated for network: " print;
+    osdPathName printNL;
+    "=" fill:80 . printNL;
+    newLine printNL;
+  ];
+
+  ^self
+];
+
+### Path to config file
+# the empty string means don't use a config file
+# NA means search for the config file
+#
+# NA is the default
+^tmp define: 'VdbScanConfigFile' toBe: NA;
+
+AdminTools defineMethod: [|loadConfigFile|
+  !cfgArg <- ^tmp VdbScanConfigFile;
+  !read <- FALSE;
+
+  (cfgArg = "" && read isFalse) ifTrue: [
+    :read <- TRUE;
+  ];
+
+  (read isFalse && cfgArg isntNA) ifTrue: [
+    cfgArg asFileContents evaluate;
+    :read <- TRUE;
+  ];
+
+  # Check $HOME/FAST/VdbScan.cfg.vis
+  (read isFalse && cfgArg isNA) ifTrue: [
+    !path <- CoreWorkspace ProcessControlTools getEnvFor: "HOME" . 
+        concat: "/FAST/VdbScan.cfg.vis";
+    path fileExists ifTrue: [
+      path asFileContents evaluate;
+      :read <- TRUE;
+    ];
+  ];
+
+  # Check $HOME/VS/VdbScan.cfg.vis
+  (read isFalse && cfgArg isNA) ifTrue: [
+    !path <- CoreWorkspace ProcessControlTools getEnvFor: "HOME" . 
+        concat: "/VS/VdbScan.cfg.vis";
+    path fileExists ifTrue: [
+      path asFileContents evaluate;
+      :read <- TRUE;
+    ];
+  ];
+];
+
+AdminTools defineMethod: [|vdbScan|
+  loadConfigFile;
+  displayCriticalIndexes;
+  displayCriticalNDFSize;
+  displayCriticalNDFErrors;
+  displayCriticalContainers;
+  displayCriticalContainerTables;
+  NDFTool getRecords;
+  displayCriticalCleans;
+];
+
+AdminTools defineMethod: [|vdbScanExtraInformation|
+  # really don't want verbose SNF in the detailed reports
+  !enableVerboseSNF <- FALSE;
+  ^tmp VdbScanVerboseSNF ifTrue: [
+    :enableVerboseSNF <- TRUE;
+    CoreWorkspace Utility SessionAttribute disableVerboseSelectorNotFound;
+  ];
+
+  vdbScanFoundErrors ifTrue: [
+    displayNDFErrors;
+    NDFTool displayNDFToolOutput;
+    displaySpacesToInvestigate;
+    displayContainersToInvestigate;
+  ];
+
+  enableVerboseSNF ifTrue: [
+    CoreWorkspace Utility SessionAttribute enableVerboseSelectorNotFound;
+  ];
+];
+
+
+Utility defineMethod: [|basicUpdateNetwork| 
+  ">>> Database Updates Intentionally Disabled by VdbScan.vis <<<" printNL;
+  -1
+];
+
+[
+  # Define primitives for IndexedList mapping types
+  (IndexedList respondsTo: '__setIndexingTypeToProductMapped') ifFalse: [
+    IndexedList define: '__setIndexingTypeToProductMapped' 
+      toBePrimitive: 294
+      withControlValue:   1;
+  ];
+  (IndexedList respondsTo: '__setIndexingTypeToPartitionMapped') ifFalse: [
+    IndexedList define: '__setIndexingTypeToPartitionMapped' 
+      toBePrimitive: 294
+      withControlValue:   2;
+  ];
+] value;
+
+
+
+# AdminTools displayCriticalCleans;
+# AdminTools vdbScanExtraInformation;
