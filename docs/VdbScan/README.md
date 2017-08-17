@@ -35,6 +35,15 @@ The main goal of `VdbScan.vis` is to alert teams using vision to problems in the
 ################################################################################
 ```
 
+### Two-liner
+
+For reference
+
+```
+limit datasize 20000000
+echo QUIT | batchvision -x '"VdbScan.vis" asFileContents evaluate; AdminTools vdbScan;' >& VdbScan.log &
+```
+
 ## Getting the File
 
 [`VdbScan.vis` can be downloaded here.](https://github.com/vision-dbms/vision/blob/master/application/localvision/bootstrap/protocol/utilities/VdbScan.vis)
