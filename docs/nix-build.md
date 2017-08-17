@@ -140,4 +140,15 @@ compilation terminated.
 make: *** [VkUUID.o] Error 1
 ```
 
-You're missing `uuid.h` which you'll need to install.  On redhat or centos the file is a part of `libuuid-devel` which is not installed by default.
+You're missing `uuid.h` which you'll need to install.  On redhat or centos the file is a part of `libuuid-devel` (`sudo yum install libuuid-devel`) which is not installed by default.
+
+## Missing C++ compiler in `gcc`
+
+`C++` doesn't come with `gcc` by default.  If you get an error like this:
+
+```
+gcc: error trying to exec 'cc1plus': execvp: No such file or directory
+gcc: error trying to exec 'cc1plus': execvp: No such file or directory
+```
+
+you'll have to add `C++` to `gcc` (`sudo yum install gcc-c++`)
