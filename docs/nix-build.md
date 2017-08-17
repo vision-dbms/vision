@@ -1,7 +1,8 @@
 # *nix Build instructions
 
-In this example we'll be building `release-8.1` on Linux from a fresh clone of the repository at `https://github.com/VCommitter/vision.git`.  
+In this example we'll be building `release-8.1` on Linux from a fresh clone of the repository at `https://github.com/vision-dbms/vision.git`.  
 
+1. Start Up `tcsh`
 1. Get the source (here we'll use directory `vision-open-source`)
    * `git clone https://github.com/vision-dbms/vision.git vision-open-source`
    * `cd vision-open-source`
