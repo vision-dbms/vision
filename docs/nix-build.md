@@ -1,9 +1,10 @@
 # *nix Build instructions
 
-In this example we'll be building `release-8.1` on Linux from a fresh clone of the repository at `https://github.com/VCommitter/vision.git`.  
+In this example we'll be building `release-8.1` on Linux from a fresh clone of the repository at `https://github.com/vision-dbms/vision.git`.  
 
+1. Start Up `tcsh`
 1. Get the source (here we'll use directory `vision-open-source`)
-   * `git clone https://github.com/VCommitter/vision.git vision-open-source`
+   * `git clone https://github.com/vision-dbms/vision.git vision-open-source`
    * `cd vision-open-source`
 1. Switch to the branch you want to build
    * `git checkout release-8.1`
@@ -139,4 +140,15 @@ compilation terminated.
 make: *** [VkUUID.o] Error 1
 ```
 
-You're missing `uuid.h` which you'll need to install.  On redhat or centos the file is a part of `libuuid-devel` which is not installed by default.
+You're missing `uuid.h` which you'll need to install.  On redhat or centos the file is a part of `libuuid-devel` (`sudo yum install libuuid-devel`) which is not installed by default.
+
+## Missing C++ compiler in `gcc`
+
+`C++` doesn't come with `gcc` by default.  If you get an error like this:
+
+```
+gcc: error trying to exec 'cc1plus': execvp: No such file or directory
+gcc: error trying to exec 'cc1plus': execvp: No such file or directory
+```
+
+you'll have to add `C++` to `gcc` (`sudo yum install gcc-c++`)
