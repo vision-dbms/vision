@@ -60,15 +60,9 @@ cp -f $sourceDir/vcaservicemanager/vcaservicemanager $destDir/bin
 
 
 # these executables are the same
-cp -f $destDir/bin/onprof $destDir/bin/onck
-
-
-# aliases
-pushd $destDir/bin >& /dev/null
-  ln -s vcaservicemanager vpool
-  ln -s vsaprompt vprompt
-popd >& /dev/null
-
+ln -f $destDir/bin/onprof $destDir/bin/onck
+ln -f $destDir/bin/vcaservicemanager $destDir/bin/vpool
+ln -f $destDir/bin/vsaprompt $destDir/bin/vprompt
 
 set editor = $sourceDir/frontend/frontend
 if (-f $editor) then

@@ -63,8 +63,9 @@ PrivateVarDef bool NetworkUpdateIsAdministrative = false;
  *****  Session GC State  *****
  ******************************/
 
-PrivateVarDef bool GarbageCollectionRunning = false;
-PrivateVarDef bool NetworkGarbageCollectedInSession = false;
+M_AND::GenIndex_t M_AND::g_xGCGeneration = 0;
+bool M_AND::g_bGarbageCollectionRunning = false;
+bool M_AND::g_bNetworkGarbageCollectedInSession = false;
 
 bool M_DCTE::g_bPotentialSessionGarbage = false;
 
@@ -346,6 +347,9 @@ public:
     bool holdsAContainerAddress () const {
 	return m_pDCTE->holdsAContainerAddress ();
     }
+    bool holdsAContainerHandle () const {
+	return m_pDCTE->holdsAContainerHandle ();
+    }
     bool holdsACPCC () const {
 	return m_pDCTE->holdsACPCC ();
     }
@@ -467,16 +471,7 @@ public:
 public:
     void ForwardToSpace (M_ASD* pTargetSpace);
 
-    M_POP const *FollowForwardings () {
-	M_POP const *pPOP = 0;
-	while (holdsAForwardingPOP ()) {
-	    pPOP = &addressAsPOP ();
-	    m_pASD = m_pASD->AccessASD (pPOP);
-	    m_xContainer = M_POP_ContainerIndex (pPOP);
-	    m_pDCTE = m_pASD->cte (m_xContainer);
-	}
-	return pPOP;
-    }
+    M_POP const *FollowForwardings ();
 
 //  Positioning
 public:
@@ -634,6 +629,17 @@ public:
     unsigned int	m_xContainer;
     M_DCTE*		m_pDCTE;
 };
+
+M_POP const *M_CTE::FollowForwardings () {
+  M_POP const *pPOP = 0;
+  while (holdsAForwardingPOP ()) {
+    pPOP = &addressAsPOP ();
+    m_pASD = m_pASD->AccessASD (pPOP);
+    m_xContainer = M_POP_ContainerIndex (pPOP);
+    m_pDCTE = m_pASD->cte (m_xContainer);
+  }
+  return pPOP;
+}
 
 
 /*****************************
@@ -1310,7 +1316,7 @@ PS_UpdateStatus M_AND::UpdateNetwork (bool globalUpdate) {
 
     if (globalUpdate)
 	m_pPhysicalAND->UpdateNetwork (this);
-    else if (NetworkGarbageCollectedInSession)
+    else if (NetworkGarbageCollectedInSession ())
 	m_pPhysicalAND->SetUpdateStatusTo (PS_UpdateStatus_NotSeparable);
     else
 	m_pASDRing->persistentASD ()->UpdateSpace ();
@@ -1399,8 +1405,6 @@ VContainerHandle::VContainerHandle (M_ASD *pContainerSpace, RTYPE_Type xContaine
 , m_pRTD		(M_RTDPtr (xContainerType))
 , m_bReadWrite		(true)
 , m_bPrecious		(false)
-, m_iHandleRefCount	(0)
-, m_bVisited		(false)
 {
     pContainerSpace->CreateContainer (xContainerType, sContainer, this); 
     M_RTD_HandleCreateCount (m_pRTD)++;
@@ -1413,8 +1417,6 @@ VContainerHandle::VContainerHandle (M_ASD *pContainerSpace, RTYPE_Type xContaine
 , m_pRTD		(M_RTDPtr (xContainerType))
 , m_bReadWrite		(false)
 , m_bPrecious		(false)
-, m_iHandleRefCount	(0)
-, m_bVisited		(false)
 {
     M_RTD_HandleCreateCount (m_pRTD)++;
 }
@@ -1427,8 +1429,6 @@ VContainerHandle::VContainerHandle (M_CTE &rCTE)
 , m_pRTD		(M_RTDPtr (M_CPreamble_RType (m_pContainer)))
 , m_bReadWrite		(rCTE.addressType () == M_CTEAddressType_RWContainer)
 , m_bPrecious		(false)
-, m_iHandleRefCount	(0)
-, m_bVisited		(false)
 {
     M_RTD_HandleCreateCount (m_pRTD)++;
 }
@@ -2266,7 +2266,12 @@ void M_ASD::ScanSegments () {
  ******************************************/
 
 void VContainerHandle::flushCachedResources_() {
-    if (referenceCount () == 1 && m_pContainer && !m_bPrecious)
+/*****
+  Cached handles have a reference count of zero; however, this test used to
+  check for a referenceCount () == 1.  Wonder what kind of dangling references
+  that generated...
+ *****/
+    if (referenceCount () == 0 && m_pContainer && !m_bPrecious)
 	DetachFromCTE ();
 }
 
@@ -2282,7 +2287,7 @@ bool M_ASD::FlushCachedResources (VArgList const&) {
 
 void M_AND::FlushCachedResources () {
 //  Don't do anything that could change the set of accessed containers if a GC is running, ...
-    if (GarbageCollectionRunning)
+    if (GarbageCollectionRunning ())
 	return;
 
     bool InitialHandlePreservationFlag = VContainerHandle::g_bPreservingHandles;
@@ -3728,21 +3733,37 @@ bool M_ASD::InitializeSpaceForTransientGC (VArgList const &rArgList) {
 		    GCQueueInsert (cte.containerIndex ());
 		    cte.gcVisited(true); 
 		    cSelfReferences++;
-		}		    
-		else {
-		    if (cte.isNew()) {
-			cte.setReferenceCountToZero ();
-			cte.gcVisited(false);
-		    }
-
-		    if (pHandle->hasAReadWriteContainer ()) {
-			if (cte.isntNew ()) {
-			    GCQueueInsert (cte.containerIndex ());
-			    cte.gcVisited(true); 
-			    cSelfReferences++;
-			}
-		    }
 		}
+		else if (cte.isNew()) {
+		    cte.setReferenceCountToZero ();
+		    cte.gcVisited(false);
+		}
+		else if (pHandle->hasAReadWriteContainer ()) {
+		    GCQueueInsert (cte.containerIndex ());
+		    cte.gcVisited(true);
+		    cSelfReferences++;
+		}
+/*****
+ *  The preceding 'else if' clauses replace and simplify the following...
+ *****
+ *		else {
+ *		    if (cte.isNew()) {
+ *			cte.setReferenceCountToZero ();
+ *			cte.gcVisited(false);
+ *		    }
+ *
+ *		    if (pHandle->hasAReadWriteContainer ()) {
+ *			if (cte.isntNew ()) {
+ *			    GCQueueInsert (cte.containerIndex ());
+ *			    cte.gcVisited(true);
+ *			    cSelfReferences++;
+ *			}
+ *		    }
+ *		}
+ *****
+ *  ... and makes the flow of the container handle logic parallel the flow of the
+ *      'M_CTEAddressType_RWContainer' logic it mirrors.
+ *****/
 	    }
 		break;
 
@@ -3768,20 +3789,63 @@ bool M_ASD::InitializeSpaceForTransientGC (VArgList const &rArgList) {
 }
 
 
+/*********************************************************************************
+The 'Cycle Detect' (now a bit of a misnomer) phase of the garbage collector
+is responsible for estimating the minimal set of container handles that must
+be added to the garbage collector's root set in order to protect database
+structures currently in use in this process.
+
+In pre-8.1 versions of Vision, container handles were simple structures that
+always and only served as database access handles.  In that model, all handles
+were always added to the garbage collector's root set.
+
+In release 8.1, container handles became more general.  While still serving
+as access handles, they can also act as data caches, 'future's for persistable
+structures, and participants in potentially cyclic transient data structures
+of their own.  Just because a container handle exists and is attached to a
+container table entry (CTE) doesn't mean that either the associated CTE or the
+handle must be retained.  Handles may be directly or indirectly referenced from
+other handles or from elsewhere in the process. Only those handles that are (or
+might be) referenced from elsewhere must be added to the garbage collector's
+root set.
+
+To identify which container handles must be in the root set, the garbage
+collector first identifies the set of CTEs reachable from the persistent
+roots of the database.  That closure is computed on the basis of both inter-
+container (POP references) and inter-handle references.  Those CTEs NOT in
+that persistent root-set closure become candidates for the cycle-detect
+phase of the garbage collector.
+
+Trivially, the cycle-detect phase could add all container handles it finds
+in the set of CTEs not included in the persistent root set's closure.  While
+doing so is safe, it is not minimal.  To identify the CTEs associated with
+container handles referenced from elsewhere in the process, the cycle-detect
+algorithm first identifies those container handles that are ONLY referenced
+from other handles outside the persistent closure.  It does that by ONLY
+following inter-handle references to compute partial reference counts for
+each handle reached directly or indirectly.  At the end of that process,
+those handles whose partial reference count is LESS THAN their actual reference
+count MUST be considered to be referenced from elsewhere in the process. Adding
+them to the garbage collector's root set, another marking pass is run, completing
+the garbage collector's reachability phase.
+
+Note that the partial reference count computation process is allowed to miss
+references.  Doing so results in under-counting the number of intra-database
+internal references.  Under-counting is always safe; however, the cost of under-
+counting is the failure to detect and reclaim orphaned structures.
+**********************************************************************************/
 bool M_ASD::EnqueuePossibleCycles (VArgList const &rArgList) {
     unsigned int xUB = cteCount () - 1;
     for (unsigned int cti = 0; cti <= xUB; cti++) {
 	M_CTE cte (this, cti);
         if (!cte.gcVisited()) {
             cte.cdVisited(false);
-	    switch (cte.addressType ()) {
-	    case M_CTEAddressType_CPCC:
+	    if (cte.holdsACPCC ()) {
 		VContainerHandle *pHandle = cte.addressAsContainerHandle ();
-		if (cte.referenceCount() == 0 && pHandle->isReferenced())
-		{
-		    GCQueueInsert (cte.containerIndex ());
-		    cte.cdVisited(true);
-		}
+		GCQueueInsert (cte.containerIndex ());
+		cte.cdVisited(true);
+
+		pHandle->generateLogRecord ("EnqueuePC");
 	    }
         }
     } 
@@ -3793,23 +3857,17 @@ bool M_ASD::EnqueueOmittingCycles (VArgList const &rArgList) {
     unsigned int xUB = cteCount () - 1;
     for (unsigned int cti = 0; cti <= xUB; cti++) {
 	M_CTE cte (this, cti);
-        if (!cte.gcVisited()) {
-	    switch (cte.addressType ()) {
-	    case M_CTEAddressType_CPCC:
-		VContainerHandle *pHandle = cte.addressAsContainerHandle ();
-
-		// check out the handle's status after cycle detection and reset
-		cte.foundAllReferences(pHandle->cdReferenceCount() == pHandle->referenceCount());
-		pHandle->unmark();
-
-		if (cte.referenceCount() == 0 && pHandle->isReferenced()) {
-		    if (!cte.foundAllReferences()) {
-			GCQueueInsert (cte.containerIndex ());
-			cte.gcVisited(true);
-		    } 
-		    else {
-			//fprintf(stderr, "omitted something\n");
-		    }
+	if (cte.holdsACPCC ()) {
+	    VContainerHandle *pHandle = cte.addressAsContainerHandle ();
+	    // record the handle's status after cycle detection...
+	    cte.foundAllReferences(pHandle->foundAllReferences());
+	    if (!cte.gcVisited()) {
+		if (cte.foundAllReferences()) {
+		    pHandle->generateLogRecord ("Omit");
+		} else {
+		    GCQueueInsert (cte.containerIndex ());
+		    cte.gcVisited(true);
+		    pHandle->generateLogRecord ("Keep");
 		}
 	    }
 	}
@@ -3876,7 +3934,6 @@ void M_ASD::ConsiderContainersInQueue(M_ASD::GCVisitBase* pGCV) {
 	}
 
 /****  Next, access the container's address  ****/
-	M_CPreamble *pAddress = 0;
 	switch (cte.addressType ()) {
 	case M_CTEAddressType_ForwardingPOP:
 /****
@@ -3888,51 +3945,18 @@ void M_ASD::ConsiderContainersInQueue(M_ASD::GCVisitBase* pGCV) {
 	    );
 	    break;
 	case M_CTEAddressType_CPCC:
-	    pAddress = cte.addressAsContainerHandle ()->containerAddress ();
+	    pGCV->processContainerHandle (cte, cte.addressAsContainerHandle ());
 	    break;
 	case M_CTEAddressType_ROContainer:
 	case M_CTEAddressType_RWContainer:
 	    cte.InitializeCTEContainerAddress ();
-	    pAddress = cte.addressAsContainerAddress ();
+	    pGCV->processContainerAddress (cte, cte.addressAsContainerAddress ());
 	    break;
 	default:
 	    ERR_SignalFault (
 		EC__MError, "MarkContainersInQueue: Unknown CTE type"
 	    );
 	    break;
-	}
-
-/****
- *  Call the rtype handler to insert the containers it references into the
- *  appropriate marking queue
- ****/
-	if (pAddress) {	// ... nil for objects whose container creation has been deferred.
-/****
- * Since we are pulling out an address to be used by the marking function
- * we need to protect it. Within the marking function, a new segment might be
- * accessed which could trigger a segment remapping. If that happens, then
- * pAddress would perhaps become invalid.
- ****/
-	    M_Type_MarkFn pMarkingFunction = M_RTD_MarkFn (
-		M_RTDPtr (M_CPreamble_RType (pAddress))
-	    );
-	    if (pMarkingFunction) {
-		cte.setMustStayMapped ();
-
-                #if defined(DEBUG_SESSION_GC)
-                    fprintf(stderr, "marking [%d: %d] new: %d type: %d refHandle: %d refcount: %d\n", 
-                        Index(), cIndex, cte.isNew(), cte.addressType(), 
-                        ( cte.addressType() == M_CTEAddressType_CPCC &&
-                          cte.addressAsContainerHandle()->isReferenced()
-                        ), 
-                        cte.referenceCount()
-                    );
-                #endif
-
-		pMarkingFunction (pGCV, this, pAddress);
-/**** We are done with pAddress now, so we can remove the protection. ****/
-		cte.clearMustStayMapped ();
-	    }
 	}
     }
 }
@@ -4081,10 +4105,11 @@ bool M_ASD::SweepUp (VArgList const &rArgList) {
 		 *  are referenced.
 		 *************************************************************/
 		    VContainerHandle *pHandle = cte.addressAsContainerHandle ();
-
-		    if (pHandle->isReferenced () && !cte.foundAllReferences())
+		    if (cte.gcVisited () || pHandle->isReferenced() && !cte.foundAllReferences()) {
 			bOkToReclaim = false;
-		    else {
+			pHandle->generateLogRecord ("Preserve");
+		    } else {
+			pHandle->generateLogRecord ("Reclaim");
 			if (pHandle->hasAReadWriteContainer ())
 			    pAddress = pHandle->containerAddress ();
 			else {
@@ -4101,27 +4126,25 @@ bool M_ASD::SweepUp (VArgList const &rArgList) {
 	    }
 
 	    if (bOkToReclaim) {
-                #if defined(DEBUG_SESSION_GC)
-                    fprintf(stderr, "  reclaiming [%d: %d] new: %d type: %d "
-                        "refHandle: %d refcount: %d\n", 
-                        Index(), ctIndex, cte.isNew(), cte.addressType(), 
-                        ( cte.addressType() == M_CTEAddressType_CPCC &&
-                          cte.addressAsContainerHandle()->isReferenced()
-                        ), 
-                        cte.referenceCount()
-                    );
-                #endif
+#if defined(DEBUG_SESSION_GC)
+		fprintf(stderr, "  reclaiming [%d: %d] new: %d type: %d "
+			"refHandle: %d refcount: %d\n", 
+			Index(), ctIndex, cte.isNew(), cte.addressType(), 
+			cte.holdsACPCC() && cte.addressAsContainerHandle()->isReferenced(), 
+			cte.referenceCount()
+		);
+#endif
 
 
-	    if (pAddress) {
+		if (pAddress) {
 		    DeallocateContainer (pAddress);
 		    bReclaimedContainers = true;
-		if (cte.isntNew ())
+		    if (cte.isntNew ())
 			bReclaimedPersistentContainers = true;
-	    }
+		}
 		cte.DeallocateCTE ();
+	    }
 	}
-    }
     }
 
     // cleanup CTE flags
@@ -4208,27 +4231,6 @@ bool M_DCTE::mark (M_ASD::GCVisitBase* pGCV, M_ASD *pASD, unsigned int xContaine
 
 
 /*---------------------------------------------------------------------------
- * Quasi-public routine to mark a container as referenced and if
- * the container has not been visited, to initiate marking of the
- * containers it references.
- *
- *  Arguments:
- *	pPOP		-  A pointer to a POP for the container to Mark.
- *
- *  Returns:
- *	NOTHING - Executed for side effect only.
- *
- *---------------------------------------------------------------------------
- */
-void M_ASD::GCVisitMark::Mark_ (M_ASD* pASD, M_POP const *pPOP) {
-  if (M_POP_ObjectSpace (pPOP) != 1) {
-    M_CTE cte (pASD->Database(), pPOP);
-    pASD->recordGCReference (
-	M_POP_ObjectSpace (pPOP), cte.Mark (this)
-    );
-  }
-}
-/*---------------------------------------------------------------------------
  * Quasi-public routine to mark an array of containers as referenced and for
  * each container that has not been visited, to initiate marking of the
  * containers it references.
@@ -4242,48 +4244,106 @@ void M_ASD::GCVisitMark::Mark_ (M_ASD* pASD, M_POP const *pPOP) {
  *	NOTHING - Executed for side effect only.
  *---------------------------------------------------------------------------
  */
-void M_ASD::GCVisitMark::Mark_ (M_ASD* pASD, M_POP const *pReferences, unsigned int cReferences) {
+void M_ASD::GCVisitBase::Mark_(M_ASD* pASD, M_POP const *pReferences, unsigned int cReferences) {
     while (cReferences-- > 0)
 	Mark (pASD, pReferences++);
 }
 
-
-void M_ASD::GCVisitCycleDetect::Mark_ (M_ASD* pASD, M_POP const *pReferences, unsigned int cReferences) {
-    while (cReferences-- > 0)
-	Mark_ (pASD, pReferences++);
+/*---------------------------------------------------------------------------
+ * Quasi-public routine to mark a container as referenced and if
+ * the container has not been visited, to initiate marking of the
+ * containers it references.
+ *
+ *  Arguments:
+ *	pPOP		-  A pointer to a POP for the container to Mark.
+ *
+ *  Returns:
+ *	NOTHING - Executed for side effect only.
+ *
+ *---------------------------------------------------------------------------
+ */
+void M_ASD::GCVisitBase::Mark_(M_ASD* pASD, M_POP const *pPOP) {
 }
 
-void M_ASD::GCVisitCycleDetect::Mark_ (M_ASD* pASD, M_POP const *pPOP) {
+void M_ASD::GCVisitMark::Mark_(M_ASD* pASD, M_POP const *pPOP) {
+  if (M_POP_ObjectSpace (pPOP) != 1) {
     M_CTE cte (pASD->Database(), pPOP);
+    pASD->recordGCReference (
+	M_POP_ObjectSpace (pPOP), cte.Mark (this)
+    );
+  }
+}
+
 
-    if (cte.gcVisited()) return; /* Might be in a cycle, but won't be removed */
+/*--------------------------------*
+ *  M_ASD::GCVisitBase
+ *--------------------------------*/
+void M_ASD::GCVisitBase::processContainerAddress (M_CTE &rCTE, M_CPreamble *pAddress) {
+/****
+ *  Call the rtype handler to insert the containers it references into the
+ *  appropriate marking queue
+ ****/
+    if (pAddress) {	// ... nil for objects whose container creation has been deferred.
+/****
+ * Since we are pulling out an address to be used by the marking function
+ * we need to protect it. Within the marking function, a new segment might be
+ * accessed which could trigger a segment remapping. If that happens, then
+ * pAddress would perhaps become invalid.
+ ****/
+	M_Type_MarkFn pMarkingFunction = M_RTD_MarkFn (
+	    M_RTDPtr (M_CPreamble_RType (pAddress))
+	);
+	if (pMarkingFunction) {
+	    rCTE.setMustStayMapped ();
 
-    bool isAReturnVisit = cte.cdVisited();
-
-    if (!isAReturnVisit) {
-	switch (cte.addressType()) {
-	case M_CTEAddressType_ForwardingPOP:
-	    Mark (cte.space(), &cte.addressAsPOP ());
-	    break;
-	case M_CTEAddressType_CPCC:
-            #if 0
-	    fprintf(stderr, "  examining [%d: %d]: refcount: %d type: %s\n", 
-		cte.space(), cte.containerIndex(), 
-                cte.addressAsContainerHandle()->referenceCount(),
-                cte.addressAsContainerHandle()->RTypeName()
+#if defined(DEBUG_SESSION_GC)
+	    fprintf(stderr, "marking [%d: %d] new: %d type: %d refHandle: %d refcount: %d\n", 
+		    rCTE.spaceIndex(), cIndex, rCTE.isNew(), rCTE.addressType(), 
+		    ( rCTE.holdsACPCC () && rCTE.addressAsContainerHandle()->isReferenced()), 
+		    rCTE.referenceCount()
 	    );
-            #endif
+#endif
 
-	    cte.addressAsContainerHandle()->mark();
-	    /* no break */
-	default:
-	    cte.space()->GCQueueInsert (cte.containerIndex());
-	    cte.cdVisited(true);
-	    break;
+	    pMarkingFunction (this, rCTE.space (), pAddress);
+/**** We are done with pAddress now, so we can remove the protection. ****/
+	    rCTE.clearMustStayMapped ();
 	}
     }
 }
-
+
+void M_ASD::GCVisitBase::processContainerHandle (M_CTE &rCTE, VContainerHandle *pHandle) {
+    processContainerAddress (rCTE, pHandle->containerAddress ());
+}
+
+/*--------------------------------*
+ *  M_ASD::GCVisitMark
+ *--------------------------------*/
+void M_ASD::GCVisitMark::processContainerHandle (M_CTE &rCTE, VContainerHandle *pHandle) {
+    BaseClass::processContainerHandle (rCTE, pHandle);
+    pHandle->visitReferencesUsing (this);
+}
+void M_ASD::GCVisitMark::visitHandle (VContainerHandle *pHandle) {
+    pHandle->gcMarkFor (this);
+}
+
+/*--------------------------------*
+ *  M_ASD::GCVisitCycleDetect
+ *--------------------------------*/
+void M_ASD::GCVisitCycleDetect::processContainerAddress (M_CTE &rCTE, M_CPreamble *pAddress) {
+}
+
+void M_ASD::GCVisitCycleDetect::processContainerHandle (M_CTE &rCTE, VContainerHandle *pHandle) {
+    pHandle->visitReferencesUsing (this);
+}
+
+void M_ASD::GCVisitCycleDetect::visitHandle (VContainerHandle *pHandle) {
+    pHandle->cdMarkFor (this);
+}
+
+/*---------------------------------------------------------------------------
+ *---------------------------------------------------------------------------
+ */
+
 M_ASD::GCVisitMark 	  M_ASD::m_GCMarker;
 M_ASD::GCVisitCycleDetect M_ASD::m_GCCycleDetect;
 
@@ -4310,8 +4370,8 @@ bool M_AND::DisposeOfNetworkGarbage () {
 
     bool result = false;
     UNWIND_Try {
-	NetworkGarbageCollectedInSession =
-	GarbageCollectionRunning	 = true;
+	OnGCStart ();
+	g_bNetworkGarbageCollectedInSession = true;
 
 	GCInvocationCount++;
 	GCRevisitCount = GCFirstVisitCount = 0;
@@ -4329,7 +4389,7 @@ bool M_AND::DisposeOfNetworkGarbage () {
 
 	M_DCTE::g_bPotentialSessionGarbage = false;
     } UNWIND_Finally {
-	GarbageCollectionRunning	= false;
+	OnGCFinish ();
     } UNWIND_EndTryFinally;
 
     return result;
@@ -4456,12 +4516,14 @@ bool VDatabaseFederatorForBatchvision::EnqueueOmittingCycles () const {
 bool M_AND::DoGCCycleElimination () { 
     EnqueuePossibleCycles();
     TraverseAndDetectCycles();
+
     return EnqueueOmittingCycles();
 }
  
 bool VDatabaseFederatorForBatchvision::DoGCCycleElimination() const { 
     EnqueuePossibleCycles();
     TraverseAndDetectCycles();
+
     return EnqueueOmittingCycles();
 }
 
@@ -4492,12 +4554,12 @@ bool VDatabaseFederatorForBatchvision::DisposeOfSessionGarbage (bool bAggressive
     // Don't run if the network garbage collector is running and only
     // bother if garbage could have potentially been created since
     // last disposal ....
-    if (!GarbageCollectionRunning && M_DCTE::g_bPotentialSessionGarbage) {
+    if (!M_AND::GarbageCollectionRunning () && M_DCTE::g_bPotentialSessionGarbage) {
 	if (bAggressive)
 	    FlushCachedResources ();
 
 	UNWIND_Try {
-	    GarbageCollectionRunning = true;
+	    M_AND::OnGCStart ();
 
 	    GCInvocationCount++;
 	    GCRevisitCount = GCFirstVisitCount = 0;
@@ -4510,7 +4572,7 @@ bool VDatabaseFederatorForBatchvision::DisposeOfSessionGarbage (bool bAggressive
 
 	    DoTransientGCSetup ();
 	    DoTransientGCMarking ();
-            DoGCCycleElimination();
+	    DoGCCycleElimination();
 	    DoTransientGCMarking (); // new second mark phase
 	    result = DoTransientGCSweep ();
 	    if (TracingSessionGC) {
@@ -4519,7 +4581,7 @@ bool VDatabaseFederatorForBatchvision::DisposeOfSessionGarbage (bool bAggressive
 	    }
 
 	} UNWIND_Finally {
-	    GarbageCollectionRunning = false;
+	    M_AND::OnGCFinish ();
 	} UNWIND_EndTryFinally;
     }
     return result;

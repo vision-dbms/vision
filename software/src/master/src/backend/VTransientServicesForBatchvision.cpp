@@ -19,7 +19,9 @@
 #if defined(_WIN32)
 #include <malloc.h>
 #endif
-#if defined (__linux__) || defined (sun)
+
+#if defined (__linux__) || defined (sun) || defined(__APPLE__)
+#define USING_SYS_RESOURCE_LIMITS
 #include <sys/resource.h>
 #endif
 
@@ -59,7 +61,7 @@ VTransientServicesForBatchvision::VTransientServicesForBatchvision ()
     , m_sGCThreshold				(static_cast<V::U64>(4096) * 1024 * 1024 * 1024)
     , m_sGCSpread				(256 * 1024 * 1024)
 {
-#if defined (__linux__) || defined (sun)
+#if defined (USING_SYS_RESOURCE_LIMITS)
 
     // Unless directed otherwise, ...
     // Don't allow unlimited datasize. If unlimited, fall back to 2 GB ..
@@ -228,7 +230,7 @@ void *VTransientServicesForBatchvision::allocate (size_t cBytes) {
     else do {
 	V::U64 cTotalBytesNeeded = cBytes + UTIL_FreeListTotal + static_cast<V::U64> (ENVIR_SessionMemoryUse ()) +
 				   VOutputBuffer::cellAllocatorCurrentAllocationAmount ();
-#if defined (__linux__) || defined (sun)
+#if defined (USING_SYS_RESOURCE_LIMITS)
 
     // As of early 2008, Linux does not enforce limitations on the heap size (limit datasize or ulimit -d)
     // To prevent individual batchvision sessions from consuming too much swap and RAM,
@@ -276,7 +278,7 @@ void *VTransientServicesForBatchvision::allocate (size_t cBytes) {
 		return result;
 	    }
 	    iStatus.MakeErrorStatus ();
-#if defined (__linux__) || defined (sun)
+#if defined (USING_SYS_RESOURCE_LIMITS)
 	}
 #endif
 	if (!g_bAttemptingToReclaimResources)
@@ -284,7 +286,7 @@ void *VTransientServicesForBatchvision::allocate (size_t cBytes) {
     } while (
 	!g_bAttemptingToReclaimResources
 	&& ( garbageCollected ()
-#if defined (sun) || defined (_WIN32) || defined (__linux__)
+#if defined (sun) || defined (_WIN32) || defined (__linux__) || defined(__APPLE__)
 	     // reclaiming mappings on VMS won't help.
 	|| mappingsReclaimed ()
 #endif
@@ -342,7 +344,7 @@ void *VTransientServicesForBatchvision::reallocate (void *pMemory, size_t cBytes
 	if (pMemory)
 	    m_sTotalMemoryAllocation -= _msize (pMemory);
 #endif
-#if defined (__linux__) || defined (sun)
+#if defined (USING_SYS_RESOURCE_LIMITS)
 	if (cBytes + UTIL_FreeListTotal + static_cast<V::U64> (ENVIR_SessionMemoryUse ()) +
 				VOutputBuffer::cellAllocatorCurrentAllocationAmount () >
 		m_sMemoryAllocationLimit + 4096 * 100){
@@ -361,13 +363,13 @@ void *VTransientServicesForBatchvision::reallocate (void *pMemory, size_t cBytes
 	    iStatus.MakeErrorStatus ();
 	    if (!g_bAttemptingToReclaimResources)
 		g_sOriginalAllocationSize = cBytes;
-#if defined (__linux__) || defined (sun)
+#if defined (USING_SYS_RESOURCE_LIMITS)
 	}
 #endif
     } while (
 	!g_bAttemptingToReclaimResources 
 	&& (garbageCollected ()
-#if defined (sun) || defined (_WIN32) || defined (__linux__)
+#if defined (sun) || defined (_WIN32) || defined (__linux__) || defined (__APPLE__)
 	     // reclaiming mappings on VMS won't help.
 	|| mappingsReclaimed ()
 #endif
