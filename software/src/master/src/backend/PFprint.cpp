@@ -913,7 +913,7 @@ void nicePrintRealNumber (VOutputGenerator &rOutputGenerator, int iFieldWidth, i
  ***** left justifies strings.
  *****/
 V_DefinePrimitive (IntegerPrintOf) {
-    bool	 withCommas, bNice = false, bCompact = false;
+    bool	 withCommas = false, bNice = false, bCompact = false;
     unsigned int converseMessageSelector;
     FMTType	 resultFormat;
 
@@ -921,7 +921,6 @@ V_DefinePrimitive (IntegerPrintOf) {
 /*****  Decode the alias by which this primitive was invoked...  *****/
     switch (V_TOTSC_Primitive) {
     case XIntegerPrintOf:
-        withCommas = false;
 	converseMessageSelector = KS__PrintColon;
         break;
     case XIntegerPrintWithCommasOf:
@@ -1196,11 +1195,10 @@ V_DefinePrimitive (DoublePrintOf) {
 
 
 /*****  Decode the alias by which this primitive was invoked...  *****/
-    bool withCommas, bNice = false, bCompact = false;
+    bool withCommas = false, bNice = false, bCompact = false;
     int converseMessageSelector;
     switch (V_TOTSC_Primitive) {
     case XDoublePrintOf:
-        withCommas = false;
 	converseMessageSelector = KS__PrintColon;
         break;
     case XDoublePrintWithCommasOf:
