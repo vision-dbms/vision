@@ -730,7 +730,7 @@ void Vsa::VEvaluatorPool::hardRestart () {
     log ("HARD RESTARTING POOL");
 
 	if (m_iStatus != Status_Suspended) 
-		suspend ();
+		suspend (false);
 
 	Vca::VTrigger<VEvaluatorPool> *pOnFlushTrigger;
 	pOnFlushTrigger = new Vca::VTrigger<VEvaluatorPool> (this, &VEvaluatorPool::resumeHardRestart);
@@ -742,8 +742,8 @@ void Vsa::VEvaluatorPool::resumeHardRestart (Vca::VTrigger<ThisClass> *pTrigger)
     m_pOnFlushTrigger.clear ();
     restart ();
 
-    if ( !m_bExplicitlySuspended)
-		resume ();
+    if (!m_bExplicitlySuspended)
+		resume (false);
 }
 
 void Vsa::VEvaluatorPool::triggerOnFlush () {
@@ -791,15 +791,29 @@ void Vsa::VEvaluatorPool::flushWorkers (
 }
 
 void Vsa::VEvaluatorPool::suspend () {
+    log ("EXPLICITLY SUSPENDING POOL");
+    suspend(true);
+}
+void Vsa::VEvaluatorPool::suspend (bool explicitly) {
     traceInfo ("VEvaluatorPool::suspend");
     log ("SUSPENDING POOL");
+
+    if (explicitly)
+        m_bExplicitlySuspended = true;
 
     BaseClass::suspend ();
 }
 
 void Vsa::VEvaluatorPool::resume () {
+    log ("EXPLICITLY RESUMING POOL");
+    resume(true);
+}
+void Vsa::VEvaluatorPool::resume (bool explicitly) {
     traceInfo ("VEvaluatorPool::resume");
     log ("RESUMING POOL");
+
+    if (explicitly)
+        m_bExplicitlySuspended = false;
 
     BaseClass::resume ();
     onQueue ();
@@ -1309,7 +1323,6 @@ void Vsa::VEvaluatorPool::Suspend (
     IEvaluatorControl *pRole, IVReceiver<bool>* pReceiver
 ) {
     suspend ();
-	m_bExplicitlySuspended = true;
     if (pReceiver)
         pReceiver->OnData (true);
 }
@@ -1318,7 +1331,6 @@ void Vsa::VEvaluatorPool::Resume (
     IEvaluatorControl *pRole, IVReceiver<bool>* pReceiver
 ) {
     resume ();
-	m_bExplicitlySuspended = false;
     if (pReceiver)
         pReceiver->OnData (true);
 }

@@ -922,7 +922,9 @@ namespace Vsa {
         void restart ();
         void stop    ();
         void suspend ();
+        void suspend (bool);
         void resume  ();
+        void resume  (bool);
         void flushWorkers (Vca::VTrigger<VEvaluatorPool> *pTrigger=0);
         void hardRestart       ();
 		void resumeHardRestartSuspended (Vca::VTrigger<ThisClass> *pTrigger);
