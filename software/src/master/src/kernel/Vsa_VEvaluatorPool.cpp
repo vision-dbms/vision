@@ -615,6 +615,7 @@ Vsa::VEvaluatorPool::VEvaluatorPool (PoolSettings *pSettings)
 , m_cToBeFlushedWorkers     (0)
 , m_cTempWorkerMinimum      (pSettings->workerMinimum ())
 , m_cShrinkTimerExpirations (0)
+, m_bExplicitlySuspended    (false)
 , m_pSettings               (pSettings)
 , m_pGenerationTail         (0)
 , m_cBCEvaluationsInProgress (0)
@@ -727,27 +728,22 @@ void Vsa::VEvaluatorPool::restart () {
 void Vsa::VEvaluatorPool::hardRestart () {
     traceInfo ("VEvaluatorPool::hardRestart");
     log ("HARD RESTARTING POOL");
-	
-	Vca::VTrigger<VEvaluatorPool> *pOnFlushTrigger;
-	if (m_iStatus == Status_Suspended) {
-		pOnFlushTrigger = new Vca::VTrigger<VEvaluatorPool> (this, &VEvaluatorPool::resumeHardRestartSuspended);
-	} else {
+
+	if (m_iStatus != Status_Suspended) 
 		suspend ();
-		pOnFlushTrigger = new Vca::VTrigger<VEvaluatorPool> (this, &VEvaluatorPool::resumeHardRestart);
-	}
+
+	Vca::VTrigger<VEvaluatorPool> *pOnFlushTrigger;
+	pOnFlushTrigger = new Vca::VTrigger<VEvaluatorPool> (this, &VEvaluatorPool::resumeHardRestart);
 	flushWorkers (pOnFlushTrigger);
 }
 
-void Vsa::VEvaluatorPool::resumeHardRestartSuspended (Vca::VTrigger<ThisClass> *pTrigger) {
-    m_pOnFlushTrigger.clear ();
-    restart ();
-}
 
 void Vsa::VEvaluatorPool::resumeHardRestart (Vca::VTrigger<ThisClass> *pTrigger) {
     m_pOnFlushTrigger.clear ();
     restart ();
-	// it is suspended, so need to be resumed
-	resume ();
+
+    if ( !m_bExplicitlySuspended)
+		resume ();
 }
 
 void Vsa::VEvaluatorPool::triggerOnFlush () {
@@ -1313,6 +1309,7 @@ void Vsa::VEvaluatorPool::Suspend (
     IEvaluatorControl *pRole, IVReceiver<bool>* pReceiver
 ) {
     suspend ();
+	m_bExplicitlySuspended = true;
     if (pReceiver)
         pReceiver->OnData (true);
 }
@@ -1321,6 +1318,7 @@ void Vsa::VEvaluatorPool::Resume (
     IEvaluatorControl *pRole, IVReceiver<bool>* pReceiver
 ) {
     resume ();
+	m_bExplicitlySuspended = false;
     if (pReceiver)
         pReceiver->OnData (true);
 }
