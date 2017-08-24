@@ -19,7 +19,7 @@ CDBG	= -g -xs
 CREL	= -O -xvector
 CVER	= ${CREL}
 C32	= -m32
-C64	= -m64
+C64	= -m64 -xmemalign=8i
 CARCH	= ${C64}
 CFLAGS	= ${CVER} ${CBASE} ${CARCH}
 
