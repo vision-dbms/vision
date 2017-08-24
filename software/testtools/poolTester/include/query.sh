@@ -102,8 +102,8 @@ function query() {
     local toRun
     if [[ ! -z "$queryFile" ]]; then
         toRun="$queryFile"
-        verbose_inform "Running query file: $queryFile"
-	verbose_inform "NFD env variable: $NDFPathName"
+        verbose_inform "Running query file: $queryFile expectedResults: $expectedResultsFile"
+	verbose_inform "NDF env variable: $NDFPathName"
 	verbose_inform "Workers startup query: $WorkerStartupQuery"
         getVPrompt $vpromptOptions < $queryFile > $actualResultsFile & 2>&1
 	local vpromptPID=$!
@@ -114,7 +114,7 @@ function query() {
     else
         toRun="$queryExpression"
         [[ ! -z "$queryURL" ]] && toRun="\"$queryURL\" asUrl;"
-        verbose_inform "Running query: $toRun"
+        verbose_inform "Running query: $toRun expectedResults: $expectedResultsFile"
         toRun="$toRun
 ?g"
 	
@@ -122,8 +122,10 @@ function query() {
         echo "$toRun" | getVPrompt $vpromptOptions > $actualResultsFile
     fi
     # Compare results.
+verbose_inform "Compare results: $actualResultsFile $expectedResultsFile"
     [[ -z "$expectedResultsFile" ]] && return 0
-    diff -q $actualResultsFile $expectedResultsFile >/dev/null
+#    diff -q $actualResultsFile $expectedResultsFile >/dev/null
+    diff $actualResultsFile $expectedResultsFile >/dev/null
     case $? in
         0)
             # Test passed. Delete the file and return. 
