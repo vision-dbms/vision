@@ -333,6 +333,7 @@ EOD
 function restart() {
     require_pool
     local waitForWorkers=false
+    local OPTIND=1
     while getopts 'w' OPTION; do
         case $OPTION in
             w)
