@@ -729,8 +729,7 @@ void Vsa::VEvaluatorPool::hardRestart () {
     traceInfo ("VEvaluatorPool::hardRestart");
     log ("HARD RESTARTING POOL");
 
-	if (m_iStatus != Status_Suspended) 
-		suspend (false);
+    suspend (false);
 
 	Vca::VTrigger<VEvaluatorPool> *pOnFlushTrigger;
 	pOnFlushTrigger = new Vca::VTrigger<VEvaluatorPool> (this, &VEvaluatorPool::resumeHardRestart);
@@ -742,8 +741,7 @@ void Vsa::VEvaluatorPool::resumeHardRestart (Vca::VTrigger<ThisClass> *pTrigger)
     m_pOnFlushTrigger.clear ();
     restart ();
 
-    if (!m_bExplicitlySuspended)
-		resume (false);
+    resume (false);
 }
 
 void Vsa::VEvaluatorPool::triggerOnFlush () {
@@ -798,10 +796,13 @@ void Vsa::VEvaluatorPool::suspend (bool explicitly) {
     traceInfo ("VEvaluatorPool::suspend");
     log ("SUSPENDING POOL");
 
+    if (explicitly || !isSuspended()) 
+        // try the suspend if it's explicit or we weren't already suspended
+        BaseClass::suspend ();
+
     if (explicitly)
         m_bExplicitlySuspended = true;
 
-    BaseClass::suspend ();
 }
 
 void Vsa::VEvaluatorPool::resume () {
@@ -815,8 +816,10 @@ void Vsa::VEvaluatorPool::resume (bool explicitly) {
     if (explicitly)
         m_bExplicitlySuspended = false;
 
-    BaseClass::resume ();
-    onQueue ();
+    if (m_bExplicitlySuspended == false) {
+        BaseClass::resume ();
+        onQueue ();
+    }
 }
 
 /********
