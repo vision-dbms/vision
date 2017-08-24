@@ -922,7 +922,9 @@ namespace Vsa {
         void restart ();
         void stop    ();
         void suspend ();
+        void suspend (bool);
         void resume  ();
+        void resume  (bool);
         void flushWorkers (Vca::VTrigger<VEvaluatorPool> *pTrigger=0);
         void hardRestart       ();
 		void resumeHardRestartSuspended (Vca::VTrigger<ThisClass> *pTrigger);
@@ -1197,11 +1199,16 @@ namespace Vsa {
          */
         Vca::VTimer::Reference         m_pShrinkTimer;
 
-	/**
-	 * Count of the number of times the shrink timer has expired --
-	 * An indication of the number of times shrinking has occurred.
-	 */
-	Vca::U32                       m_cShrinkTimerExpirations;
+        /**
+         * Count of the number of times the shrink timer has expired --
+         * An indication of the number of times shrinking has occurred.
+         */
+        Vca::U32                       m_cShrinkTimerExpirations;
+
+        /**
+         * Track whether this pool has been explicitly suspended
+         */
+        bool m_bExplicitlySuspended;
 
         /**
          * Count of broadcast evaluations currently in progress.
