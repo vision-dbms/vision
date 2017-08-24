@@ -36,82 +36,6 @@
 #include "VSymbolImplementation.h"
 
 
-/**********************************
- **********************************
- *****  Descriptor Utilities  *****
- **********************************
- **********************************/
-
-/********************************
- *****  Pointer Conversion  *****
- ********************************/
-
-/*---------------------------------------------------------------------------
- *****  Microcode to convert a descriptor's pointer on inheritance or property return.
- *
- *  Arguments:
- *	pDescriptor		- a reference to the standard descriptor to be 'stepped'.
- *	pEffectiveStore		- the address of a CPD for the effective V-Store of
- *				  '*pDescriptor'.
- *	pPPT			- the positional p-token of '*pDescriptor'.  Redundant
- *				  but always available in the caller.
- *
- *  Returns:
- *	NOTHING - Executed for side effect on 'dsc'.
- *
- *****/
-void DSC_Pointer::convert (M_CPD* pEffectiveStore, M_CPD* pPPT) {
-    M_CPD* pRPT = rtVSTORE_CPD_RowPTokenCPD (pEffectiveStore);
-
-    clear ();
-    constructReferenceConstant (pPPT, pRPT, rtPTOKEN_CPD_BaseElementCount (pRPT));
-}
-
-
-/*********************************
- *****  Inheritance Stepper  *****
- *********************************/
-
-/*---------------------------------------------------------------------------
- *****  Microcode to replace the contents of 'V_Context' with the
- *****  inheritance 'superior' of those contents.
- *
- *  Arguments:
- *	rDescriptor		- a reference to the standard descriptor to be 'stepped'.
- *	pEffectiveStore		- the address of a CPD for the effective V-Store of
- *				  '*pDescriptor'.
- *	fRequiresConversion	- a boolean which, when true, specifies that the pointer
- *				  component of '*pDescriptor' must be converted to a 'nil'
- *				  reference to access 'pEffectiveStore's inheritance.
- *	pPPT			- the positional p-token of '*pDescriptor'.  Redundant
- *				  but always available in the caller.
- *
- *  Returns:
- *	NOTHING - Executed for side effect on 'dsc'.
- *
- *****/
-void DSC_Descriptor::Step (M_CPD* pEffectiveStore, bool fRequiresConversion, M_CPD* pPPT) {
-/*****  ... manufacture an descriptor for the inheritance, ...  *****/
-    DSC_Descriptor inheritance; {
-	M_CPD* inheritancePointer = rtVSTORE_CPD_InheritancePointerCPD (pEffectiveStore);
-	inheritance.constructMonotype (
-	    rtVSTORE_CPD_InheritanceStoreCPD (pEffectiveStore), inheritancePointer
-	);
-	inheritancePointer->release ();
-    }
-
-/*****  ... adjust the context pointer if necessary, ...  *****/
-    if (fRequiresConversion)
-	m_iPointer.convert (pEffectiveStore, pPPT);
-
-/*****  ... and step to this descriptor's 'superior'.  *****/
-    DSC_Descriptor newdsc;
-    newdsc.constructComposition (m_iPointer, inheritance);
-    inheritance.clear ();
-    setToMoved (newdsc);
-}
-
-
 /******************************
  ******************************
  *****                    *****
@@ -249,7 +173,7 @@ protected:
     rtLINK_CType *newCodSubset ();
     rtLINK_CType *newDomSubset (unsigned int sPrefix);
 
-    M_CPD *subsetPPT (unsigned int cElements);
+    rtPTOKEN_Handle *subsetPPT (unsigned int cElements);
 
 //  Output Generation
 private:
@@ -286,7 +210,7 @@ private:
 private:
     VReference<VComputationUnit>const	m_pCodTask;
     VReference<VSNFTask>	const	m_pDomTask;
-    M_CPD*			const	m_pDomPPT;
+    rtPTOKEN_Handle*		const	m_pDomPPT;
     unsigned int			m_xDomElement;
     unsigned int			m_cDomSubsets;
     VReference<rtLINK_CType>		m_pNASubset;
@@ -368,21 +292,18 @@ void VComputationUnitParameterAccessor::commit () {
 }
 
 rtLINK_CType *VComputationUnitParameterAccessor::newCodSubset () {
-    return rtLINK_RefConstructor (m_pCodTask->ptoken_(), -1);
+    return rtLINK_RefConstructor (m_pCodTask->ptoken_());
 }
 
 rtLINK_CType *VComputationUnitParameterAccessor::newDomSubset (unsigned int sPrefix) {
     m_cDomSubsets++;
-    return rtLINK_RefConstructor (m_pDomTask->ptoken (), -1)->AppendRange (
-	0, sPrefix
-    );
+    return rtLINK_RefConstructor (m_pDomTask->ptoken ())->AppendRange (0, sPrefix);
 }
 
-M_CPD *VComputationUnitParameterAccessor::subsetPPT (unsigned int cElements) {
-    if (cElements < rtPTOKEN_CPD_BaseElementCount (m_pDomPPT))
-	return rtPTOKEN_New (m_pDomPPT->ScratchPad (), cElements);
-    m_pDomPPT->retain ();
-    return m_pDomPPT;
+rtPTOKEN_Handle *VComputationUnitParameterAccessor::subsetPPT (unsigned int cElements) {
+    return cElements < m_pDomPPT->cardinality () ? new rtPTOKEN_Handle (
+	m_pDomPPT->ScratchPad (), cElements
+    ) : m_pDomPPT;
 }
 
 
@@ -395,14 +316,12 @@ bool VComputationUnitParameterAccessor::PData::output (
     VComputationUnitParameterAccessor *pAccessor, unsigned int xParameter
 ) {
     if (m_cElements > 0) {
-	M_CPD *pPPT = pAccessor->subsetPPT (m_cElements);
+	rtPTOKEN_Handle::Reference pPPT (pAccessor->subsetPPT (m_cElements));
 	m_pCodSubset->Close (pPPT);
 	if (m_pDomSubset)
 	    m_pDomSubset->Close (pPPT);
 
 	pAccessor->output (xParameter, m_pCodSubset, m_pDomSubset);
-
-	pPPT->release ();
 
 	return true;
     }
@@ -439,7 +358,7 @@ void VComputationUnitParameterAccessor::implement () {
 
     m_pDomTask->normalizeDuc ();
     DSC_Descriptor &rIndices = m_pDomTask->duc ().contentAsMonotype ();
-    if (rIndices.storeCPD ()->DoesntName (&M_KnownObjectTable::TheIntegerClass)) {
+    if (rIndices.store ()->DoesntName (&M_KOT::TheIntegerClass)) {
 	m_pDomTask->loadDucWithNA ();
 	return;
     }
@@ -467,14 +386,12 @@ void VComputationUnitParameterAccessor::implement () {
     if (m_cDomSubsets > 0) {
 	VFragmentation &rDucFragmentation = m_pDomTask->loadDucWithFragmentation ();
 	if (m_pNASubset) {
-	    M_CPD *pPPT = rtPTOKEN_New (m_pDomPPT->ScratchPad (), m_sNASubset);
-	    m_pNASubset->Close (pPPT);
+	    m_pNASubset->Close (new rtPTOKEN_Handle (m_pDomPPT->ScratchPad (), m_sNASubset));
 	    m_pNASubset->retain ();
 	    rDucFragmentation.createFragment (m_pNASubset)->datum().setToNA (
 		m_pNASubset->PPT (), m_pDomTask->codKOT ()
 	    );
 	    m_cDomSubsets--;
-	    pPPT->release ();
 	}
 	for (
 	    unsigned int xParameter = 0;
@@ -596,6 +513,70 @@ VControlPointFiringType VComputationUnit::Context::ControlPoints::firingType (VC
 }
 
 
+/***************************************************
+ ***************************************************
+ *****                                         *****
+ *****  VComputationUnit::Context::GoferOrder  *****
+ *****                                         *****
+ ***************************************************
+ ***************************************************/
+
+/*************************
+ *************************
+ *****  Fulfillment  *****
+ *************************
+ *************************/
+
+bool VComputationUnit::Context::GoferOrder::fulfillFromClient (Context *pContext, Query *pQuery) const {
+    return unfulfill ();
+}
+
+bool VComputationUnit::Context::GoferOrder::fulfillFromServer (Context *pContext) const {
+    return unfulfill ();
+}
+
+
+/**********************************************
+ **********************************************
+ *****                                    *****
+ *****  VComputationUnit::Context::Query  *****
+ *****                                    *****
+ **********************************************
+ **********************************************/
+
+/**************************
+ **************************
+ *****  Construction  *****
+ **************************
+ **************************/
+
+VComputationUnit::Context::Query::Query (Vsa::VEvaluation *pEvaluation) : m_pEvaluation (pEvaluation) {
+}
+
+/*************************
+ *************************
+ *****  Destruction  *****
+ *************************
+ *************************/
+
+VComputationUnit::Context::Query::~Query () {
+}
+
+/**********************************
+ **********************************
+ *****  Client Object Gofers  *****
+ **********************************
+ **********************************/
+
+bool VComputationUnit::Context::Query::getClientObjectGofer (icollection_gofer_t::Reference& rpGofer, Context *pContext) {
+    return cachedClientObjectGofer (rpGofer, m_pICollectionGofer, pContext);
+}
+
+bool VComputationUnit::Context::Query::getClientObjectGofer (isingleton_gofer_t::Reference& rpGofer, Context *pContext) {
+    return cachedClientObjectGofer (rpGofer, m_pISingletonGofer, pContext);
+}
+
+
 /***************************************
  ***************************************
  *****                             *****
@@ -610,7 +591,7 @@ VControlPointFiringType VComputationUnit::Context::ControlPoints::firingType (VC
  *******************************
  *******************************/
 
-bool VComputationUnit::Context::g_fVerboseSelectorNotFound	= false;
+bool VComputationUnit::Context::g_fVerboseSelectorNotFound	= getenv ("VisionVerboseSNF") ? true : false;
 unsigned int VComputationUnit::Context::g_iLargeTaskSize	= 500000;
 
 /**************************
@@ -625,7 +606,13 @@ VComputationUnit::Context::Context (ControlPoints& rControlPoints, Context* pPar
 , m_pLargeTaskSize	(pParent ? pParent->m_pLargeTaskSize : &g_iLargeTaskSize)
 {
 }
-
+
+VComputationUnit::Context::Context (ThisClass *pParent)
+: m_pParent		(pParent)
+, m_rControlPoints	(pParent->m_rControlPoints)
+, m_pLargeTaskSize	(pParent->m_pLargeTaskSize)
+{
+}
 
 /********************
  ********************
@@ -635,6 +622,35 @@ VComputationUnit::Context::Context (ControlPoints& rControlPoints, Context* pPar
 
 bool VComputationUnit::Context::verboseSelectorNotFound () const {
     return m_pParent ? m_pParent->verboseSelectorNotFound () : g_fVerboseSelectorNotFound;
+}
+
+/*************************
+ *************************
+ *****  Fulfillment  *****
+ *************************
+ *************************/
+
+bool VComputationUnit::Context::fulfill (GoferOrder const &rOrder) {
+    return fulfillPrerequisite (rOrder);
+}
+
+bool VComputationUnit::Context::fulfillPrerequisite (GoferOrder const &rOrder) {
+    return m_pParent ? m_pParent->fulfill (rOrder) : rOrder.fulfillFromServer (this);
+}
+
+bool VComputationUnit::Context::objectComesFromClient () const {
+    static bool const bUsingEvaluator = IsNil (getenv ("SuppressEvaluatorPump"));
+    return bUsingEvaluator;
+}
+
+bool VComputationUnit::Context::objectComesFromServer (VString& rServerName) const {
+    static char const *const s_pServerName = getenv ("FASTBridgeServer");
+    if (!s_pServerName)
+	return false;
+
+    static VString const s_iServerName (s_pServerName, false);
+    rServerName.setTo (s_iServerName);
+    return true;
 }
 
 
@@ -1271,7 +1287,7 @@ char const *VComputationUnit::selectorName () const {
  *****  Modification  *****
  **************************/
 
-bool VComputationUnit::setDucFeathers (DSC_Pointer& rFeathers, VDescriptor& rValues) const {
+bool VComputationUnit::setDucFeathers (DSC_Pointer &rFeathers, VDescriptor &rValues) const {
     if (!datumAlterable_ ())
 	return false;
 
@@ -1279,7 +1295,7 @@ bool VComputationUnit::setDucFeathers (DSC_Pointer& rFeathers, VDescriptor& rVal
 	loadDucWithCopied (rValues);
     else {
 	if (m_pDuc->isEmpty ())
-	    loadDucWithVector (rtVECTOR_New (ptoken_()));
+	    loadDucWithVector (new rtVECTOR_Handle (ptoken_()));
 	else
 	    normalizeDuc ();
 	rValues.assignTo (rFeathers, convertDucToVector ());

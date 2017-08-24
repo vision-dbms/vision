@@ -59,8 +59,7 @@ void VFragment::Descriptor::initializeFrom (VFragment* pFragment) {
 
     VDescriptor const& rContent = m_pFragment->datum ();
     if (rContent.isStandard ()) {
-	m_pStoreCPD.setTo (rContent.contentAsMonotype ().storeCPDIfAvailable ());
-	m_pStoreHandle = m_pStoreCPD->containerHandle ();
+	m_pStore.setTo (rContent.contentAsMonotype ().store ());
     }
     else rContent.raiseTypeException ("VFragment::Descriptor::initializeFrom (VFragment*)");
 }
@@ -105,7 +104,7 @@ void VFragment::Descriptor::fastMergeBegin (
 	pRRD = rtLINK_RRDC_NextRRDC (pRRD);
     }
 
-    m_pAssignmentLinkc = rtLINK_PosConstructor (pSubset->PPT (), -1);
+    m_pAssignmentLinkc = rtLINK_PosConstructor (pSubset->PPT ());
 }
 
 
@@ -127,57 +126,37 @@ M_CPD* VFragment::Descriptor::createContent (rtLINK_CType* pNewSubset) {
 
     RTYPE_Type xContentRType = rContent.pointerRType ();
 
-    M_CPD* pTokenRefCPD;
-    int	   pTokenRefIndex;
-    rContent.getRPTReference (pTokenRefCPD, pTokenRefIndex);
+    rtPTOKEN_Handle::Reference pRPT (rContent.RPT ());
 
     M_CPD* pNewContent;
     switch (xContentRType) {
     case RTYPE_C_IntUV:
-	pNewContent = rtINTUV_New (
-	    pNewSubset->PPT (), pTokenRefCPD, pTokenRefIndex
-	);
+	pNewContent = rtINTUV_New	(pNewSubset->PPT (), pRPT);
 	break;
     case RTYPE_C_DoubleUV:
-	pNewContent = rtDOUBLEUV_New (
-	    pNewSubset->PPT (), pTokenRefCPD, pTokenRefIndex
-	);
+	pNewContent = rtDOUBLEUV_New	(pNewSubset->PPT (), pRPT);
 	break;
     case RTYPE_C_FloatUV:
-	pNewContent = rtFLOATUV_New (
-	    pNewSubset->PPT (), pTokenRefCPD, pTokenRefIndex
-	);
+	pNewContent = rtFLOATUV_New	(pNewSubset->PPT (), pRPT);
 	break;
     case RTYPE_C_CharUV:
-	pNewContent = rtCHARUV_New (
-	    pNewSubset->PPT (), pTokenRefCPD, pTokenRefIndex
-	);
+	pNewContent = rtCHARUV_New	(pNewSubset->PPT (), pRPT);
 	break;
     case RTYPE_C_Link:
     case RTYPE_C_RefUV:
-	pNewContent = rtREFUV_New (
-	    pNewSubset->PPT (), pTokenRefCPD, pTokenRefIndex
-	);
+	pNewContent = rtREFUV_New	(pNewSubset->PPT (), pRPT);
 	break;
     case RTYPE_C_Unsigned64UV:
-	pNewContent = rtU64UV_New (
-	    pNewSubset->PPT (), pTokenRefCPD, pTokenRefIndex
-	);
+	pNewContent = rtU64UV_New	(pNewSubset->PPT (), pRPT);
 	break;
     case RTYPE_C_Unsigned96UV:
-	pNewContent = rtU96UV_New (
-	    pNewSubset->PPT (), pTokenRefCPD, pTokenRefIndex
-	);
+	pNewContent = rtU96UV_New	(pNewSubset->PPT (), pRPT);
 	break;
     case RTYPE_C_Unsigned128UV:
-	pNewContent = rtU128UV_New (
-	    pNewSubset->PPT (), pTokenRefCPD, pTokenRefIndex
-	);
+	pNewContent = rtU128UV_New	(pNewSubset->PPT (), pRPT);
 	break;
     case RTYPE_C_UndefUV:
-	pNewContent = rtUNDEFUV_New (
-	    pNewSubset->PPT (), pTokenRefCPD, pTokenRefIndex
-	);
+	pNewContent = rtUNDEFUV_New	(pNewSubset->PPT (), pRPT);
 	break;
     default:
 	raiseException (
@@ -187,7 +166,6 @@ M_CPD* VFragment::Descriptor::createContent (rtLINK_CType* pNewSubset) {
 	);
 	break;
     }
-    pTokenRefCPD->release ();
 
     return pNewContent;
 }
@@ -200,9 +178,7 @@ M_CPD* VFragment::Descriptor::createContent (rtLINK_CType* pNewSubset) {
 void VFragment::Descriptor::createFragment (
     rtLINK_CType* pNewSubset, M_CPD* pNewContent, VFragmentation* pParent
 ) {
-    pParent->createFragment (pNewSubset)->datum ().setToMonotype (
-	m_pStoreCPD, pNewContent
-    );
+    pParent->createFragment (pNewSubset)->datum ().setToMonotype (m_pStore, pNewContent);
 }
 
 

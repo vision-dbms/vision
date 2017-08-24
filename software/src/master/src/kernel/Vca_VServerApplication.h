@@ -590,7 +590,7 @@ namespace Vca {
     /// @name Tracking and Trackables
     //@{
     public:
-	VTrackable_count_t const &activeOfferCountTrackable () const;
+	VTrackable_count_t const &activeOfferCountTrackable ();
     //@}
 
     //  State

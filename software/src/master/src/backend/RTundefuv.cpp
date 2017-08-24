@@ -69,34 +69,9 @@ DEFINE_CONCRETE_RTT (rtUNDEFUV_Handle);
  *	A standard CPD for the UndefUV created.
  *
  *****/
-PublicFnDef M_CPD *rtUNDEFUV_New (
-    M_CPD*			posPTokenRefCPD,
-    int				posPTokenRefIndex,
-    M_CPD*			refPTokenRefCPD,
-    int				refPTokenRefIndex
-)
-{
-    VCPDReference pPPT (posPTokenRefCPD, posPTokenRefIndex, RTYPE_C_PToken);
+PublicFnDef M_CPD *rtUNDEFUV_New (rtPTOKEN_Handle *pPPT, M_CPD *pRPTRef, int xRPTRef) {
     return UV_New (
-	RTYPE_C_UndefUV,
-	pPPT,
-	refPTokenRefCPD,
-	refPTokenRefIndex,
-	0,
-	NilOf (Ref_UV_Initializer),
-	0
-    );
-}
-
-PublicFnDef M_CPD *rtUNDEFUV_New (M_CPD *pPPT, M_CPD *pRPTRef, int xRPTRef) {
-    return UV_New (
-	RTYPE_C_UndefUV,
-	pPPT,
-	pRPTRef,
-	xRPTRef,
-	0,
-	NilOf (Ref_UV_Initializer),
-	0
+	RTYPE_C_UndefUV, pPPT, pRPTRef, xRPTRef, 0, NilOf (Ref_UV_Initializer), 0
     );
 }
 
@@ -112,14 +87,9 @@ PublicFnDef M_CPD *rtUNDEFUV_New (M_CPD *pPPT, M_CPD *pRPTRef, int xRPTRef) {
  *	A standard CPD for the UndefUV created.
  *
  *****/
-PublicFnDef M_CPD *rtUNDEFUV_New (M_CPD *posPToken, M_CPD *refPToken) {
+PublicFnDef M_CPD *rtUNDEFUV_New (rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT) {
     return UV_New (
-	RTYPE_C_UndefUV,
-	posPToken,
-	refPToken,
-	0,
-	NilOf (Ref_UV_Initializer),
-	0
+	RTYPE_C_UndefUV, pPPT, pRPT, 0, NilOf (Ref_UV_Initializer), 0
     );
 }
 
@@ -138,36 +108,38 @@ PublicFnDef M_CPD *rtUNDEFUV_New (M_CPD *posPToken, M_CPD *refPToken) {
  *	'cpd'
  *
  *****/
-PublicFnDef M_CPD* rtUNDEFUV_Align (M_CPD* cpd) {
-    M_CPD* newPToken;
-
+PrivateFnDef M_CPD* rtUNDEFUV_Align (M_CPD* cpd) {
 /*****  Validate Argument R-Type  *****/
-    RTYPE_MustBeA ("rtUNDEFUV_Align", M_CPD_RType (cpd), RTYPE_C_UndefUV);
+    RTYPE_MustBeA ("rtUNDEFUV_Align", cpd->RType (), RTYPE_C_UndefUV);
+    static_cast<rtUNDEFUV_Handle*>(cpd->containerHandle ())->align ();
+    return cpd;
+}
 
+bool rtUNDEFUV_Handle::align () {
 /*****  Align Positionally  *****/
-    if (rtPTOKEN_IsCurrent (cpd, UV_CPx_PToken));
-    else {
-	cpd->EnableModifications ();
-	newPToken = rtPTOKEN_BasePToken (cpd, UV_CPx_PToken);
-	cpd->StoreReference (UV_CPx_PToken, newPToken);
-	UV_CPD_ElementCount (cpd) = rtPTOKEN_CPD_BaseElementCount (newPToken);
-	newPToken->release ();
+    bool bChangesMade = false;
+    rtPTOKEN_Handle::Reference pPToken;
+    if (isntTerminal (pptPOP (), pPToken)) {
+	bChangesMade = true;
+	EnableModifications ();
+	pPToken.setTo (pPToken->basePToken ());
+	StoreReference (pptPOP (), pPToken);
+	setElementCountTo (pPToken->cardinality ());
 
 /*****  Turn off the set bit if necessary ... *****/
-	if (UV_CPD_ElementCount (cpd) > 1)
-	    UV_CPD_IsASetUV (cpd) = false;
+	if (elementCount () > 1)
+	    clearIsASet ();
     }
 /*****  Align Referentially  *****/
-    if (rtPTOKEN_IsCurrent (cpd, UV_CPx_RefPToken))
-	return cpd;
-
-    cpd->EnableModifications ();
-    newPToken = rtPTOKEN_BasePToken (cpd, UV_CPx_RefPToken);
-    cpd->StoreReference (UV_CPx_RefPToken, newPToken);
-    newPToken->release ();
+    if (isntTerminal (rptPOP (), pPToken)) {
+	bChangesMade = true;
+	EnableModifications ();
+	pPToken.setTo (pPToken->basePToken ());
+	StoreReference (rptPOP (), pPToken);
+    }
 
 /*****  Return the Argument  *****/
-    return cpd;
+    return bChangesMade;
 }
 
 
@@ -203,13 +175,15 @@ PublicFnDef void rtUNDEFUV_ToSetUV (
     unsigned int origSize = UV_CPD_ElementCount (sourceCPD);
 
 /***** Create a new result uvector ... *****/
-    M_CPD *newPosPToken = rtPTOKEN_New (pContainerSpace, origSize > 0 ? 1 : 0);
-    *resultCPD = rtUNDEFUV_New (newPosPToken, sourceCPD, UV_CPx_RefPToken);
+    rtPTOKEN_Handle::Reference pNewPPT (new rtPTOKEN_Handle (pContainerSpace, origSize > 0 ? 1 : 0));
+    *resultCPD = rtUNDEFUV_New (pNewPPT, sourceCPD, UV_CPx_RefPToken);
     UV_CPD_IsASetUV (*resultCPD) = true;
 
 /***** Create the new reference uvector ... *****/
-    *refuvCPD = rtREFUV_New (sourceCPD, UV_CPx_PToken, newPosPToken, -1);
-    newPosPToken->release ();
+    rtPTOKEN_Handle::Reference pSourcePPT (
+	static_cast<rtUVECTOR_Handle*>(sourceCPD->containerHandle ())->pptHandle ()
+    );
+    *refuvCPD = rtREFUV_New (pSourcePPT, pNewPPT);
 
 /***** Fill in the reference uvector ... *****/
     rtREFUV_ElementType *refuvp = rtREFUV_CPD_Array (*refuvCPD);
@@ -239,10 +213,13 @@ PublicFnDef void rtUNDEFUV_ToSetUV (
  *
  *****/
 PublicFnDef M_CPD *rtUNDEFUV_Distribute (M_CPD *refuvCPD, M_CPD *sourceuvCPD) {
-    VCPDReference pPPT (refuvCPD, UV_CPx_RefPToken, RTYPE_C_PToken);
-    return rtUNDEFUV_UVAssign (
-	rtUNDEFUV_New (pPPT, sourceuvCPD, UV_CPx_RefPToken), refuvCPD, sourceuvCPD
+    rtPTOKEN_Handle::Reference pPPT (
+	static_cast<rtUVECTOR_Handle*>(refuvCPD->containerHandle ())->rptHandle ()
     );
+    rtPTOKEN_Handle::Reference pRPT (
+	static_cast<rtUVECTOR_Handle*>(sourceuvCPD->containerHandle ())->rptHandle ()
+    );
+    return rtUNDEFUV_UVAssign (rtUNDEFUV_New (pPPT, pRPT), refuvCPD, sourceuvCPD);
 }
 
 
@@ -320,9 +297,9 @@ PublicFnDef M_CPD *rtUNDEFUV_UVExtract (M_CPD *sourceCPD, M_CPD *refuvCPD) {
     );
 
 /*****  Extract and return the requested values  *****/
-    return rtUNDEFUV_New (
-	refuvCPD, UV_CPx_PToken, sourceCPD, UV_CPx_RefPToken
-    );
+    rtPTOKEN_Handle::Reference pPPT (static_cast<rtUVECTOR_Handle*>(refuvCPD->containerHandle ())->pptHandle ());
+    rtPTOKEN_Handle::Reference pRPT (static_cast<rtUVECTOR_Handle*>(sourceCPD->containerHandle ())->rptHandle ());
+    return rtUNDEFUV_New (pPPT, pRPT);
 }
 
 
@@ -686,8 +663,8 @@ PublicFnDef void rtUNDEFUV_PartitndPartition (
     partition->AlignForDistribute (rtUNDEFUV_Align (values), UV_CPx_PToken);
 
 /*****  Create the major and minor partitions...  *****/
-    rtLINK_CType *majorPartition = rtLINK_RefConstructor (partition->RPT (), -1);
-    rtLINK_CType *minorPartition = rtLINK_PosConstructor (partition->PPT (), -1);
+    rtLINK_CType *majorPartition = rtLINK_RefConstructor (partition->RPT ());
+    rtLINK_CType *minorPartition = rtLINK_PosConstructor (partition->PPT ());
 
 /*****  Initialize the traversal pointers...  *****/
     unsigned int minorCount = 0;
@@ -698,10 +675,9 @@ PublicFnDef void rtUNDEFUV_PartitndPartition (
     );
 
 /*****  Close and return the partitions created...  *****/
-    M_CPD *groupPToken = rtPTOKEN_New (partition->PPT ()->Space (), minorCount);
+    rtPTOKEN_Handle::Reference groupPToken (new rtPTOKEN_Handle (partition->PPT ()->Space (), minorCount));
     *majorLC = majorPartition->Close (groupPToken);
     *minorLC = minorPartition->Close (groupPToken);
-    groupPToken->release ();
 
 /*---------------------------------------------------------------------------
  *****  Link Traversal Component Handler Macro Deletions
@@ -757,14 +733,14 @@ PublicFnDef void rtUNDEFUV_LocateOrAdd (
     rtLINK_CType**		addedLinkC
 ) {
 /***** Make sure both the source and target are undefined set uvectors ... *****/
-    if (((RTYPE_Type)M_CPD_RType (sourceCPD) != RTYPE_C_UndefUV) ||
+    if ((sourceCPD->RType () != RTYPE_C_UndefUV) ||
 	!UV_CPD_IsASetUV (sourceCPD)
     ) ERR_SignalFault (
 	EC__InternalInconsistency,
 	"rtUNDEFUV_LocateOrAdd:  Source UVector Must Be An Undefined Set"
     );
 
-    if (((RTYPE_Type)M_CPD_RType (targetCPD) != RTYPE_C_UndefUV) ||
+    if ((targetCPD->RType () != RTYPE_C_UndefUV) ||
 	!UV_CPD_IsASetUV (targetCPD)
     ) ERR_SignalFault (
 	EC__InternalInconsistency,
@@ -802,18 +778,15 @@ PublicFnDef void rtUNDEFUV_LocateOrAdd (
 	    targetCPD, UV_CPx_PToken
 	);
 	targetPTokenC->AppendAdjustment (0, 1);
-	M_CPD *ptoken = targetPTokenC->ToPToken ();
+	rtPTOKEN_Handle::Reference ptoken (targetPTokenC->ToPToken ());
 	targetCPD->StoreReference (UV_CPx_PToken, ptoken);
 	UV_CPD_ElementCount (targetCPD) = 1;
-	ptoken->release ();
 
 	/***  Show that the value was added ... ***/
 	if (wantAddedLinkC) {
 	    *addedLinkC = rtLINK_RefConstructor (sourceCPD, UV_CPx_PToken);
 	    rtLINK_AppendRange (*addedLinkC, 0, 1);
-	    ptoken = rtPTOKEN_New (sourceCPD->ScratchPad (), 1);
-	    (*addedLinkC)->Close (ptoken);
-	    ptoken->release ();
+	    (*addedLinkC)->Close (new rtPTOKEN_Handle (sourceCPD->ScratchPad (), 1));
 	}
     }
 
@@ -843,7 +816,7 @@ PublicFnDef void rtUNDEFUV_LocateOrAdd (
  *****/
 PublicFnDef bool rtUNDEFUV_ScalarLocateOrAdd (M_CPD *targetCPD, int *locationPtr) {
 /***** Make sure the target is a undefined set uvector ... *****/
-    if (((RTYPE_Type)M_CPD_RType (targetCPD) != RTYPE_C_UndefUV) ||
+    if ((targetCPD->RType () != RTYPE_C_UndefUV) ||
 	!UV_CPD_IsASetUV (targetCPD)
     ) ERR_SignalFault (
 	EC__InternalInconsistency,
@@ -860,10 +833,9 @@ PublicFnDef bool rtUNDEFUV_ScalarLocateOrAdd (M_CPD *targetCPD, int *locationPtr
 	    targetCPD, UV_CPx_PToken
 	);
 	targetPTokenC->AppendAdjustment (0, 1);
-	M_CPD *ptoken = targetPTokenC->ToPToken ();
+	rtPTOKEN_Handle::Reference ptoken (targetPTokenC->ToPToken ());
 	targetCPD->StoreReference (UV_CPx_PToken, ptoken);
 	UV_CPD_ElementCount (targetCPD) = 1;
-	ptoken->release ();
 
 	*locationPtr = 0;
 	return true;
@@ -921,14 +893,14 @@ PublicFnDef void rtUNDEFUV_Lookup (
 )
 {
 /***** Make sure both the source and key are undefined set uvectors ... *****/
-    if (((RTYPE_Type)M_CPD_RType (sourceCPD) != RTYPE_C_UndefUV) ||
+    if ((sourceCPD->RType () != RTYPE_C_UndefUV) ||
 	!UV_CPD_IsASetUV (sourceCPD)
     ) ERR_SignalFault (
 	EC__InternalInconsistency,
 	"rtUNDEFUV_Lookup:  Source UVector Must Be An Undefined Set"
     );
 
-    if (((RTYPE_Type)M_CPD_RType (keyCPD) != RTYPE_C_UndefUV) ||
+    if ((keyCPD->RType () != RTYPE_C_UndefUV) ||
         !UV_CPD_IsASetUV (keyCPD)
     ) ERR_SignalFault (
 	EC__InternalInconsistency,
@@ -962,14 +934,12 @@ PublicFnDef void rtUNDEFUV_Lookup (
 /***** If the source is empty, the value is NOT found ... *****/
     if (UV_CPD_ElementCount (sourceCPD) == 0) {
 	/*** locations = empty ***/
-	M_CPD *ptoken = rtPTOKEN_New (keyCPD->Space (), 0);
+	rtPTOKEN_Handle::Reference ptoken (new rtPTOKEN_Handle (keyCPD->Space (), 0));
 	(*locationsLinkC)->Close (ptoken);
 
 	/*** located = empty ***/
 	*locatedLinkC = rtLINK_RefConstructor (keyCPD, UV_CPx_PToken);
 	(*locatedLinkC)->Close (ptoken);
-
-	ptoken->release ();
     }
 /*****  ... else the value is found ... *****/
     else {
@@ -1014,7 +984,7 @@ PublicFnDef bool rtUNDEFUV_ScalarLookup (
 )
 {
 /***** Make sure the source is a undefined set uvector ... *****/
-    if (((RTYPE_Type)M_CPD_RType (sourceCPD) != RTYPE_C_UndefUV) ||
+    if ((sourceCPD->RType () != RTYPE_C_UndefUV) ||
 	!UV_CPD_IsASetUV (sourceCPD)
     ) ERR_SignalFault (
 	EC__InternalInconsistency,
@@ -1069,8 +1039,7 @@ PrivateFnDef int PrintElement (M_CPD *Unused(cpd)) {
 IOBJ_DefineNewaryMethod (NewDM) {
     return RTYPE_QRegister (
 	rtUNDEFUV_New (
-	    RTYPE_QRegisterCPD (parameterArray[0]),
-	    RTYPE_QRegisterCPD (parameterArray[1])
+	    RTYPE_QRegisterPToken (parameterArray[0]), RTYPE_QRegisterPToken (parameterArray[1])
 	)
     );
 }
@@ -1090,8 +1059,6 @@ IOBJ_DefineNewaryMethod (NewDistributeDM) {
  ************************/
 
 UV_DefineEPrintDM (PrintElementDM, PrintElement)
-
-UV_DefineAlignDM (AlignDM, rtUNDEFUV_Align)
 
 UV_DefineAtDM (AtDM, rtUNDEFUV_LCExtract, rtUNDEFUV_UVExtract)
 
@@ -1198,7 +1165,6 @@ RTYPE_DefineHandler(rtUNDEFUV_Handler) {
     IOBJ_BeginMD (instanceMD)
 	UV_StandardDMDEPackage
 	IOBJ_MDE ("eprint"		, PrintElementDM)
-	IOBJ_MDE ("align"		, AlignDM)
 	IOBJ_MDE ("at:"			, AtDM)
 	IOBJ_MDE ("at:put:"		, AtPutDM)
 	IOBJ_MDE ("toSetUV"		, ToSetUVDM)

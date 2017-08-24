@@ -48,6 +48,7 @@ namespace Vsa {
   	VINTERFACE_ROLE_1 (SetWorkerGenerationLimit, Vca::U32);
 	VINTERFACE_ROLE_1 (GetEvaluationAttemptMaximum, IVReceiver<Vca::U32>*);
 	VINTERFACE_ROLE_1 (SetEvaluationAttemptMaximum, Vca::U32);
+	
 	VINTERFACE_ROLE_1 (GetWorkerMinimumAvailable, IVReceiver<Vca::U32>*);
 	VINTERFACE_ROLE_1 (SetWorkerMinimumAvailable, Vca::U32);
 	VINTERFACE_ROLE_1 (GetWorkerStartupQuery, IVReceiver<VString const &>*);
@@ -73,6 +74,7 @@ namespace Vsa {
 	VINTERFACE_METHOD_1 (SetWorkerMinimum, Vca::U32);
   	VINTERFACE_METHOD_1 (GetWorkerGenerationLimit, IVReceiver<Vca::U32>*);
   	VINTERFACE_METHOD_1 (SetWorkerGenerationLimit, Vca::U32);
+	
 	VINTERFACE_METHOD_1 (GetEvaluationAttemptMaximum, IVReceiver<Vca::U32>*);
 	VINTERFACE_METHOD_1 (SetEvaluationAttemptMaximum, Vca::U32);
 	VINTERFACE_METHOD_1 (GetWorkerMinimumAvailable, IVReceiver<Vca::U32>*);

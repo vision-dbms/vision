@@ -65,7 +65,6 @@
 #include "VFragment.h"
 #include "VTransientServices.h"
 
-#include "V_VArgList.h"
 #include "V_VString.h"
 
 /*****  External Object Support *****/
@@ -74,6 +73,9 @@
 /*****  Self  *****/
 #include "PFutil.h"
 
+
+Vca_Decl Vca::VGoferInterface<Vca::IInfoServer>::Reference g_pInfoServerGofer;
+
 
 /*******************************
  *******************************
@@ -120,6 +122,7 @@
 #define XFederate				6
 #define XClientObject				7
 #define XExternalObject				8
+#define XNotify                                 9
 
 /******************************************
  *****  Time Stamp Access Primitives  *****
@@ -343,21 +346,19 @@ V_DefinePrimitive (Federate) {
 
 /*****  Access the string store, ...  *****/
     DSC_Descriptor& rCurrent = pTask->getCurrent ();
-    M_CPD *pStringStore = rCurrent.storeCPD ();
 
 /*****  ... and compile the string.  *****/
-    if (RTYPE_C_Block == M_CPD_RType (pStringStore))
-	AccessDBRoot (pTask, V_BlockString (pStringStore, DSC_Descriptor_Scalar_Int (rCurrent)));
-    else {
+    rtBLOCK_Handle::Strings pBlockStrings;
+    rtLSTORE_Handle::Strings pLStoreStrings;
+    if (pBlockStrings.setTo (rCurrent.store ()))
+	AccessDBRoot (pTask, pBlockStrings[DSC_Descriptor_Scalar_Int (rCurrent)]);
+    else if (pLStoreStrings.setTo (rCurrent.store ())) {
 	rtREFUV_AlignReference (&DSC_Descriptor_Scalar (rCurrent));
-
-	M_CPD *pCharUV = rtLSTORE_CPD_ContentStringsCPD (pStringStore);
-	AccessDBRoot (
-	    pTask, V_LStoreString (pStringStore, pCharUV, DSC_Descriptor_Scalar_Int (rCurrent))
-	);
-
-	pCharUV->release ();
+	AccessDBRoot (pTask, pLStoreStrings[DSC_Descriptor_Scalar_Int (rCurrent)]);
     }
+    else pTask->raiseUnimplementedOperationException (
+	"Federate: Unrecognized String Store Type"
+    );
 }
 
 
@@ -392,22 +393,46 @@ V_DefinePrimitive (ExternalObject) {
 
 /*****  Access the string store for the external object address  *****/
     DSC_Descriptor& rCurrent = pTask->getCurrent ();
-    M_CPD *pStringStore = rCurrent.storeCPD ();
 
 /*****  ... and compile the string.  *****/
-    if (RTYPE_C_Block == M_CPD_RType (pStringStore))
-	pTask->accessExternalObject (
-	    V_BlockString (pStringStore, DSC_Descriptor_Scalar_Int (rCurrent)), bUsingDirectory
-	);
-    else {
+    rtBLOCK_Handle::Strings pBlockStrings;
+    rtLSTORE_Handle::Strings pLStoreStrings;
+    if (pBlockStrings.setTo (rCurrent.store ()))
+	pTask->accessExternalObject (pBlockStrings[DSC_Descriptor_Scalar_Int (rCurrent)], bUsingDirectory);
+    else if (pLStoreStrings.setTo (rCurrent.store ())) {
 	rtREFUV_AlignReference (&DSC_Descriptor_Scalar (rCurrent));
-
-	M_CPD *pCharUV = rtLSTORE_CPD_ContentStringsCPD (pStringStore);
-	pTask->accessExternalObject (
-	    V_LStoreString (pStringStore, pCharUV, DSC_Descriptor_Scalar_Int (rCurrent)), bUsingDirectory
-	);
-	pCharUV->release ();
+	pTask->accessExternalObject (pLStoreStrings[DSC_Descriptor_Scalar_Int (rCurrent)], bUsingDirectory);
     }
+    else pTask->raiseUnimplementedOperationException (
+	"ExternalObject: Unrecognized String Store Type"
+    );
+}
+
+/*****************************
+ *----  XNotify Utility  ----*
+ *****************************/
+
+V_DefinePrimitive (Notify) {
+    if (!pTask->isScalar ()) pTask->raiseUnimplementedOperationException (
+	"Notify: Non-Scalar Operation Not Supported"
+    );
+
+/*****  Getting the Notify parameters  *****/
+    if (!pTask->loadDucWithNextParameterAsMonotype () ||
+	pTask->ducStore ()->DoesntNameTheIntegerClass ()
+    ) {
+	pTask->raiseUnimplementedOperationException ("Notify: Only takes integer event number");
+    }
+
+    pTask->normalizeDuc ();
+
+    if (!pTask->isScalar ())
+	pTask->raiseUnimplementedOperationException ("Notify: Only takes scalar event number");
+
+    unsigned int xEvent = DSC_Descriptor_Scalar_Int (ADescriptor);
+    VString iMsg = pTask->transientServicesProvider ()->getNSMessage ();
+    g_pInfoServerGofer.notify (xEvent, "#%d: %s\n", xEvent, iMsg.content ());
+    pTask->loadDucWithTrue ();
 }
 
 
@@ -716,7 +741,8 @@ V_DefinePrimitive (FormatTimeStamp) {
  *****/
 PrivateFnDef void CompileAndRun (VPrimitiveTask *pTask, char const *source) {
 /*****  Access the local definition dictionary, ...  *****/
-    VCPDReference pDictionary (0, pTask->ducDictionary ());
+    rtDICTIONARY_Handle::Reference pDictionary;
+    pTask->getDucDictionary (pDictionary);
 
 /*****  ... and compile the string.  *****/
     char messageBuffer[256];
@@ -790,7 +816,6 @@ protected:
     VPrimitiveTask *const	m_pTask;
     unsigned int		m_iSubtaskSize;
     rtLINK_CType*		m_pSubtaskSubset;
-    DSC_Descriptor		m_iEmpty;
     VDescriptor			m_iDictionarySource;
     VFragmentation*		m_pDucFragmentation;
 };
@@ -803,8 +828,6 @@ protected:
 VStringEvaluateSubtaskGenerator::VStringEvaluateSubtaskGenerator (VPrimitiveTask *pTask)
 : m_pTask (pTask), m_iSubtaskSize (0), m_pSubtaskSubset (0)
 {
-    m_iEmpty.construct ();
-
     m_iDictionarySource.setToMoved (pTask->duc ());
     m_pDucFragmentation = &pTask->loadDucWithFragmentation ();
 }
@@ -826,18 +849,16 @@ void VStringEvaluateSubtaskGenerator::closeSubtask () {
     if (IsNil (m_pSubtaskSubset))
 	return;
 
-    M_CPD *pSubtaskPToken = m_pTask->NewDomPToken (m_iSubtaskSize);
+    rtPTOKEN_Handle::Reference pSubtaskPToken (m_pTask->NewDomPToken (m_iSubtaskSize));
     m_pSubtaskSubset->Close (pSubtaskPToken);
 
-    m_pTask->blockContext ()->retain (); m_pSubtaskSubset->retain ();
-    DSC_Descriptor iParent;
-    iParent.constructLink (m_pTask->blockContext (), m_pSubtaskSubset);
+    m_pSubtaskSubset->retain ();
+    DSC_Pointer iParentPointer;
+    iParentPointer.constructLink (m_pSubtaskSubset);
 
     m_pDucFragmentation->createFragment (m_pSubtaskSubset)->datum().setToIdentity (
-	new rtCLOSURE_Constructor (
-	    new rtCONTEXT_Constructor (
-		m_iEmpty, m_iEmpty, m_iEmpty, iParent
-	    ), m_pTask->primitive ()
+	new rtCLOSURE_Handle (
+	    new rtCONTEXT_Handle (m_pTask->blockContext (), iParentPointer), m_pTask->primitive ()
 	), pSubtaskPToken
     );
 
@@ -882,20 +903,14 @@ V_DefinePrimitive (StringEvaluate) {
 /*****  Access the string store, ...  *****/
     DSC_Descriptor& rCurrent = pTask->getCurrent ();
 
-    M_CPD *pStringStore = rCurrent.storeCPD ();
-
 /*****  ... and compile the string.  *****/
-    if (RTYPE_C_Block == M_CPD_RType (pStringStore)) {
-	if (rCurrent.isScalar ()) CompileAndRun (
-	    pTask, V_BlockString (
-		pStringStore, DSC_Descriptor_Scalar_Int (rCurrent)
-	    )
-	);
-	else if (DSC_Descriptor_Value (rCurrent).isACoercedScalar ()) CompileAndRun (
-	    pTask, V_BlockString (
-		pStringStore, rtINTUV_CPD_Array (DSC_Descriptor_Value (rCurrent))[0]
-	    )
-	);
+    rtBLOCK_Handle::Strings pBlockStrings;
+    rtLSTORE_Handle::Strings pLStoreStrings;
+    if (pBlockStrings.setTo (rCurrent.store ())) {
+	if (rCurrent.isScalar ())
+	    CompileAndRun (pTask, pBlockStrings[DSC_Descriptor_Scalar_Int (rCurrent)]);
+	else if (DSC_Descriptor_Value (rCurrent).isACoercedScalar ())
+	    CompileAndRun (pTask, pBlockStrings[rtINTUV_CPD_Array (DSC_Descriptor_Value (rCurrent))[0]]);
 	else {
 	    unsigned int elementCount = pTask->cardinality ();
 	    unsigned int const *stringIndices = (unsigned int *)rtINTUV_CPD_Array (
@@ -924,16 +939,10 @@ V_DefinePrimitive (StringEvaluate) {
     }
 
 
-    else {
-	M_CPD *pCharUV = rtLSTORE_CPD_ContentStringsCPD (pStringStore);
-
+    else if (pLStoreStrings.setTo (rCurrent.store ())) {
 	if (rCurrent.isScalar ()) {
 	    rtREFUV_AlignReference (&DSC_Descriptor_Scalar (rCurrent));
-	    CompileAndRun (
-		pTask, V_LStoreString (
-		    pStringStore, pCharUV, DSC_Descriptor_Scalar_Int (rCurrent)
-		)
-	    );
+	    CompileAndRun (pTask, pLStoreStrings[DSC_Descriptor_Scalar_Int (rCurrent)]);
 	}
 	else {
 	    bool aBlockHasBeenScheduled = false;
@@ -947,9 +956,7 @@ V_DefinePrimitive (StringEvaluate) {
 			EC__InternalInconsistency,\
 			"StringEvaluate: Non-Unique String Encountered"\
 		    );\
-		    else CompileAndRun (\
-			pTask, V_LStoreString (pStringStore, pCharUV, origin)\
-		    );\
+		    else CompileAndRun (pTask, pLStoreStrings[origin]);\
 		    aBlockHasBeenScheduled = true;\
 		}
 #ifdef __VMS
@@ -983,8 +990,6 @@ V_DefinePrimitive (StringEvaluate) {
 #		undef handleRepeat
 	    }
 	}
-
-	pCharUV->release ();
     }
 }
 
@@ -1043,39 +1048,11 @@ V_DefinePrimitive (Send) {
 	pTask->normalizeDuc ();
 	DSC_Descriptor& rDucMonotype = pTask->ducMonotype ();
 
-	rtBLOCK_Handle *pBlock = 0; unsigned int xPrimitive = 0;
-	M_CPD *closureCPD; rtCLOSURE_Constructor *closure = static_cast<rtCLOSURE_Constructor*> (
-	    rDucMonotype.storePOIfAvailable ()
+	rtBLOCK_Handle::Reference pBlock; unsigned int xPrimitive = 0; rtCONTEXT_Handle::Reference pContext;
+	rDucMonotype.decodeClosure (pBlock, xPrimitive, &pContext);
+	if (pBlock) iMy.constructComposition (
+	    DSC_Descriptor_Pointer (rDucMonotype), pContext->getCurrent ()
 	);
-	if (closure) {
-	    if (closure->isAPrimitiveClosure ())
-		xPrimitive = closure->primitive ();
-	    else {
-		rtCONTEXT_Constructor *context = closure->context ();
-		DSC_Descriptor& rClosureCurrent = context->getCurrent ();
-		iMy.constructComposition (
-		    DSC_Descriptor_Pointer (rDucMonotype), rClosureCurrent
-		);
-		pBlock = closure->block ();
-	    }
-	}
-	else if (rtCLOSURE_CPD_IsAPrimClosure (closureCPD = rDucMonotype.storeCPDIfAvailable ()))
-	    xPrimitive = rtCLOSURE_CPD_Primitive (closureCPD);
-	else {
-	    DSC_Descriptor dsc; {
-		VCPDReference pContext (
-		    closureCPD, rtCLOSURE_CPx_Context, RTYPE_C_Context
-		);
-		VCPDReference pDescriptor (
-		    pContext, rtCONTEXT_CPx_Current, RTYPE_C_Descriptor
-		);
-		rtDSC_Unpack (pDescriptor, &dsc);
-	    }
-	    iMy.constructComposition (DSC_Descriptor_Pointer (rDucMonotype), dsc);
-	    dsc.clear ();
-
-	    pBlock = static_cast<rtBLOCK_Handle*>(closureCPD->GetContainerHandle (rtCLOSURE_CPx_Block, RTYPE_C_Block));
-	}
 
 /*****  Initialize 'self', 'current', and 'parent':  *****/
 	DSC_Descriptor& rSelf = pTask->getSelf ();
@@ -1086,11 +1063,11 @@ V_DefinePrimitive (Send) {
 	iCurrent.construct (iSelf);
 
 /*****  Create the task descriptor:  *****/
-	rtCONTEXT_Constructor *pContext = new rtCONTEXT_Constructor (iSelf, iCurrent, iMy);
+	pContext.setTo (new rtCONTEXT_Handle (iSelf, iCurrent, iMy));
 	pTask->loadDucWithIdentity (
-	    pBlock ? new rtCLOSURE_Constructor (
+	    pBlock ? new rtCLOSURE_Handle (
 		pContext, pBlock, rDucMonotype.storeMask ()
-	    ) : new rtCLOSURE_Constructor (
+	    ) : new rtCLOSURE_Handle (
 		pContext, xPrimitive, rDucMonotype.storeMask ()
 	    )
 	);
@@ -1210,12 +1187,13 @@ PrivateFnDef void SendConverseByToEval (
 
 
 V_DefinePrimitive (ForDatesInRangeEvaluate) {
-    VDescriptor		functionXDsc,
-			initialDateXDsc,
-			finalDateXDsc;
-    DSC_Descriptor	keyDsc;
-    M_CPD		*ptoken, *dateUV;
-    int			dateIncrementType;
+    VDescriptor			functionXDsc,
+				initialDateXDsc,
+				finalDateXDsc;
+    DSC_Descriptor		keyDsc;
+    rtPTOKEN_Handle::Reference	ptoken;
+    M_CPD*			dateUV;
+    int				dateIncrementType;
 
 #define initialDateDsc	initialDateXDsc.contentAsMonotype ()
 #define finalDateDsc	finalDateXDsc.contentAsMonotype ()
@@ -1279,14 +1257,14 @@ V_DefinePrimitive (ForDatesInRangeEvaluate) {
  *  If either of the date arguments are polymorphic, or not 'dates'
  *  then send the converse message.
  *****/
-    if (!initialDateXDsc.isStandard() || initialDateDsc.storeCPD()->DoesntNameTheDateClass()) {
+    if (!initialDateXDsc.isStandard() || initialDateDsc.store ()->DoesntNameTheDateClass()) {
 	SendConverseByToEval (
 	    pTask, KS__ByToEvaluate, initialDateXDsc, finalDateXDsc, functionXDsc
 	);
 	return;
     }
 
-    if (!finalDateXDsc.isStandard() || finalDateDsc.storeCPD()->DoesntNameTheDateClass()) {
+    if (!finalDateXDsc.isStandard() || finalDateDsc.store ()->DoesntNameTheDateClass()) {
 	SendConverseByToEval (
 	    pTask, KS__ByFromEvaluate, finalDateXDsc, initialDateXDsc, functionXDsc
 	);
@@ -1303,8 +1281,6 @@ V_DefinePrimitive (ForDatesInRangeEvaluate) {
 
 /*****  Scalar case ... *****/
     if (initialDateDsc.isScalar () || initialDateDsc.holdsAScalarIdentity ()) {
-	rtINTUV_ElementType	*uvp;
-
 /*****  Create the integer uvector to hold all the dates ... *****/
 	unsigned int totalDateCount = DATES_EnumerateDatesInRange (  /*Count??? */
 	    DSC_Descriptor_Scalar_Int (initialDateDsc),
@@ -1315,9 +1291,9 @@ V_DefinePrimitive (ForDatesInRangeEvaluate) {
 	    true
 	);
 
-	ptoken = pTask->NewCodPToken (totalDateCount);
+	ptoken.setTo (pTask->NewCodPToken (totalDateCount));
 	dateUV = pTask->NewDateUV (ptoken);
-	uvp = rtINTUV_CPD_Array (dateUV);
+	rtINTUV_ElementType *uvp = rtINTUV_CPD_Array (dateUV);
 
 	unsigned int dateCount = DATES_EnumerateDatesInRange (
 	    DSC_Descriptor_Scalar_Int (initialDateDsc),
@@ -1364,7 +1340,7 @@ V_DefinePrimitive (ForDatesInRangeEvaluate) {
 	    true
 	);
 
-	ptoken = pTask->NewCodPToken (totalDateCount1);
+	ptoken.setTo (pTask->NewCodPToken (totalDateCount1));
 	dateUV = pTask->NewDateUV (ptoken);
 	uvp = rtINTUV_CPD_Array (dateUV);
 
@@ -1402,7 +1378,6 @@ V_DefinePrimitive (ForDatesInRangeEvaluate) {
     dateUV->release ();
 
     rtINDEX_Key *pTemporalContext = new rtINDEX_Key (ptoken, &keyDsc);
-    ptoken->release ();
     keyDsc.clear ();
 
 /*****  Set the continuation, ... *****/
@@ -1469,11 +1444,9 @@ V_DefinePrimitive (SelectorToString) {
 
 	    /***  Block String ***/
 	    if (rtype == RTYPE_C_IntUV) {
-		DSC_Scalar_RefPToken (DSC_Descriptor_Scalar (ADescriptor))->release ();
-
-		M_CPD *pRPT = pTask->ducStore ()->TheStringClass ().PTokenCPD ();
-		pRPT->retain ();
-		DSC_Scalar_RefPToken (DSC_Descriptor_Scalar (ADescriptor)) = pRPT;
+		DSC_Descriptor_Scalar (ADescriptor).setRPT (
+		    pTask->ducStore ()->kot ()->TheStringClass.PTokenHandle ()
+		);
 	    }
 	    /*** LStore String - return as is ***/
 	    break;
@@ -1514,7 +1487,7 @@ V_DefinePrimitive (SelectorToString) {
 	    /***  Block Strings  ***/
 	    if (rtype == RTYPE_C_IntUV) {
 		DSC_Descriptor_Value (ADescriptor)->StoreReference (
-		    UV_CPx_RefPToken, pTask->ducStore()->TheStringClass().PTokenCPD ()
+		    UV_CPx_RefPToken, pTask->ducStore()->kot()->TheStringClass.PTokenHandle ()
 		);
 	    }
 	    /***  LStore strings - OK as is ***/
@@ -1546,20 +1519,20 @@ V_DefinePrimitive (SelectorToString) {
  *****  selector associated with a block.
  *
  *  Arguments:
- *	block			- a standard CPD for the block whose selector
+ *	pBlock			- a handle for the block whose selector
  *				  is to be accessed.
  *
  *  Returns:
  *	NOTHING - Executed for side effect only.
  *
  *****/
-PrivateFnDef void LoadAWithBlockSelector (VPrimitiveTask *pTask, M_CPD *block) {
-    if (IsNil (block) || rtBLOCK_CPD_NoSelector (block))
+PrivateFnDef void LoadAWithBlockSelector (VPrimitiveTask *pTask, rtBLOCK_Handle *pBlock) {
+    if (IsNil (pBlock) || pBlock->selectorUndefined ())
 	pTask->loadDucWithNA ();
-    else if (rtBLOCK_CPD_SelectorIsKnown (block))
-        pTask->loadDucWithSelector (rtBLOCK_CPD_SelectorIndex (block));
+    else if (pBlock->selectorIsKnown ())
+        pTask->loadDucWithSelector (pBlock->selectorIndex ());
     else
-        pTask->loadDucWithSelector (block, rtBLOCK_CPD_SelectorIndex (block));
+        pTask->loadDucWithSelector (pBlock, pBlock->selectorIndex ());
 }
 
 
@@ -1578,12 +1551,11 @@ V_DefinePrimitive (ClosureSelector) {
     pTask->loadDucWithCurrent ();
 
 /*****  Obtain the block associated with this closure...  *****/
-    rtBLOCK_Handle::Reference block; unsigned int primitive;
-    pTask->decodeClosureInDuc (block, primitive);
+    rtBLOCK_Handle::Reference pBlock; unsigned int primitive;
+    pTask->decodeClosureInDuc (pBlock, primitive);
 
 /*****  ... and load the accumulator with an 'undefined' or the selector:  *****/
-    VCPDReference pBlockCPD (0, block ?  block->GetCPD () : 0);
-    LoadAWithBlockSelector (pTask, pBlockCPD);
+    LoadAWithBlockSelector (pTask, pBlock);
 }
 
 
@@ -1597,20 +1569,16 @@ V_DefinePrimitive (ClosureSelector) {
  *	'NA' or a descriptor for the method block's selector.
  *
  *****/
-V_DefinePrimitive (MethodSelector)
-{
+V_DefinePrimitive (MethodSelector) {
 /*****  Obtain '^current'...  *****/
     DSC_Descriptor& rCurrent = pTask->getCurrent ();
 
 /*****  Obtain a CPD for the block associated with this method...  *****/
-    M_CPD *method = rCurrent.storeCPD ();
-    M_CPD *block = rtMETHOD_CPD_BlockCPD (method);
+    rtBLOCK_Handle::Reference pBlock;
+    static_cast<rtMETHOD_Handle*>(rCurrent.store ())->getBlock (pBlock);
 
 /*****  ... load the accumulator with an 'undefined' or the selector...  *****/
-    LoadAWithBlockSelector (pTask, block);
-
-/*****  ... and clean up.  *****/
-    block->release ();
+    LoadAWithBlockSelector (pTask, pBlock);
 }
 
 
@@ -1628,19 +1596,17 @@ V_DefinePrimitive (ClosureAsMethod) {
 //  Get the closure and decode it, ...
     DSC_Descriptor& rCurrent = pTask->getCurrent ();
 
-    VReference<rtBLOCK_Handle> pBlock; unsigned int xPrimitive; rtCONTEXT_Constructor *pContext;
+    VReference<rtBLOCK_Handle> pBlock; unsigned int xPrimitive; rtCONTEXT_Handle::Reference pContext;
     rCurrent.decodeClosure (pBlock, xPrimitive, &pContext);
 
 //  If the closure is a block context...  *****/
     if (pBlock) {
     /*****  ... construct and return a method:  *****/
-	DSC_Descriptor& rClosureCurrent = pContext->getCurrent ();
-
 	DSC_Descriptor iMethod;
-	iMethod.constructComposition (DSC_Descriptor_Pointer (rCurrent), rClosureCurrent);
+	iMethod.constructComposition (DSC_Descriptor_Pointer (rCurrent), pContext->getCurrent ());
 
-	M_CPD *pMethod = rtMETHOD_New (
-	    pTask->codScratchPad (), pBlock, iMethod.storeCPD ()
+	rtMETHOD_Handle::Reference pMethod (
+	    new rtMETHOD_Handle (pTask->codScratchPad (), pBlock, iMethod.store ())
 	);
 	pMethod->setAttentionMaskTo (rCurrent.storeMask ());
 	iMethod.setStoreTo (pMethod);
@@ -1651,9 +1617,6 @@ V_DefinePrimitive (ClosureAsMethod) {
     /*****  ... otherwise, return the index of the primitive:  *****/
         pTask->loadDucWithPrimitive (xPrimitive);
     }
-
-//  And clean-up:
-    pContext->release ();
 }
 
 
@@ -1698,27 +1661,26 @@ V_DefinePrimitive (MethodAsClosure) {
 	iMy.reorder (distribution);
 
 /*****  Obtain a reference to the positional P-Token of the context...  *****/
-    M_CPD *posPToken = iCurrent.PPT ();
+    rtPTOKEN_Handle::Reference posPToken (iCurrent.PPT ());
 
 /*****  Obtain a CPD for the method...  *****/
-    M_CPD *method = iMy.storeCPD ();
-    method->retain ();
+    rtMETHOD_Handle::Reference pMethod (static_cast<rtMETHOD_Handle*>(iMy.store ()));
 
 /*****
  *  Change 'origin's store to the store associated with the method...
  *****/
-    iMy.setStoreTo (rtMETHOD_CPD_OriginCPD (method));
+    Vdd::Store::Reference pMyStore;
+    pMethod->getMyStore (pMyStore);
+    iMy.setStoreTo (pMyStore);
 
 /*****  Create a descriptor for the new closure...  *****/
+    rtBLOCK_Handle::Reference pBlock;
+    pMethod->getBlock (pBlock);
     ADescriptor.constructIdentity (
-	new rtCLOSURE_Constructor (
-	    new rtCONTEXT_Constructor (iSelf, iCurrent, iMy),
-	    static_cast<rtBLOCK_Handle*> (
-		method->GetContainerHandle (rtMETHOD_CPx_Block, RTYPE_C_Block)
-	    ), method->attentionMask ()
+	new rtCLOSURE_Handle (
+	    new rtCONTEXT_Handle (iSelf, iCurrent, iMy), pBlock, pMethod->attentionMask ()
 	), posPToken
     );
-    method->release ();
 
 /*****
  *  And adjust its order if a distribution was factored from the recipient...
@@ -1744,26 +1706,9 @@ V_DefinePrimitive (ClosureSelf) {
     DSC_Descriptor& rCurrent = pTask->getCurrent ();
 
     DSC_Descriptor result;
-    rtCLOSURE_Constructor *closureC = static_cast<rtCLOSURE_Constructor*> (rCurrent.storePOIfAvailable ());
-    if (IsntNil (closureC)) {
-	rtCONTEXT_Constructor *contextC = closureC->context ();
-	DSC_Descriptor& rClosureSelf = contextC->getSelf ();
-	result.constructComposition (DSC_Descriptor_Pointer (rCurrent), rClosureSelf);
-    }
-    else {
-	M_CPD *contextCPD = rtCLOSURE_CPD_ContextCPD (rCurrent.storeCPDIfAvailable ());
-	M_CPD *pDescriptor = rtCONTEXT_CPD_SelfCPD (contextCPD);
-
-	DSC_Descriptor dsc;
-	rtDSC_Unpack (pDescriptor, &dsc);
-
-	contextCPD->release ();
-	pDescriptor->release ();
-
-	result.constructComposition (DSC_Descriptor_Pointer (rCurrent), dsc);
-	dsc.clear ();
-    }
-
+    result.constructComposition (
+	DSC_Descriptor_Pointer (rCurrent), static_cast<rtCLOSURE_Handle*> (rCurrent.store ())->getSelf ()
+    );
     pTask->loadDucWithMoved (result);
 }
 
@@ -1782,26 +1727,9 @@ V_DefinePrimitive (ClosureCurrent) {
     DSC_Descriptor& rCurrent = pTask->getCurrent ();
 
     DSC_Descriptor result;
-    rtCLOSURE_Constructor *closureC = static_cast<rtCLOSURE_Constructor*> (rCurrent.storePOIfAvailable ());
-    if (IsntNil (closureC)) {
-	rtCONTEXT_Constructor *contextC = closureC->context ();
-	DSC_Descriptor& rClosureCurrent = contextC->getCurrent ();
-	result.constructComposition (DSC_Descriptor_Pointer (rCurrent), rClosureCurrent);
-    }
-    else {
-	M_CPD *contextCPD = rtCLOSURE_CPD_ContextCPD (rCurrent.storeCPDIfAvailable ());
-	M_CPD *pDescriptor = rtCONTEXT_CPD_CurrentCPD (contextCPD);
-
-	DSC_Descriptor dsc;
-	rtDSC_Unpack (pDescriptor, &dsc);
-
-	contextCPD->release ();
-	pDescriptor->release ();
-
-	result.constructComposition (DSC_Descriptor_Pointer (rCurrent), dsc);
-	dsc.clear ();
-    }
-
+    result.constructComposition (
+	DSC_Descriptor_Pointer (rCurrent), static_cast<rtCLOSURE_Handle*> (rCurrent.store ())->getCurrent ()
+    );
     pTask->loadDucWithMoved (result);
 }
 
@@ -1818,40 +1746,15 @@ V_DefinePrimitive (ClosureCurrent) {
  *****/
 V_DefinePrimitive (ClosureOrigin) {
     DSC_Descriptor& rCurrent = pTask->getCurrent ();
+    DSC_Descriptor& rClosureOrigin = static_cast<rtCLOSURE_Handle*> (rCurrent.store ())->getMy ();
 
-    DSC_Descriptor result;
-    rtCLOSURE_Constructor *closureC = static_cast<rtCLOSURE_Constructor*> (rCurrent.storePOIfAvailable ());
-    if (IsntNil (closureC)) {
-	rtCONTEXT_Constructor *contextC = closureC->context ();
-	DSC_Descriptor& rClosureOrigin = contextC->getMy ();
-
-	if (rClosureOrigin.isEmpty ()) {
-	    pTask->loadDucWithNA ();
-	    return;
-	}
-
-	result.constructComposition (DSC_Descriptor_Pointer (rCurrent), rClosureOrigin);
-    }
+    if (rClosureOrigin.isEmpty ())
+	pTask->loadDucWithNA ();
     else {
-	M_CPD *contextCPD = rtCLOSURE_CPD_ContextCPD (rCurrent.storeCPDIfAvailable ());
-	M_CPD *pDescriptor = rtCONTEXT_CPD_OriginCPD (contextCPD);
-
-	DSC_Descriptor	dsc;
-	rtDSC_Unpack (pDescriptor, &dsc);
-
-	contextCPD->release ();
-	pDescriptor->release ();
-
-	if (dsc.isEmpty ()) {
-	    pTask->loadDucWithNA ();
-	    return;
-	}
-
-	result.constructComposition (DSC_Descriptor_Pointer (rCurrent), dsc);
-	dsc.clear ();
+	DSC_Descriptor result;
+	result.constructComposition (DSC_Descriptor_Pointer (rCurrent), rClosureOrigin);
+	pTask->loadDucWithMoved (result);
     }
-
-    pTask->loadDucWithMoved (result);
 }
 
 
@@ -1863,13 +1766,11 @@ V_DefinePrimitive (Assign) {
 /*****  Obtain the vector, ...  *****/
     DSC_Descriptor& rCurrent = pTask->getCurrent ();
 
-    M_CPD *pVector = rCurrent.storeCPD ();
-
 /*****  ... obtain the parameter, ...  *****/
     pTask->loadDucWithNextParameter ();
 
 /*****  ... and perform the assignment.  *****/
-    pTask->duc ().assignTo (DSC_Descriptor_Pointer (rCurrent), pVector);
+    pTask->duc ().assignTo (DSC_Descriptor_Pointer (rCurrent), rCurrent.store ());
 }
 
 
@@ -1878,30 +1779,27 @@ V_DefinePrimitive (Assign) {
  *********************************************/
 
 V_DefinePrimitive (CleanStore) {
-    bool deletingEmptyUSegments;
+    bool bCleaning;
 
     switch (V_TOTSC_Primitive) {
     case XCleanStore:
-	deletingEmptyUSegments = true;
+	bCleaning = true;
 	break;
     case XAlignStore:
-	deletingEmptyUSegments = false;
+	bCleaning = false;
         break;
     default:
 	pTask->raiseUnimplementedAliasException ("CleanAndAlignStore");
 	break;
     }
 
-/*****  rtVSTORE_AlignAll does the r-type switch, ...  *****/
-    pTask->loadDucWithBoolean (
-	rtVSTORE_AlignAll (pTask->getSelf ().storeCPD (), deletingEmptyUSegments)
-    );
+    pTask->loadDucWithBoolean (pTask->getSelf ().store ()->alignAll (bCleaning));
 }
 
 V_DefinePrimitive (CleanDictionary) {
-    M_CPD *pDictionaryCPD = pTask->getSelf ().dictionaryCPD ();
-    pTask->loadDucWithBoolean (rtDICTIONARY_AlignAll (pDictionaryCPD, true));
-    pDictionaryCPD->release ();
+    rtDICTIONARY_Handle::Reference pDictionary;
+    pTask->getSelf ().getDictionary (pDictionary);
+    pTask->loadDucWithBoolean (pDictionary->alignAll ());
 }
 
 
@@ -2001,6 +1899,7 @@ struct SessionAttribute {
 
 /*****  General Session Parameter Indices  *****/
 
+#define GP_NSMessage          511
 #define GP_SetExitValue	      512
 
 /*****  Space Update Parameter Indices  *****/
@@ -2156,7 +2055,7 @@ PrivateFnDef void SetSessionAttributeToInteger (
 	VComputationUnit::Context::g_fVerboseSelectorNotFound = value ? true : false;
 	break;
     case EP_CachingContainerHandles:
-	VContainerHandle::g_fPreservingHandles = value ? true : false;
+	VContainerHandle::g_bPreservingHandles = value ? true : false;
 	break;
     case EP_CachingDictionaries:
 	rtDICTIONARY_UsingCache = value ? true : false;
@@ -2268,6 +2167,9 @@ PrivateFnDef void SetSessionAttributeToString (
     case EP_VisionUsageLogDelimiter:
 	pTask->transientServicesProvider ()->updateUsageLogDelimiter (value);
 	break;
+    case GP_NSMessage:
+	pTask->transientServicesProvider ()->setNSMessage (value);
+	break;
     default:
 	break;
     }
@@ -2341,7 +2243,7 @@ PrivateFnDef void SetSessionAttributeToBoolean (VPrimitiveTask *pTask, bool valu
     ) SetSessionAttributeToInteger (pTask, pp, value);
 }
 
-PrivateFnDef void SetSessionAttributeToBlockString (VPrimitiveTask *pTask, M_CPD *pStringStore) {
+PrivateFnDef void SetSessionAttributeToBlockString (VPrimitiveTask *pTask, rtBLOCK_Handle::Strings &rpStrings) {
     DSC_Descriptor &rCurrent = pTask->getCurrent ();
 
     SessionAttribute *pp, *pl;
@@ -2350,7 +2252,7 @@ PrivateFnDef void SetSessionAttributeToBlockString (VPrimitiveTask *pTask, M_CPD
     if (DucIsAScalar) SetSessionAttributeToString (
 	pTask,
 	(SessionAttribute*)&DSC_Descriptor_Scalar_Int (rCurrent),
-	V_BlockString (pStringStore, DSC_Descriptor_Scalar_Int (ADescriptor))
+	rpStrings[DSC_Descriptor_Scalar_Int (ADescriptor)]
     );
     else for (
 	pp = (SessionAttribute*)rtINTUV_CPD_Array (DSC_Descriptor_Value (rCurrent)),
@@ -2358,20 +2260,18 @@ PrivateFnDef void SetSessionAttributeToBlockString (VPrimitiveTask *pTask, M_CPD
 	ip = rtINTUV_CPD_Array (DSC_Descriptor_Value (ADescriptor));
 	pp < pl;
 	pp++, ip++
-    ) SetSessionAttributeToString (pTask, pp, V_BlockString (pStringStore, *ip));
+    ) SetSessionAttributeToString (pTask, pp, rpStrings[*ip]);
 }
 
-PrivateFnDef void SetSessionAttributeToLStoreString (VPrimitiveTask *pTask, M_CPD *pStringStore) {
+PrivateFnDef void SetSessionAttributeToLStoreString (VPrimitiveTask *pTask, rtLSTORE_Handle::Strings &rpStrings) {
     DSC_Descriptor &rCurrent = pTask->getCurrent ();
 
-    rtLSTORE_Align (pStringStore);
-    M_CPD *charuv = rtLSTORE_CPD_ContentStringsCPD (pStringStore);
     if (DucIsAScalar) {
 	rtREFUV_AlignReference (&DSC_Descriptor_Scalar (ADescriptor));
 	SetSessionAttributeToString (
 	    pTask,
 	    (SessionAttribute*)&DSC_Descriptor_Scalar_Int (rCurrent),
-	    V_LStoreString (pStringStore, charuv, DSC_Descriptor_Scalar_Int (ADescriptor))
+	    rpStrings[DSC_Descriptor_Scalar_Int (ADescriptor)]
 	);
     }
     else {
@@ -2383,10 +2283,9 @@ PrivateFnDef void SetSessionAttributeToLStoreString (VPrimitiveTask *pTask, M_CP
 	     rp = rtREFUV_CPD_Array (refuv);
 	     pp < pl;
 	     pp++, rp++
-	) SetSessionAttributeToString (pTask, pp, V_LStoreString (pStringStore, charuv, *rp));
+	) SetSessionAttributeToString (pTask, pp, rpStrings[*rp]);
 	refuv->release ();
     }
-    charuv->release ();
 }
 
 
@@ -2400,21 +2299,22 @@ V_DefinePrimitive (SetSessionAttribute) {
 /*****  Otherwise, acquire both operands of the binary ... *****/
     pTask->normalizeDuc ();
 
-    M_CPD *argType = pTask->ducStore ();
-    if (argType->NamesTheDoubleClass ())
+    rtBLOCK_Handle::Strings pBlockStrings;
+    rtLSTORE_Handle::Strings pLStoreStrings;
+
+    Vdd::Store *pArgStore = pTask->ducStore ();
+    if (pArgStore->NamesTheDoubleClass ())
 	SetSessionAttributeToDouble (pTask);
-    else if (argType->NamesTheIntegerClass ())
+    else if (pArgStore->NamesTheIntegerClass ())
 	SetSessionAttributeToInteger (pTask);
-    else if (argType->NamesTheTrueClass ())
+    else if (pArgStore->NamesTheTrueClass ())
 	SetSessionAttributeToBoolean (pTask, true);
-    else if (argType->NamesTheFalseClass ())
+    else if (pArgStore->NamesTheFalseClass ())
 	SetSessionAttributeToBoolean (pTask, false);
-    else if (RTYPE_C_Block == (RTYPE_Type)M_CPD_RType (argType))
-	SetSessionAttributeToBlockString (pTask, argType);
-    else if (
-	RTYPE_C_ListStore == (RTYPE_Type)M_CPD_RType (argType) &&
-	rtLSTORE_CPD_StringStore (argType)
-    ) SetSessionAttributeToLStoreString (pTask, argType);
+    else if (pBlockStrings.setTo (pArgStore))
+	SetSessionAttributeToBlockString (pTask, pBlockStrings);
+    else if (pLStoreStrings.setTo (pArgStore))
+	SetSessionAttributeToLStoreString (pTask, pLStoreStrings);
 }
 
 
@@ -2457,7 +2357,7 @@ PrivateFnDef void dumpTheTable (
     pObjectCPD->WriteDBUpdateInfo (replace);
 
 /*****  Output the VStore or LStore ... *****/
-    RTYPE_Type xObjectRType = (RTYPE_Type)M_CPD_RType (pObjectCPD);
+    RTYPE_Type xObjectRType = pObjectCPD->RType ();
     if (xObjectRType == RTYPE_C_ValueStore) {
 	IO_printf ("+++ Writing the ValueStore Records ... \n");
 	rtVSTORE_WriteDBUpdateInfo (pObjectCPD);
@@ -2483,19 +2383,12 @@ PrivateFnDef void dumpTheTable (
 
 
 V_DefinePrimitive (DBUpdateDump) {
-    char const *filename;
     bool	replace;
     int		converseMessageSelector;
 
 /*****   Define Internal macros  *****/
-#define handleBlockStrings(value) {\
-    filename = V_BlockString (pStringStore, value);\
-    dumpTheTable (pTask, filename, replace, object);\
-}
-
-#define handleLStoreStrings(value) {\
-    filename = V_LStoreString (pStringStore, charCPD, value);\
-    dumpTheTable (pTask, filename, replace, object);\
+#define handleStrings(value) {\
+    dumpTheTable (pTask, pStrings[value], replace, pObjectCPD);\
 }
 
 /*---------------------------------------------------------------------------
@@ -2530,33 +2423,36 @@ V_DefinePrimitive (DBUpdateDump) {
     pTask->normalizeDuc ();
 
 /*****  Get the object to dump ... *****/
-    M_CPD *object = pTask->ducStore ();
+    VContainerHandle::Reference pContainerHandle;
+    pTask->ducStore ()->getContainerHandle (pContainerHandle);
+
+    VCPDReference pObjectCPD (0, pContainerHandle->GetCPD ());
 
 /*****  Determine the file(s) to create ... *****/
-    M_CPD *pStringStore = rCurrent.storeCPD ();
-    RTYPE_Type xStoreRType = (RTYPE_Type)M_CPD_RType (pStringStore);
-    if (xStoreRType == RTYPE_C_Block) {
+    rtBLOCK_Handle::Strings pBlockStrings;
+    rtLSTORE_Handle::Strings pLStoreStrings;
+    if (pBlockStrings.setTo (rCurrent.store ())) {
+#define pStrings pBlockStrings
 	if (DucIsAScalar) {
-	    handleBlockStrings (DSC_Descriptor_Scalar_Int (rCurrent));
+	    handleStrings (DSC_Descriptor_Scalar_Int (rCurrent));
 	}
 	else {
-	    DSC_Traverse (rCurrent, handleBlockStrings);
+	    DSC_Traverse (rCurrent, handleStrings);
 	}
+#undef pStrings
     }
-    else if (xStoreRType == RTYPE_C_ListStore && rtLSTORE_CPD_StringStore (pStringStore)) {
-	M_CPD *charCPD = rtLSTORE_CPD_ContentStringsCPD (pStringStore);
+    else if (pLStoreStrings.setTo (rCurrent.store ())) {
+#define pStrings pLStoreStrings
 	if (DucIsAScalar) {
-	    handleLStoreStrings (DSC_Descriptor_Scalar_Int (rCurrent));
+	    handleStrings (DSC_Descriptor_Scalar_Int (rCurrent));
 	}
 	else {
-	    DSC_Traverse (rCurrent, handleLStoreStrings);
+	    DSC_Traverse (rCurrent, handleStrings);
 	}
-
-	charCPD->release ();
+#undef pStrings
     }
 
-#undef handleBlockStrings
-#undef handleLStoreStrings
+#undef handleStrings
 }
 
 
@@ -2610,6 +2506,10 @@ BeginDescriptions
     PD (XExternalObject,
 	"ExternalObject",
 	ExternalObject)
+
+    PD (XNotify,
+	"Notify",
+	Notify)
 
     PD (XSetSessionAttribute,
 	"SetSessionAttribute", 

@@ -7,8 +7,9 @@
 
 #include "VPrimitiveTaskController.h"
 
-#include "VCPDReference.h"
 #include "VMutexClaim.h"
+
+#include "Vdd_Store.h"
 
 /**************************
  *****  Declarations  *****
@@ -47,7 +48,7 @@ protected:
 //  State
 protected:
     VMutexClaim			m_iMutexClaim;
-    VContainerHandle::Reference	m_pProtectedContainer;
+    Vdd::Store::Reference	m_pProtectedContainer;
     VPrimitiveDescriptor*	m_pProtectedPrimitive;
 };
 

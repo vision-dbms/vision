@@ -60,6 +60,21 @@
  ***************************/
 
 DEFINE_CONCRETE_RTT (rtINDEX_Handle);
+
+/******************************
+ ******************************
+ *****  Canonicalization  *****
+ ******************************
+ ******************************/
+
+bool rtINDEX_Handle::getCanonicalization_(rtVSTORE_Handle::Reference &rpStore, DSC_Pointer const &rPointer) {
+    rpStore.setTo (
+	static_cast<rtVSTORE_Handle*>(
+	    (isATimeSeries () ? TheTimeSeriesClass () : TheIndexedListClass ()).ObjectHandle ()
+	)
+    );
+    return true;
+}
 
 
 /**************************
@@ -149,7 +164,7 @@ DEFINE_CONCRETE_RTT (rtINDEX_Key);
  *****  Routine to create a new key.
  *
  *  Argument:
- *	posPToken	- the positional p-token of 'source'.  Redundant but
+ *	pPPT		- the positional p-token of 'source'.  Redundant but
  *			  available.
  *	source		- a standard descriptor for the elements to be held
  *                        in this key.
@@ -158,12 +173,8 @@ DEFINE_CONCRETE_RTT (rtINDEX_Key);
  *	The address of the created key.
  *
  *****/
-rtINDEX_Key::rtINDEX_Key (M_CPD *posPToken, DSC_Descriptor *source) : BaseClass (1) {
+rtINDEX_Key::rtINDEX_Key (rtPTOKEN_Handle *pPPT, DSC_Descriptor *source) : BaseClass (1), m_pPPT (pPPT) {
     NewKeyCount++;
-
-/*****  Set the p-token...*****/
-    posPToken->retain ();
-    m_pPPT = posPToken;
 
 /*****  Decode the source descriptor ... *****/
     if (source->isScalar ()) {
@@ -210,9 +221,11 @@ rtINDEX_Key::rtINDEX_Key (
     rtINDEX_Key *parent, rtLINK_CType *subset, M_CPD *reordering
 ) : BaseClass (1) {
 /*****  Make sure that 'reordering' is really a reference uvector ... *****/
-    M_CPD *ptoken;
-    if (reordering) {
-	if ((RTYPE_Type)M_CPD_RType (reordering) != RTYPE_C_RefUV) raiseException (
+    rtPTOKEN_Handle::Reference pPPT;
+    if (!reordering)
+	m_pPPT.setTo (subset->PPT ());
+    else {
+	if (reordering->RType () != RTYPE_C_RefUV) raiseException (
 	    EC__InternalInconsistency,
 	    "rtINDEX_NewFutureKey: 'reordering' must be a reference uvector"
 	);
@@ -224,17 +237,11 @@ rtINDEX_Key::rtINDEX_Key (
 	    "rtINDEX_NewFutureKey: Reordering P-Tokens Differ In Size"
 	);
 
-	ptoken = UV_CPD_PosPTokenCPD (reordering);
-    }
-    else {
-	ptoken = subset->PPT ();
-	ptoken->retain ();
+	m_pPPT.setTo (static_cast<rtUVECTOR_Handle*>(reordering->containerHandle ())->pptHandle ());
     }
 
 /*****  ... and initialize a new key, ...  *****/
-    m_pPPT = ptoken;
-
-/***** ... as a new scalar key if 'parent' is scalar, ...  *****/
+/*****  ... as a new scalar key if 'parent' is scalar, ...  *****/
     if (rtINDEX_KeyType_Scalar == rtINDEX_Key_Type (parent)) {
 	m_xType = rtINDEX_KeyType_Scalar;
 
@@ -283,8 +290,6 @@ rtINDEX_Key *rtINDEX_Key::NewFutureKey (rtLINK_CType *subset, M_CPD *reordering)
  *	'rtINDEX_Key::release'.
  *****/
 rtINDEX_Key::~rtINDEX_Key () {
-    m_pPPT->release ();
-
     switch (m_xType) {
     case rtINDEX_KeyType_Set:
 	rtINDEX_Key_Enumerator (this)->release ();
@@ -350,11 +355,8 @@ void rtINDEX_Key::AttemptSequenceToScalarKeyConv () {
 /*****  Determine if this sequence can be converted into a scalar ... *****/
     if (m_iSequence.isACoercedScalar ()) {
 	// ... and convert to scalar if possible... *****/
-	M_CPD *store = m_iSequence.storeCPD ();
-	store->retain ();
-
 	m_iSet.constructScalarComposition (
-	    store, 0, DSC_Descriptor_Value (m_iSequence)
+	    m_iSequence.store (), 0, DSC_Descriptor_Value (m_iSequence)
 	);
 
 	m_xType = rtINDEX_KeyType_Scalar;
@@ -540,9 +542,12 @@ void rtINDEX_Key::RealizeSet () {
  *****  Key Query  *****
  ***********************/
 
-bool rtINDEX_Key::HoldsKeysInStore (M_CPD *pStoreRefCPD, int xStoreRef) {
+bool rtINDEX_Key::ConformsToIndex (rtINDEX_Handle *pIndex) {
+    if (!pIndex || !pIndex->isATimeSeries ())
+	return false;
+
     rtINDEX_Key *pKey = this;
-    DSC_Descriptor* pKeyDescriptor = NilOf (DSC_Descriptor*);
+    DSC_Descriptor *pKeyDescriptor = NilOf (DSC_Descriptor*);
     while (IsNil (pKeyDescriptor)) {
 	switch (rtINDEX_Key_Type (pKey)) {
 	case rtINDEX_KeyType_Scalar:
@@ -565,16 +570,13 @@ bool rtINDEX_Key::HoldsKeysInStore (M_CPD *pStoreRefCPD, int xStoreRef) {
 	}
     }
 
-    return pStoreRefCPD->ReferenceNames (xStoreRef, pKeyDescriptor->storeCPD ());
-}
-
-
-bool rtINDEX_Key::ConformsToIndex (M_CPD *pIndexCPD) {
-    return HoldsKeysInStore (pIndexCPD, rtINDEX_CPx_KeyStore);
+    Vdd::Store::Reference pIndexKeyStore;
+    pIndex->getKeyStore (pIndexKeyStore);
+    return pIndexKeyStore->Names (pKeyDescriptor->store ());
 }
 
-bool rtINDEX_Key::ConformsToIndex (DSC_Descriptor *pIndexDescriptor) {
-    return HoldsKeysInStore (pIndexDescriptor->storeCPD (), rtINDEX_CPx_KeyStore);
+bool rtINDEX_Key::ConformsToIndex (DSC_Descriptor const &rInstances) {
+    return ConformsToIndex (dynamic_cast<rtINDEX_Handle*>(rInstances.store ()));
 }
 
 
@@ -592,22 +594,19 @@ bool rtINDEX_Key::ConformsToIndex (DSC_Descriptor *pIndexDescriptor) {
  *****  Routine to create a new index and its associated L-Store.
  *
  *  Arguments:
- *	pInstancePTokenCPD	- the address of a CPD for the list p-token of the
+ *	pInstancePToken		- the address of a handle for the list p-token of the
  *				  index.
  *	xKeyMapRType		- the index of the new index's key map r-type.  Must
  *				  be either RTYPE_C_Link or RTYPE_C_RefUV.
  *	xKeySetRType		- the index of the new index's key set r-type.  Must
  *				  be one of the value u-vector types or RTYPE_C_Vector.
- *	pKeySetRefPTokenCPD/xKeySetRefPTokenRef
- *				- a CPD address/index pair referencing a POP for the
- *				  reference p-token of the key set.  Required if
- *				  'xKeySetRType' is one of the u-vector types, ignored
- *				  otherwise.
- *	pKeyStoreRef/xKeyStoreRef
- *				- a CPD address/index pair referencing a POP for the
- *				  key store for this index.  Required if 'xKeySetRType'
- *				  is one of the u-vector types, ignored otherwise.
- *	pContentPrototypeCPD	- a CPD for the content prototype of the contained
+ *	pKeySetRPT		- a handle for the reference p-token of the key set.
+ *				  Required if 'xKeySetRType' is one of the u-vector types,
+ *				  ignored otherwise.
+ *	pKeyStore		- the key store for this index.
+ *				  Required if 'xKeySetRType' is one of the u-vector
+ *				  types, ignored otherwise.
+ *	pContentPrototype	- a CPD for the content prototype of the contained
  *				  l-store (Nil to request a Vector).
  *
  *  Returns:
@@ -615,19 +614,17 @@ bool rtINDEX_Key::ConformsToIndex (DSC_Descriptor *pIndexDescriptor) {
  *
  *
  *****/
-PrivateFnDef M_CPD *rtINDEX_NewCluster (
-    M_CPD*			pInstancePTokenCPD,
+PrivateFnDef rtINDEX_Handle *rtINDEX_NewCluster (
+    rtPTOKEN_Handle*		pInstancePToken,
     RTYPE_Type			xKeyMapRType,
     RTYPE_Type			xKeySetRType,
-    M_CPD*			pKeySetRefPTokenRef,
-    int				xKeySetRefPTokenRef,
-    M_CPD*			pKeyStoreRef,
-    int				xKeyStoreRef,
-    M_CPD*			pContentPrototypeCPD
+    rtPTOKEN_Handle*		pKeySetRPT,
+    Vdd::Store*			pKeyStore,
+    Vdd::Store*			pContentPrototype
 )
 {
 /*****  Superficially validate the key set creation arguments, ...  *****/
-    if (RTYPE_C_Vector != xKeySetRType && IsNil (pKeyStoreRef)) ERR_SignalFault (
+    if (RTYPE_C_Vector != xKeySetRType && IsNil (pKeyStore)) ERR_SignalFault (
 	EC__InternalInconsistency, UTIL_FormatMessage (
 	    "rtINDEX_NewCluster: Key Store Required For Key Type %s",
 	    RTYPE_TypeIdAsString (xKeySetRType)
@@ -635,55 +632,41 @@ PrivateFnDef M_CPD *rtINDEX_NewCluster (
     );
 
 /*****  ... create the key set, ...  *****/
-    M_ASD *pContainerSpace = pInstancePTokenCPD->Space ();
-    M_CPD *pKeySetPTokenCPD = rtPTOKEN_New (pContainerSpace, 0);
-    M_CPD *pKeySetCPD;
+    M_ASD *pContainerSpace = pInstancePToken->Space ();
+    rtPTOKEN_Handle::Reference pKeySetPPT (new rtPTOKEN_Handle (pContainerSpace, 0));
+    M_CPD *pKeySet;
     switch (xKeySetRType) {
     case RTYPE_C_Vector:
-	pKeySetCPD = rtVECTOR_NewSetVector (pKeySetPTokenCPD);
-	pKeyStoreRef = NilOf (M_CPD*);
+	pKeySet = (new rtVECTOR_Handle (pKeySetPPT, true))->GetCPD ();
+	pKeyStore = 0;
 	break;
     case RTYPE_C_CharUV:
-	pKeySetCPD = rtCHARUV_New (
-	    pKeySetPTokenCPD, pKeySetRefPTokenRef, xKeySetRefPTokenRef
-	);
-	UV_CPD_IsASetUV (pKeySetCPD) = true;
+	pKeySet = rtCHARUV_New (pKeySetPPT, pKeySetRPT);
+	UV_CPD_IsASetUV (pKeySet) = true;
 	break;
     case RTYPE_C_DoubleUV:
-	pKeySetCPD = rtDOUBLEUV_New (
-	    pKeySetPTokenCPD, pKeySetRefPTokenRef, xKeySetRefPTokenRef
-	);
-	UV_CPD_IsASetUV (pKeySetCPD) = true;
+	pKeySet = rtDOUBLEUV_New (pKeySetPPT, pKeySetRPT);
+	UV_CPD_IsASetUV (pKeySet) = true;
 	break;
     case RTYPE_C_FloatUV:
-	pKeySetCPD = rtFLOATUV_New (
-	    pKeySetPTokenCPD, pKeySetRefPTokenRef, xKeySetRefPTokenRef
-	);
-	UV_CPD_IsASetUV (pKeySetCPD) = true;
+	pKeySet = rtFLOATUV_New (pKeySetPPT, pKeySetRPT);
+	UV_CPD_IsASetUV (pKeySet) = true;
 	break;
     case RTYPE_C_IntUV:
-	pKeySetCPD = rtINTUV_New (
-	    pKeySetPTokenCPD, pKeySetRefPTokenRef, xKeySetRefPTokenRef
-	);
-	UV_CPD_IsASetUV (pKeySetCPD) = true;
+	pKeySet = rtINTUV_New (pKeySetPPT, pKeySetRPT);
+	UV_CPD_IsASetUV (pKeySet) = true;
 	break;
     case RTYPE_C_Unsigned64UV:
-	pKeySetCPD = rtU64UV_New (
-	    pKeySetPTokenCPD, pKeySetRefPTokenRef, xKeySetRefPTokenRef
-	);
-	UV_CPD_IsASetUV (pKeySetCPD) = true;
+	pKeySet = rtU64UV_New (pKeySetPPT, pKeySetRPT);
+	UV_CPD_IsASetUV (pKeySet) = true;
 	break;
     case RTYPE_C_Unsigned96UV:
-	pKeySetCPD = rtU96UV_New (
-	    pKeySetPTokenCPD, pKeySetRefPTokenRef, xKeySetRefPTokenRef
-	);
-	UV_CPD_IsASetUV (pKeySetCPD) = true;
+	pKeySet = rtU96UV_New (pKeySetPPT, pKeySetRPT);
+	UV_CPD_IsASetUV (pKeySet) = true;
 	break;
     case RTYPE_C_Unsigned128UV:
-	pKeySetCPD = rtU128UV_New (
-	    pKeySetPTokenCPD, pKeySetRefPTokenRef, xKeySetRefPTokenRef
-	);
-	UV_CPD_IsASetUV (pKeySetCPD) = true;
+	pKeySet = rtU128UV_New (pKeySetPPT, pKeySetRPT);
+	UV_CPD_IsASetUV (pKeySet) = true;
 	break;
     default:
 	ERR_SignalFault (
@@ -695,22 +678,24 @@ PrivateFnDef M_CPD *rtINDEX_NewCluster (
     }
 
 /*****  ... create the lstore ... *****/
-    M_CPD *pLStoreCPD = rtLSTORE_NewCluster (pInstancePTokenCPD, pContentPrototypeCPD, 0);
+    rtLSTORE_Handle::Reference pListStore (
+	new rtLSTORE_Handle (pInstancePToken, pContentPrototype)
+    );
 
 /*****  create the key map, ... *****/
-    M_CPD *pElementPTokenCPD = rtLSTORE_CPD_ContentPTokenCPD (pLStoreCPD);
-    M_CPD *pKeyMapCPD;
+    rtPTOKEN_Handle::Reference pElementPToken;
+    pListStore->getContentPToken (pElementPToken);
+    M_CPD *pKeyMap;
     switch (xKeyMapRType) {
     case RTYPE_C_Link: {
-	    M_CPD *pKeyMapRefPTokenCPD = rtPTOKEN_New (
-		pContainerSpace, pInstancePTokenCPD, -1, pKeySetPTokenCPD, -1
+	    rtPTOKEN_Handle::Reference pKeyMapRPT (
+		new rtPTOKEN_Handle (pContainerSpace, pInstancePToken, pKeySetPPT)
 	    );
-	    pKeyMapCPD = rtLINK_NewEmptyLink (pElementPTokenCPD, pKeyMapRefPTokenCPD);
-	    pKeyMapRefPTokenCPD->release ();
+	    pKeyMap = rtLINK_NewEmptyLink (pElementPToken, pKeyMapRPT);
 	}
 	break;
     case RTYPE_C_RefUV:
-	pKeyMapCPD = rtREFUV_New (pElementPTokenCPD, pKeySetPTokenCPD);
+	pKeyMap = rtREFUV_New (pElementPToken, pKeySetPPT);
 	break;
     default:
 	ERR_SignalFault (
@@ -723,27 +708,28 @@ PrivateFnDef M_CPD *rtINDEX_NewCluster (
     }
 
 /*****  ... create and initialize the index, ... *****/
-    M_CPD *pIndexCPD = POPVECTOR_New (
-	pContainerSpace, RTYPE_C_Index, rtINDEX_CPD_StdPtrCount
+    rtINDEX_Handle *pIndex = new rtINDEX_Handle (
+	pContainerSpace, pListStore, pKeyMap, pKeySet, pKeyStore
     );
 
-    pIndexCPD->StoreReference (rtINDEX_CPx_Lists	, pLStoreCPD);
-    pIndexCPD->StoreReference (rtINDEX_CPx_Map		, pKeyMapCPD);
-    pIndexCPD->StoreReference (rtINDEX_CPx_KeyValues	, pKeySetCPD);
-    if (pKeyStoreRef)
-	pIndexCPD->StoreReference (rtINDEX_CPx_KeyStore, pKeyStoreRef, xKeyStoreRef);
-
 /*****  ... cleanup, ...  *****/
-    pKeyMapCPD->release ();
-    pElementPTokenCPD->release ();
-    pLStoreCPD->release ();
-    pKeySetCPD->release ();
-    pKeySetPTokenCPD->release ();
+    pKeyMap->release ();
+    pKeySet->release ();
 
 /*****  ... and return:  *****/
     NewCount++;
 
-    return pIndexCPD;
+    return pIndex;
+}
+
+rtINDEX_Handle::rtINDEX_Handle (
+    M_ASD *pSpace, rtLSTORE_Handle *pListStore, M_CPD *pKeyMap, M_CPD *pKeySet, Vdd::Store *pKeyStore
+) : BaseClass (pSpace, RTYPE_C_Index, rtINDEX_CPD_StdPtrCount) {
+    StoreReference (rtINDEX_CPx_Lists	 , static_cast<VContainerHandle*>(pListStore));
+    StoreReference (rtINDEX_CPx_Map	 , pKeyMap);
+    StoreReference (rtINDEX_CPx_KeyValues, pKeySet);
+    if (pKeyStore)
+	StoreReference (rtINDEX_CPx_KeyStore, pKeyStore);
 }
 
 
@@ -751,17 +737,17 @@ PrivateFnDef M_CPD *rtINDEX_NewCluster (
  *****  Routine to create a new index and its associated L-Store.
  *
  *  Arguments:
- *	pInstancePTokenCPD	- the address of a CPD for the list p-token of the
+ *	pInstancePToken		- the address of a handle for the list p-token of the
  *				  index.
  *	xKeySetRType		- the index of the new index's key set r-type.  Must
  *				  be one of the value u-vector types or RTYPE_C_Vector.
- *	pKeySetRefPTokenCPD	- a CPD for the reference p-token of the key set.
+ *	pKeySetRPT		- a handle for the reference p-token of the key set.
  *				  Required if 'xKeySetRType' is one of the u-vector
  *				  types, ignored otherwise.
  *	pKeyStoreCPD		- a CPD for the key store for this index.  Required
  *				  if 'xKeySetRType' is one of the u-vector types,
  *				  ignored otherwise.
- *	pContentPrototypeCPD	- a CPD for the content prototype of the contained
+ *	pContentPrototype	- a CPD for the content prototype of the contained
  *				  l-store (Nil to request a Vector).
  *
  *  Returns:
@@ -769,23 +755,15 @@ PrivateFnDef M_CPD *rtINDEX_NewCluster (
  *
  *
  *****/
-PublicFnDef M_CPD *rtINDEX_NewCluster (
-    M_CPD*			pInstancePTokenCPD,
+PublicFnDef rtINDEX_Handle *rtINDEX_NewCluster (
+    rtPTOKEN_Handle*		pInstancePToken,
     RTYPE_Type			xKeySetRType,
-    M_CPD*			pKeySetRefPTokenCPD,
-    M_CPD*			pKeyStoreCPD,
-    M_CPD*			pContentPrototypeCPD
-)
-{
+    rtPTOKEN_Handle*		pKeySetRPT,
+    Vdd::Store*			pKeyStore,
+    Vdd::Store*			pContentPrototype
+) {
     return rtINDEX_NewCluster (
-	pInstancePTokenCPD,
-	rtINDEX_KeyMapDefaultType,
-	xKeySetRType,
-	pKeySetRefPTokenCPD,
-	-1,
-	pKeyStoreCPD,
-	-1,
-	pContentPrototypeCPD
+	pInstancePToken, rtINDEX_KeyMapDefaultType, xKeySetRType, pKeySetRPT, pKeyStore, pContentPrototype
     );
 }
 
@@ -794,30 +772,25 @@ PublicFnDef M_CPD *rtINDEX_NewCluster (
  *****  Routine to create a new indexed list cluster.
  *
  *  Arguments:
- *	pInstancePTokenCPD	- a standard CPD for the positional p-token
+ *	pInstancePToken		- a handle for the positional p-token
  *				  of the index.
- *	pContentPrototypeCPD	- a CPD for the content prototype of the contained
+ *	pContentPrototype	- a CPD for the content prototype of the contained
  *				  l-store (Nil to request a Vector).
- *	--			- an unused argument that dis-ambiguates the content
- *				  and cluster prototype overloads of rtINDEX_NewCluster.
  *
  *  Returns:
  *	The address of a CPD for the 'Index' created.
  *
  *****/
-PublicFnDef M_CPD *rtINDEX_NewCluster (
-    M_CPD *pInstancePTokenCPD, M_CPD *pContentPrototypeCPD, int
-)
-{
+PublicFnDef rtINDEX_Handle *rtINDEX_NewCluster (
+    rtPTOKEN_Handle *pInstancePToken, Vdd::Store *pContentPrototype
+) {
     return rtINDEX_NewCluster (
-	pInstancePTokenCPD,
+	pInstancePToken,
 	rtINDEX_KeyMapDefaultType,
 	RTYPE_C_Vector,
-	NilOf (M_CPD*),
-	-1,
-	NilOf (M_CPD*),
-	-1,
-	pContentPrototypeCPD
+	NilOf (rtPTOKEN_Handle*),
+	NilOf (Vdd::Store*),
+	pContentPrototype
     );
 }
 
@@ -826,44 +799,31 @@ PublicFnDef M_CPD *rtINDEX_NewCluster (
  *****  Routine to create a new indexed list cluster.
  *
  *  Arguments:
- *	pInstancePTokenCPD	- the address of a CPD for the positional p-token
+ *	pInstancePToken		- the address of a handle for the positional p-token
  *				  of the index.
  *	xKeyMapRType		- the index of the new index's key map r-type.  Must
  *				  be either RTYPE_C_Link or RTYPE_C_RefUV.
  *	pKeySetPrototype	- the address of a descriptor which provides the key's
  * 				  type information.
- *	pContentPrototypeCPD	- a CPD for the content prototype of the contained
+ *	pContentPrototype	- a CPD for the content prototype of the contained
  *				  l-store (Nil to request a Vector).
  *
  *  Returns:
  *	The address of a CPD for the 'Index' created.
  *
  *****/
-PrivateFnDef M_CPD *rtINDEX_NewCluster (
-    M_CPD*			pInstancePTokenCPD,
+PrivateFnDef rtINDEX_Handle *rtINDEX_NewCluster (
+    rtPTOKEN_Handle*		pInstancePToken,
     RTYPE_Type			xKeyMapRType,
-    DSC_Descriptor*	pKeySetPrototype,
-    M_CPD*			pContentPrototypeCPD
-)
-{
+    DSC_Descriptor*		pKeySetPrototype,
+    Vdd::Store*			pContentPrototype
+) {
     RTYPE_Type xKeySetRType = pKeySetPrototype->pointerRType ();
 
-    M_CPD *pKeySetRefPTokenRef; int xKeySetRefPTokenRef;
-    pKeySetPrototype->getRPTReference (pKeySetRefPTokenRef, xKeySetRefPTokenRef);
-
-    M_CPD *pIndexCPD = rtINDEX_NewCluster (
-	pInstancePTokenCPD,
-	xKeyMapRType,
-	xKeySetRType,
-	pKeySetRefPTokenRef,
-	xKeySetRefPTokenRef,
-	pKeySetPrototype->storeCPDIfAvailable (),
-	-1,
-	pContentPrototypeCPD
+    rtPTOKEN_Handle::Reference pKeySetRPT (pKeySetPrototype->RPT ());
+    return rtINDEX_NewCluster (
+	pInstancePToken, xKeyMapRType, xKeySetRType, pKeySetRPT, pKeySetPrototype->store (), pContentPrototype
     );
-    pKeySetRefPTokenRef->release ();
-
-    return pIndexCPD;
 }
 
 
@@ -871,25 +831,24 @@ PrivateFnDef M_CPD *rtINDEX_NewCluster (
  *****  Routine to create a new indexed list cluster.
  *
  *  Arguments:
- *	pInstancePTokenCPD	- the address of a CPD for the positional p-token
+ *	pInstancePToken		- the address of a handle for the positional p-token
  *				  of the index.
  *	pKeySetPrototype	- the address of a descriptor which provides the key's
  * 				  type information.
- *	pContentPrototypeCPD	- a CPD for the content prototype of the contained
+ *	pContentPrototype	- a CPD for the content prototype of the contained
  *				  l-store (Nil to request a Vector).
  *
  *  Returns:
  *	The address of a CPD for the 'Index' created.
  *
  *****/
-PublicFnDef M_CPD *rtINDEX_NewCluster (
-    M_CPD*			pInstancePTokenCPD,
-    DSC_Descriptor*	pKeySetPrototype,
-    M_CPD*			pContentPrototypeCPD
-)
-{
+PublicFnDef rtINDEX_Handle *rtINDEX_NewCluster (
+    rtPTOKEN_Handle*		pInstancePToken,
+    DSC_Descriptor*		pKeySetPrototype,
+    Vdd::Store*			pContentPrototype
+) {
     return rtINDEX_NewCluster (
-	pInstancePTokenCPD, rtINDEX_KeyMapDefaultType, pKeySetPrototype, pContentPrototypeCPD
+	pInstancePToken, rtINDEX_KeyMapDefaultType, pKeySetPrototype, pContentPrototype
     );
 }
 
@@ -898,45 +857,47 @@ PublicFnDef M_CPD *rtINDEX_NewCluster (
  *****  Routine to create a new indexed list cluster.
  *
  *  Arguments:
- *	pInstancePTokenCPD	- the address of a CPD for the positional p-token
+ *	rpResult		- a reference to the rtINDEX_Handle::Reference
+ *				  that will be set to a handle for the clone.
+ *	pClonePPT		- the address of a handle for the positional p-token
  *				  of the index.
- *	pPrototypeIndexCPD	- the address of a CPD for an existing index which will
- *				  be cloned.
- *
- *  Returns:
- *	The address of a CPD for the 'Index' created.
  *
  *****/
-PublicFnDef M_CPD *rtINDEX_NewCluster (
-    M_CPD *pInstancePTokenCPD, M_CPD *pPrototypeIndexCPD
-)
-{
-    M_CPD *pKeySetCPD = pPrototypeIndexCPD->GetCPD (rtINDEX_CPx_KeyValues);
-    M_CPD *pKeyMapCPD = pPrototypeIndexCPD->GetCPD (rtINDEX_CPx_Map);
-    M_CPD *pContentPrototypeCPD; {
-	M_CPD *pLStoreCPD = rtINDEX_CPD_ListStoreCPD (pPrototypeIndexCPD);
-	pContentPrototypeCPD = rtLSTORE_CPD_ContentCPD (pLStoreCPD);
-	pLStoreCPD->release ();
+bool rtINDEX_Handle::isACloneOfIndex (rtINDEX_Handle const *pOther) const {
+    return ReferenceNames (rtINDEX_CPx_KeyStore, pOther, pOther->element (rtINDEX_CPx_KeyStore));
+}
+
+void rtINDEX_Handle::clone (Reference &rpResult, rtPTOKEN_Handle *pClonePPT) const {
+    M_CPD *pKeySet;
+    getKeySet (pKeySet);
+
+    Vdd::Store::Reference pKeyStore;  rtPTOKEN_Handle::Reference pKeySetRPT;
+    if (ReferenceIsntNil (rtINDEX_CPx_KeyStore)) {
+	getKeyStore (pKeyStore);
+	pKeySetRPT.setTo (static_cast<rtUVECTOR_Handle*>(pKeySet->containerHandle ())->rptHandle ());
     }
 
-    M_CPD *pIndexCPD = rtINDEX_NewCluster (
-	pInstancePTokenCPD,
-	rtINDEX_KeyMapAutoConversionEnabled
-	    ? rtINDEX_KeyMapDefaultType
-	    : (RTYPE_Type)M_CPD_RType (pKeyMapCPD),
-	(RTYPE_Type)M_CPD_RType (pKeySetCPD),
-	pKeySetCPD,
-	UV_CPx_RefPToken,
-	pPrototypeIndexCPD,
-	rtINDEX_CPx_KeyStore,
-	pContentPrototypeCPD
+    M_CPD *pKeyMap;
+    getKeyMap (pKeyMap);
+
+    Vdd::Store::Reference pContentPrototype; {
+	rtLSTORE_Handle::Reference pListStore;
+	getListStore (pListStore);
+	pListStore->getContent (pContentPrototype);
+    }
+
+    rpResult.setTo (
+	rtINDEX_NewCluster (
+	    pClonePPT,
+	    rtINDEX_KeyMapAutoConversionEnabled ? rtINDEX_KeyMapDefaultType : pKeyMap->RType (),
+	    pKeySet->RType (),
+	    pKeySetRPT,
+	    pKeyStore,
+	    pContentPrototype
+	)
     );
-
-    pContentPrototypeCPD->release ();
-    pKeyMapCPD->release ();
-    pKeySetCPD->release ();
-
-    return pIndexCPD;
+    pKeyMap->release ();
+    pKeySet->release ();
 }
 
 
@@ -961,21 +922,18 @@ PublicFnDef M_CPD *rtINDEX_NewCluster (
  *	A cpd for the index created.
  *
  *****/
-PrivateFnDef M_CPD *rtINDEX_NewCluster (
-    rtLINK_CType	*pContentPartition,
-    M_CPD		*pContent,
-    RTYPE_Type		 xKeyMapRType,
-    rtINDEX_Key		*pKey
+PrivateFnDef rtINDEX_Handle *rtINDEX_NewCluster (
+    rtLINK_CType *pContentPartition, Vdd::Store *pContent, RTYPE_Type xKeyMapRType, rtINDEX_Key *pKey
 ) {
 
 /*****  Make the LStore ... *****/
-    M_CPD *pLStoreCPD = rtLSTORE_NewCluster (pContentPartition, pContent, true);
-    M_ASD *pContainerSpace = pLStoreCPD->Space ();
+    rtLSTORE_Handle::Reference pListStore (new rtLSTORE_Handle (pContentPartition, pContent, true));
+    M_ASD *pContainerSpace = pListStore->objectSpace ();
 
 /*****  ... obtain the key set, ... *****/
     pKey->RealizeSet ();
 
-    M_CPD *pKeySetCPD;
+    M_CPD *pKeySet;
     if (pKey->isScalar ()) {
 	DSC_Pointer setPointer;
 	M_CPD *pKeyEnumeratorCPD;
@@ -986,40 +944,32 @@ PrivateFnDef M_CPD *rtINDEX_NewCluster (
 	    pKeyEnumeratorCPD,
 	    DSC_Descriptor_Pointer (rtINDEX_Key_Sequence (pKey))
 	);
-	pKeySetCPD = DSC_Pointer_Value (setPointer);
+	pKeySet = DSC_Pointer_Value (setPointer);
 	pKeyEnumeratorCPD->release ();
     }
-    else pKeySetCPD = M_DuplicateCPDPtr (
-	DSC_Descriptor_Value (rtINDEX_Key_Set (pKey))
-    );
+    else {
+	pKeySet = DSC_Descriptor_Value (rtINDEX_Key_Set (pKey));
+	pKeySet->retain ();
+    }
 
 /*****  ... create the key map, ...  *****/
-    M_CPD *pKeyMapCPD;
+    M_CPD *pKeyMap;
     switch (xKeyMapRType) {
     case RTYPE_C_Link: {
-	    M_CPD *pKeyMapRefPTokenCPD = rtPTOKEN_New (
-		pContainerSpace, pLStoreCPD, rtLSTORE_CPx_RowPToken, pKeySetCPD, UV_CPx_PToken
+	    rtPTOKEN_Handle *pRowPToken = pContentPartition->RPT ();
+	    rtPTOKEN_Handle::Reference pColPToken (
+		static_cast<rtUVECTOR_Handle*>(pKeySet->containerHandle ())->pptHandle ()
 	    );
-
-	    rtLINK_CType *pKeyMapLC = rtLINK_RefConstructor (pKeyMapRefPTokenCPD, -1);
-	    unsigned int const numberOfRows = rtPTOKEN_BaseElementCount (
-		pLStoreCPD, rtLSTORE_CPx_RowPToken
+	    rtLINK_CType *pKeyMapLC = rtLINK_RefConstructor (
+		new rtPTOKEN_Handle (pContainerSpace, pRowPToken, pColPToken)
 	    );
-	    unsigned int const numberOfColumns = rtPTOKEN_BaseElementCount (
-		pKeySetCPD, UV_CPx_PToken
-	    );
-	    unsigned int const *pBreakpoint = rtLSTORE_CPD_BreakpointArray (
-		pLStoreCPD
-	    ) + 1;
+	    unsigned int const numberOfRows = pRowPToken->cardinality ();
+	    unsigned int const numberOfCols = pColPToken->cardinality ();
+	    unsigned int const *pBreakpoint = pListStore->breakpointArray () + 1;
 
 	    unsigned int elementNumber = 0;
 	    if (pKey->isScalar ()) {
-		for (
-		    unsigned int rowNumber = 0;
-		    rowNumber < numberOfRows;
-		    rowNumber++, pBreakpoint++
-		)
-		{
+		for (unsigned int rowNumber = 0; rowNumber < numberOfRows; rowNumber++, pBreakpoint++) {
 		    if (elementNumber < *pBreakpoint) {
 			elementNumber++;
 			rtLINK_AppendRange (pKeyMapLC, rowNumber, 1);
@@ -1030,41 +980,30 @@ PrivateFnDef M_CPD *rtINDEX_NewCluster (
 		unsigned int const *enumeration = (unsigned int *)rtREFUV_CPD_Array (
 		    rtINDEX_Key_Enumerator (pKey)
 		);
-		for (
-		    unsigned int rowNumber = 0;
-
-		    rowNumber < numberOfRows;
-
-		    rowNumber++, pBreakpoint++
-		)
-		{
-		    while (elementNumber < *pBreakpoint)
-		    {
+		for (unsigned int rowNumber = 0; rowNumber < numberOfRows; rowNumber++, pBreakpoint++) {
+		    while (elementNumber < *pBreakpoint) {
 			elementNumber++;
-			rtLINK_AppendRange (
-			    pKeyMapLC, rowNumber * numberOfColumns + *enumeration++, 1
-			);
+			rtLINK_AppendRange (pKeyMapLC, rowNumber * numberOfCols + *enumeration++, 1);
 		    }
 		}
 	    }
 	    pKeyMapLC->Close (pContentPartition->PPT ());
-	    pKeyMapCPD = pKeyMapLC->ToLink ();
-
-	    pKeyMapRefPTokenCPD->release ();
+	    pKeyMap = pKeyMapLC->ToLink ();
 	}
 	break;
     case RTYPE_C_RefUV:
 	if (pKey->isScalar ()) {
-	    pKeyMapCPD = rtREFUV_New (
-		pContentPartition->PPT (), pKeySetCPD, (int)UV_CPx_PToken
-	    );
+	    pKeyMap = rtREFUV_New (pContentPartition->PPT (), pKeySet, (int)UV_CPx_PToken);
 	    memset (
-		rtREFUV_CPD_Array (pKeyMapCPD),
+		rtREFUV_CPD_Array (pKeyMap),
 		0,
-		UV_CPD_ElementCount (pKeyMapCPD) * UV_CPD_Granularity (pKeyMapCPD)
+		UV_CPD_ElementCount (pKeyMap) * UV_CPD_Granularity (pKeyMap)
 	    );
 	}
-	else pKeyMapCPD = M_DuplicateCPDPtr (rtINDEX_Key_Enumerator (pKey));
+	else {
+	    pKeyMap = rtINDEX_Key_Enumerator (pKey);
+	    pKeyMap->retain ();
+	}
 	break;
     default:
 	ERR_SignalFault (
@@ -1077,25 +1016,16 @@ PrivateFnDef M_CPD *rtINDEX_NewCluster (
     }
 
 /*****  ....  Make the index  .... *****/
-    M_CPD *pIndexCPD = POPVECTOR_New (
-	pContainerSpace, RTYPE_C_Index, rtINDEX_CPD_StdPtrCount
+    rtINDEX_Handle *pIndex = new rtINDEX_Handle (
+	pContainerSpace, pListStore, pKeyMap, pKeySet, rtINDEX_Key_Set (pKey).store ()
     );
-
-/*****  ...  initialize it  ...  *****/
-    pIndexCPD->StoreReference (rtINDEX_CPx_Lists, pLStoreCPD);
-    pIndexCPD->StoreReference (
-	rtINDEX_CPx_KeyStore, rtINDEX_Key_Set (pKey).storeCPDIfAvailable ()
-    );
-    pIndexCPD->StoreReference (rtINDEX_CPx_KeyValues, pKeySetCPD);
-    pIndexCPD->StoreReference (rtINDEX_CPx_Map, pKeyMapCPD);
 
 /*****  ...  clean up  ...  *****/
-    pLStoreCPD->release ();
-    pKeyMapCPD->release ();
-    pKeySetCPD->release ();
+    pKeyMap->release ();
+    pKeySet->release ();
 
 /*****  ... and return the result.  *****/
-    return pIndexCPD;
+    return pIndex;
 }
 
 
@@ -1118,8 +1048,8 @@ PrivateFnDef M_CPD *rtINDEX_NewCluster (
  *	A cpd for the index created.
  *
  *****/
-PublicFnDef M_CPD *rtINDEX_NewCluster (
-    rtLINK_CType *pContentPartition, M_CPD *pContent, rtINDEX_Key *pKey
+PublicFnDef rtINDEX_Handle *rtINDEX_NewCluster (
+    rtLINK_CType *pContentPartition, Vdd::Store *pContent, rtINDEX_Key *pKey
 ) {
     return rtINDEX_NewCluster (
 	pContentPartition, pContent, rtINDEX_KeyMapDefaultType, pKey
@@ -1131,27 +1061,25 @@ PublicFnDef M_CPD *rtINDEX_NewCluster (
  *****  Routine to create a new time-series indexed list cluster.
  *
  *  Arguments:
- *	pInstancePTokenCPD	- a standard CPD for the positional p-token
+ *	pInstancePToken		- a handle for the positional p-token
  *				  of the index.
  *
  *  Returns:
  *	The address of a CPD for the 'Index' created.
  *
  *****/
-PublicFnDef M_CPD *rtINDEX_NewTimeSeries (M_CPD *pInstancePTokenCPD) {
+PublicFnDef rtINDEX_Handle *rtINDEX_NewTimeSeries (rtPTOKEN_Handle *pInstancePToken) {
     NewTimeSeriesCount++;
 
-    M_KOTE const &rDate = pInstancePTokenCPD->TheDateClass ();
+    M_KOTE const &rDate = pInstancePToken->TheDateClass ();
 
     return rtINDEX_NewCluster (
-	pInstancePTokenCPD,
+	pInstancePToken,
 	rtINDEX_KeyMapDefaultType,
 	RTYPE_C_IntUV,
-	rDate.PTokenCPD (),
-	-1,
-	rDate,
-	-1,
-	NilOf (M_CPD*)
+	rDate.PTokenHandle (),
+	rDate.store (),
+	0
     );
 }
 
@@ -1165,74 +1093,57 @@ PublicFnDef M_CPD *rtINDEX_NewTimeSeries (M_CPD *pInstancePTokenCPD) {
  *
  *  Arguments:
  *	pIndexCPD		- the address of a CPD for the index to align.
- *	fDeletingKeyMapNils	- a flag that, when non-zero, requests the deletion
+ *	bDeletingKeyMapNils	- a flag that, when non-zero, requests the deletion
  *				  of nils from partitioned key maps.
  *
  *  Returns:
  *	'pIndexCPD'
  *
  *****/
-PublicFnDef M_CPD *rtINDEX_Align (M_CPD *pIndexCPD, bool fDeletingKeyMapNils) {
+bool rtINDEX_Handle::align (bool bDeletingKeyMapNils) {
 /*****
  *  Align the l-store first so that the key map alignment does not cause
  *  the list and element p-tokens of the l-store to be out of alignment
  *  simultaneously, ...
  *****/
-    M_CPD *pLStoreCPD = rtINDEX_CPD_ListStoreCPD (pIndexCPD);
-    rtLSTORE_Align (pLStoreCPD);
+    rtLSTORE_Handle::Reference pListStore;
+    getListStore (pListStore);
+    pListStore->align ();
 
 /*****
  *  Align the key map, and, if element deletions were possible, align the
  *  l-store again to reflect those deletions, ...
  *****/
-    M_CPD *pKeyMapCPD = pIndexCPD->GetCPD (rtINDEX_CPx_Map);
-    switch ((RTYPE_Type)M_CPD_RType (pKeyMapCPD))
-    {
+    M_CPD *pKeyMap;
+    getKeyMap (pKeyMap);
+
+    switch (pKeyMap->RType ()) {
     case RTYPE_C_Link:
-	rtLINK_AlignLink 	(pKeyMapCPD);
-	rtLSTORE_Align		(pLStoreCPD);
+	pKeyMap->align ();
+	pListStore->align ();
 	break;
 
     case RTYPE_C_RefUV:
-	if (fDeletingKeyMapNils)
-	{
-	    rtREFUV_DeleteNils	(pKeyMapCPD);
-	    rtLSTORE_Align	(pLStoreCPD);
+	if (!bDeletingKeyMapNils)
+	    pKeyMap->align ();
+	else {
+	    rtREFUV_DeleteNils (pKeyMap);
+	    pListStore->align ();
 	}
-	else rtREFUV_Align (pKeyMapCPD);
 	break;
 
     default:
 	ERR_SignalFault (
-	    EC__InternalInconsistency,
-	    UTIL_FormatMessage (
-		"rtINDEX_Align: Invalid Index Map Type: %s",
-		RTYPE_TypeIdAsString ((RTYPE_Type)M_CPD_RType (pKeyMapCPD))
+	    EC__InternalInconsistency, UTIL_FormatMessage (
+		"rtINDEX_Handle::align: Invalid Index Map Type: %s",
+		pKeyMap->RTypeName ()
 	    )
 	);
 	break;
     }
-    pKeyMapCPD->release ();
-    pLStoreCPD->release ();
+    pKeyMap->release ();
 
-    return pIndexCPD;
-}
-
-/*---------------------------------------------------------------------------
- *****  Routine to align an Index when the row ptoken is not current.
- *
- *  Arguments:
- *	pIndexCPD		- the address of a CPD for the index to align.
- *
- *  Returns:
- *	'pIndexCPD'
- *
- *****/
-PublicFnDef M_CPD *rtINDEX_Align (
-    M_CPD*			pIndexCPD
-)
-{
-    return rtINDEX_Align (pIndexCPD, false);
+    return true;
 }
 
 
@@ -1244,8 +1155,7 @@ PublicFnDef M_CPD *rtINDEX_Align (
  *****  Routine to comprehensively align an Index.
  *
  *  Arguments:
- *	pIndexCPD		- a standard CPD for the Index to be aligned.
- *	deletingEmptyUSegments	- a boolean which, when true, requests that
+ *	bDeletingEmptyUSegments	- a boolean which, when true, requests that
  *				  unreferenced u-segments be deleted from
  *				  vectors.
  *
@@ -1253,90 +1163,46 @@ PublicFnDef M_CPD *rtINDEX_Align (
  *	true if an alignment was performed, false otherwise.
  *
  *****/
-PublicFnDef bool rtINDEX_AlignAll (M_CPD *pIndexCPD, bool deletingEmptyUSegments) {
-    bool result; {
-	M_CPD *pLStoreCPD = rtINDEX_CPD_ListStoreCPD (pIndexCPD);
-	result = rtLSTORE_AlignAll (pLStoreCPD, deletingEmptyUSegments);
-	pLStoreCPD->release ();
-    }
-    {
-	M_CPD *pKeySetCPD = pIndexCPD->GetCPD (rtINDEX_CPx_KeyValues);
-	switch ((RTYPE_Type)M_CPD_RType (pKeySetCPD)) {
-	case RTYPE_C_Vector:
-	    result = rtVECTOR_AlignAll (pKeySetCPD, deletingEmptyUSegments) || result;
-	    break;
-	case RTYPE_C_CharUV:
-	    rtCHARUV_Align (pKeySetCPD);
-	    break;
-	case RTYPE_C_DoubleUV:
-	    rtDOUBLEUV_Align (pKeySetCPD);
-	    break;
-	case RTYPE_C_FloatUV:
-	    rtFLOATUV_Align (pKeySetCPD);
-	    break;
-	case RTYPE_C_IntUV:
-	    rtINTUV_Align (pKeySetCPD);
-	    break;
-	case RTYPE_C_Unsigned64UV:
-	    rtU64UV_Align (pKeySetCPD);
-	    break;
-	case RTYPE_C_Unsigned96UV:
-	    rtU96UV_Align (pKeySetCPD);
-	    break;
-	case RTYPE_C_Unsigned128UV:
-	    rtU128UV_Align (pKeySetCPD);
-	    break;
-	default:
-	    pKeySetCPD->release ();
-	    ERR_SignalFault (
-		EC__InternalInconsistency, UTIL_FormatMessage (
-		    "rtINDEX_AlignAll: Invalid Index Key Type: %s",
-		    RTYPE_TypeIdAsString ((RTYPE_Type)M_CPD_RType (pKeySetCPD))
-		)
-	    );
-	    break;
-	}
-	pKeySetCPD->release ();
-    }
-    {
-	M_CPD *pKeyMapCPD = pIndexCPD->GetCPD (rtINDEX_CPx_Map);
-	switch ((RTYPE_Type)M_CPD_RType (pKeyMapCPD)) {
+bool rtINDEX_Handle::alignAll (bool bDeletingEmptyUSegments) {
+    rtLSTORE_Handle::Reference pListStore;
+    getListStore (pListStore);
+    bool result = pListStore->alignAll (bDeletingEmptyUSegments); {
+	M_CPD *pKeySet;
+	getKeySet (pKeySet);
+	result = pKeySet->alignAll (bDeletingEmptyUSegments) || result;
+	pKeySet->release ();
+    } {
+	M_CPD *pKeyMap;
+	getKeyMap (pKeyMap);
+	switch (pKeyMap->RType ()) {
 	case RTYPE_C_Link:
-	    if (!rtPTOKEN_IsCurrent (pKeyMapCPD, rtLINK_CPx_PosPToken)
-	    ||  !rtPTOKEN_IsCurrent (pKeyMapCPD, rtLINK_CPx_RefPToken)
-	    )
-	    {
-		rtLINK_AlignLink (pKeyMapCPD);
+	    if (pKeyMap->isntTerminal (rtLINK_CPx_PosPToken) || pKeyMap->isntTerminal (rtLINK_CPx_RefPToken)) {
+		pKeyMap->align ();
 		result = true;
 	    }
 	    break;
 
 	case RTYPE_C_RefUV:
-	    if (!rtPTOKEN_IsCurrent (pKeyMapCPD, UV_CPx_PToken)
-	    ||  !rtPTOKEN_IsCurrent (pKeyMapCPD, UV_CPx_RefPToken)
-	    ) result = true;
-
-	    result = rtREFUV_DeleteNils (pKeyMapCPD) || result;
+	    if (pKeyMap->isntTerminal (UV_CPx_PToken) || pKeyMap->isntTerminal (UV_CPx_RefPToken)) {
+		result = true;
+	    }
+	    result = rtREFUV_DeleteNils (pKeyMap) || result;
 	    break;
 
 	default:
-	    pKeyMapCPD->release ();
+	    pKeyMap->release ();
 	    ERR_SignalFault (
 		EC__InternalInconsistency, UTIL_FormatMessage (
-		    "rtINDEX_AlignAll: Invalid Index Map Type: %s",
-		    RTYPE_TypeIdAsString ((RTYPE_Type)M_CPD_RType (pKeyMapCPD))
+		    "rtINDEX_Handle::alignAll: Invalid Index Map Type: %s",
+		    pKeyMap->RTypeName ()
 		)
 	    );
 	    break;
 	}
-	pKeyMapCPD->release ();
+	pKeyMap->release ();
     }
-    {
-	M_CPD *pLStoreCPD = rtINDEX_CPD_ListStoreCPD (pIndexCPD);
-	if (rtLSTORE_AlignAll (pLStoreCPD, deletingEmptyUSegments))
-	    result = true;
-	pLStoreCPD->release ();
-    }
+    if (pListStore->alignAll (bDeletingEmptyUSegments))
+	result = true;
 
     return result;
 }
@@ -1346,42 +1212,40 @@ PublicFnDef bool rtINDEX_AlignAll (M_CPD *pIndexCPD, bool deletingEmptyUSegments
  *****  Product Key Map Construction Helper  *****
  *************************************************/
 
-PrivateFnDef M_CPD *rtINDEX_PartitionedMapAsProductMap (M_CPD *pKeyMapCPD, M_CPD *pLStoreCPD) {
+PrivateFnDef M_CPD *rtINDEX_PartitionedMapAsProductMap (M_CPD *pKeyMap, M_CPD *pLStoreCPD) {
     rtLINK_CType *pKeyMapLC; {
-	M_CPD *pKeyMapRefPTokenCPD = rtPTOKEN_New (
-	    pLStoreCPD->Space (),
-	    pLStoreCPD, rtLSTORE_CPx_RowPToken,
-	    pKeyMapCPD, UV_CPx_RefPToken
+	rtPTOKEN_Handle::Reference pKeyMapPPT (
+	    static_cast<rtPTOKEN_Handle*>(pKeyMap->GetContainerHandle (UV_CPx_RefPToken, RTYPE_C_PToken))
 	);
-
-	pKeyMapLC = rtLINK_RefConstructor (pKeyMapRefPTokenCPD, -1);
-
-	pKeyMapRefPTokenCPD->release ();
+	rtPTOKEN_Handle::Reference pLStorePPT (
+	    static_cast<rtPTOKEN_Handle*>(pLStoreCPD->GetContainerHandle (rtLSTORE_CPx_RowPToken, RTYPE_C_PToken))
+	);
+	pKeyMapLC = rtLINK_RefConstructor (new rtPTOKEN_Handle (pLStoreCPD->Space (), pLStorePPT, pKeyMapPPT));
     }
 
     unsigned int const numberOfRows = rtPTOKEN_BaseElementCount (
 	pLStoreCPD, rtLSTORE_CPx_RowPToken
     );
-    unsigned int const numberOfColumns = rtPTOKEN_BaseElementCount (
-	pKeyMapCPD, UV_CPx_RefPToken
+    unsigned int const numberOfCols = rtPTOKEN_BaseElementCount (
+	pKeyMap, UV_CPx_RefPToken
     );
     unsigned int const *pBreakpoint = rtLSTORE_CPD_BreakpointArray (
 	pLStoreCPD
     ) + 1;
 
     unsigned int elementNumber = 0;
-    unsigned int const *enumeration = (unsigned int *)rtREFUV_CPD_Array (pKeyMapCPD);
+    unsigned int const *enumeration = (unsigned int *)rtREFUV_CPD_Array (pKeyMap);
     for (
 	unsigned int rowNumber = 0; rowNumber < numberOfRows; rowNumber++, pBreakpoint++
     ) {
 	while (elementNumber < *pBreakpoint) {
 	    elementNumber++;
 	    rtLINK_AppendRange (
-		pKeyMapLC, rowNumber * numberOfColumns + *enumeration++, 1
+		pKeyMapLC, rowNumber * numberOfCols + *enumeration++, 1
 	    );
 	}
     }
-    pKeyMapLC->Close (pKeyMapCPD, UV_CPx_PToken);
+    pKeyMapLC->Close (pKeyMap, UV_CPx_PToken);
 
     return pKeyMapLC->ToLink ();
 }
@@ -1391,48 +1255,44 @@ PrivateFnDef M_CPD *rtINDEX_PartitionedMapAsProductMap (M_CPD *pKeyMapCPD, M_CPD
  *****  Key Map Conversion  *****
  ********************************/
 
-PublicFnDef void rtINDEX_GetKeyMapType (
-    M_CPD*			pIndexCPD,
-    RTYPE_Type&			xKeyMapType
-)
-{
-    M_CPD *pKeyMapCPD = pIndexCPD->GetCPD (rtINDEX_CPx_Map);
-    xKeyMapType = (RTYPE_Type)M_CPD_RType (pKeyMapCPD);
-    pKeyMapCPD->release ();
+void rtINDEX_Handle::getKeyMapType (RTYPE_Type &rxKeyMapType) const {
+    VContainerHandle::Reference pKeyMap;
+    getKeyMap (pKeyMap);
+    rxKeyMapType = pKeyMap->RType ();
 }
 
-PublicFnDef void rtINDEX_SetKeyMapType (
-    M_CPD*			pIndexCPD,
-    RTYPE_Type			xKeyMapType
-)
-{
-    rtINDEX_Align (pIndexCPD, true);
+void rtINDEX_Handle::setKeyMapType (RTYPE_Type xKeyMapType) {
+    align (true);
 
-    M_CPD *pKeyMapCPD = pIndexCPD->GetCPD (rtINDEX_CPx_Map);
+    M_CPD *pKeyMap;
+    getKeyMap (pKeyMap);
+
     M_CPD *pNewMapCPD = NilOf (M_CPD*);
-    switch ((RTYPE_Type)M_CPD_RType (pKeyMapCPD)) {
+    switch (pKeyMap->RType ()) {
     case RTYPE_C_Link:
 	if (RTYPE_C_RefUV == xKeyMapType) {
-	    rtLINK_CType *pKeyMapLC = rtLINK_ToConstructor (pKeyMapCPD);
+	    rtLINK_CType *pKeyMapLC = rtLINK_ToConstructor (pKeyMap);
 	    pNewMapCPD = rtLINK_ColumnProjection (pKeyMapLC);
 	    pKeyMapLC->release ();
 	}
 	break;
     case RTYPE_C_RefUV:
 	if (RTYPE_C_Link == xKeyMapType) {
-	    M_CPD *pLStoreCPD = rtINDEX_CPD_ListStoreCPD (pIndexCPD);
-	    pNewMapCPD = rtINDEX_PartitionedMapAsProductMap (pKeyMapCPD, pLStoreCPD);
+	    M_CPD *pLStoreCPD;
+	    getListStore (pLStoreCPD);
+	    pNewMapCPD = rtINDEX_PartitionedMapAsProductMap (pKeyMap, pLStoreCPD);
 	    pLStoreCPD->release ();
 	}
 	break;
     default:
 	break;
     }
-    if (IsntNil (pNewMapCPD)) {
-	pIndexCPD->StoreReference (rtINDEX_CPx_Map, pNewMapCPD);
+    if (pNewMapCPD) {
+	EnableModifications ();
+	StoreReference (rtINDEX_CPx_Map, pNewMapCPD);
 	pNewMapCPD->release ();
     }
-    pKeyMapCPD->release ();
+    pKeyMap->release ();
 }
 
 
@@ -1443,15 +1303,8 @@ PublicFnDef void rtINDEX_SetKeyMapType (
 /*---------------------------------------------------------------------------
  ***** Private Routine to ensure that an index's key meets the definition of
  ***** a vector/uvector set.
- *
- *  Arguments:
- *	pIndexCPD		- a pointer to a CPD for the index.
- *
- *  Returns:
- *	NOTHING
- *
  *****/
-PrivateFnDef void EnsureIndexKeyMeetsSetDefinition (M_CPD *pIndexCPD) {
+void rtINDEX_Handle::EnsureIndexKeyMeetsSetDefinition () {
 
 #define no_op(position,count,origin)
 
@@ -1468,28 +1321,28 @@ PrivateFnDef void EnsureIndexKeyMeetsSetDefinition (M_CPD *pIndexCPD) {
 }
 
 /*****  Obtain the key set, ... *****/
-    M_CPD *pKeySetCPD = pIndexCPD->GetCPD (rtINDEX_CPx_KeyValues);
-    rtLINK_CType *refNilsLC;
-    switch ((RTYPE_Type)M_CPD_RType (pKeySetCPD)) {
+    M_CPD *pKeySet;
+    getKeySet (pKeySet);
+
+    rtLINK_CType *refNilsLC = 0;
+    switch (pKeySet->RType ()) {
     case RTYPE_C_Vector:
 /*****  If the key set is valid, do a simple alignment...  *****/
-	if (rtVECTOR_IsASet (pKeySetCPD, &refNilsLC))
-	    rtINDEX_Align (pIndexCPD);
+	if (static_cast<rtVECTOR_Handle*>(pKeySet->containerHandle ())->isASet (&refNilsLC))
+	    align ();
 
 /*****  If the key set can be fixed by deleting its nil elements, do so...  *****/
 	else if (IsntNil (refNilsLC)) {
-	    rtPTOKEN_CType *pKeySetDomainAdjustment = rtPTOKEN_NewShiftPTConstructor (
-		refNilsLC->RPT (), -1
-	    );
+	    rtPTOKEN_CType *pKeySetDomainAdjustment = refNilsLC->RPT ()->makeAdjustments ();
 	    unsigned int sKeySetDomainAdjustment = 0;
 
 	    rtLINK_TraverseRRDCList (refNilsLC, no_op, handleRepeat, handleRange);
 	    refNilsLC->release ();
 
-	    pKeySetDomainAdjustment->ToPToken ()->release ();
+	    pKeySetDomainAdjustment->ToPToken ()->discard ();
 
-	    if (rtVECTOR_RestoreSetAttribute (pKeySetCPD))
-		rtINDEX_Align (pIndexCPD, true);
+	    if (static_cast<rtVECTOR_Handle*>(pKeySet->containerHandle ())->restoreSetAttribute ())
+		align (true);
 	    else ERR_SignalFault (
 		EC__InternalInconsistency,
 		"rtINDEX_EnsureIndexKeyMeetsSetDefinition: Set Restore Failed"
@@ -1512,8 +1365,8 @@ PrivateFnDef void EnsureIndexKeyMeetsSetDefinition (M_CPD *pIndexCPD) {
     case RTYPE_C_Unsigned96UV:
     case RTYPE_C_Unsigned128UV:
 /*****  If the key set is valid, do a simple alignment...  *****/
-	if (UV_CPD_IsASetUV (pKeySetCPD))
-	    rtINDEX_Align (pIndexCPD);
+	if (UV_CPD_IsASetUV (pKeySet))
+	    align ();
 
 /*****  Otherwise, fail...  *****/
 	else ERR_SignalFault (
@@ -1527,12 +1380,12 @@ PrivateFnDef void EnsureIndexKeyMeetsSetDefinition (M_CPD *pIndexCPD) {
 	    EC__InternalInconsistency,
 	    UTIL_FormatMessage (
 		"rtINDEX_EnsureIndexKeyMeetsSetDefinition: Invalid Index Key Type: %s",
-		RTYPE_TypeIdAsString ((RTYPE_Type)M_CPD_RType (pKeySetCPD))
+		pKeySet->RTypeName ()
 	    )
 	);
 	break;
     }
-    pKeySetCPD->release ();
+    pKeySet->release ();
 
 #undef handleRange
 #undef handleRepeat
@@ -1547,14 +1400,11 @@ PrivateFnDef void EnsureIndexKeyMeetsSetDefinition (M_CPD *pIndexCPD) {
 /*---------------------------------------------------------------------------
  *****  Key Set Cleanup.
  *
- *  Arguments:
- *	pIndexCPD		- a cpd for the index being cleaned up.
- *
  *  Returns:
  *	NOTHING
  *
  *****/
-PublicFnDef void rtINDEX_DeleteUnusedKeys (M_CPD *pIndexCPD) {
+void rtINDEX_Handle::deleteUnusedKeys () {
 
 #define handleNil(cumulative, count, columnNumber) {\
     if (columnNumber > lastColumn) pKeyPTokenConstructor->AppendAdjustment (\
@@ -1583,14 +1433,15 @@ PublicFnDef void rtINDEX_DeleteUnusedKeys (M_CPD *pIndexCPD) {
 }
 
 /*****  Check index integrity ... *****/
-    EnsureIndexKeyMeetsSetDefinition (pIndexCPD);
+    EnsureIndexKeyMeetsSetDefinition ();
 
 /*****  ... get the key projection of the presence map, ...  *****/
-    M_CPD *pKeyMapCPD = pIndexCPD->GetCPD (rtINDEX_CPx_Map);
-    rtLINK_CType *pKeySelectorLC;
-    switch ((RTYPE_Type)M_CPD_RType (pKeyMapCPD)) {
+    M_CPD *pKeyMap;
+    getKeyMap (pKeyMap);
+    rtLINK_CType *pKeySelectorLC = 0;
+    switch (pKeyMap->RType ()) {
     case RTYPE_C_Link: {
-	    rtLINK_CType *pKeyMapLC = rtLINK_ToConstructor (pKeyMapCPD);
+	    rtLINK_CType *pKeyMapLC = rtLINK_ToConstructor (pKeyMap);
 
 	    M_CPD *pKeyEnumerationCPD = rtLINK_ColumnProjection (pKeyMapLC);
 	    pKeyMapLC->release ();
@@ -1601,37 +1452,35 @@ PublicFnDef void rtINDEX_DeleteUnusedKeys (M_CPD *pIndexCPD) {
 	break;
 
     case RTYPE_C_RefUV:
-	pKeySelectorLC = rtLINK_RefUVToConstructor (pKeyMapCPD);
+	pKeySelectorLC = rtLINK_RefUVToConstructor (pKeyMap);
 	break;
 
     default:
 	ERR_SignalFault (
 	    EC__InternalInconsistency, UTIL_FormatMessage (
-		"rtINDEX_Align: Invalid Index Map Type: %s",
-		RTYPE_TypeIdAsString ((RTYPE_Type)M_CPD_RType (pKeyMapCPD))
+		"rtINDEX_Handle::deleteUnusedKeys: Invalid Index Map Type: %s",
+		pKeyMap->RTypeName ()
 	    )
 	);
 	break;
     }
 
 /*****  Prepare the key ptoken for editing  *****/
-    M_CPD *pKeyPTokenCPD = pKeySelectorLC->RPT ();
-    rtPTOKEN_CType *pKeyPTokenConstructor = rtPTOKEN_NewShiftPTConstructor (
-	pKeyPTokenCPD, -1
-    );
+    rtPTOKEN_Handle *pKeyPToken = pKeySelectorLC->RPT ();
+    rtPTOKEN_CType *pKeyPTokenConstructor = pKeyPToken->makeAdjustments ();
 
 /*****  Traverse the key selector, editing the column ptoken  *****/
     int totalAdjustment = 0;
     int adjustment = 0;
     int lastColumn = 0;
     rtLINK_TraverseRRDCList (pKeySelectorLC, handleNil, handleRepeat, handleRange);
-    handleNil (0, 0, (int)rtPTOKEN_CPD_BaseElementCount (pKeyPTokenCPD));
+    handleNil (0, 0, (int)pKeyPToken->cardinality ());
 
 /*****  Commit the changes  *****/
-    pKeyPTokenConstructor->ToPToken ()->release ();
+    pKeyPTokenConstructor->ToPToken ()->discard ();
     pKeySelectorLC->release ();
 
-    pKeyMapCPD->release ();
+    pKeyMap->release ();
 
 #undef handleNil
 #undef handleRepeat
@@ -1647,8 +1496,7 @@ PublicFnDef void rtINDEX_DeleteUnusedKeys (M_CPD *pIndexCPD) {
  *****  Routine to add a specified number of rows to the end of an index.
  *
  *  Arguments:
- *	index			- a standard CPD for an index.
- *	newListsPToken		- a standard CPD for a P-Token which
+ *	pAdditionPPT		- a standard CPD for a P-Token which
  *				  specifies the number of rows to be added.
  *
  *  Returns:
@@ -1656,15 +1504,34 @@ PublicFnDef void rtINDEX_DeleteUnusedKeys (M_CPD *pIndexCPD) {
  *	positional P-Token of this link constructor will be 'newListsPToken'.
  *
  *****/
-PublicFnDef rtLINK_CType *rtINDEX_AddLists (M_CPD *index, M_CPD *newListsPToken) {
-/*****  Check index integrity ... *****/
-    EnsureIndexKeyMeetsSetDefinition (index);
+rtLINK_CType *rtINDEX_Handle::addInstances_(rtPTOKEN_Handle *pAdditionPPT) {
+    EnsureIndexKeyMeetsSetDefinition ();
 
-    M_CPD *pLStoreCPD = rtINDEX_CPD_ListStoreCPD (index);
-    rtLINK_CType* result = rtLSTORE_AddLists (pLStoreCPD, newListsPToken);
-    pLStoreCPD->release ();
+    Vdd::Store::Reference pListStore;
+    getListStore (pListStore);
+    if (isATimeSeries ()) {
+	rtPTOKEN_Handle::Reference pPPT (pListStore->getPToken ());
+	if (!pPPT->isIndependent ())
+	    return 0;
+    }
+    return pListStore->addInstances (pAdditionPPT);
+}
+
 
-    return result;
+/*************************************
+ *****  List Cardinality Access  *****
+ *************************************/
+
+bool rtINDEX_Handle::getCardinality (M_CPD *&rpResult, rtLINK_CType *pSubscript) {
+    rtLSTORE_Handle::Reference pListStore;
+    getListStore (pListStore);
+    return pListStore->getCardinality (rpResult, pSubscript);
+}
+
+bool rtINDEX_Handle::getCardinality (unsigned int &rpResult, DSC_Scalar &rSubscript) {
+    rtLSTORE_Handle::Reference pListStore;
+    getListStore (pListStore);
+    return pListStore->getCardinality (rpResult, rSubscript);
 }
 
 
@@ -1705,33 +1572,141 @@ PublicFnDef rtLINK_CType *rtINDEX_AddLists (M_CPD *index, M_CPD *newListsPToken)
  *	NOTHING
  *
  *****/
-PublicFnDef void rtINDEX_Subscript (
-    DSC_Descriptor	 *sourceDsc,
-    DSC_Descriptor	 *keyDsc,
-    int			  keyModifier,
-    DSC_Descriptor	 *resultDsc,
-    rtLINK_CType	**locatedLinkc
-)
-{
-/*****
- *  Create a new descriptor containing the lstore and sourceDsc's pointer ...
- *****/
-    M_CPD *index = sourceDsc->storeCPD ();
+
+bool rtINDEX_Handle::getListElements (
+    DSC_Descriptor &rResult, rtLINK_CType *pInstances, M_CPD *pSubscript, int iModifier, rtLINK_CType **ppGuard
+) {
+//  Check integrity ...
+    EnsureIndexKeyMeetsSetDefinition ();
+
+//  ... and do the operation:
+    rtLSTORE_Handle::Reference pListStore;
+    getListStore (pListStore);
+    return pListStore->getListElements (rResult, pInstances, pSubscript, iModifier, ppGuard);
+}
+
+bool rtINDEX_Handle::getListElements (
+    DSC_Descriptor &rResult, DSC_Scalar &rInstance, int xSubscript, int iModifier
+) {
+//  Check integrity ...
+    EnsureIndexKeyMeetsSetDefinition ();
+
+//  ... and do the operation:
+    rtLSTORE_Handle::Reference pListStore;
+    getListStore (pListStore);
+    return pListStore->getListElements (rResult, rInstance, xSubscript, iModifier);
+}
+
+bool rtINDEX_Handle::getListElements (
+    DSC_Descriptor &rResult, DSC_Pointer &rInstances, DSC_Descriptor &rSubscript, int iModifier, rtLINK_CType **ppGuard
+) {
+//  Check integrity ...
+    EnsureIndexKeyMeetsSetDefinition ();
+
+//  ... and do the operation:
+    rtLSTORE_Handle::Reference pListStore;
+    getListStore (pListStore);
+    return pListStore->getListElements (rResult, rInstances, rSubscript, iModifier, ppGuard);
+}
+
+
+/****************************
+ *****  Element Access  *****
+ ****************************/
+
+bool rtINDEX_Handle::getListElements (
+    DSC_Pointer		&rInstances,
+    Vdd::Store::Reference&rpElementStore,
+    rtLINK_CType	*&rpElementPointer,
+    rtLINK_CType	*&rpExpansion,
+    M_CPD		*&rpDistribution,
+    rtINDEX_Key		*&rpKey
+) {
+    ExtractCount++;
 
 /*****  Check its integrity ... *****/
-    EnsureIndexKeyMeetsSetDefinition (index);
+    EnsureIndexKeyMeetsSetDefinition ();
 
-    DSC_Descriptor indexDsc;
-    indexDsc.store ().construct (rtINDEX_CPD_ListStoreCPD (index));
-    DSC_Descriptor_Pointer (indexDsc).construct (DSC_Descriptor_Pointer (*sourceDsc));
-
-/*****  Perform the function ...  *****/
-    rtLSTORE_Subscript (
-	&indexDsc, keyDsc, keyModifier, resultDsc, locatedLinkc
+/*****  Extract elements from the l-store ... *****/
+    rtLSTORE_Handle::Reference pListStore;
+    getListStore (pListStore);
+    bool bDone = pListStore->getListElements (
+	rInstances, rpElementStore, rpElementPointer, rpExpansion, rpDistribution, rpKey
     );
 
-/*****  Cleanup and exit ...  *****/
-    indexDsc.clear ();
+/*****
+ *  If the index isn't a time-series, then its keys are stored in a vector.
+ *  As of now (6/3/87) the handling of this type of index has not been
+ *  defined and no rtINDEX_Key can be created. Thus, cleanup and return.
+ *****/
+    if (!bDone || !isATimeSeries ()) {
+	rpKey = NilOf (rtINDEX_Key *);
+	return bDone;
+    }
+
+/*****  Get a selector for the keys ... *****/
+    M_CPD *pKeySelectorCPD; {
+	M_CPD *pKeyMap;
+	getKeyMap (pKeyMap);
+	switch (pKeyMap->RType ()) {
+	case RTYPE_C_Link: {
+		rtLINK_CType *pMapSelectorLC = rtLINK_LCExtract (
+		    pKeyMap, rpElementPointer
+		);
+
+	    /*****  Get the column projection ... *****/
+		pKeySelectorCPD = rtLINK_ColumnProjection (pMapSelectorLC);
+		pMapSelectorLC->release ();
+	    }
+	    break;
+
+	case RTYPE_C_RefUV:
+	    pKeySelectorCPD = rtREFUV_LCExtract (pKeyMap, rpElementPointer);
+	    break;
+
+	default:
+	    ERR_SignalFault (
+		EC__InternalInconsistency, UTIL_FormatMessage (
+		    "rtINDEX_Extract: Invalid Index Map Type: %s",
+		    pKeyMap->RTypeName ()
+		)
+	    );
+	    break;
+	}
+	pKeyMap->release ();
+    }
+
+/*****  Make the new key ... *****/
+    DSC_Descriptor newKeyDsc; {
+	Vdd::Store::Reference pKeyStore;
+	getKeyStore (pKeyStore);
+
+	M_CPD *pKeySet;
+	getKeySet (pKeySet);
+
+	/*** Make a descriptor from the index's key store and set... ***/
+	DSC_Descriptor keyDsc;
+	keyDsc.constructMonotype (pKeyStore, pKeySet);
+	pKeySet->release ();
+
+	/***  Extract using 'pKeySelectorCPD' ... ***/
+	newKeyDsc.constructComposition (pKeySelectorCPD, keyDsc);
+	pKeySelectorCPD->release ();
+
+	keyDsc.clear ();
+    }
+
+    /***  Distribute if neccessary ... ***/
+    if (rpDistribution)
+	newKeyDsc.distribute (rpDistribution);
+
+    /*** And make the new key ... ***/
+    rtPTOKEN_Handle::Reference ptoken (newKeyDsc.PPT ());
+    rpKey = new rtINDEX_Key (ptoken, &newKeyDsc);
+
+    newKeyDsc.clear ();
+
+    return true;
 }
 
 
@@ -1743,151 +1718,41 @@ PublicFnDef void rtINDEX_Subscript (
  *****  Routine to lookup point(s) in an index.
  *
  *  Arguments:
- *	pResultDescriptor	- the address of a descriptor which will be set to
+ *	rResult			- the address of a descriptor which will be set to
  *				  contain the point(s) found.
- *	pIndexDescriptor	- the address of a descriptor naming the index.
+ *	pResultPPT		- the address of the positional p-token of the result.
  *
  *  Returns:
  *	Nothing.
  *
  *****/
-PublicFnDef void rtINDEX_TimeZero (
-    DSC_Descriptor*	pResultDescriptor,
-    DSC_Descriptor*	pIndexDescriptor
-)
-{
-/*****  Get the index, ... *****/
-    M_CPD *pIndexCPD = pIndexDescriptor->storeCPD ();
-
+bool rtINDEX_Handle::getTimeZero (
+    DSC_Descriptor &rResult, rtPTOKEN_Handle *pResultPPT
+) {
 /*****  ... validate that it is a time-series, ...  *****/
-    if (!rtINDEX_CPD_IsATimeSeries (pIndexCPD)) ERR_SignalFault (
+    if (!isATimeSeries ()) ERR_SignalFault (
 	EC__InternalInconsistency, "rtINDEX_TimeZero: Not A Time-Series"
     );
 
-/*****  ... get the result's positional p-token, ...  *****/
-    M_CPD *pPosPTokenCPD = pIndexDescriptor->PPT ();
-
 /*****  ... get the key set, ...  *****/
-    M_CPD *pKeySetCPD = pIndexCPD->GetCPD (rtINDEX_CPx_KeyValues);
+    M_CPD *pKeySet;
+    getKeySet (pKeySet);
+
+/*****  ... get the key store, ...  *****/
+    Vdd::Store::Reference pKeyStore;
+    getKeyStore (pKeyStore);
 
 /*****  ... construct the result, ...  *****/
-    pResultDescriptor->constructZero (
-	pIndexCPD->GetCPD (rtINDEX_CPx_KeyStore),
-	(RTYPE_Type)M_CPD_RType (pKeySetCPD),
-	pPosPTokenCPD,
-	UV_CPD_RefPTokenCPD (pKeySetCPD)
+    rResult.constructZero (
+	pKeyStore, pKeySet->RType (), pResultPPT, static_cast<rtUVECTOR_Handle*>(
+	    pKeySet->containerHandle ()
+	)->rptHandle ()
     );
 
 /*****  ... and cleanup and return.  *****/
-    pKeySetCPD->release ();
-    pPosPTokenCPD->release ();
-}
-
+    pKeySet->release ();
 
-/*********************************
- *****  Extraction Routines  *****
- *********************************/
-
-PublicFnDef void rtINDEX_Extract (
-    DSC_Descriptor	 &rIndexDescriptor,
-    M_CPD		*&pElementCluster,
-    rtLINK_CType	*&elementSelector,
-    rtLINK_CType	*&expansionLinkc,
-    M_CPD		*&elementDistribution,
-    rtINDEX_Key		*&pKey
-)
-{
-    ExtractCount++;
-
-/*****  Get the index out of 'pIndexDescriptor' ... *****/
-    M_CPD *pIndexCPD = rIndexDescriptor.storeCPD ();
-
-/*****  Check its integrity ... *****/
-    EnsureIndexKeyMeetsSetDefinition (pIndexCPD);
-
-/*****  Extract elements from the l-store ... *****/
-    {
-	DSC_Descriptor lstoreDsc;
-	lstoreDsc.construct (rIndexDescriptor);
-
-	lstoreDsc.setStoreTo (rtINDEX_CPD_ListStoreCPD (pIndexCPD));
-
-	rtLSTORE_Extract (
-	    lstoreDsc, pElementCluster, elementSelector, expansionLinkc, elementDistribution
-	);
-
-	lstoreDsc.clear ();
-    }
-
-/*****
- *  If the index isn't a time-series, then its keys are stored in a vector.
- *  As of now (6/3/87) the handling of this type of index has not been
- *  defined and no rtINDEX_Key can be created. Thus, cleanup and return.
- *****/
-    if (!rtINDEX_CPD_IsATimeSeries (pIndexCPD)) {
-	pKey = NilOf (rtINDEX_Key *);
-	return;
-    }
-
-/*****  Get a selector for the keys ... *****/
-    M_CPD *pKeySelectorCPD; {
-	M_CPD *pKeyMapCPD = pIndexCPD->GetCPD (rtINDEX_CPx_Map);
-	switch ((RTYPE_Type)M_CPD_RType (pKeyMapCPD)) {
-	case RTYPE_C_Link: {
-		rtLINK_CType *pMapSelectorLC = rtLINK_LCExtract (
-		    pKeyMapCPD, elementSelector
-		);
-
-	    /*****  Get the column projection ... *****/
-		pKeySelectorCPD = rtLINK_ColumnProjection (pMapSelectorLC);
-		pMapSelectorLC->release ();
-	    }
-	    break;
-
-	case RTYPE_C_RefUV:
-	    pKeySelectorCPD = rtREFUV_LCExtract (pKeyMapCPD, elementSelector);
-	    break;
-
-	default:
-	    ERR_SignalFault (
-		EC__InternalInconsistency,
-		UTIL_FormatMessage (
-		    "rtINDEX_Extract: Invalid Index Map Type: %s",
-		    RTYPE_TypeIdAsString ((RTYPE_Type)M_CPD_RType (pKeyMapCPD))
-		)
-	    );
-	    break;
-	}
-	pKeyMapCPD->release ();
-    }
-
-/*****  Make the new key ... *****/
-    DSC_Descriptor newKeyDsc; {
-	M_CPD *pKeyStoreCPD	= pIndexCPD->GetCPD (rtINDEX_CPx_KeyStore);
-	M_CPD *pKeySetCPD	= pIndexCPD->GetCPD (rtINDEX_CPx_KeyValues);
-	DSC_Descriptor keyDsc;
-
-	/*** Make a descriptor from the index's pKeyStoreCPD and pKeySetCPD ... ***/
-	keyDsc.constructMonotype (pKeyStoreCPD, pKeySetCPD);
-	pKeySetCPD->release ();
-
-	/***  Extract using 'pKeySelectorCPD' ... ***/
-	newKeyDsc.constructComposition (pKeySelectorCPD, keyDsc);
-	pKeySelectorCPD->release ();
-
-	keyDsc.clear ();
-    }
-
-    /***  Distribute if neccessary ... ***/
-    if (elementDistribution)
-	newKeyDsc.distribute (elementDistribution);
-
-    /*** And make the new key ... ***/
-    M_CPD *ptoken = newKeyDsc.PPT ();
-    pKey = new rtINDEX_Key (ptoken, &newKeyDsc);
-    ptoken->release ();
-
-    newKeyDsc.clear ();
+    return true;
 }
 
 
@@ -1908,18 +1773,15 @@ protected:
 
 /*****  Construction  *****/
 protected:
-    rtINDEX_Operation (M_CPD *pIndexCPD);
+    rtINDEX_Operation (rtINDEX_Handle *pIndex);
 
 /*****  Destruction  *****/
     ~rtINDEX_Operation ();
 
 /*****  Component Access Helpers  *****/
 protected:
-    M_CPD *IndexElementsCPD () const {
-	return rtLSTORE_CPD_ContentCPD (m_pLStoreCPD);
-    }
-    M_CPD *IndexElementPTokenCPD () const {
-	return rtLSTORE_CPD_ContentPTokenCPD (m_pLStoreCPD);
+    Vdd::Store *IndexElements () const {
+	return m_pIndexElements;
     }
 
 /*****  Fault Generation Helpers  *****/
@@ -1930,9 +1792,10 @@ protected:
 
 /*****  State  *****/
 protected:
-    M_CPD *const m_pIndexCPD;
-    M_CPD *m_pLStoreCPD;
-    M_CPD *m_pKeySetCPD;
+    rtINDEX_Handle::Reference const	m_pIndex;
+    rtLSTORE_Handle::Reference		m_pIndexLists;
+    Vdd::Store::Reference		m_pIndexElements;
+    M_CPD *m_pKeySet;
     M_CPD *m_pKeyMapCPD;
 };
 
@@ -1941,16 +1804,16 @@ protected:
  *****  Construction  *****
  **************************/
 
-rtINDEX_Operation::rtINDEX_Operation (M_CPD *pIndexCPD)
-: m_pIndexCPD (pIndexCPD)
-{
+rtINDEX_Operation::rtINDEX_Operation (rtINDEX_Handle *pIndex) : m_pIndex (pIndex) {
 /*****  Check the integrity of the index, ... *****/
-    EnsureIndexKeyMeetsSetDefinition (m_pIndexCPD);
+    pIndex->EnsureIndexKeyMeetsSetDefinition ();
 
 /*****  ... and unpack and cache its components:  *****/
-    m_pLStoreCPD = rtINDEX_CPD_ListStoreCPD (m_pIndexCPD);
-    m_pKeySetCPD = m_pIndexCPD->GetCPD (rtINDEX_CPx_KeyValues);
-    m_pKeyMapCPD = m_pIndexCPD->GetCPD (rtINDEX_CPx_Map);
+    pIndex->getListStore (m_pIndexLists);
+    m_pIndexLists->getContent (m_pIndexElements);
+
+    pIndex->getKeySet (m_pKeySet);
+    pIndex->getKeyMap (m_pKeyMapCPD);
 }
 
 /*************************
@@ -1958,9 +1821,8 @@ rtINDEX_Operation::rtINDEX_Operation (M_CPD *pIndexCPD)
  *************************/
 
 rtINDEX_Operation::~rtINDEX_Operation () {
+    m_pKeySet->release ();
     m_pKeyMapCPD->release ();
-    m_pKeySetCPD->release ();
-    m_pLStoreCPD->release ();
 }
 
 
@@ -1968,14 +1830,14 @@ rtINDEX_Operation::~rtINDEX_Operation () {
  *****  Fault Generation  *****
  ******************************/
 
-void rtINDEX_Operation::SignalKeySetTypeFault (char const* pWhereDescription) const {
+void rtINDEX_Operation::SignalKeySetTypeFault (char const *pWhereDescription) const {
     ERR_SignalFault (
 	EC__InternalInconsistency,
 	UTIL_FormatMessage (
 	    "rtINDEX::%s:%s: Invalid Key Set Type: %s",
 	    WhatIAmDoingDescription (),
 	    pWhereDescription,
-	    RTYPE_TypeIdAsString ((RTYPE_Type)M_CPD_RType (m_pKeySetCPD))
+	    m_pKeySet->RTypeName ()
 	)
     );
 }
@@ -1990,7 +1852,7 @@ void rtINDEX_Operation::SignalKeyMapTypeFault (
 	    "rtINDEX::%s:%s: Invalid Key Map Type: %s",
 	    WhatIAmDoingDescription (),
 	    pWhereDescription,
-	    RTYPE_TypeIdAsString ((RTYPE_Type)M_CPD_RType (m_pKeyMapCPD))
+	    m_pKeyMapCPD->RTypeName ()
 	)
     );
 }
@@ -2042,7 +1904,7 @@ protected:
 
 /*****  Component Access Helpers  *****/
 protected:
-    M_CPD *OperationPPT () const {
+    rtPTOKEN_Handle *OperationPPT () const {
 	return m_iIndexDescriptor.PPT ();
     }
 
@@ -2193,8 +2055,7 @@ rtINDEX_KeyedOperation::rtINDEX_KeyedOperation (
     DSC_Descriptor	&iResultDescriptor,
     DSC_Descriptor	&iIndexDescriptor,
     rtINDEX_Key		*pKey
-)
-: rtINDEX_Operation	(iIndexDescriptor.storeCPD ())
+) : rtINDEX_Operation	(static_cast<rtINDEX_Handle*>(iIndexDescriptor.store ()))
 , m_iResultDescriptor	(iResultDescriptor)
 , m_iIndexDescriptor	(iIndexDescriptor)
 , m_pKey		(pKey)
@@ -2212,18 +2073,13 @@ void rtINDEX_KeyedOperation::LocateKeyAsKeySetReference (
     rtLINK_LookupCase		xLookupCase,
     rtLINK_CType		*&pKeySetDomainReference,
     rtLINK_CType		*&pKeySetDomainReferenceGuard
-)
-{
-    switch ((RTYPE_Type)M_CPD_RType (m_pKeySetCPD)) {
+) {
+    switch (m_pKeySet->RType ()) {
     case RTYPE_C_Vector: {
 	    DSC_Pointer locationsPointer;
 	    DSC_Pointer foundPointer;
-	    rtVECTOR_LookupFromValueD (
-		m_pKeySetCPD,
-		&OperationKeySet (),
-		xLookupCase,
-		&locationsPointer,
-		&foundPointer
+	    static_cast<rtVECTOR_Handle*>(m_pKeySet->containerHandle ())->locate (
+		OperationKeySet (), xLookupCase, locationsPointer, foundPointer
 	    );
 	    pKeySetDomainReferenceGuard = foundPointer.isEmpty ()
 		? NilOf (rtLINK_CType*) : (rtLINK_CType*)DSC_Pointer_Link (foundPointer);
@@ -2232,7 +2088,7 @@ void rtINDEX_KeyedOperation::LocateKeyAsKeySetReference (
         break;
     case RTYPE_C_CharUV:
 	rtCHARUV_Lookup (
-	    m_pKeySetCPD,
+	    m_pKeySet,
 	    DSC_Descriptor_Value (OperationKeySet ()),
 	    xLookupCase,
 	    &pKeySetDomainReference,
@@ -2241,7 +2097,7 @@ void rtINDEX_KeyedOperation::LocateKeyAsKeySetReference (
         break;
     case RTYPE_C_DoubleUV:
 	rtDOUBLEUV_Lookup (
-	    m_pKeySetCPD,
+	    m_pKeySet,
 	    DSC_Descriptor_Value (OperationKeySet ()),
 	    xLookupCase,
 	    &pKeySetDomainReference,
@@ -2250,7 +2106,7 @@ void rtINDEX_KeyedOperation::LocateKeyAsKeySetReference (
         break;
     case RTYPE_C_FloatUV:
 	rtFLOATUV_Lookup (
-	    m_pKeySetCPD,
+	    m_pKeySet,
 	    DSC_Descriptor_Value (OperationKeySet ()),
 	    xLookupCase,
 	    &pKeySetDomainReference,
@@ -2259,7 +2115,7 @@ void rtINDEX_KeyedOperation::LocateKeyAsKeySetReference (
         break;
     case RTYPE_C_IntUV:
 	rtINTUV_Lookup (
-	    m_pKeySetCPD,
+	    m_pKeySet,
 	    DSC_Descriptor_Value (OperationKeySet ()),
 	    xLookupCase,
 	    &pKeySetDomainReference,
@@ -2268,7 +2124,7 @@ void rtINDEX_KeyedOperation::LocateKeyAsKeySetReference (
         break;
     case RTYPE_C_Unsigned64UV:
 	rtU64UV_Lookup (
-	    m_pKeySetCPD,
+	    m_pKeySet,
 	    DSC_Descriptor_Value (OperationKeySet ()),
 	    xLookupCase,
 	    &pKeySetDomainReference,
@@ -2277,7 +2133,7 @@ void rtINDEX_KeyedOperation::LocateKeyAsKeySetReference (
         break;
     case RTYPE_C_Unsigned96UV:
 	rtU96UV_Lookup (
-	    m_pKeySetCPD,
+	    m_pKeySet,
 	    DSC_Descriptor_Value (OperationKeySet ()),
 	    xLookupCase,
 	    &pKeySetDomainReference,
@@ -2286,7 +2142,7 @@ void rtINDEX_KeyedOperation::LocateKeyAsKeySetReference (
         break;
     case RTYPE_C_Unsigned128UV:
 	rtU128UV_Lookup (
-	    m_pKeySetCPD,
+	    m_pKeySet,
 	    DSC_Descriptor_Value (OperationKeySet ()),
 	    xLookupCase,
 	    &pKeySetDomainReference,
@@ -2306,15 +2162,11 @@ int rtINDEX_KeyedOperation::LocateKeyAsKeySetReference (
 )
 {
     bool fKeySetDomainReferenceValid;
-    if (RTYPE_C_Vector == (RTYPE_Type)M_CPD_RType (m_pKeySetCPD)) {
+    if (RTYPE_C_Vector == m_pKeySet->RType ()) {
 	DSC_Pointer locationsPointer;
 	DSC_Pointer locatedPointer;
-	rtVECTOR_LookupFromValueD (
-	    m_pKeySetCPD,
-	    &OperationKeySet (),
-	    xLookupCase,
-	    &locationsPointer,
-	    &locatedPointer
+	static_cast<rtVECTOR_Handle*>(m_pKeySet->containerHandle ())->locate (
+	    OperationKeySet (), xLookupCase, locationsPointer, locatedPointer
 	);
 	fKeySetDomainReferenceValid = locationsPointer.isntEmpty ();
 	iKeySetDomainReference = DSC_Pointer_Scalar (locationsPointer);
@@ -2322,10 +2174,10 @@ int rtINDEX_KeyedOperation::LocateKeyAsKeySetReference (
     }
     else {
 	int xKeySetDomainReference;
-	switch ((RTYPE_Type)M_CPD_RType (m_pKeySetCPD)) {
+	switch (m_pKeySet->RType ()) {
 	case RTYPE_C_CharUV:
 	    fKeySetDomainReferenceValid = rtCHARUV_ScalarLookup (
-		m_pKeySetCPD,
+		m_pKeySet,
 		&DSC_Descriptor_Scalar_Char (OperationKeySet ()),
 		xLookupCase,
 		&xKeySetDomainReference
@@ -2333,7 +2185,7 @@ int rtINDEX_KeyedOperation::LocateKeyAsKeySetReference (
 	    break;
 	case RTYPE_C_DoubleUV:
 	    fKeySetDomainReferenceValid = rtDOUBLEUV_ScalarLookup (
-		m_pKeySetCPD,
+		m_pKeySet,
 		&DSC_Descriptor_Scalar_Double (OperationKeySet ()),
 		xLookupCase,
 		&xKeySetDomainReference
@@ -2341,7 +2193,7 @@ int rtINDEX_KeyedOperation::LocateKeyAsKeySetReference (
 	    break;
 	case RTYPE_C_FloatUV:
 	    fKeySetDomainReferenceValid = rtFLOATUV_ScalarLookup (
-		m_pKeySetCPD,
+		m_pKeySet,
 		&DSC_Descriptor_Scalar_Float (OperationKeySet ()),
 		xLookupCase,
 		&xKeySetDomainReference
@@ -2349,7 +2201,7 @@ int rtINDEX_KeyedOperation::LocateKeyAsKeySetReference (
 	    break;
 	case RTYPE_C_IntUV:
 	    fKeySetDomainReferenceValid = rtINTUV_ScalarLookup (
-		m_pKeySetCPD,
+		m_pKeySet,
 		&DSC_Descriptor_Scalar_Int (OperationKeySet ()),
 		xLookupCase,
 		&xKeySetDomainReference
@@ -2357,7 +2209,7 @@ int rtINDEX_KeyedOperation::LocateKeyAsKeySetReference (
 	    break;
 	case RTYPE_C_Unsigned64UV:
 	    fKeySetDomainReferenceValid = rtU64UV_ScalarLookup (
-		m_pKeySetCPD,
+		m_pKeySet,
 		&DSC_Descriptor_Scalar_Unsigned64 (OperationKeySet ()),
 		xLookupCase,
 		&xKeySetDomainReference
@@ -2365,7 +2217,7 @@ int rtINDEX_KeyedOperation::LocateKeyAsKeySetReference (
 	    break;
 	case RTYPE_C_Unsigned96UV:
 	    fKeySetDomainReferenceValid = rtU96UV_ScalarLookup (
-		m_pKeySetCPD,
+		m_pKeySet,
 		&DSC_Descriptor_Scalar_Unsigned96 (OperationKeySet ()),
 		xLookupCase,
 		&xKeySetDomainReference
@@ -2373,7 +2225,7 @@ int rtINDEX_KeyedOperation::LocateKeyAsKeySetReference (
 	    break;
 	case RTYPE_C_Unsigned128UV:
 	    fKeySetDomainReferenceValid = rtU128UV_ScalarLookup (
-		m_pKeySetCPD,
+		m_pKeySet,
 		&DSC_Descriptor_Scalar_Unsigned128 (OperationKeySet ()),
 		xLookupCase,
 		&xKeySetDomainReference
@@ -2386,11 +2238,9 @@ int rtINDEX_KeyedOperation::LocateKeyAsKeySetReference (
 	    break;
 	}
 
-	if (fKeySetDomainReferenceValid)
-	{
-	    DSC_InitReferenceScalar (
-		iKeySetDomainReference,
-		UV_CPD_PosPTokenCPD (m_pKeySetCPD),
+	if (fKeySetDomainReferenceValid) {
+	    iKeySetDomainReference.constructReference (
+		static_cast<rtUVECTOR_Handle*>(m_pKeySet->containerHandle ())->pptHandle (),
 		xKeySetDomainReference
 	    );
 	}
@@ -2409,8 +2259,7 @@ void rtINDEX_KeyedOperation::LocateKeyAsKeyMapDomainReference (
     rtLINK_CType		*&pKeyMapDomainReference,
     rtLINK_CType		*&pKeyMapDomainReferenceGuard,
     M_CPD			*&pKeyMapDistribution
-)
-{
+) {
     rtLINK_CType *pKeySetDomainReference;
     rtLINK_CType *pKeySetDomainReferenceGuard;
     LocateKeyAsKeySetReference (
@@ -2448,7 +2297,7 @@ int rtINDEX_KeyedOperation::LocateKeyAsKeyMapDomainReference (
 	pKeyMapDomainReferenceGuard
     );
 
-    DSC_ClearScalar (iKeySetDomainReference);
+    iKeySetDomainReference.destroy ();
 
     return true;
 }
@@ -2470,7 +2319,7 @@ int rtINDEX_KeyedOperation::LocateKeyAsKeyMapDomainReference (
 	fKeyMapDomainReferenceIsValid
     );
 
-    DSC_ClearScalar (iKeySetDomainReference);
+    iKeySetDomainReference.destroy ();
 
     return fKeyMapDomainReferenceIsValid;
 }
@@ -2527,7 +2376,7 @@ int rtINDEX_KeyedOperation::LocateKeyAsKeyMapComainReference (
 	iKeyMapComainReference
     );
 
-    DSC_ClearScalar (iKeySetDomainReference);
+    iKeySetDomainReference.destroy ();
 
     return true;
 }
@@ -2546,7 +2395,7 @@ int rtINDEX_KeyedOperation::LocateKeyAsKeyMapComainReference (
 	iKeySetDomainReference, fKeyMapComainIsAProduct, iKeyMapComainReference
     );
 
-    DSC_ClearScalar (iKeySetDomainReference);
+    iKeySetDomainReference.destroy ();
 
     return true;
 }
@@ -2583,7 +2432,7 @@ void rtINDEX_KeyedOperation::ConvertKeySetReferenceToKeyMapDomainReference (
 	    m_pKeyMapCPD,
 	    pKeyMapComainReferenceLC,
 	    rtLINK_LookupCase_GT == xLookupCase ? rtLINK_LookupCase_GE : xLookupCase,
-	    rtPTOKEN_CPD_BaseElementCount (pKeySetDomainReference->RPT ()),
+	    pKeySetDomainReference->RPT ()->cardinality (),
 	    &pKeyMapDomainReference,
 	    &pKeyMapDomainReferenceGuard
 	);
@@ -2592,7 +2441,7 @@ void rtINDEX_KeyedOperation::ConvertKeySetReferenceToKeyMapDomainReference (
     else {
 	rtREFUV_PartitionedLocate (
 	    m_pKeyMapCPD,
-	    rtLSTORE_CPD_BreakpointArray (m_pLStoreCPD),
+	    m_pIndexLists->breakpointArray (),
 	    OperationIndexReferenceLC (),
 	    pKeyMapComainReferenceCPD,
 	    rtLINK_LookupCase_GT == xLookupCase ? rtLINK_LookupCase_GE : xLookupCase,
@@ -2623,13 +2472,12 @@ void rtINDEX_KeyedOperation::ConvertKeySetReferenceToKeyMapDomainReference (
 	iKeyMapComainReference
     );
 
-    if (fKeyMapComainIsAProduct)
-    {
+    if (fKeyMapComainIsAProduct) {
 	rtLINK_LookupUsingLCKey (
 	    m_pKeyMapCPD,
 	    pKeyMapComainReferenceLC,
 	    rtLINK_LookupCase_GT == xLookupCase ? rtLINK_LookupCase_GE : xLookupCase,
-	    rtPTOKEN_CPD_BaseElementCount (DSC_Scalar_RefPToken (iKeySetDomainReference)),
+	    iKeySetDomainReference.RPTCardinality (),
 	    &pKeyMapDomainReference,
 	    &pKeyMapDomainReferenceGuard
 	);
@@ -2638,14 +2486,14 @@ void rtINDEX_KeyedOperation::ConvertKeySetReferenceToKeyMapDomainReference (
     else {
 	rtREFUV_PartitionedLocate (
 	    m_pKeyMapCPD,
-	    rtLSTORE_CPD_BreakpointArray (m_pLStoreCPD),
+	    m_pIndexLists->breakpointArray (),
 	    OperationIndexReferenceLC (),
 	    iKeyMapComainReference,
 	    rtLINK_LookupCase_GT == xLookupCase ? rtLINK_LookupCase_GE : xLookupCase,
 	    pKeyMapDomainReference,
 	    pKeyMapDomainReferenceGuard
 	);
-	DSC_ClearScalar (iKeyMapComainReference);
+	iKeyMapComainReference.destroy ();
     }
 }
 
@@ -2668,18 +2516,18 @@ void rtINDEX_KeyedOperation::ConvertKeySetReferenceToKeyMapDomainReference (
 	m_pKeyMapCPD,
 	&iKeyMapComainReference,
 	rtLINK_LookupCase_GT == xLookupCase ? rtLINK_LookupCase_GE : xLookupCase,
-	rtPTOKEN_CPD_BaseElementCount (DSC_Scalar_RefPToken (iKeySetDomainReference)),
+	iKeySetDomainReference.RPTCardinality (),
 	&iKeyMapDomainReference
     ) : rtREFUV_PartitionedLocate (
 	m_pKeyMapCPD,
-	rtLSTORE_CPD_BreakpointArray (m_pLStoreCPD),
+	m_pIndexLists->breakpointArray (),
 	OperationIndexReference (),
 	iKeyMapComainReference,
 	rtLINK_LookupCase_GT == xLookupCase ? rtLINK_LookupCase_GE : xLookupCase,
 	iKeyMapDomainReference
     );
 
-    DSC_ClearScalar (iKeyMapComainReference);
+    iKeyMapComainReference.destroy ();
 }
 
 
@@ -2701,15 +2549,15 @@ void rtINDEX_KeyedOperation::ConvertKeySetReferenceToKeyMapComainReference (
 	    pKeySetDomainReferenceGuard, pKeySetDomainReference
 	);
     
-	switch ((RTYPE_Type)M_CPD_RType (m_pKeyMapCPD)) {
+	switch (m_pKeyMapCPD->RType ()) {
 	case RTYPE_C_Link:
 	    fKeyMapComainIsAProduct = true;
-	    rtLINK_AlignLink (m_pKeyMapCPD);
-	    {
-		M_CPD *pKeyMapComainPTokenCPD = rtLINK_CPD_RefPTokenCPD (m_pKeyMapCPD);
-
+	    m_pKeyMapCPD->align (); {
+		rtPTOKEN_Handle::Reference pKeyMapComainPToken (
+		    static_cast<rtLINK_Handle*>(m_pKeyMapCPD->containerHandle ())->rptHandle ()
+		);
 		pKeyMapComainReferenceCPD = rtLINK_LinearizeLCrUVic (
-		    pKeyMapComainPTokenCPD,
+		    pKeyMapComainPToken,
 		    OperationIndexReferenceLC (),
 		    pPartialKeySetReferences,
 		    OperationKeySetReference ()
@@ -2718,7 +2566,6 @@ void rtINDEX_KeyedOperation::ConvertKeySetReferenceToKeyMapComainReference (
 		    pKeyMapComainReferenceCPD, &pKeyMapComainDistribution, true
 		);
 		pKeyMapComainReferenceCPD->release ();
-		pKeyMapComainPTokenCPD->release ();
 
 		pKeyMapComainReferenceCPD = NilOf (M_CPD*);
 	    }
@@ -2740,14 +2587,16 @@ void rtINDEX_KeyedOperation::ConvertKeySetReferenceToKeyMapComainReference (
 
 	pPartialKeySetReferences->release ();
     }
-    else switch ((RTYPE_Type)M_CPD_RType (m_pKeyMapCPD)) {
+    else switch (m_pKeyMapCPD->RType ()) {
     case RTYPE_C_Link:
 	fKeyMapComainIsAProduct = true;
-	rtLINK_AlignLink (m_pKeyMapCPD); {
-	    M_CPD *pKeyMapComainPTokenCPD = rtLINK_CPD_RefPTokenCPD (m_pKeyMapCPD);
+	m_pKeyMapCPD->align (); {
+	    rtPTOKEN_Handle::Reference pKeyMapComainPToken (
+		static_cast<rtLINK_Handle*>(m_pKeyMapCPD->containerHandle ())->rptHandle ()
+	    );
 
 	    pKeyMapComainReferenceCPD = rtLINK_LinearizeLCrLCic (
-		pKeyMapComainPTokenCPD,
+		pKeyMapComainPToken,
 		OperationIndexReferenceLC (),
 		pKeySetDomainReference,
 		OperationKeySetReference ()
@@ -2758,7 +2607,6 @@ void rtINDEX_KeyedOperation::ConvertKeySetReferenceToKeyMapComainReference (
 	    );
 
 	    pKeyMapComainReferenceCPD->release ();
-	    pKeyMapComainPTokenCPD->release ();
 
 	    pKeyMapComainReferenceCPD = NilOf (M_CPD*);
 	}
@@ -2787,28 +2635,24 @@ void rtINDEX_KeyedOperation::ConvertKeySetReferenceToKeyMapComainReference (
     rtREFUV_Type_Reference&	iKeyMapComainReference
 )
 {
-    switch ((RTYPE_Type)M_CPD_RType (m_pKeyMapCPD))
+    switch (m_pKeyMapCPD->RType ())
     {
     case RTYPE_C_Link:
 	fKeyMapComainIsAProduct = true;
-	rtLINK_AlignLink (m_pKeyMapCPD);
-	{
-	    M_CPD *pKeyMapComainPTokenCPD = rtLINK_CPD_RefPTokenCPD (m_pKeyMapCPD);
-
-	    pKeyMapComainReferenceLC = rtLINK_LinearizeLCrRc (
-		pKeyMapComainPTokenCPD,
-		OperationIndexReferenceLC (),
-		&iKeySetDomainReference
+	m_pKeyMapCPD->align (); {
+	    rtPTOKEN_Handle::Reference pKeyMapComainPToken (
+		static_cast<rtLINK_Handle*>(m_pKeyMapCPD->containerHandle ())->rptHandle ()
 	    );
-
-	    pKeyMapComainPTokenCPD->release ();
+	    pKeyMapComainReferenceLC = rtLINK_LinearizeLCrRc (
+		pKeyMapComainPToken, OperationIndexReferenceLC (), &iKeySetDomainReference
+	    );
 	}
 	break;
 
     case RTYPE_C_RefUV:
 	fKeyMapComainIsAProduct = false;
 	pKeyMapComainReferenceLC = NilOf (rtLINK_CType *);
-	DSC_DuplicateScalar (iKeyMapComainReference, iKeySetDomainReference);
+	iKeyMapComainReference.constructFrom (iKeySetDomainReference);
 	break;
 
     default:
@@ -2824,28 +2668,26 @@ void rtINDEX_KeyedOperation::ConvertKeySetReferenceToKeyMapComainReference (
     rtREFUV_Type_Reference&	iKeyMapComainReference
 )
 {
-    switch ((RTYPE_Type)M_CPD_RType (m_pKeyMapCPD))
+    switch (m_pKeyMapCPD->RType ())
     {
     case RTYPE_C_Link:
 	fKeyMapComainIsAProduct = true;
-	rtLINK_AlignLink (m_pKeyMapCPD);
-	{
-	    M_CPD *pKeyMapComainPTokenCPD = rtLINK_CPD_RefPTokenCPD (m_pKeyMapCPD);
-
+	m_pKeyMapCPD->align (); {
+	    rtPTOKEN_Handle::Reference pKeyMapComainPToken (
+		static_cast<rtLINK_Handle*>(m_pKeyMapCPD->containerHandle ())->rptHandle ()
+	    );
 	    rtREFUV_LinearizeRrRc (
 		&iKeyMapComainReference,
-		pKeyMapComainPTokenCPD,
+		pKeyMapComainPToken,
 		&OperationIndexReference (),
 		&iKeySetDomainReference
 	    );
-
-	    pKeyMapComainPTokenCPD->release ();
 	}
 	break;
 
     case RTYPE_C_RefUV:
 	fKeyMapComainIsAProduct = false;
-	DSC_DuplicateScalar (iKeyMapComainReference, iKeySetDomainReference);
+	iKeyMapComainReference.constructFrom (iKeySetDomainReference);
 	break;
 
     default:
@@ -2859,19 +2701,13 @@ void rtINDEX_KeyedOperation::ConvertKeySetReferenceToKeyMapComainReference (
  *****  Nil Element Reference Result Generator  *****
  ****************************************************/
 
-void rtINDEX_KeyedOperation::SetResultToNilElementReference ()
-{
-    M_CPD *pPosPTokenCPD = OperationPPT ();
-    M_CPD *pRefPTokenCPD = IndexElementPTokenCPD ();
+void rtINDEX_KeyedOperation::SetResultToNilElementReference () {
+    rtPTOKEN_Handle::Reference pPPT (OperationPPT ());
+    rtPTOKEN_Handle::Reference pRPT (m_pIndexElements->getPToken ());
 
     m_iResultDescriptor.constructReferenceConstant (
-	pPosPTokenCPD,
-	IndexElementsCPD (),
-	pRefPTokenCPD,
-	rtPTOKEN_CPD_BaseElementCount (pRefPTokenCPD)
+	pPPT, IndexElements (), pRPT, pRPT->cardinality ()
     );
-
-    pPosPTokenCPD->release ();
 }
 
 
@@ -2883,15 +2719,12 @@ void rtINDEX_KeyedOperation::SetResultToIntervalLimit (
     rtLINK_CType	*pKeyMapDomainReference,
     rtLINK_CType	*pKeyMapDomainReferenceGuard,
     M_CPD		*pKeyMapDistribution
-)
-{
+) {
     LookupMListLimitCount++;
 
     M_CPD *pKeySetDomainReference;
-    switch ((RTYPE_Type)M_CPD_RType (m_pKeyMapCPD))
-    {
-    case RTYPE_C_Link:
-	{
+    switch (m_pKeyMapCPD->RType ()) {
+    case RTYPE_C_Link: {
 	    rtLINK_CType *pKeyMapComainReferences = rtLINK_LCExtract (
 		m_pKeyMapCPD, pKeyMapDomainReference
 	    );
@@ -2916,10 +2749,11 @@ void rtINDEX_KeyedOperation::SetResultToIntervalLimit (
     }
 
     {
+	Vdd::Store::Reference pKeyStore;
+	m_pIndex->getKeyStore (pKeyStore);
+
 	DSC_Descriptor iKeySetDescriptor;
-	iKeySetDescriptor.constructMonotype (
-	    m_pIndexCPD->GetCPD (rtINDEX_CPx_KeyStore), m_pKeySetCPD
-	);
+	iKeySetDescriptor.constructMonotype (pKeyStore, m_pKeySet);
 	m_iResultDescriptor.constructComposition (pKeySetDomainReference, iKeySetDescriptor);
 	iKeySetDescriptor.clear ();
     }
@@ -2938,25 +2772,22 @@ void rtINDEX_KeyedOperation::SetResultToIntervalLimit (
     LookupSListLimitCount++;
 
     rtREFUV_Type_Reference iKeySetDomainReference;
-    switch ((RTYPE_Type)M_CPD_RType (m_pKeyMapCPD)) {
+    switch (m_pKeyMapCPD->RType ()) {
     case RTYPE_C_Link: {
 	    rtREFUV_Type_Reference iKeyMapComainReference;
 	    rtLINK_RefExtract (
 		&iKeyMapComainReference, m_pKeyMapCPD, &iKeyMapDomainReference
 	    );
 
-	    M_CPD *pKeySetDomainPTokenCPD = rtPTOKEN_CPD_ColPTokenCPD (
-		DSC_Scalar_RefPToken (iKeyMapComainReference)
+	    rtPTOKEN_Handle::Reference pKeySetDomainPToken (
+		iKeyMapComainReference.RPT ()->colPTokenHandle ()
 	    );
 
-	    DSC_InitReferenceScalar (
-		iKeySetDomainReference,
-		pKeySetDomainPTokenCPD,
-		DSC_Scalar_Int (
-		    iKeyMapComainReference
-		) % rtPTOKEN_CPD_BaseElementCount (pKeySetDomainPTokenCPD)
+	    iKeySetDomainReference.constructReference (
+		pKeySetDomainPToken,
+		DSC_Scalar_Int (iKeyMapComainReference) % pKeySetDomainPToken->cardinality ()
 	    );
-	    DSC_ClearScalar (iKeyMapComainReference);
+	    iKeyMapComainReference.destroy ();
 	}
 	break;
 
@@ -2970,15 +2801,16 @@ void rtINDEX_KeyedOperation::SetResultToIntervalLimit (
     }
 
     {
+	Vdd::Store::Reference pKeyStore;
+	m_pIndex->getKeyStore (pKeyStore);
+
 	DSC_Descriptor iKeySetDescriptor;
-	iKeySetDescriptor.constructMonotype (
-	    m_pIndexCPD->GetCPD (rtINDEX_CPx_KeyStore), m_pKeySetCPD
-	);
+	iKeySetDescriptor.constructMonotype (pKeyStore, m_pKeySet);
 	m_iResultDescriptor.constructComposition (iKeySetDomainReference, iKeySetDescriptor);
 	iKeySetDescriptor.clear ();
     }
 
-    DSC_ClearScalar (iKeySetDomainReference);
+    iKeySetDomainReference.destroy ();
 }
 
 
@@ -2987,16 +2819,8 @@ void rtINDEX_KeyedOperation::SetResultToIntervalLimit (
  ****************************************/
 
 void rtINDEX_KeyedOperation::SetResultToTimeZero () {
-    M_CPD *pPosPTokenCPD = OperationPPT ();
-
-    m_iResultDescriptor.constructZero (
-	m_pIndexCPD->GetCPD (rtINDEX_CPx_KeyStore),
-	(RTYPE_Type)M_CPD_RType (m_pKeySetCPD),
-	pPosPTokenCPD,
-	UV_CPD_RefPTokenCPD (m_pKeySetCPD)
-    );
-
-    pPosPTokenCPD->release ();
+    rtPTOKEN_Handle::Reference pPosPToken (OperationPPT ());
+    m_pIndex->getTimeZero (m_iResultDescriptor, pPosPToken);
 }
 
 
@@ -3156,58 +2980,60 @@ void rtINDEX_LocateOrAddOperation::ProcessMKMLCase () {
 
 /*****  ... update the key set, ... *****/
     rtLINK_CType *pKeySetDomainReference;
-    switch ((RTYPE_Type)M_CPD_RType (m_pKeySetCPD)) {
+    switch (m_pKeySet->RType ()) {
     case RTYPE_C_Vector: {
 	    DSC_Pointer locationsPointer;
-	    rtVECTOR_LocateOrAdd (m_pKeySetCPD, &OperationKeySet (), &locationsPointer);
+	    static_cast<rtVECTOR_Handle*>(m_pKeySet->containerHandle ())->locateOrAdd (
+		OperationKeySet (), locationsPointer
+	    );
 	    pKeySetDomainReference = DSC_Pointer_Link (locationsPointer);
 	}
 	break;
     case RTYPE_C_CharUV:
 	rtCHARUV_LocateOrAdd (
-	    m_pKeySetCPD,
+	    m_pKeySet,
 	    DSC_Descriptor_Value (OperationKeySet ()),
 	    &pKeySetDomainReference
 	);
 	break;
     case RTYPE_C_DoubleUV:
 	rtDOUBLEUV_LocateOrAdd (
-	    m_pKeySetCPD,
+	    m_pKeySet,
 	    DSC_Descriptor_Value (OperationKeySet ()),
 	    &pKeySetDomainReference
 	);
 	break;
     case RTYPE_C_FloatUV:
 	rtFLOATUV_LocateOrAdd (
-	    m_pKeySetCPD,
+	    m_pKeySet,
 	    DSC_Descriptor_Value (OperationKeySet ()),
 	    &pKeySetDomainReference
 	);
 	break;
     case RTYPE_C_IntUV:
 	rtINTUV_LocateOrAdd (
-	    m_pKeySetCPD,
+	    m_pKeySet,
 	    DSC_Descriptor_Value (OperationKeySet ()),
 	    &pKeySetDomainReference
 	);
 	break;
     case RTYPE_C_Unsigned64UV:
 	rtU64UV_LocateOrAdd (
-	    m_pKeySetCPD,
+	    m_pKeySet,
 	    DSC_Descriptor_Value (OperationKeySet ()),
 	    &pKeySetDomainReference
 	);
 	break;
     case RTYPE_C_Unsigned96UV:
 	rtU96UV_LocateOrAdd (
-	    m_pKeySetCPD,
+	    m_pKeySet,
 	    DSC_Descriptor_Value (OperationKeySet ()),
 	    &pKeySetDomainReference
 	);
 	break;
     case RTYPE_C_Unsigned128UV:
 	rtU128UV_LocateOrAdd (
-	    m_pKeySetCPD,
+	    m_pKeySet,
 	    DSC_Descriptor_Value (OperationKeySet ()),
 	    &pKeySetDomainReference
 	);
@@ -3243,7 +3069,7 @@ void rtINDEX_LocateOrAddOperation::ProcessMKMLCase () {
 	else {
 	    rtREFUV_PartitionedLocateOrAdd (
 		m_pKeyMapCPD,
-		rtLSTORE_CPD_BreakpointArray (m_pLStoreCPD),
+		m_pIndexLists->breakpointArray (),
 		OperationIndexReferenceLC (),
 		pKeyMapComainReferenceCPD,
 		pKeyMapDomainReference,
@@ -3257,12 +3083,10 @@ void rtINDEX_LocateOrAddOperation::ProcessMKMLCase () {
 	if (IsntNil (pKeyMapDomainReferenceAdditions)) {
 	    M_CPD *pElementAddCounts = rtLINK_LCCountReferences (
 		pKeyMapDomainReferenceAdditions,
-		m_pLStoreCPD->TheIntegerClass ().PTokenCPD (),
+		m_pIndexLists->kot ()->TheIntegerClass.PTokenHandle (),
 		pKeyMapDomainReferenceDistribution
 	    );
-	    rtLSTORE_AlignUsingLCSelctLists (
-		m_pLStoreCPD, OperationIndexReferenceLC (), pElementAddCounts
-	    );
+	    m_pIndexLists->alignUsingSelectedLists (OperationIndexReferenceLC (), pElementAddCounts);
 	    pElementAddCounts->release ();
 	    pKeyMapDomainReferenceAdditions->release ();
 	}
@@ -3271,7 +3095,7 @@ void rtINDEX_LocateOrAddOperation::ProcessMKMLCase () {
 
 /*****  ... and initialize the result descriptor.  *****/
     m_iResultDescriptor.constructReference (
-	IndexElementsCPD (), pKeyMapDomainReferenceDistribution, pKeyMapDomainReference
+	IndexElements (), pKeyMapDomainReferenceDistribution, pKeyMapDomainReference
     );
 }
 
@@ -3291,16 +3115,15 @@ void rtINDEX_LocateOrAddOperation::ProcessSKMLCase ()
 /*****  ... update the key map, ... *****/
     rtLINK_CType *pKeyMapDomainReferences; {
 	rtLINK_CType *pKeyMapDomainAdditions;
-	switch ((RTYPE_Type)M_CPD_RType (m_pKeyMapCPD))
-	{
+	switch (m_pKeyMapCPD->RType ()) {
 	case RTYPE_C_Link:
-	    rtLINK_AlignLink (m_pKeyMapCPD);
-	    {
-		M_CPD *pKeyMapComainPTokenCPD = rtLINK_CPD_RefPTokenCPD (m_pKeyMapCPD);
-		rtLINK_CType *pKeyMapComainReferenceLC = rtLINK_LinearizeLCrRc (
-		    pKeyMapComainPTokenCPD, OperationIndexReferenceLC (), &keySelectorRef
+	    m_pKeyMapCPD->align (); {
+		rtPTOKEN_Handle::Reference pKeyMapComainPToken (
+		    static_cast<rtLINK_Handle*>(m_pKeyMapCPD->containerHandle ())->rptHandle ()
 		);
-		pKeyMapComainPTokenCPD->release ();
+		rtLINK_CType *pKeyMapComainReferenceLC = rtLINK_LinearizeLCrRc (
+		    pKeyMapComainPToken, OperationIndexReferenceLC (), &keySelectorRef
+		);
 
 		pKeyMapDomainReferences = rtLINK_LocateOrAddFromLC (
 		    m_pKeyMapCPD, pKeyMapComainReferenceLC, &pKeyMapDomainAdditions
@@ -3313,7 +3136,7 @@ void rtINDEX_LocateOrAddOperation::ProcessSKMLCase ()
 	case RTYPE_C_RefUV:
 	    rtREFUV_PartitionedLocateOrAdd (
 		m_pKeyMapCPD,
-		rtLSTORE_CPD_BreakpointArray (m_pLStoreCPD),
+		m_pIndexLists->breakpointArray (),
 		OperationIndexReferenceLC (),
 		keySelectorRef,
 		pKeyMapDomainReferences,
@@ -3330,20 +3153,18 @@ void rtINDEX_LocateOrAddOperation::ProcessSKMLCase ()
 	if (IsntNil (pKeyMapDomainAdditions)) {
 	    M_CPD *pElementAddCounts = rtLINK_LCCountReferences (
 		pKeyMapDomainAdditions,
-		m_pLStoreCPD->TheIntegerClass ().PTokenCPD (),
+		m_pIndexLists->kot ()->TheIntegerClass.PTokenHandle (),
 		NilOf (M_CPD*)
 	    );
-	    rtLSTORE_AlignUsingLCSelctLists (
-		m_pLStoreCPD, OperationIndexReferenceLC (), pElementAddCounts
-	    );
+	    m_pIndexLists->alignUsingSelectedLists (OperationIndexReferenceLC (), pElementAddCounts);
 	    pElementAddCounts->release ();
 	    pKeyMapDomainAdditions->release ();
 	}
     }
-    DSC_ClearScalar (keySelectorRef);
+    keySelectorRef.destroy ();
 
 /*****  ... and initialize the result descriptor.  *****/
-    m_iResultDescriptor.constructLink (IndexElementsCPD (), pKeyMapDomainReferences);
+    m_iResultDescriptor.constructLink (IndexElements (), pKeyMapDomainReferences);
 }
 
 
@@ -3351,8 +3172,7 @@ void rtINDEX_LocateOrAddOperation::ProcessSKMLCase ()
  *****  SKSL Delegation Handler  *****
  *************************************/
 
-void rtINDEX_LocateOrAddOperation::ProcessSKSLCase ()
-{
+void rtINDEX_LocateOrAddOperation::ProcessSKSLCase () {
     DefineSKeySListCount++;
 
 /*****  ... update the key set, ... *****/
@@ -3362,31 +3182,29 @@ void rtINDEX_LocateOrAddOperation::ProcessSKSLCase ()
 /*****  ... update the key map, ... *****/
     rtREFUV_Type_Reference elementSelectorRef; {
 	bool added;
-	switch ((RTYPE_Type)M_CPD_RType (m_pKeyMapCPD)) {
+	switch (m_pKeyMapCPD->RType ()) {
 	case RTYPE_C_Link:
-	    rtLINK_AlignLink (m_pKeyMapCPD); {
-		M_CPD *pKeyMapComainPTokenCPD = rtLINK_CPD_RefPTokenCPD (m_pKeyMapCPD);
+	    m_pKeyMapCPD->align (); {
+		rtPTOKEN_Handle::Reference pKeyMapComainPToken (
+		    static_cast<rtLINK_Handle*>(m_pKeyMapCPD->containerHandle ())->rptHandle ()
+		);
 
 		rtREFUV_Type_Reference cartesianKeyRef;
 		rtREFUV_LinearizeRrRc (
-		    &cartesianKeyRef,
-		    pKeyMapComainPTokenCPD,
-		    &OperationIndexReference (),
-		    &keySelectorRef
+		    &cartesianKeyRef, pKeyMapComainPToken, &OperationIndexReference (), &keySelectorRef
 		);
-		pKeyMapComainPTokenCPD->release ();
 
 		added = rtLINK_LocateOrAddFromRef (
 		    m_pKeyMapCPD, &cartesianKeyRef, &elementSelectorRef
 		);
-		DSC_ClearScalar (cartesianKeyRef);
+		cartesianKeyRef.destroy ();
 	    }
 	    break;
 
 	case RTYPE_C_RefUV:
 	    rtREFUV_PartitionedLocateOrAdd (
 		m_pKeyMapCPD,
-		rtLSTORE_CPD_BreakpointArray (m_pLStoreCPD),
+		m_pIndexLists->breakpointArray (),
 		OperationIndexReference (),
 		keySelectorRef,
 		elementSelectorRef,
@@ -3400,14 +3218,13 @@ void rtINDEX_LocateOrAddOperation::ProcessSKSLCase ()
 	}
 
 /*****  ... align the lstore if anything was added... *****/
-	if (added) rtLSTORE_AlignUsingRefSelctList (
-	    m_pLStoreCPD, &OperationIndexReference (), 1
-	);
+	if (added) 
+	    m_pIndexLists->alignUsingSelectedLists (OperationIndexReference (), 1);
     }
-    DSC_ClearScalar (keySelectorRef);
+    keySelectorRef.destroy ();
 
 /*****  ... and initialize the result descriptor. *****/
-    m_iResultDescriptor.constructScalar (IndexElementsCPD (), elementSelectorRef);
+    m_iResultDescriptor.constructScalar (IndexElements (), elementSelectorRef);
 }
 
 
@@ -3436,61 +3253,62 @@ void rtINDEX_LocateOrAddOperation::ProduceNAResult ()
  */
 void rtINDEX_LocateOrAddOperation::DefineScalarKey (
     rtREFUV_Type_Reference&	rKeySetDomainReference
-)
-{
-    if (RTYPE_C_Vector == M_CPD_RType (m_pKeySetCPD)) {
+) {
+    if (RTYPE_C_Vector == m_pKeySet->RType ()) {
 	DSC_Pointer locationPointer;
-	rtVECTOR_LocateOrAdd (m_pKeySetCPD, &OperationKeySet (), &locationPointer);
+	static_cast<rtVECTOR_Handle*>(m_pKeySet->containerHandle ())->locateOrAdd (
+	    OperationKeySet (), locationPointer
+	);
 	rKeySetDomainReference = DSC_Pointer_Scalar (locationPointer);
     }
     else {
 	int xKeySetDomainReference;
-	switch (M_CPD_RType (m_pKeySetCPD)) {
+	switch (m_pKeySet->RType ()) {
 	case RTYPE_C_CharUV:
 	    rtCHARUV_ScalarLocateOrAdd (
-		m_pKeySetCPD,
+		m_pKeySet,
 		&DSC_Descriptor_Scalar_Char (OperationKeySet ()), 
 		(int *)&xKeySetDomainReference
 	    );
 	    break;
 	case RTYPE_C_DoubleUV:
 	    rtDOUBLEUV_ScalarLocateOrAdd (
-		m_pKeySetCPD,
+		m_pKeySet,
 		&DSC_Descriptor_Scalar_Double (OperationKeySet ()), 
 		(int *)&xKeySetDomainReference
 	    );
 	    break;
 	case RTYPE_C_FloatUV:
 	    rtFLOATUV_ScalarLocateOrAdd (
-		m_pKeySetCPD,
+		m_pKeySet,
 		&DSC_Descriptor_Scalar_Float (OperationKeySet ()), 
 		(int *)&xKeySetDomainReference
 	    );
 	    break;
 	case RTYPE_C_IntUV:
 	    rtINTUV_ScalarLocateOrAdd (
-		m_pKeySetCPD,
+		m_pKeySet,
 		&DSC_Descriptor_Scalar_Int (OperationKeySet ()),
 		(int *)&xKeySetDomainReference
 	    );
 	    break;
 	case RTYPE_C_Unsigned64UV:
 	    rtU64UV_ScalarLocateOrAdd (
-		m_pKeySetCPD,
+		m_pKeySet,
 		&DSC_Descriptor_Scalar_Unsigned64 (OperationKeySet ()), 
 		(int *)&xKeySetDomainReference
 	    );
 	    break;
 	case RTYPE_C_Unsigned96UV:
 	    rtU96UV_ScalarLocateOrAdd (
-		m_pKeySetCPD,
+		m_pKeySet,
 		&DSC_Descriptor_Scalar_Unsigned96 (OperationKeySet ()), 
 		(int *)&xKeySetDomainReference
 	    );
 	    break;
 	case RTYPE_C_Unsigned128UV:
 	    rtU128UV_ScalarLocateOrAdd (
-		m_pKeySetCPD,
+		m_pKeySet,
 		&DSC_Descriptor_Scalar_Unsigned128 (OperationKeySet ()), 
 		(int *)&xKeySetDomainReference
 	    );
@@ -3499,10 +3317,8 @@ void rtINDEX_LocateOrAddOperation::DefineScalarKey (
 	    SignalKeySetTypeFault ("DefineScalarKey");
 	    break;
 	}
-	DSC_InitReferenceScalar (
-	    rKeySetDomainReference,
-	    rtPTOKEN_BasePToken (m_pKeySetCPD, UV_CPx_PToken),
-	    xKeySetDomainReference
+	rKeySetDomainReference.constructReference (
+	    rtPTOKEN_BasePToken (m_pKeySet, UV_CPx_PToken), xKeySetDomainReference
 	);
     }
 }
@@ -3615,14 +3431,14 @@ void rtINDEX_LocateOperation::ProcessMKMLCase ()
 	pKeyMapDomainReferenceGuard->release ();
 	pKeyMapDomainReference->release ();
 
-	m_iResultDescriptor.constructMonotype (IndexElementsCPD (), pKeyMapReferenceUV);
+	m_iResultDescriptor.constructMonotype (IndexElements (), pKeyMapReferenceUV);
 	m_iResultDescriptor.distribute (pKeyMapDistribution);
 
 	pKeyMapReferenceUV->release ();
 	pKeyMapDistribution->release ();
     }
     else m_iResultDescriptor.constructReference (
-	IndexElementsCPD (), pKeyMapDistribution, pKeyMapDomainReference
+	IndexElements (), pKeyMapDistribution, pKeyMapDomainReference
     );
 }
 
@@ -3648,11 +3464,11 @@ void rtINDEX_LocateOperation::ProcessSKMLCase ()
 	pKeyMapDomainReference->release ();
 	pKeyMapDomainReferenceGuard->release ();
 
-	m_iResultDescriptor.constructMonotype (IndexElementsCPD (), pKeyMapReferenceUV);
+	m_iResultDescriptor.constructMonotype (IndexElements (), pKeyMapReferenceUV);
 	pKeyMapReferenceUV->release ();
     }
     else {
-	m_iResultDescriptor.constructLink (IndexElementsCPD (), pKeyMapDomainReference);
+	m_iResultDescriptor.constructLink (IndexElements (), pKeyMapDomainReference);
     }
 }
 
@@ -3661,13 +3477,12 @@ void rtINDEX_LocateOperation::ProcessSKMLCase ()
  *****  SKSL Delegation Handler  *****
  *************************************/
 
-void rtINDEX_LocateOperation::ProcessSKSLCase ()
-{
+void rtINDEX_LocateOperation::ProcessSKSLCase () {
     LookupSKeySListCount++;
 
     rtREFUV_Type_Reference iKeyMapDomainReference;
     if (LocateKeyAsKeyMapDomainReference (m_xLookupCase, iKeyMapDomainReference))
-	m_iResultDescriptor.constructScalar (IndexElementsCPD (), iKeyMapDomainReference);
+	m_iResultDescriptor.constructScalar (IndexElements (), iKeyMapDomainReference);
     else
 	ProduceNAResult ();
 }
@@ -3834,10 +3649,9 @@ void rtINDEX_IntervalLimitOperation::ProcessSKMLCase ()
 void rtINDEX_IntervalLimitOperation::ProcessSKSLCase ()
 {
     rtREFUV_Type_Reference iKeyMapDomainReference;
-    if (LocateKeyAsKeyMapDomainReference (m_xLookupCase, iKeyMapDomainReference))
-    {
+    if (LocateKeyAsKeyMapDomainReference (m_xLookupCase, iKeyMapDomainReference)) {
 	SetResultToIntervalLimit (iKeyMapDomainReference);
-	DSC_ClearScalar (iKeyMapDomainReference);
+	iKeyMapDomainReference.destroy ();
     }
     else ProduceNAResult ();
 }
@@ -3911,9 +3725,8 @@ public:
 
 /*****  Cleanup  *****/
 public:
-    void DeleteUnusedKeys ()
-    {
-	rtINDEX_DeleteUnusedKeys (m_pIndexCPD);
+    void DeleteUnusedKeys () {
+	m_pIndex->deleteUnusedKeys ();
     }
 
 /*****  Delegation  *****/
@@ -3971,7 +3784,7 @@ void rtINDEX_DeleteElementOperation::ProcessMKMLCase () {
     else {
 	rtREFUV_PartitionedDelete (
 	    m_pKeyMapCPD,
-	    rtLSTORE_CPD_BreakpointArray (m_pLStoreCPD),
+	    m_pIndexLists->breakpointArray (),
 	    OperationIndexReferenceLC (),
 	    pKeyMapComainReferenceCPD
 	);
@@ -3983,7 +3796,7 @@ void rtINDEX_DeleteElementOperation::ProcessMKMLCase () {
     if (pKeyMapComainDistribution)
 	pKeyMapComainDistribution->release ();
 
-    rtLSTORE_Align (m_pLStoreCPD);
+    m_pIndexLists->align ();
 }
 
 
@@ -4008,18 +3821,18 @@ void rtINDEX_DeleteElementOperation::ProcessSKMLCase () {
 	);
 	pKeyMapComainReferenceLC->release ();
 
-	rtLSTORE_Align (m_pLStoreCPD);
+	m_pIndexLists->align ();
     }
     else {
 	rtREFUV_PartitionedDelete (
 	    m_pKeyMapCPD,
-	    rtLSTORE_CPD_BreakpointArray (m_pLStoreCPD),
+	    m_pIndexLists->breakpointArray (),
 	    OperationIndexReferenceLC (),
 	    iKeyMapComainReference
 	);
-	DSC_ClearScalar (iKeyMapComainReference);
+	iKeyMapComainReference.destroy ();
 
-	rtLSTORE_Align (m_pLStoreCPD);
+	m_pIndexLists->align ();
     }
 }
 
@@ -4037,20 +3850,20 @@ void rtINDEX_DeleteElementOperation::ProcessSKSLCase () {
     ) ProduceNAResult ();
     else if (fKeyMapComainIsAProduct) {
 	rtLINK_DeleteRefSelectedElement (m_pKeyMapCPD, &iKeyMapComainReference);
-	DSC_ClearScalar (iKeyMapComainReference);
+	iKeyMapComainReference.destroy ();
 
-	rtLSTORE_Align (m_pLStoreCPD);
+	m_pIndexLists->align ();
     }
     else {
 	rtREFUV_PartitionedDelete (
 	    m_pKeyMapCPD,
-	    rtLSTORE_CPD_BreakpointArray (m_pLStoreCPD),
+	    m_pIndexLists->breakpointArray (),
 	    OperationIndexReference (),
 	    iKeyMapComainReference
 	);
-	DSC_ClearScalar (iKeyMapComainReference);
+	iKeyMapComainReference.destroy ();
 
-	rtLSTORE_Align (m_pLStoreCPD);
+	m_pIndexLists->align ();
     }
 }
 
@@ -4175,17 +3988,15 @@ protected:
 void rtINDEX_DeleteKeyOperation::update () {
     m_sKeySetDomainAdjustment = 0;
     m_pKeySetDomainAdjustment = rtPTOKEN_NewShiftPTConstructor (
-	m_pKeySetCPD, RTYPE_C_Vector == (RTYPE_Type)M_CPD_RType (
-	    m_pKeySetCPD
-	) ? rtVECTOR_CPx_PToken : UV_CPx_PToken
+	m_pKeySet, RTYPE_C_Vector == m_pKeySet->RType () ? rtVECTOR_CPx_PToken : UV_CPx_PToken
     );
 }
 
 void rtINDEX_DeleteKeyOperation::commit () {
-    m_pKeySetDomainAdjustment->ToPToken ()->release ();
+    m_pKeySetDomainAdjustment->ToPToken ()->discard ();
     m_pKeySetDomainAdjustment = NilOf (rtPTOKEN_CType *);
 
-    rtINDEX_Align (m_pIndexCPD, true);
+    m_pIndex->align(true);
 }
 
 
@@ -4203,7 +4014,7 @@ void rtINDEX_DeleteKeyOperation::operate () {
 	    );
 	    commit ();
 
-	    DSC_ClearScalar (iKeySetDomainReference);
+	    iKeySetDomainReference.destroy ();
 	}
     }
     else {
@@ -4274,26 +4085,18 @@ PublicFnDef void rtINDEX_KeyDelete (DSC_Descriptor *pIndexDescriptor, rtINDEX_Ke
  *  'Type' Methods  *
  ********************/
 
-IOBJ_DefineNewaryMethod (NewDM)
-{
+IOBJ_DefineNewaryMethod (NewDM) {
+    return RTYPE_QRegister (rtINDEX_NewCluster (RTYPE_QRegisterPToken (parameterArray[0])));
+}
+
+IOBJ_DefineNewaryMethod (NewUsingContentPrototypeDM) {
+    Vdd::Store::Reference pContentPrototype (RTYPE_QRegisterHandle (parameterArray[1])->getStore ());
     return RTYPE_QRegister (
-	rtINDEX_NewCluster (RTYPE_QRegisterCPD (parameterArray[0]), NilOf (M_CPD*), -1)
+	rtINDEX_NewCluster (RTYPE_QRegisterPToken (parameterArray[0]), pContentPrototype)
     );
 }
 
-IOBJ_DefineNewaryMethod (NewUsingContentPrototypeDM)
-{
-    return RTYPE_QRegister (
-	rtINDEX_NewCluster (
-	    RTYPE_QRegisterCPD (parameterArray[0]),
-	    RTYPE_QRegisterCPD (parameterArray[1]),
-	    -1
-	)
-    );
-}
-
-IOBJ_DefineUnaryMethod (DisplayCountsDM)
-{
+IOBJ_DefineUnaryMethod (DisplayCountsDM) {
     IO_printf ("\nIndex Routines Usage Counts\n");
     IO_printf (  "--------------------------\n");
 
@@ -4345,8 +4148,7 @@ IOBJ_DefineUnaryMethod (DisplayCountsDM)
 }
 
 
-IOBJ_DefineUnaryMethod (InitCountsDM)
-{
+IOBJ_DefineUnaryMethod (InitCountsDM) {
     NewKeyCount			= 0;
     NewFutureKeyCount		= 0;
     RealizeKeySequenceCount	= 0;
@@ -4375,20 +4177,17 @@ IOBJ_DefineUnaryMethod (InitCountsDM)
 }
 
 
-IOBJ_DefineUnaryMethod (SetDefaultMapTypeToProductDM)
-{
+IOBJ_DefineUnaryMethod (SetDefaultMapTypeToProductDM) {
     rtINDEX_KeyMapDefaultType = RTYPE_C_Link;
     return self;
 }
 
-IOBJ_DefineUnaryMethod (SetDefaultMapTypeToPartitionDM)
-{
+IOBJ_DefineUnaryMethod (SetDefaultMapTypeToPartitionDM) {
     rtINDEX_KeyMapDefaultType = RTYPE_C_RefUV;
     return self;
 }
 
-IOBJ_DefineNilaryMethod (GetDefaultMapTypeDM)
-{
+IOBJ_DefineNilaryMethod (GetDefaultMapTypeDM) {
     return RTYPE_TypeIObject (rtINDEX_KeyMapDefaultType);
 }
 
@@ -4398,13 +4197,13 @@ IOBJ_DefineNilaryMethod (GetDefaultMapTypeDM)
  ************************/
 
 IOBJ_DefineUnaryMethod (AlignDM) {
-    rtINDEX_Align (RTYPE_QRegisterCPD (self));
+    RTYPE_QRegisterCPD (self)->align ();
 
     return self;
 }
 
 IOBJ_DefineUnaryMethod (CompAlignDM) {
-    rtINDEX_AlignAll (RTYPE_QRegisterCPD (self), false);
+    RTYPE_QRegisterCPD (self)->alignAll (false);
 
     return self;
 }
@@ -4467,8 +4266,7 @@ RTYPE_DefineHandler (rtINDEX_Handler) {
  *****  Facility Definition  *****
  *********************************/
 
-FAC_DefineFacility
-{
+FAC_DefineFacility {
     switch (FAC_RequestTypeField)
     {
     FAC_FDFCase_FacilityIdAsString (rtINDEX);

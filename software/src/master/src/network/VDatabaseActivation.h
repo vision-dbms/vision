@@ -53,7 +53,7 @@ public:
 //  Resource Utilization Query
 public:
     virtual void AccumulateAllocationStatistics (
-	double *pAllocationTotal, double *pMappingTotal
+	unsigned __int64 *pAllocationTotal, unsigned __int64 *pMappingTotal
     ) const = 0;
 
 //  Resource Utilization Management

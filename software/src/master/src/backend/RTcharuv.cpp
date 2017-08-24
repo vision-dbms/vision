@@ -59,7 +59,7 @@ DEFINE_CONCRETE_RTT (rtCHARUV_Handle);
  *****  Basic CharUV instantiation routine.
  *
  *  Arguments:
- *	pPPT			- a CPD for the PPT of the result.
+ *	pPPT			- a handle for the PPT of the result.
  *	refPTokenRefCPD/Index	- a reference to a POP for the P-Token which
  *				  will define the referential state of the
  *				  elements of this U-Vector.
@@ -80,24 +80,14 @@ DEFINE_CONCRETE_RTT (rtCHARUV_Handle);
  *
  *****/
 PublicFnDef M_CPD *__cdecl rtCHARUV_New (
-    M_CPD*			pPPT,
-    M_CPD*			refPTokenRefCPD,
-    int				refPTokenRefIndex,
-    Ref_UV_Initializer		initFn,
-    ...
+    rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT, Ref_UV_Initializer initFn, ...
 ) {
 /*****  Acquire the arguments passed to this function  *****/
     V_VARGLIST (initFnAP, initFn);
 
 /*****  Create and initialize the CharUV  *****/
     return UV_New (
-	RTYPE_C_CharUV,
-	pPPT,
-	refPTokenRefCPD,
-	refPTokenRefIndex,
-	sizeof (rtCHARUV_ElementType),
-	initFn,
-	initFnAP
+	RTYPE_C_CharUV, pPPT, pRPT, sizeof (rtCHARUV_ElementType), initFn, initFnAP
     );
 }
 
@@ -119,7 +109,7 @@ PublicFnDef M_CPD *__cdecl rtCHARUV_New (
  *	A standard CPD for the CharUV created.
  *
  *****/
-PublicFnDef M_CPD *rtCHARUV_New (M_CPD *pPPT, M_CPD *pRPTRef, int xRPTRef) {
+PublicFnDef M_CPD *rtCHARUV_New (rtPTOKEN_Handle *pPPT, M_CPD *pRPTRef, int xRPTRef) {
     return UV_New (
 	RTYPE_C_CharUV,
 	pPPT,
@@ -136,21 +126,16 @@ PublicFnDef M_CPD *rtCHARUV_New (M_CPD *pPPT, M_CPD *pRPTRef, int xRPTRef) {
  *****  Standard CharUV instantiation routine.
  *
  *  Arguments:
- *	posPToken		- the positional P-Token of the new uvector.
- *	refPToken		- the referential P-Token of the new uvector.
+ *	pPPT		- the positional P-Token of the new uvector.
+ *	pRPT		- the referential P-Token of the new uvector.
  *
  *  Returns:
  *	A standard CPD for the CharUV created.
  *
  *****/
-PublicFnDef M_CPD *rtCHARUV_New (M_CPD *posPToken, M_CPD *refPToken) {
+PublicFnDef M_CPD *rtCHARUV_New (rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT) {
     return UV_New (
-	RTYPE_C_CharUV,
-	posPToken,
-	refPToken,
-	sizeof (rtCHARUV_ElementType),
-	NilOf (Ref_UV_Initializer),
-	0
+	RTYPE_C_CharUV, pPPT, pRPT, sizeof (rtCHARUV_ElementType), NilOf (Ref_UV_Initializer), 0
     );
 }
 
@@ -173,16 +158,12 @@ PublicFnDef M_CPD *rtCHARUV_New (M_CPD *posPToken, M_CPD *refPToken) {
  *	'cpd'
  *
  *****/
-PublicFnDef M_CPD *rtCHARUV_Align (M_CPD *cpd) {
+PrivateFnDef M_CPD *rtCHARUV_Align (M_CPD *cpd) {
 /*****  Validate Argument R-Type  *****/
-    RTYPE_MustBeA ("rtCHARUV_Align", M_CPD_RType (cpd), RTYPE_C_CharUV);
+    RTYPE_MustBeA ("rtCHARUV_Align", cpd->RType (), RTYPE_C_CharUV);
 
 /*****  Align Positionally  *****/
-/*---------------------------------------------------------------------------
- * This will probably change when P-Tokens are re-implemented !!!!!!!!!!!!!!!
- *---------------------------------------------------------------------------
- */
-    UV_Align (cpd, NilOf (M_CPD::UVShiftProcessor));
+    static_cast<rtCHARUV_Handle*>(cpd->containerHandle ())->align ();
 
 /*****  Return the Argument  *****/
     return cpd;
@@ -217,16 +198,17 @@ PublicFnDef void rtCHARUV_ToSetUV (
     rtCHARUV_Align (sourceCPD);
 
 /*****  ... and access the relevant source data:  *****/
-    VCPDReference pSourcePPT (sourceCPD, UV_CPx_PToken, RTYPE_C_PToken);
+    rtPTOKEN_Handle::Reference pSourcePPT (
+	static_cast<rtUVECTOR_Handle*>(sourceCPD->containerHandle ())->pptHandle ()
+    );
     unsigned int sSource = UV_CPD_ElementCount (sourceCPD);
 
 /*****  If the source is empty, ... *****/
     if (0 == sSource) {
     /*****  ... the result is trivial:  *****/
-	M_CPD *pResultPPT = rtPTOKEN_New (pContainerSpace, 0);
+	rtPTOKEN_Handle::Reference pResultPPT (new rtPTOKEN_Handle (pContainerSpace, 0));
 	*refuvCPD = rtREFUV_New (pSourcePPT, pResultPPT);
 	*resultCPD = rtCHARUV_New (pResultPPT, sourceCPD, UV_CPx_RefPToken);
-	pResultPPT->release ();
     }
 /*****  ... otherwise, ...  *****/
     else {
@@ -260,7 +242,7 @@ PublicFnDef void rtCHARUV_ToSetUV (
 	}
 
     /*****  ... generate the set's domain,  ...  *****/
-	M_CPD *pResultPPT = rtPTOKEN_New (pContainerSpace, xResultElement + 1);
+	rtPTOKEN_Handle::Reference pResultPPT (new rtPTOKEN_Handle (pContainerSpace, xResultElement + 1));
 
     /*****  ... fix the source->set reference map's codomain, ...  *****/
 	(*refuvCPD)->StoreReference (UV_CPx_RefPToken, pResultPPT);
@@ -285,8 +267,6 @@ PublicFnDef void rtCHARUV_ToSetUV (
 	}
 
     /*****  ... and clean up:  *****/
-	pResultPPT->release ();
-
 	UTIL_Free (pSortArray);
     }
 
@@ -314,10 +294,13 @@ PublicFnDef void rtCHARUV_ToSetUV (
  *
  *****/
 PublicFnDef M_CPD *rtCHARUV_Distribute (M_CPD *refuvCPD, M_CPD *sourceuvCPD) {
-    VCPDReference pPPT (refuvCPD, UV_CPx_RefPToken, RTYPE_C_PToken);
-    return rtCHARUV_UVAssign (
-	rtCHARUV_New (pPPT, sourceuvCPD, UV_CPx_RefPToken), refuvCPD, sourceuvCPD
+    rtPTOKEN_Handle::Reference pPPT (
+	static_cast<rtUVECTOR_Handle*>(refuvCPD->containerHandle ())->rptHandle ()
     );
+    rtPTOKEN_Handle::Reference pRPT (
+	static_cast<rtUVECTOR_Handle*>(sourceuvCPD->containerHandle ())->rptHandle ()
+    );
+    return rtCHARUV_UVAssign (rtCHARUV_New (pPPT, pRPT), refuvCPD, sourceuvCPD);
 }
 
 
@@ -357,14 +340,9 @@ PublicFnDef M_CPD *rtCHARUV_LCExtract (M_CPD *sourceCPD, rtLINK_CType *linkConst
     linkConstructor->AlignForExtract (rtCHARUV_Align (sourceCPD), UV_CPx_PToken);
 
 /*****  Extract the requested values  *****/
+    rtPTOKEN_Handle::Reference pRPT (static_cast<rtUVECTOR_Handle*>(sourceCPD->containerHandle ())->rptHandle ());
     return rtCHARUV_New (
-	linkConstructor->PPT (),
-	sourceCPD,
-	UV_CPx_RefPToken,
-	UV_InitLCExtractedUV,
-	sourceCPD,
-	linkConstructor,
-	NilOf (Ref_UV_Initializer)
+	linkConstructor->PPT (), pRPT, UV_InitLCExtractedUV, sourceCPD, linkConstructor, NilOf (Ref_UV_Initializer)
     );
 }
 
@@ -449,20 +427,12 @@ PublicFnDef M_CPD *rtCHARUV_UVExtract (M_CPD *sourceCPD, M_CPD *refuvCPD) {
  * Align 'source' and 'refuv' and validate 'refuv's applicability as an
  * extraction subscript for 'source'.
  *****/
-    rtREFUV_AlignForExtract (
-	rtCHARUV_Align (sourceCPD), UV_CPx_PToken, refuvCPD
-    );
+    rtREFUV_AlignForExtract (rtCHARUV_Align (sourceCPD), UV_CPx_PToken, refuvCPD);
 
 /*****  Extract and return the requested values  *****/
-    VCPDReference pPPT (refuvCPD, UV_CPx_PToken, RTYPE_C_PToken);
-    return rtCHARUV_New (
-	pPPT,
-	sourceCPD,
-	UV_CPx_RefPToken,
-	InitializeExtractedUV,
-	sourceCPD,
-	refuvCPD
-    );
+    rtPTOKEN_Handle::Reference pPPT (static_cast<rtUVECTOR_Handle*>(refuvCPD->containerHandle ())->pptHandle ());
+    rtPTOKEN_Handle::Reference pRPT (static_cast<rtUVECTOR_Handle*>(sourceCPD->containerHandle ())->rptHandle ());
+    return rtCHARUV_New (pPPT, pRPT, InitializeExtractedUV, sourceCPD, refuvCPD);
 }
 
 
@@ -503,8 +473,7 @@ PublicFnDef void rtCHARUV_RFExtract (
     );
 
 /*****  Extract and return the requested values  *****/
-    *resultAddr = (element = rtREFUV_Ref_Element (referenceAddr)) >=
-	rtPTOKEN_CPD_BaseElementCount(rtREFUV_Ref_RefPTokenCPD (referenceAddr))
+    *resultAddr = (element = rtREFUV_Ref_Element (referenceAddr)) >= referenceAddr->RPTCardinality ()
     ? '\0'
     : rtCHARUV_CPD_Array (sourceCPD)[element];
 }
@@ -915,8 +884,8 @@ PublicFnDef void rtCHARUV_PartitndPartition (
     partition->AlignForDistribute (rtCHARUV_Align (values), UV_CPx_PToken);
 
 /*****  Create the major and minor partitions...  *****/
-    rtLINK_CType *majorPartition = rtLINK_RefConstructor (partition->RPT (), -1);
-    rtLINK_CType *minorPartition = rtLINK_PosConstructor (partition->PPT (), -1);
+    rtLINK_CType *majorPartition = rtLINK_RefConstructor (partition->RPT ());
+    rtLINK_CType *minorPartition = rtLINK_PosConstructor (partition->PPT ());
 
 /*****  Initialize the traversal pointers...  *****/
     rtCHARUV_ElementType const *valuesPtr = rtCHARUV_CPD_Array (values);
@@ -926,10 +895,9 @@ PublicFnDef void rtCHARUV_PartitndPartition (
     rtLINK_TraverseRRDCList (partition, handleRepetition, handleRepetition, handleRange);
 
 /*****  Close and return the partitions created...  *****/
-    M_CPD *groupPToken = rtPTOKEN_New (partition->PPT ()->Space (), minorCount);
+    rtPTOKEN_Handle::Reference groupPToken (new rtPTOKEN_Handle (partition->PPT ()->Space (), minorCount));
     *majorLC = majorPartition->Close (groupPToken);
     *minorLC = minorPartition->Close (groupPToken);
-    groupPToken->release ();
 
 /*---------------------------------------------------------------------------
  *****  Link Traversal Component Handler Macro Deletions
@@ -1022,16 +990,12 @@ PublicFnDef void rtCHARUV_LocateOrAdd (
 
 
 /***** Make sure both the source and target are character set uvectors ... *****/
-    if (((RTYPE_Type)M_CPD_RType (sourceCPD) != RTYPE_C_CharUV) ||
-	!UV_CPD_IsASetUV (sourceCPD)
-    ) ERR_SignalFault (
+    if (sourceCPD->RType () != RTYPE_C_CharUV || !UV_CPD_IsASetUV (sourceCPD)) ERR_SignalFault (
 	EC__InternalInconsistency,
 	"rtCHARUV_LocateOrAdd: Source UVector Must Be A Character Set"
     );
 
-    if (((RTYPE_Type)M_CPD_RType (targetCPD) != RTYPE_C_CharUV) ||
-	!UV_CPD_IsASetUV (targetCPD)
-    ) ERR_SignalFault (
+    if (targetCPD->RType () != RTYPE_C_CharUV || !UV_CPD_IsASetUV (targetCPD)) ERR_SignalFault (
 	EC__InternalInconsistency,
 	"rtCHARUV_LocateOrAdd:  Target UVector Must Be A Character Set"
     );
@@ -1039,8 +1003,7 @@ PublicFnDef void rtCHARUV_LocateOrAdd (
 /***** Align and validate source and target uvectors ... *****/
     rtCHARUV_Align (sourceCPD);
     rtCHARUV_Align (targetCPD);
-    if (sourceCPD->ReferenceDoesntName (UV_CPx_RefPToken, targetCPD, UV_CPx_RefPToken)
-    ) ERR_SignalFault (
+    if (sourceCPD->ReferenceDoesntName (UV_CPx_RefPToken, targetCPD, UV_CPx_RefPToken)) ERR_SignalFault (
 	EC__InternalInconsistency,
 	"rtCHARUV_LocateOrAdd:  Referential Inconsistency."
     );
@@ -1113,11 +1076,9 @@ PublicFnDef void rtCHARUV_LocateOrAdd (
     if (resultCount > origTargetCount) {
 	/***** Deal with addedLinkC ... *****/
 	if (wantAddedLinkC) {
-	    M_CPD *ptoken = rtPTOKEN_New (
-		sourceCPD->ScratchPad (), (*addedLinkC)->ElementCount ()
+	    (*addedLinkC)->Close (
+		new rtPTOKEN_Handle (sourceCPD->ScratchPad (), (*addedLinkC)->ElementCount ())
 	    );
-	    (*addedLinkC)->Close (ptoken);
-	    ptoken->release ();
 	}
 
 	/***** Reconstruct the resulting target uvector ... *****/
@@ -1147,11 +1108,9 @@ PublicFnDef void rtCHARUV_LocateOrAdd (
 	    *trgp++ = *resultp++;
 
 	/*** Deal with the new positional ptoken ... ***/
-	M_CPD *ptoken = targetPTokenC->ToPToken ();
+	rtPTOKEN_Handle::Reference ptoken (targetPTokenC->ToPToken ());
 
 	targetCPD->StoreReference (UV_CPx_PToken, ptoken);
-
-	ptoken->release ();
     }
 
 /***** Close *locationsLinkC ... *****/
@@ -1201,9 +1160,7 @@ PublicFnDef bool rtCHARUV_ScalarLocateOrAdd (
 
 
 /***** Make sure the target is a character set uvector ... *****/
-    if (((RTYPE_Type)M_CPD_RType (targetCPD) != RTYPE_C_CharUV) ||
-	!UV_CPD_IsASetUV (targetCPD)
-    ) ERR_SignalFault (
+    if (targetCPD->RType () != RTYPE_C_CharUV || !UV_CPD_IsASetUV (targetCPD)) ERR_SignalFault (
 	EC__InternalInconsistency,
 	"rtCHARUV_ScalarLocateOrAdd:  Target UVector Must Be A Character Set"
     );
@@ -1271,11 +1228,9 @@ PublicFnDef bool rtCHARUV_ScalarLocateOrAdd (
 	*(rtCHARUV_CPD_Array (targetCPD) + addAt) = value;
 
 	/*** Deal with the new positional ptoken ... ***/
-	M_CPD *ptoken = targetPTokenC->ToPToken ();
+	rtPTOKEN_Handle::Reference ptoken (targetPTokenC->ToPToken ());
 
 	targetCPD->StoreReference (UV_CPx_PToken, ptoken);
-
-	ptoken->release ();
 
 	*locationPtr = addAt;
 	return true;
@@ -1378,16 +1333,12 @@ PublicFnDef void rtCHARUV_Lookup (
 
 
 /***** Make sure both the source and key are character set uvectors ... *****/
-    if (((RTYPE_Type)M_CPD_RType (sourceCPD) != RTYPE_C_CharUV) ||
-	!UV_CPD_IsASetUV (sourceCPD)
-    ) ERR_SignalFault (
+    if (sourceCPD->RType () != RTYPE_C_CharUV || !UV_CPD_IsASetUV (sourceCPD)) ERR_SignalFault (
 	EC__InternalInconsistency,
 	"rtCHARUV_Lookup:  Source UVector Must Be A Character Set"
     );
 
-    if (((RTYPE_Type)M_CPD_RType (keyCPD) != RTYPE_C_CharUV) ||
-        !UV_CPD_IsASetUV (keyCPD)
-    ) ERR_SignalFault (
+    if (keyCPD->RType () != RTYPE_C_CharUV || !UV_CPD_IsASetUV (keyCPD)) ERR_SignalFault (
 	EC__InternalInconsistency,
 	"rtCHARUV_Lookup:  Key UVector Must Be A Character Set"
     );
@@ -1450,10 +1401,11 @@ PublicFnDef void rtCHARUV_Lookup (
 /***** Done with the traversal *****/
 /***** Close the link constructors ... *****/
     if (someNotFound) {
-	M_CPD *ptoken = rtPTOKEN_New (keyCPD->Space (), (*locatedLinkC)->ElementCount ());
+	rtPTOKEN_Handle::Reference ptoken (
+	    new rtPTOKEN_Handle (keyCPD->Space (), (*locatedLinkC)->ElementCount ())
+	);
 	(*locatedLinkC)->Close (ptoken);
 	(*locationsLinkC)->Close (ptoken);
-	ptoken->release ();
     }
     else {
 	/*** all found, so the locatedLinkC is not needed ***/
@@ -1509,9 +1461,7 @@ PublicFnDef bool rtCHARUV_ScalarLookup (
     *(rtCHARUV_CPD_Array (sourceCPD) + index)
 
 /***** Make sure the source is a character set uvector ... *****/
-    if (((RTYPE_Type)M_CPD_RType (sourceCPD) != RTYPE_C_CharUV) ||
-	!UV_CPD_IsASetUV (sourceCPD)
-    ) ERR_SignalFault (
+    if (sourceCPD->RType () != RTYPE_C_CharUV || !UV_CPD_IsASetUV (sourceCPD)) ERR_SignalFault (
 	EC__InternalInconsistency,
 	"rtCHARUV_Lookup:  Source UVector Must Be A Character Set"
     );
@@ -1611,8 +1561,7 @@ PrivateFnDef int PrintElement (M_CPD *cpd) {
 IOBJ_DefineNewaryMethod (NewDM) {
     return RTYPE_QRegister (
 	rtCHARUV_New (
-	    RTYPE_QRegisterCPD (parameterArray[0]),
-	    RTYPE_QRegisterCPD (parameterArray[1])
+	    RTYPE_QRegisterPToken (parameterArray[0]), RTYPE_QRegisterPToken (parameterArray[1])
 	)
     );
 }
@@ -1632,8 +1581,6 @@ IOBJ_DefineNewaryMethod (NewDistributeDM) {
  ************************/
 
 UV_DefineEPrintDM (PrintElementDM, PrintElement)
-
-UV_DefineAlignDM (AlignDM, rtCHARUV_Align)
 
 UV_DefineAtDM (AtDM, rtCHARUV_LCExtract, rtCHARUV_UVExtract)
 
@@ -1770,7 +1717,6 @@ RTYPE_DefineHandler(rtCHARUV_Handler) {
     IOBJ_BeginMD (instanceMD)
 	UV_StandardDMDEPackage
 	IOBJ_MDE ("eprint"		, PrintElementDM)
-	IOBJ_MDE ("align"		, AlignDM)
 	IOBJ_MDE ("at"			, AtCurrentDM)
 	IOBJ_MDE ("put:"		, AtCurrentPutDM)
 	IOBJ_MDE ("atref:"		, AtReferenceDM)

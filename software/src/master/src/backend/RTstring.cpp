@@ -90,7 +90,7 @@ PrivateFnDef void InitStdCPD (M_CPD *cpd) {
 PublicFnDef M_CPD *rtSTRING_New (M_ASD *pContainerSpace, char const *string) {
     M_CPD *cpd = pContainerSpace->CreateContainer (
 	RTYPE_C_String, strlen (string) + 1
-    );
+    )->NewCPD ();
     
     strcpy (rtSTRING_CPD_Begin (cpd) = M_CPD_ContainerBase (cpd), string);
     rtSTRING_CPD_End (cpd) = rtSTRING_CPD_Begin (cpd) + strlen (string);
@@ -162,7 +162,7 @@ PublicFnDef M_CPD *rtSTRING_Append (M_CPD *orig_cpd, char const *new_str) {
 PublicFnDef M_CPD *rtSTRING_Trim (M_CPD *orig_cpd) {
     char *str, *sptr, *eptr;
 
-    RTYPE_MustBeA ("rtSTRING_Trim", M_CPD_RType (orig_cpd), RTYPE_C_String);
+    RTYPE_MustBeA ("rtSTRING_Trim", orig_cpd->RType (), RTYPE_C_String);
     str = rtSTRING_CPD_Begin (orig_cpd);
 
     for (sptr = str; isspace (*sptr); sptr++);
@@ -227,7 +227,7 @@ IOBJ_DefineMethod (Append_DM) {
     M_CPD *newTailCPD = RTYPE_QRegisterCPD (parameterArray[0]);
 
     RTYPE_MustBeA (
-	"'append:' Debug Method", M_CPD_RType (newTailCPD), RTYPE_C_String
+	"'append:' Debug Method", newTailCPD->RType (), RTYPE_C_String
     );
 
     rtSTRING_Append (
@@ -238,13 +238,10 @@ IOBJ_DefineMethod (Append_DM) {
 }
 
 IOBJ_DefineUnaryMethod (Compile_DM) {
-    M_CPD *pSource = RTYPE_QRegisterCPD (self);
-    M_CPD *pDictionary = rtDICTIONARY_New (IOBJ_ScratchPad);
+    rtDICTIONARY_Handle::Reference pDictionary (new rtDICTIONARY_Handle (IOBJ_ScratchPad));
     M_CPD *pProgram = RSLANG_Compile (
-	IOBJ_ScratchPad, rtSTRING_CPD_Begin (pSource), pDictionary
+	IOBJ_ScratchPad, rtSTRING_CPD_Begin (RTYPE_QRegisterCPD (self)), pDictionary
     );
-    pDictionary->release ();
-
     return pProgram ? RTYPE_QRegister (pProgram) : IOBJ_TheNilIObject;
 }
 

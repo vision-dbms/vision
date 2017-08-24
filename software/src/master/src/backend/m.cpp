@@ -17,7 +17,6 @@
 #include "batchvision.h"
 
 #include "ps.h"
-#include "ts.h"
 
 #include "venvir.h"
 #include "verr.h"
@@ -30,6 +29,10 @@
 typedef V::VArgList VStdargList;
 
 #include "VDatabaseFederatorForBatchvision.h"
+
+#include "Vdd_Store.h"
+
+#include "RTpct.h"
 
 /*****  Shared  *****/
 #include "m.h"
@@ -60,17 +63,17 @@ PrivateVarDef bool NetworkUpdateIsAdministrative = false;
  *****  Session GC State  *****
  ******************************/
 
-bool M_DCTE::g_bPotentialSessionGarbage = false;
+M_AND::GenIndex_t M_AND::g_xGCGeneration = 0;
+bool M_AND::g_bGarbageCollectionRunning = false;
+bool M_AND::g_bNetworkGarbageCollectedInSession = false;
 
-PrivateVarDef bool NetworkGarbageCollectedInSession = false;
+bool M_DCTE::g_bPotentialSessionGarbage = false;
 
 /**********************
  *****  Switches  *****
  **********************/
 
-bool VContainerHandle::g_fPreservingHandles = true;
-
-PrivateVarDef bool CPDZeroingEnabled = false;
+bool VContainerHandle::g_bPreservingHandles = true;
 
 #if defined(_DEBUG) && !defined(INCLUDING_XDB_REFERENCE_TRACING)
 #define INCLUDING_XDB_REFERENCE_TRACING
@@ -79,6 +82,9 @@ PrivateVarDef bool CPDZeroingEnabled = false;
 #if defined(INCLUDING_XDB_REFERENCE_TRACING)
 PrivateVarDef bool TracingCrossDBReferences = false;
 #endif
+
+/* turn on for session GC debugging */
+// #define DEBUG_SESSION_GC
 
 /**********************
  *****  Counters  *****
@@ -236,6 +242,7 @@ PrivateFnDef void GetCPDCounts (unsigned int &rACount, unsigned int &rDCount) {
  ************************/
 
 class M_CTE {
+    friend class M_AND;
     friend class M_ASD;
     friend class VContainerHandle;
 
@@ -323,6 +330,10 @@ public:
 	return m_pDCTE;
     }
 
+    void getPOP (M_POP &rResult) const {
+	M_POP_D_ObjectSpace	(rResult) = spaceIndex ();
+	M_POP_D_ContainerIndex	(rResult) = containerIndex ();
+    }
     bool hasBeenAccessed () const {
 	return m_pDCTE->hasBeenAccessed ();
     }
@@ -336,6 +347,9 @@ public:
     bool holdsAContainerAddress () const {
 	return m_pDCTE->holdsAContainerAddress ();
     }
+    bool holdsAContainerHandle () const {
+	return m_pDCTE->holdsAContainerHandle ();
+    }
     bool holdsACPCC () const {
 	return m_pDCTE->holdsACPCC ();
     }
@@ -345,6 +359,9 @@ public:
 
     bool isAForwardingTarget () const {
 	return m_pDCTE->isAForwardingTarget ();
+    }
+    bool isASweepTarget () const {
+	return m_pDCTE->isASweepTarget ();
     }
     bool isATRefRescanTarget () const {
 	return m_pDCTE->isATRefRescanTarget ();
@@ -361,7 +378,7 @@ public:
 	return m_pDCTE->underConstruction ();
     }
     bool isntUnderConstruction () const {
-	return !m_pDCTE->underConstruction ();
+	return m_pDCTE->isntUnderConstruction ();
     }
 
     bool isReferenced () const {
@@ -425,8 +442,12 @@ public:
 	m_pASD->AdjustTRBounds (m_xContainer);
     }
 
-    void clearIsATRefRescanTarget () const {
-	m_pDCTE->clearIsATRefRescanTarget ();
+    void setTRefFlags () const {
+	m_pDCTE->setTRefFlags ();
+	m_pASD->AdjustTRBounds (m_xContainer);
+    }
+    void clearTRefFlags () const {
+	m_pDCTE->clearTRefFlags ();
     }
 
     void clearIsNew () const {
@@ -450,16 +471,7 @@ public:
 public:
     void ForwardToSpace (M_ASD* pTargetSpace);
 
-    M_POP const *FollowForwardings () {
-	M_POP const *pPOP = 0;
-	while (holdsAForwardingPOP ()) {
-	    pPOP = &addressAsPOP ();
-	    m_pASD = m_pASD->AccessASD (pPOP);
-	    m_xContainer = M_POP_ContainerIndex (pPOP);
-	    m_pDCTE = m_pASD->cte (m_xContainer);
-	}
-	return pPOP;
-    }
+    M_POP const *FollowForwardings ();
 
 //  Positioning
 public:
@@ -481,11 +493,13 @@ protected:
     }
 
 public:
-    void IncrementCTEReferenceCount () const {
+    void retain () const {
 	m_pDCTE->retain ();
     }
-
-    void DecrementCTEReferenceCount () const {
+    void untain () const {
+	m_pDCTE->untain ();
+    }
+    void release () const {
 	m_pDCTE->release (m_pASD, m_xContainer);
     }
 
@@ -497,6 +511,25 @@ public:
     }
     void setReferenceCountToInfinity () const {
 	m_pDCTE->setReferenceCountToInfinity ();
+    }
+
+    bool gcVisited() { 
+	return m_pDCTE->gcVisited(); 
+    }
+    void gcVisited(bool visited) { 
+	m_pDCTE->gcVisited(visited);
+    }
+    bool cdVisited() { 
+	return m_pDCTE->cdVisited(); 
+    }
+    void cdVisited(bool visited) { 
+	m_pDCTE->cdVisited(visited);
+    }
+    bool foundAllReferences() { 
+	return m_pDCTE->foundAllReferences(); 
+    }
+    void foundAllReferences(bool foundAll) { 
+	m_pDCTE->foundAllReferences(foundAll);
     }
 
 //  Container Access
@@ -518,18 +551,19 @@ public:
 	    m_pDCTE->setHasBeenAccessed ();
 
 	    M_RTD *pRTD = M_RTDPtr (M_CPreamble_RType (pAddress));
-	    if (!M_RTD_ConvertFn (pRTD)) {
-		setToContainerAddress (pAddress, false);
-		m_pASD->AdjustLiveRefBounds (m_xContainer);
-	    }
-	    else {
+	    if (M_RTD_ConvertFn (pRTD)) {
 		pAddress = M_RTD_ConvertFn (pRTD) (m_pASD, pAddress);
 		setToContainerAddress (pAddress, true);
 		m_pASD->AdjustRWBounds (m_xContainer);
 	    }
+	    else {
+		setToContainerAddress (pAddress, false);
+		m_pASD->AdjustLiveRefBounds (m_xContainer);
+	    }
 	}
     }
 
+private:
     VContainerHandle *MakeHandle () {
 	VContainerHandle *pHandle = M_RTD_HandleMaker (
 	    M_RTDPtr (M_CPreamble_RType (addressAsContainerAddress ()))
@@ -551,9 +585,6 @@ public:
 	    return addressAsContainerHandle ();
 	if (holdsAContainerAddress ()) {
 	    InitializeCTEContainerAddress ();
-
-	    m_pDCTE->retain ();
-
 	    return MakeHandle ();
 	}
 	return NilOf (VContainerHandle*);
@@ -563,14 +594,16 @@ public:
 	FollowForwardings ();
 	VContainerHandle *pHandle = AttachHandle ();
 
-	if (xExpectedType != RTYPE_C_Any && xExpectedType != pHandle->RType())
+	if (xExpectedType != RTYPE_C_Any && xExpectedType != pHandle->RType()) {
+	    pHandle->release ();
 	    RaiseExpectedTypeException (xExpectedType);
+	}
 
 	return pHandle;
     }
 
-    void setToContainerAddress (M_CPreamble *pAddress, bool isReadWrite) const {
-	m_pDCTE->setToContainerAddress (pAddress, isReadWrite);
+    void setToContainerAddress (M_CPreamble *pAddress, bool bReadWrite) const {
+	m_pDCTE->setToContainerAddress (pAddress, bReadWrite);
     }
     void clearContainerAddress () const {
 	m_pDCTE->clearContainerAddress ();
@@ -582,8 +615,8 @@ public:
 
 //  GC Support
 public:
-    bool Mark () const {
-	return m_pDCTE->mark (m_pASD, m_xContainer);
+    bool Mark (M_ASD::GCVisitBase* pGCV) const {
+	return m_pDCTE->mark (pGCV, m_pASD, m_xContainer);
     }
 
 //  Exception Generation
@@ -596,6 +629,17 @@ public:
     unsigned int	m_xContainer;
     M_DCTE*		m_pDCTE;
 };
+
+M_POP const *M_CTE::FollowForwardings () {
+  M_POP const *pPOP = 0;
+  while (holdsAForwardingPOP ()) {
+    pPOP = &addressAsPOP ();
+    m_pASD = m_pASD->AccessASD (pPOP);
+    m_xContainer = M_POP_ContainerIndex (pPOP);
+    m_pDCTE = m_pASD->cte (m_xContainer);
+  }
+  return pPOP;
+}
 
 
 /*****************************
@@ -603,19 +647,19 @@ public:
  *****************************/
 
 void M_DCTE::reclaim (M_ASD *pASD, unsigned int xContainer) {
-    switch (m_xAddressType) {
-    default:
-	break;
-    case M_CTEAddressType_RWContainer:
-	pASD->DestroyContainer (m_iAddress.asContainerAddress);
-	break;
+    if (M_CTEAddressType_CPCC == m_xAddressType) {
+	VContainerHandle *pHandle = m_iAddress.asCPCC;
+	if (pHandle->isReferenced ())
+	    return;
+	pHandle->DetachFromCTE ();
+    }
 
-    case M_CTEAddressType_CPCC:
-	if (m_iAddress.asCPCC->IsReadWrite ()) {
-	    pASD->DestroyContainer (m_iAddress.asCPCC->containerAddress ());
-	}
-	m_iAddress.asCPCC->ClearTransientExtension ();
-	m_iAddress.asCPCC->deleteReference ();
+    switch (m_xAddressType) {
+    case M_CTEAddressType_RWContainer:
+	if (gcVisited()) 
+	pASD->DestroyContainer (m_iAddress.asContainerAddress);
+	else
+	    pASD->DeallocateContainer (m_iAddress.asContainerAddress);
 	break;
 
     case M_CTEAddressType_ForwardingPOP:
@@ -807,6 +851,10 @@ unsigned int M_ASD::CT::entry () {
     unsigned int xEntry = m_xFreeListHead;
     m_xFreeListHead = entry (xEntry)->addressAsCTI ();
 
+    if (m_xFreeListHead >= entryCount () && m_xFreeListHead != UINT_MAX) {
+	IO_printf ("\n+++ Bad free list entry: %u->%08x(%u)\n", xEntry, m_xFreeListHead, m_xFreeListHead);
+    }
+
     return xEntry;
 }
 
@@ -840,7 +888,7 @@ void M_ASD::CT::growFreeList () {
 //  ... if expansion is possible, ...
 	if (newCount > M_POP_MaxContainerIndex) {
 //  ... if not and a garbage collection frees some entries, whew...
-	    if (M_DisposeOfSessionGarbage () && freeListIsntEmpty ())
+	    if (M_DisposeOfSessionGarbage (true) && freeListIsntEmpty ())
 		return;
 
 	    newCount = M_POP_MaxContainerIndex;
@@ -923,7 +971,7 @@ void M_ASD::AdjustTRBounds (unsigned int xCTE) {
 }
 
 void M_ASD::AdjustLiveRefBounds (unsigned int xCTE) {
-    m_iLiveReferencedRegion.include (xCTE);
+    m_iLiveReferenceRegion.include (xCTE);
 }
 
 void M_ASD::ResetRWBounds () {
@@ -935,7 +983,7 @@ void M_ASD::ResetTRBounds () {
 }
 
 void M_ASD::ResetLiveRefBounds () {
-    m_iLiveReferencedRegion.reset ();
+    m_iLiveReferenceRegion.reset ();
 }
 
 
@@ -954,8 +1002,7 @@ void M_ASD::ResetLiveRefBounds () {
  *
  *****/
 void M_ASD::DestroyContainer (M_CPreamble* pContainerAddress) {
-    unsigned int size = M_CPreamble_Size (pContainerAddress);
-
+    if (pContainerAddress) {
     DeallocateContainerCount++;
 
 /*****  Erase the container ...  *****/
@@ -966,7 +1013,32 @@ void M_ASD::DestroyContainer (M_CPreamble* pContainerAddress) {
 	reclaimer (this, pContainerAddress);
 
 /*****  ... and deallocate its space:  *****/
-    TS_DeallocateContainer (pContainerAddress);
+	DeallocateContainer (pContainerAddress);
+    }
+}
+
+/*---------------------------------------------------------------------------
+ *****  Routine to free a container in transient storage.
+ *
+ *  Argument:
+ *	containerAddress	- the address of the transient container
+ *				  to be freed.
+ *
+ *  Returns:
+ *	NOTHING
+ *
+ *****/
+void M_ASD::DeallocateContainer (M_CPreamble *containerAddress) {
+// Check for reasonable container framing, ...
+    M_CPreamble_ValidateFraming (containerAddress);
+
+//  ... grab the size, ...
+    unsigned int size = M_CPreamble_Size (containerAddress);
+
+//  ... free the container, ...
+    UTIL_Free ((pointer_t)containerAddress);
+
+//  ... and do the accounting
     DecrementAllocation (size);
 }
 
@@ -1208,7 +1280,7 @@ void __cdecl M_AND::EnumerateModifiedSpaces (
     for (M_ASD *asd = m_pASDRing;
 
 	 asd != ringTerminator && (
-	    asd->SpaceHasntChanged () || (asd->*elementProcessor) (iArgList)
+	    asd->hasntChanged () || (asd->*elementProcessor) (iArgList)
 	 );
 
 	 asd = asd->successor (), ringTerminator = m_pASDRing
@@ -1244,7 +1316,7 @@ PS_UpdateStatus M_AND::UpdateNetwork (bool globalUpdate) {
 
     if (globalUpdate)
 	m_pPhysicalAND->UpdateNetwork (this);
-    else if (NetworkGarbageCollectedInSession)
+    else if (NetworkGarbageCollectedInSession ())
 	m_pPhysicalAND->SetUpdateStatusTo (PS_UpdateStatus_NotSeparable);
     else
 	m_pASDRing->persistentASD ()->UpdateSpace ();
@@ -1316,7 +1388,7 @@ PS_UpdateStatus M_AND::IncorporateExternalUpdate (char const * xuSpecPathName) {
  *	Container handles are created with container access, since that is
  *	why there are being created.  Since access requires a reference, the
  *	container handle holds a reference to the underlying CTE.  If access
- *	isn't needed, release it using 'ReleaseAccessLock ()' so that the
+ *	isn't needed, release it using 'release ()' so that the
  *	container can be garbage collected.
  *****/
 
@@ -1328,19 +1400,45 @@ PS_UpdateStatus M_AND::IncorporateExternalUpdate (char const * xuSpecPathName) {
  *				  VContainerHandle is being attached.
  *
  *****/
-VContainerHandle::VContainerHandle (M_CTE &rCTE)
-: BaseClass				(1)
-, m_pContainerAddress			(rCTE.addressAsContainerAddress ())
-, m_pRTD				(M_RTDPtr (M_CPreamble_RType (m_pContainerAddress)))
-, m_pASD				(rCTE.space ())
-, m_pDCTE				(rCTE.dcte ())
-, m_pCPDChainHead			(0)
-, m_iAccessCount			(1)
-, m_fOwnsAnUnusedAccessLock		(true)
-, m_fTransientExtensionHasAnAccessLock	(false)
-, m_fIsReadWrite			(rCTE.addressType ())
+VContainerHandle::VContainerHandle (M_ASD *pContainerSpace, RTYPE_Type xContainerType, size_t sContainer)
+: m_pASD		(pContainerSpace)
+, m_pRTD		(M_RTDPtr (xContainerType))
+, m_bReadWrite		(true)
+, m_bPrecious		(false)
+{
+    pContainerSpace->CreateContainer (xContainerType, sContainer, this); 
+    M_RTD_HandleCreateCount (m_pRTD)++;
+}
+
+VContainerHandle::VContainerHandle (M_ASD *pContainerSpace, RTYPE_Type xContainerType)
+: m_pASD		(pContainerSpace)
+, m_pContainer		(0)
+, m_pDCTE		(0)
+, m_pRTD		(M_RTDPtr (xContainerType))
+, m_bReadWrite		(false)
+, m_bPrecious		(false)
 {
     M_RTD_HandleCreateCount (m_pRTD)++;
+}
+
+VContainerHandle::VContainerHandle (M_CTE &rCTE)
+: m_pASD		(rCTE.space ())
+, m_pDCTE				(rCTE.dcte ())
+, m_pContainer		(rCTE.addressAsContainerAddress ())
+, m_pContainerIdentity	(&M_CPreamble_POP (m_pContainer))
+, m_pRTD		(M_RTDPtr (M_CPreamble_RType (m_pContainer)))
+, m_bReadWrite		(rCTE.addressType () == M_CTEAddressType_RWContainer)
+, m_bPrecious		(false)
+{
+    M_RTD_HandleCreateCount (m_pRTD)++;
+}
+
+VContainerHandle *VContainerHandle::attachTo (M_CTE &rCTE) {
+    m_pContainer = rCTE.addressAsContainerAddress ();
+    m_pContainerIdentity.setTo (&M_CPreamble_POP (m_pContainer));
+    m_pDCTE.setTo (rCTE.dcte ());
+    rCTE.setToContainerHandle (this);
+    return this;
 }
 
 VContainerHandle *VContainerHandle::Maker (M_CTE &rCTE) {
@@ -1354,9 +1452,6 @@ VContainerHandle *VContainerHandle::Maker (M_CTE &rCTE) {
 
 VContainerHandle::~VContainerHandle () {
     M_RTD_HandleDeleteCount (m_pRTD)++;
-
-    if (m_pTransientExtension)
-	m_pTransientExtension->EndRoleAsTransientExtensionOf (this);
 }
 
 
@@ -1382,22 +1477,33 @@ void VContainerHandle::AttachToCTE (M_CTE &rCTE) {
 
 //  ... update the handle, ...
     m_pASD = rCTE.space ();
-    m_pDCTE = rCTE.dcte ();
+    m_pDCTE.setTo (rCTE.dcte ());
 
 //  ... the container, ...
-    M_CPreamble_POPObjectSpace	  (m_pContainerAddress)	= rCTE.spaceIndex ();
-    M_CPreamble_POPContainerIndex (m_pContainerAddress)	= rCTE.containerIndex ();
+    if (hasAnIdentity ()) {
+	M_POP *pPOP = const_cast<M_POP*>(m_pContainerIdentity.referent ());
+	M_POP_ObjectSpace	(pPOP) = rCTE.spaceIndex ();
+	M_POP_ContainerIndex	(pPOP) = rCTE.containerIndex ();
+    }
 
 //  ... and the space:
-    if (m_fIsReadWrite) {
+    if (!hasAReadOnlyContainer()) {
 	m_pASD->AdjustRWBounds (rCTE.containerIndex ());
 
 	if (m_pASD != pSourceASD) {
-	    unsigned int sContainer = ContainerSize ();
+	    unsigned int sContainer = containerSize ();
 	    pSourceASD->DecrementAllocation (sContainer);
 	    m_pASD->IncrementAllocation (sContainer);
 	}
     }
+}
+
+void VContainerHandle::DetachFromCTE () {
+    if (m_pDCTE) {
+	m_pDCTE->setToContainerAddress (m_pContainer, m_bReadWrite);
+	m_pDCTE.clear ();
+    }
+    discard ();
 }
 
 
@@ -1413,6 +1519,34 @@ bool VContainerHandle::PersistReferences () {
 }
 
 
+/******************************
+ *****  Container Copier  *****
+ ******************************/
+
+/*---------------------------------------------------------------------------
+ *****  Routine to copy a container.
+ *
+ *  Argument:
+ *	oldPreamblePtr		- a pointer to the preamble of an already
+ *				  existing container
+ *
+ *  Returns:
+ *	A pointer to the preamble of the copied container.
+ *
+ *****/
+static M_CPreamble *CopyContainer (M_CPreamble* oldPreamblePtr) {
+    size_t			size = (size_t)M_CPreamble_Size (oldPreamblePtr)
+					+ sizeof (M_CPreamble)
+					+ sizeof (M_CEndMarker);
+    M_CPreamble*		result = (M_CPreamble*) UTIL_Malloc (size);
+
+    memcpy (result, oldPreamblePtr, size);
+
+    M_CPreamble_FixSizes (result);
+
+    return result;
+}
+
 /**************************
  *****  Modification  *****
  **************************/
@@ -1421,12 +1555,12 @@ bool VContainerHandle::PersistReferences () {
  *****  Internal utility to enable modification of a container.
  *****/
 void VContainerHandle::EnableModifications () {
-    if (!m_fIsReadWrite) {
+    if (hasAReadOnlyContainer ()) {
 	EnableModificationsCount++;
 
-	unsigned int sContainer = ContainerSize ();
-	AdjustContainerPointers (TS_CopyContainer (m_pContainerAddress), true);
-	m_pASD->persistentASD ()->ReleaseContainer (ContainerIndex (), sContainer);
+	unsigned int sContainer = containerSize ();
+	AdjustContainerPointers (CopyContainer (m_pContainer), true);
+	m_pASD->persistentASD ()->ReleaseContainer (containerIndexNC (), sContainer);
 	m_pASD->IncrementAllocation (sContainer);
     }
 }
@@ -1435,6 +1569,41 @@ void VContainerHandle::EnableModifications () {
 /**************************
  *****  Reallocation  *****
  **************************/
+
+/*---------------------------------------------------------------------------
+ *****  Routine to re-size a container in transient storage.
+ *
+ *  Arguments:
+ *	containerAddress	- the address of the preamble of the container
+ *				  to be resized.
+ *	newSize			- the new size the container in bytes.
+ *
+ *  Returns:
+ *	The new address of the container.
+ *
+ *****/
+M_CPreamble *M_ASD::ReallocateContainer (M_CPreamble *containerAddress, size_t newSize) {
+    M_CPreamble_ValidateFraming (containerAddress);
+
+    newSize = RoundContainerSize (newSize);
+
+    size_t oldSize = M_CPreamble_Size (containerAddress);
+    M_CPreamble *result = reinterpret_cast<M_CPreamble*> (
+	UTIL_Realloc (
+	    reinterpret_cast<pointer_t>(containerAddress), sizeof (M_CPreamble) + sizeof (M_CEndMarker) + newSize
+	)
+    );
+    if (newSize > oldSize)
+	IncrementAllocation (newSize - oldSize);
+    else
+	DecrementAllocation (oldSize - newSize);
+
+    M_CPreamble_NSize (result) = newSize;
+    M_CEndMarker_Size (M_CPreamble_EndMarker (result)) = newSize;
+
+    return result;
+}
+
 
 /*---------------------------------------------------------------------------
  *****  Routine to change the size of a container to a new absolute size.
@@ -1448,16 +1617,23 @@ void VContainerHandle::EnableModifications () {
  *
  *****/
 void VContainerHandle::ReallocateContainer (size_t newSize) {
+    if (hasAContainer ()) {
     ReallocateContainerCount++;
-
     EnableModifications ();
 
-    size_t oldSize = ContainerSize ();
-    M_CPreamble* pNewContainerAddress = TS_ReallocateContainer (m_pContainerAddress, newSize);
-    m_pASD->AdjustAllocation (M_CPreamble_Size (pNewContainerAddress) - oldSize);
+	M_CPreamble *pNewContainerAddress = m_pASD->ReallocateContainer (m_pContainer, newSize);
+	if (m_pContainer != pNewContainerAddress)
+	    AdjustContainerPointers (pNewContainerAddress, true);
+    }
+    else {
+	unsigned int xContainer = containerIndex ();
+	m_pASD->AdjustTRBounds (xContainer);
+	m_pDCTE->setTRefFlags ();
 
-    if (m_pContainerAddress != pNewContainerAddress)
-	AdjustContainerPointers (pNewContainerAddress, true);
+	m_pContainer = m_pASD->AllocateContainer (RType (), newSize, xContainer);
+	m_pContainerIdentity.setTo (&M_CPreamble_POP (m_pContainer));
+	m_bReadWrite = true;
+    }
 }
 
 
@@ -1485,19 +1661,23 @@ void VContainerHandle::AdjustContainerPointers (
     M_CPreamble* pNewAddress, bool bNewAddressIsReadWrite
 ) {
 /*****  Determine the container movement amount, ...  *****/
-    pointer_diff_t addressDelta = (pointer_size_t)pNewAddress - (pointer_size_t)m_pContainerAddress;
+    if (hasNoContainer ())
+	return;
 
-/*****  ...fix the CPCC, ...  *****/
-    m_pContainerAddress = pNewAddress;
-    m_fIsReadWrite	= bNewAddressIsReadWrite;
+    pointer_diff_t addressDelta = (pointer_size_t)pNewAddress - (pointer_size_t)m_pContainer;
+
+/*****  ...fix the container handle, ...  *****/
+    m_pContainer = pNewAddress;
+    m_pContainerIdentity.setTo (&M_CPreamble_POP (m_pContainer));
+    m_bReadWrite = bNewAddressIsReadWrite;
 
 /*****  ... adjust the ASD if necessary, ...  *****/
     if (bNewAddressIsReadWrite)
-	m_pASD->AdjustRWBounds (ContainerIndex ());
+	m_pASD->AdjustRWBounds (containerIndexNC ());
 
 /*****  ... and fix the CPD addresses.  *****/
-    unsigned int iPointerCount = CPDPointerCount ();
-    for (M_CPD* cpd = m_pCPDChainHead; IsntNil (cpd); cpd = M_CPD_NLink (cpd)) {
+    unsigned int iPointerCount = cpdPointerCount ();
+    for (M_CPD *cpd = m_pCPDChainHead; cpd; cpd = M_CPD_NLink (cpd)) {
 	M_CPD_PreamblePtr (cpd) = pNewAddress;
 
 	pointer_t	*p, *pl;
@@ -1529,18 +1709,15 @@ unsigned int M_DCTE::g_iForwardedContainerCount = 0;
  *****/
 void M_CTE::ForwardToSpace (M_ASD* pTargetSpace) {
 //  Access the container, ...
-    VContainerHandle* pHandle = AttachHandle ();
-    pHandle->AcquireAccessLock ();
+    VContainerHandle::Reference pHandle (AttachHandle ());
 
 //  ... allocate a CTE for the container in its new space, ...
-    /********************************************************************************
-     *  CTEs used as the target of a forwarding require an initial reference count  *
-     *  of 2 to reflect a reference from each of:				    *
-     *	1. the original CTE in its new role as a forwarder, and			    *
-     *	2. the access associated with the container handle transfered by the	    *
-     *	   forwarding.								    *
-     ********************************************************************************/
-    M_CTE newCTE (2, pTargetSpace);
+    /*****************************************************************************
+     *  CTEs used as the target of a forwarding have an initial reference count  *
+     *  of 1 that reflects the reference from the original CTE in its new role   *
+     *  as a forwarder.								 *
+     *****************************************************************************/
+    M_CTE newCTE (1, pTargetSpace);
 
 //  ... move the container, ...
     pHandle->AttachToCTE (newCTE);
@@ -1554,12 +1731,6 @@ void M_CTE::ForwardToSpace (M_ASD* pTargetSpace) {
     m_pDCTE->setToForwardingPOP (iPOP);
 
     newCTE.setForwardingTargetFlags ();
-
-//  ... remove the reference to the old CTE created by AcquireAccessLock, ...
-    DecrementCTEReferenceCount ();
-
-//  ... and release the container access lock:
-    pHandle->ReleaseAccessLock ();
 }
 
 /*---------------------------------------------------------------------------
@@ -1575,9 +1746,9 @@ void M_CTE::ForwardToSpace (M_ASD* pTargetSpace) {
  *	NOTHING
  *
  *****/
-void VContainerHandle::ForwardToSpace (M_ASD* pTargetSpace) {
+bool VContainerHandle::forwardToSpace_(M_ASD *pTargetSpace) {
     if (pTargetSpace == m_pASD)
-	return;
+	return true;
 
 /*****-------------------------------------------------------------------*****
  *****	               DISALLOW CROSS-DATABASE FORWARDING                *****
@@ -1586,15 +1757,18 @@ void VContainerHandle::ForwardToSpace (M_ASD* pTargetSpace) {
  *****  changed to POPs valid in the namespace of the target database.   *****
  *****-------------------------------------------------------------------*****/
     if (m_pASD->Database () != pTargetSpace->Database ())
-	return;
+	return false;
 
-    if (IsntInTheScratchPad ()) ERR_SignalFault (
-	EC__MError,
-	"VContainerHandle::ForwardToSpace: Attempt To Forward A Persistent Physical Object"
-    );
+/*****-------------------------------------------------------------------*****
+ *****	               DISALLOW PERSISTENCE CHANGES                      *****
+ *****-------------------------------------------------------------------*****/
+    if (isntInTheScratchPad () || pTargetSpace->IsTheScratchPad ())
+	return false;
 
-    M_CTE oldCTE (m_pASD, ContainerIndex ());
+    M_CTE oldCTE (m_pASD, containerIndex ());
     oldCTE.ForwardToSpace (pTargetSpace);
+
+    return true;
 }
 
 
@@ -1626,10 +1800,11 @@ void VContainerHandle::ForwardToSpace (M_ASD* pTargetSpace) {
  *
  *****/
 void M_ASD::EnablePCTModification () {
-    if (IsNil (m_pPCTCPCC)) {
+    if (m_pPCTCPCC.isNil ()) {
     //  Access the persistent container table, ...
-	m_pPCTCPCC = GetContainerHandle (M_KnownCTI_ContainerTable, RTYPE_C_PCT);
-	m_pPCTCPCC->AcquireAccessLock ();
+	m_pPCTCPCC.setTo (
+	    static_cast<rtPCT_Handle*>(GetContainerHandle (M_KnownCTI_ContainerTable, RTYPE_C_PCT))
+	);
 
     //  ... align it with the transient container table, ...
 	AlignCT ();
@@ -1758,12 +1933,9 @@ void __cdecl M_ASD::EnumerateContainers (
 	case M_CTEAddressType_ROContainer:
 	case M_CTEAddressType_RWContainer:
 	case M_CTEAddressType_CPCC: {
-		VContainerHandle *pCPCC = cte.AttachHandle ();
-		pCPCC->AcquireAccessLock ();
+		VContainerHandle::Reference pCPCC (cte.AttachHandle ());
 
-		okToProceed = (pCPCC->*elementProcessor) (iArgList);
-
-		pCPCC->ReleaseAccessLock ();
+		okToProceed = (pCPCC.referent ()->*elementProcessor) (iArgList);
 	    }
 	    break;
 
@@ -1814,12 +1986,9 @@ void __cdecl M_ASD::EnumerateActiveContainers (
     /*****  ... 'continue' if this entry is inappropriate, ...  *****/
 	switch (cte.addressType ()) {
 	case M_CTEAddressType_CPCC: {
-		VContainerHandle* pCPCC = cte.addressAsContainerHandle ();
-		pCPCC->AcquireAccessLock ();
+		VContainerHandle::Reference pCPCC (cte.addressAsContainerHandle ());
 
-		okToProceed = (pCPCC->*elementProcessor) (iArgList);
-
-		pCPCC->ReleaseAccessLock ();
+		okToProceed = (pCPCC.referent()->*elementProcessor) (iArgList);
 	    }
 	    break;
 
@@ -1867,16 +2036,16 @@ void __cdecl M_ASD::EnumerateTRefRescanContainers (
 	M_CTE cte (this, lowerCTIBound);
 
     /*****  ... skip inappropriate entries, ...  *****/
-	VContainerHandle *pCPCC = 0;
+	VContainerHandle::Reference pCPCC;
 	switch (cte.addressType ()) {
 	case M_CTEAddressType_RWContainer:
 	    if (cte.isATRefRescanTarget ())
-		pCPCC = cte.AttachHandle ();
+		pCPCC.setTo (cte.AttachHandle ());
 	    break;
 
 	case M_CTEAddressType_CPCC:
 	    if (cte.isATRefRescanTarget ())
-		pCPCC = cte.addressAsContainerHandle ();
+		pCPCC.setTo (cte.addressAsContainerHandle ());
 	    break;
 
 	default:
@@ -1885,13 +2054,9 @@ void __cdecl M_ASD::EnumerateTRefRescanContainers (
 
     /*****  ... and process them.  *****/
 	if (pCPCC) {
-	    cte.clearIsATRefRescanTarget ();
+	    cte.clearTRefFlags ();
 
-	    pCPCC->AcquireAccessLock ();
-
-	    okToProceed = (pCPCC->*elementProcessor) (iArgList);
-
-	    pCPCC->ReleaseAccessLock ();
+	    okToProceed = (pCPCC.referent ()->*elementProcessor) (iArgList);
 	}
     }
 }
@@ -1931,15 +2096,15 @@ void __cdecl M_ASD::EnumerateModifiedContainers (
 	M_CTE cte (this, lowerCTIBound);
 
     /*****  ... skip inappropriate entries, ...  *****/
-	VContainerHandle *pCPCC = 0;
+	VContainerHandle::Reference pCPCC;
 	switch (cte.addressType ()) {
 	case M_CTEAddressType_RWContainer:
-	    pCPCC = cte.AttachHandle ();
+	    pCPCC.setTo (cte.AttachHandle ());
 	    break;
 
 	case M_CTEAddressType_CPCC:
-	    pCPCC = cte.addressAsContainerHandle ();
-	    if (!pCPCC->IsReadWrite ())
+	    pCPCC.setTo (cte.addressAsContainerHandle ());
+	    if (pCPCC->isReadOnly ())
 		continue;
 	    break;
 
@@ -1949,11 +2114,8 @@ void __cdecl M_ASD::EnumerateModifiedContainers (
 
     /*****   ... and process the rest:  *****/
 	pCPCC->CheckConsistency ();
-	pCPCC->AcquireAccessLock ();
 
-	okToProceed = (pCPCC->*elementProcessor) (iArgList);
-
-	pCPCC->ReleaseAccessLock ();
+	okToProceed = (pCPCC.referent ()->*elementProcessor) (iArgList);
     }
 }
 
@@ -2006,7 +2168,7 @@ void __cdecl M_ASD::EnumerateUpdatingContainers (
 	M_CTE cte (this, lowerCTIBound);
 
     /*****  ... skip inappropriate entries, ...  *****/
-	VContainerHandle *pCPCC = 0;
+	VContainerHandle::Reference pCPCC;
 	switch (cte.addressType ()) {
 	case M_CTEAddressType_ROContainer:
 	    if (m_pPASD->CompactingAll ()) {
@@ -2018,16 +2180,17 @@ void __cdecl M_ASD::EnumerateUpdatingContainers (
 	/*****  NO BREAK HERE  *****/
 
 	case M_CTEAddressType_RWContainer:
-	    pCPCC = cte.AttachHandle ();
+	    pCPCC.setTo (cte.AttachHandle ());
 	    break;
 
 	case M_CTEAddressType_CPCC:
 	    pCPCC = cte.addressAsContainerHandle ();
-	    if (m_pPASD->CompactingAll () || pCPCC->IsReadWrite ())
+	    if (pCPCC->hasNoContainer ())
+		continue;
+            if (m_pPASD->CompactingAll () || pCPCC->hasAReadWriteContainer ())
 		break;
 	    if (notCompactingSpace ||
-		PS_CTE_Segment (PS_ASD_CTEntry (m_pPASD, lowerCTIBound)) >=
-		    m_pPASD->MinSavedSegment ()
+		PS_CTE_Segment (PS_ASD_CTEntry (m_pPASD, lowerCTIBound)) >= m_pPASD->MinSavedSegment ()
 	    ) continue;
 	    break;
 
@@ -2036,17 +2199,14 @@ void __cdecl M_ASD::EnumerateUpdatingContainers (
 	}
 
     /*****   ... and process the rest:  *****/
-	if (pCPCC->IsReadWrite ())
+	if (pCPCC->hasAReadWriteContainer ())
 	    rwContainersProcessed++;
 	else
 	    roContainersProcessed++;
 
 	pCPCC->CheckConsistency ();
-	pCPCC->AcquireAccessLock ();
 
-	okToProceed = (pCPCC->*elementProcessor) (iArgList);
-
-	pCPCC->ReleaseAccessLock ();
+	okToProceed = (pCPCC.referent ()->*elementProcessor) (iArgList);
     }
 
     if (m_pPASD->TracingUpdate ()) IO_printf (
@@ -2054,7 +2214,8 @@ void __cdecl M_ASD::EnumerateUpdatingContainers (
 	roContainersProcessed,
 	rwContainersProcessed,
 	m_xSpace
-    );}
+    );
+}
 
 
 /**********************************
@@ -2063,8 +2224,8 @@ void __cdecl M_ASD::EnumerateUpdatingContainers (
 
 void M_ASD::ScanSegments () {
 /*****  Access the container table bounds, ...  *****/
-    unsigned int lowerCTIBound = m_iLiveReferencedRegion.lb ();
-    unsigned int upperCTIBound = m_iLiveReferencedRegion.ub () + 1;
+    unsigned int lowerCTIBound = m_iLiveReferenceRegion.lb ();
+    unsigned int upperCTIBound = m_iLiveReferenceRegion.ub () + 1;
 
     ResetLiveRefBounds ();
 /*****  ... and enumerate the containers:  *****/
@@ -2077,8 +2238,7 @@ void M_ASD::ScanSegments () {
 	case M_CTEAddressType_ROContainer:
 	    if (cte.mustStayMapped ())
 		m_pPASD->RetainContainer (lowerCTIBound);
-	    if (cte.mustBeRemapped () ||
-		!m_pPASD->ContainerHasBeenRetained (lowerCTIBound)) {
+	    if (cte.mustBeRemapped () || !m_pPASD->ContainerHasBeenRetained (lowerCTIBound)) {
 		cte.clearContainerAddress ();
 		cte.clearMustBeRemapped ();
 	    }
@@ -2087,7 +2247,7 @@ void M_ASD::ScanSegments () {
 	    break;
 
 	case M_CTEAddressType_CPCC:
-	    if (!cte.addressAsContainerHandle ()->IsReadWrite ()) {
+	    if (cte.addressAsContainerHandle ()->hasAReadOnlyContainer ()) {
 		m_pPASD->RetainContainer (lowerCTIBound);
 		AdjustLiveRefBounds (lowerCTIBound);
 	    }
@@ -2105,12 +2265,18 @@ void M_ASD::ScanSegments () {
  *****  Resource Reclamation Handlers *****
  ******************************************/
 
-PrivateVarDef bool g_bMayBeginGarbageCollection = true;
+void VContainerHandle::flushCachedResources_() {
+/*****
+  Cached handles have a reference count of zero; however, this test used to
+  check for a referenceCount () == 1.  Wonder what kind of dangling references
+  that generated...
+ *****/
+    if (referenceCount () == 0 && m_pContainer && !m_bPrecious)
+	DetachFromCTE ();
+}
 
 bool VContainerHandle::FlushCachedResources (VArgList const&) {
-    if (m_pTransientExtension) {
-	m_pTransientExtension->FlushCacheAsTransientExtensionOf (this);
-    }
+    flushCachedResources_();
     return true;
 }
 
@@ -2121,15 +2287,15 @@ bool M_ASD::FlushCachedResources (VArgList const&) {
 
 void M_AND::FlushCachedResources () {
 //  Don't do anything that could change the set of accessed containers if a GC is running, ...
-    if (!g_bMayBeginGarbageCollection)
+    if (GarbageCollectionRunning ())
 	return;
 
-    bool InitialHandlePreservationFlag = VContainerHandle::g_fPreservingHandles;
+    bool InitialHandlePreservationFlag = VContainerHandle::g_bPreservingHandles;
     UNWIND_Try {
-	VContainerHandle::g_fPreservingHandles = false;
+	VContainerHandle::g_bPreservingHandles = false;
 	EnumerateAccessedSpaces (&M_ASD::FlushCachedResources);
     } UNWIND_Finally {
-	VContainerHandle::g_fPreservingHandles = InitialHandlePreservationFlag;
+	VContainerHandle::g_bPreservingHandles = InitialHandlePreservationFlag;
     } UNWIND_EndTryFinally;
 }
 
@@ -2204,8 +2370,8 @@ bool M_ASD::Persist (M_POP *pOldPOP) {
 
     if (pNewPOP) {
 	*pOldPOP = *pNewPOP;
-	iNewCTE.IncrementCTEReferenceCount ();
-	iOldCTE.DecrementCTEReferenceCount ();
+	iNewCTE.retain ();
+	iOldCTE.release ();
     }
 
     return true;
@@ -2268,14 +2434,11 @@ bool VContainerHandle::PersistReferences (VArgList const&) {
  *
  *****/
 void M_ASD::EliminateTransientReferences () {
-//  Reset the transient reference target rescan bounds, ...
-    ResetTRBounds ();
-
-//  ... persist references from this space's modified containers, ...
+//  Persist references from this space's modified containers, ...
     EnumerateModifiedContainers (&VContainerHandle::PersistReferences);
 
 //  ... and do the same thing for all newcomers:
-    while (UpdateIsWell () && SpaceHasTRefRescanTargets ())
+    while (UpdateIsWell () && hasTransientReferences ())
 	EnumerateTRefRescanContainers (&VContainerHandle::PersistReferences);
 }
 
@@ -2290,9 +2453,7 @@ void M_ASD::VisitUnaccessedContainers () {
 	M_CTE cte (this, ctindex);
 	if (cte.holdsAReadOnlyContainerAddress () && !cte.hasBeenAccessed ()) {
 	    unaccessedContainerCount++;
-	    VContainerHandle *pCPCC = cte.AttachHandle ();
-	    pCPCC->AcquireAccessLock ();
-	    pCPCC->ReleaseAccessLock ();
+	    VContainerHandle::Reference pCPCC (cte.AttachHandle ());
 	}
     }
     if (m_pPASD->TracingCompaction ()) IO_printf (
@@ -2319,9 +2480,8 @@ void M_ASD::VisitUnaccessedContainers () {
  *****/
 void M_ASD::RemapSpace () {
     unsigned int	lowerCTIBound,
-			upperCTIBound,
-			oldContainerSize;
-    VContainerHandle*	cpcc;
+			upperCTIBound;
+    VContainerHandle::Reference cpcc;
     M_CPreamble*	oldContainerAddress;
     bool		oldContainerIsReadWrite;
 
@@ -2331,8 +2491,7 @@ void M_ASD::RemapSpace () {
     );
 
 /*****  ... flush the container pointer for the writeable PCT, ...  *****/
-    m_pPCTCPCC->ReleaseAccessLock ();
-    m_pPCTCPCC = NilOf (VContainerHandle*);
+    m_pPCTCPCC.clear ();
 
 /*****  ... access and reset the container table bounds, ...  *****/
     if (!m_pPASD->DoingCompaction ()) {
@@ -2361,21 +2520,16 @@ void M_ASD::RemapSpace () {
 		break;
 
 	    case M_CTEAddressType_RWContainer:
-		oldContainerSize = M_CPreamble_Size (
-		    cte.addressAsContainerAddress ()
-		);
-		TS_DeallocateContainer (cte.addressAsContainerAddress ());
-		DecrementAllocation (oldContainerSize);
+		DeallocateContainer (cte.addressAsContainerAddress ());
 		cte.clearContainerAddress ();
 		rwContainersProcessed++;
 		break;
 
 	    case M_CTEAddressType_CPCC:
 		cpcc = cte.addressAsContainerHandle ();
-		cpcc->AcquireAccessLock ();
 		
 		oldContainerAddress	= cpcc->containerAddress ();
-		oldContainerIsReadWrite = cpcc->IsReadWrite ();
+		oldContainerIsReadWrite = cpcc->hasAReadWriteContainer ();
 
 		cpcc->AdjustContainerPointers (
 		    m_pPASD->AccessContainer (cte.containerIndex (), false),
@@ -2384,14 +2538,14 @@ void M_ASD::RemapSpace () {
 		cte.setHasBeenAccessed ();
 
 		if (oldContainerIsReadWrite) {
-		    oldContainerSize = M_CPreamble_Size (oldContainerAddress);
-		    TS_DeallocateContainer (oldContainerAddress);
-		    DecrementAllocation (oldContainerSize);
 		    rwContainersProcessed++;
+		    if (oldContainerAddress) {
+			DeallocateContainer (oldContainerAddress);
+		    }
 		}
 		else roContainersProcessed++;
 
-		cpcc->ReleaseAccessLock ();
+		cpcc.clear ();
 		break;
 
 	    default:
@@ -2439,7 +2593,7 @@ PS_UpdateStatus VContainerHandle::CreateSpace () {
  *  Abort if an attempt is being made to create a space rooted in an already
  *  persistent object, ...
  *****/
-    if (IsntInTheScratchPad ()) ERR_SignalFault (
+    if (isntInTheScratchPad ()) ERR_SignalFault (
 	EC__InternalInconsistency, "Attempt To Forward A Persistent Physical Object"
     );
 
@@ -2581,7 +2735,7 @@ static V::VAllocator<
 
 M_CPD* VContainerHandle::NewCPD () {
 /*****  Allocate the CPD, ...  *****/
-    unsigned int ptrCount = m_pRTD->CPDPointerCount ();
+    unsigned int ptrCount = m_pRTD->cpdPointerCount ();
     M_CPD* pNewCPD = (M_CPD*)CPDAllocator.allocate (
 	sizeof(M_CPD) + sizeof(pointer_t) * (ptrCount - 1)
     );
@@ -2598,21 +2752,21 @@ M_CPD* VContainerHandle::NewCPD () {
     M_CPD_NLink		(pNewCPD) = m_pCPDChainHead;
     M_CPD_PLink		(pNewCPD) = NilOf (M_CPD*);
     M_CPD_CPCC		(pNewCPD) = this;
-    M_CPD_PreamblePtr	(pNewCPD) = m_pContainerAddress;
+    M_CPD_PreamblePtr	(pNewCPD) = m_pContainer;
 
     if (m_pCPDChainHead)
 	m_pCPDChainHead->m_pPrev = pNewCPD;
     else
-	AcquireAccessLock ();
+	retain ();
 
-    m_pCPDChainHead = pNewCPD;
+    m_pCPDChainHead.setTo (pNewCPD);
 
     return pNewCPD;
 }
 
 M_CPD* VContainerHandle::GetCPD () {
 //  Return a reuseable CPD if one exists, ...
-    if (m_pRTD->CPDReuseable () && IsntNil (m_pCPDChainHead)) {
+    if (m_pRTD->cpdReuseable () && m_pCPDChainHead.isntNil ()) {
 	m_pCPDChainHead->retain ();
 	return m_pCPDChainHead;
     }
@@ -2625,8 +2779,8 @@ M_CPD* VContainerHandle::GetCPD () {
 	initFn (pNewCPD);
     else {
 	pointer_t* pointers = (pointer_t*)M_CPD_Pointers (pNewCPD);
-	pointer_t* pl = pointers + CPDPointerCount ();
-	pointer_t container = (pointer_t)ContainerContent ();
+	pointer_t* pl = pointers + cpdPointerCount ();
+	pointer_t container = containerContent ();
 	while (pointers < pl)
 	    *pointers++ = container;
     }
@@ -2673,18 +2827,11 @@ void M_CPD::reclaim () {
     if (m_pPrev)
 	m_pPrev->m_pNext = m_pNext;
     else if (IsNil (m_pContainerHandle->m_pCPDChainHead = m_pNext))
-	m_pContainerHandle->ReleaseAccessLock ();
+	m_pContainerHandle->release ();
 
 /*****  Finally, free the detached CPD...  *****/
-    if (CPDZeroingEnabled) {
-	m_pContainerPreamble = NilOf (M_CPreamble*);
-	memset (
-	    (void *)m_iPointerArray, 0, sizeof (m_iPointerArray[0]) * pRTD->CPDPointerCount ()
-	);
-    }
-
     CPDAllocator.deallocate (
-	this, sizeof (M_CPD) + sizeof (pointer_t) * (pRTD->CPDPointerCount () - 1)
+	this, sizeof (M_CPD) + sizeof (pointer_t) * (pRTD->cpdPointerCount () - 1)
     );
 }
 
@@ -2734,30 +2881,50 @@ M_CPD* M_CPD::GetCPD () {
  *	The address of a CPD for the container created.
  *
  *****/
-M_CPD* M_ASD::CreateContainer (RTYPE_Type type, size_t size) {
-//  Allocate a CTE, ...
-    M_CTE cte (1, this);
+M_CPreamble *M_ASD::AllocateContainer (RTYPE_Type type, size_t size, unsigned int xContainer) {
+    size = RoundContainerSize (size);
 
-//  ... allocate the container, ...
-    cte.setToContainerAddress (
-	TS_AllocateContainer (type, size, cte.spaceIndex (), cte.containerIndex ()),
-	true
+    M_CPreamble* result = (M_CPreamble*) UTIL_Malloc (
+	sizeof (M_CPreamble) + sizeof(M_CEndMarker) + size
     );
+    IncrementAllocation (size);
+
+    M_CPreamble_NSize			(result) = size;
+    M_CPreamble_RType			(result) = (unsigned int)(type);
+    M_CPreamble_OSize			(result) = 0;
+    M_CPreamble_POPObjectSpace		(result) = m_xSpace;
+    M_CPreamble_POPContainerIndex	(result) = xContainer;
+
+    M_CEndMarker_Size (M_CPreamble_EndMarker (result)) = size;
+
+    AdjustRWBounds (xContainer);
     AllocateContainerCount++;
 
-//  ... adjust the relevant counts and bounds, ...
-    IncrementAllocation (
-	M_CPreamble_Size (cte.addressAsContainerAddress ())
-    );
-    AdjustRWBounds (cte.containerIndex ());
+    return result;
+}
+
+VContainerHandle *M_ASD::CreateContainer (RTYPE_Type type, size_t size, VContainerHandle *pHandle) {
+//  Allocate a CTE, ...
+    M_CTE cte (0, this);
+
+//  ... allocate the container, ...
+    cte.setToContainerAddress (AllocateContainer (type, size, cte.containerIndex ()), true);
+
+//  ... adjust the relevant bounds, ...
+    cte.setTRefFlags ();
 
 //  ... attach a CPCC, and allocate and return a CPD:
-//      disabling GC while container table entries are being modified ...
-    g_bMayBeginGarbageCollection = false;
-    M_CPD *pResult = cte.MakeHandle ()->NewCPD ();
-    g_bMayBeginGarbageCollection = true;
+    return pHandle ? pHandle->attachTo (cte) : cte.MakeHandle ();
+}
 
-    return pResult;
+void M_ASD::CreateIdentity (M_POP &rResult, VContainerHandle *pHandle) {
+    M_CTE cte (0, this);
+    cte.setToContainerHandle (pHandle);
+    pHandle->m_pDCTE = cte.dcte ();
+
+    AdjustRWBounds(cte.containerIndex());
+    cte.setTRefFlags ();
+    cte.getPOP (rResult);
 }
 
 
@@ -2782,8 +2949,8 @@ PrivateFnDef void M_SwapContainers (M_CPD* cpd1, M_CPD* cpd2) {
     VContainerHandle* cpcc2 = M_CPD_CPCC (cpd2);
 
 /*****  Obtain the container table entries for the two containers  *****/
-    M_CTE cte1 (cpcc1->Space (), cpcc1->ContainerIndex ());
-    M_CTE cte2 (cpcc2->Space (), cpcc2->ContainerIndex ());
+    M_CTE cte1 (cpcc1->Space (), cpcc1->containerIndex ());
+    M_CTE cte2 (cpcc2->Space (), cpcc2->containerIndex ());
 
 /*****  Reassociate the cpcc's  *****/
     cpcc1->EnableModifications ();
@@ -2821,7 +2988,7 @@ PrivateFnDef void M_SwapContainers (M_CPD* cpd1, M_CPD* cpd2) {
 void VContainerHandle::AdjustContainerTailPointers (
     pointer_t pOldTail, pointer_t pNewTail, pointer_diff_t sa
 ) {
-    unsigned int const iPointerCount = CPDPointerCount ();
+    unsigned int const iPointerCount = cpdPointerCount ();
 
     for (M_CPD* pCPD = m_pCPDChainHead; pCPD; pCPD = M_CPD_NLink (pCPD)) {
 	pointer_t *p, *pl;
@@ -2918,10 +3085,10 @@ void VContainerHandle::VShiftContainerTail (
  *	'pBase', 'pNewTail', and 'pOldTail' need to be recomputed if the container is
  *	grown.
  ******/
-    pointer_t pBase	= (pointer_t)ContainerContent ();
+    pointer_t pBase	= containerContent ();
     pointer_t pOldTail	= pTail;
     pointer_t pNewTail	= pOldTail + sShift;
-    ptrdiff_t sGrowth	= pNewTail - pBase + sTail - ContainerSize ();
+    ptrdiff_t sGrowth	= pNewTail - pBase + sTail - containerSize ();
 
     if (sShift < 0) {	/*  Delete/Shift-Left  */
         if (pNewTail < pBase) ERR_SignalFault (
@@ -2940,7 +3107,7 @@ void VContainerHandle::VShiftContainerTail (
 	    GrowContainer (sGrowth);
 
 	    /*  Recompute 'pOldTail' and 'pNewTail'  */
-	    pOldTail += (pointer_size_t)ContainerContent () - (pointer_size_t)pBase;
+	    pOldTail += (pointer_size_t)containerContent () - (pointer_size_t)pBase;
 	    pNewTail = pOldTail + sShift;
 	}
 
@@ -3004,11 +3171,10 @@ void __cdecl M_CPD::ShiftContainerTail (
  *	the destination CPD and not to the POP associated with the CPD itself.
  *
  *****/
-M_CPD* M_CPD::StoreReference (unsigned int xReference, VContainerHandle const *pThat) {
+M_CPD *M_CPD::StoreReference (unsigned int xReference, VContainerHandle *pThat) {
     ASSERT_LIVENESS (this, POPCopyTarget);
 
     EnableModifications ();
-
     m_pContainerHandle->StoreReference (POP (xReference), pThat);
 
     return this;
@@ -3060,7 +3226,6 @@ M_CPD *M_CPD::StoreReference (
     ASSERT_LIVENESS (pThat, POPCopySource);
 
     EnableModifications ();
-
     if (xThatReference < 0) m_pContainerHandle->StoreReference (
 	POP (xReference), pThat->containerHandle ()
     );
@@ -3093,6 +3258,12 @@ void M_AND::StoreReference (
 #endif
 
     Release (&iOldReference);
+}
+
+void M_AND::StoreReference (M_POP *pReference, Vdd::Store *pThat) {
+    VContainerHandle::Reference pThatHandle;
+    pThat->getContainerHandle (pThatHandle);
+    StoreReference (pReference, pThatHandle);
 }
 
 
@@ -3396,10 +3567,13 @@ void M_ASD::GCQueue::Insert (unsigned int xContainer) {
 	}
 	qe = m_pFree;
     }
-    else if (m_xStorageCell >= m_cStorageCells)
+    else if (IsNil (m_pFree)) {
       	ERR_SignalFault (
-			 EC__MError, UTIL_FormatMessage ("Insufficient Queue Entries for Garbage Collection %u",m_cStorageCells * 1024)
+	     EC__MError, UTIL_FormatMessage (
+		"Insufficient Queue Entries for Garbage Collection %u",m_cStorageCells * 1024
+	    )
 	);
+    }
 
     m_pFree = qe->next;
 
@@ -3432,7 +3606,6 @@ unsigned int M_ASD::GCQueue::Remove () {
 void M_ASD::GCQueueInsert (unsigned int xContainer) {
     if (IsNil (m_pGCQueue))
 	m_pGCQueue = new GCQueue (cteCount ());
-
     m_pGCQueue->Insert (xContainer);
 }
 
@@ -3467,11 +3640,13 @@ bool M_ASD::InitializeSpaceForGC (VArgList const&) {
 	switch (cte.addressType ()) {
 	case M_CTEAddressType_ForwardingPOP:
 	    cte.setReferenceCountToZero ();
+	    cte.gcVisited(false); 
 	    break;
 
 	default:
 	    cte.setReferenceCountToInfinity ();
 	    GCQueueInsert (cte.containerIndex ());
+	    cte.gcVisited(true); 
 	    cSelfReferences++;
 	    break;
 	}
@@ -3483,31 +3658,17 @@ bool M_ASD::InitializeSpaceForGC (VArgList const&) {
     while (++ctIndex < ctBound) {
 	M_CTE cte (this, ctIndex);
 	switch (cte.addressType ()) {
-	case M_CTEAddressType_CPCC:
-//*********************************************************************************
-//  Only CPCCs that are actually accessing their containers hold references...
-//*********************************************************************************
-	    if (cte.addressAsContainerHandle ()->AccessCount () > 0) {
-		cte.setReferenceCountToOne ();
-		GCQueueInsert (cte.containerIndex ());
-		cSelfReferences++;
-	    }
-	    else {
-		cte.setReferenceCountToZero ();
-	    }
-	    break;
-
 #if defined(DebuggingForwardings)
 	case M_CTEAddressType_ForwardingPOP:
 	    if (cte.isReferenced ()) {
 		M_CTE targetCTE (this, cte.addressAsPOP ());
 		IO_printf (
 		    "+++ Forwarding Found At [%u:%u](RC:%u) Referencing [%u:%u](RC:%u)\n",
-		    cte.SpaceIndex (),
-		    cte.ContainerIndex (),
+		    cte.spaceIndex (),
+		    cte.containerIndex (),
 		    cte.referenceCount (),
-		    targetCTE.SpaceIndex (),
-		    targetCTE.ContainerIndex (),
+		    targetCTE.spaceIndex (),
+		    targetCTE.containerIndex (),
 		    targetCTE.referenceCount ()
 		);
 	    }
@@ -3515,10 +3676,22 @@ bool M_ASD::InitializeSpaceForGC (VArgList const&) {
 #endif
 
 	default:
-	    if (cte.isntUnderConstruction ()) 
-		cte.setReferenceCountToZero ();
+/************************************************************************
+ *  Now that CTE's of new objects start life with a reference count of	*
+ *  zero, under construction testing must be done in the sweep phase:	*
+ *	    if (cte.isntUnderConstruction ())				*
+ ************************************************************************/
+	    cte.setReferenceCountToZero ();
+	    cte.gcVisited(false); 
 	    break;
 	}
+
+        #if defined(DEBUG_SESSION_GC)
+            fprintf(stderr, "initializing [%d: %d] new: %d type: %d refcount: %d\n", 
+                Index(), ctIndex, cte.isNew(), cte.addressType(), 
+                cte.referenceCount()
+            );
+        #endif
     }
 
 /*****  ... and update the metrics:  *****/
@@ -3543,37 +3716,67 @@ bool M_ASD::InitializeSpaceForTransientGC (VArgList const &rArgList) {
 	    M_CTE cte (this, xCTE);
 	    switch (cte.addressType ()) {
 	    case M_CTEAddressType_RWContainer:
-		if (cte.isntNew ()) {
-		    GCQueueInsert (cte.containerIndex ());
-		    cSelfReferences++;
-		}
-		else if (cte.isntUnderConstruction ()) {
+		if (cte.isNew ()) {
 		    cte.setReferenceCountToZero ();
+		    cte.gcVisited(false);
+		}
+		else {
+		    GCQueueInsert (cte.containerIndex ());
+		    cte.gcVisited(true); 
+		    cSelfReferences++;
 		}
 		break;
 
 	    case M_CTEAddressType_CPCC: {
-		    VContainerHandle *pHandle = cte.addressAsContainerHandle ();
-		    if (pHandle->IsReadWrite ()) {
-			if (cte.isntNew ()) {
-			    GCQueueInsert (cte.containerIndex ());
-			    cSelfReferences++;
-			}
-			else if (pHandle->AccessCount () > 0) {
-			    cte.setReferenceCountToOne ();
-			    GCQueueInsert (cte.containerIndex ());
-			    cSelfReferences++;
-			}
-			else {
-			    cte.setReferenceCountToZero ();
-			}
-		    }
+		VContainerHandle *pHandle = cte.addressAsContainerHandle ();
+		if (pHandle->isPrecious ()) {
+		    GCQueueInsert (cte.containerIndex ());
+		    cte.gcVisited(true); 
+		    cSelfReferences++;
 		}
+		else if (cte.isNew()) {
+		    cte.setReferenceCountToZero ();
+		    cte.gcVisited(false);
+		}
+		else if (pHandle->hasAReadWriteContainer ()) {
+		    GCQueueInsert (cte.containerIndex ());
+		    cte.gcVisited(true);
+		    cSelfReferences++;
+		}
+/*****
+ *  The preceding 'else if' clauses replace and simplify the following...
+ *****
+ *		else {
+ *		    if (cte.isNew()) {
+ *			cte.setReferenceCountToZero ();
+ *			cte.gcVisited(false);
+ *		    }
+ *
+ *		    if (pHandle->hasAReadWriteContainer ()) {
+ *			if (cte.isntNew ()) {
+ *			    GCQueueInsert (cte.containerIndex ());
+ *			    cte.gcVisited(true);
+ *			    cSelfReferences++;
+ *			}
+ *		    }
+ *		}
+ *****
+ *  ... and makes the flow of the container handle logic parallel the flow of the
+ *      'M_CTEAddressType_RWContainer' logic it mirrors.
+ *****/
+	    }
 		break;
 
 	    default:
 		break;
 	    }
+
+            #if defined(DEBUG_SESSION_GC)
+                fprintf(stderr, "initializing [%d: %d] new: %d type: %d refcount: %d\n", 
+                    Index(), xCTE, cte.isNew(), cte.addressType(), 
+                    cte.referenceCount()
+                );
+            #endif
 	}
 
     /*****  ... and update the metrics:  *****/
@@ -3586,6 +3789,108 @@ bool M_ASD::InitializeSpaceForTransientGC (VArgList const &rArgList) {
 }
 
 
+/*********************************************************************************
+The 'Cycle Detect' (now a bit of a misnomer) phase of the garbage collector
+is responsible for estimating the minimal set of container handles that must
+be added to the garbage collector's root set in order to protect database
+structures currently in use in this process.
+
+In pre-8.1 versions of Vision, container handles were simple structures that
+always and only served as database access handles.  In that model, all handles
+were always added to the garbage collector's root set.
+
+In release 8.1, container handles became more general.  While still serving
+as access handles, they can also act as data caches, 'future's for persistable
+structures, and participants in potentially cyclic transient data structures
+of their own.  Just because a container handle exists and is attached to a
+container table entry (CTE) doesn't mean that either the associated CTE or the
+handle must be retained.  Handles may be directly or indirectly referenced from
+other handles or from elsewhere in the process. Only those handles that are (or
+might be) referenced from elsewhere must be added to the garbage collector's
+root set.
+
+To identify which container handles must be in the root set, the garbage
+collector first identifies the set of CTEs reachable from the persistent
+roots of the database.  That closure is computed on the basis of both inter-
+container (POP references) and inter-handle references.  Those CTEs NOT in
+that persistent root-set closure become candidates for the cycle-detect
+phase of the garbage collector.
+
+Trivially, the cycle-detect phase could add all container handles it finds
+in the set of CTEs not included in the persistent root set's closure.  While
+doing so is safe, it is not minimal.  To identify the CTEs associated with
+container handles referenced from elsewhere in the process, the cycle-detect
+algorithm first identifies those container handles that are ONLY referenced
+from other handles outside the persistent closure.  It does that by ONLY
+following inter-handle references to compute partial reference counts for
+each handle reached directly or indirectly.  At the end of that process,
+those handles whose partial reference count is LESS THAN their actual reference
+count MUST be considered to be referenced from elsewhere in the process. Adding
+them to the garbage collector's root set, another marking pass is run, completing
+the garbage collector's reachability phase.
+
+Note that the partial reference count computation process is allowed to miss
+references.  Doing so results in under-counting the number of intra-database
+internal references.  Under-counting is always safe; however, the cost of under-
+counting is the failure to detect and reclaim orphaned structures.
+**********************************************************************************/
+bool M_ASD::EnqueuePossibleCycles (VArgList const &rArgList) {
+    unsigned int xUB = cteCount () - 1;
+    for (unsigned int cti = 0; cti <= xUB; cti++) {
+	M_CTE cte (this, cti);
+        if (!cte.gcVisited()) {
+            cte.cdVisited(false);
+	    if (cte.holdsACPCC ()) {
+		VContainerHandle *pHandle = cte.addressAsContainerHandle ();
+		GCQueueInsert (cte.containerIndex ());
+		cte.cdVisited(true);
+
+		pHandle->generateLogRecord ("EnqueuePC");
+	    }
+        }
+    } 
+
+   return true;
+}
+
+bool M_ASD::EnqueueOmittingCycles (VArgList const &rArgList) {
+    unsigned int xUB = cteCount () - 1;
+    for (unsigned int cti = 0; cti <= xUB; cti++) {
+	M_CTE cte (this, cti);
+	if (cte.holdsACPCC ()) {
+	    VContainerHandle *pHandle = cte.addressAsContainerHandle ();
+	    // record the handle's status after cycle detection...
+	    cte.foundAllReferences(pHandle->foundAllReferences());
+	    if (!cte.gcVisited()) {
+		if (cte.foundAllReferences()) {
+		    pHandle->generateLogRecord ("Omit");
+		} else {
+		    GCQueueInsert (cte.containerIndex ());
+		    cte.gcVisited(true);
+		    pHandle->generateLogRecord ("Keep");
+		}
+	    }
+	}
+    } 
+
+   return true;
+}
+
+bool M_ASD::TraverseAndDetectCycles (VArgList const &rArgList) {
+    if (IsNil (m_pGCQueue) || m_pGCQueue->MarkingComplete ())
+        return true;			/****  Nothing to do  ****/
+
+    ConsiderContainersInQueue(&m_GCCycleDetect);
+
+/****  Indicate that some marking was done...  *****/
+    VArgList iArgList (rArgList);
+    *iArgList.arg<bool*>() = true;
+
+    return true;		/**** Processed some containers  ****/
+}
+
+
+
 /**************************
  *****  Marking Pass  *****
  **************************/
@@ -3611,18 +3916,12 @@ bool M_ASD::InitializeSpaceForTransientGC (VArgList const &rArgList) {
 
 PrivateVarDef unsigned int ContainerCounter = 0;
 
-bool M_ASD::MarkContainersInQueue (VArgList const &rArgList) {
-    MarkContainersInQueue_callCount++;
-    if (IsNil (m_pGCQueue) || m_pGCQueue->MarkingComplete ())
-        return true;			/****  Nothing to do  ****/
-    MarkContainersInQueue_doCount++;
+void M_ASD::ConsiderContainersInQueue(M_ASD::GCVisitBase* pGCV) {
+    if (IsNil (m_pGCQueue)) return;
 
-/****  Update the pass counter...  *****/
-    m_pAND->GCMetricsForSpace (m_xSpace)->recordPass ();
-
-/****  Continue processing until nothing left in the marking queue  ****/
     while (m_pGCQueue->MarkingIncomplete ()) {
-	M_CTE cte (this, GCQueueRemove ());
+        unsigned int cIndex = GCQueueRemove();
+	M_CTE cte (this, cIndex);
 
 /****  Echo the progress report marker  ****/
 	if (TracingContainerMarking ()) {
@@ -3635,7 +3934,6 @@ bool M_ASD::MarkContainersInQueue (VArgList const &rArgList) {
 	}
 
 /****  Next, access the container's address  ****/
-	M_CPreamble* pAddress;
 	switch (cte.addressType ()) {
 	case M_CTEAddressType_ForwardingPOP:
 /****
@@ -3647,19 +3945,12 @@ bool M_ASD::MarkContainersInQueue (VArgList const &rArgList) {
 	    );
 	    break;
 	case M_CTEAddressType_CPCC:
-	    pAddress = cte.addressAsContainerHandle ()->containerAddress ();
+	    pGCV->processContainerHandle (cte, cte.addressAsContainerHandle ());
 	    break;
 	case M_CTEAddressType_ROContainer:
 	case M_CTEAddressType_RWContainer:
 	    cte.InitializeCTEContainerAddress ();
-/****
- * Since we are pulling out an address to be used by the marking function
- * we need to protect it. Within the marking function, a new segment might be
- * accessed which could trigger a segment remapping. If that happens, then
- * pAddress would perhaps become invalid.
- ****/
-	    cte.setMustStayMapped ();
-	    pAddress = cte.addressAsContainerAddress ();
+	    pGCV->processContainerAddress (cte, cte.addressAsContainerAddress ());
 	    break;
 	default:
 	    ERR_SignalFault (
@@ -3667,18 +3958,21 @@ bool M_ASD::MarkContainersInQueue (VArgList const &rArgList) {
 	    );
 	    break;
 	}
-/****
- *  Call the rtype handler to insert the containers it references into the
- *  appropriate marking queue
- ****/
-	M_Type_MarkFn pMarkingFunction = M_RTD_MarkFn (
-	    M_RTDPtr (M_CPreamble_RType (pAddress))
-	);
-	if (pMarkingFunction)
-	    pMarkingFunction (this, pAddress);
-/**** We are done with pAddress now, so we can remove the protection. ****/
-	cte.clearMustStayMapped ();
     }
+}
+
+bool M_ASD::MarkContainersInQueue (VArgList const &rArgList) {
+    MarkContainersInQueue_callCount++;
+    if (IsNil (m_pGCQueue) || m_pGCQueue->MarkingComplete ())
+        return true;			/****  Nothing to do  ****/
+    MarkContainersInQueue_doCount++;
+
+/****  Update the pass counter...  *****/
+    m_pAND->GCMetricsForSpace (m_xSpace)->recordPass ();
+
+/****  Continue processing until nothing left in the marking queue  ****/
+    ConsiderContainersInQueue(&m_GCMarker);
+
 
 /****  Indicate that some marking was done...  *****/
     VArgList iArgList (rArgList);
@@ -3687,6 +3981,8 @@ bool M_ASD::MarkContainersInQueue (VArgList const &rArgList) {
     return true;		/**** Processed some containers  ****/
 }
 
+
+
 
 /*---------------------------------------------------------------------------
  * Driving routine for the marking phase of the garbage collector.  Each space
@@ -3741,9 +4037,9 @@ void M_AND::PerformMarkPhaseOfGC () {
  */
 bool M_ASD::SweepUp (VArgList const &rArgList) {
     VArgList iArgList (rArgList);
-    bool *const pSweepResult = iArgList.arg<bool*> ();
-    bool reclaimedPersistentContainers = false;
-    bool reclaimedContainers = false;
+    bool *pSweepResult= iArgList.arg<bool*> ();
+    bool bReclaimedPersistentContainers = false;
+    bool bReclaimedContainers = false;
 
 /****  Cleanup marking structures...  ****/
     if (m_pGCQueue) {
@@ -3761,9 +4057,23 @@ bool M_ASD::SweepUp (VArgList const &rArgList) {
 //	M_CTE cte (this, ctIndex);
 //  The above was changed since cteCount () can be zero ...
 
-    for (unsigned int ctIndex = cteCount (); ctIndex > 1; ) {
+    for (
+        unsigned int ctIndex = cteCount (); 
+        ctIndex > 1 || (ctIndex > 0 && m_xSpace == 0); 
+    ) 
+    {
 	M_CTE cte (this, --ctIndex);
 	m_iCT.setFreeListBaseTo (ctIndex);
+
+        #if defined(DEBUG_SESSION_GC)
+            fprintf(stderr, "sweep [%d: %d] new: %d type: %d refHandle: %d refcount: %d\n", 
+                Index(), ctIndex, cte.isNew(), cte.addressType(), 
+                ( cte.addressType() == M_CTEAddressType_CPCC &&
+                  cte.addressAsContainerHandle()->isReferenced()
+                ), 
+                cte.referenceCount()
+            );
+        #endif
 
 /*---------------------------------------------------------------------------*
  *  At this point, the garbage collector can reclaim resources consumed by
@@ -3773,13 +4083,14 @@ bool M_ASD::SweepUp (VArgList const &rArgList) {
  *  those handlers 'release' will not have been counted during the garbage
  *  collection and may not even continue to refer to valid CTEs!
  *---------------------------------------------------------------------------*/
-	if (cte.isntReferenced ()) {
+	if (cte.isASweepTarget ()) {
 	    M_CPreamble *pAddress = 0;
 	    bool bOkToReclaim = true;
+
 	/****  Deallocate any read/write containers  ****/
 	    switch (cte.addressType ()) {
 	    case M_CTEAddressType_ROContainer:
-		reclaimedContainers = reclaimedPersistentContainers = true;
+		bReclaimedContainers = bReclaimedPersistentContainers = true;
 		break;
 
 	    case M_CTEAddressType_RWContainer:
@@ -3794,15 +4105,18 @@ bool M_ASD::SweepUp (VArgList const &rArgList) {
 		 *  are referenced.
 		 *************************************************************/
 		    VContainerHandle *pHandle = cte.addressAsContainerHandle ();
-		    if (pHandle->AccessCount () > 0)
+		    if (cte.gcVisited () || pHandle->isReferenced() && !cte.foundAllReferences()) {
 			bOkToReclaim = false;
-		    else {
-			if (pHandle->IsReadWrite ())
+			pHandle->generateLogRecord ("Preserve");
+		    } else {
+			pHandle->generateLogRecord ("Reclaim");
+			if (pHandle->hasAReadWriteContainer ())
 			    pAddress = pHandle->containerAddress ();
-			else
-			    reclaimedContainers = reclaimedPersistentContainers = true;
-			pHandle->ClearTransientExtension ();
-			pHandle->deleteReference ();
+			else {
+			    bReclaimedContainers = true;
+			    bReclaimedPersistentContainers = pHandle->hasAContainer ();
+			}
+			pHandle->DetachFromCTE ();
 		    }
 		}
 		break;
@@ -3811,22 +4125,43 @@ bool M_ASD::SweepUp (VArgList const &rArgList) {
 		break;
 	    }
 
-	    if (pAddress) {
-		DecrementAllocation (M_CPreamble_Size (pAddress));
-		TS_DeallocateContainer (pAddress);
-		reclaimedContainers = true;
-		if (cte.isntNew ())
-		    reclaimedPersistentContainers = true;
-	    }
-	    if (bOkToReclaim)
+	    if (bOkToReclaim) {
+#if defined(DEBUG_SESSION_GC)
+		fprintf(stderr, "  reclaiming [%d: %d] new: %d type: %d "
+			"refHandle: %d refcount: %d\n", 
+			Index(), ctIndex, cte.isNew(), cte.addressType(), 
+			cte.holdsACPCC() && cte.addressAsContainerHandle()->isReferenced(), 
+			cte.referenceCount()
+		);
+#endif
+
+
+		if (pAddress) {
+		    DeallocateContainer (pAddress);
+		    bReclaimedContainers = true;
+		    if (cte.isntNew ())
+			bReclaimedPersistentContainers = true;
+		}
 		cte.DeallocateCTE ();
+	    }
 	}
     }
+
+    // cleanup CTE flags
+    for (unsigned int ctIndex = cteCount (); ctIndex > 1 || (ctIndex > 0 && m_xSpace == 0); )  {
+	M_CTE cte (this, --ctIndex);
+	cte.gcVisited(true);
+	cte.cdVisited(true);
+	cte.foundAllReferences(false);
+    }
+
+
+
 /****  indicate that the container table has been modified  ****/
-    if (reclaimedPersistentContainers)
+    if (bReclaimedPersistentContainers)
 	CompelUpdate ();
 
-    if (reclaimedContainers)
+    if (bReclaimedContainers)
 	*pSweepResult= true;
 
     return true;
@@ -3859,10 +4194,17 @@ bool M_AND::PerformSweepPhaseOfGC () {
  *****  Marking Tools  *****
  ***************************/
 
-bool M_DCTE::mark (M_ASD *pASD, unsigned int xContainer) {
-    bool isAReturnVisit = isReferenced ();
+bool M_DCTE::mark (M_ASD::GCVisitBase* pGCV, M_ASD *pASD, unsigned int xContainer) {
+    bool isAReturnVisit = gcVisited();
 
     retain ();
+
+    #if defined(DEBUG_SESSION_GC)
+	fprintf(stderr, "  visiting [%d: %d]: new: %d type: %d refcount: %d\n", 
+	    pASD->Index(), xContainer, isNew(), addressType(), referenceCount()
+	);
+    #endif
+
 
     if (isAReturnVisit)
 	GCRevisitCount++;
@@ -3875,10 +4217,11 @@ bool M_DCTE::mark (M_ASD *pASD, unsigned int xContainer) {
 	switch (m_xAddressType) {
 	case M_CTEAddressType_ForwardingPOP:
 	    g_iForwardedContainerCount++;
-	    pASD->Mark (&addressAsPOP ());
+	    pGCV->Mark (pASD, &addressAsPOP ());
 	    break;
 	default:
 	    pASD->GCQueueInsert (xContainer);
+	    gcVisited(true);
 	    break;
 	}
     }
@@ -3887,27 +4230,6 @@ bool M_DCTE::mark (M_ASD *pASD, unsigned int xContainer) {
 }
 
 
-/*---------------------------------------------------------------------------
- * Quasi-public routine to mark a container as referenced and if
- * the container has not been visited, to initiate marking of the
- * containers it references.
- *
- *  Arguments:
- *	pPOP		-  A pointer to a POP for the container to Mark.
- *
- *  Returns:
- *	NOTHING - Executed for side effect only.
- *
- *---------------------------------------------------------------------------
- */
-void M_ASD::Mark (M_POP const *pPOP) {
-  if (M_POP_ObjectSpace (pPOP) != 1) {
-    M_CTE cte (m_pAND, pPOP);
-    m_pAND->GCMetricsForSpace (m_xSpace)->recordReference (
-	M_POP_ObjectSpace (pPOP), cte.Mark ()
-    );
-  }
-}
 /*---------------------------------------------------------------------------
  * Quasi-public routine to mark an array of containers as referenced and for
  * each container that has not been visited, to initiate marking of the
@@ -3922,11 +4244,110 @@ void M_ASD::Mark (M_POP const *pPOP) {
  *	NOTHING - Executed for side effect only.
  *---------------------------------------------------------------------------
  */
-void M_ASD::Mark (M_POP const *pReferences, unsigned int cReferences) {
+void M_ASD::GCVisitBase::Mark_(M_ASD* pASD, M_POP const *pReferences, unsigned int cReferences) {
     while (cReferences-- > 0)
-	Mark (pReferences++);
+	Mark (pASD, pReferences++);
+}
+
+/*---------------------------------------------------------------------------
+ * Quasi-public routine to mark a container as referenced and if
+ * the container has not been visited, to initiate marking of the
+ * containers it references.
+ *
+ *  Arguments:
+ *	pPOP		-  A pointer to a POP for the container to Mark.
+ *
+ *  Returns:
+ *	NOTHING - Executed for side effect only.
+ *
+ *---------------------------------------------------------------------------
+ */
+void M_ASD::GCVisitBase::Mark_(M_ASD* pASD, M_POP const *pPOP) {
+}
+
+void M_ASD::GCVisitMark::Mark_(M_ASD* pASD, M_POP const *pPOP) {
+  if (M_POP_ObjectSpace (pPOP) != 1) {
+    M_CTE cte (pASD->Database(), pPOP);
+    pASD->recordGCReference (
+	M_POP_ObjectSpace (pPOP), cte.Mark (this)
+    );
+  }
 }
 
+
+/*--------------------------------*
+ *  M_ASD::GCVisitBase
+ *--------------------------------*/
+void M_ASD::GCVisitBase::processContainerAddress (M_CTE &rCTE, M_CPreamble *pAddress) {
+/****
+ *  Call the rtype handler to insert the containers it references into the
+ *  appropriate marking queue
+ ****/
+    if (pAddress) {	// ... nil for objects whose container creation has been deferred.
+/****
+ * Since we are pulling out an address to be used by the marking function
+ * we need to protect it. Within the marking function, a new segment might be
+ * accessed which could trigger a segment remapping. If that happens, then
+ * pAddress would perhaps become invalid.
+ ****/
+	M_Type_MarkFn pMarkingFunction = M_RTD_MarkFn (
+	    M_RTDPtr (M_CPreamble_RType (pAddress))
+	);
+	if (pMarkingFunction) {
+	    rCTE.setMustStayMapped ();
+
+#if defined(DEBUG_SESSION_GC)
+	    fprintf(stderr, "marking [%d: %d] new: %d type: %d refHandle: %d refcount: %d\n", 
+		    rCTE.spaceIndex(), cIndex, rCTE.isNew(), rCTE.addressType(), 
+		    ( rCTE.holdsACPCC () && rCTE.addressAsContainerHandle()->isReferenced()), 
+		    rCTE.referenceCount()
+	    );
+#endif
+
+	    pMarkingFunction (this, rCTE.space (), pAddress);
+/**** We are done with pAddress now, so we can remove the protection. ****/
+	    rCTE.clearMustStayMapped ();
+	}
+    }
+}
+
+void M_ASD::GCVisitBase::processContainerHandle (M_CTE &rCTE, VContainerHandle *pHandle) {
+    processContainerAddress (rCTE, pHandle->containerAddress ());
+}
+
+/*--------------------------------*
+ *  M_ASD::GCVisitMark
+ *--------------------------------*/
+void M_ASD::GCVisitMark::processContainerHandle (M_CTE &rCTE, VContainerHandle *pHandle) {
+    BaseClass::processContainerHandle (rCTE, pHandle);
+    pHandle->visitReferencesUsing (this);
+}
+void M_ASD::GCVisitMark::visitHandle (VContainerHandle *pHandle) {
+    pHandle->gcMarkFor (this);
+}
+
+/*--------------------------------*
+ *  M_ASD::GCVisitCycleDetect
+ *--------------------------------*/
+void M_ASD::GCVisitCycleDetect::processContainerAddress (M_CTE &rCTE, M_CPreamble *pAddress) {
+}
+
+void M_ASD::GCVisitCycleDetect::processContainerHandle (M_CTE &rCTE, VContainerHandle *pHandle) {
+    pHandle->visitReferencesUsing (this);
+}
+
+void M_ASD::GCVisitCycleDetect::visitHandle (VContainerHandle *pHandle) {
+    pHandle->cdMarkFor (this);
+}
+
+/*---------------------------------------------------------------------------
+ *---------------------------------------------------------------------------
+ */
+
+M_ASD::GCVisitMark 	  M_ASD::m_GCMarker;
+M_ASD::GCVisitCycleDetect M_ASD::m_GCCycleDetect;
+
+
 
 /*---------------------------------------------------------------------------
  * Top Level Routine for running the network's garbage collector.
@@ -3949,8 +4370,8 @@ bool M_AND::DisposeOfNetworkGarbage () {
 
     bool result = false;
     UNWIND_Try {
-	NetworkGarbageCollectedInSession = true;
-	g_bMayBeginGarbageCollection	 = false;
+	OnGCStart ();
+	g_bNetworkGarbageCollectedInSession = true;
 
 	GCInvocationCount++;
 	GCRevisitCount = GCFirstVisitCount = 0;
@@ -3958,16 +4379,17 @@ bool M_AND::DisposeOfNetworkGarbage () {
 	M_DCTE::g_bPotentialSessionGarbage = false;
 	M_DCTE::g_iForwardedContainerCount = 0;
 
-    //  PerformSetupPhaseOfGC ();
 	InitializeGCMetrics ();
 	EnumerateSpaces (&M_ASD::InitializeSpaceForGC);
 
+	PerformMarkPhaseOfGC ();
+	DoGCCycleElimination();
 	PerformMarkPhaseOfGC ();
 	result = PerformSweepPhaseOfGC ();
 
 	M_DCTE::g_bPotentialSessionGarbage = false;
     } UNWIND_Finally {
-	g_bMayBeginGarbageCollection	= true;
+	OnGCFinish ();
     } UNWIND_EndTryFinally;
 
     return result;
@@ -3980,10 +4402,7 @@ bool M_AND::DisposeOfNetworkGarbage () {
 
 bool __cdecl M_ASD::Apply (bool (M_ASD::*elementProcessor) (VArgList const&), ...) {
     V_VARGLIST (iArgList, elementProcessor);
-
-    bool result = (this->*elementProcessor) (iArgList);
-
-    return result;
+    return (this->*elementProcessor) (iArgList);
 }
 
 void M_AND::DoTransientGCSetup () {
@@ -4003,7 +4422,8 @@ bool M_AND::DoTransientGCMarking () {
     ContainerCounter = 0;
 
     bool moreToDo = false;
-    EnumerateAccessedSpaces (&M_ASD::MarkContainersInQueue, &moreToDo);
+    EnumerateModifiedSpaces (&M_ASD::MarkContainersInQueue, &moreToDo);
+
 
     if (TracingContainerMarking ()) {
 	::printf ("\n");
@@ -4026,9 +4446,90 @@ void VDatabaseFederatorForBatchvision::DoTransientGCMarking () const {
     } while (moreToDo);
 }
 
+bool M_AND::EnqueuePossibleCycles () {
+    EnumerateModifiedSpaces (&M_ASD::EnqueuePossibleCycles);
+    return true;
+}
+
+bool VDatabaseFederatorForBatchvision::EnqueuePossibleCycles() const {
+    for ( VDatabaseActivation *pActivation = m_pActivationListHead; 
+          pActivation; 
+          pActivation = pActivation->successor()
+        ) 
+    {
+        static_cast<M_AND*>(pActivation)->EnqueuePossibleCycles ();
+    }
+    return true;
+}
+
+bool M_AND::TraverseAndDetectCycles() {
+    bool moreToDo = true;
+    bool workDone = false;
+    while (moreToDo) {
+	moreToDo = false;
+	EnumerateModifiedSpaces (&M_ASD::TraverseAndDetectCycles, &moreToDo);
+	if (moreToDo) 
+	    workDone = true;
+    }
+
+    return workDone;
+}
+
+bool VDatabaseFederatorForBatchvision::TraverseAndDetectCycles() const {
+    bool moreToDo = true;
+    bool workDone = false;
+
+    while (moreToDo) {
+	moreToDo = false;
+	VDatabaseActivation *pActivation = m_pActivationListHead;
+	while (pActivation) {
+	    if (static_cast<M_AND*>(pActivation)->TraverseAndDetectCycles ()) {
+		moreToDo = true;
+                workDone = true;
+            }
+	    pActivation = pActivation->successor ();
+	}
+    }
+
+    return workDone;
+}
+
+bool M_AND::EnqueueOmittingCycles () {
+    EnumerateModifiedSpaces (&M_ASD::EnqueueOmittingCycles);
+    return false;
+}
+
+bool VDatabaseFederatorForBatchvision::EnqueueOmittingCycles () const {
+    bool cyclesOmitted = false;
+    for ( VDatabaseActivation *pActivation = m_pActivationListHead; 
+          pActivation; 
+          pActivation = pActivation->successor()
+        ) 
+    {
+        if (static_cast<M_AND*>(pActivation)->EnqueueOmittingCycles ()) 
+	    cyclesOmitted = true;
+    }
+
+    return cyclesOmitted;
+}
+
+bool M_AND::DoGCCycleElimination () { 
+    EnqueuePossibleCycles();
+    TraverseAndDetectCycles();
+
+    return EnqueueOmittingCycles();
+}
+ 
+bool VDatabaseFederatorForBatchvision::DoGCCycleElimination() const { 
+    EnqueuePossibleCycles();
+    TraverseAndDetectCycles();
+
+    return EnqueueOmittingCycles();
+}
+
 bool M_AND::DoTransientGCSweep () {
     bool sweptAway = false;
-    EnumerateAccessedSpaces (&M_ASD::SweepUp, &sweptAway);
+    EnumerateModifiedSpaces (&M_ASD::SweepUp, &sweptAway);
     return sweptAway;
 }
 
@@ -4046,15 +4547,19 @@ bool VDatabaseFederatorForBatchvision::DoTransientGCSweep () const {
 }
 
 PrivateVarDef bool TracingSessionGC = false;
-bool VDatabaseFederatorForBatchvision::DisposeOfSessionGarbage () const {
+
+bool VDatabaseFederatorForBatchvision::DisposeOfSessionGarbage (bool bAggressive) const {
     bool result = false;
 
     // Don't run if the network garbage collector is running and only
     // bother if garbage could have potentially been created since
     // last disposal ....
-    if (g_bMayBeginGarbageCollection && M_DCTE::g_bPotentialSessionGarbage) {
+    if (!M_AND::GarbageCollectionRunning () && M_DCTE::g_bPotentialSessionGarbage) {
+	if (bAggressive)
+	    FlushCachedResources ();
+
 	UNWIND_Try {
-	    g_bMayBeginGarbageCollection = false;
+	    M_AND::OnGCStart ();
 
 	    GCInvocationCount++;
 	    GCRevisitCount = GCFirstVisitCount = 0;
@@ -4067,6 +4572,8 @@ bool VDatabaseFederatorForBatchvision::DisposeOfSessionGarbage () const {
 
 	    DoTransientGCSetup ();
 	    DoTransientGCMarking ();
+	    DoGCCycleElimination();
+	    DoTransientGCMarking (); // new second mark phase
 	    result = DoTransientGCSweep ();
 	    if (TracingSessionGC) {
 	      IO_printf ("Leaving GC: \t%14.0f\n", ENVIR_SessionMemoryUse ());
@@ -4074,14 +4581,14 @@ bool VDatabaseFederatorForBatchvision::DisposeOfSessionGarbage () const {
 	    }
 
 	} UNWIND_Finally {
-	    g_bMayBeginGarbageCollection = true;
+	    M_AND::OnGCFinish ();
 	} UNWIND_EndTryFinally;
     }
     return result;
 }
 
-PublicFnDef bool M_DisposeOfSessionGarbage () {
-    return ENVIR_Session ()->DisposeOfSessionGarbage ();
+PublicFnDef bool M_DisposeOfSessionGarbage (bool bAggressive) {
+    return ENVIR_Session ()->DisposeOfSessionGarbage (bAggressive);
 }
 
 
@@ -4134,10 +4641,10 @@ PublicFnDef void __cdecl M_LogError (char const* format, ...) {
 
 bool M_ASD::AddressSpaceQuery (VArgList const &rArgList) {
     VArgList iArgList (rArgList);
-    double *const allocTotal = iArgList.arg<double*> ();
-    double *const mappingTotal = iArgList.arg<double*> ();
+    unsigned __int64 *const allocTotal = iArgList.arg<unsigned __int64*>();
+    unsigned __int64 *const mappingTotal = iArgList.arg<unsigned __int64*>();
 
-    *allocTotal += m_iTransientAllocation;
+    *allocTotal += m_sTransientAllocation;
 
     if (m_pPASD) {
 	unsigned int segmentCount;
@@ -4148,7 +4655,7 @@ bool M_ASD::AddressSpaceQuery (VArgList const &rArgList) {
 }
 
 void M_AND::AccumulateAllocationStatistics (
-    double *pAllocationTotal, double *pMappingTotal
+    unsigned __int64 *pAllocationTotal, unsigned __int64 *pMappingTotal
 ) const {
     EnumerateAccessedSpaces (
 	&M_ASD::AddressSpaceQuery, pAllocationTotal, pMappingTotal
@@ -4170,7 +4677,10 @@ void M_AND::AccumulateAllocationStatistics (
 PublicFnDef void M_AccumulateAllocationStatistics (
     double *pAllocationTotal, double *pMappingTotal
 ) {
-    ENVIR_Session ()->AccumulateAllocationStatistics (pAllocationTotal, pMappingTotal);
+    unsigned __int64 sTotalAllocation = 0, sTotalMapping = 0;
+    ENVIR_Session ()->AccumulateAllocationStatistics (&sTotalAllocation, &sTotalMapping);
+    *pAllocationTotal = static_cast<double>(sTotalAllocation);
+    *pMappingTotal = static_cast<double>(sTotalMapping);
 }
 
 
@@ -4191,10 +4701,7 @@ PublicFnDef void M_AccumulateAllocationStatistics (
  *
  *****/
 void M_CPD::print () const {
-    IO_printf (
-	"#%s[%u:%u]",
-	RTYPE_TypeIdAsString (ContainerRType ()), SpaceIndex (), ContainerIndex ()
-    );
+    IO_printf ("#%s[%u:%u]", RTypeName (), spaceIndex (), containerIndex ());
 }
 
 
@@ -4212,16 +4719,12 @@ void M_CPD::print () const {
  *  Switch Access Methods  *
  ***************************/
 
-IOBJ_DefineNilaryMethod (CPDZeroingSwitchDM) {
-    return IOBJ_SwitchIObject (&CPDZeroingEnabled);
-}
-
 IOBJ_DefineNilaryMethod (FreePoolsDisabledDM) {
     return IOBJ_SwitchIObject (&V::VAllocatorFreeList::g_bFreePoolDisabled);
 }
 
 IOBJ_DefineNilaryMethod (PreservingCPCCsDM) {
-    return IOBJ_SwitchIObject (&VContainerHandle::g_fPreservingHandles);
+    return IOBJ_SwitchIObject (&VContainerHandle::g_bPreservingHandles);
 }
 
 IOBJ_DefineNilaryMethod (SegmentScanTraceDM) {
@@ -4361,7 +4864,7 @@ bool M_ASD::DisplaySpaceMappingInfo (VArgList const &rArgList) {
     }
 
     if (m_pPASD)
-	segmentBytes = m_pPASD->MappedSizeOfSpace (&segmentCount);
+	segmentBytes = static_cast<double>(m_pPASD->MappedSizeOfSpace (&segmentCount));
 
     IO_printf (
 	"%8u   %8u   %14.0f   %8u    %14.0f\n",
@@ -4417,14 +4920,14 @@ IOBJ_DefineUnaryMethod (DisplayMappingInfoDM) {
  *************************************/
 
 PrivateFnDef void DisplayRetentionInfoHeading () {
-    IO_printf ("                                      CPD    CPCC       CTE T-Ext\n");
-    IO_printf ("R-Type               POP              # Refs Refs ACnt Refs Refs Type\n");
-    IO_printf ("-------------------- ------------- ---- ---- ---- ---- ---- ---- ------------\n");
+    IO_printf ("                                       CPD   CPCC CTE\n");
+    IO_printf ("R-Type               POP              # Refs Refs Refs Precious?\n");
+    IO_printf ("-------------------- ------------- ---- ---- ---- ---- ---------\n");
 }
 
 bool M_ASD::DisplayRetentionInfoForSpace (VArgList const &rArgList) {
     VArgList iArgList (rArgList);
-    bool const bDoingAllContainers = iArgList.arg<unsigned int> () ? true : false;
+    bool const bDisplayingAllContainers = iArgList.arg<unsigned int> () ? true : false;
 
 /*****  ... access the container table bounds, ...  *****/
     unsigned int lowerCTIBound = 0;
@@ -4436,15 +4939,15 @@ bool M_ASD::DisplayRetentionInfoForSpace (VArgList const &rArgList) {
 	M_CTE cte (this, lowerCTIBound);
 
     /*****  ... 'continue' if this entry is inappropriate, ...  *****/
-	VContainerHandle* pCPCC;
+	VContainerHandle const *pCPCC;
 	switch (cte.addressType ()) {
 	case M_CTEAddressType_CPCC:
 	    pCPCC = cte.addressAsContainerHandle ();
-	    if (bDoingAllContainers || pCPCC->HasATransientExtension ()) {
-		M_CPD*		cpd;
-		unsigned int	cpdCount, cpdReferenceCount;
+	    if (bDisplayingAllContainers || pCPCC->isReferenced () || pCPCC->isPrecious ()) {
+		unsigned int cpdCount = 0;
+		unsigned int cpdReferenceCount = 0;
 		for (
-		    cpdCount = cpdReferenceCount = 0, cpd = pCPCC ->CPDChainHead ();
+		    M_CPD const *cpd = pCPCC ->cpdChainHead ();
 
 		    IsntNil (cpd);
 
@@ -4453,24 +4956,21 @@ bool M_ASD::DisplayRetentionInfoForSpace (VArgList const &rArgList) {
 		    cpd = M_CPD_NLink (cpd)
 		);
 		IO_printf (
-		    "#%-20s[%4u:%6u] %4u %4u %4u %4u",
+		    "#%-20s[%4u:%6u] %4u %4u %4u",
 		    pCPCC->RTypeName (),
 		    m_xSpace,
-		    pCPCC->ContainerIndex (),
+		    pCPCC->containerIndexNC (),
 		    cpdCount,
 		    cpdReferenceCount,
-		    pCPCC->referenceCount (),
-		    pCPCC->AccessCount	  ()
+		    pCPCC->referenceCount ()
 		);
 		if (cte.referenceCountIsFinite ())
 		    IO_printf (" %4u", cte.referenceCount ());
 		else
 		    IO_printf ("  Inf");
 
-		if (pCPCC->HasATransientExtension ()) {
-		    transientx_t *pTE = pCPCC->TransientExtension ();
-		    IO_printf (" %4u %s", pTE->referenceCount (), pTE->rttName ().content ());
-		}
+		if (pCPCC->isPrecious ())
+		    IO_printf (" Precious");
 		IO_printf ("\n");
 	    }
 	    break;
@@ -4522,8 +5022,8 @@ IOBJ_DefineUnaryMethod (DisplayCPDCountsByRType) {
 		RTYPE_TypeIdAsString ((RTYPE_Type)i),
 		cnt - M_RTD_CPDDeleteCount (rtd),
 		cnt,
-		rtd->CPDPointerCount (),
-		rtd->CPDReuseable () ? " R" : ""
+		rtd->cpdPointerCount (),
+		rtd->cpdReuseable () ? " R" : ""
 	    );
 	    if (lines % 4 == 0)
 		IO_printf ("\n");
@@ -4584,11 +5084,11 @@ IOBJ_DefineUnaryMethod (DisplayRTDTable) {
 
         IO_printf (
 	   "  %6d    %c      %c      %c      %c\n",
-	    rtd->CPDPointerCount(),
+	    rtd->cpdPointerCount(),
 	    M_RTD_ReclaimFn	(rtd)	? 'Y' : ' ',
 	    M_RTD_CPDInitFn	(rtd)	? 'Y' : ' ',
 	    M_RTD_MarkFn	(rtd)	? 'Y' : ' ',
-	    rtd->CPDReuseable	()	? 'Y' : ' '
+	    rtd->cpdReuseable	()	? 'Y' : ' '
 	);
 
         if ((lines % 4) == 0)
@@ -4604,12 +5104,11 @@ IOBJ_DefineUnaryMethod (DisplayRTDTable) {
 bool M_ASD::DisplaySpaceMallocInfo (VArgList const &rArgList) {
     VArgList iArgList (rArgList);
     double *const total = iArgList.arg<double*>();
+    double sAllocation = static_cast<double>(m_sTransientAllocation);
 
-    IO_printf (
-	"   Space %2u Containers =\t %14.0f\n", m_xSpace, m_iTransientAllocation
-    );
+    IO_printf ("   Space %2u Containers =\t %14.0f\n", m_xSpace, sAllocation);
 
-    *total += m_iTransientAllocation;
+    *total += sAllocation;
 
     return true;
 }
@@ -4691,7 +5190,7 @@ IOBJ_DefineNewaryMethod (CreateSpaceDM) {
 	"Space Creation Status: %s\n", M_UpdateStatusDescription (pSpaceRoot->CreateSpace (), NilOf (char *))
     );
 
-    return IOBJ_IntIObject (RTYPE_QRegisterCPD (parameterArray[0])->SpaceIndex ());
+    return IOBJ_IntIObject (RTYPE_QRegisterCPD (parameterArray[0])->spaceIndex ());
 }
 
 IOBJ_DefineUnaryMethod (UpdateNetworkDM) {
@@ -4738,7 +5237,6 @@ FAC_DefineFacility {
 	IOBJ_MDE ("displayConstants"	, DisplayConstantsDM)
 	IOBJ_MDE ("displayRTDTable"	, DisplayRTDTable)
 	IOBJ_MDE ("displayMallocInfo"	, DisplayMallocInfo)
-	IOBJ_MDE ("cpdZeroingSwitch"	, CPDZeroingSwitchDM)
 	IOBJ_MDE ("freePoolsDisabled"	, FreePoolsDisabledDM)
 	IOBJ_MDE ("preservingCPCCs"	, PreservingCPCCsDM)
 	IOBJ_MDE ("segmentScanTrace"	, SegmentScanTraceDM)

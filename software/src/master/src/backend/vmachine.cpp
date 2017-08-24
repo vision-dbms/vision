@@ -38,7 +38,28 @@
 #include "vprimfns.h"
 #include "vutil.h"
 
+#include "RTblock.h"
+#include "RTcharuv.h"
 #include "RTclosure.h"
+#include "RTcontext.h"
+#include "RTdictionary.h"
+#include "RTdoubleuv.h"
+#include "RTdsc.h"
+#include "RTfloatuv.h"
+#include "RTindex.h"
+#include "RTintuv.h"
+#include "RTlink.h"
+#include "RTlstore.h"
+#include "RTmethod.h"
+#include "RTptoken.h"
+#include "RTrefuv.h"
+#include "RTseluv.h"
+#include "RTu128uv.h"
+#include "RTu64uv.h"
+#include "RTu96uv.h"
+#include "RTundefuv.h"
+#include "RTvector.h"
+#include "RTvstore.h"
 
 #include "VBoundCall.h"
 #include "VEvaluationCall.h"
@@ -164,14 +185,39 @@ IOBJ_DefineUnaryMethod (DisplayConstantsDM) {
     UTIL_DisplaySizeofType (VReadEvalPrintController  );
     UTIL_DisplaySizeofType (VWhileTrueController      );
     IO_printf ("\n");
-    UTIL_DisplaySizeofType (VConstructor              );
-    UTIL_DisplaySizeofType (rtCONTEXT_Constructor     );
-    UTIL_DisplaySizeofType (rtCLOSURE_Constructor     );
-    IO_printf ("\n");
     UTIL_DisplaySizeofType (VDescriptor               );
     UTIL_DisplaySizeofType (VFragmentation            );
     UTIL_DisplaySizeofType (VFragment                 );
     UTIL_DisplaySizeofType (DSC_Descriptor            );
+    IO_printf ("\n");
+    UTIL_DisplaySizeofType (rtBLOCK_Handle            );
+    UTIL_DisplaySizeofType (rtCHARUV_Handle           );
+    UTIL_DisplaySizeofType (rtCLOSURE_Handle          );
+    UTIL_DisplaySizeofType (rtCONTEXT_Handle          );
+    UTIL_DisplaySizeofType (rtDICTIONARY_Handle       );
+    UTIL_DisplaySizeofType (rtDOUBLEUV_Handle         );
+    UTIL_DisplaySizeofType (rtDSC_Handle              );
+    UTIL_DisplaySizeofType (rtFLOATUV_Handle          );
+    UTIL_DisplaySizeofType (rtINDEX_Handle            );
+    UTIL_DisplaySizeofType (rtINTUV_Handle            );
+    UTIL_DisplaySizeofType (rtLINK_Handle             );
+    UTIL_DisplaySizeofType (rtLSTORE_Handle           );
+    UTIL_DisplaySizeofType (rtMETHOD_Handle           );
+    UTIL_DisplaySizeofType (rtPTOKEN_Handle           );
+    UTIL_DisplaySizeofType (rtREFUV_Handle            );
+    UTIL_DisplaySizeofType (rtSELUV_Handle            );
+    UTIL_DisplaySizeofType (rtU128UV_Handle           );
+    UTIL_DisplaySizeofType (rtU64UV_Handle            );
+    UTIL_DisplaySizeofType (rtU96UV_Handle            );
+    UTIL_DisplaySizeofType (rtUNDEFUV_Handle          );
+    UTIL_DisplaySizeofType (rtVECTOR_Handle           );
+    UTIL_DisplaySizeofType (rtVSTORE_Handle           );
+    IO_printf ("\n");
+    UTIL_DisplaySizeofType (rtINDEX_Key               );
+    UTIL_DisplaySizeofType (rtLINK_CType              );
+    UTIL_DisplaySizeofType (rtPTOKEN_CType            );
+    UTIL_DisplaySizeofType (rtVECTOR_CType            );
+    IO_printf ("\n");
 
     return self;
 }

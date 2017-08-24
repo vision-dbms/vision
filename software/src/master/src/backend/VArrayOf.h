@@ -26,7 +26,7 @@
 class VArray : public VTransient {
 //  Construction
 protected:
-    VArray (M_CPD* pDPT) : m_iElementCount (rtPTOKEN_CPD_BaseElementCount (pDPT)) {
+    VArray (rtPTOKEN_Handle *pDPT) : m_iElementCount (pDPT->cardinality ()) {
     }
     VArray (unsigned int iElementCount = 0) : m_iElementCount (iElementCount) {
     }
@@ -42,8 +42,8 @@ public:
 
 //  P-Token Manufacture
 public:
-    M_CPD* newBasePToken () const {
-	return rtPTOKEN_New (M_AttachedNetwork->ScratchPad (), m_iElementCount);
+    rtPTOKEN_Handle *newBasePToken () const {
+	return new rtPTOKEN_Handle (M_AttachedNetwork->ScratchPad (), m_iElementCount);
     }
 
 //  State
@@ -80,7 +80,7 @@ protected:
 
 //  Construction
 public:
-    VArrayOf (M_CPD* pDPT) : VArray (pDPT), m_pElementArray (newElementArray ()) {
+    VArrayOf (rtPTOKEN_Handle *pDPT) : VArray (pDPT), m_pElementArray (newElementArray ()) {
     }
     VArrayOf (
 	unsigned int iElementCount = 0
@@ -108,7 +108,7 @@ public:
 
 //  Element Insertion and Deletion
 public:
-    M_CPD* editUsingDPTChain (M_CPD* pDPT);
+    rtPTOKEN_Handle *editUsingDPTChain (rtPTOKEN_Handle *pDPT);
 
     void insert (unsigned int xInsertionOrigin, unsigned int iElementCount);
 

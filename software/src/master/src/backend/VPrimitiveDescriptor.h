@@ -15,7 +15,6 @@
 
 class M_CPD;
 
-class rtCONTEXT_Constructor;
 class rtLINK_CType;
 
 class VCall;

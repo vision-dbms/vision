@@ -49,12 +49,9 @@ VfLocateGenerator::VfLocateGenerator (VAssociativeResult& rResult)
  *****************/
 
 void VfLocateGenerator::initialize (
-    M_CPD* pTargetPTokenRef, int xTargetPTokenRef, M_CPD* pSourcePToken
-)
-{
-    VAssociativeOperator::initialize (
-	pTargetPTokenRef, xTargetPTokenRef, pSourcePToken
-    );
+    rtPTOKEN_Handle *pTargetPToken, rtPTOKEN_Handle *pSourcePToken
+) {
+    VAssociativeOperator::initialize (pTargetPToken, pSourcePToken);
 
     m_sGuardDomain = 0;
 
@@ -67,8 +64,7 @@ void VfLocateGenerator::createGuard () {
 }
 
 void VfLocateGenerator::commit () {
-    if (sourceCardinality () > m_sGuardDomain)
-    {
+    if (sourceCardinality () > m_sGuardDomain) {
 	createGuardIfNecessary ();
 	commitTargetReference (m_sGuardDomain);
     }

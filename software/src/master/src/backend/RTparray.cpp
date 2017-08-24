@@ -59,7 +59,7 @@ DEFINE_CONCRETE_RTT (rtPARRAY_Handle);
 PublicFnDef M_CPD *rtPARRAY_New (M_ASD *pContainerSpace, unsigned int elementCount) {
     M_CPD *cpd = pContainerSpace->CreateContainer (
 	RTYPE_C_PArray, elementCount * sizeof (M_POP)
-    );
+    )->NewCPD ();
 
     rtPARRAY_CPD_Element (cpd) = rtPARRAY_CPD_ElementArray (cpd);
 
@@ -139,7 +139,7 @@ PrivateFnDef void ReclaimContainer (
  *****  Internal routine to 'save' a P-Array
  *****/
 bool rtPARRAY_Handle::PersistReferences () {
-    return Persist ((M_POP*)ContainerContent (), ContainerSize () / sizeof (M_POP));
+    return Persist ((M_POP*)containerContent (), containerSize () / sizeof (M_POP));
 }
 
 
@@ -160,9 +160,9 @@ bool rtPARRAY_Handle::PersistReferences () {
  *	NOTHING - Executed for side effect only.
  *
  *****/
-PrivateFnDef void MarkContainers (M_ASD *pSpace, M_CPreamble const *pContainer) {
-    pSpace->Mark (
-	(M_POP const*)(pContainer + 1), (M_CPreamble_Size (pContainer) / sizeof (M_POP))
+PrivateFnDef void MarkContainers (M_ASD::GCVisitBase* pGCV, M_ASD* pSpace, M_CPreamble const *pContainer) {
+    pGCV->Mark (
+	pSpace, (M_POP const*)(pContainer + 1), (M_CPreamble_Size (pContainer) / sizeof (M_POP))
     );
 }
 

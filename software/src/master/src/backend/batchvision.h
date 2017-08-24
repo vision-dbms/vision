@@ -24,6 +24,12 @@ namespace Vca {
     class IStdPipeSource;
 }
 
+#ifdef _WIN32
+#define Vca_Decl Vca_API
+#else
+#define Vca_Decl extern
+#endif
+
 /*************************
  *****  Definitions  *****
  *************************/
@@ -41,7 +47,8 @@ public:
     typedef IVReceiver<IDirectoryEntry*>	IDirectoryEntrySink;
     typedef Vca::IStdPipeSource			IStdPipeSource;
 
-    typedef Vsa::IEvaluator			IEvaluator;
+    typedef Vsa::IEvaluator_Ex1			IEvaluator_Ex1;
+    typedef Vsa::IEvaluator             IEvaluator;
     typedef Vsa::IEvaluatorClient		IEvaluatorClient;
 
 //  Instance
@@ -88,9 +95,9 @@ public:
 
 //  IEvaluator
 private:
-    Vca::VRole<ThisClass,IEvaluator> m_pIEvaluator;
+    Vca::VRole<ThisClass,IEvaluator_Ex1> m_pIEvaluator;
 public:
-    void getRole (IEvaluator::Reference &rpRole) {
+    void getRole (IEvaluator_Ex1::Reference &rpRole) {
 	m_pIEvaluator.getRole (rpRole);
     }
 
@@ -102,6 +109,15 @@ public:
     void EvaluateURL (
 	IEvaluator *pRole, IEvaluatorClient *pClient, VString const &rPath, VString const &rQuery, VString const &rEnvironment
     );
+
+// IEvaluator_Ex1 Callbacks
+    void EvaluateExpression_Ex (
+	IEvaluator *pRole, IEvaluatorClient *pClient, VString const &rPath, VString const &rExpression, VString const &rID, VString const& rCID
+    );
+    void EvaluateURL_Ex (
+	IEvaluator *pRole, IEvaluatorClient *pClient, VString const &rPath, VString const &rQuery, VString const &rEnvironment, VString const &rID, VString const& rCID
+    );
+
 
 //  Evaluator Materialization
 private:
@@ -159,7 +175,7 @@ public:
 //  State
 private:
     VEvaluatorPump::Reference m_pEvaluator;
-    IEvaluator::Reference m_pEvaluatorImplementation;
+    IEvaluator_Ex1::Reference m_pEvaluatorImplementation;
 };
 
 extern VTransientServicesForBatchvision ThisProcess;

@@ -10,7 +10,7 @@
 #if defined(_WIN32)
 #define V_SEMAPHORE_IMPLEMENTED_USING_WIN32_SEMAPHORES
 
-#elif defined(sun) || defined(__linux__) || defined(__APPLE__)
+#elif defined(sun) || defined(__linux__)
 #include <semaphore.h>
 #define V_SEMAPHORE_IMPLEMENTED_USING_POSIX_SEMAPHORES
 
@@ -29,6 +29,8 @@
  *************************/
 
 namespace V {
+    class VTime;
+
     class V_API VSemaphore : public VSynchronizationObject {
 	DECLARE_FAMILY_MEMBERS (VSemaphore, VSynchronizationObject);
 
@@ -49,6 +51,7 @@ namespace V {
 	void produce ();
 	void consume ();
 	bool consumeTry ();
+	WaitStatus consumeTry (VTime const &rLimit);
 
     //  State
     private:

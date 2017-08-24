@@ -13,6 +13,7 @@
  ***********************/
 
 #include "VContainerHandle.h"
+#include "Vdd_Store.h"
 
 /***********************
  *****  Container  *****
@@ -69,10 +70,6 @@
     cpd, rtBLOCK_CPx_PLVElement\
 )
 
-#define rtBLOCK_CPD_DictionaryCPD(cpd) (\
-    (cpd)->GetCPD (rtBLOCK_CPx_LocalEnv, RTYPE_C_Dictionary)\
-)
-
 /*****	Selector type access macros	*****/
 #define rtBLOCK_CPD_SelectorName(cpd) M_CPD_PointerToCharacter (\
     cpd, rtBLOCK_CPx_SelectorName\
@@ -85,9 +82,6 @@
 
 #define rtBLOCK_CPD_SelectorIsKnown(cpd)\
     (rtBLOCK_CPD_SelectorType (cpd) == rtBLOCK_C_KnownSelector)
-
-#define rtBLOCK_CPD_SelectorIsDefined(cpd)\
-    (rtBLOCK_CPD_SelectorType (cpd) == rtBLOCK_C_DefinedSelector)
 
 #define rtBLOCK_CPD_NoSelector(cpd)\
     (rtBLOCK_CPD_SelectorType (cpd) == rtBLOCK_C_NoSelector)
@@ -114,8 +108,6 @@ PublicFnDecl void rtBLOCK_AppendPLVector (
 PublicFnDecl void rtBLOCK_AppendELEVector (
     M_CPD *cpd, int* evaledLEVector, int size
 );
-
-PublicFnDecl bool rtBLOCK_Align (M_CPD *cpd);
 
 
 /******************************
@@ -124,20 +116,63 @@ PublicFnDecl bool rtBLOCK_Align (M_CPD *cpd);
  ******************************
  ******************************/
 
-class rtBLOCK_Handle : public VContainerHandle {
-    DECLARE_CONCRETE_RTT (rtBLOCK_Handle, VContainerHandle);
+class rtBLOCK_Handle : public VStoreContainerHandle {
+    DECLARE_CONCRETE_RTT (rtBLOCK_Handle, VStoreContainerHandle);
 
-//  Helper Types
+//  Aliases
 public:
     typedef unsigned int offset_t;
 
+//  Strings
+public:
+    class Strings {
+    //  Construction
+    public:
+	Strings ();
+
+    //  Destruction
+    public:
+	~Strings ();
+
+    //  Access
+    public:
+	char const *operator[] (unsigned int xString) const {
+	    return string (xString);
+	}
+	char const *string (unsigned int xString) const {
+	    return m_pCharacters + xString;
+	}
+
+    //  Query
+    public:
+	bool isSet () const {
+	    return m_pStoreHandle.isntNil ();
+	}
+	bool isntSet () const {
+	    return m_pStoreHandle.isNil ();
+	}
+
+    //  Update
+    public:
+	bool setTo (Vdd::Store *pStore) {
+	    return setTo (dynamic_cast<rtBLOCK_Handle*>(pStore));
+	}
+	bool setTo (rtBLOCK_Handle *pStore);
+
+    //  State
+    private:
+	Reference	m_pStoreHandle;
+	char const*	m_pCharacters;
+    };
+    friend class Strings;
+
 //  Construction
-protected:
-    rtBLOCK_Handle (M_CTE &rCTE) : BaseClass (rCTE), m_pBlockHeader (typecastContent ()) {
-    }
 public:
     static VContainerHandle *Maker (M_CTE &rCTE) {
 	return new rtBLOCK_Handle (rCTE);
+    }
+private:
+    rtBLOCK_Handle (M_CTE &rCTE) : BaseClass (rCTE), m_pBlockHeader (typecastContent ()) {
     }
 
 //  Destruction
@@ -145,10 +180,29 @@ private:
     ~rtBLOCK_Handle () {
     }
 
+//  Lifetime Management
+public:
+    void protectFromGC (bool bProtect) {
+	setPreciousTo (bProtect);
+    }
+
+//  Alignment
+private:
+    virtual /*override*/ bool align_() {
+	return align ();
+    }
+public:
+    bool align ();
+    using BaseClass::alignAll;
+
+//  Canonicalization
+private:
+    virtual /*override*/ bool getCanonicalization_(VReference<rtVSTORE_Handle> &rpStore, DSC_Pointer const &rPointer);
+
 //  Access
 private:
     rtBLOCK_BlockType *typecastContent () const {
-	return reinterpret_cast<rtBLOCK_BlockType*> (ContainerContent ());
+	return reinterpret_cast<rtBLOCK_BlockType*> (containerContent ());
     }
 
     pointer_t addressOf (offset_t xOffset) const {
@@ -159,6 +213,13 @@ private:
     }
     rtBLOCK_PLVectorType const *addressOfPLVector() const {
 	return reinterpret_cast<rtBLOCK_PLVectorType*>(addressOf (offsetOfPLVector ()));
+    }
+    char const *addressOfStringSpace () const {
+	return const_cast<char const*>(addressOf (offsetOfStringSpace ()));
+    }
+
+    M_POP *dictionaryPOP () const {
+	return &rtBLOCK_localEnvironmentPOP (m_pBlockHeader);
     }
 
     offset_t offsetOfBCVector () const {
@@ -179,29 +240,59 @@ public:
 	return addressOfPLVector ()->physicalLiterals + xOffset;
     }
     char const *addressOfString (offset_t xOffset) const {
-	return reinterpret_cast<char const*>(addressOf (offsetOfStringSpace ())) + xOffset;
+	return addressOfStringSpace () + xOffset;
     }
 
-    M_CPD *getDictionaryCPD () {
-	return GetCPD (&rtBLOCK_localEnvironmentPOP (m_pBlockHeader), RTYPE_C_Dictionary);
+    rtDICTIONARY_Handle *getDictionary () const {
+	return static_cast<rtDICTIONARY_Handle*>(GetContainerHandle (dictionaryPOP (), RTYPE_C_Dictionary));
     }
-    rtDICTIONARY_Handle *getDictionaryHandle () const {
-	return static_cast<rtDICTIONARY_Handle*>(
-	    GetContainerHandle (&rtBLOCK_localEnvironmentPOP (m_pBlockHeader), RTYPE_C_Dictionary)
-	);
+
+    unsigned int nestedBlockCount () const {
+	return rtBLOCK_PLVector_Count (addressOfPLVector ());
     }
-	
-    M_CPD *getNestedBlockCPD (offset_t xOffset) {
+    M_CPD *nestedBlockCPD (offset_t xOffset) {
 	return GetCPD (addressOfPOP (xOffset), RTYPE_C_Block);
     }
-    rtBLOCK_Handle *getNestedBlockHandle (offset_t xOffset) const {
+    rtBLOCK_Handle *nestedBlockHandle (offset_t xOffset) const {
 	return static_cast<rtBLOCK_Handle*>(GetContainerHandle (addressOfPOP (xOffset), RTYPE_C_Block));
     }
 
-//  Maintenance
+    unsigned int selectorIndex () const {
+	return rtBLOCK_SelectorIndex (typecastContent ());
+    }
+    char const *selectorName () const {
+	return selectorIsUserDefined () ? addressOfString (selectorIndex ()) : 0;
+    }
+    unsigned int selectorType () const {
+	return rtBLOCK_SelectorType (typecastContent ());
+    }
+
+    bool selectorIsKnown () const {
+	return selectorType () == rtBLOCK_C_KnownSelector;
+    }
+    bool selectorIsUserDefined () const {
+	return selectorType () == rtBLOCK_C_DefinedSelector;
+    }
+    bool selectorUndefined () const {
+	return selectorType () == rtBLOCK_C_NoSelector;
+    }
+
+//  Attributes
+private:
+    virtual /*override*/ rtDICTIONARY_Handle *getDictionary_(DSC_Pointer const &rPointer) const;
+    virtual /*override*/ rtPTOKEN_Handle *getPToken_() const;
+
+//  Container Maintenance
 protected:
     virtual /*override*/ void AdjustContainerPointers (M_CPreamble *pNewAddress, bool bWritable);
     virtual /*override*/ bool PersistReferences ();
+
+//  Display and Inspection
+public:
+    virtual /*override*/ unsigned int getPOPCount () const {
+	return 1/*dictionary*/ + nestedBlockCount ();
+    }
+    virtual /*override*/ bool getPOP (M_POP *pResult, unsigned int xPOP) const;
 
 //  State
 protected:

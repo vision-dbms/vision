@@ -225,7 +225,7 @@ namespace Vca {
     private:
 	void createExportOf (IVUnknown *pObject, bool bWeak);
 	void createExportOf (VcaOID *pOID, bool bWeak);
-	void deleteExportOf (VcaOID *pOID, U32 cExports, U32 cWeakExports, U32 cMessages);
+	void deleteExportOf (VMessageHolder<IPeer_Ex2> const& rMessage, VcaOID *pOID, U32 cExports, U32 cWeakExports, U32 cMessages);
 	bool weakenExportOf (VcaOID *pOID);
 	bool weakenRemoteImportOf (VcaOID *pOIDR);
     protected:

@@ -1332,16 +1332,12 @@ PrivateFnDef void ComplainAboutExecutionCase (
 }
 
 
-PrivateFnDef int CompareValuesOperandBehaviorsAreConformant (
-    DSC_Descriptor& rCurrent, DSC_Descriptor& rArgument
-) {
-    M_CPD* pReceiverBehaviorCPD = rCurrent.storeCPD ();
-    M_CPD* pArgumentBehaviorCPD = rArgument.storeCPD ();
+PrivateFnDef bool CompareValuesOperandsAreConformant (DSC_Descriptor &rCurrent, DSC_Descriptor &rArgument) {
+    Vdd::Store *pReceiverStore = rCurrent.store ();
+    Vdd::Store *pArgumentStore = rArgument.store ();
 
-    return rtVSTORE_AreBehavioriallyEquivalent (
-	pReceiverBehaviorCPD, pArgumentBehaviorCPD
-    ) || pReceiverBehaviorCPD->NamesABuiltInNumericClass (
-    ) && pArgumentBehaviorCPD->NamesABuiltInNumericClass (
+    return pReceiverStore->isACloneOf (pArgumentStore) || (
+	pReceiverStore->NamesABuiltInNumericClass () && pArgumentStore->NamesABuiltInNumericClass ()
     );
 }
 
@@ -2256,8 +2252,8 @@ V_DefinePrimitive (CompareNumbers) {
 /*****  Determine the execution case, ...  *****/
     ComparisonExecutionCase xExecutionCase;
 
-    M_CPD* pOperandStoreCPD = pTask->ducStore ();
-    if (pOperandStoreCPD->NamesTheDoubleClass ()) {
+    Vdd::Store *pOperandStore = pTask->ducStore ();
+    if (pOperandStore->NamesTheDoubleClass ()) {
 	switch (V_TOTSC_Primitive) {
 	case XIntegerLessThan:
 	case XIntegerLessThanOrEqual:
@@ -2293,7 +2289,7 @@ V_DefinePrimitive (CompareNumbers) {
     }
 
 
-    else if (pOperandStoreCPD->NamesTheIntegerClass ()) {
+    else if (pOperandStore->NamesTheIntegerClass ()) {
 	switch (V_TOTSC_Primitive) {
 	case XIntegerLessThan:
 	case XIntegerLessThanOrEqual:
@@ -2329,7 +2325,7 @@ V_DefinePrimitive (CompareNumbers) {
     }
 
 
-    else if (pOperandStoreCPD->NamesTheFloatClass ()) {
+    else if (pOperandStore->NamesTheFloatClass ()) {
 	switch (V_TOTSC_Primitive) {
 	case XIntegerLessThan:
 	case XIntegerLessThanOrEqual:
@@ -2394,7 +2390,7 @@ V_DefinePrimitive (CompareValues) {
 
 /*****  Determine the execution case, ...  *****/
     ComparisonExecutionCase xExecutionCase = NotHandled;
-    if (CompareValuesOperandBehaviorsAreConformant (rCurrent, ADescriptor)) {
+    if (CompareValuesOperandsAreConformant (rCurrent, ADescriptor)) {
 	RTYPE_Type xReceiverValueType = rCurrent.pointerRType ();
 
 	RTYPE_Type xArgumentValueType = ADescriptor.pointerRType ();

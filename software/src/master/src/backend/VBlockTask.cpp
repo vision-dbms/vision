@@ -209,24 +209,25 @@ VBlockTask::VBlockTask (
 /*++++  ... create the new store, ...  ++++*/
     DSC_Descriptor& rCurrent = getCurrent ();
 
-    M_CPD *pDictionary = pBlock->getDictionaryCPD ();
-    M_CPD *pCurrentPPT = rtPTOKEN_New (pBlock->ScratchPad (), cardinality ());
+    rtDICTIONARY_Handle::Reference pDictionary (pBlock->getDictionary ());
+
+    rtPTOKEN_Handle::Reference pCurrentPPT (
+	new rtPTOKEN_Handle (pBlock->ScratchPad (), cardinality ())
+    );
     M_CPD *pSuperPointer = rCurrent.pointerCPD (pCurrentPPT);
 
-    M_CPD *pCurrentStore = rtVSTORE_NewCluster (
-	pCurrentPPT, pDictionary, rCurrent.storeCPD (), pSuperPointer
+    Vdd::Store::Reference pCurrentStore (
+	rtVSTORE_NewCluster (pCurrentPPT, pDictionary, rCurrent.store (), pSuperPointer)
     );
 
 /*++++
  *  ... replace ^current with a descriptor for the store just created, ...
  *+++*/
     rCurrent.clear ();
-    rCurrent.constructCorrespondence (ptoken (), pCurrentStore, rtVSTORE_CPx_RowPToken);
+    rCurrent.constructCorrespondence (ptoken (), pCurrentStore);
 
 /*++++  ... and clean up.  ++++*/
     pSuperPointer->release ();
-    pDictionary->release ();
-    pCurrentPPT->release ();
 }
 
 
@@ -443,9 +444,8 @@ void VBlockTask::run () {
      **********************/
 
 	    case VByteCodeDescriptor::DispatchCase_StoreContext:
-		m_pBlockContext->retain ();
 		loadDucWithIdentity (
-		    new rtCLOSURE_Constructor (
+		    new rtCLOSURE_Handle (
 			m_pBlockContext, m_iByteCodeScanner.fetchedBlockHandle ()
 		    )
 		);
@@ -464,7 +464,7 @@ void VBlockTask::run () {
 
 	    case VByteCodeDescriptor::DispatchCase_StoreSelector:
 		loadDucWithSelector (
-		    blockCPD (), m_iByteCodeScanner.fetchedSelectorIndex ()
+		    blockHandle (), m_iByteCodeScanner.fetchedSelectorIndex ()
 		);
 		setStepPoint ();
 		break;
@@ -478,7 +478,7 @@ void VBlockTask::run () {
 
 	    case VByteCodeDescriptor::DispatchCase_StoreString:
 		loadDucWithInteger (
-		    blockCPD (), blockCPD ()->TheStringClass ().PTokenCPD (),
+		    blockHandle (), blockHandle ()->TheStringClass ().PTokenHandle (),
 		    m_iByteCodeScanner.fetchedLiteral ()
 		);
 		setStepPoint ();
@@ -535,10 +535,11 @@ void VBlockTask::run () {
  *---------------------------------------------------------------------------*/
 void VBlockTask::acquireParameter (VSelector const& rSelector) {
 //  Obtain ^current's store, ...
-    M_CPD *pCurrentStore = current ().storeCPD ();
+    rtVSTORE_Handle *pCurrentStore = static_cast<rtVSTORE_Handle*>(current ().store ());
 
 //  Find the parameter, ...
-    if (rtDICTIONARY_LookupResult_FoundProperty != rSelector.lookup (pCurrentStore))
+    unsigned int xPropertySlot;
+    if (Vdd::Store::DictionaryLookup_FoundProperty != pCurrentStore->lookup (rSelector, xPropertySlot))
 	raiseInstructionException ("Parameter Not Found");
 
 /*****  ... obtain the parameter value, ...  *****/
@@ -547,16 +548,22 @@ void VBlockTask::acquireParameter (VSelector const& rSelector) {
 /*****  ... as a normalized vector, ...  *****/
     normalizeDuc ();
 
-    M_CPD *pVector = convertDucToVector ();
+    VDescriptor::Type xInitialDucType = duc().type ();
+    rtVECTOR_Handle::Reference pVector (convertDucToVector ());
 
 /*****  ... update the vector's ptoken, ...  *****/
-    pVector->StoreReference (rtVECTOR_CPx_PToken, pCurrentStore, rtVSTORE_CPx_RowPToken);
+    pVector->setPTokenTo (pCurrentStore);
 
 /*****  ... install the vector in the block's store, ...  *****/
-    pCurrentStore->StoreReference (rtVSTORE_CPx_Column, pVector);
+    pCurrentStore->StoreReference (rtVSTORE_CPx_Column + xPropertySlot, static_cast<VContainerHandle*>(pVector));
 
 /*****  ... clean up, ...  *****/
     duc().clear ();
+}
+
+void rtVECTOR_Handle::setPTokenTo (rtVSTORE_Handle *pStore) {
+    EnableModifications ();
+    StoreReference (ptokenPOP (), pStore, pStore->ptokenPOP ());
 }
 
 

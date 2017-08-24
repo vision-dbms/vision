@@ -98,9 +98,11 @@ namespace Vca {
             cancel ();
 
             m_pInterface.setTo (pInterface);
-            ITrigger::Reference pTrigger;
-            getRole (pTrigger);
-            pInterface->requestNoRouteToPeerCallback (m_pTicket, pTrigger);
+	    if (pInterface) {
+		ITrigger::Reference pTrigger;
+		getRole (pTrigger);
+		pInterface->requestNoRouteToPeerCallback (m_pTicket, pTrigger);
+	    }
         }
 
         /**

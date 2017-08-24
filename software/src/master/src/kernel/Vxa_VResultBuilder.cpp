@@ -28,21 +28,6 @@
 #include "Vxa_VImportable.h"
 
 
-/********************************************
- ********************************************
- *****                                  *****
- *****  Vxa::VResultBuilder::TailHints  *****
- *****                                  *****
- ********************************************
- ********************************************/
-
-Vxa::VResultBuilder::TailHints::TailHints (VResultBuilder const *pResultBuilder) : BaseClass (pResultBuilder->cursor ()) {
-    pResultBuilder->attach (this);
-}
-
-Vxa::VResultBuilder::TailHints::~TailHints () {
-}
-
 
 /************************
  ************************
@@ -67,6 +52,12 @@ namespace {
 	~Importable () {
 	}
 
+    public:
+	static ThisClass *ThisRBImportable () {
+	    static ThisClass *pRBI = new ThisClass ();
+	    return pRBI;
+	}
+
     //  Retrieval
     private:
 	template <class ImporterType> bool retrieveImpl (
@@ -83,5 +74,12 @@ namespace {
 	virtual bool retrieve (scalar_return_t &rResult, VTask *pTask, VCallType2Importer &rImporter) {
 	    return retrieveImpl (rResult, pTask, rImporter);
 	}
-    } g_iResultBuilderImportable;
+    };
 }
+
+namespace Vxa {
+    void InitializeRBImportables () {
+	Importable::ThisRBImportable ();	    
+    }
+}
+

@@ -72,20 +72,17 @@ VReference<VTaskDomain> VTaskDomain::g_pGroundDomain;
  **************************
  **************************/
 
-VTaskDomain::VTaskDomain (VTaskDomain* pParent, rtLINK_CType* pSubset, M_CPD* pReordering)
+VTaskDomain::VTaskDomain (VTaskDomain *pParent, rtLINK_CType *pSubset, M_CPD *pReordering)
 : m_pParent	(pParent)
 , m_pSubset	(pSubset)
 , m_pReordering	(pReordering)
 , m_pDPT	(pReordering
-		 ? pReordering->GetCPD (UV_CPx_PToken, RTYPE_C_PToken)
+		 ? static_cast<rtPTOKEN_Handle*>(pReordering->GetContainerHandle (UV_CPx_PToken, RTYPE_C_PToken))
 		 : pSubset->PPT ())
 {
-//  Release extra reference, ...
-    if (pReordering)
-	m_pDPT->release ();
 }
 
-VTaskDomain::VTaskDomain () : m_pDPT (M_AttachedNetwork->TheScalarPToken ()) {
+VTaskDomain::VTaskDomain () : m_pDPT (M_AttachedNetwork->TheScalarPTokenHandle ()) {
 }
 
 VTaskDomain* VTaskDomain::groundDomain  () {

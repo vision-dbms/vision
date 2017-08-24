@@ -378,7 +378,7 @@ void Vca::VcaSelf::createExportOf (VcaOID *pObject, bool bWeak) {
 }
 
 void Vca::VcaSelf::deleteExportOf (
-    VcaOID *pOID, U32 cExports, U32 cWeakExports, U32 cMessages
+    VMessageHolder<IPeer_Ex2> const& rMessage, VcaOID *pOID, U32 cExports, U32 cWeakExports, U32 cMessages
 ) {
 }
 

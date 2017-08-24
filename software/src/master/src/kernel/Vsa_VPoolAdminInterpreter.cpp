@@ -67,7 +67,9 @@ char const *Vsa::VPoolAdminInterpreter::g_pCommandUsage[] = {
     "setLogFileSize     <size>  - Sets the log file size (Megabytes)",
     "setLogFileBackups  <count> - Sets the log file backup count",
     "setEvaluationTimeout <timeout_secs> - Sets the Pool's Evaluation Timeout value (secs)",
-    "setEvaluationAttempts <count> - Sets the maximum evaluation attempt count",
+	"setEvaluationAttempts <count> - Sets the maximum evaluation attempt count",
+    "setEvaluationOnErrorAttempts <count> - Sets the maximum evaluation attempt count when error occurs",
+    "setEvaluationTimeOutAttempts <count> - Sets the maximum evaluation attempt count when time out occurs",
     "setShrinkTimeOut   <timeout> - Sets shrink timeout for new workers (Minutes)",
     "setStopTimeOut     <timeout> - Sets stop timeout for the pool application(Mins)",
     "setWorkerStartupFromFile <vision file> - Sets worker startup query file",
@@ -156,7 +158,9 @@ bool Vsa::VPoolAdminInterpreter::processCommand (char *pFullCommand) {
            "setLogFileSize",
            "setLogFileBackups",
            "setEvaluationTimeout",
-           "setEvaluationAttempts",
+		   "setEvaluationAttempts",
+           "setEvaluationOnErrorAttempts",
+		   "setEvaluationTimeOutAttempts",
            "setShrinkTimeOut",
            "setStopTimeOut",
            "setWorkerStartupFromFile",
@@ -212,7 +216,9 @@ bool Vsa::VPoolAdminInterpreter::processCommand (char *pFullCommand) {
             CSetLogFileSize,
             CSetLogFileBackups,
             CSetEvaluationTimeout,
-            CSetEvaluationAttempts,
+			CSetEvaluationAttempts,
+            CSetEvaluationOnErrorAttempts,
+			CSetEvaluationTimeOutAttempts,
             CSetShrinkTimeOut,
             CSetStopTimeOut,
             CSetWorkerStartupFromFile,
@@ -515,14 +521,32 @@ bool Vsa::VPoolAdminInterpreter::processCommand (char *pFullCommand) {
             else
                 displayCommand (CSetEvaluationTimeout);
             break;
-
-        case CSetEvaluationAttempts:
+		
+		case CSetEvaluationAttempts:
             if (iArgCount == 2)
                 m_pAdmin->SetEvaluationAttempts (atoi (pArgs[0]), pArgs[1]);
             else if (iArgCount == 1)
                 m_pAdmin->SetEvaluationAttempts (atoi (pArgs[0]));
             else
                 displayCommand (CSetEvaluationAttempts);
+            break;
+			
+        case CSetEvaluationOnErrorAttempts:
+            if (iArgCount == 2)
+                m_pAdmin->SetEvaluationOnErrorAttempts (atoi (pArgs[0]), pArgs[1]);
+            else if (iArgCount == 1)
+                m_pAdmin->SetEvaluationOnErrorAttempts (atoi (pArgs[0]));
+            else
+                displayCommand (CSetEvaluationOnErrorAttempts);
+            break;
+
+        case CSetEvaluationTimeOutAttempts:
+            if (iArgCount == 2)
+                m_pAdmin->SetEvaluationTimeOutAttempts (atoi (pArgs[0]), pArgs[1]);
+            else if (iArgCount == 1)
+                m_pAdmin->SetEvaluationTimeOutAttempts (atoi (pArgs[0]));
+            else
+                displayCommand (CSetEvaluationTimeOutAttempts);
             break;
 
         case CDisplaySessions:

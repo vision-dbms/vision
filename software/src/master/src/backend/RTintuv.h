@@ -45,6 +45,49 @@
 )
 
 
+/******************************
+ ******************************
+ *****  Container Handle  *****
+ ******************************
+ ******************************/
+
+class rtINTUV_Handle : public rtUVECTOR_Handle {
+//  Run Time Type
+    DECLARE_CONCRETE_RTT (rtINTUV_Handle, rtUVECTOR_Handle);
+
+//  Aliases
+public:
+    typedef rtINTUV_ElementType element_t;
+
+//  Construction
+public:
+    static VContainerHandle *Maker (M_CTE &rCTE) {
+	return new rtINTUV_Handle (rCTE);
+    }
+protected:
+    rtINTUV_Handle (M_CTE &rCTE) : rtUVECTOR_Handle (rCTE) {
+    }
+
+//  Destruction
+private:
+    ~rtINTUV_Handle () {
+    }
+
+//  Access
+public:
+    element_t *array () const {
+	return UV_UV_ArrayAsType (typecastContent (), element_t);
+    }
+    element_t element (unsigned int xElement) const {
+	return array ()[xElement];
+    }
+
+//  Alignment
+public:
+    using BaseClass::align;
+};
+
+
 /********************************
  ********************************
  *****  Callable Interface  *****
@@ -52,31 +95,15 @@
  ********************************/
 
 PublicFnDecl M_CPD *__cdecl rtINTUV_New (
-    M_CPD*			pPPT,
-    M_CPD*			refPTokenRefCPD,
-    int				refPTokenRefIndex,
-    Ref_UV_Initializer		initFn,
-    ...
+    rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT, Ref_UV_Initializer initFn, ...
 );
 
 PublicFnDecl M_CPD *rtINTUV_New (
-    M_CPD*			posPTokenRefCPD,
-    int				posPTokenRefIndex,
-    M_CPD*			refPTokenRefCPD,
-    int				refPTokenRefIndex
+    rtPTOKEN_Handle *pPPT, M_CPD *pRPTRef, int xRPTRef
 );
 
 PublicFnDecl M_CPD *rtINTUV_New (
-    M_CPD *pPPT, M_CPD *pRPTRef, int xRPTRef
-);
-
-PublicFnDecl M_CPD *rtINTUV_New (
-    M_CPD*			posPToken,
-    M_CPD*			refPToken
-);
-
-PublicFnDecl M_CPD *rtINTUV_Align (
-    M_CPD*			cpd
+    rtPTOKEN_Handle *pPPT, rtPTOKEN_Handle *pRPT
 );
 
 PublicFnDecl void rtINTUV_ToSetUV (
@@ -153,7 +180,7 @@ PublicFnDecl M_CPD *rtINTUV_PartitndSortIndices (
 PublicFnDecl M_CPD *rtINTUV_PartitndRanks (
     rtLINK_CType*		partition,
     M_CPD*			sortIndices,
-    M_CPD*			pRefPTokenCPD
+    rtPTOKEN_Handle*		pRefPTokenCPD
 );
 
 PublicFnDecl void rtINTUV_PartitndPartition (
@@ -190,43 +217,6 @@ PublicFnDecl bool rtINTUV_ScalarLookup (
     rtLINK_LookupCase		lookupCase,
     int				*locationPtr
 );
-
-
-/******************************
- ******************************
- *****  Container Handle  *****
- ******************************
- ******************************/
-
-class rtINTUV_Handle : public rtUVECTOR_Handle {
-//  Run Time Type
-    DECLARE_CONCRETE_RTT (rtINTUV_Handle, rtUVECTOR_Handle);
-
-//  Construction
-protected:
-    rtINTUV_Handle (M_CTE &rCTE) : rtUVECTOR_Handle (rCTE) {
-    }
-
-public:
-    static VContainerHandle *Maker (M_CTE &rCTE) {
-	return new rtINTUV_Handle (rCTE);
-    }
-
-//  Destruction
-protected:
-
-//  Access
-public:
-
-//  Query
-public:
-
-//  Callbacks
-protected:
-
-//  State
-protected:
-};
 
 
 #endif

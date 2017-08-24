@@ -1078,6 +1078,24 @@ namespace Vca {
 
 	/*>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<*/
 	public:
+            /**
+             * Limits are used to ensure that transfer sizes are within the
+             * capacity of the runtime node, the utilized device and the
+             * involved data structures.
+             *
+             * The current implementation uses iosb$w_bcnt which is an unsigned
+             * short int. We therefore must enforce that limit on all of our
+             * sys$qio calls.
+             *
+             * In the case of a tcp device, it appears that multinet requires
+             * that we use iosb$w_bcnt. According to release notes from 2006,
+             * http://h71000.www7.hp.com/doc/83final/tcprn/tcp_rnpro_004.html ,
+             * UCX has repurposed the second longword of iosb (iosb$l_dev_depend)
+             * to be a 32bit transfer size. It is therefore theoretically
+             * possible to raise the limits on UCX nodes, but that effort is
+             * postponed until proper testing can be done.
+             */
+
 	    class Limits {
 		DECLARE_FAMILY_MEMBERS (Limits, void);
 
@@ -1112,7 +1130,7 @@ namespace Vca {
 		}
 
 		void reset () {
-		    m_sGetLimit = m_sPutLimit = UINT_MAX;
+		    m_sGetLimit = m_sPutLimit = USHRT_MAX;
 		}
 
 		void setTo (ThisClass const &rOther) {
@@ -1120,13 +1138,13 @@ namespace Vca {
 		    m_sPutLimit = rOther.m_sPutLimit;
 		}
 		void setGetLimitTo (size_t sLimit) {
-		    m_sGetLimit = sLimit;
+		    m_sGetLimit = V_Min (sLimit, USHRT_MAX);
 		}
 		void setPutLimitTo (size_t sLimit) {
-		    m_sPutLimit = sLimit;
+		    m_sPutLimit = V_Min (sLimit, USHRT_MAX);
 		}
 		void setTransferLimitTo (size_t sLimit) {
-		    m_sGetLimit = m_sPutLimit = sLimit;
+		    m_sGetLimit = m_sPutLimit = V_Min (sLimit, USHRT_MAX);
 		}
 
 		ThisClass& operator= (ThisClass const &rOther) {
@@ -7404,6 +7422,7 @@ template class Vca::VDevice_<Vca::OS::DatagramSocket>;
 
 namespace Vca {
     namespace OS {
+	int const sListenBacklog = V::GetEnvironmentInteger ("VListenBacklog", 5);
 	class DeviceManager : public VDeviceManager {
 	    DECLARE_CONCRETE_RTTLITE (DeviceManager, VDeviceManager);
 
@@ -8153,7 +8172,7 @@ bool Vca::OS::DeviceManager::supply_(
 		int const bSet = 1;
 		setsockopt (hSocket, SOL_SOCKET, SO_REUSEADDR, &bSet, sizeof (bSet));
 	    }
-	    bFailed = rAddress.bind (hSocket) < 0 || listen (hSocket, 5) < 0;
+	    bFailed = rAddress.bind (hSocket) < 0 || listen (hSocket, sListenBacklog) < 0;
 	}
 	if (bFailed) {
 	    rStatus.MakeErrorStatus ();

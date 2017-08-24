@@ -116,13 +116,13 @@
  *************************************/
 
 V_DefinePrimitive (NewList) {
-    M_CPD *pContentPrototypeCPD = NilOf (M_CPD *);
+    Vdd::Store *pContentPrototype = 0;
     switch (V_TOTSC_PrimitiveFlags) {
     case 0:
 	break;
 
     case 2:
-	pContentPrototypeCPD = pTask->getSelf ().storeCPD ();
+	pContentPrototype = pTask->getSelf ().store ();
 	break;
 
     default:
@@ -134,7 +134,7 @@ V_DefinePrimitive (NewList) {
 	break;
     }
 
-    pTask->loadDucWithNewLStore (pContentPrototypeCPD);
+    pTask->loadDucWithNewLStore (pContentPrototype);
 }
 
 
@@ -147,11 +147,11 @@ V_DefinePrimitive (NewListInStore) {
     pTask->loadDucWithCurrent ();
 
 /*****  Validate that its store is an L-Store...  *****/
-    M_CPD* lstore = pTask->ducStore ();
-    RTYPE_MustBeA ("NewListInStore", M_CPD_RType (lstore), RTYPE_C_ListStore);
+    Vdd::Store *lstore = pTask->ducStore ();
+    RTYPE_MustBeA ("NewListInStore", lstore->rtype (), RTYPE_C_ListStore);
 
 /*****  Manufacture a new collection of instances...  *****/
-    rtLINK_CType* newLists = rtLSTORE_AddLists (lstore, V_TOTSC_PToken);
+    rtLINK_CType *newLists = lstore->addInstances (V_TOTSC_PToken);
 
 /*****  Return them...  *****/
     DSC_Descriptor_Pointer (ADescriptor).setTo (newLists);
@@ -174,34 +174,31 @@ V_DefinePrimitive (AppendObjectToList) {
 /*****  Access the lists and their elements...  *****/
     DSC_Descriptor& rCurrent = pTask->getCurrent ();
 
-    M_CPD* pListCluster = rCurrent.storeCPD ();
-    M_CPD* pElementCluster = rtLSTORE_CPD_ContentCPD (pListCluster);
+    rtLSTORE_Handle *pListStore = static_cast<rtLSTORE_Handle*>(rCurrent.store ());
+
+    Vdd::Store::Reference pElementCluster;
+    pListStore->getContent (pElementCluster);
 
 /*****  Create the elements, ...  *****/
     DSC_Descriptor iElementDescriptor;
     if (rCurrent.holdsAScalarReference ()) {
 	rtREFUV_Type_Reference	iElementRef;
 
-        rtLSTORE_AppendToRefSelectdList (
-	    pListCluster, &DSC_Descriptor_Scalar (rCurrent), &iElementRef
-	);
+        pListStore->appendToList (iElementRef, DSC_Descriptor_Scalar (rCurrent));
 
 	iElementDescriptor.constructConstant (V_TOTSC_PToken, pElementCluster, iElementRef);
     }
     else if (rCurrent.holdsALink ()) {
 	rtLINK_CType *pElementLC;
-	rtLSTORE_AppendToLCSelectedList (
-	    pListCluster, DSC_Descriptor_Link (rCurrent), &pElementLC
-	);
+	pListStore->appendToList (pElementLC, DSC_Descriptor_Link (rCurrent));
 	iElementDescriptor.constructLink (pElementCluster, pElementLC);
     }
     else {
-	pElementCluster->release ();
 	DSC_Descriptor_Pointer (rCurrent).complainAboutBadPointerType ("AppendObjectToList");
     }
 
 //  If the elements can be updated internally, do it, ...
-    if (0 == V_TOTSC_PrimitiveFlags && RTYPE_C_Vector == pElementCluster->RType ()) {
+    if (0 == V_TOTSC_PrimitiveFlags && RTYPE_C_Vector == pElementCluster->rtype ()) {
 	pTask->loadDucWithNextParameter ();
 	pTask->duc ().assignTo (DSC_Descriptor_Pointer (iElementDescriptor), pElementCluster);
 	iElementDescriptor.clear ();
@@ -242,13 +239,14 @@ V_DefinePrimitive (IndexedListToSequencedList) {
 
 /*****  Access the l-store...  *****/
     DSC_Descriptor &rResult = pTask->ducMonotype ();
-    M_CPD *pLStore = rtINDEX_CPD_ListStoreCPD (rResult.storeCPD ());
+    rtLSTORE_Handle::Reference pListStore;
+    static_cast<rtINDEX_Handle*>(rResult.store ())->getListStore (pListStore);
 
 /*****  ... and return the requested result:  *****/
     switch (V_TOTSC_Primitive) {
     case XIndexedListToSequencedList: {
 	    DSC_Descriptor iCopy;
-	    rtLSTORE_Copy (pLStore, pLStore->ScratchPad (), &iCopy);
+	    pListStore->copy (iCopy, pListStore->scratchPad ());
 
 	    DSC_Descriptor iResult;
 	    iResult.constructComposition (rResult.Pointer (), iCopy);
@@ -258,15 +256,12 @@ V_DefinePrimitive (IndexedListToSequencedList) {
 	}
 	break;
     case XIndexedListToSharedList:
-	pLStore->retain ();
-	rResult.setStoreTo (pLStore);
+	rResult.setStoreTo (pListStore);
 	break;
     default:
 	pTask->raiseUnimplementedAliasException ("IndexedListToSequenceList");
 	break;
     }
-
-    pLStore->release ();
 }
 
 
@@ -315,18 +310,16 @@ V_DefinePrimitive (NumericList) {
 	totalSize += (cnt = *sizeuvp++) >= 0 ? cnt : 0;
 
 /*****  Create the integer uvector to contain the actual list values ... *****/
-    M_CPD *seqPToken  = pTask->NewCodPToken (totalSize);
+    rtPTOKEN_Handle::Reference seqPToken (pTask->NewCodPToken (totalSize));
     M_CPD *seqUVector; {
-	M_CPD *pRPTRef; int xRPTRef;
-	rCurrent.getRPTReference (pRPTRef, xRPTRef);
-	seqUVector = rtINTUV_New (seqPToken, pRPTRef, xRPTRef);
-	pRPTRef->release ();
+	rtPTOKEN_Handle::Reference pRPT (rCurrent.RPT ());
+	seqUVector = rtINTUV_New (seqPToken, pRPT);
     }
     rtINTUV_ElementType	*seqPtr = rtINTUV_CPD_Array (seqUVector);
 
 /*****  Create the linkc which will describe the lstore to create ...  *****/
-    M_CPD *pLStorePPT = pTask->NewCodPToken ();
-    rtLINK_CType *pPartition = rtLINK_RefConstructor (pLStorePPT, -1);
+    rtPTOKEN_Handle::Reference pLStorePPT (pTask->NewCodPToken ());
+    rtLINK_CType *pPartition = rtLINK_RefConstructor (pLStorePPT);
 
 /*****  Fill both 'pPartition' and 'seqUVector' ... *****/
     initializeSizePtrs;
@@ -341,15 +334,14 @@ V_DefinePrimitive (NumericList) {
     pPartition->Close (seqPToken);
 
 /*****  Create a vector containing the values integer uvector ...  *****/
-    M_CPD *pContent = rtVECTOR_NewFromUV (seqPToken, rCurrent.storeCPD (), seqUVector);
-    seqPToken->release ();
+    rtVECTOR_Handle::Reference pContent (
+	rtVECTOR_Handle::NewFrom (seqPToken, rCurrent.store (), seqUVector)
+    );
     seqUVector->release ();
 
 /****** Create and return the new lstore ... *****/
-    pTask->loadDucWithListOrStringStore (rtLSTORE_NewCluster (pPartition, pContent));
-    pContent->release ();
+    pTask->loadDucWithListOrStringStore (new rtLSTORE_Handle (pPartition, pContent));
     pPartition->release ();
-    pLStorePPT->release ();
 
 #undef initializeSizePtrs
 }
@@ -363,52 +355,40 @@ V_DefinePrimitive (CountListElements) {
 /*****  Access the lists and their elements...  *****/
     DSC_Descriptor& rCurrent = pTask->getCurrent ();
 
-    M_CPD *lists = rCurrent.storeCPD ();
-    M_CPD *lstore = (RTYPE_Type)M_CPD_RType (lists) == RTYPE_C_ListStore
-	? M_DuplicateCPDPtr (lists) : rtINDEX_CPD_ListStoreCPD (lists);
-
 /*****  And return the list element counts...  *****/
     if (rCurrent.holdsAScalarReference ()) {
+	unsigned int iResult;
 	pTask->loadDucWithInteger (
-	    rtLSTORE_RefSelListElementCount (lstore, &DSC_Descriptor_Scalar (rCurrent))
+	    rCurrent.store()->getCardinality (
+		iResult, DSC_Descriptor_Scalar (rCurrent)
+	    ) ? iResult : 0
 	);
     }
     else if (rCurrent.holdsALink ()) {
-	M_CPD* elementCounts = rtLSTORE_LCSelListElementCount (
-	    lstore, DSC_Descriptor_Link (rCurrent)
-	);
-	pTask->loadDucWithMonotype (elementCounts);
-	elementCounts->release ();
+	M_CPD *pResult;
+	if (!rCurrent.store ()->getCardinality (pResult, DSC_Descriptor_Link (rCurrent)))
+	    pTask->loadDucWith (0);
+	else {
+	    pTask->loadDucWithMonotype (pResult);
+	    pResult->release ();
+	}
     }
-    else if (rCurrent.holdsAScalarValue ()) {
+    else if (rCurrent.holdsValuesInAnyForm ()) {
 /*****
  * A property defined at a 'value' class is by definition empty, so return
  * zero as the count.
  *****/
 	pTask->loadDucWithInteger (0);
     }
-    else if (rCurrent.holdsNonScalarValues ()) {
-	M_CPD* elementCounts = pTask->NewIntUV ();
-/*****
- * A property defined at a 'value' class is by definition empty, so return
- * zero as the count. (Integer uvectors are zero-filled at creation)
- *****/
-	pTask->loadDucWithMonotype (elementCounts);
-
-	elementCounts->release ();
-    }
     else {
 	rCurrent.complainAboutBadPointerType ("CountListElements");
     }
-/*****  Cleanup  *****/
-    lstore->release ();
 }
 
 
 /*****  Primitive to do list positional accesses (subscripting).
  *****/
-V_DefinePrimitive (CellAtPosition)
-{
+V_DefinePrimitive (CellAtPosition) {
     int modifier, converseMessageSelector;
 
 /*****  Determine the origin ...  *****/
@@ -453,18 +433,18 @@ V_DefinePrimitive (CellAtPosition)
     }
 
 /*****  Perform the lookup ...  *****/
-    DSC_Descriptor resultDsc;
-    rtLINK_CType*  locatedLinkc;
-    if ((RTYPE_Type)M_CPD_RType (rCurrent.storeCPD ()) == RTYPE_C_ListStore)
-	rtLSTORE_Subscript (&rCurrent, &ADescriptor, modifier, &resultDsc, &locatedLinkc);
-    else
-	rtINDEX_Subscript  (&rCurrent, &ADescriptor, modifier, &resultDsc, &locatedLinkc);
-
-    VDescriptor* pGuardedDatum = pTask->loadDucWithGuardedDatum (locatedLinkc);
-    if (pGuardedDatum)
-	pGuardedDatum->setToMoved (resultDsc);
-    else
-	resultDsc.clear ();
+    DSC_Descriptor iResult; rtLINK_CType *pGuard;
+    iResult.construct ();
+    if (!rCurrent.store ()->getListElements (iResult, rCurrent.Pointer (), ADescriptor, modifier, &pGuard)) {
+	pTask->loadDucWithNA ();
+    }
+    else {
+	VDescriptor *pGuardedDatum = pTask->loadDucWithGuardedDatum (pGuard);
+	if (pGuardedDatum)
+	    pGuardedDatum->setToMoved (iResult);
+	else
+	    iResult.clear ();
+    }
 }
 
 

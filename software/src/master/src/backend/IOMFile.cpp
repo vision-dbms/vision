@@ -185,8 +185,7 @@ int IOMFile::SetTcpNodelay (int Unused (fOnOff)) {
  *				  Contains seek information.
  *
  *  Returns:
- *	The number of bytes actually available for reading.  Always zero for this
- *	driver.
+ *	The number of bytes actually available for reading.
  *
  *****/
 size_t IOMFile::GetByteCount (IOMHandle const* pHandle) {

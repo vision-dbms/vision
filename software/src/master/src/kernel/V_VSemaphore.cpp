@@ -21,6 +21,8 @@
 /************************
  *****  Supporting  *****
  ************************/
+
+#include "V_VTime.h"
 
 
 /***************************
@@ -137,5 +139,61 @@ bool V::VSemaphore::consumeTry () {
 	pthread_mutex_unlock (&m_iMutex);
     }
     return bSuccessful;
+#endif
+}
+
+V::VSemaphore::WaitStatus V::VSemaphore::consumeTry (VTime const &rLimit) {
+#if defined(V_SEMAPHORE_IMPLEMENTED_USING_WIN32_SEMAPHORES)
+    return WAIT_TIMEOUT != WaitForSingleObject (m_hSemaphore, 0) ?
+      WaitStatus_Success : WaitStatus_Timeout;
+#elif defined(V_SEMAPHORE_IMPLEMENTED_USING_POSIX_SEMAPHORES)
+    timespec iLimit;
+    rLimit.asValue (iLimit);
+
+    bool bNotDone = false;
+    do {
+	if (sem_timedwait (&m_iSemaphore, &iLimit)) {
+	    switch (errno) {
+	    case EINTR:
+		bNotDone = true;
+		break;
+	    case ETIMEDOUT:
+		return WaitStatus_Timeout;
+	    default:
+		return WaitStatus_Failure;
+	    }
+	}
+    } while (bNotDone);
+    return WaitStatus_Success;
+#elif defined(V_SEMAPHORE_IMPLEMENTED_USING_POSIX_PTHREADOBJECTS)
+    timespec iLimit;
+    rLimit.asValue (iLimit);
+
+    if (pthread_mutex_lock (&m_iMutex) != 0)
+	return WaitStatus_Failure;
+
+    WaitStatus xResultStatus = WaitStatus_Success;
+    bool bNotDone = false;
+    do {
+	switch (pthread_cond_timedwait (&m_iCondvar, &m_iMutex, &iLimit)) {
+	case 0:
+	    if (m_iValue > 0) {
+		m_iValue--;
+	    } else {
+		bNotDone = true;
+	    }
+	    break;
+	case ETIMEDOUT:
+	    xResultStatus = WaitStatus_Timeout;
+	    break;
+	default:
+	    xResultStatus = WaitStatus_Failure;
+	    break;
+	}
+    } while (bNotDone);
+
+    pthread_mutex_unlock (&m_iMutex);
+
+    return xResultStatus;
 #endif
 }

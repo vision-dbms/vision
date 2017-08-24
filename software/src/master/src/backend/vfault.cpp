@@ -436,11 +436,12 @@ PublicFnDef void FAULT_RecordWarning (char const *msg) {
 
 PrivateFnDef M_CPD *IntegerField (VPrimitiveTask *pTask, FAULT_IntegerAccessor field) {
 /*****  Create the uvector ...  *****/
-    M_CPD *ptoken = pTask->NewCodPToken (
-	FAULT_SessionErrorCount + FAULT_SessionWarningCount - FAULT_SessionUnrecordedCount
+    rtPTOKEN_Handle::Reference ptoken (
+	pTask->NewCodPToken (
+	    FAULT_SessionErrorCount + FAULT_SessionWarningCount - FAULT_SessionUnrecordedCount
+	)
     );
     M_CPD *result = pTask->NewIntUV (ptoken);
-    ptoken->release ();
 
 /*****  Fill the uvector ...  *****/
     rtINTUV_ElementType *ptr = rtINTUV_CPD_Array (result);
@@ -464,9 +465,8 @@ PrivateFnDef M_CPD *StringField (VPrimitiveTask *pTask, FAULT_StringAccessor fie
     }
 
 /*****  Create the uvector ...  *****/
-    M_CPD *ptoken = pTask->NewCodPToken (count);
+    rtPTOKEN_Handle::Reference ptoken (pTask->NewCodPToken (count));
     M_CPD *result = pTask->NewCharUV (ptoken);
-    ptoken->release ();
 
 /*****  Fill the uvector ...  *****/
     rtCHARUV_ElementType *ptr = rtCHARUV_CPD_Array (result);

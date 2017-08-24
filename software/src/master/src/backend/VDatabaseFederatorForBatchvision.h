@@ -41,8 +41,13 @@ private:
     void DoTransientGCMarking	() const;
     bool DoTransientGCSweep	() const;
 
+    bool DoGCCycleElimination	() const;
+    bool EnqueuePossibleCycles	() const;
+    bool TraverseAndDetectCycles() const;
+    bool EnqueueOmittingCycles	() const;
+
 public:
-    bool DisposeOfSessionGarbage () const;
+    bool DisposeOfSessionGarbage (bool bAggressive = false) const;
 
 //  State
 protected:

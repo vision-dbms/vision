@@ -57,18 +57,22 @@ typedef unsigned short		uint_least16_t;
 typedef unsigned int		uint_least32_t;
 typedef unsigned __int64	uint_least64_t;
 
+typedef int			intptr_t;
+typedef unsigned int		uintptr_t;
+
 #define INT64_MAX		_I64_MAX
 #define UINT64_MAX		_UI64_MAX
 #else
 #include <stdint.h>
 #endif
 
-typedef int			intptr_t;
-typedef unsigned int		uintptr_t;
-
 //=====
 //==  Defines
 //=====
+
+#ifdef _WIN64
+#define _LP64
+#endif
 
 #define DECLSPEC_DLLEXPORT __declspec(dllexport)
 #define DECLSPEC_DLLIMPORT __declspec(dllimport)
@@ -123,7 +127,7 @@ typedef unsigned int		uintptr_t;
 #define stat			_stat
 #define strcasecmp		_stricmp
 #define strncasecmp		_strnicmp
-#define strtok_r(str,delim,saveptr) strtok (str,delim)
+#define strtok_r		 strtok_s
 #define umask			_umask
 #define unlink			_unlink
 #define write			_write

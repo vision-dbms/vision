@@ -17,83 +17,108 @@ class M_AND;
 class M_ASD;
 class M_CPD;
 
+class rtPTOKEN_Handle;
+
 class VContainerHandle;
+
+namespace Vdd {
+    class Store;
+}
 
 
 /*************************
  *****  Definitions  *****
  *************************/
 
-class M_KnownObjectTable : public VBenderenceable {
-    DECLARE_CONCRETE_RTT (M_KnownObjectTable, VBenderenceable);
+/********************
+ *----  M_KOTE  ----*
+ ********************/
 
-//  Known Object Table Entry
+class M_KOT;
+
+class M_KOTE : public VTransient {
+    DECLARE_FAMILY_MEMBERS (M_KOTE, VTransient);
+
+//  Aliases
 public:
-    class Entry : public VTransient {
-    //  Construction
-    public:
-	Entry () : m_pObjectCPD (0), m_pObjectHandle (0), m_pPTokenCPD (0) {
-	}
-
-    //  Destruction
-    public:
-	~Entry ();
-
-    //  Query
-    public:
-	bool IsSet () const {
-	    return IsntNil (m_pObjectCPD);
-	}
-	bool IsntSet () const {
-	    return IsNil (m_pObjectCPD);
-	}
-
-    //  Access
-    public:
-	M_CPD *ObjectCPD () const {
-	    return m_pObjectCPD;
-	}
-	M_CPD *PTokenCPD () const {
-	    return m_pPTokenCPD;
-	}
-	operator M_CPD* () const {
-	    return m_pObjectCPD;
-	}
-
-	VContainerHandle *ObjectHandle () const {
-	    return m_pObjectHandle;
-	}
-	VContainerHandle *PTokenHandle () const {
-	    return m_pPTokenHandle;
-	}
-	operator VContainerHandle* () const {
-	    return m_pObjectHandle;
-	}
-
-	inline M_CPD *RetainedObjectCPD () const;
-	inline M_CPD *RetainedPTokenCPD () const;
-
-    //  Update
-    public:
-	void RegisterObject (M_KnownObjectTable *pKOT, M_CPD *pObjectCPD);
-
-    //  State
-    protected:
-	M_CPD			*m_pObjectCPD;
-	M_CPD			*m_pPTokenCPD;
-	VContainerHandle	*m_pObjectHandle;
-	VContainerHandle	*m_pPTokenHandle;
-    };
+    typedef Vdd::Store Store;
 
 //  Construction
 public:
-    M_KnownObjectTable (M_AND *pAND);	//  Creation
-    M_KnownObjectTable (M_CPD *pKOTC);	//  Access
+    M_KOTE ();
+
+//  Destruction
+public:
+    ~M_KOTE ();
+
+//  Query
+public:
+    bool IsSet () const {
+	return IsntNil (m_pObjectCPD);
+    }
+    bool IsntSet () const {
+	return IsNil (m_pObjectCPD);
+    }
+
+//  Access
+public:
+    operator Store* () const {
+	return store ();
+    }
+    Store *store () const {
+	return m_pStore;
+    }
+
+    operator M_CPD* () const {
+	return m_pObjectCPD;
+    }
+    operator VContainerHandle* () const {
+	return m_pObjectHandle;
+    }
+    M_CPD *ObjectCPD () const {
+	return m_pObjectCPD;
+    }
+    VContainerHandle *ObjectHandle () const {
+	return m_pObjectHandle;
+    }
+
+    rtPTOKEN_Handle *PTokenHandle () const {
+	return m_pPTokenHandle;
+    }
+
+//  Update
+public:
+    void RegisterObject (M_KOT *pKOT, M_CPD *pObjectCPD);
+
+//  State
+protected:
+    M_CPD*			m_pObjectCPD;
+    VContainerHandle*		m_pObjectHandle;
+    VReference<rtPTOKEN_Handle>	m_pPTokenHandle;
+    VReference<Store>		m_pStore;
+};
+
+
+/*******************
+ *----  M_KOT  ----*
+ *******************/
+
+class M_KOT : public VBenderenceable {
+    DECLARE_CONCRETE_RTT (M_KOT, VBenderenceable);
+
+//  Aliases
+public:
+    typedef Vdd::Store Store;
+
+//  Construction
+public:
+    M_KOT (M_AND *pAND);	//  Creation
+    M_KOT (M_CPD *pKOTC);	//  Access
     void completeInitialization ();
 
 //  Destruction
 protected:
-    ~M_KnownObjectTable ();
+    ~M_KOT ();
 
 //  Access
 public:
@@ -103,73 +128,48 @@ public:
 	return m_pKOTC;
     }
 
-    Entry const &GetBlockEquivalentClassFromPToken (VContainerHandle const *pHandle) const {
-	return TheStringClass.PTokenHandle () == pHandle
-	    ? TheStringClass : TheSelectorClass;
+    M_KOTE const &GetBlockEquivalentClassFromPToken (rtPTOKEN_Handle const *pHandle) const {
+	return TheStringClass.PTokenHandle () == pHandle ? TheStringClass : TheSelectorClass;
     }
 
     inline M_ASD *Space () const;
 
-    M_CPD *TheCharacterPTokenCPD () const {
-	return TheCharacterClass.PTokenCPD ();
-    }
-    M_CPD *TheDatePTokenCPD () const {
-	return TheDateClass.PTokenCPD ();
-    }
-    M_CPD *TheDoublePTokenCPD () const {
-	return TheDoubleClass.PTokenCPD ();
-    }
-    M_CPD *TheFalsePTokenCPD () const {
-	return TheFalseClass.PTokenCPD ();
-    }
-    M_CPD *TheFloatPTokenCPD () const {
-	return TheFloatClass.PTokenCPD ();
-    }
-    M_CPD *TheIntegerPTokenCPD () const {
-	return TheIntegerClass.PTokenCPD ();
-    }
-    M_CPD *TheNAPTokenCPD () const {
-	return TheNAClass.PTokenCPD ();
-    }
-    M_CPD *ThePrimitivePTokenCPD () const {
-	return ThePrimitiveClass.PTokenCPD ();
-    }
-    M_CPD *TheStringPTokenCPD () const {
-	return TheStringClass.PTokenCPD ();
-    }
-    M_CPD *TheTruePTokenCPD () const {
-	return TheTrueClass.PTokenCPD ();
-    }
-
-    VContainerHandle *TheCharacterPTokenHandle () const {
+    rtPTOKEN_Handle *TheCharacterPTokenHandle () const {
 	return TheCharacterClass.PTokenHandle ();
     }
-    VContainerHandle *TheDatePTokenHandle () const {
+    rtPTOKEN_Handle *TheDatePTokenHandle () const {
 	return TheDateClass.PTokenHandle ();
     }
-    VContainerHandle *TheDoublePTokenHandle () const {
+    rtPTOKEN_Handle *TheDoublePTokenHandle () const {
 	return TheDoubleClass.PTokenHandle ();
     }
-    VContainerHandle *TheFalsePTokenHandle () const {
+    rtPTOKEN_Handle *TheFalsePTokenHandle () const {
 	return TheFalseClass.PTokenHandle ();
     }
-    VContainerHandle *TheFloatPTokenHandle () const {
+    rtPTOKEN_Handle *TheFloatPTokenHandle () const {
 	return TheFloatClass.PTokenHandle ();
     }
-    VContainerHandle *TheIntegerPTokenHandle () const {
+    rtPTOKEN_Handle *TheIntegerPTokenHandle () const {
 	return TheIntegerClass.PTokenHandle ();
     }
-    VContainerHandle *TheNAPTokenHandle () const {
+    rtPTOKEN_Handle *TheNAPTokenHandle () const {
 	return TheNAClass.PTokenHandle ();
     }
-    VContainerHandle *ThePrimitivePTokenHandle () const {
+    rtPTOKEN_Handle *ThePrimitivePTokenHandle () const {
 	return ThePrimitiveClass.PTokenHandle ();
     }
-    VContainerHandle *TheStringPTokenHandle () const {
+    rtPTOKEN_Handle *TheStringPTokenHandle () const {
 	return TheStringClass.PTokenHandle ();
     }
-    VContainerHandle *TheTruePTokenHandle () const {
+    rtPTOKEN_Handle *TheTruePTokenHandle () const {
 	return TheTrueClass.PTokenHandle ();
+    }
+
+    rtPTOKEN_Handle *TheScalarPTokenHandle () const {
+	return (rtPTOKEN_Handle*)TheScalarPToken.ObjectHandle ();
+    }
+    rtPTOKEN_Handle *TheSelectorPTokenHandle () const {
+	return (rtPTOKEN_Handle*)TheSelectorPToken.ObjectHandle ();
     }
 
 //  Query
@@ -180,16 +180,17 @@ public:
     void ForwardAndLock (M_CPD *pObject) const;
 
     void RegisterObject (
-	M_CPD					*pObjectCPD,
-	Entry	M_KnownObjectTable	      ::*pKOTE,
-	M_POP	ENVIR_BuiltInObjectPArray     ::*pKOTCE
+	M_CPD *pObject, M_KOTE M_KOT::*pKOTE, M_POP ENVIR_BuiltInObjectPArray::*pKOTCE
+    );
+    void RegisterObject (
+	VContainerHandle *pObject, M_KOTE M_KOT::*pKOTE, M_POP ENVIR_BuiltInObjectPArray::*pKOTCE
     );
 
 //  State
 protected:
     M_CPD* const m_pKOTC;
 public:
-    Entry ENVIR_KOTEs (ENVIR_KOTE_Include, ENVIR_AKOE_Exclude);
+    M_KOTE ENVIR_KOTEs (ENVIR_KOTE_Include, ENVIR_AKOE_Exclude);
 
 };
 
@@ -197,11 +198,7 @@ public:
  *****  'typedef's  *****
  ************************/
 
-typedef M_KnownObjectTable::Entry M_KOTE;
-
-typedef M_KOTE const M_KnownObjectTable::*M_KOTM;
-
-typedef M_KnownObjectTable const M_KOT;
+typedef M_KOTE const M_KOT::*M_KOTM;
 
 
 #endif

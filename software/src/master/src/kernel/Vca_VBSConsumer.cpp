@@ -383,13 +383,13 @@ void Vca::VBSConsumer::PutBufferedData () {
     enum {
 	QuiescenceCount = 2
     };
-    unsigned int xPassesToGo = QuiescenceCount;
+    unsigned int xPassesToGo = QuiescenceCount + (g_pFirstInstance ? g_pFirstInstance->m_cNumCheckpoints : 0);
     //   Loop until no work is done for QuiescenceCount consecutive passes...
     do {
 	VReference<ThisClass> pInstance (g_pFirstInstance);
 	while (pInstance) {
 	    if (pInstance->putBufferedData ())
-		xPassesToGo = QuiescenceCount;
+		xPassesToGo = QuiescenceCount + pInstance->m_cNumCheckpoints;
 	    pInstance.setTo (pInstance->m_pNextInstance);
 	}
     } while (--xPassesToGo > 0);

@@ -150,11 +150,11 @@ namespace Vsa {
                 VReference<WorkerGeneration>      m_pGeneration;
                 VEvaluatorPool      const  *const m_pPool;
                 Vca::U32                          m_iWorkerId;
-		IEvaluator::Reference             m_pEvaluator;
+				IEvaluator::Reference             m_pEvaluator;
                 VReference<Worker>                m_pWorker;
                 VReference<ThisClass>             m_pSuccessor;
                 VReference<ThisClass>             m_pPredecessor;
-		interface_monitor_t::Reference    m_pEvaluatorEKG;
+				interface_monitor_t::Reference    m_pEvaluatorEKG;
             };
 
     //  Friends
@@ -176,7 +176,7 @@ namespace Vsa {
 
     //  Access
     public:
-        Vca::U32 generationId  () const {
+        Vca::U32 generationId () const {
             return m_iGeneration;
         }
         Vca::U32 onlineWorkerCount () const {
