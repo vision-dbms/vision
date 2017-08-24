@@ -4,6 +4,36 @@
 if type git >& /dev/null; then
 ####  ... and we're inside a git work-tree, ...
     if git rev-parse --is-inside-work-tree >& /dev/null; then
-	echo "git:work-tree=$(git rev-parse --show-toplevel),branch=$(git rev-parse --abbrev-ref HEAD),commit=$(git rev-parse HEAD)"
+        differences=""
+
+        diff_files=`git diff-index --name-only HEAD `
+        if [ ! -z "$diff_files" ]; then
+            diff_files=`echo $diff_files | xargs -n1 basename`
+            diff_files=`echo $diff_files | sed 's/ /--/g' | sed 's/\n/--/g'`
+            differences=$diff_files 
+        fi
+
+        toplevel=`git rev-parse --show-toplevel`
+        new_files=`git ls-files --others --exclude-standard $toplevel`
+        if [ ! -z "$new_files" ]; then
+            new_files=`echo $new_files | sed 's/ /--/g' | sed 's/\n/--/g'`
+
+            if [ ! -z "$differences" ]; then
+                differences="$differences---"
+            fi
+
+            differences="$differences$new_files"
+        fi
+
+        if [ -z "$differences" ]; then
+            differences="NONE"
+        fi
+
+        if [ ${#differences} -ge 100 ]; then
+            differences=`echo $differences | cut -c 1-97`
+            differences="$differences..."
+        fi
+
+	echo "git:work-tree=$(git rev-parse --show-toplevel),branch=$(git rev-parse --abbrev-ref HEAD),commit=$(git rev-parse HEAD),differences=$differences"
     fi
 fi
