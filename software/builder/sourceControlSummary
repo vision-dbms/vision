@@ -13,7 +13,8 @@ if type git >& /dev/null; then
             differences=$diff_files 
         fi
 
-        new_files=`git ls-files --others --exclude-standard `
+        toplevel=`git rev-parse --show-toplevel`
+        new_files=`git ls-files --others --exclude-standard $toplevel`
         if [ ! -z "$new_files" ]; then
             new_files=`echo $new_files | sed 's/ /--/g' | sed 's/\n/--/g'`
 
