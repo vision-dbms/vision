@@ -9,7 +9,7 @@
 #include "Vxa_VCollectableObject.h"
 #include "Vxa_VCollectable.h"
 
-#include <pugixml.hpp>
+#include "pugixml.hpp"
 
 /**************************
  *****  Declarations  *****
