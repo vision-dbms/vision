@@ -11,6 +11,7 @@ function waitForStat() {
     local actual
     local timeout=120
     local conditionMet=false
+    local OPTIND=1
     while getopts 'c:t:' OPTION; do
         case $OPTION in
             c)
@@ -50,6 +51,7 @@ function waitForStat() {
                         conditionMet=true
                         break
                     else
+			debug_inform "$i of $timeout: $actual $cond $val"
                         sleep 1
                     fi
                 done
@@ -78,7 +80,7 @@ Waits until a given pool statistic condition is met, up to a given timeout. For 
 
 At least one of the following arguments must be specified:
     -c CONDITION Specify statistical condition that should be checked for. Should be in the form <VAR><OPERATOR><VALUE> Where <VAR> is the statistic name, <OPERATOR> is the conditional operator (one of: <, <=, >, >=, =, !=) and <VALUE> is the condition's check value.
-    -t TIMEOUT   The timeout of the wait operation in seconds. Only effects subsequent -c arguments. Defaults to 60.
+    -t TIMEOUT   The timeout of the wait operation in seconds. Only effects subsequent -c arguments. Defaults to 120.
 
 Exit status is zero if condition(s) met, nonzero otherwise.
 

@@ -1,0 +1,37 @@
+# An example .poolTester init file:
+
+# poolTester will look for this file in your home directory, and then in your current directory,
+#   loading it to initalize whatever settings you desire or need ...
+
+
+# poolTester makes use of the native Linux utility 'seq' in many places
+# Before I found an implementation in an out of the way directory on my
+# Solaris machine, I used this function to provide a sufficient subset of
+# 'seq' functionality to satisfy poolTester's needs.
+
+#function seq () 
+#{ 
+#    i=$1;
+#    if [[ -z $2 ]]; then
+#	l=$1
+#	i=1
+#    else
+#	l=$2
+#    fi
+#    while [ $i -le $l ]; do
+#        printf "%d\n" $i
+#        i=`expr $i + 1`
+#    done
+#}
+
+# need a grep that understands the -q option ....
+alias grep=/usr/xpg4/bin/grep
+
+# the following is needed to make regular expressions work properly on some versions of bash
+shopt -s expand_aliases compat31
+
+# a location for the executables under test 
+export Tools=exe
+
+# NDF for running testDeck01 and its ilk ...
+export NDFPathName=../td/testNetwork-sparc/NDF
