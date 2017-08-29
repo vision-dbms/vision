@@ -1,0 +1,17 @@
+# Repeated hardRestarts left a pool in a suspended state in early versions of 8.1
+# This script fails with an error when run against that version.
+# It succeeds when run against version 8.0
+# It should succeed when run against a version of 8.1 with the bug fixed!!
+
+#
+pre_exec: start -c $POOLTESTERDIR/configs/max1.ptc
+
+thread:main, repetitions:1
+
+operation_on_thread:main, run:hardRestart
+operation_on_thread:main, run:hardRestart
+operation_on_thread:main, run:query -q $POOLTESTERDIR/queries/TestQuery01.vis -a
+
+post_exec: waitForStat -t 60 -c Status=Running 
+#post_exec: waitForStat -t 60 -c QueriesProcessed=2
+post_exec: hardStop
