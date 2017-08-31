@@ -147,7 +147,7 @@ EOD
 function doesPoolExist () {
 debug_inform "doesPoolExist called"
 	
-	local poolID=1
+	local poolID=$poolIdx
 	# Get current user.
 	local user=`whoami`
 	local poolPID
@@ -174,9 +174,9 @@ debug_inform "doesPoolExist called"
                                 [[ $val -eq 0 ]] && retWarn="pool does not exist"
 				
                 # Perform check.
-                debug_inform "Waiting up to $timeout seconds for pool connection evaluation ($val)."
+                debug_inform "Checking for pool existence ($val)."
 				
-				poolPID=`ps aux|grep vpool| grep $user | grep testpool$poolID| grep -v grep| awk '{print $2}'`
+				poolPID=`ps -af|grep vpool| grep $user | grep testpool$poolID| grep -v grep| awk '{print $2}'`
 				toReturn=$?
 
 				[[ $poolPID -ne 0 ]] && [[ $toReturn -eq 0 ]] && actual=0 || actual=1

@@ -133,7 +133,8 @@ function compareLog() {
     dumpLog -s > $logFileStripped
     dumpLog -f $expectedLogFile -s > $expectedLogFileStripped
     
-    diff -q $logFileStripped $expectedLogFileStripped >/dev/null
+#    diff -q $logFileStripped $expectedLogFileStripped >/dev/null
+    diff $logFileStripped $expectedLogFileStripped >/dev/null
     case $? in
         0)
             verbose_inform "Pool log matches '$expectedLogFile'."
