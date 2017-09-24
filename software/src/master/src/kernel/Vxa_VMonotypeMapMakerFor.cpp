@@ -1,4 +1,5 @@
 /*****  Vxa_VMonotypeMapMakerFor Implementation  *****/
+#define Vxa_VMonotypeMapMakerFor_Implementation
 
 /************************
  ************************
@@ -109,25 +110,3 @@ template <typename Val_T, typename Var_T> void Vxa::VMonotypeMapMakerFor<Val_T,V
 	m_iContainer.Delete (commitLimit (), m_iContainer.cardinality () - commitLimit ());
     }
 }
-
-
-
-/****************************
- ****************************
- *****  Instantiations  *****
- ****************************
- ****************************/
-
-template class Vxa_API Vxa::VMonotypeMapMakerFor<bool>;
-
-template class Vxa_API Vxa::VMonotypeMapMakerFor<short>;
-template class Vxa_API Vxa::VMonotypeMapMakerFor<int>;
-
-template class Vxa_API Vxa::VMonotypeMapMakerFor<unsigned short>;
-template class Vxa_API Vxa::VMonotypeMapMakerFor<unsigned int>;
-
-template class Vxa_API Vxa::VMonotypeMapMakerFor<float>;
-template class Vxa_API Vxa::VMonotypeMapMakerFor<double>;
-
-template class Vxa_API Vxa::VMonotypeMapMakerFor<char const*,VString>;
-template class Vxa_API Vxa::VMonotypeMapMakerFor<VString>;

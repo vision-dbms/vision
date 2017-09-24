@@ -1,4 +1,5 @@
 /*****  Vxa_VExportable Implementation  *****/
+#define Vxa_VExportable_Implementation
 
 /************************
  ************************
@@ -44,17 +45,6 @@
  ******************************/
 
 namespace Vxa {
-    template class Vxa_API VExportable<bool>;
-    template class Vxa_API VExportable<short>;
-    template class Vxa_API VExportable<unsigned short>;
-    template class Vxa_API VExportable<int>;
-    template class Vxa_API VExportable<unsigned int>;
-    template class Vxa_API VExportable<float>;
-    template class Vxa_API VExportable<double>;
-
-    template class Vxa_API VExportable<char const*>;
-    template class Vxa_API VExportable<VString>;
-
     template <
 	typename Val_T, typename Var_T = typename Vca::VTypePattern<Val_T>::var_t
     > class Vxa_API VStockExportable : public VExportable<Val_T> {

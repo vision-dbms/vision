@@ -31,12 +31,12 @@
  *************************/
 
 #define DEFINE_VXA_COLLECTABLE(T)\
-    template class Vxa_API Vxa::VExportable<T*>;\
-    template class Vxa_API Vxa::VImportable<T*>
+    template class Vxa::VExportable<T*>;\
+    template class Vxa::VImportable<T*>
 
 #define DEFINE_VXA_TEMPLATED_COLLECTABLE(T)\
     DEFINE_VXA_COLLECTABLE(T);\
-    template class Vxa_API T
+    template class T
 
 namespace Vxa {
     template <typename T> class VCollectable

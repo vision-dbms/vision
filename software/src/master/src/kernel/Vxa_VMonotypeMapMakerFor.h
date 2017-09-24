@@ -70,4 +70,31 @@ namespace Vxa {
 }
 
 
+/*************************************
+*****  Template Instantiations  *****
+*************************************/
+
+#if defined(USING_HIDDEN_DEFAULT_VISIBILITY) || defined(Vxa_VMonotypeMapMakerFor_Implementation)
+
+#ifndef Vxa_VMonotypeMapMakerFor_Implementation
+#define Vxa_VMonotypeMapMakerFor_Implementation extern
+#endif
+
+Vxa_VMonotypeMapMakerFor_Implementation template class Vxa_API Vxa::VMonotypeMapMakerFor<bool>;
+
+Vxa_VMonotypeMapMakerFor_Implementation template class Vxa_API Vxa::VMonotypeMapMakerFor<short>;
+Vxa_VMonotypeMapMakerFor_Implementation template class Vxa_API Vxa::VMonotypeMapMakerFor<int>;
+
+Vxa_VMonotypeMapMakerFor_Implementation template class Vxa_API Vxa::VMonotypeMapMakerFor<unsigned short>;
+Vxa_VMonotypeMapMakerFor_Implementation template class Vxa_API Vxa::VMonotypeMapMakerFor<unsigned int>;
+
+Vxa_VMonotypeMapMakerFor_Implementation template class Vxa_API Vxa::VMonotypeMapMakerFor<float>;
+Vxa_VMonotypeMapMakerFor_Implementation template class Vxa_API Vxa::VMonotypeMapMakerFor<double>;
+
+Vxa_VMonotypeMapMakerFor_Implementation template class Vxa_API Vxa::VMonotypeMapMakerFor<char const*, VString>;
+Vxa_VMonotypeMapMakerFor_Implementation template class Vxa_API Vxa::VMonotypeMapMakerFor<VString>;
+
+#endif
+
+
 #endif

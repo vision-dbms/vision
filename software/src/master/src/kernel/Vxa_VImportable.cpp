@@ -1,4 +1,5 @@
 /*****  Vxa_VImportable Implementation  *****/
+#define Vxa_VImportable_Implementation
 
 /************************
  ************************
@@ -40,19 +41,6 @@
  ******************************/
 
 namespace Vxa {
-    template class Vxa_API VImportable<bool>;
-    template class Vxa_API VImportable<short>;
-    template class Vxa_API VImportable<unsigned short>;
-    template class Vxa_API VImportable<int>;
-    template class Vxa_API VImportable<unsigned int>;
-    template class Vxa_API VImportable<float>;
-    template class Vxa_API VImportable<double>;
-
-    template class Vxa_API VImportable<char const*>;
-    template class Vxa_API VImportable<VString const&>;
-
-    template class Vxa_API VImportable<VResultBuilder&>;
-
     template <
 	typename Val_T, typename Var_T = typename Vca::VTypePattern<Val_T>::var_t
     > class Vxa_API VStockImportable : public VImportable<Val_T> {

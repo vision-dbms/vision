@@ -47,7 +47,7 @@ namespace Vxa {
  *----  template <typename T> class VExportable  ----*
  *****************************************************/
 
-    template <typename T> class Vxa_API VExportable : virtual public VExportableType {
+    template <typename T> class VExportable : virtual public VExportableType {
 	DECLARE_FAMILY_MEMBERS (VExportable<T>, VExportableType);
 
     //  Construction
@@ -157,5 +157,28 @@ namespace Vxa {
     }
 }
 
+
+/*************************************
+*****  Template Instantiations  *****
+*************************************/
+
+#if defined(USING_HIDDEN_DEFAULT_VISIBILITY) || defined(Vxa_VExportable_Implementation)
+
+#ifndef Vxa_VExportable_Implementation
+#define Vxa_VExportable_Implementation extern
+#endif
+
+Vxa_VExportable_Implementation template class Vxa_API Vxa::VExportable<bool>;
+Vxa_VExportable_Implementation template class Vxa_API Vxa::VExportable<short>;
+Vxa_VExportable_Implementation template class Vxa_API Vxa::VExportable<unsigned short>;
+Vxa_VExportable_Implementation template class Vxa_API Vxa::VExportable<int>;
+Vxa_VExportable_Implementation template class Vxa_API Vxa::VExportable<unsigned int>;
+Vxa_VExportable_Implementation template class Vxa_API Vxa::VExportable<float>;
+Vxa_VExportable_Implementation template class Vxa_API Vxa::VExportable<double>;
+
+Vxa_VExportable_Implementation template class Vxa_API Vxa::VExportable<char const*>;
+Vxa_VExportable_Implementation template class Vxa_API Vxa::VExportable<VString>;
+
+#endif
 
 #endif
