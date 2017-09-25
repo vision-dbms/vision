@@ -25,6 +25,11 @@
  *  This class exists to demangle std::type_info::name() on Linux (and
  *  other) platforms where demangled names are not returned by default.
  *---------------------------------------------------------------------*/
+
+#if defined(__linux__) || defined(__APPLE__)
+#define USING_CXXABI_DEMANGLE
+#endif
+
 namespace V {
     class V_API VRTTI : public VTransient {
 	DECLARE_FAMILY_MEMBERS (VRTTI, VTransient);
@@ -45,7 +50,7 @@ namespace V {
     //  State
     private:
 	std::type_info const&	m_rTypeInfo;
-#ifdef __linux
+#ifdef USING_CXXABI_DEMANGLE
 	mutable char const*	m_pDemangledName;
 #endif
     };
