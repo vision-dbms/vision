@@ -110,3 +110,23 @@ template <typename Val_T, typename Var_T> void Vxa::VMonotypeMapMakerFor<Val_T,V
 	m_iContainer.Delete (commitLimit (), m_iContainer.cardinality () - commitLimit ());
     }
 }
+
+
+/*************************************
+ *************************************
+ *****  Template Instantiations  *****
+ *************************************
+ *************************************
+ *
+ *  Recursive dependencies exist between Vxa::VMonotypeMapMakerFor<T> and templated
+ *  member functions in Vxa::VCallType2Exporter.  While other compilers are willing
+ *  to accept explicit instantiations of Vxa::VMonotypeMapMaker<T> placed in the
+ *  "Vxa_VMonotypeMapMakerFor.h" header file included at this beginning of this file,
+ *  MacOS' clang/llvm compiler is not.  That is presumably because all definitions
+ *  needed to instantiate VMonotypeMapMakerFor<T> have not yet been seen by the
+ *  compiler.  The workaround is to wait until those definitions have been made
+ *  before attempting the instantiations (read, instantiate the templates at this
+ *  point in the file, not in a file included near its beginning).
+ *
+ *****/
+#include "Vxa_VMonotypeMapMakerFor_Instantiations.h"

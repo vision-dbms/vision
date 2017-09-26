@@ -109,8 +109,8 @@ namespace Vxa {
 	universe_t *universe () const {
 	/**************************************************************************************************
 	 *  Every stock exportable has a unique universe set that is a 'const' property of the exportable.
-	 *  Normally, the stock exportable's constructor would be the natural place to create set.  That
-	 *  cannot be done, however.  Stock exportables are anonymous-namespace scoped globals.  That means
+	 *  Normally, the stock exportable's constructor would be the natural place to create that set.
+	 *  That cannot be done.  Stock exportables are anonymous-namespace scoped globals.  That means
 	 *  they are constructed when the Vxa library is loaded.  Consequently, their constructors cannot
 	 *  rely directly or indirectly on the prior construction of any other global data objects in the
 	 *  library.  Sets, on the other hand, are role players.  They require a cohort and cohort

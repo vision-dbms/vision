@@ -68,33 +68,29 @@ namespace Vxa {
 	container_t m_iContainer;
     };
 }
-
+
 
 /*************************************
-*****  Template Instantiations  *****
-*************************************/
-
-#if defined(USING_HIDDEN_DEFAULT_VISIBILITY) || defined(Vxa_VMonotypeMapMakerFor_Implementation)
+ *****  Template Instantiations  *****
+ *************************************
+ *
+ *  Recursive dependencies exist between Vxa::VMonotypeMapMakerFor<T> and templated
+ *  member functions in Vxa::VCallType2Exporter.  While other compilers are willing
+ *  to accept explicit instantiations of Vxa::VMonotypeMapMaker<T> placed in this
+ *  header file, MacOS' clang/llvm compiler is not.  That is presumably because all
+ *  definitions needed to instantiate VMonotypeMapMakerFor<T> have not yet been seen
+ *  by the compiler.  The workaround is to wait until those definitions have been made
+ *  before attempting the instantiations (read, instantiate the templates as the last
+ *  thing Vxa_VMonotypeMapMakerFor.cpp does, not here).
+ *
+ *  There is no corresponding problem declaring these instantiations as 'extern', so
+ *  when that's the goal (i.e., not their 'implementation/definition'), continue to
+ *  include them here.
+ *
+ *****/
 
 #ifndef Vxa_VMonotypeMapMakerFor_Implementation
-#define Vxa_VMonotypeMapMakerFor_Implementation extern
+#include "Vxa_VMonotypeMapMakerFor_Instantiations.h"
 #endif
 
-Vxa_VMonotypeMapMakerFor_Implementation template class Vxa_API Vxa::VMonotypeMapMakerFor<bool>;
-
-Vxa_VMonotypeMapMakerFor_Implementation template class Vxa_API Vxa::VMonotypeMapMakerFor<short>;
-Vxa_VMonotypeMapMakerFor_Implementation template class Vxa_API Vxa::VMonotypeMapMakerFor<int>;
-
-Vxa_VMonotypeMapMakerFor_Implementation template class Vxa_API Vxa::VMonotypeMapMakerFor<unsigned short>;
-Vxa_VMonotypeMapMakerFor_Implementation template class Vxa_API Vxa::VMonotypeMapMakerFor<unsigned int>;
-
-Vxa_VMonotypeMapMakerFor_Implementation template class Vxa_API Vxa::VMonotypeMapMakerFor<float>;
-Vxa_VMonotypeMapMakerFor_Implementation template class Vxa_API Vxa::VMonotypeMapMakerFor<double>;
-
-Vxa_VMonotypeMapMakerFor_Implementation template class Vxa_API Vxa::VMonotypeMapMakerFor<char const*, VString>;
-Vxa_VMonotypeMapMakerFor_Implementation template class Vxa_API Vxa::VMonotypeMapMakerFor<VString>;
-
-#endif
-
-
-#endif
+#endif // #ifndef Vxa_VMonotypeMapMakerFor_Interface
