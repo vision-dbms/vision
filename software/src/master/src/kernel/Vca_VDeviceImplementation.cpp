@@ -74,7 +74,7 @@ void Vca::VDeviceImplementation::onErrorDetect_(AbstractUse *pUse, VkStatus cons
     VString iStatusMessage;
     rStatus.getDescription (iStatusMessage);
 
-    VCohort::DefaultLogger().printf ("+++ Vca::VDeviceImplementation[%llp]: %s: %s\n", this, iUseName.content (), iStatusMessage.content ());
+    VCohort::DefaultLogger().printf ("+++ Vca::VDeviceImplementation[%p]: %s: %s\n", this, iUseName.content (), iStatusMessage.content ());
 }
 
 void Vca::VDeviceImplementation::onErrorDetect (AbstractUse *pUse, VkStatus const &rStatus) {
@@ -91,7 +91,7 @@ void Vca::VDeviceImplementation::onFirstReader () {
     incrementUserCount ();
 }
 void Vca::VDeviceImplementation::onFinalReader () {
-    VCohort::DefaultLogger().printf ("+++ Vca::VDeviceImplementation[%llp]: onFinalReader\n", this);
+    VCohort::DefaultLogger().printf ("+++ Vca::VDeviceImplementation[%p]: onFinalReader\n", this);
     decrementUserCount ();
 }
 
@@ -99,7 +99,7 @@ void Vca::VDeviceImplementation::onFirstWriter () {
     incrementUserCount ();
 }
 void Vca::VDeviceImplementation::onFinalWriter () {
-    VCohort::DefaultLogger().printf ("+++ Vca::VDeviceImplementation[%llp]: onFinalWriter\n", this);
+    VCohort::DefaultLogger().printf ("+++ Vca::VDeviceImplementation[%p]: onFinalWriter\n", this);
     decrementUserCount ();
 }
 
@@ -121,7 +121,7 @@ void Vca::VDeviceImplementation::onUserCountWasZero_() {
 void Vca::VDeviceImplementation::onUserCountIsZero () {
 //  Immediately treat devices with no users as unused even if they have I/O operations in progress...
     if (m_cUses > 0) {
-	VCohort::DefaultLogger().printf ("+++ Vca::VDeviceImplementation[%llp]::onUserCountIsZero: use count = %u.\n", this, m_cUses);
+	VCohort::DefaultLogger().printf ("+++ Vca::VDeviceImplementation[%p]::onUserCountIsZero: use count = %u.\n", this, m_cUses);
 	onUseCountIsZero_();
     }
     onUserCountIsZero_();
@@ -135,7 +135,7 @@ void Vca::VDeviceImplementation::onUseCountWasZero () {
     if (m_cUsers > 0)
 	onUseCountWasZero_();
     else {
-	VCohort::DefaultLogger().printf ("+++ Vca::VDeviceImplementation[%llp]::onUseCountWasZero: no users.\n", this);
+	VCohort::DefaultLogger().printf ("+++ Vca::VDeviceImplementation[%p]::onUseCountWasZero: no users.\n", this);
     }
 }
 void Vca::VDeviceImplementation::onUseCountWasZero_() {
@@ -147,7 +147,7 @@ void Vca::VDeviceImplementation::onUseCountIsZero () {
     if (m_cUsers > 0)
 	onUseCountIsZero_();
     else {
-	VCohort::DefaultLogger().printf ("+++ Vca::VDeviceImplementation[%llp]:: onUseCountIsZero: no users.\n", this);
+	VCohort::DefaultLogger().printf ("+++ Vca::VDeviceImplementation[%p]:: onUseCountIsZero: no users.\n", this);
     }
 }
 void Vca::VDeviceImplementation::onUseCountIsZero_() {
