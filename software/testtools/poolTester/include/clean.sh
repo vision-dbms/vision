@@ -65,7 +65,7 @@ function isntFileRetained() {
 #
 function clean() {
     rmOptions="-rf"
-    debug_on && rmOptions="$rmOptions -v"
+#    debug_on && rmOptions="$rmOptions -v"
     local file
     for file in "$scratchSpace/testpool$poolIdx"/*; do
         if isntFileRetained "$file"; then

@@ -21,7 +21,7 @@ function runScript_getValue() {
     
     # TODO: enhance robustness of runScript_getValue()
     local -a kvps # Array of key-value pairs.
-    lines_to_array "`echo $line | sed 's/,/\n/g'`" kvps # Populate array
+    lines_to_array "`echo $line | tr , '\n'`" kvps # Populate array
     for i in `seq 0 $((${#kvps[@]} - 1))`; do # Iterate over array
         # Check if this key-value-pair has the key we're looking for.
         [[ "${kvps[$i]}" =~ "[ 	]*$searchKey[ 	]*:(.*)" ]] || continue
@@ -29,6 +29,7 @@ function runScript_getValue() {
         # We've found the correct key. Output the value and return.
         local value=`trim "${BASH_REMATCH[1]}"`
 	eval "$toReturn='$(echo `eval echo \"$value\"`)'"
+	debug_inform "value found: '$value' -- '$toReturn'"
         break;
     done
 }
@@ -205,7 +206,7 @@ function runScript() {
         runScript_getValue "${threadLines[$i]}" thread threadID
         
         # Start thread.
-        debug_inform "Starting thread $threadID."
+        debug_inform "Starting thread $threadID.($threadLines[$i])"
         runScript_runThread "$scriptFile" "$threadID" &
     done
     

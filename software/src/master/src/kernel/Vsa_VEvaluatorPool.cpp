@@ -615,6 +615,7 @@ Vsa::VEvaluatorPool::VEvaluatorPool (PoolSettings *pSettings)
 , m_cToBeFlushedWorkers     (0)
 , m_cTempWorkerMinimum      (pSettings->workerMinimum ())
 , m_cShrinkTimerExpirations (0)
+, m_bExplicitlySuspended    (false)
 , m_pSettings               (pSettings)
 , m_pGenerationTail         (0)
 , m_cBCEvaluationsInProgress (0)
@@ -727,27 +728,20 @@ void Vsa::VEvaluatorPool::restart () {
 void Vsa::VEvaluatorPool::hardRestart () {
     traceInfo ("VEvaluatorPool::hardRestart");
     log ("HARD RESTARTING POOL");
-	
+
+    suspend (false);
+
 	Vca::VTrigger<VEvaluatorPool> *pOnFlushTrigger;
-	if (m_iStatus == Status_Suspended) {
-		pOnFlushTrigger = new Vca::VTrigger<VEvaluatorPool> (this, &VEvaluatorPool::resumeHardRestartSuspended);
-	} else {
-		suspend ();
-		pOnFlushTrigger = new Vca::VTrigger<VEvaluatorPool> (this, &VEvaluatorPool::resumeHardRestart);
-	}
+	pOnFlushTrigger = new Vca::VTrigger<VEvaluatorPool> (this, &VEvaluatorPool::resumeHardRestart);
 	flushWorkers (pOnFlushTrigger);
 }
 
-void Vsa::VEvaluatorPool::resumeHardRestartSuspended (Vca::VTrigger<ThisClass> *pTrigger) {
-    m_pOnFlushTrigger.clear ();
-    restart ();
-}
 
 void Vsa::VEvaluatorPool::resumeHardRestart (Vca::VTrigger<ThisClass> *pTrigger) {
     m_pOnFlushTrigger.clear ();
     restart ();
-	// it is suspended, so need to be resumed
-	resume ();
+
+    resume (false);
 }
 
 void Vsa::VEvaluatorPool::triggerOnFlush () {
@@ -795,18 +789,37 @@ void Vsa::VEvaluatorPool::flushWorkers (
 }
 
 void Vsa::VEvaluatorPool::suspend () {
+    log ("EXPLICITLY SUSPENDING POOL");
+    suspend(true);
+}
+void Vsa::VEvaluatorPool::suspend (bool explicitly) {
     traceInfo ("VEvaluatorPool::suspend");
     log ("SUSPENDING POOL");
 
-    BaseClass::suspend ();
+    if (explicitly || !isSuspended()) 
+        // try the suspend if it's explicit or we weren't already suspended
+        BaseClass::suspend ();
+
+    if (explicitly)
+        m_bExplicitlySuspended = true;
+
 }
 
 void Vsa::VEvaluatorPool::resume () {
+    log ("EXPLICITLY RESUMING POOL");
+    resume(true);
+}
+void Vsa::VEvaluatorPool::resume (bool explicitly) {
     traceInfo ("VEvaluatorPool::resume");
     log ("RESUMING POOL");
 
-    BaseClass::resume ();
-    onQueue ();
+    if (explicitly)
+        m_bExplicitlySuspended = false;
+
+    if (m_bExplicitlySuspended == false) {
+        BaseClass::resume ();
+        onQueue ();
+    }
 }
 
 /********
