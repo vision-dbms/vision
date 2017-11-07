@@ -135,8 +135,8 @@ protected:
 
     void removeFrom (VFragmentation* pParent);
 
-public:
-    void discard ();
+private:
+    static void Discard (VFragment *pFragment);
 
 //  Access
 public:
