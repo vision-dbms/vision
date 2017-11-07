@@ -304,7 +304,7 @@ PrivateFnDef void AccessDBRoot (VPrimitiveTask *pTask, char const *pDatabaseSpec
     unsigned int xSpace = 3;
     char const *pColon = strchr (pDatabaseSpec, ':');
     if (pColon) {
-	sscanf (pColon + 1, "%lu", &xSpace);
+	sscanf (pColon + 1, "%u", &xSpace);
 
 	VString iDatabaseSpecPrefix;
 	iDatabaseSpecPrefix.setTo (pDatabaseSpec, pColon - pDatabaseSpec);
