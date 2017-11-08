@@ -145,7 +145,7 @@ void VcaSamples::ThisApp::OnData (IRecipient *pRole, VString const &rString) {
 void VcaSamples::ThisApp::OnData (ISubscriber *pRole, ISubscription *pSubscription) {
     m_pSubscription.setTo (pSubscription);
 
-    fprintf (stderr, "+++ Got Subscription: %llp\n", pSubscription);
+    fprintf (stderr, "+++ Got Subscription: %p\n", pSubscription);
 }
 
 void VcaSamples::ThisApp::OnError_(Vca::IError *pError, VString const &rMessage) {

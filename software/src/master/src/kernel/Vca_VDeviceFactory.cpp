@@ -1576,14 +1576,14 @@ bool Vca::OS::Device::onEvent (
 ) const {
     rsTransfer = rIOSB.iosb$w_bcnt;
     if (0 == rsTransfer) {
-	VCohort::DefaultLogger().printf ("+++ Vca::VDeviceImplementation[%llp]::onEvent BSPut 0.\n", this);
+	VCohort::DefaultLogger().printf ("+++ Vca::VDeviceImplementation[%p]::onEvent BSPut 0.\n", this);
     }
     return true;
 }
 
 bool Vca::OS::Device::makeBlockedStatus (VkStatus &rStatus, unsigned int xStatus, XIOSB const *pIOSB, char const *pWhat) const {
     if (pIOSB->status () > 1) VCohort::DefaultLogger().printf (
-	"+++ Vca::VDeviceImplementation[%llp]::makeBlockedStatus: %08x %04x %04x%s\n", this, xStatus, pIOSB->status (), pIOSB->iosb$w_bcnt, pWhat
+	"+++ Vca::VDeviceImplementation[%p]::makeBlockedStatus: %08x %04x %04x%s\n", this, xStatus, pIOSB->status (), pIOSB->iosb$w_bcnt, pWhat
     );
     
     return rStatus.MakeBlockedStatus (xStatus);

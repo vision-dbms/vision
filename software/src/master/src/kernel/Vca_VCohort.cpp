@@ -291,7 +291,7 @@ bool Vca::VCohort::Claim::acquire (bool bWait) {
     if (!acquireTry () && bWait) {
 	do {
 	    if (TracingCohortWaitStates ()) printf (
-		"+++ Thread %llp waiting for cohort %llp%s.\n",
+		"+++ Thread %p waiting for cohort %p%s.\n",
 		m_pThread.referent (), m_pCohort.referent (), m_pCohort->isVca () ? " (Vca)" : ""
 	    );
 
@@ -301,7 +301,7 @@ bool Vca::VCohort::Claim::acquire (bool bWait) {
 	    m_pThread->waitForSignal ();
 
 	    if (TracingCohortWaitStates ())
-		printf ("+++ Thread %llp resumed.\n", m_pThread.referent ());
+		printf ("+++ Thread %p resumed.\n", m_pThread.referent ());
 	} while (!acquireTry () || !m_pThread->acquireCohorts ());
     }
     return m_bHeld;
@@ -778,7 +778,7 @@ bool Vca::VCohort::processEvents (Manager *pEM, size_t sTimeout, bool &rbEventsP
     bool bExternalSources = false;
     if (ShutdownCalled ()) {
 	defaultLogger().printf (
-	    "+++ VCohort[%llp]::processEvents: Shutting down with %s device manager, I/O count: %u, timer count: %u, message count: %u, %ums timeout%s.\n",
+	    "+++ VCohort[%p]::processEvents: Shutting down with %s device manager, I/O count: %u, timer count: %u, message count: %u, %ums timeout%s.\n",
 	    this,
 	    m_pDeviceManager ? "a" : "no",
 	    m_pDeviceManager ? m_pDeviceManager->useCount () : 0,
@@ -796,7 +796,7 @@ bool Vca::VCohort::processEvents (Manager *pEM, size_t sTimeout, bool &rbEventsP
     }
     if (EventsDisabled (sTimeout, m_tLastEvent)) {
 	defaultLogger().printf (
-	    "+++ VCohort[%llp]::processEvents: Events disabled with %s device manager, I/O count: %u, timer count: %u, message count: %u, %ums timeout%s.\n",
+	    "+++ VCohort[%p]::processEvents: Events disabled with %s device manager, I/O count: %u, timer count: %u, message count: %u, %ums timeout%s.\n",
 	    this,
 	    m_pDeviceManager ? "a" : "no",
 	    m_pDeviceManager ? m_pDeviceManager->useCount () : 0,
