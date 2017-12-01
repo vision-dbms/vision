@@ -50,8 +50,11 @@ public:
     VSymbolImplementation const *implementation () const {
 	return m_pImplementation;
     }
-    level_t level () const {
-	return this ? m_pType->level () : (level_t)USHRT_MAX;
+    static level_t levelOf (VSymbolBinding const *pBinding) {
+	return pBinding ? pBinding->leveL () : (level_t)USHRT_MAX;
+    }
+    level_t leveL () const {
+	return m_pType->level ();
     }
 
     index_t subtypeBindingLB () const {

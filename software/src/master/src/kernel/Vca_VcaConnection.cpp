@@ -74,7 +74,7 @@ Vca::VcaConnection::VcaConnection (
 
 Vca::VcaConnection::~VcaConnection () {
     if (!isAtExit ())
-	defaultLogger().printf ("+++ VcaConnection[%llp]::~VcaConnection\n", this);
+	defaultLogger().printf ("+++ VcaConnection[%p]::~VcaConnection\n", this);
     traceInfo ("Destroying VcaConnection");
 }
 
