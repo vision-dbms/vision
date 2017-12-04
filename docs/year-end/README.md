@@ -2,8 +2,8 @@ This document discusses the implementation of new pricing and holding structures
 
 Command Script Files:
 --------------
-* CreatePricingStructure-2016.csh
-* CreateHoldingStructure-2016.csh
+* [CreatePricingStructure.csh](CreatePricingStructure.csh)
+* [CreateHoldingStructure.csh](CreateHoldingStructure.csh)
 
 Each script is customized to generate the upcoming year.
 
