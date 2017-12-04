@@ -9,7 +9,7 @@ Each script is customized to generate the upcoming year.
 
 When to Run:
 ------------
-These two scripots can be executed any time before new Pricing or Holding records are
+These two scripts can be executed any time before new Pricing or Holding records are
 updated for the upcoming year.  It is assumed this DBA activity will occur at least
 once annually.
 
@@ -22,7 +22,7 @@ Stop your production cycle before running these scripts.
 The scripts default to the vision database using the same defaults as `batchvision`.
 In many installations this default is set as `$NDFPathName` and `$OSDPathName`. To confirm
 your batchvision default you can use `batchvision` and at the `V>` run `ndfPathName` to confirm.
-Override these assumptions by seeting the environment variable appropriate for your
+Override these assumptions by setting the environment variable appropriate for your
 installation.
 
 Run the scripts from the unix prompt using your best practices.
