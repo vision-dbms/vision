@@ -8320,10 +8320,10 @@ Vca::VCohortIndex const &Vca::VDeviceFactory::CohortIndex () {
  *****************************/
 
 bool Vca::VDeviceFactory::Supply (Reference &rpInstance) {
-    VCohort *pCohort = VCohort::Vca ();
-    rpInstance.setTo (reinterpret_cast<ThisClass*> (pCohort->value (CohortIndex ())));
+    rpInstance.setTo (reinterpret_cast<ThisClass*> (VCohort::VcaValue (CohortIndex ())));
     if (rpInstance.isNil ())
-	rpInstance.setTo (new ThisClass (pCohort));
+	rpInstance.setTo (new ThisClass (VCohort::Vca ()));
+
     return rpInstance.isntNil ();
 }
 
