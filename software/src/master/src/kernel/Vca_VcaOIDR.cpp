@@ -87,11 +87,22 @@ void Vca::VcaOIDX::supplyInterface_(IVUnknown::Reference &rpProxy) {
 }
 
 bool Vca::VcaOIDX::detachInterface (IVUnknown *pProxy) {
+/*********************************************************************************
+ *****  Once upon a time in VMS land, the following appeared:
+
 //  Don't argue with the next three lines of nastiness --  they work around an ugly
 //  little bug in the VMS compiler's peephole optimization of atomic operations.
+
     bool bThis = this ? true : false;
     bool bCleared = bThis && m_pProxy.interlockedClearIf (pProxy);
     return bCleared;
+
+ *****  Modern compilers such as g++ version 6.3 and beyond don't like this (actually
+ *****  comparing 'this' to null) very much so that little bit of nastiness, augmented
+ *****  by ented suitably placed null guards with the much simpler that follows...
+ *****
+ *********************************************************************************/
+    return m_pProxy.interlockedClearIf (pProxy);
 }
 
 
