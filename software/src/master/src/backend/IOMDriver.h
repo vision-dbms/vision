@@ -180,10 +180,10 @@ public:
     }
 
     IOMDriver* errorInputDriver	() const {
-	return this ? m_pErrorInputDriver.operator->() : 0;
+	return m_pErrorInputDriver;
     }
     IOMDriver* errorOutputDriver () const {
-	return this ? m_pErrorOutputDriver.operator->() : 0;
+	return m_pErrorOutputDriver;
     }
 
     bool getInputHandler (DSC_Descriptor& rInputHandler);
@@ -201,7 +201,7 @@ public:
     }
 
     unsigned int optionValue (IOMHandle const* pHandle) const {
-	return this ? m_iOptions.optionValue (pHandle, this) : 0;
+	return m_iOptions.optionValue (pHandle, this);
     }
 
     IOMPromptFormat promptFormat () const {
