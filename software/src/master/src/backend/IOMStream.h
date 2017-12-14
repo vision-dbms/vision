@@ -54,12 +54,8 @@ public:
 public:
     class WindowFrame : public VTransient {
     //  Construction
-    protected:
-	WindowFrame (WindowFrame *pPredecessor, VReference<Producer> &rpProducer);
     public:
-	WindowFrame *Push (VReference<Producer> &rpProducer) {
-	    return new WindowFrame (this, rpProducer);
-	}
+	WindowFrame (WindowFrame *pPredecessor, VReference<Producer> &rpProducer);
 
     //  Destruction
     protected:
@@ -107,6 +103,8 @@ public:
 
 //  Control
 protected:
+    void PushInput ();
+    void PopInput  ();
     void PopAllInput ();
 
     int Seek (IOMHandle const* pHandle);
