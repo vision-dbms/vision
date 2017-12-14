@@ -73,10 +73,14 @@ void UNWIND_Target::pop () {
 void UNWIND_Target::hop () {
 
 /*****  Jump to the nearest trap or destination, ...  *****/
-    if (this && DestinationStack)
+    if (DestinationStack)
         longjmp (DestinationStack->jumpBuffer, true);
 
 /*****  ... or exit the system.  *****/
+    stop ();
+}
+
+void UNWIND_Target::stop () {
     Vca::Exit (ErrorExitValue);
 }
 
@@ -90,7 +94,7 @@ void UNWIND_Target::panic () const {
 	">>> UNWIND Panic. TOS:%08X DD:%08X, Restarting?:%s <<<\n",
 	DestinationStack, this, m_fRestarting ? "Y" : "N"
     );
-    Vca::Exit (ErrorExitValue);
+    stop ();
 }
 
 
@@ -115,7 +119,11 @@ PublicFnDef void UNWIND_ThrowException () {
 
 
 /*****  ... and long jump to it:  *****/
-    DestinationStack->hop ();
+    if (DestinationStack)
+        DestinationStack->hop ();
+    else {
+        Vca::Exit (ErrorExitValue);
+    }
 }
 
 

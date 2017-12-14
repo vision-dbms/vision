@@ -78,6 +78,8 @@ public:
 
     void hop ();
 
+    static void stop ();
+
 //  Panic
 public:
     void panic () const;
