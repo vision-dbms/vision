@@ -4108,8 +4108,7 @@ PublicFnDef bool M_DisposeOfSessionGarbage () {
  *
  *****/
 void M_AND::VLogError (char const* format, VArgList const &rArgList) {
-    if (this)
-	m_pPhysicalAND->VLogError (format, rArgList);
+    m_pPhysicalAND->VLogError (format, rArgList);
 }
 
 /*---------------------------------------------------------------------------
