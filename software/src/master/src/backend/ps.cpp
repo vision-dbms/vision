@@ -5352,22 +5352,20 @@ PublicFnDef void PS_CreateNetwork (
  *
  *****/
 void PS_ASD::WriteDBUpdateInfo (unsigned int xContainer, bool replace) {
-    if (this) {
-	char *spacePathName = SpacePathName ();
-	char *p = strrchr (spacePathName, '/');
-	if (IsntNil (p))
-	    *p = '\0';
+    char *spacePathName = SpacePathName ();
+    char *p = strrchr (spacePathName, '/');
+    if (IsntNil (p))
+        *p = '\0';
 
-	DBUPDATE_OutputHeaderRecord (
-	    spacePathName,
-	    m_xSpace,
-	    PS_ASD_RootSegment (this),
-	    xContainer,
-	    replace,
-	    m_pAND->NDFPathName (),
-	    m_pAND->UpdateFO ()
-	);
-    }
+    DBUPDATE_OutputHeaderRecord (
+        spacePathName,
+        m_xSpace,
+        PS_ASD_RootSegment (this),
+        xContainer,
+        replace,
+        m_pAND->NDFPathName (),
+        m_pAND->UpdateFO ()
+    );
 }
 
 
