@@ -2673,11 +2673,14 @@ PS_AND::PS_AND (
  *****  Routine to access an object space.
  *
  *  Argument:
+ *      rpResult                - a reference to a PS_ASD* that will be
+ *                                set to point to the PS_ASD for the space
+ *                                if it was successfully accessed.
  *	spaceIndex		- the index of the space to be accessed.
  *
  *  Returns:
- *	The address of an 'accessed space descriptor' describing the accessed
- *	space.  'Nil' will be returned if space index is 0.
+ *	True if the access succeeded (rpResult can be used), false otherwise.
+ *      Access will fail if the space index is 0.
  *
  *  Notes:
  *	This routine accesses the space version consistent with the network
@@ -2686,7 +2689,7 @@ PS_AND::PS_AND (
  *	accessed by this routine.
  *
  *****/
-PS_ASD *PS_AND::AccessSpace (unsigned int spaceIndex) {
+bool PS_AND::AccessSpace (PS_ASD *&rpResult, unsigned int spaceIndex) {
 /*****  Abort if an attempt is made to map an out-of-bounds space...  *****/
     if (spaceIndex >= m_iSpaceCount) {
 	ERR_SignalFault (
@@ -2699,12 +2702,14 @@ PS_ASD *PS_AND::AccessSpace (unsigned int spaceIndex) {
     }
 /*****  Return if an attempt is made to map a non-persistent space...  *****/
     if (PS_AND_Role (this, spaceIndex) == PS_Role_Nonextant)
-	return NilOf (PS_ASD*);
+	return false;
     
 /*****  Return the space if it already exists, ...  *****/
     for (PS_ASD *asd = m_pASDList; asd; asd = asd->NextASD ()) {
-	if (spaceIndex == asd->spaceIndex ())
-	    return asd;
+	if (spaceIndex == asd->spaceIndex ()) {
+	    rpResult = asd;
+            return true;
+        }
     }
 
 #if defined(sun) && !defined (_LP64)
@@ -2720,7 +2725,8 @@ PS_ASD *PS_AND::AccessSpace (unsigned int spaceIndex) {
 #if defined(sun) && !defined (_LP64)
     MappedAddressThreshold = savedThreshold;
 #endif
-    return m_pASDList;
+    rpResult = m_pASDList;
+    return true;
 }
 
 
@@ -5615,13 +5621,13 @@ PS_ASD *PS_AND::IncorporateExternalUpdate (char const *xuSpecPathName) {
  *  Access the external update specification and its associated space, ...
  *****/
     XUIS iXUIS (xuSpecPathName);
-    PS_ASD *asd = AccessSpace (iXUIS.spaceIndex ());
 
 /*****
  *  ... validate that the external update is consistent with the current
  *	state of the space, ...
  *****/
-    if (PS_ASD_RootSegment (asd) + 1 != (int)iXUIS.SegmentOrigin ()) {
+    PS_ASD *asd = 0;
+    if (!AccessSpace (asd, iXUIS.spaceIndex ()) || PS_ASD_RootSegment (asd) + 1 != (int)iXUIS.SegmentOrigin ()) {
 	m_xUpdateStatus = PS_UpdateStatus_Inconsistent;
 	return NilOf (PS_ASD*);
     }
