@@ -96,7 +96,11 @@ protected:
 
 //  Display
 public:
-    void Display (bool fDisplaySubtypeBindings = true, unsigned int xLevel = 0) const;
+    static void Display (
+        ThisClass const *pBinding, bool fDisplaySubtypeBindings = true, unsigned int xLevel = 0
+    );
+private:
+    void Display (bool fDisplaySubtypeBindings, unsigned int xLevel) const;
 
 //  State
 protected:

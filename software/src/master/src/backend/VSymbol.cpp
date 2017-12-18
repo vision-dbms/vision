@@ -324,7 +324,7 @@ VSymbolImplementation const *VSymbol::implementationAt (VRunTimeType const *pTyp
 
 void VSymbol::DisplayBindings () const {
     printf ("Symbol: %s\n", m_pName);
-    rootBinding ()->Display (true, 1);
+    VSymbolBinding::Display (rootBinding (), true, 1);
     printf ("================\n");
 }
 
