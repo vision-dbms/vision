@@ -785,7 +785,7 @@ IOBJ_DefineNilaryMethod (TestdeckTrace) {
 }
 
 IOBJ_DefineUnaryMethod (SegFault) {
-    int p=0;
+    pointer_size_t p=0;
     int *pp = (int *)p;
     int xx = *pp;
 
