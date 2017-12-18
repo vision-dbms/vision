@@ -96,9 +96,6 @@ public:
     char const* consumedStartupExpression ();
 
 public:
-    int getPeerNameString   (char** ppString, size_t* psString);
-    int getSocketNameString (char** ppString, size_t* psString);
-
     int getTcpNodelay (int* fOnOff);
 
 //  Control

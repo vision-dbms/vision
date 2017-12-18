@@ -1023,30 +1023,10 @@ char const* IOMStream::consumedStartupExpression () {
     return pStartupExpression ? pStartupExpression : "";
 }
 
-int IOMStream::getPeerNameString (char** ppString, size_t* psString) {
-#if 0
-    return GetSocketStream ()->GetSocketPeerName (&m_iStatus, ppString, psString);
-#else
-    return BaseClass::getPeerNameString (ppString, psString);
-#endif
-}
-
-int IOMStream::getSocketNameString (char** ppString, size_t* psString) {
-#if 0
-    return GetSocketStream ()->GetSocketName (&m_iStatus, ppString, psString);
-#else
-    return BaseClass::getSocketNameString (ppString, psString);
-#endif
-}
-
 int IOMStream::getTcpNodelay (int* fOnOff) {
-#if 0
-    return GetSocketStream ()->GetTcpNodelay (&m_iStatus, fOnOff);
-#else
     *fOnOff = false;
     m_iStatus.MakeFailureStatus ();
     return -1;
-#endif
 }
 
 
@@ -1165,12 +1145,8 @@ int IOMStream::EndReception () {
  *****************/
 
 int IOMStream::SetTcpNodelay (int fOnOff) {
-#if 0
-    return GetSocketStream ()->SetTcpNodelay (&m_iStatus, fOnOff);
-#else
     m_iStatus.MakeFailureStatus ();
     return -1;
-#endif
 }
 
 
