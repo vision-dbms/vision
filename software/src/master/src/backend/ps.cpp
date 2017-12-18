@@ -5687,7 +5687,7 @@ PublicFnDef void PS_Initialize () {
 
     if (IsntNil (estring = getenv ("VisionAddressThreshold")) &&
 	(evalue = (unsigned int)strtoul (estring, (char **)NULL, 0)) > 0
-    ) MappedAddressThreshold = (void const*)evalue;
+    ) MappedAddressThreshold = reinterpret_cast<void const*>(static_cast<pointer_size_t>(evalue));
 
     if (IsntNil (estring = getenv ("VisionNSyncRetries")) &&
 	(evalue = (unsigned int)strtoul (estring, (char **)NULL, 0)) > 0
@@ -5775,7 +5775,7 @@ PublicFnDef void PS_SetMappingLimit (int limit) {
 }
 
 PublicFnDef void PS_SetAddressThreshold (unsigned int threshold) {
-    MappedAddressThreshold = (void const*)threshold;
+    MappedAddressThreshold = reinterpret_cast<void const*>(static_cast<pointer_size_t>(threshold));
 }
 
 PublicFnDef void PS_SetNSyncRetries (int retries) {
