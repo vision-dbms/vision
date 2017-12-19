@@ -187,7 +187,7 @@ PrivateFnDef char const* RTYPE_TypeIdAsString (
  *****/
 PrivateFnDef void DisplayCtrData (M_CPreamble *p, off_t offset, bool oldPreambleFormat) {
     printf (
-	"[%4d:%7d] #%-20s%11d%11d\n",
+	"[%4d:%7d] #%-20s%11ld%11ld\n",
 	M_CPreamble_POPObjectSpace (p),
 	M_CPreamble_POPContainerIndex (p),
 	RTYPE_TypeIdAsString ((RTYPE_Type)M_CPreamble_RType (p)),
@@ -221,7 +221,7 @@ PrivateFnDef void  DisplayCTPreamble (
     printf("    RTYPE:                      %s\n",
 	RTYPE_TypeIdAsString ((RTYPE_Type)M_CPreamble_RType (p)));
 
-    printf("    CT size:                    %d\n",
+    printf("    CT size:                    %ld\n",
 	M_CPreamble_Size (p) + M_SizeOfPreambleType + M_SizeOfEndMarker);
 
     printf("    Object Space:               %d\n",
@@ -253,7 +253,7 @@ PrivateFnDef off_t DisplayACTE (int fd, off_t offset, int index) {
     ReadStructure (fd, (PS_Type_FO)offset, &CTEBuf, sizeof(PS_CTE));
 
     if (!PS_CTE_IsFree (CTEBuf)) printf (
-	"\n%d\t%d\t%lu", index, PS_CTE_Segment (CTEBuf), PS_CTE_Offset (CTEBuf)
+	"\n%d\t%d\t%u", index, PS_CTE_Segment (CTEBuf), PS_CTE_Offset (CTEBuf)
     );
 
     return offset + sizeof(PS_CTE);
