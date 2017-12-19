@@ -2269,7 +2269,10 @@ PrivateFnDef void PrintAAsStrings (VPrimitiveTask* pTask, int size) {
 }
 
 
-    STD_sprintf (format, size == 0 ? "%%s" : "%%-%d.%ds", size, size);
+    if (0 == size)
+	STD_sprintf (format, "%%s");
+    else
+	STD_sprintf (format, "%%-%d.%ds", size, size);
     M_CPD* stringStore = pTask->ducStore ();
     rtype = ADescriptor.pointerRType ();
 

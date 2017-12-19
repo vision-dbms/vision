@@ -163,7 +163,7 @@ PrivateFnDef char const* RTYPE_TypeIdAsString (
 #define RTYPE_TypeId(rTypeId) #rTypeId
 
     static char const *rTypeIdStrings [] = {RTYPE_RTypeList};
-    char	errorMsg [64];
+    static char errorMsg [64];
 
     sprintf (errorMsg, "Unknown RTYPE#%d", (int)r);
     return
