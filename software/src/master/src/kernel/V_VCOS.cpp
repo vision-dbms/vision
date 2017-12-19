@@ -73,7 +73,7 @@ void V::VCOS::guarantee (size_t sNewStorage, bool bExact) {
 	if (sNewStorage >= g_sReportingThreshold) {
 	    fprintf (
 		stderr,
-		"+++ %p: Privatized %u byte%s of storage (was %u shared)\n",
+		"+++ %p: Privatized %lu byte%s of storage (was %lu shared)\n",
 		this, sNewStorage, sNewStorage != 1 ? "s" : "",  m_sStorage
 	    );
 	}

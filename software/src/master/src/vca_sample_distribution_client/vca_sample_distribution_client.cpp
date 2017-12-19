@@ -186,7 +186,7 @@ void VcaSamples::ThisApp::onPublication (IPublication *pPublication) {
 
 	pPublication->Subscribe (pSubscriber, pRecipient, false);
     } else {
-	fprintf (stderr, "+++ No Server At Address\n", arg0 ());
+	fprintf (stderr, "+++ No Server At Address %s\n", arg0 ());
 	setExitStatus (ErrorExitValue);
 	stop ();
     }
