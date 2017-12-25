@@ -761,7 +761,7 @@ void VSNFTaskHolder::start (ISingleton *pExternalObject) {
     if (m_pSNFTask) {
 	if (g_iLogger.isActive ()) {
 	    g_iLogger.printf (
-		"+++%5u: %llp->%s [%u x %u]\n", taskId (), pExternalObject,
+		"+++%5u: %p->%s [%u x %u]\n", taskId (), pExternalObject,
 		m_pSNFTask->selectorName (), m_pSNFTask->cardinality (), m_pSNFTask->parameterCount ()
 	    );
 	}
@@ -802,7 +802,7 @@ void VSNFTaskHolder::start (ICollection *pExternalObject) {
 	getRole (pICaller);
 	if (g_iLogger.isActive ()) {
 	    g_iLogger.printf (
-		"+++%5u: %llp->%s [%u x %u]\n", taskId (), pExternalObject,
+		"+++%5u: %p->%s [%u x %u]\n", taskId (), pExternalObject,
 		m_pSNFTask->selectorName (), m_pSNFTask->cardinality (), m_pSNFTask->parameterCount ()
 	    );
 	}

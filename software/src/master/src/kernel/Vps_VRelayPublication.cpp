@@ -140,7 +140,7 @@ void Vca::Vps::VRelayPublication::cancelSubscriptionMonitor () {
 
 void Vca::Vps::VRelayPublication::OnData (IPublicationReceiver *pRole, IPublication *pPublication) {
     if (m_bRestarted && TracingRelay ()) {
-	printf ("+++ %llp: Got new supplier for %s\n", this, subject ().content ());
+	printf ("+++ %p: Got new supplier for %s\n", this, subject ().content ());
     }
 
     if (!pPublication)

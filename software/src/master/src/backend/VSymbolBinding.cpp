@@ -85,15 +85,19 @@ VSymbolBindingHolder &VSymbolBinding::subtypeBindingHolder (index_t xSubtype) {
  *********************
  *********************/
 
-void VSymbolBinding::Display (bool bDisplaySubtypeBindings, unsigned int xLevel) const {
-    if (!this)
-	return;
+void VSymbolBinding::Display (
+    ThisClass const *pBinding, bool fDisplaySubtypeBindings, unsigned int xLevel
+) {
+    if (pBinding)
+        pBinding->Display (fDisplaySubtypeBindings, xLevel);
+}
 
+void VSymbolBinding::Display (bool bDisplaySubtypeBindings, unsigned int xLevel) const {
     printf ("%*c%s%s\n", xLevel * 2, ' ', m_pType->name (), m_pImplementation ? " Y" : "");
 
     if (bDisplaySubtypeBindings && m_xSubtypeBindingUB > m_xSubtypeBindingLB) {
 	unsigned int nSubtypes = m_xSubtypeBindingUB - m_xSubtypeBindingLB;
 	for (unsigned int xSubtype = 0; xSubtype < nSubtypes; xSubtype++)
-	    m_iSubtypeBindings[xSubtype]->Display (true, xLevel + 1);
+	    Display (m_iSubtypeBindings[xSubtype], true, xLevel + 1);
     }
 }

@@ -634,16 +634,19 @@ namespace Vca {
          * Low-level convenience function for associating additional thread-specific Vca data.
          */
 	static void *VcaValue (Index const &rIndex) {
-	    return Vca ()->value (rIndex);
+	    return GetValue (Vca (), rIndex);
 	}
+        static void *GetValue (VCohort const* pCohort, Index const &rIndex) {
+            return pCohort ? pCohort->getValue (rIndex) : 0;
+        }
+        void *getValue (Index const &rIndex) const {
+	    return m_iCache.value (rIndex);
+        }
 	bool attach (Index const &rIndex, void const *pValue) {
 	    return m_iCache.attach (rIndex, pValue);
 	}
 	bool detach (Index const &rIndex, void const *pValue) {
 	    return m_iCache.detach (rIndex, pValue);
-	}
-	void *value (Index const &rIndex) const {
-	    return this ? m_iCache.value (rIndex) : 0;
 	}
     //@}
 

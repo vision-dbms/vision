@@ -1291,8 +1291,11 @@ void VQueryAgent::report (char const* pMessage)
     printf ("<H2> VQuery Error </H2>\n");
     printf ("<HR>\n");
 //    printf ("<STRONG>\n");
-    printf ("Your request to access", m_pPathInfo);
-    printf (strlen (m_iServiceName) > 0 ? " the '%s'" : " a", m_iServiceName);
+    printf ("Your request to access %s", m_pPathInfo);
+    if (strlen (m_iServiceName) > 0)
+	printf (" the '%s'", m_iServiceName);
+    else
+	printf (" a");
     printf (" Vision server failed.\n%s\n", pMessage);
 //    printf ("</STRONG>\n");
     printf ("<HR>\n");

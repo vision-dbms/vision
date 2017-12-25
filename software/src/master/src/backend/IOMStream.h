@@ -54,12 +54,8 @@ public:
 public:
     class WindowFrame : public VTransient {
     //  Construction
-    protected:
-	WindowFrame (WindowFrame *pPredecessor, VReference<Producer> &rpProducer);
     public:
-	WindowFrame *Push (VReference<Producer> &rpProducer) {
-	    return new WindowFrame (this, rpProducer);
-	}
+	WindowFrame (WindowFrame *pPredecessor, VReference<Producer> &rpProducer);
 
     //  Destruction
     protected:
@@ -100,13 +96,12 @@ public:
     char const* consumedStartupExpression ();
 
 public:
-    int getPeerNameString   (char** ppString, size_t* psString);
-    int getSocketNameString (char** ppString, size_t* psString);
-
     int getTcpNodelay (int* fOnOff);
 
 //  Control
 protected:
+    void PushInput ();
+    void PopInput  ();
     void PopAllInput ();
 
     int Seek (IOMHandle const* pHandle);

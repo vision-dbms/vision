@@ -624,19 +624,23 @@ PublicFnDef void READER_SignalResponse (
     case SIGIOT:
 	READER_FatalError ("*** abort (IOT) signal received ***");
 	break;
-	
+
+#ifdef SIGEMT
     case SIGEMT:
 	READER_FatalError ("*** software generated signal received ***");
 	break;
-	
+#endif
+
     case SIGFPE:
 	READER_FatalError ("*** floating point exception signal received ***");
 	break;
-	
+
+#ifdef SIGBUS
     case SIGBUS:
 	READER_FatalError ("*** bus error signal received ***");
 	break;
-	
+#endif
+
     case SIGSEGV:
 	READER_FatalError ("*** segmentation violation signal received ***");
 	break;
@@ -665,10 +669,12 @@ PublicFnDef void READER_SignalResponse (
 	READER_FatalError ("*** user defined signal 2 signal received ***");
 	break;
 	
-//     case SIGPWR:
-// 	READER_FatalError ("*** power fail signal received ***");
-// 	break;
-	
+#ifdef SIGPWR
+    case SIGPWR:
+	READER_FatalError ("*** power fail signal received ***");
+	break;
+#endif
+
     case SIGVTALRM:
 	READER_FatalError ("*** virtual timer alarm signal received ***");
 	break;
@@ -681,9 +687,11 @@ PublicFnDef void READER_SignalResponse (
 	READER_FatalError ("*** SIGIO signal received ***");
 	break;
 	
-//     case SIGWINDOW:
-// 	READER_FatalError ("*** window or mouse signal received ***");
-// 	break;
+#ifdef SIGWINDOW
+    case SIGWINDOW:
+	READER_FatalError ("*** window or mouse signal received ***");
+	break;
+#endif
 
     case SIGCHLD:
 	if (ChildProcess) READER_FatalError (

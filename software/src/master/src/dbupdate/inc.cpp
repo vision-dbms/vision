@@ -1100,7 +1100,7 @@ PrivateFnDef int ConvertDataFileToSegment (
 	else if (outsize < 0)
 	{
 	    fprintf (stderr,
-		     "Error: Inconsistent state. origEnd:%08X; endPtr:%08X\n",
+		     "Error: Inconsistent state. origEnd:%p; endPtr:%p\n",
 		     origEnd, endPtr);
 	    return true;
 	}
@@ -1309,7 +1309,7 @@ PrivateFnDef void SetUp (
 	    display_error ("Error creating ISpec file");
 	    exit (ErrorExitValue);
 	}
-	fprintf (Ispec, "XUISpecFile:%04d:%04d:%04d\n",
+	fprintf (Ispec, "XUISpecFile:%04ld:%04ld:%04d\n",
 					      osDUMP_SpaceName,
 					      osDUMP_ContSegment + 1,
 					      0);
@@ -1376,7 +1376,7 @@ PrivateFnDef void CloseDataDescriptionFile (
 )
 {
     rewind (Ispec);
-    fprintf (Ispec, "XUISpecFile:%04d:%04d:%04d",
+    fprintf (Ispec, "XUISpecFile:%04ld:%04ld:%04d",
 			osDUMP_SpaceName,
 			osDUMP_ContSegment + 1,
 			totalFileCount

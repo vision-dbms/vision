@@ -116,7 +116,8 @@ PublicFnDef char *IO_pfgets (char const* prompt, char *pBuffer, size_t sBuffer) 
 	    bNotDone = false;
 	    break;
 	case VkStatusType_Blocked:
-	    pChannel->Wait ();
+            if (pChannel)
+                pChannel->Wait ();
 	    break;
 	default:
 	    pBuffer = NilOf (char*);

@@ -30,6 +30,8 @@
 #include "RTlink.h"
 #include "RTrefuv.h"
 
+class rtVECTOR_CType;
+
 class VBlockTask;
 class VDescriptor;
 class VectorReconstructor;
@@ -341,17 +343,32 @@ private:
 	g_cAllocations++;
     }
 
-public:
-    rtVECTOR_PMRDC *Append (rtVECTOR_USDC *pUSDC, unsigned int xOrigin, unsigned int sRun) {
-	rtVECTOR_PMRDC *pResult = this;
-	if (this && pUSDC == m_pUSDC)
-	    m_iSegmentLength += sRun;
-	else if (sRun) {
-	    pResult = new rtVECTOR_PMRDC (pUSDC, xOrigin, sRun);
-	    if (this)
-		m_pSuccessor = pResult;
+private:
+    static bool NewTail (rtVECTOR_PMRDC *&rpChainTail, rtVECTOR_USDC *const pUSDC, unsigned int xOrigin, unsigned int sRun) {
+    //  Return true if a new PMRD was created, false otherwise...
+	if (sRun > 0) {
+	    rpChainTail = new rtVECTOR_PMRDC (pUSDC, xOrigin, sRun);
+	    return true;
 	}
-	return pResult;
+	return false;
+    }
+
+    bool UpdateTail (rtVECTOR_PMRDC *&rpChainTail, rtVECTOR_USDC *const pUSDC, unsigned int xOrigin, unsigned int sRun) {
+    //  Return true if a new PMRD was created, false otherwise...
+	bool bNewTail = false;
+	if (pUSDC == m_pUSDC)
+	    m_iSegmentLength += sRun;
+	else if (NewTail (m_pSuccessor, pUSDC, xOrigin, sRun)) {
+	    rpChainTail = m_pSuccessor;
+	    bNewTail = true;
+	}
+	return bNewTail;
+    }
+
+public:
+    static bool Append (rtVECTOR_PMRDC *&rpChainTail, rtVECTOR_USDC *const pUSDC, unsigned int xOrigin, unsigned int sRun) {
+    //  Return true if a new PMRD was created, false otherwise...
+	return rpChainTail ? rpChainTail->UpdateTail (rpChainTail, pUSDC, xOrigin, sRun) : NewTail (rpChainTail, pUSDC, xOrigin, sRun);
     }
 
 //  Destruction
@@ -443,12 +460,11 @@ public:
     rtVECTOR_CType (rtVECTOR_Handle *pVector);
 
     void AppendPMRD (rtVECTOR_USDC *pUSDC, unsigned int xOrigin, unsigned int sRun) {
-	rtVECTOR_PMRDC *pNewPMRD = m_pPMRDChainTail->Append (pUSDC, xOrigin, sRun);
-	if (m_pPMRDChainTail != pNewPMRD) {
-	    m_pPMRDChainTail = pNewPMRD;
+    //  Append returns true if the PMRD list was extended, false otherwise...
+	if (rtVECTOR_PMRDC::Append (m_pPMRDChainTail, pUSDC, xOrigin, sRun)) {
 	    m_iPMRDCount++;
 	    if (!m_pPMRDChainHead)
-		m_pPMRDChainHead = pNewPMRD;
+		m_pPMRDChainHead = m_pPMRDChainTail;
 	}
     }
     void AppendPMRD (unsigned int xSegment, unsigned int xOrigin, unsigned int sRun) {

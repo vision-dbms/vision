@@ -2135,7 +2135,10 @@ PrivateFnDef void PrintAAsStrings (VPrimitiveTask* pTask, int size) {
     }
 
     char format[32];
-    STD_sprintf (format, size == 0 ? "%%s" : "%%-%d.%ds", size, size);
+    if (0 == size)
+	STD_sprintf (format, "%%s");
+    else
+	STD_sprintf (format, "%%-%d.%ds", size, size);
 
     switch (ADescriptor.pointerRType ()) {
     case RTYPE_C_IntUV: {

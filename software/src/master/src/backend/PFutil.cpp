@@ -307,7 +307,7 @@ PrivateFnDef void AccessDBRoot (VPrimitiveTask *pTask, char const *pDatabaseSpec
     unsigned int xSpace = 3;
     char const *pColon = strchr (pDatabaseSpec, ':');
     if (pColon) {
-	sscanf (pColon + 1, "%lu", &xSpace);
+	sscanf (pColon + 1, "%u", &xSpace);
 
 	VString iDatabaseSpecPrefix;
 	iDatabaseSpecPrefix.setTo (pDatabaseSpec, pColon - pDatabaseSpec);
@@ -1917,7 +1917,7 @@ struct SessionAttribute {
 PrivateFnDef void SetSessionAttributeToDouble (
     VPrimitiveTask *pTask, SessionAttribute *parameter, double value
 ) {
-    M_ASD *asd;
+    M_ASD *asd = 0;
 
     if (0 == parameter->spaceIndex) switch (parameter->parameterIndex) {
     case EP_VisionRefAlignCDRatio:
@@ -1928,7 +1928,7 @@ PrivateFnDef void SetSessionAttributeToDouble (
 	break;
     }
     else if (
-	IsntNil (asd = pTask->codDatabase ()->AccessSpace (parameter->spaceIndex))
+        pTask->codDatabase ()->AccessSpace (asd, parameter->spaceIndex)
     ) switch (parameter->parameterIndex) {
     case SP_MSSOverride:
 	asd->PhysicalASD ()->SetMSSOverrideTo (value);
@@ -1956,7 +1956,7 @@ PrivateFnDef void SetSessionAttributeToDouble (
 PrivateFnDef void SetSessionAttributeToInteger (
     VPrimitiveTask *pTask, SessionAttribute *parameter, int value
 ) {
-    M_ASD *asd;
+    M_ASD *asd = 0;
 
     if (0 == parameter->spaceIndex) switch (parameter->parameterIndex) {
     case NP_DoingCompaction:
@@ -2110,7 +2110,7 @@ PrivateFnDef void SetSessionAttributeToInteger (
 	break;
     }
     else if (
-	IsntNil (asd = pTask->codDatabase ()->AccessSpace (parameter->spaceIndex))
+        pTask->codDatabase ()->AccessSpace (asd, parameter->spaceIndex)
     ) switch (parameter->parameterIndex) {
     case SP_ForceUpdate:
 	if (value)
@@ -2148,6 +2148,7 @@ PrivateFnDef void SetSessionAttributeToInteger (
 PrivateFnDef void SetSessionAttributeToString (
     VPrimitiveTask *pTask, SessionAttribute *parameter, char const *value
 ) {
+    M_ASD *asd = 0;
     if (0 == parameter->spaceIndex) switch (parameter->parameterIndex) {
     case NP_UpdateAnnotation:
 	pTask->codDatabase ()->SetUpdateAnnotationTo (value);
@@ -2173,8 +2174,9 @@ PrivateFnDef void SetSessionAttributeToString (
     default:
 	break;
     }
+//  What effect does the following code have and can it removed? (mjc - 2017-12-18)
     else if (
-	IsntNil (pTask->codDatabase ()->AccessSpace (parameter->spaceIndex))
+	pTask->codDatabase ()->AccessSpace (asd, parameter->spaceIndex)
     ) switch (parameter->parameterIndex) {
     default:
     case NP_UpdateAnnotation:

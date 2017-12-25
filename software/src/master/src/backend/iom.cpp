@@ -232,11 +232,25 @@ IOMDriver* IOMHandle::driver () const {
     return m_xDriverValid && m_xDriver < DriverTableSize
 	? DriverTable[m_xDriver] : NilOf (IOMDriver*);
 }
-
 
 IOMChannelType IOMHandle::channelType () const {
     IOMDriver* pDriver = driver ();
     return pDriver ? pDriver->channelType () : IOMChannelType_Null;
+}
+
+IOMDriver* IOMHandle::errorInputDriver () const {
+    IOMDriver* pDriver = driver ();
+    return pDriver ? pDriver->errorInputDriver () : 0;
+}
+
+IOMDriver* IOMHandle::errorOutputDriver () const {
+    IOMDriver* pDriver = driver ();
+    return pDriver ? pDriver->errorOutputDriver () : 0;
+}
+
+unsigned int IOMHandle::optionValue () const {
+    IOMDriver* pDriver = driver ();
+    return pDriver ? pDriver->optionValue (this) : 0;
 }
 
 IOMState IOMHandle::state () const {

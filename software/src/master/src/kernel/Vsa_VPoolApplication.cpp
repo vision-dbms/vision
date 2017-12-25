@@ -571,7 +571,7 @@ void Vsa::VPoolApplication::Restart (
 bool Vsa::VPoolApplication::GetU32Value_(
     IVReceiver<Vca::U32> *pResult, VString const &rKey
 ) {
-	if (m_pEvaluatorPool) {
+    if (m_pEvaluatorPool) {
 	if (rKey.equalsIgnoreCase("QueryCount")) pResult->OnData(m_pEvaluatorPool->queriesProcessed ());
 	else if (rKey.equalsIgnoreCase ("MinWorkers")) pResult->OnData(m_pEvaluatorPool->workerMinimum ());
 	else if (rKey.equalsIgnoreCase ("MaxWorkers")) pResult->OnData(m_pEvaluatorPool->workerMaximum ());
@@ -580,9 +580,8 @@ bool Vsa::VPoolApplication::GetU32Value_(
 	else if (rKey.equalsIgnoreCase ("ShrinkTimeRemaining")) pResult->OnData(m_pEvaluatorPool->shrinkTimeRemaining());
 	else if (rKey.equalsIgnoreCase ("AssertionsFailed")) pResult->OnData(m_pEvaluatorPool->checkAssertions());
 	else return BaseClass::GetU32Value_(pResult, rKey);
-	}
+    }
     else return BaseClass::GetU32Value_(pResult, rKey);
-    return true;
 }
 
 bool Vsa::VPoolApplication::GetStringValue_(
@@ -607,15 +606,15 @@ bool Vsa::VPoolApplication::GetStringValue_(
 		pResult->OnData (rResult);
 	} else if (rKey.equalsIgnoreCase ("quickStatsHeader")) {
 		VString rResult;
-		char iAppendToResult[13];
-		sprintf(iAppendToResult, " | %10s", "Clients");
+		char iAppendToResult[16];
+		snprintf(iAppendToResult, sizeof(iAppendToResult), " | %10s", "Clients");
 		m_pEvaluatorPool->quickStatsHeader (rResult);
 		rResult << iAppendToResult;
 		pResult->OnData (rResult);
 	} else if (rKey.equalsIgnoreCase ("quickStats")) {
 		VString rResult;
-		char iAppendToResult[13];
-		sprintf(iAppendToResult, " | %10d", activeOfferCount ());
+		char iAppendToResult[16];
+		snprintf(iAppendToResult, sizeof(iAppendToResult), " | %10d", activeOfferCount ());
 		m_pEvaluatorPool->quickStats (rResult);
 		rResult << iAppendToResult;
 		pResult->OnData (rResult);
@@ -637,9 +636,8 @@ bool Vsa::VPoolApplication::GetStringValue_(
 		pResult->OnData (rResult);
 	}
 	else return BaseClass::GetStringValue_(pResult, rKey);
-	}
-	else return BaseClass::GetStringValue_(pResult, rKey);
-    return true;
+    }
+    else return BaseClass::GetStringValue_(pResult, rKey);
 }
 
 /****
