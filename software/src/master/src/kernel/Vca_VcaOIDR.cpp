@@ -97,9 +97,12 @@ bool Vca::VcaOIDX::detachInterface (IVUnknown *pProxy) {
     bool bCleared = bThis && m_pProxy.interlockedClearIf (pProxy);
     return bCleared;
 
- *****  Modern compilers such as g++ version 6.3 and beyond don't like this (actually
- *****  comparing 'this' to null) very much so that little bit of nastiness, augmented
- *****  by ented suitably placed null guards with the much simpler that follows...
+ *****  Modern compilers such as g++ version 6.3 and beyond don't like this very much
+ *****  (actually, they don't like comparing 'this' to null).  To keep those compilers
+ *****  happy and healthy (and who doesn't compilers that are happy and healthy), note
+ *****
+ *****  1) this routine is a virtual member function, so 'this' cannot be NULL and
+ *****  2) replace the nastiness with with the much simpler...
  *****
  *********************************************************************************/
     return m_pProxy.interlockedClearIf (pProxy);
