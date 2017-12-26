@@ -582,6 +582,7 @@ bool Vsa::VPoolApplication::GetU32Value_(
 	else return BaseClass::GetU32Value_(pResult, rKey);
     }
     else return BaseClass::GetU32Value_(pResult, rKey);
+    return true;
 }
 
 bool Vsa::VPoolApplication::GetStringValue_(
@@ -638,6 +639,7 @@ bool Vsa::VPoolApplication::GetStringValue_(
 	else return BaseClass::GetStringValue_(pResult, rKey);
     }
     else return BaseClass::GetStringValue_(pResult, rKey);
+    return true;
 }
 
 /****
