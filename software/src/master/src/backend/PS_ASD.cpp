@@ -36,7 +36,7 @@
  ********************/
 
 bool PS_ASD::GetCTE (unsigned int xContainer, PS_CTE &rResult) const {
-    if (this && xContainer < CTEntryCount ()) {
+    if (xContainer < CTEntryCount ()) {
 	rResult = PS_ASD_CTEntry (this, xContainer);
 	return true;
     }

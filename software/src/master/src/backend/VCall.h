@@ -119,8 +119,11 @@ public:
     unsigned int callerDecompilationIndent () const;
     unsigned int callerDecompilationOffset () const;
 
+    static unsigned int CallerPCOf (VCall const *pCall) {
+        return pCall ? pCall->callerPC () : UINT_MAX;
+    }
     unsigned int callerPC () const {
-	return this ? m_xCallerPC : UINT_MAX;
+	return m_xCallerPC;
     }
 
     rtLINK_CType* callerSubset () const {

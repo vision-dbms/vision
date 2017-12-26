@@ -249,8 +249,7 @@ VFragment::~VFragment () {
  *  'discard'  *
  ***************/
 
-void VFragment::discard () {
-    VFragment* pThisFragment = this;
+void VFragment::Discard (VFragment* pThisFragment) {
     while (pThisFragment) {
         VFragment* pNextFragment = pThisFragment->next ();
 

@@ -35,13 +35,8 @@ public:
 
     IOMDriver* driver () const;
 
-    IOMDriver* errorInputDriver () const {
-	return driver ()->errorInputDriver ();
-    }
-
-    IOMDriver* errorOutputDriver () const {
-	return driver ()->errorOutputDriver ();
-    }
+    IOMDriver* errorInputDriver () const;
+    IOMDriver* errorOutputDriver () const;
 
     unsigned int index () const {
 	return m_xDriverValid ? m_xDriver + 1 : 0;
@@ -50,9 +45,7 @@ public:
     IOMOption optionIndex () const {
 	return (IOMOption)m_xOption;
     }
-    unsigned int optionValue () const {
-	return driver ()->optionValue (this);
-    }
+    unsigned int optionValue () const;
 
     size_t seekOffset () const {
 	return m_iSeekOffset;

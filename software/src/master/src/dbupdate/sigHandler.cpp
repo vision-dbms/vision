@@ -51,18 +51,22 @@ PublicFnDef void handle_signal (
 	display_error ("*** abort (IOT) signal received ***");
 	break;
 	
+#ifdef SIGEMT
     case SIGEMT:
 	display_error ("*** software generated signal received ***");
 	break;
+#endif
 	
     case SIGFPE:
 	sprintf(fpebuf,"*** floating point exception signal received (%d) ***",code);
 	display_error (fpebuf);
 	break;
 	
+#ifdef SIGBUS
     case SIGBUS:
 	display_error ("*** bus error signal received ***");
 	break;
+#endif
 	
     case SIGSEGV:
 	display_error ("*** segmentation violation signal received ***");
@@ -92,9 +96,11 @@ PublicFnDef void handle_signal (
 	display_error ("*** user defined signal 2 signal received ***");
 	break;
 	
-//     case SIGPWR:
-// 	display_error ("*** power fail signal received ***");
-// 	break;
+#ifdef SIGPWR
+    case SIGPWR:
+	display_error ("*** power fail signal received ***");
+	break;
+#endif
 	
     case SIGVTALRM:
 	display_error ("*** virtual timer alarm signal received ***");
@@ -108,9 +114,11 @@ PublicFnDef void handle_signal (
 	display_error ("*** SIGIO signal received ***");
 	break;
 	
-//     case SIGWINDOW:
-// 	display_error ("*** window or mouse signal received ***");
-// 	break;
+#ifdef SIGWINDOW
+    case SIGWINDOW:
+	display_error ("*** window or mouse signal received ***");
+	break;
+#endif
 	
     case SIGCHLD:
         display_error ("*** child status has changed ***");
@@ -166,9 +174,13 @@ PublicFnDef int set_signals (
 	STD_sigvector (SIGILL, &vec, 0) == -1 ||
 	STD_sigvector (SIGTRAP, &vec, 0) == -1 ||
 	STD_sigvector (SIGIOT, &vec, 0) == -1 ||
+#ifdef SIGEMT
 	STD_sigvector (SIGEMT, &vec, 0) == -1 ||
+#endif
 	STD_sigvector (SIGFPE, &vec, 0) == -1 ||
+#ifdef SIGBUS
 	STD_sigvector (SIGBUS, &vec, 0) == -1 ||
+#endif
 	STD_sigvector (SIGSEGV, &vec, 0) == -1 ||
 	STD_sigvector (SIGSYS, &vec, 0) == -1 ||
 	STD_sigvector (SIGPIPE,  &vec, 0) == -1 ||
@@ -176,13 +188,15 @@ PublicFnDef int set_signals (
 	STD_sigvector (SIGTERM,  &vec, 0) == -1 ||
 	STD_sigvector (SIGUSR1,  &vec, 0) == -1 ||
 	STD_sigvector (SIGUSR2,  &vec, 0) == -1 ||
-/****
+#ifdef SIGPWR
 	STD_sigvector (SIGPWR,  &vec, 0) == -1 ||
-****/
+#endif
 	STD_sigvector (SIGVTALRM,  &vec, 0) == -1 ||
 	STD_sigvector (SIGPROF,  &vec, 0) == -1 ||
 	STD_sigvector (SIGIO,  &vec, 0) == -1 // ||
-//	STD_sigvector (SIGWINDOW, &vec, 0) == -1
+#ifdef SIGWINDOW
+	STD_sigvector (SIGWINDOW, &vec, 0) == -1
+#endif
     ) {
 	    return(0);
 	    }

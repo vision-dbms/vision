@@ -198,8 +198,10 @@ void Vca::VPassiveDirectiveAgent::onPlumbing (
 }
 
 bool Vca::VPassiveDirectiveAgent::onInputLine (char const *pLine, size_t sLine) {
-    if (g_bTracingLineGrabber)
-	fprintf (stderr, "+++ Got Input: <%*.*s>\n", sLine, sLine, pLine);
+    if (g_bTracingLineGrabber) {
+        int const isLine = static_cast<int> (sLine);
+	fprintf (stderr, "+++ Got Input: <%*.*s>\n", isLine, isLine, pLine);
+    }
     return true;
 }
 void Vca::VPassiveDirectiveAgent::onInputDone () {

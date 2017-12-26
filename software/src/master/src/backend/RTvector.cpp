@@ -6872,7 +6872,7 @@ void rtVECTOR_Handle::UpdateVectorSetPositionalState (
 }
 
 /***** Create a ptoken constructor for the target ... *****/
-    rtPTOKEN_CType *targetPTokenC = targetPTokenC = getPToken ()->makeAdjustments ();
+    rtPTOKEN_CType *targetPTokenC = getPToken ()->makeAdjustments ();
 
 /*****  Get the modified ptoken for the usegment uvector ... *****/
     rtPTOKEN_CType *ptokenC;

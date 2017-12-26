@@ -1137,7 +1137,7 @@ PrivateVarDef MENU_Choice categoryChoices[] = {
 
 PrivateFnDef int validateAccount()
 {
-    char buffer[81];
+    char buffer[128];
     ERR_displayStr(" Validating Account and Date...",FALSE);
 
     if (isBlank(FORM_fieldValue(IOBJECT)))
@@ -1147,7 +1147,7 @@ PrivateFnDef int validateAccount()
     }
 
     strToUpper(FORM_fieldValue(IOBJECT));
-    sprintf(buffer, "!__tmpAccount <- Named Account \\%s", FORM_fieldValue(IOBJECT));
+    snprintf(buffer, sizeof(buffer), "!__tmpAccount <- Named Account \\%s", FORM_fieldValue(IOBJECT));
     RS_dumpOutput();
     if (RS_sendAndCheck(buffer, ">>>"))
     {
@@ -1164,7 +1164,7 @@ PrivateFnDef int validateAccount()
     return(FALSE);
 }
 PrivateFnDef int validateCompany(char const *str) {
-    char buffer[81];
+    char buffer[128];
     ERR_displayStr(str,FALSE);
 
     if (isBlank(FORM_fieldValue(IOBJECT)))
@@ -1174,7 +1174,11 @@ PrivateFnDef int validateCompany(char const *str) {
     }
 
     strToUpper(FORM_fieldValue(IOBJECT));
-    sprintf(buffer, "!__tmpCompany <- Named Company \\%s", FORM_fieldValue(IOBJECT));
+    snprintf(
+        buffer,
+	sizeof(buffer),
+	"!__tmpCompany <- Named Company \\%s", FORM_fieldValue(IOBJECT)
+    );
     RS_dumpOutput();
     if (RS_sendAndCheck(buffer, ">>>"))
     {
@@ -1182,7 +1186,7 @@ PrivateFnDef int validateCompany(char const *str) {
 	return(TRUE);
     }
 
-    sprintf(buffer, "__tmpCompany name");
+    snprintf(buffer, sizeof(buffer), "__tmpCompany name");
     RS_sendLine(buffer);
     if( !RS_readLine(buffer,80) )
 	buffer[0] = '\0';
@@ -1191,7 +1195,7 @@ PrivateFnDef int validateCompany(char const *str) {
     return(FALSE);
 }
 PrivateFnDef int validateSecurity() {
-    char buffer[81];
+    char buffer[128];
     ERR_displayStr(" Validating Security and Date...",FALSE);
 
     if (isBlank(FORM_fieldValue(IOBJECT)))
@@ -1201,7 +1205,11 @@ PrivateFnDef int validateSecurity() {
     }
 
     strToUpper(FORM_fieldValue(IOBJECT));
-    sprintf(buffer, "!__tmpSecurity <- Named Security \\%s", FORM_fieldValue(IOBJECT));
+    snprintf(
+	buffer,
+	sizeof(buffer),
+	"!__tmpSecurity <- Named Security \\%s", FORM_fieldValue(IOBJECT)
+    );
     RS_dumpOutput();
     if (RS_sendAndCheck(buffer, ">>>"))
     {
@@ -1209,7 +1217,7 @@ PrivateFnDef int validateSecurity() {
 	return(TRUE);
     }
 
-    sprintf(buffer, "__tmpSecurity name");
+    snprintf(buffer, sizeof(buffer), "__tmpSecurity name");
     RS_sendLine(buffer);
     if( !RS_readLine(buffer,80) )
 	buffer[0] = '\0';
@@ -1219,7 +1227,7 @@ PrivateFnDef int validateSecurity() {
 }
 
 PrivateFnDef void validateInitial() {
-    char buffer[81];
+    char buffer[128];
 
     GotValidObjectAndDate = FALSE;
 
@@ -1253,19 +1261,23 @@ PrivateFnDef void validateInitial() {
 	return;
     }
 
-    sprintf(buffer, "!__tmpDate <- %04d%02d%02d asDate", dYear,dMonth,dDay);
+    snprintf(buffer, sizeof(buffer), "!__tmpDate <- %04d%02d%02d asDate", dYear,dMonth,dDay);
     if (RS_sendAndCheck(buffer, "       NA"))
     {
 	ERR_displayPause(" Invalid Date");
 	return;
     }
-    sprintf(FormattedDate,"%02d/%02d/%04d",dMonth,dDay,dYear);
-    sprintf(UnFormattedDate, "%04d%02d%02d", dYear,dMonth,dDay);
+    snprintf(FormattedDate, sizeof(FormattedDate),"%02d/%02d/%04d",dMonth,dDay,dYear);
+    snprintf(UnFormattedDate, sizeof(UnFormattedDate), "%04d%02d%02d", dYear,dMonth,dDay);
 
     if( DateType == EstimateDate )
     {
 	strToUpper(FORM_fieldValue(IOBJECT));
-	sprintf(buffer, "!__tmpSource <- Named EstimateSource \\%s", FORM_fieldValue(ISOURCE));
+	snprintf(
+	    buffer,
+	    sizeof(buffer),
+	    "!__tmpSource <- Named EstimateSource \\%s", FORM_fieldValue(ISOURCE)
+	);
 	RS_dumpOutput();
 	if (RS_sendAndCheck(buffer, ">>>"))
 	{

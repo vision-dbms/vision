@@ -387,7 +387,7 @@ namespace Vca {
 	void OnData (ExportStubClient *pRole, Data &rData) {
 	    if (m_iData.contentSize () > 0) {
 		fprintf (
-		    stderr, "%s %p:OnData: Orphaned %u data bytes\n", rttName ().content (), this,
+		    stderr, "%s %p:OnData: Orphaned %lu data bytes\n", rttName ().content (), this,
 		    m_iData.contentSize ()
 		);
 		fflush (stderr);
