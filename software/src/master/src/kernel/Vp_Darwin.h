@@ -33,6 +33,8 @@
 
 #define MAXIMUM_WAIT_OBJECTS	FD_SETSIZE
 
+#define gethostid		Vk_gethostid
+
 #define USING(x) using x;
 
 #ifndef DECLSPEC_DLLEXPORT
