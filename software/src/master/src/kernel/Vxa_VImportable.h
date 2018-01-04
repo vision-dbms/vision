@@ -11,6 +11,7 @@
  *****  Declarations  *****
  **************************/
 
+#include "Vxa_VResultBuilder.h"
 #include "Vxa_VScalar.h"
 
 /*************************
@@ -21,8 +22,6 @@ namespace Vxa {
     class VCallType1Importer;
     class VCallType2Importer;
     class VTask;
-
-    Vxa_API    void InitializeStockImportables ();
 
 /***********************************
  *----  class VImportableType  ----*
@@ -46,7 +45,7 @@ namespace Vxa {
  *----  template <typename T> class VImportable  ----*
  *****************************************************/
 
-    template <typename T> class Vxa_API VImportable : virtual public VImportableType {
+    template <typename T> class VImportable : virtual public VImportableType {
 	DECLARE_FAMILY_MEMBERS (VImportable<T>, VImportableType);
 
     //  Aliases
@@ -120,5 +119,30 @@ namespace Vxa {
     template <typename T> VImportable<T>* VImportable<T>::g_pTraits = 0;
 }
 
+
+/*************************************
+*****  Template Instantiations  *****
+*************************************/
+
+#if defined(USING_HIDDEN_DEFAULT_VISIBILITY) || defined(Vxa_VImportable_Implementation)
+
+#ifndef Vxa_VImportable_Implementation
+#define Vxa_VImportable_Implementation extern
+#endif
+
+Vxa_VImportable_Implementation template class Vxa_API Vxa::VImportable<bool>;
+Vxa_VImportable_Implementation template class Vxa_API Vxa::VImportable<short>;
+Vxa_VImportable_Implementation template class Vxa_API Vxa::VImportable<unsigned short>;
+Vxa_VImportable_Implementation template class Vxa_API Vxa::VImportable<int>;
+Vxa_VImportable_Implementation template class Vxa_API Vxa::VImportable<unsigned int>;
+Vxa_VImportable_Implementation template class Vxa_API Vxa::VImportable<float>;
+Vxa_VImportable_Implementation template class Vxa_API Vxa::VImportable<double>;
+
+Vxa_VImportable_Implementation template class Vxa_API Vxa::VImportable<char const*>;
+Vxa_VImportable_Implementation template class Vxa_API Vxa::VImportable<VString const&>;
+
+Vxa_VImportable_Implementation template class Vxa_API Vxa::VImportable<Vxa::VResultBuilder&>;
+
+#endif
 
 #endif

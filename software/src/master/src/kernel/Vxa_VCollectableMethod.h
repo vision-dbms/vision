@@ -15,6 +15,7 @@
  **************************/
 
 #include "Vxa_VCollectableCollectionOf.h"
+#include "Vxa_VImportable.h"
 
 /*************************
  *****  Definitions  *****

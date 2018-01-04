@@ -1,4 +1,5 @@
 /*****  Vxa_VMonotypeMapMakerFor Implementation  *****/
+#define Vxa_VMonotypeMapMakerFor_Implementation
 
 /************************
  ************************
@@ -109,25 +110,23 @@ template <typename Val_T, typename Var_T> void Vxa::VMonotypeMapMakerFor<Val_T,V
 	m_iContainer.Delete (commitLimit (), m_iContainer.cardinality () - commitLimit ());
     }
 }
-
 
 
-/****************************
- ****************************
- *****  Instantiations  *****
- ****************************
- ****************************/
-
-template class Vxa_API Vxa::VMonotypeMapMakerFor<bool>;
-
-template class Vxa_API Vxa::VMonotypeMapMakerFor<short>;
-template class Vxa_API Vxa::VMonotypeMapMakerFor<int>;
-
-template class Vxa_API Vxa::VMonotypeMapMakerFor<unsigned short>;
-template class Vxa_API Vxa::VMonotypeMapMakerFor<unsigned int>;
-
-template class Vxa_API Vxa::VMonotypeMapMakerFor<float>;
-template class Vxa_API Vxa::VMonotypeMapMakerFor<double>;
-
-template class Vxa_API Vxa::VMonotypeMapMakerFor<char const*,VString>;
-template class Vxa_API Vxa::VMonotypeMapMakerFor<VString>;
+/*************************************
+ *************************************
+ *****  Template Instantiations  *****
+ *************************************
+ *************************************
+ *
+ *  Recursive dependencies exist between Vxa::VMonotypeMapMakerFor<T> and templated
+ *  member functions in Vxa::VCallType2Exporter.  While other compilers are willing
+ *  to accept explicit instantiations of Vxa::VMonotypeMapMaker<T> placed in the
+ *  "Vxa_VMonotypeMapMakerFor.h" header file included at this beginning of this file,
+ *  MacOS' clang/llvm compiler is not.  That is presumably because all definitions
+ *  needed to instantiate VMonotypeMapMakerFor<T> have not yet been seen by the
+ *  compiler.  The workaround is to wait until those definitions have been made
+ *  before attempting the instantiations (read, instantiate the templates at this
+ *  point in the file, not in a file included near its beginning).
+ *
+ *****/
+#include "Vxa_VMonotypeMapMakerFor_Instantiations.h"

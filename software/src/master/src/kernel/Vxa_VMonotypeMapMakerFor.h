@@ -68,6 +68,29 @@ namespace Vxa {
 	container_t m_iContainer;
     };
 }
+
 
+/*************************************
+ *****  Template Instantiations  *****
+ *************************************
+ *
+ *  Recursive dependencies exist between Vxa::VMonotypeMapMakerFor<T> and templated
+ *  member functions in Vxa::VCallType2Exporter.  While other compilers are willing
+ *  to accept explicit instantiations of Vxa::VMonotypeMapMaker<T> placed in this
+ *  header file, MacOS' clang/llvm compiler is not.  That is presumably because all
+ *  definitions needed to instantiate VMonotypeMapMakerFor<T> have not yet been seen
+ *  by the compiler.  The workaround is to wait until those definitions have been made
+ *  before attempting the instantiations (read, instantiate the templates as the last
+ *  thing Vxa_VMonotypeMapMakerFor.cpp does, not here).
+ *
+ *  There is no corresponding problem declaring these instantiations as 'extern', so
+ *  when that's the goal (i.e., not their 'implementation/definition'), continue to
+ *  include them here.
+ *
+ *****/
 
+#ifndef Vxa_VMonotypeMapMakerFor_Implementation
+#include "Vxa_VMonotypeMapMakerFor_Instantiations.h"
 #endif
+
+#endif // #ifndef Vxa_VMonotypeMapMakerFor_Interface

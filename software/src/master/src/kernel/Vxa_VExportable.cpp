@@ -1,4 +1,5 @@
 /*****  Vxa_VExportable Implementation  *****/
+#define Vxa_VExportable_Implementation
 
 /************************
  ************************
@@ -33,6 +34,7 @@
 
 #include "Vxa_VInfiniteSetOf.h"
 #include "Vxa_VResultBuilder.h"
+
 
 /******************************
  ******************************
@@ -43,17 +45,6 @@
  ******************************/
 
 namespace Vxa {
-    template class Vxa_API VExportable<bool>;
-    template class Vxa_API VExportable<short>;
-    template class Vxa_API VExportable<unsigned short>;
-    template class Vxa_API VExportable<int>;
-    template class Vxa_API VExportable<unsigned int>;
-    template class Vxa_API VExportable<float>;
-    template class Vxa_API VExportable<double>;
-
-    template class Vxa_API VExportable<char const*>;
-    template class Vxa_API VExportable<VString>;
-
     template <
 	typename Val_T, typename Var_T = typename Vca::VTypePattern<Val_T>::var_t
     > class Vxa_API VStockExportable : public VExportable<Val_T> {
@@ -118,8 +109,8 @@ namespace Vxa {
 	universe_t *universe () const {
 	/**************************************************************************************************
 	 *  Every stock exportable has a unique universe set that is a 'const' property of the exportable.
-	 *  Normally, the stock exportable's constructor would be the natural place to create set.  That
-	 *  cannot be done, however.  Stock exportables are anonymous-namespace scoped globals.  That means
+	 *  Normally, the stock exportable's constructor would be the natural place to create that set.
+	 *  That cannot be done.  Stock exportables are anonymous-namespace scoped globals.  That means
 	 *  they are constructed when the Vxa library is loaded.  Consequently, their constructors cannot
 	 *  rely directly or indirectly on the prior construction of any other global data objects in the
 	 *  library.  Sets, on the other hand, are role players.  They require a cohort and cohort
@@ -129,12 +120,6 @@ namespace Vxa {
 	    if (m_pUniverse.isNil ())
 		m_pUniverse.setTo (new universe_t (const_cast<ThisClass*>(this)));
 	    return m_pUniverse;
-	}
-
-    public:
-	static ThisClass *ThisStockExportable () {
-	    static ThisClass *pSE = new ThisClass ();
-	    return pSE;
 	}
 
     //  Result Generation
@@ -155,16 +140,26 @@ namespace Vxa {
     private:
 	typename universe_t::Reference mutable m_pUniverse;
     };
-    
-    void InitializeStockExportables () {
-	Vxa::VStockExportable<bool>::ThisStockExportable ();
-	Vxa::VStockExportable<short>::ThisStockExportable ();
-	Vxa::VStockExportable<unsigned short>::ThisStockExportable ();
-	Vxa::VStockExportable<int>::ThisStockExportable ();
-	Vxa::VStockExportable<unsigned int>::ThisStockExportable ();
-	Vxa::VStockExportable<float>::ThisStockExportable ();
-	Vxa::VStockExportable<double>::ThisStockExportable ();
-	Vxa::VStockExportable<char const*, VString>::ThisStockExportable ();
-	Vxa::VStockExportable<VString>::ThisStockExportable ();
-    }
+}
+
+
+/************************************************
+ ************************************************
+ *****                                      *****
+ *****  Vxa::VExportable Run Time Metadata  *****
+ *****                                      *****
+ ************************************************
+ ************************************************/
+
+namespace {
+    Vxa::VStockExportable<bool>				g_iExportable_bool;
+    Vxa::VStockExportable<short>			g_iExportable_short;
+    Vxa::VStockExportable<unsigned short>		g_iExportable_unsigned_short;
+    Vxa::VStockExportable<int>				g_iExportable_int;
+    Vxa::VStockExportable<unsigned int>			g_iExportable_unsigned_int;
+    Vxa::VStockExportable<float>			g_iExportable_float;
+    Vxa::VStockExportable<double>			g_iExportable_double;
+
+    Vxa::VStockExportable<char const*,VString>		g_iExportable_char_const_p;
+    Vxa::VStockExportable<VString>			g_iExportable_VString;
 }

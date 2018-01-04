@@ -20,7 +20,7 @@
 #define Vxa_Main_API DECLSPEC_DLLIMPORT
 
 #ifdef _WIN32
-#pragma comment(lib, "vcamain.lib")
+#pragma comment(lib, "vxamain.lib")
 #endif
 
 #endif
