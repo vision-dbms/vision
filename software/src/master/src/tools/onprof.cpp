@@ -575,14 +575,11 @@ inline void ReclaimSegments () {
  *  Mapping  *
  *************/
 
-static void ResolveSpaceLinks (
-    char *			spacePathName
-)
-{
+static void ResolveSpaceLinks (char *spacePathName) {
     char linkPathName[1024], *nlp;
     FILE *ls;
 
-    while (sprintf (linkPathName, "%s/LINK", spacePathName),
+    while (snprintf (linkPathName, sizeof(linkPathName), "%s/LINK", spacePathName),
 	   access (linkPathName, 0) == 0)
     {
 	if (NULL == (ls = fopen (linkPathName, "r")))
@@ -599,11 +596,11 @@ static void ResolveSpaceLinks (
 static void Map (
     VkMemory *pMapping, char const *directory, char const *space, unsigned int segment
 ) {
-    char spacedir[1024], file[1024];
+    char spacedir[1025], file[1100];
 
-    sprintf (spacedir, "%s/%s", directory, space);
+    snprintf (spacedir, sizeof(spacedir), "%s/%s", directory, space);
     ResolveSpaceLinks (spacedir);
-    sprintf (file, "%s/%u", spacedir, segment);
+    snprintf (file, sizeof(file), "%s/%u", spacedir, segment);
 
     if (++MappedSegmentCount >= MappedSegmentLimit)
 	ReclaimSegments ();
@@ -634,7 +631,7 @@ PrivateFnDef void ResolveNetworkLink (char *pOSDPathName, char const *pNDFPathNa
     char  pLinkBuffer[1024], *pNewLine;
     FILE* pLinkStream;
 
-    sprintf (pLinkBuffer, "%s.OSDPATH", pNDFPathName);
+    snprintf (pLinkBuffer, sizeof(pLinkBuffer), "%s.OSDPATH", pNDFPathName);
 
 #if defined(_WIN32)
     pLinkStream = fopen (pLinkBuffer, "rt");

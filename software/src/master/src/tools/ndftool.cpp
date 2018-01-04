@@ -759,8 +759,11 @@ public:
     CVersion *CurrentUpdateSuccessor () const {
 	return m_pConfiguration->UpdateSuccessor ();
     }
+    static PS_Type_FO CurrentFO (CVersion const *pVersion) {
+        return pVersion ? pVersion->CurrentFO () : PS_FO_Nil;
+    }
     PS_Type_FO CurrentFO () const {
-	return this ? m_pConfiguration->FO () : PS_FO_Nil;
+	return m_pConfiguration->FO ();
     }
     PS_Type_FO CurrentMP () const {
 	return m_pConfiguration->MP ();
@@ -790,8 +793,11 @@ public:
     CVersion *InitialUpdateSuccessor () const {
 	return m_iConfiguration.UpdateSuccessor ();
     }
+    static PS_Type_FO InitialFO (CVersion const *pVersion) {
+	return pVersion ? pVersion->InitialFO () : PS_FO_Nil;
+    }
     PS_Type_FO InitialFO () const {
-	return this ? m_iConfiguration.FO () : PS_FO_Nil;
+	return m_iConfiguration.FO ();
     }
     PS_Type_FO InitialMP () const {
 	return m_iConfiguration.MP ();
@@ -1467,14 +1473,14 @@ void CVersion::Configuration::WriteToNDF (CVersion *pVersion) {
     PS_NVD_SRV (m_iNVD) = SeekNDFLocation (PS_FO_Nil);
     WriteSRV (m_iSpaceCount, pVersion->m_iSRVGrain, iSRV);
 
-    PS_NVD_PreviousVersion (m_iNVD) = m_pCommitPredecessor->CurrentFO ();
+    PS_NVD_PreviousVersion (m_iNVD) = CurrentFO (m_pCommitPredecessor);
 
-    PS_NVD_UpdateThread (m_iNVD) = (
+    PS_NVD_UpdateThread (m_iNVD) = CurrentFO (
 	m_pUpdatePredecessor ? m_pUpdatePredecessor : m_pAncestor
-    )->CurrentFO ();
+    );
 
-    PS_NVD_AccessedVersion	(m_iNVD) = m_pAncestor->CurrentFO ();
-    PS_NVD_MP			(m_iNVD) = m_pAncestor->InitialFO ();
+    PS_NVD_AccessedVersion	(m_iNVD) = CurrentFO (m_pAncestor);
+    PS_NVD_MP			(m_iNVD) = InitialFO (m_pAncestor);
 
     m_xVersion = SeekNDFLocation (PS_FO_Nil);
     WriteNDFStructure (&m_iNVD, sizeof (PS_NVD));
@@ -1601,52 +1607,52 @@ void CVersion::DisplayHeader (int *originalOffset, int *adjustedOffset) const {
 
     if (InitialAncestor () != CurrentAncestor ()) display ("\
 *    Accessed Version . . . . . . %d (Changed To %d)\n",
-	Canonical (InitialAncestor ()->InitialFO ()),
-	Canonical (CurrentAncestor ()->InitialFO ())
+	Canonical (InitialFO (InitialAncestor ())),
+	Canonical (InitialFO (CurrentAncestor ()))
     );
     else display ("\
 *    Accessed Version . . . . . . %d\n",
-	Canonical (InitialAncestor ()->InitialFO ())
+	Canonical (InitialFO (InitialAncestor ()))
     );
 
     if (InitialCommitPredecessor () != CurrentCommitPredecessor ()) display ("\
 *    Commit Predecessor . . . . . %d (Changed To %d)\n",
-	Canonical (InitialCommitPredecessor ()->InitialFO ()),
-	Canonical (CurrentCommitPredecessor ()->InitialFO ())
+	Canonical (InitialFO (InitialCommitPredecessor ())),
+	Canonical (InitialFO (CurrentCommitPredecessor ()))
     );
     else display ("\
 *    Commit Predecessor . . . . . %d\n",
-	Canonical (InitialCommitPredecessor ()->InitialFO ())
+	Canonical (InitialFO (InitialCommitPredecessor ()))
     );
 
     if (InitialCommitSuccessor () != CurrentCommitSuccessor ()) display ("\
 *    Commit Successor . . . . . . %d (Changed To %d)\n",
-	Canonical (InitialCommitSuccessor ()->InitialFO ()),
-	Canonical (CurrentCommitSuccessor ()->InitialFO ())
+	Canonical (InitialFO (InitialCommitSuccessor ())),
+	Canonical (InitialFO (CurrentCommitSuccessor ()))
     );
     else display ("\
 *    Commit Successor . . . . . . %d\n",
-	Canonical (InitialCommitSuccessor ()->InitialFO ())
+	Canonical (InitialFO (InitialCommitSuccessor ()))
     );
 
     if (InitialUpdatePredecessor () != CurrentUpdatePredecessor ()) display ("\
 *    Process Predecessor. . . . . %d (Changed To %d)\n",
-	Canonical (InitialUpdatePredecessor ()->InitialFO ()),
-	Canonical (CurrentUpdatePredecessor ()->InitialFO ())
+	Canonical (InitialFO (InitialUpdatePredecessor ())),
+	Canonical (InitialFO (CurrentUpdatePredecessor ()))
     );
     else display ("\
 *    Process Predecessor. . . . . %d\n",
-	Canonical (InitialUpdatePredecessor ()->InitialFO ())
+	Canonical (InitialFO (InitialUpdatePredecessor ()))
     );
 
     if (InitialUpdateSuccessor () != CurrentUpdateSuccessor ()) display ("\
 *    Process Successor. . . . . . %d (Changed To %d)\n",
-	Canonical (InitialUpdateSuccessor ()->InitialFO ()),
-	Canonical (CurrentUpdateSuccessor ()->InitialFO ())
+	Canonical (InitialFO (InitialUpdateSuccessor ())),
+	Canonical (InitialFO (CurrentUpdateSuccessor ()))
     );
     else display ("\
 *    Process Successor. . . . . . %d\n",
-	Canonical (InitialUpdateSuccessor ()->InitialFO ())
+	Canonical (InitialFO (InitialUpdateSuccessor ()))
     );
 }
 
@@ -1819,8 +1825,8 @@ PrivateFnDef void DisplayVersionModelSummaryReport (bool /*bVerbose*/) {
 	PS_NDH_DirectoryVersion	(NDH),
 	TimeStampAsString (&PS_NDH_ModificationTimeStamp (NDH)),
 	OSDPathName,
-	NewestVersion->InitialFO (),
-	OldestVersion->InitialFO (),
+	CVersion::InitialFO (NewestVersion),
+	CVersion::InitialFO (OldestVersion),
 	ReachableVersionCount,
 	VisitedVersionCount,
 	UserDeletedVersionCount,

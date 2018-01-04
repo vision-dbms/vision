@@ -663,16 +663,8 @@ typedef void (*STD_SignalHandlerType) (
 #elif defined(__VMS) || defined(_AIX) || defined(__linux__) || defined(sun) || defined(__APPLE__)
 
 /*****  Define names for unsupported signals  *****/
-#if defined(__linux__)
-#define SIGEMT SIGUNUSED+1 /* Linux doesn't have this one */
-#define SIGWINDOW SIGUNUSED+2 /* Linux doesn't have this one */
-
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
 #define SIGCLD SIGCHLD
-
-#else
-#define	SIGWINDOW 41
-
 #endif
 
 #define STD_maskType		int

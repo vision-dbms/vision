@@ -69,7 +69,8 @@ namespace Vca {
 	//  Grip
 	public:
 	    void detachInterface (IVUnknown *pProxy) const {
-		m_pReferent->detachInterface (pProxy);
+                if (isntNil ())
+                    m_pReferent->detachInterface (pProxy);
 	    }
 	};
 	friend class Vise;

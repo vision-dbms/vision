@@ -94,7 +94,7 @@ void Vxa::VCallHandle::report (char const *pFormat, ...) const {
     VString iMessage;
     iMessage.vprintf (pFormat, ap);
 
-    fprintf (stderr, "+++ %llp: %s: %s\n", caller (), iNowString.content (), iMessage.content ());
+    fprintf (stderr, "+++ %p: %s: %s\n", caller (), iNowString.content (), iMessage.content ());
 }
 
 void Vxa::VCallHandle::reportInvocation () const {

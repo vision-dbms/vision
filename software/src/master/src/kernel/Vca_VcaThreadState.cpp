@@ -80,8 +80,7 @@ Vca::VCohort *Vca::VcaThreadState::Cohort () {
 }
 
 void *Vca::VcaThreadState::CohortValue (VCohortIndex const &rIndex) {
-    VCohort *const pCohort = Cohort ();
-    return pCohort ? pCohort->value (rIndex) : 0;
+    return VCohort::GetValue (Cohort (), rIndex);
 }
 
 

@@ -1128,15 +1128,15 @@ void M_ASD::AlignCT () {
  *****/
 M_ASD *M_AND::CreateASD (unsigned int xSpace, bool aMissingSpaceIsAnError) {
 /*****  Access the underlying physical space...  *****/
-    PS_ASD *pPhysicalASD = m_pPhysicalAND->AccessSpace (xSpace);
-    if (aMissingSpaceIsAnError && IsNil (pPhysicalASD)) ERR_SignalFault (
+    PS_ASD *pASD = 0;
+    if (!m_pPhysicalAND->AccessSpace (pASD, xSpace) && aMissingSpaceIsAnError) ERR_SignalFault (
 	EC__MError, UTIL_FormatMessage (
 	    "Object Space %u Is Undefined In This Network", xSpace
 	)
     );
 
 /*****  ... and create and return the new ASD...  *****/
-    return pPhysicalASD ? new M_ASD (this, pPhysicalASD) : 0;
+    return pASD ? new M_ASD (this, pASD) : 0;
 }
 
 
@@ -1148,14 +1148,18 @@ M_ASD *M_AND::CreateASD (unsigned int xSpace, bool aMissingSpaceIsAnError) {
  *****  Routine to return the ASD associated with a space.
  *
  *  Arguments:
+ *      rpResult                - a reference to an M_ASD* that will be
+ *                                set to point to the M_ASD for the space
+ *                                if it was successfully accessed.
  *	xSpace			- the index of the space to access.
  *
  *  Returns:
- *	The address of the ASD or 'Nil' if the space index is invalid.
+ *	True if the access succeeded (rpResult can be used), false otherwise.
  *
  *****/
-M_ASD* M_AND::AccessSpace (unsigned int xSpace) {
-    return xSpace < SpaceCount () ? AccessASD (xSpace, false) : NilOf (M_ASD*);
+bool M_AND::AccessSpace (M_ASD *&rpResult, unsigned int xSpace) {
+    rpResult = xSpace < SpaceCount () ? AccessASD (xSpace, false) : NilOf (M_ASD*);
+    return IsntNil (rpResult);
 }
 
 /*---------------------------------------------------------------------------
@@ -1163,16 +1167,16 @@ M_ASD* M_AND::AccessSpace (unsigned int xSpace) {
  *
  *  Arguments:
  *	xSpace			- the index of the space to access.
- *	rfSpaceValid		- a reference to a flag to be set indicating 
+ *	pbSpaceValid		- a pointer to a boolean to be set indicating 
  *				  whether the requested space is in range
  *  Returns:
  *	The address of the ASD or 'Nil' if the space index is invalid, or not yet
  *	accessed.
  *
  *****/
-M_ASD* M_AND::AccessSpace (unsigned int xSpace, bool *pfSpaceValid) {
-    *pfSpaceValid = xSpace < ActiveSpaceCount ();
-    return *pfSpaceValid ? m_iASDVector [xSpace] : NilOf (M_ASD*);
+M_ASD* M_AND::AccessSpace (unsigned int xSpace, bool *pbSpaceValid) {
+    *pbSpaceValid = xSpace < ActiveSpaceCount ();
+    return *pbSpaceValid ? m_iASDVector [xSpace] : NilOf (M_ASD*);
 }
 
 
@@ -4615,8 +4619,7 @@ PublicFnDef bool M_DisposeOfSessionGarbage (bool bAggressive) {
  *
  *****/
 void M_AND::VLogError (char const* format, VArgList const &rArgList) {
-    if (this)
-	m_pPhysicalAND->VLogError (format, rArgList);
+    m_pPhysicalAND->VLogError (format, rArgList);
 }
 
 /*---------------------------------------------------------------------------

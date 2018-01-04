@@ -93,20 +93,19 @@ VDatabase *M_AND::database_() const {
 }
 
 bool M_AND::ContainerExists (M_POP const *pReference) {
-    M_ASD* pASD = AccessSpace (pReference);
-    unsigned int xContainer = M_POP_ContainerIndex (pReference);
-
-    return IsntNil (pASD)
+    unsigned int const xContainer = M_POP_ContainerIndex (pReference);
+    M_ASD* pASD = 0;
+    return AccessSpace (pASD, pReference)
 	&& xContainer < pASD->cteCount ()
 	&& pASD->cte (xContainer)->isReferenced ();
 }
 
 bool M_AND::ContainerPersists (M_POP const *pReference) {
+    PS_ASD *pASD = 0;
     PS_CTE iCTE;
-    return (M_POP_ObjectSpace (pReference) < SpaceCount ()) &&
-	m_pPhysicalAND->AccessSpace(M_POP_ObjectSpace (pReference))->GetLiveCTE (
-	    M_POP_ContainerIndex (pReference), iCTE
-    );
+    return M_POP_ObjectSpace (pReference) < SpaceCount ()
+        && m_pPhysicalAND->AccessSpace(pASD, M_POP_ObjectSpace (pReference))
+        && pASD->GetLiveCTE (M_POP_ContainerIndex (pReference), iCTE);
 }
 
 VContainerHandle *M_AND::SafeGetContainerHandle (M_POP const *pReference) {

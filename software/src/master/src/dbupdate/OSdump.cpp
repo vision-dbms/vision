@@ -115,7 +115,7 @@ PublicFnDef int osDUMP_ReadDump (
 
     sscanf(
 	buffer,
-	"%d %s %d %d %d %d %s %lu",
+	"%d %s %ld %ld %ld %ld %s %u",
 	&recordType,
 	osDUMP_PathName,
 	&osDUMP_SpaceName,
@@ -221,7 +221,7 @@ PublicFnDef int osDUMP_ReadContTable () {
     PS_SH preamble;
     long containerTableOffset;
 
-    sprintf(segmentName, "%s/%d/%d", osDUMP_PathName,
+    sprintf(segmentName, "%s/%ld/%ld", osDUMP_PathName,
 				     osDUMP_SpaceName,
 				     osDUMP_ContSegment);
 
@@ -431,7 +431,7 @@ PrivateFnDef M_CPreamble* GetSegmentPtr (
     if (segment > osDUMP_ContSegment) {
 	fprintf (
 	    stderr,
-	    "*** Fatal Error: Non-existent segment referenced:%s/%d/%d ***\n",
+	    "*** Fatal Error: Non-existent segment referenced:%s/%ld/%d ***\n",
 	    osDUMP_PathName, osDUMP_SpaceName, segment
 	);
 	exit (ErrorExitValue);
@@ -439,7 +439,7 @@ PrivateFnDef M_CPreamble* GetSegmentPtr (
 
     if (IsNil (SMV[segment].RegionAddress ())) {
 	sprintf (
-	    filename, "%s/%d/%d", osDUMP_PathName, osDUMP_SpaceName, segment
+	    filename, "%s/%ld/%d", osDUMP_PathName, osDUMP_SpaceName, segment
 	);
 
 	if (!SMV[segment].Map (filename, true, VkMemory::Share_Private)) {
@@ -529,7 +529,7 @@ PublicFnDef M_CPreamble* osDUMP_GetPtokenPtr (
         osDUMP_CTIndex =  M_POP_D_ContainerIndex (rtLSTORE_RowPToken (table));
         break;
     default:
-        fprintf (stderr, "Unknown table type %0X:%d\n", table, rtype);
+        fprintf (stderr, "Unknown table type %p:%d\n", table, rtype);
 	exit (ErrorExitValue);
         break;
     }
@@ -594,7 +594,7 @@ PublicFnDef M_CPreamble* osDUMP_GetVectorPtokenPtr (
     ptoken = GetSegmentPtr (segment, offset, NilOf (size_t *));
     if (!osDUMP_Replacing && rtPTOKEN_IsntTerminal (ptoken))
     {
-	fprintf (stderr, "Vector ptoken (%d) not current [%s]\n",
+	fprintf (stderr, "Vector ptoken (%ld) not current [%s]\n",
 		 osDUMP_CTIndex, osDUMP_Item (dbVector));
 	exit (ErrorExitValue);
     }
@@ -617,7 +617,7 @@ PublicFnDef M_CPreamble* osDUMP_GetUsegPtokenPtr (
     ptoken = GetSegmentPtr (segment, offset, NilOf (size_t *));
     if (!osDUMP_Replacing && rtPTOKEN_IsntTerminal (ptoken))
     {
-	fprintf (stderr, "USegment ptoken (%d) not current [%s]\n",
+	fprintf (stderr, "USegment ptoken (%ld) not current [%s]\n",
 		 osDUMP_CTIndex, osDUMP_Item (dbVector));
 	exit (ErrorExitValue);
     }

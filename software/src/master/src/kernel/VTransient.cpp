@@ -201,17 +201,9 @@ void VTransient::vraiseException (
 void VTransient::traceInfo (char const *pWhat) const {
     if (objectsTrace ()) {
 #if 0
-	display ("\n+++ %-50s:", pWhat);
-	if (!this)
-	    display (" Nil");
-	else 
-	    display (" %p", this);
+	display ("\n+++ %-50s: %p", pWhat, this);
 #else
-	fprintf (stderr, "\n+++ %-50s:", pWhat);
-	if (!this)
-	    fprintf (stderr, " Nil");
-	else 
-	    fprintf (stderr, " %p", this);
+	fprintf (stderr, "\n+++ %-50s: %p", pWhat, this);
 	fflush (stderr);
 #endif
     }

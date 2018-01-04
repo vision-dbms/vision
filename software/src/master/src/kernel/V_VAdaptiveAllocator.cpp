@@ -37,10 +37,10 @@
  *********************
  *********************/
 
-size_t V::VAdaptiveAllocator::Parameters::g_sIncrementDelay	= 2;
-size_t V::VAdaptiveAllocator::Parameters::g_sIncrementMin	= 4096;
-size_t V::VAdaptiveAllocator::Parameters::g_sIncrementMax	= 16 * 1024 * 1024;
-size_t V::VAdaptiveAllocator::Parameters::g_sIncrementMultiplier= 4;
+size_t V::VAdaptiveAllocator::g_sIncrementDelay      = 2;
+size_t V::VAdaptiveAllocator::g_sIncrementMin        = 4096;
+size_t V::VAdaptiveAllocator::g_sIncrementMax        = 16 * 1024 * 1024;
+size_t V::VAdaptiveAllocator::g_sIncrementMultiplier = 4;
 
 
 /***********************************
@@ -58,16 +58,16 @@ size_t V::VAdaptiveAllocator::Parameters::g_sIncrementMultiplier= 4;
  *****************/
 
 void V::VAdaptiveAllocator::reset () {
-    m_sCurrentIncrement = m_pParameters->incrementMin ();
-    m_sTimeToNextAdaptiveCall = m_pParameters->incrementDelay ();
+    m_sCurrentIncrement = incrementMin ();
+    m_sTimeToNextAdaptiveCall = incrementDelay ();
 }
 
 size_t V::VAdaptiveAllocator::nextSize (size_t sRequired) {
     if (0 == m_sTimeToNextAdaptiveCall--) {
-	m_sTimeToNextAdaptiveCall = m_pParameters->incrementDelay ();
-	m_sCurrentIncrement *= m_pParameters->incrementMultiplier ();
-	if (m_sCurrentIncrement > m_pParameters->incrementMax ())
-	    m_sCurrentIncrement = m_pParameters->incrementMax ();
+	m_sTimeToNextAdaptiveCall = incrementDelay ();
+	m_sCurrentIncrement *= incrementMultiplier ();
+	if (m_sCurrentIncrement > incrementMax ())
+	    m_sCurrentIncrement = incrementMax ();
     }
 
     return (sRequired + m_sCurrentIncrement) / m_sCurrentIncrement * m_sCurrentIncrement;

@@ -103,13 +103,13 @@ void VSymbol::createBinding (
 ) {
 //  Obtain the level of the current candidate binding...
     unsigned short xTypeLevel = pType->level ();
-    unsigned short xCandidateLevel = (*rpCandidateBindingHolder)->level ();
+    unsigned short xCandidateLevel = VSymbolBinding::levelOf (*rpCandidateBindingHolder);
 
 //  If the candidate in hand is more general than this type, ...
     if (xCandidateLevel < xTypeLevel) {
     //  ... ask our supertype to process it:
 	createBinding (pType->supertype (), rpCandidateBindingHolder);
-	xCandidateLevel = (*rpCandidateBindingHolder)->level ();
+	xCandidateLevel = VSymbolBinding::levelOf (*rpCandidateBindingHolder);
 
     //  If we get a candidate just above us, ...
 	if (xTypeLevel /* > 0 */ - 1 == xCandidateLevel /* ...possibly infinite */) {
@@ -117,7 +117,7 @@ void VSymbol::createBinding (
 	    rpCandidateBindingHolder = &(*rpCandidateBindingHolder)->subtypeBindingHolder (
 		pType
 	    );
-	    xCandidateLevel = (*rpCandidateBindingHolder)->level ();
+	    xCandidateLevel = VSymbolBinding::levelOf (*rpCandidateBindingHolder);
 	}
     }
 
@@ -206,19 +206,19 @@ VSymbolBinding *VSymbol::locateBinding (
 
 //  Obtain the level of the current candidate binding...
     unsigned short xTypeLevel = pType->level ();
-    unsigned short xCandidateLevel = rpCandidateBinding->level ();
+    unsigned short xCandidateLevel = VSymbolBinding::levelOf (rpCandidateBinding);
 
 //  If the candidate in hand is more general than this type, ...
     if (xCandidateLevel < xTypeLevel) {
     //  ... ask our supertype to process it:
 	pActualBinding = locateBinding (pType->supertype (), rpCandidateBinding);
-	xCandidateLevel = rpCandidateBinding->level ();
+	xCandidateLevel = VSymbolBinding::levelOf (rpCandidateBinding);
 
     //  If we get a candidate just above us, ...
 	if (xTypeLevel /* > 0 */ - 1 == xCandidateLevel /* ...possibly infinite */) {
 	// ... grab the specialized binding that may apply to us:
 	    rpCandidateBinding = rpCandidateBinding->subtypeBinding (pType);
-	    xCandidateLevel = rpCandidateBinding->level ();
+	    xCandidateLevel = VSymbolBinding::levelOf (rpCandidateBinding);
 	}
     }
 
@@ -258,7 +258,7 @@ void VSymbol::set (VRunTimeType *pType, VSymbolImplementation const *pValue) {
     VSymbolBindingHolder *pCandidateBindingHolder = &m_pRootBinding;
     createBinding (pType, pCandidateBindingHolder);
     VSymbolBinding *pCandidateBinding = *pCandidateBindingHolder;
-    if (pCandidateBinding->level () > xTypeLevel) {
+    if (VSymbolBinding::levelOf (pCandidateBinding) > xTypeLevel) {
 	//  A new binding will be needed, so create one, ...
 	VSymbolBinding *pNewBinding = new VSymbolBinding (pType);
 
@@ -324,7 +324,7 @@ VSymbolImplementation const *VSymbol::implementationAt (VRunTimeType const *pTyp
 
 void VSymbol::DisplayBindings () const {
     printf ("Symbol: %s\n", m_pName);
-    rootBinding ()->Display (true, 1);
+    VSymbolBinding::Display (rootBinding (), true, 1);
     printf ("================\n");
 }
 

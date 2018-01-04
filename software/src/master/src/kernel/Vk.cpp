@@ -12,6 +12,10 @@
 
 #include "Vk.h"
 
+#ifdef __APPLE__
+#include <sys/sysctl.h>
+#endif
+
 /************************
  *****  Supporting  *****
  ************************/
@@ -843,6 +847,19 @@ PublicFnDef V_API long Vk_gethostid () {
     char serialNumber[16];
     sysinfo (SI_HW_SERIAL, serialNumber, sizeof(serialNumber));
     return atoi (serialNumber);
+
+#elif defined(__APPLE__)
+    /*****************
+     *
+     *  'gethostid/hostid' is deprecated in BSD and its derivatives.  Unless someone has
+     *  taken the time to set it explicitly (unlikely), the value returned on MacOS will
+     *  be 0.  If that's the case, return a wired non-zero value to keep scripts that
+     *  interpret 0 as meaning this is VMS (totally bogus, ARRRRRRGH).
+     *
+     ****************/
+    int32_t iHostID = 0;
+    size_t  sHostID = sizeof (iHostID);
+    return sysctlbyname ("kern.hostid", &iHostID, &sHostID, NULL, 0) == 0 && iHostID ? iHostID : 987654321;
 
 #else
     return 0;

@@ -185,6 +185,7 @@ static char *insertStr(
        }
        return (p);   /* return address of converted line t */
     }
+    return s;
 }
 
 
@@ -532,6 +533,7 @@ static int saveLines(   /* saves lines delimited by @@@ in v[] */
          return (1);      /* signal: struct memb values assigned */
       }
    }
+   return ZERO;
 }
 
 

@@ -30,7 +30,7 @@
 #endif
 
 /* Disable all CAM logging, pre-compilation wherever possible! */
-#if defined(sun) || defined(_WIN32) /* no windows or sun CAM logging right now */
+#if !defined(CAM_EXPLICITLY_ENABLED) || defined(sun) || defined(_WIN32) /* no windows or sun CAM logging right now */
 #define NULL_CAM_LOGGING
 #endif
 

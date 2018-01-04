@@ -602,19 +602,14 @@ IVUnknown *VTypeInfo::proxy (VcaOIDX *pOIDX) {
  *********************/
 
 void VTypeInfo::displayDescription (size_t sIndent) const {
-    if (this) {
-	VString iUUIDString;
-	uuid ().GetString (iUUIDString);
-	display ("%s(\"%s\")<", (char const*)iUUIDString, (char const*)name ());
-	m_iParameters.displayDescription (sIndent + 2);
-	display ("\n%*s>", sIndent, "");
-	if (m_pSuper) {
-	    display (" : public ");
-	    m_pSuper->displayDescription (sIndent);
-	}
-    }
-    else {
-	display ("?(\"?\")<>");
+    VString iUUIDString;
+    uuid ().GetString (iUUIDString);
+    display ("%s(\"%s\")<", (char const*)iUUIDString, (char const*)name ());
+    m_iParameters.displayDescription (sIndent + 2);
+    display ("\n%*s>", sIndent, "");
+    if (m_pSuper) {
+        display (" : public ");
+        m_pSuper->displayDescription (sIndent);
     }
 }
 
