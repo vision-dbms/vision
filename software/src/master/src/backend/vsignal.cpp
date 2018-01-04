@@ -124,10 +124,12 @@ PrivateFnDef void SIGNAL_StandardSignalHandler (
         signalErrorCode = EC__AnInterrupt;
 	signalErrorMessage = "IOT Instruction Signal";
 	break;
+#ifdef SIGEMT
     case SIGEMT:
         signalErrorCode = EC__AnInterrupt;
 	signalErrorMessage = "EMT Instruction Signal";
 	break;
+#endif
     case SIGFPE:
         signalErrorCode = EC__FPESignal;
 	signalErrorMessage = "Floating Point Exception Signal";
@@ -136,11 +138,13 @@ PrivateFnDef void SIGNAL_StandardSignalHandler (
         signalErrorCode = EC__AnInterrupt;
 	signalErrorMessage = "Kill Signal";
 	break;
+#ifdef SIGBUS
     case SIGBUS:
         signalErrorCode = EC__AnInterrupt;
 	signalErrorMessage = "Bus Error Signal";
 	ThisProcess.dumpStack ();
 	break;
+#endif
     case SIGSEGV:
         signalErrorCode = EC__SegmentationFault;
 	signalErrorMessage = "Segmentation Violation Signal";
@@ -165,14 +169,14 @@ PrivateFnDef void SIGNAL_StandardSignalHandler (
         signalErrorCode = EC__UserSignal1;
 	signalErrorMessage = "User Defined Signal 1";
 	IO_printf 
-	    ("******* ERROR THE EDITOR DIED AND HAS RESTARTED ********\n");
+	  ("******* ERROR THE EDITOR DIED AND HAS RESTARTED ********\n");
 	/* NOTICE THAT THIS GOES TO STDOUT */
 	break;
     case SIGUSR2:
         signalErrorCode = EC__UserSignal2;
 	signalErrorMessage = "User Defined Signal 2";
 	break;
-#ifndef __APPLE__
+#ifdef SIGWINDOW
     case SIGWINDOW:
         signalErrorCode = EC__AnInterrupt;
 	signalErrorMessage = "Windowing Signal Signal";
@@ -191,7 +195,7 @@ PrivateFnDef void SIGNAL_StandardSignalHandler (
         signalErrorCode = EC__AnInterrupt;
 	signalErrorMessage = "Death of a Child Signal";
 	break;
-#ifndef __APPLE__
+#ifdef SIGPWR
     case SIGPWR:
         signalErrorCode = EC__AnInterrupt;
 	signalErrorMessage = "Power State Indication Signal";
@@ -482,7 +486,9 @@ PublicFnDef void SIGNAL_SetUpSignalHandlers () {
 	case SIGPROF:
 	    break;
 	case SIGSEGV:
+#ifdef SIGBUS
 	case SIGBUS:
+#endif
 	    if (IsntNil (getenv ("VisionEnableCoreDump")))
 		break;
 	default:

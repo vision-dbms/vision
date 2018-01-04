@@ -671,12 +671,7 @@ void VkUUID::displayInfo (char const *pWhat, uuid_t const &rUUID) {
 
 
 void VkUUID::displayInfo (char const *pWhat) {
-    printf ("%-20.20s:", pWhat);
-    if (!this) 
-	printf ("Nil");
-    else {
-        VString uuidString;
-	GetString(uuidString);
-	printf(" %s ",uuidString.content ());
-    }
+    VString uuidString;
+    GetString(uuidString);
+    printf ("%-20.20s: %s ", pWhat, uuidString.content ());
 }

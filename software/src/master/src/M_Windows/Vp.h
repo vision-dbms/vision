@@ -123,7 +123,7 @@ typedef unsigned int		uintptr_t;
 #define stat			_stat
 #define strcasecmp		_stricmp
 #define strncasecmp		_strnicmp
-#define strtok_r(str,delim,saveptr) strtok (str,delim)
+#define strtok_r(str,delim,saveptr) strtok_s (str,delim,saveptr)
 #define umask			_umask
 #define unlink			_unlink
 #define write			_write

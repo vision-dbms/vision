@@ -175,14 +175,19 @@ namespace Vca {
         }
 
     //  Cohort
+    private:
+        VCohort *cohorT () const {
+            return m_pCohort;
+        }
     public:
+        static VCohort *CohortOf (VRolePlayer const *pRolePlayer);
         /**
          * Used to query for the cohort to which this VRolePlayer belongs.
          *
          * @return the cohort to which this VRolePlayer belongs, or zero if uninitialized.
          */
         VCohort *cohort () const {
-            return this ? m_pCohort.referent () : 0;
+            return CohortOf (this);
         }
         /**
          * Used to determine if this VRolePlayer belongs to a given VCohort.

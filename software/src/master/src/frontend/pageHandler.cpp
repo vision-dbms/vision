@@ -593,7 +593,7 @@ PublicFnDef void MAIN_getCompany() {
 }
 
 PrivateFnDef void execProfile () {
-    char buffer[80];
+    char buffer[128];
     
     if (strlen (COMPANY) == 0)
     {
@@ -604,7 +604,7 @@ PrivateFnDef void execProfile () {
     ERR_displayStr(" Validating Company...",FALSE);
     strToUpper (COMPANY);
     
-    sprintf (buffer, "Named Company %s", COMPANY);
+    snprintf (buffer, sizeof(buffer), "Named Company %s", COMPANY);
     if (RS_sendAndCheck (buffer, ">>>"))
 	ERR_displayPause (" Invalid Company");
     else

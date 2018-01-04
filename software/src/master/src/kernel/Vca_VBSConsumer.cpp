@@ -438,7 +438,7 @@ namespace Vca {
 	void OnData (ExportStubClient *pRole, U32 sVoid) {
 	    if (m_sVoid > 0) {
 		fprintf (
-		    stderr, "%s %p:OnData: Orphaned %u void bytes\n", rttName ().content (), this,
+		    stderr, "%s %p:OnData: Orphaned %lu void bytes\n", rttName ().content (), this,
 		    m_sVoid
 		);
 		fflush (stderr);

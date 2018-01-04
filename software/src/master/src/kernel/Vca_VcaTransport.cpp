@@ -416,7 +416,7 @@ void Vca::VcaTransport::BSManager::onTransfer (size_t sTransfer) {
 bool Vca::VcaTransport::BSManager::onStatus (VStatus const &rStatus) {
     bool const bClosedOrFailed = rStatus.isClosed () || rStatus.isFailed ();
     if (bClosedOrFailed) {
-	m_pTransport->defaultLogger().printf ("+++ VcaTransportOutbound[%llp]::BSManager[%llp]::onStatus %s\n",
+	m_pTransport->defaultLogger().printf ("+++ VcaTransportOutbound[%p]::BSManager[%p]::onStatus %s\n",
  				m_pTransport.referent(), this, rStatus.CodeDescription ());
 	log ("\nVca::VcaTransport::BSManager::onStatus...Aborting Transport...");
 
@@ -888,7 +888,7 @@ void Vca::VcaTransportInbound::OnError (
     IClient *pRole, IError *pError, VString const &rMessage
 ) {
     if (m_pBS) {
-	defaultLogger().printf ("+++ VcaTransportInbound[%llp]::OnError %s\n", this, rMessage.content ());
+	defaultLogger().printf ("+++ VcaTransportInbound[%p]::OnError %s\n", this, rMessage.content ());
 
 //	onActivityError (pError, rMessage);
 	abortSerialization ();
@@ -973,7 +973,7 @@ void Vca::VcaTransportInbound::wrapup (VcaSerializer *pSerializer) {
  *****************************************************************************/ 
 
 void Vca::VcaTransportInbound::Close () {
-    defaultLogger().printf ("+++ VcaTransportInbound[%llp]::Close\n", this);
+    defaultLogger().printf ("+++ VcaTransportInbound[%p]::Close\n", this);
     if (m_pBS) {
 	m_pBS->Close ();
 	m_pBS.clear ();
@@ -982,7 +982,7 @@ void Vca::VcaTransportInbound::Close () {
 }
 
 void Vca::VcaTransportInbound::Abort () {
-    defaultLogger().printf ("+++ VcaTransportInbound[%llp]::Abort\n", this);
+    defaultLogger().printf ("+++ VcaTransportInbound[%p]::Abort\n", this);
     if (m_pBS) {
 	m_pBS->Abort ();
 	m_pBS.clear ();
@@ -1075,7 +1075,7 @@ void Vca::VcaTransportOutbound::OnError (
     IClient *pRole, IError *pError, VString const &rMessage
 ) {
     if (m_pBS) {
-	defaultLogger().printf ("+++ VcaTransportOutbound[%llp]::OnError %s\n", this, rMessage.content ());
+	defaultLogger().printf ("+++ VcaTransportOutbound[%p]::OnError %s\n", this, rMessage.content ());
 
 //	onActivityError (pError, rMessage);
 	abortSerialization ();
@@ -1235,7 +1235,7 @@ void Vca::VcaTransportOutbound::startHeartBeat () {
 	getRole (pTrigger);
 
 	VString sTimerPurpose;
-	sTimerPurpose.printf ("Connection %llp Heartbeat", m_pConnection.referent());
+	sTimerPurpose.printf ("Connection %p Heartbeat", m_pConnection.referent());
 
 	m_pHeartBeatTimer.setTo (new VTimer (VCohort::Vca (), sTimerPurpose, pTrigger, HEARTBEAT_VALUE, true));
 
@@ -1285,10 +1285,10 @@ void Vca::VcaTransportOutbound::Process (ITrigger *pRole) {
 		);
 		startMessage (pMessage);
 	    } else if (shutdownInProgress () && uSecondsSinceLastMessage >= 10 * HEARTBEAT_VALUE) {
-		defaultLogger().printf ("+++ VcaTransportOutbound[%llp]: Heartbeat aborting stalled shutdown.\n", this);
+		defaultLogger().printf ("+++ VcaTransportOutbound[%p]: Heartbeat aborting stalled shutdown.\n", this);
 		Abort ();
 	    } else if (0 == m_sHeartBeatStall++) {
-		defaultLogger().printf ("+++ VcaTransportOutbound[%llp]: Heartbeat transport busy.\n", this);
+		defaultLogger().printf ("+++ VcaTransportOutbound[%p]: Heartbeat transport busy.\n", this);
 	    }
 	}
     }
@@ -1302,7 +1302,7 @@ void Vca::VcaTransportOutbound::Process (ITrigger *pRole) {
  **********************/
 
 void Vca::VcaTransportOutbound::Close () {
-    defaultLogger().printf ("+++ VcaTransportOutbound[%llp]::Close\n", this);
+    defaultLogger().printf ("+++ VcaTransportOutbound[%p]::Close\n", this);
     stopHeartBeat ();
     if (m_pBS) {
         m_pBS->unregisterManager (m_pBSManager);
@@ -1313,7 +1313,7 @@ void Vca::VcaTransportOutbound::Close () {
 }
 
 void Vca::VcaTransportOutbound::Abort () {
-    defaultLogger().printf ("+++ VcaTransportOutbound[%llp]::Abort\n", this);
+    defaultLogger().printf ("+++ VcaTransportOutbound[%p]::Abort\n", this);
     stopHeartBeat ();
     if (m_pBS) {
         m_pBS->unregisterManager (m_pBSManager);

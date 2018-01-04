@@ -55,27 +55,37 @@ public:
     int GetSocketName (
 	VkStatus *pStatusReturn, char **ppString, size_t *psString
     ) const {
-	return m_pStream->GetSocketName (pStatusReturn, ppString, psString);
+	return m_pStream
+            ? m_pStream->GetSocketName (pStatusReturn, ppString, psString)
+            : MakeFailureStatus (pStatusReturn);
     }
 
     int GetSocketPeerName (
 	VkStatus *pStatusReturn, char **ppString, size_t *psString
     ) const {
-	return m_pStream->GetSocketPeerName (pStatusReturn, ppString, psString);
+	return m_pStream
+            ? m_pStream->GetSocketPeerName (pStatusReturn, ppString, psString)
+            : MakeFailureStatus (pStatusReturn);
     }
 
     int GetTcpNodelay (VkStatus *pStatusReturn, int *fOnOff) const {
-	return m_pStream->GetTcpNodelay (pStatusReturn, fOnOff);
+	return m_pStream
+            ? m_pStream->GetTcpNodelay (pStatusReturn, fOnOff)
+            : MakeFailureStatus (pStatusReturn);
     }
 
     SOCKET SocketHandle () const {
-	return m_pStream->GetSocketHandle ();
+	return m_pStream ? m_pStream->GetSocketHandle () : INVALID_SOCKET;
     }
     VkStream *Stream () const {
 	return m_pStream;
     }
 
 protected:
+    static int MakeFailureStatus (VkStatus *pStatusReturn) {
+        pStatusReturn->MakeFailureStatus ();
+        return -1;
+    }
     HANDLE StreamHandle () const {
 	return m_pStream->m_hStream;
     }
@@ -111,14 +121,20 @@ public:
     );
 
     int EndReception (VkStatus *pStatusReturn) const {
-	return m_pStream->EndReception (pStatusReturn);
+	return m_pStream
+            ? m_pStream->EndReception (pStatusReturn)
+            : MakeFailureStatus (pStatusReturn);
     }
     int EndTransmission (VkStatus *pStatusReturn) const {
-	return m_pStream->EndTransmission (pStatusReturn);
+	return m_pStream
+            ? m_pStream->EndTransmission (pStatusReturn)
+            : MakeFailureStatus (pStatusReturn);
     }
 
     int SetTcpNodelay (VkStatus *pStatusReturn, int fOnOff) const {
-	return m_pStream->SetTcpNodelay (pStatusReturn, fOnOff);
+	return m_pStream
+            ? m_pStream->SetTcpNodelay (pStatusReturn, fOnOff)
+            : MakeFailureStatus (pStatusReturn);
     }
 
 //  State

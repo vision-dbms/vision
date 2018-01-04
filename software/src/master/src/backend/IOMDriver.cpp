@@ -447,9 +447,6 @@ bool IOMDriver::GetDouble (IOMHandle const* pHandle, double *value) {
  * (As used in io.cpp's IO_pfgets () method for getting input) 
  ******************************************************************************/
 void IOMDriver::Wait () {
-    if (IsNil (this))
-	return;
-
     PutBufferedData ();
 
     Vca::VCohortManager iCM; bool rHandledEvents = false;

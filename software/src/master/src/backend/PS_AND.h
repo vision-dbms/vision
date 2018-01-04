@@ -341,7 +341,7 @@ public:
 
 //  Space Access
 public:
-    PS_ASD *AccessSpace (unsigned int spaceIndex);
+    bool AccessSpace (PS_ASD *&rpResult, unsigned int spaceIndex);
 
 //  Database Update
 protected:

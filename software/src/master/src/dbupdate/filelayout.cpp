@@ -240,7 +240,7 @@ PrivateFnDef OUTFILE *find_right_file(
 )
 {
     int i, bytes;
-    char filename[PATH_MAX];
+    char filename[PATH_MAX+128];
     ITEM_LAYOUT *item;
     OUTFILE *file;
 
@@ -332,9 +332,10 @@ PrivateFnDef OUTFILE *find_right_file(
     OUT_charPtr(file) = OUT_buffer(file) + OUT_header(file);
 
 /*** open new file ****/
-    sprintf(filename, "%s%d%s", FILE_prefix(layout),
-				FILE_fileCount(layout),
-				".dat");
+    snprintf(filename, sizeof(filename),
+	     "%s%d%s", FILE_prefix(layout),
+	     FILE_fileCount(layout),
+	     ".dat");
     bytes = numPreallocBytes(layout,file);
     if (-1 ==
         (int)(OUT_fd(file) = READER_SegmentCreate(filename, 0660, bytes)))
@@ -439,16 +440,17 @@ PublicFnDef void open_keys (
 )
 {
     int i, j, fileCount, fileNum[MAX_FILES];
-    char file_name[PATH_MAX];
+    char file_name[PATH_MAX+128];
     KEY_LAYOUT *key;
     OUTFILE *file;
 
     for (i = 0; i < FILE_keyCount(layout); i++)
     {
 	key = FILE_key(layout, i);
-	sprintf(file_name, "%s%d%s", FILE_prefix(layout),
-				     i,
-				     ".key");
+	snprintf(file_name, sizeof(file_name),
+		 "%s%d%s", FILE_prefix(layout),
+		 i,
+		 ".key");
 	if ((KEY_fd(key) = READER_FileCreate (file_name, 0660, 0)) < 0)
 	    READER_FatalError ("Key File Open");
 	KEY_bufPtr(key) = KEY_buffer(key);
@@ -547,7 +549,7 @@ PublicFnDef void write_layouts (
 )
 {
     int i, col, keyNum;
-    char type, buffer[256], filename[PATH_MAX];
+    char type, buffer[256], filename[PATH_MAX+128];
     FILE *file_ptr;
     OUTFILE *file;
     ITEM_LAYOUT *item;
@@ -556,10 +558,11 @@ PublicFnDef void write_layouts (
     for (i = 0; i < FILE_fileCount(layout); i++)
     {
 	file = FILE_outfile(layout, i);
-	sprintf(filename, "%s%d%s",
-			   FILE_prefix(layout),
-			   i,
-			   ".lay");
+	snprintf(filename, sizeof(filename),
+		 "%s%d%s",
+		 FILE_prefix(layout),
+		 i,
+		 ".lay");
 
 	if ( NULL == (file_ptr = fopen(filename, "w")))
 	    READER_FatalError("Layout File Open");

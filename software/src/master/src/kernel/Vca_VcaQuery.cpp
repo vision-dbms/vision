@@ -167,7 +167,7 @@ void Vsa::VQueryApp::report (char const *pMessage) const {
     printf ("<H2> VQuery Error </H2>\n");
     printf ("<HR>\n");
     // printf ("<STRONG>\n");
-    printf ("Your request to access", m_iPathInfo.content ());
+    printf ("Your request to access %s", m_iPathInfo.content ());
     // printf (strlen (m_iServiceName) > 0 ? " the '%s'" : " a", m_iServiceName.content ());
     printf (" Vision server failed.\n%s\n", pMessage);
     // printf ("</STRONG>\n");

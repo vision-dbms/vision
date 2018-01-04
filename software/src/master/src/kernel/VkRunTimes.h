@@ -341,7 +341,7 @@ private:
 #define UTIL_TimeDelta(start, end, field) ((end).field () - (start).field ())
 
 #define UTIL_PrintDelta(start, end, field, fmt) IO_printf (\
-    #field": "fmt"\n", UTIL_TimeDelta (start, end, field)\
+    #field ": " fmt "\n", UTIL_TimeDelta (start, end, field)\
 )
 
 #define UTIL_PrintTimeDelta(start, end, field) UTIL_PrintDelta (start, end, field, "%g")

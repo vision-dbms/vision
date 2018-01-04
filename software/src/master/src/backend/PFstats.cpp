@@ -65,20 +65,19 @@
  ***************************/
 
 bool M_AND::ContainerExists (M_POP const *pReference) {
-    M_ASD* pASD = AccessSpace (pReference);
-    unsigned int xContainer = M_POP_ContainerIndex (pReference);
-
-    return IsntNil (pASD)
+    unsigned int const xContainer = M_POP_ContainerIndex (pReference);
+    M_ASD* pASD = 0;
+    return AccessSpace (pASD, pReference)
 	&& xContainer < pASD->cteCount ()
 	&& pASD->cte (xContainer)->isReferenced ();
 }
 
 bool M_AND::ContainerPersists (M_POP const *pReference) {
+    PS_ASD *pASD = 0;
     PS_CTE iCTE;
-    return (M_POP_ObjectSpace (pReference) < SpaceCount ()) &&
-	m_pPhysicalAND->AccessSpace(M_POP_ObjectSpace (pReference))->GetLiveCTE (
-	    M_POP_ContainerIndex (pReference), iCTE
-    );
+    return M_POP_ObjectSpace (pReference) < SpaceCount ()
+        && m_pPhysicalAND->AccessSpace(pASD, M_POP_ObjectSpace (pReference))
+        && pASD->GetLiveCTE (M_POP_ContainerIndex (pReference), iCTE);
 }
 
 M_CPD *M_AND::SafeGetCPD (M_POP const *pReference) {
@@ -352,9 +351,8 @@ PrivateFnDef double GetAllocation (
 PrivateFnDef unsigned int GetCTEntryCount (
     M_AND *pNetwork, unsigned int xSpace, bool *spaceValid
 ) {
-    M_ASD* asd = pNetwork->AccessSpace (xSpace);
-    *spaceValid = IsntNil (asd);
-    return *spaceValid ? asd->cteCount () : 0;
+    M_ASD* asd = 0;
+    return (*spaceValid = pNetwork->AccessSpace (asd, xSpace)) ? asd->cteCount () : 0;
 }
 
 
@@ -774,21 +772,25 @@ PrivateFnDef unsigned int GetContainerType (M_AND *pNetwork, M_POP const *pPOP) 
 }
 
 PrivateFnDef unsigned int GetContainerSegment (M_AND *pNetwork, M_POP const *pPOP) {
+    M_ASD* pASD;
     PS_CTE iCTE;
-    return pNetwork->AccessSpace (pPOP)->GetLiveCTE (M_POP_ContainerIndex (pPOP), iCTE)
+    return pNetwork->AccessSpace(pASD, pPOP) && pASD->GetLiveCTE(M_POP_ContainerIndex (pPOP), iCTE)
 	? PS_CTE_Segment (iCTE) : UINT_MAX;
 }
 
 PrivateFnDef unsigned int GetContainerSegmentOffset (M_AND *pNetwork, M_POP const *pPOP) {
+    M_ASD* pASD;
     PS_CTE iCTE;
-    return pNetwork->AccessSpace (pPOP)->GetLiveCTE (M_POP_ContainerIndex (pPOP), iCTE)
+    return pNetwork->AccessSpace(pASD, pPOP) && pASD->GetLiveCTE(M_POP_ContainerIndex (pPOP), iCTE)
 	? PS_CTE_Offset (iCTE) : UINT_MAX;
 }
 
 PrivateFnDef unsigned int GetContainerAddrType (M_AND *pNetwork, M_POP const *pPOP) {
-    M_DCTE const &cte = *pNetwork->AccessSpace (pPOP)->cte (
-	M_POP_ContainerIndex (pPOP)
-    );
+    M_ASD *pASD = 0;
+    if (!pNetwork->AccessSpace (pASD, pPOP))
+        return M_CTEAddressType_ForwardingPOP;
+
+    M_DCTE const &cte = *pASD->cte (M_POP_ContainerIndex (pPOP));
     unsigned int addrType = cte.addressType ();
 
     if (M_CTEAddressType_CPCC == addrType) {
@@ -801,9 +803,10 @@ PrivateFnDef unsigned int GetContainerAddrType (M_AND *pNetwork, M_POP const *pP
 }
 
 PrivateFnDef unsigned int GetContainerRefCount (M_AND *pNetwork, M_POP const *pPOP) {
-    return pNetwork->AccessSpace (pPOP)->cte (
-	M_POP_ContainerIndex (pPOP)
-    )->referenceCount ();
+    M_ASD *pASD;
+    return pNetwork->AccessSpace (pASD, pPOP)
+        ? pASD->cte (M_POP_ContainerIndex (pPOP))->referenceCount ()
+        : 0;
 }
 
 

@@ -413,9 +413,9 @@ public:
 	return AccessASD (M_POP_ObjectSpace (pPOP), aMissingSpaceIsAnError);
     }
 
-    M_ASD *AccessSpace (unsigned int xSpace);
-    M_ASD *AccessSpace (M_POP const *pPOP) {
-	return AccessSpace (M_POP_ObjectSpace (pPOP));
+    bool AccessSpace (M_ASD *&rpResult, unsigned int xSpace);
+    bool AccessSpace (M_ASD *&rpResult, M_POP const *pPOP) {
+	return AccessSpace (rpResult, M_POP_ObjectSpace (pPOP));
     }
 
     M_ASD *AccessSpace (unsigned int xSpace, bool *pfSpaceValid);

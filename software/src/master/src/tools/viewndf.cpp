@@ -219,7 +219,7 @@ PrivateFnDef void displayNDH (
     printf("\n  signature        : %d",  PS_NDH_Signature (ndh));
     printf("\n  ndf version      : %d",  PS_NDH_NDFVersion (ndh));
     printf("\n  directory version: %d",	 PS_NDH_DirectoryVersion (ndh));
-    printf("\n  current NVD FO   : %lu", PS_NDH_CurrentNetworkVersion (ndh));
+    printf("\n  current NVD FO   : %u", PS_NDH_CurrentNetworkVersion (ndh));
     printf("\n  update timestamp : %s\n",
 		ctimeval (&PS_NDH_ModificationTimeStamp (ndh))
     );
@@ -320,7 +320,7 @@ PrivateFnDef void displaySVD (
 /****  get the segment directory name ****/
     getCountedString (fd, svd.spacePathName, segDirBuf, PATHBUFSIZE);
 
-    printf("\t%d\t%d\t%d\t%d\t%d\t%lu",
+    printf("\t%d\t%d\t%d\t%d\t%d\t%u",
 		PS_SVD_SpaceIndex (svd), 
 		PS_SVD_MinSegment (svd),
 		PS_SVD_MaxSegment (svd), 
@@ -390,10 +390,10 @@ PrivateFnDef PS_Type_FO doThisVersion (
     ReadNVD (fd, fo, &nvd);
 
     printf("\n  timestamp -- %s\n", ctimeval (&PS_NVD_CommitTimeStamp (nvd)));
-    printf("\n  previous version  : %lu", PS_NVD_PreviousVersion (nvd));
-    printf("\n  previous nvd chain: %lu", PS_NVD_PreviousNVDChain (nvd));
-    printf("\n  update thread     : %lu", PS_NVD_UpdateThread (nvd));
-    printf("\n  accessed version  : %lu", PS_NVD_AccessedVersion (nvd));
+    printf("\n  previous version  : %u", PS_NVD_PreviousVersion (nvd));
+    printf("\n  previous nvd chain: %u", PS_NVD_PreviousNVDChain (nvd));
+    printf("\n  update thread     : %u", PS_NVD_UpdateThread (nvd));
+    printf("\n  accessed version  : %u", PS_NVD_AccessedVersion (nvd));
     printf("\n  directory version : %d",  PS_NVD_DirectoryVersion (nvd));
     printf("\n  software version  : %d",  PS_NVD_SoftwareVersion (nvd));
 

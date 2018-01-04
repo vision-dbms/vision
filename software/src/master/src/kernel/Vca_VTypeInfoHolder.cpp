@@ -134,7 +134,7 @@ void Vca::VTypeInfoHolderInstance::raiseMissingTypeInfoHolderException (
     char const *pTypeName = iRTTI.name ();
     /* raiseApplicationException */
     fprintf (
-	stderr, "%08x:%s: Master Instance Missing\n", pTTIHG, pTypeName ? pTypeName : "VTypeInfoHolder<--Unknown-Type-->"
+	stderr, "%p:%s: Master Instance Missing\n", pTTIHG, pTypeName ? pTypeName : "VTypeInfoHolder<--Unknown-Type-->"
     );
 }
 
@@ -233,7 +233,7 @@ IVUnknown *Vca::VTypeInfoHolderInstance::proxy (VcaOIDX *pOIDX) const {
 void Vca::VTypeInfoHolderInstance::showTypeInfoDescription (
     std::type_info const &rTypeInfo
 ) const {
-    if (this && m_pTypeInfo.isntNil ())
+    if (m_pTypeInfo.isntNil ())
 	m_pTypeInfo->displayDescription ();
     else {
 	V::VRTTI iRTTI (rTypeInfo);

@@ -513,15 +513,15 @@ bool Vsa::VPoolApplication::GetStringValue_(
         pResult->OnData (rResult);
     } else if (rKey.equalsIgnoreCase ("quickStatsHeader")) {
         VString rResult;
-        char iAppendToResult[13];
-        sprintf(iAppendToResult, " | %10s", "Clients");
+        char iAppendToResult[16];
+        snprintf(iAppendToResult, sizeof(iAppendToResult), " | %10s", "Clients");
         m_pEvaluatorPool->quickStatsHeader (rResult);
         rResult << iAppendToResult;
         pResult->OnData (rResult);
     } else if (rKey.equalsIgnoreCase ("quickStats")) {
         VString rResult;
-        char iAppendToResult[13];
-        sprintf(iAppendToResult, " | %10d", activeOfferCount ());
+        char iAppendToResult[16];
+        snprintf(iAppendToResult, sizeof(iAppendToResult), " | %10d", activeOfferCount ());
         m_pEvaluatorPool->quickStats (rResult);
         rResult << iAppendToResult;
         pResult->OnData (rResult);

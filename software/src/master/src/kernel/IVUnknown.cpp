@@ -366,21 +366,18 @@ bool IVUnknown::weakenImport () const {
 
 void IVUnknown::displayInfo () const {
     BaseClass::displayInfo ();
-    if (!this)
-	display (" Nil");
-    else {
-	VcaOIDR *pOIDR = oidr ();
-	if (!pOIDR)
-	    display (" Local Object");
-	else display (
-	    " Remote Object: %08x:%08x %s",
-	    pOIDR->objectSSID ().u32High (),
-	    pOIDR->objectSSID ().u32Low (),
-	    pOIDR->objectType ()->name ().content ()
-	);
-	display (" %s", typeInfo_()->name ().content());
-    }
-    display ("\n");
+
+    VcaOIDR *pOIDR = oidr ();
+    if (!pOIDR)
+        display (" Local Object");
+    else display (
+        " Remote Object: %08x:%08x %s",
+        pOIDR->objectSSID ().u32High (),
+        pOIDR->objectSSID ().u32Low (),
+        pOIDR->objectType ()->name ().content ()
+    );
+    display (" %s\n", typeInfo_()->name ().content());
+
     fflush (stdout);
 }
 
