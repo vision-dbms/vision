@@ -62,7 +62,7 @@ template <typename Val_T, typename Var_T> Vxa::VMonotypeMapMakerFor<Val_T,Var_T>
  **************************/
 
 template <typename Val_T, typename Var_T> bool Vxa::VMonotypeMapMakerFor<Val_T,Var_T>::transmitValues_(
-    VCallType2Exporter *pExporter, VCollectableCollection *pCluster, object_reference_array_t const &rInjection
+    VCallType2Exporter *pExporter, VCollection *pCluster, object_reference_array_t const &rInjection
 ) {
     return pExporter->returnSegment (rInjection, pCluster, trimmedContainer ());
 }
@@ -74,7 +74,7 @@ template <typename Val_T, typename Var_T> bool Vxa::VMonotypeMapMakerFor<Val_T,V
 }
 
 template <typename Val_T, typename Var_T> bool Vxa::VMonotypeMapMakerFor<Val_T,Var_T>::transmitValues_(
-    VCallType2Exporter *pExporter, VCollectableCollection *pCluster
+    VCallType2Exporter *pExporter, VCollection *pCluster
 ) {
     return pExporter->returnObjects (pCluster, trimmedContainer ());
 }

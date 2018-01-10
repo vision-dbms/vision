@@ -246,10 +246,10 @@ namespace Vxa {
 	bool returnConstant (VString const &rConstant) const;
 
     //  ... objects:
-	template <typename T> bool returnObjects (VCollectableCollection *pCluster, T const &rT) const {
+	template <typename T> bool returnObjects (VCollection *pCluster, T const &rT) const {
 	    return raiseResultTypeException (typeid(*this), typeid (T));
 	}
-	bool returnObjects (VCollectableCollection *pCluster, object_reference_array_t const &rReferences) const;
+	bool returnObjects (VCollection *pCluster, object_reference_array_t const &rReferences) const;
 
     //  ... vectors:
 	bool returnVector (VkDynamicArrayOf<bool> const &rVector) const;
@@ -271,7 +271,7 @@ namespace Vxa {
 	virtual /*override*/ bool returnNA () const;
 
     //  ... segments:
-	template <typename T> bool returnSegment (object_reference_array_t const &rInjection, VCollectableCollection *pCluster, T const &rT) const {
+	template <typename T> bool returnSegment (object_reference_array_t const &rInjection, VCollection *pCluster, T const &rT) const {
 	    return raiseResultTypeException (typeid(*this), typeid (T));
 	}
 
@@ -291,7 +291,7 @@ namespace Vxa {
 	bool returnSegment (object_reference_array_t const &rInjection, VkDynamicArrayOf<double> const &rValues) const;
 
 	bool returnSegment (object_reference_array_t const &rInjection, VkDynamicArrayOf<VString> const &rValues) const;
-	bool returnSegment (object_reference_array_t const &rInjection, VCollectableCollection *pCluster, object_reference_array_t const &rReferences) const;
+	bool returnSegment (object_reference_array_t const &rInjection, VCollection *pCluster, object_reference_array_t const &rReferences) const;
 
 	bool returnSegment (object_reference_array_t const &rInjection) const;
 

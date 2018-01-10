@@ -267,7 +267,7 @@ bool Vxa::VCallType2::returnConstant (VString const &rConstant) const {
  *********************/
 
 bool Vxa::VCallType2:: returnObjects (
-    VCollectableCollection *pCluster, VkDynamicArrayOf<unsigned int> const &rReferences
+    VCollection *pCluster, VkDynamicArrayOf<unsigned int> const &rReferences
 ) const {
     ICollection::Reference pClusterInterface;
     pCluster->getRole (pClusterInterface);
@@ -437,7 +437,7 @@ bool Vxa::VCallType2::returnSegment (object_reference_array_t const &rInjection,
 }
 
 bool Vxa::VCallType2::returnSegment (
-    object_reference_array_t const &rInjection, VCollectableCollection *pCluster, object_reference_array_t const &rReferences
+    object_reference_array_t const &rInjection, VCollection *pCluster, object_reference_array_t const &rReferences
 ) const {
     ICollection::Reference pClusterInterface;
     pCluster->getRole (pClusterInterface);

@@ -51,8 +51,8 @@ namespace Vxa {
 
     //  Transmission
     public:
-	bool transmitValues_(VCallType2Exporter *pExporter, VCollectableCollection *pCluster, object_reference_array_t const &rInjection);
-	bool transmitValues_(VCallType2Exporter *pExporter, VCollectableCollection *pCluster);
+	bool transmitValues_(VCallType2Exporter *pExporter, VCollection *pCluster, object_reference_array_t const &rInjection);
+	bool transmitValues_(VCallType2Exporter *pExporter, VCollection *pCluster);
 
 	bool transmitValues_(VCallType2Exporter *pExporter, object_reference_array_t const &rInjection);
 	bool transmitValues_(VCallType2Exporter *pExporter);
