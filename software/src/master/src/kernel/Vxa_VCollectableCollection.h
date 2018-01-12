@@ -20,6 +20,22 @@
 namespace Vxa {
     class VCollectableObject;
 
+    /*----------------------------------------------------------------------*
+     *---- template <typename collectable_t> struct VCollectableTraits  ----*
+     *----------------------------------------------------------------------*/
+
+    template <typename collectable_t> struct VCollectableTraits {
+	typedef collectable_t* val_t;
+	typedef typename collectable_t::Reference var_t;
+	typedef typename collectable_t::template ClusterOf<typename collectable_t::Reference>::type cluster_t;
+    };
+    template <typename collectable_t> struct VCollectableTraits<VReference<collectable_t> > : public VCollectableTraits<collectable_t> {
+    };
+
+    /*----------------------------------------*
+     *----  class VCollectableCollection  ----*
+     *----------------------------------------*/
+
     class Vxa_API VCollectableCollection : public VCollection {
 	DECLARE_ABSTRACT_RTTLITE (VCollectableCollection, VCollection);
 

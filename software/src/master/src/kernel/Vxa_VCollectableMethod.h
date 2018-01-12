@@ -31,11 +31,10 @@ namespace Vxa {
 
     //  Aliases
     public:
-	typedef T* val_t;
-	typedef typename T::Reference var_t;
-	typedef VCollectableCollectionOf<var_t> collection_t;
-//        typedef typename T::template ClusterOf<object_reference_t>::type collection_t;
-	typedef VScalar<typename collection_t::val_t> self_provider_t;
+	typedef typename VCollectableTraits<T>::val_t val_t;
+	typedef typename VCollectableTraits<T>::var_t var_t;
+        typedef typename VCollectableTraits<T>::cluster_t collection_t;
+	typedef VScalar<val_t> self_provider_t;
 
     //  Implementation
     public:

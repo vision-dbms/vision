@@ -21,6 +21,10 @@
 namespace Vxa {
     class VResultBuilder;
 
+    /*------------------------------------*
+     *----  class VCollectableObject  ----*
+     *------------------------------------*/
+
     class Vxa_API VCollectableObject : virtual public VRolePlayer {
 	DECLARE_ABSTRACT_RTTLITE (VCollectableObject, VRolePlayer);
 
@@ -35,12 +39,12 @@ namespace Vxa {
     public:
 	class Vxa_API ClassBuilder;
 
-    //  ClusterOf<T> Trait
-    //  ... redefine in derived types to use something other than a VCollectableCollectionOf<T>
-    //  ... as the cluster type.
+    //  Traits
     public:
-        template <typename T> struct ClusterOf {
-            typedef VCollectableCollectionOf<T> type;
+    //  ClusterOf<collectable_reference_t>
+    //  ... redefine in derived types to use something other than a VCollectableCollectionOf<T>
+        template <typename collectable_reference_t> struct ClusterOf {
+            typedef VCollectableCollectionOf<collectable_reference_t> type;
         };
 
     //  Construction
@@ -79,8 +83,9 @@ namespace Vxa {
 	collection_index_t m_xObject;
     };
 
-/*****************************************************************
- *****************************************************************/
+    /*--------------------------------------------------*
+     *----  class VCollectableObject::ClassBuilder  ----*
+     *--------------------------------------------------*/
 
     class Vxa_API VCollectableObject::ClassBuilder {
     //  Construction
