@@ -159,8 +159,8 @@ namespace Vxa {
 
 
 /*************************************
-*****  Template Instantiations  *****
-*************************************/
+ *****  Template Instantiations  *****
+ *************************************/
 
 #if defined(USING_HIDDEN_DEFAULT_VISIBILITY) || defined(Vxa_VExportable_Implementation)
 

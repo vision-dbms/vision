@@ -11,7 +11,7 @@
  *****  Declarations  *****
  **************************/
 
-#include "Vxa_VCollectableCollection.h"
+#include "Vxa_VCollectableCollectionOf.h"
 #include "Vxa_VCollectableMethod.h"
 
 /*************************
@@ -34,6 +34,14 @@ namespace Vxa {
     //  Class Builder
     public:
 	class Vxa_API ClassBuilder;
+
+    //  ClusterOf<T> Trait
+    //  ... redefine in derived types to use something other than a VCollectableCollectionOf<T>
+    //  ... as the cluster type.
+    public:
+        template <typename T> struct ClusterOf {
+            typedef VCollectableCollectionOf<T> type;
+        };
 
     //  Construction
     protected:

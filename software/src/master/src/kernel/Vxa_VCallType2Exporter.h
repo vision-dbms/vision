@@ -66,7 +66,7 @@ namespace Vxa {
 	template <typename object_reference_t> void getObjectIdentity (
 	    object_reference_t const &rpObject, VClass *pClass, VCollectableCollection::Reference &rpObjectCluster, object_index_t &rxObject
 	) {
-	    typedef VCollectableCollectionOf<typename object_reference_t::ReferencedClass*,object_reference_t> cluster_t;
+            typedef typename object_reference_t::ReferencedClass::template ClusterOf<object_reference_t>::type cluster_t;
 	    if (rpObject->getIdentity (rpObjectCluster, rxObject))
 		return;
 

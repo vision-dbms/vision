@@ -33,7 +33,8 @@ namespace Vxa {
     public:
 	typedef T* val_t;
 	typedef typename T::Reference var_t;
-	typedef VCollectableCollectionOf<val_t,var_t> collection_t;
+	typedef VCollectableCollectionOf<var_t> collection_t;
+//        typedef typename T::template ClusterOf<object_reference_t>::type collection_t;
 	typedef VScalar<typename collection_t::val_t> self_provider_t;
 
     //  Implementation
