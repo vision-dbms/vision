@@ -74,12 +74,8 @@ namespace Vxa {
 	}
 
     //  Method Invocation
-    private: //  Override of VCollection::invokeMethod_ ...
+    protected: //  Override of VCollection::invokeMethod_ ...
 	virtual bool invokeMethod_(VString const &rMethodName, VCallHandle const &rCallHandle) {
-	    return invokeMethod (rMethodName, rCallHandle);
-	}
-    protected:
-	bool invokeMethod (VString const &rMethodName, VCallHandle const &rCallHandle) {
 	    return m_pClass->invokeMethod (rMethodName, rCallHandle, this);
 	}
 
