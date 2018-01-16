@@ -21,9 +21,9 @@
 namespace Vxa {
     class VResultBuilder;
 
-    /*------------------------------------*
-     *----  class VCollectableObject  ----*
-     *------------------------------------*/
+    /*-----------------------------------------*
+     *----  class Vxa::VCollectableObject  ----*
+     *-----------------------------------------*/
 
     class Vxa_API VCollectableObject : virtual public VRolePlayer {
 	DECLARE_ABSTRACT_RTTLITE (VCollectableObject, VRolePlayer);
@@ -83,9 +83,9 @@ namespace Vxa {
 	collection_index_t m_xObject;
     };
 
-    /*--------------------------------------------------*
-     *----  class VCollectableObject::ClassBuilder  ----*
-     *--------------------------------------------------*/
+    /*-------------------------------------------------------*
+     *----  class Vxa::VCollectableObject::ClassBuilder  ----*
+     *-------------------------------------------------------*/
 
     class Vxa_API VCollectableObject::ClassBuilder {
     //  Construction
@@ -123,7 +123,13 @@ namespace Vxa {
     private:
 	VClass* m_pClass;
 	VString m_iHelpInfo;
-    };
+    }; // class Vxa::VCollectableObject
+
+    /*----------------------------------------------------------*
+     *----  typedef Vxa::Object => Vxa::VCollectableObject  ----*
+     *----------------------------------------------------------*/
+
+    typedef VCollectableObject Object;
 }
 
 
