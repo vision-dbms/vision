@@ -33,7 +33,7 @@ namespace Vxa {
     public:
 	typedef typename VCollectableTraits<T>::val_t val_t;
 	typedef typename VCollectableTraits<T>::var_t var_t;
-        typedef typename VCollectableTraits<T>::cluster_t collection_t;
+        typedef typename VCollectableTraits<T>::cluster_t cluster_t;
 	typedef VScalar<val_t> self_provider_t;
 
     //  Implementation
@@ -45,7 +45,7 @@ namespace Vxa {
 	protected:
 	    Implementation (
 		VCallData const &rCallData, VCollection *pCollection
-	    ) : BaseClass (rCallData), m_pCollection (static_cast<collection_t*>(pCollection)) {
+	    ) : BaseClass (rCallData), m_pCollection (static_cast<cluster_t*>(pCollection)) {
 	    }
 
 	//  Destruction
@@ -68,7 +68,7 @@ namespace Vxa {
 
 	//  State
 	private:
-	    typename collection_t::Reference const m_pCollection;
+	    typename cluster_t::Reference const m_pCollection;
 	    typename self_provider_t::Reference m_pSelfProvider;
 	};
 

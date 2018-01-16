@@ -118,17 +118,17 @@ namespace Vxa {
     //****************************************************************
     //  SelfProviderFor
     public:
-	template <typename Collection_T, typename Provider_T> class SelfProviderFor : public SelfProvider {
-	    typedef SelfProviderFor<Collection_T,Provider_T> this_t;
+	template <typename Cluster_T, typename Provider_T> class SelfProviderFor : public SelfProvider {
+	    typedef SelfProviderFor<Cluster_T,Provider_T> this_t;
 	    DECLARE_CONCRETE_RTTLITE (this_t, SelfProvider);
 
 	//  Aliases
 	public:
-	    typedef Collection_T collection_t;
+	    typedef Cluster_T cluster_t;
 	    typedef Provider_T provider_t;
 
-	    typedef typename collection_t::val_t val_t;
-	    typedef typename collection_t::var_t var_t;
+	    typedef typename cluster_t::val_t val_t;
+	    typedef typename cluster_t::var_t var_t;
 
 	//****************************************************************
 	//  CurrentSelf
@@ -139,8 +139,8 @@ namespace Vxa {
 	    //  Construction
 	    public:
 		CurrentSelf (
-		    collection_t *pCollection, object_reference_array_t const &rSelfReferences, VTaskCursor *pTaskCursor
-		) : BaseClass (pCollection->type ()), m_pCollection (pCollection), m_iSelfReferences (rSelfReferences), m_pTaskCursor (pTaskCursor) {
+		    cluster_t *pCluster, object_reference_array_t const &rSelfReferences, VTaskCursor *pTaskCursor
+		) : BaseClass (pCluster->type ()), m_pCluster (pCluster), m_iSelfReferences (rSelfReferences), m_pTaskCursor (pTaskCursor) {
 		}
 
 	    //  Destruction
@@ -151,12 +151,12 @@ namespace Vxa {
 	    //  Access
 	    public:
 		val_t value () {
-		    return m_pCollection->element(m_iSelfReferences[m_pTaskCursor->position ()]);
+		    return m_pCluster->element(m_iSelfReferences[m_pTaskCursor->position ()]);
 		}
 
 	    //  State
 	    private:
-		typename collection_t::Reference const m_pCollection;
+		typename cluster_t::Reference const m_pCluster;
 		object_reference_array_t const m_iSelfReferences;
 		VTaskCursor::Reference const m_pTaskCursor;
 	    };
@@ -165,8 +165,8 @@ namespace Vxa {
 	//  Construction
 	public:
 	    SelfProviderFor (
-		ICaller *pCaller, VTask *pTask, collection_t *pCollection, provider_t &rpSelfProvider
-	    ) : BaseClass (pCaller, pTask), m_pCollection (pCollection), m_rpSelfProvider (rpSelfProvider) {
+		ICaller *pCaller, VTask *pTask, cluster_t *pCluster, provider_t &rpSelfProvider
+	    ) : BaseClass (pCaller, pTask), m_pCluster (pCluster), m_rpSelfProvider (rpSelfProvider) {
 	    }
 
 	//  Destruction
@@ -179,21 +179,21 @@ namespace Vxa {
 	    bool onSelf (object_reference_t xSelfReference) const {
 		m_rpSelfProvider.setTo (
 		    new VScalarInstance<val_t, var_t>(
-			m_pCollection->type (), m_pCollection->element (xSelfReference)
+			m_pCluster->type (), m_pCluster->element (xSelfReference)
 		    )
 		);
 		return true;
 	    }
 	    bool onSelf (object_reference_array_t const &rSelfReferences) const {
 		m_rpSelfProvider.setTo (
-		    new CurrentSelf (m_pCollection, rSelfReferences, taskCursor ())
+		    new CurrentSelf (m_pCluster, rSelfReferences, taskCursor ())
 		);
 		return true;
 	    }
 
 	//  State
 	private:
-	    typename collection_t::Reference const m_pCollection;
+	    typename cluster_t::Reference const m_pCluster;
 	    provider_t &m_rpSelfProvider;
 	};
 
@@ -213,7 +213,7 @@ namespace Vxa {
 
     //  Invocation
     public:
-	virtual bool invoke (VMethod *pMethod, VCollection *pCollection) const;
+	virtual bool invoke (VMethod *pMethod, VCollection *pCluster) const;
 	bool start (VTask *pTask) const;
 
     //  Parameter Acquisition
@@ -222,10 +222,10 @@ namespace Vxa {
 	bool onParameterRequest (VTask *pTask, unsigned int xParameter) const;
 	bool onParameterReceipt (VTask *pTask, unsigned int xParameter) const;
     public:
-	template <typename collection_t, typename provider_t> bool getSelfProviderFor (
-	    VTask *pTask, collection_t *pCollection, provider_t &rpSelfProvider
+	template <typename cluster_t, typename provider_t> bool getSelfProviderFor (
+	    VTask *pTask, cluster_t *pCluster, provider_t &rpSelfProvider
 	) const {
-	    (new SelfProviderFor<collection_t,provider_t> (m_pCaller, pTask,pCollection,rpSelfProvider))->discard ();
+	    (new SelfProviderFor<cluster_t,provider_t> (m_pCaller,pTask,pCluster,rpSelfProvider))->discard ();
 	    return true;
 	}
 

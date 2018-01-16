@@ -44,7 +44,7 @@ namespace Vxa {
 
     //  Aliases
     public:
-        typedef typename VCollectableTraits<T>::cluster_t collection_t;
+        typedef typename VCollectableTraits<T>::cluster_t cluster_t;
 	typedef typename VCollectableTraits<T>::val_t val_t;
 	typedef typename VCollectableTraits<T>::var_t var_t;
 
@@ -126,7 +126,7 @@ namespace Vxa {
     //  Export Creation
     private:
 	virtual bool createExport (export_return_t &rpResult, val_t const &rpInstance) {
-	    (new collection_t (thisAsClass (), 0, rpInstance))->getRole (rpResult);
+	    (new cluster_t (thisAsClass (), 0, rpInstance))->getRole (rpResult);
 	    return rpResult.isntNil ();
 	}
 

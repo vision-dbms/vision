@@ -25,8 +25,6 @@ namespace Vxa {
 
     //  Aliases
     public:
-	typedef ThisClass collection_t;
-	typedef Reference collection_reference_t;
 	typedef VkDynamicArrayOf<Var_T> container_t;
 
 	typedef typename Var_T::ReferencedClass *val_t;
