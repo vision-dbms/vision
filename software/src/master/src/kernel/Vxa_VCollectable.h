@@ -7,8 +7,6 @@
 
 #include "Vxa_VClass.h"
 
-#include "Vxa_VExportableDatum.h"
-
 #include "Vxa_VExportable.h"
 #include "Vxa_VImportable.h"
 #include "Vxa_VResultBuilder.h"
@@ -18,8 +16,6 @@
  **************************/
 
 #include "V_VRTTI.h"
-
-#include "Vxa_VCollectableMethod.h"
 
 #include "Vxa_VConstant.h"
 
@@ -48,10 +44,9 @@ namespace Vxa {
 
     //  Aliases
     public:
-	typedef VCollectableMethodBase<T> method_t;
-	typedef typename method_t::collection_t collection_t;
-	typedef typename method_t::val_t val_t;
-	typedef typename method_t::var_t var_t;
+        typedef typename VCollectableTraits<T>::cluster_t collection_t;
+	typedef typename VCollectableTraits<T>::val_t val_t;
+	typedef typename VCollectableTraits<T>::var_t var_t;
 
 	typedef VCollectable<T> collectable_t;
 	typedef VExportable<T*> exportable_t;
