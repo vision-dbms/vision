@@ -33,7 +33,6 @@ namespace Vxa {
     //  Aliases
     public:
 	typedef ThisClass Object;
-	typedef VCollectableCollection::collection_index_t collection_index_t;
 
     //  Class Builder
     public:
@@ -57,30 +56,31 @@ namespace Vxa {
 
     //  Access
     public:
-	VCollectableCollection *objectCollection () const {
-	    return m_pCollection;
+	cluster_t *objectCluster () const {
+	    return m_iIdentity.cluster ();
 	}
-	collection_index_t objectIndex () const {
-	    return m_xObject;
+	cluster_index_t objectIndex () const {
+	    return m_iIdentity.clusterIndex ();
 	}
 
     //  Identity Access
     public:
-	bool getIdentity (VCollectableCollection::Reference &rpCollection, collection_index_t &rxObject) const {
-	    rpCollection = m_pCollection;
-	    rxObject = m_xObject;
-	    return rpCollection.isntNil ();
+	bool getIdentity (VCollectableIdentity &rIdentity) const {
+            return m_iIdentity.getIdentity (rIdentity);
 	}
 
     //  Identity Management
     public:
-	bool attach (VCollectableCollection *pCollection, collection_index_t xObject);
-	bool detach (VCollectableCollection *pCollection);
+	bool attach (cluster_t *pCluster, cluster_index_t xObject) {
+            return m_iIdentity.attach (pCluster, xObject);
+        }
+	bool detach (cluster_t *pCluster) {
+            return m_iIdentity.detach (pCluster);
+        }
 
     //  State
     private:
-	VCollectableCollection::Pointer m_pCollection;
-	collection_index_t m_xObject;
+        VCollectableIdentity m_iIdentity;
     };
 
     /*-------------------------------------------------------*

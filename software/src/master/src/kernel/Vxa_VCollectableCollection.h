@@ -94,6 +94,66 @@ namespace Vxa {
 	VClass::Pointer const m_pClass;
 	cardinality_t m_sCollection;
     };
+
+
+    /*--------------------------------------*
+     *----  class VCollectableIdentity  ----*
+     *--------------------------------------*/
+
+    class Vxa_API VCollectableIdentity {
+    //  Friends
+        friend class VCollectableObject;
+
+    //  Aliases
+    public:
+        typedef VCollectableCollection cluster_t;
+        typedef VCollectableCollection::collection_index_t cluster_index_t;
+
+    //  Construction / Destruction
+    public:
+        VCollectableIdentity () : m_xObject (0) {
+        }
+        ~VCollectableIdentity () {
+        }
+
+    //  Access
+    public:
+        cluster_t *cluster () const {
+            return m_pCluster;
+        }
+        cluster_index_t clusterIndex () const {
+            return m_xObject;
+        }
+        bool getIdentity (VCollectableIdentity &rResult) const {
+            if (isntSet ())
+                return false;
+            rResult.m_xObject  = m_xObject;
+            rResult.m_pCluster = m_pCluster;
+            return true;
+        }
+
+    //  Query
+    public:
+        bool isSet () const {
+            return m_pCluster.isntNil ();
+        }
+        bool isntSet () const {
+            return m_pCluster.isNil ();
+        }
+
+    //  Update
+    private:
+        bool attach (cluster_t *pCluster, cluster_index_t xObject);
+        bool detach (cluster_t *pCluster);
+
+    //  State
+    private:
+        cluster_t::Pointer m_pCluster;
+        cluster_index_t    m_xObject;
+    };
+
+    typedef VCollectableIdentity::cluster_t       cluster_t;
+    typedef VCollectableIdentity::cluster_index_t cluster_index_t;
 }
 
 

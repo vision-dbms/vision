@@ -79,3 +79,30 @@ bool Vxa::VCollectableCollection::attach (VCollectableObject *pObject) {
 bool Vxa::VCollectableCollection::detach (VCollectableObject *pObject) {
     return pObject && pObject->detach (this);
 }
+
+
+/***************************************
+ ***************************************
+ *****                             *****
+ *****  Vxa::VCollectableIdentity  *****
+ *****                             *****
+ ***************************************
+ ***************************************/
+
+/********************
+ ********************
+ *****  Update  *****
+ ********************
+ ********************/
+
+bool Vxa::VCollectableIdentity::attach (cluster_t *pCluster, cluster_index_t xObject) {
+    if (m_pCluster.interlockedSetIfNil (pCluster)) {
+	m_xObject = xObject;
+	return true;
+    }
+    return false;
+}
+
+bool Vxa::VCollectableIdentity::detach (cluster_t *pCluster) {
+    return m_pCluster.interlockedClearIf (pCluster);
+}

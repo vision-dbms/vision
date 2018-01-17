@@ -37,7 +37,7 @@
  **************************
  **************************/
 
-Vxa::VCollectableObject::VCollectableObject () : m_xObject (0) {
+Vxa::VCollectableObject::VCollectableObject () {
 }
 
 /*************************
@@ -47,24 +47,6 @@ Vxa::VCollectableObject::VCollectableObject () : m_xObject (0) {
  *************************/
 
 Vxa::VCollectableObject::~VCollectableObject () {
-}
-
-/********************
- ********************
- *****  Update  *****
- ********************
- ********************/
-
-bool Vxa::VCollectableObject::attach (VCollectableCollection *pCollection, collection_index_t xObject) {
-    if (m_pCollection.interlockedSetIfNil (pCollection)) {
-	m_xObject = xObject;
-	return true;
-    }
-    return false;
-}
-
-bool Vxa::VCollectableObject::detach (VCollectableCollection *pCollection) {
-    return m_pCollection.interlockedClearIf (pCollection);
 }
 
 

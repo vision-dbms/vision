@@ -28,8 +28,7 @@ namespace Vxa {
 
     //  Aliases
     public:
-	typedef cardinality_t object_index_t;
-	typedef VMonotypeMapMakerFor<object_index_t> map_maker_t;
+	typedef VMonotypeMapMakerFor<cluster_index_t> map_maker_t;
 
 	typedef VkMapOf<VClass::Pointer,VClass*,VClass const*,VCollectableCollection::Reference> cluster_map_t;
 
@@ -46,11 +45,11 @@ namespace Vxa {
 	virtual bool returnResult (VExportableDatum const &rDatum);
     public:
 	template <typename object_reference_t> bool returnObject (VClass *pClass, object_reference_t const &rpObject) {
-	    VCollectableCollection::Reference pObjectCluster; object_index_t xObject;
-	    getObjectIdentity (rpObject, pClass, pObjectCluster, xObject);
+            VCollectableIdentity iObjectIdentity;
+	    getObjectIdentity (rpObject, pClass, iObjectIdentity);
 
 	    map_maker_t::Reference pMapMaker;
-	    updateMap (pMapMaker, pObjectCluster, xObject);
+	    updateMap (pMapMaker, iObjectIdentity.cluster (), iObjectIdentity.clusterIndex ());
 
 	    return true;
 	}
@@ -64,12 +63,12 @@ namespace Vxa {
     //  Object Management
     private:
 	template <typename object_reference_t> void getObjectIdentity (
-	    object_reference_t const &rpObject, VClass *pClass, VCollectableCollection::Reference &rpObjectCluster, object_index_t &rxObject
+	    object_reference_t const &rpObject, VClass *pClass, VCollectableIdentity &rObjectIdentity
 	) {
-	    typedef typename VCollectableTraits<object_reference_t>::cluster_t cluster_t;
-	    if (rpObject->getIdentity (rpObjectCluster, rxObject))
+	    if (rpObject->getIdentity (rObjectIdentity))
 		return;
 
+	    typedef typename VCollectableTraits<object_reference_t>::cluster_t cluster_t;
 	    unsigned int xObjectCluster;
 	    if (m_iClusterMap.Insert (pClass,xObjectCluster))
 	    //  Cluster doesn't exist, create it...
@@ -81,7 +80,7 @@ namespace Vxa {
 		);
 		pCluster->append (rpObject);
 	    }
-	    rpObject->getIdentity (rpObjectCluster, rxObject);
+	    rpObject->getIdentity (rObjectIdentity);
 	}
 
     //  Map Making
