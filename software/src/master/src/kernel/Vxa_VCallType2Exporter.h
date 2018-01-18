@@ -45,11 +45,10 @@ namespace Vxa {
 	virtual bool returnResult (VExportableDatum const &rDatum);
     public:
 	template <typename object_reference_t> bool returnObject (VClass *pClass, object_reference_t const &rpObject) {
-            VCollectableIdentity iObjectIdentity;
-	    getObjectIdentity (rpObject, pClass, iObjectIdentity);
+	    getObjectIdentity (rpObject, pClass);
 
 	    map_maker_t::Reference pMapMaker;
-	    updateMap (pMapMaker, iObjectIdentity.cluster (), iObjectIdentity.clusterIndex ());
+	    updateMap (pMapMaker, rpObject->objectCluster (), rpObject->objectIndex ());
 
 	    return true;
 	}
@@ -63,24 +62,19 @@ namespace Vxa {
     //  Object Management
     private:
 	template <typename object_reference_t> void getObjectIdentity (
-	    object_reference_t const &rpObject, VClass *pClass, VCollectableIdentity &rObjectIdentity
+	    object_reference_t const &rpObject, VClass *pClass
 	) {
-	    if (rpObject->getIdentity (rObjectIdentity))
-		return;
+        //  If the object no identity ...
+	    if (rpObject->hasNoIdentity ()) {
+            // ... access the cluster map slot associated with the object's type:
+                unsigned int xCluster;
+                m_iClusterMap.Insert (pClass,xCluster);
 
-	    typedef typename VCollectableTraits<object_reference_t>::cluster_t cluster_t;
-	    unsigned int xObjectCluster;
-	    if (m_iClusterMap.Insert (pClass,xObjectCluster))
-	    //  Cluster doesn't exist, create it...
-		m_iClusterMap[xObjectCluster].setTo (new cluster_t (pClass, tailHints (), rpObject.referent ()));
-	    else {
-	    //  Cluster exists, add object to it...
-		typename cluster_t::Reference const pCluster (
-		    static_cast<cluster_t*>(m_iClusterMap[xObjectCluster].referent ())
-		);
-		pCluster->append (rpObject);
-	    }
-	    rpObject->getIdentity (rObjectIdentity);
+            //  ... and assign an identity based on the cluster associated with that slot:
+                VCollectableTraits<object_reference_t>::CreateIdentity (
+                    m_iClusterMap[xCluster], rpObject, pClass, tailHints ()
+                );
+            }
 	}
 
     //  Map Making

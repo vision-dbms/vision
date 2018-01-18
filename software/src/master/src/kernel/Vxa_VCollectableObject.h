@@ -54,7 +54,7 @@ namespace Vxa {
     protected:
 	~VCollectableObject ();
 
-    //  Access
+    //  Identity Access
     public:
 	cluster_t *objectCluster () const {
 	    return m_iIdentity.cluster ();
@@ -63,13 +63,16 @@ namespace Vxa {
 	    return m_iIdentity.clusterIndex ();
 	}
 
-    //  Identity Access
+    //  Identity Query
     public:
-	bool getIdentity (VCollectableIdentity &rIdentity) const {
-            return m_iIdentity.getIdentity (rIdentity);
-	}
+        bool hasAnIdentity () const {
+            return m_iIdentity.isSet ();
+        }
+        bool hasNoIdentity () const {
+            return m_iIdentity.isntSet ();
+        }
 
-    //  Identity Management
+    //  Identity Update
     public:
 	bool attach (cluster_t *pCluster, cluster_index_t xObject) {
             return m_iIdentity.attach (pCluster, xObject);

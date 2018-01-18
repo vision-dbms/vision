@@ -126,7 +126,28 @@ namespace Vxa {
     //  Export Creation
     private:
 	virtual bool createExport (export_return_t &rpResult, val_t const &rpInstance) {
-	    (new cluster_t (thisAsClass (), 0, rpInstance))->getRole (rpResult);
+            /************************************************************************
+             *>>>>  This routine is called to export root extension objects offered
+             *>>>>  by servers and client transactions.  While fully identifying an
+             *>>>>  extension object requires both the cluster and index portions of
+             *>>>>  its identity, this routine returns only the cluster.  The missing
+             *>>>>  index is assumed to be zero when the returned cluster is later
+             *>>>>  used to access the export.  To accommodate that convention, the
+             *>>>>  original implementation of this routine always created a new,
+             *>>>>  single element cluster containing the exported object:
+             *
+             *    (new cluster_t (thisAsClass (), 0, rpInstance))->getRole (rpResult);
+             *
+             *>>>>  While that approach 'worked', it also permitted the creation of
+             *>>>>  multiple identities for the same object.  As Vxa's notions of
+             *>>>>  object identity and cluster management evolves, this is probably
+             *>>>>  not something we want.  Allow it for now, but plan to change
+             *>>>>  that in the not too distant future.
+             ************************************************************************/
+            VCollectableCollection::Reference pCluster;
+            VCollectableTraits<T>::CreateIdentity (pCluster, rpInstance, thisAsClass ());
+            pCluster->getRole (rpResult);
+
 	    return rpResult.isntNil ();
 	}
 

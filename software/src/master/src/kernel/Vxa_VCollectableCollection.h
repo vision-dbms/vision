@@ -19,18 +19,7 @@
 
 namespace Vxa {
     class VCollectableObject;
-
-    /*----------------------------------------------------------------------*
-     *---- template <typename collectable_t> struct VCollectableTraits  ----*
-     *----------------------------------------------------------------------*/
-
-    template <typename collectable_t> struct VCollectableTraits {
-	typedef collectable_t* val_t;
-	typedef typename collectable_t::Reference var_t;
-	typedef typename collectable_t::template ClusterOf<typename collectable_t::Reference>::type cluster_t;
-    };
-    template <typename collectable_t> struct VCollectableTraits<VReference<collectable_t> > : public VCollectableTraits<collectable_t> {
-    };
+
 
     /*----------------------------------------*
      *----  class VCollectableCollection  ----*
@@ -124,13 +113,6 @@ namespace Vxa {
         cluster_index_t clusterIndex () const {
             return m_xObject;
         }
-        bool getIdentity (VCollectableIdentity &rResult) const {
-            if (isntSet ())
-                return false;
-            rResult.m_xObject  = m_xObject;
-            rResult.m_pCluster = m_pCluster;
-            return true;
-        }
 
     //  Query
     public:
@@ -154,6 +136,33 @@ namespace Vxa {
 
     typedef VCollectableIdentity::cluster_t       cluster_t;
     typedef VCollectableIdentity::cluster_index_t cluster_index_t;
+
+
+    /*----------------------------------------------------------------------*
+     *---- template <typename collectable_t> struct VCollectableTraits  ----*
+     *----------------------------------------------------------------------*/
+
+    template <typename collectable_t> struct VCollectableTraits {
+	typedef collectable_t* val_t;
+	typedef typename collectable_t::Reference var_t;
+	typedef typename collectable_t::template ClusterOf<typename collectable_t::Reference>::type cluster_t;
+
+        static void CreateIdentity (
+            VCollectableCollection::Reference &rpCluster,
+            collectable_t *pObject, VClass *pClass, VCardinalityHints *pTailHints = 0
+        ) {
+	    if (pObject->hasAnIdentity ()) {
+            } else if (rpCluster) {
+                static_cast<cluster_t*>(rpCluster.referent ())->append (pObject);
+            } else {
+                rpCluster.setTo (new cluster_t (pClass, pTailHints, pObject));
+            }
+        }
+    };
+
+    template <typename collectable_t>
+    struct VCollectableTraits<VReference<collectable_t> > : public VCollectableTraits<collectable_t> {
+    };
 }
 
 
