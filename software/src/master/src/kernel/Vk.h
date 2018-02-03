@@ -69,6 +69,11 @@
  *                                keyword is valid.  Defined in this file unless
  *                                a platform specific "Vp.h" file already sets
  *                                it, typically because it isn't supported.
+ *      FINAL                   - a macro typically set to the C++11 'final'
+ *                                keyword and intended for use wherever that
+ *                                keyword is valid.  Defined in this file unless
+ *                                a platform specific "Vp.h" file already sets
+ *                                it, typically because it isn't supported.
  *
  *	BOGUS_TEMPLATE		- 'template' or empty for platform specific
  *				  bogus error suppression.  Defined in Vp.h
@@ -107,6 +112,10 @@
 
 #ifndef OVERRIDE
 #define OVERRIDE override
+#endif
+
+#ifndef FINAL
+#define FINAL final
 #endif
 
 #ifndef BOGUS_TEMPLATE

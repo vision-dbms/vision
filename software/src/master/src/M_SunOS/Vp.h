@@ -51,6 +51,7 @@
 
 #define USING(x) using x;
 #define OVERRIDE
+#define FINAL
 
 #define DECLSPEC_DLLEXPORT
 #define DECLSPEC_DLLIMPORT
