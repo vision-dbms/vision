@@ -50,6 +50,7 @@
 #define __int8			char
 
 #define USING(x) using x;
+#define OVERRIDE
 
 #define DECLSPEC_DLLEXPORT
 #define DECLSPEC_DLLIMPORT
