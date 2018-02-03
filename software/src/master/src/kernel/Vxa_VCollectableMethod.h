@@ -131,13 +131,13 @@ namespace Vxa {
 		    && m_iP16.retrieve (this, rImporter)
 		    && BaseClass::startUsing (rImporter);
 	    }
-	    virtual bool startUsing (VCallType1Importer &rImporter) {
+	    bool startUsing (VCallType1Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool startUsing (VCallType2Importer &rImporter) {
+	    bool startUsing (VCallType2Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool run () {
+	    bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
 		while (BaseClass::moreToDo ()) {
 		    (BaseClass::self ()->*pMember)(
@@ -194,10 +194,10 @@ namespace Vxa {
 	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCollection, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) {
+	bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return invokeImpl (pCollection);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) {
+	bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return invokeImpl (pCollection);
 	}
     private:
@@ -251,13 +251,13 @@ namespace Vxa {
 		    && m_iP15.retrieve (this, rImporter)
 		    && BaseClass::startUsing (rImporter);
 	    }
-	    virtual bool startUsing (VCallType1Importer &rImporter) {
+	    bool startUsing (VCallType1Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool startUsing (VCallType2Importer &rImporter) {
+	    bool startUsing (VCallType2Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool run () {
+	    bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
 		while (BaseClass::moreToDo ()) {
 		    (BaseClass::self ()->*pMember)(
@@ -313,10 +313,10 @@ namespace Vxa {
 	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCollection, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) {
+	bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return invokeImpl (rCallHandle, pCollection);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) {
+	bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return invokeImpl (rCallHandle, pCollection);
 	}
     private:
@@ -366,13 +366,13 @@ namespace Vxa {
 		    && m_iP14.retrieve (this, rImporter)
 		    && BaseClass::startUsing (rImporter);
 	    }
-	    virtual bool startUsing (VCallType1Importer &rImporter) {
+	    bool startUsing (VCallType1Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool startUsing (VCallType2Importer &rImporter) {
+	    bool startUsing (VCallType2Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool run () {
+	    bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
 		while (BaseClass::moreToDo ()) {
 		    (BaseClass::self ()->*pMember)(
@@ -427,10 +427,10 @@ namespace Vxa {
 	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCollection, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) {
+	bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return invokeImpl (rCallHandle, pCollection);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) {
+	bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return invokeImpl (rCallHandle, pCollection);
 	}
     private:
@@ -479,13 +479,13 @@ namespace Vxa {
 		    && m_iP13.retrieve (this, rImporter)
 		    && BaseClass::startUsing (rImporter);
 	    }
-	    virtual bool startUsing (VCallType1Importer &rImporter) {
+	    bool startUsing (VCallType1Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool startUsing (VCallType2Importer &rImporter) {
+	    bool startUsing (VCallType2Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool run () {
+	    bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
 		while (BaseClass::moreToDo ()) {
 		    (BaseClass::self ()->*pMember)(
@@ -539,10 +539,10 @@ namespace Vxa {
 	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCollection, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) {
+	bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return invokeImpl (rCallHandle, pCollection);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) {
+	bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return invokeImpl (rCallHandle, pCollection);
 	}
     private:
@@ -589,13 +589,13 @@ namespace Vxa {
 		    && m_iP12.retrieve (this, rImporter)
 		    && BaseClass::startUsing (rImporter);
 	    }
-	    virtual bool startUsing (VCallType1Importer &rImporter) {
+	    bool startUsing (VCallType1Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool startUsing (VCallType2Importer &rImporter) {
+	    bool startUsing (VCallType2Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool run () {
+	    bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
 		while (BaseClass::moreToDo ()) {
 		    (BaseClass::self ()->*pMember)(
@@ -647,10 +647,10 @@ namespace Vxa {
 	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCollection, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) {
+	bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return invokeImpl (rCallHandle, pCollection);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) {
+	bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return invokeImpl (rCallHandle, pCollection);
 	}
     private:
@@ -696,13 +696,13 @@ namespace Vxa {
 		    && m_iP11.retrieve (this, rImporter)
 		    && BaseClass::startUsing (rImporter);
 	    }
-	    virtual bool startUsing (VCallType1Importer &rImporter) {
+	    bool startUsing (VCallType1Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool startUsing (VCallType2Importer &rImporter) {
+	    bool startUsing (VCallType2Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool run () {
+	    bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
 		while (BaseClass::moreToDo ()) {
 		    (BaseClass::self ()->*pMember)(
@@ -752,10 +752,10 @@ namespace Vxa {
 	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCollection, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) {
+	bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return invokeImpl (rCallHandle, pCollection);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) {
+	bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return invokeImpl (rCallHandle, pCollection);
 	}
     private:
@@ -800,13 +800,13 @@ namespace Vxa {
 		    && m_iP10.retrieve (this, rImporter)
 		    && BaseClass::startUsing (rImporter);
 	    }
-	    virtual bool startUsing (VCallType1Importer &rImporter) {
+	    bool startUsing (VCallType1Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool startUsing (VCallType2Importer &rImporter) {
+	    bool startUsing (VCallType2Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool run () {
+	    bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
 		while (BaseClass::moreToDo ()) {
 		    (BaseClass::self ()->*pMember)(
@@ -855,10 +855,10 @@ namespace Vxa {
 	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCollection, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) {
+	bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return invokeImpl (rCallHandle, pCollection);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) {
+	bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return invokeImpl (rCallHandle, pCollection);
 	}
     private:
@@ -901,13 +901,13 @@ namespace Vxa {
 		    && m_iP9.retrieve (this, rImporter)
 		    && BaseClass::startUsing (rImporter);
 	    }
-	    virtual bool startUsing (VCallType1Importer &rImporter) {
+	    bool startUsing (VCallType1Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool startUsing (VCallType2Importer &rImporter) {
+	    bool startUsing (VCallType2Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool run () {
+	    bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
 		while (BaseClass::moreToDo ()) {
 		    (BaseClass::self ()->*pMember)(
@@ -955,10 +955,10 @@ namespace Vxa {
 	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCollection, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) {
+	bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return invokeImpl (rCallHandle, pCollection);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) {
+	bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return invokeImpl (rCallHandle, pCollection);
 	}
     private:
@@ -1000,13 +1000,13 @@ namespace Vxa {
 		    && m_iP8.retrieve (this, rImporter)
 		    && BaseClass::startUsing (rImporter);
 	    }
-	    virtual bool startUsing (VCallType1Importer &rImporter) {
+	    bool startUsing (VCallType1Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool startUsing (VCallType2Importer &rImporter) {
+	    bool startUsing (VCallType2Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool run () {
+	    bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
 		while (BaseClass::moreToDo ()) {
 		    (BaseClass::self ()->*pMember)(m_iP1, m_iP2, m_iP3, m_iP4, m_iP5, m_iP6, m_iP7, m_iP8);
@@ -1050,10 +1050,10 @@ namespace Vxa {
 	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCollection, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) {
+	bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return invokeImpl (rCallHandle, pCollection);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) {
+	bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return invokeImpl (rCallHandle, pCollection);
 	}
     private:
@@ -1093,13 +1093,13 @@ namespace Vxa {
 		    && m_iP7.retrieve (this, rImporter)
 		    && BaseClass::startUsing (rImporter);
 	    }
-	    virtual bool startUsing (VCallType1Importer &rImporter) {
+	    bool startUsing (VCallType1Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool startUsing (VCallType2Importer &rImporter) {
+	    bool startUsing (VCallType2Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool run () {
+	    bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
 		while (BaseClass::moreToDo ()) {
 		    (BaseClass::self ()->*pMember)(m_iP1, m_iP2, m_iP3, m_iP4, m_iP5, m_iP6, m_iP7);
@@ -1142,10 +1142,10 @@ namespace Vxa {
 	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCollection, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) {
+	bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return invokeImpl (rCallHandle, pCollection);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) {
+	bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return invokeImpl (rCallHandle, pCollection);
 	}
     private:
@@ -1184,13 +1184,13 @@ namespace Vxa {
 		    && m_iP6.retrieve (this, rImporter)
 		    && BaseClass::startUsing (rImporter);
 	    }
-	    virtual bool startUsing (VCallType1Importer &rImporter) {
+	    bool startUsing (VCallType1Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool startUsing (VCallType2Importer &rImporter) {
+	    bool startUsing (VCallType2Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool run () {
+	    bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
 		while (BaseClass::moreToDo ()) {
 		    (BaseClass::self ()->*pMember)(m_iP1, m_iP2, m_iP3, m_iP4, m_iP5, m_iP6);
@@ -1232,10 +1232,10 @@ namespace Vxa {
 	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCollection, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) {
+	bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return invokeImpl (rCallHandle, pCollection);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) {
+	bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return invokeImpl (rCallHandle, pCollection);
 	}
     private:
@@ -1273,13 +1273,13 @@ namespace Vxa {
 		    && m_iP5.retrieve (this, rImporter)
 		    && BaseClass::startUsing (rImporter);
 	    }
-	    virtual bool startUsing (VCallType1Importer &rImporter) {
+	    bool startUsing (VCallType1Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool startUsing (VCallType2Importer &rImporter) {
+	    bool startUsing (VCallType2Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool run () {
+	    bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
 		while (BaseClass::moreToDo ()) {
 		    (BaseClass::self ()->*pMember)(m_iP1, m_iP2, m_iP3, m_iP4, m_iP5);
@@ -1320,10 +1320,10 @@ namespace Vxa {
 	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCollection, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) {
+	bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return invokeImpl (rCallHandle, pCollection);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) {
+	bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return invokeImpl (rCallHandle, pCollection);
 	}
     private:
@@ -1361,13 +1361,13 @@ namespace Vxa {
 		    && m_iP4.retrieve (this, rImporter)
 		    && BaseClass::startUsing (rImporter);
 	    }
-	    virtual bool startUsing (VCallType1Importer &rImporter) {
+	    bool startUsing (VCallType1Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool startUsing (VCallType2Importer &rImporter) {
+	    bool startUsing (VCallType2Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool run () {
+	    bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
 		while (BaseClass::moreToDo ()) {
 		    (BaseClass::self ()->*pMember)(m_iP1, m_iP2, m_iP3, m_iP4);
@@ -1406,10 +1406,10 @@ namespace Vxa {
 	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCollection, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) {
+	bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return invokeImpl (rCallHandle, pCollection);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) {
+	bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return invokeImpl (rCallHandle, pCollection);
 	}
     private:
@@ -1445,13 +1445,13 @@ namespace Vxa {
 		    && m_iP3.retrieve (this, rImporter)
 		    && BaseClass::startUsing (rImporter);
 	    }
-	    virtual bool startUsing (VCallType1Importer &rImporter) {
+	    bool startUsing (VCallType1Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool startUsing (VCallType2Importer &rImporter) {
+	    bool startUsing (VCallType2Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool run () {
+	    bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
 		while (BaseClass::moreToDo ()) {
 		    (BaseClass::self ()->*pMember)(m_iP1, m_iP2, m_iP3);
@@ -1489,10 +1489,10 @@ namespace Vxa {
 	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCollection, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) {
+	bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return invokeImpl (rCallHandle, pCollection);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) {
+	bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return invokeImpl (rCallHandle, pCollection);
 	}
     private:
@@ -1525,13 +1525,13 @@ namespace Vxa {
 		    && m_iP2.retrieve (this, rImporter)
 		    && BaseClass::startUsing (rImporter);
 	    }
-	    virtual bool startUsing (VCallType1Importer &rImporter) {
+	    bool startUsing (VCallType1Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool startUsing (VCallType2Importer &rImporter) {
+	    bool startUsing (VCallType2Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool run () {
+	    bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
 		while (BaseClass::moreToDo ()) {
 		    (BaseClass::self ()->*pMember)(m_iP1, m_iP2);
@@ -1568,10 +1568,10 @@ namespace Vxa {
 	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCollection, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) {
+	bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return invokeImpl (rCallHandle, pCollection);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) {
+	bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return invokeImpl (rCallHandle, pCollection);
 	}
     private:
@@ -1603,13 +1603,13 @@ namespace Vxa {
 		return m_iP1.retrieve (this, rImporter)
 		    && BaseClass::startUsing (rImporter);
 	    }
-	    virtual bool startUsing (VCallType1Importer &rImporter) {
+	    bool startUsing (VCallType1Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool startUsing (VCallType2Importer &rImporter) {
+	    bool startUsing (VCallType2Importer &rImporter) OVERRIDE {
 		return startUsingImpl (rImporter);
 	    }
-	    virtual bool run () {
+	    bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
 		while (BaseClass::moreToDo ()) {
 		    (BaseClass::self ()->*pMember)(m_iP1);
@@ -1645,10 +1645,10 @@ namespace Vxa {
 	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCollection, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) {
+	bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return invokeImpl (rCallHandle, pCollection);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) {
+	bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return invokeImpl (rCallHandle, pCollection);
 	}
     private:
@@ -1676,7 +1676,7 @@ namespace Vxa {
 	    ~Implementation () {
 	    }
 	private:
-	    virtual bool run () {
+	    bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
 		while (BaseClass::moreToDo ()) {
 		    (BaseClass::self ()->*pMember)();
@@ -1710,10 +1710,10 @@ namespace Vxa {
 	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCollection, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) {
+	bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return invokeImpl (rCallHandle, pCollection);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) {
+	bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return invokeImpl (rCallHandle, pCollection);
 	}
     private:

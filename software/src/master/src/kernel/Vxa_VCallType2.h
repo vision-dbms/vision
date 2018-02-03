@@ -266,9 +266,9 @@ namespace Vxa {
 	bool returnVector (VkDynamicArrayOf<VString> const &rVector) const;
 
     //  ... status:
-	virtual /*override*/ bool returnError (VString const &rMessage) const;
-	virtual /*override*/ bool returnSNF () const;
-	virtual /*override*/ bool returnNA () const;
+	bool returnError (VString const &rMessage) const OVERRIDE;
+	bool returnSNF () const OVERRIDE;
+	bool returnNA () const OVERRIDE;
 
     //  ... segments:
 	template <typename T> bool returnSegment (object_reference_array_t const &rInjection, VCollection *pCluster, T const &rT) const {
