@@ -51,7 +51,7 @@ private:
 
 //  Alignment
 private:
-    virtual /*override*/ bool align_() {
+    virtual bool align_() OVERRIDE {
 	return align ();
     }
 public:

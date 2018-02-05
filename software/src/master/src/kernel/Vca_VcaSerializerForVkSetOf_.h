@@ -80,11 +80,11 @@ namespace Vca {
 
     //  Transport Callbacks
     protected:
-	void localizeData () OVERRIDE {
+	virtual void localizeData () OVERRIDE {
 	    peer ()->localize (m_cElements);
 	}
 
-	void getData () OVERRIDE {
+	virtual void getData () OVERRIDE {
 	    get (&m_cElements, sizeof (m_cElements));
 	}
 
@@ -92,13 +92,13 @@ namespace Vca {
 	    This function determines the cardinality of the set, and sends it over the wire.
 	    Also initializes the buffer storage with the first element to be sent
 	**/
-	void putData () OVERRIDE {
+	virtual void putData () OVERRIDE {
 	    m_cElements = m_rDatum.cardinality();
 	    put (&m_cElements, sizeof (m_cElements)); 
 	}
 
 	// This function inserts the last element obtained into the datum 
-	void wrapupIncomingSerialization () OVERRIDE {
+	virtual void wrapupIncomingSerialization () OVERRIDE {
 	    if (m_cElements !=0)
 		m_rDatum.Insert (m_iElement);
 	}       

@@ -39,7 +39,7 @@ namespace Vca {
 
 	//  Maintenance
 	private:
-	    bool locate (Entry::Reference &rpEntry, VString const &rName) OVERRIDE;
+	    virtual bool locate (Entry::Reference &rpEntry, VString const &rName) OVERRIDE;
 
 	//  State
 	private:

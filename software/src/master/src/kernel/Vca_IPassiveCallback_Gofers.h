@@ -69,13 +69,13 @@ namespace Vca {
 
 	//  Callbacks
 	private:
-	    void onNeed () OVERRIDE {
+	    virtual void onNeed () OVERRIDE {
 		m_pServer.materializeFor (this);
 		m_pConnector.materializeFor (this);
 		m_sTimeout.materializeFor (this);
 		BaseClass::onNeed ();
 	    }
-	    void onData() OVERRIDE {
+	    virtual void onData() OVERRIDE {
 		IPassiveCallbackReceiver::Reference pCallbackSink;
 		getRole (pCallbackSink);
 		m_pConnector->RequestCallback (pCallbackSink, m_pServer, m_sTimeout);

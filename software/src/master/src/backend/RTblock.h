@@ -188,7 +188,7 @@ public:
 
 //  Alignment
 private:
-    virtual /*override*/ bool align_() {
+    virtual bool align_() OVERRIDE {
 	return align ();
     }
 public:
@@ -197,7 +197,7 @@ public:
 
 //  Canonicalization
 private:
-    virtual /*override*/ bool getCanonicalization_(VReference<rtVSTORE_Handle> &rpStore, DSC_Pointer const &rPointer);
+    virtual bool getCanonicalization_(VReference<rtVSTORE_Handle> &rpStore, DSC_Pointer const &rPointer) OVERRIDE;
 
 //  Access
 private:
@@ -279,20 +279,20 @@ public:
 
 //  Attributes
 private:
-    virtual /*override*/ rtDICTIONARY_Handle *getDictionary_(DSC_Pointer const &rPointer) const;
-    virtual /*override*/ rtPTOKEN_Handle *getPToken_() const;
+    virtual rtDICTIONARY_Handle *getDictionary_(DSC_Pointer const &rPointer) const OVERRIDE;
+    virtual rtPTOKEN_Handle *getPToken_() const OVERRIDE;
 
 //  Container Maintenance
 protected:
-    virtual /*override*/ void AdjustContainerPointers (M_CPreamble *pNewAddress, bool bWritable);
-    virtual /*override*/ bool PersistReferences ();
+    virtual void AdjustContainerPointers (M_CPreamble *pNewAddress, bool bWritable) OVERRIDE;
+    virtual bool PersistReferences () OVERRIDE;
 
 //  Display and Inspection
 public:
-    virtual /*override*/ unsigned int getPOPCount () const {
+    virtual unsigned int getPOPCount () const OVERRIDE {
 	return 1/*dictionary*/ + nestedBlockCount ();
     }
-    virtual /*override*/ bool getPOP (M_POP *pResult, unsigned int xPOP) const;
+    virtual bool getPOP (M_POP *pResult, unsigned int xPOP) const OVERRIDE;
 
 //  State
 protected:

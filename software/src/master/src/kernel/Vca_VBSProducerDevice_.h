@@ -45,19 +45,19 @@ namespace Vca {
 
     //  Face Implementation
     private:
-	VDevice *device_() OVERRIDE {
+	virtual VDevice *device_() OVERRIDE {
 	    return this;
 	}
-	bool getName_(VkStatus &rStatus, VString &rName) OVERRIDE {
+	virtual bool getName_(VkStatus &rStatus, VString &rName) OVERRIDE {
 	    return static_cast<BaseClass*>(this)->getName (rStatus, rName);
 	}
-	bool start_(
+	virtual bool start_(
 	    VkStatus &rStatus, VDeviceBSReader *pUser, VDeviceBSReadArea const &rArea
 	) OVERRIDE {
 	    VReference<Get> pUse (new Get (this));
 	    return pUse->start (rStatus, pUser, rArea);
 	}
-        bool start_(
+        virtual bool start_(
 	    VkStatus &rStatus, VDeviceBSReader *pUser
         ) OVERRIDE {
 	    VReference<ReadPoll> pUse (new ReadPoll (this));
@@ -66,23 +66,23 @@ namespace Vca {
 
     //  Face Access
     public:
-        operator BSReadFace* () OVERRIDE { return this; }
+        virtual operator BSReadFace* () OVERRIDE { return this; }
 
     //  User Accounting
     private:
-	void onFirstUser_(VDevice::BSReadFace *pFace) OVERRIDE {
+	virtual void onFirstUser_(VDevice::BSReadFace *pFace) OVERRIDE {
 	    static_cast<Implementation*>(this)->onFirstReader ();
 	}
-	void onFinalUser_(VDevice::BSReadFace *pFace) OVERRIDE {
+	virtual void onFinalUser_(VDevice::BSReadFace *pFace) OVERRIDE {
 	    static_cast<Implementation*>(this)->onFinalReader ();
 	}
 
     //  User Creation
     private:
-	bool supplyConnection_(VReference<VConnection>&rpUser) OVERRIDE {
+	virtual bool supplyConnection_(VReference<VConnection>&rpUser) OVERRIDE {
 	    return static_cast<VDevice::BSReadFace*>(this)->supply (rpUser);
 	}
-	bool supplyBSProducer_(VReference<VBSProducer>&rpUser) OVERRIDE {
+	virtual bool supplyBSProducer_(VReference<VBSProducer>&rpUser) OVERRIDE {
 	    return static_cast<VDevice::BSReadFace*>(this)->supply (rpUser);
 	}
     };

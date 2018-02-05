@@ -261,7 +261,7 @@ public:
 	return m_cActiveSpaces;
     }
 
-    VDatabase *database_() const;
+    virtual VDatabase *database_() const OVERRIDE;
 
     M_KOT *KOT () const {
 	return m_pKnownObjectTable;
@@ -684,18 +684,18 @@ public:
 
 //  Resource Utilization Query
 public:
-    void AccumulateAllocationStatistics (
+    virtual void AccumulateAllocationStatistics (
 	unsigned __int64 *pAllocationTotal, unsigned __int64 *pMappingTotal
-    ) const;
+    ) const OVERRIDE;
 
 //  Resource Utilization Management
 public:
-    void FlushCachedResources ();
+    virtual void FlushCachedResources () OVERRIDE;
 
-    unsigned int ReclaimSegments () {
+    virtual unsigned int ReclaimSegments () OVERRIDE {
 	return m_pPhysicalAND->ReclaimSegments ();
     }
-    unsigned int ReclaimAllSegments () {
+    virtual unsigned int ReclaimAllSegments () OVERRIDE {
 	return m_pPhysicalAND->ReclaimAllSegments ();
     }
 

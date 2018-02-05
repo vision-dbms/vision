@@ -122,8 +122,8 @@ namespace Vca {
 	//  Display
 	public:
 	    using BaseClass::displayInfo;
-	    void displayInfo () const OVERRIDE;
-	    void getInfo (VString &rResult, const VString &rPrefix) const OVERRIDE;
+	    virtual void displayInfo () const OVERRIDE;
+	    virtual void getInfo (VString &rResult, const VString &rPrefix) const OVERRIDE;
 
 	//  State
 	protected:

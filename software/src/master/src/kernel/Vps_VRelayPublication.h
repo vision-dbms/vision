@@ -120,8 +120,8 @@ namespace Vca {
 
 	//  Control
 	protected:
-	    bool start () OVERRIDE;
-	    bool stop () OVERRIDE;
+	    virtual bool start () OVERRIDE;
+	    virtual bool stop () OVERRIDE;
 	private:
 	    void cancelSubscription ();
 	    void cancelSubscriptionMonitor ();

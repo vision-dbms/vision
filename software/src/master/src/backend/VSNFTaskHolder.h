@@ -111,7 +111,7 @@ public:
 
 	//  Execution
 	public:
-	    void start () const {
+	    virtual void start () const OVERRIDE {
 		startIt (m_pT.referent ());
 	    }
 
@@ -310,7 +310,7 @@ public:
 
 //  Access/Query
 protected:
-    void getDescription_(VString& rResult) const OVERRIDE;
+    virtual void getDescription_(VString& rResult) const OVERRIDE;
 public:
     unsigned int taskCardinality () const {
 	return m_pSNFTask ? m_pSNFTask->cardinality () : 0;

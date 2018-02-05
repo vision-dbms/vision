@@ -106,7 +106,7 @@ namespace Vxa {
 
     //  Access
     public:
-	Val_T value () OVERRIDE {
+	virtual Val_T value () OVERRIDE {
 	    return m_iValue;
 	}
 

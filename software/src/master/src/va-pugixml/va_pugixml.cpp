@@ -44,7 +44,7 @@ namespace VA {
 
 	//  Root Offering
 	private:
-	    void getRootObject () OVERRIDE {
+	    virtual void getRootObject () OVERRIDE {
 		offer (Vxa::Export (new Root ()));
 	    }
 	};

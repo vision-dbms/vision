@@ -201,10 +201,10 @@ namespace Vca {
         /**
          * @todo: remove static_cast here, was put in to avoid a dominance bug in MSVC.
          */
-	VDeviceUse *use_() OVERRIDE {
+	virtual VDeviceUse *use_() OVERRIDE {
 	    return static_cast<BaseClass*>(this);
 	}
-	VDevice::User *user_() OVERRIDE {
+	virtual VDevice::User *user_() OVERRIDE {
 	    return static_cast<BaseClass*>(this)->user ();
 	}
     public:
@@ -219,31 +219,31 @@ namespace Vca {
 	    return static_cast<BaseClass*>(this)->start (rStatus, pUser, rArea);
 	}
     private:
-	bool start_(VkStatus &rStatus, Area const &rArea) OVERRIDE {
+	virtual bool start_(VkStatus &rStatus, Area const &rArea) OVERRIDE {
 	    return static_cast<UseImpl*>(this)->start (rStatus, rArea);
 	}
 
     //  Callback
     private:
-	void triggerUser_() OVERRIDE {
+	virtual void triggerUser_() OVERRIDE {
 	    static_cast<BaseClass*>(this)->triggerUser ();
 	}
 
     //  Completion
     private:
-	bool onData_(size_t sTransfer, bool bKeep) OVERRIDE {
+	virtual bool onData_(size_t sTransfer, bool bKeep) OVERRIDE {
 	    return static_cast<BaseClass*>(this)->onData (sTransfer, bKeep);
 	}
-	bool onData_(VDevice *pDevice, bool bKeep) OVERRIDE {
+	virtual bool onData_(VDevice *pDevice, bool bKeep) OVERRIDE {
 	    return static_cast<BaseClass*>(this)->onData (pDevice, bKeep);
 	}
-	bool onError_(VkStatus const &rStatus, bool bKeep) OVERRIDE {
+	virtual bool onError_(VkStatus const &rStatus, bool bKeep) OVERRIDE {
 	    return static_cast<BaseClass*>(this)->onError (rStatus, bKeep);
 	}
 
     //  Recycling
     private:
-	void recycle_() OVERRIDE {
+	virtual void recycle_() OVERRIDE {
 	    BaseClass::recycle ();
 	}
     };
@@ -275,10 +275,10 @@ namespace Vca {
 
     //  Access
     private:
-	VDeviceUse *use_() OVERRIDE {
+	virtual VDeviceUse *use_() OVERRIDE {
 	    return static_cast<BaseClass*>(this);
 	}
-	VDevice::User *user_() OVERRIDE {
+	virtual VDevice::User *user_() OVERRIDE {
 	    return static_cast<BaseClass*>(this)->user ();
 	}
     public:
@@ -292,31 +292,31 @@ namespace Vca {
 	    return static_cast<BaseClass*>(this)->start (rStatus, pUser);
 	}
     private:
-	bool start_(VkStatus &rStatus) OVERRIDE {
+	virtual bool start_(VkStatus &rStatus) OVERRIDE {
 	    return static_cast<UseImpl*>(this)->start (rStatus);
 	}
 
     //  Callback
     private:
-	void triggerUser_() OVERRIDE {
+	virtual void triggerUser_() OVERRIDE {
 	    static_cast<BaseClass*>(this)->triggerUser ();
 	}
 
     //  Completion
     private:
-	bool onData_(size_t sTransfer, bool bKeep) OVERRIDE {
+	virtual bool onData_(size_t sTransfer, bool bKeep) OVERRIDE {
 	    return static_cast<BaseClass*>(this)->onData (sTransfer, bKeep);
 	}
-	bool onData_(VDevice *pDevice, bool bKeep) OVERRIDE {
+	virtual bool onData_(VDevice *pDevice, bool bKeep) OVERRIDE {
 	    return static_cast<BaseClass*>(this)->onData (pDevice, bKeep);
 	}
-	bool onError_(VkStatus const &rStatus, bool bKeep) OVERRIDE {
+	virtual bool onError_(VkStatus const &rStatus, bool bKeep) OVERRIDE {
 	    return static_cast<BaseClass*>(this)->onError (rStatus, bKeep);
 	}
 
     //  Recycling
     private:
-	void recycle_() OVERRIDE {
+	virtual void recycle_() OVERRIDE {
 	    BaseClass::recycle ();
 	}
     };
@@ -349,11 +349,11 @@ namespace Vca {
 
     //  Access
     private:
-	VDeviceUse *use_() OVERRIDE {
+	virtual VDeviceUse *use_() OVERRIDE {
 	//  The static cast is needed to avoid a dominance bug in MSVC:
 	    return static_cast<BaseClass*>(this);
 	}
-	VDeviceUser *user_() OVERRIDE {
+	virtual VDeviceUser *user_() OVERRIDE {
 	    return static_cast<BaseClass*>(this)->user ();
 	}
     public:
@@ -368,31 +368,31 @@ namespace Vca {
 	    return static_cast<BaseClass*>(this)->start (rStatus, pUser);
 	}
     private:
-	bool start_(VkStatus &rStatus) OVERRIDE {
+	virtual bool start_(VkStatus &rStatus) OVERRIDE {
 	    return static_cast<UseImpl*>(this)->start (rStatus);
 	}
 
     //  Callback
     private:
-	void triggerUser_() OVERRIDE {
+	virtual void triggerUser_() OVERRIDE {
 	    static_cast<BaseClass*>(this)->triggerUser ();
 	}
 
     //  Completion
     private:
-	bool onData_(size_t sTransfer, bool bKeep) OVERRIDE {
+	virtual bool onData_(size_t sTransfer, bool bKeep) OVERRIDE {
 	    return static_cast<BaseClass*>(this)->onData (sTransfer, bKeep);
 	}
-	bool onData_(VDevice *pDevice, bool bKeep) OVERRIDE {
+	virtual bool onData_(VDevice *pDevice, bool bKeep) OVERRIDE {
 	    return static_cast<BaseClass*>(this)->onData (pDevice, bKeep);
 	}
-	bool onError_(VkStatus const &rStatus, bool bKeep) OVERRIDE {
+	virtual bool onError_(VkStatus const &rStatus, bool bKeep) OVERRIDE {
 	    return static_cast<BaseClass*>(this)->onError (rStatus, bKeep);
 	}
 
     //  Recycling
     private:
-	void recycle_() OVERRIDE {
+	virtual void recycle_() OVERRIDE {
 	    recycle ();
 	}
     };

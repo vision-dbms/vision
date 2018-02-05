@@ -29,9 +29,9 @@ protected:
 
 //  Access
 public:
-    VDatabaseComponent *container_() const;
+    virtual VDatabaseComponent *container_() const OVERRIDE;
 
-    VDatabase *database_() const;
+    virtual VDatabase *database_() const OVERRIDE;
     VDatabase *database () const {
 	return m_pDatabase;
     }

@@ -92,7 +92,7 @@ namespace Vca {
             /**
              * Invokes a VQueryInterface query using the obtained data, then delegates to the derived class using supply_().
              */
-	    void onData () OVERRIDE {
+	    virtual void onData () OVERRIDE {
 		IObjectSink::Reference pObjectSink;
 		getRole (pObjectSink);
 		VQueryInterface<Interface_T> iQuery (pObjectSink);
@@ -139,13 +139,13 @@ namespace Vca {
              * @copybrief Vca::VGofer::onNeed()
              * Materializes the object name and namespace interface.
              */
-	    void onNeed () OVERRIDE {
+	    virtual void onNeed () OVERRIDE {
 		m_iEntryName.materializeFor (this);
 		m_iImageName.materializeFor (this);
 		BaseClass::onNeed ();
 	    }
 
-	    void supply_(typename BaseClass::query_t const &rQuery, offering_t const &rCounterOffer) OVERRIDE {
+	    virtual void supply_(typename BaseClass::query_t const &rQuery, offering_t const &rCounterOffer) OVERRIDE {
 		Gofer::Supply (rQuery, rCounterOffer, m_iEntryName, m_iImageName);
 	    }
 
@@ -225,7 +225,7 @@ namespace Vca {
              * @copybrief Vca::VGofer::onNeed()
              * Materializes the object name and namespace interface.
              */
-	    void onNeed () OVERRIDE {
+	    virtual void onNeed () OVERRIDE {
 		m_iObjectName.materializeFor (this);
 		m_pNamespace.materializeFor (this);
 		BaseClass::onNeed ();
@@ -233,7 +233,7 @@ namespace Vca {
             /**
              * Delegates to Gofer::Supply().
              */
-	    void supply_(typename BaseClass::query_t const &rQuery, offering_t const &rCounterOffer) OVERRIDE {
+	    virtual void supply_(typename BaseClass::query_t const &rQuery, offering_t const &rCounterOffer) OVERRIDE {
 		Gofer::Supply (rQuery, rCounterOffer, m_iObjectName, m_pNamespace);
 	    }
 
@@ -280,11 +280,11 @@ namespace Vca {
 
 	//  Callbacks and Triggers
 	private:
-	    void onNeed () OVERRIDE {
+	    virtual void onNeed () OVERRIDE {
 		m_pCallback.materializeFor (this);
 		BaseClass::onNeed ();
 	    }
-	    void supply_(typename BaseClass::query_t const &rQuery, offering_t const &rCounterOffer) OVERRIDE {
+	    virtual void supply_(typename BaseClass::query_t const &rQuery, offering_t const &rCounterOffer) OVERRIDE {
 		rQuery.getObject (m_pCallback);
 	    }
 
@@ -319,11 +319,11 @@ namespace Vca {
 
 	//  Callbacks and Triggers
 	private:
-	    void onNeed () OVERRIDE {
+	    virtual void onNeed () OVERRIDE {
 		m_pPipeSource.materializeFor (this);
 		BaseClass::onNeed ();
 	    }
-	    void supply_(typename BaseClass::query_t const &rQuery, offering_t const &rCounterOffer) OVERRIDE {
+	    virtual void supply_(typename BaseClass::query_t const &rQuery, offering_t const &rCounterOffer) OVERRIDE {
 		Gofer::Supply (rQuery, rCounterOffer, m_pPipeSource);
 	    }
 
@@ -359,11 +359,11 @@ namespace Vca {
 
 	//  Callbacks and Triggers
 	private:
-	    void onNeed () OVERRIDE {
+	    virtual void onNeed () OVERRIDE {
 		m_pObjectSource.materializeFor (this);
 		BaseClass::onNeed ();
 	    }
-	    void supply_(typename BaseClass::query_t const &rQuery, offering_t const &rCounterOffer) OVERRIDE {
+	    virtual void supply_(typename BaseClass::query_t const &rQuery, offering_t const &rCounterOffer) OVERRIDE {
 		rQuery.getObject (m_pObjectSource);
 	    }
 
@@ -417,7 +417,7 @@ namespace Vca {
 		BaseClass::setTo (pInstance);
 	    }
 	private:
-	    void onData () OVERRIDE {
+	    virtual void onData () OVERRIDE {
 		if (!m_iSource)
 		    BaseClass::setTo (static_cast<Interface_T*>(0));
 		else {
@@ -426,7 +426,7 @@ namespace Vca {
 		    m_iSource->Supply (pSink);
 		}
 	    }
-	    void onNeed () OVERRIDE {
+	    virtual void onNeed () OVERRIDE {
 		m_iSource.materializeFor (this);
 		BaseClass::onNeed ();
 	    }
@@ -461,10 +461,10 @@ namespace Vca {
 
 	//  Callbacks and Triggers
 	private:
-	    void onData () OVERRIDE {
+	    virtual void onData () OVERRIDE {
 		BaseClass::setTo (m_iSource);
 	    }
-	    void onNeed () OVERRIDE {
+	    virtual void onNeed () OVERRIDE {
 		m_iSource.materializeFor (this);
 		BaseClass::onNeed ();
 	    }

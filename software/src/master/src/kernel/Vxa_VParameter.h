@@ -54,7 +54,7 @@ namespace Vxa {
 
     //  Access
     public:
-	value_t value () OVERRIDE {
+	virtual value_t value () OVERRIDE {
 	    return static_cast<value_t>(m_iDataStorage[m_pCursor->position()]);
 	}
 
@@ -92,7 +92,7 @@ namespace Vxa {
 
     //  Access
     public:
-	value_t value () OVERRIDE {
+	virtual value_t value () OVERRIDE {
 	    return m_iDataStorage[m_pCursor->position()] ? true : false;
 	}
 

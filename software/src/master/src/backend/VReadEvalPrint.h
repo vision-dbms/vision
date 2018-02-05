@@ -76,7 +76,7 @@ protected:
 //  Execution
 protected:
     void exit ();
-    void fail ();
+    virtual void fail () OVERRIDE;
 
 //  Execution Support
 protected:

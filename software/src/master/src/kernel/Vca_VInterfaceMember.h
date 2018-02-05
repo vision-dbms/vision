@@ -369,13 +369,13 @@ namespace Vca {
 
         //  Access
         public:
-            VInterfaceMember const *applicable_() const OVERRIDE {
+            virtual VInterfaceMember const *applicable_() const OVERRIDE {
                 return applicable ();
             }
-            VTuple const &arguments_() const OVERRIDE {
+            virtual VTuple const &arguments_() const OVERRIDE {
                 return arguments ();
             }
-            VTuple &arguments_() OVERRIDE {
+            virtual VTuple &arguments_() OVERRIDE {
                 return arguments ();
             }
 
@@ -388,13 +388,13 @@ namespace Vca {
             Arguments &arguments () {
                 return m_iPayload.arguments ();
             }
-            IVUnknown *recipient () const OVERRIDE {
+            virtual IVUnknown *recipient () const OVERRIDE {
                 return m_iPayload.recipient ();
             }
 
         //  Evaluation
         private:
-            void evaluate_() OVERRIDE {
+            virtual void evaluate_() OVERRIDE {
                 VMessageManager::Reference pManager;
                 subManager (pManager);
                 m_iPayload.evaluateWith (this, pManager);
@@ -669,13 +669,13 @@ namespace Vca {
 
         //  Access
         public:
-            VInterfaceMember const *applicable_() const OVERRIDE {
+            virtual VInterfaceMember const *applicable_() const OVERRIDE {
                 return applicable ();
             }
-            VTuple const &arguments_() const OVERRIDE {
+            virtual VTuple const &arguments_() const OVERRIDE {
                 return arguments ();
             }
-            VTuple &arguments_() OVERRIDE {
+            virtual VTuple &arguments_() OVERRIDE {
                 return arguments ();
             }
 
@@ -688,13 +688,13 @@ namespace Vca {
             Arguments &arguments () {
                 return m_iPayload.arguments ();
             }
-            IVUnknown *recipient () const OVERRIDE {
+            virtual IVUnknown *recipient () const OVERRIDE {
                 return m_iPayload.recipient ();
             }
 
         //  Evaluation
         private:
-            void evaluate_() OVERRIDE {
+            virtual void evaluate_() OVERRIDE {
                 VMessageManager::Reference pManager;
                 subManager (pManager);
                 m_iPayload.evaluateWith (this, pManager);
@@ -962,13 +962,13 @@ namespace Vca {
 
         //  Access
         public:
-            VInterfaceMember const *applicable_() const OVERRIDE {
+            virtual VInterfaceMember const *applicable_() const OVERRIDE {
                 return applicable ();
             }
-            VTuple const &arguments_() const OVERRIDE {
+            virtual VTuple const &arguments_() const OVERRIDE {
                 return arguments ();
             }
-            VTuple &arguments_() OVERRIDE {
+            virtual VTuple &arguments_() OVERRIDE {
                 return arguments ();
             }
 
@@ -981,13 +981,13 @@ namespace Vca {
             Arguments &arguments () {
                 return m_iPayload.arguments ();
             }
-            IVUnknown *recipient () const OVERRIDE {
+            virtual IVUnknown *recipient () const OVERRIDE {
                 return m_iPayload.recipient ();
             }
 
         //  Evaluation
         private:
-            void evaluate_() OVERRIDE {
+            virtual void evaluate_() OVERRIDE {
                 VMessageManager::Reference pManager;
                 subManager (pManager);
 		m_iPayload.evaluateWith (this, pManager);
@@ -1257,13 +1257,13 @@ namespace Vca {
 
         //  Access
         public:
-            VInterfaceMember const *applicable_() const OVERRIDE {
+            virtual VInterfaceMember const *applicable_() const OVERRIDE {
                 return applicable ();
             }
-            VTuple const &arguments_() const OVERRIDE {
+            virtual VTuple const &arguments_() const OVERRIDE {
                 return arguments ();
             }
-            VTuple &arguments_() OVERRIDE {
+            virtual VTuple &arguments_() OVERRIDE {
                 return arguments ();
             }
 
@@ -1276,13 +1276,13 @@ namespace Vca {
             Arguments &arguments () {
                 return m_iPayload.arguments ();
             }
-            IVUnknown *recipient () const OVERRIDE {
+            virtual IVUnknown *recipient () const OVERRIDE {
                 return m_iPayload.recipient ();
             }
 
         //  Evaluation
         private:
-            void evaluate_() OVERRIDE {
+            virtual void evaluate_() OVERRIDE {
                 VMessageManager::Reference pManager;
                 subManager (pManager);
                 m_iPayload.evaluateWith (this, pManager);
@@ -1553,13 +1553,13 @@ namespace Vca {
 
         //  Access
         public:
-            VInterfaceMember const *applicable_() const OVERRIDE {
+            virtual VInterfaceMember const *applicable_() const OVERRIDE {
                 return applicable ();
             }
-            VTuple const &arguments_() const OVERRIDE {
+            virtual VTuple const &arguments_() const OVERRIDE {
                 return arguments ();
             }
-            VTuple &arguments_() OVERRIDE {
+            virtual VTuple &arguments_() OVERRIDE {
                 return arguments ();
             }
 
@@ -1572,13 +1572,13 @@ namespace Vca {
             Arguments &arguments () {
                 return m_iPayload.arguments ();
             }
-            IVUnknown *recipient () const OVERRIDE {
+            virtual IVUnknown *recipient () const OVERRIDE {
                 return m_iPayload.recipient ();
             }
 
         //  Evaluation
         private:
-            void evaluate_() OVERRIDE {
+            virtual void evaluate_() OVERRIDE {
                 VMessageManager::Reference pManager;
                 subManager (pManager);
                 m_iPayload.evaluateWith (this, pManager);
@@ -1849,13 +1849,13 @@ namespace Vca {
 
         //  Access
         public:
-            VInterfaceMember const *applicable_() const OVERRIDE {
+            virtual VInterfaceMember const *applicable_() const OVERRIDE {
                 return applicable ();
             }
-            VTuple const &arguments_() const OVERRIDE {
+            virtual VTuple const &arguments_() const OVERRIDE {
                 return arguments ();
             }
-            VTuple &arguments_() OVERRIDE {
+            virtual VTuple &arguments_() OVERRIDE {
                 return arguments ();
             }
 
@@ -1868,13 +1868,13 @@ namespace Vca {
             Arguments &arguments () {
                 return m_iPayload.arguments ();
             }
-            IVUnknown *recipient () const OVERRIDE {
+            virtual IVUnknown *recipient () const OVERRIDE {
                 return m_iPayload.recipient ();
             }
 
         //  Evaluation
         private:
-            void evaluate_() OVERRIDE {
+            virtual void evaluate_() OVERRIDE {
                 VMessageManager::Reference pManager;
                 subManager (pManager);
                 m_iPayload.evaluateWith (this, pManager);
@@ -2145,13 +2145,13 @@ namespace Vca {
 
         //  Access
         public:
-            VInterfaceMember const *applicable_() const OVERRIDE {
+            virtual VInterfaceMember const *applicable_() const OVERRIDE {
                 return applicable ();
             }
-            VTuple const &arguments_() const OVERRIDE {
+            virtual VTuple const &arguments_() const OVERRIDE {
                 return arguments ();
             }
-            VTuple &arguments_() OVERRIDE {
+            virtual VTuple &arguments_() OVERRIDE {
                 return arguments ();
             }
 
@@ -2164,13 +2164,13 @@ namespace Vca {
             Arguments &arguments () {
                 return m_iPayload.arguments ();
             }
-            IVUnknown *recipient () const OVERRIDE {
+            virtual IVUnknown *recipient () const OVERRIDE {
                 return m_iPayload.recipient ();
             }
 
         //  Evaluation
         private:
-            void evaluate_() OVERRIDE {
+            virtual void evaluate_() OVERRIDE {
                 VMessageManager::Reference pManager;
                 subManager (pManager);
                 m_iPayload.evaluateWith (this, pManager);
@@ -2442,13 +2442,13 @@ namespace Vca {
 
         //  Access
         public:
-            VInterfaceMember const *applicable_() const OVERRIDE {
+            virtual VInterfaceMember const *applicable_() const OVERRIDE {
                 return applicable ();
             }
-            VTuple const &arguments_() const OVERRIDE {
+            virtual VTuple const &arguments_() const OVERRIDE {
                 return arguments ();
             }
-            VTuple &arguments_() OVERRIDE {
+            virtual VTuple &arguments_() OVERRIDE {
                 return arguments ();
             }
 
@@ -2461,13 +2461,13 @@ namespace Vca {
             Arguments &arguments () {
                 return m_iPayload.arguments ();
             }
-            IVUnknown *recipient () const OVERRIDE {
+            virtual IVUnknown *recipient () const OVERRIDE {
                 return m_iPayload.recipient ();
             }
 
         //  Evaluation
         private:
-            void evaluate_() OVERRIDE {
+            virtual void evaluate_() OVERRIDE {
                 VMessageManager::Reference pManager;
                 subManager (pManager);
                 m_iPayload.evaluateWith (this, pManager);

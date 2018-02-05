@@ -146,17 +146,17 @@ public:
 private:
     void doConnect (IStdPipeSource *pStdPipeSource);
 
-    bool start_();
-    bool stop_(bool bHardstop);
+    virtual bool start_() OVERRIDE;
+    virtual bool stop_(bool bHardstop) OVERRIDE;
 
 //  Process Management
 public:
     static void RestartProcess ();
-    void restartProcess ();
+    virtual void restartProcess () OVERRIDE;
 
-    int getExitValue ();
+    virtual int getExitValue () OVERRIDE;
 
-    void setExitValue (int value);
+    virtual void setExitValue (int value) OVERRIDE;
 
 //  Logging Control
 private:

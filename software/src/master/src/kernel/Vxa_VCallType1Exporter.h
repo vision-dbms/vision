@@ -102,28 +102,28 @@ namespace Vxa {
 
 	//  Update
 	public:
-	    bool setResultTo (exporter_t *pExporter, bool iValue) OVERRIDE {
+	    virtual bool setResultTo (exporter_t *pExporter, bool iValue) OVERRIDE {
 		return pExporter->storeResult (m_iStorage, iValue);
 	    }
-	    bool setResultTo (exporter_t *pExporter, int iValue) OVERRIDE {
+	    virtual bool setResultTo (exporter_t *pExporter, int iValue) OVERRIDE {
 		return pExporter->storeResult (m_iStorage, iValue);
 	    }
-	    bool setResultTo (exporter_t *pExporter, float iValue) OVERRIDE {
+	    virtual bool setResultTo (exporter_t *pExporter, float iValue) OVERRIDE {
 		return pExporter->storeResult (m_iStorage, iValue);
 	    }
-	    bool setResultTo (exporter_t *pExporter, double iValue) OVERRIDE {
+	    virtual bool setResultTo (exporter_t *pExporter, double iValue) OVERRIDE {
 		return pExporter->storeResult (m_iStorage, iValue);
 	    }
-	    bool setResultTo (exporter_t *pExporter, VString const &rValue) OVERRIDE {
+	    virtual bool setResultTo (exporter_t *pExporter, VString const &rValue) OVERRIDE {
 		return pExporter->storeResult (m_iStorage, rValue);
 	    }
-	    bool setResultTo (exporter_t *pExporter, ISingleton *pValue) OVERRIDE {
+	    virtual bool setResultTo (exporter_t *pExporter, ISingleton *pValue) OVERRIDE {
 		return pExporter->storeResult (m_iStorage, pValue);
 	    }
 
 	//  Transmission
 	public:
-	    bool transmitUsing (VCallType1Exporter *pExporter) const OVERRIDE {
+	    virtual bool transmitUsing (VCallType1Exporter *pExporter) const OVERRIDE {
 		return pExporter->transmit (m_iStorage);
 	    }
 

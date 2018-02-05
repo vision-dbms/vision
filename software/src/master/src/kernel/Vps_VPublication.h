@@ -208,7 +208,7 @@ namespace Vca {
 
     //  Overrides
     private:
-	void OnError_(IError *pInterface, VString const &rMessage) OVERRIDE;
+	virtual void OnError_(IError *pInterface, VString const &rMessage) OVERRIDE;
 
     //  Access
     protected:

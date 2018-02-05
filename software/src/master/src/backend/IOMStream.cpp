@@ -98,8 +98,8 @@ public:
 //  Callbacks
 public:
     void OnTransfer (IBSClient *pRole, Vca::U32 sTransfer);
-    void OnEnd (IClient *pRole);
-    void OnError (IClient *pRole, Vca::IError *pError, VString const &rMessage);
+    virtual void OnEnd (IClient *pRole) OVERRIDE;
+    virtual void OnError (IClient *pRole, Vca::IError *pError, VString const &rMessage) OVERRIDE;
 
 //  Termination
 public:
@@ -517,8 +517,8 @@ public:
 //  Callbacks
 public:
     void OnTransfer (IBSClient *pRole, Vca::U32 sTransfer);
-    void OnEnd (IClient *pRole);
-    void OnError (IClient *pRole, Vca::IError *pError, VString const &rMessage);
+    virtual void OnEnd (IClient *pRole) OVERRIDE;
+    virtual void OnError (IClient *pRole, Vca::IError *pError, VString const &rMessage) OVERRIDE;
 
 //  State Update
 protected:

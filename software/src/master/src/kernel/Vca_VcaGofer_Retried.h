@@ -101,13 +101,13 @@ namespace Vca {
              *
              * @see m_pResultSource
              */
-	    void onNeed () OVERRIDE {
+	    virtual void onNeed () OVERRIDE {
 		m_pResultSource.materializeFor (this);
 		BaseClass::onNeed ();
 	    }
 
             /** Stops retries. */
-	    void onData () OVERRIDE {
+	    virtual void onData () OVERRIDE {
 		stopTrying ();
 		BaseClass::setTo (m_pResultSource);
 	    }
@@ -115,7 +115,7 @@ namespace Vca {
             /**
              * Initiates retry as necessary, stops trying when retry limit has been reached.
              */
-	    void onError (IError *pInterface, VString const &rMessage) OVERRIDE {
+	    virtual void onError (IError *pInterface, VString const &rMessage) OVERRIDE {
 		if (m_cRetriesRemaining-- > 0)
 		    keepTrying ();
 		else {
@@ -126,7 +126,7 @@ namespace Vca {
 
 	protected:
             /** Cancels retry delay timer. */
-	    void onReset () OVERRIDE { // onGoferReset
+	    virtual void onReset () OVERRIDE { // onGoferReset
 		if (m_pDelayTimer)
 		    m_pDelayTimer->stop ();
 		BaseClass::onReset ();

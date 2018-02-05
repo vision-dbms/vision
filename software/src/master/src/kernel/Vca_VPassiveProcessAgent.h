@@ -35,13 +35,13 @@ namespace Vca {
 	    return m_pDirectiveGofer;
 	}
     private:
-	void supplyDirective_(
+	virtual void supplyDirective_(
 	    VString &rDirective, VString const &rDirectivePrefix, CallData const &rCallData
 	) const OVERRIDE;
 
     //  Use
     private:
-	void processCallbackRequest (CallData const &rCallData) OVERRIDE;
+	virtual void processCallbackRequest (CallData const &rCallData) OVERRIDE;
 
     //  State
     private:

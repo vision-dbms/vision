@@ -166,19 +166,19 @@ private:
 
 //  Canonicalization
 private:
-    virtual /*override*/ bool getCanonicalization_(VReference<rtVSTORE_Handle> &rpStore, DSC_Pointer const &rPointer);
+    virtual bool getCanonicalization_(VReference<rtVSTORE_Handle> &rpStore, DSC_Pointer const &rPointer) OVERRIDE;
 
 //  Cache
 private:
     rtDICTIONARY_Cache *cache ();
-    virtual /*override*/ void flushCachedResources_();
+    virtual void flushCachedResources_() OVERRIDE;
 
 //  Access
 private:
-    virtual /*overrride*/ rtDICTIONARY_Handle *getDictionary_(DSC_Pointer const &rPointer) const {
+    virtual rtDICTIONARY_Handle *getDictionary_(DSC_Pointer const &rPointer) const OVERRIDE {
 	return static_cast<rtDICTIONARY_Handle*>(TheFixedPropertyClassDictionary().ObjectHandle ());
     }
-    virtual /*override*/ rtPTOKEN_Handle *getPToken_() const {
+    virtual rtPTOKEN_Handle *getPToken_() const OVERRIDE {
 	return getPToken ();
     }
 public:
@@ -257,19 +257,19 @@ public:
 
 //  Element Update
 private:
-    virtual /*override*/ bool setElements_(rtLINK_CType *pSubscript, DSC_Descriptor &rValues) {
+    virtual bool setElements_(rtLINK_CType *pSubscript, DSC_Descriptor &rValues) OVERRIDE {
 	assign (pSubscript, rValues);
 	return true;
     }
-    virtual /*override*/ bool setElements_(rtLINK_CType *pSubscript, rtVECTOR_CType *pValues) {
+    virtual bool setElements_(rtLINK_CType *pSubscript, rtVECTOR_CType *pValues) OVERRIDE {
 	assign (pSubscript, pValues);
 	return true;
     }
-    virtual /*override*/ bool setElements_(DSC_Scalar &rSubscript, DSC_Descriptor &rValues) {
+    virtual bool setElements_(DSC_Scalar &rSubscript, DSC_Descriptor &rValues) OVERRIDE {
 	assign (rSubscript, rValues);
 	return true;
     }
-    virtual /*override*/ bool setElements_(DSC_Scalar &rSubscript, rtVECTOR_CType *pValues) {
+    virtual bool setElements_(DSC_Scalar &rSubscript, rtVECTOR_CType *pValues) OVERRIDE {
 	assign (rSubscript, pValues);
 	return true;
     }
@@ -287,10 +287,10 @@ public:
 
 //  Store Update
 private:
-    virtual /*override*/ bool align_() {
+    virtual bool align_() OVERRIDE {
 	return align ();
     }
-    virtual /*override*/ bool alignAll_(bool bCleaning) {
+    virtual bool alignAll_(bool bCleaning) OVERRIDE {
 	return alignAll (bCleaning);
     }
 public:
@@ -301,24 +301,24 @@ public:
 
 //  Associative Operations
 private:
-    virtual /*override*/ void associativeInsert_(
+    virtual void associativeInsert_(
 	VCollectionOfStrings *pElements, M_CPD *&rpReordering, VAssociativeResult &rAssociation
-    );
-    virtual /*override*/ void associativeInsert_(
+    ) OVERRIDE;
+    virtual void associativeInsert_(
 	VCollectionOfUnsigned32 *pElements, M_CPD *&rpReordering, VAssociativeResult &rAssociation
-    );
-    virtual /*override*/ void associativeLocate_(
+    ) OVERRIDE;
+    virtual void associativeLocate_(
 	VCollectionOfStrings *pElements, M_CPD *&rpReordering, VAssociativeResult &rAssociation
-    );
-    virtual /*override*/ void associativeLocate_(
+    ) OVERRIDE;
+    virtual void associativeLocate_(
 	VCollectionOfUnsigned32 *pElements, M_CPD *&rpReordering, VAssociativeResult &rAssociation
-    );
-    virtual /*override*/ void associativeDelete_(
+    ) OVERRIDE;
+    virtual void associativeDelete_(
 	VCollectionOfStrings *pElements, M_CPD *&rpReordering, VAssociativeResult &rAssociation
-    );
-    virtual /*override*/ void associativeDelete_(
+    ) OVERRIDE;
+    virtual void associativeDelete_(
 	VCollectionOfUnsigned32 *pElements, M_CPD *&rpReordering, VAssociativeResult &rAssociation
-    );
+    ) OVERRIDE;
 
     /*---------------------------------------------------------------------------
      *****  Templates to maintain a collection of selectors.
@@ -379,19 +379,19 @@ private:
 
 //  Instance Deletion
 private:
-    virtual bool deleteInstances_(DSC_Scalar &pInstances) {
+    virtual bool deleteInstances_(DSC_Scalar &pInstances) OVERRIDE {
 	return doInstanceDeletion (pInstances);
     }
-    virtual bool deleteInstances_(rtLINK_CType *pInstances, rtLINK_CType *&rpTrues, rtLINK_CType *&rpFalses) {
+    virtual bool deleteInstances_(rtLINK_CType *pInstances, rtLINK_CType *&rpTrues, rtLINK_CType *&rpFalses) OVERRIDE {
 	return doInstanceDeletion (pInstances, rpTrues, rpFalses);
     }
 
 //  Display and Inspection
 public:
-    virtual /*override*/ void getClusterReferenceMapData (MapEntryData &rData, unsigned int xReference);
-    virtual /*override*/ unsigned int getClusterReferenceMapSize ();
+    virtual void getClusterReferenceMapData (MapEntryData &rData, unsigned int xReference) OVERRIDE;
+    virtual unsigned int getClusterReferenceMapSize () OVERRIDE;
 
-    virtual /*override*/ unsigned __int64 getClusterSize ();
+    virtual unsigned __int64 getClusterSize () OVERRIDE;
 
 //  State
 private:

@@ -186,7 +186,7 @@ namespace Vca {
 	    }
 
 	protected:
-	    void getDescription_(VString &rResult) const OVERRIDE;
+	    virtual void getDescription_(VString &rResult) const OVERRIDE;
 
 	//  Roles
 	public:
@@ -275,7 +275,7 @@ namespace Vca {
 	    }
 
 	protected:
-	    void getDescription_(VString &rResult) const OVERRIDE;
+	    virtual void getDescription_(VString &rResult) const OVERRIDE;
 
 	//  Roles
 	public:
@@ -453,8 +453,8 @@ namespace Vca {
 
     //  Activity Accounting
     private:
-	void onActivityCountWasZero () OVERRIDE;
-	void onActivityCountIsZero () OVERRIDE;
+	virtual void onActivityCountWasZero () OVERRIDE;
+	virtual void onActivityCountIsZero () OVERRIDE;
 
 	void onStopCondition ();
 
@@ -517,8 +517,8 @@ namespace Vca {
         bool onCallbackRequest (char const *pCallbackRequest);
         void onCallbackRequest (IPassiveCall *pCall, VString const &rCallerAddress, uuid_t const &rCallID);
 
-        void onStandardChannels (VBSProducer *pStdin, VBSConsumer *pStdout) OVERRIDE;
-        void onStandardChannels (VBSProducer *pStdin, VBSConsumer *pStdout, VBSConsumer *pStderr) OVERRIDE;
+        virtual void onStandardChannels (VBSProducer *pStdin, VBSConsumer *pStdout) OVERRIDE;
+        virtual void onStandardChannels (VBSProducer *pStdin, VBSConsumer *pStdout, VBSConsumer *pStderr) OVERRIDE;
 
 	bool attach (Listener *pListener);
 	bool detach (Listener *pListener);
@@ -535,7 +535,7 @@ namespace Vca {
          * @see m_pControlRequests
          * @see ControlRequest::stop()
          */
-        bool stop_(bool bHardstop) OVERRIDE;
+        virtual bool stop_(bool bHardstop) OVERRIDE;
 
         /**
          * Propagates the pause operation to all buddies for whom we have control requests.
@@ -543,7 +543,7 @@ namespace Vca {
          * @see m_pControlRequests
          * @see ControlRequest::pause()
          */
-        bool pause_() OVERRIDE;
+        virtual bool pause_() OVERRIDE;
 
         /**
          * Propagates the reesume operation to all buddies for whom we have control requests.
@@ -551,7 +551,7 @@ namespace Vca {
          * @see m_pControlRequests
          * @see ControlRequest::resume()
          */
-        bool resume_() OVERRIDE;
+        virtual bool resume_() OVERRIDE;
 
     /// @name Triggering and Timeouts
     //@{

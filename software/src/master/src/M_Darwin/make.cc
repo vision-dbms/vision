@@ -18,7 +18,7 @@ D	=
 
 CDEFS	=  -DVisionBuild
 CINCS	=
-CBASE	= -fexceptions -frtti -std=c++11 -Wno-inconsistent-missing-override -Wno-trigraphs -Wno-undefined-bool-conversion -Wno-logical-op-parentheses -Wno-switch -Wno-shift-op-parentheses -Wno-shift-negative-value -Wno-parentheses -Wno-deprecated-declarations
+CBASE	= -fexceptions -frtti -std=c++11 -Wno-trigraphs -Wno-undefined-bool-conversion -Wno-logical-op-parentheses -Wno-switch -Wno-shift-op-parentheses -Wno-shift-negative-value -Wno-parentheses -Wno-deprecated-declarations
 CDBG	= -g -fno-limit-debug-info -fno-inline-functions
 CREL	= -O2
 CVER	= ${CREL}

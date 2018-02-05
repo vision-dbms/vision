@@ -34,7 +34,7 @@ namespace Vca {
 
     //  Callbacks
     private:
-	void onData () OVERRIDE {
+	virtual void onData () OVERRIDE {
 	}
 
     //  Update

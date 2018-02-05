@@ -36,7 +36,7 @@ namespace Vca {
 
     //  Access
     protected:
-	void getDescription_(VString& rResult) const OVERRIDE;
+	virtual void getDescription_(VString& rResult) const OVERRIDE;
 
     //  State
     private:

@@ -70,7 +70,7 @@ namespace Vca {
 
 	//  Tracing and Display
 	public:
-	    void getInfo (VString &rResult, VString const &rPrefix) const OVERRIDE;
+	    virtual void getInfo (VString &rResult, VString const &rPrefix) const OVERRIDE;
 
 	//  State
 	private:
@@ -105,7 +105,7 @@ namespace Vca {
 
     //  Connectivity
     public:
-	bool isConnected () const OVERRIDE {
+	virtual bool isConnected () const OVERRIDE {
 	    return true;
 	}
 	bool isntConnected () const {
@@ -128,34 +128,34 @@ namespace Vca {
 	    return m_cMessagesReported == m_cMessagesProcessed && m_cMessagesProcessed == m_cMessagesReceived;
 	}
 
-	void updateMessageCounts (count_t cReported, count_t cReceived, count_t cProcessed) OVERRIDE;
+	virtual void updateMessageCounts (count_t cReported, count_t cReceived, count_t cProcessed) OVERRIDE;
 
     //  Object Access
     private:
-	uuid_t const& objectSiteUUID_() const OVERRIDE;
-	VTypeInfo *objectType_() const OVERRIDE;
+	virtual uuid_t const& objectSiteUUID_() const OVERRIDE;
+	virtual VTypeInfo *objectType_() const OVERRIDE;
 
-	void supplyInterface_(VReference<IVUnknown>&rpInterface) OVERRIDE;
+	virtual void supplyInterface_(VReference<IVUnknown>&rpInterface) OVERRIDE;
 
     //  Object Export
     private:
-	void onFinalExport () OVERRIDE;
+	virtual void onFinalExport () OVERRIDE;
 
     //  Object Import
     private:
-        void createImportFrom (VcaPeer *pPeer, bool bWeak) OVERRIDE {
+        virtual void createImportFrom (VcaPeer *pPeer, bool bWeak) OVERRIDE {
 	}
-	void deleteImportFrom (VcaPeer *pPeer) OVERRIDE {
+	virtual void deleteImportFrom (VcaPeer *pPeer) OVERRIDE {
 	}
-	bool weakenImportFrom (VcaPeer *pPeer) OVERRIDE {
+	virtual bool weakenImportFrom (VcaPeer *pPeer) OVERRIDE {
 	    return false;
 	}
 
     //  Tracing and Display
     public:
 	using BaseClass::displayInfo;
-	void displayInfo () const OVERRIDE;
-	void getInfo (VString &rResult, const VString &rPrefix) const OVERRIDE;
+	virtual void displayInfo () const OVERRIDE;
+	virtual void getInfo (VString &rResult, const VString &rPrefix) const OVERRIDE;
 	void getEvaluatorTable (VString &rResult, VString const &rPrefix) const;
 
     //  State

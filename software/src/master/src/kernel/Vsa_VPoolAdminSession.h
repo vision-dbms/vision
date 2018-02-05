@@ -200,10 +200,10 @@ namespace Vsa {
 
         //  Vca::IClient Methods
         public:
-            void OnError (
+            virtual void OnError (
                 Vca::IClient *pRole, Vca::IError *pError, VString const &rMessage
             ) OVERRIDE;
-            void OnEnd (Vca::IClient *pRole) OVERRIDE;
+            virtual void OnEnd (Vca::IClient *pRole) OVERRIDE;
 
         //  Operations
         public:

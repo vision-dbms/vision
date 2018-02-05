@@ -48,9 +48,9 @@ namespace Vsa {
     
     //  VMessageManager Methods
   public:
-    void onEnd () OVERRIDE;
-    void onError (Vca::IError *pError, VString const &rMessage) OVERRIDE;
-    void onSent () OVERRIDE;
+    virtual void onEnd () OVERRIDE;
+    virtual void onError (Vca::IError *pError, VString const &rMessage) OVERRIDE;
+    virtual void onSent () OVERRIDE;
     
   protected:
     Vsa::IEvaluatorClient::Reference m_pClient;

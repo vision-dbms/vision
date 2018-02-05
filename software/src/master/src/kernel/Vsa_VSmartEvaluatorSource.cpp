@@ -99,7 +99,7 @@ namespace Vsa {
     //  ObjectSink Methods
   public:
     void OnData (ObjectSink *pRole, IVUnknown *pObject);
-    void OnError_ (Vca::IError *pError, VString const &rMessage) OVERRIDE;
+    virtual void OnError_ (Vca::IError *pError, VString const &rMessage) OVERRIDE;
 
     //  IUpDownSubscriber Role
   private:

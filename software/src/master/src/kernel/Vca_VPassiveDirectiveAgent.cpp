@@ -80,7 +80,7 @@ namespace Vca {
 
     //  Callbacks
     private:
-	void OnError_(IError *pInterface, VString const &rMessage) OVERRIDE {
+	virtual void OnError_(IError *pInterface, VString const &rMessage) OVERRIDE {
 	    onError (pInterface, rMessage);
 	}
 	void onError (IError *pInterface, VString const &rMessage);

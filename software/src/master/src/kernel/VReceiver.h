@@ -97,19 +97,19 @@ public:
 
 //  Message Handling
 private:
-    bool defersTo (Vca::VMessageScheduler &rScheduler) OVERRIDE {
+    virtual bool defersTo (Vca::VMessageScheduler &rScheduler) OVERRIDE {
 	return rScheduler.mustSchedule (m_pCohort);
     }
 
 //  IVReceiver Methods
 private:
-    void VINTERFACE_MEMBERIMPL(OnData) (Vca::VMessage *pMessage, Datum iDatum) OVERRIDE {
+    virtual void VINTERFACE_MEMBERIMPL(OnData) (Vca::VMessage *pMessage, Datum iDatum) OVERRIDE {
 	(m_pActor.referent()->*m_pAction) (this, iDatum);
     }
 
 //  Vca::IClient Methods
 private:
-    void VINTERFACE_MEMBERIMPL(OnEnd) (Vca::VMessage *pMessage) OVERRIDE {
+    virtual void VINTERFACE_MEMBERIMPL(OnEnd) (Vca::VMessage *pMessage) OVERRIDE {
 	if (m_bEndAction)
 	    (m_pActor.referent()->*m_pEndAction) (this);
 	else if (m_bErrorAction) {
@@ -117,14 +117,14 @@ private:
 	    VINTERFACE_MEMBERIMPL(OnError) (pMessage, 0, iEOD);
 	}
     }
-    void VINTERFACE_MEMBERIMPL(OnError) (Vca::VMessage *pMessage, Vca::IError *pError, VString const &rText) OVERRIDE {
+    virtual void VINTERFACE_MEMBERIMPL(OnError) (Vca::VMessage *pMessage, Vca::IError *pError, VString const &rText) OVERRIDE {
 	if (m_bErrorAction)
 	    (m_pActor.referent()->*m_pErrorAction) (this, pError, rText);
     }
 
 //  IVUnknown Methods
 private:
-    void VINTERFACE_MEMBERIMPL(QueryInterface) (Vca::VMessage *pMessage, VTypeInfo *pTypeInfo, IVReceiver<IVUnknown*> *pReceiver) OVERRIDE {
+    virtual void VINTERFACE_MEMBERIMPL(QueryInterface) (Vca::VMessage *pMessage, VTypeInfo *pTypeInfo, IVReceiver<IVUnknown*> *pReceiver) OVERRIDE {
 	BaseClass::QI (pTypeInfo, pReceiver);
     }
 

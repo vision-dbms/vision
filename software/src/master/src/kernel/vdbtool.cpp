@@ -731,7 +731,7 @@ protected:
 private:
     bool ExplicitConverter ();
     void ProcessSlave ();
-    virtual /*override*/ bool start_();
+    virtual bool start_() OVERRIDE;
 
 //  State
 protected:

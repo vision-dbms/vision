@@ -324,13 +324,13 @@ namespace Vca {
 
     //  Transitions
     private:
-	bool start_() OVERRIDE;
-	bool getDefaultServerName (VString &rServerName) const OVERRIDE;
+	virtual bool start_() OVERRIDE;
+	virtual bool getDefaultServerName (VString &rServerName) const OVERRIDE;
 
     //  Callbacks
     private:
-	void onStandardInput (VBSProducer *pStdin) OVERRIDE;
-	void onStandardChannelAccessError (IError *pInterface, VString const &rMessage) OVERRIDE;
+	virtual void onStandardInput (VBSProducer *pStdin) OVERRIDE;
+	virtual void onStandardChannelAccessError (IError *pInterface, VString const &rMessage) OVERRIDE;
 
 	void sendPause		(IPauseResume *pInterface);
 	void sendResume		(IPauseResume *pInterface);

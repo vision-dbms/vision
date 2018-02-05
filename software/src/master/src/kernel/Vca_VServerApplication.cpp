@@ -147,7 +147,7 @@ namespace Vca {
 
 	//  Description
 	protected:
-	    void getDescription_(VString& rResult) const OVERRIDE;
+	    virtual void getDescription_(VString& rResult) const OVERRIDE;
 
 	//  State
 	private:
@@ -168,10 +168,10 @@ namespace Vca {
 
     //  Callbacks
     private:
-	void onIncrement (VcaOffer* pOffer) OVERRIDE {
+	virtual void onIncrement (VcaOffer* pOffer) OVERRIDE {
 	    m_pServer->onOfferCountIncrement (this, pOffer);
 	}
-	void onDecrement (VcaOffer* pOffer) OVERRIDE {
+	virtual void onDecrement (VcaOffer* pOffer) OVERRIDE {
 	    m_pServer->onOfferCountDecrement (this, pOffer);
 	}
 
@@ -269,7 +269,7 @@ namespace Vca {
 
     //  Access
     protected:
-	void getDescription_(VString &rResult) const OVERRIDE;
+	virtual void getDescription_(VString &rResult) const OVERRIDE;
 
     //  Roles
     public:

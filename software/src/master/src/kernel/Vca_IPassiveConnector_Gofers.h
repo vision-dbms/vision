@@ -52,7 +52,7 @@ namespace Vca {
             /**
              * Manufactures a TCP/IP listener and attaches a new VPassiveConnector to it. Sets this gofer's value to an IPassiveConnector instance for said VPassiveConnecter.
              */
-	    void onData () OVERRIDE;
+	    virtual void onData () OVERRIDE;
 	};
 
         /**

@@ -174,10 +174,10 @@ namespace Vca {
 
     //  IClient Role
     public/*private*/:
-	void OnError (
+	virtual void OnError (
 	    IClient *pRole, IError *pError, VString const &rDescription
 	) OVERRIDE;
-	void OnEnd (IClient *pRole) OVERRIDE;
+	virtual void OnEnd (IClient *pRole) OVERRIDE;
 
     //  IPipeSourceClient Role
     private:

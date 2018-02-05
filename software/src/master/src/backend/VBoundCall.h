@@ -36,7 +36,7 @@ private:
 
 //  Access
 public:
-    rtBLOCK_Handle *boundBlock () const;
+    virtual rtBLOCK_Handle *boundBlock () const OVERRIDE;
 
 //  State
 protected:

@@ -391,16 +391,16 @@ namespace Vsa {
 	void OnTransfer (BSConsumerClient *pRole, size_t sTransfer);
 	void OnTransfer (BSProducerClient *pRole, size_t sTransfer);
 
-        void OnEnd (Vca::IClient *pRole) OVERRIDE {
+        virtual void OnEnd (Vca::IClient *pRole) OVERRIDE {
             OnError (pRole, 0, "Process Terminated");
         }
-	void OnError (
+	virtual void OnError (
 	    Vca::IClient *pRole, Vca::IError *pError, VString const &rDescription
 	) OVERRIDE;
 
     //  Execution
     private:
-	void onQueue_ () OVERRIDE;
+	virtual void onQueue_ () OVERRIDE;
 
 	void primeOutgoingPump ();
 	void crankOutgoingPump (IBSClient *pRole);
@@ -417,7 +417,7 @@ namespace Vsa {
 
     //  Cancellation
     protected:
-        bool cancel_ (VEvaluation *pEvaluation) OVERRIDE;
+        virtual bool cancel_ (VEvaluation *pEvaluation) OVERRIDE;
         virtual void cancelCurrent () {}
 
     //  State

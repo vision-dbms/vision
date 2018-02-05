@@ -316,7 +316,7 @@ namespace Vca {
 
     //  Response Callbacks
     private:
-	void onData (
+	virtual void onData (
 	    VSiteInfo*		pSiteInfo,
 	    ProcessInfo::pid_t	iPID,
 	    ProcessInfo::uid_t	iUID,

@@ -85,7 +85,7 @@ namespace Vca {
 	void OnData (
 	    IPipeSourceClient *pRole, VBSConsumer *pBSToPeer, VBSProducer *pBSToHere, VBSProducer *pErrToHere
 	);
- 	void OnError (
+ 	virtual void OnError (
 	    IClient *pRole, IError *pError, VString const &rDescription
 	) OVERRIDE;
 

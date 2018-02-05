@@ -44,7 +44,7 @@ namespace Vca {
 
     //  Local Use
     private:
-	bool supply_(VDevice::Reference &rpDevice) OVERRIDE {
+	virtual bool supply_(VDevice::Reference &rpDevice) OVERRIDE {
 	    DeviceImplementation iDD (this);
 	    rpDevice.setTo (new VBSProducerConsumerDevice_<DeviceImplementation> (iDD));
 	    return rpDevice.isntNil ();

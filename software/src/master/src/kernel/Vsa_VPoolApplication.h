@@ -214,10 +214,10 @@ namespace Vsa {
 
     //  Control
     private:
-	bool start_() OVERRIDE;
-	bool stop_(bool bHardStop) OVERRIDE;
-	bool pause_() OVERRIDE;
-	bool resume_() OVERRIDE;
+	virtual bool start_() OVERRIDE;
+	virtual bool stop_(bool bHardStop) OVERRIDE;
+	virtual bool pause_() OVERRIDE;
+	virtual bool resume_() OVERRIDE;
 
     //  Call Backs 
     private:
@@ -241,7 +241,7 @@ namespace Vsa {
 	    return m_pEvaluatorPool.isNil () ? 0 : m_pEvaluatorPool->getStopTimeOut ();
 	}
     private:
-	Vca::U32 stopTimeout_() const OVERRIDE {
+	virtual Vca::U32 stopTimeout_() const OVERRIDE {
 	    return stopTimeout ();
 	}
    

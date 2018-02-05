@@ -160,10 +160,10 @@ namespace Vca {
 
 	//  Use
 	private:
-	    void operator () (Val_T iValue) const OVERRIDE {
+	    virtual void operator () (Val_T iValue) const OVERRIDE {
 		m_iCallback (iValue);
 	    }
-	    void operator () (IError *pIError, VString const &rMessage) const OVERRIDE {
+	    virtual void operator () (IError *pIError, VString const &rMessage) const OVERRIDE {
 		m_iCallback (pIError, rMessage);
 	    }
 

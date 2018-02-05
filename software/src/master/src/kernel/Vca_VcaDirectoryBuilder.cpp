@@ -393,7 +393,7 @@ namespace {
 
     //  Callbacks
     private:
-	void onTrigger_() OVERRIDE {
+	virtual void onTrigger_() OVERRIDE {
 	    (m_pTarget.referent()->*m_pMember) (this);
 	}
 
@@ -430,7 +430,7 @@ namespace Vca {
 
     //  Access
     protected:
-	void getDescription_(VString &rDescription) const OVERRIDE {
+	virtual void getDescription_(VString &rDescription) const OVERRIDE {
 	    m_pSession->getDescription (rDescription);
 	}
     public:
@@ -440,10 +440,10 @@ namespace Vca {
 
     //  Callbacks
     private:
-	void onData () OVERRIDE;
-	void onReset () OVERRIDE;
+	virtual void onData () OVERRIDE;
+	virtual void onReset () OVERRIDE;
 
-	void onError (IError *pInterface, VString const &rMessage) OVERRIDE;
+	virtual void onError (IError *pInterface, VString const &rMessage) OVERRIDE;
 	void onValue (IVUnknown *pObject);
 
     //  TTL
@@ -849,7 +849,7 @@ namespace Vca {
 
     //  Instantiation
     private:
-	Session* instantiationFor_(Bindings const& rBindings) const OVERRIDE;
+	virtual Session* instantiationFor_(Bindings const& rBindings) const OVERRIDE;
 	Fallback* aliasListFor (Bindings const& rBindings) const;
 
     //  Access
@@ -857,13 +857,13 @@ namespace Vca {
 	unsigned int aliasCount () const;
 
     private:
-	bool supplyObjectGofer_(gofer_t::Reference& rpObjectGofer) const OVERRIDE;
+	virtual bool supplyObjectGofer_(gofer_t::Reference& rpObjectGofer) const OVERRIDE;
 
     //  Query
     public:
 	void initialize (gofer_array_t &rGoferArray) const;
 
-	void getInfo (VString &rInfo) const OVERRIDE;
+	virtual void getInfo (VString &rInfo) const OVERRIDE;
 	using BaseClass::getInfo;
 
 	bool oneOf () const {
@@ -871,7 +871,7 @@ namespace Vca {
 	}
 
     private:
-	void getStatusMessage_(VString &rInfo) const OVERRIDE;
+	virtual void getStatusMessage_(VString &rInfo) const OVERRIDE;
 
     //  State
     private:
@@ -1029,7 +1029,7 @@ namespace Vca {
 
     //  Instantiation
     private:
-	Session* instantiationFor_(Bindings const& rBindings) const OVERRIDE;
+	virtual Session* instantiationFor_(Bindings const& rBindings) const OVERRIDE;
 
     //  Access
     public:
@@ -1041,18 +1041,18 @@ namespace Vca {
 	}
 
     private:
-	bool supplyObjectGofer_(gofer_t::Reference& rpObjectGofer) const OVERRIDE;
+	virtual bool supplyObjectGofer_(gofer_t::Reference& rpObjectGofer) const OVERRIDE;
 
     //  Query
     public:
 	void initialize (gofer_array_t &rGoferArray) const;
 
-	void getInfo (VString &rInfo) const OVERRIDE;
+	virtual void getInfo (VString &rInfo) const OVERRIDE;
 
 	using BaseClass::getInfo;
 
     private:
-	void getStatusMessage_(VString &rInfo) const OVERRIDE;
+	virtual void getStatusMessage_(VString &rInfo) const OVERRIDE;
 
     //  State
     private:
@@ -1345,7 +1345,7 @@ namespace Vca {
 
     //  Instantiation
     private:
-	Session* instantiationFor_(Bindings const& rBindings) const OVERRIDE;
+	virtual Session* instantiationFor_(Bindings const& rBindings) const OVERRIDE;
 
     //  Access
     public:
@@ -1370,11 +1370,11 @@ namespace Vca {
 
     //  Query
     public:
-	void getInfo (VString &rInfo) const OVERRIDE;
+	virtual void getInfo (VString &rInfo) const OVERRIDE;
 	using BaseClass::getInfo;
     protected:
-	bool supplyPassiveServerGofer_(PassiveServerGofer::Reference &rpPassiveServer) const OVERRIDE;
-	bool supplyPipeSourceGofer_(PipeSourceGofer::Reference &rpPipeSourceGofer) const OVERRIDE;
+	virtual bool supplyPassiveServerGofer_(PassiveServerGofer::Reference &rpPassiveServer) const OVERRIDE;
+	virtual bool supplyPipeSourceGofer_(PipeSourceGofer::Reference &rpPipeSourceGofer) const OVERRIDE;
     private:
 
 	bool supplyPipeSourceGoferForDirective (
@@ -1394,7 +1394,7 @@ namespace Vca {
 	) const;
 
     private:
-	bool isAPassiveAgent_() const OVERRIDE {
+	virtual bool isAPassiveAgent_() const OVERRIDE {
 	    return isAPassiveAgent ();
 	}
     public:
@@ -1634,7 +1634,7 @@ namespace Vca {
 
 	//  Instantiation
     private:
-	Session* instantiationFor_(Bindings const& rBindings) const OVERRIDE;
+	virtual Session* instantiationFor_(Bindings const& rBindings) const OVERRIDE;
 
     //  Access
     public:
@@ -1657,11 +1657,11 @@ namespace Vca {
 
     //  Query
     public:
-	void getInfo (VString &rInfo) const OVERRIDE;
+	virtual void getInfo (VString &rInfo) const OVERRIDE;
 	using BaseClass::getInfo;
     protected:
-	bool supplyPassiveServerGofer_(PassiveServerGofer::Reference &rpPassiveServer) const OVERRIDE;
-	bool supplyPipeSourceGofer_(PipeSourceGofer::Reference &rpPipeSourceGofer) const OVERRIDE;
+	virtual bool supplyPassiveServerGofer_(PassiveServerGofer::Reference &rpPassiveServer) const OVERRIDE;
+	virtual bool supplyPipeSourceGofer_(PipeSourceGofer::Reference &rpPipeSourceGofer) const OVERRIDE;
 
     //  State
     protected:

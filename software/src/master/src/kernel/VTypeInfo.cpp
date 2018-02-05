@@ -192,7 +192,7 @@ private:
 
 //  Access
 public:
-    VString const &name () const OVERRIDE {
+    virtual VString const &name () const OVERRIDE {
 	return m_iName;
     }
 
@@ -225,7 +225,7 @@ private:
 
 //  Access
 public:
-    VString const &name () const OVERRIDE {
+    virtual VString const &name () const OVERRIDE {
 	if (m_iName.isEmpty ())
 	    m_iName.setTo (m_iRTTI.name ());
 	return m_iName;

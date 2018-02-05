@@ -50,19 +50,19 @@ namespace Vca {
 
     //  Message Handling
     private:
-	bool defersTo (VMessageScheduler &rScheduler) OVERRIDE {
+	virtual bool defersTo (VMessageScheduler &rScheduler) OVERRIDE {
 	    return rScheduler.mustSchedule (m_pCohort);
 	}
 
     //  IVUnknown Methods
     private:
-	void VINTERFACE_MEMBERIMPL(QueryInterface) (VMessage *pMessage, VTypeInfo *pTypeInfo, IVReceiver<IVUnknown*> *pReceiver) OVERRIDE {
+	virtual void VINTERFACE_MEMBERIMPL(QueryInterface) (VMessage *pMessage, VTypeInfo *pTypeInfo, IVReceiver<IVUnknown*> *pReceiver) OVERRIDE {
 	    BaseClass::QI (pTypeInfo, pReceiver);
 	}
 
     //  ITrigger Methods
     private:
-	void VINTERFACE_MEMBERIMPL(Process) (VMessage *pMessage) OVERRIDE {
+	virtual void VINTERFACE_MEMBERIMPL(Process) (VMessage *pMessage) OVERRIDE {
 	    (m_pActor.referent()->*m_pAction) (this);
 	}
 

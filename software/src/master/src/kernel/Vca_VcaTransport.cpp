@@ -74,11 +74,11 @@ namespace Vca {
 
     //  Transport Callbacks
     protected:
-	void localizeData () OVERRIDE;
-	void getData () OVERRIDE;
-	void putData () OVERRIDE;
-	void wrapupIncomingSerialization () OVERRIDE;
-	void wrapupOutgoingSerialization () OVERRIDE;
+	virtual void localizeData () OVERRIDE;
+	virtual void getData () OVERRIDE;
+	virtual void putData () OVERRIDE;
+	virtual void wrapupIncomingSerialization () OVERRIDE;
+	virtual void wrapupOutgoingSerialization () OVERRIDE;
 
     //  State
     protected:
@@ -251,12 +251,12 @@ namespace Vca {
 
     //  Transport Callbacks
     protected:
-	void localizeData () OVERRIDE;
+	virtual void localizeData () OVERRIDE;
 
-	void getData () OVERRIDE;
-	void putData () OVERRIDE;
+	virtual void getData () OVERRIDE;
+	virtual void putData () OVERRIDE;
 
-	void wrapupIncomingSerialization () OVERRIDE;
+	virtual void wrapupIncomingSerialization () OVERRIDE;
 
     //  State
     protected:

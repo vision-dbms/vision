@@ -68,7 +68,7 @@ namespace Vsa {
         /**
          * Returns false; all broadcast evaluations are never retryable.
          */
-        bool retryable() const OVERRIDE {
+        virtual bool retryable() const OVERRIDE {
             return false;
         }
 

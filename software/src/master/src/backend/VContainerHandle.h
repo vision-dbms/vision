@@ -1060,8 +1060,8 @@ public:
 
 //  Attention Mask
 private:
-    unsigned int attentionMask_() const;
-    virtual /*override*/ void setAttentionMaskTo_(unsigned int iValue);
+    virtual unsigned int attentionMask_() const OVERRIDE;
+    virtual void setAttentionMaskTo_(unsigned int iValue) OVERRIDE;
 public:
     unsigned int attentionMask () const {
 	return static_cast<HandleBase const*>(this)->attentionMask ();
@@ -1072,19 +1072,19 @@ public:
 
 //  Database Access
 private:
-    virtual /*override*/ M_AND *database_() const;
-    virtual /*override*/ M_KOT *kot_() const;
-    virtual /*override*/ M_ASD *objectSpace_() const;
-    virtual /*override*/ RTYPE_Type rtype_() const;
-    virtual /*override*/ M_ASD *scratchPad_() const;
+    virtual M_AND *database_() const OVERRIDE;
+    virtual M_KOT *kot_() const OVERRIDE;
+    virtual M_ASD *objectSpace_() const OVERRIDE;
+    virtual RTYPE_Type rtype_() const OVERRIDE;
+    virtual M_ASD *scratchPad_() const OVERRIDE;
 
 //  Database Container Access
 private:
-    void getContainerHandle_(VReference<VContainerHandle>&rpResult);
+    virtual void getContainerHandle_(VReference<VContainerHandle>&rpResult) OVERRIDE;
 
 //  Database Container Management
 private:
-    bool isAForwardingTarget_() const;
+    virtual bool isAForwardingTarget_() const OVERRIDE;
 public:
     bool forwardToSpace (M_ASD *pSpace) {
 	return static_cast<HandleBase*>(this)->forwardToSpace (pSpace);
@@ -1092,7 +1092,7 @@ public:
 
 //  Store Access
 private:
-    virtual /*override*/ StoreBase *getStore_();
+    virtual StoreBase *getStore_() OVERRIDE;
 public:
     bool getStore (VReference<StoreBase> &rpResult) {
 	rpResult.setTo (getStore ());
@@ -1104,16 +1104,16 @@ public:
 
 //  Reference Reporting and Visitor Support
 public:
-    virtual /*override*/ void generateReferenceReport (V::VSimpleFile &rOutputFile, unsigned int xLevel) const {
+    virtual void generateReferenceReport (V::VSimpleFile &rOutputFile, unsigned int xLevel) const OVERRIDE {
 	BaseClass::generateReferenceReport (rOutputFile, xLevel);
     }
-    virtual /*override*/ void visitReferencesUsing (Visitor *visitor) {
+    virtual void visitReferencesUsing (Visitor *visitor) OVERRIDE {
 	BaseClass::visitReferencesUsing (visitor);
     }
 
 //  Visitor Support
 public:
-    virtual /*override*/ void visitUsing (Visitor *visitor) {
+    virtual void visitUsing (Visitor *visitor) OVERRIDE {
 	BaseClass::visitUsing (visitor);
     }
 };

@@ -109,8 +109,8 @@ namespace Vsa {
 
     //  Command Processor
     private:
-        bool onData_(char const *pLine, size_t sLine) OVERRIDE;
-        void onDone_() OVERRIDE;
+        virtual bool onData_(char const *pLine, size_t sLine) OVERRIDE;
+        virtual void onDone_() OVERRIDE;
 
         bool processCommand (char *pCommand);
 

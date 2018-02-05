@@ -141,7 +141,7 @@ namespace Vsa {
 
 	//  IClient Methods
             /** Implements Vca::IClient::OnError(). */
-	    void OnError (
+	    virtual void OnError (
 		Vca::IClient *pRole, Vca::IError *pError, VString const &rText
 	    ) OVERRIDE;
         //@}

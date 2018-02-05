@@ -787,11 +787,11 @@ public:
 
     protected:
 	using BaseClass::Mark_;
-	virtual void Mark_(M_ASD* pASD, M_POP const *pPOP);
+	virtual void Mark_(M_ASD* pASD, M_POP const *pPOP) OVERRIDE;
 
-	virtual void processContainerHandle  (M_CTE &rCTE, VContainerHandle *pHandle);
+	virtual void processContainerHandle  (M_CTE &rCTE, VContainerHandle *pHandle) OVERRIDE;
 
-	virtual /*override*/ void visitHandle (VContainerHandle *pHandle);
+	virtual void visitHandle (VContainerHandle *pHandle) OVERRIDE;
     };
 
 // GC Traversal Controllers : GCVisitCycleDetect
@@ -799,10 +799,10 @@ public:
 	DECLARE_FAMILY_MEMBERS (GCVisitCycleDetect,GCVisitBase);
 
     protected:
-	virtual void processContainerAddress (M_CTE &rCTE, M_CPreamble *pAddress);
-	virtual void processContainerHandle  (M_CTE &rCTE, VContainerHandle *pHandle);
+	virtual void processContainerAddress (M_CTE &rCTE, M_CPreamble *pAddress) OVERRIDE;
+	virtual void processContainerHandle  (M_CTE &rCTE, VContainerHandle *pHandle) OVERRIDE;
 
-	virtual /*override*/ void visitHandle (VContainerHandle *pHandle);
+	virtual void visitHandle (VContainerHandle *pHandle) OVERRIDE;
     };
 
 

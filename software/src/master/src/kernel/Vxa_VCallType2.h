@@ -150,7 +150,7 @@ namespace Vxa {
 
 	    //  Access
 	    public:
-		val_t value () OVERRIDE {
+		virtual val_t value () OVERRIDE {
 		    return m_pCluster->element(m_iSelfReferences[m_pTaskCursor->position ()]);
 		}
 
@@ -176,7 +176,7 @@ namespace Vxa {
 
 	//  Implementation
 	private:
-	    bool onSelf (object_reference_t xSelfReference) const OVERRIDE {
+	    virtual bool onSelf (object_reference_t xSelfReference) const OVERRIDE {
 		m_rpSelfProvider.setTo (
 		    new VScalarInstance<val_t, var_t>(
 			m_pCluster->type (), m_pCluster->element (xSelfReference)
@@ -184,7 +184,7 @@ namespace Vxa {
 		);
 		return true;
 	    }
-	    bool onSelf (object_reference_array_t const &rSelfReferences) const OVERRIDE {
+	    virtual bool onSelf (object_reference_array_t const &rSelfReferences) const OVERRIDE {
 		m_rpSelfProvider.setTo (
 		    new CurrentSelf (m_pCluster, rSelfReferences, taskCursor ())
 		);
@@ -209,11 +209,11 @@ namespace Vxa {
 
     //  Access
     private:
-	IVUnknown *caller () const OVERRIDE;
+	virtual IVUnknown *caller () const OVERRIDE;
 
     //  Invocation
     public:
-	bool invoke (VMethod *pMethod, VCollection *pCluster) const OVERRIDE;
+	virtual bool invoke (VMethod *pMethod, VCollection *pCluster) const OVERRIDE;
 	bool start (VTask *pTask) const;
 
     //  Parameter Acquisition
@@ -266,9 +266,9 @@ namespace Vxa {
 	bool returnVector (VkDynamicArrayOf<VString> const &rVector) const;
 
     //  ... status:
-	bool returnError (VString const &rMessage) const OVERRIDE;
-	bool returnSNF () const OVERRIDE;
-	bool returnNA () const OVERRIDE;
+	virtual bool returnError (VString const &rMessage) const OVERRIDE;
+	virtual bool returnSNF () const OVERRIDE;
+	virtual bool returnNA () const OVERRIDE;
 
     //  ... segments:
 	template <typename T> bool returnSegment (object_reference_array_t const &rInjection, VCollection *pCluster, T const &rT) const {

@@ -74,14 +74,14 @@ public:
     unsigned int cardinality () const {
 	return m_pDPT->cardinality ();
     }
-    unsigned int cardinality_() const {
+    virtual unsigned int cardinality_() const OVERRIDE {
 	return cardinality ();
     }
 
     rtPTOKEN_Handle *ptoken () const {
 	return m_pDPT;
     }
-    rtPTOKEN_Handle *ptoken_() const {
+    virtual rtPTOKEN_Handle *ptoken_() const OVERRIDE {
 	return ptoken ();
     }
 

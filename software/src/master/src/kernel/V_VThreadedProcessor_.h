@@ -74,14 +74,14 @@ namespace V {
              *
              * @see V::VThread::adjustStackSize()
              */
-            void adjustStackSize (size_t &rsSize) const OVERRIDE {
+            virtual void adjustStackSize (size_t &rsSize) const OVERRIDE {
                 m_pProcessor->adjustStackSize (rsSize);
             }
 
             /**
              * Delegates to VThreadedProcessor::employ().
              */
-            pthread_procedure_result_t run_() OVERRIDE { // ... virtual called by the thread procedure to do this thread's business
+            virtual pthread_procedure_result_t run_() OVERRIDE { // ... virtual called by the thread procedure to do this thread's business
                 m_pProcessor->employ (this);
                 return 0;
             }

@@ -50,10 +50,10 @@ namespace Vxa {
 
     //  Invocation
     private:
-	bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) OVERRIDE {
+	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return rCallHandle.returnConstant (value ());
 	}
-	bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) OVERRIDE {
+	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) OVERRIDE {
 	    return rCallHandle.returnConstant (value ());
 	}
 

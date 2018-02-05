@@ -739,7 +739,7 @@ namespace Vca {
         /**
          * Implements VMessageStarter::start_().
          */
-	void start_(VMessage *pMessage) OVERRIDE;
+	virtual void start_(VMessage *pMessage) OVERRIDE;
 
         /**
          * Starts an event monitor as necessary. Wakes an existing event monitor if one already exists. May result in the creation of a new thread.

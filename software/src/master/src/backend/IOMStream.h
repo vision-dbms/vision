@@ -91,12 +91,12 @@ private:
 
 //  Query
 public:
-    IOMChannelType channelType () const;
+    virtual IOMChannelType channelType () const OVERRIDE;
 
-    char const* consumedStartupExpression ();
+    virtual char const* consumedStartupExpression () OVERRIDE;
 
 public:
-    int getTcpNodelay (int* fOnOff);
+    virtual int getTcpNodelay (int* fOnOff) OVERRIDE;
 
 //  Control
 protected:
@@ -107,11 +107,11 @@ protected:
     int Seek (IOMHandle const* pHandle);
 
 public:
-    void Close ();
-    int EndTransmission	();
-    int EndReception	();
+    virtual void Close () OVERRIDE;
+    virtual int EndTransmission	() OVERRIDE;
+    virtual int EndReception	() OVERRIDE;
 
-    int SetTcpNodelay (int fOnOff);
+    virtual int SetTcpNodelay (int fOnOff) OVERRIDE;
 
     void SetStartupExpressionTo (char const* pStartupExpression) {
 	m_pStartupExpression = pStartupExpression;
@@ -119,44 +119,44 @@ public:
 
 //  Input
 public:
-    VkStatusType InputOperationStatus () const; 
+    virtual VkStatusType InputOperationStatus () const OVERRIDE;
 
-    size_t GetByteCount (IOMHandle const* pHandle);
-    size_t GetData	(IOMHandle const* pHandle, void *pBuffer, size_t cbMin, size_t cbMax);
+    virtual size_t GetByteCount (IOMHandle const* pHandle) OVERRIDE;
+    virtual size_t GetData	(IOMHandle const* pHandle, void *pBuffer, size_t cbMin, size_t cbMax) OVERRIDE;
 
-    VkStatusType GetString (
+    virtual VkStatusType GetString (
 	IOMHandle const*pHandle,
 	size_t		cbMin,
 	size_t		cbMax,
 	char **		ppString,
 	size_t *	psString
-    );
+    ) OVERRIDE;
 
-    VkStatusType GetLine (
+    virtual VkStatusType GetLine (
 	IOMHandle const*pHandle,
 	char const*	zPrompt,
 	char **		ppLine,
 	size_t *	psLine
-    );
+    ) OVERRIDE;
 
 //  Output
 public:
-    void OpenOutputFile	 (char const *filename, bool fOutputRedirected);
-    void CloseOutputFile ();
+    virtual void OpenOutputFile	 (char const *filename, bool fOutputRedirected) OVERRIDE;
+    virtual void CloseOutputFile () OVERRIDE;
 
-    bool PutBufferedData ();
+    virtual bool PutBufferedData () OVERRIDE;
 
-    size_t PutData (IOMHandle const* pHandle, void const* pBuffer, size_t sBuffer);
+    virtual size_t PutData (IOMHandle const* pHandle, void const* pBuffer, size_t sBuffer) OVERRIDE;
 
-    size_t PutString (char const *string);
+    virtual size_t PutString (char const *string) OVERRIDE;
 
-    size_t VPrint  (size_t sData, char const *fmt, va_list ap);
-    size_t VReport (size_t sData, char const *fmt, va_list ap);
+    virtual size_t VPrint  (size_t sData, char const *fmt, va_list ap) OVERRIDE;
+    virtual size_t VReport (size_t sData, char const *fmt, va_list ap) OVERRIDE;
 
 //  CheckPoint
 public:
-    void createCheckPoint (bool bBlocking, Vca::ITrigger *pTrigger);
-    void releaseBlockingCheckPoint (Vca::VTrigger<IOMDriver>* pTrigger);
+    virtual void createCheckPoint (bool bBlocking, Vca::ITrigger *pTrigger) OVERRIDE;
+    virtual void releaseBlockingCheckPoint (Vca::VTrigger<IOMDriver>* pTrigger) OVERRIDE;
 
 //  State
 protected:

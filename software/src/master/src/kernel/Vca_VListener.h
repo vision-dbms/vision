@@ -218,13 +218,13 @@ namespace Vca {
 
     //  Callbacks
     private:
-	void trigger_() OVERRIDE {
+	virtual void trigger_() OVERRIDE {
 	    acceptConnections ();
 	}
 
     //  Completion
     private:
-	void onDevice_(VDevice *pDevice) OVERRIDE;
+	virtual void onDevice_(VDevice *pDevice) OVERRIDE;
 
     //  Request Processing
     private:

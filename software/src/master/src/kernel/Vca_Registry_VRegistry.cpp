@@ -257,11 +257,11 @@ namespace Vca {
 
 	//  Implementation
 	private:
-	    void OnEnd_() OVERRIDE;
-	    void OnError_(IError *pInterface, VString const &rMessage) OVERRIDE;
+	    virtual void OnEnd_() OVERRIDE;
+	    virtual void OnError_(IError *pInterface, VString const &rMessage) OVERRIDE;
 
 	    bool onCallEnd (IPassiveCallbackReceiver::Reference &rpCallbackReceiver);
-	    void onCallback (IPassiveCallback *pCallback) OVERRIDE;
+	    virtual void onCallback (IPassiveCallback *pCallback) OVERRIDE;
 
 	    void onEnd ();
 	    void onError (IError *pInterface, VString const &rMessage);
@@ -481,17 +481,17 @@ namespace Vca {
 
 	//  Callbacks
 	private:
-	    void onNeed () OVERRIDE {
+	    virtual void onNeed () OVERRIDE {
 		m_pOffering.materializeFor (this);
 		object_gofer_t::onNeed ();
 	    }
-	    void onData () OVERRIDE {
+	    virtual void onData () OVERRIDE {
 		setTo (m_pOffering);
 	    }
 
 	//  Implementation
 	private:
-	    void onQuery (IObjectSink* pObjectSink, VTypeInfo* pObjectType) OVERRIDE;
+	    virtual void onQuery (IObjectSink* pObjectSink, VTypeInfo* pObjectType) OVERRIDE;
 
 	//  State
 	private:

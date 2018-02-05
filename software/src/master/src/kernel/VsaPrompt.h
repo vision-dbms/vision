@@ -37,10 +37,10 @@ namespace Vsa {
 
     //  Startup
     private:
-	bool start_() OVERRIDE;
+	virtual bool start_() OVERRIDE;
 
     private:
-	bool getDefaultServerName (VString &rServerName) const OVERRIDE;
+	virtual bool getDefaultServerName (VString &rServerName) const OVERRIDE;
 
 	void onGoferValue (IEvaluator *pIEvaluator);
 	void onGoferError (Vca::IError* pInterface, VString const& rMessage) {

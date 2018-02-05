@@ -108,7 +108,7 @@ namespace Vca {
     //  Callbacks
     public:
 	void OnData (receiver_t *pRole, IVUnknown *pResult);
-	void OnError_(IError *pInterface, VString const &rMessage) OVERRIDE;
+	virtual void OnError_(IError *pInterface, VString const &rMessage) OVERRIDE;
 	void Process (ITrigger *pRole);
 
     //  Use

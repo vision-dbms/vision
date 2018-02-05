@@ -80,12 +80,12 @@ namespace Vca {
 		BaseClass::setTo (pRequest);
 	    }
 	private:
-	    void onNeed () OVERRIDE {
+	    virtual void onNeed () OVERRIDE {
 		m_pSource.materializeFor (this);
 		m_pSink.materializeFor (this);
 		BaseClass::onNeed ();
 	    }
-	    void onData () OVERRIDE {
+	    virtual void onData () OVERRIDE {
 		IRequestSink::Reference pRequestSink;
 		m_pIRequestSink.getRole (pRequestSink);
 		submit (pRequestSink, m_pSource, m_pSink);
@@ -265,7 +265,7 @@ namespace {
 
     // Other Callbacks
     public:
-	void OnError_(IError *pInterface, VString const &rMessage) OVERRIDE {
+	virtual void OnError_(IError *pInterface, VString const &rMessage) OVERRIDE {
 	    cerr << "Error: " << rMessage << endl;
             onDone ();
 	}
@@ -366,12 +366,12 @@ namespace Vca {
 
 	//  Event Callbacks
 	private:
-	    void OnEvent_(IEvent* pEvent, IEvent* pProxy, VTime const& rTimestamp, VString const& rDescription) OVERRIDE;
-	    void OnEndEvent_(IEvent* pEvent, IEvent* pProxy, VTime const& rTimestamp) OVERRIDE;
-	    void OnErrorEvent_(IEvent* pEvent, IEvent* pProxy, VTime const& rTimestamp, IError* pInterface, VString const& rMessage) OVERRIDE;
-	    void OnFailureEvent_(IEvent* pEvent, IEvent* pProxy, VTime const& rTimestamp, IError* pInterface, VString const& rMessage) OVERRIDE;
+	    virtual void OnEvent_(IEvent* pEvent, IEvent* pProxy, VTime const& rTimestamp, VString const& rDescription) OVERRIDE;
+	    virtual void OnEndEvent_(IEvent* pEvent, IEvent* pProxy, VTime const& rTimestamp) OVERRIDE;
+	    virtual void OnErrorEvent_(IEvent* pEvent, IEvent* pProxy, VTime const& rTimestamp, IError* pInterface, VString const& rMessage) OVERRIDE;
+	    virtual void OnFailureEvent_(IEvent* pEvent, IEvent* pProxy, VTime const& rTimestamp, IError* pInterface, VString const& rMessage) OVERRIDE;
 
-	    void onCompletion_() OVERRIDE;
+	    virtual void onCompletion_() OVERRIDE;
 
 	//  State
 	private:
@@ -389,7 +389,7 @@ namespace Vca {
 
     //  Activity Sink Callbacks
     private:
-	void createMonitorFor (VActivity *pActivity) const OVERRIDE;
+	virtual void createMonitorFor (VActivity *pActivity) const OVERRIDE;
     };
 }
 

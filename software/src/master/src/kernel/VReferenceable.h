@@ -131,7 +131,7 @@ public:\
 #define DECLARE_CONCRETE_RTTLITE_MEMBERS(thisClass,baseClass,whichRTT)\
     DECLARE_CONCRETE_RTTLITE_MEMBERS_NODT(thisClass,baseClass,whichRTT);\
 private:\
-    void deleteThis () OVERRIDE {\
+    virtual void deleteThis () OVERRIDE {\
 	if (this->onDeleteThis ())\
 	    delete this;\
     }
@@ -168,7 +168,7 @@ private:\
  */
 #define DECLARE_RTT_MEMBERS()\
 public:\
-    VRunTimeType *rtt () const OVERRIDE {\
+    virtual VRunTimeType *rtt () const OVERRIDE {\
 	return &RTT;\
     }\
     /** Convenience define for a V::VRunTimeType_ templated for this class. */\
@@ -467,7 +467,7 @@ namespace V {
 //  Reclamation
     private:
 	virtual void deleteThis () = 0;
-	void die_() OVERRIDE;
+	virtual void die_() OVERRIDE;
 	void die () {
 	    if (m_iReferenceCount.decrementIsZero ())
 		deleteThis ();

@@ -65,7 +65,7 @@ namespace Vca {
 
     //  IClient Callbacks
     private:
-	void OnError_(IError* pInterface, VString const& rMessage) OVERRIDE;
+	virtual void OnError_(IError* pInterface, VString const& rMessage) OVERRIDE;
 
     //  State
 	VActivityMonitor::Reference const m_pMonitor;

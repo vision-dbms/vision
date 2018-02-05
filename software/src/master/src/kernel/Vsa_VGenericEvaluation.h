@@ -55,7 +55,7 @@ namespace Vsa {
     private:
 	Vca::VRole<ThisClass,IEvaluation> m_pIEvaluation;
     public:
-	void getRole (IEvaluation::Reference &rpRole) OVERRIDE;
+	virtual void getRole (IEvaluation::Reference &rpRole) OVERRIDE;
     };
 }
 

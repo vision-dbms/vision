@@ -48,19 +48,19 @@ namespace Vca {
 
     //  Callbacks
     private:
-	void onEnd () OVERRIDE {
+	virtual void onEnd () OVERRIDE {
 	    if (m_pStakeHolder)
 		m_pStakeHolder->onEnd ();
 	}
-	void onError (IError *pInterface, VString const &rMessage) OVERRIDE {
+	virtual void onError (IError *pInterface, VString const &rMessage) OVERRIDE {
 	    if (m_pStakeHolder)
 		m_pStakeHolder->onError (pInterface, rMessage);
 	}
-	void onSent () OVERRIDE {
+	virtual void onSent () OVERRIDE {
 	    if (m_pStakeHolder)
 		m_pStakeHolder->onSent ();
 	}
-	void onTrigger () OVERRIDE {
+	virtual void onTrigger () OVERRIDE {
 	    if (m_pStakeHolder)
 		m_pStakeHolder->onTrigger ();
 	}

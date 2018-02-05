@@ -89,10 +89,10 @@ namespace Vca {
 
     //  Callbacks
     private:
-	bool onData_(char const *pLine, size_t sLine) OVERRIDE {
+	virtual bool onData_(char const *pLine, size_t sLine) OVERRIDE {
 	    return m_pInputProcessor->onInputLine (pLine, sLine);
 	}
-	void onDone_() OVERRIDE {
+	virtual void onDone_() OVERRIDE {
 	    m_pInputProcessor->onInputDone ();
 	}
 

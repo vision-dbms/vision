@@ -773,7 +773,7 @@ private:
 
 //  Alignment
 private:
-    virtual /*override*/ bool align_() {
+    virtual bool align_() OVERRIDE {
 	return align ();
     }
 public:
@@ -818,19 +818,19 @@ public:
 
 //  Forwarding
 private:
-    bool forwardToSpace_(M_ASD *pSpace);
+    virtual bool forwardToSpace_(M_ASD *pSpace) OVERRIDE;
 
 //  Callbacks
 public:
-    void CheckConsistency ();
+    virtual void CheckConsistency () OVERRIDE;
 
 protected:
-    bool PersistReferences ();
+    virtual bool PersistReferences () OVERRIDE;
 
 //  Display and Inspection
 public:
-    virtual /*override*/ bool getPOP (M_POP *pResult, unsigned int xPOP) const;
-    virtual /*override*/ unsigned int getPOPCount () const {
+    virtual bool getPOP (M_POP *pResult, unsigned int xPOP) const OVERRIDE;
+    virtual unsigned int getPOPCount () const OVERRIDE {
 	return 2;
     }
 };

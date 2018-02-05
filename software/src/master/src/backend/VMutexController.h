@@ -37,7 +37,7 @@ protected:
 
 //  Execution
 protected:
-    void fail ();
+    virtual void fail () OVERRIDE;
 
 //  Continuations
 protected:

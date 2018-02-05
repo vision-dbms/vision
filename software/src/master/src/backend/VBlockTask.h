@@ -90,34 +90,34 @@ protected:
 	return m_iByteCodeScanner.blockHandle ();
     }
 
-    void decompilation (VString& rString, VCall const* pContext) const;
+    virtual void decompilation (VString& rString, VCall const* pContext) const OVERRIDE;
     void decompilation (VString& rString) const {
 	decompilation (rString, 0);
     }
 
-    void decompilationPrefix (VString& rString, VCall const* pContext) const;
+    virtual void decompilationPrefix (VString& rString, VCall const* pContext) const OVERRIDE;
     void decompilationPrefix (VString& rString) const {
 	decompilationPrefix (rString, 0);
     }
 
-    void decompilationSuffix (VString& rString, VCall const* pContext) const;
+    virtual void decompilationSuffix (VString& rString, VCall const* pContext) const OVERRIDE;
     void decompilationSuffix (VString& rString) const {
 	decompilationSuffix (rString, 0);
     }
 
-    unsigned int decompilationIndent (VCall const* pContext) const;
+    virtual unsigned int decompilationIndent (VCall const* pContext) const OVERRIDE;
     unsigned int decompilationIndent () const {
 	return decompilationIndent (0);
     }
 
-    unsigned int decompilationOffset (VCall const* pContext) const;
+    virtual unsigned int decompilationOffset (VCall const* pContext) const OVERRIDE;
     unsigned int decompilationOffset () const {
 	return decompilationOffset (0);
     }
 
 //  Execution...
 protected:
-    void run ();
+    virtual void run () OVERRIDE;
 
 //  ... Call Commit
     void commitCall (ReturnCase xReturnCase = Return_Value) {
@@ -136,15 +136,15 @@ protected:
 
 //  Display
 public:
-    void dumpByteCodes (VCall const* pContext) const;
+    virtual void dumpByteCodes (VCall const* pContext) const OVERRIDE;
     void dumpByteCodes () const {
 	dumpByteCodes (0);
     }
 
-    void reportInfo	(unsigned int xLevel, VCall const* pContext = 0) const;
-    void reportTrace	() const;
+    virtual void reportInfo	(unsigned int xLevel, VCall const* pContext = 0) const OVERRIDE;
+    virtual void reportTrace	() const OVERRIDE;
 
-    char const* description () const;
+    virtual char const* description () const OVERRIDE;
 
 //  Exception Generation
 protected:

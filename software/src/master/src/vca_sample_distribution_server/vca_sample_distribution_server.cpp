@@ -126,8 +126,8 @@ namespace VcaSamples {
 
     //  Startup
     private:
-	void onStandardInput (Vca::VBSProducer *pStdin) OVERRIDE;
-	bool start_() OVERRIDE;
+	virtual void onStandardInput (Vca::VBSProducer *pStdin) OVERRIDE;
+	virtual bool start_() OVERRIDE;
 
     //  Input Processing
     public:

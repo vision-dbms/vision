@@ -177,7 +177,7 @@ namespace Vca {
 
     //  Monitoring
     public:
-	void createMonitorFor (VActivity* pActivity) const OVERRIDE;
+	virtual void createMonitorFor (VActivity* pActivity) const OVERRIDE;
 
     //  State
     private:
