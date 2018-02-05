@@ -470,7 +470,7 @@ int rslangchar;			/* current input token number */
 int
 rslangparse()
 {
-	register rslangSTYPE *rslangpvt;	/* top of value stack for $vars */
+	REGISTER rslangSTYPE *rslangpvt;	/* top of value stack for $vars */
 
 	/*
 	** Initialize externals - rslangparse may be called more than once
@@ -489,10 +489,10 @@ rslangparse()
 	rslangchar = -1;
 
 	{
-		register rslangSTYPE *rslang_pv;	/* top of value stack */
-		register int *rslang_ps;		/* top of state stack */
-		register int rslang_state;		/* current state */
-		register int  rslang_n;		/* internal state number info */
+		REGISTER rslangSTYPE *rslang_pv;	/* top of value stack */
+		REGISTER int *rslang_ps;		/* top of state stack */
+		REGISTER int rslang_state;		/* current state */
+		REGISTER int  rslang_n;		/* internal state number info */
 
 		goto rslangstack;
 
@@ -531,7 +531,7 @@ rslangparse()
 		*/
 		if ( rslangdebug )
 		{
-			register int rslang_i;
+			REGISTER int rslang_i;
 
 			printf( "State %d, token ", rslang_state );
 			if ( rslangchar == 0 )
@@ -594,7 +594,7 @@ rslangparse()
 #if rslangDEBUG
 		if ( rslangdebug && rslangtmp )
 		{
-			register int rslang_i;
+			REGISTER int rslang_i;
 
 			printf( "Received token " );
 			if ( rslangchar == 0 )
@@ -636,7 +636,7 @@ rslangparse()
 #if rslangDEBUG
 			if ( rslangdebug && rslangtmp )
 			{
-				register int rslang_i;
+				REGISTER int rslang_i;
 
 				printf( "Received token " );
 				if ( rslangchar == 0 )
@@ -663,7 +663,7 @@ rslangparse()
 			** look through exception table
 			*/
 			{
-				register int *rslangxi = rslangexca;
+				REGISTER int *rslangxi = rslangexca;
 
 				while ( ( *rslangxi != -1 ) ||
 					( rslangxi[1] != rslang_state ) )
@@ -749,7 +749,7 @@ rslangparse()
 				*/
 				if ( rslangdebug )
 				{
-					register int rslang_i;
+					REGISTER int rslang_i;
 
 					printf( "Error recovery discards " );
 					if ( rslangchar == 0 )
@@ -809,7 +809,7 @@ rslangparse()
 		*/
 		{
 			/* length of production doubled with extra bit */
-			register int rslang_len = rslangr2[ rslang_n ];
+			REGISTER int rslang_len = rslangr2[ rslang_n ];
 
 			if ( !( rslang_len & 01 ) )
 			{

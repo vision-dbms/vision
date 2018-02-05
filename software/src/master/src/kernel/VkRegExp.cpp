@@ -179,9 +179,9 @@
  * of the structure of the compiled regexp.
  */
 VkRegExp::VkRegExp (char const* exp) : m_bValid (false) {
-	register char *scan;
-	register char *longest;
-	register int len;
+	REGISTER char *scan;
+	REGISTER char *longest;
+	REGISTER int len;
 	int flags;
 
 	if (exp == NULL) {
@@ -269,10 +269,10 @@ VkRegExp::~VkRegExp () {
  * follows makes it hard to avoid.
  */
 char *VkRegExp::reg (int paren, int *flagp) {
-	register char *ret;
-	register char *br;
-	register char *ender;
-	register int parno;
+	REGISTER char *ret;
+	REGISTER char *br;
+	REGISTER char *ender;
+	REGISTER int parno;
 	int flags;
 
 	*flagp = HASWIDTH;	/* Tentatively. */
@@ -337,9 +337,9 @@ char *VkRegExp::reg (int paren, int *flagp) {
  * Implements the concatenation operator.
  */
 char *VkRegExp::regbranch (int *flagp) {
-	register char *ret;
-	register char *chain;
-	register char *latest;
+	REGISTER char *ret;
+	REGISTER char *chain;
+	REGISTER char *latest;
 	int flags;
 
 	*flagp = WORST;		/* Tentatively. */
@@ -373,9 +373,9 @@ char *VkRegExp::regbranch (int *flagp) {
  * endmarker role is not redundant.
  */
 char *VkRegExp::regpiece (int *flagp) {
-	register char *ret;
-	register char op;
-	register char *next;
+	REGISTER char *ret;
+	REGISTER char op;
+	REGISTER char *next;
 	int flags;
 
 	ret = regatom(&flags);
@@ -434,7 +434,7 @@ char *VkRegExp::regpiece (int *flagp) {
  * separate node; the code is simpler that way and it's not worth fixing.
  */
 char * VkRegExp::regatom (int *flagp) {
-	register char *ret;
+	REGISTER char *ret;
 	int flags;
 
 	*flagp = WORST;		/* Tentatively. */
@@ -451,8 +451,8 @@ char * VkRegExp::regatom (int *flagp) {
 		*flagp |= HASWIDTH|SIMPLE;
 		break;
 	case '[': {
-			register int xClass;
-			register int classend;
+			REGISTER int xClass;
+			REGISTER int classend;
 
 			if (*regparse == '^') {	/* Complement of range. */
 				ret = regnode(ANYBUT);
@@ -510,8 +510,8 @@ char * VkRegExp::regatom (int *flagp) {
 		*flagp |= HASWIDTH|SIMPLE;
 		break;
 	default: {
-			register int len;
-			register char ender;
+			REGISTER int len;
+			REGISTER char ender;
 
 			regparse--;
 			len = strcspn(regparse, META);
@@ -541,8 +541,8 @@ char * VkRegExp::regatom (int *flagp) {
  */
 char *VkRegExp::regnode (char op)	/* Location. */
 {
-	register char *ret;
-	register char *ptr;
+	REGISTER char *ret;
+	REGISTER char *ptr;
 
 	ret = regcode;
 	if (ret == &regdummy) {
@@ -576,9 +576,9 @@ void VkRegExp::regc (char b)
  * Means relocating the operand.
  */
 void VkRegExp::reginsert (char op, char *opnd) {
-	register char *src;
-	register char *dst;
-	register char *place;
+	REGISTER char *src;
+	REGISTER char *dst;
+	REGISTER char *place;
 
 	if (regcode == &regdummy) {
 		regsize += 3;
@@ -601,9 +601,9 @@ void VkRegExp::reginsert (char op, char *opnd) {
  - regtail - set the next-pointer at the end of a node chain
  */
 void VkRegExp::regtail (char *p, char *val) {
-	register char *scan;
-	register char *temp;
-	register int offset;
+	REGISTER char *scan;
+	REGISTER char *temp;
+	REGISTER int offset;
 
 	if (p == &regdummy)
 		return;
@@ -652,7 +652,7 @@ bool VkRegExp::Execute (Query& rQuery) const {
 
 	/* If there is a "must appear" string, look for it. */
 	if (regmust != NULL) {
-		register char const* s = rQuery.string ();
+		REGISTER char const* s = rQuery.string ();
 		while ((s = strchr(s, regmust[0])) != NULL) {
 			if (strncmp(s, regmust, regmlen) == 0)
 				break;	/* Found it. */
@@ -667,7 +667,7 @@ bool VkRegExp::Execute (Query& rQuery) const {
 	    return regtry(rQuery, rQuery.string ());
 
 	/* Messy cases:  unanchored match. */
-	register char const* s = rQuery.string ();
+	REGISTER char const* s = rQuery.string ();
 	if (regstart != '\0')
 		/* We know what char it must start with. */
 		while ((s = strchr(s, regstart)) != NULL) {
@@ -691,9 +691,9 @@ bool VkRegExp::Execute (Query& rQuery) const {
  */
 bool			/* false failure, true success */
 VkRegExp::regtry (Query& rQuery, char const* string) const {
-	register int i;
-	register char const** sp = rQuery.m_startp;
-	register char const** ep = rQuery.m_endp;
+	REGISTER int i;
+	REGISTER char const** sp = rQuery.m_startp;
+	REGISTER char const** ep = rQuery.m_endp;
 
 	rQuery.reginput = string;
 
@@ -724,7 +724,7 @@ VkRegExp::regmatch (Query& rQuery, char *prog) const {
 	char const **querySP = rQuery.m_startp;	/* Pointer to startp array. */
 	char const **queryEP = rQuery.m_endp;	/* Ditto for endp. */
 
-	register char *scan = prog;	/* Current node. */
+	REGISTER char *scan = prog;	/* Current node. */
 	while (scan != NULL) {
 	    char *next = regnext(scan);	/* Next node. */
 		switch (OP(scan)) {
@@ -742,8 +742,8 @@ VkRegExp::regmatch (Query& rQuery, char *prog) const {
 			rQuery.reginput++;
 			break;
 		case EXACTLY: {
-				register int len;
-				register char *opnd;
+				REGISTER int len;
+				REGISTER char *opnd;
 
 				opnd = OPERAND(scan);
 				/* Inline the first character, for speed. */
@@ -778,8 +778,8 @@ VkRegExp::regmatch (Query& rQuery, char *prog) const {
 		case OPEN+7:
 		case OPEN+8:
 		case OPEN+9: {
-				register int no;
-				register char const*save;
+				REGISTER int no;
+				REGISTER char const*save;
 
 				no = OP(scan) - OPEN;
 				save = rQuery.reginput;
@@ -806,8 +806,8 @@ VkRegExp::regmatch (Query& rQuery, char *prog) const {
 		case CLOSE+7:
 		case CLOSE+8:
 		case CLOSE+9: {
-				register int no;
-				register char const*save;
+				REGISTER int no;
+				REGISTER char const*save;
 
 				no = OP(scan) - CLOSE;
 				save = rQuery.reginput;
@@ -826,7 +826,7 @@ VkRegExp::regmatch (Query& rQuery, char *prog) const {
 			}
 			break;
 		case BRANCH: {
-				register char const*save;
+				REGISTER char const*save;
 
 				if (OP(next) != BRANCH)		/* No choice. */
 					next = OPERAND(scan);	/* Avoid recursion. */
@@ -845,10 +845,10 @@ VkRegExp::regmatch (Query& rQuery, char *prog) const {
 			break;
 		case STAR:
 		case PLUS: {
-				register char nextch;
-				register int no;
-				register char const*save;
-				register int min;
+				REGISTER char nextch;
+				REGISTER int no;
+				REGISTER char const*save;
+				REGISTER int min;
 
 				/*
 				 * Lookahead to avoid useless match attempts
@@ -894,10 +894,10 @@ VkRegExp::regmatch (Query& rQuery, char *prog) const {
  - regrepeat - repeatedly match something simple, report how many
  */
 int VkRegExp::regrepeat (Query& rQuery, char *p) const {
-	register int count = 0;
+	REGISTER int count = 0;
 
-	register char const *scan = rQuery.reginput;
-	register char *opnd = OPERAND(p);
+	REGISTER char const *scan = rQuery.reginput;
+	REGISTER char *opnd = OPERAND(p);
 	switch (OP(p)) {
 	case ANY:
 		count = strlen(scan);
@@ -934,8 +934,8 @@ int VkRegExp::regrepeat (Query& rQuery, char *p) const {
 /*
  - regnext - dig the "next" pointer out of a node
  */
-char *VkRegExp::regnext (register char *p) const {
-	register int offset;
+char *VkRegExp::regnext (REGISTER char *p) const {
+	REGISTER int offset;
 
 	if (p == &regdummy)
 		return(NULL);

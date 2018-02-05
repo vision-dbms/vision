@@ -141,7 +141,7 @@ PublicFnDef void READER_ConvertToAscii (
 )
 {
     unsigned char *		ptr;
-    register int		i;
+    REGISTER int		i;
 
     for (
 	i = 0, ptr = buffer;
@@ -156,7 +156,7 @@ PublicFnDef void READER_ConvertToEbcdic (
 )
 {
     unsigned char *		ptr;
-    register int		i;
+    REGISTER int		i;
     static bool			ASCII_to_EBCDIC_tableGenerated = false;
 
     if (!ASCII_to_EBCDIC_tableGenerated)

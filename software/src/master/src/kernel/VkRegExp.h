@@ -80,7 +80,7 @@ private:
     void reginsert (char, char *);
     void regtail (char *, char *);
     void regoptail (char *, char *);
-    char *regnext (register char*) const;
+    char *regnext (REGISTER char*) const;
     bool regtry (Query& rQuery, char const*) const;
     bool regmatch (Query& rQuery, char*) const;
     int regrepeat (Query& rQuery, char*) const;
