@@ -209,15 +209,15 @@ namespace Vsa {
 
     //  IGetter Methods:
     protected:
-	virtual bool GetU32Value_(IVReceiver<Vca::U32>*, VString const &);
-	virtual bool GetStringValue_(IVReceiver<VString const &>*, VString const &);
+	virtual bool GetU32Value_(IVReceiver<Vca::U32>*, VString const &) OVERRIDE;
+	virtual bool GetStringValue_(IVReceiver<VString const &>*, VString const &) OVERRIDE;
 
     //  Control
     private:
-	bool start_();
-	bool stop_(bool bHardStop);
-	bool pause_();
-	bool resume_();
+	bool start_() OVERRIDE;
+	bool stop_(bool bHardStop) OVERRIDE;
+	bool pause_() OVERRIDE;
+	bool resume_() OVERRIDE;
 
     //  Call Backs 
     private:
@@ -241,7 +241,7 @@ namespace Vsa {
 	    return m_pEvaluatorPool.isNil () ? 0 : m_pEvaluatorPool->getStopTimeOut ();
 	}
     private:
-	Vca::U32 stopTimeout_() const {
+	Vca::U32 stopTimeout_() const OVERRIDE {
 	    return stopTimeout ();
 	}
    

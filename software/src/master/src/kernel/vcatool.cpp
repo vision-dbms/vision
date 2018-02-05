@@ -265,7 +265,7 @@ namespace {
 
     // Other Callbacks
     public:
-	void OnError_(IError *pInterface, VString const &rMessage) {
+	void OnError_(IError *pInterface, VString const &rMessage) OVERRIDE {
 	    cerr << "Error: " << rMessage << endl;
             onDone ();
 	}
@@ -366,12 +366,12 @@ namespace Vca {
 
 	//  Event Callbacks
 	private:
-	    void OnEvent_(IEvent* pEvent, IEvent* pProxy, VTime const& rTimestamp, VString const& rDescription);
-	    void OnEndEvent_(IEvent* pEvent, IEvent* pProxy, VTime const& rTimestamp);
-	    void OnErrorEvent_(IEvent* pEvent, IEvent* pProxy, VTime const& rTimestamp, IError* pInterface, VString const& rMessage);
-	    void OnFailureEvent_(IEvent* pEvent, IEvent* pProxy, VTime const& rTimestamp, IError* pInterface, VString const& rMessage);
+	    void OnEvent_(IEvent* pEvent, IEvent* pProxy, VTime const& rTimestamp, VString const& rDescription) OVERRIDE;
+	    void OnEndEvent_(IEvent* pEvent, IEvent* pProxy, VTime const& rTimestamp) OVERRIDE;
+	    void OnErrorEvent_(IEvent* pEvent, IEvent* pProxy, VTime const& rTimestamp, IError* pInterface, VString const& rMessage) OVERRIDE;
+	    void OnFailureEvent_(IEvent* pEvent, IEvent* pProxy, VTime const& rTimestamp, IError* pInterface, VString const& rMessage) OVERRIDE;
 
-	    void onCompletion_();
+	    void onCompletion_() OVERRIDE;
 
 	//  State
 	private:
@@ -389,7 +389,7 @@ namespace Vca {
 
     //  Activity Sink Callbacks
     private:
-	void createMonitorFor (VActivity *pActivity) const;
+	void createMonitorFor (VActivity *pActivity) const OVERRIDE;
     };
 }
 

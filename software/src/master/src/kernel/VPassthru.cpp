@@ -97,7 +97,7 @@ public:
 	//  IPassiveCall Callbacks
 	public:
 	    void GetUUID (IPassiveCall *pRole, IVReceiver<uuid_t const&> *pReceiver);
-	    void OnError_(IError *pInterface, VString const &rMessage);
+	    void OnError_(IError *pInterface, VString const &rMessage) OVERRIDE;
 
 	//  State
 	private:
@@ -117,7 +117,7 @@ public:
 
     //  Access
     protected:
-	void getDescription_(VString &rDescription) const;
+	void getDescription_(VString &rDescription) const OVERRIDE;
 
     //  Management
     protected:
@@ -138,7 +138,7 @@ private:
 
 //  Callbacks
 private:
-    bool start_();
+    bool start_() OVERRIDE;
 
 private:
     void onCallbackError (VString const &rMessage);

@@ -86,7 +86,7 @@ namespace Vsa {
 	//  Callbacks
 	private:
 	    void OnEvaluator (IEvaluator* pEvaluator);
-	    void OnError_(IError* pInterface, VString const& rMessage);
+	    void OnError_(IError* pInterface, VString const& rMessage) OVERRIDE;
 
 	//  State
 	private:
@@ -116,7 +116,7 @@ namespace Vsa {
 
 	//  Use
 	private:
-	    virtual void load (Fifo &rOutputFifo);
+	    void load (Fifo &rOutputFifo) OVERRIDE;
 
 	//  State
 	private:
@@ -134,7 +134,7 @@ namespace Vsa {
 
     //  Access/Query
     protected:
-	void getDescription_(VString &rResult) const;
+	void getDescription_(VString &rResult) const OVERRIDE;
     public:
 	IEvaluator* evaluator () const {
 	    return m_pPrompt->evaluator ();
@@ -145,15 +145,15 @@ namespace Vsa {
 
     //  VEvaluatorClient Callbacks
     public:
-	void OnAccept (IEvaluatorClient *pRole, IEvaluation *pEvaluation, Vca::U32 xQueuePosition) {
+	void OnAccept (IEvaluatorClient *pRole, IEvaluation *pEvaluation, Vca::U32 xQueuePosition) OVERRIDE {
 	    OnAccept_(pEvaluation, xQueuePosition);
 	}
-	void OnAccept_(IEvaluation *pEvaluation, Vca::U32 xQueuePosition);
-	void OnResult_(IEvaluationResult *pResult, VString const &rOutput);
+	void OnAccept_(IEvaluation *pEvaluation, Vca::U32 xQueuePosition) OVERRIDE;
+	void OnResult_(IEvaluationResult *pResult, VString const &rOutput) OVERRIDE;
 
     //  Value Callbacks
     protected:
-	void OnError_(IError* pInterface, VString const& rMessage);
+	void OnError_(IError* pInterface, VString const& rMessage) OVERRIDE;
 	void OnResultError (IError* pInterface, VString const& rMessage);
     private:
 	void OnEvaluator (IEvaluator* pEvaluator);
@@ -179,7 +179,7 @@ namespace Vsa {
 
     //  Monitoring
     private:
-	void monitorInterface (IVUnknown* pInterface);
+	void monitorInterface (IVUnknown* pInterface) OVERRIDE;
 	void cancelInterfaceMonitor();
 	void signalInterfaceMonitor ();
 	void cancelResultMonitor();
@@ -187,7 +187,7 @@ namespace Vsa {
 
     //  Update
     private:
-	virtual void load (Fifo &rOutputFifo);
+	virtual void load (Fifo &rOutputFifo) OVERRIDE;
 
     //  State
     private:

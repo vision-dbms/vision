@@ -55,7 +55,7 @@ namespace VcaApps {
 
     //  Startup
     private:
-	bool start_();
+	bool start_() OVERRIDE;
 
     public:
 	void sendNotice (Vca::IInfoServer *pInterface, int xType, VString  rTarget);

@@ -160,13 +160,13 @@ namespace Vsa {
 
     //  Shutdown
     private:
-        bool stop_(bool bHardStop);
+        bool stop_(bool bHardStop) OVERRIDE;
 
     //  Start
     private:
-        bool start_();
+        bool start_() OVERRIDE;
         void processCommandLineArgs (VString const &rServerName);
-        bool getDefaultServerName (VString &rServerName) const;
+        bool getDefaultServerName (VString &rServerName) const OVERRIDE;
 
     //  Utility
     public:

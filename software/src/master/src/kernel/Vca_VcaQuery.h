@@ -50,15 +50,15 @@ namespace Vsa {
 
     //  Startup
     private:
-	bool start_();
-	bool getDefaultServerName (VString &rServerName) const;
+	bool start_() OVERRIDE;
+	bool getDefaultServerName (VString &rServerName) const OVERRIDE;
 
     //  VEvaluatorClient Callbacks
     public:
-	void OnAccept_(IEvaluation *pEvaluation, Vca::U32 xQueuePosition);
-        void OnResult_(IEvaluationResult*, VString const&);
+	void OnAccept_(IEvaluation *pEvaluation, Vca::U32 xQueuePosition) OVERRIDE;
+        void OnResult_(IEvaluationResult*, VString const&) OVERRIDE;
 
-	void OnError_(Vca::IError*, VString const&);
+	void OnError_(Vca::IError*, VString const&) OVERRIDE;
 
     //  Evaluator Receiver
     private:

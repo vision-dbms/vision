@@ -82,14 +82,14 @@ namespace VcaSamples {
 
     //--->  (Other : Vca::IClient)
     private:
-	void OnError_(Vca::IError *pError, VString const &rMessage);
+	void OnError_(Vca::IError *pError, VString const &rMessage) OVERRIDE;
 
     //  Startup
     private:
-	bool start_();
+	bool start_() OVERRIDE;
 
 	void onPublication (IPublication *pPublication);
-	void onStandardInput (Vca::VBSProducer *pBS);
+	void onStandardInput (Vca::VBSProducer *pBS) OVERRIDE;
 
     //  Input Processing
     public:
