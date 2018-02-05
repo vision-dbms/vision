@@ -42,7 +42,7 @@ namespace Vxa {
 
     //  Access
     private:
-	virtual cardinality_t cardinality_() const {
+	cardinality_t cardinality_() const OVERRIDE {
 	    return cardinality ();
 	}
     public:
@@ -64,8 +64,10 @@ namespace Vxa {
 
     //  Method Invocation
     protected: //  Override of VCollection::invokeMethod_ ...
-	virtual bool invokeMethod_(VString const &rMethodName, VCallHandle const &rCallHandle) {
-	    return m_pClass->invokeMethod (rMethodName, rCallHandle, this);
+	bool invokeMethod_(
+            VString const &rMethodName, VCallHandle const &rCallHandle, cardinality_t cParameters, cardinality_t cTask
+        ) OVERRIDE {
+	    return m_pClass->invokeMethod (rMethodName, rCallHandle, cParameters, cTask, this);
 	}
 
     //  Transmission

@@ -60,7 +60,7 @@ namespace Vxa {
     //  Method Execution
     public:
 	bool invokeMethod (
-	    VString const &rName, VCallHandle const &rCallHandle, VCollection *pCollection
+	    VString const &rName, VCallHandle const &rCallHandle, cardinality_t cParameters, cardinality_t cTask, VCollection *pCollection
 	) const;
 
     //  State

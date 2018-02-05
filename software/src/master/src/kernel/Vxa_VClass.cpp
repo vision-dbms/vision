@@ -99,7 +99,7 @@ bool Vxa::VClass::defineMethod (VMethod *pMethod) {
  *******************************/
 
 bool Vxa::VClass::invokeMethod (
-    VString const &rName, VCallHandle const &rCallHandle, VCollection *pCollection
+    VString const &rName, VCallHandle const &rCallHandle, cardinality_t cParameters, cardinality_t cTask, VCollection *pCollection
 ) const {
     unsigned int xElement = UINT_MAX;
     return m_iDictionary.Locate (rName, xElement)
