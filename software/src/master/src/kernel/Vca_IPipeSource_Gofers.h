@@ -49,11 +49,11 @@ namespace Vca {
 
 	//  Callbacks
 	private:
-	    void onNeed () {
+	    void onNeed () OVERRIDE {
 		m_iAddress.materializeFor (this);
 		BaseClass::onNeed ();
 	    }
-	    void onData ();
+	    void onData () OVERRIDE;
 
 	//  State
 	private:
@@ -87,14 +87,14 @@ namespace Vca {
 
 	//  Callbacks
 	private:
-	    void onNeed () {
+	    void onNeed () OVERRIDE {
 		m_iCommand.materializeFor (this);
 		m_bPlumbingStdin.materializeFor (this);
 		m_bPlumbingStdout.materializeFor (this);
 		m_bPlumbingStderr.materializeFor (this);
 		BaseClass::onNeed ();
 	    }
-	    void onData ();
+	    void onData () OVERRIDE;
 
 	//  State
 	private:
@@ -130,7 +130,7 @@ namespace Vca {
 
 	//  Callbacks
 	private:
-	    void onNeed () {
+	    void onNeed () OVERRIDE {
 		m_iHost.materializeFor (this);
 		m_iLogin.materializeFor (this);
 		m_iPassword.materializeFor (this);
@@ -138,7 +138,7 @@ namespace Vca {
 		m_b3Pipe.materializeFor (this);
 		BaseClass::onNeed ();
 	    }
-	    void onData ();
+	    void onData () OVERRIDE;
 
 	//  State
 	private:
@@ -175,7 +175,7 @@ namespace Vca {
 
 	//  Callbacks
 	private:
-	    void onNeed () {
+	    void onNeed () OVERRIDE {
 		m_iHost.materializeFor (this);
 		m_iLogin.materializeFor (this);
 		m_iPassword.materializeFor (this);
@@ -183,7 +183,7 @@ namespace Vca {
 		m_b3Pipe.materializeFor (this);
 		BaseClass::onNeed ();
 	    }
-	    void onData ();
+	    void onData () OVERRIDE;
 
 	//  State
 	private:

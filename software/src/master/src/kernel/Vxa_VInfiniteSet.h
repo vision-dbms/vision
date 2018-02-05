@@ -29,7 +29,7 @@ namespace Vxa {
 
     //  Cardinality
     private:
-	cardinality_t cardinality_() const {
+	cardinality_t cardinality_() const OVERRIDE {
 	    return cardinality ();
 	}
     public:
@@ -39,8 +39,8 @@ namespace Vxa {
 
     //  Transmission
     protected:
-	bool transmitUsing_(VCallType2Exporter *pExporter, VMonotypeMapMaker *pMapMaker, object_reference_array_t const &rInjection);
-	bool transmitUsing_(VCallType2Exporter *pExporter, VMonotypeMapMaker *pMapMaker);
+	bool transmitUsing_(VCallType2Exporter *pExporter, VMonotypeMapMaker *pMapMaker, object_reference_array_t const &rInjection) OVERRIDE;
+	bool transmitUsing_(VCallType2Exporter *pExporter, VMonotypeMapMaker *pMapMaker) OVERRIDE;
     };
 }
 

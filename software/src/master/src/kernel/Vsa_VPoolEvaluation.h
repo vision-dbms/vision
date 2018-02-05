@@ -67,7 +67,7 @@ namespace Vsa {
 
     //  IEvaluation Role
     public:
-	void getRole (IEvaluation::Reference &rpRole);
+	void getRole (IEvaluation::Reference &rpRole) OVERRIDE;
 
     //  IPoolEvaluation Role
         void UseAnyGenerationWorker (IPoolEvaluation *pRole);
@@ -142,7 +142,7 @@ namespace Vsa {
             m_iValidGeneration = iGeneration;
         }
 
-	virtual void setRetryable (bool bRetryable) {
+	void setRetryable (bool bRetryable) OVERRIDE {
 	    m_bRetryable = bRetryable;
 	}
 

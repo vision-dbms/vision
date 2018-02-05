@@ -87,7 +87,7 @@ namespace Vca {
 	);
  	void OnError (
 	    IClient *pRole, IError *pError, VString const &rDescription
-	);
+	) OVERRIDE;
 
     //  Name Query
     public:

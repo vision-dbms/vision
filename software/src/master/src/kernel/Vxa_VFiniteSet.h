@@ -29,7 +29,7 @@ namespace Vxa {
 
     //  Cardinality
     private:
-	cardinality_t cardinality_() const {
+	cardinality_t cardinality_() const OVERRIDE {
 	    return cardinality ();
 	}
     public:

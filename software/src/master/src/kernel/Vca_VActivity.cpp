@@ -64,12 +64,11 @@ namespace Vca {
 
 	    //  Callbacks and Triggers
 	    private:
-		void onData ();
-
+		void onData () OVERRIDE;
 
 	    //  Gofering
 	    private:
-		Gofering* newGofering_() {
+		Gofering* newGofering_() OVERRIDE {
 		    return 0;
 		}
 

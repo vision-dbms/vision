@@ -50,15 +50,15 @@ namespace Vsa {
 
     //  Callbacks
     private:
-	void OnAccept_(Vsa::IEvaluation *pEvaluation, Vca::U32 xQueuePosition) {
+	void OnAccept_(Vsa::IEvaluation *pEvaluation, Vca::U32 xQueuePosition) OVERRIDE {
 	    if (m_pRUC)
 		m_pRUC->onAccept (pEvaluation, xQueuePosition);
 	}
-	void OnChange_(Vca::U32 xQueuePosition) {
+	void OnChange_(Vca::U32 xQueuePosition) OVERRIDE {
 	    if (m_pRUC)
 		m_pRUC->onChange (xQueuePosition);
 	}
-	void OnError_(Vca::IError *pInterface, VString const &rMessage) {
+	void OnError_(Vca::IError *pInterface, VString const &rMessage) OVERRIDE {
 	    if (m_pRUC) {
 		m_pRUC->onError (pInterface, rMessage);
 		m_pRUC.clear ();
@@ -66,7 +66,7 @@ namespace Vsa {
 		BaseClass::OnError_(pInterface, rMessage);
 	    }
 	}
-	void OnResult_(Vsa::IEvaluationResult *pResult, VString const &rOutput) {
+	void OnResult_(Vsa::IEvaluationResult *pResult, VString const &rOutput) OVERRIDE {
 	    if (m_pRUC) {
 		m_pRUC->onResult (pResult, rOutput);
 		m_pRUC.clear ();

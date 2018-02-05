@@ -38,7 +38,7 @@ namespace Vca {
 
     //  Monitoring
     public:
-	void createMonitorFor (VActivity* pActivity) const;
+	void createMonitorFor (VActivity* pActivity) const OVERRIDE;
     };
 }
 

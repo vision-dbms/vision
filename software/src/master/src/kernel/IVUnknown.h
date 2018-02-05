@@ -1111,13 +1111,13 @@ namespace Vca {
 
     //  Access
     protected:
-        IVUnknown *interface_() const {
+        IVUnknown *interface_() const OVERRIDE {
             return m_rpI;
         }
 
     //  Update
     private:
-        inline void setInterfaceTo_(IVUnknown *pIVUnknown);
+        inline void setInterfaceTo_(IVUnknown *pIVUnknown) OVERRIDE;
 
     //  State
     protected:
@@ -1202,25 +1202,25 @@ namespace Vca {
 
 //  Message Handling
     private:
-        virtual bool defersTo (VMessageScheduler &rScheduler) {
+        bool defersTo (VMessageScheduler &rScheduler) OVERRIDE {
             return m_pOIDX->defersTo (rScheduler);
         }
 
 //  Connectivity
 private:
-    virtual /*override*/ bool isConnected_() const {
+    bool isConnected_() const OVERRIDE {
 	return m_pOIDX.isConnected ();
     }
-    virtual /*override*/ bool isUsable_() const {
+    bool isUsable_() const OVERRIDE {
 	return m_pOIDX.isUsable ();
     }
 
 //  OID
     private:
-        VcaOIDR *oidr_() const {
+        VcaOIDR *oidr_() const OVERRIDE {
             return oidr ();
         }
-        VcaOIDX *oidx_() const {
+        VcaOIDX *oidx_() const OVERRIDE {
             return oidx ();
         }
     protected:

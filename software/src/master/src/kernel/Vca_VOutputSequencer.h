@@ -131,7 +131,7 @@ namespace Vca {
 
 	//  Use
 	private:
-	    virtual void load (Fifo &rOutputFifo);
+	    void load (Fifo &rOutputFifo) OVERRIDE;
 	};
 
     /*-----------------------------*
@@ -152,7 +152,7 @@ namespace Vca {
 
 	//  Use
 	private:
-	    virtual void load (Fifo &rOutputFifo);
+	    void load (Fifo &rOutputFifo) OVERRIDE;
 	};
 
     /*-----------------------*
@@ -173,7 +173,7 @@ namespace Vca {
 
 	//  Use
 	private:
-	    virtual void load (Fifo &rOutputFifo);
+	    void load (Fifo &rOutputFifo) OVERRIDE;
 
 	//  State
 	private:
@@ -198,7 +198,7 @@ namespace Vca {
 
 	//  Use
 	private:
-	    virtual void load (Fifo &rOutputFifo);
+	    void load (Fifo &rOutputFifo) OVERRIDE;
 
 	//  State
 	private:
@@ -230,7 +230,7 @@ namespace Vca {
 
     //  IClient Methods
     public/*private*/:
-	void OnError (IClient *pRole, IError *pError, VString const &rMessage);
+	void OnError (IClient *pRole, IError *pError, VString const &rMessage) OVERRIDE;
 
     //  Access/Query
     public:
@@ -265,8 +265,8 @@ namespace Vca {
 	void queue (Output *pOutput);
 	void start (Output *pOutput);
 
-	virtual void schedule_();
-	virtual void run_();
+	void schedule_() OVERRIDE;
+	void run_() OVERRIDE;
 
     //  Event Management
     public:

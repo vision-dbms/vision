@@ -209,11 +209,11 @@ namespace Vxa {
 
     //  Access
     private:
-	IVUnknown *caller () const;
+	IVUnknown *caller () const OVERRIDE;
 
     //  Invocation
     public:
-	virtual bool invoke (VMethod *pMethod, VCollection *pCluster) const;
+	bool invoke (VMethod *pMethod, VCollection *pCluster) const OVERRIDE;
 	bool start (VTask *pTask) const;
 
     //  Parameter Acquisition

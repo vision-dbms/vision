@@ -312,8 +312,8 @@ namespace Vca {
 	void onConnectorError (IError *pInterface, VString const &rMessage);
 	void onConnector (IPassiveConnector *pConnector);
 
-	void onAck_();
-	void onNack_();
+	void onAck_() OVERRIDE;
+	void onNack_() OVERRIDE;
 
 	void saySomething (char const *pWhat) const;
 
@@ -494,8 +494,8 @@ namespace Vca {
 
     //  Callbacks
     private:
-	void onAck_();
-	void onNack_();
+	void onAck_() OVERRIDE;
+	void onNack_() OVERRIDE;
     private:
 	void onForwarder (INeedYou *pINeedYou);
 
@@ -674,7 +674,7 @@ namespace Vca {
  
 	//  IClient Related Methods
 	private:
-	    void OnError_(IError* pInterface, VString const& rMessage) {
+	    void OnError_(IError* pInterface, VString const& rMessage) OVERRIDE {
 		m_pClient->onProcessInfoError (pInterface, rMessage);
 	    }
 
@@ -694,13 +694,13 @@ namespace Vca {
 
     //  Requests
     private:
-	void onAuthoritativeSourceNeeded_();
-	void onPIDNeeded_();
-	void onUIDNeeded_();
-	void onGIDNeeded_();
-	void onHostNameNeeded_();
-	void onUserNameNeeded_();
-	void onGroupNameNeeded_();
+	void onAuthoritativeSourceNeeded_() OVERRIDE;
+	void onPIDNeeded_() OVERRIDE;
+	void onUIDNeeded_() OVERRIDE;
+	void onGIDNeeded_() OVERRIDE;
+	void onHostNameNeeded_() OVERRIDE;
+	void onUserNameNeeded_() OVERRIDE;
+	void onGroupNameNeeded_() OVERRIDE;
     private:
 	void requestProcessInfo ();
 

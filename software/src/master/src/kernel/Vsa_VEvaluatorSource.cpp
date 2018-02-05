@@ -83,8 +83,8 @@ namespace Vsa {
     public:
 	void OnError (
 	    Vca::IClient *pRole, Vca::IError *pError, VString const &rMessage
-	);
-	void OnEnd (Vca::IClient *pRole);
+	) OVERRIDE;
+	void OnEnd (Vca::IClient *pRole) OVERRIDE;
 
     //  EKG
     private:

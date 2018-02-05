@@ -93,7 +93,7 @@ namespace Vsa {
 
         //  Role Player Overrides
         private:
-            void OnError_(Vca::IError *pError, VString const &rMessage) {
+            void OnError_(Vca::IError *pError, VString const &rMessage) OVERRIDE {
                 m_pStringSink->OnError (pError, rMessage);
             }
 

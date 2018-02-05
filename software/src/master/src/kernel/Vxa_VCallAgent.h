@@ -136,11 +136,11 @@ namespace Vxa {
 
 	//  Callbacks
 	private:
-	    virtual bool createFromIntegers (i32_array_t const &rValues, VCallAgent *pAgent) {
+	    bool createFromIntegers (i32_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
 		BaseClass::setResultTo (new VBooleanParameter<i32_array_t> (BaseClass::type (), rValues, pAgent->taskCursor ()));
 		return true;
 	    }
-	    virtual bool createFromDoubles (f64_array_t const &rValues, VCallAgent *pAgent) {
+	    bool createFromDoubles (f64_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
 		BaseClass::setResultTo (new VBooleanParameter<f64_array_t> (BaseClass::type (), rValues, pAgent->taskCursor ()));
 		return true;
 	    }
@@ -167,11 +167,11 @@ namespace Vxa {
 
 	//  Callbacks
 	private:
-	    virtual bool createFromIntegers (i32_array_t const &rValues, VCallAgent *pAgent) {
+	    bool createFromIntegers (i32_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
 		BaseClass::setResultTo (new VParameter<scalar_return_t,i32_array_t> (BaseClass::type (), rValues, pAgent->taskCursor ()));
 		return true;
 	    }
-	    virtual bool createFromDoubles (f64_array_t const &rValues, VCallAgent *pAgent) {
+	    bool createFromDoubles (f64_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
 		BaseClass::setResultTo (new VParameter<scalar_return_t,f64_array_t> (BaseClass::type (), rValues, pAgent->taskCursor ()));
 		return true;
 	    }
@@ -198,7 +198,7 @@ namespace Vxa {
 
 	//  Callbacks
 	private:
-	    virtual bool createFromStrings (str_array_t const &rValues, VCallAgent *pAgent) {
+	    bool createFromStrings (str_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
 		BaseClass::setResultTo (new VParameter<scalar_return_t,str_array_t> (BaseClass::type (), rValues, pAgent->taskCursor ()));
 		return true;
 	    }
@@ -359,29 +359,29 @@ namespace Vxa {
 
     //  Implementation
     private:
-	virtual bool onParameterRequest (VTask *pTask, unsigned int xParameter) const {
+	bool onParameterRequest (VTask *pTask, unsigned int xParameter) const OVERRIDE {
 	    return m_iHandle.onParameterRequest (pTask, xParameter);
 	}
-	virtual bool onParameterReceipt (VTask *pTask, unsigned int xParameter) const {
+	bool onParameterReceipt (VTask *pTask, unsigned int xParameter) const OVERRIDE {
 	    return m_iHandle.onParameterReceipt (pTask, xParameter);
 	}
 
-	virtual bool raiseParameterTypeException (
+	bool raiseParameterTypeException (
 	    std::type_info const &rOriginatingType, std::type_info const &rResultType
-	) const {
+	) const OVERRIDE {
 	    return m_iHandle.raiseParameterTypeException (rOriginatingType, rResultType);
 	}
-	virtual bool raiseUnimplementedOperationException (
+	bool raiseUnimplementedOperationException (
 	    std::type_info const &rOriginatingType, char const *pWhere
-	) const {
+	) const OVERRIDE {
 	    return m_iHandle.raiseUnimplementedOperationException (rOriginatingType, pWhere);
 	}
 
-	virtual void reportCompletion () const {
+	void reportCompletion () const OVERRIDE {
 	    return m_iHandle.reportCompletion ();
 	}
 
-	virtual bool returnError_(VString const &rMessage) const {
+	bool returnError_(VString const &rMessage) const OVERRIDE {
 	    return m_iHandle.returnError (rMessage);
 	}
 

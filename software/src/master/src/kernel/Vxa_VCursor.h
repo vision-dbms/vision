@@ -68,7 +68,7 @@ namespace Vxa {
 
 	//  Access
 	private:
-	    cardinality_t upperBound_() const {
+	    cardinality_t upperBound_() const OVERRIDE {
 		return upperBound ();
 	    }
 	public:

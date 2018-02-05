@@ -81,8 +81,8 @@ namespace Vsa {
 
 			//  Implementation
 		protected:
-			virtual void parseSessionsFile (char const *pConfigFile, SessionType iType);
-			virtual bool insertSession (Session *pSession);
+			void parseSessionsFile (char const *pConfigFile, SessionType iType) OVERRIDE;
+			bool insertSession (Session *pSession) OVERRIDE;
 			
 			bool parsePoolSessionTemplate (VSimpleFile &rSessionsFile, SessionType iType, VReference<Session> &rpSession) const;
 			
@@ -90,7 +90,7 @@ namespace Vsa {
 
 		//  Query
 		protected:
-			virtual bool includeIfTagAccepted (char const *pTag) const;    
+			bool includeIfTagAccepted (char const *pTag) const OVERRIDE;
 	};
     //  Construction
     public:
@@ -101,7 +101,7 @@ namespace Vsa {
 	~VsaDirectoryBuilder ();
 
     public:
-	virtual void build (Vca::VDirectory *pDirectory);
+	void build (Vca::VDirectory *pDirectory) OVERRIDE;
     };
 }
 

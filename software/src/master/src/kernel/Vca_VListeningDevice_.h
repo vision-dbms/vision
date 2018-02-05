@@ -44,29 +44,29 @@ namespace Vca {
 
     //  Face Implementation
     private:
-	VDevice *device_() {
+	VDevice *device_() OVERRIDE {
 	    return this;
 	}
-	bool getName_(VkStatus &rStatus, VString &rName) {
+	bool getName_(VkStatus &rStatus, VString &rName) OVERRIDE {
 	    return static_cast<BaseClass*>(this)->getName (rStatus, rName);
 	}
-	bool start_(VkStatus &rStatus, VDevice::Listener *pUser) {
+	bool start_(VkStatus &rStatus, VDevice::Listener *pUser) OVERRIDE {
 	    VReference<Accept> pUse (new Accept (this));
 	    return pUse->start (rStatus, pUser);
 	}
 
     //  User Accounting
     private:
-	void onFirstUser_(VDevice::ListenFace *pFace) {
+	void onFirstUser_(VDevice::ListenFace *pFace) OVERRIDE {
 	    static_cast<Implementation*>(this)->onFirstListener ();
 	}
-	void onFinalUser_(VDevice::ListenFace *pFace) {
+	void onFinalUser_(VDevice::ListenFace *pFace) OVERRIDE {
 	    static_cast<Implementation*>(this)->onFinalListener ();
 	}
 
     //  User Creation
     private:
-	bool supplyListener_(VReference<VListener>&rpUser) {
+	bool supplyListener_(VReference<VListener>&rpUser) OVERRIDE {
 	    return static_cast<VDevice::ListenFace*>(this)->supply (rpUser);
 	}
     };

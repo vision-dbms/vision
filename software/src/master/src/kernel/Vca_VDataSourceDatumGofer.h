@@ -53,12 +53,12 @@ namespace Vca {
 
     //  Callbacks
     private:
-	void onNeed () {
+	void onNeed () OVERRIDE {
 	//  Get the value producer...
 	    m_pIValueProducer.materializeFor (this);
 	    BaseClass::onNeed ();
 	}
-	void onData () {
+	void onData () OVERRIDE {
 	//  and when the value producer is available, ask it for a value...
 	    typename IValueConsumer::Reference pIValueConsumer (
 		new ValueReceiver (this, &ThisClass::onValue, &ThisClass::onErroR)

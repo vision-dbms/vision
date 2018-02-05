@@ -37,11 +37,11 @@ namespace Vca {
     private:
 	void supplyDirective_(
 	    VString &rDirective, VString const &rDirectivePrefix, CallData const &rCallData
-	) const;
+	) const OVERRIDE;
 
     //  Use
     private:
-	void processCallbackRequest (CallData const &rCallData);
+	void processCallbackRequest (CallData const &rCallData) OVERRIDE;
 
     //  State
     private:

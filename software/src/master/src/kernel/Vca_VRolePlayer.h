@@ -24,12 +24,15 @@
  *****  Definitions  *****
  *************************/
 
-#define DECLARE_ROLEPLAYER_CLASSINFO()\
+#define DECLARE_ROLEPLAYER_CLASSINFO_BASE(ORIDE)\
 public:\
-    virtual Vca::VClassInfoHolder &classInfo () const {\
+    virtual Vca::VClassInfoHolder &classInfo () const ORIDE {\
 	return ClassInfo ();\
     }\
     static Vca::VClassInfoHolder &ClassInfo ()
+
+#define DECLARE_ROLEPLAYER_CLASSINFO()\
+    DECLARE_ROLEPLAYER_CLASSINFO_BASE(OVERRIDE)
 
 namespace Vca {
     template <class Interface_T> class VGoferInterface;
@@ -46,7 +49,9 @@ namespace Vca {
      */
     class Vca_API VRolePlayer : public virtual VReferenceable {
         DECLARE_ABSTRACT_RTTLITE (VRolePlayer, VReferenceable);
-	DECLARE_ROLEPLAYER_CLASSINFO ();
+#define NOT_AN_OVERRIDE
+	DECLARE_ROLEPLAYER_CLASSINFO_BASE (NOT_AN_OVERRIDE);
+#undef NOT_AN_OVERRIDE
 
         friend class VRoleHolder;
 

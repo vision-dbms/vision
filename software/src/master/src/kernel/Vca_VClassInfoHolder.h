@@ -252,24 +252,24 @@ namespace Vca {
 		return GetContainer (pCastContainer, pContainer) && SetResult (pResultSink, (pCastContainer->*m_pAccessor)().value ());
 	    }
 	public:
-	    bool getTrackableValue (IClient *pValueSink, ITicketSink *pTicketSink, VRolePlayer *pContainer) const {
+	    bool getTrackableValue (IClient *pValueSink, ITicketSink *pTicketSink, VRolePlayer *pContainer) const OVERRIDE {
 		Container_T *pCastContainer = 0;
 		return GetContainer (pCastContainer, pContainer)
 		    && (pCastContainer->*m_pAccessor)().supplyAndTrack (dynamic_cast<IValueSink*>(pValueSink), pTicketSink);
 	    }
-	    bool getValue (IVReceiver<VString const&> *pResultSink, VRolePlayer *pContainer) const {
+	    bool getValue (IVReceiver<VString const&> *pResultSink, VRolePlayer *pContainer) const OVERRIDE {
 		return getValueImpl (pResultSink, pContainer);
 	    }
-	    bool getValue (IVReceiver<unsigned int> *pResultSink, VRolePlayer *pContainer) const {
+	    bool getValue (IVReceiver<unsigned int> *pResultSink, VRolePlayer *pContainer) const OVERRIDE {
 		return getValueImpl (pResultSink, pContainer);
 	    }
-	    bool getValue (IVReceiver<unsigned __int64> *pResultSink, VRolePlayer *pContainer) const {
+	    bool getValue (IVReceiver<unsigned __int64> *pResultSink, VRolePlayer *pContainer) const OVERRIDE {
 		return getValueImpl (pResultSink, pContainer);
 	    }
-	    bool getValue (IVReceiver<float> *pResultSink, VRolePlayer *pContainer) const {
+	    bool getValue (IVReceiver<float> *pResultSink, VRolePlayer *pContainer) const OVERRIDE {
 		return getValueImpl (pResultSink, pContainer);
 	    }
-	    bool getValue (IVReceiver<double> *pResultSink, VRolePlayer *pContainer) const {
+	    bool getValue (IVReceiver<double> *pResultSink, VRolePlayer *pContainer) const OVERRIDE {
 		return getValueImpl (pResultSink, pContainer);
 	    }
 
@@ -434,19 +434,19 @@ namespace Vca {
 		return GetContainer (pCastContainer, pContainer) && SetResult (pResultSink, (pCastContainer->*m_pAccessor)());
 	    }
 	public:
-	    bool getValue (IVReceiver<VString const&> *pResultSink, VRolePlayer *pContainer) const {
+	    bool getValue (IVReceiver<VString const&> *pResultSink, VRolePlayer *pContainer) const OVERRIDE {
 		return getValueImpl (pResultSink, pContainer);
 	    }
-	    bool getValue (IVReceiver<unsigned int> *pResultSink, VRolePlayer *pContainer) const {
+	    bool getValue (IVReceiver<unsigned int> *pResultSink, VRolePlayer *pContainer) const OVERRIDE {
 		return getValueImpl (pResultSink, pContainer);
 	    }
-	    bool getValue (IVReceiver<unsigned __int64> *pResultSink, VRolePlayer *pContainer) const {
+	    bool getValue (IVReceiver<unsigned __int64> *pResultSink, VRolePlayer *pContainer) const OVERRIDE {
 		return getValueImpl (pResultSink, pContainer);
 	    }
-	    bool getValue (IVReceiver<float> *pResultSink, VRolePlayer *pContainer) const {
+	    bool getValue (IVReceiver<float> *pResultSink, VRolePlayer *pContainer) const OVERRIDE {
 		return getValueImpl (pResultSink, pContainer);
 	    }
-	    bool getValue (IVReceiver<double> *pResultSink, VRolePlayer *pContainer) const {
+	    bool getValue (IVReceiver<double> *pResultSink, VRolePlayer *pContainer) const OVERRIDE {
 		return getValueImpl (pResultSink, pContainer);
 	    }
 
@@ -486,19 +486,19 @@ namespace Vca {
 		return SetResult (pResultSink, (*m_pAccessor)());
 	    }
 	public:
-	    bool getValue (IVReceiver<VString const&> *pResultSink, VRolePlayer *pContainer) const {
+	    bool getValue (IVReceiver<VString const&> *pResultSink, VRolePlayer *pContainer) const OVERRIDE {
 		return getValueImpl (pResultSink, pContainer);
 	    }
-	    bool getValue (IVReceiver<unsigned int> *pResultSink, VRolePlayer *pContainer) const {
+	    bool getValue (IVReceiver<unsigned int> *pResultSink, VRolePlayer *pContainer) const OVERRIDE {
 		return getValueImpl (pResultSink, pContainer);
 	    }
-	    bool getValue (IVReceiver<unsigned __int64> *pResultSink, VRolePlayer *pContainer) const {
+	    bool getValue (IVReceiver<unsigned __int64> *pResultSink, VRolePlayer *pContainer) const OVERRIDE {
 		return getValueImpl (pResultSink, pContainer);
 	    }
-	    bool getValue (IVReceiver<float> *pResultSink, VRolePlayer *pContainer) const {
+	    bool getValue (IVReceiver<float> *pResultSink, VRolePlayer *pContainer) const OVERRIDE {
 		return getValueImpl (pResultSink, pContainer);
 	    }
-	    bool getValue (IVReceiver<double> *pResultSink, VRolePlayer *pContainer) const {
+	    bool getValue (IVReceiver<double> *pResultSink, VRolePlayer *pContainer) const OVERRIDE {
 		return getValueImpl (pResultSink, pContainer);
 	    }
 
@@ -653,19 +653,19 @@ namespace Vca {
 		return true;
 	    }
 	public:
-	    bool getValue (IVReceiver<VString const&> *pResultSink, VRolePlayer *pContainer) const {
+	    bool getValue (IVReceiver<VString const&> *pResultSink, VRolePlayer *pContainer) const OVERRIDE {
 		return getValueImpl (pResultSink, pContainer);
 	    }
-	    bool getValue (IVReceiver<unsigned int> *pResultSink, VRolePlayer *pContainer) const {
+	    bool getValue (IVReceiver<unsigned int> *pResultSink, VRolePlayer *pContainer) const OVERRIDE {
 		return getValueImpl (pResultSink, pContainer);
 	    }
-	    bool getValue (IVReceiver<unsigned __int64> *pResultSink, VRolePlayer *pContainer) const {
+	    bool getValue (IVReceiver<unsigned __int64> *pResultSink, VRolePlayer *pContainer) const OVERRIDE {
 		return getValueImpl (pResultSink, pContainer);
 	    }
-	    bool getValue (IVReceiver<float> *pResultSink, VRolePlayer *pContainer) const {
+	    bool getValue (IVReceiver<float> *pResultSink, VRolePlayer *pContainer) const OVERRIDE {
 		return getValueImpl (pResultSink, pContainer);
 	    }
-	    bool getValue (IVReceiver<double> *pResultSink, VRolePlayer *pContainer) const {
+	    bool getValue (IVReceiver<double> *pResultSink, VRolePlayer *pContainer) const OVERRIDE {
 		return getValueImpl (pResultSink, pContainer);
 	    }
 
@@ -710,19 +710,19 @@ namespace Vca {
  		return true;
 	    }
 	public:
-	    bool getValue (IVReceiver<VString const&> *pResultSink, VRolePlayer *pContainer) const {
+	    bool getValue (IVReceiver<VString const&> *pResultSink, VRolePlayer *pContainer) const OVERRIDE {
 		return getValueImpl (pResultSink, pContainer);
 	    }
-	    bool getValue (IVReceiver<unsigned int> *pResultSink, VRolePlayer *pContainer) const {
+	    bool getValue (IVReceiver<unsigned int> *pResultSink, VRolePlayer *pContainer) const OVERRIDE {
 		return getValueImpl (pResultSink, pContainer);
 	    }
-	    bool getValue (IVReceiver<unsigned __int64> *pResultSink, VRolePlayer *pContainer) const {
+	    bool getValue (IVReceiver<unsigned __int64> *pResultSink, VRolePlayer *pContainer) const OVERRIDE {
 		return getValueImpl (pResultSink, pContainer);
 	    }
-	    bool getValue (IVReceiver<float> *pResultSink, VRolePlayer *pContainer) const {
+	    bool getValue (IVReceiver<float> *pResultSink, VRolePlayer *pContainer) const OVERRIDE {
 		return getValueImpl (pResultSink, pContainer);
 	    }
-	    bool getValue (IVReceiver<double> *pResultSink, VRolePlayer *pContainer) const {
+	    bool getValue (IVReceiver<double> *pResultSink, VRolePlayer *pContainer) const OVERRIDE {
 		return getValueImpl (pResultSink, pContainer);
 	    }
 

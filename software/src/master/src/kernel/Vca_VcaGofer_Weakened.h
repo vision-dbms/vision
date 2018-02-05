@@ -34,11 +34,11 @@ namespace Vca {
 
 	//  Callbacks
 	private:
-	    void onNeed () {
+	    void onNeed () OVERRIDE {
 		m_iSource.materializeFor (this);
 		BaseClass::onNeed ();
 	    }
-	    void onData () {
+	    void onData () OVERRIDE {
 		if (m_iSource)
 		    m_iSource->weakenImport ();
 		BaseClass::setTo (m_iSource);

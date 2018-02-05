@@ -80,12 +80,12 @@ namespace Vca {
 		BaseClass::setTo (pRequest);
 	    }
 	private:
-	    void onNeed () {
+	    void onNeed () OVERRIDE {
 		m_pSource.materializeFor (this);
 		m_pSink.materializeFor (this);
 		BaseClass::onNeed ();
 	    }
-	    void onData () {
+	    void onData () OVERRIDE {
 		IRequestSink::Reference pRequestSink;
 		m_pIRequestSink.getRole (pRequestSink);
 		submit (pRequestSink, m_pSource, m_pSink);

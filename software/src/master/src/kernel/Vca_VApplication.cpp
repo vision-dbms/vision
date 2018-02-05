@@ -134,7 +134,7 @@ namespace Vca {
 
     //  Description
     protected:
-	void getDescription_(VString& rResult) const;
+	void getDescription_(VString& rResult) const OVERRIDE;
 
     //  State
     private:

@@ -74,6 +74,11 @@
  *                                keyword is valid.  Defined in this file unless
  *                                a platform specific "Vp.h" file already sets
  *                                it, typically because it isn't supported.
+ *      REGISTER                - a macro typically set to the C 'register'
+ *                                keyword and intended for use wherever that
+ *                                keyword is valid.  Defined in this file unless
+ *                                a platform specific "Vp.h" file already sets
+ *                                it, typically because its use is deprecated.
  *
  *	BOGUS_TEMPLATE		- 'template' or empty for platform specific
  *				  bogus error suppression.  Defined in Vp.h
@@ -116,6 +121,10 @@
 
 #ifndef FINAL
 #define FINAL final
+#endif
+
+#ifndef REGISTER
+#define REGISTER register
 #endif
 
 #ifndef BOGUS_TEMPLATE

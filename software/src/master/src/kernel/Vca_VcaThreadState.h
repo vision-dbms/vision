@@ -117,7 +117,7 @@ namespace Vca {
          */
 	static Reference Here ();
     private:
-	virtual void onThreadDetach ();
+	void onThreadDetach () OVERRIDE;
 
     //  State
     private:

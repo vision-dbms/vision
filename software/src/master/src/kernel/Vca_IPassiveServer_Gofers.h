@@ -82,11 +82,11 @@ namespace Vca {
 
 	//  Callbacks
 	protected:
-	    void onNeed () {
+	    void onNeed () OVERRIDE {
 		m_iCommand.materializeFor (this);
 		BaseClass::onNeed ();
 	    }
-	    void onData () {
+	    void onData () OVERRIDE {
 		IPassiveServer::Reference pIPassiveServer;
 		(new Server (m_iCommand))->getRole (pIPassiveServer);
 		setTo (pIPassiveServer);

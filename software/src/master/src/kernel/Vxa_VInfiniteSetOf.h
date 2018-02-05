@@ -37,7 +37,7 @@ namespace Vxa {
 
     //  Description
     protected:
-	VString &getDescription_(VString &rResult) const {
+	VString &getDescription_(VString &rResult) const OVERRIDE {
 	    rResult << "SetOf<";
 	    return m_pType->getDescription (rResult) << ">";
 	}

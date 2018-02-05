@@ -99,7 +99,7 @@ namespace V {
 
     //  Access
     private:
-        virtual Thread *thread_() const {
+        Thread *thread_() const OVERRIDE {
             return const_cast<VThread*>(this);
         }
     public:

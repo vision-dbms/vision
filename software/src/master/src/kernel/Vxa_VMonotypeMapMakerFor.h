@@ -51,11 +51,11 @@ namespace Vxa {
 
     //  Transmission
     public:
-	bool transmitValues_(VCallType2Exporter *pExporter, VCollection *pCluster, object_reference_array_t const &rInjection);
-	bool transmitValues_(VCallType2Exporter *pExporter, VCollection *pCluster);
+	bool transmitValues_(VCallType2Exporter *pExporter, VCollection *pCluster, object_reference_array_t const &rInjection) OVERRIDE;
+	bool transmitValues_(VCallType2Exporter *pExporter, VCollection *pCluster) OVERRIDE;
 
-	bool transmitValues_(VCallType2Exporter *pExporter, object_reference_array_t const &rInjection);
-	bool transmitValues_(VCallType2Exporter *pExporter);
+	bool transmitValues_(VCallType2Exporter *pExporter, object_reference_array_t const &rInjection) OVERRIDE;
+	bool transmitValues_(VCallType2Exporter *pExporter) OVERRIDE;
 	
     //  Update
     public:

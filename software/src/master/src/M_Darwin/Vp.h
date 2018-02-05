@@ -36,6 +36,7 @@
 #define gethostid		Vk_gethostid
 
 #define USING(x) using x;
+#define REGISTER
 
 #ifndef DECLSPEC_DLLEXPORT
 #define DECLSPEC_DLLEXPORT

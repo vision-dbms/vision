@@ -371,76 +371,76 @@ namespace Vca {
 
     //  Face Implementation
     private:
-	VDevice *device_() {
+	VDevice *device_() OVERRIDE {
 	    return this;
 	}
-	bool getName_(VkStatus &rStatus, VString &rName) {
+	bool getName_(VkStatus &rStatus, VString &rName) OVERRIDE {
 	    return static_cast<BaseClass*>(this)->getName (rStatus, rName);
 	}
 	bool start_(
 	    VkStatus &rStatus, VDeviceBSReader *pUser, VDeviceBSReadArea const &rArea
-	) {
+	) OVERRIDE {
 	    typename Get::Reference pUse (new Get (this));
 	    return pUse->start (rStatus, pUser, rArea);
 	}
 	bool start_(
 	    VkStatus &rStatus, VDeviceBSWriter *pUser, VDeviceBSWriteArea const &rArea
-	) {
+	) OVERRIDE {
 	    typename Put::Reference pUse (new Put (this));
 	    return pUse->start (rStatus, pUser, rArea);
 	}
         bool start_(
 	    VkStatus &rStatus, VDeviceBSWriter *pUser
-        ) {
+        ) OVERRIDE {
 	    VReference<WritePoll> pUse (new WritePoll (this));
 	    return pUse->start (rStatus, pUser);
         }
         bool start_(
 	    VkStatus &rStatus, VDeviceBSReader *pUser
-        ) {
+        ) OVERRIDE {
 	    VReference<ReadPoll> pUse (new ReadPoll (this));
 	    return pUse->start (rStatus, pUser);
         }
-	bool start_(VkStatus &rStatus, VDevice::Listener *pUser) {
+	bool start_(VkStatus &rStatus, VDevice::Listener *pUser) OVERRIDE {
 	    typename Accept::Reference pUse (new Accept (this));
 	    return pUse->start (rStatus, pUser);
 	}
 
     //  User Accounting
     private:
-	void onFirstUser_(VDevice::BSReadFace *pFace) {
+	void onFirstUser_(VDevice::BSReadFace *pFace) OVERRIDE {
 	    static_cast<Implementation*>(this)->onFirstReader ();
 	}
-	void onFinalUser_(VDevice::BSReadFace *pFace) {
+	void onFinalUser_(VDevice::BSReadFace *pFace) OVERRIDE {
 	    static_cast<Implementation*>(this)->onFinalReader ();
 	}
 
-	void onFirstUser_(VDevice::BSWriteFace *pFace) {
+	void onFirstUser_(VDevice::BSWriteFace *pFace) OVERRIDE {
 	    static_cast<Implementation*>(this)->onFirstWriter ();
 	}
-	void onFinalUser_(VDevice::BSWriteFace *pFace) {
+	void onFinalUser_(VDevice::BSWriteFace *pFace) OVERRIDE {
 	    static_cast<Implementation*>(this)->onFinalWriter ();
 	}
 
-	void onFirstUser_(VDevice::ListenFace *pFace) {
+	void onFirstUser_(VDevice::ListenFace *pFace) OVERRIDE {
 	    static_cast<Implementation*>(this)->onFirstListener ();
 	}
-	void onFinalUser_(VDevice::ListenFace *pFace) {
+	void onFinalUser_(VDevice::ListenFace *pFace) OVERRIDE {
 	    static_cast<Implementation*>(this)->onFinalListener ();
 	}
 
     //  User Creation
     private:
-	bool supplyBSProducer_(VBSProducer::Reference &rpUser) {
+	bool supplyBSProducer_(VBSProducer::Reference &rpUser) OVERRIDE {
 	    return static_cast<VDevice::BSReadFace*>(this)->supply (rpUser);
 	}
-	bool supplyBSConsumer_(VBSConsumer::Reference &rpUser) {
+	bool supplyBSConsumer_(VBSConsumer::Reference &rpUser) OVERRIDE {
 	    return static_cast<VDevice::BSWriteFace*>(this)->supply (rpUser);
 	}
-	bool supplyConnection_(VConnection::Reference &rpUser) {
+	bool supplyConnection_(VConnection::Reference &rpUser) OVERRIDE {
 	    return static_cast<VDevice::BSReadFace*>(this)->supply (rpUser);
 	}
-	bool supplyListener_(VListener::Reference &rpUser) {
+	bool supplyListener_(VListener::Reference &rpUser) OVERRIDE {
 	    return static_cast<VDevice::ListenFace*>(this)->supply (rpUser);
 	}
 
@@ -7465,8 +7465,8 @@ namespace Vca {
 
 	//  Event Processing
 	private:
-	    virtual /*override*/ bool postInterrupt_();
-	    virtual /*override*/ bool processEvent_(size_t sTimeout);
+	    bool postInterrupt_() OVERRIDE;
+	    bool processEvent_(size_t sTimeout) OVERRIDE;
 
 	//  Suppliers
 	public:

@@ -293,23 +293,23 @@ namespace Vca {
 
 	//  Query
 	public:
-	    bool holdsDatum_(Val_T iValue) const {
+	    bool holdsDatum_(Val_T iValue) const OVERRIDE {
 		return iValue == m_iValue;
 	    }
 	private:
-	    virtual bool isDatum_() const {
+	    bool isDatum_() const OVERRIDE {
 		return true;
 	    }
 
 	//  Use
 	private:
-	    virtual void setDatum_(source_t *pSource, Val_T iValue) {
+	    void setDatum_(source_t *pSource, Val_T iValue) OVERRIDE {
 		m_iValue = iValue;
 	    }
             /**
              * Performs validation and returns false upon failure; otherwise, passes value to rSink and returns true.
              */
-	    virtual bool supply_(source_t *pSource, sink_t const &rSink) {
+	    bool supply_(source_t *pSource, sink_t const &rSink) OVERRIDE {
 		if (!pSource->validatesDatum (m_iValue))
 		    return false;
 
@@ -360,17 +360,17 @@ namespace Vca {
 		return pInterface == m_pInterface && rMessage == m_iMessage;
 	    }
 	private:
-	    virtual bool isError_() const {
+	    bool isError_() const OVERRIDE {
 		return true;
 	    }
 
 	//  Use
 	private:
-	    virtual void setError_(source_t *pSource, IError *pInterface, VString const &rMessage) {
+	    void setError_(source_t *pSource, IError *pInterface, VString const &rMessage) OVERRIDE {
 		m_pInterface.setTo (pInterface);
 		m_iMessage.setTo (rMessage);
 	    }
-	    virtual bool supply_(source_t *pSource, sink_t const &rSink) {
+	    bool supply_(source_t *pSource, sink_t const &rSink) OVERRIDE {
 		if (!pSource->validatesError (m_pInterface, m_iMessage))
 		    return false;
 
@@ -408,33 +408,33 @@ namespace Vca {
 
 	//  Query
 	private:
-	    virtual bool coversDatum_(Val_T iValue) const {
+	    bool coversDatum_(Val_T iValue) const OVERRIDE {
 		return true;
 	    }
-	    virtual bool coversError_(IError *pInterface, VString const &rMessage) const {
+	    bool coversError_(IError *pInterface, VString const &rMessage) const OVERRIDE {
 		return true;
 	    }
-	    virtual bool isFuture_() const {
+	    bool isFuture_() const OVERRIDE {
 		return true;
 	    }
 
 	//  Use
 	private:
-	    virtual void setDatum_(source_t *pSource, Val_T iValue) {
+	    void setDatum_(source_t *pSource, Val_T iValue) OVERRIDE {
 		Reference iRetainer (this);
 		BaseClass::newDatum (pSource, iValue);
 		m_pSinks (iValue);
 	    }
-	    virtual void setError_(source_t *pSource, IError *pInterface, VString const &rMessage) {
+	    void setError_(source_t *pSource, IError *pInterface, VString const &rMessage) OVERRIDE {
 		Reference iRetainer (this);
 		BaseClass::newError (pSource, pInterface, rMessage);
 		m_pSinks (pInterface, rMessage);
 	    }
-	    virtual bool supply_(source_t *pSource, sink_t const &rSink) {
+	    bool supply_(source_t *pSource, sink_t const &rSink) OVERRIDE {
 		m_pSinks.push (rSink);
 		return true;
 	    }
-	    virtual void unset_(source_t *pSource) {
+	    void unset_(source_t *pSource) OVERRIDE {
 	    }
 
 	//  State

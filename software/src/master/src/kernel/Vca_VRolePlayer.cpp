@@ -218,19 +218,19 @@ namespace Vca {
 
 	//  Callbacks
 	private:
-	    void onError (IError *pInterface, VString const &rMessage) {
+	    void onError (IError *pInterface, VString const &rMessage) OVERRIDE {
 		m_iQuery.onError (pInterface, rMessage);
 	    }
 
 	//  Delegations
 	private:
-	    void getRoleFrom (RoleProvider *pProvider) const {
+	    void getRoleFrom (RoleProvider *pProvider) const OVERRIDE {
 		m_iQuery.getRoleFrom (pProvider);
 	    }
-	    void getRoleFrom (IRoleProvider *pProvider, ITrigger *pNotFoundSink) const {
+	    void getRoleFrom (IRoleProvider *pProvider, ITrigger *pNotFoundSink) const OVERRIDE {
 		m_iQuery.getRoleFrom (pProvider, pNotFoundSink);
 	    }
-	    void getRoleFrom (IRoleProvider2 *pProvider, IStatusSink *pStatusSink) const {
+	    void getRoleFrom (IRoleProvider2 *pProvider, IStatusSink *pStatusSink) const OVERRIDE {
 		m_iQuery.getRoleFrom (pProvider, pStatusSink);
 	    }
 	    /**
@@ -238,7 +238,7 @@ namespace Vca {
 	     * Possible when this query transaction was initiated by an IRoleProvider2::QueryRole2
 	     * message.
 	     */
-	    void sendAck () const {
+	    void sendAck () const OVERRIDE {
 		m_iQuery.sendAck ();
 	    }
 	    /**
@@ -247,7 +247,7 @@ namespace Vca {
 	     * transaction is delegated to a peer that does not support sending such acknowledgements
 	     * (i.e., does not implement IRoleProvider2).
 	     */
-	    void sendQuack () const {
+	    void sendQuack () const OVERRIDE {
 		m_iQuery.sendQuack ();
 	    }
 
@@ -707,7 +707,7 @@ namespace Vca {
 
     //  Use
     private:
-	bool accepted (Query const *pQuery) const;
+	bool accepted (Query const *pQuery) const OVERRIDE;
 
     //  State
     private:
@@ -768,7 +768,7 @@ namespace Vca {
 
     //  Use
     private:
-	bool accepted (Query const *pQuery) const;
+	bool accepted (Query const *pQuery) const OVERRIDE;
 
     //  State
     private:

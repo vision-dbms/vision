@@ -324,7 +324,7 @@ namespace Vca {
 	    VString const&	rHostName,
 	    VString const&	rUserName,
 	    VString const&	rGroupName
-	);
+	) OVERRIDE;
 
     //  State
     private:

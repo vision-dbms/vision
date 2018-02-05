@@ -310,7 +310,7 @@ public:
 
 //  Access/Query
 protected:
-    void getDescription_(VString& rResult) const;
+    void getDescription_(VString& rResult) const OVERRIDE;
 public:
     unsigned int taskCardinality () const {
 	return m_pSNFTask ? m_pSNFTask->cardinality () : 0;

@@ -33,7 +33,7 @@ namespace Vca {
 
     //  Triggering
     private:
-	void trigger () const;
+	void trigger () const OVERRIDE;
 
     //  State
     private:

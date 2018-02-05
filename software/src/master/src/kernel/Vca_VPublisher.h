@@ -49,10 +49,10 @@ namespace Vca {
 		}
 
 	    public:
-		ThisClass* successor () const {
+		ThisClass* successor () const OVERRIDE {
 		    return NextUsable (m_pSuccessor);
 		}
-		Interface_T* target () const {
+		Interface_T* target () const OVERRIDE {
 		    return m_pTarget;
 		}
     	    
@@ -128,7 +128,7 @@ namespace Vca {
 	//  Subscription Management
 	//  ... cancelation:
 	private:
-	    void cancel_(VSubscriptionManager::Subscription const* pSubscription) {
+	    void cancel_(VSubscriptionManager::Subscription const* pSubscription) OVERRIDE {
 		SubscriptionReference* ppCandidate (&m_pSubscriptions);
 		while (ppCandidate->isntNil () && !(*ppCandidate)->unlink (ppCandidate, pSubscription));
 	    }
@@ -151,10 +151,10 @@ namespace Vca {
 
     //  Access
     public:
-	Subscription* subscription () const {
+	Subscription* subscription () const OVERRIDE {
 	    return m_pManager->subscription ();
 	}	
-	Interface_T* target () {
+	Interface_T* target () OVERRIDE {
 	    return m_pManager->target ();
 	}
 
@@ -164,17 +164,17 @@ namespace Vca {
 	    return m_pManager->hasSubscriptions ();
 	}
     protected:
-	virtual /*override*/ bool isConnected_() const {
+	bool isConnected_() const OVERRIDE {
 	    return m_pManager->hasSubscriptions ();
 	}
 
-	virtual /*override*/ bool isUsable_() const {
+	bool isUsable_() const OVERRIDE {
 	    return true;
 	}
 
     //  Message Handling
     private:
-        bool defersTo (VMessageScheduler &rScheduler) {
+        bool defersTo (VMessageScheduler &rScheduler) OVERRIDE {
             return false;
         }
 

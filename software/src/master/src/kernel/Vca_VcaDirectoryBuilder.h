@@ -533,7 +533,7 @@ namespace Vca {
 	public:
 	    bool hasPattern (VString const& rPattern) const;
 	protected:
-	    bool locate (Entry::Reference &rpEntry, VString const &rName);
+	    bool locate (Entry::Reference &rpEntry, VString const &rName) OVERRIDE;
 
 	//  Update
 	public:
@@ -560,7 +560,7 @@ namespace Vca {
 	 * Virtual member called to create a new directory on behalf of create(VDirectory::Reference& rpDirectory).
 	 * Creates a VcaDirectoryBuilder::Directory implementing regular expression entry patterns.
 	 */
-	VDirectory* newDirectory_() const;
+	VDirectory* newDirectory_() const OVERRIDE;
     public:
         /**
          * Populates a directory by delegating to Order::buildDirectory().
@@ -569,7 +569,7 @@ namespace Vca {
          * @see Vca::VDirectoryBuider::build()
          * @see Order::buildDirectory()
          */
-	virtual /*override*/ void build (VDirectory *pDirectory);
+	void build (VDirectory *pDirectory) OVERRIDE;
     };
 }
 

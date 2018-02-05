@@ -129,15 +129,15 @@ namespace Vxa {
 
     //  Implementation
     protected:
-	bool commitThrough (cardinality_t xElement);
+	bool commitThrough (cardinality_t xElement) OVERRIDE;
     protected:
-	VMapMaker &getMapMakerFor (VMapMaker &rParent, cardinality_t xElement, VSet *pCodomain);
+	VMapMaker &getMapMakerFor (VMapMaker &rParent, cardinality_t xElement, VSet *pCodomain) OVERRIDE;
     private:
 	VMapMaker &getMapMakerFor (cardinality_t xElement, VSet *pCodomain);
 
     //  Transmission
     protected:
-	bool transmitUsing (VCallType2Exporter *pExporter);
+	bool transmitUsing (VCallType2Exporter *pExporter) OVERRIDE;
 
     //  State
     private:

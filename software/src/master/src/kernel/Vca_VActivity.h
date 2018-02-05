@@ -145,7 +145,7 @@ namespace Vca {
 
 	//  Description
 	protected:
-	    virtual void getDescription_(VString &rsDescription) const;
+	    void getDescription_(VString &rsDescription) const OVERRIDE;
 	};
 
     //********************************************************************************************/
@@ -168,12 +168,12 @@ namespace Vca {
 
 	//  Description
 	protected:
-	    virtual void getDescription_(VString &rsDescription) const;
+	    void getDescription_(VString &rsDescription) const OVERRIDE;
 
 	//  Distribution
 	protected:
 	    using BaseClass::sendTo_;
-	    void sendTo_(EndErrSink const &rObserver);
+	    void sendTo_(EndErrSink const &rObserver) OVERRIDE;
 
 	//  State
 	private:
@@ -203,12 +203,12 @@ namespace Vca {
 
 	//  Description
 	protected:
-	    virtual void getDescription_(VString &rsDescription) const;
+	    void getDescription_(VString &rsDescription) const OVERRIDE;
 
 	//  Distribution
 	protected:
-	    void sendTo_(EndErrSink const &rObserver);
-	    void sendTo_(EventSink const &rObserver);
+	    void sendTo_(EndErrSink const &rObserver) OVERRIDE;
+	    void sendTo_(EventSink const &rObserver) OVERRIDE;
 	};
 
     //********************************************************************************************/
@@ -230,7 +230,7 @@ namespace Vca {
 
 	//  Description
 	protected:
-	    virtual void getDescription_(VString &rsDescription) const;
+	    void getDescription_(VString &rsDescription) const OVERRIDE;
 	};
 
     //********************************************************************************************/
@@ -252,12 +252,12 @@ namespace Vca {
 
 	//  Description
 	protected:
-	    virtual void getDescription_(VString &rsDescription) const;
+	    void getDescription_(VString &rsDescription) const OVERRIDE;
 
 	//  Distribution
 	protected:
 	    using BaseClass::sendTo_;
-	    void sendTo_(EndErrSink const &rObserver);
+	    void sendTo_(EndErrSink const &rObserver) OVERRIDE;
 
 	//  State
 	private:

@@ -143,7 +143,7 @@ namespace Vsa {
             /** Implements Vca::IClient::OnError(). */
 	    void OnError (
 		Vca::IClient *pRole, Vca::IError *pError, VString const &rText
-	    );
+	    ) OVERRIDE;
         //@}
 
 	//  TimeOut 

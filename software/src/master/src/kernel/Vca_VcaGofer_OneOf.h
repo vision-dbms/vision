@@ -130,7 +130,7 @@ namespace Vca {
             /**
              * Samples without replacement from our candidate list.
              */
-	    void onData () {
+	    void onData () OVERRIDE {
 		if (TracingGofers ()) {
 		    VString iDesc;
 		    BaseClass::getDescription (iDesc);
@@ -236,7 +236,7 @@ namespace Vca {
             /**
              * Resets candidate availability; delegates to resetElementSelector().
              */
-	    void onReset () { // onGofeReset
+	    void onReset () OVERRIDE { // onGofeReset
 		if (TracingGofers ()) {
 		    VString iDesc;
 		    BaseClass::getDescription (iDesc);

@@ -79,7 +79,7 @@ namespace Vsa {
 
     //  Implementation
     public:
-	void Supply (IEvaluatorSource *pRole, IEvaluatorSink *pSink);
+	void Supply (IEvaluatorSource *pRole, IEvaluatorSink *pSink) OVERRIDE;
 
     //  Factory Callbacks
     protected:

@@ -118,10 +118,10 @@ namespace Vca {
 	}
 	void decrementConnectionRequestCount (bool bDefunctingAllowed);
 
-	bool isConnected_() const {
+	bool isConnected_() const OVERRIDE {
 	    return isConnected ();
 	}
-	bool isUsable_() const {
+	bool isUsable_() const OVERRIDE {
 	    return isUsable ();
 	}
 	void processCallbackRequest_(
@@ -131,7 +131,7 @@ namespace Vca {
 	    VString const&	rCallbackAddress,
 	    uuid_t const&	rCallbackID,
 	    ConnectKind		xConnectKind
-	);
+	) OVERRIDE;
     private:
 	void closeConnections ();
 
@@ -180,14 +180,14 @@ namespace Vca {
 
     //  Transport
     private:
-	void attach_(VcaTransportInbound *pTransport);
-	void attach_(VcaTransportOutbound *pTransport);
-	void detach_(VcaTransportInbound *pTransport);
-	void detach_(VcaTransportOutbound *pTransport);
+	void attach_(VcaTransportInbound *pTransport) OVERRIDE;
+	void attach_(VcaTransportOutbound *pTransport) OVERRIDE;
+	void detach_(VcaTransportInbound *pTransport) OVERRIDE;
+	void detach_(VcaTransportOutbound *pTransport) OVERRIDE;
 
-	void startNextSerializerOn_(VcaTransportInbound *pTransport);
-	void startNextSerializerOn_(VcaTransportOutbound *pTransport);
-	bool getSpecificFreeOutboundTransport_ (VcaTransportOutbound *pTransport);
+	void startNextSerializerOn_(VcaTransportInbound *pTransport) OVERRIDE;
+	void startNextSerializerOn_(VcaTransportOutbound *pTransport) OVERRIDE;
+	bool getSpecificFreeOutboundTransport_ (VcaTransportOutbound *pTransport) OVERRIDE;
 
 	void deleteEvaluators ();
 
@@ -201,12 +201,12 @@ namespace Vca {
 
     //  Evaluation
     private:
-        void evaluateOutgoing_ (VMessage *pMessage);
+        void evaluateOutgoing_ (VMessage *pMessage) OVERRIDE;
       
     //  Control
     private:
-	virtual /*override*/ void markDefunct_();
-	virtual /*override*/ void onShutdown ();
+	void markDefunct_() OVERRIDE;
+	void onShutdown () OVERRIDE;
 
     //  Evaluation
     private:
@@ -223,20 +223,20 @@ namespace Vca {
 
     //  Object Export
     private:
-	void createExportOf (IVUnknown *pObject, bool bWeak);
-	void createExportOf (VcaOID *pOID, bool bWeak);
-	void deleteExportOf (VMessageHolder<IPeer_Ex2> const& rMessage, VcaOID *pOID, U32 cExports, U32 cWeakExports, U32 cMessages);
-	bool weakenExportOf (VcaOID *pOID);
+	void createExportOf (IVUnknown *pObject, bool bWeak) OVERRIDE;
+	void createExportOf (VcaOID *pOID, bool bWeak) OVERRIDE;
+	void deleteExportOf (VMessageHolder<IPeer_Ex2> const& rMessage, VcaOID *pOID, U32 cExports, U32 cWeakExports, U32 cMessages) OVERRIDE;
+	bool weakenExportOf (VcaOID *pOID) OVERRIDE;
 	bool weakenRemoteImportOf (VcaOID *pOIDR);
     protected:
-	virtual /*override*/ void onExportCountIsZero ();
-	virtual /*override*/ void onExportCountWasZero ();
+	void onExportCountIsZero () OVERRIDE;
+	void onExportCountWasZero () OVERRIDE;
 
     //  Object Import
     private:
-	void createImportOf (VcaOID *pOID, bool bWeak);
-	void deleteImportOf (VcaOID *pOID);
-	bool weakenImportOf (VcaOID *pOID);
+	void createImportOf (VcaOID *pOID, bool bWeak) OVERRIDE;
+	void deleteImportOf (VcaOID *pOID) OVERRIDE;
+	bool weakenImportOf (VcaOID *pOID) OVERRIDE;
 	bool weakenRemoteExportOf (VcaOIDR *pOIDR);
 
 	bool receive_(
@@ -245,14 +245,14 @@ namespace Vca {
 	    VTypeInfo*		pType,
 	    VcaSite*		pSource,
 	    bool		bWeak
-	);
+	) OVERRIDE;
 	bool receive_(
 	    VcaOID::Reference &rpOID, VcaSSID const &rSSID, VcaSite *pSource, bool bWeak
-	);
+	) OVERRIDE;
 
     protected:
-	virtual /*override*/ void onImportCountIsZero ();
-	virtual /*override*/ void onImportCountWasZero ();
+	void onImportCountIsZero () OVERRIDE;
+	void onImportCountWasZero () OVERRIDE;
 
     public:
 	bool receive (
@@ -276,8 +276,8 @@ namespace Vca {
 
     //  Remote Import
     private:
-	void createRemoteImportOf (VcaOID  *pOID) const;
-        void deleteRemoteImportOf (VcaOIDR *pOIDR) const;
+	void createRemoteImportOf (VcaOID  *pOID) const OVERRIDE;
+        void deleteRemoteImportOf (VcaOIDR *pOIDR) const OVERRIDE;
 
     //  Remote Fake Export-Import
     private:
@@ -292,10 +292,10 @@ namespace Vca {
 
     //  Remote Reflection
     private:
-	void getReflection_(IPeer::Reference &rpReflection) {
+	void getReflection_(IPeer::Reference &rpReflection) OVERRIDE {
 	    getReflection (rpReflection);
 	}
-	void setReflection (IPeer *pReflection);
+	void setReflection (IPeer *pReflection) OVERRIDE;
 
 	RemoteReflectionGofer_T *reflectionGofer () const {
 	    return m_pRemoteReflectionGofer;
@@ -311,20 +311,20 @@ namespace Vca {
 	    VcaPeer::Reference, VcaPeer*, VcaPeer const*, VcaRouteStatistics
 	> RouteTable;
 
-	void addRoute   (VcaPeer *pPeer, VcaRouteStatistics const &rMetrics);
-	void addRouteTo (VcaSite *pSite, VcaRouteStatistics const &rMetrics) {
+	void addRoute   (VcaPeer *pPeer, VcaRouteStatistics const &rMetrics) OVERRIDE ;
+	void addRouteTo (VcaSite *pSite, VcaRouteStatistics const &rMetrics) OVERRIDE {
 	    pSite->addRoute (this, rMetrics);
 	}
 
 	bool deleteRoute (VcaPeer *pPeer);
 
-	void getBestRouteMetrics (VcaRouteStatistics &rMetrics) const {
+	void getBestRouteMetrics (VcaRouteStatistics &rMetrics) const OVERRIDE {
 	    rMetrics = m_iBestRouteMetrics;
 	}
 
     //  Self
     private:
-	bool isSelf_() const {
+	bool isSelf_() const OVERRIDE {
 	    return isSelf ();
 	}
     public:
@@ -334,12 +334,12 @@ namespace Vca {
 
     //  Tracing and Display
     public:
-	void displayPendingMessageCounts () const;
-	void displayRoutes () const;    // Displays routes to reach this peer
+	void displayPendingMessageCounts () const OVERRIDE;
+	void displayRoutes () const OVERRIDE;    // Displays routes to reach this peer
 
     //  Site Info
     private:
-	VSiteInfo* getSiteInfo_(VSiteInfo::Reference& rpInfo) const;
+	VSiteInfo* getSiteInfo_(VSiteInfo::Reference& rpInfo) const OVERRIDE;
 
 /****************************************************************************************
  * /////////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ *

@@ -700,7 +700,7 @@ namespace Vca {
     /** @name Run State Access/Query */
     //@{
     protected:
-	void getDescription_(VString& rResult) const;
+	void getDescription_(VString& rResult) const OVERRIDE;
     public:
         /**
 	 * Returns the name of a run state.

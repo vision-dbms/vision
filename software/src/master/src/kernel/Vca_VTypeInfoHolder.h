@@ -196,7 +196,7 @@ namespace Vca {
 
     //  Access
     private:
-	virtual /*override*/ V::VRTTI const &rtti_() const;
+	V::VRTTI const &rtti_() const OVERRIDE;
     public:
 	static VTypeInfo *typeInfo ();
 	static VTypeInfo *typeInfoNoException ();
