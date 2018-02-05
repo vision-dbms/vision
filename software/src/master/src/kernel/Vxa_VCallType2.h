@@ -150,7 +150,7 @@ namespace Vxa {
 
 	    //  Access
 	    public:
-		val_t value () {
+		val_t value () OVERRIDE {
 		    return m_pCluster->element(m_iSelfReferences[m_pTaskCursor->position ()]);
 		}
 
@@ -176,7 +176,7 @@ namespace Vxa {
 
 	//  Implementation
 	private:
-	    bool onSelf (object_reference_t xSelfReference) const {
+	    bool onSelf (object_reference_t xSelfReference) const OVERRIDE {
 		m_rpSelfProvider.setTo (
 		    new VScalarInstance<val_t, var_t>(
 			m_pCluster->type (), m_pCluster->element (xSelfReference)
@@ -184,7 +184,7 @@ namespace Vxa {
 		);
 		return true;
 	    }
-	    bool onSelf (object_reference_array_t const &rSelfReferences) const {
+	    bool onSelf (object_reference_array_t const &rSelfReferences) const OVERRIDE {
 		m_rpSelfProvider.setTo (
 		    new CurrentSelf (m_pCluster, rSelfReferences, taskCursor ())
 		);

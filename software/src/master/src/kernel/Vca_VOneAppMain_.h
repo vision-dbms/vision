@@ -44,7 +44,7 @@ namespace Vca {
 
 	//  Access
 	public:
-	    RunState runState () const {
+	    RunState runState () const OVERRIDE {
 		return m_pImplementation ? m_pImplementation->runState () : RunState_AwaitingStart;
 	    }
 	    App* implementation () const {
@@ -53,7 +53,7 @@ namespace Vca {
 
 	//  Control
 	private:
-	    bool start_() {
+	    bool start_() OVERRIDE {
 	    //  Create, ...
 		m_pImplementation.setTo (new App (appContext ()));
 
