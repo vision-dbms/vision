@@ -64,10 +64,10 @@ namespace Vxa {
 
     //  Instance Retrieval
     private:
-	virtual bool retrieve (scalar_return_t &rResult, VTask *pTask, VCallType1Importer &rImporter) {
+	virtual bool retrieve (scalar_return_t &rResult, VTask *pTask, VCallType1Importer &rImporter) OVERRIDE {
 	    return rImporter.getParameter (pTask, this, rResult);
 	}
-	virtual bool retrieve (scalar_return_t &rResult, VTask *pTask, VCallType2Importer &rImporter) {
+	virtual bool retrieve (scalar_return_t &rResult, VTask *pTask, VCallType2Importer &rImporter) OVERRIDE {
 	    return rImporter.getParameter (pTask, this, rResult);
 	}
     };
