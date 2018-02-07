@@ -62,7 +62,7 @@ namespace Vxa {
 
     //  Invocation
     public:
-	virtual bool invoke (VMethod *pMethod, VCollection *pCluster) const;
+	virtual bool invokeMethod (VMethod *pMethod, cardinality_t cTask, VCollection *pCluster) const;
 
     //  Parameter Acquisition
     protected:

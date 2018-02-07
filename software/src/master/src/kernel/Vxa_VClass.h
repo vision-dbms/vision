@@ -57,10 +57,14 @@ namespace Vxa {
     public:
 	bool defineMethod (VMethod *pMethod);
 
+    //  Method Access
+    public:
+        virtual bool getMethod (VMethod::Reference &rpMethod, VString const &rName, cardinality_t cParameters) const;
+
     //  Method Execution
     public:
 	bool invokeMethod (
-	    VString const &rName, VCallHandle const &rCallHandle, cardinality_t cParameters, cardinality_t cTask, VCollection *pCollection
+	    VString const &rName, VCallHandle const &rCallHandle, cardinality_t cParameters, cardinality_t cTask, VCollection *pCluster
 	) const;
 
     //  State

@@ -213,7 +213,7 @@ namespace Vxa {
 
     //  Invocation
     public:
-	virtual bool invoke (VMethod *pMethod, VCollection *pCluster) const OVERRIDE;
+	virtual bool invokeMethod (VMethod *pMethod, cardinality_t cTask, VCollection *pCluster) const OVERRIDE;
 	bool start (VTask *pTask) const;
 
     //  Parameter Acquisition

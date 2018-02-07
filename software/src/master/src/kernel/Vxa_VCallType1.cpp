@@ -91,10 +91,10 @@ IVUnknown *Vxa::VCallType1::caller () const {
  ************************
  ************************/
 
-bool Vxa::VCallType1::invoke (VMethod *pMethod, VCollection *pCollection) const {
+bool Vxa::VCallType1::invokeMethod (VMethod *pMethod, cardinality_t cTask, VCollection *pCluster) const {
     reportInvocation ();
 
-    return pMethod->invoke (*this, pCollection);
+    return pMethod->invoke (*this, cTask, pCluster);
 }
 
 

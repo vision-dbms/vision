@@ -62,7 +62,7 @@ namespace Vxa {
 	    std::type_info const &rOriginatorType, char const *pWhere
 	) const;
     public:
-	virtual bool invoke (VMethod *pMethod, VCollection *pCollection) const = 0;
+	virtual bool invokeMethod (VMethod *pMethod, cardinality_t cTask, VCollection *pCluster) const = 0;
 
 	virtual bool returnError (VString const &rMessage) const = 0;
 	virtual bool returnSNF () const = 0;
