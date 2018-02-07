@@ -98,9 +98,9 @@ bool Vxa::VClass::defineMethod (VMethod *pMethod) {
  ***************************
  ***************************/
 
-bool Vxa::VClass::getMethod (VMethod::Reference &rpMethod, VString const &rName, cardinality_t cParameters) const {
+bool Vxa::VClass::getMethod (VMethod::Reference &rpMethod, VCallHandle const &rCallHandle) const {
     unsigned int xElement = UINT_MAX;
-    if (!m_iDictionary.Locate (rName, xElement))
+    if (!m_iDictionary.Locate (rCallHandle.methodName (), xElement))
         return false;
 
     rpMethod.setTo (m_iDictionary.value(xElement));
@@ -113,11 +113,9 @@ bool Vxa::VClass::getMethod (VMethod::Reference &rpMethod, VString const &rName,
  *******************************
  *******************************/
 
-bool Vxa::VClass::invokeMethod (
-    VString const &rName, VCallHandle const &rCallHandle, cardinality_t cParameters, cardinality_t cTask, VCollection *pCluster
-) const {
+bool Vxa::VClass::invokeMethod (VCallHandle const &rCallHandle, VCollection *pCluster) const {
     VMethod::Reference pMethod;
-    return getMethod (pMethod, rName, cParameters)
-	?  rCallHandle.invokeMethod (pMethod, cTask, pCluster)
+    return getMethod (pMethod, rCallHandle)
+	?  rCallHandle.invokeMethod (pMethod, pCluster)
 	:  rCallHandle.returnSNF ();
 }

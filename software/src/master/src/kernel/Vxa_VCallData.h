@@ -23,7 +23,7 @@ namespace Vxa {
 
     //  Construction
     public:
-	VCallData (cardinality_t cParameters, cardinality_t cTask);
+	VCallData (VString const &rMethodName, cardinality_t cParameters, cardinality_t cTask);
 	VCallData (ThisClass const &rOther);
 
     //  Destruction
@@ -32,6 +32,9 @@ namespace Vxa {
 
     //  Access
     public:
+        VString const &methodName () const {
+            return m_iMethodName;
+        }
 	cardinality_t cardinality () const {
 	    return m_pDomain->cardinality ();
 	}
@@ -44,6 +47,7 @@ namespace Vxa {
 
     //  State
     private:
+        VString const m_iMethodName;
 	VFiniteSet::Reference const m_pDomain;
 	cardinality_t const m_cParameters;
     };

@@ -200,7 +200,7 @@ namespace Vxa {
     //****************************************************************
     //  Construction
     public:
-	VCallType2 (cardinality_t cParameters, cardinality_t cTask, ICaller *pTask);
+        VCallType2 (VString const &rMethodName, cardinality_t cParameters, cardinality_t cTask, ICaller *pTask);
 	VCallType2 (ThisClass const &rOther);
 
     //  Destruction
@@ -213,7 +213,7 @@ namespace Vxa {
 
     //  Invocation
     public:
-	virtual bool invokeMethod (VMethod *pMethod, cardinality_t cTask, VCollection *pCluster) const OVERRIDE;
+	virtual bool invokeMethod (VMethod *pMethod, VCollection *pCluster) const OVERRIDE;
 	bool start (VTask *pTask) const;
 
     //  Parameter Acquisition

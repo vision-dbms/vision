@@ -70,9 +70,7 @@ namespace Vxa {
 	 *  return false.  (This convention may change in the future).
 	 *-----------------------------
 	 */
-	virtual bool invokeMethod_(
-            VString const &rMessageName, VCallHandle const &rCallHandle, cardinality_t cParameters, cardinality_t cTask
-        ) = 0;
+	virtual bool invokeMethod_(VCallHandle const &rCallHandle) = 0;
     };
 }
 

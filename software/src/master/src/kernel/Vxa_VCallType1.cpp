@@ -57,8 +57,8 @@ namespace {
  **************************/
 
 Vxa::VCallType1::VCallType1 (
-    cardinality_t cParameters, cardinality_t cTask, IVSNFTaskHolder *pCaller
-) :  BaseClass (cParameters, cTask), m_pCaller (pCaller) {
+    VString const &rMethodName, cardinality_t cParameters, cardinality_t cTask, IVSNFTaskHolder *pCaller
+) :  BaseClass (rMethodName, cParameters, cTask), m_pCaller (pCaller) {
 }
 
 Vxa::VCallType1::VCallType1 (
@@ -91,10 +91,10 @@ IVUnknown *Vxa::VCallType1::caller () const {
  ************************
  ************************/
 
-bool Vxa::VCallType1::invokeMethod (VMethod *pMethod, cardinality_t cTask, VCollection *pCluster) const {
+bool Vxa::VCallType1::invokeMethod (VMethod *pMethod, VCollection *pCluster) const {
     reportInvocation ();
 
-    return pMethod->invoke (*this, cTask, pCluster);
+    return pMethod->invoke (*this, pCluster);
 }
 
 

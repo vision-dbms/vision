@@ -49,7 +49,9 @@ namespace Vxa {
     //****************************************************************
     //  Construction
     public:
-	VCallType1 (cardinality_t cParameters, cardinality_t cTask, IVSNFTaskHolder *pTask);
+	VCallType1 (
+            VString const &rMethodName, cardinality_t cParameters, cardinality_t ocTask, IVSNFTaskHolder *pTask
+        );
 	VCallType1 (ThisClass const &rOther);
 
     //  Destruction
@@ -62,7 +64,7 @@ namespace Vxa {
 
     //  Invocation
     public:
-	virtual bool invokeMethod (VMethod *pMethod, cardinality_t cTask, VCollection *pCluster) const;
+	virtual bool invokeMethod (VMethod *pMethod, VCollection *pCluster) const;
 
     //  Parameter Acquisition
     protected:

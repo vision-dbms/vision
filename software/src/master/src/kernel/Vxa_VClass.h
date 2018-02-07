@@ -59,13 +59,11 @@ namespace Vxa {
 
     //  Method Access
     public:
-        virtual bool getMethod (VMethod::Reference &rpMethod, VString const &rName, cardinality_t cParameters) const;
+        virtual bool getMethod (VMethod::Reference &rpMethod, VCallHandle const &rCallHandle) const;
 
     //  Method Execution
     public:
-	bool invokeMethod (
-	    VString const &rName, VCallHandle const &rCallHandle, cardinality_t cParameters, cardinality_t cTask, VCollection *pCluster
-	) const;
+	bool invokeMethod (VCallHandle const &rCallHandle, VCollection *pCluster) const;
 
     //  State
     private:

@@ -128,8 +128,8 @@ void Vxa::VCallType2::SelfProvider::OnError_(Vca::IError *pInterface, VString co
  **************************/
 
 Vxa::VCallType2::VCallType2 (
-    cardinality_t cParameters, cardinality_t cTask, ICaller *pCaller
-) :  BaseClass (cParameters, cTask), m_pCaller (pCaller) {
+    VString const &rMethodName, cardinality_t cParameters, cardinality_t cTask, ICaller *pCaller
+) :  BaseClass (rMethodName, cParameters, cTask), m_pCaller (pCaller) {
 }
 
 Vxa::VCallType2::VCallType2 (
@@ -162,8 +162,8 @@ IVUnknown *Vxa::VCallType2::caller () const {
  ************************
  ************************/
 
-bool Vxa::VCallType2::invokeMethod (VMethod *pMethod, cardinality_t cTask, VCollection *pCluster) const {
-    return pMethod->invoke (*this, cTask, pCluster);
+bool Vxa::VCallType2::invokeMethod (VMethod *pMethod, VCollection *pCluster) const {
+    return pMethod->invoke (*this, pCluster);
 }
 
 bool Vxa::VCallType2::start (VTask *pTask) const {

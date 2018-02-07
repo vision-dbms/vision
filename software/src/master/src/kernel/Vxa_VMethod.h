@@ -52,8 +52,8 @@ namespace Vxa {
 
     //  Invocation
     private:
-	virtual bool invoke (VCallType1 const &rCallHandle, cardinality_t cTask, VCollection *pCluster) = 0;
-	virtual bool invoke (VCallType2 const &rCallHandle, cardinality_t cTask, VCollection *pCluster) = 0;
+	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCluster) = 0;
+	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCluster) = 0;
 
     //  State
     private:

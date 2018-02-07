@@ -24,7 +24,7 @@ namespace Vxa {
 
     //  Construction
     protected:
-	VCallHandle (cardinality_t cParameters, cardinality_t cTask);
+	VCallHandle (VString const &rMethodName, cardinality_t cParameters, cardinality_t cTask);
 	VCallHandle (ThisClass const &rOther);
 
     //  Destruction
@@ -62,7 +62,7 @@ namespace Vxa {
 	    std::type_info const &rOriginatorType, char const *pWhere
 	) const;
     public:
-	virtual bool invokeMethod (VMethod *pMethod, cardinality_t cTask, VCollection *pCluster) const = 0;
+	virtual bool invokeMethod (VMethod *pMethod, VCollection *pCluster) const = 0;
 
 	virtual bool returnError (VString const &rMessage) const = 0;
 	virtual bool returnSNF () const = 0;

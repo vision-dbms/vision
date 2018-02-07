@@ -42,8 +42,8 @@
  **************************/
 
 Vxa::VCallHandle::VCallHandle (
-    cardinality_t cParameters, cardinality_t cTask
-) : BaseClass (cParameters, cTask) {
+    VString const &rMethodName, cardinality_t cParameters, cardinality_t cTask
+) : BaseClass (rMethodName, cParameters, cTask) {
 }
 
 Vxa::VCallHandle::VCallHandle (ThisClass const &rOther) : BaseClass (rOther) {

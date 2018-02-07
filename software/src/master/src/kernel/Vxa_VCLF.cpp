@@ -63,6 +63,6 @@ void Vxa::VCLF::ExternalImplementation (
     VString iMessage;
     iMessage.printf ("VCLF::ExternalImplementation(%s): Not Supported", rMessageName.content ());
 
-    VCallType1 iCallHandle (cParameters, cTask, pCaller);
+    VCallType1 iCallHandle (rMessageName, cParameters, cTask, pCaller);
     iCallHandle.returnError (iMessage);
 }
