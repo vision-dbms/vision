@@ -137,11 +137,11 @@ namespace Vxa {
 	//  Callbacks
 	private:
 	    virtual bool createFromIntegers (i32_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
-		BaseClass::setResultTo (new VBooleanParameter<i32_array_t> (BaseClass::type (), rValues, pAgent->taskCursor ()));
+		this->setResultTo (new VBooleanParameter<i32_array_t> (this->type (), rValues, pAgent->taskCursor ()));
 		return true;
 	    }
 	    virtual bool createFromDoubles (f64_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
-		BaseClass::setResultTo (new VBooleanParameter<f64_array_t> (BaseClass::type (), rValues, pAgent->taskCursor ()));
+		this->setResultTo (new VBooleanParameter<f64_array_t> (this->type (), rValues, pAgent->taskCursor ()));
 		return true;
 	    }
 	};
@@ -168,11 +168,11 @@ namespace Vxa {
 	//  Callbacks
 	private:
 	    virtual bool createFromIntegers (i32_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
-		BaseClass::setResultTo (new VParameter<scalar_return_t,i32_array_t> (BaseClass::type (), rValues, pAgent->taskCursor ()));
+		this->setResultTo (new VParameter<scalar_return_t,i32_array_t> (this->type (), rValues, pAgent->taskCursor ()));
 		return true;
 	    }
 	    virtual bool createFromDoubles (f64_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
-		BaseClass::setResultTo (new VParameter<scalar_return_t,f64_array_t> (BaseClass::type (), rValues, pAgent->taskCursor ()));
+		this->setResultTo (new VParameter<scalar_return_t,f64_array_t> (this->type (), rValues, pAgent->taskCursor ()));
 		return true;
 	    }
 	};
@@ -199,7 +199,7 @@ namespace Vxa {
 	//  Callbacks
 	private:
 	    virtual bool createFromStrings (str_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
-		BaseClass::setResultTo (new VParameter<scalar_return_t,str_array_t> (BaseClass::type (), rValues, pAgent->taskCursor ()));
+		this->setResultTo (new VParameter<scalar_return_t,str_array_t> (this->type (), rValues, pAgent->taskCursor ()));
 		return true;
 	    }
 	};
