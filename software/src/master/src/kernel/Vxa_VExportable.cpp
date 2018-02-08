@@ -81,10 +81,10 @@ namespace Vxa {
 
 	//  Use
 	public:
-	    virtual bool returnResultUsing (VCallType1Exporter *pExporter) const {
+	    virtual bool returnResultUsing (VCallType1Exporter *pExporter) const OVERRIDE {
 		return pExporter->returnResult (type (), m_iValue);
 	    }
-	    virtual bool returnResultUsing (VCallType2Exporter *pExporter) const {
+	    virtual bool returnResultUsing (VCallType2Exporter *pExporter) const OVERRIDE {
 		typename map_maker_t::Reference pMapMaker;
 		return pExporter->returnResult (pMapMaker, type (), universe (), static_cast<Val_T>(m_iValue));
 	    }
@@ -124,14 +124,14 @@ namespace Vxa {
 
     //  Result Generation
     private:
-	virtual bool createMethod (method_return_t &rResult, VString const &rName, Val_T const &rValue) {
-	    rResult.setTo (new VConstant<Val_T,Var_T> (rName, rValue));
+	virtual bool createMethod (method_return_t &rResult, Val_T const &rValue) OVERRIDE {
+	    rResult.setTo (new VConstant<Val_T,Var_T> (rValue));
 	    return true;
 	}
-	virtual bool createExport (export_return_t &rResult, Val_T const &rValue) {
+	virtual bool createExport (export_return_t &rResult, Val_T const &rValue) OVERRIDE {
 	    return false;
 	}
-	virtual bool returnResult (VResultBuilder *pResultBuilder, Val_T const &rValue) {
+	virtual bool returnResult (VResultBuilder *pResultBuilder, Val_T const &rValue) OVERRIDE {
 	    Datum const iDatum (this, rValue);
 	    return pResultBuilder->returnResult (iDatum);
 	}

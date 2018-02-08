@@ -61,8 +61,8 @@ namespace Vxa {
 	    typedef typename T::ClassBuilder base_t;
 	public:
 	    CBuilder (VClass *pClass) : base_t (pClass) {
-		base_t::defineConstant ("rttiName", collectable_t::RTTIName ());
-		base_t::defineHelp (collectable_t::RTTIName ());
+		this->defineConstant ("rttiName", collectable_t::RTTIName ());
+		this->defineHelp (collectable_t::RTTIName ());
 	    }
 	};
 
@@ -83,10 +83,10 @@ namespace Vxa {
 
 	//  Use
 	public:
-	    virtual bool returnResultUsing (VCallType1Exporter *pExporter) const {
+	    virtual bool returnResultUsing (VCallType1Exporter *pExporter) const OVERRIDE {
 		return pExporter->returnObject (type (), m_pObject);
 	    }
-	    virtual bool returnResultUsing (VCallType2Exporter *pExporter) const {
+	    virtual bool returnResultUsing (VCallType2Exporter *pExporter) const OVERRIDE {
 		return pExporter->returnObject (type (), m_pObject);
 	    }
 
@@ -125,7 +125,7 @@ namespace Vxa {
 
     //  Export Creation
     private:
-	virtual bool createExport (export_return_t &rpResult, val_t const &rpInstance) {
+	virtual bool createExport (export_return_t &rpResult, val_t const &rpInstance) OVERRIDE {
             /************************************************************************
              *>>>>  This routine is called to export root extension objects offered
              *>>>>  by servers and client transactions.  While fully identifying an
@@ -153,10 +153,8 @@ namespace Vxa {
 
     //  Method Creation
     private:
-	virtual bool createMethod (
-	    method_return_t &rpResult, VString const &rName, val_t const &rpInstance
-	) {
-	    rpResult.setTo (new VConstant<val_t,var_t> (rName, rpInstance));
+	virtual bool createMethod (method_return_t &rpResult, val_t const &rpInstance) OVERRIDE {
+	    rpResult.setTo (new VConstant<val_t,var_t> (rpInstance));
 	    return rpResult.isntNil ();
 	}
 
@@ -165,16 +163,16 @@ namespace Vxa {
 	template <class ImporterType> bool retrieveImpl (scalar_return_t &rResult, VTask *pTask, ImporterType &rImporter) {
 	    return rImporter.raiseUnimplementedOperationException (pTask, typeid(*this), "retrieveImpl");
 	}
-	virtual bool retrieve (scalar_return_t &rResult, VTask *pTask, VCallType1Importer &rImporter) {
+	virtual bool retrieve (scalar_return_t &rResult, VTask *pTask, VCallType1Importer &rImporter) OVERRIDE {
 	    return retrieveImpl (rResult, pTask, rImporter);
 	}
-	virtual bool retrieve (scalar_return_t &rResult, VTask *pTask, VCallType2Importer &rImporter) {
+	virtual bool retrieve (scalar_return_t &rResult, VTask *pTask, VCallType2Importer &rImporter) OVERRIDE {
 	    return retrieveImpl (rResult, pTask, rImporter);
 	}
 
     //  Result Generation
     private:
-	virtual bool returnResult (VResultBuilder *pResultBuilder, val_t const &rpResult) {
+	virtual bool returnResult (VResultBuilder *pResultBuilder, val_t const &rpResult) OVERRIDE {
 	    Datum const iDatum (thisAsClass (), rpResult);
 	    return pResultBuilder->returnResult (iDatum);
 	}

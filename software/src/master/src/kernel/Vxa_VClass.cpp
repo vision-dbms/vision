@@ -85,9 +85,9 @@ Vxa::VClass::~VClass () {
  *******************************
  *******************************/
 
-bool Vxa::VClass::defineMethod (VMethod *pMethod) {
+bool Vxa::VClass::defineMethod (VString const &rName, VMethod *pMethod) {
     unsigned int xElement;
-    m_iDictionary.Insert (pMethod->name (), xElement);
+    m_iDictionary.Insert (rName, xElement);
     m_iDictionary.value(xElement).setTo (pMethod);
     return true;
 }

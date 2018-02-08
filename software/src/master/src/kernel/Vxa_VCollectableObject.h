@@ -108,9 +108,9 @@ namespace Vxa {
 
 	template <typename Signature> bool defineMethod (VString const &rName, Signature pMember) {
 	    typename VCollectableMethod<Signature>::Reference pMethod (
-		new VCollectableMethod<Signature> (rName, pMember)
+		new VCollectableMethod<Signature> (pMember)
 	    );
-	    return defineMethod (pMethod);
+	    return defineMethodImpl (rName, pMethod);
 	}
 
 	bool defineHelp (VString const &rWhere);
@@ -118,9 +118,9 @@ namespace Vxa {
     private:
 	template <typename T> bool defineConstantImpl (VString const &rName, T const &rConstant) {
 	    VMethod::Reference pMethod;
-	    return VExportable<T>::CreateMethod (pMethod, rName, rConstant) && defineMethod (pMethod);
+	    return VExportable<T>::CreateMethod (pMethod, rConstant) && defineMethodImpl (rName, pMethod);
 	}
-	bool defineMethod (VMethod *pMethod);
+	bool defineMethodImpl (VString const &rName, VMethod *pMethod);
 
     //  State
     private:

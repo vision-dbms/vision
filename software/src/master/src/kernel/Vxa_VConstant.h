@@ -34,7 +34,7 @@ namespace Vxa {
 
     //  Construction
     public:
-	VConstant (VString const &rName, Val_T iVal) : BaseClass (rName), m_iVar (iVal) {
+	VConstant (Val_T iVal) : m_iVar (iVal) {
 	}
 
     //  Destruction

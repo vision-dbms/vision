@@ -66,8 +66,8 @@ namespace Vxa {
 
     //  Result Generation
     public:
-	static bool CreateMethod (method_return_t &rResult, VString const &rName, T const &rInstance) {
-	    return g_pTraits && g_pTraits->createMethod (rResult, rName, rInstance);
+	static bool CreateMethod (method_return_t &rResult, T const &rInstance) {
+	    return g_pTraits && g_pTraits->createMethod (rResult, rInstance);
 	}
 	static bool CreateExport (export_return_t &rResult, T const &rInstance) {
 	    return g_pTraits && g_pTraits->createExport (rResult, rInstance);
@@ -99,7 +99,7 @@ namespace Vxa {
 	    return g_pTraits && g_pTraits->returnResult (pResultBuilder, rInstance);
 	}
     private:
-	virtual bool createMethod (method_return_t &rResult, VString const &rName, T const &rInstance) = 0;
+	virtual bool createMethod (method_return_t &rResult, T const &rInstance) = 0;
 	virtual bool createExport (export_return_t &rResult, T const &rInstance) = 0;
 	virtual bool returnResult (VResultBuilder *pResultBuilder, T const &rInstance) = 0;
 

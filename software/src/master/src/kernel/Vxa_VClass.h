@@ -55,7 +55,7 @@ namespace Vxa {
 
     //  Method Definition
     public:
-	bool defineMethod (VMethod *pMethod);
+	bool defineMethod (VString const &rName, VMethod *pMethod);
 
     //  Method Access
     public:

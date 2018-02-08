@@ -51,6 +51,12 @@ namespace Vxa {
 	cardinality_t cardinality () const {
 	    return m_iCallData.cardinality ();
 	}
+        cardinality_t parameterCount () const {
+            return m_iCallData.parameterCount ();
+        }
+        VString const &methodName () const {
+            return m_iCallData.methodName ();
+        }
 	VTaskCursor *cursor () const {
 	    return m_pCursor;
 	}

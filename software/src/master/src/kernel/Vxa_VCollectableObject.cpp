@@ -67,10 +67,16 @@ Vxa::VCollectableObject::~VCollectableObject () {
 Vxa::VCollectableObject::ClassBuilder::ClassBuilder (Vxa::VClass *pClass) : m_pClass (pClass) {
 }
 
-bool Vxa::VCollectableObject::ClassBuilder::defineMethod (VMethod *pMethod) {
-    m_iHelpInfo << pMethod->name () << "\n";
+/**************************************
+ **************************************
+ *****  Method Definition Helpers *****
+ **************************************
+ **************************************/
 
-    return m_pClass->defineMethod (pMethod);
+bool Vxa::VCollectableObject::ClassBuilder::defineMethodImpl (VString const &rName, VMethod *pMethod) {
+    m_iHelpInfo << rName << "\n";
+
+    return m_pClass->defineMethod (rName, pMethod);
 }
 
 bool Vxa::VCollectableObject::ClassBuilder::defineHelp (VString const &rWhere) {
