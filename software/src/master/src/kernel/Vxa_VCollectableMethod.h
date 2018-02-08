@@ -139,19 +139,19 @@ namespace Vxa {
 	    }
 	    virtual bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
-		while (BaseClass::moreToDo ()) {
-		    (BaseClass::self ()->*pMember)(
+		while (this->moreToDo ()) {
+		    (this->self ()->*pMember)(
 			m_iP1 , m_iP2 , m_iP3 , m_iP4 ,	m_iP5 , m_iP6 , m_iP7 , m_iP8 ,
 			m_iP9 , m_iP10, m_iP11, m_iP12,	m_iP13, m_iP14, m_iP15, m_iP16
 		    );
-		    BaseClass::next ();
+		    this->next ();
 		}
-		if (BaseClass::isAlive ())
-		    BaseClass::onSuccess ();
+		if (this->isAlive ())
+		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
 		    iMessage<<(this->methodName ());
-		    BaseClass::onFailure (0, iMessage);
+		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
 		m_iP5.clear (); m_iP6.clear (); m_iP7.clear (); m_iP8.clear ();
@@ -259,19 +259,19 @@ namespace Vxa {
 	    }
 	    virtual bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
-		while (BaseClass::moreToDo ()) {
-		    (BaseClass::self ()->*pMember)(
+		while (this->moreToDo ()) {
+		    (this->self ()->*pMember)(
 			m_iP1 , m_iP2 , m_iP3 , m_iP4 , m_iP5 , m_iP6 , m_iP7 , m_iP8 ,
 			m_iP9 , m_iP10, m_iP11, m_iP12,	m_iP13, m_iP14, m_iP15
 		    );
-		    BaseClass::next ();
+		    this->next ();
 		}
-		if (BaseClass::isAlive ())
-		    BaseClass::onSuccess ();
+		if (this->isAlive ())
+		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
 		    iMessage<<(this->methodName ());
-		    BaseClass::onFailure (0, iMessage);
+		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
 		m_iP5.clear (); m_iP6.clear (); m_iP7.clear (); m_iP8.clear ();
@@ -374,19 +374,19 @@ namespace Vxa {
 	    }
 	    virtual bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
-		while (BaseClass::moreToDo ()) {
-		    (BaseClass::self ()->*pMember)(
+		while (this->moreToDo ()) {
+		    (this->self ()->*pMember)(
 			m_iP1 , m_iP2 , m_iP3 , m_iP4 ,	m_iP5 , m_iP6 , m_iP7 , m_iP8 ,
 			m_iP9 , m_iP10, m_iP11, m_iP12,	m_iP13, m_iP14
 		    );
-		    BaseClass::next ();
+		    this->next ();
 		}
-		if (BaseClass::isAlive ())
-		    BaseClass::onSuccess ();
+		if (this->isAlive ())
+		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
 		    iMessage<<(this->methodName ());
-		    BaseClass::onFailure (0, iMessage);
+		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
 		m_iP5.clear (); m_iP6.clear (); m_iP7.clear (); m_iP8.clear ();
@@ -487,19 +487,19 @@ namespace Vxa {
 	    }
 	    virtual bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
-		while (BaseClass::moreToDo ()) {
-		    (BaseClass::self ()->*pMember)(
+		while (this->moreToDo ()) {
+		    (this->self ()->*pMember)(
 			m_iP1 , m_iP2 , m_iP3 , m_iP4 ,	m_iP5 , m_iP6 , m_iP7 , m_iP8 ,
 			m_iP9 , m_iP10, m_iP11, m_iP12,	m_iP13
 		    );
-		    BaseClass::next ();
+		    this->next ();
 		}
-		if (BaseClass::isAlive ())
-		    BaseClass::onSuccess ();
+		if (this->isAlive ())
+		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
 		    iMessage<<(this->methodName ());
-		    BaseClass::onFailure (0, iMessage);
+		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
 		m_iP5.clear (); m_iP6.clear (); m_iP7.clear (); m_iP8.clear ();
@@ -597,19 +597,19 @@ namespace Vxa {
 	    }
 	    virtual bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
-		while (BaseClass::moreToDo ()) {
-		    (BaseClass::self ()->*pMember)(
+		while (this->moreToDo ()) {
+		    (this->self ()->*pMember)(
 			m_iP1 , m_iP2 , m_iP3 , m_iP4 ,	m_iP5 , m_iP6 , m_iP7 , m_iP8 ,
 			m_iP9 , m_iP10, m_iP11, m_iP12
 		    );
-		    BaseClass::next ();
+		    this->next ();
 		}
-		if (BaseClass::isAlive ())
-		    BaseClass::onSuccess ();
+		if (this->isAlive ())
+		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
 		    iMessage<<(this->methodName ());
-		    BaseClass::onFailure (0, iMessage);
+		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
 		m_iP5.clear (); m_iP6.clear (); m_iP7.clear (); m_iP8.clear ();
@@ -704,18 +704,18 @@ namespace Vxa {
 	    }
 	    virtual bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
-		while (BaseClass::moreToDo ()) {
-		    (BaseClass::self ()->*pMember)(
+		while (this->moreToDo ()) {
+		    (this->self ()->*pMember)(
 			m_iP1, m_iP2, m_iP3, m_iP4, m_iP5, m_iP6, m_iP7, m_iP8, m_iP9, m_iP10, m_iP11
 		    );
-		    BaseClass::next ();
+		    this->next ();
 		}
-		if (BaseClass::isAlive ())
-		    BaseClass::onSuccess ();
+		if (this->isAlive ())
+		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
 		    iMessage<<(this->methodName ());
-		    BaseClass::onFailure (0, iMessage);
+		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
 		m_iP5.clear (); m_iP6.clear (); m_iP7.clear (); m_iP8.clear ();
@@ -808,18 +808,18 @@ namespace Vxa {
 	    }
 	    virtual bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
-		while (BaseClass::moreToDo ()) {
-		    (BaseClass::self ()->*pMember)(
+		while (this->moreToDo ()) {
+		    (this->self ()->*pMember)(
 			m_iP1, m_iP2, m_iP3, m_iP4, m_iP5, m_iP6, m_iP7, m_iP8, m_iP9, m_iP10
 		    );
-		    BaseClass::next ();
+		    this->next ();
 		}
-		if (BaseClass::isAlive ())
-		    BaseClass::onSuccess ();
+		if (this->isAlive ())
+		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
 		    iMessage<<(this->methodName ());
-		    BaseClass::onFailure (0, iMessage);
+		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
 		m_iP5.clear (); m_iP6.clear (); m_iP7.clear (); m_iP8.clear ();
@@ -909,18 +909,18 @@ namespace Vxa {
 	    }
 	    virtual bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
-		while (BaseClass::moreToDo ()) {
-		    (BaseClass::self ()->*pMember)(
+		while (this->moreToDo ()) {
+		    (this->self ()->*pMember)(
 			m_iP1, m_iP2, m_iP3, m_iP4, m_iP5, m_iP6, m_iP7, m_iP8, m_iP9
 		    );
-		    BaseClass::next ();
+		    this->next ();
 		}
-		if (BaseClass::isAlive ())
-		    BaseClass::onSuccess ();
+		if (this->isAlive ())
+		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
 		    iMessage<<(this->methodName ());
-		    BaseClass::onFailure (0, iMessage);
+		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
 		m_iP5.clear (); m_iP6.clear (); m_iP7.clear (); m_iP8.clear ();
@@ -1008,16 +1008,16 @@ namespace Vxa {
 	    }
 	    virtual bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
-		while (BaseClass::moreToDo ()) {
-		    (BaseClass::self ()->*pMember)(m_iP1, m_iP2, m_iP3, m_iP4, m_iP5, m_iP6, m_iP7, m_iP8);
-		    BaseClass::next ();
+		while (this->moreToDo ()) {
+		    (this->self ()->*pMember)(m_iP1, m_iP2, m_iP3, m_iP4, m_iP5, m_iP6, m_iP7, m_iP8);
+		    this->next ();
 		}
-		if (BaseClass::isAlive ())
-		    BaseClass::onSuccess ();
+		if (this->isAlive ())
+		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
 		    iMessage<<(this->methodName ());
-		    BaseClass::onFailure (0, iMessage);
+		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
 		m_iP5.clear (); m_iP6.clear (); m_iP7.clear (); m_iP8.clear();
@@ -1101,16 +1101,16 @@ namespace Vxa {
 	    }
 	    virtual bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
-		while (BaseClass::moreToDo ()) {
-		    (BaseClass::self ()->*pMember)(m_iP1, m_iP2, m_iP3, m_iP4, m_iP5, m_iP6, m_iP7);
-		    BaseClass::next ();
+		while (this->moreToDo ()) {
+		    (this->self ()->*pMember)(m_iP1, m_iP2, m_iP3, m_iP4, m_iP5, m_iP6, m_iP7);
+		    this->next ();
 		}
-		if (BaseClass::isAlive ())
-		    BaseClass::onSuccess ();
+		if (this->isAlive ())
+		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
 		    iMessage<<(this->methodName ());
-		    BaseClass::onFailure (0, iMessage);
+		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
 		m_iP5.clear (); m_iP6.clear (); m_iP7.clear();
@@ -1192,16 +1192,16 @@ namespace Vxa {
 	    }
 	    virtual bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
-		while (BaseClass::moreToDo ()) {
-		    (BaseClass::self ()->*pMember)(m_iP1, m_iP2, m_iP3, m_iP4, m_iP5, m_iP6);
-		    BaseClass::next ();
+		while (this->moreToDo ()) {
+		    (this->self ()->*pMember)(m_iP1, m_iP2, m_iP3, m_iP4, m_iP5, m_iP6);
+		    this->next ();
 		}
-		if (BaseClass::isAlive ())
-		    BaseClass::onSuccess ();
+		if (this->isAlive ())
+		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
 		    iMessage<<(this->methodName ());
-		    BaseClass::onFailure (0, iMessage);
+		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
 		m_iP5.clear (); m_iP6.clear();
@@ -1281,16 +1281,16 @@ namespace Vxa {
 	    }
 	    virtual bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
-		while (BaseClass::moreToDo ()) {
-		    (BaseClass::self ()->*pMember)(m_iP1, m_iP2, m_iP3, m_iP4, m_iP5);
-		    BaseClass::next ();
+		while (this->moreToDo ()) {
+		    (this->self ()->*pMember)(m_iP1, m_iP2, m_iP3, m_iP4, m_iP5);
+		    this->next ();
 		}
-		if (BaseClass::isAlive ())
-		    BaseClass::onSuccess ();
+		if (this->isAlive ())
+		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
 		    iMessage<<(this->methodName ());
-		    BaseClass::onFailure (0, iMessage);
+		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
 		m_iP5.clear();
@@ -1369,16 +1369,16 @@ namespace Vxa {
 	    }
 	    virtual bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
-		while (BaseClass::moreToDo ()) {
-		    (BaseClass::self ()->*pMember)(m_iP1, m_iP2, m_iP3, m_iP4);
-		    BaseClass::next ();
+		while (this->moreToDo ()) {
+		    (this->self ()->*pMember)(m_iP1, m_iP2, m_iP3, m_iP4);
+		    this->next ();
 		}
-		if (BaseClass::isAlive ())
-		    BaseClass::onSuccess ();
+		if (this->isAlive ())
+		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
 		    iMessage<<(this->methodName ());
-		    BaseClass::onFailure (0, iMessage);
+		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear();
 		return true;
@@ -1453,16 +1453,16 @@ namespace Vxa {
 	    }
 	    virtual bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
-		while (BaseClass::moreToDo ()) {
-		    (BaseClass::self ()->*pMember)(m_iP1, m_iP2, m_iP3);
-		    BaseClass::next ();
+		while (this->moreToDo ()) {
+		    (this->self ()->*pMember)(m_iP1, m_iP2, m_iP3);
+		    this->next ();
 		}
-		if (BaseClass::isAlive ())
-		    BaseClass::onSuccess ();
+		if (this->isAlive ())
+		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
 		    iMessage<<(this->methodName ());
-		    BaseClass::onFailure (0, iMessage);
+		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear();
 		return true;
@@ -1533,16 +1533,16 @@ namespace Vxa {
 	    }
 	    virtual bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
-		while (BaseClass::moreToDo ()) {
-		    (BaseClass::self ()->*pMember)(m_iP1, m_iP2);
-		    BaseClass::next ();
+		while (this->moreToDo ()) {
+		    (this->self ()->*pMember)(m_iP1, m_iP2);
+		    this->next ();
 		}
-		if (BaseClass::isAlive ())
-		    BaseClass::onSuccess ();
+		if (this->isAlive ())
+		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
 		    iMessage<<(this->methodName ());
-		    BaseClass::onFailure (0, iMessage);
+		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear();
 		return true;
@@ -1611,16 +1611,16 @@ namespace Vxa {
 	    }
 	    virtual bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
-		while (BaseClass::moreToDo ()) {
-		    (BaseClass::self ()->*pMember)(m_iP1);
-		    BaseClass::next ();
+		while (this->moreToDo ()) {
+		    (this->self ()->*pMember)(m_iP1);
+		    this->next ();
 		}
-		if (BaseClass::isAlive ())
-		    BaseClass::onSuccess ();
+		if (this->isAlive ())
+		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
 		    iMessage<<(this->methodName ());
-		    BaseClass::onFailure (0, iMessage);
+		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear();
 		return true;
@@ -1678,16 +1678,16 @@ namespace Vxa {
 	private:
 	    virtual bool run () OVERRIDE {
 		member_t const pMember = m_pMethod->member ();
-		while (BaseClass::moreToDo ()) {
-		    (BaseClass::self ()->*pMember)();
-		    BaseClass::next ();
+		while (this->moreToDo ()) {
+		    (this->self ()->*pMember)();
+		    this->next ();
 		}
-		if (BaseClass::isAlive ())
-		    BaseClass::onSuccess ();
+		if (this->isAlive ())
+		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
 		    iMessage<<(this->methodName ());
-		    BaseClass::onFailure (0, iMessage);
+		    this->onFailure (0, iMessage);
 		}
 		return true;
 	    }
