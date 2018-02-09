@@ -19,6 +19,7 @@
  *************************/
 
 namespace Vxa {
+    class VAny;
     class VResultBuilder;
 
     /*-----------------------------------------*

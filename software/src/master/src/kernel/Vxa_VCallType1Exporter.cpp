@@ -68,7 +68,7 @@ Vxa::VCallType1Exporter::ResultSet::~ResultSet () {
 
 Vxa::VCallType1Exporter::VCallType1Exporter (
     VTask *pTask, VCallType1Importer const &rCallImporter
-) : BaseClass (pTask->cursor ()), VCallType1 (rCallImporter), m_pTask (pTask), m_bDisabled (false) {
+) : BaseClass (pTask), VCallType1 (rCallImporter), m_bDisabled (false) {
 }
 
 /*************************
@@ -177,7 +177,7 @@ bool Vxa::VCallType1Exporter::makeResultSetOf (ISingleton *pValue) {
 }
 
 void Vxa::VCallType1Exporter::logError (VError *pError) const {
-    m_pTask->onErrorEvent (pError); 
+    task()->onErrorEvent (pError);
 }
 
 bool Vxa::VCallType1Exporter::returnResult (VExportableDatum const &rDatum) {

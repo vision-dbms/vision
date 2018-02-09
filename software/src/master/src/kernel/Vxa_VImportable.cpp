@@ -83,6 +83,7 @@ namespace Vxa {
  ************************************************/
 
 namespace {
+    Vxa::VStockImportable<Vxa::VAny const&>		g_iImportTraits_VAny;
     Vxa::VStockImportable<bool>				g_iImportTraits_bool;
     Vxa::VStockImportable<short>			g_iImportTraits_short;
     Vxa::VStockImportable<unsigned short>		g_iImportTraits_unsigned_short;

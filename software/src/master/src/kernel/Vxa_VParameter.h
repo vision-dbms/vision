@@ -18,6 +18,36 @@
  *************************/
 
 namespace Vxa {
+
+    /*************************************************************************************
+     *----  template <typename value_t, typename storage_t> class VParameterStorage  ----*
+     *************************************************************************************/
+
+    template <typename storage_t,typename value_t> class VParameterStorage {
+    //  Construction
+    public:
+        VParameterStorage (
+            VCursor *pCursor, storage_t const &rDataStorage
+        ) : m_pCursor (pCursor), m_iDataStorage (rDataStorage) {
+        }
+
+    //  Destruction
+    public:
+        ~VParameterStorage () {
+        }
+
+    //  Access
+    public:
+	value_t value () const {
+	    return static_cast<value_t>(m_iDataStorage[m_pCursor->position()]);
+	}
+
+    //  State
+    private:
+	VCursor::Reference	const m_pCursor;
+	storage_t		const m_iDataStorage;
+    };
+
    /*************************************************************************************
     *----  template <typename scalar_return_t, typename data_storage_t> VParameter  ----*
     *************************************************************************************
@@ -37,14 +67,13 @@ namespace Vxa {
 
     //  Aliases
     public:
-	typedef VCursor cursor_t;
 	typedef typename BaseClass::value_t value_t;
 
     //  Construction
     public:
 	VParameter (
-	    VImportableType *pType, data_storage_t const &rDataStorage, cursor_t *pCursor
-	) : BaseClass (pType), m_iDataStorage (rDataStorage), m_pCursor (pCursor) {
+	    VImportableType *pType, VCursor *pCursor, data_storage_t const &rDataStorage
+	) : BaseClass (pType), m_iDataStorage (pCursor, rDataStorage) {
 	}
 
     //  Destruction
@@ -55,13 +84,12 @@ namespace Vxa {
     //  Access
     public:
 	virtual value_t value () OVERRIDE {
-	    return static_cast<value_t>(m_iDataStorage[m_pCursor->position()]);
+	    return static_cast<value_t>(m_iDataStorage.value ());
 	}
 
     //  State
     private:
-	data_storage_t		const m_iDataStorage;
-	cursor_t::Reference	const m_pCursor;
+        VParameterStorage<data_storage_t,value_t> const m_iDataStorage;
     };
 
 
@@ -75,14 +103,13 @@ namespace Vxa {
 
     //  Aliases
     public:
-	typedef VCursor cursor_t;
 	typedef typename BaseClass::value_t value_t;
 
     //  Construction
     public:
 	VBooleanParameter (
-	    VImportableType *pType, data_storage_t const &rDataStorage, cursor_t *pCursor
-	) : BaseClass (pType), m_iDataStorage (rDataStorage), m_pCursor (pCursor) {
+	    VImportableType *pType, VCursor *pCursor, data_storage_t const &rDataStorage
+	) : BaseClass (pType), m_iDataStorage (pCursor, rDataStorage) {
 	}
 
     //  Destruction
@@ -92,14 +119,13 @@ namespace Vxa {
 
     //  Access
     public:
-	virtual value_t value () OVERRIDE {
-	    return m_iDataStorage[m_pCursor->position()] ? true : false;
+	virtual bool value () OVERRIDE {
+	    return m_iDataStorage.value () ? true : false;
 	}
 
     //  State
     private:
-	data_storage_t		const m_iDataStorage;
-	cursor_t::Reference	const m_pCursor;
+	VParameterStorage<data_storage_t,value_t> const m_iDataStorage;
     };
 }
 

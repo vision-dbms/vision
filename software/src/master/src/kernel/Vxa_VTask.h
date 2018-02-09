@@ -60,6 +60,9 @@ namespace Vxa {
 	VTaskCursor *cursor () const {
 	    return m_pCursor;
 	}
+        cardinality_t cursorPosition () const {
+            return m_pCursor->position ();
+        }
 
     //  Query
     public:

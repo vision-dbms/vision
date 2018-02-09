@@ -28,6 +28,32 @@
 #include "Vxa_VImportable.h"
 
 
+/*********************************
+ *********************************
+ *****                       *****
+ *****  Vxa::VResultBuilder  *****
+ *****                       *****
+ *********************************
+ *********************************/
+
+/**************************
+ **************************
+ *****  Construction  *****
+ **************************
+ **************************/
+
+Vxa::VResultBuilder::VResultBuilder (VTask *pTask) : m_pTask (pTask) {
+}
+
+/*************************
+ *************************
+ *****  Destruction  *****
+ *************************
+ *************************/
+
+Vxa::VResultBuilder::~VResultBuilder () {
+}
+
 
 /************************
  ************************
@@ -62,10 +88,14 @@ namespace {
 	    );
 	    return true;
 	}
-	virtual bool retrieve (scalar_return_t &rResult, VTask *pTask, VCallType1Importer &rImporter) {
+	virtual bool retrieve (
+            scalar_return_t &rResult, VTask *pTask, VCallType1Importer &rImporter
+        ) OVERRIDE {
 	    return retrieveImpl (rResult, pTask, rImporter);
 	}
-	virtual bool retrieve (scalar_return_t &rResult, VTask *pTask, VCallType2Importer &rImporter) {
+	virtual bool retrieve (
+            scalar_return_t &rResult, VTask *pTask, VCallType2Importer &rImporter
+        ) OVERRIDE {
 	    return retrieveImpl (rResult, pTask, rImporter);
 	}
     } g_iResultBuilderImportable;

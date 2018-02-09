@@ -27,6 +27,8 @@ class VString;
  *************************/
 
 namespace Vxa {
+    class VAny;
+
     /*****************************************************
      *----  template <typename Val_T> class VScalar  ----*
      *****************************************************/
@@ -57,6 +59,7 @@ namespace Vxa {
 	VType::Pointer const m_pType;
     };
 
+    typedef VScalar<VAny const&>::Reference	any_scalar_return_t;
     typedef VScalar<bool>::Reference		bool_scalar_return_t;
     typedef VScalar<short>::Reference		short_scalar_return_t;
     typedef VScalar<unsigned short>::Reference	unsigned_short_scalar_return_t;

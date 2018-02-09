@@ -10,6 +10,8 @@
 #include "Vxa_IVSNFTaskImplementation3.h"
 #include "Vxa_IVSNFTaskImplementation3NC.h"
 
+#include "Vxa_VAny.h"
+
 /**************************
  *****  Declarations  *****
  **************************/
@@ -90,6 +92,7 @@ namespace Vxa {
 	//  Aliases
 	public:
 	    typedef typename scalar_return_t::ReferencedClass scalar_t;
+            typedef typename scalar_t::value_t scalar_value_t;
 
 	//  Construction
 	protected:
@@ -116,6 +119,83 @@ namespace Vxa {
 	};
 
 
+    /***************************************************************************
+     *----  template <typename scalar_return_t> class AnyParameterFactory  ----*
+     ***************************************************************************/
+
+    public:
+	template <typename scalar_return_t> class AnyParameterFactory
+            : public ParameterFactory_<scalar_return_t>
+        {
+	    DECLARE_CONCRETE_RTTLITE (AnyParameterFactory<scalar_return_t>, ParameterFactory_<scalar_return_t>);
+
+        //  Aliases
+        public:
+            typedef typename BaseClass::scalar_value_t       scalar_val_t;
+            typedef typename Vca::VTypePattern<scalar_val_t> scalar_var_t;
+
+        //  Parameter Storage
+        public:
+            template <typename data_storage_t> class ParameterStorage : public VAny {
+            //  Construction
+            public:
+                ParameterStorage (
+                    VCallAgent *pAgent, data_storage_t const &rDataStorage
+                ) : m_iDataStorage (pAgent->taskCursor (), rDataStorage) {
+                }
+
+            //  Destruction
+            public:
+                ~ParameterStorage () {
+                }
+
+            //  Use
+            public:
+                virtual void supply (Client &rClient) const OVERRIDE {
+                    rClient.on (m_iDataStorage.value ());
+                }
+
+            //  State
+            private:
+                VParameterStorage<data_storage_t, typename data_storage_t::element_t> m_iDataStorage;
+            };
+
+	//  Construction
+	public:
+	    AnyParameterFactory (
+                VImportableType *pType, scalar_return_t &rpResult
+            ) : BaseClass (pType, rpResult) {
+	    }
+
+	//  Destruction
+	protected:
+	    ~AnyParameterFactory () {
+	    }
+
+	//  Callbacks
+	private:
+            template <typename data_storage_t> bool createFromImpl (
+                VCallAgent *pAgent, data_storage_t const &rValues
+            ) {
+                this->setResultTo (
+                    new VScalarInstance<scalar_val_t,ParameterStorage<data_storage_t> > (
+                        this->type (), pAgent, rValues
+                    )
+                );
+                return true;
+            }
+	    virtual bool createFromIntegers (i32_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
+                return createFromImpl (pAgent, rValues);
+	    }
+	    virtual bool createFromDoubles (f64_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
+                return createFromImpl (pAgent, rValues);
+	    }
+	    virtual bool createFromStrings (str_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
+                return createFromImpl (pAgent, rValues);
+	    }
+	};
+
+
     /*******************************************************************************
      *----  template <typename scalar_return_t> class BooleanParameterFactory  ----*
      *******************************************************************************/
@@ -137,11 +217,19 @@ namespace Vxa {
 	//  Callbacks
 	private:
 	    virtual bool createFromIntegers (i32_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
-		this->setResultTo (new VBooleanParameter<i32_array_t> (this->type (), rValues, pAgent->taskCursor ()));
+		this->setResultTo (
+                    new VBooleanParameter<i32_array_t> (
+                        this->type (), pAgent->taskCursor (), rValues
+                    )
+                );
 		return true;
 	    }
 	    virtual bool createFromDoubles (f64_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
-		this->setResultTo (new VBooleanParameter<f64_array_t> (this->type (), rValues, pAgent->taskCursor ()));
+		this->setResultTo (
+                    new VBooleanParameter<f64_array_t> (
+                        this->type (), pAgent->taskCursor (), rValues
+                    )
+                );
 		return true;
 	    }
 	};
@@ -168,11 +256,19 @@ namespace Vxa {
 	//  Callbacks
 	private:
 	    virtual bool createFromIntegers (i32_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
-		this->setResultTo (new VParameter<scalar_return_t,i32_array_t> (this->type (), rValues, pAgent->taskCursor ()));
+		this->setResultTo (
+                    new VParameter<scalar_return_t,i32_array_t> (
+                        this->type (), pAgent->taskCursor (), rValues
+                    )
+                );
 		return true;
 	    }
 	    virtual bool createFromDoubles (f64_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
-		this->setResultTo (new VParameter<scalar_return_t,f64_array_t> (this->type (), rValues, pAgent->taskCursor ()));
+		this->setResultTo (
+                    new VParameter<scalar_return_t,f64_array_t> (
+                        this->type (), pAgent->taskCursor (), rValues
+                    )
+                );
 		return true;
 	    }
 	};
@@ -199,7 +295,11 @@ namespace Vxa {
 	//  Callbacks
 	private:
 	    virtual bool createFromStrings (str_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
-		this->setResultTo (new VParameter<scalar_return_t,str_array_t> (this->type (), rValues, pAgent->taskCursor ()));
+		this->setResultTo (
+                    new VParameter<scalar_return_t,str_array_t> (
+                        this->type (), pAgent->taskCursor (), rValues
+                    )
+                );
 		return true;
 	    }
 	};
@@ -295,6 +395,11 @@ namespace Vxa {
 	bool getParameterFactory (factory_reference_t &rpParameterFactory, unsigned int xParameter);
 	bool setParameterFactory (ParameterFactory *pParameterFactory);
     public:
+	template <typename scalar_result_t> bool getAnyParameter (VImportableType *pType, scalar_result_t &rpResult) {
+	    return moreToDo () && setParameterFactory (
+		new AnyParameterFactory<scalar_result_t> (pType, rpResult)
+	    );
+	}
 	template <typename scalar_result_t> bool getBooleanParameter (VImportableType *pType, scalar_result_t &rpResult) {
 	    return moreToDo () && setParameterFactory (
 		new BooleanParameterFactory<scalar_result_t> (pType, rpResult)

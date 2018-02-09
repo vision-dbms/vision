@@ -253,7 +253,6 @@ namespace Vxa {
     //  State
     private:
 	ResultSet::Reference m_pResultSet;
-	VTask *m_pTask;
 	bool m_bDisabled;
     };
 }

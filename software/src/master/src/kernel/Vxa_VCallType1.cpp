@@ -339,6 +339,10 @@ Vxa::VCallAgent *Vxa::VCallType1Importer::agent (VTask *pTask) const {
     return m_pAgent;
 }
 
+bool Vxa::VCallType1Importer::getParameter (VTask *pTask, VImportableType *pType, any_scalar_return_t &rpResult) {
+    return agent (pTask)->getAnyParameter (pType, rpResult);
+}
+
 bool Vxa::VCallType1Importer::getParameter (VTask *pTask, VImportableType *pType, bool_scalar_return_t &rpResult) {
     return agent (pTask)->getBooleanParameter (pType, rpResult);
 }

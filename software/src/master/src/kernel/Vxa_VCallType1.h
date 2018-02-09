@@ -60,11 +60,11 @@ namespace Vxa {
 
     //  Access
     private:
-	IVUnknown *caller () const;
+	virtual IVUnknown *caller () const OVERRIDE;
 
     //  Invocation
     public:
-	virtual bool invokeMethod (VMethod *pMethod, VCollection *pCluster) const;
+	virtual bool invokeMethod (VMethod *pMethod, VCollection *pCluster) const OVERRIDE;
 
     //  Parameter Acquisition
     protected:
@@ -145,6 +145,7 @@ namespace Vxa {
 	) {
 	    return raiseParameterTypeException (pTask, typeid(*this), typeid (scalar_return_t));
 	}
+        bool getParameter (VTask *pTask, VImportableType *pType, any_scalar_return_t &rResult);
 	bool getParameter (VTask *pTask, VImportableType *pType, bool_scalar_return_t &rResult);
 	bool getParameter (VTask *pTask, VImportableType *pType, short_scalar_return_t &rResult);
 	bool getParameter (VTask *pTask, VImportableType *pType, unsigned_short_scalar_return_t &rResult);

@@ -130,6 +130,7 @@ namespace Vxa {
 #define Vxa_VImportable_Implementation extern
 #endif
 
+Vxa_VImportable_Implementation template class Vxa_API Vxa::VImportable<Vxa::VAny const&>;
 Vxa_VImportable_Implementation template class Vxa_API Vxa::VImportable<bool>;
 Vxa_VImportable_Implementation template class Vxa_API Vxa::VImportable<short>;
 Vxa_VImportable_Implementation template class Vxa_API Vxa::VImportable<unsigned short>;
