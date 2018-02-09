@@ -105,8 +105,8 @@ namespace Vxa {
 	bool returnVector (VkDynamicArrayOf<VString> const &rVector) const;
 	bool returnVector (VkDynamicArrayOf<ISingleton::Reference> const &rVector) const;
 
-	virtual bool returnError (VString const &rMessage) const;
-	virtual bool returnSNF () const;
+	virtual bool returnError (VString const &rMessage) const OVERRIDE;
+	virtual bool returnSNF () const OVERRIDE;
 
     //  Task Management
     public:
