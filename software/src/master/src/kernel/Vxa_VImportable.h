@@ -119,10 +119,45 @@ namespace Vxa {
     template <typename T> VImportable<T>* VImportable<T>::g_pTraits = 0;
 }
 
+/****************************************************************************************
+ *----  template <typename T, template<typename> class W> class VImportable<W<T> >  ----*
+ ****************************************************************************************/
+#include "VkArrayOf.h"
+
+namespace Vxa {
+    template <typename T> class PPack {
+    //  Aliases
+    public:
+        typedef T val_t;
+        typedef typename Vca::VTypePattern<T>::var_t var_t;
+        typedef VImportable<val_t> importable_t;
+        typedef typename importable_t::Instance importable_instance_t;
+
+    //  Construction
+    public:
+        PPack (cardinality_t cParameters) : m_aParameters (cParameters) {
+        }
+    //  Destruction
+    public:
+        ~PPack () {
+        }
+
+    //  State
+    private:
+        V::VkArrayOf<importable_instance_t> m_aParameters;
+    };
+
+/**********************************************************************************/
+    template <template<typename> class W, typename T> class VImportable<W<T> > {
+    };
+    template <template<typename> class W, typename T> class VImportable<W<T>&> {
+    };
+
+}
 
 /*************************************
-*****  Template Instantiations  *****
-*************************************/
+ *****  Template Instantiations  *****
+ *************************************/
 
 #if defined(USING_HIDDEN_DEFAULT_VISIBILITY) || defined(Vxa_VImportable_Implementation)
 
