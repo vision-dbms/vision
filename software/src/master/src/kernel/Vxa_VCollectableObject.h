@@ -114,6 +114,13 @@ namespace Vxa {
 	    return defineMethodImpl (rName, pMethod);
 	}
 
+	template <typename Signature> bool defineDefault (Signature pMember) {
+	    typename VCollectableMethod<Signature>::Reference pMethod (
+		new VCollectableMethod<Signature> (pMember)
+	    );
+	    return defineDefaultImpl (pMethod);
+	}
+
 	bool defineHelp (VString const &rWhere);
 
     private:
@@ -122,6 +129,7 @@ namespace Vxa {
 	    return VExportable<T>::CreateMethod (pMethod, rConstant) && defineMethodImpl (rName, pMethod);
 	}
 	bool defineMethodImpl (VString const &rName, VMethod *pMethod);
+	bool defineDefaultImpl (VMethod *pMethod);
 
     //  State
     private:

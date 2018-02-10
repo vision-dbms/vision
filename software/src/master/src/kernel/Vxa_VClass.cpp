@@ -92,6 +92,11 @@ bool Vxa::VClass::defineMethod (VString const &rName, VMethod *pMethod) {
     return true;
 }
 
+bool Vxa::VClass::defineDefault (VMethod *pMethod) {
+    m_pDefaultMethod.setTo (pMethod);
+    return true;
+}
+
 /***************************
  ***************************
  *****  Method Access  *****
@@ -100,11 +105,12 @@ bool Vxa::VClass::defineMethod (VString const &rName, VMethod *pMethod) {
 
 bool Vxa::VClass::getMethod (VMethod::Reference &rpMethod, VCallHandle const &rCallHandle) const {
     unsigned int xElement = UINT_MAX;
-    if (!m_iDictionary.Locate (rCallHandle.methodName (), xElement))
-        return false;
-
-    rpMethod.setTo (m_iDictionary.value(xElement));
-    return true;
+    if (m_iDictionary.Locate (rCallHandle.methodName (), xElement)) {
+	rpMethod.setTo (m_iDictionary.value(xElement));
+	return true;
+    }
+    rpMethod.setTo (m_pDefaultMethod);
+    return rpMethod.isntNil ();
 }
 
 /*******************************
