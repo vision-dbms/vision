@@ -131,8 +131,7 @@ namespace Vxa {
 
         //  Aliases
         public:
-            typedef typename BaseClass::scalar_value_t       scalar_val_t;
-            typedef typename Vca::VTypePattern<scalar_val_t> scalar_var_t;
+            typedef typename BaseClass::scalar_value_t scalar_value_t;
 
         //  Parameter Storage
         public:
@@ -178,7 +177,7 @@ namespace Vxa {
                 VCallAgent *pAgent, data_storage_t const &rValues
             ) {
                 this->setResultTo (
-                    new VScalarInstance<scalar_val_t,ParameterStorage<data_storage_t> > (
+                    new VScalarInstance<scalar_value_t,ParameterStorage<data_storage_t> > (
                         this->type (), pAgent, rValues
                     )
                 );
