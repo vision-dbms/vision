@@ -79,6 +79,10 @@ bool Vxa::VCollectableObject::ClassBuilder::defineMethodImpl (VString const &rNa
     return m_pClass->defineMethod (rName, pMethod);
 }
 
+bool Vxa::VCollectableObject::ClassBuilder::defineDefaultImpl (VMethod *pMethod) {
+    return m_pClass->defineDefault (pMethod);
+}
+
 bool Vxa::VCollectableObject::ClassBuilder::defineHelp (VString const &rWhere) {
     VString iHelpInfo;
     iHelpInfo << "The class " << rWhere << " supports the following methods:\nhelp\n" << m_iHelpInfo;

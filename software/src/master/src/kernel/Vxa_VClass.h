@@ -56,6 +56,7 @@ namespace Vxa {
     //  Method Definition
     public:
 	bool defineMethod (VString const &rName, VMethod *pMethod);
+	bool defineDefault (VMethod *pMethod);
 
     //  Method Access
     public:
@@ -68,6 +69,7 @@ namespace Vxa {
     //  State
     private:
 	dictionary_t m_iDictionary;
+	VMethod::Reference m_pDefaultMethod;
 	unsigned __int64 m_cCollectionsCreated;
 	unsigned __int64 m_cCollectionsDeleted;
 	unsigned __int64 m_cInstancesReported;
