@@ -122,6 +122,7 @@ namespace Vxa {
 /****************************************************************************************
  *----  template <typename T, template<typename> class W> class VImportable<W<T> >  ----*
  ****************************************************************************************/
+
 #include "VkArrayOf.h"
 
 namespace Vxa {
@@ -145,6 +146,78 @@ namespace Vxa {
     //  State
     private:
         V::VkArrayOf<importable_instance_t> m_aParameters;
+    };
+
+/**********************************************************************************/
+    template <typename T> class VImportable<PPack<T> > {
+    //  Aliases
+    public:
+        typedef PPack<T> pack_t;
+	typedef typename VScalar<T>::Reference scalar_return_t;
+
+    //  Instance
+    public:
+	class Instance {
+	//  Construction
+	public:
+	    Instance () {
+	    }
+
+	//  Destruction
+	public:
+	    ~Instance () {
+	    }
+
+	//  Access
+	public:
+	    operator T () const {
+		return m_pValue->value ();
+	    }
+
+	//  Update
+	public:
+	    template <typename CallImporter> bool retrieve (VTask *pTask, CallImporter &rImporter) {
+		return Retrieve (m_pValue, pTask, rImporter);
+	    }
+	    void clear () {
+		m_pValue.clear ();
+	    }
+
+	//  State
+	private:
+	    scalar_return_t m_pValue;
+	};
+
+    //  Construction
+    protected:
+	VImportable () {
+	}
+
+    //  Destruction
+    protected:
+	~VImportable () {
+	}
+
+    //  Use
+    private:
+	template <class ImporterType> static bool RetrieveImpl (
+	    scalar_return_t &rResult, VTask *pTask, ImporterType &rImporter
+	) {
+        //  GOTTA GET A TYPE...
+	    /* rResult.setTo ( */
+	    /*     new VScalarInstance<VResultBuilder&,pack_t> (this, pTask, rImporter) */
+	    /* ); */
+	    /* return true; */
+            return false;
+	}
+
+    public:
+	static bool Retrieve (scalar_return_t &rResult, VTask *pTask, VCallType1Importer &rImporter) {
+	    return RetrieveImpl (rResult, pTask, rImporter);
+	}
+	static bool Retrieve (scalar_return_t &rResult, VTask *pTask, VCallType2Importer &rImporter) {
+	    return RetrieveImpl (rResult, pTask, rImporter);
+	}
     };
 
 /**********************************************************************************/
