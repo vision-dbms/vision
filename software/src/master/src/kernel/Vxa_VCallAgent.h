@@ -11,6 +11,7 @@
 #include "Vxa_IVSNFTaskImplementation3NC.h"
 
 #include "Vxa_VAny.h"
+#include "Vxa_VPack.h"
 
 /**************************
  *****  Declarations  *****
@@ -379,6 +380,14 @@ namespace Vxa {
 	bool moreToDo () const {
 	    return m_pTask->moreToDo ();
 	}
+
+        cardinality_t parameterIndex () const {
+            return m_xParameter;
+        }
+        cardinality_t parameterCountRemaining () const {
+            return m_cParameters - m_xParameter;
+        }
+            
 	VTask *task () const {
 	    return m_pTask;
 	}
@@ -394,6 +403,12 @@ namespace Vxa {
 	bool getParameterFactory (factory_reference_t &rpParameterFactory, unsigned int xParameter);
 	bool setParameterFactory (ParameterFactory *pParameterFactory);
     public:
+        template <typename scalar_result_t> bool getParameterPack (VImportableType *pType, scalar_result_t &rpResult) {
+            /* return moreToDo () && setParameterFactory ( */
+            /*     new ParameterPackFactory<scalar_result_t> (pType, rpResult) */
+            /* ); */
+            return false;
+        }
 	template <typename scalar_result_t> bool getAnyParameter (VImportableType *pType, scalar_result_t &rpResult) {
 	    return moreToDo () && setParameterFactory (
 		new AnyParameterFactory<scalar_result_t> (pType, rpResult)

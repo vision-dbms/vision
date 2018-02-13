@@ -21,6 +21,10 @@
 
 namespace Vxa {
     class Vxa_API VAny {
+    //  Aliases
+    public:
+        typedef VAny const& value_t;
+
     //  Client
     public:
         class Client;

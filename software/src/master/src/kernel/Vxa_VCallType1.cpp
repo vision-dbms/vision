@@ -374,6 +374,14 @@ bool Vxa::VCallType1Importer::getParameter (VTask *pTask, VImportableType *pType
 bool Vxa::VCallType1Importer::getParameter (VTask *pTask, VImportableType *pType, VString_scalar_return_t &rpResult) {
     return agent (pTask)->getStringParameter (pType, rpResult);
 }
+
+Vxa::cardinality_t Vxa::VCallType1Importer::getParameterIndex (VTask *pTask) const {
+    return agent (pTask)->parameterIndex ();
+}
+
+Vxa::cardinality_t Vxa::VCallType1Importer::getParameterCountRemaining (VTask *pTask) const {
+    return agent (pTask)->parameterCountRemaining ();
+}
 
 
 /**********************************

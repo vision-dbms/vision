@@ -11,6 +11,7 @@
  *****  Declarations  *****
  **************************/
 
+#include "Vxa_VPack.h"
 #include "Vxa_VResultBuilder.h"
 #include "Vxa_VScalar.h"
 
@@ -117,43 +118,18 @@ namespace Vxa {
     };
 
     template <typename T> VImportable<T>* VImportable<T>::g_pTraits = 0;
-}
+
 
-/****************************************************************************************
- *----  template <typename T, template<typename> class W> class VImportable<W<T> >  ----*
- ****************************************************************************************/
+/**********************************************************************
+ *----  template <typename T> class VImportable<VPack<T> const&>  ----*
+ **********************************************************************/
 
-#include "VkArrayOf.h"
-
-namespace Vxa {
-    template <typename T> class PPack {
+    template <typename T> class VImportable<VPack<T> const&> {
     //  Aliases
     public:
-        typedef T val_t;
-        typedef typename Vca::VTypePattern<T>::var_t var_t;
-        typedef VImportable<val_t> importable_t;
-        typedef typename importable_t::Instance importable_instance_t;
-
-    //  Construction
-    public:
-        PPack (cardinality_t cParameters) : m_aParameters (cParameters) {
-        }
-    //  Destruction
-    public:
-        ~PPack () {
-        }
-
-    //  State
-    private:
-        V::VkArrayOf<importable_instance_t> m_aParameters;
-    };
-
-/**********************************************************************************/
-    template <typename T> class VImportable<PPack<T> > {
-    //  Aliases
-    public:
-        typedef PPack<T> pack_t;
-	typedef typename VScalar<T>::Reference scalar_return_t;
+        typedef VPack<T> pack_t;
+        typedef typename pack_t::value_t pack_value_t;
+        typedef typename pack_t::return_t pack_return_t;
 
     //  Instance
     public:
@@ -170,7 +146,7 @@ namespace Vxa {
 
 	//  Access
 	public:
-	    operator T () const {
+	    operator pack_value_t () const {
 		return m_pValue->value ();
 	    }
 
@@ -185,8 +161,12 @@ namespace Vxa {
 
 	//  State
 	private:
-	    scalar_return_t m_pValue;
+	    pack_return_t m_pValue;
 	};
+
+    //  PackImplementation
+    public:
+        class PackImplementation;
 
     //  Construction
     protected:
@@ -200,32 +180,65 @@ namespace Vxa {
 
     //  Use
     private:
-	template <class ImporterType> static bool RetrieveImpl (
-	    scalar_return_t &rResult, VTask *pTask, ImporterType &rImporter
+	template <class CallImporter> static bool RetrieveImpl (
+	    pack_return_t &rResult, VTask *pTask, CallImporter &rImporter
 	) {
-        //  GOTTA GET A TYPE...
-	    /* rResult.setTo ( */
-	    /*     new VScalarInstance<VResultBuilder&,pack_t> (this, pTask, rImporter) */
-	    /* ); */
-	    /* return true; */
-            return false;
+        //  GOTTA GET A TYPE??? MAYBE NOT!!!
+	    rResult.setTo (
+                new VScalarInstance<pack_value_t,PackImplementation> (
+                    static_cast<VImportableType*>(0), pTask, rImporter
+                )
+	    );
+	    return true;
 	}
 
     public:
-	static bool Retrieve (scalar_return_t &rResult, VTask *pTask, VCallType1Importer &rImporter) {
+	static bool Retrieve (pack_return_t &rResult, VTask *pTask, VCallType1Importer &rImporter) {
 	    return RetrieveImpl (rResult, pTask, rImporter);
 	}
-	static bool Retrieve (scalar_return_t &rResult, VTask *pTask, VCallType2Importer &rImporter) {
+	static bool Retrieve (pack_return_t &rResult, VTask *pTask, VCallType2Importer &rImporter) {
 	    return RetrieveImpl (rResult, pTask, rImporter);
 	}
     };
 
-/**********************************************************************************/
-    template <template<typename> class W, typename T> class VImportable<W<T> > {
-    };
-    template <template<typename> class W, typename T> class VImportable<W<T>&> {
-    };
+
 
+/******************************************************************************************
+ *----  template <typename T> class VImportable<VPack<T> const&>::PackImplementation  ----*
+ ******************************************************************************************/
+
+    template <typename T> class VImportable<VPack<T> const&>::PackImplementation : public VPack<T> {
+    //  Aliases
+    public:
+        typedef typename VImportable<T>::Instance element_instance_t;
+
+    //  Construction
+    public:
+        template <typename CallImporter> PackImplementation (
+            VTask *pTask, CallImporter &rImporter
+        ) : m_iElementArray (rImporter.getParameterCountRemaining (pTask)) {
+            for (cardinality_t xParameter = 0; xParameter < parameterCount (); xParameter++)
+                m_iElementArray[xParameter].retrieve (pTask, rImporter);
+        }
+
+    //  Destruction
+    public:
+        ~PackImplementation () {
+        }
+
+    //  Access
+    public:
+        cardinality_t parameterCount () const OVERRIDE {
+            return m_iElementArray.elementCount ();
+        }
+        T parameterValue (cardinality_t xParameter) const OVERRIDE {
+            return m_iElementArray[xParameter];
+        }
+
+    //  State
+    private:
+        VkDynamicArrayOf<element_instance_t> m_iElementArray;
+    };
 }
 
 /*************************************

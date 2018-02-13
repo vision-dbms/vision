@@ -15,6 +15,7 @@
 
 #include "Vxa_IVSNFTaskHolder.h"
 
+#include "Vxa_VPack.h"
 #include "Vxa_VScalar.h"
 
 /*************************
@@ -154,6 +155,9 @@ namespace Vxa {
 	bool getParameter (VTask *pTask, VImportableType *pType, float_scalar_return_t &rResult);
 	bool getParameter (VTask *pTask, VImportableType *pType, double_scalar_return_t &rResult);
 	bool getParameter (VTask *pTask, VImportableType *pType, VString_scalar_return_t &rResult);
+
+        cardinality_t getParameterIndex (VTask *pTask) const;
+        cardinality_t getParameterCountRemaining (VTask *pTask) const;
 
     //  Exception Generation
     protected:
