@@ -52,6 +52,10 @@ namespace Vxa {
         virtual cardinality_t parameterCount () const = 0;
         virtual T parameterValue (cardinality_t xParameter) const = 0;
 
+        T operator[] (cardinality_t xParameter) const {
+            return parameterValue (xParameter);
+        }
+
     //  State
     private:
     };
