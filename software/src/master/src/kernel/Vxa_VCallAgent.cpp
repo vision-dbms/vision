@@ -12,8 +12,6 @@
 
 #include "Vk.h"
 
-#include <iostream>
-
 /******************
  *****  Self  *****
  ******************/
@@ -147,27 +145,11 @@ void Vxa::VCallAgent::OnParameterError (
  ***********************************/
 
 bool Vxa::VCallAgent::setParameterFactory (ParameterFactory *pParameterFactory) {
-    std::cerr
-        << this
-        << "setParameterFactory["
-        << m_xParameter
-        << "]: "
-        << task ()->methodName ()
-        << std::endl;
     m_pFactory[m_xParameter].setTo (pParameterFactory);
     return onParameterRequest (m_pTask, m_xParameter++);
 }
 
 bool Vxa::VCallAgent::getParameterFactory (factory_reference_t &rpParameterFactory, unsigned int xParameter) {
-    std::cerr
-        << this
-        << "getParameterFactory["
-        << xParameter
-        << "/"
-        << m_xParameter
-        << "]: "
-        << task ()->methodName ()
-        << std::endl;
     if (xParameter < m_cParameters)
 	rpParameterFactory.claim (m_pFactory[xParameter]);
     else
