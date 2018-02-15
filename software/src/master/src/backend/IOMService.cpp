@@ -67,30 +67,10 @@ IOMChannelType IOMService::channelType () const {
     return IOMChannelType_Service;
 }
 
-int IOMService::getPeerNameString (char** ppString, size_t* psString) {
-#if 0
-    return GetSocketStream ()->GetSocketPeerName (&m_iStatus, ppString, psString);
-#else
-    return BaseClass::getPeerNameString (ppString, psString);
-#endif
-}
-
-int IOMService::getSocketNameString (char** ppString, size_t* psString) {
-#if 0
-    return GetSocketStream ()->GetSocketName (&m_iStatus, ppString, psString);
-#else
-    return BaseClass::getSocketNameString (ppString, psString);
-#endif
-}
-
 int IOMService::getTcpNodelay (int* fOnOff) {
-#if 0
-    return GetSocketStream ()->GetTcpNodelay (&m_iStatus, fOnOff);
-#else
     *fOnOff = false;
     m_iStatus.MakeFailureStatus ();
     return -1;
-#endif
 }
 
 
@@ -115,40 +95,18 @@ void IOMService::Close () {
 }
 
 int IOMService::EndTransmission () {
-    if (isClosing ()) {
-	m_iStatus.MakeFailureStatus ();
-	return -1;
-    }
-
-#if 0
-    return GetSocketStream ()->EndTransmission (&m_iStatus);
-#else
     m_iStatus.MakeFailureStatus ();
     return -1;
-#endif
 }
 
 int IOMService::EndReception () {
-    if (isClosing ()) {
-	m_iStatus.MakeFailureStatus ();
-	return -1;
-    }
-
-#if 0
-    return GetSocketStream ()->m_iListener.EndReception (&m_iStatus);
-#else
     m_iStatus.MakeFailureStatus ();
     return -1;
-#endif
 }
 
 int IOMService::SetTcpNodelay (int fOnOff) {
-#if 0
-    return GetSocketStream ()->SetTcpNodelay (&m_iStatus, fOnOff);
-#else
     m_iStatus.MakeFailureStatus ();
     return -1;
-#endif
 }
 
 

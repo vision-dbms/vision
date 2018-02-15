@@ -944,7 +944,7 @@ PrivateFnDef void specialItem() {
 }
 
 PrivateFnDef void execExpr () {
-    char buffer[100];
+    char buffer[256];
 
     if (isBlank(FORM_fieldValue(EXPR1)) &&
 	isBlank(FORM_fieldValue(EXPR2)))
@@ -955,7 +955,9 @@ PrivateFnDef void execExpr () {
     
     PAGE_status(MenuPage) = PAGE_ExitOnExec;
 
-    sprintf(buffer, "%s %s", FORM_fieldValue(EXPR1), FORM_fieldValue(EXPR2));
+    snprintf(buffer, sizeof(buffer),
+	     "%s %s",
+	     FORM_fieldValue(EXPR1), FORM_fieldValue(EXPR2));
     strcpy(FORM_fieldValue(ITEM), buffer);
     CUR_wattron(Win1, FORM_fieldAttr(ITEM));
     CUR_wmove(Win1, FORM_fieldY(ITEM), FORM_fieldX(ITEM));
@@ -1386,7 +1388,7 @@ PrivateFnDef void getItemsUniverse() {
 PrivateVarDef int UnivFirstTime = TRUE;
 
 PrivateFnDef void execUniverse () {
-    char buffer[80];
+    char buffer[128];
     
     if (isBlank(FORM_fieldValue(UNIVERSE)))
     {
@@ -1395,7 +1397,7 @@ PrivateFnDef void execUniverse () {
     }
 
    ERR_displayStr(" Validating Universe...",FALSE);
-   sprintf(buffer, "companyUniverse%sList", FORM_fieldValue(UNIVERSE));
+   snprintf(buffer, sizeof(buffer), "companyUniverse%sList", FORM_fieldValue(UNIVERSE));
 
     if (RS_sendAndCheck (buffer, ">>>"))
 	ERR_displayPause (" Invalid Universe");

@@ -1821,7 +1821,7 @@ char msg[80];
 	ERR_displayStrMsg(SearchString," not found",BEEP);
    else
    {
-	sprintf(msg,"Replaced %d occurences",count);
+	snprintf(msg,sizeof(msg),"Replaced %d occurences",count);
 	ERR_displayStr(msg,FALSE);
    }
    return SUCCESS;
@@ -1914,7 +1914,7 @@ char msg[80];
 	ERR_displayStrMsg(SearchString," not found",BEEP);
    else
    {
-	sprintf(msg,"Replaced %d occurences",count);
+        snprintf(msg, sizeof(msg),"Replaced %d occurences",count);
 	ERR_displayStr(msg,FALSE);
    }
 
@@ -2204,11 +2204,11 @@ PublicFnDef int BUF_appendRegion(
  *************************************************/
 
 PrivateFnDef void systemPrint (LINEBUFFER *buf) {
-    char buffer[80], filename[80], *row;
+    char buffer[128], filename[128], *row;
     FILE *fd;
 
     ERR_displayStr ("Printing buffer, please wait...",FALSE);
-    sprintf(filename, "/tmp/vision%d", getpid());
+    snprintf(filename, sizeof(filename), "/tmp/vision%d", getpid());
 
     fd = fopen (filename, "w");
 
@@ -2226,7 +2226,7 @@ PrivateFnDef void systemPrint (LINEBUFFER *buf) {
     fclose(fd);
 
 /***    sprintf(buffer, "lp -c -s -oc < %s", filename);	***/
-    sprintf (buffer, "%s %s", PRINT_Command.command, filename);
+    snprintf (buffer, sizeof(buffer), "%s %s", PRINT_Command.command, filename);
     RS_system (buffer);
     remove (filename);
     ERR_clearMsg ();
@@ -2254,7 +2254,7 @@ PrivateFnDef void pcPrint(LINEBUFFER *buf) {
     putchar('\020');	/*** toggle printer ***/
 #endif
 
-    sprintf (filename, "/tmp/vision%d", getpid());
+    snprintf (filename, sizeof(filename), "/tmp/vision%d", getpid());
 
     fd = fopen (filename, "w");
 
@@ -2267,7 +2267,7 @@ PrivateFnDef void pcPrint(LINEBUFFER *buf) {
 
     fclose (fd);
 
-    sprintf (buffer, "%s %s", PRINT_Command.command, filename);
+    snprintf (buffer, sizeof(buffer), "%s %s", PRINT_Command.command, filename);
     RS_system (buffer);
     remove (filename);
 

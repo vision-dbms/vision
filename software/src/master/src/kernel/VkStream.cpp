@@ -370,7 +370,7 @@ size_t VkStream::GetByteCount (VkStatus *pStatusReturn){
 
 
 SOCKET VkStream::GetSocketHandle () const {
-    return this && VkStreamType_Socket == m_xType ? (SOCKET)m_hStream : INVALID_SOCKET;
+    return VkStreamType_Socket == m_xType ? (SOCKET)m_hStream : INVALID_SOCKET;
 }
 
 int VkStream::GetSocketName (

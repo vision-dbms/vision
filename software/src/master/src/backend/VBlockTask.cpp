@@ -60,7 +60,7 @@ VBlockTask::Decompilation::Decompilation (
     VBlockTask const *pBlockTask, VCall const *pContext
 ) {
     RSLANG_Decompile (
-	m_iSource, pBlockTask->blockCPD (), &m_iOffset, pContext->callerPC ()
+        m_iSource, pBlockTask->blockCPD (), &m_iOffset, VCall::CallerPCOf (pContext)
     );
     m_pPrefix = m_iSource;
 

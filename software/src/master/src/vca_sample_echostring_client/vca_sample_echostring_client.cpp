@@ -170,7 +170,7 @@ void VcaSamples::ThisApp::onServer (IEchoString *pEchoServer) {
 	    pToken = iCommandLineCursor.nextToken ();
 	} while (pToken);
     } else {
-	fprintf (stderr, "+++ No Server At Address\n", arg0 ());
+	fprintf (stderr, "+++ No Server At Address %s\n", arg0 ());
 	setExitStatus (ErrorExitValue);
 	stop ();
     }

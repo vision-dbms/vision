@@ -920,7 +920,7 @@ public:
 
     bool GetCTE (unsigned int xContainer, CTE &rResult) const;
     bool GetCTE (unsigned int xContainer, PS_CTE &rResult) const {
-	return IsntNil (this) && m_pPASD->GetCTE (xContainer, rResult);
+	return m_pPASD->GetCTE (xContainer, rResult);
     }
 
     bool GetCTE (int xContainer, CTE &rResult) const {

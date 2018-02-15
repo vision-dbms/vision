@@ -969,6 +969,10 @@ Vca::VRolePlayer::~VRolePlayer () {
  ********************
  ********************/
 
+Vca::VCohort *Vca::VRolePlayer::CohortOf (VRolePlayer const *pRolePlayer) {
+    return pRolePlayer ? pRolePlayer->cohorT () : 0;
+}
+
 VString Vca::VRolePlayer::classBaseNames () const {
     return classInfo().baseNames ();
 }

@@ -901,10 +901,12 @@ PrivateFnDef void parentSignalHandler (int sig)
 	ERR_displayError (ERR_FloatSig);
 	break;
 	
+#ifdef SIGBUS
     case SIGBUS:
 	ERR_displayError (ERR_BusSig);
 	break;
-	
+#endif
+
     case SIGSYS:
 	ERR_displayError (ERR_ArgSig);
 	break;
@@ -921,7 +923,7 @@ PrivateFnDef void parentSignalHandler (int sig)
 	ERR_displayError (ERR_User1Sig);
 	break;
 
-#ifndef __APPLE__	
+#ifdef SIGPWR
     case SIGPWR:
 	ERR_displayError (ERR_PowerSig);
 	break;
@@ -939,7 +941,7 @@ PrivateFnDef void parentSignalHandler (int sig)
 	ERR_displayError (ERR_SIGIOSig);
 	break;
 	
-#ifndef __APPLE__
+#ifdef SIGWINDOW
     case SIGWINDOW:
 	ERR_displayError (ERR_WinSig);
 	break;

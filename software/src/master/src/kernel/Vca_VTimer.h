@@ -212,12 +212,12 @@ namespace Vca {
 
         /** Returns true if this timer is running. */
         bool isRunning () const {
-            return this && m_bRunning;
+            return m_bRunning;
         }
 
         /** Returns true if this timer is @e not running. */
         bool isntRunning () const {
-            return !this || !m_bRunning;
+            return !m_bRunning;
         }
 
         /** Returns the amount of time until this timer will expire. */

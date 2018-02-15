@@ -184,7 +184,7 @@ bool VkSocketAddress::constructGenericAddress (
 	m_iAddress.inOpenVisionFormat.sa_family
     );
     size_t index = 0;
-    u_long nextByte;
+    unsigned int  nextByte;
     int	   nextOffset;
 
     while (
