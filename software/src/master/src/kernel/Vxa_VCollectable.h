@@ -145,7 +145,11 @@ namespace Vxa {
              *>>>>  that in the not too distant future.
              ************************************************************************/
             VCollectableCollection::Reference pCluster;
-            VCollectableTraits<T>::CreateIdentity (pCluster, rpInstance, thisAsClass ());
+            if (rpInstance->hasAnIdentity ())
+                pCluster.setTo (rpInstance->objectCluster ());
+            else {
+                VCollectableTraits<T>::CreateIdentity (pCluster, rpInstance, thisAsClass ());
+            }
             pCluster->getRole (rpResult);
 
 	    return rpResult.isntNil ();
