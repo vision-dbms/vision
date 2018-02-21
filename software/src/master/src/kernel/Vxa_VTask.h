@@ -25,6 +25,9 @@ namespace Vxa {
 
     class VCallType1Importer;
     class VCallType2Importer;
+
+    class VCollectableObject;
+
     class VError;
 
     class Vxa_API VTask : public VRolePlayer, public Vca::VActivity {
@@ -32,6 +35,7 @@ namespace Vxa {
 
 	friend class VCallType1;
 	friend class VCallType2;
+        friend class VCollectableObject;
 
     //  LaunchRequest
     public:
@@ -93,13 +97,17 @@ namespace Vxa {
 	    return --m_cSuspensions > 0 || launch ();
 	}
     private:
-	bool launch ();
+	virtual bool launch () = 0;
+    public:
+        bool launchInThreadPool ();
+
     public:
 	void kill () {
 	    m_pCursor->kill ();
 	}
     private:
 	virtual bool run () = 0;
+    public:
 	bool runWithMonitor ();
 
     //  Iteration

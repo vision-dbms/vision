@@ -82,6 +82,12 @@ namespace Vxa {
             return m_iIdentity.detach (pCluster);
         }
 
+    //  Task Launcher
+    public:
+        static bool launchTask (VTask *pTask) {
+            return pTask->launchInThreadPool ();
+        }
+
     //  State
     private:
         VCollectableIdentity m_iIdentity;

@@ -20,6 +20,8 @@
  *************************/
 
 namespace Vxa {
+    class VTask;
+
     template <typename Var_T> class VCollectableCollectionOf : public VCollectableCollection {
 	DECLARE_CONCRETE_RTTLITE (VCollectableCollectionOf<Var_T>, VCollectableCollection);
 
@@ -27,8 +29,9 @@ namespace Vxa {
     public:
 	typedef VkDynamicArrayOf<Var_T> container_t;
 
-	typedef typename Var_T::ReferencedClass *val_t;
-	typedef Var_T var_t;
+        typedef typename Var_T::ReferencedClass class_t;
+	typedef class_t *val_t;
+	typedef Var_T    var_t;
 
     //  Construction
     public:
@@ -59,6 +62,12 @@ namespace Vxa {
 	val_t element (unsigned int xElement) const {
 	    return xElement < cardinality() ? m_iContainer[xElement] : static_cast<val_t>(0);
 	}
+
+    //  Task Launcher
+    public:
+        bool launchTask (VTask *pTask) {
+            return class_t::launchTask (pTask);
+        }
 
     //  Update
     public:

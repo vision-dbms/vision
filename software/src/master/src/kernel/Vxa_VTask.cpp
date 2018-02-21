@@ -75,16 +75,6 @@ public:
 public:
     void process () {
 	if (m_pTask) {
-	//--------------------------------------------------------------------------------
-	//---  This code is running in a thread pool thread.  Since this is Vca code,
-	//---  it is quite likely that a call will be made that needs the current
-	//---  cohort.  Make sure the cohort it gets isn't permanently locked to this
-	//---  thread by attempting a non-blocking claim of the task's cohort or, if
-	//---  that fails, claiming a new virtual cohort before running the task.
-	//--------------------------------------------------------------------------------
-	    Vca::VCohort::Claim iCC (m_pTask, false); // ... attempt a non-blocking claim of the task's cohort
-	    if (iCC.isntHeld ())  //  ... if the claim didn't succeed, ...
-		iCC.clear ();  //  ... clear the claim so that it's free to create a new cohort if necessary.
 	    m_pTask->runWithMonitor ();
 	}
     }
@@ -149,14 +139,25 @@ bool Vxa::VTask::startWithMonitorUsing (VCallType2Importer &rImporter) {
 }
 
 bool Vxa::VTask::runWithMonitor () {
-    bool iResult = run ();
-/* After testing, we may get rid of runWithMonitor ()
-    if (iResult)
+//--------------------------------------------------------------------------------
+//---  This code is running in an arbitrary thread.  Since this is Vca code, it
+//---  is quite likely that a call will be made that needs the current cohort.
+//---  Make sure the cohort it gets isn't permanently locked to this thread by
+//---  first attempting a non-blocking claim of the task's cohort and, if that
+//---  fails, claiming a new virtual cohort before running the task.
+//--------------------------------------------------------------------------------
+    Vca::VCohort::Claim iCC (this, false); // ... attempt a non-blocking claim of the task's cohort
+    if (iCC.isntHeld ())  //  ... if the claim didn't succeed, ...
+        iCC.clear ();  //  ... clear the claim so that it's free to create a new cohort if necessary.
+
+    bool const bSuccessful = run ();
+/*
+    if (bSuccessful)
 	onSuccess ();
     else
 	onFailure (0, "Vxa task run error!");
 */
-    return iResult;
+    return bSuccessful;
 }
 
 void Vxa::VTask::onErrorEvent (VError *pError) {
@@ -165,7 +166,7 @@ void Vxa::VTask::onErrorEvent (VError *pError) {
     onActivityError (0, iMessage);
 }
 
-bool Vxa::VTask::launch () {
+bool Vxa::VTask::launchInThreadPool () {
     static V::VThreadedProcessor_<LaunchRequest>::Reference g_pRequestProcessor;
     if (g_pRequestProcessor.isNil ()) {
 	V::VThreadedProcessor_<LaunchRequest>::Reference const pRequestProcessor (
@@ -175,7 +176,7 @@ bool Vxa::VTask::launch () {
 	pRequestProcessor->setWorkerLimit	(V::GetEnvironmentUnsigned ("VxaTaskLimit", 32));		//  ... a number drawn from a hat
 	g_pRequestProcessor.interlockedSetIfNil (pRequestProcessor);
     }
-    LaunchRequest iLR (this);
-    g_pRequestProcessor->process (iLR);
+//    LaunchRequest iLR (this);
+    g_pRequestProcessor->process (LaunchRequest (this));
     return true;
 }
