@@ -774,7 +774,7 @@ namespace Vca {
          * @param bHardStop if false, this method will return true only if this application is stopped; if true, this method will additionally return true if this application is @e not stopped.
          */
         bool isStopping (bool bHardStop) const {
-            return isStopping () || bHardStop && isntStopped ();
+            return isStopping () || (bHardStop && isntStopped ());
         }
     //@}
 
