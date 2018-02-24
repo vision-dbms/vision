@@ -208,7 +208,7 @@ namespace Vca {
                      * @param[in] rpReversed an existing Fallback list to which this reversal will be prepended.
                      * @param[out] rpReversed the reference by which the reversed list of Fallback instances will be returned.
                      */
-		    void getReversedList (Reference &rpReversed) const;
+		    static void GetReversedList (Reference &rpReversed, ThisClass *pList);
 
 		//  Use
 		public:

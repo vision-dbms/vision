@@ -579,9 +579,13 @@ Vca::VcaDirectoryBuilder::Order::Session::Fallback::Fallback (
  ********************
  ********************/
 
-void Vca::VcaDirectoryBuilder::Order::Session::Fallback::getReversedList (Reference &rpReversed) const {
-    for (ThisClass const *pNext = this; pNext; pNext = pNext->successor ())
-	rpReversed.setTo (new ThisClass (pNext->name (), rpReversed));
+void Vca::VcaDirectoryBuilder::Order::Session::Fallback::GetReversedList (
+    Reference &rpReversed, ThisClass *pList
+) {
+    while (pList) {
+	rpReversed.setTo (new ThisClass (pList->name (), rpReversed));
+        pList = pList->successor ();
+    }
 }
 
 /*****************
@@ -680,7 +684,7 @@ void Vca::VcaDirectoryBuilder::Order::Session::getInfo (VString &rInfo) const {
 
     //  Reverse the alias list so names are displayed in the correct order:
     Fallback::Reference pReversed;
-    m_pFallbackList->getReversedList (pReversed);
+    Fallback::GetReversedList (pReversed, m_pFallbackList);
 
     while (pReversed) {
 	rInfo << "\r\nElse Use: " << pReversed->name ();
@@ -951,7 +955,7 @@ void Vca::VcaDirectoryBuilder::Order::AliasSession::getInfo (VString &rInfo) con
     else {
     //  Reverse the alias list so names are displayed in the correct order:
 	Fallback::Reference pReversed;
-	m_pAliasList->getReversedList (pReversed);
+	Fallback::GetReversedList (pReversed, m_pAliasList);
 
 	rInfo << "\r\nOne Of:";
 
@@ -969,7 +973,7 @@ void Vca::VcaDirectoryBuilder::Order::AliasSession::getStatusMessage_(VString &r
     else {
     //  Reverse the alias list so names are displayed in the correct order:
 	Fallback::Reference pReversed;
-	m_pAliasList->getReversedList (pReversed);
+	Fallback::GetReversedList (pReversed, m_pAliasList);
 
 	char const *pPrefix = "One Of {";
 
@@ -1104,7 +1108,7 @@ void Vca::VcaDirectoryBuilder::Order::LinkedSession::getInfo (VString &rInfo) co
     else {
     //  Reverse the alias list so names are displayed in the correct order:
 	Fallback::Reference pReversed;
-	m_pAliasList->getReversedList (pReversed);
+	Fallback::GetReversedList (pReversed, m_pAliasList);
 
 	rInfo << "\r\nOne Of:";
 
@@ -1124,7 +1128,7 @@ void Vca::VcaDirectoryBuilder::Order::LinkedSession::getStatusMessage_(VString &
     else {
     //  Reverse the alias list so names are displayed in the correct order:
 	Fallback::Reference pReversed;
-	m_pAliasList->getReversedList (pReversed);
+	Fallback::GetReversedList (pReversed, m_pAliasList);
 
 	char const *pPrefix = "One Of {";
 
