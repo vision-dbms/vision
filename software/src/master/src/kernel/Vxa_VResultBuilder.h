@@ -71,6 +71,25 @@ namespace Vxa {
 	    return m_pTailHints ? m_pTailHints : new TailHints (this);
 	}
 
+        bool invokedIntensionally () const {
+            return m_pTask->invokedIntensionally ();
+        }
+        cardinality_t parameterCount () const {
+            return m_pTask->parameterCount ();
+        }
+        VString const &selectorName () const {
+            return m_pTask->selectorName ();
+        }
+        VString const &selectorComponent (cardinality_t xComponent) const {
+            return m_pTask->selectorComponent (xComponent);
+        }
+        bool selectorComponent (VString &rComponent, cardinality_t xComponent) const {
+            return m_pTask->selectorComponent (rComponent, xComponent);
+        }
+        cardinality_t taskCardinality () const {
+            return m_pTask->cardinality ();
+        }
+
     //  Query
     public:
 	bool isAlive () const {

@@ -65,8 +65,8 @@ void Vxa::VCollection::Bind (
     ICollection *pRole, ICaller *pCaller, VString const &rMethodName, cardinality_t cParameters, cardinality_t cTask
 ) {
     if (pCaller) {
-	VCallType2 iCallHandle (rMethodName, cParameters, cTask, pCaller);
-//	invokeMethod_(iCallHandle);
+	VCallType2 iCallHandle (rMethodName, cParameters, cTask, pCaller, true);
+	invokeMethod_(iCallHandle);
     }
 }
 
@@ -74,7 +74,7 @@ void Vxa::VCollection::Invoke (
     ICollection *pRole, ICaller *pCaller, VString const &rMethodName, cardinality_t cParameters, cardinality_t cTask
 ) {
     if (pCaller) {
-	VCallType2 iCallHandle (rMethodName, cParameters, cTask, pCaller);
+	VCallType2 iCallHandle (rMethodName, cParameters, cTask, pCaller, false);
 	invokeMethod_(iCallHandle);
     }
 }

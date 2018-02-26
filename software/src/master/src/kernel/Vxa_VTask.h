@@ -58,8 +58,17 @@ namespace Vxa {
         cardinality_t parameterCount () const {
             return m_iCallData.parameterCount ();
         }
-        VString const &methodName () const {
-            return m_iCallData.methodName ();
+        bool invokedIntensionally () const {
+            return m_iCallData.invokedIntensionally ();
+        }
+        VString const &selectorName () const {
+            return m_iCallData.selectorName ();
+        }
+        VString const &selectorComponent (cardinality_t xComponent) const {
+            return m_iCallData.selectorComponent (xComponent);
+        }
+        bool selectorComponent (VString &rComponent, cardinality_t xComponent) const {
+            return m_iCallData.selectorComponent (rComponent, xComponent);
         }
 	VTaskCursor *cursor () const {
 	    return m_pCursor;

@@ -26,7 +26,9 @@ namespace Vxa {
 
     //  Construction
     protected:
-	VCallHandle (VString const &rMethodName, cardinality_t cParameters, cardinality_t cTask);
+	VCallHandle (
+            VString const &rMethodName, cardinality_t cParameters, cardinality_t cTask, bool bIntensional
+        );
 	VCallHandle (ThisClass const &rOther);
 
     //  Destruction

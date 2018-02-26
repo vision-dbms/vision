@@ -128,8 +128,8 @@ void Vxa::VCallType2::SelfProvider::OnError_(Vca::IError *pInterface, VString co
  **************************/
 
 Vxa::VCallType2::VCallType2 (
-    VString const &rMethodName, cardinality_t cParameters, cardinality_t cTask, ICaller *pCaller
-) :  BaseClass (rMethodName, cParameters, cTask), m_pCaller (pCaller) {
+    VString const &rMethodName, cardinality_t cParameters, cardinality_t cTask, ICaller *pCaller, bool bIntensional
+) :  BaseClass (rMethodName, cParameters, cTask, bIntensional), m_pCaller (pCaller) {
 }
 
 Vxa::VCallType2::VCallType2 (

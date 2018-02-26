@@ -154,7 +154,7 @@ namespace Vxa {
 		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
-		    iMessage<<(this->methodName ());
+		    iMessage<<(this->selectorName ());
 		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
@@ -274,7 +274,7 @@ namespace Vxa {
 		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
-		    iMessage<<(this->methodName ());
+		    iMessage<<(this->selectorName ());
 		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
@@ -389,7 +389,7 @@ namespace Vxa {
 		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
-		    iMessage<<(this->methodName ());
+		    iMessage<<(this->selectorName ());
 		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
@@ -502,7 +502,7 @@ namespace Vxa {
 		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
-		    iMessage<<(this->methodName ());
+		    iMessage<<(this->selectorName ());
 		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
@@ -612,7 +612,7 @@ namespace Vxa {
 		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
-		    iMessage<<(this->methodName ());
+		    iMessage<<(this->selectorName ());
 		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
@@ -718,7 +718,7 @@ namespace Vxa {
 		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
-		    iMessage<<(this->methodName ());
+		    iMessage<<(this->selectorName ());
 		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
@@ -822,7 +822,7 @@ namespace Vxa {
 		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
-		    iMessage<<(this->methodName ());
+		    iMessage<<(this->selectorName ());
 		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
@@ -923,7 +923,7 @@ namespace Vxa {
 		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
-		    iMessage<<(this->methodName ());
+		    iMessage<<(this->selectorName ());
 		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
@@ -1020,7 +1020,7 @@ namespace Vxa {
 		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
-		    iMessage<<(this->methodName ());
+		    iMessage<<(this->selectorName ());
 		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
@@ -1113,7 +1113,7 @@ namespace Vxa {
 		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
-		    iMessage<<(this->methodName ());
+		    iMessage<<(this->selectorName ());
 		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
@@ -1204,7 +1204,7 @@ namespace Vxa {
 		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
-		    iMessage<<(this->methodName ());
+		    iMessage<<(this->selectorName ());
 		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
@@ -1293,7 +1293,7 @@ namespace Vxa {
 		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
-		    iMessage<<(this->methodName ());
+		    iMessage<<(this->selectorName ());
 		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear ();
@@ -1381,7 +1381,7 @@ namespace Vxa {
 		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
-		    iMessage<<(this->methodName ());
+		    iMessage<<(this->selectorName ());
 		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear (); m_iP4.clear();
@@ -1465,7 +1465,7 @@ namespace Vxa {
 		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
-		    iMessage<<(this->methodName ());
+		    iMessage<<(this->selectorName ());
 		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear (); m_iP3.clear();
@@ -1545,7 +1545,7 @@ namespace Vxa {
 		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
-		    iMessage<<(this->methodName ());
+		    iMessage<<(this->selectorName ());
 		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear (); m_iP2.clear();
@@ -1623,7 +1623,7 @@ namespace Vxa {
 		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
-		    iMessage<<(this->methodName ());
+		    iMessage<<(this->selectorName ());
 		    this->onFailure (0, iMessage);
 		}
 		m_iP1.clear();
@@ -1690,7 +1690,7 @@ namespace Vxa {
 		    this->onSuccess ();
 		else {
 		    VString iMessage ("Vxa Remote Invocation Failure: ");
-		    iMessage<<(this->methodName ());
+		    iMessage<<(this->selectorName ());
 		    this->onFailure (0, iMessage);
 		}
 		return true;
