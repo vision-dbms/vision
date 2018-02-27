@@ -110,15 +110,11 @@ Vxa::VCallData::Selector::~Selector () {
  ********************/
 
 VString const &Vxa::VCallData::Selector::component (cardinality_t xComponent) const {
-    if (xComponent < parameterCount ())
-        return m_aComponents[xComponent];
-
-    static VString g_iEmptyString;
-    return g_iEmptyString;
+    return xComponent < parameterCount () ? m_aComponents[xComponent] : m_iName;
 }
 
 bool Vxa::VCallData::Selector::component (VString &rComponent, unsigned int xComponent) const {
-    if (xComponent < m_aComponents.elementCount ()) {
+    if (xComponent < parameterCount ()) {
         rComponent.setTo (m_aComponents[xComponent]);
         return true;
     }
