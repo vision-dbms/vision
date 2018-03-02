@@ -333,8 +333,7 @@ namespace Vca {
 
     //  Destruction
     protected:
-	~VcaSerializer_() {
-	}
+	~VcaSerializer_();
 
     //  Sequencer Actions
     protected:

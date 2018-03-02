@@ -418,6 +418,15 @@ Vca::VcaSerializer_<Vca::VInterfaceMember const*>::VcaSerializer_(
 ) : VcaSerializer (pCaller), m_rDatum (rDatum) {
     m_pSequencer.setTo (new Sequencer (this, &ThisClass::doData));
 }
+
+Vca::VcaSerializer_<Vca::VInterfaceMember const*>::~VcaSerializer_() {
+    if (isOutgoing ()) {
+        transport()->defaultLogger().printf (
+            "+++ VcaSerializerForApplicable: [%p] %s: destruction: %p\n",
+            m_rDatum, m_rDatum->name (), m_pInterfaceType.referent ()
+        );
+    }
+}
 
 
 /*******************************
