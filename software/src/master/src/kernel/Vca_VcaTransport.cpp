@@ -63,8 +63,7 @@ namespace Vca {
 
     //  Destruction
     protected:
-	~VcaSerializerForMessage () {
-	}
+	~VcaSerializerForMessage ();
 
     //  Sequencer Actions
     protected:
@@ -116,6 +115,15 @@ Vca::VcaSerializerForMessage::VcaSerializerForMessage (VcaTransportInbound *pTra
 {
     m_pSequencer.setTo (new Sequencer (this, &ThisClass::doSequenceNumber));
 }
+
+Vca::VcaSerializerForMessage::~VcaSerializerForMessage () {
+    if (isOutgoing ()) {
+        transport()->defaultLogger().printf (
+            "+++ VcaSerializerForMessage: %p->%s[%u]: destruction\n",
+            m_pMessage->recipient (), m_pApplicable->name (), m_xMessage, m_xArgument
+        );
+    }
+}
 
 
 /*******************************
@@ -125,16 +133,34 @@ Vca::VcaSerializerForMessage::VcaSerializerForMessage (VcaTransportInbound *pTra
  *******************************/
 
 void Vca::VcaSerializerForMessage::doSequenceNumber (Sequencer *pSequencer) {
+    if (isOutgoing ()) {
+        transport()->defaultLogger().printf (
+            "+++ VcaSerializerForMessage: %p->%s[%u]: doSequenceNumber\n",
+            m_pMessage->recipient (), m_pApplicable->name (), m_xMessage
+        );
+    }
     pSequencer->setActionTo (&ThisClass::doApplicable);
     transferData ();
 }
 
 void Vca::VcaSerializerForMessage::doApplicable (Sequencer *pSequencer) {
+    if (isOutgoing ()) {
+        transport()->defaultLogger().printf (
+            "+++ VcaSerializerForMessage: %p->%s[%u]: doApplicable: %p\n",
+            m_pMessage->recipient (), m_pApplicable->name (), m_xMessage, m_pApplicable
+        );
+    }
     pSequencer->setActionTo (&ThisClass::doArguments);
     start (this, New_VcaSerializer_(this, m_pApplicable));
 }
 
 void Vca::VcaSerializerForMessage::doArguments (Sequencer *pSequencer) {
+    if (isOutgoing ()) {
+        transport()->defaultLogger().printf (
+            "+++ VcaSerializerForMessage: %p->%s[%u]: doArgument: %u\n",
+            m_pMessage->recipient (), m_pApplicable->name (), m_xMessage, m_xArgument
+        );
+    }
     if (m_pMessage.isNil () && m_pApplicable)
 	m_pMessage.setTo (m_pApplicable->newMessage (m_xMessage));
 
@@ -482,8 +508,11 @@ Vca::VcaTransport::TransportTracing  Vca::VcaTransport::g_bTracingTransfers = Tr
 
 bool Vca::VcaTransport::TracingTransfers () {
     if (Tracing_NotInitialized == g_bTracingTransfers) {
-	char const *const pEnvValue = getenv ("TraceTransports");
-	g_bTracingTransfers = !pEnvValue || strcasecmp (pEnvValue, "TRUE") ? Tracing_Off : Tracing_On;
+	g_bTracingTransfers = (
+            V::GetEnvironmentBoolean ("TracingTransportsByPID") ||
+            V::GetEnvironmentBoolean ("TracingTransports") ||
+            V::GetEnvironmentBoolean ("TraceTransports")
+        ) ? Tracing_On : Tracing_Off;
     }
     return Tracing_On == g_bTracingTransfers;
 }
@@ -619,8 +648,16 @@ namespace {
 
 	if (bNotInitialized) {
 	    bNotInitialized = false;
-	    if (char const * const pEnvValue = getenv ("TraceTransportPath"))
-		pDisplayFile = fopen (pEnvValue, "a");
+            VString iLogFileName;
+            char const *pLogFileName = NULL;
+            if (!V::GetEnvironmentBoolean ("TracingTransportsByPID"))
+                pLogFileName = getenv ("TraceTransportPath");
+            else {
+		iLogFileName << "p_" << getpid () << "_transport.log";
+                pLogFileName = iLogFileName;
+	    }
+            if (pLogFileName)
+		pDisplayFile = fopen (pLogFileName, "a");
 	}
 	return pDisplayFile;
     }
@@ -636,7 +673,7 @@ void Vca::VcaTransport::displayDataAtTransferPoint (
     char const *pData, size_t sData, FILE *pFile
 ) const {
     m_cBytesTransfered += sData;
-    if (sData > 0 && IsntNil (pFile) && tracingTransfers () && transferDisplayLimit () > m_cBytesTransfered) {
+    if (sData > 0 && pFile && tracingTransfers () && transferDisplayLimit () > m_cBytesTransfered) {
 	RTTI iSerializerRTTI (m_pInTransitSerializer);
 	fprintf (
 	    pFile, "%s %p: %p: %s:", directionCode (), this,
@@ -727,15 +764,24 @@ void Vca::VcaTransport::schedule (VcaSerializer *pSerializer) {
  ***************************
  ***************************/
 
+void ReportNoInTransitSerializer (V::VLogger &rLogger, VcaTransport *pTransport) {
+    rLogger.printf (
+        "Vca::VcaTransport[%p]::resumeSerialization: No %s In Transit Serializer",
+        pTransport, pTransport->isIncoming () ? "Incoming" : "Outgoing"
+    );
+}
+
 void Vca::VcaTransport::resumeSerialization (bool notSuspended) {
     if (notSuspended)
 	m_pInTransitSerializer.clear ();
-    else {
+    else if (m_pInTransitSerializer) {
 	VcaSerializer::Pointer const pSuspendedSerializer (m_pInTransitSerializer);
 	pSuspendedSerializer->retain ();
 	m_pInTransitSerializer.clear ();
 	pSuspendedSerializer->untain ();
 	pSuspendedSerializer->resume ();
+    } else {
+        ReportNoInTransitSerializer (defaultLogger (), this);
     }
 }
 

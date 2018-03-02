@@ -432,6 +432,13 @@ void Vca::VcaSerializer_<Vca::VInterfaceMember const*>::doData (Sequencer *pSequ
 }
 
 void Vca::VcaSerializer_<Vca::VInterfaceMember const*>::doType (Sequencer *pSequencer) {
+    if (isOutgoing ()) {
+        transport()->defaultLogger().printf (
+            "+++ VcaSerializerForApplicable: [%p] %s: doType: %p\n",
+            m_rDatum, m_rDatum->name (), m_pInterfaceType.referent ()
+        );
+    }
+
     clearSequencer ();
     start (this, New_VcaSerializer_(this, m_pInterfaceType));
 }
@@ -466,6 +473,13 @@ void Vca::VcaSerializer_<Vca::VInterfaceMember const*>::getData () {
 void Vca::VcaSerializer_<Vca::VInterfaceMember const*>::putData () {
     m_xMember = m_rDatum->index ();
     m_pInterfaceType.setTo (m_rDatum->interfaceTypeInfo_());
+
+    if (isOutgoing ()) {
+        transport()->defaultLogger().printf (
+            "+++ VcaSerializerForApplicable: [%p] %s: doData: %u\n",
+            m_rDatum, m_rDatum->name (), m_xMember
+        );
+    }
 
     //  {memberIndex:U32} (VTypeInfo *pInterface)
     put (&m_xMember, sizeof (m_xMember));
