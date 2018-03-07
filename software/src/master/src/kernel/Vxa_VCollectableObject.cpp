@@ -48,6 +48,32 @@ Vxa::VCollectableObject::VCollectableObject () {
 
 Vxa::VCollectableObject::~VCollectableObject () {
 }
+
+/*******************************
+ *******************************
+ *****  Ticketing Support  *****
+ *******************************
+ *******************************/
+
+bool Vxa::VCollectableObject::GetObjectForTicket (
+    Reference &rObject, VString const &rTicket
+) {
+    return false;
+}
+
+void Vxa::VCollectableObject::GetHandle (VResultBuilder &rRB) {
+    rRB = GetHandleImpl ();
+}
+
+void Vxa::VCollectableObject::GetTicket (VResultBuilder &rRB) {
+    rRB = GetTicketImpl ();
+}
+
+VString Vxa::VCollectableObject::GetTicketImpl (bool bSingleUse) {
+    VString iTicket;
+    iTicket.printf ("!*%c%p", (bSingleUse ? '.' : '*'), this);
+    return iTicket;
+}
 
 
 /***************************************************
@@ -65,6 +91,8 @@ Vxa::VCollectableObject::~VCollectableObject () {
  **************************/
 
 Vxa::VCollectableObject::ClassBuilder::ClassBuilder (Vxa::VClass *pClass) : m_pClass (pClass) {
+    defineMethod (".getHandle", &VCollectableObject::GetHandle);
+    defineMethod (".getTicket", &VCollectableObject::GetTicket);
 }
 
 /**************************************

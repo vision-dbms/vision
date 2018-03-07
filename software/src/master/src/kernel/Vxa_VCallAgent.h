@@ -152,7 +152,7 @@ namespace Vxa {
             //  Use
             public:
                 virtual void supply (Client &rClient) const OVERRIDE {
-                    rClient.on (m_iDataStorage.value ());
+                    rClient.deliver (m_iDataStorage.value ());
                 }
 
             //  State

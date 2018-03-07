@@ -82,6 +82,20 @@ namespace Vxa {
             return m_iIdentity.detach (pCluster);
         }
 
+    //  Ticket Support
+    public:
+        static bool GetObjectForTicket (
+            Reference &rObject, VString const &rTicket
+        );
+        void GetHandle (VResultBuilder &rRB);
+        void GetTicket (VResultBuilder &rRB);
+
+    private:
+        VString GetHandleImpl () {
+            return GetTicketImpl (false);
+        }
+        VString GetTicketImpl (bool bSingleUse = true);
+
     //  Task Launcher
     public:
         static bool launchTask (VTask *pTask) {

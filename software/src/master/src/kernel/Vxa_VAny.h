@@ -20,6 +20,8 @@
  *************************/
 
 namespace Vxa {
+    class VCollectableObject;
+
     class Vxa_API VAny {
     //  Aliases
     public:
@@ -51,11 +53,19 @@ namespace Vxa {
     protected:
         ~Client () {}
 
-    //  Callbacks
+    //  Delivery
     public:
+        template <typename Datum> void deliver (Datum iDatum) {
+            on (iDatum);
+        }
+        void deliver (VString const &rString);
+
+    //  Callbacks
+    protected:
         virtual void on (int iValue) = 0;
         virtual void on (double iValue) = 0;
         virtual void on (VString const &rString) = 0;
+        virtual void on (VCollectableObject *pObject) = 0;
     };
 } //  namespace Vxa
 
