@@ -12,7 +12,6 @@
  **************************/
 
 #include "Vxa_VPack.h"
-#include "Vxa_VResultBuilder.h"
 #include "Vxa_VScalar.h"
 
 /*************************
@@ -22,6 +21,7 @@
 namespace Vxa {
     class VCallType1Importer;
     class VCallType2Importer;
+    class VResultBuilder;
     class VTask;
 
 /***********************************

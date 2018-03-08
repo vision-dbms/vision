@@ -13,6 +13,7 @@
 
 #include "Vxa_VCollectableCollectionOf.h"
 #include "Vxa_VCollectableMethod.h"
+#include "Vxa_VResultBuilder.h"
 
 /*************************
  *****  Definitions  *****
@@ -20,7 +21,6 @@
 
 namespace Vxa {
     class VAny;
-    class VResultBuilder;
 
     /*-----------------------------------------*
      *----  class Vxa::VCollectableObject  ----*
