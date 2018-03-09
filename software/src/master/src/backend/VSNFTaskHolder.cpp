@@ -808,9 +808,15 @@ void VSNFTaskHolder::start (ICollection *pExternalObject) {
 	}
 	try {
 	    g_iScheduler.incrementTaskCount ();
-	    pExternalObject->Invoke (
-		pICaller, m_pSNFTask->selectorName (), m_pSNFTask->parameterCount (), m_pSNFTask->cardinality ()
-	    );
+            if (m_pSNFTask->returnCase () == VComputationUnit::Return_Intension) {
+                pExternalObject->Bind (
+                    pICaller, m_pSNFTask->selectorName (), m_pSNFTask->parameterCount (), m_pSNFTask->cardinality ()
+                );
+            } else {
+                pExternalObject->Invoke (
+                    pICaller, m_pSNFTask->selectorName (), m_pSNFTask->parameterCount (), m_pSNFTask->cardinality ()
+                );
+            }
 	} catch (...) {
 	    g_iScheduler.decrementTaskCount ();
 	    throw;
