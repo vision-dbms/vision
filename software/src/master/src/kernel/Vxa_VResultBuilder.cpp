@@ -25,6 +25,9 @@
 #include "Vxa_VCallType1Exporter.h"
 #include "Vxa_VCallType2Exporter.h"
 
+#include "Vxa_VCallType1Importer.h"
+#include "Vxa_VCallType2Importer.h"
+
 #include "Vxa_VImportable.h"
 
 

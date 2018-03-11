@@ -7,8 +7,8 @@
 
 #include "Vxa_VMethod.h"
 #include "Vxa_VTask.h"
-#include "Vxa_VCallType1.h"
-#include "Vxa_VCallType2.h"
+#include "Vxa_VCallType1Importer.h"
+#include "Vxa_VCallType2Importer.h"
 
 /**************************
  *****  Declarations  *****

@@ -16,7 +16,7 @@
  *****  Self  *****
  ******************/
 
-#include "Vxa_VCallType2.h"
+#include "Vxa_VCallType2Importer.h"
 
 /************************
  *****  Supporting  *****
@@ -27,7 +27,6 @@
 #include "Vxa_VCLF.h"
 #include "Vxa_VCallType2Importer.h"
 #include "Vxa_VCallAgent.h"
-#include "Vxa_VCollection.h"
 #include "Vxa_VMethod.h"
 
 #include "V_VArgList.h"
