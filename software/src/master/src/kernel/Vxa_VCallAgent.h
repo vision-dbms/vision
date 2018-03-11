@@ -274,6 +274,41 @@ namespace Vxa {
 	};
 
 
+    /*******************************************************************************
+     *----  template <typename scalar_return_t> class ObjectParameterFactory  ----*
+     *******************************************************************************/
+
+    public:
+	template <typename scalar_return_t> class ObjectParameterFactory : public ParameterFactory_<scalar_return_t> {
+	    DECLARE_CONCRETE_RTTLITE (ObjectParameterFactory<scalar_return_t>, ParameterFactory_<scalar_return_t>);
+
+	//  Construction
+	public:
+	    ObjectParameterFactory (VImportableType *pType, scalar_return_t &rpResult) : BaseClass (pType, rpResult) {
+	    }
+
+	//  Destruction
+	protected:
+	    ~ObjectParameterFactory () {
+	    }
+
+	//  Callbacks
+	private:
+	    virtual bool createFromStrings (str_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
+#if 0
+		this->setResultTo (
+                    new VParameter<scalar_return_t,str_array_t> (
+                        this->type (), pAgent->taskCursor (), rValues
+                    )
+                );
+		return true;
+#else
+                return false;
+#endif
+	    }
+	};
+
+
     /******************************************************************************
      *----  template <typename scalar_return_t> class StringParameterFactory  ----*
      ******************************************************************************/
@@ -403,12 +438,6 @@ namespace Vxa {
 	bool getParameterFactory (factory_reference_t &rpParameterFactory, unsigned int xParameter);
 	bool setParameterFactory (ParameterFactory *pParameterFactory);
     public:
-        template <typename scalar_result_t> bool getParameterPack (VImportableType *pType, scalar_result_t &rpResult) {
-            /* return moreToDo () && setParameterFactory ( */
-            /*     new ParameterPackFactory<scalar_result_t> (pType, rpResult) */
-            /* ); */
-            return false;
-        }
 	template <typename scalar_result_t> bool getAnyParameter (VImportableType *pType, scalar_result_t &rpResult) {
 	    return moreToDo () && setParameterFactory (
 		new AnyParameterFactory<scalar_result_t> (pType, rpResult)
@@ -422,6 +451,11 @@ namespace Vxa {
 	template <typename scalar_result_t> bool getNumericParameter (VImportableType *pType, scalar_result_t &rpResult) {
 	    return moreToDo () && setParameterFactory (
 		new NumericParameterFactory<scalar_result_t> (pType, rpResult)
+	    );
+	}
+	template <typename scalar_result_t> bool getObjectParameter (VImportableType *pType, scalar_result_t &rpResult) {
+	    return moreToDo () && setParameterFactory (
+		new ObjectParameterFactory<scalar_result_t> (pType, rpResult)
 	    );
 	}
 	template <typename scalar_result_t> bool getStringParameter (VImportableType *pType, scalar_result_t &rpResult) {

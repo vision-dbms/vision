@@ -7,13 +7,11 @@
 
 #include "Vxa_VCallType2.h"
 
-//#include "Vxa_VCollectableCollectionOf.h"
-
 /**************************
  *****  Declarations  *****
  **************************/
 
-#include "Vxa_VTaskCursor.h"
+#include "Vxa_VCallAgent.h"
 
 /*************************
  *****  Definitions  *****
@@ -42,6 +40,11 @@ namespace Vxa {
     private:
 	VCallAgent *agent (VTask *pTask) const;
     public:
+	template <typename scalar_return_t> bool getObjectParameter (
+	    VTask *pTask, VImportableType *pType, scalar_return_t &rResult
+	) {
+            return agent (pTask)->getObjectParameter (pType, rResult);
+        }
 	template <typename scalar_return_t> bool getParameter (
 	    VTask *pTask, VImportableType *pType, scalar_return_t &rResult
 	) {

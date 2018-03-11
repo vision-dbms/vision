@@ -26,7 +26,6 @@
 
 #include "Vxa_VCLF.h"
 #include "Vxa_VCallType1Importer.h"
-#include "Vxa_VCallAgent.h"
 #include "Vxa_VMethod.h"
 
 

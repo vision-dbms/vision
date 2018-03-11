@@ -165,7 +165,7 @@ namespace Vxa {
     //  Parameter Acquistion
     private:
 	template <class ImporterType> bool retrieveImpl (scalar_return_t &rResult, VTask *pTask, ImporterType &rImporter) {
-	    return rImporter.raiseUnimplementedOperationException (pTask, typeid(*this), "retrieveImpl");
+	    return rImporter.getObjectParameter (pTask, this, rResult);
 	}
 	virtual bool retrieve (scalar_return_t &rResult, VTask *pTask, VCallType1Importer &rImporter) OVERRIDE {
 	    return retrieveImpl (rResult, pTask, rImporter);
