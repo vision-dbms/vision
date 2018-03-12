@@ -38,10 +38,39 @@ namespace Vxa {
 
 	typedef Vxa::IVSNFTaskImplementation3NC ICallType2Implementation_T;
 
+    /*****************************************************************
+     *----  template <typename storage_t> class CastableStorage  ----*
+     *****************************************************************/
+    public:
+        template <typename storage_t> class CastableStorage {
+        //  Construction
+        public:
+            CastableStorage (
+                VCursor *pCursor, storage_t const &rData
+            ) : m_pCursor (pCursor), m_iData (rData) {
+            }
+
+        //  Destruction
+        public:
+            ~CastableStorage () {
+            }
+
+        //  Access
+        public:
+            operator typename storage_t::element_t const& () const {
+                return m_iData[m_pCursor->position()];
+            }
+
+        //  State
+        private:
+            VCursor::Reference	const m_pCursor;
+            storage_t		const m_iData;
+        };
+
+
     /******************************
      *----  ParameterFactory  ----*
      ******************************/
-
     public:
 	class ParameterFactory : public VReferenceable {
 	    DECLARE_ABSTRACT_RTTLITE (ParameterFactory, VReferenceable);
@@ -85,7 +114,6 @@ namespace Vxa {
     /*************************************************************************
      *----  template <typename scalar_return_t> class ParameterFactory_  ----*
      *************************************************************************/
-
     public:
 	template <typename scalar_return_t> class ParameterFactory_ : public ParameterFactory {
 	    DECLARE_ABSTRACT_RTTLITE (ParameterFactory_<scalar_return_t>, ParameterFactory);
@@ -123,7 +151,6 @@ namespace Vxa {
     /***************************************************************************
      *----  template <typename scalar_return_t> class AnyParameterFactory  ----*
      ***************************************************************************/
-
     public:
 	template <typename scalar_return_t> class AnyParameterFactory
             : public ParameterFactory_<scalar_return_t>
@@ -137,11 +164,15 @@ namespace Vxa {
         //  Parameter Storage
         public:
             template <typename data_storage_t> class ParameterStorage : public VAny {
+            //  Aliases
+            public:
+                typedef typename data_storage_t::element_t value_t;
+
             //  Construction
             public:
                 ParameterStorage (
-                    VCallAgent *pAgent, data_storage_t const &rDataStorage
-                ) : m_iDataStorage (pAgent->taskCursor (), rDataStorage) {
+                    VCallAgent *pAgent, data_storage_t const &rData
+                ) : m_iData (pAgent->taskCursor (), rData) {
                 }
 
             //  Destruction
@@ -152,12 +183,12 @@ namespace Vxa {
             //  Use
             public:
                 virtual void supply (Client &rClient) const OVERRIDE {
-                    rClient.deliver (m_iDataStorage.value ());
+                    rClient.deliver (static_cast<value_t>(m_iData));
                 }
 
             //  State
             private:
-                VParameterStorage<data_storage_t, typename data_storage_t::element_t> m_iDataStorage;
+                CastableStorage<data_storage_t> m_iData;
             };
 
 	//  Construction
@@ -218,7 +249,7 @@ namespace Vxa {
 	private:
 	    virtual bool createFromIntegers (i32_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
 		this->setResultTo (
-                    new VBooleanParameter<i32_array_t> (
+                    new VBooleanParameter<CastableStorage<i32_array_t> > (
                         this->type (), pAgent->taskCursor (), rValues
                     )
                 );
@@ -226,7 +257,7 @@ namespace Vxa {
 	    }
 	    virtual bool createFromDoubles (f64_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
 		this->setResultTo (
-                    new VBooleanParameter<f64_array_t> (
+                    new VBooleanParameter<CastableStorage<f64_array_t> > (
                         this->type (), pAgent->taskCursor (), rValues
                     )
                 );
@@ -257,7 +288,7 @@ namespace Vxa {
 	private:
 	    virtual bool createFromIntegers (i32_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
 		this->setResultTo (
-                    new VParameter<scalar_return_t,i32_array_t> (
+                    new VParameter<scalar_return_t,CastableStorage<i32_array_t> > (
                         this->type (), pAgent->taskCursor (), rValues
                     )
                 );
@@ -265,7 +296,7 @@ namespace Vxa {
 	    }
 	    virtual bool createFromDoubles (f64_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
 		this->setResultTo (
-                    new VParameter<scalar_return_t,f64_array_t> (
+                    new VParameter<scalar_return_t,CastableStorage<f64_array_t> > (
                         this->type (), pAgent->taskCursor (), rValues
                     )
                 );
@@ -331,7 +362,7 @@ namespace Vxa {
 	private:
 	    virtual bool createFromStrings (str_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
 		this->setResultTo (
-                    new VParameter<scalar_return_t,str_array_t> (
+                    new VParameter<scalar_return_t,CastableStorage<str_array_t> > (
                         this->type (), pAgent->taskCursor (), rValues
                     )
                 );
