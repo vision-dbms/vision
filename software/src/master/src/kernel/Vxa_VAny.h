@@ -22,6 +22,9 @@
 namespace Vxa {
     class VCollectableObject;
 
+/************************
+ *----  class VAny  ----*
+ ************************/
     class Vxa_API VAny {
     //  Aliases
     public:
@@ -44,6 +47,9 @@ namespace Vxa {
         virtual void supply (Client &rClient) const = 0;
     };
 
+/********************************
+ *----  class VAny::Client  ----*
+ ********************************/
     class Vxa_API VAny::Client {
     //  Construction
     protected:
@@ -58,7 +64,6 @@ namespace Vxa {
         template <typename Datum> void deliver (Datum iDatum) {
             on (iDatum);
         }
-        void deliver (VString const &rString);
 
     //  Callbacks
     protected:

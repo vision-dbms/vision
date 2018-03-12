@@ -38,27 +38,106 @@ namespace Vxa {
 
 	typedef Vxa::IVSNFTaskImplementation3NC ICallType2Implementation_T;
 
-    /*****************************************************************
-     *----  template <typename storage_t> class CastableStorage  ----*
-     *****************************************************************/
+    /***************************************************************
+     *----  template <typename storage_t> class SimpleStorage  ----*
+     ***************************************************************/
     public:
-        template <typename storage_t> class CastableStorage {
+        template <typename storage_t> class SimpleStorage {
+        //  Aliases
+        public:
+            typedef typename storage_t::element_t element_t;
+
         //  Construction
         public:
-            CastableStorage (
-                VCursor *pCursor, storage_t const &rData
-            ) : m_pCursor (pCursor), m_iData (rData) {
+            SimpleStorage (
+                VCallAgent *pAgent, storage_t const &rData
+            ) : m_pCursor (pAgent->taskCursor ()), m_iData (rData) {
+            }
+            SimpleStorage (
+                SimpleStorage const &rOther
+            ) : m_pCursor (rOther.m_pCursor), m_iData (rOther.m_iData) {
             }
 
         //  Destruction
         public:
-            ~CastableStorage () {
+            ~SimpleStorage () {
             }
 
         //  Access
         public:
-            operator typename storage_t::element_t const& () const {
+            operator element_t const& () const {
+                return value ();
+            }
+            element_t const& value () const {
                 return m_iData[m_pCursor->position()];
+            }
+
+        //  State
+        private:
+            VCursor::Reference	const m_pCursor;
+            storage_t		const m_iData;
+        };
+
+    /****************************************************************
+     *----  template <typename storage_t> class BooleanStorage  ----*
+     ****************************************************************/
+    public:
+        template <typename storage_t> class BooleanStorage : public SimpleStorage<storage_t> {
+        //  Construction
+        public:
+            BooleanStorage (
+                VCallAgent *pAgent, storage_t const &rData
+            ) : SimpleStorage<storage_t> (pAgent, rData) {
+            }
+            BooleanStorage (
+                BooleanStorage const &rOther
+            ) : SimpleStorage<storage_t> (rOther) {
+            }
+
+        //  Destruction
+        public:
+            ~BooleanStorage () {
+            }
+
+        //  Access
+        public:
+            operator bool () const {
+                return this->value () ? true : false;
+            }
+        };
+
+    /***************************************************************
+     *----  template <typename storage_t> class TicketStorage  ----*
+     ***************************************************************/
+    public:
+        template <typename storage_t,typename object_value_t> class TicketStorage {
+        //  Aliases
+        public:
+            typedef object_value_t element_t;
+
+        //  Construction
+        public:
+            TicketStorage (
+                VCallAgent *pAgent, storage_t const &rData
+            ) : m_pCursor (pAgent->taskCursor ()), m_iData (rData) {
+            }
+            TicketStorage (
+                TicketStorage const &rOther
+            ) : m_pCursor (rOther.m_pCursor), m_iData (rOther.m_iData) {
+            }
+
+        //  Destruction
+        public:
+            ~TicketStorage () {
+            }
+
+        //  Access
+        public:
+            operator object_value_t () const {
+                return value ();
+            }
+            object_value_t value () const {
+                return 0;
             }
 
         //  State
@@ -137,10 +216,14 @@ namespace Vxa {
 
 	//  Update
 	protected:
-	    bool setResultTo (scalar_t *pResult) const {
-		m_rpResult.setTo (pResult);
-		return true;
-	    }
+            template <typename storage_t> bool setResultTo (
+                storage_t const &rData
+            ) const {
+                m_rpResult.setTo (
+                    new VParameter<storage_t,scalar_value_t> (this->type (), rData)
+                );
+                return true;
+            }
 
 	//  State
 	private:
@@ -161,34 +244,44 @@ namespace Vxa {
         public:
             typedef typename BaseClass::scalar_value_t scalar_value_t;
 
-        //  Parameter Storage
+        //  Any Storage
         public:
-            template <typename data_storage_t> class ParameterStorage : public VAny {
+            template <typename data_storage_t> class AnyStorage : public VAny {
             //  Aliases
             public:
                 typedef typename data_storage_t::element_t value_t;
 
             //  Construction
             public:
-                ParameterStorage (
+                AnyStorage (
                     VCallAgent *pAgent, data_storage_t const &rData
-                ) : m_iData (pAgent->taskCursor (), rData) {
+                ) : m_iData (rData) {
+                }
+                AnyStorage (
+                    AnyStorage const &rOther
+                ) : m_iData (rOther.m_iData) {
                 }
 
             //  Destruction
             public:
-                ~ParameterStorage () {
+                ~AnyStorage () {
                 }
 
-            //  Use
+            //  Access
             public:
+                operator VAny const& () const {
+                    return value ();
+                }
+                VAny const & value () const {
+                    return *this;
+                }
                 virtual void supply (Client &rClient) const OVERRIDE {
                     rClient.deliver (static_cast<value_t>(m_iData));
                 }
 
             //  State
             private:
-                CastableStorage<data_storage_t> m_iData;
+                data_storage_t m_iData;
             };
 
 	//  Construction
@@ -205,24 +298,24 @@ namespace Vxa {
 
 	//  Callbacks
 	private:
-            template <typename data_storage_t> bool createFromImpl (
+            template <typename data_storage_t> bool createUsingStorage (
                 VCallAgent *pAgent, data_storage_t const &rValues
             ) {
-                this->setResultTo (
-                    new VScalarInstance<scalar_value_t,ParameterStorage<data_storage_t> > (
-                        this->type (), pAgent, rValues
-                    )
-                );
-                return true;
+                return this->setResultTo (AnyStorage<data_storage_t> (pAgent, rValues));
+            }
+            template <typename data_storage_t> bool createUsingSimpleStorage (
+                VCallAgent *pAgent, data_storage_t const &rValues
+            ) {
+                return createUsingStorage (pAgent, SimpleStorage<data_storage_t> (pAgent, rValues));
             }
 	    virtual bool createFromIntegers (i32_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
-                return createFromImpl (pAgent, rValues);
+                return createUsingSimpleStorage (pAgent, rValues);
 	    }
 	    virtual bool createFromDoubles (f64_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
-                return createFromImpl (pAgent, rValues);
+                return createUsingSimpleStorage (pAgent, rValues);
 	    }
 	    virtual bool createFromStrings (str_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
-                return createFromImpl (pAgent, rValues);
+                return createUsingSimpleStorage (pAgent, rValues);
 	    }
 	};
 
@@ -248,20 +341,10 @@ namespace Vxa {
 	//  Callbacks
 	private:
 	    virtual bool createFromIntegers (i32_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
-		this->setResultTo (
-                    new VBooleanParameter<CastableStorage<i32_array_t> > (
-                        this->type (), pAgent->taskCursor (), rValues
-                    )
-                );
-		return true;
+                return this->setResultTo (BooleanStorage<i32_array_t> (pAgent, rValues));
 	    }
 	    virtual bool createFromDoubles (f64_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
-		this->setResultTo (
-                    new VBooleanParameter<CastableStorage<f64_array_t> > (
-                        this->type (), pAgent->taskCursor (), rValues
-                    )
-                );
-		return true;
+		return this->setResultTo (BooleanStorage<f64_array_t> (pAgent, rValues));
 	    }
 	};
 
@@ -287,20 +370,10 @@ namespace Vxa {
 	//  Callbacks
 	private:
 	    virtual bool createFromIntegers (i32_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
-		this->setResultTo (
-                    new VParameter<scalar_return_t,CastableStorage<i32_array_t> > (
-                        this->type (), pAgent->taskCursor (), rValues
-                    )
-                );
-		return true;
+		return this->setResultTo (SimpleStorage<i32_array_t> (pAgent, rValues));
 	    }
 	    virtual bool createFromDoubles (f64_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
-		this->setResultTo (
-                    new VParameter<scalar_return_t,CastableStorage<f64_array_t> > (
-                        this->type (), pAgent->taskCursor (), rValues
-                    )
-                );
-		return true;
+		return this->setResultTo (SimpleStorage<f64_array_t> (pAgent, rValues));
 	    }
 	};
 
@@ -312,6 +385,10 @@ namespace Vxa {
     public:
 	template <typename scalar_return_t> class ObjectParameterFactory : public ParameterFactory_<scalar_return_t> {
 	    DECLARE_CONCRETE_RTTLITE (ObjectParameterFactory<scalar_return_t>, ParameterFactory_<scalar_return_t>);
+
+        //  Aliases
+        public:
+            typedef typename BaseClass::scalar_value_t object_value_t;
 
 	//  Construction
 	public:
@@ -326,16 +403,7 @@ namespace Vxa {
 	//  Callbacks
 	private:
 	    virtual bool createFromStrings (str_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
-#if 0
-		this->setResultTo (
-                    new VParameter<scalar_return_t,str_array_t> (
-                        this->type (), pAgent->taskCursor (), rValues
-                    )
-                );
-		return true;
-#else
-                return false;
-#endif
+		return this->setResultTo (TicketStorage<str_array_t,object_value_t>(pAgent, rValues));
 	    }
 	};
 
@@ -361,12 +429,7 @@ namespace Vxa {
 	//  Callbacks
 	private:
 	    virtual bool createFromStrings (str_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
-		this->setResultTo (
-                    new VParameter<scalar_return_t,CastableStorage<str_array_t> > (
-                        this->type (), pAgent->taskCursor (), rValues
-                    )
-                );
-		return true;
+		return this->setResultTo (SimpleStorage<str_array_t> (pAgent, rValues));
 	    }
 	};
 
