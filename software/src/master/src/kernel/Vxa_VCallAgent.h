@@ -65,6 +65,9 @@ namespace Vxa {
 
         //  Access
         public:
+            template <typename consumer_t> void supply (consumer_t &rConsumer) const {
+                rConsumer.consume (value ());
+            }
             operator element_t const& () const {
                 return value ();
             }
@@ -101,8 +104,14 @@ namespace Vxa {
 
         //  Access
         public:
+            template <typename consumer_t> void supply (consumer_t &rConsumer) const {
+                rConsumer.consume (value ());
+            }
             operator bool () const {
                 return this->value () ? true : false;
+            }
+            bool value () const {
+                return this->SimpleStorage<storage_t>::value () ? true : false;
             }
         };
 
@@ -276,7 +285,7 @@ namespace Vxa {
                     return *this;
                 }
                 virtual void supply (Client &rClient) const OVERRIDE {
-                    rClient.deliver (static_cast<value_t>(m_iData));
+                    m_iData.supply (rClient);
                 }
 
             //  State

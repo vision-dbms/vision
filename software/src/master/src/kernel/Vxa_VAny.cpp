@@ -32,19 +32,3 @@
  *****                     *****
  *******************************
  *******************************/
-
-/**********************
- **********************
- *****  Delivery  *****
- **********************
- **********************/
-
-#if 0
-void Vxa::VAny::Client::deliver (VString const &rString) {
-    VCollectableObject::Reference pObject;
-    if (VCollectableObject::GetObjectForTicket (pObject, rString))
-        on (pObject);
-    else
-        on (rString);
-}
-#endif

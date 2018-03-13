@@ -61,7 +61,7 @@ namespace Vxa {
 
     //  Delivery
     public:
-        template <typename Datum> void deliver (Datum iDatum) {
+        template <typename Datum> void consume (Datum iDatum) {
             on (iDatum);
         }
 
