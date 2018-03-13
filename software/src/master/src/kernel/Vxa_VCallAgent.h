@@ -28,6 +28,37 @@
 namespace Vxa {
     class VImportableType;
 
+/***************************************
+ *----  class VTicketObjectHolder  ----*
+ ***************************************/
+    class VCollectableObject;
+    class VObjectHolder : public VReferenceable {
+        DECLARE_ABSTRACT_RTTLITE (VObjectHolder, VReferenceable);
+
+    protected:
+        VObjectHolder () {
+        }
+        ~VObjectHolder () {
+        }
+    public:
+        template <typename object_value_t> bool getObject (
+            object_value_t &rpObject, VString const &rObjectTicket
+        ) {
+            VCollectableObject *pObject = 0;
+            if (getObject (pObject, rObjectTicket)) {
+                rpObject = dynamic_cast<object_value_t>(pObject);
+                return true;
+            }
+            return false;
+        }
+        bool getObject (VCollectableObject* &rpObject, VString const &rObjectTicket) {
+            return false;
+        }
+    };
+
+/******************************
+ *----  class VCallAgent  ----*
+ ******************************/
     class VCallAgent : public VRolePlayer {
 	DECLARE_ABSTRACT_RTTLITE (VCallAgent, VRolePlayer);
 
@@ -38,35 +69,35 @@ namespace Vxa {
 
 	typedef Vxa::IVSNFTaskImplementation3NC ICallType2Implementation_T;
 
-    /***************************************************************
-     *----  template <typename storage_t> class SimpleStorage  ----*
-     ***************************************************************/
+    /*********************************************************
+     *----  template <typename storage_t> class Wrapped  ----*
+     *********************************************************/
     public:
-        template <typename storage_t> class SimpleStorage {
+        template <typename storage_t> class Wrapped {
         //  Aliases
         public:
             typedef typename storage_t::element_t element_t;
 
         //  Construction
         public:
-            SimpleStorage (
-                VCallAgent *pAgent, storage_t const &rData
+            Wrapped (
+                storage_t const &rData, VCallAgent *pAgent
             ) : m_pCursor (pAgent->taskCursor ()), m_iData (rData) {
             }
-            SimpleStorage (
-                SimpleStorage const &rOther
+            Wrapped (
+                Wrapped const &rOther
             ) : m_pCursor (rOther.m_pCursor), m_iData (rOther.m_iData) {
             }
 
         //  Destruction
         public:
-            ~SimpleStorage () {
+            ~Wrapped () {
             }
 
         //  Access
         public:
-            template <typename consumer_t> void supply (consumer_t &rConsumer) const {
-                rConsumer.consume (value ());
+            template <typename consumer_t> bool supply (consumer_t &rConsumer) const {
+                return rConsumer.consume (value ());
             }
             operator element_t const& () const {
                 return value ();
@@ -81,78 +112,138 @@ namespace Vxa {
             storage_t		const m_iData;
         };
 
-    /****************************************************************
-     *----  template <typename storage_t> class BooleanStorage  ----*
-     ****************************************************************/
+    /*********************************************************
+     *----  template <typename storage_t> class Boolean  ----*
+     *********************************************************/
     public:
-        template <typename storage_t> class BooleanStorage : public SimpleStorage<storage_t> {
+        template <typename storage_t> class Boolean {
         //  Construction
         public:
-            BooleanStorage (
-                VCallAgent *pAgent, storage_t const &rData
-            ) : SimpleStorage<storage_t> (pAgent, rData) {
+            template <typename wrapped_storage_t> Boolean (
+                wrapped_storage_t const &rData, VCallAgent *pAgent
+            ) : m_iData (storage_t (rData, pAgent)) {
             }
-            BooleanStorage (
-                BooleanStorage const &rOther
-            ) : SimpleStorage<storage_t> (rOther) {
+            Boolean (storage_t const &rData) : m_iData (rData) {
+            }
+            Boolean (Boolean const &rOther) : m_iData (rOther.m_iData) {
             }
 
         //  Destruction
         public:
-            ~BooleanStorage () {
+            ~Boolean () {
             }
 
         //  Access
         public:
-            template <typename consumer_t> void supply (consumer_t &rConsumer) const {
-                rConsumer.consume (value ());
+            template <typename consumer_t> bool supply (consumer_t &rConsumer) const {
+                return rConsumer.consume (value ());
             }
             operator bool () const {
-                return this->value () ? true : false;
+                return value ();
             }
             bool value () const {
-                return this->SimpleStorage<storage_t>::value () ? true : false;
+                return m_iData.value () ? true : false;
             }
+
+        //  State
+        private:
+            storage_t const m_iData;
         };
 
-    /***************************************************************
-     *----  template <typename storage_t> class TicketStorage  ----*
-     ***************************************************************/
+    /****************************************************************
+     *----  template <typename storage_t> class TicketedObject  ----*
+     ****************************************************************/
     public:
-        template <typename storage_t,typename object_value_t> class TicketStorage {
+        template <typename storage_t,typename object_value_t> class TicketedObject {
         //  Aliases
         public:
             typedef object_value_t element_t;
 
         //  Construction
         public:
-            TicketStorage (
-                VCallAgent *pAgent, storage_t const &rData
-            ) : m_pCursor (pAgent->taskCursor ()), m_iData (rData) {
+            template <typename wrapped_storage_t> TicketedObject (
+                wrapped_storage_t const &rData, VCallAgent *pAgent
+            ) : m_iData (storage_t (rData, pAgent)) {
             }
-            TicketStorage (
-                TicketStorage const &rOther
-            ) : m_pCursor (rOther.m_pCursor), m_iData (rOther.m_iData) {
+            TicketedObject (
+                storage_t const &rData
+            ) : m_iData (rData) {
+            }
+            TicketedObject (
+                TicketedObject const &rOther
+            ) : m_iData (rOther.m_iData) {
             }
 
         //  Destruction
         public:
-            ~TicketStorage () {
+            ~TicketedObject () {
             }
 
         //  Access
+        private:
+            bool getObject (object_value_t &rpObject) const {
+                return m_pObjectHolder && m_pObjectHolder->getObject (rpObject, m_iData);
+            }
+        protected:
+            template <typename consumer_t> bool supplyAlways (consumer_t &rConsumer) const {
+                return supply (rConsumer) || m_iData.supply (rConsumer);
+            }
         public:
+            template <typename consumer_t> bool supply (consumer_t &rConsumer) const {
+                object_value_t pObject = 0;
+                return getObject (pObject) && rConsumer.consume (pObject);
+            }
             operator object_value_t () const {
                 return value ();
             }
             object_value_t value () const {
-                return 0;
+                object_value_t pObject = 0;
+                getObject (pObject);
+                return pObject;
             }
 
         //  State
         private:
-            VCursor::Reference	const m_pCursor;
-            storage_t		const m_iData;
+            storage_t		       const m_iData;
+            VObjectHolder::Reference mutable m_pObjectHolder;
+        };
+
+    /*********************************************************************
+     *----  template <typename storage_t> class MaybeTicketedObject  ----*
+     *********************************************************************/
+    public:
+        template <typename storage_t,typename object_value_t> class MaybeTicketedObject
+            : public TicketedObject<storage_t,object_value_t>
+        {
+        //  Aliases
+        public:
+            typedef TicketedObject<storage_t,object_value_t> BaseClass;
+
+        //  Construction
+        public:
+            template <typename wrapped_storage_t> MaybeTicketedObject (
+                wrapped_storage_t const &rData, VCallAgent *pAgent
+            ) : BaseClass (rData, pAgent) {
+            }
+            MaybeTicketedObject (
+                storage_t const &rData
+            ) : BaseClass (rData) {
+            }
+            MaybeTicketedObject (
+                MaybeTicketedObject const &rOther
+            ) : BaseClass (rOther) {
+            }
+
+        //  Destruction
+        public:
+            ~MaybeTicketedObject () {
+            }
+
+        //  Access
+        public:
+            template <typename consumer_t> bool supply (consumer_t &rConsumer) const {
+                return this->supplyAlways (rConsumer);
+            }
         };
 
 
@@ -255,25 +346,29 @@ namespace Vxa {
 
         //  Any Storage
         public:
-            template <typename data_storage_t> class AnyStorage : public VAny {
+            template <typename storage_t> class Any : public VAny {
             //  Aliases
             public:
-                typedef typename data_storage_t::element_t value_t;
+                typedef typename storage_t::element_t value_t;
 
             //  Construction
             public:
-                AnyStorage (
-                    VCallAgent *pAgent, data_storage_t const &rData
+                template <typename wrapped_storage_t> Any (
+                    wrapped_storage_t const &rData, VCallAgent *pAgent
+                ) : m_iData (storage_t (rData, pAgent)) {
+                }
+                Any (
+                    storage_t const &rData
                 ) : m_iData (rData) {
                 }
-                AnyStorage (
-                    AnyStorage const &rOther
+                Any (
+                    Any const &rOther
                 ) : m_iData (rOther.m_iData) {
                 }
 
             //  Destruction
             public:
-                ~AnyStorage () {
+                ~Any () {
                 }
 
             //  Access
@@ -290,7 +385,7 @@ namespace Vxa {
 
             //  State
             private:
-                data_storage_t m_iData;
+                storage_t m_iData;
             };
 
 	//  Construction
@@ -307,24 +402,22 @@ namespace Vxa {
 
 	//  Callbacks
 	private:
-            template <typename data_storage_t> bool createUsingStorage (
-                VCallAgent *pAgent, data_storage_t const &rValues
+            template <typename storage_t> bool createUsingWrapped (
+                storage_t const &rValues, VCallAgent *pAgent
             ) {
-                return this->setResultTo (AnyStorage<data_storage_t> (pAgent, rValues));
-            }
-            template <typename data_storage_t> bool createUsingSimpleStorage (
-                VCallAgent *pAgent, data_storage_t const &rValues
-            ) {
-                return createUsingStorage (pAgent, SimpleStorage<data_storage_t> (pAgent, rValues));
+                return this->setResultTo (Any<Wrapped<storage_t> > (rValues, pAgent));
             }
 	    virtual bool createFromIntegers (i32_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
-                return createUsingSimpleStorage (pAgent, rValues);
+                return createUsingWrapped (rValues, pAgent);
 	    }
 	    virtual bool createFromDoubles (f64_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
-                return createUsingSimpleStorage (pAgent, rValues);
+                return createUsingWrapped (rValues, pAgent);
 	    }
 	    virtual bool createFromStrings (str_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
-                return createUsingSimpleStorage (pAgent, rValues);
+		return this->setResultTo (
+                    Any<MaybeTicketedObject<Wrapped<str_array_t>,VCollectableObject*> >(rValues, pAgent)
+                );
+
 	    }
 	};
 
@@ -350,10 +443,10 @@ namespace Vxa {
 	//  Callbacks
 	private:
 	    virtual bool createFromIntegers (i32_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
-                return this->setResultTo (BooleanStorage<i32_array_t> (pAgent, rValues));
+                return this->setResultTo (Boolean<Wrapped<i32_array_t> >(rValues, pAgent));
 	    }
 	    virtual bool createFromDoubles (f64_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
-		return this->setResultTo (BooleanStorage<f64_array_t> (pAgent, rValues));
+		return this->setResultTo (Boolean<Wrapped<f64_array_t> >(rValues, pAgent));
 	    }
 	};
 
@@ -379,10 +472,10 @@ namespace Vxa {
 	//  Callbacks
 	private:
 	    virtual bool createFromIntegers (i32_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
-		return this->setResultTo (SimpleStorage<i32_array_t> (pAgent, rValues));
+		return this->setResultTo (Wrapped<i32_array_t> (rValues, pAgent));
 	    }
 	    virtual bool createFromDoubles (f64_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
-		return this->setResultTo (SimpleStorage<f64_array_t> (pAgent, rValues));
+		return this->setResultTo (Wrapped<f64_array_t> (rValues, pAgent));
 	    }
 	};
 
@@ -412,7 +505,9 @@ namespace Vxa {
 	//  Callbacks
 	private:
 	    virtual bool createFromStrings (str_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
-		return this->setResultTo (TicketStorage<str_array_t,object_value_t>(pAgent, rValues));
+		return this->setResultTo (
+                    TicketedObject<Wrapped<str_array_t>,object_value_t>(rValues, pAgent)
+                );
 	    }
 	};
 
@@ -438,7 +533,7 @@ namespace Vxa {
 	//  Callbacks
 	private:
 	    virtual bool createFromStrings (str_array_t const &rValues, VCallAgent *pAgent) OVERRIDE {
-		return this->setResultTo (SimpleStorage<str_array_t> (pAgent, rValues));
+		return this->setResultTo (Wrapped<str_array_t> (rValues, pAgent));
 	    }
 	};
 

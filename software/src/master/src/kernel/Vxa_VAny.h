@@ -61,16 +61,16 @@ namespace Vxa {
 
     //  Delivery
     public:
-        template <typename Datum> void consume (Datum iDatum) {
-            on (iDatum);
+        template <typename Datum> bool consume (Datum iDatum) {
+            return on (iDatum);
         }
 
     //  Callbacks
     protected:
-        virtual void on (int iValue) = 0;
-        virtual void on (double iValue) = 0;
-        virtual void on (VString const &rString) = 0;
-        virtual void on (VCollectableObject *pObject) = 0;
+        virtual bool on (int iValue) = 0;
+        virtual bool on (double iValue) = 0;
+        virtual bool on (VString const &rString) = 0;
+        virtual bool on (VCollectableObject *pObject) = 0;
     };
 } //  namespace Vxa
 
