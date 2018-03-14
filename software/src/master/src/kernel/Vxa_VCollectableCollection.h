@@ -6,6 +6,7 @@
  ************************/
 
 #include "Vxa_VCollection.h"
+#include "Vxa_VTicketProducer.h"
 
 /**************************
  *****  Declarations  *****
@@ -18,15 +19,19 @@
  *************************/
 
 namespace Vxa {
+    class VCollectableIdentity;
     class VCollectableObject;
-
 
-    /*----------------------------------------*
-     *----  class VCollectableCollection  ----*
-     *----------------------------------------*/
+    typedef VTicketProducer::cluster_t       cluster_t;
+    typedef VTicketProducer::cluster_index_t cluster_index_t;
 
+/*----------------------------------------*
+ *----  class VCollectableCollection  ----*
+ *----------------------------------------*/
     class Vxa_API VCollectableCollection : public VCollection {
 	DECLARE_ABSTRACT_RTTLITE (VCollectableCollection, VCollection);
+
+        friend class VCollectableIdentity;
 
     //  Aliases
     public:
@@ -45,10 +50,14 @@ namespace Vxa {
 	virtual cardinality_t cardinality_() const OVERRIDE {
 	    return cardinality ();
 	}
+        virtual VCollectableObject* object_(collection_index_t xElement) const = 0;
     public:
 	cardinality_t cardinality () const {
 	    return m_sCollection;
 	}
+        VCollectableObject *object (collection_index_t xElement) const {
+            return object_(xElement);
+        }
 	VClass *type () const {
 	    return m_pClass;
 	}
@@ -73,6 +82,12 @@ namespace Vxa {
 	virtual bool transmitUsing_(VCallType2Exporter *pExporter, VMonotypeMapMaker *pMapMaker, object_reference_array_t const &rInjection) OVERRIDE;
 	virtual bool transmitUsing_(VCallType2Exporter *pExporter, VMonotypeMapMaker *pMapMaker) OVERRIDE;
 
+    //  Ticket Generation
+    protected:
+        bool getTicket (VString &rTicket, collection_index_t xObject, bool bSingleUse) {
+            return m_iTicketProducer.getTicket (rTicket, this, xObject, bSingleUse);
+        }
+
     //  Update
     protected:
 	bool attach (VCollectableObject *pObject);
@@ -82,21 +97,16 @@ namespace Vxa {
     private:
 	VClass::Pointer const m_pClass;
 	cardinality_t m_sCollection;
+        VTicketProducer m_iTicketProducer;
     };
 
 
-    /*--------------------------------------*
-     *----  class VCollectableIdentity  ----*
-     *--------------------------------------*/
-
+/*--------------------------------------*
+ *----  class VCollectableIdentity  ----*
+ *--------------------------------------*/
     class Vxa_API VCollectableIdentity {
     //  Friends
         friend class VCollectableObject;
-
-    //  Aliases
-    public:
-        typedef VCollectableCollection cluster_t;
-        typedef VCollectableCollection::collection_index_t cluster_index_t;
 
     //  Construction / Destruction
     public:
@@ -123,6 +133,12 @@ namespace Vxa {
             return m_pCluster.isNil ();
         }
 
+    //  Ticket Generation
+    public:
+        bool getTicket (VString &rTicket, bool bSingleUse) const {
+            return m_pCluster && m_pCluster->getTicket (rTicket, m_xObject, bSingleUse);
+        }
+
     //  Update
     private:
         bool attach (cluster_t *pCluster, cluster_index_t xObject);
@@ -133,14 +149,11 @@ namespace Vxa {
         cluster_t::Pointer m_pCluster;
         cluster_index_t    m_xObject;
     };
-
-    typedef VCollectableIdentity::cluster_t       cluster_t;
-    typedef VCollectableIdentity::cluster_index_t cluster_index_t;
 
 
-    /*----------------------------------------------------------------------*
-     *---- template <typename collectable_t> struct VCollectableTraits  ----*
-     *----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ *---- template <typename collectable_t> struct VCollectableTraits  ----*
+ *----------------------------------------------------------------------*/
 
     template <typename collectable_t> struct VCollectableTraits {
 	typedef collectable_t* val_t;

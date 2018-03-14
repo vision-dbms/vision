@@ -55,24 +55,20 @@ Vxa::VCollectableObject::~VCollectableObject () {
  *******************************
  *******************************/
 
-bool Vxa::VCollectableObject::GetObjectForTicket (
-    Reference &rObject, VString const &rTicket
-) {
-    return false;
-}
-
 void Vxa::VCollectableObject::GetHandle (VResultBuilder &rRB) {
-    rRB = GetHandleImpl ();
+    GetTicketImplementation (rRB, false);
 }
 
 void Vxa::VCollectableObject::GetTicket (VResultBuilder &rRB) {
-    rRB = GetTicketImpl ();
+    GetTicketImplementation (rRB, true);
 }
 
-VString Vxa::VCollectableObject::GetTicketImpl (bool bSingleUse) {
+void Vxa::VCollectableObject::GetTicketImplementation (VResultBuilder &rRB, bool bSingleUse) {
     VString iTicket;
-    iTicket.printf ("!*%c%p", (bSingleUse ? '.' : '*'), this);
-    return iTicket;
+    if (m_iIdentity.getTicket (iTicket, bSingleUse))
+        rRB = iTicket;
+    else
+        rRB = false;
 }
 
 
@@ -91,8 +87,9 @@ VString Vxa::VCollectableObject::GetTicketImpl (bool bSingleUse) {
  **************************/
 
 Vxa::VCollectableObject::ClassBuilder::ClassBuilder (Vxa::VClass *pClass) : m_pClass (pClass) {
-    defineMethod (".getHandle", &VCollectableObject::GetHandle);
-    defineMethod (".getTicket", &VCollectableObject::GetTicket);
+    defineMethod (".getHandle" , &VCollectableObject::GetHandle);
+    defineMethod (".getTicket" , &VCollectableObject::GetTicket);
+    defineMethod (".getTicket:", &VCollectableObject::GetTicketImplementation);
 }
 
 /**************************************

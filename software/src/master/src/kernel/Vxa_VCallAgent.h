@@ -12,6 +12,7 @@
 
 #include "Vxa_VAny.h"
 #include "Vxa_VPack.h"
+#include "Vxa_VTicketConsumer.h"
 
 /**************************
  *****  Declarations  *****
@@ -27,34 +28,6 @@
 
 namespace Vxa {
     class VImportableType;
-
-/***************************************
- *----  class VTicketObjectHolder  ----*
- ***************************************/
-    class VCollectableObject;
-    class VObjectHolder : public VReferenceable {
-        DECLARE_ABSTRACT_RTTLITE (VObjectHolder, VReferenceable);
-
-    protected:
-        VObjectHolder () {
-        }
-        ~VObjectHolder () {
-        }
-    public:
-        template <typename object_value_t> bool getObject (
-            object_value_t &rpObject, VString const &rObjectTicket
-        ) {
-            VCollectableObject *pObject = 0;
-            if (getObject (pObject, rObjectTicket)) {
-                rpObject = dynamic_cast<object_value_t>(pObject);
-                return true;
-            }
-            return false;
-        }
-        bool getObject (VCollectableObject* &rpObject, VString const &rObjectTicket) {
-            return false;
-        }
-    };
 
 /******************************
  *----  class VCallAgent  ----*
@@ -163,6 +136,45 @@ namespace Vxa {
             storage_t const m_iData;
         };
 
+    /************************************************************
+     *----  template <typename storage_t> class Bookmarked  ----*
+     ************************************************************/
+    public:
+        template <typename storage_t> class Bookmarked
+            : public storage_t
+        {
+            DECLARE_FAMILY_MEMBERS (Bookmarked<storage_t>, storage_t);
+
+        //  Construction
+        protected:
+            template <typename wrapped_storage_t> Bookmarked (
+                wrapped_storage_t const &rData, VCallAgent *pAgent
+            ) : BaseClass (rData, pAgent), m_iBookmark (this->cursor ()) {
+            }
+            template <typename wrapped_storage_t> Bookmarked (
+                wrapped_storage_t const &rData
+            ) : BaseClass (rData), m_iBookmark (this->cursor ()) {
+            }
+
+        //  Destruction
+        protected:
+            ~Bookmarked () {
+            }
+
+        //  Access
+        public:
+            bool bookmarkIsSet () const {
+                return m_iBookmark.isSet ();
+            }
+            bool bookmarkReset () const {
+                return m_iBookmark.reset ();
+            }
+
+        //  State
+        private:
+            VCursor::Bookmark mutable m_iBookmark;
+        };
+
     /*********************************************************
      *----  template <typename storage_t> class Boolean  ----*
      *********************************************************/
@@ -208,10 +220,10 @@ namespace Vxa {
      ****************************************************************/
     public:
         template <typename storage_t,typename object_value_t> class TicketedObject
-            : public Wrapper<storage_t>
+            : public Bookmarked<Wrapper<storage_t> >
         {
             typedef TicketedObject<storage_t,object_value_t> this_t;
-            DECLARE_FAMILY_MEMBERS (this_t, Wrapper<storage_t>);
+            DECLARE_FAMILY_MEMBERS (this_t, Bookmarked<Wrapper<storage_t> >);
 
         //  Aliases
         public:
@@ -240,8 +252,11 @@ namespace Vxa {
         //  Access
         private:
             bool getObject (object_value_t &rpObject) const {
-            //  TO DO: Object Holder Initialization
-                return m_pObjectHolder && m_pObjectHolder->getObject (rpObject, this->wrappedElement ());
+                return VTicketConsumer::Get (m_pTicketConsumer) && (
+                    this->bookmarkReset ()
+                    ? m_pTicketConsumer->getObject (rpObject, this->wrappedElement ())
+                    : m_pTicketConsumer->getObject (rpObject)
+                );
             }
         protected:
             template <typename consumer_t> bool supplyAlways (consumer_t &rConsumer) const {
@@ -263,7 +278,7 @@ namespace Vxa {
 
         //  State
         private:
-            VObjectHolder::Reference mutable m_pObjectHolder;
+            VTicketConsumer::Reference mutable m_pTicketConsumer;
         };
 
     /*********************************************************************

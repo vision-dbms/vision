@@ -55,11 +55,15 @@ namespace Vxa {
 	}
 
     //  Access
+    protected:
+        virtual VCollectableObject* object_(collection_index_t xElement) const OVERRIDE {
+            return element (xElement);
+        }
     public:
-	val_t operator[] (unsigned int xElement) const {
+	val_t operator[] (collection_index_t xElement) const {
 	    return element (xElement);
 	}
-	val_t element (unsigned int xElement) const {
+	val_t element (collection_index_t xElement) const {
 	    return xElement < cardinality() ? m_iContainer[xElement] : static_cast<val_t>(0);
 	}
 

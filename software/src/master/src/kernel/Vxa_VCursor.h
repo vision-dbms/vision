@@ -27,6 +27,39 @@ namespace Vxa {
     public:
 	typedef Reference CursorReference;
 
+    //  class Bookmark
+    public:
+        class Bookmark {
+        //  Construction
+        public:
+            Bookmark (
+                VCursor *pCursor
+            ) : m_pCursor (pCursor), m_xBookmark (pCursor->cardinality ()) {
+            }
+
+        //  Destruction
+        public:
+            ~Bookmark () {
+            }
+
+        //  Tracking
+        public:
+            bool isSet () const {
+                return m_xBookmark == m_pCursor->position ();
+            }
+            bool reset () {
+                if (isSet ())
+                    return false;
+                m_xBookmark = m_pCursor->position ();
+                return true;
+            }
+
+        //  State
+        private:
+            CursorReference const m_pCursor;
+            cardinality_t m_xBookmark;
+        };
+
     //  class CardinalityHints
     public:
 	class Vxa_API CardinalityHints : public VCardinalityHints {

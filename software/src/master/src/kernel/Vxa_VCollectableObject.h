@@ -38,6 +38,7 @@ namespace Vxa {
     //  Class Builder
     public:
 	class Vxa_API ClassBuilder;
+        friend class ClassBuilder;
 
     //  Traits
     public:
@@ -82,19 +83,11 @@ namespace Vxa {
             return m_iIdentity.detach (pCluster);
         }
 
-    //  Ticket Support
+    //  Ticket Generation
     public:
-        static bool GetObjectForTicket (
-            Reference &rObject, VString const &rTicket
-        );
         void GetHandle (VResultBuilder &rRB);
         void GetTicket (VResultBuilder &rRB);
-
-    private:
-        VString GetHandleImpl () {
-            return GetTicketImpl (false);
-        }
-        VString GetTicketImpl (bool bSingleUse = true);
+        void GetTicketImplementation (VResultBuilder &rRB, bool bSingleUse);
 
     //  Task Launcher
     public:
