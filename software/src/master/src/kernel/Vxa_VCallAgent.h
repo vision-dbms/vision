@@ -96,6 +96,10 @@ namespace Vxa {
 
         //  Access
         public:
+            VCursor *cursor () const {
+                return m_pCursor;
+            }
+
             template <typename consumer_t> bool supply (consumer_t &rConsumer) const {
                 return rConsumer.consume (value ());
             }
@@ -113,19 +117,72 @@ namespace Vxa {
         };
 
     /*********************************************************
+     *----  template <typename storage_t> class Wrapper  ----*
+     *********************************************************/
+    public:
+        template <typename storage_t> class Wrapper {
+        //  Aliases
+        protected:
+            typedef storage_t                     wrapped_storage_t;
+            typedef typename storage_t::element_t wrapped_element_t;
+
+        //  Construction
+        protected:
+            template <typename wrapped_storage_t> Wrapper (
+                wrapped_storage_t const &rData, VCallAgent *pAgent
+            ) : m_iData (storage_t (rData, pAgent)) {
+            }
+            Wrapper (storage_t const &rData) : BaseClass (rData) {
+            }
+            Wrapper (Wrapper const &rOther) : m_iData (rOther.m_iData) {
+            }
+
+        //  Destruction
+        protected:
+            ~Wrapper () {
+            }
+
+        //  Access
+        public:
+            VCursor* cursor () const {
+                return m_iData.cursor ();
+            }
+        protected:
+            template <typename consumer_t> bool supplyWrapped (consumer_t &rConsumer) const {
+                return m_iData.supply (rConsumer);
+            }
+            wrapped_storage_t const &wrappedStorage () const {
+                return m_iData;
+            }
+            wrapped_element_t const &wrappedElement () const {
+                return m_iData;
+            }
+
+        //  State
+        private:
+            storage_t const m_iData;
+        };
+
+    /*********************************************************
      *----  template <typename storage_t> class Boolean  ----*
      *********************************************************/
     public:
-        template <typename storage_t> class Boolean {
+        template <typename storage_t> class Boolean : public Wrapper<storage_t> {
+            DECLARE_FAMILY_MEMBERS (Boolean<storage_t>, Wrapper<storage_t>);
+
+        //  Aliases
+        public:
+            typedef bool element_t;
+
         //  Construction
         public:
             template <typename wrapped_storage_t> Boolean (
                 wrapped_storage_t const &rData, VCallAgent *pAgent
-            ) : m_iData (storage_t (rData, pAgent)) {
+            ) : BaseClass (rData, pAgent) {
             }
-            Boolean (storage_t const &rData) : m_iData (rData) {
+            Boolean (storage_t const &rData) : BaseClass (rData) {
             }
-            Boolean (Boolean const &rOther) : m_iData (rOther.m_iData) {
+            Boolean (Boolean const &rOther) : BaseClass (rOther) {
             }
 
         //  Destruction
@@ -138,23 +195,24 @@ namespace Vxa {
             template <typename consumer_t> bool supply (consumer_t &rConsumer) const {
                 return rConsumer.consume (value ());
             }
-            operator bool () const {
+            operator element_t () const {
                 return value ();
             }
-            bool value () const {
-                return m_iData.value () ? true : false;
+            element_t value () const {
+                return this->wrappedElement () ? true : false;
             }
-
-        //  State
-        private:
-            storage_t const m_iData;
         };
 
     /****************************************************************
      *----  template <typename storage_t> class TicketedObject  ----*
      ****************************************************************/
     public:
-        template <typename storage_t,typename object_value_t> class TicketedObject {
+        template <typename storage_t,typename object_value_t> class TicketedObject
+            : public Wrapper<storage_t>
+        {
+            typedef TicketedObject<storage_t,object_value_t> this_t;
+            DECLARE_FAMILY_MEMBERS (this_t, Wrapper<storage_t>);
+
         //  Aliases
         public:
             typedef object_value_t element_t;
@@ -163,15 +221,15 @@ namespace Vxa {
         public:
             template <typename wrapped_storage_t> TicketedObject (
                 wrapped_storage_t const &rData, VCallAgent *pAgent
-            ) : m_iData (storage_t (rData, pAgent)) {
+            ) : BaseClass (rData, pAgent) {
             }
             TicketedObject (
                 storage_t const &rData
-            ) : m_iData (rData) {
+            ) : BaseClass (rData) {
             }
             TicketedObject (
                 TicketedObject const &rOther
-            ) : m_iData (rOther.m_iData) {
+            ) : BaseClass (rOther) {
             }
 
         //  Destruction
@@ -182,29 +240,29 @@ namespace Vxa {
         //  Access
         private:
             bool getObject (object_value_t &rpObject) const {
-                return m_pObjectHolder && m_pObjectHolder->getObject (rpObject, m_iData);
+            //  TO DO: Object Holder Initialization
+                return m_pObjectHolder && m_pObjectHolder->getObject (rpObject, this->wrappedElement ());
             }
         protected:
             template <typename consumer_t> bool supplyAlways (consumer_t &rConsumer) const {
-                return supply (rConsumer) || m_iData.supply (rConsumer);
+                return supply (rConsumer) || this->supplyWrapped (rConsumer);
             }
         public:
             template <typename consumer_t> bool supply (consumer_t &rConsumer) const {
-                object_value_t pObject = 0;
+                element_t pObject = 0;
                 return getObject (pObject) && rConsumer.consume (pObject);
             }
-            operator object_value_t () const {
+            operator element_t () const {
                 return value ();
             }
-            object_value_t value () const {
-                object_value_t pObject = 0;
+            element_t value () const {
+                element_t pObject = 0;
                 getObject (pObject);
                 return pObject;
             }
 
         //  State
         private:
-            storage_t		       const m_iData;
             VObjectHolder::Reference mutable m_pObjectHolder;
         };
 
@@ -215,9 +273,9 @@ namespace Vxa {
         template <typename storage_t,typename object_value_t> class MaybeTicketedObject
             : public TicketedObject<storage_t,object_value_t>
         {
-        //  Aliases
-        public:
-            typedef TicketedObject<storage_t,object_value_t> BaseClass;
+            typedef MaybeTicketedObject<storage_t,object_value_t> this_t;
+            typedef TicketedObject     <storage_t,object_value_t> base_t;
+            DECLARE_FAMILY_MEMBERS (this_t, base_t);
 
         //  Construction
         public:
@@ -346,7 +404,9 @@ namespace Vxa {
 
         //  Any Storage
         public:
-            template <typename storage_t> class Any : public VAny {
+            template <typename storage_t> class Any : public VAny, public Wrapper<storage_t> {
+                DECLARE_FAMILY_MEMBERS (Any<storage_t>, Wrapper<storage_t>);
+
             //  Aliases
             public:
                 typedef typename storage_t::element_t value_t;
@@ -355,15 +415,15 @@ namespace Vxa {
             public:
                 template <typename wrapped_storage_t> Any (
                     wrapped_storage_t const &rData, VCallAgent *pAgent
-                ) : m_iData (storage_t (rData, pAgent)) {
+                ) : BaseClass (rData, pAgent) {
                 }
                 Any (
                     storage_t const &rData
-                ) : m_iData (rData) {
+                ) : BaseClass (rData) {
                 }
                 Any (
                     Any const &rOther
-                ) : m_iData (rOther.m_iData) {
+                ) : BaseClass (rOther) {
                 }
 
             //  Destruction
@@ -380,12 +440,8 @@ namespace Vxa {
                     return *this;
                 }
                 virtual void supply (Client &rClient) const OVERRIDE {
-                    m_iData.supply (rClient);
+                    this->supplyWrapped (rClient);
                 }
-
-            //  State
-            private:
-                storage_t m_iData;
             };
 
 	//  Construction
