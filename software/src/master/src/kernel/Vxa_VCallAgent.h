@@ -59,7 +59,7 @@ namespace Vxa {
 /******************************
  *----  class VCallAgent  ----*
  ******************************/
-    class VCallAgent : public VRolePlayer {
+    class Vxa_API VCallAgent : public VRolePlayer {
 	DECLARE_ABSTRACT_RTTLITE (VCallAgent, VRolePlayer);
 
     //  Aliases

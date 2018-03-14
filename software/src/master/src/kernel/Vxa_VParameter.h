@@ -59,7 +59,7 @@ namespace Vxa {
     //  Access
     public:
 	virtual value_t value () OVERRIDE {
-	    return m_iStorage;
+	    return static_cast<scalar_value_t>(m_iStorage);
 	}
 
     //  State
