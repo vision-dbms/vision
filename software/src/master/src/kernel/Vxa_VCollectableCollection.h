@@ -83,7 +83,10 @@ namespace Vxa {
 	virtual bool transmitUsing_(VCallType2Exporter *pExporter, VMonotypeMapMaker *pMapMaker) OVERRIDE;
 
     //  Ticket Generation
-    protected:
+    public:
+        bool getTicketKey (VString &rKey) const {
+            return m_iTicketProducer.getTicketKey (rKey);
+        }
         bool getTicket (VString &rTicket, collection_index_t xObject, bool bSingleUse) {
             return m_iTicketProducer.getTicket (rTicket, this, xObject, bSingleUse);
         }
@@ -96,8 +99,8 @@ namespace Vxa {
     //  State
     private:
 	VClass::Pointer const m_pClass;
-	cardinality_t m_sCollection;
-        VTicketProducer m_iTicketProducer;
+        VTicketProducer const m_iTicketProducer;
+	cardinality_t         m_sCollection;
     };
 
 

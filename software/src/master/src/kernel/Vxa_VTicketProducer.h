@@ -41,16 +41,15 @@ namespace Vxa {
         }
 
     //  Use
-    private:
-        bool readyToUse ();
     public:
+        bool getTicketKey (VString &rKey) const;
         bool getTicket (
             VString &rTicket, cluster_t *pCluster, cluster_index_t xObject, bool bSingleUse
-        );
+        ) const;
 
     //  State
     private:
-        VString m_iUUID;
+        VString mutable m_iKey;
     };
 } //  namespace Vxa
 
