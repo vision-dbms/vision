@@ -41,6 +41,8 @@ namespace Vxa {
         }
 
     //  Use
+    private:
+        bool readyToUse ();
     public:
         bool getTicket (
             VString &rTicket, cluster_t *pCluster, cluster_index_t xObject, bool bSingleUse
