@@ -7544,18 +7544,32 @@ namespace Vca {
 
 	//  State
 	private:
+	    enum DMState {
+		State_Running,
+		State_CondWait,
+		State_PollWait,
+		State_Signalled
+	    };
+            char const *DMStateName () {
+                return DMStateName (m_xState);
+            }
+            static char const *DMStateName (DMState xState) {
+                switch (xState) {
+                case State_Running:  return "Running";
+                case State_CondWait: return "CondWait";
+                case State_PollWait: return "PollWait";
+                default:
+                    break;
+                }
+                return "Signalled";
+            }
 	    DeviceUseReference	m_pBlockedUses;
 	    DeviceIndex		m_iDeviceIndex;
 	    PollVector		m_iPollVector;
 	    bool		m_bValidPoll;
 	    pthread_mutex_t	m_iMutex;
 	    pthread_cond_t	m_iCondvar;
-	    enum {
-		State_Running,
-		State_CondWait,
-		State_PollWait,
-		State_Signalled
-	    }			m_xState;
+	    DMState 		m_xState;
 	    int			m_iPSPair[2];	//  Poll Signalling Socket Pair
 	    DevicePoll		m_iPSPoll;
 	};
@@ -7637,6 +7651,10 @@ void Vca::OS::Device::getPollData () {
 bool Vca::OS::DeviceManager::postInterrupt_() {
     bool bSignalingCondvar = false;
 
+    defaultLogger().printf (
+        "+++ Vca::OS::DeviceManager::postInterrupt_: Entry: %s\n", DMStateName ()
+    );
+
     pthread_mutex_lock (&m_iMutex);
     switch (m_xState) {
     case State_CondWait:
@@ -7646,7 +7664,11 @@ bool Vca::OS::DeviceManager::postInterrupt_() {
     case State_PollWait:
 	if (m_iPSPair[1] >= 0) {
 	    static char iByte = 0;
-	    write (m_iPSPair[1], &iByte, sizeof (iByte));
+            defaultLogger().printf (
+                "+++ Vca::OS::DeviceManager::postInterrupt_: Write: %s %d\n",
+                DMStateName (),
+                write (m_iPSPair[1], &iByte, sizeof (iByte))
+            );
 	}
 	break;
     }
@@ -7654,6 +7676,10 @@ bool Vca::OS::DeviceManager::postInterrupt_() {
     pthread_mutex_unlock (&m_iMutex);
     if (bSignalingCondvar)
 	pthread_cond_signal (&m_iCondvar);
+
+    defaultLogger().printf (
+        "+++ Vca::OS::DeviceManager::postInterrupt_: Exit : %s\n", DMStateName ()
+    );
 
     return true;
 }
@@ -7685,6 +7711,10 @@ bool Vca::OS::DeviceManager::processEvent_(
 	return false;
 
 //  Do the poll if all handles are valid, ...
+    defaultLogger().printf (
+        "+++ Vca::OS::DeviceManager::processEvent_ : Setup: %s %lu%s\n",
+        DMStateName (), sPoll, m_bValidPoll ? " Valid" : ""
+    );
     if (m_bValidPoll) {
 	int cEvents = 0;
 	if (sPoll > 0) {
@@ -7711,13 +7741,28 @@ bool Vca::OS::DeviceManager::processEvent_(
 		pthread_mutex_unlock (&m_iMutex);
 	    }
 	    cEvents = poll (m_iPollVector.elementArray (), sPoll, sTimeout);
+            defaultLogger().printf (
+                "+++ Vca::OS::DeviceManager::processEvent_ : Poll : %s %lu %lu %d\n",
+                DMStateName (), sPoll, sTimeout, cEvents
+            );
 	    if (m_xState == State_PollWait) {
 		get (m_iDeviceIndex, m_iPSPoll);
 		if (m_iPSPoll.canRead ()) {
 		    //  Drain the signal reader...
 		    char iByte[1]; BSReadArea iByteArea (iByte, sizeof(iByte));
 		    VkStatus iStatus; ssize_t sTransfer;
+#if 1
+                    bool bNotDone = true;
+		    while (bNotDone && m_iPSPoll.doRead (iStatus, sTransfer, iByteArea, xSignalFD)) {
+                        defaultLogger().printf (
+                            "+++ Vca::OS::DeviceManager::processEvent_ : Drain: %s %ld\n",
+                            DMStateName (), sTransfer
+                        );
+                        bNotDone = m_iPSPoll.pollRead (xSignalFD);
+                    };
+#else
 		    while (m_iPSPoll.doRead (iStatus, sTransfer, iByteArea, xSignalFD) && m_iPSPoll.pollRead (xSignalFD));
+#endif
 		}
 	    }
 	    m_xState = State_Running;
