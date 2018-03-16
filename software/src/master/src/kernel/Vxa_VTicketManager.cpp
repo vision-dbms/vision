@@ -193,7 +193,6 @@ namespace {
     }
 /*----------------*/
     bool VTicketRegistry::getObject (VCollectableObject::Reference &rpObject, VString const &rTicket) {
-        std::cerr << "........: getObject: " << rTicket << std::endl;
     //  Parse the ticket...
         static unsigned int const Expecting_Opening = 0;
         static unsigned int const Expecting_Key     = 1;
@@ -205,7 +204,6 @@ namespace {
         for (unsigned int xWhatsNext = Expecting_Opening ; xWhatsNext < Expecting_Closing; xWhatsNext++) {
             if (!iNext.getPrefix (':', iHead, iRest))
                 return false;
-            std::cerr << ".........: getObject: " << iHead << ", " << iRest << std::endl;
             switch (xWhatsNext) {
             case Expecting_Opening:
                 if (iHead != "<!*")
