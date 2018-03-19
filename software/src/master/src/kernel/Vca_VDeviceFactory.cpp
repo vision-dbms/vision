@@ -7745,27 +7745,48 @@ bool Vca::OS::DeviceManager::processEvent_(
                 "+++ Vca::OS::DeviceManager::processEvent_ : Poll : %s %lu %lu %d\n",
                 DMStateName (), sPoll, sTimeout, cEvents
             );
-	    if (m_xState == State_PollWait) {
+            switch (m_xState) {
+	    case State_PollWait:
 		get (m_iDeviceIndex, m_iPSPoll);
 		if (m_iPSPoll.canRead ()) {
 		    //  Drain the signal reader...
 		    char iByte[1]; BSReadArea iByteArea (iByte, sizeof(iByte));
-		    VkStatus iStatus; ssize_t sTransfer;
-#if 1
-                    bool bNotDone = true;
-		    while (bNotDone && m_iPSPoll.doRead (iStatus, sTransfer, iByteArea, xSignalFD)) {
+		    VkStatus iStatus; ssize_t sTransfer; bool bNotDone = true;
+                    static int const xTestCase = V::GetEnvironmentInteger ("PollCase", 0);
+                    switch (xTestCase) {
+                    case 3:
+                        bNotDone = m_iPSPoll.doRead (iStatus, sTransfer, iByteArea, xSignalFD);
                         defaultLogger().printf (
-                            "+++ Vca::OS::DeviceManager::processEvent_ : Drain: %s %ld\n",
-                            DMStateName (), sTransfer
+                            "+++ Vca::OS::DeviceManager::processEvent_ : Drain: %s %u %ld %s\n",
+                            DMStateName (), xTestCase, sTransfer, bNotDone ? "N" : "D"
                         );
-                        bNotDone = m_iPSPoll.pollRead (xSignalFD);
-                    };
-#else
-		    while (m_iPSPoll.doRead (iStatus, sTransfer, iByteArea, xSignalFD) && m_iPSPoll.pollRead (xSignalFD));
-#endif
+                        break;
+                    case 2:
+                        bNotDone = m_iPSPoll.doRead (iStatus, sTransfer, iByteArea, xSignalFD) && m_iPSPoll.pollRead (xSignalFD);
+                        defaultLogger().printf (
+                            "+++ Vca::OS::DeviceManager::processEvent_ : Drain: %s %u %ld %s\n",
+                            DMStateName (), xTestCase, sTransfer, bNotDone ? "N" : "D"
+                        );
+                        break;
+                    case 1:
+                        while (bNotDone && m_iPSPoll.doRead (iStatus, sTransfer, iByteArea, xSignalFD)) {
+                            bNotDone = m_iPSPoll.pollRead (xSignalFD);
+                            defaultLogger().printf (
+                                "+++ Vca::OS::DeviceManager::processEvent_ : Drain: %s %u %ld %s\n",
+                                DMStateName (), xTestCase, sTransfer, bNotDone ? "N" : "D"
+                            );
+                        };
+                        break;
+                    default:
+                        while (m_iPSPoll.doRead (iStatus, sTransfer, iByteArea, xSignalFD) && m_iPSPoll.pollRead (xSignalFD));
+                        break;
+                    }
 		}
-	    }
-	    m_xState = State_Running;
+                break;
+            default:
+                break;
+            }
+            m_xState = State_Running;
 	}
 	else if (sTimeout < UINT_MAX) {
 	    timespec iTimespec;
