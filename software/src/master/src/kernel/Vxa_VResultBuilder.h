@@ -131,6 +131,13 @@ namespace Vxa {
 	    setResultTo (rT);
 	    return *this;
 	}
+	template <typename T, size_t N> ThisClass& operator= (T (&raT)[N]) {
+	    setResultTo (raT);
+	    return *this;
+	}
+        template <typename T, size_t N> void setResultTo (T (&raT)[N]) {
+            VExportable<T*>::ReturnResult (this, raT);
+        }
 	template <typename T> void setResultTo (T const &rT) {
 	    VExportable<T>::ReturnResult (this, rT);
 	}
