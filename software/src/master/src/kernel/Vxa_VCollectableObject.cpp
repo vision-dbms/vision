@@ -87,9 +87,8 @@ void Vxa::VCollectableObject::GetTicketImplementation (VResultBuilder &rRB, bool
  **************************/
 
 Vxa::VCollectableObject::ClassBuilder::ClassBuilder (Vxa::VClass *pClass) : m_pClass (pClass) {
-    defineMethod (".getHandle" , &VCollectableObject::GetHandle);
-    defineMethod (".getTicket" , &VCollectableObject::GetTicket);
-    defineMethod (".getTicket:", &VCollectableObject::GetTicketImplementation);
+    defineMethod (".id" , &VCollectableObject::GetTicket);
+    defineMethod (".id:", &VCollectableObject::GetTicketImplementation);
 }
 
 /**************************************
