@@ -115,6 +115,7 @@ namespace {
     }
 /*----------------*/
     bool VTicketRegistry::Entry::onDeleteThis () {
+    /*
         std::cerr
             << this
             << ": onDelete : "
@@ -124,7 +125,7 @@ namespace {
             << ", "
             << m_pCluster.referent ()
             << std::endl;
-
+    */
         m_pRegistry->m_mEntries.Delete (m_iKey);
         return true;
     }
@@ -134,7 +135,7 @@ namespace {
     ) {
         retain ();
         rTicket << "<!*:" << m_iKey << ":" << xObject << (bSingleUse ? ":T" : ":H") << ":*!>";
-
+    /*
         std::cerr
             << this
             << ": getTicket: "
@@ -150,7 +151,7 @@ namespace {
             << ": "
             << rTicket
             << std::endl;
-
+    */
         return true;
     }
 /*----------------*/
@@ -158,6 +159,7 @@ namespace {
         VCollectableObject::Reference &rpObject, cluster_index_t xObject, bool bSingleUse
     ) {
         rpObject.setTo (m_pCluster->object (xObject));
+    /*
         std::cerr
             << this
             << ": getObject: "
@@ -171,7 +173,7 @@ namespace {
             << (bSingleUse ? ", T: " : ", H: ")
             << rpObject.referent ()
             << std::endl;
-
+    */
         if (bSingleUse)
             release ();
         return rpObject.isntNil ();
