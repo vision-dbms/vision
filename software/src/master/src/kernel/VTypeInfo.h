@@ -57,6 +57,7 @@ public:
     typedef Vca::VTypeInfoHolderInstance VTypeInfoHolderInstance;
     typedef VkUUIDHolder UUIDHolder;
     typedef V::uuid_t uuid_t;
+    typedef V::VString VString;
 
 //  Friends
     friend class Vca::VTypeInfoHolderInstance;

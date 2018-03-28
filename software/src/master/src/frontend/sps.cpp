@@ -1631,7 +1631,7 @@ PublicFnDef int SPS_readHeadingList(
 
 PublicFnDef int SPS_readStringOnly(char *buf, int len) {
 	int	errlen, errval;
-	VString ptr;
+	V::VString ptr;
 
 	errlen = strlen(ErrorString);
 	errval = SPS_NOERROR;
@@ -1648,7 +1648,7 @@ PublicFnDef int SPS_readStringOnly(char *buf, int len) {
 PublicFnDef int SPS_readString(char *buf, int len) {
 	int	errlen, errval;
 	char	buf2[256];
-	VString ptr;
+	V::VString ptr;
 
 	errlen = strlen(ErrorString);
 	errval = SPS_NOERROR;
@@ -1672,7 +1672,7 @@ PublicFnDef int SPS_readString(char *buf, int len) {
 PublicFnDef int SPS_readInteger() {
 	int	i;
 	char	buf[SPS_maxItemWidth+1];
-	VString ptr;
+	V::VString ptr;
 
 	if( !RS_readLine(buf,SPS_maxItemWidth) )
 		return( SPS_GOTPROMPT );
@@ -1751,7 +1751,7 @@ PublicFnDef int SPS_readCell(
 ) {
 	char	buf[SPS_maxItemWidth+1];
 	int	errlen;
-	VString ptr;
+	V::VString ptr;
 
 	errlen = strlen(ErrorString);
 	if( !RS_readLine(buf,SPS_maxItemWidth) )

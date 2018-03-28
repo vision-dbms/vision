@@ -274,7 +274,7 @@ template <class T> T Vsa::VOdometer<T>::getValue()  const {
 	return m_value; 
 }
 
-template <class T> VString Vsa::VOdometer<T>::print() const { 
+template <class T> V::VString Vsa::VOdometer<T>::print() const { 
 	VString s;
 	int i = 0;
 	int num = m_valueList.cardinality();

@@ -12,8 +12,8 @@
 
 /***** Classes and Structures *****/
 struct MENU_Choice {
-    VString label;
-    VString help;
+    V::VString label;
+    V::VString help;
     char letter;	 
     void (*handler)();
     char active;

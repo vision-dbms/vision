@@ -258,7 +258,7 @@ Vca::VApplication::~VApplication () {
  ********************
  ********************/
 
-VString Vca::VApplication::description () const {
+V::VString Vca::VApplication::description () const {
     VString iResult;
     getDescription_(iResult);
     return iResult;

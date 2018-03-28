@@ -17,6 +17,7 @@ class VEvaluatorPump : public Vsa::VEvaluatorPump {
 
 //  Aliases
 public:
+    typedef V::VString VString;
     typedef Vsa::IEvaluatorClient IEvaluatorClient;
     typedef Vsa::VEvaluation VEvaluation;
 

@@ -33,6 +33,8 @@ class VSNFTaskHolder : public Vca::VActivity {
 
 //  Aliases
 public:
+    typedef V::VString VString;
+
     typedef Reference TaskHolderReference;
     typedef Vca::VTrigger<ThisClass> Trigger;
 

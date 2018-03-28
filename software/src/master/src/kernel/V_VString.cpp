@@ -41,7 +41,7 @@
  *********************
  *********************/
 
-char VString::g_iEmptyBuffer[] = "";
+char V::VString::g_iEmptyBuffer[] = "";
 
 
 /**************************
@@ -50,16 +50,16 @@ char VString::g_iEmptyBuffer[] = "";
  **************************
  **************************/
 
-VString::VString (char const *pString, bool bCopy) : m_iStorage (
+V::VString::VString (char const *pString, bool bCopy) : m_iStorage (
     pString ? const_cast<char*>(pString) : g_iEmptyBuffer,
     pString ? strlen (pString) + 1 : 1, pString && bCopy
 ) {
 }
 
-VString::VString () : m_iStorage (g_iEmptyBuffer, 1, false) {
+V::VString::VString () : m_iStorage (g_iEmptyBuffer, 1, false) {
 }
 
-VString::VString (size_t sString) : m_iStorage (g_iEmptyBuffer, 1, false) {
+V::VString::VString (size_t sString) : m_iStorage (g_iEmptyBuffer, 1, false) {
     guarantee (sString);
 }
 
@@ -70,7 +70,7 @@ VString::VString (size_t sString) : m_iStorage (g_iEmptyBuffer, 1, false) {
  **************************
  **************************/
 
-unsigned int VString::countOf (char const *pString, char iCharacter) {
+unsigned int V::VString::countOf (char const *pString, char iCharacter) {
     unsigned int nOccurrences = 0;
 
     while (char const *pNextOccurrence = strchr (pString, iCharacter)) {
@@ -81,7 +81,7 @@ unsigned int VString::countOf (char const *pString, char iCharacter) {
     return nOccurrences;
 }
 
-unsigned int VString::countOf (char const *pString, char const *pSubstring) {
+unsigned int V::VString::countOf (char const *pString, char const *pSubstring) {
     unsigned int nOccurrences = 0;
 
     while (char const *pNextOccurrence = strstr (pString, pSubstring)) {
@@ -99,7 +99,7 @@ unsigned int VString::countOf (char const *pString, char const *pSubstring) {
  ********************
  ********************/
 
-VString& VString::append (char const *pString, size_t sString) {
+V::VString &V::VString::append (char const *pString, size_t sString) {
     if (pString) {
 	size_t sOld = length ();
 	size_t sNew = sOld + sString;
@@ -110,7 +110,7 @@ VString& VString::append (char const *pString, size_t sString) {
     return *this;
 }
 
-void VString::setTo (char const *pString, size_t sString) {
+void V::VString::setTo (char const *pString, size_t sString) {
     if (pString && sString) {
 	pointer_t pStorage = storage (sString);
 	strncpy (pStorage, pString, sString);
@@ -122,74 +122,74 @@ void VString::setTo (char const *pString, size_t sString) {
 	clear ();
 }
 
-void VString::setToMoved (VString &rOther) {
+void V::VString::setToMoved (VString &rOther) {
     if (this != &rOther) {
 	setTo (rOther);
 	rOther.clear ();
     }
 }
 
-void VString::setToStatic (char const *pString, size_t sString) {
+void V::VString::setToStatic (char const *pString, size_t sString) {
     clear ();
     if (pString)
 	m_iStorage.setTo (const_cast<char*>(pString), sString + 1);
 }
 
-void VString::setToStatic (char const *pString) {
+void V::VString::setToStatic (char const *pString) {
     clear ();
     if (pString)
 	m_iStorage.setTo (const_cast<char*>(pString), strlen (pString) + 1);
 }
 
 
-VString& VString::operator<< (char iValue) {
+V::VString &V::VString::operator<< (char iValue) {
     char iWorkBuffer[2];
     sprintf (iWorkBuffer, "%c", iValue);
     return append (iWorkBuffer);
 }
 
-VString& VString::operator<< (unsigned char iValue) {
+V::VString &V::VString::operator<< (unsigned char iValue) {
     char iWorkBuffer[2];
     sprintf (iWorkBuffer, "%c", iValue);
     return append (iWorkBuffer);
 }
 
-VString& VString::operator<< (double iValue) {
+V::VString &V::VString::operator<< (double iValue) {
     char iWorkBuffer[32];
     sprintf (iWorkBuffer, "%g", iValue);
     return append (iWorkBuffer);
 }
 
-VString& VString::operator<< (int iValue) {
+V::VString &V::VString::operator<< (int iValue) {
     char iWorkBuffer[32];
     sprintf (iWorkBuffer, "%d", iValue);
     return append (iWorkBuffer);
 }
 
-VString& VString::operator<< (unsigned int iValue) {
+V::VString &V::VString::operator<< (unsigned int iValue) {
     char iWorkBuffer[32];
     sprintf (iWorkBuffer, "%u", iValue);
     return append (iWorkBuffer);
 }
 
-VString& VString::operator<< (__int64 iValue) {
+V::VString &V::VString::operator<< (__int64 iValue) {
     char iWorkBuffer[32];
     sprintf (iWorkBuffer, "%d", (int)iValue);
     return append (iWorkBuffer);
 }
 
-VString& VString::operator<< (unsigned __int64 iValue) {
+V::VString &V::VString::operator<< (unsigned __int64 iValue) {
     char iWorkBuffer[32];
     sprintf (iWorkBuffer, "%llu", iValue);
     return append (iWorkBuffer);
 }
 
-VString& VString::printf (char const *pFormat, ...) {
+V::VString &V::VString::printf (char const *pFormat, ...) {
     V_VARGLIST (ap, pFormat);
     return vprintf (pFormat, ap);
 }
 
-VString& VString::vprintf (char const *pFormat, va_list ap) {
+V::VString &V::VString::vprintf (char const *pFormat, va_list ap) {
 
     FILE *pSink;
 #if defined (_WIN32)
@@ -214,7 +214,7 @@ VString& VString::vprintf (char const *pFormat, va_list ap) {
     return *this;
 }
 
-VString& VString::vsafeprintf (char const *pFormat, va_list ap) {
+V::VString &V::VString::vsafeprintf (char const *pFormat, va_list ap) {
 
     FILE *pSink;
 #if defined (_WIN32)
@@ -252,7 +252,7 @@ VString& VString::vsafeprintf (char const *pFormat, va_list ap) {
  *****  VString::Quote  *****
  ****************************/
 
-VString& VString::quote (char const *pString) {
+V::VString &V::VString::quote (char const *pString) {
     static char const *const pSpecials = "\\\"";
     size_t sGuarantee = length () + 2;
     if (pString) {
@@ -300,7 +300,7 @@ VString& VString::quote (char const *pString) {
   * If the delimiter is not present they return the entire string.
   ***************************************************************************/
 
-bool VString::getPrefix (char iDelimiter, VString &rPrefix, VString &rRemainingString) const {
+bool V::VString::getPrefix (char iDelimiter, VString &rPrefix, VString &rRemainingString) const {
   if (length () == 0)
     return false;
 
@@ -318,7 +318,7 @@ bool VString::getPrefix (char iDelimiter, VString &rPrefix, VString &rRemainingS
   return false;
 }
 
-bool VString::getPrefix (char const *pDelimiter, VString &rPrefix, VString &rRemainingString) const {
+bool V::VString::getPrefix (char const *pDelimiter, VString &rPrefix, VString &rRemainingString) const {
     if (length () == 0)
 	return false;
 
@@ -343,7 +343,7 @@ bool VString::getPrefix (char const *pDelimiter, VString &rPrefix, VString &rRem
  * Whitespace at the end of the string is trimmed automatically regardless of size.
  * If cTotalSize is altogether too small, a simple '...' is returned.
  */
-void VString::getSummary(VString &rSummary, unsigned int cTotalSize) const {
+void V::VString::getSummary(VString &rSummary, unsigned int cTotalSize) const {
     const bool bShortString = cTotalSize <= 80;
     const unsigned int cNumDots = 3;
     unsigned int cTailSize = cTotalSize / 10;
@@ -396,7 +396,7 @@ void VString::getSummary(VString &rSummary, unsigned int cTotalSize) const {
   * in the string. If it is not present, then a -1 is returned.
   ***************************************************************************/
 
-int VString::index (char iChar, unsigned int cOccurence) const {
+int V::VString::index (char iChar, unsigned int cOccurence) const {
   int index = -1;
   char const *pStorage = storage ();
   char const *pNextOccurence = 0;
@@ -418,43 +418,38 @@ int VString::index (char iChar, unsigned int cOccurence) const {
  **************************
  **************************/
 
-class VStringIndex : public VReferenceable {
-    DECLARE_CONCRETE_RTT (VStringIndex, VReferenceable);
+namespace {
+    class VStringIndex : public VReferenceable {
+        DECLARE_CONCRETE_RTTLITE (VStringIndex, VReferenceable);
 
-//  Friend
-    friend class VString;
+    //  Friend
+        friend class V::VString;
 
-//  Construction
-public:
-    VStringIndex (unsigned int xIndex) : m_xIndex (xIndex) {
-    }
+    //  Construction
+    public:
+        VStringIndex (unsigned int xIndex) : m_xIndex (xIndex) {
+        }
 
-//  Destruction
-private:
-    ~VStringIndex () {
-    }
+    //  Destruction
+    private:
+        ~VStringIndex () {
+        }
 	
-//  Access
-public:
-    unsigned int getIndex () const {
-	return m_xIndex;
-    }
+    //  Access
+    public:
+        unsigned int getIndex () const {
+            return m_xIndex;
+        }
 
-//  State
-private:
-    VReference<ThisClass>	m_pNext;
-    VReference<ThisClass>       m_pPrev;
-    unsigned int		m_xIndex;
-};
-
-/***************************
- ***************************
- *****  Run Time Type  *****
- ***************************
- ***************************/
-
-DEFINE_CONCRETE_RTT (VStringIndex);
-
+    //  State
+    private:
+        Reference	m_pNext;
+        Reference       m_pPrev;
+        unsigned int	m_xIndex;
+    };
+    DEFINE_CONCRETE_RTTLITE (V::VStringIndex);
+}
+
 
 /*********************
  *********************
@@ -468,7 +463,7 @@ DEFINE_CONCRETE_RTT (VStringIndex);
   * string. This is an in-place substring replacement method.
   **************************************************************************/
 
-void VString::replaceSubstring (char const *pSubStr, char const *pReplacement) {
+void V::VString::replaceSubstring (char const *pSubStr, char const *pReplacement) {
 
     // if substring or the replacement string is 0 then return
     if (!pReplacement || !pSubStr) 
@@ -481,7 +476,7 @@ void VString::replaceSubstring (char const *pSubStr, char const *pReplacement) {
 
     //  count and store the matching substring indices... 
 
-    VReference<VStringIndex> pHead, pTail;
+    VStringIndex::Reference pHead, pTail;
     char const *pSubStrPtr=0; char const *pStorage=0;
     for (pStorage = content ();
 	 *pStorage && (pSubStrPtr = strstr (pStorage, pSubStr)); 
@@ -489,7 +484,7 @@ void VString::replaceSubstring (char const *pSubStr, char const *pReplacement) {
     ) {
       xIndex = pSubStrPtr - content ();
       
-      VReference<VStringIndex> pEntry (new VStringIndex (xIndex));
+      VStringIndex::Reference pEntry (new VStringIndex (xIndex));
       if (pTail) {
 	pEntry->m_pPrev.setTo (pTail);
 	pTail->m_pNext.setTo (pEntry);
@@ -516,7 +511,7 @@ void VString::replaceSubstring (char const *pSubStr, char const *pReplacement) {
 	  pPtr = (sNewMemSize > sLength+1) ? storage (sNewMemSize) : pPtr;
 	  
 	  //  traverse the list from back 
-	  VReference<VStringIndex> pEntry (pTail);
+	  VStringIndex::Reference pEntry (pTail);
 	  int xPrevIndex = -1;
 	  char *pPrevTarget = pPtr+sNewMemSize-1;
 
@@ -596,7 +591,7 @@ void VString::replaceSubstring (char const *pSubStr, char const *pReplacement) {
   *       Output is written to a completely new string. 
  ***************************************************************************/
 
-void VString::replaceSubstring (
+void V::VString::replaceSubstring (
     char const *pSubstring, char const *pRepstring, VString &rResult
 ) const {
     // if the substring is "" then return as it is
@@ -642,7 +637,7 @@ void VString::replaceSubstring (
 /**
  * Replaces CR with CRLF and stores the result in dest, obliterating anything that was already there.
  */
-void VString::convertLFtoCRLF (VString &dest) const {
+void V::VString::convertLFtoCRLF (VString &dest) const {
   int sSource = length (), sDest = 0;
   const char *pSource = content ();
   

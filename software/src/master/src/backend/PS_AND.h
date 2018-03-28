@@ -153,6 +153,7 @@ class PS_AND {
 //  Aliases
 public:
     typedef V::VArgList VArgList;
+    typedef V::VString VString;
 
 //  Construction
 public:

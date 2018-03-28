@@ -34,7 +34,6 @@
 #include "VConfig.h"
 
 template <class R> class VReference;
-class VString;
 
 
 /*****************************************

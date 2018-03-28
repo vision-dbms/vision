@@ -9,7 +9,9 @@
  *****************************************/
 
 class rtDICTIONARY_Handle;
-class VString;
+namespace V {
+    class VString;
+}
 
 /********************************
  ********************************
@@ -28,7 +30,7 @@ PublicFnDecl M_CPD *RSLANG_Compile (
 );
 
 PublicFnDecl void RSLANG_Decompile (
-    VString		&rSourceReturn,
+    V::VString		&rSourceReturn,
     M_CPD		*pProgram,
     unsigned int	*pDecompiledPC = 0,
     unsigned int	 xPCOffset = UINT_MAX

@@ -18,7 +18,9 @@
  **************************
  **************************/
 
-class VString;
+namespace V {
+    class VString;
+}
 
 /*********************
  *********************
@@ -139,7 +141,7 @@ PublicFnDecl void ERR_ReportErrorOnStdout (
 );
 
 PublicFnDecl void ERR_DumpErrorToString (
-    VString                     &strDump, 
+    V::VString                  &strDump, 
     char const*                 banner, 
     ERR_ErrorDescription        *errorDescription, 
     unsigned int                counter = 0

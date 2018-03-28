@@ -9,8 +9,6 @@
  *****  Declarations  *****
  **************************/
 
-class VString;
-
 /*************************
  *****  Definitions  *****
  *************************/
@@ -43,7 +41,7 @@ public:
  *----  template <> class VTypeTraists<char const*>  ----*
  *********************************************************/
 
-template <> class VTypeTraits<char const*> : public VTypeTraits<VString> {
+template <> class VTypeTraits<char const*> : public VTypeTraits<V::VString> {
 //  Reference Type
 public:
     typedef char const *&ReferenceType;

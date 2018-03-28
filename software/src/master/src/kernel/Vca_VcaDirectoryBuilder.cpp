@@ -59,6 +59,8 @@
  ***********************/
 
 namespace {
+    typedef V::VString VString;
+
     VString ToLower (VString const& rInput) {
 	VString iOutput (rInput);
 	for (char* pOutput = iOutput.storage (); *pOutput; pOutput++)

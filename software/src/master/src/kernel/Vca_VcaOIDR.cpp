@@ -667,7 +667,7 @@ Vca::VcaOIDR::~VcaOIDR () {
  ********************
  ********************/
 
-VString &Vca::VcaOIDR::GetListName (VString &rName, List xList) {
+V::VString &Vca::VcaOIDR::GetListName (VString &rName, List xList) {
     if (static_cast<int>(xList) < static_cast<int>(InactiveListCount))
 	rName.printf ("List %u", xList);
     else switch (xList) {

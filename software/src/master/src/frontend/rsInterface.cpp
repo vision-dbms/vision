@@ -407,11 +407,11 @@ PublicFnDef int RS_sendAndCheck(
     result = FALSE;
 
 /**** check RSstdout ****/
-    VString outp (eatLeadingAndTrailingSpaces(output));
+    V::VString outp (eatLeadingAndTrailingSpaces(output));
     len = strlen(outp);
     while (RS_readLine (buffer, RS_MaxLine))
     {
-	VString buf (eatLeadingAndTrailingSpaces(buffer));
+	V::VString buf (eatLeadingAndTrailingSpaces(buffer));
 	if (0 == strncmp(buf, outp, len))
 	    result = TRUE;
     }

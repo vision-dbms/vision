@@ -827,6 +827,8 @@ typedef Vca::ProcessInfo::gid_t gid_t;
 #endif
 
 namespace {
+    typedef V::VString VString;
+
     void MySiteInfo (IVReceiver<VString const&> *pResultSink) {
 	Vca::self ()->info ()->supplyProcessInfo (pResultSink);
     }

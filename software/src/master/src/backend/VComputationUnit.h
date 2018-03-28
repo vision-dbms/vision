@@ -58,6 +58,7 @@ class ABSTRACT VComputationUnit : public VInternalGroundStore {
 //  Aliases
 public:
     typedef Vdd::Store Store;
+    typedef V::VString VString;
 
 //  Friends
     friend class VComputationList;

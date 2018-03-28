@@ -106,9 +106,9 @@ static size_t		sNextAllocation = sInitialAllocation;
 static size_t		sThisAdaptiveInterval = 4;
 static size_t		sNextAdaptiveInterval = sThisAdaptiveInterval;
 static size_t		sPool = 0;
-static pointer_t	pPool = 0;
+static V::pointer_t	pPool = 0;
 
-pointer_t V::VAllocatorGranule::getSpace (size_t sSpace) {
+V::pointer_t V::VAllocatorGranule::getSpace (size_t sSpace) {
     pointer_t pSpace;
     if (g_bFreePoolDisabled)
 	pSpace = static_cast<pointer_t>(BaseClass::allocate (sSpace));

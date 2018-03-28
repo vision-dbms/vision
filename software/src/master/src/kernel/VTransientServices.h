@@ -26,6 +26,7 @@
 class V_API VTransientServices : public virtual VTransient {
     DECLARE_FAMILY_MEMBERS (VTransientServices, VTransient);
 
+    typedef V::VString VString;
     typedef VkSetOf<VString, VString const&, char const*> NSTarget_t;
     typedef VkSetOf<int,int> EventSet_t;
     typedef VkSetOf<VString, VString const&, char const*> ActionInfos_t;

@@ -14,8 +14,6 @@
 /**************************
  *****  Declarations  *****
  **************************/
-
-class VString;
 
 
 /*************************
@@ -47,6 +45,10 @@ namespace V {
  *------------------*/
 
 class V_API VkUUID {
+//  Aliases
+public:
+    typedef V::VString VString;
+
 //  uuid_t
 public:
     typedef V::uuid_t uuid_t;

@@ -13,7 +13,9 @@
 #include "verr.h"
 
 class VPrimitiveTask;
-class VString;
+namespace V {
+    class VString;
+}
 
 
 /********************************
@@ -57,7 +59,7 @@ PublicFnDecl M_CPD *FAULT_AccessMoreInfoAvail (VPrimitiveTask *pTask);
 
 PublicFnDecl void FAULT_DisplayFaults (bool bShowErrors, bool bShowWarnings);
 
-PublicFnDecl void FAULT_DumpFaults (VString &strDump, bool bShowErrors = true, bool bShowWarnings = true);
+PublicFnDecl void FAULT_DumpFaults (V::VString &strDump, bool bShowErrors = true, bool bShowWarnings = true);
 
 #endif
 

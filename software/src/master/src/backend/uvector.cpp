@@ -100,9 +100,9 @@ PublicFnDef void UV_InitStdCPD (M_CPD *cpd) {
     UV_CPD_RefPToken	(cpd) = &UV_UV_RefPToken (uvBase);
     UV_CPD_AuxiliaryPOP	(cpd) = &UV_UV_AuxiliaryPOP (uvBase);
 
-    pointer_t a = UV_UV_Array (uvBase);
-    pointer_t *p = (pointer_t *)M_CPD_Pointers (cpd);
-    pointer_t *pl = p + cpd->PointerCount ();
+    V::pointer_t a = UV_UV_Array (uvBase);
+    V::pointer_t *p = (V::pointer_t *)M_CPD_Pointers (cpd);
+    V::pointer_t *pl = p + cpd->PointerCount ();
 
     for (p += UV_CPx_Element; p < pl; *p++ = a);
 }
@@ -854,7 +854,7 @@ PublicFnDef M_CPD *UV_LCAssign (M_CPD *targetCPD, rtLINK_CType *linkc, M_CPD *so
  *
  *****/
 PublicFnDef M_CPD *UV_LCAssignScalar (
-    M_CPD *targetCPD, rtLINK_CType *linkc, pointer_t sourceValueAddress
+    M_CPD *targetCPD, rtLINK_CType *linkc, V::pointer_t sourceValueAddress
 ) {
     int			granularity	= UV_CPD_Granularity (targetCPD);
     char		*tBaseAsChar,
@@ -1040,7 +1040,7 @@ PublicFnDef void UV_NextElement (
     int
 	granularity	    = UV_CPD_Granularity (uvectorCPD),
 	elementCount	    = UV_CPD_ElementCount (uvectorCPD);
-    pointer_t
+    V::pointer_t
 	*elementPtrAddr	    = &UV_CPD_Element (uvectorCPD, char);
 
 
@@ -1113,7 +1113,8 @@ IOBJ_DefinePublicUnaryMethod (UV_DM_PreviousElement)
 {
     M_CPD*	cpd = RTYPE_QRegisterCPD (self);
     int		granularity = UV_CPD_Granularity (cpd);
-    pointer_t	*elementPtrAddr = &UV_CPD_Element (cpd, char),
+    V::pointer_t
+		*elementPtrAddr = &UV_CPD_Element (cpd, char),
 		arrayOrigin = UV_CPD_Array (cpd, char);
 
     if (*elementPtrAddr <= arrayOrigin)

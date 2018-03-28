@@ -177,7 +177,7 @@ Vxa_VExportable_Implementation template class Vxa_API Vxa::VExportable<float>;
 Vxa_VExportable_Implementation template class Vxa_API Vxa::VExportable<double>;
 
 Vxa_VExportable_Implementation template class Vxa_API Vxa::VExportable<char const*>;
-Vxa_VExportable_Implementation template class Vxa_API Vxa::VExportable<VString>;
+Vxa_VExportable_Implementation template class Vxa_API Vxa::VExportable<V::VString>;
 
 #endif
 

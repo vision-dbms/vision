@@ -30,7 +30,6 @@
 
 #include "Vca_VTimer.h"
 
-class VString;
 class VTypeInfo;
 
 

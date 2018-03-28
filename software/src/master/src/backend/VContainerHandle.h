@@ -78,7 +78,10 @@ public:
     typedef V::VAggregatePointer<M_CPD>		M_CPD_Pointer;
     typedef V::VAggregatePointer<M_DCTE>	M_DCTE_Pointer;
     typedef V::VAggregatePointer<M_POP const>	M_POP_Pointer;
-    typedef V::VArgList VArgList;
+
+    typedef V::VArgList  VArgList;
+    typedef V::VString   VString;
+    typedef V::pointer_t pointer_t;
 
     typedef Vdd::Object::Visitor Visitor;
 

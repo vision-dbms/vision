@@ -21,8 +21,6 @@
  *****  Declarations  *****
  **************************/
 
-class VString;
-
 DECLARE_VsaINTERFACE (IEvaluatorClient)
 
 VINTERFACE_TEMPLATE_INSTANTIATIONS (Vsa,IEvaluatorPool_Ex2)

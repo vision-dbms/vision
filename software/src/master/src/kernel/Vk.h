@@ -163,7 +163,9 @@ typedef char **argv_t;
 #pragma __pointer_size __restore
 #endif
 
-typedef char *pointer_t;
+namespace V {
+    typedef char *pointer_t;
+}
 
 #ifdef __VMS
 typedef __int64 pointer_diff_t;

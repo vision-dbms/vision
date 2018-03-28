@@ -255,6 +255,8 @@ DEFINE_CONCRETE_RTT (Batchvision);
  ***********************/
 
 namespace {
+    typedef V::VString VString;
+
     VString GetFaultDumps () {
         VString iResult;
 	FAULT_DumpFaults (iResult);

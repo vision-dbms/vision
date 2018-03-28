@@ -76,6 +76,7 @@ class M_AND : public VDatabaseActivation {
 //  Aliases
 public:
     typedef V::VArgList VArgList;
+    typedef V::VString VString;
 
 //  GC Metrics
 public:

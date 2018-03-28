@@ -825,7 +825,7 @@ PrivateFnDef int NDFReadCountedArrayElementCount (int fd, PS_Type_FO fo) {
     NDFSeek (fd, fo);
 
     int	elementCount = 0;
-    NDFRead (fd, (pointer_t)&elementCount, sizeof (int));
+    NDFRead (fd, (V::pointer_t)&elementCount, sizeof (int));
 
     return elementCount;
 }
@@ -1490,7 +1490,7 @@ PrivateFnDef PS_SMD *GrowSMV (
     int newByteCount = PS_SMV_ByteCount (newRootSegment, minSegment);
     PS_SMD *result = (PS_SMD*)UTIL_Realloc (oldSMV, newByteCount);
 
-    memset ((pointer_t)result + oldByteCount, 0, newByteCount - oldByteCount);
+    memset ((V::pointer_t)result + oldByteCount, 0, newByteCount - oldByteCount);
 
     return result;
 }
@@ -2829,7 +2829,7 @@ unsigned __int64 PS_ASD::MappedSizeOfSpace (unsigned int *segCount) const {
 }
 
 void PS_ASD::dumpCTSegment () {
-    VString iDumpName ("ctDump_");
+    V::VString iDumpName ("ctDump_");
     iDumpName << m_xSpace << "_" << RootSegment () << "." << getpid ();
     unlink (iDumpName);
     int fd = open (iDumpName, O_CREAT | O_RDWR, 0644);
@@ -3674,7 +3674,7 @@ void PS_ASD::ValidateChecksum (char const *segmentPathName) const {
 	IO_printf (" of %u ...\n", oldChecksum);
     unsigned int newChecksum = 0;
     AccumulateChecksum (
-	&newChecksum, (pointer_t)(segmentAddress + 1), PS_SMD_SegmentSize (&smd) - sizeof (PS_SH)
+	&newChecksum, (V::pointer_t)(segmentAddress + 1), PS_SMD_SegmentSize (&smd) - sizeof (PS_SH)
     );
     ReclaimSMDMapping (&smd);
     if (oldChecksum != newChecksum) ERR_SignalFault (
@@ -4971,7 +4971,7 @@ PrivateFnDef PS_CTList* ReadContainerTable (char const *segDirPath, PS_SVD *svdP
     );
     M_CEndMarker_Size (
 	(M_CEndMarker*)(
-	    (pointer_t)(ctList->ct) + M_CPreamble_NSize (&ctList->preamble)
+	    (V::pointer_t)(ctList->ct) + M_CPreamble_NSize (&ctList->preamble)
 	)
     ) = M_CPreamble_NSize (&ctList->preamble);
 

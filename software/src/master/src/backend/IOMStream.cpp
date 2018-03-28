@@ -73,6 +73,9 @@ public:
     typedef Vca::IBSClient	IBSClient;
     typedef Vca::IClient	IClient;
 
+    typedef V::VString   VString;
+    typedef V::pointer_t pointer_t;
+
 //  Construction
 public:
     IOMStreamProducer (IOMStream *pIOMStream, BS *pBS);
@@ -480,6 +483,9 @@ public:
     typedef Vca::VBSConsumer	BS;
     typedef Vca::IBSClient	IBSClient;
     typedef Vca::IClient	IClient;
+
+    typedef V::VString   VString;
+    typedef V::pointer_t pointer_t;
 
 //  Constants
 protected:

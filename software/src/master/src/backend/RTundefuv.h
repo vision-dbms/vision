@@ -107,7 +107,7 @@ PublicFnDecl M_CPD* rtUNDEFUV_UVExtract (
 );
 
 PublicFnDecl void rtUNDEFUV_RFExtract (
-    pointer_t			resultAddr,
+    V::pointer_t		resultAddr,
     M_CPD*			sourceCPD, 
     rtREFUV_TypePTR_Reference	referenceAddr
 );
@@ -127,19 +127,19 @@ PublicFnDecl M_CPD* rtUNDEFUV_UVAssign (
 PublicFnDecl void rtUNDEFUV_RFAssign (
     M_CPD*			targetCPD,
     rtREFUV_TypePTR_Reference	reference,
-    pointer_t			value
+    V::pointer_t		value
 );
 
 PublicFnDecl M_CPD* rtUNDEFUV_LCAssignScalar (
     M_CPD*			targetCPD,
     rtLINK_CType*		linkConstructor,
-    pointer_t			valuePtr
+    V::pointer_t		valuePtr
 );
 
 PublicFnDecl M_CPD* rtUNDEFUV_UVAssignScalar (
     M_CPD*			targetCPD,
     M_CPD*			refuvCPD,
-    pointer_t			valuePtr
+    V::pointer_t		valuePtr
 );
 
 PublicFnDecl M_CPD* rtUNDEFUV_PartitndSortIndices (

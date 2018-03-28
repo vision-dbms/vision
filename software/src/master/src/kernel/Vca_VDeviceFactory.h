@@ -13,8 +13,6 @@
 
 class VkSocketAddress;
 class VkStatus;
-
-class VString;
 
 
 /*************************

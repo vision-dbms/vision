@@ -40,6 +40,8 @@ class Batchvision : public Vca::VServerApplication, public VComputationScheduler
 
 //  Aliases
 public:
+    typedef V::VString VString;
+
     typedef Vca::VBSConsumer			VBSConsumer;
     typedef Vca::VBSProducer			VBSProducer;
 

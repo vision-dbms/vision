@@ -160,6 +160,6 @@ namespace {
     Vxa::VStockExportable<float>			g_iExportable_float;
     Vxa::VStockExportable<double>			g_iExportable_double;
 
-    Vxa::VStockExportable<char const*,VString>		g_iExportable_char_const_p;
-    Vxa::VStockExportable<VString>			g_iExportable_VString;
+    Vxa::VStockExportable<char const*,V::VString>	g_iExportable_char_const_p;
+    Vxa::VStockExportable<V::VString>			g_iExportable_VString;
 }

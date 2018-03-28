@@ -395,7 +395,7 @@ Vca_VTypeInfoHolder_InstantiationsForPODT (VTypeInfo*);
 
 Vca_VTypeInfoHolder_InstantiationsForREFT (V::uuid_t);
 Vca_VTypeInfoHolder_InstantiationsForREFT (V::VBlob);
-Vca_VTypeInfoHolder_InstantiationsForREFTX(VString);
+Vca_VTypeInfoHolder_InstantiationsForREFTX(V::VString);
 Vca_VTypeInfoHolder_InstantiationsForREFT (V::VTime);
 
 Vca_VTypeInfoHolder_InstantiationsForSREF (Vca::VcaPeerCharacteristics);

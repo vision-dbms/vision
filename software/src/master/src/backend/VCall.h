@@ -20,7 +20,6 @@
 class rtBLOCK_Handle;
 class rtINDEX_Key;
 
-class VString;
 class VTask;
 
 

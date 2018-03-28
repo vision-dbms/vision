@@ -40,6 +40,11 @@ class VTask;
 class ABSTRACT IOMDriver : public Vca::VRolePlayer {
     DECLARE_ABSTRACT_RTT (IOMDriver, Vca::VRolePlayer);
 
+//  Aliases
+ public:
+    typedef V::VString VString;
+    typedef V::pointer_t pointer_t;
+
 //  Friends
     friend class VChannelController;
     friend class VReadEvalPrintController;

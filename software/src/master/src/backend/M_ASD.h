@@ -194,7 +194,9 @@ class M_ASD : public VTransient {
 
 //  Aliases
 public:
-    typedef V::VArgList VArgList;
+    typedef V::VArgList  VArgList;
+    typedef V::VString   VString;
+    typedef V::pointer_t pointer_t;
 
 //  Container Table
 public:

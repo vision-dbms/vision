@@ -64,6 +64,7 @@
  **************************/
 
 namespace {
+    typedef V::VString VString;
 
     /****************/
     Vca::VcaSite::ConnectKind CallMePolicy () {

@@ -109,7 +109,7 @@ Vxa::VCallData::Selector::~Selector () {
  ********************
  ********************/
 
-VString const &Vxa::VCallData::Selector::component (cardinality_t xComponent) const {
+V::VString const &Vxa::VCallData::Selector::component (cardinality_t xComponent) const {
     return xComponent < parameterCount () ? m_aComponents[xComponent] : m_iName;
 }
 

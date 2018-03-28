@@ -535,7 +535,7 @@ PublicFnDecl M_CPD* UV_LCAssign (
 PublicFnDecl M_CPD* UV_LCAssignScalar (
     M_CPD*			targetCPD,
     rtLINK_CType*		linkc,
-    pointer_t			sourceValueAddress
+    V::pointer_t		sourceValueAddress
 );
 
 PublicFnDecl void UV_Print (

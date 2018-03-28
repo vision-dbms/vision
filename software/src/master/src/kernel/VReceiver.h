@@ -24,6 +24,7 @@ public:
 
 //  Aliases
 public:
+    typedef V::VString VString;
     typedef Vca::VCohort VCohort;
     typedef VCohort::Reference CohortReference;
 

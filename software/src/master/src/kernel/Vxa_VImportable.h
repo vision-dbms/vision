@@ -261,7 +261,7 @@ Vxa_VImportable_Implementation template class Vxa_API Vxa::VImportable<float>;
 Vxa_VImportable_Implementation template class Vxa_API Vxa::VImportable<double>;
 
 Vxa_VImportable_Implementation template class Vxa_API Vxa::VImportable<char const*>;
-Vxa_VImportable_Implementation template class Vxa_API Vxa::VImportable<VString const&>;
+Vxa_VImportable_Implementation template class Vxa_API Vxa::VImportable<V::VString const&>;
 
 Vxa_VImportable_Implementation template class Vxa_API Vxa::VImportable<Vxa::VResultBuilder&>;
 

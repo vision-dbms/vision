@@ -39,6 +39,8 @@
 
 /*************************************************/
 namespace {
+    typedef V::VString VString;
+
     char const *LogFileName () {
 	static char const *pLogFileName = getenv ("VcaDeviceLog");
 	static bool bNotInitialized = true;

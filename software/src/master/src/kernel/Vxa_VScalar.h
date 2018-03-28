@@ -18,8 +18,6 @@
  *****  Declarations  *****
  **************************/
 
-class VString;
-
 #include "Vca_VTypePattern.h"
 
 /*************************

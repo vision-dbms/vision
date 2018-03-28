@@ -15,7 +15,6 @@
 #include "VConnection.h"
 
 class VFormatSettings;
-class VString;
 
 
 /*************************
@@ -24,6 +23,10 @@ class VString;
 
 class VConnectionUse : public VReferenceable {
     DECLARE_ABSTRACT_RTT (VConnectionUse, VReferenceable);
+
+//  Aliases
+ public:
+    typedef V::VString VString;
 
 //  Friends
     friend class VConnection;

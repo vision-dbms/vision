@@ -1281,7 +1281,7 @@ void rtVECTOR_CType::getVector (rtVECTOR_Handle::Reference &rpResult) {
  *
  *****/
 PrivateFnDef void InitNewUSegmentArraySpace (
-    VContainerHandle *vector, pointer_t pTail, ptrdiff_t expansionBytes, va_list Unused(ap)
+    VContainerHandle *vector, V::pointer_t pTail, ptrdiff_t expansionBytes, va_list Unused(ap)
 ) {
     vector->constructReferences ((M_POP*)pTail, (size_t)expansionBytes / sizeof (M_POP));
 }
@@ -1506,7 +1506,7 @@ unsigned int rtVECTOR_Handle::LocateOrAddSegment (
 /*****  ...add the new U-Segment to the U-Segment Index...  *****/
     unsigned int sSegmentIndex = segmentIndexSize ();
     ShiftContainerTail (
-	reinterpret_cast<pointer_t>(segmentIndex () + xIndexSlot),
+	reinterpret_cast<V::pointer_t>(segmentIndex () + xIndexSlot),
 	(sSegmentIndex - xIndexSlot) * sizeof (int), sizeof (int), true
     );
     segmentIndex ()[xIndexSlot] = xArraySlot;
@@ -1624,7 +1624,7 @@ void rtVECTOR_Handle::RemoveEmptySegments (int *pUSegmentRelocationMap, unsigned
 	    newUSegmentCount = rtVECTOR_V_USegArrayInitialSize;
 
 	ShiftContainerTail (
-	    reinterpret_cast<pointer_t>(segmentIndex ()),
+	    reinterpret_cast<V::pointer_t>(segmentIndex ()),
 	    segmentIndexSize () * sizeof (int),
 	    ((ptrdiff_t)newUSegmentCount - sUSegmentArray) * sizeof(rtVECTOR_USDType),
 	    true
@@ -1644,7 +1644,7 @@ void rtVECTOR_Handle::RemoveEmptySegments (int *pUSegmentRelocationMap, unsigned
 
     if (uSegmentWIndex != uSegmentCount) {
 	ShiftContainerTail (
-	    reinterpret_cast<pointer_t>(uSegmentIndex + uSegmentCount),
+	    reinterpret_cast<V::pointer_t>(uSegmentIndex + uSegmentCount),
 	    0,
 	    ((ptrdiff_t)uSegmentWIndex - uSegmentCount) * sizeof(int),
 	    true
@@ -2668,7 +2668,7 @@ void VectorReconstructor::ReconstructVector () {
 
 /*****  Adjust the space allocated to the P-Map...  *****/
     m_pVector->ShiftContainerTail (
-	reinterpret_cast<pointer_t>(m_pVector->pmap () + oldPMapSize),
+	reinterpret_cast<V::pointer_t>(m_pVector->pmap () + oldPMapSize),
 	sizeof (rtVECTOR_PMRDType)
 	    + sizeof(int) * m_pVector->segmentIndexSize ()
 	    + sizeof(rtVECTOR_USDType) * m_pVector->segmentArraySize (),
@@ -6809,7 +6809,7 @@ unsigned int rtVECTOR_Handle::AddNewPMapEntryToSetVector (int trgUSegi) {
 /*****  (2) move the container tail to make room for the new pmap entry *****/
     unsigned int sMap = pmapSize ();
     ShiftContainerTail (
-	reinterpret_cast<pointer_t>(pMapEntry),
+	reinterpret_cast<V::pointer_t>(pMapEntry),
 	sizeof (rtVECTOR_PMRDType) * (sMap + 1 - trgPMapi)
 	+ sizeof (int) * sIndex 
 	+ sizeof (rtVECTOR_USDType) * segmentArraySize (),

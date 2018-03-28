@@ -92,6 +92,6 @@ namespace {
     Vxa::VStockImportable<float>			g_iImportTraits_float;
     Vxa::VStockImportable<double>			g_iImportTraits_double;
 
-    Vxa::VStockImportable<char const*,VString>		g_iImportTraits_char_const_p;
-    Vxa::VStockImportable<VString const&,VString>	g_iImportTraits_VString;
+    Vxa::VStockImportable<char const*,V::VString>	g_iImportTraits_char_const_p;
+    Vxa::VStockImportable<V::VString const&,V::VString>	g_iImportTraits_VString;
 }

@@ -42,8 +42,8 @@ static void CheckSum (char const *file, checksum_t *cs1, checksum_t *cs2) {
     if (!mapping.Map (file, true, g_xMappingMode))
 	return;
 
-    pointer_t baddr, paddr, eaddr;
-    baddr = (pointer_t)mapping.RegionAddress ();
+    V::pointer_t baddr, paddr, eaddr;
+    baddr = (V::pointer_t)mapping.RegionAddress ();
     for (
 	*cs1 = *(checksum_t *)(baddr + 28),
 	eaddr = baddr + mapping.RegionSize (),

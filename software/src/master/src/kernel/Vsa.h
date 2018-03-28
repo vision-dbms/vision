@@ -35,6 +35,8 @@
  ***********************/
 
 namespace Vsa {
+    typedef V::VString VString;
+
     typedef Vca::IObjectSource IObjectSource;
     typedef Vca::IObjectSink   IObjectSink;
 

@@ -21,8 +21,6 @@
  *****  Declarations  *****
  **************************/
 
-class VString;
-
 VINTERFACE_TEMPLATE_INSTANTIATIONS_AT_LEVEL (Vsa,IEvaluator,2)
 
 /*************************

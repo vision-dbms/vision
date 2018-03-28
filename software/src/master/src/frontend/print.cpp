@@ -240,8 +240,8 @@ PrivateFnDef int initPrinters () {
                 PrinterChoices[j][0].choices[i] = '0';
             PrinterChoices[j][1].subfield = -1;
 
-            new (&typeChoices[offset].label) VString (NONElabel);
-            new (&typeChoices[offset].help) VString (NONEhelp);
+            new (&typeChoices[offset].label) V::VString (NONElabel);
+            new (&typeChoices[offset].help) V::VString (NONEhelp);
 
             typeChoices[offset].letter = tolower (typeChoices[offset].label[0]);
 

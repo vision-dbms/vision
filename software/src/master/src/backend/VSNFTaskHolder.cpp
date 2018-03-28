@@ -217,7 +217,7 @@ template void VSNFTaskHolder::ReturnArray<unsigned int,int>  (VkDynamicArrayOf<u
 template void VSNFTaskHolder::ReturnArray<double,double>     (VkDynamicArrayOf<double>const&,double const*&);
 template void VSNFTaskHolder::ReturnArray<float,float>       (VkDynamicArrayOf<float>const&,float const*&);
 
-template void VSNFTaskHolder::ReturnArray<VString,VString>   (VkDynamicArrayOf<VString>const&,VString const*&);
+template void VSNFTaskHolder::ReturnArray<V::VString,V::VString>   (VkDynamicArrayOf<VString>const&,VString const*&);
 template void VSNFTaskHolder::ReturnArray<Vxa::ISingleton::Reference,Vxa::ISingleton::Reference> (
     VkDynamicArrayOf<Vxa::ISingleton::Reference>const&,Vxa::ISingleton::Reference const*&
 );
@@ -233,7 +233,7 @@ template <typename Source_T> void VSNFTaskHolder::ReturnArray (VkDynamicArrayOf<
 template void VSNFTaskHolder::ReturnArray<double>      (VkDynamicArrayOf<double>const&);
 template void VSNFTaskHolder::ReturnArray<float>       (VkDynamicArrayOf<float>const&);
 template void VSNFTaskHolder::ReturnArray<int>         (VkDynamicArrayOf<int>const&);
-template void VSNFTaskHolder::ReturnArray<VString>     (VkDynamicArrayOf<VString>const&);
+template void VSNFTaskHolder::ReturnArray<V::VString>  (VkDynamicArrayOf<VString>const&);
 template void VSNFTaskHolder::ReturnArray<Vxa::ISingleton::Reference> (VkDynamicArrayOf<Vxa::ISingleton::Reference>const&);
 
 
@@ -264,7 +264,7 @@ template void VSNFTaskHolder::ReturnSegment<unsigned int,int>  (object_reference
 template void VSNFTaskHolder::ReturnSegment<double,double>     (object_reference_array_t const&,VkDynamicArrayOf<double>const&,double const*&);
 template void VSNFTaskHolder::ReturnSegment<float,float>       (object_reference_array_t const&,VkDynamicArrayOf<float>const&,float const*&);
 
-template void VSNFTaskHolder::ReturnSegment<VString,VString>   (object_reference_array_t const&,VkDynamicArrayOf<VString>const&,VString const*&);
+template void VSNFTaskHolder::ReturnSegment<V::VString,V::VString> (object_reference_array_t const&,VkDynamicArrayOf<VString>const&,VString const*&);
 
 /*****************************************************
  *----  VSNFTaskHolder::ReturnSegment<Source_T>  ----*
@@ -279,7 +279,7 @@ template <typename Source_T> void VSNFTaskHolder::ReturnSegment (
 template void VSNFTaskHolder::ReturnSegment<double>  (object_reference_array_t const&,VkDynamicArrayOf<double>const&);
 template void VSNFTaskHolder::ReturnSegment<float>   (object_reference_array_t const&,VkDynamicArrayOf<float>const&);
 template void VSNFTaskHolder::ReturnSegment<int>     (object_reference_array_t const&,VkDynamicArrayOf<int>const&);
-template void VSNFTaskHolder::ReturnSegment<VString> (object_reference_array_t const&,VkDynamicArrayOf<VString>const&);
+template void VSNFTaskHolder::ReturnSegment<V::VString> (object_reference_array_t const&,VkDynamicArrayOf<VString>const&);
 
 
 /*******************************************************

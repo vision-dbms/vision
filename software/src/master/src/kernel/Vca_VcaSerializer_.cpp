@@ -695,7 +695,7 @@ void Vca::VcaSerializer_<Vca::VPeerDataArray>::wrapupIncomingSerialization () {
  **************************
  **************************/
 
-Vca::VcaSerializer_<VString>::VcaSerializer_(
+Vca::VcaSerializer_<V::VString>::VcaSerializer_(
     VcaSerializer *pCaller, DataType &rDatum
 ) : VcaSerializer (pCaller), m_rDatum (rDatum), m_pData (0) {
     m_pSequencer.setTo (new Sequencer (this, &ThisClass::doData));
@@ -708,7 +708,7 @@ Vca::VcaSerializer_<VString>::VcaSerializer_(
  *******************************
  *******************************/
 
-void Vca::VcaSerializer_<VString>::doData (Sequencer *pSequencer) {
+void Vca::VcaSerializer_<V::VString>::doData (Sequencer *pSequencer) {
     if (movingData ())
 	clearSequencer ();
     transferData ();
@@ -724,7 +724,7 @@ void Vca::VcaSerializer_<VString>::doData (Sequencer *pSequencer) {
  *----  Data Localization  ----*
  *******************************/
 
-void Vca::VcaSerializer_<VString>::localizeData () {
+void Vca::VcaSerializer_<V::VString>::localizeData () {
     if (movingSize ()) {
 	peer ()->localize (m_sData);
 	m_pData = m_rDatum.storage (m_sData);
@@ -735,7 +735,7 @@ void Vca::VcaSerializer_<VString>::localizeData () {
  *----  Get Data  ----*
  **********************/
 
-void Vca::VcaSerializer_<VString>::getData () {
+void Vca::VcaSerializer_<V::VString>::getData () {
     if (movingData ())
 	get (m_pData, m_sData + 1);
     else // movingSize ()
@@ -746,7 +746,7 @@ void Vca::VcaSerializer_<VString>::getData () {
  *----  Put Data  ----*
  **********************/
 
-void Vca::VcaSerializer_<VString>::putData () {
+void Vca::VcaSerializer_<V::VString>::putData () {
     if (movingData ())
 	put (m_pData, m_sData + 1);
     else { // movingSize ()

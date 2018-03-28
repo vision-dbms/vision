@@ -287,7 +287,7 @@ PublicFnDef void ERR_ReportErrorOnStdout (
  *
  *****/
 PublicFnDef void ERR_DumpErrorToString (
-    VString &strDump, char const *banner, ERR_ErrorDescription *errorDescription, unsigned int counter
+    V::VString &strDump, char const *banner, ERR_ErrorDescription *errorDescription, unsigned int counter
 )
 {
     // Don't report if we are over the limit. 

@@ -19,7 +19,6 @@
 
 class VFormatSettings;
 class VDatum;
-class VString;
 
 
 /*************************
@@ -30,6 +29,7 @@ class VConnection : public VReferenceable {
     DECLARE_CONCRETE_RTTLITE (VConnection, VReferenceable);
     DECLARE_COM_WRAPPABLE (IConnection);
 
+    typedef V::VString VString;
     typedef Vca::IDataSource<Vsa::IEvaluator*> IEvaluatorSource;
     typedef VReceiverWaiter<VkDynamicArrayOf <VString> const &, V::VReferenceable_<VkDynamicArrayOf<VString> > > EntryNamesReceiver;
     typedef VReceiverWaiter<VString const&, V::VReferenceable_<VString> > EntryDescriptionReceiver;

@@ -1186,7 +1186,7 @@ PrivateFnDef bool ConvertPOPToDsc (
     VContainerHandle::Reference pStoreHandle (pTask->codDatabase ()->SafeGetContainerHandle (pPOP));
     if (pStoreHandle) {
 	if (pStoreHandle->RType () == RTYPE_C_Block) {
-	    VString iSource; {
+	    V::VString iSource; {
 		M_CPD *pStoreCPD = pStoreHandle->GetCPD ();
 		RSLANG_Decompile (iSource, pStoreCPD);
 		pStoreCPD->release ();

@@ -199,13 +199,13 @@ Vca::U32 Vsa::VPoolWorker::generationId () const {
     return m_pGeneration->generationId ();
 }
 
-VString Vsa::VPoolWorker::createTime() const {
+V::VString Vsa::VPoolWorker::createTime() const {
 	VString createStr;
 	m_iCreateTime.asString(createStr);	
 	return createStr;
 }
 
-VString Vsa::VPoolWorker::retireTime() const {
+V::VString Vsa::VPoolWorker::retireTime() const {
 	VString retireStr;
 	if(m_iMode == Worker_Retired) {
 		m_iRetireTime.asString(retireStr);

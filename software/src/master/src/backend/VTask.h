@@ -32,8 +32,6 @@
 
 class VByteCodeScanner;
 class VNumericBinary;
-class VString;
-
 class VfGuardTool;
 
 
@@ -105,6 +103,7 @@ class ABSTRACT VTask : public VComputationUnit {
 //  Aliases
 public:
     typedef Vdd::Store Store;
+    typedef V::VString VString;
 
 //  Meta Maker
 protected:

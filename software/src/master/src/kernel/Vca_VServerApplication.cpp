@@ -736,7 +736,7 @@ bool Vca::VServerApplication::getListenerName (VString &rName) const {
     return true;
 }
 
-VString Vca::VServerApplication::listenerName () const {
+V::VString Vca::VServerApplication::listenerName () const {
     VString iResult;
     getListenerName (iResult);
     return iResult;

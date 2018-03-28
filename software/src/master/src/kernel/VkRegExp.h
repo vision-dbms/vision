@@ -15,6 +15,9 @@
 
 class VkRegExp {
 public:
+    typedef V::VString VString;
+
+public:
     class V_API Query {
 	friend class VkRegExp;
 
@@ -105,6 +108,5 @@ private:
     VString m_vsInfo;
     bool m_bValid;
 };
-
 
 #endif
