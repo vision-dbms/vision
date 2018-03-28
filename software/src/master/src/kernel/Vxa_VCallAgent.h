@@ -448,10 +448,7 @@ namespace Vxa {
 
             //  Access
             public:
-                operator VAny const& () const {
-                    return value ();
-                }
-                VAny const & value () const {
+                VAny const &value () const {
                     return *this;
                 }
                 virtual void supply (Client &rClient) const OVERRIDE {
