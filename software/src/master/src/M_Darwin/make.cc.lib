@@ -3,7 +3,7 @@
 #########################################################
 
 #--objectrule--#	$(CXX) $(CFLAGS) $(CDEFS) $(CINCS) -o $@ -c
-#--linkerrule--#	$(LINKER) $@ $(CFLAGS) $(LFLAGS) -install_name @executable_path/$@ *.o$B $(LIBS)
+#--linkerrule--#	$(LINKER) $@ $(CFLAGS) $(LFLAGS) -install_name @loader_path/$@ *.o$B $(LIBS)
 #--objectsuffix--#	$B
 #--targetprefix--#	../lib$D/
 #--targetsuffix--#	.dylib
