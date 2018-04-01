@@ -52,7 +52,7 @@ public:
     }
 
     /** Implements IClient::OnError() by signalling the wait lock. */
-    void OnError_ (Vca::IError *pError, const VString &rMessage) {
+    void OnError_ (Vca::IError *pError, const V::VString &rMessage) {
         m_sErrorMessage = rMessage;
         signal (false);
     }
@@ -74,7 +74,7 @@ public:
      *
      * @param rMessage the reference by which the cached error message should be returned.
      */
-    void getErrorMessage (VString &rMessage) {
+    void getErrorMessage (V::VString &rMessage) {
         rMessage = m_sErrorMessage;
     }
 //@}
@@ -84,7 +84,7 @@ private:
     /** Cached return value. */
     DataReference m_pDatum;
     /** Cached error message. */
-    VString m_sErrorMessage;
+    V::VString m_sErrorMessage;
 };
 
 #endif

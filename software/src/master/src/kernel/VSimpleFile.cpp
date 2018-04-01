@@ -33,15 +33,15 @@
 
 #if defined(_WIN32)
 
-char const * const VSimpleFile::g_pTextReadMode = "rt";
-char const * const VSimpleFile::g_pTextWriteMode = "wt";
-char const * const VSimpleFile::g_pTextAppendMode = "a+t";
+char const * const V::VSimpleFile::g_pTextReadMode = "rt";
+char const * const V::VSimpleFile::g_pTextWriteMode = "wt";
+char const * const V::VSimpleFile::g_pTextAppendMode = "a+t";
 
 #else
 
-char const * const VSimpleFile::g_pTextReadMode = "r";
-char const * const VSimpleFile::g_pTextWriteMode = "w";
-char const * const VSimpleFile::g_pTextAppendMode = "a";
+char const * const V::VSimpleFile::g_pTextReadMode = "r";
+char const * const V::VSimpleFile::g_pTextWriteMode = "w";
+char const * const V::VSimpleFile::g_pTextAppendMode = "a";
 
 #endif
 
@@ -61,7 +61,7 @@ char const * const VSimpleFile::g_pTextAppendMode = "a";
  *****************
  *****************/
 
-bool VSimpleFile::Open (char const *pFileName, char const *pFileMode) {
+bool V::VSimpleFile::Open (char const *pFileName, char const *pFileMode) {
     close ();
 #if defined (__linux__) && defined (VMS_LINUX_EXPLICIT_COMPAT)
     String iFileName(FileSpecTranslation::translateVMSFileSpec (pFileName));
@@ -74,7 +74,7 @@ bool VSimpleFile::Open (char const *pFileName, char const *pFileMode) {
     return IsntNil (m_pStream);
 }
 
-bool VSimpleFile::OpenUniqueTemp (VString& rFileName, char const *pPrefix) {
+bool V::VSimpleFile::OpenUniqueTemp (VString& rFileName, char const *pPrefix) {
     close ();
 #if defined (__linux__) && defined (VMS_LINUX_EXPLICIT_COMPAT)
     String iFileName(FileSpecTranslation::translateVMSFileSpec (pPrefix));
@@ -107,7 +107,7 @@ bool VSimpleFile::OpenUniqueTemp (VString& rFileName, char const *pPrefix) {
 #endif
 }
 
-bool VSimpleFile::GetLine (VString &rLine) const {
+bool V::VSimpleFile::GetLine (VString &rLine) const {
     if (IsNil (m_pStream))
 	return false;
 
@@ -124,7 +124,7 @@ bool VSimpleFile::GetLine (VString &rLine) const {
     return bGotSomething;
 }
 
-bool VSimpleFile::GetContents (VString &rContents) const {
+bool V::VSimpleFile::GetContents (VString &rContents) const {
     if (IsNil (m_pStream))
 	return false;
 
@@ -144,7 +144,7 @@ bool VSimpleFile::GetContents (VString &rContents) const {
 }
 
 
-bool VSimpleFile::PutLine (char const *pLine) const {
+bool V::VSimpleFile::PutLine (char const *pLine) const {
     if (IsNil (m_pStream))
 	return false;
 
@@ -153,19 +153,19 @@ bool VSimpleFile::PutLine (char const *pLine) const {
     return true;
 }
 
-bool VSimpleFile::PutString (char const *pString) const {
+bool V::VSimpleFile::PutString (char const *pString) const {
     if (IsNil (m_pStream) || IsNil (pString))
 	return false;
 
     return fputs (pString, m_pStream) >= 0;
 }
 
-int __cdecl VSimpleFile::printf (char const *pFormat, ...) const {
+int __cdecl V::VSimpleFile::printf (char const *pFormat, ...) const {
     V_VARGLIST (pFormatArgs, pFormat);
     return vprintf (pFormat, pFormatArgs);
 }
 
-int VSimpleFile::vprintf (char const *pFormat, va_list pFormatArgs) const {
+int V::VSimpleFile::vprintf (char const *pFormat, va_list pFormatArgs) const {
     V::VArgList iFormatArgs (pFormatArgs);
     int const cBytesTransfered = m_pStream ? STD_vfprintf (m_pStream, pFormat, iFormatArgs) : 0;
     if (m_bAutoFlushEnabled)
@@ -173,19 +173,19 @@ int VSimpleFile::vprintf (char const *pFormat, va_list pFormatArgs) const {
     return cBytesTransfered;
 }
 
-void VSimpleFile::flush () const {
+void V::VSimpleFile::flush () const {
     if (m_pStream)
 	fflush (m_pStream);
 }
 
-void VSimpleFile::close () {
+void V::VSimpleFile::close () {
     if (m_pStream) {
     	fclose (m_pStream);
 	m_pStream = 0;
     }
 }
 
-unsigned int VSimpleFile::Size () const {
+unsigned int V::VSimpleFile::Size () const {
     unsigned int size = 0;
     if (m_pStream) {
 	int handle = fileno (m_pStream);
@@ -202,7 +202,7 @@ unsigned int VSimpleFile::Size () const {
  ******************
  ******************/
 
-int VSimpleFile::dup2 (int filedes2) const {
+int V::VSimpleFile::dup2 (int filedes2) const {
     if (m_pStream)
 	return ::dup2 (fileno (m_pStream), filedes2);
     return -1;

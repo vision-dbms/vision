@@ -28,7 +28,7 @@ public:
     void OnData (Vsa::IEvaluator *pEvaluator);
 
     /** Implements IClient::OnError() by signalling the wait lock. */
-    void OnError (Vca::IError *pError, const VString &rMessage);
+    void OnError (Vca::IError *pError, const V::VString &rMessage);
 
     /**
      * Retrieves cached value.
@@ -44,7 +44,7 @@ public:
      *
      * @param rMessage the reference by which the cached error message should be returned.
      */
-    void getErrorMessage (VString &rMessage) {
+    void getErrorMessage (V::VString &rMessage) {
         rMessage = m_sErrorMessage;
     }
 // State
@@ -52,7 +52,7 @@ private:
     /** Cached return value. */
     Vsa::IEvaluator::Reference m_pEvaluator;
     /** Cached error message. */
-    VString m_sErrorMessage;
+    V::VString m_sErrorMessage;
 };
 
 #endif

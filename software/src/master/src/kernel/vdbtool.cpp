@@ -221,11 +221,11 @@ namespace Vdb {
     class IDatabase;
 
     VINTERFACE_ROLE (IDatabaseManager, IVUnknown)
-	VINTERFACE_ROLE_2 (OpenDatabase, IVReceiver<IDatabase*>*, VString const&);
+	VINTERFACE_ROLE_2 (OpenDatabase, IVReceiver<IDatabase*>*, V::VString const&);
     VINTERFACE_ROLE_END
 
     VINTERFACE (IDatabaseManager, IVUnknown)
-	VINTERFACE_METHOD_2 (OpenDatabase, IVReceiver<IDatabase*>*, VString const&);
+	VINTERFACE_METHOD_2 (OpenDatabase, IVReceiver<IDatabase*>*, V::VString const&);
     VINTERFACE_END
 }
 
@@ -333,11 +333,11 @@ namespace Vdb {
 
 namespace Vdb {
     VINTERFACE_ROLE (ITransaction, Vca::IClient)
-	VINTERFACE_ROLE_1 (LogMessage, VString const&);
+	VINTERFACE_ROLE_1 (LogMessage, V::VString const&);
     VINTERFACE_ROLE_END
 
     VINTERFACE (ITransaction, Vca::IClient)
-	VINTERFACE_METHOD_1 (LogMessage, VString const&);
+	VINTERFACE_METHOD_1 (LogMessage, V::VString const&);
     VINTERFACE_END
 }
 
@@ -488,10 +488,10 @@ public:
 //  NDF Access / Update
 protected:
     void Get (PS_Type_FO oDatum, void *pDatum, size_t sDatum) const {
-	memcpy (pDatum, (pointer_t)m_iMapping.RegionAddress () + oDatum, sDatum);
+	memcpy (pDatum, (V::pointer_t)m_iMapping.RegionAddress () + oDatum, sDatum);
     }
     void Put (PS_Type_FO oDatum, void const*pDatum, size_t sDatum) const {
-	memcpy ((pointer_t)m_iMapping.RegionAddress () + oDatum, pDatum, sDatum);
+	memcpy ((V::pointer_t)m_iMapping.RegionAddress () + oDatum, pDatum, sDatum);
     }
     void Sync ();
 
@@ -1028,7 +1028,7 @@ PrivateFnDef void Block_Convert (rtBLOCK_BlockType *pThis, size_t Unused(sThis))
 
 /*****  ... byte code vector, ...  *****/
     if (pThis->preamble.byteCodeVector > 0) {
-    	unsigned char* pBC = (unsigned char*)((pointer_t)pThis + pThis->preamble.byteCodeVector);
+	unsigned char* pBC = (unsigned char*)((V::pointer_t)pThis + pThis->preamble.byteCodeVector);
 	bool notDone = true;
 	do {
 	    switch (*pBC++) {
@@ -1122,7 +1122,7 @@ PrivateFnDef void Block_Convert (rtBLOCK_BlockType *pThis, size_t Unused(sThis))
 /*****  ... POP vector, ...  *****/
     if (pThis->preamble.physicalLiteralVector > 0) {
 	rtBLOCK_PLVectorType* pVector = (rtBLOCK_PLVectorType*)(
-	    (pointer_t)pThis + pThis->preamble.physicalLiteralVector
+	    (V::pointer_t)pThis + pThis->preamble.physicalLiteralVector
 	);
 	int iPOP;
 
@@ -1134,7 +1134,7 @@ PrivateFnDef void Block_Convert (rtBLOCK_BlockType *pThis, size_t Unused(sThis))
 /*****  ... and unused Evaled literal entry vector, ...  *****/
     if (pThis->preamble.evaledLEntryVector > 0) {
 	rtBLOCK_ELEVectorType* pVector = (rtBLOCK_ELEVectorType*)(
-	    (pointer_t)pThis + pThis->preamble.evaledLEntryVector
+	    (V::pointer_t)pThis + pThis->preamble.evaledLEntryVector
 	);
 	int iEntry;
 
@@ -1476,7 +1476,7 @@ PrivateFnDef void POPVector_Convert (POPVECTOR_PVType *	pThis, size_t Unused(sTh
 PrivateFnDef void UVector_Convert (UV_PreambleType *pThis, size_t Unused(sThis), int isASelectorUVector) {
     size_t  cElement;
     size_t  sElement;
-    pointer_t pElement;
+    V::pointer_t pElement;
     union uvectorFields_t {
 	struct forward_t {
 #if defined(_AIX)
@@ -1526,7 +1526,7 @@ PrivateFnDef void UVector_Convert (UV_PreambleType *pThis, size_t Unused(sThis),
 
     cElement = pThis->elementCount;
     sElement = pThis->granularity;
-    pElement = (pointer_t)(pThis + 1);
+    pElement = (V::pointer_t)(pThis + 1);
     if (isASelectorUVector) while (cElement-- > 0) {
     	rtSELUV_Type_Element* pSelector = (rtSELUV_Type_Element*)pElement;
 
@@ -1650,7 +1650,7 @@ PrivateFnDef M_CPreamble *Container_Convert (
 
     /*****  ... validate the end-marker address, ...  *****/
     M_CEndMarker *pEndMarker = M_CPreamble_EndMarker (pThis);
-    if ((pointer_t)pEndMarker >= (pointer_t)pLimit) {
+    if ((V::pointer_t)pEndMarker >= (V::pointer_t)pLimit) {
 	MessageType_DisplayApplicationMessage (
 	    MessageType_Error,
 	    "Container [%04u:%07u]: Size %u Exceeds %u Bytes Remaining In Segment",
@@ -1834,7 +1834,7 @@ PrivateFnDef bool Segment_Convert (
 	gettime (&OperationStartTime);
 
 	pNextContainer = (M_CPreamble*)(pSegment + 1);
-	pNullContainer = (M_CPreamble*)((pointer_t)pSegment + sSegment);
+	pNullContainer = (M_CPreamble*)((V::pointer_t)pSegment + sSegment);
 
 	pSegment->m_dataFormat = Vk_DataFormatChanging;
 
@@ -2347,7 +2347,7 @@ void VSegmentHandle::PrepareIncomingMessage (
 	m_pPathName = strdup (MakeMessage ("%s%s", m_pSavedPathName,"x"));
 
 	if (MapNew (pMessage->Size ()))
-	    pMessage->AttachBody ((pointer_t)m_iMapping.RegionAddress ());
+	    pMessage->AttachBody ((V::pointer_t)m_iMapping.RegionAddress ());
 	else RaiseApplicationException (
 	    "Segment %s: Cannot Create", m_pPathName
 	);
@@ -2449,7 +2449,7 @@ void VSegmentHandle::PrepareOutgoingMessage (
 		m_pPathName, m_iMapping.RegionSize ()
 	    );
 	    pMessage->SetSizeTo (m_iMapping.RegionSize ());
-	    pMessage->AttachBody ((pointer_t)m_iMapping.RegionAddress ());
+	    pMessage->AttachBody ((V::pointer_t)m_iMapping.RegionAddress ());
 	}
 	else {
 	    if (Verbose) MessageType_DisplayApplicationMessage (
@@ -3424,7 +3424,7 @@ void VConversionAgent::PrepareIncomingMessage (
 	break;
     case MessageIndex_SetContent:
 	if (MapNew (pMessage->Size ()))
-	    pMessage->AttachBody ((pointer_t)m_iMapping.RegionAddress ());
+	    pMessage->AttachBody ((V::pointer_t)m_iMapping.RegionAddress ());
 	else RaiseApplicationException (
 	    "NDF %s: Cannot Create", m_pSlavePathName
 	);

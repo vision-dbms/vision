@@ -15,7 +15,7 @@ public:
      *
      * @param[in] rQuery the query for which we're caching the result.
      */
-    VQueryCache (VString const &rQuery) : m_query (rQuery) {}
+    VQueryCache (V::VString const &rQuery) : m_query (rQuery) {}
 
 // Destruction
 protected:
@@ -24,7 +24,7 @@ protected:
 
 // VEvaluatorClient Methods
 private:
-    virtual void OnResult_(Vsa::IEvaluationResult *pResult, VString const &rOutput);
+    virtual void OnResult_(Vsa::IEvaluationResult *pResult, V::VString const &rOutput);
 
 // Evaluation
 public:
@@ -44,14 +44,14 @@ public:
      *
      * @param rResult the reference by which the result should be retrieved.
      */
-    void getResult (VString &rResult) { rResult = m_result; }
+    void getResult (V::VString &rResult) { rResult = m_result; }
 
 // State
 protected:
     /** The cached result. */
-    VString m_result;
+    V::VString m_result;
     /** The cached query. */
-    VString const m_query;
+    V::VString const m_query;
 };
 
 #endif

@@ -27,7 +27,7 @@ void VEvaluatorSinkWaiter::OnData (Vsa::IEvaluator *pEvaluator) {
     signal ();
 }
 
-void VEvaluatorSinkWaiter::OnError (Vca::IError *pError, const VString &rMessage) {
+void VEvaluatorSinkWaiter::OnError (Vca::IError *pError, const V::VString &rMessage) {
     m_sErrorMessage = rMessage;
     signal (false);
 }

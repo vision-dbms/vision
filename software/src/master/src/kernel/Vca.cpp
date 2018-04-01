@@ -74,7 +74,7 @@ Vca::VcaSelf *Vca::self () {
 static WSADATA	g_iWinsockInitializationData;
 static int	g_xWinsockInitializationError = WSANOTINITIALISED;
 
-static bool GetInitializationStatus (VString *pMessageReturn) {
+static bool GetInitializationStatus (V::VString *pMessageReturn) {
     if (!g_xWinsockInitializationError || !pMessageReturn)
 	return !g_xWinsockInitializationError;
 
