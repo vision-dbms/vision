@@ -80,13 +80,15 @@ Vxa::VCallData::~VCallData () {
 Vxa::VCallData::Selector::Selector (
     VString const &rName, cardinality_t cParameters
 ) : m_iName (rName), m_aComponents (cParameters) {
-    VString rNameResidue (rName);
+    VString iNameResidue (rName); VString iNextResidue;
     for (cardinality_t xComponent = 0;
-         xComponent < cParameters && rNameResidue.getPrefix (
-             ':', const_cast<VString&>(m_aComponents[xComponent]), rNameResidue
+         xComponent < cParameters && iNameResidue.getPrefix (
+             ':', const_cast<VString&>(m_aComponents[xComponent]), iNextResidue
          );
          xComponent++
-    );
+    ) {
+        iNameResidue.setTo (iNextResidue);
+    }
 }
 
 Vxa::VCallData::Selector::Selector (
