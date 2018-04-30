@@ -30,6 +30,8 @@
 #include "VkMapOf.h"
 #include "VkUUID.h"
 
+#include "V_VSpinlock.h"
+
 #include "Vxa_VCollectableCollection.h"
 #include "Vxa_VCollectableObject.h"
 
@@ -51,6 +53,7 @@ namespace {
     class VTicketRegistry {
     //  Aliases
     public:
+        typedef V::VSpinlock Mutex;
         typedef VTicketRegistry Registry;
 
     //  class Entry
@@ -81,6 +84,7 @@ namespace {
             VString              const m_iKey;
             cluster_t::Reference const m_pCluster;
         };
+        typedef VkMapOf<VString,VString const&,VString const&,Entry::Pointer> Map;
         friend class Entry;
 
     //  Construction
@@ -103,9 +107,16 @@ namespace {
     public:
         bool getObject (VCollectableObject::Reference &rpObject, VString const &rTicket);
 
+    //  Map Management
+    private:
+        bool locateEntry (Entry::Reference &rpEntry, VString const &rkEntry, cluster_t *pCluster);
+        bool locateEntry (Entry::Reference &rpEntry, VString const &rkEntry) const;
+        bool deleteEntry (VString const &rkEntry);
+
     //  State
     private:
-        VkMapOf<VString,VString const&,VString const&,Entry::Pointer> m_mEntries;
+        Mutex mutable m_iMutex;
+        Map           m_iMap;
     };
 /*----------------*/
 /*----------------*/
@@ -126,7 +137,7 @@ namespace {
             << m_pCluster.referent ()
             << std::endl;
     */
-        m_pRegistry->m_mEntries.Delete (m_iKey);
+        m_pRegistry->deleteEntry (m_iKey);
         return true;
     }
 /*----------------*/
@@ -183,15 +194,10 @@ namespace {
     bool VTicketRegistry::getTicket (
         VString &rTicket, cluster_t *pCluster, cluster_index_t xObject, bool bSingleUse
     ) {
-        VString kEntry;
-        if (!pCluster->getTicketKey (kEntry))
-            return false;
-
-        unsigned int xEntry = 0;
-        if (m_mEntries.Insert (kEntry, xEntry)) {
-            m_mEntries[xEntry].setTo (new Entry (this, kEntry, pCluster));
-        }
-        return m_mEntries[xEntry]->getTicket (rTicket, xObject, bSingleUse);
+        VString kEntry; Entry::Reference pEntry;
+        return pCluster->getTicketKey (kEntry)
+            && locateEntry (pEntry, kEntry, pCluster)
+            && pEntry->getTicket (rTicket, xObject, bSingleUse);
     }
 /*----------------*/
     bool VTicketRegistry::getObject (VCollectableObject::Reference &rpObject, VString const &rTicket) {
@@ -232,10 +238,30 @@ namespace {
         if (iRest != "*!>")
             return false;
 
-    //  ... and get the entry:
+    //  ... and get the object:
+        Entry::Reference pEntry;
+        return locateEntry (pEntry, iKey) && pEntry->getObject (rpObject, xObject, bSingleUse);
+    }
+/*----------------*/
+    bool VTicketRegistry::locateEntry (Entry::Reference &rpEntry, VString const &rkEntry, cluster_t *pCluster) {
+        Mutex::Claim iMutexClaim (m_iMutex);
+
+        unsigned int xEntry = 0;
+        if (m_iMap.Insert (rkEntry, xEntry)) {
+            m_iMap[xEntry].setTo (new Entry (this, rkEntry, pCluster));
+        }
+        return (rpEntry = m_iMap[xEntry]).isntNil ();
+    }
+    bool VTicketRegistry::locateEntry (Entry::Reference &rpEntry, VString const &rkEntry) const {
+        Mutex::Claim iMutexClaim (m_iMutex);
+
         unsigned int xEntry;
-        return m_mEntries.Locate (iKey, xEntry)
-            && m_mEntries[xEntry]->getObject (rpObject, xObject, bSingleUse);
+        return m_iMap.Locate (rkEntry, xEntry) && (rpEntry = m_iMap[xEntry]).isntNil ();
+    }
+/*----------------*/
+    bool VTicketRegistry::deleteEntry (VString const &rkEntry) {
+        Mutex::Claim iMutexClaim (m_iMutex);
+        return m_iMap.Delete(rkEntry);
     }
 /*----------------*/
 /*----------------*/
