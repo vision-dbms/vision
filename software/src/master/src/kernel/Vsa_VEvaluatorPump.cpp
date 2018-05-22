@@ -541,7 +541,7 @@ static void displayAndConsume (
     Vsa::VEvaluatorPump *pPump, char const *pWhere, V::VFifoLite &rFifo, size_t sTransfer
 ) {
     if (pPump->objectsTrace ()) {
-	VString iMessage (rFifo.consumerAreaSize () + 256);
+        V::VString iMessage (rFifo.consumerAreaSize () + 256);
 	iMessage << pPump->rttName () << "::" << pWhere << ": <";
 
 	iMessage.append (rFifo.consumerArea (), sTransfer);
