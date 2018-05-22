@@ -471,7 +471,9 @@ char const* VSNFTask::description () const {
  *********************************/
 
 void VSNFTask::startExternalInvocation (ISingleton *pISingleton) {
-    static bool const bICE = getenv ("VxaICE") ? true : false;  //  ICE == ICollection Enabled
+//  ICE == ICollection Enabled
+//  (enabled by default unless the 'VxaNoICE' environment variable is set)
+    static bool const bICE = getenv ("VxaICE") || !getenv("VxaNoICE");
     suspend ();
 
     if (Vxa::ICollection *const pICollection = bICE ? dynamic_cast<Vxa::ICollection*>(pISingleton) : 0) {
