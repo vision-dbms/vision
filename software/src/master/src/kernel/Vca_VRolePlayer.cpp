@@ -11,6 +11,7 @@
  ********************/
 
 #include "Vk.h"
+#include <iostream>
 
 /******************
  *****  Self  *****
@@ -413,11 +414,17 @@ bool Vca::VRolePlayer::RoleProvider::Query::getRoleFrom (VRolePlayer *pRolePlaye
 	    m_pInterfaceSink->OnData (0);       //  ... let that client know we don't implement the role.
 
 //     if (objectsTrace ()) {
-// 	VString iTraceMessage;
-// 	iTraceMessage.printf (
-// 	    "supplyInterface: %s%s%s%s",
-// 	    pInterfaceType->name ().content (), pAggregator ? " A" : "", bSubquery ? " SQ" : "", bFoundOrWorking ? " F/W" : ""
-// 	);
+	VString iTraceMessage;
+	iTraceMessage.printf (
+	    "supplyInterface: %s Aggregator: %p, Sink: %p, Result: %p, %s%s",
+	    m_pInterfaceType->name ().content (),
+            m_pAggregator.referent (),
+            m_pInterfaceSink.referent (),
+            pInterface.referent (),
+            m_bSubquery ? " SQ" : "",
+            bFoundOrWorking ? " F/W" : ""
+	);
+        std::cerr << iTraceMessage.content () << std::endl;
 // 	traceInfo (iTraceMessage);
 //     }
     return bFoundOrWorking;
@@ -1327,7 +1334,7 @@ bool Vca::VRolePlayer::supplyInterface (
 /*==========================================================================================*
  * 
  *  A small, private helper used to perform a LIFO search (most derived to most abstract
- *  class order) the locally implemented interfaces of this class.
+ *  class order) for locally implemented interfaces of this class.
  *
  *==========================================================================================*/
 
