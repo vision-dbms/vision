@@ -397,6 +397,11 @@ Vca::VRolePlayer::RoleProvider::Query::~Query () {
  *  query.
  *  
  *==========================================================================================*/
+bool cerrObjectsTrace () {
+    static bool bTracing = getenv ("cerrTraceObjects");
+    return bTracing;
+}
+
 bool Vca::VRolePlayer::RoleProvider::Query::getRoleFrom (VRolePlayer *pRolePlayer) const {
     bool bFoundOrWorking = true;
 
@@ -414,6 +419,7 @@ bool Vca::VRolePlayer::RoleProvider::Query::getRoleFrom (VRolePlayer *pRolePlaye
 	    m_pInterfaceSink->OnData (0);       //  ... let that client know we don't implement the role.
 
 //     if (objectsTrace ()) {
+    if (cerrObjectsTrace ()) {
 	VString iTraceMessage;
 	iTraceMessage.printf (
 	    "supplyInterface: %s Aggregator: %p, Sink: %p, Result: %p, %s%s",
@@ -426,7 +432,7 @@ bool Vca::VRolePlayer::RoleProvider::Query::getRoleFrom (VRolePlayer *pRolePlaye
 	);
         std::cerr << iTraceMessage.content () << std::endl;
 // 	traceInfo (iTraceMessage);
-//     }
+    }
     return bFoundOrWorking;
 }
 
