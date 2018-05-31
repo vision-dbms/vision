@@ -103,7 +103,10 @@ void VReadEvalPrintController::QueryContext::onQueryInProgress (VReadEvalPrintCo
 }
 
 void VReadEvalPrintController::QueryContext::onQueryCompleted (VReadEvalPrintController *pTask) {
-    m_pQuery.clear ();
+    if (m_pQuery) {
+        m_pQuery->setEOL ();
+        m_pQuery.clear ();
+    }
 }
 
 

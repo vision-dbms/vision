@@ -176,7 +176,8 @@ public:
 		if (rpCachedGofer.isNil ())
 		    createClientObjectGofer (rpCachedGofer, pContext);
 		rpResultGofer.setTo (rpCachedGofer);
-		return rpResultGofer.isntNil ();
+//		return rpResultGofer.isntNil ();
+                return checkEOL (rpResultGofer, "cachedClientObjectGofer");
 	    }
 
 	    template <typename gofer_reference_t> bool createClientObjectGofer (gofer_reference_t &rpGofer, Context *pContext) {
@@ -194,7 +195,6 @@ public:
 			}
 			rpGofer.claim (pObjectGofer);
 		    }
-
 		    typename Vca::VGoferInterface<Vca::IDataSource<interface_t*> >::Reference pSourceGofer;
 		    if (m_pEvaluation->newClientObjectGofer (pSourceGofer)) {
 			pObjectGofer.setTo (new Vca::Gofer::Sourced<interface_t> (pSourceGofer));
@@ -205,15 +205,25 @@ public:
 			rpGofer.claim (pObjectGofer);
 		    }
 		}
-		return rpGofer.isntNil ();
+//		return rpGofer.isntNil ();
+                return checkEOL (rpGofer, "createClientObjectGofer");
 	    }
-		
 
-	    //  State
+        //  EOL
+        public:
+            void setEOL ();
+        protected:
+            template <typename gofer_reference_t> bool checkEOL (gofer_reference_t &rpGofer, char const *pWhere) const {
+                return m_bEOL ? failEOL (rpGofer, pWhere) : rpGofer.isntNil ();
+            }
+            bool failEOL (Vca::VRolePlayer *pGofer, char const *pWhere) const;
+
+        //  State
 	private:
 	    Vsa::VEvaluation::Reference   const m_pEvaluation;         
 	    icollection_gofer_t::Reference	m_pICollectionGofer;
 	    isingleton_gofer_t::Reference	m_pISingletonGofer;
+            bool				m_bEOL;
 	};
 
 /****************************************************************************************/
