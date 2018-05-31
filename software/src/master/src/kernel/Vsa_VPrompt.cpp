@@ -46,6 +46,104 @@
 extern     Vca::VGoferInterface<Vca::IInfoServer>::Reference g_pInfoServerGofer;
 
 
+/***********************************
+ ***********************************
+ *****                         *****
+ *****  Vsa::XPrompt::Tracker  *****
+ *****                         *****
+ ***********************************
+ ***********************************/
+
+#include "Vxa_VCollectable.h"
+#include "Vxa_VCollectableObject.h"
+
+/*****************************************************************
+ *  Sample Vision Usage:
+
+# Run once to prime batchvision session:
+!tracker <- 999;  # <- run once
+?g
+
+# Run as many times as necessary:
+JS jsObject do: [^self getQueryID print; ^self setTrackID: ^my :tracker increment. print; ^self getTrackID printNL];
+?r 5
+
+ *
+ *****************************************************************/
+namespace Vsa {
+    namespace XPrompt {
+        typedef int id_t;
+
+        class Tracker : public Vxa::VCollectableObject {
+            DECLARE_CONCRETE_RTTLITE (Tracker, Vxa::VCollectableObject);
+
+        //  Class Builder
+        public:
+            class ClassBuilder : public Vxa::VCollectableObject::ClassBuilder {
+            protected:
+                ClassBuilder (Vxa::VClass *pClass);
+            };
+            friend ClassBuilder;
+
+        //  ID Generator
+        private:
+            static id_t NewID ();
+
+        //  Construction
+        public:
+            Tracker ();
+        private:
+        //  Destruction
+            ~Tracker ();
+
+        //  Methods
+        protected:
+            void GetQueryID (Vxa::VResultBuilder &rResult);
+            void GetTrackID (Vxa::VResultBuilder &rResult);
+            void SetTrackID (Vxa::VResultBuilder &rResult, id_t xTrackId);
+
+        //  State
+        private:
+            id_t const m_xQueryID;
+            id_t       m_xTrackID;
+        }; // Tracker
+
+    /******************/
+        id_t Tracker::NewID () {
+            static id_t xNextID = 0;
+            return xNextID++;
+        }
+
+        Tracker::Tracker () : m_xQueryID (NewID ()), m_xTrackID (-1) {
+        }
+        Tracker::~Tracker () {
+        }
+
+        void Tracker::GetQueryID (Vxa::VResultBuilder &rResult) {
+            rResult = m_xQueryID;
+        }
+        void Tracker::GetTrackID (Vxa::VResultBuilder &rResult) {
+            rResult = m_xTrackID;
+        }
+        void Tracker::SetTrackID (Vxa::VResultBuilder &rResult, id_t xTrackID) {
+            rResult = m_xTrackID;
+            m_xTrackID = xTrackID;
+        }
+
+    /******************/
+        Tracker::ClassBuilder::ClassBuilder (Vxa::VClass *pClass) : BaseClass::ClassBuilder (pClass) {
+            defineMethod ("getQueryID" , &Tracker::GetQueryID);
+            defineMethod ("getTrackID" , &Tracker::GetTrackID);
+            defineMethod ("setTrackID:", &Tracker::SetTrackID);
+        }
+    }
+}
+namespace {
+    Vxa::VCollectable<Vsa::XPrompt::Tracker> g_iMeta;
+}
+DEFINE_VXA_COLLECTABLE(Vsa::XPrompt::Tracker);
+
+
 /***************************************
  ***************************************
  *****                             *****
@@ -60,6 +158,9 @@ namespace Vsa {
 
     //  Aliases
     public:
+        typedef Vca::IRoleProvider2 IRoleProvider2;
+        typedef Vca::ITrigger ITrigger;
+
 	typedef Reference QueryOutputReference;
 	typedef Vca::VInterfaceEKG<ThisClass,IVUnknown> interface_monitor_t;
 
@@ -144,6 +245,21 @@ namespace Vsa {
 	}
 
     //  VEvaluatorClient Callbacks
+    private:
+        void CheckIt (VTypeInfo *pInterfaceType, VString const &rWhere) const;
+        void ShowIt  (VTypeInfo *pInterfaceType, VString const &rWhere) const;
+        void Gotcha  (VTypeInfo *pInterfaceType, VString const &rWhere) const;
+    public:
+        virtual void QueryInterface (
+            IVUnknown *pRole, VTypeInfo *pInterfaceType, IObjectSink *pInterfaceSink
+        ) OVERRIDE;
+        virtual void QueryRole2 (
+            Vca::IRoleProvider2 *pRole, IStatusSink *pStatusSink, IObjectSink *pInterfaceSink, VTypeInfo *pInterfaceType, IVUnknown *pAggregator
+        ) OVERRIDE;
+        virtual void QueryRole (
+            Vca::IRoleProvider *pRole, ITrigger *pStatusSink, IObjectSink *pInterfaceSink, VTypeInfo *pInterfaceType, IVUnknown *pAggregator
+        ) OVERRIDE;
+
     public:
 	virtual void OnAccept (IEvaluatorClient *pRole, IEvaluation *pEvaluation, Vca::U32 xQueuePosition) OVERRIDE {
 	    OnAccept_(pEvaluation, xQueuePosition);
@@ -202,6 +318,7 @@ namespace Vsa {
 	TimingOutput::Reference		m_pTimingOutput;
 	bool				m_bTimingRequested;
 	bool				m_bTimingValid;
+        bool                            m_bEOL;
         CAM::Operation                  m_iCamOp;
     };
 }
@@ -220,13 +337,16 @@ Vsa::VPrompt::QueryOutput::QueryOutput (VPrompt* pPrompt, VString const& rPath, 
     , m_iQuery		(rQuery)
     , m_bTimingRequested(false)
     , m_bTimingValid	(false)
+    , m_bEOL            (false)
 {
     m_iCamOp = (StreamCapture() << "file" << __FILE__ << "line" << __LINE__ 
         << "label" << "Vsa::VPrompt::QueryOutput::QueryOutput"
     );
     m_iCamOp.detachFromCamStack();
 
-    aggregate (pPrompt->queryRoleGofer ());
+//    aggregate (pPrompt->queryRoleGofer ());
+
+    aggregate (Vxa::Export (new XPrompt::Tracker ()));
 
     retain (); {
 	if (IEvaluator* const pEvaluator = pPrompt->evaluator ())
@@ -245,6 +365,49 @@ Vsa::VPrompt::QueryOutput::QueryOutput (VPrompt* pPrompt, VString const& rPath, 
  *************************/
 
 Vsa::VPrompt::QueryOutput::~QueryOutput () {
+}
+
+/************************
+ ************************
+ *****  Entrapment  *****
+ ************************
+ ************************/
+
+void Vsa::VPrompt::QueryOutput::CheckIt (VTypeInfo *pInterfaceType, VString const &rWhere) const {
+    return m_bEOL ? Gotcha (pInterfaceType, rWhere) : ShowIt (pInterfaceType, rWhere);
+}
+
+void Vsa::VPrompt::QueryOutput::ShowIt (VTypeInfo *pInterfaceType, VString const &rWhere) const {
+    VString iTypeName;
+    pInterfaceType->getName (iTypeName);
+    std::cerr << this << ": " << iTypeName << " " << rWhere << std::endl;
+}
+
+void Vsa::VPrompt::QueryOutput::Gotcha (VTypeInfo *pInterfaceType, VString const &rWhere) const {
+    VString iGotcha (rWhere);
+    iGotcha << " GOTCHA !!!";
+    ShowIt (pInterfaceType, iGotcha);
+}
+
+void Vsa::VPrompt::QueryOutput::QueryInterface (
+    IVUnknown *pRole, VTypeInfo *pInterfaceType, IObjectSink *pInterfaceSink
+) {
+    CheckIt (pInterfaceType, "QueryInterface");
+    BaseClass::QueryInterface (pRole, pInterfaceType, pInterfaceSink);
+}
+
+void Vsa::VPrompt::QueryOutput::QueryRole2 (
+    IRoleProvider2 *pRole, IStatusSink *pStatusSink, IObjectSink *pInterfaceSink, VTypeInfo *pInterfaceType, IVUnknown *pAggregator
+) {
+    CheckIt (pInterfaceType, "QueryRole2");
+    BaseClass::QueryRole2 (pRole, pStatusSink, pInterfaceSink, pInterfaceType, pAggregator);
+}
+
+void Vsa::VPrompt::QueryOutput::QueryRole (
+    IRoleProvider *pRole, ITrigger *pStatusSink, IObjectSink *pInterfaceSink, VTypeInfo *pInterfaceType, IVUnknown *pAggregator
+) {
+    CheckIt (pInterfaceType, "QueryRole");
+    BaseClass::QueryRole (pRole, pStatusSink, pInterfaceSink, pInterfaceType, pAggregator);
 }
 
 /********************
@@ -329,6 +492,8 @@ void Vsa::VPrompt::QueryOutput::monitorInterface (IVUnknown* pInterface) {
 }
 
 void Vsa::VPrompt::QueryOutput::cancelInterfaceMonitor () {
+    m_bEOL = true;
+
     interface_monitor_t::Reference pInterfaceMonitor;
     pInterfaceMonitor.claim (m_pInterfaceMonitor);
     if (pInterfaceMonitor)
@@ -595,14 +760,19 @@ bool Vsa::VPrompt::onInputLine (char const *pLine, size_t sLine) {
 	m_iThisQuery << "\n";
     }
     else if (sLine > 1) {
+        int cRepetitionsRequested = 0;
 	switch (pLine[1]) {
 	case 'f':
 	    m_iThisQuery.clear ();
 	    break;
+        case 'r':
+            cRepetitionsRequested = atoi (&pLine[2]) - 1;
 	case 'g':
 	case 'G':
 	    outputQuery (m_iThisQuery);
 	    m_iLastQuery.setTo (m_iThisQuery);
+            while (cRepetitionsRequested-- > 0)
+                outputQuery (m_iThisQuery);
 	    m_iThisQuery.clear ();
 	    break;
 	case 'l':
