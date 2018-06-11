@@ -550,7 +550,7 @@ bool VComputationUnit::Context::GoferOrder::fulfillFromServer (Context *pContext
  **************************
  **************************/
 
-VComputationUnit::Context::Query::Query (Vsa::VEvaluation *pEvaluation) : m_pEvaluation (pEvaluation), m_bEOL (false) {
+VComputationUnit::Context::Query::Query (Vsa::VEvaluation *pEvaluation) : m_pEvaluation (pEvaluation) {
 }
 
 /*************************
@@ -574,20 +574,6 @@ bool VComputationUnit::Context::Query::getClientObjectGofer (icollection_gofer_t
 
 bool VComputationUnit::Context::Query::getClientObjectGofer (isingleton_gofer_t::Reference& rpGofer, Context *pContext) {
     return cachedClientObjectGofer (rpGofer, m_pISingletonGofer, pContext);
-}
-
-void VComputationUnit::Context::Query::setEOL () {
-    m_bEOL = true;
-    m_pICollectionGofer.clear ();
-    m_pISingletonGofer.clear ();
-}
-
-bool VComputationUnit::Context::Query::failEOL (Vca::VRolePlayer *pGofer, char const *pWhere) const {
-    VString iGoferType;
-    if (pGofer)
-        iGoferType.setTo (pGofer->rttName());
-    std::cerr << this << ": " << pWhere << ", " << iGoferType << std::endl;
-    return pGofer;
 }
 
 

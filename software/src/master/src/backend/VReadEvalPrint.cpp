@@ -104,7 +104,7 @@ void VReadEvalPrintController::QueryContext::onQueryInProgress (VReadEvalPrintCo
 
 void VReadEvalPrintController::QueryContext::onQueryCompleted (VReadEvalPrintController *pTask) {
     if (m_pQuery) {
-        m_pQuery->setEOL ();
+//      m_pQuery->setEOL ();
         m_pQuery.clear ();
     }
 }
