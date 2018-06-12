@@ -148,20 +148,7 @@ namespace Vsa {
 
     //  VEvaluatorClient Callbacks
     private:
-        void CheckIt (VTypeInfo *pInterfaceType, VString const &rWhere) const;
-        void ShowIt  (VTypeInfo *pInterfaceType, VString const &rWhere) const;
         void Gotcha  (VTypeInfo *pInterfaceType, VString const &rWhere) const;
-    public:
-        virtual void QueryInterface (
-            IVUnknown *pRole, VTypeInfo *pInterfaceType, IObjectSink *pInterfaceSink
-        ) OVERRIDE;
-        virtual void QueryRole2 (
-            Vca::IRoleProvider2 *pRole, IStatusSink *pStatusSink, IObjectSink *pInterfaceSink, VTypeInfo *pInterfaceType, IVUnknown *pAggregator
-        ) OVERRIDE;
-        virtual void QueryRole (
-            Vca::IRoleProvider *pRole, ITrigger *pStatusSink, IObjectSink *pInterfaceSink, VTypeInfo *pInterfaceType, IVUnknown *pAggregator
-        ) OVERRIDE;
-
     public:
 	virtual void OnAccept (IEvaluatorClient *pRole, IEvaluation *pEvaluation, Vca::U32 xQueuePosition) OVERRIDE {
 	    OnAccept_(pEvaluation, xQueuePosition);
@@ -220,7 +207,6 @@ namespace Vsa {
 	TimingOutput::Reference		m_pTimingOutput;
 	bool				m_bTimingRequested;
 	bool				m_bTimingValid;
-        bool                            m_bEOL;
         CAM::Operation                  m_iCamOp;
     };
 }
@@ -239,7 +225,6 @@ Vsa::VPrompt::QueryOutput::QueryOutput (VPrompt* pPrompt, VString const& rPath, 
     , m_iQuery		(rQuery)
     , m_bTimingRequested(false)
     , m_bTimingValid	(false)
-    , m_bEOL            (false)
 {
     m_iCamOp = (StreamCapture() << "file" << __FILE__ << "line" << __LINE__ 
         << "label" << "Vsa::VPrompt::QueryOutput::QueryOutput"
@@ -265,49 +250,6 @@ Vsa::VPrompt::QueryOutput::QueryOutput (VPrompt* pPrompt, VString const& rPath, 
  *************************/
 
 Vsa::VPrompt::QueryOutput::~QueryOutput () {
-}
-
-/************************
- ************************
- *****  Entrapment  *****
- ************************
- ************************/
-
-void Vsa::VPrompt::QueryOutput::CheckIt (VTypeInfo *pInterfaceType, VString const &rWhere) const {
-    return m_bEOL ? Gotcha (pInterfaceType, rWhere) : ShowIt (pInterfaceType, rWhere);
-}
-
-void Vsa::VPrompt::QueryOutput::ShowIt (VTypeInfo *pInterfaceType, VString const &rWhere) const {
-    VString iTypeName;
-    pInterfaceType->getName (iTypeName);
-    std::cerr << this << ": " << iTypeName << " " << rWhere << std::endl;
-}
-
-void Vsa::VPrompt::QueryOutput::Gotcha (VTypeInfo *pInterfaceType, VString const &rWhere) const {
-    VString iGotcha (rWhere);
-    iGotcha << " GOTCHA !!!";
-    ShowIt (pInterfaceType, iGotcha);
-}
-
-void Vsa::VPrompt::QueryOutput::QueryInterface (
-    IVUnknown *pRole, VTypeInfo *pInterfaceType, IObjectSink *pInterfaceSink
-) {
-    CheckIt (pInterfaceType, "QueryInterface");
-    BaseClass::QueryInterface (pRole, pInterfaceType, pInterfaceSink);
-}
-
-void Vsa::VPrompt::QueryOutput::QueryRole2 (
-    IRoleProvider2 *pRole, IStatusSink *pStatusSink, IObjectSink *pInterfaceSink, VTypeInfo *pInterfaceType, IVUnknown *pAggregator
-) {
-    CheckIt (pInterfaceType, "QueryRole2");
-    BaseClass::QueryRole2 (pRole, pStatusSink, pInterfaceSink, pInterfaceType, pAggregator);
-}
-
-void Vsa::VPrompt::QueryOutput::QueryRole (
-    IRoleProvider *pRole, ITrigger *pStatusSink, IObjectSink *pInterfaceSink, VTypeInfo *pInterfaceType, IVUnknown *pAggregator
-) {
-    CheckIt (pInterfaceType, "QueryRole");
-    BaseClass::QueryRole (pRole, pStatusSink, pInterfaceSink, pInterfaceType, pAggregator);
 }
 
 /********************
@@ -392,8 +334,6 @@ void Vsa::VPrompt::QueryOutput::monitorInterface (IVUnknown* pInterface) {
 }
 
 void Vsa::VPrompt::QueryOutput::cancelInterfaceMonitor () {
-    m_bEOL = true;
-
     interface_monitor_t::Reference pInterfaceMonitor;
     pInterfaceMonitor.claim (m_pInterfaceMonitor);
     if (pInterfaceMonitor)
