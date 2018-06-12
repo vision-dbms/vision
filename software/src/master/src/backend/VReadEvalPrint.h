@@ -51,6 +51,7 @@ public:
     //  State
     private:
 	Query::Reference m_pQuery;
+        Vsa::request_index_t m_xRequestInProgress;
     };
 
 /************************************************************************/

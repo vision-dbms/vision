@@ -613,8 +613,8 @@ public:
 	return *m_pDuc;
     }
 
-    bool getEvaluation (Vsa::VEvaluation::Reference &rpEvaluation) const {
-	return channel_()->getEvaluation (rpEvaluation);
+    bool getEvaluation (Vsa::VEvaluation::Reference &rpEvaluation, Vsa::request_index_t xRequestInProgress) const {
+	return channel_()->getEvaluation (rpEvaluation, xRequestInProgress);
     }
     unsigned int largeTaskSize () const {
 	return m_pContext->largeTaskSize ();

@@ -68,10 +68,8 @@ public:
 	VEvaluatorPump *evaluator () const {
 	    return m_pEvaluator;
 	}
-	bool getEvaluation (Vsa::VEvaluation::Reference &rpEvaluation) const {
-	    if (m_pEvaluator)
-		rpEvaluation.setTo (m_pEvaluator->incomingClient ());
-	    return rpEvaluation.isntNil ();
+	bool getEvaluation (Vsa::VEvaluation::Reference &rpEvaluation, Vsa::request_index_t xRequestInProgress) const {
+	    return m_pEvaluator && m_pEvaluator->getEvaluation (rpEvaluation, xRequestInProgress);
 	}
 	unsigned int optionValue (
 	    IOMHandle const* pHandle, IOMDriver const* pDriver
@@ -164,8 +162,8 @@ public:
     }
 
     bool getInputHandler (DSC_Descriptor& rInputHandler);
-    bool getEvaluation (Vsa::VEvaluation::Reference &rpEvaluation) const {
-	return m_iOptions.getEvaluation (rpEvaluation);
+    bool getEvaluation (Vsa::VEvaluation::Reference &rpEvaluation, Vsa::request_index_t xRequestInProgress) const {
+	return m_iOptions.getEvaluation (rpEvaluation, xRequestInProgress);
     }
 
     virtual int	getPeerNameString   (char** ppString, size_t* psString);

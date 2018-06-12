@@ -65,7 +65,9 @@ template class VPrimitiveTaskController<VReadEvalPrintController>;
  **************************
  **************************/
 
-VReadEvalPrintController::QueryContext::QueryContext (VTask *pCaller) : BaseClass (pCaller->context ()) {
+VReadEvalPrintController::QueryContext::QueryContext (
+    VTask *pCaller
+) : BaseClass (pCaller->context ()), m_xRequestInProgress (0) {
 }
 
 /*************************
@@ -96,17 +98,15 @@ bool VReadEvalPrintController::QueryContext::fulfill (GoferOrder const &rOrder) 
 void VReadEvalPrintController::QueryContext::onQueryInProgress (VReadEvalPrintController *pTask) {
     if (m_pQuery.isNil ()) {
 	Vsa::VEvaluation::Reference pEvaluation;
-	if (pTask->channel ()->getEvaluation (pEvaluation)) {
+	if (pTask->channel ()->getEvaluation (pEvaluation, m_xRequestInProgress)) {
 	    m_pQuery.setTo (new Query (pEvaluation));
 	}
     }
 }
 
 void VReadEvalPrintController::QueryContext::onQueryCompleted (VReadEvalPrintController *pTask) {
-    if (m_pQuery) {
-//      m_pQuery->setEOL ();
-        m_pQuery.clear ();
-    }
+    m_xRequestInProgress++;
+    m_pQuery.clear ();
 }
 
 

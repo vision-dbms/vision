@@ -112,7 +112,7 @@ Vsa::VEvaluatorPump::IQueue::Entry::~Entry () {
  ********************
  ********************/
 
-Vsa::VEvaluatorPump::IQueue::Entry *Vsa::VEvaluatorPump::IQueue::Entry::get (
+Vsa::VEvaluatorPump::IQueue::Entry *Vsa::VEvaluatorPump::IQueue::Entry::getNextRequest (
     VEvaluation::Reference &rpRequest, unsigned int &rcPrompts
 ) const {
     rpRequest.setTo (m_pRequest);
@@ -128,6 +128,20 @@ Vsa::VEvaluatorPump::IQueue::Entry *Vsa::VEvaluatorPump::IQueue::Entry::get (
  *****                               *****
  *****************************************
  *****************************************/
+
+/********************
+ ********************
+ *****  Access  *****
+ ********************
+ ********************/
+
+bool Vsa::VEvaluatorPump::IQueue::getEvaluation (VEvaluation::Reference &rpEvaluation, request_index_t xRequest) const {
+    for (Entry *pEntry = m_pHead; pEntry; pEntry = pEntry->m_pSuccessor) {
+        if (pEntry->getEvaluation (rpEvaluation, xRequest))
+            return true;
+    }
+    return false;
+}
 
 /*********************
  *********************
@@ -153,7 +167,7 @@ void Vsa::VEvaluatorPump::IQueue::dequeue (
 	rcPrompts = 0;
     }
     else {
-	m_pHead.setTo (m_pHead->get (rpRequest, rcPrompts));
+	m_pHead.setTo (m_pHead->getNextRequest (rpRequest, rcPrompts));
 	if (m_pHead.isNil ())
 	    m_pTail.clear ();
         m_sQueue--;
@@ -497,6 +511,18 @@ Vsa::VEvaluatorPump::~VEvaluatorPump () {
     if (m_pBSProducer)
 	m_pBSProducer->Close ();
     traceInfo ("Destroying VEvaluatorPump");
+}
+
+/********************
+ ********************
+ *****  Access  *****
+ ********************
+ ********************/
+
+bool Vsa::VEvaluatorPump::getEvaluation (VEvaluation::Reference &rpRequest, request_index_t xRequest) const {
+    return (
+        m_pIncomingClient && m_pIncomingClient->getEvaluation (rpRequest, xRequest)
+    ) || m_iIncomingQueue.getEvaluation (rpRequest, xRequest);
 }
 
 

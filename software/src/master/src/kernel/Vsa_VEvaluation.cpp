@@ -198,6 +198,14 @@ void Vsa::VEvaluation::getDescription_(VString &rResult) const {
     rResult << ": " << queryString ();
 }
 
+bool Vsa::VEvaluation::getEvaluation (Reference &rpEvaluation, request_index_t xRequest) {
+    if (index () != xRequest)
+        return false;
+
+    rpEvaluation.setTo (this);
+    return true;
+}
+
 void Vsa::VEvaluation::getVisionExpression (
     VPathQuery::Formatter const &rFormatter, VString &rResult
 ) {

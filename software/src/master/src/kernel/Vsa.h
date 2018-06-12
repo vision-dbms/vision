@@ -41,6 +41,8 @@ namespace Vsa {
     typedef Vca::IObjectSink   IObjectSink;
 
     typedef ::IVUnknown IVUnknown;
+
+    typedef Vca::U32 request_index_t;
 }
 
 

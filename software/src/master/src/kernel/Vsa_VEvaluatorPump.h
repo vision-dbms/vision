@@ -83,7 +83,11 @@ namespace Vsa {
 
 	    //  Access
 	    public:
-		Entry *get (VEvaluation::Reference &rpRequest, unsigned int &rcPrompts) const;
+                bool getEvaluation (VEvaluation::Reference &rpEvaluation, request_index_t xRequest) const {
+                    return m_pRequest->getEvaluation (rpEvaluation, xRequest);
+                }
+
+		Entry* getNextRequest (VEvaluation::Reference &rpRequest, unsigned int &rcPrompts) const;
 
 	    //  State
 	    private:
@@ -102,6 +106,10 @@ namespace Vsa {
 	public:
 	    ~IQueue () {
 	    }
+
+        //  Access
+        public:
+            bool getEvaluation (VEvaluation::Reference &rpEvaluation, request_index_t xRequest) const;
 
 	//  Query		
 	private:
@@ -363,9 +371,7 @@ namespace Vsa {
 	}
 
     public:
-	VEvaluation *incomingClient () const {
-	    return m_pIncomingClient;
-	}
+        bool getEvaluation (VEvaluation::Reference &rpEvaluation, request_index_t xRequest) const;
 
 	bool incomingPumpIsBusy () const {
 	    return m_pBSProducer.isNil ()
