@@ -46,104 +46,6 @@
 extern     Vca::VGoferInterface<Vca::IInfoServer>::Reference g_pInfoServerGofer;
 
 
-/***********************************
- ***********************************
- *****                         *****
- *****  Vsa::XPrompt::Tracker  *****
- *****                         *****
- ***********************************
- ***********************************/
-
-#include "Vxa_VCollectable.h"
-#include "Vxa_VCollectableObject.h"
-
-/*****************************************************************
- *  Sample Vision Usage:
-
-# Run once to prime batchvision session:
-!tracker <- 999;  # <- run once
-?g
-
-# Run as many times as necessary:
-JS jsObject do: [^self getQueryID print; ^self setTrackID: ^my :tracker increment. print; ^self getTrackID printNL];
-?r 5
-
- *
- *****************************************************************/
-namespace Vsa {
-    namespace XPrompt {
-        typedef int id_t;
-
-        class Tracker : public Vxa::VCollectableObject {
-            DECLARE_CONCRETE_RTTLITE (Tracker, Vxa::VCollectableObject);
-
-        //  Class Builder
-        public:
-            class ClassBuilder : public Vxa::VCollectableObject::ClassBuilder {
-            protected:
-                ClassBuilder (Vxa::VClass *pClass);
-            };
-            friend ClassBuilder;
-
-        //  ID Generator
-        private:
-            static id_t NewID ();
-
-        //  Construction
-        public:
-            Tracker ();
-        private:
-        //  Destruction
-            ~Tracker ();
-
-        //  Methods
-        protected:
-            void GetQueryID (Vxa::VResultBuilder &rResult);
-            void GetTrackID (Vxa::VResultBuilder &rResult);
-            void SetTrackID (Vxa::VResultBuilder &rResult, id_t xTrackId);
-
-        //  State
-        private:
-            id_t const m_xQueryID;
-            id_t       m_xTrackID;
-        }; // Tracker
-
-    /******************/
-        id_t Tracker::NewID () {
-            static id_t xNextID = 0;
-            return xNextID++;
-        }
-
-        Tracker::Tracker () : m_xQueryID (NewID ()), m_xTrackID (-1) {
-        }
-        Tracker::~Tracker () {
-        }
-
-        void Tracker::GetQueryID (Vxa::VResultBuilder &rResult) {
-            rResult = m_xQueryID;
-        }
-        void Tracker::GetTrackID (Vxa::VResultBuilder &rResult) {
-            rResult = m_xTrackID;
-        }
-        void Tracker::SetTrackID (Vxa::VResultBuilder &rResult, id_t xTrackID) {
-            rResult = m_xTrackID;
-            m_xTrackID = xTrackID;
-        }
-
-    /******************/
-        Tracker::ClassBuilder::ClassBuilder (Vxa::VClass *pClass) : BaseClass::ClassBuilder (pClass) {
-            defineMethod ("getQueryID" , &Tracker::GetQueryID);
-            defineMethod ("getTrackID" , &Tracker::GetTrackID);
-            defineMethod ("setTrackID:", &Tracker::SetTrackID);
-        }
-    }
-}
-namespace {
-    Vxa::VCollectable<Vsa::XPrompt::Tracker> g_iMeta;
-}
-DEFINE_VXA_COLLECTABLE(Vsa::XPrompt::Tracker);
-
-
 /***************************************
  ***************************************
  *****                             *****
@@ -344,9 +246,7 @@ Vsa::VPrompt::QueryOutput::QueryOutput (VPrompt* pPrompt, VString const& rPath, 
     );
     m_iCamOp.detachFromCamStack();
 
-//    aggregate (pPrompt->queryRoleGofer ());
-
-    aggregate (Vxa::Export (new XPrompt::Tracker ()));
+    aggregate (pPrompt->queryRoleGofer ());
 
     retain (); {
 	if (IEvaluator* const pEvaluator = pPrompt->evaluator ())
