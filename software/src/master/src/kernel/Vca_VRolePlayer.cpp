@@ -397,11 +397,6 @@ Vca::VRolePlayer::RoleProvider::Query::~Query () {
  *  query.
  *  
  *==========================================================================================*/
-bool cerrObjectsTrace () {
-    static bool bTracing = getenv ("cerrTraceObjects");
-    return bTracing;
-}
-
 bool Vca::VRolePlayer::RoleProvider::Query::getRoleFrom (VRolePlayer *pRolePlayer) const {
     bool bFoundOrWorking = true;
 
@@ -418,8 +413,7 @@ bool Vca::VRolePlayer::RoleProvider::Query::getRoleFrom (VRolePlayer *pRolePlaye
     else if (!sendNack () && m_pInterfaceSink)  //  ... if we're not sending our nack to someone else and have a client, ...
 	    m_pInterfaceSink->OnData (0);       //  ... let that client know we don't implement the role.
 
-//     if (objectsTrace ()) {
-    if (cerrObjectsTrace ()) {
+    if (objectsTrace ()) {
 	VString iTraceMessage;
 	iTraceMessage.printf (
 	    "supplyInterface: %s Aggregator: %p, Sink: %p, Result: %p, %s%s",
@@ -430,8 +424,7 @@ bool Vca::VRolePlayer::RoleProvider::Query::getRoleFrom (VRolePlayer *pRolePlaye
             m_bSubquery ? " SQ" : "",
             bFoundOrWorking ? " F/W" : ""
 	);
-        std::cerr << iTraceMessage.content () << std::endl;
-// 	traceInfo (iTraceMessage);
+ 	pRolePlayer->traceInfo (iTraceMessage);
     }
     return bFoundOrWorking;
 }
