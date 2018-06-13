@@ -7651,10 +7651,6 @@ void Vca::OS::Device::getPollData () {
 bool Vca::OS::DeviceManager::postInterrupt_() {
     bool bSignalingCondvar = false;
 
-    defaultLogger().printf (
-        "+++ Vca::OS::DeviceManager::postInterrupt_: Entry: %s\n", DMStateName ()
-    );
-
     pthread_mutex_lock (&m_iMutex);
     switch (m_xState) {
     case State_CondWait:
@@ -7664,11 +7660,7 @@ bool Vca::OS::DeviceManager::postInterrupt_() {
     case State_PollWait:
 	if (m_iPSPair[1] >= 0) {
 	    static char iByte = 0;
-            defaultLogger().printf (
-                "+++ Vca::OS::DeviceManager::postInterrupt_: Write: %s %d\n",
-                DMStateName (),
-                write (m_iPSPair[1], &iByte, sizeof (iByte))
-            );
+            write (m_iPSPair[1], &iByte, sizeof (iByte));
 	}
 	break;
     }
@@ -7676,10 +7668,6 @@ bool Vca::OS::DeviceManager::postInterrupt_() {
     pthread_mutex_unlock (&m_iMutex);
     if (bSignalingCondvar)
 	pthread_cond_signal (&m_iCondvar);
-
-    defaultLogger().printf (
-        "+++ Vca::OS::DeviceManager::postInterrupt_: Exit : %s\n", DMStateName ()
-    );
 
     return true;
 }
@@ -7711,10 +7699,6 @@ bool Vca::OS::DeviceManager::processEvent_(
 	return false;
 
 //  Do the poll if all handles are valid, ...
-    defaultLogger().printf (
-        "+++ Vca::OS::DeviceManager::processEvent_ : Setup: %s %lu%s\n",
-        DMStateName (), sPoll, m_bValidPoll ? " Valid" : ""
-    );
     if (m_bValidPoll) {
 	int cEvents = 0;
 	if (sPoll > 0) {
@@ -7741,10 +7725,6 @@ bool Vca::OS::DeviceManager::processEvent_(
 		pthread_mutex_unlock (&m_iMutex);
 	    }
 	    cEvents = poll (m_iPollVector.elementArray (), sPoll, sTimeout);
-            defaultLogger().printf (
-                "+++ Vca::OS::DeviceManager::processEvent_ : Poll : %s %lu %lu %d\n",
-                DMStateName (), sPoll, sTimeout, cEvents
-            );
             switch (m_xState) {
 	    case State_PollWait:
 		get (m_iDeviceIndex, m_iPSPoll);
@@ -7752,35 +7732,7 @@ bool Vca::OS::DeviceManager::processEvent_(
 		    //  Drain the signal reader...
 		    char iByte[1]; BSReadArea iByteArea (iByte, sizeof(iByte));
 		    VkStatus iStatus; ssize_t sTransfer; bool bNotDone = true;
-                    static int const xTestCase = V::GetEnvironmentInteger ("PollCase", 0);
-                    switch (xTestCase) {
-                    case 3:
-                        bNotDone = m_iPSPoll.doRead (iStatus, sTransfer, iByteArea, xSignalFD);
-                        defaultLogger().printf (
-                            "+++ Vca::OS::DeviceManager::processEvent_ : Drain: %s %u %ld %s\n",
-                            DMStateName (), xTestCase, sTransfer, bNotDone ? "N" : "D"
-                        );
-                        break;
-                    case 2:
-                        bNotDone = m_iPSPoll.doRead (iStatus, sTransfer, iByteArea, xSignalFD) && m_iPSPoll.pollRead (xSignalFD);
-                        defaultLogger().printf (
-                            "+++ Vca::OS::DeviceManager::processEvent_ : Drain: %s %u %ld %s\n",
-                            DMStateName (), xTestCase, sTransfer, bNotDone ? "N" : "D"
-                        );
-                        break;
-                    case 1:
-                        while (bNotDone && m_iPSPoll.doRead (iStatus, sTransfer, iByteArea, xSignalFD)) {
-                            bNotDone = m_iPSPoll.pollRead (xSignalFD);
-                            defaultLogger().printf (
-                                "+++ Vca::OS::DeviceManager::processEvent_ : Drain: %s %u %ld %s\n",
-                                DMStateName (), xTestCase, sTransfer, bNotDone ? "N" : "D"
-                            );
-                        };
-                        break;
-                    default:
-                        while (m_iPSPoll.doRead (iStatus, sTransfer, iByteArea, xSignalFD) && m_iPSPoll.pollRead (xSignalFD));
-                        break;
-                    }
+                    while (m_iPSPoll.doRead (iStatus, sTransfer, iByteArea, xSignalFD) && m_iPSPoll.pollRead (xSignalFD));
 		}
                 break;
             default:
