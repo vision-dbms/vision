@@ -610,7 +610,6 @@ typedef struct dirent STD_DirectoryEntryType;
 #define SIGXCPU		30
 #define SIGXFSZ		31
 #define SIGURG		32
-#define SIGWINCH	33
 
 #define STD_maskType		int
 
