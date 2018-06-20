@@ -13,6 +13,8 @@
  *****  Declarations  *****
  **************************/
 
+#include "Vxa_VCollection.h"
+
 /*************************
  *****  Definitions  *****
  *************************/
@@ -55,7 +57,7 @@ namespace Vxa {
     //  Construction
     public:
 	VCallData (
-            VString const &rSelectorName, cardinality_t cParameters, cardinality_t cTask, bool bIntensional
+            VCollection *pCluster, VString const &rSelectorName, cardinality_t cParameters, cardinality_t cTask, bool bIntensional
         );
 	VCallData (ThisClass const &rOther);
 
@@ -68,6 +70,9 @@ namespace Vxa {
 	cardinality_t cardinality () const {
 	    return m_pDomain->cardinality ();
 	}
+        VCollection *cluster() const {
+            return m_pCluster;
+        }
 	VFiniteSet *domain () const {
 	    return m_pDomain;
 	}
@@ -89,9 +94,10 @@ namespace Vxa {
 
     //  State
     private:
-        Selector              const m_iSelector;
-	VFiniteSet::Reference const m_pDomain;
-        bool                  const m_bIntensional;
+        VCollection::Reference const m_pCluster;
+        Selector               const m_iSelector;
+	VFiniteSet::Reference  const m_pDomain;
+        bool                   const m_bIntensional;
     };
 }
 

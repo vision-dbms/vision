@@ -39,7 +39,7 @@
  **************************
  **************************/
 
-Vxa::VCLF::VCLF () : m_pISingleton (this) {
+Vxa::VCLF::VCLF (VCollection *pCluster) : m_pCluster (pCluster), m_pISingleton (this) {
 }
 
 /*************************
@@ -63,6 +63,6 @@ void Vxa::VCLF::ExternalImplementation (
     VString iMessage;
     iMessage.printf ("VCLF::ExternalImplementation(%s): Not Supported", rMessageName.content ());
 
-    VCallType1 iCallHandle (rMessageName, cParameters, cTask, pCaller);
+    VCallType1 iCallHandle (m_pCluster, rMessageName, cParameters, cTask, pCaller);
     iCallHandle.returnError (iMessage);
 }

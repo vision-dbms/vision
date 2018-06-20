@@ -57,8 +57,8 @@ namespace {
  **************************/
 
 Vxa::VCallType1::VCallType1 (
-    VString const &rMethodName, cardinality_t cParameters, cardinality_t cTask, IVSNFTaskHolder *pCaller
-) :  BaseClass (rMethodName, cParameters, cTask, false), m_pCaller (pCaller) {
+    VCollection *pCluster, VString const &rMethodName, cardinality_t cParameters, cardinality_t cTask, IVSNFTaskHolder *pCaller
+) :  BaseClass (pCluster, rMethodName, cParameters, cTask, false), m_pCaller (pCaller) {
 }
 
 Vxa::VCallType1::VCallType1 (
@@ -106,7 +106,7 @@ bool Vxa::VCallType1::invokeMethod (VMethod *pMethod, VCollection *pCluster) con
 
 void Vxa::VCallType1::returnImplementationHandle (IVSNFTaskImplementation *pHandle) const {
     VkDynamicArrayOf<ISingleton::Reference> iDeprecatedClientListFactoryArray(1);
-    (new VCLF ())->getRole (iDeprecatedClientListFactoryArray[0]);
+    (new VCLF (cluster()))->getRole (iDeprecatedClientListFactoryArray[0]);
     m_pCaller->ReturnImplementationHandle (pHandle, iDeprecatedClientListFactoryArray);
 }
 

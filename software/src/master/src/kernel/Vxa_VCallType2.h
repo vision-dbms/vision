@@ -199,7 +199,7 @@ namespace Vxa {
     //  Construction
     public:
         VCallType2 (
-            VString const &rMethodName, cardinality_t cParameters, cardinality_t cTask, ICaller *pTask, bool bIntensional
+            VCollection *pCluster, VString const &rMethodName, cardinality_t cParameters, cardinality_t cTask, ICaller *pTask, bool bIntensional
         );
 	VCallType2 (ThisClass const &rOther);
 

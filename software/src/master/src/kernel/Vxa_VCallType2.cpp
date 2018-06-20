@@ -129,8 +129,8 @@ void Vxa::VCallType2::SelfProvider::OnError_(Vca::IError *pInterface, VString co
  **************************/
 
 Vxa::VCallType2::VCallType2 (
-    VString const &rMethodName, cardinality_t cParameters, cardinality_t cTask, ICaller *pCaller, bool bIntensional
-) :  BaseClass (rMethodName, cParameters, cTask, bIntensional), m_pCaller (pCaller) {
+    VCollection *pCluster, VString const &rMethodName, cardinality_t cParameters, cardinality_t cTask, ICaller *pCaller, bool bIntensional
+) :  BaseClass (pCluster, rMethodName, cParameters, cTask, bIntensional), m_pCaller (pCaller) {
 }
 
 Vxa::VCallType2::VCallType2 (
@@ -181,7 +181,7 @@ bool Vxa::VCallType2::start (VTask *pTask) const {
 
 void Vxa::VCallType2::returnImplementationHandle (IVSNFTaskImplementation *pHandle) const {
     VkDynamicArrayOf<ISingleton::Reference> iDeprecatedClientListFactoryArray(1);
-    (new VCLF ())->getRole (iDeprecatedClientListFactoryArray[0]);
+    (new VCLF (cluster()))->getRole (iDeprecatedClientListFactoryArray[0]);
     m_pCaller->ReturnImplementationHandle (pHandle, iDeprecatedClientListFactoryArray);
 }
 

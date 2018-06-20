@@ -48,7 +48,7 @@ namespace Vxa {
     //  Construction
     public:
 	VCallType1 (
-            VString const &rMethodName, cardinality_t cParameters, cardinality_t ocTask, IVSNFTaskHolder *pTask
+            VCollection *pCluster, VString const &rMethodName, cardinality_t cParameters, cardinality_t ocTask, IVSNFTaskHolder *pTask
         );
 	VCallType1 (ThisClass const &rOther);
 

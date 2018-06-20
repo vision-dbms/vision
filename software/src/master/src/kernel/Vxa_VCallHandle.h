@@ -27,7 +27,7 @@ namespace Vxa {
     //  Construction
     protected:
 	VCallHandle (
-            VString const &rMethodName, cardinality_t cParameters, cardinality_t cTask, bool bIntensional
+            VCollection *pCluster, VString const &rMethodName, cardinality_t cParameters, cardinality_t cTask, bool bIntensional
         );
 	VCallHandle (ThisClass const &rOther);
 
