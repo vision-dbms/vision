@@ -64,7 +64,7 @@ namespace Vxa {
 
     //  Method Execution
     public:
-	bool invokeMethod (VCallHandle const &rCallHandle, VCollection *pCluster) const;
+	bool invokeMethod (VCallHandle const &rCallHandle) const;
 
     //  State
     private:

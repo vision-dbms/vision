@@ -18,7 +18,6 @@
  *************************/
 
 namespace Vxa {
-    class VCollection;
     class VMethod;
 
     class Vxa_API VCallHandle : public VCallData {
@@ -66,7 +65,7 @@ namespace Vxa {
 	    std::type_info const &rOriginatorType, char const *pWhere
 	) const;
     public:
-	virtual bool invokeMethod (VMethod *pMethod, VCollection *pCluster) const = 0;
+	virtual bool invokeMethod (VMethod *pMethod) const = 0;
 
 	virtual bool returnError (VString const &rMessage) const = 0;
 	virtual bool returnSNF () const = 0;

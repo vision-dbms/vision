@@ -163,8 +163,8 @@ IVUnknown *Vxa::VCallType2::caller () const {
  ************************
  ************************/
 
-bool Vxa::VCallType2::invokeMethod (VMethod *pMethod, VCollection *pCluster) const {
-    return pMethod->invoke (*this, pCluster);
+bool Vxa::VCallType2::invokeMethod (VMethod *pMethod) const {
+    return pMethod->invoke (*this);
 }
 
 bool Vxa::VCallType2::start (VTask *pTask) const {

@@ -44,8 +44,8 @@ namespace Vxa {
 	//  Construction
 	protected:
 	    Implementation (
-		VCallData const &rCallData, VCollection *pCluster
-	    ) : BaseClass (rCallData), m_pCluster (static_cast<cluster_t*>(pCluster)) {
+		VCallData const &rCallData
+	    ) : BaseClass (rCallData), m_pCluster (static_cast<cluster_t*>(rCallData.cluster ())) {
 	    }
 
 	//  Destruction
@@ -108,10 +108,10 @@ namespace Vxa {
 	class Implementation : public base_t::Implementation {
 	    DECLARE_CONCRETE_RTTLITE (Implementation, typename base_t::Implementation);
 	public:
-	    Implementation (
-		VCallData const &rCallData, VCollection *pCluster, method_t *pMethod
-	    ) : BaseClass (rCallData, pCluster), m_pMethod (pMethod) {
-	    }
+            Implementation(
+                VCallData const &rCallData, method_t *pMethod
+            ) : BaseClass (rCallData), m_pMethod (pMethod) {
+            }
 	protected:
 	    ~Implementation () {
 	    }
@@ -194,15 +194,15 @@ namespace Vxa {
 	    return m_pMember;
 	}
     private:
-	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle, VCollection *pCluster) {
-	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCluster, this));
+	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle) {
+	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCluster) OVERRIDE {
-	    return invokeImpl (rCallHandle, pCluster);
+	virtual bool invoke (VCallType1 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCluster) OVERRIDE {
-	    return invokeImpl (rCallHandle, pCluster);
+	virtual bool invoke (VCallType2 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
     private:
 	member_t const m_pMember;
@@ -229,10 +229,10 @@ namespace Vxa {
 	class Implementation : public base_t::Implementation {
 	    DECLARE_CONCRETE_RTTLITE (Implementation, typename base_t::Implementation);
 	public:
-	    Implementation (VCallData const &rCallData, VCollection *pCluster, method_t *pMethod)
-		: BaseClass (rCallData, pCluster), m_pMethod (pMethod)
-	    {
-	    }
+            Implementation(
+                VCallData const &rCallData, method_t *pMethod
+            ) : BaseClass (rCallData), m_pMethod (pMethod) {
+            }
 	protected:
 	    ~Implementation () {
 	    }
@@ -313,15 +313,15 @@ namespace Vxa {
 	    return m_pMember;
 	}
     private:
-	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle, VCollection *pCluster) {
-	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCluster, this));
+	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle) {
+	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCluster) OVERRIDE {
-	    return invokeImpl (rCallHandle, pCluster);
+	virtual bool invoke (VCallType1 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCluster) OVERRIDE {
-	    return invokeImpl (rCallHandle, pCluster);
+	virtual bool invoke (VCallType2 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
     private:
 	member_t const m_pMember;
@@ -345,9 +345,9 @@ namespace Vxa {
 	class Implementation : public base_t::Implementation {
 	    DECLARE_CONCRETE_RTTLITE (Implementation, typename base_t::Implementation);
 	public:
-	    Implementation (VCallData const &rCallData, VCollection *pCluster, method_t *pMethod)
-		: BaseClass (rCallData, pCluster), m_pMethod (pMethod)
-	    {
+	    Implementation (
+                VCallData const &rCallData, method_t *pMethod
+            ) : BaseClass (rCallData), m_pMethod (pMethod) {
 	    }
 	protected:
 	    ~Implementation () {
@@ -427,15 +427,15 @@ namespace Vxa {
 	    return m_pMember;
 	}
     private:
-	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle, VCollection *pCluster) {
-	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCluster, this));
+	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle) {
+	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCluster) OVERRIDE {
-	    return invokeImpl (rCallHandle, pCluster);
+	virtual bool invoke (VCallType1 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCluster) OVERRIDE {
-	    return invokeImpl (rCallHandle, pCluster);
+	virtual bool invoke (VCallType2 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
     private:
 	member_t const m_pMember;
@@ -459,9 +459,9 @@ namespace Vxa {
 	class Implementation : public base_t::Implementation {
 	    DECLARE_CONCRETE_RTTLITE (Implementation, typename base_t::Implementation);
 	public:
-	    Implementation (VCallData const &rCallData, VCollection *pCluster, method_t *pMethod)
-		: BaseClass (rCallData, pCluster), m_pMethod (pMethod)
-	    {
+	    Implementation (
+                VCallData const &rCallData, method_t *pMethod
+            ) : BaseClass (rCallData), m_pMethod (pMethod) {
 	    }
 	protected:
 	    ~Implementation () {
@@ -539,15 +539,15 @@ namespace Vxa {
 	    return m_pMember;
 	}
     private:
-	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle, VCollection *pCluster) {
-	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCluster, this));
+	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle) {
+	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCluster) OVERRIDE {
-	    return invokeImpl (rCallHandle, pCluster);
+	virtual bool invoke (VCallType1 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCluster) OVERRIDE {
-	    return invokeImpl (rCallHandle, pCluster);
+	virtual bool invoke (VCallType2 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
     private:
 	member_t const m_pMember;
@@ -570,9 +570,9 @@ namespace Vxa {
 	class Implementation : public base_t::Implementation {
 	    DECLARE_CONCRETE_RTTLITE (Implementation, typename base_t::Implementation);
 	public:
-	    Implementation (VCallData const &rCallData, VCollection *pCluster, method_t *pMethod)
-		: BaseClass (rCallData, pCluster), m_pMethod (pMethod)
-	    {
+	    Implementation (
+                VCallData const &rCallData, method_t *pMethod
+            ) : BaseClass (rCallData), m_pMethod (pMethod) {
 	    }
 	protected:
 	    ~Implementation () {
@@ -647,15 +647,15 @@ namespace Vxa {
 	    return m_pMember;
 	}
     private:
-	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle, VCollection *pCluster) {
-	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCluster, this));
+	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle) {
+	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCluster) OVERRIDE {
-	    return invokeImpl (rCallHandle, pCluster);
+	virtual bool invoke (VCallType1 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCluster) OVERRIDE {
-	    return invokeImpl (rCallHandle, pCluster);
+	virtual bool invoke (VCallType2 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
     private:
 	member_t const m_pMember;
@@ -678,10 +678,10 @@ namespace Vxa {
 	class Implementation : public base_t::Implementation {
 	    DECLARE_CONCRETE_RTTLITE (Implementation, typename base_t::Implementation);
 	public:
-	    Implementation (VCallData const &rCallData, VCollection *pCluster, method_t *pMethod)
-		: BaseClass (rCallData, pCluster), m_pMethod (pMethod)
-	    {
-	    }
+            Implementation(
+                VCallData const &rCallData, method_t *pMethod
+            ) : BaseClass (rCallData), m_pMethod (pMethod) {
+            }
 	protected:
 	    ~Implementation () {
 	    }
@@ -752,15 +752,15 @@ namespace Vxa {
 	    return m_pMember;
 	}
     private:
-	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle, VCollection *pCluster) {
-	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCluster, this));
+	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle) {
+	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCluster) OVERRIDE {
-	    return invokeImpl (rCallHandle, pCluster);
+	virtual bool invoke (VCallType1 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCluster) OVERRIDE {
-	    return invokeImpl (rCallHandle, pCluster);
+	virtual bool invoke (VCallType2 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
     private:
 	member_t const m_pMember;
@@ -783,10 +783,10 @@ namespace Vxa {
 	class Implementation : public base_t::Implementation {
 	    DECLARE_CONCRETE_RTTLITE (Implementation, typename base_t::Implementation);
 	public:
-	    Implementation (VCallData const &rCallData, VCollection *pCluster, method_t *pMethod)
-		: BaseClass (rCallData, pCluster), m_pMethod (pMethod)
-	    {
-	    }
+            Implementation(
+                VCallData const &rCallData, method_t *pMethod
+            ) : BaseClass (rCallData), m_pMethod (pMethod) {
+            }
 	protected:
 	    ~Implementation () {
 	    }
@@ -855,15 +855,15 @@ namespace Vxa {
 	    return m_pMember;
 	}
     private:
-	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle, VCollection *pCluster) {
-	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCluster, this));
+	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle) {
+	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCluster) OVERRIDE {
-	    return invokeImpl (rCallHandle, pCluster);
+	virtual bool invoke (VCallType1 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCluster) OVERRIDE {
-	    return invokeImpl (rCallHandle, pCluster);
+	virtual bool invoke (VCallType2 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
     private:
 	member_t const m_pMember;
@@ -885,10 +885,10 @@ namespace Vxa {
 	class Implementation : public base_t::Implementation {
 	    DECLARE_CONCRETE_RTTLITE (Implementation, typename base_t::Implementation);
 	public:
-	    Implementation (VCallData const &rCallData, VCollection *pCluster, method_t *pMethod)
-		: BaseClass (rCallData, pCluster), m_pMethod (pMethod)
-	    {
-	    }
+            Implementation(
+                VCallData const &rCallData, method_t *pMethod
+            ) : BaseClass (rCallData), m_pMethod (pMethod) {
+            }
 	protected:
 	    ~Implementation () {
 	    }
@@ -955,15 +955,15 @@ namespace Vxa {
 	    return m_pMember;
 	}
     private:
-	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle, VCollection *pCluster) {
-	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCluster, this));
+	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle) {
+	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCluster) OVERRIDE {
-	    return invokeImpl (rCallHandle, pCluster);
+	virtual bool invoke (VCallType1 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCluster) OVERRIDE {
-	    return invokeImpl (rCallHandle, pCluster);
+	virtual bool invoke (VCallType2 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
     private:
 	member_t const m_pMember;
@@ -985,10 +985,10 @@ namespace Vxa {
 	class Implementation : public base_t::Implementation {
 	    DECLARE_CONCRETE_RTTLITE (Implementation, typename base_t::Implementation);
 	public:
-	    Implementation (VCallData const &rCallData, VCollection *pCluster, method_t *pMethod)
-		: BaseClass (rCallData, pCluster), m_pMethod (pMethod)
-	    {
-	    }
+            Implementation(
+                VCallData const &rCallData, method_t *pMethod
+            ) : BaseClass (rCallData), m_pMethod (pMethod) {
+            }
 	protected:
 	    ~Implementation () {
 	    }
@@ -1050,15 +1050,15 @@ namespace Vxa {
 	    return m_pMember;
 	}
     private:
-	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle, VCollection *pCluster) {
-	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCluster, this));
+	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle) {
+	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCluster) OVERRIDE {
-	    return invokeImpl (rCallHandle, pCluster);
+	virtual bool invoke (VCallType1 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCluster) OVERRIDE {
-	    return invokeImpl (rCallHandle, pCluster);
+	virtual bool invoke (VCallType2 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
     private:
 	member_t const m_pMember;
@@ -1079,10 +1079,10 @@ namespace Vxa {
 	class Implementation : public base_t::Implementation {
 	    DECLARE_CONCRETE_RTTLITE (Implementation, typename base_t::Implementation);
 	public:
-	    Implementation (VCallData const &rCallData, VCollection *pCluster, method_t *pMethod)
-		: BaseClass (rCallData, pCluster), m_pMethod (pMethod)
-	    {
-	    }
+            Implementation(
+                VCallData const &rCallData, method_t *pMethod
+            ) : BaseClass (rCallData), m_pMethod (pMethod) {
+            }
 	protected:
 	    ~Implementation () {
 	    }
@@ -1142,15 +1142,15 @@ namespace Vxa {
 	    return m_pMember;
 	}
     private:
-	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle, VCollection *pCluster) {
-	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCluster, this));
+	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle) {
+	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCluster) OVERRIDE {
-	    return invokeImpl (rCallHandle, pCluster);
+	virtual bool invoke (VCallType1 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCluster) OVERRIDE {
-	    return invokeImpl (rCallHandle, pCluster);
+	virtual bool invoke (VCallType2 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
     private:
 	member_t const m_pMember;
@@ -1171,10 +1171,10 @@ namespace Vxa {
 	class Implementation : public base_t::Implementation {
 	    DECLARE_CONCRETE_RTTLITE (Implementation, typename base_t::Implementation);
 	public:
-	    Implementation (VCallData const &rCallData, VCollection *pCluster, method_t *pMethod)
-		: BaseClass (rCallData, pCluster), m_pMethod (pMethod)
-	    {
-	    }
+            Implementation(
+                VCallData const &rCallData, method_t *pMethod
+            ) : BaseClass (rCallData), m_pMethod (pMethod) {
+            }
 	protected:
 	    ~Implementation () {
 	    }
@@ -1232,15 +1232,15 @@ namespace Vxa {
 	    return m_pMember;
 	}
     private:
-	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle, VCollection *pCluster) {
-	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCluster, this));
+	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle) {
+	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCluster) OVERRIDE {
-	    return invokeImpl (rCallHandle, pCluster);
+	virtual bool invoke (VCallType1 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCluster) OVERRIDE {
-	    return invokeImpl (rCallHandle, pCluster);
+	virtual bool invoke (VCallType2 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
     private:
 	member_t const m_pMember;
@@ -1261,10 +1261,10 @@ namespace Vxa {
 	class Implementation : public base_t::Implementation {
 	    DECLARE_CONCRETE_RTTLITE (Implementation, typename base_t::Implementation);
 	public:
-	    Implementation (VCallData const &rCallData, VCollection *pCluster, method_t *pMethod)
-		: BaseClass (rCallData, pCluster), m_pMethod (pMethod)
-	    {
-	    }
+            Implementation(
+                VCallData const &rCallData, method_t *pMethod
+            ) : BaseClass (rCallData), m_pMethod (pMethod) {
+            }
 	protected:
 	    ~Implementation () {
 	    }
@@ -1320,15 +1320,15 @@ namespace Vxa {
 	    return m_pMember;
 	}
     private:
-	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle, VCollection *pCluster) {
-	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCluster, this));
+	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle) {
+	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCluster) OVERRIDE {
-	    return invokeImpl (rCallHandle, pCluster);
+	virtual bool invoke (VCallType1 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCluster) OVERRIDE {
-	    return invokeImpl (rCallHandle, pCluster);
+	virtual bool invoke (VCallType2 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
     private:
 	member_t const m_pMember;
@@ -1350,10 +1350,10 @@ namespace Vxa {
 	class Implementation : public base_t::Implementation {
 	    DECLARE_CONCRETE_RTTLITE (Implementation, typename base_t::Implementation);
 	public:
-	    Implementation (VCallData const &rCallData, VCollection *pCluster, method_t *pMethod)
-		: BaseClass (rCallData, pCluster), m_pMethod (pMethod)
-	    {
-	    }
+            Implementation(
+                VCallData const &rCallData, method_t *pMethod
+            ) : BaseClass (rCallData), m_pMethod (pMethod) {
+            }
 	protected:
 	    ~Implementation () {
 	    }
@@ -1406,15 +1406,15 @@ namespace Vxa {
 	    return m_pMember;
 	}
     private:
-	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle, VCollection *pCluster) {
-	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCluster, this));
+	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle) {
+	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCluster) OVERRIDE {
-	    return invokeImpl (rCallHandle, pCluster);
+	virtual bool invoke (VCallType1 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCluster) OVERRIDE {
-	    return invokeImpl (rCallHandle, pCluster);
+	virtual bool invoke (VCallType2 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
     private:
 	member_t const m_pMember;
@@ -1435,10 +1435,10 @@ namespace Vxa {
 	class Implementation : public base_t::Implementation {
 	    DECLARE_CONCRETE_RTTLITE (Implementation, typename base_t::Implementation);
 	public:
-	    Implementation (VCallData const &rCallData, VCollection *pCluster, method_t *pMethod)
-		: BaseClass (rCallData, pCluster), m_pMethod (pMethod)
-	    {
-	    }
+            Implementation(
+                VCallData const &rCallData, method_t *pMethod
+            ) : BaseClass (rCallData), m_pMethod (pMethod) {
+            }
 	protected:
 	    ~Implementation () {
 	    }
@@ -1489,15 +1489,15 @@ namespace Vxa {
 	    return m_pMember;
 	}
     private:
-	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle, VCollection *pCluster) {
-	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCluster, this));
+	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle) {
+	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCluster) OVERRIDE {
-	    return invokeImpl (rCallHandle, pCluster);
+	virtual bool invoke (VCallType1 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCluster) OVERRIDE {
-	    return invokeImpl (rCallHandle, pCluster);
+	virtual bool invoke (VCallType2 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
     private:
 	member_t const m_pMember;
@@ -1516,10 +1516,10 @@ namespace Vxa {
 	class Implementation : public base_t::Implementation {
 	    DECLARE_CONCRETE_RTTLITE (Implementation, typename base_t::Implementation);
 	public:
-	    Implementation (VCallData const &rCallData, VCollection *pCluster, method_t *pMethod)
-		: BaseClass (rCallData, pCluster), m_pMethod (pMethod)
-	    {
-	    }
+            Implementation(
+                VCallData const &rCallData, method_t *pMethod
+            ) : BaseClass (rCallData), m_pMethod (pMethod) {
+            }
 	protected:
 	    ~Implementation () {
 	    }
@@ -1568,15 +1568,15 @@ namespace Vxa {
 	    return m_pMember;
 	}
     private:
-	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle, VCollection *pCluster) {
-	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCluster, this));
+	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle) {
+	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCluster) OVERRIDE {
-	    return invokeImpl (rCallHandle, pCluster);
+	virtual bool invoke (VCallType1 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCluster) OVERRIDE {
-	    return invokeImpl (rCallHandle, pCluster);
+	virtual bool invoke (VCallType2 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
     private:
 	member_t const m_pMember;
@@ -1595,10 +1595,10 @@ namespace Vxa {
 	class Implementation : public base_t::Implementation {
 	    DECLARE_CONCRETE_RTTLITE (Implementation, typename base_t::Implementation);
 	public:
-	    Implementation (VCallData const &rCallData, VCollection *pCluster, method_t *pMethod)
-		: BaseClass (rCallData, pCluster), m_pMethod (pMethod)
-	    {
-	    }
+            Implementation(
+                VCallData const &rCallData, method_t *pMethod
+            ) : BaseClass (rCallData), m_pMethod (pMethod) {
+            }
 	protected:
 	    ~Implementation () {
 	    }
@@ -1645,15 +1645,15 @@ namespace Vxa {
 	    return m_pMember;
 	}
     private:
-	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle, VCollection *pCluster) {
-	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCluster, this));
+	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle) {
+	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCluster) OVERRIDE {
-	    return invokeImpl (rCallHandle, pCluster);
+	virtual bool invoke (VCallType1 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCluster) OVERRIDE {
-	    return invokeImpl (rCallHandle, pCluster);
+	virtual bool invoke (VCallType2 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
     private:
 	member_t const m_pMember;
@@ -1673,8 +1673,8 @@ namespace Vxa {
 	    DECLARE_CONCRETE_RTTLITE (Implementation, typename base_t::Implementation);
 	public:
 	    Implementation (
-		VCallData const &rCallData, VCollection *pCluster, method_t *pMethod
-	    ) : BaseClass (rCallData, pCluster), m_pMethod (pMethod) {
+		VCallData const &rCallData, method_t *pMethod
+	    ) : BaseClass (rCallData), m_pMethod (pMethod) {
 	    }
 	protected:
 	    ~Implementation () {
@@ -1710,15 +1710,15 @@ namespace Vxa {
 	    return m_pMember;
 	}
     private:
-	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle, VCollection *pCluster) {
-	    typename Implementation::Reference pTask (new Implementation (rCallHandle, pCluster, this));
+	template <class CallHandle> bool invokeImpl (CallHandle rCallHandle) {
+	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCluster) OVERRIDE {
-	    return invokeImpl (rCallHandle, pCluster);
+	virtual bool invoke (VCallType1 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCluster) OVERRIDE {
-	    return invokeImpl (rCallHandle, pCluster);
+	virtual bool invoke (VCallType2 const &rCallHandle) OVERRIDE {
+	    return invokeImpl (rCallHandle);
 	}
     private:
 	member_t const m_pMember;

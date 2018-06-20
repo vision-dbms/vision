@@ -119,9 +119,9 @@ bool Vxa::VClass::getMethod (VMethod::Reference &rpMethod, VCallHandle const &rC
  *******************************
  *******************************/
 
-bool Vxa::VClass::invokeMethod (VCallHandle const &rCallHandle, VCollection *pCluster) const {
+bool Vxa::VClass::invokeMethod (VCallHandle const &rCallHandle) const {
     VMethod::Reference pMethod;
     return getMethod (pMethod, rCallHandle)
-	?  rCallHandle.invokeMethod (pMethod, pCluster)
+	?  rCallHandle.invokeMethod (pMethod)
 	:  rCallHandle.returnSNF ();
 }

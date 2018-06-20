@@ -74,7 +74,7 @@ namespace Vxa {
     //  Method Invocation
     protected: //  Override of VCollection::invokeMethod_ ...
 	virtual bool invokeMethod_(VCallHandle const &rCallHandle) OVERRIDE {
-	    return m_pClass->invokeMethod (rCallHandle, this);
+	    return m_pClass->invokeMethod (rCallHandle);
 	}
 
     //  Transmission
