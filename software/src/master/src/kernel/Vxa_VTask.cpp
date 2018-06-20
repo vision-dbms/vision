@@ -166,6 +166,10 @@ void Vxa::VTask::onErrorEvent (VError *pError) {
     onActivityError (0, iMessage);
 }
 
+bool Vxa::VTask::launch () {
+    return m_iCallData.launchTask (this);
+}
+
 bool Vxa::VTask::launchInThreadPool () {
     static V::VThreadedProcessor_<LaunchRequest>::Reference g_pRequestProcessor;
     if (g_pRequestProcessor.isNil ()) {

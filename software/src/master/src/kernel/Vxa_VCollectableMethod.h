@@ -59,10 +59,6 @@ namespace Vxa {
 		return rImporter.getSelfProviderFor (this, m_pCluster.referent (), m_pSelfProvider)
 		    && BaseClass::startUsing (rImporter);
 	    }
-        private:
-            virtual bool launch () OVERRIDE {
-                return m_pCluster->launchTask (this);
-            }
 
 	//  Use
 	protected:

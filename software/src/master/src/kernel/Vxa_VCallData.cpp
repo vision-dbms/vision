@@ -63,6 +63,16 @@ Vxa::VCallData::VCallData (
 
 Vxa::VCallData::~VCallData () {
 }
+
+/************************
+ ************************
+ *****  Visitation  *****
+ ************************
+ ************************/
+
+bool Vxa::VCallData::launchTask (VTask *pTask) const {
+    return m_pCluster->launchTask (pTask);
+}
 
 
 /**************************************

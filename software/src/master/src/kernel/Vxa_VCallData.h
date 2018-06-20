@@ -92,6 +92,10 @@ namespace Vxa {
             return m_iSelector.component (rComponent, xComponent);
         }
 
+    //  Task Management
+    public:
+        bool launchTask (VTask *pTask) const;
+
     //  State
     private:
         VCollection::Reference const m_pCluster;

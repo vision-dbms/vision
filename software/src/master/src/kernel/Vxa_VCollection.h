@@ -19,6 +19,7 @@
 
 namespace Vxa {
     class VCallHandle;
+    class VTask;
 
     class Vxa_API VCollection : public VSet {
 	DECLARE_ABSTRACT_RTTLITE (VCollection, VSet);
@@ -71,6 +72,8 @@ namespace Vxa {
 	 *-----------------------------
 	 */
 	virtual bool invokeMethod_(VCallHandle const &rCallHandle) = 0;
+
+        virtual bool launchTask (VTask *pTask) = 0;
     };
 }
 

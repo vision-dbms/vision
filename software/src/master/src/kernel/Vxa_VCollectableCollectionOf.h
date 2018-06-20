@@ -69,7 +69,7 @@ namespace Vxa {
 
     //  Task Launcher
     public:
-        bool launchTask (VTask *pTask) {
+        virtual bool launchTask (VTask *pTask) OVERRIDE {
             return class_t::launchTask (pTask);
         }
 

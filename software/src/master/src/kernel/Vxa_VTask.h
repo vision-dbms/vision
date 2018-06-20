@@ -55,6 +55,9 @@ namespace Vxa {
 	cardinality_t cardinality () const {
 	    return m_iCallData.cardinality ();
 	}
+        VCollection *cluster () const {
+            return m_iCallData.cluster ();
+        }
         cardinality_t parameterCount () const {
             return m_iCallData.parameterCount ();
         }
@@ -106,7 +109,7 @@ namespace Vxa {
 	    return --m_cSuspensions > 0 || launch ();
 	}
     private:
-	virtual bool launch () = 0;
+	bool launch ();
     public:
         bool launchInThreadPool ();
 
