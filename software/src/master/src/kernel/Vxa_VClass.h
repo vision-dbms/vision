@@ -60,11 +60,11 @@ namespace Vxa {
 
     //  Method Access
     public:
-        virtual bool getMethod (VMethod::Reference &rpMethod, VCallHandle const &rCallHandle) const;
+        virtual bool getMethod (VMethod::Reference &rpMethod, VCallData const &rCallData) const;
 
     //  Method Execution
     public:
-	bool invokeMethod (VCallHandle const &rCallHandle) const;
+	bool invokeCall (VCallHandle const &rCallHandle) const;
 
     //  State
     private:

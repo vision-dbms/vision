@@ -194,10 +194,10 @@ namespace Vxa {
 	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle) OVERRIDE {
+	virtual bool invokeCall (VCallType1 const &rCallHandle) OVERRIDE {
 	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle) OVERRIDE {
+	virtual bool invokeCall (VCallType2 const &rCallHandle) OVERRIDE {
 	    return invokeImpl (rCallHandle);
 	}
     private:
@@ -313,10 +313,10 @@ namespace Vxa {
 	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle) OVERRIDE {
+	virtual bool invokeCall (VCallType1 const &rCallHandle) OVERRIDE {
 	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle) OVERRIDE {
+	virtual bool invokeCall (VCallType2 const &rCallHandle) OVERRIDE {
 	    return invokeImpl (rCallHandle);
 	}
     private:
@@ -427,10 +427,10 @@ namespace Vxa {
 	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle) OVERRIDE {
+	virtual bool invokeCall (VCallType1 const &rCallHandle) OVERRIDE {
 	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle) OVERRIDE {
+	virtual bool invokeCall (VCallType2 const &rCallHandle) OVERRIDE {
 	    return invokeImpl (rCallHandle);
 	}
     private:
@@ -539,10 +539,10 @@ namespace Vxa {
 	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle) OVERRIDE {
+	virtual bool invokeCall (VCallType1 const &rCallHandle) OVERRIDE {
 	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle) OVERRIDE {
+	virtual bool invokeCall (VCallType2 const &rCallHandle) OVERRIDE {
 	    return invokeImpl (rCallHandle);
 	}
     private:
@@ -647,10 +647,10 @@ namespace Vxa {
 	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle) OVERRIDE {
+	virtual bool invokeCall (VCallType1 const &rCallHandle) OVERRIDE {
 	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle) OVERRIDE {
+	virtual bool invokeCall (VCallType2 const &rCallHandle) OVERRIDE {
 	    return invokeImpl (rCallHandle);
 	}
     private:
@@ -752,10 +752,10 @@ namespace Vxa {
 	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle) OVERRIDE {
+	virtual bool invokeCall (VCallType1 const &rCallHandle) OVERRIDE {
 	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle) OVERRIDE {
+	virtual bool invokeCall (VCallType2 const &rCallHandle) OVERRIDE {
 	    return invokeImpl (rCallHandle);
 	}
     private:
@@ -855,10 +855,10 @@ namespace Vxa {
 	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle) OVERRIDE {
+	virtual bool invokeCall (VCallType1 const &rCallHandle) OVERRIDE {
 	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle) OVERRIDE {
+	virtual bool invokeCall (VCallType2 const &rCallHandle) OVERRIDE {
 	    return invokeImpl (rCallHandle);
 	}
     private:
@@ -955,10 +955,10 @@ namespace Vxa {
 	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle) OVERRIDE {
+	virtual bool invokeCall (VCallType1 const &rCallHandle) OVERRIDE {
 	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle) OVERRIDE {
+	virtual bool invokeCall (VCallType2 const &rCallHandle) OVERRIDE {
 	    return invokeImpl (rCallHandle);
 	}
     private:
@@ -1050,10 +1050,10 @@ namespace Vxa {
 	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle) OVERRIDE {
+	virtual bool invokeCall (VCallType1 const &rCallHandle) OVERRIDE {
 	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle) OVERRIDE {
+	virtual bool invokeCall (VCallType2 const &rCallHandle) OVERRIDE {
 	    return invokeImpl (rCallHandle);
 	}
     private:
@@ -1142,10 +1142,10 @@ namespace Vxa {
 	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle) OVERRIDE {
+	virtual bool invokeCall (VCallType1 const &rCallHandle) OVERRIDE {
 	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle) OVERRIDE {
+	virtual bool invokeCall (VCallType2 const &rCallHandle) OVERRIDE {
 	    return invokeImpl (rCallHandle);
 	}
     private:
@@ -1232,10 +1232,10 @@ namespace Vxa {
 	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle) OVERRIDE {
+	virtual bool invokeCall (VCallType1 const &rCallHandle) OVERRIDE {
 	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle) OVERRIDE {
+	virtual bool invokeCall (VCallType2 const &rCallHandle) OVERRIDE {
 	    return invokeImpl (rCallHandle);
 	}
     private:
@@ -1320,10 +1320,10 @@ namespace Vxa {
 	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle) OVERRIDE {
+	virtual bool invokeCall (VCallType1 const &rCallHandle) OVERRIDE {
 	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle) OVERRIDE {
+	virtual bool invokeCall (VCallType2 const &rCallHandle) OVERRIDE {
 	    return invokeImpl (rCallHandle);
 	}
     private:
@@ -1406,10 +1406,10 @@ namespace Vxa {
 	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle) OVERRIDE {
+	virtual bool invokeCall (VCallType1 const &rCallHandle) OVERRIDE {
 	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle) OVERRIDE {
+	virtual bool invokeCall (VCallType2 const &rCallHandle) OVERRIDE {
 	    return invokeImpl (rCallHandle);
 	}
     private:
@@ -1489,10 +1489,10 @@ namespace Vxa {
 	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle) OVERRIDE {
+	virtual bool invokeCall (VCallType1 const &rCallHandle) OVERRIDE {
 	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle) OVERRIDE {
+	virtual bool invokeCall (VCallType2 const &rCallHandle) OVERRIDE {
 	    return invokeImpl (rCallHandle);
 	}
     private:
@@ -1568,10 +1568,10 @@ namespace Vxa {
 	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle) OVERRIDE {
+	virtual bool invokeCall (VCallType1 const &rCallHandle) OVERRIDE {
 	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle) OVERRIDE {
+	virtual bool invokeCall (VCallType2 const &rCallHandle) OVERRIDE {
 	    return invokeImpl (rCallHandle);
 	}
     private:
@@ -1645,10 +1645,10 @@ namespace Vxa {
 	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle) OVERRIDE {
+	virtual bool invokeCall (VCallType1 const &rCallHandle) OVERRIDE {
 	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle) OVERRIDE {
+	virtual bool invokeCall (VCallType2 const &rCallHandle) OVERRIDE {
 	    return invokeImpl (rCallHandle);
 	}
     private:
@@ -1710,10 +1710,10 @@ namespace Vxa {
 	    typename Implementation::Reference pTask (new Implementation (rCallHandle, this));
 	    return rCallHandle.start (pTask);
 	}
-	virtual bool invoke (VCallType1 const &rCallHandle) OVERRIDE {
+	virtual bool invokeCall (VCallType1 const &rCallHandle) OVERRIDE {
 	    return invokeImpl (rCallHandle);
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle) OVERRIDE {
+	virtual bool invokeCall (VCallType2 const &rCallHandle) OVERRIDE {
 	    return invokeImpl (rCallHandle);
 	}
     private:

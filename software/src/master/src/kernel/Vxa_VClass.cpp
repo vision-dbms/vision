@@ -103,9 +103,9 @@ bool Vxa::VClass::defineDefault (VMethod *pMethod) {
  ***************************
  ***************************/
 
-bool Vxa::VClass::getMethod (VMethod::Reference &rpMethod, VCallHandle const &rCallHandle) const {
+bool Vxa::VClass::getMethod (VMethod::Reference &rpMethod, VCallData const &rCallData) const {
     unsigned int xElement = UINT_MAX;
-    if (m_iDictionary.Locate (rCallHandle.selectorName (), xElement)) {
+    if (m_iDictionary.Locate (rCallData.selectorName (), xElement)) {
 	rpMethod.setTo (m_iDictionary.value(xElement));
 	return true;
     }
@@ -119,7 +119,7 @@ bool Vxa::VClass::getMethod (VMethod::Reference &rpMethod, VCallHandle const &rC
  *******************************
  *******************************/
 
-bool Vxa::VClass::invokeMethod (VCallHandle const &rCallHandle) const {
+bool Vxa::VClass::invokeCall (VCallHandle const &rCallHandle) const {
     VMethod::Reference pMethod;
     return getMethod (pMethod, rCallHandle)
 	?  rCallHandle.invokeMethod (pMethod)

@@ -66,7 +66,7 @@ void Vxa::VCollection::Bind (
 ) {
     if (pCaller) {
 	VCallType2 iCallHandle (this, rMethodName, cParameters, cTask, pCaller, true);
-	invokeMethod_(iCallHandle);
+        invokeCall (iCallHandle);
     }
 }
 
@@ -75,7 +75,7 @@ void Vxa::VCollection::Invoke (
 ) {
     if (pCaller) {
 	VCallType2 iCallHandle (this, rMethodName, cParameters, cTask, pCaller, false);
-	invokeMethod_(iCallHandle);
+        invokeCall (iCallHandle);
     }
 }
 
@@ -89,6 +89,6 @@ void Vxa::VCollection::ExternalImplementation (
 ) {
     if (pCaller) {
 	VCallType1 iCallHandle (this, rMethodName, cParameters, cTask, pCaller);
-	invokeMethod_(iCallHandle);
+        invokeCall (iCallHandle);
     }
 }

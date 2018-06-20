@@ -24,6 +24,8 @@ namespace Vxa {
     class Vxa_API VCollection : public VSet {
 	DECLARE_ABSTRACT_RTTLITE (VCollection, VSet);
 
+        friend class VCallData;
+
     //  Construction
     protected:
 	VCollection ();
@@ -71,7 +73,7 @@ namespace Vxa {
 	 *  return false.  (This convention may change in the future).
 	 *-----------------------------
 	 */
-	virtual bool invokeMethod_(VCallHandle const &rCallHandle) = 0;
+	virtual bool invokeCall (VCallHandle const &rCallHandle) = 0;
 
         virtual bool launchTask (VTask *pTask) = 0;
     };

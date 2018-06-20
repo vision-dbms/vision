@@ -164,7 +164,7 @@ IVUnknown *Vxa::VCallType2::caller () const {
  ************************/
 
 bool Vxa::VCallType2::invokeMethod (VMethod *pMethod) const {
-    return pMethod->invoke (*this);
+    return pMethod->invokeCall (*this);
 }
 
 bool Vxa::VCallType2::start (VTask *pTask) const {

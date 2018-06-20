@@ -94,7 +94,7 @@ IVUnknown *Vxa::VCallType1::caller () const {
 bool Vxa::VCallType1::invokeMethod (VMethod *pMethod) const {
     reportInvocation ();
 
-    return pMethod->invoke (*this);
+    return pMethod->invokeCall (*this);
 }
 
 

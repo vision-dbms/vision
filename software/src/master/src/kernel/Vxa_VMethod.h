@@ -45,8 +45,8 @@ namespace Vxa {
 
     //  Invocation
     private:
-	virtual bool invoke (VCallType1 const &rCallHandle) = 0;
-	virtual bool invoke (VCallType2 const &rCallHandle) = 0;
+	virtual bool invokeCall (VCallType1 const &rCallHandle) = 0;
+	virtual bool invokeCall (VCallType2 const &rCallHandle) = 0;
     };
     typedef VMethod::Reference method_return_t;
 } //  namespace Vxa
