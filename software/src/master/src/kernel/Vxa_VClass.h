@@ -24,6 +24,8 @@
  *************************/
 
 namespace Vxa {
+    class VCallData;
+
     class Vxa_API VClass : virtual public VExportableType {
 	DECLARE_FAMILY_MEMBERS (VClass, VExportableType);
 
