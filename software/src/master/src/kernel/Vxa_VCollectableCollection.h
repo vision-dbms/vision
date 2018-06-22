@@ -33,10 +33,6 @@ namespace Vxa {
 
         friend class VCollectableIdentity;
 
-    //  Aliases
-    public:
-	typedef cardinality_t collection_index_t;
-
     //  Construction
     protected:
 	VCollectableCollection (VClass *pClass);
@@ -50,14 +46,13 @@ namespace Vxa {
 	virtual cardinality_t cardinality_() const OVERRIDE {
 	    return cardinality ();
 	}
-        virtual VCollectableObject* object_(collection_index_t xElement) const = 0;
+        virtual VClass *type_ () const OVERRIDE {
+            return type ();
+        }
     public:
 	cardinality_t cardinality () const {
 	    return m_sCollection;
 	}
-        VCollectableObject *object (collection_index_t xElement) const {
-            return object_(xElement);
-        }
 	VClass *type () const {
 	    return m_pClass;
 	}

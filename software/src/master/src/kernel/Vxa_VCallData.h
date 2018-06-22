@@ -73,6 +73,12 @@ namespace Vxa {
         VCollection *cluster() const {
             return m_pCluster;
         }
+        VCollectableObject *clusterObject (object_reference_t xObject) const {
+            return m_pCluster->object (xObject);
+        }
+        VClass *clusterType () const {
+            return m_pCluster->type ();
+        }
 	VFiniteSet *domain () const {
 	    return m_pDomain;
 	}

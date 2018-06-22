@@ -58,6 +58,12 @@ namespace Vxa {
         VCollection *cluster () const {
             return m_iCallData.cluster ();
         }
+        VCollectableObject *clusterObject (object_reference_t xObject) const {
+            return m_iCallData.clusterObject (xObject);
+        }
+        VClass *clusterType () const {
+            return m_iCallData.clusterType ();
+        }
         cardinality_t parameterCount () const {
             return m_iCallData.parameterCount ();
         }

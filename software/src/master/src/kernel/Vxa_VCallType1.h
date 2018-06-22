@@ -70,16 +70,20 @@ namespace Vxa {
 	bool onParameterRequest (VTask *pTask, unsigned int xParameter) const;
 	bool onParameterReceipt (VTask *pTask, unsigned int xParameter) const;
     public:
-	template <typename cluster_t, typename provider_t> bool getSelfProviderFor (
-	    VTask *pTask, cluster_t *pCluster, provider_t &rpProvider
+	template <typename provider_t> bool getSelfProviderFor (
+            provider_t &rpProvider, VTask *pTask
 	) const {
+            typedef typename provider_t::ReferencedClass::value_t val_t;
 	    rpProvider.setTo (
-		new VScalarInstance<typename cluster_t::val_t, typename cluster_t::var_t>(
-		    pCluster->type (), pCluster->element (0)
+		new VScalarInstance<val_t>(
+		    TaskObjectClass (pTask), dynamic_cast<val_t>(TaskObject (pTask, 0))
 		)
 	    );
 	    return true;
 	}
+    private:
+        static VClass *TaskObjectClass (VTask *pTask);
+        static VCollectableObject *TaskObject (VTask *pTask, object_reference_t xObject);
 
     //  Result Return
     public:

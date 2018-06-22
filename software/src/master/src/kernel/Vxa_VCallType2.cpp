@@ -47,7 +47,7 @@
  **************************/
 
 Vxa::VCallType2::SelfProvider::SelfProvider (
-    ICaller *pCaller, VTask *pTask
+    VTask *pTask, ICaller *pCaller
 ) : m_pTask (pTask), m_pISelfReferenceSink (this), m_pISelfReferenceArraySink (this) {
     pTask->suspend ();
     retain (); {
@@ -77,6 +77,18 @@ Vxa::VCallType2::SelfProvider::~SelfProvider () {
  *****  Access  *****
  ********************
  ********************/
+
+Vxa::VCollection *Vxa::VCallType2::SelfProvider::cluster () const {
+    return m_pTask->cluster ();
+}
+
+Vxa::VClass *Vxa::VCallType2::SelfProvider::clusterType () const {
+    return m_pTask->clusterType ();
+}
+
+Vxa::VCollectableObject *Vxa::VCallType2::SelfProvider::clusterObject (object_reference_t xObject) const {
+    return m_pTask->clusterObject (xObject);
+}
 
 Vxa::VTaskCursor *Vxa::VCallType2::SelfProvider::taskCursor () const {
     return m_pTask->cursor ();

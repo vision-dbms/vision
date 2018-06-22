@@ -45,7 +45,7 @@ namespace Vxa {
 	protected:
 	    Implementation (
 		VCallData const &rCallData
-	    ) : BaseClass (rCallData), m_pCluster (static_cast<cluster_t*>(rCallData.cluster ())) {
+	    ) : BaseClass (rCallData) {
 	    }
 
 	//  Destruction
@@ -56,7 +56,7 @@ namespace Vxa {
 	//  Startup
 	protected:
 	    template <class importer_t> bool startUsing (importer_t &rImporter) {
-		return rImporter.getSelfProviderFor (this, m_pCluster.referent (), m_pSelfProvider)
+		return rImporter.getSelfProviderFor (m_pSelfProvider, this)
 		    && BaseClass::startUsing (rImporter);
 	    }
 
@@ -68,7 +68,6 @@ namespace Vxa {
 
 	//  State
 	private:
-	    typename cluster_t::Reference const m_pCluster;
 	    typename self_provider_t::Reference m_pSelfProvider;
 	};
 

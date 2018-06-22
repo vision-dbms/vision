@@ -123,6 +123,15 @@ bool Vxa::VCallType1::onParameterReceipt (VTask *pTask, unsigned int xParameter)
 
     return pTask->resume ();
 }
+
+Vxa::VClass *Vxa::VCallType1::TaskObjectClass (VTask *pTask) {
+    return pTask->clusterType ();
+}
+
+Vxa::VCollectableObject *Vxa::VCallType1::TaskObject (VTask *pTask, object_reference_t xObject) {
+    return pTask->clusterObject (xObject);
+}
+
 
 
 /*******************************
