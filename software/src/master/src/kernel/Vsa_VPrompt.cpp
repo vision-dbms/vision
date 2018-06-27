@@ -147,8 +147,6 @@ namespace Vsa {
 	}
 
     //  VEvaluatorClient Callbacks
-    private:
-        void Gotcha  (VTypeInfo *pInterfaceType, VString const &rWhere) const;
     public:
 	virtual void OnAccept (IEvaluatorClient *pRole, IEvaluation *pEvaluation, Vca::U32 xQueuePosition) OVERRIDE {
 	    OnAccept_(pEvaluation, xQueuePosition);
