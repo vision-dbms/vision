@@ -66,7 +66,7 @@ namespace VcaSamples {
 
     //  Startup
     private:
-	bool start_();
+	virtual bool start_() OVERRIDE;
 
 	void onServer (IEchoString *pEchoServer);
 

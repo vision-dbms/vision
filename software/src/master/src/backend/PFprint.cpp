@@ -2328,7 +2328,7 @@ PrivateFnDef void PrintAAsBlockClosureIndices (
     VPrimitiveTask *pTask, rtBLOCK_Handle *pBlock, int lbracket, int rbracket
 ) {
     VCPDReference pBlockCPD (0, pBlock->GetCPD ());
-    VString iSource;
+    V::VString iSource;
     RSLANG_Decompile (iSource, pBlockCPD);
     pTask->printf (
 	iSource.length () + 2, "%c%s%c", lbracket, (char const*)iSource, rbracket
@@ -2403,7 +2403,7 @@ PrivateFnDef void SPrintAAsBlockClosureIndices (
     VPrimitiveTask *pTask, rtBLOCK_Handle *pBlock, char const *lbracket, char const *rbracket
 ) {
     VCPDReference pBlockCPD (0, pBlock->GetCPD ());
-    VString iSource;
+    V::VString iSource;
     RSLANG_Decompile (iSource, pBlockCPD);
     pTask->loadDucWithListOrStringStore (
 	rtLSTORE_NewStringStoreWithDelm (

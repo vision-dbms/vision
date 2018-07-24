@@ -507,13 +507,13 @@ IOBJ_DefineUnaryMethod (ClearQRegister) {
 IOBJ_DefineUnaryMethod (DumpContainerDM) {
     M_CPD*			cpd = RTYPE_QRegisterCPD (self);
     M_CPreamble*		preamble;
-    pointer_t			p, pl;
+    V::pointer_t		p, pl;
     unsigned int i;
 
     for (
 	i = 1,
 	preamble = M_CPD_PreamblePtr (cpd),
-	p = (pointer_t)preamble,
+	p = (V::pointer_t)preamble,
 	pl = p
 	   + sizeof (M_CPreamble)
 	   + sizeof (M_CEndMarker) 

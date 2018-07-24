@@ -13,7 +13,7 @@
  *****  Components  *****
  ************************/
 
-#include "Vxa_VTaskCursor.h"
+#include "Vxa_VTask.h"
 
 /**************************
  *****  Declarations  *****
@@ -50,30 +50,50 @@ namespace Vxa {
     //****************************************************************
     //  Construction
     protected:
-	VResultBuilder (VTaskCursor *pCursor) : m_pCursor (pCursor) {
-	}
+	VResultBuilder (VTask *pTask);
 
     //  Destruction
     protected:
-	~VResultBuilder () {
-	}
+	~VResultBuilder ();
 
     //  Access
     public:
+        VTask *task () const {
+            return m_pTask;
+        }
 	VTaskCursor *cursor () const {
-	    return m_pCursor;
+	    return m_pTask->cursor ();
 	}
 	cardinality_t cursorPosition () const {
-	    return m_pCursor->position ();
+	    return m_pTask->cursorPosition ();
 	}
 	TailHints *tailHints () const {
 	    return m_pTailHints ? m_pTailHints : new TailHints (this);
 	}
 
+        bool invokedIntensionally () const {
+            return m_pTask->invokedIntensionally ();
+        }
+        cardinality_t parameterCount () const {
+            return m_pTask->parameterCount ();
+        }
+        VString const &selectorName () const {
+            return m_pTask->selectorName ();
+        }
+        VString const &selectorComponent (cardinality_t xComponent) const {
+            return m_pTask->selectorComponent (xComponent);
+        }
+        bool selectorComponent (VString &rComponent, cardinality_t xComponent) const {
+            return m_pTask->selectorComponent (rComponent, xComponent);
+        }
+        cardinality_t taskCardinality () const {
+            return m_pTask->cardinality ();
+        }
+
     //  Query
     public:
 	bool isAlive () const {
-	    return m_pCursor->isAlive ();
+	    return m_pTask->isAlive ();
 	}
 
     //  Maintenance
@@ -111,6 +131,13 @@ namespace Vxa {
 	    setResultTo (rT);
 	    return *this;
 	}
+	template <typename T, size_t N> ThisClass& operator= (T (&raT)[N]) {
+	    setResultTo (raT);
+	    return *this;
+	}
+        template <typename T, size_t N> void setResultTo (T (&raT)[N]) {
+            VExportable<T*>::ReturnResult (this, raT);
+        }
 	template <typename T> void setResultTo (T const &rT) {
 	    VExportable<T>::ReturnResult (this, rT);
 	}
@@ -128,7 +155,7 @@ namespace Vxa {
 
     //  State
     private:
-	VTaskCursor::Reference const m_pCursor;
+        VTask::Reference const m_pTask;
 	TailHints::Reference mutable m_pTailHints;
     };
 }

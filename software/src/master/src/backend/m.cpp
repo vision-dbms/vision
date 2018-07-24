@@ -2835,7 +2835,7 @@ void M_CPD::reclaim () {
 
 /*****  Finally, free the detached CPD...  *****/
     CPDAllocator.deallocate (
-	this, sizeof (M_CPD) + sizeof (pointer_t) * (pRTD->cpdPointerCount () - 1)
+	this, sizeof (M_CPD) + sizeof (V::pointer_t) * (pRTD->cpdPointerCount () - 1)
     );
 }
 

@@ -49,6 +49,7 @@ class VPassthru : public Vca::VClientApplication {
 //  Aliases
 public:
     typedef V::uuid_t		uuid_t;
+    typedef V::VString		VString;
 
     typedef Vca::IError		IError;
     typedef Vca::IPassiveCall	IPassiveCall;
@@ -97,7 +98,7 @@ public:
 	//  IPassiveCall Callbacks
 	public:
 	    void GetUUID (IPassiveCall *pRole, IVReceiver<uuid_t const&> *pReceiver);
-	    void OnError_(IError *pInterface, VString const &rMessage);
+	    virtual void OnError_(IError *pInterface, VString const &rMessage) OVERRIDE;
 
 	//  State
 	private:
@@ -117,7 +118,7 @@ public:
 
     //  Access
     protected:
-	void getDescription_(VString &rDescription) const;
+	virtual void getDescription_(VString &rDescription) const OVERRIDE;
 
     //  Management
     protected:
@@ -138,7 +139,7 @@ private:
 
 //  Callbacks
 private:
-    bool start_();
+    virtual bool start_() OVERRIDE;
 
 private:
     void onCallbackError (VString const &rMessage);

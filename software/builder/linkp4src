@@ -99,7 +99,7 @@ foreach dir ($dirs)
             set platformdir = "M_${os}"
 	endif
         if ( $?platformdir ) then
-            foreach i ($platformdir/*)
+            foreach i ($platformdir/make.*)
 		set resultFile = `basename $i`
 		#  If this is a 'generator' file, run it to create a make.defs file, ...
 		if ( "_$i:e" == "_gen" ) then
@@ -117,9 +117,9 @@ foreach dir ($dirs)
             echo "CINCS += -I." >> make.defs.includes
             echo "make.defs.includes" >> visionBuilder.scrubFiles
         endif
-        
+
+        # Add source directories to include directory search path...
 	foreach sourcedir ($sources)
-            # Add in our include directory to the makefile.
             echo "CINCS += -I$sourcedir" >> make.defs.includes
             echo "VPATH += $sourcedir" >> make.defs.includes
             
@@ -140,18 +140,8 @@ foreach dir ($dirs)
             endif
 	end
 
-        # Manually link in our platform-specific code.
-        # TODO: Do this once inside the kernel/ directory, or change the code to use #ifdefs.
-        foreach file ( Vp{,Socket,FileMapping}_${vp}.h )
-            set destFile = `echo $file | sed -e "s/_${vp}//"`
-	    ln -s -f ../kernel/$file $destFile
-            echo "$destFile" >> visionBuilder.scrubFiles
-        end
-
-	if (-f VpOpenDialog_Not.h) then
-            ln -s -f VpOpenDialog_Not.h VpOpenDialog.h
-            echo "VpOpenDialog.h" >> visionBuilder.scrubFiles
-        endif
+        # Add platform directory to include directory search path...
+        echo "CINCS += -I../$platformdir" >> make.defs.includes
 
 	####  ... create the library list, ...
 	if (-e make.llist) then

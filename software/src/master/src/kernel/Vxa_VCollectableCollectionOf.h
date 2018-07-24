@@ -20,24 +20,23 @@
  *************************/
 
 namespace Vxa {
-    template <typename Val_T, typename Var_T>
-    class VCollectableCollectionOf : public VCollectableCollection {
-	typedef VCollectableCollectionOf<Val_T,Var_T> this_t;
-	DECLARE_CONCRETE_RTTLITE (this_t, VCollectableCollection);
+    class VTask;
+
+    template <typename Var_T> class VCollectableCollectionOf : public VCollectableCollection {
+	DECLARE_CONCRETE_RTTLITE (VCollectableCollectionOf<Var_T>, VCollectableCollection);
 
     //  Aliases
     public:
-	typedef ThisClass collection_t;
-	typedef Reference collection_reference_t;
 	typedef VkDynamicArrayOf<Var_T> container_t;
 
-	typedef Val_T val_t;
-	typedef Var_T var_t;
+        typedef typename Var_T::ReferencedClass class_t;
+	typedef class_t *val_t;
+	typedef Var_T    var_t;
 
     //  Construction
     public:
 	VCollectableCollectionOf (
-	    VClass *pClass, VCardinalityHints *pTailHints, Val_T pInstance
+	    VClass *pClass, VCardinalityHints *pTailHints, val_t pInstance
 	) : BaseClass (pClass), m_iContainer (pTailHints ? pTailHints->span () : 1) {
 //################################################################
 //  Calling attach causes a nasty stack dump which is very
@@ -56,17 +55,27 @@ namespace Vxa {
 	}
 
     //  Access
+    protected:
+        virtual VCollectableObject* object_(collection_index_t xElement) const OVERRIDE {
+            return element (xElement);
+        }
     public:
-	Val_T operator[] (unsigned int xElement) const {
+	val_t operator[] (collection_index_t xElement) const {
 	    return element (xElement);
 	}
-	Val_T element (unsigned int xElement) const {
-	    return xElement < cardinality() ? m_iContainer[xElement] : static_cast<Val_T>(0);
+	val_t element (collection_index_t xElement) const {
+	    return xElement < cardinality() ? m_iContainer[xElement] : static_cast<val_t>(0);
 	}
+
+    //  Task Launcher
+    public:
+        virtual bool launchTask (VTask *pTask) OVERRIDE {
+            return class_t::launchTask (pTask);
+        }
 
     //  Update
     public:
-	void append (Val_T pInstance) {
+	void append (val_t pInstance) {
 	    collection_index_t const xObject = cardinality ();
 	    if (xObject >= m_iContainer.cardinality ())
 		m_iContainer.Append (xObject - m_iContainer.cardinality () + 1);

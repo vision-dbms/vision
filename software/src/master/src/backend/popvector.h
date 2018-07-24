@@ -188,17 +188,17 @@ protected:
 
 //  Callbacks
 public:
-    void CheckConsistency ();
+    virtual void CheckConsistency () OVERRIDE;
 
 protected:
-    bool PersistReferences ();
+    virtual bool PersistReferences () OVERRIDE;
 
 //  Display and Inspection
 public:
-    virtual /*override*/ unsigned int getPOPCount () const {
+    virtual unsigned int getPOPCount () const OVERRIDE {
 	return elementCount ();
     }
-    virtual /*override*/ bool getPOP (M_POP *pResult, unsigned int xPOP) const;
+    virtual bool getPOP (M_POP *pResult, unsigned int xPOP) const OVERRIDE;
 };
 
 typedef VStoreHandle_<rtPOPVECTOR_Handle> rtPOPVECTOR_StoreHandle;

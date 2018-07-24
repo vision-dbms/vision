@@ -33,6 +33,8 @@ class VSNFTaskHolder : public Vca::VActivity {
 
 //  Aliases
 public:
+    typedef V::VString VString;
+
     typedef Reference TaskHolderReference;
     typedef Vca::VTrigger<ThisClass> Trigger;
 
@@ -111,7 +113,7 @@ public:
 
 	//  Execution
 	public:
-	    void start () const {
+	    virtual void start () const OVERRIDE {
 		startIt (m_pT.referent ());
 	    }
 
@@ -310,7 +312,7 @@ public:
 
 //  Access/Query
 protected:
-    void getDescription_(VString& rResult) const;
+    virtual void getDescription_(VString& rResult) const OVERRIDE;
 public:
     unsigned int taskCardinality () const {
 	return m_pSNFTask ? m_pSNFTask->cardinality () : 0;

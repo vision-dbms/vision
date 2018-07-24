@@ -102,7 +102,7 @@ public:
 	return m_cSegmentsExpected == m_cSegmentsReceived;
     }
 
-    bool datumAlterable_ () const;
+    virtual bool datumAlterable_ () const OVERRIDE;
 
 //  Access
 public:
@@ -116,7 +116,7 @@ public:
 
 //  Parameter Access
 public:
-    bool getParameter (unsigned int xParameter, VDescriptor& rDatum);
+    virtual bool getParameter (unsigned int xParameter, VDescriptor& rDatum) OVERRIDE;
     bool getSelfReference (object_reference_t &rSelfReference);
     bool getSelfReference (object_reference_array_t &rSelfReference);
 
@@ -149,14 +149,14 @@ public:
     }
 
 protected:
-    void run ();
+    virtual void run () OVERRIDE;
 
 //  Display and Description
 public:
-    void reportInfo	(unsigned int xLevel, VCall const* pContext = 0) const;
-    void reportTrace	() const;
+    virtual void reportInfo	(unsigned int xLevel, VCall const* pContext = 0) const OVERRIDE;
+    virtual void reportTrace	() const OVERRIDE;
 
-    char const* description () const;
+    virtual char const* description () const OVERRIDE;
 
 //  External Invocation
 public:

@@ -1134,7 +1134,7 @@ PrivateFnDef void ReconstructLink (
 /***** Shift the container tail to deal with this size difference *****/
     linkCPD->EnableModifications ();
     linkCPD->containerHandle ()->ShiftContainerTail (
-	(pointer_t)(rtLINK_CPD_RRDArray (linkCPD) + rtLINK_CPD_RRDCount (linkCPD) + 1),
+	(V::pointer_t)(rtLINK_CPD_RRDArray (linkCPD) + rtLINK_CPD_RRDCount (linkCPD) + 1),
 	0, sizeof (rtLINK_RRDType) * (
 	    (ptrdiff_t)rtLINK_LC_RRDCount (linkC) - rtLINK_CPD_RRDCount(linkCPD)
 	), true

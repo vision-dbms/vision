@@ -386,7 +386,7 @@ int main (int Unused(argc),char *Unused(argv)[]) {
     DisplaySize (size_t);
     DisplaySize (ssize_t);
 
-    DisplaySize (pointer_t);
+    DisplaySize (V::pointer_t);
     DisplaySize (pointer_diff_t);
     DisplaySize (pointer_size_t);
 

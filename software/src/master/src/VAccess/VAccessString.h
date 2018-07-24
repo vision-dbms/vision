@@ -3,13 +3,13 @@
 
 #include "V_VString.h"
 
-class VAccessString : public VString {
-	DECLARE_FAMILY_MEMBERS (VAccessString, VString);
+class VAccessString : public V::VString {
+	DECLARE_FAMILY_MEMBERS (VAccessString, V::VString);
 
 public:
 	// Constructors
-	VAccessString() : VString() {};
-	VAccessString(VString const &rString) : VString(rString) {};
+	VAccessString() : V::VString  () {};
+	VAccessString(VString const &rString) : V::VString(rString) {};
 
 	// Operator overloads.
 	ThisClass &operator= (VString const &rOther) {

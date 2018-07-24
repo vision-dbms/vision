@@ -40,6 +40,8 @@ class Batchvision : public Vca::VServerApplication, public VComputationScheduler
 
 //  Aliases
 public:
+    typedef V::VString VString;
+
     typedef Vca::VBSConsumer			VBSConsumer;
     typedef Vca::VBSProducer			VBSProducer;
 
@@ -146,17 +148,17 @@ public:
 private:
     void doConnect (IStdPipeSource *pStdPipeSource);
 
-    bool start_();
-    bool stop_(bool bHardstop);
+    virtual bool start_() OVERRIDE;
+    virtual bool stop_(bool bHardstop) OVERRIDE;
 
 //  Process Management
 public:
     static void RestartProcess ();
-    void restartProcess ();
+    virtual void restartProcess () OVERRIDE;
 
-    int getExitValue ();
+    virtual int getExitValue () OVERRIDE;
 
-    void setExitValue (int value);
+    virtual void setExitValue (int value) OVERRIDE;
 
 //  Logging Control
 private:

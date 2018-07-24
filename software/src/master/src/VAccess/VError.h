@@ -26,7 +26,7 @@ public:
 
 //  State
 protected:
-    VString m_iDescription;
+    V::VString m_iDescription;
 };
 
 

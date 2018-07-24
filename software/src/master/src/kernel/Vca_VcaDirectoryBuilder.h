@@ -208,7 +208,7 @@ namespace Vca {
                      * @param[in] rpReversed an existing Fallback list to which this reversal will be prepended.
                      * @param[out] rpReversed the reference by which the reversed list of Fallback instances will be returned.
                      */
-		    void getReversedList (Reference &rpReversed) const;
+		    static void GetReversedList (Reference &rpReversed, ThisClass *pList);
 
 		//  Use
 		public:
@@ -533,7 +533,7 @@ namespace Vca {
 	public:
 	    bool hasPattern (VString const& rPattern) const;
 	protected:
-	    bool locate (Entry::Reference &rpEntry, VString const &rName);
+	    virtual bool locate (Entry::Reference &rpEntry, VString const &rName) OVERRIDE;
 
 	//  Update
 	public:
@@ -560,7 +560,7 @@ namespace Vca {
 	 * Virtual member called to create a new directory on behalf of create(VDirectory::Reference& rpDirectory).
 	 * Creates a VcaDirectoryBuilder::Directory implementing regular expression entry patterns.
 	 */
-	VDirectory* newDirectory_() const;
+	virtual VDirectory* newDirectory_() const OVERRIDE;
     public:
         /**
          * Populates a directory by delegating to Order::buildDirectory().
@@ -569,7 +569,7 @@ namespace Vca {
          * @see Vca::VDirectoryBuider::build()
          * @see Order::buildDirectory()
          */
-	virtual /*override*/ void build (VDirectory *pDirectory);
+	virtual void build (VDirectory *pDirectory) OVERRIDE;
     };
 }
 

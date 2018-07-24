@@ -16,8 +16,6 @@
  *****  Declarations  *****
  **************************/
 
-class VString;
-
 #if defined(_WIN32)
 typedef DWORD VkStatusCode;
 #else
@@ -45,6 +43,10 @@ enum VkStatusType {
 };
 
 class V_API VkStatus {
+//  Aliases
+ public:
+    typedef V::VString VString;
+
 //  Description
 public:
     static char const *DescriptionFor (VkStatusCode xCode);

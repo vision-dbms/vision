@@ -277,7 +277,7 @@ DEFINE_ABSTRACT_RTT (VCall);
 template class Vsi_ciref_c<VCall, VDescriptor>;
 template class Vsi_f0_c<VCall, unsigned int>;
 template class Vsi_f0_c<VCall, char const*>;
-template class Vsi_getr_c<VCall, VString>;
+template class Vsi_getr_c<VCall, V::VString>;
 template class Vsi_p0_c<VCall>;
 
 void VCall::MetaMaker () {

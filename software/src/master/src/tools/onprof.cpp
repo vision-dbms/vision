@@ -705,7 +705,7 @@ static void LoadNetworkHeaderData (int fd) {
     );
 
 /*****  Look for segment mapping hints...  *****/
-    VString iText (NetworkOSDPathName);
+    V::VString iText (NetworkOSDPathName);
     iText.append ("/.hints");
 
     VSimpleFile iFile;
@@ -1047,7 +1047,7 @@ static void ProcessBlock (M_CPreamble *container) {
 
     MarkPOP (rtBLOCK_localEnvironmentPOP (cp));
     if (rtBLOCK_PLVector (cp)) {
-	rtBLOCK_PLVectorType *plv = (rtBLOCK_PLVectorType *)((pointer_t)(cp) + rtBLOCK_PLVector (cp));
+	rtBLOCK_PLVectorType *plv = (rtBLOCK_PLVectorType *)((V::pointer_t)(cp) + rtBLOCK_PLVector (cp));
 	MarkPOPArray(rtBLOCK_PLVector_POP (plv), rtBLOCK_PLVector_Count (plv));
     }
 }

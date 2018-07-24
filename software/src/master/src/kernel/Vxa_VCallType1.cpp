@@ -25,7 +25,7 @@
 #include "Vxa_IVSNFTaskHolder2.h"
 
 #include "Vxa_VCLF.h"
-#include "Vxa_VCallAgent.h"
+#include "Vxa_VCallType1Importer.h"
 #include "Vxa_VMethod.h"
 
 
@@ -57,8 +57,8 @@ namespace {
  **************************/
 
 Vxa::VCallType1::VCallType1 (
-    cardinality_t cParameters, cardinality_t cTask, IVSNFTaskHolder *pCaller
-) :  BaseClass (cParameters, cTask), m_pCaller (pCaller) {
+    VCollection *pCluster, VString const &rMethodName, cardinality_t cParameters, cardinality_t cTask, IVSNFTaskHolder *pCaller
+) :  BaseClass (pCluster, rMethodName, cParameters, cTask, false), m_pCaller (pCaller) {
 }
 
 Vxa::VCallType1::VCallType1 (
@@ -91,10 +91,10 @@ IVUnknown *Vxa::VCallType1::caller () const {
  ************************
  ************************/
 
-bool Vxa::VCallType1::invoke (VMethod *pMethod, VCollection *pCollection) const {
+bool Vxa::VCallType1::invokeMethod (VMethod *pMethod) const {
     reportInvocation ();
 
-    return pMethod->invoke (*this, pCollection);
+    return pMethod->invokeCall (*this);
 }
 
 
@@ -106,7 +106,7 @@ bool Vxa::VCallType1::invoke (VMethod *pMethod, VCollection *pCollection) const 
 
 void Vxa::VCallType1::returnImplementationHandle (IVSNFTaskImplementation *pHandle) const {
     VkDynamicArrayOf<ISingleton::Reference> iDeprecatedClientListFactoryArray(1);
-    (new VCLF ())->getRole (iDeprecatedClientListFactoryArray[0]);
+    (new VCLF (cluster()))->getRole (iDeprecatedClientListFactoryArray[0]);
     m_pCaller->ReturnImplementationHandle (pHandle, iDeprecatedClientListFactoryArray);
 }
 
@@ -123,6 +123,15 @@ bool Vxa::VCallType1::onParameterReceipt (VTask *pTask, unsigned int xParameter)
 
     return pTask->resume ();
 }
+
+Vxa::VClass *Vxa::VCallType1::TaskObjectClass (VTask *pTask) {
+    return pTask->clusterType ();
+}
+
+Vxa::VCollectableObject *Vxa::VCallType1::TaskObject (VTask *pTask, object_reference_t xObject) {
+    return pTask->clusterObject (xObject);
+}
+
 
 
 /*******************************
@@ -339,6 +348,10 @@ Vxa::VCallAgent *Vxa::VCallType1Importer::agent (VTask *pTask) const {
     return m_pAgent;
 }
 
+bool Vxa::VCallType1Importer::getParameter (VTask *pTask, VImportableType *pType, any_scalar_return_t &rpResult) {
+    return agent (pTask)->getAnyParameter (pType, rpResult);
+}
+
 bool Vxa::VCallType1Importer::getParameter (VTask *pTask, VImportableType *pType, bool_scalar_return_t &rpResult) {
     return agent (pTask)->getBooleanParameter (pType, rpResult);
 }
@@ -369,6 +382,14 @@ bool Vxa::VCallType1Importer::getParameter (VTask *pTask, VImportableType *pType
 
 bool Vxa::VCallType1Importer::getParameter (VTask *pTask, VImportableType *pType, VString_scalar_return_t &rpResult) {
     return agent (pTask)->getStringParameter (pType, rpResult);
+}
+
+Vxa::cardinality_t Vxa::VCallType1Importer::getParameterIndex (VTask *pTask) const {
+    return agent (pTask)->parameterIndex ();
+}
+
+Vxa::cardinality_t Vxa::VCallType1Importer::getParameterCountRemaining (VTask *pTask) const {
+    return agent (pTask)->parameterCountRemaining ();
 }
 
 

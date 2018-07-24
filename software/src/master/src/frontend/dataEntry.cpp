@@ -1516,7 +1516,7 @@ PrivateFnDef void validateFundamental()
 	return;
     }
 
-    VString s (eatLeadingAndTrailingSpaces(FORM_fieldValue(IFREQ)));
+    V::VString s (eatLeadingAndTrailingSpaces(FORM_fieldValue(IFREQ)));
     c = *s;
     if( c == 'A' )
 	FrequencyLetter = ' ';

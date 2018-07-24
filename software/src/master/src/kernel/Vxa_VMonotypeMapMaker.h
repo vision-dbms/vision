@@ -17,7 +17,7 @@
  *************************/
 
 namespace Vxa {
-    class VCollectableCollection;
+    class VCollection;
 
     class Vxa_API VMonotypeMapMaker : public VMapMaker::Implementation {
 	DECLARE_ABSTRACT_RTTLITE (VMonotypeMapMaker,VMapMaker::Implementation);
@@ -57,11 +57,11 @@ namespace Vxa {
 	bool transmitUsing (VCallType2Exporter *pExporter, object_reference_array_t const &rInjection);
 	bool transmitUsing (VCallType2Exporter *pExporter);
     public:
-	bool transmitValues (VCallType2Exporter *pExporter, VCollectableCollection *pCollection, object_reference_array_t const &rInjection) {
-	    return transmitValues_(pExporter, pCollection, rInjection);
+	bool transmitValues (VCallType2Exporter *pExporter, VCollection *pCluster, object_reference_array_t const &rInjection) {
+	    return transmitValues_(pExporter, pCluster, rInjection);
 	}
-	bool transmitValues (VCallType2Exporter *pExporter, VCollectableCollection *pCollection) {
-	    return transmitValues_(pExporter, pCollection);
+	bool transmitValues (VCallType2Exporter *pExporter, VCollection *pCluster) {
+	    return transmitValues_(pExporter, pCluster);
 	}
 
 	bool transmitValues (VCallType2Exporter *pExporter, object_reference_array_t const &rInjection) {
@@ -71,8 +71,8 @@ namespace Vxa {
 	    return transmitValues_(pExporter);
 	}
     private:
-	virtual bool transmitValues_(VCallType2Exporter *pExporter, VCollectableCollection *pCollection, object_reference_array_t const &rInjection) = 0;
-	virtual bool transmitValues_(VCallType2Exporter *pExporter, VCollectableCollection *pCollection) = 0;
+	virtual bool transmitValues_(VCallType2Exporter *pExporter, VCollection *pCluster, object_reference_array_t const &rInjection) = 0;
+	virtual bool transmitValues_(VCallType2Exporter *pExporter, VCollection *pCluster) = 0;
 
 	virtual bool transmitValues_(VCallType2Exporter *pExporter, object_reference_array_t const &rInjection) = 0;
 	virtual bool transmitValues_(VCallType2Exporter *pExporter) = 0;

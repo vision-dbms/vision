@@ -380,8 +380,8 @@ public:
     unsigned int  const	m_sOutgoingChunk;
     State		m_xOutgoingState;
     VkMessage		m_iOutgoingMessage;
-    pointer_t		m_pOutgoingCursor;
-    pointer_t		m_pOutgoingLimit;
+    V::pointer_t	m_pOutgoingCursor;
+    V::pointer_t	m_pOutgoingLimit;
     QueueEntry	       *m_pOutgoingQueueHead;
     QueueEntry	       *m_pOutgoingQueueTail;
 };
@@ -457,8 +457,8 @@ public:
     unsigned int	   const m_sIncomingChunk;
     State			 m_xIncomingState;
     VkMessage			 m_iIncomingMessage;
-    pointer_t			 m_pIncomingCursor;
-    pointer_t			 m_pIncomingLimit;
+    V::pointer_t		 m_pIncomingCursor;
+    V::pointer_t		 m_pIncomingLimit;
     VkMessageTargetTable  *const m_pIncomingTargets;
 };
 

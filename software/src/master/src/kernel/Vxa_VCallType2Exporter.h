@@ -28,8 +28,7 @@ namespace Vxa {
 
     //  Aliases
     public:
-	typedef cardinality_t object_index_t;
-	typedef VMonotypeMapMakerFor<object_index_t> map_maker_t;
+	typedef VMonotypeMapMakerFor<cluster_index_t> map_maker_t;
 
 	typedef VkMapOf<VClass::Pointer,VClass*,VClass const*,VCollectableCollection::Reference> cluster_map_t;
 
@@ -46,11 +45,10 @@ namespace Vxa {
 	virtual bool returnResult (VExportableDatum const &rDatum);
     public:
 	template <typename object_reference_t> bool returnObject (VClass *pClass, object_reference_t const &rpObject) {
-	    VCollectableCollection::Reference pObjectCluster; object_index_t xObject;
-	    getObjectIdentity (rpObject, pClass, pObjectCluster, xObject);
+	    getObjectIdentity (rpObject, pClass);
 
 	    map_maker_t::Reference pMapMaker;
-	    updateMap (pMapMaker, pObjectCluster, xObject);
+	    updateMap (pMapMaker, rpObject->objectCluster (), rpObject->objectIndex ());
 
 	    return true;
 	}
@@ -64,24 +62,19 @@ namespace Vxa {
     //  Object Management
     private:
 	template <typename object_reference_t> void getObjectIdentity (
-	    object_reference_t const &rpObject, VClass *pClass, VCollectableCollection::Reference &rpObjectCluster, object_index_t &rxObject
+	    object_reference_t const &rpObject, VClass *pClass
 	) {
-	    typedef VCollectableCollectionOf<typename object_reference_t::ReferencedClass*,object_reference_t> cluster_t;
-	    if (rpObject->getIdentity (rpObjectCluster, rxObject))
-		return;
+        //  If the object no identity ...
+	    if (rpObject->hasNoIdentity ()) {
+            // ... access the cluster map slot associated with the object's type:
+                unsigned int xCluster;
+                m_iClusterMap.Insert (pClass,xCluster);
 
-	    unsigned int xObjectCluster;
-	    if (m_iClusterMap.Insert (pClass,xObjectCluster))
-	    //  Cluster doesn't exist, create it...
-		m_iClusterMap[xObjectCluster].setTo (new cluster_t (pClass, tailHints (), rpObject.referent ()));
-	    else {
-	    //  Cluster exists, add object to it...
-		typename cluster_t::Reference const pCluster (
-		    static_cast<cluster_t*>(m_iClusterMap[xObjectCluster].referent ())
-		);
-		pCluster->append (rpObject);
-	    }
-	    rpObject->getIdentity (rpObjectCluster, rxObject);
+            //  ... and assign an identity based on the cluster associated with that slot:
+                VCollectableTraits<object_reference_t>::CreateIdentity (
+                    m_iClusterMap[xCluster], rpObject, pClass, tailHints ()
+                );
+            }
 	}
 
     //  Map Making

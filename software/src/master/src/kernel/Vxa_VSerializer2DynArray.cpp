@@ -270,12 +270,12 @@ private:
 
 //  Serialization Callbacks
 private:
-    void getData ();
-    void putData ();
-    void localizeData ();
+    virtual void getData () OVERRIDE;
+    virtual void putData () OVERRIDE;
+    virtual void localizeData () OVERRIDE;
 
-    void wrapupIncomingSerialization ();
-    void wrapupOutgoingSerialization ();
+    virtual void wrapupIncomingSerialization () OVERRIDE;
+    virtual void wrapupOutgoingSerialization () OVERRIDE;
 
 //  State
 private:

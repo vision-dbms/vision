@@ -37,27 +37,16 @@ namespace Vxa {
 
     //  Construction
     protected:
-	VMethod (VString const &rName);
-	VMethod (char const *pName);
+	VMethod ();
 
     //  Destruction
     protected:
 	~VMethod ();
 
-    //  Access
-    public:
-	VString const &name () const {
-	    return m_iName;
-	}
-
     //  Invocation
     private:
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) = 0;
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) = 0;
-
-    //  State
-    private:
-	VString const m_iName;
+	virtual bool invokeCall (VCallType1 const &rCallHandle) = 0;
+	virtual bool invokeCall (VCallType2 const &rCallHandle) = 0;
     };
     typedef VMethod::Reference method_return_t;
 } //  namespace Vxa

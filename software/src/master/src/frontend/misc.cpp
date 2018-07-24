@@ -30,8 +30,8 @@ PublicFnDef void strToLower(char *str) {
 	str++;
 }
 
-PublicFnDef VString eatLeadingAndTrailingSpaces(char const *str) {
-    VString result;
+PublicFnDef V::VString eatLeadingAndTrailingSpaces(char const *str) {
+    V::VString result;
 
 //  If there's no input, or the input is empty, return an empty string, ...
     size_t len = str ? strlen (str) : static_cast<size_t>(0);

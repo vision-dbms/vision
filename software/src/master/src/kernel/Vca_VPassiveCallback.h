@@ -68,9 +68,9 @@ namespace Vca {
 
     //  Triggers and Callbacks
     private:
-	void onNeed ();
-	void onData ();
-	void onError (IError *pIError, VString const &rMessage);
+	virtual void onNeed () OVERRIDE;
+	virtual void onData () OVERRIDE;
+	virtual void onError (IError *pIError, VString const &rMessage) OVERRIDE;
 
     //  State
     private:

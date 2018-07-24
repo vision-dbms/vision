@@ -98,13 +98,13 @@ void rtPOPVECTOR_Handle::CheckConsistency () {
  *****/
 PublicFnDef void POPVECTOR_InitStdCPD (M_CPD* cpd) {
     M_POP	*pop = POPVECTOR_CPD_Array (cpd);
-    pointer_t	*p = (pointer_t *)M_CPD_Pointers (cpd),
+    V::pointer_t*p = (V::pointer_t *)M_CPD_Pointers (cpd),
 		*pl = p + cpd->PointerCount () - POPVECTOR_CPD_XtraPtrCount;
 
     while (p < pl)
-	*p++ = (pointer_t)pop++;
+	*p++ = (V::pointer_t)pop++;
 
-    *p = (pointer_t)POPVECTOR_CPD_Array (cpd);
+    *p = (V::pointer_t)POPVECTOR_CPD_Array (cpd);
 }
 
 
@@ -235,7 +235,7 @@ PublicFnDef void POPVECTOR_MarkContainers (M_ASD::GCVisitBase* pGCV, M_ASD* pSpa
  *
  *****/
 PrivateFnDef void InitializePOPs (
-    VContainerHandle *pContainerHandle, pointer_t pTail, ptrdiff_t Unused(sShift), va_list ap
+    VContainerHandle *pContainerHandle, V::pointer_t pTail, ptrdiff_t Unused(sShift), va_list ap
 ) {
     V::VArgList iArgList (ap);
 

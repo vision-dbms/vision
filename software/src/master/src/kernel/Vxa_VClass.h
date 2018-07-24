@@ -24,6 +24,8 @@
  *************************/
 
 namespace Vxa {
+    class VCallData;
+
     class Vxa_API VClass : virtual public VExportableType {
 	DECLARE_FAMILY_MEMBERS (VClass, VExportableType);
 
@@ -55,17 +57,21 @@ namespace Vxa {
 
     //  Method Definition
     public:
-	bool defineMethod (VMethod *pMethod);
+	bool defineMethod (VString const &rName, VMethod *pMethod);
+	bool defineDefault (VMethod *pMethod);
+
+    //  Method Access
+    public:
+        virtual bool getMethod (VMethod::Reference &rpMethod, VCallData const &rCallData) const;
 
     //  Method Execution
     public:
-	bool invokeMethod (
-	    VString const &rName, VCallHandle const &rCallHandle, VCollection *pCollection
-	) const;
+	bool invokeCall (VCallHandle const &rCallHandle) const;
 
     //  State
     private:
 	dictionary_t m_iDictionary;
+	VMethod::Reference m_pDefaultMethod;
 	unsigned __int64 m_cCollectionsCreated;
 	unsigned __int64 m_cCollectionsDeleted;
 	unsigned __int64 m_cInstancesReported;

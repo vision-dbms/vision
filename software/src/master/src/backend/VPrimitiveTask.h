@@ -90,10 +90,10 @@ public:
 
 //  Display
 public:
-    void reportInfo	(unsigned int xLevel, VCall const* pContext = 0) const;
-    void reportTrace	() const;
+    virtual void reportInfo	(unsigned int xLevel, VCall const* pContext = 0) const OVERRIDE;
+    virtual void reportTrace	() const OVERRIDE;
 
-    char const* description () const;
+    virtual char const* description () const OVERRIDE;
 
 //  Exception Generation
 public:
@@ -148,7 +148,7 @@ public:
 
 //  Execution
 protected:
-    void run ();
+    virtual void run () OVERRIDE;
 
 public:
     void setContinuationTo (Continuation pContinuation) {

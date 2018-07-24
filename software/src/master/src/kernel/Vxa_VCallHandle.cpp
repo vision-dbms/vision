@@ -42,8 +42,8 @@
  **************************/
 
 Vxa::VCallHandle::VCallHandle (
-    cardinality_t cParameters, cardinality_t cTask
-) : BaseClass (cParameters, cTask) {
+    VCollection *pCluster, VString const &rMethodName, cardinality_t cParameters, cardinality_t cTask, bool bIntensional
+) : BaseClass (pCluster, rMethodName, cParameters, cTask, bIntensional) {
 }
 
 Vxa::VCallHandle::VCallHandle (ThisClass const &rOther) : BaseClass (rOther) {

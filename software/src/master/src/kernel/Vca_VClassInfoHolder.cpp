@@ -125,14 +125,14 @@ void Vca::VClassInfoHolder::getProperties (property_map_t &rResultSink) const {
     }
 }
 
-VString Vca::VClassInfoHolder::baseNames () const {
+V::VString Vca::VClassInfoHolder::baseNames () const {
     VString iResult;
     for (unsigned int xElement = 0; xElement < m_mBases.cardinality (); xElement++)
 	iResult << m_mBases[xElement]->typeName () << "\n";
     return iResult;
 }
 
-VString Vca::VClassInfoHolder::propertyNames () const {
+V::VString Vca::VClassInfoHolder::propertyNames () const {
     VString iResult;
     for (unsigned int xElement = 0; xElement < m_mProperties.cardinality (); xElement++) {
 	iResult << m_mProperties.key(xElement) << "\n";
@@ -140,7 +140,7 @@ VString Vca::VClassInfoHolder::propertyNames () const {
     return iResult;
 }
 
-VString Vca::VClassInfoHolder::summary () const {
+V::VString Vca::VClassInfoHolder::summary () const {
     VString iResult;
     iResult
 	<< "Class " << typeName () << ":\n\n"

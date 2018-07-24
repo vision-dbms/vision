@@ -324,7 +324,7 @@ PublicFnDef M_CPD *rtUNDEFUV_UVExtract (M_CPD *sourceCPD, M_CPD *refuvCPD) {
  *
  *****/
 PublicFnDef void rtUNDEFUV_RFExtract (
-    pointer_t Unused(resultAddr), M_CPD *sourceCPD, rtREFUV_TypePTR_Reference referenceAddr
+    V::pointer_t Unused(resultAddr), M_CPD *sourceCPD, rtREFUV_TypePTR_Reference referenceAddr
 )
 {
 /*****
@@ -456,7 +456,7 @@ PublicFnDef M_CPD *rtUNDEFUV_UVAssign (
  *
  *****/
 PublicFnDef void rtUNDEFUV_RFAssign (
-    M_CPD *targetCPD, rtREFUV_TypePTR_Reference reference, pointer_t Unused(value)
+    M_CPD *targetCPD, rtREFUV_TypePTR_Reference reference, V::pointer_t Unused(value)
 )
 {
 /*****
@@ -499,7 +499,7 @@ PublicFnDef void rtUNDEFUV_RFAssign (
  *
  *****/
 PublicFnDef M_CPD *rtUNDEFUV_LCAssignScalar (
-    M_CPD *targetCPD, rtLINK_CType *linkConstructor, pointer_t Unused(valuePtr)
+    M_CPD *targetCPD, rtLINK_CType *linkConstructor, V::pointer_t Unused(valuePtr)
 ) {
 /*****  Align 'target' and perform the assignment  *****/
     linkConstructor->AlignForAssign (rtUNDEFUV_Align (targetCPD), UV_CPx_PToken);
@@ -535,7 +535,7 @@ PublicFnDef M_CPD *rtUNDEFUV_LCAssignScalar (
  *
  *****/
 PublicFnDef M_CPD *rtUNDEFUV_UVAssignScalar (
-    M_CPD *targetCPD, M_CPD *refuvCPD, pointer_t Unused(valuePtr)
+    M_CPD *targetCPD, M_CPD *refuvCPD, V::pointer_t Unused(valuePtr)
 )
 {
 /*****

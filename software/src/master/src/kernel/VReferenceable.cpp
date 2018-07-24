@@ -139,7 +139,7 @@ V::VReferenceableBase::~VReferenceableBase () {
  ********************
  ********************/
 
-VString V::VReferenceableBase::rttName () const {
+V::VString V::VReferenceableBase::rttName () const {
     VRTTI const iRTTI (typeid(*this));
     return VString (iRTTI.name ());
 }

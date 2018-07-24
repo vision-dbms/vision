@@ -62,7 +62,7 @@ namespace VcaSamples {
 
     //  Startup
     private:
-	bool start_();
+	virtual bool start_() OVERRIDE;
     };
 }
 

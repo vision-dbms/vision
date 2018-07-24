@@ -17,6 +17,7 @@ class VEvaluatorPump : public Vsa::VEvaluatorPump {
 
 //  Aliases
 public:
+    typedef V::VString VString;
     typedef Vsa::IEvaluatorClient IEvaluatorClient;
     typedef Vsa::VEvaluation VEvaluation;
 
@@ -58,16 +59,16 @@ private:
 
 //  Evaluation
 protected:
-    virtual /*override*/ VEvaluation* createEvaluation (
+    virtual VEvaluation* createEvaluation (
 	IEvaluatorClient *pClient, VString const &rPath, VString const &rExpression
-    );
-    virtual /*override*/ VEvaluation* createEvaluation (
+    ) OVERRIDE;
+    virtual VEvaluation* createEvaluation (
 	IEvaluatorClient* pClient, VString const &rPath, VString const &rQuery, VString const &rEnvironment
-    );
+    ) OVERRIDE;
 
 //  Cancellation
 protected:
-    void cancelCurrent ();
+    virtual void cancelCurrent () OVERRIDE;
 };
 
 #endif

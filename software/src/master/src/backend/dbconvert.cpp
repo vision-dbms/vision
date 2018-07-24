@@ -322,10 +322,10 @@ public:
 //  NDF Access / Update
 protected:
     void Get (PS_Type_FO oDatum, void *pDatum, unsigned int sDatum) const {
-	memcpy (pDatum, (pointer_t)m_iMapping.RegionAddress () + oDatum, sDatum);
+	memcpy (pDatum, (V::pointer_t)m_iMapping.RegionAddress () + oDatum, sDatum);
     }
     void Put (PS_Type_FO oDatum, void const*pDatum, unsigned int sDatum) const {
-	memcpy ((pointer_t)m_iMapping.RegionAddress () + oDatum, pDatum, sDatum);
+	memcpy ((V::pointer_t)m_iMapping.RegionAddress () + oDatum, pDatum, sDatum);
     }
     void Sync ();
 
@@ -735,7 +735,7 @@ PrivateFnDef void MessageType_VDisplayApplicationMessage (
     MessageType xMessageType, char const *pFormat, V::VArgList const &rArguments
 ) {
     V::VTime iNow; 
-    VString iTimestring;
+    V::VString iTimestring;
     iNow.asString (iTimestring);
 
     fflush  (stdout);
@@ -754,7 +754,7 @@ PrivateFnDef void MessageType_VDisplaySystemMessage (
     MessageType xMessageType, char const *pFormat, V::VArgList const &rArguments
 ) {
     V::VTime iNow; 
-    VString iTimestring;
+    V::VString iTimestring;
     iNow.asString (iTimestring);
 
     fflush  (stdout);
@@ -812,7 +812,7 @@ PrivateFnDef void RaiseSystemException (char const *pFormat, ...) {
  *******************************/
 
 PrivateFnDef void StartStreamManager () {
-    VString iMessage;
+    V::VString iMessage;
 
     if (Vca::Start (&iMessage))
 	return;
@@ -959,7 +959,7 @@ PrivateFnDef void Block_Convert (
     if (pThis->preamble.byteCodeVector > 0)
     {
     	unsigned char* pBC = (unsigned char*)(
-	    (pointer_t)pThis + pThis->preamble.byteCodeVector
+	    (V::pointer_t)pThis + pThis->preamble.byteCodeVector
 	);
 	bool notDone = true;
 	do {
@@ -1056,7 +1056,7 @@ PrivateFnDef void Block_Convert (
     if (pThis->preamble.physicalLiteralVector > 0)
     {
 	rtBLOCK_PLVectorType* pVector = (rtBLOCK_PLVectorType*)(
-	    (pointer_t)pThis + pThis->preamble.physicalLiteralVector
+	    (V::pointer_t)pThis + pThis->preamble.physicalLiteralVector
 	);
 	int iPOP;
 
@@ -1069,7 +1069,7 @@ PrivateFnDef void Block_Convert (
     if (pThis->preamble.evaledLEntryVector > 0)
     {
 	rtBLOCK_ELEVectorType* pVector = (rtBLOCK_ELEVectorType*)(
-	    (pointer_t)pThis + pThis->preamble.evaledLEntryVector
+	    (V::pointer_t)pThis + pThis->preamble.evaledLEntryVector
 	);
 	int iEntry;
 
@@ -1449,7 +1449,7 @@ PrivateFnDef void UVector_Convert (
 {
     unsigned int  cElement;
     unsigned int  sElement;
-    pointer_t pElement;
+    V::pointer_t pElement;
     union uvectorFields_t {
 	struct forward_t {
 #if defined(_AIX)
@@ -1499,7 +1499,7 @@ PrivateFnDef void UVector_Convert (
 
     cElement = pThis->elementCount;
     sElement = pThis->granularity;
-    pElement = (pointer_t)(pThis + 1);
+    pElement = (V::pointer_t)(pThis + 1);
     if (isASelectorUVector) while (cElement-- > 0) {
     	rtSELUV_Type_Element* pSelector = (rtSELUV_Type_Element*)pElement;
 
@@ -1630,7 +1630,7 @@ PrivateFnDef M_CPreamble* Container_Convert (
 
     /*****  ... validate the end-marker address, ...  *****/
     M_CEndMarker *pEndMarker = M_CPreamble_EndMarker (pThis);
-    if ((pointer_t)pEndMarker >= (pointer_t)pLimit)
+    if ((V::pointer_t)pEndMarker >= (V::pointer_t)pLimit)
     {
 	MessageType_DisplayApplicationMessage (
 	    MessageType_Error,
@@ -1817,7 +1817,7 @@ PrivateFnDef bool Segment_Convert (
 	gettime (&OperationStartTime);
 
 	pNextContainer = (M_CPreamble*)(pSegment + 1);
-	pNullContainer = (M_CPreamble*)((pointer_t)pSegment + sSegment);
+	pNullContainer = (M_CPreamble*)((V::pointer_t)pSegment + sSegment);
 
 	pSegment->m_dataFormat = Vk_DataFormatChanging;
 
@@ -2332,7 +2332,7 @@ void VSegmentHandle::PrepareIncomingMessage (
 	m_pPathName = strdup (MakeMessage ("%s%s", m_pSavedPathName,"x"));
 
 	if (MapNew (pMessage->Size ()))
-	    pMessage->AttachBody ((pointer_t)m_iMapping.RegionAddress ());
+	    pMessage->AttachBody ((V::pointer_t)m_iMapping.RegionAddress ());
 	else RaiseApplicationException (
 	    "Segment %s: Cannot Create", m_pPathName
 	);
@@ -2436,7 +2436,7 @@ void VSegmentHandle::PrepareOutgoingMessage (
 		m_pPathName, m_iMapping.RegionSize ()
 	    );
 	    pMessage->SetSizeTo (m_iMapping.RegionSize ());
-	    pMessage->AttachBody ((pointer_t)m_iMapping.RegionAddress ());
+	    pMessage->AttachBody ((V::pointer_t)m_iMapping.RegionAddress ());
 	}
 	else {
 	    if (Verbose) MessageType_DisplayApplicationMessage (
@@ -3550,7 +3550,7 @@ void VConversionAgent::PrepareIncomingMessage (
 	break;
     case MessageIndex_SetContent:
 	if (MapNew (pMessage->Size ()))
-	    pMessage->AttachBody ((pointer_t)m_iMapping.RegionAddress ());
+	    pMessage->AttachBody ((V::pointer_t)m_iMapping.RegionAddress ());
 	else RaiseApplicationException (
 	    "NDF %s: Cannot Create", m_pSlavePathName
 	);

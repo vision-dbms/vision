@@ -34,9 +34,9 @@ private:
 
 //  Access
 public:
-    unsigned int cardinality_ () const;
+    virtual unsigned int cardinality_ () const OVERRIDE;
 
-    rtPTOKEN_Handle *ptoken_() const;
+    virtual rtPTOKEN_Handle *ptoken_() const OVERRIDE;
 
     Vxa::ISingleton *getInterface () const {
 	return m_pCollection;
@@ -44,7 +44,7 @@ public:
 
 //  Task Implementation
 public:
-    bool groundImplementationSucceeded (VSNFTask* pTask);
+    virtual bool groundImplementationSucceeded (VSNFTask* pTask) OVERRIDE;
 
 //  State
 protected:

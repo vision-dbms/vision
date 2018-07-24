@@ -11,6 +11,7 @@
  ********************/
 
 #include "Vk.h"
+#include <iostream>
 
 /******************
  *****  Self  *****
@@ -218,19 +219,19 @@ namespace Vca {
 
 	//  Callbacks
 	private:
-	    void onError (IError *pInterface, VString const &rMessage) {
+	    virtual void onError (IError *pInterface, VString const &rMessage) OVERRIDE {
 		m_iQuery.onError (pInterface, rMessage);
 	    }
 
 	//  Delegations
 	private:
-	    void getRoleFrom (RoleProvider *pProvider) const {
+	    virtual void getRoleFrom (RoleProvider *pProvider) const OVERRIDE {
 		m_iQuery.getRoleFrom (pProvider);
 	    }
-	    void getRoleFrom (IRoleProvider *pProvider, ITrigger *pNotFoundSink) const {
+	    virtual void getRoleFrom (IRoleProvider *pProvider, ITrigger *pNotFoundSink) const OVERRIDE {
 		m_iQuery.getRoleFrom (pProvider, pNotFoundSink);
 	    }
-	    void getRoleFrom (IRoleProvider2 *pProvider, IStatusSink *pStatusSink) const {
+	    virtual void getRoleFrom (IRoleProvider2 *pProvider, IStatusSink *pStatusSink) const OVERRIDE {
 		m_iQuery.getRoleFrom (pProvider, pStatusSink);
 	    }
 	    /**
@@ -238,7 +239,7 @@ namespace Vca {
 	     * Possible when this query transaction was initiated by an IRoleProvider2::QueryRole2
 	     * message.
 	     */
-	    void sendAck () const {
+	    virtual void sendAck () const OVERRIDE {
 		m_iQuery.sendAck ();
 	    }
 	    /**
@@ -247,7 +248,7 @@ namespace Vca {
 	     * transaction is delegated to a peer that does not support sending such acknowledgements
 	     * (i.e., does not implement IRoleProvider2).
 	     */
-	    void sendQuack () const {
+	    virtual void sendQuack () const OVERRIDE {
 		m_iQuery.sendQuack ();
 	    }
 
@@ -412,14 +413,19 @@ bool Vca::VRolePlayer::RoleProvider::Query::getRoleFrom (VRolePlayer *pRolePlaye
     else if (!sendNack () && m_pInterfaceSink)  //  ... if we're not sending our nack to someone else and have a client, ...
 	    m_pInterfaceSink->OnData (0);       //  ... let that client know we don't implement the role.
 
-//     if (objectsTrace ()) {
-// 	VString iTraceMessage;
-// 	iTraceMessage.printf (
-// 	    "supplyInterface: %s%s%s%s",
-// 	    pInterfaceType->name ().content (), pAggregator ? " A" : "", bSubquery ? " SQ" : "", bFoundOrWorking ? " F/W" : ""
-// 	);
-// 	traceInfo (iTraceMessage);
-//     }
+    if (objectsTrace ()) {
+	VString iTraceMessage;
+	iTraceMessage.printf (
+	    "supplyInterface: %s Aggregator: %p, Sink: %p, Result: %p, %s%s",
+	    m_pInterfaceType->name ().content (),
+            m_pAggregator.referent (),
+            m_pInterfaceSink.referent (),
+            pInterface.referent (),
+            m_bSubquery ? " SQ" : "",
+            bFoundOrWorking ? " F/W" : ""
+	);
+ 	pRolePlayer->traceInfo (iTraceMessage);
+    }
     return bFoundOrWorking;
 }
 
@@ -707,7 +713,7 @@ namespace Vca {
 
     //  Use
     private:
-	bool accepted (Query const *pQuery) const;
+	virtual bool accepted (Query const *pQuery) const OVERRIDE;
 
     //  State
     private:
@@ -768,7 +774,7 @@ namespace Vca {
 
     //  Use
     private:
-	bool accepted (Query const *pQuery) const;
+	virtual bool accepted (Query const *pQuery) const OVERRIDE;
 
     //  State
     private:
@@ -827,6 +833,8 @@ typedef Vca::ProcessInfo::gid_t gid_t;
 #endif
 
 namespace {
+    typedef V::VString VString;
+
     void MySiteInfo (IVReceiver<VString const&> *pResultSink) {
 	Vca::self ()->info ()->supplyProcessInfo (pResultSink);
     }
@@ -1325,7 +1333,7 @@ bool Vca::VRolePlayer::supplyInterface (
 /*==========================================================================================*
  * 
  *  A small, private helper used to perform a LIFO search (most derived to most abstract
- *  class order) the locally implemented interfaces of this class.
+ *  class order) for locally implemented interfaces of this class.
  *
  *==========================================================================================*/
 

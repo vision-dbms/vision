@@ -22,8 +22,8 @@ Vxa_VMonotypeMapMakerFor_Implementation template class Vxa_API Vxa::VMonotypeMap
 Vxa_VMonotypeMapMakerFor_Implementation template class Vxa_API Vxa::VMonotypeMapMakerFor<float>;
 Vxa_VMonotypeMapMakerFor_Implementation template class Vxa_API Vxa::VMonotypeMapMakerFor<double>;
 
-Vxa_VMonotypeMapMakerFor_Implementation template class Vxa_API Vxa::VMonotypeMapMakerFor<char const*, VString>;
-Vxa_VMonotypeMapMakerFor_Implementation template class Vxa_API Vxa::VMonotypeMapMakerFor<VString>;
+Vxa_VMonotypeMapMakerFor_Implementation template class Vxa_API Vxa::VMonotypeMapMakerFor<char const*, V::VString>;
+Vxa_VMonotypeMapMakerFor_Implementation template class Vxa_API Vxa::VMonotypeMapMakerFor<V::VString>;
 
 #endif // defined(USING_HIDDEN_DEFAULT_VISIBILITY) || defined(Vxa_VMonotypeMapMakerFor_Implementation)
 

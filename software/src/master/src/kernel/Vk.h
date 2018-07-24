@@ -64,6 +64,21 @@
  *				  of sizeof(Type)) instance of the type.
  *	USING(name)		- a macro for inserting optional 'using name;'
  *				  declarations in 'strict' ansi code.
+ *      OVERRIDE                - a macro typically set to the C++11 'override'
+ *                                keyword and intended for use wherever that
+ *                                keyword is valid.  Defined in this file unless
+ *                                a platform specific "Vp.h" file already sets
+ *                                it, typically because it isn't supported.
+ *      FINAL                   - a macro typically set to the C++11 'final'
+ *                                keyword and intended for use wherever that
+ *                                keyword is valid.  Defined in this file unless
+ *                                a platform specific "Vp.h" file already sets
+ *                                it, typically because it isn't supported.
+ *      REGISTER                - a macro typically set to the C 'register'
+ *                                keyword and intended for use wherever that
+ *                                keyword is valid.  Defined in this file unless
+ *                                a platform specific "Vp.h" file already sets
+ *                                it, typically because its use is deprecated.
  *
  *	BOGUS_TEMPLATE		- 'template' or empty for platform specific
  *				  bogus error suppression.  Defined in Vp.h
@@ -98,6 +113,18 @@
 
 #ifndef USING
 #define USING(name)
+#endif
+
+#ifndef OVERRIDE
+#define OVERRIDE override
+#endif
+
+#ifndef FINAL
+#define FINAL final
+#endif
+
+#ifndef REGISTER
+#define REGISTER register
 #endif
 
 #ifndef BOGUS_TEMPLATE
@@ -136,7 +163,9 @@ typedef char **argv_t;
 #pragma __pointer_size __restore
 #endif
 
-typedef char *pointer_t;
+namespace V {
+    typedef char *pointer_t;
+}
 
 #ifdef __VMS
 typedef __int64 pointer_diff_t;
@@ -581,7 +610,6 @@ typedef struct dirent STD_DirectoryEntryType;
 #define SIGXCPU		30
 #define SIGXFSZ		31
 #define SIGURG		32
-#define SIGWINCH	33
 
 #define STD_maskType		int
 

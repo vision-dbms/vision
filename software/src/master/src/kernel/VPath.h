@@ -23,6 +23,7 @@ class VPath : public VReferenceable {
 
 public:
     typedef V::uuid_t uuid_t;
+    typedef V::VString VString;
 
 public:
     class VPathPeer : public VReferenceable {

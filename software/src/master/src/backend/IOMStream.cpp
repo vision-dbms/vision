@@ -73,6 +73,9 @@ public:
     typedef Vca::IBSClient	IBSClient;
     typedef Vca::IClient	IClient;
 
+    typedef V::VString   VString;
+    typedef V::pointer_t pointer_t;
+
 //  Construction
 public:
     IOMStreamProducer (IOMStream *pIOMStream, BS *pBS);
@@ -98,8 +101,8 @@ public:
 //  Callbacks
 public:
     void OnTransfer (IBSClient *pRole, Vca::U32 sTransfer);
-    void OnEnd (IClient *pRole);
-    void OnError (IClient *pRole, Vca::IError *pError, VString const &rMessage);
+    virtual void OnEnd (IClient *pRole) OVERRIDE;
+    virtual void OnError (IClient *pRole, Vca::IError *pError, VString const &rMessage) OVERRIDE;
 
 //  Termination
 public:
@@ -481,6 +484,9 @@ public:
     typedef Vca::IBSClient	IBSClient;
     typedef Vca::IClient	IClient;
 
+    typedef V::VString   VString;
+    typedef V::pointer_t pointer_t;
+
 //  Constants
 protected:
     enum {
@@ -517,8 +523,8 @@ public:
 //  Callbacks
 public:
     void OnTransfer (IBSClient *pRole, Vca::U32 sTransfer);
-    void OnEnd (IClient *pRole);
-    void OnError (IClient *pRole, Vca::IError *pError, VString const &rMessage);
+    virtual void OnEnd (IClient *pRole) OVERRIDE;
+    virtual void OnError (IClient *pRole, Vca::IError *pError, VString const &rMessage) OVERRIDE;
 
 //  State Update
 protected:

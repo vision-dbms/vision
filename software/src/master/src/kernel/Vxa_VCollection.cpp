@@ -65,8 +65,8 @@ void Vxa::VCollection::Bind (
     ICollection *pRole, ICaller *pCaller, VString const &rMethodName, cardinality_t cParameters, cardinality_t cTask
 ) {
     if (pCaller) {
-	VCallType2 iCallHandle (cParameters, cTask, pCaller);
-//	invokeMethod_(rMethodName, iCallHandle);
+	VCallType2 iCallHandle (this, rMethodName, cParameters, cTask, pCaller, true);
+        invokeCall (iCallHandle);
     }
 }
 
@@ -74,8 +74,8 @@ void Vxa::VCollection::Invoke (
     ICollection *pRole, ICaller *pCaller, VString const &rMethodName, cardinality_t cParameters, cardinality_t cTask
 ) {
     if (pCaller) {
-	VCallType2 iCallHandle (cParameters, cTask, pCaller);
-	invokeMethod_(rMethodName, iCallHandle);
+	VCallType2 iCallHandle (this, rMethodName, cParameters, cTask, pCaller, false);
+        invokeCall (iCallHandle);
     }
 }
 
@@ -88,7 +88,7 @@ void Vxa::VCollection::ExternalImplementation (
     ISingleton *pRole, IVSNFTaskHolder *pCaller, VString const &rMethodName, cardinality_t cParameters, cardinality_t cTask
 ) {
     if (pCaller) {
-	VCallType1 iCallHandle (cParameters, cTask, pCaller);
-	invokeMethod_(rMethodName, iCallHandle);
+	VCallType1 iCallHandle (this, rMethodName, cParameters, cTask, pCaller);
+        invokeCall (iCallHandle);
     }
 }

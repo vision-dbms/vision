@@ -25,7 +25,8 @@
 #include "Vxa_ICaller.h"
 
 #include "Vxa_VCLF.h"
-#include "Vxa_VCallAgent.h"
+#include "Vxa_VCallType2Importer.h"
+#include "Vxa_VCollection.h"
 #include "Vxa_VMethod.h"
 
 #include "V_VArgList.h"
@@ -46,7 +47,7 @@
  **************************/
 
 Vxa::VCallType2::SelfProvider::SelfProvider (
-    ICaller *pCaller, VTask *pTask
+    VTask *pTask, ICaller *pCaller
 ) : m_pTask (pTask), m_pISelfReferenceSink (this), m_pISelfReferenceArraySink (this) {
     pTask->suspend ();
     retain (); {
@@ -76,6 +77,18 @@ Vxa::VCallType2::SelfProvider::~SelfProvider () {
  *****  Access  *****
  ********************
  ********************/
+
+Vxa::VCollection *Vxa::VCallType2::SelfProvider::cluster () const {
+    return m_pTask->cluster ();
+}
+
+Vxa::VClass *Vxa::VCallType2::SelfProvider::clusterType () const {
+    return m_pTask->clusterType ();
+}
+
+Vxa::VCollectableObject *Vxa::VCallType2::SelfProvider::clusterObject (object_reference_t xObject) const {
+    return m_pTask->clusterObject (xObject);
+}
 
 Vxa::VTaskCursor *Vxa::VCallType2::SelfProvider::taskCursor () const {
     return m_pTask->cursor ();
@@ -128,8 +141,8 @@ void Vxa::VCallType2::SelfProvider::OnError_(Vca::IError *pInterface, VString co
  **************************/
 
 Vxa::VCallType2::VCallType2 (
-    cardinality_t cParameters, cardinality_t cTask, ICaller *pCaller
-) :  BaseClass (cParameters, cTask), m_pCaller (pCaller) {
+    VCollection *pCluster, VString const &rMethodName, cardinality_t cParameters, cardinality_t cTask, ICaller *pCaller, bool bIntensional
+) :  BaseClass (pCluster, rMethodName, cParameters, cTask, bIntensional), m_pCaller (pCaller) {
 }
 
 Vxa::VCallType2::VCallType2 (
@@ -162,8 +175,8 @@ IVUnknown *Vxa::VCallType2::caller () const {
  ************************
  ************************/
 
-bool Vxa::VCallType2::invoke (VMethod *pMethod, VCollection *pCollection) const {
-    return pMethod->invoke (*this, pCollection);
+bool Vxa::VCallType2::invokeMethod (VMethod *pMethod) const {
+    return pMethod->invokeCall (*this);
 }
 
 bool Vxa::VCallType2::start (VTask *pTask) const {
@@ -180,7 +193,7 @@ bool Vxa::VCallType2::start (VTask *pTask) const {
 
 void Vxa::VCallType2::returnImplementationHandle (IVSNFTaskImplementation *pHandle) const {
     VkDynamicArrayOf<ISingleton::Reference> iDeprecatedClientListFactoryArray(1);
-    (new VCLF ())->getRole (iDeprecatedClientListFactoryArray[0]);
+    (new VCLF (cluster()))->getRole (iDeprecatedClientListFactoryArray[0]);
     m_pCaller->ReturnImplementationHandle (pHandle, iDeprecatedClientListFactoryArray);
 }
 
@@ -267,7 +280,7 @@ bool Vxa::VCallType2::returnConstant (VString const &rConstant) const {
  *********************/
 
 bool Vxa::VCallType2:: returnObjects (
-    VCollectableCollection *pCluster, VkDynamicArrayOf<unsigned int> const &rReferences
+    VCollection *pCluster, VkDynamicArrayOf<unsigned int> const &rReferences
 ) const {
     ICollection::Reference pClusterInterface;
     pCluster->getRole (pClusterInterface);
@@ -437,7 +450,7 @@ bool Vxa::VCallType2::returnSegment (object_reference_array_t const &rInjection,
 }
 
 bool Vxa::VCallType2::returnSegment (
-    object_reference_array_t const &rInjection, VCollectableCollection *pCluster, object_reference_array_t const &rReferences
+    object_reference_array_t const &rInjection, VCollection *pCluster, object_reference_array_t const &rReferences
 ) const {
     ICollection::Reference pClusterInterface;
     pCluster->getRole (pClusterInterface);
@@ -506,6 +519,10 @@ Vxa::VCallAgent *Vxa::VCallType2Importer::agent (VTask *pTask) const {
     return m_pAgent;
 }
 
+bool Vxa::VCallType2Importer::getParameter (VTask *pTask, VImportableType *pType, any_scalar_return_t &rResult) {
+    return agent (pTask)->getAnyParameter (pType, rResult);
+}
+
 bool Vxa::VCallType2Importer::getParameter (VTask *pTask, VImportableType *pType, bool_scalar_return_t &rResult) {
     return agent (pTask)->getBooleanParameter (pType, rResult);
 }
@@ -536,6 +553,14 @@ bool Vxa::VCallType2Importer::getParameter (VTask *pTask, VImportableType *pType
 
 bool Vxa::VCallType2Importer::getParameter (VTask *pTask, VImportableType *pType, VString_scalar_return_t &rResult) {
     return agent (pTask)->getStringParameter (pType, rResult);
+}
+
+Vxa::cardinality_t Vxa::VCallType2Importer::getParameterIndex (VTask *pTask) const {
+    return agent (pTask)->parameterIndex ();
+}
+
+Vxa::cardinality_t Vxa::VCallType2Importer::getParameterCountRemaining (VTask *pTask) const {
+    return agent (pTask)->parameterCountRemaining ();
 }
 
 

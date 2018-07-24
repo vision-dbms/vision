@@ -34,15 +34,15 @@ protected:
 
 //  Execution
 protected:
-    void run	();
-    void fail	();
+    virtual void run	() OVERRIDE;
+    virtual void fail	() OVERRIDE;
 
 //  Display And Description
 public:
-    void reportInfo	(unsigned int xLevel, VCall const* pContext = 0) const;
-    void reportTrace	() const;
+    virtual void reportInfo	(unsigned int xLevel, VCall const* pContext = 0) const OVERRIDE;
+    virtual void reportTrace	() const OVERRIDE;
 
-    char const* description () const;
+    virtual char const* description () const OVERRIDE;
 
 
 //  State

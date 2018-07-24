@@ -93,7 +93,7 @@ private:
 //  Destruction
 private:
     ~rtCONTEXT_Handle ();
-    void deleteThis ();
+    virtual void deleteThis () OVERRIDE;
 
 //  Lifetime Management
 public:
@@ -137,14 +137,14 @@ public:
 
 //  Alignment
 private:
-    virtual /*override*/ bool align_() {
+    virtual bool align_() OVERRIDE {
 	return align ();
     }
 
 // Garbage collection marking
 public:
-    virtual /*override*/ void visitReferencesUsing (Visitor *visitor);
-    virtual /*override*/ void generateReferenceReport (V::VSimpleFile &rOutputFile, unsigned int xLevel) const;
+    virtual void visitReferencesUsing (Visitor *visitor) OVERRIDE;
+    virtual void generateReferenceReport (V::VSimpleFile &rOutputFile, unsigned int xLevel) const OVERRIDE;
 
 public:
     bool align ();
@@ -159,11 +159,11 @@ public:
 
 //  Display and Inspection
 public:
-    virtual /*override*/ unsigned __int64 getClusterSize ();
+    virtual unsigned __int64 getClusterSize () OVERRIDE;
 
 //  Maintenance
 protected:
-    bool PersistReferences ();
+    virtual bool PersistReferences () OVERRIDE;
 
 //  State
 private:

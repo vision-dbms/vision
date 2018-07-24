@@ -51,6 +51,7 @@ public:
     //  State
     private:
 	Query::Reference m_pQuery;
+        Vsa::request_index_t m_xRequestInProgress;
     };
 
 /************************************************************************/
@@ -76,7 +77,7 @@ protected:
 //  Execution
 protected:
     void exit ();
-    void fail ();
+    virtual void fail () OVERRIDE;
 
 //  Execution Support
 protected:

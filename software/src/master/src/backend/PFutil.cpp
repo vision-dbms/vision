@@ -302,27 +302,27 @@ V_DefinePrimitive (ReclaimResources) {
  ***********************/
 
 PrivateFnDef void AccessDBRoot (VPrimitiveTask *pTask, char const *pDatabaseSpec) {
-    VString iDatabaseSpec;
+    V::VString iDatabaseSpec;
 
     unsigned int xSpace = 3;
     char const *pColon = strchr (pDatabaseSpec, ':');
     if (pColon) {
 	sscanf (pColon + 1, "%u", &xSpace);
 
-	VString iDatabaseSpecPrefix;
+	V::VString iDatabaseSpecPrefix;
 	iDatabaseSpecPrefix.setTo (pDatabaseSpec, pColon - pDatabaseSpec);
 	iDatabaseSpec.setTo (iDatabaseSpecPrefix);
 	pDatabaseSpec = iDatabaseSpec;
     }
 
-    VString	iVersionSpec;
+    V::VString	iVersionSpec;
     char const *pVersionSpec = 0;
     char const *pComma = strchr (pDatabaseSpec, ',');
     if (pComma) {
 	iVersionSpec.setTo (pComma + 1);
 	pVersionSpec = iVersionSpec;
 
-	VString iDatabaseSpecPrefix;
+	V::VString iDatabaseSpecPrefix;
 	iDatabaseSpecPrefix.setTo (pDatabaseSpec, pComma - pDatabaseSpec);
 	iDatabaseSpec.setTo (iDatabaseSpecPrefix);
 	pDatabaseSpec = iDatabaseSpec;
@@ -430,7 +430,7 @@ V_DefinePrimitive (Notify) {
 	pTask->raiseUnimplementedOperationException ("Notify: Only takes scalar event number");
 
     unsigned int xEvent = DSC_Descriptor_Scalar_Int (ADescriptor);
-    VString iMsg = pTask->transientServicesProvider ()->getNSMessage ();
+    V::VString iMsg = pTask->transientServicesProvider ()->getNSMessage ();
     g_pInfoServerGofer.notify (xEvent, "#%d: %s\n", xEvent, iMsg.content ());
     pTask->loadDucWithTrue ();
 }

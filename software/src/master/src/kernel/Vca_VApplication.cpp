@@ -134,7 +134,7 @@ namespace Vca {
 
     //  Description
     protected:
-	void getDescription_(VString& rResult) const;
+	virtual void getDescription_(VString& rResult) const OVERRIDE;
 
     //  State
     private:
@@ -258,7 +258,7 @@ Vca::VApplication::~VApplication () {
  ********************
  ********************/
 
-VString Vca::VApplication::description () const {
+V::VString Vca::VApplication::description () const {
     VString iResult;
     getDescription_(iResult);
     return iResult;

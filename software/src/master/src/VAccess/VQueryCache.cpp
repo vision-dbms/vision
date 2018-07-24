@@ -21,7 +21,7 @@
 
 #include "Vca_CompilerHappyPill.h"
 
-void VQueryCache::OnResult_ (Vsa::IEvaluationResult *pResult, VString const &rOutput) {
+void VQueryCache::OnResult_ (Vsa::IEvaluationResult *pResult, V::VString const &rOutput) {
     m_result = rOutput;
 }
 

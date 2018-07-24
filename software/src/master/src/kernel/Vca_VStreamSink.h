@@ -40,23 +40,23 @@ namespace Vca {
 
     //  Callback
     private:
-	void trigger_() {
+	virtual void trigger_() OVERRIDE {
 	    onPutContinuation ();
 	}
 
     //  Completion
     private:
-	void onTransfer_(size_t sTransfer) {
+	virtual void onTransfer_(size_t sTransfer) OVERRIDE {
 	    onPutCompletion (sTransfer);
 	}
 
     //  Control
     private:
-	void endTransfers ();
+	virtual void endTransfers () OVERRIDE;
 
     //  Data Transfer
     private:
-	void transferData ();
+	virtual void transferData () OVERRIDE;
     };
 }
 

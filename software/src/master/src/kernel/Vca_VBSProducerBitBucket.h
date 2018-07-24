@@ -50,8 +50,8 @@ namespace Vca {
 
     //  IClient Methods
     public:
-	void OnError (IClient *pRole, IError *pError, VString const &rMessage);
-	void OnEnd (IClient *pRole);
+	virtual void OnError (IClient *pRole, IError *pError, VString const &rMessage) OVERRIDE;
+	virtual void OnEnd (IClient *pRole) OVERRIDE;
 
     //  State
     private:

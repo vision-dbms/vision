@@ -734,7 +734,8 @@ extern int rslanglex ();
 
 typedef struct bufferType {
     int		size;
-    pointer_t	allocated_area,
+    V::pointer_t
+		allocated_area,
 		current_ptr;
 } stringSpaceType;
 
@@ -924,7 +925,7 @@ PrivateFnDef VByteCodeDescriptor::ByteCode getBinaryByteCode (
  ********************************************/
 
 PrivateVarDef unsigned short stringIndex;
-PrivateVarDef pointer_t stringSpaceBase;
+PrivateVarDef V::pointer_t stringSpaceBase;
 
 /*---------------------------------------------------------------------------
  *****  Function passed to the HP_Unix provided twalk routine.
@@ -1011,7 +1012,7 @@ PrivateFnDef void InitializeStringSpace (
 
 #define ConditionalGrow(stringSpace,stringLength,walkIdTable,walkEnvTable)\
 {\
-    pointer_t oldSpace;\
+    V::pointer_t oldSpace;\
 \
     if (tracingStringSpaceOps)\
     {\
@@ -1343,7 +1344,7 @@ PrivateFnDef int insertSelectorBinding (
     stringSpaceType		*stringSpace,
     void			**idTable,
     void			**envTable,
-    pointer_t			selectorPtr
+    V::pointer_t		selectorPtr
 )
 {
     int index = SELECTOR_StringToKSI (selectorPtr);
@@ -3707,7 +3708,7 @@ PrivateFnDef void reproduceSource (
  *
  *****/
 PublicFnDef void RSLANG_Decompile (
-    VString		&rSourceReturn,
+    V::VString		&rSourceReturn,
     M_CPD		*pBlockCPD,
     unsigned int	*pDecompiledPCOffset,
     unsigned int	 xPCOffset
@@ -3855,13 +3856,13 @@ IOBJ_DefineUnaryMethod (OneStepPrint) {
 }
 
 IOBJ_DefineNilaryMethod (Decompile) {
-    VString iSource;
+    V::VString iSource;
     RSLANG_Decompile (iSource, RTYPE_QRegisterCPD (blockIObj));
     return RTYPE_QRegister (rtSTRING_New (iSource));
 }
 
 IOBJ_DefineNewaryMethod (GetSource) {
-    VString iSource;
+    V::VString iSource;
     RSLANG_Decompile (iSource, RTYPE_QRegisterCPD (parameterArray [0]));
     return RTYPE_QRegister (rtSTRING_New (iSource));
 }

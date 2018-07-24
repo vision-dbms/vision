@@ -34,7 +34,6 @@
 #include "VConfig.h"
 
 template <class R> class VReference;
-class VString;
 
 
 /*****************************************
@@ -131,8 +130,8 @@ public:\
 #define DECLARE_CONCRETE_RTTLITE_MEMBERS(thisClass,baseClass,whichRTT)\
     DECLARE_CONCRETE_RTTLITE_MEMBERS_NODT(thisClass,baseClass,whichRTT);\
 private:\
-    void deleteThis () {\
-	if (BaseClass::onDeleteThis ())\
+    virtual void deleteThis () OVERRIDE {\
+	if (this->onDeleteThis ())\
 	    delete this;\
     }
 
@@ -168,7 +167,7 @@ private:\
  */
 #define DECLARE_RTT_MEMBERS()\
 public:\
-    VRunTimeType *rtt () const {\
+    virtual VRunTimeType *rtt () const OVERRIDE {\
 	return &RTT;\
     }\
     /** Convenience define for a V::VRunTimeType_ templated for this class. */\
@@ -442,6 +441,7 @@ namespace V {
 //  Destruction
     protected:
 	~VReferenceableImplementation_();
+
 	/**
 	 *  Override this function in any subclass to gain control of the
 	 *  deletion process.  If your override returns true, this object
@@ -450,14 +450,8 @@ namespace V {
 	 *
 	 *  This function is non-virtual by design.  There is absolutely
 	 *  no value in making it virtual since 'deleteThis' is already
-	 *  virtual and explicitly overridden in all concrete derived
+	 *  virtual and explicitly overridden in all derived concrete
 	 *  classes.
-	 *
-	 *  Special Note For Overrides In Concrete Classes - Declare
-	 *  concrete classes that need to explicitly override this member
-	 *  using 'DECLARE_CONCRETE_RTT_NODT' to suppress the automatic
-	 *  inclusion of a 'using BaseClass::onDeleteThis' statement in
-	 *  your class definition.
 	 */
 	bool onDeleteThis () {
 	    return true;
@@ -472,7 +466,7 @@ namespace V {
 //  Reclamation
     private:
 	virtual void deleteThis () = 0;
-	virtual void die_();
+	virtual void die_() OVERRIDE;
 	void die () {
 	    if (m_iReferenceCount.decrementIsZero ())
 		deleteThis ();

@@ -68,8 +68,8 @@ namespace Vsa {
         /// @name Gofer callbacks
         //@{
         private:
-            void onNeed ();
-            void onData ();
+            virtual void onNeed () OVERRIDE;
+            virtual void onData () OVERRIDE;
         //@}
 
         /// @name IEvaluatorSink implementation.

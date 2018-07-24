@@ -338,7 +338,7 @@ int debugchar;			/* current input token number */
 int
 debugparse()
 {
-	register debugSTYPE *debugpvt;	/* top of value stack for $vars */
+	REGISTER debugSTYPE *debugpvt;	/* top of value stack for $vars */
 
 	/*
 	** Initialize externals - debugparse may be called more than once
@@ -357,10 +357,10 @@ debugparse()
 	debugchar = -1;
 
 	{
-		register debugSTYPE *debug_pv;	/* top of value stack */
-		register int *debug_ps;		/* top of state stack */
-		register int debug_state;		/* current state */
-		register int  debug_n;		/* internal state number info */
+		REGISTER debugSTYPE *debug_pv;	/* top of value stack */
+		REGISTER int *debug_ps;		/* top of state stack */
+		REGISTER int debug_state;		/* current state */
+		REGISTER int  debug_n;		/* internal state number info */
 
 		goto debugstack;
 
@@ -398,7 +398,7 @@ debugparse()
 		*/
 		if ( debugdebug )
 		{
-			register int debug_i;
+			REGISTER int debug_i;
 
 			printf( "State %d, token ", debug_state );
 			if ( debugchar == 0 )
@@ -461,7 +461,7 @@ debugparse()
 #if debugDEBUG
 		if ( debugdebug && debugtmp )
 		{
-			register int debug_i;
+			REGISTER int debug_i;
 
 			printf( "Received token " );
 			if ( debugchar == 0 )
@@ -503,7 +503,7 @@ debugparse()
 #if debugDEBUG
 			if ( debugdebug && debugtmp )
 			{
-				register int debug_i;
+				REGISTER int debug_i;
 
 				printf( "Received token " );
 				if ( debugchar == 0 )
@@ -530,7 +530,7 @@ debugparse()
 			** look through exception table
 			*/
 			{
-				register int *debugxi = debugexca;
+				REGISTER int *debugxi = debugexca;
 
 				while ( ( *debugxi != -1 ) ||
 					( debugxi[1] != debug_state ) )
@@ -615,7 +615,7 @@ debugparse()
 				*/
 				if ( debugdebug )
 				{
-					register int debug_i;
+					REGISTER int debug_i;
 
 					printf( "Error recovery discards " );
 					if ( debugchar == 0 )
@@ -675,7 +675,7 @@ debugparse()
 		*/
 		{
 			/* length of production doubled with extra bit */
-			register int debug_len = debugr2[ debug_n ];
+			REGISTER int debug_len = debugr2[ debug_n ];
 
 			if ( !( debug_len & 01 ) )
 			{

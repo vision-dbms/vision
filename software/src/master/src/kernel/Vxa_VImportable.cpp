@@ -25,8 +25,8 @@
 
 #include "V_VString.h"
 
-#include "Vxa_VCallType1.h"
-#include "Vxa_VCallType2.h"
+#include "Vxa_VCallType1Importer.h"
+#include "Vxa_VCallType2Importer.h"
 
 #include "Vxa_VResultBuilder.h"
 #include "Vxa_VTask.h"
@@ -64,10 +64,10 @@ namespace Vxa {
 
     //  Instance Retrieval
     private:
-	virtual bool retrieve (scalar_return_t &rResult, VTask *pTask, VCallType1Importer &rImporter) {
+	virtual bool retrieve (scalar_return_t &rResult, VTask *pTask, VCallType1Importer &rImporter) OVERRIDE {
 	    return rImporter.getParameter (pTask, this, rResult);
 	}
-	virtual bool retrieve (scalar_return_t &rResult, VTask *pTask, VCallType2Importer &rImporter) {
+	virtual bool retrieve (scalar_return_t &rResult, VTask *pTask, VCallType2Importer &rImporter) OVERRIDE {
 	    return rImporter.getParameter (pTask, this, rResult);
 	}
     };
@@ -83,6 +83,7 @@ namespace Vxa {
  ************************************************/
 
 namespace {
+    Vxa::VStockImportable<Vxa::VAny const&>		g_iImportTraits_VAny;
     Vxa::VStockImportable<bool>				g_iImportTraits_bool;
     Vxa::VStockImportable<short>			g_iImportTraits_short;
     Vxa::VStockImportable<unsigned short>		g_iImportTraits_unsigned_short;
@@ -91,6 +92,6 @@ namespace {
     Vxa::VStockImportable<float>			g_iImportTraits_float;
     Vxa::VStockImportable<double>			g_iImportTraits_double;
 
-    Vxa::VStockImportable<char const*,VString>		g_iImportTraits_char_const_p;
-    Vxa::VStockImportable<VString const&,VString>	g_iImportTraits_VString;
+    Vxa::VStockImportable<char const*,V::VString>	g_iImportTraits_char_const_p;
+    Vxa::VStockImportable<V::VString const&,V::VString>	g_iImportTraits_VString;
 }

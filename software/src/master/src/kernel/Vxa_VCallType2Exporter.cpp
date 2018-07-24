@@ -22,7 +22,7 @@
  *****  Supporting  *****
  ************************/
 
-#include "Vxa_VTask.h"
+#include "Vxa_VCallType2Importer.h"
 
 
 /*************************************
@@ -41,7 +41,7 @@
 
 Vxa::VCallType2Exporter::VCallType2Exporter (
     VTask *pTask, VCallType2Importer const &rCallImporter
-) : BaseClass (pTask->cursor ()), VCallType2 (rCallImporter) {
+) : BaseClass (pTask), VCallType2 (rCallImporter) {
 }
 
 /*************************

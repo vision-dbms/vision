@@ -471,7 +471,9 @@ char const* VSNFTask::description () const {
  *********************************/
 
 void VSNFTask::startExternalInvocation (ISingleton *pISingleton) {
-    static bool const bICE = getenv ("VxaICE") ? true : false;  //  ICE == ICollection Enabled
+//  ICE == ICollection Enabled
+//  (enabled by default unless the 'VxaNoICE' environment variable is set)
+    static bool const bICE = getenv ("VxaICE") || !getenv("VxaNoICE");
     suspend ();
 
     if (Vxa::ICollection *const pICollection = bICE ? dynamic_cast<Vxa::ICollection*>(pISingleton) : 0) {
@@ -609,10 +611,10 @@ template void VSNFTask::ProcessArray<double,double>      (VDescriptor&, rtPTOKEN
 static char const * DynamicArrayStringAccessFn(bool reset, va_list pArgs) {
     V::VArgList iArgList (pArgs);
 
-    static VkDynamicArrayOf<VString> const  *pStrings;
+    static VkDynamicArrayOf<V::VString> const  *pStrings;
     static unsigned int xString;
     if (reset) {
-        pStrings = iArgList.arg<VkDynamicArrayOf<VString> const*>();
+        pStrings = iArgList.arg<VkDynamicArrayOf<V::VString> const*>();
         xString = 0;
     }
     else if (xString < pStrings->cardinality())
@@ -620,7 +622,7 @@ static char const * DynamicArrayStringAccessFn(bool reset, va_list pArgs) {
     return NilOf (char const*);
 }
 
-template<> void VSNFTask::ProcessArray<VString,VString> (
+template<> void VSNFTask::ProcessArray<V::VString,V::VString> (
     VDescriptor &rResult, rtPTOKEN_Handle *pPPT, VkDynamicArrayOf<VString> const &rSourceArray, VString const *&rpResultArray
 ) const {
     rResult.setToCorrespondence (
@@ -691,7 +693,7 @@ template void VSNFTask::ReturnArray<unsigned int,int>  (VkDynamicArrayOf<unsigne
 template void VSNFTask::ReturnArray<float,float>       (VkDynamicArrayOf<float> const&,float const*&);
 template void VSNFTask::ReturnArray<double,double>     (VkDynamicArrayOf<double> const&,double const*&);
 
-template void VSNFTask::ReturnArray<VString,VString>   (VkDynamicArrayOf<VString> const&,VString const*&);
+template void VSNFTask::ReturnArray<V::VString,V::VString> (VkDynamicArrayOf<VString> const&,VString const*&);
 
 template void VSNFTask::ReturnArray<Vxa::ISingleton::Reference,Vxa::ISingleton::Reference>(
     VkDynamicArrayOf<Vxa::ISingleton::Reference> const&,Vxa::ISingleton::Reference const*&
@@ -722,7 +724,7 @@ template bool VSNFTask::ReturnSegment<unsigned int,int>   (object_reference_arra
 template bool VSNFTask::ReturnSegment<double,double>      (object_reference_array_t const &rInjector, VkDynamicArrayOf<double> const&, double const*&);
 template bool VSNFTask::ReturnSegment<float,float>        (object_reference_array_t const &rInjector, VkDynamicArrayOf<float> const&, float const*&);
 
-template bool VSNFTask::ReturnSegment<VString,VString>    (object_reference_array_t const &rInjector, VkDynamicArrayOf<VString> const&, VString const*&);
+template bool VSNFTask::ReturnSegment<V::VString,V::VString>    (object_reference_array_t const &rInjector, VkDynamicArrayOf<VString> const&, VString const*&);
 
 
 /************************************************

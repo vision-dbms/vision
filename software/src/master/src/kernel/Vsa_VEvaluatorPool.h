@@ -605,12 +605,12 @@ namespace Vsa {
     /// @name Evaluation Creation
     //@{
     private:
-        VEvaluation *createEvaluation (
+        virtual VEvaluation *createEvaluation (
             IEvaluatorClient*, VString const&, VString const&
-        );
-        VEvaluation *createEvaluation (
+        ) OVERRIDE;
+        virtual VEvaluation *createEvaluation (
             IEvaluatorClient*, VString const&, VString const&, VString const&
-        );
+        ) OVERRIDE;
     //@}
 
     /// @name Query
@@ -888,8 +888,8 @@ namespace Vsa {
          * Pool-specific request queue handling, including hiring of new workers as necessary.
          * Also handles hard stop trigger processing.
          */
-        void onQueue_ ();
-        void onRequest (VEvaluation *pRequest);
+        virtual void onQueue_ () OVERRIDE;
+        virtual void onRequest (VEvaluation *pRequest) OVERRIDE;
 
         /**
          * Attempt query processing.
@@ -933,7 +933,7 @@ namespace Vsa {
         void hardstop (Vca::ITrigger *pTrigger=0);
         void triggerOnFlush ();
         void cancelQuery (Vca::U32 iID, BoolReceiver *pClient = 0);
-        virtual bool cancel_ (VEvaluation* pEvaluation);
+        virtual bool cancel_ (VEvaluation* pEvaluation) OVERRIDE;
     //@}
 
     /// @name Offline Worker Management

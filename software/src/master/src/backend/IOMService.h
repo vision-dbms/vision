@@ -69,55 +69,55 @@ public:
     );
 
 //  IClient Methods
-    void OnError (IClient *pRole, IError *pIError, VString const &rMessage);
+    virtual void OnError (IClient *pRole, IError *pIError, VString const &rMessage) OVERRIDE;
 
 //  Query
 public:
-    IOMChannelType channelType () const;
+    virtual IOMChannelType channelType () const OVERRIDE;
 
-    int getTcpNodelay (int* fOnOff);
+    virtual int getTcpNodelay (int* fOnOff) OVERRIDE;
 
 //  Control
 public:
-    void Close ();
+    virtual void Close () OVERRIDE;
 
-    int EndTransmission ();
-    int EndReception ();
+    virtual int EndTransmission () OVERRIDE;
+    virtual int EndReception () OVERRIDE;
 
-    int SetTcpNodelay (int fOnOff);
+    virtual int SetTcpNodelay (int fOnOff) OVERRIDE;
 
 //  Input
 public:
-    IOMDriver *GetConnection ();
+    virtual IOMDriver *GetConnection () OVERRIDE;
 
-    size_t GetByteCount (IOMHandle const* pHandle);
+    virtual size_t GetByteCount (IOMHandle const* pHandle) OVERRIDE;
 
-    size_t GetData (IOMHandle const* pHandle, void* pBuffer, size_t cbMin, size_t cbMax);
+    virtual size_t GetData (IOMHandle const* pHandle, void* pBuffer, size_t cbMin, size_t cbMax) OVERRIDE;
 
-    VkStatusType GetString (
+    virtual VkStatusType GetString (
 	IOMHandle const*	pHandle,
 	size_t			cbMin,
 	size_t			cbMax,
 	char **			ppString,
 	size_t *		psString
-    );
+    ) OVERRIDE;
 
-    VkStatusType GetLine (
+    virtual VkStatusType GetLine (
 	IOMHandle const*	pHandle,
 	char const*		zPrompt,
 	char**			ppLine,
 	size_t *		psLine
-    );
+    ) OVERRIDE;
 
 //  Output
 public:
-    bool PutBufferedData ();
+    virtual bool PutBufferedData () OVERRIDE;
 
-    size_t PutData (IOMHandle const* pHandle, void const* pBuffer, size_t sBuffer);
+    virtual size_t PutData (IOMHandle const* pHandle, void const* pBuffer, size_t sBuffer) OVERRIDE;
 
-    size_t PutString (char const* string);
+    virtual size_t PutString (char const* string) OVERRIDE;
 
-    size_t VPrint (size_t sData, char const* pFormat, va_list pFormatArguments);
+    virtual size_t VPrint (size_t sData, char const* pFormat, va_list pFormatArguments) OVERRIDE;
 
 //  State
 protected:

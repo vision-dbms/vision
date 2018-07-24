@@ -96,7 +96,7 @@ private:
 
 //  Alignment
 private:
-    virtual /*override*/ bool align_() {
+    virtual bool align_() OVERRIDE {
 	return align ();
     }
 public:
@@ -105,7 +105,7 @@ public:
 
 //  Canonicalization
 private:
-    virtual /*override*/ bool getCanonicalization_(VReference<rtVSTORE_Handle> &rpStore, DSC_Pointer const &rPointer);
+    virtual bool getCanonicalization_(VReference<rtVSTORE_Handle> &rpStore, DSC_Pointer const &rPointer) OVERRIDE;
 
 //  Access
 private:
@@ -144,32 +144,32 @@ public:
 
 //  Dictionary
 private:
-    virtual /*overrride*/ rtDICTIONARY_Handle *getDictionary_(DSC_Pointer const &rPointer) const {
+    virtual rtDICTIONARY_Handle *getDictionary_(DSC_Pointer const &rPointer) const OVERRIDE {
 	return static_cast<rtDICTIONARY_Handle*>(TheClosureClassDictionary ().ObjectHandle ());
     }
 
 // Garbage collection marking
 public:
-    virtual /*override*/ void visitReferencesUsing (Visitor *visitor);
-    virtual /*override*/ void generateReferenceReport (V::VSimpleFile &rOutputFile, unsigned int xLevel) const;
+    virtual void visitReferencesUsing (Visitor *visitor) OVERRIDE;
+    virtual void generateReferenceReport (V::VSimpleFile &rOutputFile, unsigned int xLevel) const OVERRIDE;
 
 //  Store Access
 private:
-    virtual /*override*/ bool decodeClosure_(
+    virtual bool decodeClosure_(
 	rtBLOCK_Handle::Reference &rpBlock, unsigned int &rxPrimitive, rtCONTEXT_Handle::Reference *ppContext
-    ) const;
-    virtual /*override*/ rtPTOKEN_Handle *getPToken_() const;
+    ) const OVERRIDE;
+    virtual rtPTOKEN_Handle *getPToken_() const OVERRIDE;
 
 //  Maintenance
 protected:
-    bool PersistReferences ();
+    virtual bool PersistReferences () OVERRIDE;
 
 //  Display and Inspection
 public:
-    virtual /*override*/ unsigned __int64 getClusterSize ();
+    virtual unsigned __int64 getClusterSize () OVERRIDE;
 
-    virtual /*override*/ bool getPOP (M_POP *pResult, unsigned int xPOP) const;
-    virtual /*override*/ unsigned int getPOPCount () const {
+    virtual bool getPOP (M_POP *pResult, unsigned int xPOP) const OVERRIDE;
+    virtual unsigned int getPOPCount () const OVERRIDE {
 	return 2;
     }
 

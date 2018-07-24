@@ -452,7 +452,7 @@ PublicFnDef int VARS_funcFromModuleName(char const *name) {
 	if( name == NULL )
 		return(-1);
 
-	VString nm (eatLeadingAndTrailingSpaces(name));
+	V::VString nm (eatLeadingAndTrailingSpaces(name));
 	
 	for (int i = 0; VARS_menuName(&NameAndFunc[i]) != NULL; i++)
 	{

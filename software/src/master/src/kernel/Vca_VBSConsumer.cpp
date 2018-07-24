@@ -153,9 +153,9 @@ namespace Vca {
 
     //  Communication
     private:
-	void onEnd ();
-	void onError (IError *pError, VString const &rMessage);
-	void onTransfer (size_t sTransfer);
+	virtual void onEnd () OVERRIDE;
+	virtual void onError (IError *pError, VString const &rMessage) OVERRIDE;
+	virtual void onTransfer (size_t sTransfer) OVERRIDE;
 
     //  Queueing
     private:
@@ -446,22 +446,22 @@ namespace Vca {
 	    m_sVoid += sVoid;
 	    onPutContinuation ();
 	}
-	void OnEnd (IClient *pRole) {
+	virtual void OnEnd (IClient *pRole) OVERRIDE {
 	    onEnd ();
 	}
-	void OnError (IClient *pRole, IError *pError, VString const &rMessage) {
+	virtual void OnError (IClient *pRole, IError *pError, VString const &rMessage) OVERRIDE {
 	    onError (pError, rMessage);
 	}
 
     //  Control
     private:
-	void endTransfers () {
+	virtual void endTransfers () OVERRIDE {
 	    m_pRemote->Close ();
 	}
 
     //  Data Transfer
     private:
-	void transferData ();
+	virtual void transferData () OVERRIDE;
 
     //  State
     private:

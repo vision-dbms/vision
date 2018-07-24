@@ -291,14 +291,14 @@ namespace V {
 
 	//  Access/Query
 	private:
-	    virtual /*override*/ unsigned int adjustedSectionFlags_(unsigned int iFlags, addr64_t pSpace) const;
-	    virtual /*override*/ bool getRegionID_(VkStatus &rStatus, _generic_64 &rRegionID, addr64_t pSpace) const;
+	    virtual unsigned int adjustedSectionFlags_(unsigned int iFlags, addr64_t pSpace) const OVERRIDE;
+	    virtual bool getRegionID_(VkStatus &rStatus, _generic_64 &rRegionID, addr64_t pSpace) const OVERRIDE;
 
 	//  Use
 	private:
-	    virtual /*override*/ bool acquireSpace_(VkStatus &rStatus, MMR &rpMM, Area &rArea, Area const &rSpace);
-	    virtual /*override*/ bool provideSpace_(VkStatus &rStatus, MMR &rpMM, Area &rArea, size64_t sSpace);
-	    virtual /*override*/ bool reclaimSpace_(VkStatus &rStatus, MMR &rpMM, Area &rArea);
+	    virtual bool acquireSpace_(VkStatus &rStatus, MMR &rpMM, Area &rArea, Area const &rSpace) OVERRIDE;
+	    virtual bool provideSpace_(VkStatus &rStatus, MMR &rpMM, Area &rArea, size64_t sSpace) OVERRIDE;
+	    virtual bool reclaimSpace_(VkStatus &rStatus, MMR &rpMM, Area &rArea) OVERRIDE;
 	};
 
 

@@ -151,7 +151,7 @@ template <class E> void VArray<E>::fixVector (size_t sOldElementVector)
  ********************************/
 
 template <class E> void VArray<E>::formatForVision (
-    VString&	iExpression,
+    V::VString&	iExpression,
     char const*		pKeyword,
     bool		fQuote,
     bool		fClose,

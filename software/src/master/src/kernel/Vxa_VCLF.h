@@ -13,6 +13,8 @@
  *****  Declarations  *****
  **************************/
 
+#include "Vxa_VCollection.h"
+
 /*************************
  *****  Definitions  *****
  *************************/
@@ -34,7 +36,7 @@ namespace Vxa {
 
     //  Construction
     public:
-	VCLF ();
+	VCLF (VCollection *pCluster);
 
     //  Destruction
     private:
@@ -57,6 +59,10 @@ namespace Vxa {
 	void ExternalImplementation (
 	    ISingleton *pRole, IVSNFTaskHolder *pCaller, VString const &rMessageName, cardinality_t cParameters, cardinality_t cTask
 	);
+
+    //  State
+    private:
+        VCollection::Reference const m_pCluster;
     };
 }
 

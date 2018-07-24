@@ -15,7 +15,6 @@
  **************************/
 
 class VkStatus;
-class VString;
 
 #if defined(_WIN32) 
 #include <assert.h>
@@ -48,6 +47,10 @@ enum VdbNetworkLockOperation {
 
 class V_API VdbNetwork : public VTransient {
     DECLARE_FAMILY_MEMBERS (VdbNetwork, VTransient);
+
+//  Aliases
+ public:
+    typedef V::VString VString;
 
 //  Max Lock Count (same as max space count)
 public:

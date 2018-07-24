@@ -7,8 +7,6 @@
 
 #include "Vxa_VCallHandle.h"
 
-#include "Vxa_VCollectableCollectionOf.h"
-
 /**************************
  *****  Declarations  *****
  **************************/
@@ -63,15 +61,18 @@ namespace Vxa {
 
 	//  Construction
 	protected:
-	    SelfProvider (ICaller *pCaller, VTask *pTask);
+	    SelfProvider (VTask *pTask, ICaller *pCaller);
 
 	//  Destruction
 	protected:
 	    ~SelfProvider ();
 
 	//  Access
-	protected:
-	    VTaskCursor *taskCursor () const;
+	public:
+            VCollection*        cluster       () const;
+            VCollectableObject* clusterObject (object_reference_t xObject) const;
+            VClass*             clusterType   () const;
+	    VTaskCursor*        taskCursor    () const;
 
 	//  Roles
 	public:
@@ -118,17 +119,14 @@ namespace Vxa {
     //****************************************************************
     //  SelfProviderFor
     public:
-	template <typename Collection_T, typename Provider_T> class SelfProviderFor : public SelfProvider {
-	    typedef SelfProviderFor<Collection_T,Provider_T> this_t;
-	    DECLARE_CONCRETE_RTTLITE (this_t, SelfProvider);
+	template <typename Provider_T> class SelfProviderFor : public SelfProvider {
+	    DECLARE_CONCRETE_RTTLITE (SelfProviderFor<Provider_T>, SelfProvider);
 
 	//  Aliases
 	public:
-	    typedef Collection_T collection_t;
 	    typedef Provider_T provider_t;
 
-	    typedef typename collection_t::val_t val_t;
-	    typedef typename collection_t::var_t var_t;
+	    typedef typename provider_t::ReferencedClass::value_t val_t;
 
 	//****************************************************************
 	//  CurrentSelf
@@ -139,8 +137,8 @@ namespace Vxa {
 	    //  Construction
 	    public:
 		CurrentSelf (
-		    collection_t *pCollection, object_reference_array_t const &rSelfReferences, VTaskCursor *pTaskCursor
-		) : BaseClass (pCollection->type ()), m_pCollection (pCollection), m_iSelfReferences (rSelfReferences), m_pTaskCursor (pTaskCursor) {
+		    SelfProvider const *pSelfProvider, object_reference_array_t const &rSelfReferences, VTaskCursor *pTaskCursor
+		) : BaseClass (pSelfProvider->clusterType ()), m_pCluster (pSelfProvider->cluster ()), m_iSelfReferences (rSelfReferences), m_pTaskCursor (pTaskCursor) {
 		}
 
 	    //  Destruction
@@ -150,23 +148,23 @@ namespace Vxa {
 
 	    //  Access
 	    public:
-		val_t value () {
-		    return m_pCollection->element(m_iSelfReferences[m_pTaskCursor->position ()]);
+		virtual val_t value () OVERRIDE {
+		    return dynamic_cast<val_t>(m_pCluster->object (m_iSelfReferences[m_pTaskCursor->position ()]));
 		}
 
 	    //  State
 	    private:
-		typename collection_t::Reference const m_pCollection;
+                VCollection::Reference   const m_pCluster;
 		object_reference_array_t const m_iSelfReferences;
-		VTaskCursor::Reference const m_pTaskCursor;
+		VTaskCursor::Reference   const m_pTaskCursor;
 	    };
 
 	//****************************************************************
 	//  Construction
 	public:
 	    SelfProviderFor (
-		ICaller *pCaller, VTask *pTask, collection_t *pCollection, provider_t &rpSelfProvider
-	    ) : BaseClass (pCaller, pTask), m_pCollection (pCollection), m_rpSelfProvider (rpSelfProvider) {
+		VTask *pTask, ICaller *pCaller, provider_t &rpSelfProvider
+	    ) : BaseClass (pTask, pCaller), m_rpSelfProvider (rpSelfProvider) {
 	    }
 
 	//  Destruction
@@ -176,31 +174,32 @@ namespace Vxa {
 
 	//  Implementation
 	private:
-	    bool onSelf (object_reference_t xSelfReference) const {
-		m_rpSelfProvider.setTo (
-		    new VScalarInstance<val_t, var_t>(
-			m_pCollection->type (), m_pCollection->element (xSelfReference)
+	    virtual bool onSelf (object_reference_t xSelfReference) const OVERRIDE {
+                m_rpSelfProvider.setTo (
+                    new VScalarInstance<val_t> (
+                        clusterType (), dynamic_cast<val_t>(clusterObject (xSelfReference))
 		    )
 		);
 		return true;
 	    }
-	    bool onSelf (object_reference_array_t const &rSelfReferences) const {
+	    virtual bool onSelf (object_reference_array_t const &rSelfReferences) const OVERRIDE {
 		m_rpSelfProvider.setTo (
-		    new CurrentSelf (m_pCollection, rSelfReferences, taskCursor ())
+		    new CurrentSelf (this, rSelfReferences, taskCursor ())
 		);
-		return true;
+                return true;
 	    }
 
 	//  State
 	private:
-	    typename collection_t::Reference const m_pCollection;
 	    provider_t &m_rpSelfProvider;
 	};
 
     //****************************************************************
     //  Construction
     public:
-	VCallType2 (cardinality_t cParameters, cardinality_t cTask, ICaller *pTask);
+        VCallType2 (
+            VCollection *pCluster, VString const &rMethodName, cardinality_t cParameters, cardinality_t cTask, ICaller *pTask, bool bIntensional
+        );
 	VCallType2 (ThisClass const &rOther);
 
     //  Destruction
@@ -209,11 +208,11 @@ namespace Vxa {
 
     //  Access
     private:
-	IVUnknown *caller () const;
+	virtual IVUnknown *caller () const OVERRIDE;
 
     //  Invocation
     public:
-	virtual bool invoke (VMethod *pMethod, VCollection *pCollection) const;
+	virtual bool invokeMethod (VMethod *pMethod) const OVERRIDE;
 	bool start (VTask *pTask) const;
 
     //  Parameter Acquisition
@@ -222,10 +221,10 @@ namespace Vxa {
 	bool onParameterRequest (VTask *pTask, unsigned int xParameter) const;
 	bool onParameterReceipt (VTask *pTask, unsigned int xParameter) const;
     public:
-	template <typename collection_t, typename provider_t> bool getSelfProviderFor (
-	    VTask *pTask, collection_t *pCollection, provider_t &rpSelfProvider
+	template <typename provider_t> bool getSelfProviderFor (
+            provider_t &rpSelfProvider, VTask *pTask
 	) const {
-	    (new SelfProviderFor<collection_t,provider_t> (m_pCaller, pTask,pCollection,rpSelfProvider))->discard ();
+	    (new SelfProviderFor<provider_t> (pTask, m_pCaller, rpSelfProvider))->discard ();
 	    return true;
 	}
 
@@ -246,10 +245,10 @@ namespace Vxa {
 	bool returnConstant (VString const &rConstant) const;
 
     //  ... objects:
-	template <typename T> bool returnObjects (VCollectableCollection *pCluster, T const &rT) const {
+	template <typename T> bool returnObjects (VCollection *pCluster, T const &rT) const {
 	    return raiseResultTypeException (typeid(*this), typeid (T));
 	}
-	bool returnObjects (VCollectableCollection *pCluster, object_reference_array_t const &rReferences) const;
+	bool returnObjects (VCollection *pCluster, object_reference_array_t const &rReferences) const;
 
     //  ... vectors:
 	bool returnVector (VkDynamicArrayOf<bool> const &rVector) const;
@@ -266,12 +265,12 @@ namespace Vxa {
 	bool returnVector (VkDynamicArrayOf<VString> const &rVector) const;
 
     //  ... status:
-	virtual /*override*/ bool returnError (VString const &rMessage) const;
-	virtual /*override*/ bool returnSNF () const;
-	virtual /*override*/ bool returnNA () const;
+	virtual bool returnError (VString const &rMessage) const OVERRIDE;
+	virtual bool returnSNF () const OVERRIDE;
+	virtual bool returnNA () const OVERRIDE;
 
     //  ... segments:
-	template <typename T> bool returnSegment (object_reference_array_t const &rInjection, VCollectableCollection *pCluster, T const &rT) const {
+	template <typename T> bool returnSegment (object_reference_array_t const &rInjection, VCollection *pCluster, T const &rT) const {
 	    return raiseResultTypeException (typeid(*this), typeid (T));
 	}
 
@@ -291,7 +290,7 @@ namespace Vxa {
 	bool returnSegment (object_reference_array_t const &rInjection, VkDynamicArrayOf<double> const &rValues) const;
 
 	bool returnSegment (object_reference_array_t const &rInjection, VkDynamicArrayOf<VString> const &rValues) const;
-	bool returnSegment (object_reference_array_t const &rInjection, VCollectableCollection *pCluster, object_reference_array_t const &rReferences) const;
+	bool returnSegment (object_reference_array_t const &rInjection, VCollection *pCluster, object_reference_array_t const &rReferences) const;
 
 	bool returnSegment (object_reference_array_t const &rInjection) const;
 
@@ -300,58 +299,6 @@ namespace Vxa {
     //  State
     private:
 	ICaller::Reference const m_pCaller;
-    };
-
-
-    /**************************************
-     *----  class VCallType2Importer  ----*
-     **************************************/
-
-    class Vxa_API VCallType2Importer : public VCallType2 {
-	DECLARE_FAMILY_MEMBERS (VCallType2Importer, VCallType2);
-
-	friend class VCallAgent;
-
-    //  Construction
-    public:
-	VCallType2Importer (VCallType2 const &rCallHandle);
-	VCallType2Importer (ThisClass const &rOther);
-
-    //  Destruction
-    public:
-	~VCallType2Importer ();
-
-    //  Parameter Acquisition
-    private:
-	VCallAgent *agent (VTask *pTask) const;
-    public:
-	template <typename scalar_return_t> bool getParameter (
-	    VTask *pTask, VImportableType *pType, scalar_return_t &rResult
-	) {
-	    return raiseParameterTypeException (pTask, typeid(*this), typeid (scalar_return_t));
-	}
-	bool getParameter (VTask *pTask, VImportableType *pType, bool_scalar_return_t &rResult);
-	bool getParameter (VTask *pTask, VImportableType *pType, short_scalar_return_t &rResult);
-	bool getParameter (VTask *pTask, VImportableType *pType, unsigned_short_scalar_return_t &rResult);
-	bool getParameter (VTask *pTask, VImportableType *pType, int_scalar_return_t &rResult);
-	bool getParameter (VTask *pTask, VImportableType *pType, unsigned_int_scalar_return_t &rResult);
-	bool getParameter (VTask *pTask, VImportableType *pType, float_scalar_return_t &rResult);
-	bool getParameter (VTask *pTask, VImportableType *pType, double_scalar_return_t &rResult);
-	bool getParameter (VTask *pTask, VImportableType *pType, VString_scalar_return_t &rResult);
-
-    //  Exception Generation
-    protected:
-	bool raiseParameterTypeException (
-	    VTask *pTask, std::type_info const &rOriginatorType, std::type_info const &rUnexpectedType
-	) const;
-    public:
-	bool raiseUnimplementedOperationException (
-	    VTask *pTask, std::type_info const &rOriginator, char const *pWhere
-	) const;
-
-    //  State
-    private:
-	VReference<VCallAgent> mutable m_pAgent;
     };
 }
 

@@ -117,7 +117,7 @@ struct UV_UVType {
 )
 
 #define UV_UV_Array(p) (\
-    (pointer_t)(&UV_UV_Preamble (p) + 1)\
+    (V::pointer_t)(&UV_UV_Preamble (p) + 1)\
 )
 
 #define UV_UV_ArrayAsType(p, type) (\

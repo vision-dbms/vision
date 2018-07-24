@@ -407,7 +407,7 @@ bool VkMessageReceivingAgent::ProcessEvent () {
     do {
 	switch (m_xIncomingState) {
 	case State_Ready:
-	    m_pIncomingCursor = (pointer_t)&m_iIncomingMessage.m_iHeader;
+	    m_pIncomingCursor = (V::pointer_t)&m_iIncomingMessage.m_iHeader;
 	    m_pIncomingLimit  = m_pIncomingCursor + sizeof (VkMessageHeader);
 
 	    m_xIncomingState = State_HeadArriving;
@@ -449,7 +449,7 @@ bool VkMessageReceivingAgent::ProcessEvent () {
 	    if (0 == m_iIncomingMessage.Size ())
 		m_xIncomingState = State_BodyArrived;
 	    else if (m_iIncomingMessage.RealizeBody ()) {
-		m_pIncomingCursor = (pointer_t)m_iIncomingMessage.Body ();
+		m_pIncomingCursor = (V::pointer_t)m_iIncomingMessage.Body ();
 		m_pIncomingLimit  = m_pIncomingCursor + m_iIncomingMessage.Size ();
 
 		m_xIncomingState = State_BodyArriving;
@@ -507,7 +507,7 @@ void VkMessageShippingAgent::ProcessEvent () {
 	switch (m_xOutgoingState) {
 	case State_Ready:
 	    m_iOutgoingMessage.PrepareOutgoingMessage (this);
-	    m_pOutgoingCursor = (pointer_t)&m_iOutgoingMessage.m_iHeader;
+	    m_pOutgoingCursor = (V::pointer_t)&m_iOutgoingMessage.m_iHeader;
 	    m_pOutgoingLimit  = m_pOutgoingCursor + sizeof (VkMessageHeader);
 
 	    m_xOutgoingState = State_HeadDeparting;
@@ -534,7 +534,7 @@ void VkMessageShippingAgent::ProcessEvent () {
 	    if (0 == m_iOutgoingMessage.Size ())
 		m_xOutgoingState = State_BodyDeparted;
 	    else {
-		m_pOutgoingCursor = (pointer_t)m_iOutgoingMessage.Body ();
+		m_pOutgoingCursor = (V::pointer_t)m_iOutgoingMessage.Body ();
 		m_pOutgoingLimit  = m_pOutgoingCursor + m_iOutgoingMessage.Size ();
 
 		m_xOutgoingState = State_BodyDeparting;

@@ -490,7 +490,7 @@ void VTransientServices::updateCamLogPath (char const *pPath) {
  **************************
  **************************/
 
-VString VTransientServices::getNSMessage () const {
+V::VString VTransientServices::getNSMessage () const {
     return m_iNSMessage;
 }
 void VTransientServices::setNSServer (char const *pServer) {

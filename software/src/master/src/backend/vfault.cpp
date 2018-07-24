@@ -593,7 +593,7 @@ PublicFnDef void FAULT_DisplayFaults (bool bShowErrors, bool bShowWarnings) {
  *  Note:
  *  	Saved to a string.
  *****/
-PublicFnDef void FAULT_DumpFaults (VString &strDump, bool bShowErrors, bool bShowWarnings) {
+PublicFnDef void FAULT_DumpFaults (V::VString &strDump, bool bShowErrors, bool bShowWarnings) {
     strDump.printf ("\n%u Faults not recorded during this session\n",
 	FAULT_SessionUnrecordedCount);
     strDump.printf ("\n%u Errors occurred during this session\n",

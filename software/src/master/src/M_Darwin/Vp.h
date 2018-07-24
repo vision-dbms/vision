@@ -1,27 +1,22 @@
-#ifndef Vp_Solaris_2x_Interface
-#define Vp_Solaris_2x_Interface
+#ifndef Vp_Linux_Interface
+#define Vp_Linux_Interface
 
 #include <sys/ioctl.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
 #include <sys/time.h>
 #include <sys/times.h>
-#include <sys/systeminfo.h>
 
 #include <dirent.h>
 
 #include <float.h>
-#include <ieeefp.h>
-#include <inttypes.h>
-#include <sunmath.h>
+#include <math.h>
 
 #include <search.h>
+#include <stdint.h>
 #include <unistd.h>
 
-#ifndef isfinite
-#define isfinite(r) finite(r)
-#endif
-#define NaNQ quiet_nan (0)
+#define NaNQ log(-1.0)
 
 #define _sysconf sysconf
 
@@ -40,23 +35,28 @@
 
 #define gethostid		Vk_gethostid
 
-#ifndef _LP64
-#define __int64			long long
-#else
-#define __int64			long
-#endif
-#define __int32			int
-#define __int16			short
-#define __int8			char
-
 #define USING(x) using x;
+#define REGISTER
 
+#ifndef DECLSPEC_DLLEXPORT
 #define DECLSPEC_DLLEXPORT
+#endif
+
+#ifndef DECLSPEC_DLLIMPORT
 #define DECLSPEC_DLLIMPORT
+#endif
 
-//  C++ Template Use Fixups
-#define BOGUS_TEMPLATE template
-#define BOGUS_TYPENAME typename
-
+#ifndef __int64
+#define __int64			long long
+#endif
+#ifndef __int32
+#define __int32			int
+#endif
+#ifndef __int16
+#define __int16			short
+#endif
+#ifndef __int8
+#define __int8			char
+#endif
 
 #endif

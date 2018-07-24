@@ -38,7 +38,7 @@ namespace Vca {
 
     //  Execution
     private:
-	bool start_();
+	virtual bool start_() OVERRIDE;
     };
 }
 

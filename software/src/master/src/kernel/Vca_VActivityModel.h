@@ -361,16 +361,16 @@ namespace Vca {
 
 	//  Access
 	protected:
-	    void getAuthority_(IActivity::Reference &rpAuthority);
-	    void getDescription_(VString &rDescription) const;
+	    virtual void getAuthority_(IActivity::Reference &rpAuthority) OVERRIDE;
+	    virtual void getDescription_(VString &rDescription) const OVERRIDE;
 
-	    bool getLocalStartTime_(VTime &rResult) const;
-	    bool getLocalEndTime_(VTime &rResult) const;
-	    bool getLocalEndTimeEstimate_(VTime &rResult) const;
+	    virtual bool getLocalStartTime_(VTime &rResult) const OVERRIDE;
+	    virtual bool getLocalEndTime_(VTime &rResult) const OVERRIDE;
+	    virtual bool getLocalEndTimeEstimate_(VTime &rResult) const OVERRIDE;
 
-	    bool getRemoteStartTime_(VTime &rResult) const;
-	    bool getRemoteEndTime_(VTime &rResult) const;
-	    bool getRemoteEndTimeEstimate_(VTime &rResult) const;
+	    virtual bool getRemoteStartTime_(VTime &rResult) const OVERRIDE;
+	    virtual bool getRemoteEndTime_(VTime &rResult) const OVERRIDE;
+	    virtual bool getRemoteEndTimeEstimate_(VTime &rResult) const OVERRIDE;
 	public:
 	    IActivity* activity () const {
 		return authority ();
@@ -390,7 +390,7 @@ namespace Vca {
 
 	//  Update
 	protected:
-	    void onMonitorCompletion_(VActivityMonitor *pMonitor, VTime const &rEndTime);
+	    virtual void onMonitorCompletion_(VActivityMonitor *pMonitor, VTime const &rEndTime) OVERRIDE;
 
 	//  Distribution
 	public:
@@ -398,11 +398,11 @@ namespace Vca {
 
 	//  Monitoring
 	protected:
-	    virtual void onMonitorCreation_(VActivityMonitor *pMonitor);
-	    virtual void onMonitorDeletion_(VActivityMonitor *pMonitor);
-	    virtual void sendTo_(VActivityMonitor *pMonitor, IActivitySink *pActivitySink);
-	    virtual void supplyEvents_(VActivityMonitor *pMonitor, ITicketSink *pTicketSink);
-	    virtual void supplyEndErrEvents_(VActivityMonitor *pMonitor, ITicketSink *pTicketSink);
+	    virtual void onMonitorCreation_(VActivityMonitor *pMonitor) OVERRIDE;
+	    virtual void onMonitorDeletion_(VActivityMonitor *pMonitor) OVERRIDE;
+	    virtual void sendTo_(VActivityMonitor *pMonitor, IActivitySink *pActivitySink) OVERRIDE;
+	    virtual void supplyEvents_(VActivityMonitor *pMonitor, ITicketSink *pTicketSink) OVERRIDE;
+	    virtual void supplyEndErrEvents_(VActivityMonitor *pMonitor, ITicketSink *pTicketSink) OVERRIDE;
 
 	//  State
 	private:

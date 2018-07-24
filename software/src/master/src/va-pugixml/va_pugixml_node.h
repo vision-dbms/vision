@@ -33,6 +33,10 @@ namespace VA {
 	class Node : public Vxa::VCollectableObject {
 	    DECLARE_CONCRETE_RTTLITE (Node, Vxa::VCollectableObject);
 
+        //  Aliases
+        public:
+            typedef V::VString VString;
+
 	//  Class Builder
 	public:
 	    class ClassBuilder : public Object::ClassBuilder {

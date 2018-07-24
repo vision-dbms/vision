@@ -107,11 +107,11 @@ Vca_IDataSource_InstantiationsForPODT (Vca::U64);
 #ifdef Vca_IDataSource_Instantiations1
 Vca_IDataSource_InstantiationsForREFT (V::uuid_t);
 Vca_IDataSource_InstantiationsForREFT (V::VBlob);
-Vca_IDataSource_InstantiationsForREFT (VString);
+Vca_IDataSource_InstantiationsForREFT (V::VString);
 Vca_IDataSource_InstantiationsForREFT (V::VTime);
 
-Vca_IDataSource_InstantiationsForArrayOf (VString);
-Vca_IDataSource_InstantiationsForPODT (Vca::IDataSource<VString const&>*);
+Vca_IDataSource_InstantiationsForArrayOf (V::VString);
+Vca_IDataSource_InstantiationsForPODT (Vca::IDataSource<V::VString const&>*);
 #endif  // defined(Vca_IDataSource_Instantiations1)
 
 #endif	// defined(USING_HIDDEN_DEFAULT_VISIBILITY) ...

@@ -30,7 +30,7 @@
 
 #include "VTransientServices.h"
 
-typedef VkSetOf<VString, VString const&, char const*> ActionInfos_t;
+typedef VkSetOf<V::VString, V::VString const&, char const*> ActionInfos_t;
 extern     Vca::VGoferInterface<Vca::IInfoServer>::Reference g_pInfoServerGofer;
 
 /*****************************
@@ -42,6 +42,7 @@ extern     Vca::VGoferInterface<Vca::IInfoServer>::Reference g_pInfoServerGofer;
  *****************************/
 
 namespace VcaApps {
+    typedef V::VString VString;
     class VNotify : public Vca::VClientApplication {
 	DECLARE_CONCRETE_RTT (VNotify, Vca::VClientApplication);
 
@@ -55,10 +56,10 @@ namespace VcaApps {
 
     //  Startup
     private:
-	bool start_();
+	virtual bool start_() OVERRIDE;
 
     public:
-	void sendNotice (Vca::IInfoServer *pInterface, int xType, VString  rTarget);
+	void sendNotice (Vca::IInfoServer *pInterface, int xType, VString rTarget);
 
     private:
 	VkDynamicArrayOf<VString> m_iInfoArray;

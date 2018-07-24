@@ -35,10 +35,14 @@
  ***********************/
 
 namespace Vsa {
+    typedef V::VString VString;
+
     typedef Vca::IObjectSource IObjectSource;
     typedef Vca::IObjectSink   IObjectSink;
 
     typedef ::IVUnknown IVUnknown;
+
+    typedef Vca::U32 request_index_t;
 }
 
 

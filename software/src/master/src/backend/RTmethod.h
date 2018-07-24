@@ -70,7 +70,7 @@ private:
 
 //  Canonicalization
 private:
-    virtual /*override*/ bool getCanonicalization_(VReference<rtVSTORE_Handle> &rpStore, DSC_Pointer const &rPointer);
+    virtual bool getCanonicalization_(VReference<rtVSTORE_Handle> &rpStore, DSC_Pointer const &rPointer) OVERRIDE;
 
 //  Access
 private:
@@ -93,10 +93,10 @@ public:
 
 //  Dictionary
 private:
-    virtual /*override*/ rtDICTIONARY_Handle *getDictionary_(DSC_Pointer const &rPointer) const {
+    virtual rtDICTIONARY_Handle *getDictionary_(DSC_Pointer const &rPointer) const OVERRIDE {
 	return static_cast<rtDICTIONARY_Handle*>(TheMethodClassDictionary().ObjectHandle ());
     }
-    virtual /*override*/ rtPTOKEN_Handle *getPToken_() const {
+    virtual rtPTOKEN_Handle *getPToken_() const OVERRIDE {
 	Vdd::Store::Reference pMyStore;
 	getMyStore (pMyStore);
 	return pMyStore->getPToken ();
@@ -104,7 +104,7 @@ private:
 
 //  Maintenance
 private:
-    virtual /*override*/ bool align_() {
+    virtual bool align_() OVERRIDE {
 	return align ();
     }
 public:
@@ -116,7 +116,7 @@ protected:
 
 //  Display and Inspection
 public:
-    virtual /*override*/ unsigned __int64 getClusterSize ();
+    virtual unsigned __int64 getClusterSize () OVERRIDE;
 };
 
 

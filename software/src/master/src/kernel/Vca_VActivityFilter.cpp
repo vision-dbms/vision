@@ -236,15 +236,15 @@ namespace Vca {
 
     //  Access
     protected:
-	void getDescription_(VString &rResult) const;
+	virtual void getDescription_(VString &rResult) const OVERRIDE;
 
     //  LifespanMonitor Callbacks
     private:
-	void OnEndEvent_(IEvent* pEvent, IEvent* pProxy, VTime const& rTimestamp);
-	void OnErrorEvent_(IEvent* pEvent, IEvent* pProxy, VTime const& rTimestamp, IError* pInterface, VString const& rMessage);
-	void OnFailureEvent_(IEvent* pEvent, IEvent* pProxy, VTime const& rTimestamp, IError* pInterface, VString const& rMessage);
+	virtual void OnEndEvent_(IEvent* pEvent, IEvent* pProxy, VTime const& rTimestamp) OVERRIDE;
+	virtual void OnErrorEvent_(IEvent* pEvent, IEvent* pProxy, VTime const& rTimestamp, IError* pInterface, VString const& rMessage) OVERRIDE;
+	virtual void OnFailureEvent_(IEvent* pEvent, IEvent* pProxy, VTime const& rTimestamp, IError* pInterface, VString const& rMessage) OVERRIDE;
 
-	void onCompletion_();
+	virtual void onCompletion_() OVERRIDE;
 
     //  Forwarding
     private:
@@ -257,17 +257,17 @@ namespace Vca {
     private:
 	bool ripen ();
 
-	bool ripenedBy (Harvester::Item const* pItem, Harvester::Item::Reference &rpNextItem);
-	bool ripenedBy (VTime const& rTime, Harvester::Item::Reference &rpNextItem);
+	virtual bool ripenedBy (Harvester::Item const* pItem, Harvester::Item::Reference &rpNextItem) OVERRIDE;
+	virtual bool ripenedBy (VTime const& rTime, Harvester::Item::Reference &rpNextItem) OVERRIDE;
 
-	bool ripensBefore (Item const* pItem) const;
-	bool ripensAfter  (Item const* pItem) const;
+	virtual bool ripensBefore (Item const* pItem) const OVERRIDE;
+	virtual bool ripensAfter  (Item const* pItem) const OVERRIDE;
 
-	bool ripensBefore (VTime const& rTime) const;
-	bool ripensAfter  (VTime const& rTime) const;
+	virtual bool ripensBefore (VTime const& rTime) const OVERRIDE;
+	virtual bool ripensAfter  (VTime const& rTime) const OVERRIDE;
 
-	bool startedBefore (VTime const& rTime) const;
-	bool startedAfter  (VTime const& rTime) const;
+	virtual bool startedBefore (VTime const& rTime) const OVERRIDE;
+	virtual bool startedAfter  (VTime const& rTime) const OVERRIDE;
 
     //  State
     private:

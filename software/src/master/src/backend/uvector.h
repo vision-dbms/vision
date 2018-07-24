@@ -137,7 +137,7 @@ protected:
     };
 
 private:
-    virtual /*override*/ bool align_();
+    virtual bool align_() OVERRIDE;
 protected:
     bool align ();
     bool alignUsing (AlignmentFillProcessor &rFillProcessor);
@@ -217,7 +217,7 @@ protected:
 
 //  Forwarding
 private:
-    bool forwardToSpace_(M_ASD *pSpace);
+    virtual bool forwardToSpace_(M_ASD *pSpace) OVERRIDE;
 
 //  Update
 protected:
@@ -233,17 +233,17 @@ protected:
 
 //  Callbacks
 public:
-    void CheckConsistency ();
+    virtual void CheckConsistency () OVERRIDE;
 
 protected:
-    bool PersistReferences ();
+    virtual bool PersistReferences () OVERRIDE;
 
 //  Display and Inspection
 public:
-    virtual /*override*/ unsigned int getPOPCount () const {
+    virtual unsigned int getPOPCount () const OVERRIDE {
 	return 3;
     }
-    virtual /*override*/ bool getPOP (M_POP *pResult, unsigned int xPOP) const;
+    virtual bool getPOP (M_POP *pResult, unsigned int xPOP) const OVERRIDE;
 };
 
 
@@ -535,7 +535,7 @@ PublicFnDecl M_CPD* UV_LCAssign (
 PublicFnDecl M_CPD* UV_LCAssignScalar (
     M_CPD*			targetCPD,
     rtLINK_CType*		linkc,
-    pointer_t			sourceValueAddress
+    V::pointer_t		sourceValueAddress
 );
 
 PublicFnDecl void UV_Print (

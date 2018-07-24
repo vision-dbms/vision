@@ -58,6 +58,7 @@ class ABSTRACT VComputationUnit : public VInternalGroundStore {
 //  Aliases
 public:
     typedef Vdd::Store Store;
+    typedef V::VString VString;
 
 //  Friends
     friend class VComputationList;
@@ -193,7 +194,6 @@ public:
 			}
 			rpGofer.claim (pObjectGofer);
 		    }
-
 		    typename Vca::VGoferInterface<Vca::IDataSource<interface_t*> >::Reference pSourceGofer;
 		    if (m_pEvaluation->newClientObjectGofer (pSourceGofer)) {
 			pObjectGofer.setTo (new Vca::Gofer::Sourced<interface_t> (pSourceGofer));
@@ -206,9 +206,8 @@ public:
 		}
 		return rpGofer.isntNil ();
 	    }
-		
 
-	    //  State
+        //  State
 	private:
 	    Vsa::VEvaluation::Reference   const m_pEvaluation;         
 	    icollection_gofer_t::Reference	m_pICollectionGofer;
@@ -614,8 +613,8 @@ public:
 	return *m_pDuc;
     }
 
-    bool getEvaluation (Vsa::VEvaluation::Reference &rpEvaluation) const {
-	return channel_()->getEvaluation (rpEvaluation);
+    bool getEvaluation (Vsa::VEvaluation::Reference &rpEvaluation, Vsa::request_index_t xRequestInProgress) const {
+	return channel_()->getEvaluation (rpEvaluation, xRequestInProgress);
     }
     unsigned int largeTaskSize () const {
 	return m_pContext->largeTaskSize ();

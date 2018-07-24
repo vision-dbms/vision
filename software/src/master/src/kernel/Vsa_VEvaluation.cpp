@@ -48,9 +48,9 @@ namespace Vsa {
     
     //  VMessageManager Methods
   public:
-    void onEnd ();
-    void onError (Vca::IError *pError, VString const &rMessage);
-    void onSent ();
+    virtual void onEnd () OVERRIDE;
+    virtual void onError (Vca::IError *pError, VString const &rMessage) OVERRIDE;
+    virtual void onSent () OVERRIDE;
     
   protected:
     Vsa::IEvaluatorClient::Reference m_pClient;
@@ -196,6 +196,14 @@ void Vsa::VEvaluation::cancel () {
 void Vsa::VEvaluation::getDescription_(VString &rResult) const {
     BaseClass::getDescription_(rResult);
     rResult << ": " << queryString ();
+}
+
+bool Vsa::VEvaluation::getEvaluation (Reference &rpEvaluation, request_index_t xRequest) {
+    if (index () != xRequest)
+        return false;
+
+    rpEvaluation.setTo (this);
+    return true;
 }
 
 void Vsa::VEvaluation::getVisionExpression (

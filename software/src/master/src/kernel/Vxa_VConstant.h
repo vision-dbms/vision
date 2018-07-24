@@ -34,7 +34,7 @@ namespace Vxa {
 
     //  Construction
     public:
-	VConstant (VString const &rName, Val_T iVal) : BaseClass (rName), m_iVar (iVal) {
+	VConstant (Val_T iVal) : m_iVar (iVal) {
 	}
 
     //  Destruction
@@ -50,10 +50,10 @@ namespace Vxa {
 
     //  Invocation
     private:
-	virtual bool invoke (VCallType1 const &rCallHandle, VCollection *pCollection) {
+	virtual bool invokeCall (VCallType1 const &rCallHandle) OVERRIDE {
 	    return rCallHandle.returnConstant (value ());
 	}
-	virtual bool invoke (VCallType2 const &rCallHandle, VCollection *pCollection) {
+	virtual bool invokeCall (VCallType2 const &rCallHandle) OVERRIDE {
 	    return rCallHandle.returnConstant (value ());
 	}
 
