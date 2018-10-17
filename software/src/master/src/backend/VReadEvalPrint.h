@@ -73,6 +73,9 @@ private:
 //  Query
 protected:
     bool isAController () const;
+    bool isClientQuery () const {
+        return m_bClientQuery;
+    }
 
 //  Execution
 protected:
@@ -124,7 +127,8 @@ protected:
 					m_bExecutionLogged,
 					m_bNeedingSetup,
 					m_bVerboseStats,
-					m_bGCEnabled;
+					m_bGCEnabled,
+                                        m_bClientQuery;
 };
 
 

@@ -105,7 +105,8 @@ void VReadEvalPrintController::QueryContext::onQueryInProgress (VReadEvalPrintCo
 }
 
 void VReadEvalPrintController::QueryContext::onQueryCompleted (VReadEvalPrintController *pTask) {
-    m_xRequestInProgress++;
+    if (pTask->isClientQuery ())
+        m_xRequestInProgress++;
     m_pQuery.clear ();
 }
 
@@ -150,6 +151,7 @@ VReadEvalPrintController::VReadEvalPrintController (
   , m_bNeedingSetup		(true)
   , m_bVerboseStats		(true)
   , m_bGCEnabled                (true)
+  , m_bClientQuery              (true)
 {
     setContextTo (&m_iQueryContext);
 
@@ -529,6 +531,7 @@ void VReadEvalPrintController::ScheduleEvaluation () {
 
 void VReadEvalPrintController::ConcludeEvaluation (bool fDisplayingOutput) {
     m_iQueryContext.onQueryCompleted (this);
+    m_bClientQuery = true;
 
     if (m_pOutputBuffer.referent () != m_pInitialOutputBuffer) {
 	if (fDisplayingOutput)
@@ -560,8 +563,10 @@ void VReadEvalPrintController::ConcludeEvaluation (bool fDisplayingOutput) {
 void VReadEvalPrintController::REPStart () {
     setContinuationTo (&VReadEvalPrintController::REPRead);
 
-    if (m_iThisSource.length () > 0)
+    if (m_iThisSource.length () > 0) {
+        m_bClientQuery = false;
 	ProcessCommand ("?g");
+    }
 }
 
 /************************
