@@ -306,8 +306,7 @@ void VReadEvalPrintController::ProcessCommand (char const *pLine) {
 	m_iEndTime = m_iMidTime;
 
     /*----  ...and run it.  ----*/
-        if (m_pBlock.isntNil ())
-	    setContinuationTo (&VReadEvalPrintController::REPEval);
+        RunQuery ();
 
         break;
     /********************************************************************
@@ -401,8 +400,7 @@ void VReadEvalPrintController::ProcessCommand (char const *pLine) {
 	m_iEndTime = m_iMidTime;
 
     /*----  ...and run it.  ----*/
-        if (m_pBlock.isntNil ())
-	    setContinuationTo (&VReadEvalPrintController::REPRepeat);
+        RunQuery ();
 
         break;
 
@@ -495,8 +493,7 @@ void VReadEvalPrintController::ProcessCommand (char const *pLine) {
 	m_iEndTime = m_iMidTime;
 
     /*----  ...and run it.  ----*/
-        if (m_pBlock.isntNil ())
-	    setContinuationTo (&VReadEvalPrintController::REPEval);
+        RunQuery ();
 
         break;
 	
@@ -509,6 +506,19 @@ void VReadEvalPrintController::ProcessCommand (char const *pLine) {
 /***********************************************
  *****  Evaluation Scheduling and Cleanup  *****
  ***********************************************/
+
+void VReadEvalPrintController::RunQuery () {
+    if (m_pBlock.isntNil ())
+        setContinuationTo (&VReadEvalPrintController::REPEval);
+    else {
+        EndQuery ();
+    }
+}
+
+void VReadEvalPrintController::EndQuery () {
+    m_iQueryContext.onQueryCompleted (this);
+    m_bClientQuery = true;
+}
 
 void VReadEvalPrintController::ScheduleEvaluation () {
     disableGC ();
@@ -530,8 +540,7 @@ void VReadEvalPrintController::ScheduleEvaluation () {
 }
 
 void VReadEvalPrintController::ConcludeEvaluation (bool fDisplayingOutput) {
-    m_iQueryContext.onQueryCompleted (this);
-    m_bClientQuery = true;
+    EndQuery ();
 
     if (m_pOutputBuffer.referent () != m_pInitialOutputBuffer) {
 	if (fDisplayingOutput)

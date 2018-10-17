@@ -86,6 +86,9 @@ protected:
 protected:
     void ProcessCommand (char const *pLine);
 
+    void RunQuery ();
+    void EndQuery ();
+
     void ScheduleEvaluation ();
     void ConcludeEvaluation (bool fDisplayingOutput = true);
 
