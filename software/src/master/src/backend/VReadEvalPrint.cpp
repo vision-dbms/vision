@@ -149,6 +149,7 @@ VReadEvalPrintController::VReadEvalPrintController (
   , m_bExecutionLogged		(true) 
   , m_bNeedingSetup		(true)
   , m_bVerboseStats		(true)
+  , m_bGCEnabled                (true)
 {
     setContextTo (&m_iQueryContext);
 
