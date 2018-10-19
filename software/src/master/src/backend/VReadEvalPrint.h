@@ -73,6 +73,9 @@ private:
 //  Query
 protected:
     bool isAController () const;
+    bool isClientQuery () const {
+        return m_bClientQuery;
+    }
 
 //  Execution
 protected:
@@ -82,6 +85,9 @@ protected:
 //  Execution Support
 protected:
     void ProcessCommand (char const *pLine);
+
+    void RunQuery ();
+    void EndQuery ();
 
     void ScheduleEvaluation ();
     void ConcludeEvaluation (bool fDisplayingOutput = true);
@@ -124,7 +130,8 @@ protected:
 					m_bExecutionLogged,
 					m_bNeedingSetup,
 					m_bVerboseStats,
-					m_bGCEnabled;
+					m_bGCEnabled,
+                                        m_bClientQuery;
 };
 
 
