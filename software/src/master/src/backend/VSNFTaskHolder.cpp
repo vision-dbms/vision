@@ -370,7 +370,7 @@ void VSNFTaskHolder::GetParameter (IVSNFTaskHolder *pRole, unsigned int xParamet
 		    g_iLogger.log (taskId (), sWhere, dynamicArray);
 
 		pImplementation->SetToDouble (xParameter, dynamicArray);
-	    } else if (rtype == RTYPE_C_FloatUV && store->NamesTheDoubleClass ()) {
+	    } else if (rtype == RTYPE_C_FloatUV && store->NamesTheFloatClass ()) {
     // ... float cast to double, ...
 		float const *const pParameterArray = rDatum;
 		VkDynamicArrayOf<Vca::F64> dynamicArray(elementCount);
