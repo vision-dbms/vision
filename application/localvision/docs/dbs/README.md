@@ -1,0 +1,1 @@
+The material in this directory describes Vision's original bulk loader.  Superceded by Vision's newer _DataFeed_ classes, the original loader described here is deprecated and may be removed or disabled by future software updates.
