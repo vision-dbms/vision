@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title>Vision Tutorial 1: Vision Basics</title>
+</head>
+<body>
+<body bgcolor=white>
+
+<h2>Vision Tutorial 1: Vision Basics</h2>
+
+<p>
+| <a href="FHome.htm">Home</a> 
+| <a href="vtutor.htm">Tutorials</a> 
+| <a href="clNumber.htm">Numbers</a>
+| <a href="clString.htm">Strings</a>
+| <a href="Lang.htm">Language</a> | 
+<hr >
+
+<h3>Topics Covered:</h3>
+
+<ul type= square>
+<li><a href="#Working with Numbers and Strings">Working with
+Numbers and Strings</a>
+<li><a href="#Printing">Printing</a>
+<li><a href="#Parameters">Parameters</a>
+<li><a href="#Programs">Programs</a>
+<li><a href="#Variables">Variables</a>
+<li><a href="#SeeAlso:">See Also:</a> 
+</ul>
+<hr>
+
+<blockquote><hr>
+<center><b><font size+1>Reminder!</font></b> </a></center>
+To run these examples, you should first start a new session then load the sample database using:
+<pre><tt><b>     "/localvision/samples/general/sample.load" asFileContents evaluate ; 
+</b></tt></pre>
+Any other files referenced can be read from the <i>/localvision/samples/general/</i>
+directory.
+
+<p>
+<b>Note:</b> The <i>sample.load</i> file runs by default on a <i>Unix</i> environment.  If you are using a <i>Windows NT</i> platform, this location may be prefixed by a drive  and optional path (e.g. <i>d:/visiondb/localvision/samples/general/sample.load</i>).  Check with your Vision Administrator for further details.
+<hr></blockquote>
+
+<hr>
+
+<a name="Working with Numbers and Strings"><h3><b>Working with Numbers and Strings</b></h3></a>
+
+<p>Type the expression:
+
+<ul>
+<pre><b>3</b></pre>
+</ul>
+
+Submit the request to Vision. You should see
+
+<ul>
+<pre><b>3</b></pre>
+</ul>
+
+displayed as the result.
+
+<p>Now type: 
+
+<ul>
+<pre><b>1.23</b></pre>
+</ul>
+
+You will see:
+
+<ul>
+<pre><b>1.23</b></pre>
+</ul>
+
+displayed. In fact, if you submit any number - positive, negative, integer,
+or decimal - Vision will respond by redisplaying the number you requested
+in the Output Window. Vision can accomplish this feat with strings as well.
+A string is any combination of characters enclosed in double quotes.
+
+<p>For example, type: 
+
+<ul>
+<pre><b>"This is a string"</b></pre>
+</ul>
+
+and submit this request. You will see: 
+
+<ul>
+<pre><b>This is a string</b></pre>
+</ul>
+
+displayed. Vision can do more than merely redisplay whatever you submit.
+For example, type: 
+
+<ul>
+<pre><b>22 + 5</b></pre>
+</ul>
+
+The answer, 27, will be displayed. Try this with strings. For example,
+type: 
+
+<ul>
+<pre><b>"This is a string" + 5</b></pre>
+</ul>
+
+You should see:
+
+<ul>
+<pre><b>>>> Selector '+' Not Found <<< 
+     NA</b></pre>
+</ul>
+
+displayed. What does this response mean and why was it only displayed
+after you tried to add 5 to a string? When you submit the request <i>22
++ 5</i>, you are asking Vision to perform the addition operation between
+two numbers, 22 and 5. Since this is a defined operation, Vision complies
+with your request by performing the calculation and displaying the result.
+When you ask Vision to add 5 to a string, Vision complains because the
+addition operation is not defined for strings. The <a href="Error.htm#snf">Selector
+Not Found</a> response identifies the specific operation that Vision could
+not perform. In this case, the operation is <i>;</i>
+
+<p>Now try this experiment. Submit the request:
+
+<ul>
+<pre><b>"This is a string" count</b></pre>
+</ul>
+
+You should see: 
+
+<ul>
+<pre><b>16</b></pre>
+</ul>
+
+The count operation is defined to count the number of characters in
+a string. The answer indicates that the supplied string contains 16 characters.
+
+<p>Submit:
+
+<ul>
+<pre><b>3 count</b></pre>
+</ul>
+
+<p>You should see
+
+<ul>
+<pre><b> > Selector 'count' Not Found <<< 
+ NA</b></pre>
+</ul>
+
+If you ask Vision to perform the operation <i>count</i> for a string,
+Vision complies by counting the number of characters in the string. When
+you ask Vision to perform the <i>count</i> operation on a number, Vision
+complains because this operation is not defined for numbers. In this case,
+the <a href="Error.htm#snf">Selector Not Found</a> response specifically
+identifies that <i>count</i> is the operation that could not be performed.
+
+
+<p>Now submit: 
+
+<ul>
+<pre><b>"This is a string" count + 3</b></pre>
+</ul>
+
+You should see: 
+
+<ul>
+<pre><b>19.00</b></pre>
+</ul>
+
+Although you cannot add 3 to a string, you can add 3 to the number of
+characters in the string. In this case, Vision counts that there are 16
+characters in the supplied string, adds 3 to this number, and displays
+the result of 19. 
+
+<p>This may be a good time to step back and explore what is really happening
+inside Vision. The basic unit of information in Vision is known as an 
+<a href="Fund.htm#objects">Object</a>. For example, the number 3, the 
+string "This is a string", GM's common stock, and a list of companies 
+are all objects in Vision. As you have seen in the above examples, 
+different operations are defined for different types of objects. 
+Arithmetic operations such as + are meaningful with numbers but not with strings. 
+The <i>count</i> operation is meaningful with strings but not with numbers. 
+
+<p>Similar kinds of objects are organized into <a href="Fund.htm#class">Classes</a>.
+For example 3, 17, and 1.75 are all part of the class Number and "a",
+"This is a string", and "3" are all part of the class String. Objects in a class 
+are referred to as <a href="Fund.htm#instance">Instances</a>
+of that class. For example, 3 is an instance of the class Number. Objects
+in a class all respond to a set of operations defined for that class. In
+the Vision language, operations are known as <a href="Fund.htm#message">Messages</a>.
+A request for an object to carry out one of its operations is known as
+<b>Sending A Message</b>. All the instances in a class respond to the same
+set of messages. 
+
+<p>In the example: 
+
+<ul>
+<pre><b>"This is a string" count + 3 </b></pre>
+</ul>
+
+the message <i>count</i> is sent to the string "This is a string"
+and the number 16 is returned. The message <i>+ 3</i> is then automatically
+sent to the number 16, producing the result 19. In the example: 
+
+<ul>
+<pre><b>3 count</b></pre>
+</ul>
+
+the message <i>count</i> is sent to the number 3. Since the class Number
+has no definition for the message <i>count</i>, the <a href="Error.htm#snf">
+Selector 'count' Not Found</a> response is displayed. 
+
+<p>All objects in Vision repond to a set of messages. All objects respond
+to the message <a href="mObject.htm#displayMessages">displayMessages</a> by displaying
+the list of messages defined for object. For example, type: 
+
+<ul>
+<pre><b>3 displayMessages</b></pre>
+</ul>
+
+Your should see the messages that are valid to send to the number 3.
+The list of messages is expanded over time. The <i>displayMessages</i> message
+will always provide an up-to-date list. 
+
+<hr>
+
+<a name="Printing"><h3><b>Printing</b></h3></a>
+
+<p>All objects in the system have a default way in which they print. For
+example, integers are right justified in a 9 character field and print
+with no decimal places and decimal numbers are right justified in a 9 character
+field and print with 2 decimal places. Strings are left justified when
+they are printed. 
+
+<p>When you submit a request, Vision automatically sends the message <a href="Lang.htm#printing">print</a>
+to the final result. In other words, when you submit the request: </p>
+
+<ul>
+<pre><b>3</b></pre>
+</ul>
+
+Vision actually evaluates the expression: 
+
+<ul>
+<pre><b>3 print</b></pre>
+</ul>
+
+and therefore prints the value 3 when it is done. Try submitting the
+request: 
+
+<ul>
+<pre><b>3 print</b></pre>
+</ul>
+
+You will see the result: 
+
+<ul>
+<pre><b>3         3</b></pre>
+</ul>
+
+The 3 is printed twice. The first 3 is the one you explicitly requested;
+the second is Vision automatically sending the <i>print</i> message to
+the result. Both versions are printed in 9 character positions; 8 blanks
+followed by the number. 
+
+<p>You can alter the format of the result. For instance, suppose you wanted
+to print the number 1.1 to 3 decimals places. Submit the expression: </p>
+
+<ul>
+<pre><b>1.1 print: 8.3</b></pre>
+</ul>
+
+You will see the result: 
+
+<ul>
+<pre><b>1.100 1.10</b></pre>
+</ul>
+
+The first value is the result of the <i>print:</i> message. The second
+value is again the result of Vision's automatic print feature. To suppress
+this second value, place a semi-colon at the end of your input line as
+shown below: 
+
+<ul>
+<pre><b>1.1 print: 8.3 ;</b></pre>
+</ul>
+
+You will see the result:
+
+<ul>
+<pre><b>1.100</b></pre>
+</ul>
+
+The print format of 8.3 indicates that you wanted your result printed
+in 8 character positions with 3 decimal places to the right of the decimal.
+The total character width of 8 includes the space required for the decimal
+point and digits. 
+
+<p>Many other formatting tools are available for <a href="Lang.htm#printing">printing</a>.
+A few simple messages are described below.
+
+<p>To print the number 5 million with commas, type the following: 
+
+<ul>
+<pre><b>5000000 printWithCommas: 12 ;</b></pre>
+</ul>
+
+You should see:
+
+<ul>
+<pre><b>5,000,000</b></pre>
+</ul>
+
+To start a new line after the value is printed use the <i>printNL</i>
+or <i>printNL:</i> message. For example, type: 
+
+<ul>
+<pre><b>3 printNL</b></pre>
+</ul>
+
+You should see: 
+
+<ul>
+<pre><b>3 
+3</b></pre>
+</ul>
+
+The second 3 is the result of Vision's automatic print message. It appears
+on a separate line because the <i>printNL</i> message automatically prints
+a carriage return after the first 3. In both cases, the number is printed
+with 9 characters. 
+
+<p>To left justify a number, send it the <i>print:</i> message with a negative
+value for the parameter. For example, the expression: 
+
+<ul>
+<pre><b>3 printNL: -9</b></pre>
+</ul>
+
+displays the output: 
+
+<ul>
+<pre><b>3########        (where # indicates a blank space) 
+########3</b></pre>
+</ul>
+
+The first 3 is left justified in 9 character positions. The second 3
+is the result of Vision's automatic print message which right justifies
+the value in 9 character positions. It appears on a separate line because
+the <i>printNL:</i> message automatically prints a carriage return after
+the first 3. 
+
+<p>By default, all characters in a string are printed. No truncation or
+padding occurs. The <i>print:</i> message can be used to control the output
+width of a string. The value after the : indicates the number of characters
+that should be output. Strings containing fewer characters than the supplied
+width are padded with the appropriate number of blanks on the right (i.e.,
+they are left-justified) by default. A String containing more characters
+than the supplied width will have its rightmost characters truncated. 
+
+<p>For example, the expression:
+
+<ul>
+<pre><b>"xyz" print: 2 ;</b></pre>
+</ul>
+
+displays
+
+<ul>
+<pre><b>xy</b></pre>
+</ul>
+
+and the expression: 
+
+<ul>
+<pre><b>"xyz" print: 10 ;</b></pre>
+</ul>
+
+displays the output: 
+
+<ul>
+<pre><b>xyz#######       (where # indicates a blank space) </pre></b>
+</ul>
+
+To right justify a string, send it the <i>print: </i>message with a
+negative value for the parameter. For example, the expression: 
+
+<ul>
+<pre><b>"x" print: -20 ;</b></pre>
+</ul>
+
+Produces the output:
+
+<ul>
+<pre>      #19 spaces                <b>x</b></pre>
+</ul>
+
+The message <i>center:</i> can be sent to a string to center it over
+a specified number of columns. For example to center a title over the 80
+columns type:
+
+<ul>
+<pre><b>"My Title" center: 80 </b></pre>
+</ul>
+
+You should see:
+
+<ul>
+<pre><b>             My Title</b></pre>
+</ul>
+
+The message <i>centerNL</i>: works in the same way as <i>center:</i>,
+but follows the output by a carriage return. 
+
+<p>
+<hr>
+
+<a name="Parameters"><h3><b>Parameters</b></h3></a>
+
+<p>The <i>print:</i> message differs from the standard print message in
+one important way; it has a parameter. A <a href="Lang.htm#parameter">Parameter</a>
+is an extra piece of information needed to carry out the message. In the
+case of the <i>print: </i>message, the parameter provides information regarding
+the column width and number of decimal places to use when printing the
+value. In the example: 
+
+<ul>
+<pre><b>1.1 print: 8.3 ;</b></pre>
+</ul>
+
+the parameter <b>8.3</b> indicates that the result should occupy 8 character
+positions and that the result should be rounded to 3 decimal places. 
+
+<p>Try omitting this parameter as shown below: 
+
+<ul>
+<pre><b>3 print:</b></pre>
+</ul>
+
+You should see the response: 
+
+<ul>
+<pre><b>>> 'syntax error' near source line 1, character 11 <<< 
+3 print: 
+**      ^</b></pre>
+</ul>
+
+Since Vision was expecting a value following the <i>print:</i> message
+and none was provided, you are informed that you have made a <a href="Error.htm#syn">syntax
+error</a>. Vision tries to identify where the error occurred and provides
+an indicator arrow (i.e., the ^ symbol) in the area where the problem was
+first identified. In this case, the arrow points to the area directly after
+the <i>print:</i> message. 
+
+<p>You have actually already seen another example that uses a parameter.
+The message + requires that you provide an additional piece of information,
+namely a number that you wish to add to the original number. Try leaving
+off this parameter as shown below: 
+
+<ul>
+<pre><b>3 +</b></pre>
+</ul>
+
+You should see: 
+
+<ul>
+<pre><b>>> 'syntax error' near source line 1, character 4 <<<
+3 + 
+** ^ </b></pre>
+</ul>
+
+As you can see, the error message is the same as in the prior example.
+Although the operations you were trying to perform were different (i.e.,
+printing versus adding), in both cases you left out a piece of information
+that Vision needed to execute your request. 
+
+<hr>
+
+<a name="Programs"><h3><b>Programs</b></h3></a>
+
+<p>Whether you realize it or not, you have already written your first Vision
+program. A <a href="Program.htm">program</a> is merely a set of one
+or more Vision requests. All the programs you have seen so far have asked
+Vision to perform a single request. There are situations where you would
+like to perform a set of operations, one after another. Vision provides
+a simple mechanism for accomplishing this. 
+
+<p>For example, submit the following: 
+
+<ul>
+<pre><b>"The Answer Is: " print ; 
+2 + 2 </b></pre>
+</ul>
+
+You should see: 
+
+<ul>
+<pre><b>The Answer Is: 4.00</b></pre>
+</ul>
+
+The semi-colon is used to separate expressions within a Vision program.
+Each expression is executed in sequence. Vision automatically sends the
+<i>print</i> message to the result of the last expression. If you terminate
+the last expression with a semi-colon, the automatic printing is suppressed.
+
+
+<p>A <b>block</b> is a special form of program that represents a deferred
+sequence of steps. The general form for a block is illustrated below: 
+
+<ul>
+<pre><b>[ statement 1 ; 
+  statement 2 ; 
+   . . . 
+] </b></pre>
+</ul>
+
+Blocks always return the value of the last statement executed. Blocks
+are often used as parameters to other messages. For example, the <i><tt>ifTrue:ifFalse:</tt></i>
+message requires two parameters that are blocks that contain the program
+to run if a specific condition is (is not) met. For example: 
+
+<ul>
+<pre><b>myList count > 100 
+    ifTrue: [ "This is a big list." print; ] 
+   ifFalse: [ "This is a small list." print; ]; </b></pre>
+</ul>
+
+If the number of elements in the list <i>myList</i> is greater than
+100 the program supplied by the first block is executed. In this case the
+string "This is a big list" will be displayed. Otherwise, the
+program supplied by the second block is executed. In this case the string
+"This is a small list" will be displayed. 
+
+<hr>
+
+<p>
+<a name="Variables"><h3><b>Variables</b></h3></a>
+
+<p>It is often useful to save the results of specific tasks for later use.
+For example, type in the following program:
+
+<ul>
+<pre><b>!x <- 2 + 2</b></pre>
+</ul>
+
+The answer 4 should appear. Now type: 
+
+<ul>
+<pre><b>x + 1</b></pre>
+</ul>
+
+You should see the answer 5. 
+
+<p>The results of any Vision expression can be saved into a 
+<a href="Lang.htm#variable">Variable</a>. You can create as many 
+variables as you need during the course of your session. Any information 
+that you save into a variable is available for the remainder of your 
+session or until you redefine the variable. 
+
+<p>To create a variable, type <i>!</i> followed by a valid variable name. The
+<b><i><-</i></b> message is used to assign a value into this variable.
+For example, enter the following program: 
+
+<ul>
+<pre><b>!x <- 2 ; 
+!y <- 3 ; 
+!z <- x + y ; 
+"The Value Of x is: " print; 
+x printNL; 
+"The Value Of y is: " print ; 
+y printNL ; 
+"The Value of x + y (z) is: " print; 
+z printNL ; </b></pre>
+</ul>
+
+Your should see: 
+
+<ul>
+<pre><b>The Value Of x is:        2
+The Value Of y is:        3 
+<br>The Value of x + y (z) is:     5.00 </b></pre>
+</ul>
+
+Variables can be used to store values other than numbers. For example,
+create a variable called <i>answer</i> containing the string: "The
+Answer Is:" as illustrated below: 
+
+<ul>
+<pre><b>!answer <- "The Answer Is: " </b></pre>
+</ul>
+
+Now try the following program: 
+
+<ul>
+<pre><b>answer print; 
+2 + 2 </b></pre>
+</ul>
+
+You should see: 
+
+<ul>
+<pre><b>The Answer Is:     4.00</b></pre>
+</ul>
+
+<p>
+<hr>
+<a name="SeeAlso:"><b><h3>See Also:</h3></b></a>
+
+| <a href="tuLoad.htm">Creating a Demo Database</a>
+| <a href="tuSingle.htm">Single Object Access</a> 
+| <a href="tuList.htm">Using Lists</a>
+| <a href="tuTS.htm">Using Dates and TimeSeries</a> |
+
+<hr>
+
+
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy; 1999 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated January 25, 1999</font>
+
+</table>
+
+</body>
+</html>

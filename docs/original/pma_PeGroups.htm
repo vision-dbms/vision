@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Upload Format: PeGroups</title>
+
+</head>
+<body>
+<body bgcolor=white>
+<h2>Vision Portfolio Management Application Layer: Data Feeds</h2>
+<p>
+| <a href="pmaFeeds.htm">Application Feeds</a> |
+<hr><p>
+<font size=+2><b>Data Feed: </b><i>PeGroups</i></font><p>
+<font size=+1><b>Category: </b><i>RangeGroupFeed</i></font><p>
+
+<h3>Summary:</h3>
+<p>
+<ul>
+The <i>PeGroups</i> feed is used to define and update <b>PEGroup</b>
+   ranges and to classify <b>Security</b> instances into ranges based on
+   a security's current <i>priceToEarnings</i> value using the <i>peCurr</i> method
+   defined at <b>Security</b>.  The security property
+   <i>peGroup</i> stores the current range value.
+   The <b>RangeClassification</b>  class is described in more detail in the
+   <a href="pmaSupp.htm#RangeClass"><i>Portfolio Management Application
+   Classes</i></a> document.  
+</ul>
+<p>
+
+<h3>Available Fields:</h3>
+<p>
+<center><table border=1 width=80% cellpadding=4 cellspacing=2>
+<tr><th>Field<th>PeGroup<br>Property<th>Type<th>Description
+<tr>
+<tr><th align=center colspan=4>--- Required Fields ---
+<tr>
+<td><i>startValue</i>
+<td><i>lowerBound</i>
+<td>Number
+<td>minimum value in range
+<tr>
+<td><i>endValue</i>
+<td><i>upperBound</i>
+<td>Number
+<td>maximum value in range
+<tr>
+<td><i>label</i>
+<td><i>name</i>
+<td>-
+<td>label that describes range
+</table></center>
+<p>
+
+<h3>Special Processing Rules:</h3>
+<p>
+<ul type=disc>
+<li>This feed replaces all existing instances of the <b>PEGroup</b>
+      classes with the instances defined by this feed.
+<p>
+<li>Using the ranges defined by this feed, the <b>Security</b> property
+      <i>peCurr</i> is used to determine an <b>PEGroup</b>
+      classification which is used to update the <i>peGroup</i>
+      property at the security.
+<p>
+<li>Use the value <i>NA</i> to indicate a range is unbounded for its 
+      start or end point.  Ranges are assumed to be contiguous.
+</ul>
+
+<p>
+<a name="related">
+<h3>Related Feeds:</h3>
+<p>
+<ul type=disc>
+<li><a href="pma_FundamentalM.htm"><i>FundamentalM</i></a>:
+updates monthly earnings
+<li><a href="pma_PriceFeed.htm"><i>PriceFeed</i></a>:
+updates prices
+</ul>
+<p>
+<h3>Sample Upload:</h3>
+<p>
+The following tab-delimited feed could be used to define and update
+price-to-earnings groups.  The fields must be supplied in this order.
+The header line should be included, but the header values are ignored:
+<pre><tt><b>
+     Interface ExternalFeedManager upload: "PeGroups" using:
+       "startValue     endValue   label
+        NA             1          less than 1
+        1              5          1 to 5
+        5             10          5 to 10
+        10            20          10 to 20
+        20            NA          more than 20
+      " ;
+</b></tt></pre>
+<p>
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy 1998 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated August 27, 1998</font>
+</tr>
+</table>
+
+</body>
+</html>

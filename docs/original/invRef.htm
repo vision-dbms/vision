@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Investment Management Application Layer </title>
+</head>
+<body bgcolor=white>
+<h2>Vision Investment Management Application Layer</h2>
+
+<p>
+| <a href="FHome.htm">Home</a>
+| <a href="vapps.htm">Applications</a> |
+<p>
+<Hr>
+<h3>Topics Covered:</h3>
+<ul type=square>
+<li><a href="#overview">Overview</a>
+<li><a href="#company">The Company Class</a>
+<li><a href="#security">The Security Class</a>
+<li><a href="#account">The Account Class</a>
+<li><a href="#holding">The Holding Class</a>
+<li><a href="#issues">Special Issues</a>
+<li><a href="#datasets">External Data Sets</a>
+</ul>
+<p>
+<hr>
+<h3><a name="overview">Overview</a></h3>
+<p>
+The core Vision system comes with a set of classes already defined.
+These classes include an initial set of methods which can be
+modified and extended by the user.  Vision's built-in class
+hierarchy is discussed in detail in the general Vision reference manuals.
+Insyte offers an Application Layer that presents a set of useful classes
+and protocol designed to support investment management applications.
+The Investment Management
+classes and messages were entirely implemented using the Vision
+language.  You can therefore modify, extend, and reorganize the
+structures to meet the specific needs of your organization.
+<p>
+Note that the instances created for the core investment classes
+will be dependent on your installation's requirements.  Many of the
+named instances used in the examples in these document
+are included for illustration
+purposes only and may not exist in your environment.
+You can create them using the techniques provided or substitute
+instance identifiers that are defined for you organization.
+
+<p>
+<hr>
+<h3><a name="company">The Company Class</a></h3>
+<p>
+The instances of the class <b>Company</b> represent the individual 
+corporate entities for which you track information.  Information
+maintained for a company typically includes sales, earnings
+estimates, and ratings.  A large amount of raw data about companies
+is provided by external data vendors.  In Vision, this data is viewed
+as a property of the company.  
+<p>
+The document, 
+<a href="invSecurity.htm"><i>The Company and Security Classes</i></a>, 
+describes this class in more details.
+<p>
+<hr>
+<h3><a name="security">The Security Class</a></h3>
+<p>
+The instances of the class <b>Security</b> represent the individual 
+securities issues by a corporation, government, or other entity.
+A variety of security types exist including common and preferred
+stock, convertible and non-convertible bonds, and options.  Data 
+maintained for a security typically includes price, dividend, and
+shares outstanding information.  Portfolios hold specific amounts of
+one or more individual securities.  Raw data about securities
+is often provided by external data vendors.
+In Vision, this data is viewed as a property of the security.  
+<p>
+The document, 
+<a href="invSecurity.htm"><i>The Company and Security Classes</i></a>, 
+describes this class in more details.
+
+<p>
+<hr>
+<h3><a name="account">The Account Class</a></h3>
+<p>
+The class <b>Account</b> is a super class of the classes
+<b>Portfolio</b>, <b>AggAccount</b>, and <b>IndexAccount</b>.
+A Portfolio is defined as an account whose holdings are created via a feed
+from an internal portfolio accounting system.  An AggAccount is
+defined as an account whose holdings are created by combining the holdings 
+for a list of component portfolios.  An IndexAccount is defined as an
+account whose holdings are created starting with a universe of securities.
+<p>
+The document, <a href="invAccount.htm"><i>The Account Class</i></a>, 
+describes this class in more details.
+
+<p>
+<hr>
+<h3><a name="holding">The Holding Class</a></h3>
+<p>
+The class <b>Holding</b> is used to represent a specific holding by an
+account in a specific security as of a specific point in time.  
+Holdings are rarely referenced directly.  Instead they are accessed
+via a particular security or account.  Data maintained for a holding
+typically includes shares held and total market value.
+<p>
+The document, <a href="invHolding.htm"><i>The Holding Class</i></a>, 
+describes this class in more details.
+
+<p>
+<hr>
+<h3><a name="issues">Special Issues</a></h3>
+<p>
+Special structures have been designed to manage dividend,
+price, and adjustment data in the Vision database.
+These structures have been created to correctly handle split and
+currency adjustments
+automatically.  In addition, these structures have been designed
+to facilitate future reorganizations as the database grows, so that 
+applications that use this data are sheltered from structural changes.
+<p>
+The document, <a href="invIssues.htm"><i>Special Issues</i></a>
+describes these issues in more detail.
+
+<p>
+<hr>
+<h3><a name="datasets">External Data Sets</a></h3>
+<p>
+The Investment Management Application Layer provides access to a
+variety of data sources that are updated by an external vendor on
+a regular basis.  These data sets are linked to specific companies,
+securities, or other instances as part of an update process known
+as reconciliation.  The reconcile addresses any adjustments that are local to
+a specific vendor so that access to multiple data sources can 
+appear as homogeneous as possible.  Cusip changes, splits adjustments,
+and fiscal year management are all addressed in a uniform manner.
+<p>
+The document, <a href="invExtDB.htm"><i>External Data Sets</i></a>
+describes this process in more detail.
+
+
+<p>
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy 1997 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Created June 11, 1997</font>
+</table>
+
+</body>
+</html>
+
+
+

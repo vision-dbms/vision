@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<HTML><HEAD><TITLE>Vision Portfolio Management Application Feeds</TITLE>
+<META content="text/html; charset=windows-1252" http-equiv=Content-Type>
+<META content="MSHTML 5.00.3103.1000" name=GENERATOR></HEAD>
+<BODY bgColor=white>
+<H2>Vision Portfolio Management Application Feeds</H2>
+<P>| <A href="vpma.htm">Application 
+Overview</A> | <A 
+href="pmaAnalyst.htm">Analyst Tools</A> | <A 
+href="pmaDBA.htm">Database Administration</A> 
+| <A href="pmaXRef.htm">Application Cross 
+Reference</A> | <A href="clDataFeed.htm">The 
+Data Feed Class</A> | 
+<HR>
+
+<H3>Topics Covered:</H3>
+<UL type=square>
+  <LI><A href="pmaFeeds.htm#overview">Overview</A> 
+  <LI><A href="pmaFeeds.htm#formats">DataFeed Formats</A> 
+  <LI><A href="pmaFeeds.htm#predefined">Pre-defined Feed Summary</A> 
+  <LI><A href="pmaFeeds.htm#starter">Starter Feeds</A> 
+  <LI><A href="pmaFeeds.htm#rejects">Reject Files</A> 
+  <LI><A href="pmaFeeds.htm#excel">Temporary Changes via Excel</A> 
+  <LI><A href="pmaFeeds.htm#vadmin">Permanent Changes via VAdmin</A> 
+  <LI><A href="pmaFeeds.htm#config">Configuration Files</A> </LI></UL>
+<P>
+<HR>
+
+<H3><A name=overview>Overview</A></H3>
+<P>A standardized interface for loading security, portfolio, and related 
+investment data into Vision is provided as part of the <B>Portfolio Management 
+Application Layer</B>. <B>DataFeed</B> classes have been defined to translate 
+data from sources external to Vision into Vision objects. All feeds correspond 
+to regular, tabular structures that are loaded into Vision from external files 
+and/or updated directly from other sources such as a spreadsheet range or a 
+relational database. 
+<P>
+<HR>
+
+<H3><A name=formats>DataFeed Formats</A></H3>
+<P>A separate <B>DataFeed</B> is defined for each format of external data you 
+wish to load into your Vision database. A data feed consists of one or more 
+records that are separated by carriage-return/line-feed. Each record contains 
+one or more fields, normally delimited by a tab character. In addition: 
+<P>
+<UL type=disc>
+  <LI>The first record is a header containing tab-delimited field identifiers 
+  which correspond to the data items to update. 
+  <LI>The header record can contain any number of identifiers in any order. If 
+  an identifier is invalid, the data in this column will be ignored. 
+  <LI>The field identifiers <I>Entity</I>, <I>EntityId</I>, and <I>Id</I> can be 
+  used interchangeably to identify a column containing an entity identifier. The 
+  field identifiers <I>Currency</I> and <I>CurrencyId</I> can be used 
+  interchangeably to identify a column containing a currency identifier. Field 
+  identifiers are not case sensitive. 
+  <LI>Numeric values can be supplied with any number of decimal places. 
+  <LI>Dates can be supplied in a number of default formats:<BR>
+  <UL type=disc>YY (12/31 of supplied year)<BR>YYMM (end of month in supplied 
+    year)<BR>YYYYMMDD<BR>MM/DD/YY<BR>MM/DD/YYYY<BR>MM-DD-YY<BR>MM-DD-YYYY<BR></UL>The initial date can be indicated as <I>10101</I> or <I>Default</I>.  Additional date formats are available with <A href="pmaFeeds.htm#config">Configuration Files</A>. 
+<BR>
+
+  <LI>Values that are not available should be supplied as blanks or the string 
+  NA. 
+  <LI>Records that are blank or start with a # as the first non-blank character 
+  are ignored. </LI></UL>
+<P>DataFeeds have been subdivided into a number of categories that represent 
+different ways to map external data into Vision. These include: 
+<P>
+<CENTER>
+<TABLE border=1 cellPadding=4 cellSpacing=2 width="80%">
+  <CAPTION>--- DataFeed Categories ---</CAPTION>
+  <TBODY>
+  <TR>
+    <TD><B>Master Feeds</B> 
+    <TD>create new entity instances and refresh key properties in entity 
+      instances. 
+  <TR>
+    <TD><B>EntityExtender Feeds</B> 
+    <TD>update sets of data used to supplement an existing entity, potentially 
+      over time, such as pricing data for <B>Security</B>. 
+  <TR>
+    <TD><B>Transaction Feeds</B> 
+    <TD>create, cross reference, and generate summary statistics for classes 
+      associated with two or more entities such as <B>Holding</B>. 
+  <TR>
+    <TD><B>Alias Feeds</B> 
+    <TD>establish multiple aliases for existing <B>Entity</B> instances. 
+  <TR>
+    <TD><B>XRef Feeds</B> 
+    <TD>establish alternative identifiers for existing <B>Entity</B> 
+      instances. 
+  <TR>
+    <TD><B>Membership Feeds</B> 
+    <TD>update and cross reference one-to-many relationships between two 
+      <B>Entity</B> instances such as <B>Company</B> and <B>Industry</B> over 
+      time. 
+  <TR>
+    <TD><B>RangeGroup Feeds</B> 
+    <TD>define and update numeric ranges and categorize <B>Entity</B> 
+      instances into the appropriate range group. 
+  <TR>
+    <TD><B>Support Feeds</B> 
+    <TD>define access names and rules for data items. 
+  <TR>
+    <TD><B>Schema Feeds</B> 
+    <TD>define new core classes, properties, and data feed classes. 
+</TR></TBODY></TABLE></CENTER>
+<P>
+<P>
+<HR>
+
+<H3><A name=predefined>Pre-defined Feed Summary</A></H3>
+<P>A number of data feeds have been pre-defined to support the Portfolio 
+Management Application. These feeds are summarized below and are described in 
+detail in individual fact sheets. 
+<P><B>Master Feeds</B> 
+<P>These feeds are used to create new entity instances and refresh key 
+properties in entity instances: 
+<P>
+<UL type=disc>
+  <LI><A 
+  href="pma_AggAccountMaster.htm"><I>AggAccountMaster</I></A> 
+  creates and refreshes <B>AggAccount</B> instances. 
+  <LI><A 
+  href="pma_AnalystMaster.htm"><I>AnalystMaster</I></A> 
+  creates and refreshes <B>Analyst</B> instances. 
+  <LI><A 
+  href="pma_AssetCatMaster.htm"><I>AssetCatMaster</I></A> 
+  creates and refreshes <B>AssetCat</B> instances. 
+  <LI><A 
+  href="pma_CompanyMaster.htm"><I>CompanyMaster</I></A> 
+  creates and refreshes <B>Company</B> instances. 
+  <LI><A 
+  href="pma_CompositeAccountMaster.htm"><I>CompositeAccountMaster</I></A> 
+  creates and refreshes <B>CompositeAccount</B> instances. 
+  <LI><A 
+  href="pma_CountryMaster.htm"><I>CountryMaster</I></A> 
+  creates and refreshes <B>Country</B> instances. 
+  <LI><A 
+  href="pma_CurrencyMaster.htm"><I>CurrencyMaster</I></A> 
+  creates and refreshes <B>Currency</B> instances. 
+  <LI><A 
+  href="pma_IdSourceMaster.htm"><I>IdSourceMaster</I></A> 
+  creates and refreshes <B>IdSource</B> instances. 
+  <LI><A 
+  href="pma_IndexAccountMaster.htm"><I>IndexAccountMaster</I></A> 
+  creates and refreshes <B>IndexAccount</B> instances. 
+  <LI><A 
+  href="pma_IndustryMaster.htm"><I>IndustryMaster</I></A> 
+  creates and refreshes <B>Industry</B> instances. 
+  <LI><A 
+  href="pma_PortfolioMaster.htm"><I>PortfolioMaster</I></A> 
+  creates and refreshes <B>Portfolio</B> instances. 
+  <LI><A 
+  href="pma_SectorMaster.htm"><I>SectorMaster</I></A> 
+  creates and refreshes <B>Sector</B> instances. 
+  <LI><A 
+  href="pma_SecurityMaster.htm"><I>SecurityMaster</I></A> 
+  creates and refreshes <B>Security</B> instances. 
+  <LI><A 
+  href="pma_SecurityTypeMaster.htm"><I>SecurityTypeMaster</I></A> 
+  creates and refreshes <B>SecurityType</B> instances. 
+  <LI><A 
+  href="pma_UniverseMaster.htm"><I>UniverseMaster</I></A> 
+  creates and refreshes <B>Universe</B> instances. </LI></UL>
+<P><B>Entity Extender Feeds</B> 
+<P>These feeds are used to update sets of data used to supplement an existing 
+entity and usually populate <B>DataRecord</B> classes such as <B>PriceRecord</B> 
+and <B>DivRecord</B>. 
+<P>
+<UL type=disc>
+  <LI><A 
+  href="pma_AnalystEst.htm"><I>AnalystEst</I></A> 
+  updates earnings estimate data supplied by an analyst for <B>Company</B> 
+  instances. 
+  <LI><A 
+  href="pma_DivFeed.htm"><I>DivFeed</I></A> 
+  updates dividend data for <B>Security</B> instances. 
+  <LI><A 
+  href="pma_EconFeed.htm"><I>EconFeed</I></A> 
+  updates economic data for <B>Country</B> instances. 
+  <LI><A 
+  href="pma_ExchangeRateFeed.htm"><I>ExchangeRateFeed</I></A> 
+  updates exchange rate data for <B>Currency</B> instances. 
+  <LI><A 
+  href="pma_FundamentalA.htm"><I>FundamentalA</I></A> 
+  updates annual fundamental data for <B>Company</B> instances. 
+  <LI><A 
+  href="pma_FundamentalM.htm"><I>FundamentalM</I></A> 
+  updates monthly fundamental data for <B>Company</B> instances. 
+  <LI><A 
+  href="pma_FundamentalQ.htm"><I>FundamentalQ</I></A> 
+  updates quarterly fundamental data for <B>Company</B> instances. 
+  <LI><A 
+  href="pma_IndexAccountBuilder.htm"><I>IndexAccountBuilder</I></A> 
+  updates data associated with rule-based creation of <B>IndexAccount</B> 
+  holdings. 
+  <LI><A 
+  href="pma_PriceFeed.htm"><I>PriceFeed</I></A> 
+  updates pricing data for <B>Security</B> instances. 
+  <LI><A 
+  href="pma_SplitsFeed.htm"><I>SplitsFeed</I></A> 
+  updates stock split data for <B>Security</B> instances. </LI></UL>
+<P><B>Transaction Feeds</B> 
+<P>These feeds are used to create, cross reference, and generate summary 
+statistics for classes associated with two or more entities such as 
+<B>Holding</B>. 
+<P>
+<UL type=disc>
+  <LI><A 
+  href="pma_HoldingsFeed.htm"><I>HoldingsFeed</I></A> 
+  creates <B>Holding</B> instances and cross references the holdings over time 
+  by <B>Portfolio</B> and <B>Security</B>. </LI></UL>
+<P><B>Alias Feeds</B> 
+<P>These feeds are used to establish multiple aliases for specific entity 
+instances. 
+<P>
+<UL type=disc>
+  <LI><A 
+  href="pma_SecurityAliases.htm"><I>SecurityAliases</I></A> 
+  establishes aliases for <B>Security</B> instances. </LI></UL><B>XRef Feeds</B> 
+<P>These feeds are used to load alternative identifiers.
+<P>
+<UL type=disc>
+  <LI><A 
+  href="pma_SecurityXRef.htm"><I>SecurityXRef</I></A> 
+  is used to load alternative identifiers for <B>Security</B> instances. 
+</LI></UL>
+<P><B>Membership Feeds</B> 
+<P>These feeds are used to update and cross reference one-to-many relationships 
+such as <I>company-to-industry</I> over time. 
+<P>
+<UL type=disc>
+  <LI><A 
+  href="pma_CompanyToAnalyst.htm"><I>CompanyToAnalyst</I></A> 
+  updates the <I>company-analyst</I> relationship over time. 
+  <LI><A 
+  href="pma_CompanyToCountry.htm"><I>CompanyToCountry</I></A> 
+  updates the <I>company-country</I> relationship. 
+  <LI><A 
+  href="pma_CompanyToIndustry.htm"><I>CompanyToIndustry</I></A> 
+  updates the <I>company-industry</I> relationship over time. 
+  <LI><A 
+  href="pma_CompositeAccountMembers.htm"><I>CompositeAccountMembers</I></A> 
+  updates the composition of <B>CompositeAccounts</B> over time. 
+  <LI><A 
+  href="pma_IndustryToSector.htm"><I>IndustryToSector</I></A> 
+  updates the <I>industry-sector</I> relationship. 
+  <LI><A 
+  href="pma_PortfolioAggregates.htm"><I>PortfolioAggregates</I></A> 
+  updates the <B>Portfolio</B> members of <B>AggAccounts</B> over time. 
+  <LI><A 
+  href="pma_UniverseMembers.htm"><I>UniverseMembers</I></A> 
+  creates and names lists of related entities over time. </LI></UL>
+<P><B>RangeGroup Feeds</B> 
+<P>These feeds are used to define and update numeric ranges and categorize 
+entities into the appropriate range group. 
+<P>
+<UL type=disc>
+  <LI><A 
+  href="pma_McapGroups.htm"><I>McapGroups</I></A> 
+  assigns <B>Security</B> instances to a group based on market capitalization. 
+  <LI><A 
+  href="pma_PbGroups.htm"><I>PbGroups</I></A> 
+  assigns <B>Security</B> instances to a group based on price-to-book ratios. 
+  <LI><A 
+  href="pma_PeGroups.htm"><I>PeGroups</I></A> 
+  assigns <B>Security</B> instances to a group based on price-to-earnings 
+  ratios. </LI></UL>
+<P><B>Support Feeds</B> 
+<P>These feeds are used are used to name data item access paths and define rules 
+for inclusion in various applications. the appropriate range group. 
+<P>
+<UL type=disc>
+  <LI><I>DataAccessPathFeed</I></A> defines links to navigate between classes. 
+  <LI><I>DataItemFeed</I></A> names and defines access rules for data items. 
+  </LI></UL>
+<P><B>Schema Feeds</B> 
+<P>These feeds are used to define new core classes, data feed classes, and 
+properties. 
+<P>
+<UL>
+  <LI><I>ClassSetup</I> is used to create new <B>Entity</B>, <B>DataRecord</B>, 
+  and <B>LinkRecord</B> subclasses. 
+  <LI><I>PropertySetup</I> is used to define properties that can be uploaded for 
+  any of the core classes. 
+  <LI><I>MasterFeedSetup</I> is used to define new <B>MasterFeed</B> subclasses. 
+
+  <LI><I>EntityExtenderFeedSetup</I> is used to define new 
+  <B>EntityExtenderFeed</B> subclasses. 
+  <LI><I>TransactionFeedSetup</I> is used to define new <B>TransactionFeed</B> 
+  subclasses. 
+  <LI><I>MembershipFeedSetup</I> is used to define new <B>MembershipFeed</B> 
+  subclasses. 
+  <LI><I>AliasFeedSetup</I> is used to define new <B>AliasFeed</B> subclasses. 
+  <LI><I>RangeGroupFeedSetup</I> is used to define new <B>RangeGroupFeed</B> 
+  subclasses. </LI></UL>
+<P>
+<HR>
+
+<H3><A name=starter>Starter Feeds</A></H3>
+<P>To successfully use the supplied <A 
+href="pmaApps.htm"><I>Headstart 
+Applications</I></A>, your initial feeds should include security, portfolio, and 
+company masters, holdings data, and supplemental data such as industry and 
+sector masters. The recommended starter feeds are described in the document, <A 
+href="pmaInstall.htm#feeds"><I>Portfolio 
+Management Application Startup</I></A>. These feeds provide enough information 
+to use most of the starter portfolio reports without modification. 
+<P>
+<HR>
+
+
+<H3><A name=rejects>Reject Files</A> </H3>
+<p>
+A reject file is generated when a data feed record is not processed for any reason. The reject file is created in the working directory with the same file name as the data feed appended by <i>.rejects</i>.     
+The first line of this file is the field order list used to process the feed followed by the records that were not processed by the feed.  Comments at the end of the record indicate a rejection reason where possible.
+Once the reject reason has been resolved the reject file can be used as the data feed.
+The <a href="#config">configuration file</a> option <i>rejectFileName</i> can be used to customize the location and name of the reject file.
+<p>
+<hr>
+<H3><A name=excel>Temporary Changes via Excel</A></H3>
+<P>Vision data feeds provide a potent means for an analyst that wants to use the 
+Vision browser applications on dynamically generated information. For example, 
+an analyst may want to create a composite account on the fly that can be used as 
+a benchmark for comparison with an existing portfolio. You can use the <A 
+href="pma_CompositeAccountMaster.htm"><I>CompositeAccountMaster</I></A> 
+feed to define <B>CompositeAccount</B> instances and the <A 
+href="pma_CompositeAccountMembers.htm"><I>CompositeAccountMembers</I></A> 
+feed to update the composition of <B>CompositeAccounts</B> over time. You can 
+then run the<A href="pma_AccountCompare.htm"> 
+Account Comparison</A> or the <A 
+href="pma_AccountCharacteristics.htm">Characteristics 
+</A>application from the browser to compare these newly created composites with 
+other portfolios. 
+<P>Your Vision installation comes with a custom menu named <I>VUpload</I>. If 
+you have installed it, this choice will appear in the menu bar at the top of 
+your Excel spreadsheet. If you do not see this choice, you will need to <A 
+href="admInstExcel.htm">install the 
+Add-In.</A> 
+<P>The <I>VUpload</I> component allows you to temporarily make private 
+modifications to the database using the available data feed formats. You can use 
+<I>VUpload</I> to modify existing data, create new instances, and define new 
+structures including new data feed formats. Several data feeds are also 
+available for controlling display aspects of the applications you view through 
+your browser. 
+<P>When you exit Excel, your changes to the database are not saved. You can save 
+your changes as data feed files which can be saved permanently by the Vision 
+Administrator using <A 
+href="pmaFeeds.htm#vadmin">the tools 
+described below</A>. The Excel Add-Ins are described in detail in the document 
+<A href="pmaAnalyst.htm"><I>Vision Analyst 
+Tools</I></A>. 
+<P>
+<HR>
+
+<H3><A name=vadmin>Permanent Changes via VAdmin</A></H3>
+<P>Your Vision database is designed to store portfolio, security, holding, and 
+related information over time. Although you can load this data temporarily on an 
+as needed basis using <A 
+href="pmaFeeds.htm#excel">the techniques 
+described above</A>, you will most likely want to permanently commit data to the 
+database on a regular basis so that the information can be shared by many users. 
+The <I>Vision Administrator Module</I> provides a number of tools for 
+coordinating updates to your Vision database and performing various database 
+administration functions. 
+<P>The <I>Vision Administrator Module</I> is described in detail in the document 
+<A href="pmaDBA.htm"><I>Vision Application 
+Administration</I></A>. 
+<P>
+<HR>
+<A name=config>
+<H3>Configuration Files</H3></A>A <I>configuration</I> file is a standard text 
+file which contains directions that override the default settings for loading a 
+data feed file. The configuration file must have the same name, through the 
+first '.', as the file it accompanies. For example, 
+<UL>
+  <TABLE>
+    <TBODY>
+    <TR>
+      <TD><B>Feed File name</B>
+      <TD><B>Configuration File name</B> 
+    <TR>
+      <TD>Holdings.txt
+      <TD>Holdings.cfg 
+    <TR>
+      <TD>Holdings.19981105.txt &nbsp;&nbsp;
+      <TD>Holdings.cfg 
+    <TR>
+      <TD>Holdings19990315
+      <TD>Holdings19990315.cfg</TR></TBODY></TABLE></UL>Note that the naming 
+convention used in the second example allows for one configuration file to be 
+shared with multiple holdings files. 
+<P>Configuration files contain one or more lines, where each line contains two 
+fields: a configuration option and a value. The option and value are separated 
+by either the tab character or vertical bar. The data item fields themselves are 
+separated by a comma. For example, the default delimiter character for data feed 
+files is either the tab or vertical bar. You can override this in the 
+configuration file using: 
+<P>
+<UL><PRE>delimiter	,</PRE></UL>
+<P>If this entry exists in your configuration file for the data feed, the data 
+feed loader will assume that the fields in your feed are separated by commas. 
+<P>
+Configuration files can also be used with loadFromFile and <a href="clDataFeedAdv.htm#bulk">bulkLoadFromFile</a>.
+<P>
+<P>The current configuration file options are described below: 
+<P>
+<CENTER>
+<TABLE border=1 cellPadding=4 cellSpacing=2 width="80%">
+  <TBODY>
+  <TR>
+    <TH>Option
+    <TH>Description
+    <TH>Default 
+  <TR>
+    <TD><A href="pmaFeeds.htm#fieldOrderList">fieldOrderList</a>
+    <TD>Sets the order of the field headings.
+    <TD>First line of file 
+  <TR>
+    <TD><A href="pmaFeeds.htm#headerLineNumber">headerLineNumber</a>
+    <TD>Indicates row number containing header.
+    <TD>1 
+  <TR>
+    <TD><A href="pmaFeeds.htm#currency">currency</a>
+    <TD>Sets currency value.
+    <TD>none 
+  <TR>
+    <TD>rejectFileName
+    <TD>Sets name and location of reject file.
+    <TD>File name appended with <i>.rejects</i> in working directory
+  <TR>
+    <TD>delimiter
+    <TD>Separates data columns.
+    <TD>tab or vertical bar 
+  <TR>
+    <TD>naTest
+    <TD>Format of NA values in the feed, multiple values can be supplied.
+    <TD>NA 
+  <TR>
+    <TD><A href="pmaFeeds.htm#naPatternTest">naPatternTest</a>
+    <TD>Uses regular expressions to determine NA value.
+    <TD>none 
+  <TR>
+    <TD><A href="pmaFeeds.htm#skipTop">skipTop</a>
+    <TD>Skips rows at the top of the feed file.
+    <TD>0 
+  <TR>
+    <TD>skipBottom
+    <TD>Skips rows at end of feed file.
+    <TD>0 
+  <TR>
+    <TD><A href="pmaFeeds.htm#skipChars">skipChars</a>
+    <TD>Eliminates specific characters from data being uploaded.
+    <TD>none 
+  <TR>
+    <TD>maxRecords
+    <TD>Limits the number of rows that the feed uploads.
+    <TD>All 
+  <TR>
+    <TD><A href="pmaFeeds.htm#autoExpire">autoExpire</a>
+    <TD>Adds a 'default' value to a time series after last 'real' value, based 
+      on a supplied expiration period.
+    <TD>off 
+  <TR>
+    <TD><A href="pmaFeeds.htm#dateFormat">dateFormat</a>
+    <TD>Indicates the format of the digits supplied in the 'date' field.
+    <TD>Variety of default formats as described in <A 
+      href="pmaFeeds.htm#formats">DataFeed 
+      Formats</A>. 
+  <TR>
+    <TD><A href="pmaFeeds.htm#asofDate">asofDate</a>
+    <TD>Sets value for any date-sensitive data.
+    <TD>Date provided in data records or if none, current date. 
+  <TR>
+    <TD><A href="pmaFeeds.htm#asofDateLineNumber">asofDateLineNumber</a>
+    <TD>Indicates the line in the data file that contains the <I>as of</I> 
+      date.
+    <TD>Date provided in data records or if none, current date. 
+  <TR>
+    <TD><A href="pmaFeeds.htm#adjustmentDate">adjustmentDate</a>
+    <TD>Sets the default value of the adjustment date.
+    <TD>Date provided in data records or if none, current date. 
+</TR></TBODY></TABLE></CENTER>
+<P>The following situations show where a configuration file is necessary and 
+provide examples of how it is used. 
+<UL></UL>
+<P><B><a name=fieldOrderList>fieldOrderList</a></B> 
+<UL>If a feed has an incorrect headerline, the option <I>fieldOrderList</I> 
+  should be used to change the headers. More specifically, if a feed contains 
+  the header <I>symbol</I> for the data item that Vision recognizes as 
+  <I>id</I>, you can use the <I>fieldOrderList</I> to specify the correct item 
+  names. Following is an example <I>CompanyMaster</I> feed and configuration 
+  file: 
+  <P>
+  <UL><B>Sample File:</B> 
+    <P><PRE>symbol | name          | country
+GM     | GeneralMotors | US
+</PRE></UL>
+  <UL><B>Sample Configuration:</B> 
+    <P><PRE>fieldOrderList | id,name,country</PRE></UL>
+  <P><I>fieldOrderList</I> can also be used to eliminate columns of data from 
+  your feed. For example, if a file contains five columns of data and you only 
+  wish to use the first, second, and fourth columns, you could set up your 
+  configuration file to include only the items you want: 
+  <P>
+  <UL><B>Sample File:</B> 
+    <P><PRE>id | name | ticker | country | currency</PRE></UL>
+  <P>
+  <UL><B>Sample Configuration:</B> <PRE>fieldOrderList | id, name, , country</PRE></UL>
+  <P></P></UL>
+<P><B><a name=headerLineNumber>headerLineNumber</B></a> 
+<UL>Another use of the configuration file is to provide headings to files that 
+  do not have them. In addition to <I>fieldOrderList</I>, you need to set 
+  <I>headerLineNumber</I> to 0 so that the top line of the instances is included (by default the first line is assumed to be a header). 
+  <P>
+  <UL><B>Sample File:</B> 
+    <P><PRE>GM  | GeneralMotors               | US
+IBM | International Business Mach | US</PRE></UL>
+  <P>
+  <UL><B>Sample Configuration:</B> <PRE>fieldOrderList   | id,name,country
+headerLineNumber | 0</PRE></UL>
+  <P></P></UL>
+
+
+<P><B><a name=currency>currency</a></B> 
+<UL>The configuration file option <i>currency</i> will set the currency value for all records in a feed that have no value or <i>NA</i> for currency.  
+  <P>
+  <UL><B>Sample File:</B> 
+    <P><PRE>id   | name                      | currencyId
+MRK  | Merck & Co Inc            | NA
+GM   | GeneralMotors             | 
+MHP  | McGraw-Hill Companies Inc | CAD</PRE></UL>
+  <P>
+  <UL><B>Sample Configuration:</B> 
+    <P><PRE>currency | USD
+</PRE></UL>This example will set USD as the currency for MRK and GM but CAD will remain the currency for MHP.
+In addition, <i>currency</i> can be used to set the currency value for all records in a feed where a currency field does not exist.  <P></P></UL>
+
+
+<P><B><a name=naPatternTest>naPatternTest</a></B> 
+<UL>This configuration file option will convert data to NAs based on the exsitence of the pattern in the data.  The pattern can include the special pattern matching symbols supported as "regular expression".  For example:
+  <P>
+  <UL><B>Sample File:</B> 
+    <P><PRE>id | currencyId | sharesOut | latestMarketCapUS
+45920010 | US | 9999 | 7595900
+00036110 | US | 2400 | 4499000</PRE></UL>
+  <UL><B>Sample Configuration:</B> 
+    <P><PRE>naPatternTest | 9[59]9
+    </PRE></UL>
+This example will load NA for <i>sharesOut</i> and <i>latestMarketCapUS</i> for security 45920010 but will load all of other values. <b>WARNING:</b> Practice extreme caution when using Regular Expressions - due to their nature it is easy for a regular expression to include more than intended as seen in the above example where it might not have been the intent for security 45920010's <i>latestMarketCapUS</i> value to be loaded as NA.
+ <P></P></UL>
+
+<P><B><a name=skipTop>skipTop</a></B> 
+<UL>Another use of the configuration file is for a multiline header. For 
+  example, if a date has been included as a seperate header line, you need to 
+  include <I>skipTop</I> set to 2, so that the two headers are not processed as 
+  actual data: 
+  <P>
+  <UL><B>Sample File:</B> 
+    <P><PRE>98/06/30
+symbol | name          | currency
+GM     | GeneralMotors | USD</PRE></UL>
+  <P>
+  <UL><B>Sample Configuration:</B> 
+    <P><PRE>fieldOrderList | id,name,currency
+skipTop        | 2</PRE></UL>
+  <P></P></UL>
+<P><B><a name=skipChars>skipChars</a></B> 
+<UL>If a file has data that has quotation marks surrounding specific values, 
+  uploads will be not be processed properly. To prevent this, you can use the 
+  option <I>skipChars</I>. 
+  <P>
+  <UL><B>Sample File:</B> 
+    <P><PRE>"id" | "name"           | "currency"
+"GM" | "General Motors" | "US"</PRE></UL>
+  <P>
+  <UL><B>Sample Configuration:</B> <PRE>skipChars | "</PRE></UL>
+  <P></P></UL>
+
+
+<P><B><a name=autoExpire>autoExpire</a></B> 
+<UL>The <I>autoExpire</I> option provides the capability to add a default 
+  value to a time series as of a certain offset for feeds associated with a 
+  <B>DataRecord</B>. Since by default Vision returns the last available value 
+  for a time series, this option is useful if you prefer to retrieve NA's rather than old data. For example, assume all companies in your database have 
+  funDataM data as of 5/31/99 and your June 30 file has data for active 
+  companies, but does not include data for companies that no longer exist. In 
+  these cases, you will want to expire your FundMData after 1 month. The 
+  <I>autoExpire</I> option can be used in the configuration file to specify an 
+  expiration period such as <I>1 monthEnds</I>. This indicates that any company 
+  whose most recent 'real' data point is from more than <I>1 monthEnds</I> ago 
+  should get a 'default' data point added as of the month-end following its last real date: 
+  <P>
+  <UL><B>Sample File:</B> 
+    <P><PRE>EntityId | date | currencyId | pe 
+abc | 06/30/99 | USD | 7.39
+mno | 06/30/99 | USD | 4.56</PRE></UL>
+  <P>
+  <P>
+  <UL><B>Sample Configuration:</B> 
+    <P><PRE>autoExpire | 1 monthEnds | DateOffset</PRE></UL>
+  <P>In the above example, FundMData values for all companies other than 
+  <I>abc</I> and <I>mno</I> whose most recent "real" data is 5/30/99 or earlier, 
+  will be updated with the default value <I>NA</I> for 6/30/99. 
+  <P>The second column in the configuration file indicates the expiration period 
+  and the third column indicates that the second column should be treated as a 
+  DateOffset. You can use any DateOffset as a value. The most likely values are:
+  <P>
+  <UL><PRE>1 monthEnds
+3 monthEnds
+12 monthEnds
+1 businessDays</PRE></UL>
+  <P>Note that 3 monthEnds is the same as 1 quarterEnds when you are dealing 
+  with calendar data. When you are dealing with fiscal data, 3 monthEnds puts 
+  you at the end of the next fiscal quarter whereas 1 quarterEnds puts you at 
+  the end of the next calendar quarter </P></UL>
+
+
+<P><B><a name=dateFormat>dateFormat</a></B> 
+<UL>
+  <P>If a file contains dates in any of the following alternative formats: MMYY, MMYYYY, MMDDYY, MMDDYYYY, or YYYYMM, you will need to use the 
+  <I>dateFormat</I> option. Note: this only applies to the field named 'date'. 
+  For example:
+  <P>
+  <UL><B>Sample File:</B>
+    <P><PRE>memberID | groupID | date
+0036110  | 560     | 121994</PRE>
+<B>Sample Configuration:</B> <PRE>dateFormat | MMYYYY</PRE></UL>
+
+
+The format YYYYMMXX will convert the supplied date in YYYYMMDD format to end of month format.  For example, if you use this configuration file option with a feed with date values of 20000805 and 20000825, both will load as 20000831.  <P></P></UL>
+
+
+
+<P><B><a name=asofDate>asofDate</a></B> 
+<UL>If a file does not include a date, you can use the <I>asofDate</I> option. 
+  For example: 
+  <P>
+  <UL><B>Sample File:</B> <PRE>memberID | groupID
+0036110 560</PRE></UL>
+  <UL><B>Sample Configuration:</B> 
+    <P><PRE>asofDate | 19990430</PRE></UL></UL>
+
+<P><B><a name=asofDateLineNumber>asofDateLineNumber</a></B> 
+<UL>Alternatively, you can include the date in the feed file and use the 
+  <I>asofDateLineNumber</I> option. For example: 
+  <P>
+  <UL type=disc><B>Sample File:</B> 
+    <P><PRE>19990430
+memberID | groupID
+0036110  | 560</PRE><B>Sample Configuration:</B> 
+    <P><PRE>asofDateLineNumber | 1
+HeaderLineNumber   | 2</PRE></UL></UL>
+<P><B><a name=adjustmentDate>adjustmentDate</a></B> 
+<UL>If the data in your feed file has been adjusted to reflect splits but 
+  <I>adjustmentDate</I> is not included as part of the data record, use this 
+  option to set the adjustment date. For example: 
+  <P>
+  <UL><B>Sample File:</B> <PRE>entityId | date | currencyId | close | volume 
+abc | 09/30/99 | USD | 37.39 | .59
+mno | 09/30/99 | USD | 44.56 | .38</PRE></UL>
+  <UL><B>Sample Configuration:</B> 
+    <P><PRE>adjustmentDate | 19991231</PRE></UL></UL>
+<HR>
+
+<TABLE border=0 width="100%">
+  <TBODY>
+  <TR>
+<td align=left><font size=-1>Copyright &copy; 2000 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated December 15, 2000</font>
+</TR></TBODY></TABLE></BODY></HTML>

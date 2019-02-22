@@ -1,0 +1,2143 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Messages: String</title>
+</head>
+<body bgcolor=white>
+<p>
+<center> | <A href="FHome.htm">Home</A>
+ | <A href="clString.htm">String Class  </A>
+ | <A href="mXRef.htm">Message XRef</A>
+ | <A href="Messages.htm">Messages (General)</A>
+ | 
+</center><hr>
+
+<center>
+<font face="Arial" color="darkblue" size=3 >
+<h3>Profile of Class <i>String</i></h3>
+</center>
+</font><p>
+<blockquote><center><hr width=70%><p>
+Includes Classes: <i>Ordinal, String</i>
+<p><hr width=70%></center></blockquote><p>
+<pre>
+
+<A href="clObject.htm">Object</A>
+  | 
+Ordinal
+  | 
+  +--- <b>String</b>
+</pre>
+<p><hr align=left width=70% ><p>
+
+The instances of class String are objects that represent sequences
+of characters.  The representation of a string is a sequence of
+characters delimited by double quotes.  Unlike selectors, strings
+need not be unique.  Any character may be included in a string.  If a
+double quote is to be included, it must be preceded by the escape
+character .
+<p><hr align=left width=70% ><p>
+
+<font size=+1 face="Arial" color="darkred">Message Index</font>
+<p><img src="instdot.gif" align="middle" alt="o "><A href="#!="><b>!= aString</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#<"><b>< aNumber</b></A><i> (Ordinal)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#<"><b>< aString</b></A><i> (String)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#<="><b><= aNumber</b></A><i> (Ordinal)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#<="><b><= aString</b></A><i> (String)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#="><b>= aString</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#>"><b>> aNumber</b></A><i> (Ordinal)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#>"><b>> aString</b></A><i> (String)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#>="><b>>= aNumber</b></A><i> (Ordinal)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#>="><b>>= aString</b></A><i> (String)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#LowerCaseDictionary"><b>LowerCaseDictionary</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#UpperCaseDictionary"><b>UpperCaseDictionary</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#__asOpenVisionChannel"><b>__asOpenVisionChannel</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#additionUpdateDumpOf:"><b>additionUpdateDumpOf:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#appendOutputOf:"><b>appendOutputOf: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#as:"><b>as: type</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asBlock"><b>asBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asBlockIn:"><b>asBlockIn: object</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asCSVRecords"><b>asCSVRecords</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asCells"><b>asCells</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asCellsOn:"><b>asCellsOn: delimiter</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asCurrency"><b>asCurrency</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asDate"><b>asDate</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asFileContents"><b>asFileContents</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asInteger"><b>asInteger</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asLines"><b>asLines</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asNumber"><b>asNumber</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asOpenVisionChannel"><b>asOpenVisionChannel</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asOpenVisionChannelToVision"><b>asOpenVisionChannelToVision</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asQuotedString"><b>asQuotedString</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asRecords"><b>asRecords</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asSelector"><b>asSelector</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (Ordinal)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (String)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asString"><b>asString</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asUpperLowerWords"><b>asUpperLowerWords</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asWords"><b>asWords</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#at:"><b>at: n </b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#at:put:"><b>at: n put: object</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#basicConcat:"><b>basicConcat:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#basicContains:"><b>basicContains:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#basicDrop:"><b>basicDrop:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#basicFill:"><b>basicFill:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#basicFindPatternExtent:"><b>basicFindPatternExtent:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#basicFindPatternOrigin:"><b>basicFindPatternOrigin:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#basicFindSubstringOrigin:"><b>basicFindSubstringOrigin:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#basicTake:"><b>basicTake:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#between:and:"><b>between: anOrdinal1 and: anOrdinal2</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#breakOn:"><b>breakOn: aCharacterSet</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#breakString:"><b> breakString: aString</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#canonicalizedForSort"><b>canonicalizedForSort</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#capitalize"><b>capitalize</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#cbreakOn:"><b>cbreakOn: aCharacterSet</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#cbreakString:"><b> cbreakString: aString</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#center:"><b>center: anInteger</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#centerNL:"><b>centerNL: anInteger</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (Ordinal)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (String)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#concat:"><b>concat: aString</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#contains:"><b>contains: aString</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#containsSubstring:"><b>containsSubstring: substring</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#convertFrom:"><b> convertFrom: string</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#convertToNumber"><b>convertToNumber</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#count"><b>count</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (Ordinal)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (String)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#deleteFromDictionaryOf:"><b>deleteFromDictionaryOf: anObject</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#drop:"><b>drop: aNumber</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#evaluate"><b>evaluate</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#evaluateIn:"><b>evaluateIn: anObject</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#evaluateWithCompilationErrorHandler:in:"><b>evaluateWithCompilationErrorHandler:in:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#fill:"><b>fill: aNumber</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#filterOutputOf:"><b>filterOutputOf: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#findPatternExtent:"><b>findPatternExtent: pattern</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#findPatternOrigin:"><b>findPatternOrigin: pattern</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#findPatternSuffix:"><b>findPatternSuffix: pattern</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#findSubstringExtent:"><b>findSubstringExtent: substring</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#findSubstringOrigin:"><b>findSubstringOrigin: substring</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#findSubstringSuffix:"><b>findSubstringSuffix: substring</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#fixed"><b>fixed</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#formatForExcel"><b>formatForExcel</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#formatForPRN"><b>formatForPRN</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#from:"><b>from: pos</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#from:for:"><b>from: pos1 for: count</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#from:to:"><b>from: pos1 to: pos2</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#howManyOf:"><b>howManyOf: charset</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#inRange:"><b>Ordinal inRange: aList</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#inSet:"><b>inSet: aList</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isBlank"><b>isBlank</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isBlankFor:"><b>isBlankFor: aNumber</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isDefault"><b>isDefault</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isOrdinal"><b>isOrdinal</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isString"><b>isString</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#locateInDictionaryOf:"><b>locateInDictionaryOf: anObject</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#locateOrAddInDictionaryOf:"><b>locateOrAddInDictionaryOf: anObject</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#lowercase"><b>lowercase</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#matchesString:"><b>matchesString: aString</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#max:"><b>max: aNumber</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#min:"><b>min: aNumber</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#new"><b>new</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#notBetween:and:"><b>notBetween: anOrdinal1 and: anOrdinal2</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#notifyAsComment"><b>notifyAsComment</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#notifyAsError"><b>notifyAsError</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#notifyAsWarning"><b>notifyAsWarning</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#orderUsingDictionary:"><b>orderUsingDictionary: dictionary</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#pad:"><b>pad: aNumber</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#patternExtentIn:"><b>patternExtentIn: string</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#patternOriginIn:"><b>patternOriginIn: string</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#prefixNotSpannedBy:"><b>prefixNotSpannedBy: aString</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#prefixNotSpannedIn:"><b>prefixNotSpannedIn: aString</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#prefixSpannedBy:"><b>prefixSpannedBy: aString</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#prefixSpannedIn:"><b>prefixSpannedIn: aString</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#prefixWith:"><b> prefixWith: aString</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#print"><b>print</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#print:"><b>print: anInteger</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#printPRN"><b>printPRN</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#printPRN:"><b>printPRN: anInteger</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#putStringTo:"><b>putStringTo:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#replacementUpdateDumpOf:"><b>replacementUpdateDumpOf:</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#reverse"><b>reverse</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#sprint:"><b>sprint: anInteger</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#startingPositionOf:"><b>startingPositionOf: subString</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#startingPositionsOf:"><b>startingPositionsOf: subString</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#stripBoundingBlanks"><b>stripBoundingBlanks</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#stripChar:"><b>stripChar: char</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#stripCommas"><b>stripCommas</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#stripLeadingBlanks"><b>stripLeadingBlanks</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#stripTrailingBlanks"><b>stripTrailingBlanks</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#substituteOutputOf:"><b>substituteOutputOf: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#substringOriginIn:"><b>substringOriginIn: string</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#take:"><b>take: anInteger</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#to:"><b>to: pos</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#toDouble"><b>toDouble</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#toList"><b>toList</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#toLower"><b>toLower</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#toUpper"><b>toUpper</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#translate:to:"><b>translate: charSet to: string</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#translateString:to:"><b>translateString: fromString to: toString</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#unixFileContents"><b>unixFileContents</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (Ordinal)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (String)</i><br>
+<p><hr align=left width=70% ><p>
+
+<font size=+1 face="Arial" color="darkred">Messages</font>
+<p><img src="instdot.gif" align="middle" alt="o "><A name="!="></A><b>!=</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String != aString</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient string is the same as the supplied string.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#!=">Date</A> | <A href="mNumber.htm#!=">Number</A> | <A href="mObject.htm#!=">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="<"></A><b><</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal < aNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient is smaller than supplied value.  Each subclass of Ordinal 
+must redefine this message.  If a subclass does not implement <, then an 
+attempt to send the message to a subclass results in an error message of the 
+form: >>> '<' must be implemented for 'recipient' <<<.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#<">Date</A> | <A href="mObject.htm#<">Object</A> | <A href="mString.htm#<">String</A> | <A href="mNA.htm#<">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="<"></A><b><</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String < aString</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient string comes before supplied string alphabetically.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#<">Date</A> | <A href="mObject.htm#<">Object</A> | <A href="mNA.htm#<">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="<="></A><b><=</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal <= aNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient is smaller than or equal to supplied value.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#<=">Date</A> | <A href="mObject.htm#<=">Object</A> | <A href="mString.htm#<=">String</A> | <A href="mNA.htm#<=">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="<="></A><b><=</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String <= aString</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient string comes before or is equal to supplied string.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#<=">Date</A> | <A href="mObject.htm#<=">Object</A> | <A href="mNA.htm#<=">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="="></A><b>=</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String = aString</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if supplied string contains the identical sequence as the recipient 
+String.  Two strings are NOT identical if one has extra blanks at the beginning 
+or end.  Upper and lower case letters are NOT 
+identical.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#=">Date</A> | <A href="mDate.htm#=">DateRange</A> | <A href="mObject.htm#=">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name=">"></A><b>></b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal > aNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient is larger than supplied value.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#>">Date</A> | <A href="mNumber.htm#>">Number</A> | <A href="mObject.htm#>">Object</A> | <A href="mString.htm#>">String</A> | <A href="mNA.htm#>">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name=">"></A><b>></b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String > aString</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient String comes after supplied String alphabetically.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#>">Date</A> | <A href="mNumber.htm#>">Number</A> | <A href="mObject.htm#>">Object</A> | <A href="mNA.htm#>">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name=">="></A><b>>=</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal >= aNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient is larger than or equal to supplied value.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#>=">Date</A> | <A href="mNumber.htm#>=">Number</A> | <A href="mObject.htm#>=">Object</A> | <A href="mString.htm#>=">String</A> | <A href="mNA.htm#>=">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name=">="></A><b>>=</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String >= aString</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient String is the same or comes after supplied String 
+alphabetically.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#>=">Date</A> | <A href="mNumber.htm#>=">Number</A> | <A href="mObject.htm#>=">Object</A> | <A href="mNA.htm#>=">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="LowerCaseDictionary"></A><b>LowerCaseDictionary</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String LowerCaseDictionary</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Upper to lower case conversion chart.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDict.htm">Dictionary</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="UpperCaseDictionary"></A><b>UpperCaseDictionary</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String UpperCaseDictionary</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Lower to upper case conversion chart.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDict.htm">Dictionary</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="__asOpenVisionChannel"></A><b>__asOpenVisionChannel</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String __asOpenVisionChannel</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="additionUpdateDumpOf:"></A><b>additionUpdateDumpOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String additionUpdateDumpOf:</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="appendOutputOf:"></A><b>appendOutputOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String appendOutputOf: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Appends all print statement that are invoked directly or indirectly
+within the supplied block to the Unix file; the recipient string represents 
+the Unix filename. </blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="as:"></A><b>as:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String as: type</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts the recipient String to an instance of the class indicated by
+the parameter, if possible.  If the type is a string that is not the
+default String, the supplied type will be evaluated to determine its class. 
+The implementation of 'convertFrom:' defined for that class will be used
+to convert the string to the correct class.  The version at Object looks
+the string up in the class' default naming dictionary if it exists.  
+If the recipient String contains the ',' character, this method returns
+a list of objects of the supplied type.  Any String that cannot be
+converted to the supplied class returns NA.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#as:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asBlock"></A><b>asBlock</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String asBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts recipient into a Block that contains the recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBlock.htm">Block</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asBlockIn:"></A><b>asBlockIn:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String asBlockIn: object</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts recipient into a Block that contains the recipient.
+The block is created in the execution environment of the suplied object.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBlock.htm">Block</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asCSVRecords"></A><b>asCSVRecords</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String asCSVRecords</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts a comma-separated-value format file to a list of strings,<br>
+with each element responding to the message 'fields', which returns<br>
+a list of the comma-separted values.  Embedded commas in the original<br>
+file are preserved.  For example, if the file 'sample.dat' contains:<br>
+     key1, description1, value1<br>
+     key2, "description 2 with , character", value2<br>
+then:<br>
+     "sample.dat" asCSVRecords<br>
+     do: [ "Field 1: " print ; fields at: 1 . printNL ;<br>
+           "Field 2: " print ; fields at: 2 . printNL ;<br>
+           "Field 3: " print ; fields at: 3 . printNL ;<br>
+         ] ;<br>
+<br>
+displays:<br>
+<br>
+     Field 1: key1<br>
+     Field 2: description1<br>
+     Field 3: value1<br>
+     Field 1: key2<br>
+     Field 2: description 2 with , character<br>
+     Field 3: value2<br>
+</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asCells"></A><b>asCells</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String asCells</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts the recipient string into a list of strings extended
+by the 'cells' message which returns a list of strings generated
+using the tab or Vision delimiter. Lines containing Vision Formatter
+commands (i.e., @@@) are removed as are any cells that contain an 
+escape character.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asCellsOn:"></A><b>asCellsOn:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String asCellsOn: delimiter</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts the recipient string into a list of strings extended
+by the 'cells' message which returns a list of strings generated
+using supplied delimiter. Lines containing Vision Formatter
+commands (i.e., @@@) are removed as are any cells that contain an 
+escape character.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asCurrency"></A><b>asCurrency</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String asCurrency</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts recipient into a Currency.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCurrency.htm">Currency</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mCurrency.htm#asCurrency">Currency</A> | <A href="mNA.htm#asCurrency">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asDate"></A><b>asDate</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String asDate</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts the recipient String into a Date object.  The recipient<br>
+can contain a value in one of the following forms: <br>
+      "yy", "yymm", "yymmdd", "yyyymmdd"<br>
+      "m/d/y"     where m is 1-12; d is 1-31; y is yy or yyyy<br>
+      "m-d-y"     where m is 1-12; d is 1-31; y is yy or yyyy<br>
+      "+ # offset", where # is integer and offset is a DateOffset<br>
+      "- # offset", where # is integer and offset is a DateOffset<br>
+      "today"<br>
+      "yesterday"<br>
+<br>
+The 'offset' formats add/subtract the offset from the current value of '^date'.<br>
+For example:<br>
+     "961231" asDate      --> 12/31/96<br>
+     "1/3/95" asDate      --> 1/3/95<br>
+     "+ 3 days"           --> current date + 3 days<br>
+     "today"              --> today's date<br>
+</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDate.htm">Date</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#asDate">Date</A> | <A href="mOffset.htm#asDate">DateOffset</A> | <A href="mNumber.htm#asDate">Number</A> | <A href="mNA.htm#asDate">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asFileContents"></A><b>asFileContents</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String asFileContents</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts the file name specified by the recipient string into a String
+containing the file's contents.  If the file is not found, an empty string
+is returned.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asInteger"></A><b>asInteger</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String asInteger</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts recipient into a Number of class Integer.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Integer
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#asInteger">Date</A> | <A href="mOffset.htm#asInteger">DateOffset</A> | <A href="mNA.htm#asInteger">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asLines"></A><b>asLines</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String asLines</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a list of strings based on carriage returns in recipient string.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asNumber"></A><b>asNumber</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String asNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts recipient string into a number.  Strings containing numbers with no 
+decimal point are converted to integers.  Strings containing non-numeric 
+characters are converted to NA.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#asNumber">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asOpenVisionChannel"></A><b>asOpenVisionChannel</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String asOpenVisionChannel</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asOpenVisionChannelToVision"></A><b>asOpenVisionChannelToVision</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String asOpenVisionChannelToVision</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asQuotedString"></A><b>asQuotedString</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String asQuotedString</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the recipient string enclosed in double quotes.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asRecords"></A><b>asRecords</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String asRecords</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts the file specified in the recipient string into
+a list of strings, with each element representing a record in the
+original file.  Empty lines are excluded from the returned list.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asSelector"></A><b>asSelector</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String asSelector</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the recipient as a selector object.  The version at Selector returns
+recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Selector
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the original object.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Ordinal
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#asSelf">Block</A> | <A href="mBoolean.htm#asSelf">Boolean</A> | <A href="mClassify.htm#asSelf">Classification</A> | <A href="mCollect.htm#asSelf">Collection</A> | <A href="mCurrency.htm#asSelf">Currency</A> | <A href="mDate.htm#asSelf">Date</A> | <A href="mOffset.htm#asSelf">DateOffset</A> | <A href="mDate.htm#asSelf">DateRange</A> | <A href="mDict.htm#asSelf">Dictionary</A> | <A href="mEntity.htm#asSelf">Entity</A> | <A href="mIList.htm#asSelf">IndexedList</A> | <A href="mInterface.htm#asSelf">Interface</A> | <A href="mList.htm#asSelf">List</A> | <A href="mNumber.htm#asSelf">Number</A> | <A href="mObject.htm#asSelf">Object</A> | <A href="mOpenVision.htm#asSelf">OpenVision</A> | <A href="mSchema.htm#asSelf">Schema</A> | <A href="mString.htm#asSelf">String</A> | <A href="mTS.htm#asSelf">TimeSeries</A> | <A href="mNA.htm#asSelf">Undefined</A> | <A href="mUtil.htm#asSelf">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the original object.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#asSelf">Block</A> | <A href="mBoolean.htm#asSelf">Boolean</A> | <A href="mClassify.htm#asSelf">Classification</A> | <A href="mCollect.htm#asSelf">Collection</A> | <A href="mCurrency.htm#asSelf">Currency</A> | <A href="mDate.htm#asSelf">Date</A> | <A href="mOffset.htm#asSelf">DateOffset</A> | <A href="mDate.htm#asSelf">DateRange</A> | <A href="mDict.htm#asSelf">Dictionary</A> | <A href="mEntity.htm#asSelf">Entity</A> | <A href="mIList.htm#asSelf">IndexedList</A> | <A href="mInterface.htm#asSelf">Interface</A> | <A href="mList.htm#asSelf">List</A> | <A href="mNumber.htm#asSelf">Number</A> | <A href="mObject.htm#asSelf">Object</A> | <A href="mOpenVision.htm#asSelf">OpenVision</A> | <A href="mSchema.htm#asSelf">Schema</A> | <A href="mTS.htm#asSelf">TimeSeries</A> | <A href="mNA.htm#asSelf">Undefined</A> | <A href="mUtil.htm#asSelf">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asString"></A><b>asString</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String asString</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns recipient string stripped of any extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#asString">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asUpperLowerWords"></A><b>asUpperLowerWords</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String asUpperLowerWords</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a list of strings based on upper case letter word boundaries.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asWords"></A><b>asWords</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String asWords</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a list of strings representing the individual words in the recipient
+string where a word is terminated by a blank, tab or new line character.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="at:"></A><b>at:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String at: n </font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the character at the specified position.  For example:<br>
+<br>
+     "abcdefghij" at: 3 .<br>
+<br>
+returns the single character string "c".</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Integer<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDict.htm#at:">Dictionary</A> | <A href="mList.htm#at:">List</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="at:put:"></A><b>at:put:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String at: n put: object</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Inserts the supplied string at the supplied character position.  For <br>
+example:<br>
+<br>
+     "abcdefghij" at: 3 put: "xyz"<br>
+<br>
+returns the string "abxyzcdefghij".</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Integer<br>
+2 - String<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDict.htm#at:put:">Dictionary</A> | <A href="mList.htm#at:put:">List</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="basicConcat:"></A><b>basicConcat:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String basicConcat:</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="basicContains:"></A><b>basicContains:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String basicContains:</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="basicDrop:"></A><b>basicDrop:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String basicDrop:</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="basicFill:"></A><b>basicFill:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String basicFill:</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="basicFindPatternExtent:"></A><b>basicFindPatternExtent:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String basicFindPatternExtent:</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="basicFindPatternOrigin:"></A><b>basicFindPatternOrigin:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String basicFindPatternOrigin:</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="basicFindSubstringOrigin:"></A><b>basicFindSubstringOrigin:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String basicFindSubstringOrigin:</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="basicTake:"></A><b>basicTake:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String basicTake:</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="between:and:"></A><b>between:and:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal between: anOrdinal1 and: anOrdinal2</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient Ordinal is between supplied Ordinal1 and
+supplied Ordinal2</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+2 - String<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#between:and:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="breakOn:"></A><b>breakOn:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String breakOn: aCharacterSet</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Breaks the recipient string into a list using the characters in the
+string parameter as break points.  The break point characters are not
+included in the resultant list elements.  For example, the expression:
+     myString breakOn: newLine
+can be used to return a list of strings corresponding to the 'records'
+in the recipient string.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="breakString:"></A><b>breakString:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String  breakString: aString</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="canonicalizedForSort"></A><b>canonicalizedForSort</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String canonicalizedForSort</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#canonicalizedForSort">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="capitalize"></A><b>capitalize</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String capitalize</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Capitalizes the first letter of the string.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="cbreakOn:"></A><b>cbreakOn:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String cbreakOn: aCharacterSet</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Breaks the recipient string into a list using the characters NOT in the
+string parameter as break points.  The break point characters are not
+included in the resultant list elements.  This message is the converse
+of 'breakOn:'. </blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="cbreakString:"></A><b>cbreakString:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String  cbreakString: aString</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="center:"></A><b>center:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String center: anInteger</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Centers the recipient string in specified width. If string 
+contains more characters than supplied width, it is truncated to fit and no 
+centering is performed.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Integer<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="centerNL:"></A><b>centerNL:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String centerNL: anInteger</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Centers the recipient String using the supplied width and then 
+starts a new line.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Integer<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reference to the object which describes the class.  Class level information 
+is stored here.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#classDescriptor">Block</A> | <A href="mBoolean.htm#classDescriptor">Boolean</A> | <A href="mClassify.htm#classDescriptor">Classification</A> | <A href="mCollect.htm#classDescriptor">Collection</A> | <A href="mCurrency.htm#classDescriptor">Currency</A> | <A href="mDate.htm#classDescriptor">Date</A> | <A href="mOffset.htm#classDescriptor">DateOffset</A> | <A href="mDate.htm#classDescriptor">DateRange</A> | <A href="mDict.htm#classDescriptor">Dictionary</A> | <A href="mEntity.htm#classDescriptor">Entity</A> | <A href="mIList.htm#classDescriptor">IndexedList</A> | <A href="mInterface.htm#classDescriptor">Interface</A> | <A href="mList.htm#classDescriptor">List</A> | <A href="mNumber.htm#classDescriptor">Number</A> | <A href="mObject.htm#classDescriptor">Object</A> | <A href="mOpenVision.htm#classDescriptor">OpenVision</A> | <A href="mSchema.htm#classDescriptor">Schema</A> | <A href="mString.htm#classDescriptor">String</A> | <A href="mTS.htm#classDescriptor">TimeSeries</A> | <A href="mNA.htm#classDescriptor">Undefined</A> | <A href="mUtil.htm#classDescriptor">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reference to the object which describes the class.  Class level information 
+is stored here.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#classDescriptor">Block</A> | <A href="mBoolean.htm#classDescriptor">Boolean</A> | <A href="mClassify.htm#classDescriptor">Classification</A> | <A href="mCollect.htm#classDescriptor">Collection</A> | <A href="mCurrency.htm#classDescriptor">Currency</A> | <A href="mDate.htm#classDescriptor">Date</A> | <A href="mOffset.htm#classDescriptor">DateOffset</A> | <A href="mDate.htm#classDescriptor">DateRange</A> | <A href="mDict.htm#classDescriptor">Dictionary</A> | <A href="mEntity.htm#classDescriptor">Entity</A> | <A href="mIList.htm#classDescriptor">IndexedList</A> | <A href="mInterface.htm#classDescriptor">Interface</A> | <A href="mList.htm#classDescriptor">List</A> | <A href="mNumber.htm#classDescriptor">Number</A> | <A href="mObject.htm#classDescriptor">Object</A> | <A href="mOpenVision.htm#classDescriptor">OpenVision</A> | <A href="mSchema.htm#classDescriptor">Schema</A> | <A href="mTS.htm#classDescriptor">TimeSeries</A> | <A href="mNA.htm#classDescriptor">Undefined</A> | <A href="mUtil.htm#classDescriptor">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="concat:"></A><b>concat:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String concat: aString</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Appends supplied string to the end of the recipient string.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="contains:"></A><b>contains:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String contains: aString</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if the supplied string is included in the recipient string.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#contains:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="containsSubstring:"></A><b>containsSubstring:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String containsSubstring: substring</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+This message returns TRUE if substring is found in the recipient.  Unlike<br>
+the 'contains:' message, this form matches each character literally, so<br>
+no wildcard characters are recognized.  For example,<br>
+<br>
+     "abc" contains: "^a" <br>
+<br>
+returns TRUE, but<br>
+<br>
+     "abc" containsSubstring: "^a" <br>
+<br>
+returns FALSE.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="convertFrom:"></A><b>convertFrom:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String  convertFrom: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+This message converts the supplied string to an instance of the recipient's
+class if applicable, returning NA otherwise.  The definition at Object
+will lookup the string in the class' naming dictionary, if defined.
+The version at String returns the recipient stripped of any extensions.
+The versions at Number, Integer, Double, and Float convert the recipient
+to a numeric value if possible.  The version at Date converts the recipient
+to a Date using the 'asDate' message defined at String.  The version at
+Boolean returns TRUE if the recipient contains an upper/lower case
+combination of 'true' and FALSE if the recipient contains an upper/lower
+case combination of 'false'.  The version at block returns a block 
+containing the string as a message.  This message is called by the
+'as:' message at String.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#convertFrom:">Block</A> | <A href="mBoolean.htm#convertFrom:">Boolean</A> | <A href="mDate.htm#convertFrom:">Date</A> | <A href="mNumber.htm#convertFrom:">Number</A> | <A href="mObject.htm#convertFrom:">Object</A> | <A href="mNA.htm#convertFrom:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="convertToNumber"></A><b>convertToNumber</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String convertToNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Removes any non-numeric characters (0-9 . - +) from the start and end of 
+the string and any commas from within the remaining string.  If the 
+resultant string can be converted by a number it is, otherwise NA is
+returned.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="count"></A><b>count</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String count</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Counts the number of characters in recipient string.
+Returns a non-negative integer.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Integer
+<p><b>Also Defined At: </b><br>
+ | <A href="mIList.htm#count">IndexedList</A> | <A href="mList.htm#count">List</A> | <A href="mTS.htm#count">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default instance of the recipient object's class</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Ordinal
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#defaultInstance">Block</A> | <A href="mBoolean.htm#defaultInstance">Boolean</A> | <A href="mClassify.htm#defaultInstance">Classification</A> | <A href="mCollect.htm#defaultInstance">Collection</A> | <A href="mCurrency.htm#defaultInstance">Currency</A> | <A href="mDate.htm#defaultInstance">Date</A> | <A href="mOffset.htm#defaultInstance">DateOffset</A> | <A href="mDate.htm#defaultInstance">DateRange</A> | <A href="mDict.htm#defaultInstance">Dictionary</A> | <A href="mEntity.htm#defaultInstance">Entity</A> | <A href="mIList.htm#defaultInstance">IndexedList</A> | <A href="mInterface.htm#defaultInstance">Interface</A> | <A href="mList.htm#defaultInstance">List</A> | <A href="mNumber.htm#defaultInstance">Number</A> | <A href="mOpenVision.htm#defaultInstance">OpenVision</A> | <A href="mSchema.htm#defaultInstance">Schema</A> | <A href="mString.htm#defaultInstance">String</A> | <A href="mTS.htm#defaultInstance">TimeSeries</A> | <A href="mNA.htm#defaultInstance">Undefined</A> | <A href="mUtil.htm#defaultInstance">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default instance of the recipient object's class</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#defaultInstance">Block</A> | <A href="mBoolean.htm#defaultInstance">Boolean</A> | <A href="mClassify.htm#defaultInstance">Classification</A> | <A href="mCollect.htm#defaultInstance">Collection</A> | <A href="mCurrency.htm#defaultInstance">Currency</A> | <A href="mDate.htm#defaultInstance">Date</A> | <A href="mOffset.htm#defaultInstance">DateOffset</A> | <A href="mDate.htm#defaultInstance">DateRange</A> | <A href="mDict.htm#defaultInstance">Dictionary</A> | <A href="mEntity.htm#defaultInstance">Entity</A> | <A href="mIList.htm#defaultInstance">IndexedList</A> | <A href="mInterface.htm#defaultInstance">Interface</A> | <A href="mList.htm#defaultInstance">List</A> | <A href="mNumber.htm#defaultInstance">Number</A> | <A href="mOpenVision.htm#defaultInstance">OpenVision</A> | <A href="mSchema.htm#defaultInstance">Schema</A> | <A href="mTS.htm#defaultInstance">TimeSeries</A> | <A href="mNA.htm#defaultInstance">Undefined</A> | <A href="mUtil.htm#defaultInstance">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="deleteFromDictionaryOf:"></A><b>deleteFromDictionaryOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String deleteFromDictionaryOf: anObject</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts the recipient string to a selector and removes the protocol 
+implemented by it from the dictionary associated with the supplied object.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Object<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="drop:"></A><b>drop:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String drop: aNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Drops the specified number of characters form the beginning or end of 
+recipient string.  A positive integer drops characters starting at the 
+beginning of the string.  A negative number drops characters starting at the 
+end of the string.  If you drop more characters that the string contains, a 
+string with 0 characters is returned.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="evaluate"></A><b>evaluate</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String evaluate</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Executes string as VISION expression at ^global.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="evaluateIn:"></A><b>evaluateIn:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String evaluateIn: anObject</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Executes string as VISION expression in supplied environment.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Object<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="evaluateWithCompilationErrorHandler:in:"></A><b>evaluateWithCompilationErrorHandler:in:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String evaluateWithCompilationErrorHandler:in:</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+2 - Undefined<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="fill:"></A><b>fill:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String fill: aNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Repeats the characters in the original string until a string of the specified 
+length is formed.  A negative number repeats the pattern from right to left.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="filterOutputOf:"></A><b>filterOutputOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String filterOutputOf: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Supplies the printed output associated with the execution of the<br>
+supplied block as input to the recipient string as a Unix Command.<br>
+<br>
+For example:  <br>
+<br>
+     "format" filterOutputOf: [ Named Company IBM displayReport ] <br>
+<br>
+will redirect the report through the format program as standard input<br>
+(i.e., format < report).  By default, the results of executing this<br>
+expression will be printed on your screen.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="findPatternExtent:"></A><b>findPatternExtent:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String findPatternExtent: pattern</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the length of the pattern if it is present in the recipient.  If
+it is not present, zero is returned.  This version views the pattern as a
+regular expression (i.e., wildcards are interpretted).</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="findPatternOrigin:"></A><b>findPatternOrigin:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String findPatternOrigin: pattern</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the zero-based position of the first occurrence of the
+pattern in the recipient.  If the string is not found,
+the length of the recipient is returned.  This version views the
+pattern as a regular expression (i.e., wildcards are interpretted).</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="findPatternSuffix:"></A><b>findPatternSuffix:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String findPatternSuffix: pattern</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the zero-based position of the first character after the first
+occurrence of the pattern in the recipient.  If the string is not found,
+the length of the recipient is returned.  This version views the
+pattern as a regular expression (i.e., wildcards are interpretted).</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="findSubstringExtent:"></A><b>findSubstringExtent:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String findSubstringExtent: substring</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the length of the sub-string if it is present in the recipient.
+If the string is not prsent, zero is returned.  This version matches the 
+characters in the sub-string explicitly.  </blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="findSubstringOrigin:"></A><b>findSubstringOrigin:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String findSubstringOrigin: substring</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the zero-based position of the first occurrence of the
+sub-string in the recipient.  If the string is not found,
+the length of the recipient is returned.  This version matches
+the characters in the sub-string explicitly.  </blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="findSubstringSuffix:"></A><b>findSubstringSuffix:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String findSubstringSuffix: substring</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the zero-based position of the first character after the first
+occurrence of the sub-string in the recipient.  If the string is not 
+found, the length of the recipient is returned.  This version matches
+the characters in the sub-string explicitly.  </blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="fixed"></A><b>fixed</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String fixed</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="formatForExcel"></A><b>formatForExcel</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String formatForExcel</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+reformats the recipient string for use as tab delimited
+output.  This message assumes that the recipient string is delimited
+by the tab or Vision delimiter.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#formatForExcel">Block</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="formatForPRN"></A><b>formatForPRN</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String formatForPRN</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+reformats the recipient string for use as PRN-style input
+Strings are printed in quotes, numbers are printed as is, and field
+are separated by a space.  This message assumes that the recipient
+string is delimited by the tab or Vision delimiter.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#formatForPRN">Block</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="from:"></A><b>from:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String from: pos</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a substring of recipient starting from position indicated by
+parameter.  If 'pos' is numeric, the substring starting with this
+character position to the end of the string is returned.  If 'pos'
+is a character, the substring starting from the first occurrence of
+this character to the end of the string is returned.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Ordinal<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mTS.htm#from:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="from:for:"></A><b>from:for:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String from: pos1 for: count</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a substring of the recipient object from the supplied position
+for count characters.  If count is positive, supplied position is the 
+first position of the returned string.  If count is negative, supplied
+position is the last position of the returned string.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Integer<br>
+2 - Integer<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="from:to:"></A><b>from:to:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String from: pos1 to: pos2</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a substring of the recipient object from the starting position
+to the ending position.  The supplied parameters should be positive
+integers.  If pos1 is greater than pos2, the resultant string is reversed.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Integer<br>
+2 - Integer<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mTS.htm#from:to:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="howManyOf:"></A><b>howManyOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String howManyOf: charset</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the number of occurrences of any of the characters in the supplied<br>
+character set in the recipient String.  For example:<br>
+     "1/15/96" howManyOf: "/" . printNL ;<br>
+</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Integer
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="inRange:"></A><b>inRange:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal Ordinal inRange: aList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient Ordinal is in range specified by aList, where aList
+contains 2 elements - the start and end of the range (inclusive).</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="inSet:"></A><b>inSet:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal inSet: aList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient Ordinal is included in supplied list.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isBlank"></A><b>isBlank</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String isBlank</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns TRUE if string is all blanks.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isBlankFor:"></A><b>isBlankFor:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String isBlankFor: aNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns TRUE if string is blank for first n characters.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isDefault"></A><b>isDefault</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String isDefault</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns TRUE if string is empty.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mCollect.htm#isDefault">Collection</A> | <A href="mDate.htm#isDefault">Date</A> | <A href="mObject.htm#isDefault">Object</A> | <A href="mNA.htm#isDefault">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isOrdinal"></A><b>isOrdinal</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal isOrdinal</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a TRUE value when sent to any Ordinal.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>TRUE
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#isOrdinal">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isString"></A><b>isString</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String isString</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a TRUE value when sent to any String.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>TRUE
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#isString">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="locateInDictionaryOf:"></A><b>locateInDictionaryOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String locateInDictionaryOf: anObject</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts the recipient string into a selector and returns the intensional 
+form of the value assessed in the dictionary of the supplied object.  Send
+the 'value' message to evaluate the object returned.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Object<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="locateOrAddInDictionaryOf:"></A><b>locateOrAddInDictionaryOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String locateOrAddInDictionaryOf: anObject</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts the recipient string into a selector and looks up this selector in 
+the supplied object's dictionary, returning the intensional form of the value 
+if present.  Otherwise the selector is added to the dictionary and the 
+intensional form is returned.  Send 'value' message to intensional form to 
+evaluate it.  </blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Object<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="lowercase"></A><b>lowercase</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String lowercase</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts the first letter of a string to lowercase.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="matchesString:"></A><b>matchesString:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String matchesString: aString</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests whether supplied string is identical to recipient string.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#matchesString:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="max:"></A><b>max:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal max: aNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the larger of the supplied value and the recipient Number. If an 
+invalid parameter is supplied, NA is returned.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mCollect.htm#max:">Collection</A> | <A href="mNA.htm#max:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="min:"></A><b>min:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal min: aNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the smaller of the supplied value and the recipient Number. If an 
+invalid parameter is supplied, NA is returned.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mCollect.htm#min:">Collection</A> | <A href="mNA.htm#min:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="new"></A><b>new</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal new</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Undefines the 'new' message for Ordinal classes.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Ordinal
+<p><b>Also Defined At: </b><br>
+ | <A href="mBoolean.htm#new">Boolean</A> | <A href="mCollect.htm#new">Collection</A> | <A href="mDate.htm#new">DateRange</A> | <A href="mDict.htm#new">Dictionary</A> | <A href="mObject.htm#new">Object</A> | <A href="mNA.htm#new">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="notBetween:and:"></A><b>notBetween:and:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal notBetween: anOrdinal1 and: anOrdinal2</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient Ordinal is not between supplied Ordinal1
+and supplied Ordinal2.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+2 - String<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#notBetween:and:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="notifyAsComment"></A><b>notifyAsComment</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String notifyAsComment</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Obsolete.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="notifyAsError"></A><b>notifyAsError</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String notifyAsError</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Obsolete.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="notifyAsWarning"></A><b>notifyAsWarning</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String notifyAsWarning</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Obsolete.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="orderUsingDictionary:"></A><b>orderUsingDictionary:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String orderUsingDictionary: dictionary</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#orderUsingDictionary:">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="pad:"></A><b>pad:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String pad: aNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Pads the string with blanks if number of characters in the string
+is less than supplied parameter.  If 'n' is negative, string is
+padded on the left; otherwise, it is padded on the right.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="patternExtentIn:"></A><b>patternExtentIn:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String patternExtentIn: string</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="patternOriginIn:"></A><b>patternOriginIn:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String patternOriginIn: string</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="prefixNotSpannedBy:"></A><b>prefixNotSpannedBy:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String prefixNotSpannedBy: aString</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+This message returns the number of characters at the beginning of the 
+recipient string that do not match any character in the supplied string.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Integer
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="prefixNotSpannedIn:"></A><b>prefixNotSpannedIn:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String prefixNotSpannedIn: aString</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="prefixSpannedBy:"></A><b>prefixSpannedBy:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String prefixSpannedBy: aString</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+This message returns the number of characters at the beginning of the 
+recipient string that match any character in the supplied string</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Integer
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="prefixSpannedIn:"></A><b>prefixSpannedIn:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String prefixSpannedIn: aString</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="prefixWith:"></A><b>prefixWith:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String  prefixWith: aString</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="print"></A><b>print</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String print</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Redefines the standard print message so that the content of the string is 
+printed.  All characters are printed; no truncation or padding occurs.  
+Strings can contain the carraige return character.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#print">Block</A> | <A href="mDate.htm#print">Date</A> | <A href="mOffset.htm#print">DateOffset</A> | <A href="mDate.htm#print">DateRange</A> | <A href="mEntity.htm#print">Entity</A> | <A href="mIList.htm#print">IndexedList</A> | <A href="mList.htm#print">List</A> | <A href="mObject.htm#print">Object</A> | <A href="mTS.htm#print">TimeSeries</A> | <A href="mNA.htm#print">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="print:"></A><b>print:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String print: anInteger</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Prints the string using the supplied width.  Strings containing fewer 
+characters than the supplied width are padded with the appropriate number 
+of blanks on the right (i.e., left-justified).  If the supplied width is 
+negative, the string will be padded with the blanks on the left (right-
+justified).  If the string contains more characters than the width supplied, 
+the rightmost characters will be removed.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Integer<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBoolean.htm#print:">Boolean</A> | <A href="mDate.htm#print:">Date</A> | <A href="mEntity.htm#print:">Entity</A> | <A href="mNumber.htm#print:">Number</A> | <A href="mObject.htm#print:">Object</A> | <A href="mNA.htm#print:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="printPRN"></A><b>printPRN</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String printPRN</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Prints the recipient string using 'prn' format.  The recipient is printed 
+surrounded by quotes.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#printPRN">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="printPRN:"></A><b>printPRN:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String printPRN: anInteger</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Prints the recipient object in 'prn' format using the supplied width.  The 
+output string is surrounded by quotes.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Integer<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#printPRN:">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="putStringTo:"></A><b>putStringTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String putStringTo:</font></blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="replacementUpdateDumpOf:"></A><b>replacementUpdateDumpOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String replacementUpdateDumpOf:</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For Internal Use Only.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Undefined<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="reverse"></A><b>reverse</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String reverse</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the recipient string with each character in reverse order.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="sprint:"></A><b>sprint:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String sprint: anInteger</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the recipient string in a new string formatted to the number of 
+characters specified in supplied width</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Integer<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNumber.htm#sprint:">Number</A> | <A href="mObject.htm#sprint:">Object</A> | <A href="mNA.htm#sprint:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="startingPositionOf:"></A><b>startingPositionOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String startingPositionOf: subString</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the position number at which the first occurence of the supplied
+substring starts in the recipient string.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Integer
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="startingPositionsOf:"></A><b>startingPositionsOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String startingPositionsOf: subString</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the list of position numbers at which the supplied substring
+starts in the recipient string.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="stripBoundingBlanks"></A><b>stripBoundingBlanks</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String stripBoundingBlanks</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the string stripped of blanks on either side.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="stripChar:"></A><b>stripChar:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String stripChar: char</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the recipient string with the supplied character removed
+for every occurrence</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="stripCommas"></A><b>stripCommas</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String stripCommas</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the string stripped of any commas.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="stripLeadingBlanks"></A><b>stripLeadingBlanks</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String stripLeadingBlanks</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the string stripped of any leading blanks.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="stripTrailingBlanks"></A><b>stripTrailingBlanks</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String stripTrailingBlanks</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the string stripped of any blanks that follow the last character.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="substituteOutputOf:"></A><b>substituteOutputOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String substituteOutputOf: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Creates a Unix file containing all print statement that are invoked directly
+or indirectly within the supplied block; the recipient string represents the
+Unix filename </blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="substringOriginIn:"></A><b>substringOriginIn:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String substringOriginIn: string</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="take:"></A><b>take:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String take: anInteger</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Keeps the specified number of characters from the beginning or end of the 
+string.  A positive number keeps characters starting at the beginning of the 
+string.  A negative number keeps characters starting at the end of the string.  
+If you keep more characters than the string contains, blanks will be added to 
+the beginning or end of the string.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Integer<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="to:"></A><b>to:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String to: pos</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a substring of recipient from start of recipient to position
+indicated by parameter.  If 'pos' is numeric, the substring ending with
+this character position is returned.  If 'pos' is a character, the
+substring starting from the beginning of the recipient through to the
+first occurrence of this character is returned.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Ordinal<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mTS.htm#to:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="toDouble"></A><b>toDouble</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String toDouble</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts recipient string to a double precision number if possible.  If 
+recipient does not contian a valid number, NA is returned.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Double
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="toList"></A><b>toList</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String toList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts recipient string to a list of characters.  The resultant list has
+one element for each character in the recipient string.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mIList.htm#toList">IndexedList</A> | <A href="mList.htm#toList">List</A> | <A href="mTS.htm#toList">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="toLower"></A><b>toLower</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String toLower</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts the characters in the recipient string to lower case letters and
+returns a single string.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="toUpper"></A><b>toUpper</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String toUpper</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts the characters in the recipient string to upper case letters and
+returns a single string.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="translate:to:"></A><b>translate:to:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String translate: charSet to: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Replaces all occurrences of any character in the string supplied as the
+first parameter with the string supplied a the second parameter.  This
+differs from the 'translateString:to:' message which replaces all 
+occurrences of the first string with the second string.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+2 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="translateString:to:"></A><b>translateString:to:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String translateString: fromString to: toString</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Replaces all occurrences of the 'fromString' with 'toString'.  Note
+that this differs from the 'translate:to:' message which replaces any
+character in the first parameter with the string supplied as the second
+parameter.  Note that this version returns NA when the translation 
+encounters overlapping replacments.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+2 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="unixFileContents"></A><b>unixFileContents</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String unixFileContents</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the string 'Ordinal'.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#whatAmI">Block</A> | <A href="mBoolean.htm#whatAmI">Boolean</A> | <A href="mClassify.htm#whatAmI">Classification</A> | <A href="mCollect.htm#whatAmI">Collection</A> | <A href="mCurrency.htm#whatAmI">Currency</A> | <A href="mDate.htm#whatAmI">Date</A> | <A href="mOffset.htm#whatAmI">DateOffset</A> | <A href="mDate.htm#whatAmI">DateRange</A> | <A href="mDict.htm#whatAmI">Dictionary</A> | <A href="mEntity.htm#whatAmI">Entity</A> | <A href="mIList.htm#whatAmI">IndexedList</A> | <A href="mInterface.htm#whatAmI">Interface</A> | <A href="mList.htm#whatAmI">List</A> | <A href="mNumber.htm#whatAmI">Number</A> | <A href="mObject.htm#whatAmI">Object</A> | <A href="mOpenVision.htm#whatAmI">OpenVision</A> | <A href="mSchema.htm#whatAmI">Schema</A> | <A href="mString.htm#whatAmI">String</A> | <A href="mTS.htm#whatAmI">TimeSeries</A> | <A href="mNA.htm#whatAmI">Undefined</A> | <A href="mUtil.htm#whatAmI">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">String whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the string 'String'.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#whatAmI">Block</A> | <A href="mBoolean.htm#whatAmI">Boolean</A> | <A href="mClassify.htm#whatAmI">Classification</A> | <A href="mCollect.htm#whatAmI">Collection</A> | <A href="mCurrency.htm#whatAmI">Currency</A> | <A href="mDate.htm#whatAmI">Date</A> | <A href="mOffset.htm#whatAmI">DateOffset</A> | <A href="mDate.htm#whatAmI">DateRange</A> | <A href="mDict.htm#whatAmI">Dictionary</A> | <A href="mEntity.htm#whatAmI">Entity</A> | <A href="mIList.htm#whatAmI">IndexedList</A> | <A href="mInterface.htm#whatAmI">Interface</A> | <A href="mList.htm#whatAmI">List</A> | <A href="mNumber.htm#whatAmI">Number</A> | <A href="mObject.htm#whatAmI">Object</A> | <A href="mOpenVision.htm#whatAmI">OpenVision</A> | <A href="mSchema.htm#whatAmI">Schema</A> | <A href="mTS.htm#whatAmI">TimeSeries</A> | <A href="mNA.htm#whatAmI">Undefined</A> | <A href="mUtil.htm#whatAmI">Utility</A> | 
+<p></blockquote>
+
+<p><hr>
+<table border=0 width=100%>
+<tr>
+<td align=left>
+<font size=-1>Copyright &copy 1997 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated May 7, 1997</font>
+</table>
+</body>
+</html>

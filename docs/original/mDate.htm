@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Messages: Date</title>
+</head>
+<body bgcolor=white>
+<p>
+<center> | <A href="FHome.htm">Home</A>
+ | <A href="clDate.htm">Date Class  </A>
+ | <A href="mXRef.htm">Message XRef</A>
+ | <A href="Messages.htm">Messages (General)</A>
+ | 
+</center><hr>
+
+<center>
+<font face="Arial" color="darkblue" size=3 >
+<h3>Profile of Class <i>Date</i></h3>
+</center>
+</font><p>
+<blockquote><center><hr width=70%><p>
+Includes Classes: <i>Date, Ordinal</i>
+<p><hr width=70%></center></blockquote><p>
+<pre>
+
+<A href="clObject.htm">Object</A>
+  | 
+Ordinal
+  | 
+  +--- <b>Date</b>
+</pre>
+<p><hr align=left width=70% ><p>
+
+<pre>The instances of the class Date represent a specific day in the
+calendar.  Each date encompasses a day, month, and year.  Dates are
+formed in one of two ways.  Explicit dates can be derived by sending
+the asDate message to integers in one of the forms illustrated below:
+
+     Integer Form            Example             Returns Date
+     -----------------------------------------------------------------
+     YYYYMMDD                19850923 asDate      9/23/1985
+       YYMMDD                  861015 asDate     10/15/1986
+         YYMM                    8803 asDate      3/31/1988
+           YY                      87 asDate     12/31/1987
+
+Dates can also be formed relative to another date by adding or
+subtracting a date offset to or from the date.  For example:  
+
+     88 asDate - 5 days          ==>   12/26/1988
+     87 asDate + 1 monthEnds     ==>    1/31/1988
+</pre><p><hr align=left width=70% ><p>
+
+<font size=+1 face="Arial" color="darkred">Message Index</font>
+<p><img src="instdot.gif" align="middle" alt="o "><A href="#!="><b>!= aDate</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#+"><b>+ aDateOffset</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#-"><b>- aDateOffset</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#<"><b>< aNumber</b></A><i> (Ordinal)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#<"><b>< aDate</b></A><i> (Date)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#<="><b><= aNumber</b></A><i> (Ordinal)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#<="><b><= aDate</b></A><i> (Date)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#="><b>= aDate</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#>"><b>> aNumber</b></A><i> (Ordinal)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#>"><b>> aDate</b></A><i> (Date)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#>="><b>>= aNumber</b></A><i> (Ordinal)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#>="><b>>= aDate</b></A><i> (Date)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#DayOfWeekDescriptor"><b>DayOfWeekDescriptor</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#MonthDescriptor"><b>MonthDescriptor</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#__fixReference"><b>__fixReference</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asBDay"><b>asBDay</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asBDayMonday"><b>asBDayMonday</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asCurrentYearMMDD"><b>asCurrentYearMMDD</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asDate"><b>asDate</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asIDate7"><b>asIDate7</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asInteger"><b>asInteger</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asMonthEnd"><b>asMonthEnd</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asMostRecentBusinessMonthEnd"><b>asMostRecentBusinessMonthEnd</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asMostRecentMonthEnd"><b>asMostRecentMonthEnd</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asQuarterEnd"><b>asQuarterEnd</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (Ordinal)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (Date)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asYearBeginning"><b>asYearBeginning</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asYearEnd"><b>asYearEnd</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#between:and:"><b>between: anOrdinal1 and: anOrdinal2</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#by:from:evaluate:"><b>by: aDateOffset from: aDate evaluate: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#by:to:evaluate:"><b>by: aDateOffset to: aDate evaluate: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (Ordinal)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (Date)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#convertFrom:"><b> convertFrom: string</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#count30DayDaysTo:"><b>count30DayDaysTo: aDate</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#count360DayYearsTo:"><b>count360DayYearsTo: aDate</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#count6monthIntervalsTo:"><b>count6monthIntervalsTo: aDate</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#countBDaysTo:"><b>countBDaysTo: aDate</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#countDaysTo:"><b>countDaysTo: aDate</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#countFullMonthsTo:"><b>countFullMonthsTo: aDate</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#countIntervalsOf:to:"><b>countIntervalsOf: aDateOffset to: aDate</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#countMonthsTo:"><b>countMonthsTo: aDate</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#countYearsTo:"><b>countYearsTo: aDate</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#day"><b>day</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#dayNumberOfWeek"><b>dayNumberOfWeek</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#dayOfWeek"><b>dayOfWeek</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (Ordinal)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (Date)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#evaluate:"><b>evaluate: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#extract:for:"><b>extract: block for: object</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#formatUsingLongName"><b>formatUsingLongName</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#formatUsingMMDD"><b>formatUsingMMDD</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#formatUsingMMDDYY"><b>formatUsingMMDDYY</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#formatUsingMMDDYYYY"><b>formatUsingMMDDYYYY</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#formatUsingShortName"><b>formatUsingShortName</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#getDayOfWeekDescriptor"><b>getDayOfWeekDescriptor</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#getMonthDescriptor"><b>getMonthDescriptor</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#inRange:"><b>Ordinal inRange: aList</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#inSet:"><b>inSet: aList</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#inputExpression"><b>inputExpression</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isDate"><b>isDate</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isDefault"><b>isDefault</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isInitialDate"><b>isInitialDate</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isLastBusinessDayOfMonth"><b>isLastBusinessDayOfMonth</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isMonthEnd"><b>isMonthEnd</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isOrdinal"><b>isOrdinal</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isValid"><b>isValid</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isntValid"><b>isntValid</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#max:"><b>max: aNumber</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#min:"><b>min: aNumber</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#month"><b>month</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#new"><b>new</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#notBetween:and:"><b>notBetween: anOrdinal1 and: anOrdinal2</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#print"><b>print</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#print:"><b>print: anInteger</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#quarterNumber"><b>quarterNumber</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#to:by:"><b>to: aDate by: aDateOffset</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (Ordinal)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (Date)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#year"><b>year</b></A><br>
+<p><hr align=left width=70% ><p>
+
+<font size=+1 face="Arial" color="darkred">Messages</font>
+<p><img src="instdot.gif" align="middle" alt="o "><A name="!="></A><b>!=</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date != aDate</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient date is the same as the supplied date.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Date<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNumber.htm#!=">Number</A> | <A href="mObject.htm#!=">Object</A> | <A href="mString.htm#!=">String</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="+"></A><b>+</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date + aDateOffset</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Adds the supplied date increment to the recipient date.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDate.htm">Date</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - DateOffset<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mOffset.htm#+">DateOffset</A> | <A href="mList.htm#+">List</A> | <A href="mTS.htm#+">TimeSeries</A> | <A href="mNA.htm#+">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="-"></A><b>-</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date - aDateOffset</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Subtracts the supplied date increment from the recipient date</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDate.htm">Date</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - DateOffset<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mList.htm#-">List</A> | <A href="mTS.htm#-">TimeSeries</A> | <A href="mNA.htm#-">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="<"></A><b><</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal < aNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient is smaller than supplied value.  Each subclass of Ordinal 
+must redefine this message.  If a subclass does not implement <, then an 
+attempt to send the message to a subclass results in an error message of the 
+form: >>> '<' must be implemented for 'recipient' <<<.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#<">Date</A> | <A href="mObject.htm#<">Object</A> | <A href="mString.htm#<">String</A> | <A href="mNA.htm#<">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="<"></A><b><</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date < aDate</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient date comes before supplied date.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Date<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#<">Object</A> | <A href="mString.htm#<">String</A> | <A href="mNA.htm#<">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="<="></A><b><=</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal <= aNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient is smaller than or equal to supplied value.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#<=">Date</A> | <A href="mObject.htm#<=">Object</A> | <A href="mString.htm#<=">String</A> | <A href="mNA.htm#<=">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="<="></A><b><=</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date <= aDate</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient date is the same or earlier than supplied date.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Date<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#<=">Object</A> | <A href="mString.htm#<=">String</A> | <A href="mNA.htm#<=">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="="></A><b>=</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date = aDate</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient date is the same as the supplied date.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Date<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#=">Object</A> | <A href="mString.htm#=">String</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name=">"></A><b>></b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal > aNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient is larger than supplied value.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#>">Date</A> | <A href="mNumber.htm#>">Number</A> | <A href="mObject.htm#>">Object</A> | <A href="mString.htm#>">String</A> | <A href="mNA.htm#>">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name=">"></A><b>></b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date > aDate</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient date is later than supplied date.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Date<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNumber.htm#>">Number</A> | <A href="mObject.htm#>">Object</A> | <A href="mString.htm#>">String</A> | <A href="mNA.htm#>">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name=">="></A><b>>=</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal >= aNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient is larger than or equal to supplied value.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#>=">Date</A> | <A href="mNumber.htm#>=">Number</A> | <A href="mObject.htm#>=">Object</A> | <A href="mString.htm#>=">String</A> | <A href="mNA.htm#>=">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name=">="></A><b>>=</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date >= aDate</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient date is the same or earlier than supplied date.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Date<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNumber.htm#>=">Number</A> | <A href="mObject.htm#>=">Object</A> | <A href="mString.htm#>=">String</A> | <A href="mNA.htm#>=">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="DayOfWeekDescriptor"></A><b>DayOfWeekDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date DayOfWeekDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns default 'Date DayOfWeekDescriptor' object</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Date DayOfWeekDescriptor
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="MonthDescriptor"></A><b>MonthDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date MonthDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns default 'Date MonthDescriptor' object</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Date MonthDescriptor
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="__fixReference"></A><b>__fixReference</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date __fixReference</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mOffset.htm#__fixReference">DateOffset</A> | <A href="mObject.htm#__fixReference">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asBDay"></A><b>asBDay</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date asBDay</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts the recipient date to a business day (Monday - Friday).  If the 
+recipient date is a Monday through Friday date, that date is returned.  If the 
+recipient date is a Saturday or Sunday date, the previous Friday's date is 
+returned.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDate.htm">Date</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asBDayMonday"></A><b>asBDayMonday</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date asBDayMonday</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts the recipient date to a business day (Monday - Friday).  If the 
+recipient date is a Monday through Friday date, that date is returned.  If the 
+recipient date is a Saturday or Sunday date, the following Monday's date is 
+returned.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDate.htm">Date</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asCurrentYearMMDD"></A><b>asCurrentYearMMDD</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date asCurrentYearMMDD</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts recipient date to same date in current year.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDate.htm">Date</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asDate"></A><b>asDate</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date asDate</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns recipient stripped of any extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDate.htm">Date</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mOffset.htm#asDate">DateOffset</A> | <A href="mNumber.htm#asDate">Number</A> | <A href="mString.htm#asDate">String</A> | <A href="mNA.htm#asDate">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asIDate7"></A><b>asIDate7</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date asIDate7</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts recipient into an integer representing the number of days since 
+January 1, 0001.  Useful for computing the number of days between two dates.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Integer
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asInteger"></A><b>asInteger</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date asInteger</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts a date into an integer in YYYYMMDD form.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Integer
+<p><b>Also Defined At: </b><br>
+ | <A href="mOffset.htm#asInteger">DateOffset</A> | <A href="mString.htm#asInteger">String</A> | <A href="mNA.htm#asInteger">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asMonthEnd"></A><b>asMonthEnd</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date asMonthEnd</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the month-end date for the Date represented by the recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDate.htm">Date</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asMostRecentBusinessMonthEnd"></A><b>asMostRecentBusinessMonthEnd</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date asMostRecentBusinessMonthEnd</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the last business day in the month on or before the recipient date.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDate.htm">Date</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asMostRecentMonthEnd"></A><b>asMostRecentMonthEnd</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date asMostRecentMonthEnd</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the last month-end date relative to the recipient date.  If 
+recipient is not a month-end date, the previous month-end date is returned.  
+If recipient is a month-end date, it is returned.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDate.htm">Date</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asQuarterEnd"></A><b>asQuarterEnd</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date asQuarterEnd</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the quarter-end date for the Date represented by the recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDate.htm">Date</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the original object.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Ordinal
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#asSelf">Block</A> | <A href="mBoolean.htm#asSelf">Boolean</A> | <A href="mClassify.htm#asSelf">Classification</A> | <A href="mCollect.htm#asSelf">Collection</A> | <A href="mCurrency.htm#asSelf">Currency</A> | <A href="mDate.htm#asSelf">Date</A> | <A href="mOffset.htm#asSelf">DateOffset</A> | <A href="mDate.htm#asSelf">DateRange</A> | <A href="mDict.htm#asSelf">Dictionary</A> | <A href="mEntity.htm#asSelf">Entity</A> | <A href="mIList.htm#asSelf">IndexedList</A> | <A href="mInterface.htm#asSelf">Interface</A> | <A href="mList.htm#asSelf">List</A> | <A href="mNumber.htm#asSelf">Number</A> | <A href="mObject.htm#asSelf">Object</A> | <A href="mOpenVision.htm#asSelf">OpenVision</A> | <A href="mSchema.htm#asSelf">Schema</A> | <A href="mString.htm#asSelf">String</A> | <A href="mTS.htm#asSelf">TimeSeries</A> | <A href="mNA.htm#asSelf">Undefined</A> | <A href="mUtil.htm#asSelf">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the original object.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDate.htm">Date</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#asSelf">Block</A> | <A href="mBoolean.htm#asSelf">Boolean</A> | <A href="mClassify.htm#asSelf">Classification</A> | <A href="mCollect.htm#asSelf">Collection</A> | <A href="mCurrency.htm#asSelf">Currency</A> | <A href="mOffset.htm#asSelf">DateOffset</A> | <A href="mDict.htm#asSelf">Dictionary</A> | <A href="mEntity.htm#asSelf">Entity</A> | <A href="mIList.htm#asSelf">IndexedList</A> | <A href="mInterface.htm#asSelf">Interface</A> | <A href="mList.htm#asSelf">List</A> | <A href="mNumber.htm#asSelf">Number</A> | <A href="mObject.htm#asSelf">Object</A> | <A href="mOpenVision.htm#asSelf">OpenVision</A> | <A href="mSchema.htm#asSelf">Schema</A> | <A href="mString.htm#asSelf">String</A> | <A href="mTS.htm#asSelf">TimeSeries</A> | <A href="mNA.htm#asSelf">Undefined</A> | <A href="mUtil.htm#asSelf">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asYearBeginning"></A><b>asYearBeginning</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date asYearBeginning</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the year-beginning date for the Date represented by the recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDate.htm">Date</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asYearEnd"></A><b>asYearEnd</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date asYearEnd</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the year-end date for the Date represented by the recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDate.htm">Date</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="between:and:"></A><b>between:and:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal between: anOrdinal1 and: anOrdinal2</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient Ordinal is between supplied Ordinal1 and
+supplied Ordinal2</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+2 - String<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#between:and:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="by:from:evaluate:"></A><b>by:from:evaluate:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date by: aDateOffset from: aDate evaluate: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates supplied Block for recipient Date by supplied increment from 
+supplied Date</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - DateOffset<br>
+2 - Date<br>
+3 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="by:to:evaluate:"></A><b>by:to:evaluate:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date by: aDateOffset to: aDate evaluate: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates supplied Block for recipient Date by supplied increment to 
+supplied Date.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - DateOffset<br>
+2 - Date<br>
+3 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reference to the object which describes the class.  Class level information 
+is stored here.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#classDescriptor">Block</A> | <A href="mBoolean.htm#classDescriptor">Boolean</A> | <A href="mClassify.htm#classDescriptor">Classification</A> | <A href="mCollect.htm#classDescriptor">Collection</A> | <A href="mCurrency.htm#classDescriptor">Currency</A> | <A href="mDate.htm#classDescriptor">Date</A> | <A href="mOffset.htm#classDescriptor">DateOffset</A> | <A href="mDate.htm#classDescriptor">DateRange</A> | <A href="mDict.htm#classDescriptor">Dictionary</A> | <A href="mEntity.htm#classDescriptor">Entity</A> | <A href="mIList.htm#classDescriptor">IndexedList</A> | <A href="mInterface.htm#classDescriptor">Interface</A> | <A href="mList.htm#classDescriptor">List</A> | <A href="mNumber.htm#classDescriptor">Number</A> | <A href="mObject.htm#classDescriptor">Object</A> | <A href="mOpenVision.htm#classDescriptor">OpenVision</A> | <A href="mSchema.htm#classDescriptor">Schema</A> | <A href="mString.htm#classDescriptor">String</A> | <A href="mTS.htm#classDescriptor">TimeSeries</A> | <A href="mNA.htm#classDescriptor">Undefined</A> | <A href="mUtil.htm#classDescriptor">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reference to the object which describes the class.  Class level information 
+is stored here.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#classDescriptor">Block</A> | <A href="mBoolean.htm#classDescriptor">Boolean</A> | <A href="mClassify.htm#classDescriptor">Classification</A> | <A href="mCollect.htm#classDescriptor">Collection</A> | <A href="mCurrency.htm#classDescriptor">Currency</A> | <A href="mOffset.htm#classDescriptor">DateOffset</A> | <A href="mDict.htm#classDescriptor">Dictionary</A> | <A href="mEntity.htm#classDescriptor">Entity</A> | <A href="mIList.htm#classDescriptor">IndexedList</A> | <A href="mInterface.htm#classDescriptor">Interface</A> | <A href="mList.htm#classDescriptor">List</A> | <A href="mNumber.htm#classDescriptor">Number</A> | <A href="mObject.htm#classDescriptor">Object</A> | <A href="mOpenVision.htm#classDescriptor">OpenVision</A> | <A href="mSchema.htm#classDescriptor">Schema</A> | <A href="mString.htm#classDescriptor">String</A> | <A href="mTS.htm#classDescriptor">TimeSeries</A> | <A href="mNA.htm#classDescriptor">Undefined</A> | <A href="mUtil.htm#classDescriptor">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="convertFrom:"></A><b>convertFrom:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date  convertFrom: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+This message converts the supplied string to an instance of the recipient's
+class if applicable, returning NA otherwise.  The definition at Object
+will lookup the string in the class' naming dictionary, if defined.
+The version at String returns the recipient stripped of any extensions.
+The versions at Number, Integer, Double, and Float convert the recipient
+to a numeric value if possible.  The version at Date converts the recipient
+to a Date using the 'asDate' message defined at String.  The version at
+Boolean returns TRUE if the recipient contains an upper/lower case
+combination of 'true' and FALSE if the recipient contains an upper/lower
+case combination of 'false'.  The version at block returns a block 
+containing the string as a message.  This message is called by the
+'as:' message at String.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#convertFrom:">Block</A> | <A href="mBoolean.htm#convertFrom:">Boolean</A> | <A href="mNumber.htm#convertFrom:">Number</A> | <A href="mObject.htm#convertFrom:">Object</A> | <A href="mString.htm#convertFrom:">String</A> | <A href="mNA.htm#convertFrom:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="count30DayDaysTo:"></A><b>count30DayDaysTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date count30DayDaysTo: aDate</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Counts the number of days between original date and date supplied, assuming 
+all months have 30 days.  Assumes original date is earlier than date 
+supplied.  Used primarily in yield-to-maturity type applications.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Date<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="count360DayYearsTo:"></A><b>count360DayYearsTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date count360DayYearsTo: aDate</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Counts the number of years between original date and date supplied, 
+assuming all months have 30 days (all years have 360 days).  Assumes original 
+date is earlier than date supplied.  Used primarily in yield-to-maturity type 
+applications.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Date<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="count6monthIntervalsTo:"></A><b>count6monthIntervalsTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date count6monthIntervalsTo: aDate</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Counts the number of 6 month intervals between two dates. Assumes original 
+date is earlier than supplied date.  Used primarily in bond applications - 
+interpreted as number of full coupon payments remaining. Assumes end point is 
+at a six month interval.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Date<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="countBDaysTo:"></A><b>countBDaysTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date countBDaysTo: aDate</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Counts the number of business days between recipient date and date supplied.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Date<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="countDaysTo:"></A><b>countDaysTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date countDaysTo: aDate</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Counts the number of days between recipient date and date supplied.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Date<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="countFullMonthsTo:"></A><b>countFullMonthsTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date countFullMonthsTo: aDate</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes number of FULL months between two dates.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Date<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="countIntervalsOf:to:"></A><b>countIntervalsOf:to:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date countIntervalsOf: aDateOffset to: aDate</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Counts the number of full intervals between recipient date and date supplied</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - DateOffset<br>
+2 - Date<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="countMonthsTo:"></A><b>countMonthsTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date countMonthsTo: aDate</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes number of months between two dates.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Date<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="countYearsTo:"></A><b>countYearsTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date countYearsTo: aDate</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the number of years (full and fractional) between two dates.  A full 
+year is assumed to have 365.25 days.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Date<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="day"></A><b>day</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date day</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the 'day' portion of recipient date.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Integer
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="dayNumberOfWeek"></A><b>dayNumberOfWeek</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date dayNumberOfWeek</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a number (1 - 7) indicating recipient's day of week.  1 is Monday; 
+7 is Sunday.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Integer
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="dayOfWeek"></A><b>dayOfWeek</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date dayOfWeek</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns day of week as a string (e.g. Monday).</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default instance of the recipient object's class</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Ordinal
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#defaultInstance">Block</A> | <A href="mBoolean.htm#defaultInstance">Boolean</A> | <A href="mClassify.htm#defaultInstance">Classification</A> | <A href="mCollect.htm#defaultInstance">Collection</A> | <A href="mCurrency.htm#defaultInstance">Currency</A> | <A href="mDate.htm#defaultInstance">Date</A> | <A href="mOffset.htm#defaultInstance">DateOffset</A> | <A href="mDate.htm#defaultInstance">DateRange</A> | <A href="mDict.htm#defaultInstance">Dictionary</A> | <A href="mEntity.htm#defaultInstance">Entity</A> | <A href="mIList.htm#defaultInstance">IndexedList</A> | <A href="mInterface.htm#defaultInstance">Interface</A> | <A href="mList.htm#defaultInstance">List</A> | <A href="mNumber.htm#defaultInstance">Number</A> | <A href="mOpenVision.htm#defaultInstance">OpenVision</A> | <A href="mSchema.htm#defaultInstance">Schema</A> | <A href="mString.htm#defaultInstance">String</A> | <A href="mTS.htm#defaultInstance">TimeSeries</A> | <A href="mNA.htm#defaultInstance">Undefined</A> | <A href="mUtil.htm#defaultInstance">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default instance of the recipient object's class</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDate.htm">Date</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#defaultInstance">Block</A> | <A href="mBoolean.htm#defaultInstance">Boolean</A> | <A href="mClassify.htm#defaultInstance">Classification</A> | <A href="mCollect.htm#defaultInstance">Collection</A> | <A href="mCurrency.htm#defaultInstance">Currency</A> | <A href="mOffset.htm#defaultInstance">DateOffset</A> | <A href="mDict.htm#defaultInstance">Dictionary</A> | <A href="mEntity.htm#defaultInstance">Entity</A> | <A href="mIList.htm#defaultInstance">IndexedList</A> | <A href="mInterface.htm#defaultInstance">Interface</A> | <A href="mList.htm#defaultInstance">List</A> | <A href="mNumber.htm#defaultInstance">Number</A> | <A href="mOpenVision.htm#defaultInstance">OpenVision</A> | <A href="mSchema.htm#defaultInstance">Schema</A> | <A href="mString.htm#defaultInstance">String</A> | <A href="mTS.htm#defaultInstance">TimeSeries</A> | <A href="mNA.htm#defaultInstance">Undefined</A> | <A href="mUtil.htm#defaultInstance">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="evaluate:"></A><b>evaluate:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date evaluate: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates all statements in the block as of recipient date.  The recipient 
+date becomes the default inside the block (changing the value of the 
+magic word ^date).  The default date would otherwise be the current date 
+(accessible by the magic word ^today).</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDate.htm">Date</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mCurrency.htm#evaluate:">Currency</A> | <A href="mOffset.htm#evaluate:">DateOffset</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="extract:for:"></A><b>extract:for:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date extract: block for: object</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+This message evaluates the supplied block for the supplied object and returns
+the value as of the recipient date.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Object<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="formatUsingLongName"></A><b>formatUsingLongName</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date formatUsingLongName</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns date as string in the form March 31, 1991.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="formatUsingMMDD"></A><b>formatUsingMMDD</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date formatUsingMMDD</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns date as string in the form 3/31.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="formatUsingMMDDYY"></A><b>formatUsingMMDDYY</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date formatUsingMMDDYY</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns date as string in the form 3/31/91.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="formatUsingMMDDYYYY"></A><b>formatUsingMMDDYYYY</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date formatUsingMMDDYYYY</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns date as string in the form 3/31/1991</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="formatUsingShortName"></A><b>formatUsingShortName</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date formatUsingShortName</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns date as string in the form 31-Mar-1991.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="getDayOfWeekDescriptor"></A><b>getDayOfWeekDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date getDayOfWeekDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns DayOfWeekDescriptor for current date.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Date DayOfWeekDescriptor
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="getMonthDescriptor"></A><b>getMonthDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date getMonthDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns MonthDescriptor for current date.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Date MonthDescriptor
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="inRange:"></A><b>inRange:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal Ordinal inRange: aList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient Ordinal is in range specified by aList, where aList
+contains 2 elements - the start and end of the range (inclusive).</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="inSet:"></A><b>inSet:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal inSet: aList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient Ordinal is included in supplied list.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="inputExpression"></A><b>inputExpression</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date inputExpression</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Used by DDMS ToolKit to format recipient as input.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNumber.htm#inputExpression">Number</A> | <A href="mObject.htm#inputExpression">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isDate"></A><b>isDate</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date isDate</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a TRUE value when sent to any date.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>TRUE
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#isDate">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isDefault"></A><b>isDefault</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date isDefault</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns TRUE if date is earliest possible date.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mCollect.htm#isDefault">Collection</A> | <A href="mObject.htm#isDefault">Object</A> | <A href="mString.htm#isDefault">String</A> | <A href="mNA.htm#isDefault">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isInitialDate"></A><b>isInitialDate</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date isInitialDate</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns TRUE if date is earliest possible date, otherwise returns FALSE.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isLastBusinessDayOfMonth"></A><b>isLastBusinessDayOfMonth</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date isLastBusinessDayOfMonth</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Determines if recipient date is the last business day of the month.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isMonthEnd"></A><b>isMonthEnd</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date isMonthEnd</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Determines whether recipient date is the last day of the month.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isOrdinal"></A><b>isOrdinal</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal isOrdinal</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a TRUE value when sent to any Ordinal.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>TRUE
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#isOrdinal">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isValid"></A><b>isValid</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date isValid</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns TRUE if recipient date is greater than or equal to earliest possible 
+date (January 1, 0001).</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isntValid"></A><b>isntValid</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date isntValid</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns TRUE if recipient date less than earliest possible date 
+(January 1, 0001).</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="max:"></A><b>max:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal max: aNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the larger of the supplied value and the recipient Number. If an 
+invalid parameter is supplied, NA is returned.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mCollect.htm#max:">Collection</A> | <A href="mNA.htm#max:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="min:"></A><b>min:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal min: aNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the smaller of the supplied value and the recipient Number. If an 
+invalid parameter is supplied, NA is returned.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mCollect.htm#min:">Collection</A> | <A href="mNA.htm#min:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="month"></A><b>month</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date month</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the 'month' portion of recipient date.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Integer
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="new"></A><b>new</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal new</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Undefines the 'new' message for Ordinal classes.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Ordinal
+<p><b>Also Defined At: </b><br>
+ | <A href="mBoolean.htm#new">Boolean</A> | <A href="mCollect.htm#new">Collection</A> | <A href="mDate.htm#new">DateRange</A> | <A href="mDict.htm#new">Dictionary</A> | <A href="mObject.htm#new">Object</A> | <A href="mNA.htm#new">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="notBetween:and:"></A><b>notBetween:and:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal notBetween: anOrdinal1 and: anOrdinal2</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Tests if recipient Ordinal is not between supplied Ordinal1
+and supplied Ordinal2.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+2 - String<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#notBetween:and:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="print"></A><b>print</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date print</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Redefines the standard print message so that the value of the recipient date 
+is printed.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDate.htm">Date</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#print">Block</A> | <A href="mOffset.htm#print">DateOffset</A> | <A href="mEntity.htm#print">Entity</A> | <A href="mIList.htm#print">IndexedList</A> | <A href="mList.htm#print">List</A> | <A href="mObject.htm#print">Object</A> | <A href="mString.htm#print">String</A> | <A href="mTS.htm#print">TimeSeries</A> | <A href="mNA.htm#print">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="print:"></A><b>print:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date print: anInteger</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Prints the recipient date using the supplied format.  If the width is less 
+than 8 characters, the format is mm/yy padded with spaces at the right.  If 
+the width is 8 characters, the format is mm/dd/yy.  If the width is 9 
+characters, the format is mm/dd/yy_.  Otherwise, the format is mm/dd/yyyy 
+padded with spaces at the right.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDate.htm">Date</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Integer<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBoolean.htm#print:">Boolean</A> | <A href="mEntity.htm#print:">Entity</A> | <A href="mNumber.htm#print:">Number</A> | <A href="mObject.htm#print:">Object</A> | <A href="mString.htm#print:">String</A> | <A href="mNA.htm#print:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="quarterNumber"></A><b>quarterNumber</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date quarterNumber</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the quarter (1-4) of the recipient date.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Integer
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="to:by:"></A><b>to:by:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date to: aDate by: aDateOffset</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Produces a Date Range from two Dates and a Date Increment supplied.  Dates 
+can be in ascending or descending order.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDate.htm">DateRange</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Date<br>
+2 - DateOffset<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Ordinal whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the string 'Ordinal'.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#whatAmI">Block</A> | <A href="mBoolean.htm#whatAmI">Boolean</A> | <A href="mClassify.htm#whatAmI">Classification</A> | <A href="mCollect.htm#whatAmI">Collection</A> | <A href="mCurrency.htm#whatAmI">Currency</A> | <A href="mDate.htm#whatAmI">Date</A> | <A href="mOffset.htm#whatAmI">DateOffset</A> | <A href="mDate.htm#whatAmI">DateRange</A> | <A href="mDict.htm#whatAmI">Dictionary</A> | <A href="mEntity.htm#whatAmI">Entity</A> | <A href="mIList.htm#whatAmI">IndexedList</A> | <A href="mInterface.htm#whatAmI">Interface</A> | <A href="mList.htm#whatAmI">List</A> | <A href="mNumber.htm#whatAmI">Number</A> | <A href="mObject.htm#whatAmI">Object</A> | <A href="mOpenVision.htm#whatAmI">OpenVision</A> | <A href="mSchema.htm#whatAmI">Schema</A> | <A href="mString.htm#whatAmI">String</A> | <A href="mTS.htm#whatAmI">TimeSeries</A> | <A href="mNA.htm#whatAmI">Undefined</A> | <A href="mUtil.htm#whatAmI">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the string 'Date'.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#whatAmI">Block</A> | <A href="mBoolean.htm#whatAmI">Boolean</A> | <A href="mClassify.htm#whatAmI">Classification</A> | <A href="mCollect.htm#whatAmI">Collection</A> | <A href="mCurrency.htm#whatAmI">Currency</A> | <A href="mOffset.htm#whatAmI">DateOffset</A> | <A href="mDict.htm#whatAmI">Dictionary</A> | <A href="mEntity.htm#whatAmI">Entity</A> | <A href="mIList.htm#whatAmI">IndexedList</A> | <A href="mInterface.htm#whatAmI">Interface</A> | <A href="mList.htm#whatAmI">List</A> | <A href="mNumber.htm#whatAmI">Number</A> | <A href="mObject.htm#whatAmI">Object</A> | <A href="mOpenVision.htm#whatAmI">OpenVision</A> | <A href="mSchema.htm#whatAmI">Schema</A> | <A href="mString.htm#whatAmI">String</A> | <A href="mTS.htm#whatAmI">TimeSeries</A> | <A href="mNA.htm#whatAmI">Undefined</A> | <A href="mUtil.htm#whatAmI">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="year"></A><b>year</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Date year</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Retuns the 'year' portion of recipient date.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Integer
+<p></blockquote>
+
+<p><hr>
+<table border=0 width=100%>
+<tr>
+<td align=left>
+<font size=-1>Copyright &copy 1997 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated May 7, 1997</font>
+</table>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Upload Format: UniverseMaster </title>
+
+</head>
+<body>
+<body bgcolor=white>
+<h2>Vision Portfolio Management Application Layer: Data Feeds</h2>
+<p>
+| <a href="pmaFeeds.htm">Application Feeds</a> |
+<hr><p>
+<font size=+2><b>Data Feed: </b><i>UniverseMaster</i></font><p>
+<font size=+1><b>Category: </b><i>MasterFeed</i></font><p>
+
+<h3>Summary:</h3>
+<p>
+<ul>The <i>UniverseMaster</i> feed is used to create
+     and refresh basic information for <b>Universe</b> instances.
+     A <b>Universe</b> is used to name and track lists of related entities
+     over time.  This class is described in detail in the 
+     <a href="clUniverse.htm"><i>Vision Class: Universe</i></a>
+     document.  A number of <a href="#related feeds">related feeds</a> are also available.
+</ul>
+<p>
+
+<h3>Available Fields:</h3>
+<p>
+<center><table border=1 width=80% cellpadding=4 cellspacing=2>
+<tr><th>Field<th>Vision<br>Property<th>Type<th>Description
+<tr>
+<tr><th align=center colspan=4>--- Required Fields ---
+<tr>
+<td><i>entityId</i>
+<td><i>code</i>
+<td>String
+<td>id of new or existing Universe instance
+<tr>
+<td><i>memberType</i>
+<td><i>memberType</i>
+<td>String
+<td>id of existing Entity class
+<tr>
+<tr><th align=center colspan=4>--- Suggested Fields ---
+<tr>
+<td><i>name</i>
+<td><i>name</i>
+<td>String
+<td>descriptive name
+<tr>
+
+<tr>
+<tr><th align=center colspan=4>--- Other Fields ---
+<tr>
+<td><i>numericCode</i>
+<td><i>numericCode</i>
+<td>Number
+<td>numeric code
+<tr>
+<td><i>shortName</i>
+<td><i>shortName</i>
+<td>String
+<td>short name
+<tr>
+<td><i>sortCode</i>
+<td><i>sortCode</i>
+<td>String
+<td>sort code
+<tr>
+
+</table></center>
+<p>
+
+<h3>Special Processing Rules:</h3>
+<p>
+<ul type=disc>
+<li>The <i>memberType</i> should reference an existing Entity class
+that represents the type of entity to be tracked by this universe.
+</ul>
+
+<p>
+<a name="related feeds">
+<h3>Related Feeds:</h3></a>
+<p>
+<ul type=disc>
+<li><a href="pma_UniverseMembers.htm"><i>UniverseMembers</i></a>:
+updates memberships for universes over time
+</ul>
+<p>
+<h3>Sample Upload:</h3>
+<p>
+The following tab-delimited feed could be used to create <b>Universe</b> instances
+and refresh basic information:
+<pre><tt><b>
+   Interface ExternalFeedManager upload: "UniverseMaster" using:
+   "Id	     Name                        MemberType
+    SP500    Standard & Poors 500        Security
+    DJ30     Dow Jones 30 Industrials    Security
+   "  ;
+</b></tt></pre>
+
+<p>
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy 1998 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated August 27, 1998</font>
+</tr>
+</table>
+
+</body>
+</html>

@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Messages: Block</title>
+</head>
+<body bgcolor=white>
+<p>
+<center> | <A href="FHome.htm">Home</A>
+ | <A href="clBlock.htm">Block Class  </A>
+ | <A href="mXRef.htm">Message XRef</A>
+ | <A href="Messages.htm">Messages (General)</A>
+ | 
+</center><hr>
+
+<center>
+<font face="Arial" color="darkblue" size=3 >
+<h3>Profile of Class <i>Block</i></h3>
+</center>
+</font><p>
+<pre>
+
+<A href="clObject.htm">Object</A>
+  | 
+Function
+  | 
+ComputedFunction
+  | 
+  +--- <b>Block</b>
+</pre>
+<p><hr align=left width=70% ><p>
+
+<pre>A Block is a set of one or more expressions that are viewed together
+as a unit.  Each expression in a block is known as a statement.
+Statements are separated by the character ; .  The block itself is
+surrounded by square brackets.  The general form for a block is:  
+
+     [ statement1 ;
+       statement2 ;
+       statement3 ;
+       . . .
+     ] ;
+</pre><p><hr align=left width=70% ><p>
+
+<font size=+1 face="Arial" color="darkred">Message Index</font>
+<p><img src="instdot.gif" align="middle" alt="o "><A href="#asClosure:"><b>asClosure: anObject</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asMethod"><b>asMethod</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asOf:"><b>asOf: aDate</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asRowsColumns"><b>asRowsColumns</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asSelf"><b>asSelf</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asUndelimitedString"><b>asUndelimitedString</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#aveForDateRange:"><b>aveForDateRange: aDateRange</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#cGrowForDateRange:"><b>cGrowForDateRange: aDateRange</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#changeLag:"><b>changeLag: aDateOffset</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#changeLead:"><b>changeLead: aDateOffset</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#convergeTo:within:initialGuess:"><b>convergeTo: aValue within: tolerance initialGuess: guess</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#convertFrom:"><b> convertFrom: string</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#current"><b>current</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#displayAll"><b>displayAll</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#divertDelimitedOutput"><b>divertDelimitedOutput</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#divertOutput"><b>divertOutput</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#environment"><b>environment</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#environment:"><b>environment: anObject</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#environmentWith:"><b>environmentWith: anObject</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#environmentWith:and:"><b>environmentWith: object1  and: object2</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#environmentWith:and:and:"><b>environmentWith: obj1 and: obj2 and: obj3</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#environmentWith:and:and:and:"><b>environmentWith: obj1 and: obj2 and: obj3 and: obj4</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#environmentWith:and:and:and:and:"><b>environmentWith: obj1 and: obj2 and: obj3 and: obj4 and: obj5</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#environmentWith:and:and:and:and:and:"><b>environmentWith: obj1 and: obj2 and: obj3 and: obj4 and: obj5 and: obj6</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#extractForDateRange:"><b>extractForDateRange: aDateRange</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#formatForExcel"><b>formatForExcel</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#formatForPRN"><b>formatForPRN</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#gMeanForDateRange:"><b>gMeanForDateRange: aDateRange</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isBlock"><b>isBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#lag:"><b>lag: aDateOffset</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#latest"><b>latest</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#lead:"><b>lead: aDateOffset</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#lsGrowForDateRange:"><b>lsGrowForDateRange: aDateRange</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#maxForDateRange:"><b>maxForDateRange: aDateRange</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#medianForDateRange:"><b>medianForDateRange: aDateRange</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#minForDateRange:"><b>minForDateRange: aDateRange</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#my"><b>my</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#pctChangeLag:"><b>pctChangeLag: aDateOffset</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#pctChangeLead:"><b>pctChangeLead: aDateOffset</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#print"><b>print</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#productForDateRange:"><b>productForDateRange: aDateRange</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#selector"><b>selector</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#self"><b>self</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#sprint"><b>sprint</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#stdDevForDateRange:"><b>stdDevForDateRange: aDateRange</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#totalForDateRange:"><b>totalForDateRange: aDateRange</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#value"><b>value</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#value:"><b>value: anObject</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#valueWith:"><b>valueWith: anObject</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#valueWith:and:"><b>valueWith: obj1 and: obj2 </b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#valueWith:and:and:"><b>valueWith: obj1 and: obj2 and: obj3 </b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#valueWith:and:and:and:"><b>valueWith: obj1 and: obj2 and: obj3 and: obj4</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#valueWith:and:and:and:and:"><b>valueWith: obj1 and: obj2 and: obj3 and: obj4 and: obj5</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#valueWith:and:and:and:and:and:"><b>valueWith: obj1 and: obj2 and: obj3 and: obj4 and: obj5 and: obj6</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#whatAmI"><b>whatAmI</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#whileTrue:"><b>whileTrue: aBlock</b></A><br>
+<p><hr align=left width=70% ><p>
+
+<font size=+1 face="Arial" color="darkred">Messages</font>
+<p><img src="instdot.gif" align="middle" alt="o "><A name="asClosure:"></A><b>asClosure:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block asClosure: anObject</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Object<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asMethod"></A><b>asMethod</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block asMethod</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts Block to Method</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Method
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asOf:"></A><b>asOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block asOf: aDate</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the value of the Block as of the supplied date.  If no value is 
+stored for the date, the closest date prior to the supplied date is used.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Date<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mTS.htm#asOf:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asRowsColumns"></A><b>asRowsColumns</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block asRowsColumns</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Executes the recipient block and returns a list of strings representing
+the rows of the output where each element of the list is extended by the
+variable 'columns' which represent the columns of output for the row.
+Each element in 'columns' is a string that corresponds to each print 
+statement in the recipient block.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the original object.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBlock.htm">Block</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBoolean.htm#asSelf">Boolean</A> | <A href="mClassify.htm#asSelf">Classification</A> | <A href="mCollect.htm#asSelf">Collection</A> | <A href="mCurrency.htm#asSelf">Currency</A> | <A href="mDate.htm#asSelf">Date</A> | <A href="mOffset.htm#asSelf">DateOffset</A> | <A href="mDate.htm#asSelf">DateRange</A> | <A href="mDict.htm#asSelf">Dictionary</A> | <A href="mEntity.htm#asSelf">Entity</A> | <A href="mIList.htm#asSelf">IndexedList</A> | <A href="mInterface.htm#asSelf">Interface</A> | <A href="mList.htm#asSelf">List</A> | <A href="mNumber.htm#asSelf">Number</A> | <A href="mObject.htm#asSelf">Object</A> | <A href="mOpenVision.htm#asSelf">OpenVision</A> | <A href="mSchema.htm#asSelf">Schema</A> | <A href="mString.htm#asSelf">String</A> | <A href="mTS.htm#asSelf">TimeSeries</A> | <A href="mNA.htm#asSelf">Undefined</A> | <A href="mUtil.htm#asSelf">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asUndelimitedString"></A><b>asUndelimitedString</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block asUndelimitedString</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the block as a string with surrounding brackets [ ] removed.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="aveForDateRange:"></A><b>aveForDateRange:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block aveForDateRange: aDateRange</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the average value of the recipient block over the specified date 
+range.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - DateRange<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mTS.htm#aveForDateRange:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="cGrowForDateRange:"></A><b>cGrowForDateRange:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block cGrowForDateRange: aDateRange</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the compound growth rate of the recipient block over the specified 
+date range.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - DateRange<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mTS.htm#cGrowForDateRange:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="changeLag:"></A><b>changeLag:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block changeLag: aDateOffset</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the absolute change between the value of the block as of the default 
+date and an earlier relative date.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - DateOffset<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mTS.htm#changeLag:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="changeLead:"></A><b>changeLead:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block changeLead: aDateOffset</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the absolute change between the value of the block as of the default 
+date and a future relative date.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - DateOffset<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mTS.htm#changeLead:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reference to the object which describes the class.  Class level information 
+is stored here.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBoolean.htm#classDescriptor">Boolean</A> | <A href="mClassify.htm#classDescriptor">Classification</A> | <A href="mCollect.htm#classDescriptor">Collection</A> | <A href="mCurrency.htm#classDescriptor">Currency</A> | <A href="mDate.htm#classDescriptor">Date</A> | <A href="mOffset.htm#classDescriptor">DateOffset</A> | <A href="mDate.htm#classDescriptor">DateRange</A> | <A href="mDict.htm#classDescriptor">Dictionary</A> | <A href="mEntity.htm#classDescriptor">Entity</A> | <A href="mIList.htm#classDescriptor">IndexedList</A> | <A href="mInterface.htm#classDescriptor">Interface</A> | <A href="mList.htm#classDescriptor">List</A> | <A href="mNumber.htm#classDescriptor">Number</A> | <A href="mObject.htm#classDescriptor">Object</A> | <A href="mOpenVision.htm#classDescriptor">OpenVision</A> | <A href="mSchema.htm#classDescriptor">Schema</A> | <A href="mString.htm#classDescriptor">String</A> | <A href="mTS.htm#classDescriptor">TimeSeries</A> | <A href="mNA.htm#classDescriptor">Undefined</A> | <A href="mUtil.htm#classDescriptor">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="convergeTo:within:initialGuess:"></A><b>convergeTo:within:initialGuess:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block convergeTo: aValue within: tolerance initialGuess: guess</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Executes recipient block until it converges to within tolerance distance from 
+supplied value using guess as the initial guess.  The recipient block contains 
+the function you wish to evaluate.  Iteration terminates if value converges to 
+within tolerance or a maximum of forty iterations have been reached.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+2 - Number<br>
+3 - Number<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="convertFrom:"></A><b>convertFrom:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block  convertFrom: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+This message converts the supplied string to an instance of the recipient's
+class if applicable, returning NA otherwise.  The definition at Object
+will lookup the string in the class' naming dictionary, if defined.
+The version at String returns the recipient stripped of any extensions.
+The versions at Number, Integer, Double, and Float convert the recipient
+to a numeric value if possible.  The version at Date converts the recipient
+to a Date using the 'asDate' message defined at String.  The version at
+Boolean returns TRUE if the recipient contains an upper/lower case
+combination of 'true' and FALSE if the recipient contains an upper/lower
+case combination of 'false'.  The version at block returns a block 
+containing the string as a message.  This message is called by the
+'as:' message at String.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBoolean.htm#convertFrom:">Boolean</A> | <A href="mDate.htm#convertFrom:">Date</A> | <A href="mNumber.htm#convertFrom:">Number</A> | <A href="mObject.htm#convertFrom:">Object</A> | <A href="mString.htm#convertFrom:">String</A> | <A href="mNA.htm#convertFrom:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="current"></A><b>current</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block current</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns current environment of block.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default instance of the recipient object's class</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBlock.htm">Block</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBoolean.htm#defaultInstance">Boolean</A> | <A href="mClassify.htm#defaultInstance">Classification</A> | <A href="mCollect.htm#defaultInstance">Collection</A> | <A href="mCurrency.htm#defaultInstance">Currency</A> | <A href="mDate.htm#defaultInstance">Date</A> | <A href="mOffset.htm#defaultInstance">DateOffset</A> | <A href="mDate.htm#defaultInstance">DateRange</A> | <A href="mDict.htm#defaultInstance">Dictionary</A> | <A href="mEntity.htm#defaultInstance">Entity</A> | <A href="mIList.htm#defaultInstance">IndexedList</A> | <A href="mInterface.htm#defaultInstance">Interface</A> | <A href="mList.htm#defaultInstance">List</A> | <A href="mNumber.htm#defaultInstance">Number</A> | <A href="mOpenVision.htm#defaultInstance">OpenVision</A> | <A href="mSchema.htm#defaultInstance">Schema</A> | <A href="mString.htm#defaultInstance">String</A> | <A href="mTS.htm#defaultInstance">TimeSeries</A> | <A href="mNA.htm#defaultInstance">Undefined</A> | <A href="mUtil.htm#defaultInstance">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="displayAll"></A><b>displayAll</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block displayAll</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Displays block definition (see TimeSeries)</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mTS.htm#displayAll">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="divertDelimitedOutput"></A><b>divertDelimitedOutput</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block divertDelimitedOutput</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Prints block with marked areas for internal formatting purposes.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="divertOutput"></A><b>divertOutput</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block divertOutput</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Captures output as a string instead of to terminal.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="environment"></A><b>environment</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block environment</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns block's environment.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="environment:"></A><b>environment:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block environment: anObject</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Return's block's environment, evaluated with one input.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Object<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="environmentWith:"></A><b>environmentWith:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block environmentWith: anObject</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns block's environment, evaluated with one inputs.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Object<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="environmentWith:and:"></A><b>environmentWith:and:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block environmentWith: object1  and: object2</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns block's environment, evaluated with two inputs.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Object<br>
+2 - Object<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="environmentWith:and:and:"></A><b>environmentWith:and:and:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block environmentWith: obj1 and: obj2 and: obj3</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns block's environment, evaluated with three inputs.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Object<br>
+2 - Object<br>
+3 - Object<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="environmentWith:and:and:and:"></A><b>environmentWith:and:and:and:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block environmentWith: obj1 and: obj2 and: obj3 and: obj4</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns block's environment, evaluated with four inputs.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Object<br>
+2 - Object<br>
+3 - Object<br>
+4 - Object<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="environmentWith:and:and:and:and:"></A><b>environmentWith:and:and:and:and:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block environmentWith: obj1 and: obj2 and: obj3 and: obj4 and: obj5</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns block's environment, evaluated with five inputs.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Object<br>
+2 - Object<br>
+3 - Object<br>
+4 - Object<br>
+5 - Object<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="environmentWith:and:and:and:and:and:"></A><b>environmentWith:and:and:and:and:and:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block environmentWith: obj1 and: obj2 and: obj3 and: obj4 and: obj5 and: obj6</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns block's environment, evaluated with six inputs.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Object<br>
+2 - Object<br>
+3 - Object<br>
+4 - Object<br>
+5 - Object<br>
+6 - Object<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="extractForDateRange:"></A><b>extractForDateRange:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block extractForDateRange: aDateRange</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Extracts the value of the recipient block for each point in the date range 
+and returns a time series containing those date-value pairs.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clTS.htm">TimeSeries</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - DateRange<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mTS.htm#extractForDateRange:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="formatForExcel"></A><b>formatForExcel</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block formatForExcel</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Executes the recipient block and generates tab-delimited output suitable
+for loading into Excel.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mString.htm#formatForExcel">String</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="formatForPRN"></A><b>formatForPRN</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block formatForPRN</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Executes the recipient block and generates PRN-style output.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mString.htm#formatForPRN">String</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="gMeanForDateRange:"></A><b>gMeanForDateRange:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block gMeanForDateRange: aDateRange</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the geometric mean value of the recipient block over the specified 
+date range.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - DateRange<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mTS.htm#gMeanForDateRange:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isBlock"></A><b>isBlock</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block isBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the value TRUE when sent to any block.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>TRUE
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#isBlock">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="lag:"></A><b>lag:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block lag: aDateOffset</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the value of the block as of a date relative to the default date.  
+The derived date is defined as: ^date - anOffset.  If no value is stored for 
+the derived date, the closest date prior to the supplied date is used.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - DateOffset<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mTS.htm#lag:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="latest"></A><b>latest</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block latest</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the value of the recipient block as of the current date.  Identical 
+to [ ] asOf: ^today.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mTS.htm#latest">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="lead:"></A><b>lead:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block lead: aDateOffset</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the value of the block as of a date relative to the default date.  
+The derived date is defined as: ^date + aDateOffset.  If no value is stored for 
+the derived date, the closest date prior to the supplied date is used.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - DateOffset<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mTS.htm#lead:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="lsGrowForDateRange:"></A><b>lsGrowForDateRange:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block lsGrowForDateRange: aDateRange</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the least squares growth value of the recipient block over the 
+specified date range.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - DateRange<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mTS.htm#lsGrowForDateRange:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="maxForDateRange:"></A><b>maxForDateRange:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block maxForDateRange: aDateRange</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the maximum value of the recipient block over the specified 
+date range.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - DateRange<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mTS.htm#maxForDateRange:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="medianForDateRange:"></A><b>medianForDateRange:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block medianForDateRange: aDateRange</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the median value of the recipient block over the specified 
+date range.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - DateRange<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mTS.htm#medianForDateRange:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="minForDateRange:"></A><b>minForDateRange:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block minForDateRange: aDateRange</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the minimum value of the recipient block over the specified 
+date range.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - DateRange<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mTS.htm#minForDateRange:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="my"></A><b>my</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block my</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns environment in which block was defined.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="pctChangeLag:"></A><b>pctChangeLag:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block pctChangeLag: aDateOffset</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the percent change between the value of the block as of the default 
+date and an earlier relative date.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - DateOffset<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mTS.htm#pctChangeLag:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="pctChangeLead:"></A><b>pctChangeLead:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block pctChangeLead: aDateOffset</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the percent change between the value of the block as of the default 
+date and a later relative date.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - DateOffset<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mTS.htm#pctChangeLead:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="print"></A><b>print</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block print</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Redefines the standard print message to print out the contents of the 
+recipient block.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBlock.htm">Block</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#print">Date</A> | <A href="mOffset.htm#print">DateOffset</A> | <A href="mDate.htm#print">DateRange</A> | <A href="mEntity.htm#print">Entity</A> | <A href="mIList.htm#print">IndexedList</A> | <A href="mList.htm#print">List</A> | <A href="mObject.htm#print">Object</A> | <A href="mString.htm#print">String</A> | <A href="mTS.htm#print">TimeSeries</A> | <A href="mNA.htm#print">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="productForDateRange:"></A><b>productForDateRange:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block productForDateRange: aDateRange</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the product of the values of the recipient block over the specified 
+date range.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - DateRange<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mTS.htm#productForDateRange:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="selector"></A><b>selector</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block selector</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the selector for the block (i.e., the message name).</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Selector
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="self"></A><b>self</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block self</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns recipient Block.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clBlock.htm">Block</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="sprint"></A><b>sprint</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block sprint</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns recipient Block as string.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="stdDevForDateRange:"></A><b>stdDevForDateRange:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block stdDevForDateRange: aDateRange</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the standard deviation of the values of the recipient Block over 
+the specified date range.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - DateRange<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mTS.htm#stdDevForDateRange:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="totalForDateRange:"></A><b>totalForDateRange:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block totalForDateRange: aDateRange</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the sum of the values of the recipient block over the specified 
+date range.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clNumber.htm">Number</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - DateRange<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mTS.htm#totalForDateRange:">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="value"></A><b>value</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block value</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the recipient block.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#value">Object</A> | <A href="mTS.htm#value">TimeSeries</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="value:"></A><b>value:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block value: anObject</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the recipient block with one parameter.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Object<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="valueWith:"></A><b>valueWith:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block valueWith: anObject</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the recipient block with one parameter.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Object<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="valueWith:and:"></A><b>valueWith:and:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block valueWith: obj1 and: obj2 </font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the recipient block with two parameters.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Object<br>
+2 - Object<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="valueWith:and:and:"></A><b>valueWith:and:and:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block valueWith: obj1 and: obj2 and: obj3 </font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the recipient block with three parameters.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Object<br>
+2 - Object<br>
+3 - Object<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="valueWith:and:and:and:"></A><b>valueWith:and:and:and:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block valueWith: obj1 and: obj2 and: obj3 and: obj4</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the recipient block with four parameters.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Object<br>
+2 - Object<br>
+3 - Object<br>
+4 - Object<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="valueWith:and:and:and:and:"></A><b>valueWith:and:and:and:and:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block valueWith: obj1 and: obj2 and: obj3 and: obj4 and: obj5</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the recipient block with five parameters.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Object<br>
+2 - Object<br>
+3 - Object<br>
+4 - Object<br>
+5 - Object<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="valueWith:and:and:and:and:and:"></A><b>valueWith:and:and:and:and:and:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block valueWith: obj1 and: obj2 and: obj3 and: obj4 and: obj5 and: obj6</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the recipient block with six parameters.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Object<br>
+2 - Object<br>
+3 - Object<br>
+4 - Object<br>
+5 - Object<br>
+6 - Object<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the string 'Block'.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBoolean.htm#whatAmI">Boolean</A> | <A href="mClassify.htm#whatAmI">Classification</A> | <A href="mCollect.htm#whatAmI">Collection</A> | <A href="mCurrency.htm#whatAmI">Currency</A> | <A href="mDate.htm#whatAmI">Date</A> | <A href="mOffset.htm#whatAmI">DateOffset</A> | <A href="mDate.htm#whatAmI">DateRange</A> | <A href="mDict.htm#whatAmI">Dictionary</A> | <A href="mEntity.htm#whatAmI">Entity</A> | <A href="mIList.htm#whatAmI">IndexedList</A> | <A href="mInterface.htm#whatAmI">Interface</A> | <A href="mList.htm#whatAmI">List</A> | <A href="mNumber.htm#whatAmI">Number</A> | <A href="mObject.htm#whatAmI">Object</A> | <A href="mOpenVision.htm#whatAmI">OpenVision</A> | <A href="mSchema.htm#whatAmI">Schema</A> | <A href="mString.htm#whatAmI">String</A> | <A href="mTS.htm#whatAmI">TimeSeries</A> | <A href="mNA.htm#whatAmI">Undefined</A> | <A href="mUtil.htm#whatAmI">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="whileTrue:"></A><b>whileTrue:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Block whileTrue: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+While recipient block evaluates to TRUE, executes supplied block</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+
+<p><hr>
+<table border=0 width=100%>
+<tr>
+<td align=left>
+<font size=-1>Copyright &copy 1997 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated May 7, 1997</font>
+</table>
+</body>
+</html>

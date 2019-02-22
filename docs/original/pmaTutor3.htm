@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title>PMA Tutorial 3: Basic Report Methods</title>
+</head>
+<body>
+<body bgcolor=white>
+
+<h2>PMA Tutorial 3: Basic Report Methods</h2>
+
+<p>| <a href="FHome.htm">Home</a> 
+   | <a href="vtutor.htm">Tutorials</a> | <hr>
+
+<blockquote><hr>
+<center><b><font size+1>Reminder!</font></b> </a></center>
+To run these examples, you should first start a new session then load the sample database using:
+<pre><tt><b>     "/localvision/samples/pma/sample.load" asFileContents evaluate ; 
+</b></tt></pre>
+Any other files referenced can be read from the <i>/localvision/samples/pma</i>
+directory.<p>
+<b>Note:</b> The <i>sample.load</i> file runs by default on a <i>Unix</i> environment.  If you are using a <i>Windows NT</i> platform, this location may be prefixed by a drive  and optional path (e.g. <i>d:/visiondb/localvision/samples/pma/sample.load</i>).  Check with your Vision Administrator for further details.
+<hr></blockquote>
+
+
+In order to best understand basic report methods, it is important to take a look at an example from PMA Tutorial 2, which is below as <i>example3.a</i>.  There you defined an example that displays holdings data with headings, sorted by percentage of portfolio.
+ If you read <i>example3.a</i> you should see:
+<ul>
+<pre><b>
+"Code" print:10 ;
+"Name" print:37 ;
+"Shares" print:12 ;
+"Total Mkt Val" print:15 ;
+"% of Port" printNL ;
+newLine print ;
+
+Named Account \102 holdings
+sortDown:[percentOfPort] .
+do:
+   [
+    security code print:10 ;
+    security name print:35 ;
+    shares printWithCommas:10 ;
+    totalMarketValue printWithCommas:15 ;
+    percentOfPort printNL ;
+   ];
+</b></pre>
+</ul>
+Since you have seen this example before you do not need to execute it.
+<hr>
+
+A Method provides a way to define a program that can be run without recalling the entire original code each time.  <i>Example3.b</i> defines a method that will produce the same results as <i>example3.a</i>.  In this example the method is named <i>firstReport</i>. Read the file <i>example3.b</i>. You should see: 
+
+<ul>
+<pre><b>
+Account defineMethod: 
+    [ | firstReport | 
+"Code" print:10 ;
+"Name" print:35 ;
+"Shares" print:12 ;
+"Total Mkt Val" print:15 ;
+"% of Port" printNL ;
+newLine print ;
+
+holdings
+sortDown:[percentOfPort] .  # sort largest to smallest
+do:
+   [
+    security code print:10 ;
+    security name print:35 ;
+    shares print:10 ;
+    totalMarketValue printWithCommas:15 ;
+    percentOfPort printNL ;
+   ];
+];
+</b></pre>
+</ul>
+<p>
+
+Methods are defined for a specific class.  In this case, the method is
+defined for the class Account.  This means that the method can be run for any instance
+of an Account subclass.
+Vertical bars (||) are needed in order to define the method name.   
+<p>
+When you execute this program the output buffer should be blank because the code is defining, not running, the method.
+
+<hr>
+<p>
+The next example runs the method <i>firstReport</i> for the <i>Account 102</i>.
+
+Read the file <i>example3.c.</i> You should see: 
+
+<ul>
+<pre><b>
+Named Account \102 firstReport
+</b></pre>
+</ul>
+<p>Execute this program. You should see:
+
+<ul>
+<pre><b>
+Code      Name                               Shares      Total Mkt Val  % of Port
+
+24702510  DELL COMPUTER CORP COM                8600.00     717,566.80    15.41
+02364J10  AMERICA ONLINE INC DEL COM            8200.00     695,975.00    14.95
+00949T10  AIRTOUCH COMMUNICATNS COM            15200.00     589,000.00    12.65
+...
+</b></pre>
+</ul>
+<p>
+The expression <i>Named Account \102</i> <i>firstReport</i> runs the method for the 
+<i>Account 102</i>.
+
+This example shows that using a method produces the same output as using original code.
+
+<hr>
+
+The next example runs the method <i>firstReport</i> for a different Account.
+
+Read the file <i>example3.d.</i> You should see: 
+
+<ul>
+<pre><b>
+Named Account \232 firstReport
+</b></pre>
+</ul>
+<p>Execute this program. You should see:
+
+<ul>
+<pre><b>
+Code      Name                               Shares      Total Mkt Val  % of Port
+
+40410010  HBO & CO COM                         12000.00     519,756.00     7.15
+24702510  DELL COMPUTER CORP COM                5900.00     492,284.20     6.77
+40169810  GUIDANT CORP COM                      8000.00     480,000.00     6.60
+...
+</b></pre>
+</ul>
+<p>
+
+Although the values are different, the basic report is the same because 
+you are using the same method.
+
+<hr>
+<p>The next example alters the method <i>firstReport</i>, by centering the account identifier at the top of the report.
+This will make it easier to distinguish which account was used.
+
+Read the file <i>example3.e.</i> You should see: 
+
+<ul>
+<pre><b>
+Account defineMethod: 
+    [ | firstReport | 
+
+"Account: " concat: code . center:80 . printNL;  # center account 
+newLine print ;
+
+"Code" print:10 ;
+"Name" print:35 ;
+"Shares" print:12 ;
+"Total Mkt Val" print:15 ;
+"% of Port" printNL ;
+newLine print ;
+
+holdings
+sortDown:[percentOfPort] .  # sorted in descending order
+do:
+   [
+    security code print:10 ;
+    security name print:35 ;
+    shares print:10 ;
+    totalMarketValue printWithCommas:15 ;
+    percentOfPort printNL ;
+   ];
+];
+</b></pre>
+</ul>
+<p>
+The <i>concat:</i> statement appends the value of the message <i>code</i> for the current Account to the string <i>"Account: "</i>.
+The message <i>center:</i> centers the string and the <i>printNL</i> displays the result. 
+<p>
+Execute this program.  You should see a blank output buffer.
+<hr>
+
+The next example runs the new version of the method <i>firstReport</i> for the <i>Account 102</i>, this time
+with the Account identifier centered at the top of the report.
+Read the file <i>example3.f.</i> You should see:
+<ul>
+<pre><b>
+Named Account \102 firstReport
+</b></pre>
+</ul>
+<p>
+Execute the program.  You should see:
+
+<ul>
+<pre><b>
+                                  Account: 102                                  
+
+Code      Name                               Shares      Total Mkt Val  % of Port
+
+24702510  DELL COMPUTER CORP COM                8600.00     717,566.80    15.41
+02364J10  AMERICA ONLINE INC DEL COM            8200.00     695,975.00    14.95
+00949T10  AIRTOUCH COMMUNICATNS COM            15200.00     589,000.00    12.65
+...
+</b></pre>
+</ul>
+<hr>
+
+The next example runs the method <i>firstReport</i> for the <i>Account 232</i>.
+Read the file <i>example3.g</i>. You should see:
+<ul>
+<pre><b>
+Named Account \232 firstReport
+</b></pre>
+</ul>
+<p>
+Execute the program.  You should see:
+
+<ul>
+<pre><b>
+                                  Account: 232                                  
+
+Code      Name                               Shares      Total Mkt Val  % of Port
+
+40410010  HBO & CO COM                         12000.00     519,756.00     7.15
+24702510  DELL COMPUTER CORP COM                5900.00     492,284.20     6.77
+40169810  GUIDANT CORP COM                      8000.00     480,000.00     6.60
+...
+</b></pre>
+</ul>
+<p>
+<hr>
+The next example uses the method <i>firstReport</i> to display data for <i>Account 102</i> as of
+a different date.
+
+Read the file <i>example3.h</i>. You should see:
+
+<ul>
+<pre><b>
+971031 evaluate:
+[
+ Named Account \102 firstReport
+];
+</b></pre>
+</ul>
+
+The expression <i>evaluate:[]</i> surrounding the request  
+will access all data as of the date supplied. 
+This date becomes the default date used for all operations within the brackets. 
+As a result, the retrieved data of this example will be from 10/31/97.
+<p>
+Execute the program.  You should see:
+
+<ul>
+<pre><b>
+                                  Account: 102                                  
+
+Code      Name                               Shares      Total Mkt Val  % of Port
+
+40410010  HBO & CO COM                         19600.00     852,600.00     9.61
+37935240  GLOBAL MARINE INC COM                25400.00     790,575.00     8.91
+24702510  DELL COMPUTER CORP COM                8600.00     689,075.00     7.77
+...
+</b></pre>
+</ul>
+<hr>
+
+<p>The next example alters the method <i>firstReport</i>, by displaying the most 
+recent holdings date, in addition to the account name, at the top of the report.
+
+Read the file <i>example3.i</i>. You should see: 
+
+<ul>
+<pre><b>
+Account defineMethod: 
+    [ | firstReport | 
+
+"Account: " concat: code . center:80 . printNL ;        # center account 
+"As Of: " concat: holdingsDate . center:80 . printNL ;  # center holdings date
+newLine printNL ;
+
+"Code" print:10 ;
+"Name" print:35 ;
+"Shares" print:12 ;
+"Total Mkt Val" print:15 ;
+"% of Port" printNL ;
+newLine print ;
+
+holdings
+sortDown:[percentOfPort] .  # sort lowest to smallest
+do:
+   [
+    security code print:10 ;
+    security name print:35 ;
+    shares print:10 ;
+    totalMarketValue printWithCommas:15 ;
+    percentOfPort printNL ;
+   ];
+];
+</b></pre>
+</ul>
+<p>
+The message <i>holdingsDate</i> returns the date that the holdings were last updated, either on or before the evaluation date, for the Account.
+
+<p>
+Execute this program.  You should see a blank output buffer.
+<hr>
+
+The next example runs the new version of the method.
+Read the file <i>example3.j.</i> You should see:
+<ul>
+<pre><b>
+Named Account \102 firstReport
+</b></pre>
+</ul>
+<p>
+Execute the program.  You should see:
+
+<ul>
+<pre><b>
+                                                                    Account: 102                                  
+                               As Of: 12/15/1997                                
+
+
+Code      Name                               Shares      Total Mkt Val  % of Port
+
+24702510  DELL COMPUTER CORP COM                8600.00     717,566.80    15.41
+02364J10  AMERICA ONLINE INC DEL COM            8200.00     695,975.00    14.95
+00949T10  AIRTOUCH COMMUNICATNS COM            15200.00     589,000.00    12.65
+...
+</b></pre>
+</ul>
+
+The date 12/15/1997 is the most recent date that the holdings were loaded in the sample database.
+<hr>
+
+The next example runs the method <i>firstReport</i> for the <i>Account 102</i>  
+from a different date.
+
+Read the file <i>example3.k</i>. You should see:
+<ul>
+<pre><b>
+971031 evaluate:
+[
+ Named Account \102 firstReport
+];
+</b></pre>
+</ul>
+<p>
+Execute the program.  You should see:
+
+<ul>
+<pre><b>
+                                  Account: 102                                  
+                               As Of: 10/31/1997                                
+
+
+Code      Name                               Shares      Total Mkt Val  % of Port
+
+40410010  HBO & CO COM                         19600.00     852,600.00     9.61
+37935240  GLOBAL MARINE INC COM                25400.00     790,575.00     8.91
+24702510  DELL COMPUTER CORP COM                8600.00     689,075.00     7.77
+...
+</b></pre>
+</ul>
+<p>
+
+<hr>
+The next example is a method that uses input supplied by the user 
+for sorting data.
+Read the file <i>example3.l</i>. You should see: 
+
+<ul>
+<pre><b>
+Account defineMethod: 
+[ | firstReport: sortString | # method with one parameter
+
+"Account: " concat: code . center:80 . printNL ;  # center account 
+"As Of: " concat: holdingsDate . center:80 . printNL ;  # center holdings date
+newLine print;
+
+
+"Code" print:10 ;
+"Name" print:37 ;
+"Shares" print:12 ;
+"Total Mkt Val" print:15 ;
+"% of Port" print:10 ;
+
+newLine print ;
+
+!sortBlock <- sortString asBlock ;
+holdings
+sortUp:sortBlock .  # sortBy user supplied rule
+do:
+   [
+    security code print:10 ;
+    security name print:35 ;
+    shares printWithCommas:10 ;
+    totalMarketValue printWithCommas:15 ;
+    percentOfPort printNL:10 ;
+   ];
+];
+
+</b></pre>
+</ul>
+ 
+<p>Execute this program. You should see a blank output buffer.
+<p>
+ Note that after the method name <i>firstReport:</i> but still in the vertical brackets, there is an expression <i>sortString</i>.  This expression implies that additional input is required for the method to run.  The required input will be a string that contains an expression for sorting the holdings. The expression <i>asBlock</i> converts the string into a block, which is used
+as a parameter for the <i>sortUp:</i> message.
+<hr>
+ 
+The next example calls the method <i>firstReport</i> for <i>Account</i> <i>102</i>,
+sorting the data by name.
+
+Read the file <i>example3.m.</i> You should see: 
+
+<ul>
+<pre><b>
+Named Account \102 firstReport:"security name"
+</b></pre>
+</ul>
+
+Execute this program.  You should see the following:
+
+<ul>
+<pre><b>
+                                  Account: 102                                  
+                               As Of: 12/15/1997                                
+
+Code      Name                                 Shares      Total Mkt Val  % of Port 
+00949T10  AIRTOUCH COMMUNICATNS COM           15,200.00     589,000.00     12.65
+02364J10  AMERICA ONLINE INC DEL COM           8,200.00     695,975.00     14.95
+14912310  CATERPILLAR INC DEL COM              9,400.00     476,467.20     10.23
+...
+</b></pre>
+</ul>
+<p>
+The basic report is now sorted by <i>"security name"</i>.
+<hr>
+<p>
+
+The next example runs the method <i>firstReport</i> for the <b>Account</b> <i>102</i>,
+sorting the data by shares.
+
+Read the file <i>example3.n</i>. You should see: 
+
+<ul>
+<pre><b>
+Named Account \102 firstReport:"shares"
+</b></pre>
+</ul>
+
+Execute this program.  You should see the following:
+
+<ul>
+<pre><b>
+                                  Account: 102                                  
+                               As Of: 12/15/1997                                
+
+Code      Name                                 Shares      Total Mkt Val  % of Port 
+40169810  GUIDANT CORP COM                     2,900.00     174,000.00      3.74
+19416210  COLGATE PALMOLIVE CO COM             4,300.00     287,025.00      6.17
+39350510  GREEN TREE FINL CORP COM             5,600.00     114,800.00      2.47
+...
+</b></pre>
+</ul>
+<p>
+<hr>
+
+As always, you can change the date by supplying your request within a 
+<i>date evaluate:</i> block.
+Read the file <i>example3.o</i>.  You should see:
+<ul><pre>
+<b>
+971031 evaluate:
+[
+ Named Account \102 firstReport:"shares"
+]
+</b>
+</pre></ul>
+<p>
+Execute this program.  You should see the following:
+<ul><pre>
+<b>
+                                  Account: 102                                  
+                               As Of: 10/31/1997                                
+
+Code      Name                                 Shares      Total Mkt Val  % of Port 
+06605010  BANKAMERICA CORP COM                 1,800.00     129,375.00      1.46
+19416210  COLGATE PALMOLIVE CO COM             4,300.00     278,425.00      3.14
+39350510  GREEN TREE FINL CORP COM             5,600.00     236,600.00      2.67
+...
+</b>
+</pre></ul>
+
+<hr>
+| <a href="tuBasic.htm">Vision Basics</a>  
+| <a href="tuLoad.htm">Creating a Demo Database</a>
+| <a href="tuSingle.htm">Single Object Access</a> 
+| <a href="tuList.htm">Using Lists</a> 
+| <a href="tuTS.htm">Using Dates and TimeSeries</a> |
+
+<hr>
+
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy; 1999 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Created January 28, 1999</font>
+</table>
+
+</body>
+</html>

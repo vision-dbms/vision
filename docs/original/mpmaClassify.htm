@@ -1,0 +1,1723 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Messages: Classification</title>
+</head>
+<body bgcolor=white>
+<p>
+<center> 
+ | <a href="vpma.htm">Portfolio Management Application Overview</a> 
+ | <A href="clClassify.htm">Classification Class  </A>
+ | <A href="mXRef.htm">Message XRef</A>
+ | <A href="Messages.htm">Messages (General)</A>
+ | 
+</center><hr>
+
+<center>
+<font face="Arial" color="darkblue" size=3 >
+<h3>Profile of Class <i>Classification</i></h3>
+</center>
+</font><p>
+<blockquote><center><hr width=70%><p>
+Includes Classes: <i>AssetCategory, Classification, Country, Entity, Industry, RangeClassification, Sector, SecurityType</i>
+<p><hr width=70%></center></blockquote><p>
+<pre>
+
+<A href="clObject.htm">Object</A>
+  | 
+<A href="clEntity.htm">Entity</A>
+  | 
+  +--- <b>Classification</b>
+  |      |
+  |      +--- <A href="clpmaCompany.htm">AssetCategory</A>
+  |      |
+  |      +--- <A href="clpmaCompany.htm">Country</A>
+  |      |
+  |      +--- <A href="clpmaCompany.htm">Industry</A>
+  |      |
+  |      +--- RangeClassification
+  |      |
+  |      +--- <A href="clpmaCompany.htm">Sector</A>
+  |      |
+  |      +--- <A href="clpmaCompany.htm">SecurityType</A>
+</pre>
+<p><hr align=left width=70% ><p>
+
+This abstract class is a subclass of Entity and a superclass of
+classes used primarily for grouping and aggregation purposes.
+<p><hr align=left width=70% ><p>
+
+<font size=+1 face="Arial" color="darkred">Message Index</font>
+<p><img src="instdot.gif" align="middle" border=0 alt="o "><A href="#XRef"><b>XRef</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#accessExpression"><b>accessExpression</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#addAlias:"><b>addAlias: alias</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#addAlias:toXRefIn:"><b>addAlias: string toXRefIn: dictionary</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#aliases"><b>aliases</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (Classification)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (RangeClassification)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (Country)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (Industry)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (Sector)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (SecurityType)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (AssetCategory)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#childList"><b>childList</b></A><i> (Classification)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (Classification)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (RangeClassification)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (Country)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (Industry)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (Sector)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (SecurityType)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (AssetCategory)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#cleanupClassStructures"><b>cleanupClassStructures</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#cleanupLocalNames"><b>cleanupLocalNames</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#clusterStrings"><b>clusterStrings</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#companyList"><b>companyList</b></A><i> (Country)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#companyList"><b>companyList</b></A><i> (Industry)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#companyList"><b>companyList</b></A><i> (Sector)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#createInitializationListFrom:"><b>createInitializationListFrom: initList</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#createNewXRefManager"><b>createNewXRefManager</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#createPrivateStructure"><b>createPrivateStructure</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#createXRef:withProperty:"><b>createXRef: id withProperty: propertyId</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (Classification)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (RangeClassification)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (Country)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (Industry)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (Sector)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (SecurityType)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (AssetCategory)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#deleteAlias:"><b>deleteAlias: aliasList</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#displayHierarchy"><b>displayHierarchy</b></A><i> (Classification)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#displayInfo"><b>displayInfo</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#displayLabel"><b>displayLabel</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#displayLabelKey"><b>displayLabelKey</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#displayMemberHistory"><b>displayMemberHistory</b></A><i> (Classification)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#displayXRefAuditReport"><b>displayXRefAuditReport</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#getAllChildren"><b>getAllChildren</b></A><i> (Classification)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#getAllCompanies"><b>getAllCompanies</b></A><i> (Industry)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#getAllMembers"><b>getAllMembers</b></A><i> (Classification)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#getClassificationFor:"><b>getClassificationFor: input</b></A><i> (RangeClassification)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#getOrCreate:"><b>getOrCreate: key</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#getRecordForUser:"><b>getRecordForUser: userName</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#helpMessage"><b>helpMessage</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#includesElement:"><b>includesElement: entity</b></A><i> (Classification)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#industryList"><b>industryList</b></A><i> (Sector)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializationList"><b>initializationList</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializationList"><b>initializationList</b></A><i> (Country)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initialize"><b>initialize</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializeDataBaseLinks"><b>initializeDataBaseLinks</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializeGlobalInstanceProperties"><b>initializeGlobalInstanceProperties</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializeGlobalInstanceProperties"><b>initializeGlobalInstanceProperties</b></A><i> (Classification)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializeGlobalSubclassProperties"><b>initializeGlobalSubclassProperties</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializeKeys:"><b>initializeKeys: keys</b></A><i> (RangeClassification)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializeLocalAttributes"><b>initializeLocalAttributes</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#isAssetCategory"><b>isAssetCategory</b></A><i> (AssetCategory)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#isCanada"><b>isCanada</b></A><i> (Country)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#isCashEquiv"><b>isCashEquiv</b></A><i> (SecurityType)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#isClassification"><b>isClassification</b></A><i> (Classification)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#isCountry"><b>isCountry</b></A><i> (Country)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#isEntity"><b>isEntity</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#isEquity"><b>isEquity</b></A><i> (SecurityType)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#isFixed"><b>isFixed</b></A><i> (SecurityType)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#isIndustry"><b>isIndustry</b></A><i> (Industry)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#isMemberOf:"><b>isMemberOf: universe</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#isOther"><b>isOther</b></A><i> (SecurityType)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#isParent"><b>isParent</b></A><i> (Classification)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#isRangeClassification"><b>isRangeClassification</b></A><i> (RangeClassification)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#isSector"><b>isSector</b></A><i> (Sector)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#isSecurityType"><b>isSecurityType</b></A><i> (SecurityType)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#isUS"><b>isUS</b></A><i> (Country)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#isUSA"><b>isUSA</b></A><i> (Country)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#locateId:"><b>locateId: id</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#locateIds:"><b>locateIds: string</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#lowerBound"><b>lowerBound</b></A><i> (RangeClassification)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#masterListCodes"><b>masterListCodes</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#memberList"><b>memberList</b></A><i> (Classification)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#name"><b>name</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#named"><b>named</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#named"><b>named</b></A><i> (Classification)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#named"><b>named</b></A><i> (RangeClassification)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#named"><b>named</b></A><i> (Country)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#named"><b>named</b></A><i> (Industry)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#named"><b>named</b></A><i> (Sector)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#named"><b>named</b></A><i> (SecurityType)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#named"><b>named</b></A><i> (AssetCategory)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#newAs:"><b>newAs: string</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#numericCode"><b>numericCode</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#parent"><b>parent</b></A><i> (Classification)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#print"><b>print</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#print:"><b>print: aFormat</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#profile"><b>profile</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#rangeName"><b>rangeName</b></A><i> (RangeClassification)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#rebuildAliases"><b>rebuildAliases</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#sector"><b>sector</b></A><i> (Industry)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setNameTo:"><b>setNameTo: string</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setNumericCodeTo:"><b>setNumericCodeTo: string</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setParentTo:"><b>setParentTo: p</b></A><i> (Classification)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setShortNameTo:"><b>setShortNameTo: string</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setSortCodeTo:"><b>setSortCodeTo: string</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setXRefIn:to:"><b>setXRefIn: dictionary to: string</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#shortName"><b>shortName</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#sortCode"><b>sortCode</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#specializeAs:at:"><b>specializeAs: string at: object</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#unitCalc"><b>unitCalc</b></A><i> (SecurityType)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#universes"><b>universes</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#updateInitializationListWith:"><b>updateInitializationListWith: block</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#upperBound"><b>upperBound</b></A><i> (RangeClassification)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#validateInputString:"><b>validateInputString: input</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (Classification)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (RangeClassification)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (Country)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (Industry)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (Sector)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (SecurityType)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (AssetCategory)</i><br>
+<p><hr align=left width=70% ><p>
+
+<font size=+1 face="Arial" color="darkred">Messages</font>
+<p><img src="instdot.gif" align="middle" border=0 alt="o "><A name="XRef"></A><b>XRef</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity XRef</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Provides cross reference for alternative identifiers.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>XRef
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="accessExpression"></A><b>accessExpression</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity accessExpression</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a string that could be used to request recipient</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Format&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Advanced
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="addAlias:"></A><b>addAlias:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity addAlias: alias</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Adds supplied string as alternate name in recipient's naming dictionary.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="addAlias:toXRefIn:"></A><b>addAlias:toXRefIn:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity addAlias: string toXRefIn: dictionary</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Adds the supplied string as an alias in the supplied cross reference dictionary.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+2 - XRef<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="aliases"></A><b>aliases</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity aliases</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns list of aliases defined for recipient.
+These aliases should represent valid identifier to use with the recipient's
+naming dictionary.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>List of <A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Recipient stripped of any extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Conversion&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Classification asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Recipient stripped of any extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Conversion&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaClassify.htm">Classification</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">RangeClassification asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the original object, stripped of extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Conversion&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Country asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Recipient stripped of any extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Conversion&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaCompany.htm">Country</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Industry asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Recipient stripped of any extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Conversion&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaCompany.htm">Industry</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Sector asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Recipient stripped of any extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Conversion&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaCompany.htm">Sector</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">SecurityType asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Recipient stripped of any extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Conversion&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaCompany.htm">SecurityType</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">AssetCategory asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Recipient stripped of any extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Conversion&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaCompany.htm">AssetCategory</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="childList"></A><b>childList</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Classification childList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+List of instances of recipient's class that have
+recipient as a direct parent.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>IndexedList of <A href="clpmaClassify.htm">Classification</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Class descriptor for recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Schema ClassDescriptor
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Classification classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Class descriptor for recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Schema ClassDescriptor
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">RangeClassification classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reference to the object which describes the class.  Class level information 
+is stored here.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Schema ClassDescriptor
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Country classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Class descriptor for recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Schema ClassDescriptor
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Industry classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Class descriptor for recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Schema ClassDescriptor
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Sector classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Class descriptor for recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Schema ClassDescriptor
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">SecurityType classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Class descriptor for recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Schema ClassDescriptor
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">AssetCategory classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Class descriptor for recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Schema ClassDescriptor
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="cleanupClassStructures"></A><b>cleanupClassStructures</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity cleanupClassStructures</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Runs 'cleanStoreAndDictionary' at Object, this method is redefined as
+needed by subclasses to perform general cleanup functions.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>DBAdmin&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="cleanupLocalNames"></A><b>cleanupLocalNames</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity cleanupLocalNames</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+This method is executed by the 'flagForDeletionWithReason:' 
+message and is used to remove aliases from the appropriate naming
+dictionaries.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>DBAdmin&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="clusterStrings"></A><b>clusterStrings</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity clusterStrings</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reclusters string property values.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>DBAdamin&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="companyList"></A><b>companyList</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Country companyList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+List of companies in country (same as 'memberList'). </blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>IndexedList of <A href="clpmaCompany.htm">Company</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="companyList"></A><b>companyList</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Industry companyList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+List of companies in recipient (same as 'memberList'). </blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>IndexedList of <A href="clpmaCompany.htm">Company</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="companyList"></A><b>companyList</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Sector companyList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+List of all companies in the 'memberList'
+of the industries in recpient's 'memberList'. </blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>List of <A href="clpmaCompany.htm">Company</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="createInitializationListFrom:"></A><b>createInitializationListFrom:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity createInitializationListFrom: initList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Creates a new class constant for the recipient's class 
+named 'initializationList' and copies the list of blocks in supplied parameter
+to this list.  The initializationList is used during the instance creation
+process to initialize default values in the new instance.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - List<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="createNewXRefManager"></A><b>createNewXRefManager</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity createNewXRefManager</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Creates a new XRef manager as a class constant
+for the recipient's class and stores the Default reference to the
+recipient's class naming dictionary.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>XRef
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="createPrivateStructure"></A><b>createPrivateStructure</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity createPrivateStructure</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Creates private extension of recipient's class.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="admUpdat.htm">PrivateRecord</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="createXRef:withProperty:"></A><b>createXRef:withProperty:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity createXRef: id withProperty: propertyId</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Creates a new XRef for recipient's class and
+defines the supplied property for this class.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>XRef
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+2 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default Entity instance.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Classification defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default Classification instance.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaClassify.htm">Classification</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">RangeClassification defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default instance for the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>RangeClassification
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Country defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default Country instance.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaCompany.htm">Country</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Industry defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default Industry instance.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaCompany.htm">Industry</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Sector defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default Sector instance.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaCompany.htm">Sector</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">SecurityType defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default SecurityType instance.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaCompany.htm">SecurityType</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">AssetCategory defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default AssetCategory instance.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaCompany.htm">AssetCategory</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="deleteAlias:"></A><b>deleteAlias:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity deleteAlias: aliasList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Deletes the alias from the recipient's naming 
+dictionary.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="displayHierarchy"></A><b>displayHierarchy</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Classification displayHierarchy</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Displays recipient's parent hierarchy.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="displayInfo"></A><b>displayInfo</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity displayInfo</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Displays the code and name for the recipient followed by a new line.
+This message is often redefined by the subclasses to display one line
+of simple formatted information about an entity.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="displayLabel"></A><b>displayLabel</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity displayLabel</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns recipient's name by default.  This message
+is often redefined by the Entity subclasses.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="displayLabelKey"></A><b>displayLabelKey</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity displayLabelKey</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the recipient's code by default.  This message
+is often redefined by the Entity subclasses.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="displayMemberHistory"></A><b>displayMemberHistory</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Classification displayMemberHistory</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Displays history of changes to the 'memberList'
+property.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="displayXRefAuditReport"></A><b>displayXRefAuditReport</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity displayXRefAuditReport</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Displays a report summarizing the different XRef
+dictionaries defined for recipient's class.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="getAllChildren"></A><b>getAllChildren</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Classification getAllChildren</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+List of instances of recipient's class that have
+recipient as a direct or indirect parent.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>List of <A href="clpmaClassify.htm">Classification</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="getAllCompanies"></A><b>getAllCompanies</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Industry getAllCompanies</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+List of all companies in recipient's 'memberList'
+or the 'memberList' of any of its direct or indirect children.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>List of <A href="clpmaCompany.htm">Company</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="getAllMembers"></A><b>getAllMembers</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Classification getAllMembers</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+List of members in 'memberList' for recipient and
+all direct and indirect children of recipient.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>List of <A href="clEntity.htm">Entity</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="getClassificationFor:"></A><b>getClassificationFor:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">RangeClassification getClassificationFor: input</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>RangeClassification
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="getOrCreate:"></A><b>getOrCreate:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity getOrCreate: key</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns object named by string in recipient class' naming dictionary.
+If not found, a new instance is created and returned.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Access&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="getRecordForUser:"></A><b>getRecordForUser:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity getRecordForUser: userName</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns private data extension for recipient 
+maintained by specified user.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Access&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Advanced
+<p><b>Returns: </b><A href="admUpdat.htm">PrivateRecord</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="helpMessage"></A><b>helpMessage</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity helpMessage</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a message describing the recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Descriptive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="includesElement:"></A><b>includesElement:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Classification includesElement: entity</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns TRUE if recipient's 'memberList' includes
+supplied entity.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Inquiry&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Entity<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="industryList"></A><b>industryList</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Sector industryList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+List of industries in recpient (same as 'memberList').</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>IndexedList of <A href="clpmaCompany.htm">Industry</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializationList"></A><b>initializationList</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity initializationList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the list of blocks used to initialize default values in new
+instances of the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>List of <A href="clBlock.htm">Block</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializationList"></A><b>initializationList</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Country initializationList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Default values set on instance creation,
+this list includes 'baseCurrency'.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>List of <A href="clBlock.htm">Block</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initialize"></A><b>initialize</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity initialize</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Initializes properties in newly created instance.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializeDataBaseLinks"></A><b>initializeDataBaseLinks</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity initializeDataBaseLinks</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Initializes a new instance.  Run as part of the instance creation process.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializeGlobalInstanceProperties"></A><b>initializeGlobalInstanceProperties</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity initializeGlobalInstanceProperties</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Initializes a new instance.  Run as part of the instance creation process.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializeGlobalInstanceProperties"></A><b>initializeGlobalInstanceProperties</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Classification initializeGlobalInstanceProperties</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+This method is run as part of the 'new' method and is used to initialize
+properties in the new instance.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaClassify.htm">Classification</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializeGlobalSubclassProperties"></A><b>initializeGlobalSubclassProperties</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity initializeGlobalSubclassProperties</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+This method is run as part of the 'specialized' method and is used to 
+initialize properties in the default row of the new class.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializeKeys:"></A><b>initializeKeys:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">RangeClassification initializeKeys: keys</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+This method is run as part of the 'createInstance:' process.  A single
+string representing the code of the new object is supplied.  Many classes
+redefine this message to require a list of keys as a parameter.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializeLocalAttributes"></A><b>initializeLocalAttributes</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity initializeLocalAttributes</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Initializes a new instance.  Run as part of the instance creation process.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="isAssetCategory"></A><b>isAssetCategory</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">AssetCategory isAssetCategory</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the value TRUE.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Inquiry&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>TRUE
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="isCanada"></A><b>isCanada</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Country isCanada</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Is recpient the country 'Canada'?</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Inquiry&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="isCashEquiv"></A><b>isCashEquiv</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">SecurityType isCashEquiv</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Is recpient's 'assetCategory' cash?</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Inquiry&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="isClassification"></A><b>isClassification</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Classification isClassification</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the value TRUE.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Inquiry&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>TRUE
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="isCountry"></A><b>isCountry</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Country isCountry</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the value TRUE.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Inquiry&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>TRUE
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="isEntity"></A><b>isEntity</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity isEntity</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the value TRUE when sent to any Entity.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Inquiry&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>TRUE
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="isEquity"></A><b>isEquity</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">SecurityType isEquity</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Is recpient's 'assetCategory' equity?</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Inquiry&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="isFixed"></A><b>isFixed</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">SecurityType isFixed</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Is recpient's 'assetCategory' fixed income?</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Inquiry&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="isIndustry"></A><b>isIndustry</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Industry isIndustry</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the value TRUE.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Inquiry&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>TRUE
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="isMemberOf:"></A><b>isMemberOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity isMemberOf: universe</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns TRUE if recipient is a member of supplied
+Universe or Classification.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Universe<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="isOther"></A><b>isOther</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">SecurityType isOther</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Is recpient's 'assetCategory' other?</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Inquiry&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="isParent"></A><b>isParent</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Classification isParent</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns TRUE if recipient is its own parent. 
+(TRUE by default).</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Inquiry&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="isRangeClassification"></A><b>isRangeClassification</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">RangeClassification isRangeClassification</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Not Defined&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>TRUE
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="isSector"></A><b>isSector</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Sector isSector</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the value TRUE.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Inquiry&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>TRUE
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="isSecurityType"></A><b>isSecurityType</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">SecurityType isSecurityType</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the value TRUE.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Inquiry&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>TRUE
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="isUS"></A><b>isUS</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Country isUS</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Is recpient the country 'United States'?</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Inquiry&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="isUSA"></A><b>isUSA</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Country isUSA</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Is recpient the country 'United States'?</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Inquiry&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="locateId:"></A><b>locateId:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity locateId: id</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns entity associated with id supplied, searching naming dictionaries
+associated with entity class.  By default only 'named' is searched; this
+message can be redefined for subclasses that can use multiple dictionaries.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Access&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="locateIds:"></A><b>locateIds:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity locateIds: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a list of entities of recipient's class.
+The parameter should be supplied as a single string with the ',' character
+used to separate the ids to locate (e.g., "GM, IBM, XON" ). </blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Access&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>List of <A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="lowerBound"></A><b>lowerBound</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">RangeClassification lowerBound</font></blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="masterListCodes"></A><b>masterListCodes</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity masterListCodes</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Displays code and name for all non-default instances in 
+recipient's class.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="memberList"></A><b>memberList</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Classification memberList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Member entities associated with recipient.</blockquote>
+<p><b>Type: </b>TimeSeriesProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>IndexedList of <A href="clEntity.htm">Entity</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="name"></A><b>name</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity name</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+recipient's name.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="named"></A><b>named</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity named</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Naming dictionary for recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clDict.htm">Dictionary</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="named"></A><b>named</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Classification named</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Naming dictionary associated with recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Named
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="named"></A><b>named</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">RangeClassification named</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the naming dictionary for the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Descriptive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Named
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="named"></A><b>named</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Country named</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Naming dictionary associated with recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Named
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="named"></A><b>named</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Industry named</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Naming dictionary associated with recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Named
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="named"></A><b>named</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Sector named</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Naming dictionary associated with recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Named
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="named"></A><b>named</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">SecurityType named</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Naming dictionary associated with recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Named
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="named"></A><b>named</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">AssetCategory named</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Naming dictionary associated with recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Named
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="newAs:"></A><b>newAs:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity newAs: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Special version of 'newAs:' message designed to address the additional
+requirements of entity instance creation.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="numericCode"></A><b>numericCode</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity numericCode</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Numeric code.  This value can be used to assign
+numeric orderings for instances of a class.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="parent"></A><b>parent</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Classification parent</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Recipient's parent object.  This is an instance of
+the recipient's class and is the recipient by default.  This property is
+used to construct classification hierarchies.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaClassify.htm">Classification</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="print"></A><b>print</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity print</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Redefines the standard print message so that 
+recipient's 'code' is printed.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="print:"></A><b>print:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity print: aFormat</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Prints recipient's 'code' using supplied format.  </blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Integer<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="profile"></A><b>profile</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity profile</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Displays a multi-line description of recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="rangeName"></A><b>rangeName</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">RangeClassification rangeName</font></blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="rebuildAliases"></A><b>rebuildAliases</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity rebuildAliases</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Rebuilds the 'aliases' list for all instances of
+ recipient's using the current selector in recpient's naming dictionary.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="sector"></A><b>sector</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Industry sector</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Sector associated with recipient.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaCompany.htm">Sector</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setNameTo:"></A><b>setNameTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity setNameTo: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Updates recipient's 'name' property with supplied 
+string.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setNumericCodeTo:"></A><b>setNumericCodeTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity setNumericCodeTo: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Updates recipient's 'numericCode' property with 
+supplied number.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setParentTo:"></A><b>setParentTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Classification setParentTo: p</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reassign the parent object to another instance
+of recipient's class.  By default, the recipient is its own parent.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaClassify.htm">Classification</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Classification<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setShortNameTo:"></A><b>setShortNameTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity setShortNameTo: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Updates recipient's 'shortName' property with string.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setSortCodeTo:"></A><b>setSortCodeTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity setSortCodeTo: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Updates recipient's 'sortCode' property with string.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setXRefIn:to:"></A><b>setXRefIn:to:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity setXRefIn: dictionary to: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Sets the supplied string in the supplied XRef dictionary
+to return recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - XRef<br>
+2 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="shortName"></A><b>shortName</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity shortName</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Short name.  This is the same as 'code' by default.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="sortCode"></A><b>sortCode</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity sortCode</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Code that can be used to sort instances.  This is
+the same as 'code' by default.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="specializeAs:at:"></A><b>specializeAs:at:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity specializeAs: string at: object</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Creates a subclass of recipient named by supplied string.  The name is
+defined at the supplied object.  Note that this class is NOT installed
+in the Schema database by default</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+2 - Object<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="unitCalc"></A><b>unitCalc</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">SecurityType unitCalc</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Mutliplier for adjusting units of security held for
+market value calculation purposes.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Double
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="universes"></A><b>universes</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity universes</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+List of Universe in which recipient is a member.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>List of Universe
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="updateInitializationListWith:"></A><b>updateInitializationListWith:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity updateInitializationListWith: block</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Adds the supplied block to the recipient class' initializationList.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="upperBound"></A><b>upperBound</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">RangeClassification upperBound</font></blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="validateInputString:"></A><b>validateInputString:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity validateInputString: input</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Instance in recipient's class associated
+with the supplied string.  If not found, NA is returned.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Access&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Return the string "Entity".</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Descriptive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Classification whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the string "Classification".</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">RangeClassification whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the name of the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Descriptive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Country whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the string "Country".</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Industry whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the string "Industry".</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Sector whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the string "Sector".</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">SecurityType whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the string "SecurityType".</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">AssetCategory whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the string "AssetCategory".</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+
+<p><hr>
+<table border=0 width=100%>
+<tr>
+<td align=left>
+<font size=-1>Copyright &copy 1998 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated March 19, 1998</font>
+</table>
+</body>
+</html>

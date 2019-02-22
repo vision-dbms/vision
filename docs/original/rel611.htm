@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html>
+<head><title>Vision Release Notes 6.1.1</title></head>
+<body bgcolor=white>
+<h2>Vision Release Notes 6.1.1</h2>
+
+<hr><h3>Topics Covered:</h3>
+<ul type=square><br><li><a href="#description">Description</a>
+<br><li><a href="#updatelicenses">Update Licenses</a> 
+<br><li><a href="#selectornotfound">Selector Not Found Reporting</a> 
+<br><li><a href="#stringtokenization">String Tokenization Primitives</a> 
+<br><li><a href="#stringcaseconversion">String Case Conversion</a> 
+<br><li><a href="#stringclustering">String Clustering</a> 
+<br><li><a href="#clusterobjectspace">Cluster Object Space Assignment</a> 
+<br><li><a href="#ieeenan">IEEE NaN->NA Conversion</a> 
+<br><li><a href="#typedefragcoal">Type Defragmentation/Coalescing</a> 
+<br><li><a href="#optimizedgarbagecoll">Optimized Garbage Collection and Session Garbage Collection</a> 
+<br><li><a href="#errorhandling">Error handling in batchvision</a> 
+<br><li><a href="#tuneableupdate">Tuneable Update Write Size</a> 
+<br><li><a href="#minorenhancements">Minor Enhancements and Bug Fixes</a> 
+<br><li><a href="#newmessages">New Messages</a> 
+</ul>
+<p><hr><p>
+<h3><a name=description>Description</a></h3>
+
+<p>
+Release 6.1.1 adds new capabilities, bug fixes, and specialized
+performance improvements to Vision.  Internally, it also implements
+many important architectural changes that lay the groundwork for
+future capabilities.  These notes describe the functionality, bug
+fixes, and other externally visible changes associated with this
+release.  
+
+<p>
+Please note that this release introduces the need for a Vision license
+key in order to update your database.  The license is tied to 
+specific hosts or IP addresses.  Based on this information, Insyte
+will supply you with a Vision script that must be installed in
+order to update your database with release 6.1.1 (and future releases).
+See <a href="#updatelicenses">Update Licenses</a> for more information.
+
+<p>
+Several Vision scripts have been included with this release,
+providing optional new and modified messages for your installation:
+
+<p>
+<ul type=disc>
+<table width=80%><tr valign=top align=left><td>EXTcore.6.1.1   <td>New protocol for core classes
+<tr valign=top align=left><td>CHadmin.6.1.1   <td>New and modified protocol for the AdminTools ToolKit
+<tr valign=top align=left><td>CHfeeds.6.1.1   <td>New and modified protocol for DataFeed support
+</table></ul>
+
+
+<p>
+Some of these messages can be installed independent of the Vision
+version being run; however, many of the messages included in this
+release define new primitives which will only work with this and
+future releases.  These messages are identified in the <a href="#newmessages">New Messages</a>.
+
+
+<hr>
+<p>
+<h3><a name=updatelicenses>Update Licenses</a></h3>
+
+<p>
+A license issued by Innovative Systems Techniques, Inc. is required to
+update a Vision database using this and subsequent Vision releases.
+Without that license, Vision can be used to read an existing database
+but not maintain or build one.  If, at the start of an update, Vision
+cannot find a suitable license, it generates the following output:
+
+<ul type=disc><b><pre>V> Utility updateNetwork
+V> ?g
+>>> License Does Not Permit Network Update From This Session &lt;&lt;&lt;
+        5</pre></b></ul>
+
+Vision update licenses are tied to specific hosts or IP addresses.
+Once you have supplied Insyte with this information, you will receive via 
+e-mail a Vision script containing licensing information defined for
+your environment.  The EXTcore.6.1.1 script implements the basic
+changes to the Utility class required to save and use the license.
+With the modifications defined in those scripts installed, the Vision
+license script you received simply needs to be run and saved once in order
+to permanently enable updates to that database from the systems for
+which you have licenses.  
+ 
+
+<hr>
+<p>
+<h3><a name=selectornotfound>Selector Not Found Reporting</a></h3>
+
+<p>
+As of this release, the information content of <i>Selector Not Found</i>
+messages can be controlled via a session attribute.  The
+EXTcore.6.1.1 script defines messages that enable and disable this
+attribute.  When enabled, a display of the Vision virtual machine's
+execution stack accompanies each <i>Selector Not Found</i> message.  By
+default, this attribute is disabled, resulting in the generation of
+conventional <i>Selector Not Found</i> messages.  The following example
+illustrates the result of enabling this attribute:  
+
+<ul type=disc><b><pre>####  Define a method that causes a selector not found, ...
+V> Integer defineMethod: [ | foo | ^self bar ];
+V> ?g
+
+####  Generate the conventional selector not found, ...
+V> 3 foo
+V> ?g
+
+>>> Selector 'bar' Not Found &lt;&lt;&lt;
+      NA 
+
+####  Enable verbose selector not found messages, ...
+V> Utility SessionAttribute enableVerboseSelectorNotFound ;
+V> ?g
+
+####  And get the verbose message, ...
+V> 3 foo
+V> ?g
+
+>>> Selector 'bar' Not Found &lt;&lt;&lt;
+
+    Selector Recipient: #RTYPE_C_ValueStore[2:994]
+
+
+----   1:
+
+|foo|^self bar
+           ^
+
+----   2:
+
+3 foo
+  ^
+      NA </pre></b></ul>
+
+The <i>verboseSelectorNotFound</i> session attribute makes an experimental
+capability added to release 5.9.5 controllable using a Vision expression.  
+
+
+<hr>
+<p>
+<h3><a name=stringtokenization>String Tokenization Primitives</a></h3>
+
+<p>
+Several new variants of the <i>breakOn:</i> primitive have been added to
+Vision.  These are defined in the EXTcore.6.1.1 script and will only
+work with release 6.1.1 and future releases.  These primitives extend
+the <i>breakOn:</i> concept to support substring and pattern matching and
+provide a convenient way to return both the matched and unmatched
+portions of their input.  The following operations are available:  
+
+<ul type=disc><b><pre>    Message             Index   Converse
+    =======             =====   ========
+    breakOn:            369     breakString:
+    breakOnString:      389     stringBreak:		
+    breakOnPattern:     390     patternBreak:
+
+    tokenizeOn:         369/1   breakTokenize:
+    tokenizeOnString:   389/1   stringTokenize:
+    tokenizeOnPattern:  390/1   patternTokenize:
+
+    cbreakOn:           370     cbreakString:
+    ctokenizeOn:        370/1   cbreakTokenize:</pre></b></ul>
+
+In this list, all but <i>breakOn:</i> and <i>cbreakOn:</i> and their converses
+are new.
+
+<p>
+The <i>breakOn:</i>, <i>breakOnString:</i> and <i>breakOnPattern:</i> primitives
+divide a string into one or more substrings based on a set of
+characters, a string to be matched, or a regular expression,
+respectively.  For example, if <i>s</i> is defined as:
+
+    <ul type=disc><b><pre>!s &lt;- "The quick brown fox jumped over the lazy dog.";</pre></b></ul>
+
+then, <i>s breakOn: "the". do: ["&lt;" print; print; ">" printNL];</i>
+displays:
+
+<ul type=disc><b><pre>&lt;T&gt;
+&lt;&gt;
+&lt; quick brown fox jump>
+&lt;d ov>
+&lt;r >
+&lt;>
+&lt;>
+&lt; lazy dog.></pre></b></ul>
+
+In this example, each occurrence of a "t", "h", or "e" marks the end of
+a substring.  To match the string "the" exactly, <i>breakOnString:</i> is
+used.  For example, using <i>breakOnString:</i> instead of <i>breakOn:</i> in
+the previous example produces the following output:
+
+<ul type=disc><b><pre>&lt;The quick brown fox jumped over >
+&lt; lazy dog.></pre></b></ul>
+
+Because <i>breakOnString:</i> performs an exact match, the initial "The"
+wasn't used to delimit a substring.  To match on more complex
+patterns, <i>breakOnPattern:</i> is used.  For example:
+
+<ul type=disc><b><pre>s breakOnPattern: "[Tt]he".
+do: ["&lt;" print; print; ">" printNL];</pre></b></ul>
+
+displays:
+
+<ul type=disc><b><pre>&lt;>
+&lt; quick brown fox jumped over >
+&lt; lazy dog.></pre></b></ul>
+
+The <i>breakOn...:</i> operations return the text between matches as a list
+of the form "substring-1", "substring-2", ..., "substring-n".  The
+matched characters, strings, or patterns are not returned as part of
+that list of substrings.  To deal with cases where the delimiting text
+is of interest, the <i>tokenize...</i> primitives are provided.  These
+primitives return their results as lists of the form "substring-1",
+"match-1", "substring-2", "match-2", ..., "match-n-1", "substring-n".
+For example, replacing <i>breakOn:</i> with <i>tokenizeOn:</i> in the first of
+the preceding examples yields the output:
+
+<ul type=disc><b><pre>&lt;T>
+&lt;h>
+&lt;>
+&lt;e>
+&lt; quick brown fox jump>
+&lt;e>
+&lt;d ov>
+&lt;e>
+&lt;r >
+&lt;t>
+&lt;>
+&lt;h>
+&lt;>
+&lt;e>
+&lt; lazy dog.></pre></b></ul>
+
+Note that the elements in the output list returned by <i>tokenizeOn...</i>
+always alternate between the substrings between matches and matched
+text.  If matches occur at adjacent positions in the source string,
+they are separated by an empty substring in the result.  The empty
+substrings separating the matched "t"'s, "h"'s, and "e"'s are examples
+of this behavior.  As is the case with <i>breakOn...</i>, the first string
+in the list is always the text up to the first match, and the last
+string in the list is always the text after the last match.
+
+<p>
+To complete the illustration of the <i>tokenizeOn...:</i> variants, if
+<i>tokenizeOnString:</i> is used in place of <i>tokenizeOn:</i> in the previous
+example, the following output is generated:
+
+<ul type=disc><b><pre>&lt;The quick brown fox jumped over >
+&lt;the>
+&lt; lazy dog.></pre></b></ul>
+
+and, if <i>... tokenizeOnPattern: "[Tt]he"</i> is used in place of
+<i>... tokenizeOnString: "the"</i>, the following result is produced:
+
+<ul type=disc><b><pre>&lt;The>
+&lt; quick brown fox jumped over >
+&lt;the>
+&lt; lazy dog.></pre></b></ul>
+
+Before leaving the topic of tokenization, there is another noteworthy example.  <i>ctokenizeOn:</i>, given an empty argument, can be used to quickly
+convert a string into a list of its characters.  For example:
+
+<ul type=disc><b><pre>"abc" ctokenizeOn: "".
+do: ["&lt;" print; print; ">" printNL];</pre></b></ul>
+
+generates the output:
+
+<ul type=disc><b><pre>&lt;>
+&lt;a>
+&lt;>
+&lt;b>
+&lt;>
+&lt;c>
+&lt;></b></pre></b></ul>
+
+This behavior is used to produce the high performance version of the
+<i>toList</i> String method, supplied in the FIXcore.6.1.1 script.
+
+<p>
+While empty character sets always produce well defined answers when
+passed as an argument to <i>breakOn:</i>, <i>tokenizeOn:</i>, <i>cbreakOn:</i> and
+<i>ctokenizeOn:</i>, they can cause problems for the string and pattern
+matching variants of these primitives.  That is because empty strings
+and patterns always match the beginning of any input and never consume
+any characters from that input.  The result is a sure-fire recipe for
+an infinite loop.  To prevent that, special provision is made in these
+primitives to detect empty search strings and patterns.  If an empty
+string or pattern is detected, only the first, empty match will be
+returned.  Thus, either:
+
+    <ul type=disc><b><pre>"abc" breakOnString: "". do: ["&lt;" print; print; ">" printNL];</pre></b></ul>
+
+or:
+
+    <ul type=disc><b><pre>"abc" breakOnPattern: "()". do: ["&lt;" print; print; ">" printNL];</pre></b></ul>
+    
+displays:
+
+<ul type=disc><b><pre>&lt;>
+&lt;abc></pre></b></ul>
+
+while either:
+
+    <ul type=disc><b><pre>"abc" tokenizeOnString: "". do: ["&lt;" print; print; ">" printNL];</pre></b></ul>
+
+or:
+
+    <ul type=disc><b><pre>"abc" tokenizeOnPattern: "()". do: ["&lt;" print; print; ">" printNL];</pre></b></ul>
+
+displays:
+
+<ul type=disc><b><pre>&lt;>
+&lt;>
+&lt;abc></pre></b></ul>
+
+While on the topic of regular expressions and string pattern matching,
+there is one final point to be made. The regular expression processing
+algorithms used by all string pattern matching primitives in Vision
+always match the longest possible substring.  For simple patterns,
+this isn't usually an issue, but, for patterns with wildcards, some
+care needs to be taken.  For example, in the examples of this section,
+if:
+
+    <ul type=disc><b><pre>s tokenizeOnPattern: "[Tt]he". do: ["&lt;" print; print; ">" printNL];</pre></b></ul>
+
+had been written as:
+
+    <ul type=disc><b><pre>s tokenizeOnPattern: "[Tt].*e".do: ["&lt;" print; print; ">" printNL];</pre></b></ul>
+
+the resulting output would have been:
+
+    <ul type=disc><b><pre>&lt;>
+&lt;The quick brown fox jumped over the>
+&lt; lazy dog.></pre></b></ul>
+
+instead of:
+
+<ul type=disc><b><pre>&lt;The>
+&lt; quick brown fox jumped over >
+&lt;the>
+&lt; lazy dog.></pre></b></ul>
+
+<hr>
+<p>
+<h3><a name=stringcaseconversion>String Case Conversion</a></h3>
+
+Five new unary primitives have been defined in the EXTcore.6.1.1
+script to change the case of a string.  Four of these primitives are
+direct replacements for non-primitive methods currently in use --
+<i>toUpper</i>, <i>toLower</i>, <i>capitalize</i>, and <i>lowercase</i>.  The fifth,
+<i>toggleCase</i>, flips the case of all upper and lower case characters
+it finds in its input string.  All of these primitives return a
+suitably modified copy of their input.  
+  
+
+<hr>
+<p>
+<h3><a name=stringclustering>String Clustering</a></h3>
+
+<p>
+Prior to this release, there was no direct mechanism for placing a
+string in a specific cluster.  Only the Vision bulk loader (a.k.a.,
+the incorporator) had that ability.  The implementation and
+performance consequences were significant and often hard to recognize.
+Release 6.1.1 introduces a collection of primitives that facilitate
+string clustering.
+
+<p>
+Beginning with this release, strings can be clustered using a
+mechanism known as associative clusters.  Associative clusters apply
+only to strings.  Associative string clusters are similar to
+dictionaries in that they examine the text of a string and store at
+most one copy of a string based on its text.  Additionally, like
+dictionaries, the instances in an associative cluster are ordered by
+their text.  The script EXTcore.6.1.1 contains the new primitives
+defined to support string clustering.  These primitives will not work
+with earlier releases.
+
+<p>
+Not all string clusters are associative string clusters.  Associative
+string clusters are created using the <i>newAssociativeCluster</i>
+operation:
+
+<ul type=disc><b><pre>!stringSpace &lt;- String newAssociativeCluster;</pre></b></ul>
+
+The <i>string</i> returned by <i>newAssociativeCluster</i> is the shadow
+instance of a new associative cluster containing no instances.
+The message <i>isAnAssociativeCluster</i> returns a boolean indicating
+whether the recipient String is part of an associative string cluster.
+
+<p>
+Strings are added to the associative cluster using the message
+<i>insertIntoCluster:</i>:
+
+<ul type=disc><b><pre>!a0 &lt;- "a" insertIntoCluster: stringSpace;</pre></b></ul>
+
+or its converse, <i>clusterInsert:</i>:
+
+<ul type=disc><b><pre>!a1 &lt;- stringSpace clusterInsert: "a";</pre></b></ul>
+
+As noted, only one copy of "a" is inserted into the cluster -- both
+<i>a0</i> and <i>a1</i> reference the same copy of the string "a".
+
+<p>
+Associative clusters can be queried to determine if they contain a
+particular string.  The <i>locateInCluster:</i> message or its converse,
+<i>clusterLocate:</i> perform that function.  Both messages return the
+instance of the string in the associative cluster if the string is
+present and NA if it isn't.  In the context of this example, both:
+
+<ul type=disc><b><pre>"a", "b" do: [
+    ^self print: 3;
+     ^self locateInCluster: ^my stringSpace. printNL
+];</pre></b></ul>
+
+and:
+
+<ul type=disc><b><pre>"a", "b" do: [
+    ^self print: 3;
+     ^my stringSpace clusterLocate: ^self. printNL
+];</pre></b></ul>
+
+display:
+
+<ul type=disc><b><pre>a  a
+b        NA </pre></b></ul>
+
+Strings can be deleted from an associative cluster using the
+ <i>deleteFromCluster:</i> message or its <i>clusterDelete:</i> converse:
+
+<ul type=disc><b><pre>Input:
+"a" deleteFromCluster: stringSpace
+
+Output:
+TRUE
+
+Input:
+stringSpace instanceList
+
+Output:
+List of 0</pre></b></ul>
+
+Both deletion messages return TRUE if the string was found and deleted
+and FALSE if the string was not present in the first place.  If the
+same string is deleted in the context of a list operation:
+
+    <ul type=disc><b><pre>"a", "a" do: [
+    ^self print: 2;
+    ^self deleteFromCluster: ^my stringSpace. printNL
+];</pre></b></ul>
+
+only one instance of the delete operation returns TRUE:
+
+<ul type=disc><b><pre>a FALSE
+a TRUE</pre></b></ul>
+
+As is the case with any deletion, all references to the deleted
+string are automatically converted to references to the shadow
+instance of the associative cluster.
+
+<p>
+Strings stored in associative clusters are protected from deletion
+using the standard instance deletion messages -- <i>delete</i> and
+<i>rdelete</i>.  If one of these messages is sent to an associative cluster
+resident string, the deletion will fail and the message will return
+FALSE:
+
+<ul type=disc><b><pre>Input:
+!a0 &lt;- "a" insertIntoCluster: stringSpace
+Output:
+a
+
+Input:
+a0 rdelete
+Output:
+FALSE
+
+Input:
+a0
+Output:
+a</pre></b></ul>
+
+While strings in associative clusters are protected from accidental
+deletion, they are not protected from damage by the incorporator.  If
+an associative string cluster is used as an incorporator string store,
+it will be severely damaged and will need to be re-created.
+
+
+<hr>
+<p>
+<h3><a name=clusterobjectspace>Cluster Object Space Assignment</a></h3>
+
+<p>
+As of this release, it is possible to explicitly assign newly created
+transient clusters to specific persistent object spaces.  Previously,
+that assignment was made based on the first persistent reference to
+the new cluster encountered during the initial save of the new
+cluster.  The script EXTcore.6.1.1 includes new primitives used to
+locate new clusters.  These primitives will not work with earlier
+releases.  
+
+<p>
+Cluster object space assignments are made with the message
+ <i>establishResidenceInSpaceOf:</i> :
+
+<ul type=disc><b><pre>Object createSubclass: "MyClass";
+MyClass establishResidenceInSpaceOf: AnotherClass</pre></b></ul>
+
+or its converse <i>provideResidenceFor:</i>:
+
+<ul type=disc><b><pre>Object createSubclass: "MyClass";
+AnotherClass provideResidenceFor: MyClass</pre></b></ul>
+
+<i>AnotherClass</i> is assumed to have a persistent identity (i.e., it was
+saved previously or given a persistent identity using the cluster
+object space assignment messages described here).  If <i>AnotherClass</i> has
+a valid persistent identity (i.e., an object space), <i>MyClass</i> will be
+assigned to the same object space as <i>AnotherClass</i>.
+
+<p>
+Both the <i>establishResidenceInSpaceOf:</i> message and its converse
+return TRUE if the object space assignment was performed successfully
+and FALSE if it failed.  The object space assignment can fail if the
+<i>new</i> cluster already has a persistent identity or if the <i>old</i>
+reference cluster doesn't.  If the assignment fails, no identity
+changes occur.
+
+
+<hr>
+<p>
+<h3><a name=ieeenan>IEEE NaN->NA Conversion</a></h3>
+
+<p>
+As of this release, the numeric primitives (add, subtract, multiply,
+divide, power, subtracted from, divided into, and power of) convert
+IEEE NaN (Not a Number) values into Vision NAs.  Previously, only
+division by zero generated Vision NAs; other conditions like overflow,
+underflow, and loss of precision returned the IEEE NaN generated by
+the hardware.  While these NaN values propagated correctly through
+subsequent computations, Vision programs could not test for them or
+control their display.
+
+
+<hr>
+<p>
+<h3><a name=typedefragcoal>Type Defragmentation/Coalescing</a> </h3>
+
+<p>
+When sending a message to a collection of objects, Vision's virtual
+machine partitions that collection by the type of its elements.  For
+each type found, the virtual machine locates the implementation of the
+message and applies that implementation to the set of elements in the
+associated partition.  The objects returned become the recipients of
+the next message sent by the expression being evaluated.  In general,
+the objects returned can be of different types, and more importantly,
+objects of the same type can be returned in several of the partitions.
+The effect of this recursive partitioning is fragmentation (in fact,
+the structure used to hold these partitioned intermediate results is
+called a fragmentation).  Common examples of this occur when a message
+returning a boolean is sent to a polymorphic collection of objects or
+different execution paths generated by <i>ifTrue:</i> and its variants all
+return objects of the same type.
+
+<p>
+There is a performance and clustering tradeoff between performing a
+computation on a recursively fragmented collection versus coalescing
+the fragmentation.  Coalescing similar types can result in larger and
+more efficiently organized partitions; however, there is a cost
+associated with searching for coalesceable fragments and with
+performing the defragmentation.  Historically, Vision deferred
+defragmentation because, in the majority of cases, that resulted in
+better average performance.  In some cases, particularly those
+involving the creation of new persistent objects, this decision had an
+adverse affect on clustering, update performance, or both.  A new,
+high performance, defragmentation algorithm implemented in this
+release changes the tradeoff.  As of this release, Vision's default
+behavior is to attempt aggressive defragmentation prior to sending a
+message to a fragmented collection.
+
+<p>
+Vision's type defragmentation behavior can be controlled by the
+ <i>visionAttemptDefragment</i> session attribute (defined in the
+accompanying extension scripts) or the <i>VisionAttemptDefragment</i>
+environment variable.  Aggressive defragmentation can be disabled by
+setting the session attribute to FALSE:
+
+    <ul type=disc><b><pre>Utility SessionAttribute visionAttemptDefragment &lt;- FALSE;</pre></b></ul>
+
+or by setting the environment variable to 0:
+
+       <ul type=disc><b><pre>setenv VisionAttemptDefragment 0    # c-shell syntax</pre></b></ul>
+
+prior to starting a Vision session.
+
+
+<hr>
+<p>
+<h3><a name=optimizedgarbagecoll>Optimized Garbage Collection and Session Garbage Collection</a></h3>
+
+<p>
+The internal queuing mechanism used by the network maintenance
+garbage collector (<i>Utility collectGarbage</i>) has been reimplemented to
+yield a performance improvement of up to an order of magnitude (10x)
+in some cases with the effect most noticeable on large databases with
+many containers.
+
+<p>
+Vision has always utilized a reference counting mechanism to enable
+the collection of transient objects that are no longer needed.  This
+mechanism works well in most situations, but fails in the case of
+circular references.  If a circular reference is introduced, the
+reference count of any object in the path of the circular reference
+will never drop to zero, nor will that of any objects referenced by
+objects in the circular path.  This release includes a mark-and-sweep
+garbage collector for transient objects similar to the mark-and-sweep
+global garbage collector.  The EXTcore.6.1.1 script includes the new
+primitive <i>collectSessionGarbage</i> which can be explicitly invoked to
+perform transient garbage collection.  It is automatically invoked
+whenever:  
+<p>
+<ul type=disc>
+<ol type=1>
+<li>an allocation error is encountered.
+<li>when a Vision session has been idle for more than 30 seconds. </ol></ul>
+
+<hr>
+<p>
+<h3><a name=errorhandling>Error handling in batchvision</a></h3>
+
+<p>
+A serious Vision error (reported in the NDF.ERROR file, and in the
+session log with the preface <i>>>> Error Trapped by Read-Eval-Print
+&lt;&lt;&lt;</i>) traditionally leaves the session active, but unable to commit
+changes to the object network. This policy provides an opportunity for
+determining the cause of the error by exploring the state of the
+session.  This remains Vision's default policy; however, with this
+release, there are two other possible responses to a serious error.
+
+<p>
+One of the new possibilities is to choose to exit the session. The
+second is to restart the session. In both cases, all access to the
+environment developed in the session prior to the error is lost. In
+the restart case, a batchvision with the same standard input and
+output channels replaces the original session.  If both exit and
+restart are chosen, exit takes precedence.
+
+<p>
+This feature has been provided because, after a serious error, the
+batchvision session may be unable to relinquish some system
+resources. On some platforms, this inability is more serious than
+others, and can result in other batchvision sessions being stalled
+until the session with the error exits or restarts.
+
+<p>
+There are two ways to enable restart or exit on error.  One is via
+environment variables:
+
+<ul type=disc><b><pre>setenv VisionExitOnError 1
+setenv VisionRestartOnError 1</pre></b></ul>
+
+The second is via session attributes:
+
+<ul type=disc><b><pre>Utility SessionAttribute visionExitOnError &lt;- 1;
+Utility SessionAttribute visionRestartOnError &lt;- 1;</pre></b></ul>
+
+
+<hr>
+<p>
+<h3><a name=tuneableupdate>Tuneable Update Write Size</a></h3>
+
+<p>
+Some operating and file system configurations do not work correctly
+when presented with large disk write requests.  These failures are
+caught by Vision's update checksum mechanism; however, they require
+that the failed update be re-run.  This release implements a tuning
+parameter that controls the maximum amount of data that Vision will
+attempt to transfer to disk during a single update write.  Either the
+session attribute <i>visionMaxWriteChunk</i> or the environment variable
+ <i>VisionMaxWriteChunk</i> can be set to the maximum number of bytes that
+Vision will attempt to transfer.  By default, this parameter is set
+internally by Vision to not exceed the documented limits of the
+operating system on which Vision is running.  You should not change
+the value of this parameter unless you are encountering or suspect
+that you are encountering a problem caused by an operating system bug.
+
+
+<hr>
+<p>
+<h3><a name=minorenhancements>Minor Enhancements and Bug Fixes</a></h3>
+
+<p>
+<ol type=1><li>batchvision
+  <ol type=a>
+	<li>The <i>asObject</i> message when sent to a POP representing a Block
+	   now returns a decompiled string. Previously it had returned an
+	   NA. This is in support of the new <i>Selector Not Found</i> handling.
+	 <li>Fix to OpenVision process streams to prevent generation of
+	   Unix "zombies".
+	 <li>Lowered Severity of <i>echoToFile:</i> usage errors to a "warning".
+	   This means that the error is not written to the NDF.ERRORS
+	   log, and that the session will be able to update the
+	   network. The usage errors are still reported to the session.
+	   In addition, the primitive now catches an integer argument as
+	   a usage error.  In the past, an integer argument would specify
+	   an undefined file name, or potentially cause a segmentation
+	   fault. 
+	 <li>Fixed degenerate case in the <i>FilterOutputOf:</i> primitive. When
+	   run from a stream open via communication with an OpenVision
+	   service channel, the <i>FilterOutputOf:</i> primitive would
+	   sometimes not work. The degenerate case would result when the
+	   original input and output streams, opened by default when
+	   batchvision starts up, were closed.
+	 <li>Enable the setting of the following tuning parameters as
+	   Session Attributes. Previously, they could only be modified via
+	   environment variables (see EXTcore.6.1.1)
+	 <li>Enhanced error reporting for segment mismatches. The
+	   expected and actual transaction ids and resource ids for
+	   the segment are now included in the error message which is
+	   recorded in the NDF.ERRORS log.
+	 <li>Modified FilterOutput2 (NT implementation of
+	   <i>FilterOutputOf:</i> to return 512 if process creation fails.
+	 <li>Modified permission constants for Object Space
+	   Creation. In prior releases, if a user was in the global
+	   update rights list, then space creation was
+	   permitted. Starting with this release, VisionAdm privilege
+	   must also be set.
+	 <li>If Utility collectGarbage is run in a session, User Space
+	   updates are no longer permitted.
+	 <li>Any Update Annotations which were previously set to be
+	   entered into the NDF, are now also written to NDF.JOURNAL (if
+	   it exists.)
+	 <li>New primitives to access NDF and process information including
+           the version number of the database your session has accessed
+           and the session's process id (see EXTcore.6.1.1).
+	 <li>When run with the -I option, batchvision now checks the checksum 
+	   of the external segments it is being asked to commit. This
+	   is subject to disabling via the environment variable
+	   VisionCheckCheckSM.
+	 <li>Transaction IDs generated by the Windows/NT version of
+	   batchvision are now based on the volume serial number of
+	   the c: drive of the machine running batchvision and have
+	   the same structure as transaction ids generated on UNIX
+	   systems.  Previously, Windows/NT transaction IDs were
+	   generated from an OLE UUID.
+  </ol>
+<p>
+    <li>compustat2
+  <ol type=a>
+        <li>Adjusted implementation of Floating point conversion so
+	   that NA comparisons would work on all platforms (NT in particular)
+        <li>Generalized Header/Trailer filtering  by introducing the
+	   <i>-N</i> option.  This allows command line specification of a
+	   character string which compustat2 will use to identify
+	   "Null" records. If the input string matches the beginning
+	   of a record, that record is discarded. By default,
+	   compustat2 behaves as though it were called in the
+	   following way:
+
+		     <ul type=disc><b><pre>compustat2 -N "000000000000"</pre></b></ul>
+
+	   In other words, it will discard all records which begin
+	   with 12 zeros.
+  </ol>
+
+<p>
+    <li>dbconvert
+  <ol type=a>
+	 <li>When the transfer of a segment between platforms with the
+	   same binary data representation (i.e., no data conversion
+	   required) is interrupted, a subsequent run of dbconvert
+	   would interpret the partial segment as complete. To correct
+	   for this, the 6.1.1 version receives segments into
+	   temporary files. Only when the transfer has completed does
+	   dbconvert move the segment into place. (The temporary file
+	   is the segment number with an <i>x</i> character appended.
+	 <li>When running in server mode, dbconvert would send
+	   unformatted textual error messages to the client which could
+	   not interpret them. Version 6.1.1 of the dbconvert server
+	   writes those errors instead to a file specified via the
+	   <i>-s</i> option. If the <i>-s</i> option is not specified, dbconvert
+	   will use /dev/null as the default repository for these messages.
+	 <li>Corrected an error message informing users that a container would
+	   extend beyond the end of a segment. In earlier versions, it
+	   printed an incorrect container size.
+	 <li>Added an error message to inform users when dbconvert cannot
+	   recognize a message format.
+</ol>
+
+<p>
+      <li>preproc2
+<ol type=a>	 
+        <li>When converting a numeric field, preproc2 now checks to
+	   ensure that the entire field is legitimately numeric. In
+	   earlier versions, preproc2 would convert whatever string
+	   was present. If the string was not numeric, the conversion
+	   result would be zero. This version converts such strings to
+	   NA values.
+
+	   <ul type=disc><b><pre>For Example			New		Old
+'         '			NA		0
+'    3    '			3		3
+'    .   3'			NA		0
+'   42Kzcd'			NA		42</pre></b></ul>
+</ol>
+
+<p>
+      <li>ndftool
+<ol type=a>
+  <li>removed inaccurate error report induced by a session which
+	    performed multiple saves of which one (not the last) was a
+	    base version.
+</ol>
+<p>
+    	<li>onprof/onck
+<ol type=a>	
+  <li>removed inaccurate error report induced by a space which
+	    has no root (container at table slot 1)
+	  <li>augmented error messages that report mismatched versions to
+	    include the expected and actual version numbers.
+	  <li>utility is now tolerant of missing spaces in a network.
+</ol></ol>
+
+<hr>
+<p>
+<h3><a name=newmessages>New Messages</a></h3>
+
+<b><pre>********************
+   EXTcore.6.1.1
+********************</pre></b>
+<ul type=disc>
+This script contains messages that have been added to the core classes as 
+part of release 6.1.1.  Note that many of these messages are primitives
+which will only run in release 6.1.1 or higher.  The methods used to
+install these primitives relies on messages defined in the EXTprimitives.6.0
+script from release 6.0.
+</ul>
+
+
+<hr>
+</ul><b><pre>Class     Utility
+Message   UpdateLicense
+          setUpdateLicenseTo: </pre></b><ul type=disc>
+
+</ul><b><pre>Class     Utility SessionAttribute
+Message   licenseItemAt:</pre></b><ul type=disc>
+
+These message have been defined to install and access the license 
+information defined for your site.  You will not be able to perform
+updates to your database if these messages are not installed in 
+conjunction with a site-specific license file generated for you by
+Insyte.
+
+<p>
+Note that this message will not work with releases prior to 6.1.1
+</ul><hr>
+<b><pre>Class     Utility
+Message   updateNetwork</pre></b><ul type=disc>
+
+This message has been modified to query the stored license information. 
+If this information is not stored and/or it does not match the host
+or IP address defined for your installation, the update will abort
+and you will see the error message:
+
+     <pre><b><ul type=disc>&gt;&gt;&gt; License Does Not Permit Network Update From This Session &lt;&lt;&lt;</pre></b></ul>
+
+</ul><hr>
+<b><pre>Class     Utility SessionAttribute
+Message   visionMaxWriteChunk
+          visionMappingLimit
+          visionAddressThreshold
+          visionNSyncRetries
+          visionSSyncRetries
+          visionSOpenRetries
+          visionSORetryDelay
+          visionNetOpenTrace
+          visionLargeTaskSize
+          visionStackDump
+          visionGRMEnabled
+          visionGRMTrace
+          visionAttemptDefragment
+          visionRestartOnError
+          visionExitOnError
+          verboseSelectorNotFound
+          largeContainerSizeOfSpace: space</pre></b><ul type=disc>
+
+These messages provide control over various session-temporary attributes.
+Note that these messages will not work with releases prior to 6.1.1
+</ul><hr>
+<b><pre>Class     Utility SessionAttribute
+Message   enableVerboseSelectorNotFound
+          disableVerboseSelectorNotFound</pre></b><ul type=disc>
+
+These messages are used to toggle the amount of information displayed
+when a Vision query encounters a <i>selector not found</i>.  By default,
+the verbose mode is disabled.
+
+<p>
+Note that these messages will not work with releases prior to 6.1.1
+</ul><hr>
+<b><pre>Class     Utility 
+Message   hostname
+          hostId
+          username
+          processId</pre></b><ul type=disc>
+
+The message <i>hostname</i> displays the logical name of the machine on
+which your <i>batchvision</i> is running.  The message <i>hostId</i> displays
+the vendor-specific integer uniquely identifying this machine.  The
+<i>username</i> message is the name of the current effective user code
+running the <i>batchvision</i>.  The <i>processId</i> returns the process 
+identifier assigned to the <i>batchvision</i> by the operating system.
+
+<p>
+Note that these messages will not work with releases prior to 6.1.1
+</ul><hr>
+<b><pre>Class     Utility 
+Message   accessedNetworkVersion</pre></b><ul type=disc>
+
+This message displays the version number of the NDF accessed at session
+startup.
+
+<p>
+Note that this message will not work with releases prior to 6.1.1
+</ul><hr>
+<b><pre>Class     Utility 
+Message   currentNetworkVersion</pre></b><ul type=disc>
+
+This message displays the version number of the last commit performed
+by this session.  This will be the same as the accessed version when
+no commits have been performed.
+
+<p>
+Note that this message will not work with releases prior to 6.1.1
+</ul><hr>
+<b><pre>Class     Utility 
+Message   collectSessionGarbage</pre></b><ul type=disc>
+
+This message runs the transient garbage collection.
+
+<p>
+Note that this message will not work with releases prior to 6.1.1
+</ul><hr>
+<b><pre>Class     Utility 
+Message   fullCompact
+          fullCompactOf:
+          fullCompactExcept:</pre></b><ul type=disc>
+
+These methods have been modified to turn off tracing after execution so
+that the release 6.1.1 transient garbage collect does not cause sporadic
+printing to occur within a session left running after a compaction.
+</ul><hr>
+<b><pre>Class     String 
+Message   breakOnString: string
+          breakOnPattern: stringPattern</pre></b><ul type=disc>
+
+These messages expand on the functionality of the <i>breakOn:</i> message.
+While the original <i>breakOn:</i> message divides the recipient string into 
+one or more substrings based on a set of one or more characters, these
+messages are used to divide the recipient string into one or more substrings
+based on a string to match exactly or a regular expression.  The messages
+<i>stringBreak:</i> and <i>patternBreak:</i> are converse messages that must be
+defined in the database but are not generally called directly.
+
+<p>
+Note that these messages will not work with releases prior to 6.1.1
+</ul><hr>
+<b><pre>Class     String 
+Message   tokenizeOn: string
+          ctokenizeOn: string
+          tokenizeOnString: string
+          tokenizeOnPattern: stringPattern</pre></b><ul type=disc>
+
+The <i>breakOn:</i> message variations return the text between matches as a 
+list of the form "substring-1", "substring-2", ... "substring-n".  The
+matched characters, strings, or patterns are not returned as part of 
+the list of substrings.  The <i>tokenize</i> versions of these methods
+return their results in the form "substring-1", "match-1", "substring-2",
+"match-2", ... "match-n-1, "substring-n".  The elements in the returned
+list always alternate between the substrings between matches and the
+matched text.  If matches occur at adjacent positions in the recipient
+string, they are separated by an empty substring in the result. Then
+message <i>ctokenizeOn:</i> is similar to <i>tokenizeOn:</i> except a match
+occurs for any character in the recipient not included in the parameter.
+The messages <i>breakTokenize:</i> and <i>cbreakTokenize:</i>, <i>stringTokenize:</i>,
+and <i>patternTokenize:</i>  are converse messages that must be
+defined in the database but are not generally called directly.
+
+<p>
+Note that these messages will not work with releases prior to 6.1.1
+</ul><hr>
+<b><pre>Class     String 
+Message   toList
+          translateString: string to: replacement</pre></b><ul type=disc>
+
+These modified messages used the new <i>ctokenizeOn:</i> and <i>breakOnString:</i>
+primitives to produce much faster implementations.
+
+<p>
+Note that these modifications will not work with releases prior to 6.1.1
+</ul><hr>
+<b><pre>Class     String 
+Message   translatePattern: pattern to: replacement</pre></b><ul type=disc>
+
+This message replaces all occurrences of the supplied <i>pattern</i> with
+the <i>replacement</i>.
+
+<p>
+Note that this message will not work with releases prior to 6.1.1
+</ul><hr>
+<b><pre>Class     String 
+Message   toUpper
+          toLower
+          capitalize
+          lowercase
+          toggleCase</pre></b><ul type=disc>
+
+These messages are used to change the case of the characters in the
+recipient string.  The first four of these messages replace non-primitive
+methods currently in use.  The <i>toggleCase</i> method flips the case of
+all upper and lower case characters it finds in the recipient.   
+
+<p>
+Note that these messages will not work with releases prior to 6.1.1
+</ul><hr>
+<b><pre>Class     String 
+Message   newAssociativeCluster</pre></b><ul type=disc>
+
+This message creates a new associative string cluster and is normally
+sent to ^global String.
+
+<p>
+Note that this message will not work with releases prior to 6.1.1
+</ul><hr>
+<b><pre>Class     String 
+Message   isAnAssociativeCluster</pre></b><ul type=disc>
+
+This message returns a boolean value indicating if the recipient is an
+associative string cluster.
+
+<p>
+Note that this message will not work with releases prior to 6.1.1
+</ul><hr>
+<b><pre>Class     String 
+Message   insertIntoCluster: cluster
+          clusterInsert: stringValue</pre></b><ul type=disc>
+
+These messages add the <i>stringValue</i> into an associative cluster if it 
+is not already present in it and return the value stored in the cluster.
+Because associative clusters maintain only one copy of any string, the
+value returned will have the same contents as the one in inserted but
+may not be the same string object.
+
+<p>
+Note that these messages will not work with releases prior to 6.1.1
+</ul><hr>
+<b><pre>Class     String 
+Message   locateInCluster: cluster
+          clusterLocate: stringValue</pre></b><ul type=disc>
+
+These messages return the instance of the string in the associative
+cluster if the string is present and NA if it is not.
+
+<p>
+Note that these messages will not work with releases prior to 6.1.1
+</ul><hr>
+<b><pre>Class     String 
+Message   deleteFromCluster: cluster
+          clusterDelete: stringValue</pre></b><ul type=disc>
+
+These messages delete a string from an associative cluster.  They return
+TRUE if the string was found and deleted and FALSE otherwise.  If the 
+same string is deleted more than once in a list operation, only one
+instance of the delete operation will return TRUE.
+
+<p>
+Note that these messages will not work with releases prior to 6.1.1
+</ul><hr>
+
+<b><pre>Class     Object 
+Message   establishResidenceInSpaceOf: object
+          provideResidenceFor: aCluster</pre></b><ul type=disc>
+
+These messages can be used to explicitly assign newly created
+transient clusters to specific persistent object spaces.  Cluster object
+space assignments are made with the message <i>establishResidenceInSpaceOf:</i> :
+<ul type=disc><b><pre>Object createSubclass: "MyClass";
+MyClass establishResidenceInSpaceOf: AnotherClass</pre></b></ul>
+or its converse <i>provideResidenceFor:</i>:
+<ul type=disc><b><pre>Object createSubclass: "MyClass";
+AnotherClass provideResidenceFor: MyClass</pre></b></ul>
+
+<i>AnotherClass</i> is assumed to have a persistent identity (i.e., it was
+saved previously or given a persistent identity using the cluster
+object space assignment messages described here).  If AnotherClass has
+a valid persistent identity (i.e., an object space), <i>MyClass</i> will be
+assigned to the same object space as <i>AnotherClass</i>.
+
+<p>
+Both the <i>establishResidenceInSpaceOf:</i> message and its converse
+return TRUE if the object space assignment was performed successfully
+and FALSE if it failed.  The object space assignment can fail if the
+ <i>new</i> cluster already has a persistent identity or if the <i>old</i>
+reference cluster doesn't.  If the assignment fails, no identity
+changes occur.
+
+<p>
+Note that these messages will not work with releases prior to 6.1.1
+</ul><hr>
+
+<b><pre>********************
+   CHadmin.6.1.1
+********************</pre></b>
+<ul type=disc>
+This script contains modifications and additions related to the AdminTools
+ToolKit.  These messages work with pre-6.1.1 versions of the database as
+well.  These messages are frequently used by Insyte support personnel to
+help analyze object structure complexity.
+
+
+</ul>
+<b><pre>********************
+   CHfeeds.6.1.1
+********************</pre></b>
+<ul type=disc>
+This script contains modifications and additions related to the DataFeed
+class.  The <i>reconcile</i> method is modified to keep track of the last
+timestamp and count each time a feed is run.  This is a transitional
+change - more audit information will be recorded in a separate descriptor
+class in a future release.
+</ul>
+
+<p><hr><table width=100%>
+  <tr>
+    <td align=left><font size=-1>Copyright &copy; 1999 Innovative Systems Techniques, Inc.</font>
+    <td align=right><font size=-1>Updated January 28, 1999</font></table>
+
+</body>
+</html>

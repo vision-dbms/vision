@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Upload Format: IdSourceMaster </title>
+
+</head>
+<body>
+<body bgcolor=white>
+<h2>Vision Portfolio Management Application Layer: Data Feeds</h2>
+<p>
+| <a href="pmaFeeds.htm">Application Feeds</a> |
+<hr><p>
+<font size=+2><b>Data Feed: </b><i>IdSourceMaster</i></font><p>
+<font size=+1><b>Category: </b><i>MasterFeed</i></font><p>
+
+<h3>Summary:</h3>
+<p>
+<ul>
+The <i>IdSourceMaster</i> feed is used to create and refresh basic information for <b>IdSource</b> instances.  <b>IdSources</b> are used to define standard sources of entity identification schemas.  Alternative identifiers are stored in <a href="clDict.htm#xref">cross reference dictionaries (<i>XRef's</i>)</a> defined for an <b>Entity</b> class.  XRef's provide a convenient way to track identifiers that are uniquely assigned by a specific source but may overlap with identifiers assigned by other sources.
+</ul><p>
+
+<h3>Available Fields:</h3><p>
+<center><table border=1 width=80% cellpadding=4 cellspacing=2>
+<tr><th>Field<th>Vision<br>Property<th>Type<th>Description
+<tr>
+<tr><th align=center colspan=4>--- Required Fields ---
+<tr>
+<td><i>entityId</i>
+<td><i>code</i>
+<td>String
+<td>id of new or existing IdSource instance
+<tr><th align=center colspan=4>--- Suggested Fields ---
+<tr>
+<td><i>name</i>
+<td><i>name</i>
+<td>String
+<td>descriptive name
+<tr>
+<td><i>xrefName</i>
+<td><i>xrefName</i>
+<td>String
+<td>name of XRef (if different from code)
+<tr>
+<td><i>xrefProperty</i>
+<td><i>xrefProperty</i>
+<td>String
+<td>name of property (if different from code)
+<tr>
+<td><i>primaryFlag</i>
+<td><i>primaryFlag</i>
+<td>Boolean
+<td>track source at <b>Named</b> as well
+<tr>
+<td><i>retainOldFlag</i>
+<td><i>retainOldFlag</i>
+<td>Boolean
+<td>keep old values in cross reference
+<tr><th align=center colspan=4>--- Other Fields ---
+<tr>
+<td><i>numericCode</i>
+<td><i>numericCode</i>
+<td>Number
+<td>numeric code
+<tr>
+<td><i>shortName</i>
+<td><i>shortName</i>
+<td>String
+<td>short name
+<tr>
+<td><i>sortCode</i>
+<td><i>sortCode</i>
+<td>String
+<td>sort code
+<tr>
+
+</table></center>
+<p>
+
+<h3>Special Processing Rules:</h3>
+<p>
+<ul type=disc>
+<li>The <i>xrefName</i> is used to identify the name of the <b>XRef</b> dictionary that will be  used to store aliases supplied by this source; by default, this value will be the same as the   instance's <i>code</i>.<p>
+<li>The <i>xrefProperty</i> is used to identify the name of the property to be defined at the  <b>entity</b> class which will hold the current value of the identifier supplied by this source.<p>
+<li>The <i>primaryFlag</i> can be set to <i>Yes (True)</i> or <i>No (False)</i> to indicate that  the source should be viewed as a primary supplier of identifiers.  Identifiers for primary  sources are tracked in the local cross reference and the entity's shared naming dictionary.  By  default, a source is not flagged as primary.<p>
+<li>The <i>retainOldFlag</i> can be set to <i>Yes (True)</i> or <i>No (False)</i> to indicate  that the old values of the identifier should be maintained as aliases in the cross reference.  If  set to true, an old identifier can be used to access the underlying entity instance until it is  reassigned by the source to reference a different entity.  By default, a source is not flagged  to retain old values.<p>
+</ul><p>
+
+<a name="related">
+<h3>Related Feeds:</h3><p>
+<ul type=disc>
+<li><a href="pma_SecurityXRef.htm"><i>SecurityXRef</i></a>: loads cross reference ids by source
+</ul><p>
+
+<h3>Sample Upload:</h3>
+<p>
+The following tab-delimited feed could be used to create <b>IdSource</b> instances
+and refresh basic information:
+<pre><tt><b>
+   Interface ExternalFeedManager upload: "IdSourceMaster" using:
+   "Id	      Name       primaryFlag   xrefName   xrefProperty  retainOldFlag
+    CUSIP     Cusip      Yes           Cusip      cusip         Yes
+    SEDOL     Sedol      Yes           Sedol      sedol	        Yes
+    TICKERUS  US Ticker  Yes           TickerUS   ticker        No
+    RIC       Reuters    No            Ric        ricCode       No
+    ISIN      Isin       Yes           Isin       isin          No
+    Valor     Valor      No            Valor      valor         No 
+   " ;
+</b></tt></pre>
+
+<p>
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy 1998 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated December 23, 1998</font>
+</tr>
+</table>
+
+</body>
+</html>

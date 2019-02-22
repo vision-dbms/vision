@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Upload Format: FundamentalM</title>
+
+</head>
+<body>
+<body bgcolor=white>
+<h2>Vision Portfolio Management Application Layer: Data Feeds</h2>
+<p>
+| <a href="pmaFeeds.htm">Application Feeds</a> |
+<hr><p>
+<font size=+2><b>Data Feed: </b><i>FundamentalM</i></font><p>
+<font size=+1><b>Category: </b><i>EntityExtenderFeed</i></font><p>
+
+<h3>Summary:</h3>
+<p>
+<ul>
+The <i>FundamentalM</i> feed is used to create and update 
+   <b>FundamentalDataM</b> data record instances for companies.  
+   A separate <b>FundamentalDataM</b> record is created for each
+   month-end date for which data is available for a company.
+   The data is accessed via the time series property <i>funDataM</i>
+   defined for the <b>Company</b> class.
+<p>
+   This feed can include data for any number
+   of companies for any number of dates and 
+   can be used to initialize new dates, set initial values for 
+   properties and/or change existing values.
+<p>
+   This class is described in the
+   <a href="pmaSupp.htm#Fundamental"><i>Portfolio Management Application
+   Supplemental Classes</i></a> document.  
+</ul><p>
+
+<h3>Available Fields:</h3>
+<p>
+<center><table border=1 width=80% cellpadding=4 cellspacing=2>
+<tr><th>Field<th>FundamentalDataM<br>Property<th>Type<th>Description
+<tr>
+<tr><th align=center colspan=4>--- Required Fields ---
+<tr>
+<td><i>entityId</i>
+<td><i>entity</i>
+<td>String
+<td>any valid company identifier
+<tr>
+<td><i>date</i>
+<td><i>date</i>
+<td>Date
+<td>month-end date of data
+<tr>
+<td><i>currencyId</i>
+<td><i>baseCurrency</i>
+<td>String
+<td>id of currency for monetary data values
+<tr><th align=center colspan=4>--- Suggested Fields ---
+<tr>
+<td><i>adjustmentDate</i>
+<td><i>adjustmentDate</i>
+<td>Date
+<td>date through which data values are adjusted
+<tr>
+<td><i>bookValue</i>
+<td><i>_bookValue</i>
+<td>Number
+<td>book value per share
+<tr>
+<td><i>eps12</i>
+<td><i>_eps12</i>
+<td>Number
+<td>latest 12 month earnings per share
+<tr>
+<td><i>epsOps12</i>
+<td><i>_epsOps12</i>
+<td>Number
+<td>latest 12 month eps from operations
+<tr>
+<td><i>marketCap</i>
+<td><i>_marketCap</i>
+<td>Number
+<td>market capitalization
+<tr>
+<td><i>price</i>
+<td><i>_price</i>
+<td>Number
+<td>price
+<tr>
+<td><i>sharesOut</i>
+<td><i>_sharesOut</i>
+<td>Number
+<td>shares outstanding
+<tr>
+<td><i>pe</i>
+<td><i>_pe</i>
+<td>Number
+<td>pe ratio
+<tr>
+<td><i>priceToBook</i>
+<td><i>_priceToBook</i>
+<td>Number
+<td>price to book value ratio
+
+<tr>
+  <td><i>return1m</i>
+  <td><i>_return1m</i>
+  <td>Number
+  <td>monthly return
+
+</table></center>
+<p>
+<h3>Special Processing Rules:</h3>
+<p>
+<ul type=disc>
+<li>
+The <i>entityId</i> must correspond to an existing <b>Company</b>
+     instance.  Any valid company alias can be used to identify the company.
+<p>
+<li>The <i>date</i> must be included and indicates the month-end
+      date of the data.  It can be in any valid date format
+      such as <i>9705</i> or <i>5/31/97</i>.  This date is used to update
+      the <b>Company</b> time series property <i>funDataM</i>.
+<p>
+<li>If the <i>entityId</i> and <i>date</i> are valid and the date does
+      not currently exist in the <b>Company</b> time series property 
+      <i>funDataM</i>, a new <b>FundamentalDataM</b> instance is 
+      created and added to this time series on this date.  Any items
+      supplied by this feed are then set or refreshed.  Note that you
+      do not need to include all the items in a single feed.
+<p>
+<li>The <i>currencyId</i> is used to identify the currency in which the
+      data values are supplied.
+      This currency can be different from the company's base currency.  
+      By default, the information is
+      automatically converted into its company's base currency when it
+      is accessed (in cases where the currencies are different).
+      If the supplied <i>currencyId</i> 
+      does not map to an existing currency instance, the record's
+      <i>baseCurrency</i> is set to the default currency.
+<p>
+<li>The <i>adjustmentDate</i> is used to identify the date through
+      which the data in the feed instance has been adjusted for splits.
+      Normally, this date is the same as the record's date and this field
+      need not be provided.  When loading history and/or corrections,
+      the values may be supplied unadjusted (i.e., the values that
+      existed on the date) or adjusted (i.e., the values adjusted for
+      any splits that have occurred since the date.  If the data is
+      unadjusted, the <i>adjustmentDate</i> field is not needed or can 
+      contain the same value as the <i>date</i> field.  If the
+      data has been adjusted to reflect splits that have occurred since
+      the record date, this field should indicate the date through
+      which splits have been applied.
+<p>
+      Note that you do not need to resend data that has changed as the result
+      of a split adjustment.  Only true data corrections need to be supplied 
+      using this feed.
+</ul>
+
+<p>
+<a name="related">
+<h3>Related Feeds:</h3>
+<p>
+<ul type=disc>
+<li><a href="pma_CompanyMaster.htm"><i>CompanyMaster</i></a>:
+defines Company instances referenced by this feed
+<li><a href="pma_FundamentalQ.htm"><i>FundamentalQ</i></a>:
+loads quarterly company fundamentals
+<li><a href="pma_FundamentalM.htm"><i>FundamentalM</i></a>:
+loads monthly company fundamentals
+</ul>
+<p>
+<h3>Sample Upload:</h3>
+<p>
+The following tab-delimited feed could be used to create and
+refresh <b>FundamentalDataM</b> instances:
+<pre><tt><b>
+Interface ExternalFeedManager upload: "FundamentalM" using:
+     "entity     date     currency     adjustmentDate     eps12     pe
+      45920010   19970831 USD          19971217               5.83    7.39
+      45920010   19970930 USD          19971217               6.00    7.68
+      45920010   19971031 USD          19971217               6.00    6.43
+      45920010   19971130 USD          19971217               6.00    8.27
+      00036110   19970731 USD          19971217               1.38    5.91
+      00036110   19970831 USD          19971217               1.47    2.83
+      00036110   19970930 USD          19971217               1.47    2.70
+      00036110   19971031 USD          19971217               1.47    4.36
+     " ;
+</b></tt></pre>
+
+<p>
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy; 1999 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated October 31, 1999</font>
+</tr>
+</table>
+
+</body>
+</html>
+
+
+
+
+
+
+
+

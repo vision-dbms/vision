@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title>Database Administration</title>
+</head>
+<body>
+<body bgcolor=white>
+
+<h2>Database Administration</h2>
+
+| <a href="FHome.htm">Home</a> 
+| <a href="Running.htm">Running Vision</a> |
+<hr>
+
+<p>
+<h3>Topics Covered:</h3>
+<ul type="square">
+<li><a href="#Deleting Unneeded References">Deleting Unneeded References</a>
+<li><a href="#deletions">Deletions</a>
+<li><a href="#Schema Message Management">Schema Message Management</a>
+</ul>
+<hr>
+
+<a name = "Deleting Unneeded References"><h3>Deleting Unneeded References</h3></a>
+The <a href="admTools.htm#Garbage Collection"><i>garbage collection</i></a>
+and <a href="admTools.htm#compaction"><i>compaction</i></a> tools 
+can be used to eliminate structures from your Vision database network that 
+are no longer active.  There are some structures associated with 
+property values and methods that are not automatically purged 
+by these tools.  Several messages have been defined that allow 
+you to flag additional information for the garbage collector to free.
+<p>
+
+Vision properties and collections manage internal structures for 
+each type (i.e.,  class) of value stored for any of its instances. 
+Vision properties and lists retain references to types even after 
+none of the instances they represent refer to values of the type.  
+To support the selective deletion of unneeded references, two 
+primitives are available: the <i>cleanStore</i> message operates 
+on the instances of a class and the <i>cleanDictionary</i> message 
+operates on the message dictionary of a class. Both messages are defined 
+at the class <i>Object</i> and return a <i>Boolean</i> value indicating whether 
+the recipient object was "cleaned".  The cover methods <i>rcleanStore</i>
+and <i>rcleanDictionary</i> can be used to recursively clean the stores 
+or dictionaries of the recipient object.  The messages <i>cleanStoreAndDictionary</i> 
+and <i>rcleanStoreAndDictionary</i> can be used to perform both types of  
+clean up for the recipient object.  
+<p>
+
+The <i>cleanStore</i> message can be sent to a class to eliminate any unneeded 
+references for its properties.  For properties that reference instances of 
+other user-defined classes, an alignment operation is also performed if 
+necessary.  The alignment operation replaces a chain of pointers with a single 
+pointer in cases where the referenced class has had additions or deletions 
+since the last time the property was updated, thereby speeding up access.  
+The <i>cleanStore</i> message should also be explicitly sent to any properties 
+that reference collections to align these structures as well.  
+For example, if Security defines a fixed property <i>heldList</i> that contains 
+a list of <i>Holding</i> instances, you would use:
+<pre><b>
+	mySecurity heldList cleanStore
+</b></pre>
+
+to align the list as well as to purge old, non-referenced 
+structures.  If values of <i>heldList</i> are clustered for all securities, 
+you only need to run <i>cleanStore</i> for one element.  If the values of 
+<i>heldList</i> are not clustered, you could use:
+<pre><b>
+	Security instanceList do: [ heldList cleanStore ] ;
+</b></pre>
+
+The message <i>cleanDictionary</i> is the class level analog of <i>cleanStore</i>.  
+It aligns the class dictionary and purges unneeded <i>define:toBe:</i> and 
+<i>defineMethod:</i> definitions.
+<p>
+
+It is useful to periodically clean the stores and dictionaries for each 
+class in your database.  For most classes, this simply involves executing 
+the <i>cleanStoreAndDictionary</i> message.  Classes that contain property 
+values which reference lists of elements need to also execute the <i>cleanStore</i> 
+message on any of these properties as well.  Also, any class that manages multiple 
+clusters (i.e., parallel stores created using the <i>newPrototype</i> message) must 
+explicitly send the cleanStore message to each of these clusters.
+<p>
+
+The message <i>cleanupClassStructures</i> has been defined at the class 
+<i>Object</i> to perform the basic <i>cleanStoreAndDictionary</i> operation 
+on the recipient and display a confirmation if the recipient required cleaning.  
+This message can be redefined for any class that requires additional steps.  
+For example, to redefine this message to also clean the <i>heldList</i> property 
+at <i>Security</i>, use:
+<pre><b>
+	Security
+	defineMethod:
+	[ | cleanupClassStructures |
+	  ^super cleanupClassStructures ;      #-- runs the general version
+	  heldList cleanStore
+	      ifTrue: [ "-- cleaned Security heldList" printNL ] ;
+	  ^self
+	] ;
+</b></pre>
+<hr>
+
+<a name="deletions"><h3>Deletions</h3></a>
+
+<a name="Object Deletion"><h4>Object Deletion</h4></a>
+
+Instances can be flagged for deletion without actually removing the 
+object from the database.  This is the recommended approach for most 
+applications, giving you an opportunity to undelete an accidental 
+deletion if necessary.  Several properties have been defined at <i>Object</i> 
+to aid in tracking deletion information.  Undeleted objects have values 
+of NA for all of these properties:
+<pre><b>
+     Property	      Definition</pre>
+<ul><hr width=450 align=middle></ul>
+<pre>     deletionFlag     TRUE if flagged for deletion
+     deletionDate     Date object was flagged for deletion
+     deletionReason   String explaining deletion reason
+</pre></b>
+The expression:
+<pre><b>
+	object flagForDeletionWithReason: string
+
+        where object	is the object to be flagged for deletion
+	string	        is the reason for deletion
+</pre></b>
+
+is used to flag an object for deletion.  It is defined to perform 
+the following operations:
+
+<ol type="1">
+<li>Set the value of <i>deletionFlag</i> to TRUE.
+<p>
+<li>Set the value of <i>deletionDate</i> to the current date.
+<p>
+<li>Set the value of <i>deletionReason</i> to the supplied string.
+<p>
+<li>Run the object's implementation of the method <i>cleanupDeletedObject</i>.
+</ol>
+
+The <i>cleanupDeletedObject</i> message executes the following steps:
+
+<ol type="1">
+<li>Run the object's version of <i>cleanupLocalAttributes</i>.  By default, 
+this message does not do anything.  It should be redefined as 
+appropriate for specific classes.
+<p>
+<li>Run the object's version of <i>cleanupLocalNames</i>.  By default,  
+this message deletes the object's code from the class' naming dictionary, 
+if one exists.  This message can be redefined or augmented at specific 
+classes as needed.
+</ol>
+
+Several messages have been defined to utilize the <i>deletionFlag</i> property:
+
+<pre><b>
+     Message	  Definition</b></pre>	
+<ul><hr width=380 align=middle></ul>
+<pre><b>     isActive     TRUE if object's deletionFlag isNA
+     isntActive   TRUE if object isActive != TRUE
+     isDeleted	  Same as isntActive
+     isntDeleted  Same as isActive
+</b></pre>
+
+The message <i>activeList</i> is used to return all instances 
+of a class (as base objects) that are active and not default.
+<p>
+
+To actually delete an object from the database, you need to send the  
+<i>delete</i> or <i>rdelete</i> (recursive delete) message to it.  The recursive 
+version should normally be used, since it deletes the instance of the object at all levels of its inheritance path.
+<p>
+
+Note that objects should be deleted with care.  If you delete 
+any object that is referenced by another object (e.g., as the value of a property), 
+the reference will be replaced by a reference to the <i>Null</i>
+or <a href="Classes.htm#shadow"><i>Shadow</i></a> instance for the deleted 
+object's class.  As a result, the old reference will continue to respond 
+to the same messages; however, all properties of the <i>Shadow</i> instance 
+will contain NA values.  You cannot assign values into the properties of the 
+<i>Shadow</i> instance.  To determine if an object is the Shadow instance,
+you can send it the <i>isInternalDefault</i> message.
+
+<a name="Message Deletion"><h4>Message Deletion</h4></a>
+
+Messages should be deleted using the <i>deleteMessage:</i> message.  
+The general form for message deletion is:
+<pre><b>
+	object deleteMessage: "message"
+</b></pre>
+
+<a name="Other Deletions"><h4>Other Deletions</h4></a>
+
+The <i>delete:</i> message can be used to remove a point from a time series, 
+an indexed list, or a dictionary object.  For example:
+<pre><b>
+	Named Security delete: "IBM"
+</b></pre>
+
+deletes the name IBM from the <i>Security</i> class' naming dictionary.  
+The general forms of this message are:
+
+<pre><b>        dictionary delete: string
+
+	where	<i>dictionary</i> is an instance of the <i>Dictionary</i> class
+	and	<i>string</i> is an instance of the <i>String</i> class
+
+	ts delete: date
+
+	where	<i>ts</i> is an instance of the <i>TimeSeries</i> class
+	and	<i>date</i> is an instance of the <i>Date class</i>
+
+	ilist delete: object
+
+	where	<i>ilist</i> is an instance of the <i>IndexedList</i> class
+	and	<i>object</i> is an object that was used as an index in this list
+</b></pre>
+<hr>
+
+<a name="Schema Message Management"><h3>Schema Message Management</h3></a>
+
+The class <i>Schema MessageImplementationDescriptor</i> maintains information 
+about the messages in your Vision database.  Each message defined for any class 
+in the schema database has a corresponding instance in this class.  These instances 
+store information about the message itself including its type, function, and description, 
+as well as tracking changes to methods over time.
+<p>
+
+All classes created using a variation of the <i>createSubclass</i> message will 
+automatically be available in the database. New instances of the 
+<i>Schema MessageImplementationDescriptor</i> class are NOT  
+created automatically.  Each time you use one of the <i>define</i> messages, 
+the class is flagged to indicate that new messages are pending.  To process 
+and refresh all messages, execute the expression:
+
+<pre><b>
+	Schema processAllMessages
+</b></pre>
+
+This process creates and refreshes message descriptors in the 
+schema database as needed.  It will generate a report similar 
+to the one illustrated below:
+
+<pre><b>
+	Schema Message Cross Reference Last Updated: Fri Oct 30 11:59:17 EST 1992
+	---  Current Counts  ---
+	CD:             172
+	MD:            1968
+	MID:           4133
+
+	---  Classes To Update  ---
+	BuiltInWorkspace
+	CoreWorkspace
+	Environment DBA Schema
+	Environment DBA DDMS
+
+	...  Creating New Messages
+	...  Refreshing Messages
+	...  Cleanup
+
+	Schema Message Cross Reference Last Updated: Tue Nov 10 15:57:02 EST 1992
+	---  Current Counts  ---
+	CD:             172
+	MD:            1970
+	MID:           4151
+
+	18 Created.
+	25 Refreshed.
+</b></pre>
+
+This report displays the status of the schema database prior 
+to processing, the list of classes processed, the status after 
+processing, and the number of messages created and refreshed.
+Depending on the number of classes to process, the update time 
+will range from a few seconds to a few minutes.  Most installations 
+incorporate this procedure into a standard nightly update.
+<p>
+<hr>
+
+
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy; 1998 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated December 23, 1998</font>
+</tr>
+</table>
+
+</body>
+</html>
+
+
+
+
+

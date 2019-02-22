@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Upload Format: UniverseMembers </title>
+
+</head>
+<body>
+<body bgcolor=white>
+<h2>Vision Portfolio Management Application Layer: Data Feeds</h2>
+<p>
+| <a href="pmaFeeds.htm">Application Feeds</a> |
+<hr><p>
+<font size=+2><b>Data Feed: </b><i>UniverseMembers</i></font><p>
+<font size=+1><b>Category: </b><i>MembershipFeed</i></font><p>
+
+<h3>Summary:</h3>
+<p>
+<ul>
+The <i>UniverseMembers</i> feed is used to define the
+     member <b>Entities</b> in a <b>Universe</b> over time.
+     The records supplied by this feed are used to update the
+     <b>Universe</b> time series property <i>list</i>.
+<p>
+     This class is described in detail in the 
+     <a href="clUniverse.htm"><i>Vision Class: Universe</i></a>
+     document.  
+</ul>
+<p>
+
+<h3>Available Fields:</h3>
+<p>
+<center><table border=1 width=80% cellpadding=4 cellspacing=2>
+<tr><th>Field<th>Type<th>Description
+<tr>
+<tr><th align=center colspan=3>--- Required Fields ---
+<tr>
+<td><i>groupId</i>
+<td>String
+<td>id of existing Universe instance
+<tr>
+<td><i>memberId</i>
+<td>String
+<td>id of existing Entity instance appropriate for Universe
+<tr>
+<tr><th align=center colspan=3>--- Suggested Fields ---
+<tr>
+<td><i>date</i>
+<td>Date
+<td>date of the membership
+</table></center>
+<p>
+
+<h3>Special Processing Rules:</h3>
+<p>
+<ul type=disc>
+<li>The <i>groupId</i> and <i>memberId</i> fields must be supplied.
+     The <i>groupId</i> must correspond to an existing <b>Universe</b>
+     instance.  The <i>memberId</i> must correspond to
+     an existing <b>Entity</b> instance of the class defined for
+     the <b>Universe</b>.
+<p>
+<li>The <i>date</i> field is optional
+     and should be supplied if you want to track membership changes
+     in a universe over time.  It can be supplied in any
+     valid date format such as <i>19971215</i> or <i>12/15/97</i>.
+     To specify an initial membership, use the 
+     date <i>10101</i> or the string <i>Default</i> as the value of
+     the <i>date</i> field.
+<p>
+<li>The <i>list</i> time series property will be updated
+     for each <i>groupId/date</i> combination included in this feed
+     with an IndexedList of the appropriate entity instances specified
+     by this feed.  Because the memberships will replace the existing
+     <i>list</i> for a date, you must specify all the members
+     for each <i>groupId/date</i> included.
+</ul>
+
+<p>
+<a name="related">
+<h3>Related Feeds:</h3>
+<p>
+<ul type=disc>
+<li><a href="pma_UniverseMaster.htm"><i>UniverseMaster</i></a>:
+creates Universe instances
+</ul>
+<p>
+<h3>Sample Upload:</h3>
+<p>
+The following tab-delimited feed could be used to define <b>Universe</b> 
+memberships over time.
+<pre><tt><b>
+Interface ExternalFeedManager upload: "UniverseMembers" using:
+     "groupId     date       memberId
+      SP500       19971031   45920010	
+      SP500       19971031   37044210	
+      SP500       19971031   88553510	
+      SP500       19971031   00282410	
+      SP500       19971031   00724F10	
+      #---  ...
+      SP500       19971130   45920010	
+      SP500       19971130   37044210	
+      SP500       19971130   88553510	
+      SP500       19971130   00282410	
+      SP500       19971130   00724F10	
+      #---  ...
+      DJT         Default    01165910
+      DJT         Default    00176510
+      DJT         Default    00202M10
+      #---  ...
+     " ;
+</b></tt></pre>
+
+<p>
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy; 1998 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated October 31, 1999</font>
+</tr>
+</table>
+
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html><head><title>Release 6.1.2 Upgrade for Unix</title></head>
+<body bgcolor=white>
+<h2>Release 6.1.2 Upgrade for Unix</h2><hr>
+<p>
+<h3>Download Contents:</h3>
+<ul type=disc><table>
+<tr align=left valign=right><td>ReadMe.txt<td>Installation instructions (this document).
+
+<tr align=left valign=right><td>visionUpgrade_1.5_to_1.6.unix<td>A C-Shell Unix script that will install the updated database support files and create a new Object Space to your network.
+
+<tr align=left valign=right><td>CHcore.6.1.2<td>Incorporates new primitives. This file is read by the <i>visionUpgrade_1.5_to_1.6.unix</i> script.
+
+<tr align=left valign=right><td>CHdbs.6.1.2<td>Miscellaneous changes to the bulk database driver.  This file is read by the <i>visionUpgrade_1.5_to_1.6.unix</i> script.
+
+<tr align=left valign=right><td>rollbackNetwork.cmd<td>A C-Shell Unix script that has been updated to work with the PMA 1.6 release. This file is read by the <i>visionUpgrade_1.5_to_1.6.unix</i> script.
+</table></ul> 
+
+<h3>Installation Procedures:</h3>
+<p>These installation procedures have been automated for PMA installations.  Non-PMA installations can review the release contents for applicability to their environment.
+<p><ol type=1>
+<li>Backup the current <i>/vision</i> and <i>/localvision</i> contents by following the 
+   appropriate backup procedures for your installation.
+
+<li>Close any sessions to the Vision database prior to starting this process.
+
+<li>Make sure you are logged into the system as the Vision Administrator.
+
+<li>Extract the contents of the <a href="download/VisionUpgrade.tar">VisionUpgrade.tar</a> archive to a temporary 
+   directory of your choice.
+  <ol type=a>
+   <li>Go to the directory that has the <i>VisionUpgrade.tar</i> file.
+
+   <li>Extract the files from:
+
+<b><pre>               tar xpf VisionUpgrade.tar</pre></b>
+</ol>
+
+<li>Install the new vision executables over the old version or create a new link.
+  <ol type=a>
+   <li>Go to the directory that will hold the vision files and subdirectories. 
+   <li>Copy the appropriate <a href="download/vision.sol.tar.Z">vision.sol.tar.Z</a>, <a href="download/vision.hpux.tar.Z">vision.hpux.tar.Z</a>, or <a href="download/vision.aix.tar.Z">vision.aix.tar.Z</a> file to this directory. 
+   <li>Decompress the tar file using the appropriate options to preserve permissions: 
+
+<b><pre>               uncompress vision.*.tar.Z</pre></b>
+
+   <li>Extract the files and subdirectories from: 
+
+<b><pre>               tar xpf vision.*.tar</pre></b>
+   <li>Re-link if necesary.
+
+  </ol>
+<li>Run the <i>visionUpgrade_1.5_to_1.6.unix</i> script to run the protocol and Object Space 
+   creation steps as well as copy the updated <i>rollbackNetwork.cmd</i> script into place.
+  <ol type=a>
+   <li>Execute the script from the directory that has the <i>VisionUpgrade.tar</i> file.
+
+<b><pre>               visionUpgrade_1.5_to_1.6.unix</pre></b>
+  </ol>
+<li>Review the upgrade output in the generated log:
+<b><pre>                    /localvision/logs/visionUpgrade_1.5_to_1.6.log</pre></b>
+</ol>
+
+
+<p><hr><table border=0 width="100%"><tr><td align=left><font size=-1>Copyright &copy; 1999 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated March 26, 1999</font></tr></table>
+</body></html>

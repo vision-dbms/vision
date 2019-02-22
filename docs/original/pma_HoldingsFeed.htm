@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Upload Format: HoldingsFeed </title>
+
+</head>
+<body>
+<body bgcolor=white>
+<h2>Vision Portfolio Management Application Layer: Data Feeds</h2>
+<p>
+| <a href="pmaFeeds.htm">Application Feeds</a> |
+<hr><p>
+<font size=+2><b>Data Feed: </b><i>HoldingsFeed</i></font><p>
+<font size=+1><b>Category: </b><i>TransactionFeed</i></font><p>
+
+<h3>Summary:</h3>
+<p>
+<ul>
+The <i>HoldingsFeed</i> feed is used to create <b>Holding</b>
+     instances for one or more <b>Portfolio</b> or <b>IndexAccount</b>
+     instances for one or more time periods.  Instances of the
+     class <b>Holding</b> are used to represent the amount of a security
+     that is held in an account at a specific point in time.
+     Each record supplied by this feed is used to create a new <b>Holding</b>
+     instance for the referenced account.  
+<p>
+     The <b>Holding</b> class and its relationship to the <b>Account</b>
+     subclasses are described in detail in the
+     <a href="clpmaAccount.htm#holdings"><i>Portfolio Management Application
+     Classes</i></a> document.  A number of <a href="#related feeds">related feeds</a>
+are available
+     to create new <b>Portfolio</b>, <b>AggAccount</b>, 
+     <b>IndexAccount</b>, and <b>CompositeAccount</b> instances 
+     and to update other account-based information.
+
+</ul>
+<p>
+
+<h3>Available Fields:</h3>
+<p>
+<center><table border=1 width=80% cellpadding=4 cellspacing=2>
+<tr><th>Field<th>Holding Property<th>Type<th>Description
+<tr>
+<tr><th align=center colspan=4>--- Required Fields ---
+<tr>
+<td><i>acctId</i>
+<td><i>account</i>
+<td>String
+<td>id of existing Portfolio or IndexAccount instance
+<tr>
+<td><i>secId</i>
+<td><i>security</i>
+<td>String
+<td>id of existing Security instance
+<tr>
+<td><i>date</i>
+<td><i>date</i>
+<td>Date
+<td>date of the Holding
+
+<tr><th align=center colspan=4>--- Suggested Fields ---
+<tr>
+<td><i>mval</i>
+<td><i>_totalMarketValue</i>
+<td>Number
+<td>market value of security held in account on date
+<tr>
+<td><i>shares</i>
+<td><i>_shares</i>
+<td>Number
+<td>shares (or units of security) held in account on date
+
+<tr><th align=center colspan=4>--- Other Fields ---
+<tr>
+<td><i>price</i>
+<td><i>_accountingPrice</i>
+<td>Number
+<td>price used to compute market value of security
+<tr><td><i>totalCost</i>
+<td><i>_totalCost</i>
+<td>Number
+<td>total cost of holding
+<tr><td><i>unitCost</i>
+<td><i>_totalCost</i>
+<td>Number
+<td>unit cost of holdings
+<tr><td><i>adjustDate</i>
+<td><i>_adjustmentDate</i>
+<td>Date
+<td>date holding is adjusted through
+<tr><td><i>currencyId</i>
+<td><i>baseCurrency</i>
+<td>String
+<td>currency of the holding
+<tr>
+</table></center>
+<p>
+
+<h3>Special Processing Rules:</h3>
+<p>
+<ul type=disc>
+<li>The <i>acctId</i>, <i>secId</i>, and <i>date</i> fields must be supplied.
+     The <i>acctId</i> must correspond to an existing <b>Portfolio</b> or
+     <b>IndexAccount</b> instance.  The <i>secId</i> must correspond to
+     an existing <b>Security</b> instance.  The <i>date</i> can be in any
+     valid date format such as <i>19971215</i> or <i>12/15/97</i>.
+<p>
+<li>Holdings created by this feed will replace existing holdings for
+     any <i>acctId/date</i> combination included in this feed.  
+     You must therefore supply a record for each security held for each <i>acctId/date</i>
+     included, even if you are just modifying existing holdings.
+<p>
+<li>The total market value of the holding is derived using the following 
+     rules:
+<p>
+<dl>
+<dt><dd>- If the <i>mval</i> field is supplied, it represents the market value.
+<dt><dd>- Otherwise, if the <i>secId</i> is "CashUS", the value of the
+       <i>shares</i> field is used, if present.
+<dt><dd>- Otherwise, if the referenced account is an <b>IndexAccount</b>
+       and no shares are supplied, the security's market capitalization
+       as of the supplied date is used.
+<dt><dd>- Otherwise, the market value is computed as the supplied <i>shares</i>
+       field multiplied by the security's price.  If the <i>price</i>
+       field is supplied, this price is used; otherwise, the stored
+       price for the security as of the supplied date is used.  This
+       computed value is multiplied by the <i>unitCalc</i> of the
+       security's type (which is usually 1).
+</dl><p>
+     This value is used to update the <i>_totalMarketValue</i> property
+     of the holding.  The value is assumed to be in the same currency
+     as the referenced account.
+<p>
+<li>If the <i>mval</i> field is not supplied, then the <i>unitCalc</i> field must be used in the <a href="pma_SecurityTypeMaster.htm">SecurityType Master</a>.
+<p>
+<li>If the <i>shares</i> field is not supplied, it is calculated
+     as the computed total market value divided by the supplied price
+     if present, the security's price otherwise.
+     If the <i>shares</i> field is supplied, it
+     should refer to the actual shares held on the supplied date,
+     unadjusted for any splits that have occurred since that date.
+     This value is used to update the <i>_shares</i> property of the holding.
+<p>
+<li>If the <i>totalCost</i> field is not supplied, it is computed as the
+     product of the <i>shares</i> and <i>unitCost</i> fields if they are
+     supplied.  This value updates the <i>_totalCost</i> property of the
+     holding.  The value is assumed to be in the same currency as the 
+     referenced account.
+<p>
+<li>If the <i>price</i> is supplied, it will update the
+     <i>_accountingPrice</i> property of the holding as well as the <i>_accountingPrice</i> and <i>accountingCurrency</i> properties in the price record. The <i>accountingCurrency</i> is set to the currency of the Portfolio. If the <i>mval</i>
+     field is not provided, this price will be used in the calculation
+     of total market value if present.  This value is assumed to be
+     in the same currency as the referenced account and should represent
+     the actual price on the supplied date, unadjusted for any splits that
+     have occurred since that date.
+<p>
+<li>For each <i>acctId/date</i> combination present, the account
+     time series properties <i>_totalMarketValue</i>, 
+     <i>_totalMarketValueCash</i>, <i>_totalMarketValueEquity</i>, 
+     <i>_totalMarketValueFixed</i>, and <i>_totalCost</i>, are
+     computed from the holdings created by this feed.  The
+     holding properties <i>percentOfPort</i> and <i>percentOfEquity</i>
+     are also computed.
+<p>
+<li>If an <i>adjustDate</i> is supplied, it will update the <i>adjustmentDate</i> property of the holding and split adjustments for the <i>shares</i> property will be computed relative to this date.
+<p>
+<li>If a <i>currencyId</i> is supplied, the <i>baseCurrency</i> property for the holding will updated and <i>totalMarketValue</i> will be computed using this value. 
+<p>
+<li>Holdings are recreated for any <b>AggAccount</b> that includes
+     one or more <b>Portfolios</b> updated for each date present in the feed.
+     If <b>Portfolio</b> instances are included in the feed,
+     the holdings cross reference by security is rebuilt for each
+     date present.
+</ul>
+<p>
+
+<h3>Tips:</h3>
+<p>
+<ul type=disc>
+<li>If the referenced account is an <b>IndexAccount</b>, you can create
+     even-dollar holdings by setting the <i>mval</i> field to the same
+     value for each record supplied for the <i>acctId/date</i>.
+<p>
+<li>If the referenced account is an <b>IndexAccount</b>, you can create
+     market-cap-weighted holdings by setting the <i>mval</i> field to
+     the market capitalization for the security for each record supplied
+     for the <i>acctId/date</i>. Alternatively, you can omit
+     the <i>shares</i> and the <i>mval</i> fields, and the stored
+     market capitalization for the security as of the supplied date
+     will be used.
+<p>
+<li>If the referenced account is an <b>IndexAccount</b> for which only the weight is available, use the HoldingsFeed with the <i>mval</i> field set to the weight.  This has the effect of creating an <b>IndexAccount</b> with total market value of 100 with the individual securities held in proportion to their supplied weight.
+</ul>
+<p>
+
+<a name="related feeds">
+<h3>Related Feeds:</h3></a>
+<p>
+<ul type=disc>
+<li><a href="pma_PortfolioMaster.htm"><i>PortfolioMaster</i></a>:
+creates Portfolio instances 
+<li><a href="pma_AggAccountMaster.htm"><i>PortfolioMaster</i></a>: 
+creates AggAccount instances 
+<li><a href="pma_PortfolioAggregates.htm"><i>PortfolioAggregates</i></a>:
+defines Portfolio memberships in AggAccounts over time
+<li><a href="pma_CompositeAccountMaster.htm"><i>CompositeAccountMaster</i></a>:
+creates CompositeAccount instances 
+<li><a href="pma_CompositeAccountMembers.htm"><i>CompositeAccountMembers</i></a>:
+defines weighted combinations of Portfolio, AggAccount, IndexAccount, and/or other 
+CompositeAccount instances that make up a composite over time
+<li><a href="pma_IndexAccountMaster.htm"><i>IndexAccountMaster</i></a>:
+creates IndexAccount instances 
+<li><a href="pma_IndexAccountBuilder.htm"><i>IndexAccountBuilder</i></a>:
+creates holdings for one or more IndexAccount instances over time using existing 
+Security Universe instances and a weighting rule
+</ul>
+<p>
+
+<h3>Sample Upload:</h3>
+<p>
+The following tab-delimited feed could be used to create <b>Portfolio</b>
+holdings for several portfolios on a single date.  Market values will be
+derived for each holding:
+<pre><tt><b>
+     Interface ExternalFeedManager upload: "HoldingsFeed" using:
+     "date     acctId      secId     shares
+      9712     PORT1       GM        1000
+      9712     PORT1       F         2000
+      9712     PORT1       CASH     20000
+      9712     PORT2       IBM      10000
+      9712     PORT2       DELL     15000
+      9712     PORT2       CASH     20000
+     " ;
+</b></tt></pre>
+<p>
+The following tab-delimited feed could be used to create <b>Portfolio</b>
+holdings for several portfolios on several dates.  Market values are
+assigned directly from this feed:
+<pre><tt><b>
+     Interface ExternalFeedManager upload: "HoldingsFeed" using:
+     "date     acctId      secId     mval
+      9712     PORT1       GM        1234.56
+      9712     PORT1       F         2345.67
+      9712     PORT1       CASH     20000.00
+      9712     PORT2       IBM       9876.54
+      9712     PORT2       DELL      8765.43
+      9712     PORT2       CASH     10000.00
+      9711     PORT1       GM        1233.21
+      9711     PORT1       F         2344.32
+      9711     PORT1       CASH     20000.00
+     " ;
+</b></tt></pre>
+<p>
+The following tab-delimited feed could be used to create
+even dollar holdings for several <b>IndexAccounts</b>:
+<pre><tt><b>
+     Interface ExternalFeedManager upload: "HoldingsFeed" using:
+     "date     acctId       secId     mval
+      9712     INDEX1       GM        100
+      9712     INDEX1       F         100
+      9712     INDEX1       C         100
+      9712     INDEX2       IBM       100
+      9712     INDEX2       DELL      100
+      9712     INDEX2       HWP       100
+      9711     INDEX1       GM        100
+      9711     INDEX1       F         100
+      9711     INDEX1       C         100
+     " ;
+</b></tt></pre>
+<p>
+The following tab-delimited feed could be used to create
+market-cap-weighted holdings for several <b>IndexAccounts</b>:
+<pre><tt><b>
+     Interface ExternalFeedManager upload: "HoldingsFeed" using:
+     "date     acctId       secId
+      9712     INDEX1       GM
+      9712     INDEX1       F
+      9712     INDEX1       C
+      9712     INDEX2       IBM
+      9712     INDEX2       DELL
+      9712     INDEX2       HWP
+      9711     INDEX1       GM
+      9711     INDEX1       F
+      9711     INDEX1       C
+     " ;
+</b></tt></pre>
+
+
+
+<p>
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy; 1999 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated December 31, 1999</font>
+</tr>
+</table>
+
+</body>
+</html>

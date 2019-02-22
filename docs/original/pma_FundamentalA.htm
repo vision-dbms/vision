@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Upload Format: FundamentalA</title>
+
+</head>
+<body>
+<body bgcolor=white>
+<h2>Vision Portfolio Management Application Layer: Data Feeds</h2>
+<p>
+| <a href="pmaFeeds.htm">Application Feeds</a> |
+<hr><p>
+<font size=+2><b>Data Feed: </b><i>FundamentalA</i></font><p>
+<font size=+1><b>Category: </b><i>EntityExtenderFeed</i></font><p>
+
+<h3>Summary:</h3>
+<p>
+<ul>
+ The <i>FundamentalA</i> feed is used to create and update 
+   <b>FundamentalDataA</b> data record instances for companies.  
+   A separate <b>FundamentalDataA</b> record is created for each
+   fiscal year-end date for which data is available for a company.
+   The data is accessed via the time series property <i>funDataA</i>
+   defined for the <b>Company</b> class.
+<p>
+   This feed can include data for any number
+   of companies for any number of dates and 
+   can be used to initialize new dates, set initial values for 
+   properties and/or change existing values.
+<p>
+   This class is described in the
+   <a href="pmaSupp.htm#Fundamental"><i>Portfolio Management Application
+   Supplemental Classes</i></a> document.  
+</ul>
+<p>
+
+<h3>Available Fields:</h3>
+<p>
+<center><table border=1 width=80% cellpadding=4 cellspacing=2>
+<tr><th>Field<th>FundamentalDataA<br>Property<th>Type<th>Description
+<tr>
+<tr><th align=center colspan=4>--- Required Fields ---
+<tr>
+<td><i>entityId</i>
+<td><i>entity</i>
+<td>String
+<td>any valid company identifier
+<tr>
+<td><i>date</i>
+<td><i>date</i>
+<td>Date
+<td>fiscal year-end date of data
+<tr>
+<td><i>currencyId</i>
+<td><i>baseCurrency</i>
+<td>String
+<td>id of currency for monetary data values
+<tr><th align=center colspan=4>--- Suggested Fields ---
+<tr>
+<td><i>adjustmentDate</i>
+<td><i>adjustmentDate</i>
+<td>Date
+<td>date through which data values are adjusted
+<tr>
+<td><i>assets</i>
+<td><i>_assets</i>
+<td>Number
+<td>assets
+<tr>
+<td><i>assetsOther</i>
+<td><i>_assetsOther</i>
+<td>Number
+<td>other assets
+<tr>
+<td><i>cash</i>
+<td><i>_cash</i>
+<td>Number
+<td>cash
+<tr>
+<td><i>cogs</i>
+<td><i>_cogs</i>
+<td>Number
+<td>cost of goods sold
+<tr>
+<td><i>commonEquity</i>
+<td><i>_commonEquity</i>
+<td>Number
+<td>common equity
+<tr>
+<td><i>curAssets</i>
+<td><i>_curAssets</i>
+<td>Number
+<td>current assets
+<tr>
+<td><i>curAssetsOther</i>
+<td><i>_curAssetsOther</i>
+<td>Number
+<td>other current assets
+<tr>
+<td><i>curLiab</i>
+<td><i>_curLiab</i>
+<td>Number
+<td>current liability
+<tr>
+<td><i>curLiabOther</i>
+<td><i>_curLiabOther</i>
+<td>Number
+<td>other current liability
+<tr>
+<td><i>debtCurLiab</i>
+<td><i>_debtCurLiab</i>
+<td>Number
+<td>debt in current liability
+<tr>
+<td><i>defTax</i>
+<td><i>_defTax</i>
+<td>Number
+<td>deferred tax
+<tr>
+<td><i>deprecAmort</i>
+<td><i>_deprecAmort</i>
+<td>Number
+<td>depreciation and amortization
+<tr>
+<td><i>income</i>
+<td><i>_income</i>
+<td>Number
+<td>income
+<tr>
+<td><i>incomeTax</i>
+<td><i>_incomeTax</i>
+<td>Number
+<td>income tax
+<tr>
+<td><i>intExp</i>
+<td><i>_intExp</i>
+<td>Number
+<td>interest expense
+<tr>
+<td><i>intang</i>
+<td><i>_intang</i>
+<td>Number
+<td>intangable assets
+<tr>
+<td><i>inventory</i>
+<td><i>_inventory</i>
+<td>Number
+<td>inventory
+<tr>
+<td><i>investAndAdvEquity</i>
+<td><i>_investAndAdvEquity</i>
+<td>Number
+<td>investment and advances - equity
+<tr>
+<td><i>investAndAdvOther</i>
+<td><i>_investAndAdvOther</i>
+<td>Number
+<td>investment and advances - other
+<tr>
+<td><i>liab</i>
+<td><i>_liab</i>
+<td>Number
+<td>liabilities
+<tr>
+<td><i>liabOther</i>
+<td><i>_liabOther</i>
+<td>Number
+<td>other liabilities
+<tr>
+<td><i>ltDebt</i>
+<td><i>_ltDebt</i>
+<td>Number
+<td>long term debt
+<tr>
+<td><i>minorInt</i>
+<td><i>_minorInt</i>
+<td>Number
+<td>minority interest
+<tr>
+<td><i>minorIntBS</i>
+<td><i>_minorIntBS</i>
+<td>Number
+<td>minority interest - balance sheet
+<tr>
+<td><i>netIncome</i>
+<td><i>_netIncome</i>
+<td>Number
+<td>net income
+<tr>
+<td><i>nonOpIncome</i>
+<td><i>_nonOpIncome</i>
+<td>Number
+<td>non-operating income
+<tr>
+<td><i>opIncome</i>
+<td><i>_opIncome</i>
+<td>Number
+<td>operating income
+<tr>
+<td><i>payables</i>
+<td><i>_payables</i>
+<td>Number
+<td>payables
+<tr>
+<td><i>ppeNet</i>
+<td><i>_ppeNet</i>
+<td>Number
+<td>property, pland and equipment net
+<tr>
+<td><i>prefStockCV</i>
+<td><i>_prefStockCV</i>
+<td>Number
+<td>preferred stock 
+<tr>
+<td><i>pretaxIncome</i>
+<td><i>_pretaxIncome</i>
+<td>Number
+<td>pretax income
+<tr>
+<td><i>receivables</i>
+<td><i>_receivables</i>
+<td>Number
+<td>receivables
+<tr>
+<td><i>sales</i>
+<td><i>_sales</i>
+<td>Number
+<td>sales
+<tr>
+<td><i>sga</i>
+<td><i>_sga</i>
+<td>Number
+<td>selling, general and administrative
+<tr>
+<td><i>specialItems</i>
+<td><i>_specialItems</i>
+<td>Number
+<td>special items
+<tr>
+<td><i>stockhEquity</i>
+<td><i>_stockhEquity</i>
+<td>Number
+<td>stockholders equity
+<tr>
+<td><i>taxesPayable</i>
+<td><i>_taxesPayable</i>
+<td>Number
+<td>taxes payable
+</table></center>
+<p>
+
+<h3>Special Processing Rules:</h3>
+<p>
+<ul type=disc>
+<li>The <i>entityId</i> must correspond to an existing <b>Company</b>
+     instance.  Any valid company alias can be used to identify the company.
+<p>
+<li>The <i>date</i> must be included and indicates the fiscal year-end date
+      of the data.  It can be in any valid date format
+      such as <i>9705</i> or <i>5/31/97</i>.  This date is used to update
+      the <b>Company</b> time series property <i>funDataA</i>.
+<p>
+<li>If the <i>entityId</i> and <i>date</i> are valid and the date does
+      not currently exist in the <b>Company</b> time series property 
+      <i>funDataA</i>, a new <b>FundamentalDataA</b> instance is 
+      created and added to this time series on this date.  Any items
+      supplied by this feed are then set or refreshed.  Note that you
+      do not need to include all the items in a single feed.
+<p>
+<li>The <i>currencyId</i> is used to identify the currency in which the
+      data values are supplied.
+      This currency can be different from the company's base currency.  
+      By default, the information is
+      automatically converted into its company's base currency when it
+      is accessed (in cases where the currencies are different).
+      If the supplied <i>currencyId</i> 
+      does not map to an existing currency instance, the record's
+      <i>baseCurrency</i> is set to the default currency.
+<p>
+<li>The <i>adjustmentDate</i> is used to identify the date through
+      which the data in the feed instance has been adjusted for splits.
+      Normally, this date is the same as the record's date and this field
+      need not be provided.  When loading history and/or corrections,
+      the values may be supplied unadjusted (i.e., the values that
+      existed on the date) or adjusted (i.e., the values adjusted for
+      any splits that have occurred since the date).  If the data is
+      unadjusted, the <i>adjustmentDate</i> field is not needed or can 
+      contain the same value as the <i>date</i> field.  If the
+      data has been adjusted to reflect splits that have occurred since
+      the record date, this field should indicate the date through
+      which splits have been applied.
+<p>
+      Note that you do not need to resend data that has changed as the result
+      of a split adjustment.  Only true data corrections need to be supplied 
+      using this feed.
+</ul>
+
+<p>
+<a name="related">
+<h3>Related Feeds:</h3>
+<p>
+<ul type=disc>
+<li><a href="pma_CompanyMaster.htm"><i>CompanyMaster</i></a>:
+defines Company instances referenced by this feed
+<li><a href="pma_FundamentalQ.htm"><i>FundamentalQ</i></a>:
+loads quarterly company fundamentals
+<li><a href="pma_FundamentalM.htm"><i>FundamentalM</i></a>:
+loads monthly company fundamentals
+</ul>
+<p>
+<h3>Sample Upload:</h3>
+<p>
+The following tab-delimited feed could be used to create and
+refresh <b>FundamentalDataA</b> instances:
+<pre><tt><b>
+     Interface ExternalFeedManager upload: "FundamentalA" using:
+     "entity     date     currency     adjustmentDate     sales     cogs
+      45920010   19951231 USD          19971217             71940.00  37618.00
+      45920010   19961231 USD          19971217             75947.00  41732.00
+      00036110   19960531 USD          19971217               504.99    404.11
+      00036110   19970531 USD          19971217               589.33    468.50
+      00512510   19960331 USD          19971217               269.90    219.76
+      00512510   19970331 USD          19971217               402.02    322.43
+     " ;
+</b></tt></pre>
+
+<p>
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy; 1998 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated October 31, 1999</font>
+</tr>
+</table>
+
+</body>
+</html>

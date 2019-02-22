@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- saved from url=(0057)pma_SecurityMaster.htm -->
+<HTML><HEAD><TITLE>Vision Upload Format: securityMaster</TITLE>
+<META content="text/html; charset=windows-1252" http-equiv=Content-Type>
+<META content="MSHTML 5.00.3103.1000" name=GENERATOR></HEAD>
+<BODY bgColor=white>
+<H2>Vision Portfolio Management Application Layer: Data Feeds</H2>
+<P>| <A href="pmaFeeds.htm">Application 
+Feeds</A> | 
+<HR>
+
+<P><FONT size=+2><B>Data Feed: </B><I>SecurityMaster</I></FONT>
+<P><FONT size=+1><B>Category: </B><I>MasterFeed</I></FONT>
+<P>
+<H3>Summary:</H3>
+<P>
+<UL>The <I>SecurityMaster</I> feed is used to create and refresh basic 
+  information for <B>Security</B> instances. This feed can also be used to 
+  create <B>Company</B> instances for cases where the security represents the 
+  primary issue for a company. A number of <A 
+  href="pma_SecurityMaster.htm#related feeds">related 
+  feeds</A> have been defined to update additional security information such as 
+  prices, dividends, and splits. </UL>
+<P>
+<H3>Available Fields:</H3>
+<P>
+<CENTER>
+<TABLE border=1 cellPadding=4 cellSpacing=2 width="80%">
+  <TBODY>
+  <TR>
+    <TH>Field
+    <TH>Vision<BR>Property
+    <TH>Type
+    <TH>Description 
+  <TR>
+  <TR>
+    <TH align=middle colSpan=4>--- Required Fields --- 
+  <TR>
+    <TD><I>entityId</I> 
+    <TD><I>code</I> 
+    <TD>String 
+    <TD>id of new or existing Security instance 
+  <TR>
+    <TD><I>currencyId</I> 
+    <TD><I>baseCurrency</I> 
+    <TD>String 
+    <TD>id of existing Currency instance 
+  <TR>
+  <TR>
+    <TH align=middle colSpan=4>--- Suggested Fields --- 
+  <TR>
+    <TD><I>companyId</I> 
+    <TD><I>company</I> 
+    <TD>String 
+    <TD>id of underlying Company instance which issued this security 
+  <TR>
+    <TD><I>cusip</I> 
+    <TD><I>cusip</I> 
+    <TD>String 
+    <TD>8 or 9 character Cusip 
+  <TR>
+    <TD><I>name</I> 
+    <TD><I>name</I> 
+    <TD>String 
+    <TD>security name 
+  <TR>
+    <TD><I>sedol</I> 
+    <TD><I>sedol</I> 
+    <TD>String 
+    <TD>6 or 7 character Sedol 
+  <TR>
+    <TD><I>ticker</I> 
+    <TD><I>ticker</I> 
+    <TD>String 
+    <TD>Ticker symbol 
+  <TR>
+    <TD><I>type</I> 
+    <TD><I>type</I> 
+    <TD>String 
+    <TD>id of existing SecurityType instance 
+  <TR>
+  <TR>
+  <TR>
+    <TH align=middle colSpan=4>--- Other Fields --- 
+  <TR>
+    <TD><I>isin</I> 
+    <TD><I>isin</I> 
+    <TD>String 
+    <TD>isin id 
+  <TR>
+    <TD><I>latestMarket<BR>CapUS</I> 
+    <TD><I>latestMarket<BR>CapUS</I> 
+    <TD>Number 
+    <TD>latest mcap available (in US$) 
+  <TR>
+    <TD><I>sharesOut </I>
+    <TD><I>_sharesOut </I>
+    <TD>Number 
+    <TD>latest shares outstanding 
+  <TR>
+    <TD><I>shortName</I> 
+    <TD><I>shortName</I> 
+    <TD>String 
+    <TD>short name 
+  <TR>
+    <TD><I>sortCode</I> 
+    <TD><I>sortCode</I> 
+    <TD>String 
+    <TD>sort code 
+  <TR>
+    <TD><I>valor</I> 
+    <TD><I>valor</I> 
+    <TD>String 
+    <TD>valor id 
+  <TR>
+    <TD><I>terminateFlag</I> 
+    <TD><I>deletionDate</I> 
+    <TD>Date 
+    <TD>date the security became inactive </TR></TBODY></TABLE></CENTER>
+<P>
+<H3>Special Processing Rules:</H3>
+<P>
+<UL type=disc>
+  <LI>The <I>entityId</I> can be a unique id assigned by your organization (or 
+  your security master source) that permanently identifies the security. 
+  Alternatively, you can use the Cusip, Sedol, or other standard security 
+  identifier to populate this field. This field updates the <I>code</I> property of the security instance. 
+  <P></P>
+<li>If the value of code is the same as either the cusip or sedol and there is a change to cusip or sedol, then the value at code will also be reset.  
+
+
+<P></P>
+  <LI>The <I>cusip</I>, <I>sedol</I>, and <I>ticker</I> are added to the naming 
+  dictionaries defined for the <B>Security</B> and <B>Company</B> classes in 
+  addition to the <I>entityId</I> value. Any of these aliases can be used as the 
+  <I>entityId</I> for this and related security feeds. Any of these aliases can 
+  be used as the <I>id</I> value in the expression:<PRE><TT><B>
+     Named Security at: "<I>id</I>" .
+</B></TT></PRE>
+  <P></P>
+<li>If a record has a cusip or sedol that is currently in the database associated with a different security, the cusip or sedol change will not be posted.  This prevents accidently moving ids from one security (and its company) to another.  To effect a change, change the cusip or sedol in the security that currently <i>owns</i> the id.
+  <P></P>
+  <LI>Data feed records with duplicate <I>cusip</I> or <I>sedol</I> id's will 
+  not be processed and an appropriate message will be displayed in the exception 
+  report. Duplicate <I>ticker</I> symbols will be updated. 
+  <P></P>
+  <LI>The <I>companyId</I> is used to identify the related <B>Company</B> 
+  instance with which the security should be associated. If this value is 
+  identical to the security's <I>entityId</I> and the company instance does not 
+  exist, a new company instance is created with this security identified as its 
+  primary security. Otherwise, if the <I>companyId</I> does not map to an 
+  existing company instance, the security's <I>company</I> value is set to the 
+  default company. 
+  <P></P>
+<li>The messages <i>disableCusipChanges</i>, <i>disableSedolChanges</i>, and <i>disableCompanyChanges</i> can be used to prohibit posting company, cusip and sedol changes.  The records that were not updated are printed in the exception report.  These options are reset to enable after each run.
+  <P></P>
+  <LI>The <I>currencyId</I> is used to identify the currency in which monetary 
+  values for the security are displayed by default. If this value does not map 
+  to an existing currency instance, the security's <I>baseCurrency</I> is set to 
+  the default currency. 
+  <P></P>
+  <LI>The <I>type</I> is used to identify the <B>SecurityType</B> instance with 
+  which the security should be associated. The security type is used to store 
+  data that supports calculations such as holding market values. If this value 
+  does not map to an existing instance, the security's <I>type</I> value is set 
+  to the default instance. </LI></UL>
+<P><A name="related feeds">
+<H3>Related Feeds:</H3></A>
+<P>
+<UL type=disc>
+  <LI><A 
+  href="pma_SecurityAliases.htm"><I>securityAliases</I></A>: 
+  loads cusip/sedol changes and add other aliases for securities 
+  <LI><A 
+  href="pma_PriceFeed.htm"><I>priceFeed</I></A>: 
+  loads pricing information for securities 
+  <LI><A 
+  href="pma_SplitsFeed.htm"><I>splitsFeed</I></A>: 
+  loads stock split and dividend information 
+  <LI><A 
+  href="pma_DivFeed.htm"><I>divFeed</I></A>: 
+  loads dividend information for securities 
+  <LI><A 
+  href="pma_CompanyMaster.htm"><I>companyMaster</I></A>: 
+  defines <B>Company</B> instances which may be referenced by securities 
+  <LI><A 
+  href="pma_CurrencyMaster.htm"><I>currencyMaster</I></A>: 
+  defines <B>Currency</B> instances which may be referenced by securities 
+  <LI><A 
+  href="pma_SecurityTypeMaster.htm"><I>securityTypeMaster</I></A>: 
+  defines <B>SecurityType</B> instances which may be referenced by securities 
+  <LI><A 
+  href="pma_McapGroups.htm"><I>mcapGroups</I></A>: 
+  updates market capitalization range group for securities 
+  <LI><A 
+  href="pma_PbGroups.htm"><I>pbGroups</I></A>: 
+  updates price to book range group for securities 
+  <LI><A 
+  href="pma_PeGroups.htm"><I>peGroups</I></A>: 
+  updates price to earnings range group for securities </LI></UL>
+<P>
+<H3>Sample Upload:</H3>
+<P>The following tab-delimited feed could be used to create and refresh security 
+instances:<PRE><TT><B>
+   Interface ExternalFeedManager upload: "securityMaster" using:
+   "entityId name           companyId  cusip     ticker  currencyId  type
+    00036110 AAR CORP COM   00036110   00036100	 AIR     USD         1
+    00079410 ACC CORP COM   00079410   00079410  ACCC    USD         1
+    00095710 ABM INDS INC   00095710   00095710  AMB     USD         1
+    "  ;
+</B></TT></PRE>
+<P>
+<HR>
+
+<TABLE border=0 width="100%">
+  <TBODY>
+  <TR>
+<td align=left><font size=-1>Copyright &copy; 2000 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated December 15, 2000</font>
+  </TD></TR></TBODY></TABLE></BODY></HTML>

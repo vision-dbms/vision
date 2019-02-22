@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- saved from url=(0056)pma_CompanyMaster.htm -->
+<HTML><HEAD><TITLE>Vision Upload Format: CompanyMaster</TITLE>
+<META content="text/html; charset=windows-1252" http-equiv=Content-Type>
+<META content="MSHTML 5.00.3103.1000" name=GENERATOR></HEAD>
+<BODY bgColor=white>
+<H2>Vision Portfolio Management Application Layer: Data Feeds</H2>
+<P>| <A href="pmaFeeds.htm">Application 
+Feeds</A> | 
+<HR>
+
+<P><FONT size=+2><B>Data Feed: </B><I>CompanyMaster</I></FONT>
+<P><FONT size=+1><B>Category: </B><I>MasterFeed</I></FONT>
+<P>
+<H3>Summary:</H3>
+<P>
+<UL>The <I>CompanyMaster</I> feed is used to create and refresh basic 
+  information for <B>Company</B> instances. Companies represent the actual 
+  corporate entity. One or more <B>Security</B> instances may be associated with 
+  a specific company. Fundamental company information is usually stored with the 
+  companies; pricing, dividend, and split related information is usually stored 
+  with the securities. The <B>Company</B> class is described in detail in the <A 
+  href="clpmaCompany.htm#related"><I>Portfolio 
+  Management Application Classes</I></A> document. A number of <A 
+  href="pma_CompanyMaster.htm#related feeds">related 
+  feeds</A> are also available. </UL>
+<P>
+<H3>Available Fields:</H3>
+<P>
+<CENTER>
+<TABLE border=1 cellPadding=4 cellSpacing=2 width="80%">
+  <TBODY>
+  <TR>
+    <TH>Field
+    <TH>Vision<BR>Property
+    <TH>Type
+    <TH>Description 
+  <TR>
+  <TR>
+    <TH align=middle colSpan=4>--- Required Fields --- 
+  <TR>
+    <TD><I>entityId</I> 
+    <TD><I>code</I> 
+    <TD>String 
+    <TD>id of new or existing Company instance 
+  <TR>
+  <TR>
+    <TH align=middle colSpan=4>--- Suggested Fields --- 
+  <TR>
+    <TD><I>currencyId</I> 
+    <TD><I>baseCurrency</I> 
+    <TD>String 
+    <TD>id of existing Currency instance 
+  <TR>
+    <TD><I>name</I> 
+    <TD><I>name</I> 
+    <TD>String 
+    <TD>descriptive name 
+  <TR>
+  <TR>
+    <TH align=middle colSpan=4>--- Other Fields --- 
+  <TR>
+    <TD><I>analyst</I> 
+    <TD><I>analyst</I> 
+    <TD>String 
+    <TD>id of existing Analyst instance 
+  <TR>
+    <TD><I>country</I> 
+    <TD><I>country</I> 
+    <TD>String 
+    <TD>id of existing Country instance 
+  <TR>
+    <TD><I>fiscalYearEnd</I> 
+    <TD><I>fiscalYearEnd</I> 
+    <TD>Integer 
+    <TD>fiscal year end month 
+  <TR>
+    <TD><I>industry</I> 
+    <TD><I>industry</I> 
+    <TD>String 
+    <TD>id of existing Industry instance 
+  <TR>
+    <TD><I>primaryCompany</I> 
+    <TD><I>_primaryCompany</I> 
+    <TD>String 
+    <TD>id of parent company
+  <TR>
+    <TD><I>shortName</I> 
+    <TD><I>shortName</I> 
+    <TD>String 
+    <TD>short name 
+  <TR>
+    <TD><I>sortCode</I> 
+    <TD><I>sortCode</I> 
+    <TD>String 
+    <TD>sort code 
+  <TR></TR></TBODY></TABLE></CENTER>
+<P>
+<H3>Special Processing Rules:</H3>
+<P>
+<UL type=disc>
+  <LI>The <I>entityId</I> can be a unique id assigned by your organization (or 
+  your company master source) that permanently identifies the company. The 
+  aliases associated with any security for that company are also valid as the 
+  identifier (e.g., the cusip or sedol of a security issued by the company). 
+  <P></P>
+  <LI>The <I>currencyId</I> is used to identify the currency in which monetary 
+  values for the company are displayed by default. This currency may differ from 
+  the currencies of the securities for that company. 
+  <P></P>
+  <li><i>primaryCompany</i> can be used to set a parent company when it is different from the company (e.g., GMH's primaryCompany is GM). 
+
+</LI></UL>
+<P><A name="related feeds">
+<H3>Related Feeds:</H3></A>
+<P>
+<UL type=disc>
+  <LI><A 
+  href="pma_SecurityMaster.htm"><I>SecurityMaster</I></A>: 
+  defines Security instances which reference companies 
+  <LI><A 
+  href="pma_FundamentalA.htm"><I>FundamentalA</I></A>: 
+  loads company annual fundamentals over time 
+  <LI><A 
+  href="pma_FundamentalQ.htm"><I>FundamentalQ</I></A>: 
+  loads company quarterly fundamentals over time 
+  <LI><A 
+  href="pma_FundamentalM.htm"><I>FundamentalM</I></A>: 
+  loads company monthly fundamentals over time 
+  <LI><A 
+  href="pma_CompanyToCountry.htm"><I>CompanyToCountry</I></A>: 
+  manages company-country relationship 
+  <LI><A 
+  href="pma_CompanyToIndustry.htm"><I>CompanyToIndustry</I></A>: 
+  manages company-industry relationship over time 
+  <LI><A 
+  href="pma_CompanyToAnalyst.htm"><I>CompanyToAnalyst</I></A>: 
+  manages company-analyst relationship over time </LI></UL>
+<P>
+<H3>Sample Upload:</H3>
+<P>The following tab-delimited feed could be used to create <B>Company</B> 
+instances and refresh basic information: <PRE><TT><B>
+   Interface ExternalFeedManager upload: "CompanyMaster" using:
+   "Id		Name		fiscalYearEnd
+    00036110	AAR CORP	     5
+    00079410	ACC CORP	     12
+    00095710	ABM INDUSTRIES 	     10 
+   "  ;
+</B></TT></PRE>
+<P>
+<HR>
+
+<TABLE border=0 width="100%">
+  <TBODY>
+  <TR>
+<td align=left><font size=-1>Copyright &copy; 2000 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated December 15, 2000</font>
+</TD></TR></TBODY></TABLE></BODY></HTML>

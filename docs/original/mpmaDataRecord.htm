@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Messages: DataRecord</title>
+</head>
+<body bgcolor=white>
+<p>
+<center> 
+ | <a href="vpma.htm">Portfolio Management Application Overview</a> 
+ | <A href="appClasses.htm">Application Class  </A>
+ | <A href="mXRef.htm">Message XRef</A>
+ | <A href="Messages.htm">Messages (General)</A>
+ | 
+</center><hr>
+
+<center>
+<font face="Arial" color="darkblue" size=3 >
+<h3>Profile of Class <i>DataRecord</i></h3>
+</center>
+</font><p>
+<blockquote><center><hr width=70%><p>
+Includes Classes: <i>DataRecord, DivRecord, PriceRecord</i>
+<p><hr width=70%></center></blockquote><p>
+<pre>
+
+<A href="clObject.htm">Object</A>
+  | 
+  +--- <b>DataRecord</b>
+  |      |
+  |      +--- <A href="clpmaCompany.htm">DivRecord</A>
+  |      |
+  |      +--- <A href="clpmaCompany.htm">PriceRecord</A>
+</pre>
+<p><hr align=left width=70% ><p>
+
+This abstract class is used to define subclasses that manage
+subsets of data about a specific entity so that data can be
+organized into manageable units.
+<p><hr align=left width=70% ><p>
+
+<font size=+1 face="Arial" color="darkred">Message Index</font>
+<p><img src="instdot.gif" align="middle" border=0 alt="o "><A href="#_ask"><b>_ask</b></A><i> (PriceRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#_bid"><b>_bid</b></A><i> (PriceRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#_div"><b>_div</b></A><i> (DivRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#_high"><b>_high</b></A><i> (PriceRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#_low"><b>_low</b></A><i> (PriceRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#_open"><b>_open</b></A><i> (PriceRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#_price"><b>_price</b></A><i> (PriceRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#_volume"><b>_volume</b></A><i> (PriceRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#addDiv:asOf:inCurrency:for:"><b>addDiv: div asOf: date inCurrency: curr for: security</b></A><i> (DivRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#adjustmentDate"><b>adjustmentDate</b></A><i> (DataRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#adjustmentFactor"><b>adjustmentFactor</b></A><i> (DataRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (DataRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (DivRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (PriceRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#ask"><b>ask</b></A><i> (PriceRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#bid"><b>bid</b></A><i> (PriceRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (DataRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (DivRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (PriceRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#cleanupClassStructures"><b>cleanupClassStructures</b></A><i> (DataRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#currency"><b>currency</b></A><i> (DataRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#currencyFactor"><b>currencyFactor</b></A><i> (DataRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#currentStore"><b>currentStore</b></A><i> (DataRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#currentStore"><b>currentStore</b></A><i> (DivRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#currentStore"><b>currentStore</b></A><i> (PriceRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#date"><b>date</b></A><i> (DataRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (DataRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (DivRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (PriceRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#displayInfo"><b>displayInfo</b></A><i> (DataRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#div"><b>div</b></A><i> (DivRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#entity"><b>entity</b></A><i> (DataRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#getAllInstances"><b>getAllInstances</b></A><i> (DataRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#getCurrentInstances"><b>getCurrentInstances</b></A><i> (DataRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#getNewPrototype"><b>getNewPrototype</b></A><i> (DataRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#high"><b>high</b></A><i> (PriceRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializeGlobalSubclassProperties"><b>initializeGlobalSubclassProperties</b></A><i> (DataRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializeKeys:"><b>initializeKeys: keys</b></A><i> (DataRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializeLocalAttributes"><b>initializeLocalAttributes</b></A><i> (DataRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#isDataRecord"><b>isDataRecord</b></A><i> (DataRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#isDivRecord"><b>isDivRecord</b></A><i> (DivRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#isPriceRecord"><b>isPriceRecord</b></A><i> (PriceRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#low"><b>low</b></A><i> (PriceRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#open"><b>open</b></A><i> (PriceRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#paymentDate"><b>paymentDate</b></A><i> (DivRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#price"><b>price</b></A><i> (PriceRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#print"><b>print</b></A><i> (DataRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#print"><b>print</b></A><i> (DivRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#print"><b>print</b></A><i> (PriceRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#print:"><b>print: format</b></A><i> (DataRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#print:"><b>print: format</b></A><i> (DivRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#print:"><b>print: format</b></A><i> (PriceRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#purgeRecordAndLink"><b>purgeRecordAndLink</b></A><i> (DataRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#recordDate"><b>recordDate</b></A><i> (DataRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#recordValue"><b>recordValue</b></A><i> (DataRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#security"><b>security</b></A><i> (DivRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#security"><b>security</b></A><i> (PriceRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setAdjustmentDateTo:"><b>setAdjustmentDateTo: date</b></A><i> (DataRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setAskTo:"><b>setAskTo: value</b></A><i> (PriceRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setBidTo:"><b>setBidTo: value</b></A><i> (PriceRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setDividendTo:"><b>setDividendTo: div</b></A><i> (DivRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setHighTo:"><b>setHighTo: value</b></A><i> (PriceRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setLowTo:"><b>setLowTo: value</b></A><i> (PriceRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setOpenTo:"><b>setOpenTo: value</b></A><i> (PriceRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setPaymentDateTo:"><b>setPaymentDateTo: date</b></A><i> (DivRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setPriceTo:"><b>setPriceTo: price</b></A><i> (PriceRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setUpdateBlockTo:"><b>setUpdateBlockTo: aBlock</b></A><i> (DataRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setVolumeTo:"><b>setVolumeTo: vol</b></A><i> (PriceRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#storeXRef"><b>storeXRef</b></A><i> (DataRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#storeXRef"><b>storeXRef</b></A><i> (DivRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#storeXRef"><b>storeXRef</b></A><i> (PriceRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#updateBlock"><b>updateBlock</b></A><i> (DataRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#volume"><b>volume</b></A><i> (PriceRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (DataRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (DivRecord)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (PriceRecord)</i><br>
+<p><hr align=left width=70% ><p>
+
+<font size=+1 face="Arial" color="darkred">Messages</font>
+<p><img src="instdot.gif" align="middle" border=0 alt="o "><A name="_ask"></A><b>_ask</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">PriceRecord _ask</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Asking price of 'security' on 'date' in 'baseCurrency'
+of recipient unadjusted for splits since 'adjustmentDate'.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="_bid"></A><b>_bid</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">PriceRecord _bid</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Bid price of 'security' on 'date' in 'baseCurrency'
+of recipient unadjusted for splits since 'adjustmentDate'.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="_div"></A><b>_div</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DivRecord _div</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Same as 'recordValue'.  Total cash dividend paid
+by 'security' on 'date' in record's 'baseCurrency' unadjusted for splits
+since 'adjustmentDate'. </blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="_high"></A><b>_high</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">PriceRecord _high</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+High price of 'security' on 'date' in 'baseCurrency'
+of recipient unadjusted for splits since 'adjustmentDate'.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="_low"></A><b>_low</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">PriceRecord _low</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Low price of 'security' on 'date' in 'baseCurrency'
+of recipient unadjusted for splits since 'adjustmentDate'.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="_open"></A><b>_open</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">PriceRecord _open</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Opening price of 'security' on 'date' in 'baseCurrency'
+of recipient unadjusted for splits since 'adjustmentDate'.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="_price"></A><b>_price</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">PriceRecord _price</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Same as 'recordValue'.  Closing price of 'security'
+on 'date' in 'baseCurrency' of recipient unadjusted for splits since 'adjustmentDate'.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="_volume"></A><b>_volume</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">PriceRecord _volume</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Trading volume of 'security' on 'date' unadjusted for
+splits since 'adjustmentDate'.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="addDiv:asOf:inCurrency:for:"></A><b>addDiv:asOf:inCurrency:for:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DivRecord addDiv: div asOf: date inCurrency: curr for: security</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Adds a new DivRecord for supplied security on supplied
+date if needed, then refreshes its 'recordValue' and 'baseCurrency' with
+supplied dividend and currency. </blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaCompany.htm">DivRecord</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+2 - Date<br>
+3 - Currency<br>
+4 - Security<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="adjustmentDate"></A><b>adjustmentDate</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DataRecord adjustmentDate</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Date through which data in recipient is adjusted.
+By default, this is the same as the 'recordDate'.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clDate.htm">Date</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="adjustmentFactor"></A><b>adjustmentFactor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DataRecord adjustmentFactor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Factor to adjust data in recipient for splits that
+have occurred since 'adjustmentDate'.  By default, this value is 1.0.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DataRecord asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Recipient stripped of any extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Conversion&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaDataRecord.htm">DataRecord</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DivRecord asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+recipient object, stripped of any extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Conversion&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaCompany.htm">DivRecord</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">PriceRecord asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+recipient object, stripped of any extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Conversion&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaCompany.htm">PriceRecord</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="ask"></A><b>ask</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">PriceRecord ask</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Asking price, adjusted for splits in current currency
+associated with security.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="bid"></A><b>bid</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">PriceRecord bid</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Bid price, adjusted for splits in current currency
+associated with security.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DataRecord classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Class descriptor for recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Schema ClassDescriptor
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DivRecord classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Class descriptor for recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Schema ClassDescriptor
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">PriceRecord classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Class descriptor for recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Schema ClassDescriptor
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="cleanupClassStructures"></A><b>cleanupClassStructures</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DataRecord cleanupClassStructures</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Runs 'cleanStoreAndDictionary' at Object, this method is redefined as
+needed by subclasses to perform general cleanup functions.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>DBAdmin&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="currency"></A><b>currency</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DataRecord currency</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Currency of related entity.  This is 
+the 'baseCurrency' of the entity by default, unless a currency override
+is in effect.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clCurrency.htm">Currency</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="currencyFactor"></A><b>currencyFactor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DataRecord currencyFactor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Factor to convert monetary values in recpient to
+the current 'currency'</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="currentStore"></A><b>currentStore</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DataRecord currentStore</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Current physical store used to instatiate new
+instances.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaDataRecord.htm">DataRecord</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="currentStore"></A><b>currentStore</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DivRecord currentStore</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Current physical store used to instatiate new
+instances.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaCompany.htm">DivRecord</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="currentStore"></A><b>currentStore</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">PriceRecord currentStore</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Current physical store used to instatiate new
+instances.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaCompany.htm">PriceRecord</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="date"></A><b>date</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DataRecord date</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Date for which data in recipient applies
+(same as 'recordDate')</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clDate.htm">Date</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DataRecord defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Default DataRecord instance.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaDataRecord.htm">DataRecord</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DivRecord defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Default DivRecord instance.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaCompany.htm">DivRecord</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">PriceRecord defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Default PriceRecord instance.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaCompany.htm">PriceRecord</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="displayInfo"></A><b>displayInfo</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DataRecord displayInfo</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Displays a single line summary of recipient
+terminated with a new line.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="div"></A><b>div</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DivRecord div</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Total dividends paid for security on date adjusted for
+splits in current currency associated with security.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="entity"></A><b>entity</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DataRecord entity</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Entity with which the recpient is associated.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="getAllInstances"></A><b>getAllInstances</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DataRecord getAllInstances</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+List of all instances in all stores of recipient's
+class.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Access&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Advanced
+<p><b>Returns: </b>List of <A href="clpmaDataRecord.htm">DataRecord</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="getCurrentInstances"></A><b>getCurrentInstances</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DataRecord getCurrentInstances</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+List of all instances in recipient's 'currentStore'.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Access&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Advanced
+<p><b>Returns: </b>List of <A href="clpmaDataRecord.htm">DataRecord</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="getNewPrototype"></A><b>getNewPrototype</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DataRecord getNewPrototype</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Creates new physical store for recipient's class.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaDataRecord.htm">DataRecord</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="high"></A><b>high</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">PriceRecord high</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+High price, adjusted for splits in current currency
+associated with security.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializeGlobalSubclassProperties"></A><b>initializeGlobalSubclassProperties</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DataRecord initializeGlobalSubclassProperties</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+This method is run as part of the 'specialized' method and is used to 
+initialize properties in the default row of the new class.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaDataRecord.htm">DataRecord</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializeKeys:"></A><b>initializeKeys:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DataRecord initializeKeys: keys</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Initializes new instance with supplied key values.
+Up to four values should be supplied as a list: entity, date, value, and
+currency.  These values will be used to update the 'entity', 'recordDate',
+'recordValue', and 'baseCurrency' properties in the recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaDataRecord.htm">DataRecord</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - List<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializeLocalAttributes"></A><b>initializeLocalAttributes</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DataRecord initializeLocalAttributes</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Iniitializes new instances.
+This method runs the general initializations defined
+for all objects followed by initializations defined for 
+the recipient's class.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaDataRecord.htm">DataRecord</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="isDataRecord"></A><b>isDataRecord</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DataRecord isDataRecord</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the value TRUE.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Inquiry&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>TRUE
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="isDivRecord"></A><b>isDivRecord</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DivRecord isDivRecord</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the value TRUE.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Inquiry&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>TRUE
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="isPriceRecord"></A><b>isPriceRecord</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">PriceRecord isPriceRecord</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the value TRUE.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Inquiry&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>TRUE
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="low"></A><b>low</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">PriceRecord low</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Low price, adjusted for splits in current currency
+associated with security.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="open"></A><b>open</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">PriceRecord open</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Opening price, adjusted for splits in current currency
+associated with security.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="paymentDate"></A><b>paymentDate</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DivRecord paymentDate</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Payment date for dividend</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clDate.htm">Date</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="price"></A><b>price</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">PriceRecord price</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Closing price, adjusted for splits in current currency
+associated with security.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="print"></A><b>print</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DataRecord print</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Prints the recipient's 'recordValue' if non-NA;
+otherwise, the recipient's class name is printed.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaDataRecord.htm">DataRecord</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="print"></A><b>print</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DivRecord print</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Prints the total dividend, by default.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaCompany.htm">DivRecord</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="print"></A><b>print</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">PriceRecord print</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Prints the closing price, by default.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaCompany.htm">PriceRecord</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="print:"></A><b>print:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DataRecord print: format</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Prints recipient using supplied format.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaDataRecord.htm">DataRecord</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="print:"></A><b>print:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DivRecord print: format</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Prints the dividend using supplied format.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaCompany.htm">DivRecord</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="print:"></A><b>print:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">PriceRecord print: format</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Prints closing price using supplied format.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaCompany.htm">PriceRecord</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="purgeRecordAndLink"></A><b>purgeRecordAndLink</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DataRecord purgeRecordAndLink</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Deletes the recipient after severing its
+relationship with its underlying entity.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="recordDate"></A><b>recordDate</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DataRecord recordDate</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Date for which data in recipient applies.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clDate.htm">Date</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="recordValue"></A><b>recordValue</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DataRecord recordValue</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Property used to record 'primary' data value in
+record, if appropriate.  This is the value that will print by default.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="security"></A><b>security</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DivRecord security</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Same as 'entity'.  Security associated with recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaSecurity.htm">Security</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="security"></A><b>security</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">PriceRecord security</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Same as 'entity'.  Security associated with recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaSecurity.htm">Security</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setAdjustmentDateTo:"></A><b>setAdjustmentDateTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DataRecord setAdjustmentDateTo: date</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Updates the 'adjustmentDate' to indicate that data
+in the recpient has been adjusted through a date that is different from the
+record date.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaDataRecord.htm">DataRecord</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Date<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setAskTo:"></A><b>setAskTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">PriceRecord setAskTo: value</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Set/reset ask value in recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaCompany.htm">PriceRecord</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setBidTo:"></A><b>setBidTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">PriceRecord setBidTo: value</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Set/reset bid value in recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaCompany.htm">PriceRecord</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setDividendTo:"></A><b>setDividendTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DivRecord setDividendTo: div</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Set/reset value of dividend in recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaCompany.htm">DivRecord</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setHighTo:"></A><b>setHighTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">PriceRecord setHighTo: value</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Set/reset high value in recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaCompany.htm">PriceRecord</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setLowTo:"></A><b>setLowTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">PriceRecord setLowTo: value</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Set/reset low value in recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaCompany.htm">PriceRecord</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setOpenTo:"></A><b>setOpenTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">PriceRecord setOpenTo: value</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Set/reset open value in recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaCompany.htm">PriceRecord</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setPaymentDateTo:"></A><b>setPaymentDateTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DivRecord setPaymentDateTo: date</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Set/reset value of payment date in recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaCompany.htm">DivRecord</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Date<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setPriceTo:"></A><b>setPriceTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">PriceRecord setPriceTo: price</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Set/reset closing price in recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaCompany.htm">PriceRecord</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setUpdateBlockTo:"></A><b>setUpdateBlockTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DataRecord setUpdateBlockTo: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Defines the block to use to access the property
+at the underlying entity's class for update.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaDataRecord.htm">DataRecord</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setVolumeTo:"></A><b>setVolumeTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">PriceRecord setVolumeTo: vol</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Set/reset volume in recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaCompany.htm">PriceRecord</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Number<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="storeXRef"></A><b>storeXRef</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DataRecord storeXRef</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+List of physical storage structures created for 
+recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>DBAdmin&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>List of <A href="clpmaDataRecord.htm">DataRecord</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="storeXRef"></A><b>storeXRef</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DivRecord storeXRef</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+List of physical storage structures created for 
+recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>List of <A href="clpmaCompany.htm">DivRecord</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="storeXRef"></A><b>storeXRef</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">PriceRecord storeXRef</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+List of physical storage structures created for 
+recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>List of <A href="clpmaCompany.htm">PriceRecord</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="updateBlock"></A><b>updateBlock</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DataRecord updateBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Block used to access the property
+at the underlying entity's class for update.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>DBAdmin&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clBlock.htm">Block</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="volume"></A><b>volume</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">PriceRecord volume</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Volume, adjusted for splits.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DataRecord whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns name of recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DivRecord whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns name of recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">PriceRecord whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns name of recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+
+<p><hr>
+<table border=0 width=100%>
+<tr>
+<td align=left>
+<font size=-1>Copyright &copy 1998 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated March 19, 1998</font>
+</table>
+</body>
+</html>

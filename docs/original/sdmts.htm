@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title>Sets Do More Than Select</title>
+   <meta name="Author" content="Michael J. Caruso">
+   <meta name="GENERATOR" content="Mozilla/2.01Gold (Win32)">
+</head>
+<body bgcolor=white>
+
+<center><h1>Sets Do More Than <i>select</i></h1></center>
+<h2>Introduction</h2>
+<p>
+The first generation of
+database-centered applications -- maintaining an organization's operating
+data -- demanded database management systems tuned to handle large numbers
+of small, update-oriented transactions. The first generation of true
+database management technology -- relational data base systems -- was well
+matched to that class of problem. The normal forms of the relational model
+taught many good lessons in data analysis and structuring, the large amounts
+of simple data fit well into the tabular representation of relational data
+base management, and for the most part, the relatively simple data in
+these applications could be effectively queried using standard SQL query
+languages.</p>
+
+<p>As the complexity of database-centered applications grows, a new set
+of database system requirements is emerging.  The new generation of
+database-centered applications no longer focuses on operational data and transaction
+processing. Instead, it focuses on:
+<ul>
+<li>managing and using complex relationships
+<li>intelligent data acquisition
+<li>decision support
+</ul>
+These new applications do not fit well into a relational
+framework, primarily because relational database systems lack the ability
+to express many of the constraints, rules, and queries these new applications
+need.  When relational implementations are tried, large parts of the application
+need to be written as custom programs in conventional programming languages,
+not in the database system.
+
+<p>This custom-programming strategy has significant costs in terms
+of both performance and productivity. These costs are compounded by the
+fact that many of these applications have a natural representation in the
+new technology of object-orientation.  All of these factors have led to
+the emergence of object-oriented databases -- a technology that unifies
+the capabilities of database management and object-oriented programming
+systems.</p>
+
+<p>Merging these two technologies creates a new technology that is more
+than the sum of its parts -- both in terms of the problems it can solve
+and the technical demands it imposes on its implementation.  
+Some attempts to create this new technology have begun with object-oriented programming
+languages like C++ or Smalltalk, and
+augmented them with database-like capabilities such as persistence and
+sharing.
+
+<p> Unfortunately, programming languages
+and the techniques for optimizing them were never designed to scale to
+the size of a very large database.  Other efforts started with relational
+frameworks and attempted to generalize the representational and query processing
+capabilities of these engines. While the set-orientation of a database
+engine is required for the system to scale, the classic techniques for
+optimizing and processing relational queries are not general enough to
+be of value to the full range of queries possible in these much more powerful
+information processing engines. To succeed, a new approach is required.</p>
+
+<p><a href="sdmts.htm#Programming Languages Do Not Scale">Programming Language
+Techniques Do Not Scale</a> </p>
+
+<p><a href="sdmts.htm#Relational Query Engines Are Not General Enough">Relational
+Query Engines Are Not General Enough</a> </p>
+
+<p><a href="sdmts.htm#A New Paradigm For Data Base Programming">A New Paradigm
+For Object-Oriented Database Implementation</a></p>
+
+<h2><a name="Programming Languages Do Not Scale"></a>Programming Language
+Techniques Do Not Scale</h2>
+
+<p>A solution to any problem that can be solved on a computer can be implemented
+in a general purpose programming language.  Because the problems associated
+with the new generation of database-centered applications require functionality
+readily available in object-oriented programming languages but not present
+in traditional relational query languages, it seems reasonable to start
+with one of these programming languages and give it the database functionality
+it lacks.  However, there are problems with this approach. </p>
+
+<p>Traditionally, programming languages, including the current generation
+of object-oriented programming languages, are designed to give programmers
+precise control over the order in which programs execute.  The goal of a
+programming language is the implementation of algorithms -- <i>how</i>
+a result is obtained is as important as <i>what</i> result is obtained.</p>
+
+<p>In contrast, database management systems attempt to frame requests in
+terms of <i>what</i> result is required, leaving the complex issues of
+<i>how</i> to obtain that result to the database system.  In its simplest
+terms, even though a <i>SQL</i> query appears to be comparing every record
+from one table with every record from another table to do a join, that
+almost never happens in any well tuned, modern database system.  While
+there are optimization techniques that rearrange programs to make them
+more efficient, adherence to <i>how</i> constrains what can be done.</p>
+
+<p>At its essence, the fundamental problem for any database system, including
+an object-oriented database system, is the efficient processing of collection
+operations.  Even though navigation reduces the need for some set-based
+operations like <i>join</i>, every non-trivial application eventually needs
+to select, group, or enumerate the elements of one of more collections.
+Ultimately, the number and size of the collections in a database is the
+issue that most impacts the scalability of the applications the database
+supports. </p>
+
+<p>The most serious problem with most languages is their failure to encapsulate
+collection iteration in a useful way. Some languages are worse than others
+in this regard.  For example, C++, despite its object-orientation, has no
+constructs whatsoever for collection iteration.  Like its third generation
+ancestor, C, it assumes that collection iteration is a special case
+of the control flow iterators <i>for (...)...</i>,<i> while ...</i>, and
+<i>do ... while (...)</i>.  Algorithmic in nature, the language provides
+tools for precisely specifying <i>how</i> the iteration is to be performed,
+not <i>what</i> the iteration is intended to do.</p>
+
+<p> While object-orientation
+makes possible the creation of a boundless number of collection types that
+provide a rich set of collection organizations -- <i>Array</i>, <i>Bag</i>,
+<i>Dictionary</i>, <i>TimeSeries</i>, and <i>Set</i>, among others -- programs
+written using these collection types must ask for the elements of a collection
+one at a time.  Even if a collection type implements manipulation methods
+that accept element processing functions among their arguments, the issue
+has merely been deferred -- these functions have no tools to examine either
+the compiled code they were passed or the global context in which they
+are executing in order to develop an efficient execution plan.</p>
+
+<p>There are object-oriented languages, like Smalltalk, that do encapsulate
+collection iteration.  These languages have taken a step in the right direction
+in that they encourage a programming style that is less algorithmic and
+more result-oriented.  Unfortunately, the standard implementations of these
+languages still lack the architectural support to allow collections to
+be treated as more than just a bundle of elements.  Just as in C++, there
+are no tools, either explicitly available to the application designer or
+implicitly built into the language processor, that allow collection operations
+to examine the code they are executing or the global context in which they
+are running.  Without that ability, it becomes very difficult to develop
+query processing strategies that exploit the availability of storage structures
+that optimize specific element level operations or that recognize redundant
+patterns of access.</p>
+
+<h2><a name="Relational Query Engines Are Not General Enough"></a>Relational
+Query Engines Are Not General Enough</h2>
+
+<p>If programming languages and their implementations lack a model for
+result-oriented collection operations, that is certainly not true of relational
+database systems. The design philosophy behind these systems is clearly
+collection and result-oriented.  Even though it is possible to think of
+queries algorithmically, <i>how</i> a result is obtained is usually determined
+by the database system.  Not constrained by <i>how</i>, these systems are
+free to find efficient, scalable answers to the question of <i>what</i>.</p>
+
+<p>Naturally, this suggests that these systems ought to be the starting point
+for object-oriented database technology. Unfortunately, there are problems
+with this approach, as well.  To understand the problems, it is important
+to understand how relational systems do what they do so well.</p>
+
+<p>Relational database systems are specialists -- they restrict themselves
+to a small set of well understood operations defined on a correspondingly
+small set of basic types.  They achieve their performance by extensively
+optimizing those operations.  Typically, what they understand are the logical
+operations of <i>and</i>, <i>or</i>, and <i>not</i> and the relational
+operations of equality and inequality (i.e., &lt;, &lt;=, =, !=, &gt;=,
+and &gt;) applied to numbers, strings, and a few simple variations on numbers
+and strings like <i>Date</i>.  They achieve performance by constructing
+indices that efficiently identify sets of records satisfying these relational
+operations and by reordering queries to make the most efficient possible
+use of those indices.</p>
+
+<p>In a well designed database, most, if not all, queries
+built using this restricted set of operations can be answered using these
+high performance structures. Of course, not every field in the database
+needs to be indexed and not every operation that the relational system
+can do is optimized by an index.  In that case, most modern relational systems
+attempt to bound the set of records that must be examined using the available
+indices before reverting to the classical approach of actually iterating
+through the remaining database records to obtain a final result.</p>
+
+<p>While the query processing techniques of relational systems can be of
+use in an object database, their value is limited.  While these techniques
+can be helpful in cases where the system is called upon to identify a set
+of records satisfying a criteria for which an index exists, the set of
+operations that the object system is called upon to process far exceeds
+the set of operations optimized by the multitude of tree structures used
+to construct indices.  In those cases, a system naively constructed on top
+of a relational engine finds itself falling through to the iterative technique-of-last-resort
+that allows relational engines to process queries for which no better approach
+can be found.</p>
+
+<p>This problem is often compounded by the technique many hybrid systems
+use to make new types and operations available from their query languages.
+The approach taken by these systems uses a language like C++ to implement
+new classes and operations.  These new types and operations are then treated
+as a black box by the database system.  Instead of optimizing these new
+types and operations as first class components of the database system,
+the database system optimizes around them.  While this approach may eliminate
+some of the data traffic between a database server and its clients, it
+does nothing to optimize the new types and operations that are presumably
+critical to the applications being developed with these systems.</p>
+
+<h2><a name="A New Paradigm For Data Base Programming"></a>A New Paradigm
+For Object-Oriented Database Implementation</h2>
+
+<p>While object-oriented programming languages have the expressive power
+to implement a new generation of database-centered applications, they
+do not treat operations on collections as central to their architectures.
+If a database management system is to be useful for more than simple record
+retrieval, it must take a collection-centric view of its contents.  That
+is well-established by the success relational systems have with the simple
+queries and programs they are capable of expressing.</p>
+
+<p>The techniques used
+to implement these relational systems are too specialized, however, and must be generalized
+to support the richer set of operations possible in object-oriented
+databases.  That generalization is possible.  With it, a new collection-centered
+architectural framework for object-oriented database programming emerges
+with the scalability required to support the needs of large, analytic,
+cross-sectional applications.</p>
+
+<p>A collection-centric model is important to a database management system
+because it allows both data and operations to be reorganized.  The single
+most important reorganization in current systems involves the use of indices
+to optimize the selection criteria used to locate one or more records in
+a collection of records.  Even though current systems use collections and
+indices as a way to optimize associative access, that is not the real reason
+they are important in a generalized model.  They are important because they
+provide an alternative physical structure that reduces the amount of unnecessary
+data transferred from disk, where it is stored, to memory, where it can
+be used.  When generalized, the principles they embody lead to the scalability
+of a much broader class of operations. </p>
+
+<p>Whether represented as a record, tuple, or object, an entity in the
+world appears as a collection of related properties whose values hold the
+modeled state of the entity.  This time-honored mapping makes intuitive
+and mathematical sense and, almost universally, serves as the logical basis
+for most database models of the world.  Typically, it serves as the physical
+model for information storage as well.</p>
+
+<p>A record, tuple, or object is usually
+represented in memory as a contiguous block of fields holding values for
+the entity it represents.  This holistic approach to physical representation
+is not optimal for cross-sectional analyses of collections of entities.
+Even though it exists as a whole, an entity is never used as a whole except
+possibly when it is created or in response to the artificial question <i>&quot;Tell
+me everything there is to know about...&quot;</i>.  This query is even more
+artificial in the object world where <i>&quot;everything there is know&quot;</i>
+can include navigations that ultimately access the entire database.</p>
+
+<p>Instead,
+entities are accessed and used one property at a time. Information in the
+properties not being examined is simply ignored.  An index addresses that
+by isolating the values of a specific property or set of properties from
+a collection of entities.  When it uses an index, a database system accesses
+just the values of the property it needs without transfering the values
+of properties it has no intention of using.</p>
+
+<p>Technically, an index represents a special case of a general concept
+known as <i>vertical partitioning.</i>  When similar data objects are visualized
+as a table, records store <i>horizontal</i> slices through that table while
+indices store <i>vertical</i> slices. Even though the operations performed
+in an object database are more complex than the operations traditionally
+implemented using indices, the vertical partitioning principles remain
+important. Access to the <i>sales</i> property for a collection of <i>Company</i>
+objects can be far more efficient, especially for large collections, if
+two conditions can be met:</p>
+
+<ol>
+<li>the physical model of the data base system can cluster the <i>sales</i>
+property of those <i>Company</i> objects <i>vertically</i> so that they
+are near each other on disk.</li>
+
+<li>the computational model of the data base programming language can take
+advantage of that clustering.</li>
+</ol>
+
+<p>Satisfying the first of these conditions -- the clustering condition
+-- requires that the database system recognize that instances of a type
+are created as part of a collection of related instances -- not simply
+as independent objects that happen to have the same structure and behavior.
+This is a broader definition than is traditionally employed by programming
+languages.  In a programming language, types are used only for their
+program-verification and code-generation capabilities and do not usually play a
+role in managing the run-time environment.  Satisfying the clustering condition
+is a relatively simple and localized problem of object memory management.
+</p>
+
+<p>Satisfying the second of these conditions -- the computational utility
+condition -- is harder.  Satisfying this condition requires that collection
+operations play an architecturally central role in the object database
+programming language.  In particular, operations whose interpretation suggests
+that they are enumerating the elements of a collection must be identified
+and presented to the database engine for expansion, not implemented by
+a program that doles out elements one at a time.</p>
+
+<p>Fortunately, there is a natural way of interpreting the object model
+that preserves its power while providing a framework for exploiting the
+kinds of clustering needed to support high performance analytics.  Instead
+of interpreting the properties of an object as fields in a structure, those
+properties can be interpreted as <i>functions</i> that map one set of objects
+-- the set of instances of the class where the properties are defined --
+to other sets of objects -- the instances of other classes in the
+database.  With this interpretation, the object database programming language
+immediately elevates its perspective from individual objects to collections
+of objects for everything that it does.</p>
+
+<p>This change in interpretation comes without damaging the comprehensibility
+of the database programming language. For example:</p>
+
+<ul>
+<p><i>gm sales</i></p>
+</ul>
+
+<p>is a perfectly natural, object-oriented way to ask for the value of
+<i>gm</i>'s sales -- in fact, it is the expression that would be used in
+a language like Smalltalk.  The change in perspective primarily occurs under
+the covers of the database programming language.  From that perspective,
+this expression applies the function <i>sales</i> to the collection of
+objects returned from the function <i>gm</i>.  Presumably, <i>gm</i> is
+a function defined in the user's current environment that returns the <i>Company</i>
+object representing General Motors.  Standard object-oriented mechanisms
+like inheritance remain applicable -- they are used as before to locate
+<i>function</i> implementations based on the kinds of objects encountered.</p>
+
+<p>Not all of an object's state is needed at once -- only <i>gm</i>'s <i>sales</i>
+property is accessed from the hundreds, and in some cases, thousands of
+properties typically needed to model a <i>Company</i> object.  That theme
+is recurrent -- consider the expression:</p>
+
+<ul>
+<p><i>gm sales / gm industry sales *&nbsp;100</i></p>
+</ul>
+
+<p>which computes the percentage of <i>gm</i>'s sales relative to the sales
+of its industry.  In this case only the values of <i>gm</i>'s <i>industry</i>
+and <i>sales</i> properties are accessed. </p>
+
+<p>If objects are accessed one at a time, it probably does not matter that
+most of an object's properties are ignored.  It does matter when operations
+are performed on collections of objects and it is not always obvious when
+those operations are being performed.  Although this computation seems to
+be a perfectly benign example of navigation, it uses a hidden collection.
+This example is taken from a real database in which every <i>Industry</i>
+object has a collection-valued property named <i>companyList</i> that records
+the set of <i>Company</i> objects that comprise the <i>Industry</i>. Using
+that list, <i>sales</i> is a derived property of <i>Industry</i> objects
+computed using the expression:</p>
+
+<ul>
+<p><i>companyList total: [sales]</i></p>
+</ul>
+
+<p>Although this expression uses no relational operations or selection
+criteria, it is still optimized by the vertical partitioning of <i>Company</i>
+objects.  Although the database engine references multiple <i>Company</i>
+objects to compute an industry's <i>sales</i>, it only requires the value
+of one property -- <i>sales</i> -- from each of those objects.  The combination
+of vertical object partitioning and the functional interpretation of objects
+allows it to do just that without accessing information in properties that
+are not being used. </p>
+
+<p>Unlike relational systems which require that data be represented in
+<i>first normal form</i> (i.e., no nested collections), the natural definition
+of new object types requires the use and encapsulation of multi-valued
+relationships.  As this example illustrates, the database programming language
+must be prepared to deal with object properties that are themselves collections.
+Among other things, that implies that the database programming language
+must be prepared to deal with and optimize recursive collection operations.
+For example:</p>
+
+<ul>
+<p><i>Company instances select: [sales &gt; industry sales * 0.4]</i></p>
+</ul>
+
+<p>is expected to return the set of companies whose <i>sales</i> is more
+than 40% of their industry's <i>sales</i>.  As before, the set of properties
+needed to process this expression is a small fraction of the total number
+of properties available for <i>Company</i> objects.</p>
+
+<p>Once again, there is
+a natural functional interpretation for this query as the application of
+the composed function <i>[sales &gt;&nbsp;industry sales * 0.4]</i> to
+a set of <i>Company</i> objects.  In using that composed function, the
+database engine first applies the functions <i>sales</i> and <i>industry</i>
+to the set of <i>Company</i> objects passed to the <i>select:</i> operation
+and then applies the functions <i>&gt;</i>, <i>sales</i>, and
+<i>*</i> to the appropriate collection of objects returned from those initial
+function applications.</p>
+
+<p>The nested collection operation within the definition
+of <i>industry sales</i> does not pose a problem and, in fact, presents an
+opportunity for further optimization.  Unlike conventional object-oriented
+programming systems that deal with collection enumerations one element
+at a time, a functional perspective gives the database engine access to
+the entire state of the query and thus gives it an opportunity to restate
+the query in more optimal ways.</p>
+
+<p>There are other benefits to vertical object partitioning and the functional
+interpretation of objects.  One of them is data compression. The database
+engine has the opportunity to build representations of properties optimized
+to their data types and to compress those representations across multiple
+instances.  As a result, it is possible to do things like compress null
+values and object references across sets of instances and to design high
+performance strategies for evaluating the composition of those compressed
+functions.</p>
+
+<p>The creation of a viable technology that uses these techniques is not
+just an academic exercise.  The examples in this section are written using
+the Vision<sup>TM</sup> database programming language from Innovative
+Systems Techniques, Inc.  Vision
+provides the logical modeling power and computational completeness of
+an object-oriented programming language along with a collection-centric
+perspective of database programming.  The first production databases and
+applications built using Vision went into service in 1986
+and remain in use today.  The collection-based storage and control flow
+reorganization techniques described here have been part of Vision
+since its introduction.</p>
+
+<p>
+<hr>
+<table border="0" width="100%">
+<tr>
+<td align="left"><font size="-1">Copyright &copy; 1999 Innovative Systems Techniques, Inc.</font>
+<td align="right"><font size="-1">Updated January 28, 1999</font>
+</table>
+
+<hr>
+
+<font size=-1><Center> 
+| <a href="index.htm">Home</a> 
+| <a href="abtinsyt.htm">About Insyte</a> |
+<br>
+| <a href="vonline.htm">Vision On-line</a> 
+| <a href="visiontech.htm">Vision Technology</a>
+| <a href="vpma.htm">Investment Managers</a>  
+| <a href="trowestory.htm">Client Spotlight</a>
+| <a href="euro.htm">Euro</a> | <a href="findus.htm">Find Us</a>
+| <a href="mailto:insytenet@istvision.com">E-Mail Insyte</a> |
+<br>
+| <a href="toc.htm">Table of Contents</a> |
+
+</center></font>
+
+
+</body></html>

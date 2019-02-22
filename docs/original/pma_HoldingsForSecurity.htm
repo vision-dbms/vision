@@ -1,0 +1,2032 @@
+<!DOCTYPE html>
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="Mozilla/4.04 [en] (WinNT; I) [Netscape]">
+   <TITLE>Vision Upload Format: HoldingsForSecurity</TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF">
+
+<H2>
+Vision Portfolio Management Application Layer: Application</H2>
+| <A HREF="pmaApps.htm">Headstart Applications</A>
+|&nbsp;
+<HR>
+
+<P><FONT SIZE=+2><B>Application: </B><I>HoldingsForSecurity</I></FONT>
+
+<P>&nbsp;
+<H3>
+Summary:</H3>
+The <B>HoldingsForSecurity</B> application is used to display the portfolios
+that hold a security as of a date.
+<H3>
+Inputs:</H3>
+
+<CENTER><TABLE BORDER CELLSPACING=2 CELLPADDING=4 WIDTH="80%" >
+<TR>
+<TH>Position</TH>
+
+<TH>Form Id</TH>
+
+<TH>Description&nbsp;</TH>
+</TR>
+
+<TR>
+<TD>1&nbsp;</TD>
+
+<TD>id&nbsp;</TD>
+
+<TD>Id of the security&nbsp;</TD>
+</TR>
+
+<TR>
+<TD>2&nbsp;</TD>
+
+<TD>-&nbsp;</TD>
+
+<TD>global date override&nbsp;</TD>
+</TR>
+
+<TR>
+<TD>3&nbsp;</TD>
+
+<TD>-&nbsp;</TD>
+
+<TD>Sorting criteria&nbsp;</TD>
+</TR>
+</TABLE></CENTER>
+
+<H3>
+Analysis:</H3>
+
+<UL type=disc>
+<LI>
+The <I>id</I> must reference an existing <B>Security</B> instance.</LI>
+
+<LI>
+If parameter 3 is supplied, it specifies the sorting criteria. By default,
+the report is sorted from highest to lowest shares.</LI>
+
+<LI>
+This report is restricted to <B>Portfolios</B> that own the security. No
+other <B>Account</B> subclasses are included.</LI>
+
+<LI>
+The basic report displays portfolios as rows and the following columns:</LI>
+
+<DL>
+<DD>
+Portfolio Id</DD>
+
+<DD>
+Portfolio Name</DD>
+
+<DD>
+Shares held in Portfolio</DD>
+
+<DD>
+Total market value of holding</DD>
+
+<DD>
+Percent of portfolio in this security</DD>
+</DL>
+
+<LI>
+If no global currency has been specified, the portfolio market values are
+expressed in the security's base currency.</LI>
+</UL>
+
+<H3>
+Key Data Feeds:</H3>
+
+<UL type=disc>
+<LI>
+<I><A HREF="pma_HoldingsFeed.htm">HoldingsFeed</A></I></LI>
+</UL>
+
+<H3>
+Related Reports:</H3>
+
+<UL type=disc>
+<LI>
+<I><A HREF="pma_SecurityProfile.htm">SecurityProfile</A></I></LI>
+
+<LI>
+<I><A HREF="pma_AccountProfile.htm">AccountProfile</A></I></LI>
+
+<LI>
+<I><A HREF="pma_HoldingsHistoryForSecurity.htm">HoldingsHistoryForSecurity</A></I></LI>
+</UL>
+
+<H3>
+Sample Usage:</H3>
+
+<UL type=disc>
+<PRE><B><TT>Interface ApplicationWS runWith: "HoldingsForSecurity", "DELL" ;</TT></B></PRE>
+</UL>
+
+<H3>
+Sample Input:</H3>
+<FORM NAME=ApplicationForm ACTION="http://visionWeb/cgi-bin/vquery.exe/default/">
+<CENTER><TABLE BORDER CELLSPACING=2 CELLPADDING=8 WIDTH="50%" >
+<TR>
+<TH ALIGN=RIGHT BGCOLOR="#ADD8E6">Enter Security:&nbsp;</TH>
+
+<TD><INPUT TYPE=text NAME= id SIZE= 15 VALUE= "24702510"><INPUT TYPE=submit value=Submit></TD>
+</TR>
+
+<TR>
+<TH><FONT SIZE=-1>Date:</FONT>
+<BR><INPUT TYPE=text NAME=globalDate VALUE= "19990115"></TH>
+
+<TH><FONT SIZE=-1>Currency:</FONT>
+<BR><SELECT NAME=globalCurrency><OPTION VALUE=LOC SELECTED><FONT SIZE=-1>Local&nbsp;<OPTION VALUE=USD >United
+States Dollar&nbsp;<OPTION VALUE=ARS>Argentine Peso&nbsp;<OPTION VALUE=AUD>Australian
+Dollar&nbsp;<OPTION VALUE=ATS>Austrian Schilling&nbsp;<OPTION VALUE=BEF>Belgian
+Franc&nbsp;<OPTION VALUE=BRL>Brazilian Real&nbsp;<OPTION VALUE=GBP>British
+Pound&nbsp;<OPTION VALUE=CAD>Canadian Dollar&nbsp;<OPTION VALUE=CLP>Chilean
+Peso&nbsp;<OPTION VALUE=CNY>Chinese (yuan) Renmin&nbsp;<OPTION VALUE=COP>Columbian
+Peso&nbsp;<OPTION VALUE=CZK>Czechoslovakian Korun&nbsp;<OPTION VALUE=DKK>Danish
+Krone&nbsp;<OPTION VALUE=EGP>Egyptian Pound&nbsp;<OPTION VALUE=EUR>Euro
+Dollar&nbsp;<OPTION VALUE=FIM>Finnish Markka&nbsp;<OPTION VALUE=FRF>French
+Franc&nbsp;<OPTION VALUE=DEM>German Deutschmark&nbsp;<OPTION VALUE=GRD>Greek
+Drachma&nbsp;<OPTION VALUE=HKD>Hong Kong Dollar&nbsp;<OPTION VALUE=HUF>Hungarian
+Forint&nbsp;<OPTION VALUE=INR>Indian Rupee&nbsp;<OPTION VALUE=IDR>Indonesian
+Rupiah&nbsp;<OPTION VALUE=IEP>Irish Pound&nbsp;<OPTION VALUE=ILS>Israeli
+Shekel&nbsp;<OPTION VALUE=ITL>Italian Lira&nbsp;<OPTION VALUE=JMD>Jamaican
+Dollar&nbsp;<OPTION VALUE=JPY>Japanese Yen&nbsp;<OPTION VALUE=JOD>Jordanian
+Dinar&nbsp;<OPTION VALUE=KES>Kenyan Shilling&nbsp;<OPTION VALUE=LUF>Luxembourg
+Franc&nbsp;<OPTION VALUE=MYR>Malaysian Ringgit&nbsp;<OPTION VALUE=MAD>Moroccan
+Dirham&nbsp;<OPTION VALUE=NLG>Netherlands Guilder&nbsp;<OPTION VALUE=MXP>New
+Mexican Peso&nbsp;<OPTION VALUE=NZD>New Zealand Dollar&nbsp;<OPTION VALUE=NGN>Nigerian
+Naira&nbsp;<OPTION VALUE=NOK>Norwegian Krone&nbsp;<OPTION VALUE=PKR>Pakistani
+Rupee&nbsp;<OPTION VALUE=PEN>Peruvian new Sol&nbsp;<OPTION VALUE=PHP>Philippine
+Peso&nbsp;<OPTION VALUE=PLZ>Polish Zloty&nbsp;<OPTION VALUE=PTE>Portugese
+Escudo&nbsp;<OPTION VALUE=SGD>Singapore Dollar&nbsp;<OPTION VALUE=ZAR>South
+African Rand&nbsp;<OPTION VALUE=KRW>South Korean Won&nbsp;<OPTION VALUE=ESP>Spanish
+Peseta&nbsp;<OPTION VALUE=LKR>Sri Lankan Rupee&nbsp;<OPTION VALUE=SEK>Swedish
+Krona&nbsp;<OPTION VALUE=CHF>Swiss Franc&nbsp;<OPTION VALUE=TWD>Taiwan
+Dollar&nbsp;<OPTION VALUE=THB>Thailand Baht&nbsp;<OPTION VALUE=TRL>Turkish
+Lira&nbsp;<OPTION VALUE=VEB>Venezuelan Bolivar&nbsp;<OPTION VALUE=ZWD>Zimbabwe
+Dollar&nbsp;</FONT></SELECT></TH>
+</TR>
+</TABLE></CENTER>
+
+<H3>
+<INPUT TYPE=hidden NAME=appName VALUE="HoldingsForSecurity"></FORM></H3>
+
+<H3>
+Sample Output:</H3>
+
+<UL type=disc>
+<CENTER>
+<H3>
+<FONT FACE="Arial"><FONT COLOR="#00008B"><FONT SIZE=+0>--- Holdings in
+DELL COMPUTER CORP COM ---</FONT></FONT></FONT></H3></CENTER>
+
+<CENTER>
+<H4>
+<FONT FACE="Arial"><FONT COLOR="#00008B"><FONT SIZE=+0>Data As Of: 1/13/1999
+--- Currency: United States Dollar</FONT></FONT></FONT></H4></CENTER>
+
+<CENTER>
+<H4>
+<FONT FACE="Arial"><FONT COLOR="#00008B"><FONT SIZE=+0>Latest Price: 79.3125</FONT></FONT></FONT></H4></CENTER>
+
+<HR align=center width=50%>
+<CENTER><TABLE BORDER CELLSPACING=2 WIDTH="80%" >
+<TR>
+<TH ALIGN=CENTER VALIGN=TOP COLSPAN="5"><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>(sorted
+by shares ; restricted to Portfolios)</FONT></FONT></FONT></TH>
+</TR>
+
+<TR>
+<TH ALIGN=CENTER VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=-1>Code</FONT></FONT></FONT></TH>
+
+<TH ALIGN=CENTER VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=-1>Account
+Name</FONT></FONT></FONT></TH>
+
+<TH ALIGN=CENTER VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=-1>Shares</FONT></FONT></FONT></TH>
+
+<TH ALIGN=CENTER VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=-1>Market
+Value</FONT></FONT></FONT></TH>
+
+<TH ALIGN=CENTER VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=-1>%
+of Port</FONT></FONT></FONT></TH>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;Total
+for Security:</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+2,876,150</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;
+227,716,359</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>732</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 732&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+693,700</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+55,019,081</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.37</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>982</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 982&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+247,600</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+19,637,775</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.57</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>387</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 387&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+191,800</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+15,212,138</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+1.99</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>179</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 179&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+90,700</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+7,193,644</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.76</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>593</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 593&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+86,300</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+6,844,669</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.97</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>923</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 923&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+82,000</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+6,503,625</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+5.09</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>968</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 968&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+67,800</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+5,377,388</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+5.21</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>051</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 051&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+59,700</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4,734,956</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+2.00</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>003</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 003&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+58,800</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4,663,575</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.96</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>959</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 959&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+58,200</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4,615,988</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.88</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>207</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 207&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+49,800</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+3,949,762</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+1.54</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>343</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 343&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+49,800</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+3,949,762</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+2.26</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>722</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 722&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+45,800</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+3,632,512</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.73</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>909</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 909&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+45,300</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+3,592,856</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.62</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>088</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 088&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+39,400</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+3,124,912</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.73</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>678</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 678&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+39,000</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+3,093,188</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+5.06</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>323</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 323&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+37,700</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+2,990,081</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.75</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>844</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 844&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+36,300</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+2,879,044</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.25</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>099</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 099&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+35,400</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+2,807,662</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.82</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>213</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 213&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+31,600</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+2,506,275</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+1.96</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>263</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 263&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+31,600</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+2,506,275</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.61</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>132</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 132&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+31,400</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+2,490,412</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+5.42</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>002</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 002&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+30,900</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+2,450,756</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+5.06</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>124</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 124&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+26,200</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+2,077,988</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+5.06</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>119</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 119&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+25,700</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+2,038,331</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+5.08</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>332</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 332&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+25,400</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+2,014,538</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.87</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>602</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 602&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+21,900</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+1,736,944</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.70</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>019</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 019&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+20,000</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+1,277,500</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.24</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>892</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 892&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+19,000</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+1,506,938</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.35</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>532</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 532&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+18,600</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+1,475,212</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+5.24</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>369</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 369&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+15,800</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+1,253,138</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.79</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>638</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 638&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+15,600</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+1,237,275</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.61</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>474</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 474&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+15,300</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+1,213,481</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+5.10</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>679</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 679&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+15,000</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+1,189,688</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.74</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>963</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 963&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+14,600</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+1,157,962</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.98</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>729</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 729&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+14,600</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+1,157,962</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+2.61</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>033</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 033&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+13,600</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+1,078,650</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+2.77</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>232</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 232&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+12,500</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+991,406</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+3.28</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>753</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 753&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+12,500</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+991,406</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+5.26</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>728</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 728&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+12,500</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+991,406</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+2.68</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>863</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 863&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+12,500</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+991,406</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.40</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>133</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 133&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+12,300</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+975,544</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.99</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>022</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 022&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+12,100</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+959,681</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.58</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>102</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 102&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+11,400</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+904,162</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+5.05</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>473</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 473&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+10,700</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+848,644</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.83</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>669</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 669&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+10,700</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+848,644</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+3.07</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>872</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 872&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+10,400</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+824,850</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+5.33</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>082</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 082&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+10,200</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+808,988</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.79</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>538</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 538&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+10,200</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+808,988</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.63</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>779</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 779&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+10,200</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+808,988</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+5.54</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>314</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 314&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+10,000</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+793,125</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.74</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>374</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 374&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+9,600</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+761,400</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+5.07</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>953</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 953&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+9,400</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+745,538</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.78</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>472</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 472&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+9,400</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+745,538</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+3.51</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>244</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 244&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+9,200</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+729,675</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+5.08</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>893</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 893&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+9,100</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+721,744</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+5.03</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>169</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 169&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+8,700</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+690,019</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.60</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>759</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 759&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+8,700</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+690,019</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.66</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>382</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 382&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+8,600</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+682,088</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.31</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>873</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 873&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+8,600</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+682,088</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.64</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>899</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 899&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+8,600</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+682,088</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+2.90</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>444</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 444&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+8,400</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+666,225</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+5.09</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>303</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 303&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+7,100</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+563,119</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.75</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>744</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 744&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+7,000</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+555,188</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.42</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>714</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 714&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+6,800</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+539,325</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.33</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>063</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 063&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+6,700</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+531,394</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+2.27</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>572</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 572&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+6,700</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+531,394</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+1.55</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>978</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 978&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+6,600</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+523,462</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+5.52</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>412</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 412&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+6,100</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+483,806</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+2.32</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>644</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 644&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+6,100</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+483,806</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.47</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>353</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 353&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+6,100</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+483,806</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.81</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>059</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 059&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+5,900</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+467,944</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.31</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>553</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 553&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+5,800</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+460,012</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+5.02</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>522</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 522&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+5,800</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+460,012</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+2.13</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>964</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 964&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+5,800</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+370,475</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+2.34</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>874</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 874&nbsp;&nbsp;&nbsp;&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+5,800</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+460,012</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+5.18</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>813</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 813&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+5,600</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+444,150</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+2.55</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>363</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 363&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+5,600</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+444,150</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.88</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>944</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 944&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+5,600</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+444,150</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.50</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>579</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 579&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+5,600</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+444,150</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+2.07</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>573</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 573&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+5,600</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+444,150</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.75</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>163</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 163&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+5,500</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+436,219</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.95</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>992</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 992&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+5,500</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+436,219</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+3.05</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>223</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 223&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+5,500</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+436,219</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.85</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>834</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 834&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+5,200</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+412,425</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+5.13</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>699</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 699&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+4,800</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+380,700</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.94</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>544</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 544&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+4,800</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+380,700</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+5.22</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>682</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 682&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+4,400</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+348,975</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+3.31</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>093</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 093&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+4,400</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+348,975</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+2.10</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>393</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 393&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+4,400</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+348,975</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.73</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>734</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 734&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+4,400</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+348,975</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+5.04</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>674</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 674&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+4,200</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+333,112</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.80</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>912</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 912&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+4,000</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+317,250</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+2.59</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>543</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 543&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+3,700</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+293,456</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+2.43</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>317</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 317&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+3,700</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+293,456</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+1.79</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>622</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 622&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+3,600</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+285,525</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+3.09</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>653</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 653&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+3,600</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+285,525</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+5.02</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>773</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 773&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+3,400</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+269,662</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+5.26</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>689</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 689&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+3,400</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+269,662</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+3.30</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>904</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 904&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2,900</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+230,006</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+5.11</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>043</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 043&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2,600</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+206,212</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+2.35</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>962</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 962&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2,600</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+206,212</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+1.59</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>524</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 524&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2,400</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+190,350</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.79</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>224</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 224&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2,400</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+190,350</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+2.99</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>243</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 243&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2,100</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+166,556</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+2.26</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>172</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 172&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2,100</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+166,556</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+1.52</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>143</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 143&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+1,500</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+118,969</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+2.31</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>072</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 072&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+1,500</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+118,969</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+1.56</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>603</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 603&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+1,200</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+95,175</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+2.78</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>254</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 254&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+1,000</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+79,312</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+1.74</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>424</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Insyte
+Test 424&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+650</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+51,553</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;
+4.19</FONT></FONT></FONT></TD>
+</TR>
+</TABLE></CENTER>
+
+<HR align=center width=50%>
+<BR>&nbsp;</UL>
+
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy 1999 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated January 28, 1999</font>
+</table></BODY>
+</HTML>

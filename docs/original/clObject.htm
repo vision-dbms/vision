@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Class: Object </title>
+</head>
+<body bgcolor = white>
+
+<h2>Vision Class: Object</h2>
+<p>
+     | <a href="FHome.htm">Home</a> | <a href="clXRef.htm">Class XRef</a> |
+<hr> 
+<h3>Topics Covered:</h3> 
+<ul type=square> 
+<li><a href="#overview">Overview</a>
+<li><a href="#popular">Frequently Used Messages</a>
+<li><a href="#basic">Object Characteristics</a>
+<li><a href="#display">Display Messages</a>
+<li><a href="#evaluation">Evaluation Messages</a>
+<li><a href="#classes">Class and Instance Messages</a>
+<li><a href="#messages">Message Management Messages</a>
+<li><a href="#identity">Object Identity Messages</a>
+<li><a href="#constant">Object Constants</a>
+<li><a href="#currency">Currency Messages</a>
+<li><a href="#general">General Access and Update Messages</a>
+</ul>
+<p>
+<hr>
+<h3><a name="overview">Overview</a></h3> 
+<p> 
+The <b>Object</b> class is a direct or indirect super class of all
+other classes in the database.  Any message defined at <i>Object</i>
+is applicable to all objects.  Any subclass can redefine the behavior
+of a message defined at the <i>Object</i> class.  You do not normally
+create instances of the class <i>Object</i> directly.  When you 
+create instances in another class, a new instance is created in
+each of that class' super classes including <i>Object</i>.
+<p>
+The major subclasses of <i>Object</i> are:
+<font size=+1><pre>
+          <b>Object</b>
+              <a href="clBoolean.htm">Boolean</a>
+              <a href="clDate.htm#dr">DateRange</a>
+              <a href="clDict.htm">Dictionary</a>
+              <a href="clEntity.htm">Entity</a>
+              Function
+                  <a href="clBlock.htm">Block</a>
+                  <a href="clIList.htm">IndexedList</a>
+                  <a href="clList.htm">List</a>
+                  <a href="clTS.htm">TimeSeries</a>
+              Ordinal
+                  <a href="clDate.htm">Date</a>
+                  <a href="clNumber.htm">Number</a>
+                  <a href="clString.htm">String</a>
+              ToolKit
+                  <a href="tkOpenVision.htm">OpenVision</a>
+                  <a href="tkSchema.htm">Schema</a>
+                  <a href="tkInterface.htm">UserInterface</a>
+             <a href="clNA.htm">Undefined</a>
+
+</pre></font>
+
+<p>
+<hr>
+<h3><a name="popular">Frequently Used Messages</a></h3>
+<p>
+Messages defined at <i>Object</i> are available to all objects
+in the database.  The following tables summarize the most
+frequently used messages.  They are described in more detail
+in later sections.
+<p>
+The following messages are used to <b>access</b> and <b>display</b>
+basic information about a specific object:
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+</tr>
+
+<tr>
+<td><a href="#basic"><i>code</i></a>
+<td><i>String</i> representing <i>recipient's</i> user-defined id
+<tr>
+<td><a href="#basic"><i>creationDate</i></a>
+<td><i>Date</i> of <i>recipient's</i> creation
+<tr>
+<td><a href="#basic"><i>whatAmI</i></a>
+<td><i>String</i> identifying <i>recipient's</i> class
+<tr>
+<td><a href="#display"><i>print</i></a>
+<td>Display <i>recipient</i> using default format for its class
+<tr>
+<td><a href="#display"><i>print:</i></a>
+<td>Display <i>recipient</i> using supplied format for 
+<tr>
+<td><a href="#display"><i>printNL</i></a>
+<td>Display <i>recipient</i> using default format followed by a new line
+<tr>
+<td><a href="#display"><i>printNL:</i></a>
+<td>Display <i>recipient</i> using supplied format followed by a new line
+<tr>
+<td><a href="#descriptive"><i>displayInfo</i></a>
+<td>Display a line of summary information about <i>recipient</i>
+<tr>
+<td><a href="#descriptive"><i>profile</i></a>
+<td>Display a descriptive report about <i>recipient</i>
+</tr></table></Center>
+
+<p>
+The following messages are used to <b>evaluate</b> programs,
+sending all statements to the recipient object:
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+</tr>
+<tr>
+<td><a href="#do:"><i>do: [] </i></a>
+<td>Evaluate <i>parameter</i> in the context of <i>recipient</i>
+and return the <i>recipient</i>
+<tr>
+<td><a href="#do:"><i>send: [] </i></a>
+<td>Evaluate <i>parameter</i> in the context of <i>recipient</i>
+and return the result of evaluating <i>parameter</i>
+<tr>
+<td><a href="#extendBy:"><i>extendBy: [] </i></a>
+<td>Evaluate <i>parameter</i> in the context of <i>recipient</i>
+and return a specialization of <i>recipient</i> that includes
+variables defined in <i>parameter</i>
+</tr></table></Center>
+
+<p>
+The following additional messages are frequently used:
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+</tr>
+<tr>
+<td><a href="#compare"><i>=</i></a>
+<td>Is <i>recipient</i> equal to <i>parameter</i>?
+<tr>
+<td><a href="#compare"><i>!=</i></a>
+<td>Is <i>recipient</i> not equal to <i>parameter</i>?
+<tr>
+<td><a href="clList.htm#basic"><i>asList</i></a>
+<td>Convert <i>recipient</i> to a <i>List</i> containing one element
+<tr>
+<td><a href="#extensions"><i>asSelf</i></a>
+<td>Return <i>recipient</i> stripped of any extensions
+<tr>
+<td><a href="Output.htm#convert"><i>asString</i></a>
+<td>Convert <i>recipient</i> to a <i>String</i> 
+<tr>
+<td><a href="#isMessages"><i>isNA</i></a>
+<td>Is <i>recipient</i> an instance of the <i>Undefined</i> class?
+<tr>
+<td><a href="#isMessages"><i>isntNA</i></a>
+<td>Is <i>recipient</i> not an instance of the <i>Undefined</i> class?
+<tr>
+<td><a href="clNA.htm#else"><i>else: [ ] </i></a>
+<td>If <i>recipient</i> is <i>NA</i> evaluate <i>parameter</i>; otherwise,
+return <i>recipient</i>
+<tr>
+<td><a href="clNA.htm#else"><i>elseIf:[] then: []</i></a>
+<td>If <i>recipient</i> is <i>NA</i> evaluate <i>parameter1</i>; if it is
+<i>TRUE</i>, evaluate <i>parameter2</i> otherwise,
+return <i>recipient</i>
+<tr>
+<td><a href="clNA.htm#conditional"><i>ifTrue:[]ifFalse:[]else:[]</i></a>
+<td>If <i>recipient</i> is <i>TRUE</i> evaluate <i>parameter1</i>; 
+if <i>recipient</i> is <i>FALSE</i> evaluate <i>parameter2</i>; 
+otherwise, evaluate <i>parameter3</i>
+</tr></table></Center>
+
+<p>
+The following messages are used to perform class-level operations
+and are normally sent to the default instance of a class:
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+</tr>
+<tr>
+<td><a href="#classCreation"><i>createSubclass:</i></a>
+<td>Create a subclass of the <i>recipient</i>
+<tr>
+<td><a href="#instancesAccess"><i>instanceList</i></a>
+<td><i>List</i> of instances in <i>recipient's</i> class
+<tr>
+<td><a href="#instanceCreation"><i>createInstance:</i></a>
+<td>Create instance in <i>recipient's</i> class
+<tr>
+<td><a href="#messageCreate"><i>defineFixedProperty:</i></a>
+<td>Define fixed property in <i>recipient's</i> class
+<tr>
+<td><a href="#messageCreate"><i>define:</i></a>
+<td>Define time series property in <i>recipient's</i> class
+<tr>
+<td><a href="#messageCreate"><i>define:toBe:</i></a>
+<td>Define class constant in <i>recipient's</i> class
+<tr>
+<td><a href="#messageCreate"><i>defineMethod:</i></a>
+<td>Define method in <i>recipient's</i> class
+<tr>
+<td><a href="#messageAccess"><i>getMessage:</i></a>
+<td>Retrieve the <i>MessageImplementationDescriptor</i> 
+in <i>recipient's</i> class
+for the message named by <i>parameter</i> 
+<tr>
+<td><a href="#messageAccess"><i>showMessages</i></a>
+<td>Display all messages defined directly for <i>recipient's</i> class
+<tr>
+<td><a href="#messageAccess"><i>showMessagesX</i></a>
+<td>Display all messages defined  for <i>recipient's</i> class and
+its superclasses
+<tr>
+<td><a href="#classAccess"><i>showInheritance</i></a>
+<td>Display the <i>recipient's</i> position in the class hierarchy
+</tr></table></Center>
+
+<p>
+<hr>
+<h3><a name="basic">Object Characteristics</a></h3>
+<p>
+The properties <i>code</i> and <i>creationDate</i> are defined for 
+all objects.  The <i>code</i> normally contains a string that identifies
+the object.  The <i>creationDate</i> contains the date that the object
+was created.  
+Note that the <i>code</i> value may not be unique and
+both properties can have an <i>NA</i> value.  For example, instances
+of many of the built-in classes such as <i>Number</i> and <i>String</i>
+do not have these property values set.  Although any method can
+initialize and reset these values, these properties are usually updated
+as part of the <a href="Classes.htm#instance">instance creation process</a>.
+<p>
+An object respond to the message <i>whatAmI</i> by returning the
+name of its class as a string.  An object respond to the message
+<i>classDescriptor</i> by returning the instance of the class
+<a href="Classes.htm#cd"><i>Schema ClassDescriptor</i></a> that
+corresponds to the object's class.
+<p>
+<a name="isMessages"> </a>
+All objects respond to the messages <i>isNA</i> and <i>isntNA</i>,
+returning a <i>Boolean</i> value.  Unless an object is an instance
+of the <a href="clNA.htm"><i>Undefined</i></a> class, the value
+returned by the <i>isNA</i> message will always be <i>FALSE</i>
+and the value returned by the <i>isntNA</i> message will always be 
+<i>TRUE</i>.
+<p>
+Whenever a new class is created, the message is<i>XXX</i> 
+(where <i>XXX</i> is the class name) is defined as a class constant
+for the new class and for <i>Object</i>.  The value of the constant
+for the new class is <i>TRUE</i> and the value for the <i>Object</i>
+class is <i>FALSE</i>.  These messages are automatically defined
+when you create new classes using the
+<a href="Classes.htm#subclass"><i>createSubclass:</i></a>
+message.  As a result, you can send messages such as
+<i>isNumber</i>, <i>isString</i>, <i>isDictionary</i>, and 
+<i>isList</i> to any object.  For example, the expression:<pre><tt><b>
+     3 isString
+</b></tt></pre>
+returns <i>FALSE</i> and the expressions:<pre><tt><b>
+     3 isNumber
+</b></tt></pre>
+returns <i>TRUE</i>.
+<p>
+Every Vision class has an instance which represents its
+<a href="Classes.htm#default">default instance</a>.
+The property <i>defaultFlag</i> is defined at <i>Object</i>
+and set to <i>TRUE</i> if the object is the default instance
+for the class.  The messages <i>isDefault</i> and <i>isntDefault</i>
+return a <i>Boolean</i> based on the value of this property.
+<p>
+An object can be <a href="Classes.htm#delete">flagged for deletion</a>
+without actually removing it from the database.  
+The property <i>deletionFlag</i> is defined at <i>Object</i>
+and set to <i>TRUE</i> if the object has been flagged for deletion.
+The messages <i>isActive</i>, <i>isntActive</i>,
+<i>isDeleted</i>, and <i>isntDeleted</i>,
+return a <i>Boolean</i> based on the value of this property.
+<p>
+The message <a href="Classes.htm#subclass"><i>super</i></a>
+returns the instance of the <i>recipient</i> managed by
+its parent class.
+
+<p>
+<hr>
+<h3><a name="display">Display Messages</a></h3>
+<p>
+
+<a name="print"> </a>
+All objects respond to the messages <i>print</i> and <i>print:</i>.
+Many classes redefine these messages.
+By default, the <i>print</i> message displays the name of the
+object's class.  The <i>print:</i> message provides you with control
+over the width of the printing format.  The interpretation of the
+parameter depends on the recipient object's class. More information
+about <a href="Output.htm#print">printing rules</a> is available.
+<p>
+<a name="descriptive"> </a>
+The message
+<a href="mObject.htm#displayInfo"><i>displayInfo</i></a>
+is defined to display an object's class name and value followed by
+a carriage return.  Some classes, such as 
+<a href="clEntity.htm#message">Entity</a> redefine this message to display
+additional information.  For example, the expression:<pre><tt><b>
+     Named Currency US displayInfo ; 
+</b></tt></pre>
+displays the <i>code</i> and <i>name</i> of the object representing the
+US currency.
+<p>
+The message <a href="mObject.htm#profile"><i>profile</i></a>
+is defined to display a descriptive report for an object.
+Some classes, such as 
+<a href="clEntity.htm#message">Entity</a> redefine this message to display
+additional information.  For example, the expression:<pre><tt><b>
+     Named Currency US profile ; 
+</b></tt></pre>
+displays a descriptive report about the object representing the
+US currency.
+
+<p>
+<hr>
+<h3><a name="evaluation">Evaluation Messages</a></h3>
+<p>
+<a name="do:"> </a>
+It is often useful to send a number of messages to the same object.
+For example, you could request a number of values for the Canadian
+currency object using:<pre><tt><b>
+     Named Currency CAD code print ;
+     Named Currency CAD name print ;
+     Named Currency CAD usExchange printNL ;
+</b></tt></pre>
+The <a href="#do:"><i>do:</i></a>
+message can be used to "factor out" 
+the repeated expression in the body of your program, in this
+case the <i>Named Currency CAD</i>.  The previous example could be
+rewritten using:<pre><tt><b>
+     Named Currency CAD
+     do: [ code print; 
+           name print ; 
+           usExchange printNL ;
+         ] ;
+</b></tt></pre>
+<p>
+The general form for the <i>do:</i> message is:<pre><tt>
+     object 
+     do: [ expression1 ;
+           expression2 ;
+           #- ...
+           expressionN ;
+         ] ;
+</tt></pre>
+<p>
+The <i>do:</i> message requires one parameter, a block containing the
+program to evaluate.  All expressions inside the block are evaluated
+for the recipient object, the Canadian currency in the early example.  After
+the block has executed, the <i>do:</i> message returns the recipient
+object.
+<p>
+The
+<i>do:</i> message is one of several messages that
+<a href="Execution.htm#context">changes the context</a> of the message
+execution.  The <a href="mObject.htm#send:"><i>send:</i></a>
+message is identical to the <i>do:</i> message except that it returns
+the result of executing the block instead of the original object.
+<p>
+The general form for the <i>send:</i> message is:<pre><tt>
+     object 
+     send: [ expression1 ;
+             expression2 ;
+             #- ...
+             expressionN ;
+             returnObject
+           ] ;
+</tt></pre>
+<p>
+For example:<pre><tt><b>
+     #--  Case 1: 'do:' returns the original object
+     !result <- "xyz" do:
+        [ printNL ;           #- print recipient
+          count printNL ;     #- print count
+          count               #- result of block
+        ] ;
+     result printNL ;          #- prints string "xyz"
+
+     #--  Case 2: 'send:' returns the result of the block
+     !result <- "xyz" send: 
+        [ printNL ;           #- print recipient
+          count printNL ;     #- print count
+          count               #- result of block
+        ] ;
+     result printNL ;         #- prints 3 (the count returned)
+</b></tt></pre>
+In the first case, the variable <i>result</i> is assigned to the
+object returned by the <i>do:</i> message.  Since <i>do:</i> returns
+the recipient object, the value of <i>result</i> is the string
+<i>"xyz"</i>.  Note that the result returned by the block
+is ignored in this situation.  In the second case, the variable
+<i>result</i> is assigned to the
+object returned by the <i>send:</i> message.  Since <i>send:</i> returns
+the result of evaluating the block, the value of <i>result</i> is the
+recipient string's count, <i>3</i>.
+<p>
+<a name="extendBy:"> </a>
+The <a href="mObject.htm#extendBy:"><i>extendBy:</i></a>
+message is similar to <i>do:</i> except that it returns the
+original object extended by the extra layer of messages defined
+within the block.  
+The general form for the <i>extendBy:</i> message is:<pre><tt>
+     !newObject <- object extendBy:
+         [ !variable1 <- expression1 ;
+           !variable2 <- expression2 ;
+           #- ...
+           !variableN <- expressionN ;
+           ^current define: 'ts1' ;
+           ^current defineMethod: [ | m1 | whatAmI print ; ] ;
+         ] ;
+</tt></pre>
+<p>
+The variable <i>newObject</i> is an 
+<a href="Execution.htm#specialization">instance-level specialization</a>
+of the recipient
+object.  This object responds to all the variables defined by the
+block and inherits from the original object.  For example:<pre><tt><b>
+     !result <- "xyz" extendBy:
+        [ !countPlus1 <- count + 1 ; #- create a variable
+          !countPlus2 <- count + 3 ; #- create another one
+        ] ;
+     result
+     do: [ printNL ;                 #- print string xyz
+           count printNL ;           #- inherited message prints 3
+           countPlus1 printNL ;      #- extension message prints 4.00
+         ] ;
+</b></tt></pre>
+The variable <i>result</i> responds to the message <i>countPlus1</i>
+and any additional messages to which the original <i>String</i>
+object responds such as <i>count</i>.
+<p>
+The <i>extendBy:</i> message can define any number of new messages
+within the block.
+Any number of <i>extendBy: </i> messages can be applied in
+succession.  Each <i>extendBy:</i> creates a new layer for
+resolving messages.  
+<a href="Execution.htm#resolve">Messages are resolved</a>
+by searching from the last extension layer added
+backwards.  For example:<pre><tt><b>
+     "xyz" 
+        extendBy: [ !layer1 <- "this is layer 1" ] .
+        extendBy: [ !layer2 <- "this is layer 2" ] .
+        extendBy: [ !layer3 <- "this is layer 3" ] .
+     do: [ count printNL ;
+           layer1 printNL ;
+           layer2 printNL ;
+           layer3 printNL ;
+        ] ;
+</b></tt></pre>
+Each application of the <i>extendBy:</i> message returns the prior
+recipient plus the new message.  The final <i>do:</i> message
+accesses data from each of these extensions (<i>layer1, layer2,
+layer3</i>) and from the original object (<i>count</i>).
+<p>
+<a name="local"> </a>
+The messages <i>asLocalContextFor:</i> and
+<i>extendedBy:asLocalContextFor:</i>
+are defined at the class <i>Object</i> to provide a way to
+to extend the global environment with additional protocol.
+These messages are described in detail in conjunction with
+the <a href="Execution.htm#local">magic word <i>^local</i></a>.
+
+<p>
+<hr>
+<h3><a name="classes">Class and Instance Messages</a></h3>
+<p>
+A number of messages are defined for the class <i>Object</i>
+are used to create and manage classes and instances.  These
+messages are summarized in the following tables.
+<a name="classCreation"> </a>
+<p>
+The following messages are used to 
+<a href="Classes.htm#subclass"><b>create new subclasses</b></a>
+and are normally sent to the default instance of the class you
+wish to subclass:
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+</tr>
+<tr>
+<td><a href="mObject.htm#createSubclass"><i>createSubclass</i></a>
+<td>Creates and returns subclass of <i>recipient</i>
+<tr>
+<td><a href="mObject.htm#createSubclass:"><i>createSubclass:</i></a>
+<td>Creates and returns subclass of <i>recipient</i>, using
+<i>parameter</i> string to name the new class
+<tr>
+<td><a href="mObject.htm#createSubclass:at:"><i>createSubclass:at:</i></a>
+<td>Creates and returns subclass of <i>recipient</i>, using
+<i>parameter1</i> string to name the new class and <i>parameter2</i>
+to identify the class at which the new class should be named
+<tr>
+<td><a href="mObject.htm#initializeGlobalSubclassProperties">
+<i>initializeGlobalSubclassProperties</i></a>
+<td>Sets value in default instance and defines class methods and
+constants as part of the <i>createSubclass</i> process
+<tr>
+<td><a href="mObject.htm#basicSpecialized"><i>basicSpecialized</i></a>
+<td>Primitive method to
+create and return subclass of <i>recipient</i>, without running
+any special initialization steps
+<tr>
+<td><a href="mObject.htm#newPrototype"><i>newPrototype</i></a>
+<td>Primitive method to create a
+<a href="Classes.htm#prototype">new prototype</a> of <i>recipient</i>
+</tr></table></Center>
+
+<a name="classAccess"> </a>
+<p>
+The following messages are used to determine the recipient's
+<a href="Classes.htm#access"><b>class inheritance</b></a>:
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+</tr>
+<tr>
+<td><a href="mObject.htm#showInheritance"><i>showInheritance</i></a>
+<td>Displays inheritance hierarchy of <i>recipient</i>
+<tr>
+<td><a href="mObject.htm#inheritsFrom:"><i>inheritsFrom:</i></a>
+<td>Is <i>recipient</i> a subclass of <i>parameter</i>?
+<tr>
+<td><a href="mObject.htm#isSuperClassOf:"><i>isSuperClassOf:</i></a>
+<td>Is <i>recipient</i> a superclass of <i>parameter</i>?
+</tr></table></Center>
+
+<p>
+<a name="instanceCreation"> </a>
+The following messages are used to 
+<a href="Classes.htm#instance"><b>create new instances</b></a>
+of a class:
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+</tr>
+
+<tr>
+<td><a href="mObject.htm#createInstance"><i>createInstance</i></a>
+<td>Creates and returns a new instance in <i>recipient's</i> class
+<tr>
+<td><a href="mObject.htm#createInstance:"><i>createInstance:</i></a>
+<td>Creates and returns a new instance in <i>recipient's</i> class,
+using <i>parameter</i> string to name the new instance
+<tr>
+<td><a href="mObject.htm#initializeGlobalInstanceProperties">
+<i>initializeGlobalInstanceProperties</i></a>
+<td>Sets initial values in new instance
+<tr>
+<td><a href="mObject.htm#basicNew"><i>basicNew</i></a>
+<td>Primitive method to
+create and return new instance of <i>recipient's</i> class, without running
+any special initialization steps
+<tr>
+<td><a href="mObject.htm#clusterNew"><i>clusterNew</i></a>
+<td>Primitive method to
+create and return new instance of <i>recipient's</i> class, without running
+any special initialization steps used with some built-in classes to
+ensure that instances are <a href="Classes.htm#cluster">clustered</a>
+</tr></table></Center>
+
+<p>
+<a name="instancesAccess"> </a>
+The following messages are used to 
+<a href="Classes.htm#access"><b>access the instances</b></a>
+in the recipient's class:
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+</tr>
+<tr>
+<td><a href="mObject.htm#instanceList"><i>instanceList</i></a>
+<td>Returns <i>List</i> of all instances in <i>recipient's</i> class
+<tr>
+<td><a href="mObject.htm#masterList"><i>masterList</i></a>
+<td>Returns <i>List</i> of all non-default instances in
+<i>recipient's</i> class
+<tr>
+<td><a href="mObject.htm#activeList"><i>activeList</i></a>
+<td>Returns <i>List</i> of all non-default instances in
+<i>recipient's</i> class that are not flagged for deletion
+</tr></table></Center>
+
+<p>
+Many messages have been defined at the <i>Object</i> class
+to support a variety of database administration fucntions.
+<a href="admDBA.htm">Detailed information</a> is available.
+
+<p>
+<hr>
+<h3><a name="messages">Message Management Messages</a></h3>
+<p>
+A number of messages are defined for the class <i>Object</i>
+are used to create and manage messages.  These
+messages are summarized in the following tables.
+<p>
+<a name="messageCreate"> </a>
+The following messages are used to 
+<a href="Fund.htm#message"><b>create and delete messages</b></a>
+and are normally sent to the default instance of the class:
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+</tr>
+
+<tr>
+<td><a href="mObject.htm#defineFixedProperty:"><i>defineFixedProperty:</i></a>
+<td>Define fixed property named by <i>parameter</i> for
+<i>recipient's</i> class
+<tr>
+<td><a
+href="mObject.htm#defineFixedProperty:withDefault:">
+<i>defineFixedProperty:withDefault:</i></a>
+<td>Define fixed property named by <i>parameter1</i> for
+<i>recipient's</i> class and set default value to <i>parameter2</i>
+<tr>
+<td><a href="mObject.htm#define:"><i>define:</i></a>
+<td>Define time varying property named by <i>parameter</i> for
+<i>recipient's</i> class
+<tr>
+<td><a
+href="mObject.htm#define:withDefault:"><i>define:withDefault:</i></a>
+<td>Define time varying property named by <i>parameter1</i> for
+<i>recipient's</i> class and set default value to <i>parameter2</i>
+<tr>
+<td><a href="mObject.htm#define:toBe:"><i>define:toBe:</i></a>
+<td>Define class constant named by <i>parameter1</i> that returns
+value of <i>parameter2</i>
+<tr>
+<td><a href="mObject.htm#defineMethod:"><i>defineMethod:</i></a>
+<td>Define method for <i>recipient's</i> class using block provided
+as <i>parameter</i>
+<tr>
+<td><a href="mObject.htm#deleteMessage:"><i>deleteMessage:</i></a>
+<td>Delete message named by <i>parameter</i> from <i>recipient's</i>
+class
+</tr></table></Center>
+
+<p>
+<a name="messageAccess"> </a>
+The following messages are used to 
+<a href="Messages.htm#access"><b>access and the display</b></a>
+the messages defined for the recipient's class:
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+</tr>
+
+<tr>
+<td><a href="mObject.htm#getMessage:"><i>getMessage:</i></a>
+<td>Retrieve the <i>MessageImplementationDescriptor</i> 
+in <i>recipient's</i> class for the message named by <i>parameter</i> 
+<tr>
+<td><a href="mObject.htm#getMessages"><i>getMessages</i></a>
+<td>Return <i>List</i> of messages in <i>recipient's</i> class
+<tr>
+<td><a href="mObject.htm#showMessages"><i>showMessages</i></a>
+<td>Display messages in <i>recipient's</i> class
+<tr>
+<td><a href="mObject.htm#getMessagesX"><i>getMessagesX</i></a>
+<td>Return <i>List</i> of messages in <i>recipient's</i> class
+and its superclasses
+<tr>
+<td><a href="mObject.htm#showMessagesX"><i>showMessagesX</i></a>
+<td>Display messages in <i>recipient's</i> class
+and its superclasses
+<tr>
+<td><a href="mObject.htm#getMessagesDefining:"><i>getMessagesDefining:</i></a>
+<td>Return <i>List</i> of messages in <i>recipient's</i> class hierarchy
+that define the message specified by <i>parameter
+<tr>
+<td>
+<a href="mObject.htm#showMessagesDefining:"><i>showMessagesDefining:</i></a>
+<td>Display messages in <i>recipient's</i> class hierarchy
+that define the message specified by <i>parameter
+<tr>
+<td><a href="mObject.htm#getMessageNamesContaining:">
+<i>getMessageNamesContaining:</i></a>
+<td>Return <i>List</i> of messages in <i>recipient's</i> class hierarchy
+with names that contain the substring specified by <i>parameter</i>
+<tr>
+<td><a href="mObject.htm#showMessageNamesContaining:">
+<i>showMessageNamesContaining:</i></a>
+<td>Display messages in <i>recipient's</i> class hierarchy
+with names that contain the substring specified by <i>parameter</i>
+<tr>
+<td><a href="mObject.htm#getMessagesUsing:"><i>getMessagesUsing:</i></a>
+<td>Return <i>List</i> of methods in <i>recipient's</i> class hierarchy
+that use the substring specified by <i>parameter</i>
+<tr>
+<td><a href="mObject.htm#showMessagesUsing:"><i>showMessagesUsing:</i></a>
+<td>Display names of methods in <i>recipient's</i> class hierarchy
+that use the substring specified by <i>parameter</i>
+<tr>
+<td><a href="mObject.htm#showMethodsUsing:"><i>showMethodsUsing:</i></a>
+<td>Display implementations of methods in <i>recipient's</i> class hierarchy
+that use the substring specified by <i>parameter</i>
+<tr>
+<td><a href="mObject.htm#getMessagesInInheritancePath">
+<i>getMessagesInInheritancePath</i></a>
+<td>Return <i>List</i> of messages in <i>recipient's</i> class hierarchy
+<tr>
+<td><a href="mObject.htm#showProperties"><i>showProperties</i></a>
+<td>Display messages defined as properties in <i>recipient's</i> class 
+<tr>
+<td><a href="mObject.htm#selectorList"><i>selectorList</i></a>
+<td>Primitive method to return list of strings representing messages
+defined for <i>recipient</i>
+</tr></table></Center>
+
+<p>
+<hr>
+<h3><a name="identity">Object Identity Messages</a></h3>
+
+<p>
+<a name="compare"> </a>
+The <i>=</i> and <i>!=</i> messages compare the recipient and parameter
+objects for equality.  The <i>==</i> and <i>!==</i> messages compare
+recipient and parameter object for object identity.
+For most classes the <i>=</i> and <i>==</i> messages and
+the <i>!=</i> and <i>!==</i> return the same value.
+For the ordinal classes (i.e., <i>Number, Date, String</i>),
+these messages return different results.
+For example, the <i>integer 3</i> is equal to the <i>double 3.0</i> because
+they have the same value.  The 
+<i>integer 3</i> is not identical to the
+<i>double 3.0</i> because they are not the same object.  Therefore:<pre><tt><b>
+     3 = 3.0
+</b></tt></pre>
+returns <i>TRUE</i> and:<pre><tt><b>
+     3 == 3.0
+</b></tt></pre>
+returns <i>FALSE</i>.  The <i>=</i> and <i>!=</i>
+messages can be redefined for other
+classes as appropriate.  Although you could redefine the <i>==</i> and
+<i>!==</i> messages, this is not normally done.
+<p>
+The messages
+<a href="mObject.htm#isEquivalentTo:"><i>isEquivalentTo:</i></a> and
+<a href="mObject.htm#isntEquivalentTo:"><i>isntEquivalentTo:</i></a> 
+return <i>TRUE</i> (<i>FALSE</i>) if the recipient object is equal to
+(not equal to) the parameter.  At the <i>Object</i> class, the
+<i>isEquivalentTo:</i> message is defined using <i>=</i> and the
+<i>isntEquivalentTo:</i> message is defined to return the 
+opposite logical value.  The <i>isEquivalentTo:</i> message can
+be redefined by subclasses to alter this comparison.  
+<p>
+<a name="extensions"> </a>
+One common mistake when working with object identity occurs when an
+extended object is compared to an unextended object.  Although the
+underlying objects may be the same, these objects will not be
+equal or identical.
+The message
+<a href="Classes.htm#hierarchy"><i>asSelf</i></a> can be used to strip any
+extensions from an object.  It is often useful to send this message
+to the recipient and parameter objects prior to performing any
+equality tests.  For example:<pre><tt><b>
+    Named Currency US = (Named Currency US extendBy: [ !x ] )
+</b></tt></pre>
+returns <i>FALSE</i>, whereas:<pre><tt><b>
+    Named Currency US = (Named Currency US extendBy: [ !x ] ) asSelf
+</b></tt></pre>
+returns <i>TRUE</i>.
+<p>
+The 
+<a href="Classes.htm#access"><i>asBaseObject</i></a>
+message returns the actual object that was
+created with the <i>createInstance</i> message.  When it is sent to
+an extension of an object, it returns the same value that <i>asSelf</i>
+returns.  When it is sent to a super instance of an object, it returns
+the original child object.
+
+<p>
+<hr>
+<h3><a name="constant">Object Constants</a></h3>
+<p>
+Several frequently used values have been defined as constants at the class
+<i>Object</i>.  You can send these messages to any object to access
+the defined constant value.
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+</tr>
+<tr>
+<td><i>NA</i>
+<td>Returns the <i>Undefined</i> value
+<tr>
+<td><i>FALSE</i>
+<td>Returns the boolean value <i>FALSE</i>
+<tr>
+<td><i>TRUE</i>
+<td>Returns the boolean value <i>TRUE</i>
+<tr>
+<td><i>earliestPossibleDate</i>
+<td>Returns the <i>Date</i> representing January 1, 0001
+<tr>
+<td><i>newLine</i>
+<td>Returns a <i>String</i> containing the new line character
+<tr>
+<td><i>newPage</i>
+<td>Returns a <i>String</i> containing the form feed character
+</tr></table></Center>
+
+<p>
+<hr>
+<h3><a name="currency">Currency Messages</a></h3>
+<p>
+The 
+<href="clCurrency.htm"><i>Currency</i> 
+class is used to track exchange rate information between
+currencies.  Several messages have been defined at the <i>Object</i>
+class to support the <b>basic currency protocol</b> for all objects:
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+</tr>
+<tr>
+<td><i>baseCurrency</i>
+<td>Fixed property that stores the actual currency in which data values
+for the <i>recipient</i> are stored and accessed by default
+<tr>
+<td><i>currency</i>
+<td>Returns the current currency override if set, the <i>baseCurrency</i>
+otherwise
+<tr>
+<td><i>currencyFactor</i>
+<td>Returns the exchange rate between the base currency and currency 
+override
+<tr>
+<td><i>setBaseCurrencyTo:</i>
+<td>Sets the base currency of the <i>recipient</i> to the currency
+specified by the <i>parameter</i>
+</tr></table></Center>
+
+<p>
+<hr>
+<h3><a name="general">General Access and Update Messages</a></h3>
+<p>
+
+Several messages have been defined at the <i>Object</i>
+class to support <b>general access and update</b> for all objects:
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+</tr>
+
+<tr>
+<td><a href="mObject.htm#getPotentialChoicesForString:">
+<i>getPotentialChoicesForString:</i></a>
+<td>Returns <i>List</i> of objects in <i>recipient's</i> class that
+could be associated with <i>parameter</i>
+<tr>
+<td><a href="mObject.htm#validateInputString:"><i>validateInputString:</i></a>
+<td>Returns object in <i>recipient's</i> class associated with the
+supplied <i>parameter</i>
+<tr>
+<td><a href="mObject.htm#extract:forDateRange:"<i>extract:forDateRange:</i></a>
+<td>Evaluates <i>parameter1</i> block for <i>recipient</i> for each
+date in <i>parameter2</i>, returning the result as a <i>TimeSeries</i>
+<tr>
+<td><a href="mObject.htm#setProperty:to:"<i>setProperty:to:</i></a>
+<td>Updates <i>parameter1</i> with the value of <i>parameter2</i> in
+<i>recipient</i>
+<tr>
+<td><a href="mObject.htm#updateTS:with:"<i>updateTS:with:</i></a>
+<td>Updates time series indicated by 
+<i>parameter1</i> with the value of <i>parameter2</i> in
+<i>recipient</i>
+
+</tr></table></Center>
+
+<p>
+<hr>
+
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy 1997 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated June 19, 1997</font>
+</table>
+
+</body>
+</html>
+
+

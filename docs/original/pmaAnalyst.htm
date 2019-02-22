@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Portfolio Management Application Analyst Tools</title>
+</head>
+<body bgcolor=white>
+<h2>Vision Portfolio Management Application: Analyst Tools</h2>
+
+<p>
+| <a href="vpma.htm">Application Overview</a> 
+| <a href="pmaApps.htm">Applications</a>
+| <a href="pmaFeeds.htm">Data Feeds</a>
+| <a href="pmaXRef.htm">Application Cross Reference</a>
+|
+<hr>
+<h3>Topics Covered:</h3>
+<ul type=square>
+<li><a href="#overview">Overview</a>
+<li><a href="#upload">Uploading Data</a>
+<li><a href="#items">Finding DataFeed Items</a>
+<li><a href="#usage">Sample Usage</a>
+<li><a href="#workbook">Using the Sample Workbook</a>
+<li><a href="#file">Loading Data From A Text File</a>
+<li><a href="#browser">Relationship to the Application Browser</a>
+<li><a href="#schema">Creating Entities, DataRecords, and Relationships</a>
+<li><a href="#extract">The Data Extraction Module</a>
+</ul>
+
+<p>
+<hr>
+<h3><a name="overview">Overview</a></h3>
+<p>
+
+Two add-ins have been defined that enable an analyst to dynamically
+interact with Vision from within the Excel<sup>TM</sup> environment.
+The <i>Extract</i> add-in provides the ability to download data
+from Vision directly into your spreadsheet.
+If you have installed it, the choice <i>Vision</i>
+will appear in the menu bar at the top of your Excel spreadsheet.
+The <i>VUpload</i> add-in provides the ability to upload data
+to Vision directly from your spreadsheet.
+If you have installed it, the choice <i>VUpload</i>
+will appear in the menu bar to the right of the <i>Vision</i> choice.
+If you do not see a choice, you will need to 
+<a href="admInstExcel.htm">install the add-in.</a>
+<p>
+The first time you select an option from the <i>Vision</i> or
+<i>VUpload</i> menu, you will be prompted for a password.
+If you prefer, you can explicitly log in using the <i>Connect</i>
+choice in the <i>Vision</i> menu.
+You should supply your password for the VisionServer machine and
+click <i>OK</i>.  
+You will need to provide the password whenever you restart
+Excel and after you
+disconnect from Vision (using the <i>Disconnect</i> choice in the
+<i>Vision</i> menu).
+
+<p>
+<hr>
+<h3><a name="upload">Uploading Data</a></h3>
+<p>
+The <i>VUpload</i> component allows you
+to temporarily make private modifications to the database
+using the available data feed formats.
+You can use <i>VUpload</i> to modify existing data, create new
+instances, and define new structures including new data feed formats.
+Several data feeds are also available for controlling display aspects of the
+applications you view through your browser.
+When you exit Excel, your changes to the database are not saved.  
+If you save your changes as one or more delimited text files,
+they can be committed to the database
+permanently by the Vision Administrator using the
+<a href="pmaDBA.htm"><i>Vision Administrator Module</i></a>.
+<p>
+
+All loads are done by selecting a
+<a href="pmaFeeds.htm"> predefined feed name</a> associated
+with the type of data you wish to upload.
+For example, if you want 
+to load Company data, you use the feed named <i>CompanyMaster</i>.
+The feed can be selected via a menu or included as part of a
+range of data to upload.
+<p>
+
+When you have a small amount of data that is missing or needs to be updated, 
+you can define it in a range and upload it.
+In this example, the Companies <i>Comp1</i>, <i>Comp2</i>, and <i>Comp3</i> 
+are missing from a database. 
+
+<p>
+<center>
+<img src="upload.gif" width=449 height=170 border=1 alt="Selected Range For Interface">
+</center>
+<p>
+
+After selecting the range, it is loaded into the database by doing the following:
+<p>
+
+
+1. Select <i>Upload Data</i> From the <i>VUpload</i> menu.  
+<p>
+<ul>The following dialog box appears.</ul>
+<p>	
+  
+<center>
+<img src="upload1.gif" width=390 height=335 alt="Upload Dialog Box">
+</center>
+<p>
+
+<ul>
+The <i>Class:</i> list box display the categories.  Each category contains one or more feed names.
+</ul>
+<p>
+
+2. Select the class <i>Entity</i> from the <i>Category</i> list box.   
+The list of available Entity feeds is displayed in the list box on the right.
+
+<p>
+
+<center>
+<img src="upload2.gif" width=391 height=334 alt="Upload Dialog Box With Feed Named">
+</center>
+<p>
+
+3. Select <i>CompanyMaster</i> from the <i>Feed</i> list box. 
+<p>
+<ul>A description of the feed appears in the display area.</ul>
+<p>
+
+<center>
+<img src="upload3.gif" width=391 height=334 alt="Upload Dialog Box With Feed Descriptions">
+</center>
+<p>
+
+4. Select the <i>Range</i> button.
+<p>
+<ul>
+The following dialog box appears.
+</ul>
+
+<p>
+<center>
+<img src="upload4.gif" width=182 height=117 border=1 alt="Create Entity Dialog Box">
+</center>
+<p>
+
+
+5. Select <i>Yes</i> to indicate that it is okay to create new entities.
+
+<p>
+<ul>
+The Diagnostics dialog box appears.  
+</ul>
+
+<p>
+<center>
+<img src="upload5.gif" width=287 height=208 border=1 alt="Diagnostics Dialog Box">
+</center>
+
+6. Select OK.
+<p>
+
+You have successfully loaded the new companies into your database.  
+If you wanted to see the entire Diagnostics report, you can select <i>Details</i>
+and the sheet name "Diagnostics" will display the following data:
+<p>
+
+<center>
+<img src="upload6.gif"width=559 height=303 alt="Diagnostics Worksheet" border=1>
+</center>
+
+<p>
+
+If you type the feed name above the first cell of the range, 
+you can load the same data without needing to pick the feed from the interface.
+Using the companies Comp1,Comp2, and Comp3 from the previous example,
+the feed is set up as follows:
+
+<p>
+<center>
+<img src="upload8.gif" width=435 height=178 alt="CompanyMaster Selected Spreadsheet">
+</center>
+
+<p>
+Make sure the feed name is included as the top left cell in the
+range.  Do the following:
+<p>
+
+1. Select <i>UploadData</i> from the <i>VUpload</i> Menu.
+
+<ul> You should see the Diagnostics Dialog Box</ul>.
+<p>
+
+2. Select OK.
+
+You have now successfully loaded the data.
+<p>
+<blockquote><hr>
+<i>Note:</i>If you want to use the interface to upload data, the cursor 
+cannot be in a cell that has the name of a feed. 
+<hr></blockquote>
+
+<p>
+<hr>
+<h3><a name="items">Finding DataFeed Items</a></h3>
+<p>
+
+The first line of your range defines the names of the items to load.
+If you do not know the items for a specific feed, you can use the <i>Items</i> button on the interface to find them.
+They will then be displayed on the sheet named "Item".  To use 
+this process to find the items for <i>CompanyMaster</i>, do the following:
+<p>
+1. Select Upload Data from the VUpload menu.
+<p>
+2. Select Entity.
+<p>
+3. Select CompanyMaster.
+<p>
+4. Select The <i>Items</i> Button.
+<p>
+<ul>
+You should see the items defined for <i>CompanyMaster</i> as shown below.
+</ul>
+<p>
+
+
+<center>
+<img src="upload7.gif" width=482 height=243 border=1 alt="Items Worksheet" border=1>
+</center>
+
+
+
+<p>
+<hr>
+<h3><a name="usage">Sample Usage</a></h3>
+<p>
+Vision data feeds provide a potent means for an analyst that wants
+to use the Vision browser applications on dynamically generated
+information.  For example, an analyst may want to create a composite
+account on the fly that can be used as a benchmark for comparison
+with an existing portfolio.  You can use the 
+<a href="pma_CompositeAccountMaster.htm"><i>CompositeAccountMaster</i></a>
+feed to define <b>CompositeAccount</b> instances and the
+<a href="pma_CompositeAccountMembers.htm"><i>CompositeAccountMembers</i></a>
+feed to update the composition of <b>CompositeAccounts</b> over time.
+You can then run the <a href="pma_AccountCompare.htm">Account Comparison</a>
+or the <a href="pma_AccountCharacteristics.htm">Characteristics </a>
+application from the browser to compare these newly created
+composites with other portfolios.
+<p>
+
+<h4>Creating Composite Accounts</h4>
+<p>
+
+To create instances for the <i>CompositeAccount</i> feed, the minimal headings that are required are id and name. 
+In this example, the instances <i>Compo1</i>, <i>Compo2</i>, and <i>Compo3</i> are defined. 
+<p>
+
+<center>
+<img src="composite1.gif" border=1 width=209 height=155 alt="Composite Account Master Selected">
+</center>
+<p>
+
+1. Select the range. 
+<p>
+2. Select <i>Upload Data</i> from the menu. 
+<p>
+The diagnostics report should confirm that you have successfully loaded the data. 
+
+<p>
+
+You have now successfully created 3 instances of the class <i>CompositeAccount</i>. 
+<p>
+
+<h4>Creating Compostite Account Memberships</h4>
+
+<p>
+To create a <i>CompositeAccountMemberbership</i>, you must supply one or more
+accounts(<i>memberId</i>) and <i>weights</i> for each composite (<i>groupId</i>) 
+Optionally, you can include date as well.
+<p>
+
+<center>
+<img src="composite2.gif" border=1 width=323 height=224 alt="Composite Account Membership Selected">
+</center>
+<p>
+
+
+1. Select the Range.
+<p>
+
+2. Select Upload.
+<p>
+
+The diagnostics message box should indicate that you have created the instances that
+make this relationship correspond to each other.
+
+<p>
+<h4>Running Composite Account Reports From the Browser</h4>
+<p>
+
+To see these newly created composites from the browser, do the following:
+<p>
+
+1. Select <i>Account</i> Reports.
+<p>
+2. Select the <i>Account Comparison</i> Report.
+<p>
+
+3. Enter <i>Compo1</i> in the <i>Account</i> text box, and <i>102</i> in the <i>VS</i> text box.
+<p>
+
+4. Select the <i>Submit</i> button
+<p>
+
+You should see the following output, comparing CompositeAccount <i>Compo1</i> to portfolio <i>102</i> broken down by sector.
+<p>
+
+<center>
+<img src="composite3.gif" border=1 width=789 height=438 alt="Comparison Report">
+</center>
+
+<p>
+<hr>
+<h3><a name="workbook">Using the Sample Workbook</a></h3>
+<p>
+
+The Sample Upload Workbook is an Excel Workbook that contains examples
+of all of the feeds that are available from Vision.  
+It is located in the <i>{fill in the blank}/Samples</i> directory,
+and is called <i>VUSample.xls</i>.
+<p>
+The first Worksheet is the Table Of Contents.  
+The TOC identifies all of the feeds on the sheets, and categorizes each feed.  
+This is an example of the feeds belonging to the category Company.
+
+<p>
+<center>
+<img src="workbook1.gif" width=240 height=308 border=1 alt = "Upload Workbook">
+</center>
+<p>
+The button next to each feed name sends you to the worksheet with the
+corresponding feed name.
+<p>
+
+Each feed that is displayed in the worksheet is there to guide you when
+you set up your own feeds.  This is an example of the <i>CompanyMaster</i> feed.
+<p> 
+<center>
+<img src="workbook2.gif" width=437 height=176 border=1 alt = "Company Profile Workbook Sample">
+</center>
+<p>
+You can insert your own data, select the range, and upload it using the technique described above.
+<p>
+
+<hr>
+<h3><a name="file">Loading Data From A Text File</a></h3>
+<p>
+
+Loading data from a text file that is stored in a PC directory should be used when you have a large amount of data to load. 
+When the file is loaded this way, <i>VUpload</i> bypasses Excel and loads the data directly into Vision. 
+In this example, a <i>CompanyMaster</i> file called <i>comp.txt</i> is located
+in the directory <i>c:\datafiles</i>.  To load the text file, do the following:
+<p>
+1.  Select <i>Upload Data</i> from the <i>VUpload</i> menu.
+<p>
+
+2. At the interface, select the class <i>Entity</i> from the <i>Class</i> list box.   
+<p>
+
+3. Select <i>CompanyMaster</i> from the <i>Feed</i> list box. 
+<p>
+
+4. Select the <i>File</i> button.
+<p>
+<ul> You should see the <i>Open</i> dialog Box.</ul>
+<p>
+
+5. At the <i>Look In</i> text pull down box, find the directory <i>datafiles</i> for the file <i>comp.txt</i>, and select it.  
+<p>
+
+<center>
+<img src="upload9.gif" width=680 height=419 border=1 alt="Open File Dialog Box">
+</center>
+<p>
+
+6. Select Open.
+<p>
+<ul>When the file is loaded, you should see the Diagnostics dialog box.</ul>
+<p>
+
+7. Select OK.
+<p>
+
+<blockquote>
+<hr>
+
+<b>Note:</b> This only works with NT Servers.
+<hr>
+</blockquote>
+
+<p>
+<hr>
+<h3><a name="browser">Relationship to the Application Browser</a></h3>
+<p>
+To use Vision's web-based applications, there needs to be at least
+one Vision session running waiting for browser requests.  These Vision
+sessions are known as <i>listeners</i>.  Two types of listener can
+be started: <i>master listeners</i> and <i>private listeners</i>.
+The <a href="pmaDBA.htm#web">Vision Administrator</a>
+can start one or more master
+listeners which are available and shared by all browser users.
+Analysts using the Excel add-ins automatically start a private listener
+which enables them to view private data via the standard browser
+applications.
+<p>
+When you start Excel and connect to Vision, a private listener is
+automatically started for you.  When you make a Vision request via your
+web browser, it will be routed to this private listener.  Any changes
+you make to the database via Excel will be reflected in any applications
+you run via the web browser.  No one else will see your changes.
+When you exit Excel, these temporary modifications will disappear.
+If you wish to commit your changes to the database permanently,
+you will need to save them into one or more delimited text files and
+notify your administrator.
+
+
+
+<p>
+<hr>
+<h3>
+<a name="schema">Creating New Entities, DataRecords, and Relationships</a>
+</h3>
+
+<p>
+<a name = "entity"><h4>Creating New Entity Classes</h4></a> 
+<p>
+<a href="clEntity.htm"><i>Entity</i> classes</a>
+ are used to organize instances that represent
+real-world entities or classifications.  Entities are always
+created using a unique identifier.  Each entity is normally
+assigned a name.  The <i>VUpload</i> menu provides a choice for
+creating new <i>Entity</i> classes.  
+
+For example, the process of creating a new entity class representing
+portfolio managers is described below:
+<p>
+1. Select <i>Create Entity</i> from the <i>VUpload</i> menu.
+<p>
+
+<center>
+<img src="entity1.gif" width=215 height=264 alt="Create Entity Dialog Box">
+</center>
+<p>
+
+2. Enter <i>Manager</i> as the new entity type, 
+and select <i>Entity</i> from the <i>Created From</i> List Box.
+<p>
+
+<center>
+<img src="entity2.gif" width=213 height=260 alt="Dialog Box With Entity Manager">
+</center>
+<p>
+
+3. Select OK.
+<p>
+
+<center>
+<img src="entity3.gif" width=358 height=133 alt="MSGBOX Entity Class Manager Created">
+</center>
+<p>
+
+4. You should see confirmation that the <i>Manager</i> class has been
+created and that the <i>ManagerMaster</i> feed class has been
+created for uploading manager data.  
+<p>
+5. Select OK.
+<p>
+You can now create new instances of <i>Manager</i> using the
+<i>ManagerMaster</i> feed in the <i>Entity</i> feed category.
+
+<p>
+<h4>Creating Instances For Entity feeds</h4>
+<p>
+
+To create instances for the new <i>Manager</i> feed, the minimal headings that
+are required are <i>id</i> and <i>name</i>.  
+In this example, the instances <i>Man1</i>, <i>Man2</i>, and <i>Man3</i> are defined. 
+<p>
+
+<center>
+<img src="manager1.gif" width=164 height=111 border=1 alt="selected Manager instances">       
+</center>
+<p>
+1.  Select the range.
+<p>
+
+2.  Select <i>Upload Data</i> from the menu.
+<p>
+
+3.  Select <i>Entity</i> from the Category list box and <i>ManagerMaster</i> from the <i>Feed</i>
+list box.
+<p>
+<ul>
+Note that the <i>ManagerMaster</i> was added when you created the <i>Manager</i> entity.
+</ul>
+<p>
+
+<center>
+<img src="manager2.gif" width=391 height=334 alt="Upload Dialog Box With Manager Feed Selected">
+</center>
+
+<p>
+
+4. Select the Range button.
+<p>
+<ul>
+The diagnostics report should confirm that you have successfully loaded the data.
+</ul>
+<p>
+
+5. Select OK.
+<p>
+
+You have now successfully created 3 instances of the class <i>Manager</i>.
+
+<p>
+<hr>
+<a name = "datarecord"><h4>Creating New DataRecord Classes</h4></a> 
+<p>
+<a href="appClasses.htm#data"><i>DataRecord</i></a> classes
+are used to manage sets of related
+information about a specific entity.  These classes provide a way to
+organize data about an entity into manageable substructures.
+For example, <i>PriceRecord</i> is used to track pricing information
+such as high, low, and closing price for a security.
+<i>DataRecord</i> instances are normally accessed via a property
+defined at the <i>Entity</i> instance with which it is associated.
+<p>
+The <i>VUpload</i> menu provides a choice for
+creating new <i>DataRecord</i> classes and associating them with
+an <i>Entity</i> class.  For example, you can create the class 
+<i>ModelData</i> to track several model scores about a company
+over time using the following procedure:
+
+<p>
+1. Select <i>Create DataRecord</i> from the <i>VUpload</i> menu.
+<p>
+
+<center>
+<img src="datarecord1.gif" width=407 height=264 alt="Create DataRecord Dialog Box">
+</center>
+<p>
+
+2. Enter <i>ModelData</i> as the new
+DataRecord type, select <i>DataRecord</i> from the <i> From</i> List Box,
+select <i>Company</i> from the <i>Link To Entity...</i> list box, and enter
+<i>modelData</i> in the <i>access via:</i> text box.  Select 
+<i>Time Series</i> to indicate that the model data varies over time.
+<p>
+
+<center>
+<img src="datarecord2.gif" width=407 height=264 alt="Creating ModelData">
+</center>
+
+<p>
+
+3. Select OK to define the <i>ModelData</i> class and its link to
+<i>Company</i>.
+<p>
+
+<center>
+<img src="datarecord3.gif" width=464 height=149 alt="MSGBOX DataRecord ModelData Created">
+</center>
+<p>
+
+4. You should see confirmation that the <i>ModelData</i> class has been
+define and linked to the <i>Company</i> class via the
+<i>modelData</i> path.  The <i>ModelDataFeed</i> has been
+created for uploading model data for a company over time.
+<p>
+5. Select OK.
+<p>
+
+You have now created the feed name <i>ModelDataFeed</i>, which is
+found in the <i>Entity Extender</i> feed category.
+
+<p>
+<h4>Creating Properties for a DataRecord</h4>
+<p>
+Before you can create instances for a DataRecord, you must define properties for it.  
+A <i>property</i> is a message that is defined for a specific class. 
+When defining a property, you use the feed name <i>PropertySetup</i>.
+In this example, <i>ModelData</i> defines properties for the model scores, 
+<i>model1</i>, <i>model2</i>, and <i>model3</i>.   
+Select the range and upload it.
+<p>
+
+<center>
+<img src= "modeldata1.gif" width=325 height=153 border=1 alt = "selected range property setup" >
+</center>
+ 
+<p>
+
+You will receive notification that the properties for DataRecord have been established.
+
+You can now create new instances of <i>ModelData</i> using the
+<i>ModeDataFeed</i> feed in the <i>Entity Extender</i> feed category.
+
+
+<p>
+<h4>Creating DataRecord Instances for Companies Over Time</h4>
+
+<p>
+
+In this example, you are tracking model scores for several companies for several dates:
+<p>
+
+1. Select the Range
+<p>
+
+<center>
+<img src= "modeldata2.gif" width=408 height=177 border=1 alt = "selected range ModelData" >
+</center>
+<p>
+
+
+2. Select <i>Upload Data</i> from the menu.
+<p>
+
+3. Select the category <i>Entity Extender</i>, and the feed <i>ModelDataFeed</i>. 
+<p>
+<ul>
+Note that the <i>ModelDataFeed</i> choice was added when you created the <i>ModelDataRecord</i>.
+</ul>
+<p>
+
+<center>
+<img src= "modeldata3.gif" width=391 height=336 alt = "ModelData displayed in the interface" >
+</center>
+<p>
+
+4. Select Range.
+<p>
+
+The diagnostic report should confirm that you have successfully loaded the data.
+See <a href="#extract">The Data Extraction Module</a> for a sample of how to 
+extract this data. 
+<p>
+
+<hr>
+
+<p>
+<a name = "relationship"><h4>Creating A Relationship</h4></a> 
+<p>
+Relationship are used to define <i>MembershipFeeds</i> for
+uploading one-to-many relationships such as
+<i>company-to-industry</i> over time.
+For example, every portfolio is managed by a single manager
+at a given point in time and a manager manages zero, one, or many
+portfolios at a given point in time.  You can create a relationship
+to track this using the following procedure:
+<p>
+
+1. Select <i>Create Relationship</i> from the <i>VUpload</i> menu.
+<p>
+
+<center>
+<img src="relationship1.gif" width=391 height=264 alt="Create Relationship Dialog Box">
+</center>
+<p>
+
+2. Enter <i>PortToManager</i> as the new
+relationship, select <i>Manager</i> from the <i>Group Type</i> list box,
+and <i>Portfolio</i> from the <i>Member Type:</i> list box.
+You need to define the access path from <i>Portfolio</i> to
+<i>Manager</i> and from <i>Manager</i> to <i>Portfolio</i>.
+Since each manager tracks a list of portfolios, enter
+<i>portfolioList</i> for the <i>GroupType path</i>.  
+Since each portfolio is managed by a single manager at a given point
+in time, enter <i>manager</i> for the <i>MemberType path</i>.
+Select <i>Time Series</i> to indicate that the relationship will
+change over time.
+<p>
+
+<center>
+<img src="relationship2.gif" width=389 height=261 alt="Creating PortToManager Relationship Paths">
+</center>
+
+<p>
+3. Select OK to submit these definitions.
+<p>
+
+
+4. You should see confirmation that the <i>PortToManager</i> 
+feed has been created for membership updates.
+<p>
+5 Select OK.
+<p>
+
+You can now create new instances of <i>PortToManager</i> in the <i>Relationship</i> feed category.
+<p>
+
+
+<h4>Creating Instances For Relationships</h4>
+
+<p>
+To create relationships, you must have data for <i>memberId</i> and a <i>groupId</i>.  
+In this example, the members are instances of <i>Portfolio</i> and the groups
+are instances of <i>Manager</i>.
+<p>
+<b>Note:</b> You need to define instances for PortolioMaster to do this example.
+<p>
+1. Select The Range.
+<p>
+
+<center>
+<img src="porttomanager1.gif" width=170 height=179 alt="PortToManager Selected Range">
+</center>
+<p>
+
+2. Select Upload.
+<p>
+
+3. Select the category <i>Relationship</i> and the feed <i>PortToManager</i>. 
+<p>
+
+<center>
+<img src="porttomanager2.gif" width=391 height=336 alt="PortToManager Displayed">
+</center>
+<p>
+
+The diagnostics message box should indicate that you have created the instances that
+make this relationship correspond to each other.
+
+<p>
+<hr>
+<h3><a name="extract">The Data Extraction Module</a></h3>
+<p>
+The <i>Extract</i> add-in defines tools to download Vision data
+directly into your spreadsheet.
+You can access specific data values as part of formulas in a cell.  
+Alternatively, you can extract tables of information in a number of formats.  
+This add-in is described in detail in the document
+<a href="ifExcel.htm"><i>Sample Excel Access to Vision</i></a>.
+<p>
+
+The following is an example of an <i>Entity By Item Extraction</i>.
+The companies are entered as rows, IBM and GM, tracking the items 
+entered as columns, <i>modelRecord model1</i> and <i>modelRecord model2</i>.
+To complete the extraction, do the following:
+<p>
+
+1. Select The Range
+
+<center>
+<img src="modelextract1.gif" width=376 height=70 border=1 alt="Model Data Extraction Example">
+</center>
+<p>
+
+2. Select <i>Set Defaults</i> from the <i>Vision</i> menu.
+<p>
+
+3. Enter <i>Company</i> as the <i>Entity Type</i>.
+<p>
+
+4. Select <i>Get Entity By Item Data</i> from the <i>Vision</i> menu. 
+<p>
+
+Your Extraction is complete.
+<p>
+
+<p>
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy; 2000 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated December 15, 2000</font>
+</table>
+
+</body>
+</html>
+
+
+

@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<HTML>
+<HEAD>
+   <TITLE>Sample Java Access to Vision</TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF">
+
+<H2>
+Sample Java Access to Vision</H2>
+| <A HREF="FHome.htm">Home</A> | <A HREF="vifaces.htm">Interfaces</A> |
+<A HREF="ifDownload.htm#ifCAccess">Download Scripts</A> |&nbsp;
+<HR>
+<H3>
+Topics Covered:</H3>
+
+<UL type=square>
+<LI>
+<A HREF="#Introduction">Introduction</A></LI>
+
+<LI>
+<A HREF="#Operation">Operation</A></LI>
+
+<LI>
+<A HREF="#Running">Running</A></LI>
+
+<LI>
+<A HREF="#Security">Security Issues</A></LI>
+
+<LI>
+<A HREF="#Examples">Examples</A></LI>
+
+<LI>
+<A HREF="#Reference">Reference</A></LI>
+</UL>
+
+<HR><A NAME="Introduction"></A>
+<H3>
+Introduction</H3>
+The Vision Java interface kit consists of the java package "VInterface".
+The classes in this package can be used to provide structured as well as
+simple string-based access to Vision data.
+
+<P>The Vision Java interface kit is supplied in source
+code form. You are encouraged to modify that source code to suit your
+needs. The kit has been tested using Netscape 3.0 and Internet Explorer
+3.2 on the Windows95 platform.
+<hr>
+
+<A NAME="Operation"></A>
+<H3>Operation</H3>
+The Vision Java interface kit provides array and string oriented, socket
+based access to Vision. When you use the kit, you primarily work with instances
+of the six classes summarized in the following table:
+<TABLE BORDER >
+<TR>
+<TD><B>Class Name</B>&nbsp;</TD>
+
+<TD><B>Class Description</B>&nbsp;</TD>
+</TR>
+
+<TR>
+<TD VALIGN=TOP>Vox&nbsp;</TD>
+
+<TD>The basic class that provides connections to Vision. It can launch
+new Vision sessions using the remote execution daemon, connect to existing
+Vision servers running at known port addresses, or open connections to
+already established OpenVision sessions defined at the host. The 'submit'
+member function processes in Vision the submitted String query and returns
+the result as a String instance. To use Vision, you need to create one
+instance of this class or its subclass, although you can create more if
+your application needs to talk to more than one Vision session at a time.&nbsp;</TD>
+</TR>
+
+<TR>
+<TD VALIGN=TOP>VConnection&nbsp;</TD>
+
+<TD>A subclass of Vox, VConnections provides somewhat more structured access
+to Vision. Member methods enable the setting of environmental variables,
+such as date and currency. This class also provides member functions to
+process Vision include files, execute a Vision expression without returning
+any output and obtain the value of an item for an entity in your Vision
+data base.&nbsp;</TD>
+</TR>
+
+<TR>
+<TD VALIGN=TOP>VExtractWS&nbsp;</TD>
+
+<TD>This class encapsulates array based retrieval of Vision data using
+Vision's ExtractWS interface. Your application can create as many instances
+of this class as it needs.&nbsp;</TD>
+</TR>
+
+<TR>
+<TD VALIGN=TOP>VDatum&nbsp;</TD>
+
+<TD>This class implements a variant type capable of holding numeric, string,
+or NA data. When you retrieve data using the VExtractWS interface to Vision,
+your data is returned as an array of VDatum objects.&nbsp;</TD>
+</TR>
+</TABLE>
+The remainder of this section illustrates how these classes are used to
+access Vision. That illustration begins with the include files needed to
+access the definitions of these classes.
+
+<P>In order to access Vision, at least one instance of VConnection must
+be created and opened. The following statement creates a <I>VConnection</I>
+object:
+<PRE>
+<B>&nbsp;&nbsp;&nbsp; VConnection myConnection = new VConnection() ;</B></PRE>
+Creating a <I>VConnection</I> object does not actually connect you to a
+Vision session. To do that, you need to call either the <B>openSession</B>,
+<B>rexec</B> or <B>connect</B> <I>VConnection</I> member function.
+
+<P>The <B>rexec</B> member function uses the remote execution daemon to
+start a private Vision session for your use:
+<PRE>
+<B>&nbsp;&nbsp;&nbsp; try
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; myConnection.rexec(host, user, password, command) ;
+&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp; catch(IOException e)&nbsp;
+&nbsp;&nbsp;&nbsp; {&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; System.err.println("+++ rexec failed: " + e);&nbsp;
+&nbsp;&nbsp;&nbsp; }</B></PRE>
+This function accepts four arguments: the host, user name, and password
+used to create your session, and the final optional argument supplies the
+command string used to start your batchvision session. If you do not supply
+this argument, the interface kit will run <I>/vision/bin/batchvision</I>
+with no arguments. The <I>Host</I>, <I>User</I>, <I>Password</I>, and <I>Command</I>
+functions called here are not part of the interface kit -- they are simply
+syntactically valid place holders for the argument values you must supply.
+It is your responsibility to supply those values in whatever way is appropriate.
+
+<P>If the <B>rexec</B> member function fails, it throws an IOException.
+If the exception thrown involved the functioning of the <A HREF="api/VInterface.Vox.html">Vox</A>
+or the <A HREF="api/VInterface.VConnection.html">VConnection</A>
+classes, a <A HREF="api/VInterface.VoxException.html">VoxException</A>
+will be thrown.
+
+<P>The <B>connect</B> member function is another way to establish a connection
+to a Vision session:
+<PRE>
+<B>&nbsp;&nbsp;&nbsp; try
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; myConnection.connect(myHost, 8001) ;
+&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp; catch(IOException e)&nbsp;
+&nbsp;&nbsp;&nbsp; {&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; System.err.println("+++ connection failed: " + e);&nbsp;
+&nbsp;&nbsp;&nbsp; }</B></PRE>
+This function accepts two arguments -- the name of a host and the number
+of a port. It expects to find a Vision server listening for connections
+at the specified port on the specified host. In the case illustrated here,
+the host is obtained from the myHost String variable and the port is hardwired
+to port 8001. There is nothing magic about this number -- you or your Vision
+administrator decide what it will be when the service is created.
+
+<P>Like the <B>rexec</B> member function, the <B>connect</B> member function
+throws an IOException
+when it fails.
+
+<P>Finally, the <B>openSession</B> member function can be used to establish
+a connection to a Vision session predefined at the host:
+<PRE>
+<B>&nbsp;&nbsp;&nbsp; try
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; myConnection.openSession(myHost, "default") ;
+&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp; catch(IOException e)&nbsp;
+&nbsp;&nbsp;&nbsp; {&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; System.err.println("+++ openSession failed: " + e);&nbsp;
+&nbsp;&nbsp;&nbsp; }</B></PRE>
+This function accepts two arguments -- the name of a host and the name
+of a predefined Vision session. The session must be found in a copy of
+or link to the vquery.cfg file placed in the 'etc' folder relative to the
+host's http server. In this file, the port number for the named session
+is found. It expects to find a Vision server listening for connections
+at the specified session on the specified host. In the case illustrated
+here, the host is obtained from the myHost String variable and the session
+searched for is the default session, perhaps list in vquery.cfg as 7001.
+
+<P>Like the <B>rexec</B> and <B>connect</B> member functions, the <B>openSession</B>
+member function throws an IOException
+when it fails.
+
+<P>You can call any of these member functions as often as you need or care
+to for a given connection. Each call disconnects the current Vision session
+if one was established and creates or connects to a new session based on
+the argument values you supply.
+
+<P>Once you have connected your <I>VConnection</I> object to a Vision session,
+you can use it to run Vision expressions and retrieve data from Vision.
+The 'submit' VConnection member function allows you to run an arbitrary
+Vision expression and collect the output it generates. For example:
+<PRE>
+<B>&nbsp;&nbsp;&nbsp; String iBalanceSheet = "" ;
+&nbsp;&nbsp;&nbsp; try
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; iBalanceSheet =&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; myConnection.submit("Named Company IBM balanceSheet") ;
+&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp; catch (IOException e)
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; System.err.println("Problem with Vision connection: " + e) ;
+&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp; finally
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; System.out.println("Balance Sheet:\n" + iBalanceSheet) ;
+&nbsp;&nbsp;&nbsp; }</B></PRE>
+requests a balance sheet from Vision and writes it to standard output.
+
+<P>The <B>submit</B> member function expects one required arguments --
+a <I>String</I> instance containing the text of the request to Vision.
+The return value will be another String instance which contains the output
+result of the request. The <B>submit</B> member function throws an IOException
+when it fails.
+
+<P>In addition to its required arguments, the <B>submit</B> member function
+accepts four optional arguments -- two that specify the global date and
+currency applicable to your request and two that are helpful in collecting
+very large and very small quantities of output.
+
+<P>The first and second optional arguments to <B>submit</B> (its second
+and third actual arguments) specify the date as of which to run your request
+and the default currency to which to convert monetary values when processing
+that request. Both arguments are specified as strings and can be null to
+select your system's default value for the parameter. For example:
+<PRE>
+<B>&nbsp;&nbsp;&nbsp; String iBalanceSheet = "" ;
+&nbsp;&nbsp;&nbsp; try
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; iBalanceSheet =&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; myConnection.submit("Named Company IBM balanceSheet",
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; null,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "CHF"
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ) ;
+&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp; catch (IOException e)
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; System.err.println("Problem with Vision connection: " + e) ;
+&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp; finally
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; System.out.println("Balance Sheet:\n" + iBalanceSheet) ;
+&nbsp;&nbsp;&nbsp; }</B></PRE>
+requests IBM's balance sheet reported in Swiss Francs while:
+<PRE>
+<B>&nbsp;&nbsp;&nbsp; String iBalanceSheet = "" ;
+&nbsp;&nbsp;&nbsp; try
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; iBalanceSheet =&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; myConnection.submit("Named Company IBM balanceSheet",
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "93"
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ) ;
+&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp; catch (IOException e)
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; System.err.println("Problem with Vision connection: " + e) ;
+&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp; finally
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; System.out.println("Balance Sheet:\n" + iBalanceSheet) ;
+&nbsp;&nbsp;&nbsp; }</B></PRE>
+requests IBM's balance sheet as of 1993, and:
+<PRE>
+<B>&nbsp;&nbsp;&nbsp; String iBalanceSheet = "" ;
+&nbsp;&nbsp;&nbsp; try
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; iBalanceSheet =&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; myConnection.submit("Named Company IBM balanceSheet",
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "93"
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "CHF"
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ) ;
+&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp; catch (IOException e)
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; System.err.println("Problem with Vision connection: " + e) ;
+&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp; finally
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; System.out.println("Balance Sheet:\n" + iBalanceSheet) ;
+&nbsp;&nbsp;&nbsp; }</B></PRE>
+requests IBM's balance sheet as of 1983 reported in Swiss Francs.
+
+<P>The <B>submit</B> member function is not the only way to interact with
+Vision using a <I>VConnection</I> object. The <B>execute</B> member function
+is an alternative to <B>submit</B> if you do not care about the output
+generated by your request. The <B>execute</B> member function takes one
+required argument -- a String containing the Vision expression you want
+executed -- and two optional arguments -- the global date and currency
+applicable to that expression. Like the <B>submit</B> member function,
+<B>execute</B> throws an IOException
+when it fails.
+
+<P>The <I>VConnection</I> class also provides <B>include</B> member functions
+to process Vision include files. These functions read and execute a file
+of Vision code resident on the system where your Vision session is running.
+Again, an IOException
+is thrown if it fails.
+
+<P>Finally, the <I>VConnection</I> class provides the <B>getValue</B> member
+functions. These member functions access the value of an item for an entity
+in your Vision data base. For example:
+<PRE>
+<B>&nbsp;&nbsp;&nbsp; double iReal;
+&nbsp;&nbsp;&nbsp; try
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; iReal =&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; myConnection.getDoubleValue("Company", "IBM", "sales") ;
+&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp; catch (IOException e)
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; System.err.println("Could not get IBM's sales: " + e) ;
+&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp; System.out.println(iReal) ;</B></PRE>
+returns the value of IBM's sales as of the current date, expressed in the
+default currency for your data base. The <B>getValue</B> functions come
+in four varieties for each data type that can be returned: <B>getStringValue</B>
+returns a String instance, <B>getIntValue</B> returns an int primitive,
+and <B>getDoubleValue</B> returns a double primitive. The fourth version,
+<B>getValue</B> returns a <A HREF="api/VInterface.VDatum.html">VDatum</A>
+instance -- a Vision Java interface kit data type discussed in greater
+detail below. All of the <B>getValue</B> members throw an IOException if it fails.
+
+<P>The <B>getValue</B> member functions also accept two optional arguments
+that specify the date and currency to use when retrieving the item. For
+example:
+<PRE>
+<B>&nbsp;&nbsp;&nbsp; double iReal;
+&nbsp;&nbsp;&nbsp; try
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; iReal =&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; myConnection.getDoubleValue("Company", "IBM", "sales", "93") ;
+&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp; catch (IOException e)
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; System.err.println("Could not get IBM's sales: " + e) ;
+&nbsp;&nbsp;&nbsp; }</B></PRE>
+accesses IBM's sales as of 1993 while:
+<PRE>
+<B>&nbsp;&nbsp;&nbsp; double iReal;
+&nbsp;&nbsp;&nbsp; try
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; iReal =&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; myConnection.getDoubleValue("Company", "IBM", "sales",&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; null, "CHF") ;
+&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp; catch (IOException e)
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; System.err.println("Could not get IBM's sales: " + e) ;
+&nbsp;&nbsp;&nbsp; }</B></PRE>
+accesses IBM's most recent sales expressed in Swiss Francs and:
+<PRE>
+<B>&nbsp;&nbsp;&nbsp; double iReal;
+&nbsp;&nbsp;&nbsp; try
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; iReal =&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; myConnection.getDoubleValue("Company", "IBM", "sales",
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "93", "CHF"
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ) ;
+&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp; catch (IOException e)
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; System.err.println("Could not get IBM's sales: " + e) ;
+&nbsp;&nbsp;&nbsp; }</B></PRE>
+accesses IBM's sales as of 1993 expressed in Swiss Francs.
+
+<P>The <I>VConnection</I> class provides a relatively unstructured interface
+to Vision. The <I>VExtractWS</I> class provides a structured interface.
+In particular, the <I>VExtractWS</I> class provides you with access to
+the <B>Interface ExtractWS</B> Vision ToolKit for retrieving array structured
+data from Vision. The following Vision Java interface kit code creates
+a VExtractWS object initialized to request a 4 row by 3 column entity by
+item array of data:
+<PRE>
+<B>&nbsp;&nbsp;&nbsp; VExtractWS iExtractWS1 = new VExtractWS(myConnection);
+&nbsp;&nbsp;&nbsp; iExtractWS1
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .setOrientationTo(ExtractOrientation.EI)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .setDelimiterTo("##")
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .setEntityTypeTo("Security")
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addEntity("GM")
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addEntity("IBM")
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addEntity("HWP")
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addEntity("XON")
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addItem("name")
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addItem("price")
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addItem("price@95")
+&nbsp;&nbsp;&nbsp; ;</B></PRE>
+The preceding code fragment specifies the data you want to retrieve; the
+following interface kit code actually gets it:
+<PRE>
+<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; VDatum[][] iDatumArray1 ;
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; try
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; iDatumArray1 = iExtractWS1.run() ;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; displayDatumArray(iDataArray1) ;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp; catch (VExtractWSException e)&nbsp;
+&nbsp;&nbsp;&nbsp; {&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; System.err.println(e.toString()) ;&nbsp;
+&nbsp;&nbsp;&nbsp; }</B></PRE>
+The <B>displayDatumArray</B> function is not part of the interface kit
+-- it is an example of a routine you would write to do something with the
+data you retrieved. It might look like this:
+<PRE>
+<B>&nbsp;&nbsp;&nbsp; void DisplayArray (VDatum[][] myDataArray)
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; int rows = myDataArray.length ;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; int cols = myDataArray[0].length ;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; System.out.println("rows: " + rows + "\tcols: " + cols) ;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; String displayArray = "" ;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; for (int i = 0; i &lt; rows; i++)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; for (int j = 0; j &lt; cols; j++)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; displayArray += myDataArray[i][j] + "\t" ;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; displayArray += "\n" ;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; System.out.print(displayArray) ;
+&nbsp;&nbsp;&nbsp; }</B></PRE>
+The <B>run</B> member function throws an IOException
+if it fails. When the call illustrated above succeeds, iDatumArray1 contains
+four rows -- one for each Security -- and three columns -- one for each
+item -- specified in the calls that created iExtractWS1.
+
+<P>The items added to this extract workspace were added with no data types
+explicitly specified for them. The item's value is returned as a <A HREF="api/VInterface.VDatum.html">VDatum</A>
+instance. The Vision Java interface kit will attempt to convert the item's
+value to a number if possible, returning the value as a string if and only
+if it isn't explicitly recognized as a Vision NA or cannot be converted
+to a numeric value.
+
+<P>You can modify the settings associated with a <I>VExtractWS</I> object
+and re-run it. The following example adds an entity and an item to the
+extract workspace object created above, changes its orientation to item
+by entity, and re-runs it.
+<PRE>
+<B>&nbsp;&nbsp;&nbsp; iExtractWS1
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .setOrientationTo(ExtractOrientation.EI)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addEntity("ACD")
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addItem("company compustat sales")
+&nbsp;&nbsp;&nbsp; ;
+&nbsp;&nbsp;&nbsp; try
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; iDatumArray1 = iExtractWS1.run() ;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; displayDatumArray(iDataArray1) ;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp; catch (VExtractWSException e)&nbsp;
+&nbsp;&nbsp;&nbsp; {&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; System.err.println(e.toString()) ;&nbsp;
+&nbsp;&nbsp;&nbsp; }</B></PRE>
+When you re-use an extract workspace object, only your changes are transmitted
+to Vision. You can request that all of the current settings in the workspace
+be re-transmitted when you re-run the workspace. You do that by passing
+true as the value of the <B>run</B> member function's optional parameter:
+<PRE>
+<B>&nbsp;&nbsp;&nbsp; try
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; iDatumArray1 = iExtractWS1.run(true) ;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; displayDatumArray(iDataArray1) ;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp; catch (VExtractWSException e)&nbsp;
+&nbsp;&nbsp;&nbsp; {&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; System.err.println(e.toString()) ;&nbsp;
+&nbsp;&nbsp;&nbsp; }</B></PRE>
+You can create as many <I>VExtractWS</I> and <I>VDatum</I> array objects
+as your application needs. Each VExtractWS corresponds to a distinct ExtractWS
+object in your Vision session that does not interfere with any other workspace
+object. When you dispose of one of your <I>VExtractWS</I> objects, the
+corresponding remote object is also destroyed.
+
+<P>The following code creates and initializes a second workspace and uses
+it to fill a second data array:
+<PRE>
+<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; VExtractWS iExtractWS2 = new VextractWS2(myConnection);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; iExtractWS2
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .setOrientationTo(ExtractOrientation.ET)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .setColumnLabelsOn()
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .setRowLabelsOn()
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .setEntityTypeTo("Security")
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .setItemTo("price")
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .setEntityListTo ("GM, IBM, HWP, XON")
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addDate ("9601")
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addDate ("9512")
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addDate ("9511")
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addDate ("9510")
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addDate ("9509")
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addDate ("9508")
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addDate ("9507")
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addDate ("9506")
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addDate ("9505")
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addDate ("9504")
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addDate ("9503")
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addDate ("9502")
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addDate ("9501")
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ;
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; VDatum[][] iDatumArray2;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; try
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; iDatumArray2 = iExtractWS2.run () ;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; displayDatumArray (iDatumArray2);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; catch (VExtractWSException e)&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; System.err.println(e.toString()) ;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }</B></PRE>
+Note that this example also illustrates one of two alternate methods for
+specifying an entity list. In this case, the entity list is specified as
+a comma separated list of values. You can also use Vision's Interface ExtractWS
+ability to generate the list dynamically as the following example illustrates:
+<PRE>
+<B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; VExtractWS iExtractWS3 = new VextractWS2(myConnection);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; iExtractWS3
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .setOrientationTo(ExtractOrientation.EI)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .setColumnLabelsOn ()
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .setScalarLabelOn ()
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .setEntityTypeTo ("Security")
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .setEntityTo ("IBM")
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .setEntityListExpressionTo ("holdings")
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addItem ("account name"&nbsp;&nbsp;&nbsp; , VDatumKind_String)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addItem ("shares"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; , VDatumKind_Real)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addItem ("totalCost"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; , VDatumKind_Real)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addItem ("totalMarketValue", VDatumKind_Real)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ;
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; VDatum[][] iDatumArray3;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; try
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; iDatumArray3 = iExtractWS3.run () ;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; displayDatumArray (iDatumArray3);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; catch (VExtractWSException e)&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; System.err.println(e.toString()) ;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }</B></PRE>
+<hr>
+
+<A NAME="Running"></A>
+<H3>
+Running</H3>
+The Vision Java interface kit is supplied in both source code and byte
+code form. In general, you should include the '.class' files in the 'VInterface'
+directory or folder and place the folder so that your Java applet or application
+can access it: locally (via an applet opened by a client or a Java application),
+'VInterface' must be on the defined 'CLASSPATH'; remotely (from the html
+server via an applet opened by a browser), VInterface can also be placed
+in the same directory as the html page that uses it.
+<hr>
+
+<A NAME="Security"></A>
+<H3>
+Security Issues</H3>
+As part of its security features, Java prevents an applet from accessing
+any machine location (either by http protocol or by files) except for the
+server itself. Therefore, if the applet that uses the VInterface package
+is loaded remotely via from the server, only Vision sessions on that server's
+host can be accessed; otherwise, a security exception is thrown.
+
+<P>Trying to connect to any Vision session via the file protocol (loading
+the applet locally) will throw a security exception regardless of the host.
+This can be avoided if the proper CLASSPATH and class packages are set
+up: install the JDK 1.02 classes and make sure they, the current directory,
+and the directory containing VInterface are on the CLASSPATH. For example,
+the CLASSPATH variable might look something like
+<PRE>SET CLASSPATH=.\;C:\java\lib\classes.zip;C:\Developement\packages;</PRE>
+This should enable any host to be available when using the file protocol.
+<hr>
+<H3>
+<A NAME="Examples"></A></H3>
+
+<H3>
+Examples</H3>
+To view a sample applet that uses the VInterface package to create a simple
+Vision Editor, <A HREF="../Demos/VEditDemo/VEditButton.html">click here.</A>
+
+<P>To view a sample applet that uses the VExtractWS class to produce 2D
+data tables,&nbsp; <A HREF="../Demos/ExtractDemo/ExtractGraphDemo.html">click here.</A>
+<hr>
+
+<H3>
+<A NAME="Reference"></A></H3>
+
+<H3>
+Reference</H3>
+
+<UL>
+<LI>
+class VInterface.<A HREF="api/VInterface.VConnection.html#_top_">VConnection</A></LI>
+
+<LI>
+class VInterface.<A HREF="api/VInterface.VConnectionUse.html#_top_">VConnectionUse</A></LI>
+
+<LI>
+class VInterface.<A HREF="api/VInterface.VDatum.html#_top_">VDatum</A></LI>
+
+<LI>
+class VInterface.<A HREF="api/VInterface.VExtractWS.html#_top_">VExtractWS</A></LI>
+
+<LI>
+class VInterface.<A HREF="api/VInterface.Vox.html#_top_">Vox</A></LI>
+
+<LI>
+Error Handling</LI>
+
+<UL>
+<LI>
+class VInterface.<A HREF="api/VInterface.VoxException.html#_top_">VoxException</A></LI>
+
+<LI>
+class VInterface.<A HREF="api/VInterface.VDatumException.html#_top_">VDatumException</A></LI>
+
+<LI>
+class VInterface.<A HREF="api/VInterface.VExtractWSException.html#_top_">VExtractWSException</A></LI>
+</UL>
+</UL>
+&nbsp;
+
+<hr>
+<TABLE BORDER=0 WIDTH="100%" >
+<TR>
+<TD ALIGN=LEFT><FONT SIZE=-1>Copyright &copy; 1997 Innovative Systems Techniques,
+Inc.</FONT>&nbsp;</TD>
+
+<TD ALIGN=RIGHT><FONT SIZE=-1>Created December 12, 1997</FONT>&nbsp;</TD>
+</TR>
+</TABLE>
+&nbsp;
+</BODY>
+</HTML>

@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Classes </title>
+
+</head>
+<body>
+<body bgcolor=white>
+<h2>Vision Classes</h2>
+
+<p>
+     | <a href="FHome.htm">Home</a> | <a href="Fund.htm#class">General Concepts</a> | <a href="tkSchema.htm">Schema</a> | <a href="clXRef.htm">Cross Reference</a> |<hr>
+<h3>Topics Covered:</h3>
+<ul type="square">
+<li><a href="#review">Review</a>
+<li><a href="#default">Default Values</a>
+<li><a href="#cd">Class Descriptors</a>
+<li><a href="#subclass">Creating Subclasses</a>
+<li><a href="#instance">Creating Instances</a>
+<li><a href="#delete">Deleting Instances</a>
+<li><a href="#access">Basic Access</a>
+<li><a href="#cluster">Clustering Issues</a>
+</ul>
+<p>
+The basic rules for class and instance creation are presented in the
+document <a href="Fund.htm#class"><i>Vision Fundamentals.</i></a>  
+This document presents a much more detailed description of class
+and instance creation and management.
+<hr>
+<h3><a name="review">Review</a></h3>
+<p>
+<b>Classes</b> provide a basic tool for organizing your information.  Vision
+comes with many pre-defined classes including <i>Number</i>, 
+<i>TimeSeries</i>,
+and <i>Entity</i>.  All <b>Instances</b> of a class respond to the same set of
+messages and use the same implementations to do so.  All instances
+of a class have the same number and types of properties and use the
+same message names to refer to them.
+<p>
+Any class can be thought of as a table.  The instances of the class
+form the rows of the table.  The messages of the class form the
+columns in the table.  This tabular organization is similar to the
+relational database model.  However, in most relational systems, the
+actual data values in the columns are restricted to a fixed set of
+simple data types.  No such restriction exists in Vision.  The values
+in the table can include instances of any class, including instances
+of other user-defined classes, as well as simple values such as
+numbers, strings, and dates.  
+<p>
+Class <b>Specialization</b> provides a means for defining a new class that
+inherits common properties and operations from another class.  A
+class that is a specialization of another class is called a
+<b>Subclass</b>.  A class inherits all the messages of its <b>Superclass</b>.
+Each time a new instance of the subclass is created, a corresponding
+instance is automatically created in its superclass.  Messages can
+be defined or redefined at a subclass.  If a message is redefined by
+a subclass, instances of the subclass will use the new message.  
+<p>
+New classes are always created as a subclass of an existing class.
+All classes therefore inherit messages from a sequence of classes.
+If a message is not defined by the class itself, this sequence
+begins with a class' super class and continues with its super class'
+superclass until the class named <i>Object</i> is encountered.  The class
+Object has no superclass.  All other classes are direct or indirect
+subclasses of the Object class.  The class Object therefore defines
+the messages that are available to all objects in the database.
+<p>
+<hr>
+<h3><a name="default">Default Values</a></h3>
+<p>
+Every Vision class has an instance which represents its <b>Default 
+Instance</b>.  When a new class is created, an initial instance representing
+this default instance is also created.  The message 
+<i>defaultInstance</i> is defined as a class constant when a new class
+is created 
+and returns the default instance associated with the class.  This
+instance is often used to store initial values for specific properties
+of the class.  Note that Vision does note treat this instance differently
+from other instances in its class.  All special behavior for default
+instances is defined by methods under your control.
+<p>
+For <a href="clEntity.htm"><i>Entity</i> </a>
+subclasses, the default instance is stored in
+the appropriate <a href="clEntity.htm#subclass">naming dictionary</a>
+with the name <i>Default</i>.
+The default instance for an entity class can be accessed using the
+expression:<pre><tt><b>
+     Named xxx Default
+</b></tt></pre>
+where <i>xxx</i> is the Entity class desired.  In most cases the class
+name itself returns the default instance.  For example, the
+expression:<pre><tt><b>
+     Named Currency Default = Currency
+</b></tt></pre>
+returns a <i>TRUE</i> value.
+<p>
+This instance in all ways behaves like other instances
+in the class.  To determine if an object is the default instance
+in its class, the <i>isDefault</i> and <i>isntDefault</i> messages are defined.
+Both return boolean (i.e., <i>TRUE/FALSE</i>) values.  For example:<pre><tt><b>
+     Named Currency US isDefault         
+
+</b>returns <i>FALSE</i><b>
+
+     Named Currency US isntDefault       
+
+</b>returns <i>TRUE</i><b>
+
+     Named Currency Default isDefault    
+
+</b>returns <i>TRUE</i> and<b>
+
+     Named Currency Default isntDefault  
+
+</b>returns <i>FALSE</i><b>.
+</b></tt></pre>
+<p>
+<a name="sampleNAvsDefault"> </a>
+Many messages are defined to return objects from other classes.
+For example, the message <i>company</i> at the class 
+<i>Security</i> could return
+an instance of the <i>Company</i> class.  For example:<pre><tt><b>
+     Named Security IBM company  
+</b></tt></pre>
+returns the object representing the <i>Company</i> IBM.
+If companies respond to the message <i>sales</i>, then the
+expressions:<pre><tt><b>
+     Named Security IBM company sales
+</b>and<b>
+     Named Company IBM sales
+</b></tt></pre>
+are identical and both return IBM's sales value.
+<p>
+<i>Cash</i> is a security that is not affiliated with a particular
+company.
+The value for the <i>company</i> message for this security could be a
+simple <i>NA</i> value.  In the case, the expression:<pre><tt><b>
+     Named Security Cash company sales
+</b></tt></pre>
+would generate the error: <pre><tt>
+     >>> Selector 'sales' Not Found <<<
+</tt></pre>
+since the expression <i>Named Security Cash company</i> returns the
+value <i>NA</i> and <i>NA</i> does not recognize the <i>sales</i> message.
+Although you might not ever request the <i>sales</i> value for the
+cash security directly, you might indirectly need it in a list.
+For example:<pre><tt><b>
+     securityList
+     do: [ #---  other stuff
+           company sales printNL ;
+         ] ;
+</b></tt></pre>
+If the value of <i>company</i> were <i>NA</i> for some securities, the 
+<a href="Error.htm#snf">selector not found</a>
+message would appear in your output.
+<p>
+Rather than storing an <i>NA</i> as the value of <i>company</i> for
+the cash security, you could store the default instance using:<pre><tt><b>
+     Named Security Cash :company <- Named Company Default ;
+</b></tt></pre>
+Now the expression: <pre><tt><b>
+     Named Security Cash company sales
+</b></tt></pre>
+will return the value <i>NA</i> and you will not see the <i>Selector
+Not Found</i> error message.  Default initializations such as this one are
+normally done as part of the instance creation process.
+<p>
+<hr>
+<h3><a name="cd">Class Descriptors</a></h3>
+<p>
+The class <a href="tkSchema.htm"><i>Schema ClassDescriptor</i></a>
+is used to maintain information about the
+classes in your Vision database.  Each instance of
+<i>Schema ClassDescriptor</i>
+corresponds to a specific class.  Messages defined for this class
+enable you to record information pertaining to class hierarchy,
+naming conventions, and descriptions.  The <i>classDescriptor</i>
+message is defined for each class to return the instance of the
+<i>Schema ClassDescriptor</i> class used to store descriptive 
+information about the class.
+<p>
+<hr>
+<h3><a name="subclass">Creating Subclasses</a></h3>
+<p>
+You can create a new class from an existing class using the
+expression:<pre><tt><b>
+     !NewClass <- Object createSubclass ;
+</b></tt></pre>
+The variable <i>NewClass</i> is defined to be a subclass of the class
+<i>Object</i>.  Instances of the class <i>NewClass</i> will respond to all
+messages defined at <i>Object</i> as well as any additional messages
+defined at <i>NewClass</i>.  By convention, class names such as <i>NewClass</i>
+are capitalized, although this is not a requirement.
+<p>
+When you send the <i>createSubclass</i> message to an existing class, the
+following operations are performed:
+<p>
+<ol type="1">
+<li>A new subclass of the recipient class is created.
+<li>An initial instance is created in the new class.  This is the
+<b>default instance</b> for the class.
+<li>A new instance
+is also created in each superclass of the new class.  These instances
+are automatically linked via the <i>super</i> message.
+<li>The message <i>initializeGlobalSubclassProperties</i> is sent to
+the new class.
+<li>The message <i>initializeGlobalInstanceProperties</i> is sent to the
+new (i.e., the default) instance.
+<li>A new instance of the class Schema ClassDescriptor is created
+and the class constant <i>classDescriptor</i> is defined at the new class 
+to point to this new class descriptor instance.
+<li>The default instance of the new class is returned.
+</ol>
+<p>
+Notice that new class creation also creates the default instance for the
+class.  In the
+above expression, the variable <i>NewClass</i> can be interchangeably
+thought of as the name of the class or as the default instance in
+this class.
+<p>
+The message <i>initializeGlobalSubclassProperties</i> is used to
+set values in the default instance and define class constants and
+methods for the class.  It is defined at 
+Object to perform the following operations:
+<p>
+<ol type="1">
+<li>Flag the first instance as the default by setting the value of the
+<i>defaultFlag</i> property to <i>TRUE</i>.
+<li>Set the value of the <i>code</i> property in the default instance
+to the string "Default" .
+<li>Define the class constant <i>defaultInstance</i> to return this first
+instance.
+<li>
+Define the method <i>asSelf</i> to return the actual
+instance in a class, stripped of any extensions.
+</ol>
+<p>
+The message <i>initializeGlobalSubclassProperties</i> is often redefined by
+subclasses that require additional processing steps.  
+To redefine the message, the following approach is often 
+appropriate:<pre><tt><b>
+     NewClass
+     defineMethod:
+     [ | initializeGlobalSubclassProperties |
+       ^super initializeGlobalSubclassProperties ;    # run parent's version 
+       # ...  additional initializations go here
+     ] ;
+</b></tt></pre>
+The first line of this method is used to run the super class'
+version of the method first, followed by any class-specific rules
+you wish to define.
+<p>
+The message <i>initializeGlobalInstanceProperties</i> is used to
+initialize all new instances of a class.  Since class creation
+actually involves creating a first instance in the class, this
+message is executed for this instance.  It is described in detail in
+<a href="#instance">the next section</a>.
+<p>
+Two variations of the <i>createSubclass</i> message have been implemented to
+encapsulate frequently used specialization techniques.  The
+expressions:<pre><tt><b>
+     class createSubclass: string ;
+</b>and<b>
+     class createSubclass: string at: object ;
+</b></tt></pre>
+where <i>class</i> is the class to specialize, <i>string</i>
+is the name of the class to create and <i>object</i>
+is the place to name the class are used to
+automatically name the class and define additional standard protocol.  
+For example, the expression:<pre><tt><b>
+     Object createSubclass: "Sample1"
+</b></tt></pre>
+is defined to automatically perform the following operations:<pre><tt><b>
+     !Sample1 <- Object createSubclass ;
+     Sample1 define: 'whatAmI' toBe: "Sample1" ;
+     Sample1 define: 'isSample1' toBe: TRUE ;
+     Object define: 'isSample1' toBe: FALSE ;
+</b></tt></pre>
+The expression:<pre><tt><b>
+    Object createSubclass: "Sample2" at: Sample1
+</b></tt></pre>
+is defined to automatically perform the following operations:<pre><tt><b>
+     Sample1 define: 'Sample2' toBe: Object createSubclass ;
+     Sample1 Sample2 define: 'whatAmI' toBe: "Sample2" ;
+     Sample1 Sample2 define: 'isSample2' toBe: TRUE ;
+     Object define: 'isSample2' toBe: FALSE ;
+</b></tt></pre>
+Notice that access to the class <i>Sample2</i> is only available via
+<i>Sample1</i>.  This technique is useful for restricting the
+messages at <i>^global</i> to those that really need to be shared.
+<p>
+There may be cases where you need to run a version of <i>createSubclass</i>
+that skips the initialization steps.  The <i>basicSpecialized</i> message
+is available for these situations.  This message is a primitive that
+does the minimal work needed to create a new class.  It is used
+primarily by methods that need to create temporary classes.
+<p>
+<hr>
+<h3><a name="instance">Creating Instances</a></h3>
+<p>
+You can create a new instance of any class using the
+expression:<pre><tt><b>
+     !NewInstance <- NewClass new ;
+</b></tt></pre>
+The variable <i>NewInstance</i> is defined to be an instance in the class
+<i>NewClass</i>.  This instance will respond to all messages defined at
+<i>NewClass</i> and any of its super classes.
+<p>
+When you send the <i>new</i> message to an existing class, the
+following operations are performed:
+<ol type="1">
+<li>A new instance is created in the supplied class and all its
+super classes.
+<li>The message <i>initializeGlobalInstanceProperties</i> is executed for this
+new instance.
+<li>The new instance is returned.
+</ol>
+<p>
+The message <i>initializeGlobalInstanceProperties</i> is used to
+initialize values associated with the new instance.
+It is defined at
+Object to perform the following operations:
+<ol type="1">
+<li>Set the value of the <i>baseObject</i> property in the new 
+instance to point to the new instance.
+<li>Set the <i>creationDate</i> property in the new instance to the current
+date.
+</ol>
+<p>
+This message is often redefined by
+subclasses that require additional processing steps.  
+To redefine the message, the following approach is often 
+appropriate:<pre><tt><b>
+     NewClass
+     defineMethod:
+     [ | initializeGlobalInstanceProperties |
+       ^super initializeGlobalInstanceProperties ;    # run parent's version 
+       # ...  additional initializations go here
+     ] ;
+</b></tt></pre>
+The first line of this method is used to run the super class'
+version of the method first, followed by any class-specific rules
+you wish to define.
+<p>
+There may be cases where you need to run a version of <i>new</i>
+that skips the initialization steps.  The message <i>basicNew</i> is a
+primitive version available for these situations.
+<p>
+The <i>new</i> message is normally used to create new instances of standard
+built-in classes such as <i>List</i> and <i>TimeSeries</i>.  The message
+<i>createInstance</i> has been defined to provide a more comprehensive approach
+to instance creation, performing additional initializations based on 
+information in its <i>classDescriptor</i>.  The expression:<pre><tt><b>
+     NewClass createInstance: keys
+</b>
+  where keys   is a single parameter or a list of parameters used to
+               initialize the instance
+</tt></pre>
+performs the following operations:
+<p>
+<ol type="1">
+<li>Creates a new instance of the class using <i>new</i>.
+<li>Runs the <i>initializeKeys:</i> message passing the supplied <i>keys</i>
+as a parameter.  This message is used to assign the parameters
+provided to properties in the new instance.  This message is defined
+at Object to assign the parameter passed to the <i>code</i> property.
+Many subclasses will want to redefine this method.
+<li>Runs the <i>initializeDefaults</i> message.  This message is used to
+initialize any properties that have default values.  Any
+property that does not have an explicit default value will have the
+value <a href="clNA.htm"><i>NA</i></a>.
+<li>
+Runs the <i>initializeLocalAttributes</i> message.  This message is used
+to initialize any additional properties required by the subclass.
+This message is defined to take no action at Object.  Many
+subclasses will want to redefine this method to address local
+initialization issues.
+<li>
+Runs the <i>initializeNames</i> message which runs the <i>initializeNamesFor:
+stringList</i> message for the class.  If the class descriptor has an
+associated naming dictionary, the strings in <i>stringList</i> will be
+added to this dictionary to reference this new instance.
+<li>Returns this new instance.
+</ol>
+<p>
+The <i>createInstance</i> message is defined to call <i>createInstance: NA</i>.
+<p>
+For example, the expression:<pre><tt><b>
+     NewClass createInstance: "NewClass1"
+</b></tt></pre>
+will automatically perform the following operation:<pre><tt><b>
+     NewClass createInstance do: [ :code <- "NewClass1" ] 
+</b></tt></pre>
+<p>
+You could change the instance creation rules by modifying one or
+more of the initialization messages as appropriate.  For example,
+assume you want to use two properties, <i>cusip</i> and <i>ticker</i> to
+initialize new <i>Company</i> instances and that you want to initialize the
+property <i>name</i> to the ticker's value:<pre><tt><b>
+     Company
+        defineFixedProperty: 'cusip' .
+        defineFixedProperty: 'ticker' .
+        defineFixedProperty: 'name' ;
+
+     Company
+     defineMethod:
+     [ | initializeKeys: keys |
+       :cusip <- keys at: 1 ;          # first element in list
+       :ticker <- keys at: 2 ;         # second element in list
+       :code <- cusip ;                # for consistency
+     ] ;
+
+     Company
+     defineMethod:
+     [ | initializeLocalAttributes |
+       ^super initializeLocalAttributes;   # run version defined at Entity 
+       :name <- ticker ;
+     ] ;
+
+     Company
+     defineMethod:
+     [ | initializeNames |
+      ^self initializeNamesFor: cusip, ticker ;
+     ] ;
+</b></tt></pre>
+The expression:<pre><tt><b>
+     Company createInstance: "12345610", "Dummy"
+</b></tt></pre>
+will create a new <i>Company</i> instance, initialize its 
+<i>cusip</i>, <i>ticker</i>,
+and <i>name</i> properties, and update the naming dictionary with the
+two new names.  The expressions:<pre><tt><b>
+     Named Company \12345610
+</b>and<b>
+     Named Company Dummy
+</b></tt></pre>
+both return this newly created company instance.
+<p>
+<hr>
+<h3><a name="delete">Deleting Instances</a></h3>
+<p>
+Instances can be flagged for deletion without actually removing the
+object from the database.  This is a recommended approach for most
+applications, giving you an opportunity to 'undelete' an accidental
+deletion if necessary.   Several properties have been defined to aid
+in tracking deletion information.  Undeleted objects have values of
+<i>NA</i> for all of these properties:<p>
+<Center><table WIDTH="400" TABLE BORDER="1" CELLSPACING="2" CELLPADDING="8">
+<tr>
+<td><b>Message</b></td>
+<td><b>Definition</b></td>
+</tr>
+
+<tr>
+<td><i>deletionFlag</i></td>
+<td>TRUE if flagged for deletion</td>
+<tr>
+<td><i>deletionDate</i></td>
+<td>Date object was flagged for deletion</td>
+<tr>
+<td><i>deletionReason</i></td>
+<td>String explaining deletion reason</td>
+</tr>
+</table></Center>
+<p>
+The expression:<pre><tt><b>
+    object flagForDeletionWithReason: string
+</b>
+    where  object        is the object to be flagged for deletion
+           string        is the reason for deletion
+</tt></pre>
+is used to flag an object for deletion.  
+It is defined to perform the following operations:
+<p>
+<ol type="1">
+<li>Set the value of <i>deletionFlag</i> to TRUE.
+<li>Set the value of <i>deletionDate</i> to current date.
+<li>Set the value of <i>deletionReason</i> to supplied string.
+<li>Run the object's implementation of the method <i>cleanupDeletedObject</i>.
+</ol>
+<p>
+The <i>cleanupDeletedObject</i> message executes the following steps:
+<p>
+<ol type="1">
+<li>Run the object's version of <i>cleanupLocalAttributes</i>. 
+By default, this
+message does not do anything.  It should be redefined as appropriate
+for specific classes.
+<li>Run the object's version of <i>cleanupLocalNames</i>.  By default, this
+message deletes the object's code from the class' naming dictionary,
+if one exists.  This message can be redefined or augmented at specific
+classes as needed.
+</ol>
+<p>
+Several messages have been defined to utilize the <i>deletionFlag</i>
+property:
+<p>
+<Center><table WIDTH="400" TABLE BORDER="1" CELLSPACING="2" CELLPADDING="8">
+<tr>
+<td><b>Message</b></td>
+<td><b>Definition</b></td>
+</tr>
+
+<tr>
+<td><i>isActive</i></td>
+<td>TRUE if object's deletionFlag isNA</td>
+<tr>
+<td><i>isntActive</i></td>
+<td>TRUE if object isActive != TRUE</td>
+<tr>
+<td><i>isDeleted</i></td>
+<td>Same as isntActive</td>
+<tr>
+<td><i>isntDeleted</i></td>
+<td>Same as isActive</td>
+</tr>
+</table></Center>
+<p>
+To actually delete objects, you use the <i>delete</i> or <i>rdelete</i>
+message.  The <i>delete</i> just deletes the instance without considering the
+inheritance hierarchy.  The <i>rdelete</i> version deletes the recipient
+object and all instances in its <i>super</i> hierarchy.  There is no reason
+not to always use the <i>rdelete</i> version.  Note that these messages
+should be used <b>after</b>
+the <i>flagForDeletionWithReason:</i> message has been run
+to cleanup other information related to the instance.  
+<a name="shadow"> </a>Once an instance
+has been deleted, any references to the instance from other properties
+will return a <b>Shadow</b> instance for the class.  The shadow instance
+will respond to all the messages in the class, but will have <i>NA</i>
+values for all its properties.
+<p>
+<hr>
+<h3><a name="access">Basic Access</a></h3>
+<p>
+All objects respond to the message <i>instanceList</i> by returning an
+object containing the list of all instances in its class.  The
+expression:<pre><tt><b>
+     NewClass instanceList 
+</b></tt></pre>
+returns the list of instances in the class <i>NewClass</i>.  The
+<i>instanceList count</i> should equal <i>1</i>
+directly after a class is created.  This instance is the default instance.
+<p>
+The <i>isDefault</i> and <i>isntDefault</i> messages can be used to identify
+objects that are (are not) the default instance in a class.
+For example, the expression:<pre><tt><b>
+    NewClass instanceList select: [ isntDefault ] 
+</b></tt></pre>
+would be used to select all the non-default instances of the class
+<i>NewClass</i>.
+<p>
+Recall that the <i>createInstance</i> message creates a new instance in all the
+super classes of an object.  In the example:<pre><tt><b>
+     Object createSubclass: "Sample1" ;
+     Sample1 createSubclass: "Sample1A" ;
+     Sample1 createSubclass: "Sample1B" ;
+     !s1a1 <- Sample1A createInstance: "Sample1A1" ;
+     !s1a2 <- Sample1A createInstance: "Sample1A2" ;
+</b></tt></pre>
+The class <i>Sample1A</i> would contain 3 instances (the default plus the two
+new instances), the class <i>Sample1B</i> would contain 1 instance (the
+default), and the class <i>Sample1</i> would contain 5 instances (the
+default plus one instance for each instance of its subclasses).
+<p>
+<a name="hierarchy"> </a>
+The variable <i>s1a1</i> returns an instance of the class <i>Sample1A</i>.  It
+is sometimes necessary to access the actual <i>instance</i> in the object's
+superclass.  The expression:<pre><tt><b>
+     s1a1 super
+</b></tt></pre>
+returns an instance of the class <i>Sample1</i>.  This instance will
+respond to all the messages defined at <i>Sample1</i> and its super
+classes, but will not know about any messages defined at the class
+<i>Sample1A</i>.  You can navigate back to the "true" object using the
+expression:<pre><tt><b>
+     s1a1 super asBaseObject
+</b></tt></pre>
+The <i>asBaseObject</i> message will return the actual object that was
+created with the <i>createInstance</i> message.  The 
+expression:<pre><tt><b>
+     s1a1 super asBaseObject = s1a1
+</b></tt></pre>
+returns the value <i>TRUE</i>.  The <i>asBaseObject</i> message is useful for
+assembling all the objects belonging to any of the subclasses of a
+class.  For example, the expression:<pre><tt><b>
+    Sample1 instanceList send: [ asBaseObject ] 
+</b></tt></pre>
+could be used to return the list of all actual objects that are
+defined at <i>Sample1</i> or any of its subclasses.  The simple
+<i>instanceList</i> message would return a list of 5 objects all of class
+<i>Sample1</i>, whereas the above expression would return a list of 5
+objects with 3 objects of class <i>Sample1A</i>, 1 object of class
+<i>Sample1B</i>, and 1 object of class <i>Sample1</i>.
+<p>
+The <i>masterList</i>
+message has been defined to return the non-default, base object
+instances associated with a class.  For example, the expression:<pre><tt><b>
+    Sample1 masterList
+</b></tt></pre>
+is the same as:<pre><tt><b>
+    Sample1 instanceList select: [ isntDefault ] .
+       send: [ asBaseObject ] 
+</b></tt></pre>
+The returned list in both cases would contain 2 instances (<i>s1a1</i>
+and <i>s1a2</i>).  The message
+<i>activeList</i> is used to return all instances of a class
+(as base objects) that are active (not flagged for deletion)
+and not default.
+<p>
+The message <i>asSelf</i>
+is similar in function to the <i>asBaseObject</i> message and often
+returns the same object.  It is used to strip any extensions
+from an object.  For example, the expression:<pre><tt><b>
+     s1a2 = (s1a2 extendBy: [ !x ] )
+</b></tt></pre>
+would return FALSE.  The expressions:<pre><tt><b>
+     s1a2 = (s1a2 extendBy: [ !x ] . asSelf )
+</b>and<b>
+     s1a2 = (s1a2 extendBy: [ !x ] . asBaseObject)
+</b></tt></pre>
+would both return TRUE.  By convention, the <i>asBaseObject</i> message
+is used to navigate from a super class to a subclass and the <i>asSelf</i>
+message is used to strip extensions from an object.  
+<p>
+The message <i>showInheritance</i> can be sent to an object to see the
+classes in its hierarchy.  For example, the expression:<pre><tt><b>
+     Integer showInheritance
+</b></tt></pre>
+displays the following:<pre><tt><b>
+      ***  Inheritance Map For Class: Integer  ***
+
+      Object
+        |
+      Ordinal
+        |
+      Number
+        |
+     Integer   <===== YOU ARE HERE
+</b></tt></pre>
+The expression:<pre><tt><b>
+     Number showInheritance
+</b></tt></pre>
+displays:<pre><tt><b>
+     ***  Inheritance Map For Class: Number  ***
+     
+     Object
+       |
+     Ordinal
+       |
+     Number   <===== YOU ARE HERE
+        Double
+        Float
+        Integer
+</b></tt></pre>
+<p>
+The expression:<pre><tt><b>
+     classA inheritsFrom: classB
+</b></tt></pre>
+returns TRUE if <i>classA</i> is a subclass of <i>classB</i>.  
+The expression:<pre><tt><b>
+     classA isSuperClassOf: classB
+</b></tt></pre>
+returns TRUE if <i>classA</i> is a super class of <i>classB</i>.  
+For example:<pre><tt><b>
+     Integer inheritsFrom: Number
+</b></tt></pre>
+returns TRUE and: <pre><tt><b>
+     Integer isSuperClassOf: Number
+</b></tt></pre>
+returns FALSE.
+<p>
+<hr>
+<h3><a name="cluster">Clustering Issues</a></h3>
+<p>
+When Vision creates a new instance of a class, it needs to put it somewhere.
+Deciding where it goes is an object clustering issue.
+<p>
+Vision views classes as tables and instances as rows in those tables.
+This is more than a conceptual convenience -- it is also the basis for
+Vision's object clustering model. Every Vision object is divided into 
+<a href="Execution.htm#layers">layers</a>.
+Each layer corresponds to a class in the object's superclass hierarchy
+and lives in a table associated with that class. As a result, when you
+reference an object, you are also referencing the collection of tables
+that contain that object.  Each of those tables is known as a <b>Cluster</b>
+or <b>Store</b>.
+The set of tables used to contain all the layers of an object is known
+as a <b>Cluster Chain</b>.
+<p>
+In Vision, you reference a class indirectly through its instances. The
+<i>createSubclass</i> message, for example, always returns the default
+instance of the class it creates. 
+When you create a new instance of a class, you are actually
+asking an existing instance to create another instance for you.
+Normally, the new instance will have a row created in each level of the
+original instance's cluster chain.
+<p>
+By default, when you send 
+the <i>new</i> message or one of the <i>createInstance</i>
+messages to an instance of a non-<i>Collection</i>, non-<i>Built-in</i> class,
+you are asking Vision to create a new instance in the same cluster chain as the
+existing instance. That happens because all of these messages ultimately
+send a <i>clusterNew</i> message to the original instance. 
+The <i>clusterNew</i>
+message is a primitive message that requests the creation of a new instance
+in the same cluster chain as its recipient.
+<p>
+Not all of the instances of a class need to reside in the same cluster
+chain. In many cases it would be inconvenient or inefficient if they did.
+For example, when Vision creates objects for its own use, it creates new
+clusters to hold them. The <i>Built-in</i> class <i>String</i> and <i>Collection</i>
+classes automatically create new clusters to store new strings and collections as
+they are created.  References to these new clusters are typically temporary
+variables or properties if the clusters are to be permanently stored.
+<p>
+You too can create new clusters. The <i>newPrototype</i> message creates a new
+cluster chain capable of holding instances of the same class as its recipient.
+All objects respond to the <i>newPrototype</i> message. The <i>newPrototype</i>
+message creates cluster chains that are initially empty; for example:<pre><tt><b>
+     !newCluster <- MyClass newPrototype ;
+     newCluster instanceList count printNL;
+</b></tt></pre>
+returns the value <i>0</i>.
+<p>
+Because there are no instances in these clusters, the <i>newPrototype</i>
+message returns a <a href="#shadow"><i>shadow instance</i></a> of the class.
+The shadow instance cannot be used to store values. To get an instance you
+can use, you must send a message like <i>new</i>, <i>clusterNew</i>, or one of 
+the <i>createInstance</i> messages to the shadow instance returned by
+<i>newPrototype</i>.
+<p>
+Classes whose instances are divided across multiple cluster chains are
+said to be <b>Horizontally Partitioned</b>. There are reasons to horizontally
+partition a class and tradeoffs associated with those reasons.
+By default, the instance creation messages inherited from <i>Object</i>
+use the <i>clusterNew</i> message to keep most classes highly clustered.
+This strategy assumes that you will tend to operate on collections of these
+instances. In contrast, the instance creation messages inherited 
+from <i>Collection</i>
+use the <i>newPrototype new</i> message sequence to horizontally
+partition the collection classes. This strategy assumes that unrelated
+collections will not be used together and will probably have different
+lifetimes.
+<p>
+The primary reasons to horizontally partition a class are:
+<p>
+<ul>
+<li>to improve instance creation and update performance
+<li>to store instances of the same class in different object spaces
+<li>to segregate unrelated instances of the same class
+<li>to segregate instances with different lifetimes
+</ul>
+
+<p>
+As the number of instances in
+a cluster grows, the cost of creating and updating instances in that cluster
+increases. That is because Vision attempts to keep the instances in a cluster
+near each other on disk. Keeping those instances near each other improves
+the performance of operations like <i>select:</i>, <i>groupedBy:</i>, and
+<i>do:</i>. As the size of the cluster grows, however, Vision needs to
+do more work to maintain instance proximity. Eventually the cost of maintaining
+proximity outweighs its benefits and the class should be horizontally partitioned.
+<p>
+A cluster resides in just one object space. Since a cluster can only reside in
+a single object space, a class must be horizontally partitioned if its instances
+are to be stored in multiple object spaces. The most common reason for doing
+that is to save your own personal instances of a class whose primary cluster you
+cannot save.
+<p>
+The primary benefit to a high degree of clustering is query performance.
+Clustering is of no benefit and not worth the cost for instances that are not
+used that way. For example, two lists used to hold totally different types of
+elements are unlikely to be used together in a query. Even though they are both
+lists, there is no benefit to keeping them in the same cluster.
+<p>
+Clusters disappear from the database when they are no longer needed. They are
+no longer needed as soon as there are no references to any of their objects. If
+the same class is used to create instances that have different lifetimes, it
+makes sense to horizontally partition the class. Vision uses this strategy when
+it creates objects that represent the intermediate results of a program. The
+same strategy can be employed in your applications.
+<p>
+In summary:
+<p>
+<ol type="1">
+<li>The <i>new</i> and <i>clusterNew</i> messages are identical
+for most classes.  By default, most classes have one cluster 
+and new instances are created in this cluster.  
+<li>The <i>newPrototype</i> message is used to start a new cluster
+for a class.  This cluster initially has 0 instances.  
+<li>The <i>Collection</i> subclasses are not clustered by default.  The
+<i>new</i> message creates the new instance in a new cluster.  The
+<i>clusterNew</i> message creates the new instance in the same cluster
+as the recipient collection.
+<li><i>Strings</i> are not clustered by default.  As new strings are created,
+they are stored in separate clusters.  Modifying a string will return a new
+string but it will not be in the same cluster as the original string.
+Additional techniques are used to recluster strings if needed.
+</ol>
+<p>
+When you send the <i>newPrototype</i> message to an object, it starts
+a new cluster for physically storing instances.
+The new structure is at the same level of inheritance as the 
+original.  Messages defined at the original class or any subsequent
+clusters are seen by all clusters.  
+The <i>instanceList</i> message only
+returns the list of instances in the same physical cluster as the
+recipient.  
+<p>
+By convention, you should always create a new initial instance in a new cluster
+and set its default flag much the same way the initial instance is created when
+a new class is defined.  It is also useful to create a class constant that
+tracks the different clusters that have been created.  For example:<pre><tt><b>
+      #--  Create a list to store the first instance of each cluster
+      Currency define: 'storeXRef' toBe: List new ;
+
+      #--  Add the initial cluster as the first entry
+      Currency storeXRef , Currency ;
+
+      #--  Define a method to create a new cluster store
+      Currency defineMethod:
+      [ | createNewStore | 
+        #-- create new store and first instance in store
+        !store <- ^self newPrototype new
+        do: [ 
+           :defaultFlag <- TRUE ;
+            #- other initializations
+            ] ;
+
+        #--  use this if you want to name the store at ^global
+        ^global define: whatAmI toBe: store ; 
+        #--  add new store to storeXRef list
+        ^self storeXRef, store ;
+        store
+      ] ;
+
+   
+     #--  define fullInstanceList to return instances across clusters
+     Currency defineMethod:
+     [ | fullInstanceList |
+       storeXRef collectListElementsFrom: [ ^self instanceList ] 
+     ] ;
+</b></tt></pre>
+More information about clustering
+<a href="clString.htm#cluster"><i>Strings</i></a>,
+<a href="clList.htm#cluster"><i>Lists</i></a> and
+<a href="clIList.htm#cluster"><i>IndexedLists</i></a>
+is available.
+<p>
+<hr>
+
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy 1998 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated February 19, 1998</font>
+</table>
+
+</body>
+</html>

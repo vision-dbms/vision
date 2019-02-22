@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Class: Collection</title>
+</head>
+<body bgcolor = white>
+<h2>Vision Class: Collection</h2>
+
+<p>
+     | <a href="FHome.htm">Home</a> | <a href="clXRef.htm">Class XRef</a> | <a href="clList.htm">The List Class</a> | <a href="clIList.htm">The IndexedList Class</a> | <a href="clTS.htm">The TimeSeries Class</a> |
+<hr> 
+<h3>Topics Covered:</h3> 
+<ul type=square> 
+<li><a href="#overview">Overview</a>
+<li><a href="#basic">Collection Basics</a>
+<li><a href="#select">Creating Subsets</a>
+<li><a href="#sorts">Sorting and Ranking Collections</a>
+<li><a href="#groups">Grouping Collections</a>
+<li><a href="#compute">Collection Computation Messages</a>
+<li><a href="#tiles">
+Tiles, Running Totals, and Other Intra-List Messages</a>
+<li><a href="#inter">Inter-Collection Messages</a> 
+<li><a href="#creation">Creating and Updating Collections</a>
+<li><a href="#dot">Collection Messages and the
+   <font size=+2>.</font> Operator </a>
+<li><a href="#iterate">When to Iterate</a>
+<li><a href="#more">Related Topics</a>
+</ul>
+<p>
+<hr>
+<h3><a name="overview">Overview</a></h3> 
+<p> 
+The <b>Collection</b> class is an abstract class that is used to
+organize classes in the hierarchy whose instances represent sets
+of objects.  The major subclasses of <i>Collection</i> are:
+<a href="clList.htm"><i>List</i></a>,
+<a href="clIList.htm"><i>IndexedList</i></a>, and
+<a href="clTS.htm"><i>TimeSeries</i></a>.
+<p>
+Instances of the class <b>List</b> represent collections of objects
+that are accessed either by position or as a set.  Instances of
+the class <b>IndexedList</b> represent collections of objects
+that are accessed by a user-defined index or as a set.  Instances of
+the class <b>TimeSeries</b> represent collections of objects
+that are accessed by date or as a set.
+The elements in a collection do not need to be from the same class.
+<p>
+
+<p>
+The <i>Collection</i> class is an indirect subclass of Object:
+<font size=+1><pre>
+          <a href="clObject.htm">Object</a>
+             |
+             Function
+                |
+                EnumeratedFunction
+                   |
+                   <b>Collection</b>
+                      |
+                      IndexedCollection
+                      |   |-- <a href="clIList.htm">IndexedList</a>
+                      |   |-- <a href="clTS.htm">TimeSeries</a>
+                      |
+                      SequencedCollection
+                          |-- <a href="clList.htm">List</a>
+
+</pre></font>
+The <i>Collecton</i> classes have been optimized to organize and
+query large sets of data.  A large number of the messages defined
+for these classes have been written in Vision and can therefore be
+modified and expanded as needed.  As always, you can define any
+number of new messages for these classes.
+<p>
+<hr>
+<h3><a name="basic">Collection Basics</a></h3>
+<p>
+Many of the frequently used <i>List</i>, <i>IndexedList</i>,
+and <i>TimeSeries</i> messages are defined at the class <i>Collection</i>.
+Each subclass defines additional messages that are unique for the
+specific class.  You can send the <i>toList</i> message to an
+instance of any of the <i>Collecton</i> subclasses to return an
+instance of the <i>List</i> class.  You cannot directly convert
+instances of one of these subclasses to a <i>TimeSeries</i> or an
+<i>IndexedList</i> object.
+<p>
+All <i>Collection</i> objects respond to the message 
+<a href="mList.htm#count"><i>count</i></a>.  For example:<pre><tt><b>
+     Currency instanceList count print ;
+</b></tt></pre>
+prints the number of instances in the Currency class.
+<p>
+The <a name="do" href="mList.htm#do:"><i>do:</i></a> message
+has been redefined at the <i>Collection</i> class.
+It performs the same function as the 
+<a href="clObject.htm#do:">version defined at Object</a>; however,
+instead of applying to a single object, the version defined
+for the <i>Collection</i> class applies the block supplied as the
+parameter to each
+element in the recipient object.  For example:<pre><tt><b>
+     Currency instanceList
+     do: [ code print: 10 ; name printNL ] ;
+</b></tt></pre>
+displays the value of <i>code</i> and <i>name</i> for each instance
+in the Currency class.  The supplied block is evaluated for each
+element in the collection.  Messages within the block are sent
+to the individual elements in the collection.  
+<p>
+The <a name="send" href="mList.htm#send:"><i>send:</i></a> 
+message has also been redefined at the <i>Collection</i> class.
+It works identically to the <i>do:</i> message except for the
+value returned.  The block is evaluated for each object in
+the recipient collection.  Unlike the <i>do:</i> message,
+the result of evaluating the block is returned, not the original
+object.  <a href="clBlock.htm#return">Blocks</a> return
+the value of the last statement exectued.  The <i>send:</i>
+message is defined to return this object for each object
+in the recipient collection.  For example:<pre><tt><b>
+     !names <- Currency instanceList
+         send: [ name ] ;
+     names count printNL ;
+</b></tt></pre>
+In this example,
+the currency name is returned for each instance in the Currency
+class.  The variable <i>names</i> represents a collection
+where each element in this collection is the name of a currency. 
+If the <i>do:</i> message had been used instead of <i>send:</i>,
+the variable <i>names</i> would represent the list of all
+currency instances.  The collection returned by the
+<i>send:</i> message has the same number of elements 
+in the same order as the original collection.
+If the original collection is a
+<i>List</i> or an <i>IndexedList</i>, the <i>send:</i> message
+returns a <i>List</i>.  If the original collection is a <i>TimeSeries</i>,
+the <i>send:</i> message returns a <i>TimeSeries</i>
+containing the same dates as the original <i>TimeSeries</i>.  
+The <i>do:</i> message always returns the original collection.
+<p>
+The <i>extendBy:</i> message
+has been redefined at the <i>Collection</i> class.
+It performs the same function as the 
+<a name="extend" href="clObject.htm#extendBy:">version defined at Object</a>.
+Instead of applying to a single object, the version defined
+for the <i>Collection</i> class applies the block supplied as the
+parameter to each
+element in the recipient object, returning a collection where each
+element of the collection is extended by the variables defined within
+the block.  For example:<pre><tt><b>
+     !xlist <- Currency instanceList
+        extendBy: [ !nameLength <- name count ;
+                    !name10 <- name take: 10 ;
+                  ] ;
+</b></tt></pre>
+defines <i>xlist</i> to represent a list of all currency instances
+that respond to the new variables
+<i>nameLength</i> and <i>name10</i> 
+in addition to the currency messages.  For example:<pre><tt><b>
+     xlist 
+     do: [ name print: 30 ;   
+           nameLength printNL ;
+         ] ;
+</b></tt></pre>
+All objects in <i>xlist</i> respond to the <i>nameLength</i> message
+just like any other message.  All objects in the list continue to
+respond to the messages already defined such as <i>name</i>.  
+<p>
+Within the square brackets, you can define as many variables as you
+would like. Each variable should be introduced with the symbol <b>!</b>
+followed by a variable name. 
+If the original collection is a
+<i>List</i> or an <i>IndexedList</i>, the <i>extendBy:</i> message
+returns a <i>List</i>.  If the original collection is a <i>TimeSeries</i>,
+the <i>extendBy:</i> message returns a <i>TimeSeries</i>
+containing the same dates as the original <i>TimeSeries</i>.  
+<p>
+The <a href="mList.htm#collect:"><i>collect:</i></a> message is used
+to create an extension of the original list that always defines a
+variable named <i>value</i>.  This variable is set to the result of evaluating
+the block supplied as a parameter to the <i>collect:</i> message.
+<p>
+The messages <i>do:</i>, <i>send:</i>, and <i>extendBy:</i>
+have been redefined for the <i>Collection</i> classes to operate
+on the elements of the collection.  The messages <i>basicDo:</i>,
+<i>basicSend:</i>, and <i>basicExtend:</i> are available if
+you want to run any of these operations on the collection as
+a whole.  For example:<pre><tt><b>
+     Currency instanceList
+     basicDo: [ whatAmI print: 30 ; count printNL ] ;
+</b></tt></pre>
+sends the messages inside the block to the collection object itself,
+not to the individual elements.  
+<p>
+The message <a href="mList.htm#numberElements"><i>numberElements</i></a>
+can be used to extend each element in a collection by the variable
+<i>position</i> which corresponds to its position number in the collection.
+For example:<pre><tt><b>
+     Currency instanceList 
+       numberElements            #- extend by !position
+     do: [ code print: 10 ;  
+           position printNL ;
+         ] ;
+</b></tt></pre>
+<p>
+The message
+<a href="mList.htm#linkElements"><i>linkElements</i></a>
+can be used to extend each element in a collection by the 
+two variables: <i>prior</i> and <i>next</i>.  These variables
+will return the elements in the recipient that are before or
+after each element in the recipient.  For example:<pre><tt><b>
+     3 sequence linkElements
+     do: [ print ; 
+           prior print ; 
+           next printNL 
+         ] ;
+
+</b>displays:<b>
+
+             1      NA         2
+             2        1        3
+             3        2        NA
+</b></tt></pre>
+<p>
+<hr>
+<h3><a name="select">Creating Subsets</a></h3>
+<p>
+It is often useful to restrict a collection to objects that meet
+certain criteria.  For example, you may wish to find the currencies
+with a US exchange rate greater than 2 and produce a report for those
+currencies:<pre><tt><b>
+     Currency instanceList            #- start with all currencies
+        select: [ usExchange > 2 ].   #- return subset meeting criteria
+     do: [ name print: 30 ;           #- display name and exchange
+           usExchange printNL ;       #-   for members of subset
+         ] ;
+</b></tt></pre>
+<p>
+The <a href="mList.htm#select:"><i>select:</i></a>
+message returns a collection of those elements in the original
+collection that meet the criteria specified. 
+<p>
+The <i>select:</i> message returns a new <i>Collection</i> object
+that contains a subset of the objects in the original
+<i>Collection</i>.  This subset can be empty (i.e., contain no
+objects) and will never have more elements than the original
+collection.  If the
+original collection is a <i>List</i> or an <i>IndexedList</i>, the
+<i>select:</i> message returns a <i>List</i>.  If the original
+collection is a <i>TimeSeries</i>, the <i>select:</i> message returns
+a <i>TimeSeries</i> containing a subset of the dates in the original
+<i>TimeSeries</i>.  
+<p>
+The block supplied as the parameter to the <i>select:</i> message
+can contain any valid Vision program.  You can create local variables
+in this block and use the <i>&&</i> and <i>||</i> messages to produce
+multi-part criteria.  For example:<pre><tt><b>
+     Currency instanceList
+     select: [ !firstLetter <- name take: 1 ;
+               (usExchange > 2 ) &&
+               (firstLetter < "B" || firstLetter > "U")
+             ] .
+
+</b></tt></pre>
+The value returned by the selection block is the value
+used to perform the selection.  The subset will include all
+elements that return the value <i>TRUE</i> when this block is
+evaluated.  Since the object returned by the <i>select:</i> message
+is another <i>Collection</i>, you can send another <i>select:</i>
+message to it.  The previous example could have been written using:<pre><tt><b>
+     Currency instanceList
+     select: [ usExchange > 2 ] .
+     select: [ !firstLetter <- name take: 1 ;
+               firstLetter < "B" || firstLetter > "U"
+             ] .
+
+</b></tt></pre>
+<p>
+The message <a href="mList.htm#first:"><i>first:</i></a> is used to
+select the specified number of elements in the recipient that are not the
+<a href="Classes.htm#default">default value</a>, starting from the
+beginning of the collection.
+The message <a href="mList.htm#last:"><i>last:</i></a> is used to
+select the specified number of elements in the recipient that are not the
+<a href="Classes.htm#default">default value</a>, starting from the
+end of the collection.  For example:<pre><tt><b>
+     Currency instanceList last: 10 .
+         select: [ usExchange > 2 ] .
+</b></tt></pre>
+This expression selects the last 10 currencies in the <i>Currency</i>
+class and then selects those with an exchange rate greater than 2
+from this subset.  
+<p>
+The message <i>nonDefaults</i> can be used to eliminate any
+default values from a <i>Collection</i>.  For example:<pre><tt><b>
+     Currency instanceList nonDefaults
+</b></tt></pre>
+returns a list of all currencies excluding the default instance.
+It is equivalent to:<pre><tt><b>
+     Currency instanceList 
+        select: [ isntDefault ] .
+
+</b></tt></pre>
+
+<p>
+<hr>
+<h3><a name="sorts">Sorting and Ranking Collections</a></h3>
+<p>
+The messages <i>sortUp:</i> and <i>sortDown:</i> return the
+recipient collection as a <i>List</i> object in ascending
+or descending order.  The collection
+is sorted by the value returned by the block supplied as a parameter.
+For example:<pre><tt><b>
+     Currency instanceList 
+        sortUp: [ name ] .
+     do: [ name printNL ] ;
+</b></tt></pre>
+This program sorts the currency objects by name and prints them
+in alphabetical order.  
+<p>
+You can perform multiple sorts
+using the <a href="mList.htm#sortUpBy:then:"><i>sortUpBy:then:</i></a>
+and <a href="mList.htm#sortDownBy:then:"><i>sortDownBy:then:</i></a>
+messages and supplying two criteria. For example, to sort by exchange
+rate, then name, use:<pre><tt><b>
+     Currency instanceList 
+        sortUpBy: [ usExchange ] then: [ name ] .
+     do: [ name print: 30 ; usExchange printNL ] ;
+</b></tt></pre>
+The messages <i>sortUpBy:then:then:</i>, <i>sortUpBy:then:then:then:</i>, 
+<i>sortDownBy:then:then:</i>, and <i>sortDownBy:then:then:then:</i>
+have also been defined to perform sorts with additional criteria.
+<p>
+Since these messages assume all your sorts are ascending or
+descending, they cannot be used to sort the currencies from highest
+to lowest score and then alphabetically by name for ties.  To
+accomplish this, you need to take advantage of the fact that the
+<i>sort</i> messages produce "stable" sorts.  This means that when a
+sort message is applied to a collection, the original order of the
+collection is preserved if the sort produces a tied value.  If you
+apply several sort criteria in reverse order (i.e., the most
+detailed level of sort first), you can produce the desired results.
+For example:<pre><tt><b>
+     Currency instanceList 
+        sortUp: [ name ] .
+        sortUp: [ usExchange ] .
+     do: [ name print: 30 ; usExchange printNL ] ;
+</b></tt></pre>
+is identical to the previous example, producing an ascending sort
+by exchange rate, sorting alphabetically when the exchange rates are
+the same.  The expression:<pre><tt><b>
+     Currency instanceList 
+        sortUp: [ name ] .
+        sortDown: [ usExchange ] .
+     do: [ name print: 30 ; usExchange printNL ] ;
+</b></tt></pre>
+produces a descending sort by exchange rate, sorting alphabetically 
+when the exchange rates are the same.
+<p>
+<a name="ranks"> </a>
+The <a href="mList.htm#rankUp:"><i>rankUp:</i></a> and
+<a href="mList.htm#rankDown:"><i>rankDown:</i></a> 
+messages are defined to rank the elements in a <i>Collection</i>
+based on the value returned by evaluating the parameter supplied
+as a block.  These message return a <i>List</i> or <i>TimeSeries</i>
+extended by the variable <i>rank</i> which represents the element's
+rank in the collection.  The value of <i>rank</i> will be an integer
+between 1 and the number of elements in the recipient object.  The
+returned object will have the same number of elements 
+and will be in the same order as the recipient.  For example:<pre><tt><b>
+     Currency instanceList
+          rankUp: [ usExchange ] .
+     do: [ code print: 5 ; usExchange print ; rank printNL ] ;
+</b></tt></pre>
+The displayed rank indicates the currency's position in the
+collection by ascending exchanging rate.
+<p>
+The messages
+<a href="mList.htm#rankDown:usingCollector:">
+<i>rankDown:usingCollector:</i></a> and
+<a href="mList.htm#rankUp:usingCollector:">
+<i>rankUp:usingCollector:</i></a>
+provide a way to define a different variable name to the hold
+the value of the rank.  The second parameter is a named block
+that defines the variable name to use as a parameter and returns
+the value of <i>^current</i>.  For example, to name the variable
+<i>alt</i> instead of <i>rank</i> use:<pre><tt><b>
+     Currency instanceList
+        rankUp: [ usExchange ] usingCollector: [ | :alt | ^current ] .
+     do: [ code print: 5 ; usExchange print ; alt printNL ] ;
+</b></tt></pre>
+
+<p>
+<hr>
+<h3><a name="groups">Grouping Collections</a></h3>
+<p>
+The 
+<a href="mList.htm#groupedBy:"><i>groupedBy:</i></a>
+message provides you with a powerful tool for
+aggregation, enabling you to simultaneously analyze information at a detailed
+and aggregate level. The <i>groupedBy:</i> message is used to organize
+your original <i>Collecton</i>
+into a <i>List</i> of <b>groups</b>, sublists that are
+generated based on the criteria supplied.
+You can perform summary analysis on each group and
+analyze the individual elements in each group. 
+<p>
+The <i>groupedBy:</i>
+message groups the recipient collection based on the value returned by
+the block supplied as a parameter.  It returns a <i>List</i> of the unique
+instances of this value found in the recipient collection,
+extended by the variable <i>groupList</i>, which
+returns the <i>List</i> of elements from the original collection 
+that are associated with the specific group.
+<p>
+For example, if the variable <i>companyList</i> contains a list
+of companies that respond to the message <i>sector</i>, and each
+sector responds to the message <i>name</i>, then
+the expression:<pre><tt><b>
+     companyList groupedBy: [ sector ] .
+     do: [ name printNL ;
+         ] ;
+</b></tt></pre>
+can be used to group the companies into sectors and display the name
+of each sector present.  
+<p>
+By asking Vision to group 
+<i>companyList</i> by <i>sector</i>, Vision returns a <i>List</i> of
+the sectors that exist in <i>companyList</i>. 
+The original set of companies is not lost. Each element in the <i>List</i>
+formed by the <i>groupedBy:</i> message responds to the message
+<i>groupList</i>.
+This message returns the <i>List</i> of companies from the original 
+collection associated with the specific group.  For example:<pre><tt><b>
+     companyList groupedBy: [ sector ] . 
+     do: [ name print ;
+           groupList count printNL ;
+         ] ;
+</b></tt></pre>
+displays the number of elements in the group after each sector's name.
+Since <i>groupList</i> returns a <i>List</i> object, you can send
+any of the <i>List</i> messages to it.  For example, you could
+display the companies in each sector using:<pre><tt><b>
+     companyList groupedBy: [ sector ] . 
+     do: [ name print ;
+           groupList count printNL ;
+           groupList 
+           do: [                        # for each company in sector 
+               displayInfo ;            # print standard company info
+               ] ;                      # end of groupList do: []
+         ];                             # end of sector do: []
+</b></tt></pre>
+In this example, the summary information is displayed about the
+sector followed by an entry for each element in the sector.
+<p>
+Pictorially the <i>groupedBy:</i> message works as follows: 
+<p>
+<center><img src="list3.gif" lowsrc="list3.gif" 
+alt="groupedBy: message structure" border=0 ></center>
+<p>
+Grouping introduces a concept known as <b>nested</b> lists. 
+In this case, the outer
+list represents a list of sectors. Each element in this outer list in turn
+responds to the message <i>groupList</i> which returns the set of elements
+from the original list that are in the current group. Since this subset
+is itself a list, you can perform any list operations on it,
+including grouping it further.  For example:<pre><tt><b>
+     companyList groupedBy: [ sector ] .      # group by sector 
+     do: [ 
+         "SECTOR: " print; 
+         name printNL;                        # print sector's name 
+         groupList groupedBy: [ industry ] .  # group companies in sector 
+         do: [                                #    by industry 
+             "INDUSTRY: " print; 
+             name printNL;                    # print industry's name 
+             groupList                        # for each company 
+             do: [                            #   in industry 
+                 "Company: " print ; 
+                 name printNL ;               # print company's name
+                 ] ;                          # end of companies in ind. 
+             ] ;                              # end of industries in sector 
+     ] ;                                      # end of sectors
+</b></tt></pre>
+<p>
+This report groups <i>companyList</i> into sectors.  The companies
+within a sector are then grouped into industries.  The companies are listed
+under their corresponding industry. This example uses the <i>groupedBy:</i>
+message twice; once to group the original list into sectors; the second
+time to group the companies in a given sector into industries. 
+<p>
+<blockquote><hr>
+<center><a name="groupedStrings.note"><b>Note: </b> </a></center>
+<p>
+The message <a href="mList.htm#groupedByString:"><i>groupedByString:</i></a>
+is used to correctly group lists
+using a criteria block that generates a <i>String</i> value.  By default, 
+strings that are distinct objects will be grouped into separate groups 
+even if they have the same content.  This version of the 
+<i>groupedBy:</i>
+message groups strings with the same content into the same group,
+even if the initial strings are distinct objects.
+<hr></blockquote>
+<p>
+A number of additional variations of the <i>groupedBy:</i> message
+have been defined and are summarized below:
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+</tr>
+<tr>
+<td><a href="mList.htm#groupedBy:in:"><i>groupedBy:in:</i></a>
+<td>
+Groups <i>recipient</i> using <i>parameter1</i>
+and returns <i>List</i> containing one
+element for each value in the <i>List</i> supplied as
+<i>parameter2</i>
+<tr>
+<td><a href="mList.htm#groupedBy:intersect:"><i>groupedBy:intersect:</i></a>
+<td>Groups <i>recipient</i> using <i>parameter1</i>
+and returns <i>List</i> containing one
+element for each value that appears in both <i>recipient</i> and
+<i>parameter2</i>
+<tr>
+<td><a href="mList.htm#groupedBy:union:"><i>groupedBy:union:</i></a>
+<td>
+Groups <i>recipient</i> using <i>parameter1</i>
+and returns <i>List</i> containing one
+element for each value that appears in either <i>recipient</i> or
+<i>parameter2</i>
+<tr>
+<td><a href="mList.htm#groupedBy:usingCutoffs:"><i>groupedBy:usingCutoffs:</i></a>
+<td>
+Groups <i>recipient</i> using <i>parameter1</i> into partitions based
+on <i>List</i> of <i>Numbers</i> supplied in <i>parameter2</i>
+<tr>
+<td><a href="mList.htm#groupedByCriteria:"><i>groupedByCriteria:</i></a>
+<td>Groups <i>recipient</i> based on <i>List</i> of <i>Blocks</i>
+supplied as <i>parameter</i>, returning a <i>List</i> extended by
+<i>keyList</i> as well as <i>groupList</i>
+<tr>
+<td><a href="mList.htm#groupPrintUsing:"><i>groupPrintUsing:</i></a>
+<td>
+Groups <i>recipient</i> using <i>parameter</i>, displaying
+the count for each group 
+<tr>
+<td><a href="mList.htm#mgroupedBy:"><i>mgroupedBy:</i></a>
+<td>
+Groups <i>recipient</i> using <i>parameter1</i> which can return a
+<i>List</i> of objects.
+Elements in the <i>recipient</i> may be 
+included in one or more <i>groupLists</i>.
+
+</tr></table></Center>
+
+<p>
+<hr>
+<h3><a name="compute">Collection Computation Messages</a></h3>
+<p>
+A number of messages have been defined to compute summary statistics
+for a <i>Collection</i>.  For example:<pre><tt><b>
+     companyList average: [ sales ] 
+</b></tt></pre>
+computes the average sales value for the companies in <i>companyList</i>.
+<p>
+The following table summarizes the various statistical messages
+that have been defined.  Note that
+most of these messages are defined in Vision and can therefore be copied
+or modified to create other variations as needed.  
+These messages can be sent to an instance of any <i>Collection</i> subclass
+and return a numeric value of <i>NA</i>.
+Parameters are <i>Blocks</i> except where explicitly noted.
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+<td><b>Sample</b>
+</tr>
+
+<tr>
+<td><a href="mList.htm#average"><i>average</i></a>
+<td>Simple average 
+<td>5 sequence average
+<tr>
+<td><a href="mList.htm#average:"><i>average:</i></a>
+<td>Simple average based on value returned by <i>parameter</i>
+<td>list average: [ sales ] 
+<tr>
+<td><a href="mList.htm#average:withWeights:"><i>average:withWeights:</i></a>
+<td>Weighted average using <i>parameter2</i> to weight the value
+returned by <i>parameter1</i>
+<td>list average: [sales] withWeights: [mktCap] 
+<tr>
+<td><a href="mList.htm#compound"><i>compound</i></a>
+<td>Compounded value
+<td>5 sequence compound
+<tr>
+<td><a href="mList.htm#compound:"><i>compound:</i></a>
+<td>Compounded value based on value returned by <i>parameter</i>
+<td>list compound: [sales] 
+<tr>
+<td><a href="mList.htm#correlate:with:"><i>correlate:with:</i></a>
+<td>Correlation based on evaluation of blocks supplied as two
+<i>parameters</i>
+<td>list correlate: [sales] with: [profit]
+<tr>
+<td><a href="mList.htm#gMean"><i>gMean</i></a>
+<td>Geometric Mean
+<td>5 sequence gMean
+<tr>
+<td><a href="mList.htm#gMean:"><i>gMean:</i></a>
+<td>Geometric mean based on value returned by <i>parameter</i>
+<td>list gMean: [sales]
+<tr>
+<td><a href="mList.htm#harmonicMean"><i>harmonicMean</i></a>
+<td>Harmonic Mean
+<td>5 sequence harmonicMean
+<tr>
+<td><a href="mList.htm#harmonicMean:"><i>harmonicMean:</i></a>
+<td>Harmonic mean based on value returned by <i>parameter</i>
+<td>list harmonicMean: [sales]
+<tr>
+<td>
+<a href="mList.htm#harmonicMean:withWeights:"><i>harmonicMean:withWeights:</i></a>
+<td>Harmonic mean using <i>parameter2</i> to weight the value
+returned by <i>parameter1</i>
+<td>list harmonicMean: [sales] withWeights: [mktCap] 
+<tr>
+<td><a href="mList.htm#max"><i>max</i></a>
+<td>Maximum value in <i>recipient</i>
+<td>5 sequence max
+<tr>
+<td><a href="mList.htm#max:"><i>max:</i></a>
+<td>Maximum based on value returned by <i>parameter</i>
+<td>list max: [sales]
+<tr>
+<td><a href="mList.htm#median"><i>median</i></a>
+<td>Median value in <i>recipient</i>
+<td>5 sequence median
+<tr>
+<td><a href="mList.htm#median:"><i>median:</i></a>
+<td>Median based on value returned by <i>parameter</i>
+<td>list median: [sales]
+<tr>
+<td><a href="mList.htm#min"><i>min</i></a>
+<td>Minimum value in <i>recipient</i>
+<td>5 sequence min
+<tr>
+<td><a href="mList.htm#min:"><i>min:</i></a>
+<td>Minimum based on value returned by <i>parameter</i>
+<td>list min: [sales]
+<tr>
+<td><a href="mList.htm#mode"><i>mode</i></a>
+<td>Mode value in <i>recipient</i>
+<td>5 sequence mode
+<tr>
+<td><a href="mList.htm#mode:"><i>mode:</i></a>
+<td>Mode based on value returned by <i>parameter</i>
+<td>list mode: [sales]
+<tr>
+<td><a href="mList.htm#product"><i>product</i></a>
+<td>Product of values in <i>recipient</i>
+<td>5 sequence product
+<tr>
+<td><a href="mList.htm#product:"><i>product:</i></a>
+<td>Product of values returned by <i>parameter</i>
+<td>list product: [sales]
+<tr>
+<td><a href="mList.htm#rankCorrelate:with:"><i>rankCorrelate:with:</i></a>
+<td>Correlation between relative ranks of values returned by the
+two <i>parameters</i>
+<td>list rankCorrelate: [sales] with: [profit]
+<tr>
+<td><a href="mList.htm#regress:"><i>regress:</i></a>
+<td>Performs linear regression between <i>recipient</i> and <i>parameter</i>,
+returning object that responds to <i>beta</i>, <i>alpha</i>,
+<i>pearson</i>, <i>rsq</i>, and <i>stdErr</i>.  
+<td>(2,3,9,1,8,7,5) regress: (6,5,11,7,5,4,4) .
+<tr>
+<td><a href="mList.htm#stdDev"><i>stdDev</i></a>
+<td>Standard deviation of values in <i>recipient</i>
+<td>5 sequence stdDev
+<tr>
+<td><a href="mList.htm#stdDev:"><i>stdDev:</i></a>
+<td>Standard deviation based on value returned by <i>parameter</i>
+<td>list stdDev: [sales]
+<tr>
+<td><a href="mList.htm#total"><i>total</i></a>
+<td>Total value in <i>recipient</i>
+<td>5 sequence total
+<tr>
+<td><a href="mList.htm#total:"><i>total:</i></a>
+<td>Total based on value returned by <i>parameter</i>
+<td>list total: [sales]
+</tr></table></Center>
+
+<p>
+<hr>
+<h3><a name="tiles"></a>
+Tiles, Running Totals, and Other Intra-List Messages</a></h3>
+<p>
+The 
+<a href="mList.htm#decileUp:"><i>decileUp:</i></a> and
+<a href="mList.htm#decileDown:"><i>decileDown:</i></a> 
+messages have been implemented to assign a value from 1 to 10 to each element
+in the recipient <i>Collecton</i>.  The <i>decileUp:</i> message
+assigns the value 1 to the first 10% of the elements with the lowest
+values, the value 2 to the next 10%, and so on with the value 10 assigned
+to the elements in the top 10%. The <i>decileDown:</i> message assigns
+the value 1 to the first 10% of the elements with the highest values
+and the value 10 to the elements in the bottom 10%. When you send
+one of these messages to a <i>Collection</i>,
+Vision returns the recipient extended by the variable
+named <i>decile</i>. For example:<pre><tt><b>
+     companyList decileDown: [ sales ] . 
+     do: [ name print: 30 ; 
+           sales print: 10 ;
+           decile printNL ; 
+         ] ;
+</b></tt></pre>
+displays the decile value from 1 to 10 for each company in
+<i>companyList</i>.
+<p>
+The 
+<a href="mList.htm#quintileUp:"><i>quintileUp:</i></a> and
+<a href="mList.htm#quintileDown:"><i>quintileDown:</i></a> 
+messages are identical to the decile messages except they assign a value
+from 1 to 5, returned in a variable named <i>quintile</i>. 
+The 
+<a href="mList.htm#percentileUp:"><i>percentileUp:</i></a> and
+<a href="mList.htm#percentileDown:"><i>percentileDown:</i></a> 
+messages are identical to the decile messages except they assign a value
+from 1 to 100, returned in a variable named <i>percentile</i>. 
+<p>
+The messages 
+<a href="mList.htm#tileUp:tiles:"><i>tileUp:tiles:</i></a> and
+<a href="mList.htm#tileDown:tiles:"><i>tileDown:tiles:</i></a>
+can be used to provide an arbitrary number of tiles.
+The extended variable is named <i>tile</i>.
+For example, to group a company list into fractiles (20 groups),
+you could use:<pre><tt><b>
+     companyList 
+          tileUp: [ sales ] tiles: 20 .
+     do: [ name print: 30 ; 
+           sales print: 10 ;
+           tile printNL ;      #- number from 1-20
+         ] ;
+</b></tt></pre>
+<p>
+If you want to define a different name for the extended variable
+representing the tile, you can use the messages
+<a href="mList.htm#decileUp:using:"><i>decileUp:using:</i></a>,
+<a href="mList.htm#decileDown:using:"><i>decileDown:using:</i></a>,
+<a href="mList.htm#quintileUp:using:"><i>quintileUp:using:</i></a>,
+<a href="mList.htm#quintileDown:using:"><i>quintileDown:using:</i></a>,
+<a href="mList.htm#percentileUp:using:"><i>percentileUp:using:</i></a>,
+<a href="mList.htm#percentileDown:using:"><i>percentileDown:using:</i></a>,
+<a href="mList.htm#tileUp:using:tiles:"><i>tileUp:using:tiles:</i></a>, and
+<a href="mList.htm#tileDown:using:tiles:"><i>tileDown:using:tiles:</i></a>.
+For example:<pre><tt><b>
+     companyList 
+         decileUp: [ sales ] using: "d1" .
+         decileUp: [ profit ] using: "d2" .
+     do: [ name print: 30 ; 
+           d1 print ;          # sales decile
+           d2 printNL ;        # profit decile
+         ] ;
+</b></tt></pre>
+<p>
+These various "tiling" messages have all been defined in Vision using
+the messages <i>tileUp:usingCollector:tiles:</i> and
+<i>tileDown:usingCollector:tiles:</i>.  The first parameter is
+the block to be evaluated.  The second parameter defines the
+name of the extended variable.  The third parameter indicates
+the number of "tiles" to create.  For example, to define
+the message <i>fractileUp:</i>, use:<pre><tt><b>
+     Collection
+     defineMethod: 
+     [ | fractileUp: block |
+       ^self tileUp: block 
+             usingCollector: [ |:fractile| ^current ] 
+             tiles: 20
+     ] ;
+
+</b></tt></pre>
+<p>
+<a name="runningTotal"> </a>
+The message
+<a href="mList.htm#runningTotal:"><i>runningTotal:</i></a>
+returns the recipient <i>Collection</i> extended by the
+variable <i>runningTotal</i> which represents the running
+sum of the elements in the collection to that point.  For example:<pre><tt><b>
+     20 sequence
+        runningTotal: [ ^self ] .    
+     do: [ print ; 
+           runningTotal printNL ;
+         ];
+</b></tt></pre>
+The message
+<a href="mList.htm#runningAverage:"><i>runningAverage:</i></a>
+returns the recipient <i>Collection</i> extended by the
+variable <i>runningAverage</i> which represents the running
+average of the elements in the collection to that point.  
+<p>
+Several additional <i>Collection</i> messages return the
+recipient collection extended by a new variable. 
+The message
+<a href="mList.htm#normalize:"><i>normalize:</i></a>
+returns the recipient extended by the variable <i>norm</i>,
+representing the normalized value of the element relative
+the mean and standard deviation of the collection.
+The message
+<a href="mList.htm#weightedDecile:"><i>weightedDecile:</i></a>
+returns the recipient extended by the variable <i>decile</i>,
+a number from 1 to 10.
+The message
+<a href="mList.htm#weightedQuintile:"><i>weightedQuintile:</i></a>
+returns the recipient extended by the variable <i>quintile</i>,
+a number from 1 to 5.
+<p>
+<hr>
+<h3><a name="inter">Inter-Collection Messages</a></h3>
+<p>
+A number of messages have been defined to perform operations
+<b>between</b> two lists.  The messages can be sent to an instance
+of any <i>Collection</i> subclass and return a <i>List</i> object
+unless otherwise noted.
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+<td><b>Sample</b>
+</tr>
+
+<tr>
+<td><a href="mList.htm#+"><i>+</i></a>
+<td>Add <i>parameter</i> to <i>recipient</i> (List or TimeSeries
+only); <i>parameter</i> can be a scalar number or a list of numbers
+<td>5 sequence + 5 sequence
+<tr>
+<td><a href="mList.htm#-"><i>-</i></a>
+<td>Subtract <i>parameter</i> from <i>recipient</i> (List or TimeSeries
+only); <i>parameter</i> can be a scalar number or a list of numbers
+<td>5 sequence - 3
+<tr>
+<td><a href="mList.htm#*"><i>*</i></a>
+<td>Multiply <i>recipient</i> by <i>parameter</i> (List or TimeSeries
+only); <i>parameter</i> can be a scalar number or a list of numbers
+<td>5 sequence * 5 sequence
+<tr>
+<td><a href="mList.htm#/"><i>/</i></a>
+<td>Divide <i>recipient</i> by <i>parameter</i> (List or TimeSeries
+only); <i>parameter</i> can be a scalar number or a list of numbers
+<td>5 sequence / 2
+<tr>
+<td><a href="mList.htm#isEquivalentTo:"<i>isEquivalentTo:</i></a>
+<td>Returns <i>Boolean</i> indicating if <i>recipient</i> and
+<i>parameter</i> have equivalent content
+<td>5 sequence isEquivalentTo: 1,2,3,4,5 .
+<tr>
+<td><a href="mList.htm#union:"<i>union:</i></a>
+<td>Returns <i>List</i> of elements in either or both the
+<i>recipient</i> and <i>parameter</i>
+<td>5 sequence union: 3 sequence .
+<tr>
+<td><a href="mList.htm#union:using:"<i>union:using:</i></a>
+<td>Returns <i>List</i> of elements in either or both the
+<i>recipient</i> and <i>parameter1</i> using block supplied
+as <i>parameter2</i> to modify the elements before comparing for
+equality
+<td> list1 union: list2 using: [ asSelf ] .
+<tr>
+<td><a href="mList.htm#intersect:"<i>intersect:</i></a>
+<td>Returns <i>List</i> of elements in both the
+<i>recipient</i> and <i>parameter</i>
+<td>5 sequence intersect: 3 sequence .
+<tr>
+<td><a href="mList.htm#intersect:using:"<i>intersect:using:</i></a>
+<td>Returns <i>List</i> of elements in both the
+<i>recipient</i> and <i>parameter1</i> using block supplied
+as <i>parameter2</i> to modify the elements before comparing for
+equality
+<td> list1 intersect: list2 using: [ asSelf ] .
+<tr>
+<td><a href="mList.htm#exclude:"<i>exclude:</i></a>
+<td>Returns <i>List</i> of elements in 
+<i>recipient</i> that are not in <i>parameter</i>
+<td>5 sequence exclude: 3 sequence .
+<tr>
+<td><a href="mList.htm#exclude:using:"<i>exclude:using:</i></a>
+<td>Returns <i>List</i> of elements in 
+<i>recipient</i> that are not in <i>parameter1</i> using block supplied
+as <i>parameter2</i> to modify the elements before comparing for
+equality
+<td> list1 exclude: list2 using: [ asSelf ] .
+<tr>
+<td><a href="mList.htm#difference:"<i>difference:</i></a>
+<td>Returns a <i>List</i> of 2 elements: the first contains the
+<i>List</i> of elements that are in <i>recipient</i> and not in
+<i>parameter</i>; the second contains the <i>List</i> of elements
+that are in <i>parameter</i> and not in <i>recipient</i>
+<td>list1 difference: list2 .
+</tr></table></Center>
+
+<p>
+<hr>
+<h3><a name="creation">Creating and Updating Collections</a></h3>
+<p>
+Many of the messages described in this document implicitly create
+new instances of one of the <i>Collection</i> subclasses.  Messages
+such as <i>send:</i>, <i>select:</i>, <i>groupedBy:</i>, <i>sortUp:</i>,
+<i>decileDown:</i>, and <i>extendBy:</i> all create and return new 
+<i>Collection</i> objects.  
+<p>
+There is normally no reason to create new instances of the
+<i>Collection</i> class directly.
+You can explicitly create a new instance of any of the
+<i>Collection</i> subclasses by sending the <i>new</i> message 
+to the specific class.  For example:<pre><tt><b>
+     !list <- List new ; 
+     !ilist <- IndexedList new ;
+     !ts <- TimeSeries new ;
+</b></tt></pre>
+The variables <i>list</i>, <i>ilist</i>, and <i>ts</i> can be
+accessed and updated using the rules defined for the
+<a href="clList.htm"><i>List</i></a>,
+<a href="clIList.htm"><i>IndexedList</i></a>, and
+<a href="clTS.htm"><i>TimeSeries</i></a>, respectively.
+<p>
+The 
+<a href="mList.htm#copyListElements"><i>copyListElements</i></a>
+message can be used to create a copy of a <i>Collection</i>.  The returned
+object is a new <i>Collection</i> containing the same elements as
+the original.  When this message is sent to a <i>List</i> or
+<i>IndexedList</i>, a new <i>List</i> is created and returned.
+When this message is sent to a <i>TimeSeries</i>, a new
+<i>TimeSeries</i> object is created and returned.
+<p>
+The <a href="mList.htm#append:"><i>append:</i></a>
+message can be used to append objects to a <i>Collection</i>.
+The returned object is always a new <i>List</i>.
+<p>
+The <a href="mList.htm#collectListElementsFrom:">
+<i>collectListElementsFrom:</i></a> message
+is used to create a single <i>List</i> from a <i>Collection</i>
+of <i>Lists</i>.  The supplied parameter should be a <i>Block</i>.
+This message evaluates the block for each element and creates
+a "running list" of the objects returned by the block.  If the
+returned object is a <i>Collection</i>, the individual elements
+in the collection are appending the "running list".  For example:<pre><tt><b>
+     5 sequence
+        collectListElementsFrom: [ ^self sequence ] .
+     do: [ printNL ] ;
+</b></tt></pre>
+returns a single <i>List</i> containing the elements
+<i>1</i>, 
+<i>1</i>, <i>2</i>, 
+<i>1</i>, <i>2</i>, <i>3</i>, 
+<i>1</i>, <i>2</i>, <i>3</i>, <i>4</i>, 
+<i>1</i>, <i>2</i>, <i>3</i>, <i>4</i>, <i>5</i>.
+
+<p>
+<hr>
+<h3>
+<a name="dot">Collection Messages and the <font size=+1>.</font> Operator
+</a></h3>
+<p>
+A common requirement when working with <i>Collections</i>
+is to apply a series of operations in succession.  Starting with a
+list, you may wish to perform a series of extensions,
+selections, and groupings, then sort and print the result.  There
+are a number of different techniques that can be used to produce
+the same result.  For example:<pre><tt><b>
+     !myList <- Currency instanceList ;
+     !xList <- myList 
+       extendBy: [ !rate <- 1 / usExchange ] ;
+     !subset1 <- xList select: [ rate < 1.5 ] ;
+     !subset2 <- subset1 first: 5 ;
+     !final <- subset2 sortUp: [ name ] ;
+     final do: [ code print: 5 ;
+                 name print: 15 ;
+                 rate printNL ;
+               ] ;
+</b></tt></pre>
+This example uses a large number of temporary variables.  Although
+there is nothing wrong with this approach, you need not save each of
+the intermediate steps.  For example:<pre><tt><b>
+     Currency instanceList 
+       extendBy: [ !rate <- 1 / usExchange ] .
+       select: [ rate < 1.5 ] .
+       first: 5 .
+       sortUp: [ name ] .
+     do: [ code print: 5 ;
+           name print: 15 ;
+           rate printNL ;
+         ] ;
+</b></tt></pre>
+This example produces the same result without any intermediate
+variables. 
+<p>
+Note that the 
+<a href="Syntax.htm#dot"><font size=+1><b>.</b></font> operator</a>
+is used to terminate the keyword messages such as <i>select:</i>
+and <i>do:</i>.  A common misassumption is that this operator
+is automatically inserted after each collection operation.  Although
+this particular example may look as though that is the case, the
+purpose of the operator is to terminate the parameters and evaluate
+the expression up until that point.  For example, if you were using
+the unary message <i>numberElements</i> in the previous expression
+it would not be followed by the <font size=+1><b>.</b></font>:<pre><tt><b>
+     Currency instanceList 
+       numberElements           #- . not needed since no parameters
+       extendBy: [ !rate <- 1 / usExchange ] .    #- . terminates block 
+       select: [ rate < 1.5 ] .                   #- . terminates block 
+       first: 5 .                                 #- . terminates count 
+       sortUp: [ name ] .                         #- . terminates block
+     do: [ code print: 5 ;
+           name print: 15 ;
+           rate printNL ;
+         ] ;
+</b></tt></pre>
+The <font size=+1><b>.</b></font> operator</a> provides an
+alternative to using parentheses in expressions containing numerous
+keywords applied in succession such as this one.  The same expression
+using parentheses could be written as:<pre><tt><b>
+     ((((Currency instanceList 
+            numberElements 
+            extendBy: [ !rate <- 1 / usExchange ]
+        ) select: [ rate < 1.5 ]
+       ) first: 5 
+      ) sortUp: [ name ] 
+     ) do: [ code print: 5 ;
+             name print: 15 ;
+             rate printNL ;
+           ] ;
+</b></tt></pre>
+
+<p>
+<hr>
+<h3><a name="iterate">When to Iterate</a></h3>
+<p>
+The <i>do:</i> message is defined to evaluate its block parameter
+for each element in the collection.  Although this operation
+may appear to operate an element at a time, 
+collection operations are actually optimized internally 
+and do not execute by sequential evaluation.  
+<p>
+<blockquote><hr><center><font size=+1>
+<a name="iterate.warn"><b>Warning!! </b></a>
+</font></center>
+Because collections are not evaluated sequentially,
+you do not have control over the order in which the collection is
+processed nor can you assume that the number of evaluations is
+equal to the number of elements in the list.  
+For example:<pre><tt><b>     !count <- 0 ;
+     list do: [ ^global :count <- ^global count + 1 ] ;
+     count printNL ;
+</b></tt></pre>
+will not produce the results you expect.  Although you might
+expect <i>count</i> to equal the number of elements in <i>list</i>,
+it would actually equal the number of internal passes needed to
+process the list.  
+<hr></blockquote>
+<p>
+The <a href="mList.htm#iterate:"><i>iterate:</i></a> message can
+be used instead of <i>do:</i> when you want to evaluate the
+list in order, an element at a time.  Although there are situations
+when you may need to do this, this message is much slower than
+the <i>do:</i> message since it does not benefit from the
+optimizations available.  For example:<pre><tt><b>
+     !count <- 0 ;
+     list iterate: [ ^global :count <- ^global count + 1 ] ;
+     count printNL ;
+</b></tt></pre>
+
+<hr>
+<h3><a name="more">Related Topics</a></h3>
+<p>
+For additional information see:
+<p>
+<ul type=square>
+<li><a href="clList.htm">The List Class</a>
+<li><a href="clIList.htm">The IndexedList Class</a>
+<li><a href="clTS.htm">The TimeSeries Class</a>
+<li><a href="tuList.htm">Vision Tutorial: Using Lists</a>
+<li><a href="tuTS.htm">Vision Tutorial: Using TimeSeries</a>
+<li><a href="sdmts.htm#">Technical Paper: Sets Do More Than Select</a>
+</ul>
+<p>
+<p>
+<hr>
+
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy 1997 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated June 19, 1997</font>
+</table>
+
+</body>
+</html>

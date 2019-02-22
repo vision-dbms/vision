@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Messages: Currency</title>
+</head>
+<body bgcolor=white>
+<p>
+<center> | <A href="FHome.htm">Home</A>
+ | <A href="clCurrency.htm">Currency Class  </A>
+ | <A href="mXRef.htm">Message XRef</A>
+ | <A href="Messages.htm">Messages (General)</A>
+ | 
+</center><hr>
+
+<center>
+<font face="Arial" color="darkblue" size=3 >
+<h3>Profile of Class <i>Currency</i></h3>
+</center>
+</font><p>
+<blockquote><center><hr width=70%><p>
+Includes Classes: <i>Currency, Entity</i>
+<p><hr width=70%></center></blockquote><p>
+<pre>
+
+<A href="clObject.htm">Object</A>
+  | 
+<A href="clEntity.htm">Entity</A>
+  | 
+  +--- <b>Currency</b>
+</pre>
+<p><hr align=left width=70% ><p>
+
+
+<p><hr align=left width=70% ><p>
+
+<font size=+1 face="Arial" color="darkred">Message Index</font>
+<p><img src="instdot.gif" align="middle" alt="o "><A href="#XRef"><b>XRef</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#XRef"><b>XRef</b></A><i> (Currency)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#accessExpression"><b>accessExpression</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#addAlias:"><b>addAlias: string</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#addAlias:toXRefIn:"><b>addAlias: string toXRefIn: dictionary</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#aliases"><b>aliases</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asCurrency"><b>asCurrency</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (Currency)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (Currency)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#cleanupClassStructures"><b>cleanupClassStructures</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#cleanupLocalNames"><b>cleanupLocalNames</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#clearDefault"><b>clearDefault</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#clusterStrings"><b>clusterStrings</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#createInitializationListFrom:"><b>createInitializationListFrom: blockList</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#createNewXRefManager"><b>createNewXRefManager</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#createPrivateStructure"><b>createPrivateStructure</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#createXRef:withProperty:"><b>createXRef: id withProperty: propertyId</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (Currency)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#deleteAlias:"><b>deleteAlias: aliasList</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#displayGlobalOverride"><b>displayGlobalOverride</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#displayInfo"><b>displayInfo</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#displayLabel"><b>displayLabel</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#displayLabelKey"><b>displayLabelKey</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#displayXRefAuditReport"><b>displayXRefAuditReport</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#evaluate:"><b>evaluate: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#exchangeTo:relativeTo:"><b>exchangeTo: targetCurr relativeTo: date</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#getOrCreate:"><b>getOrCreate: string</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#getRecordForUser:"><b>getRecordForUser: userName</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#helpMessage"><b>helpMessage</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#initializationList"><b>initializationList</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#initialize"><b>initialize</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#initialize"><b>initialize</b></A><i> (Currency)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#initializeDataBaseLinks"><b>initializeDataBaseLinks</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#initializeGlobalInstanceProperties"><b>initializeGlobalInstanceProperties</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#initializeGlobalSubclassProperties"><b>initializeGlobalSubclassProperties</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#initializeLocalAttributes"><b>initializeLocalAttributes</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isCanadian"><b>isCanadian</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isCurrency"><b>isCurrency</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isEntity"><b>isEntity</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isTrueCurrency"><b>isTrueCurrency</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isUS"><b>isUS</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isUSA"><b>isUSA</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#loadFromFile:"><b>loadFromFile: file</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#loadValuesFor:as:fromFile:"><b>loadValuesFor: item as: type fromFile: file</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#locateId:"><b>locateId: string</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#locateIds:"><b> locateIds: string</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#masterListCodes"><b>masterListCodes</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#name"><b>name</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#named"><b>named</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#named"><b>named</b></A><i> (Currency)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#newAs:"><b>newAs: string</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#numericCode"><b>numericCode</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#print"><b>print</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#print:"><b>print: anInteger</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#profile"><b>profile</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#rebuildAliases"><b>rebuildAliases</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#setAsDefault"><b>setAsDefault</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#setNameTo:"><b>setNameTo: string</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#setNumericCodeTo:"><b>setNumericCodeTo: ordinal</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#setShortNameTo:"><b>setShortNameTo: string</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#setSortCodeTo:"><b>setSortCodeTo: ordinal</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#setUnderlyingCurrencyTo:withExchange:"><b>setUnderlyingCurrencyTo: curr withExchange: exch</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#setXRefIn:to:"><b>setXRefIn: dictionary to: string</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#shortName"><b>shortName</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#sortCode"><b>sortCode</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#specializeAs:at:"><b>specializeAs: string at: object</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#underlyingCurrency"><b>underlyingCurrency</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#underlyingExchange"><b>underlyingExchange</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#updateInitializationListWith:"><b>updateInitializationListWith: block</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#usExchange"><b>usExchange</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#validateInputString:"><b> validateInputString: input</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (Currency)</i><br>
+<p><hr align=left width=70% ><p>
+
+<font size=+1 face="Arial" color="darkred">Messages</font>
+<p><img src="instdot.gif" align="middle" alt="o "><A name="XRef"></A><b>XRef</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity XRef</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>XRef
+<p><b>Also Defined At: </b><br>
+ | <A href="mCurrency.htm#XRef">Currency</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="XRef"></A><b>XRef</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Currency XRef</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Currency XRef
+<p><b>Also Defined At: </b><br>
+ | <A href="mEntity.htm#XRef">Entity</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="accessExpression"></A><b>accessExpression</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity accessExpression</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a string that could be used to request recipient</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#accessExpression">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="addAlias:"></A><b>addAlias:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity addAlias: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Adds supplied string as alternate name in recipient's naming dictionary.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="addAlias:toXRefIn:"></A><b>addAlias:toXRefIn:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity addAlias: string toXRefIn: dictionary</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="aliases"></A><b>aliases</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity aliases</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns list of aliases named for entity.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asCurrency"></A><b>asCurrency</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Currency asCurrency</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts recipient into a Currency.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mString.htm#asCurrency">String</A> | <A href="mNA.htm#asCurrency">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the original object.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#asSelf">Block</A> | <A href="mBoolean.htm#asSelf">Boolean</A> | <A href="mClassify.htm#asSelf">Classification</A> | <A href="mCollect.htm#asSelf">Collection</A> | <A href="mCurrency.htm#asSelf">Currency</A> | <A href="mDate.htm#asSelf">Date</A> | <A href="mOffset.htm#asSelf">DateOffset</A> | <A href="mDate.htm#asSelf">DateRange</A> | <A href="mDict.htm#asSelf">Dictionary</A> | <A href="mIList.htm#asSelf">IndexedList</A> | <A href="mInterface.htm#asSelf">Interface</A> | <A href="mList.htm#asSelf">List</A> | <A href="mNumber.htm#asSelf">Number</A> | <A href="mObject.htm#asSelf">Object</A> | <A href="mOpenVision.htm#asSelf">OpenVision</A> | <A href="mSchema.htm#asSelf">Schema</A> | <A href="mString.htm#asSelf">String</A> | <A href="mTS.htm#asSelf">TimeSeries</A> | <A href="mNA.htm#asSelf">Undefined</A> | <A href="mUtil.htm#asSelf">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Currency asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the original object, stripped of extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#asSelf">Block</A> | <A href="mBoolean.htm#asSelf">Boolean</A> | <A href="mClassify.htm#asSelf">Classification</A> | <A href="mCollect.htm#asSelf">Collection</A> | <A href="mDate.htm#asSelf">Date</A> | <A href="mOffset.htm#asSelf">DateOffset</A> | <A href="mDate.htm#asSelf">DateRange</A> | <A href="mDict.htm#asSelf">Dictionary</A> | <A href="mEntity.htm#asSelf">Entity</A> | <A href="mIList.htm#asSelf">IndexedList</A> | <A href="mInterface.htm#asSelf">Interface</A> | <A href="mList.htm#asSelf">List</A> | <A href="mNumber.htm#asSelf">Number</A> | <A href="mObject.htm#asSelf">Object</A> | <A href="mOpenVision.htm#asSelf">OpenVision</A> | <A href="mSchema.htm#asSelf">Schema</A> | <A href="mString.htm#asSelf">String</A> | <A href="mTS.htm#asSelf">TimeSeries</A> | <A href="mNA.htm#asSelf">Undefined</A> | <A href="mUtil.htm#asSelf">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reference to the object which describes the class.  Class level 
+information is stored here.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#classDescriptor">Block</A> | <A href="mBoolean.htm#classDescriptor">Boolean</A> | <A href="mClassify.htm#classDescriptor">Classification</A> | <A href="mCollect.htm#classDescriptor">Collection</A> | <A href="mCurrency.htm#classDescriptor">Currency</A> | <A href="mDate.htm#classDescriptor">Date</A> | <A href="mOffset.htm#classDescriptor">DateOffset</A> | <A href="mDate.htm#classDescriptor">DateRange</A> | <A href="mDict.htm#classDescriptor">Dictionary</A> | <A href="mIList.htm#classDescriptor">IndexedList</A> | <A href="mInterface.htm#classDescriptor">Interface</A> | <A href="mList.htm#classDescriptor">List</A> | <A href="mNumber.htm#classDescriptor">Number</A> | <A href="mObject.htm#classDescriptor">Object</A> | <A href="mOpenVision.htm#classDescriptor">OpenVision</A> | <A href="mSchema.htm#classDescriptor">Schema</A> | <A href="mString.htm#classDescriptor">String</A> | <A href="mTS.htm#classDescriptor">TimeSeries</A> | <A href="mNA.htm#classDescriptor">Undefined</A> | <A href="mUtil.htm#classDescriptor">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Currency classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reference to the object which describes the class.  Class level information 
+is stored here.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Schema ClassDescriptor
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#classDescriptor">Block</A> | <A href="mBoolean.htm#classDescriptor">Boolean</A> | <A href="mClassify.htm#classDescriptor">Classification</A> | <A href="mCollect.htm#classDescriptor">Collection</A> | <A href="mDate.htm#classDescriptor">Date</A> | <A href="mOffset.htm#classDescriptor">DateOffset</A> | <A href="mDate.htm#classDescriptor">DateRange</A> | <A href="mDict.htm#classDescriptor">Dictionary</A> | <A href="mEntity.htm#classDescriptor">Entity</A> | <A href="mIList.htm#classDescriptor">IndexedList</A> | <A href="mInterface.htm#classDescriptor">Interface</A> | <A href="mList.htm#classDescriptor">List</A> | <A href="mNumber.htm#classDescriptor">Number</A> | <A href="mObject.htm#classDescriptor">Object</A> | <A href="mOpenVision.htm#classDescriptor">OpenVision</A> | <A href="mSchema.htm#classDescriptor">Schema</A> | <A href="mString.htm#classDescriptor">String</A> | <A href="mTS.htm#classDescriptor">TimeSeries</A> | <A href="mNA.htm#classDescriptor">Undefined</A> | <A href="mUtil.htm#classDescriptor">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="cleanupClassStructures"></A><b>cleanupClassStructures</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity cleanupClassStructures</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Runs 'cleanStoreAndDictionary' at Object, this method is redefined as
+needed by subclasses to perform general cleanup functions.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDict.htm#cleanupClassStructures">Dictionary</A> | <A href="mObject.htm#cleanupClassStructures">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="cleanupLocalNames"></A><b>cleanupLocalNames</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity cleanupLocalNames</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+This method is executed by the 'flagForDeletionWithReason:' message and
+is redefined as needed by subclasses.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#cleanupLocalNames">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="clearDefault"></A><b>clearDefault</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Currency clearDefault</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="clusterStrings"></A><b>clusterStrings</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity clusterStrings</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="createInitializationListFrom:"></A><b>createInitializationListFrom:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity createInitializationListFrom: blockList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Creates a new class constant for the recipient's class named
+'initializationList' and copies the blocks in blockList to this
+list.  The initializationList is used during the instance creation
+process to initialize default values in the new instance.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - List<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="createNewXRefManager"></A><b>createNewXRefManager</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity createNewXRefManager</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="createPrivateStructure"></A><b>createPrivateStructure</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity createPrivateStructure</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="createXRef:withProperty:"></A><b>createXRef:withProperty:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity createXRef: id withProperty: propertyId</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default instance of the recipient object's class</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#defaultInstance">Block</A> | <A href="mBoolean.htm#defaultInstance">Boolean</A> | <A href="mClassify.htm#defaultInstance">Classification</A> | <A href="mCollect.htm#defaultInstance">Collection</A> | <A href="mCurrency.htm#defaultInstance">Currency</A> | <A href="mDate.htm#defaultInstance">Date</A> | <A href="mOffset.htm#defaultInstance">DateOffset</A> | <A href="mDate.htm#defaultInstance">DateRange</A> | <A href="mDict.htm#defaultInstance">Dictionary</A> | <A href="mIList.htm#defaultInstance">IndexedList</A> | <A href="mInterface.htm#defaultInstance">Interface</A> | <A href="mList.htm#defaultInstance">List</A> | <A href="mNumber.htm#defaultInstance">Number</A> | <A href="mOpenVision.htm#defaultInstance">OpenVision</A> | <A href="mSchema.htm#defaultInstance">Schema</A> | <A href="mString.htm#defaultInstance">String</A> | <A href="mTS.htm#defaultInstance">TimeSeries</A> | <A href="mNA.htm#defaultInstance">Undefined</A> | <A href="mUtil.htm#defaultInstance">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Currency defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default instance for the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clCurrency.htm">Currency</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#defaultInstance">Block</A> | <A href="mBoolean.htm#defaultInstance">Boolean</A> | <A href="mClassify.htm#defaultInstance">Classification</A> | <A href="mCollect.htm#defaultInstance">Collection</A> | <A href="mDate.htm#defaultInstance">Date</A> | <A href="mOffset.htm#defaultInstance">DateOffset</A> | <A href="mDate.htm#defaultInstance">DateRange</A> | <A href="mDict.htm#defaultInstance">Dictionary</A> | <A href="mEntity.htm#defaultInstance">Entity</A> | <A href="mIList.htm#defaultInstance">IndexedList</A> | <A href="mInterface.htm#defaultInstance">Interface</A> | <A href="mList.htm#defaultInstance">List</A> | <A href="mNumber.htm#defaultInstance">Number</A> | <A href="mOpenVision.htm#defaultInstance">OpenVision</A> | <A href="mSchema.htm#defaultInstance">Schema</A> | <A href="mString.htm#defaultInstance">String</A> | <A href="mTS.htm#defaultInstance">TimeSeries</A> | <A href="mNA.htm#defaultInstance">Undefined</A> | <A href="mUtil.htm#defaultInstance">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="deleteAlias:"></A><b>deleteAlias:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity deleteAlias: aliasList</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="displayGlobalOverride"></A><b>displayGlobalOverride</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Currency displayGlobalOverride</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="displayInfo"></A><b>displayInfo</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity displayInfo</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Displays the code and name for the recipient followed by a new line.
+This message is often redefined by the subclasses to display one line
+of simple formatted information about an entity.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#displayInfo">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="displayLabel"></A><b>displayLabel</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity displayLabel</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the recipient's name</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#displayLabel">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="displayLabelKey"></A><b>displayLabelKey</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity displayLabelKey</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the recipient's code</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#displayLabelKey">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="displayXRefAuditReport"></A><b>displayXRefAuditReport</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity displayXRefAuditReport</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="evaluate:"></A><b>evaluate:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Currency evaluate: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates all statements in the block for each date in the Date Range.  Each 
+Date in the Date Range becomes the default inside the block (changing the value 
+of the 'magic word' ^date).</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#evaluate:">Date</A> | <A href="mOffset.htm#evaluate:">DateOffset</A> | <A href="mDate.htm#evaluate:">DateRange</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="exchangeTo:relativeTo:"></A><b>exchangeTo:relativeTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Currency exchangeTo: targetCurr relativeTo: date</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="getOrCreate:"></A><b>getOrCreate:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity getOrCreate: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns object named by string in recipient class' naming dictionary.
+If not found, a new instance is created and returned.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="getRecordForUser:"></A><b>getRecordForUser:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity getRecordForUser: userName</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="helpMessage"></A><b>helpMessage</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity helpMessage</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a message describing the recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#helpMessage">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="initializationList"></A><b>initializationList</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity initializationList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the list of blocks used to initialize default values in new
+instances of the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clList.htm">List</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="initialize"></A><b>initialize</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity initialize</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Initializes a new instance.  Run as part of the instance creation process.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mCurrency.htm#initialize">Currency</A> | <A href="mDict.htm#initialize">Dictionary</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="initialize"></A><b>initialize</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Currency initialize</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Initializes a new instance of the recipient dictionary.  Run as part of
+the instance creation process.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDict.htm#initialize">Dictionary</A> | <A href="mEntity.htm#initialize">Entity</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="initializeDataBaseLinks"></A><b>initializeDataBaseLinks</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity initializeDataBaseLinks</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Initializes a new instance.  Run as part of the instance creation process.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="initializeGlobalInstanceProperties"></A><b>initializeGlobalInstanceProperties</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity initializeGlobalInstanceProperties</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Initializes a new instance.  Run as part of the instance creation process.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mClassify.htm#initializeGlobalInstanceProperties">Classification</A> | <A href="mObject.htm#initializeGlobalInstanceProperties">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="initializeGlobalSubclassProperties"></A><b>initializeGlobalSubclassProperties</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity initializeGlobalSubclassProperties</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+This method is run as part of the 'specialized' method and is used to 
+initialize properties in the default row of the new class.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDict.htm#initializeGlobalSubclassProperties">Dictionary</A> | <A href="mObject.htm#initializeGlobalSubclassProperties">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="initializeLocalAttributes"></A><b>initializeLocalAttributes</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity initializeLocalAttributes</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Initializes a new instance.  Run as part of the instance creation process.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDict.htm#initializeLocalAttributes">Dictionary</A> | <A href="mObject.htm#initializeLocalAttributes">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isCanadian"></A><b>isCanadian</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Currency isCanadian</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isCurrency"></A><b>isCurrency</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Currency isCurrency</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>TRUE
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#isCurrency">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isEntity"></A><b>isEntity</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity isEntity</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the value TRUE when sent to any Entity.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>TRUE
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#isEntity">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isTrueCurrency"></A><b>isTrueCurrency</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Currency isTrueCurrency</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isUS"></A><b>isUS</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Currency isUS</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isUSA"></A><b>isUSA</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Currency isUSA</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="loadFromFile:"></A><b>loadFromFile:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity loadFromFile: file</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="loadValuesFor:as:fromFile:"></A><b>loadValuesFor:as:fromFile:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity loadValuesFor: item as: type fromFile: file</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="locateId:"></A><b>locateId:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity locateId: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns entity associated with id supplied, searching naming dictionaries
+associated with entity class.  By default only 'named' is searched; this
+message can be redefined for subclasses that can use multiple dictionaries.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="locateIds:"></A><b>locateIds:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity  locateIds: string</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="masterListCodes"></A><b>masterListCodes</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity masterListCodes</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Displays all codes and names for all non-default instances in recipient's
+class.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="name"></A><b>name</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity name</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns descriptive name for recipient.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="named"></A><b>named</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity named</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the naming dictionary for the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDict.htm">Dictionary</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mClassify.htm#named">Classification</A> | <A href="mCurrency.htm#named">Currency</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="named"></A><b>named</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Currency named</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the naming dictionary for the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Named
+<p><b>Also Defined At: </b><br>
+ | <A href="mClassify.htm#named">Classification</A> | <A href="mEntity.htm#named">Entity</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="newAs:"></A><b>newAs:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity newAs: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Special version of 'newAs:' message designed to address the additional
+requirements of entity instance creation.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDict.htm#newAs:">Dictionary</A> | <A href="mObject.htm#newAs:">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="numericCode"></A><b>numericCode</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity numericCode</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns descriptive numeric code for recipient.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="print"></A><b>print</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity print</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Redefines the standard print message so that the value of the recipient code
+is printed.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#print">Block</A> | <A href="mDate.htm#print">Date</A> | <A href="mOffset.htm#print">DateOffset</A> | <A href="mDate.htm#print">DateRange</A> | <A href="mIList.htm#print">IndexedList</A> | <A href="mList.htm#print">List</A> | <A href="mObject.htm#print">Object</A> | <A href="mString.htm#print">String</A> | <A href="mTS.htm#print">TimeSeries</A> | <A href="mNA.htm#print">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="print:"></A><b>print:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity print: anInteger</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Prints the recipient code using the supplied format.  </blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Integer<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBoolean.htm#print:">Boolean</A> | <A href="mDate.htm#print:">Date</A> | <A href="mNumber.htm#print:">Number</A> | <A href="mObject.htm#print:">Object</A> | <A href="mString.htm#print:">String</A> | <A href="mNA.htm#print:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="profile"></A><b>profile</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity profile</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Displays a multi-line description of the recipient object.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mInterface.htm#profile">Interface</A> | <A href="mObject.htm#profile">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="rebuildAliases"></A><b>rebuildAliases</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity rebuildAliases</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="setAsDefault"></A><b>setAsDefault</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Currency setAsDefault</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="setNameTo:"></A><b>setNameTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity setNameTo: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Updates the value of the recipient's 'name' property with string</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="setNumericCodeTo:"></A><b>setNumericCodeTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity setNumericCodeTo: ordinal</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Updates the value of the recipient's 'numericCode' property with string 
+or number.  Used as an alternative identification scheme.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Ordinal<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="setShortNameTo:"></A><b>setShortNameTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity setShortNameTo: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Updates the value of the recipient's 'shortName' property with string.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="setSortCodeTo:"></A><b>setSortCodeTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity setSortCodeTo: ordinal</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Updates the value of the recipient's 'sortCode' property with string 
+or number.  Used as an alternative identification scheme.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Ordinal<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="setUnderlyingCurrencyTo:withExchange:"></A><b>setUnderlyingCurrencyTo:withExchange:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Currency setUnderlyingCurrencyTo: curr withExchange: exch</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="setXRefIn:to:"></A><b>setXRefIn:to:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity setXRefIn: dictionary to: string</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="shortName"></A><b>shortName</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity shortName</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns descriptive shortName for recipient.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="sortCode"></A><b>sortCode</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity sortCode</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns descriptive sortCode for recipient.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="specializeAs:at:"></A><b>specializeAs:at:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity specializeAs: string at: object</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Creates a subclass of recipient named by supplied string.  The name is
+defined at the supplied object.  Note that this class is NOT installed
+in the Schema database by default</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#specializeAs:at:">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="underlyingCurrency"></A><b>underlyingCurrency</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Currency underlyingCurrency</font></blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="underlyingExchange"></A><b>underlyingExchange</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Currency underlyingExchange</font></blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="updateInitializationListWith:"></A><b>updateInitializationListWith:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity updateInitializationListWith: block</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Adds the supplied block to the recipient class' initializationList.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="usExchange"></A><b>usExchange</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Currency usExchange</font></blockquote>
+<p><b>Type: </b>TimeSeriesProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="validateInputString:"></A><b>validateInputString:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity  validateInputString: input</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the object in the recipient's classs associated with the 
+supplied string, using the recipient's class naming dictionary.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#validateInputString:">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Return the string "Entity".</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#whatAmI">Block</A> | <A href="mBoolean.htm#whatAmI">Boolean</A> | <A href="mClassify.htm#whatAmI">Classification</A> | <A href="mCollect.htm#whatAmI">Collection</A> | <A href="mCurrency.htm#whatAmI">Currency</A> | <A href="mDate.htm#whatAmI">Date</A> | <A href="mOffset.htm#whatAmI">DateOffset</A> | <A href="mDate.htm#whatAmI">DateRange</A> | <A href="mDict.htm#whatAmI">Dictionary</A> | <A href="mIList.htm#whatAmI">IndexedList</A> | <A href="mInterface.htm#whatAmI">Interface</A> | <A href="mList.htm#whatAmI">List</A> | <A href="mNumber.htm#whatAmI">Number</A> | <A href="mObject.htm#whatAmI">Object</A> | <A href="mOpenVision.htm#whatAmI">OpenVision</A> | <A href="mSchema.htm#whatAmI">Schema</A> | <A href="mString.htm#whatAmI">String</A> | <A href="mTS.htm#whatAmI">TimeSeries</A> | <A href="mNA.htm#whatAmI">Undefined</A> | <A href="mUtil.htm#whatAmI">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Currency whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the name of the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#whatAmI">Block</A> | <A href="mBoolean.htm#whatAmI">Boolean</A> | <A href="mClassify.htm#whatAmI">Classification</A> | <A href="mCollect.htm#whatAmI">Collection</A> | <A href="mDate.htm#whatAmI">Date</A> | <A href="mOffset.htm#whatAmI">DateOffset</A> | <A href="mDate.htm#whatAmI">DateRange</A> | <A href="mDict.htm#whatAmI">Dictionary</A> | <A href="mEntity.htm#whatAmI">Entity</A> | <A href="mIList.htm#whatAmI">IndexedList</A> | <A href="mInterface.htm#whatAmI">Interface</A> | <A href="mList.htm#whatAmI">List</A> | <A href="mNumber.htm#whatAmI">Number</A> | <A href="mObject.htm#whatAmI">Object</A> | <A href="mOpenVision.htm#whatAmI">OpenVision</A> | <A href="mSchema.htm#whatAmI">Schema</A> | <A href="mString.htm#whatAmI">String</A> | <A href="mTS.htm#whatAmI">TimeSeries</A> | <A href="mNA.htm#whatAmI">Undefined</A> | <A href="mUtil.htm#whatAmI">Utility</A> | 
+<p></blockquote>
+
+<p><hr>
+<table border=0 width=100%>
+<tr>
+<td align=left>
+<font size=-1>Copyright &copy 1997 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated May 7, 1997</font>
+</table>
+</body>
+</html>

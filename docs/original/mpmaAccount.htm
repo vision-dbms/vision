@@ -1,0 +1,2262 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Messages: Account</title>
+</head>
+<body bgcolor=white>
+<p>
+<center> 
+ | <a href="vpma.htm">Portfolio Management Application Overview</a> 
+ | <A href="clpmaAccount.htm">Account Class  </A>
+ | <A href="mXRef.htm">Message XRef</A>
+ | <A href="Messages.htm">Messages (General)</A>
+ | 
+</center><hr>
+
+<center>
+<font face="Arial" color="darkblue" size=3 >
+<h3>Profile of Class <i>Account</i></h3>
+</center>
+</font><p>
+<blockquote><center><hr width=70%><p>
+Includes Classes: <i>Account, AggAccount, CompositeAccount, Entity, IndexAccount, Portfolio</i>
+<p><hr width=70%></center></blockquote><p>
+<pre>
+
+<A href="clObject.htm">Object</A>
+  | 
+<A href="clEntity.htm">Entity</A>
+  | 
+  +--- <b>Account</b>
+  |      |
+  |      +--- <A href="clpmaAccount.htm">AggAccount</A>
+  |      |
+  |      +--- <A href="clpmaAccount.htm">CompositeAccount</A>
+  |      |
+  |      +--- <A href="clpmaAccount.htm">IndexAccount</A>
+  |      |
+  |      +--- <A href="clpmaAccount.htm">Portfolio</A>
+</pre>
+<p><hr align=left width=70% ><p>
+
+This class represents actual and derived investment accounts.
+The subclasses of Account are used to define different styles of Account
+holding derivation.  Applications that are independent of the holdings
+creation process are defined at this class so that instances of the
+different subclasses can be used interchangeably.
+<p><hr align=left width=70% ><p>
+
+<font size=+1 face="Arial" color="darkred">Message Index</font>
+<p><img src="instdot.gif" align="middle" border=0 alt="o "><A href="#Component"><b>Component</b></A><i> (CompositeAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#XRef"><b>XRef</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#_totalCost"><b>_totalCost</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#_totalMarketValue"><b>_totalMarketValue</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#_totalMarketValueCash"><b>_totalMarketValueCash</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#_totalMarketValueEquity"><b>_totalMarketValueEquity</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#_totalMarketValueFixed"><b>_totalMarketValueFixed</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#accessExpression"><b>accessExpression</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#addAlias:"><b>addAlias: string</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#addAlias:toXRefIn:"><b>addAlias: string toXRefIn: dictionary</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#addComponent:withWeight:"><b>addComponent: account withWeight: weight</b></A><i> (CompositeAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#addMember:"><b>addMember: security</b></A><i> (IndexAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#aggregateList"><b>aggregateList</b></A><i> (Portfolio)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#aliases"><b>aliases</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (Portfolio)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (AggAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (IndexAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#asSelf"><b>asSelf</b></A><i> (CompositeAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#buildHoldings"><b>buildHoldings</b></A><i> (AggAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#buildHoldings"><b>buildHoldings</b></A><i> (CompositeAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (Portfolio)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (AggAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (IndexAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><i> (CompositeAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#cleanupClassStructures"><b>cleanupClassStructures</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#cleanupClassStructures"><b>cleanupClassStructures</b></A><i> (AggAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#cleanupClassStructures"><b>cleanupClassStructures</b></A><i> (IndexAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#cleanupLocalNames"><b>cleanupLocalNames</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#clusterStrings"><b>clusterStrings</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#componentList"><b>componentList</b></A><i> (CompositeAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#computeAccountTotals"><b>computeAccountTotals</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#createEvenDollarHoldingsAsOf:"><b>createEvenDollarHoldingsAsOf: date</b></A><i> (IndexAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#createEvenShareHoldingsAsOf:"><b>createEvenShareHoldingsAsOf: date</b></A><i> (IndexAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#createHoldingsFrom:"><b>createHoldingsFrom: xsecList</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#createHoldingsFrom:"><b>createHoldingsFrom: xsecList</b></A><i> (IndexAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#createHoldingsFromMembers"><b>createHoldingsFromMembers</b></A><i> (IndexAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#createInitializationListFrom:"><b>createInitializationListFrom: blockList</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#createMCapWeightedHoldingsAsOf:"><b>createMCapWeightedHoldingsAsOf: date</b></A><i> (IndexAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#createMValWeightedHoldingsAsOf:using:"><b>createMValWeightedHoldingsAsOf: date using: acct</b></A><i> (IndexAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#createNewXRefManager"><b>createNewXRefManager</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#createPrivateStructure"><b>createPrivateStructure</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#createWeightedHoldingsAsOf:using:"><b>createWeightedHoldingsAsOf: date using: acct</b></A><i> (IndexAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#createXRef:withProperty:"><b>createXRef: id withProperty: propertyId</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#dailyCutoff"><b>dailyCutoff</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (Portfolio)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (AggAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (IndexAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><i> (CompositeAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#deleteAlias:"><b>deleteAlias: aliasList</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#deleteCurrentHoldings"><b>deleteCurrentHoldings</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#deleteMember:"><b>deleteMember: security</b></A><i> (IndexAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#displayAggregateList"><b>displayAggregateList</b></A><i> (Portfolio)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#displayInfo"><b>displayInfo</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#displayLabel"><b>displayLabel</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#displayLabelKey"><b>displayLabelKey</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#displayXRefAuditReport"><b>displayXRefAuditReport</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#getHoldingIn:"><b>getHoldingIn: security</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#getMemberWeightsUsingAccount:"><b>getMemberWeightsUsingAccount: acct</b></A><i> (IndexAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#getMembers"><b>getMembers</b></A><i> (IndexAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#getOrCreate:"><b>getOrCreate: string</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#getRecordForUser:"><b>getRecordForUser: userName</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#hasHoldings"><b>hasHoldings</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#helpMessage"><b>helpMessage</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#holdings"><b>holdings</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#holdingsDate"><b>holdingsDate</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#holdingsPrototype"><b>holdingsPrototype</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#holdingsSeries"><b>holdingsSeries</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#holds:"><b>holds: security</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializationList"><b>initializationList</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializationList"><b>initializationList</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializationList"><b>initializationList</b></A><i> (Portfolio)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializationList"><b>initializationList</b></A><i> (AggAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializationList"><b>initializationList</b></A><i> (IndexAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializationList"><b>initializationList</b></A><i> (CompositeAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initialize"><b>initialize</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initialize"><b>initialize</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initialize"><b>initialize</b></A><i> (Portfolio)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initialize"><b>initialize</b></A><i> (AggAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initialize"><b>initialize</b></A><i> (IndexAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initialize"><b>initialize</b></A><i> (CompositeAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializeComponentList"><b>initializeComponentList</b></A><i> (CompositeAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializeDailyHoldingsBasedValues"><b>initializeDailyHoldingsBasedValues</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializeDailySummaryValues"><b>initializeDailySummaryValues</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializeDataBaseLinks"><b>initializeDataBaseLinks</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializeForHoldingsPrecalcs"><b>initializeForHoldingsPrecalcs</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializeGlobalInstanceProperties"><b>initializeGlobalInstanceProperties</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializeGlobalSubclassProperties"><b>initializeGlobalSubclassProperties</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializeLocalAttributes"><b>initializeLocalAttributes</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#initializeNewMembershipDate"><b>initializeNewMembershipDate</b></A><i> (IndexAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#isAccount"><b>isAccount</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#isAggAccount"><b>isAggAccount</b></A><i> (AggAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#isCompositeAccount"><b>isCompositeAccount</b></A><i> (CompositeAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#isEntity"><b>isEntity</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#isIndexAccount"><b>isIndexAccount</b></A><i> (IndexAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#isMemberOf:"><b>isMemberOf: universe</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#isPortfolio"><b>isPortfolio</b></A><i> (Portfolio)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#locateId:"><b>locateId: string</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#locateId:"><b>locateId: id</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#locateIds:"><b>locateIds: string</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#masterListCodes"><b>masterListCodes</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#memberList"><b>memberList</b></A><i> (AggAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#memberList"><b>memberList</b></A><i> (IndexAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#memberListPrototype"><b>memberListPrototype</b></A><i> (AggAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#memberListPrototype"><b>memberListPrototype</b></A><i> (IndexAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#membershipRule"><b>membershipRule</b></A><i> (AggAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#membershipRule"><b>membershipRule</b></A><i> (IndexAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#name"><b>name</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#named"><b>named</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#named"><b>named</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#named"><b>named</b></A><i> (Portfolio)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#named"><b>named</b></A><i> (AggAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#named"><b>named</b></A><i> (IndexAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#named"><b>named</b></A><i> (CompositeAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#newAs:"><b>newAs: string</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#numericCode"><b>numericCode</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#print"><b>print</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#print:"><b>print: anInteger</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#profile"><b>profile</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#profile"><b>profile</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#profile"><b>profile</b></A><i> (Portfolio)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#profile"><b>profile</b></A><i> (AggAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#profile"><b>profile</b></A><i> (IndexAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#profile"><b>profile</b></A><i> (CompositeAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#purgeHoldings"><b>purgeHoldings</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#purgeOldHoldingsForAll"><b>purgeOldHoldingsForAll</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#rebuildAliases"><b>rebuildAliases</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setMembershipRuleTo:"><b>setMembershipRuleTo: block</b></A><i> (AggAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setMembershipRuleTo:"><b>setMembershipRuleTo: block</b></A><i> (IndexAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setNameTo:"><b>setNameTo: string</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setNumericCodeTo:"><b>setNumericCodeTo: ordinal</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setSecuritiesTo:asOf:"><b>setSecuritiesTo: list asOf: date</b></A><i> (IndexAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setShortNameTo:"><b>setShortNameTo: string</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setSortCodeTo:"><b>setSortCodeTo: ordinal</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setStyleTo:"><b>setStyleTo: input</b></A><i> (IndexAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setUniverseTo:"><b>setUniverseTo: input</b></A><i> (IndexAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#setXRefIn:to:"><b>setXRefIn: dictionary to: string</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#shortName"><b>shortName</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#sortCode"><b>sortCode</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#specializeAs:at:"><b>specializeAs: string at: object</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#style"><b>style</b></A><i> (IndexAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#totalCost"><b>totalCost</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#totalMarketValue"><b>totalMarketValue</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#totalMarketValueCash"><b>totalMarketValueCash</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#totalMarketValueEquity"><b>totalMarketValueEquity</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#totalMarketValueFixed"><b>totalMarketValueFixed</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#uniqueId"><b>uniqueId</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#universe"><b>universe</b></A><i> (IndexAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#universes"><b>universes</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#updateInitializationListWith:"><b>updateInitializationListWith: block</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#updateMemberships"><b>updateMemberships</b></A><i> (IndexAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#validateInputString:"><b>validateInputString: input</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (Entity)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (Account)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (Portfolio)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (AggAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (IndexAccount)</i><br>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A href="#whatAmI"><b>whatAmI</b></A><i> (CompositeAccount)</i><br>
+<p><hr align=left width=70% ><p>
+
+<font size=+1 face="Arial" color="darkred">Messages</font>
+<p><img src="instdot.gif" align="middle" border=0 alt="o "><A name="Component"></A><b>Component</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">CompositeAccount Component</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns default instance of class used to
+instantiate components for a composite.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaAccount.htm">CompositeAccount Component</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="XRef"></A><b>XRef</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity XRef</font></blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Not Defined&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>XRef
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="_totalCost"></A><b>_totalCost</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account _totalCost</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Total cost of holdings in account (in its base currency).</blockquote>
+<p><b>Type: </b>TimeSeriesProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="_totalMarketValue"></A><b>_totalMarketValue</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account _totalMarketValue</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Total market value of account (in its base currency).</blockquote>
+<p><b>Type: </b>TimeSeriesProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="_totalMarketValueCash"></A><b>_totalMarketValueCash</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account _totalMarketValueCash</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Total cash available in account (in its base currency).</blockquote>
+<p><b>Type: </b>TimeSeriesProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="_totalMarketValueEquity"></A><b>_totalMarketValueEquity</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account _totalMarketValueEquity</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Total market value of equity portion of account (in its base currency).</blockquote>
+<p><b>Type: </b>TimeSeriesProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="_totalMarketValueFixed"></A><b>_totalMarketValueFixed</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account _totalMarketValueFixed</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Total market value of fixed income portion of account (in its base currency).</blockquote>
+<p><b>Type: </b>TimeSeriesProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="accessExpression"></A><b>accessExpression</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity accessExpression</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a string that could be used to request recipient</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Format&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Advanced
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="addAlias:"></A><b>addAlias:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity addAlias: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Adds supplied string as alternate name in recipient's naming dictionary.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="addAlias:toXRefIn:"></A><b>addAlias:toXRefIn:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity addAlias: string toXRefIn: dictionary</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Not Defined&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="addComponent:withWeight:"></A><b>addComponent:withWeight:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">CompositeAccount addComponent: account withWeight: weight</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Creates a new instance of Component and adds it
+to recipient's 'componentList' as of current evaluation date
+using the supplied account as the index.  The
+properties 'account' and 'weight' in the new component are set to the
+supplied values.  Weights should be supplied as a percent.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaAccount.htm">CompositeAccount</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Account<br>
+2 - Number<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="addMember:"></A><b>addMember:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexAccount addMember: security</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Add supplied security to 'memberList' defined as of 
+current evaluation date.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaAccount.htm">IndexAccount</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Security<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="aggregateList"></A><b>aggregateList</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Portfolio aggregateList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+List of AggAccounts that include recipient.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>List of <A href="clpmaAccount.htm">AggAccount</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - AggAccount<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="aliases"></A><b>aliases</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity aliases</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns list of aliases named for entity.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>List of <A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the original object.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Conversion&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+recipient object, stripped of any extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Conversion&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Portfolio asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Recipient stripped of any extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Conversion&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaAccount.htm">Portfolio</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">AggAccount asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Recipient stripped of any extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Conversion&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaAccount.htm">AggAccount</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexAccount asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Recipient stripped of any extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Conversion&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaAccount.htm">IndexAccount</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">CompositeAccount asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Recipient stripped of any extensions.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Conversion&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaAccount.htm">CompositeAccount</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="buildHoldings"></A><b>buildHoldings</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">AggAccount buildHoldings</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Creates holdings from the holdings associated with
+the Portfolios in recipient's memberList as of the evalution date.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="buildHoldings"></A><b>buildHoldings</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">CompositeAccount buildHoldings</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Creates holdings from the holdings associated with
+the accounts in  recipient's 'componentList' as of the evalution date.
+The shares and market values are computed using the weight stored for
+the component.  For example, if Account XYZ is a component with a
+weight of 50, 50% of each holding in Account XYZ will be included
+in the rcipient.  Note that the weights are used to determine the
+number of shares and market value for each holding and need not
+add up to 100.
+</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reference to the object which describes the class.  Class level 
+information is stored here.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Class descriptor for recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Schema ClassDescriptor
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Portfolio classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Class descriptor for recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Schema ClassDescriptor
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">AggAccount classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Class descriptor for recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Schema ClassDescriptor
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexAccount classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Class descriptor for recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Schema ClassDescriptor
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">CompositeAccount classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Class descriptor for recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Schema ClassDescriptor
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="cleanupClassStructures"></A><b>cleanupClassStructures</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity cleanupClassStructures</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Runs 'cleanStoreAndDictionary' at Object, this method is redefined as
+needed by subclasses to perform general cleanup functions.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>DBAdmin&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="cleanupClassStructures"></A><b>cleanupClassStructures</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">AggAccount cleanupClassStructures</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Aligns complex structures.  This method is invoked as
+part of a production cleanup process.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>DBAdmin&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="cleanupClassStructures"></A><b>cleanupClassStructures</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexAccount cleanupClassStructures</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Aligns complex structures.  This method is invoked as
+part of a production cleanup process.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>DBAdmin&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="cleanupLocalNames"></A><b>cleanupLocalNames</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity cleanupLocalNames</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+This method is executed by the 'flagForDeletionWithReason:' message and
+is redefined as needed by subclasses.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>DBAdmin&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="clusterStrings"></A><b>clusterStrings</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity clusterStrings</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Not Defined&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="componentList"></A><b>componentList</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">CompositeAccount componentList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+IndexedList of components in recipient as of evaluation 
+date.</blockquote>
+<p><b>Type: </b>TimeSeriesProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>IndexedList of <A href="clpmaAccount.htm">CompositeAccount Component</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="computeAccountTotals"></A><b>computeAccountTotals</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account computeAccountTotals</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Computes the total market values by asset category
+for recipient and updates the 'percentOfPort' and 'percentOfEquity'
+values for each of its holdings.  This method is automatically run as
+part of the holdings creation process.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="createEvenDollarHoldingsAsOf:"></A><b>createEvenDollarHoldingsAsOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexAccount createEvenDollarHoldingsAsOf: date</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Creates even dollar holdings for recipient
+as of supplied date using securities in 'memberList' as of that date.
+This method assumes that $1,000 of each security is held.  The
+'_totalMarketValue' of each holding is therefore $1,000 and the 
+'_shares' are set to 1000 / the security's price.  Account totals
+are computed and 'percentOfPort' is updated for each holding.
+</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Advanced
+<p><b>Returns: </b>NoValue
+<p><b>Parameters: </b>
+<blockquote>
+1 - Date<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="createEvenShareHoldingsAsOf:"></A><b>createEvenShareHoldingsAsOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexAccount createEvenShareHoldingsAsOf: date</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Creates even share holdings for recipient
+as of supplied date using securities in 'memberList' as of that date.
+This method assumes that 1,000 shares of each security is held.  The
+'_shares' of each holding are set to 1000.00 and the '_totalMarketValue'
+is computed as 'price * shares' using the security's price.  Account totals
+are computed and 'percentOfPort' is updated for each holding.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Advanced
+<p><b>Returns: </b>NoValue
+<p><b>Parameters: </b>
+<blockquote>
+1 - Date<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="createHoldingsFrom:"></A><b>createHoldingsFrom:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account createHoldingsFrom: xsecList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Creates holdings in the recipient using the supplied 
+list of extended securities.  List elements must be extended by the 
+variables 'security', 'totalMarketValue', 'shares', 'totalCost', and,
+optionally, 'accountingPrice'.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>NoValue
+<p><b>Parameters: </b>
+<blockquote>
+1 - List<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="createHoldingsFrom:"></A><b>createHoldingsFrom:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexAccount createHoldingsFrom: xsecList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Creates holdings in the recipient using the supplied 
+list of extended securities.  List elements must be extended by the 
+variables 'security', 'totalMarketValue', 'shares', 'totalCost', and,
+optionally, 'accountingPrice'.  The 'memberList' property is set to
+the unextended list of securities as of the evaluation and
+the 'universe' property is set to
+'Default' and the 'style' property is set to 'Manual' as of this date.
+</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>NoValue
+<p><b>Parameters: </b>
+<blockquote>
+1 - List<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="createHoldingsFromMembers"></A><b>createHoldingsFromMembers</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexAccount createHoldingsFromMembers</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Creates a holding object for each security in
+'memberList' as of current evaluation date.  The holding properties
+(e.g., '_shares' and '_totalMarketValue' are not initialized.  This
+method is normally called by one of the other 'create...HoldingsAsOf:'
+messages, which fill in these property values.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Advanced
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="createInitializationListFrom:"></A><b>createInitializationListFrom:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity createInitializationListFrom: blockList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Creates a new class constant for the recipient's class named
+'initializationList' and copies the blocks in blockList to this
+list.  The initializationList is used during the instance creation
+process to initialize default values in the new instance.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Advanced
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - List<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="createMCapWeightedHoldingsAsOf:"></A><b>createMCapWeightedHoldingsAsOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexAccount createMCapWeightedHoldingsAsOf: date</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Creates market-cap-weighted holdings for recipient
+as of supplied date using securities in 'memberList' as of that date.
+This method assumes that you hold the total market value of each holding
+is equal to the security's market capitalization.  The '_shares' 
+are set to this market value / the security's price.  Account totals
+are computed and 'percentOfPort' is updated for each holding.
+This method assumes that the 'marketCap' method has been defined for
+security.  All market cap values are accessed in the base currency of
+the recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Advanced
+<p><b>Returns: </b>NoValue
+<p><b>Parameters: </b>
+<blockquote>
+1 - Date<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="createMValWeightedHoldingsAsOf:using:"></A><b>createMValWeightedHoldingsAsOf:using:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexAccount createMValWeightedHoldingsAsOf: date using: acct</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Creates holdings for recipient
+as of supplied date using securities in 'memberList' as of that date
+based on the market value of the security in the supplied Account.
+This method assumes that you own the same number of shares that the
+supplied account has.  If the supplied account does not own the security,
+the shares value in the recipient's holding will be 0.
+The '_totalMarketValue'
+is computed as 'price * shares' using the security's price.  Account totals
+are computed and 'percentOfPort' is updated for each holding.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Advanced
+<p><b>Returns: </b>NoValue
+<p><b>Parameters: </b>
+<blockquote>
+1 - Date<br>
+2 - Account<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="createNewXRefManager"></A><b>createNewXRefManager</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity createNewXRefManager</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Not Defined&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="createPrivateStructure"></A><b>createPrivateStructure</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity createPrivateStructure</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Not Defined&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="createWeightedHoldingsAsOf:using:"></A><b>createWeightedHoldingsAsOf:using:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexAccount createWeightedHoldingsAsOf: date using: acct</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Creates holdings extended by various
+statistics for recipient
+as of supplied date using securities in 'memberList' as of that date.
+This method assumes that you own the same number of shares that the
+supplied account has.  The extension includes the property 
+'mvalEvenDollar' which is set to 1000, 'mvalMCapWeighted' which is
+set to the security's price (in recipient's base currency) * the
+security's 'sharesOut' value, and 'mvalMVWeighted' which is set to the
+security's price * the shares held in supplied account.  The
+extension propeties 'pctEvenDollar', 'pctMCapWeighted', and 'pctMValWeighted'
+are computed relative to this list of holdings.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Advanced
+<p><b>Returns: </b>NoValue
+<p><b>Parameters: </b>
+<blockquote>
+1 - Date<br>
+2 - Account<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="createXRef:withProperty:"></A><b>createXRef:withProperty:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity createXRef: id withProperty: propertyId</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Not Defined&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="dailyCutoff"></A><b>dailyCutoff</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account dailyCutoff</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Constant used to determine the number of days
+of daily holdings to keep whenever the 'purgeHoldings' message is invoked.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clDate.htm">DateOffset</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default instance of the recipient object's class</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Default Account instance.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaAccount.htm">Account</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Portfolio defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default Portfolio instance.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaAccount.htm">Portfolio</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">AggAccount defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default AggAccount instance.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaAccount.htm">AggAccount</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexAccount defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default IndexAccount instance.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaAccount.htm">IndexAccount</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">CompositeAccount defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default CompositeAccount instance.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaAccount.htm">CompositeAccount</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="deleteAlias:"></A><b>deleteAlias:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity deleteAlias: aliasList</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Not Defined&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="deleteCurrentHoldings"></A><b>deleteCurrentHoldings</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account deleteCurrentHoldings</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Deletes holdings in the recipient as of current ^date.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="deleteMember:"></A><b>deleteMember:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexAccount deleteMember: security</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Deletes supplied security from 'memberList' as of 
+current evaluation date.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaAccount.htm">IndexAccount</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Security<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="displayAggregateList"></A><b>displayAggregateList</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Portfolio displayAggregateList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Displays list of AggAccount instances that include
+recipient.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="displayInfo"></A><b>displayInfo</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity displayInfo</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Displays the code and name for the recipient followed by a new line.
+This message is often redefined by the subclasses to display one line
+of simple formatted information about an entity.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="displayLabel"></A><b>displayLabel</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity displayLabel</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the recipient's name</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="displayLabelKey"></A><b>displayLabelKey</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity displayLabelKey</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the recipient's code</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="displayXRefAuditReport"></A><b>displayXRefAuditReport</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity displayXRefAuditReport</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Not Defined&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="getHoldingIn:"></A><b>getHoldingIn:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account getHoldingIn: security</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns Holding instance for the supplied security
+in the recipient.  If security is not held, the default Holding is returned.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaAccount.htm">Holding</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Security<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="getMemberWeightsUsingAccount:"></A><b>getMemberWeightsUsingAccount:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexAccount getMemberWeightsUsingAccount: acct</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns list of securities in 'memberList' as of
+evaluation date extended by the properties 
+'mvalEvenDollar' which stores the value 1000,
+'pctEvenDollar' which stores the percent of index in this security
+based on even dollar market values,
+'mvalMCapWeighted' which stores the security's 'price' * the security's
+'sharesOut' in the recipient's currency,
+'pctMCapWeighted' which stores the percent of index in this security
+based on market cap values,
+'mvalMValWeighted' which stores the market value based on the number
+shares of this security in the supplied account as of the evaluation date, and
+'pctMValWeighted' which stores the percent of index in this security based
+on the supplied accounts' market value.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>List of <A href="clpmaSecurity.htm">Security</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Account<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="getMembers"></A><b>getMembers</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexAccount getMembers</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns list of security members in recipient
+as of evaluation date.  If 'membershipRule' is stored for recipient
+it is evalauted; otherwise, 'memberList' is converted to a List an
+returned.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>List of <A href="clpmaSecurity.htm">Security</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="getOrCreate:"></A><b>getOrCreate:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity getOrCreate: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns object named by string in recipient class' naming dictionary.
+If not found, a new instance is created and returned.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Access&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="getRecordForUser:"></A><b>getRecordForUser:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity getRecordForUser: userName</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Not Defined&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="hasHoldings"></A><b>hasHoldings</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account hasHoldings</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Does recipient have holdings as of current ^date?</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="helpMessage"></A><b>helpMessage</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity helpMessage</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a message describing the recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Descriptive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="holdings"></A><b>holdings</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account holdings</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+List of Holding objects for this recipient as of
+the current ^date.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>List of <A href="clpmaAccount.htm">Holding</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="holdingsDate"></A><b>holdingsDate</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account holdingsDate</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Actual date of the latest holdings available on
+or before current ^date.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clDate.htm">Date</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="holdingsPrototype"></A><b>holdingsPrototype</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account holdingsPrototype</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Used to cluster 'holdingsSeries' list objects.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>List of <A href="clpmaAccount.htm">Holding</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="holdingsSeries"></A><b>holdingsSeries</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account holdingsSeries</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Time series of lists of holdings in recipient account.</blockquote>
+<p><b>Type: </b>TimeSeriesProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>List of <A href="clpmaAccount.htm">Holding</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="holds:"></A><b>holds:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account holds: security</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Is supplied security held by recipient?</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Security<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializationList"></A><b>initializationList</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity initializationList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the list of blocks used to initialize default values in new
+instances of the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Advanced
+<p><b>Returns: </b>List of <A href="clBlock.htm">Block</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializationList"></A><b>initializationList</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account initializationList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Default values set on instance creation,
+this list includes 'baseCurrency'.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>List of <A href="clBlock.htm">Block</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializationList"></A><b>initializationList</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Portfolio initializationList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Default values set on instance creation,
+this list includes 'baseCurrency'.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>List of <A href="clBlock.htm">Block</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializationList"></A><b>initializationList</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">AggAccount initializationList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Default values set on instance creation,
+this list includes 'baseCurrency'.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>List of <A href="clBlock.htm">Block</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializationList"></A><b>initializationList</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexAccount initializationList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Default values set on instance creation,
+this list includes 'baseCurrency'.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>List of <A href="clBlock.htm">Block</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializationList"></A><b>initializationList</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">CompositeAccount initializationList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Default values set on instance creation,
+this list includes 'baseCurrency'.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>List of <A href="clBlock.htm">Block</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initialize"></A><b>initialize</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity initialize</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Initializes a new instance.  Run as part of the instance creation process.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Advanced
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initialize"></A><b>initialize</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account initialize</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Initializes properties in newly created instance.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaAccount.htm">Account</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initialize"></A><b>initialize</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Portfolio initialize</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Initializes properties in newly created instance.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaAccount.htm">Portfolio</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initialize"></A><b>initialize</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">AggAccount initialize</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Initializes properties in newly created instance.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaAccount.htm">AggAccount</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initialize"></A><b>initialize</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexAccount initialize</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Initializes properties in newly created instance.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaAccount.htm">IndexAccount</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initialize"></A><b>initialize</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">CompositeAccount initialize</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Initializes properties in newly created instance.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaAccount.htm">CompositeAccount</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializeComponentList"></A><b>initializeComponentList</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">CompositeAccount initializeComponentList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Creates a new IndexedList and stores it in
+'componentList' time series as of current evaluation date (^date).</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializeDailyHoldingsBasedValues"></A><b>initializeDailyHoldingsBasedValues</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account initializeDailyHoldingsBasedValues</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Initializes time series properties prior to holdings 
+creation for recipient.  The 'holdingsSeries' is set to the empty list 
+(holdingsPrototype) and the total market value and cost properties are
+set to NA for the current evaluation date (^date).</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializeDailySummaryValues"></A><b>initializeDailySummaryValues</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account initializeDailySummaryValues</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Initializes properties prior to holdings creation
+for recipient.  This method can be used to initialize other account-related
+properties, not initialized with 'initializeDailyHoldingsBasedValues.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializeDataBaseLinks"></A><b>initializeDataBaseLinks</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity initializeDataBaseLinks</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Initializes a new instance.  Run as part of the instance creation process.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Advanced
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializeForHoldingsPrecalcs"></A><b>initializeForHoldingsPrecalcs</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account initializeForHoldingsPrecalcs</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Initializes properties prior to holdings creation
+for all Accounts and Securities.  This method should be run in environments
+where all portfolios are updated at the same time and any portfolio not
+included in an update needs to have its values reset to NA.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializeGlobalInstanceProperties"></A><b>initializeGlobalInstanceProperties</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity initializeGlobalInstanceProperties</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Initializes a new instance.  Run as part of the instance creation process.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Advanced
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializeGlobalSubclassProperties"></A><b>initializeGlobalSubclassProperties</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity initializeGlobalSubclassProperties</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+This method is run as part of the 'specialized' method and is used to 
+initialize properties in the default row of the new class.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializeLocalAttributes"></A><b>initializeLocalAttributes</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity initializeLocalAttributes</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Initializes a new instance.  Run as part of the instance creation process.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Advanced
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="initializeNewMembershipDate"></A><b>initializeNewMembershipDate</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexAccount initializeNewMembershipDate</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Creates a new IndexedList and stores it in
+'memberList' time series as of current evaluation date (^date).</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaAccount.htm">IndexAccount</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="isAccount"></A><b>isAccount</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account isAccount</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the value TRUE.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Inquiry&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>TRUE
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="isAggAccount"></A><b>isAggAccount</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">AggAccount isAggAccount</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the value TRUE.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Inquiry&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>TRUE
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="isCompositeAccount"></A><b>isCompositeAccount</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">CompositeAccount isCompositeAccount</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the value TRUE.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Inquiry&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>TRUE
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="isEntity"></A><b>isEntity</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity isEntity</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the value TRUE when sent to any Entity.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Inquiry&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>TRUE
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="isIndexAccount"></A><b>isIndexAccount</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexAccount isIndexAccount</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the value TRUE.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Inquiry&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>TRUE
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="isMemberOf:"></A><b>isMemberOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity isMemberOf: universe</font></blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clBoolean.htm">Boolean</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Universe<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="isPortfolio"></A><b>isPortfolio</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Portfolio isPortfolio</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the value TRUE.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Inquiry&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>TRUE
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="locateId:"></A><b>locateId:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity locateId: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns entity associated with id supplied, searching naming dictionaries
+associated with entity class.  By default only 'named' is searched; this
+message can be redefined for subclasses that can use multiple dictionaries.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Access&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="locateId:"></A><b>locateId:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account locateId: id</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the Account object associated with the supplied
+id.  If the message is sent directly to 'Account', the naming dictionary
+search order starts with Named Account, followed by Named Portfolio,
+Named AggAccount, Named IndexAccount, and Named CompositeAccount.  If
+the message is set to a subclass of 'Account', just that subclass'
+naming dictionary is used.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Access&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clpmaAccount.htm">Account</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="locateIds:"></A><b>locateIds:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity locateIds: string</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Not Defined&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="masterListCodes"></A><b>masterListCodes</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity masterListCodes</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Displays all codes and names for all non-default instances in recipient's
+class.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="memberList"></A><b>memberList</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">AggAccount memberList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+IndexedList of portfolios in recipient as of evaluation 
+date.</blockquote>
+<p><b>Type: </b>TimeSeriesProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>IndexedList of <A href="clpmaAccount.htm">Portfolio</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Portfolio<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="memberList"></A><b>memberList</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexAccount memberList</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+IndexedList of securities in recipient as of evaluation
+date.</blockquote>
+<p><b>Type: </b>TimeSeriesProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>IndexedList of <A href="clpmaSecurity.htm">Security</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Security<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="memberListPrototype"></A><b>memberListPrototype</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">AggAccount memberListPrototype</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Used to cluster 'memberList' list objects.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>IndexedList of <A href="clpmaAccount.htm">Portfolio</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="memberListPrototype"></A><b>memberListPrototype</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexAccount memberListPrototype</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Used to cluster 'memberList' list objects.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>IndexedList of <A href="clpmaAccount.htm">Portfolio</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="membershipRule"></A><b>membershipRule</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">AggAccount membershipRule</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Block used to derive <i>memberList</i>.  Not currently
+supported.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Reserved
+<p><b>Returns: </b><A href="clBlock.htm">Block</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="membershipRule"></A><b>membershipRule</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexAccount membershipRule</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Block used to derive <i>memberList</i>.  Not currently
+supported.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Reserved
+<p><b>Returns: </b><A href="clBlock.htm">Block</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="name"></A><b>name</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity name</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns descriptive name for recipient.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Descriptive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="named"></A><b>named</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity named</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the naming dictionary for the recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Descriptive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clDict.htm">Dictionary</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="named"></A><b>named</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account named</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Naming dictionary associated with recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Named
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="named"></A><b>named</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Portfolio named</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Naming dictionary associated with recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Named
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="named"></A><b>named</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">AggAccount named</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Naming dictionary associated with recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Named
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="named"></A><b>named</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexAccount named</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Naming dictionary associated with recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Named
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="named"></A><b>named</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">CompositeAccount named</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Naming dictionary associated with recipient's class.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Named
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="newAs:"></A><b>newAs:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity newAs: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Special version of 'newAs:' message designed to address the additional
+requirements of entity instance creation.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="numericCode"></A><b>numericCode</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity numericCode</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns descriptive numeric code for recipient.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Descriptive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="print"></A><b>print</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity print</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Redefines the standard print message so that the value of the recipient code
+is printed.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="print:"></A><b>print:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity print: anInteger</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Prints the recipient code using the supplied format.  </blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Integer<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="profile"></A><b>profile</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity profile</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Displays a multi-line description of the recipient object.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="profile"></A><b>profile</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account profile</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Basic descriptive report about the recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="profile"></A><b>profile</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Portfolio profile</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Basic descriptive report about the recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="profile"></A><b>profile</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">AggAccount profile</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Basic descriptive report about the recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="profile"></A><b>profile</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexAccount profile</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Basic descriptive report about the recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="profile"></A><b>profile</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">CompositeAccount profile</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Basic descriptive report about the recipient.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Display&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="purgeHoldings"></A><b>purgeHoldings</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account purgeHoldings</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Deletes all holdings in recipient as of ^date,
+and removes the empty list from 'holdingsSeries' on that date.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="purgeOldHoldingsForAll"></A><b>purgeOldHoldingsForAll</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account purgeOldHoldingsForAll</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+For any account having holdings, this method purges
+all holdings that are not for the last day (or business day) of the month
+that are older than the 'dailyCutoff'-specified increment.  For each
+date that is purge, the corresponding security holdings structures
+are also cleared.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b>NoValue
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="rebuildAliases"></A><b>rebuildAliases</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity rebuildAliases</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Not Defined&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setMembershipRuleTo:"></A><b>setMembershipRuleTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">AggAccount setMembershipRuleTo: block</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Updates the 'membershipRule' property.  Not 
+currently supported.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaAccount.htm">AggAccount</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setMembershipRuleTo:"></A><b>setMembershipRuleTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexAccount setMembershipRuleTo: block</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Updates the 'membershipRule' property.  Not 
+currently supported.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaAccount.htm">IndexAccount</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setNameTo:"></A><b>setNameTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity setNameTo: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Updates the value of the recipient's 'name' property with string</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setNumericCodeTo:"></A><b>setNumericCodeTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity setNumericCodeTo: ordinal</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Updates the value of the recipient's 'numericCode' property with string 
+or number.  Used as an alternative identification scheme.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Ordinal<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setSecuritiesTo:asOf:"></A><b>setSecuritiesTo:asOf:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexAccount setSecuritiesTo: list asOf: date</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Updates 'memberList' property with supplied
+list of securities on supplied date.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaAccount.htm">IndexAccount</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - List<br>
+2 - Date<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setShortNameTo:"></A><b>setShortNameTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity setShortNameTo: string</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Updates the value of the recipient's 'shortName' property with string.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setSortCodeTo:"></A><b>setSortCodeTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity setSortCodeTo: ordinal</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Updates the value of the recipient's 'sortCode' property with string 
+or number.  Used as an alternative identification scheme.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Ordinal<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setStyleTo:"></A><b>setStyleTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexAccount setStyleTo: input</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Sets 'style' to supplied value as of current
+evaluation date (^date).</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaAccount.htm">IndexAccount</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - String<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setUniverseTo:"></A><b>setUniverseTo:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexAccount setUniverseTo: input</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Sets 'universe' to supplied Universe instance
+as of current evaluation date (^date) and updates 'memberList' with
+securities in that universe as of the same date.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaAccount.htm">IndexAccount</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Universe<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="setXRefIn:to:"></A><b>setXRefIn:to:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity setXRefIn: dictionary to: string</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Not Defined&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="shortName"></A><b>shortName</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity shortName</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns descriptive shortName for recipient.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Descriptive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="sortCode"></A><b>sortCode</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity sortCode</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns descriptive sortCode for recipient.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Descriptive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="specializeAs:at:"></A><b>specializeAs:at:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity specializeAs: string at: object</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Creates a subclass of recipient named by supplied string.  The name is
+defined at the supplied object.  Note that this class is NOT installed
+in the Schema database by default</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Creation&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="style"></A><b>style</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexAccount style</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Style used to derive holding shares and market value.</blockquote>
+<p><b>Type: </b>TimeSeriesProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="totalCost"></A><b>totalCost</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account totalCost</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Total cost of holdings (adjusted to current currency).</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="totalMarketValue"></A><b>totalMarketValue</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account totalMarketValue</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Total market value of holdings (adjusted to current currency).</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="totalMarketValueCash"></A><b>totalMarketValueCash</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account totalMarketValueCash</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Total market value of cash holdings (adjusted to current currency).</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="totalMarketValueEquity"></A><b>totalMarketValueEquity</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account totalMarketValueEquity</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Total market value of equity holdings (adjusted to current currency).</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="totalMarketValueFixed"></A><b>totalMarketValueFixed</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account totalMarketValueFixed</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Total market value of fixed income holdings (adjusted to current currency).</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clNumber.htm">Number</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="uniqueId"></A><b>uniqueId</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account uniqueId</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Unique identification for the recipient among all account classes.</blockquote>
+<p><b>Type: </b>FixedProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="universe"></A><b>universe</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexAccount universe</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Universe used to retrieve security members.</blockquote>
+<p><b>Type: </b>TimeSeriesProperty&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>Universe
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="universes"></A><b>universes</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity universes</font></blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Data&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b>List of Universe
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="updateInitializationListWith:"></A><b>updateInitializationListWith:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity updateInitializationListWith: block</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Adds the supplied block to the recipient class' initializationList.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Advanced
+<p><b>Returns: </b><A href="clEntity.htm">Entity</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="updateMemberships"></A><b>updateMemberships</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexAccount updateMemberships</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+If 'membershipRule' is defined, it is used
+to update the securities in 'memberList' as of current evaluation date.</blockquote>
+<p><b>Type: </b>Method (time varying)&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Update&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>DBA
+<p><b>Returns: </b><A href="clpmaAccount.htm">IndexAccount</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="validateInputString:"></A><b>validateInputString:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity validateInputString: input</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the object in the recipient's classs associated with the 
+supplied string, using the recipient's class naming dictionary.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Inquiry&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clObject.htm">Object</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Entity whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Return the string "Entity".</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Descriptive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Account whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the string "Account".</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">Portfolio whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the string "Portfolio".</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">AggAccount whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the string "AggAccount".</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">IndexAccount whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the string "IndexAccount".</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" border=0 alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">CompositeAccount whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the string "CompositeAccount".</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Function: </b>Schema&nbsp &nbsp &nbsp &nbsp &nbsp <b>Level: </b>Basic
+<p><b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+
+<p><hr>
+<table border=0 width=100%>
+<tr>
+<td align=left>
+<font size=-1>Copyright &copy 1998 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated March 19, 1998</font>
+</table>
+</body>
+</html>

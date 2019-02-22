@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Class: Date </title>
+</head>
+<body bgcolor=white>
+
+<h2>Vision Class: Date</h2>
+<p>
+     | <a href="FHome.htm">Home</a> | <a href="mDate.htm">Messages</a> | <a href="clTS.htm">TimeSeries</a> | <a href="clXRef.htm">Class XRef</a> |
+<hr> 
+<h3>Topics Covered:</h3> 
+<ul type=square> 
+<li><a href="#overview">Overview</a>
+<li><a href="#creation">Creating Dates and DateOffsets</a>
+<li><a href="#usage">Basic Usage</a>
+<li><a href="#ts">Dates and TimeSeries Data</a>
+<li><a href="#internal">Date Arithmetic and Internal Dates</a>
+<li><a href="#other">Other Date Messages</a>
+<li><a href="#dr">DateRanges</a>
+<li><a href="#more">Additional Information</a>
+</ul>
+<p>
+<hr>
+<h3><a name="overview">Overview</a></h3> 
+<p> 
+<b>Dates</b> are objects that represent a specific day in the calendar.  
+Any historical or future date can be represented in Vision.  It is not
+meaningful to create new instances of the <i>Date</i> class.
+<p>
+The class <b>DateOffset</b>
+is an abstract class that supports the protocol for 
+different date increments:  <b>BusinessDays</b>, <b>Days</b>,
+<b>MonthBeginnings</b>, <b>MonthEnds</b>, <b>Months</b>, 
+<b>QuarterBeginnings</b>, <b>QuarterEnds</b>, <b>Quarters</b>, 
+<b>YearBeginnings</b>, <b>YearEnds</b>, and <b>Years</b>.  
+You create instances of the <i>DateOffset</i> subclasses to represent
+increments that can be added to or subtracted from a <i>Date</i>.
+<p>
+The class <b>DateRange</b> represents a range of dates 
+of a specific frequency.  You create instances of this
+class to define specific intervals of dates for evaluation.
+<p>
+The <i>Date</i> and <i>DateOffset</i>
+classes are direct subclasses of the class <i>Ordinal</i>.
+The <i>DateRange</i> class is a subclass of <i>Object</i>:
+<font size=+1><pre>
+          <a href="clObject.htm">Object</a>
+             |
+             |-- <b>DateRange</b>
+             |
+             |-- Ordinal
+                   |
+                   |-- <b>Date</b>
+                   |
+                   |-- <b>DateOffset</b>
+                         |-- BusinessDays
+                         |-- Days
+                         |-- MonthBeginnings
+                         |-- MonthEnds
+                         |-- Months
+                         |-- QuarterBeginnings
+                         |-- QuarterEnds
+                         |-- Quarters
+                         |-- YearBeginnings
+                         |-- YearEnds
+                         |-- Years
+
+</pre></font>
+
+<p>
+<hr>
+<h3><a name="creation">Creating Dates and DateOffsets</a></h3>
+<p>
+The instances of the class <b>Date</b> represent a specific day in
+the calendar.  
+You can create a date object by sending the <i>asDate</i> message
+to an <i>Integer</i> in one of the following forms:
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Format</b>
+<td><b>Example</b>
+<td><b>Returns the String</b>
+</tr>
+
+<tr>
+<td>YYYYMMDD
+<td>19960614 asDate
+<td>June 14, 1996
+<tr>
+<td>YYMMDD
+<td>960614 asDate
+<td>June 14, 1996
+<tr>
+<td>YYMM
+<td>9606 asDate
+<td>June 30, 1996 (month-end)
+<tr>
+<td>YY
+<td>96 asDate
+<td>Dec 31, 1996 (year-end)
+
+</tr></table></Center>
+<p>
+The <a href="Execution.htm#today">magic word <i>^today</i></a> 
+returns the date object representing the current date.
+The message <i>earliestPossibleDate</i> has been defined at the
+class <i>Object</i> to return the <i>Date</i> object representing the first
+valid date that can be represented in Vision.  This date corresponds to
+the first of January in the year 1.
+<p>
+<a name="offset"> </a>
+You can add and subtract <i>DateOffsets</i> from a <i>Date</i> to
+create new date objects.  For example:<pre><tt><b>
+     95 asDate + 5 days
+</b></tt></pre>
+returns the date object representing Jan 5, 1996 and:<pre><tt><b>
+     ^today - 1 months
+</b></tt></pre>
+returns the object representing the date one month prior to the
+current date.
+<p>
+Eleven <b>DateOffset</b> subclasses have been defined:
+<b>Days</b>, <b>BusinessDays</b>,
+<b>Months</b>, <b>MonthBeginnings</b>, <b>MonthEnds</b>,
+<b>Quarters</b>, <b>QuarterBeginnings</b>, <b>QuarterEnds</b>,
+<b>Years</b>, <b>YearBeginnings</b>, and <b>YearEnds</b>.
+<p>
+Valid <i>DateOffset</i> instances are formed by sending one of the following
+messages to an <i>Integer</i>:
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Example</b>
+<td><b>Returns Date</b>
+</tr>
+
+<tr>
+<td><i>days</i>
+<td>95 asDate + 6 days
+<td>Jan 6, 1996
+<tr>
+<td><i>businessDays</i>
+<td>95 asDate + 6 businessDays
+<td>Jan 8, 1996
+<tr>
+<td><i>months</i>
+<td>951215 asDate - 1 months
+<td>Nov 15, 1995
+<tr>
+<td><i>monthBeginnings</i>
+<td>951215 asDate - 1 monthBeginnings
+<td>Nov 1, 1995
+<tr>
+<td><i>monthEnds</i>
+<td>951215 asDate - 1 monthEnds
+<td>Nov 30, 1995
+<tr>
+<td><i>quarters</i>
+<td>951215 asDate - 1 quarters
+<td>Sept 15, 1995
+<tr>
+<td><i>quarterBeginnings</i>
+<td>951215 asDate - 1 quarterBeginnings
+<td>July 1, 1995
+<tr>
+<td><i>quarterEnds</i>
+<td>951215 asDate - 1 quarterEnds
+<td>Sept 30, 1995
+<tr>
+<td><i>years</i>
+<td>951215 asDate - 1 years
+<td>Dec 15, 1994
+<tr>
+<td><i>yearBeginnings</i>
+<td>951215 asDate - 1 yearBeginnings
+<td>Jan 1, 1994
+<tr>
+<td><i>yearEnds</i>
+<td>951215 asDate - 1 yearEnds
+<td>Dec 31, 1994
+
+</tr></table></Center>
+<p>
+When a <i>DateOffset</i> is added to or subtracted from a <i>Date</i>,
+another <i>Date</i> object is returned.  Since the returned object
+is a <i>Date</i> you can add or subtract an offset from it as well.
+For example:<pre><tt><b>
+     ^today - 1 yearEnds + 3 days
+</b></tt></pre>
+returns the third day of the current year.
+<p>
+Calculations that involve <i>BusinessDays</i> will only return
+Monday through Friday dates.  Calculations that involve
+<i>MonthBeginnings</i>, <i>QuarterBeginnings</i>, or <i>YearBeginnings</i>,
+will only return dates that are the first day of the month, quarter,
+or year.  Calculations that involve
+<i>MonthEnds</i>, <i>QuarterEnds</i>, or <i>YearEnds</i>,
+will only return dates that are the last day of the month, quarter,
+or year.  
+<p>
+Calculations that involve
+<i>Months</i>, <i>Quarters</i>, or <i>Years</i>,
+will return dates that are on the same day in the month, as long as
+the date is valid.  For example, the expression:<pre><tt><b>
+     960430 asDate - 1 months
+</b></tt></pre>
+returns the date <i>March 30, 1996</i>.  The expression:<pre><tt><b>
+     960331 asDate - 1 months
+</b></tt></pre>
+returns the date <i>February 29, 1996</i> since February 31 is not
+a valid date.
+<p>
+Date offsets that are formed by sending an increment message to
+the integer value <i>0</i> are used to convert a <i>Date</i>
+to a boundary relative to its current value.  The following table
+defines these boundaries:
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Example</b>
+<td><b>Returns Date</b>
+<td><b>Definition</b>
+</tr>
+
+<tr>
+<td>95 asDate + 0 businessDays
+<td>Dec 29, 1995
+<td>Convert Saturday and Sunday dates to prior Friday
+<tr>
+<td>95 asDate + 0 monthBeginnings
+<td>Dec 1, 1995
+<td>First day in <i>recipient's</i> month
+<tr>
+<td>95 asDate + 0 monthEnds
+<td>Dec 31, 1995
+<td>Last day in <i>recipient's</i> month
+<tr>
+<td>9511 asDate + 0 quarterBeginnings
+<td>Oct 1, 1995
+<td>First day in <i>recipient's</i> quarter
+<tr>
+<td>9511 asDate + 0 quarterEnds
+<td>Dec 31, 1995
+<td>Last day in <i>recipient's</i> quarter
+<tr>
+<td>9511 asDate + 0 yearBeginnings
+<td>Jan 1, 1995
+<td>First day in <i>recipient's</i> year
+<tr>
+<td>9511 asDate + 0 yearEnds
+<td>Dec 31, 1995
+<td>Last day in <i>recipient's</i> year
+</tr></table></Center>
+
+<p>
+<hr>
+<h3><a name="usage">Basic Usage</a></h3>
+<p>
+All dates respond to the messages <i>month</i>, <i>day</i>, and <i>year</i>,
+returning integer values.  For example:<pre><tt><b>
+     960615 asDate month
+
+</b>returns <i>6</i><b>,
+
+     960615 asDate day
+
+</b>returns <i>15</i><b>, and
+
+     960615 asDate year
+</b></tt></pre>
+returns <i>1996</i>.  
+<p>
+By default, dates print in the format <i>month/day/year</i>.  For 
+example:<pre><tt><b>
+     96 asDate print ;
+
+</b>displays:<b>
+
+     12/31/1996
+</b></tt></pre>
+The <i>print:</i> message prints dates in different formats, depending
+on the value of the supplied parameter.  More information about
+<a name="print" href="Output.htm#printDate">printing dates</a>
+is available.  
+<p>
+<a name="format"> </a>
+The <i>asInteger</i> message can be used to convert
+a date to an eight-digit integer in the form <i>YYYYMMDD</i>.
+The following additional messages can be used
+to <b>format</b> date objects.  They
+return an instance of the class <i>String</i>:
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Sample</b>
+<td><b>Returns</b>
+</tr>
+
+<tr>
+<td><a href="mDate.htm#formatUsingMMDD"<i>formatUsingMMDD</i></a>
+<td> 95 asDate formatUsingMMDD
+<td>"12/31"
+<tr>
+<td><a href="mDate.htm#formatUsingMMDDYY"<i>formatUsingMMDDYY</i></a>
+<td> 95 asDate formatUsingMMDDYY
+<td>"12/31/95"
+<tr>
+<td><a
+href="mDate.htm#formatUsingMMDDYYYY"<i>formatUsingMMDDYYYY</i></a>
+<td> 95 asDate formatUsingMMDDYYYY
+<td>"12/31/1995"
+<tr>
+<td><a href="mDate.htm#formatUsingShortName"<i>formatUsingShortName</i></a>
+<td> 95 asDate formatUsingShortName
+<td>"31-Dec-1995"
+<tr>
+<td><a href="mDate.htm#formatUsingLongName"<i>formatUsingLongName</i></a>
+<td>95 asDate formatUsingLongName
+<td>"December 31, 1995"
+</tr></table></Center>
+<p>
+The message <i>getMonthDescriptor</i> returns an instance of the
+class <i>Date MonthDescriptor</i>.  This class has 12 instances, one
+for each month.  Instances of this class respond to the messages
+<i>shortName</i> and <i>longName</i>.
+The <i>getMonthDescriptor</i> message returns the instance corresponding
+to the recipient date's month.  For example:<pre><tt><b>
+     960615 asDate getMonthDescriptor shortName
+</b></tt></pre>
+returns the string <i>"Jun"</i>.  The <i>MonthDescriptor</i> class
+was created using the 
+<a href="Classes.htm#subclass"><i>createSubclass:at:</i></a>
+variation of the <i>createSubclass:</i> message so the class is only
+visible to <i>Date</i> objects.
+<p>
+The message <i>getDayOfWeekDescriptor</i> returns an instance of the
+class <i>Date DayOfWeekDescriptor</i>.  This class has 7 instances, one
+for each day of the week.  The message <i>code</i> returns the name
+of the day of the week.  For example:<pre><tt><b>
+     960615 asDate getDayOfWeekDescriptor code
+</b></tt></pre>
+returns the string <i>"Saturday"</i>.  The message <i>dayOfWeek</i>
+has been defined at the <i>Date</i> class to return this value as well.
+The <i>DayOfWeekDescriptor</i> class
+was created using the 
+<a href="Classes.htm#subclass"><i>createSubclass:at:</i></a>
+variation of the <i>createSubclass:</i> message so the class is only
+visible to <i>Date</i> objects.
+<p>
+<a name="convert"> </a>
+In addition to the <i>asDate</i> message, 
+the following messages can be used to <b>convert</b> <i>Integer</i>
+instances to <i>Date</i> instances:
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+<td><b>Sample</b>
+</tr>
+
+<tr>
+<td><a href="mNumber.htm#asDateFromMMDD"<i>asDateFromMMDD</i></a>
+<td>Convert <i>recipient</i> in MMDD format to a <i>Date</i> object
+<td>0315 asDateFromMMDD
+<tr>
+<td><a href="mNumber.htm#asDateFromMMDDYY"<i>asDateFromMMDDYY</i></a>
+<td>Convert <i>recipient</i> in MMDDYY format to a <i>Date</i> object
+<td>031595 asDateFromMMDDYY
+<tr>
+<td><a href="mNumber.htm#asDateFromMMDDYYYY"<i>asDateFromMMDDYYYY</i></a>
+<td>Convert <i>recipient</i> in MMDDYYYY format to a <i>Date</i> object
+<td> 03151995 asDateFromMMDDYYYY
+<tr>
+<td><a href="mNumber.htm#asDateFromMMYY"<i>asDateFromMMYY</i></a>
+<td>Convert <i>recipient</i> in MMYY format to a <i>Date</i> object
+<td> 0395 asDateFromMMYY
+<tr>
+<td><a href="mNumber.htm#asDateFromYYYYMM"<i>asDateFromYYYYMM</i></a>
+<td>Convert <i>recipient</i> in YYYYMM format to a <i>Date</i> object
+<td> 199503 asDateFromYYYYMM
+<tr>
+<td><a href="mNumber.htm#asMonthEnd"<i>asMonthEnd</i></a>
+<td>Convert <i>recipient</i> month (1 - 12) to month-end <i>Date</i> 
+in current year
+<td> 9 asMonthEnd
+<tr>
+<td><a href="mNumber.htm#asMonthEndInYear:"<i>asMonthEndInYear:</i></a>
+<td>Convert <i>recipient</i> month (1 - 12) to month-end <i>Date</i> 
+in <i>parameter</i> year
+<td> 9 asMonthEndInYear: 1995
+
+</tr>
+</table></Center>
+
+<p>
+In addition to the <i>+ offset</i> and <i>- offset </i> messages,
+The following messages can be used to <b>derive</b> a <i>Date</i>
+instance from another <i>Date</i>:
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+<td><b>Sample</b>
+</tr>
+
+<tr>
+<td><a href="mDate.htm#asBDay"><i>asBDay</i><a>
+<td>Convert <i>recipient</i> to prior Friday's date if it is a
+Saturday or Sunday; otherwise, return <i>recipient</i>
+<td>960615 asDate asBDay
+<tr>
+<td><a href="mDate.htm#asBDayMonday"><i>asBDayMonday</i></a>
+<td>Convert <i>recipient</i> to following Monday's date if it is a
+Saturday or Sunday; otherwise, return <i>recipient</i>
+<td>960615 asDate asBDayMonday
+<tr>
+<td><a
+href="mDate.htm#asCurrentYearMMDD"><i>asCurrentYearMMDD</i></a>
+<td>Convert <i>recipient</i> to the same month/day in current year
+<td>920615 asDate asCurrentYearMMDD
+<tr>
+<td><a href="mDate.htm#asMonthEnd"><i>asMonthEnd</i></a>
+<td>Convert <i>recipient</i> to last day of its month
+<td>960615 asDate asMonthEnd
+<tr>
+<td><a href="mDate.htm#asMostRecentMonthEnd"><i>asMostRecentMonthEnd</i></a>
+<td>Convert <i>recipient</i> to last day in the month on or
+or before the <i>recipient</i>
+<td>960615 asDate asMostRecentMonthEnd
+<tr>
+<td><a href="mDate.htm#asQuarterEnd"><i>asQuarterEnd</i></a>
+<td>Convert <i>recipient</i> to last day in quarter
+<td>960615 asDate asQuarterEnd
+<tr>
+<td><a href="mDate.htm#asYearBeginning"><i>asYearBeginning</i></a>
+<td>Convert <i>recipient</i> to first date in year
+<td>960615 asDate asYearBeginning
+<tr>
+<td><a href="mDate.htm#asYearEnd"><i>asYearEnd</i></a>
+<td>Convert <i>recipient</i> to last date in year
+<td>960615 asDate asYearEnd
+
+</tr>
+</table></Center>
+<p>
+
+<p>
+<hr>
+<h3><a name="ts">Dates and TimeSeries Data</a></h3>
+<p>
+<i>Date</i> objects play an important role in 
+<a href="clTS.htm">accessing and updating time-series data</a>.
+Dates (or integer equivalents) are the parameters for the
+<a href="mTS.htm#asOf:"><i>asOf:</i></a> and
+<a href="mTS.htm#asOf:put:"><i>asOf:put:</i></a> 
+messages define for the <i>TimeSeries</i> class.
+For example:<pre><tt><b>
+     Named Currency CAD :usExchange asOf: 950315 asDate
+</b></tt></pre>
+returns the Canadian Dollar exchange rate as of March 15, 1995.
+The expression:<pre><tt><b>
+     Named Currency CAD :usExchange asOf: 951315 put: 1.23 ;
+</b></tt></pre>
+sets the <i>March 15th</i> value to <i>1.23</i>.
+<p>
+When a message retrieves data stored in a
+<a href="Fund.htm#ts">time-varying property</a>, it 
+accesses the data as of a specific date.  By default, this
+date is the current date.  For example:<pre><tt><b>
+     Named Currency CAD usExchange
+</b></tt></pre>
+returns the most recent exchange rate for the Canadian Dollar.
+<p>
+The <i>evaluate:</i> message is sent to a <i>Date</i> or an
+<i>Integer</i> that can be converted to a date and is used to
+change the default date.  The parameter to this message is
+a block.  All messages within the block that access time series
+properties will access the values as of this date by default.
+For example:<pre><tt><b>
+     950315 evaluate:
+       [ Named Currency CAD usExchange printNL ] ;
+</b></tt></pre>
+In this case, the exchange rate is accessed as of March 15, 1995.
+The <a href="Execution.htm#date">magic word <i>^date</i></a> refers
+to the default date.  For example:<pre><tt><b>
+     950315 evaluate:
+       [ ^date print: 15 ;
+         Named Currency CAD usExchange printNL ;
+       ] ;
+</b></tt></pre>
+<a name="nested"> </a>
+This example displays the date <i>3/15/1995</i> followed by the exchange
+rate.  You can change the default date within the <i>evaluate:</i> block.
+For example:<pre><tt><b>
+     950315 evaluate:
+       [ ^date print: 15 ;
+         Named Currency CAD usExchange printNL ;
+         ^date + 5 businessDays evaluate:
+             [ ^date print: 15 ; Named Currency CAD usExchange printNL ] ;
+       ] ;
+</b></tt></pre>
+This examples displays the date <i>3/15/1995</i> followed by the exchange
+rate for that date.  It then displays the date and exchange rate for
+the date 5 business days later than the original date.
+<p>
+<blockquote><hr><center>
+<a href="Execution.htm" name="evaluateScope.note"><b>Note: </b> </a></center>
+The <i>evaluate:</i> message changes the time context of the
+block but does not change the recipient object like the <i>do:</i>
+message.  In other words, the magic word <i>^date</i> is rebound
+by the <i>evaluate:</i> message but the magic word <i>^self</i> is
+not.
+If you send the <i>do:</i> message to a <i>Date</i>, messages within
+the block will be sent to the recipient date object (i.e., <i>^self</i>
+is rebound).  The magic word <i>^date</i> will not use this date.
+For example:<pre><tt><b>
+     960315 asDate
+     do: [ ^date print ;        #- will be ^today
+           month print ; year printNL ;
+         ] ;
+
+     960315 asDate
+     evaluate:
+         [ ^date print ;       #- will be 3/15/96
+           ^date month print ; ^date year printNL ;
+         ] ;
+
+</b></tt></pre>
+<hr></blockquote>
+
+<p>
+<hr>
+<h3><a name="internal">Date Arithmetic and Internal Dates</a></h3>
+<p>
+The <i>+ offset</i> and <i>- offset </i> messages are used
+to compute a date based on another date.  Several messages
+are also defined that allow you to perform computations between
+dates.  
+<p>
+Date arithmetic is facilitated by the internal representation of
+the date objects.
+Internally, dates are stored as integers numbered consecutively
+from 1.  This value can be accessed by sending the <i>asIDate7</i>
+(integer form using 7-day weeks) message to a <i>Date</i>.
+For example:<pre><tt><b>
+     95 asDate asIDate7
+</b></tt></pre>
+returns the integer value <i>728,658</i>.
+Since dates are number consecutively,
+internal dates can be used to compute the number of days between
+two dates.  For example:<pre><tt><b>
+     !date1 <- 950315 asDate; 
+     !date2 <- 950322 asDate ; 
+     (date2 asIDate7 - date1 asIDate7 ) asInteger print ;
+</b></tt></pre>
+prints the value <i>7</i>.  
+The message <a href="mDate.htm#countDaysTo:"><i>countDaysTo:</i></a>
+performs this same function.  For example:<pre><tt><b>
+     !date1 <- 950315 asDate; 
+     !date2 <- 950322 asDate ; 
+     date1 countDaysTo: date . asInteger print ;
+</b></tt></pre>
+
+<p>
+<hr>
+<h3><a name="other">Other Date Messages</a></h3>
+<p>
+The following messages perform basic <b>comparison</b> operations
+between the <i>recipient Date</i> and <i>parameter Date</i>.
+These messages return an instance of the 
+<a href="clBoolean.htm"><i>Boolean</i></a> class
+except where noted.
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+<td><b>Sample</b>
+</tr>
+
+<tr>
+<td><i>=</i>
+<td>Is <i>recipient</i> equal to <i>parameter</i>?
+<td>^today = ^date
+<tr>
+<td><i>==</i>
+<td>Is <i>recipient</i> 
+<a href="Navigate.htm#equiv">identical</a>
+to <i>parameter</i>?
+<td>^today == ^date
+<tr>
+<td><i>!=</i>
+<td>Is <i>recipient</i> not equal to <i>parameter</i>?
+<td>^today != ^date
+<tr>
+<td><i>!==</i>
+<td>Is recipient not identical to <i>parameter</i>?
+<td>^today !== ^date
+<tr>
+<td><i>&lt</i>
+<td>Is recipient less than <i>parameter</i>?
+<td>^today < ^date
+<tr>
+<td><i>&lt=</i>
+<td>Is recipient less than or equal to <i>parameter</i>?
+<td>^today <= ^date
+<tr>
+<td><i>&gt</i>
+<td>Is recipient greater than <i>parameter</i>?
+<td>^today > ^date
+<tr>
+<td><i>&gt=</i>
+<td>Is recipient greater than or equal to <i>parameter</i>?
+<td>^today >= ^date
+<tr>
+<td><a href="mDate.htm#between:and:"><i>between:and:</i></a>
+<td>Is recipient value between two <i>parameter</i> values?
+<td>^today between: 95 asDate and: 96 asDate .
+<tr>
+<td><a href="mDate.htm#inRange:"><i>inRange:</i></a>
+<td>Is recipient value in the range implied by the <i>parameter</i>,
+a list of two elements representing the start and end of the
+range inclusively?
+<td>^today inRange: 95 asDate, 96 asDate .
+<tr>
+<td><a href="mDate.htm#inSet:"><i>inSet:</i></a>
+<td>Is recipient equal to one of the values in the <i>parameter</i>,
+a list containing one or more elements?
+<td>^today inSet: 94 asDate, 95 asDate, 96 asDate .
+<tr>
+<td><a href="mDate.htm#notBetween:and:"><i>notBetween:and:</i></a>
+<td>Is recipient value not between two <i>parameter</i> values?
+<td>^today notBetween: 95 asDate and: 96 asDate .
+<tr>
+<td><a href="mDate.htm#max:"><i>max:</i></a>
+<td>Returns the larger of <i>recipient</i> and <i>parameter</i> value
+<td> ^today max: ^date . 
+<tr>
+<td><a href="mDate.htm#min:"><i>min:</i></a>
+<td>Returns the smaller of <i>recipient</i> and <i>parameter</i> value
+<td> ^today min: ^date . 
+
+</tr>
+</table></Center>
+
+<p>
+The following messages perform basic <b>inquiries</b> about
+the <i>recipient</i>.  These messages return an instance of the 
+<a href="clBoolean.htm"><i>Boolean</i></a> class.
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+<td><b>Sample</b>
+</tr>
+
+<tr>
+<td><a href="mDate.htm#isMonthEnd"><i>isMonthEnd</i></a>
+<td>Is <i>recipient</i> a month-end date?
+<td> ^today isMonthEnd
+<tr>
+<td><a href="mDate.htm#isLastBusinessDayOfMonth">
+<i>isLastBusinessDayOfMonth</i></a>
+<td>Is <i>recipient</i> the last business day of the month?
+<td> ^today isLastBusinessDayOfMonth
+<tr>
+<td><a href="mDate.htm#isInitialDate"><i>isInitialDate</i></a>
+<td>Is <i>recipient</i> the earliest possible date?
+<td> ^today isInitialDate
+
+</tr>
+</table></Center>
+<p>
+
+
+<p>
+<hr>
+<h3><a name="dr">Date Ranges</a></h3> 
+<p> 
+A <b>DateRange</b> is defined by specifying a starting date, and
+ending date, and a date offset.  Starting and ending dates can be any
+date or an integer that can be converted
+to a valid date.
+<p>
+The general form for creating a date range is:<pre><tt>
+     !dr <- date1 to: date2 by: offset ;
+</tt></pre>
+For example:<pre><tt><b>
+     #--  define date range of month-end dates in 1995
+     !dr1 <- 9501 to: 9512 by: 1 monthEnds ;
+
+     #--  define weekly dates back one year
+     !dr2 <- ^today to: ^today - 1 years by: 5 businessDays ;
+</b></tt></pre>
+<p>
+<i>DateRange</i> objects respond to the <i>date1</i>, <i>date2</i>,
+and <i>increment</i> messages by returning the starting date,
+the ending date, and the date offset used to define the date range.
+<p>
+<i>DateRanges</i> respond to the <i>evaluate:</i> message by executing
+the block supplied as a parameter, once for each point in the date
+range.  For example:<pre><tt><b>
+     9501 to: 9512 by: 1 monthEnds .
+     evaluate: [ ^date print: 15 ; 
+                 Named Currency CAD usExchange printNL ;
+               ] ;
+</b></tt></pre>
+In this example, the US exchange rate for the Canadian currency
+is printed for each month-end date in 1995.  The supplied block
+prints the evaluation date and the exchange rate.  
+Starting with the initial date (i.e., January 31, 1995), 
+Vision processes this block for each date in the date range,
+incrementing the evaluation date by the date range's offset (i.e., 1
+monthEnds) until the ending date (i.e., December 31, 1995) is
+crossed.  The <a href="Execution.htm#date">magic word <i>^date</i></a>
+reflects the specific evaluation date within the range as it is 
+processing.
+<p>
+Date ranges can be executed in reverse order as well.  When the
+starting date in a date range is later than the ending date, Vision
+will decrement the evaluation date by the offset provided.
+For example, if the date
+range in the previous example were defined using: <i>9512 to: 9501
+by: 1 monthEnds</i>, the exchange rates would be displayed starting
+with December 1995 and ending with January 1995.  
+<p>
+<blockquote><hr><center>
+<a href="Execution.htm" name="evaluateScopeDR.note"><b>Note: </b> </a></center>
+The <i>evaluate:</i> message changes the time context of the
+block but does not change the recipient object like the <i>do:</i>
+message.  In other words, the magic word <i>^date</i> is rebound
+by the <i>evaluate:</i> message but the magic word <i>^self</i> is
+not.
+<hr></blockquote>
+<p>
+<a name="iterate"> </a>
+The <i>evaluate:</i> message is defined to evaluate its block parameter
+for each element in the date range.  Although this operation
+may appear to operate a date at a time, 
+it is actually optimized internally 
+and does not execute by sequential evaluation.  
+<p>
+<blockquote><hr><center><font size=+1>
+<a name="iterate.warn"><b>Warning!! </b></a>
+</font></center>
+Because date ranges are not evaluated sequentially,
+you do not have control over the order in which the date range is
+processed nor can you assume that the number of evaluations is
+equal to the number of elements in the range.
+<hr></blockquote>
+<p>
+The <a href="mDRange.htm#iterate:"><i>iterate:</i></a> message can
+be used instead of <i>evaluate:</i> when you want to evaluate the
+date range an element at a time.  For example:<pre><tt><b>
+     9501 to: 9512 by: 1 monthEnds .
+      iterate: [ ^date print: 15 ; 
+                 Named Currency CAD usExchange printNL ;
+               ] ;
+</b></tt></pre>
+<p>
+<a name="dateList"> </a>
+You can convert a <i>DateRange</i> into a <i>List</i> of <i>Date</i>
+objects using the <i>asDateList</i> message.  For example:<pre><tt><b>
+     !drange <- 9501 to: 9512 by: 1 monthEnds ;
+     !dlist <- drange asDateList ;
+     dlist count print ;
+</b></tt></pre>
+The variable <i>dlist</i> returns a <i>List</i> of 12 date objects.
+Note that the magic word <i>^date</i> will not be associated with
+these objects.  For example:<pre><tt><b>
+     dlist do: [ ^date print: 15 ; printNL ; ] ;
+</b></tt></pre>
+In this example, the same value will print for <i>^date</i> for
+each element in <i>dlist</i>.  The actual value of the <i>Date</i>
+will print as the second item in the line.
+<p>
+The message <a href="mDRange.htm#extract:for:"><i>extract:for:</i></a>
+is used to execute a program for an object over a date range, returning
+a <i>TimeSeries</i>.  For example:<pre><tt><b>
+     9501 to: 9512 by: 1 monthEnds .
+        extract: [ usExchange ] for: Named Currency CAD
+</b></tt></pre>
+returns a time series of twelve month-end exchange rates for the
+Canadian currency.
+<p>
+<hr>
+<h3><a name="more">Additional Information</a></h3>
+<p>
+For additional information see:
+<p>
+<ul type=square>
+<li><a href="Fund.htm#ts">Time Varying Properties</a>
+<li><a href="clTS.htm">The TimeSeries Class </a>
+<li><a href="clTS.htm#drange">TimeSeries and DateRanges </a>
+<li><a href="Output.htm#printDate">Printing Dates</a>
+<li><a href="Navigate.htm#message">General Message Information</a>
+<li><a href="tuTS.htm">Vision Tutorial: Using Dates and TimeSeries</a>
+</ul>
+<p>
+<hr>
+
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy 1997 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated June 19, 1997</font>
+</table>
+
+</body>
+</html>

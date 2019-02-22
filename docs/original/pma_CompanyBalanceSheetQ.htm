@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="Mozilla/4.04 [en] (WinNT; I) [Netscape]">
+   <TITLE>Vision Upload Format: CompanyBalanceSheetQ</TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF">
+
+<H2>
+Vision Portfolio Management Application Layer: Application</H2>
+| <A HREF="pmaApps.htm">Headstart Applications</A>
+|&nbsp;
+<HR>
+
+<P><FONT SIZE=+2><B>Application: </B><I>CompanyBalanceSheetQ</I></FONT>
+
+<P>&nbsp;
+<H3>
+Summary:</H3>
+The <B>CompanyBalanceSheetQ</B> application is used to display the last
+five fiscal quarters of balance sheet information for a company.
+<H3>
+Inputs:</H3>
+
+<CENTER><TABLE BORDER CELLSPACING=2 CELLPADDING=4 WIDTH="80%" >
+<TR>
+<TH>Position</TH>
+
+<TH>Form Id</TH>
+
+<TH>Description&nbsp;</TH>
+</TR>
+
+<TR>
+<TD>1&nbsp;</TD>
+
+<TD>id&nbsp;</TD>
+
+<TD>Id of the company&nbsp;</TD>
+</TR>
+</TABLE></CENTER>
+
+<H3>
+Analysis:</H3>
+
+<UL type=disc>
+<LI>
+The <I>id</I> must reference an existing <B>Company</B> instance.</LI>
+
+<LI>
+The basic report displays the balance sheet line items as rows and the
+last five fiscal quarter end dates as columns.</LI>
+</UL>
+
+<H3>
+Key Data Feeds:</H3>
+
+<UL type=disc>
+<LI>
+<I><A HREF="pma_FundamentalQ.htm">FundamentalQ</A></I></LI>
+</UL>
+
+<H3>
+Related Reports:</H3>
+
+<UL type=disc>
+<LI>
+<I><A HREF="pma_CompanyBalanceSheet.htm">CompanyBalanceSheet</A></I></LI>
+
+<LI>
+<I><A HREF="pma_CompanyIncomeStatementQ.htm">CompanyIncomeStatementQ</A></I></LI>
+
+<LI>
+<I><A HREF="pma_CompanyProfile.htm">CompanyProfile</A></I></LI>
+</UL>
+
+<H3>
+Sample Usage:</H3>
+
+<UL type=disc>
+<PRE><B><TT>Interface ApplicationWS runWith: "CompanyBalanceSheetQ", "DELL" ;</TT></B></PRE>
+</UL>
+
+<H3>
+Sample Input:</H3>
+<FORM NAME=ApplicationForm ACTION="http://visionWeb/cgi-bin/vquery.exe/default/">
+<CENTER><TABLE BORDER CELLSPACING=2 CELLPADDING=8 WIDTH="50%" >
+<TR>
+<TH ALIGN=RIGHT BGCOLOR="#ADD8E6">Enter Security:&nbsp;</TH>
+
+<TD><INPUT TYPE=text NAME= id SIZE= 15 VALUE= "24702510"><INPUT TYPE=submit value=Submit></TD>
+</TR>
+
+<TR>
+<TH><FONT SIZE=-1>Date:</FONT>
+<BR><INPUT TYPE=text NAME=globalDate VALUE= "19990115"></TH>
+
+<TH><FONT SIZE=-1>Currency:</FONT>
+<BR><SELECT NAME=globalCurrency><OPTION VALUE=LOC SELECTED><FONT SIZE=-1>Local&nbsp;<OPTION VALUE=USD >United
+States Dollar&nbsp;<OPTION VALUE=ARS>Argentine Peso&nbsp;<OPTION VALUE=AUD>Australian
+Dollar&nbsp;<OPTION VALUE=ATS>Austrian Schilling&nbsp;<OPTION VALUE=BEF>Belgian
+Franc&nbsp;<OPTION VALUE=BRL>Brazilian Real&nbsp;<OPTION VALUE=GBP>British
+Pound&nbsp;<OPTION VALUE=CAD>Canadian Dollar&nbsp;<OPTION VALUE=CLP>Chilean
+Peso&nbsp;<OPTION VALUE=CNY>Chinese (yuan) Renmin&nbsp;<OPTION VALUE=COP>Columbian
+Peso&nbsp;<OPTION VALUE=CZK>Czechoslovakian Korun&nbsp;<OPTION VALUE=DKK>Danish
+Krone&nbsp;<OPTION VALUE=EGP>Egyptian Pound&nbsp;<OPTION VALUE=EUR>Euro
+Dollar&nbsp;<OPTION VALUE=FIM>Finnish Markka&nbsp;<OPTION VALUE=FRF>French
+Franc&nbsp;<OPTION VALUE=DEM>German Deutschmark&nbsp;<OPTION VALUE=GRD>Greek
+Drachma&nbsp;<OPTION VALUE=HKD>Hong Kong Dollar&nbsp;<OPTION VALUE=HUF>Hungarian
+Forint&nbsp;<OPTION VALUE=INR>Indian Rupee&nbsp;<OPTION VALUE=IDR>Indonesian
+Rupiah&nbsp;<OPTION VALUE=IEP>Irish Pound&nbsp;<OPTION VALUE=ILS>Israeli
+Shekel&nbsp;<OPTION VALUE=ITL>Italian Lira&nbsp;<OPTION VALUE=JMD>Jamaican
+Dollar&nbsp;<OPTION VALUE=JPY>Japanese Yen&nbsp;<OPTION VALUE=JOD>Jordanian
+Dinar&nbsp;<OPTION VALUE=KES>Kenyan Shilling&nbsp;<OPTION VALUE=LUF>Luxembourg
+Franc&nbsp;<OPTION VALUE=MYR>Malaysian Ringgit&nbsp;<OPTION VALUE=MAD>Moroccan
+Dirham&nbsp;<OPTION VALUE=NLG>Netherlands Guilder&nbsp;<OPTION VALUE=MXP>New
+Mexican Peso&nbsp;<OPTION VALUE=NZD>New Zealand Dollar&nbsp;<OPTION VALUE=NGN>Nigerian
+Naira&nbsp;<OPTION VALUE=NOK>Norwegian Krone&nbsp;<OPTION VALUE=PKR>Pakistani
+Rupee&nbsp;<OPTION VALUE=PEN>Peruvian new Sol&nbsp;<OPTION VALUE=PHP>Philippine
+Peso&nbsp;<OPTION VALUE=PLZ>Polish Zloty&nbsp;<OPTION VALUE=PTE>Portugese
+Escudo&nbsp;<OPTION VALUE=SGD>Singapore Dollar&nbsp;<OPTION VALUE=ZAR>South
+African Rand&nbsp;<OPTION VALUE=KRW>South Korean Won&nbsp;<OPTION VALUE=ESP>Spanish
+Peseta&nbsp;<OPTION VALUE=LKR>Sri Lankan Rupee&nbsp;<OPTION VALUE=SEK>Swedish
+Krona&nbsp;<OPTION VALUE=CHF>Swiss Franc&nbsp;<OPTION VALUE=TWD>Taiwan
+Dollar&nbsp;<OPTION VALUE=THB>Thailand Baht&nbsp;<OPTION VALUE=TRL>Turkish
+Lira&nbsp;<OPTION VALUE=VEB>Venezuelan Bolivar&nbsp;<OPTION VALUE=ZWD>Zimbabwe
+Dollar&nbsp;</FONT></SELECT></TH>
+</TR>
+</TABLE></CENTER>
+
+<H3>
+<INPUT TYPE=hidden NAME=appName VALUE="CompanyBalanceSheetQ"></FORM></H3>
+
+<H3>
+Sample Output:</H3>
+
+<UL type=disc>
+<CENTER>
+<H3>
+<FONT FACE="Arial"><FONT COLOR="#00008B"><FONT SIZE=+0>DELL COMPUTER CORP
+COM</FONT></FONT></FONT></H3></CENTER>
+
+<CENTER>
+<H4>
+<FONT FACE="Arial"><FONT COLOR="#00008B"><FONT SIZE=+0>Data As Of: 1/15/1999
+--- Currency: United States Dollar</FONT></FONT></FONT></H4></CENTER>
+
+<HR align=center width=50%>
+<CENTER><TABLE BORDER CELLSPACING=0 WIDTH="80%" >
+<CAPTION><B><FONT FACE="Arial"><FONT COLOR="#008000"><FONT SIZE=+1>Quarterly
+Balance Sheet</FONT></FONT></FONT></B></CAPTION>
+
+<TR>
+<TH ALIGN=CENTER VALIGN=TOP><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=-2>&nbsp;</FONT></FONT></FONT></TH>
+
+<TH ALIGN=CENTER VALIGN=TOP><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>10/97</FONT></FONT></FONT></TH>
+
+<TH ALIGN=CENTER VALIGN=TOP><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>07/97</FONT></FONT></FONT></TH>
+
+<TH ALIGN=CENTER VALIGN=TOP><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>04/97</FONT></FONT></FONT></TH>
+
+<TH ALIGN=CENTER VALIGN=TOP><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>01/97</FONT></FONT></FONT></TH>
+
+<TH ALIGN=CENTER VALIGN=TOP><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>10/96</FONT></FONT></FONT></TH>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>ASSETS</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Current
+Assets</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;&nbsp;
+Cash</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+1,615</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+1,515</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+1,442</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+1,352</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+1,183</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;&nbsp;
+Accounts Receivables</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+1,350</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+1,133</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+991</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+903</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+915</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;&nbsp;
+Inventories</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+301</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+273</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+266</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+251</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+216</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;&nbsp;
+Other Current Assets</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+341</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+331</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+280</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+241</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+177</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;--------</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;--------</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;--------</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;--------</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;--------</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Total
+Current Assets</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+3,607</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+3,252</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+2,979</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+2,747</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+2,491</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Net
+Plant</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+301</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+288</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+252</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+235</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+223</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Other
+Assets</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+13</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+12</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+12</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+11</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+10</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Total
+Assets</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+3,921</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+3,552</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+3,243</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+2,993</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+2,724</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;========</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;========</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;========</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;========</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;========</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;&nbsp;
+LIABILITIES AND NET WORTH</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Debt
+In Cur Liabilities</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+NA&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+NA&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+NA&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+27</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+7</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Accounts
+Payable</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+1,488</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+1,285</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+1,146</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+1,040</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+911</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Income
+Taxes Payable</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+NA&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+NA&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+73</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+6</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Other
+Current Liabilities</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+891</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+778</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+634</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+591</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+544</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;--------</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;--------</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;--------</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;--------</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;--------</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Total
+Current Liabilities</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+2,379</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+2,063</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+1,853</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+1,658</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+1,468</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Total
+Lt Debt</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+17</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+NA&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+18</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+18</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+18</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Other
+Liabilities</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+267</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+277</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+251</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+232</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+216</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Def
+Taxes And ITC</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Minority
+Interest</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;--------</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;--------</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;--------</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;--------</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;--------</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Total
+Liabilities</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+2,663</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+2,340</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+2,122</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+1,908</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+1,702</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;
+Preferred Stock</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+51</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+85</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+264</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+279</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+171</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;
+Common Equity</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+1,207</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+1,127</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+857</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+806</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+851</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;--------</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;--------</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;--------</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;--------</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;--------</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Total
+Stockholder's Equity</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+1,258</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+1,212</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+1,121</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+1,085</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+1,022</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Total
+Liab. + Net Worth</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+3,921</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+3,552</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+3,243</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+2,993</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;&nbsp;&nbsp;
+2,724</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;========</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;========</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;========</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;========</FONT></FONT></FONT></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Courier"><FONT COLOR="#000000"><FONT SIZE=-1>&nbsp;========</FONT></FONT></FONT></TD>
+</TR>
+</TABLE></CENTER>
+
+<HR align=center width=50%>
+<BR>&nbsp;</UL>
+
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy 1999 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated January 28, 1999</font>
+</table></BODY>
+</HTML>

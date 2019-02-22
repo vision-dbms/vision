@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision ToolKit Class: Interface </title>
+</head>
+<body bgcolor=white>
+<h2>Vision ToolKit Class: Interface</h2>
+
+<p>
+     | <a href="FHome.htm">Home</a> 
+     | <a href="vifaces.htm">Interfaces</a>
+     | <a href="ifHtml.htm">Html Access</a>
+     | <a href="ifCAccess.htm">C Access</a>
+     | <a href="ifDownload.htm#tkInterface">Download Scripts</a> 
+     |
+<hr>
+<h3>Topics Covered:</h3>
+<ul type=square>
+<li><a href="tkInterface.htm#overview">Interface Overview</a>
+<li><a href="tkInterface.htm#expressions">Running Arbitrary Expressions</a>
+<li><a href="tkInterface.htm#globals">Globals</a>
+<li><a href="tkInterface.htm#buffering">Buffered Output</a>
+<li><a href="tkInterface.htm#extract">Structured Data Extraction</a>
+<li><a href="tkInterface.htm#apps">Parameterized Applications</a>
+<li><a href="tkInterface.htm#format">The FormatTools ToolKit</a>
+<li><a href="tkInterface.htm#html">Interfacing to Html</a>
+<li><a href="tkInterface.htm#external">External Access to Vision</a>
+</ul>
+<hr>
+<p>
+The Vision <b>Interface ToolKit</b> has been created to provide a set of
+classes and messages that aid in interfacing with environments external
+to Vision.  This ToolKit enables you to standardize your interactions
+with Vision and provides protocol for arbitrary expression
+evaluation, structured data extraction, and parameterized
+queries.  
+The Vision <b>FormatTools ToolKit</b> has been created to provide a modular
+approach for generating output that can be formatted for different
+environments without changing the methods that produce the output.
+<p>
+These ToolKits can run with any release of the <i>batchvision</i>
+executable; however, they assume that messages defined for the
+built-in classes through release 5.9.4 have been installed.  This 
+tool kit is a standard component of any Vision database bootstrapped
+after March 1997.  For databases created prior to this date, this tool kit 
+can be installed using the package of Vision scripts
+<a href="ifDownload.htm#tkInterface">supplied</a>.
+<p>
+<hr>
+<h3><a name="overview">Overview</a></h3>
+<p>
+The <b>Interface</b> class is used to support the protocol for
+interacting with Vision via a standard set of messages.
+As with all ToolKits, subclasses of the <b>Interface</b> ToolKit are
+named relative to <b>Interface</b>.  The subclass hierarchy is
+shown below:
+<pre>
+          <a href="clObject.htm">Object</a>
+             |
+          ToolKit
+             |
+             <b>Interface</b>
+                |
+                Interface Constant
+                Interface ErrorLog
+                Interface External
+                   Interface HtmlAccess
+                Interface Global
+                Interface Workspace
+                   Interface ApplicationWS
+                   Interface ExtractWS
+</pre>
+<p>
+Most of these class are used to organize protocol and are not
+directly instantiated.  The <b>Interface Workspace</b> subclasses
+are used directly and can be instantiated as needed.
+<p>
+The class <b>Interface Workspace</b> is an abstract class used to
+define common protocol for different types of structured query.
+The subclass <b>Interface ApplicationWS</b> supports parameterized
+application execution.  The subclass <b>Interface ExtractWS</b>
+supports structured data extraction in a number of different formats.
+<a href="clDict.htm#named">Naming dictionaries</a>
+have been set up for each of the <b>Workspace</b>
+subclasses.  These dictionaries are accessible via
+<b>Interface Named ApplicationWS</b> and <b>Interface Named ExtractWS</b>.
+When you create a new instance in either of these classes using 
+the <i>createInstance:</i> message, the name will automatically get added to
+the appropriate naming dictionary.
+<p>
+The other subclasses of <b>Interface</b> are used to support
+interactions with any of these classes.
+The <b>Interface Constant</b> class is used to define messages that
+return constant values used by the various subclasses.  The
+<b>Interface Global</b> class is used to define properties that are
+set and accessed by the workspace classes.  The <b>Interface
+ErrorLog</b> class provides protocol to standardize error
+reporting.  The <b>Interface External</b> class is an abstract class
+that is subclassed to define protocol specific to an external
+environment.  The <b>Interface HtmlAccess</b> class is included here.
+<p>
+Because all these classes inherit from and are named at
+<b>Interface</b>, methods defined at any of the subclasses can
+reference the other classes using a relative name.  For example:<pre><tt><b>
+     Interface ApplicationWS 
+     defineMethod: 
+     [ | displayGlobalMessages |
+       Global displayMessages ;
+     ] ;
+
+</b>is equivalent to:<b>
+
+     Interface ApplicationWS 
+     defineMethod: 
+     [ | displayGlobalMessages |
+       ^global Interface Global displayMessages ;
+     ] ;
+</b></tt></pre>
+<p>
+<hr>
+<h3><a name="expressions">Running Arbitrary Expressions</a></h3>
+<p>
+At its simplest level, the <b>Interface</b> class can execute an
+arbitrary Vision expression supplied as a block or a string.
+For example:<pre><tt><b>
+     Interface runExpression: "2 + 2" ;
+</b>or<b>
+     Interface runExpression: [ 2 + 2 ] ;
+
+</b></tt></pre>
+An arbitrary amount of output can be returned.  For example:<pre><tt><b>
+     Interface runExpression: 
+        "Currency masterList 
+            sortUp: [ name ] .   
+         do: [ code print: 5 ; name print: 25 ; usExchange printNL ] ;
+        " ;
+
+</b>generates:<b>
+
+     AUD  Australian Dollar             1.34
+     BEF  Belgian Franc                29.93
+     GBP  British Pound                 0.65
+     CAD  Canadian Dollar               1.35
+     . . . 
+
+</b></tt></pre>
+Although these expressions could be evaluated by Vision directly
+without using the <b>Interface</b> class, this class allows
+you to take advantage of other interface capabilities such as
+<a href="#globals">globals</a> and <a href="#buffering">buffering</a>.
+<p>
+<h4><a name="globals">Globals</a></h4>
+<p>
+There are a number of global variables that you can set to control
+access and display.  The variables currently defined are:
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Variable</b>
+<td><b>Definition</b>
+<td><b>Comments</b>
+</tr>
+<tr>
+<td>Date
+<td>As of date for expression evaluation.
+<td>Today's date by default.
+</tr>
+<tr>
+<td>Currency
+<td>Currency used to express monetary values.
+<td>Local currency by default.
+</tr>
+<tr>
+<td>Delimiter
+<td>Delimiter to use to separate values in output.
+<td>No delimiter by default.
+</tr></table></Center>
+<p>
+A global value remains in effect for the remainder of your Vision
+session or until you reset the value.  To reset all globals to their
+default values use one of:<pre><tt><b>
+     Interface resetGlobals ;
+</b>or<b>
+     Interface Global reset ;
+
+</b></tt></pre>
+To set a global value, use one or more of the following messages,
+sent to <i>Interface Global</i>:
+<p>
+<ul>
+<li><i>setDateTo:</i> date
+<li><i>setCurrencyTo:</i> currency
+<li><i>setDelimiterTo:</i> character
+</ul>
+<p>
+The value supplied for <i>date</i> can be any valid date or numeric
+equivalent.  The value supplied for <i>currency</i> can be any
+<b>Currency</b> object or a string that converts to a <b>Currency</b> (e.g.,
+"BEF" ; "CAD").  The value supplied for <i>character</i> can be any
+string value.  For example:<pre><tt><b>
+     Interface Global reset
+        setDateTo: 93 . setDelimiterTo: "|" ;
+
+     Interface runExpression: 
+        " Currency masterList 
+            sortUp: [ name ] .   
+          do: [ code print: 5 ; name print: 25 ; usExchange printNL ] ;
+        " ;
+
+</b>generates:<b>
+
+     AUD  |Australian Dollar        |     1.48|
+     BEF  |Belgian Franc            |    36.12|
+     GBP  |British Pound            |     0.68|
+     CAD  |Canadian Dollar          |     1.33|
+     . . .
+</b></tt></pre>
+In this example, the exchange rate data is retrieved as of year-end
+1993 and the output is delimited by the "|" character.  Notice that
+the "set" messages all return the <b>Interface Global</b> object
+so multiple messages can be streamed in a sequence as shown here.
+You can send the <i>profile</i> message to see the current global
+settings: <pre><tt><b>
+     Interface Global profile ;
+
+</b>generates:<b>
+
+     Current Interface Globals
+     Date:          12/31/1993
+     Currency:       Undefined       NA 
+     Delimiter:     |
+
+</b></tt></pre>
+<p>
+<h4><a name="buffering">Buffering results</a></h4>
+<p>
+You can limit the number of lines of output returned using the
+<i>setRowLimitTo:</i> message defined at <b>Interface</b>.  For
+example:<pre><tt><b>
+     Interface resetGlobals ;
+     Interface setRowLimitTo: 2 ;
+     Interface runExpression: 
+        "Currency masterList 
+            sortUp: [ name ] .   
+         do: [ code print: 5 ; name print: 25 ; usExchange printNL ] ;
+        " ;
+
+</b>generates:<b>
+
+     AUD  Australian Dollar             1.34
+     BEF  Belgian Franc                29.93
+
+</b></tt></pre>
+Set the limit to <i>0</i> to suppress all output.  To retrieve a
+subset of rows use the <i>displayRowsFrom:to:</i> message.  For
+example: <pre><tt><b>
+     Interface displayRowsFrom: 2 to: 5 ;
+
+</b>generates:<b>
+
+     BEF  Belgian Franc                29.93
+     GBP  British Pound                 0.65
+     CAD  Canadian Dollar               1.35
+     DKK  Danish Krone                  5.63
+
+</b></tt></pre>
+To display size information about the last expression run, use
+the <i>displayCounts</i> message:<pre><tt><b>
+     Interface displayCounts ;
+
+</b>generates:<b>
+
+      Characters:      4628
+            Rows:       167
+     Max Columns:         3
+
+</b></tt></pre>
+These values indicate the total size, total rows, and maximum number
+of columns for the entire output buffer independent of the number of
+rows you actually displayed.  
+<p>
+<hr>
+<h3><a name="extract">Structured Data Extraction</a></h3>
+<p>
+The class <b>Interface ExtractWS</b> 
+is used to specify requests for 2-dimensional
+extracts of Vision data.  Six extraction formats are available:
+
+<p><Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+
+<tr><th>Rows<th>Columns<th>For</tr>
+<tr><td>Entities<td>Items<td>Date</tr>
+<tr><td>Items<td>Entities<td>Date</tr>
+<tr><td>Entities<td>Dates<td>Item</tr>
+<tr><td>Dates<td>Entities<td>Item</tr>
+<tr><td>Items<td>Dates<td>Entity</tr>
+<tr><td>Dates<td>Items<td>Entity</tr>
+
+</tr></table></Center><p>
+
+An <b>Entity</b> refers to a Vision subclass that defines
+<i>"Named"</i> elements such as Company, Industry, or Account.  An
+<b>EntityList</b> can be supplied as an explicit list of instances
+for an <b>Entity</b> class.  Alternatively, the list can be derived
+using a supplied Vision expression.  For example, you can extract
+data for a list of companies for an industry using the expression
+<i>[companyList]</i>.  
+<p>
+A <b>Date</b> refers to an absolute or relative date.  Absolute dates can be 
+integers or strings in the form 
+<b>YY</b>, <b>YYMM</b>, <b>YYMMDD</b>, or <b>YYYYMMDD</b>.  The
+constant <b>^today</b> can also be used.  Relative dates can be expressed 
+as:<pre><tt>     { + -}  ##  offset
+</b></tt></pre>
+where <i>##</i> is an integer and offset is one of 
+<i>days</i>, <i>businessDays</i>, 
+<i>months</i>, <i>monthEnds</i>, <i>monthBeginnings</i>, 
+<i>quarters</i>, <i>quarterEnds</i>, <i>quarterBeginnings</i>,
+<i>years</i>, <i>yearEnds</i>, or <i>yearBeginnings</i>
+(e.g., <i>-3 monthEnds</i>).  More information on date creation 
+<a href="clDate.htm#creation">is available</a>.
+<p>
+An <b>Item</b> refers to a Vision expression that can be evaluated
+for the entity or entity list supplied.  
+This can be a simple message such as <i>"price"</i> or a
+multi-message expression such as <i>"company industry sector name"</i>.
+Item qualifiers for date and currency can be appended to the item
+name using the "@".  The complete format for specifying an item is:<pre><tt>
+     expression@date@currency@path
+
+</tt></pre>
+where:
+<p><Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr><th>Element<th>Definition<th>Default</tr>
+<tr>
+<td>expression
+<td>Message or Vision expression to which
+the current entity or entity list objects respond
+<i>(note - expression is prefixed by path element, if supplied)</i>
+<td>Must be supplied
+<tr>
+<td>date
+<td>Absolute or relative date
+<td>Global date if set, otherwise today
+<tr>
+<td>currency
+<td>Currency identifier
+<td>Global currency if set, otherwise local currency
+<tr>
+<td>path
+<td>Vision expression to which current entity or entity list objects respond
+<td>Optional.  Prefix to <i>expression</i> if present.
+</tr></table></Center><p>
+The "." character can be substituted for the "@" character to
+separate item specification components.  Unneeded elements can be
+omitted.  For example the following <b>Item</b> specifications can
+be defined for an entity class <b>Company</b> which responds to
+the expressions <i>price</i> and <i>industry sales</i>:
+
+<p><Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr><th>Item Specification<th>Definition</tr>
+<tr>
+<td><i>"price"</i>
+<td>price as of the current default date and currency
+<tr>
+<td><i>"price@9309"</i> 
+<td>price as of 9/30/93
+<tr>
+<td><i>"price@-1 years"</i>
+<td>price as of 1 year prior to the current global date
+<tr>
+<td><i>"price@93@CAD"</i> 
+<td>1993 price in Canadian dollars
+<tr>
+<td><i>"price@@CAD"</i> 
+<td>price as of the current global date in Canadian dollars
+<tr>
+<td><i>"industry sales"</i>
+<td>sales for company's industry
+<tr>
+<td><i>"industry sales@-1 years@CAD"</i>
+<td>industry sales for prior year in Canadian dollars
+<tr>
+<td><i>"sales@@@industry"</i>
+<td>industry sales using path element
+<tr>
+<td><i>"sales@-1 years@CAD@industry"</i>
+<td>industry sales for prior year in Canadian dollars using path
+element
+</tr>
+</tr></table></Center><p>
+The remainder of this section describes the extraction process and
+includes the following topics:
+<p>
+<ul type=disc>
+<li><a href="#extractBasics">Specifying Extraction Requests</a>
+<li><a href="#extractOptions">Extraction Options</a>
+<li><a href="#extractEI">Entity by Item Extractions</a>
+<li><a href="#extractIT">Item by Time Extractions</a>
+<li><a href="#extractET">Entity by Time Extractions</a>
+<li><a href="#extractMulti">Multiple Extraction Workspaces</a>
+</ul>
+<p>
+<h4><a name="extractBasics">Specifying Extraction Requests</a></h4>
+<p>
+An extraction request must include an orientation and an entity type.
+The following orientation values have been defined:
+<p><Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr><th>Orientation<th>Definition</tr>
+<tr><td>EI<td>Entity x Item
+<tr><td>IE<td>Item x Entity
+<tr><td>IT<td>Item x Time
+<tr><td>TI<td>Time x Item
+<tr><td>TE<td>Time x Entity
+<tr><td>ET<td>Entity x Time
+</tr></table></Center><p>
+The entity type can be any <b>Entity</b> subclass defined in your
+database.
+<p>
+You need to supply a list of values to form the rows and columns of
+your extract and a single value representing the remaining dimension.
+The types of values supplied will depend on the orientation and
+entity type you select.  For example, if your orientation is
+<i>"EI"</i> and your entity type is <i>Company</i>, you will need
+to supply a list of companies to form the rows of your extraction, a
+list of item specifications to form the columns of your extraction
+and an optional date.  If your orientation is <i>"IT"</i>, you will
+need to supply a list of item specifications to form the rows of
+your extraction, a list of dates to form the columns of your
+extraction and a single company identifier.
+<p>
+The following messages are used to define the data you wish to extract:
+<p><Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr><th>Message<th>Sample<th>Usage</tr>
+<tr>
+<td><i>setOrientationTo:</i>
+<td>"EI"
+<td>Required.  
+<tr>
+<td><i>setEntityTypeTo:</i>
+<td>Company
+<td>Required.
+<tr>
+<td><i>setEntityTo:</i>
+<td>"IBM"
+<td>Required for "IT" and "TI" orientations.  Also used for derived
+entity lists.
+<tr>
+<td><i>setEntityListTo:</i>
+<td>"IBM, GM, XON"
+<td>Required for "EI", "ET", "IE", and "TE" orientations.  Can be
+used to set an explicit list or to derive a list from the current
+entity.
+<tr>
+<td><i>setDateTo:</i>
+<td>961215
+<td>Defaults to Global date if not set.
+<tr>
+<td><i>setDateListTo:</i>
+<td>93, 92, 91
+<td>Required for "IT", "TI", "ET", and "TE" orientations.  
+<tr>
+<td><i>setItemTo:</i>
+<td>"price@93"
+<td>Required for "ET" and "TE" orientations.
+<tr>
+<td><i>setItemListTo:</i>
+<td>"name","price@93","sales@@@industry"
+<td>Required for "EI", "IE", "IT", and "TI" orientations.
+</tr></table></Center><p>
+
+For example, the following extract requests price and industry sales
+data for a list of companies:<pre><tt><b>
+     Interface ExtractWS
+         setOrientationTo: "EI" .
+         setEntityTypeTo: Company .
+         setEntityListTo: "IBM, GM, XON" .
+         setItemListTo: "ticker", "price", "price@93", "industry sales" .
+     run ;
+
+</b>generating<b>:
+
+              3         4 
+      IBM    129.00     56.50 221318.33 
+      GM     53.62     54.88 359988.98 
+      XON     88.62     63.12 195283.44 
+
+</b></tt></pre>
+The first line displays the total number of rows and columns in the
+extraction.  The row count does not include this totals line.  In
+this example, data is extracted for the 3 entities defined as the
+row dimension for the four data items defined in the column
+dimension.
+<p>
+<h4><a name="extractOptions">Extraction Options</a></h4>
+<p>
+A number of options are available to control the appearance of
+the extraction.  You can use the
+<a href="#globals">global</a> options defined for the
+general <b>Interface</b> class to control the default date,
+currency, and delimiter.  You can use the
+<a href="#buffering">buffering</a> options defined for the
+general <b>Interface</b> class to control the lines of output
+returned.  For example:<pre><tt><b>
+     Interface ExtractWS
+         setDelimiterTo: "," .
+     run ;
+
+</b>generating<b>:
+
+               3,         4, 
+      IBM,    129.00,     56.50,221318.33,
+      GM,     53.62,     54.88,359988.98,
+      XON,     88.62,     63.12,195283.44, 
+
+</b></tt></pre>
+Notice that you did not need to respecify the entire query.  You
+only need to set the new options and rerun the extract.
+<p>
+Several additional messages are available to optionally
+control components of your extraction output.  The messages 
+<i>setColumnLabelsOn</i> and <i>setColumnLabelsOff</i> 
+are used to indicate if column headings should be displayed.
+The default value is "off".  If it is set to "on", the headers
+are displayed in a row above the first row of extracted data.
+The messages 
+<i>setRowLabelsOn</i> and <i>setRowLabelsOff</i> 
+are used to indicate if row labels should be displayed.
+The default value is "off".  If it is set to "on", an additional
+column is displayed to the left of the first column of extracted
+data.  The messages 
+<i>setScalarLabelOn</i> and <i>setScalarLabelOff</i> 
+are used to indicate if the scalar value should be displayed.
+The default value is "off".  If it is set to "on", the value
+is displayed in the row above and in the column to the left
+of the top left extraction value.  The counts displayed in the
+first line of extraction output are adjusted to include labels, when
+present.
+<p>
+The message <i>setNumberFormatTo:</i> can be used to set the width,
+decimal places, and a comma indicator for any numeric data displayed.
+The value should be a number in the form: <pre><tt>
+     width.decimal
+</tt></pre>
+such as 15.3 to indicate that numbers should be displayed with an 
+overall width of 15 characters with 3 decimal places.  To indicate 
+that the numbers should be printed with commas, specify the value as
+a string in the form:
+     "width.decimal,"
+</tt></pre>
+If the "," character appears anywhere in the format, numeric data
+will be displayed with commas.
+<p>
+For example:<pre><tt><b>
+     Interface ExtractWS
+        setDelimiterTo: "|" .
+        setScalarLabelOn
+        setColumnLabelsOn
+        setRowLabelsOn
+        setNumberFormatTo: "15.3," .
+     run ;
+
+</b>generates:<b>
+             4|        5|
+     2/27/1997|ticker|price|price@93|industry sales|
+     45920010|IBM|        129.000|         56.500|    221,318.330|
+     37044210|GM|         53.625|         54.875|    359,988.980|
+     30229010|XON|         88.625|         63.125|    195,283.440|
+</b></tt></pre>
+<p>
+The counts in the first line reflect the additional row and column
+for the labels.  The delimiter has been changed to the "|" character
+and the numeric data has been reformatted.
+<p>
+You can create blank rows and columns in your output by including
+blank value in your entity, date, and/or item lists.  
+A blank column is signified by two consecutive delimiter characters.
+For example:<pre><tt><b>
+     Interface ExtractWS
+         setEntityListTo: "IBM", "", "GM", "XON" .
+         setItemListTo: "ticker", "price", "", "industry sales" .
+     run ;
+
+</b>generates:<b>
+             5|        5|
+     2/27/1997|ticker|price||industry sales|
+     45920010|IBM|        129.000||    221,318.330|
+     |||||
+     37044210|GM|         53.620||    359,988.980|
+     30229010|XON|         88.620||    195,283.440|
+
+</b></tt></pre>
+<p>
+The <i>reset</i> message can be sent to the <b>Interface
+ExtractWS</b> class to clear all the values.  The <i>profile</i>
+message can be used to display the current settings.
+<p>
+<h4><a name="extractEI">Entity by Item Extractions</a></h4>
+<p>
+The <i>Entity by Item ("EI")</i> and the <i>Item by Entity ("IE")</i>
+orientations enable you to extract one or more items for one or more
+entities as of a specific date.  The item specifications can be used
+to override this date for specific items.  You use the 
+<i>setEntityListTo:</i> message to specify the list of entity and the
+<i>setItemListTo:</i> message to specify the list of items.  The
+<i>setDateTo:</i> message is used to set the scalar date.  If no date
+is set, the current value of the Global date is used.
+<p>
+The entity list can be set in one of two ways.  You can explicitly
+supply a list of entity identifiers that correspond to the current
+entity type.  This list can be supplied as a list of strings or a 
+a single string containing comma-separated identifiers.  For 
+example:<pre><tt><b>
+     Interface ExtractWS
+          setOrientationTo: "EI" .
+          setEntityTypeTo: Company .
+          setEntityListTo: "IBM", "GM", "XON" .   </b>#--  list of strings<b> 
+          setItemListTo: "ticker", "price", "price@93" .
+     run ;
+
+</b>or<b>
+     Interface ExtractWS
+          setOrientationTo: "EI" .
+          setEntityTypeTo: Company .
+          setEntityListTo: "IBM, GM, XON" .       </b>#--  single string<b> 
+          setItemListTo: "ticker", "price", "price@93" .
+     run ;
+
+</b></tt></pre>
+These forms both set the entity list to the three companies
+indicated.  You can also derive a set of entities by supplying
+a Vision expression that evaluates to a list when sent to
+a specific entity.  For example, if the class <b>Industry</b>
+responds to the message <i>companyList</i> with the list of
+companies in that industry, you could generate a list of company
+entities using:<pre><tt><b>
+     Interface ExtractWS
+          setOrientationTo: "EI" .
+          setEntityTypeTo: Industry .
+          setEntityTo: "Auto" .
+          setEntityListTo: [ companyList ] .
+          setItemListTo: "ticker", "price", "price@93" .
+     run ;
+</b></tt></pre>
+This assumes that the expression:<pre><tt><b>
+     Named Industry Auto companyList
+</b></tt></pre>
+returns the list of companies you wish to extract.  Note that in this
+case you set the entity type to <i>Industry</i> and supplied the id
+for a specific instance of this class.  Since the returned list is a
+list of companies, the item list you supply should specify
+expressions that are applicable to company objects.
+<p>
+<h4><a name="extractIT">Item by Time Extractions</a></h4>
+<p>
+The <i>Item by Time ("IT")</i> and the <i>Time by Item ("TI")</i>
+orientations enable you to extract one or more items for one or more
+dates for a specific entity.  You use the 
+<i>setItemListTo:</i> message to specify the list of items and the
+<i>setDateListTo:</i> message to specify the list of dates.  The
+<i>setEntityTo:</i> message is used to set the scalar entity value.
+This value must be an identifier for the entity type specified.
+The date list can be any combination of absolute and relative dates.
+The item list should specify items that are applicable to the entity
+type selected.  For example:<pre><tt><b>
+     Interface ExtractWS
+          setOrientationTo: "IT" .
+          setEntityTypeTo: Company .
+          setEntityTo: "IBM" .
+          setDateListTo: 95, 94, -5 years .
+          setItemListTo: "sales", "cash" .
+          setScalarLabelOn
+          setColumnLabelsOn
+          setRowLabelsOn
+     run ;
+
+</b></tt></pre>
+Note that relative dates are relative to the scalar date, if
+specified.  Otherwise, the global date is used to compute relative
+dates.
+<p>
+<h4><a name="extractET">Entity by Time Extractions</a></h4>
+<p>
+The <i>Entity by Time ("ET")</i> and the <i>Time by Entity ("TE")</i>
+orientations enable you to extract data over time for one or more
+entities for a specific item.  You use the
+<i>setEntityListTo:</i>message to specify the list of entities and the
+<i>setDateListTo:</i> message to specify the list of dates.  The
+<i>setItemTo:</i> message is used to set the scalar item value.
+The entity list can be set using the same rules described for
+the <a href="#extractEI">Entity by Item</a> orientation.
+The date list can be set using the same rules described for
+the <a href="#extractIT">Item by Time</a> orientation.
+<p>
+<h4><a name="extractMulti">Multiple Extraction Workspaces</a></h4>
+<p>
+You can create and name multiple workspaces for your extractions.
+To create two new extraction workspaces, use:<pre><tt><b>
+     Interface ExtractWS createInstance: "Extract1" ;
+     Interface ExtractWS createInstance: "Extract2" ;
+</b></tt></pre>
+Access to these workspaces is provided via <i>Interface Named
+ExtractWS</i>.  For example:<pre><tt><b>
+     Interface Named ExtractWS Extract1
+</b></tt></pre>
+accesses the first workspace and<pre><tt><b>
+     Interface Named ExtractWS Extract2
+</b></tt></pre>
+accesses the second one.  Any of the extraction messages can be
+used with any workspace.  For example:<pre><tt><b>
+     Interface Named ExtractWS Extract2
+          setOrientationTo: "IT" .
+          setEntityTypeTo: Company .
+          setEntityTo: "IBM" .
+          setDateListTo: 95, 94, -5 years .
+          setItemListTo: "sales", "cash" .
+          setScalarLabelOn
+          setColumnLabelsOn
+          setRowLabelsOn
+     run ;
+
+     Interface Named ExtractWS Extract2
+          setEntityTo: "GM" .
+     run ;     
+
+</b></tt></pre>
+You can delete a named workspace using
+the <i>deleteInstance</i> message.  For example:<pre><tt><b>
+     Interface Named ExtractWS Extract2 deleteInstance ;
+</b></tt></pre>
+
+<p>
+<hr>
+<h3><a name="apps">Parameterized Applications</a></h3>
+<p>
+The <b>Interface ApplicationWS</b> class is used to provide a standardized
+mechanism for supplying any number of parameters to an application.  In
+general, it is used to provide a modular interface to environments that
+need to interact with Vision with a minimal amount of syntax-specific
+knowledge.  The external environment needs to know the name of the
+application, the order and/or names of its inputs, and what it wants to
+do with the output.  The application details are delegated to a Vision
+method which interprets and processes the inputs and presents results.
+<p>
+To interact with the <b>Interface ApplicationWS</b> class, you need to
+specify an application name and a list of parameter values.
+Two general formats are available:<pre><tt><b>
+     Interface ApplicationWS runWith: "appName", p1, p2, ... pn ;
+
+</b>and<b>
+
+     Interface ApplicationWS 
+          setApplicationTo: "appName" .
+          set: "param1" to: p1 .
+          set: "param2" to: p2 .
+          set: "paramn" to: pn .
+     run ;
+
+</b></tt></pre>
+In the first format, you supply a list of inputs to the <i>runWith:</i>
+message where the first element in this list is the name of the method
+to run and the remaining list elements are the input values.  The method
+should be defined at the <b>Interface ApplicationWS</b> class and
+contains the rules to interpret and process the inputs based
+on their order in the parameter list.
+<p>
+In the second format, you explicitly set the application and 
+parameter values by name.  In this example, three parameters are
+explicitly named and assigned values.
+<p>
+The <i>reset</i> message is used to clear the current application
+and any parameters that have been set by name or via a parameter
+list.  This message does not clear the Global values.  
+The <i>profile</i> message displays the current application and
+parameter values.
+<p>
+The <i>runWith:</i> message executes the <i>reset</i> message prior
+to updating the parameter list.   The <i>set:to:</i> messages do not.
+If desired, you can use a combination of the parameter list and named
+parameters using:<pre><tt><b>
+     Interface ApplicationWS
+        reset resetGlobals
+        setApplicationTo: "appName" .
+        setParameterListTo: p1, p2, p3 .
+        set: "extraParameter" to: TRUE .
+     run ;
+</b></tt></pre>
+<p>
+The remainder of this section describes parameterized applications
+in more detail and includes the following topics:
+<p>
+<ul type=disc>
+<li><a href="#appPredefined">Pre-defined Applications</a>
+<li><a href="#appCreation">Creating Parameterized Applications</a>
+<li><a href="#appErrors">Error Handling</a>
+<li><a href="#appMulti">Multiple Application Workspaces</a>
+</ul>
+<p>
+<h4><a name="appPredefined">Pre-defined Applications</a></h4>
+<p>
+Two applications have been pre-defined: <b>Profile</b> and
+<b>GetValue</b>.
+<p>
+The <b>Profile</b> application requires two parameters - the class
+of the object to profile and the id of the object to profile.  These
+parameters can be supplied as a list or as named parameters using the
+following rules:
+<p><Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr><th>Parameter<th>List Position<th>named id</tr>
+<tr>
+<td>class identifier
+<td>1
+<td>"classId"
+<tr>
+<td>instance identifier
+<td>2
+<td>"id"
+</tr></table></Center><p>
+For example:<pre><tt><b>
+     Interface ApplicationWS 
+        runWith: "Profile", Currency, "USD" ;
+</b></tt></pre>
+returns a profile for the <b>Currency</b> object representing US
+Dollars and:<pre><tt><b>
+     Interface ApplicationWS 
+        reset
+        setApplicationTo: "Profile" .
+        set: "classId" to: Currency .
+        set: "id" to: "CAD" .
+        run ;
+</b></tt></pre>
+returns a profile for the <b>Currency</b> object representing
+Canadian Dollars.
+<p>
+You can supply up to four parameters to the <b>GetValue</b>
+application - the class of the object, the id of the object, the
+data item to retrieve, and an optional path used to navigate to the
+item.  These
+parameters can be supplied as a list or as named parameters using the
+following rules:
+<p><Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr><th>Parameter<th>List Position<th>named id</tr>
+<tr>
+<td>class identifier
+<td>1
+<td>"entityType"
+<tr>
+<td>instance identifier
+<td>2
+<td>"entityId"
+<tr>
+<td>item to retrieve
+<td>3
+<td>"item"
+<tr>
+<td>optional path to item
+<td>4
+<td>"path"
+</tr></table></Center><p>
+For example:<pre><tt><b>
+     Interface ApplicationWS 
+        runWith: "GetValue", Currency, "CAD", "usExchange" ;
+</b></tt></pre>
+returns the value of the Canadian exchange rate as of the current
+date.  You can use the
+<a href="#globals">global</a> and 
+<a href="#buffering">buffering</a> options defined for the
+general <b>Interface</b> class to control the default date,
+currency, delimiter, and buffering. For example:<pre><tt><b>
+     Interface Global setDateTo: 93 ;
+     Interface ApplicationWS 
+        runWith: "GetValue", Currency, "CAD", "usExchange" ;
+</b></tt></pre>
+returns the value of the Canadian exchange rate as of year-end 1993.
+<p>
+The supplied entity can be a string containing a comma-separated
+list of identifiers.  In this case, a multi-line report will be
+returned displaying one line for each entity id that is valid for
+the class.  For example:<pre><tt><b>
+     Interface ApplicationWS 
+        resetGlobals
+        runWith: "GetValue", Currency, "BEF, GBP, CAD", "usExchange" ;
+
+</b>generates:<b>
+
+     id    usExchange
+     BEF       29.93 
+     GBP        0.65 
+     CAD        1.35 
+</b></tt></pre>
+<p>
+
+<p>
+<h4><a name="appCreation">Creating Parameterized Applications</a></h4>
+<p>
+Applications name methods defined at the <b>Interface
+ApplicationWS</b> class.  Each method retrieves and interprets the
+inputs supplied and takes the appropriate action based on the inputs.
+Standardized error logging facilities are available.
+<p>
+The message <i>getParameter:</i> can be called from within an
+application method to retrieve the value of supplied parameter.  If
+the argument to this message is a number, the parameter is retrieved
+positionally from the supplied parameter list.  If the argument to
+this message is a string, the parameter associated with the name
+indicated by the string is retrieved.  For example, a basic profile
+application can be defined to accept two inputs, the class and the
+instance id, then run the <i>profile</i> message for this object:<pre><tt><b>
+     Interface ApplicationWS defineMethod: [ | BasicProfile |
+        !class <- ^self getParameter: 1 ;
+        !id <- ^self getParameter: 2 . stripBoundingBlanks ;
+        !entity <- id as: class ;
+        entity profile ;
+     ] ;
+
+</b>To run:<b>
+
+     Interface ApplicationWS runWith: "BasicProfile", Currency, "CAD" ;
+</b></tt></pre>
+Alternatively, you could have defined this method to use named
+parameters:<pre><tt><b>
+     Interface ApplicationWS defineMethod: [ | BasicProfile |
+        !class <- ^self getParameter: "class" ;
+        !id <- ^self getParameter: "objectId" . stripBoundingBlanks ;
+        !entity <- id as: class ;
+        entity profile ;
+     ] ;
+
+</b>To run:<b>
+
+     Interface ApplicationWS reset
+        setApplicationTo: "BasicProfile" .
+        set: "class" to: Currency .
+        set: "objectId" to: "CAD" .
+        run ;
+
+</b></tt></pre>
+You could also define this method to accept either order-based or
+named parameters.  The <i>getParameter:orName:</i> message will
+retrieve the parameter positionally if present, by name otherwise.
+For example:<pre><tt><b>
+     Interface ApplicationWS defineMethod: [ | BasicProfile |
+        !class <- ^self getParameter: 1 orName: "class" ;
+        !id <- ^self getParameter: 2 orName: "objectId" .
+             stripBoundingBlanks ;
+        !entity <- id as: class ;
+        entity profile ;
+     ] ;
+
+</b>To run:<b>
+
+     Interface ApplicationWS runWith: "BasicProfile", Currency, "CAD" ;
+</b>or<b>
+     Interface ApplicationWS reset
+        setApplicationTo: "BasicProfile" .
+        set: "class" to: Currency .
+        set: "objectId" to: "CAD" .
+        run ;
+
+</b></tt></pre>
+<p>
+<h4><a name="appErrors">Error Handling</a></h4>
+<p>
+The prior application does not test on the validity of the inputs.
+You can add explicit tests and error messages directly to the
+method.  For example:<pre><tt><b>
+     Interface ApplicationWS defineMethod: [ | BasicProfile |
+        !class <- ^self getParameter: 1 ;
+        !id <- ^self getParameter: 2 . stripBoundingBlanks ;
+        !entity <- id as: class ;
+        entity isEntity
+          ifTrue: [ entity profile ]
+         ifFalse: [ ">>> Bad class or id supplied." printNL ];
+     ] ;
+
+     Interface ApplicationWS runWith: "BasicProfile", Currency, "XYZ";
+
+</b>generates:<b>
+
+     >>> Bad class or id supplied.
+</b></tt></pre>
+You can create whatever conventions you need to report errors in this
+fashion.  A logging mechanism has been included as part of the <b>Interface</b>
+class to standardize error reporting and queue any error messages generated
+until the end of the application's execution.  The message
+<i>post:for:with:</i> has been defined for the class <b>Interface ErrorLog</b>
+to store an error message.  For example:<pre><tt><b>
+     Interface ApplicationWS defineMethod: [ | BasicProfile |
+        !class <- ^self getParameter: 1 ;
+        !id <- ^self getParameter: 2 . stripBoundingBlanks ;
+        !entity <- id as: class ;
+        entity isEntity
+          ifTrue: [ entity profile ]
+         ifFalse: 
+           [ ErrorLog post: "Bad class or id supplied."
+                      for: ^self with: class, id
+           ] ;
+     ] ;
+
+     Interface ApplicationWS runWith: "BasicProfile", Currency, "XYZ" ;
+
+</b>generates:<b>
+
+     Transaction #: 1       
+     Error: Bad class or id supplied.
+        in:  Interface ApplicationWS :  Default
+        Input: Currency Default
+        Input: String XYZ
+
+</b></tt></pre>
+The current error log is automatically displayed after the application
+has run.  If more than one error were encountered, they would each be
+listed in this format.  The errors will always be displayed at the end
+of any application execution.  This enables you to run some parts
+of an application even when an error is encountered.  For example:<pre><tt><b>
+     Interface ApplicationWS defineMethod: [ | BasicProfile |
+        !class <- ^self getParameter: 1 ;
+        !id <- ^self getParameter: 2 . stripBoundingBlanks ;
+        !entity <- id as: class ;
+        entity isEntity
+         ifFalse: 
+           [ ErrorLog post: "Bad class or id supplied."
+                      for: ^self with: class, id
+           ] ;
+        #-- run it any way
+        "This profile is run whether the entity is found or not." printNL ;
+        entity profile ;
+     ] ;
+
+     Interface ApplicationWS runWith: "BasicProfile", Currency, "XYZ" ;
+
+</b>generates:<b>
+
+     This profile is run whether the entity is found or not.
+     Class:                        Undefined
+     Code:                               NA 
+     Created:                            NA 
+     Is Default:                   TRUE
+     Is Active:                    TRUE
+     Transaction #: 1       
+     Error: Bad class or id supplied.
+        in:  Interface ApplicationWS :  Default
+        Input: Currency Default
+        Input: String XYZ
+
+</b></tt></pre>
+
+<p>
+<h4><a name="appMulti">Multiple Application Workspaces</a></h4>
+<p>
+You can create and name multiple workspaces for your applications.
+To create two new workspaces, use:<pre><tt><b>
+     Interface ApplicationWS createInstance: "App1" ;
+     Interface ApplicationWS createInstance: "App2" ;
+</b></tt></pre>
+Access to these workspaces is provided via <i>Interface Named
+ApplicationWS</i>.  For example:<pre><tt><b>
+     Interface Named ApplicationWS App1
+</b></tt></pre>
+accesses the first workspace and<pre><tt><b>
+     Interface Named ApplicationWS App2
+</b></tt></pre>
+accesses the second one.  Any of the application messages can be
+used with any workspace.  For example:<pre><tt><b>
+     Interface Named ApplicationWS App2
+         runWith: "BasicProfile", Currency, "CAD" ;
+</b></tt></pre>
+You can delete a named workspace using
+the <i>deleteInstance</i> message.  For example:<pre><tt><b>
+     Interface Named ApplicationWS App2 deleteInstance ;
+
+</b></tt></pre>
+You can also make subclasses of the <b>Interface ApplicationWS</b>
+class to group related applications together.  For example, you
+may want to separate administrative applications from analyst 
+applications:<pre><tt><b>
+     Interface ApplicationWS 
+         createSubclass: "AdminApps" at: Interface ;
+     Interface ApplicationWS 
+         createSubclass: "AnalystApps" at: Interface ;
+     Interface ApplicationWS showInheritance ;
+</b></tt></pre>
+You define and run methods for the subclasses the same way you do
+for the parent <b>ApplicationWS</b> class.
+<p>
+<hr>
+<h3><a name="format">The FormatTools ToolKit</a></h3>
+<p>
+The Vision <b>FormatTools ToolKit</b> has been created to provide a modular
+approach for generating output that can be formatted for different
+environments without changing the methods that produce the output.
+As with all ToolKits, subclasses of the <b>FormatTools</b> ToolKit are
+named relative to <b>FormatTools</b>.  The subclass hierarchy is
+shown below:
+<font size=+1><pre>
+          <a href="clObject.htm">Object</a>
+             |
+          ToolKit
+             |
+             <b>FormatTools</b>
+                |
+                FormatTools Html
+
+</pre></font>
+By default, the subclass <b>FormatTools Html</b> is included with
+this <b>ToolKit</b>.  You can create any number of additional subclasses, as
+needed.
+<p>
+Messages are defined at the <b>FormatTools</b> class
+to generate "vanilla" versions of basic formatting tags.
+Messages are redefined at subclasses of <b>FormatTools</b>
+to generate tags that are appropriate to that formatting environment.
+<p>
+For example, the message <i>bold:</i> can be defined to format
+the supplied parameter with bold tags.  By default, you just
+return the argument.  In the <i>Html</i> environment, you surround the
+output with the tags &lt b&gt and &lt/b&gt.  The following methods
+implement this behavior:<pre><tt><b>
+     FormatTools defineMethod: [ | bold: object |
+        object asString
+     ] ;
+
+     FormatTools Html defineMethod: [ | bold: object | 
+        [ "&lt b&gt" print ; object print ; "&lt/b&gt" print ;
+        ] divertOutput
+     ] ;
+</b></tt></pre>
+The expression:<pre><tt><b>
+     FormatTools bold: "xyz" . print ;
+</b></tt></pre>
+displays the undecorated string and the expression:<pre><tt><b>
+     FormatTools Html bold: "xyz" . print ;
+</b></tt></pre>
+displays the bold tags.
+<p>
+The message <i>FormatTools</i> is defined at <b>Object</b> to
+return the parent <b>FormatTools</b> class by default.  You can
+use the <i>evaluate:</i> message to rebind the <b>FormatTools</b>
+message to one of the subclasses.  For 
+example, define a method at the <b>Currency</b> class to
+display the code in bold followed by the name of the instance:<pre><tt><b>
+     Currency defineMethod: [ | demoFormat |
+        FormatTools bold: code . print ;
+        name printNL ;
+     ] ;
+</b></tt></pre>
+Run this method using:<pre><tt><b>
+     Named Currency CAD demoFormat ;
+
+</b>generating:<b>
+
+     CAD Canadian Dollar
+</b></tt></pre>
+Note that no special formatting appears since the default
+<i>bold:</i> message just prints its argument.  Run the same
+expression within an <i>evaluate:</i> block:<pre><tt><b>
+     FormatTools Html evaluate:
+        [ Named Currency CAD demoFormat ; ] ;
+</pre>
+</b>generating:<b><pre>
+
+     &lt b&gt CAD&lt/b&gt Canadian Dollar
+</pre>
+</b></tt></pre>
+Because the <i>demoFormat</i> message was invoked from within the
+<i>FormatTools Html</i> evaluation block, this version of the
+<i>bold:</i> message is executed.
+<p>
+A number of sample formatting messages have been defined in this toolkit
+with default and "Html"
+behavior.  You can customize these messages to suit you environment's
+needs and create new ones to capture different types of formatting 
+requirements.  Formatting messages include:
+<dl>
+<dt><a href="#formatModes">Modes</a>
+<dd><i>beginPreserveMode</i>
+<dd><i>endPreserveMode</i>
+</dl>
+<p>
+<dl>
+<dt><a href="#formatTitles">Titles and Sections</a>
+<dd><i>buildTitle:</i> stringList <i>over:</i> span
+<dd><i>buildTitle:</i> stringList <i>over:</i> span <i>withStyle:</i> optionList
+<dd><i>buildCommentBlock:</i> string <i>over:</i> span
+<dd><i>buildOptionsBar:</i> string
+<dd><i>buildSectionBreakOver:</i> span <i>alignedTo:</i> alignment
+</dl>
+<p>
+<dl>
+<dt><a href="#formatStyles">Styles</a>
+<dd><i>bold:</i> string
+<dd><i>italic:</i> string
+<dd><i>center:</i> string
+<dd><i>buildItemList:</i> stringList
+</dl>
+<p>
+<dl>
+<dt><a href="#formatLinks">Links</a>
+<dd><i>buildLinkForApp:</i> app <i>withLabel:</i> label <i>andParams:</i> plist
+<dd><i>buildLinkForApp:</i> app <i>withLabel:</i> label
+<dd><i>buildLink:</i> link <i>withLabel:</i> label
+<dd><i>buildLink:</i> link <i>withPath:</i> path <i>withLabel:</i> label
+<dd><i>buildImage:</i> file <i>withAlt:</i> alt
+<dd><i>buildImage:</i> file <i>withPath:</i> path <i>withAlt:</i> alt
+<dd><i>buildLinkForApp:</i> app <i>withCheck:</i> block <i>andLabel:</i> txt <i>andParams:</i> plist
+<dd><i>buildLinkForAppZeroCheck:</i> app <i>withLabel:</i> txt <i>andParams:</i> plist
+<dd><i>buildURLForApp:</i> app <i>andParams:</i> plist
+</dl>
+<p>
+<dl>
+<dt>Tables
+</dl>
+<p>
+<h4><a name="formatModes">Format Mode Messages</a></h4>
+<p>
+<i>beginPreserveMode</i><br>
+<i>endPreserveMode</i>
+<p>
+These messages are used to mark the start and end of a section of
+text that should not be "formatted".  The default versions of these
+messages do not do anything.  The "Html" versions generates the 
+<i>&lt pre&gt</i> and <i>&lt/pre&gt</i> tags.
+<p>
+
+<h4><a name="formatTitles">Title and Section Formatting</a></h4>
+<p>
+<i>buildTitle:</i> stringList <i>over:</i> span <br>
+<i>buildTitle:</i> stringList <i>over:</i> span <i>withStyle:</i> optionList
+<p>
+This message is used to format a title.  The first parameter is a 
+string or a list of strings.  The second parameter is a number representing
+the number of columns.  If the optionList parameter is supplied,
+it may contain up to four elements: a font string, a color string, 
+a font size, and a boolean indicating if the title should be centered.
+The default version of this message centers each
+string in the list over the number columns indicated by the second parameter.
+The "Html" version prints the first string within
+<i>&lt h3&gt</i> and <i>&lt/h3&gt</i> tags and subsequent strings within
+<i>&lt h4&gt</i> and <i>&lt/h4&gt</i> tags.  The entire title is printed
+within <i>&lt center&gt</i> and <i>&lt/center&gt</i> tags.
+The second parameter is not
+used by this version of the method. For example:<pre><tt><b>
+     Currency defineMethod: [ | demoFormat |
+        FormatTools buildTitle: "Currency Report" over: 80 . print ;
+        code print ; " " print ; name printNL ;
+     ] ;
+
+     Named Currency CAD demoFormat ;
+
+</b>generates:<b>
+
+                              Currency Report
+
+     CAD Canadian Dollar
+</b></tt></pre>
+The title is centered over 80 columns.  Running the same
+expression within an <i>evaluate:</i> block:<pre><tt><b>
+     FormatTools Html evaluate:
+        [ Named Currency CAD demoFormat ; ] ;
+
+</b>generates:<b>
+
+     &lt center&gt
+     &lt h3&gt Currency Report &lt/h3&gt
+     &lt/center&gt&lt p&gt
+     CAD Canadian Dollar
+</b></tt></pre>
+Because the <i>demoFormat</i> message was invoked from within the
+<i>FormatTools Html</i> evaluation block, this version of the
+message is executed.
+<p>
+<i>buildCommentBlock:</i> string <i>over:</i> span
+<p>
+This message is used to format a centered block of information.
+The first parameter is a string.
+The second parameter is a number representing
+the number of columns.  
+The default version of this message breaks the string on the <i>newLine</i>
+character and centers each line.
+The "Html" version prints the string within
+<i>blockquote, center, hr, </i> and <i>p</i> tags.
+<p>
+<i>buildOptionsBar:</i> string
+<p>
+The default version of this message does nothing.  The "Html" version
+formats the supplied string within <i>center</i> tags followed by
+a horizontal line.
+<p>
+<i>buildSectionBreakOver:</i> span <i>alignedTo:</i> alignment
+<p>
+This message formats a horizontal line whose size and alignment is
+based on the supplied parameters.  The default version of this message
+creates the line from the '-' character.  Its length is the value of
+the first parameter.  If the second parameter contains the string
+"center" or "right" the line will be justified accordingly, otherwise,
+the line will be printed left-justified.
+The "Html" version supplies the two parameters to the <i>hr</i> tag
+as settings for the <i>align</i> and <i>width</i> values.
+<p>
+<h4><a name="formatStyles">Format Style Messages</a></h4>
+<i>bold:</i> string
+<p>
+This message formats the supplied string within bold tags.  In the default
+version of this message, there are no tags.  In the "Html" version, the
+string is formatted within the <i>&lt b&gt</i> <i>&lt/b&gt</i> tags.
+<p>
+<i>italic:</i> string
+<p>
+This message formats the supplied string within italic tags.  In the default
+version of this message, there are no tags.  In the "Html" version, the
+string is formatted within the <i>&lt i&gt</i> <i>&lt/i&gt</i> tags.
+<p>
+<i>buildItemList:</i> string
+<p>
+This message returns the supplied string with no extra formatting
+in the default version .  In the "Html" version, the string is formatted
+within the <i>&lt ul&gt</i> and <i>&lt/ul&gt</i> tags.  The supplied 
+string is broken into lines and each line is prefixed with the
+<i>&lt li&gt</i> tag.
+<p>
+<h4><a name="formatLinks">Creating Links</a></h4>
+<p>
+The various "build link"  messages are used to generate references 
+to other documents, including documents dynamically generated by
+Vision using inputs from the current document.  These messages are
+discussed in detail in the document
+<a href="ifHtml.htm#format"><i>Vision Interfaces: Sample Html Access</i></a>.
+<p>
+<hr>
+<h3><a name="html">Interfacing to Html</a></h3>
+<p>
+Web browsers such as <i>Netscape</i> and <i>Internet Explorer</i> offer an
+excellent mechanism for delivering documents that can be dynamically
+generated by Vision.  The <b>Interface</b> and <b>FormatTools</b>
+ToolKits provide a means for standardizing your requests for
+information and returning the results in a form that can be
+displayed by a browser.
+<p>
+In general, you can use Html and its numerous extensions such
+as <i>JavaScript</i> and <i>Java</i> applets to design interfaces
+that request specific inputs from a user.  These inputs can be
+submitted to Vision via a <i>cgi</i> or alternative interface
+program to access the appropriate 
+information from Vision, dynamically generated
+based on the inputs supplied and formatted
+correctly for the browser.  The returned documents can have embedded
+links to other documents, including requests for additional
+information from your Vision database.
+<p>
+Vision's role in generating dynamic Html documents is described in:
+<a href="ifHtml.htm"><i>Vision Interfaces: Sample Html Access</i></a>.
+
+<p>
+<hr>
+<h3><a name="external">External Access to Vision</a></h3>
+<p>
+The <b>Vision C++ Interface Kit</b> consists of a set of C++ classes that you
+use to provide structured access to Vision data.  The classes in this
+kit provide you with array and character based access to Vision.
+The <b>Vision C++ Interface Kit</b> is supplied in source code form so
+you can modify it to suit your needs.  
+<p>
+This kit is documented in:
+<a href="ifCAccess.htm"><i>Vision Interfaces: Sample C++ Access</i></a>.
+
+<p>
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy 1998 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated February 19, 1998</font>
+
+</table>
+
+</body>
+</html>

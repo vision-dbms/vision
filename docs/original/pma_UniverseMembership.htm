@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="Mozilla/4.04 [en] (WinNT; I) [Netscape]">
+   <TITLE>Vision Upload Format: UniverseMembership</TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF">
+
+<H2>
+Vision Portfolio Management Application Layer: Application</H2>
+| <A HREF="pmaApps.htm">Headstart Applications</A>
+|&nbsp;
+<HR>
+
+<P><FONT SIZE=+2><B>Application: </B><I>UniverseMembership</I></FONT>
+
+<P>&nbsp;
+<H3>
+Summary:</H3>
+The <B>UniverseMembership</B> application is used to display the entities
+comprising a universe at a particular point in time and the entities added
+and dropped from the universe on the last date it was changed.
+<H3>
+Inputs:</H3>
+
+<CENTER><TABLE BORDER CELLSPACING=2 CELLPADDING=4 WIDTH="80%" >
+<TR>
+<TH>Position</TH>
+
+<TH>Form Id</TH>
+
+<TH>Description&nbsp;</TH>
+</TR>
+
+<TR>
+<TD>1&nbsp;</TD>
+
+<TD>id&nbsp;</TD>
+
+<TD>Id of the universe&nbsp;</TD>
+</TR>
+
+<TR>
+<TD>2&nbsp;</TD>
+
+<TD>-&nbsp;</TD>
+
+<TD>Global date override&nbsp;</TD>
+</TR>
+</TABLE></CENTER>
+
+<H3>
+Analysis:</H3>
+
+<UL type=disc>
+<LI>
+The <I>id</I> must reference an existing <B>Universe</B> instance.</LI>
+
+<LI>
+The basic report displays the list of entities in the universe followed
+by the entities added to the universe on the last date the membership was
+updated and the entities dropped from the universe on this date.</LI>
+</UL>
+
+<H3>
+Key Data Feeds:</H3>
+
+<UL type=disc>
+<LI>
+<I><A HREF="pma_UniverseMembers.htm">UniverseMembers</A></I></LI>
+</UL>
+
+<H3>
+Related Reports:</H3>
+
+<UL type=disc>
+<LI>
+<I><A HREF="pma_UniverseProfile.htm">UniverseProfile</A></I></LI>
+</UL>
+
+<H3>
+Sample Usage:</H3>
+
+<UL type=disc>
+<PRE><B><TT>Interface ApplicationWS runWith: "UniverseMembership", "SP500" ;</TT></B></PRE>
+</UL>
+
+<H3>
+Sample Input:</H3>
+<FORM NAME=ApplicationForm ACTION="http://visionWeb/cgi-bin/vquery.exe/default/">
+<CENTER><TABLE BORDER CELLSPACING=2 CELLPADDING=8 WIDTH="50%" >
+<TR>
+<TH ALIGN=RIGHT BGCOLOR="#ADD8E6">Enter Universe:&nbsp;</TH>
+
+<TD><INPUT TYPE=text NAME= id SIZE= 15 VALUE= "SP500"><INPUT TYPE=submit value=Submit></TD>
+</TR>
+
+<TR>
+<TH><FONT SIZE=-1>Date:</FONT>
+<BR><INPUT TYPE=text NAME=globalDate VALUE= "19971130"></TH>
+
+<TH><FONT SIZE=-1>Currency:</FONT>
+<BR><SELECT NAME=globalCurrency><OPTION VALUE=LOC SELECTED><FONT SIZE=-1>Local&nbsp;<OPTION VALUE=USD >United
+States Dollar&nbsp;<OPTION VALUE=ARS>Argentine Peso&nbsp;<OPTION VALUE=AUD>Australian
+Dollar&nbsp;<OPTION VALUE=ATS>Austrian Schilling&nbsp;<OPTION VALUE=BEF>Belgian
+Franc&nbsp;<OPTION VALUE=BRL>Brazilian Real&nbsp;<OPTION VALUE=GBP>British
+Pound&nbsp;<OPTION VALUE=CAD>Canadian Dollar&nbsp;<OPTION VALUE=CLP>Chilean
+Peso&nbsp;<OPTION VALUE=CNY>Chinese (yuan) Renmin&nbsp;<OPTION VALUE=COP>Columbian
+Peso&nbsp;<OPTION VALUE=CZK>Czechoslovakian Korun&nbsp;<OPTION VALUE=DKK>Danish
+Krone&nbsp;<OPTION VALUE=EGP>Egyptian Pound&nbsp;<OPTION VALUE=EUR>Euro
+Dollar&nbsp;<OPTION VALUE=FIM>Finnish Markka&nbsp;<OPTION VALUE=FRF>French
+Franc&nbsp;<OPTION VALUE=DEM>German Deutschmark&nbsp;<OPTION VALUE=GRD>Greek
+Drachma&nbsp;<OPTION VALUE=HKD>Hong Kong Dollar&nbsp;<OPTION VALUE=HUF>Hungarian
+Forint&nbsp;<OPTION VALUE=INR>Indian Rupee&nbsp;<OPTION VALUE=IDR>Indonesian
+Rupiah&nbsp;<OPTION VALUE=IEP>Irish Pound&nbsp;<OPTION VALUE=ILS>Israeli
+Shekel&nbsp;<OPTION VALUE=ITL>Italian Lira&nbsp;<OPTION VALUE=JMD>Jamaican
+Dollar&nbsp;<OPTION VALUE=JPY>Japanese Yen&nbsp;<OPTION VALUE=JOD>Jordanian
+Dinar&nbsp;<OPTION VALUE=KES>Kenyan Shilling&nbsp;<OPTION VALUE=LUF>Luxembourg
+Franc&nbsp;<OPTION VALUE=MYR>Malaysian Ringgit&nbsp;<OPTION VALUE=MAD>Moroccan
+Dirham&nbsp;<OPTION VALUE=NLG>Netherlands Guilder&nbsp;<OPTION VALUE=MXP>New
+Mexican Peso&nbsp;<OPTION VALUE=NZD>New Zealand Dollar&nbsp;<OPTION VALUE=NGN>Nigerian
+Naira&nbsp;<OPTION VALUE=NOK>Norwegian Krone&nbsp;<OPTION VALUE=PKR>Pakistani
+Rupee&nbsp;<OPTION VALUE=PEN>Peruvian new Sol&nbsp;<OPTION VALUE=PHP>Philippine
+Peso&nbsp;<OPTION VALUE=PLZ>Polish Zloty&nbsp;<OPTION VALUE=PTE>Portugese
+Escudo&nbsp;<OPTION VALUE=SGD>Singapore Dollar&nbsp;<OPTION VALUE=ZAR>South
+African Rand&nbsp;<OPTION VALUE=KRW>South Korean Won&nbsp;<OPTION VALUE=ESP>Spanish
+Peseta&nbsp;<OPTION VALUE=LKR>Sri Lankan Rupee&nbsp;<OPTION VALUE=SEK>Swedish
+Krona&nbsp;<OPTION VALUE=CHF>Swiss Franc&nbsp;<OPTION VALUE=TWD>Taiwan
+Dollar&nbsp;<OPTION VALUE=THB>Thailand Baht&nbsp;<OPTION VALUE=TRL>Turkish
+Lira&nbsp;<OPTION VALUE=VEB>Venezuelan Bolivar&nbsp;<OPTION VALUE=ZWD>Zimbabwe
+Dollar&nbsp;</FONT></SELECT></TH>
+</TR>
+</TABLE></CENTER>
+
+<H3>
+<INPUT TYPE=hidden NAME=appName VALUE="UniverseMembership"></FORM></H3>
+
+<H3>
+Sample Output:</H3>
+
+<UL type=disc>
+<CENTER>
+<H3>
+<FONT FACE="Arial"><FONT COLOR="#00008B"><FONT SIZE=+0>Universe Membership
+For: Standard &amp; Poors 500</FONT></FONT></FONT></H3></CENTER>
+
+<CENTER>
+<H4>
+<FONT FACE="Arial"><FONT COLOR="#00008B"><FONT SIZE=+0>Data As Of: 11/30/1997
+--- Currency: United States Dollar</FONT></FONT></FONT></H4></CENTER>
+
+<HR align=center width=50%>
+<CENTER><TABLE BORDER CELLSPACING=2 WIDTH="65%" >
+<TR>
+<TH ALIGN=CENTER VALIGN=TOP COLSPAN="2"><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>---
+Basics ---</FONT></FONT></FONT></TH>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>#
+Current Members:&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+500</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Effective
+Date:&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>11/30/1997</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>#
+Prior Members:&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+500</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=TOP><B><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>Effective
+Date:&nbsp;</FONT></FONT></FONT></B></TD>
+
+<TD ALIGN=RIGHT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>10/31/1997</FONT></FONT></FONT></TD>
+</TR>
+</TABLE></CENTER>
+&nbsp;
+<CENTER><TABLE BORDER CELLSPACING=2 WIDTH="80%" >
+<TR>
+<TH ALIGN=CENTER VALIGN=TOP COLSPAN="2"><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>---
+New Members ---</FONT></FONT></FONT></TH>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>FE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+FIRSTENERGY CORP COM&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>SNV&nbsp;&nbsp;&nbsp;&nbsp;
+SYNOVUS FINL CORP COM&nbsp;</FONT></FONT></FONT></TD>
+</TR>
+</TABLE></CENTER>
+&nbsp;
+<CENTER><TABLE BORDER CELLSPACING=2 WIDTH="80%" >
+<TR>
+<TH ALIGN=CENTER VALIGN=TOP COLSPAN="2"><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>---
+Dropped Members ---</FONT></FONT></FONT></TH>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>OEC&nbsp;&nbsp;&nbsp;&nbsp;
+OHIO EDISON CO COM&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>SB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+SALOMON INC COM&nbsp;</FONT></FONT></FONT></TD>
+</TR>
+</TABLE></CENTER>
+&nbsp;
+<CENTER><TABLE BORDER CELLSPACING=2 WIDTH="80%" >
+<TR>
+<TH ALIGN=CENTER VALIGN=TOP COLSPAN="2"><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>---
+Current Members ---</FONT></FONT></FONT></TH>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>COMS&nbsp;&nbsp;&nbsp;
+3COM CORP COM&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>ABT&nbsp;&nbsp;&nbsp;&nbsp;
+ABBOTT LABS COM&nbsp;</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>ADBE&nbsp;&nbsp;&nbsp;
+ADOBE SYS INC COM&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>AMD&nbsp;&nbsp;&nbsp;&nbsp;
+ADVANCED MICRO DEVICES COM&nbsp;</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>ANV&nbsp;&nbsp;&nbsp;&nbsp;
+AEROQUIP-VICKERS INC COM&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>AET&nbsp;&nbsp;&nbsp;&nbsp;
+AETNA INC COM&nbsp;</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>AHM&nbsp;&nbsp;&nbsp;&nbsp;
+AHMANSON H F &amp; CO COM&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>APD&nbsp;&nbsp;&nbsp;&nbsp;
+AIR PRODS &amp; CHEMS INC COM&nbsp;</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>ATI&nbsp;&nbsp;&nbsp;&nbsp;
+AIRTOUCH COMMUNICATNS COM&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>ACV&nbsp;&nbsp;&nbsp;&nbsp;
+ALBERTO CULVER CO CL B CONV</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>ABS&nbsp;&nbsp;&nbsp;&nbsp;
+ALBERTSONS INC COM&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>AL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ALCAN ALUM LTD COM&nbsp;</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>ALT&nbsp;&nbsp;&nbsp;&nbsp;
+ALLEGHENY TELEDYNE INC COM&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>AGN&nbsp;&nbsp;&nbsp;&nbsp;
+ALLERGAN INC COM&nbsp;</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>ALD&nbsp;&nbsp;&nbsp;&nbsp;
+ALLIEDSIGNAL INC COM&nbsp;</FONT></FONT></FONT></TD>
+
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0>ALL&nbsp;&nbsp;&nbsp;&nbsp;
+ALLSTATE CORP COM&nbsp;</FONT></FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><FONT FACE="Arial"><FONT COLOR="#000000"><FONT SIZE=+0><b>.&nbsp;&nbsp;.&nbsp;&nbsp;.</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;</FONT></FONT></FONT></TD>
+</TR>
+
+</TABLE></CENTER>
+
+<HR SIZE=0 WIDTH="50%">
+<BR>&nbsp;</UL>
+
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy 1999 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated January 28, 1999</font>
+</table></BODY>
+</HTML>

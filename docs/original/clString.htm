@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Class: String </title>
+</head>
+<body bgcolor = white>
+<h2>Vision Class: String</h2>
+
+<p>
+     | <a href="FHome.htm">Home</a> | <a href="mString.htm">Messages</a> | <a href="clXRef.htm">Class XRef</a> | <a href="Input.htm">Input</a> | <a href="Output.htm">Output</a> |
+<hr> 
+<h3>Topics Covered:</h3> 
+<ul type=square> 
+<li><a href="#overview">Overview</a>
+<li><a href="#basic">Basic String Messages</a>
+<li><a href="#format">Formatting Messages</a>
+<li><a href="#io">Parsing, Input, and Output Messages</a>
+<li><a href="#conversion">Conversion Messages</a>
+<li><a href="#comparison">Comparison Messages</a>
+<li><a href="#identity">String Identity</a>
+<li><a href="#substring">Additional Substring Messages</a>
+<li><a href="#cluster">String Clustering</a>
+<li><a href="#other">Related Topics</a>
+</ul>
+<p>
+<hr>
+<h3><a name="overview">Overview</a></h3> 
+<p> 
+<b>Strings</b> are objects that represent sequences of characters.
+Strings respond to messages that format, parse, and perform
+comparisons with other strings.  The
+literal representation of a string is a sequence of characters
+delimited by double quotes.  For example:
+<p>
+<ul type="disc">
+<li>"xyz"
+<li>"a"
+<li>"The Vision language is fun"
+</ul>
+<p>
+Any character may be included in a string.  If you need to include a
+double quote in the string, it must be <i>escaped</i> using the '\'
+character to avoid confusion with the string delimiters.  For
+example:<pre><tt><b>
+     "He said, \"The Vision language is fun\" "
+</b></tt></pre>
+returns the string:<pre><tt><b>
+     He said, "The Vision language is fun"
+</b></tt></pre>
+<p>
+The <i>String</i> class is a direct subclass of the class <i>Ordinal</i>:
+<font size=+1><pre>
+          <a href="clObject.htm">Object</a>
+             |
+             Ordinal
+                |
+                <b>String</b>
+
+</pre></font>
+<p>
+<hr>
+<h3><a name="basic">Basic String Messages</a></h3>
+<p>
+The following messages perform <b>basic</b> <i>String</i> operations.
+Except where noted, these messages return a <i>String</i> object.
+Note that the original string is never modified; a new string object
+is returned.
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+<td><b>Sample</b>
+</tr>
+
+<tr>
+<td><a href="mString.htm#count"><i>count</i></a>
+<td>Number of characters in string returned as an <i>Integer</i>
+<td>"xyz" count
+<tr>
+<td><a href="mString.htm#drop:"><i>drop:</i></a>
+<td>Drop <i>parameter</i> characters from beginning or end of
+<i>recipient</i>
+<td>"xyz" drop: 2 .
+<tr>
+<td><a href="mString.htm#take:"><i>take:</i></a>
+<td>Take <i>parameter</i> characters from beginning or end of
+<i>recipient</i>
+<td>"xyz" take: 2 .
+<tr>
+<td><a href="mString.htm#concat:"><i>concat:</i></a>
+<td>Concatenate the <i>parameter</i> string to the <i>recipient</i>
+<td>"xyz" concat: "abc"
+<tr>
+<td><a href="mString.htm#at:"><i>at:</i></a>
+<td>Return single character at position indicated by
+<i>parameter</i>
+<td>"xyz" at: 2 . 
+<tr>
+<td><a href="mString.htm#contains:"><i>contains:</i></a>
+<td>Return boolean indicating if <i>recipient</i> contains
+<i>parameter</i>
+<td>"whatAmI" contains: "what" .
+</tr>
+</table></Center>
+
+<p>
+<hr>
+<h3><a name="format">Formatting Messages</a></h3>
+<p>
+Many messages defined for the class <i>String</i> allow you to
+reformat the strings in a variety of ways.
+These messages all return a <i>String</i> object.
+Note that the original string is never modified; a new string object
+is returned.
+<p>
+The following messages provide different ways to <b>pad</b> strings:
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+<td><b>Sample</b>
+</tr>
+
+<tr>
+<td><a href="mString.htm#center:"><i>center:</i></a>
+<td>Center <i>recipient</i> over <i>parameter</i> columns
+<td>"xyz" center: 80 .
+<tr>
+<tr>
+<td><a href="mString.htm#fill:"><i>fill:</i></a>
+<td>Repeat characters in <i>recipient</i> until string of
+<i>parameter</i> length is formed
+<td>"xyz" fill: 20 .
+<tr>
+<td><a href="mString.htm#pad:"><i>pad:</i></a>
+<td>Pad <i>recipient</i> with blanks until string of
+<i>parameter</i> length is formed
+<td>"xyz" pad: 20 .
+
+</tr>
+</table></Center>
+
+<p>
+The following messages provide different ways to <b>strip characters</b>
+out of strings:
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+<td><b>Sample</b>
+</tr>
+
+<tr>
+<td><a href="mString.htm#stripChar:"><i>stripChar:</i></a>
+<td>Remove the characters in <i>parameter</i> from <i>recipient</i>
+<td>"abacadae" stripChar: "ad" .
+<tr>
+<td><a href="mString.htm#stripBoundingBlanks"><i>stripBoundingBlanks</i></a>
+<td>Remove blanks from start and end of <i>recipient</i>
+<td>"  xyz  " stripBoundingBlanks
+<tr>
+<td><a href="mString.htm#stripLeadingBlanks"><i>stripLeadingBlanks</i></a>
+<td>Remove blanks from start of <i>recipient</i>
+<td>"  xyz  " stripLeadingBlanks
+<tr>
+<td><a href="mString.htm#stripTrailingBlanks"><i>stripTrailingBlanks</i></a>
+<td>Remove blanks from end of <i>recipient</i>
+<td>"  xyz  " stripTrailingBlanks
+
+</tr>
+</table></Center>
+
+<p>
+The following messages provide some basic <b>reformatting</b> operations:
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+<td><b>Sample</b>
+</tr>
+
+<tr>
+<td><a href="mString.htm#asQuotedString"><i>asQuotedString</i></a>
+<td>Returns <i>recipient</i> surrounded by quote characters
+<td> "xyz" asQuotedString
+<tr>
+<td><a href="mString.htm#capitalize"><i>capitalize</i></a>
+<td>Capitalize first letter in <i>recipient</i>
+<td> "xyz" capitalize
+<tr>
+<td><a href="mString.htm#lowercase"><i>lowercase</i></a>
+<td>Change first letter in <i>recipient</i> to a lower case letter
+<td> "Xyz" lowercase
+<tr>
+<td><a href="mString.htm#reverse"><i>reverse</i></a>
+<td>Reverse order of characters in <i>recipient</i>
+<td> "xyz" reverse
+<tr>
+<td><a href="mString.htm#toLower"><i>toLower</i></a>
+<td>Convert all letters in <i>recipient</i> to lower case
+<td> "XYZ" toLower
+<tr>
+<td><a href="mString.htm#toUpper"><i>toUpper</i></a>
+<td>Convert all letters in <i>recipient</i> to upper case
+<td> "xyz" toUpper
+<tr>
+<td><a href="mString.htm#at:put:"><i>at:put:</i></a>
+<td>Insert string supplied as second <i>parameter</i> at position
+in <i>recipient</i> indicated by first <i>parameter</i>
+<td> "xyz" at: 2 put: "abc"
+<tr>
+<td><a href="mString.htm#translate:to:"><i>translate:to:</i></a>
+<td>Replace all occurrences of character supplied as first <i>parameter</i>
+with string supplied as second <i>parameter</i>
+<td> "xyz" translate: "x" to: "a" .
+
+</tr>
+</table></Center>
+
+<p>
+<hr>
+<h3><a name="io">Parsing, Input and Output Messages</a></h3>
+<p>
+Many messages defined for the class <i>String</i> allow you to
+read and parse input files and generate output files.
+<p>
+The following messages provide different ways to <b>read in files</b>.
+<a href="Input.htm#more">More detailed samples are available.</a>
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+<td><b>Sample</b>
+</tr>
+
+<tr>
+<td><a href="mString.htm#asFileContents"><i>asFileContents</i></a>
+<td>Interpret <i>recipient</i> as a file name and return file's contents
+as a single string
+<td> "myFile" asFileContents
+<tr>
+<td><a href="mString.htm#asRecords"><i>asRecords</i></a>
+<td>Interpret <i>recipient</i> as a file name and return contents as
+a list of strings where each element corresponds to a
+row in the file
+<td> "myFile" asRecords
+<tr>
+<td><a href="mString.htm#asCSVRecords"><i>asCSVRecords</i></a>
+<td>Interpet <i>recipient</i> as a file name for a file in
+comma-separated-value format and return contents as
+a list of strings where each element corresponds to a
+row in the file and each element is extended by the
+message <i>fields</i> which returns a list of strings
+<td> "myFile" asCSVRecords
+<tr>
+<td><a href="OV.htm#asOpenVisionChannel"><i>asOpenVisionChannel</i></a>
+<td>Convert <i>recipient</i> containing a channel specification in
+form <i>type,options:resource</i> to an <i>OpenVisionChannel</i>
+<td> "file:/tmp/file1.dat" asOpenVisionChannel
+
+</tr>
+</table></Center>
+
+<p>
+The following messages provide <b>string parsing</b> operations
+that are useful for processing strings representing
+the contents of data files.
+<a href="Input.htm#data">More detailed samples are available.</a>
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+<td><b>Sample</b>
+</tr>
+
+<tr>
+<td><a href="mString.htm#asLines"><i>asLines</i></a>
+<td>Convert <i>recipient</i> to list of strings breaking original
+on <i>new line</i> character
+<td> "myFile" asFileContents asLines
+<tr>
+<td><a href="mString.htm#asWords"><i>asWords</i></a>
+<td>Convert <i>recipient</i> to list of strings breaking original
+on <i>tab</i>, <i>space</i>, and <i>new line</i> characters
+<td> "multi word string" asWords
+<tr>
+<td><a href="mString.htm#breakOn:"><i>breakOn:</i></a>
+<td>Convert <i>recipient</i> to list of strings breaking original on
+any character in <i>parameter</i>
+<td> "1,2,3,4,5" breakOn: "," .
+<tr>
+<td><a href="mString.htm#cbreakOn:"><i>cbreakOn:</i></a>
+<td>Convert <i>recipient</i> to list of strings breaking original on
+any character not in <i>parameter</i>
+<td> "1xyz3" cbreakOn: "1234567890" .
+<tr>
+<td><a href="mString.htm#asCells"><i>asCells</i></a>
+<td>Convert <i>recipient</i> to list of strings corresponding
+to records where each record is extended by
+<i>cells</i> which breaks each element into a list of strings 
+using <i>tab</i> and <i>octal 377</i>
+<td> "myFile" asFileContents asCells
+<tr>
+<td><a href="mString.htm#asCellsOn:"><i>asCellsOn:</i></a>
+<td>Convert <i>recipient</i> to list of strings corresponding
+to records where each record is extended by
+<i>cells</i> which breaks each element into a list of strings 
+using characters in <i>parameter</i> as break points.
+<td> "myFile" asFileContents asCellsOn: "," .
+</tr>
+</table></Center>
+<p>
+The following messages provide different ways to <b>output files</b>.
+<a href="Output.htm#files">More detailed samples are available.</a>
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+<td><b>Sample</b>
+</tr>
+
+<tr>
+<td><a href="mString.htm#substituteOutputOf:"><i>substituteOutputOf:</i></a>
+<td>Interpret <i>recipient</i> as a file name and output all printing
+encountered in <i>parameter</i>, a block, to this file
+<td> "outFile" substituteOutputOf: [ ] ;
+<tr>
+<td><a href="mString.htm#appendOutputOf:"><i>appendOutputOf:</i></a>
+<td>Interpret <i>recipient</i> as a file name and append all printing
+encountered in <i>parameter</i>, a block, to the end of this file
+<td> "outFile" appendOutputOf: [ ] ;
+<tr>
+<td><a href="mString.htm#filterOutputOf:"><i>filterOutputOf:</i></a>
+<td>Interpret <i>recipient</i> as a program name and supply all printing
+encountered in <i>parameter</i>, a block, as input
+<td> "myProgram" filterOutputOf: [ ] ;
+
+</tr>
+</table></Center>
+
+
+<p>
+<hr>
+<h3><a name="conversion">Conversion Messages</a></h3>
+<p>
+Several messages have been defined to <b>convert</b> an instance of
+<i>String</i> to an instance of another class:
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+<td><b>Sample</b>
+</tr>
+
+<tr>
+<td><a href="mString.htm#asCurrency"><i>asCurrency</i></a>
+<td>Convert <i>recipient</i> to an instance of 
+<a href="clCurrency.htm"><i>Currency</i></a>
+<td> "USD" asCurrency
+<tr>
+<td><a href="mString.htm#asInteger"><i>asInteger</i></a>
+<td>Convert <i>recipient</i> to an integer
+<td> "123" asInteger
+<tr>
+<td><a href="mString.htm#asNumber"><i>asNumber</i></a>
+<td>Convert <i>recipient</i> to a number
+<td> "123.45" asNumber
+<tr>
+<td><a href="mString.htm#convertToNumber"><i>convertToNumber</i></a>
+<td>Remove non-numeric characters from start and end of
+<i>recipient</i> and any commas from remaining string and convert to
+a number
+<td> "123,456.78" convertToNumber
+<tr>
+<td><a href="mString.htm#toList"><i>toList</i></a>
+<td>Convert <i>recipient</i> to a list of one character strings
+<td> "abcdef" toList
+</tr>
+</table></Center>
+
+<p>
+Several messages have been defined to convert a
+<i>String</i> into a Vision program.  The program can be
+<a href="Input.htm#program">run immediately</a> or returned as a 
+<a href="clBlock.htm"><i>Block</i></a> that can be evaluated
+at a later time.
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+<td><b>Sample</b>
+</tr>
+
+<tr>
+<td><a href="mString.htm#evaluate"><i>evaluate</i></a>
+<td>Interpret the <i>recipient</i> as Vision code and run it
+<td>"whatAmI" evaluate
+<tr>
+<td><a href="mString.htm#evaluateIn:"><i>evaluateIn:</i></a>
+<td>Interpret the <i>recipient</i> as Vision code and run it in
+the context of <i>parameter</i>
+<td>"whatAmI" evaluateIn: Currency .
+<tr>
+<td><a href="mString.htm#asBlock"><i>asBlock</i></a>
+<td>Convert <i>recipient</i> to a block
+<td> "whatAmI" asBlock value
+<tr>
+<td><a href="mString.htm#asBlockIn:"><i>asBlockIn:</i></a>
+<td>Convert <i>recipient</i> to a block in
+the context of <i>parameter</i>
+<td> "whatAmI" asBlockIn: Named Currency USD . value
+
+</tr>
+</table></Center>
+<p>
+
+<hr>
+<h3><a name="comparison">Comparison Messages</a></h3>
+<p>
+
+The following messages perform basic <b>comparison</b> operations
+between the <i>recipient</i> and <i>parameter</i> string values.
+These messages return an instance of the 
+<a href="clBoolean.htm"><i>Boolean</i></a> class
+except where noted.
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+<td><b>Sample</b>
+</tr>
+
+<tr>
+<td><i>=</i>
+<td>Is <i>recipient</i> equal to <i>parameter</i>?
+<td>"y" = ("xy" at: 2)
+<tr>
+<td><i>==</i>
+<td>Is <i>recipient</i> 
+<a href="Navigate.htm#equiv">identical</a>
+to <i>parameter</i>?
+<td>"y" == ("xy" at: 2)
+<tr>
+<td><i>!=</i>
+<td>Is <i>recipient</i> not equal to <i>parameter</i>?
+<td>"y" != ("y" at: 2)
+<tr>
+<td><i>!==</i>
+<td>Is recipient not identical to <i>parameter</i>?
+<td>"y" !== ("y" at: 2)
+<tr>
+<td><i>&lt</i>
+<td>Is recipient less than <i>parameter</i>?
+<td>"x" < "y"
+<tr>
+<td><i>&lt=</i>
+<td>Is recipient less than or equal to <i>parameter</i>?
+<td>"x" <= "y"
+<tr>
+<td><i>&gt</i>
+<td>Is recipient greater than <i>parameter</i>?
+<td>"x" > "y"
+<tr>
+<td><i>&gt=</i>
+<td>Is recipient greater than or equal to <i>parameter</i>?
+<td>"x" >= "y"
+<tr>
+<td><a href="mString.htm#between:and:"><i>between:and:</i></a>
+<td>Is recipient value between two <i>parameter</i> values?
+<td>"b" between: "a" and: "c" .
+<tr>
+<td><a href="mString.htm#inRange:"><i>inRange:</i></a>
+<td>Is recipient value in the range implied by the <i>parameter</i>,
+a list of two elements representing the start and end of the
+range inclusively?
+<td>"b" inRange: "a","c" .
+<tr>
+<td><a href="mString.htm#inSet:"><i>inSet:</i></a>
+<td>Is recipient equal to one of the values in the <i>parameter</i>,
+a list containing one or more elements?
+<td>"b" inSet: "a","b","c" .
+<tr>
+<td><a href="mString.htm#notBetween:and:"><i>notBetween:and:</i></a>
+<td>Is recipient value not between two <i>parameter</i> values?
+<td>"b" notBetween: "a" and: "c" .
+<tr>
+<td><a href="mString.htm#max:"><i>max:</i></a>
+<td>Returns the larger of <i>recipient</i> and <i>parameter</i> value
+<td> "a" max: "b" . 
+<tr>
+<td><a href="mString.htm#min:"><i>min:</i></a>
+<td>Returns the smaller of <i>recipient</i> and <i>parameter</i> value
+<td> "a" min: "b" . 
+
+</tr>
+</table></Center>
+<p>
+
+<hr>
+<h3><a name="identity">String Identity</a></h3>
+<p>
+<blockquote><hr>
+<center><b>Warning!! </b></center>
+Two strings with the same content may not be the same object.
+For example:<pre><tt><b>
+     !string1 <- "abc" ;
+     !string2 <- "ABC" toLower ;
+     (string1 = string2) printNL ;
+     (string1 == string2) printNL ;
+</b></tt></pre>
+Strings are equal (i.e., = ) when they have the same content.
+Strings are identical (i.e., == ) when they are the same object.
+Strings that are created directly in quotes or by manipulating
+string objects produce distinct objects.
+<hr></blockquote>
+<p>
+The <a href="clCollect.htm#groupedStrings.note"><i>groupedBy:</i> message</a>
+defined for <i>Collections</i> requires strings to be identical if
+they are to be included in the same group.  The <i>groupedByString:</i>
+variation relaxes this constraint and uses string equality as the basis for
+groups.  If you want to use a string object as an index in an 
+<a href="clIList.htm"><i>IndexedList</i></a>, 
+you need to use the identical string to access the element from the list.
+<p>
+Several techniques are available to preserve string identity.  For 
+example, suppose you wanted to rate each currency with an A, B, or C
+value.  You could create class constants to hold unique
+versions of the strings:<pre><tt><b>
+     #-- define constant
+     Currency define: 'ratingA' toBe: "A" ;
+     Currency define: 'ratingB' toBe: "B" ;
+     Currency define: 'ratingC' toBe: "C" ;
+
+     #-- define property
+     Currency defineFixedProperty: 'rating' ;
+
+     #-- assign values
+     Named Currency send: [ USD, CAD ] .
+        do: [ :rating <- ratingA ] ;
+
+     #-- compare
+     (Named Currency USD rating == Named Currency CAD rating) printNL ;
+</b></tt></pre>
+The US and Canadian currencies will have identical values for their rating.
+<p>
+You can create a <a href="clDict.htm"><i>Dictionary</i></a> to hold
+an unique version of the string:<pre><tt><b>
+     #--  create dictionary
+     Currency define: "StringLookup" toBe: Dictionary new ;
+     Currency StringLookup at: "A" put: "A" ;
+     Currency StringLookup at: "B" put: "B" ;
+     Currency StringLookup at: "C" put: "C" ;
+
+     #-- define property
+     Currency defineFixedProperty: 'rating' ;
+
+     #-- assign values
+     Named Currency send: [ USD, CAD ] .
+        do: [ :rating <- StringLookup at: "A" ] ;
+
+     #-- compare
+     (Named Currency USD rating == Named Currency CAD rating) printNL ;
+</b></tt></pre>
+<p>
+Alternatively, you could create 
+a new class of rating values and assign each value to an entry in this table 
+as illustrated below:<pre><tt><b>
+     Entity createSubclass: "Rating" ;
+     Rating createInstance: "A" ; 
+     Rating createInstance: "B" ; 
+     Rating createInstance: "C" ; 
+     Named Currency USD :rating <- Named Rating A ; 
+     Named Currency CAD :rating <- Named Rating A ; 
+</b></tt></pre>
+
+<p>
+<hr>
+<h3><a name="substring">Additional Substring Messages</a></h3>
+<p>
+Many additional messages that support substring operations
+are defined for the class <i>String</i>:
+<p>
+The following messages return a <b>substring</b> of the recipient:
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+<td><b>Sample</b>
+</tr>
+
+<tr>
+<td><a href="mString.htm#from:to:"><i>from:to:</i></a>
+<td>Extracts substring from position <i>parameter1</i> 
+to position <i>parameter2</i>
+<td>"abcdef" from: 2 to: 4 .
+<tr>
+<td><a href="mString.htm#from:for:"><i>from:for:</i></a>
+<td>Extracts substring from position <i>parameter1</i>
+for number of characters indicated by <i>parameter2</i>
+<td>"abcdef" from: 2 for: 3 .
+<tr>
+<td><a href="mString.htm#from:"><i>from:</i></a>
+<td>If <i>parameter</i> is a number, extracts substring from this
+position to end; if <i>parameter</i> is a string, extracts from
+first occurrence to end
+<td>"abcdef" from: "b" .
+<tr>
+<td><a href="mString.htm#to:"><i>to:</i></a>
+<td>If <i>parameter</i> is a number, extracts substring from beginning
+to this position; if <i>parameter</i> is a string, extracts from
+beginning to its first occurrence
+<td>"abcdef" to: "b" .
+
+</tr>
+</table></Center>
+<p>
+
+<p>
+<a name="inquiry"> </a>
+The following messages are <b>inquiries</b> about the recipient
+and return a <i>Boolean</i> value:
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+<td><b>Sample</b>
+</tr>
+<tr>
+<td><a href="mString.htm#isBlank"><i>isBlank</i></a>
+<td>Is <i>recipient</i> blank?
+<td>"  abc" isBlank
+<tr>
+<td><a href="mString.htm#isBlankFor:"><i>isBlankFor:</i></a>
+<td>Are the first <i>parameter</i> characters of <i>recipient</i> blank?
+<td>"  abc" isBlankFor: 2 .
+<tr>
+<td><a href="mString.htm#contains:"><i>contains:</i></a>
+<td>Does <i>recipient</i> contain <i>parameter</i> as a substring?
+(wildcards are recognized)
+<td>"whatAmI" contains: "^what" .
+<tr>
+<td><a href="mString.htm#containsSubstring:"><i>containsSubstring:</i></a>
+<td>Does <i>recipient</i> contain <i>parameter</i> as a substring?
+(wildcards viewed as literals)
+<td>"whatAmI" containsSubstring: "^what"
+
+</tr>
+</table></Center>
+<p>
+
+The following messages return integer values representing a <b>position</b>
+or a <b>length</b>:
+<p>
+<Center><table width="90%" border="1" cellspacing="2" cellpadding="8">
+<tr>
+<td><b>Message</b>
+<td><b>Definition</b>
+<td><b>Sample</b>
+</tr>
+
+<tr>
+<td><a href="mString.htm#findPatternExtent:"><i>findPatternExtent:</i></a>
+<td>Length of <i>parameter</i> if present in <i>recipient</i>,
+interpretting wildcards
+<td>"abcdef" findPatternExtent: "[a-c][a-c]" .
+<tr>
+<td><a href="mString.htm#findSubstringExtent:"><i>findSubstringExtent:</i></a>
+<td>Length of <i>parameter</i> if present in <i>recipient</i>,
+viewing wildcards as literals
+<td>"abcdef" findSubstringExtent: "[a-c][a-c]" .
+<tr>
+<td><a href="mString.htm#findPatternOrigin:"><i>findPatternOrigin:</i></a>
+<td>Zero-based position of first occurrence of <i>parameter</i> in
+<i>recipient</i>, interpretting wildcards
+<td>"ab^c" findPatternOrigin: "^c" .
+<tr>
+<td><a href="mString.htm#findSubstringOrigin:"><i>findSubstringOrigin:</i></a>
+<td>Zero-based position of first occurrence of <i>parameter</i> in
+<i>recipient</i>, viewing wildcards as literals
+<td>"ab^c" findSubstringOrigin: "^c" .
+<tr>
+<td><a href="mString.htm#findPatternSuffix:"><i>findPatternSuffix:</i></a>
+<td>Zero-based position of first character after first occurrence of 
+<i>parameter</i> in <i>recipient</i>, interpretting wildcards
+<td>"ab^cd" findPatternSuffix: "^c" .
+<tr>
+<td><a href="mString.htm#findSubstringSuffix:"><i>findSubstringSuffix:</i></a>
+<td>Zero-based position of first character after first occurrence of 
+<i>parameter</i> in <i>recipient</i>, viewing wildcards as literals
+<td>"ab^cd" findSubstringSuffix: "^c" .
+<tr>
+<td><a href="mString.htm#startingPositionOf:"><i>startingPositionOf:</i></a>
+<td>Position of first occurrence of <i>parameter</i> in <i>recipient</i>
+<td>"abc" startingPositionOf: "bc" .
+<tr>
+<td><a href="mString.htm#startingPositionsOf:"><i>startingPositionsOf:</i></a>
+<td>List of position numbers at which <i>parameter</i> starts 
+in <i>recipient</i>
+<td>"abcdbcebc" startingPositionsOf: "bc" .
+<tr>
+<td><a href="mString.htm#prefixNotSpannedBy:"><i>prefixNotSpannedBy:</i></a>
+<td>Number of characters at start of <i>recipient</i>that do not match
+any character in <i>parameter</i>
+<td>"abc" prefixNotSpannedBy: "cdefg" .
+<tr>
+<td><a href="mString.htm#prefixSpannedBy:"><i>prefixSpannedBy:</i></a>
+<td>Number of characters at start of <i>recipient</i> that match any
+character in <i>parameter</i>
+<td>"abc" prefixSpannedBy: "aeiou" .
+
+</tr>
+</table></Center>
+
+<p>
+<hr>
+<h3><a name="cluster">String Clustering</a></h3>
+<p>
+Currently in development ..
+<p>
+<hr>
+<h3><a name="other">Related Topics</a></h3>
+<p>
+For additional information see:
+<p>
+<ul type=square>
+<li><a href="Output.htm#printString">Printing Strings</a>
+<li><a href="Output.htm">Generating Output</a>
+<li><a href="Input.htm#program">Reading Programs from Files</a>
+<li><a href="Input.htm#data">Loading Data from Files</a>
+<li><a href="Input.htm#adv">Memory Resources and Advanced Data Loading Techniques</a>
+<li><a href="tkOpenVision.htm">Using Strings to Specify External Channel</a>
+<li><a href="clBlock.htm#convert">Converting Strings to Blocks</a>
+<li><a href="Output.htm#convert">Converting Objects to Strings</a>
+<li><a href="Navigate.htm#message">General Message Information</a>
+<li><a href="tuBasic.htm#Working with Numbers and Strings">Vision Basics Tutorial</a>
+</ul>
+<p>
+<p>
+<hr>
+
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy 1998 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated February 19, 1998 </font>
+</table>
+
+</body>
+</html>
+

@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # VdbScan Error Message Lookup
 
 Scan for your error messages here.  Try not to clutter this up with things other than the error message.

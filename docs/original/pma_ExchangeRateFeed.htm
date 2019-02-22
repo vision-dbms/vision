@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Upload Format: ExchangeRateFeed</title>
+
+</head>
+<body>
+<body bgcolor=white>
+<h2>Vision Portfolio Management Application Layer: Data Feeds</h2>
+<p>
+| <a href="pmaFeeds.htm">Application Feeds</a> |
+<hr><p>
+<font size=+2><b>Data Feed: </b><i>ExchangeRateFeed</i></font><p>
+<font size=+1><b>Category: </b><i>EntityExtenderFeed</i></font><p>
+
+<h3>Summary:</h3>
+<p>
+<ul>
+The <i>ExchangeRateFeed</i> feed is used to update currency exchange
+   rates over time.   The time series <i>usExchange</i> tracks daily 
+   exchange rates
+   to convert a specific currency into US Dollars.  Exchange rates
+   are stored as the number of foreign currency units that are 
+   equivalent to one US Dollar.  
+<p>
+   The <b>Currency</b> class and currency conversions
+   are described in detail in the
+   <a href="clCurrency.htm"><i>Vision Class: Currency</i></a> document.  
+</ul>
+<p>
+
+<h3>Available Fields:</h3>
+<p>
+<center><table border=1 width=80% cellpadding=4 cellspacing=2>
+<tr><th>Field<th>Currency<br>Property<th>Type<th>Description
+<tr>
+<tr><th align=center colspan=4>--- Required Fields ---
+<tr>
+<td><i>entityId</i>
+<td> -
+<td>String
+<td>any valid currency identifier
+<tr>
+<td><i>date</i>
+<td> -
+<td>Date
+<td>date of exchange rate
+<tr>
+<td><i>usExchange</i>
+<td><i>usExchange</i>
+<td>Number
+<td>rate of exchange to us currency
+</table></center>
+<p>
+
+<h3>Special Processing Rules:</h3>
+<p>
+<ul type=disc>
+<li>The <i>entityId</i> must correspond to an existing <b>Currency</b>
+     instance.
+<p>
+<li>The <i>date</i> must be included and indicates the date of the
+      exchange.  It can be in any valid date format
+      such as <i>19971215</i> or <i>12/15/97</i>.
+<p>
+<li>The <i>usExchange</i> field should contain the number of
+      units in the currency associated with <i>entityId</i> that are
+      equivalent to one US Dollar.  
+
+<p><li>The exchange rates for the eleven Euro countries
+ are automatically updated (legacy fixed rate to EUR * daily EUR to US rate) when EUR <i>usExchange</i> rates are included for the supplied date.
+
+
+
+</ul>
+
+<p>
+<a name="related">
+<h3>Related Feeds:</h3>
+<p>
+<ul type=disc>
+<li><a href="pma_CurrencyMaster.htm"><i>CurrencyMaster</i></a>:
+defines Currency instances referenced by this feed
+</ul>
+<p>
+<h3>Sample Upload:</h3>
+<p>
+The following tab-delimited feed could be used to update currency exchange rates.
+<pre><tt><b>
+ Interface ExternalFeedManager upload: "ExchangeRateFeed" using:
+     "entityId        date      usExchange
+      CAD             19971128  1.4234	
+      CAD             19971201  1.4238	
+      CAD             19971202  1.4219	
+      ARS             19971128  0.9996	
+      ARS             19971201  0.9999	
+      ARS             19971202  0.9999	
+      ATS             19971128 12.4142	
+      ATS             19971201 12.5080	
+      ATS             19971202 12.4888	
+     " ;
+</b></tt></pre>
+
+<p>
+<hr>
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy; 2000 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated December 15, 2000</font>
+</tr>
+</table>
+
+</body>
+</html>

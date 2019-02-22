@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>The Holding Class</title>
+</head>
+
+<body bgcolor=white>
+<h2>The Holding Class</h2>
+| <a href="FHome.htm">Home</a> |<a href="invRef.htm">Investment Reference</a> | <a href="invAccount.htm">The Account Classes </a> |
+<hr>
+<p>
+<h3>Topics Covered:</h3>
+
+<ul type=disc>
+<li><a href="#Overview">Overview</a>
+<li><a href="#The Holding Class">The Holding Class</a>
+<li><a href="#Holdings Access">Holding Access</a>
+<li><a href="#The Holdings Creation Process">The Holdings Creation Process</a>
+<li><a href="#IndexAccount Holdings">IndexAccount Holdings</a>
+<li><a href="#New Instances and Additional Messages">New Instances and Additional Messages</a>
+</ul>
+<hr>
+
+<a name="Overview"><h3>Overview</h3></a>
+  
+The class <b>Holding</b> is used  to  represent  a  specific  holding  by  an
+account  in  a  security as of a specific point in time.  Holdings are
+rarely (if ever) referenced directly.  Instead they are accessed via a
+particular  security  or account.  In general, holdings are created as
+part of the process that updates the  accounts  each  day.   Key  data
+items  such as <i>totalMarketValue</i> and <i>percentOfPort</i> for each Holding
+and   Account  summary  information  such  as  <i>totalMarketValue</i>  and
+<i>totalCost</i> are also computed at this time.
+<p>
+
+The Holding data structure is illustrated below:
+<p>
+
+<center><b>Data Structure Diagram: Class Holding</b></center>
+<p>
+<pre>
+    _____________
+    |  Holding  |--|
+    |___________|  |                     ______________
+                   |---- security   ---> |  Security  |
+                   |                     |____________|          ___________
+                   |                        |                    |   ...   |
+                   |                        |---- holdings  ---> | Holding |
+                   |                        |                    | Holding |
+                   |                        |                    |   ...   |
+                   |                        |                    |_________|
+                   |                        |                    ___________
+                   |                        |---- taxlots   ---> |   ...   |
+                   |                        |                    | taxlot  |
+                   |                        |---- cusip          | taxlot  |
+                   |                        |---- name           |   ...   |
+                   |                        |---- price          |_________|
+                   |                        |---- company --->
+                   |                     __________________
+                   |---- account    ---> |  Account       |
+                   |                     |________________|      ___________
+                   |                        |                    |   ...   |
+                   |                        |---- holdings  ---> | Holding |
+                   |                        |                    | Holding |
+                   |                        |                    |   ...   |
+                   |                        |                    |_________|
+                   |                        |
+                   |---- date               |                    ___________
+                   |---- baseCurrency       |---- taxlots   ---> |   ...   |
+                   |---- percentOfPort      |---- code           | taxlot  |
+                   |---- shares             |---- name           | taxlot  |
+                   |---- totalCost          |---- totalMarketVal |   ...   |
+                   |---- totalMarketValue   |---- inceptionDate  |_________|
+                   |                        |---- portfolioManager --></pre>
+<hr>
+
+<a name="The Holding Class"><h3>The Holding Class</h3></a>
+
+
+The following key messages are defined for the class Holding:
+<p>
+
+<center><table border=1 cellspacing=2 cellpadding=8>
+<tr><td><b>Property</b><td><b>Returns
+<tr><td>account<td>Account instance represented by holding
+<tr><td>security<td>Security instance represented by holding
+<tr><td>date<td>Date represent by holding
+<tr><td>baseCurrency<td>Currency in which monetary values are
+represented (initialized to account's value)
+<tr><td>_shares<td>Unadjusted shares owned by account in security
+<tr><td>shares<td>Split adjusted shares owned by acct in security
+<tr><td>_totalMarketValue<td>Unadjusted market value of shares owned using
+price on holding date in baseCurrency
+<tr><td>totalMarketValue<td>Currency adjusted market value
+<tr><td>_totalCost<td>Unadjusted cost of shares owned in baseCurrency
+<tr><td>totalCost<td>Currency adjusted cost
+<tr><td>percentOfPort<td>Weight of this holding by market value relative
+to market value of account
+<tr><td>percentOfEquity<td>Weight of this holding by market value relative
+to equity market value of account
+</table></center>
+<p>
+
+Each Holding responds to the  messages  <i>security</i>  and  <i>account</i>  by
+returning  an  instance  of  those  classes;  therefore,  any messages
+defined at Security or  Account  can  be  referenced  via  a  specific
+Holding.   The  message  <i>id</i>  has been defined at Holding to return a
+string in the form  <i>securityCode---accountCode</i>.   For  example,  the
+<i>id</i> for a holding of security GM in portfolio XYZ would display as:
+
+<pre><b>    37044210---XYZ  </b></pre>
+
+Unlike the entity classes described so far, you do not create holdings
+directly.  Instead various methods have been defined which can be used
+as part of  the  production  cycle  or  interactively  to  create  and
+maintain holdings.  
+<hr>
+
+<a name="Holdings Access"><h3>Holdings Access</h3></a>
+
+
+The message <i>holdings</i> is defined for the class Security  and  Account
+to  return the list of holdings associated with the instance as of the
+current evaluation date. Since the message <i>holdings</i> returns a  List,
+any  message  defined  for  the  List  class  can be sent (e.g., do: ,
+select: , groupedBy:, sortUp: , etc.).  For example:
+
+<pre><b>    Named Portfolio XYZ holdings
+    do: [
+        security name print: 30 ;               #-- security level
+        security price print: 10 ;              #-- security level
+        totalMarketValue printNL: 15 ;          #-- holding level
+        ] ;
+
+    Named Portfolio XYZ holdings
+    groupedBy: [ security company country ] .
+    do: [
+        code print: 10 ; name printNL ;         #-- country level
+        groupList sortDown: [ percentOfPort ] .
+        do: [
+            security name print: 30 ;           #-- security level
+            security price print: 10 ;          #-- security level
+            totalMarketValue print: 15 ;        #-- holding level
+            percentOfPort printNL ;             #-- holding level
+            ] ;
+       newLine print ;
+       ] ;
+</b></pre>
+
+The message <i>getHoldingIn:</i> is used to get an account's holding  in  a
+specific  security if it exists.  A default holding record is returned
+otherwise.  For example:
+
+<pre><b>    Named Portfolio XYZ
+      getHoldingIn: Named Security GM . percentOfPort </b></pre>
+
+returns the percentage of the Portfolio XYZ represented by the holding
+in  GM.   The  message  <i>holds:</i> is used to indicate whether or not an
+account holds a specific security.  It returns a boolean  value.   For
+example:
+
+<pre><b>    Portfolio masterList
+      select: [ ^self holds: ^global Named Security GM ] .
+</b></pre>
+
+returns the list of all portfolios that currently hold GM.
+
+
+The message  <i>holdings</i>  is  used  to  access  the  list  of  holdings
+associated with a Security as well.  For example:
+
+<pre><b>    Named Security GM  holdings
+    do: [
+        account code print: 30 ;                     #--  account level
+        account portfolioManager name print: 20 ;    #--  account level
+        security price print: 10 ;                   #--  security level
+        totalMarketValue print: 15 ;                 #--  holding level
+        newLine print ;
+        ] ;
+
+
+    Named Security GM holdings
+    groupedBy: [ account portfolioManager ] .
+    do: [
+        code print: 10 ; name printNL ;              #-- manager level
+        groupList sortDown: [ percentOfPort] .
+        do: [
+            account name print: 30 ;                 #-- account level
+            totalMarketValue print: 15 ;             #-- holding level
+            percentOfPort printNL ;                  #-- holding level
+            ] ;
+        newLine print ;
+        ] ;
+</b></pre>
+
+Note that the list  of  holdings  includes  holdings  in  any  account
+subclass.   If  you  want to restrict this list to the holdings in the
+portfolio class only, use the expression:
+
+<pre><b>    Named Security GM holdings
+      select: [ account isPortfolio ] .
+    do: [
+        ] ;
+</b></pre>
+
+The message <i>getHoldingIn:</i> is used to get a security's holding  in  a
+specific  account  if it exists.  A default holding record is returned
+otherwise.  For example:
+
+<pre><b>    Named Security GM
+        getHoldingIn: Named Portfolio XYZ  . percentOfPort
+</b></pre>
+
+Since holdings are stored over time, you can access a portfolio as  of
+a different date using the standard Vision techniques.  For example:
+
+<pre><b>    9311 evaluate:
+       [
+       Named Portfolio XYZ holdings
+       do: [
+           security name print: 30 ;
+           security price print: 10 ;
+           totalMarketValue printNL: 15 ;
+           ] ;
+       ]
+</b></pre>
+
+displays the holdings information as of Nov  30,  1993.   The  message
+<i>holdingsDate</i>  can  be  used  to  display  the  effective date of the
+holdings list being accessed.  For example:
+
+<pre><b>    9311 evaluate:
+       [
+       Named Portfolio XYZ
+       do: [ "Holdings As Of: " print; holdingsDate printNL ;
+              holdings
+              do: [
+                  security name print: 30 ;
+                  security price print: 10 ;
+                  totalMarketValue printNL: 15 ;
+                  ] ;
+           ]
+       ] ;
+</b></pre>
+
+The message <i>hasHoldings</i> is defined for the Account class to indicate
+whether  an account has holdings as of the current evaluate date.  For
+example, the expression:
+
+<pre><b>    Portfolio masterList select: [ hasHoldings ]  </b></pre>
+
+returns the list of portfolios that  have  current  holdings  and  the
+expression:
+
+<pre><b>    9311 evaluate:
+       [ Portfolio masterList select: [ hasHoldings ]
+       ]
+</b></pre>
+
+returns the list of portfolios that had holdings as of Nov 30, 1993.
+
+The actual holding instance  lists  are  stored  in  the  time  series
+property   <i>holdingsSeries</i>  defined  for  the  Security  and  Account
+classes. To support the possibility of future  reorganization  of  the
+holdings  data  structure  for  performance  and  storage  reason, the
+<i>holdings</i> message has been defined to return the list stored  in  the
+<i>holdingsSeries</i>  time  series  as of the evaluation date.  Unless you
+are explicitly writing methods that update the time series, you should
+use  the  <i>holdings</i>  message  to access your data.  In this way, your
+code will be immune to any changes that may be made to the  underlying
+property that manages the actual time series data.
+<p>
+
+<hr>
+
+<a name="The Holdings Creation Process"><h3>The Holdings Creation Process</h3></a>
+
+ 
+A holding in a Portfolio represents the actual number of  shares  held
+by the portfolio in a security on a specific date. A single holding is
+created by aggregating the  individual  tax  lots  associated  with  a
+single  security  in  an  account.   As a result, there is one Holding
+created for each account/security pair included  in  the  taxlot  feed
+from  the  accounting system.  Section 10 describes the taxlot feed in
+more detail.
+<p>
+
+An AggAccount's holdings  are  created  by  collecting  the  tax  lots
+associated  with  each  of its member portfolios and creating a single
+holding for each distinct security represented.   After  the  holdings
+have   been   created,   Portfolio   and   AggAccount   instances  are
+interchangeable.  Holdings can  also  be  generated  for  IndexAccount
+instances;  however,  since  these updates are not dependent on actual
+accounting data feeds these holdings are often  created  interactively
+as needed.
+<p>
+
+Whenever the tax lot data is updated by  the  accounting  system,  new
+holdings  are  created  for  all  Portfolios  with  tax  lots  and any
+AggAccount with <i>autoPrecalcsFlag</i> set to  TRUE  (all  AggAccounts  by
+default).    The   <i>createHoldingsFromTaxlots</i>  message  is  executed,
+performing the following steps:
+<p>
+
+<ul type=disc>
+<li>Creates a new Holding instance for each security  represented  in
+the  taxlots.   Normally,  a  single  holding  is created for the
+security  <i>Named  Security  CashUS</i>  that   includes   all   cash
+instruments.
+<p>
+<li>Updates the shares, total market value, and total cost properties
+for each holding.
+<p>
+<li>Updates the <i>holdingsSeries</i> time series for the Account with the
+new  list of holdings.  Note that the message <i>holdings</i> accesses
+this time series.
+<p>
+<li>Executes the <i>computeAccountTotals</i> message.
+</ul>
+<p=2>
+
+The message <i>computeAccountTotals</i> performs the following steps:
+<ul type=disc>
+<li>Updates the following properties for the account:</ul><dl>
+<center><table>
+<tr><td>_totalMarketValue
+<tr><td>_totalMarketValueCash
+<tr><td>_totalMarketValueEquity
+<tt><td>_totalMarketValueFixed
+<tr><td>_totalCost
+</table></center>
+<p>
+
+<ul type=disc>
+<li>Updates the properties <i>percentOfPort</i> and <i>percentOfEquity</i>  for
+each holding in the account.
+</ul>
+<p>
+
+After all the Portfolio and AggAccount holdings have been created  and
+the  account  totals  computed,  the  holdings are cross referenced by
+security using the Security message <i>rebuildHoldings</i>.
+<p>
+
+The  <i>doPrecalcs</i>  message performs  the following steps:
+<p>
+
+<ul type=disc>
+<li>Updates    the    AggAccount's <i>memberList</i>    using    the
+<i>updateMembership</i> message if the member list is rule-based.
+<p>
+<li>Updates the <i>taxlots</i> property  with  the  list  of  all  taxlots
+defined in any of the AggAccount's member portfolios.
+<p>
+<li>Executes the <i>createHoldingsFromTaxlots</i> message described above.
+</ul>
+<p>
+
+<hr>
+
+<a name="IndexAccount Holdings"><h3>IndexAccount Holdings</h3></a>
+
+Unlike  the  Portfolio  and  AggAccount  classes,  holdings  for   the
+IndexAccount  class  are  not  dependent  on a feed from an accounting
+system. Four techniques have been supplied for generating holdings for
+instances   of   the   IndexAccount   class.    Creating  holdings  is
+advantageous if you wish to use an IndexAccount interchangeably with a
+Portfolio or AggAccount in an application.  The messages:
+
+<pre><b>    createEvenDollarHoldingsAsOf: aDate
+    createEvenShareHoldingsAsOf: aDate
+    createMCapWeightedHoldingsAsOf: aDate
+    createMValWeightedHoldingsAsOf: aDate using: anAccount
+</b></pre>
+
+can be used to build holdings based  on  the  IndexAccount's  security
+list  as  of  a  date.  The  first  three messages require a date as a
+parameter.  The last message creates holdings as of the supplied  date
+weighted  by the security's holding in the supplied account.  All four
+messages  execute  the   <i>createHoldingsFromMembers</i>   message   which
+performs the following steps:
+<p>
+
+<ul type=disc>
+<li>Purges any holdings that already exist for the evaluation date.
+<p>
+<li>Initializes the total market value and total cost  properties  to
+NA as of the evaluation date.
+<p>
+<li>Executes  the <i>getMembers</i>  message  for  the  IndexAccount  and
+creates  a  holding  for  each  security  member.   This  list of
+holdings is assigned to the IndexAccount's holdings  time  series
+as of the evaluation date.
+</ul>
+<p>
+
+The <i>createEvenDollarHoldingsAsOf:</i>  message assumes  that  $1,000  is
+invested  in  each  security  in  the  index.   In  other  words,  the
+<i>totalMarketValue</i> for each security is 1000.  Shares are computed for
+each  holding  as the total market value divided by the security price
+in the account's base currency.   The  message  <i>computeAccountTotals</i>
+described   in   the   previous  section  is  then  executed  for  the
+IndexAccount.  For example:
+
+<pre><b>    Named IndexAccount MyIndex createEvenDollarHoldingsAsOf: ^today ;
+    Named IndexAccount MyIndex holdings
+    do: [ security code print: 10 ;
+          totalMarketValue print: 15 ;        #- 1000 for all
+          shares print ;
+          percentOfPort printNL ;             #- 1/count * 100 for all
+        ] ;
+   <i>Total Account Market Value: </i> print ;
+   Named IndexAccount MyIndex totalMarketValue printNL: 15 ;
+</b></pre>
+
+The <i>createEvenShareHoldingsAsOf:</i>  message assumes that you  purchase
+1000  shares  of  each  security  in  the  index.  In other words, the
+<i>shares</i> for each security is 1000.  Total market  value  is  computed
+for  each  holding  as  the  shares  times  the  security price in the
+account's base currency.  The message <i>computeAccountTotals</i> described
+in  the  previous  section is then executed for the IndexAccount.  For
+example:
+
+<pre><b>    Named IndexAccount MyIndex createEvenShareHoldingsAsOf: ^today ;
+    Named IndexAccount MyIndex holdings
+    do: [ security code print: 10 ;
+          totalMarketValue print: 15 ;
+          shares print ;                          #- 1000 for all
+          percentOfPort printNL ;
+        ] ;
+    <i>Total Account Market Value: </i> print ;
+    Named IndexAccount MyIndex totalMarketValue printNL: 15 ;
+</b></pre>
+
+The  <i>createMCapWeightedHoldingsAsOf:</i>   message  assumes   that   you
+purchase all the outstanding shares of each security in the index.  In
+other words, the <i>shares</i> for each security is equal to the  value  of
+<i>security sharesOut</i>.  Total market value is computed for each holding
+as the shares times the security price in the account's base currency.
+The  message  <i>computeAccountTotals</i> described in the previous section
+is then executed for the IndexAccount.  For example:
+
+<pre><b>    Named IndexAccount MyIndex createMCapWeightedHoldingsAsOf: ^today ;
+    Named IndexAccount MyIndex holdings
+    do: [ security code print: 10 ;
+          totalMarketValue print: 15 ;
+          shares print ;                          #- sharesOut for all
+          percentOfPort printNL ;
+        ] ;
+    <i>Total Account Market Value: </i> print ;
+    Named IndexAccount MyIndex totalMarketValue printNL: 15 ;
+</b></pre>
+  
+The <i>createMValWeightedHoldingsAsOf:using:</i>  message assumes that  you
+purchase  the equivalent number of shares held in the supplied account
+for each security in the index.  Total market value  is  computed  for
+each  holding  as the shares times the security price in the account's
+base currency.  The message <i>computeAccountTotals</i>  described  in  the
+previous section is then executed for the IndexAccount.  For example:
+
+<pre><b>    Named IndexAccount MyIndex
+       createMValWeightedHoldingsAsOf: ^today
+       using: Named Portfolio XYZ ;
+    Named IndexAccount MyIndex holdings
+    do: [ security code print: 10 ;
+          totalMarketValue print: 15 ;
+          shares print ;                        #- shares in XYZ or 0
+          percentOfPort printNL ;
+        ] ;
+    <i>Total Account Market Value: </i> print ;
+    Named IndexAccount MyIndex totalMarketValue printNL: 15 ;
+</b></pre>
+
+The message <i>createWeightedHoldingsAsOf: date using: account</i>  can  be
+used  to create a holdings structure that responds to market value and
+percentage held messages for the different types of weighting schemes.
+This message extends the holdings list with the following variables:
+
+<pre><b>    pctEvenDollar
+    mvalEvenDollar
+    pctMCapWeighted
+    mvalMCapWeighted
+    pctMValWeighted
+    mvalMValWeighted
+</b></pre>
+
+The summary statistics are not recomputed  with  this  message,  since
+several different market value numbers are defined.
+<p>
+
+Once the holdings have been created, you may want to explicitly change
+the shares value for one more holding.  The message: <i>setSharesIn:to:</i>
+is used to reset the value of shares for the holdings in the  security
+specified.  For example:
+
+<pre><b>    Named IndexAccount MyIndex
+      setSharesIn: Named Security IBM to: 500 ;
+</b></pre>
+
+After you have changed the shares in one or more securities  you  will
+need  to  execute  the <i>computeAccountTotals</i> message to recompute the
+IndexAccount market values and the holding percentages.
+<p>
+
+Note that the create messages should only  be  used  if  you  wish  to
+generate   holdings   The   message   <i>getMemberWeightsUsingAccount:</i>,
+described in the previous section, is more efficient for  applications
+that do not need account level summary statistics.
+<p>
+<hr>
+
+<a name="New Instances and Additional Messages"><h3>New Instances and Additional Messages</h3></a>
+
+Holding instances are usually created and  maintained  as  part  of  a
+nightly  production  cycle.   The  specific processing rules used vary
+based on your installation's policies.  
+<p>
+
+Your installation may have defined many additional  messages  for  the
+Holding  class.   The  <i>showMessages</i> message is the fastest way to
+determine the current list of messages available  for  a  class.   For
+example:
+
+<pre><b>    Holding showMessages </b></pre>
+
+<hr>
+
+<table border="0" width="100%">
+<tr>
+<td align="left"><font size="-1">Copyright &copy 1997 Innovative Systems Techniques, Inc.</font>
+<td align="right"><font size="-1">Created June 11, 1997</font>
+
+</table>
+<hr>
+
+</body>
+</html>
+
+
+
+

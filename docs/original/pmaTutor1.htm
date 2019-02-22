@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title>PMA Tutorial 1: Basic Security and Account Access</title>
+</head>
+<body>
+<body bgcolor=white>
+
+<h2>PMA Tutorial 1: Basic Security and Account Access</h2>
+
+<p>| <a href="FHome.htm">Home</a> 
+   | <a href="vtutor.htm">Tutorials</a> | <hr>
+
+<blockquote><hr>
+<center><b><font size+1>Reminder!</font></b> </a></center>
+To run these examples, you should first start a new session then load the sample database using:
+<pre><tt><b>     "/localvision/samples/pma/sample.load" asFileContents evaluate ; 
+</b></tt></pre>
+Any other files referenced can be read from the <i>/localvision/samples/pma</i>
+directory.
+<p>
+<b>Note:</b> The <i>sample.load</i> file runs by default on a <i>Unix</i> environment.  If you are using a <i>Windows NT</i> platform, this location may be prefixed by a drive  and optional path (e.g. <i>d:/visiondb/localvision/samples/pma/sample.load</i>).  Check with your Vision Administrator for further details.
+
+<hr></blockquote>
+<p>
+
+<hr>
+<p>The first example displays a basic data item for a single Security.
+Read the file <i>example1.a</i>.  You should see the following:
+<ul>
+<pre><b>
+Named Security IBM ticker print ;
+</b></pre>
+</ul>
+
+<p>Execute this program. You should see: 
+
+<ul>
+<pre><b>
+IBM
+</b></pre>
+</ul>
+<p>
+
+The message <i>ticker</i> is a property of Security.
+
+<hr>
+<p>This example displays two basic data items for a single Security.
+Read the file <i>example1.b</i>.  You should see the following:
+<ul>
+<pre><b>
+Named Security IBM ticker print ;
+Named Security IBM price print ;
+
+</b></pre>
+</ul>
+
+<p>Execute this program. You should see: 
+
+<ul>
+<pre><b>
+IBM   102.00
+</b></pre>
+</ul>
+<p>
+<hr>
+<p>The next example displays multiple data items in one statement for a single security.
+Read the file <i>example1.c</i> You should see the following:
+
+<ul>
+<pre><b>
+Named Security IBM
+do: [ 
+      ticker print: 5 ; 
+      name print: 30 ; 
+      price print:10 ;
+     ] ;
+</b></pre>
+</ul>
+
+<p>Execute this program. You should see: 
+
+<ul>
+<pre><b>
+IBM  INTERNATIONAL BUSINESS MACH CO    102.00
+</b></pre>
+</ul>
+<p>
+
+The <i>do:</i> statement is used to streamline repetitive code. 
+In this example, the <i>do:</i> statement is used to write three separate messages 
+<i>name</i>, <i>ticker</i>, and <i>price</i> into one statement. 
+
+<hr>
+
+<p>In the previous examples the current date was used because one had not been supplied.  However, it is possible to access data from any date.  The following example displays the same data as the previous example but as of 12/10/97.  Read the file <i>example1.d</i>. You should see: 
+
+<ul>
+<pre><b>
+971210 evaluate: 
+  [
+   Named Security IBM 
+   do: [ 
+        ticker print: 5 ; 
+        name print: 30 ; 
+        price print:10 ;
+       ] ;
+   ];
+</b></pre>
+</ul>
+
+<p>Execute this program. You should see: 
+
+
+<ul>
+<pre><b>
+IBM  INTERNATIONAL BUSINESS MACH CO    106.50
+</b></pre>
+</ul>
+<p>
+
+The <i>evaluate:</i> message will access all data as of the date supplied. 
+This date becomes the default date used for all operations contained inside the brackets.
+
+<hr>
+
+<p>This example displays some additional data about IBM.  
+Read the file <i>example1.e</i>. You should see: 
+
+<ul>
+<pre><b>
+ Named Security IBM 
+   do: [ 
+        ticker print: 5 ; 
+        company fiscalYearEnd print:-5 ;
+	company industry sector print: 8 ; 
+        price print:10 ;
+       ] ;
+</b></pre>
+</ul>
+
+<p>Execute this program. You should see: 
+
+
+<ul>
+<pre><b>
+IBM  12   TECH        102.00
+</pre></b>
+</ul>
+
+One aspect of navigational flow in Vision is that messages are defined to return objects from other classes. 
+An example of this is in the message <i>company fiscalYearEnd</i>, which displays the month in which a company has its fiscal year end.
+The message <i>company</i> at the class <b>Security</b> returns an instance of the <b>Company</b> class, which enables
+you to access the message <i>fiscalYearEnd</i> or any other message defined at the <b>Company</b> class, such as <i>industry</i> or <i>country</i>.
+<p>
+The example <i>company industry sector</i>, is a continuation of the navigational theme.
+The message <i>industry</i>, which is defined at <b>Company</b>, allows you to 
+find the <i>sector</i> for the security IBM. 
+
+<hr>
+
+
+This next program displays the same data, but for a list of Securities.
+Read the file <i>example1.f.</i> You should see: 
+
+<ul>
+<pre><b>
+Security masterList
+   first: 100 . 
+   do: [ 
+        ticker print: 10 ; 
+        name print: 30 ; 
+        price printNL:10;
+       ] ;
+</b></pre>
+</ul>
+
+<p>Execute this program. You should see: 
+
+<ul>
+<pre><b>       
+CashUS    CashUS                               NA 
+AOL       AMERICA ONLINE INC DEL COM         83.94
+GM        GENERAL MTRS CORP COM              64.38
+IBM       INTERNATIONAL BUSINESS MACH CO    102.00
+...
+</b></pre>
+</ul>
+
+
+The expression <i>Security masterList</i> is a list of all securities in the database.
+The message <i>first:100</i> limits the output to the first 100 in the database.
+<hr>
+
+This next example displays the same data for multiple Securities as of a different date.
+Read the file <i>example1.g.</i> You should see: 
+
+<ul>
+<pre><b>
+971210 evaluate:
+[
+ Security masterList
+   do: [ 
+        ticker print: 5 ; 
+        name print: 30 ; 
+        price printNL:10;
+       ] ;
+];
+</b></pre>
+</ul>
+
+<p>Execute this program. You should see: 
+
+<ul>
+<pre><b>       
+CashUCashUS                               NA 
+AOL  AMERICA ONLINE INC DEL COM         85.00
+GM   GENERAL MTRS CORP COM              64.38
+IBM  INTERNATIONAL BUSINESS MACH CO    106.50
+...
+</b></pre>
+</ul>
+
+<hr>
+
+The next example displays securities with a price over $50.
+Read the file <i>example1.h.</i> You should see: 
+
+<ul>
+<pre><b>
+Security masterList 
+select:[ price > 50 ] .
+sortUp: [ name ] .
+do: [ 
+      code print:15 ; 
+      name print:30 ;
+      price printNL:10 ;
+    ];
+</b></pre>
+</ul>
+<p>Execute this program. You should see: 
+
+<ul>
+<pre><b>
+02364J10       AMERICA ONLINE INC DEL COM         83.94
+37044210       GENERAL MTRS CORP COM              64.38
+45920010       INTERNATIONAL BUSINESS MACH CO    102.00
+275438         ROYAL BK CDA MONTREAL QUE COM      53.50
+</b></pre>
+</ul>
+
+The <i>select:</i> message eliminates all data that does not meet the criteria inside its brackets.
+The <i>sortUp:</i> message sorts the information in ascending order by a chosen message.  
+In this case, it is sorted by the name.
+<hr>
+
+The next example displays securities with a price over $50 as of a different date.
+Read the file <i>example1.i.</i> You should see: 
+
+<ul>
+<pre><b>
+971210 evaluate:
+[
+Security masterList 
+select:[ price > 50 ] .
+sortUp: [ name ] .
+do: [ 
+      code print:15; 
+      name print:30;
+      price printNL:10;
+    ];
+];
+</b></pre>
+</ul>
+<p>Execute this program. You should see:
+
+<ul>
+<pre><b>
+02364J10       AMERICA ONLINE INC DEL COM         85.00
+37044210       GENERAL MTRS CORP COM              64.38
+45920010       INTERNATIONAL BUSINESS MACH CO    106.50
+275438         ROYAL BK CDA MONTREAL QUE COM      53.50
+</b></pre>
+</ul>
+
+
+<hr>
+
+
+The following example improves on the previous example by grouping the securities by sector.
+Read the file <i>example1.j</i>. You should see: 
+
+<ul>
+<pre><b>
+Security masterList 
+select:[ price > 50 ] .
+groupedBy: [ company industry sector ] .
+sortUp: [ name ] .
+do: [  
+      name printNL;  # This is the Sector name
+      newLine print;
+     
+      groupList     
+      do:
+         [
+          code print:10;
+          name print:30;
+          price printNL;
+         ];
+    newLine print;
+    ];
+</b></pre>
+</ul>
+
+<p>Execute this program. You should see:
+
+<ul>
+<pre><b>
+Consumer durables
+
+37044210  GENERAL MTRS CORP COM             64.38
+
+Consumer services
+
+02364J10  AMERICA ONLINE INC DEL COM        83.94
+
+...
+</b></pre>
+</ul>
+
+The <i>groupedBy:</i> message groups the current list based on the supplied block.
+
+Once the list has been grouped, the securities in the group are accessed with the
+<i>groupList</i> message.   
+<hr>
+
+<p>The first Account example displays data items for a single
+account based on the most recent pricing date of 12/15/97. 
+Read the file <i>example1.k</i> You should see the following:
+
+<ul>
+<pre><b>
+Named Account \102 
+do:
+   [
+    code print:5;
+    name print:20;
+    holdings count print:5;
+    totalMarketValue printWithCommasNL:15;
+   ];
+</b></pre>
+</ul>
+
+<p>Execute this program. You should see: 
+
+<ul>
+<pre><b>
+102  INSYTE GROWTH FUND     11   4,655,327.20
+</b></pre>
+</ul>
+<p>
+The message <i>holdings count</i> is used to find the total number of holdings within the Account.
+
+<hr>
+
+
+<p>
+
+
+
+This next program displays the same data, but for a list of Accounts.
+Read the file <i>example1.l.</i> You should see: 
+
+<ul>
+<pre><b>
+Account masterList 
+sortDown:[name] .
+do:
+   [
+    code print:5;
+    name print:35;
+    holdings count print:5;
+    totalMarketValue printWithCommasNL:20; 
+  ];
+</b></pre>
+</ul>
+
+<p>Execute this program. You should see: 
+
+<ul>
+<pre><b>
+879  RICH's INTL FUND                      22        7,822,067.28
+999  RICH'S INSYTE GLOBAL FUND             20        4,740,402.27
+892  RICH'S GROWTH FUND                    25       10,391,284.11
+...
+</b></pre>
+</ul>
+
+
+<hr>
+| <a href="tuBasic.htm">Vision Basics</a>  
+| <a href="tuLoad.htm">Creating a Demo Database</a>
+| <a href="tuSingle.htm">Single Object Access</a> 
+| <a href="tuList.htm">Using Lists</a> 
+| <a href="tuTS.htm">Using Dates and TimeSeries</a> |
+
+<hr>
+
+<table border=0 width="100%">
+<tr>
+<td align=left><font size=-1>Copyright &copy; 1999 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Created January 28, 1999</font>
+</table>
+
+</body>
+</html>

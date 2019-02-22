@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vision Messages: DateOffset</title>
+</head>
+<body bgcolor=white>
+<p>
+<center> | <A href="FHome.htm">Home</A>
+ | <A href="clOffset.htm">DateOffset Class  </A>
+ | <A href="mXRef.htm">Message XRef</A>
+ | <A href="Messages.htm">Messages (General)</A>
+ | 
+</center><hr>
+
+<center>
+<font face="Arial" color="darkblue" size=3 >
+<h3>Profile of Class <i>DateOffset</i></h3>
+</center>
+</font><p>
+<pre>
+
+<A href="clObject.htm">Object</A>
+  | 
+Ordinal
+  | 
+  +--- <b>DateOffset</b>
+  |      |
+  |      +--- BusinessDays
+  |      |
+  |      +--- Days
+  |      |
+  |      +--- MonthBeginnings
+  |      |
+  |      +--- MonthEnds
+  |      |
+  |      +--- Months
+  |      |
+  |      +--- QuarterBeginnings
+  |      |
+  |      +--- QuarterEnds
+  |      |
+  |      +--- Quarters
+  |      |
+  |      +--- YearBeginnings
+  |      |
+  |      +--- YearEnds
+  |      |
+  |      +--- Years
+</pre>
+<p><hr align=left width=70% ><p>
+
+<pre>The class DateOffset is an abstract class that supports the protocol
+for the different classes of date increment.  DateOffset are used
+primarily in the formation of date ranges and for date arithmetic as
+illustrated below:  
+
+     !dr <- 88 to: 85 by: 1 years
+     !lastYearEnd <- ^today - 1 yearEnds;
+
+Most of the protocol for is actually implemented at the
+specializations of DateOffset.  The actual implementations will
+differ among the classes, but the functional goal of a message will
+be the same.  
+</pre><p><hr align=left width=70% ><p>
+
+<font size=+1 face="Arial" color="darkred">Message Index</font>
+<p><img src="instdot.gif" align="middle" alt="o "><A href="#*"><b>* aValue</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#+"><b>+ aValue</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#__fixReference"><b>__fixReference</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asDate"><b>asDate</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asInteger"><b>asInteger</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#asSelf"><b>asSelf</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#classDescriptor"><b>classDescriptor</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#defaultInstance"><b>defaultInstance</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#evaluate:"><b>evaluate: aBlock</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#evaluate:from:to:"><b>evaluate: aBlock from: aDate to: aDate</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#incrementName"><b>incrementName</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#isDateOffset"><b>isDateOffset</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#print"><b>print</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#subtractedFrom:"><b>subtractedFrom: aDate</b></A><br>
+<img src="instdot.gif" align="middle" alt="o "><A href="#whatAmI"><b>whatAmI</b></A><br>
+<p><hr align=left width=70% ><p>
+
+<font size=+1 face="Arial" color="darkred">Messages</font>
+<p><img src="instdot.gif" align="middle" alt="o "><A name="*"></A><b>*</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DateOffset * aValue</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Multiplies the recipient offset by the value supplied.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDate.htm">Date</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Value<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mList.htm#*">List</A> | <A href="mTS.htm#*">TimeSeries</A> | <A href="mNA.htm#*">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="+"></A><b>+</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DateOffset + aValue</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Adds the recipient offset to the value supplied.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDate.htm">Date</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Value<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#+">Date</A> | <A href="mList.htm#+">List</A> | <A href="mTS.htm#+">TimeSeries</A> | <A href="mNA.htm#+">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="__fixReference"></A><b>__fixReference</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DateOffset __fixReference</font></blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#__fixReference">Date</A> | <A href="mObject.htm#__fixReference">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asDate"></A><b>asDate</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DateOffset asDate</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Adds the recipient offset to the current date (^date).</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDate.htm">Date</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#asDate">Date</A> | <A href="mNumber.htm#asDate">Number</A> | <A href="mString.htm#asDate">String</A> | <A href="mNA.htm#asDate">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asInteger"></A><b>asInteger</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DateOffset asInteger</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Converts a DateOffset into an integer in YYYYMMDD form.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>Integer
+<p><b>Also Defined At: </b><br>
+ | <A href="mDate.htm#asInteger">Date</A> | <A href="mString.htm#asInteger">String</A> | <A href="mNA.htm#asInteger">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="asSelf"></A><b>asSelf</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DateOffset asSelf</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the original object.</blockquote>
+<p><b>Type: </b>Primitive&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clOffset.htm">DateOffset</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#asSelf">Block</A> | <A href="mBoolean.htm#asSelf">Boolean</A> | <A href="mClassify.htm#asSelf">Classification</A> | <A href="mCollect.htm#asSelf">Collection</A> | <A href="mCurrency.htm#asSelf">Currency</A> | <A href="mDate.htm#asSelf">Date</A> | <A href="mDate.htm#asSelf">DateRange</A> | <A href="mDict.htm#asSelf">Dictionary</A> | <A href="mEntity.htm#asSelf">Entity</A> | <A href="mIList.htm#asSelf">IndexedList</A> | <A href="mInterface.htm#asSelf">Interface</A> | <A href="mList.htm#asSelf">List</A> | <A href="mNumber.htm#asSelf">Number</A> | <A href="mObject.htm#asSelf">Object</A> | <A href="mOpenVision.htm#asSelf">OpenVision</A> | <A href="mSchema.htm#asSelf">Schema</A> | <A href="mString.htm#asSelf">String</A> | <A href="mTS.htm#asSelf">TimeSeries</A> | <A href="mNA.htm#asSelf">Undefined</A> | <A href="mUtil.htm#asSelf">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="classDescriptor"></A><b>classDescriptor</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DateOffset classDescriptor</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Reference to the object which describes the class.  Class level information 
+is stored here.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#classDescriptor">Block</A> | <A href="mBoolean.htm#classDescriptor">Boolean</A> | <A href="mClassify.htm#classDescriptor">Classification</A> | <A href="mCollect.htm#classDescriptor">Collection</A> | <A href="mCurrency.htm#classDescriptor">Currency</A> | <A href="mDate.htm#classDescriptor">Date</A> | <A href="mDate.htm#classDescriptor">DateRange</A> | <A href="mDict.htm#classDescriptor">Dictionary</A> | <A href="mEntity.htm#classDescriptor">Entity</A> | <A href="mIList.htm#classDescriptor">IndexedList</A> | <A href="mInterface.htm#classDescriptor">Interface</A> | <A href="mList.htm#classDescriptor">List</A> | <A href="mNumber.htm#classDescriptor">Number</A> | <A href="mObject.htm#classDescriptor">Object</A> | <A href="mOpenVision.htm#classDescriptor">OpenVision</A> | <A href="mSchema.htm#classDescriptor">Schema</A> | <A href="mString.htm#classDescriptor">String</A> | <A href="mTS.htm#classDescriptor">TimeSeries</A> | <A href="mNA.htm#classDescriptor">Undefined</A> | <A href="mUtil.htm#classDescriptor">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="defaultInstance"></A><b>defaultInstance</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DateOffset defaultInstance</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the default instance of the recipient object's class</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clOffset.htm">DateOffset</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#defaultInstance">Block</A> | <A href="mBoolean.htm#defaultInstance">Boolean</A> | <A href="mClassify.htm#defaultInstance">Classification</A> | <A href="mCollect.htm#defaultInstance">Collection</A> | <A href="mCurrency.htm#defaultInstance">Currency</A> | <A href="mDate.htm#defaultInstance">Date</A> | <A href="mDate.htm#defaultInstance">DateRange</A> | <A href="mDict.htm#defaultInstance">Dictionary</A> | <A href="mEntity.htm#defaultInstance">Entity</A> | <A href="mIList.htm#defaultInstance">IndexedList</A> | <A href="mInterface.htm#defaultInstance">Interface</A> | <A href="mList.htm#defaultInstance">List</A> | <A href="mNumber.htm#defaultInstance">Number</A> | <A href="mOpenVision.htm#defaultInstance">OpenVision</A> | <A href="mSchema.htm#defaultInstance">Schema</A> | <A href="mString.htm#defaultInstance">String</A> | <A href="mTS.htm#defaultInstance">TimeSeries</A> | <A href="mNA.htm#defaultInstance">Undefined</A> | <A href="mUtil.htm#defaultInstance">Utility</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="evaluate:"></A><b>evaluate:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DateOffset evaluate: aBlock</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Adds the recipient to the current ^date and evaluates the supplied block.<br>
+For example:<br>
+     -3 monthEnds evaluate: [ ^date printNL ] ;<br>
+</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mCurrency.htm#evaluate:">Currency</A> | <A href="mDate.htm#evaluate:">Date</A> | <A href="mDate.htm#evaluate:">DateRange</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="evaluate:from:to:"></A><b>evaluate:from:to:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DateOffset evaluate: aBlock from: aDate to: aDate</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Evaluates the supplied block for the date range formed by date1, date2, and 
+the recipient DateOffset.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clObject.htm">Object</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Block<br>
+2 - Date<br>
+3 - Date<br>
+</blockquote>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="incrementName"></A><b>incrementName</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DateOffset incrementName</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the name portion of the recipient DateOffset as a String.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="isDateOffset"></A><b>isDateOffset</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DateOffset isDateOffset</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns a TRUE value when sent to any DateOffset.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b>TRUE
+<p><b>Also Defined At: </b><br>
+ | <A href="mObject.htm#isDateOffset">Object</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="print"></A><b>print</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DateOffset print</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Redefines the standard print message so that the content of the actual date 
+offset is printed.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clOffset.htm">DateOffset</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#print">Block</A> | <A href="mDate.htm#print">Date</A> | <A href="mDate.htm#print">DateRange</A> | <A href="mEntity.htm#print">Entity</A> | <A href="mIList.htm#print">IndexedList</A> | <A href="mList.htm#print">List</A> | <A href="mObject.htm#print">Object</A> | <A href="mString.htm#print">String</A> | <A href="mTS.htm#print">TimeSeries</A> | <A href="mNA.htm#print">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="subtractedFrom:"></A><b>subtractedFrom:</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DateOffset subtractedFrom: aDate</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Subtracts the recipient DateOffset from the supplied Date.</blockquote>
+<p><b>Type: </b>Method&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clDate.htm">Date</A>
+<p><b>Parameters: </b>
+<blockquote>
+1 - Date<br>
+</blockquote>
+<p><b>Also Defined At: </b><br>
+ | <A href="mNA.htm#subtractedFrom:">Undefined</A> | 
+<p></blockquote>
+<img src="instdot.gif" align="middle" alt="o "><A name="whatAmI"></A><b>whatAmI</b>
+<p><blockquote>
+<b>Synopsis:      </b>
+<blockquote>
+<font size=+1 face="Courier" color="red">DateOffset whatAmI</font></blockquote>
+<p><b>Description: </b>
+<blockquote>
+Returns the string 'DateOffset'.</blockquote>
+<p><b>Type: </b>Constant&nbsp &nbsp &nbsp &nbsp &nbsp <b>Returns: </b><A href="clString.htm">String</A>
+<p><b>Also Defined At: </b><br>
+ | <A href="mBlock.htm#whatAmI">Block</A> | <A href="mBoolean.htm#whatAmI">Boolean</A> | <A href="mClassify.htm#whatAmI">Classification</A> | <A href="mCollect.htm#whatAmI">Collection</A> | <A href="mCurrency.htm#whatAmI">Currency</A> | <A href="mDate.htm#whatAmI">Date</A> | <A href="mDate.htm#whatAmI">DateRange</A> | <A href="mDict.htm#whatAmI">Dictionary</A> | <A href="mEntity.htm#whatAmI">Entity</A> | <A href="mIList.htm#whatAmI">IndexedList</A> | <A href="mInterface.htm#whatAmI">Interface</A> | <A href="mList.htm#whatAmI">List</A> | <A href="mNumber.htm#whatAmI">Number</A> | <A href="mObject.htm#whatAmI">Object</A> | <A href="mOpenVision.htm#whatAmI">OpenVision</A> | <A href="mSchema.htm#whatAmI">Schema</A> | <A href="mString.htm#whatAmI">String</A> | <A href="mTS.htm#whatAmI">TimeSeries</A> | <A href="mNA.htm#whatAmI">Undefined</A> | <A href="mUtil.htm#whatAmI">Utility</A> | 
+<p></blockquote>
+
+<p><hr>
+<table border=0 width=100%>
+<tr>
+<td align=left>
+<font size=-1>Copyright &copy 1997 Innovative Systems Techniques, Inc.</font>
+<td align=right><font size=-1>Updated May 7, 1997</font>
+</table>
+</body>
+</html>
