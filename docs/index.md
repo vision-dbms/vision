@@ -4,8 +4,6 @@ layout: default
 
 # Vision Documentation
 
-*[VIEW THIS PAGE USING github pages (`github.io`)](https://vision-dbms.github.io/vision/) to make the links work*
-
 ## Vision Executables
 
 * [Unix & Linux Build Instructions](nix-build.html)
