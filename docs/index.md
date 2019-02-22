@@ -2,8 +2,6 @@
 layout: default
 ---
 
-# Vision Documentation
-
 ## Vision Executables
 
 * [Unix & Linux Build Instructions](nix-build.html)
